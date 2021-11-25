@@ -2,18 +2,11 @@ package org.open4goods.aggregation.aggregator;
 
 import java.io.Closeable;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
-import org.apache.commons.lang3.StringUtils;
 import org.open4goods.aggregation.AbstractAggregationService;
 import org.open4goods.exceptions.NotAddedException;
-import org.open4goods.model.aggregation.AggregationResult;
 import org.open4goods.model.aggregation.ParticipantData;
-import org.open4goods.model.constants.ReferentielKey;
 import org.open4goods.model.data.DataFragment;
 import org.open4goods.model.product.AggregatedData;
 import org.slf4j.Logger;

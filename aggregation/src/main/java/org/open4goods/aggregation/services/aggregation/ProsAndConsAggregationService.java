@@ -1,8 +1,6 @@
 
 package org.open4goods.aggregation.services.aggregation;
 
-import java.util.Map;
-
 import org.open4goods.aggregation.AbstractAggregationService;
 import org.open4goods.model.data.DataFragment;
 import org.open4goods.model.product.AggregatedData;

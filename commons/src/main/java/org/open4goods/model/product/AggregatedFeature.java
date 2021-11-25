@@ -1,8 +1,5 @@
 package org.open4goods.model.product;
 
-import java.util.HashSet;
-import java.util.Set;
-
 public class AggregatedFeature {
 	
 	private String name;

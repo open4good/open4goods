@@ -7,8 +7,6 @@ import java.util.stream.Stream;
 
 import org.open4goods.model.data.DataFragment;
 
-import io.micrometer.core.annotation.Timed;
-
 public interface CustomDataFragmentRepository  {
 
 	/**

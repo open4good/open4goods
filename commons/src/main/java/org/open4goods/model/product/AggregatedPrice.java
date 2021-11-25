@@ -1,9 +1,6 @@
 
 package org.open4goods.model.product;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.open4goods.model.constants.Currency;
 import org.open4goods.model.constants.ProductState;
 import org.open4goods.model.data.DataFragment;

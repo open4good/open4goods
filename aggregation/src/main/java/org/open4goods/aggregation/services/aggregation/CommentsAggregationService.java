@@ -1,9 +1,6 @@
 
 package org.open4goods.aggregation.services.aggregation;
 
-import java.util.Map;
-import java.util.Set;
-
 import org.open4goods.aggregation.AbstractAggregationService;
 import org.open4goods.config.yml.CommentsAggregationConfig;
 import org.open4goods.model.data.Comment;

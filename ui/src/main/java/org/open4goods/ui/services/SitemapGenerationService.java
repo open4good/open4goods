@@ -12,7 +12,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 
 import org.apache.commons.io.FileUtils;
-import org.elasticsearch.search.sort.SortOrder;
 import org.open4goods.dao.AggregatedDataRepository;
 import org.open4goods.helper.GenericFileLogger;
 import org.open4goods.model.product.AggregatedData;

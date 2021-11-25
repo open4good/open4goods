@@ -1,6 +1,5 @@
 package org.open4goods.api.services.store;
 
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
