@@ -10,8 +10,6 @@ The first open source price contributor, doing its best for the common good.
  * Financially contributing to the environmental cause, through a repayment of 20% of the site incomes. 
 
 
-![AppVeyor](https://img.shields.io/appveyor/build/open4good/open4goods)
-
 -----
   
 ## The project  
