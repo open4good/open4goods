@@ -9,7 +9,6 @@ The first open source price contributor, doing its best for the common good.
  * Probably the largest [product open data database](https://eco-achat.fr/opendata) in the world.
  * Financially contributing to the environmental cause, through a repayment of 20% of the site incomes. 
 
-
 -----
   
 ## The project  
@@ -84,8 +83,6 @@ To permanently set the max virtual memory :
 2. add line vm.max_map_count=262144  
 3. sudo service sysctl restart  
   
-  
-  
 ### Building the open4goods project from code base  
 Jars are not published to any central repo (nor planned to, it seems not to make any particular sense). To build, please go into the project folder. Then :  
 ```    
@@ -112,9 +109,7 @@ This will build and run tests, hope in your terminal you'll get a
 [INFO] ------------------------------------------------------------------------  
   
 ```  
-  
-  
-  
+    
 ### Launching  
 The open4goods project is packaged under the form of several SpringBoot web applications. You will probably want to launch :  
 * [API](api) component : Play with the data aspect and the business logic  
