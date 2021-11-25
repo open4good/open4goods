@@ -8,7 +8,7 @@
 	<version>0.0.1-SNAPSHOT</version>
 	<packaging>pom</packaging>
 	<description>The open4goods project parent pom</description>
-	<url>https://github.com/open4good/open4goods-light</url>
+	<url>https://github.com/open4good/open4goods</url>
 	<properties>
 		<github.global.server>github</github.global.server>
 		<springboot.version>2.5.7</springboot.version>
