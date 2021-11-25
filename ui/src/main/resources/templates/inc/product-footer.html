@@ -1,0 +1,45 @@
+<footer class="footer pt-6 pb-5 bg-primary text-white">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-4">
+                
+                <p>eco-achat.fr est une initiative opensource et opendata visant à compenser partiellement l'impact de  vos achats en ligne.</p>
+               
+            </div>
+            <div class="col-6 col-md-4 mb-5 mb-lg-0">
+                <span class="h5">eco-achat.fr</span>
+                <ul class="footer-links mt-2">
+                    <li><a  href="/compensation-carbone">Compensation carbone</a></li>
+                    <li><a  href="/opendata">Open data</a></li>
+                    <li><a target="_blank" href="https://github.com/open4good/open4goods-light">Open source</a></li>
+                </ul>
+            </div>
+            <div class="col-6 col-md-4 mb-5 mb-lg-0">
+                <span class="h5">Autre</span>
+                <ul class="footer-links mt-2">
+                    <li><a href="https://github.com/open4good/open4goods-light/issues/new"
+                            target="_blank">Déclarer un bug ou une évolution</a></li>
+                
+                    <li><a href="/contact">Nous contacter</a></li>
+                    <li th:if="${genericResponse.duration != 0}">Page générée en <span th:text="${genericResponse.duration}"> </span> ms</li>
+                    
+                    
+                </ul>
+            </div>
+        </div>
+        <hr class="bg-secondary my-3 my-lg-5">
+        <div class="row">
+            <div class="col mb-md-0">
+
+                <a href="https://eco-achat.fr"  class="d-flex justify-content-center mb-3">  
+                    <img src="../../assets/img/brand/light.svg" height="30" class="me-2" alt="Logo un-geste">
+                    <p class="text-white fw-bold footer-logo-text m-0">eco-achat.fr</p>
+                </a>
+                <div class="d-flex text-center justify-content-center align-items-center" role="contentinfo">
+                    <p class="fw-normal font-small mb-0">Copyright © open4goods -<span
+                            class="current-year">2021</span>. Produit de bien commun</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</footer>

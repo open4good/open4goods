@@ -1,0 +1,150 @@
+<!--/*
+
+=========================================================
+* Pixel Pro Bootstrap 5 UI Kit
+=========================================================
+
+* Product Page: https://themesberg.com/product/ui-kit/pixel-pro-premium-bootstrap-5-ui-kit
+* Copyright 2021 Themesberg (https://www.themesberg.com)
+
+* Coded by https://themesberg.com
+
+=========================================================
+
+* The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software. Contact us if you want to remove it.
+
+*/-->
+<!DOCTYPE html>
+<html th:lang="${siteLocale.language}">
+
+<head>
+
+	<!--/* Metas and CSS */-->
+	<th:block th:include="inc/header-meta.html"></th:block>
+    
+	<!-- Primary Meta Tags -->
+	<title th:text="#{search.title}"></title>
+	<meta name="title" th:content="#{search.meta.title}">
+	<meta name="description" th:content="#{search.meta.description}">
+		
+	<!-- Open Graph / Facebook -->
+	<meta property="og:type" content="website">
+	<meta property="og:url" th:content="${url}">
+	<meta property="og:title" th:content="#{search.title}">
+	<meta property="og:description" th:content="#{search.meta.description}">
+	<meta property="og:image"  th:content="${baseUrl} + '/assets/img/brand/light.svg'">
+	
+	<!-- Twitter -->
+	<meta name="twitter:card" content="summary_large_image">
+	<meta name="twitter:url" th:content="${url}">
+	<meta name="twitter:title" th:content="#{search.title}">
+	<meta name="twitter:description" th:content="#{search.meta.description}">
+	<meta name="twitter:image" th:content="${baseUrl} + 'assets/img/brand/light.svg'">
+	
+	<!-- CSS -->
+	<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.25/css/dataTables.bootstrap5.min.css">
+	
+</head>
+
+<body>
+    
+	<!--/* Navbar */-->
+	<header class="header-global">
+    	<nav id="navbar-main" aria-label="Primary navigation" class="navbar navbar-main navbar-expand-lg navbar-theme-primary headroom navbar-dark navbar-theme-primary">
+			<th:block th:include="inc/navbar-non-product.html"></th:block>
+		</nav>
+	</header>
+	
+    <main>	
+       <!--/* Loader */-->
+       <th:block th:include="inc/preloader.html"></th:block>
+		
+
+
+       <!--/* Search panel */-->
+        <section class="section-header bg-primary text-white ">
+            <div class="container">
+                <div class="row justify-content-center">
+                    <div class="col-12 col-md-10 text-center">
+                        <h1 class="mb-3">Rechercher dans les produits</h1>
+                        <p class="lead px-lg-5 mb-5">Vous êtes dans la recherche globale, une recherche détaillée est disponible dans chaque catégorie de produits.</p>
+                        <form id="searchForm" method="post">
+                            <div class="form-group bg-white shadow-soft rounded-pill mb-4 px-3 py-2">
+                                <div class="row align-items-center">
+                                    <div class="col">
+                                        <div class="input-group input-group-merge shadow-none">
+                                            <div class="input-group-text bg-transparent border-0"><span class="fas fa-search"></span></div>
+                                            <input id="searchInput" name="query" th:value="${query}" type="text" class="form-control border-0 form-control-flush shadow-none pb-2" placeholder="Rechercher un produit" required>
+                                        </div>
+                                    </div>
+                                    <div class="col-auto">
+                                        <button type="submit" class="btn btn-block btn-primary rounded-pill">Chercher</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            <div class="pattern bottom"></div>
+        </section>
+
+
+        
+                
+       
+       <!--/* Verticals results */-->
+        <section class="section section-md bg-white">        
+         	<div class="container-semi-fluid">
+                <div class="row justify-content-center">
+        
+			        <div th:each="item: ${results.data}" class="col-12 col-md-12 mb-3">			        	
+			        	<th:block th:with="item = ${item}">
+				        	<th:block th:include="inc/search-card.html"></th:block>        
+			        	</th:block>   
+			        </div>
+	        	</div>
+	        </div>
+        </section>
+       
+       
+     
+      
+
+    </main>
+
+	<!--/* Footer */-->
+	<th:block th:include="inc/footer.html"></th:block>	
+
+<!-- Core -->
+<script src="../../vendor/@popperjs/core/dist/umd/popper.min.js"></script>
+<script src="../../vendor/bootstrap/dist/js/bootstrap.min.js"></script>
+<script src="../../vendor/headroom.js/dist/headroom.min.js"></script>
+
+<!-- Vendor JS -->
+
+<script src="../../vendor/smooth-scroll/dist/smooth-scroll.polyfills.min.js"></script>
+<script src="../../vendor/vivus/dist/vivus.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.5.1.js"></script>
+<script src="https://cdn.datatables.net/1.10.25/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.10.25/js/dataTables.bootstrap5.min.js"></script>
+
+<!-- pixel JS -->
+<script src="../../assets/js/pixel.js"></script>
+
+<script>
+$(document).ready(function() {
+	// search feature
+    $('#searchInput').on("change",function (e) {
+    	$('#searchForm').attr("action","/recherche/"+($('#searchInput').val()));
+    });
+	
+	// Datatable init
+	$('#searchTable').DataTable();
+
+	
+} );
+</script>
+</body>
+
+</html>

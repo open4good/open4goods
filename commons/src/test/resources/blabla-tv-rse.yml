@@ -1,0 +1,16 @@
+texts:
+  # Très mauvais
+  - onTrue: "rating('RSE').distance() >= -5 && rating('RSE').distance() < -3"
+    onFalse: ""
+    content:
+    - <<Cette télévision||Cet écran>> est très mauvais pour la planète. Avec une note de [[${data.rating('RSE').value}]]/5 alors que la moyenne est de [[${data.rating('RSE').cardinality.average}]], le [[${data.attributes.MODEL.rawValue}]] de [[${data.attributes.BRAND.rawValue}]] fait partie des <<télévisions||téléviseurs||TV's>> les plus polluantes.  
+  - onTrue: "rating('RSE').distance() >= -3 && rating('RSE').distance() < -1"
+    onFalse: ""
+    content:
+    - <<Cette télévision||Cette TV>> est assez mauvaise pour la planète. Avec une note de [[${data.rating('RSE').value}]]/5 alors que la moyenne est de [[${data.rating('RSE').cardinality.average}]], le [[${data.attributes.MODEL.rawValue}]] de [[${data.attributes.BRAND.rawValue}]] fait partie des <<télévisions||téléviseurs||TV's>> les plus polluantes.  
+  - onTrue: "rating('RSE').distance() >= -1 && rating('RSE').distance() < 0"
+    onFalse: ""
+    content:
+    - <<Cette télévision||Ce téléviseur||Cette TV||Cet écran>> est légèrement mauvais pour la planète. Avec une note de [[${data.rating('RSE').value}]]/5 alors que la moyenne est de [[${data.rating('RSE').cardinality.average}]], le [[${data.attributes.MODEL.rawValue}]] de [[${data.attributes.BRAND.rawValue}]] fait partie des <<télévisions||téléviseurs||TV's>> les plus polluantes.  
+
+ 

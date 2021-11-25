@@ -1,0 +1,63 @@
+server:
+  compression:
+    enabled: true
+    mime-types: text/html,text/xml,text/plain,text/css,text/javascript,application/javascript,application/json
+    min-response-size: 1024
+  http2:
+    enabled: true
+
+apiConfig:
+  apiTitle: "Open4goods API"
+  apiDescription: "This API allows you to browse eco-achat content"
+  apiVersion: "0.1"
+  apiLicence: "May vary"
+
+management:
+  
+  health:
+    diskspace:
+      threshold: 10000MB  
+             
+  endpoints:
+    web:
+      exposure:
+        include:
+        - "*"
+        exclude:
+        - "shutdown"
+        
+#  endpoint:
+        
+#    health:
+#      show-details: always   
+          
+spring:
+  mail:
+#   host: 
+    port: 587
+#    username: 
+#    password: 
+    properties:
+        mail.smtp.auth: true
+        mail.smtp.starttls.enable: true        
+  messages:
+    basename: i18n/messages
+  application:
+    name: open4goods-ui
+  thymeleaf:
+      cache: false
+  data:
+    elasticsearch:
+      repositories:
+        enabled: true
+
+    
+#Css and js mimification
+wro4j:
+  filterUrl : /resources
+  cacheGzippedContent: true
+  ignoreMissingResources: false
+  managerFactory:
+    preProcessors: removeSourceMaps, cssImport, jsMin
+    
+

@@ -1,0 +1,38 @@
+        <div class="container position-relative">
+            <a class="navbar-brand" href="/">
+                <img class="navbar-brand-dark" src="../../assets/img/brand/light.svg" alt="eco-achat.fr logo light">
+                <img class="navbar-brand-light" src="../../assets/img/brand/dark.svg" alt="eco-achat.fr logo dark">
+            </a>
+            <div class="navbar-collapse collapse me-auto" id="navbar_global">
+                <div class="navbar-collapse-header">
+                    <div class="row">
+                        <div class="col-6 collapse-brand">
+                            <a href="/">
+                                <img src="../../assets/img/brand/dark.svg" alt="eco-achat.fr logo">
+                            </a>
+                        </div>
+                        <div class="col-6 collapse-close">
+                            <a href="#navbar_global" class="fas fa-times" data-bs-toggle="collapse" data-bs-target="#navbar_global" aria-controls="navbar_global" aria-expanded="false" title="close" aria-label="Toggle navigation"></a>
+                        </div>
+                    </div>
+                </div>
+                <ul class="navbar-nav navbar-nav-hover align-items-lg-center">
+                    <li class="nav-item dropdown">
+                        <a href="/" class="nav-link">
+                            eco-achat.fr 
+                        </a>                        
+                    </li>
+                    
+                    <th:block th:if="${page}">
+                    	<li class="nav-item dropdown">
+	                        <a th:href="${url}" class="nav-link" th:text="' » ' +${page}"></a>                        
+	                    </li>
+                    </th:block>                                        
+                </ul>
+
+            </div>
+            
+            
+            <!--/* Right icons */-->				
+			<th:block th:include="inc/navbar-right-icons.html"></th:block>
+        </div>

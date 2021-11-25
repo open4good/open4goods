@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<artifactId>ui</artifactId>
+	<name>ui</name>
+
+	<parent>
+		<groupId>org.open4goods</groupId>
+		<artifactId>org.open4goods</artifactId>
+		<version>0.0.1-SNAPSHOT</version>
+	</parent>
+
+	<properties>
+		<start-class>org.open4goods.ui.Ui</start-class>
+		<main.basedir>${basedir}/../..</main.basedir>
+	</properties>
+
+	<dependencies>
+
+		<dependency>
+			<groupId>com.opencsv</groupId>
+			<artifactId>opencsv</artifactId>
+			<version>5.5.2</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-devtools</artifactId>
+			<optional>true</optional>
+		</dependency>
+
+
+		<!-- Commons (model) -->
+		<dependency>
+			<groupId>org.open4goods</groupId>
+			<artifactId>commons</artifactId>
+			<version>${global.version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.open4goods</groupId>
+			<artifactId>aggregation</artifactId>
+			<version>${global.version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.talanlabs</groupId>
+			<artifactId>avatar-generator</artifactId>
+			<version>1.1.0</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.talanlabs</groupId>
+			<artifactId>avatar-generator-cat</artifactId>
+			<version>1.1.0</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.talanlabs</groupId>
+			<artifactId>avatar-generator-smiley</artifactId>
+			<version>1.1.0</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.talanlabs</groupId>
+			<artifactId>avatar-generator-8bit</artifactId>
+			<version>1.1.0</version>
+		</dependency>
+
+
+
+		<!-- https://mvnrepository.com/artifact/com.github.dfabulich/sitemapgen4j -->
+		<dependency>
+			<groupId>com.github.dfabulich</groupId>
+			<artifactId>sitemapgen4j</artifactId>
+			<version>1.1.2</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-thymeleaf</artifactId>
+		</dependency>
+
+		<!-- web -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-web</artifactId>
+			<exclusions>
+				<exclusion>
+					<groupId>org.springframework.boot</groupId>
+					<artifactId>spring-boot-starter-tomcat</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-cache</artifactId>
+		</dependency>
+
+
+		<!-- servlet container -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-undertow</artifactId>
+			<!-- <scope>provided</scope> -->
+		</dependency>
+
+
+		<!-- API DOC -->
+		<dependency>
+			<groupId>io.springfox</groupId>
+			<artifactId>springfox-swagger2</artifactId>
+			<version>${swagger.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>io.springfox</groupId>
+			<artifactId>springfox-swagger-ui</artifactId>
+		</dependency>
+
+	</dependencies>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-maven-plugin</artifactId>
+				<version>${springboot.version}</version>
+				<executions>
+					<execution>
+						<goals>
+							<goal>repackage</goal>
+						</goals>
+					</execution>
+				</executions>
+
+				<configuration>
+					<layers>
+						<enabled>true</enabled>
+						<includeLayerTools>true</includeLayerTools>
+					</layers>
+				</configuration>
+
+
+			</plugin>
+		</plugins>
+	</build>
+</project>

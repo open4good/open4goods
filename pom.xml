@@ -1,0 +1,360 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>org.open4goods</groupId>
+	<artifactId>org.open4goods</artifactId>
+	<name>parent</name>
+	<version>0.0.1-SNAPSHOT</version>
+	<packaging>pom</packaging>
+	<description>The open4goods project parent pom</description>
+	<url>https://github.com/open4good/open4goods-light</url>
+	<properties>
+		<github.global.server>github</github.global.server>
+		<springboot.version>2.5.7</springboot.version>
+		<java.version>17</java.version>
+		<maven.compiler.source>17</maven.compiler.source>
+		<maven.compiler.target>17</maven.compiler.target>
+		<global.version>0.0.1-SNAPSHOT</global.version>
+		<swagger.version>2.9.2</swagger.version>
+		<jacoco.version>0.8.7</jacoco.version>
+		<xwiki.version>11.10.2</xwiki.version>
+
+		<!-- To exclude springboot dependency management -->
+		<processDependencyManagement>false</processDependencyManagement>
+		<processPluginDependenciesInPluginManagement>true</processPluginDependenciesInPluginManagement>
+		<maven-compiler-plugin-version>3.8.1</maven-compiler-plugin-version>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<dependency.locations.enabled>false</dependency.locations.enabled>
+		<exclude.tests>nothing-to-exclude</exclude.tests>
+	</properties>
+
+	<modules>
+		<module>commons</module>
+		<module>crawler</module>
+		<module>api</module>
+		<module>aggregation</module>
+		<module>ui</module>
+	</modules>
+
+
+	<issueManagement>
+		<url>https://github.com/open4good/open4goods-light/issues</url>
+		<system>GitHub Issues</system>
+	</issueManagement>
+
+	<licenses>
+		<license>
+			<name>GNU GPL V2 Morality License</name>
+			<url>https://raw.githubusercontent.com/open4good/open4goods-light/main/LICENSE</url>
+			<distribution>repo</distribution>
+		</license>
+	</licenses>
+
+	<scm>
+		<url>https://github.com/open4good/open4goods-light</url>
+		<connection>scm:git://github.com/open4good/open4goods-light</connection>
+	</scm>
+
+
+
+	<repositories>
+		<repository>
+			<id>central</id>
+			<url>https://repo1.maven.org/maven2</url>
+		</repository>
+
+		<repository>
+			<id>jcenter</id>
+			<url>https://jcenter.bintray.com/</url>
+		</repository>
+	</repositories>
+
+
+	<distributionManagement>
+		<site>
+			<id>maven</id>
+			<url>https://eco-achat.fr</url>
+		</site>
+	</distributionManagement>
+
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<!-- Import dependency management from Spring Boot -->
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-dependencies</artifactId>
+				<version>${springboot.version}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+
+
+
+			<dependency>
+				<groupId>io.springfox</groupId>
+				<artifactId>springfox-swagger-ui</artifactId>
+				<version>${swagger.version}</version>
+			</dependency>
+
+
+
+
+		</dependencies>
+	</dependencyManagement>
+
+
+
+	<dependencies>
+
+		<dependency>
+			<groupId>net.sf.barcode4j</groupId>
+			<artifactId>barcode4j</artifactId>
+			<version>2.1</version>
+		</dependency>
+		
+		<dependency>
+			<groupId>com.sleepycat</groupId>
+			<artifactId>je</artifactId>
+			<version>18.3.12</version>
+		</dependency>
+
+
+		<dependency>
+			<groupId>commons-io</groupId>
+			<artifactId>commons-io</artifactId>
+			<version>2.11.0</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-validation</artifactId>
+		</dependency>
+
+
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-lang3</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>ch.qos.logback</groupId>
+			<artifactId>logback-classic</artifactId>
+
+		</dependency>
+
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-test</artifactId>
+			<scope>test</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-devtools</artifactId>
+			<optional>true</optional>
+		</dependency>
+	</dependencies>
+
+
+	<reporting>
+
+
+		<plugins>
+
+			<plugin>
+				<groupId>org.jacoco</groupId>
+				<artifactId>jacoco-maven-plugin</artifactId>
+				<version>${jacoco.version}</version>
+
+				<reportSets>
+					<reportSet>
+						<reports>
+							<report>report</report>
+						</reports>
+					</reportSet>
+				</reportSets>
+			</plugin>
+
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>versions-maven-plugin</artifactId>
+				<version>2.8.1</version>
+				<reportSets>
+					<reportSet>
+						<reports>
+							<report>dependency-updates-report</report>
+							<report>plugin-updates-report</report>
+							<report>property-updates-report</report>
+						</reports>
+					</reportSet>
+				</reportSets>
+			</plugin>
+
+
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>taglist-maven-plugin</artifactId>
+				<version>2.4</version>
+				<configuration>
+					<aggregate>true</aggregate>
+					<xmlOutputDirectory>${project.build.directory}/site/taglist</xmlOutputDirectory>
+
+				</configuration>
+				<reportSets>
+					<reportSet>
+						<!-- defines taglist reports in the modules -->
+						<id>taglist-report</id>
+						<reports>
+							<report>taglist</report>
+						</reports>
+					</reportSet>
+
+					<reportSet>
+						<!-- defines taglist aggregate report -->
+						<id>taglist-aggregate</id>
+						<inherited>false</inherited>
+						<reports>
+							<report>taglist</report>
+						</reports>
+						<configuration>
+							<aggregate>true</aggregate>
+						</configuration>
+					</reportSet>
+				</reportSets>
+			</plugin>
+
+
+
+			<!-- Maven site plugin configuration -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-site-plugin</artifactId>
+
+				<version>3.9.1</version>
+				<configuration>
+					<skipDeploy></skipDeploy>
+				</configuration>
+			</plugin>
+
+
+
+
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-project-info-reports-plugin</artifactId>
+				<version>3.1.2</version>
+			</plugin>
+
+		</plugins>
+
+	</reporting>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-enforcer-plugin</artifactId>
+				<version>3.0.0</version>
+				<executions>
+					<execution>
+						<id>enforce-banned-dependencies</id>
+						<goals>
+							<goal>enforce</goal>
+						</goals>
+						<configuration>
+							<rules>
+								<bannedDependencies>
+									<excludes>
+										<!--this is to check we do not have the xml-apis included since 
+											JRE provides it already -->
+										<exclude>xml-apis:xml-apis</exclude>
+
+									</excludes>
+								</bannedDependencies>
+							</rules>
+							<fail>true</fail>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+
+			<!-- Jacoco plugin configuration -->
+			<plugin>
+				<groupId>org.jacoco</groupId>
+				<artifactId>jacoco-maven-plugin</artifactId>
+				<version>${jacoco.version}</version>
+				<executions>
+					<execution>
+						<id>prepare-agent</id>
+						<goals>
+							<goal>prepare-agent</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+
+
+			<!-- Maven clean plugin configuration -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-clean-plugin</artifactId>
+				<version>3.1.0</version>
+				<configuration>
+					<filesets>
+						<fileset>
+							<directory>logs</directory>
+							<followSymlinks>false</followSymlinks>
+						</fileset>
+						<fileset>
+							<directory>target</directory>
+							<followSymlinks>false</followSymlinks>
+						</fileset>
+						<fileset>
+							<directory>data</directory>
+							<followSymlinks>false</followSymlinks>
+						</fileset>
+						<fileset>
+							<directory>src/test/resources/last</directory>
+							<followSymlinks>false</followSymlinks>
+						</fileset>
+					</filesets>
+				</configuration>
+			</plugin>
+
+
+
+
+
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<version>2.22.2</version>
+			</plugin>
+
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-failsafe-plugin</artifactId>
+				<version>2.22.2</version>
+			</plugin>
+
+		</plugins>
+
+		<pluginManagement>
+			<plugins>
+				<!-- Maven compiler plugin configuration -->
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-compiler-plugin</artifactId>
+					<version>${maven-compiler-plugin-version}</version>
+					<configuration>
+						<release>17</release>
+						<source>17</source>
+						<target>17</target>
+						<forceJavacCompilerUse>true</forceJavacCompilerUse>
+					</configuration>
+				</plugin>
+			</plugins>
+		</pluginManagement>
+	</build>
+</project>

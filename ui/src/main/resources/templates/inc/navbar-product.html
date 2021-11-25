@@ -1,0 +1,85 @@
+        <div class="container position-relative">
+            <a class="navbar-brand" href="/">
+                <img class="navbar-brand-dark" src="../../assets/img/brand/light.svg" alt="eco-achat.fr logo light">
+                <img class="navbar-brand-light" src="../../assets/img/brand/dark.svg" alt="eco-achat.fr logo dark">
+            </a>
+            <div class="navbar-collapse collapse me-auto" id="navbar_global">
+                <div class="navbar-collapse-header">
+                    <div class="row">
+                        <div class="col-6 collapse-brand">
+                            <a href="/">
+                                <img src="../../assets/img/brand/dark.svg" alt="eco-achat.fr logo">
+                            </a>
+                        </div>
+                        <div class="col-6 collapse-close">
+                            <a href="#navbar_global" class="fas fa-times" data-bs-toggle="collapse" data-bs-target="#navbar_global" aria-controls="navbar_global" aria-expanded="false" title="close" aria-label="Toggle navigation"></a>
+                        </div>
+                    </div>
+                </div>
+                <ul class="navbar-nav navbar-nav-hover align-items-lg-center">
+                    <li class="nav-item dropdown">
+                        <a href="/" class="nav-link">
+                            eco-achat.fr 
+                        </a>                        
+                    </li>
+                    <li class="d-none d-lg-block nav-item">»</li>
+                    
+                    <li th:if="${product.datasourceCategories.size() > 1}" class="nav-item dropdown">
+                        <a th:href="'/categorie/'+${product.shortestCategory.toLowerCase()}" class="nav-link dropdown-toggle" id="dashboardDropdown" aria-expanded="false" data-bs-toggle="dropdown">
+                            <th:block th:text="${product.shortestCategory.toLowerCase().replace('>',' » ')}"></th:block>
+                            <span class="fas fa-angle-down nav-link-arrow ms-1"></span>
+                        </a>
+                        <div class="dropdown-menu dropdown-megamenu-sm px-0 py-2 p-lg-4" aria-labelledby="dashboardDropdown">
+                            <div class="row">
+                                <div class="col-12">
+                                    <ul class="list-style-none mb-4">                                    	
+                                    	<li  class="mb-2 megamenu-item" th:each="item, stat : ${product.datasourceCategories}">
+											  <a class="megamenu-link" th:href="'/categorie/'+${item.toLowerCase()}" th:text="${item.toLowerCase().replace('>',' » ')}"></a>
+										</li>                                        
+                                    </ul>
+                                </div>
+                                
+                            </div>
+                        </div>
+                    </li>   
+                    
+                    <li th:if="${product.datasourceCategories.size() == 1}" class="nav-item">
+                        <a th:href="'/categorie/'+${product.shortestCategory}" class="nav-link">
+                           <th:block th:text="${product.shortestCategory.toLowerCase().replace('>',' » ')}"></th:block>
+                        </a>                        
+                    </li>                
+                    
+                    <li class="d-none d-lg-block nav-item"> » </li>
+                    
+                    <li class="nav-item dropdown">
+                        <a th:href="${product.names.name}" class="nav-link dropdown-toggle" id="componentsDropdown" aria-expanded="false" data-bs-toggle="dropdown">
+                            <th:block th:text="${product.names.shortestOfferName()}"></th:block>
+                            <span class="fas fa-angle-down nav-link-arrow ms-1"></span>
+                        </a>
+                        
+                         <div class="dropdown-menu dropdown-megamenu-sm px-0 py-2 p-lg-4" aria-labelledby="componentsDropdown">
+                            <div class="row">
+                                <div class="col-12">
+                                    <ul class="list-style-none mb-4">
+										<li class="mb-2 megamenu-item"><a class="megamenu-link" href="#meilleursPrix">Meilleur prix et compensation carbone</a></li>
+										<li th:if="${product.namesAndDescriptionsWithoutShortestName().size} > 0" class="mb-2 megamenu-item"><a class="megamenu-link" href="#description">Description</a></li>
+										<li th:if="${product.gtinInfos.country}" class="mb-2 megamenu-item"><a class="megamenu-link" href="#origine">Origine du produit</a></li>
+										<li th:if="${product.offersCount} > 1" class="mb-2 megamenu-item"> <a class="megamenu-link" href="#offres">Tous les prix</a></li>
+										<li class="mb-2 megamenu-item"><a class="megamenu-link"	href="#caracteristiques">Caracteristiques</a></li>
+									</ul>
+                                </div>
+                                
+                            </div>
+                        </div>
+                        
+                    </li>
+                    
+                </ul>
+
+            </div>
+            
+            
+            <!--/* Right icons */-->				
+			<th:block th:include="inc/navbar-right-icons.html"></th:block>
+           
+        </div>

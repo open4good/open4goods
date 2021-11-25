@@ -1,0 +1,38 @@
+
+server:
+  port: 8081
+
+
+logging:
+    level:
+      ROOT: warn
+      org.open4goods: warn
+      GENERIC_LOGGER: error
+
+# The key to provide to get ADMIN_ROLE
+adminKey: open4goods
+
+  
+crawlerKeys:
+  - open4goods
+
+verticalsFolder: "/home/goulven/git/open4goods-config/verticals/"
+datasourcesfolder: "/home/goulven/git/open4goods-config/datasources/"
+
+
+spring:
+  thymeleaf:
+      cache: false
+
+
+######################################
+# The locally embeded crawler node
+#####################################        
+fetcherProperties:
+  apiKey: open4goods
+  concurrentFetcherTask: 30
+  apiSynchConfig:
+    nodeName: localNode
+    nodeUrl: http://localhost:8081  
+
+             

@@ -1,0 +1,25 @@
+                                                               
+                                                               
+               AAA               PPPPPPPPPPPPPPPPP   IIIIIIIIII
+              A:::A              P::::::::::::::::P  I::::::::I
+             A:::::A             P::::::PPPPPP:::::P I::::::::I
+            A:::::::A            PP:::::P     P:::::PII::::::II
+           A:::::::::A             P::::P     P:::::P  I::::I  
+          A:::::A:::::A            P::::P     P:::::P  I::::I  
+         A:::::A A:::::A           P::::PPPPPP:::::P   I::::I  
+        A:::::A   A:::::A          P:::::::::::::PP    I::::I  
+       A:::::A     A:::::A         P::::PPPPPPPPP      I::::I  
+      A:::::AAAAAAAAA:::::A        P::::P              I::::I  
+     A:::::::::::::::::::::A       P::::P              I::::I  
+    A:::::AAAAAAAAAAAAA:::::A      P::::P              I::::I  
+   A:::::A             A:::::A   PP::::::PP          II::::::II
+  A:::::A               A:::::A  P::::::::P          I::::::::I
+ A:::::A                 A:::::A P::::::::P          I::::::::I
+AAAAAAA                   AAAAAAAPPPPPPPPPP          IIIIIIIIII
+                                                               
+                                                               
+                                                               
+                                                               
+                                                               
+                                                               
+                                                               

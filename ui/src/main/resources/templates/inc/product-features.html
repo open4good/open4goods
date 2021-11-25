@@ -1,0 +1,11 @@
+<div class="card">
+	<div class="card-header"><h2 class="h5">Fonctionnalités</h2></div>
+	<div style="max-height: 400px" class="overflow-auto card-body">	
+		
+		<ul>
+			<th:block th:each="item, stat : ${product.attributes.features}">
+				<li  role="alert" th:text="${item.name}"></li>
+			</th:block>
+		</ul>
+	</div>
+</div>

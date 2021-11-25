@@ -1,0 +1,183 @@
+<!--/*
+
+=========================================================
+* Pixel Pro Bootstrap 5 UI Kit
+=========================================================
+
+* Product Page: https://themesberg.com/product/ui-kit/pixel-pro-premium-bootstrap-5-ui-kit
+* Copyright 2021 Themesberg (https://www.themesberg.com)
+
+* Coded by https://themesberg.com
+
+=========================================================
+
+* The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software. Contact us if you want to remove it.
+
+*/-->
+<!DOCTYPE html>
+<html th:lang="${siteLocale.language}">
+
+<head>
+
+	<!--/* Metas and CSS */-->
+	<th:block th:include="inc/header-meta.html"></th:block>
+    
+	<!-- Primary Meta Tags -->
+	<title th:text="#{index.title}"></title>
+	<meta name="title" th:content="#{index.meta.title}">
+	<meta name="description" th:content="#{index.meta.description}">
+		
+	<!-- Open Graph / Facebook -->
+	<meta property="og:type" content="website">
+	<meta property="og:url" th:content="${url}">
+	<meta property="og:title" th:content="#{index.title}">
+	<meta property="og:description" th:content="#{index.meta.description}">
+	<meta property="og:image" th:content="${url} + 'assets/img/brand/light.svg'">
+	
+	<!-- Twitter -->
+	<meta name="twitter:card" content="summary_large_image">
+	<meta name="twitter:url" th:content="${url}">
+	<meta name="twitter:title" th:content="#{index.title}">
+	<meta name="twitter:description" th:content="#{index.meta.description}">
+	<meta name="twitter:image" th:content="${url} + 'assets/img/brand/light.svg'">
+	
+</head>
+
+<body>
+    
+	<!--/* Navbar */-->
+	<header class="header-global">
+    	<nav id="navbar-main" aria-label="Primary navigation" class="navbar navbar-main navbar-expand-lg navbar-theme-primary headroom navbar-light navbar-theme-secondary">
+			<th:block th:include="inc/navbar-non-product.html"></th:block>
+		</nav>
+	</header>
+	
+    <main>	
+       <!--/* Loader */-->
+       <th:block th:include="inc/preloader.html"></th:block>
+		
+       <!--/* Search */-->
+       <section class="section section-header text-dark">
+           <div class="container">
+               <div class="row justify-content-between align-items-center">
+                   <div class="col-12 col-md-6">
+                       <h1 class="display-2 mb-4">eco<span class="text-secondary-app fw-bold">-</span>achat<span class="text-secondary-app fw-bold">.fr</span>
+                       </h1>
+                       <p class="lead text-gray mb-1">Ici, vous transformez vos achats en actes engagés pour la planète.</p>
+	                           <form method="post" id="searchForm" action="/recherche">
+			                       <div class="d-flex flex-wrap mt-4 mt-lg-5">
+			                           <div class="input-group">
+				                               <input type="text" id="searchInput" class="form-control" th:placeholder="'Chercher dans ' + ${#numbers.formatDecimal(totalItems, 0, 'COMMA', 0, 'POINT')} + ' produits'" aria-label="Search" aria-describedby="basic-addon1" name="query">
+				                               <button onclick="document.getElementById('searchForm').submit()" class="btn btn-primary" type="button"><span class="icon icon-xs me-1"><span class="fas fa-search"></span></span> Chercher</button>
+			                            </div>
+			                       </div>
+	                           </form>
+	                           
+                   <blockquote class="mt-5 blockquote text-center">
+                    Le meilleur achat pour la planète est celui qu'on ne fait pas.<b> Avez-vous vraiment besoin de ce que vous allez acheter ?</b><br/> Si la réponse est oui, nous compenserons en partie l'impact environnemental de votre produit.
+					</blockquote>
+					
+                   </div>
+                   <div class="col-12 col-md-6 text-center">
+                       <img class="d-none d-md-inline-block" src="../../assets/img/index-logo.svg" alt="achat et compensation carbone">
+                   </div>
+                   
+
+			
+			
+               </div>
+           </div>
+       </section>
+       
+      <!--/* Infos */-->
+       <section class="section section-lg py-sm-0 py-sm-0 bg-primary-app pb-md-5 pt-md-5">
+           <div class="container z-2 mt-sm-n6 mt-md-n7">
+               <div class="row">
+                   <div class="col-12 col-md-6 col-lg-4 mb-4 mb-lg-0">
+                       <div class="card bg-white border-gray-300 text-gray p-4">
+                           <div class="card-header bg-white border-0 pb-0">
+                               <h2 class="h4 m-0">Compensez vos achats</h2>
+                           </div>
+                           <div class="card-body">
+ 							   <p>
+                                   Nous offrons 20% de nos revenus d'affiliation à la compensation carbone de votre achat !                         
+                               </p>
+                               <a href="/compensation-carbone" class="btn btn-sm btn-secondary-app animate-up-2 mt-3">En savoir plus</a>
+                           </div>
+                       </div>
+                   </div>
+                   <div class="col-12 col-md-6 col-lg-4 mb-4 mb-lg-0">
+                       <div class="card bg-white border-gray-300 text-gray p-4">
+                           <div class="card-header bg-white border-0 pb-0">
+                               <h2 class="h4 m-0">Open source</h2>
+                           </div>
+                           <div class="card-body">
+                               <p>
+                                   Ce site est en open source, vous pouvez consulter et réutiliser
+                                   l'intégralité du code source.                         
+                               </p>
+                               <a target="_blank" href="https://github.com/open4good/open4goods-light/" class="btn btn-sm btn-secondary-app animate-up-2 mt-3">En savoir plus</a>
+                           </div>
+                       </div>
+                   </div>
+                   <div class="col-12 col-md-6 col-lg-4">
+                       <div class="card bg-white border-gray-300 text-gray p-4">
+                           <div class="card-header bg-white border-0 pb-0">
+                               <h2 class="h4 m-0">Open data</h2>
+                           </div>
+                           <div class="card-body">
+                               <p>
+                                   L'intégralité des données de la plateforme sont disponibles en open data                         
+                               </p>
+                               <a href="/opendata" class="btn btn-sm btn-secondary-app animate-up-2 mt-3">En savoir plus</a>
+                           </div>
+                       </div>
+                   </div>
+               </div>
+           </div>
+       </section>
+       
+      	<!--/* Partners
+        <section class="section section-lg py-sm-0 py-sm-0 pb-md-5 pt-md-5">   
+            <div class="container">
+                <div class="row justify-content-between align-items-center">
+                
+                	<h2 class="h3 text-center text-lg-left mb-3">Nos partenaires</h2>
+                	<p>
+                		La compensation carbone s'applique également si vous faites vos achats sur les plateformes marchandes en utilisant les liens ci-dessous.
+                	</p>
+
+                </div>
+            </div>
+
+        </section>
+         */-->
+    </main>
+
+	<!--/* Footer */-->
+	<th:block th:include="inc/footer.html"></th:block>	
+
+<!-- Core -->
+<script src="../../vendor/bootstrap/dist/js/bootstrap.min.js"></script>
+<script src="../../vendor/headroom.js/dist/headroom.min.js"></script>
+
+<!-- Vendor JS -->
+
+<script src="../../vendor/smooth-scroll/dist/smooth-scroll.polyfills.min.js"></script>
+<script src="../../vendor/vivus/dist/vivus.min.js"></script>
+<script type="text/javascript" language="javascript" src="https://code.jquery.com/jquery-3.5.1.js"></script>
+
+<!-- pixel JS -->
+<script src="../../assets/js/pixel.js"></script>
+
+<script>
+$(document).ready(function() {
+    $('#searchInput').on("change",function (e) {
+    	$('#searchForm').attr("action","/recherche/"+encodeURIComponent($('#searchInput').val()));
+    });
+} );
+</script>
+
+</body>
+
+</html>

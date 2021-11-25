@@ -1,0 +1,12 @@
+########################
+# Logging configuration
+########################
+logging: 
+    file: 
+      name: ${logsFolder}/crawler.log  
+      max-history: 5      
+      max-size: 200MB     
+      
+spring:
+  application:
+    name: crawler

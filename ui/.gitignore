@@ -1,0 +1,9 @@
+/target/
+/.attach*
+/bin/*
+/.classpath
+/.project
+/.settings
+/.settings/*
+/capsule/
+/capsule-data/

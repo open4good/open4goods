@@ -1,0 +1,33 @@
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+<!-- Favicon -->
+<link rel="apple-touch-icon" sizes="120x120" href="../../assets/img/favicon/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="../../assets/img/favicon/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="../../assets/img/favicon/favicon-16x16.png">
+<link rel="manifest" href="../../assets/img/favicon/site.webmanifest">
+<link rel="mask-icon" href="../../assets/img/favicon/safari-pinned-tab.svg" color="#ffffff">
+<meta name="msapplication-TileColor" content="#ffffff">
+<meta name="theme-color" content="#ffffff">
+
+<link type="text/css" href="../../vendor/@fortawesome/fontawesome-free/css/all.min.css" rel="stylesheet">
+
+<!-- Glide JS -->
+<link rel="stylesheet" href="../../vendor/@glidejs/glide/dist/css/glide.core.min.css">
+<link rel="stylesheet" href="../../vendor/@glidejs/glide/dist/css/glide.theme.min.css">
+
+<link type="text/css" href="../../css/pixel.css" rel="stylesheet">
+
+<link rel="search" type="application/opensearchdescription+xml" th:title="#{opensearch.title}" th:href="${baseUrl} + 'opensearch.xml'">
+
+
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script th:unless="${dev}" async src="https://www.googletagmanager.com/gtag/js?id=G-4085Y6CBL7"></script>
+<script th:unless="${dev}">
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-4085Y6CBL7');
+</script>
+
