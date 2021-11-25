@@ -12,13 +12,11 @@ import org.open4goods.aggregation.AbstractAggregationService;
 import org.open4goods.config.yml.ui.VerticalProperties;
 import org.open4goods.model.constants.ProductState;
 import org.open4goods.model.data.DataFragment;
-import org.open4goods.model.data.ProviderSupportType;
 import org.open4goods.model.product.AggregatedData;
 import org.open4goods.model.product.AggregatedPrice;
 import org.open4goods.model.product.AggregatedPrices;
 import org.open4goods.model.product.PriceHistory;
 import org.open4goods.services.DataSourceConfigService;
-import org.open4goods.services.StandardiserService;
 
 /**
  * This service compute price infos from DataFragments computations if not in

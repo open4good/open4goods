@@ -32,7 +32,6 @@ import org.open4goods.services.DataSourceConfigService;
 import org.open4goods.services.EvaluationService;
 import org.open4goods.services.Gs1PrefixService;
 import org.open4goods.services.ImageMagickService;
-import org.open4goods.services.RecaptchaService;
 import org.open4goods.services.RemoteFileCachingService;
 import org.open4goods.services.ResourceService;
 import org.open4goods.services.SerialisationService;

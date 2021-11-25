@@ -5,7 +5,6 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.open4goods.model.Standardisable;
-import org.open4goods.model.attribute.Attribute;
 import org.open4goods.model.constants.Currency;
 import org.open4goods.services.StandardiserService;
 import org.springframework.data.elasticsearch.annotations.DateFormat;

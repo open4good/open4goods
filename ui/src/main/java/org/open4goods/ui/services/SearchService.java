@@ -5,8 +5,6 @@ import java.util.stream.Stream;
 
 import org.apache.commons.lang3.StringUtils;
 import org.open4goods.dao.AggregatedDataRepository;
-import org.open4goods.model.aggregation.CategoryStatResults;
-import org.open4goods.store.repository.CustomDataFragmentRepository;
 import org.open4goods.ui.controllers.dto.VerticalSearchResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

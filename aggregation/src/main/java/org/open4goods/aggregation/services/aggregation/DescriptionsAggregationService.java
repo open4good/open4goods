@@ -1,9 +1,5 @@
 package org.open4goods.aggregation.services.aggregation;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
-
 import org.apache.commons.lang3.StringUtils;
 import org.jsoup.Jsoup;
 import org.open4goods.aggregation.AbstractAggregationService;
