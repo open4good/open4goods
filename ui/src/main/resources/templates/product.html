@@ -1,0 +1,169 @@
+<!--/*
+
+=========================================================
+* Pixel Pro Bootstrap 5 UI Kit
+=========================================================
+
+* Product Page: https://themesberg.com/product/ui-kit/pixel-pro-premium-bootstrap-5-ui-kit
+* Copyright 2021 Themesberg (https://www.themesberg.com)
+
+* Coded by https://themesberg.com
+
+=========================================================
+
+* The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software. Contact us if you want to remove it.
+
+*/-->
+<!DOCTYPE html>
+<html th:lang="${siteLocale.language}">
+
+<head>
+	<!--/* Metas and CSS */-->
+	<th:block th:include="inc/header-meta.html"></th:block>
+    
+	<!-- Primary Meta Tags -->
+	<title th:text="#{product.title(${product.names.shortestOfferName()})}"></title>
+	<meta name="title" th:content="#{product.meta.title(${product.names.shortestOfferName()})}">	
+	<meta name="description" th:if="${null != product.model() && null != product.brand()}" th:content="#{product.meta.description.withbrandandmodel(${product.model()}, ${product.brand()}, ${#numbers.formatDecimal(product.bestPrice().compensation, 1, 2)}, ${product.names.shortestOfferName()})}">            
+    <meta name="description" th:unless="${null != product.model() && null != product.brand()}" th:content="#{product.meta.description.withname(${product.names.shortestOfferName()}, ${#numbers.formatDecimal(product.bestPrice().compensation, 1, 2)})}">
+	<!-- Open Graph / Facebook -->
+	<meta property="og:type" content="website">
+	<meta property="og:url" th:content="${url}">
+	<meta property="og:title" th:content="#{product.title(${product.names.shortestOfferName()})}">
+	<meta property="og:description" th:content="#{product.meta.description(${product.names.shortestOfferName()})}">
+	<meta property="og:image" th:content="${baseUrl} + '/assets/img/brand/light.svg'">
+	
+	<!-- Twitter -->
+	<meta name="twitter:card" content="summary_large_image">
+	<meta name="twitter:url" th:content="${url}">
+	<meta name="twitter:title" th:content="#{product.title(${product.names.shortestOfferName()})}">
+	<meta name="twitter:description" th:content="#{product.meta.description(${product.names.shortestOfferName()})}">
+	<meta name="twitter:image" th:content="${baseUrl} + 'assets/img/brand/light.svg'">
+	
+	<!-- CSS -->
+	<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.25/css/dataTables.bootstrap5.min.css">
+
+</head>
+
+<body>
+    
+
+<header class="header-global">
+    <nav id="navbar-main" aria-label="Primary navigation" class="navbar navbar-main navbar-expand-lg navbar-theme-primary headroom navbar-light navbar-transparent navbar-theme-secondary">
+		<th:block th:include="inc/navbar-product.html"></th:block>
+	</nav>
+</header>
+<main>
+      
+       <!--/* Loader */-->
+       <th:block th:include="inc/preloader.html"></th:block>
+
+       <!--/* Microdatas */-->
+       <th:block th:include="inc/product-microdatas.html"></th:block>
+
+        <div class="section section-lg pt-5 pt-md-7 bg-gray-200">
+            <div class="container">
+				<div class="card shadow p-4">
+				
+       				<!--/* Header */-->				
+					<th:block th:include="inc/product-header.html"></th:block>
+               								
+					<div class="row mt-3">
+
+	       				<!--/* Best price */-->				
+						<div class="col-sm-12 col-md-12 col-lg-6">
+							<th:block th:include="inc/product-best-price.html"></th:block>										
+						</div>
+						
+	       				<!--/* Compensation */-->				
+						<div class="col-sm-12 col-md-12 col-lg-6">
+							<th:block th:include="inc/product-compensation.html"></th:block>
+						</div>
+					</div>	
+					
+				</div>
+				
+   				<!--/* Descriptions */-->				
+				<th:block th:include="inc/product-descriptions.html"></th:block>							
+
+							
+   				 <!--/* Product origin */-->				
+				 <th:block th:include="inc/product-origin.html"></th:block>
+             
+  				 <!--/* Product all prices */-->
+				 <th:block th:include="inc/product-all-prices.html"></th:block>
+  				 
+				 <div class="row mt-3">
+      				<!--/* Referentiel attributes */-->									
+					<div class=" col-lg-12">
+						<th:block th:include="inc/product-referentiel-attributes.html"></th:block>										
+	      				<!--/* Fonctionnalites */-->				
+						<div class="mt-3"  th:if="${product.attributes.features.size > 0}" th:include="inc/product-features.html"></div>
+					</div>
+					
+					<div class=" col-lg-12">
+	      				<!--/* Attributes */-->				
+						<th:block th:include="inc/product-attributes.html"></th:block>
+						
+						<!--/* Attributes */-->				
+						<th:block th:include="inc/product-unmatched-attributes.html"></th:block>
+
+	      				<!--/* Categories */-->				
+						<th:block th:include="inc/product-categories.html"></th:block>
+					</div>
+					
+										
+				</div>	
+  				 			
+			</div>
+		</div>  
+</main>
+
+<!--/* Product footer */-->				
+<th:block th:include="inc/product-footer.html"></th:block>
+    
+
+    <!-- Core -->
+<script src="../../vendor/@popperjs/core/dist/umd/popper.min.js"></script>
+<script src="../../vendor/bootstrap/dist/js/bootstrap.min.js"></script>
+<script src="../../vendor/headroom.js/dist/headroom.min.js"></script>
+
+<!-- Vendor JS -->
+<script src="../../vendor/onscreen/dist/on-screen.umd.min.js"></script>
+<script src="../../vendor/nouislider/distribute/nouislider.min.js"></script>
+<script src="../../vendor/jarallax/dist/jarallax.min.js"></script>
+<script src="../../vendor/smooth-scroll/dist/smooth-scroll.polyfills.min.js"></script>
+<script src="../../vendor/vivus/dist/vivus.min.js"></script>
+<script src="../../vendor/chartist/dist/chartist.min.js"></script>
+<script src="../../vendor/chartist-plugin-tooltips/dist/chartist-plugin-tooltip.min.js"></script>
+<script src="../../vendor/@glidejs/glide/dist/glide.min.js"></script>
+<script src="../../vendor/countup.js/dist/countUp.umd.js"></script>
+<script src="../../vendor/vanillajs-datepicker/dist/js/datepicker.min.js"></script>
+
+<script async defer src="https://buttons.github.io/buttons.js"></script>
+
+<script type="text/javascript" language="javascript" src="https://code.jquery.com/jquery-3.5.1.js"></script>
+<script type="text/javascript" language="javascript" src="https://cdn.datatables.net/1.10.25/js/jquery.dataTables.min.js"></script>
+<script type="text/javascript" language="javascript" src="https://cdn.datatables.net/1.10.25/js/dataTables.bootstrap5.min.js"></script>
+
+<!-- pixel JS -->
+<script src="../../assets/js/pixel.js"></script>
+<script>
+$(document).ready(function() {
+	if (($("#offersTable")).length) {
+		$('#offersTable').DataTable();		
+	}
+	
+	if ($("#allAttributes").length) {
+		$('#allAttributes').DataTable();
+	}
+    
+    
+    
+    
+} );
+</script>
+
+</body>
+
+</html>

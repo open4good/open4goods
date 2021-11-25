@@ -1,0 +1,219 @@
+package org.open4goods.config.yml.ui;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+
+import org.open4goods.config.yml.attributes.AttributeConfig;
+import org.open4goods.model.attribute.Attribute;
+import org.open4goods.model.constants.CacheConstants;
+import org.springframework.cache.annotation.Cacheable;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonMerge;
+
+public class AttributesConfig {
+
+	/**
+	 * The specific configs configurations
+	 */
+	@JsonMerge
+	private Set<AttributeConfig> configs = new HashSet<AttributeConfig>();
+
+	
+	/**
+	 * If true, will extract featured items
+	 */
+	private boolean featuredActivated = true;
+
+	/**
+	 * If set, the list of configs values making an attribute to be categorized as a "Feature" (must be uppercase)
+	 */
+	@JsonMerge
+	private Set<String> featuredValues = new HashSet<>();
+	
+	
+
+	
+	
+	
+	/**
+	 * The list of matching on some attribute values. It allows to define custom
+	 * texts / icons / images on products having specific attribute values
+	 **/
+	private List<AttributeMatching> attributesMatching = new ArrayList<>();
+
+	// Internal map
+	@JsonIgnore
+	private Map<String, AttributeConfig> hashedAttributesByKey;
+
+	public AttributesConfig(Set<AttributeConfig> configs) {
+		this.configs = configs;
+	
+	}
+
+	
+	public AttributesConfig() {
+	}
+
+	
+	
+	/**
+	 * Get all configs synonyms by provider
+	 * 
+	 * @return A map-ProviderKey,Synonym, Translated Key
+	 */
+	@Cacheable(cacheNames = CacheConstants.FOREVER_LOCAL_CACHE_NAME)
+	public Map<String, Map<String, String>> synonyms() {
+
+		final Map<String, Map<String, String>> hashedSynonyms = new HashMap<>();
+
+		for (final AttributeConfig ac : configs) {
+			for (final Entry<String, Set<String>> entry : ac.getSynonyms().entrySet()) {
+				if (!hashedSynonyms.containsKey(entry.getKey())) {
+					hashedSynonyms.put(entry.getKey(), new HashMap<>());
+				}
+				for (final String val : entry.getValue()) {
+					hashedSynonyms.get(entry.getKey()).put(val, ac.getKey());
+				}
+			}
+		}
+
+		return hashedSynonyms;
+	}
+
+	public Attribute translateAttribute(final Attribute a, final String provider) {
+
+		Map<String, String> p = synonyms().get(provider);
+
+		// TODO(conf) : This rules should be weared at the config level.
+		String translated = a.getName();
+
+		// Sanitization
+		//TODO : from conf
+		translated = translated.replace("(+ D'INFOS)", "");
+		
+		if (translated.endsWith(":")) {
+			translated = translated.substring(0, translated.length() - 1).trim();
+		}
+
+		final int pos = translated.indexOf('|');
+		if (pos != -1) {
+			translated = translated.substring(pos + 1).trim();
+		}
+
+		// Not nice, but due to current design, in order to handle attr name on unmatched attrs
+		a.setName(translated);
+		
+		
+		if (null != p) {
+			// Trying on the specific provider name
+			final String r = p.get(translated);
+			if (r != null) {
+				a.setName(r);
+				return a;
+			}
+		}
+
+		// Trying on the "ALL" case
+		p = synonyms().get("all");
+
+		if (null != p) {
+			final String r = p.get(translated);
+			if (r != null) {
+				a.setName(r);
+				return a;
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * Gets an attribute config by it's id
+	 * @param key
+	 * @return
+	 */
+	public AttributeConfig getAttributeConfigByKey(final String key) {
+		singletonHashAttrs();
+		final AttributeConfig ac = hashedAttributesByKey.get(key);
+		return ac;
+	}
+
+	/**
+	 * Return the attributeConfig for an attribute, if any
+	 * 
+	 * @param value
+	 * @return
+	 */
+	public AttributeConfig getConfigFor(final Attribute value) {
+
+		if (null == value) {
+			return null;
+		}
+
+		return getAttributeConfigByKey(value.getName());
+	}
+
+	private void singletonHashAttrs() {
+		// Caching if needed
+		if (null == hashedAttributesByKey) {
+			hashedAttributesByKey = new HashMap<>();
+
+			for (final AttributeConfig a : configs) {
+				hashedAttributesByKey.put(a.getKey(), a);
+
+			}
+		}
+	}
+
+	
+	
+	
+	public Set<String> getAttributeKeys() {
+		singletonHashAttrs();
+		return hashedAttributesByKey.keySet();
+	}
+
+	public Set<AttributeConfig> getConfigs() {
+		return configs;
+	}
+
+	public void setConfigs(Set<AttributeConfig> attributes) {
+		this.configs = attributes;
+	}
+
+	public List<AttributeMatching> getAttributesMatching() {
+		return attributesMatching;
+	}
+
+	public void setAttributesMatching(List<AttributeMatching> attributesMatching) {
+		this.attributesMatching = attributesMatching;
+	}
+
+
+	public boolean isFeaturedActivated() {
+		return featuredActivated;
+	}
+
+
+	public void setFeaturedActivated(boolean featuredActivated) {
+		this.featuredActivated = featuredActivated;
+	}
+
+
+	public Set<String> getFeaturedValues() {
+		return featuredValues;
+	}
+
+
+	public void setFeaturedValues(Set<String> featuredValues) {
+		this.featuredValues = featuredValues;
+	}
+
+
+
+}

@@ -1,0 +1,9 @@
+/target/
+/.attach*
+/bin/*
+/.classpath
+/.project
+/.settings
+/capsule-data/
+/open4goods/
+/open4goods-data/

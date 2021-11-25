@@ -1,0 +1,38 @@
+<div id="meilleursPrix" class="card">
+	<div class="row g-0 align-items-center">
+		<div class="col-sm-7">
+			<!-- Header -->
+			<div class="card-header border-0 bg-white text-center pb-0">
+				<h2 class="text-primary mb-0">Meilleur prix</h2>
+				<th:block th:if="${product.offersCount} > 1">
+					<span class="text-success small"> sur </span>
+					<a href="#offres">
+						<span class="h6 mb-0 text-danger">
+						<span th:text='${product.offersCount}'></span> offres</span>
+					</a>
+				</th:block>
+				<span class="d-block my-3"> <span class="display-2 fw-bold">
+					<th:block th:text="${#numbers.formatDecimal(product.bestPrice().price, 1, 2)}"></th:block> 
+					<span class="align-baseline font-medium" th:text="#{'symbol.'+${product.bestPrice().currency}}"></span>
+				</span>
+				</span>
+			</div>
+		</div>
+		<div class="col-sm-5">
+			<!-- Content -->
+			<div class="card-body pb-0">
+				<ul class="list-group list-group-flush price-list mb-4">
+					<li class="list-group-item border-0"><span class="far fa-lightbulb"></span><span th:text="${product.bestPrice().datasourceName}"></span> </li>
+					<li th:if="${product.bestPrice().productState}" class="list-group-item border-0"><span class="far fa-paper-plane"></span><span th:text="#{'condition.'+${product.bestPrice().productState}}"></li>
+				</ul>
+			</div>
+			<!-- End Content -->
+		</div>
+
+		<div class="">
+			<div class="m-3 d-grid">
+				<a rel=”nofollow” th:href="'/compensation/'+${product.bestPrice().affiliationToken}" class="btn btn-primary animate-up-2">Acheter</a>
+			</div>
+		</div>
+	</div>
+</div>

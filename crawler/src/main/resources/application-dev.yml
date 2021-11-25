@@ -1,0 +1,37 @@
+testMode: false
+dedicatedLogToConsole: false
+
+masterEndpoint: https://api.eco-achat.fr
+apiSynchConfig:
+  nodeName: devNode
+#  nodeUrl: 
+    
+
+
+logging:
+  level:
+    ROOT: INFO
+    org.open4goods: INFO
+server:
+  port: 9191
+
+defaultCrawlConfig:
+  resumableCrawling: false
+  userAgentString: eco-achat.fr (https://eco-achat.fr/)
+  politenessDelay: 50
+  includeBinaryContentInCrawling: false
+  processBinaryContentInCrawling: false
+  maxConnectionsPerHost: 10
+  maxTotalConnections: 100
+  maxOutgoingLinksToFollow: 5000
+  maxDownloadSize: 1048576
+  followRedirects: true
+  onlineTldListUpdate: false
+  shutdownOnEmptyQueue: true
+  threadMonitoringDelaySeconds: 2
+  threadShutdownDelaySeconds: 2
+  cleanupDelaySeconds: 2
+  socketTimeout: 15000
+  connectionTimeout: 2000
+
+    

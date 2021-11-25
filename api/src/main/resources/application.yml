@@ -1,0 +1,47 @@
+server:
+  compression:
+    enabled: true
+    mime-types: text/html,text/xml,text/plain,text/css,text/javascript,application/javascript,application/json
+    min-response-size: 1024
+  http2:
+    enabled: true
+    
+    
+########################
+# Logging configuration
+########################
+logging: 
+    file:   
+      max-history: 5      
+      max-size: 200MB      
+      
+      
+spring:
+  jackson:
+    default-property-inclusion: non-empty
+  application:
+    name: open4goods-api
+            
+management:
+  health:
+    diskspace:
+      threshold: 10000MB  
+         
+  endpoints:
+    web:
+      exposure:
+        include:
+        - "*"
+        exclude:
+        - "shutdown"
+  endpoint:
+    
+    health:
+      show-details: always   
+       
+attributeAggregationConfig:
+  excludedAttributeNames:
+    - BRAND
+    - MODEL
+    - MODELE
+  

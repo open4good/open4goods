@@ -1,0 +1,34 @@
+<div id="caracteristiques" class="card">
+	<div class="card-header"><h2 class="h5">Identification du produit</h2></div>
+	<div class="card-body">
+		<table class="table table-hover">
+			<tbody>
+				<tr th:if="${product.brand()}">
+					<th scope="row">Marque</th>
+					<td  th:text="${product.brand()}"></td>
+				</tr>
+
+				<tr th:if="${product.model()}">
+					<th scope="row">Modèle</th>
+					<td th:text="${product.model()}"></td>
+				</tr>
+
+				<tr>
+					<th scope="row">Gtin / Ean</th>
+					<td th:text="${product.gtin()}"></td>
+				</tr>
+				
+				
+				<th:block th:each="item, stat : ${product.alternativeIds}">
+					<tr th:if="${stat.first}">
+						<th scope="row" th:rowspan="${product.alternativeIds.size()}">Autres noms</th>
+						<td th:text="${item}"></td>
+					</tr>
+					<tr th:unless="${stat.first}">
+						<td th:text="${item}"></td>
+					</tr>
+				</th:block>				
+			</tbody>
+		</table>
+	</div>
+</div>

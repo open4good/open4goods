@@ -1,0 +1,10 @@
+<div class="card my-3">
+	<div class="card-header"><h2 class="h5">Catégories</h2></div>
+	<div class="card-body">	
+		<th:block th:each="item, stat : ${product.datasourceCategories}">
+			<div class="alert alert-primary" role="alert">
+			 <a  th:href="'/categorie/'+${item.toLowerCase()}" th:text="${item}"></a>
+			</div>
+		</th:block>
+	</div>
+</div>

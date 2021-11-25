@@ -1,0 +1,25 @@
+# This workflow will trigger the remote ssh script to 
+# restart infrastructure with the latest artefacts version
+on: workflow_dispatch
+    
+name: Publish latest infrastructure 
+
+jobs:
+  deploy:
+    name: publish-infra
+    runs-on: self-hosted
+
+    steps:
+      - name: Publish via ssh
+        uses: garygrossgarten/github-action-ssh@release
+        with:
+          command: sh /opt/open4goods/bin/publish-infra.sh
+          host: ${{ secrets.REMOTE_HOST }}
+          username: ${{ secrets.REMOTE_USER }}
+          privateKey: ${{ secrets.SSH_PRIVATE_KEY}}
+          
+          
+
+                      
+
+                                    

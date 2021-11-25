@@ -1,0 +1,189 @@
+<!--/*
+
+=========================================================
+* Pixel Pro Bootstrap 5 UI Kit
+=========================================================
+
+* Product Page: https://themesberg.com/product/ui-kit/pixel-pro-premium-bootstrap-5-ui-kit
+* Copyright 2021 Themesberg (https://www.themesberg.com)
+
+* Coded by https://themesberg.com
+
+=========================================================
+
+* The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software. Contact us if you want to remove it.
+
+*/-->
+<!DOCTYPE html>
+<html th:lang="${siteLocale.language}">
+
+<head>
+
+	<!--/* Metas and CSS */-->
+	<th:block th:include="inc/header-meta.html"></th:block>
+    
+	<!-- Primary Meta Tags -->
+	<title th:text="#{contact.title}"></title>
+	<meta name="title" th:content="#{contact.meta.title}">
+	<meta name="description" th:content="#{contact.meta.description}">
+		
+	<!-- Open Graph / Facebook -->
+	<meta property="og:type" content="website">
+	<meta property="og:url" th:content="${url}">
+	<meta property="og:title" th:content="#{contact.title}">
+	<meta property="og:description" th:content="#{contact.meta.description}">
+	<meta property="og:image" th:content="${baseUrl} + 'assets/img/brand/light.svg'">
+	
+	<!-- Twitter -->
+	<meta name="twitter:card" content="summary_large_image">
+	<meta name="twitter:url" th:content="${url}">
+	<meta name="twitter:title" th:content="#{contact.title}">
+	<meta name="twitter:description" th:content="#{contact.meta.description}">
+	<meta name="twitter:image" th:content="${baseUrl} + 'assets/img/brand/light.svg'">
+	
+</head>
+
+<body>
+    
+	<!--/* Navbar */-->
+	<header class="header-global">
+    	<nav id="navbar-main" aria-label="Primary navigation" class="navbar navbar-main navbar-expand-lg navbar-theme-primary headroom navbar-dark navbar-theme-primary">
+			<th:block th:include="inc/navbar-non-product.html"></th:block>
+		</nav>
+	</header>
+	
+    <main>
+
+       <!--/* Loader */-->
+       <th:block th:include="inc/preloader.html"></th:block>
+
+
+ 
+ 
+            
+        <!-- Hero -->
+        <section  class="section section-header pb-11 bg-primary text-white">
+            <div class="container">
+                <div class="row justify-content-center">
+                    <div class="col-12 col-xl-8 text-center">
+                    	<th:block th:unless="${info}">
+	                        <h1 class="display-2 mb-3">Nous contacter</h1>
+	                        <p class="lead">Vous avez une question ou une remarque ? N'hésitez pas à utiliser le formulaire ci-dessous, nous tâcherons de vous répondre dans les meilleurs délais.</p>        
+                    	</th:block>
+                    	<th:block th:if="${info}">
+	                        <h1 class="display-2 mb-3">Message envoyé !</h1>
+	                        <p class="lead">Merci pour votre message, nous en prendrons connaissance rapidement et tâcherons d'y apporter une réponse dans les meilleurs délais.</p>        
+                    	</th:block>
+                    	
+                    	
+                    </div>
+                </div>
+            </div>
+
+	 
+	        <!--/* message failed */-->
+	 	    <div th:if="${error} "class="alert alert-danger alert-dismissible fade show my-3" role="alert">
+	            <span class="fas fa-bullhorn me-1"></span>
+	            <strong>Erreur !</strong> Nous n'avons pas pu envoyer votre message, en raison d'une erreur technique ! (<span th:text="${error}" ></span>) !
+	            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        
+        </section>
+        <!-- Section -->
+        <div th:if= "${error == null && info == null}" class="section py-0">
+            <div class="container mt-n10">
+                <div class="row">
+                    <div class="col-12">
+                        <iframe class="map rounded" id="gmap_canvas" src="https://maps.google.com/maps?q=brest=&z=8&ie=UTF8&iwloc=&output=embed"></iframe>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Section -->
+        <section th:if= "${error == null && info == null}" class="section section-lg pt-6">
+            <div class="container">
+                <div class="row justify-content-center mb-5 mb-lg-6">
+                    <div class="col-12 col-lg-8">
+                        <!-- Contact Card -->
+                        <div class="card border-0 p-2 p-md-3 p-lg-5">
+                            <div class="card-header bg-white border-0 text-center">
+                                <h2>Formulaire de contact</h2>
+                                <p>Merci de renseigner une adresse mail valable si vous souhaitez une réponse !</p>
+                            </div>
+                            <div class="card-body px-0 pt-0">
+                                <form id="contact-form" method="POST" action="/contact">
+                                    <!-- Form -->
+                                    <div class="mb-4">
+                                        <label for="name">Votre nom</label>
+                                        <div class="input-group">
+                                            <span class="input-group-text" id="basic-addon3"><span class="fas fa-user-circle"></span></span>
+                                            <input type="text" class="form-control" placeholder="ex: Marc assin" id="name" name="name" required>
+                                        </div>
+                                    </div>
+                                    <!-- End of Form -->
+                                    <!-- Form -->
+                                    <div class="mb-4">
+                                        <label for="email">Votre mail</label>
+                                        <div class="input-group">
+                                            <span class="input-group-text" id="basic-addon4"><span class="fas fa-envelope"></span></span>
+                                            <input type="email" class="form-control" placeholder="marc-assin@eco-achat.fr" id="email" name="email" required>
+                                        </div>
+                                    </div>
+                                    <!-- End of Form -->
+                                    <div class="mb-4">
+                                        <label for="message">Votre message</label>
+                                        <textarea placeholder="Your message" class="form-control" id="message" rows="4" name="message" required></textarea>
+                                    </div>
+                                    <!-- End of Form -->
+								        
+                                    <div class="d-grid">
+                                        <button type="submit" class="g-recaptcha btn rounded btn-secondary"  data-sitekey="6LcOBDcdAAAAAL3zmLBZpwvBDjMUsSB0RzbxDe-z" 
+									        data-callback='onSubmit' 
+									        data-action='submit'>Envoyer le message</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                        <!-- End of Contact Card -->
+                    </div>
+                </div>                
+            </div>
+        </section>
+        <!-- End of section -->
+    </main>
+	<!--/* Footer */-->
+	<th:block th:include="inc/footer.html"></th:block>	
+
+    <!-- Core -->
+<script src="../../vendor/@popperjs/core/dist/umd/popper.min.js"></script>
+<script src="../../vendor/bootstrap/dist/js/bootstrap.min.js"></script>
+<script src="../../vendor/headroom.js/dist/headroom.min.js"></script>
+
+<!-- Vendor JS -->
+<script src="../../vendor/onscreen/dist/on-screen.umd.min.js"></script>
+<script src="../../vendor/nouislider/distribute/nouislider.min.js"></script>
+<script src="../../vendor/jarallax/dist/jarallax.min.js"></script>
+<script src="../../vendor/smooth-scroll/dist/smooth-scroll.polyfills.min.js"></script>
+<script src="../../vendor/vivus/dist/vivus.min.js"></script>
+<script src="../../vendor/chartist/dist/chartist.min.js"></script>
+<script src="../../vendor/chartist-plugin-tooltips/dist/chartist-plugin-tooltip.min.js"></script>
+<script src="../../vendor/@glidejs/glide/dist/glide.min.js"></script>
+<script src="../../vendor/countup.js/dist/countUp.umd.js"></script>
+<script src="../../vendor/vanillajs-datepicker/dist/js/datepicker.min.js"></script>
+
+<script async defer src="https://buttons.github.io/buttons.js"></script>
+
+<script src="https://www.google.com/recaptcha/api.js"></script>
+
+ <script>
+   function onSubmit(token) {
+     document.getElementById("contact-form").submit();
+   }
+ </script>
+  
+<!-- pixel JS -->
+<script src="../../assets/js/pixel.js"></script>
+
+</body>
+
+</html>

@@ -1,0 +1,287 @@
+<!--/*
+
+=========================================================
+* Pixel Pro Bootstrap 5 UI Kit
+=========================================================
+
+* Product Page: https://themesberg.com/product/ui-kit/pixel-pro-premium-bootstrap-5-ui-kit
+* Copyright 2021 Themesberg (https://www.themesberg.com)
+
+* Coded by https://themesberg.com
+
+=========================================================
+
+* The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software. Contact us if you want to remove it.
+
+*/-->
+<!DOCTYPE html>
+<html th:lang="${siteLocale.language}">
+
+<head>
+ 
+	<!--/* Metas and CSS */-->
+	<th:block th:include="inc/header-meta.html"></th:block>
+	
+	<!-- Primary Meta Tags -->
+	<title th:text="#{category.title(${category})}"></title>
+	<meta name="title" th:content="#{category.meta.title(${category})}">
+	<meta name="description" th:content="#{category.meta.description(${results.data.size()},${category})}">
+		
+	<!-- Open Graph / Facebook -->
+	<meta property="og:type" content="website">
+	<meta property="og:url" th:content="${url}">
+	<meta property="og:title" th:content="#{category.title(${category})}">
+	<meta property="og:description" th:content="#{category.meta.description(${results.data.size()},${category})}">
+	<meta property="og:image"  th:content="${baseUrl} + '/assets/img/brand/light.svg'">
+	
+	<!-- Twitter -->
+	<meta name="twitter:card" content="summary_large_image">
+	<meta name="twitter:url" th:content="${url}">
+	<meta name="twitter:title" th:content="#{category.title(${category})}">
+	<meta name="twitter:description" th:content="#{category.meta.description(${results.data.size()},${category})}">
+	<meta name="twitter:image" th:content="${baseUrl} + 'assets/img/brand/light.svg'">
+	
+	<!-- NOTICE: You can use the _analytics.html partial to include production code specific code & trackers -->
+	<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.25/css/dataTables.bootstrap5.min.css">
+		
+
+	
+	<style>
+	.container-semi-fluid {
+		max-width: 90%;
+		width: 90;
+		margin: auto;
+	}
+	
+	
+	.dataTables_paginate {
+			float: right;
+	}
+	
+	.dataTables_empty {
+			display: none;
+	}	
+	</style>
+
+
+</head>
+
+<body>
+    
+
+  
+	<!--/* Navbar */-->
+	<header class="header-global">
+    	<nav id="navbar-main" aria-label="Primary navigation" class="navbar navbar-main navbar-expand-lg navbar-theme-primary headroom navbar-light navbar-theme-secondary">
+			<th:block th:include="inc/navbar-non-product.html"></th:block>
+		</nav>
+	</header>
+	
+    <main>
+
+        <!--/* Loader */-->
+        <th:block th:include="inc/preloader.html"></th:block>
+	
+
+        <div class="section section-lg pt-5 pt-md-7 bg-gray-200">
+            <div class="container-semi-fluid">
+                <div class="row pt-5 pt-md-0">
+                <!--/* Filters
+                    <div class="col-12 col-lg-3 mb-3 mb-lg-0">
+
+
+						
+						<div class="card accordion" id="accordionExample2">
+							<div class="accordion-item">
+							  <h2 class="accordion-header border-bottom border-2" id="headingFour">
+								<button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFour" aria-expanded="true" aria-controls="collapseFour">
+									<span class="fab fa-leanpub me-2"></span>
+									Prix
+								</button>
+							  </h2>
+							  <div id="collapseFour" class="accordion-collapse collapse show" aria-labelledby="headingFour" data-bs-parent="#accordionExample2">
+								<div class="accordion-body">
+								  <!-- Range slider container -->							
+									<div class="input-slider-range-container mx-3 mt-5" id="slider-score" th:attr="data-range-value-min=${results.minPrice}, data-range-value-max=${results.maxPrice}">
+										<!-- Range slider values -->
+										<div class="row d-none">
+											<div class="col-6">
+												<span class="range-slider-value value-low" th:attr="data-range-value-low=${results.minPrice}"  ></span>
+											</div>
+											<div class="col-6 text-right">
+												<span class="range-slider-value value-high" th:attr="data-range-value-high=${results.maxPrice}"></span>
+											</div>
+									</div>
+									<!-- End of range slider values -->
+								  
+								  
+								</div>
+							  </div>
+							</div>
+							<div class="accordion-item">
+							  <h2 class="accordion-header  border-bottom border-2" id="headingFive">
+								<button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFive" aria-expanded="false" aria-controls="collapseFive">
+									<span class="fas fa-question-circle me-2"></span>
+									Impact écologique
+								</button>
+							  </h2>
+							  <div id="collapseFive" class="accordion-collapse collapse" aria-labelledby="headingFive" data-bs-parent="#accordionExample2">
+								<div class="accordion-body">
+
+								  <!-- Range slider container -->							
+									<div class="input-slider-range-container mx-3 mt-5" id="slider-score" th:attr="data-range-value-min=${results.minPrice}, data-range-value-max=${results.maxPrice}">
+										<!-- Range slider values -->
+										<div class="row d-none">
+											<div class="col-6">
+												<span class="range-slider-value value-low" th:attr="data-range-value-low=${results.minPrice}"  ></span>
+											</div>
+											<div class="col-6 text-right">
+												<span class="range-slider-value value-high" th:attr="data-range-value-high=${results.maxPrice}"></span>
+											</div>
+									</div>
+									<!-- End of range slider values -->
+									
+								</div>
+							  </div>
+							</div>
+							<div class="accordion-item">
+							  <h2 class="accordion-header  border-bottom border-2" id="headingSix">
+								<button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSix" aria-expanded="false" aria-controls="collapseSix">
+									<span class="fas fa-microphone-alt me-2"></span>
+									Marque
+								</button>
+							  </h2>
+							  <div id="collapseSix" class="accordion-collapse collapse" aria-labelledby="headingSix" data-bs-parent="#accordionExample2">
+								<div class="accordion-body">
+									<!-- Checkboxes -->
+									<div class="row">
+										<div th:each="item: ${results.brands}" class="col-12">
+											<div class="form-check mb-1">
+												<input class="form-check-input" type="checkbox" checked th:value="${item.key}" th:id="'check'+${item.key}">
+												<label class="form-check-label" th:for="'check'+${item.key}" th:text="${item.key}"></label>
+												<span class="badge bg-gray badge-pill float-end" th:text="${item.value}"></span>
+											</div>
+										</div>
+									</div>
+									<!-- End checkbox -->
+
+								</div>
+							  </div>
+							</div>
+						</div>
+					</div>
+				</div>	
+                
+                
+
+                
+		
+		
+		
+		
+	</div>
+ */-->
+
+
+
+
+<div class="card col-12 col-lg-12">
+
+
+					<div class="row align-items-center">
+
+                        <div class="col-md-12">
+                            <div class="info-main">
+                                <h1> Recherche détaillée : <span th:text="${query}"></span> </h1>
+                            </div>
+                        </div> 
+                    </div> 
+
+		<table id="example" class="table table-striped" style="width:100%">
+        <thead>
+            <tr>
+                <th>Marque</th>
+                <th>Modele</th>
+                <th>Nom</th>
+                <th>Prix</th>
+                <th>Compensation</th>
+                <th>Offres</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr th:each="item: ${results.data}">
+                <td><span th:text="${item.brand() == null ? 'INCONNU' : item.brand()}"></span></td>
+                <td><span th:text="${item.model()}"></span></td>
+                <td><a th:href="'/'+${item.names.name}" th:text="${item.names.shortestOfferName()}"></a></td>
+                <td><span th:text="${item.bestPrice().price}"></span><span class="align-baseline font-medium" th:text="#{'symbol.'+${item.bestPrice().currency}}"></span></td>
+                <td><span th:text="${#numbers.formatDecimal(item.bestPrice().compensation, 1, 2)}"></span><span class="align-baseline font-medium" th:text="#{'symbol.'+${item.bestPrice().currency}}"></span></td>
+                <td><span th:text="${item.offersCount}"></span></td>
+            </tr>
+            
+        </tbody>
+        <tfoot>
+            <tr>
+                <th>Marque</th>
+                <th>Modele</th>
+                <th>Nom</th>
+                <th>Prix</th>
+                <th>Compensation</th>
+                <th>Offres</th>
+            </tr>
+        </tfoot>
+    </table>
+		
+          
+          
+                    
+</div>
+
+		</div>
+        </div>
+  		</div>
+    </main>
+ 
+ 	<!--/* Footer */-->
+	<th:block th:include="inc/footer.html"></th:block>	
+
+    <!-- Core -->
+<script src="../../vendor/@popperjs/core/dist/umd/popper.min.js"></script>
+<script src="../../vendor/bootstrap/dist/js/bootstrap.min.js"></script>
+<script src="../../vendor/headroom.js/dist/headroom.min.js"></script>
+
+<!-- Vendor JS -->
+<script src="../../vendor/onscreen/dist/on-screen.umd.min.js"></script>
+<script src="../../vendor/nouislider/distribute/nouislider.min.js"></script>
+<script src="../../vendor/jarallax/dist/jarallax.min.js"></script>
+<script src="../../vendor/smooth-scroll/dist/smooth-scroll.polyfills.min.js"></script>
+<script src="../../vendor/vivus/dist/vivus.min.js"></script>
+<script src="../../vendor/chartist/dist/chartist.min.js"></script>
+<script src="../../vendor/chartist-plugin-tooltips/dist/chartist-plugin-tooltip.min.js"></script>
+<script src="../../vendor/@glidejs/glide/dist/glide.min.js"></script>
+<script src="../../vendor/countup.js/dist/countUp.umd.js"></script>
+<script src="../../vendor/vanillajs-datepicker/dist/js/datepicker.min.js"></script>
+
+<script async defer src="https://buttons.github.io/buttons.js"></script>
+
+<script type="text/javascript" language="javascript" src="https://code.jquery.com/jquery-3.5.1.js"></script>
+<script type="text/javascript" language="javascript" src="https://cdn.datatables.net/1.10.25/js/jquery.dataTables.min.js"></script>
+<script type="text/javascript" language="javascript" src="https://cdn.datatables.net/1.10.25/js/dataTables.bootstrap5.min.js"></script>
+
+
+<!-- pixel JS -->
+<script src="../../assets/js/pixel.js"></script>
+<!-- custom sources -->
+<script src="../../assets/js/pixel-custom.js"></script>
+<script>
+$(document).ready(function() {
+	
+
+    var table = $('#example').DataTable();
+		
+	
+} );
+</script>
+
+</body>
+
+</html>

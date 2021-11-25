@@ -1,0 +1,53 @@
+
+# Spring classical config
+server:
+  port: 8082
+
+########################
+# Logging configuration
+########################
+
+logging: 
+    level:
+        ROOT: info
+        org.open4goods: info
+
+#verticalsFolder: "/home/goulven/git/open4goods-config/verticals/"
+#datasourcesfolder: "/home/goulven/git/open4goods-config/datasources/"
+
+spring:
+  thymeleaf:
+      cache: false
+
+  mail:
+#    host: 
+#    port: 587
+#    username: 
+#    password: 
+    properties:
+        mail.smtp.auth: true
+        mail.smtp.starttls.enable: true
+        mail.smtp.ssl.trust: smtp.gmail.com
+        
+email: your@email.com
+
+#google.recaptcha.secret: 
+
+webConfig:
+  templatesCaching: false
+      
+###############################################################
+# URL's 
+###############################################################
+namings:
+  serverNames:
+    fr: localhost
+#    default: 127.0.0.1  
+  
+  baseUrls:
+    fr: http://localhost:8082/
+#    default: http://127.0.0.1:8080/  
+
+#elasticsearch.username: 
+#elasticsearch.password: 
+#elasticsearch.host:      

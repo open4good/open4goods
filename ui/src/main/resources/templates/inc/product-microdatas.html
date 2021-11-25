@@ -1,0 +1,23 @@
+ <div itemtype="https://schema.org/Product">
+     <meta th:if="${product.model()}" itemprop="mpn" th:content="${product.model()}" />
+     <meta itemprop="name" th:content="${product.names.shortestOfferName()}" />
+     <link itemprop="image" th:href="'/'+${product.names.name}+'/image.png'" />
+     <meta th:if="${product.shortestDescription(siteLanguage)}" itemprop="description" th:content="${product.shortestDescription(siteLanguage)}" />
+     <meta th:unless="${product.shortestDescription(siteLanguage)}" itemprop="description" th:content="${product.names.longestOfferName()}" />
+     
+     <div th:if="${product.bestPrice()}" itemprop="offers" itemtype="https://schema.org/Offer" itemscope>
+       <link itemprop="url" th:href="${url}" />
+       <meta itemprop="availability" content="https://schema.org/InStock" />
+       <meta itemprop="priceCurrency" th:content="${product.bestPrice.currency}" />
+       <meta th:if="${product.bestPrice.productState.toString().equals('OCCASION')}" itemprop="itemCondition" content="https://schema.org/UsedCondition" />
+       <meta th:unless="${product.bestPrice.productState.toString().equals('OCCASION')}" itemprop="itemCondition" content="https://schema.org/NewCondition" />
+       
+       <meta itemprop="price" th:content="${product.bestPrice.price}" />
+       <meta itemprop="priceValidUntil" th:content="${product.bestPrice.validUntil()}" />
+     </div>
+
+     <meta th:if="${product.gtin()}" itemprop="sku" th:content="${product.gtin()}" />
+     <div th:if="${product.brand()}" itemprop="brand" itemtype="https://schema.org/Brand" itemscope>
+       <meta itemprop="name" th:content="${product.brand()}" />
+     </div>
+ </div>

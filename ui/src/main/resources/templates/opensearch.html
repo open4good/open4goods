@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<OpenSearchDescription xmlns="http://a9.com/-/spec/opensearch/1.1/" xmlns:ie="http://schemas.microsoft.com/Search/2008/" xmlns:moz="http://www.mozilla.org/2006/browser/search/">
+     <ShortName th:text="#{opensearch.shortName}"></ShortName>
+     <Language th:text="${siteLocale.language}"></Language>
+     <Description th:utext="#{opensearch.description}"></Description>
+     <Image height="16" width="16" type="image/x-icon" th:text="${baseUrl}+'assets/img/favicon.ico'"></Image>
+     <Image height="32" width="32" type="image/x-icon" th:text="${baseUrl}+'assets/img/favicon-32x32.png'"></Image>
+     <Image height="64" width="64" type="image/x-icon" th:text="${baseUrl}+'assets/img/favicon-64x64.png'"></Image>
+     <Url type="text/html" method="GET" th:attr="template=${baseUrl}+'recherche/{searchTerms}'"/>
+     <ie:PreviewUrl type="text/html" method="GET" th:attr="template=${baseUrl}+'recherche/{searchTerms}'"/>
+</OpenSearchDescription>

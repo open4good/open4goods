@@ -1,0 +1,25 @@
+                                                                                                                                                                           
+                                                                                                                                                                           
+        CCCCCCCCCCCCCRRRRRRRRRRRRRRRRR                  AAA   WWWWWWWW                           WWWWWWWWLLLLLLLLLLL             EEEEEEEEEEEEEEEEEEEEEERRRRRRRRRRRRRRRRR   
+     CCC::::::::::::CR::::::::::::::::R                A:::A  W::::::W                           W::::::WL:::::::::L             E::::::::::::::::::::ER::::::::::::::::R  
+   CC:::::::::::::::CR::::::RRRRRR:::::R              A:::::A W::::::W                           W::::::WL:::::::::L             E::::::::::::::::::::ER::::::RRRRRR:::::R 
+  C:::::CCCCCCCC::::CRR:::::R     R:::::R            A:::::::AW::::::W                           W::::::WLL:::::::LL             EE::::::EEEEEEEEE::::ERR:::::R     R:::::R
+ C:::::C       CCCCCC  R::::R     R:::::R           A:::::::::AW:::::W           WWWWW           W:::::W   L:::::L                 E:::::E       EEEEEE  R::::R     R:::::R
+C:::::C                R::::R     R:::::R          A:::::A:::::AW:::::W         W:::::W         W:::::W    L:::::L                 E:::::E               R::::R     R:::::R
+C:::::C                R::::RRRRRR:::::R          A:::::A A:::::AW:::::W       W:::::::W       W:::::W     L:::::L                 E::::::EEEEEEEEEE     R::::RRRRRR:::::R 
+C:::::C                R:::::::::::::RR          A:::::A   A:::::AW:::::W     W:::::::::W     W:::::W      L:::::L                 E:::::::::::::::E     R:::::::::::::RR  
+C:::::C                R::::RRRRRR:::::R        A:::::A     A:::::AW:::::W   W:::::W:::::W   W:::::W       L:::::L                 E:::::::::::::::E     R::::RRRRRR:::::R 
+C:::::C                R::::R     R:::::R      A:::::AAAAAAAAA:::::AW:::::W W:::::W W:::::W W:::::W        L:::::L                 E::::::EEEEEEEEEE     R::::R     R:::::R
+C:::::C                R::::R     R:::::R     A:::::::::::::::::::::AW:::::W:::::W   W:::::W:::::W         L:::::L                 E:::::E               R::::R     R:::::R
+ C:::::C       CCCCCC  R::::R     R:::::R    A:::::AAAAAAAAAAAAA:::::AW:::::::::W     W:::::::::W          L:::::L         LLLLLL  E:::::E       EEEEEE  R::::R     R:::::R
+  C:::::CCCCCCCC::::CRR:::::R     R:::::R   A:::::A             A:::::AW:::::::W       W:::::::W         LL:::::::LLLLLLLLL:::::LEE::::::EEEEEEEE:::::ERR:::::R     R:::::R
+   CC:::::::::::::::CR::::::R     R:::::R  A:::::A               A:::::AW:::::W         W:::::W          L::::::::::::::::::::::LE::::::::::::::::::::ER::::::R     R:::::R
+     CCC::::::::::::CR::::::R     R:::::R A:::::A                 A:::::AW:::W           W:::W           L::::::::::::::::::::::LE::::::::::::::::::::ER::::::R     R:::::R
+        CCCCCCCCCCCCCRRRRRRRR     RRRRRRRAAAAAAA                   AAAAAAAWWW             WWW            LLLLLLLLLLLLLLLLLLLLLLLLEEEEEEEEEEEEEEEEEEEEEERRRRRRRR     RRRRRRR
+                                                                                                                                                                           
+                                                                                                                                                                           
+                                                                                                                                                                           
+                                                                                                                                                                           
+                                                                                                                                                                           
+                                                                                                                                                                           
+                                                                                                                                                                           

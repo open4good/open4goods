@@ -1,0 +1,22 @@
+<div th:if="${product.attributes.unmapedAttributes.size()} > 0"  class="card shadow my-3">
+	<div class="card-header"><h2 class="h5">Toutes les caractéristiques</h2></div>
+	<div class="card-body">
+		<table id="allAttributes" class="table table-striped" style="width: 100%">
+			<thead>
+				<tr>
+					<th>Nom</th>
+					<th>Valeur</th>
+				</tr>
+			</thead>
+			<tbody>
+			
+				<tr th:each="attr : ${product.attributes.unmapedAttributes}">
+					<td><span th:text="${attr.name}"></span></td>
+					<td><span th:text="${attr.value}"></span> </td>
+				</tr>
+			
+			</tbody>
+	
+		</table>		
+	</div>
+</div>

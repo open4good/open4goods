@@ -1,0 +1,72 @@
+server:
+  compression:
+    enabled: true
+    mime-types: text/html,text/xml,text/plain,text/css,text/javascript,application/javascript,application/json
+    min-response-size: 1024
+  http2:
+    enabled: true
+
+wikiConfig:
+    user: Admin
+    password: 
+    baseUrl: https://wiki.web-equitable.org/xwiki
+
+
+management:
+  
+  health:
+    diskspace:
+      threshold: 10000MB  
+    
+         
+  endpoints:
+    web:
+      exposure:
+        include:
+        - "*"
+        exclude:
+        - "shutdown"
+        
+#  endpoint:
+        
+#    health:
+#      show-details: always   
+          
+spring:
+  boot:
+    admin:
+      client:
+        url: http://localhost:8082 
+  mail:
+    host: smtp.gmail.com
+    port: 587
+#    username: 
+#    password: 
+    properties:
+        mail.smtp.auth: true
+        mail.smtp.starttls.enable: true        
+  resources:
+    addMappings: false
+  messages:
+    basename: i18n/messages
+  application:
+    name: ui
+  thymeleaf:
+      cache: false
+  data:
+    elasticsearch:
+      cluster-nodes: 127.0.0.1:9300
+      cluster-name: elastic
+      repositories:
+        enabled: true
+
+    
+#Css and js mimification
+wro4j:
+  filterUrl : /resources
+  cacheGzippedContent: true
+  ignoreMissingResources: false
+  managerFactory:
+    preProcessors: removeSourceMaps, cssImport, jsMin
+    
+
