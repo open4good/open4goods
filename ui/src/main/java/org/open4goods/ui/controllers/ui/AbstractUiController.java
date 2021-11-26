@@ -40,7 +40,7 @@ public class AbstractUiController {
 
 		ret.addObject("config",config);
 
-		ret.addObject("dev", env.acceptsProfiles("dev"));
+		ret.addObject("dev", env.acceptsProfiles("dev","devsec"));
 
 		ret.addObject("url",request.getRequestURL().toString() );
 		

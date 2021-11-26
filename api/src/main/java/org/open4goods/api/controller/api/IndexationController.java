@@ -14,11 +14,11 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import springfox.documentation.annotations.ApiIgnore;
+import io.swagger.v3.oas.annotations.Hidden;
 
 @RestController
 @PreAuthorize("hasAuthority('"+RolesConstants.ROLE_CRAWLER+"')")
-@ApiIgnore
+@Hidden
 public class IndexationController {
 
 	private static final Logger logger = LoggerFactory.getLogger(IndexationController.class);

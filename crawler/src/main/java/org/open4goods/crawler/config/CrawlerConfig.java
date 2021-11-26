@@ -14,13 +14,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import springfox.documentation.builders.ApiInfoBuilder;
-import springfox.documentation.builders.PathSelectors;
-import springfox.documentation.builders.RequestHandlerSelectors;
-import springfox.documentation.service.ApiInfo;
-import springfox.documentation.spi.DocumentationType;
-import springfox.documentation.spring.web.plugins.Docket;
-
 @Configuration
 public class CrawlerConfig {
 
@@ -80,16 +73,5 @@ public class CrawlerConfig {
 		return new FetchersService(fetcherProperties, webDatasourceFetchingService, csvDatasourceFetchingService,apiDatasourceFetchingService);
 	}
 
-	/**
-	 * Swagger configuration
-	 * @return
-	 */
-	@Bean
-	public Docket docket() {
-		//TODO(conf) : from conf
-		final ApiInfo apiInfo = new ApiInfoBuilder().title("Fetcher").description("The fetcher API").version("0.1").build();
-
-		return new Docket(DocumentationType.SWAGGER_2).apiInfo(apiInfo).select()
-				.apis(RequestHandlerSelectors.basePackage("org.open4goods")).paths(PathSelectors.any()).build();
-	}
+	
 }

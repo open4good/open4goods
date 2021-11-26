@@ -2,8 +2,6 @@ package org.open4goods.api.config;
 
 import java.io.IOException;
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import org.open4goods.api.config.yml.ApiProperties;
@@ -38,6 +36,8 @@ import org.open4goods.services.SerialisationService;
 import org.open4goods.services.StandardiserService;
 import org.open4goods.services.VerticalsConfigService;
 import org.open4goods.store.repository.DataFragmentRepository;
+import org.springdoc.core.GroupedOpenApi;
+import org.springdoc.core.customizers.OpenApiCustomiser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.cache.CacheManager;
@@ -54,16 +54,9 @@ import com.github.benmanes.caffeine.cache.Ticker;
 
 import io.micrometer.core.aop.TimedAspect;
 import io.micrometer.core.instrument.MeterRegistry;
-import springfox.documentation.builders.ApiInfoBuilder;
-import springfox.documentation.builders.PathSelectors;
-import springfox.documentation.builders.RequestHandlerSelectors;
-import springfox.documentation.service.ApiInfo;
-import springfox.documentation.service.ApiKey;
-import springfox.documentation.service.AuthorizationScope;
-import springfox.documentation.service.SecurityReference;
-import springfox.documentation.spi.DocumentationType;
-import springfox.documentation.spi.service.contexts.SecurityContext;
-import springfox.documentation.spring.web.plugins.Docket;
+import io.swagger.v3.oas.models.Components;
+import io.swagger.v3.oas.models.security.SecurityRequirement;
+import io.swagger.v3.oas.models.security.SecurityScheme;
 
 @Configuration
 public class ApiConfig {
@@ -103,32 +96,59 @@ public class ApiConfig {
 	// SwaggerConfig
 	//////////////////////////////////////////////////////////
 
-	public @Bean Docket docket(@Autowired final ApiProperties config) {
-		return new Docket(DocumentationType.SWAGGER_2).apiInfo(apiInfo(config))
-				.securitySchemes(Collections.singletonList(apiKey()))
-				.securityContexts(Collections.singletonList(securityContext())).select()
-				.apis(RequestHandlerSelectors.basePackage("org.open4goods")).paths(PathSelectors.any()).build();
-	}
+	  @Bean
+	  public GroupedOpenApi adminApi() {
+	      return GroupedOpenApi.builder()
+	              .group("api")
+//	              .pathsToMatch("/admin/**")
+	              .packagesToScan("org.open4goods.api")
+	              .addOpenApiCustomiser(apiSecurizer())
+	              
+	              .build();
+	  }
+	  
+	    @Bean
+	    public OpenApiCustomiser apiSecurizer() {
+	        return openApi -> openApi.addSecurityItem(new SecurityRequirement().addList("Authorization"))
+	                .components(new Components()
+	                        .addSecuritySchemes(UrlConstants.APIKEY_PARAMETER, new SecurityScheme()
+	                                .in(SecurityScheme.In.HEADER)
+	                                .type(SecurityScheme.Type.APIKEY)
+	                                .name(UrlConstants.APIKEY_PARAMETER)
+	                        		)
+	                        		
+	                );
+	              
+	    }
+	  
 
-	private ApiInfo apiInfo(final ApiProperties config) {
-		return new ApiInfoBuilder().title(config.getSwaggerTitle()).description(config.getSwaggerDescription())
-				.version(config.getSwaggerVersion()).contact(config.getSwaggerContact()).build();
-	}
+	  
+//	public @Bean Docket docket(@Autowired final ApiProperties config) {
+//		return new Docket(DocumentationType.SWAGGER_2).apiInfo(apiInfo(config))
+//				.securitySchemes(Collections.singletonList(apiKey()))
+//				.securityContexts(Collections.singletonList(securityContext())).select()
+//				.apis(RequestHandlerSelectors.basePackage("org.open4goods")).paths(PathSelectors.any()).build();
+//	}
 
-	private ApiKey apiKey() {
-		return new ApiKey(UrlConstants.APIKEY_PARAMETER, UrlConstants.APIKEY_PARAMETER, "header");
-	}
+//	private ApiInfo apiInfo(final ApiProperties config) {
+//		return new ApiInfoBuilder().title(config.getSwaggerTitle()).description(config.getSwaggerDescription())
+//				.version(config.getSwaggerVersion()).contact(config.getSwaggerContact()).build();
+//	}
 
-	private SecurityContext securityContext() {
-		return SecurityContext.builder().securityReferences(defaultAuth()).forPaths(PathSelectors.any()).build();
-	}
-
-	private List<SecurityReference> defaultAuth() {
-		final AuthorizationScope authorizationScope = new AuthorizationScope("global", "global");
-		final AuthorizationScope[] authorizationScopes = new AuthorizationScope[1];
-		authorizationScopes[0] = authorizationScope;
-		return Arrays.asList(new SecurityReference(UrlConstants.APIKEY_PARAMETER, authorizationScopes));
-	}
+//	private ApiKey apiKey() {
+//		return new ApiKey(UrlConstants.APIKEY_PARAMETER, UrlConstants.APIKEY_PARAMETER, "header");
+//	}
+//
+//	private SecurityContext securityContext() {
+//		return SecurityContext.builder().securityReferences(defaultAuth()).forPaths(PathSelectors.any()).build();
+//	}
+//
+//	private List<SecurityReference> defaultAuth() {
+//		final AuthorizationScope authorizationScope = new AuthorizationScope("global", "global");
+//		final AuthorizationScope[] authorizationScopes = new AuthorizationScope[1];
+//		authorizationScopes[0] = authorizationScope;
+//		return Arrays.asList(new SecurityReference(UrlConstants.APIKEY_PARAMETER, authorizationScopes));
+//	}
 
 
 	//////////////////////////////////////////////////////////
@@ -280,13 +300,13 @@ public class ApiConfig {
 	// Embeded crawler configuration
 	//////////////////////////////////////////////
 
-	private @Autowired FetchersService crawlersInterface;
-
-	private @Autowired ThreadPoolTaskScheduler taskScheduler;
-
-	private @Autowired DataSourceConfigService dataSourceConfigService;
-
-	private @Autowired FetcherOrchestrationService fetcherOrchestrationService;
+//	private @Autowired FetchersService crawlersInterface;
+//
+//	private @Autowired ThreadPoolTaskScheduler taskScheduler;
+//
+//	private @Autowired DataSourceConfigService dataSourceConfigService;
+//
+//	private @Autowired FetcherOrchestrationService fetcherOrchestrationService;
 
 	// For the crawlController, inported from crawler
 	public @Bean FetcherProperties fetcherProperties(@Autowired final ApiProperties apiProperties) {
@@ -347,7 +367,8 @@ public class ApiConfig {
 	}
 
 	@Bean
-	public FetcherOrchestrationService fetcherOrchestrationService() {
+	@Autowired
+	public FetcherOrchestrationService fetcherOrchestrationService(ThreadPoolTaskScheduler taskScheduler, DataSourceConfigService dataSourceConfigService) {
 		return new FetcherOrchestrationService(taskScheduler, dataSourceConfigService);
 	}
 
@@ -366,7 +387,8 @@ public class ApiConfig {
 	 *
 	 * @return
 	 */
-	public ApiSynchService apiSynchService(@Autowired final ApiProperties apiProperties) {
+	@Autowired
+	public ApiSynchService apiSynchService( final ApiProperties apiProperties, FetchersService crawlersInterface,FetcherOrchestrationService fetcherOrchestrationService) {
 		return new ApiSynchService(apiProperties.getFetcherProperties().getApiSynchConfig(), crawlersInterface, null,
 				null) {
 			@Override

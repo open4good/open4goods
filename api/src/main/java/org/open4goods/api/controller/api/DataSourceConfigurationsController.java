@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.Operation;
 
 /**
  * This controller allows informations and communications about DatasourceConfigurations
@@ -35,25 +35,25 @@ public class DataSourceConfigurationsController {
 	public @Autowired IndexationService indexationService;
 
 	@GetMapping(path=UrlConstants.MASTER_API_DATASOURCES_CONFIG)
-	@ApiOperation("List all availlable datasource configurations")
+	@Operation(summary="List all availlable datasource configurations")
 	public Map<String, DataSourceProperties> datasources () {
 		return datasourceConfigService.getDatasourceConfigs();
 	}
 
 	@GetMapping(path=UrlConstants.MASTER_API_DATASOURCE_CONFIG_PREFIX+"{datasourceName}")
-	@ApiOperation(value="Get a specific datasource configuration")
+	@Operation(summary ="Get a specific datasource configuration")
 	public DataSourceProperties datasource (@PathVariable @NotBlank final String datasourceName) {
 		return datasourceConfigService.getDatasourceConfig(datasourceName);
 	}
 
 	@GetMapping(path=UrlConstants.MASTER_API_DATASOURCE_CONFIG_PREFIX+"{datasourceName}/lastindexed")
-	@ApiOperation("Get the last indexed datafragment for a specific datasource")
+	@Operation(summary="Get the last indexed datafragment for a specific datasource")
 	public DataFragment datasourceLastIndexed (@PathVariable @NotBlank final String datasourceName) {
 		return indexationService.getLastIndexed(datasourceName);
 	}
 
 	@GetMapping(path=UrlConstants.MASTER_API_DATASOURCE_CONFIG_PREFIX+"{datasourceName}"+UrlConstants.MASTER_API_DATASOURCE_CONFIG_NEXT_SCHEDULE_SUFFIX)
-	@ApiOperation("Get a specific datasource configuration")
+	@Operation(summary="Get a specific datasource configuration")
 	public Date datasourceNextSchedule ( @PathVariable @NotBlank final String datasourceName) {
 		return datasourceConfigService.getNextSchedule(datasourceName);
 	}

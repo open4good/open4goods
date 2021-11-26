@@ -56,13 +56,6 @@ import org.yaml.snakeyaml.Yaml;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.Ticker;
 
-import springfox.documentation.builders.ApiInfoBuilder;
-import springfox.documentation.builders.PathSelectors;
-import springfox.documentation.builders.RequestHandlerSelectors;
-import springfox.documentation.service.ApiInfo;
-import springfox.documentation.spi.DocumentationType;
-import springfox.documentation.spring.web.plugins.Docket;
-
 @Configuration
 public class AppConfig {
 
@@ -174,25 +167,6 @@ public class AppConfig {
 //	    return firewall;
 //	}
 	
-	///////////////////////////////////
-	// Swagger
-	///////////////////////////////////
-	@Bean
-	public Docket docket() {
-		return new Docket(DocumentationType.SWAGGER_2).apiInfo(apiInfo()).select()
-				.apis(RequestHandlerSelectors.basePackage("org.open4goods.ui.controllers.api")).paths(PathSelectors.any())
-
-				.build();
-	}
-
-	private ApiInfo apiInfo() {
-		return new ApiInfoBuilder().title(config.getApiConfig().getApiTitle())
-				.description(config.getApiConfig().getApiDescription())
-				// TODDO(P3,0.25, feature) Contact in swagger API
-				.version(config.getApiConfig().getApiVersion()).license(config.getApiConfig().getApiLicence())
-				.licenseUrl(config.getApiConfig().getApiLicenceUrl())
-				.termsOfServiceUrl(config.getApiConfig().getApiTermsOfServiceUrl()).build();
-	}
 
 	///////////////////////////////////
 	// Resources

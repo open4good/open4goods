@@ -16,8 +16,6 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.validation.annotation.Validated;
 
-import springfox.documentation.service.Contact;
-
 @Configuration
 @ConfigurationProperties
 @Validated
@@ -66,26 +64,6 @@ public class ApiProperties {
 	 * Elastic search port
 	 */
 	private Integer elasticSearchPort= 9200;
-	
-	/**
-	 * Title for the swagger API
-	 */
-	private String swaggerTitle;
-	/**
-	 * Description for the swagger API
-	 */
-	private String swaggerDescription;
-
-	/**
-	 * Version for the swagger API
-	 */
-
-	private String swaggerVersion;
-
-	/**
-	 * Contact for the swagger API
-	 */
-	private Contact swaggerContact;
 
 	/**
 	 * The list of crawler api keys to authorize
@@ -270,38 +248,7 @@ public class ApiProperties {
 		this.crawlerKeys = crawlerKeys;
 	}
 
-	public String getSwaggerTitle() {
-		return swaggerTitle;
-	}
-
-	public void setSwaggerTitle(final String swaggerTitle) {
-		this.swaggerTitle = swaggerTitle;
-	}
-
-	public String getSwaggerDescription() {
-		return swaggerDescription;
-	}
-
-	public void setSwaggerDescription(final String swaggerDescription) {
-		this.swaggerDescription = swaggerDescription;
-	}
-
-	public String getSwaggerVersion() {
-		return swaggerVersion;
-	}
-
-	public void setSwaggerVersion(final String swaggerVersion) {
-		this.swaggerVersion = swaggerVersion;
-	}
-
-	public Contact getSwaggerContact() {
-		return swaggerContact;
-	}
-
-	public void setSwaggerContact(final Contact swaggerContact) {
-		this.swaggerContact = swaggerContact;
-	}
-
+	
 
 	public Integer getDataFragmentsDequeueSize() {
 		return dataFragmentsDequeueSize;

@@ -17,11 +17,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import springfox.documentation.annotations.ApiIgnore;
-
 @RestController
 //TODO(gof) : Add SpringWebSecurity
-@ApiIgnore
+
 public class CrawlController {
 
 	private final FetchersService fetchersService;
