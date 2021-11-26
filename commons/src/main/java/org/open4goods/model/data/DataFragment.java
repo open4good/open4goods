@@ -43,7 +43,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.google.common.base.Objects;
 import com.google.common.collect.Sets;
 
-@Document(indexName = DataFragment.DATAFRAGMENTS_INDEX, refreshInterval = "60s", createIndex = true)
+@Document(indexName = DataFragment.DATAFRAGMENTS_INDEX+2, refreshInterval = "60s", createIndex = true)
 //@Mapping(mappingPath = "/esmappings/datafragments.json")
 /**
  * The main product document a some (lot) of structured fields and some other
@@ -190,7 +190,7 @@ public class DataFragment implements Standardisable, Validable {
 	 * The referentiel attributes
 	 */
 	// @Field(index = false, datasourceName = true, type = FieldType.Keyword)
-	@Field(index = false, store = false, type = FieldType.Object)
+	@Field(index = true, store = false, type = FieldType.Object)
 	//TODO(p1, bug, 2) : What he hell, having the ReferentielKey enum causes jackson "com.fasterxml.jackson.databind.JsonMappingException: class java.lang.String cannot be cast to class java.lang.Enum"
 	private Map<String, String> referentielAttributes = new HashMap<>();
 
