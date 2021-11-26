@@ -8,12 +8,12 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.servlet.view.RedirectView;
 
-import springfox.documentation.annotations.ApiIgnore;
+import io.swagger.v3.oas.annotations.Hidden;
 
 @Controller
 
 //TODO(0.25, P2,design) Endpoints are badly named. Standardize, resfulize
-@ApiIgnore
+@Hidden
 public class HomeController {
 
 	private static final Logger logger = LoggerFactory.getLogger(HomeController.class);

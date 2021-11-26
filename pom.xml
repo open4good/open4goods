@@ -11,7 +11,7 @@
 	<url>https://github.com/open4good/open4goods</url>
 	<properties>
 		<github.global.server>github</github.global.server>
-		<springboot.version>2.5.7</springboot.version>
+		<springboot.version>2.6.0</springboot.version>
 		<java.version>17</java.version>
 		<maven.compiler.source>17</maven.compiler.source>
 		<maven.compiler.target>17</maven.compiler.target>
@@ -39,21 +39,21 @@
 
 
 	<issueManagement>
-		<url>https://github.com/open4good/open4goods-light/issues</url>
+		<url>https://github.com/open4good/open4goods/issues</url>
 		<system>GitHub Issues</system>
 	</issueManagement>
 
 	<licenses>
 		<license>
-			<name>GNU GPL V2 Morality License</name>
-			<url>https://raw.githubusercontent.com/open4good/open4goods-light/main/LICENSE</url>
+			<name>GNU AFFERO GENERAL PUBLIC LICENSE + Morality License</name>
+			<url>https://raw.githubusercontent.com/open4good/open4goods/main/LICENSE</url>
 			<distribution>repo</distribution>
 		</license>
 	</licenses>
 
 	<scm>
-		<url>https://github.com/open4good/open4goods-light</url>
-		<connection>scm:git://github.com/open4good/open4goods-light</connection>
+		<url>https://github.com/open4good/open4goods</url>
+		<connection>scm:git://github.com/open4good/open4goods</connection>
 	</scm>
 
 
@@ -91,11 +91,6 @@
 
 
 
-			<dependency>
-				<groupId>io.springfox</groupId>
-				<artifactId>springfox-swagger-ui</artifactId>
-				<version>${swagger.version}</version>
-			</dependency>
 
 
 

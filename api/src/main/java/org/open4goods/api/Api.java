@@ -21,8 +21,6 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.mashape.unirest.http.Unirest;
 
-import springfox.documentation.swagger2.annotations.EnableSwagger2;
-
 
 
 @SpringBootApplication (scanBasePackageClasses = {Api.class, ESConfig.class})
@@ -31,7 +29,6 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
 @EnableScheduling
 @EnableElasticsearchRepositories(basePackageClasses = DataFragmentRepository.class)
 @EnableCaching
-@EnableSwagger2
 
 public abstract class Api {
 

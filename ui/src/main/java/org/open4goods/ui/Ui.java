@@ -22,13 +22,10 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 import com.mashape.unirest.http.ObjectMapper;
 import com.mashape.unirest.http.Unirest;
 
-import springfox.documentation.swagger2.annotations.EnableSwagger2;
-
 @SpringBootApplication(scanBasePackages = "org.open4goods")
 @EnableScheduling
 @EnableCaching
 @Configuration
-@EnableSwagger2
 @EnableElasticsearchRepositories(basePackageClasses = {DataFragmentRepository.class, AffiliationTokenRepository.class})
 public class Ui {
 
