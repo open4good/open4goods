@@ -122,34 +122,6 @@ public class ApiConfig {
 	    }
 	  
 
-	  
-//	public @Bean Docket docket(@Autowired final ApiProperties config) {
-//		return new Docket(DocumentationType.SWAGGER_2).apiInfo(apiInfo(config))
-//				.securitySchemes(Collections.singletonList(apiKey()))
-//				.securityContexts(Collections.singletonList(securityContext())).select()
-//				.apis(RequestHandlerSelectors.basePackage("org.open4goods")).paths(PathSelectors.any()).build();
-//	}
-
-//	private ApiInfo apiInfo(final ApiProperties config) {
-//		return new ApiInfoBuilder().title(config.getSwaggerTitle()).description(config.getSwaggerDescription())
-//				.version(config.getSwaggerVersion()).contact(config.getSwaggerContact()).build();
-//	}
-
-//	private ApiKey apiKey() {
-//		return new ApiKey(UrlConstants.APIKEY_PARAMETER, UrlConstants.APIKEY_PARAMETER, "header");
-//	}
-//
-//	private SecurityContext securityContext() {
-//		return SecurityContext.builder().securityReferences(defaultAuth()).forPaths(PathSelectors.any()).build();
-//	}
-//
-//	private List<SecurityReference> defaultAuth() {
-//		final AuthorizationScope authorizationScope = new AuthorizationScope("global", "global");
-//		final AuthorizationScope[] authorizationScopes = new AuthorizationScope[1];
-//		authorizationScopes[0] = authorizationScope;
-//		return Arrays.asList(new SecurityReference(UrlConstants.APIKEY_PARAMETER, authorizationScopes));
-//	}
-
 
 	//////////////////////////////////////////////////////////
 	// The scheduling thread pool executor
@@ -264,10 +236,6 @@ public class ApiConfig {
 		return new AggregatedDataRepository();
 	}
 
-//	@Bean
-//	CustomDataFragmentRepositoryImpl dataFragmentsRepository() {
-//		return new CustomDataFragmentRepositoryImpl();
-//	}
 
 	@Bean
 	StandardiserService standardiserService() {
@@ -300,13 +268,6 @@ public class ApiConfig {
 	// Embeded crawler configuration
 	//////////////////////////////////////////////
 
-//	private @Autowired FetchersService crawlersInterface;
-//
-//	private @Autowired ThreadPoolTaskScheduler taskScheduler;
-//
-//	private @Autowired DataSourceConfigService dataSourceConfigService;
-//
-//	private @Autowired FetcherOrchestrationService fetcherOrchestrationService;
 
 	// For the crawlController, inported from crawler
 	public @Bean FetcherProperties fetcherProperties(@Autowired final ApiProperties apiProperties) {
