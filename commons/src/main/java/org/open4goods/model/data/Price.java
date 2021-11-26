@@ -11,6 +11,11 @@ import java.util.Set;
 import javax.validation.constraints.NotNull;
 
 import org.apache.commons.lang3.StringUtils;
+import org.joda.time.DurationFieldType;
+import org.joda.time.Period;
+import org.joda.time.PeriodType;
+import org.joda.time.format.PeriodFormat;
+import org.joda.time.format.PeriodFormatter;
 import org.open4goods.exceptions.ValidationException;
 import org.open4goods.model.Standardisable;
 import org.open4goods.model.Validable;
@@ -136,6 +141,23 @@ public class Price implements Validable, Standardisable, Comparable<Double> {
 		return price < p.getPrice();
 	}
 
+	
+	/**
+	 * 
+	 * @return a localised formated duration of when the price was last indexed
+	 */
+	public String ago(Locale locale) {
+				
+		DurationFieldType[] fields = {DurationFieldType.days(), DurationFieldType.hours()};
+		Period period = new Period(System.currentTimeMillis() - timeStamp, PeriodType.forFields(fields)).normalizedStandard();
+		PeriodFormatter formatter = PeriodFormat.wordBased(locale);
+		
+		period.getDays();
+		
+		
+		return (formatter. print(period));
+	}
+	
 	public void setCurrency(String currency) throws ParseException {
 
 		if (StringUtils.isEmpty(currency)) {

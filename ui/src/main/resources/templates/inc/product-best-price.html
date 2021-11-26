@@ -1,6 +1,6 @@
 <div id="meilleursPrix" class="card">
 	<div class="row g-0 align-items-center">
-		<div class="col-sm-7">
+		<div class="col-sm-6">
 			<!-- Header -->
 			<div class="card-header border-0 bg-white text-center pb-0">
 				<h2 class="text-primary mb-0">Meilleur prix</h2>
@@ -18,12 +18,15 @@
 				</span>
 			</div>
 		</div>
-		<div class="col-sm-5">
+		<div class="col-sm-6">
 			<!-- Content -->
 			<div class="card-body pb-0">
 				<ul class="list-group list-group-flush price-list mb-4">
-					<li class="list-group-item border-0"><span class="far fa-lightbulb"></span><span th:text="${product.bestPrice().datasourceName}"></span> </li>
-					<li th:if="${product.bestPrice().productState}" class="list-group-item border-0"><span class="far fa-paper-plane"></span><span th:text="#{'condition.'+${product.bestPrice().productState}}"></li>
+					<li class="list-group-item border-0"><span class="fas fa-store"></span><span th:text="${product.bestPrice().datasourceName}"></span> </li>
+
+					<li th:if="${product.bestPrice().productState}" class="list-group-item border-0"><span class="fas fa-box"></span><span th:text="#{'condition.'+${product.bestPrice().productState}}"></li>
+					<li class="list-group-item border-0"><span class="fas fa-clock"></span><span th:text="'il y a ' + ${product.bestPrice().ago(userLocale)} "></span> </li>
+				
 				</ul>
 			</div>
 			<!-- End Content -->
