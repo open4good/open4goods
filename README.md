@@ -1,5 +1,7 @@
 # Open4goods project  
 
+[![Build and test](https://github.com/open4good/open4goods/actions/workflows/buildDeploy.yml/badge.svg?branch=main)](https://github.com/open4good/open4goods/actions/workflows/buildDeploy.yml)
+
 The first open source price contributor, doing its best for the common good. 
  
  * Official user sites. Directly from this github repo to :  
