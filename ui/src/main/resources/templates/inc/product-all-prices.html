@@ -1,4 +1,4 @@
-<div th:if="${product.offersCount} > 1" id="offres" class="card shadow my-3">
+<div th:if="${product.offersCount} > 1" id="offres" class="card shadow my-3 p-4">
 
 	<table id="offersTable" class="table table-striped" style="width: 100%">
 		<thead>
@@ -15,8 +15,8 @@
 			<tr th:each="offer : ${product.price.offers}">
 				<td> <a rel=”nofollow” th:href="'/compensation/'+${offer.affiliationToken}"> <span th:text="${offer.datasourceName}"></span></a></td>
 				<td><span th:text="${offer.price}"></span> <span th:text="#{'symbol.'+${offer.currency}}"></span></td>
-				<td><span th:text="${offer.timeStamp}"></span></td>
-				<td><span th:text="${offer.productState}"></span> </td>
+				<td><span th:text="${offer.ago(userLocale)}"></span></td>
+				<td><span th:text="#{'condition.'+${offer.productState}}"></span> </td>
 				<td><span th:text="${#numbers.formatDecimal(offer.compensation, 1, 2)}"></span> <span th:text="#{'symbol.'+${offer.currency}}"> </span></td>				
 			</tr>
 		
