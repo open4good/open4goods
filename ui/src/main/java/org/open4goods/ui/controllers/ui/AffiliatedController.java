@@ -35,6 +35,11 @@ public class AffiliatedController {
 	public ModelAndView compensation(@PathVariable(required = true, name = "token") final String token,
 			final HttpServletRequest request, final HttpServletResponse response) {
 
+
+		// No follow
+		response.addHeader("X-Robots-Tag", "noindex, nofollow");
+
+		
 		// TODO : in a service
 		final String ip = IpHelper.getIp(request);
 
