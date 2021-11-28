@@ -4,11 +4,13 @@ import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.nio.charset.Charset;
 import java.util.Locale;
+import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.lang3.StringUtils;
+import org.open4goods.model.constants.ProductState;
 import org.open4goods.ui.config.yml.UiConfig;
 import org.open4goods.ui.controllers.dto.VerticalSearchResponse;
 import org.open4goods.ui.services.SearchService;
@@ -19,6 +21,8 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.ModelAndView;
+
+import com.google.common.collect.Sets;
 
 @Controller
 //	TODO(i18n, P2, 0.25) : I18n the pathes
@@ -47,7 +51,8 @@ public class GlobalSearchController extends AbstractUiController {
 		
 		ModelAndView model = defaultModelAndView("search", request);
 
-		VerticalSearchResponse results = searchService.globalSearch(q);
+//		Set<String> categroies = Sets.newHashSet("JOUR>AUTRES MEUBLES");
+		VerticalSearchResponse results = searchService.globalSearch(q, null, null, null, null,0,50);
 		
 		model.addObject("results",results);
 		model.addObject("query", q);

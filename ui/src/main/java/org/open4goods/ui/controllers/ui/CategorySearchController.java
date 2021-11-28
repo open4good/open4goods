@@ -26,7 +26,7 @@ public class CategorySearchController extends AbstractUiController {
 		ModelAndView model = defaultModelAndView("search-category", request);
 
 		VerticalSearchResponse results = searchService.categorieSearch(query.toUpperCase());		
-		results.compute();
+//		results.compute();
 		
 		model.addObject("results",results);
 		model.addObject("category",query.replace(">", " - "));

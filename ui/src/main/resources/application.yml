@@ -5,7 +5,8 @@ server:
     min-response-size: 1024
   http2:
     enabled: true
-
+  forward-headers-strategy: NATIVE
+  
 apiConfig:
   apiTitle: "Open4goods API"
   apiDescription: "This API allows you to browse eco-achat content"

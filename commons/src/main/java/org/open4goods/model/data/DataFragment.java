@@ -43,7 +43,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.google.common.base.Objects;
 import com.google.common.collect.Sets;
 
-@Document(indexName = DataFragment.DATAFRAGMENTS_INDEX+2, refreshInterval = "60s", createIndex = true)
+@Document(indexName = DataFragment.DATAFRAGMENTS_INDEX, refreshInterval = "60s", createIndex = true)
 //@Mapping(mappingPath = "/esmappings/datafragments.json")
 /**
  * The main product document a some (lot) of structured fields and some other
