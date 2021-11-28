@@ -5,7 +5,7 @@ server:
     min-response-size: 1024
   http2:
     enabled: true
-    
+  forward-headers-strategy: NATIVE
     
 ########################
 # Logging configuration
@@ -15,7 +15,9 @@ logging:
       max-history: 5      
       max-size: 200MB      
       
-      
+
+  
+   
 spring:
   jackson:
     default-property-inclusion: non-empty

@@ -32,6 +32,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.elasticsearch.core.ElasticsearchRestTemplate;
 import org.springframework.data.elasticsearch.core.IndexOperations;
 import org.springframework.data.elasticsearch.core.SearchHit;
+import org.springframework.data.elasticsearch.core.SearchHits;
 import org.springframework.data.elasticsearch.core.document.Document;
 import org.springframework.data.elasticsearch.core.index.Settings;
 import org.springframework.data.elasticsearch.core.mapping.IndexCoordinates;
@@ -164,7 +165,13 @@ public class AggregatedDataRepository {
 				.map(e -> e.getContent());
 		
 	}
+
 	
+	public SearchHits<AggregatedData> search(NativeSearchQuery query, final String indexName, int from, int to) {				
+		return elasticsearchTemplate.search(query, AggregatedData.class, IndexCoordinates.of(indexName));
+		
+	}
+
 	
 	/**
 	 * Index an AggregatedData
@@ -307,41 +314,12 @@ public class AggregatedDataRepository {
 		
 	}
 
-
-//	public CategoryStatResults stats(String query) {
-//		
-//		
-//		CategoryStatResults result = new CategoryStatResults();
-//		
-//		final QueryStringQueryBuilder queryBuilder = new QueryStringQueryBuilder(query);
-//		final NativeSearchQuery initialQuery = new NativeSearchQueryBuilder()
-//				.withQuery(queryBuilder)
-//				.addAggregation(AggregationBuilders.min("min_price").field("price.minPrice.price"))
-//				.addAggregation(AggregationBuilders.max("max_price").field("price.minPrice.price"))
-//				.addAggregation(AggregationBuilders.terms("attributes").field("attributes.unmapedAttributes.name.keyword").size(1000))				
-//				.addAggregation(AggregationBuilders.terms("features").field("attributes.features.name.keyword").size(1000))				
-//				.build();		
-//		
-//		
-//	
-//
-//		AggregationsContainer<?> aggregations = elasticsearchTemplate.search(initialQuery, AggregatedData.class,  current_index).getAggregations();
-//
-//		
-//		 minPrice = aggregations.get("min_price");
-//		Max maxPrice = aggregations.get("max_price");
-//		Terms attrs =  aggregations.get("attributes");
-//		Terms features=  aggregations.get("features");
-//
-//		return result;
-//	}
-
 	
 	/**
 	 * 
 	 * @return RangeQueryBuilder representing the valid dates
 	 */
-	private RangeQueryBuilder getValidDateQuery() {
+	public RangeQueryBuilder getValidDateQuery() {
 		return QueryBuilders.rangeQuery("price.minPrice.timeStamp") 
 				.gt(expirationClause());
 	}

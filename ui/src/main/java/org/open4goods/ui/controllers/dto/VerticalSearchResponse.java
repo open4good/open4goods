@@ -23,42 +23,20 @@ public class VerticalSearchResponse {
 	
 	private Double maxPrice = null;
 	
-	/**
-	 * Compute the brands, minPrice / maxPrice
-	 */
-	public void compute() {
-		
-		data.forEach(e -> {
-			
-			// Brands
-			Integer val = brands.get(e.brand());
-			if (null == val) {
-				brands.put(e.brand(), 1);
-			} else {
-				brands.put(e.brand(), val+1);
-			}
-			
-			// minPrice
-			if (null == minPrice) {
-				minPrice = e.bestPrice().getPrice();
-			} else {
-				if (e.bestPrice().getPrice() < minPrice.doubleValue()) {
-					minPrice = e.bestPrice().getPrice();					
-				}
-			}
-			
-			// maxPrice
-			if (null == maxPrice) {
-				maxPrice = e.bestPrice().getPrice();
-			} else {
-				if (e.bestPrice().getPrice() > maxPrice.doubleValue()) {
-					maxPrice = e.bestPrice().getPrice();					
-				}
-			}			
-		});
-		
-		
-	}
+	private long totalResults;
+	
+	private long from;
+	
+	private long to;
+
+	private long itemNew;
+	
+	private long itemOccasion;
+
+	private long itemUnknown;
+	
+	private Map<String, Long> categories = new HashMap<>();
+	
 	
 	
 	
@@ -120,5 +98,70 @@ public class VerticalSearchResponse {
 	public void setMaxPrice(Double max) {
 		this.maxPrice = max;
 	}
+
+
+
+
+	public long getTotalResults() {
+		return totalResults;
+	}
+
+
+
+
+	public void setTotalResults(long totalResults) {
+		this.totalResults = totalResults;
+	}
+
+
+	public long getFrom() {
+		return from;
+	}
+
+	public void setFrom(long from) {
+		this.from = from;
+	}
+
+	public long getTo() {
+		return to;
+	}
+
+	public void setTo(long to) {
+		this.to = to;
+	}
+
+	public long getItemNew() {
+		return itemNew;
+	}
+
+	public void setItemNew(long itemNew) {
+		this.itemNew = itemNew;
+	}
+
+	public long getItemOccasion() {
+		return itemOccasion;
+	}
+
+	public void setItemOccasion(long itemOccasion) {
+		this.itemOccasion = itemOccasion;
+	}
+
+	public long getItemUnknown() {
+		return itemUnknown;
+	}
+
+	public void setItemUnknown(long itemUnknown) {
+		this.itemUnknown = itemUnknown;
+	}
+
+	public Map<String, Long> getCategories() {
+		return categories;
+	}
+
+	public void setCategories(Map<String, Long> categories) {
+		this.categories = categories;
+	}
+	
+	
 	
 }
