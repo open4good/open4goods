@@ -63,15 +63,7 @@ public class ApiConfig {
 
 	@Autowired ApiProperties apiProperties;
 
-	@Bean
-	public CapsuleResourceBundle messageSource() {
-		CapsuleResourceBundle messageSource = new CapsuleResourceBundle();
-		messageSource.setBasename("classpath:/i18n/messages");
-		// TODO(conf,0.25,P3) : from conf
-		messageSource.setCacheSeconds(60);
 
-		return messageSource;
-	}
 
 	
 	@Bean
