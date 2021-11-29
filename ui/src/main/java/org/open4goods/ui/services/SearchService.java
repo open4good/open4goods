@@ -134,10 +134,18 @@ public class SearchService {
 		vsr.setMaxPrice(maxPrice.getValue());
 		vsr.setMinPrice(minPrice.getValue());
 		
-		vsr.setItemNew( productSate.getBucketByKey(ProductState.NEW.toString()).getDocCount()) ;
-		vsr.setItemOccasion( productSate.getBucketByKey(ProductState.OCCASION.toString()).getDocCount()) ;
-		vsr.setItemUnknown(productSate.getBucketByKey(ProductState.UNKNOWN.toString()).getDocCount());
+		if (null != productSate.getBucketByKey(ProductState.NEW.toString())) {			
+			vsr.setItemNew( productSate.getBucketByKey(ProductState.NEW.toString()).getDocCount()) ;
+		}
 
+		if (null != productSate.getBucketByKey(ProductState.OCCASION.toString())) {			
+			vsr.setItemOccasion( productSate.getBucketByKey(ProductState.OCCASION.toString()).getDocCount()) ;
+		}
+		
+		if (null != productSate.getBucketByKey(ProductState.UNKNOWN.toString())) {			
+			vsr.setItemUnknown(productSate.getBucketByKey(ProductState.UNKNOWN.toString()).getDocCount());
+		}
+		
 		for (Bucket b :   catTerms.getBuckets()) {			
 			vsr.getCategories().put(b.getKey().toString(), b.getDocCount());			
 		}
