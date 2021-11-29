@@ -35,4 +35,8 @@ fetcherProperties:
     nodeName: localNode
     nodeUrl: http://localhost:8081  
 
+
+elasticsearch.username: 
+elasticsearch.password:  
+elasticsearch.host: 127.0.0.1
              
