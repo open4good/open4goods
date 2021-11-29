@@ -28,8 +28,8 @@ services:
         soft: 65536
         hard: 65536
 
-    volumes:
-      - /tmp/elastic-data:/usr/share/elasticsearch/data
+#    volumes:
+#      - /tmp/elastic-data:/usr/share/elasticsearch/data
 
     ports:
       - 9200:9200

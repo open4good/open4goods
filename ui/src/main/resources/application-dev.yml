@@ -20,10 +20,10 @@ spring:
       cache: false
 
   mail:
-#    host: 
-#    port: 587
-#    username: 
-#    password: 
+    host: 
+    port: 587
+    username: 
+    password: 
     properties:
         mail.smtp.auth: true
         mail.smtp.starttls.enable: true
@@ -31,7 +31,7 @@ spring:
         
 email: your@email.com
 
-#google.recaptcha.secret: 
+google.recaptcha.secret: "[RECAPTCHA_SECRET]"
 
 webConfig:
   templatesCaching: false
@@ -48,6 +48,6 @@ namings:
     fr: http://localhost:8082/
 #    default: http://127.0.0.1:8080/  
 
-#elasticsearch.username: 
-#elasticsearch.password: 
-#elasticsearch.host:      
+elasticsearch.username: 
+elasticsearch.password:  
+elasticsearch.host: 127.0.0.1 
