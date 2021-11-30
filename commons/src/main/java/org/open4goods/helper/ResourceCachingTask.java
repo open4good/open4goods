@@ -1,4 +1,4 @@
-package org.open4goods.aggregation.services;
+package org.open4goods.helper;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -9,7 +9,6 @@ import org.apache.tika.config.TikaConfig;
 import org.apache.tika.mime.MimeType;
 import org.open4goods.exceptions.TechnicalException;
 import org.open4goods.exceptions.ValidationException;
-import org.open4goods.helper.IdHelper;
 import org.open4goods.model.constants.ResourceType;
 import org.open4goods.model.data.ImageInfo;
 import org.open4goods.model.data.IndexedResource;

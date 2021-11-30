@@ -76,7 +76,7 @@ public class CrawlerOrchestrationController {
 	@Operation(summary="Run a all datasources retrieving against best availlables node")
 	@PreAuthorize("hasAuthority('"+RolesConstants.ROLE_ADMIN+"')")
 	public FetchRequestResponse triggerAllFetcher() {
-		for (final Entry<String, DataSourceProperties> ds : datasourceConfigService.getDatasourceConfigs().entrySet()) {
+		for (final Entry<String, DataSourceProperties> ds : datasourceConfigService.datasourceConfigs().entrySet()) {
 			fetcherOrchestrationService.triggerRemoteCrawling(ds.getKey());
 		}
 		return new FetchRequestResponse(true);
@@ -86,7 +86,7 @@ public class CrawlerOrchestrationController {
 	@Operation(summary="Run a all CSV datasources retrieving against best availlables node")
 	@PreAuthorize("hasAuthority('"+RolesConstants.ROLE_ADMIN+"')")
 	public FetchRequestResponse triggerAllCsvFetcher() {
-		for (final Entry<String, DataSourceProperties> ds : datasourceConfigService.getDatasourceConfigs().entrySet()) {
+		for (final Entry<String, DataSourceProperties> ds : datasourceConfigService.datasourceConfigs().entrySet()) {
 			if (null != ds.getValue().getCsvDatasource()) {
 				fetcherOrchestrationService.triggerRemoteCrawling(ds.getKey());
 			}

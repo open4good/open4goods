@@ -37,7 +37,7 @@ public class DataSourceConfigurationsController {
 	@GetMapping(path=UrlConstants.MASTER_API_DATASOURCES_CONFIG)
 	@Operation(summary="List all availlable datasource configurations")
 	public Map<String, DataSourceProperties> datasources () {
-		return datasourceConfigService.getDatasourceConfigs();
+		return datasourceConfigService.datasourceConfigs();
 	}
 
 	@GetMapping(path=UrlConstants.MASTER_API_DATASOURCE_CONFIG_PREFIX+"{datasourceName}")

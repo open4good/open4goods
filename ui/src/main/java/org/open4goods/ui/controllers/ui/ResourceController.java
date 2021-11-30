@@ -12,12 +12,15 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.io.IOUtils;
+import org.bouncycastle.jcajce.provider.asymmetric.dsa.DSASigner.dsa224;
 import org.open4goods.dao.AggregatedDataRepository;
+import org.open4goods.exceptions.InvalidParameterException;
 import org.open4goods.exceptions.TechnicalException;
 import org.open4goods.exceptions.ValidationException;
 import org.open4goods.model.constants.ResourceTagDictionary;
 import org.open4goods.model.data.Resource;
 import org.open4goods.model.product.AggregatedData;
+import org.open4goods.services.DataSourceConfigService;
 import org.open4goods.services.TagCloudService;
 import org.open4goods.ui.config.yml.UiConfig;
 import org.open4goods.ui.services.GtinService;
@@ -55,7 +58,7 @@ public class ResourceController extends AbstractUiController {
 	private @Autowired GtinService gtinService;
 	private @Autowired TagCloudService tagcloudService;
 	private @Autowired UiConfig config;
-
+	private @Autowired DataSourceConfigService dsConfigService;
 	//////////////////////////////////////////////////////////////
 	// Mappings
 	//////////////////////////////////////////////////////////////
@@ -154,5 +157,19 @@ public class ResourceController extends AbstractUiController {
 		response.addHeader("Content-type","image/png");
 		IOUtils.copy(tagcloudService.getImageStream(data) ,response.getOutputStream());
 	}
+	
+	
+	@GetMapping("/icon/{datasourceName}")
+	public void datasourceIcon(@PathVariable String datasourceName, final HttpServletResponse response) throws FileNotFoundException, IOException, InvalidParameterException  {
+		response.addHeader("Content-type","image/png");
+		IOUtils.copy(dsConfigService.getFavicon(datasourceName) ,response.getOutputStream());
+	}
+
+	@GetMapping("/logo/{datasourceName}")
+	public void datasourceLogo(@PathVariable String datasourceName, final HttpServletResponse response) throws FileNotFoundException, IOException, InvalidParameterException  {
+		response.addHeader("Content-type","image/png");
+		IOUtils.copy(dsConfigService.getLogo(datasourceName) ,response.getOutputStream());
+	}
+
 	
 }
