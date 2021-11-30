@@ -11,6 +11,7 @@ import org.open4goods.dao.AggregatedDataRepository;
 import org.open4goods.model.constants.CacheConstants;
 import org.open4goods.model.constants.Currency;
 import org.open4goods.model.data.Price;
+import org.open4goods.services.DataSourceConfigService;
 import org.open4goods.services.EvaluationService;
 import org.open4goods.services.ImageMagickService;
 import org.open4goods.services.MailService;
@@ -75,6 +76,12 @@ public class AppConfig {
 	public SitemapGenerationService sitemapGenerationService (@Autowired AggregatedDataRepository aggregatedDataRepository, @Autowired UiConfig props ) {
 		return new SitemapGenerationService(aggregatedDataRepository, props);
 	}
+	
+	/** The bean providing datasource configurations **/
+	public @Bean DataSourceConfigService datasourceConfigService(@Autowired final UiConfig config) {
+		return new DataSourceConfigService(config.getDatasourcesfolder());
+	}
+
 	
 	@Bean
 	public  RecaptchaService recaptchaService() {

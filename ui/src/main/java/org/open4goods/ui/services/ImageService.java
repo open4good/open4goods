@@ -6,9 +6,9 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import org.apache.commons.io.IOUtils;
-import org.open4goods.aggregation.services.ResourceCachingTask;
 import org.open4goods.exceptions.TechnicalException;
 import org.open4goods.exceptions.ValidationException;
+import org.open4goods.helper.ResourceCachingTask;
 import org.open4goods.model.data.IndexedResource;
 import org.open4goods.model.data.Resource;
 import org.open4goods.services.ImageMagickService;

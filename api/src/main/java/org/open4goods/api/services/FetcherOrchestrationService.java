@@ -64,7 +64,7 @@ public class FetcherOrchestrationService {
 	public void schedule() {
 		logger.info("Initialising direct datasources scheduling");
 
-		final Map<String,DataSourceProperties> providerConfigs = datasourceConfigService.getDatasourceConfigs();
+		final Map<String,DataSourceProperties> providerConfigs = datasourceConfigService.datasourceConfigs();
 		for (final Entry<String, DataSourceProperties> pConf : providerConfigs.entrySet()) {
 
 			final String realCron = pConf.getValue().cron();
@@ -98,7 +98,7 @@ public class FetcherOrchestrationService {
 
 		// Checking if there is not a running fetching job for this provider
 
-		for (final Entry<String, DataSourceProperties> p : datasourceConfigService.getDatasourceConfigs().entrySet()) {
+		for (final Entry<String, DataSourceProperties> p : datasourceConfigService.datasourceConfigs().entrySet()) {
 			if (p.getKey().equals(datasourceConfName)) {
 				return triggerRemoteCrawling(p.getValue(), datasourceConfName);
 			}
@@ -119,7 +119,7 @@ public class FetcherOrchestrationService {
 
 		// Checking if there is not a running fetching job for this provider
 
-		for (final Entry<String, DataSourceProperties> p : datasourceConfigService.getDatasourceConfigs().entrySet()) {
+		for (final Entry<String, DataSourceProperties> p : datasourceConfigService.datasourceConfigs().entrySet()) {
 			if (p.getKey().equals(datasourceConfName)) {
 				return triggerRemoteCrawling(nodeName, p.getValue(),datasourceConfName);
 			}

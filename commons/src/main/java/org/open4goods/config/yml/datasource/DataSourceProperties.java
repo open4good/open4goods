@@ -61,6 +61,13 @@ public class DataSourceProperties {
 
 	@NotBlank
 	private String favico;
+	
+	private String logo;
+	
+	
+	private String portalUrl;
+	
+	
 
 	/**
 	 * The percent of reversement for the provider
@@ -498,6 +505,22 @@ public class DataSourceProperties {
 
 	public void setReversement(Double reversement) {
 		this.reversement = reversement;
+	}
+
+	public String getLogo() {
+		return logo;
+	}
+
+	public void setLogo(String logo) {
+		this.logo = logo;
+	}
+
+	public String getPortalUrl() {
+		return portalUrl;
+	}
+
+	public void setPortalUrl(String portalUrl) {
+		this.portalUrl = portalUrl;
 	}
 
 }
