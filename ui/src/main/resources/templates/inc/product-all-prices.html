@@ -13,7 +13,7 @@
 		<tbody>
 		
 			<tr th:each="offer : ${product.price.offers}">
-				<td> <a rel=”nofollow” th:href="'/compensation/'+${offer.affiliationToken}"> <span th:text="${offer.datasourceName}"></span></a></td>
+				<td><img height="16" width="16" class="me-2" th:src="'/icon/'+${offer.datasourceName}">  <a rel=”nofollow” th:href="'/compensation/'+${offer.affiliationToken}"> <span th:text="${offer.datasourceName}"></span></a></td>
 				<td><span th:text="${offer.price}"></span> <span th:text="#{'symbol.'+${offer.currency}}"></span></td>
 				<td><span th:text="${offer.ago(userLocale)}"></span></td>
 				<td><span th:text="#{'condition.'+${offer.productState}}"></span> </td>
