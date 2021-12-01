@@ -121,8 +121,8 @@ public class AppConfig {
 
 	
 	@Bean	
-	public SearchService searchService(@Autowired AggregatedDataRepository aggregatedDataRepository) {
-		return new SearchService(aggregatedDataRepository);
+	public SearchService searchService(@Autowired AggregatedDataRepository aggregatedDataRepository, @Autowired final UiConfig uiconfig) {
+		return new SearchService(aggregatedDataRepository, uiconfig.logsFolder());
 	}
 
 	@Bean
