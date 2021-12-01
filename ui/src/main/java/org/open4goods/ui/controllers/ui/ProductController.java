@@ -113,11 +113,15 @@ public class ProductController extends AbstractUiController {
 	 * @param price
 	 * @throws IOException 
 	 */
-	private void inferAffiliationToken(AggregatedData data, AggregatedPrice price) throws IOException {
+	private void inferAffiliationToken(AggregatedData data, AggregatedPrice price)  {
 
-			AffiliationToken token = new AffiliationToken(price, data);
-			String serToken = URLEncoder.encode(serialisationService.compressString(serialisationService.toJson(token)), Charset.defaultCharset());			
-			price.setAffiliationToken(serToken);		
+			try {
+				AffiliationToken token = new AffiliationToken(price, data);
+				String serToken = URLEncoder.encode(serialisationService.compressString(serialisationService.toJson(token)), Charset.defaultCharset());			
+				price.setAffiliationToken(serToken);
+			} catch (Exception e) {
+				LOGGER.error("Error while generating affiliation token for {} : {}", data, e.getMessage());
+			}		
 	}
 
 }
