@@ -56,11 +56,12 @@ public class ProductController extends AbstractUiController {
 	 * @param request
 	 * @param response
 	 * @return
+	 * @throws IOException 
 	 * @throws UnirestException
 	 */
 
 	@GetMapping("/*-{id:\\d+}")
-	public ModelAndView product(@PathVariable String id, final HttpServletRequest request, HttpServletResponse response) {
+	public ModelAndView product(@PathVariable String id, final HttpServletRequest request, HttpServletResponse response) throws IOException {
 
 		// Getting the product name
 		String path= URLEncoder.encode(request.getServletPath().substring(1));							
@@ -110,21 +111,13 @@ public class ProductController extends AbstractUiController {
 	 * 
 	 * @param data
 	 * @param price
+	 * @throws IOException 
 	 */
-	private void inferAffiliationToken(AggregatedData data, AggregatedPrice price) {
-		
-		if (null == price) {
-			LOGGER.error("Generating affiliation token failed ! No price found for data {}", data);
-		} else {			
-			try {
-				AffiliationToken token = new AffiliationToken(price, data);
-				String serToken = URLEncoder.encode(serialisationService.compressString(serialisationService.toJson(token)), Charset.defaultCharset());
-				
-				price.setAffiliationToken(serToken);
-			} catch (Exception e1) {
-				LOGGER.error("Error generating affiliation token", e1);
-			}
-		}
+	private void inferAffiliationToken(AggregatedData data, AggregatedPrice price) throws IOException {
+
+			AffiliationToken token = new AffiliationToken(price, data);
+			String serToken = URLEncoder.encode(serialisationService.compressString(serialisationService.toJson(token)), Charset.defaultCharset());			
+			price.setAffiliationToken(serToken);		
 	}
 
 }
