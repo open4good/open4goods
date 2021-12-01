@@ -112,13 +112,18 @@ public class ProductController extends AbstractUiController {
 	 * @param price
 	 */
 	private void inferAffiliationToken(AggregatedData data, AggregatedPrice price) {
-		try {
-			AffiliationToken token = new AffiliationToken(price, data);
-			String serToken = URLEncoder.encode(serialisationService.compressString(serialisationService.toJson(token)), Charset.defaultCharset());
-			
-			price.setAffiliationToken(serToken);
-		} catch (IOException e1) {
-			LOGGER.error("Error generating affiliation token", e1);
+		
+		if (null == price) {
+			LOGGER.error("Generating affiliation token failed ! No price found for data {}", data);
+		} else {			
+			try {
+				AffiliationToken token = new AffiliationToken(price, data);
+				String serToken = URLEncoder.encode(serialisationService.compressString(serialisationService.toJson(token)), Charset.defaultCharset());
+				
+				price.setAffiliationToken(serToken);
+			} catch (Exception e1) {
+				LOGGER.error("Error generating affiliation token", e1);
+			}
 		}
 	}
 
