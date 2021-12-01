@@ -41,6 +41,11 @@ public class CsvDataSourceProperties {
 	private Character csvQuoteChar;
 
 	/**
+	 * csvQuoteChar
+	 */
+	private Character csvEscapeChar='"';
+	
+	/**
 	 * If defined, only columns (keys) having one of the values will be handled
 	 */
 	private Map<String, Set<String>> columnsFilter = new HashMap<>();
@@ -485,6 +490,14 @@ public class CsvDataSourceProperties {
 
 	public void setAttributesKeyKeepAfter(String attributesKeyKeepAfter) {
 		this.attributesKeyKeepAfter = attributesKeyKeepAfter;
+	}
+
+	public Character getCsvEscapeChar() {
+		return csvEscapeChar;
+	}
+
+	public void setCsvEscapeChar(Character csvEscapeChar) {
+		this.csvEscapeChar = csvEscapeChar;
 	}
 	
 	

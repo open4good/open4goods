@@ -17,6 +17,7 @@ import java.util.concurrent.Executors;
 import javax.annotation.PreDestroy;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.open4goods.config.yml.datasource.CsvDataSourceProperties;
@@ -246,13 +247,20 @@ public class CsvDatasourceFetchingService extends DatasourceFetchingService {
 			final CsvDataSourceProperties config = dsProperties.getCsvDatasource();
 			dedicatedLogger.info("Fetching CSV datasource {} ", dsConfName);
 
-			CsvSchema schema = CsvSchema.emptySchema().withHeader().withColumnSeparator(config.getCsvSeparator());
+			CsvSchema schema = CsvSchema.emptySchema()
+								.withHeader()
+								.withColumnSeparator(config.getCsvSeparator())
+								.withEscapeChar(config.getCsvEscapeChar())
+								;
 
 			if (null != config.getCsvQuoteChar()) {
 				schema = schema.withQuoteChar(config.getCsvQuoteChar().charValue());
 			} else {
 				schema = schema.withoutQuoteChar();
 			}
+			
+			
+			
 
 			for (final String url : config.getDatasourceUrls()) {
 				try {
@@ -320,6 +328,9 @@ public class CsvDatasourceFetchingService extends DatasourceFetchingService {
 						}
 					}
 
+					// CSV sanitization using libreoffice
+					destFile = libreOfficeSanitisation(destFile,config);
+					
 					// Row number counting
 
 					dedicatedLogger.info("Counting lines for {} ", destFile.getAbsolutePath());
@@ -388,6 +399,7 @@ public class CsvDatasourceFetchingService extends DatasourceFetchingService {
 
 		}
 
+	
 	}
 
 	private void handleAttributes(final DataFragment pd, final DataSourceProperties config, final String attrRaw, Logger dedicatedLogger) {
@@ -712,4 +724,54 @@ public class CsvDatasourceFetchingService extends DatasourceFetchingService {
 
 	}
 
+	/**
+	 * Sanitisation using libreoffice
+	 * @param destFile
+	 * @param config
+	 * @return
+	 */
+	private File libreOfficeSanitisation(File destFile, CsvDataSourceProperties config) {
+
+		// libreoffice --headless --convert-to csv:"Text - txt - csv (StarCalc)":59,34,76,,,,true /home/goulven/Bureau/products_405199502.csv --outdir /tmp/libreofficeCSV --infilter=CSV:59,34,UTF8
+		
+		String outDir = System.getProperty("java.io.tmpdir")+"/libreofficeCSV";
+		String fileName = destFile.getName();
+		
+//		int fieldSeparator=59;
+//		int textSeparator=34;
+
+		int fieldSeparator=config.getCsvSeparator();
+		int textSeparator=config.getCsvQuoteChar();
+		
+		//TODO(conf) : 76 and utf8 represents encoding, should make it configurable
+		ProcessBuilder builder = new ProcessBuilder("libreoffice", "--headless", "--convert-to", "csv:Text - txt - csv (StarCalc):"+fieldSeparator+","+textSeparator+",76,,,,true", destFile.getAbsolutePath(), "--outdir", outDir, "--infilter=CSV:"+fieldSeparator+","+textSeparator+",UTF8");
+
+		try {
+			Process process = builder.start();
+			process.waitFor();
+
+			logger.info("Libreoffice conversion result : {}", IOUtils.toString(process.getInputStream()));
+						
+			String error = IOUtils.toString(process.getErrorStream());
+			if (!StringUtils.isEmpty(error)) {
+				logger.error("Error returned by libreoffice converter. Sanitisation will be skipped : {}",error);
+			}
+			else {				
+				destFile.delete();
+				return new File(outDir+"/"+fileName);
+			}
+		
+		} catch (IOException | InterruptedException e) {
+			logger.error("Error with libreoffice transformation",e);
+		}
+		return destFile;
+
+	
+	
+	}
+
+	
+	
+	
+	
 }
