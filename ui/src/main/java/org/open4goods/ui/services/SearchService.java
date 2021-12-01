@@ -59,7 +59,7 @@ public class SearchService {
 	 */
 	public VerticalSearchResponse globalSearch(String initialQuery, Integer fromPrice, Integer toPrice, Set<String> categories, ProductState condition, int from, int to) {
 		
-		String query = sanitize(initialQuery).trim();
+		String query =  sanitize(initialQuery);
 		
 
 		
@@ -186,13 +186,15 @@ public class SearchService {
 	}
 	
 	public String sanitize(String q) {
-		return q.replace("(", " ")
+		return StringUtils.normalizeSpace(q.replace("(", " ")
 				.replace(")", " ")
 				.replace("[", " ")
 				.replace("]", " ")
 				.replace("+", " ")
 				.replace("-", " ")
-				.replace(":", " ");
+				.replace(":", " ")
+				.replace("\"", " "));
+		
 				
 				
 				
