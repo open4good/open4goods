@@ -51,6 +51,7 @@ public class MailService {
 			helper.setText(msg);
 			helper.setSubject(subject);
 			helper.setFrom(from);
+			helper.setReplyTo(from);
 			mailSender.send(message);
 		} catch (Exception e) {
 			logger.error("Error while sending email ! ",e);
