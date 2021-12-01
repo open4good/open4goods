@@ -15,6 +15,7 @@ import org.elasticsearch.search.aggregations.bucket.terms.Terms.Bucket;
 import org.elasticsearch.search.aggregations.metrics.Max;
 import org.elasticsearch.search.aggregations.metrics.Min;
 import org.open4goods.dao.AggregatedDataRepository;
+import org.open4goods.helper.GenericFileLogger;
 import org.open4goods.model.constants.ProductState;
 import org.open4goods.model.product.AggregatedData;
 import org.open4goods.ui.controllers.dto.VerticalSearchResponse;
@@ -24,6 +25,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.elasticsearch.core.SearchHits;
 import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilder;
+
+import ch.qos.logback.classic.Level;
 
 /**
  * Service in charge of the search in AggregatedDatas and in DataFragments
@@ -42,11 +45,13 @@ public class SearchService {
 	
 	private AggregatedDataRepository aggregatedDataRepository;
 
-
+	private Logger statsLogger;
+	
 	
 	@Autowired
-	public SearchService(AggregatedDataRepository aggregatedDataRepository) {
+	public SearchService(AggregatedDataRepository aggregatedDataRepository, String logsFolder) {
 		this.aggregatedDataRepository = aggregatedDataRepository;
+		this.statsLogger  = GenericFileLogger.initLogger("stats-search", Level.INFO, logsFolder, false);
 	}
 	
 	/**
@@ -61,7 +66,9 @@ public class SearchService {
 		
 		String query =  sanitize(initialQuery);
 		
-
+		// Logging
+		statsLogger.info("Searching {}",initialQuery);
+		
 		
 		// Valid timestamp
 		BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery()  
