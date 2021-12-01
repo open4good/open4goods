@@ -3,9 +3,13 @@ server:
     enabled: true
     mime-types: text/html,text/xml,text/plain,text/css,text/javascript,application/javascript,application/json
     min-response-size: 1024
+  undertow:
+    worker-threads: 1000
   http2:
     enabled: true
   forward-headers-strategy: NATIVE
+  
+  
   
 apiConfig:
   apiTitle: "Open4goods API"
