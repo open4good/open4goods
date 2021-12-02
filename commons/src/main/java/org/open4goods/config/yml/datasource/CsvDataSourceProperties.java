@@ -40,6 +40,12 @@ public class CsvDataSourceProperties {
 	 */
 	private Character csvQuoteChar;
 
+	
+	/**
+	 * Encoding of the CSV file
+	 */	
+	private String csvEncoding="UTF8";
+	
 	/**
 	 * csvQuoteChar
 	 */
@@ -498,6 +504,14 @@ public class CsvDataSourceProperties {
 
 	public void setCsvEscapeChar(Character csvEscapeChar) {
 		this.csvEscapeChar = csvEscapeChar;
+	}
+
+	public String getCsvEncoding() {
+		return csvEncoding;
+	}
+
+	public void setCsvEncoding(String csvEncoding) {
+		this.csvEncoding = csvEncoding;
 	}
 	
 	
