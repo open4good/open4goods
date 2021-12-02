@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.net.URLDecoder;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -65,6 +66,7 @@ import net.lingala.zip4j.exception.ZipException;
 
 public class CsvDatasourceFetchingService extends DatasourceFetchingService {
 
+	
 	private static final Logger logger = LoggerFactory.getLogger(CsvDatasourceFetchingService.class);
 
 	private final ObjectMapper csvMapper = new CsvMapper().enable((CsvParser.Feature.IGNORE_TRAILING_UNMAPPABLE));
@@ -82,6 +84,11 @@ public class CsvDatasourceFetchingService extends DatasourceFetchingService {
 
 	private final FetcherProperties fetcherProperties;
 
+	// The chars used in CSV after libreoffice sanitisation
+	private static final char SANITISED_COLUMN_SEPARATOR = ';';
+	private static final char SANITIZED_ESCAPE_CHAR = '"';
+	private static final char SANITIZED_QUOTE_CHAR = '"';
+	
 	/**
 	 * Constructor
 	 *
@@ -134,59 +141,7 @@ public class CsvDatasourceFetchingService extends DatasourceFetchingService {
 		return running;
 	}
 
-	public DataFragment synchFetch(final String datasourceConfigName, final DataSourceProperties dsProperties,
-			final String csvHeaders, final String csvLine) throws IOException, ValidationException {
 
-		final CsvDataSourceProperties config = dsProperties.getCsvDatasource();
-
-		final Logger dedicatedLogger = createDatasourceLogger(datasourceConfigName, dsProperties,
-				fetcherProperties.getCrawlerLogDir());
-
-//		csvMapper.enable(CsvParser.Feature.IGNORE_TRAILING_UNMAPPABLE);
-
-		final CsvSchema schema = CsvSchema.emptySchema().withHeader().withQuoteChar(config.getCsvQuoteChar())
-				.withColumnSeparator(config.getCsvSeparator());
-
-		// configure the reader on what bean to read and how we want to write
-		// that bean
-		final ObjectReader oReader = csvMapper.readerFor(Map.class).with(schema);
-
-		final MappingIterator<Map<String, String>> mi = oReader.readValues(csvHeaders + "\n" + csvLine);
-
-		DataFragmentWebCrawler crawler = null;
-		CrawlController controler = null;
-
-		if (null != config.getWebDatasource()) {
-			try {
-				logger.info("Configuring direct crawler for CSV datasource {}", dsProperties.getName());
-				controler = webFetchingService.createCrawlController("csv-" + dsProperties.getName(),
-						dsProperties.getCsvDatasource().getWebDatasource().getCrawlConfig());
-				crawler = webFetchingService.createWebCrawler(datasourceConfigName, dsProperties,
-						dsProperties.getCsvDatasource().getWebDatasource());
-
-				crawler.setShouldFollowLinks(false);
-
-			} catch (final Exception e) {
-				logger.error("Error while starting the CSV associated web crawler", e);
-			}
-		}
-
-		try {
-			// Handle the csv line
-			final Map<String, String> line = mi.next();
-
-			final DataFragment df = parseCsvLine(crawler, controler, dsProperties, line, datasourceConfigName,
-					dedicatedLogger);
-
-			return df;
-
-		} catch (final ValidationException e) {
-			logger.warn("Validation failed : {} on {}", e.getMessage(), csvLine);
-		} catch (final Exception e) {
-			logger.error("Unexpected exception while parsing {}", csvLine, e);
-		}
-		return null;
-	}
 
 	/**
 	 * Stopping jobs on application exit
@@ -208,6 +163,9 @@ public class CsvDatasourceFetchingService extends DatasourceFetchingService {
 	class CsvFetchingThread implements Runnable {
 
 		private static final String CLASSPATH_PREFIX = "classpath:";
+		
+		
+		
 		private final DataSourceProperties dsProperties;
 		private final String dsConfName;
 		private final Logger dedicatedLogger;
@@ -249,18 +207,10 @@ public class CsvDatasourceFetchingService extends DatasourceFetchingService {
 
 			CsvSchema schema = CsvSchema.emptySchema()
 								.withHeader()
-								.withColumnSeparator(config.getCsvSeparator())
-								.withEscapeChar(config.getCsvEscapeChar())
+								.withColumnSeparator(SANITISED_COLUMN_SEPARATOR)
+								.withEscapeChar(SANITIZED_ESCAPE_CHAR)
+								.withQuoteChar(SANITIZED_QUOTE_CHAR)
 								;
-
-			if (null != config.getCsvQuoteChar()) {
-				schema = schema.withQuoteChar(config.getCsvQuoteChar().charValue());
-			} else {
-				schema = schema.withoutQuoteChar();
-			}
-			
-			
-			
 
 			for (final String url : config.getDatasourceUrls()) {
 				try {
@@ -271,7 +221,7 @@ public class CsvDatasourceFetchingService extends DatasourceFetchingService {
 
 					// local file download, then estimate number of rows
 //					TODO(design,P2,0.5) : Allow CSV file forwarding on remote crawl (for now, CSV with classpath fetching only works on local node)
-					File destFile = File.createTempFile("csv", dsConfName);
+					File destFile = File.createTempFile("csv", dsConfName+".csv");
 					dedicatedLogger.info("Downloading CSV for {} from {} to {}", dsConfName, url, destFile);
 
 					if (url.startsWith("http")) {
@@ -329,7 +279,7 @@ public class CsvDatasourceFetchingService extends DatasourceFetchingService {
 					}
 
 					// CSV sanitization using libreoffice
-					destFile = libreOfficeSanitisation(destFile,config);
+					destFile = libreOfficeSanitisation(destFile,config,dedicatedLogger);
 					
 					// Row number counting
 
@@ -358,8 +308,7 @@ public class CsvDatasourceFetchingService extends DatasourceFetchingService {
 								dedicatedLogger.warn("Null line");
 								continue;
 							}
-							final DataFragment df = parseCsvLine(crawler, controler, dsProperties, line, dsConfName,
-									dedicatedLogger);
+							final DataFragment df = parseCsvLine(crawler, controler, dsProperties, line, dsConfName, dedicatedLogger);
 
 							// Effectiv indexation
 							if (null != df) {
@@ -728,9 +677,10 @@ public class CsvDatasourceFetchingService extends DatasourceFetchingService {
 	 * Sanitisation using libreoffice
 	 * @param destFile
 	 * @param config
+	 * @param dedicatedLogger 
 	 * @return
 	 */
-	private File libreOfficeSanitisation(File destFile, CsvDataSourceProperties config) {
+	private File libreOfficeSanitisation(File destFile, CsvDataSourceProperties config, Logger dedicatedLogger) {
 
 		// libreoffice --headless --convert-to csv:"Text - txt - csv (StarCalc)":59,34,76,,,,true /home/goulven/Bureau/products_405199502.csv --outdir /tmp/libreofficeCSV --infilter=CSV:59,34,UTF8
 		
@@ -741,19 +691,23 @@ public class CsvDatasourceFetchingService extends DatasourceFetchingService {
 //		int textSeparator=34;
 
 		int fieldSeparator=config.getCsvSeparator();
-		int textSeparator=config.getCsvQuoteChar();
+		int textSeparator=config.getCsvQuoteChar() == null ? 0 : config.getCsvQuoteChar();
 		
-		//TODO(conf) : 76 and utf8 represents encoding, should make it configurable
-		ProcessBuilder builder = new ProcessBuilder("libreoffice", "--headless", "--convert-to", "csv:Text - txt - csv (StarCalc):"+fieldSeparator+","+textSeparator+",76,,,,true", destFile.getAbsolutePath(), "--outdir", outDir, "--infilter=CSV:"+fieldSeparator+","+textSeparator+",UTF8");
+		//NOTE :  76 represents utf8 encoding
+		ProcessBuilder builder = new ProcessBuilder("libreoffice", "--headless", "--convert-to", "csv:Text - txt - csv (StarCalc):"+(int)SANITISED_COLUMN_SEPARATOR+","+(int)SANITIZED_QUOTE_CHAR+",76,,,,true", destFile.getAbsolutePath(), "--outdir", outDir, "--infilter=CSV:"+fieldSeparator+","+textSeparator+","+config.getCsvEncoding());
 
 		try {
 			Process process = builder.start();
 			process.waitFor();
 
-			logger.info("Libreoffice conversion result : {}", IOUtils.toString(process.getInputStream()));
-						
-			String error = IOUtils.toString(process.getErrorStream());
+			logger.info("Libreoffice conversion result : {}", IOUtils.toString(process.getInputStream(),Charset.defaultCharset()));
+			
+			
+			
+			
+			String error = IOUtils.toString(process.getErrorStream(),Charset.defaultCharset());
 			if (!StringUtils.isEmpty(error)) {
+				dedicatedLogger.error("Error returned by libreoffice converter. Sanitisation will be skipped : {}",error);
 				logger.error("Error returned by libreoffice converter. Sanitisation will be skipped : {}",error);
 			}
 			else {				
