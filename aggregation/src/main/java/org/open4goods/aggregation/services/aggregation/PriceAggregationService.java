@@ -154,7 +154,7 @@ public class PriceAggregationService extends AbstractAggregationService {
 	}
 
 	private String priceKey(final AggregatedPrice df) {
-		return df.getDatasourceName() + (df.getOfferName()== null ? "" : df.getOfferName().trim().toUpperCase());
+		return df.getDatasourceName() + (null == df.getProductState() ? "" : df.getProductState()) +  (df.getOfferName()== null ? "" : df.getOfferName().trim().toUpperCase());
 	}
 
 	/**
