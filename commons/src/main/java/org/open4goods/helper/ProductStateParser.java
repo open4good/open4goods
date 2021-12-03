@@ -21,6 +21,7 @@ public class ProductStateParser {
 			return ProductState.NEW;
 
 		case "PRODUIT RECONDITIONNÉ":
+		case "RECONDITIONNÉ":
 		case "USED":
 		case "OCCASION":
 		case "VERY GOOD":
