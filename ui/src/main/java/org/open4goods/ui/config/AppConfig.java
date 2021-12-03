@@ -36,6 +36,7 @@ import org.springframework.cache.support.SimpleCacheManager;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.Ordered;
+import org.springframework.http.CacheControl;
 import org.springframework.http.HttpInputMessage;
 import org.springframework.http.HttpOutputMessage;
 import org.springframework.http.MediaType;
@@ -60,6 +61,8 @@ import com.github.benmanes.caffeine.cache.Ticker;
 @Configuration
 public class AppConfig {
 
+	// TODO : Cache period from conf
+	public static final int CACHE_PERIOD_SECONDS = 3600*24*7;
 	private @Autowired UiConfig config;
 
 	@Bean
@@ -211,8 +214,21 @@ public class AppConfig {
 
 				registry.setOrder(Ordered.LOWEST_PRECEDENCE);
 				registry.addResourceHandler("/sitemap/**").addResourceLocations("file:" + config.siteMapFolder().getAbsolutePath() + "/");
-				registry.addResourceHandler("/swagger-ui.html").addResourceLocations("classpath:/META-INF/resources/swagger-ui.html");
+				
+				registry
+	             .addResourceHandler("/assets/**")
+	             .addResourceLocations("classpath:/static/assets/")
+	             .setCachePeriod(CACHE_PERIOD_SECONDS);
+	        
+		        registry
+	            .addResourceHandler("/css/**")
+	            .addResourceLocations("classpath:/static/css/")
+	            .setCachePeriod(CACHE_PERIOD_SECONDS);
+		        
+		        
 			}
+		    
+
 		};
 	}
 

@@ -23,6 +23,7 @@ import org.open4goods.model.data.Resource;
 import org.open4goods.model.product.AggregatedData;
 import org.open4goods.services.DataSourceConfigService;
 import org.open4goods.services.TagCloudService;
+import org.open4goods.ui.config.AppConfig;
 import org.open4goods.ui.config.yml.UiConfig;
 import org.open4goods.ui.services.GtinService;
 import org.open4goods.ui.services.ImageService;
@@ -108,6 +109,7 @@ public class ResourceController extends AbstractUiController {
 		
 		if (img.isPresent()) {
 			response.addHeader("Content-type","image/png");
+			response.addHeader("Cache-Control","public, max-age="+AppConfig.CACHE_PERIOD_SECONDS);
 			
 			InputStream stream = imageService.getCoverPng(img.get());
 			IOUtils.copy(stream ,response.getOutputStream());
@@ -137,6 +139,8 @@ public class ResourceController extends AbstractUiController {
 		}
 		
 		response.addHeader("Content-type","image/png");
+					response.addHeader("Cache-Control","public, max-age="+AppConfig.CACHE_PERIOD_SECONDS);
+		
 		InputStream stream = gtinService.gtin(data.gtin());
 		IOUtils.copy(stream ,response.getOutputStream());
 		IOUtils.closeQuietly(stream);
@@ -163,6 +167,7 @@ public class ResourceController extends AbstractUiController {
 		}
 		
 		response.addHeader("Content-type","image/png");
+					response.addHeader("Cache-Control","public, max-age="+AppConfig.CACHE_PERIOD_SECONDS);
 		
 		InputStream stream = tagcloudService.getImageStream(data);
 		IOUtils.copy(stream ,response.getOutputStream());
@@ -174,6 +179,8 @@ public class ResourceController extends AbstractUiController {
 	@GetMapping("/icon/{datasourceName}")
 	public void datasourceIcon(@PathVariable String datasourceName, final HttpServletResponse response) throws FileNotFoundException, IOException, InvalidParameterException  {
 		response.addHeader("Content-type","image/png");
+					response.addHeader("Cache-Control","public, max-age="+AppConfig.CACHE_PERIOD_SECONDS);
+		
 		InputStream stream = dsConfigService.getFavicon(datasourceName);
 		IOUtils.copy(stream ,response.getOutputStream());
 		IOUtils.closeQuietly(stream);
@@ -182,6 +189,7 @@ public class ResourceController extends AbstractUiController {
 	@GetMapping("/logo/{datasourceName}")
 	public void datasourceLogo(@PathVariable String datasourceName, final HttpServletResponse response) throws FileNotFoundException, IOException, InvalidParameterException  {
 		response.addHeader("Content-type","image/png");
+					response.addHeader("Cache-Control","public, max-age="+AppConfig.CACHE_PERIOD_SECONDS);
 		InputStream stream = dsConfigService.getLogo(datasourceName);
 		IOUtils.copy(stream ,response.getOutputStream());
 		IOUtils.closeQuietly(stream);
