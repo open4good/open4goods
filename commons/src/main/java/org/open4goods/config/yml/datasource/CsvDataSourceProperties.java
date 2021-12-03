@@ -86,6 +86,18 @@ public class CsvDataSourceProperties {
 	 */
 	protected String affiliatedUrl;
 
+
+	/**
+	 * If set, only the cells having the corresponding values will be included
+	 */
+	protected Map<String, String> include = new HashMap<>();
+	
+	/**
+	 * If set, only the cells NOT having the corresponding values will be included
+	 */
+	protected Map<String, String> exclude = new HashMap<>();
+
+	
 	/**
 	 * If set, those tokens will be replaced in affiliation url's
 	 */
@@ -528,6 +540,22 @@ public class CsvDataSourceProperties {
 
 	public void setCsvSanitisation(Boolean csvSanitisation) {
 		this.csvSanitisation = csvSanitisation;
+	}
+
+	public Map<String, String> getInclude() {
+		return include;
+	}
+
+	public void setInclude(Map<String, String> include) {
+		this.include = include;
+	}
+
+	public Map<String, String> getExclude() {
+		return exclude;
+	}
+
+	public void setExclude(Map<String, String> exclude) {
+		this.exclude = exclude;
 	}
 	
 	

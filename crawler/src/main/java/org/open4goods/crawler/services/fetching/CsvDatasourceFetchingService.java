@@ -248,6 +248,7 @@ public class CsvDatasourceFetchingService extends DatasourceFetchingService {
 				int okItems = 0;
 				int validationFailedItems = 0;
 				int errorItems = 0;
+				int excludedItems = 0;
 				
 				try {
 
@@ -336,6 +337,8 @@ public class CsvDatasourceFetchingService extends DatasourceFetchingService {
 						Map<String, String> line = null;
 						try {
 
+
+							
 							// stats update
 							running.get(dsConfName).incrementProcessed();
 							running.get(dsConfName).decrementQueue();
@@ -346,6 +349,35 @@ public class CsvDatasourceFetchingService extends DatasourceFetchingService {
 								dedicatedLogger.warn("Null line");
 								continue;
 							}
+							
+							
+							// Checking inclusions					
+							boolean skip = false;
+							for (Entry<String, String> entry : config.getInclude().entrySet()) {
+								String val = getFromCsvRow(line, entry.getKey());
+								if (null != val && !val.equalsIgnoreCase(entry.getValue())) {
+									excludedItems++;
+									skip = true;
+									break;
+								}								
+							}
+							if (skip) {
+								continue;
+							}
+							
+							// Checking exclusions					
+							for (Entry<String, String> entry : config.getExclude().entrySet()) {									
+								String val = getFromCsvRow(line, entry.getKey());
+								if (null != val && val.equalsIgnoreCase(entry.getValue())) {
+									excludedItems++;
+									skip = true;
+									break;
+								}								
+							}
+							if (skip) {
+								continue;
+							}
+							
 							final DataFragment df = parseCsvLine(crawler, controler, dsProperties, line, dsConfName, dedicatedLogger);
 
 							// Effectiv indexation
@@ -365,7 +397,7 @@ public class CsvDatasourceFetchingService extends DatasourceFetchingService {
 						}
 					}
 					
-					statsLogger.info("End csv fetching for {}:{}. {} imported, {} validations failed, {} errors ", dsConfName, url, okItems, validationFailedItems, errorItems);
+					statsLogger.info("End csv fetching for {}:{}. {} imported, {} validations failed, {} excluded, {} errors ", dsConfName, url, okItems, validationFailedItems, excludedItems, errorItems);
 
 					dedicatedLogger.info("Removing fetched CSV file at {}", destFile);
 					if (url.startsWith("http")) {
@@ -374,7 +406,7 @@ public class CsvDatasourceFetchingService extends DatasourceFetchingService {
 
 				} catch (final Exception e) {
 					statsLogger.error("CSV fetching aborted : {}:{} ",dsConfName ,url,e);
-					statsLogger.info("End csv fetching for {}{}. {} imported, {} validations failed, {} errors ", dsConfName, url,  okItems, validationFailedItems, errorItems);
+					statsLogger.info("End csv fetching for {}{}. {} imported, {} validations failed, {} excluded, {} errors ", dsConfName, url,  okItems, validationFailedItems, excludedItems, errorItems);
 
 				}
 			}
