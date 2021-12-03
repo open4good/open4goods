@@ -5,7 +5,6 @@ import org.open4goods.crawler.services.ApiSynchService;
 import org.open4goods.crawler.services.DataFragmentCompletionService;
 import org.open4goods.crawler.services.FetchersService;
 import org.open4goods.crawler.services.IndexationService;
-import org.open4goods.crawler.services.fetching.AggregatedDataBackedFetchingService;
 import org.open4goods.crawler.services.fetching.CsvDatasourceFetchingService;
 import org.open4goods.crawler.services.fetching.WebDatasourceFetchingService;
 import org.open4goods.services.EvaluationService;
@@ -67,10 +66,9 @@ public class CrawlerConfig {
 	@Bean
 	public FetchersService fetchersService(@Autowired final FetcherProperties fetcherProperties,
 			@Autowired final WebDatasourceFetchingService webDatasourceFetchingService,
-			@Autowired final CsvDatasourceFetchingService csvDatasourceFetchingService,
-			@Autowired final AggregatedDataBackedFetchingService apiDatasourceFetchingService
+			@Autowired final CsvDatasourceFetchingService csvDatasourceFetchingService			
 			) {
-		return new FetchersService(fetcherProperties, webDatasourceFetchingService, csvDatasourceFetchingService,apiDatasourceFetchingService);
+		return new FetchersService(fetcherProperties, webDatasourceFetchingService, csvDatasourceFetchingService);
 	}
 
 	

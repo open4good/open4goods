@@ -2,6 +2,7 @@ package org.open4goods.ui.controllers.ui;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.lang.management.ManagementFactory;
 import java.lang.management.RuntimeMXBean;
 import java.util.ArrayList;
@@ -83,8 +84,8 @@ public class AvatarController {
 
 
 		{
-			try {
-				IOUtils.copy(org.apache.commons.io.FileUtils.openInputStream(file), response.getOutputStream());
+			try (InputStream str = org.apache.commons.io.FileUtils.openInputStream(file)){				
+				IOUtils.copy(str, response.getOutputStream());
 			} catch (final IOException e) {
 				logger.error("Error rendering avatar file  {} : {}", file.getAbsolutePath(), e.getMessage());
 				throw new ResourceNotFoundException(e.getMessage());

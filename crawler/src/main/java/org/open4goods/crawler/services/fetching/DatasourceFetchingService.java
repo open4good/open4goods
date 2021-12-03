@@ -29,7 +29,7 @@ public abstract class DatasourceFetchingService {
 	protected Logger statsLogger;
 
 	public DatasourceFetchingService (final String logsFolder) {
-		statsLogger = GenericFileLogger.initLogger("datasource-stats", Level.INFO, logsFolder, false);
+		statsLogger = GenericFileLogger.initLogger("stats-datasource", Level.INFO, logsFolder, false);
 	}
 
 	/**

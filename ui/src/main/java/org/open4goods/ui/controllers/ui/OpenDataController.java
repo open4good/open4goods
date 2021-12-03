@@ -1,6 +1,7 @@
 package org.open4goods.ui.controllers.ui;
 
 import java.io.IOException;
+import java.io.InputStream;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -53,10 +54,10 @@ public class OpenDataController extends AbstractUiController {
 
 	@GetMapping(path = "/opendata/gtin-open-data.zip")
 	public void opensearch(final HttpServletResponse response) throws IOException {
-		try {
+		try (InputStream str = openDataService.limitedRateStream()){
 			response.setHeader("Content-type", "application/octet-stream");
 			response.setHeader("Content-Disposition", "attachment; filename=\"gtin-open-data.zip\"");
-			IOUtils.copy(openDataService.limitedRateStream(), response.getOutputStream());
+			IOUtils.copy(str, response.getOutputStream());
 		} catch (IOException e) {			
 			LOGGER.error("opendata file download error or interruption : {}",e.getMessage());
 			openDataService.decrementDownloadCounter();

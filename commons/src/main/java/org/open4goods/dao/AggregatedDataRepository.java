@@ -1,5 +1,6 @@
 package org.open4goods.dao;
 
+import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.util.Collection;
 import java.util.HashMap;
@@ -220,8 +221,9 @@ public class AggregatedDataRepository {
 			IndexOperations indexOps = elasticsearchTemplate.indexOps(IndexCoordinates.of(indexName));
 			if (!indexOps.exists() ) {				
 				final Map mapping =    elasticsearchTemplate.indexOps(IndexCoordinates.of(AggregatedData.DEFAULT_REPO) ). getMapping();
-				 Settings settings =  Settings.parse(IOUtils.toString(resolver.getResource("classpath:/elastic-settings.json").getInputStream(), Charset.defaultCharset()));
-
+				InputStream stream = resolver.getResource("classpath:/elastic-settings.json").getInputStream();
+				Settings settings =  Settings.parse(IOUtils.toString(stream, Charset.defaultCharset()));
+				IOUtils.closeQuietly(stream);
 				
 				
 				logger.info("Will create the AggregatedData typed index for {}", indexName);				
