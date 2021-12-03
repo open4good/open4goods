@@ -28,6 +28,7 @@ import org.open4goods.crawler.config.yml.FetcherProperties;
 import org.open4goods.crawler.services.DataFragmentCompletionService;
 import org.open4goods.crawler.services.IndexationService;
 import org.open4goods.exceptions.ValidationException;
+import org.open4goods.helper.GenericFileLogger;
 import org.open4goods.helper.InStockParser;
 import org.open4goods.helper.ProductStateParser;
 import org.open4goods.helper.ShippingCostParser;
@@ -53,6 +54,7 @@ import com.fasterxml.jackson.dataformat.csv.CsvParser;
 import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 import com.google.common.collect.Sets;
 
+import ch.qos.logback.classic.Level;
 import edu.uci.ics.crawler4j.crawler.CrawlController;
 import net.lingala.zip4j.ZipFile;
 import net.lingala.zip4j.exception.ZipException;
@@ -108,6 +110,7 @@ public class CsvDatasourceFetchingService extends DatasourceFetchingService {
 
 		// The CSV executor can have at most the fetcher max indexation tasks threads
 		executor = Executors.newFixedThreadPool(fetcherProperties.getConcurrentFetcherTask());
+		
 
 	}
 
@@ -205,14 +208,47 @@ public class CsvDatasourceFetchingService extends DatasourceFetchingService {
 			final CsvDataSourceProperties config = dsProperties.getCsvDatasource();
 			dedicatedLogger.info("Fetching CSV datasource {} ", dsConfName);
 
-			CsvSchema schema = CsvSchema.emptySchema()
-								.withHeader()
-								.withColumnSeparator(SANITISED_COLUMN_SEPARATOR)
-								.withEscapeChar(SANITIZED_ESCAPE_CHAR)
-								.withQuoteChar(SANITIZED_QUOTE_CHAR)
-								;
+			
+			/////////////////////////////
+			// Csv Shema definition
+			////////////////////////////
+			
+			CsvSchema schema;
+			
+			
+			if (config.getCsvSanitisation().booleanValue()) {				
+				schema = CsvSchema.emptySchema()
+									.withHeader()
+									.withColumnSeparator(SANITISED_COLUMN_SEPARATOR)
+									.withEscapeChar(SANITIZED_ESCAPE_CHAR)
+									.withQuoteChar(SANITIZED_QUOTE_CHAR)
+									;
+			} else {
+				 schema = CsvSchema.emptySchema()
+						.withHeader()
+						.withColumnSeparator(config.getCsvSeparator())						
+						;
 
+				 if (null != config.getCsvQuoteChar()) {
+					 schema = schema.withQuoteChar(config.getCsvQuoteChar().charValue());
+				 } else {
+					 schema = schema.withoutQuoteChar();
+				 }
+				 
+				 if (null != config.getCsvEscapeChar()) {
+					 schema = schema.withEscapeChar(config.getCsvEscapeChar());
+				 }
+			}
+
+
+			
+			
 			for (final String url : config.getDatasourceUrls()) {
+				
+				int okItems = 0;
+				int validationFailedItems = 0;
+				int errorItems = 0;
+				
 				try {
 
 					// configure the reader on what bean to read and how we want to write
@@ -243,8 +279,6 @@ public class CsvDatasourceFetchingService extends DatasourceFetchingService {
 						// Unzipping the files
 						try {
 							// Unzipping the data
-
-//							 destFile = new File("/home/goulven/Bureau/datafeed_530033.zip");
 
 							final ZipFile zipFile = new ZipFile(destFile);
 //							File zipedDestFile = File.createTempFile("csv_zipped", dsProperties.getName());
@@ -279,21 +313,25 @@ public class CsvDatasourceFetchingService extends DatasourceFetchingService {
 					}
 
 					// CSV sanitization using libreoffice
-					destFile = libreOfficeSanitisation(destFile,config,dedicatedLogger);
+					if (config.getCsvSanitisation().booleanValue()) {	
+						destFile = libreOfficeSanitisation(destFile,config,dedicatedLogger);
+					}
+					
 					
 					// Row number counting
 
 					dedicatedLogger.info("Counting lines for {} ", destFile.getAbsolutePath());
 
-					// NOTE : Choice is made not to have the queue, to avoit this long line counting
+					// NOTE : Choice is made not to have the queue, to avoid this long line counting
 //					final Path path = Paths.get(destFile.getAbsolutePath());
 //					final long linesCount = Files.lines(path).count();
 					final long linesCount = 0L;
 					running.get(dsConfName).setQueueLength(linesCount);
 
-					dedicatedLogger.info("Starting {} CSV lines fetching of {} ", linesCount,
-							destFile.getAbsolutePath());
+					dedicatedLogger.info("Starting {} CSV lines fetching of {} ", linesCount, destFile.getAbsolutePath());
+					
 					final MappingIterator<Map<String, String>> mi = oReader.readValues(destFile);
+					
 					while (mi.hasNext() && !running.get(dsConfName).isShuttingDown()) {
 						Map<String, String> line = null;
 						try {
@@ -313,17 +351,21 @@ public class CsvDatasourceFetchingService extends DatasourceFetchingService {
 							// Effectiv indexation
 							if (null != df) {
 								indexationService.index(df, dsConfName);
+								okItems++;
 							} else {
 								dedicatedLogger.error("Cannot index null datafragment");
 							}
 
 						} catch (final ValidationException e) {
+							validationFailedItems++;
 							dedicatedLogger.info("Validation exception while parsing {} : {}", line, e.getMessage());
 						} catch (final Exception e) {
-							dedicatedLogger.error("Unexpected error () while parsing {} at {}.", line, url, e);
-//							break;
+							errorItems++;
+							dedicatedLogger.warn("error  while parsing {} at {}.", url, e.getMessage());
 						}
 					}
+					
+					statsLogger.info("End csv fetching for {}:{}. {} imported, {} validations failed, {} errors ", dsConfName, url, okItems, validationFailedItems, errorItems);
 
 					dedicatedLogger.info("Removing fetched CSV file at {}", destFile);
 					if (url.startsWith("http")) {
@@ -331,7 +373,9 @@ public class CsvDatasourceFetchingService extends DatasourceFetchingService {
 					}
 
 				} catch (final Exception e) {
-					dedicatedLogger.error("Unexpected exception while handling offer ", e);
+					statsLogger.error("CSV fetching aborted : {}:{} ",dsConfName ,url,e);
+					statsLogger.info("End csv fetching for {}{}. {} imported, {} validations failed, {} errors ", dsConfName, url,  okItems, validationFailedItems, errorItems);
+
 				}
 			}
 			// Calling the finished to collect stats
@@ -702,10 +746,12 @@ public class CsvDatasourceFetchingService extends DatasourceFetchingService {
 
 			logger.info("Libreoffice conversion result : {}", IOUtils.toString(process.getInputStream(),Charset.defaultCharset()));
 			
-			
-			
-			
 			String error = IOUtils.toString(process.getErrorStream(),Charset.defaultCharset());
+			
+			IOUtils.closeQuietly(process.getErrorStream());
+			IOUtils.closeQuietly(process.getInputStream());
+			 
+			 
 			if (!StringUtils.isEmpty(error)) {
 				dedicatedLogger.error("Error returned by libreoffice converter. Sanitisation will be skipped : {}",error);
 				logger.error("Error returned by libreoffice converter. Sanitisation will be skipped : {}",error);
