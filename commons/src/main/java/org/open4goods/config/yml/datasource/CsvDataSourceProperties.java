@@ -46,6 +46,14 @@ public class CsvDataSourceProperties {
 	 */	
 	private String csvEncoding="UTF8";
 	
+	
+	/**
+	 * If true, will use libreoffice headless to sanitize the CSV file
+	 */	
+	private Boolean csvSanitisation=false;
+	
+	
+		
 	/**
 	 * csvQuoteChar
 	 */
@@ -512,6 +520,14 @@ public class CsvDataSourceProperties {
 
 	public void setCsvEncoding(String csvEncoding) {
 		this.csvEncoding = csvEncoding;
+	}
+
+	public Boolean getCsvSanitisation() {
+		return csvSanitisation;
+	}
+
+	public void setCsvSanitisation(Boolean csvSanitisation) {
+		this.csvSanitisation = csvSanitisation;
 	}
 	
 	
