@@ -3,6 +3,7 @@ package org.open4goods.api.services;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -59,7 +60,6 @@ public class ImportExportService {
 	private final SerialisationService serialisationService;
 
 	private boolean running = false;
-
 
 	private final ApiProperties apiProperties;
 
@@ -130,17 +130,13 @@ public class ImportExportService {
 			fragments
 				.takeWhile(f -> counter.incrementAndGet() < maxFragments)
 				.forEach(f -> {
-//			if (counter.incrementAndGet() > maxFragments) {
 				String fragment = serialisationService.toJson(transformExport(f)) + "\n";
-
-				try {
-					IOUtils.copy(IOUtils.toInputStream(fragment, Charset.defaultCharset()), zipOutputStream);
+				try (InputStream str = IOUtils.toInputStream(fragment, Charset.defaultCharset())) {
+					IOUtils.copy((str), zipOutputStream);
 				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+					logger.error("Error closing stream",e);
 				}
 
-//			}
 		});
 		zipOutputStream.closeEntry();
 

@@ -114,7 +114,8 @@ public class ResourceCachingTask  {
 			if (!target.exists()) {
 				logger.info("Saving resource to local : {}",target);
 				Request.Get(url)
-				//TODO from conf 
+				//TODO from conf
+					.userAgent("Mozilla/5.0 (Windows NT 5.1; rv:5.0.1) Gecko/20100101 Firefox/5.0.1")
 					.connectTimeout(1000)
 					.socketTimeout(1000)
 					.execute()

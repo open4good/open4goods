@@ -4,6 +4,7 @@ package org.open4goods.ui.controllers.ui;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URLEncoder;
 import java.util.Locale;
 import java.util.Optional;
@@ -107,8 +108,13 @@ public class ResourceController extends AbstractUiController {
 		
 		if (img.isPresent()) {
 			response.addHeader("Content-type","image/png");
-			IOUtils.copy(imageService.getCoverPng(img.get()) ,response.getOutputStream());
-		}	
+			
+			InputStream stream = imageService.getCoverPng(img.get());
+			IOUtils.copy(stream ,response.getOutputStream());
+			IOUtils.closeQuietly(stream);			
+		} else {
+			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "image introuvable !");
+		}
 	}
 
 	@GetMapping("/*-{id:\\d+}/"+GTIN_IMG)
@@ -131,7 +137,9 @@ public class ResourceController extends AbstractUiController {
 		}
 		
 		response.addHeader("Content-type","image/png");
-		IOUtils.copy(gtinService.gtin(data.gtin()) ,response.getOutputStream());
+		InputStream stream = gtinService.gtin(data.gtin());
+		IOUtils.copy(stream ,response.getOutputStream());
+		IOUtils.closeQuietly(stream);
 	}
 
 
@@ -155,20 +163,28 @@ public class ResourceController extends AbstractUiController {
 		}
 		
 		response.addHeader("Content-type","image/png");
-		IOUtils.copy(tagcloudService.getImageStream(data) ,response.getOutputStream());
+		
+		InputStream stream = tagcloudService.getImageStream(data);
+		IOUtils.copy(stream ,response.getOutputStream());
+		IOUtils.closeQuietly(stream);
+		
 	}
 	
 	
 	@GetMapping("/icon/{datasourceName}")
 	public void datasourceIcon(@PathVariable String datasourceName, final HttpServletResponse response) throws FileNotFoundException, IOException, InvalidParameterException  {
 		response.addHeader("Content-type","image/png");
-		IOUtils.copy(dsConfigService.getFavicon(datasourceName) ,response.getOutputStream());
+		InputStream stream = dsConfigService.getFavicon(datasourceName);
+		IOUtils.copy(stream ,response.getOutputStream());
+		IOUtils.closeQuietly(stream);
 	}
 
 	@GetMapping("/logo/{datasourceName}")
 	public void datasourceLogo(@PathVariable String datasourceName, final HttpServletResponse response) throws FileNotFoundException, IOException, InvalidParameterException  {
 		response.addHeader("Content-type","image/png");
-		IOUtils.copy(dsConfigService.getLogo(datasourceName) ,response.getOutputStream());
+		InputStream stream = dsConfigService.getLogo(datasourceName);
+		IOUtils.copy(stream ,response.getOutputStream());
+		IOUtils.closeQuietly(stream);
 	}
 
 	

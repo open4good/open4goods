@@ -6,7 +6,6 @@ import java.util.Map;
 
 import org.open4goods.config.yml.datasource.DataSourceProperties;
 import org.open4goods.crawler.config.yml.FetcherProperties;
-import org.open4goods.crawler.services.fetching.AggregatedDataBackedFetchingService;
 import org.open4goods.crawler.services.fetching.CsvDatasourceFetchingService;
 import org.open4goods.crawler.services.fetching.WebDatasourceFetchingService;
 import org.open4goods.exceptions.TechnicalException;
@@ -32,7 +31,6 @@ public class FetchersService{
 
 	private final CsvDatasourceFetchingService csvDatasourceFetchingService;
 
-	private final AggregatedDataBackedFetchingService apiBackedFetchingService;
 
 	private final WebDatasourceFetchingService webDatasourceFetchingService;
 
@@ -43,12 +41,11 @@ public class FetchersService{
 	 * @param csvDatasourceFetchingService
 	 * @param indexationService
 	 */
-	public FetchersService(final FetcherProperties config, final WebDatasourceFetchingService webDatasourceFetchingService, final CsvDatasourceFetchingService csvDatasourceFetchingService,final AggregatedDataBackedFetchingService apiBackedFetchingService) {
+	public FetchersService(final FetcherProperties config, final WebDatasourceFetchingService webDatasourceFetchingService, final CsvDatasourceFetchingService csvDatasourceFetchingService) {
 		super();
 		this.config = config;
 		this.csvDatasourceFetchingService = csvDatasourceFetchingService;
 		this.webDatasourceFetchingService = webDatasourceFetchingService;
-		this.apiBackedFetchingService = apiBackedFetchingService;
 	}
 
 	/**
@@ -65,9 +62,6 @@ public class FetchersService{
 		}else if (null != provider.getWebDatasource()) {
 			logger.info("Starting web fetching of {}",datasourceConfName);
 			webDatasourceFetchingService.start(provider,datasourceConfName);
-		} else if (null != provider.getApiDatasource()) {
-			logger.info("Starting api fetching of {}",datasourceConfName);
-			apiBackedFetchingService.start(provider,datasourceConfName);
 		}
 
 		else {
@@ -83,10 +77,7 @@ public class FetchersService{
 		}else if (null != provider.getWebDatasource()) {
 			logger.info("Stoping web fetching of {}",datasourceConfName);
 			webDatasourceFetchingService.stop(datasourceConfName);
-		} else if (null != provider.getApiDatasource()) {
-			logger.info("Stoping api fetching of {}",datasourceConfName);
-			apiBackedFetchingService.stop(datasourceConfName);
-		}
+		} 
 
 
 
@@ -105,7 +96,7 @@ public class FetchersService{
 
 		ret.putAll( webDatasourceFetchingService.stats());
 		ret.putAll( csvDatasourceFetchingService.stats());
-		ret.putAll( apiBackedFetchingService.stats());
+
 
 		Long totQueue = 0L, totProcessed = 0L, totIndexed = 0L;
 		// Computing the global stats from each crawlers one

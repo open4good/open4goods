@@ -39,6 +39,10 @@ public class ImageMagickService {
 	 final String err = IOUtils.toString(p.getErrorStream(), "UTF-8");
 	 final String std = IOUtils.toString(p.getInputStream(), "UTF-8");
 
+	 IOUtils.closeQuietly(p.getErrorStream());
+	 IOUtils.closeQuietly(p.getInputStream());
+	 	 
+	 
 	 if (log.isInfoEnabled() && !StringUtils.isEmpty(std)) {
 	 log.info("Image magick output : {}", err);
 	 }
@@ -74,6 +78,9 @@ public class ImageMagickService {
 			final String err = IOUtils.toString(p.getErrorStream(), "UTF-8");
 			final String std = IOUtils.toString(p.getInputStream(), "UTF-8");
 
+			 IOUtils.closeQuietly(p.getErrorStream());
+			 IOUtils.closeQuietly(p.getInputStream());
+			 
 			if (log.isInfoEnabled() && !StringUtils.isEmpty(std)) {
 				log.info("Image magick output : {}", err);
 			}
@@ -107,6 +114,9 @@ public class ImageMagickService {
 			final String err = IOUtils.toString(p.getErrorStream(), "UTF-8");
 			final String std = IOUtils.toString(p.getInputStream(), "UTF-8");
 
+			 IOUtils.closeQuietly(p.getErrorStream());
+			 IOUtils.closeQuietly(p.getInputStream());
+			
 			if (log.isInfoEnabled() && !StringUtils.isEmpty(std)) {
 				log.info("Image magick output : {}", err);
 			}

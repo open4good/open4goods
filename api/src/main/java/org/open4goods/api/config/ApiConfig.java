@@ -15,7 +15,6 @@ import org.open4goods.crawler.services.ApiSynchService;
 import org.open4goods.crawler.services.DataFragmentCompletionService;
 import org.open4goods.crawler.services.FetchersService;
 import org.open4goods.crawler.services.IndexationService;
-import org.open4goods.crawler.services.fetching.AggregatedDataBackedFetchingService;
 import org.open4goods.crawler.services.fetching.CsvDatasourceFetchingService;
 import org.open4goods.crawler.services.fetching.WebDatasourceFetchingService;
 import org.open4goods.dao.AggregatedDataRepository;
@@ -25,7 +24,6 @@ import org.open4goods.model.constants.TimeConstants;
 import org.open4goods.model.constants.UrlConstants;
 import org.open4goods.model.data.DataFragment;
 import org.open4goods.model.data.Price;
-import org.open4goods.services.CapsuleResourceBundle;
 import org.open4goods.services.DataSourceConfigService;
 import org.open4goods.services.EvaluationService;
 import org.open4goods.services.Gs1PrefixService;
@@ -283,14 +281,6 @@ public class ApiConfig {
 				apiProperties.logsFolder());
 	}
 
-	@Bean
-	public AggregatedDataBackedFetchingService aggregatedFetchingService(
-			@Autowired final IndexationService indexationService, @Autowired final ApiProperties apiProperties,
-			@Autowired final DataFragmentCompletionService completionService,
-			@Autowired final SerialisationService serialisationService) {
-		return new AggregatedDataBackedFetchingService(indexationService, apiProperties.logsFolder(),
-				 completionService, serialisationService, apiProperties.getFetcherProperties());
-	}
 
 	/**
 	 * A custom "direct" implementation to update directly the local crawler status,
@@ -313,10 +303,10 @@ public class ApiConfig {
 	@Bean
 	public FetchersService crawlersInterface(@Autowired final ApiProperties apiProperties,
 			@Autowired final CsvDatasourceFetchingService csvDatasourceFetchingService,
-			@Autowired final WebDatasourceFetchingService webDatasourceFetchingService,
-			@Autowired final AggregatedDataBackedFetchingService apiBackedFetchingService) {
+			@Autowired final WebDatasourceFetchingService webDatasourceFetchingService
+		) {
 		return new FetchersService(apiProperties.getFetcherProperties(), webDatasourceFetchingService,
-				csvDatasourceFetchingService, apiBackedFetchingService);
+				csvDatasourceFetchingService);
 	}
 
 	@Bean
