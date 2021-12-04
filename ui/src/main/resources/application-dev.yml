@@ -12,8 +12,8 @@ logging:
         ROOT: info
         org.open4goods: info
 
-#verticalsFolder: "/home/goulven/git/open4goods-config/verticals/"
-#datasourcesfolder: "/home/goulven/git/open4goods-config/datasources/"
+verticalsFolder: "/home/goulven/git/open4goods-config/verticals/"
+datasourcesfolder: "/home/goulven/git/open4goods-config/datasources/"
 
 spring:
   thymeleaf:

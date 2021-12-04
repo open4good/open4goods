@@ -118,7 +118,6 @@ public class DataSourceConfigService {
 	//NOTE(gof) : cache not working on inner class calls. SelfMade cache for safety
 //	@Cacheable(cacheNames=CacheConstants.FOREVER_LOCAL_CACHE_NAME)
 	public Map<String,DataSourceProperties> datasourceConfigs() {
-		logger.info("Adding {} datasourcesByFileName definitions", additionalDatasources.size());
 
 		if (null != datasourcesByFileName) {
 			return datasourcesByFileName;
