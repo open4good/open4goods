@@ -393,7 +393,7 @@ public class CsvDatasourceFetchingService extends DatasourceFetchingService {
 							dedicatedLogger.info("Validation exception while parsing {} : {}", line, e.getMessage());
 						} catch (final Exception e) {
 							errorItems++;
-							dedicatedLogger.warn("error  while parsing {} at {}.", url, e.getMessage());
+							dedicatedLogger.warn("error while parsing {} at {}.", url, e.getMessage());
 						}
 					}
 					
