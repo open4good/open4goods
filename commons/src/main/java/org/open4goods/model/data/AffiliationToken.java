@@ -39,6 +39,21 @@ public class AffiliationToken {
 		super();
 	}
 
+	
+	public AffiliationToken(String datasourceName , String url) {
+		brand = "PARTNER";
+		brandUid = "PARTNER";
+		gtin= "";
+		price=0.0;
+		affiliated = true;
+		this.datasourceName = datasourceName;
+		this.url=url;
+		ts = System.currentTimeMillis();
+		id = UUID.randomUUID().toString();
+	}
+
+	
+	
 	public AffiliationToken(final DataFragment e, final AggregatedData data) {
 		brand = data.brand();
 		brandUid = data.model();

@@ -47,7 +47,7 @@
                    <div class="col-12 col-md-6">
                        <h1 class="display-2 mb-4">eco<span class="text-secondary-app fw-bold">-</span>achat<span class="text-secondary-app fw-bold">.fr</span>
                        </h1>
-                       <p class="lead text-gray mb-1">Ici, vous transformez vos achats en actes engagés pour la planète.</p>
+                       <p class="lead text-gray mb-1">Ici, vous transformez vos achats en actes engagés pour la planète. Nous réferençons les produits de nos <a href="#partnersLink"> <span th:text="${partners.size()}"></span> partenaires</a> </p>
 	                           <form method="post" id="searchForm" action="/recherche">
 			                       <div class="d-flex flex-wrap mt-4 mt-lg-5">
 			                           <div class="input-group">
@@ -121,21 +121,48 @@
            </div>
        </section>
        
-      	<!--/* Partners
+       
+      <!--/* Partners */-->       
         <section class="section section-lg py-sm-0 py-sm-0 pb-md-5 pt-md-5">   
             <div class="container">
                 <div class="row justify-content-between align-items-center">
                 
-                	<h2 class="h3 text-center text-lg-left mb-3">Nos partenaires</h2>
+                	<h2 id="partnersLink" class="h3 text-center text-lg-left mb-3">Nos partenaires</h2>
                 	<p>
-                		La compensation carbone s'applique également si vous faites vos achats sur les plateformes marchandes en utilisant les liens ci-dessous.
+                		Merci à nos partenaires, qui nous permettent de mettre en oeuvre cette nouvelle façon de consommer ! La compensation environnementale s'applique également si vous faites vos achats sur les plateformes marchandes en utilisant les liens ci-dessous.
                 	</p>
 
                 </div>
+                
+                
+				<div class="mb-3">
+                    <div class="input-group">
+                        <span class="input-group-text" id="partnersSearchLabel"><span class="fas fa-search"></span></span>
+                        <input type="text" class="form-control" id="partnersSearch" placeholder="Filtrer" aria-label="Search" aria-describedby="partnersSearchLabel">
+                    </div>
+                </div>
+                                
+                
+	
+                <div class="row">
+		            <th:block th:each="partner : ${partners}">
+						<div class="partnerCard col-md-4 col-lg-4 mb-5 mb-lg-0 mt-3" th:attr="data-string=${partner.key.name}">
+			                <div class="text-center card shadow p-4">
+			                	<a th:href="'/compensation/'+${partner.value}" rel="nofollow" >
+			                    	<img height="150" class="img-fluid" th:src="'/logo/'+${partner.key.name}"  th:alt="${partner.key.name}">
+			                	</a>
+
+			                </div>
+			            </div>
+		            </th:block>
+                </div>
+	                   
+                   
+                   
             </div>
 
         </section>
-         */-->
+
     </main>
 
 	<!--/* Footer */-->
@@ -156,10 +183,31 @@
 
 <script>
 $(document).ready(function() {
-    $('#searchInput').on("change",function (e) {
+	// Product search input
+	$('#searchInput').on("change",function (e) {
     	$('#searchForm').attr("action","/recherche/"+encodeURIComponent($('#searchInput').val()));
     });
+
+	// Partners search
+	$("#partnersSearch").on("keyup", function() {
+		  var input = $(this).val().toUpperCase();
+
+		  $(".partnerCard").each(function() {
+		    if ($(this).data("string").toUpperCase().indexOf(input) < 0) {
+		      $(this).hide();
+		    } else {
+		      $(this).show();
+		    }
+		  })
+		});	
+
+
+
 } );
+
+
+
+
 </script>
 
 </body>
