@@ -29,7 +29,6 @@ public class ProductStateParser {
 			return ProductState.OCCASION;
 
 		case "UNKNOWN":
-		case "":
 			return ProductState.UNKNOWN;
 
 		default:

@@ -695,7 +695,11 @@ public class CsvDatasourceFetchingService extends DatasourceFetchingService {
 			try {
 				p.setProductState(ProductStateParser.parse(getFromCsvRow(item, csvProperties.getProductState())));
 			} catch (final Exception e1) {
-				dedicatedLogger.warn("Cannot parse product state : {} ", e1.getMessage());
+				if (null != config.getDefaultItemCondition()) {
+					p.setProductState(config.getDefaultItemCondition());
+				} else {				
+					dedicatedLogger.warn("Cannot parse product state : {} ", e1.getMessage());
+				}
 			}
 		}
 
