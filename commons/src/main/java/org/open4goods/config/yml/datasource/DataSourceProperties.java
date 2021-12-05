@@ -189,6 +189,11 @@ public class DataSourceProperties {
 	private Long minimumIndexedItems = Long.MAX_VALUE;
 
 	/**
+	 * If set, this tokens will be removed from descriptions
+	 */
+	private Set<String> descriptionRemoveToken;
+	
+	/**
 	 * If set, means this is a CSV datasource.
 	 */
 	private CsvDataSourceProperties csvDatasource;
@@ -523,4 +528,16 @@ public class DataSourceProperties {
 		this.portalUrl = portalUrl;
 	}
 
+	public Set<String> getDescriptionRemoveToken() {
+		return descriptionRemoveToken;
+	}
+
+	public void setDescriptionRemoveToken(Set<String> descriptionRemoveToken) {
+		this.descriptionRemoveToken = descriptionRemoveToken;
+	}
+
+	
+	
+	
+	
 }

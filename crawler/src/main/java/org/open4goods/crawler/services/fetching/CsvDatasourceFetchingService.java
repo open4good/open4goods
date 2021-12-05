@@ -609,7 +609,20 @@ public class CsvDatasourceFetchingService extends DatasourceFetchingService {
 		}
 
 		for (final String desc : csvProperties.getDescription()) {
-			p.addDescription(getFromCsvRow(item, desc), config.getLanguage());
+			
+			String description = getFromCsvRow(item, desc);
+			
+			
+			if (!StringUtils.isEmpty(description) && null != config.getDescriptionRemoveToken()) {
+				
+				for (String token : config.getDescriptionRemoveToken()) {
+					description = description.replace(token, "");
+				}				
+			}
+			
+			if (!StringUtils.isEmpty(description)) {				
+				p.addDescription(description, config.getLanguage());
+			}			
 		}
 
 		try {
