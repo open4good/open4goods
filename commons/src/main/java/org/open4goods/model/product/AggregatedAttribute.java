@@ -37,6 +37,7 @@ public class AggregatedAttribute {
 	/**
 	 * The collections of conflicts for this attribute
 	 */
+	@Field(index = false, store = false, type = FieldType.Keyword)
 	private Set<ConflictedAttribute> sources = new HashSet<>();
 	
 

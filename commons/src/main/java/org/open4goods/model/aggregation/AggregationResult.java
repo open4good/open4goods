@@ -3,6 +3,9 @@ package org.open4goods.model.aggregation;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.springframework.data.elasticsearch.annotations.Field;
+import org.springframework.data.elasticsearch.annotations.FieldType;
+
 /**
  * Contains the stats / results about the construction of an AggregatedData
  * @author goulven
@@ -11,7 +14,7 @@ import java.util.Set;
 public class AggregationResult {
 
 
-
+	@Field(index = false, store = false, type = FieldType.Object)
 	private Set<ParticipantData> participantDatas = new HashSet<>();
 
 	public Set<ParticipantData> getParticipantDatas() {
