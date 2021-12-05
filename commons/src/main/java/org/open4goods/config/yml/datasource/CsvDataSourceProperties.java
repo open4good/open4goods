@@ -42,6 +42,11 @@ public class CsvDataSourceProperties {
 
 	
 	/**
+	 * csvQuoteChar
+	 */
+	private Character csvEscapeChar='"';
+
+	/**
 	 * Encoding of the CSV file
 	 */	
 	private String csvEncoding="UTF8";
@@ -54,10 +59,6 @@ public class CsvDataSourceProperties {
 	
 	
 		
-	/**
-	 * csvQuoteChar
-	 */
-	private Character csvEscapeChar='"';
 	
 	/**
 	 * If defined, only columns (keys) having one of the values will be handled
