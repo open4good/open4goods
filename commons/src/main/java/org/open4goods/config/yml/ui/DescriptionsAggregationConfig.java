@@ -5,7 +5,7 @@ public class DescriptionsAggregationConfig {
 	/**
 	 * The number of characters the description will be truncated
 	 */
-	private int descriptionsTruncationLength = 400;
+	private int descriptionsTruncationLength = 1000;
 
 	/**
 	 * The truncation suffix that will be happened if truncaation occurs
