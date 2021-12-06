@@ -78,7 +78,10 @@ public class SitemapGenerationService {
 
 		AtomicLong totalItems= new AtomicLong(0);
 		// Processing each data
-		aggregatedDataRepository.exportAllHavingPrices().forEach(e -> {			
+		aggregatedDataRepository.exportAllHavingPrices()
+		// TODO (conf) : Number of offers count to figure in sitemap
+		.filter(e -> e.getOffersCount() > 1)
+		.forEach(e -> {			
 			onAggregatedData(e);
 			totalItems.incrementAndGet();
 		});
