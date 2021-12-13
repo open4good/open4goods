@@ -7,6 +7,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStreamWriter;
+import java.text.CharacterIterator;
+import java.text.StringCharacterIterator;
 import java.time.Instant;
 import java.util.Date;
 import java.util.Locale;
@@ -223,7 +225,7 @@ public class OpenDataService {
 	 */
 	@Cacheable(key = "#root.method.name", cacheNames = CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME)
 	public String fileSize() {
-		return FileUtils.byteCountToDisplaySize(uiConfig.openDataFile().length());
+		return humanReadableByteCountBin(uiConfig.openDataFile().length());
 	}
 
 	/**
@@ -243,5 +245,23 @@ public class OpenDataService {
 	public long totalItems() {
 		return aggregatedDataRepository.countMainIndex();
 	}
+	
+	/**
+	 * Convert a size in human readable form
+	 * @param bytes
+	 * @return
+	 */
+	public static String humanReadableByteCountBin(long bytes) {
+		if (-1000 < bytes && bytes < 1000) {
+	        return bytes + " B";
+	    }
+	    CharacterIterator ci = new StringCharacterIterator("kMGTPE");
+	    while (bytes <= -999_950 || bytes >= 999_950) {
+	        bytes /= 1000;
+	        ci.next();
+	    }
+	    return String.format("%.1f %cB", bytes / 1000.0, ci.current());
+	}
+	
 
 }
