@@ -627,7 +627,10 @@ public class CsvDatasourceFetchingService extends DatasourceFetchingService {
 
 		try {
 			for (final String imgCell : csvProperties.getImage()) {
-				p.addResource(getFromCsvRow(item, imgCell), ResourceTagDictionary.CSV);
+				String r = getFromCsvRow(item, imgCell);
+				if (!StringUtils.isEmpty(r)) {
+					p.addResource(r, ResourceTagDictionary.CSV);
+				}
 			}
 		} catch (final ValidationException e1) {
 			dedicatedLogger.warn("Problem while adding resource for {}", item);
