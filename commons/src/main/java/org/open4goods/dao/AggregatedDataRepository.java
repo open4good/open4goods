@@ -61,7 +61,7 @@ public class AggregatedDataRepository {
 
 
 	/** Duration in ms where a price is considered to be valid. Only data with a price greater than this one will be returned to the user **/
-	private long VALID_UNTIL_DURATION =1000 * 3600 * 24 * 5;
+	private long VALID_UNTIL_DURATION =1000 * 3600 * 24 * 2;
 
 	private IndexCoordinates current_index = IndexCoordinates.of(MAIN_INDEX_NAME);
 
