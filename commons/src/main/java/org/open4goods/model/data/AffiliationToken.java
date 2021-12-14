@@ -5,6 +5,7 @@ import java.util.UUID;
 import org.open4goods.model.product.AggregatedData;
 import org.open4goods.model.product.AggregatedPrice;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.elasticsearch.annotations.DateFormat;
 import org.springframework.data.elasticsearch.annotations.Document;
 import org.springframework.data.elasticsearch.annotations.Field;
 import org.springframework.data.elasticsearch.annotations.FieldType;
@@ -14,7 +15,7 @@ public class AffiliationToken {
 
 	@Id
 	private String id;
-	@Field(index = false, store = false, type = FieldType.Date)
+	@Field(index = false, store = false, type = FieldType.Date, format = DateFormat.epoch_millis)
 	private long ts;
 	@Field(index = false, store = false, type = FieldType.Keyword)
 	private Boolean affiliated;
