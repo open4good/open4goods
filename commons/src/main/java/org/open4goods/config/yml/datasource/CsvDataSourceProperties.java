@@ -155,6 +155,12 @@ public class CsvDataSourceProperties {
 	 * Column name(s) containing images
 	 */
 	protected Set<String> image = new HashSet<>();
+	
+	/**
+	 * If set and if image name contains one of this token, the image will be skipped
+	 */
+	protected Set<String> imageTokenExclusions;
+	
 
 	/**
 	 * The currency, as static expression
@@ -557,6 +563,14 @@ public class CsvDataSourceProperties {
 
 	public void setExclude(Map<String, String> exclude) {
 		this.exclude = exclude;
+	}
+
+	public Set<String> getImageTokenExclusions() {
+		return imageTokenExclusions;
+	}
+
+	public void setImageTokenExclusions(Set<String> imageTokenExclusions) {
+		this.imageTokenExclusions = imageTokenExclusions;
 	}
 	
 	
