@@ -629,7 +629,24 @@ public class CsvDatasourceFetchingService extends DatasourceFetchingService {
 			for (final String imgCell : csvProperties.getImage()) {
 				String r = getFromCsvRow(item, imgCell);
 				if (!StringUtils.isEmpty(r)) {
+					
+				    // Checking for image tokens exclusions
+					if (null != csvProperties.getImageTokenExclusions()) {
+						boolean skip = false;
+						for (String re : csvProperties.getImageTokenExclusions()) {
+							if (r.contains(re)) {
+								skip = true;
+								break;
+							}
+						}
+						if (skip) {
+							continue;
+						}						
+					}
+					
 					p.addResource(r, ResourceTagDictionary.CSV);
+				
+				
 				}
 			}
 		} catch (final ValidationException e1) {
