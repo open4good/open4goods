@@ -22,7 +22,7 @@
 			<!-- Content -->
 			<div class="card-body pb-0">
 				<ul class="list-group list-group-flush price-list mb-4">
-					<li class="list-group-item border-0"><img height="16" width="16" class="me-2" th:src="'/icon/'+${product.bestPrice().datasourceName}"><span th:text="${product.bestPrice().datasourceName}"></span> </li>
+					<li class="list-group-item border-0"><img height="16" width="16" class="me-2" th:src="'/icon/'+${product.bestPrice().datasourceName}" th:title="'icône ' + ${product.bestPrice().shortDataSourceName()}"><span th:text="${product.bestPrice().datasourceName}"></span> </li>
 
 					<li th:if="${product.bestPrice().productState}" class="list-group-item border-0"><span class="fas fa-box"></span><span th:text="#{'condition.'+${product.bestPrice().productState}}"></li>
 					<li class="list-group-item border-0"><span class="fas fa-clock"></span><span th:text="'il y a ' + ${product.bestPrice().ago(userLocale)} "></span> </li>
