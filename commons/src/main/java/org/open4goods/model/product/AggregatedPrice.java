@@ -52,11 +52,23 @@ public class AggregatedPrice extends Price {
 		setPrice(df.getPrice().getPrice());
 		setTimeStamp(df.getLastIndexationDate());		
 		setProductState(df.getProductState());
-		
-		
-		
 	}
 
+	/**
+	 * 
+	 * @return the datasource name without tld
+	 */
+	public String shortDataSourceName() {
+		
+		int i = datasourceName.indexOf(".");
+		if (i == -1) {
+			return datasourceName;
+		} else {
+			return datasourceName.substring(0,i);
+		}
+		
+	}
+	
 	/**
 	 * Only used for the "average" price representation
 	 * @param price
