@@ -32,7 +32,8 @@ import com.google.common.collect.Sets;
 public class Price implements Validable, Standardisable, Comparable<Double> {
 
 
-	public static final int VALID_UNTIL_DURATION = 1000 * 3600 *24 * 5;
+	// TODO(conf): from conf : price valid 3 monthes in microdata
+	public static final long MICRODATA_VALID_UNTIL_DURATION = 1000 * 3600 *24 * 90l;
 
 	private final static Logger logger = LoggerFactory.getLogger(Price.class);
 
@@ -232,13 +233,13 @@ public class Price implements Validable, Standardisable, Comparable<Double> {
 	 */
 	public String validUntil () {
 		
-		Date date = new Date(timeStamp + VALID_UNTIL_DURATION);
+		Date date = new Date(timeStamp + MICRODATA_VALID_UNTIL_DURATION);
 		Calendar calendar = Calendar.getInstance();
 		calendar.setTime(date);
 		return new StringBuilder()
 				.append(calendar.get(Calendar.YEAR))
 				.append("-")
-				.append(calendar.get(Calendar.MONTH))
+				.append(calendar.get(Calendar.MONTH)+1)
 				.append("-").append(calendar.get(Calendar.DAY_OF_MONTH))
 				.toString();
 	}
