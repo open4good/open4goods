@@ -23,6 +23,9 @@ public class BarcodeValidationService {
 	// Testing for ISBN
 	public  SimpleEntry<BarcodeType, String> sanitize(String barcode) {
 
+		
+//		String barcode = Long.valueOf(code).toString();
+		
 		ISBNValidator isbnValidator = ISBNValidator.getInstance();
 
 	
@@ -32,27 +35,28 @@ public class BarcodeValidationService {
 			return new AbstractMap.SimpleEntry<BarcodeType, String>(BarcodeType.ISBN_13, formatedbarCode);			
 		}
 
-
 		// Checking ISBN 10
 		formatedbarCode = isbnValidator.validateISBN10(barcode);
 		if (null != formatedbarCode) {
 			// Converting to ISBN 13
 			return new AbstractMap.SimpleEntry<BarcodeType, String>(BarcodeType.ISBN_13, isbnValidator.convertToISBN13(formatedbarCode));			
 		}
-		
-		
-		
+			
 		
 		// EAN13
 		if (EAN13CheckDigit.EAN13_CHECK_DIGIT.isValid(barcode)) {
-			return new AbstractMap.SimpleEntry<BarcodeType, String>(BarcodeType.EAN_13, formatedbarCode);			
+
+			if (barcode.length() == 8 ) {
+				return new AbstractMap.SimpleEntry<BarcodeType, String>(BarcodeType.GTIN_8, formatedbarCode);							
+			} else if (barcode.length() == 13 ) {			
+				return new AbstractMap.SimpleEntry<BarcodeType, String>(BarcodeType.GTIN_13, formatedbarCode);			
+			} else if (barcode.length() == 12 ) {			
+				return new AbstractMap.SimpleEntry<BarcodeType, String>(BarcodeType.GTIN_12, formatedbarCode);			
+			} 
 		}
-		
-		
+
 		// Unknown type
 		return new AbstractMap.SimpleEntry<BarcodeType, String>(BarcodeType.UNKNOWN, barcode);			
-		
-		
 		
 		
 	}

@@ -15,19 +15,21 @@ public class BarcodeTest {
 		
 		
 		// Testing ean13
-		assertEquals(BarcodeType.EAN_13, service.sanitize("8436542858045").getKey());
-		assertEquals(BarcodeType.EAN_13, service.sanitize("3462117246967").getKey());
+		assertEquals(BarcodeType.GTIN_13, service.sanitize("8436542858045").getKey());
+		assertEquals(BarcodeType.GTIN_13, service.sanitize("3462117246967").getKey());
 		
-		
+
+		// Testing ean8
+		assertEquals(BarcodeType.GTIN_8, service.sanitize("40170725").getKey());
+
+		assertEquals(BarcodeType.GTIN_12, service.sanitize("123601057072").getKey());
+
 		
 		// Testing ISBN 13
 		assertEquals(BarcodeType.ISBN_13, service.sanitize("9782298135039").getKey());
 		assertEquals(BarcodeType.ISBN_13, service.sanitize("978-614-404-018-8").getKey());
 		
-		
-		 
-		 
-		
+
 		// Testing ISBN 10 (converted to isbn13)
 		assertEquals(BarcodeType.ISBN_13, service.sanitize("0198526636").getKey());
 		

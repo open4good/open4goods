@@ -59,7 +59,7 @@ public class BarCodeAggregationService extends AbstractAggregationService {
 		// Adding country information
 		/////////////////////////////
 
-		 if (valResult.getKey().equals(BarcodeType.EAN_13)) {
+		 if (valResult.getKey().equals(BarcodeType.GTIN_13)) {
 			 
 			String country = gs1Service.detectCountry(output.gtin());
 	//		logger.info("Country for {} is {}", output.gtin(), country);
