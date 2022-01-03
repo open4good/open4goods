@@ -16,6 +16,9 @@ public class BarcodeTest {
 		
 		// Testing ean13
 		assertEquals(BarcodeType.EAN_13, service.sanitize("8436542858045").getKey());
+		assertEquals(BarcodeType.EAN_13, service.sanitize("3462117246967").getKey());
+		
+		
 		
 		// Testing ISBN 13
 		assertEquals(BarcodeType.ISBN_13, service.sanitize("9782298135039").getKey());
