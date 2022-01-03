@@ -19,6 +19,10 @@ public class VerticalSearchResponse {
 
 	private Map<String, Integer> brands = new HashMap<>();
 	
+	private Integer maxOffers;
+
+	private Integer minOffers;
+	
 	private Double minPrice = null;
 	
 	private Double maxPrice = null;
@@ -161,6 +165,23 @@ public class VerticalSearchResponse {
 	public void setCategories(Map<String, Long> categories) {
 		this.categories = categories;
 	}
+
+	public Integer getMaxOffers() {
+		return maxOffers;
+	}
+
+	public void setMaxOffers(Integer maxOffers) {
+		this.maxOffers = maxOffers;
+	}
+
+	public Integer getMinOffers() {
+		return minOffers;
+	}
+
+	public void setMinOffers(Integer minOffers) {
+		this.minOffers = minOffers;
+	}
+	
 	
 	
 	
