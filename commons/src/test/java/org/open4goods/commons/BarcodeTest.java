@@ -1,5 +1,6 @@
 package org.open4goods.commons;
 
+import static org.junit.Assert.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.Test;
@@ -13,6 +14,8 @@ public class BarcodeTest {
 	public void test() {
 		BarcodeValidationService service = new BarcodeValidationService();
 		
+		assertEquals(BarcodeType.UNKNOWN, service.sanitize("5020570230324").getKey());
+
 		
 		// Testing ean13
 		assertEquals(BarcodeType.GTIN_13, service.sanitize("8436542858045").getKey());
@@ -22,6 +25,10 @@ public class BarcodeTest {
 		// Testing ean8
 		assertEquals(BarcodeType.GTIN_8, service.sanitize("40170725").getKey());
 
+		
+
+		
+		// Gtin12
 		assertEquals(BarcodeType.GTIN_12, service.sanitize("123601057072").getKey());
 
 		
