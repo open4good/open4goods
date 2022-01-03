@@ -118,6 +118,8 @@ public class SearchService {
 		esQuery = esQuery 
 				.withAggregations(AggregationBuilders.min("min_price").field("price.minPrice.price"))
 				.withAggregations(AggregationBuilders.max("max_price").field("price.minPrice.price"))
+				.withAggregations(AggregationBuilders.max("max_offers").field("offersCount"))				
+				.withAggregations(AggregationBuilders.min("min_offers").field("offersCount"))				
 				.withAggregations(AggregationBuilders.terms("condition").field("price.minPrice.productState").size(5))	
 				.withAggregations(AggregationBuilders.terms("categories").field("datasourceCategories").size(5000))	
 				
@@ -134,12 +136,19 @@ public class SearchService {
 					
 		Min minPrice = aggregations.get("min_price");
 		Max maxPrice = aggregations.get("max_price");
+		Max maxOffers = aggregations.get("max_offers");
+		Min minOffers = aggregations.get("min_offers");
+		
 		Terms productSate  =  aggregations.get("condition");
 		Terms catTerms  =  aggregations.get("categories");
 		
 		
 		vsr.setMaxPrice(maxPrice.getValue());
 		vsr.setMinPrice(minPrice.getValue());
+		vsr.setMaxOffers(Double.valueOf(maxOffers.getValue()).intValue());
+		vsr.setMinOffers(Double.valueOf(minOffers.getValue()).intValue());
+		
+		
 		
 		if (null != productSate.getBucketByKey(ProductState.NEW.toString())) {			
 			vsr.setItemNew( productSate.getBucketByKey(ProductState.NEW.toString()).getDocCount()) ;
