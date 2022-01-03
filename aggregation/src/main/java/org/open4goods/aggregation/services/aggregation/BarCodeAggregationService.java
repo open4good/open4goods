@@ -1,9 +1,15 @@
 
 package org.open4goods.aggregation.services.aggregation;
 
+import java.util.AbstractMap.SimpleEntry;
+
 import org.open4goods.aggregation.AbstractAggregationService;
+import org.open4goods.exceptions.AggregationSkipException;
+import org.open4goods.model.BarcodeType;
+import org.open4goods.model.constants.ReferentielKey;
 import org.open4goods.model.data.DataFragment;
 import org.open4goods.model.product.AggregatedData;
+import org.open4goods.services.BarcodeValidationService;
 import org.open4goods.services.Gs1PrefixService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,22 +27,47 @@ public class BarCodeAggregationService extends AbstractAggregationService {
 
 	private Gs1PrefixService gs1Service;
 
-	public BarCodeAggregationService(final String logsFolder, final Gs1PrefixService gs1Service) {
+	private BarcodeValidationService validationService;
+
+	public BarCodeAggregationService(final String logsFolder, final Gs1PrefixService gs1Service, final BarcodeValidationService barcodeValidationService) {
 		super(logsFolder);
 		this.gs1Service = gs1Service;
+		this.validationService = barcodeValidationService;
 
 	}
 
 	@Override
-	public void onDataFragment(final DataFragment input, final AggregatedData output) {
+	public void onDataFragment(final DataFragment input, final AggregatedData output) throws AggregationSkipException {
 
+		/////////////////////////////
+		// Validating barcodes
+		/////////////////////////////
+		
+		SimpleEntry<BarcodeType, String> valResult = validationService.sanitize(output.gtin());
+		
+		if (valResult.getKey().equals(BarcodeType.UNKNOWN)) {
+			dedicatedLogger.error("{} is not a valid ISBN/UEAN13 barcode : {}",input);
+			throw new AggregationSkipException("Invalid barcode : " + output.gtin());
+		}
+		
+		// Replacing the barcode, due to sanitisation
+		 output.getAttributes().getReferentielAttributes().put(ReferentielKey.GTIN,valResult.getValue());
+		
+		
 		/////////////////////////////
 		// Adding country information
 		/////////////////////////////
 
-		String country = gs1Service.detectCountry(output.gtin());
-//		logger.info("Country for {} is {}", output.gtin(), country);
-		output.getGtinInfos().setCountry(country);
+		 if (valResult.getKey().equals(BarcodeType.EAN_13)) {
+			 
+			String country = gs1Service.detectCountry(output.gtin());
+	//		logger.info("Country for {} is {}", output.gtin(), country);
+			output.getGtinInfos().setCountry(country);
+		 } 
+		 
+		 // Setting barcode type
+		 output.getGtinInfos().setUpcType(valResult.getKey());
+		 
 
 	}
 

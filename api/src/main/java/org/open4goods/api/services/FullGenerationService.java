@@ -22,9 +22,10 @@ import org.open4goods.api.config.yml.ApiProperties;
 import org.open4goods.config.yml.ui.VerticalConfig;
 import org.open4goods.config.yml.ui.VerticalProperties;
 import org.open4goods.dao.AggregatedDataRepository;
-import org.open4goods.exceptions.NotAddedException;
+import org.open4goods.exceptions.AggregationSkipException;
 import org.open4goods.model.data.DataFragment;
 import org.open4goods.model.product.AggregatedData;
+import org.open4goods.services.BarcodeValidationService;
 import org.open4goods.services.DataSourceConfigService;
 import org.open4goods.services.EvaluationService;
 import org.open4goods.services.Gs1PrefixService;
@@ -68,6 +69,8 @@ public class FullGenerationService {
 
 	private RealTimeAggregator aggregator;
 	
+	private BarcodeValidationService barcodeValidationService;
+	
 
 
 	
@@ -77,7 +80,7 @@ public class FullGenerationService {
 			ReferentielService referentielService, StandardiserService standardiserService,
 			AutowireCapableBeanFactory autowireBeanFactory, AggregatedDataRepository aggregatedDataRepository,
 			ApiProperties apiProperties, Gs1PrefixService gs1prefixService,
-			DataSourceConfigService dataSourceConfigService, VerticalsConfigService configService) {
+			DataSourceConfigService dataSourceConfigService, VerticalsConfigService configService, BarcodeValidationService barcodeValidationService) {
 		super();
 		this.repository = repository;
 		this.evaluationService = evaluationService;
@@ -89,6 +92,9 @@ public class FullGenerationService {
 		this.gs1prefixService = gs1prefixService;
 		this.dataSourceConfigService = dataSourceConfigService;
 		this.configService = configService;
+		
+		this.barcodeValidationService = barcodeValidationService;
+		
 		
 		this.aggregator = getAggregator(configService.getConfigById(VerticalsConfigService.MAIN_VERTICAL_NAME).get());
 		
@@ -102,8 +108,7 @@ public class FullGenerationService {
 
 
 
-	public AggregatedData process(DataFragment df, AggregatedData data) throws NotAddedException {
-		// TODO Auto-generated method stub
+	public AggregatedData process(DataFragment df, AggregatedData data) throws AggregationSkipException {
 		return aggregator.build(df, data);
 	}
 
@@ -133,9 +138,12 @@ public class FullGenerationService {
 
 		final List<AbstractAggregationService> services = new ArrayList<>();
 
+		services.add(new BarCodeAggregationService(apiProperties.logsFolder(), gs1prefixService,barcodeValidationService));
+
 		services.add(new AttributeAggregationService(config.getAttributesConfig(), apiProperties.logsFolder()));
 
 		services.add(new NamesAggregationService(config.getNamings(), evaluationService, apiProperties.logsFolder()));
+
 
 		services.add(new IdAggregationService(config.getNamings(), evaluationService, apiProperties.logsFolder()));
 
@@ -151,7 +159,6 @@ public class FullGenerationService {
 		services.add(new DescriptionsAggregationService(config.getDescriptionsAggregationConfig(),
 				apiProperties.logsFolder()));
 
-		services.add(new BarCodeAggregationService(apiProperties.logsFolder(), gs1prefixService));
 
 		services.add(new MediaAggregationService(config, apiProperties.logsFolder()));
 

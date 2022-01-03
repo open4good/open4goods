@@ -6,6 +6,7 @@ import java.util.Set;
 
 import org.open4goods.api.services.FullGenerationService;
 import org.open4goods.dao.AggregatedDataRepository;
+import org.open4goods.exceptions.AggregationSkipException;
 import org.open4goods.model.data.DataFragment;
 import org.open4goods.model.product.AggregatedData;
 import org.slf4j.Logger;
@@ -88,15 +89,16 @@ public class DataFragmentQueueWorker implements Runnable {
 							data.setCreationDate(System.currentTimeMillis());
 						}
 						
-						results.add(generationService.process(df,data));
-//						results.add(data);
+						try {
+							results.add(generationService.process(df,data));
+						} catch (AggregationSkipException e1) {
+							logger.warn("Aggregation skipped for {} : {}",df,e1.getMessage());
+						}
 						
 					}
 					
 					// Saving the result
 					aggregatedDataRepository.index(results);
-					
-					
 					
 					
 					logger.info("{} has indexed {} DataFragments in {}ms. {} Remaining in queue",workerName,  buffer.size(),System.currentTimeMillis()-now, service.getFileQueue().size());

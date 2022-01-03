@@ -5,7 +5,7 @@ import java.io.IOException;
 import java.util.List;
 
 import org.open4goods.aggregation.AbstractAggregationService;
-import org.open4goods.exceptions.NotAddedException;
+import org.open4goods.exceptions.AggregationSkipException;
 import org.open4goods.model.aggregation.ParticipantData;
 import org.open4goods.model.data.DataFragment;
 import org.open4goods.model.product.AggregatedData;
@@ -55,9 +55,10 @@ public abstract class AbstractAggregator implements Closeable{
 	 * Build the AggregatedData using the services registered on this aggregator
 	 * @param datas
 	 * @return
+	 * @throws AggregationSkipException 
 	 */
 	@Timed(value="AbstractAggregator.build()",description="Building an aggregated data from DataFragments")
-	public AggregatedData build(final DataFragment fragment, final AggregatedData data ) throws NotAddedException {
+	public AggregatedData build(final DataFragment fragment, final AggregatedData data ) throws AggregationSkipException {
 
 		logger.info("Incrementing AggregatedData with {} DataFragment and using {} services",fragment,services.size());
 
@@ -67,6 +68,9 @@ public abstract class AbstractAggregator implements Closeable{
 			try {
 				service.onDataFragment(fragment, data);
 
+			}
+			catch (AggregationSkipException e) {
+				throw e;
 			}
 			catch (final Exception e) {
 				logger.warn("AggregationService {} throw an exception while processing data {}",service.getClass().getName(), data,e);

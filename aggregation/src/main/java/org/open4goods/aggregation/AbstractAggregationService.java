@@ -3,6 +3,7 @@ package org.open4goods.aggregation;
 import java.io.Closeable;
 import java.io.IOException;
 
+import org.open4goods.exceptions.AggregationSkipException;
 import org.open4goods.helper.GenericFileLogger;
 import org.open4goods.model.data.DataFragment;
 import org.open4goods.model.product.AggregatedData;
@@ -30,7 +31,7 @@ public abstract class AbstractAggregationService  implements Closeable {
 	 * Called on each participant DataFragment
 	 * @param data
 	 */
-	public void onDataFragment (final DataFragment input, final AggregatedData output) {}
+	public void onDataFragment (final DataFragment input, final AggregatedData output) throws AggregationSkipException {}
 
     /**
 	 * Called after aggregation process, used to ending buffers / components (flush datas, close buffers, so on...)

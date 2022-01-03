@@ -24,6 +24,7 @@ import org.open4goods.model.constants.TimeConstants;
 import org.open4goods.model.constants.UrlConstants;
 import org.open4goods.model.data.DataFragment;
 import org.open4goods.model.data.Price;
+import org.open4goods.services.BarcodeValidationService;
 import org.open4goods.services.DataSourceConfigService;
 import org.open4goods.services.EvaluationService;
 import org.open4goods.services.Gs1PrefixService;
@@ -238,13 +239,20 @@ public class ApiConfig {
 		};
 	}
 
+
+	@Bean
+	BarcodeValidationService barcodeValidationService () {
+		return new BarcodeValidationService();
+	}
+	
+	
 	@Bean
 	FullGenerationService fullGenerationService(@Autowired DataFragmentRepository repository, @Autowired EvaluationService evaluationService,
 			@Autowired ReferentielService referentielService, @Autowired StandardiserService standardiserService,
 			@Autowired AutowireCapableBeanFactory autowireBeanFactory, @Autowired AggregatedDataRepository aggregatedDataRepository,
 			@Autowired ApiProperties apiProperties, @Autowired Gs1PrefixService gs1prefixService,
-			@Autowired DataSourceConfigService dataSourceConfigService, @Autowired VerticalsConfigService configService) {
-		return new FullGenerationService(repository, evaluationService, referentielService, standardiserService, autowireBeanFactory, aggregatedDataRepository, apiProperties, gs1prefixService, dataSourceConfigService, configService);
+			@Autowired DataSourceConfigService dataSourceConfigService, @Autowired VerticalsConfigService configService, @Autowired BarcodeValidationService barcodeValidationService) {
+		return new FullGenerationService(repository, evaluationService, referentielService, standardiserService, autowireBeanFactory, aggregatedDataRepository, apiProperties, gs1prefixService, dataSourceConfigService, configService,  barcodeValidationService);
 	}
 	
 
