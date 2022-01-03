@@ -124,7 +124,7 @@ public class AggregatedData implements Standardisable {
 	// Stored (and computed) to help elastic querying / sorting
 	////////////////////
 	/** number of commercial offers **/
-	@Field(index = false, store = false, type = FieldType.Integer)
+	@Field(index = true, store = false, type = FieldType.Integer)
 	private Integer offersCount = 0;
 
 
