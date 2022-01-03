@@ -27,9 +27,6 @@ public class IdAggregationService extends AbstractAggregationService {
 	@Override
 	public void onDataFragment(final DataFragment input, final AggregatedData output) {
 
-		// The ID
-		output.setId( input.gtin());
-
 		// The participating product tags
 		output.getDatasourceCategories().add(input.getCategory());
 

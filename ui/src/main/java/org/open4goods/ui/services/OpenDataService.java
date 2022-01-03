@@ -52,7 +52,7 @@ public class OpenDataService {
 	private static final Logger LOGGER = LoggerFactory.getLogger(OpenDataService.class);
 
 	// The headers
-	private static final String[] header = { "code", "brand", "model", "name", "last_updated", "gs1_country",
+	private static final String[] header = { "code", "brand", "model", "name", "last_updated", "gs1_country", "upcType",
 			"offers_count", "min_price", "min_price_compensation", "currency", "categories", "url" };
 
 	private AggregatedDataRepository aggregatedDataRepository;
@@ -191,22 +191,27 @@ public class OpenDataService {
 		line[4] = String.valueOf(data.getLastChange());
 //		"gs1_country"
 		line[5] = data.getGtinInfos().getCountry();
+		
+//		"upcType"
+		line[6] = data.getGtinInfos().getUpcType().toString();
+		
+		
 //		"offers_count"
-		line[6] = String.valueOf(data.getOffersCount());
+		line[7] = String.valueOf(data.getOffersCount());
 //		"min_price"
 		if (null != data.bestPrice()) {
-			line[7] = String.valueOf(data.bestPrice().getPrice());
+			line[8] = String.valueOf(data.bestPrice().getPrice());
 			// "compensation"
-			line[8] = String.valueOf(data.bestPrice().getCompensation());
+			line[9] = String.valueOf(data.bestPrice().getCompensation());
 			// "currency"
-			line[9] = data.bestPrice().getCurrency().toString();
+			line[10] = data.bestPrice().getCurrency().toString();
 			// "url"
 			// TODO(gof) : i18n the url
-			line[11] = uiConfig.getBaseUrl(Locale.FRANCE) + data.getNames().getName();
+			line[12] = uiConfig.getBaseUrl(Locale.FRANCE) + data.getNames().getName();
 		}
 		
 		// Categories
-		line[10] = StringUtils.join(data.getDatasourceCategories()," ; ");
+		line[11] = StringUtils.join(data.getDatasourceCategories()," ; ");
 
 		return line;
 	}
