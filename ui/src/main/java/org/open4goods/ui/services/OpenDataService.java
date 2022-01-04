@@ -52,7 +52,7 @@ public class OpenDataService {
 	private static final Logger LOGGER = LoggerFactory.getLogger(OpenDataService.class);
 
 	// The headers
-	private static final String[] header = { "code", "brand", "model", "name", "last_updated", "gs1_country", "upcType",
+	private static final String[] header = { "code", "brand", "model", "name", "last_updated", "gs1_country", "gtinType",
 			"offers_count", "min_price", "min_price_compensation", "currency", "categories", "url" };
 
 	private AggregatedDataRepository aggregatedDataRepository;
