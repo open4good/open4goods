@@ -28,6 +28,7 @@ import org.open4goods.model.product.AggregatedData;
 import org.open4goods.services.BarcodeValidationService;
 import org.open4goods.services.DataSourceConfigService;
 import org.open4goods.services.EvaluationService;
+import org.open4goods.services.GoogleTaxonomyService;
 import org.open4goods.services.Gs1PrefixService;
 import org.open4goods.services.StandardiserService;
 import org.open4goods.services.VerticalsConfigService;
@@ -71,6 +72,7 @@ public class FullGenerationService {
 	
 	private BarcodeValidationService barcodeValidationService;
 	
+	private GoogleTaxonomyService taxonomyService;
 
 
 	
@@ -80,7 +82,8 @@ public class FullGenerationService {
 			ReferentielService referentielService, StandardiserService standardiserService,
 			AutowireCapableBeanFactory autowireBeanFactory, AggregatedDataRepository aggregatedDataRepository,
 			ApiProperties apiProperties, Gs1PrefixService gs1prefixService,
-			DataSourceConfigService dataSourceConfigService, VerticalsConfigService configService, BarcodeValidationService barcodeValidationService) {
+			DataSourceConfigService dataSourceConfigService, VerticalsConfigService configService, 
+			BarcodeValidationService barcodeValidationService, GoogleTaxonomyService taxonomyService) {
 		super();
 		this.repository = repository;
 		this.evaluationService = evaluationService;
@@ -92,6 +95,7 @@ public class FullGenerationService {
 		this.gs1prefixService = gs1prefixService;
 		this.dataSourceConfigService = dataSourceConfigService;
 		this.configService = configService;
+		this.taxonomyService = taxonomyService;
 		
 		this.barcodeValidationService = barcodeValidationService;
 		
@@ -145,7 +149,7 @@ public class FullGenerationService {
 		services.add(new NamesAggregationService(config.getNamings(), evaluationService, apiProperties.logsFolder()));
 
 
-		services.add(new IdAggregationService(config.getNamings(), evaluationService, apiProperties.logsFolder()));
+		services.add(new IdAggregationService(config.getNamings(), evaluationService, apiProperties.logsFolder(), taxonomyService));
 
 //		services.add(new UrlsAggregationService(evaluationService, apiProperties.logsFolder(),
 //				config.getNamings().getProductUrlTemplates()));

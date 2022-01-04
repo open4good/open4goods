@@ -27,6 +27,7 @@ import org.open4goods.model.data.Price;
 import org.open4goods.services.BarcodeValidationService;
 import org.open4goods.services.DataSourceConfigService;
 import org.open4goods.services.EvaluationService;
+import org.open4goods.services.GoogleTaxonomyService;
 import org.open4goods.services.Gs1PrefixService;
 import org.open4goods.services.ImageMagickService;
 import org.open4goods.services.RemoteFileCachingService;
@@ -244,15 +245,19 @@ public class ApiConfig {
 	BarcodeValidationService barcodeValidationService () {
 		return new BarcodeValidationService();
 	}
-	
+
+	@Bean
+	GoogleTaxonomyService taxonomyService() {
+		return new GoogleTaxonomyService();
+	}
 	
 	@Bean
 	FullGenerationService fullGenerationService(@Autowired DataFragmentRepository repository, @Autowired EvaluationService evaluationService,
 			@Autowired ReferentielService referentielService, @Autowired StandardiserService standardiserService,
 			@Autowired AutowireCapableBeanFactory autowireBeanFactory, @Autowired AggregatedDataRepository aggregatedDataRepository,
 			@Autowired ApiProperties apiProperties, @Autowired Gs1PrefixService gs1prefixService,
-			@Autowired DataSourceConfigService dataSourceConfigService, @Autowired VerticalsConfigService configService, @Autowired BarcodeValidationService barcodeValidationService) {
-		return new FullGenerationService(repository, evaluationService, referentielService, standardiserService, autowireBeanFactory, aggregatedDataRepository, apiProperties, gs1prefixService, dataSourceConfigService, configService,  barcodeValidationService);
+			@Autowired DataSourceConfigService dataSourceConfigService, @Autowired VerticalsConfigService configService, @Autowired BarcodeValidationService barcodeValidationService, @Autowired GoogleTaxonomyService taxonomyService) {
+		return new FullGenerationService(repository, evaluationService, referentielService, standardiserService, autowireBeanFactory, aggregatedDataRepository, apiProperties, gs1prefixService, dataSourceConfigService, configService,  barcodeValidationService, taxonomyService);
 	}
 	
 
