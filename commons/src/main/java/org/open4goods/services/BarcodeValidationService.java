@@ -52,6 +52,8 @@ public class BarcodeValidationService {
 				return new AbstractMap.SimpleEntry<BarcodeType, String>(BarcodeType.GTIN_13, barcode);			
 			} else if (barcode.length() == 12 ) {			
 				return new AbstractMap.SimpleEntry<BarcodeType, String>(BarcodeType.GTIN_12, barcode);			
+			}  else if (barcode.length() == 14 ) {			
+				return new AbstractMap.SimpleEntry<BarcodeType, String>(BarcodeType.GTIN_14, barcode);			
 			} 
 		}
 

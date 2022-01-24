@@ -30,7 +30,11 @@ public class BarcodeTest {
 		
 		// Gtin12
 		assertEquals(BarcodeType.GTIN_12, service.sanitize("123601057072").getKey());
-
+		
+				
+		// Gtin 14
+		assertEquals(BarcodeType.GTIN_14, service.sanitize("70753800008156").getKey());
+		
 		
 		// Testing ISBN 13
 		assertEquals(BarcodeType.ISBN_13, service.sanitize("9782298135039").getKey());
