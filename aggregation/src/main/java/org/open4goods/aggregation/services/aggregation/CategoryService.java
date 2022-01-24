@@ -29,32 +29,35 @@ public class CategoryService extends AbstractAggregationService {
 		//////////////////////////////
 		
 		// Trying to resolve from google mapping		
-		String cat = input.getProductCategory().trim();
 		
-		// Trying to resolve through google taxonomy
-		//TODO : I18n
-		Integer gCat = taxonomyService.getTaxonomyId("fr",input.getProductCategory());
-		if (null != gCat) {
-			dedicatedLogger.info("cat {} resolved from Google mappings : {}", cat, gCat);
-			output.getGoogleTaxonomyIds().add(gCat);
-			return;			
-		}
-		
-		// Trying to resolve from raw categories		
-		gCat = taxonomyService.getRawTaxonomy(cat);
-		if (null != gCat) {
-			dedicatedLogger.info("cat {} resolved from raw mappings : {}", cat, gCat);
-			output.getGoogleTaxonomyIds().add(gCat);
-			return;			
-		}
-
-		
-		if (output.getGoogleTaxonomyIds().isEmpty()) {
-			// Unsolvable category
-			dedicatedLogger.info("Cannot resolve category : {}", cat);
+		if (null != input.getProductCategory()) {
+			String cat = input.getProductCategory().trim();
+			
+			// Trying to resolve through google taxonomy
+			//TODO : I18n
+			Integer gCat = taxonomyService.getTaxonomyId("fr",input.getProductCategory());
+			if (null != gCat) {
+				dedicatedLogger.info("cat {} resolved from Google mappings : {}", cat, gCat);
+				output.getGoogleTaxonomyIds().add(gCat);
+				return;			
+			}
+			
+			// Trying to resolve from raw categories		
+			gCat = taxonomyService.getRawTaxonomy(cat);
+			if (null != gCat) {
+				dedicatedLogger.info("cat {} resolved from raw mappings : {}", cat, gCat);
+				output.getGoogleTaxonomyIds().add(gCat);
+				return;			
+			}
 	
-			// Adding to stats
-			taxonomyService.incrementUnmapped(cat);
+			
+			if (output.getGoogleTaxonomyIds().isEmpty()) {
+				// Unsolvable category
+				dedicatedLogger.info("Cannot resolve category : {}", cat);
+		
+				// Adding to stats
+				taxonomyService.incrementUnmapped(cat);
+			}
 		}
 		
 	}

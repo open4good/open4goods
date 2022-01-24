@@ -21,7 +21,9 @@ public class IdAggregationService extends AbstractAggregationService {
 	@Override
 	public void onDataFragment(final DataFragment input, final AggregatedData output) {
 
-
+		// ID is defined in barcode aggregation service
+		
+		
 		// Adding alternate id's
 		output.getAlternativeIds().addAll(input.getAlternateIds());
 

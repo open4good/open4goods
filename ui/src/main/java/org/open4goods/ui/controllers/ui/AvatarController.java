@@ -98,7 +98,7 @@ public class AvatarController {
 		}
 	}
 
-	public File createPngFile(final String key) {
+	public File createPngFile(final String key) throws ResourceNotFoundException {
 		File file = null;
 		try {
 			file = resourceService.getCacheFile(key);

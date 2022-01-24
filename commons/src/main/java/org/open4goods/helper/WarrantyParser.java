@@ -32,7 +32,7 @@ public class WarrantyParser {
 
 
 		if (!NumberUtils.isNumber(tmp)) {
-			throw new ResourceNotFoundException("Not a numeric parsable Warranty value : " + tmp);
+			throw new InvalidParameterException("Not a numeric parsable Warranty value : " + tmp);
 		}
 
 		// Default numeric is year

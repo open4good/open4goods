@@ -16,6 +16,7 @@ import org.apache.commons.io.IOUtils;
 import org.bouncycastle.jcajce.provider.asymmetric.dsa.DSASigner.dsa224;
 import org.open4goods.dao.AggregatedDataRepository;
 import org.open4goods.exceptions.InvalidParameterException;
+import org.open4goods.exceptions.ResourceNotFoundException;
 import org.open4goods.exceptions.TechnicalException;
 import org.open4goods.exceptions.ValidationException;
 import org.open4goods.model.constants.ResourceTagDictionary;
@@ -82,7 +83,12 @@ public class ResourceController extends AbstractUiController {
 	public void image(@PathVariable String id, final HttpServletResponse response, HttpServletRequest request) throws FileNotFoundException, IOException, ValidationException, TechnicalException {
 		
 		// Retrieve the AggregatedData		
-		AggregatedData data = esDao.getById(id);
+		AggregatedData data;
+		try {
+			data = esDao.getById(id);
+		} catch (ResourceNotFoundException e) {
+			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "image introuvable !");
+		}
 		
 		// Handling 404
 		if (null == data) {
@@ -123,7 +129,14 @@ public class ResourceController extends AbstractUiController {
 	public void gtin(@PathVariable String id, final HttpServletResponse response, HttpServletRequest request) throws FileNotFoundException, IOException, ValidationException, TechnicalException {
 		
 		// Retrieve the AggregatedData		
-		AggregatedData data = esDao.getById(id);
+		AggregatedData data;
+		
+		
+		try {
+			data = esDao.getById(id);
+		} catch (ResourceNotFoundException e) {
+			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "image introuvable !");
+		}
 		
 		// Handling 404
 		if (null == data) {
@@ -151,7 +164,12 @@ public class ResourceController extends AbstractUiController {
 	public void tagcloud(@PathVariable String id, final HttpServletResponse response,HttpServletRequest request) throws FileNotFoundException, IOException, ValidationException, TechnicalException {
 		
 		// Retrieve the AggregatedData		
-		AggregatedData data = esDao.getById(id);
+		AggregatedData data;
+		try {
+			data = esDao.getById(id);
+		} catch (ResourceNotFoundException e) {
+			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "image introuvable !");
+		}
 		
 		// Handling 404
 		if (null == data) {
