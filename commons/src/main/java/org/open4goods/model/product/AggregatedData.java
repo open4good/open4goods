@@ -105,6 +105,14 @@ public class AggregatedData implements Standardisable {
 	private Set<String> datasourceCategories = new HashSet<>();
 
 	/**
+	 * The sets of Google taxonomy resolved id's
+	 */
+	@Field(index = true, store = false, type = FieldType.Keyword)
+	private Set<Integer> googleTaxonomyIds = new HashSet<>();
+
+	
+	
+	/**
 	 * All the ratings
 	 */
 	@Field(index = false, store = false, type = FieldType.Object)
@@ -605,6 +613,14 @@ public class AggregatedData implements Standardisable {
 
 	public void setCreationDate(Long creationDate) {
 		this.creationDate = creationDate;
+	}
+
+	public Set<Integer> getGoogleTaxonomyIds() {
+		return googleTaxonomyIds;
+	}
+
+	public void setGoogleTaxonomyIds(Set<Integer> googleTaxonomyIds) {
+		this.googleTaxonomyIds = googleTaxonomyIds;
 	}
 
 

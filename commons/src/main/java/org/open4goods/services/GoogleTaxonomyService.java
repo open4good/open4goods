@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -43,6 +44,44 @@ public class GoogleTaxonomyService {
 	
 	Map<String,Map<Integer,String>> categoryNames = new HashMap<>();
 	
+	// KEy/value of raw categories to google taxonomy id's
+	Map<String,Integer> fixedCategories = new HashMap();
+	
+	
+	// Key/value of unmapped categories to google taxonomy id's
+	Map<String,Long> unMappedCategories = new ConcurrentHashMap<>();
+
+	
+	
+	/**
+	 * Load raw categories
+	 * 
+	 * @param filePath
+	 * @param language
+	 * @throws IOException
+	 */
+	public void loadRawTaxonomyFile(String fileClassPath) throws IOException {
+		// Reading CSV
+		final ObjectReader oReader = csvMapper.readerForListOf(String.class)
+				.with(CsvParser.Feature.WRAP_AS_ARRAY)
+				.with(schema);
+
+		
+		URL data = getClass().getResource(fileClassPath);		
+		final MappingIterator<List<String>> mi = oReader.readValues(data);
+
+		
+		while (mi.hasNext()) {
+
+			List<String> line = mi.next();
+			String name = line.get(0).toLowerCase().trim();
+			Integer val = Integer.valueOf(line.get(1));
+
+			fixedCategories.put(name, val);
+		}
+		
+	}
+	
 	
 	/**
 	 * Load a localized taxonomy file
@@ -51,7 +90,7 @@ public class GoogleTaxonomyService {
 	 * @param language
 	 * @throws IOException
 	 */
-	public void loadFile(String fileClassPath, String language) throws IOException {
+	public void loadGoogleTaxonomyFile(String fileClassPath, String language) throws IOException {
 
 		// Init per language dictionaries
 		localizedTaxonomy.put(language, new HashMap<>());
@@ -64,9 +103,11 @@ public class GoogleTaxonomyService {
 				.with(CsvParser.Feature.WRAP_AS_ARRAY)
 				.with(schema);
 
+		
 		URL data = getClass().getResource(fileClassPath);		
 		final MappingIterator<List<String>> mi = oReader.readValues(data);
 
+		
 		while (mi.hasNext()) {
 
 			List<String> line = mi.next();
@@ -74,7 +115,7 @@ public class GoogleTaxonomyService {
 			Integer id = Integer.valueOf(line.get(0));
 			// For each cell
 			for (int i = line.size() - 1; i >= 0; i--) {
-				String val = line.get(i);
+				String val = line.get(i).toLowerCase().trim();
 
 				if (!StringUtils.isEmpty(val)) {
 
@@ -107,6 +148,9 @@ public class GoogleTaxonomyService {
 
 		}
 		
+		// closing
+		mi.close();
+		
 		// Filling parent categories id
 		for (Integer val : lastCategoriesId.get(language).values()) {
 			
@@ -125,11 +169,17 @@ public class GoogleTaxonomyService {
 			}
 			
 		}
-		
-		
-
 	}
 
+	
+	/**
+	 * Return a raw category from fixed categories
+	 * @param val
+	 * @return
+	 */
+	public Integer getRawTaxonomy(String val) {
+		return fixedCategories.get(val.toLowerCase());
+	}
 
 	/**
 	 * Return a category name for the id and the language
@@ -184,11 +234,34 @@ public class GoogleTaxonomyService {
 		
 		Map<String, Integer> cat = lastCategoriesId.get(language);
 		
+		int pos = category.indexOf('>');
+		
+		String c;
+		if (-1 != pos) {
+			c = category.substring(pos+1);
+		} else {
+			c = category;
+		}
+		
+		c = c.toLowerCase();
+		
 		if (null == cat) {
 			logger.error("Language {} does not exists", language);
 			return null;
 		}
-		return cat.get(category);
+		return cat.get(c.toLowerCase());
+	}
+	
+	
+	/**
+	 * Increment stats for unmapped category
+	 * @param category
+	 */
+	public void incrementUnmapped (String category) {
+		
+		String c = category.toLowerCase();
+		Long val = unMappedCategories.get(c);		
+		unMappedCategories.put(c, null == val ? 1L : val +1);				
 	}
 	
 	/////////////////////////////////////
@@ -216,6 +289,16 @@ public class GoogleTaxonomyService {
 
 	public void setLocalizedTaxonomy(Map<String, Map<Integer, List<String>>> localizedTaxonomy) {
 		this.localizedTaxonomy = localizedTaxonomy;
+	}
+
+
+	public Map<String, Long> getUnMappedCategories() {
+		return unMappedCategories;
+	}
+
+
+	public void setUnMappedCategories(Map<String, Long> unMappedCategories) {
+		this.unMappedCategories = unMappedCategories;
 	}
 
 	
