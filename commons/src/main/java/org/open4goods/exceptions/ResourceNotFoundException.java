@@ -1,7 +1,7 @@
 package org.open4goods.exceptions;
 
 //@ResponseStatus(HttpStatus.NOT_FOUND)
-public class ResourceNotFoundException extends RuntimeException {
+public class ResourceNotFoundException extends Exception {
 
 	/**
 	 *

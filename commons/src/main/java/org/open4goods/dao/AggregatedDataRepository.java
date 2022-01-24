@@ -288,7 +288,7 @@ public class AggregatedDataRepository {
 	
 	
 	@Cacheable( cacheNames=CacheConstants.ONE_MINUTE_LOCAL_CACHE_NAME)
-	public AggregatedData getById(String productId) {
+	public AggregatedData getById(String productId) throws ResourceNotFoundException {
 		return getById(productId, MAIN_INDEX_NAME);
 		
 	}
