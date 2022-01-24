@@ -66,11 +66,13 @@ public class StatsController {
 		datafragmentsStoreService.getFileQueue().gc();
 	}
 
-	@PostMapping(path =  "/api/taxonomy/unmapped", produces = "text/csv;charset=UTF-8")
+	@PostMapping(path =  "/api/taxonomy/unmapped")
 	public void unmappedTaxonomy(HttpServletResponse response) throws IOException {
 
 		final CsvMapper CSV_MAPPER = new CsvMapper();
-
+		response.setContentType("text/csv;charset=UTF-8");
+		response.setCharacterEncoding("UTF-8");
+		
 		SequenceWriter seqW = CSV_MAPPER.writer().writeValues(response.getWriter());
 		seqW.write(Arrays.asList("category", "count"));
 
