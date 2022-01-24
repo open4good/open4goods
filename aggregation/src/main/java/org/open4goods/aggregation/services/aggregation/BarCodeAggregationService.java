@@ -45,14 +45,15 @@ public class BarCodeAggregationService extends AbstractAggregationService {
 		
 		SimpleEntry<BarcodeType, String> valResult = validationService.sanitize(input.gtin());
 
-		// Replacing the barcode, due to sanitisation
-		output.getAttributes().getReferentielAttributes().put(ReferentielKey.GTIN,valResult.getValue());
 		
 		if (valResult.getKey().equals(BarcodeType.UNKNOWN)) {
 			dedicatedLogger.error("{} is not a valid ISBN/UEAN13 barcode : {}",valResult.getValue() ,input);
 			throw new AggregationSkipException("Invalid barcode : " + output.gtin());
 		}
 		
+		// Replacing the barcode, due to sanitisation
+		output.getAttributes().getReferentielAttributes().put(ReferentielKey.GTIN,valResult.getValue());
+		output.setId(valResult.getValue());
 		
 		
 		/////////////////////////////
