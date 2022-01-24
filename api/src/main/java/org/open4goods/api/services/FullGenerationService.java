@@ -10,6 +10,7 @@ import org.open4goods.aggregation.AbstractAggregationService;
 import org.open4goods.aggregation.aggregator.RealTimeAggregator;
 import org.open4goods.aggregation.services.aggregation.AttributeAggregationService;
 import org.open4goods.aggregation.services.aggregation.BarCodeAggregationService;
+import org.open4goods.aggregation.services.aggregation.CategoryService;
 import org.open4goods.aggregation.services.aggregation.CommentsAggregationService;
 import org.open4goods.aggregation.services.aggregation.DescriptionsAggregationService;
 import org.open4goods.aggregation.services.aggregation.IdAggregationService;
@@ -146,10 +147,12 @@ public class FullGenerationService {
 
 		services.add(new AttributeAggregationService(config.getAttributesConfig(), apiProperties.logsFolder()));
 
+		
 		services.add(new NamesAggregationService(config.getNamings(), evaluationService, apiProperties.logsFolder()));
 
+		services.add(new CategoryService(apiProperties.logsFolder(), taxonomyService));
 
-		services.add(new IdAggregationService(config.getNamings(), evaluationService, apiProperties.logsFolder(), taxonomyService));
+		services.add(new IdAggregationService( apiProperties.logsFolder()));
 
 //		services.add(new UrlsAggregationService(evaluationService, apiProperties.logsFolder(),
 //				config.getNamings().getProductUrlTemplates()));

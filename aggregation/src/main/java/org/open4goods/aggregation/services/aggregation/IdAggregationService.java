@@ -13,33 +13,14 @@ public class IdAggregationService extends AbstractAggregationService {
 
 	private static final Logger logger = LoggerFactory.getLogger(IdAggregationService.class);
 
-	private final SiteNaming localisationAggregationConfig;
-
-	private final EvaluationService evaluationService;
-
-	private GoogleTaxonomyService taxonomyService;
-
-
-	public IdAggregationService(final SiteNaming localisationAggregationConfig,
-			final EvaluationService evaluationService, final String logsFolder, GoogleTaxonomyService taxonomyService) {
+	public IdAggregationService( final String logsFolder) {
 		super(logsFolder);
-		this.localisationAggregationConfig = localisationAggregationConfig;
-		this.evaluationService = evaluationService;
-		this.taxonomyService = taxonomyService;
+
 	}
 
 	@Override
 	public void onDataFragment(final DataFragment input, final AggregatedData output) {
 
-		// Category taxonomy 
-//		input.getProductCategory()
-		
-//		Integer cat = taxonomyService.getTaxonomyId("fr", input.getProductCategory());
-		
-		
-		
-		// The participating product tags
-		output.getDatasourceCategories().add(input.getCategory());
 
 		// Adding alternate id's
 		output.getAlternativeIds().addAll(input.getAlternateIds());

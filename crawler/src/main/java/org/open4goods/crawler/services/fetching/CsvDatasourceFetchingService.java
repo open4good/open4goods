@@ -397,6 +397,9 @@ public class CsvDatasourceFetchingService extends DatasourceFetchingService {
 						}
 					}
 					
+					// closing iterator
+					mi.close();
+					
 					statsLogger.info("End csv fetching for {}:{}. {} imported, {} validations failed, {} excluded, {} errors ", dsConfName, url, okItems, validationFailedItems, excludedItems, errorItems);
 
 					dedicatedLogger.info("Removing fetched CSV file at {}", destFile);
@@ -408,7 +411,7 @@ public class CsvDatasourceFetchingService extends DatasourceFetchingService {
 					statsLogger.error("CSV fetching aborted : {}:{} ",dsConfName ,url,e);
 					statsLogger.info("End csv fetching for {}{}. {} imported, {} validations failed, {} excluded, {} errors ", dsConfName, url,  okItems, validationFailedItems, excludedItems, errorItems);
 
-				}
+				} 
 			}
 			// Calling the finished to collect stats
 			finished(stats().get(dsConfName), dsProperties);

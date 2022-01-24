@@ -72,6 +72,8 @@ public class Gs1PrefixService {
 			iterator.readAll().forEach(e -> {
 				prefixes.putAll(e.expand(countryNames));
 			});
+			
+			iterator.close();
 
 		} catch (IOException e) {
 			logger.error("Cannot initialize gs1prefix service", e);

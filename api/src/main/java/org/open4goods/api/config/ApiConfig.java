@@ -36,6 +36,8 @@ import org.open4goods.services.SerialisationService;
 import org.open4goods.services.StandardiserService;
 import org.open4goods.services.VerticalsConfigService;
 import org.open4goods.store.repository.DataFragmentRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springdoc.core.GroupedOpenApi;
 import org.springdoc.core.customizers.OpenApiCustomiser;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -64,6 +66,7 @@ public class ApiConfig {
 	@Autowired ApiProperties apiProperties;
 
 
+	private static final Logger logger = LoggerFactory.getLogger(ApiConfig.class);
 
 	
 	@Bean
@@ -248,7 +251,35 @@ public class ApiConfig {
 
 	@Bean
 	GoogleTaxonomyService taxonomyService() {
-		return new GoogleTaxonomyService();
+		
+		GoogleTaxonomyService taxonomyService = new GoogleTaxonomyService();
+		
+		////////////////////////
+		// Loading google taxonomy
+		////////////////////////
+		try {
+			taxonomyService.loadGoogleTaxonomyFile("/taxonomy/taxonomy-with-ids.fr-FR.csv", "fr");
+		} catch (IOException e) {
+			logger.error("Cannot load french google taxonomy",e);
+		}
+		try {
+			taxonomyService.loadGoogleTaxonomyFile("/taxonomy/taxonomy-with-ids.en-US.csv", "en");
+		} catch (IOException e) {
+			logger.error("Cannot load us google taxonomy",e);
+		}
+
+		////////////////////////
+		// Loading raw taxonomy
+		////////////////////////
+		try {
+			taxonomyService.loadRawTaxonomyFile("/taxonomy/taxonomy-raw.csv");
+		} catch (IOException e) {
+			logger.error("Cannot load raw google taxonomy",e);
+		}
+		
+		
+		
+		return taxonomyService;
 	}
 	
 	@Bean

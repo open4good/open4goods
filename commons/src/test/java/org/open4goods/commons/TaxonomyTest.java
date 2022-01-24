@@ -17,7 +17,7 @@ public class TaxonomyTest {
 		GoogleTaxonomyService tService = new GoogleTaxonomyService();
 		
 		try {
-			tService.loadFile("/taxonomy/taxonomy-with-ids.fr-FR.csv", "fr");
+			tService.loadGoogleTaxonomyFile("/taxonomy/taxonomy-with-ids.fr-FR.csv", "fr");
 //			tService.loadFile("/taxonomy/taxonomy-with-ids.en-US.csv", "en");
 		} catch (IOException e) {
 			fail(e.getMessage());
