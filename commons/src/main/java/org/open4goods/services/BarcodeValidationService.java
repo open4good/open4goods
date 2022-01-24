@@ -47,11 +47,11 @@ public class BarcodeValidationService {
 		if (EAN13CheckDigit.EAN13_CHECK_DIGIT.isValid(barcode)) {
 
 			if (barcode.length() == 8 ) {
-				return new AbstractMap.SimpleEntry<BarcodeType, String>(BarcodeType.GTIN_8, formatedbarCode);							
+				return new AbstractMap.SimpleEntry<BarcodeType, String>(BarcodeType.GTIN_8, barcode);							
 			} else if (barcode.length() == 13 ) {			
-				return new AbstractMap.SimpleEntry<BarcodeType, String>(BarcodeType.GTIN_13, formatedbarCode);			
+				return new AbstractMap.SimpleEntry<BarcodeType, String>(BarcodeType.GTIN_13, barcode);			
 			} else if (barcode.length() == 12 ) {			
-				return new AbstractMap.SimpleEntry<BarcodeType, String>(BarcodeType.GTIN_12, formatedbarCode);			
+				return new AbstractMap.SimpleEntry<BarcodeType, String>(BarcodeType.GTIN_12, barcode);			
 			} 
 		}
 
