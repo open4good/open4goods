@@ -30,14 +30,14 @@ public class AggregatedAttribute {
 	/**
 	 * Set to true if this aggregatedattribute is build from attributes having different values
 	 */
-	@Field(index = false, store = false, type = FieldType.Keyword)
+	@Field(index = false, store = false, type = FieldType.Boolean)
 	private boolean hasConflicts;
 			
 	
 	/**
 	 * The collections of conflicts for this attribute
 	 */
-	@Field(index = false, store = false, type = FieldType.Keyword)
+	@Field(index = false, store = false, type = FieldType.Object)
 	private Set<ConflictedAttribute> sources = new HashSet<>();
 	
 
