@@ -35,7 +35,7 @@ public class CategoryService extends AbstractAggregationService {
 		//TODO : I18n
 		Integer gCat = taxonomyService.getTaxonomyId("fr",input.getProductCategory());
 		if (null != gCat) {
-			dedicatedLogger.warn("cat {} resolved from Google mappings : {}", cat, gCat);
+			dedicatedLogger.info("cat {} resolved from Google mappings : {}", cat, gCat);
 			output.getGoogleTaxonomyIds().add(gCat);
 			return;			
 		}
@@ -43,17 +43,19 @@ public class CategoryService extends AbstractAggregationService {
 		// Trying to resolve from raw categories		
 		gCat = taxonomyService.getRawTaxonomy(cat);
 		if (null != gCat) {
-			dedicatedLogger.warn("cat {} resolved from raw mappings : {}", cat, gCat);
+			dedicatedLogger.info("cat {} resolved from raw mappings : {}", cat, gCat);
 			output.getGoogleTaxonomyIds().add(gCat);
 			return;			
 		}
 
-		// Unsolvable category
-		dedicatedLogger.error("Cannot resolve category : {}", cat);
-
-		// Adding to stats
-		taxonomyService.incrementUnmapped(cat);
 		
+		if (output.getGoogleTaxonomyIds().isEmpty()) {
+			// Unsolvable category
+			dedicatedLogger.info("Cannot resolve category : {}", cat);
+	
+			// Adding to stats
+			taxonomyService.incrementUnmapped(cat);
+		}
 		
 	}
 
