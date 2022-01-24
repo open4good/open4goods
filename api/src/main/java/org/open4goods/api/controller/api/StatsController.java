@@ -66,7 +66,7 @@ public class StatsController {
 		datafragmentsStoreService.getFileQueue().gc();
 	}
 
-	@PostMapping(path =  "/api/taxonomy/unmapped", produces = "text/csv")
+	@PostMapping(path =  "/api/taxonomy/unmapped", produces = "text/csv;charset=UTF-8")
 	public void unmappedTaxonomy(HttpServletResponse response) throws IOException {
 
 		final CsvMapper CSV_MAPPER = new CsvMapper();
