@@ -266,8 +266,6 @@ public abstract class Extractor {
 
 		} catch (final XPathExpressionException e) {
 			getDedicatedLogger().warn("xpath evaluation error;  {} ; {} ; {}", expression, e.getMessage(), url);
-		} catch (final ResourceNotFoundException e) {
-			getDedicatedLogger().info("xpath no match found ; {} ; {} ", expression, e.getMessage(), url);
 		} catch (final Exception e) {
 			getDedicatedLogger().error("xpath unexpected exception ; {} ; {} ", expression, e.getMessage(), url, e);
 		}

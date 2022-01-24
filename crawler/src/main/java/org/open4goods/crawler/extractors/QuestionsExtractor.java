@@ -75,7 +75,13 @@ public class QuestionsExtractor extends Extractor {
 					}
 
 					if (null != cc.getQuestionAuthor()) {
-						q.setAuthor(xpathEval(rootNode, cc.getQuestionAuthor()));
+						try {
+							q.setAuthor(xpathEval(rootNode, cc.getQuestionAuthor()));
+						} catch (ResourceNotFoundException e) {
+							getDedicatedLogger().info("Cannot evaluate ROOT XPATH AUTHOR for question : {} > {}",
+									cc.getQuestionAuthor(), e.getMessage());
+							continue;
+						}
 					}
 
 
