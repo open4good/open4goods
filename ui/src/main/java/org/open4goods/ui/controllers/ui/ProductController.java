@@ -9,6 +9,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.open4goods.dao.AggregatedDataRepository;
+import org.open4goods.exceptions.ResourceNotFoundException;
 import org.open4goods.model.data.AffiliationToken;
 import org.open4goods.model.product.AggregatedData;
 import org.open4goods.model.product.AggregatedPrice;
@@ -68,7 +69,12 @@ public class ProductController extends AbstractUiController {
 
 		
 		// Retrieve the AggregatedData
-		AggregatedData data = esDao.getById(id);
+		AggregatedData data;
+		try {
+			data = esDao.getById(id);
+		} catch (ResourceNotFoundException e) {
+			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Produit " + request.getServletPath() + " introuvable !");
+		}
 
 		if (null == data) {
 			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Produit " + request.getServletPath() + " introuvable !");
