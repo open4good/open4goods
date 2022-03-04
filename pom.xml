@@ -11,7 +11,7 @@
 	<url>https://github.com/open4good/open4goods</url>
 	<properties>
 		<github.global.server>github</github.global.server>
-		<springboot.version>2.6.3</springboot.version>
+		<springboot.version>2.6.4</springboot.version>
 		<java.version>17</java.version>
 		<maven.compiler.source>17</maven.compiler.source>
 		<maven.compiler.target>17</maven.compiler.target>
@@ -23,7 +23,7 @@
 		<!-- To exclude springboot dependency management -->
 		<processDependencyManagement>false</processDependencyManagement>
 		<processPluginDependenciesInPluginManagement>true</processPluginDependenciesInPluginManagement>
-		<maven-compiler-plugin-version>3.9.0</maven-compiler-plugin-version>
+		<maven-compiler-plugin-version>3.10.0</maven-compiler-plugin-version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<dependency.locations.enabled>false</dependency.locations.enabled>
 		<exclude.tests>nothing-to-exclude</exclude.tests>
@@ -238,7 +238,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-project-info-reports-plugin</artifactId>
-				<version>3.1.2</version>
+				<version>3.2.2</version>
 			</plugin>
 
 		</plugins>
