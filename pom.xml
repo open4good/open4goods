@@ -11,7 +11,7 @@
 	<url>https://github.com/open4good/open4goods</url>
 	<properties>
 		<github.global.server>github</github.global.server>
-		<springboot.version>2.6.5</springboot.version>
+		<springboot.version>2.6.6</springboot.version>
 		<java.version>17</java.version>
 		<maven.compiler.source>17</maven.compiler.source>
 		<maven.compiler.target>17</maven.compiler.target>
@@ -226,7 +226,7 @@
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-site-plugin</artifactId>
 
-				<version>3.11.0</version>
+				<version>3.12.1</version>
 				<configuration>
 					<skipDeploy></skipDeploy>
 				</configuration>
@@ -294,7 +294,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-clean-plugin</artifactId>
-				<version>3.1.0</version>
+				<version>3.2.0</version>
 				<configuration>
 					<filesets>
 						<fileset>
