@@ -1,6 +1,7 @@
 package org.open4goods.crawler;
 
 import java.io.IOException;
+import java.time.Duration;
 
 import javax.annotation.PreDestroy;
 
@@ -101,7 +102,8 @@ public class SeleniumPageFetcher extends PageFetcher {
 
 		RemoteWebDriver driver = new RemoteWebDriver(service.getUrl(), options);
 		
-		WebDriverWait wait = new WebDriverWait(driver, 10);
+		// TODO : timer from conf
+		WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
 
 		driver.navigate().to(url);
 
