@@ -87,86 +87,91 @@ public class SearchService {
 			queryBuilder = queryBuilder.must(new QueryStringQueryBuilder(translatedVerticalQuery));		
 		}
 		
-		// from price
-		if (null != fromPrice) {
-			queryBuilder = queryBuilder.must(QueryBuilders.rangeQuery("price.minPrice.price").gt(fromPrice.intValue()));			 			
-		}
-		
-		// to price
-		if (null != toPrice) {
-			queryBuilder = queryBuilder.must(QueryBuilders.rangeQuery("price.minPrice.price").lt(toPrice.intValue()));			 			
-		}
-		
-		// condition
-		if (null != condition) {
-			queryBuilder = queryBuilder.must(QueryBuilders.termQuery("price.minPrice.productState", condition.toString()));
-		}
-		
-		// Categories
-		if (null != categories && categories.size() > 0) {
-			queryBuilder = queryBuilder.must(QueryBuilders.termsQuery("datasourceCategories", categories));
-		}
+//		// from price
+//		if (null != fromPrice) {
+//			queryBuilder = queryBuilder.must(QueryBuilders.rangeQuery("price.minPrice.price").gt(fromPrice.intValue()));			 			
+//		}
+//		
+//		// to price
+//		if (null != toPrice) {
+//			queryBuilder = queryBuilder.must(QueryBuilders.rangeQuery("price.minPrice.price").lt(toPrice.intValue()));			 			
+//		}
+//		
+//		// condition
+//		if (null != condition) {
+//			queryBuilder = queryBuilder.must(QueryBuilders.termQuery("price.minPrice.productState", condition.toString()));
+//		}
+//		
+//		// Categories
+//		if (null != categories && categories.size() > 0) {
+//			queryBuilder = queryBuilder.must(QueryBuilders.termsQuery("datasourceCategories", categories));
+//		}
+//		
+//	
+//		// Setting the query
+//		NativeSearchQueryBuilder esQuery = new NativeSearchQueryBuilder()
+//				.withQuery(queryBuilder)
+//				.withPageable(PageRequest.of(from, to))
+//				;
+//		
+//		// Adding aggregations
+//		esQuery = esQuery 
+//				.withAggregations(AggregationBuilders.min("min_price").field("price.minPrice.price"))
+//				.withAggregations(AggregationBuilders.max("max_price").field("price.minPrice.price"))
+//				.withAggregations(AggregationBuilders.max("max_offers").field("offersCount"))				
+//				.withAggregations(AggregationBuilders.min("min_offers").field("offersCount"))				
+//				.withAggregations(AggregationBuilders.terms("condition").field("price.minPrice.productState").size(5))	
+//				.withAggregations(AggregationBuilders.terms("categories").field("datasourceCategories").size(5000))	
+//				
+//				
+//				;		
 		
 	
-		// Setting the query
 		NativeSearchQueryBuilder esQuery = new NativeSearchQueryBuilder()
-				.withQuery(queryBuilder)
-				.withPageable(PageRequest.of(from, to))
-				;
+		.withQuery(queryBuilder)
+		.withPageable(PageRequest.of(from, to))
+		;
 		
-		// Adding aggregations
-		esQuery = esQuery 
-				.withAggregations(AggregationBuilders.min("min_price").field("price.minPrice.price"))
-				.withAggregations(AggregationBuilders.max("max_price").field("price.minPrice.price"))
-				.withAggregations(AggregationBuilders.max("max_offers").field("offersCount"))				
-				.withAggregations(AggregationBuilders.min("min_offers").field("offersCount"))				
-				.withAggregations(AggregationBuilders.terms("condition").field("price.minPrice.productState").size(5))	
-				.withAggregations(AggregationBuilders.terms("categories").field("datasourceCategories").size(5000))	
-				
-				
-				;		
 		
-				
 		SearchHits<AggregatedData> results = aggregatedDataRepository.search(esQuery.build(),ALL_VERTICAL_NAME,from,to);
-
 		VerticalSearchResponse vsr = new VerticalSearchResponse();			
 
-		// Handling aggregations results if relevant
-		Aggregations aggregations = (Aggregations)results.getAggregations().aggregations();
-					
-		Min minPrice = aggregations.get("min_price");
-		Max maxPrice = aggregations.get("max_price");
-		Max maxOffers = aggregations.get("max_offers");
-		Min minOffers = aggregations.get("min_offers");
-		
-		Terms productSate  =  aggregations.get("condition");
-		Terms catTerms  =  aggregations.get("categories");
-		
-		
-		vsr.setMaxPrice(maxPrice.getValue());
-		vsr.setMinPrice(minPrice.getValue());
-		vsr.setMaxOffers(Double.valueOf(maxOffers.getValue()).intValue());
-		vsr.setMinOffers(Double.valueOf(minOffers.getValue()).intValue());
-		
-		
-		
-		if (null != productSate.getBucketByKey(ProductState.NEW.toString())) {			
-			vsr.setItemNew( productSate.getBucketByKey(ProductState.NEW.toString()).getDocCount()) ;
-		}
-
-		if (null != productSate.getBucketByKey(ProductState.OCCASION.toString())) {			
-			vsr.setItemOccasion( productSate.getBucketByKey(ProductState.OCCASION.toString()).getDocCount()) ;
-		}
-		
-		if (null != productSate.getBucketByKey(ProductState.UNKNOWN.toString())) {			
-			vsr.setItemUnknown(productSate.getBucketByKey(ProductState.UNKNOWN.toString()).getDocCount());
-		}
-		
-		for (Bucket b :   catTerms.getBuckets()) {			
-			vsr.getCategories().put(b.getKey().toString(), b.getDocCount());			
-		}
-		
-		// Setting the response
+//		// Handling aggregations results if relevant
+//		Aggregations aggregations = (Aggregations)results.getAggregations().aggregations();
+//					
+//		Min minPrice = aggregations.get("min_price");
+//		Max maxPrice = aggregations.get("max_price");
+//		Max maxOffers = aggregations.get("max_offers");
+//		Min minOffers = aggregations.get("min_offers");
+//		
+//		Terms productSate  =  aggregations.get("condition");
+//		Terms catTerms  =  aggregations.get("categories");
+//		
+//		
+//		vsr.setMaxPrice(maxPrice.getValue());
+//		vsr.setMinPrice(minPrice.getValue());
+//		vsr.setMaxOffers(Double.valueOf(maxOffers.getValue()).intValue());
+//		vsr.setMinOffers(Double.valueOf(minOffers.getValue()).intValue());
+//		
+//		
+//		
+//		if (null != productSate.getBucketByKey(ProductState.NEW.toString())) {			
+//			vsr.setItemNew( productSate.getBucketByKey(ProductState.NEW.toString()).getDocCount()) ;
+//		}
+//
+//		if (null != productSate.getBucketByKey(ProductState.OCCASION.toString())) {			
+//			vsr.setItemOccasion( productSate.getBucketByKey(ProductState.OCCASION.toString()).getDocCount()) ;
+//		}
+//		
+//		if (null != productSate.getBucketByKey(ProductState.UNKNOWN.toString())) {			
+//			vsr.setItemUnknown(productSate.getBucketByKey(ProductState.UNKNOWN.toString()).getDocCount());
+//		}
+//		
+//		for (Bucket b :   catTerms.getBuckets()) {			
+//			vsr.getCategories().put(b.getKey().toString(), b.getDocCount());			
+//		}
+//		
+//		// Setting the response
 		vsr.setTotalResults(results.getTotalHits());
 		vsr.setFrom(from);
 		vsr.setTo(to);
