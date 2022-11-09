@@ -8,12 +8,9 @@ import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.index.query.QueryStringQueryBuilder;
-import org.elasticsearch.search.aggregations.AggregationBuilders;
-import org.elasticsearch.search.aggregations.Aggregations;
-import org.elasticsearch.search.aggregations.bucket.terms.Terms;
-import org.elasticsearch.search.aggregations.bucket.terms.Terms.Bucket;
-import org.elasticsearch.search.aggregations.metrics.Max;
-import org.elasticsearch.search.aggregations.metrics.Min;
+import org.elasticsearch.search.sort.SortBuilder;
+import org.elasticsearch.search.sort.SortBuilders;
+import org.elasticsearch.search.sort.SortOrder;
 import org.open4goods.dao.AggregatedDataRepository;
 import org.open4goods.helper.GenericFileLogger;
 import org.open4goods.model.constants.ProductState;
@@ -62,7 +59,7 @@ public class SearchService {
 	 * @param query
 	 * @return
 	 */
-	public VerticalSearchResponse globalSearch(String initialQuery, Integer fromPrice, Integer toPrice, Set<String> categories, ProductState condition, int from, int to) {
+	public VerticalSearchResponse globalSearch(String initialQuery, Integer fromPrice, Integer toPrice, Set<String> categories, ProductState condition, int from, int to, int minOffers, boolean sort) {
 		
 		String query =  sanitize(initialQuery);
 		
@@ -83,7 +80,15 @@ public class SearchService {
 					.map(e -> "names.offerNames:"+e)				
 					. collect(Collectors.joining(" AND "));
 
-			String translatedVerticalQuery ="attributes.referentielAttributes.GTIN.keyword:\""+query+"\"  OR ("+q+")"; 			
+			String translatedVerticalQuery ="attributes.referentielAttributes.GTIN.keyword:\""+query+"\"  OR ("+q+")"; 		
+			
+			// Adding minoffers filter
+			if (minOffers > 0) {
+				translatedVerticalQuery += " AND offersCount:> " + minOffers;
+				
+			}
+			
+			
 			queryBuilder = queryBuilder.must(new QueryStringQueryBuilder(translatedVerticalQuery));		
 		}
 		
@@ -130,7 +135,16 @@ public class SearchService {
 		NativeSearchQueryBuilder esQuery = new NativeSearchQueryBuilder()
 		.withQuery(queryBuilder)
 		.withPageable(PageRequest.of(from, to))
+		.withSort(SortBuilders.fieldSort("offersCount").order(SortOrder.DESC))
+//		.withSorts(SortBuilders.fieldSort("minOffers"))
+
 		;
+		
+//		if (sort) {
+//			 esQuery.        withSort(SortBuilders.fieldSort("offersCount").order(SortOrder.DESC));
+//		}
+//		
+		
 		
 		
 		SearchHits<AggregatedData> results = aggregatedDataRepository.search(esQuery.build(),ALL_VERTICAL_NAME,from,to);
