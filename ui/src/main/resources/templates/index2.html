@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html th:lang="${siteLocale.language}">
+
+<head>
+
+	<!--/* Metas and CSS */-->
+	<th:block th:include="inc/header-meta.html"></th:block>
+    
+	<!-- Primary Meta Tags -->
+	<title th:text="#{index.title}"></title>
+	<meta name="title" th:content="#{index.meta.title}">
+	<meta name="description" th:content="#{index.meta.description}">
+		
+	<!-- Open Graph / Facebook -->
+	<meta property="og:type" content="website">
+	<meta property="og:url" th:content="${url}">
+	<meta property="og:title" th:content="#{index.title}">
+	<meta property="og:description" th:content="#{index.meta.description}">
+	<meta property="og:image" th:content="${url} + 'assets/img/brand/light.svg'">
+	
+	<!-- Twitter -->
+	<meta name="twitter:card" content="summary_large_image">
+	<meta name="twitter:url" th:content="${url}">
+	<meta name="twitter:title" th:content="#{index.title}">
+	<meta name="twitter:description" th:content="#{index.meta.description}">
+	<meta name="twitter:image" th:content="${url} + 'assets/img/brand/light.svg'">
+	
+</head>
+
+<body>
+    
+    <main>	
+       <!--/* Loader */-->
+       <th:block th:include="inc/preloader.html"></th:block>
+		
+       <!--/* Search */-->
+       <section class="section section-header text-dark">
+           <div class="container">
+               <div class="row justify-content-between align-items-center">
+                   <div class="col-12 col-md-12">
+                       <h1 class="display-2 mb-2">green<span class="text-secondary-app fw-bold"></span>buy<span class="text-secondary-app fw-bold">.fr</span>
+                       <p class="lead text-gray mt-2">Acheter votre produit en passant par greenbuy apporte un peu de bien commun dans votre shopping en ligne. </p>
+                       </h1>
+                               <form method="post" id="searchForm" action="/recherche">
+			                       <div class="d-flex flex-wrap mt-lg-2">
+			                           <div class="input-group">
+				                               <input type="text" id="searchInput" class="form-control" th:placeholder="'Chercher dans ' + ${#numbers.formatDecimal(totalItems, 0, 'COMMA', 0, 'POINT')} + ' produits'" aria-label="Search" aria-describedby="basic-addon1" name="query">
+				                               <button onclick="document.getElementById('searchForm').submit()" class="btn btn-primary" type="button"><span class="icon icon-xs me-1"><span class="fas fa-search"></span></span> Chercher</button>
+			                            </div>
+			                       </div>
+	                           </form>
+	                           
+                   <blockquote class="mt-4 blockquote text-center">
+                   
+                 
+                       <h1 class="mb-3">Consommons peu, consommons bien</h1>
+                       <p class="lead px-lg-5">Une tentative éthique et ouverte d'amoindrir l'impact de nos achats internet, auprès de nos <a href="#partnersLink"> <span th:text="${partners.size()}"></span> boutiques partenaires</a></p>
+              
+            
+                   
+					</blockquote>
+					
+                   </div>
+                   <div class="col-12 col-md-12 text-center">
+                       <div class="row justify-content-center">
+                    
+                    
+                    
+                    
+                    
+                    
+                    <div class="col-12 col-md-4 col-lg-4 mb-4 mb-lg-0">
+                        <div class="card bg-white border-gray-300 text-gray p-4">
+                            <div class="card-header bg-white border-0 pb-0">
+                                <h2 class="h4 m-0">Compensation écologique</h2>
+                            </div>
+                            <div class="card-body">
+                                <p>
+                                   20 % du chiffre d'affaire (revenus d'affiliation) finance une organisation écologique.                      
+                                </p>
+                                <a href="#" class="btn btn-sm btn-secondary-app animate-up-2 mt-3">Compensation écologique</a>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    
+                    <div class="col-12 col-md-6 col-lg-4 mb-4 mb-lg-0">
+                        <div class="card bg-white border-gray-300 text-gray p-4">
+                            <div class="card-header bg-white border-0 pb-0">
+                                <h2 class="h4 m-0">Modèle ouvert</h2>
+                            </div>
+                            <div class="card-body">
+                                <p>
+                                   Le code est en open source, la base produit est délivrée en open data. 20% des revenus sont dédiés à la rémuneration des top contributors.                     
+                                </p>
+                                <a href="#" class="btn btn-sm btn-secondary-app animate-up-2 mt-3">Modèle ouvert</a>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    
+                    <div class="col-12 col-md-6 col-lg-4 mb-4 mb-lg-0">
+                        <div class="card bg-white border-gray-300 text-gray p-4">
+                            <div class="card-header bg-white border-0 pb-0">
+                                <h2 class="h4 m-0">Data responsable</h2>
+                            </div>
+                            <div class="card-body">
+                                <p>
+                                   Pas de cookie (Z'avez remarqué l'absence de bandeau ?). Aucune collecte de données personnelles pour préserver votre vie privée.                 
+                                </p>
+                                <a href="#" class="btn btn-sm btn-secondary-app animate-up-2 mt-3">Data responsable ?</a>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    
+                    
+                    
+                </div>
+                   </div>
+                   
+
+			
+			
+               </div>
+           </div>
+       </section>
+       
+      <!--/* Infos */-->
+       
+       
+      <!--/* Partners */-->       
+        <section class="section section-lg py-sm-0 py-sm-0 ">   
+            <div class="container">
+                <div class="row justify-content-between align-items-center">
+                
+                	<h2 id="partnersLink" class="h3 text-center text-lg-left mb-3">Nos partenaires</h2>
+                	<p>
+                		Merci à nos partenaires, qui nous permettent de mettre en oeuvre cette nouvelle façon de consommer ! La compensation environnementale s'applique également si vous faites vos achats sur les plateformes marchandes en utilisant les liens ci-dessous.
+                	</p>
+
+                </div>
+                
+                
+				<div class="mb-3">
+                    <div class="input-group">
+                        <span class="input-group-text" id="partnersSearchLabel"><span class="fas fa-search"></span></span>
+                        <input type="text" class="form-control" id="partnersSearch" placeholder="Filtrer" aria-label="Search" aria-describedby="partnersSearchLabel">
+                    </div>
+                </div>
+                                
+                
+	
+                <div class="row">
+		            <th:block th:each="partner : ${partners}">
+						<div class="partnerCard col-md-4 col-lg-4 mb-5 mb-lg-0 mt-3" th:attr="data-string=${partner.key.name}">
+			                <div class="text-center card shadow p-4">
+			                	<a th:href="'/compensation/'+${partner.value}" rel="nofollow" >
+			                    	<img height="150" class="img-fluid" th:src="'/logo/'+${partner.key.name}"  th:alt="${partner.key.name}">
+			                	</a>
+
+			                </div>
+			            </div>
+		            </th:block>
+                </div>
+	                   
+                   
+                   
+            </div>
+
+        </section>
+
+    </main>
+
+	<!--/* Footer */-->
+	<th:block th:include="inc/footer.html"></th:block>	
+
+<!-- Core -->
+<script src="../../vendor/bootstrap/dist/js/bootstrap.min.js"></script>
+<script src="../../vendor/headroom.js/dist/headroom.min.js"></script>
+
+<!-- Vendor JS -->
+
+<script src="../../vendor/smooth-scroll/dist/smooth-scroll.polyfills.min.js"></script>
+<script src="../../vendor/vivus/dist/vivus.min.js"></script>
+<script type="text/javascript" language="javascript" src="https://code.jquery.com/jquery-3.5.1.js"></script>
+
+<!-- pixel JS -->
+<script src="../../assets/js/pixel.js"></script>
+
+<script>
+$(document).ready(function() {
+	// Product search input
+	$('#searchInput').on("change",function (e) {
+    	$('#searchForm').attr("action","/recherche/"+encodeURIComponent($('#searchInput').val()));
+    });
+
+	// Partners search
+	$("#partnersSearch").on("keyup", function() {
+		  var input = $(this).val().toUpperCase();
+
+		  $(".partnerCard").each(function() {
+		    if ($(this).data("string").toUpperCase().indexOf(input) < 0) {
+		      $(this).hide();
+		    } else {
+		      $(this).show();
+		    }
+		  })
+		});	
+
+
+
+} );
+
+
+
+
+</script>
+
+</body>
+
+</html>
