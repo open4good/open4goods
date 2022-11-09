@@ -10,11 +10,13 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.lang3.StringUtils;
+import org.open4goods.model.constants.CacheConstants;
 import org.open4goods.model.constants.ProductState;
 import org.open4goods.ui.config.yml.UiConfig;
 import org.open4goods.ui.controllers.dto.VerticalSearchResponse;
 import org.open4goods.ui.services.SearchService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -44,6 +46,7 @@ public class GlobalSearchController extends AbstractUiController {
 	}	
 
 	@GetMapping({"/recherche/{query}"})
+	@Cacheable(cacheNames = CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME)
 	public ModelAndView searchGet(final HttpServletRequest request, @PathVariable String query) {
 
 		String q = StringUtils.normalizeSpace(URLDecoder.decode(query, Charset.defaultCharset()));
@@ -52,8 +55,10 @@ public class GlobalSearchController extends AbstractUiController {
 		ModelAndView model = defaultModelAndView("search", request);
 
 //		Set<String> categroies = Sets.newHashSet("JOUR>AUTRES MEUBLES");
-		VerticalSearchResponse results = searchService.globalSearch(q, null, null, null, null,0,50);
 		
+		
+		VerticalSearchResponse results = searchService.globalSearch(q, null, null, null, null,0,25,0, true);
+
 		model.addObject("results",results);
 		model.addObject("query", q);
 		
