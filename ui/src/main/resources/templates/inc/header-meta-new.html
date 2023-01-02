@@ -22,13 +22,3 @@
 <link rel="search" type="application/opensearchdescription+xml" th:title="#{opensearch.title}" th:href="${baseUrl} + 'opensearch.xml'">
 
 
-<!-- Global site tag (gtag.js) - Google Analytics -->
-<script th:unless="${dev}" async src="https://www.googletagmanager.com/gtag/js?id=G-4085Y6CBL7"></script>
-<script th:unless="${dev}">
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-
-  gtag('config', 'G-4085Y6CBL7');
-</script>
-
