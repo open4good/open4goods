@@ -61,7 +61,14 @@ public class HomeController extends AbstractUiController {
 	@GetMapping("/")
 	public ModelAndView index(final HttpServletRequest request) {
 
-		ModelAndView model = defaultModelAndView("index", request);
+		// TODO : Remove this test page
+		ModelAndView model ;
+		if (null != request.getParameter("new")) {
+			 model = defaultModelAndView("index2", request);
+		} else {
+			 model = defaultModelAndView("index", request);
+		}
+		
 		model.addObject("totalItems", aggregatedDataRepository.countMainIndexHavingPrice());
 		
 		model.addObject("partners",  partners);
