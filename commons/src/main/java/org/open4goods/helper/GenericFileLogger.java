@@ -23,7 +23,7 @@ import ch.qos.logback.core.util.FileSize;
 public class GenericFileLogger {
 
 	private static final String FILE_ROTATION_SIZE = "200MB";
-	private static final String PATTERN = "%d{HH:mm:ss.SSS} ;  %-5level ; %msg%n";
+	private static final String PATTERN = "%d{dd MMM yyyy HH:mm:ss.SSS} ;  %-5level ; %msg%n";
 	private static final int MAX_NUMBER_OF_FILE = 5;
 
 
