@@ -13,7 +13,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.io.IOUtils;
-import org.bouncycastle.jcajce.provider.asymmetric.dsa.DSASigner.dsa224;
 import org.open4goods.dao.AggregatedDataRepository;
 import org.open4goods.exceptions.InvalidParameterException;
 import org.open4goods.exceptions.ResourceNotFoundException;
