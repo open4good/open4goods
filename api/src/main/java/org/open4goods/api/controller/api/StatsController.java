@@ -56,16 +56,6 @@ public class StatsController {
 		return datafragmentsRepository.count();
 	}
 
-	@GetMapping("/api/filequeue/count")
-	public Long fileQueuecount() {
-		return datafragmentsStoreService.getFileQueue().size();
-	}
-
-	@PostMapping("/api/filequeue/gc")
-	public void gc() {
-		datafragmentsStoreService.getFileQueue().gc();
-	}
-
 	@PostMapping(path =  "/api/taxonomy/unmapped")
 	public void unmappedTaxonomy(HttpServletResponse response) throws IOException {
 

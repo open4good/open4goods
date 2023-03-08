@@ -59,7 +59,6 @@ public class ImportExportService {
 
 	private final SerialisationService serialisationService;
 
-	private boolean running = false;
 
 	private final ApiProperties apiProperties;
 
@@ -151,7 +150,7 @@ public class ImportExportService {
 	 */
 	public void doImport() throws InvalidParameterException {
 
-		checkAndToggleRunningState();
+
 
 		logger.info("Importing file");
 		final File saved = new File(apiProperties.getDatafragmentsBackupFolder() + "/" + SAVED_FILE);
@@ -194,9 +193,7 @@ public class ImportExportService {
 		}
 
 		executor.shutdown();
-		// Unpause the datafragments queuing
-		storeService.enableDequeue(true);
-		running = false;
+
 	}
 
 
@@ -207,7 +204,7 @@ public class ImportExportService {
 //	@Scheduled(initialDelay = TimeConstants.DATAFRAGMENT_EXPORT_AND_CLEANUP_FREQUENCY, fixedDelay = TimeConstants.DATAFRAGMENT_EXPORT_AND_CLEANUP_FREQUENCY)
 	public void exportAndCleanup() throws InvalidParameterException {
 
-		checkAndToggleRunningState();
+
 
 		final Long now = System.currentTimeMillis();
 
@@ -289,9 +286,7 @@ public class ImportExportService {
 			logger.error("Error while exporting and cleaning", e);
 		}
 
-		// Unpause the datafragments queuing
-		storeService.enableDequeue(true);
-		running = false;
+
 
 		statsLogger.warn( " items backuped, " + deletedCounter.longValue() + " removed in " + (System.currentTimeMillis() - now) + "ms"	);
 
@@ -344,23 +339,6 @@ public class ImportExportService {
 	
 	
 	
-	
-	/**
-	 * Check if import/export task is running, set to running state if no.
-	 */
-	private void checkAndToggleRunningState() throws InvalidParameterException {
-		if (running) {
-			throw new InvalidParameterException ("Export and cleanup already running");
-		}
-
-		
-		logger.info("Running export and cleanup");
-		
-		// Pause the datafragments queuing
-		storeService.enableDequeue(false);
-		
-		running = true;
-	}
 
 	
 	
