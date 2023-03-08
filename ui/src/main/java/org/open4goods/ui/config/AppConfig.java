@@ -74,12 +74,14 @@ public class AppConfig {
 	public OpenDataService openDataService (@Autowired AggregatedDataRepository aggregatedDataRepository, @Autowired UiConfig props ) {
 		return new OpenDataService(aggregatedDataRepository, props);
 	}
+
 	
-	@Bean
-	public SitemapGenerationService sitemapGenerationService (@Autowired AggregatedDataRepository aggregatedDataRepository, @Autowired UiConfig props ) {
-		return new SitemapGenerationService(aggregatedDataRepository, props);
-	}
-	
+	// TODO(note) : DISABLING SITE MAP GENERATION
+//	@Bean
+//	public SitemapGenerationService sitemapGenerationService (@Autowired AggregatedDataRepository aggregatedDataRepository, @Autowired UiConfig props ) {
+//		return new SitemapGenerationService(aggregatedDataRepository, props);
+//	}
+//	
 	/** The bean providing datasource configurations **/
 	public @Bean DataSourceConfigService datasourceConfigService(@Autowired final UiConfig config) {
 		return new DataSourceConfigService(config.getDatasourcesfolder());
