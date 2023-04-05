@@ -8,7 +8,7 @@ The first open source price contributor, doing its best for the common good.
 	 * **france** : **[eco-achat.fr](https://eco-achat.fr/)**
 	 * **world-wide** : maybe one day...
 
- * Probably the largest [product open data database](https://eco-achat.fr/opendata) in the world.
+ * Probably one of the largest [product open data database](https://eco-achat.fr/opendata), at least for french products.
  * Financially contributing to the environmental cause, through a repayment of 20% of the site incomes. 
 
 -----
