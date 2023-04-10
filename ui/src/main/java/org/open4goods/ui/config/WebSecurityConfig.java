@@ -26,15 +26,15 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 		
     private @Autowired AuthenticationProvider  authProvider;
 	
-	@Override
-	public void configure(WebSecurity web) throws Exception {
-		web.ignoring().antMatchers("attributes-datasources-report.html");
-		//TODO(security,P1, 0.5) : Add actuator security
-		web.ignoring().antMatchers("/actuator/**");
-		web.ignoring().antMatchers("/wikiupdate/**");
-		web.ignoring().antMatchers("/widgets");
-		web.ignoring().antMatchers("/widget/**");
-	}
+//	@Override
+//	public void configure(WebSecurity web) throws Exception {
+//		web.ignoring().antMatchers("attributes-datasources-report.html");
+//		//TODO(security,P1, 0.5) : Add actuator security
+//		web.ignoring().antMatchers("/actuator/**");
+//		web.ignoring().antMatchers("/wikiupdate/**");
+//		web.ignoring().antMatchers("/widgets");
+//		web.ignoring().antMatchers("/widget/**");
+//	}
 
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {

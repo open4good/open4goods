@@ -31,7 +31,17 @@ public class XwikiConfiguration {
 	public String viewPath() {		
 		return baseUrl +"/"+ XWIKI_VIEW_PATH;
 	}
-	
+		
+	/**
+	 * Return the edit url for a vertical (space) and a page
+	 * @param vertical
+	 * @param page
+	 * @return
+	 */
+	public String getEditUrl(String vertical, String page) {		
+		return getBaseUrl() + "/bin/edit/" + vertical + "/" + page;
+	}
+		
     
 	public String getUser() {
 		return user;
@@ -51,10 +61,6 @@ public class XwikiConfiguration {
 	public void setBaseUrl(final String wikiBaseUrl) {
 		this.baseUrl = wikiBaseUrl;
 	}
-
-
-
-
 
 
 

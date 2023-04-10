@@ -45,6 +45,8 @@ import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.http.converter.HttpMessageNotWritableException;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.authentication.AuthenticationProvider;
+import org.springframework.security.web.firewall.HttpFirewall;
+import org.springframework.security.web.firewall.StrictHttpFirewall;
 import org.springframework.web.servlet.LocaleResolver;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.PathMatchConfigurer;
@@ -185,12 +187,21 @@ public class AppConfig {
 		return lci;
 	}
 
-//	@Bean
-//	public HttpFirewall allowUrlEncodedSlashHttpFirewall() {
-//	    StrictHttpFirewall firewall = new StrictHttpFirewall();
-//	    firewall.setAllowUrlEncodedSlash(true);    
-//	    return firewall;
-//	}
+	@Bean
+	public HttpFirewall allowUrlEncodedSlashHttpFirewall() {
+	    StrictHttpFirewall firewall = new StrictHttpFirewall();
+	    firewall.setAllowUrlEncodedSlash(true);    
+	    firewall.setAllowBackSlash(true);
+	    firewall.setAllowNull(true);
+	    firewall.setAllowSemicolon(true);
+	    firewall.setUnsafeAllowAnyHttpMethod(true);
+	    firewall.setUnsafeAllowAnyHttpMethod(true);
+	    firewall.setAllowUrlEncodedPercent(true);
+	    
+	    
+	    
+	    return firewall;
+	}
 	
 
 	///////////////////////////////////
