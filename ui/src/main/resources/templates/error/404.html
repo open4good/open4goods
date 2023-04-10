@@ -43,7 +43,13 @@
                             <a href="./../index.html"><img class="img-fluid w-50" src="/assets/img/404.gif" alt="not found"></a>
                             <h1 class="mt-4"> <span class="fw-bolder text-primary">introuvable</span></h1>
                             <p class="lead my-4 px-lg-11">Oups ! Il semblerait que cette page n'existe pas.</p>
-                            <a class="btn btn-primary animate-hover" href="/"><span class="fas fa-chevron-left me-3 ps-2 animate-left-3"></span>Retour à l'accueil</a></div>
+                            <a class="btn btn-primary animate-hover" href="/"><span class="fas fa-chevron-left me-3 ps-2 animate-left-3"></span>Retour à l'accueil</a>
+                            
+                            <th:block th:if="${  T(org.springframework.security.core.context.SecurityContextHolder).context.authentication.class.name=='org.springframework.security.authentication.UsernamePasswordAuthenticationToken'}">
+                            	 <a class="btn btn-primary btn-info  animate-hover" target="_blank" href="?edit">Editer cette page<span class="fas fa-chevron-right me-3 ps-2 animate-left-3"></span></a></div>
+                            </th:block>
+						</div>
+                            
                     </div>
                 </div>
             </div>

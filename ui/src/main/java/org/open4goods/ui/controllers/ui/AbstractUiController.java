@@ -53,7 +53,7 @@ public class AbstractUiController {
 		ret.addObject("gaId",config.getWebConfig().getGoogleAnalyticsId());
 	
 		// Retrieve authentication status
-		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+		Authentication authentication = SecurityContextHolder .getContext().getAuthentication();
 		if (authentication instanceof UsernamePasswordAuthenticationToken)  {
 			ret.addObject("user",authentication.getName());
 		}
