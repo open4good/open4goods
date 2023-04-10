@@ -22,13 +22,13 @@ import org.open4goods.services.SerialisationService;
 import org.open4goods.services.StandardiserService;
 import org.open4goods.services.TagCloudService;
 import org.open4goods.services.VerticalsConfigService;
+import org.open4goods.services.XwikiService;
 import org.open4goods.ui.config.yml.UiConfig;
 import org.open4goods.ui.interceptors.GenericTemplateInterceptor;
 import org.open4goods.ui.services.GtinService;
 import org.open4goods.ui.services.ImageService;
 import org.open4goods.ui.services.OpenDataService;
 import org.open4goods.ui.services.SearchService;
-import org.open4goods.ui.services.SitemapGenerationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.caffeine.CaffeineCache;
@@ -36,7 +36,6 @@ import org.springframework.cache.support.SimpleCacheManager;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.Ordered;
-import org.springframework.http.CacheControl;
 import org.springframework.http.HttpInputMessage;
 import org.springframework.http.HttpOutputMessage;
 import org.springframework.http.MediaType;
@@ -45,6 +44,7 @@ import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.http.converter.HttpMessageNotWritableException;
 import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.web.servlet.LocaleResolver;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.PathMatchConfigurer;
@@ -82,6 +82,19 @@ public class AppConfig {
 //		return new SitemapGenerationService(aggregatedDataRepository, props);
 //	}
 //	
+	
+	
+	@Bean AuthenticationProvider capsuleAuthenticationProvider() {
+		return new CapsuleAuthenticationProvider();
+	}
+	
+	@Bean
+	XwikiService xwikiService(@Autowired UiConfig props) {
+		return new XwikiService(props.getWikiConfig());
+	}
+	
+	
+	
 	/** The bean providing datasource configurations **/
 	public @Bean DataSourceConfigService datasourceConfigService(@Autowired final UiConfig config) {
 		return new DataSourceConfigService(config.getDatasourcesfolder());

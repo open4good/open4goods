@@ -4,6 +4,7 @@ import java.io.File;
 import java.util.Locale;
 
 import org.open4goods.config.yml.TagCloudConfig;
+import org.open4goods.config.yml.XwikiConfiguration;
 import org.open4goods.config.yml.ui.ApiConfig;
 import org.open4goods.config.yml.ui.OpenSearchConfig;
 import org.open4goods.config.yml.ui.SiteNaming;
@@ -75,7 +76,10 @@ public class UiConfig {
 	private WebConfig webConfig = new WebConfig();
 
 
-
+	/**
+	 * The Xwiki instance configuration
+	 */
+	private XwikiConfiguration wikiConfig;
 
 	/**
 	 * The config for generated tagcloud
@@ -206,6 +210,16 @@ public class UiConfig {
 	public void setEmail(String email) {
 		this.email = email;
 	}
+
+	public XwikiConfiguration getWikiConfig() {
+		return wikiConfig;
+	}
+
+	public void setWikiConfig(XwikiConfiguration wikiConfig) {
+		this.wikiConfig = wikiConfig;
+	}
+	
+	
 	
 	
 
