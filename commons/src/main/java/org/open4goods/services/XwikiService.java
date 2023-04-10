@@ -46,7 +46,7 @@ public class XwikiService {
 	private static final Logger logger = LoggerFactory.getLogger(XwikiService.class);
 	
 	
-//	private final Map<String,WikiResult> contentCache = new ConcurrentHashMap<>();
+	private final Map<String,WikiResult> contentCache = new ConcurrentHashMap<>();
 	
 	private static final String GROUPS_MARKUP_START = "%GROUPES%";
 	private static final String GROUPS_MARKUP_END = "%/GROUPES%";
@@ -176,10 +176,10 @@ public class XwikiService {
 	public WikiResult getContent (String xwikiPath,  String user, String password) throws TechnicalException, InvalidParameterException{
 		
 		
-//		WikiResult cached = contentCache.get(xwikiPath);
-//		if (null != cached) {
-//			return cached;
-//		}
+		WikiResult cached = contentCache.get(xwikiPath);
+		if (null != cached) {
+			return cached;
+		}
 		
 		
 		WikiResult res = new WikiResult();
@@ -241,7 +241,7 @@ public class XwikiService {
 		res.setEditLink(url.replace("/view/", "/edit/"));
 		
 		// Putting in cache
-//		contentCache.put(xwikiPath, res);
+		contentCache.put(xwikiPath, res);
 		return res;
 	
 		
@@ -249,11 +249,14 @@ public class XwikiService {
 
 
 
-//	public void invalidate(String doc) {
-//		logger.warn("Invalidating wiki cache : {}",doc);
-//		contentCache.remove(doc.replace(".", "/"));
-//	}
-	
+	public void invalidate(String doc) {
+		logger.warn("Invalidating wiki cache : {}",doc);
+		contentCache.remove(doc.replace(".", "/"));
+	}
+
+	public void invalidateAll() {
+		contentCache.clear();
+	}
 
 //
 //	/**

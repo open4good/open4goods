@@ -54,6 +54,18 @@ public class XwikiController extends AbstractUiController {
 	 * @throws UnirestException
 	 */
 
+
+	@GetMapping("/flushCache")
+	public ModelAndView flushCache( final HttpServletRequest request) {
+		 xwikiService.invalidateAll();		 
+		 ModelAndView mv = defaultModelAndView(("xwiki"), request);;
+
+		mv.addObject("content", "All xwiki caches are invalidated");
+		mv.addObject("title", "SUCCESS, CACHE FLUSHED");
+		mv.addObject("editLink", "");
+		return mv;
+		 
+	}
 	
 	@GetMapping("/{page:[a-z-]+}")
 	public ModelAndView xwiki(
