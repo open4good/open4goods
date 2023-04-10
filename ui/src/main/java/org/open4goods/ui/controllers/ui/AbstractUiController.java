@@ -9,6 +9,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.servlet.ModelAndView;
 
 
@@ -47,10 +50,17 @@ public class AbstractUiController {
 		ret.addObject("baseUrl",config.getBaseUrl(request.getLocale()));
 		
 		
-		
-
 		ret.addObject("gaId",config.getWebConfig().getGoogleAnalyticsId());
 	
+		// Retrieve authentication status
+		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+		if (authentication instanceof UsernamePasswordAuthenticationToken)  {
+			ret.addObject("user",authentication.getName());
+		}
+		
+	
+		
+		
 		return ret;
 	}
 }
