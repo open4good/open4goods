@@ -5,24 +5,33 @@
                 
                 <p>eco-achat.fr est une initiative opensource et opendata visant à compenser partiellement l'impact de  vos achats en ligne.</p>
                
+               
+               	<span class="h5">Informations techniques</span>
+                <ul class="footer-links mt-2">                   
+                    <li class="ms-3" th:if="${genericResponse.duration != 0}">Page générée en <span th:text="${genericResponse.duration}"> </span> ms</li>
+                    <th:block th:if="${user}">
+	                    <li class="ms-3" >Connecté en tant que <b><span th:text="${user}"> </span></b></li>
+    	                <li class="ms-3" th:if="${editLink}"><a target="_blank" th:href="${editLink}">Editer cette page sur le wiki</a></li>                                       
+                    </th:block>
+                </ul>
+                
+                
             </div>
             <div class="col-6 col-md-4 mb-5 mb-lg-0">
                 <span class="h5">eco-achat.fr</span>
                 <ul class="footer-links mt-2">
-                    <li><a  href="/compensation-carbone">Compensation carbone</a></li>
-                    <li><a  href="/opendata">Open data</a></li>
-                    <li><a target="_blank" href="https://github.com/open4good/open4goods">Open source</a></li>
+                    <li class="ms-3"><a  href="/compensation-carbone">Compensation carbone</a></li>
+                    <li class="ms-3"><a  href="/opendata">Open data</a></li>
+                    <li class="ms-3"><a target="_blank" href="https://github.com/open4good/open4goods">Open source</a></li>
                 </ul>
             </div>
             <div class="col-6 col-md-4 mb-5 mb-lg-0">
                 <span class="h5">Autre</span>
                 <ul class="footer-links mt-2">
-                    <li><a href="https://github.com/open4good/open4goods/issues/new"
+                    <li class="ms-3"><a href="https://github.com/open4good/open4goods/issues/new"
                             target="_blank">Déclarer un bug ou proposer une évolution</a></li>
                 
-                    <li><a href="https://fr.linkedin.com/in/goulven-furet-b448b582">Nous contacter</a></li>
-                    <li th:if="${genericResponse.duration != 0}">Page générée en <span th:text="${genericResponse.duration}"> </span> ms</li>
-                    
+                    <li class="ms-3"><a href="https://fr.linkedin.com/in/goulven-furet-b448b582">Nous contacter</a></li>
                     
                 </ul>
             </div>
