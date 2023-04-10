@@ -29,26 +29,55 @@
 
 <body>
     
+    <!--/* Navbar */-->
+	<header class="header-global">
+    	<nav id="navbar-main" aria-label="Primary navigation" class="navbar navbar-main navbar-expand-lg navbar-theme-primary headroom navbar-light navbar-theme-secondary">
+			<th:block th:include="inc/navbar-non-product.html"></th:block>
+		</nav>
+	</header>
+	
     <main>	
        <!--/* Loader */-->
        <th:block th:include="inc/preloader.html"></th:block>
 		
        <!--/* Search */-->
-       <section class="section section-header text-dark">
+       <section class="section text-dark">
            <div class="container">
                <div class="row justify-content-between align-items-center">
                    <div class="col-12 col-md-12">
                        <h1 class="display-2 mb-2">eco-<span class="text-secondary-app fw-bold"></span>achat<span class="text-secondary-app fw-bold">.fr</span>
-                       <p class="lead text-gray mt-2">Acheter votre produit en passant par greenbuy apporte un peu de bien commun dans votre shopping en ligne. </p>
                        </h1>
+                       
+                       
+                       <div class="row">
+                       	<div class="col-2 ">                       	
+                       		<img class="navbar-brand-light" src="../../assets/img/brand/dark.svg" alt="eco-achat.fr logo dark">
+                       	</div>
+                       
+                       
+                       	<div class="col-10">
+                       	
+                      		   <p class="lead text-gray mt-2">Acheter votre produit en passant par greenbuy apporte un peu de bien commun dans votre shopping en ligne. </p>
+                       
                                <form method="post" id="searchForm" action="/recherche">
 			                       <div class="d-flex flex-wrap mt-lg-2">
-			                           <div class="input-group">
+			                           <div class="input-group input-group-lg">
 				                               <input type="text" id="searchInput" class="form-control" th:placeholder="'Chercher dans ' + ${#numbers.formatDecimal(totalItems, 0, 'COMMA', 0, 'POINT')} + ' produits'" aria-label="Search" aria-describedby="basic-addon1" name="query">
 				                               <button onclick="document.getElementById('searchForm').submit()" class="btn btn-primary" type="button"><span class="icon icon-xs me-1"><span class="fas fa-search"></span></span> Chercher</button>
 			                            </div>
 			                       </div>
 	                           </form>
+	                                                  	
+                       	</div>
+                       
+                       
+                       
+                       </div>
+                       
+
+	                           
+	                           
+	                           
 	                           
                    <blockquote class="mt-4 blockquote text-center">
                    
@@ -76,7 +105,7 @@
                             </div>
                             <div class="card-body">
                                 <p>
-                                   20 % du chiffre d'affaire (revenus d'affiliation) finance une organisation écologique.                      
+                                   20 % du chiffre d'affaire (revenus d'affiliation) financent une compensation environnementale.                      
                                 </p>
                                 <a href="#" class="btn btn-sm btn-secondary-app animate-up-2 mt-3">Compensation écologique</a>
                             </div>
