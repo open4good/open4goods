@@ -222,10 +222,10 @@ public class XwikiService {
 				body = body.replace("<?xml version=\"1.0\" encoding=\"UTF-8\"?>", "");
 				body = body.replace("<div class=\"col-xs-12\" id=\"xwikicontent\">", "<div class='wikicontent'>");
 //				author = XpathHelper.xpathEval(ret, "//div[@class='xdocLastModification']");
-				res.setTitle(XpathHelper.xpathEval(ret, "//div[@id='document-title']").getTextContent());
+				res.setTitle(StringEscapeUtils.unescapeHtml4(XpathHelper.xpathEval(ret, "//div[@id='document-title']").getTextContent()));
 
 			    // Applying blablageneration
-				res.setHtml(body);
+				res.setHtml(StringEscapeUtils.unescapeHtml4(body));
 				
 				
 
