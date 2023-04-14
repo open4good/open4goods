@@ -24,7 +24,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
  * @author Goulven.Furet
  *
  */
-public class CapsuleAuthenticationProvider implements AuthenticationProvider {
+public class XwikiAuthenticationProvider implements AuthenticationProvider {
 
 	
 	@Autowired XwikiService xwikiService;

@@ -9,5 +9,7 @@ public class RolesConstants {
 	public static final String ROLE_CRAWLER = "ROLE_CRAWLER";
 	public static final String ROLE_USER = "ROLE_USER";
 	public static final String ROLE_ADMIN = "ROLE_ADMIN";
+	public static final String ROLE_XWIKI_ALL = "ROLE_XWIKIALLGROUP";
+	
 
 }

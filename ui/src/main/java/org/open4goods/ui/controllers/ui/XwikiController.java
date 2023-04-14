@@ -8,12 +8,14 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.lang3.StringUtils;
 import org.open4goods.exceptions.InvalidParameterException;
 import org.open4goods.exceptions.TechnicalException;
+import org.open4goods.model.constants.RolesConstants;
 import org.open4goods.model.dto.WikiResult;
 import org.open4goods.services.XwikiService;
 import org.open4goods.ui.config.yml.UiConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -42,30 +44,27 @@ public class XwikiController extends AbstractUiController {
 	// Mappings
 	//////////////////////////////////////////////////////////////
 
+
 	/**
-	 * The verticalized content.
-	 *
+	 * Endpoint to flush the wiki
 	 * @param request
-	 * @param response
 	 * @return
-	 * @throws IOException
-	 * @throws InvalidParameterException
-	 * @throws TechnicalException
-	 * @throws UnirestException
 	 */
-
-
 	@GetMapping("/flushCache")
+	@PreAuthorize("hasAuthority('"+RolesConstants.ROLE_XWIKI_ALL+"')")
 	//TODO (security) : protect with role
-	public ModelAndView flushCache( final HttpServletRequest request) {
-		 xwikiService.invalidateAll();		 
-		 ModelAndView mv = defaultModelAndView(("xwiki-layout1"), request);;
+	public ModelAndView flushCache(final HttpServletRequest request) {
+		xwikiService.invalidateAll();
+		ModelAndView mv = defaultModelAndView(("xwiki-layout1"), request);
 
-		mv.addObject("content", "All xwiki caches are invalidated");
-		mv.addObject("title", "SUCCESS, CACHE FLUSHED");
-		mv.addObject("editLink", "");
+		WikiResult res = new WikiResult();
+		res.setHtml("All xwiki caches are invalidated");
+		res.setPageTitle("SUCCESS, CACHE FLUSHED");
+
+		mv.addObject("content", res);
+
 		return mv;
-		 
+
 	}
 	
 	@GetMapping("/{page:[A-Za-z-]+}")
