@@ -56,6 +56,10 @@ public class AbstractUiController {
 		Authentication authentication = SecurityContextHolder .getContext().getAuthentication();
 		if (authentication instanceof UsernamePasswordAuthenticationToken)  {
 			ret.addObject("user",authentication.getName());
+			
+			ret.addObject("roles",authentication.getAuthorities().stream().map(e->e.getAuthority()).toArray() );
+			
+			
 		}
 		
 	

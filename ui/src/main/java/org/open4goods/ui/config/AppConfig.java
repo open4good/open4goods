@@ -87,7 +87,7 @@ public class AppConfig {
 	
 	
 	@Bean AuthenticationProvider capsuleAuthenticationProvider() {
-		return new CapsuleAuthenticationProvider();
+		return new XwikiAuthenticationProvider();
 	}
 	
 	@Bean
