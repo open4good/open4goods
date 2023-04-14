@@ -7,7 +7,7 @@ services:
 ###################################################################             
   xwiki:
     # Use an already built XWiki image from DockerHub.
-    image: "xwiki:lts-mysql-tomcat"
+    image: "xwiki:15.2.0-mysql-tomcat"
     container_name: xwiki-mysql-tomcat-web
     depends_on:
       - xwiki-mysql-db
@@ -20,7 +20,7 @@ services:
     # Provide a name instead of an auto-generated id for the xwiki permanent directory configured in the Dockerfile,
     # to make it simpler to identify in 'docker volume ls'.
     volumes:
-      - xwiki-data:/usr/local/xwiki
+      - /opt/open4goods/xwiki:/usr/local/xwiki
     networks:
       - o4g-network
     ports:
@@ -42,7 +42,7 @@ services:
     # 'docker volume ls'
     volumes:
       - ./xwiki.cnf:/etc/mysql/conf.d/xwiki.cnf
-      - mysql-data:/var/lib/mysql
+      - /opt/open4goods/mysql-data:/var/lib/mysql
       - ./init.sql:/docker-entrypoint-initdb.d/init.sql
     # Configure the MySQL database and create a user with provided name/password.
     # See https://hub.docker.com/_/mysql/ for more details.
@@ -113,8 +113,6 @@ services:
 volumes:
   elastic-data:
     driver: local
-  mysql-data: {}
-  xwiki-data: {}
 
 networks:
   o4g-network:
