@@ -39,7 +39,7 @@ public class XwikiConfiguration {
 	 * @return
 	 */
 	public String getEditUrl(String vertical, String page) {		
-		return getBaseUrl() + "/bin/edit/" + vertical + "/" + page;
+		return getBaseUrl() + "/bin/edit/" + vertical + "/" + page+"?template=XWiki.PageTemplate";
 	}
 		
     

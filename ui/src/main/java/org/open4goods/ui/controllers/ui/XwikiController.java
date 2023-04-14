@@ -59,7 +59,7 @@ public class XwikiController extends AbstractUiController {
 	//TODO (security) : protect with role
 	public ModelAndView flushCache( final HttpServletRequest request) {
 		 xwikiService.invalidateAll();		 
-		 ModelAndView mv = defaultModelAndView(("xwiki"), request);;
+		 ModelAndView mv = defaultModelAndView(("xwiki-layout1"), request);;
 
 		mv.addObject("content", "All xwiki caches are invalidated");
 		mv.addObject("title", "SUCCESS, CACHE FLUSHED");
