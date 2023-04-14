@@ -14,12 +14,15 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
+import javax.xml.xpath.XPathExpressionException;
+
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringEscapeUtils;
-import org.jsoup.Jsoup;
+import org.apache.commons.lang3.StringUtils;
 import org.open4goods.config.yml.XwikiConfiguration;
 import org.open4goods.exceptions.InvalidParameterException;
+import org.open4goods.exceptions.ResourceNotFoundException;
 import org.open4goods.exceptions.TechnicalException;
 import org.open4goods.helper.DocumentHelper;
 import org.open4goods.helper.XpathHelper;
@@ -34,6 +37,7 @@ import org.springframework.web.client.RequestCallback;
 import org.springframework.web.client.ResponseExtractor;
 import org.springframework.web.client.RestTemplate;
 import org.w3c.dom.Document;
+import org.w3c.dom.Node;
 
 /**
  * This service handles XWiki abstraction. Markup language to html conversion,
@@ -50,13 +54,12 @@ public class XwikiService {
 	
 	private static final String GROUPS_MARKUP_START = "%GROUPES%";
 	private static final String GROUPS_MARKUP_END = "%/GROUPES%";
+
+	
 	
 	private final XwikiConfiguration config;
 
 	private final RestTemplate restTemplate = new RestTemplate();
-
-
-
 
 	
 	public XwikiService(XwikiConfiguration config) {
@@ -107,6 +110,9 @@ public class XwikiService {
 		
 		int posStart = raw.indexOf(GROUPS_MARKUP_START);
 		int posEnd = raw.indexOf(GROUPS_MARKUP_END);
+		
+		
+		
 		
 		if (-1 == posStart || -1 == posEnd) {
 			throw new TechnicalException("Cannot retrieve groups for " + user+". No " +GROUPS_MARKUP_START + " markup found" );
@@ -160,10 +166,6 @@ public class XwikiService {
 		restTemplate.execute(URI.create("https://wiki.web-equitable.org/xwiki/bin/export/XWiki/XWikiPreferences?editor=globaladmin&section=Export"), HttpMethod.POST, requestCallback, responseExtractor);
 	}
 	
-	
-	
-
-	
 	/**
 	 * Get a html content from the wiki
 	 * @param xwikiPath
@@ -177,10 +179,9 @@ public class XwikiService {
 		
 		
 		WikiResult cached = contentCache.get(xwikiPath);
-		if (null != cached) {
+		if (null != cached && !StringUtils.isEmpty(cached.getHtml())) {
 			return cached;
-		}
-		
+		}		
 		
 		WikiResult res = new WikiResult();
 		
@@ -210,25 +211,38 @@ public class XwikiService {
 			try {
 				String raw= response.getBody();
 				
-				// Cleaning with JSOUP
-				final org.jsoup.nodes.Document document = Jsoup.parse(raw);
-			    document.outputSettings().syntax(org.jsoup.nodes.Document.OutputSettings.Syntax.xml);			    
-			     raw = StringEscapeUtils.unescapeHtml4(raw);
-			    
-			    // Extracting with xpath
-				Document ret = DocumentHelper.getDocument(raw);				
-				String body = DocumentHelper.getStringFromDocument( XpathHelper.xpathEval(ret,"//div[@id='xwikicontent']"));
-				//NOTE : not efficient, but safe
-				body = body.replace("<?xml version=\"1.0\" encoding=\"UTF-8\"?>", "");
-				body = body.replace("<div class=\"col-xs-12\" id=\"xwikicontent\">", "<div class='wikicontent'>");
-//				author = XpathHelper.xpathEval(ret, "//div[@class='xdocLastModification']");
-				res.setTitle(StringEscapeUtils.unescapeHtml4(XpathHelper.xpathEval(ret, "//div[@id='document-title']").getTextContent()));
-
-			    // Applying blablageneration
-				res.setHtml(StringEscapeUtils.unescapeHtml4(body));
+				final Document doc = DocumentHelper.getDocument(raw);
+//			    
+				String layout = getDd(doc, 1);
+				String width= getDd(doc, 2);
 				
 				
+				String metaTitle = getDd(doc, 3);
+				String metaDescription = getDd(doc, 4);
+				String metaKeyword = getDd(doc, 5);
 
+//				String body =  DocumentHelper.getSourceFromDocument(XpathHelper.xpathEval(doc,"//div[@id='xwikicontent']//dd[6]"));
+//				body =body.substring(DD_START.length(), body.length()-DD_END.length());
+
+				String body = getHtmlFromRaw(raw);
+				
+				String pageTitle = getDd(doc, 6);
+				
+				
+				String author = XpathHelper.xpathEval(doc,"//meta[@name='author']/@content").getTextContent() ;    	
+				
+				res.setLayout(layout);
+				res.setWidth(width);
+				res.setMetaTitle(metaTitle);
+				res.setMetaDescription(metaDescription);
+				res.setMetaKeyword(metaKeyword);
+				res.setAuthor(author);
+				
+				res.setPageName(XpathHelper.xpathEval(doc, "//div[@id='document-title']").getTextContent());
+				
+				res.setHtml(body);
+				res.setPageTitle(pageTitle);
+				
 			} catch (InvalidParameterException e) {
 				//throw e;
 			} catch (Exception e) {
@@ -247,6 +261,29 @@ public class XwikiService {
 		
 	}
 
+	
+	/**
+	 * A tricky method
+	 * @return
+	 */
+	
+	public String getHtmlFromRaw(String raw) {
+		
+		
+		int pos=raw.indexOf("XWiki.PageClass[0].pageContent");
+		int start = raw.indexOf("<dd>", pos) +4;
+		int stop = raw.indexOf("</dd>", start);
+		String ret= raw.substring(start,stop);
+		
+		ret=ret.replaceAll("<div class=\"wikimodel-emptyline\"></div>", "");
+		
+		return ret;
+		
+		
+		
+		
+	}
+	
 
 
 	public void invalidate(String doc) {
@@ -256,6 +293,23 @@ public class XwikiService {
 
 	public void invalidateAll() {
 		contentCache.clear();
+	}
+	
+	
+	/**
+	 * Internal routine to retrieve attributes fiels from the wiki page
+	 * @param node
+	 * @param num
+	 * @return
+	 * @throws XPathExpressionException
+	 * @throws TechnicalException
+	 * @throws ResourceNotFoundException
+	 */
+	public String getDd(Node node, int num) throws XPathExpressionException, TechnicalException, ResourceNotFoundException {
+		String ret = XpathHelper.xpathEval(node,"//div[@id='xwikicontent']//dd["+num+"]").getTextContent();
+//		ret=ret.substring(DD_START.length(), ret.length()-DD_END.length());
+		
+		return ret;
 	}
 
 //

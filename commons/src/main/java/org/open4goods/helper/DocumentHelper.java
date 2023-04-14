@@ -7,20 +7,29 @@ package org.open4goods.helper;
 import java.io.StringWriter;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
+import javax.xml.xpath.XPath;
+import javax.xml.xpath.XPathConstants;
+import javax.xml.xpath.XPathExpression;
+import javax.xml.xpath.XPathExpressionException;
+import javax.xml.xpath.XPathFactory;
 
 import org.htmlcleaner.CleanerProperties;
 import org.htmlcleaner.DomSerializer;
 import org.htmlcleaner.HtmlCleaner;
+import org.open4goods.exceptions.ResourceNotFoundException;
 import org.open4goods.exceptions.TechnicalException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
 /**
  * @author gof
@@ -37,6 +46,11 @@ public class DocumentHelper {
 	private static  DomSerializer domSerializer;
 	
 	private static  Transformer transformer; 
+	
+	private static final XPath xpath = XPathFactory.newInstance().newXPath();
+	
+	private static final Map<String, XPathExpression> xpathCache = new ConcurrentHashMap<>();
+	
 	 
 
 	static {
@@ -90,8 +104,8 @@ public class DocumentHelper {
 
 	}
 	
-	//method to convert Document to String
-	public static String getStringFromDocument(Node node) throws TechnicalException
+//	//method to convert Document to String
+	public static String getSourceFromDocument(Node node) throws TechnicalException
 	{
 	    try
 	    {
@@ -107,6 +121,36 @@ public class DocumentHelper {
 	       throw new TechnicalException("Xpath evaluation fail ",e);
 	    }
 	} 
+	
+	
+	/**
+	 * PErforms a simple XPATH evaluation upon a W3C document
+	 *
+	 * @param document
+	 * @param expression
+	 * @return
+	 * @throws XPathExpressionException
+	 */
+	public static String xpathEval(final Node document,  String expression)
+			throws XPathExpressionException, ResourceNotFoundException {
+
+		XPathExpression expr = xpathCache.get(expression);
+		if (null == expr) {
+			expr = xpath.compile(expression);
+			xpathCache.put(expression, expr);
+		}
+
+		final NodeList nl = (NodeList) expr.evaluate(document, XPathConstants.NODESET);
+		// Benchmarker.log("Xpath eval done", b,3);
+		if (nl.getLength() > 1) {
+			throw new XPathExpressionException(nl.getLength() + " element in xpath evaluation result");
+		} else if (nl.getLength() == 0) {
+			throw new ResourceNotFoundException("No results");
+		}
+		//TODO(feature) : could infer splitter tag
+		return nl.item(0).getTextContent();
+
+	}
 	
 
 }
