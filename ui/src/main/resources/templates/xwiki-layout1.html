@@ -2,28 +2,13 @@
 <html th:lang="${siteLocale.language}">
 
 <head>
-
-	<!--/* Metas and CSS */-->
+ 	<!--/* Metas and CSS */-->
 	<th:block th:include="inc/header-meta.html"></th:block>
     
 	<!-- Primary Meta Tags -->
-	<title th:text="#{index.title}"></title>
-	<meta name="title" th:content="#{index.meta.title}">
-	<meta name="description" th:content="#{index.meta.description}">
-		
-	<!-- Open Graph / Facebook -->
-	<meta property="og:type" content="website">
-	<meta property="og:url" th:content="${url}">
-	<meta property="og:title" th:content="#{index.title}">
-	<meta property="og:description" th:content="#{index.meta.description}">
-	<meta property="og:image" th:content="${url} + 'assets/img/brand/light.svg'">
-	
-	<!-- Twitter -->
-	<meta name="twitter:card" content="summary_large_image">
-	<meta name="twitter:url" th:content="${url}">
-	<meta name="twitter:title" th:content="#{index.title}">
-	<meta name="twitter:description" th:content="#{index.meta.description}">
-	<meta name="twitter:image" th:content="${url} + 'assets/img/brand/light.svg'">
+	<title th:text="${content.metaTitle}"></title>
+	<meta th:if="${content.metaDescription}" name="description" th:content="${content.metaDescription}">	
+	<meta th:if="${content.metaKeyword}" name="keywords" th:content="${content.metaKeyword}">
 	
 </head>
 
@@ -37,30 +22,27 @@
 	</header>
 	
     <main>	
-       <!--/* Loader */-->
+        <!--/* Loader */-->
        <th:block th:include="inc/preloader.html"></th:block>
 		
-     
-      
-      <section class="section-header pb-9 pb-lg-12 mb-4 mb-lg-6">
-            <div class="container">
+      <section class="section-header pb-9 pb-lg-12">
+            <div th:class="${content.width}">
                 <div class="row justify-content-center">
                     <div class="col-12 col-md-8 text-center">
-                        <h1 class="display-2 mb-3" th:utext="${title}"></h1>                       
+                        <p class="display-2" th:utext="${content.pageTitle}"></p>                       
                     </div>
                 </div>
             </div>
-            <div class="pattern bottom"></div>
         </section>
         
       
 		<section class="section section-lg pt-0">
-            <div class="container mt-n7 mt-lg-n12 z-2">
+            <div class="mt-n7 mt-lg-n12 z-2" th:classappend="${content.width}">
                 <div class="row justify-content-center">
                     <div class="col">
                         <div class="card border-gray-300 p-4 p-md-5">
                     
-                          <th:block th:utext="${content}"></th:block>
+                          <th:block th:utext="${content.html}"></th:block>
                           
                           
                         </div>

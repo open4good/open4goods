@@ -68,7 +68,7 @@ public class XwikiController extends AbstractUiController {
 		 
 	}
 	
-	@GetMapping("/{page:[a-z-]+}")
+	@GetMapping("/{page:[A-Za-z-]+}")
 	public ModelAndView xwiki(
 			@PathVariable(name = "page") String page, final HttpServletRequest request, HttpServletResponse response)
 			throws IOException, TechnicalException, InvalidParameterException {
@@ -77,12 +77,12 @@ public class XwikiController extends AbstractUiController {
 	}
 	
 	
-	@GetMapping("/{vertical:[a-z-]+}/{page:[a-z-]+}")
+	@GetMapping("/{vertical:[A-Za-z-]+}/{page:[a-z-]+}")
 	public ModelAndView xwiki(@PathVariable(name = "vertical") String vertical,
 			@PathVariable(name = "page") String page, final HttpServletRequest request, HttpServletResponse response)
 			throws IOException, TechnicalException, InvalidParameterException {
 
-		ModelAndView mv = defaultModelAndView(("xwiki"), request);;
+		ModelAndView mv = null;
 		if (null != request.getParameter("edit")) {
 			// Edit mode, redirect to the wiki
 
@@ -90,16 +90,17 @@ public class XwikiController extends AbstractUiController {
 		} else {
 			// Rendering mode
 
+			
 			WikiResult content = xwikiService.getContent(vertical + "/" + page, config.getWikiConfig().getUser(),config.getWikiConfig().getPassword());
 
+			
+			
 			if (StringUtils.isEmpty(content.getHtml())) {
 //				mv.setStatus(HttpStatus.NOT_FOUND);
 				response.sendError(404);
 			} else {			
-				
-				mv.addObject("content", content.getHtml());
-				mv.addObject("title", content.getTitle());
-				mv.addObject("editLink", content.getEditLink());
+				mv = defaultModelAndView(("xwiki-"+content.getLayout()), request);
+				mv.addObject("content", content);
 			}
 
 		}

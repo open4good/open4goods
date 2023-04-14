@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html th:lang="${siteLocale.language}">
+
+<head>
+ 	<!--/* Metas and CSS */-->
+	<th:block th:include="inc/header-meta.html"></th:block>
+    
+	<!-- Primary Meta Tags -->
+	<title th:text="${content.metaTitle}"></title>
+	<meta th:if="${content.metaDescription}" name="description" th:content="${content.metaDescription}">	
+	<meta th:if="${content.metaKeyword}" name="keywords" th:content="${content.metaKeyword}">
+	
+</head>
+
+<body>
+    
+	<!--/* Navbar */-->
+	<header class="header-global">
+     	<nav id="navbar-main" aria-label="Primary navigation" class="navbar navbar-main navbar-expand-lg navbar-theme-primary headroom navbar-dark navbar-theme-primary">
+			<th:block th:include="inc/navbar-non-product.html"></th:block>
+		</nav>
+	</header>
+	
+    <main>	
+        <!--/* Loader */-->
+       <th:block th:include="inc/preloader.html"></th:block>
+		
+         <!-- Hero -->
+        <section class="section-header pb-2 pb-sm-2 bg-primary text-white">
+            <div class="container">
+                <div class="row justify-content-center">
+                    <div class="col-12 col-lg-10 text-center">
+                        <h1 th:text="${content.pageTitle}" class="display-3 mb-4 px-lg-5"></h1>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <div class="section section-sm bg-white pt-5 pt-lg-6 text-black">
+            <article th:class="${content.width}">
+                <div th:utext="${content.html}" class="row justify-content-center"></div>
+                
+            </article>
+        </div>
+    
+    </main>
+
+	<!--/* Footer */-->
+	<th:block th:include="inc/footer.html"></th:block>	
+
+<!-- Core -->
+<script src="../../vendor/bootstrap/dist/js/bootstrap.min.js"></script>
+<script src="../../vendor/headroom.js/dist/headroom.min.js"></script>
+
+<!-- Vendor JS -->
+
+<script src="../../vendor/smooth-scroll/dist/smooth-scroll.polyfills.min.js"></script>
+<script src="../../vendor/vivus/dist/vivus.min.js"></script>
+<script type="text/javascript" language="javascript" src="https://code.jquery.com/jquery-3.5.1.js"></script>
+
+<!-- pixel JS -->
+<script src="../../assets/js/pixel.js"></script>
+
+<script>
+$(document).ready(function() {
+	// Product search input
+	$('#searchInput').on("change",function (e) {
+    	$('#searchForm').attr("action","/recherche/"+encodeURIComponent($('#searchInput').val()));
+    });
+
+	// Partners search
+	$("#partnersSearch").on("keyup", function() {
+		  var input = $(this).val().toUpperCase();
+
+		  $(".partnerCard").each(function() {
+		    if ($(this).data("string").toUpperCase().indexOf(input) < 0) {
+		      $(this).hide();
+		    } else {
+		      $(this).show();
+		    }
+		  })
+		});	
+
+
+
+} );
+
+
+
+
+</script>
+
+</body>
+
+</html>
