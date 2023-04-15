@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html th:lang="${siteLocale.language}">
+
+<head>
+
+	<!--/* Metas and CSS */-->
+	<th:block th:include="inc/header-meta.html"></th:block>
+    
+	<!-- Primary Meta Tags -->
+	<title th:text="#{index.title}"></title>
+	<meta name="title" th:content="#{index.meta.title}">
+	<meta name="description" th:content="#{index.meta.description}">
+		
+	<!-- Open Graph / Facebook -->
+	<meta property="og:type" content="website">
+	<meta property="og:url" th:content="${url}">
+	<meta property="og:title" th:content="#{index.title}">
+	<meta property="og:description" th:content="#{index.meta.description}">
+	<meta property="og:image" th:content="${url} + 'assets/img/brand/light.svg'">
+	
+	<!-- Twitter -->
+	<meta name="twitter:card" content="summary_large_image">
+	<meta name="twitter:url" th:content="${url}">
+	<meta name="twitter:title" th:content="#{index.title}">
+	<meta name="twitter:description" th:content="#{index.meta.description}">
+	<meta name="twitter:image" th:content="${url} + 'assets/img/brand/light.svg'">
+	
+</head>
+
+<body>
+    
+	<!--/* Navbar */-->
+	<header class="header-global">
+      	<nav id="navbar-main" aria-label="Primary navigation" class="navbar navbar-main navbar-expand-lg navbar-theme-primary headroom navbar-dark navbar-theme-primary">
+			<th:block th:include="inc/navbar-non-product.html"></th:block>
+		</nav>
+	</header>
+	
+    <main>	
+       <!--/* Loader */-->
+       <th:block th:include="inc/preloader.html"></th:block>
+		
+		    <!-- Hero -->
+        <section class="section-header bg-primary text-white pb-9 pb-lg-12 mb-4 mb-lg-6">
+            <div class="container-semi-fluid">
+                <div class="row justify-content-center">
+                    <div class="col-12 col-md-8 text-center">
+                        <p class="display-2 mb-3">Nos partenaires</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        
+ 		<section class="section section-lg pt-0">
+            <div class="mt-n8 mt-lg-n12 z-2 container-semi-fluid">
+                <div class="row justify-content-center">
+                    <div class="col">
+                        <div class="card shadow border-gray-300 p-4 p-lg-5">
+							<th:block th:with="path='WIDGETS/partenaires/'">
+                        		<th:block th:include="inc/wiki.html"></th:block>
+                        	</th:block>
+								<div class="container-semi-fluid">
+					     
+					                <div class="row">
+					                
+					               
+					               		<div class="mb-3">
+					                    	<div class="input-group">
+					                        	<span class="input-group-text" id="partnersSearchLabel"><span class="fas fa-search"></span></span>
+					                        	<input type="text" class="form-control" id="partnersSearch" placeholder="Filtrer" aria-label="Search" aria-describedby="partnersSearchLabel">
+					                    	</div>
+					                	</div>
+					                	                
+							            <th:block th:each="partner : ${partners}">
+											<div class="partnerCard col-md-4 col-lg-4 mb-5 mb-lg-0 mt-3" th:attr="data-string=${partner.key.name}">
+								                <div class="text-center card shadow p-4">
+								                	<a th:href="'/compensation/'+${partner.value}" rel="nofollow" >
+								                    	<img height="150" class="img-fluid" th:src="'/logo/'+${partner.key.name}"  th:alt="${partner.key.name}">
+								                	</a>
+					
+								                </div>
+								            </div>
+							            </th:block>
+					                </div>
+	                   
+                   
+                   
+            </div>
+            
+            
+                        </div>
+
+                    </div>
+                 </div>
+             </div>
+        </section>
+
+
+    </main>
+
+	<!--/* Footer */-->
+	<th:block th:include="inc/footer.html"></th:block>	
+
+<!-- Core -->
+<script src="../../vendor/bootstrap/dist/js/bootstrap.min.js"></script>
+<script src="../../vendor/headroom.js/dist/headroom.min.js"></script>
+
+<!-- Vendor JS -->
+
+<script src="../../vendor/smooth-scroll/dist/smooth-scroll.polyfills.min.js"></script>
+<script src="../../vendor/vivus/dist/vivus.min.js"></script>
+<script type="text/javascript" language="javascript" src="https://code.jquery.com/jquery-3.5.1.js"></script>
+
+<!-- pixel JS -->
+<script src="../../assets/js/pixel.js"></script>
+
+<script>
+$(document).ready(function() {
+
+	// Partners search
+	$("#partnersSearch").on("keyup", function() {
+		  var input = $(this).val().toUpperCase();
+
+		  $(".partnerCard").each(function() {
+		    if ($(this).data("string").toUpperCase().indexOf(input) < 0) {
+		      $(this).hide();
+		    } else {
+		      $(this).show();
+		    }
+		  })
+		});	
+
+
+
+} );
+
+
+
+
+</script>
+
+</body>
+
+</html>

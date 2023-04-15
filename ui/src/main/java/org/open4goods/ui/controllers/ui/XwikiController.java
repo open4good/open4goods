@@ -21,8 +21,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.servlet.ModelAndView;
 
-import com.mashape.unirest.http.exceptions.UnirestException;
-
 @Controller
 
 /**
@@ -67,7 +65,7 @@ public class XwikiController extends AbstractUiController {
 
 	}
 	
-	@GetMapping("/{page:[A-Za-z-]+}")
+	@GetMapping("/{page:[a-z-]+}")
 	public ModelAndView xwiki(
 			@PathVariable(name = "page") String page, final HttpServletRequest request, HttpServletResponse response)
 			throws IOException, TechnicalException, InvalidParameterException {
@@ -76,7 +74,7 @@ public class XwikiController extends AbstractUiController {
 	}
 	
 	
-	@GetMapping("/{vertical:[A-Za-z-]+}/{page:[a-z-]+}")
+	@GetMapping("/{vertical:[a-z-]+}/{page:[a-z-]+}")
 	public ModelAndView xwiki(@PathVariable(name = "vertical") String vertical,
 			@PathVariable(name = "page") String page, final HttpServletRequest request, HttpServletResponse response)
 			throws IOException, TechnicalException, InvalidParameterException {
@@ -90,7 +88,7 @@ public class XwikiController extends AbstractUiController {
 			// Rendering mode
 
 			
-			WikiResult content = xwikiService.getContent(vertical + "/" + page, config.getWikiConfig().getUser(),config.getWikiConfig().getPassword());
+			WikiResult content = xwikiService.getPage(vertical + "/" + page);
 
 			
 			
