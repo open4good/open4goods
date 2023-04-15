@@ -4,6 +4,7 @@ import java.util.Locale;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.open4goods.services.XwikiService;
 import org.open4goods.ui.config.yml.UiConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,6 +22,7 @@ public class AbstractUiController {
 	
 	private @Autowired Environment env;
 	private @Autowired UiConfig config;
+	private @Autowired XwikiService xwikiService;
 	
 	/**
 	 * Instanciates a ModelAndView and prefills from conf and from httpRequest
@@ -51,6 +53,8 @@ public class AbstractUiController {
 		
 		
 		ret.addObject("gaId",config.getWebConfig().getGoogleAnalyticsId());
+		
+		ret.addObject("wiki",xwikiService);
 	
 		// Retrieve authentication status
 		Authentication authentication = SecurityContextHolder .getContext().getAuthentication();

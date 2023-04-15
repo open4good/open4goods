@@ -18,7 +18,6 @@ import javax.xml.xpath.XPathExpressionException;
 
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.open4goods.config.yml.XwikiConfiguration;
 import org.open4goods.exceptions.InvalidParameterException;
@@ -40,22 +39,20 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 
 /**
- * This service handles XWiki abstraction. Markup language to html conversion,
- * XWiki objects to Java attributes handling, content retrieving
+ * This service handles XWiki auth and xwiki content retrieving
  *
  * @author Goulven.Furet 
  */
 public class XwikiService {
 	
 	private static final Logger logger = LoggerFactory.getLogger(XwikiService.class);
-	
-	
+		
 	private final Map<String,WikiResult> contentCache = new ConcurrentHashMap<>();
 	
 	private static final String GROUPS_MARKUP_START = "%GROUPES%";
 	private static final String GROUPS_MARKUP_END = "%/GROUPES%";
-
 	
+	private static String MARKER = "<div id=\"xwikicontent\" class=\"col-xs-12\">";
 	
 	private final XwikiConfiguration config;
 
@@ -70,9 +67,9 @@ public class XwikiService {
 	 * Try to login against the wiki, return the groups if succeed. The XWIKI_GROUPES_URL page must be :
 	 * 
 	 * 
-{{velocity}}
-#set($allGroupsInAllWikis = $services.user.group.getGroupsFromAllWikis($xcontext.userReference))
-%GROUPES%$allGroupsInAllWikis%/GROUPES%
+	{{velocity}}
+	#set($allGroupsInAllWikis = $services.user.group.getGroupsFromAllWikis($xcontext.userReference))
+	%GROUPES%$allGroupsInAllWikis%/GROUPES%
 {{/velocity}}
 	 * 
 	 * @param user
@@ -84,7 +81,7 @@ public class XwikiService {
 	public List<String> loginAndGetGroups (String user, String password) throws TechnicalException, InvalidParameterException{
 		
 		
-		String plainCreds = user+":"+password;
+		String plainCreds = user +":"+password;
 		byte[] plainCredsBytes = plainCreds.getBytes();
 		byte[] base64CredsBytes = Base64.encodeBase64(plainCredsBytes);
 		String base64Creds = new String(base64CredsBytes);
@@ -101,7 +98,6 @@ public class XwikiService {
 			throw new TechnicalException("Cannot execute get request to " + config.groupsUrl(),e );
 		}
 		
-		
 		if (!response.getStatusCode().is2xxSuccessful()) {
 			throw new InvalidParameterException("Invalid password");
 		}
@@ -111,11 +107,9 @@ public class XwikiService {
 		int posStart = raw.indexOf(GROUPS_MARKUP_START);
 		int posEnd = raw.indexOf(GROUPS_MARKUP_END);
 		
-		
-		
-		
+
 		if (-1 == posStart || -1 == posEnd) {
-			throw new TechnicalException("Cannot retrieve groups for " + user+". No " +GROUPS_MARKUP_START + " markup found" );
+			throw new TechnicalException("Cannot retrieve groups for " + config.getUser()+". No " +GROUPS_MARKUP_START + " markup found" );
 		}
 		
 		String[] groups = raw.substring(posStart+GROUPS_MARKUP_START.length() +1,posEnd-1).split(",");
@@ -150,7 +144,6 @@ public class XwikiService {
 		        request.getHeaders().addAll(headers);
 		};
 		    
-				
 		// Streams the response instead of loading it all in memory
 		ResponseExtractor<Void> responseExtractor = response -> {
 		    // Here I write the response to a file but do what you like
@@ -162,12 +155,12 @@ public class XwikiService {
 		if (destFile.exists()) {
 			destFile.delete();
 		}
-		//TODO(gof) : from conf
-		restTemplate.execute(URI.create("https://wiki.web-equitable.org/xwiki/bin/export/XWiki/XWikiPreferences?editor=globaladmin&section=Export"), HttpMethod.POST, requestCallback, responseExtractor);
+		restTemplate.execute(URI.create( config.getBaseUrl()+ "/xwiki/bin/export/XWiki/XWikiPreferences?editor=globaladmin&section=Export"), HttpMethod.POST, requestCallback, responseExtractor);
 	}
 	
+	
 	/**
-	 * Get a html content from the wiki
+	 * Get a html content from the wiki, from a simple page (nice for widget rendering)
 	 * @param xwikiPath
 	 * @param user
 	 * @param password
@@ -175,7 +168,68 @@ public class XwikiService {
 	 * @throws TechnicalException
 	 * @throws InvalidParameterException
 	 */
-	public WikiResult getContent (String xwikiPath,  String user, String password) throws TechnicalException, InvalidParameterException{
+	public WikiResult html (String xwikiPath) throws TechnicalException, InvalidParameterException{		
+	
+		WikiResult cached = contentCache.get(xwikiPath);
+		if (null != cached && !StringUtils.isEmpty(cached.getHtml())) {
+			return cached;
+		}		
+		
+		WikiResult res = new WikiResult();
+		
+		String url = config.viewPath() +URLDecoder.decode(xwikiPath, Charset.defaultCharset());		
+		
+		String plainCreds = config.getUser()+":"+config.getPassword();
+		byte[] plainCredsBytes = plainCreds.getBytes();
+		byte[] base64CredsBytes = Base64.encodeBase64(plainCredsBytes);
+		String base64Creds = new String(base64CredsBytes);
+
+		HttpHeaders headers = new HttpHeaders();
+		headers.add("Authorization", "Basic " + base64Creds);
+		headers.add("accept", "text/html " );
+		
+		ResponseEntity<String> response = null;
+		try {
+			
+			HttpEntity<String> request = new HttpEntity<String>(headers);
+			response = restTemplate.exchange(url, HttpMethod.GET, request, String.class);
+		} catch (Exception e) {
+			logger.error("Cannot parse wiki page at {} : {}" , url,e.getMessage());
+		}		
+		
+		if (null != response && response.getStatusCode().is2xxSuccessful()) {
+			//throw new InvalidParameterException("Invalid password");
+			try {
+				String raw= response.getBody();
+				int pos=raw.indexOf(MARKER);
+				raw = raw.substring(pos+MARKER.length()).trim();
+				String body= raw.substring(0,raw.indexOf("\n"));				
+				res.setHtml(body);
+			}
+			catch (Exception e) {
+				
+				logger.error("Cannot parse wiki page at " + url,e);
+//				throw new TechnicalException("Cannot parse wiki page at " + url,e);
+			}
+		} 
+		res.setViewLink(url );
+		res.setEditLink(url.replace("/view/", "/edit/"));
+		
+		// Putting in cache
+		contentCache.put(xwikiPath, res);
+		return res;
+	}
+		
+	/**
+	 * Get a WikiResult content from the wiki, with full metas
+	 * @param xwikiPath
+	 * @param user
+	 * @param password
+	 * @return
+	 * @throws TechnicalException
+	 * @throws InvalidParameterException
+	 */
+	public WikiResult getPage (String xwikiPath) throws TechnicalException, InvalidParameterException{
 		
 		
 		WikiResult cached = contentCache.get(xwikiPath);
@@ -187,7 +241,7 @@ public class XwikiService {
 		
 		String url = config.viewPath() +URLDecoder.decode(xwikiPath, Charset.defaultCharset());		
 		
-		String plainCreds = user+":"+password;
+		String plainCreds = config.getUser()+":"+config.getPassword();
 		byte[] plainCredsBytes = plainCreds.getBytes();
 		byte[] base64CredsBytes = Base64.encodeBase64(plainCredsBytes);
 		String base64Creds = new String(base64CredsBytes);
@@ -207,28 +261,18 @@ public class XwikiService {
 		}		
 		
 		if (null != response && response.getStatusCode().is2xxSuccessful()) {
-			//throw new InvalidParameterException("Invalid password");
 			try {
 				String raw= response.getBody();
 				
 				final Document doc = DocumentHelper.getDocument(raw);
-//			    
+		    
 				String layout = getDd(doc, 1);
 				String width= getDd(doc, 2);
-				
-				
 				String metaTitle = getDd(doc, 3);
 				String metaDescription = getDd(doc, 4);
 				String metaKeyword = getDd(doc, 5);
-
-//				String body =  DocumentHelper.getSourceFromDocument(XpathHelper.xpathEval(doc,"//div[@id='xwikicontent']//dd[6]"));
-//				body =body.substring(DD_START.length(), body.length()-DD_END.length());
-
 				String body = getHtmlFromRaw(raw);
-				
 				String pageTitle = getDd(doc, 6);
-				
-				
 				String author = XpathHelper.xpathEval(doc,"//meta[@name='author']/@content").getTextContent() ;    	
 				
 				res.setLayout(layout);
@@ -244,11 +288,9 @@ public class XwikiService {
 				res.setPageTitle(pageTitle);
 				
 			} catch (InvalidParameterException e) {
-				//throw e;
 			} catch (Exception e) {
 				
 				logger.error("Cannot parse wiki page at " + url,e);
-//				throw new TechnicalException("Cannot parse wiki page at " + url,e);
 			}
 		} 
 		res.setViewLink(url );
@@ -256,35 +298,8 @@ public class XwikiService {
 		
 		// Putting in cache
 		contentCache.put(xwikiPath, res);
-		return res;
-	
-		
+		return res;	
 	}
-
-	
-	/**
-	 * A tricky method
-	 * @return
-	 */
-	
-	public String getHtmlFromRaw(String raw) {
-		
-		
-		int pos=raw.indexOf("XWiki.PageClass[0].pageContent");
-		int start = raw.indexOf("<dd>", pos) +4;
-		int stop = raw.indexOf("</dd>", start);
-		String ret= raw.substring(start,stop);
-		
-		ret=ret.replaceAll("<div class=\"wikimodel-emptyline\"></div>", "");
-		
-		return ret;
-		
-		
-		
-		
-	}
-	
-
 
 	public void invalidate(String doc) {
 		logger.warn("Invalidating wiki cache : {}",doc);
@@ -306,39 +321,23 @@ public class XwikiService {
 	 * @throws ResourceNotFoundException
 	 */
 	public String getDd(Node node, int num) throws XPathExpressionException, TechnicalException, ResourceNotFoundException {
-		String ret = XpathHelper.xpathEval(node,"//div[@id='xwikicontent']//dd["+num+"]").getTextContent();
-//		ret=ret.substring(DD_START.length(), ret.length()-DD_END.length());
-		
+		String ret = XpathHelper.xpathEval(node,"//div[@id='xwikicontent']//dd["+num+"]").getTextContent();	
 		return ret;
 	}
 
-//
-//	/**
-//	 * Retrieves XWiki properties from an URL
-//	 *
-//	 * @param url
-//	 * @return
-//	 */
-//	public Map<String, String> getWikiProperties(String url) {
-//		Map<String, String> ret = new HashMap<>();
-//		try {
-//			HttpResponse<String> jsonResponse = Unirest.get(url).basicAuth(config.getXwikiUser(), config.getXwikiPassword()).asString();
-//
-//			List<String> keys = xpathValues(jsonResponse.getBody(), "//property/@name");
-//			List<String> values = xpathValues(jsonResponse.getBody(), "//property/value");
-//
-//			for (int i = 0; i < keys.size(); i++) {
-//				ret.put(keys.get(i), values.get(i));
-//			}
-//
-//		} catch (UnirestException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		}
-//
-//		return ret;
-//
-//	}
-//
+	/**
+	 * A tricky method to retrieve page content
+	 * @return
+	 */
+	
+	private String getHtmlFromRaw(String raw) {
+		int pos=raw.indexOf("XWiki.PageClass[0].pageContent");
+		int start = raw.indexOf("<dd>", pos) +4;
+		int stop = raw.indexOf("</dd>", start);
+		String ret= raw.substring(start,stop);
+		
+		return ret;
+	}
+	
 
 }

@@ -1,0 +1,10 @@
+<th:block th:with="res = ${wiki.html(path)}">
+	<th:block th:utext="${res.html}"></th:block>	
+
+	<div th:if="${user}" class="row">
+		<div class="alert alert-danger text-center">
+			<b><a th:href="${res.editLink}" target="_blank">!!! EDITER SUR LE WIKI !!!</a></b>
+		</div>
+	</div>
+</th:block>
+
