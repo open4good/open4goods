@@ -55,7 +55,7 @@ public class AggregatedDataRepository {
 
 	private static final Logger logger = LoggerFactory.getLogger(AggregatedDataRepository.class);
 
-	private static final String MAIN_INDEX_NAME = "all";
+	public static final String MAIN_INDEX_NAME = "all";
 
 	private static final String BAKCUP_INDEX_NAME = MAIN_INDEX_NAME+"-1";
 
@@ -63,7 +63,7 @@ public class AggregatedDataRepository {
 	/** Duration in ms where a price is considered to be valid. Only data with a price greater than this one will be returned to the user **/
 	private long VALID_UNTIL_DURATION =1000 * 3600 * 24 * 2;
 
-	private IndexCoordinates current_index = IndexCoordinates.of(MAIN_INDEX_NAME);
+	public IndexCoordinates current_index = IndexCoordinates.of(MAIN_INDEX_NAME);
 
 	
 	private static final IndexCoordinates backup_index = IndexCoordinates.of(BAKCUP_INDEX_NAME);

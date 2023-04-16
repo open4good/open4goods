@@ -91,6 +91,10 @@ public class AggregatedData implements Standardisable {
 	@Field(index = false, store = false, type = FieldType.Object)
 	private Set<Description> descriptions = new HashSet<>();
 
+	/** The human crafted description**/
+	@Field(index = false, store = false, type = FieldType.Object)
+	private Description humanDescription;
+	
 	/**
 	 * Informations and resources related to the gtin
 	 */
@@ -382,6 +386,11 @@ public class AggregatedData implements Standardisable {
 		return list;
 	}
 
+	
+	public String namesAndDescriptionsWithoutShortestNameWithCariage() {
+		return StringUtils.join(namesAndDescriptionsWithoutShortestName(),"\n");
+	}
+	
 	/**
 	 * 
 	 * @return all names and descriptions, excluding the longest offer name
@@ -621,6 +630,14 @@ public class AggregatedData implements Standardisable {
 
 	public void setGoogleTaxonomyIds(Set<Integer> googleTaxonomyIds) {
 		this.googleTaxonomyIds = googleTaxonomyIds;
+	}
+
+	public Description getHumanDescription() {
+		return humanDescription;
+	}
+
+	public void setHumanDescription(Description humanDescription) {
+		this.humanDescription = humanDescription;
 	}
 
 
