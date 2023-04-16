@@ -10,7 +10,10 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.open4goods.dao.AggregatedDataRepository;
 import org.open4goods.exceptions.ResourceNotFoundException;
+import org.open4goods.model.Localised;
+import org.open4goods.model.constants.ProviderType;
 import org.open4goods.model.data.AffiliationToken;
+import org.open4goods.model.data.Description;
 import org.open4goods.model.product.AggregatedData;
 import org.open4goods.model.product.AggregatedPrice;
 import org.open4goods.services.SerialisationService;
@@ -22,6 +25,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.ModelAndView;
 
@@ -56,6 +61,7 @@ public class ProductController extends AbstractUiController {
 	 *
 	 * @param request
 	 * @param response
+	 * @param updatedData 
 	 * @return
 	 * @throws IOException 
 	 * @throws UnirestException
@@ -71,7 +77,8 @@ public class ProductController extends AbstractUiController {
 		// Retrieve the AggregatedData
 		AggregatedData data;
 		try {
-			data = esDao.getById(id);
+				data = esDao.getById(id);
+
 		} catch (ResourceNotFoundException e) {
 			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Produit " + request.getServletPath() + " introuvable !");
 		}
@@ -112,6 +119,33 @@ public class ProductController extends AbstractUiController {
 		return mv;
 	}
 
+	
+	@PostMapping("/*-{id:\\d+}")
+	public ModelAndView updateProduct(@RequestParam String productTitle, @RequestParam String productDescription,  @PathVariable String id, final HttpServletRequest request, HttpServletResponse response) throws IOException {
+
+		// Retrieve the AggregatedData
+		AggregatedData data;
+		try {
+			data = esDao.getById(id);
+		} catch (ResourceNotFoundException e) {
+			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Produit " + request.getServletPath() + " introuvable !");
+		}
+		
+		// Updating
+		data.getNames().setManualName(productTitle);
+		
+		Description description = new Description();
+		//TODO(i18n) 
+		description.setContent(new Localised(productDescription, "fr"));
+		description.setProviderType(ProviderType.HUMAN_REDACTED);
+		
+		data.setHumanDescription(description);
+		
+		esDao.index(data, AggregatedDataRepository.MAIN_INDEX_NAME);
+		
+		return product(id, request, response);
+		
+	}
 	/**
 	 * Infer the affiliation token in an aggregated price
 	 * 

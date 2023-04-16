@@ -53,9 +53,19 @@
        <th:block th:include="inc/product-microdatas.html"></th:block>
 
         <div class="section section-lg pt-5 pt-md-7 bg-gray-200">
+        
+
+
+			
+			        
             <div class="container">
 				<div class="card shadow p-4">
 				
+					<th:block th:if="${user}">
+						<form method="post" th:action="${url}">	
+							<input value="Enregistrer les modifications" type="submit">			
+					</th:block>
+							
        				<!--/* Header */-->				
 					<th:block th:include="inc/product-header.html"></th:block>
                								
@@ -107,6 +117,10 @@
 				</div>	
   				 			
 			</div>
+			
+			<th:block th:if="${user}">
+				</form>				
+			</th:block>			
 		</div>  
 </main>
 

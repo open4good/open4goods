@@ -14,6 +14,11 @@ public class Names {
 	@Field(index = true, store = false, type = FieldType.Text)
 	private String name;
 
+	
+	@Field(index = true, store = false, type = FieldType.Text)
+	private String manualName;
+
+	
 	@Field(index = true, store = false, type = FieldType.Text, analyzer = "french")
 //	@Field(index = true, store = false, type = FieldType.Text)
 	private Set<String> offerNames = new HashSet<>();
@@ -24,7 +29,7 @@ public class Names {
 	}
 	
 	public String shortestOfferName() {
-		return offerNames.stream().min (Comparator.comparingInt(String::length)).orElse(null);
+			return offerNames.stream().min (Comparator.comparingInt(String::length)).orElse(null);
 	}
 	
 	public Set<String> getOfferNames() {
@@ -41,6 +46,14 @@ public class Names {
 
 	public void setName(String name) {
 		this.name = name;
+	}
+
+	public String getManualName() {
+		return manualName;
+	}
+
+	public void setManualName(String manualName) {
+		this.manualName = manualName;
 	}
 
 
