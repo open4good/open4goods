@@ -43,92 +43,74 @@
        <!--/* Loader */-->
        <th:block th:include="inc/preloader.html"></th:block>
 		
- 
- 
+  
         <div class="section section-lg pt-5 pt-md-7 bg-gray-200">
             <div class="container-semi-fluid">
 
                 <div class="row ">
                 
                 	<!--/* Left column */-->                	
-                    <div class="col-12 col-lg-3 mb-3 mb-lg-0">
-
-                
+                    <div class="col-lg-3 mb-3 mb-lg-0">
+                    
+                    
+                    
+                		<!--/* Guides */-->	
+						<div class="card shadow mb-2">
+							<div class="card-header"><h2 class="h5">Les guides</h2></div>
+							<div class="card-body">
+								<ul class="list-group list-group-flush price-list">
+									<li class="list-group-item border-0"><img height="16" width="16" class="me-2" src="/icon/fnac.com" title="icône fnac"><a href="">Téléviseurs : quel impact écologique ?</a> </li>
+									<li class="list-group-item border-0"><span class="fas fa-box"></span><a href="">Bien chosir sa TV ! </a></li>
+									<li class="list-group-item border-0"><span class="fas fa-clock"></span><a>OLED, QLED, LCD : Les différences</a> </li>
+								
+								</ul>
+							</div>
+						</div>                    
+                                        
 				        <!--/* Filters */-->						
                     	<th:block th:include="inc/vertical-filters.html"></th:block>
 					</div>
 
 					<!--/* Right column */-->
-					<div class="row col-12 col-lg-9">
-						
-						<div class="col-lg-8">
-						
-							
-							
-							<div class="card">
-								<div class="row  align-items-center">
+					<div class="col-lg-9">
+
+						<div class="row">							
+							<!--/* Hero */-->						
+							<div class="card shadow">
+								<div class="row align-items-center">
 							
 									
-										<div class="row">
-					                        <div class="col-lg-4 text-center">
+										<div class="d-flex flex-wrap align-items-center row">
+					                        <div class="col-lg-2 text-center">
 					                                <img class="mt-2" width="150" src="https://media.istockphoto.com/id/173240143/fr/photo/t%C3%A9l%C3%A9vision-avec-deux-masques-de-d%C3%A9tourage.jpg?s=612x612&w=0&k=20&c=GhzC3IyvkmRp9shUBHICxM_1Lsur2uWkpNKf2F22p8s=" alt="logo tv">
 					                        </div>
-					                        <div class="col-lg-8">
-					                            <div class="info-main">
-					                                <h1>Téléviseurs </h1>
-					                            </div>
-					                        </div> 
+					                        <span class="col-lg-10">
+					                                <h1 class="mt-2 text-center">Nos téléviseurs </h1>
+					                                <div class="row p-2"> 
+					                					<th:block th:with="path='WIDGETS/partenaires/'">
+					                     					<th:block th:include="inc/wiki.html"></th:block>
+					                     				</th:block>
+					                				</div>		
+					                				
+					                        </span> 
 										</div>
 				                        
 				                        
-				                        
-				                        
-				                        
-		                				<div class="row p-4"> 
-		                					<th:block th:with="path='WIDGETS/partenaires/'">
-		                     					<th:block th:include="inc/wiki.html"></th:block>
-		                     				</th:block>
-		                				</div>	
-				
-	
 		
-	                				
-	                				
-	                						
 			                    </div>
 							</div>
 						</div>
-						<!-- Guides -->
-						<div class="col-lg-4">
-									<div class="card shadow text-center">
-					                    <div class="card-header bg-white border-0 pb-0">
-					                        <span class="card-text small"><span class="far fa-calendar-alt me-2"></span>15 March 2021</span>
-					                    </div>
-					                    <div class="card-body">
-					                      <h3 class="h5 card-title">We partnered up with Google</h3>
-					                      <p class="card-text">With supporting text below as a natural lead-in to additional content.</p>
-					                      <a href="#" class="btn btn-primary btn-sm">Learn More</a>
-					                    </div>
-					                    <div class="card-footer bg-white border-0">
-					                        <a href="#" data-toggle="tooltip" data-placement="top" title="" data-original-title="23k followers">
-					                            <img class="avatar-sm me-2 img-fluid rounded-circle" src="../../assets/img/team/profile-picture-2.jpg" alt="Moore avatar"> Jo J. Moore
-					                        </a>
-					                    </div>
-					                  </div>	
-						</div>
-						
 						
 
-						<div class="p-3 mt-2 card">
+						
+						<div class="row p-3 mt-2 card shadow">
 							<th:block th:include="inc/vertical-table.html"></th:block>
 						</div>
 
-
-
-
-</div>
-		</div>
-        </div>
+					</div>
+				</div>
+        	</div>
+       	</div>
 
 
 
