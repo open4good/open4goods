@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html th:lang="${siteLocale.language}">
+
+<head>
+
+	<!--/* Metas and CSS */-->
+	<th:block th:include="inc/header-meta.html"></th:block>
+    
+	<!-- Primary Meta Tags -->
+	<title th:text="#{search.title}"></title>
+	<meta name="title" th:content="#{search.meta.title}">
+	<meta name="description" th:content="#{search.meta.description}">
+		
+	<!-- Open Graph / Facebook -->
+	<meta property="og:type" content="website">
+	<meta property="og:url" th:content="${url}">
+	<meta property="og:title" th:content="#{search.title}">
+	<meta property="og:description" th:content="#{search.meta.description}">
+	<meta property="og:image"  th:content="${baseUrl} + '/assets/img/brand/light.svg'">
+	
+	<!-- Twitter -->
+	<meta name="twitter:card" content="summary_large_image">
+	<meta name="twitter:url" th:content="${url}">
+	<meta name="twitter:title" th:content="#{search.title}">
+	<meta name="twitter:description" th:content="#{search.meta.description}">
+	<meta name="twitter:image" th:content="${baseUrl} + 'assets/img/brand/light.svg'">
+	
+	<!-- CSS -->
+	<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.25/css/dataTables.bootstrap5.min.css">
+	
+</head>
+
+<body>
+    
+	<!--/* Navbar */-->
+	<header class="header-global">
+    	<nav id="navbar-main" aria-label="Primary navigation" class="navbar navbar-main navbar-expand-lg navbar-theme-primary headroom navbar-dark navbar-theme-primary">
+			<th:block th:include="inc/navbar-non-product.html"></th:block>
+		</nav>
+	</header>
+	
+    <main>	
+       <!--/* Loader */-->
+       <th:block th:include="inc/preloader.html"></th:block>
+		
+
+
+
+        <!-- Hero -->
+        <section class="section-header bg-secondary pb-8 pb-md-11 mb-4 mb-lg-6 text-white">
+            <div class="container">
+                <div class="row justify-content-center">
+                    <div class="col-12 col-md-10 col-lg-8 text-center">
+                        <h1 class="display-2 text-white mb-3">Notre équipe</h1>
+                        <p class="lead">                        	                       
+                        	<th:block th:with="path='TEAM/header/'">
+                        		<th:block th:include="inc/wiki.html"></th:block>
+                        	</th:block>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <section class="section section-lg pt-0">
+            <div class="container mt-n8 mt-lg-n10 z-2">
+                <div class="row mt-7">
+                    <div class="col-12 col-md-6 col-lg-4 mb-7">
+                        <div class="card shadow border-gray-300 text-center">
+                            <div class="profile-thumbnail mx-auto mt-n6">
+                                <img src="../../assets/img/team/goulven.jpeg" class="card-img-top rounded-circle border-0" alt="Jose Avatar">
+                            </div>
+                            <div class="card-body">
+                                <h2 class="h4 card-title mb-2">Goulven Furet</h2>
+                                <span class="card-subtitle text-gray fw-normal">CEO / CTO</span>
+                                <ul class="list-unstyled d-flex justify-content-center mt-3 mb-0">
+                                    <li>
+                                        <a href="https://www.linkedin.com/in/goulven-furet-b448b582/" target="_blank" rel="nofollow" aria-label="facebook social link" class="text-facebook me-3">
+                                            <span class="fab fa-linkedin"></span>
+                                        </a>
+                                    </li>                      
+                                </ul>
+                                <p class="card-text my-2">
+		                        	<th:block th:with="path='TEAM/goulven/'">
+		                        		<th:block th:include="inc/wiki.html"></th:block>
+		                        	</th:block>                                
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-12 col-md-6 col-lg-4 mb-7">
+                        <div class="card shadow border-gray-300 text-center">
+                            <div class="profile-thumbnail mx-auto mt-n6">
+                                <img src="../../assets/img/team/berangere.jpeg" class="card-img-top rounded-circle border-0" alt="Neil Avatar">
+                            </div>
+                            <div class="card-body">
+                                <h2 class="h4 card-title mb-2">Bérangère Leven</h2>
+                                <span class="card-subtitle text-gray fw-normal">Business Manager & Communication</span>
+                                <ul class="list-unstyled d-flex justify-content-center mt-3 mb-0">
+                                    <li>
+                                        <a href="https://www.linkedin.com/in/b%C3%A9rang%C3%A8re-leven/" target="_blank" aria-label="facebook social link" rel="nofollow" class="text-facebook me-3">
+                                            <span class="fab fa-linkedin"></span>
+                                        </a>
+                                    </li>
+                                </ul>
+                                <p class="card-text my-2">
+		                        	<th:block th:with="path='TEAM/berangere/'">
+		                        		<th:block th:include="inc/wiki.html"></th:block>
+		                        	</th:block>                               
+		                         </p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-12 col-md-6 col-lg-4 mb-7">
+                        <div class="card shadow border-gray-300 text-center">
+                            <div class="profile-thumbnail mx-auto mt-n6">
+                                <img src="../../assets/img/team/thomas.jpeg" class="card-img-top rounded-circle border-0" alt="Bonnie Avatar">
+                            </div>
+                            <div class="card-body">
+                                <h2 class="h4 card-title mb-2">Thomas Vandewalle</h2>
+                                <span class="card-subtitle text-gray fw-normal">SEO & Contenus</span>
+                                <ul class="list-unstyled d-flex justify-content-center mt-3 mb-0">
+                                    <li>
+                                        <a href="https://www.linkedin.com/in/thomas-vandewalle-fr001/" target="_blank" aria-label="facebook social link" rel="nofollow" class="text-facebook me-3">
+                                            <span class="fab fa-linkedin"></span>
+                                        </a>
+                                    </li>                                    
+                                </ul>
+                                <p class="card-text my-2">
+		                        	<th:block th:with="path='TEAM/thomas/'">
+		                        		<th:block th:include="inc/wiki.html"></th:block>
+		                        	</th:block>  
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    
+                    
+                </div>
+            </div>
+        </section>
+        <section class="section bg-gray-200">
+            <div class="container z-2">
+                <div class="row justify-content-center">
+                    <div class="col-md-10 text-center">
+                        <h2 class="h1">Interesé(e) par ce projet ?</h2>
+                        <p class="lead py-4 text-gray">Si vous souhaitez participer à l'aventure, de quelque manière que ce soit : n'hésitez pas !</p>
+                        <a href="/contact" class="btn btn-lg btn-secondary animate-up-2">Nous contacter</a>
+                    </div>
+                </div>
+            </div>  
+        </section>
+
+
+
+
+
+
+
+
+
+
+
+
+
+      
+
+    </main>
+
+	<!--/* Footer */-->
+	<th:block th:include="inc/footer.html"></th:block>	
+
+<!-- Core -->
+<script src="../../vendor/@popperjs/core/dist/umd/popper.min.js"></script>
+<script src="../../vendor/bootstrap/dist/js/bootstrap.min.js"></script>
+<script src="../../vendor/headroom.js/dist/headroom.min.js"></script>
+
+<!-- Vendor JS -->
+
+<script src="../../vendor/smooth-scroll/dist/smooth-scroll.polyfills.min.js"></script>
+<script src="../../vendor/vivus/dist/vivus.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.5.1.js"></script>
+<script src="https://cdn.datatables.net/1.10.25/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.10.25/js/dataTables.bootstrap5.min.js"></script>
+
+<!-- pixel JS -->
+<script src="../../assets/js/pixel.js"></script>
+
+<script>
+$(document).ready(function() {
+	// search feature
+    $('#searchInput').on("change",function (e) {
+    	$('#searchForm').attr("action","/recherche/"+($('#searchInput').val()));
+    });
+	
+	// Datatable init
+	$('#searchTable').DataTable();
+
+	
+} );
+</script>
+</body>
+
+</html>
