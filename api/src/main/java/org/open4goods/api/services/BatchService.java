@@ -64,7 +64,7 @@ public class BatchService {
 								VerticalsConfigService verticalsService) {
 		super();
 		
-		dedicatedLogger = GenericFileLogger.initLogger("stats-export", Level.INFO, apiProperties.logsFolder(), false);		
+		dedicatedLogger = GenericFileLogger.initLogger("stats-batch", Level.INFO, apiProperties.logsFolder(), false);		
 		this.dataFragmentsRepository = dataFragmentsRepository;
 		this.apiProperties = apiProperties;
 		this.dataRepository =dataRepository;
@@ -99,12 +99,8 @@ public class BatchService {
 				}
 				
 			}
-			
-			dedicatedLogger.info("End batch verticalisation");
-
-			
 		});
-		
+		dedicatedLogger.info("End batch verticalisation");		
 		
 	}
 	
