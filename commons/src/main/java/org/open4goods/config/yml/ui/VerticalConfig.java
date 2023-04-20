@@ -2,10 +2,12 @@ package org.open4goods.config.yml.ui;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.constraints.NotNull;
@@ -13,6 +15,7 @@ import javax.validation.constraints.NotNull;
 import org.open4goods.config.yml.CommentsAggregationConfig;
 import org.open4goods.config.yml.TagCloudConfig;
 import org.open4goods.config.yml.attributes.AttributeConfig;
+import org.open4goods.model.Localised;
 import org.open4goods.model.constants.CacheConstants;
 import org.open4goods.model.constants.UrlConstants;
 import org.slf4j.Logger;
@@ -39,6 +42,26 @@ public class VerticalConfig{
 	 * Vertical ID
 	 */
 	private String id;
+	
+	
+	/**
+	 * The title on the vertical home page
+	 */
+	private Localised homeTitle; 
+	
+
+	/**
+	 * The url of the vertical home page
+	 */
+	private Localised homeUrl; 
+		
+	
+	/**
+	 * The categories to associate to this vertical
+	 */
+	private Set<String> matchingCategories = new HashSet<>();
+	
+	
 						
 	/**
 	 * Configuration for commentsConfig aggregation (tagcloud rules, ...)
@@ -492,4 +515,31 @@ public class VerticalConfig{
 	public void setScoringAggregationConfig(ScoringAggregationConfig scoringAggregationConfig) {
 		this.scoringAggregationConfig = scoringAggregationConfig;
 	}
+
+	public Localised getHomeTitle() {
+		return homeTitle;
+	}
+
+	public void setHomeTitle(Localised homeTitle) {
+		this.homeTitle = homeTitle;
+	}
+
+	public Localised getHomeUrl() {
+		return homeUrl;
+	}
+
+	public void setHomeUrl(Localised homeUrl) {
+		this.homeUrl = homeUrl;
+	}
+
+	public Set<String> getMatchingCategories() {
+		return matchingCategories;
+	}
+
+	public void setMatchingCategories(Set<String> matchingCategories) {
+		this.matchingCategories = matchingCategories;
+	}
+	
+	
+	
 }

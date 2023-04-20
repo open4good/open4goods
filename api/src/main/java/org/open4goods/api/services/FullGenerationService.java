@@ -10,7 +10,6 @@ import org.open4goods.aggregation.AbstractAggregationService;
 import org.open4goods.aggregation.aggregator.RealTimeAggregator;
 import org.open4goods.aggregation.services.aggregation.AttributeAggregationService;
 import org.open4goods.aggregation.services.aggregation.BarCodeAggregationService;
-import org.open4goods.aggregation.services.aggregation.CategoryService;
 import org.open4goods.aggregation.services.aggregation.CommentsAggregationService;
 import org.open4goods.aggregation.services.aggregation.DescriptionsAggregationService;
 import org.open4goods.aggregation.services.aggregation.IdAggregationService;
@@ -19,6 +18,7 @@ import org.open4goods.aggregation.services.aggregation.NamesAggregationService;
 import org.open4goods.aggregation.services.aggregation.PriceAggregationService;
 import org.open4goods.aggregation.services.aggregation.ProsAndConsAggregationService;
 import org.open4goods.aggregation.services.aggregation.QuestionsAggregationService;
+import org.open4goods.aggregation.services.aggregation.VerticalAggregationService;
 import org.open4goods.api.config.yml.ApiProperties;
 import org.open4goods.config.yml.ui.VerticalConfig;
 import org.open4goods.config.yml.ui.VerticalProperties;
@@ -67,7 +67,7 @@ public class FullGenerationService {
 
 	private DataSourceConfigService dataSourceConfigService;
 
-	private VerticalsConfigService configService;
+	private VerticalsConfigService verticalConfigService;
 
 	private RealTimeAggregator aggregator;
 	
@@ -95,7 +95,7 @@ public class FullGenerationService {
 		this.apiProperties = apiProperties;
 		this.gs1prefixService = gs1prefixService;
 		this.dataSourceConfigService = dataSourceConfigService;
-		this.configService = configService;
+		this.verticalConfigService = configService;
 		this.taxonomyService = taxonomyService;
 		
 		this.barcodeValidationService = barcodeValidationService;
@@ -150,8 +150,11 @@ public class FullGenerationService {
 		
 		services.add(new NamesAggregationService(config.getNamings(), evaluationService, apiProperties.logsFolder()));
 
-		services.add(new CategoryService(apiProperties.logsFolder(), taxonomyService));
+//		services.add(new CategoryService(apiProperties.logsFolder(), taxonomyService));
 
+		
+		services.add(new VerticalAggregationService( apiProperties.logsFolder(), verticalConfigService));
+		
 		services.add(new IdAggregationService( apiProperties.logsFolder()));
 
 //		services.add(new UrlsAggregationService(evaluationService, apiProperties.logsFolder(),
