@@ -83,7 +83,7 @@
                    
                  
                        <h1 class="mb-3">Consommons peu, consommons bien</h1>
-                       <p class="lead px-lg-5">Une tentative éthique et ouverte d'amoindrir l'impact de vos achats internet, auprès de nos <a href="#partnersLink"> <span th:text="${partners.size()}"></span> commercants partenaires</a></p>
+                       <p class="lead px-lg-5">Une tentative éthique et ouverte d'amoindrir l'impact de vos achats internet, auprès de nos <a href="/partenaires"> <span th:text="${partners.size()}"></span> commercants partenaires</a></p>
               
             
                    
@@ -155,50 +155,7 @@
            </div>
        </section>
        
-      <!--/* Infos */-->
-       
-       
-      <!--/* Partners */-->       
-        <section class="section section-lg py-sm-0 py-sm-0 ">   
-            <div class="container">
-                <div class="row justify-content-between align-items-center">
-                
-                	<h2 id="partnersLink" class="h3 text-center text-lg-left mb-3">Nos partenaires</h2>
-                	<p>
-                		Merci à nos partenaires, qui nous permettent de mettre en oeuvre cette nouvelle façon de consommer ! La compensation environnementale s'applique également si vous faites vos achats sur les plateformes marchandes en utilisant les liens ci-dessous.
-                	</p>
-
-                </div>
-                
-                
-				<div class="mb-3">
-                    <div class="input-group">
-                        <span class="input-group-text" id="partnersSearchLabel"><span class="fas fa-search"></span></span>
-                        <input type="text" class="form-control" id="partnersSearch" placeholder="Filtrer" aria-label="Search" aria-describedby="partnersSearchLabel">
-                    </div>
-                </div>
-                                
-                
-	
-                <div class="row">
-		            <th:block th:each="partner : ${partners}">
-						<div class="partnerCard col-md-4 col-lg-4 mb-5 mb-lg-0 mt-3" th:attr="data-string=${partner.key.name}">
-			                <div class="text-center card shadow p-4">
-			                	<a th:href="'/compensation/'+${partner.value}" rel="nofollow" >
-			                    	<img height="150" class="img-fluid" th:src="'/logo/'+${partner.key.name}"  th:alt="${partner.key.name}">
-			                	</a>
-
-			                </div>
-			            </div>
-		            </th:block>
-                </div>
-	                   
-                   
-                   
-            </div>
-
-        </section>
-
+     
     </main>
 
 	<!--/* Footer */-->
