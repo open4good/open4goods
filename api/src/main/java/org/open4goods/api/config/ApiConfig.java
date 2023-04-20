@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
 
 import org.open4goods.api.config.yml.ApiProperties;
+import org.open4goods.api.services.BatchService;
 import org.open4goods.api.services.FetcherOrchestrationService;
 import org.open4goods.api.services.FullGenerationService;
 import org.open4goods.api.services.ImportExportService;
@@ -70,11 +71,16 @@ public class ApiConfig {
 
 	
 	@Bean
-	@Autowired 
+	@Autowired
 	public VerticalsConfigService verticalConfigsService(SerialisationService serialisationService) throws IOException {
 		return new VerticalsConfigService(serialisationService,apiProperties.getVerticalsFolder());
 	}
 	
+	@Bean
+	@Autowired
+	public BatchService batchService(AggregatedDataRepository dataRepository, VerticalsConfigService verticalsConfigService, DataFragmentRepository dataFragmentsRepository) throws IOException {
+		return new BatchService(dataFragmentsRepository,dataRepository, apiProperties, verticalsConfigService);
+	}
 
 
 	/**
@@ -87,6 +93,17 @@ public class ApiConfig {
 		return new SerialisationService();
 	}
 
+	
+	@Bean
+	FullGenerationService fullGenerationService(@Autowired DataFragmentRepository repository, @Autowired EvaluationService evaluationService,
+			@Autowired ReferentielService referentielService, @Autowired StandardiserService standardiserService,
+			@Autowired AutowireCapableBeanFactory autowireBeanFactory, @Autowired AggregatedDataRepository aggregatedDataRepository,
+			@Autowired ApiProperties apiProperties, @Autowired Gs1PrefixService gs1prefixService,
+			@Autowired DataSourceConfigService dataSourceConfigService, @Autowired VerticalsConfigService configService, @Autowired BarcodeValidationService barcodeValidationService, @Autowired GoogleTaxonomyService taxonomyService) {
+		return new FullGenerationService(repository, evaluationService, referentielService, standardiserService, autowireBeanFactory, aggregatedDataRepository, apiProperties, gs1prefixService, dataSourceConfigService, configService,  barcodeValidationService, taxonomyService);
+	}
+	
+	
 	//////////////////////////////////////////////////////////
 	// SwaggerConfig
 	//////////////////////////////////////////////////////////
@@ -282,15 +299,15 @@ public class ApiConfig {
 		return taxonomyService;
 	}
 	
-	@Bean
-	FullGenerationService fullGenerationService(@Autowired DataFragmentRepository repository, @Autowired EvaluationService evaluationService,
-			@Autowired ReferentielService referentielService, @Autowired StandardiserService standardiserService,
-			@Autowired AutowireCapableBeanFactory autowireBeanFactory, @Autowired AggregatedDataRepository aggregatedDataRepository,
-			@Autowired ApiProperties apiProperties, @Autowired Gs1PrefixService gs1prefixService,
-			@Autowired DataSourceConfigService dataSourceConfigService, @Autowired VerticalsConfigService configService, @Autowired BarcodeValidationService barcodeValidationService, @Autowired GoogleTaxonomyService taxonomyService) {
-		return new FullGenerationService(repository, evaluationService, referentielService, standardiserService, autowireBeanFactory, aggregatedDataRepository, apiProperties, gs1prefixService, dataSourceConfigService, configService,  barcodeValidationService, taxonomyService);
-	}
-	
+//	@Bean
+//	FullGenerationService fullGenerationService(@Autowired DataFragmentRepository repository, @Autowired EvaluationService evaluationService,
+//			@Autowired ReferentielService referentielService, @Autowired StandardiserService standardiserService,
+//			@Autowired AutowireCapableBeanFactory autowireBeanFactory, @Autowired AggregatedDataRepository aggregatedDataRepository,
+//			@Autowired ApiProperties apiProperties, @Autowired Gs1PrefixService gs1prefixService,
+//			@Autowired DataSourceConfigService dataSourceConfigService, @Autowired VerticalsConfigService configService, @Autowired BarcodeValidationService barcodeValidationService, @Autowired GoogleTaxonomyService taxonomyService) {
+//		return new FullGenerationService(repository, evaluationService, referentielService, standardiserService, autowireBeanFactory, aggregatedDataRepository, apiProperties, gs1prefixService, dataSourceConfigService, configService,  barcodeValidationService, taxonomyService);
+//	}
+//	
 
 
 	@Bean Gs1PrefixService gs1prefixService (@Autowired ResourcePatternResolver resourceResolver) throws IOException{

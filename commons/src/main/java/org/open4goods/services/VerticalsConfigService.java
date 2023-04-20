@@ -5,6 +5,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -41,10 +42,13 @@ public class VerticalsConfigService {
 	private SerialisationService serialisationService;
 
 	private Map<String, VerticalConfig> configs = new ConcurrentHashMap<>(100);
+	
+	private Map<String,VerticalConfig> categoriesToVertical = new ConcurrentHashMap<>();
+	
+	
 
 	private String verticalsFolder;
 
-	@Autowired
 	public VerticalsConfigService(SerialisationService serialisationService, String verticalsFolder) {
 		super();
 		this.serialisationService = serialisationService;
@@ -77,6 +81,19 @@ public class VerticalsConfigService {
 			configs.clear();
 			configs.putAll(configs2);
 		}
+		
+		// Associating categoriesToVertical
+		synchronized (categoriesToVertical) {
+			categoriesToVertical.clear();
+			configs.values().stream().forEach(c -> {
+				
+				c.getMatchingCategories().stream().forEach(cc -> {
+					categoriesToVertical.put(cc, c);
+				});								
+			});
+		}
+		
+
 	}
 
 	/**
@@ -118,6 +135,19 @@ public class VerticalsConfigService {
 		return ret;
 	}
 
+	
+	/**
+	 * Instanciate a vertical config for a given category name
+	 * 
+	 * @param inputStream
+	 * @param existing
+	 * @return
+	 * @throws IOException
+	 */
+	public VerticalConfig getVerticalForCategoryName(String category) {
+		return categoriesToVertical.get(category);
+		
+	}
 	/**
 	 * 
 	 * @return

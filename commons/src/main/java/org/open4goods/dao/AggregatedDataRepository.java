@@ -184,6 +184,14 @@ public class AggregatedDataRepository {
 	}
 
 	/**
+	 * Index an AggregatedData
+	 *
+	 * @param p
+	 */
+	public void index(final AggregatedData p) {
+		elasticsearchTemplate.save(p,current_index);
+	}
+	/**
 	 * Bulk Index multiple AggregatedData
 	 *
 	 * @param p

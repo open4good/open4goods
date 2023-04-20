@@ -50,6 +50,13 @@ public class AggregatedData implements Standardisable {
 	private Set<String> alternativeIds = new HashSet<>();
 
 
+	/** The vertical, if any**/
+	@Field(index = false, store = false, type = FieldType.Keyword)
+	private String vertical;
+	
+	
+
+
 	/**
 	 * The date this item has been created
 	 */
@@ -641,5 +648,12 @@ public class AggregatedData implements Standardisable {
 	}
 
 
+	public String getVertical() {
+		return vertical;
+	}
+
+	public void setVertical(String vertical) {
+		this.vertical = vertical;
+	}
 
 }
