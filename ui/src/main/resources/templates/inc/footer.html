@@ -10,12 +10,13 @@
                 <ul class="footer-links mt-2">                   
                     <li class="ms-3" th:if="${genericResponse.duration != 0}">Page générée en <span th:text="${genericResponse.duration}"> </span> ms</li>
                     <th:block th:if="${user}">
-	                    <li class="ms-3" >Connecté en tant que <b><span th:text="${user}"> </span></b></li>
+	                    <li class="ms-3" >Connecté en tant que <b><span th:text="${user}"> </span></b>, avec les rôles :</li>
                         <ul th:each="role : ${roles}" class="ms-3">
                         	<li th:text="${role}" class="ms-3"></li>
                         </ul>                            
     	                <li class="ms-3" th:if="${editLink}"><a target="_blank" th:href="${editLink}">Editer cette page sur le wiki</a></li>
     	                <li class="ms-3"><a href="/flushCache">Purger le cache</a></li>
+    	                <li class="ms-3"><a href="/logout">Se déconnecter</a></li>
                     </th:block>
                 </ul>
                 
