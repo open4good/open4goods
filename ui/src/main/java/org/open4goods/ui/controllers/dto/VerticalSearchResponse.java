@@ -17,7 +17,7 @@ public class VerticalSearchResponse {
 	
 	private List<AggregatedData> data;
 
-	private Map<String, Integer> brands = new HashMap<>();
+	private Map<String, Long> brands = new HashMap<>();
 	
 	private Integer maxOffers;
 
@@ -27,11 +27,11 @@ public class VerticalSearchResponse {
 	
 	private Double maxPrice = null;
 	
-	private long totalResults;
+	private Long totalResults;
 	
-	private long from;
+	private Integer from;
 	
-	private long to;
+	private Integer to;
 
 	private long itemNew;
 	
@@ -39,7 +39,7 @@ public class VerticalSearchResponse {
 
 	private long itemUnknown;
 	
-	private Map<String, Long> categories = new HashMap<>();
+	
 	
 	
 	
@@ -63,17 +63,6 @@ public class VerticalSearchResponse {
 
 
 
-
-	public Map<String, Integer> getBrands() {
-		return brands;
-	}
-
-
-
-
-	public void setBrands(Map<String, Integer> brands) {
-		this.brands = brands;
-	}
 
 
 
@@ -103,34 +92,27 @@ public class VerticalSearchResponse {
 		this.maxPrice = max;
 	}
 
-
-
-
-	public long getTotalResults() {
+	public Long getTotalResults() {
 		return totalResults;
 	}
 
-
-
-
-	public void setTotalResults(long totalResults) {
+	public void setTotalResults(Long totalResults) {
 		this.totalResults = totalResults;
 	}
 
-
-	public long getFrom() {
+	public Integer getFrom() {
 		return from;
 	}
 
-	public void setFrom(long from) {
+	public void setFrom(Integer from) {
 		this.from = from;
 	}
 
-	public long getTo() {
+	public Integer getTo() {
 		return to;
 	}
 
-	public void setTo(long to) {
+	public void setTo(Integer to) {
 		this.to = to;
 	}
 
@@ -158,12 +140,15 @@ public class VerticalSearchResponse {
 		this.itemUnknown = itemUnknown;
 	}
 
-	public Map<String, Long> getCategories() {
-		return categories;
+
+
+
+	public Map<String, Long> getBrands() {
+		return brands;
 	}
 
-	public void setCategories(Map<String, Long> categories) {
-		this.categories = categories;
+	public void setBrands(Map<String, Long> brands) {
+		this.brands = brands;
 	}
 
 	public Integer getMaxOffers() {
