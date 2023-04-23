@@ -203,7 +203,12 @@ public class XwikiService {
 				String raw= response.getBody();
 				int pos=raw.indexOf(MARKER);
 				raw = raw.substring(pos+MARKER.length()).trim();
-				String body= raw.substring(0,raw.indexOf("\n"));				
+				String body= raw.substring(0,raw.indexOf("\n"));	
+				
+				// Removing simple <p> tag if occurs
+				if (body.startsWith("<p>")) {					
+					body=body.substring(3,body.length()-4);					
+				}
 				res.setHtml(body);
 			}
 			catch (Exception e) {
