@@ -168,7 +168,7 @@ public class AggregatedDataRepository {
 	}
 
 	
-	public SearchHits<AggregatedData> search(NativeSearchQuery query, final String indexName, int from, int to) {				
+	public SearchHits<AggregatedData> search(NativeSearchQuery query, final String indexName) {				
 		return elasticsearchTemplate.search(query, AggregatedData.class, IndexCoordinates.of(indexName));
 		
 	}

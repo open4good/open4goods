@@ -8,7 +8,12 @@ import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.index.query.QueryStringQueryBuilder;
-import org.elasticsearch.search.sort.SortBuilder;
+import org.elasticsearch.search.aggregations.AggregationBuilders;
+import org.elasticsearch.search.aggregations.Aggregations;
+import org.elasticsearch.search.aggregations.bucket.terms.Terms;
+import org.elasticsearch.search.aggregations.bucket.terms.Terms.Bucket;
+import org.elasticsearch.search.aggregations.metrics.Max;
+import org.elasticsearch.search.aggregations.metrics.Min;
 import org.elasticsearch.search.sort.SortBuilders;
 import org.elasticsearch.search.sort.SortOrder;
 import org.open4goods.dao.AggregatedDataRepository;
@@ -91,46 +96,6 @@ public class SearchService {
 			
 			queryBuilder = queryBuilder.must(new QueryStringQueryBuilder(translatedVerticalQuery));		
 		}
-		
-//		// from price
-//		if (null != fromPrice) {
-//			queryBuilder = queryBuilder.must(QueryBuilders.rangeQuery("price.minPrice.price").gt(fromPrice.intValue()));			 			
-//		}
-//		
-//		// to price
-//		if (null != toPrice) {
-//			queryBuilder = queryBuilder.must(QueryBuilders.rangeQuery("price.minPrice.price").lt(toPrice.intValue()));			 			
-//		}
-//		
-//		// condition
-//		if (null != condition) {
-//			queryBuilder = queryBuilder.must(QueryBuilders.termQuery("price.minPrice.productState", condition.toString()));
-//		}
-//		
-//		// Categories
-//		if (null != categories && categories.size() > 0) {
-//			queryBuilder = queryBuilder.must(QueryBuilders.termsQuery("datasourceCategories", categories));
-//		}
-//		
-//	
-//		// Setting the query
-//		NativeSearchQueryBuilder esQuery = new NativeSearchQueryBuilder()
-//				.withQuery(queryBuilder)
-//				.withPageable(PageRequest.of(from, to))
-//				;
-//		
-//		// Adding aggregations
-//		esQuery = esQuery 
-//				.withAggregations(AggregationBuilders.min("min_price").field("price.minPrice.price"))
-//				.withAggregations(AggregationBuilders.max("max_price").field("price.minPrice.price"))
-//				.withAggregations(AggregationBuilders.max("max_offers").field("offersCount"))				
-//				.withAggregations(AggregationBuilders.min("min_offers").field("offersCount"))				
-//				.withAggregations(AggregationBuilders.terms("condition").field("price.minPrice.productState").size(5))	
-//				.withAggregations(AggregationBuilders.terms("categories").field("datasourceCategories").size(5000))	
-//				
-//				
-//				;		
-		
 	
 		NativeSearchQueryBuilder esQuery = new NativeSearchQueryBuilder()
 		.withQuery(queryBuilder)
@@ -147,44 +112,9 @@ public class SearchService {
 		
 		
 		
-		SearchHits<AggregatedData> results = aggregatedDataRepository.search(esQuery.build(),ALL_VERTICAL_NAME,from,to);
+		SearchHits<AggregatedData> results = aggregatedDataRepository.search(esQuery.build(),ALL_VERTICAL_NAME);
 		VerticalSearchResponse vsr = new VerticalSearchResponse();			
 
-//		// Handling aggregations results if relevant
-//		Aggregations aggregations = (Aggregations)results.getAggregations().aggregations();
-//					
-//		Min minPrice = aggregations.get("min_price");
-//		Max maxPrice = aggregations.get("max_price");
-//		Max maxOffers = aggregations.get("max_offers");
-//		Min minOffers = aggregations.get("min_offers");
-//		
-//		Terms productSate  =  aggregations.get("condition");
-//		Terms catTerms  =  aggregations.get("categories");
-//		
-//		
-//		vsr.setMaxPrice(maxPrice.getValue());
-//		vsr.setMinPrice(minPrice.getValue());
-//		vsr.setMaxOffers(Double.valueOf(maxOffers.getValue()).intValue());
-//		vsr.setMinOffers(Double.valueOf(minOffers.getValue()).intValue());
-//		
-//		
-//		
-//		if (null != productSate.getBucketByKey(ProductState.NEW.toString())) {			
-//			vsr.setItemNew( productSate.getBucketByKey(ProductState.NEW.toString()).getDocCount()) ;
-//		}
-//
-//		if (null != productSate.getBucketByKey(ProductState.OCCASION.toString())) {			
-//			vsr.setItemOccasion( productSate.getBucketByKey(ProductState.OCCASION.toString()).getDocCount()) ;
-//		}
-//		
-//		if (null != productSate.getBucketByKey(ProductState.UNKNOWN.toString())) {			
-//			vsr.setItemUnknown(productSate.getBucketByKey(ProductState.UNKNOWN.toString()).getDocCount());
-//		}
-//		
-//		for (Bucket b :   catTerms.getBuckets()) {			
-//			vsr.getCategories().put(b.getKey().toString(), b.getDocCount());			
-//		}
-//		
 //		// Setting the response
 		vsr.setTotalResults(results.getTotalHits());
 		vsr.setFrom(from);
@@ -197,6 +127,155 @@ public class SearchService {
 		return vsr;
 	}
 
+	
+	
+	
+	
+	
+	
+	
+	public VerticalSearchResponse verticalSearch(String vertical, String initialQuery, Integer fromPrice, Integer toPrice, ProductState condition, Integer from, Integer to, int minOffersToShow, boolean sort) {
+		
+		String query = initialQuery == null ? "" :  sanitize(initialQuery);
+		
+		// Logging
+		statsLogger.info("Searching {}",initialQuery);
+		
+		
+		// Valid timestamp
+		BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery()  
+				.must(aggregatedDataRepository.getValidDateQuery())				
+				;
+
+
+		// Query string query
+		if (!StringUtils.isEmpty(query)) {			
+			String frags[] = query.split(" ");
+			String q = Stream.of(frags)
+					.map(e -> "names.offerNames:"+e)				
+					. collect(Collectors.joining(" AND "));
+
+			String translatedVerticalQuery ="attributes.referentielAttributes.GTIN.keyword:\""+query+"\"  OR ("+q+")"; 		
+			
+			// Adding minoffers filter
+			if (minOffersToShow > 0) {
+				translatedVerticalQuery += " AND offersCount:> " + minOffersToShow;
+				
+			}
+			
+			
+			queryBuilder = queryBuilder.must(new QueryStringQueryBuilder(translatedVerticalQuery));		
+		}
+		
+		// from price
+		if (null != fromPrice) {
+			queryBuilder = queryBuilder.must(QueryBuilders.rangeQuery("price.minPrice.price").gt(fromPrice.intValue()));			 			
+		}
+		
+		// to price
+		if (null != toPrice) {
+			queryBuilder = queryBuilder.must(QueryBuilders.rangeQuery("price.minPrice.price").lt(toPrice.intValue()));			 			
+		}
+		
+		// condition
+		if (null != condition) {
+			queryBuilder = queryBuilder.must(QueryBuilders.termQuery("price.minPrice.productState", condition.toString()));
+		}
+		
+		// Setting the query
+		NativeSearchQueryBuilder esQuery = new NativeSearchQueryBuilder()
+				.withQuery(queryBuilder)
+
+				;
+		
+		if (null != from && null != to) {
+			esQuery = esQuery .withPageable(PageRequest.of(from, to));
+		}
+		
+		// Adding standard aggregations
+		esQuery = esQuery 
+				.withAggregations(AggregationBuilders.min("min_price").field("price.minPrice.price"))
+				.withAggregations(AggregationBuilders.max("max_price").field("price.maxPrice.price"))
+				.withAggregations(AggregationBuilders.max("max_offers").field("offersCount"))
+				//TODO : could optimize by setting at 1
+				.withAggregations(AggregationBuilders.min("min_offers").field("offersCount"))				
+				.withAggregations(AggregationBuilders.terms("condition").field("price.minPrice.productState.keyword").size(5))	
+				.withAggregations(AggregationBuilders.terms("brands").field("attributes.referentielAttributes.BRAND.keyword").size(500))	
+				
+				.withQuery(queryBuilder)
+				.withSort(SortBuilders.fieldSort("offersCount").order(SortOrder.DESC))
+//		.withSorts(SortBuilders.fieldSort("minOffers"))
+
+		;
+		
+//		if (sort) {
+//			 esQuery.        withSort(SortBuilders.fieldSort("offersCount").order(SortOrder.DESC));
+//		}
+//		
+		
+		
+		
+		SearchHits<AggregatedData> results = aggregatedDataRepository.search(esQuery.build(),ALL_VERTICAL_NAME);
+		VerticalSearchResponse vsr = new VerticalSearchResponse();			
+
+		// Handling aggregations results if relevant
+		Aggregations aggregations = (Aggregations)results.getAggregations().aggregations();
+					
+		Min minPrice = aggregations.get("min_price");
+		Max maxPrice = aggregations.get("max_price");
+		Max maxOffers = aggregations.get("max_offers");
+		Min minOffers = aggregations.get("min_offers");
+		Terms brands  =  aggregations.get("brands");
+		Terms productSate  =  aggregations.get("condition");		
+		
+		vsr.setMaxPrice(maxPrice.getValue());
+		vsr.setMinPrice(minPrice.getValue());
+		vsr.setMaxOffers(Double.valueOf(maxOffers.getValue()).intValue());
+		vsr.setMinOffers(Double.valueOf(minOffers.getValue()).intValue());
+		
+		
+		
+		if (null != productSate.getBucketByKey(ProductState.NEW.toString())) {			
+			vsr.setItemNew( productSate.getBucketByKey(ProductState.NEW.toString()).getDocCount()) ;
+		}
+
+		if (null != productSate.getBucketByKey(ProductState.OCCASION.toString())) {			
+			vsr.setItemOccasion( productSate.getBucketByKey(ProductState.OCCASION.toString()).getDocCount()) ;
+		}
+		
+		if (null != productSate.getBucketByKey(ProductState.UNKNOWN.toString())) {			
+			vsr.setItemUnknown(productSate.getBucketByKey(ProductState.UNKNOWN.toString()).getDocCount());
+		}
+		
+		for (Bucket b :   brands.getBuckets()) {			
+			vsr.getBrands().put(b.getKey().toString(), b.getDocCount());			
+		}
+
+//		// Setting the response
+		vsr.setTotalResults(results.getTotalHits());
+		vsr.setFrom(from);
+		vsr.setTo(to);
+		vsr.setData(results.get().map(e-> e.getContent()).toList());
+		
+		vsr.setVerticalName(vertical);	
+		
+		
+		return vsr;
+	}
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
 	/**
 	 * 
 	 * @param categorie
@@ -229,10 +308,8 @@ public class SearchService {
 				.replace("-", " ")
 				.replace(":", " ")
 				.replace("\"", " "));
-		
-				
-				
-				
+	
 	}
+
 
 }

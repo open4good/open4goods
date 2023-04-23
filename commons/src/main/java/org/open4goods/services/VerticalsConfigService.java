@@ -8,7 +8,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 import org.open4goods.config.yml.ui.VerticalConfig;
 import org.open4goods.model.constants.CacheConstants;
@@ -160,6 +163,8 @@ public class VerticalsConfigService {
 		f.close();
 		return ret;
 	}
+	
+	
 
 	/**
 	 * Return a config by it's Id
@@ -171,6 +176,14 @@ public class VerticalsConfigService {
 		return Optional.of(configs.get(verticalName));
 	}
 
+	
+	/**
+	 * 
+	 * @return all confifs, except the _default and the "all" one
+	 */
+	public Set<VerticalConfig>  getConfigsWithoutDefault() {
+		return getConfigs().values().stream().filter(e -> (!e.getId().equals("all")) ).collect(Collectors.toSet());
+	}
 	/**
 	 * 
 	 * @return all Vertical configs
@@ -178,5 +191,7 @@ public class VerticalsConfigService {
 	public Map<String, VerticalConfig> getConfigs() {
 		return configs;
 	}
+
+
 
 }
