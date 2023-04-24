@@ -16,6 +16,7 @@ import org.elasticsearch.search.aggregations.metrics.Max;
 import org.elasticsearch.search.aggregations.metrics.Min;
 import org.elasticsearch.search.sort.SortBuilders;
 import org.elasticsearch.search.sort.SortOrder;
+import org.open4goods.config.yml.ui.VerticalConfig;
 import org.open4goods.dao.AggregatedDataRepository;
 import org.open4goods.helper.GenericFileLogger;
 import org.open4goods.model.constants.ProductState;
@@ -129,35 +130,32 @@ public class SearchService {
 
 	
 	
-	
-	
-	
-	
-	
-	public VerticalSearchResponse verticalSearch(String vertical, String initialQuery, Integer fromPrice, Integer toPrice, ProductState condition, Integer from, Integer to, int minOffersToShow, boolean sort) {
+	public VerticalSearchResponse verticalSearch(VerticalConfig vertical, String initialQuery, Integer fromPrice, Integer toPrice, ProductState condition, Integer from, Integer to, int minOffersToShow, boolean sort) {
 		
-		String query = initialQuery == null ? "" :  sanitize(initialQuery);
+//		String query = initialQuery == null ? "" :  sanitize(initialQuery);
 		
 		// Logging
 		statsLogger.info("Searching {}",initialQuery);
-		
-		
+				
 		// Valid timestamp
 		BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery()  
-				.must(aggregatedDataRepository.getValidDateQuery())
-				
+				.must(aggregatedDataRepository.getValidDateQuery())	
 				;
-		queryBuilder = queryBuilder.must(QueryBuilders.matchQuery("vertical.keyword",vertical ));
+		queryBuilder = queryBuilder.must(QueryBuilders.matchQuery("vertical.keyword",vertical.getId() ));
 
 		
 		// from price
 		if (null != fromPrice) {
 			queryBuilder = queryBuilder.must(QueryBuilders.rangeQuery("price.minPrice.price").gt(fromPrice.intValue()));			 			
+		} else {
+			queryBuilder = queryBuilder.must(QueryBuilders.rangeQuery("price.minPrice.price").gt(0.0));
 		}
 		
 		// to price
 		if (null != toPrice) {
-			queryBuilder = queryBuilder.must(QueryBuilders.rangeQuery("price.maxPrice.price").lt(toPrice.intValue()));			 			
+			queryBuilder = queryBuilder.must(QueryBuilders.rangeQuery("price.minPrice.price").lt(toPrice.intValue()));			 			
+		} else {
+			queryBuilder = queryBuilder.must(QueryBuilders.rangeQuery("price.minPrice.price").lt(Integer.MAX_VALUE));	
 		}
 		
 		// condition
@@ -174,17 +172,19 @@ public class SearchService {
 		if (null != from && null != to) {
 			esQuery = esQuery .withPageable(PageRequest.of(from, to));
 		} else {
-			esQuery = esQuery .withPageable(PageRequest.of(0, 10000));
+			//TODO(gof) : from conf
+			esQuery = esQuery .withPageable(PageRequest.of(0, 1000));
 		}
 		
 		// Adding standard aggregations
 		esQuery = esQuery 
 				.withAggregations(AggregationBuilders.min("min_price").field("price.minPrice.price"))
-				.withAggregations(AggregationBuilders.max("max_price").field("price.maxPrice.price"))
+				.withAggregations(AggregationBuilders.max("max_price").field("price.minPrice.price"))
 				.withAggregations(AggregationBuilders.max("max_offers").field("offersCount"))
 				//TODO : could optimize by setting at 1
-				.withAggregations(AggregationBuilders.min("min_offers").field("offersCount"))				
-				.withAggregations(AggregationBuilders.terms("condition").field("price.minPrice.productState.keyword").size(5))	
+				.withAggregations(AggregationBuilders.min("min_offers").field("offersCount"))
+				//TODO: store the productState at indexation, faster and no counting by offers
+				.withAggregations(AggregationBuilders.terms("condition").field("price.offers.productState").size(5))	
 				.withAggregations(AggregationBuilders.terms("brands").field("attributes.referentielAttributes.BRAND.keyword").size(500))	
 				
 				.withQuery(queryBuilder)
@@ -197,8 +197,6 @@ public class SearchService {
 //			 esQuery.        withSort(SortBuilders.fieldSort("offersCount").order(SortOrder.DESC));
 //		}
 //		
-		
-		
 		
 		SearchHits<AggregatedData> results = aggregatedDataRepository.search(esQuery.build(),ALL_VERTICAL_NAME);
 		VerticalSearchResponse vsr = new VerticalSearchResponse();			
@@ -217,8 +215,6 @@ public class SearchService {
 		vsr.setMinPrice(minPrice.getValue());
 		vsr.setMaxOffers(Double.valueOf(maxOffers.getValue()).intValue());
 		vsr.setMinOffers(Double.valueOf(minOffers.getValue()).intValue());
-		
-		
 		
 		if (null != productSate.getBucketByKey(ProductState.NEW.toString())) {			
 			vsr.setItemNew( productSate.getBucketByKey(ProductState.NEW.toString()).getDocCount()) ;
@@ -242,8 +238,9 @@ public class SearchService {
 		vsr.setTo(to);
 		vsr.setData(results.get().map(e-> e.getContent()).toList());
 		
-		vsr.setVerticalName(vertical);	
+		vsr.setVerticalName(vertical.getId());	
 		
+		vsr.setVerticalConfig(vertical);	
 		
 		return vsr;
 	}

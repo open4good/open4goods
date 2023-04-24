@@ -8,6 +8,8 @@ import java.util.Locale;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.lang3.StringUtils;
+import org.open4goods.config.yml.ui.VerticalConfig;
 import org.open4goods.dao.AggregatedDataRepository;
 import org.open4goods.exceptions.ResourceNotFoundException;
 import org.open4goods.model.Localised;
@@ -17,6 +19,7 @@ import org.open4goods.model.data.Description;
 import org.open4goods.model.product.AggregatedData;
 import org.open4goods.model.product.AggregatedPrice;
 import org.open4goods.services.SerialisationService;
+import org.open4goods.services.VerticalsConfigService;
 import org.open4goods.ui.config.yml.UiConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,7 +52,8 @@ public class ProductController extends AbstractUiController {
 	private @Autowired AggregatedDataRepository esDao;
 
 	private @Autowired SerialisationService serialisationService;
-	
+
+	private @Autowired VerticalsConfigService verticalConfigService;
 	
 	
 	//////////////////////////////////////////////////////////////
@@ -57,7 +61,7 @@ public class ProductController extends AbstractUiController {
 	//////////////////////////////////////////////////////////////
 
 	/**
-	 * The Home page.
+	 * The product, at the home level.
 	 *
 	 * @param request
 	 * @param response
@@ -67,8 +71,25 @@ public class ProductController extends AbstractUiController {
 	 * @throws UnirestException
 	 */
 
+	
+	@GetMapping("/{vertical}/*-{id:\\d+}")
+	public ModelAndView productInVertical(@PathVariable String vertical, @PathVariable String id, final HttpServletRequest request, HttpServletResponse response) throws IOException {
+
+		
+		VerticalConfig language = verticalConfigService.getLanguageForVerticalPath(vertical);
+		
+		if (null == language) {
+			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Produit " + request.getServletPath() + " introuvable !");
+		}
+		
+		return product(id, vertical,request, response);
+		
+		
+	}
+	
+	
 	@GetMapping("/*-{id:\\d+}")
-	public ModelAndView product(@PathVariable String id, final HttpServletRequest request, HttpServletResponse response) throws IOException {
+	public ModelAndView product(@PathVariable String id, String vertical, final HttpServletRequest request, HttpServletResponse response) throws IOException {
 
 		// Getting the product name
 		String path= URLEncoder.encode(request.getServletPath().substring(1));							
@@ -83,17 +104,35 @@ public class ProductController extends AbstractUiController {
 			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Produit " + request.getServletPath() + " introuvable !");
 		}
 
+		
+		// TODO(gof) : Handling redirection if on a vertical match
+
+		
 		if (null == data) {
 			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Produit " + request.getServletPath() + " introuvable !");
 		}
 		
 	
 		// Sending 301 id no match with product name
-		if (!path.equals(data.getNames().getName())) {
-			response.setStatus(HttpServletResponse.SC_MOVED_PERMANENTLY);
-			response.setHeader("Location", config.getBaseUrl(Locale.FRANCE) + data.getNames().getName());
-			return null;
+		
+		if (null == vertical) {
+			
+			if (!path.equals(data.getNames().getName())) {
+				response.setStatus(HttpServletResponse.SC_MOVED_PERMANENTLY);
+				response.setHeader("Location", config.getBaseUrl(Locale.FRANCE) + data.getNames().getName());
+				return null;
+			}
+		} else {
+			if (!path.equals(vertical+ "%2F" + data.getNames().getName())) {
+				response.setStatus(HttpServletResponse.SC_MOVED_PERMANENTLY);
+				response.setHeader("Location", config.getBaseUrl(Locale.FRANCE) + vertical+"/"+data.getNames().getName());
+				return null;
+			}
 		}
+		
+		
+		
+		
 		
 		//TODO : in a service
 		// Adding the affiliationTokens in all prices
@@ -143,7 +182,7 @@ public class ProductController extends AbstractUiController {
 		
 		esDao.index(data, AggregatedDataRepository.MAIN_INDEX_NAME);
 		
-		return product(id, request, response);
+		return product(id, null,request, response);
 		
 	}
 	/**
