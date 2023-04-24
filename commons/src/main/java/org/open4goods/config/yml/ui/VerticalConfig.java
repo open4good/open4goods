@@ -47,13 +47,15 @@ public class VerticalConfig{
 	/**
 	 * The title on the vertical home page
 	 */
-	private Localised homeTitle; 
+	@JsonMerge
+	private Set<Localised> homeTitle = new HashSet<>(); 
 	
 
 	/**
 	 * The url of the vertical home page
 	 */
-	private Localised homeUrl; 
+	@JsonMerge
+	private Set<Localised> homeUrl = new HashSet<>(); 
 		
 	
 	/**
@@ -516,19 +518,20 @@ public class VerticalConfig{
 		this.scoringAggregationConfig = scoringAggregationConfig;
 	}
 
-	public Localised getHomeTitle() {
+
+	public Set<Localised> getHomeTitle() {
 		return homeTitle;
 	}
 
-	public void setHomeTitle(Localised homeTitle) {
+	public void setHomeTitle(Set<Localised> homeTitle) {
 		this.homeTitle = homeTitle;
 	}
 
-	public Localised getHomeUrl() {
+	public Set<Localised> getHomeUrl() {
 		return homeUrl;
 	}
 
-	public void setHomeUrl(Localised homeUrl) {
+	public void setHomeUrl(Set<Localised> homeUrl) {
 		this.homeUrl = homeUrl;
 	}
 

@@ -13,6 +13,8 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
+import javax.annotation.PostConstruct;
+
 import org.open4goods.config.yml.ui.VerticalConfig;
 import org.open4goods.model.constants.CacheConstants;
 import org.slf4j.Logger;
@@ -48,6 +50,9 @@ public class VerticalsConfigService {
 	
 	private Map<String,VerticalConfig> categoriesToVertical = new ConcurrentHashMap<>();
 	
+	private Map<String,VerticalConfig> verticalsByUrl = new HashMap<>();
+	private Map<String,String> verticalUrlByLanguage = new HashMap<>();
+
 	
 
 	private String verticalsFolder;
@@ -96,9 +101,21 @@ public class VerticalsConfigService {
 			});
 		}
 		
+		// Mapping url to i18n
+		getConfigsWithoutDefault().stream().forEach(vc -> {		
+			
+			vc.getHomeUrl().stream().forEach(v -> {
+				
+				verticalsByUrl.put(v.getText(), vc);
+				verticalUrlByLanguage.put(v.getLanguage(), v.getText());
+			});
+		});
 
 	}
 
+	
+
+	
 	/**
 	 * 
 	 * @return the available verticals configurations from classpath
@@ -151,6 +168,25 @@ public class VerticalsConfigService {
 		return categoriesToVertical.get(category);
 		
 	}
+	
+	/**
+	 * Return the language for a vertical path, if any
+	 * @param path
+	 * @return
+	 */
+	public VerticalConfig getLanguageForVerticalPath(String path) {
+		return verticalsByUrl.get(path);
+	}
+
+	/**
+	 * Return the path for a vertical language, if any
+	 * @param path
+	 * @return
+	 */
+	public String getPathForVerticalLanguage(String language) {
+		return verticalUrlByLanguage.get(language);
+	}
+	
 	/**
 	 * 
 	 * @return
@@ -191,6 +227,8 @@ public class VerticalsConfigService {
 	public Map<String, VerticalConfig> getConfigs() {
 		return configs;
 	}
+
+
 
 
 
