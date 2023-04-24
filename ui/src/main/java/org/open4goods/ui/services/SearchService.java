@@ -144,28 +144,11 @@ public class SearchService {
 		
 		// Valid timestamp
 		BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery()  
-				.must(aggregatedDataRepository.getValidDateQuery())				
-				;
-
-
-		// Query string query
-		if (!StringUtils.isEmpty(query)) {			
-			String frags[] = query.split(" ");
-			String q = Stream.of(frags)
-					.map(e -> "names.offerNames:"+e)				
-					. collect(Collectors.joining(" AND "));
-
-			String translatedVerticalQuery ="attributes.referentielAttributes.GTIN.keyword:\""+query+"\"  OR ("+q+")"; 		
-			
-			// Adding minoffers filter
-			if (minOffersToShow > 0) {
-				translatedVerticalQuery += " AND offersCount:> " + minOffersToShow;
+				.must(aggregatedDataRepository.getValidDateQuery())
 				
-			}
-			
-			
-			queryBuilder = queryBuilder.must(new QueryStringQueryBuilder(translatedVerticalQuery));		
-		}
+				;
+		queryBuilder = queryBuilder.must(QueryBuilders.matchQuery("vertical.keyword",vertical ));
+
 		
 		// from price
 		if (null != fromPrice) {
@@ -174,7 +157,7 @@ public class SearchService {
 		
 		// to price
 		if (null != toPrice) {
-			queryBuilder = queryBuilder.must(QueryBuilders.rangeQuery("price.minPrice.price").lt(toPrice.intValue()));			 			
+			queryBuilder = queryBuilder.must(QueryBuilders.rangeQuery("price.maxPrice.price").lt(toPrice.intValue()));			 			
 		}
 		
 		// condition
@@ -190,6 +173,8 @@ public class SearchService {
 		
 		if (null != from && null != to) {
 			esQuery = esQuery .withPageable(PageRequest.of(from, to));
+		} else {
+			esQuery = esQuery .withPageable(PageRequest.of(0, 10000));
 		}
 		
 		// Adding standard aggregations
