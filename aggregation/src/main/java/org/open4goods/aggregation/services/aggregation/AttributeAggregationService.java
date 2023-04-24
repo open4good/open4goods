@@ -63,7 +63,7 @@ public class AttributeAggregationService extends AbstractAggregationService {
 		List<SourcedAttribute> unMatchedAttrs = new ArrayList<>();		
 		
 	
-		for (AggregatedAttribute attr : data.getAttributes().getAttributes()) {
+		for (AggregatedAttribute attr : data.getAttributes().getUnmapedAttributes()) {
 			IAttribute translated = attributeConfig.translateAttribute(attr, data.getVertical());
 			if (null != translated) {
 				matchedAttrs.add(new SourcedAttribute(translated, data));
@@ -72,40 +72,13 @@ public class AttributeAggregationService extends AbstractAggregationService {
 			unMatchedAttrs.add(new SourcedAttribute(attr, data));
 		}
 
-		//////////////////////////////////
-		// Extracting featured attributes
-		//////////////////////////////////
 		
-		
-		// For matched
-		List<SourcedAttribute> matchedFeatures = matchedAttrs.stream()
-									.filter(e -> isFeatureAttribute(e))
-									.collect(Collectors.toList());
-		
-		// We also keep them as classical attributes
-		//matchedAttrs.removeAll(matchedFeatures);
-		
-		// For unmatched		
-		List<SourcedAttribute> unmatchedFeatures = unMatchedAttrs.stream()
-				.filter(e -> isFeatureAttribute(e))
-				.collect(Collectors.toList());
-		unMatchedAttrs.removeAll(unmatchedFeatures);
-		
-		// Merging features
-		List<SourcedAttribute> features = new ArrayList<>();
-		features.addAll(matchedFeatures);
-		features.addAll(unmatchedFeatures);
-				
-		
-		Collection<AggregatedFeature> af = aggregateFeatures(matchedFeatures,unmatchedFeatures);
-		aa.getFeatures().addAll(af);
-
 		////////////////////////////////////
 		// Aggregating standard attributes
 		///////////////////////////////////
+		aa.getAttributes().clear();
+		aa.getUnmapedAttributes().clear();
 		
-		dedicatedLogger.info("{} featured attributes merged from {} matched sources and {} unmatched sources", af.size(), matchedFeatures.size(), unmatchedFeatures.size());		
-				
 		// 3 - Applying attribute transformations on matched ones
 		//TODO : handle conflicts
 		 aa.getAttributes().addAll(aggregateAttributes(matchedAttrs));
