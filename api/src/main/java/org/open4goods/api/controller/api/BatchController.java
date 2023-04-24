@@ -40,12 +40,17 @@ public class BatchController {
 	private static final Logger logger = LoggerFactory.getLogger(BatchController.class);
 	
 
-	@GetMapping("/batch/verticals/associate")
+	@GetMapping("/batch/verticals/associateFromCategory")
 	public void backupDatas() throws InvalidParameterException, IOException {
 		batchService.definesVertical();
+	}
+	
+	
+	@GetMapping("/batch/verticals/score")
+	public void scoreVerticals() throws InvalidParameterException, IOException {
+		batchService.scoreVertical();
 		
 		
 	}
-	
 
 }

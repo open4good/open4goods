@@ -7,6 +7,8 @@ import java.util.List;
 import javax.annotation.PreDestroy;
 
 import org.open4goods.aggregation.AbstractAggregationService;
+import org.open4goods.aggregation.aggregator.AbstractAggregator;
+import org.open4goods.aggregation.aggregator.BatchedAggregator;
 import org.open4goods.aggregation.aggregator.RealTimeAggregator;
 import org.open4goods.aggregation.services.aggregation.AttributeAggregationService;
 import org.open4goods.aggregation.services.aggregation.BarCodeAggregationService;
@@ -45,9 +47,9 @@ import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
  * @author goulven
  *
  */
-public class RealtimeAggregationService {
+public class BatchAggregationService  {
 
-	protected static final Logger logger = LoggerFactory.getLogger(RealtimeAggregationService.class);
+	protected static final Logger logger = LoggerFactory.getLogger(BatchAggregationService.class);
 
 	private  DataFragmentRepository repository;
 
@@ -69,7 +71,7 @@ public class RealtimeAggregationService {
 
 	private VerticalsConfigService verticalConfigService;
 
-	private RealTimeAggregator aggregator;
+	private BatchedAggregator aggregator;
 	
 	private BarcodeValidationService barcodeValidationService;
 	
@@ -79,7 +81,7 @@ public class RealtimeAggregationService {
 	
 	
 	@Autowired
-	public RealtimeAggregationService(DataFragmentRepository repository, EvaluationService evaluationService,
+	public BatchAggregationService(DataFragmentRepository repository, EvaluationService evaluationService,
 			ReferentielService referentielService, StandardiserService standardiserService,
 			AutowireCapableBeanFactory autowireBeanFactory, AggregatedDataRepository aggregatedDataRepository,
 			ApiProperties apiProperties, Gs1PrefixService gs1prefixService,
@@ -106,18 +108,13 @@ public class RealtimeAggregationService {
 		// Initializing index
 		aggregatedDataRepository.initIndex(VerticalsConfigService.MAIN_VERTICAL_NAME);
 		
-		// Calling aggregator.BEFORE
-		aggregator.beforeStart();
+
 		
 	}
 
 
 
-	public AggregatedData process(DataFragment df, AggregatedData data) throws AggregationSkipException {
-		return aggregator.build(df, data);
-	}
 
-	
 
 	@PreDestroy
 	public void shutdown() {
@@ -132,7 +129,7 @@ public class RealtimeAggregationService {
 	 * @param config
 	 * @return
 	 */
-	RealTimeAggregator getAggregator(VerticalConfig config) {
+	public BatchedAggregator getAggregator(VerticalConfig config) {
 
 //		final CapsuleGenerationConfig config = generationConfig;
 
@@ -143,36 +140,13 @@ public class RealtimeAggregationService {
 
 		final List<AbstractAggregationService> services = new ArrayList<>();
 
-		services.add(new BarCodeAggregationService(apiProperties.logsFolder(), gs1prefixService,barcodeValidationService));
 
 		services.add(new AttributeAggregationService(config.getAttributesConfig(), apiProperties.logsFolder()));
 
 		
-		services.add(new NamesAggregationService(config.getNamings(), evaluationService, apiProperties.logsFolder()));
-
-//		services.add(new CategoryService(apiProperties.logsFolder(), taxonomyService));
 
 		
-		services.add(new VerticalAggregationService( apiProperties.logsFolder(), verticalConfigService));
-		
-		services.add(new IdAggregationService( apiProperties.logsFolder()));
-
-//		services.add(new UrlsAggregationService(evaluationService, apiProperties.logsFolder(),
-//				config.getNamings().getProductUrlTemplates()));
-
-		services.add(new PriceAggregationService(apiProperties.logsFolder(), dataSourceConfigService,config.getSegment()));
-
-		services.add(new CommentsAggregationService(apiProperties.logsFolder(), config.getCommentsConfig()));
-		services.add(new ProsAndConsAggregationService(apiProperties.logsFolder()));
-		services.add(new QuestionsAggregationService(apiProperties.logsFolder()));
-
-		services.add(new DescriptionsAggregationService(config.getDescriptionsAggregationConfig(),
-				apiProperties.logsFolder()));
-
-
-		services.add(new MediaAggregationService(config, apiProperties.logsFolder()));
-
-		final RealTimeAggregator ret = new RealTimeAggregator(services);
+		final BatchedAggregator ret = new BatchedAggregator(services);
 
 		autowireBeanFactory.autowireBean(ret);
 
@@ -181,45 +155,7 @@ public class RealtimeAggregationService {
 
 
 
-	/**
-	 * Add a Capsule Generation job to the working queue
-	 * 
-	 * @param capsuleProperties
-	 */
-
-	DataFragment cleanDataFragment(final DataFragment data, final VerticalProperties segmentProperties) {
-
-//		if (null == data.gtin()) {
-//			return null;
-//		}
-//
-//		// Evicting items that do not meet the minimum price
-//		if (data.hasPrice() && null != segmentProperties.getMinimumEvictionPrice()
-//				&& data.getPrice().getPrice() < segmentProperties.getMinimumEvictionPrice()) {
-//			return null;
-//		}
-
-//		// Updating the  compensation
-//		if ( data.hasPrice() && data.affiliated()) {
-//			try {
-//				final Double reversment = segmentProperties.getDatasources().get(data.getDatasourceName()).getPercentCompensation();
-//				if (null == reversment ) {
-//					logger.warn("No compensation defined for {}",data.getDatasourceName());
-//				} else {
-//					data.setEcologicalCompensationAmount(reversment*data.getPrice().getPrice());
-//				}
-//			} catch (final Exception e) {
-//				logger.error("Cannot compute compensation for {} : {}",data,e);
-//			}
-//		}
-
-		// Sanitizing the branduid
-		referentielService.sanitizeBrandUid(data, segmentProperties);
-
-		return data;
-
-	}
-
+	
 
 
 

@@ -12,7 +12,7 @@ import java.util.function.Predicate;
 import javax.annotation.PreDestroy;
 
 import org.apache.commons.lang3.StringUtils;
-import org.open4goods.api.services.FullGenerationService;
+import org.open4goods.api.services.RealtimeAggregationService;
 import org.open4goods.dao.AggregatedDataRepository;
 import org.open4goods.exceptions.AggregationSkipException;
 import org.open4goods.exceptions.ValidationException;
@@ -69,14 +69,14 @@ public class DataFragmentStoreService {
 
 	private AggregatedDataRepository aggregatedDataRepository;
 
-	private FullGenerationService generationService;
+	private RealtimeAggregationService generationService;
 
 	
 	/**
 	 *
 	 * @param queueFolder The folder where indexation queued datas will be stored
 	 */
-	public DataFragmentStoreService(StandardiserService standardiserService, SerialisationService serialisationService, DataFragmentRepository repository, final String queueFolder, final int dequeueSize, final int pauseDuration, final int workers, FullGenerationService generationService, AggregatedDataRepository aggregatedDataRepository) {
+	public DataFragmentStoreService(StandardiserService standardiserService, SerialisationService serialisationService, DataFragmentRepository repository, final String queueFolder, final int dequeueSize, final int pauseDuration, final int workers, RealtimeAggregationService generationService, AggregatedDataRepository aggregatedDataRepository) {
 
 		this.pauseDuration=pauseDuration;
 		this.repository = repository;
