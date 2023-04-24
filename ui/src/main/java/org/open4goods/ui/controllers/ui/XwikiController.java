@@ -1,7 +1,11 @@
 package org.open4goods.ui.controllers.ui;
 
 import java.io.IOException;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.stream.Collectors;
 
+import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -10,6 +14,7 @@ import org.open4goods.exceptions.InvalidParameterException;
 import org.open4goods.exceptions.TechnicalException;
 import org.open4goods.model.constants.RolesConstants;
 import org.open4goods.model.dto.WikiResult;
+import org.open4goods.services.VerticalsConfigService;
 import org.open4goods.services.XwikiService;
 import org.open4goods.ui.config.yml.UiConfig;
 import org.slf4j.Logger;
@@ -37,7 +42,20 @@ public class XwikiController extends AbstractUiController {
 	private @Autowired UiConfig config;
 
 	private @Autowired XwikiService xwikiService;
+	
+	// TODO : Tweak to handle categories search page
+	private @Autowired VerticalController verticalController;	
+	private @Autowired VerticalsConfigService verticalService;
+		
+		
 
+	private Set<String> verticals = new HashSet<>();
+	
+	@PostConstruct
+	public void mapVerticals () {
+		verticals.addAll(verticalService.getConfigsWithoutDefault().stream().map(e -> e.getId()).collect(Collectors.toSet()));
+	}
+	
 	//////////////////////////////////////////////////////////////
 	// Mappings
 	//////////////////////////////////////////////////////////////
@@ -70,6 +88,12 @@ public class XwikiController extends AbstractUiController {
 			@PathVariable(name = "page") String page, final HttpServletRequest request, HttpServletResponse response)
 			throws IOException, TechnicalException, InvalidParameterException {
 
+		// TODO : Twweak for verticals
+		
+		
+		if (verticals.contains(page)) {
+			return verticalController.home(page,request);
+		} else
 		return xwiki("Main", page, request,response );
 	}
 	

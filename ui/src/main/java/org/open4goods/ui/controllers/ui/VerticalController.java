@@ -1,28 +1,18 @@
 package org.open4goods.ui.controllers.ui;
 
-import java.io.IOException;
-import java.net.URLEncoder;
-import java.nio.charset.Charset;
-import java.util.HashMap;
-import java.util.Map;
-
-import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
 
-import org.open4goods.config.yml.datasource.DataSourceProperties;
-import org.open4goods.model.data.AffiliationToken;
-import org.open4goods.services.DataSourceConfigService;
-import org.open4goods.services.SerialisationService;
+import org.open4goods.config.yml.ui.VerticalConfig;
+import org.open4goods.model.constants.ProductState;
+import org.open4goods.services.VerticalsConfigService;
 import org.open4goods.ui.config.yml.UiConfig;
+import org.open4goods.ui.controllers.dto.VerticalSearchResponse;
+import org.open4goods.ui.services.SearchService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.servlet.ModelAndView;
-
-import com.mashape.unirest.http.exceptions.UnirestException;
 
 @Controller
 /**
@@ -38,13 +28,41 @@ public class VerticalController extends AbstractUiController {
 	// The siteConfig
 	private @Autowired UiConfig config;
 	
+	private @Autowired VerticalsConfigService verticalService;
+	
+	private @Autowired SearchService searchService;
+	
 	//////////////////////////////////////////////////////////////
 	// Mappings
 	//////////////////////////////////////////////////////////////
 
-	@GetMapping("/tv")
-	public ModelAndView partenaires(final HttpServletRequest request) {
+
+
+	public ModelAndView home(String vertical, final HttpServletRequest request) {
 		ModelAndView ret = defaultModelAndView(("vertical-home"), request);
+		VerticalConfig config = verticalService.getConfigById(vertical).orNull();
+				
+		// TODO : strategy of injection of products
+		
+		String query = null;
+		Integer fromPrice = null;
+		Integer toPrice = null;
+
+		// Paging
+		Integer from=null;
+		Integer to=null;
+		
+		ProductState state = null;
+		
+		int minOffers=0;
+		
+		
+		VerticalSearchResponse products = searchService.verticalSearch(vertical,query,fromPrice,toPrice,state,from,to,minOffers, false);
+		
+		ret.addObject("products", products);
+		ret.addObject("config",config);
+		
+		
 		return ret;
 	}
 
