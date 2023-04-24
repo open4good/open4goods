@@ -2,6 +2,7 @@ package org.open4goods.aggregation;
 
 import java.io.Closeable;
 import java.io.IOException;
+import java.util.Set;
 
 import org.open4goods.exceptions.AggregationSkipException;
 import org.open4goods.helper.GenericFileLogger;
@@ -28,11 +29,24 @@ public abstract class AbstractAggregationService  implements Closeable {
 	
 
     /**
-	 * Called on each participant DataFragment
+	 * Called on each participant DataFragment, in realtime mode
 	 * @param data
 	 */
 	public void onDataFragment (final DataFragment input, final AggregatedData output) throws AggregationSkipException {}
 
+	
+	/**
+	 * Call in verticals batch update
+	 * @param data
+	 * @param datas
+	 * @return
+	 */
+	public  AggregatedData onAggregatedData(AggregatedData data, Set<AggregatedData> datas) {
+		return data;
+	};
+	
+	
+	
     /**
 	 * Called after aggregation process, used to ending buffers / components (flush datas, close buffers, so on...)
 	 */
@@ -46,6 +60,10 @@ public abstract class AbstractAggregationService  implements Closeable {
 	public void init() {
 		
 	}
+
+
+
+
 
 
 

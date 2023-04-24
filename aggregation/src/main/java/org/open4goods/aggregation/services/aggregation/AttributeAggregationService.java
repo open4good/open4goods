@@ -29,6 +29,7 @@ import org.open4goods.model.product.AggregatedAttribute;
 import org.open4goods.model.product.AggregatedAttributes;
 import org.open4goods.model.product.AggregatedData;
 import org.open4goods.model.product.AggregatedFeature;
+import org.open4goods.model.product.IAttribute;
 import org.open4goods.model.product.SourcedAttribute;
 import org.open4goods.model.product.SourcedRating;
 import org.open4goods.services.StandardiserService;
@@ -42,6 +43,90 @@ public class AttributeAggregationService extends AbstractAggregationService {
 		this.attributeConfig = attributesConfig;
 	}
 
+	
+
+	@Override
+	public AggregatedData onAggregatedData(AggregatedData data, Set<AggregatedData> datas) {
+	
+		
+		AggregatedAttributes aa = data.getAttributes();
+				
+		
+		/////////////////////////////////////////
+		// Update referentiel attributes
+		/////////////////////////////////////////
+	
+		
+				
+		// 2 - Classifying "matched/unmatched" attributes
+		List<SourcedAttribute> matchedAttrs = new ArrayList<>();
+		List<SourcedAttribute> unMatchedAttrs = new ArrayList<>();		
+		
+	
+		for (AggregatedAttribute attr : data.getAttributes().getAttributes()) {
+			IAttribute translated = attributeConfig.translateAttribute(attr, data.getVertical());
+			if (null != translated) {
+				matchedAttrs.add(new SourcedAttribute(translated, data));
+			} 
+			
+			unMatchedAttrs.add(new SourcedAttribute(attr, data));
+		}
+
+		//////////////////////////////////
+		// Extracting featured attributes
+		//////////////////////////////////
+		
+		
+		// For matched
+		List<SourcedAttribute> matchedFeatures = matchedAttrs.stream()
+									.filter(e -> isFeatureAttribute(e))
+									.collect(Collectors.toList());
+		
+		// We also keep them as classical attributes
+		//matchedAttrs.removeAll(matchedFeatures);
+		
+		// For unmatched		
+		List<SourcedAttribute> unmatchedFeatures = unMatchedAttrs.stream()
+				.filter(e -> isFeatureAttribute(e))
+				.collect(Collectors.toList());
+		unMatchedAttrs.removeAll(unmatchedFeatures);
+		
+		// Merging features
+		List<SourcedAttribute> features = new ArrayList<>();
+		features.addAll(matchedFeatures);
+		features.addAll(unmatchedFeatures);
+				
+		
+		Collection<AggregatedFeature> af = aggregateFeatures(matchedFeatures,unmatchedFeatures);
+		aa.getFeatures().addAll(af);
+
+		////////////////////////////////////
+		// Aggregating standard attributes
+		///////////////////////////////////
+		
+		dedicatedLogger.info("{} featured attributes merged from {} matched sources and {} unmatched sources", af.size(), matchedFeatures.size(), unmatchedFeatures.size());		
+				
+		// 3 - Applying attribute transformations on matched ones
+		//TODO : handle conflicts
+		 aa.getAttributes().addAll(aggregateAttributes(matchedAttrs));
+		 
+		dedicatedLogger.info("{} recognized attributes, {} are not ",matchedAttrs.size(),unMatchedAttrs.size());		
+		
+		///////////////////////////////////
+		// Adding unmatched attributes
+		///////////////////////////////////
+		for (SourcedAttribute attr : unMatchedAttrs) {
+			AggregatedAttribute aat = new AggregatedAttribute();
+			aat.setName(attr.getName());
+			aat.setValue(attr.getRawValue().toString());
+			aa.getUnmapedAttributes().add(aat);			
+		}
+		
+		
+		return data;
+	}
+	
+	
 	/**
 	 * Associate and match a set of nativ attributes in a product
 	 *
@@ -68,7 +153,7 @@ public class AttributeAggregationService extends AbstractAggregationService {
 		
 	
 		for (Attribute attr : d.getAttributes()) {
-			Attribute translated = attributeConfig.translateAttribute(attr, d.getDatasourceName());
+			IAttribute translated = attributeConfig.translateAttribute(attr, "COMPUTED");
 			if (null != translated) {
 				matchedAttrs.add(new SourcedAttribute(translated, d));
 			} 
@@ -325,6 +410,8 @@ public class AttributeAggregationService extends AbstractAggregationService {
 		
 	}
 
+	
+	
 	/**
 	 * Type attribute and apply parsing rules. Return null if the Attribute fail to exact parsing rules
 	 *
@@ -512,6 +599,7 @@ public class AttributeAggregationService extends AbstractAggregationService {
 		
 		return ratings;
 	}
+
 
 
 	

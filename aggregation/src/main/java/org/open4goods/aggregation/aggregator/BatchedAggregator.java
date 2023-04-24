@@ -1,11 +1,11 @@
 package org.open4goods.aggregation.aggregator;
 
 import java.util.List;
+import java.util.Set;
 
 import org.open4goods.aggregation.AbstractAggregationService;
 import org.open4goods.exceptions.AggregationSkipException;
 import org.open4goods.model.aggregation.ParticipantData;
-import org.open4goods.model.data.DataFragment;
 import org.open4goods.model.product.AggregatedData;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,15 +17,33 @@ import io.micrometer.core.annotation.Timed;
  * @author goulven
  *
  */
-public class RealTimeAggregator extends AbstractAggregator {
+public class BatchedAggregator extends AbstractAggregator {
 
-	protected static final Logger logger = LoggerFactory.getLogger(RealTimeAggregator.class);
+	protected static final Logger logger = LoggerFactory.getLogger(BatchedAggregator.class);
+	private Set<AggregatedData> datas;
 
+	
 
-	public RealTimeAggregator(final List<AbstractAggregationService> services) {
+	public BatchedAggregator(final List<AbstractAggregationService> services) {
 		super(services);
 	}
 
+
+	public void close(Set<AggregatedData> datas) {
+		super.close();
+		this.datas = null;
+		
+	}
+
+
+	public void beforeStart(Set<AggregatedData> datas) {
+		super.beforeStart();
+		this.datas =datas;
+		
+		
+	}
+
+	
 	
 	/**
 	 * Build the AggregatedData using the services registered on this aggregator
@@ -34,19 +52,17 @@ public class RealTimeAggregator extends AbstractAggregator {
 	 * @throws AggregationSkipException 
 	 */
 	@Timed(value="AbstractAggregator.build()",description="Building an aggregated data from DataFragments")
-	public AggregatedData build(final DataFragment fragment, final AggregatedData data ) throws AggregationSkipException {
+	public AggregatedData update(final AggregatedData data, Set<AggregatedData> datas) throws AggregationSkipException {
 
-		logger.info("Incrementing AggregatedData with {} DataFragment and using {} services",fragment,services.size());
+		logger.info("Updating AggregatedData with AggragatedData {} and using {} services",data,services.size());
 
+		AggregatedData ret = null;
 		// Call transformation building registered service
 		for (final AbstractAggregationService service : services) {
 
 			try {
-				service.onDataFragment(fragment, data);
+				ret = service.onAggregatedData(data,datas);
 
-			}
-			catch (AggregationSkipException e) {
-				throw e;
 			}
 			catch (final Exception e) {
 				logger.warn("AggregationService {} throw an exception while processing data {}",service.getClass().getName(), data,e);
@@ -54,15 +70,7 @@ public class RealTimeAggregator extends AbstractAggregator {
 			}
 		}
 
-		// Computing the participant data
-		final ParticipantData pd = new ParticipantData();
-		pd.setDataUrl(fragment.affiliatedUrlIfPossible());
-		pd.setProviderName(fragment.getDatasourceConfigName());
-
-	
-		data.getAggregationResult().getParticipantDatas().add(pd);
-
-		return data;
+		return ret;
 	}
-
+	
 }
