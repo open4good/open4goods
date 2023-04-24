@@ -161,12 +161,40 @@ public class AggregatedDataRepository {
 													.build();
 		
 		
-		return elasticsearchTemplate.search(initialQuery, AggregatedData.class, IndexCoordinates.of(indexName))
+		return elasticsearchTemplate.search(initialQuery, AggregatedData.class, current_index)
 				.stream()
 				.map(e -> e.getContent());
 		
 	}
 
+	/**
+	 * Export all aggregateddatas for a vertical
+	 * @param vertical
+	 * @param max 
+	 * @param indexName
+	 * @return
+	 */
+	public Stream<AggregatedData> exportVertical(String vertical, int max) {
+
+		
+		QueryBuilder queryBuilder = QueryBuilders.boolQuery()  
+				.must(getValidDateQuery())
+				.must(new QueryStringQueryBuilder("vertical.keyword:"+vertical));
+				;
+
+		final NativeSearchQuery initialQuery = new NativeSearchQueryBuilder()
+													.withQuery(queryBuilder)
+													.withPageable(PageRequest.ofSize(max))
+													.build();
+		
+		final SearchHits<AggregatedData> str = elasticsearchTemplate.search(initialQuery, AggregatedData.class, current_index);
+
+		final Stream<AggregatedData> targetStream = str.stream()
+				.map(e->e.getContent())	;
+								
+		return targetStream;
+		
+	}
 	
 	public SearchHits<AggregatedData> search(NativeSearchQuery query, final String indexName) {				
 		return elasticsearchTemplate.search(query, AggregatedData.class, IndexCoordinates.of(indexName));

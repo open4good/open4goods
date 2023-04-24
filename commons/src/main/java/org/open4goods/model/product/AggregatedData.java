@@ -51,7 +51,7 @@ public class AggregatedData implements Standardisable {
 
 
 	/** The vertical, if any**/
-	@Field(index = false, store = false, type = FieldType.Keyword)
+	@Field(index = true, store = false, type = FieldType.Keyword)
 	private String vertical;
 	
 	

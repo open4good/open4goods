@@ -8,7 +8,7 @@ import org.open4goods.model.attribute.AttributeType;
 import org.springframework.data.elasticsearch.annotations.Field;
 import org.springframework.data.elasticsearch.annotations.FieldType;
 
-public class AggregatedAttribute {
+public class AggregatedAttribute implements IAttribute {
 
 	/**
 	 * The name of this aggregated attribute
@@ -143,6 +143,11 @@ public class AggregatedAttribute {
 
 	public void setType(AttributeType type) {
 		this.type = type;
+	}
+
+	@Override
+	public String getLanguage() {
+		return null;
 	}
 
 

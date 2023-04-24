@@ -11,6 +11,7 @@ import java.util.Set;
 import org.open4goods.config.yml.attributes.AttributeConfig;
 import org.open4goods.model.attribute.Attribute;
 import org.open4goods.model.constants.CacheConstants;
+import org.open4goods.model.product.IAttribute;
 import org.springframework.cache.annotation.Cacheable;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -86,7 +87,7 @@ public class AttributesConfig {
 		return hashedSynonyms;
 	}
 
-	public Attribute translateAttribute(final Attribute a, final String provider) {
+	public IAttribute translateAttribute(final IAttribute a, final String provider) {
 
 		Map<String, String> p = synonyms().get(provider);
 
