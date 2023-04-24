@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.open4goods.config.yml.ui.VerticalConfig;
 import org.open4goods.model.product.AggregatedData;
 
 /**
@@ -14,6 +15,8 @@ import org.open4goods.model.product.AggregatedData;
 public class VerticalSearchResponse {
 	
 	private String verticalName;
+
+	private VerticalConfig verticalConfig;
 	
 	private List<AggregatedData> data;
 
@@ -166,6 +169,15 @@ public class VerticalSearchResponse {
 	public void setMinOffers(Integer minOffers) {
 		this.minOffers = minOffers;
 	}
+
+	public VerticalConfig getVerticalConfig() {
+		return verticalConfig;
+	}
+
+	public void setVerticalConfig(VerticalConfig verticalConfig) {
+		this.verticalConfig = verticalConfig;
+	}
+	
 	
 	
 	

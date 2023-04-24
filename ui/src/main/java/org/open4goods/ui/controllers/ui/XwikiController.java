@@ -1,8 +1,8 @@
 package org.open4goods.ui.controllers.ui;
 
 import java.io.IOException;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
@@ -49,12 +49,8 @@ public class XwikiController extends AbstractUiController {
 		
 		
 
-	private Set<String> verticals = new HashSet<>();
 	
-	@PostConstruct
-	public void mapVerticals () {
-		verticals.addAll(verticalService.getConfigsWithoutDefault().stream().map(e -> e.getId()).collect(Collectors.toSet()));
-	}
+
 	
 	//////////////////////////////////////////////////////////////
 	// Mappings
@@ -88,16 +84,18 @@ public class XwikiController extends AbstractUiController {
 			@PathVariable(name = "page") String page, final HttpServletRequest request, HttpServletResponse response)
 			throws IOException, TechnicalException, InvalidParameterException {
 
-		// TODO : Twweak for verticals
+		// TODO : Twweak for verticalsLanguagesByUrl
 		
 		
-		if (verticals.contains(page)) {
+		if (null != verticalService.getLanguageForVerticalPath(page)) {
 			return verticalController.home(page,request);
 		} else
 		return xwiki("Main", page, request,response );
 	}
 	
 	
+
+
 	@GetMapping("/{vertical:[a-z-]+}/{page:[a-z-]+}")
 	public ModelAndView xwiki(@PathVariable(name = "vertical") String vertical,
 			@PathVariable(name = "page") String page, final HttpServletRequest request, HttpServletResponse response)

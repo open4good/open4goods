@@ -40,7 +40,9 @@ public class VerticalController extends AbstractUiController {
 
 	public ModelAndView home(String vertical, final HttpServletRequest request) {
 		ModelAndView ret = defaultModelAndView(("vertical-home"), request);
-		VerticalConfig config = verticalService.getConfigById(vertical).orNull();
+		
+
+		VerticalConfig config = verticalService.getLanguageForVerticalPath(vertical);
 				
 		// TODO : strategy of injection of products
 		
@@ -58,10 +60,14 @@ public class VerticalController extends AbstractUiController {
 		int minOffers=0;
 		
 		
-		VerticalSearchResponse products = searchService.verticalSearch(vertical,query,fromPrice,toPrice,state,from,to,minOffers, false);
+		VerticalSearchResponse products = searchService.verticalSearch(config,query,fromPrice,toPrice,state,from,to,minOffers, false);
 		
 		ret.addObject("products", products);
 		ret.addObject("config",config);
+		
+		// TODO: i18n
+		ret.addObject("verticalPath",verticalService.getPathForVerticalLanguage("fr"));
+		
 		
 		
 		return ret;

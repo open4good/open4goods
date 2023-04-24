@@ -4,6 +4,7 @@
                 <th>Nom</th>
                 <th>Marque</th>
                 <th>Prix</th>
+                <th>Nombre d'offres</th>                
                 <th>Eco-score</th>
                 <th>Compensation écologique</th>
                 <th>Taille écran</th>
@@ -13,9 +14,18 @@
         </thead>
         <tbody>
             <tr th:each="p : ${products.data}" >
-                <td th:text="${p.bestName()}"></td>
+               
+               
+                <td th:if="${p.model()}"><a th:text="${p.model()}" th:href="'/'+${verticalPath}+ '/'+${p.names.name}"></a></td>
+                <td th:unless="${p.model()}"><a th:text="${p.bestName()}" th:href="'/'+${verticalPath}+ '/'+${p.names.name}"></a></td>
+               
+               
+               
                 <td th:text="${p.brand()}"></td>
                 <td th:text="${p.bestPrice.price}"></td>
+                <td th:text="${p.offersCount}"></td>
+                
+                
                 <td></td>
                 <td th:text="${#numbers.formatDecimal(p.bestPrice.compensation, 1, 2)}"></td>
                 <td></td>
