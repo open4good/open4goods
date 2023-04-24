@@ -145,7 +145,18 @@ public class ProductController extends AbstractUiController {
 		inferAffiliationToken(data, data.getPrice().getMinPrice());
 //		inferAffiliationToken(data, data.getPrice().getMaxPrice());	
 		
-		ModelAndView mv = defaultModelAndView(("product"), request);
+		ModelAndView mv = null;
+		
+		
+		// TODO : Remove this test page
+		if (null != request.getParameter("new")) {
+			 mv = defaultModelAndView("product2", request);
+		} else {
+			 mv = defaultModelAndView("product", request);
+		}
+		
+		
+		
 		mv.addObject("product", data);
 		
 		// Adding the diplay country

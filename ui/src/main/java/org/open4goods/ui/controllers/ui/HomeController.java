@@ -72,6 +72,7 @@ public class HomeController extends AbstractUiController {
 		model.addObject("totalItems", aggregatedDataRepository.countMainIndexHavingPrice());
 		
 		model.addObject("partners",  partners);
+		model.addObject("url",  "/");
 		
 		return model;
 	}
