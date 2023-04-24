@@ -27,25 +27,38 @@ public class SourcedAttribute extends Attribute{
 	 * @param translated
 	 * @param df
 	 */
-	public SourcedAttribute(Attribute source, DataFragment df) {
+	public SourcedAttribute(IAttribute source, DataFragment df) {
 
 		this.date = df.getLastIndexationDate();
 		this.datasourceName = df.getDatasourceName();
 		this.url=df.affiliatedUrlIfPossible();
 		
-		setRawValue(source.getRawValue());
+		setRawValue(source.getValue());
 		setLanguage(source.getLanguage());
 		setName(source.getName());
-		setReferentiel(source.getReferentiel());
-		
-		
-		
+//		setReferentiel(source.getReferentiel());
+
 	}
+	
+	
+	public SourcedAttribute(IAttribute source, AggregatedData df) {
+
+		this.date = df.getLastChange();
+		
+		setRawValue(source.getValue());
+		setLanguage(source.getLanguage());
+		setName(source.getName());
+//		setReferentiel(source.getReferentiel());
+
+	}
+	
 	
 	////////////////////////////////
 	// Getters / setters
 	////////////////////////////////
 	
+
+
 
 
 	public String getUrl() {

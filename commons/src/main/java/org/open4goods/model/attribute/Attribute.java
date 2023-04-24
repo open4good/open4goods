@@ -17,6 +17,7 @@ import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import org.open4goods.exceptions.ValidationException;
 import org.open4goods.model.Validable;
+import org.open4goods.model.product.IAttribute;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.elasticsearch.annotations.Field;
@@ -30,7 +31,7 @@ import org.springframework.data.elasticsearch.annotations.FieldType;
  *
  */
 @SuppressWarnings("rawtypes")
-public class Attribute implements Validable {
+public class Attribute implements Validable,IAttribute {
 
 	private final static Logger logger = LoggerFactory.getLogger(Attribute.class);
 
@@ -480,6 +481,11 @@ public class Attribute implements Validable {
 
 	public void setReferentiel(Boolean referentiel) {
 		this.referentiel = referentiel;
+	}
+
+	@Override
+	public String getValue() {
+		return rawValue.toString();
 	}
 
 	
