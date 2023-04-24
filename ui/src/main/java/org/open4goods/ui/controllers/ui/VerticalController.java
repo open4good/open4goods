@@ -44,6 +44,7 @@ public class VerticalController extends AbstractUiController {
 				
 		// TODO : strategy of injection of products
 		
+		
 		String query = null;
 		Integer fromPrice = null;
 		Integer toPrice = null;
