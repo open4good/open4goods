@@ -102,7 +102,7 @@ public class BatchService {
 			// Warning, full vertical load
 			// TODO : Max from conf
 			
-			Set<AggregatedData> datas = dataRepository.exportVertical(vertical.getId(),10000).collect(Collectors.toSet());
+			Set<AggregatedData> datas = dataRepository.exportVertical(vertical.getId(),1000).collect(Collectors.toSet());
 			
 			agg.beforeStart(datas);
 
@@ -152,10 +152,15 @@ public class BatchService {
 					
 					// Index
 					//TODO : Bulk index for performance
-					dedicatedLogger.info("Vertical {} for vertical {}", vConf.getId() , e.bestName());
-
+					dedicatedLogger.warn("Vertical {} for vertical {}", vConf.getId() , e.bestName());
 					dataRepository.index(e);
+
 					
+				} else if (null != e.getVertical() ){
+					dedicatedLogger.warn("Nulling Vertical for {} ", e.bestName());
+					e.setVertical(null);
+					//TODO (gof) : bulkindex
+					dataRepository.index(e);
 				}
 				
 			}
