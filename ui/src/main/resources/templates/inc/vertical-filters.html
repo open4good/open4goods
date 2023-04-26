@@ -28,7 +28,10 @@
 					   label='L\'origine du produit est indiqué par le code barre. Ce n\'est pas une garantie sur le lieu de fabrication mais cela peut tout de même fournir une bonne indication.',
 					   labelType='alert-success',
 					   visibleSection=10,				   
-					   terms=${products.countries}">
+					   terms=${products.countries},
+					   termsLineWidget='vertical-filter-item-term-country'
+					   
+					   ">
 		<th:block th:include="inc/vertical-filter-item-terms.html"></th:block>
 	</th:block>	
 	
