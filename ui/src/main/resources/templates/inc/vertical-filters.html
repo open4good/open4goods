@@ -1,139 +1,59 @@
 <div class="card accordion" id="accordionFilter">
 
 
-	<!-- The eco-score -->	
-	<div class="accordion-item">
-		  <h2 class="accordion-header  border-bottom border-2" id="headingEcoscore">
-			<button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseEcoscore" aria-expanded="false" aria-controls="collapseEcoscore">
-				<span class="fas fa-question-circle me-2"></span>
-				Impact écologique
-			</button>
-		  </h2>
-		  <div id="collapseEcoscore" class="accordion-collapse collapse" aria-labelledby="headingEcoscore" data-bs-parent="#accordionFilter">
-			<div class="accordion-body">
+	<!-- The eco-score -->		
+	<th:block th:with="id='ecoscore',
+					   title='Eco-score',
+					   label='Filtrez ici votre recherche sur le niveau d\'impact écologique que vous êtes prèt à accepter.',
+					   labelType='alert-success',					   
+					   min=0,
+					   max=5">
+		<th:block th:include="inc/vertical-filter-item-numeric.html"></th:block>
+	</th:block>
 	
-			  <!-- Range slider container -->							
-				<div class="input-slider-range-container mx-3 mt-5" id="slider-ecoscore" data-range-value-min="0" data-range-value-max="5">
-					<!-- Range slider values -->
-					<div class="row d-none">
-						<div class="col-6">
-							<span class="range-slider-value value-low" data-range-value-low="0" ></span>
-						</div>
-						<div class="col-6 text-right">
-							<span class="range-slider-value value-high" data-range-value-high="5"></span>
-						</div>
-				</div>
-				<!-- End of range slider values -->
-				
-			</div>
-		  </div>
-		</div>
-	</div>
-	
+		
 	<!-- The item condition -->
-	<div class="accordion-item">
-	  <h2 class="accordion-header border-bottom border-2" id="headingCondition">
-		<button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseCondition" aria-expanded="true" aria-controls="collapseFour">
-			<span class="fab fa-leanpub me-2"></span>
-			Neuf ou occasion ?
-		</button>
-	  </h2>
-	  <div id="collapseCondition" class="accordion-collapse collapse" aria-labelledby="headingCondition" data-bs-parent="#accordionFilter">
-		<div class="accordion-body">
-
-			<div class="row">
-				<div class="col-12">
-					<div class="form-check mb-1">
-						<input class="form-check-input" type="checkbox" id="conditionNew">
-						<label class="form-check-label" for="cartNeuf">
-						  Neuf
-						</label>
-						<span th:text="${products.itemNew}" class="badge bg-gray badge-pill float-end"></span>
-					</div>
-				</div>
-				
-				<div class="col-12">
-					<div class="form-check mb-1">
-						<input class="form-check-input" type="checkbox" id="conditionOccasion">
-						<label class="form-check-label" for="conditionOccasion">
-						  Occasion
-						</label>
-						<span th:text="${products.itemOccasion}" class="badge bg-gray badge-pill float-end"></span>
-					</div>
-				</div>
-				
-				<div class="col-12">
-					<div class="form-check mb-1">
-						<input class="form-check-input" type="checkbox" id="conditionOccasion">
-						<label class="form-check-label" for="cartOccasion">
-						  Iconnu
-						</label>
-						<span th:text="${products.itemUnknown}" class="badge bg-gray badge-pill float-end"></span>
-					</div>
-				</div>
-				
-				
-				</div>
-			</div>			
-	  </div>
-	</div>
+	<th:block th:with="id='condition',
+					   title='Neuf ou occasion ?',
+					   label='Les produits d\'occasions coûtent moins cher et réduisent considérablement l\'impact écologique de votre achat !',
+					   labelType='alert-success',		
+					   visibleSection=10,	   
+					   terms=${products.conditions}">
+		<th:block th:include="inc/vertical-filter-item-terms.html"></th:block>
+	</th:block>	
+	
+	<!-- The originating countries -->
+	<th:block th:with="id='countries',
+					   title='Origine du produit',
+					   label='L\'origine du produit est indiqué par le code barre. Ce n\'est pas une garantie sur le lieu de fabrication mais cela peut tout de même fournir une bonne indication.',
+					   labelType='alert-success',
+					   visibleSection=10,				   
+					   terms=${products.countries}">
+		<th:block th:include="inc/vertical-filter-item-terms.html"></th:block>
+	</th:block>	
+	
 	
 	<hr class="bg-light border-2 border-top border-light">
 
 
-	<!-- The price condition -->
-	<div class="accordion-item">
-		  <h2 class="accordion-header border-bottom border-2" id="headingPrice">
-			<button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapsePrice" aria-expanded="true" aria-controls="collapsePrice">
-				<span class="fab fa-leanpub me-2"></span>
-				Prix
-			</button>
-		  </h2>
-		  <div id="collapsePrice" class="accordion-collapse collapse" aria-labelledby="headingPrice" data-bs-parent="#accordionFilter">
-			<div class="accordion-body">
-			  <!-- Range slider container -->							
-				<div class="input-slider-range-container mx-3 mt-5" id="slider-price" th:attrappend="data-range-value-min=${products.minPrice}, data-range-value-max=${products.maxPrice}">
-					<!-- Range slider values -->
-					<div class="row d-none">
-						<div class="col-6">
-							<span class="range-slider-value value-low" th:attr= "data-range-value-low=${products.minPrice}" ></span>
-						</div>
-						<div class="col-6 text-right">
-							<span class="range-slider-value value-high" th:attr= "data-range-value-high=${products.maxPrice}"></span>
-						</div>
-				</div>
-				<!-- End of range slider values -->			  			  
-			</div>
-		  </div>
-		</div>
-	</div>
+	<!-- The price condition -->	
+	<th:block th:with="title='Prix', 
+					   id='price',
+					   min=${products.minPrice},
+					   max=${products.maxPrice}">
+		<th:block th:include="inc/vertical-filter-item-numeric.html"></th:block>
+	</th:block>	
 	
-		<!-- The price condition -->
-	<div class="accordion-item">
-		  <h2 class="accordion-header border-bottom border-2" id="headingOffers">
-			<button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOffers" aria-expanded="true" aria-controls="collapseOffers">
-				<span class="fab fa-leanpub me-2"></span>
-				Concurrence
-			</button>
-		  </h2>
-		  <div id="collapseOffers" class="accordion-collapse collapse" aria-labelledby="headingOffers" data-bs-parent="#accordionFilter">
-			<div class="accordion-body">
-			  <!-- Range slider container -->							
-				<div class="input-slider-range-container mx-3 mt-5" id="slider-offers" th:attrappend="data-range-value-min=${products.minOffers}, data-range-value-max=${products.maxOffers}">
-					<!-- Range slider values -->
-					<div class="row d-none">
-						<div class="col-6">
-							<span class="range-slider-value value-low" th:attr= "data-range-value-low=${products.minOffers}" > ></span>
-						</div>
-						<div class="col-6 text-right">
-							<span class="range-slider-value value-high" th:attr= "data-range-value-high=${products.maxOffers}" ></span>
-						</div>
-				</div>
-				<!-- End of range slider values -->			  			  
-			</div>
-		  </div>
-		</div>
-	</div>
+	<!-- The num offers condition -->
+	<th:block th:with="title='Concurrence',
+	                   id='offers',
+					   label='La concurrence correspond au nombre d\'offres disponibles pour le produit. Plus elle est élevée, plus vous avez de chances d\'obtenir un prix juste et intéressant.',
+					   labelType='alert-success',	                   
+	                   min=${products.minOffers},
+	                   max=${products.maxOffers}">
+		<th:block th:include="inc/vertical-filter-item-numeric.html"></th:block>
+	</th:block>	
+	
 	
 
 	
@@ -147,31 +67,15 @@
 	
 	<hr class="bg-light border-2 border-top border-light">
 		
-	<div class="accordion-item">
-	  <h2 class="accordion-header  border-bottom border-2" id="headingBrand">
-		<button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseBrand" aria-expanded="false" aria-controls="headingBrand">
-			<span class="fas fa-microphone-alt me-2"></span>
-			Marque
-		</button>
-	  </h2>
-	  <div id="collapseBrand" class="accordion-collapse collapse" aria-labelledby="headingBrand" data-bs-parent="#accordionFilter">
-		<div class="accordion-body">
-			<!-- Checkboxes -->
-			<div class="row">
-				<div class="col-12">
-					<div th:each="brand : ${products.brands}" class="form-check mb-1">
-						<input class="form-check-input" type="checkbox" value="" th:id="'brand-'+${brand.key}">
-						<label  th:text="${brand.key}" class="form-check-label" th:for="'brand-'+${brand.key}"></label>
-						<span  th:text="${brand.value}" class="badge bg-gray badge-pill float-end"></span>
-					</div>
-				</div>
-				
-			</div>
-			<!-- End checkbox -->
-
-			</div>
-	  </div>
-	</div>
+	
+	<!-- The brand condition -->
+	<th:block th:with="id='brand',
+					   title='Marque',
+					   visibleSection=10,
+					   terms=${products.brands}">
+		<th:block th:include="inc/vertical-filter-item-terms.html"></th:block>
+	</th:block>	
+	
 </div>
 
             

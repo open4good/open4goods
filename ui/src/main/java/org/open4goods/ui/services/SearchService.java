@@ -21,6 +21,8 @@ import org.open4goods.dao.AggregatedDataRepository;
 import org.open4goods.helper.GenericFileLogger;
 import org.open4goods.model.constants.ProductState;
 import org.open4goods.model.product.AggregatedData;
+import org.open4goods.ui.controllers.dto.VerticalFilterTerm;
+import org.open4goods.ui.controllers.dto.VerticalSearchRequest;
 import org.open4goods.ui.controllers.dto.VerticalSearchResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -122,58 +124,72 @@ public class SearchService {
 		vsr.setTo(to);
 		vsr.setData(results.get().map(e-> e.getContent()).toList());
 		
-		vsr.setVerticalName(ALL_VERTICAL_NAME);	
-		
-		
 		return vsr;
 	}
 
 	
-	
-	public VerticalSearchResponse verticalSearch(VerticalConfig vertical, String initialQuery, Integer fromPrice, Integer toPrice, ProductState condition, Integer from, Integer to, int minOffersToShow, boolean sort) {
-		
-//		String query = initialQuery == null ? "" :  sanitize(initialQuery);
+
+	/**
+	 * Advanced search in a vertical
+	 * @param vertical
+	 * @param request
+	 * @return
+	 */
+	public VerticalSearchResponse verticalSearch(VerticalConfig vertical, VerticalSearchRequest request) {
 		
 		// Logging
-		statsLogger.info("Searching {}",initialQuery);
+		statsLogger.info("Searching {}",request);
 				
+		VerticalSearchResponse vsr = new VerticalSearchResponse();		
+		
 		// Valid timestamp
 		BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery()  
+				.must(QueryBuilders.matchQuery("vertical.keyword",vertical.getId() ))
 				.must(aggregatedDataRepository.getValidDateQuery())	
 				;
-		queryBuilder = queryBuilder.must(QueryBuilders.matchQuery("vertical.keyword",vertical.getId() ));
-
 		
 		// from price
-		if (null != fromPrice) {
-			queryBuilder = queryBuilder.must(QueryBuilders.rangeQuery("price.minPrice.price").gt(fromPrice.intValue()));			 			
+		if (null != request.getMinPrice()) {
+			queryBuilder = queryBuilder.must(QueryBuilders.rangeQuery("price.minPrice.price").gt(request.getMinPrice().intValue()));			 			
 		} else {
-			queryBuilder = queryBuilder.must(QueryBuilders.rangeQuery("price.minPrice.price").gt(0.0));
+			//TODO : test removing
+//			queryBuilder = queryBuilder.must(QueryBuilders.rangeQuery("price.minPrice.price").gt(0.0));
 		}
 		
 		// to price
-		if (null != toPrice) {
-			queryBuilder = queryBuilder.must(QueryBuilders.rangeQuery("price.minPrice.price").lt(toPrice.intValue()));			 			
+		if (null != request.getMaxPrice()) {
+			queryBuilder = queryBuilder.must(QueryBuilders.rangeQuery("price.minPrice.price").lt(request.getMaxPrice().intValue()+1));			 			
 		} else {
-			queryBuilder = queryBuilder.must(QueryBuilders.rangeQuery("price.minPrice.price").lt(Integer.MAX_VALUE));	
+			//TODO : test removing
+//			queryBuilder = queryBuilder.must(QueryBuilders.rangeQuery("price.minPrice.price").lt(Integer.MAX_VALUE));	
 		}
 		
 		// condition
-		if (null != condition) {
-			queryBuilder = queryBuilder.must(QueryBuilders.termQuery("price.minPrice.productState", condition.toString()));
+		if (null != request.getCondition()) {
+			queryBuilder = queryBuilder.must(QueryBuilders.termQuery("price.minPrice.productState", request.getCondition().toString()));
 		}
 		
-		// Setting the query
-		NativeSearchQueryBuilder esQuery = new NativeSearchQueryBuilder()
-				.withQuery(queryBuilder)
-
-				;
 		
-		if (null != from && null != to) {
-			esQuery = esQuery .withPageable(PageRequest.of(from, to));
+		
+		// min offersCount
+		if (null != request.getMinOffers()) {
+			queryBuilder = queryBuilder.must(QueryBuilders.rangeQuery("offersCount").gt(request.getMinOffers()));
+		}
+		
+		// max offersCount
+		if (null != request.getMaxOffers()) {
+			queryBuilder = queryBuilder.must(QueryBuilders.rangeQuery("offersCount").lt(request.getMaxOffers()+1));
+		}
+		
+		
+		// Setting the query
+		NativeSearchQueryBuilder esQuery = new NativeSearchQueryBuilder().withQuery(queryBuilder);
+		
+		if (null != request.getFrom() && null != request.getTo()) {
+			esQuery = esQuery .withPageable(PageRequest.of(request.getFrom(), request.getTo()));
 		} else {
 			//TODO(gof) : from conf
-			esQuery = esQuery .withPageable(PageRequest.of(0, 1000));
+			esQuery = esQuery .withPageable(PageRequest.of(0, 100));
 		}
 		
 		// Adding standard aggregations
@@ -184,22 +200,16 @@ public class SearchService {
 				//TODO : could optimize by setting at 1
 				.withAggregations(AggregationBuilders.min("min_offers").field("offersCount"))
 				//TODO: store the productState at indexation, faster and no counting by offers
-				.withAggregations(AggregationBuilders.terms("condition").field("price.offers.productState").size(5))	
+				.withAggregations(AggregationBuilders.terms("condition").field("price.offers.productState").size(3))	
 				.withAggregations(AggregationBuilders.terms("brands").field("attributes.referentielAttributes.BRAND.keyword").size(500))	
-				
+				.withAggregations(AggregationBuilders.terms("country").field("gtinInfos.country").size(500))	
 				.withQuery(queryBuilder)
-				.withSort(SortBuilders.fieldSort("offersCount").order(SortOrder.DESC))
-//		.withSorts(SortBuilders.fieldSort("minOffers"))
+				.withSort(SortBuilders.fieldSort("offersCount").order(SortOrder.DESC));
 
-		;
 		
-//		if (sort) {
-//			 esQuery.        withSort(SortBuilders.fieldSort("offersCount").order(SortOrder.DESC));
-//		}
-//		
 		
 		SearchHits<AggregatedData> results = aggregatedDataRepository.search(esQuery.build(),ALL_VERTICAL_NAME);
-		VerticalSearchResponse vsr = new VerticalSearchResponse();			
+	
 
 		// Handling aggregations results if relevant
 		Aggregations aggregations = (Aggregations)results.getAggregations().aggregations();
@@ -210,53 +220,43 @@ public class SearchService {
 		Min minOffers = aggregations.get("min_offers");
 		Terms brands  =  aggregations.get("brands");
 		Terms productSate  =  aggregations.get("condition");		
+		Terms countries  =  aggregations.get("country");		
 		
 		vsr.setMaxPrice(maxPrice.getValue());
 		vsr.setMinPrice(minPrice.getValue());
 		vsr.setMaxOffers(Double.valueOf(maxOffers.getValue()).intValue());
 		vsr.setMinOffers(Double.valueOf(minOffers.getValue()).intValue());
 		
-		if (null != productSate.getBucketByKey(ProductState.NEW.toString())) {			
-			vsr.setItemNew( productSate.getBucketByKey(ProductState.NEW.toString()).getDocCount()) ;
-		}
 
-		if (null != productSate.getBucketByKey(ProductState.OCCASION.toString())) {			
-			vsr.setItemOccasion( productSate.getBucketByKey(ProductState.OCCASION.toString()).getDocCount()) ;
+
+		for (Bucket b :   productSate.getBuckets()) {			
+			vsr.getConditions().add (new VerticalFilterTerm(b.getKey().toString(), b.getDocCount()));			
 		}
-		
-		if (null != productSate.getBucketByKey(ProductState.UNKNOWN.toString())) {			
-			vsr.setItemUnknown(productSate.getBucketByKey(ProductState.UNKNOWN.toString()).getDocCount());
-		}
+		vsr.getConditions().sort((o1, o2) -> o2.getCount().compareTo(o1.getCount()));
+
 		
 		for (Bucket b :   brands.getBuckets()) {			
-			vsr.getBrands().put(b.getKey().toString(), b.getDocCount());			
+			vsr.getBrands().add (new VerticalFilterTerm(b.getKey().toString(), b.getDocCount()));			
 		}
+		vsr.getBrands().sort((o1, o2) -> o2.getCount().compareTo(o1.getCount()));
+		
+		
+		for (Bucket bucket : countries.getBuckets()) {
+			vsr.getCountries().add (new VerticalFilterTerm(bucket.getKey().toString(), bucket.getDocCount()));
+		}
+		vsr.getCountries().sort((o1, o2) -> o2.getCount().compareTo(o1.getCount()));
+
 
 //		// Setting the response
 		vsr.setTotalResults(results.getTotalHits());
-		vsr.setFrom(from);
-		vsr.setTo(to);
 		vsr.setData(results.get().map(e-> e.getContent()).toList());
-		
-		vsr.setVerticalName(vertical.getId());	
-		
+				
 		vsr.setVerticalConfig(vertical);	
+		vsr.setRequest(request);
 		
 		return vsr;
 	}
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
+
 	
 	/**
 	 * 
@@ -276,7 +276,6 @@ public class SearchService {
 		
 		// TODO(gof) : Page from conf
 		vsr.setData(aggregatedDataRepository.searchValidPrices(translatedVerticalQuery,ALL_VERTICAL_NAME,0,1000) .collect(Collectors.toList()));
-		vsr.setVerticalName(ALL_VERTICAL_NAME);	
 		
 		return vsr;
 	}

@@ -1,5 +1,6 @@
 package org.open4goods.ui.controllers.dto;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -14,13 +15,13 @@ import org.open4goods.model.product.AggregatedData;
  */
 public class VerticalSearchResponse {
 	
-	private String verticalName;
 
 	private VerticalConfig verticalConfig;
 	
+	private VerticalSearchRequest request;
+	
 	private List<AggregatedData> data;
 
-	private Map<String, Long> brands = new HashMap<>();
 	
 	private Integer maxOffers;
 
@@ -36,26 +37,16 @@ public class VerticalSearchResponse {
 	
 	private Integer to;
 
-	private long itemNew;
 	
-	private long itemOccasion;
-
-	private long itemUnknown;
-	
+	private List<VerticalFilterTerm> conditions = new ArrayList<>();
+	private List<VerticalFilterTerm> brands = new ArrayList<>();
+	private List<VerticalFilterTerm> countries = new ArrayList<>();
 	
 	
 	
 	
 	
 	
-	public String getVerticalName() {
-		return verticalName;
-	}
-
-	public void setVerticalName(String verticalName) {
-		this.verticalName = verticalName;
-	}
-
 	public List<AggregatedData> getData() {
 		return data;
 	}
@@ -69,6 +60,14 @@ public class VerticalSearchResponse {
 
 
 
+
+	public VerticalSearchRequest getRequest() {
+		return request;
+	}
+
+	public void setRequest(VerticalSearchRequest request) {
+		this.request = request;
+	}
 
 	public Double getMinPrice() {
 		return minPrice;
@@ -119,40 +118,8 @@ public class VerticalSearchResponse {
 		this.to = to;
 	}
 
-	public long getItemNew() {
-		return itemNew;
-	}
+	
 
-	public void setItemNew(long itemNew) {
-		this.itemNew = itemNew;
-	}
-
-	public long getItemOccasion() {
-		return itemOccasion;
-	}
-
-	public void setItemOccasion(long itemOccasion) {
-		this.itemOccasion = itemOccasion;
-	}
-
-	public long getItemUnknown() {
-		return itemUnknown;
-	}
-
-	public void setItemUnknown(long itemUnknown) {
-		this.itemUnknown = itemUnknown;
-	}
-
-
-
-
-	public Map<String, Long> getBrands() {
-		return brands;
-	}
-
-	public void setBrands(Map<String, Long> brands) {
-		this.brands = brands;
-	}
 
 	public Integer getMaxOffers() {
 		return maxOffers;
@@ -177,9 +144,31 @@ public class VerticalSearchResponse {
 	public void setVerticalConfig(VerticalConfig verticalConfig) {
 		this.verticalConfig = verticalConfig;
 	}
-	
-	
-	
+
+	public List<VerticalFilterTerm> getBrands() {
+		return brands;
+	}
+
+	public void setBrands(List<VerticalFilterTerm> brands) {
+		this.brands = brands;
+	}
+
+	public List<VerticalFilterTerm> getCountries() {
+		return countries;
+	}
+
+	public void setCountries(List<VerticalFilterTerm> countries) {
+		this.countries = countries;
+	}
+
+	public List<VerticalFilterTerm> getConditions() {
+		return conditions;
+	}
+
+	public void setConditions(List<VerticalFilterTerm> conditions) {
+		this.conditions = conditions;
+	}
+
 	
 	
 }
