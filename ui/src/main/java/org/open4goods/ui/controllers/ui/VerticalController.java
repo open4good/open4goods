@@ -6,6 +6,7 @@ import org.open4goods.config.yml.ui.VerticalConfig;
 import org.open4goods.model.constants.ProductState;
 import org.open4goods.services.VerticalsConfigService;
 import org.open4goods.ui.config.yml.UiConfig;
+import org.open4goods.ui.controllers.dto.VerticalSearchRequest;
 import org.open4goods.ui.controllers.dto.VerticalSearchResponse;
 import org.open4goods.ui.services.SearchService;
 import org.slf4j.Logger;
@@ -44,23 +45,11 @@ public class VerticalController extends AbstractUiController {
 
 		VerticalConfig config = verticalService.getLanguageForVerticalPath(vertical);
 				
-		// TODO : strategy of injection of products
+		// TODO : strategy of injection of products for nativ SEO
 		
+		VerticalSearchRequest vRequest = new VerticalSearchRequest();		
 		
-		String query = null;
-		Integer fromPrice = null;
-		Integer toPrice = null;
-
-		// Paging
-		Integer from=null;
-		Integer to=null;
-		
-		ProductState state = null;
-		
-		int minOffers=0;
-		
-		
-		VerticalSearchResponse products = searchService.verticalSearch(config,query,fromPrice,toPrice,state,from,to,minOffers, false);
+		VerticalSearchResponse products = searchService.verticalSearch(config,vRequest);
 		
 		ret.addObject("products", products);
 		ret.addObject("config",config);

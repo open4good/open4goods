@@ -1,0 +1,49 @@
+<div class="accordion-item">
+		  <h2 class="accordion-header  border-bottom border-2" th:id="'heading'+${id}">
+			<button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" th:attr="data-bs-target='#collapse'+${id}, aria-controls='collapse'+${id}" aria-expanded="false">
+				<span class="fas fa-question-circle me-2"></span>
+				<th:block th:text="${title}"></th:block>
+			</button>
+		  </h2>
+		  <div th:id="'collapse'+${id}" class="accordion-collapse collapse" th:attr="aria-labelledby='heading'+${id}" data-bs-parent="#accordionFilter">
+			<div class="accordion-body">
+						   
+			   <div th:if="${label}" th:text="${label}" class="alert" th:classappend="${labelType}" role="alert"></div>
+
+					<div class="row">
+
+						<!-- /*  The always visible section*/ -->
+						<div th:each="term, index: ${terms}" class="col-12">
+							<th:block th:if="${index.index} < ${visibleSection}">
+								<div class="form-check mb-1">
+									<input class="form-check-input" type="checkbox" th:id="'input'+'-'+${id}+'-'+${term.id}">
+									<label th:text="${term.text}" class="form-check-label" th:for="'input'+'-'+${id}+'-'+${term.id}"></label>
+									<span th:text="${term.count}" th:id="'badge'+'-'+${id}+'-'+${term.id}" class="badge bg-gray badge-pill float-end"></span>
+								</div>
+							</th:block>
+						</div>
+						
+						<!-- /*  The collapsable area*/ -->
+						<th:block th:if="${terms.size()} >= ${visibleSection}+1">
+
+	  						<button type="button" class="mb-2 btn btn-secondary" data-bs-toggle="collapse" th:href="'#collapseMore'+${id}" role="button" aria-expanded="false" th:attr="aria-controls='collapseMore'+${id}">
+	  						    Tout afficher
+	  						</button>
+							<div class="collapse" th:id="'collapseMore'+${id}">
+								<div th:each="term, index: ${terms}" class="col-12">
+									<th:block th:if="${index.index} >= ${visibleSection}">
+										<div class="form-check mb-1">
+											<input class="form-check-input" type="checkbox" th:id="'input'+'-'+${id}+'-'+${term.id}">
+											<label th:text="${term.text}" class="form-check-label" th:for="'input'+'-'+${id}+'-'+${term.id}"></label>
+											<span th:text="${term.count}" th:id="'badge'+'-'+${id}+'-'+${term.id}" class="badge bg-gray badge-pill float-end"></span>
+										</div>
+									</th:block>
+								</div>
+							</div>							
+
+						</th:block>
+						
+					</div>
+		</div>			
+  </div>
+</div>
