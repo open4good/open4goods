@@ -1,11 +1,14 @@
 package org.open4goods.ui.controllers.ui;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import javax.servlet.http.HttpServletRequest;
 
 import org.open4goods.config.yml.ui.VerticalConfig;
-import org.open4goods.model.constants.ProductState;
 import org.open4goods.services.VerticalsConfigService;
 import org.open4goods.ui.config.yml.UiConfig;
+import org.open4goods.ui.controllers.dto.VerticalFilterTerm;
 import org.open4goods.ui.controllers.dto.VerticalSearchRequest;
 import org.open4goods.ui.controllers.dto.VerticalSearchResponse;
 import org.open4goods.ui.services.SearchService;
@@ -14,6 +17,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.servlet.ModelAndView;
+
+import com.ibm.icu.util.ULocale;
 
 @Controller
 /**
@@ -51,7 +56,16 @@ public class VerticalController extends AbstractUiController {
 		
 		VerticalSearchResponse products = searchService.verticalSearch(config,vRequest);
 		
+		Map<String,String> countryNames = new HashMap<>();		
+		for (VerticalFilterTerm country : products.getCountries()) {
+			countryNames.put(country.getText(), new ULocale("",country.getText()).getDisplayCountry( new ULocale(request.getLocale().toString())));
+		}
+
+		
+		
+		ret.addObject("countryNames", countryNames);
 		ret.addObject("products", products);
+		
 		ret.addObject("config",config);
 		
 		// TODO: i18n
