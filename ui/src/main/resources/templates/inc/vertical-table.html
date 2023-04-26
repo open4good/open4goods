@@ -4,9 +4,10 @@
                 <th>Nom</th>
                 <th>Marque</th>
                 <th>Prix</th>
-                <th>Nombre d'offres</th>                
+                <th>Offres</th>
+                <th>Origine</th>                                
                 <th>Eco-score</th>
-                <th>Compensation écologique</th>
+                <th>Compensation</th>
                 <th>Taille écran</th>
                 <th>Type écran</th>
                 
@@ -24,7 +25,7 @@
                 <td th:text="${p.brand()}"></td>
                 <td th:text="${p.bestPrice.price}"></td>
                 <td th:text="${p.offersCount}"></td>
-                
+                <td th:text="${p.gtinInfos.country}"></td>                
                 
                 <td></td>
                 <td th:text="${#numbers.formatDecimal(p.bestPrice.compensation, 1, 2)}"></td>
@@ -33,14 +34,5 @@
             </tr>
  
         </tbody>
-        <tfoot>
-            <tr>
-                <th>Nom</th>
-                <th>Marque</th>
-                <th>Prix</th>
-                <th>Eco-Score</th>
-                <th>Compensation écologique</th>
-                <th>Taille écran</th>
-            </tr>
-        </tfoot>
+
     </table>
