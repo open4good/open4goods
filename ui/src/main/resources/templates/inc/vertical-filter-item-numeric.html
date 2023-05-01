@@ -1,7 +1,8 @@
 <div class="accordion-item">
 		  <h2 class="accordion-header  border-bottom border-2" th:id="'heading'+${id}">
 			<button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" th:attr="data-bs-target='#collapse'+${id}, aria-controls='collapse'+${id}" aria-expanded="false">
-				<span class="fas fa-question-circle me-2"></span>
+				<span th:if="${icon}" class="fas me-2" th:classappend="${icon}"></span>
+				<span th:unless="${icon}" class="fas me-2 fa-question-circle"></span>
 				<th:block th:text="${title}"></th:block>
 			</button>
 		  </h2>

@@ -8,8 +8,11 @@
                 <th>Origine</th>                                
                 <th>Eco-score</th>
                 <th>Compensation</th>
-                <th>Taille écran</th>
-                <th>Type écran</th>
+                
+                <th:block th:each="filter : ${products.customFilters}">
+	                <th th:text="${filter.key.name.get(siteLanguage)}"></th>            
+                </th:block>
+                
                 
             </tr>
         </thead>
@@ -29,8 +32,13 @@
                 
                 <td></td>
                 <td th:text="${#numbers.formatDecimal(p.bestPrice.compensation, 1, 2)}"></td>
-                <td></td>
-                <td></td>
+				
+                <th:block th:each="filter : ${products.customFilters}">
+	                <td th:if="${p.attributes.aggregatedAttributes.get(filter.key.key)}" th:text="${p.attributes.aggregatedAttributes.get(filter.key.key).value }"></td>            
+	                <td th:unless="${p.attributes.aggregatedAttributes.get(filter.key.key)}"></td>            
+
+                </th:block>
+
             </tr>
  
         </tbody>
