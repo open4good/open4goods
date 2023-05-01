@@ -1,5 +1,6 @@
 package org.open4goods.ui.services;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -219,7 +220,7 @@ public class SearchService {
 		// Adding custom filters aggregations	
 		for (AttributeConfig attrConfig : customAttrFilters) {
 			esQuery = esQuery 
-					.withAggregations(AggregationBuilders.min(attrConfig.getKey()).field("attributes.aggregatedAttributes."+attrConfig.getKey()+".keyword"));			
+					.withAggregations(AggregationBuilders.terms(attrConfig.getKey()).field("attributes.aggregatedAttributes."+attrConfig.getKey()+".keyword"));			
 		}
 		
 
@@ -265,14 +266,12 @@ public class SearchService {
 		
 		// Handling custom filters aggregations	
 		for (AttributeConfig attrConfig : customAttrFilters) {
-			Terms agg  =  aggregations.get(attrConfig.getKey());	
+			Terms agg  =  aggregations.get(attrConfig.getKey());
+			vsr.getCustomFilters().put(attrConfig, new ArrayList<>());
 			for (Bucket bucket : agg.getBuckets()) {
-				
-				vsr.getCountries().add (new VerticalFilterTerm(bucket.getKey().toString(), bucket.getDocCount()));
-			
-			
+				vsr.getCustomFilters().get(attrConfig).add (new VerticalFilterTerm(bucket.getKey().toString(), bucket.getDocCount()));
 			}
-			vsr.getCountries().sort((o1, o2) -> o2.getCount().compareTo(o1.getCount()));
+			vsr.getCustomFilters().get(attrConfig).sort((o1, o2) -> o2.getCount().compareTo(o1.getCount()));
 		}		
 
 //		// Setting the response

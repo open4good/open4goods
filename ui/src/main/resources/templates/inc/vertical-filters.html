@@ -64,12 +64,12 @@
 	
 	<!-- The custom filters -->
 	
-	<th:block th:each="filter : ${filters}">
+	<th:block th:each="filter : ${products.customFilters}">
 	
-		<th:block th:with="title=${filter.name.get(siteLanguage)},
-		                   id=${filter.key},
+		<th:block th:with="title=${filter.key.name.get(siteLanguage)},
+		                   id=${filter.key.key},
 					   visibleSection=10,
-					   terms=${products.brands}">
+					   terms=${filter.value}">
 			<th:block th:include="inc/vertical-filter-item-terms.html"></th:block>
 		</th:block>		
 	
