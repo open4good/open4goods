@@ -4,6 +4,7 @@
 	<!-- The eco-score -->		
 	<th:block th:with="id='ecoscore',
 					   title='Eco-score',
+					   icon='fa-globe',
 					   label='Filtrez ici votre recherche sur le niveau d\'impact écologique que vous êtes prèt à accepter.',
 					   labelType='alert-success',					   
 					   min=0,
@@ -15,6 +16,7 @@
 	<!-- The item condition -->
 	<th:block th:with="id='condition',
 					   title='Neuf ou occasion ?',
+   					   icon='fa-handshake',  
 					   label='Les produits d\'occasions coûtent moins cher et réduisent considérablement l\'impact écologique de votre achat !',
 					   labelType='alert-success',		
 					   visibleSection=10,	   
@@ -25,6 +27,7 @@
 	<!-- The originating countries -->
 	<th:block th:with="id='countries',
 					   title='Origine du produit',
+					   icon='fa-flag',  					   
 					   label='L\'origine du produit est indiqué par le code barre. Ce n\'est pas une garantie sur le lieu de fabrication mais cela peut tout de même fournir une bonne indication.',
 					   labelType='alert-success',
 					   visibleSection=10,				   
@@ -42,6 +45,7 @@
 	<!-- The price condition -->	
 	<th:block th:with="title='Prix', 
 					   id='price',
+					   icon='fa-euro-sign',
 					   min=${products.minPrice},
 					   max=${products.maxPrice}">
 		<th:block th:include="inc/vertical-filter-item-numeric.html"></th:block>
@@ -51,7 +55,8 @@
 	<th:block th:with="title='Concurrence',
 	                   id='offers',
 					   label='La concurrence correspond au nombre d\'offres disponibles pour le produit. Plus elle est élevée, plus vous avez de chances d\'obtenir un prix juste et intéressant.',
-					   labelType='alert-success',	                   
+					   labelType='alert-success',	
+					   icon='fa-cart-plus',                   
 	                   min=${products.minOffers},
 	                   max=${products.maxOffers}">
 		<th:block th:include="inc/vertical-filter-item-numeric.html"></th:block>
@@ -67,7 +72,8 @@
 	<th:block th:each="filter : ${products.customFilters}">
 	
 		<th:block th:with="title=${filter.key.name.get(siteLanguage)},
-		                   id=${filter.key.key},
+		               id=${filter.key.key},
+					   icon=${filter.key.faIcon},		                   
 					   visibleSection=10,
 					   terms=${filter.value}">
 			<th:block th:include="inc/vertical-filter-item-terms.html"></th:block>
@@ -86,6 +92,7 @@
 	<!-- The brand condition -->
 	<th:block th:with="id='brand',
 					   title='Marque',
+					   icon='fa-copyright',					   
 					   visibleSection=10,
 					   terms=${products.brands}"
 					   >

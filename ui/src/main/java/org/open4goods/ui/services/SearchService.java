@@ -30,6 +30,7 @@ import org.open4goods.ui.controllers.dto.VerticalSearchResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.annotation.Order;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.elasticsearch.core.SearchHits;
 import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilder;
@@ -44,6 +45,9 @@ import ch.qos.logback.classic.Level;
  *
  */
 public class SearchService {
+
+	private static final String OTHER_BUCKET = "UNKNOWN";
+
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(SearchService.class);
 
@@ -210,9 +214,9 @@ public class SearchService {
 				//TODO : could optimize by setting at 1
 				.withAggregations(AggregationBuilders.min("min_offers").field("offersCount"))
 				//TODO: store the productState at indexation, faster and no counting by offers
-				.withAggregations(AggregationBuilders.terms("condition").field("price.offers.productState").size(3))	
-				.withAggregations(AggregationBuilders.terms("brands").field("attributes.referentielAttributes.BRAND.keyword").size(500))	
-				.withAggregations(AggregationBuilders.terms("country").field("gtinInfos.country").size(500))	
+				.withAggregations(AggregationBuilders.terms("condition").field("price.offers.productState").missing(OTHER_BUCKET).size(4))	
+				.withAggregations(AggregationBuilders.terms("brands").field("attributes.referentielAttributes.BRAND.keyword").missing(OTHER_BUCKET).size(500))	
+				.withAggregations(AggregationBuilders.terms("country").field("gtinInfos.country").missing(OTHER_BUCKET).size(500))	
 				.withQuery(queryBuilder)
 				.withSort(SortBuilders.fieldSort("offersCount").order(SortOrder.DESC));
 
@@ -220,7 +224,7 @@ public class SearchService {
 		// Adding custom filters aggregations	
 		for (AttributeConfig attrConfig : customAttrFilters) {
 			esQuery = esQuery 
-					.withAggregations(AggregationBuilders.terms(attrConfig.getKey()).field("attributes.aggregatedAttributes."+attrConfig.getKey()+".keyword"));			
+					.withAggregations(AggregationBuilders.terms(attrConfig.getKey()).field("attributes.aggregatedAttributes."+attrConfig.getKey()+".value.keyword").missing(OTHER_BUCKET) );			
 		}
 		
 
@@ -249,29 +253,51 @@ public class SearchService {
 			vsr.getConditions().add (new VerticalFilterTerm(b.getKey().toString(), b.getDocCount()));			
 		}
 		vsr.getConditions().sort((o1, o2) -> o2.getCount().compareTo(o1.getCount()));
-
+		// Adding others
+		if (null != productSate.getBucketByKey(OTHER_BUCKET)) {		
+			vsr.getConditions().add ( new VerticalFilterTerm(OTHER_BUCKET,productSate.getBucketByKey(OTHER_BUCKET).getDocCount()));
+		}
 		
 		for (Bucket b :   brands.getBuckets()) {			
 			vsr.getBrands().add (new VerticalFilterTerm(b.getKey().toString(), b.getDocCount()));			
 		}
 		vsr.getBrands().sort((o1, o2) -> o2.getCount().compareTo(o1.getCount()));
-		
+		// Adding others
+		if (null != brands.getBucketByKey(OTHER_BUCKET)) {		
+			vsr.getBrands().add ( new VerticalFilterTerm(OTHER_BUCKET,brands.getBucketByKey(OTHER_BUCKET).getDocCount()));
+		}
 		
 		for (Bucket bucket : countries.getBuckets()) {
 			vsr.getCountries().add (new VerticalFilterTerm(bucket.getKey().toString(), bucket.getDocCount()));
 		}
 		vsr.getCountries().sort((o1, o2) -> o2.getCount().compareTo(o1.getCount()));
-
-		
+		// Adding others
+		if (null != countries.getBucketByKey(OTHER_BUCKET)) {
+			vsr.getCountries().add ( new VerticalFilterTerm(OTHER_BUCKET,countries.getBucketByKey(OTHER_BUCKET).getDocCount()));
+		}
 		
 		// Handling custom filters aggregations	
 		for (AttributeConfig attrConfig : customAttrFilters) {
 			Terms agg  =  aggregations.get(attrConfig.getKey());
 			vsr.getCustomFilters().put(attrConfig, new ArrayList<>());
 			for (Bucket bucket : agg.getBuckets()) {
-				vsr.getCustomFilters().get(attrConfig).add (new VerticalFilterTerm(bucket.getKey().toString(), bucket.getDocCount()));
+				
+				if (!bucket.getKey().toString().equals(OTHER_BUCKET)) {					
+					vsr.getCustomFilters().get(attrConfig).add (new VerticalFilterTerm(bucket.getKey().toString(), bucket.getDocCount()));
+				}
 			}
-			vsr.getCustomFilters().get(attrConfig).sort((o1, o2) -> o2.getCount().compareTo(o1.getCount()));
+			
+			if (attrConfig.getAttributeValuesOrdering().equals(org.open4goods.config.yml.attributes.Order.COUNT ) ) {
+				vsr.getCustomFilters().get(attrConfig).sort((o1, o2) -> o2.getCount().compareTo(o1.getCount()));				
+			}
+			else {
+				vsr.getCustomFilters().get(attrConfig).sort((o1, o2) -> o1.getText().compareTo(o2.getText()));								
+			}
+			
+			// Adding others
+			if (null != agg.getBucketByKey(OTHER_BUCKET)) {
+				vsr.getCustomFilters().get(attrConfig).add ( new VerticalFilterTerm(OTHER_BUCKET,agg.getBucketByKey(OTHER_BUCKET).getDocCount()));
+			}
 		}		
 
 //		// Setting the response
