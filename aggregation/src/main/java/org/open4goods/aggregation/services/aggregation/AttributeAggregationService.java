@@ -60,16 +60,17 @@ public class AttributeAggregationService extends AbstractAggregationService {
 				
 		// 2 - Classifying "matched/unmatched" attributes
 		List<SourcedAttribute> matchedAttrs = new ArrayList<>();
-		List<SourcedAttribute> unMatchedAttrs = new ArrayList<>();		
+		List<SourcedAttribute> allAttrs = new ArrayList<>();		
 		
 	
 		for (AggregatedAttribute attr : data.getAttributes().getUnmapedAttributes()) {
 			IAttribute translated = attributeConfig.translateAttribute(attr, data.getVertical());
+			
 			if (null != translated) {
 				matchedAttrs.add(new SourcedAttribute(translated, data));
 			} 
 			
-			unMatchedAttrs.add(new SourcedAttribute(attr, data));
+			allAttrs.add(new SourcedAttribute(attr, data));
 		}
 
 		
@@ -87,12 +88,12 @@ public class AttributeAggregationService extends AbstractAggregationService {
 			aa.getAggregatedAttributes().put(aga.getName(), aga);			
 		}
 		 
-		dedicatedLogger.info("{} recognized attributes, {} are not ",matchedAttrs.size(),unMatchedAttrs.size());		
+		dedicatedLogger.info("{} recognized attributes, {} are not ",matchedAttrs.size(),allAttrs.size());		
 		
 		///////////////////////////////////
 		// Adding unmatched attributes
 		///////////////////////////////////
-		for (SourcedAttribute attr : unMatchedAttrs) {
+		for (SourcedAttribute attr : allAttrs) {
 			AggregatedAttribute aat = new AggregatedAttribute();
 			aat.setName(attr.getName());
 			aat.setValue(attr.getRawValue().toString());
@@ -126,7 +127,7 @@ public class AttributeAggregationService extends AbstractAggregationService {
 				
 		// 2 - Classifying "matched/unmatched" attributes
 		List<SourcedAttribute> matchedAttrs = new ArrayList<>();
-		List<SourcedAttribute> unMatchedAttrs = new ArrayList<>();		
+		List<SourcedAttribute> allAttrs = new ArrayList<>();		
 		
 	
 		for (Attribute attr : d.getAttributes()) {
@@ -135,7 +136,7 @@ public class AttributeAggregationService extends AbstractAggregationService {
 				matchedAttrs.add(new SourcedAttribute(translated, d));
 			} 
 			
-			unMatchedAttrs.add(new SourcedAttribute(attr, d));
+			allAttrs.add(new SourcedAttribute(attr, d));
 		}
 
 		//////////////////////////////////
@@ -152,10 +153,10 @@ public class AttributeAggregationService extends AbstractAggregationService {
 		//matchedAttrs.removeAll(matchedFeatures);
 		
 		// For unmatched		
-		List<SourcedAttribute> unmatchedFeatures = unMatchedAttrs.stream()
+		List<SourcedAttribute> unmatchedFeatures = allAttrs.stream()
 				.filter(e -> isFeatureAttribute(e))
 				.collect(Collectors.toList());
-		unMatchedAttrs.removeAll(unmatchedFeatures);
+		allAttrs.removeAll(unmatchedFeatures);
 		
 		// Merging features
 		List<SourcedAttribute> features = new ArrayList<>();
@@ -179,12 +180,12 @@ public class AttributeAggregationService extends AbstractAggregationService {
 		for (AggregatedAttribute aga : aggattrs) {
 			aa.getAggregatedAttributes().put(aga.getName(), aga);			
 		}
-		dedicatedLogger.info("{} recognized attributes, {} are not ",matchedAttrs.size(),unMatchedAttrs.size());		
+		dedicatedLogger.info("{} recognized attributes, {} are not ",matchedAttrs.size(),allAttrs.size());		
 		
 		///////////////////////////////////
 		// Adding unmatched attributes
 		///////////////////////////////////
-		for (SourcedAttribute attr : unMatchedAttrs) {
+		for (SourcedAttribute attr : allAttrs) {
 			AggregatedAttribute aat = new AggregatedAttribute();
 			aat.setName(attr.getName());
 			aat.setValue(attr.getRawValue().toString());
