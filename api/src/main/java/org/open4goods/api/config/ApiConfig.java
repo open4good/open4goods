@@ -239,9 +239,7 @@ public class ApiConfig {
 
 	public @Bean DataFragmentStoreService dataFragmentStoreService(
 			@Autowired final DataFragmentRepository dataFragmentsRepository, @Autowired final ApiProperties config, @Autowired final SerialisationService serialisationService, @Autowired StandardiserService standardiserService, @Autowired RealtimeAggregationService generationService, @Autowired AggregatedDataRepository aggregatedDataRepository) {
-		return new DataFragmentStoreService(standardiserService, serialisationService, dataFragmentsRepository, config.dataFragmentsQueueFolderLocation(),
-				config.getDataFragmentsDequeueSize(), config.getDataFragmentsDequeuePeriodMs(),
-				config.getDataFragmentsDequeueWorkers(), generationService, aggregatedDataRepository);
+		return new DataFragmentStoreService(standardiserService, dataFragmentsRepository, generationService, aggregatedDataRepository);
 	}
 
 	/**

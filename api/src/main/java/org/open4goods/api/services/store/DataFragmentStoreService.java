@@ -3,11 +3,9 @@ package org.open4goods.api.services.store;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.function.Predicate;
 
 import javax.annotation.PreDestroy;
 
@@ -19,7 +17,6 @@ import org.open4goods.exceptions.ValidationException;
 import org.open4goods.model.Standardisable;
 import org.open4goods.model.data.DataFragment;
 import org.open4goods.model.product.AggregatedData;
-import org.open4goods.services.SerialisationService;
 import org.open4goods.services.StandardiserService;
 import org.open4goods.store.repository.CustomDataFragmentRepository;
 import org.open4goods.store.repository.DataFragmentRepository;
@@ -47,13 +44,8 @@ public class DataFragmentStoreService {
 	private static final Logger logger = LoggerFactory.getLogger(DataFragmentStoreService.class);
 
 	private final DataFragmentRepository repository;
-	private SerialisationService serialisationService;
 
 
-	/**
-	 * Duration of the pause the dequeuing thread will do if nothing to index in the queue
-	 */
-	private final Integer pauseDuration;
 
 	public StandardiserService standardiserService;
 
@@ -76,19 +68,15 @@ public class DataFragmentStoreService {
 	 *
 	 * @param queueFolder The folder where indexation queued datas will be stored
 	 */
-	public DataFragmentStoreService(StandardiserService standardiserService, SerialisationService serialisationService, DataFragmentRepository repository, final String queueFolder, final int dequeueSize, final int pauseDuration, final int workers, RealtimeAggregationService generationService, AggregatedDataRepository aggregatedDataRepository) {
+	public DataFragmentStoreService(StandardiserService standardiserService, DataFragmentRepository repository, RealtimeAggregationService generationService, AggregatedDataRepository aggregatedDataRepository) {
 
-		this.pauseDuration=pauseDuration;
+
 		this.repository = repository;
-		this.serialisationService = serialisationService;
 		this.standardiserService = standardiserService;
 		this.aggregatedDataRepository = aggregatedDataRepository;
 		this.generationService=generationService;
 		
-		logger.info("Creating/resuming a filequeue at {} ", queueFolder);
-		
 
-		logger.info("Starting file queue consumer thread, with bulk page size of {} items", dequeueSize);
 	
 	}
 
@@ -280,8 +268,6 @@ public class DataFragmentStoreService {
 		return serviceShutdown;
 	}
 
-	public Integer getPauseDuration() {
-		return pauseDuration;
-	}
+
 
 }

@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.stream.Collectors;
 import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
@@ -57,6 +58,11 @@ public class VerticalConfig{
 	@JsonMerge
 	private Set<Localised> homeUrl = new HashSet<>(); 
 		
+
+	/**
+	 * The categories to associate to this vertical
+	 */
+	private List<String> verticalFilters = new ArrayList<>();
 	
 	/**
 	 * The categories to associate to this vertical
@@ -217,7 +223,20 @@ public class VerticalConfig{
 	}
 
 
+	
+	/**
+	 * 
+	 * @return the specific attributes config for this vertical
+	 */
+	public List<AttributeConfig> verticalFilters() {
 
+		return verticalFilters.stream()
+				.map(e -> getAttributesConfig().getAttributeConfigByKey(e))
+				.collect(Collectors.toList());				
+		
+	}
+	
+	
 	/**
 	 * Return the root url for a given sitelocale, with the "default" behavior
 	 *
@@ -541,6 +560,14 @@ public class VerticalConfig{
 
 	public void setMatchingCategories(Set<String> matchingCategories) {
 		this.matchingCategories = matchingCategories;
+	}
+
+	public List<String> getVerticalFilters() {
+		return verticalFilters;
+	}
+
+	public void setVerticalFilters(List<String> verticalFilters) {
+		this.verticalFilters = verticalFilters;
 	}
 	
 	

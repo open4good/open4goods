@@ -62,7 +62,19 @@
 	
 	<hr class="bg-light border-2 border-top border-light">
 	
+	<!-- The custom filters -->
 	
+	<th:block th:each="filter : ${filters}">
+	
+		<th:block th:with="title=${filter.name.get(siteLanguage)},
+		                   id=${filter.key},
+					   visibleSection=10,
+					   terms=${products.brands}">
+			<th:block th:include="inc/vertical-filter-item-terms.html"></th:block>
+		</th:block>		
+	
+	
+	</th:block>
 	
 	
 	
@@ -75,7 +87,8 @@
 	<th:block th:with="id='brand',
 					   title='Marque',
 					   visibleSection=10,
-					   terms=${products.brands}">
+					   terms=${products.brands}"
+					   >
 		<th:block th:include="inc/vertical-filter-item-terms.html"></th:block>
 	</th:block>	
 	

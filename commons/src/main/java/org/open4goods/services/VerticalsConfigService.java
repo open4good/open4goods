@@ -15,6 +15,7 @@ import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
 
+import org.open4goods.config.yml.attributes.AttributeConfig;
 import org.open4goods.config.yml.ui.VerticalConfig;
 import org.open4goods.model.constants.CacheConstants;
 import org.slf4j.Logger;
@@ -154,6 +155,7 @@ public class VerticalsConfigService {
 		inputStream.close();
 		return ret;
 	}
+
 
 	
 	/**

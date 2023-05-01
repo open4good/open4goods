@@ -16,10 +16,16 @@ public class AggregatedAttributes  {
 	 */
 	@Field(index = true, store = false, type = FieldType.Object)
 	private Map<ReferentielKey, String> referentielAttributes = new HashMap<>();
-	
-	@Field(index = false, store = false, type = FieldType.Object)
-	private Set<AggregatedAttribute> attributes = new HashSet<>();
 
+	
+	//TODO : Remove in further import / export
+//	@Field(index = false, store = false, type = FieldType.Object)
+//	private Set<AggregatedAttribute> attributes = new HashSet<>();
+//
+//	
+	@Field(index = true, store = false, type = FieldType.Object)
+	private Map<String,AggregatedAttribute> aggregatedAttributes = new HashMap<>();
+	
 	
 	@Field(index = false, store = false, type = FieldType.Object)
 	private Set<AggregatedAttribute> unmapedAttributes = new HashSet<>();
@@ -34,7 +40,7 @@ public class AggregatedAttributes  {
 	
 	@Override
 	public String toString() {
-		return "ref-attrs:"+referentielAttributes.size()+ " , attrs:"+attributes.size() ;
+		return "ref-attrs:"+referentielAttributes.size()+ " , attrs:"+aggregatedAttributes.size() ;
 	}
 	public void addReferentielAttribute(ReferentielKey key, String value) {
 		referentielAttributes.put(key, value);
@@ -43,11 +49,15 @@ public class AggregatedAttributes  {
 	
 
 
-	public Set<AggregatedAttribute> getAttributes() {
-		return attributes;
+
+	
+	
+	
+	public Map<String, AggregatedAttribute> getAggregatedAttributes() {
+		return aggregatedAttributes;
 	}
-	public void setAttributes(Set<AggregatedAttribute> attributes) {
-		this.attributes = attributes;
+	public void setAggregatedAttributes(Map<String, AggregatedAttribute> aggregatedAttributes) {
+		this.aggregatedAttributes = aggregatedAttributes;
 	}
 	public Set<AggregatedFeature> getFeatures() {
 		return features;

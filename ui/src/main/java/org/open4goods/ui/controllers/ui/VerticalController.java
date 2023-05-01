@@ -68,6 +68,11 @@ public class VerticalController extends AbstractUiController {
 		
 		ret.addObject("config",config);
 		
+		ret.addObject("filters",config.verticalFilters());
+		
+		
+		
+		
 		// TODO: i18n
 		ret.addObject("verticalPath",verticalService.getPathForVerticalLanguage("fr"));
 		

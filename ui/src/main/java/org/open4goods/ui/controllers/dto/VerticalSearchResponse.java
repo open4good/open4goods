@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.open4goods.config.yml.attributes.AttributeConfig;
 import org.open4goods.config.yml.ui.VerticalConfig;
 import org.open4goods.model.product.AggregatedData;
 
@@ -42,6 +43,9 @@ public class VerticalSearchResponse {
 	private List<VerticalFilterTerm> brands = new ArrayList<>();
 	private List<VerticalFilterTerm> countries = new ArrayList<>();
 	
+	
+	/** The custom aggregations, from filters **/
+	private Map<AttributeConfig, List<VerticalFilterTerm>> customFilters = new HashMap<>();
 	
 	
 	
@@ -167,6 +171,14 @@ public class VerticalSearchResponse {
 
 	public void setConditions(List<VerticalFilterTerm> conditions) {
 		this.conditions = conditions;
+	}
+
+	public Map<AttributeConfig, List<VerticalFilterTerm>> getCustomFilters() {
+		return customFilters;
+	}
+
+	public void setCustomFilters(Map<AttributeConfig, List<VerticalFilterTerm>> customFilters) {
+		this.customFilters = customFilters;
 	}
 
 	
