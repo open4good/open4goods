@@ -76,12 +76,16 @@ public class AttributeAggregationService extends AbstractAggregationService {
 		////////////////////////////////////
 		// Aggregating standard attributes
 		///////////////////////////////////
-		aa.getAttributes().clear();
+		aa.getAggregatedAttributes().clear();
 		aa.getUnmapedAttributes().clear();
 		
 		// 3 - Applying attribute transformations on matched ones
 		//TODO : handle conflicts
-		 aa.getAttributes().addAll(aggregateAttributes(matchedAttrs));
+		 
+		Set<AggregatedAttribute> aggattrs = aggregateAttributes(matchedAttrs);
+		for (AggregatedAttribute aga : aggattrs) {
+			aa.getAggregatedAttributes().put(aga.getName(), aga);			
+		}
 		 
 		dedicatedLogger.info("{} recognized attributes, {} are not ",matchedAttrs.size(),unMatchedAttrs.size());		
 		
@@ -170,8 +174,11 @@ public class AttributeAggregationService extends AbstractAggregationService {
 				
 		// 3 - Applying attribute transformations on matched ones
 		//TODO : handle conflicts
-		 aa.getAttributes().addAll(aggregateAttributes(matchedAttrs));
-		 
+
+		Set<AggregatedAttribute> aggattrs = aggregateAttributes(matchedAttrs);
+		for (AggregatedAttribute aga : aggattrs) {
+			aa.getAggregatedAttributes().put(aga.getName(), aga);			
+		}
 		dedicatedLogger.info("{} recognized attributes, {} are not ",matchedAttrs.size(),unMatchedAttrs.size());		
 		
 		///////////////////////////////////

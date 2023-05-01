@@ -1,5 +1,6 @@
 package org.open4goods.ui.services;
 
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -16,6 +17,7 @@ import org.elasticsearch.search.aggregations.metrics.Max;
 import org.elasticsearch.search.aggregations.metrics.Min;
 import org.elasticsearch.search.sort.SortBuilders;
 import org.elasticsearch.search.sort.SortOrder;
+import org.open4goods.config.yml.attributes.AttributeConfig;
 import org.open4goods.config.yml.ui.VerticalConfig;
 import org.open4goods.dao.AggregatedDataRepository;
 import org.open4goods.helper.GenericFileLogger;
@@ -140,7 +142,9 @@ public class SearchService {
 		// Logging
 		statsLogger.info("Searching {}",request);
 				
-		VerticalSearchResponse vsr = new VerticalSearchResponse();		
+		VerticalSearchResponse vsr = new VerticalSearchResponse();	
+		
+		List<AttributeConfig> customAttrFilters = vertical.verticalFilters();
 		
 		// Valid timestamp
 		BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery()  
@@ -192,6 +196,11 @@ public class SearchService {
 			esQuery = esQuery .withPageable(PageRequest.of(0, 100));
 		}
 		
+		
+		
+		
+		
+		
 		// Adding standard aggregations
 		esQuery = esQuery 
 				.withAggregations(AggregationBuilders.min("min_price").field("price.minPrice.price"))
@@ -207,7 +216,13 @@ public class SearchService {
 				.withSort(SortBuilders.fieldSort("offersCount").order(SortOrder.DESC));
 
 		
+		// Adding custom filters aggregations	
+		for (AttributeConfig attrConfig : customAttrFilters) {
+			esQuery = esQuery 
+					.withAggregations(AggregationBuilders.min(attrConfig.getKey()).field("attributes.aggregatedAttributes."+attrConfig.getKey()+".keyword"));			
+		}
 		
+
 		SearchHits<AggregatedData> results = aggregatedDataRepository.search(esQuery.build(),ALL_VERTICAL_NAME);
 	
 
@@ -246,6 +261,19 @@ public class SearchService {
 		}
 		vsr.getCountries().sort((o1, o2) -> o2.getCount().compareTo(o1.getCount()));
 
+		
+		
+		// Handling custom filters aggregations	
+		for (AttributeConfig attrConfig : customAttrFilters) {
+			Terms agg  =  aggregations.get(attrConfig.getKey());	
+			for (Bucket bucket : agg.getBuckets()) {
+				
+				vsr.getCountries().add (new VerticalFilterTerm(bucket.getKey().toString(), bucket.getDocCount()));
+			
+			
+			}
+			vsr.getCountries().sort((o1, o2) -> o2.getCount().compareTo(o1.getCount()));
+		}		
 
 //		// Setting the response
 		vsr.setTotalResults(results.getTotalHits());
