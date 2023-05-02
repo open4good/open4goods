@@ -74,7 +74,7 @@ public class GtinService {
 
 			try (OutputStream out = new FileOutputStream(dest)) {
 				final BitmapCanvasProvider canvas = new BitmapCanvasProvider(out, "image/x-png",
-						// TODO : Size from conf
+						// TODO : Size pageNumber conf
 						250, BufferedImage.TYPE_BYTE_GRAY, true, 0);
 				bean.generateBarcode(canvas, gtin);
 				canvas.finish();

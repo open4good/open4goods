@@ -117,22 +117,6 @@
 				</div>
         	</div>
        	</div>
-
-
-
-
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
-
     </main>
 
 	<!--/* Footer */-->
@@ -160,16 +144,63 @@
 <!-- custom sources -->
 <script src="../../assets/js/pixel-custom.js"></script>
 
+
+<!-- Setting up variables -->
+<script th:inline="javascript">
+	/*<![CDATA[*/
+	
+	    var vertical = /*[[${config.id}]]*/ 'default';
+	
+	/*]]>*/
+</script>
 <script>
+
+	<!-- Table init -->
 	$(document).ready(function() {
 		
-		<!-- Table init -->
-	    var table = $('#example').DataTable({
+	    var table = $('#tableProducts').DataTable({
 	    	searching: false,
-	        "bLengthChange": false,	    	
-	    });
-			
-		
+	        "bLengthChange": false,	 
+	        "processing": true,
+	        "serverSide": true,
+	        "orderMulti": false,
+	        "pageLength": 10,
+	        "ajax": {
+	            "url": "/"+vertical+"/paginated",
+	            "dataSrc": "data",
+	            "data": function ( data ) {
+	 //process data before sent to server.
+	 				return data;
+	         }},
+	        "columns": [
+                { 
+                	"data": "attributes.referentielAttributes.MODEL.keyword", 
+                	"name" : "Modèle",
+                	"title" : "Modèle",
+                	render: function(cell, type, data) {
+                        return '<img src="'+data.names.name+'/image.png"></img><br/><a href="/'+vertical+'/'+data.names.name+'">'+ data.attributes.referentielAttributes.MODEL +'</a>';
+                    }
+                },
+                { 
+                	"data": "attributes.referentielAttributes.BRAND.keyword", 
+                	"name" : "Marque",
+                	"title" : "Marque",
+                	render: function(cell, type, data) {
+                        return  data.attributes.referentielAttributes.BRAND ;
+                    }
+                },
+  
+                { "data": "id", "name" : "ID", "title" : "ID"  },
+                { "data": "id", "name" : "ID", "title" : "ID"  },
+                { "data": "id", "name" : "ID", "title" : "ID"  },
+                { "data": "id", "name" : "ID", "title" : "ID"  },
+                { "data": "id", "name" : "ID", "title" : "ID"  },
+                { "data": "id", "name" : "ID", "title" : "ID"  },
+                { "data": "id", "name" : "ID", "title" : "ID"  },
+
+	                ]    
+	 });
+
 	} );
 </script>
 

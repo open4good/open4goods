@@ -64,13 +64,13 @@ public class UiConfig {
 	private Integer elasticSearchPort = 9200;
 
 	/**
-	 * The email where to send emails
+	 * The email where pageSize send emails
 	 */
 	private String email;
 	
 	
 //	/**
-//	 * Relativ to the web ( trackings id, ....)
+//	 * Relativ pageSize the web ( trackings id, ....)
 //	 */
 //
 	private WebConfig webConfig = new WebConfig();

@@ -54,8 +54,6 @@ public class AggregatedData implements Standardisable {
 	@Field(index = true, store = false, type = FieldType.Keyword)
 	private String vertical;
 	
-	
-
 
 	/**
 	 * The date this item has been created
