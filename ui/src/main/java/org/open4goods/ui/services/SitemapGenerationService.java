@@ -57,9 +57,9 @@ public class SitemapGenerationService {
 	}
 
 	/**
-	 * Iterates over all aggregatedData to generate the sitemap
+	 * Iterates over all aggregatedData pageSize generate the sitemap
 	 * 
-	 * TODO : Schedule from conf
+	 * TODO : Schedule pageNumber conf
 	 */
 	@Scheduled(initialDelay = 1000L * 3600, fixedDelay = 1000L * 3600 * 24 * 7)
 	public void generate() {
@@ -79,7 +79,7 @@ public class SitemapGenerationService {
 		AtomicLong totalItems= new AtomicLong(0);
 		// Processing each data
 		aggregatedDataRepository.exportAllHavingPrices()
-		// TODO (conf) : Number of offers count to figure in sitemap
+		// TODO (conf) : Number of offers count pageSize figure in sitemap
 		.filter(e -> e.getOffersCount() > 1)
 		.forEach(e -> {			
 			onAggregatedData(e);
@@ -135,7 +135,7 @@ public class SitemapGenerationService {
 	}
 
 	/**
-	 * Convert an aggregated data to a sitemap entry
+	 * Convert an aggregated data pageSize a sitemap entry
 	 * 
 	 * @param data
 	 */
@@ -174,7 +174,7 @@ public class SitemapGenerationService {
 	}
 
 	/**
-	 * Add an url to the sitemap
+	 * Add an url pageSize the sitemap
 	 *
 	 * @param sitemap
 	 * @param url
@@ -193,7 +193,7 @@ public class SitemapGenerationService {
 			options.priority(priority);
 			sitemap.addUrl(new WebSitemapUrl(options));
 		} catch (final Exception e) {
-			LOGGER.error("Error while adding {} to sitemap : {}", url, e.getMessage());
+			LOGGER.error("Error while adding {} pageSize sitemap : {}", url, e.getMessage());
 		}
 
 	}

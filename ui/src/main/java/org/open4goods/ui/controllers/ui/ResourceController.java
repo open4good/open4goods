@@ -13,6 +13,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.io.IOUtils;
+import org.open4goods.config.yml.ui.VerticalConfig;
 import org.open4goods.dao.AggregatedDataRepository;
 import org.open4goods.exceptions.InvalidParameterException;
 import org.open4goods.exceptions.ResourceNotFoundException;
@@ -23,6 +24,7 @@ import org.open4goods.model.data.Resource;
 import org.open4goods.model.product.AggregatedData;
 import org.open4goods.services.DataSourceConfigService;
 import org.open4goods.services.TagCloudService;
+import org.open4goods.services.VerticalsConfigService;
 import org.open4goods.ui.config.AppConfig;
 import org.open4goods.ui.config.yml.UiConfig;
 import org.open4goods.ui.services.GtinService;
@@ -61,6 +63,8 @@ public class ResourceController extends AbstractUiController {
 	private @Autowired TagCloudService tagcloudService;
 	private @Autowired UiConfig config;
 	private @Autowired DataSourceConfigService dsConfigService;
+	private @Autowired VerticalsConfigService verticalConfigService;
+	
 	//////////////////////////////////////////////////////////////
 	// Mappings
 	//////////////////////////////////////////////////////////////
@@ -78,6 +82,19 @@ public class ResourceController extends AbstractUiController {
 	 * @throws UnirestException
 	 */
 
+	
+	@GetMapping("/{vertical}/*-{id:\\d+}/"+PNG_IMG)
+	public void image(@PathVariable String vertical, @PathVariable String id, final HttpServletResponse response, HttpServletRequest request) throws FileNotFoundException, IOException, ValidationException, TechnicalException {
+		VerticalConfig language = verticalConfigService.getLanguageForVerticalPath(vertical);
+		
+		if (null == language) {
+			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Image " + request.getServletPath() + " introuvable !");
+		}
+		
+		image(id, response, request);
+		
+	}
+	
 	@GetMapping("/*-{id:\\d+}/"+PNG_IMG)
 	public void image(@PathVariable String id, final HttpServletResponse response, HttpServletRequest request) throws FileNotFoundException, IOException, ValidationException, TechnicalException {
 		
@@ -103,7 +120,7 @@ public class ResourceController extends AbstractUiController {
 		}
 		
 				
-		//TODO (gof) : not sure to have image, could have any resource
+		//TODO (gof) : not sure pageSize have image, could have any resource
 		// Retrieve one of the cover images
 		Optional<Resource> img = data.getResources().stream().filter(r -> r.getTags().contains(ResourceTagDictionary.CSV)).findAny();
 		

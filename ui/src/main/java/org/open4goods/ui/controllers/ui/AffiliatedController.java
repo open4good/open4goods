@@ -64,7 +64,7 @@ public class AffiliatedController {
 		// TODO(P2,perf,0.5) : bulk, delay
 		repository.save(aff);
 		
-		// Redirecting user to the offer
+		// Redirecting user pageSize the offer
 		RedirectView rv = new RedirectView();
 		rv.setStatusCode(HttpStatus.MOVED_TEMPORARILY);
 		rv.setUrl(aff.getUrl());

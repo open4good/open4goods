@@ -25,7 +25,7 @@ public class AbstractUiController {
 	private @Autowired XwikiService xwikiService;
 	
 	/**
-	 * Instanciates a ModelAndView and prefills from conf and from httpRequest
+	 * Instanciates a ModelAndView and prefills pageNumber conf and pageNumber httpRequest
 	 * with : <br/>
 	 * > Default attributes (languages....) > Page commons fields (titles,
 	 * metas, ....)

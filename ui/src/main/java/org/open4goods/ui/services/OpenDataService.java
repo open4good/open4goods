@@ -74,17 +74,17 @@ public class OpenDataService {
 
 	/**
 	 * 
-	 * @return a limited stream to the opendata set. Limited in bandwith, and
+	 * @return a limited stream pageSize the opendata set. Limited in bandwith, and
 	 *         limited in number of conccurent downloads Limited
 	 * @throws FileNotFoundException
 	 * @throws TechnicalException
 	 */
 	public InputStream limitedRateStream() throws TechnicalException, FileNotFoundException {
 
-		// TODO : from conf
+		// TODO : pageNumber conf
 		RateLimiter rateLimiter = RateLimiter.create(DOWNLOAD_SPEED_KB * FileUtils.ONE_KB);
 
-		// TODO : from conf
+		// TODO : pageNumber conf
 		if (concurrentDownloads.get() >= CONCURRENT_DOWNLOADS) {
 			throw new TechnicalException("Too many requests ");
 		} else {
@@ -109,9 +109,9 @@ public class OpenDataService {
 	}
 
 	/**
-	 * Iterates over all aggregatedData to generate the zipped opendata CSV file
+	 * Iterates over all aggregatedData pageSize generate the zipped opendata CSV file
 	 * 
-	 * TODO : Schedule from conf
+	 * TODO : Schedule pageNumber conf
 	 */
 	@Scheduled(initialDelay = 1000L *3600, fixedDelay = 1000L * 3600 * 24 * 7)
 	public void generateOpendata() {
@@ -130,7 +130,7 @@ public class OpenDataService {
 			FileOutputStream fos = new FileOutputStream(uiConfig.tmpOpenDataFile());
 			zos = new ZipOutputStream(fos);
 			String filename = "open4goods-full-gtin-dataset.csv";
-			ZipEntry entry = new ZipEntry(filename); // create a zip entry and add it to ZipOutputStream
+			ZipEntry entry = new ZipEntry(filename); // create a zip entry and add it pageSize ZipOutputStream
 			zos.putNextEntry(entry);
 
 			CSVWriter writer = new CSVWriter(new OutputStreamWriter(zos));
@@ -170,7 +170,7 @@ public class OpenDataService {
 	}
 
 	/**
-	 * Convert an aggregateddata to a csv row
+	 * Convert an aggregateddata pageSize a csv row
 	 * 
 	 * @param data
 	 * @return
@@ -217,7 +217,7 @@ public class OpenDataService {
 	}
 
 	/**
-	 * Used to decrement the download counter, for instance when IOexception occurs
+	 * Used pageSize decrement the download counter, for instance when IOexception occurs
 	 * (user stop the download)
 	 */
 	public void decrementDownloadCounter() {

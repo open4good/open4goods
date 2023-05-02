@@ -21,11 +21,14 @@ public class VerticalSearchRequest {
 
 	ProductState condition;
 
-	Integer from;
-	Integer to;
+	Integer pageNumber;
+	Integer pageSize;
 
 	Set<String> countries = new HashSet<>();
 
+	private String sortField;
+	private org.elasticsearch.search.sort.SortOrder sortOrder;
+	
 	public Integer getMinPrice() {
 		return minPrice;
 	}
@@ -68,20 +71,20 @@ public class VerticalSearchRequest {
 		this.condition = condition;
 	}
 
-	public Integer getFrom() {
-		return from;
+	public Integer getPageNumber() {
+		return pageNumber;
 	}
 
-	public void setFrom(Integer from) {
-		this.from = from;
+	public void setPageNumber(Integer from) {
+		this.pageNumber = from;
 	}
 
-	public Integer getTo() {
-		return to;
+	public Integer getPageSize() {
+		return pageSize;
 	}
 
-	public void setTo(Integer to) {
-		this.to = to;
+	public void setPageSize(Integer to) {
+		this.pageSize = to;
 	}
 
 	public Set<String> getCountries() {
@@ -91,14 +94,22 @@ public class VerticalSearchRequest {
 	public void setCountries(Set<String> countries) {
 		this.countries = countries;
 	}
-	
-	
-	
-	
-	
-	
-	
-	
-	
+
+	public String getSortField() {
+		return sortField;
+	}
+
+	public void setSortField(String sortField) {
+		this.sortField = sortField;
+	}
+
+	public org.elasticsearch.search.sort.SortOrder getSortOrder() {
+		return sortOrder;
+	}
+
+	public void setSortOrder(org.elasticsearch.search.sort.SortOrder sortOrder) {
+		this.sortOrder = sortOrder;
+	}
+
 	
 }

@@ -69,8 +69,8 @@ public class SearchService {
 	/**
 	 * Operates a search on each vertical, and on datafragments if no results in verticals
 	 * TODO(P1,security,0.75) : enable results limitation
-	 * @param from 
-	 * @param to 
+	 * @param pageNumber 
+	 * @param pageSize 
 	 * @param query
 	 * @return
 	 */
@@ -157,7 +157,7 @@ public class SearchService {
 				.must(aggregatedDataRepository.getValidDateQuery())	
 				;
 		
-		// from price
+		// pageNumber price
 		if (null != request.getMinPrice()) {
 			queryBuilder = queryBuilder.must(QueryBuilders.rangeQuery("price.minPrice.price").gt(request.getMinPrice().intValue()));			 			
 		} else {
@@ -165,7 +165,7 @@ public class SearchService {
 //			queryBuilder = queryBuilder.must(QueryBuilders.rangeQuery("price.minPrice.price").gt(0.0));
 		}
 		
-		// to price
+		// pageSize price
 		if (null != request.getMaxPrice()) {
 			queryBuilder = queryBuilder.must(QueryBuilders.rangeQuery("price.minPrice.price").lt(request.getMaxPrice().intValue()+1));			 			
 		} else {
@@ -194,10 +194,10 @@ public class SearchService {
 		// Setting the query
 		NativeSearchQueryBuilder esQuery = new NativeSearchQueryBuilder().withQuery(queryBuilder);
 		
-		if (null != request.getFrom() && null != request.getTo()) {
-			esQuery = esQuery .withPageable(PageRequest.of(request.getFrom(), request.getTo()));
+		if (null != request.getPageNumber() && null != request.getPageSize()) {
+			esQuery = esQuery .withPageable(PageRequest.of(request.getPageNumber(), request.getPageSize()));
 		} else {
-			//TODO(gof) : from conf
+			//TODO(gof) : pageNumber conf
 			esQuery = esQuery .withPageable(PageRequest.of(0, 100));
 		}
 		
@@ -217,8 +217,16 @@ public class SearchService {
 				.withAggregations(AggregationBuilders.terms("condition").field("price.offers.productState").missing(OTHER_BUCKET).size(4))	
 				.withAggregations(AggregationBuilders.terms("brands").field("attributes.referentielAttributes.BRAND.keyword").missing(OTHER_BUCKET).size(500))	
 				.withAggregations(AggregationBuilders.terms("country").field("gtinInfos.country").missing(OTHER_BUCKET).size(500))	
-				.withQuery(queryBuilder)
-				.withSort(SortBuilders.fieldSort("offersCount").order(SortOrder.DESC));
+				.withQuery(queryBuilder);
+		
+		// Sort order
+		
+		if (null == request.getSortField()) {
+			esQuery = esQuery.withSort(SortBuilders.fieldSort("offersCount").order(SortOrder.DESC));
+		} else {
+			esQuery = esQuery.withSort(SortBuilders.fieldSort(request.getSortField()).order(request.getSortOrder()));
+		}
+
 
 		
 		// Adding custom filters aggregations	
@@ -327,7 +335,7 @@ public class SearchService {
 //		 CategoryStatResults statsResult = aggregatedDataRepository.stats(translatedVerticalQuery);
 		
 		
-		// TODO(gof) : Page from conf
+		// TODO(gof) : Page pageNumber conf
 		vsr.setData(aggregatedDataRepository.searchValidPrices(translatedVerticalQuery,ALL_VERTICAL_NAME,0,1000) .collect(Collectors.toList()));
 		
 		return vsr;

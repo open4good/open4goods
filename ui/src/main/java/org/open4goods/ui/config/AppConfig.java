@@ -63,7 +63,7 @@ import com.github.benmanes.caffeine.cache.Ticker;
 @Configuration
 public class AppConfig {
 
-	// TODO : Cache period from conf
+	// TODO : Cache period pageNumber conf
 	public static final int CACHE_PERIOD_SECONDS = 3600*24*7;
 	private @Autowired UiConfig config;
 
@@ -232,7 +232,7 @@ public class AppConfig {
 
 			/**
 			 * Define explicitly each static resources (because of the controller /* in the
-			 * CommonPageCOntroller) Also overrides classpath values with the ones from
+			 * CommonPageCOntroller) Also overrides classpath values with the ones pageNumber
 			 * filesystem
 			 */
 		    @Override

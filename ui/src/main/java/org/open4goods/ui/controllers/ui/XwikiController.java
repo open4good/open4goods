@@ -29,7 +29,7 @@ import org.springframework.web.servlet.ModelAndView;
 @Controller
 
 /**
- * This controller pages to Xwiki content
+ * This controller pages pageSize Xwiki content
  *
  * @author gof
  *
@@ -43,7 +43,7 @@ public class XwikiController extends AbstractUiController {
 
 	private @Autowired XwikiService xwikiService;
 	
-	// TODO : Tweak to handle categories search page
+	// TODO : Tweak pageSize handle categories search page
 	private @Autowired VerticalController verticalController;	
 	private @Autowired VerticalsConfigService verticalService;
 		
@@ -58,7 +58,7 @@ public class XwikiController extends AbstractUiController {
 
 
 	/**
-	 * Endpoint to flush the wiki
+	 * Endpoint pageSize flush the wiki
 	 * @param request
 	 * @return
 	 */
@@ -103,7 +103,7 @@ public class XwikiController extends AbstractUiController {
 
 		ModelAndView mv = null;
 		if (null != request.getParameter("edit")) {
-			// Edit mode, redirect to the wiki
+			// Edit mode, redirect pageSize the wiki
 
 			response.sendRedirect(config.getWikiConfig().getEditUrl(vertical,page));
 		} else {

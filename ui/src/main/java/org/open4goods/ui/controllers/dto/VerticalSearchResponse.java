@@ -44,7 +44,7 @@ public class VerticalSearchResponse {
 	private List<VerticalFilterTerm> countries = new ArrayList<>();
 	
 	
-	/** The custom aggregations, from filters **/
+	/** The custom aggregations, pageNumber filters **/
 	private Map<AttributeConfig, List<VerticalFilterTerm>> customFilters = new HashMap<>();
 	
 	

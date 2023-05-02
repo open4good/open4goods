@@ -37,7 +37,7 @@ public class ImageService  {
 	
 	
 	/**
-	 * Return the output stream for an image, with metadata and converted to png 
+	 * Return the output stream for an image, with metadata and converted pageSize png 
 	 * @param r
 	 * @return
 	 * @throws ValidationException 
