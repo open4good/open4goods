@@ -178,7 +178,7 @@
                 	"name" : "Modèle",
                 	"title" : "Modèle",
                 	render: function(cell, type, data) {
-                        return '<img src="'+data.names.name+'/image.png"></img><br/><a href="/'+vertical+'/'+data.names.name+'">'+ data.attributes.referentielAttributes.MODEL +'</a>';
+                        return '<img src="'+data.names.name+'/image.png"></img><br/><a href="/'+vertical+'/'+data.names.name+'">'+ (data.attributes.referentielAttributes.MODEL == null ? data.names.name : data.attributes.referentielAttributes.MODEL) +'</a>';
                     }
                 },
                 { 
@@ -186,7 +186,7 @@
                 	"name" : "Marque",
                 	"title" : "Marque",
                 	render: function(cell, type, data) {
-                        return  data.attributes.referentielAttributes.BRAND ;
+                        return  data.attributes.referentielAttributes.BRAND == null ? "" : data.attributes.referentielAttributes.BRAND ;
                     }
                 },
   
