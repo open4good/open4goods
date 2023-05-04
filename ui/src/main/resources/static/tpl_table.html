@@ -1,0 +1,62 @@
+<div id="template-id">
+	
+	<div class="text-center">
+		<a href="{{productUrl}}">
+			<img src="{{imageUrl}}"></img>
+			<br/>
+			<span>{{name}}</span>
+		</a>		
+	</div>
+</div>
+
+
+
+
+<div class="text-center" id="template-brand">
+	<img src="/img/brands/{{data.attributes.BRAND.rawValue}}-12.png">
+
+</div>
+
+
+<div id="template-price">
+	{{data.price.currentMinPrice.price}}
+	{{data.price.currentMinPrice.currency}}</div>
+
+
+<div id="template-offers-count">
+	{{data.price.offers.length}}
+</div>
+
+
+<div id="template-rse-rating">
+	
+	<span class="virtual-rating-{{data.aggregatedRatings.RSE.virtual}}" title="{{data.aggregatedRatings.RSE.value}}">
+		{{{rating}}}
+	</span>
+
+	
+</div>
+
+<div id="template-expert-rating">
+	
+	<span class="virtual-rating-{{data.aggregatedRatings.TECHNICAL.virtual}}" title="{{data.aggregatedRatings.TECHNICAL.value}}">
+		{{{rating}}}
+	</span>
+
+	
+</div>
+
+<div id="template-users-rating">
+	<span class="virtual-rating-{{data.aggregatedRatings.SITES.virtual}}" title="{{data.aggregatedRatings.SITES.value}}">
+		{{{rating}}}
+</span>
+
+</div>
+
+
+
+
+<div id="template-attribute-TYPE_ECRAN">
+	{{data.attributes.TYPE_ECRAN.rawValue}}
+</div>
+
