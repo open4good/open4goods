@@ -47,6 +47,35 @@
         <div class="section section-lg pt-5 pt-md-7 bg-gray-200">
             <div class="container container-semi-fluid">
 
+				<!--/* Hero */-->						
+				<div class="row mb-2">							
+					<div class="card shadow">
+						<div class=" align-items-center">
+					
+							
+								<div class="d-flex flex-wrap align-items-center row">
+			                        <div class="col-lg-2 text-center">
+			                                <img class="mt-2" width="150" src="https://media.istockphoto.com/id/173240143/fr/photo/t%C3%A9l%C3%A9vision-avec-deux-masques-de-d%C3%A9tourage.jpg?s=612x612&w=0&k=20&c=GhzC3IyvkmRp9shUBHICxM_1Lsur2uWkpNKf2F22p8s=" alt="logo tv">
+			                        </div>
+			                        <span class="col-lg-10">
+			                                <h1 class="mt-2 text-center">Nos téléviseurs </h1>
+			                                <div class="row p-2 mb-4"> 
+			                					<th:block th:with="path='WIDGETS/partenaires/'">
+			                     					<th:block th:include="inc/wiki.html"></th:block>
+			                     				</th:block>
+			                				</div>		
+			                				
+			                        </span> 
+								</div>
+		                        
+		                        
+	
+	                    </div>
+					</div>
+				</div>
+			
+			
+						
                 <div class="row ">
                 
                 	<!--/* Left column */-->                	
@@ -55,7 +84,7 @@
                     
                     
                 		<!--/* Guides */-->	
-						<div class="card shadow mb-2">
+						<div class="row card shadow mb-2">
 							<div class="card-header"><h2 class="h5">Les guides</h2></div>
 							<div class="card-body">
 								<ul class="list-group list-group-flush price-list">
@@ -68,7 +97,7 @@
 						</div>                    
                                         
 				        <!--/* Filters */-->	
-						<div class="card shadow mb-2">
+						<div class="row card shadow mb-2">
 							<div class="card-header"><h2 class="h5">Filtres</h2></div>
 							<div class="card-body">
                     			<th:block th:include="inc/vertical-filters.html"></th:block>
@@ -79,37 +108,7 @@
 
 					<!--/* Right column */-->
 					<div class="col-lg-9">
-
-						<div class="row">							
-							<!--/* Hero */-->						
-							<div class="card shadow">
-								<div class="row align-items-center">
-							
-									
-										<div class="d-flex flex-wrap align-items-center row">
-					                        <div class="col-lg-2 text-center">
-					                                <img class="mt-2" width="150" src="https://media.istockphoto.com/id/173240143/fr/photo/t%C3%A9l%C3%A9vision-avec-deux-masques-de-d%C3%A9tourage.jpg?s=612x612&w=0&k=20&c=GhzC3IyvkmRp9shUBHICxM_1Lsur2uWkpNKf2F22p8s=" alt="logo tv">
-					                        </div>
-					                        <span class="col-lg-10">
-					                                <h1 class="mt-2 text-center">Nos téléviseurs </h1>
-					                                <div class="row p-2"> 
-					                					<th:block th:with="path='WIDGETS/partenaires/'">
-					                     					<th:block th:include="inc/wiki.html"></th:block>
-					                     				</th:block>
-					                				</div>		
-					                				
-					                        </span> 
-										</div>
-				                        
-				                        
-		
-			                    </div>
-							</div>
-						</div>
-						
-
-						
-						<div class="row p-3 mt-2 card shadow">
+						<div class="ms-1 row card shadow">
 							<th:block th:include="inc/vertical-table.html"></th:block>
 						</div>
 
@@ -137,28 +136,35 @@
 
 <script src="../../vendor/nouislider/distribute/nouislider.min.js"></script>
 
-
 <!-- pixel JS -->
 <script src="../../assets/js/pixel.js"></script>
 
 <!-- custom sources -->
 <script src="../../assets/js/pixel-custom.js"></script>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mustache.js/3.2.1/mustache.min.js"></script>
+
+<!-- Ajax loaded table template -->
+<div id="tpl_place" class="hidden"></div>
 
 <!-- Setting up variables -->
 <script th:inline="javascript">
 	/*<![CDATA[*/
 	
 	    var vertical = /*[[${config.id}]]*/ 'default';
-	
+	    var siteLanguage = /*[[${siteLanguage}]]*/'default';
+	    var baseUrl = /*[[${baseUrl}]]*/'default';
 	/*]]>*/
 </script>
+
 <script>
 
-	<!-- Table init -->
-	$(document).ready(function() {
+	<!-- Datatable init function -->
+	var table;
+	
+	function initDatatable () {
 		
-	    var table = $('#tableProducts').DataTable({
+		return $('#tableProducts').DataTable({
 	    	searching: false,
 	        "bLengthChange": false,	 
 	        "processing": true,
@@ -178,9 +184,19 @@
                 	"name" : "Modèle",
                 	"title" : "Modèle",
                 	render: function(cell, type, data) {
-                        return '<img src="'+data.names.name+'/image.png"></img><br/><a href="/'+vertical+'/'+data.names.name+'">'+ (data.attributes.referentielAttributes.MODEL == null ? data.names.name : data.attributes.referentielAttributes.MODEL) +'</a>';
-                    }
+        				var template = $('#template-id').html();
+        				Mustache.parse(template);
+
+        				return Mustache.render(template, {
+        					data : data,
+        					vertical: vertical,
+           					productUrl : baseUrl+vertical+'/'+data.names.name,
+           					imageUrl : baseUrl+vertical+'/'+data.names.name+'/image.png',           					
+        					name : (data.attributes.referentielAttributes.MODEL == null ? data.names.name : data.attributes.referentielAttributes.MODEL)
+        				});                	
+                	}
                 },
+                
                 { 
                 	"data": "attributes.referentielAttributes.BRAND.keyword", 
                 	"name" : "Marque",
@@ -199,7 +215,38 @@
                 { "data": "id", "name" : "ID", "title" : "ID"  },
 
 	                ]    
-	 });
+	 	});
+		
+		
+		
+		
+	};
+
+
+
+	// On document Load
+	$(document).ready(function() {
+		
+		// Loading templates 
+		$.ajax({
+			url : '/tpl_table.html',
+			dataType : 'html',
+			cache : true, // otherwise will get fresh copy every page load
+			success : function(e) {
+				// script loaded, do stuff!
+
+				$("#tpl_place").html(e);
+
+				// Init table 
+			
+	    		table = initDatatable();
+
+				
+				
+			}
+		});
+		
+
 
 	} );
 </script>
