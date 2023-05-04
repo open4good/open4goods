@@ -42,7 +42,6 @@
     <main>	
        <!--/* Loader */-->
        <th:block th:include="inc/preloader.html"></th:block>
-		
   
         <div class="section section-lg pt-5 pt-md-7 bg-gray-200">
             <div class="container container-semi-fluid">
@@ -51,14 +50,13 @@
 				<div class="row mb-2">							
 					<div class="card shadow">
 						<div class=" align-items-center">
-					
 							
 								<div class="d-flex flex-wrap align-items-center row">
 			                        <div class="col-lg-2 text-center">
-			                                <img class="mt-2" width="150" src="https://media.istockphoto.com/id/173240143/fr/photo/t%C3%A9l%C3%A9vision-avec-deux-masques-de-d%C3%A9tourage.jpg?s=612x612&w=0&k=20&c=GhzC3IyvkmRp9shUBHICxM_1Lsur2uWkpNKf2F22p8s=" alt="logo tv">
+			                                <img class="mt-2" width="150" th:src="${config.homeLogo.i18n(siteLanguage)}">
 			                        </div>
 			                        <span class="col-lg-10">
-			                                <h1 class="mt-2 text-center">Nos téléviseurs </h1>
+			                                <h1 class="mt-2 text-center" th:text="${config.homeTitle.i18n(siteLanguage)}"></h1>
 			                                <div class="row p-2 mb-4"> 
 			                					<th:block th:with="path='WIDGETS/partenaires/'">
 			                     					<th:block th:include="inc/wiki.html"></th:block>
@@ -67,21 +65,14 @@
 			                				
 			                        </span> 
 								</div>
-		                        
-		                        
-	
 	                    </div>
 					</div>
 				</div>
-			
-			
 						
                 <div class="row ">
                 
                 	<!--/* Left column */-->                	
                     <div class="col-lg-3 mb-3 mb-lg-0">
-                    
-                    
                     
                 		<!--/* Guides */-->	
 						<div class="row card shadow mb-2">
@@ -89,7 +80,7 @@
 							<div class="card-body">
 								<ul class="list-group list-group-flush price-list">
 									<li class="list-group-item border-0"><img height="16" width="16" class="me-2" src="/icon/fnac.com" title="icône fnac"><a href="">Téléviseurs : quel impact écologique ?</a> </li>
-									<li class="list-group-item border-0"><span class="fas fa-box"></span><a href="">Bien chosir sa TV ! </a></li>
+									<li class="list-group-item border-0"><span class="fas fa-box"></span><a href="">Bien choisir sa TV ! </a></li>
 									<li class="list-group-item border-0"><span class="fas fa-clock"></span><a>OLED, QLED, LCD : Les différences</a> </li>
 								
 								</ul>
@@ -151,9 +142,13 @@
 <script th:inline="javascript">
 	/*<![CDATA[*/
 	
-	    var vertical = /*[[${config.id}]]*/ 'default';
-	    var siteLanguage = /*[[${siteLanguage}]]*/'default';
-	    var baseUrl = /*[[${baseUrl}]]*/'default';
+	    var vertical = /*[[${config.id}]]*/ '';
+	    var siteLanguage = /*[[${siteLanguage}]]*/'';
+	    var baseUrl = /*[[${baseUrl}]]*/'';
+	    var verticalPath = /*[[${verticalPath}]]*/'';
+	    
+	    
+	    
 	/*]]>*/
 </script>
 
@@ -172,7 +167,7 @@
 	        "orderMulti": false,
 	        "pageLength": 10,
 	        "ajax": {
-	            "url": "/"+vertical+"/paginated",
+	            "url": "/"+verticalPath+"/paginated",
 	            "dataSrc": "data",
 	            "data": function ( data ) {
 	 //process data before sent to server.
@@ -190,8 +185,8 @@
         				return Mustache.render(template, {
         					data : data,
         					vertical: vertical,
-           					productUrl : baseUrl+vertical+'/'+data.names.name,
-           					imageUrl : baseUrl+vertical+'/'+data.names.name+'/image.png',           					
+           					productUrl : baseUrl+verticalPath+'/'+data.names.name,
+           					imageUrl : baseUrl+verticalPath+'/'+data.names.name+'/image.png',           					
         					name : (data.attributes.referentielAttributes.MODEL == null ? data.names.name : data.attributes.referentielAttributes.MODEL)
         				});                	
                 	}
