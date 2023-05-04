@@ -105,10 +105,10 @@ public class VerticalsConfigService {
 		// Mapping url to i18n
 		getConfigsWithoutDefault().stream().forEach(vc -> {		
 			
-			vc.getHomeUrl().stream().forEach(v -> {
+			vc.getHomeUrl().entrySet().stream().forEach(v -> {
 				
-				verticalsByUrl.put(v.getText(), vc);
-				verticalUrlByLanguage.put(v.getLanguage(), v.getText());
+				verticalsByUrl.put(v.getValue(), vc);
+				verticalUrlByLanguage.put(v.getKey(), v.getValue());
 			});
 		});
 

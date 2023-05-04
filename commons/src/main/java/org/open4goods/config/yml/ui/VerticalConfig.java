@@ -16,6 +16,7 @@ import javax.validation.constraints.NotNull;
 import org.open4goods.config.yml.CommentsAggregationConfig;
 import org.open4goods.config.yml.TagCloudConfig;
 import org.open4goods.config.yml.attributes.AttributeConfig;
+import org.open4goods.model.Localisable;
 import org.open4goods.model.Localised;
 import org.open4goods.model.constants.CacheConstants;
 import org.open4goods.model.constants.UrlConstants;
@@ -49,14 +50,19 @@ public class VerticalConfig{
 	 * The title on the vertical home page
 	 */
 	@JsonMerge
-	private Set<Localised> homeTitle = new HashSet<>(); 
+	private Localisable homeTitle = new Localisable(); 
 	
-
+	/**
+	 * The image logo on the vertical home page
+	 */
+	@JsonMerge
+	private Localisable homeLogo = new Localisable(); 
+	
 	/**
 	 * The url of the vertical home page
 	 */
 	@JsonMerge
-	private Set<Localised> homeUrl = new HashSet<>(); 
+	private Localisable homeUrl = new Localisable(); 
 		
 
 	/**
@@ -538,21 +544,7 @@ public class VerticalConfig{
 	}
 
 
-	public Set<Localised> getHomeTitle() {
-		return homeTitle;
-	}
-
-	public void setHomeTitle(Set<Localised> homeTitle) {
-		this.homeTitle = homeTitle;
-	}
-
-	public Set<Localised> getHomeUrl() {
-		return homeUrl;
-	}
-
-	public void setHomeUrl(Set<Localised> homeUrl) {
-		this.homeUrl = homeUrl;
-	}
+	
 
 	public Set<String> getMatchingCategories() {
 		return matchingCategories;
@@ -569,6 +561,31 @@ public class VerticalConfig{
 	public void setVerticalFilters(List<String> verticalFilters) {
 		this.verticalFilters = verticalFilters;
 	}
+
+	public Localisable getHomeTitle() {
+		return homeTitle;
+	}
+
+	public void setHomeTitle(Localisable homeTitle) {
+		this.homeTitle = homeTitle;
+	}
+
+	public Localisable getHomeLogo() {
+		return homeLogo;
+	}
+
+	public void setHomeLogo(Localisable homeLogo) {
+		this.homeLogo = homeLogo;
+	}
+
+	public Localisable getHomeUrl() {
+		return homeUrl;
+	}
+
+	public void setHomeUrl(Localisable homeUrl) {
+		this.homeUrl = homeUrl;
+	}
+
 	
 	
 	
