@@ -74,7 +74,7 @@
 	<distributionManagement>
 		<site>
 			<id>maven</id>
-			<url>https://eco-achat.fr</url>
+			<url>https://nudger.fr</url>
 		</site>
 	</distributionManagement>
 

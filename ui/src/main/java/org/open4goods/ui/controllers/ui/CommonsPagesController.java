@@ -53,11 +53,17 @@ public class CommonsPagesController extends AbstractUiController {
 	}
 
 	@GetMapping("/compensation-carbone")
-	public ModelAndView api(final HttpServletRequest request) {
+	public ModelAndView compensation(final HttpServletRequest request) {
 		ModelAndView ret = defaultModelAndView(("compensation"), request);
 		ret.addObject("page","compensation écologique");
 		return ret;
 	}
 
+	@GetMapping("/ecoscore")
+	public ModelAndView api(final HttpServletRequest request) {
+		ModelAndView ret = defaultModelAndView(("ecoscore"), request);
+		ret.addObject("page","évaluation environnementale");
+		return ret;
+	}
 
 }

@@ -39,7 +39,7 @@ public class ContactController extends AbstractUiController {
 		model.addObject("page","nous contacter");
 		try {
 			captchaService.verifyRecaptcha(IpHelper.getIp(request), recaptchaResponse);
-			mailService.sendEmail(uiConfig.getEmail(), message, "eco-achat.fr > Message de " + name, email);
+			mailService.sendEmail(uiConfig.getEmail(), message, "nudger.fr > Message de " + name, email);
 			model.addObject("info", "Votre message a bien été envoyé !");
 		} catch (Exception e) {
 			model.addObject("error", "Le mail n'a pas pu être envoyé : " + e.getMessage());

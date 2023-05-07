@@ -1,7 +1,7 @@
 testMode: false
 dedicatedLogToConsole: false
 
-masterEndpoint: https://api.eco-achat.fr
+masterEndpoint: https://api.nudger.fr
 apiSynchConfig:
   nodeName: devNode
 #  nodeUrl: 
@@ -17,7 +17,7 @@ server:
 
 defaultCrawlConfig:
   resumableCrawling: false
-  userAgentString: eco-achat.fr (https://eco-achat.fr/)
+  userAgentString: nudger.fr (https://nudger.fr/)
   politenessDelay: 50
   includeBinaryContentInCrawling: false
   processBinaryContentInCrawling: false
