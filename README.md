@@ -5,10 +5,10 @@
 The first open source tool that operates ecological scoring, doing its best for the common good. 
  
  * Official user sites. Directly from this github repo to :  
-	 * **france** : **[eco-achat.fr](https://eco-achat.fr/)**
+	 * **france** : **[nudger.fr](https://nudger.fr/)**
 	 * **world-wide** : maybe one day...
 
- * Probably one of the largest [product open data database](https://eco-achat.fr/opendata), at least for french products.
+ * Probably one of the largest [product open data database](https://nudger.fr/opendata), at least for french products.
  * Financially contributing to the environmental cause, through a repayment of 20% of the site incomes. 
 
 -----
@@ -23,7 +23,7 @@ open4goods project is an open-source and open-data product aggregator, search en
   
  * **Renders the data through an open API, and through open data sets**, exposed through the [API](api/) component.  
   
- * Make the truth available for everyone on **officially supported websites**, (only french [eco-achat.fr](https://eco-achat.fr) for now), through the [UI](ui/) component. The affiliation revenue business model is used to deliver ecological compensation, maintain the user service and the open-data delivery  
+ * Make the truth available for everyone on **officially supported websites**, (only french [nudger.fr](https://nudger.fr) for now), through the [UI](ui/) component. The affiliation revenue business model is used to deliver ecological compensation, maintain the user service and the open-data delivery  
   
 The project will do its best to maximize community and user contributions, with effective and fastest delivery on official websites. We would be happy when we will :  
   
@@ -40,7 +40,7 @@ The project will do its best to maximize community and user contributions, with 
  * A community
  * And so more....
   
-**I will try to improve it over time**, please feel free to get your feedback on the [contact page](https://eco-achat.fr/contact), to contribute through code or with your ideas or issues on this github.
+**I will try to improve it over time**, please feel free to get your feedback on the [contact page](https://nudger.fr/contact), to contribute through code or with your ideas or issues on this github.
 
   
 ## <i class="icon-upload"></i> How to contribute  
