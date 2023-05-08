@@ -16,7 +16,7 @@ jobs:
           command: sh /opt/open4goods/bin/publish-infra.sh
           host: ${{ secrets.REMOTE_HOST }}
           username: ${{ secrets.REMOTE_USER }}
-          privateKey: ${{ secrets.SSH_PRIVATE_KEY }}
+          privateKey: ${{ secrets.SSH_PRIVATE_KEY}}
           
           
 
