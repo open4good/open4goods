@@ -12,6 +12,9 @@
 
 <link type="text/css" href="../../vendor/@fortawesome/fontawesome-free/css/all.min.css" rel="stylesheet">
 
+
+
+
 <!-- Glide JS 
 <link rel="stylesheet" href="../../vendor/@glidejs/glide/dist/css/glide.core.min.css">
 <link rel="stylesheet" href="../../vendor/@glidejs/glide/dist/css/glide.theme.min.css">
@@ -23,4 +26,14 @@
 
 <link rel="search" type="application/opensearchdescription+xml" th:title="#{opensearch.title}" th:href="${baseUrl} + 'opensearch.xml'">
 
+
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script th:unless="${dev}" async src="https://www.googletagmanager.com/gtag/js?id=G-4085Y6CBL7"></script>
+<script th:unless="${dev}">
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-4085Y6CBL7');
+</script>
 
