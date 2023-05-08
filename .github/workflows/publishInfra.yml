@@ -11,12 +11,12 @@ jobs:
 
     steps:
       - name: Publish via ssh
-		uses: appleboy/ssh-action@v0.1.10
-		with:
-		  host: ${{ secrets.REMOTE_HOST }}
-		  username: ${{ secrets.REMOTE_USER }}
-		  key: ${{ secrets.SSH_PRIVATE_KEY}}
-		  script: sh /opt/open4goods/bin/publish-infra.sh
+        uses: appleboy/ssh-action@v0.1.10
+        with:
+          host: ${{ secrets.REMOTE_HOST }}
+          username: ${{ secrets.REMOTE_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY}}
+          script: sh /opt/open4goods/bin/publish-infra.sh
         
                 
           
