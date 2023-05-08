@@ -1,8 +1,4 @@
-        <div class="container-fluid position-relative">
-            <a class="navbar-brand" href="/">
-                <img class="navbar-brand-dark" src="../../assets/img/brand/light.svg" alt="nudger.fr logo light">
-                <img class="navbar-brand-light" src="../../assets/img/brand/dark.svg" alt="nudger.fr logo dark">
-            </a>
+        <div class="container container-semi-fluid position-relative">
             <div class="navbar-collapse collapse me-auto" id="navbar_global">
                 <div class="navbar-collapse-header">
                     <div class="row">
@@ -13,26 +9,100 @@
                         </div>
                         <div class="col-6 collapse-close">
                             <a href="#navbar_global" class="fas fa-times" data-bs-toggle="collapse" data-bs-target="#navbar_global" aria-controls="navbar_global" aria-expanded="false" title="close" aria-label="Toggle navigation"></a>
+
+
+/contact
+
+
                         </div>
                     </div>
                 </div>
                 <ul class="navbar-nav navbar-nav-hover align-items-lg-center">
-                    <li class="nav-item dropdown">
+                    <li class="nav-item">
                         <a href="/" class="nav-link">
-                            nudger.fr 
-                        </a>                        
+                            <b>nudger.fr</b> 
+                        </a>       
                     </li>
-                    
-                    <th:block th:if="${page}">
-                    	<li class="nav-item dropdown">
-	                        <a th:href="${url}" class="nav-link" th:text="' » ' +${page}"></a>                        
-	                    </li>
-                    </th:block>                                        
+
+                    <li class="nav-item">
+						»      
+                    </li>
+                   
+					<li class="nav-item dropdown">
+	                        <!--/* Home */-->
+	                        <a th:if="${url == '/'}" th:href="${url}" class="nav-link dropdown-toggle" id="frontPagesDropdown" aria-expanded="false" data-bs-toggle="dropdown">Accueil<span class="fas fa-angle-down nav-link-arrow ms-1"></span></a>
+	                        <!--/* contact */-->
+	                        <a th:if="${url.endsWith('/contact')}" th:href="${url}" class="nav-link dropdown-toggle" id="frontPagesDropdown" aria-expanded="false" data-bs-toggle="dropdown">Contact<span class="fas fa-angle-down nav-link-arrow ms-1"></span></a>
+	                        <!--/* equipe */-->
+	                        <a th:if="${url.endsWith('/equipe')}" th:href="${url}" class="nav-link dropdown-toggle" id="frontPagesDropdown" aria-expanded="false" data-bs-toggle="dropdown">Equipe<span class="fas fa-angle-down nav-link-arrow ms-1"></span></a>
+                        
+                        
+                        
+                        <div class="dropdown-menu dropdown-megamenu px-0 py-2 p-lg-4" aria-labelledby="frontPagesDropdown">
+                            <div class="row">
+                                <div class="col-6 col-lg-4">
+                                    <h6 class="d-block mb-3 text-primary">Vous êtes chez vous !</h6>
+                                    <ul class="list-style-none mb-4">
+                                        <li class="mb-2 megamenu-item">
+                                            <a class="megamenu-link" href="../../html/pages/about.html">Compensation écologique</a>
+                                        </li>
+                                        <li class="mb-2 megamenu-item">
+                                            <a class="megamenu-link" href="../../html/pages/pricing.html">Eco-score</a>
+                                        </li>
+                                        <li class="mb-2 megamenu-item">
+                                            <a class="megamenu-link" href="../../html/pages/team.html">Modèle ouvert</a>
+                                        </li>
+                                        <li class="mb-2 megamenu-item">
+                                            <a class="megamenu-link" href="/donnees-personnelles">Data responsable</a>
+                                        </li>
+                                        <li class="mb-2 megamenu-item">
+                                            <a class="megamenu-link" href="/blog">Blog</a>
+                                        </li>      
+                                    </ul>
+                                   
+                                </div>
+                                <div class="col-6 col-lg-4">
+                                    <h6 class="d-block mb-3 text-primary">Catégories de produits</h6>
+                                    <ul class="list-style-none mb-4">
+                                        <li class="mb-2 megamenu-item">
+                                            <a class="megamenu-link" href="../../html/pages/legal.html">Legal center</a>
+                                        </li>
+                                        <li class="mb-2 megamenu-item">
+                                            <a class="megamenu-link" href="../../html/pages/terms.html">Terms &amp; agreement</a>
+                                        </li>
+                                    </ul>                                   
+                                </div>
+
+                               <div class="col-6 col-lg-4">
+                                     
+                                    <h6 class="d-block text-primary">Qui sommes nous ?</h6>
+                                    <ul class="list-style-none mb-4">
+                                        <li class="mb-2 megamenu-item">
+                                            <a class="megamenu-link" href="/equipe">L'équipe</a>
+                                        </li>
+                                        <li class="mb-2 megamenu-item">
+                                            <a class="megamenu-link" href="/partenaires">Nos partenaires</a>
+                                        </li>
+                                        <li class="mb-2 megamenu-item">
+                                            <a class="megamenu-link" href="/contact">Nous contacter</a>
+                                        </li>
+                                        
+                                    </ul>                   
+                                </div>
+                                                                
+                            </div>
+                        </div>
+                    </li>
+
+
+                                        
                 </ul>
 
             </div>
             
             
-            <!--/* Right icons */-->				
+            <!--/* Right icons 
 			<th:block th:include="inc/navbar-right-icons.html"></th:block>
+            */-->				
+            
         </div>
