@@ -40,7 +40,10 @@ public class WebConfig extends WebSecurityConfigurerAdapter {
 	protected void configure(HttpSecurity http) throws Exception {
 
 		http.authorizeRequests()			
-		.anyRequest().permitAll()
+//		.anyRequest().permitAll()
+		.anyRequest().authenticated()
+		
+		
 		.and().formLogin().permitAll()
 		.and().logout().permitAll();
 		
