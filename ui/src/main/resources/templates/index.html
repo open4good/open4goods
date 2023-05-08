@@ -29,7 +29,7 @@
 
 <body>
     
-	<!--/* Navbar */-->
+    <!--/* Navbar */-->
 	<header class="header-global">
     	<nav id="navbar-main" aria-label="Primary navigation" class="navbar navbar-main navbar-expand-lg navbar-theme-primary headroom navbar-light navbar-theme-secondary">
 			<th:block th:include="inc/navbar-non-product.html"></th:block>
@@ -40,30 +40,127 @@
        <!--/* Loader */-->
        <th:block th:include="inc/preloader.html"></th:block>
 		
-       <!--/* Search */-->
-       <section class="section section-header text-dark">
-           <div class="container">
+       <!--/* Central */-->
+       <section class="section text-dark">
+           <div class="container container-semi-fluid">
                <div class="row justify-content-between align-items-center">
-                   <div class="col-12 col-md-6">
-                       <h1 class="display-2 mb-4">eco<span class="text-secondary-app fw-bold">-</span>achat<span class="text-secondary-app fw-bold">.fr</span>
-                       </h1>
-                       <p class="lead text-gray mb-1">Ici, vous transformez vos achats en actes engagés pour la planète. Nous réferençons les produits de nos <a href="#partnersLink"> <span th:text="${partners.size()}"></span> partenaires</a> </p>
-	                           <form method="post" id="searchForm" action="/recherche">
-			                       <div class="d-flex flex-wrap mt-4 mt-lg-5">
-			                           <div class="input-group">
+                   <div class="col-12 col-md-12">
+                       <p class="display-2 mb-2 text-center">nudger<span class="text-secondary-app fw-bold">.fr</span>
+                       </p>
+                       
+                       
+                       <div class="row">
+                       	<div class="col-2 ">                       	
+                       		<img class="navbar-brand-light" src="../../assets/img/brand/dark.svg" alt="nudger.fr logo dark">
+                       	</div>
+                       
+                       
+                       	<div class="col-10">
+                       	
+                      		   <p class="lead text-gray mt-2">
+  									<th:block th:with="path='WIDGETS/accueil-jumbotron/'">
+		                        		<th:block th:include="inc/wiki.html"></th:block>
+		                        	</th:block>
+                      		   </p>
+                       
+                               <form method="post" id="searchForm" action="/recherche">
+			                       <div class="d-flex flex-wrap mt-lg-2">
+			                           <div class="input-group input-group-lg">
 				                               <input type="text" id="searchInput" class="form-control" th:placeholder="'Chercher dans ' + ${#numbers.formatDecimal(totalItems, 0, 'COMMA', 0, 'POINT')} + ' produits'" aria-label="Search" aria-describedby="basic-addon1" name="query">
 				                               <button onclick="document.getElementById('searchForm').submit()" class="btn btn-primary" type="button"><span class="icon icon-xs me-1"><span class="fas fa-search"></span></span> Chercher</button>
 			                            </div>
 			                       </div>
 	                           </form>
+	                                                  	
+                       	</div>
+                       
+                       
+                       
+                       </div>
+                       
+
 	                           
-                   <blockquote class="mt-5 blockquote text-center">
-                    Le meilleur achat pour la planète est celui qu'on ne fait pas.<b> Avez-vous vraiment besoin de ce que vous allez acheter ?</b><br/> Si la réponse est oui, nous compenserons en partie l'impact environnemental de votre produit.
+	                           
+	                           
+	                           
+                   <blockquote class="mt-4 blockquote text-center">
+                       <h1 class="mb-3">Consommons peu, consommons bien</h1>
+                       <p class="lead px-lg-5">Une tentative éthique et ouverte d'amoindrir l'impact de vos achats internet, auprès de nos <a href="/partenaires"> <span th:text="${partners.size()}"></span> commercants partenaires</a></p>
 					</blockquote>
 					
                    </div>
-                   <div class="col-12 col-md-6 text-center">
-                       <img class="d-none d-md-inline-block" src="../../assets/img/index-logo.svg" alt="achat et compensation carbone">
+                   <div class="col-12 col-md-12 text-center">
+                       <div class="row justify-content-center">
+                    
+		                    <div class="col-12 col-md-3 col-lg-3 mb-3 mb-lg-0">
+		                        <div class="card bg-white border-gray-300 text-gray p-4">
+		                            <div class="card-header bg-white border-0 pb-0">
+		                                <h2 class="h4 m-0">Compensation</h2>
+		                            </div>
+		                            <div class="card-body">
+		                                <p>
+											<th:block th:with="path='WIDGETS/accueil-compensation/'">
+				                        		<th:block th:include="inc/wiki.html"></th:block>
+				                        	</th:block>                                
+		                                </p>
+		                                <a href="#compensation-carbone" class="btn btn-sm btn-secondary-app animate-up-2 mt-3">Compensation écologique</a>
+		                            </div>
+		                        </div>
+		                    </div>
+		
+		                    <div class="col-12 col-md-3 col-lg-3 mb-3 mb-lg-0">
+		                        <div class="card bg-white border-gray-300 text-gray p-4">
+		                            <div class="card-header bg-white border-0 pb-0">
+		                                <h2 class="h4 m-0">Eco-score</h2>
+		                            </div>
+		                            <div class="card-body">
+		                                <p>
+											<th:block th:with="path='WIDGETS/accueil-ecoscore/'">
+				                        		<th:block th:include="inc/wiki.html"></th:block>
+				                        	</th:block>                                
+		                                </p>
+		                                <a href="#evaluation-ecologique" class="btn btn-sm btn-secondary-app animate-up-2 mt-3">Score écologique</a>
+		                            </div>
+		                        </div>
+		                    </div>                    
+		                    
+		                    <div class="col-12 col-md-3 col-lg-3 mb-3 mb-lg-0">
+		                        <div class="card bg-white border-gray-300 text-gray p-4">
+		                            <div class="card-header bg-white border-0 pb-0">
+		                                <h2 class="h4 m-0">Modèle ouvert</h2>
+		                            </div>
+		                            <div class="card-body">
+		                                <p>
+											<th:block th:with="path='WIDGETS/accueil-modele-ouvert/'">
+				                        		<th:block th:include="inc/wiki.html"></th:block>
+				                        	</th:block>                                
+		                                </p>
+		                                <a href="#modele-ouvert" class="btn btn-sm btn-secondary-app animate-up-2 mt-3">Modèle ouvert</a>
+		                            </div>
+		                        </div>
+		                    </div>
+		                    
+		                    
+		                    <div class="col-12 col-md-3 col-lg-3 mb-3 mb-lg-0">
+		                        <div class="card bg-white border-gray-300 text-gray p-4">
+		                            <div class="card-header bg-white border-0 pb-0">
+		                                <h2 class="h4 m-0">Data responsable</h2>
+		                            </div>
+		                            <div class="card-body">
+		                                <p>
+											<th:block th:with="path='WIDGETS/accueil-data-responsable'">
+				                        		<th:block th:include="inc/wiki.html"></th:block>
+				                        	</th:block>                                
+		                                </p>
+		                                <a href="#data-responsable" class="btn btn-sm btn-secondary-app animate-up-2 mt-3">Data responsable</a>
+		                            </div>
+		                        </div>
+		                    </div>
+		                    
+		                    
+                    
+                    
+                </div>
                    </div>
                    
 
@@ -72,97 +169,172 @@
                </div>
            </div>
        </section>
-       
-      <!--/* Infos */-->
-       <section class="section section-lg py-sm-0 py-sm-0 bg-primary-app pb-md-5 pt-md-5">
-           <div class="container z-2 mt-sm-n6 mt-md-n7">
-               <div class="row">
-                   <div class="col-12 col-md-6 col-lg-4 mb-4 mb-lg-0">
-                       <div class="card bg-white border-gray-300 text-gray p-4">
-                           <div class="card-header bg-white border-0 pb-0">
-                               <h2 class="h4 m-0">Compensez vos achats</h2>
-                           </div>
-                           <div class="card-body">
- 							   <p>
-                                   Nous offrons 20% de nos revenus d'affiliation à la compensation carbone de votre achat !                         
-                               </p>
-                               <a href="/compensation-carbone" class="btn btn-sm btn-secondary-app animate-up-2 mt-3">En savoir plus</a>
-                           </div>
-                       </div>
-                   </div>
-                   <div class="col-12 col-md-6 col-lg-4 mb-4 mb-lg-0">
-                       <div class="card bg-white border-gray-300 text-gray p-4">
-                           <div class="card-header bg-white border-0 pb-0">
-                               <h2 class="h4 m-0">Open source</h2>
-                           </div>
-                           <div class="card-body">
-                               <p>
-                                   Ce site est en open source, vous pouvez consulter et réutiliser
-                                   l'intégralité du code source.                         
-                               </p>
-                               <a target="_blank" href="https://github.com/open4good/open4goods/" class="btn btn-sm btn-secondary-app animate-up-2 mt-3">En savoir plus</a>
-                           </div>
-                       </div>
-                   </div>
-                   <div class="col-12 col-md-6 col-lg-4">
-                       <div class="card bg-white border-gray-300 text-gray p-4">
-                           <div class="card-header bg-white border-0 pb-0">
-                               <h2 class="h4 m-0">Open data</h2>
-                           </div>
-                           <div class="card-body">
-                               <p>
-                                   L'intégralité des données de la plateforme est disponible en open data                         
-                               </p>
-                               <a href="/opendata" class="btn btn-sm btn-secondary-app animate-up-2 mt-3">En savoir plus</a>
-                           </div>
-                       </div>
-                   </div>
-               </div>
-           </div>
-       </section>
-       
-       
-      <!--/* Partners */-->       
-        <section class="section section-lg py-sm-0 py-sm-0 pb-md-5 pt-md-5">   
-            <div class="container">
-                <div class="row justify-content-between align-items-center">
-                
-                	<h2 id="partnersLink" class="h3 text-center text-lg-left mb-3">Nos partenaires</h2>
-                	<p>
-                		Merci à nos partenaires, qui nous permettent de mettre en oeuvre cette nouvelle façon de consommer ! La compensation environnementale s'applique également si vous faites vos achats sur les plateformes marchandes en utilisant les liens ci-dessous.
-                	</p>
 
-                </div>
-                
-                
-				<div class="mb-3">
-                    <div class="input-group">
-                        <span class="input-group-text" id="partnersSearchLabel"><span class="fas fa-search"></span></span>
-                        <input type="text" class="form-control" id="partnersSearch" placeholder="Filtrer" aria-label="Search" aria-describedby="partnersSearchLabel">
+       <!--/* Search */-->       
+	   <section class="section bg-gray-200">
+		<div class="row text-center justify-content-center">
+              <div class="col-md-8 mb-5">
+                  <p class="display-3">Nos catégories évaluées</p>
+                  <p class="lead">L'assurance de bien choisir</p>
+              </div>
+        </div>	   
+        	   
+	   <div class="container container-semi-fluid ">
+        <div class="row justify-content-between">
+            <div class="col-6 col-sm-3 col-lg-2 mb-5">
+                <!-- card -->
+                <div class="card shadow">
+                    <img src="../../assets/img/shop/item-1.png" alt="apple watch"> 
+                    <div class="text-center card-footer bg-gray-200 border-top border-gray-300 p-4">
+                        <a href="#" class="h5">Téléviseurs</a>
+                        <div class="mt-2">1800 références</div> 
+                    </div>
+                </div> 
+                <!-- / card -->
+            </div>
+            
+                        <div class="col-6 col-sm-3 col-lg-2 mb-5">
+                <!-- card -->
+                <div class="card shadow">
+                    <img src="../../assets/img/shop/item-1.png" alt="apple watch"> 
+                    <div class="text-center card-footer bg-gray-200 border-top border-gray-300 p-4">
+                        <a href="#" class="h5">Téléviseurs</a>
+                        <div class="mt-2">1800 références</div> 
+                    </div>
+                </div> 
+                <!-- / card -->
+            </div>
+            
+                        <div class="col-6 col-sm-3 col-lg-2 mb-5">
+                <!-- card -->
+                <div class="card shadow">
+                    <img src="../../assets/img/shop/item-1.png" alt="apple watch"> 
+                    <div class="text-center card-footer bg-gray-200 border-top border-gray-300 p-4">
+                        <a href="#" class="h5">Téléviseurs</a>
+                        <div class="mt-2">1800 références</div> 
+                    </div>
+                </div> 
+                <!-- / card -->
+            </div>
+            
+                        <div class="col-6 col-sm-3 col-lg-2 mb-5">
+                <!-- card -->
+                <div class="card shadow">
+                    <img src="../../assets/img/shop/item-1.png" alt="apple watch"> 
+                    <div class="text-center card-footer bg-gray-200 border-top border-gray-300 p-4">
+                        <a href="#" class="h5">Téléviseurs</a>
+                        <div class="mt-2">1800 références</div> 
+                    </div>
+                </div> 
+                <!-- / card -->
+            </div>
+            
+        </div>
+    </div>
+    </section>
+    <section class="section">
+		<div class="row text-center justify-content-center">
+              <div class="col-md-8 mb-5">
+                  <p class="display-3">Notre philosophie : le bien commun</p>
+                  <p class="lead">Découvrez nos valeurs et nos atouts</p>
+              </div>
+        </div>	   
+  
+	   
+	   
+			<div class="container container-semi-fluid">
+                <div class="col-12 col-lg-12">
+                    <div class="row justify-content-center ">
+                        <div class="col-12 col-md-6">
+                            <div class="row mt-5 mt-lg-0 px-3">
+                                <!-- Icon Boxes -->
+                                <div id="compensation-carbone" class="card shadow border-gray-300">
+                                    <div class="card-body p-4 p-lg-5">
+                                        <img src="../../assets/img/pages/design.svg" alt="Web design illustration" class="image-md mb-4">
+                                        <h2  class="h4 mb-2">Compensation environnementale</h2>
+                                        <p>
+											<th:block th:with="path='WIDGETS/accueil-compensation-full/'">
+				                        		<th:block th:include="inc/wiki.html"></th:block>
+				                        	</th:block>                                           
+                                        
+                                        </p>
+                                        <a href="/compensation-carbone" class="float-end btn btn-sm btn-primary">En savoir plus sur la compensation carbone</a>
+                                    </div>
+                                </div>
+                                <!-- End of Icon Boxes -->
+                                <!-- Icon Boxes -->
+                                <div id="evaluation-ecologique" class="card shadow border-gray-300 mt-3">
+                                    <div class="card-body p-4 p-lg-5">
+                                        <img src="../../assets/img/pages/technologies.svg" alt="Responsive illustration" class="image-md mb-4">
+                                        <h2 class="h4 mb-2">Evaluation écologique</h2>
+                                        <p>
+											<th:block th:with="path='WIDGETS/accueil-ecoscore-full/'">
+				                        		<th:block th:include="inc/wiki.html"></th:block>
+				                        	</th:block>                                           	
+										</p>
+                                        <a href="#" class="float-end btn btn-sm btn-primary">En savoir plus sur l'évaluation environnementale</a>
+                                    </div>
+                                </div>
+                                <!-- End of Icon Boxes -->
+
+                                <!-- Icon Boxes -->
+                                <div  class="card shadow border-gray-300 mt-3">
+                                    <div class="card-body p-4 p-lg-5">
+                                        <img src="../../assets/img/pages/technologies.svg" alt="Responsive illustration" class="image-md mb-4">
+                                        <h2 class="h4 mb-2">Comparaison de prix</h2>
+                                        <p>
+											<th:block th:with="path='WIDGETS/accueil-comparaison-prix-full/'">
+				                        		<th:block th:include="inc/wiki.html"></th:block>
+				                        	</th:block>                                           
+                                        </p>
+                                        <a href="#" class="float-end btn btn-sm btn-primary">En savoir plus sur la comparaison de prix</a>
+                                    </div>
+                                </div>
+                                <!-- End of Icon Boxes -->
+                                
+                                
+                            </div>
+                        </div>
+                        <div class="col-12 col-md-6 mt-lg-5">
+                            <div class="row mt-3 mt-lg-0 px-3">
+                                <!-- Icon Boxes -->
+                                <div id="modele-ouvert" class="card shadow border-gray-300">
+                                    <div class="card-body p-4 p-lg-5">
+                                        <img src="../../assets/img/pages/code.svg" alt="Code illustration" class="image-md mb-4">
+                                        <h2 class="h4 mb-2">Open-source et Open-data</h2>
+                                        <p>
+											<th:block th:with="path='WIDGETS/accueil-modele-ouvert-full/'">
+				                        		<th:block th:include="inc/wiki.html"></th:block>
+				                        	</th:block>                                           
+                                        </p>
+                                        <a href="/opendata" class="float-end  btn btn-sm btn-primary">En savoir plus sur le modèle ouvert</a>
+                                    </div>
+                                </div>
+                                <!-- End of Icon Boxes -->
+                                <!-- Icon Boxes -->
+                                <div class="card shadow border-gray-300 mt-3">
+                                    <div id="data-responsable" class="card-body p-4 p-lg-5">
+                                        <img src="../../assets/img/pages/support.svg" alt="Support illustration" class="image-md mb-4">
+                                        <h2 class="h4 mb-2">Data responsable</h2>
+                                        <p>
+											<th:block th:with="path='WIDGETS/accueil-data-responsable-full/'">
+				                        		<th:block th:include="inc/wiki.html"></th:block>
+				                        	</th:block>                                           
+                                        </p>
+                                        <a href="/donnees-personnelles" class="float-end btn btn-sm btn-primary">En savoir plus sur l'utilisation de vos données</a>
+                                    </div>
+                                </div>
+                                <!-- End of Icon Boxes -->
+                            </div>
+                        </div>
                     </div>
                 </div>
-                                
-                
-	
-                <div class="row">
-		            <th:block th:each="partner : ${partners}">
-						<div class="partnerCard col-md-4 col-lg-4 mb-5 mb-lg-0 mt-3" th:attr="data-string=${partner.key.name}">
-			                <div class="text-center card shadow p-4">
-			                	<a th:href="'/compensation/'+${partner.value}" rel="nofollow" >
-			                    	<img height="150" class="img-fluid" th:src="'/logo/'+${partner.key.name}"  th:alt="${partner.key.name}">
-			                	</a>
-
-			                </div>
-			            </div>
-		            </th:block>
-                </div>
-	                   
-                   
-                   
-            </div>
-
-        </section>
-
+            </div>	   
+	   
+	   
+	   
+	   
+	   </section>     
     </main>
 
 	<!--/* Footer */-->
