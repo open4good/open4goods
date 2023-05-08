@@ -11,12 +11,13 @@ jobs:
 
     steps:
       - name: Publish via ssh
-        uses: garygrossgarten/github-action-ssh@release
+        uses: appleboy/ssh-action@v0.1.10
         with:
-          command: sh /opt/open4goods/bin/publish-jars.sh
           host: ${{ secrets.REMOTE_HOST }}
           username: ${{ secrets.REMOTE_USER }}
-          privateKey: ${{ secrets.SSH_PRIVATE_KEY}}
+          key: ${{ secrets.SSH_PRIVATE_KEY}}
+          command: sh /opt/open4goods/bin/publish-jars.sh
+
           
           
 
