@@ -5,13 +5,13 @@
 			<div>
 			
 			
-				<th:block th:if="${user}">
+				<th:block th:if="${editor}">
 					<textarea th:if="${product.humanDescription}" th:text="${product.humanDescription.content.text}" id="productDescription" name="productDescription" rows="20" cols="100"></textarea>
 					<textarea th:unless="${product.humanDescription}" th:text="${product.namesAndDescriptionsWithoutShortestNameWithCariage()}" id="productDescription" name="productDescription" rows="20" cols="100"></textarea>
 					
 				</th:block>
 				
-				<th:block th:unless="${user}">
+				<th:block th:unless="${editor}">
 				
 					<th:block th:if="${product.humanDescription}">
 						<div th:utext="${product.humanDescription.content.text}" style="max-height: 350px" class="overflow-auto card-body"></div>

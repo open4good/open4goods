@@ -1,6 +1,8 @@
 package org.open4goods.ui.controllers.ui;
 
 import java.util.Locale;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -61,7 +63,15 @@ public class AbstractUiController {
 		if (authentication instanceof UsernamePasswordAuthenticationToken)  {
 			ret.addObject("user",authentication.getName());
 			
-			ret.addObject("roles",authentication.getAuthorities().stream().map(e->e.getAuthority()).toArray() );
+			Set<String> roles = authentication.getAuthorities().stream().map(e->e.getAuthority()).collect(Collectors.toSet());
+			ret.addObject("roles",roles) ;
+
+			// TODO : role editor as const
+			if (roles.contains("SITEEDITOR")) {
+				ret.addObject("editor","true") ;
+				
+			}
+			
 			
 			
 		}
