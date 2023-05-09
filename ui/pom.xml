@@ -139,13 +139,19 @@
 		    <version>0.1.2</version>
 		</dependency>
 		
-		
+		<!--
 		<dependency>
 		    <groupId>org.webjars.npm</groupId>
 		    <artifactId>smoothscroll-polyfill</artifactId>
 		    <version>0.4.4</version>
 		</dependency>
 
+		<dependency>
+		    <groupId>org.webjars.bower</groupId>
+		    <artifactId>headroom.js</artifactId>
+		    <version>0.9.3</version>
+		</dependency>
+		-->
 
 	</dependencies>
 
