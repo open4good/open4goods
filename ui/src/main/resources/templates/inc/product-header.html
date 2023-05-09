@@ -6,15 +6,14 @@
 	<div class="col-md-9">
 		<div class="info-main text-center">
 			
-			<th:block th:if="${user}">
+			<th:block th:if="${editor}">
 				<input th:if="${product.names.manualName}" size="50" type="text" name="productTitle" id="productTitle" th:value="${product.names.manualName}">
 				<input th:unless="${product.names.manualName}" size="50" type="text" name="productTitle" id="productTitle" th:value="${product.names.shortestOfferName()}">
 			</th:block>
 			
-			<th:block th:unless="${user}">
+			<th:block th:unless="${editor}">
 				<h1 th:if="${product.names.manualName}" th:text="${product.names.manualName}"></h1>	
-				<h1 th:unless="${product.names.manualName}" th:text="${product.names.shortestOfferName()}"></h1>	
-				
+				<h1 th:unless="${product.names.manualName}" th:text="${product.names.shortestOfferName()}"></h1>					
 			</th:block>
 					
 			<th:block th:if="${null != product.bestPrice()}">

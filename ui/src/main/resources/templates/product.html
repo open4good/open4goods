@@ -61,7 +61,7 @@
             <div class="container">
 				<div class="card shadow p-4">
 				
-					<th:block th:if="${user}">
+					<th:block th:if="${editor}">
 						<form method="post" th:action="${url}">	
 							<input value="Enregistrer les modifications" type="submit">			
 					</th:block>
@@ -118,7 +118,7 @@
   				 			
 			</div>
 			
-			<th:block th:if="${user}">
+			<th:block th:if="${editor}">
 				</form>				
 			</th:block>			
 		</div>  
