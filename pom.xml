@@ -343,9 +343,9 @@
 					<artifactId>maven-compiler-plugin</artifactId>
 					<version>${maven-compiler-plugin-version}</version>
 					<configuration>
-						<release>17</release>
-						<source>17</source>
-						<target>17</target>
+						<release>19</release>
+						<source>19</source>
+						<target>19</target>
 						<forceJavacCompilerUse>true</forceJavacCompilerUse>
 					</configuration>
 				</plugin>
