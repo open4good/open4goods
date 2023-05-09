@@ -13,7 +13,7 @@ server:
   
 apiConfig:
   apiTitle: "Open4goods API"
-  apiDescription: "This API allows you to browse eco-achat content"
+  apiDescription: "This API allows you to browse eco-nudger content"
   apiVersion: "0.1"
   apiLicence: "May vary"
 

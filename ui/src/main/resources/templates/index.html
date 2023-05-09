@@ -343,13 +343,22 @@
 <!-- Core -->
 
 <script src="../../vendor/bootstrap/dist/js/bootstrap.min.js"></script>
+<script src="/webjars/jquery/jquery.min.js"></script>
+
 
 <script src="../../vendor/headroom.js/dist/headroom.min.js"></script>
 
 <!-- Vendor JS -->
 
+<!-- 
+<script src="/webjars/smooth-scroll/smooth-scroll.polyfills.min.js"></script>
+ -->
+
 <script src="../../vendor/smooth-scroll/dist/smooth-scroll.polyfills.min.js"></script>
-<script src="../../vendor/vivus/dist/vivus.min.js"></script>
+
+
+<script src="/webjars/vivus/vivus.min.js"></script>
+
 <script src="/webjars/jquery/jquery.min.js"></script>
 
 
@@ -364,22 +373,6 @@ $(document).ready(function() {
 	$('#searchInput').on("change",function (e) {
     	$('#searchForm').attr("action","/recherche/"+encodeURIComponent($('#searchInput').val()));
     });
-
-	// Partners search
-	$("#partnersSearch").on("keyup", function() {
-		  var input = $(this).val().toUpperCase();
-
-		  $(".partnerCard").each(function() {
-		    if ($(this).data("string").toUpperCase().indexOf(input) < 0) {
-		      $(this).hide();
-		    } else {
-		      $(this).show();
-		    }
-		  })
-		});	
-
-
-
 } );
 
 
