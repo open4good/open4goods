@@ -100,13 +100,6 @@
 			<version>1.16.1</version>
 		</dependency>
 
-		<!-- Tagcloud -->
-		<dependency>
-			<groupId>com.kennycason</groupId>
-			<artifactId>kumo-core</artifactId>
-			<version>1.28</version>
-		</dependency>
-
 		<dependency>
 			<groupId>io.micrometer</groupId>
 			<artifactId>micrometer-core</artifactId>
