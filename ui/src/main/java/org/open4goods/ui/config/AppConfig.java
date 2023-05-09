@@ -20,7 +20,6 @@ import org.open4goods.services.RemoteFileCachingService;
 import org.open4goods.services.ResourceService;
 import org.open4goods.services.SerialisationService;
 import org.open4goods.services.StandardiserService;
-import org.open4goods.services.TagCloudService;
 import org.open4goods.services.VerticalsConfigService;
 import org.open4goods.services.XwikiService;
 import org.open4goods.ui.config.yml.UiConfig;
@@ -143,11 +142,6 @@ public class AppConfig {
 	@Bean	
 	public SearchService searchService(@Autowired AggregatedDataRepository aggregatedDataRepository, @Autowired final UiConfig uiconfig) {
 		return new SearchService(aggregatedDataRepository, uiconfig.logsFolder());
-	}
-
-	@Bean
-	public TagCloudService tagCloudService(@Autowired final ResourceService resourceService, @Autowired final UiConfig uiconfig) {
-		return new TagCloudService(resourceService, uiconfig.getTagCloudConfig());
 	}
 
 

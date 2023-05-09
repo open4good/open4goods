@@ -3,7 +3,6 @@ package org.open4goods.ui.config.yml;
 import java.io.File;
 import java.util.Locale;
 
-import org.open4goods.config.yml.TagCloudConfig;
 import org.open4goods.config.yml.XwikiConfiguration;
 import org.open4goods.config.yml.ui.ApiConfig;
 import org.open4goods.config.yml.ui.OpenSearchConfig;
@@ -81,11 +80,6 @@ public class UiConfig {
 	 */
 	private XwikiConfiguration wikiConfig;
 
-	/**
-	 * The config for generated tagcloud
-	 */
-	private TagCloudConfig tagCloudConfig = new TagCloudConfig();
-	
 	
 	/**
 	 * Return the root url for a given sitelocale, with the "default" behavior
@@ -179,13 +173,6 @@ public class UiConfig {
 		this.namings = namings;
 	}
 
-	public TagCloudConfig getTagCloudConfig() {
-		return tagCloudConfig;
-	}
-
-	public void setTagCloudConfig(TagCloudConfig tagCloudConfig) {
-		this.tagCloudConfig = tagCloudConfig;
-	}
 
 	public String getVerticalsFolder() {
 		return verticalsFolder;

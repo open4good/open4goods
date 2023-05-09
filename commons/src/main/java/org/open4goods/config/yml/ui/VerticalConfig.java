@@ -7,17 +7,15 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.stream.Collectors;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.constraints.NotNull;
 
 import org.open4goods.config.yml.CommentsAggregationConfig;
-import org.open4goods.config.yml.TagCloudConfig;
 import org.open4goods.config.yml.attributes.AttributeConfig;
 import org.open4goods.model.Localisable;
-import org.open4goods.model.Localised;
 import org.open4goods.model.constants.CacheConstants;
 import org.open4goods.model.constants.UrlConstants;
 import org.slf4j.Logger;
@@ -83,12 +81,7 @@ public class VerticalConfig{
 	@JsonMerge
 	private CommentsAggregationConfig commentsConfig = new CommentsAggregationConfig();
 	
-	/**
-	 * Configuration for tagcloud module
-	 */
-	@JsonMerge
-	private TagCloudConfig tagCloudConfig = new TagCloudConfig();
-	
+
 	/**
 	 * The I18n URL Mappings. Think SEO !
 	 */
@@ -390,16 +383,6 @@ public class VerticalConfig{
 
 	public void setCommentsConfig(CommentsAggregationConfig commentsConfig) {
 		this.commentsConfig = commentsConfig;
-	}
-
-
-	public TagCloudConfig getTagCloudConfig() {
-		return tagCloudConfig;
-	}
-
-
-	public void setTagCloudConfig(TagCloudConfig tagCloudConfig) {
-		this.tagCloudConfig = tagCloudConfig;
 	}
 
 

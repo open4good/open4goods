@@ -23,7 +23,6 @@ import org.open4goods.model.constants.ResourceTagDictionary;
 import org.open4goods.model.data.Resource;
 import org.open4goods.model.product.AggregatedData;
 import org.open4goods.services.DataSourceConfigService;
-import org.open4goods.services.TagCloudService;
 import org.open4goods.services.VerticalsConfigService;
 import org.open4goods.ui.config.AppConfig;
 import org.open4goods.ui.config.yml.UiConfig;
@@ -54,13 +53,10 @@ public class ResourceController extends AbstractUiController {
 	private static final String PNG_IMG = "image.png";
 	private static final String GTIN_IMG = "gtin.png";
 
-	private static final String TAGCLOUD_IMG = "tagcloud.png";
-
 	// The siteConfig
 	private @Autowired ImageService imageService;
 	private @Autowired AggregatedDataRepository esDao;
 	private @Autowired GtinService gtinService;
-	private @Autowired TagCloudService tagcloudService;
 	private @Autowired UiConfig config;
 	private @Autowired DataSourceConfigService dsConfigService;
 	private @Autowired VerticalsConfigService verticalConfigService;
@@ -176,38 +172,7 @@ public class ResourceController extends AbstractUiController {
 	}
 
 
-	@GetMapping("/*-{id:\\d+}/"+TAGCLOUD_IMG)
-	public void tagcloud(@PathVariable String id, final HttpServletResponse response,HttpServletRequest request) throws FileNotFoundException, IOException, ValidationException, TechnicalException {
-		
-		// Retrieve the AggregatedData		
-		AggregatedData data;
-		try {
-			data = esDao.getById(id);
-		} catch (ResourceNotFoundException e) {
-			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "image introuvable !");
-		}
-		
-		// Handling 404
-		if (null == data) {
-			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "image introuvable !");
-		}
-		
-		// Sending 301 id no match with product name
-		String path= URLEncoder.encode(request.getServletPath().substring(1, request.getServletPath().lastIndexOf("/")));													
-		if (!path.equals(data.getNames().getName())) {
-			response.setStatus(HttpServletResponse.SC_MOVED_PERMANENTLY);
-			response.setHeader("Location", config.getBaseUrl(Locale.FRANCE) + data.getNames().getName()+"/"+TAGCLOUD_IMG);
-			return ;
-		}
-		
-		response.addHeader("Content-type","image/png");
-					response.addHeader("Cache-Control","public, max-age="+AppConfig.CACHE_PERIOD_SECONDS);
-		
-		InputStream stream = tagcloudService.getImageStream(data);
-		IOUtils.copy(stream ,response.getOutputStream());
-		IOUtils.closeQuietly(stream);
-		
-	}
+
 	
 	
 	@GetMapping("/icon/{datasourceName}")
