@@ -25,9 +25,6 @@
 	<meta name="twitter:description" th:content="#{search.meta.description}">
 	<meta name="twitter:image" th:content="${baseUrl} + 'assets/img/brand/light.svg'">
 	
-	<!-- CSS -->
-	<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.25/css/dataTables.bootstrap5.min.css">
-	
 </head>
 
 <body>
@@ -172,33 +169,18 @@
 
 <!-- Core -->
 <script src="../../vendor/@popperjs/core/dist/umd/popper.min.js"></script>
-<script src="../../vendor/bootstrap/dist/js/bootstrap.min.js"></script>
+<script src="/webjars/bootstrap/js/bootstrap.min.js"></script>
 <script src="../../vendor/headroom.js/dist/headroom.min.js"></script>
 
 <!-- Vendor JS -->
 
 <script src="../../vendor/smooth-scroll/dist/smooth-scroll.polyfills.min.js"></script>
 <script src="../../vendor/vivus/dist/vivus.min.js"></script>
-<script src="https://code.jquery.com/jquery-3.5.1.js"></script>
-<script src="https://cdn.datatables.net/1.10.25/js/jquery.dataTables.min.js"></script>
-<script src="https://cdn.datatables.net/1.10.25/js/dataTables.bootstrap5.min.js"></script>
+
 
 <!-- pixel JS -->
 <script src="../../assets/js/pixel.js"></script>
 
-<script>
-$(document).ready(function() {
-	// search feature
-    $('#searchInput').on("change",function (e) {
-    	$('#searchForm').attr("action","/recherche/"+($('#searchInput').val()));
-    });
-	
-	// Datatable init
-	$('#searchTable').DataTable();
-
-	
-} );
-</script>
 </body>
 
 </html>
