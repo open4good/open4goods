@@ -27,6 +27,12 @@
 
 	<link rel="stylesheet" type="text/css" href="/webjars/datatables/css/dataTables.bootstrap5.min.css">
 	
+	<style>
+	tbody, td, tfoot, th, thead, tr {
+    	 border-style: none;
+	}	
+	
+	</style>
 	
 </head>
 
@@ -146,6 +152,7 @@
 	    var siteLanguage = /*[[${siteLanguage}]]*/'';
 	    var baseUrl = /*[[${baseUrl}]]*/'';
 	    var verticalPath = /*[[${verticalPath}]]*/'';
+	    var additionalAttributes = /*[[${products.customFilters}]]*/'';
 	    	    	    
 	/*]]>*/
 </script>
