@@ -1,11 +1,8 @@
 package org.open4goods.aggregation.services.aggregation;
 
 import org.open4goods.aggregation.AbstractAggregationService;
-import org.open4goods.config.yml.ui.SiteNaming;
 import org.open4goods.model.data.DataFragment;
 import org.open4goods.model.product.AggregatedData;
-import org.open4goods.services.EvaluationService;
-import org.open4goods.services.GoogleTaxonomyService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -29,7 +29,6 @@ import org.open4goods.model.data.Price;
 import org.open4goods.services.BarcodeValidationService;
 import org.open4goods.services.DataSourceConfigService;
 import org.open4goods.services.EvaluationService;
-import org.open4goods.services.GoogleTaxonomyService;
 import org.open4goods.services.Gs1PrefixService;
 import org.open4goods.services.ImageMagickService;
 import org.open4goods.services.RemoteFileCachingService;
@@ -100,8 +99,8 @@ public class ApiConfig {
 			@Autowired ReferentielService referentielService, @Autowired StandardiserService standardiserService,
 			@Autowired AutowireCapableBeanFactory autowireBeanFactory, @Autowired AggregatedDataRepository aggregatedDataRepository,
 			@Autowired ApiProperties apiProperties, @Autowired Gs1PrefixService gs1prefixService,
-			@Autowired DataSourceConfigService dataSourceConfigService, @Autowired VerticalsConfigService configService, @Autowired BarcodeValidationService barcodeValidationService, @Autowired GoogleTaxonomyService taxonomyService) {
-		return new RealtimeAggregationService(repository, evaluationService, referentielService, standardiserService, autowireBeanFactory, aggregatedDataRepository, apiProperties, gs1prefixService, dataSourceConfigService, configService,  barcodeValidationService, taxonomyService);
+			@Autowired DataSourceConfigService dataSourceConfigService, @Autowired VerticalsConfigService configService, @Autowired BarcodeValidationService barcodeValidationService) {
+		return new RealtimeAggregationService(repository, evaluationService, referentielService, standardiserService, autowireBeanFactory, aggregatedDataRepository, apiProperties, gs1prefixService, dataSourceConfigService, configService,  barcodeValidationService);
 	}
 	
 	@Bean
@@ -109,8 +108,8 @@ public class ApiConfig {
 			@Autowired ReferentielService referentielService, @Autowired StandardiserService standardiserService,
 			@Autowired AutowireCapableBeanFactory autowireBeanFactory, @Autowired AggregatedDataRepository aggregatedDataRepository,
 			@Autowired ApiProperties apiProperties, @Autowired Gs1PrefixService gs1prefixService,
-			@Autowired DataSourceConfigService dataSourceConfigService, @Autowired VerticalsConfigService configService, @Autowired BarcodeValidationService barcodeValidationService, @Autowired GoogleTaxonomyService taxonomyService) {
-		return new BatchAggregationService(repository, evaluationService, referentielService, standardiserService, autowireBeanFactory, aggregatedDataRepository, apiProperties, gs1prefixService, dataSourceConfigService, configService,  barcodeValidationService, taxonomyService);
+			@Autowired DataSourceConfigService dataSourceConfigService, @Autowired VerticalsConfigService configService, @Autowired BarcodeValidationService barcodeValidationService) {
+		return new BatchAggregationService(repository, evaluationService, referentielService, standardiserService, autowireBeanFactory, aggregatedDataRepository, apiProperties, gs1prefixService, dataSourceConfigService, configService,  barcodeValidationService);
 	}
 	
 	
@@ -274,38 +273,7 @@ public class ApiConfig {
 		return new BarcodeValidationService();
 	}
 
-	@Bean
-	GoogleTaxonomyService taxonomyService() {
-		
-		GoogleTaxonomyService taxonomyService = new GoogleTaxonomyService();
-		
-		////////////////////////
-		// Loading google taxonomy
-		////////////////////////
-		try {
-			taxonomyService.loadGoogleTaxonomyFile("/taxonomy/taxonomy-with-ids.fr-FR.csv", "fr");
-		} catch (IOException e) {
-			logger.error("Cannot load french google taxonomy",e);
-		}
-		try {
-			taxonomyService.loadGoogleTaxonomyFile("/taxonomy/taxonomy-with-ids.en-US.csv", "en");
-		} catch (IOException e) {
-			logger.error("Cannot load us google taxonomy",e);
-		}
 
-		////////////////////////
-		// Loading raw taxonomy
-		////////////////////////
-		try {
-			taxonomyService.loadRawTaxonomyFile("/taxonomy/taxonomy-raw.csv");
-		} catch (IOException e) {
-			logger.error("Cannot load raw google taxonomy",e);
-		}
-		
-		
-		
-		return taxonomyService;
-	}
 	
 //	@Bean
 //	RealtimeAggregationService fullGenerationService(@Autowired DataFragmentRepository repository, @Autowired EvaluationService evaluationService,
