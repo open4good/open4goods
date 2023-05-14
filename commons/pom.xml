@@ -45,11 +45,7 @@
 			<artifactId>spring-data-elasticsearch</artifactId>
 		</dependency>
 
-		<dependency>
-			<groupId>javax.validation</groupId>
-			<artifactId>validation-api</artifactId>
-			<scope>provided</scope>
-		</dependency>
+
 
 		<dependency>
 			<groupId>com.google.guava</groupId>
