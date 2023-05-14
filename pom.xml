@@ -11,10 +11,10 @@
 	<url>https://github.com/open4good/open4goods</url>
 	<properties>
 		<github.global.server>github</github.global.server>
-		<springboot.version>2.7.10</springboot.version>
+		<springboot.version>2.7.11</springboot.version>
 		<java.version>19</java.version>
-		<maven.compiler.source>17</maven.compiler.source>
-		<maven.compiler.target>17</maven.compiler.target>
+		<maven.compiler.source>19</maven.compiler.source>
+		<maven.compiler.target>19</maven.compiler.target>
 		<global.version>0.0.1-SNAPSHOT</global.version>
 		<swagger.version>2.9.2</swagger.version>
 		<jacoco.version>0.8.10</jacoco.version>
@@ -343,9 +343,9 @@
 					<artifactId>maven-compiler-plugin</artifactId>
 					<version>${maven-compiler-plugin-version}</version>
 					<configuration>
-						<release>17</release>
-						<source>17</source>
-						<target>17</target>
+						<release>19</release>
+						<source>19</source>
+						<target>19</target>
 						<forceJavacCompilerUse>true</forceJavacCompilerUse>
 					</configuration>
 				</plugin>
