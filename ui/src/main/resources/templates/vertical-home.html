@@ -146,9 +146,7 @@
 	    var siteLanguage = /*[[${siteLanguage}]]*/'';
 	    var baseUrl = /*[[${baseUrl}]]*/'';
 	    var verticalPath = /*[[${verticalPath}]]*/'';
-	    
-	    
-	    
+	    	    	    
 	/*]]>*/
 </script>
 
@@ -170,16 +168,29 @@
 	            "url": "/"+verticalPath+"/paginated",
 	            "dataSrc": "data",
 	            "data": function ( data ) {
-	 //process data before sent to server.
 	 				return data;
 	         }},
+	         
+	         createdRow: function(row, data, dataIndex){
+	                 // Add COLSPAN attribute
+	                 $('td:eq(0)', row).attr('colspan', 9);	                 
+	                 $('td:eq(1)', row).css('display', 'none');
+	                 $('td:eq(2)', row).css('display', 'none');
+	                 $('td:eq(3)', row).css('display', 'none');
+	                 $('td:eq(4)', row).css('display', 'none');
+	                 $('td:eq(5)', row).css('display', 'none');
+	                 $('td:eq(6)', row).css('display', 'none');
+	                 $('td:eq(7)', row).css('display', 'none');
+	                 $('td:eq(8)', row).css('display', 'none');
+	         },
+	         
 	        "columns": [
                 { 
                 	"data": "attributes.referentielAttributes.MODEL.keyword", 
                 	"name" : "Modèle",
                 	"title" : "Modèle",
                 	render: function(cell, type, data) {
-        				var template = $('#template-id').html();
+        				var template = $('#template-product-search').html();
         				Mustache.parse(template);
 
         				return Mustache.render(template, {
@@ -197,10 +208,9 @@
                 	"name" : "Marque",
                 	"title" : "Marque",
                 	render: function(cell, type, data) {
-                        return  data.attributes.referentielAttributes.BRAND == null ? "" : data.attributes.referentielAttributes.BRAND ;
+                        return  "" ;
                     }
                 },
-  
                 { "data": "id", "name" : "ID", "title" : "ID"  },
                 { "data": "id", "name" : "ID", "title" : "ID"  },
                 { "data": "id", "name" : "ID", "title" : "ID"  },
@@ -211,10 +221,6 @@
 
 	                ]    
 	 	});
-		
-		
-		
-		
 	};
 
 
@@ -229,15 +235,10 @@
 			cache : true, // otherwise will get fresh copy every page load
 			success : function(e) {
 				// script loaded, do stuff!
-
 				$("#tpl_place").html(e);
 
-				// Init table 
-			
+				// Init table 			
 	    		table = initDatatable();
-
-				
-				
 			}
 		});
 		
