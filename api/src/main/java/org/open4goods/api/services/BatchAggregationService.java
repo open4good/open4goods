@@ -7,38 +7,20 @@ import java.util.List;
 import javax.annotation.PreDestroy;
 
 import org.open4goods.aggregation.AbstractAggregationService;
-import org.open4goods.aggregation.aggregator.AbstractAggregator;
 import org.open4goods.aggregation.aggregator.BatchedAggregator;
-import org.open4goods.aggregation.aggregator.RealTimeAggregator;
 import org.open4goods.aggregation.services.aggregation.AttributeAggregationService;
-import org.open4goods.aggregation.services.aggregation.BarCodeAggregationService;
-import org.open4goods.aggregation.services.aggregation.CommentsAggregationService;
-import org.open4goods.aggregation.services.aggregation.DescriptionsAggregationService;
-import org.open4goods.aggregation.services.aggregation.IdAggregationService;
-import org.open4goods.aggregation.services.aggregation.MediaAggregationService;
-import org.open4goods.aggregation.services.aggregation.NamesAggregationService;
-import org.open4goods.aggregation.services.aggregation.PriceAggregationService;
-import org.open4goods.aggregation.services.aggregation.ProsAndConsAggregationService;
-import org.open4goods.aggregation.services.aggregation.QuestionsAggregationService;
-import org.open4goods.aggregation.services.aggregation.VerticalAggregationService;
 import org.open4goods.api.config.yml.ApiProperties;
 import org.open4goods.config.yml.ui.VerticalConfig;
-import org.open4goods.config.yml.ui.VerticalProperties;
 import org.open4goods.dao.AggregatedDataRepository;
-import org.open4goods.exceptions.AggregationSkipException;
-import org.open4goods.model.data.DataFragment;
-import org.open4goods.model.product.AggregatedData;
 import org.open4goods.services.BarcodeValidationService;
 import org.open4goods.services.DataSourceConfigService;
 import org.open4goods.services.EvaluationService;
-import org.open4goods.services.GoogleTaxonomyService;
 import org.open4goods.services.Gs1PrefixService;
 import org.open4goods.services.StandardiserService;
 import org.open4goods.services.VerticalsConfigService;
 import org.open4goods.store.repository.DataFragmentRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 
 /**
@@ -75,18 +57,15 @@ public class BatchAggregationService  {
 	
 	private BarcodeValidationService barcodeValidationService;
 	
-	private GoogleTaxonomyService taxonomyService;
-
 
 	
 	
-	@Autowired
 	public BatchAggregationService(DataFragmentRepository repository, EvaluationService evaluationService,
 			ReferentielService referentielService, StandardiserService standardiserService,
 			AutowireCapableBeanFactory autowireBeanFactory, AggregatedDataRepository aggregatedDataRepository,
 			ApiProperties apiProperties, Gs1PrefixService gs1prefixService,
 			DataSourceConfigService dataSourceConfigService, VerticalsConfigService configService, 
-			BarcodeValidationService barcodeValidationService, GoogleTaxonomyService taxonomyService) {
+			BarcodeValidationService barcodeValidationService) {
 		super();
 		this.repository = repository;
 		this.evaluationService = evaluationService;
@@ -98,7 +77,6 @@ public class BatchAggregationService  {
 		this.gs1prefixService = gs1prefixService;
 		this.dataSourceConfigService = dataSourceConfigService;
 		this.verticalConfigService = configService;
-		this.taxonomyService = taxonomyService;
 		
 		this.barcodeValidationService = barcodeValidationService;
 		

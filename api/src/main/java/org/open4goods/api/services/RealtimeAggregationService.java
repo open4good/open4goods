@@ -29,7 +29,6 @@ import org.open4goods.model.product.AggregatedData;
 import org.open4goods.services.BarcodeValidationService;
 import org.open4goods.services.DataSourceConfigService;
 import org.open4goods.services.EvaluationService;
-import org.open4goods.services.GoogleTaxonomyService;
 import org.open4goods.services.Gs1PrefixService;
 import org.open4goods.services.StandardiserService;
 import org.open4goods.services.VerticalsConfigService;
@@ -72,8 +71,7 @@ public class RealtimeAggregationService {
 	private RealTimeAggregator aggregator;
 	
 	private BarcodeValidationService barcodeValidationService;
-	
-	private GoogleTaxonomyService taxonomyService;
+
 
 
 	
@@ -84,7 +82,7 @@ public class RealtimeAggregationService {
 			AutowireCapableBeanFactory autowireBeanFactory, AggregatedDataRepository aggregatedDataRepository,
 			ApiProperties apiProperties, Gs1PrefixService gs1prefixService,
 			DataSourceConfigService dataSourceConfigService, VerticalsConfigService configService, 
-			BarcodeValidationService barcodeValidationService, GoogleTaxonomyService taxonomyService) {
+			BarcodeValidationService barcodeValidationService) {
 		super();
 		this.repository = repository;
 		this.evaluationService = evaluationService;
@@ -96,7 +94,6 @@ public class RealtimeAggregationService {
 		this.gs1prefixService = gs1prefixService;
 		this.dataSourceConfigService = dataSourceConfigService;
 		this.verticalConfigService = configService;
-		this.taxonomyService = taxonomyService;
 		
 		this.barcodeValidationService = barcodeValidationService;
 		
