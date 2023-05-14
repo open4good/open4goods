@@ -1,13 +1,12 @@
-<table id="tableProducts" class="table">
+
+<table id="tableProducts" class="table compact">
         <thead>
             <tr>
                 <th>Nom</th>
                 <th>Marque</th>
+                <th>Eco-score</th>
                 <th>Prix</th>
                 <th>Offres</th>
-                <th>Origine</th>                                
-                <th>Eco-score</th>
-                <th>Compensation</th>
                 
                 <th:block th:each="filter : ${products.customFilters}">
 	                <th th:text="${filter.key.name.get(siteLanguage)}"></th>            
@@ -26,12 +25,9 @@
                
                
                 <td th:text="${p.brand()}"></td>
+                <td></td>
                 <td th:text="${p.bestPrice.price}"></td>
                 <td th:text="${p.offersCount}"></td>
-                <td th:text="${p.gtinInfos.country}"></td>                
-                
-                <td></td>
-                <td th:text="${#numbers.formatDecimal(p.bestPrice.compensation, 1, 2)}"></td>
 				
                 <th:block th:each="filter : ${products.customFilters}">
 	                <td th:if="${p.attributes.aggregatedAttributes.get(filter.key.key)}" th:text="${p.attributes.aggregatedAttributes.get(filter.key.key).value }"></td>            

@@ -6,6 +6,7 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 
 import org.open4goods.config.yml.ui.VerticalConfig;
+import org.open4goods.services.SerialisationService;
 import org.open4goods.services.VerticalsConfigService;
 import org.open4goods.ui.config.yml.UiConfig;
 import org.open4goods.ui.controllers.dto.VerticalFilterTerm;
@@ -37,6 +38,9 @@ public class VerticalController extends AbstractUiController {
 	private @Autowired VerticalsConfigService verticalService;
 	
 	private @Autowired SearchService searchService;
+
+	
+	private @Autowired SerialisationService serialisationService;
 	
 	//////////////////////////////////////////////////////////////
 	// Mappings
@@ -69,9 +73,6 @@ public class VerticalController extends AbstractUiController {
 		ret.addObject("config",config);
 		
 		ret.addObject("filters",config.verticalFilters());
-		
-		
-		
 		
 		// TODO: i18n
 		ret.addObject("verticalPath",verticalService.getPathForVerticalLanguage("fr"));

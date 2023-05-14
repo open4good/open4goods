@@ -148,17 +148,56 @@
 <script th:inline="javascript">
 	/*<![CDATA[*/
 	
-	    var vertical = /*[[${config.id}]]*/ '';
-	    var siteLanguage = /*[[${siteLanguage}]]*/'';
-	    var baseUrl = /*[[${baseUrl}]]*/'';
-	    var verticalPath = /*[[${verticalPath}]]*/'';
-	    var additionalAttributes = /*[[${products.customFilters}]]*/'';
+	    const vertical = /*[[${config.id}]]*/ '';
+	    const siteLanguage = /*[[${siteLanguage}]]*/'';
+	    const baseUrl = /*[[${baseUrl}]]*/'';
+	    const verticalPath = /*[[${verticalPath}]]*/'';
+	    const additionalAttributes = /*[[${filters}]]*/'';
 	    	    	    
 	/*]]>*/
 </script>
 
 <script>
 
+   var dummyRender = function(cell, type, data) {return  "" ;}
+   
+   var columns = [
+       { 
+       	"data": "attributes.referentielAttributes.MODEL.keyword", 
+       	"name" : "Modèle",
+       	"title" : "Modèle",
+       	render: function(cell, type, data) {
+				var template = $('#template-product-search').html();
+				Mustache.parse(template);
+
+				return Mustache.render(template, {
+					data : data,
+					vertical: vertical,
+  					productUrl : baseUrl+verticalPath+'/'+data.names.name,
+  					imageUrl : baseUrl+verticalPath+'/'+data.names.name+'/image.png',           					
+					name : (data.attributes.referentielAttributes.MODEL == null ? data.names.name : data.attributes.referentielAttributes.MODEL)
+				});                	
+       	}
+       },
+       
+       { 
+       	"data": "attributes.referentielAttributes.BRAND.keyword", 
+       	"name" : "Marque",
+       	"title" : "Marque",
+       	render: function(cell, type, data) {
+               return  "" ;
+           }
+       },
+       { "data": "id", "name" : "Ecoscore", "title" : "Ecoscore"  },
+       { "data": "price.minPrice.price", "name" : "Prix", "title" : "Prix"  },
+       { "data": "offersCount", "name" : "Concurrence", "title" : "Concurrence"  }
+           ];
+
+	 	for ( i = 0; i <  additionalAttributes.length; i++) {						
+			columns[i+5] = JSON.parse('{ "data": "attributes.aggregatedAttributes.'+additionalAttributes[i]['key']+'.value.keyword", "name" : "'+additionalAttributes[i]['name'][siteLanguage]+'", "title" : "'+additionalAttributes[i]['name'][siteLanguage]+'"  }');
+			columns[i+5].render = dummyRender;
+	 	}
+	 
 	<!-- Datatable init function -->
 	var table;
 	
@@ -181,52 +220,12 @@
 	         createdRow: function(row, data, dataIndex){
 	                 // Add COLSPAN attribute
 	                 $('td:eq(0)', row).attr('colspan', 9);	                 
-	                 $('td:eq(1)', row).css('display', 'none');
-	                 $('td:eq(2)', row).css('display', 'none');
-	                 $('td:eq(3)', row).css('display', 'none');
-	                 $('td:eq(4)', row).css('display', 'none');
-	                 $('td:eq(5)', row).css('display', 'none');
-	                 $('td:eq(6)', row).css('display', 'none');
-	                 $('td:eq(7)', row).css('display', 'none');
-	                 $('td:eq(8)', row).css('display', 'none');
+					 for ( i = 1; i < 5+ additionalAttributes.length; i++) {						
+	                 	$('td:eq('+i+')', row).css('display', 'none');
+					 }
 	         },
 	         
-	        "columns": [
-                { 
-                	"data": "attributes.referentielAttributes.MODEL.keyword", 
-                	"name" : "Modèle",
-                	"title" : "Modèle",
-                	render: function(cell, type, data) {
-        				var template = $('#template-product-search').html();
-        				Mustache.parse(template);
-
-        				return Mustache.render(template, {
-        					data : data,
-        					vertical: vertical,
-           					productUrl : baseUrl+verticalPath+'/'+data.names.name,
-           					imageUrl : baseUrl+verticalPath+'/'+data.names.name+'/image.png',           					
-        					name : (data.attributes.referentielAttributes.MODEL == null ? data.names.name : data.attributes.referentielAttributes.MODEL)
-        				});                	
-                	}
-                },
-                
-                { 
-                	"data": "attributes.referentielAttributes.BRAND.keyword", 
-                	"name" : "Marque",
-                	"title" : "Marque",
-                	render: function(cell, type, data) {
-                        return  "" ;
-                    }
-                },
-                { "data": "id", "name" : "ID", "title" : "ID"  },
-                { "data": "id", "name" : "ID", "title" : "ID"  },
-                { "data": "id", "name" : "ID", "title" : "ID"  },
-                { "data": "id", "name" : "ID", "title" : "ID"  },
-                { "data": "id", "name" : "ID", "title" : "ID"  },
-                { "data": "id", "name" : "ID", "title" : "ID"  },
-                { "data": "id", "name" : "ID", "title" : "ID"  },
-
-	                ]    
+	        "columns": columns 
 	 	});
 	};
 
@@ -248,9 +247,6 @@
 	    		table = initDatatable();
 			}
 		});
-		
-
-
 	} );
 </script>
 
