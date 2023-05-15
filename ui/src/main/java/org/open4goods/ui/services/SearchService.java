@@ -24,6 +24,7 @@ import org.open4goods.dao.AggregatedDataRepository;
 import org.open4goods.helper.GenericFileLogger;
 import org.open4goods.model.constants.ProductState;
 import org.open4goods.model.product.AggregatedData;
+import org.open4goods.ui.controllers.dto.NumericRangeFilter;
 import org.open4goods.ui.controllers.dto.VerticalFilterTerm;
 import org.open4goods.ui.controllers.dto.VerticalSearchRequest;
 import org.open4goods.ui.controllers.dto.VerticalSearchResponse;
@@ -156,20 +157,28 @@ public class SearchService {
 				.must(aggregatedDataRepository.getValidDateQuery())	
 				;
 		
-		// pageNumber price
+		// min price
 		if (null != request.getMinPrice()) {
-			queryBuilder = queryBuilder.must(QueryBuilders.rangeQuery("price.minPrice.price").gt(request.getMinPrice().intValue()));			 			
+			queryBuilder = queryBuilder.must(QueryBuilders.rangeQuery("price.minPrice.price").gte(Math.floor(request.getMinPrice())));			 			
 		} else {
 			//TODO : test removing
 //			queryBuilder = queryBuilder.must(QueryBuilders.rangeQuery("price.minPrice.price").gt(0.0));
 		}
 		
-		// pageSize price
+		// max price
 		if (null != request.getMaxPrice()) {
-			queryBuilder = queryBuilder.must(QueryBuilders.rangeQuery("price.minPrice.price").lt(request.getMaxPrice().intValue()+1));			 			
+			queryBuilder = queryBuilder.must(QueryBuilders.rangeQuery("price.minPrice.price").lte(Math.ceil(request.getMaxPrice())));			 			
 		} else {
 			//TODO : test removing
 //			queryBuilder = queryBuilder.must(QueryBuilders.rangeQuery("price.minPrice.price").lt(Integer.MAX_VALUE));	
+		}
+		
+		
+		// Adding custom numeric filters		
+		for (NumericRangeFilter filter : request.getNumericFilters()) {
+			queryBuilder = queryBuilder.must(QueryBuilders.rangeQuery(filter.getAttribute())
+											.lte(filter.getMaxValue())
+											.gte(filter.getMinValue()));			 						
 		}
 		
 		// condition
@@ -181,12 +190,12 @@ public class SearchService {
 		
 		// min offersCount
 		if (null != request.getMinOffers()) {
-			queryBuilder = queryBuilder.must(QueryBuilders.rangeQuery("offersCount").gt(request.getMinOffers()));
+			queryBuilder = queryBuilder.must(QueryBuilders.rangeQuery("offersCount").gte(request.getMinOffers()));
 		}
 		
 		// max offersCount
 		if (null != request.getMaxOffers()) {
-			queryBuilder = queryBuilder.must(QueryBuilders.rangeQuery("offersCount").lt(request.getMaxOffers()+1));
+			queryBuilder = queryBuilder.must(QueryBuilders.rangeQuery("offersCount").lte(request.getMaxOffers()+1));
 		}
 		
 		
