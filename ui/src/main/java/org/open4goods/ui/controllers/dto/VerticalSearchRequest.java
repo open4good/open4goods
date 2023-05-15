@@ -1,6 +1,8 @@
 package org.open4goods.ui.controllers.dto;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import org.open4goods.model.constants.ProductState;
@@ -25,6 +27,9 @@ public class VerticalSearchRequest {
 	Integer pageSize;
 
 	Set<String> countries = new HashSet<>();
+	
+	List<NumericRangeFilter> numericFilters = new ArrayList<>();
+	
 
 	private String sortField;
 	private org.elasticsearch.search.sort.SortOrder sortOrder;
@@ -109,6 +114,14 @@ public class VerticalSearchRequest {
 
 	public void setSortOrder(org.elasticsearch.search.sort.SortOrder sortOrder) {
 		this.sortOrder = sortOrder;
+	}
+
+	public List<NumericRangeFilter> getNumericFilters() {
+		return numericFilters;
+	}
+
+	public void setNumericFilters(List<NumericRangeFilter> numericFilters) {
+		this.numericFilters = numericFilters;
 	}
 
 	

@@ -9,6 +9,7 @@ import org.open4goods.model.product.AggregatedData;
 import org.open4goods.services.VerticalsConfigService;
 import org.open4goods.ui.controllers.dto.DataTableRequest;
 import org.open4goods.ui.controllers.dto.DataTableResults;
+import org.open4goods.ui.controllers.dto.NumericRangeFilter;
 import org.open4goods.ui.controllers.dto.PaginationCriteria;
 import org.open4goods.ui.controllers.dto.VerticalSearchRequest;
 import org.open4goods.ui.controllers.dto.VerticalSearchResponse;
@@ -50,8 +51,7 @@ public class DataTableController {
 		vRequest.setPageNumber(pagination.getFrom() / pagination.getPageSize() );
 		vRequest.setPageSize( pagination.getPageSize() );
 
-		// Handle sliders value
-		
+		// Handle numeric sliders value		
 		String[] slidersValue = request.getParameterValues("sliders[]");
 		for (String slider : slidersValue) {
 			String[] sliderValues = slider.split(":");
@@ -65,28 +65,18 @@ public class DataTableController {
 				vRequest.setMinOffers(Double.valueOf(Math.floor(Double.valueOf(sliderValues[1]).doubleValue())).intValue() );
 				vRequest.setMaxOffers(Double.valueOf(Math.ceil(Double.valueOf(sliderValues[2]).doubleValue() )).intValue() );				
 			} else {
-				
+				//vRequest.getNumericFilters().add(new NumericRangeFilter(sliderValues[0] , Double.valueOf(sliderValues[1]), Double.valueOf(sliderValues[2])));
 			}
-			
-			
-			
-			
-			
 		}
-		
-		
 		
 		// Sorting
 		if (!pagination.isSortByEmpty()) {
 			String sortKey = pagination.getSortBy().getSortBys().keySet().stream().findFirst().get();
 			SortOrder sortOrder = SortOrder.valueOf(pagination.getSortBy().getSortBys().get(sortKey).toString());
-
 			vRequest.setSortField(sortKey);
 			vRequest.setSortOrder(sortOrder);
 		}
-		
-		
-		
+
 		
 		VerticalSearchResponse vResults = searchService.verticalSearch(vConfig, vRequest);
 		
