@@ -214,6 +214,15 @@
 	            "url": "/"+verticalPath+"/paginated",
 	            "dataSrc": "data",
 	            "data": function ( data ) {
+	            	// Adding slider rangers attributes
+	            	var sliderParameters = new Array();
+	            	$('.input-slider-range-container').each (function (e) {
+	            		sliderParameters.push( $(this).attr("id") + ":" + $(this).attr('data-range-value-min') + " : " + $(this).attr('data-range-value-max'));	            		
+		            	} 
+	            	);
+	            	
+	            	data.sliders=sliderParameters;
+	            	
 	 				return data;
 	         }},
 	         
