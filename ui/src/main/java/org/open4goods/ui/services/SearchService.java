@@ -2,6 +2,7 @@ package org.open4goods.ui.services;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -160,18 +161,12 @@ public class SearchService {
 		// min price
 		if (null != request.getMinPrice()) {
 			queryBuilder = queryBuilder.must(QueryBuilders.rangeQuery("price.minPrice.price").gte(Math.floor(request.getMinPrice())));			 			
-		} else {
-			//TODO : test removing
-//			queryBuilder = queryBuilder.must(QueryBuilders.rangeQuery("price.minPrice.price").gt(0.0));
-		}
+		} 
 		
 		// max price
 		if (null != request.getMaxPrice()) {
 			queryBuilder = queryBuilder.must(QueryBuilders.rangeQuery("price.minPrice.price").lte(Math.ceil(request.getMaxPrice())));			 			
-		} else {
-			//TODO : test removing
-//			queryBuilder = queryBuilder.must(QueryBuilders.rangeQuery("price.minPrice.price").lt(Integer.MAX_VALUE));	
-		}
+		} 
 		
 		
 		// Adding custom numeric filters		
@@ -181,12 +176,18 @@ public class SearchService {
 											.gte(filter.getMinValue()));			 						
 		}
 		
+		
+		// Adding custom checkbox filters		
+		for (Entry<String, Set<String>> filter : request.getTermsFilter().entrySet()) {
+			queryBuilder = queryBuilder.must(QueryBuilders.termsQuery(filter.getKey(), filter.getValue()));			 						
+		}
+		
+		
+		
 		// condition
 		if (null != request.getCondition()) {
 			queryBuilder = queryBuilder.must(QueryBuilders.termQuery("price.minPrice.productState", request.getCondition().toString()));
 		}
-		
-		
 		
 		// min offersCount
 		if (null != request.getMinOffers()) {
@@ -197,6 +198,9 @@ public class SearchService {
 		if (null != request.getMaxOffers()) {
 			queryBuilder = queryBuilder.must(QueryBuilders.rangeQuery("offersCount").lte(request.getMaxOffers()+1));
 		}
+
+		
+		
 		
 		
 		// Setting the query
@@ -234,8 +238,6 @@ public class SearchService {
 		} else {
 			esQuery = esQuery.withSort(SortBuilders.fieldSort(request.getSortField()).order(request.getSortOrder()));
 		}
-
-
 		
 		// Adding custom filters aggregations	
 		for (AttributeConfig attrConfig : customAttrFilters) {

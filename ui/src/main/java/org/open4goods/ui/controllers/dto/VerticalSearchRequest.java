@@ -1,8 +1,10 @@
 package org.open4goods.ui.controllers.dto;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.open4goods.model.constants.ProductState;
@@ -30,9 +32,25 @@ public class VerticalSearchRequest {
 	
 	List<NumericRangeFilter> numericFilters = new ArrayList<>();
 	
+	Map<String,Set<String>> termsFilter = new HashMap<>();
+	
 
 	private String sortField;
 	private org.elasticsearch.search.sort.SortOrder sortOrder;
+	
+	
+	/**
+	 * Add a term filter
+	 * @param string
+	 * @param string2
+	 */
+	public void addTermFilter(String attribute, String term) {
+
+		if (!termsFilter.containsKey(attribute)) {
+			termsFilter.put(attribute, new HashSet<>());
+		}
+		termsFilter.get(attribute).add(term);
+	}
 	
 	public Integer getMinPrice() {
 		return minPrice;
@@ -122,6 +140,14 @@ public class VerticalSearchRequest {
 
 	public void setNumericFilters(List<NumericRangeFilter> numericFilters) {
 		this.numericFilters = numericFilters;
+	}
+
+	public Map<String, Set<String>> getTermsFilter() {
+		return termsFilter;
+	}
+
+	public void setTermsFilter(Map<String, Set<String>> termsFilter) {
+		this.termsFilter = termsFilter;
 	}
 
 	
