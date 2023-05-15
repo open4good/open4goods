@@ -8,19 +8,14 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
-import javax.annotation.PostConstruct;
-
-import org.open4goods.config.yml.attributes.AttributeConfig;
 import org.open4goods.config.yml.ui.VerticalConfig;
 import org.open4goods.model.constants.CacheConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.scheduling.annotation.Scheduled;
 

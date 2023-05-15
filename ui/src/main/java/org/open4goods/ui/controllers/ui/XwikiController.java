@@ -1,11 +1,7 @@
 package org.open4goods.ui.controllers.ui;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.stream.Collectors;
 
-import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 

@@ -28,7 +28,6 @@ import org.open4goods.crawler.config.yml.FetcherProperties;
 import org.open4goods.crawler.services.DataFragmentCompletionService;
 import org.open4goods.crawler.services.IndexationService;
 import org.open4goods.exceptions.ValidationException;
-import org.open4goods.helper.GenericFileLogger;
 import org.open4goods.helper.InStockParser;
 import org.open4goods.helper.ProductStateParser;
 import org.open4goods.helper.ShippingCostParser;
@@ -54,7 +53,6 @@ import com.fasterxml.jackson.dataformat.csv.CsvParser;
 import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 import com.google.common.collect.Sets;
 
-import ch.qos.logback.classic.Level;
 import edu.uci.ics.crawler4j.crawler.CrawlController;
 import net.lingala.zip4j.ZipFile;
 import net.lingala.zip4j.exception.ZipException;

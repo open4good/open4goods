@@ -1,14 +1,9 @@
 package org.open4goods.ui.config;
 
-import java.util.Properties;
-
-import org.open4goods.config.yml.ui.VerticalConfig;
 import org.open4goods.services.VerticalsConfigService;
-import org.open4goods.ui.controllers.ui.VerticalController;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.MediaType;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
@@ -17,10 +12,6 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.servlet.handler.SimpleUrlHandlerMapping;
-import org.springframework.web.servlet.mvc.method.RequestMappingInfo;
-import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 
 @Configuration
 @EnableWebSecurity

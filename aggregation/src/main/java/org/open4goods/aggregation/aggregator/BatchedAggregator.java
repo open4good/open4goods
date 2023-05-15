@@ -5,7 +5,6 @@ import java.util.Set;
 
 import org.open4goods.aggregation.AbstractAggregationService;
 import org.open4goods.exceptions.AggregationSkipException;
-import org.open4goods.model.aggregation.ParticipantData;
 import org.open4goods.model.product.AggregatedData;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

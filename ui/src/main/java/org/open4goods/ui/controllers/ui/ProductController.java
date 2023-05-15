@@ -8,7 +8,6 @@ import java.util.Locale;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.commons.lang3.StringUtils;
 import org.open4goods.config.yml.ui.VerticalConfig;
 import org.open4goods.dao.AggregatedDataRepository;
 import org.open4goods.exceptions.ResourceNotFoundException;

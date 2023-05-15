@@ -4,14 +4,11 @@ import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.charset.Charset;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 
 import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
 
-import org.checkerframework.framework.qual.PostconditionAnnotation;
 import org.open4goods.config.yml.datasource.DataSourceProperties;
 import org.open4goods.dao.AggregatedDataRepository;
 import org.open4goods.model.data.AffiliationToken;

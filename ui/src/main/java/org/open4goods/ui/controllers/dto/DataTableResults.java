@@ -2,7 +2,6 @@ package org.open4goods.ui.controllers.dto;
 
 import java.util.List;
 
-import com.google.gson.Gson;
 import com.google.gson.annotations.SerializedName;
 
 /**
