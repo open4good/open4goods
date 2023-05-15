@@ -219,10 +219,17 @@
 	            	$('.input-slider-range-container').each (function (e) {
 	            		sliderParameters.push( $(this).attr("id") + ":" + $(this).attr('data-range-value-min') + " : " + $(this).attr('data-range-value-max'));	            		
 		            	} 
-	            	);
-	            	
+	            	);	            	
 	            	data.sliders=sliderParameters;
 	            	
+	            	// Adding checkboxes attributes
+	            	var checkboxesParameters = new Array();
+	            	$('input:checked').each (function (e) {	            	
+	            		checkboxesParameters.push( $(this).attr("id"));	            				            	
+	            		} 
+	            	);	
+	            	data.checkboxes=checkboxesParameters;
+
 	 				return data;
 	         }},
 	         
@@ -237,8 +244,6 @@
 	        "columns": columns 
 	 	});
 	};
-
-
 
 	// On document Load
 	$(document).ready(function() {
@@ -256,6 +261,26 @@
 	    		table = initDatatable();
 			}
 		});
+				
+		// Range sliders listener
+		var slidersCounter = $('.input-slider-range-container').length;
+	    $('.input-slider-range-container').on('change', function(e) {
+	    		    	
+	    	// this change function is called on page load (component js init)
+	    	// This counter ensure the datatble is not drawn on page load
+	    	if (slidersCounter <= 0) {	    		
+				table.draw();				
+	    	} else {
+	    		slidersCounter--;
+	    	}
+	    	
+		});
+
+	    // Checkboxes listener
+	    $('input:checkbox').click(function() { 
+			table.draw();					    	
+	   	});
+		
 	} );
 </script>
 

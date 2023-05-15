@@ -13,7 +13,7 @@ public class GtinInfo {
 	/**
 	 * Manufacturer country, from the gtin
 	 */
-	@Field(index = false, store = false, type = FieldType.Keyword)
+	@Field(index = true, store = false, type = FieldType.Keyword)
 	private String country;
 
 
