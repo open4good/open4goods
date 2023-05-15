@@ -36,6 +36,7 @@ public class DataTableController {
 	@RequestMapping(value="/{vertical:[a-z-]+}/paginated", method=RequestMethod.GET)
 	public DataTableResults<AggregatedData> listUsersPaginated(@PathVariable(name = "vertical") String vertical, HttpServletRequest request, HttpServletResponse response) {
 		
+		
 		DataTableRequest<AggregatedData> dataTableInRQ = new DataTableRequest<AggregatedData>(request);
 		PaginationCriteria pagination = dataTableInRQ.getPaginationRequest();
 		
@@ -49,6 +50,31 @@ public class DataTableController {
 		vRequest.setPageNumber(pagination.getFrom() / pagination.getPageSize() );
 		vRequest.setPageSize( pagination.getPageSize() );
 
+		// Handle sliders value
+		
+		String[] slidersValue = request.getParameterValues("sliders[]");
+		for (String slider : slidersValue) {
+			String[] sliderValues = slider.split(":");
+			
+			if (sliderValues[0].equals("slider-price-minPrice-price")) {
+				// TODO : should have consts shared with javascrippt (vertical-home)
+				vRequest.setMinPrice(Double.valueOf(Math.floor(Double.valueOf(sliderValues[1]).doubleValue())).intValue() );
+				vRequest.setMaxPrice(Double.valueOf(Math.ceil(Double.valueOf(sliderValues[2]).doubleValue() )).intValue() );				
+			} else if (sliderValues[0].equals("slider-offers")) {
+				// TODO : should have consts shared with javascrippt (vertical-home)
+				vRequest.setMinOffers(Double.valueOf(Math.floor(Double.valueOf(sliderValues[1]).doubleValue())).intValue() );
+				vRequest.setMaxOffers(Double.valueOf(Math.ceil(Double.valueOf(sliderValues[2]).doubleValue() )).intValue() );				
+			} else {
+				
+			}
+			
+			
+			
+			
+			
+		}
+		
+		
 		
 		// Sorting
 		if (!pagination.isSortByEmpty()) {
