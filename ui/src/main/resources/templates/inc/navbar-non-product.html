@@ -96,7 +96,7 @@
 			<th:block th:include="inc/navbar-right-icons.html"></th:block>
             */-->				
 
- 			<form method="post" id="navbarSearchForm" action="/recherche">
+ 			<form th:unless="${hideSearch}" method="post" id="navbarSearchForm" action="/recherche">
                    <div class="input-group">
                        <button onclick="document.getElementById('navbarSearchForm').submit()" class="input-group-text" id="navbar-search-icon"><span class="fas fa-search"></span></button>
                        <input name="query" type="text" class="form-control" id="navbar-search" placeholder="Recherche" aria-label="Search" aria-describedby="navbar-search-icon">
