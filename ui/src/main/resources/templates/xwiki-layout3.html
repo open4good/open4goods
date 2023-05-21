@@ -19,11 +19,11 @@
      	<nav id="navbar-main" aria-label="Primary navigation" class="navbar navbar-main navbar-expand-lg navbar-theme-primary headroom navbar-dark navbar-theme-primary">
 			<th:block th:include="inc/navbar-non-product.html"></th:block>
 		</nav>
+        <!--/* Loader */-->
+        <th:block th:include="inc/preloader.html"></th:block>
 	</header>
 	
     <main>	
-        <!--/* Loader */-->
-       <th:block th:include="inc/preloader.html"></th:block>
 		
         <!-- Hero -->
         <section class="section-header bg-primary text-white pb-9 pb-lg-12 mb-4 mb-lg-6">
@@ -64,9 +64,11 @@
 <script src="../../vendor/smooth-scroll/dist/smooth-scroll.polyfills.min.js"></script>
 <script src="../../vendor/vivus/dist/vivus.min.js"></script>
 
+<script src="/webjars/jquery/jquery.min.js"></script>
 <!-- pixel JS -->
 <script src="../../assets/js/pixel.js"></script>
-
+<!-- custom sources -->
+<script src="../../assets/js/pixel-custom.js"></script>
 </body>
 
 </html>

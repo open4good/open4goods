@@ -49,6 +49,12 @@ public class VerticalConfig{
 	 */
 	@JsonMerge
 	private Localisable homeTitle = new Localisable(); 
+
+	/**
+	 * The description on the category section, on the home page
+	 */
+	@JsonMerge
+	private Localisable homeDescription = new Localisable(); 
 	
 	/**
 	 * The image logo on the vertical home page
@@ -567,6 +573,14 @@ public class VerticalConfig{
 
 	public void setHomeUrl(Localisable homeUrl) {
 		this.homeUrl = homeUrl;
+	}
+
+	public Localisable getHomeDescription() {
+		return homeDescription;
+	}
+
+	public void setHomeDescription(Localisable homeDescription) {
+		this.homeDescription = homeDescription;
 	}
 
 	
