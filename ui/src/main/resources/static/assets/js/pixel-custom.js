@@ -1,4 +1,17 @@
+	// NAVBAR SEARCH 
 
+
+$(document).ready(function() {
+	// Product search input
+	if ($('#navbarSearchForm')) {		
+		$('#navbarSearchForm').on("change",function (e) {
+	    	$('#navbarSearchForm').attr("action","/recherche/"+encodeURIComponent($('#navbar-search').val()));
+	    });
+	}
+} );
+
+
+	// UI RANGE SLIDER 
 
 	var rangetimers = {};
 	
@@ -18,6 +31,7 @@
 				start: [parseInt(low.getAttribute('data-range-value-low')), parseInt(e.getAttribute('data-range-value-high'))],
 				connect: !0,
 				tooltips: true,
+				step: 1,
 				range: {
 					min: parseInt(c.getAttribute('data-range-value-min')),
 					max: parseInt(c.getAttribute('data-range-value-max'))

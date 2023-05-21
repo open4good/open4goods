@@ -41,22 +41,17 @@
 
 <header class="header-global">
     <nav id="navbar-main" aria-label="Primary navigation" class="navbar navbar-main navbar-expand-lg navbar-theme-primary headroom navbar-light navbar-transparent navbar-theme-secondary">
-		<th:block th:include="inc/navbar-product.html"></th:block>
+		<th:block th:include="inc/navbar-non-product.html"></th:block>
 	</nav>
+    <!--/* Loader */-->
+    <th:block th:include="inc/preloader.html"></th:block>
+    <!--/* Microdatas */-->
+    <th:block th:include="inc/product-microdatas.html"></th:block>
 </header>
-<main>
-      
-       <!--/* Loader */-->
-       <th:block th:include="inc/preloader.html"></th:block>
 
-       <!--/* Microdatas */-->
-       <th:block th:include="inc/product-microdatas.html"></th:block>
+<main>
 
         <div class="section section-lg pt-5 pt-md-7 bg-gray-200">
-        
-
-
-			
 			        
             <div class="container">
 				<div class="card shadow p-4">
@@ -161,6 +156,8 @@
 
 <!-- pixel JS -->
 <script src="../../assets/js/pixel.js"></script>
+<!-- custom sources -->
+<script src="../../assets/js/pixel-custom.js"></script>
 <script>
 $(document).ready(function() {
 	if (($("#offersTable")).length) {

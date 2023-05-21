@@ -32,9 +32,7 @@
 	                        <!--/* equipe */-->
 	                        <a th:if="${url.endsWith('/equipe')}" th:href="${url}" class="nav-link dropdown-toggle" id="frontPagesDropdown" aria-expanded="false" data-bs-toggle="dropdown">Equipe<span class="fas fa-angle-down nav-link-arrow ms-1"></span></a>
 						</th:block>	
-                        
-                        
-                        
+                                                                        
                         <div class="dropdown-menu dropdown-megamenu px-0 py-2 p-lg-4" aria-labelledby="frontPagesDropdown">
                             <div class="row">
                                 <div class="col-6 col-lg-4">
@@ -89,17 +87,24 @@
                                                                 
                             </div>
                         </div>
-                    </li>
-
-
-                                        
+                    </li>           
                 </ul>
-
             </div>
-            
+                
             
             <!--/* Right icons 
 			<th:block th:include="inc/navbar-right-icons.html"></th:block>
             */-->				
+
+ 			<form method="post" id="navbarSearchForm" action="/recherche">
+                   <div class="input-group">
+                       <button onclick="document.getElementById('navbarSearchForm').submit()" class="input-group-text" id="navbar-search-icon"><span class="fas fa-search"></span></button>
+                       <input name="query" type="text" class="form-control" id="navbar-search" placeholder="Recherche" aria-label="Search" aria-describedby="navbar-search-icon">
+                   </div>
+             </form>
+            
+		      <button class="navbar-toggler ms-2" type="button" data-bs-toggle="collapse" data-bs-target="#navbar_global" aria-controls="navbar_global" aria-expanded="false" th:aria-label="#{site.navigation.toggle}">
+		          <span class="navbar-toggler-icon"></span>
+		      </button>               
             
         </div>
