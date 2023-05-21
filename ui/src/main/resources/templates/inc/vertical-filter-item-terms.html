@@ -6,7 +6,7 @@
 				<th:block th:text="${title}"></th:block>
 			</button>
 		  </h2>
-		  <div th:id="'collapse'+${id}" class="accordion-collapse collapse" th:attr="aria-labelledby='heading'+${id}" data-bs-parent="#accordionFilter">
+		  <div th:id="'collapse'+${id}" class="accordion-collapse collapse" th:attr="aria-labelledby='heading'+${id},data-bs-parent='#'+${accordionId}">
 			<div class="accordion-body">
 						   
 			   <div th:if="${label}" th:text="${label}" class="alert" th:classappend="${labelType}" role="alert"></div>
