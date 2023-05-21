@@ -75,10 +75,14 @@ public class VerticalConfig{
 	private List<String> verticalFilters = new ArrayList<>();
 	
 	/**
-	 * The categories to associate to this vertical
+	 * The categories that MUST BE PRESENT to associate to this vertical
 	 */
 	private Set<String> matchingCategories = new HashSet<>();
-	
+
+	/**
+	 * The categories that MUST NOT BE PRESENT to associate to this vertical
+	 */
+	private Set<String> unmatchingCategories = new HashSet<>();
 	
 						
 	/**
@@ -581,6 +585,14 @@ public class VerticalConfig{
 
 	public void setHomeDescription(Localisable homeDescription) {
 		this.homeDescription = homeDescription;
+	}
+
+	public Set<String> getUnmatchingCategories() {
+		return unmatchingCategories;
+	}
+
+	public void setUnmatchingCategories(Set<String> unmatchingCategories) {
+		this.unmatchingCategories = unmatchingCategories;
 	}
 
 	

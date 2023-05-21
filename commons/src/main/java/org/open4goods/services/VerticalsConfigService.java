@@ -161,10 +161,35 @@ public class VerticalsConfigService {
 	 * @return
 	 * @throws IOException
 	 */
-	public VerticalConfig getVerticalForCategoryName(String category) {
-		return categoriesToVertical.get(category);
+	public VerticalConfig getVerticalForCategories(Set<String> categories) {
+
+
+		VerticalConfig vc = null;
+		
+		for (String category : categories) {
+			vc = categoriesToVertical.get(category);
+	
+			// Discarding if unmatching category			
+			if (null != vc) {
+				if (vc.getUnmatchingCategories().contains(category)) {
+					vc = null;
+				}
+			}
+			
+			if (null != vc) {
+				break;
+			}
+		}
+		
+		return vc;
+		
 		
 	}
+	
+	
+
+	
+	
 	
 	/**
 	 * Return the language for a vertical path, if any
@@ -224,6 +249,8 @@ public class VerticalsConfigService {
 	public Map<String, VerticalConfig> getConfigs() {
 		return configs;
 	}
+
+
 
 
 

@@ -121,9 +121,7 @@ public class BatchAggregationService  {
 
 		services.add(new AttributeAggregationService(config.getAttributesConfig(), apiProperties.logsFolder()));
 
-		
-
-		
+				
 		final BatchedAggregator ret = new BatchedAggregator(services);
 
 		autowireBeanFactory.autowireBean(ret);

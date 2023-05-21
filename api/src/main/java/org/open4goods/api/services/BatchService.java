@@ -77,7 +77,7 @@ public class BatchService {
 			// Warning, full vertical load
 			// TODO : Max from conf
 			
-			Set<AggregatedData> datas = dataRepository.exportVertical(vertical.getId(),1000).collect(Collectors.toSet());
+			Set<AggregatedData> datas = dataRepository.exportVertical(vertical.getId(),1000000).collect(Collectors.toSet());
 			
 			agg.beforeStart(datas);
 
@@ -117,9 +117,8 @@ public class BatchService {
 		dataRepository.exportAll().forEach(e -> {
 		
 			// Getting the config for the category, if any
-			for (String cat : e.getDatasourceCategories()) {
-				
-				VerticalConfig vConf = verticalsService.getVerticalForCategoryName(cat);
+
+				VerticalConfig vConf = verticalsService.getVerticalForCategories(e.getDatasourceCategories());
 				
 				if (null != vConf) {
 					// We have a match. Associate vertical ID annd save
@@ -138,7 +137,6 @@ public class BatchService {
 					dataRepository.index(e);
 				}
 				
-			}
 		});
 		dedicatedLogger.info("End batch verticalisation");		
 		
