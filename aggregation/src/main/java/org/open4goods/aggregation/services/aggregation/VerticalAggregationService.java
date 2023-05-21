@@ -25,12 +25,15 @@ public class VerticalAggregationService extends AbstractAggregationService {
 	@Override
 	public void onDataFragment(final DataFragment input, final AggregatedData output) {
 
-		if (!StringUtils.isEmpty(input.getCategory())) {
+		String category = input.getCategory();
+		
+		
+		if (!StringUtils.isEmpty(category)) {
 			
-			output.getDatasourceCategories().add(input.getCategory());
+			output.getDatasourceCategories().add(category);
 			
 			// Adding vertical
-			VerticalConfig vertical = verticalService.getVerticalForCategoryName(input.getCategory());	
+			VerticalConfig vertical = verticalService.getVerticalForCategories(output.getDatasourceCategories());	
 			
 			if (null != vertical) {
 				if ( null != output.getVertical() && !vertical.getId().equals(output.getVertical())) {
