@@ -28,7 +28,12 @@ public class VerticalAggregationService extends AbstractAggregationService {
 		if (!StringUtils.isEmpty(input.getCategory())) {
 			
 			// Adding datasource category
-			output.getDatasourceCategories().add(input.getCategory());
+			if (StringUtils.isEmpty(input.getCategory())) {
+				dedicatedLogger.warn("No category for {}", input);
+			} else {
+				output.getDatasourceCategories().add(input.getCategory());
+				
+			}
 	
 			// Adding vertical
 			VerticalConfig vertical = verticalService.getVerticalForCategoryName(input.getCategory());	
