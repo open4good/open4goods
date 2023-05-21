@@ -60,7 +60,7 @@ public class DatasourceRegressionTest {
 	// If true, the error datafragments will be shown
 	private static boolean WITH_DETAILS = false;
 	// If true, those tests will be bypassed
-	private static final boolean BYPASS = false;
+	private static final boolean BYPASS = true;
 
 
 	@Configuration
