@@ -10,7 +10,7 @@
                         </aside> <!-- col.// -->
                         <div class="col-md-6">
                             <div class="info-main">
-                                <a href="#" class="h5 title">{{name}}</a>
+                                <a href="{{productUrl}}" class="h5 title">{{data.attributes.referentielAttributes.BRAND}} - {{name}}</a>
                                 <div class="d-flex my-3">
                                     <span class="star fas fa-star text-warning me-1"></span> 
                                     <span class="star fas fa-star text-warning me-1"></span> 
@@ -18,25 +18,24 @@
                                     <span class="star fas fa-star text-warning me-1"></span> 
                                     <span class="star fas fa-star text-warning"></span> 
                                     <span class="badge badge-pill badge-gray ms-2">4.7</span>
-                                    <span class="small text-success ms-3"><span class="fas fa-shopping-cart me-1"></span>150 orders</span>
+                                    <span class="small text-success ms-3"><span class="fas fa-shopping-cart me-1"></span>{{data.offersCount}} offre(s)</span>
                                 </div>
                                 <p>Monitor your health. Track your workouts. Get the motivation you need to achieve your fitness goals. And stay connected to the people and information you care about.</p>
                             </div>
                         </div> 
                         <div class="col-12 col-md-3">
                             <div class="d-flex align-items-center">
-                                <span class="h5 mb-0 text-gray text-through me-2">
-                                    $299.00
+                                <span class="h5 mb-0 text-danger me-2">
+                                    {{data.price.minPrice.price}} {{data.price.minPrice.currency}}
                                 </span>
-                                <span class="h6 mb-0 text-danger">$199.00</span>
                             </div> <!-- info-price-detail // -->
-                            <span class="text-success small"><span class="fas fa-shipping-fast me-1"></span>Free shipping</span>
+                            <span class="text-success small"><span class="fas fa-shopping-cart me-1"></span>Compensation : {{data.price.minPrice.compensation}} {{data.price.minPrice.currency}}</span>
                             <div class="d-grid gap-2 mt-4">
-                                <a class="btn btn-tertiary btn-sm" href="#">
+                                <a class="btn btn-tertiary btn-sm" href="{{productUrl}}">
                                     Details
                                 </a>
                                 <a href="#" class="btn btn-tertiary btn-sm"><span class="fa fa-heart me-1"></span> 
-                                    Wishlist
+                                    Acheter
                                 </a>
                             </div>
                             
