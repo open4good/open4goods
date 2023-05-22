@@ -44,11 +44,13 @@ public class VerticalAggregationService extends AbstractAggregationService {
 			}		
 		} else {
 			dedicatedLogger.warn("No category for {}", input);
-			
-			if (output.getDatasourceCategories().size() == 0) {
-				dedicatedLogger.warn("No category in {}, removing vertical", output);
-				output.setVertical(null);
-			}
 		}
+
+		// Setting no vertical if no category
+		if (output.getDatasourceCategories().size() == 0) {
+			dedicatedLogger.warn("No category in {}, removing vertical", output);
+			output.setVertical(null);
+		}
+	
 	}
 }
