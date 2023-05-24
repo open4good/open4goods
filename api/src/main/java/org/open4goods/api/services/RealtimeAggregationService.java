@@ -10,14 +10,11 @@ import org.open4goods.aggregation.AbstractAggregationService;
 import org.open4goods.aggregation.aggregator.RealTimeAggregator;
 import org.open4goods.aggregation.services.aggregation.AttributeAggregationService;
 import org.open4goods.aggregation.services.aggregation.BarCodeAggregationService;
-import org.open4goods.aggregation.services.aggregation.CommentsAggregationService;
 import org.open4goods.aggregation.services.aggregation.DescriptionsAggregationService;
 import org.open4goods.aggregation.services.aggregation.IdAggregationService;
 import org.open4goods.aggregation.services.aggregation.MediaAggregationService;
 import org.open4goods.aggregation.services.aggregation.NamesAggregationService;
 import org.open4goods.aggregation.services.aggregation.PriceAggregationService;
-import org.open4goods.aggregation.services.aggregation.ProsAndConsAggregationService;
-import org.open4goods.aggregation.services.aggregation.QuestionsAggregationService;
 import org.open4goods.aggregation.services.aggregation.VerticalAggregationService;
 import org.open4goods.api.config.yml.ApiProperties;
 import org.open4goods.config.yml.ui.VerticalConfig;
@@ -159,9 +156,9 @@ public class RealtimeAggregationService {
 
 		services.add(new PriceAggregationService(apiProperties.logsFolder(), dataSourceConfigService,config.getSegment()));
 
-		services.add(new CommentsAggregationService(apiProperties.logsFolder(), config.getCommentsConfig()));
-		services.add(new ProsAndConsAggregationService(apiProperties.logsFolder()));
-		services.add(new QuestionsAggregationService(apiProperties.logsFolder()));
+//		services.add(new CommentsAggregationService(apiProperties.logsFolder(), config.getCommentsConfig()));
+//		services.add(new ProsAndConsAggregationService(apiProperties.logsFolder()));
+//		services.add(new QuestionsAggregationService(apiProperties.logsFolder()));
 
 		services.add(new DescriptionsAggregationService(config.getDescriptionsAggregationConfig(),
 				apiProperties.logsFolder()));

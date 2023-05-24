@@ -32,7 +32,9 @@ public class AggregatedPrices implements Standardisable {
 	// 2 -> Decreasing
 	private Integer trend= 0;
 	
-	
+	@Field(index = true, store = false, type = FieldType.Boolean)
+	// True if contains at least 1 offer with OCCASION ProductState
+	private Boolean hasOccasion = false;
 	
 	
 //	@Field(index = false, store = false, type = FieldType.Object)
@@ -125,6 +127,14 @@ public class AggregatedPrices implements Standardisable {
 
 	public void setTrend(Integer trend) {
 		this.trend = trend;
+	}
+
+	public Boolean getHasOccasion() {
+		return hasOccasion;
+	}
+
+	public void setHasOccasion(Boolean hasOccasion) {
+		this.hasOccasion = hasOccasion;
 	}
 
 //	public AggregatedPrice getMaxPrice() {

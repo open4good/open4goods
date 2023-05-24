@@ -4,7 +4,6 @@ import java.util.List;
 
 import org.open4goods.aggregation.AbstractAggregationService;
 import org.open4goods.exceptions.AggregationSkipException;
-import org.open4goods.model.aggregation.ParticipantData;
 import org.open4goods.model.data.DataFragment;
 import org.open4goods.model.product.AggregatedData;
 import org.slf4j.Logger;
@@ -55,12 +54,12 @@ public class RealTimeAggregator extends AbstractAggregator {
 		}
 
 		// Computing the participant data
-		final ParticipantData pd = new ParticipantData();
-		pd.setDataUrl(fragment.affiliatedUrlIfPossible());
-		pd.setProviderName(fragment.getDatasourceConfigName());
+//		final ParticipantData pd = new ParticipantData();
+//		pd.setDataUrl(fragment.affiliatedUrlIfPossible());
+//		pd.setProviderName(fragment.getDatasourceConfigName());
 
 	
-		data.getAggregationResult().getParticipantDatas().add(pd);
+//		data.getAggregationResult().getParticipantDatas().add(pd);
 
 		return data;
 	}

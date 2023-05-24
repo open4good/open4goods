@@ -17,12 +17,6 @@ public class AggregatedAttributes  {
 	@Field(index = true, store = false, type = FieldType.Object)
 	private Map<ReferentielKey, String> referentielAttributes = new HashMap<>();
 
-	
-	//TODO : Remove in further import / export
-//	@Field(index = false, store = false, type = FieldType.Object)
-//	private Set<AggregatedAttribute> attributes = new HashSet<>();
-//
-//	
 	@Field(index = true, store = false, type = FieldType.Object)
 	private Map<String,AggregatedAttribute> aggregatedAttributes = new HashMap<>();
 	

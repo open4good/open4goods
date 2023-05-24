@@ -143,13 +143,18 @@ public class PriceAggregationService extends AbstractAggregationService {
 					// Price has decreased
 					aggPrices.setTrend(-1);
 				}
-			}
-			
+			}			
 		}
 		
 		
+		
+		aggPrices.setHasOccasion(aggPrices.getOffers().stream().anyMatch(i -> i.getProductState().equals(ProductState.OCCASION)));
 		// Setting the result
 		aggregatedData.setPrice(aggPrices);
+		
+		// Setting if has an occasion offer
+		
+		
 
 	}
 
