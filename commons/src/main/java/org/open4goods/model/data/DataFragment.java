@@ -127,15 +127,7 @@ public class DataFragment implements Standardisable, Validable {
 	 * AggregatedData data productTags
 	 */
 	@Field(index = false, store = false, type = FieldType.Text)
-	//TODO(gof) : rename to category
-	@JsonAlias("productTags")
 	private String category;
-	
-	/**
-	 * The category in raw form
-	 */
-	private String productCategory;
-	
 
 	/** The different ratings **/
 	@Field(index = false, store = false, type = FieldType.Object)
@@ -828,11 +820,8 @@ public class DataFragment implements Standardisable, Validable {
 		}
 
 		this.category = IdHelper.getCategoryName(category.trim().toUpperCase());
-
-		this.productCategory = category;
 		
-		
-		
+				
 	}
 
 	public void addDescription(final String description, final String language) {
@@ -1450,14 +1439,6 @@ public class DataFragment implements Standardisable, Validable {
 
 	public void setCreationDate(Long creationDate) {
 		this.creationDate = creationDate;
-	}
-
-	public String getProductCategory() {
-		return productCategory;
-	}
-
-	public void setProductCategory(String productCategory) {
-		this.productCategory = productCategory;
 	}
 
 }
