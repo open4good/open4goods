@@ -28,7 +28,7 @@ public class VerticalAggregationService extends AbstractAggregationService {
 		String category = input.getCategory();
 		
 		
-		if (!StringUtils.isEmpty(category)) {
+		if (!StringUtils.isBlank(category)) {
 			
 			output.getDatasourceCategories().add(category);
 			
