@@ -162,7 +162,7 @@ public class IdHelper {
 //		
 //		String retu = StringUtils.join(frags,">");
 
-		return StringUtils.normalizeSpace(name).trim().toUpperCase();
+		return StringUtils.stripAccents(StringUtils.normalizeSpace(name).toUpperCase()).trim();
 
 	}
 
