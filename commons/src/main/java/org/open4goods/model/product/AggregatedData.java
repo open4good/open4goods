@@ -11,17 +11,11 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
-import org.open4goods.exceptions.ResourceNotFoundException;
 import org.open4goods.model.Standardisable;
-import org.open4goods.model.aggregation.AggregationResult;
 import org.open4goods.model.constants.Currency;
 import org.open4goods.model.constants.ProviderType;
 import org.open4goods.model.constants.ReferentielKey;
 import org.open4goods.model.data.Description;
-import org.open4goods.model.data.ProsOrCons;
-import org.open4goods.model.data.Question;
-import org.open4goods.model.data.Rating;
-import org.open4goods.model.data.RatingType;
 import org.open4goods.model.data.Resource;
 import org.open4goods.services.StandardiserService;
 import org.slf4j.Logger;
@@ -76,9 +70,9 @@ public class AggregatedData implements Standardisable {
 //	@Field(index = true, store = false, type = FieldType.Object)
 //	private Urls urls = new Urls();
 
-	@Field(index = false, store = false, type = FieldType.Object)
-	/** The comments, aggregated and nlp processed **/
-	private AggregatedComments comments = new AggregatedComments();
+//	@Field(index = false, store = false, type = FieldType.Object)
+//	/** The comments, aggregated and nlp processed **/
+//	private AggregatedComments comments = new AggregatedComments();
 
 	@Field(index = false, store = false, type = FieldType.Object)
 	private AggregatedAttributes attributes = new AggregatedAttributes();
@@ -112,29 +106,21 @@ public class AggregatedData implements Standardisable {
 	 */
 	@Field(index = true, store = false, type = FieldType.Keyword)
 	private Set<String> datasourceCategories = new HashSet<>();
-
-	/**
-	 * The sets of Google taxonomy resolved id's
-	 */
-	@Field(index = true, store = false, type = FieldType.Keyword)
-	private Set<Integer> googleTaxonomyIds = new HashSet<>();
-
 	
-	
-	/**
-	 * All the ratings
-	 */
-	@Field(index = false, store = false, type = FieldType.Object)
-	private Set<SourcedRating> ratings = new HashSet<>();
+//	/**
+//	 * All the ratings
+//	 */
+//	@Field(index = false, store = false, type = FieldType.Object)
+//	private Set<SourcedRating> ratings = new HashSet<>();
 
-	@Field(index = false, store = false, type = FieldType.Object)
-	private Set<Question> questions = new HashSet<>();
-
-	@Field(index = false, store = false, type = FieldType.Object)
-	private Set<ProsOrCons> pros = new HashSet<>();
-
-	@Field(index = false, store = false, type = FieldType.Object)
-	private Set<ProsOrCons> cons = new HashSet<>();
+//	@Field(index = false, store = false, type = FieldType.Object)
+//	private Set<Question> questions = new HashSet<>();
+//
+//	@Field(index = false, store = false, type = FieldType.Object)
+//	private Set<ProsOrCons> pros = new HashSet<>();
+//
+//	@Field(index = false, store = false, type = FieldType.Object)
+//	private Set<ProsOrCons> cons = new HashSet<>();
 
 
 	//////////////////// :
@@ -145,11 +131,11 @@ public class AggregatedData implements Standardisable {
 	private Integer offersCount = 0;
 
 
-	/**
-	 * Informations about participant datas and aggegation process
-	 */
-	@Field(index = false, store = false, type = FieldType.Object)
-	private AggregationResult aggregationResult = new AggregationResult();
+//	/**
+//	 * Informations about participant datas and aggegation process
+//	 */
+//	@Field(index = false, store = false, type = FieldType.Object)
+//	private AggregationResult aggregationResult = new AggregationResult();
 
 	public AggregatedData() {
 		super();
@@ -230,35 +216,35 @@ public class AggregatedData implements Standardisable {
 		return price == null ? null : price.getMinPrice();
 	}
 
-	/**
-	 * Return ratings having specific tags
-	 * 
-	 * @param tag
-	 * @return
-	 */
-	public Set<SourcedRating> ratingsByTag(final String tag) {
+//	/**
+//	 * Return ratings having specific tags
+//	 * 
+//	 * @param tag
+//	 * @return
+//	 */
+//	public Set<SourcedRating> ratingsByTag(final String tag) {
+//
+//		if (null == tag || null == ratings) {
+//			return null;
+//		}
+//
+//		return ratings.stream().filter(e -> e.getTags().contains(tag)).collect(Collectors.toSet());
+//	}
 
-		if (null == tag || null == ratings) {
-			return null;
-		}
-
-		return ratings.stream().filter(e -> e.getTags().contains(tag)).collect(Collectors.toSet());
-	}
-
-	/**
-	 * Return a rating having specific tags
-	 * 
-	 * @param tag
-	 * @return
-	 */
-	public SourcedRating ratingByTag(final String tag) {
-
-		if (null == tag || null == ratings) {
-			return null;
-		}
-
-		return ratings.stream().filter(e -> e.getTags().contains(tag)).findAny().orElse(null);
-	}
+//	/**
+//	 * Return a rating having specific tags
+//	 * 
+//	 * @param tag
+//	 * @return
+//	 */
+//	public SourcedRating ratingByTag(final String tag) {
+//
+//		if (null == tag || null == ratings) {
+//			return null;
+//		}
+//
+//		return ratings.stream().filter(e -> e.getTags().contains(tag)).findAny().orElse(null);
+//	}
 
 	/**
 	 * 
@@ -268,15 +254,15 @@ public class AggregatedData implements Standardisable {
 		return alternativeIds.size() > 0;
 	}
 
-	/**
-	 * Return all the specific ratings
-	 *
-	 * @return
-	 * @throws ResourceNotFoundException
-	 */
-	public Set<Rating> ratings(final RatingType ratingType) {
-		return ratings.stream().filter(e -> e.getTags().contains(ratingType.toString())).collect(Collectors.toSet());
-	}
+//	/**
+//	 * Return all the specific ratings
+//	 *
+//	 * @return
+//	 * @throws ResourceNotFoundException
+//	 */
+//	public Set<Rating> ratings(final RatingType ratingType) {
+//		return ratings.stream().filter(e -> e.getTags().contains(ratingType.toString())).collect(Collectors.toSet());
+//	}
 
 	public List<Description> reviewsDescriptions() {
 		return descriptions.stream().filter(d -> d.getProviderType() == ProviderType.CONTENT_PROVIDER)
@@ -520,45 +506,15 @@ public class AggregatedData implements Standardisable {
 		this.descriptions = descriptions;
 	}
 
-	public Set<ProsOrCons> getPros() {
-		return pros;
-	}
 
-	public void setPros(final Set<ProsOrCons> pros) {
-		this.pros = pros;
-	}
+//	public AggregatedComments getComments() {
+//		return comments;
+//	}
+//
+//	public void setComments(AggregatedComments comments) {
+//		this.comments = comments;
+//	}
 
-	public Set<ProsOrCons> getCons() {
-		return cons;
-	}
-
-	public void setCons(final Set<ProsOrCons> cons) {
-		this.cons = cons;
-	}
-
-	public Set<SourcedRating> getRatings() {
-		return ratings;
-	}
-
-	public void setRatings(Set<SourcedRating> ratings) {
-		this.ratings = ratings;
-	}
-
-	public AggregatedComments getComments() {
-		return comments;
-	}
-
-	public void setComments(AggregatedComments comments) {
-		this.comments = comments;
-	}
-
-	public Set<Question> getQuestions() {
-		return questions;
-	}
-
-	public void setQuestions(final Set<Question> questions) {
-		this.questions = questions;
-	}
 
 	public Integer getOffersCount() {
 		return offersCount;
@@ -576,14 +532,6 @@ public class AggregatedData implements Standardisable {
 
 	public void setAlternativeIds(final Set<String> alternativeIds) {
 		this.alternativeIds = alternativeIds;
-	}
-
-	public AggregationResult getAggregationResult() {
-		return aggregationResult;
-	}
-
-	public void setAggregationResult(final AggregationResult aggregationResult) {
-		this.aggregationResult = aggregationResult;
 	}
 
 
@@ -627,14 +575,6 @@ public class AggregatedData implements Standardisable {
 
 	public void setCreationDate(Long creationDate) {
 		this.creationDate = creationDate;
-	}
-
-	public Set<Integer> getGoogleTaxonomyIds() {
-		return googleTaxonomyIds;
-	}
-
-	public void setGoogleTaxonomyIds(Set<Integer> googleTaxonomyIds) {
-		this.googleTaxonomyIds = googleTaxonomyIds;
 	}
 
 	public Description getHumanDescription() {

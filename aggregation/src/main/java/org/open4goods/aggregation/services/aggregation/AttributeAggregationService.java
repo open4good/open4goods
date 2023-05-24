@@ -24,15 +24,12 @@ import org.open4goods.model.attribute.Attribute;
 import org.open4goods.model.attribute.AttributeType;
 import org.open4goods.model.constants.ReferentielKey;
 import org.open4goods.model.data.DataFragment;
-import org.open4goods.model.data.RatingType;
 import org.open4goods.model.product.AggregatedAttribute;
 import org.open4goods.model.product.AggregatedAttributes;
 import org.open4goods.model.product.AggregatedData;
 import org.open4goods.model.product.AggregatedFeature;
 import org.open4goods.model.product.IAttribute;
 import org.open4goods.model.product.SourcedAttribute;
-import org.open4goods.model.product.SourcedRating;
-import org.open4goods.services.StandardiserService;
 
 public class AttributeAggregationService extends AbstractAggregationService {
 
@@ -520,66 +517,66 @@ public class AttributeAggregationService extends AbstractAggregationService {
 
 	
 	
-	/**
-	 * Derivated attributes that have to be into ratings
-	 * 
-	 * @param ret
-	 */
-	public Set<SourcedRating> generateRatingFromAttributes(Collection<AggregatedAttribute> collection) {
-		
-		Set<SourcedRating> ratings = new HashSet<>();
-		
-		for (AggregatedAttribute a : collection) {
-			AttributeConfig ac = attributeConfig.getAttributeConfigByKey(a.getName());
-
-			if (null == ac ) {
-				dedicatedLogger.error("Was asking to  translate {} into rating, but no AttributeConfiguration found !",a); 
-				continue;
-			}
-			
-			if ( ac.isAsRating()) {
-
-				// transformation required
-				if (ac.getNumericMapping().size() > 0) {
-					try {
-						// This is a numeric mapping
-						SourcedRating r = new SourcedRating();
-						
-						r.setMax(ac.maxRating());											
-						r.setMin(ac.minRating().intValue());
-						
-						r.setValue(ac.getNumericMapping().get(a.getValue()));
-						
-						if (null == r.getValue()) {
-							dedicatedLogger.warn("No matching found in numericMappings for attribute {} and value  {}",ac,a.getValue());	
-							continue;
-						}
-						
-
-						// tags
-						r.getTags().addAll(ac.getRatingTags());
-						r.getTags().add(RatingType.FROM_ATTRIBUTE.toString());
-						
-						// Standardization (re-scaling)
-						StandardiserService.standariseRating(r);
-						
-						// Adding
-						ratings.add(r);
-
-					} catch (NoSuchFieldException | ValidationException e) {
-						dedicatedLogger.warn("Attribute to rating conversion failed : {}",e.getMessage());						
-					} 
-					
-				} else {
-					dedicatedLogger.error("Was asking to  translate {} into rating, but no numericMapping definition !",a); 
-				}
-			}
-		}
-		
-		
-		
-		return ratings;
-	}
+//	/**
+//	 * Derivated attributes that have to be into ratings
+//	 * 
+//	 * @param ret
+//	 */
+//	public Set<SourcedRating> generateRatingFromAttributes(Collection<AggregatedAttribute> collection) {
+//		
+//		Set<SourcedRating> ratings = new HashSet<>();
+//		
+//		for (AggregatedAttribute a : collection) {
+//			AttributeConfig ac = attributeConfig.getAttributeConfigByKey(a.getName());
+//
+//			if (null == ac ) {
+//				dedicatedLogger.error("Was asking to  translate {} into rating, but no AttributeConfiguration found !",a); 
+//				continue;
+//			}
+//			
+//			if ( ac.isAsRating()) {
+//
+//				// transformation required
+//				if (ac.getNumericMapping().size() > 0) {
+//					try {
+//						// This is a numeric mapping
+//						SourcedRating r = new SourcedRating();
+//						
+//						r.setMax(ac.maxRating());											
+//						r.setMin(ac.minRating().intValue());
+//						
+//						r.setValue(ac.getNumericMapping().get(a.getValue()));
+//						
+//						if (null == r.getValue()) {
+//							dedicatedLogger.warn("No matching found in numericMappings for attribute {} and value  {}",ac,a.getValue());	
+//							continue;
+//						}
+//						
+//
+//						// tags
+//						r.getTags().addAll(ac.getRatingTags());
+//						r.getTags().add(RatingType.FROM_ATTRIBUTE.toString());
+//						
+//						// Standardization (re-scaling)
+//						StandardiserService.standariseRating(r);
+//						
+//						// Adding
+//						ratings.add(r);
+//
+//					} catch (NoSuchFieldException | ValidationException e) {
+//						dedicatedLogger.warn("Attribute to rating conversion failed : {}",e.getMessage());						
+//					} 
+//					
+//				} else {
+//					dedicatedLogger.error("Was asking to  translate {} into rating, but no numericMapping definition !",a); 
+//				}
+//			}
+//		}
+//		
+//		
+//		
+//		return ratings;
+//	}
 
 
 

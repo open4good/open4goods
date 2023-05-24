@@ -144,22 +144,22 @@ public class TestUrl {
 //
 		}
 
-		if (null != ratings) {
-			for (final Entry<RatingType, RatingsExpectedResult> ratingsEs : ratings.entrySet()) {
-				if (null == data.ratings(ratingsEs.getKey().toString())) {
-					ret.addMessage("Was expecting "+ratingsEs.getKey()+"ratings");
-				} else {
-					if (null == ratingsEs.getValue()) {
-						final Rating tmp = data.rating(ratingsEs.getKey());
-						if (null == tmp ) {
-							ret.addMessage("No "+ratingsEs.getKey()+" ratings ");
-						}
-					} else {
-						ratingsEs.getValue().test(data.rating(ratingsEs.getKey()),ratingsEs.getKey(),ret);
-					}
-				}
-			}
-		}
+//		if (null != ratings) {
+//			for (final Entry<RatingType, RatingsExpectedResult> ratingsEs : ratings.entrySet()) {
+//				if (null == data.ratings(ratingsEs.getKey().toString())) {
+//					ret.addMessage("Was expecting "+ratingsEs.getKey()+"ratings");
+//				} else {
+//					if (null == ratingsEs.getValue()) {
+//						final Rating tmp = data.rating(ratingsEs.getKey());
+//						if (null == tmp ) {
+//							ret.addMessage("No "+ratingsEs.getKey()+" ratings ");
+//						}
+//					} else {
+//						ratingsEs.getValue().test(data.rating(ratingsEs.getKey()),ratingsEs.getKey(),ret);
+//					}
+//				}
+//			}
+//		}
 
 
 		if (null != questions) {
@@ -299,19 +299,19 @@ public class TestUrl {
 		this.resources = resources;
 	}
 
-
-
-
-	public Map<RatingType, RatingsExpectedResult> getRatings() {
-		return ratings;
-	}
-
-
-
-
-	public void setRatings(final Map<RatingType, RatingsExpectedResult> ratings) {
-		this.ratings = ratings;
-	}
+//
+//
+//
+//	public Map<RatingType, RatingsExpectedResult> getRatings() {
+//		return ratings;
+//	}
+//
+//
+//
+//
+//	public void setRatings(final Map<RatingType, RatingsExpectedResult> ratings) {
+//		this.ratings = ratings;
+//	}
 
 
 
