@@ -10,6 +10,7 @@ import java.util.stream.Collectors;
 
 import org.open4goods.model.Standardisable;
 import org.open4goods.model.constants.Currency;
+import org.open4goods.model.constants.ProductState;
 import org.open4goods.services.StandardiserService;
 import org.springframework.data.elasticsearch.annotations.Field;
 import org.springframework.data.elasticsearch.annotations.FieldType;
@@ -32,9 +33,9 @@ public class AggregatedPrices implements Standardisable {
 	// 2 -> Decreasing
 	private Integer trend= 0;
 	
-	@Field(index = true, store = false, type = FieldType.Boolean)
-	// True if contains at least 1 offer with OCCASION ProductState
-	private Boolean hasOccasion = false;
+	@Field(index = true, store = false, type = FieldType.Keyword)
+	// Contains the conditions for this product
+	private Set<ProductState> conditions = new HashSet<>();
 	
 	
 //	@Field(index = false, store = false, type = FieldType.Object)
@@ -129,13 +130,16 @@ public class AggregatedPrices implements Standardisable {
 		this.trend = trend;
 	}
 
-	public Boolean getHasOccasion() {
-		return hasOccasion;
+	public Set<ProductState> getConditions() {
+		return conditions;
 	}
 
-	public void setHasOccasion(Boolean hasOccasion) {
-		this.hasOccasion = hasOccasion;
+	public void setConditions(Set<ProductState> conditions) {
+		this.conditions = conditions;
 	}
+
+
+
 
 //	public AggregatedPrice getMaxPrice() {
 //		return maxPrice;
