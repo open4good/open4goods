@@ -126,41 +126,7 @@ public class IdHelper {
 		if (StringUtils.isBlank(name)) {
 			return null;
 		}
-//		final StringBuilder ret = new StringBuilder(name.length());
-//		boolean trimMode = false;
-//		for (final char c : name.toCharArray()) {
-//
-//			if (Character.isLetter(c) || Character.isDigit(c)) {
-//				ret.append(Character.toUpperCase(c));
-//				trimMode = true;
-//			} else if (c == ' ') {
-//				ret.append(c);
-//			} else {
-//				if (trimMode) {
-//					ret.append(">");
-//					trimMode = false;
-//				}
-//			}
-//		}
-//
-//		
-//		// Splitting upons delimiter
-//		List<String> frags = Arrays.asList(ret.toString().split(">")).stream()
-//				.filter(e -> !StringUtils.isBlank(e))
-//				.collect(Collectors.toList());
-//		
-//		// Trimming categories		
-//		if (frags.size() > MAX_CATEGORIES) {			
-//			frags = frags .subList(frags.size()-MAX_CATEGORIES, frags.size());
-//		}
-//		
-//		// Normalizing spaces / accents
-//		frags = frags.stream()
-//			.map(e -> StringUtils.normalizeSpace(e))
-//			.map(e -> StringUtils.stripAccents(e))
-//			.collect(Collectors.toList());
-//		
-//		String retu = StringUtils.join(frags,">");
+
 
 		return StringUtils.stripAccents(StringUtils.normalizeSpace(name).toUpperCase()).trim();
 
