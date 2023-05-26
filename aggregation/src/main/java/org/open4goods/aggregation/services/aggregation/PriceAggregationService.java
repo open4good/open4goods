@@ -147,8 +147,11 @@ public class PriceAggregationService extends AbstractAggregationService {
 		}
 		
 		
+		// Setting the product state summary
+		aggPrices.getOffers().stream().forEach(i -> {
+			aggPrices.getConditions().add(i.getProductState());
+		});
 		
-		aggPrices.setHasOccasion(aggPrices.getOffers().stream().anyMatch(i -> i.getProductState().equals(ProductState.OCCASION)));
 		// Setting the result
 		aggregatedData.setPrice(aggPrices);
 		
