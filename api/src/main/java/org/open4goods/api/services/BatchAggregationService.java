@@ -79,12 +79,6 @@ public class BatchAggregationService  {
 		
 		
 		this.aggregator = getAggregator(configService.getConfigById(VerticalsConfigService.MAIN_VERTICAL_NAME).get());
-		
-		// Initializing index
-		aggregatedDataRepository.initIndex(VerticalsConfigService.MAIN_VERTICAL_NAME);
-		
-
-		
 	}
 
 

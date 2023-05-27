@@ -68,9 +68,6 @@ public class RealtimeAggregationService {
 
 
 
-	
-	
-	@Autowired
 	public RealtimeAggregationService(EvaluationService evaluationService,
 			ReferentielService referentielService, StandardiserService standardiserService,
 			AutowireCapableBeanFactory autowireBeanFactory, AggregatedDataRepository aggregatedDataRepository,
@@ -92,9 +89,7 @@ public class RealtimeAggregationService {
 		
 		
 		this.aggregator = getAggregator(configService.getConfigById(VerticalsConfigService.MAIN_VERTICAL_NAME).get());
-		
-		// Initializing index
-		aggregatedDataRepository.initIndex(VerticalsConfigService.MAIN_VERTICAL_NAME);
+	
 		
 		// Calling aggregator.BEFORE
 		aggregator.beforeStart();

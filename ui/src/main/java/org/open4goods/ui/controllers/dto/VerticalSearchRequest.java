@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.open4goods.model.constants.ProductState;
+import org.springframework.data.elasticsearch.core.query.Order;
 
 /**
  * Results of a search inside a specific vertical
@@ -36,7 +37,7 @@ public class VerticalSearchRequest {
 	
 
 	private String sortField;
-	private org.elasticsearch.search.sort.SortOrder sortOrder;
+	private String sortOrder;
 	
 	
 	/**
@@ -126,11 +127,11 @@ public class VerticalSearchRequest {
 		this.sortField = sortField;
 	}
 
-	public org.elasticsearch.search.sort.SortOrder getSortOrder() {
+	public String getSortOrder() {
 		return sortOrder;
 	}
 
-	public void setSortOrder(org.elasticsearch.search.sort.SortOrder sortOrder) {
+	public void setSortOrder(String sortOrder) {
 		this.sortOrder = sortOrder;
 	}
 
