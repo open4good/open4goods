@@ -56,7 +56,7 @@ public class AggregatedComment extends DataFragmentSource {
 	public boolean equals(final Object obj) {
 		if (obj instanceof Comment) {
 			final Comment o = (Comment) obj;
-			return Objects.equals(title, o.getTitle()) && Objects.equals(description, o.getDescription())
+			return Objects.equals(title, o.getTitle().getText()) && Objects.equals(description, o.getDescription().getText())
 					&& Objects.equals(date, o.getDate()) && Objects.equals(author, o.getAuthor());
 		}
 
