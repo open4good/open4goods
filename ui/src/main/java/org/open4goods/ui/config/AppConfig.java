@@ -66,13 +66,13 @@ public class AppConfig {
 	public static final int CACHE_PERIOD_SECONDS = 3600*24*7;
 	private @Autowired UiConfig config;
 
-	@Bean
-	public ImageService imageService (@Autowired ImageMagickService imageMagickService, @Autowired ResourceService resourceService ) {
+    @Bean
+    ImageService imageService(@Autowired ImageMagickService imageMagickService, @Autowired ResourceService resourceService) {
 		return new ImageService(imageMagickService, resourceService);
 	}
-	
-	@Bean
-	public OpenDataService openDataService (@Autowired AggregatedDataRepository aggregatedDataRepository, @Autowired UiConfig props ) {
+
+    @Bean
+    OpenDataService openDataService(@Autowired AggregatedDataRepository aggregatedDataRepository, @Autowired UiConfig props) {
 		return new OpenDataService(aggregatedDataRepository, props);
 	}
 
@@ -93,17 +93,16 @@ public class AppConfig {
 	XwikiService xwikiService(@Autowired UiConfig props) {
 		return new XwikiService(props.getWikiConfig());
 	}
-	
-	
-	
-	/** The bean providing datasource configurations **/
-	public @Bean DataSourceConfigService datasourceConfigService(@Autowired final UiConfig config) {
+
+
+    /** The bean providing datasource configurations **/
+     @Bean DataSourceConfigService datasourceConfigService(@Autowired final UiConfig config) {
 		return new DataSourceConfigService(config.getDatasourcesfolder());
 	}
 
-	
-	@Bean
-	public  RecaptchaService recaptchaService() {
+
+    @Bean
+    RecaptchaService recaptchaService() {
 		return new RecaptchaService();
 	}
 	
@@ -111,36 +110,36 @@ public class AppConfig {
 	@Bean MailService mailService(@Autowired final JavaMailSender sender) {
 		return new MailService(sender);
 	}
-	
-	@Bean
-	public  ImageMagickService imageMagickService() {
+
+    @Bean
+    ImageMagickService imageMagickService() {
 		return new ImageMagickService();
 	}
-	
-	@Bean
-	public  ResourceService resourceService() {
+
+    @Bean
+    ResourceService resourceService() {
 		return new ResourceService(config.getRemoteCachingFolder());
 	}
-	
-	
-	@Bean
-	public  GtinService gtinService(@Autowired ResourceService resourceService ) {
+
+
+    @Bean
+    GtinService gtinService(@Autowired ResourceService resourceService) {
 		return new GtinService(resourceService);
 	}
-	
-	
-	@Bean
-	public AggregatedDataRepository aggregatedDataRepo() {
+
+
+    @Bean
+    AggregatedDataRepository aggregatedDataRepo() {
 		return new AggregatedDataRepository();
 	}
 
-	public @Bean RemoteFileCachingService remoteFileCachingService() {
+     @Bean RemoteFileCachingService remoteFileCachingService() {
 		return new RemoteFileCachingService(config.getRemoteCachingFolder());
 	}
 
-	
-	@Bean	
-	public SearchService searchService(@Autowired AggregatedDataRepository aggregatedDataRepository, @Autowired final UiConfig uiconfig) {
+
+    @Bean
+    SearchService searchService(@Autowired AggregatedDataRepository aggregatedDataRepository, @Autowired final UiConfig uiconfig) {
 		return new SearchService(aggregatedDataRepository, uiconfig.logsFolder());
 	}
 
@@ -159,30 +158,30 @@ public class AppConfig {
 		return new EvaluationService();
 	}
 
-	@Bean
-	@Autowired 
-	public VerticalsConfigService verticalConfigsService( SerialisationService serialisationService) throws IOException {
+    @Bean
+    @Autowired
+    VerticalsConfigService verticalConfigsService(SerialisationService serialisationService) throws IOException {
 		return new VerticalsConfigService( serialisationService,config.getVerticalsFolder());
 	}
-	
-	////////////////////////////////////
-	// Locale resolution
-	////////////////////////////////////
-	
-	@Bean
-	public LocaleResolver localeResolver() {
+
+    ////////////////////////////////////
+    // Locale resolution
+    ////////////////////////////////////
+    
+    @Bean
+    LocaleResolver localeResolver() {
 		return new AcceptHeaderLocaleResolver();
 	}
 
-	@Bean
-	public LocaleChangeInterceptor localeChangeInterceptor() {
+    @Bean
+    LocaleChangeInterceptor localeChangeInterceptor() {
 		final LocaleChangeInterceptor lci = new LocaleChangeInterceptor();
 		lci.setParamName("lang");
 		return lci;
 	}
 
-	@Bean
-	public HttpFirewall allowUrlEncodedSlashHttpFirewall() {
+    @Bean
+    HttpFirewall allowUrlEncodedSlashHttpFirewall() {
 	    StrictHttpFirewall firewall = new StrictHttpFirewall();
 	    firewall.setAllowUrlEncodedSlash(true);    
 	    firewall.setAllowBackSlash(true);
@@ -285,14 +284,14 @@ public class AppConfig {
 			writer.close();
 		}
 	}
-	
 
-	//////////////////////////////////////////////
-	// The uidMap managers
-	//////////////////////////////////////////////
 
-	@Bean
-	public CacheManager cacheManager(@Autowired final Ticker ticker) {
+    //////////////////////////////////////////////
+    // The uidMap managers
+    //////////////////////////////////////////////
+
+    @Bean
+    CacheManager cacheManager(@Autowired final Ticker ticker) {
 		final CaffeineCache fCache = buildCache(CacheConstants.FOREVER_LOCAL_CACHE_NAME, ticker, 30000000);
 		final CaffeineCache hCache = buildCache(CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME, ticker, 60);
 		final CaffeineCache mCache = buildCache(CacheConstants.ONE_MINUTE_LOCAL_CACHE_NAME, ticker, 1);		
@@ -307,8 +306,8 @@ public class AppConfig {
 				Caffeine.newBuilder().expireAfterWrite(minutesToExpire, TimeUnit.MINUTES).ticker(ticker).build());
 	}
 
-	@Bean
-	public Ticker ticker() {
+    @Bean
+    Ticker ticker() {
 		return Ticker.systemTicker();
 	}
 

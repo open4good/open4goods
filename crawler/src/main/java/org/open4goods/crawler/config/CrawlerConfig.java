@@ -16,58 +16,58 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class CrawlerConfig {
 
-	@Bean
-	public DataFragmentCompletionService offerCompletionService(@Autowired final FetcherProperties fetcherProperties) {
+    @Bean
+    DataFragmentCompletionService offerCompletionService(@Autowired final FetcherProperties fetcherProperties) {
 		return new DataFragmentCompletionService();
 	}
 
-	@Bean
-	public SerialisationService serialisationService() {
+    @Bean
+    SerialisationService serialisationService() {
 		return new SerialisationService();
 	}
 
-	/**
-	 * The service that hot evaluates thymeleaf / spel expressions
-	 * @return
-	 */
-	public @Bean EvaluationService evaluationService() {
+    /**
+     * The service that hot evaluates thymeleaf / spel expressions
+     * @return
+     */
+     @Bean EvaluationService evaluationService() {
 		return new EvaluationService();
 	}
 
-	@Bean
-	public WebDatasourceFetchingService webDatasourceFetchingService(@Autowired final FetcherProperties fetcherProperties,
-			@Autowired final IndexationService indexationService) {
+    @Bean
+    WebDatasourceFetchingService webDatasourceFetchingService(@Autowired final FetcherProperties fetcherProperties,
+                                                                      @Autowired final IndexationService indexationService) {
 		return new WebDatasourceFetchingService(indexationService, fetcherProperties, fetcherProperties.getLogsDir());
 	}
 
-	@Bean
-	public CsvDatasourceFetchingService csvDatasourceFetchingService(
-			@Autowired final DataFragmentCompletionService completionService,
-			@Autowired final FetcherProperties fetcherProperties,
-			@Autowired final WebDatasourceFetchingService webDatasourceFetchingService,
-			@Autowired final IndexationService indexationService			
-			) {
+    @Bean
+    CsvDatasourceFetchingService csvDatasourceFetchingService(
+            @Autowired final DataFragmentCompletionService completionService,
+            @Autowired final FetcherProperties fetcherProperties,
+            @Autowired final WebDatasourceFetchingService webDatasourceFetchingService,
+            @Autowired final IndexationService indexationService
+            ) {
 		return new CsvDatasourceFetchingService(completionService, indexationService, fetcherProperties, webDatasourceFetchingService,fetcherProperties.getLogsDir());
 	}
 
-	@Bean
-	public IndexationService indexationService(@Autowired final FetcherProperties fetcherProperties) {
+    @Bean
+    IndexationService indexationService(@Autowired final FetcherProperties fetcherProperties) {
 		return new IndexationService(fetcherProperties.indexationEndpoint(), fetcherProperties.getApiKey());
 	}
 
-	@Bean
-	public ApiSynchService apiSynchService(@Autowired final FetcherProperties fetcherProperties,
-			@Autowired final FetchersService fetchersService) {
+    @Bean
+    ApiSynchService apiSynchService(@Autowired final FetcherProperties fetcherProperties,
+                                            @Autowired final FetchersService fetchersService) {
 		return new ApiSynchService(fetcherProperties.getApiSynchConfig(), fetchersService,
 				fetcherProperties.getMasterEndpoint(), fetcherProperties.getApiKey());
 	}
 
 
-	@Bean
-	public FetchersService fetchersService(@Autowired final FetcherProperties fetcherProperties,
-			@Autowired final WebDatasourceFetchingService webDatasourceFetchingService,
-			@Autowired final CsvDatasourceFetchingService csvDatasourceFetchingService			
-			) {
+    @Bean
+    FetchersService fetchersService(@Autowired final FetcherProperties fetcherProperties,
+                                             @Autowired final WebDatasourceFetchingService webDatasourceFetchingService,
+                                             @Autowired final CsvDatasourceFetchingService csvDatasourceFetchingService
+                                             ) {
 		return new FetchersService(fetcherProperties, webDatasourceFetchingService, csvDatasourceFetchingService);
 	}
 

@@ -82,35 +82,35 @@ public class DatasourceRegressionTest {
 //			
 //		}
 
-		public @Bean RemoteFileCachingService remoteFileCachingService(@Autowired final ApiProperties config) {
+         @Bean RemoteFileCachingService remoteFileCachingService(@Autowired final ApiProperties config) {
 			return new RemoteFileCachingService(config.remoteCachingFolder());
 		}
 
-		
-		@Bean
-		public WebDatasourceFetchingService webDatasourceFetchingService(@Autowired final ApiProperties apiProperties, @Autowired final FetcherProperties fetcherProperties) {
+
+        @Bean
+        WebDatasourceFetchingService webDatasourceFetchingService(@Autowired final ApiProperties apiProperties, @Autowired final FetcherProperties fetcherProperties) {
 			return new WebDatasourceFetchingService(null, fetcherProperties, fetcherProperties.getLogsDir());
 		}
 
-		@Bean
-		public CsvDatasourceFetchingService csvDatasourceFetchingService(
-				@Autowired final ApiProperties apiProperties, @Autowired final FetcherProperties fetcherProperties,
-				 @Autowired final WebDatasourceFetchingService httpFetchingService, @Autowired final  DataFragmentCompletionService dfCompletionService) {
+        @Bean
+        CsvDatasourceFetchingService csvDatasourceFetchingService(
+                @Autowired final ApiProperties apiProperties, @Autowired final FetcherProperties fetcherProperties,
+                @Autowired final WebDatasourceFetchingService httpFetchingService, @Autowired final  DataFragmentCompletionService dfCompletionService) {
 			return new CsvDatasourceFetchingService(dfCompletionService, null, fetcherProperties,  httpFetchingService,fetcherProperties.getLogsDir());
 		}
 
-		@Bean
-		public EvaluationService evaluationService() {
+        @Bean
+        EvaluationService evaluationService() {
 			return new EvaluationService();
 		}
 
-		@Bean
-		public SerialisationService serialisationService() {
+        @Bean
+        SerialisationService serialisationService() {
 			return new SerialisationService();
 		}
-		
-		@Bean
-		public IndexationService indexationService() {
+
+        @Bean
+        IndexationService indexationService() {
 			return new IndexationService() {
 				@Override
 				protected void indexInternal(DataFragment data) {
@@ -120,14 +120,13 @@ public class DatasourceRegressionTest {
 		}
 
 
-		@Bean
-		public ApiProperties apiProperties() {
+        @Bean
+        ApiProperties apiProperties() {
 			return new ApiProperties();
 		}
 
 
-
-		public @Bean ImageMagickService imageService() {
+         @Bean ImageMagickService imageService() {
 			return new ImageMagickService();
 		}
 
@@ -143,17 +142,15 @@ public class DatasourceRegressionTest {
 			};
 		}
 
-	
 
-
-		/** The bean providing datasource configurations **/
-		public @Bean DataSourceConfigService datasourceConfigService(@Autowired final ApiProperties config) {
+        /** The bean providing datasource configurations **/
+         @Bean DataSourceConfigService datasourceConfigService(@Autowired final ApiProperties config) {
 			//TODO : properly inject env
 			return new DataSourceConfigService("/home/goulven/git/open4goods-config/datasources");
 		}
 
-		@Bean
-		public DataFragmentCompletionService offerCompletionService() {
+        @Bean
+        DataFragmentCompletionService offerCompletionService() {
 			return new DataFragmentCompletionService();
 		}
 
