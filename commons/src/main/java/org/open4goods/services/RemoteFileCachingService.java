@@ -4,6 +4,7 @@ import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.commons.compress.utils.IOUtils;
 import org.apache.commons.io.FileUtils;
 import org.open4goods.exceptions.InvalidParameterException;
 import org.open4goods.exceptions.TechnicalException;
@@ -135,6 +136,7 @@ public class RemoteFileCachingService {
 			res.renameTo(destFile);
 		}
 
+		IOUtils.closeQuietly(zipFile);
 		destFile.setLastModified(System.currentTimeMillis());
 		return destFile;
 
