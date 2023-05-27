@@ -71,10 +71,8 @@ public class BatchService {
 		for (VerticalConfig vertical : verticalsService.getConfigsWithoutDefault()) {
 			BatchedAggregator agg = batchAggregationService.getAggregator(vertical);
 			
-			// Warning, full vertical load
-			// TODO : Max from conf
-			
-			Set<AggregatedData> datas = dataRepository.exportVertical(vertical.getId(),1000000).collect(Collectors.toSet());
+			// Warning, full vertical load		
+			Set<AggregatedData> datas = dataRepository.exportVerticalWithValidDate(vertical.getId()).collect(Collectors.toSet());
 			
 			agg.beforeStart(datas);
 
@@ -95,11 +93,6 @@ public class BatchService {
 			agg.close(datas);
 			
 		}
-		
-		
-		
-		
-		
 	}
 	
 	

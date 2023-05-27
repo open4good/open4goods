@@ -25,11 +25,10 @@ import org.springframework.security.web.SecurityFilterChain;
 public class WebConfig {
 
     private @Autowired AuthenticationProvider  authProvider;
-    private @Autowired VerticalsConfigService verticalConfig;
 
-    
+
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+    SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 
 		http.authorizeRequests()			
 //		.anyRequest().permitAll()
@@ -56,7 +55,7 @@ public class WebConfig {
     }
 
     @Bean
-    public PasswordEncoder passwordEncoder() {
+    PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 }

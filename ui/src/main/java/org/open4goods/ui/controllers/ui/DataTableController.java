@@ -1,6 +1,5 @@
 package org.open4goods.ui.controllers.ui;
 
-import org.elasticsearch.search.sort.SortOrder;
 import org.open4goods.config.yml.ui.VerticalConfig;
 import org.open4goods.model.product.AggregatedData;
 import org.open4goods.services.VerticalsConfigService;
@@ -94,7 +93,7 @@ public class DataTableController {
 		// Sorting
 		if (!pagination.isSortByEmpty()) {
 			String sortKey = pagination.getSortBy().getSortBys().keySet().stream().findFirst().get();
-			SortOrder sortOrder = SortOrder.valueOf(pagination.getSortBy().getSortBys().get(sortKey).toString());
+			String sortOrder = pagination.getSortBy().getSortBys().get(sortKey).toString();
 			vRequest.setSortField(sortKey);
 			vRequest.setSortOrder(sortOrder);
 		}

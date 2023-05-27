@@ -37,8 +37,8 @@ import org.open4goods.services.StandardiserService;
 import org.open4goods.services.VerticalsConfigService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springdoc.core.GroupedOpenApi;
-import org.springdoc.core.customizers.OpenApiCustomiser;
+import org.springdoc.core.customizers.OpenApiCustomizer;
+import org.springdoc.core.models.GroupedOpenApi;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.cache.CacheManager;
@@ -121,13 +121,13 @@ public class ApiConfig {
 	              .group("api")
 //	              .pathsToMatch("/admin/**")
 	              .packagesToScan("org.open4goods.api")
-	              .addOpenApiCustomiser(apiSecurizer())
+	              .addOpenApiCustomizer(apiSecurizer())
 	              
 	              .build();
 	  }
 	  
 	    @Bean
-	    public OpenApiCustomiser apiSecurizer() {
+	    public OpenApiCustomizer apiSecurizer() {
 	        return openApi -> openApi.addSecurityItem(new SecurityRequirement().addList("Authorization"))
 	                .components(new Components()
 	                        .addSecuritySchemes(UrlConstants.APIKEY_PARAMETER, new SecurityScheme()
