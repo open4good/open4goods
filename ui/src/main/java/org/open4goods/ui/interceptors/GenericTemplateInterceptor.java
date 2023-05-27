@@ -1,11 +1,11 @@
 package org.open4goods.ui.interceptors;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import org.open4goods.model.dto.PageInterceptionResponse;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.ModelAndView;
+
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 public class GenericTemplateInterceptor implements HandlerInterceptor {
 

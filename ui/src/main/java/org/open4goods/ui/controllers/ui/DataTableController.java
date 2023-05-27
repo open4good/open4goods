@@ -1,11 +1,7 @@
 package org.open4goods.ui.controllers.ui;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import org.elasticsearch.search.sort.SortOrder;
 import org.open4goods.config.yml.ui.VerticalConfig;
-import org.open4goods.model.constants.ProductState;
 import org.open4goods.model.product.AggregatedData;
 import org.open4goods.services.VerticalsConfigService;
 import org.open4goods.ui.controllers.dto.DataTableRequest;
@@ -18,6 +14,9 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
+
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 /**
  * @author pavan.solapure

@@ -5,9 +5,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
-
 import org.apache.commons.lang3.StringUtils;
 import org.open4goods.config.yml.GlobalAttributeAggregationConfig;
 import org.open4goods.config.yml.ui.DescriptionsAggregationConfig;
@@ -15,6 +12,9 @@ import org.open4goods.crawler.config.yml.FetcherProperties;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.validation.annotation.Validated;
+
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 
 @Configuration
 @ConfigurationProperties

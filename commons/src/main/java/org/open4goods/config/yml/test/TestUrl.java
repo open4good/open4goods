@@ -1,12 +1,10 @@
 package org.open4goods.config.yml.test;
 
 import java.util.Map;
-import java.util.Map.Entry;
 
 import org.apache.commons.lang3.StringUtils;
 import org.open4goods.model.constants.ProductState;
 import org.open4goods.model.data.DataFragment;
-import org.open4goods.model.data.Rating;
 import org.open4goods.model.data.RatingType;
 
 public class TestUrl {

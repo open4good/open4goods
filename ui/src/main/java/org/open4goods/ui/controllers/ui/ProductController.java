@@ -5,9 +5,6 @@ import java.net.URLEncoder;
 import java.nio.charset.Charset;
 import java.util.Locale;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import org.open4goods.config.yml.ui.VerticalConfig;
 import org.open4goods.dao.AggregatedDataRepository;
 import org.open4goods.exceptions.ResourceNotFoundException;
@@ -34,6 +31,9 @@ import org.springframework.web.servlet.ModelAndView;
 
 import com.ibm.icu.util.ULocale;
 import com.mashape.unirest.http.exceptions.UnirestException;
+
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 @Controller
 /**

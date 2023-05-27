@@ -3,10 +3,10 @@ package org.open4goods.model;
 
 import java.util.HashMap;
 
-import javax.servlet.http.HttpServletRequest;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import jakarta.servlet.http.HttpServletRequest;
 
 
 

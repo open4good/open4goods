@@ -10,9 +10,6 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.validation.constraints.NotNull;
-
 import org.open4goods.config.yml.CommentsAggregationConfig;
 import org.open4goods.config.yml.attributes.AttributeConfig;
 import org.open4goods.model.Localisable;
@@ -25,6 +22,9 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.annotation.Configuration;
 
 import com.fasterxml.jackson.annotation.JsonMerge;
+
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.constraints.NotNull;
 
 @Configuration
 @ConfigurationProperties

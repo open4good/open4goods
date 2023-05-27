@@ -3,8 +3,6 @@ package org.open4goods.ui.controllers.ui;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.servlet.http.HttpServletRequest;
-
 import org.open4goods.config.yml.ui.VerticalConfig;
 import org.open4goods.services.SerialisationService;
 import org.open4goods.services.VerticalsConfigService;
@@ -20,6 +18,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.servlet.ModelAndView;
 
 import com.ibm.icu.util.ULocale;
+
+import jakarta.servlet.http.HttpServletRequest;
 
 @Controller
 /**

@@ -9,8 +9,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-import javax.servlet.http.HttpServletResponse;
-
 import org.apache.commons.io.IOUtils;
 import org.open4goods.exceptions.ResourceNotFoundException;
 import org.open4goods.exceptions.ValidationException;
@@ -31,6 +29,8 @@ import com.talanlabs.avatargenerator.layers.backgrounds.RandomColorPaintBackgrou
 import com.talanlabs.avatargenerator.layers.masks.RoundRectMaskLayer;
 import com.talanlabs.avatargenerator.layers.others.ShadowLayer;
 import com.talanlabs.avatargenerator.smiley.SmileyAvatar;
+
+import jakarta.servlet.http.HttpServletResponse;
 
 @RestController
 /**

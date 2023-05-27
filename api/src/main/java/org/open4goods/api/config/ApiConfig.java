@@ -8,7 +8,6 @@ import org.open4goods.api.config.yml.ApiProperties;
 import org.open4goods.api.services.BatchAggregationService;
 import org.open4goods.api.services.BatchService;
 import org.open4goods.api.services.FetcherOrchestrationService;
-import org.open4goods.api.services.ImportExportService;
 import org.open4goods.api.services.RealtimeAggregationService;
 import org.open4goods.api.services.ReferentielService;
 import org.open4goods.api.services.store.DataFragmentStoreService;
@@ -36,7 +35,6 @@ import org.open4goods.services.ResourceService;
 import org.open4goods.services.SerialisationService;
 import org.open4goods.services.StandardiserService;
 import org.open4goods.services.VerticalsConfigService;
-import org.open4goods.store.repository.DataFragmentRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springdoc.core.GroupedOpenApi;
@@ -78,8 +76,8 @@ public class ApiConfig {
 	
 	@Bean
 	@Autowired
-	public BatchService batchService(AggregatedDataRepository dataRepository, VerticalsConfigService verticalsConfigService, DataFragmentRepository dataFragmentsRepository, BatchAggregationService batchAggregationService) throws IOException {
-		return new BatchService(dataFragmentsRepository,dataRepository, apiProperties, verticalsConfigService,batchAggregationService);
+	public BatchService batchService(AggregatedDataRepository dataRepository, VerticalsConfigService verticalsConfigService, BatchAggregationService batchAggregationService) throws IOException {
+		return new BatchService(dataRepository, apiProperties, verticalsConfigService,batchAggregationService);
 	}
 
 
@@ -95,21 +93,21 @@ public class ApiConfig {
 
 	
 	@Bean
-	RealtimeAggregationService realtimeAggregationService(@Autowired DataFragmentRepository repository, @Autowired EvaluationService evaluationService,
+	RealtimeAggregationService realtimeAggregationService( @Autowired EvaluationService evaluationService,
 			@Autowired ReferentielService referentielService, @Autowired StandardiserService standardiserService,
 			@Autowired AutowireCapableBeanFactory autowireBeanFactory, @Autowired AggregatedDataRepository aggregatedDataRepository,
 			@Autowired ApiProperties apiProperties, @Autowired Gs1PrefixService gs1prefixService,
 			@Autowired DataSourceConfigService dataSourceConfigService, @Autowired VerticalsConfigService configService, @Autowired BarcodeValidationService barcodeValidationService) {
-		return new RealtimeAggregationService(repository, evaluationService, referentielService, standardiserService, autowireBeanFactory, aggregatedDataRepository, apiProperties, gs1prefixService, dataSourceConfigService, configService,  barcodeValidationService);
+		return new RealtimeAggregationService(evaluationService, referentielService, standardiserService, autowireBeanFactory, aggregatedDataRepository, apiProperties, gs1prefixService, dataSourceConfigService, configService,  barcodeValidationService);
 	}
 	
 	@Bean
-	BatchAggregationService batchAggregationService(@Autowired DataFragmentRepository repository, @Autowired EvaluationService evaluationService,
+	BatchAggregationService batchAggregationService( @Autowired EvaluationService evaluationService,
 			@Autowired ReferentielService referentielService, @Autowired StandardiserService standardiserService,
 			@Autowired AutowireCapableBeanFactory autowireBeanFactory, @Autowired AggregatedDataRepository aggregatedDataRepository,
 			@Autowired ApiProperties apiProperties, @Autowired Gs1PrefixService gs1prefixService,
 			@Autowired DataSourceConfigService dataSourceConfigService, @Autowired VerticalsConfigService configService, @Autowired BarcodeValidationService barcodeValidationService) {
-		return new BatchAggregationService(repository, evaluationService, referentielService, standardiserService, autowireBeanFactory, aggregatedDataRepository, apiProperties, gs1prefixService, dataSourceConfigService, configService,  barcodeValidationService);
+		return new BatchAggregationService(evaluationService, referentielService, standardiserService, autowireBeanFactory, aggregatedDataRepository, apiProperties, gs1prefixService, dataSourceConfigService, configService,  barcodeValidationService);
 	}
 	
 	
@@ -228,17 +226,9 @@ public class ApiConfig {
 	}
 
 
-	public @Bean ImportExportService exportService(@Autowired final ApiProperties config,
-			@Autowired final DataFragmentRepository dataFragmentsRepository,
-			@Autowired final DataFragmentStoreService dataFragmentStoreService,
-			@Autowired final SerialisationService serialisationService) {
-		return new ImportExportService(dataFragmentsRepository,
-				dataFragmentStoreService, serialisationService,config);
-	}
-
 	public @Bean DataFragmentStoreService dataFragmentStoreService(
-			@Autowired final DataFragmentRepository dataFragmentsRepository, @Autowired final ApiProperties config, @Autowired final SerialisationService serialisationService, @Autowired StandardiserService standardiserService, @Autowired RealtimeAggregationService generationService, @Autowired AggregatedDataRepository aggregatedDataRepository) {
-		return new DataFragmentStoreService(standardiserService, dataFragmentsRepository, generationService, aggregatedDataRepository);
+			 @Autowired final ApiProperties config, @Autowired final SerialisationService serialisationService, @Autowired StandardiserService standardiserService, @Autowired RealtimeAggregationService generationService, @Autowired AggregatedDataRepository aggregatedDataRepository) {
+		return new DataFragmentStoreService(standardiserService, generationService, aggregatedDataRepository);
 	}
 
 	/**
@@ -276,7 +266,7 @@ public class ApiConfig {
 
 	
 //	@Bean
-//	RealtimeAggregationService fullGenerationService(@Autowired DataFragmentRepository repository, @Autowired EvaluationService evaluationService,
+//	RealtimeAggregationService fullGenerationService( @Autowired EvaluationService evaluationService,
 //			@Autowired ReferentielService referentielService, @Autowired StandardiserService standardiserService,
 //			@Autowired AutowireCapableBeanFactory autowireBeanFactory, @Autowired AggregatedDataRepository aggregatedDataRepository,
 //			@Autowired ApiProperties apiProperties, @Autowired Gs1PrefixService gs1prefixService,

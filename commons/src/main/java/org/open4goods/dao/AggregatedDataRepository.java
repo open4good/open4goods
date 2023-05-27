@@ -30,15 +30,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.core.io.support.ResourcePatternResolver;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.elasticsearch.core.ElasticsearchRestTemplate;
+import org.springframework.data.elasticsearch.client.elc.NativeQueryBuilder;
+import org.springframework.data.elasticsearch.client.erhlc.NativeSearchQuery;
+import org.springframework.data.elasticsearch.client.erhlc.NativeSearchQueryBuilder;
+import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
 import org.springframework.data.elasticsearch.core.IndexOperations;
 import org.springframework.data.elasticsearch.core.SearchHit;
 import org.springframework.data.elasticsearch.core.SearchHits;
 import org.springframework.data.elasticsearch.core.document.Document;
 import org.springframework.data.elasticsearch.core.index.Settings;
 import org.springframework.data.elasticsearch.core.mapping.IndexCoordinates;
-import org.springframework.data.elasticsearch.core.query.NativeSearchQuery;
-import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilder;
 import org.springframework.data.util.CloseableIterator;
 
 /**
@@ -70,7 +71,7 @@ public class AggregatedDataRepository {
 	
 	
 	
-	private @Autowired ElasticsearchRestTemplate elasticsearchTemplate;
+	private @Autowired ElasticsearchOperations elasticsearchTemplate;
 	
 	private @Autowired ResourcePatternResolver resolver;
 
@@ -113,9 +114,10 @@ public class AggregatedDataRepository {
 		QueryBuilder queryBuilder = QueryBuilders.boolQuery()  
 				.must(getValidDateQuery());
 		
-		NativeSearchQueryBuilder initialQuery = new NativeSearchQueryBuilder().withQuery(queryBuilder)
+		 NativeSearchQueryBuilder initialQuery = new NativeSearchQueryBuilder().withQuery(queryBuilder)
 //				//TODO(gof) : from conf
-				.withPageable(PageRequest.of(0, 300));
+				.withPageable(PageRequest.of(0, 300))					
+				;
 		
 		
 			if (!StringUtils.isEmpty(sortField)) {

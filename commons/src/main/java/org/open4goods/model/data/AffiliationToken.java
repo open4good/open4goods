@@ -10,7 +10,9 @@ import org.springframework.data.elasticsearch.annotations.Document;
 import org.springframework.data.elasticsearch.annotations.Field;
 import org.springframework.data.elasticsearch.annotations.FieldType;
 
-@Document(indexName = "affiliation-links", refreshInterval = "60s", createIndex = true)
+//TODO : check the refresh interval
+//@Document(indexName = "affiliation-links",  refreshInterval = "60s", createIndex = true)
+@Document(indexName = "affiliation-links", createIndex = true)
 public class AffiliationToken {
 
 	@Id

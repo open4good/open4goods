@@ -3,12 +3,12 @@ package org.open4goods.config.yml.datasource;
 import java.util.List;
 import java.util.Set;
 
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.NotNull;
-
 import org.open4goods.config.yml.test.TestUrl;
 import org.springframework.validation.annotation.Validated;
+
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 
 /**
  * Specific configuration for a Web (crawlable) DataSource

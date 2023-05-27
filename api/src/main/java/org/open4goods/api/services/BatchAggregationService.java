@@ -4,8 +4,6 @@ package org.open4goods.api.services;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.annotation.PreDestroy;
-
 import org.open4goods.aggregation.AbstractAggregationService;
 import org.open4goods.aggregation.aggregator.BatchedAggregator;
 import org.open4goods.aggregation.services.aggregation.AttributeAggregationService;
@@ -18,10 +16,11 @@ import org.open4goods.services.EvaluationService;
 import org.open4goods.services.Gs1PrefixService;
 import org.open4goods.services.StandardiserService;
 import org.open4goods.services.VerticalsConfigService;
-import org.open4goods.store.repository.DataFragmentRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
+
+import jakarta.annotation.PreDestroy;
 
 /**
  * This service is in charge of building AggregatedData in realtime mode
@@ -33,7 +32,6 @@ public class BatchAggregationService  {
 
 	protected static final Logger logger = LoggerFactory.getLogger(BatchAggregationService.class);
 
-	private  DataFragmentRepository repository;
 
 	private EvaluationService evaluationService;
 
@@ -60,14 +58,13 @@ public class BatchAggregationService  {
 
 	
 	
-	public BatchAggregationService(DataFragmentRepository repository, EvaluationService evaluationService,
+	public BatchAggregationService(EvaluationService evaluationService,
 			ReferentielService referentielService, StandardiserService standardiserService,
 			AutowireCapableBeanFactory autowireBeanFactory, AggregatedDataRepository aggregatedDataRepository,
 			ApiProperties apiProperties, Gs1PrefixService gs1prefixService,
 			DataSourceConfigService dataSourceConfigService, VerticalsConfigService configService, 
 			BarcodeValidationService barcodeValidationService) {
 		super();
-		this.repository = repository;
 		this.evaluationService = evaluationService;
 		this.referentielService = referentielService;
 		this.standardiserService = standardiserService;

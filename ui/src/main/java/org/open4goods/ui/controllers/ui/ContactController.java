@@ -1,7 +1,5 @@
 package org.open4goods.ui.controllers.ui;
 
-import javax.servlet.http.HttpServletRequest;
-
 import org.open4goods.helper.IpHelper;
 import org.open4goods.services.MailService;
 import org.open4goods.services.RecaptchaService;
@@ -12,6 +10,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.ModelAndView;
+
+import jakarta.servlet.http.HttpServletRequest;
 
 @Controller
 public class ContactController extends AbstractUiController {

@@ -4,8 +4,6 @@ import java.io.IOException;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import javax.validation.constraints.NotBlank;
-
 import org.open4goods.api.services.FetcherOrchestrationService;
 import org.open4goods.config.yml.datasource.DataSourceProperties;
 import org.open4goods.exceptions.InvalidParameterException;
@@ -32,6 +30,7 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 
 import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Operation;
+import jakarta.validation.constraints.NotBlank;
 
 /**
  * This controller allows informations and communications from fetchers

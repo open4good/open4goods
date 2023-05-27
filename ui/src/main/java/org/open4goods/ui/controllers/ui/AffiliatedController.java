@@ -4,9 +4,6 @@ import java.io.IOException;
 import java.net.URLDecoder;
 import java.nio.charset.Charset;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import org.open4goods.helper.IpHelper;
 import org.open4goods.model.data.AffiliationToken;
 import org.open4goods.services.SerialisationService;
@@ -20,6 +17,9 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.view.RedirectView;
+
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 @RestController
 //* TODO(design,P2,0.25) : should make an AffiliationService

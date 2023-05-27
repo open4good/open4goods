@@ -3,11 +3,8 @@ package org.open4goods.api;
 
 import java.io.IOException;
 
-import javax.annotation.PostConstruct;
-
-import org.open4goods.config.ESConfig;
+import org.open4goods.dao.AggregatedDataRepository;
 import org.open4goods.services.SerialisationService;
-import org.open4goods.store.repository.DataFragmentRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,13 +18,15 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.mashape.unirest.http.Unirest;
 
+import jakarta.annotation.PostConstruct;
 
 
-@SpringBootApplication (scanBasePackageClasses = {Api.class, ESConfig.class})
+
+@SpringBootApplication (scanBasePackageClasses = {Api.class})
 
 @EnableAspectJAutoProxy
 @EnableScheduling
-@EnableElasticsearchRepositories(basePackageClasses = DataFragmentRepository.class)
+@EnableElasticsearchRepositories(basePackageClasses = AggregatedDataRepository.class)
 @EnableCaching
 
 public abstract class Api {

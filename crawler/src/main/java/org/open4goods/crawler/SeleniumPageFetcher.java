@@ -3,8 +3,6 @@ package org.open4goods.crawler;
 import java.io.IOException;
 import java.time.Duration;
 
-import javax.annotation.PreDestroy;
-
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.open4goods.config.yml.datasource.CrawlProperties;
@@ -24,6 +22,7 @@ import edu.uci.ics.crawler4j.crawler.exceptions.PageBiggerThanMaxSizeException;
 import edu.uci.ics.crawler4j.fetcher.PageFetchResult;
 import edu.uci.ics.crawler4j.fetcher.PageFetcher;
 import edu.uci.ics.crawler4j.url.WebURL;
+import jakarta.annotation.PreDestroy;
 
 /**
  * A crawl4j pagefetcher that relies on Selenium to

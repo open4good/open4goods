@@ -3,9 +3,6 @@ package org.open4goods.ui.controllers.ui;
 import java.io.IOException;
 import java.io.InputStream;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import org.apache.commons.io.IOUtils;
 import org.open4goods.exceptions.TechnicalException;
 import org.open4goods.ui.services.OpenDataService;
@@ -17,6 +14,9 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.servlet.ModelAndView;
 
 import com.mashape.unirest.http.exceptions.UnirestException;
+
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 @Controller
 /**

@@ -6,11 +6,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.validation.constraints.NotBlank;
-
 import org.springframework.validation.annotation.Validated;
 
 import com.fasterxml.jackson.annotation.JsonMerge;
+
+import jakarta.validation.constraints.NotBlank;
 @Validated
 /**
  * Configuration properties for a capsule definition at the API level

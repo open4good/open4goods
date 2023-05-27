@@ -1,6 +1,6 @@
 package org.open4goods.ui.controllers.dto;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 
 /**
  * The Class DataTableColumnSpecs.

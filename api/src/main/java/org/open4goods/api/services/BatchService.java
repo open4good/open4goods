@@ -11,7 +11,6 @@ import org.open4goods.exceptions.AggregationSkipException;
 import org.open4goods.helper.GenericFileLogger;
 import org.open4goods.model.product.AggregatedData;
 import org.open4goods.services.VerticalsConfigService;
-import org.open4goods.store.repository.DataFragmentRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -29,7 +28,6 @@ public class BatchService {
 	private static final Logger logger = LoggerFactory.getLogger(BatchService.class);
 
 
-	private DataFragmentRepository dataFragmentsRepository;
 
 	private AggregatedDataRepository dataRepository;
 	
@@ -43,7 +41,7 @@ public class BatchService {
 
 	private Logger dedicatedLogger;
 
-	public BatchService( final DataFragmentRepository dataFragmentsRepository,
+	public BatchService(
 								AggregatedDataRepository dataRepository,
 								ApiProperties apiProperties,
 								VerticalsConfigService verticalsService,
@@ -51,7 +49,6 @@ public class BatchService {
 		super();
 		
 		dedicatedLogger = GenericFileLogger.initLogger("stats-batch", Level.INFO, apiProperties.logsFolder(), false);		
-		this.dataFragmentsRepository = dataFragmentsRepository;
 		this.apiProperties = apiProperties;
 		this.dataRepository =dataRepository;
 		this.verticalsService=verticalsService;

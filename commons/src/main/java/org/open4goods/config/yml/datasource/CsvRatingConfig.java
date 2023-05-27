@@ -1,9 +1,9 @@
 package org.open4goods.config.yml.datasource;
 
-import javax.validation.constraints.NotEmpty;
-
 import org.open4goods.model.data.RatingType;
 import org.springframework.validation.annotation.Validated;
+
+import jakarta.validation.constraints.NotEmpty;
 
 @Validated
 public class CsvRatingConfig {

@@ -9,9 +9,9 @@ import org.springframework.security.config.annotation.authentication.builders.Au
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.SecurityFilterChain;
 
 @Configuration
 @EnableWebSecurity
@@ -21,14 +21,14 @@ import org.springframework.security.crypto.password.PasswordEncoder;
  * @author Goulven.Furet
  *
  */
-public class WebConfig extends WebSecurityConfigurerAdapter {
+public class WebConfig {
 
     private @Autowired AuthenticationProvider  authProvider;
     private @Autowired VerticalsConfigService verticalConfig;
 
     
-	@Override
-	protected void configure(HttpSecurity http) throws Exception {
+    @Bean
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 
 		http.authorizeRequests()			
 //		.anyRequest().permitAll()
@@ -40,8 +40,12 @@ public class WebConfig extends WebSecurityConfigurerAdapter {
 		
 		http.csrf().disable();
 		http.headers().frameOptions().disable();
+		
+		return http.build();
 	}
-	
+
+    
+    
 	@Override
 	protected void configure(AuthenticationManagerBuilder auth) throws Exception {	
 			auth.authenticationProvider(authProvider);

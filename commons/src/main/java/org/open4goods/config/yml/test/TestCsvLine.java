@@ -1,9 +1,9 @@
 package org.open4goods.config.yml.test;
 
-import javax.validation.constraints.NotBlank;
-
 import org.open4goods.model.data.DataFragment;
 import org.springframework.validation.annotation.Validated;
+
+import jakarta.validation.constraints.NotBlank;
 
 @Validated
 public class TestCsvLine extends TestUrl {

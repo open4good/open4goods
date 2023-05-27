@@ -9,9 +9,6 @@ import java.net.URLEncoder;
 import java.util.Locale;
 import java.util.Optional;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import org.apache.commons.io.IOUtils;
 import org.open4goods.config.yml.ui.VerticalConfig;
 import org.open4goods.dao.AggregatedDataRepository;
@@ -38,6 +35,9 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.server.ResponseStatusException;
 
 import com.mashape.unirest.http.exceptions.UnirestException;
+
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 @Controller
 /**

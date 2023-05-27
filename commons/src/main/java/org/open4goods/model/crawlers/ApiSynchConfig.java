@@ -2,9 +2,9 @@ package org.open4goods.model.crawlers;
 
 import java.util.UUID;
 
-import javax.validation.constraints.NotBlank;
-
 import org.springframework.validation.annotation.Validated;
+
+import jakarta.validation.constraints.NotBlank;
 
 @Validated
 public class ApiSynchConfig {
