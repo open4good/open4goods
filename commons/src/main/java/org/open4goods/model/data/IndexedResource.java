@@ -8,7 +8,7 @@ import org.springframework.data.elasticsearch.annotations.Document;
  * @author goulven
  *
  */
-@Document(indexName = "products", shards = 1, replicas = 0, refreshInterval = "-1")
+//@Document(indexName = "products", shards = 1, replicas = 0, refreshInterval = "-1")
 public class IndexedResource extends Resource {
 
 	private String mimeType;

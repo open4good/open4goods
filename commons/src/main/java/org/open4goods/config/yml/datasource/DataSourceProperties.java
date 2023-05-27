@@ -7,8 +7,6 @@ import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 
-import javax.validation.constraints.NotBlank;
-
 import org.open4goods.model.constants.Currency;
 import org.open4goods.model.constants.ProductState;
 import org.open4goods.model.constants.ReferentielKey;
@@ -18,6 +16,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.validation.annotation.Validated;
 
 import ch.qos.logback.classic.Level;
+import jakarta.validation.constraints.NotBlank;
 
 /**
  * Config for a provider website

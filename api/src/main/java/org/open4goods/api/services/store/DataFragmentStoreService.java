@@ -7,8 +7,6 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import javax.annotation.PreDestroy;
-
 import org.apache.commons.lang3.StringUtils;
 import org.open4goods.api.services.RealtimeAggregationService;
 import org.open4goods.dao.AggregatedDataRepository;
@@ -18,13 +16,12 @@ import org.open4goods.model.Standardisable;
 import org.open4goods.model.data.DataFragment;
 import org.open4goods.model.product.AggregatedData;
 import org.open4goods.services.StandardiserService;
-import org.open4goods.store.repository.CustomDataFragmentRepository;
-import org.open4goods.store.repository.DataFragmentRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Scheduled;
 
 import io.micrometer.core.annotation.Timed;
+import jakarta.annotation.PreDestroy;
 
 /**
  * This service is in charge of DataFragments update and persistence. All
@@ -42,9 +39,6 @@ import io.micrometer.core.annotation.Timed;
 public class DataFragmentStoreService {
 
 	private static final Logger logger = LoggerFactory.getLogger(DataFragmentStoreService.class);
-
-	private final DataFragmentRepository repository;
-
 
 
 	public StandardiserService standardiserService;
@@ -68,10 +62,9 @@ public class DataFragmentStoreService {
 	 *
 	 * @param queueFolder The folder where indexation queued datas will be stored
 	 */
-	public DataFragmentStoreService(StandardiserService standardiserService, DataFragmentRepository repository, RealtimeAggregationService generationService, AggregatedDataRepository aggregatedDataRepository) {
+	public DataFragmentStoreService(StandardiserService standardiserService, RealtimeAggregationService generationService, AggregatedDataRepository aggregatedDataRepository) {
 
 
-		this.repository = repository;
 		this.standardiserService = standardiserService;
 		this.aggregatedDataRepository = aggregatedDataRepository;
 		this.generationService=generationService;
@@ -246,22 +239,9 @@ public class DataFragmentStoreService {
 		
 	}
 	
-	
-	
-	
-	
-	
-	
-	
-	
+
 	public @PreDestroy void destroy() {
 		serviceShutdown.set(true);
-	}
-
-
-
-	public CustomDataFragmentRepository getRepository() {
-		return repository;
 	}
 
 	public AtomicBoolean getServiceShutdown() {

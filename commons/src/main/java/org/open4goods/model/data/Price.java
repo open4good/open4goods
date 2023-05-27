@@ -8,8 +8,6 @@ import java.util.Locale;
 import java.util.Objects;
 import java.util.Set;
 
-import javax.validation.constraints.NotNull;
-
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DurationFieldType;
 import org.joda.time.Period;
@@ -28,6 +26,8 @@ import org.springframework.data.elasticsearch.annotations.Field;
 import org.springframework.data.elasticsearch.annotations.FieldType;
 
 import com.google.common.collect.Sets;
+
+import jakarta.validation.constraints.NotNull;
 
 public class Price implements Validable, Standardisable, Comparable<Double> {
 

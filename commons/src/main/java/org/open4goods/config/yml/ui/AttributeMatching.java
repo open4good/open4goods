@@ -1,10 +1,10 @@
 package org.open4goods.config.yml.ui;
 
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
-
 import org.open4goods.model.Localisable;
 import org.springframework.validation.annotation.Validated;
+
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 
 @Validated
 public class AttributeMatching {

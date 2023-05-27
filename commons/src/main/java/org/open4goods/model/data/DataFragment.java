@@ -13,9 +13,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
-
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.open4goods.exceptions.ResourceNotFoundException;
@@ -38,13 +35,13 @@ import org.springframework.data.elasticsearch.annotations.Document;
 import org.springframework.data.elasticsearch.annotations.Field;
 import org.springframework.data.elasticsearch.annotations.FieldType;
 
-import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.google.common.base.Objects;
 import com.google.common.collect.Sets;
 
-@Document(indexName = DataFragment.DATAFRAGMENTS_INDEX, refreshInterval = "60s", createIndex = true)
-//@Mapping(mappingPath = "/esmappings/datafragments.json")
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
+
 /**
  * The main product document a some (lot) of structured fields and some other
  * arbitrary ones.

@@ -5,8 +5,6 @@ package org.open4goods.api.controller.api;
 import java.util.Date;
 import java.util.Map;
 
-import javax.validation.constraints.NotBlank;
-
 import org.open4goods.config.yml.datasource.DataSourceProperties;
 import org.open4goods.crawler.services.IndexationService;
 import org.open4goods.model.constants.RolesConstants;
@@ -20,6 +18,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 
 import io.swagger.v3.oas.annotations.Operation;
+import jakarta.validation.constraints.NotBlank;
 
 /**
  * This controller allows informations and communications about DatasourceConfigurations

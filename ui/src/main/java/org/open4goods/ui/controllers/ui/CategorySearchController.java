@@ -1,7 +1,5 @@
 package org.open4goods.ui.controllers.ui;
 
-import javax.servlet.http.HttpServletRequest;
-
 import org.open4goods.ui.config.yml.UiConfig;
 import org.open4goods.ui.controllers.dto.VerticalSearchResponse;
 import org.open4goods.ui.services.SearchService;
@@ -10,6 +8,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.servlet.ModelAndView;
+
+import jakarta.servlet.http.HttpServletRequest;
 
 @Controller
 //	TODO(i18n, P2, 0.25) : I18n the pathes

@@ -3,8 +3,6 @@ package org.open4goods.crawler.services;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import javax.validation.constraints.NotBlank;
-
 import org.open4goods.model.constants.UrlConstants;
 import org.open4goods.model.data.DataFragment;
 import org.open4goods.model.dto.api.IndexationResponse;
@@ -13,6 +11,8 @@ import org.slf4j.LoggerFactory;
 
 import com.mashape.unirest.http.Unirest;
 import com.mashape.unirest.http.exceptions.UnirestException;
+
+import jakarta.validation.constraints.NotBlank;
 
 public class IndexationService {
 

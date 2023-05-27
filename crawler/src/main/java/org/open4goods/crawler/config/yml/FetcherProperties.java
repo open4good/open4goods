@@ -1,8 +1,6 @@
 
 package org.open4goods.crawler.config.yml;
 
-import javax.validation.constraints.NotBlank;
-
 import org.open4goods.config.yml.datasource.CrawlProperties;
 import org.open4goods.model.constants.UrlConstants;
 import org.open4goods.model.crawlers.ApiSynchConfig;
@@ -11,6 +9,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.validation.annotation.Validated;
+
+import jakarta.validation.constraints.NotBlank;
 
 /**
  * Config of the fetcher (ex crawler) components

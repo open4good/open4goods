@@ -9,7 +9,6 @@ import org.open4goods.model.product.AggregatedData;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import io.micrometer.core.annotation.Timed;
 
 /**
  * The real time AggregationService is stateless and thread safe.
@@ -50,7 +49,6 @@ public class BatchedAggregator extends AbstractAggregator {
 	 * @return
 	 * @throws AggregationSkipException 
 	 */
-	@Timed(value="AbstractAggregator.build()",description="Building an aggregated data from DataFragments")
 	public AggregatedData update(final AggregatedData data, Set<AggregatedData> datas) throws AggregationSkipException {
 
 		logger.info("Updating AggregatedData with AggragatedData {} and using {} services",data,services.size());

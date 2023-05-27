@@ -3,7 +3,7 @@ package org.open4goods.config.yml.datasource;
 
 import java.util.Map;
 
-import javax.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotBlank;
 
 public class XpathExtractorConfig {
 

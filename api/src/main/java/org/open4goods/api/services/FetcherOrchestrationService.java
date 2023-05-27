@@ -7,9 +7,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.TimeUnit;
 
-import javax.annotation.PostConstruct;
-import javax.validation.constraints.NotBlank;
-
 import org.open4goods.config.yml.datasource.DataSourceProperties;
 import org.open4goods.model.constants.TimeConstants;
 import org.open4goods.model.constants.UrlConstants;
@@ -28,6 +25,9 @@ import org.springframework.web.client.RestTemplate;
 
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
+
+import jakarta.annotation.PostConstruct;
+import jakarta.validation.constraints.NotBlank;
 
 
 /**

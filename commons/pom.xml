@@ -44,13 +44,13 @@
 			<groupId>org.springframework.data</groupId>
 			<artifactId>spring-data-elasticsearch</artifactId>
 		</dependency>
-
+<!---
 		<dependency>
-			<groupId>javax.validation</groupId>
+			<groupId>jakarta.validation</groupId>
 			<artifactId>validation-api</artifactId>
 			<scope>provided</scope>
 		</dependency>
-
+-->
 		<dependency>
 			<groupId>com.google.guava</groupId>
 			<artifactId>guava</artifactId>
@@ -64,18 +64,16 @@
 		</dependency>
 
 		<dependency>
-			<groupId>javax.mail</groupId>
-			<artifactId>javax.mail-api</artifactId>
+			<groupId>jakarta.mail</groupId>
+			<artifactId>jakarta.mail-api</artifactId>
 		</dependency>
 
-		<dependency>
-			<groupId>com.sun.mail</groupId>
-			<artifactId>javax.mail</artifactId>
-			<version>1.6.2</version>
-		</dependency>
+		<!-- 
+		-->
 		<dependency>
 			<groupId>org.apache.httpcomponents</groupId>
 			<artifactId>fluent-hc</artifactId>
+			<version>4.5.9</version>
 		</dependency>
 		
 		<dependency>
@@ -147,6 +145,11 @@
 			<version>1.4.9</version>
 		</dependency>
 
+		<dependency>
+		    <groupId>org.elasticsearch.client</groupId>
+		    <artifactId>elasticsearch-rest-high-level-client</artifactId>
+		    <version>7.17.10</version>
+		</dependency>
 	</dependencies>
 
 

@@ -3,9 +3,9 @@ package org.open4goods.config.yml.ui;
 
 import java.util.Locale;
 
-import javax.validation.constraints.NotBlank;
-
 import org.open4goods.model.Localisable;
+
+import jakarta.validation.constraints.NotBlank;
 
 public class SiteNaming {
 

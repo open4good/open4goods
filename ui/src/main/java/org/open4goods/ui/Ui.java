@@ -3,11 +3,8 @@ package org.open4goods.ui;
 
 import java.io.IOException;
 
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
-
+import org.open4goods.dao.AggregatedDataRepository;
 import org.open4goods.services.SerialisationService;
-import org.open4goods.store.repository.DataFragmentRepository;
 import org.open4goods.ui.repository.AffiliationTokenRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,11 +19,14 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 import com.mashape.unirest.http.ObjectMapper;
 import com.mashape.unirest.http.Unirest;
 
+import jakarta.annotation.PostConstruct;
+import jakarta.annotation.PreDestroy;
+
 @SpringBootApplication(scanBasePackages = "org.open4goods")
 @EnableScheduling
 @EnableCaching
 @Configuration
-@EnableElasticsearchRepositories(basePackageClasses = {DataFragmentRepository.class, AffiliationTokenRepository.class})
+@EnableElasticsearchRepositories(basePackageClasses = {AggregatedDataRepository.class, AffiliationTokenRepository.class})
 public class Ui {
 
 	private static final Logger logger = LoggerFactory.getLogger(Ui.class);

@@ -1,8 +1,8 @@
 package org.open4goods.helper;
 
-import javax.servlet.http.HttpServletRequest;
-
 import org.apache.commons.lang3.StringUtils;
+
+import jakarta.servlet.http.HttpServletRequest;
 
 public class IpHelper {
 
