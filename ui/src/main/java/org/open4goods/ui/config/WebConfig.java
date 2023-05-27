@@ -4,6 +4,7 @@ import org.open4goods.services.VerticalsConfigService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
@@ -46,10 +47,13 @@ public class WebConfig {
 
     
     
-	@Override
-	protected void configure(AuthenticationManagerBuilder auth) throws Exception {	
-			auth.authenticationProvider(authProvider);
-	}
+    @Bean
+    AuthenticationManager authManager(HttpSecurity http) throws Exception {
+        AuthenticationManagerBuilder authenticationManagerBuilder = 
+            http.getSharedObject(AuthenticationManagerBuilder.class);
+        authenticationManagerBuilder.authenticationProvider(authProvider);
+        return authenticationManagerBuilder.build();
+    }
 
     @Bean
     public PasswordEncoder passwordEncoder() {
