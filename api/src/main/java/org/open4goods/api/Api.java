@@ -3,6 +3,7 @@ package org.open4goods.api;
 
 import java.io.IOException;
 
+import org.open4goods.crawler.controller.CrawlController;
 import org.open4goods.dao.AggregatedDataRepository;
 import org.open4goods.services.SerialisationService;
 import org.slf4j.Logger;
@@ -22,7 +23,7 @@ import jakarta.annotation.PostConstruct;
 
 
 
-@SpringBootApplication (scanBasePackageClasses = {Api.class})
+@SpringBootApplication (scanBasePackageClasses = {Api.class, CrawlController.class})
 
 @EnableAspectJAutoProxy
 @EnableScheduling
