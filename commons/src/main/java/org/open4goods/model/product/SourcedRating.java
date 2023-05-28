@@ -35,9 +35,6 @@ public class SourcedRating extends Rating{
 	
 
 	
-	
-	
-	
 
 	/**
 	 * Constructor from a rating and a datafragment
@@ -64,10 +61,7 @@ public class SourcedRating extends Rating{
 	 */
 	public SourcedRating(SourcedAttribute df) {
 
-		this.date = df.getDate();
 		this.datasourceName = df.getDatasourceName();
-		this.url=df.getUrl();
-
 	}
 	
 	
