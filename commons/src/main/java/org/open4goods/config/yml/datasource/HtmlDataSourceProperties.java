@@ -81,6 +81,7 @@ public class HtmlDataSourceProperties {
 	 * execution of following extractors if no productTags has been found. It allows
 	 * to optimze by bypassing some extractors
 	 */
+	// TODO : in conf in each datasource
 	private Boolean evictIfNoXpathCategory = true;
 
 	/**
