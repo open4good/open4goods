@@ -8,7 +8,7 @@
 					   icon='fa-euro-sign',
 					   min=${products.minPrice},
 					   max=${products.maxPrice}">
-		<th:block th:include="inc/vertical-filter-item-numeric.html"></th:block>
+		<th:block th:insert="inc/vertical-filter-item-numeric.html"></th:block>
 	</th:block>	
 	
 	<!-- The num offers condition -->
@@ -19,7 +19,7 @@
 					   icon='fa-cart-plus',                   
 	                   min=${products.minOffers},
 	                   max=${products.maxOffers}">
-		<th:block th:include="inc/vertical-filter-item-numeric.html"></th:block>
+		<th:block th:insert="inc/vertical-filter-item-numeric.html"></th:block>
 	</th:block>	
 	
 	
@@ -36,7 +36,7 @@
 					   icon=${filter.key.faIcon},		                   
 					   visibleSection=10,
 					   terms=${filter.value}">
-			<th:block th:include="inc/vertical-filter-item-terms.html"></th:block>
+			<th:block th:insert="inc/vertical-filter-item-terms.html"></th:block>
 		</th:block>		
 	
 	
@@ -56,7 +56,7 @@
 					   visibleSection=10,
 					   terms=${products.brands}"
 					   >
-		<th:block th:include="inc/vertical-filter-item-terms.html"></th:block>
+		<th:block th:insert="inc/vertical-filter-item-terms.html"></th:block>
 	</th:block>	
 	
 </div>

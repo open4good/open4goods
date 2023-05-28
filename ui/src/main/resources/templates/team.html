@@ -4,7 +4,7 @@
 <head>
 
 	<!--/* Metas and CSS */-->
-	<th:block th:include="inc/header-meta.html"></th:block>
+	<th:block th:insert="inc/header-meta.html"></th:block>
     
 	<!-- Primary Meta Tags -->
 	<title th:text="#{search.title}"></title>
@@ -32,10 +32,10 @@
 	<!--/* Navbar */-->
 	<header class="header-global">
     	<nav id="navbar-main" aria-label="Primary navigation" class="navbar navbar-main navbar-expand-lg navbar-theme-primary headroom navbar-dark navbar-theme-primary">
-			<th:block th:include="inc/navbar-non-product.html"></th:block>
+			<th:block th:insert="inc/navbar-non-product.html"></th:block>
 		</nav>
        <!--/* Loader */-->
-       <th:block th:include="inc/preloader.html"></th:block>
+       <th:block th:insert="inc/preloader.html"></th:block>
 	</header>
 	
     <main>	
@@ -51,7 +51,7 @@
                         <h1 class="display-2 text-white mb-3">Notre équipe</h1>
                         <p class="lead">                        	                       
                         	<th:block th:with="path='TEAM/header/'">
-                        		<th:block th:include="inc/wiki.html"></th:block>
+                        		<th:block th:insert="inc/wiki.html"></th:block>
                         	</th:block>
                         </p>
                     </div>
@@ -78,7 +78,7 @@
                                 </ul>
                                 <p class="card-text my-2">
 		                        	<th:block th:with="path='TEAM/goulven/'">
-		                        		<th:block th:include="inc/wiki.html"></th:block>
+		                        		<th:block th:insert="inc/wiki.html"></th:block>
 		                        	</th:block>                                
                                 </p>
                             </div>
@@ -101,7 +101,7 @@
                                 </ul>
                                 <p class="card-text my-2">
 		                        	<th:block th:with="path='TEAM/berangere/'">
-		                        		<th:block th:include="inc/wiki.html"></th:block>
+		                        		<th:block th:insert="inc/wiki.html"></th:block>
 		                        	</th:block>                               
 		                         </p>
                             </div>
@@ -124,7 +124,7 @@
                                 </ul>
                                 <p class="card-text my-2">
 		                        	<th:block th:with="path='TEAM/thomas/'">
-		                        		<th:block th:include="inc/wiki.html"></th:block>
+		                        		<th:block th:insert="inc/wiki.html"></th:block>
 		                        	</th:block>  
                                 </p>
                             </div>
@@ -165,7 +165,7 @@
     </main>
 
 	<!--/* Footer */-->
-	<th:block th:include="inc/footer.html"></th:block>	
+	<th:block th:insert="inc/footer.html"></th:block>	
 
 <!-- Core -->
 <script src="../../vendor/@popperjs/core/dist/umd/popper.min.js"></script>

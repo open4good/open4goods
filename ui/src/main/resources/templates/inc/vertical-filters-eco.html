@@ -9,7 +9,7 @@
 					   labelType='alert-success',					   
 					   min=0,
 					   max=5">
-		<th:block th:include="inc/vertical-filter-item-numeric.html"></th:block>
+		<th:block th:insert="inc/vertical-filter-item-numeric.html"></th:block>
 	</th:block>
 	
 		
@@ -21,7 +21,7 @@
 					   labelType='alert-success',		
 					   visibleSection=10,	   
 					   terms=${products.conditions}">
-		<th:block th:include="inc/vertical-filter-item-terms.html"></th:block>
+		<th:block th:insert="inc/vertical-filter-item-terms.html"></th:block>
 	</th:block>	
 	
 	<!-- The originating countries -->
@@ -35,7 +35,7 @@
 					   termsLineWidget='vertical-filter-item-term-country'
 					   
 					   ">
-		<th:block th:include="inc/vertical-filter-item-terms.html"></th:block>
+		<th:block th:insert="inc/vertical-filter-item-terms.html"></th:block>
 	</th:block>	
 	
 	

@@ -1,11 +1,9 @@
 package org.open4goods.ui.services;
 
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import org.apache.commons.lang3.StringUtils;
 import org.open4goods.config.yml.attributes.AttributeConfig;
@@ -15,7 +13,6 @@ import org.open4goods.helper.GenericFileLogger;
 import org.open4goods.model.constants.ProductState;
 import org.open4goods.model.product.AggregatedData;
 import org.open4goods.ui.controllers.dto.NumericRangeFilter;
-import org.open4goods.ui.controllers.dto.VerticalFilterTerm;
 import org.open4goods.ui.controllers.dto.VerticalSearchRequest;
 import org.open4goods.ui.controllers.dto.VerticalSearchResponse;
 import org.slf4j.Logger;
@@ -23,15 +20,14 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
-import org.springframework.data.elasticsearch.client.elc.ElasticsearchAggregations;
 import org.springframework.data.elasticsearch.client.elc.NativeQueryBuilder;
+import org.springframework.data.elasticsearch.client.elc.QueryBuilders;
+import org.springframework.data.elasticsearch.client.erhlc.NativeSearchQueryBuilder;
 import org.springframework.data.elasticsearch.core.AggregationsContainer;
 import org.springframework.data.elasticsearch.core.SearchHits;
 import org.springframework.data.elasticsearch.core.query.Criteria;
 import org.springframework.data.elasticsearch.core.query.CriteriaQuery;
 import org.springframework.data.elasticsearch.core.query.Order;
-
-import com.ibm.icu.text.AlphabeticIndex.Bucket;
 
 import ch.qos.logback.classic.Level;
 import co.elastic.clients.elasticsearch._types.aggregations.Aggregation;
@@ -73,6 +69,7 @@ public class SearchService {
 	 * @param query
 	 * @return
 	 */
+	// TODO(perf : cache)
 	public VerticalSearchResponse globalSearch(String initialQuery, Integer fromPrice, Integer toPrice, Set<String> categories, ProductState condition, int from, int to, int minOffers, boolean sort) {
 		
 		String query =  sanitize(initialQuery);
@@ -80,44 +77,39 @@ public class SearchService {
 		// Logging
 		statsLogger.info("Searching {}",initialQuery);
 		
-		
-		Criteria c = aggregatedDataRepository.getValidDateQuery();
+		Criteria c = null;
+		if (StringUtils.isNumeric(query)) {
+			// Showing even if no offers when by GTIN
+			c = new Criteria("attributes.referentielAttributes.GTIN.keyword").is(initialQuery);
+		}
+		else {
+			c = aggregatedDataRepository.getValidDateQuery()
+					// TODO(security) : sanitize, web imput !!
+					.and(new Criteria("names.offerNames").in(Arrays.asList(query.split(" ")))
+					.and("offersCount").greaterThanEqual(1)			)	
 
 
-		// Query string query
-		if (!StringUtils.isEmpty(query)) {			
-			String frags[] = query.split(" ");
-			String q = Stream.of(frags)
-					.map(e -> "names.offerNames:"+e)				
-					. collect(Collectors.joining(" AND "));
-
-			String translatedVerticalQuery ="attributes.referentielAttributes.GTIN.keyword:\""+query+"\"  OR ("+q+")"; 		
+					;
 			
-			// Adding minoffers filter
-			if (minOffers > 0) {
-				translatedVerticalQuery += " AND offersCount:> " + minOffers;
-				
-			}
+			// TODO : could add
+//			price
+//			vertical
+//			offerscount
+//			neuf / occasion
+//			
+//			barcode nationality
+//			garantie
+//			ecoscore
+//			classe energie
 			
-			
-			c = c.and(new Criteria().expression(translatedVerticalQuery));
 		}
 	
+
 		NativeQueryBuilder esQuery = new NativeQueryBuilder()
 		.withQuery(new CriteriaQuery(c))
 		.withPageable(PageRequest.of(from, to))
-		.withSort(Sort.by(Order.desc("offersCount")))
-//		.withSorts(SortBuilders.fieldSort("minOffers"))
+		.withSort(Sort.by(Order.desc("offersCount")));
 
-		;
-		
-//		if (sort) {
-//			 esQuery.        withSort(SortBuilders.fieldSort("offersCount").order(SortOrder.DESC));
-//		}
-//		
-		
-		
-		
 		SearchHits<AggregatedData> results = aggregatedDataRepository.search(esQuery.build(),ALL_VERTICAL_NAME);
 		VerticalSearchResponse vsr = new VerticalSearchResponse();			
 
@@ -171,12 +163,12 @@ public class SearchService {
 		
 		// Adding custom checkbox filters		
 		for (Entry<String, Set<String>> filter : request.getTermsFilter().entrySet()) {
-			criterias.and(new Criteria(filter.getKey()).is(filter.getValue()) );
+			criterias.and(new Criteria(filter.getKey()).in(filter.getValue()) );
 		}
 		
 		// condition
 		if (null != request.getCondition()) {
-			criterias.and(new Criteria("price.conditions").is(request.getCondition().toString()) );
+			criterias.and(new Criteria("price.conditions").in(request.getCondition().toString()) );
 		}
 		
 		// min offersCount
