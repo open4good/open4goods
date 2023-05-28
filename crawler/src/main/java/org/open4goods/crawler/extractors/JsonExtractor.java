@@ -166,6 +166,7 @@ public class JsonExtractor extends Extractor {
 		////////////////////
 		if (!StringUtils.isEmpty(c.getCategory())) {
 			p.addProductTag(jsonEval(root, c.getCategory()));
+			// TODO : log if fail everywhere
 		}
 
 		////////////////////
