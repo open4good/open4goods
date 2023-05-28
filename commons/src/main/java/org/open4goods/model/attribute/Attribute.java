@@ -52,16 +52,9 @@ public class Attribute implements Validable,IAttribute {
 	/**
 	 * The attribute raw rawValue
 	 */
-	@Field(index = false, store = false, type = FieldType.Keyword)		
+	@Field(index = false, store = false, type = FieldType.Keyword)
+//	TODO : Pass to String
 	private Object rawValue;
-
-	/**
-	 * If true, means it is a referentiel attribute
-	 */
-	
-	@Field(index = false, store = false, type = FieldType.Boolean)	
-	private Boolean referentiel = false;
-
 
 	public Attribute() {
 
@@ -473,14 +466,6 @@ public class Attribute implements Validable,IAttribute {
 
 	public void setLanguage(final String language) {
 		this.language = language;
-	}
-
-	public Boolean getReferentiel() {
-		return referentiel;
-	}
-
-	public void setReferentiel(Boolean referentiel) {
-		this.referentiel = referentiel;
 	}
 
 	@Override

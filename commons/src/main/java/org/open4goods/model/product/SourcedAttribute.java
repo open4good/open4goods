@@ -11,13 +11,6 @@ public class SourcedAttribute extends Attribute{
 	@Field(index = false, store = false, type = FieldType.Keyword)	
 	private String datasourceName;
 	
-	@Field(index = false, store = false, type = FieldType.Keyword)	
-	private String url;
-	
-	@Field(index = false, store = false, type = FieldType.Date, format = DateFormat.epoch_millis)	
-	private Long date;
-
-
 	public SourcedAttribute() {
 		super();
 	}
@@ -29,21 +22,16 @@ public class SourcedAttribute extends Attribute{
 	 */
 	public SourcedAttribute(IAttribute source, DataFragment df) {
 
-		this.date = df.getLastIndexationDate();
 		this.datasourceName = df.getDatasourceName();
-		this.url=df.affiliatedUrlIfPossible();
 		
 		setRawValue(source.getValue());
 		setLanguage(source.getLanguage());
 		setName(source.getName());
-//		setReferentiel(source.getReferentiel());
 
 	}
 	
 	
 	public SourcedAttribute(IAttribute source, AggregatedData df) {
-
-		this.date = df.getLastChange();
 		
 		setRawValue(source.getValue());
 		setLanguage(source.getLanguage());
@@ -59,30 +47,12 @@ public class SourcedAttribute extends Attribute{
 	
 
 
-
-
-	public String getUrl() {
-		return url;
-	}
-
-	public void setUrl(String url) {
-		this.url = url;
-	}
-
 	public String getDatasourceName() {
 		return datasourceName;
 	}
 
 	public void setDatasourceName(String datasourceName) {
 		this.datasourceName = datasourceName;
-	}
-
-	public Long getDate() {
-		return date;
-	}
-
-	public void setDate(Long date) {
-		this.date = date;
 	}
 
 

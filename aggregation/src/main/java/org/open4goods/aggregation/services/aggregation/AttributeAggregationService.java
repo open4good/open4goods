@@ -284,13 +284,9 @@ public class AttributeAggregationService extends AbstractAggregationService {
 				bestValue.put(attr.getRawValue(), new AtomicInteger(0));
 			}
 			
-			if (attr.getReferentiel()) {
-				// A referentiel marked item gives 2 points
-				bestValue.get(attr.getRawValue()).addAndGet(2);
-			} else {
-				// Standard datasources give 1 point
-				bestValue.get(attr.getRawValue()).incrementAndGet();
-			}
+
+			// Standard datasources give 1 point
+			bestValue.get(attr.getRawValue()).incrementAndGet();
 			
 			
 	
@@ -307,7 +303,7 @@ public class AttributeAggregationService extends AbstractAggregationService {
 		ret.setType(Attribute.getType(elected.get().getKey()));
 		ret.setValue(elected.get().getKey().toString());
 		
-		
+		//TODO : Update the attributes conflicts / election
 		
 		// Setting potential conflicts
 		ret.setHasConflicts( ret.getSources().size() > 1);
