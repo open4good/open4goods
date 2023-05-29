@@ -96,7 +96,7 @@ public class AggregatedDataRepository {
 		
 	}
 	
-	public SearchHits<AggregatedData> search(CriteriaQuery query, final String indexName) {				
+	public SearchHits<AggregatedData> search(Query query, final String indexName) {				
 		return elasticsearchTemplate.search(query, AggregatedData.class, IndexCoordinates.of(indexName));
 		
 	}
