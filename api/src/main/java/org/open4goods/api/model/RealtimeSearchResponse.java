@@ -22,42 +22,42 @@ public class RealtimeSearchResponse {
 	// The results by gtin's, when matching
 	Map<String, Set<DataFragment>> gtinMatches = new HashMap<String, Set<DataFragment>>();
 
-	
+
 	///////////////
 	// UI helper function
 	///////////////
 	public String name(Set<DataFragment> dfs) {
 		for (DataFragment df : dfs) {
 			String ret = df.longestName();
-			
+
 			if (!StringUtils.isEmpty(ret)) {
 				return ret;
 			}
 		}
 		return "NO-NAME";
 	}
-	
-	
+
+
 	public String brand(Set<DataFragment> dfs) {
-//		return StringUtils.join(dfs.stream().map(e -> e.brand()).collect(Collectors.toSet()));
-		return (dfs.stream().filter(e -> e!= null && null != e.brand()) .map(e -> e.brand()).findAny().orElse("NO-BRAND"));
+		//		return StringUtils.join(dfs.stream().map(e -> e.brand()).collect(Collectors.toSet()));
+		return (dfs.stream().filter(e -> e!= null && null != e.brand()) .map(DataFragment::brand).findAny().orElse("NO-BRAND"));
 	}
 
-	
+
 	public String model(Set<DataFragment> dfs) {
-//		return StringUtils.join(dfs.stream().map(e -> e.brandUid()).collect(Collectors.toSet()));
-		return (dfs.stream().filter(e -> e!= null && null != e.brandUid()) .map(e -> e.brandUid()).findAny().orElse("NO-MODEL"));
+		//		return StringUtils.join(dfs.stream().map(e -> e.brandUid()).collect(Collectors.toSet()));
+		return (dfs.stream().filter(e -> e!= null && null != e.brandUid()) .map(DataFragment::brandUid).findAny().orElse("NO-MODEL"));
 	}
-	
-	
-	
-	
-	
-	
-	
+
+
+
+
+
+
+
 	/**
 	 * Constructor
-	 * 
+	 *
 	 * @param productName
 	 */
 	public RealtimeSearchResponse(String productName) {
@@ -73,7 +73,7 @@ public class RealtimeSearchResponse {
 	////////////////////////
 
 	/**
-	 * 
+	 *
 	 * @return the total number of results
 	 */
 	public Integer getTotalResults() {
@@ -86,7 +86,7 @@ public class RealtimeSearchResponse {
 	}
 
 	/**
-	 * 
+	 *
 	 * @return true if all the datafragments relate to only one gtin
 	 */
 	public boolean isMonoGtin() {
@@ -100,10 +100,10 @@ public class RealtimeSearchResponse {
 		return getTotalResults() == 0;
 	}
 
-	
+
 	/**
 	 * Straightforward method to retrieve the gtin we have much data for
-	 * 
+	 *
 	 * @return
 	 */
 	public String bestGtin() {
@@ -123,7 +123,7 @@ public class RealtimeSearchResponse {
 
 	/**
 	 * Complete the time
-	 * 
+	 *
 	 * @return
 	 */
 	public RealtimeSearchResponse done() {
@@ -132,16 +132,16 @@ public class RealtimeSearchResponse {
 	}
 
 	/**
-	 * 
+	 *
 	 * @return All datafragments in this query
 	 */
 	public Stream<DataFragment> all() {
-		return Stream.concat(nameMatches.stream(), gtinMatches.values().stream().flatMap(x -> x.stream()));
+		return Stream.concat(nameMatches.stream(), gtinMatches.values().stream().flatMap(Set::stream));
 	}
 
 	/**
 	 * All datafragments relativ to a given gtin (+ the byNames gtins)
-	 * 
+	 *
 	 * @param gtin
 	 * @return
 	 */

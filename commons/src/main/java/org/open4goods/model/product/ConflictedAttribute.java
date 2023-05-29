@@ -4,19 +4,19 @@ import java.util.HashSet;
 import java.util.Set;
 
 public class ConflictedAttribute {
-	
+
 	/**
 	 * The value for this conflict occurence
 	 */
 	private String value;
-	
+
 	/**
 	 * The attributes agreeing to this value
 	 */
 	private Set<SourcedAttribute> sources = new HashSet<>();
 
-	
-	
+
+
 	public String getValue() {
 		return value;
 	}
@@ -32,11 +32,11 @@ public class ConflictedAttribute {
 	public void setSources(Set<SourcedAttribute> sources) {
 		this.sources = sources;
 	}
-	
-	
-	
-	
-	
-	
+
+
+
+
+
+
 
 }

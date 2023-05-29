@@ -24,13 +24,13 @@ public class Resource  implements Validable {
 
 	@Field(index = false, store = false, type = FieldType.Keyword)
 	private String url;
-	
+
 	@Field(index = false, store = false, type = FieldType.Keyword)
 	private String providerName;
-	
+
 	@Field(index = false, store = false, type = FieldType.Date, format = DateFormat.epoch_millis)
 	private Long timeStamp;
-	
+
 	@Field(index = false, store = false, type = FieldType.Keyword)
 	private String cacheKey;
 
@@ -44,7 +44,7 @@ public class Resource  implements Validable {
 	 * From ResourceTagDictionary
 	 */
 	@Field(index = false, store = false, type = FieldType.Keyword)
-	
+
 	private Set<String> tags = new HashSet<>();
 
 
@@ -87,7 +87,7 @@ public class Resource  implements Validable {
 		return getUrl().hashCode();
 	}
 
-	
+
 	@Override
 	public void validate() throws ValidationException {
 		try {
@@ -99,13 +99,13 @@ public class Resource  implements Validable {
 	}
 
 
-	
+
 
 	public String nameFromUrl() {
 
-	
+
 		final int from = getUrl().lastIndexOf('/');
-		final int to = getUrl().indexOf('?', from);		
+		final int to = getUrl().indexOf('?', from);
 
 		if (from != -1 && to != -1 && from < to) {
 			String ret = getUrl().substring(from+1, to);
@@ -113,7 +113,7 @@ public class Resource  implements Validable {
 			if (-1 != to2) {
 				ret = ret.substring(0,to2-1);
 			}
-			return ret;			
+			return ret;
 		} else {
 			logger.warn("Cannot extract nice name from url {}",getUrl());
 			return getUrl();
@@ -124,11 +124,11 @@ public class Resource  implements Validable {
 		//NOTE(gof) : performances
 		int length = hash.lastIndexOf(".");
 		if (-1 == length) {
-			length=hash.length();			
+			length=hash.length();
 		}
-		
-		
-		
+
+
+
 		return hash == null ? null : hash.substring(length-3,length-2).toUpperCase() + "/" + hash.substring(length-2,length-1).toUpperCase() +"/" + hash.substring(length-1,length).toUpperCase()+"/";
 	}
 

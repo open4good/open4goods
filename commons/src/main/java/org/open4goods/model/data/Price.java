@@ -49,7 +49,7 @@ public class Price implements Validable, Standardisable, Comparable<Double> {
 	@Field(index = true, store = false, type = FieldType.Date, format = DateFormat.epoch_millis)
 	private Long timeStamp;
 
-//	private static final SimpleDateFormat iso8601 = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
+	//	private static final SimpleDateFormat iso8601 = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
 
 	public Price() {
 		super();
@@ -67,7 +67,7 @@ public class Price implements Validable, Standardisable, Comparable<Double> {
 
 	@Override
 	public int compareTo(Double o) {
-		return this.price.compareTo(o);
+		return price.compareTo(o);
 	}
 
 	@Override
@@ -79,7 +79,7 @@ public class Price implements Validable, Standardisable, Comparable<Double> {
 
 		if (obj instanceof Price) {
 			final Price p = (Price) obj;
-			return Objects.equals(this.getCurrency(), p.getCurrency()) && Objects.equals(this.getPrice(), p.getPrice());
+			return Objects.equals(getCurrency(), p.getCurrency()) && Objects.equals(getPrice(), p.getPrice());
 
 		}
 		return false;
@@ -121,7 +121,7 @@ public class Price implements Validable, Standardisable, Comparable<Double> {
 			return false;
 		}
 
-		if (!p.getCurrency().equals(this.getCurrency())) {
+		if (!p.getCurrency().equals(getCurrency())) {
 			logger.error("greaterThan is not so good on different currencies ! Data coherence will be bad....");
 		}
 
@@ -134,7 +134,7 @@ public class Price implements Validable, Standardisable, Comparable<Double> {
 			logger.error("Cannot apply lowerThan on a null price");
 			return false;
 		}
-		if (!p.getCurrency().equals(this.getCurrency())) {
+		if (!p.getCurrency().equals(getCurrency())) {
 			logger.error("lowerThan is not so good on different currencies ! Data coherence will be bad....");
 
 		}
@@ -142,23 +142,23 @@ public class Price implements Validable, Standardisable, Comparable<Double> {
 		return price < p.getPrice();
 	}
 
-	
+
 	/**
-	 * 
+	 *
 	 * @return a localised formated duration of when the price was last indexed
 	 */
 	public String ago(Locale locale) {
-				
+
 		DurationFieldType[] fields = {DurationFieldType.days(), DurationFieldType.hours()};
 		Period period = new Period(System.currentTimeMillis() - timeStamp, PeriodType.forFields(fields)).normalizedStandard();
 		PeriodFormatter formatter = PeriodFormat.wordBased(locale);
-		
+
 		period.getDays();
-		
-		
+
+
 		return (formatter. print(period));
 	}
-	
+
 	public void setCurrency(String currency) throws ParseException {
 
 		if (StringUtils.isEmpty(currency)) {
@@ -174,7 +174,7 @@ public class Price implements Validable, Standardisable, Comparable<Double> {
 	}
 
 	public void setPriceValue(final String price, final Locale locale) throws ParseException {
-		
+
 
 		Double p;
 		try {
@@ -187,7 +187,7 @@ public class Price implements Validable, Standardisable, Comparable<Double> {
 
 		}
 
-		if (null != this.price && !this.price.equals(p)) {			
+		if (null != this.price && !this.price.equals(p)) {
 			logger.info("Price conflict : {} <> {}. Will erase",p,this.price);
 		}
 
@@ -199,7 +199,7 @@ public class Price implements Validable, Standardisable, Comparable<Double> {
 
 	/**
 	 * Return the decimal part with the ".", or empty text if none
-	 * 
+	 *
 	 * @return
 	 */
 	public String priceRoundingPart() {
@@ -220,7 +220,7 @@ public class Price implements Validable, Standardisable, Comparable<Double> {
 
 	/**
 	 * Return the currency symbol
-	 * 
+	 *
 	 * @return
 	 */
 	public String currencySymbol() {
@@ -232,7 +232,7 @@ public class Price implements Validable, Standardisable, Comparable<Double> {
 	 * @return
 	 */
 	public String validUntil () {
-		
+
 		Date date = new Date(timeStamp + MICRODATA_VALID_UNTIL_DURATION);
 		Calendar calendar = Calendar.getInstance();
 		calendar.setTime(date);

@@ -28,11 +28,10 @@ import org.open4goods.model.data.Rating;
 import org.open4goods.model.data.RatingType;
 import org.open4goods.model.product.AggregatedAttribute;
 import org.open4goods.model.product.AggregatedAttributes;
-import org.open4goods.model.product.Product;
 import org.open4goods.model.product.AggregatedFeature;
 import org.open4goods.model.product.IAttribute;
+import org.open4goods.model.product.Product;
 import org.open4goods.model.product.SourcedAttribute;
-import org.open4goods.model.product.SourcedRating;
 import org.open4goods.services.StandardiserService;
 
 // TODO : Deduplicate code beween datafragment and aggregateddata
@@ -45,55 +44,55 @@ public class AttributeAggregationService extends AbstractAggregationService {
 		this.attributesConfig = attributesConfig;
 	}
 
-	
+
 
 	@Override
 	public Product onAggregatedData(Product data, Set<Product> datas) {
-	
-		
+
+
 		AggregatedAttributes aa = data.getAttributes();
-				
-		
+
+
 		/////////////////////////////////////////
 		// Update referentiel attributes
 		/////////////////////////////////////////
-	
-		
-				
+
+
+
 		// 2 - Classifying "matched/unmatched" attributes
 		List<SourcedAttribute> matchedAttrs = new ArrayList<>();
-		List<SourcedAttribute> allAttrs = new ArrayList<>();		
-		
-	
+		List<SourcedAttribute> allAttrs = new ArrayList<>();
+
+
 		for (AggregatedAttribute attr : data.getAttributes().getUnmapedAttributes()) {
 			IAttribute translated = attributesConfig.translateAttribute(attr, data.getVertical());
-			
+
 			if (null != translated) {
 				matchedAttrs.add(new SourcedAttribute(translated, data));
-			} else { 			
+			} else {
 				allAttrs.add(new SourcedAttribute(attr, data));
 			}
-			
+
 		}
 
-		
+
 		////////////////////////////////////
 		// Aggregating standard attributes
 		///////////////////////////////////
 		aa.getAggregatedAttributes().clear();
 		aa.getUnmapedAttributes().clear();
-		
+
 		// 3 - Applying attribute transformations on matched ones
 		//TODO : handle conflicts
-		 
+
 		Set<AggregatedAttribute> aggattrs = aggregateAttributes(matchedAttrs);
 		for (AggregatedAttribute aga : aggattrs) {
-			aa.getAggregatedAttributes().put(aga.getName(), aga);	
+			aa.getAggregatedAttributes().put(aga.getName(), aga);
 			aga.setScore(generateScoresFromAttribute(aga.getName() ,aga));
 		}
-		 
-		dedicatedLogger.info("{} recognized attributes, {} are not ",matchedAttrs.size(),allAttrs.size());		
-		
+
+		dedicatedLogger.info("{} recognized attributes, {} are not ",matchedAttrs.size(),allAttrs.size());
+
 		///////////////////////////////////
 		// Adding unmatched attributes
 		///////////////////////////////////
@@ -101,15 +100,15 @@ public class AttributeAggregationService extends AbstractAggregationService {
 			AggregatedAttribute aat = new AggregatedAttribute();
 			aat.setName(attr.getName());
 			aat.setValue(attr.getRawValue().toString());
-			aa.getUnmapedAttributes().add(aat);			
+			aa.getUnmapedAttributes().add(aat);
 		}
-		
-		
-		
+
+
+
 		return data;
 	}
-	
-	
+
+
 	/**
 	 * Associate and match a set of nativ attributes in a product
 	 *
@@ -119,77 +118,77 @@ public class AttributeAggregationService extends AbstractAggregationService {
 	 */
 	@Override
 	public void onDataFragment(final DataFragment d, final Product output) {
-		
+
 		AggregatedAttributes aa = output.getAttributes();
-				
-		
+
+
 		/////////////////////////////////////////
 		// Update referentiel attributes
 		/////////////////////////////////////////
 		handleReferentielAttributes(d.getReferentielAttributes() ,aa, output);
-		dedicatedLogger.info("{} referentiel attributes merged",aa.getReferentielAttributes().size());		
-		
-				
+		dedicatedLogger.info("{} referentiel attributes merged",aa.getReferentielAttributes().size());
+
+
 		// 2 - Classifying "matched/unmatched" attributes
 		List<SourcedAttribute> matchedAttrs = new ArrayList<>();
-		List<SourcedAttribute> allAttrs = new ArrayList<>();		
-		
-	
+		List<SourcedAttribute> allAttrs = new ArrayList<>();
+
+
 		for (Attribute attr : d.getAttributes()) {
 			IAttribute translated = attributesConfig.translateAttribute(attr, "COMPUTED");
 			if (null != translated) {
 				matchedAttrs.add(new SourcedAttribute(translated, d));
-			} 
-			
+			}
+
 			allAttrs.add(new SourcedAttribute(attr, d));
 		}
 
 		//////////////////////////////////
 		// Extracting featured attributes
 		//////////////////////////////////
-		
-		
+
+
 		// For matched
 		List<SourcedAttribute> matchedFeatures = matchedAttrs.stream()
-									.filter(e -> isFeatureAttribute(e))
-									.collect(Collectors.toList());
-		
+				.filter(this::isFeatureAttribute)
+				.collect(Collectors.toList());
+
 		// We also keep them as classical attributes
 		//matchedAttrs.removeAll(matchedFeatures);
-		
-		// For unmatched		
+
+		// For unmatched
 		List<SourcedAttribute> unmatchedFeatures = allAttrs.stream()
-				.filter(e -> isFeatureAttribute(e))
+				.filter(this::isFeatureAttribute)
 				.collect(Collectors.toList());
 		allAttrs.removeAll(unmatchedFeatures);
-		
+
 		// Merging features
 		List<SourcedAttribute> features = new ArrayList<>();
 		features.addAll(matchedFeatures);
 		features.addAll(unmatchedFeatures);
-				
-		
+
+
 		Collection<AggregatedFeature> af = aggregateFeatures(matchedFeatures,unmatchedFeatures);
 		aa.getFeatures().addAll(af);
 
 		////////////////////////////////////
 		// Aggregating standard attributes
 		///////////////////////////////////
-		
-		dedicatedLogger.info("{} featured attributes merged from {} matched sources and {} unmatched sources", af.size(), matchedFeatures.size(), unmatchedFeatures.size());		
-				
+
+		dedicatedLogger.info("{} featured attributes merged from {} matched sources and {} unmatched sources", af.size(), matchedFeatures.size(), unmatchedFeatures.size());
+
 		// 3 - Applying attribute transformations on matched ones
 		//TODO : handle conflicts
 
 		Set<AggregatedAttribute> aggattrs = aggregateAttributes(matchedAttrs);
 		for (AggregatedAttribute aga : aggattrs) {
-			
+
 			aga.setScore(generateScoresFromAttribute(aga.getName() ,aga));
-			aa.getAggregatedAttributes().put(aga.getName(), aga);	
-			
+			aa.getAggregatedAttributes().put(aga.getName(), aga);
+
 		}
-		dedicatedLogger.info("{} recognized attributes, {} are not ",matchedAttrs.size(),allAttrs.size());		
-		
+		dedicatedLogger.info("{} recognized attributes, {} are not ",matchedAttrs.size(),allAttrs.size());
+
 		///////////////////////////////////
 		// Adding unmatched attributes
 		///////////////////////////////////
@@ -197,34 +196,34 @@ public class AttributeAggregationService extends AbstractAggregationService {
 			AggregatedAttribute aat = new AggregatedAttribute();
 			aat.setName(attr.getName());
 			aat.setValue(attr.getRawValue().toString());
-			aa.getUnmapedAttributes().add(aat);						
+			aa.getUnmapedAttributes().add(aat);
 		}
-		
-		
+
+
 	}
 
-	
-	
+
+
 	/**
 	 * Operates the "matched" attributes aggregation
 	 * @param matchedAttrs
-	 * @param aa 
+	 * @param aa
 	 * @return
 	 */
 	private Set<AggregatedAttribute> aggregateAttributes(List<SourcedAttribute> matchedAttrs) {
 		Set<AggregatedAttribute> ret = new HashSet<>();
-		
+
 		// Split per attribute names
-		
+
 		Map<String,Set<SourcedAttribute>> attrs = new HashMap<>();
-		
+
 		matchedAttrs.forEach(a -> {
 			if (!attrs.containsKey(a.getName())) {
 				attrs.put(a.getName(),new HashSet<>());
-			}			
+			}
 			attrs.get(a.getName()).add(a);
 		});
-		
+
 		// Building aggregatedAttribute
 		for (Entry<String, Set<SourcedAttribute>> e : attrs.entrySet()) {
 			try {
@@ -235,7 +234,7 @@ public class AttributeAggregationService extends AbstractAggregationService {
 		}
 
 		return ret;
-	
+
 	}
 
 	/**
@@ -243,13 +242,13 @@ public class AttributeAggregationService extends AbstractAggregationService {
 	 * @param key
 	 * @param value
 	 * @return
-	 * @throws ValidationException 
+	 * @throws ValidationException
 	 */
 	private AggregatedAttribute aggregateAttribute(String name, Set<SourcedAttribute> attributes) throws ValidationException {
 		AggregatedAttribute ret = new AggregatedAttribute();
 		ret.setName(name);
-		
-		
+
+
 		// Retrieving attrConfig
 		final AttributeConfig aConfig = attributesConfig.getAttributeConfigByKey(name);
 
@@ -257,9 +256,9 @@ public class AttributeAggregationService extends AbstractAggregationService {
 		// Best value election, via counting map
 		///////////////////////////////
 		Map<Object, AtomicInteger> bestValue = new HashMap<>();
-		
+
 		for (SourcedAttribute attr : attributes) {
-			
+
 			SourcedAttribute parsed;
 
 			try {
@@ -269,51 +268,51 @@ public class AttributeAggregationService extends AbstractAggregationService {
 				dedicatedLogger.info("Attribute parsing failed for {} with message {} ", attr, e.getMessage());
 				continue;
 			}
-	
+
 			// Detecting type and checking conformity
 			final Optional<AttributeType> type = parsed.detectType();
 			if (type.isEmpty() ||  type.get() != aConfig.getType()) {
 				dedicatedLogger.warn("Incompatible type for attribute {} : Expected {}, real type was {}", attr, aConfig);
 				continue;
 			}
-			
+
 			// Adding attribute
 			ret.addAttribute(parsed);
-		
+
 			if (!bestValue.containsKey(attr.getRawValue())) {
 				bestValue.put(attr.getRawValue(), new AtomicInteger(0));
 			}
-			
+
 
 			// Standard datasources give 1 point
 			bestValue.get(attr.getRawValue()).incrementAndGet();
-			
-			
-	
+
+
+
 		}
 
-		// Getting The elected one			
+		// Getting The elected one
 		Optional<Entry<Object, AtomicInteger>> elected = bestValue.entrySet().stream().max((entry1, entry2) -> entry1.getValue().intValue() > entry2.getValue().intValue() ? 1 : -1);
-		
-		
+
+
 		if (elected.isEmpty() || null ==  elected.get()) {
 			throw new ValidationException("Not enough data, cannot build "+name+" from "+attributes+", see previous errors");
 		}
-		
+
 		ret.setType(Attribute.getType(elected.get().getKey()));
 		ret.setValue(elected.get().getKey().toString());
-		
+
 		//TODO : Update the attributes conflicts / election
-		
-//		// Setting potential conflicts
-//		ret.setHasConflicts( ret.getSources().size() > 1);
-		
+
+		//		// Setting potential conflicts
+		//		ret.setHasConflicts( ret.getSources().size() > 1);
+
 
 		return ret;
 	}
 
 	/**
-	 * 
+	 *
 	 * @param matchedFeatures
 	 * @param unmatchedFeatures
 	 * @return
@@ -321,25 +320,25 @@ public class AttributeAggregationService extends AbstractAggregationService {
 	private Collection<AggregatedFeature> aggregateFeatures(List<SourcedAttribute> matchedFeatures, 	List<SourcedAttribute> unmatchedFeatures) {
 
 		Map<String,AggregatedFeature> ret = new HashMap<String, AggregatedFeature>();
-		
+
 		// Adding matched attributes features
-		for (SourcedAttribute a : matchedFeatures) {			
+		for (SourcedAttribute a : matchedFeatures) {
 			if (! ret.containsKey(a.getName())) {
 				ret.put(a.getName(), new AggregatedFeature(a.getName()));
-			}			
-//			ret.get(a.getName()).getDatasources().add(a.getDatasourceName());			
+			}
+			//			ret.get(a.getName()).getDatasources().add(a.getDatasourceName());
 		}
-		
+
 		// Adding unmatched attributes features
-		for (SourcedAttribute a : unmatchedFeatures) {			
+		for (SourcedAttribute a : unmatchedFeatures) {
 			if (! ret.containsKey(a.getName())) {
 				ret.put(a.getName(), new AggregatedFeature(a.getName()));
-			}			
-//			ret.get(a.getName()).getDatasources().add(a.getDatasourceName());			
+			}
+			//			ret.get(a.getName()).getDatasources().add(a.getDatasourceName());
 		}
-		
+
 		// Aggregating matched
-		
+
 		return ret.values();
 	}
 
@@ -348,7 +347,7 @@ public class AttributeAggregationService extends AbstractAggregationService {
 	 * @param e
 	 * @return
 	 */
-	private boolean isFeatureAttribute(Attribute e) {		
+	private boolean isFeatureAttribute(Attribute e) {
 		return attributesConfig.getFeaturedValues().contains(e.getRawValue().toString().trim().toUpperCase());
 	}
 
@@ -356,43 +355,43 @@ public class AttributeAggregationService extends AbstractAggregationService {
 	 * Aggregate ReferentielAttributes
 	 * @param refAttrs
 	 * @param aa
-	 * @param output 
+	 * @param output
 	 */
 	private void handleReferentielAttributes(Map<String, String> refAttrs, AggregatedAttributes aa, Product output) {
 
 		for (Entry<String, String> attr : refAttrs.entrySet()) {
-			// TODO ( p1, DESIGN, 0.5) : tHIS HOLLY FUCK BUG. ATTR.GETkEY IS an enum, but returns a .. String and goes into classcast.. Sic ! 
-//			key = attr.getKey();
+			// TODO ( p1, DESIGN, 0.5) : tHIS HOLLY FUCK BUG. ATTR.GETkEY IS an enum, but returns a .. String and goes into classcast.. Sic !
+			//			key = attr.getKey();
 			ReferentielKey key = ReferentielKey.valueOf( String.valueOf( attr.getKey()));
-			
+
 			String value = attr.getValue();
-			
+
 			String existing = aa.getReferentielAttributes().get(key);
-			
+
 			if (!StringUtils.isEmpty(existing) && !existing.equals(value)) {
-				//TODO(0.5,p2,feature) : handle conflicts and "best value" election on referentiel attributes		
-				if (key.equals(ReferentielKey.MODEL)) {					
+				//TODO(0.5,p2,feature) : handle conflicts and "best value" election on referentiel attributes
+				if (key.equals(ReferentielKey.MODEL)) {
 					dedicatedLogger.info("Adding different {} name as alternate id. Existing is {}, would have erased with {}",key,existing, value);
 					output.getAlternativeIds().add(value);
 				} else {
 					dedicatedLogger.warn("Skipping referentiel attribute erasure for {}. Existing is {}, would have erased with {}",key,existing, value);
 				}
-			} else {			
+			} else {
 				aa.addReferentielAttribute( key, value);
 			}
-		}		
-		
+		}
+
 	}
 
-	
-	
+
+
 	/**
 	 * Type attribute and apply parsing rules. Return null if the Attribute fail to exact parsing rules
 	 *
 	 * @param translated
 	 * @param attributeConfigByKey
 	 * @return
-	 * @throws ValidationException 
+	 * @throws ValidationException
 	 */
 	public SourcedAttribute parseAttributeValue(final SourcedAttribute attr, final AttributeConfig conf) throws ValidationException {
 
@@ -473,8 +472,8 @@ public class AttributeAggregationService extends AbstractAggregationService {
 		/////////////////////////////////
 		// Checking preliminary result
 		/////////////////////////////////
-		
-		
+
+
 		if (null == attr.getRawValue()) {
 			throw new ValidationException ("Null rawValue in attribute " + attr);
 		}
@@ -504,68 +503,68 @@ public class AttributeAggregationService extends AbstractAggregationService {
 		// Typing attribute
 		///////////////////
 
-		
+
 		attr.typeAttribute(conf.getType());
 
 		return attr;
 
 	}
 
-	
-	
-/**
- * Generate the score (min, max, value) from an aggregatedattribute
- * @param attributeKey
- * @param a
- * @return
- */
+
+
+	/**
+	 * Generate the score (min, max, value) from an aggregatedattribute
+	 * @param attributeKey
+	 * @param a
+	 * @return
+	 */
 	public Rating generateScoresFromAttribute(String attributeKey , AggregatedAttribute a) {
-		
+
 		AttributeConfig ac = attributesConfig.getAttributeConfigByKey(attributeKey);
-			// transformation required
-			if (ac.getNumericMapping().size() > 0) {
-				try {
-					// This is a numeric mapping
-					Rating r = new Rating();
-					
-					r.setMax(ac.maxRating());											
-					r.setMin(ac.minRating().intValue());
-					
-					r.setValue(ac.getNumericMapping().get(a.getValue()));
-					
-					if (null == r.getValue()) {
-						dedicatedLogger.warn("No matching found in numericMappings for attribute {} and value  {}",ac,a.getValue());	
-						return null;
-					}
-					
+		// transformation required
+		if (ac.getNumericMapping().size() > 0) {
+			try {
+				// This is a numeric mapping
+				Rating r = new Rating();
 
-					// tags
-					r.getTags().addAll(ac.getRatingTags());
-					r.getTags().add(RatingType.FROM_ATTRIBUTE.toString());
-					
-					// Standardization (re-scaling)
-					StandardiserService.standariseRating(r);
-					
-					// Adding
-					return r;
+				r.setMax(ac.maxRating());
+				r.setMin(ac.minRating().intValue());
 
-				} catch (NoSuchFieldException | ValidationException e) {
-					dedicatedLogger.warn("Attribute to rating conversion failed : {}",e.getMessage());						
-				} 
-				
-			} else {
-				dedicatedLogger.error("Was asking to  translate {} into rating, but no numericMapping definition !",a); 
+				r.setValue(ac.getNumericMapping().get(a.getValue()));
+
+				if (null == r.getValue()) {
+					dedicatedLogger.warn("No matching found in numericMappings for attribute {} and value  {}",ac,a.getValue());
+					return null;
+				}
+
+
+				// tags
+				r.getTags().addAll(ac.getRatingTags());
+				r.getTags().add(RatingType.FROM_ATTRIBUTE.toString());
+
+				// Standardization (re-scaling)
+				StandardiserService.standariseRating(r);
+
+				// Adding
+				return r;
+
+			} catch (NoSuchFieldException | ValidationException e) {
+				dedicatedLogger.warn("Attribute to rating conversion failed : {}",e.getMessage());
 			}
-		
-		
-		
-		
+
+		} else {
+			dedicatedLogger.error("Was asking to  translate {} into rating, but no numericMapping definition !",a);
+		}
+
+
+
+
 		return null;
-	
+
 
 	}
 
 
 
-	
+
 }

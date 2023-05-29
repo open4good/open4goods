@@ -39,7 +39,7 @@ public class AffiliatedController {
 		// No follow
 		response.addHeader("X-Robots-Tag", "noindex, nofollow");
 
-		
+
 		// TODO : in a service
 		final String ip = IpHelper.getIp(request);
 
@@ -63,7 +63,7 @@ public class AffiliatedController {
 
 		// TODO(P2,perf,0.5) : bulk, delay
 		repository.save(aff);
-		
+
 		// Redirecting user pageSize the offer
 		RedirectView rv = new RedirectView();
 		rv.setStatusCode(HttpStatus.MOVED_TEMPORARILY);

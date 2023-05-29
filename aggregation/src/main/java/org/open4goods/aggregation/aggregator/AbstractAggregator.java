@@ -39,16 +39,16 @@ public abstract class AbstractAggregator implements Closeable{
 
 	public void beforeStart() {
 		// Auto wiring spring components
-		services.stream().forEach((s) -> {autowireBeanFactory.autowireBean(s); }) ;
-		
+		services.stream().forEach(s -> {autowireBeanFactory.autowireBean(s); }) ;
+
 		// Calling init
 		services.stream().forEach(s -> {s.init();}) ;
 
 	}
-	
 
-	
-	
+
+
+
 
 
 	@Override

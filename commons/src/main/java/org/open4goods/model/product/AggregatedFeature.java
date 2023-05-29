@@ -1,17 +1,17 @@
 package org.open4goods.model.product;
 
 public class AggregatedFeature {
-	
-	private String name;
-	
 
-	
-	
+	private String name;
+
+
+
+
 	@Override
 	public int hashCode() {
 		return name.hashCode();
 	}
-	
+
 	@Override
 	public boolean equals(Object obj) {
 
@@ -20,8 +20,8 @@ public class AggregatedFeature {
 		}
 		return false;
 	}
-	
-	
+
+
 	public AggregatedFeature(String name) {
 		super();
 		this.name = name;
@@ -35,11 +35,11 @@ public class AggregatedFeature {
 		this.name = name;
 	}
 
-	
-	
-	
-	
-	
-	
+
+
+
+
+
+
 
 }

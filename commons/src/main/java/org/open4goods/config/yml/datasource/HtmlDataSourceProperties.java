@@ -29,10 +29,10 @@ public class HtmlDataSourceProperties {
 	@NotEmpty
 	private Set<TestUrl> testUrls;
 
-//	/**
-//	 * If set, this datasource will only crawl the following url's
-//	 */
-//	private List<TestUrl> fixedUrls = new ArrayList<TestUrl>();
+	//	/**
+	//	 * If set, this datasource will only crawl the following url's
+	//	 */
+	//	private List<TestUrl> fixedUrls = new ArrayList<TestUrl>();
 
 	/**
 	 * If set, only url containing one of this string will be folllowed
@@ -71,9 +71,9 @@ public class HtmlDataSourceProperties {
 
 	private CrawlProperties crawlConfig = new CrawlProperties() ;
 
-//	private XpathExtractorConfig xpathExtractorConfig = new XpathExtractorConfig();
+	//	private XpathExtractorConfig xpathExtractorConfig = new XpathExtractorConfig();
 
-// private MockConfig mockConfig = new MockConfig();
+	// private MockConfig mockConfig = new MockConfig();
 
 
 	/**
@@ -115,13 +115,13 @@ public class HtmlDataSourceProperties {
 	}
 
 
-//	public List<TestUrl> getFixedUrls() {
-//		return fixedUrls;
-//	}
-//
-//	public void setFixedUrls(List<TestUrl> fixedUrls) {
-//		this.fixedUrls = fixedUrls;
-//	}
+	//	public List<TestUrl> getFixedUrls() {
+	//		return fixedUrls;
+	//	}
+	//
+	//	public void setFixedUrls(List<TestUrl> fixedUrls) {
+	//		this.fixedUrls = fixedUrls;
+	//	}
 
 	public List<String> getUrlContainsFilter() {
 		return urlContainsFilter;
@@ -157,13 +157,13 @@ public class HtmlDataSourceProperties {
 		this.crawlConfig = crawlConfig;
 	}
 
-//	public XpathExtractorConfig getXpathExtractorConfig() {
-//		return xpathExtractorConfig;
-//	}
-//
-//	public void setXpathExtractorConfig(final XpathExtractorConfig xpathExtractorConfig) {
-//		this.xpathExtractorConfig = xpathExtractorConfig;
-//	}
+	//	public XpathExtractorConfig getXpathExtractorConfig() {
+	//		return xpathExtractorConfig;
+	//	}
+	//
+	//	public void setXpathExtractorConfig(final XpathExtractorConfig xpathExtractorConfig) {
+	//		this.xpathExtractorConfig = xpathExtractorConfig;
+	//	}
 
 
 	public Boolean getEvictIfNoXpathCategory() {

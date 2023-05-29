@@ -12,10 +12,10 @@ import org.open4goods.aggregation.AbstractAggregationService;
 import org.open4goods.config.yml.ui.VerticalProperties;
 import org.open4goods.model.constants.ProductState;
 import org.open4goods.model.data.DataFragment;
-import org.open4goods.model.product.Product;
 import org.open4goods.model.product.AggregatedPrice;
 import org.open4goods.model.product.AggregatedPrices;
 import org.open4goods.model.product.PriceHistory;
+import org.open4goods.model.product.Product;
 import org.open4goods.services.DataSourceConfigService;
 
 /**
@@ -44,23 +44,23 @@ public class PriceAggregationService extends AbstractAggregationService {
 	@Override
 	public void onDataFragment(final DataFragment e, final Product aggregatedData) {
 
-	
+
 		if (!e.hasPrice() || !e.affiliated()) {
 			return;
 		}
-		
+
 		AggregatedPrice aggPrice = new AggregatedPrice(e);
-		
+
 		///////////////////
 		// Filtering : keeping lowest prices per provider and offer names
 		//////////////////
 
 		// Key is providerName + name
 		final Map<String, AggregatedPrice> reducedPrices = new HashMap<>();
-		
+
 		// Adding current price in the list of all prices
 		aggregatedData.getPrice().getOffers().add(aggPrice);
-		
+
 		for (final AggregatedPrice df : aggregatedData.getPrice().getOffers()) {
 
 			// TODO : compute price history
@@ -104,7 +104,7 @@ public class PriceAggregationService extends AbstractAggregationService {
 		}
 
 		AggregatedPrices aggPrices = new AggregatedPrices();
-		
+
 		aggPrices.setOffers(filtered);
 
 		/////////////////////////
@@ -114,22 +114,22 @@ public class PriceAggregationService extends AbstractAggregationService {
 		// Compute current prices
 		computePrices(filtered, aggPrices);
 
-		
+
 		// Number of offers
 		aggregatedData.setOffersCount(reducedPrices.size());
 
-		
+
 		// Computing / incrementing history
 		AggregatedPrice minPrice = aggPrices.getMinPrice();
 		if (null != minPrice && minPrice.getProductState().equals(ProductState.NEW)) {
-			
-			
-			
+
+
+
 			if (aggPrices.getHistory().size() == 0 ) {
 				// First price
 				aggPrices.setTrend(0);
 				aggPrices.getHistory().add(new PriceHistory(minPrice));
-				
+
 			}
 			else {
 				PriceHistory lastPrice = aggPrices.getHistory().get(aggPrices.getHistory().size()-1);
@@ -143,21 +143,21 @@ public class PriceAggregationService extends AbstractAggregationService {
 					// Price has decreased
 					aggPrices.setTrend(-1);
 				}
-			}			
+			}
 		}
-		
-		
+
+
 		// Setting the product state summary
 		aggPrices.getOffers().stream().forEach(i -> {
 			aggPrices.getConditions().add(i.getProductState());
 		});
-		
+
 		// Setting the result
 		aggregatedData.setPrice(aggPrices);
-		
+
 		// Setting if has an occasion offer
-		
-		
+
+
 
 	}
 
@@ -167,13 +167,13 @@ public class PriceAggregationService extends AbstractAggregationService {
 
 	/**
 	 * Computes the actual prices (min, max, average)
-	 * 
+	 *
 	 * @param filtered
 	 * @param p
 	 */
 	private void computePrices(final Collection<AggregatedPrice> filtered, final AggregatedPrices p) {
-		Double total = 0.0;
-		Integer count = 0;
+		double total = 0.0;
+		int count = 0;
 
 		// Min / max
 		for (final AggregatedPrice o : filtered) {
@@ -184,13 +184,13 @@ public class PriceAggregationService extends AbstractAggregationService {
 				p.setMinPrice(o);
 			}
 
-//			if (null == p.getMaxPrice()) {
-//				p.setMaxPrice(o);
-//			}
-//
-//			if (o.greaterThan(p.getMaxPrice())) {
-//				p.setMaxPrice(o);
-//			}
+			//			if (null == p.getMaxPrice()) {
+			//				p.setMaxPrice(o);
+			//			}
+			//
+			//			if (o.greaterThan(p.getMaxPrice())) {
+			//				p.setMaxPrice(o);
+			//			}
 
 			if (o.lowerThan(p.getMinPrice())) {
 				p.setMinPrice(o);
@@ -198,9 +198,9 @@ public class PriceAggregationService extends AbstractAggregationService {
 		}
 
 		// Average
-//		if (count != 0) {
-//			p.setAvgPrice(new AggregatedPrice(total / count, StandardiserService.DEFAULT_CURRENCY));
-//		}
+		//		if (count != 0) {
+		//			p.setAvgPrice(new AggregatedPrice(total / count, StandardiserService.DEFAULT_CURRENCY));
+		//		}
 	}
 
 	public @Override void close() throws IOException {
@@ -210,7 +210,7 @@ public class PriceAggregationService extends AbstractAggregationService {
 
 	/**
 	 * Convert days to ms
-	 * 
+	 *
 	 * @param webPriceValidity
 	 * @return
 	 */

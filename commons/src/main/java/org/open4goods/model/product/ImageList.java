@@ -218,27 +218,27 @@ public class ImageList {
 		return ret;
 	}
 
-//	/**
-//	 * Filtering the medias by language
-//	 *
-//	 *
-//	 * @return
-//	 */
-//	public ImageList filterByLang(final String lang) {
-//		return filterByLangOr(lang, null);
-//	}
-//
-//	/**
-//	 * Filtering the medias by language, returning all (no filter) if result is
-//	 * empty
-//	 *
-//	 *
-//	 *
-//	 * @return
-//	 */
-//	public ImageList filterByLangOrAll(final String lang) {
-//		return filterByLangOr(lang, medias);
-//	}
+	//	/**
+	//	 * Filtering the medias by language
+	//	 *
+	//	 *
+	//	 * @return
+	//	 */
+	//	public ImageList filterByLang(final String lang) {
+	//		return filterByLangOr(lang, null);
+	//	}
+	//
+	//	/**
+	//	 * Filtering the medias by language, returning all (no filter) if result is
+	//	 * empty
+	//	 *
+	//	 *
+	//	 *
+	//	 * @return
+	//	 */
+	//	public ImageList filterByLangOrAll(final String lang) {
+	//		return filterByLangOr(lang, medias);
+	//	}
 
 	/**
 	 * Filtering the medias by language, returning all medias (no filter) if
@@ -248,17 +248,17 @@ public class ImageList {
 	 *s
 	 * @return
 	 */
-//
-//	public ImageList filterByLangOr(final String lang, final Set<IndexedResource> images) {
-//
-//		final ImageList ret = new ImageList(
-//				medias == null ? null : medias .stream().filter(e -> lang.equalsIgnoreCase(e.getLanguageCode())).collect(Collectors.toSet()));
-//		if (null == ret || null == ret.getMedias() || ret.getMedias().size() == 0) {
-//			return new ImageList(images);
-//		}
-//
-//		return ret;
-//	}
+	//
+	//	public ImageList filterByLangOr(final String lang, final Set<IndexedResource> images) {
+	//
+	//		final ImageList ret = new ImageList(
+	//				medias == null ? null : medias .stream().filter(e -> lang.equalsIgnoreCase(e.getLanguageCode())).collect(Collectors.toSet()));
+	//		if (null == ret || null == ret.getMedias() || ret.getMedias().size() == 0) {
+	//			return new ImageList(images);
+	//		}
+	//
+	//		return ret;
+	//	}
 
 	/**
 	 * Terminal operation to get all Medias

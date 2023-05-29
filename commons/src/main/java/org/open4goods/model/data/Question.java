@@ -13,19 +13,19 @@ import org.springframework.data.elasticsearch.annotations.FieldType;
 
 public class Question  implements Validable {
 
-	@Field(index = false, store = false, type = FieldType.Object)	
+	@Field(index = false, store = false, type = FieldType.Object)
 	private Localised title;
 
-	@Field(index = false, store = false, type = FieldType.Object)	
+	@Field(index = false, store = false, type = FieldType.Object)
 	private Localised description;
 
-	@Field(index = false, store = false, type = FieldType.Date, format = DateFormat.epoch_millis)	
+	@Field(index = false, store = false, type = FieldType.Date, format = DateFormat.epoch_millis)
 	private Long date;
-	
+
 	@Field(index = false, store = false, type = FieldType.Keyword)
 	private String author;
 
-	@Field(index = false, store = false, type = FieldType.Object)	
+	@Field(index = false, store = false, type = FieldType.Object)
 	private List<Answer> answers = new ArrayList<>();
 
 	////////////////////////////////////////

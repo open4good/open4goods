@@ -21,7 +21,6 @@ import org.open4goods.services.StandardiserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.annotation.Id;
-import org.springframework.data.elasticsearch.annotations.DateFormat;
 import org.springframework.data.elasticsearch.annotations.Document;
 import org.springframework.data.elasticsearch.annotations.Field;
 import org.springframework.data.elasticsearch.annotations.FieldType;
@@ -48,7 +47,7 @@ public class Product implements Standardisable {
 	/** The vertical, if any**/
 	@Field(index = true, store = false, type = FieldType.Keyword)
 	private String vertical;
-	
+
 
 	/**
 	 * The date this item has been created
@@ -66,12 +65,12 @@ public class Product implements Standardisable {
 	@Field(index = true, store = false, type = FieldType.Object)
 	private Names names = new Names();
 
-//	@Field(index = true, store = false, type = FieldType.Object)
-//	private Urls urls = new Urls();
+	//	@Field(index = true, store = false, type = FieldType.Object)
+	//	private Urls urls = new Urls();
 
-//	@Field(index = false, store = false, type = FieldType.Object)
-//	/** The comments, aggregated and nlp processed **/
-//	private AggregatedComments comments = new AggregatedComments();
+	//	@Field(index = false, store = false, type = FieldType.Object)
+	//	/** The comments, aggregated and nlp processed **/
+	//	private AggregatedComments comments = new AggregatedComments();
 
 	@Field(index = false, store = false, type = FieldType.Object)
 	private AggregatedAttributes attributes = new AggregatedAttributes();
@@ -92,7 +91,7 @@ public class Product implements Standardisable {
 	/** The human crafted description**/
 	@Field(index = false, store = false, type = FieldType.Object)
 	private Description humanDescription;
-	
+
 	/**
 	 * Informations and resources related to the gtin
 	 */
@@ -105,21 +104,21 @@ public class Product implements Standardisable {
 	 */
 	@Field(index = true, store = false, type = FieldType.Keyword)
 	private Set<String> datasourceCategories = new HashSet<>();
-	
-//	/**
-//	 * All the ratings
-//	 */
-//	@Field(index = false, store = false, type = FieldType.Object)
-//	private Set<SourcedRating> ratings = new HashSet<>();
 
-//	@Field(index = false, store = false, type = FieldType.Object)
-//	private Set<Question> questions = new HashSet<>();
-//
-//	@Field(index = false, store = false, type = FieldType.Object)
-//	private Set<ProsOrCons> pros = new HashSet<>();
-//
-//	@Field(index = false, store = false, type = FieldType.Object)
-//	private Set<ProsOrCons> cons = new HashSet<>();
+	//	/**
+	//	 * All the ratings
+	//	 */
+	//	@Field(index = false, store = false, type = FieldType.Object)
+	//	private Set<SourcedRating> ratings = new HashSet<>();
+
+	//	@Field(index = false, store = false, type = FieldType.Object)
+	//	private Set<Question> questions = new HashSet<>();
+	//
+	//	@Field(index = false, store = false, type = FieldType.Object)
+	//	private Set<ProsOrCons> pros = new HashSet<>();
+	//
+	//	@Field(index = false, store = false, type = FieldType.Object)
+	//	private Set<ProsOrCons> cons = new HashSet<>();
 
 
 	//////////////////// :
@@ -130,11 +129,11 @@ public class Product implements Standardisable {
 	private Integer offersCount = 0;
 
 
-//	/**
-//	 * Informations about participant datas and aggegation process
-//	 */
-//	@Field(index = false, store = false, type = FieldType.Object)
-//	private AggregationResult aggregationResult = new AggregationResult();
+	//	/**
+	//	 * Informations about participant datas and aggegation process
+	//	 */
+	//	@Field(index = false, store = false, type = FieldType.Object)
+	//	private AggregationResult aggregationResult = new AggregationResult();
 
 	public Product() {
 		super();
@@ -199,7 +198,7 @@ public class Product implements Standardisable {
 	}
 
 	/**
-	 * 
+	 *
 	 * @param language
 	 * @return the shortest description in a given language
 	 */
@@ -210,58 +209,58 @@ public class Product implements Standardisable {
 				.min (Comparator.comparingInt(String::length))
 				.orElse(null);
 	}
-	
+
 	public AggregatedPrice bestPrice() {
 		return price == null ? null : price.getMinPrice();
 	}
 
-//	/**
-//	 * Return ratings having specific tags
-//	 * 
-//	 * @param tag
-//	 * @return
-//	 */
-//	public Set<SourcedRating> ratingsByTag(final String tag) {
-//
-//		if (null == tag || null == ratings) {
-//			return null;
-//		}
-//
-//		return ratings.stream().filter(e -> e.getTags().contains(tag)).collect(Collectors.toSet());
-//	}
+	//	/**
+	//	 * Return ratings having specific tags
+	//	 *
+	//	 * @param tag
+	//	 * @return
+	//	 */
+	//	public Set<SourcedRating> ratingsByTag(final String tag) {
+	//
+	//		if (null == tag || null == ratings) {
+	//			return null;
+	//		}
+	//
+	//		return ratings.stream().filter(e -> e.getTags().contains(tag)).collect(Collectors.toSet());
+	//	}
 
-//	/**
-//	 * Return a rating having specific tags
-//	 * 
-//	 * @param tag
-//	 * @return
-//	 */
-//	public SourcedRating ratingByTag(final String tag) {
-//
-//		if (null == tag || null == ratings) {
-//			return null;
-//		}
-//
-//		return ratings.stream().filter(e -> e.getTags().contains(tag)).findAny().orElse(null);
-//	}
+	//	/**
+	//	 * Return a rating having specific tags
+	//	 *
+	//	 * @param tag
+	//	 * @return
+	//	 */
+	//	public SourcedRating ratingByTag(final String tag) {
+	//
+	//		if (null == tag || null == ratings) {
+	//			return null;
+	//		}
+	//
+	//		return ratings.stream().filter(e -> e.getTags().contains(tag)).findAny().orElse(null);
+	//	}
 
 	/**
-	 * 
+	 *
 	 * @return true if this AggrgatedData has alternateIds
 	 */
 	public Boolean hasAlternateIds() {
 		return alternativeIds.size() > 0;
 	}
 
-//	/**
-//	 * Return all the specific ratings
-//	 *
-//	 * @return
-//	 * @throws ResourceNotFoundException
-//	 */
-//	public Set<Rating> ratings(final RatingType ratingType) {
-//		return ratings.stream().filter(e -> e.getTags().contains(ratingType.toString())).collect(Collectors.toSet());
-//	}
+	//	/**
+	//	 * Return all the specific ratings
+	//	 *
+	//	 * @return
+	//	 * @throws ResourceNotFoundException
+	//	 */
+	//	public Set<Rating> ratings(final RatingType ratingType) {
+	//		return ratings.stream().filter(e -> e.getTags().contains(ratingType.toString())).collect(Collectors.toSet());
+	//	}
 
 	public List<Description> reviewsDescriptions() {
 		return descriptions.stream().filter(d -> d.getProviderType() == ProviderType.CONTENT_PROVIDER)
@@ -270,7 +269,7 @@ public class Product implements Standardisable {
 
 	/**
 	 * Return the descriptions related to the product (filtering expansionsOf)
-	 * 
+	 *
 	 * @return
 	 */
 	public List<Description> productDescriptions() {
@@ -282,7 +281,7 @@ public class Product implements Standardisable {
 	}
 
 	/**
-	 * 
+	 *
 	 * @return the brand, if availlable from referentiel attributes
 	 */
 	public String brand() {
@@ -291,7 +290,7 @@ public class Product implements Standardisable {
 	}
 
 	/**
-	 * 
+	 *
 	 * @return the gtin, if availlable from referentiel attributes
 	 */
 	public String gtin() {
@@ -303,20 +302,20 @@ public class Product implements Standardisable {
 	}
 
 	/**
-	 * 
+	 *
 	 * @return the brandUid, if availlable from referentiel attributes
 	 */
 	public String model() {
 		return attributes.getReferentielAttributes().get(ReferentielKey.MODEL);
 	}
 
-//	/**
-//	 * Returns the name (brand - model)
-//	 */
-//	public String name() {
-//		return id();
-//	}
-//	
+	//	/**
+	//	 * Returns the name (brand - model)
+	//	 */
+	//	public String name() {
+	//		return id();
+	//	}
+	//
 	/**
 	 * Returns the best human readable name
 	 */
@@ -330,11 +329,11 @@ public class Product implements Standardisable {
 	}
 
 	/**
-	 * 
+	 *
 	 * @return All categories in an IHM purpose, without the shortest one
 	 */
 	public List<String> datasourceCategoriesWithoutShortest() {
-	
+
 		Set<String> ret = new HashSet<>();
 		ret.addAll(datasourceCategories.stream().toList());
 
@@ -346,11 +345,11 @@ public class Product implements Standardisable {
 		list.sort(Comparator.comparingInt(String::length));
 
 		return list;
-		
+
 	}
-	
+
 	/**
-	 * 
+	 *
 	 * @return The shortest category for this product
 	 */
 	public String shortestCategory() {
@@ -358,7 +357,7 @@ public class Product implements Standardisable {
 	}
 
 	/**
-	 * 
+	 *
 	 * @return all names and descriptions, excluding the longest offer name
 	 */
 	public List<String> namesAndDescriptionsWithoutShortestName() {
@@ -376,13 +375,13 @@ public class Product implements Standardisable {
 		return list;
 	}
 
-	
+
 	public String namesAndDescriptionsWithoutShortestNameWithCariage() {
 		return StringUtils.join(namesAndDescriptionsWithoutShortestName(),"\n");
 	}
-	
+
 	/**
-	 * 
+	 *
 	 * @return all names and descriptions, excluding the longest offer name
 	 */
 	public List<String> namesAndDescriptionsWithoutLongestName() {
@@ -400,29 +399,29 @@ public class Product implements Standardisable {
 		return list;
 	}
 
-//	/**
-//	 * 
-//	 * @return the id
-//	 */
-//	public String id() {
-//		StringBuilder builder = new StringBuilder();
-//		
-//		if (null == brand() || null == model()) {
-//			builder.append(gtin());
-//		} else {			
-//			builder.append(brand()).append("-").append(model());				
-//		}
-//		return builder.toString();
-//	}
+	//	/**
+	//	 *
+	//	 * @return the id
+	//	 */
+	//	public String id() {
+	//		StringBuilder builder = new StringBuilder();
+	//
+	//		if (null == brand() || null == model()) {
+	//			builder.append(gtin());
+	//		} else {
+	//			builder.append(brand()).append("-").append(model());
+	//		}
+	//		return builder.toString();
+	//	}
 
 	/**
 	 *
 	 * @return true if this aggregated data dispose of an affiliated link
 	 */
 	public boolean hasAffiliatedLinks() {
-		return price.getOffers().stream().filter(e -> e.isAffiliated()).findAny().isPresent();
+		return price.getOffers().stream().filter(AggregatedPrice::isAffiliated).findAny().isPresent();
 	}
-	
+
 	public List<String> tagCloudTokens() {
 		List<String> tokens = new ArrayList<>();
 		getNames().getOfferNames().stream().map(e -> e.split(" ")).forEach(e -> {
@@ -443,7 +442,7 @@ public class Product implements Standardisable {
 
 		return tokens;
 	}
-	
+
 
 	//////////////////////////////////////////
 	// Getters / Setters
@@ -456,14 +455,14 @@ public class Product implements Standardisable {
 	public void setId(final String id) {
 		this.id = id;
 	}
-//
-//	public Map<String, Attribute> getAttributes() {
-//		return attributes;
-//	}
-//
-//	public void setAttributes(final Map<String, Attribute> attributes) {
-//		this.attributes = attributes;
-//	}
+	//
+	//	public Map<String, Attribute> getAttributes() {
+	//		return attributes;
+	//	}
+	//
+	//	public void setAttributes(final Map<String, Attribute> attributes) {
+	//		this.attributes = attributes;
+	//	}
 
 	public AggregatedPrices getPrice() {
 		return price;
@@ -481,13 +480,13 @@ public class Product implements Standardisable {
 		this.names = names;
 	}
 
-//	public Urls getUrls() {
-//		return urls;
-//	}
-//
-//	public void setUrls(final Urls urls) {
-//		this.urls = urls;
-//	}
+	//	public Urls getUrls() {
+	//		return urls;
+	//	}
+	//
+	//	public void setUrls(final Urls urls) {
+	//		this.urls = urls;
+	//	}
 
 	public Long getLastChange() {
 		return lastChange;
@@ -506,13 +505,13 @@ public class Product implements Standardisable {
 	}
 
 
-//	public AggregatedComments getComments() {
-//		return comments;
-//	}
-//
-//	public void setComments(AggregatedComments comments) {
-//		this.comments = comments;
-//	}
+	//	public AggregatedComments getComments() {
+	//		return comments;
+	//	}
+	//
+	//	public void setComments(AggregatedComments comments) {
+	//		this.comments = comments;
+	//	}
 
 
 	public Integer getOffersCount() {
@@ -565,8 +564,8 @@ public class Product implements Standardisable {
 	public void setResources(Set<Resource> resources) {
 		this.resources = resources;
 	}
-	
-	
+
+
 
 	public Long getCreationDate() {
 		return creationDate;

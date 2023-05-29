@@ -32,7 +32,7 @@ class Gs1PrefixSchema {
 	}
 
 	/**
-	 * 
+	 *
 	 * @param countryNames
 	 * @return All the effectiv gs1 association for a range notation
 	 */
@@ -44,20 +44,20 @@ class Gs1PrefixSchema {
 			logger.error("Cannot resolve country code for {}", country);
 			return ret;
 		}
-		
+
 		if (range.contains(SPLIT_CHAR)) {
 			String[] frags = range.split(SPLIT_CHAR);
 
-			Integer from = Integer.valueOf(frags[0].trim());
-			Integer to = Integer.valueOf(frags[1].trim());
+			int from = Integer.parseInt(frags[0].trim());
+			int to = Integer.parseInt(frags[1].trim());
 
-			for (int i = from.intValue(); i <= to; i++) {
-					ret.put(StringUtils.leftPad(i + "", 3, '0'), code);
+			for (int i = from; i <= to; i++) {
+				ret.put(StringUtils.leftPad(i + "", 3, '0'), code);
 			}
 
 		} else {
 			code = countryNames.get(country.toLowerCase().trim());
-			ret.put(range.trim(), code);			
+			ret.put(range.trim(), code);
 		}
 
 		logger.debug("Adding gs1 prefixes : {}", ret);

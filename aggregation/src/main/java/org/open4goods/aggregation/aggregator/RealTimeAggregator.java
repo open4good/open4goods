@@ -24,12 +24,12 @@ public class RealTimeAggregator extends AbstractAggregator {
 		super(services);
 	}
 
-	
+
 	/**
 	 * Build the Product using the services registered on this aggregator
 	 * @param datas
 	 * @return
-	 * @throws AggregationSkipException 
+	 * @throws AggregationSkipException
 	 */
 	public Product build(final DataFragment fragment, final Product data ) throws AggregationSkipException {
 
@@ -52,12 +52,12 @@ public class RealTimeAggregator extends AbstractAggregator {
 		}
 
 		// Computing the participant data
-//		final ParticipantData pd = new ParticipantData();
-//		pd.setDataUrl(fragment.affiliatedUrlIfPossible());
-//		pd.setProviderName(fragment.getDatasourceConfigName());
+		//		final ParticipantData pd = new ParticipantData();
+		//		pd.setDataUrl(fragment.affiliatedUrlIfPossible());
+		//		pd.setProviderName(fragment.getDatasourceConfigName());
 
-	
-//		data.getAggregationResult().getParticipantDatas().add(pd);
+
+		//		data.getAggregationResult().getParticipantDatas().add(pd);
 
 		return data;
 	}

@@ -6,7 +6,7 @@ import java.util.List;
 import jakarta.validation.constraints.NotNull;
 
 public class RecommandationsConfig {
-	
+
 	/**
 	 *  The config for recommandations
 	 */
@@ -20,8 +20,8 @@ public class RecommandationsConfig {
 	public void setRecommandations(List<RecommandationCriteria> recommandations) {
 		this.recommandations = recommandations;
 	}
-	
-	
-	
+
+
+
 
 }

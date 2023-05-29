@@ -98,7 +98,7 @@ public class IdHelper {
 
 	public static Set<String> extractBrandUids(final String name) {
 		final Set<String> brandUids = new HashSet<>();
-        final String[] frags = name.split(" ");
+		final String[] frags = name.split(" ");
 
 		for (final String f : frags) {
 			//TODO(conf,0.25,P3) : branduid minimum length here) : from conf
@@ -120,12 +120,12 @@ public class IdHelper {
 		if (StringUtils.isBlank(name)) {
 			return null;
 		}
-		
+
 		String [] frags = name.split("\n");
-		
+
 		List<String> frs = Arrays.asList(frags).stream().filter(e ->  ! StringUtils.isBlank(StringUtils.normalizeSpace( e))).collect(Collectors.toList());
-		
-		String ret = StringUtils.join(frs," > "); 
+
+		String ret = StringUtils.join(frs," > ");
 		ret = StringUtils.stripAccents(ret);
 		ret = ret.toUpperCase();
 		ret = ret.replaceAll("\n", " > ");
@@ -153,11 +153,11 @@ public class IdHelper {
 			}
 		}
 		return ret.toString();
-//		if (ret.length() > 3) {
-//			return ret.toString();
-//		} else {
-//			throw new InvalidParameterException("Cannot get a clean name for"+name+", it would be "+ret+" and is too short.");
-//		}
+		//		if (ret.length() > 3) {
+		//			return ret.toString();
+		//		} else {
+		//			throw new InvalidParameterException("Cannot get a clean name for"+name+", it would be "+ret+" and is too short.");
+		//		}
 	}
 
 	/**
@@ -178,21 +178,21 @@ public class IdHelper {
 			}
 		}
 		return ret.toString();
-//		if (ret.length() > 3) {
-//			return ret.toString();
-//		} else {
-//			throw new InvalidParameterException("Cannot get a clean name for"+name+", it would be "+ret+" and is too short.");
-//		}
+		//		if (ret.length() > 3) {
+		//			return ret.toString();
+		//		} else {
+		//			throw new InvalidParameterException("Cannot get a clean name for"+name+", it would be "+ret+" and is too short.");
+		//		}
 	}
-	
-	
+
+
 	public static String encrypt(final String text) {
 		return Base64.encodeBase64String(xor(text.getBytes()));
 	}
 
 	public static String decrypt(final String hash) {
-        return new String(xor(Base64.decodeBase64(hash.getBytes())), StandardCharsets.UTF_8);
-    }
+		return new String(xor(Base64.decodeBase64(hash.getBytes())), StandardCharsets.UTF_8);
+	}
 
 	private static byte[] xor(final byte[] input) {
 		final byte[] output = new byte[input.length];

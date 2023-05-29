@@ -22,7 +22,7 @@ import net.lingala.zip4j.exception.ZipException;
  * @author goulven
  *
 
-  * TODO(0.25,P3,test) : unit tests
+ * TODO(0.25,P3,test) : unit tests
  */
 public class RemoteFileCachingService {
 
@@ -105,7 +105,7 @@ public class RemoteFileCachingService {
 
 	private File unzip(final File tmpFile, final File destFile, final CacheResourceConfig conf) throws ZipException {
 		final ZipFile zipFile = new ZipFile(tmpFile);
-//		File zipedDestFile = File.createTempFile("csv_zipped", dsProperties.getName());
+		//		File zipedDestFile = File.createTempFile("csv_zipped", dsProperties.getName());
 
 		final String targetFolder = tmpFile.getParent() + "/" + "unziped";
 
@@ -151,7 +151,7 @@ public class RemoteFileCachingService {
 			FileUtils.copyURLToFile(new URL(url), tmpFile);
 			return tmpFile;
 		} catch (Exception e) {
-			throw new TechnicalException("Cannot download resource " + url  + " : " + e.getMessage()); 
+			throw new TechnicalException("Cannot download resource " + url  + " : " + e.getMessage());
 		}
 	}
 

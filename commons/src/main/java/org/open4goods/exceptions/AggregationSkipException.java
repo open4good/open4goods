@@ -7,6 +7,8 @@ package org.open4goods.exceptions;
  */
 public class AggregationSkipException extends Exception {
 
+	private static final long serialVersionUID = 2675494159198565365L;
+
 	public AggregationSkipException() {
 		super();
 	}

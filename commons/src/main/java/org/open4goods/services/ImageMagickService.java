@@ -29,33 +29,33 @@ public class ImageMagickService {
 
 	public void convertToPng(final File source, final File target) {
 
-	 try {
-	 final ProcessBuilder pb = new ProcessBuilder("convert",
-	 source.getAbsolutePath(), target.getAbsolutePath());
+		try {
+			final ProcessBuilder pb = new ProcessBuilder("convert",
+					source.getAbsolutePath(), target.getAbsolutePath());
 
-	 final Process p = pb.start();
-	 p.waitFor();
+			final Process p = pb.start();
+			p.waitFor();
 
-	 final String err = IOUtils.toString(p.getErrorStream(), "UTF-8");
-	 final String std = IOUtils.toString(p.getInputStream(), "UTF-8");
+			final String err = IOUtils.toString(p.getErrorStream(), "UTF-8");
+			final String std = IOUtils.toString(p.getInputStream(), "UTF-8");
 
-	 IOUtils.closeQuietly(p.getErrorStream());
-	 IOUtils.closeQuietly(p.getInputStream());
-	 	 
-	 
-	 if (log.isInfoEnabled() && !StringUtils.isEmpty(std)) {
-	 log.info("Image magick output : {}", err);
-	 }
-
-	 if (!StringUtils.isEmpty(err)) {
-		 log.error("Error with image magick command : {}", err);
-	 }
-
-	 } catch (final Exception e) {
-		 log.error("Error while generating default translated image for favico {} : {}", source, e.getMessage());
+			IOUtils.closeQuietly(p.getErrorStream());
+			IOUtils.closeQuietly(p.getInputStream());
 
 
-	 }
+			if (log.isInfoEnabled() && !StringUtils.isEmpty(std)) {
+				log.info("Image magick output : {}", err);
+			}
+
+			if (!StringUtils.isEmpty(err)) {
+				log.error("Error with image magick command : {}", err);
+			}
+
+		} catch (final Exception e) {
+			log.error("Error while generating default translated image for favico {} : {}", source, e.getMessage());
+
+
+		}
 	}
 
 	/**
@@ -78,9 +78,9 @@ public class ImageMagickService {
 			final String err = IOUtils.toString(p.getErrorStream(), "UTF-8");
 			final String std = IOUtils.toString(p.getInputStream(), "UTF-8");
 
-			 IOUtils.closeQuietly(p.getErrorStream());
-			 IOUtils.closeQuietly(p.getInputStream());
-			 
+			IOUtils.closeQuietly(p.getErrorStream());
+			IOUtils.closeQuietly(p.getInputStream());
+
 			if (log.isInfoEnabled() && !StringUtils.isEmpty(std)) {
 				log.info("Image magick output : {}", err);
 			}
@@ -114,9 +114,9 @@ public class ImageMagickService {
 			final String err = IOUtils.toString(p.getErrorStream(), "UTF-8");
 			final String std = IOUtils.toString(p.getInputStream(), "UTF-8");
 
-			 IOUtils.closeQuietly(p.getErrorStream());
-			 IOUtils.closeQuietly(p.getInputStream());
-			
+			IOUtils.closeQuietly(p.getErrorStream());
+			IOUtils.closeQuietly(p.getInputStream());
+
 			if (log.isInfoEnabled() && !StringUtils.isEmpty(std)) {
 				log.info("Image magick output : {}", err);
 			}

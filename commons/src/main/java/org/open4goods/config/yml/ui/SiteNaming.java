@@ -73,7 +73,7 @@ public class SiteNaming {
 	}
 
 	public void setProductUrlTemplates(Localisable productTemplates) {
-		this.productUrlTemplates = productTemplates;
+		productUrlTemplates = productTemplates;
 	}
 
 	public String getProductIdTemplate() {

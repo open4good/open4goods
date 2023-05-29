@@ -38,24 +38,24 @@ public class AttributeConfig {
 	 * The associated font awesome icon
 	 */
 	private String faIcon = "fa-wrench";
-	
+
 	private Localisable name ;
 
 	private AttributeType type = AttributeType.TEXT;
 
-	
+
 	/**
 	 * If true, this attribute will be added as a rating, mapped through the numericMapping configuration attribute
 	 */
 	private boolean asRating = false;
-	
-	
+
+
 	/**
 	 * if asRating=true, then the following tags will be added to this rating
-	 * 
+	 *
 	 */
 	private Set<String> ratingTags  =  new HashSet<>();
-	
+
 	/**
 	 * The ordering that must be applied to this attributes values after aggregations. (ie rendered in search attributes selection)
 	 */
@@ -65,15 +65,15 @@ public class AttributeConfig {
 	 * If true, the ordering applied to aggregations will be reversed
 	 */
 	private Boolean attributeValuesReverseOrder = false;
-	
-	
-	
-	
-	
-	
-	
-	
-	
+
+
+
+
+
+
+
+
+
 	/** If true, this attribute will be used for aggregations searches **/
 	private Boolean searchable = false;
 
@@ -81,13 +81,13 @@ public class AttributeConfig {
 	 * The position in the search page navigation zone
 	 */
 	private Integer searchPresentationOrder = Integer.MIN_VALUE;
-	
+
 	/**
 	 * If set, this attribute will appear at the given attributeValuesOrdering in tabularised
 	 * search results
 	 **/
 	private Integer searchTableOrder;
-	
+
 	/**
 	 * If set, erase the default attributes typed template to use the defined
 	 * one
@@ -95,7 +95,7 @@ public class AttributeConfig {
 	private String searchTemplate;
 
 
-	
+
 	/**
 	 * If non null, present the "count by" stats for this attribute, Will appear at the index designated by the integer value
 	 */
@@ -111,19 +111,19 @@ public class AttributeConfig {
 	 * attribute set to true)
 	 */
 	private boolean statsDefaultView = false;
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
+
+
+
+
+
+
+
+
+
+
 	private Map<String, Set<String>> synonyms = new HashMap<>();
 
-	
+
 	/**
 	 * The parser class for custom types / datas parsing
 	 */
@@ -133,23 +133,23 @@ public class AttributeConfig {
 	 * If set, text attributes will be converted to numerics using this table conversion
 	 */
 	private Map<String,Double> numericMapping = new HashMap<>();
-	
-
-
-
-	
 
 
 
 
 
-	
-	
-	
-	
 
 
-	
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -210,12 +210,12 @@ public class AttributeConfig {
 		}
 
 		synonyms.get(store).add(synonym);
-	
-	
-	
+
+
+
 	}
 
-	
+
 	/**
 	 * If attributeconfig involves a rating translation, allows to get the max
 	 * @return
@@ -226,15 +226,15 @@ public class AttributeConfig {
 		if (!asRating) {
 			throw new ValidationException("Attribute is not configured to be translated as a rating");
 		}
-		
+
 		if ( 0 == numericMapping.size()) {
 			throw new ValidationException("Attribute is not configured to be translated as a rating, but has no numericMapping configuration");
 		}
-		
+
 		return numericMapping.values().stream().max(Comparator.comparing(Double::valueOf)).orElseThrow();
 	}
 
-	
+
 	/**
 	 * If attributeconfig involves a rating translation, allows to get the min
 	 * @return
@@ -245,22 +245,22 @@ public class AttributeConfig {
 		if (!asRating) {
 			throw new ValidationException("Attribute is not configured to be translated as a rating");
 		}
-		
+
 		if ( 0 == numericMapping.size()) {
 			throw new ValidationException("Attribute is not configured to be translated as a rating, but has no numericMapping configuration");
 		}
-		
+
 		return numericMapping.values().stream().min(Comparator.comparing(Double::valueOf)).orElseThrow();
 	}
 
-	
-	
+
+
 	@Override
 	public String toString() {
 		return key + ":" + type;
 	}
 
-	
+
 	@Override
 	public int hashCode() {
 		return key.hashCode();
@@ -268,22 +268,22 @@ public class AttributeConfig {
 
 	@Override
 	public boolean equals(Object obj) {
-	
+
 		if (obj instanceof AttributeConfig) {
 			String tmp = ((AttributeConfig)obj).getKey();
 			if (null == tmp) {
 				return tmp == key;
 			}
-			
+
 			return key.equals(tmp);
 		}
-		
+
 		return false;
 	}
-		
-		
-	
-	
+
+
+
+
 	public String i18n( final String language) {
 		return name == null ? "null:"+language : name.i18n(language);
 	}

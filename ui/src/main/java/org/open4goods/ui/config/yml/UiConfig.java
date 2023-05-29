@@ -18,7 +18,7 @@ import org.springframework.context.annotation.Configuration;
 /**
  * Le parametrage Yaml de la capsule. Celui ci dispose soit de propriétés de
  * premier niveau, soit de sous-objets de configuration.
- * 
+ *
  * @author goulven
  *
  */
@@ -36,18 +36,18 @@ public class UiConfig {
 	 * Folder where verticals configurations are stored
 	 */
 	private String verticalsFolder=rootFolder+"/config/verticals/";
-	
+
 	/**
 	 * Folder where datasources definitions are stored
 	 */
 	private String datasourcesfolder=rootFolder+"/config/datasources/";
-	
+
 	/**
 	 * The URL namings
 	 */
-	
+
 	private SiteNaming namings;
-	
+
 	private OpenSearchConfig openSearchConfig = new OpenSearchConfig();
 
 	private ApiConfig apiConfig = new ApiConfig();
@@ -66,12 +66,12 @@ public class UiConfig {
 	 * The email where pageSize send emails
 	 */
 	private String email;
-	
-	
-//	/**
-//	 * Relativ pageSize the web ( trackings id, ....)
-//	 */
-//
+
+
+	//	/**
+	//	 * Relativ pageSize the web ( trackings id, ....)
+	//	 */
+	//
 	private WebConfig webConfig = new WebConfig();
 
 
@@ -80,7 +80,7 @@ public class UiConfig {
 	 */
 	private XwikiConfiguration wikiConfig;
 
-	
+
 	/**
 	 * Return the root url for a given sitelocale, with the "default" behavior
 	 *
@@ -102,12 +102,12 @@ public class UiConfig {
 	public String logsFolder() {
 		return rootFolder + "/logs/";
 	}
-	
+
 
 	public File siteMapFolder() {
 		return new File(rootFolder + "/sitemap/");
 	}
-	
+
 	public File openDataFile() {
 		return new File(rootFolder + "/opendata/full.zip");
 	}
@@ -115,8 +115,8 @@ public class UiConfig {
 	public File tmpOpenDataFile() {
 		return new File(rootFolder + "/opendata/full-tmp.zip");
 	}
-	
-	
+
+
 	public String getRootFolder() {
 		return rootFolder;
 	}
@@ -205,9 +205,9 @@ public class UiConfig {
 	public void setWikiConfig(XwikiConfiguration wikiConfig) {
 		this.wikiConfig = wikiConfig;
 	}
-	
-	
-	
-	
+
+
+
+
 
 }

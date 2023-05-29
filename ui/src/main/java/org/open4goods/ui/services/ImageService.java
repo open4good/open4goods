@@ -18,45 +18,45 @@ import org.open4goods.services.ResourceService;
  * The ui customisation of alerting service. Simply log as CSV the affiliated
  * links click
  *
- * 
+ *
  * @author Goulven.Furet
  *
  */
 public class ImageService  {
-	
+
 	private ImageMagickService imageMagickService;
-	
+
 	private ResourceService resourceService;
 
 
-	public ImageService(ImageMagickService imageMagickService, ResourceService resourceService) {		
+	public ImageService(ImageMagickService imageMagickService, ResourceService resourceService) {
 		this.imageMagickService = imageMagickService;
 		this.resourceService = resourceService;
 
 	}
-	
-	
+
+
 	/**
-	 * Return the output stream for an image, with metadata and converted pageSize png 
+	 * Return the output stream for an image, with metadata and converted pageSize png
 	 * @param r
 	 * @return
-	 * @throws ValidationException 
-	 * @throws IOException 
-	 * @throws FileNotFoundException 
-	 * @throws TechnicalException 
+	 * @throws ValidationException
+	 * @throws IOException
+	 * @throws FileNotFoundException
+	 * @throws TechnicalException
 	 */
-	public InputStream getCoverPng(Resource r) throws FileNotFoundException, IOException, ValidationException, TechnicalException {		
+	public InputStream getCoverPng(Resource r) throws FileNotFoundException, IOException, ValidationException, TechnicalException {
 		ResourceCachingTask rct = new ResourceCachingTask(r, imageMagickService, resourceService);
-				
+
 		IndexedResource ir = rct.doFetching(r);
-		
+
 		//TODO(gof) : if exception render default error image
 		return IOUtils.toBufferedInputStream(new FileInputStream(resourceService.getCacheFile(ir)));
 	}
 
-	
-	
-	
-	
-	
+
+
+
+
+
 }

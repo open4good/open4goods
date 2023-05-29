@@ -22,11 +22,11 @@ public class Rating  implements Validable, Standardisable {
 
 	@Field(index = false, store = false, type = FieldType.Keyword)
 	private Set<String> tags = new HashSet<>();
-	
+
 
 	@Field(index = true, store = false, type = FieldType.Double)
 	private Double value;
-	
+
 	/**
 	 * The max scale for this rating
 	 */
@@ -59,7 +59,7 @@ public class Rating  implements Validable, Standardisable {
 		standardiser.standarise(this);
 	}
 
-	
+
 	@Override
 	public void validate() throws ValidationException {
 
@@ -77,11 +77,11 @@ public class Rating  implements Validable, Standardisable {
 			result.add(ValidationMessage.newValidationMessage("MISSING-MIN"));
 		}
 
-		
-//		if (tags.isEmpty()) {
-//			result.add(ValidationMessage.newValidationMessage("MISSING-TAGS"));
-//		}
-		
+
+		//		if (tags.isEmpty()) {
+		//			result.add(ValidationMessage.newValidationMessage("MISSING-TAGS"));
+		//		}
+
 		if (tags.contains( RatingType.SITES.toString())  && null == numberOfVoters) {
 			result.add(ValidationMessage.newValidationMessage("MISSING-NUMBER-OF-VOTERS"));
 		}
@@ -103,20 +103,20 @@ public class Rating  implements Validable, Standardisable {
 	}
 
 
-	
+
 	@Override
 	public int hashCode() {
 		return Objects.hash(value, min, max, tags);
 	}
-	
-	
+
+
 	@Override
 	public boolean equals(final Object obj) {
 		if (obj instanceof Rating) {
 			final Rating o = (Rating) obj;
 			return Objects.equals(value, o.getValue()) && Objects.equals(min, o.getMin())
 					&& Objects.equals(max, o.getMax())
-//					&& Objects.equals(this.label, o.getLabel())
+					//					&& Objects.equals(this.label, o.getLabel())
 					&& Objects.equals(tags, o.getTags());
 		}
 
@@ -136,34 +136,34 @@ public class Rating  implements Validable, Standardisable {
 	///////////////////////
 
 	public boolean is(Integer number) {
-		
+
 		switch (number) {
 		case 1:
 			return is1();
 		case 2:
-			return is2();		
+			return is2();
 		case 3:
 			return is3();
 		case 4:
-			return is4();			
+			return is4();
 		case 5:
-			return is5();			
+			return is5();
 		default:
 			LOGGER.warn("Cannot get rating is({})",number);
 			return false;
 		}
 	}
-	
+
 	public void addTag(RatingType rType) {
-		tags.add(rType.toString());		
+		tags.add(rType.toString());
 	}
-	
+
 	public void addTag(String rType) {
-		tags.add(rType);		
+		tags.add(rType);
 	}
-	
-	
-	
+
+
+
 	@JsonIgnore
 	public boolean is1() {
 		return percent() <= 20L;
@@ -191,12 +191,12 @@ public class Rating  implements Validable, Standardisable {
 	}
 
 
-	
+
 	public String color() {
 		if (null == value) {
 			return "white";
 		}
-		final Long percent = this. percent();
+		final Long percent =  percent();
 
 		if (percent > 80) {
 			return "green";

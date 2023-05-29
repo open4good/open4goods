@@ -26,15 +26,15 @@ public abstract class AbstractAggregationService  implements Closeable {
 		dedicatedLogger = GenericFileLogger.initLogger("aggregation-"+getClass().getSimpleName().toLowerCase(), Level.WARN, logsFolder, false);
 	}
 
-	
 
-    /**
+
+	/**
 	 * Called on each participant DataFragment, in realtime mode
 	 * @param data
 	 */
 	public void onDataFragment (final DataFragment input, final Product output) throws AggregationSkipException {}
 
-	
+
 	/**
 	 * Call in verticals batch update
 	 * @param data
@@ -44,12 +44,13 @@ public abstract class AbstractAggregationService  implements Closeable {
 	public  Product onAggregatedData(Product data, Set<Product> datas) {
 		return data;
 	};
-	
-	
-	
-    /**
+
+
+
+	/**
 	 * Called after aggregation process, used to ending buffers / components (flush datas, close buffers, so on...)
 	 */
+	@Override
 	public void close() throws IOException {
 
 	}
@@ -58,7 +59,7 @@ public abstract class AbstractAggregationService  implements Closeable {
 	 * Called before data aggregation
 	 */
 	public void init() {
-		
+
 	}
 
 

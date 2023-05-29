@@ -43,9 +43,9 @@ public class DataFragmentStoreService {
 
 	public StandardiserService standardiserService;
 
-//	// If false, dataFragments are store in the file queue but not sent to the
-//	// DataFragmentRepository
-//	private final AtomicBoolean dequeueEnabled = new AtomicBoolean(true);
+	//	// If false, dataFragments are store in the file queue but not sent to the
+	//	// DataFragmentRepository
+	//	private final AtomicBoolean dequeueEnabled = new AtomicBoolean(true);
 
 	// Queue worker shutdown condition
 	private final AtomicBoolean serviceShutdown = new AtomicBoolean(false);
@@ -57,7 +57,7 @@ public class DataFragmentStoreService {
 
 	private RealtimeAggregationService generationService;
 
-	
+
 	/**
 	 *
 	 * @param queueFolder The folder where indexation queued datas will be stored
@@ -68,9 +68,9 @@ public class DataFragmentStoreService {
 		this.standardiserService = standardiserService;
 		this.aggregatedDataRepository = aggregatedDataRepository;
 		this.generationService=generationService;
-		
 
-	
+
+
 	}
 
 	/**
@@ -113,7 +113,7 @@ public class DataFragmentStoreService {
 		/////////////////////////////////////////
 		// Validating
 		/////////////////////////////////////////
-		
+
 		if (!StringUtils.isNumeric(data.gtin())) {
 			//TODO : come back on standard validation model
 			throw new ValidationException("No gtin");
@@ -152,15 +152,15 @@ public class DataFragmentStoreService {
 	 * @param df
 	 */
 	void enqueue(final DataFragment df) {
-		
-		
-		
+
+
+
 		fileQueue.put(df.getUrl(),df);
-		
-		// Trigger hard indexing 
+
+		// Trigger hard indexing
 		//TODO(conf) : elastinc bulk size from conf
-		
-		
+
+
 		if (fileQueue.size() > 400) {
 			aggregateAndstore();
 		}
@@ -171,74 +171,74 @@ public class DataFragmentStoreService {
 	 * Aggregates datafragments to already known aggregatedDatas, then store the results
 	 * Scheduled evey hour to flush buffer
 	 */
-	
+
 	@Scheduled( fixedDelay = 3600 * 1000)
 	public void aggregateAndstore() {
-		
+
 		try {
-			
-				if (fileQueue.isEmpty()) {
-					logger.info("No datafragments to index");
-					return;
+
+			if (fileQueue.isEmpty()) {
+				logger.info("No datafragments to index");
+				return;
+			}
+
+			logger.info("Aggregating {} items",fileQueue.size());
+			// Store operation retrieve fragments, historize and re-index
+			long now = System.currentTimeMillis();
+
+			// There is data to consume and queue consummation is enabled
+			final Collection<DataFragment> buffer = fileQueue.values();
+
+
+
+			// Retrieving datafragments
+			Map<String, Product> aggDatas = aggregatedDataRepository.multiGetById(
+
+					buffer.stream()
+					.filter(s -> StringUtils.isNotBlank(s.gtin()))
+					.map(DataFragment::gtin).toList());
+
+
+			// Aggregating to product datas
+			Set<Product> results = new HashSet<Product>();
+
+			for (DataFragment df : buffer) {
+				Product data = aggDatas.get(df.gtin());
+				if (null == data) {
+					data = new Product();
+					data.setCreationDate(System.currentTimeMillis());
 				}
-			
-				logger.info("Aggregating {} items",fileQueue.size());
-				// Store operation retrieve fragments, historize and re-index
-				long now = System.currentTimeMillis();
-				
-				// There is data to consume and queue consummation is enabled
-				final Collection<DataFragment> buffer = fileQueue.values();
-		
-				
-				
-				// Retrieving datafragments
-				Map<String, Product> aggDatas = aggregatedDataRepository.multiGetById(
-							
-						buffer.stream()
-						.filter(s -> StringUtils.isNotBlank(s.gtin()))
-						.map(e->e.gtin()).toList());
 
-				
-				// Aggregating to product datas
-				Set<Product> results = new HashSet<Product>();
-				
-				for (DataFragment df : buffer) {
-					Product data = aggDatas.get(df.gtin());						
-					if (null == data) {
-						data = new Product();
-						data.setCreationDate(System.currentTimeMillis());
-					}
-					
-					try {
-						// TODO : Not the good point. Service ?
-						results.add(generationService.process(df,data));
-					} catch (AggregationSkipException e1) {
-						logger.info("Aggregation skipped for {} : {}",df,e1.getMessage());
-					}
-					
+				try {
+					// TODO : Not the good point. Service ?
+					results.add(generationService.process(df,data));
+				} catch (AggregationSkipException e1) {
+					logger.info("Aggregation skipped for {} : {}",df,e1.getMessage());
 				}
-				
 
-				
-				
-				// Saving the result
-				aggregatedDataRepository.index(results);
-				
-				
-				logger.info("Indexed {} DataFragments in {}ms.",  buffer.size(),System.currentTimeMillis()-now);
+			}
 
-				// Clearing queue
-				fileQueue.clear();
-				
-				
-			
+
+
+
+			// Saving the result
+			aggregatedDataRepository.index(results);
+
+
+			logger.info("Indexed {} DataFragments in {}ms.",  buffer.size(),System.currentTimeMillis()-now);
+
+			// Clearing queue
+			fileQueue.clear();
+
+
+
 		} catch (final Exception e) {
 			logger.error("Error while dequeing DataFragments",e);
 		}
-	
-		
+
+
 	}
-	
+
 
 	public @PreDestroy void destroy() {
 		serviceShutdown.set(true);

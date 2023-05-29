@@ -29,14 +29,13 @@ import org.open4goods.services.StandardiserService;
 import org.open4goods.services.VerticalsConfigService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 
 import jakarta.annotation.PreDestroy;
 
 /**
  * This service is in charge of building Product in realtime mode
- * 
+ *
  * @author goulven
  *
  */
@@ -63,7 +62,7 @@ public class RealtimeAggregationService {
 	private VerticalsConfigService verticalConfigService;
 
 	private RealTimeAggregator aggregator;
-	
+
 	private BarcodeValidationService barcodeValidationService;
 
 
@@ -72,7 +71,7 @@ public class RealtimeAggregationService {
 			ReferentielService referentielService, StandardiserService standardiserService,
 			AutowireCapableBeanFactory autowireBeanFactory, ProductRepository aggregatedDataRepository,
 			ApiProperties apiProperties, Gs1PrefixService gs1prefixService,
-			DataSourceConfigService dataSourceConfigService, VerticalsConfigService configService, 
+			DataSourceConfigService dataSourceConfigService, VerticalsConfigService configService,
 			BarcodeValidationService barcodeValidationService) {
 		super();
 		this.evaluationService = evaluationService;
@@ -83,17 +82,17 @@ public class RealtimeAggregationService {
 		this.apiProperties = apiProperties;
 		this.gs1prefixService = gs1prefixService;
 		this.dataSourceConfigService = dataSourceConfigService;
-		this.verticalConfigService = configService;
-		
+		verticalConfigService = configService;
+
 		this.barcodeValidationService = barcodeValidationService;
-		
-		
-		this.aggregator = getAggregator(configService.getConfigById(VerticalsConfigService.MAIN_VERTICAL_NAME).get());
-	
-		
+
+
+		aggregator = getAggregator(configService.getConfigById(VerticalsConfigService.MAIN_VERTICAL_NAME).get());
+
+
 		// Calling aggregator.BEFORE
 		aggregator.beforeStart();
-		
+
 	}
 
 
@@ -102,7 +101,7 @@ public class RealtimeAggregationService {
 		return aggregator.build(df, data);
 	}
 
-	
+
 
 	@PreDestroy
 	public void shutdown() {
@@ -113,13 +112,13 @@ public class RealtimeAggregationService {
 
 	/**
 	 * List of services in the aggregator
-	 * 
+	 *
 	 * @param config
 	 * @return
 	 */
 	RealTimeAggregator getAggregator(VerticalConfig config) {
 
-//		final CapsuleGenerationConfig config = generationConfig;
+		//		final CapsuleGenerationConfig config = generationConfig;
 
 		if (null == config) {
 			logger.error("No capsule generation config");
@@ -132,24 +131,24 @@ public class RealtimeAggregationService {
 
 		services.add(new AttributeAggregationService(config.getAttributesConfig(), apiProperties.logsFolder()));
 
-		
+
 		services.add(new NamesAggregationService(config.getNamings(), evaluationService, apiProperties.logsFolder()));
 
-//		services.add(new CategoryService(apiProperties.logsFolder(), taxonomyService));
+		//		services.add(new CategoryService(apiProperties.logsFolder(), taxonomyService));
 
-		
+
 		services.add(new VerticalAggregationService( apiProperties.logsFolder(), verticalConfigService));
-		
+
 		services.add(new IdAggregationService( apiProperties.logsFolder()));
 
-//		services.add(new UrlsAggregationService(evaluationService, apiProperties.logsFolder(),
-//				config.getNamings().getProductUrlTemplates()));
+		//		services.add(new UrlsAggregationService(evaluationService, apiProperties.logsFolder(),
+		//				config.getNamings().getProductUrlTemplates()));
 
 		services.add(new PriceAggregationService(apiProperties.logsFolder(), dataSourceConfigService,config.getSegment()));
 
-//		services.add(new CommentsAggregationService(apiProperties.logsFolder(), config.getCommentsConfig()));
-//		services.add(new ProsAndConsAggregationService(apiProperties.logsFolder()));
-//		services.add(new QuestionsAggregationService(apiProperties.logsFolder()));
+		//		services.add(new CommentsAggregationService(apiProperties.logsFolder(), config.getCommentsConfig()));
+		//		services.add(new ProsAndConsAggregationService(apiProperties.logsFolder()));
+		//		services.add(new QuestionsAggregationService(apiProperties.logsFolder()));
 
 		services.add(new DescriptionsAggregationService(config.getDescriptionsAggregationConfig(),
 				apiProperties.logsFolder()));
@@ -168,35 +167,35 @@ public class RealtimeAggregationService {
 
 	/**
 	 * Add a Capsule Generation job to the working queue
-	 * 
+	 *
 	 * @param capsuleProperties
 	 */
 
 	DataFragment cleanDataFragment(final DataFragment data, final VerticalProperties segmentProperties) {
 
-//		if (null == data.gtin()) {
-//			return null;
-//		}
-//
-//		// Evicting items that do not meet the minimum price
-//		if (data.hasPrice() && null != segmentProperties.getMinimumEvictionPrice()
-//				&& data.getPrice().getPrice() < segmentProperties.getMinimumEvictionPrice()) {
-//			return null;
-//		}
+		//		if (null == data.gtin()) {
+		//			return null;
+		//		}
+		//
+		//		// Evicting items that do not meet the minimum price
+		//		if (data.hasPrice() && null != segmentProperties.getMinimumEvictionPrice()
+		//				&& data.getPrice().getPrice() < segmentProperties.getMinimumEvictionPrice()) {
+		//			return null;
+		//		}
 
-//		// Updating the  compensation
-//		if ( data.hasPrice() && data.affiliated()) {
-//			try {
-//				final Double reversment = segmentProperties.getDatasources().get(data.getDatasourceName()).getPercentCompensation();
-//				if (null == reversment ) {
-//					logger.warn("No compensation defined for {}",data.getDatasourceName());
-//				} else {
-//					data.setEcologicalCompensationAmount(reversment*data.getPrice().getPrice());
-//				}
-//			} catch (final Exception e) {
-//				logger.error("Cannot compute compensation for {} : {}",data,e);
-//			}
-//		}
+		//		// Updating the  compensation
+		//		if ( data.hasPrice() && data.affiliated()) {
+		//			try {
+		//				final Double reversment = segmentProperties.getDatasources().get(data.getDatasourceName()).getPercentCompensation();
+		//				if (null == reversment ) {
+		//					logger.warn("No compensation defined for {}",data.getDatasourceName());
+		//				} else {
+		//					data.setEcologicalCompensationAmount(reversment*data.getPrice().getPrice());
+		//				}
+		//			} catch (final Exception e) {
+		//				logger.error("Cannot compute compensation for {} : {}",data,e);
+		//			}
+		//		}
 
 		// Sanitizing the branduid
 		referentielService.sanitizeBrandUid(data, segmentProperties);

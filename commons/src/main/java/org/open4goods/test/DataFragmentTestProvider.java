@@ -20,7 +20,7 @@ public class DataFragmentTestProvider {
 		pd.setUrl("http://perdu.com/"+UUID.randomUUID().toString());
 		pd.setDatasourceName("defaultStore");
 		pd.addProductTag("tag1");
-//		pd.setProviderType(ProviderType.AFFILIATED);
+		//		pd.setProviderType(ProviderType.AFFILIATED);
 		final DataFragmentTestBuilder p = new DataFragmentTestBuilder(pd);
 
 

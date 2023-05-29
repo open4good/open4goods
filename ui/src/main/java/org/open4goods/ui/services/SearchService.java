@@ -23,11 +23,11 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.elasticsearch.client.elc.ElasticsearchAggregations;
 import org.springframework.data.elasticsearch.client.elc.NativeQueryBuilder;
+import org.springframework.data.elasticsearch.core.SearchHit;
 import org.springframework.data.elasticsearch.core.SearchHits;
 import org.springframework.data.elasticsearch.core.query.Criteria;
 import org.springframework.data.elasticsearch.core.query.CriteriaQuery;
 import org.springframework.data.elasticsearch.core.query.CriteriaQueryBuilder;
-import org.springframework.data.elasticsearch.core.query.Order;
 
 import ch.qos.logback.classic.Level;
 import co.elastic.clients.elasticsearch._types.aggregations.Aggregation;
@@ -39,7 +39,7 @@ import co.elastic.clients.elasticsearch._types.aggregations.StringTermsBucket;
 /**
  * Service in charge of the search in AggregatedDatas and in DataFragments
  *
- * 
+ *
  * @author Goulven.Furet
  *
  */
@@ -51,34 +51,34 @@ public class SearchService {
 
 	public static final String OTHER_BUCKET = "ES-UNKNOWN";
 
-	
+
 	private ProductRepository aggregatedDataRepository;
 
 	private Logger statsLogger;
-	
-	
+
+
 	public SearchService(ProductRepository aggregatedDataRepository, String logsFolder) {
 		this.aggregatedDataRepository = aggregatedDataRepository;
-		this.statsLogger  = GenericFileLogger.initLogger("stats-search", Level.INFO, logsFolder, false);
+		statsLogger  = GenericFileLogger.initLogger("stats-search", Level.INFO, logsFolder, false);
 	}
-	
+
 	/**
 	 * Operates a search on each vertical, and on datafragments if no results in verticals
 	 * TODO(P1,security,0.75) : enable results limitation
-	 * @param pageNumber 
-	 * @param pageSize 
+	 * @param pageNumber
+	 * @param pageSize
 	 * @param query
 	 * @return
 	 */
 	// TODO(perf : cache)
 	public VerticalSearchResponse globalSearch(String initialQuery, Integer fromPrice, Integer toPrice, Set<String> categories, ProductState condition, int from, int to, int minOffers, boolean sort) {
-		
+
 		String query =  sanitize(initialQuery);
-	
-		
+
+
 		// Logging
 		statsLogger.info("Searching {}",initialQuery);
-		
+
 		Criteria c = null;
 		if (StringUtils.isNumeric(query)) {
 			// Showing even if no offers when by GTIN
@@ -87,42 +87,42 @@ public class SearchService {
 		else {
 			// TODO(security) : sanitize, web imput !!
 			c = 	new Criteria("names.offerNames").matchesAll(Arrays.asList(query.split(" ")))
-					.and("offersCount").greaterThanEqual(1)	
+					.and("offersCount").greaterThanEqual(1)
 					.and(aggregatedDataRepository.getValidDateQuery())
 					;
-			
+
 			// TODO : could add
-//			price
-//			vertical
-//			offerscount
-//			neuf / occasion
-//			
-//			barcode nationality
-//			garantie
-//			ecoscore
-//			classe energie
-			
+			//			price
+			//			vertical
+			//			offerscount
+			//			neuf / occasion
+			//
+			//			barcode nationality
+			//			garantie
+			//			ecoscore
+			//			classe energie
+
 		}
-	
+
 
 		CriteriaQueryBuilder esQuery = new CriteriaQueryBuilder(c)
-//		.withQuery(new CriteriaQuery(c))
-		.withPageable(PageRequest.of(from, to))
-		.withSort(Sort.by(Order.desc("offersCount")));
+				//		.withQuery(new CriteriaQuery(c))
+				.withPageable(PageRequest.of(from, to))
+				.withSort(Sort.by(org.springframework.data.domain.Sort.Order.desc("offersCount")));
 
 		SearchHits<Product> results = aggregatedDataRepository.search(esQuery.build(),ALL_VERTICAL_NAME);
-		VerticalSearchResponse vsr = new VerticalSearchResponse();			
+		VerticalSearchResponse vsr = new VerticalSearchResponse();
 
-//		// Setting the response
+		//		// Setting the response
 		vsr.setTotalResults(results.getTotalHits());
 		vsr.setFrom(from);
 		vsr.setTo(to);
-		vsr.setData(results.get().map(e-> e.getContent()).toList());
-		
+		vsr.setData(results.get().map(SearchHit::getContent).toList());
+
 		return vsr;
 	}
 
-	
+
 
 	/**
 	 * Advanced search in a vertical
@@ -131,60 +131,60 @@ public class SearchService {
 	 * @return
 	 */
 	public VerticalSearchResponse verticalSearch(VerticalConfig vertical, VerticalSearchRequest request) {
-		
+
 		// Logging
 		statsLogger.info("Searching {}",request);
-				
-		VerticalSearchResponse vsr = new VerticalSearchResponse();	
-		
+
+		VerticalSearchResponse vsr = new VerticalSearchResponse();
+
 		List<AttributeConfig> customAttrFilters = vertical.verticalFilters();
-		
-		
+
+
 		Criteria criterias = new Criteria("vertical.keyword").is(vertical.getId())
 				.and(aggregatedDataRepository.getValidDateQuery())
 				;
-		
+
 		// min price
 		if (null != request.getMinPrice()) {
 			criterias.and(new Criteria("price.minPrice.price").greaterThanEqual(Math.floor(request.getMinPrice())));
-		} 
-		
+		}
+
 		// max price
 		if (null != request.getMaxPrice()) {
 			criterias.and(new Criteria("price.minPrice.price").lessThanEqual(Math.ceil(request.getMaxPrice())));
-		} 
-		
-		
-		// Adding custom numeric filters		
+		}
+
+
+		// Adding custom numeric filters
 		for (NumericRangeFilter filter : request.getNumericFilters()) {
 			criterias.and(new Criteria("filter.getAttribute()").lessThanEqual(filter.getMaxValue()).greaterThanEqual(filter.getMinValue()));
-	 						
-		}		
-		
-		// Adding custom checkbox filters		
+
+		}
+
+		// Adding custom checkbox filters
 		for (Entry<String, Set<String>> filter : request.getTermsFilter().entrySet()) {
 			criterias.and(new Criteria(filter.getKey()).in(filter.getValue()) );
 		}
-		
+
 		// condition
 		if (null != request.getCondition()) {
 			criterias.and(new Criteria("price.conditions.keyword").in(request.getCondition().toString()) );
 		}
-		
+
 		// min offersCount
 		if (null != request.getMinOffers()) {
-			criterias.and(new Criteria("offersCount").greaterThanEqual(request.getMinOffers()));			
-		}
-		
-		// max offersCount
-		if (null != request.getMaxOffers()) {
-			criterias.and(new Criteria("offersCount").lessThanEqual(request.getMaxOffers()));		
+			criterias.and(new Criteria("offersCount").greaterThanEqual(request.getMinOffers()));
 		}
 
-		
+		// max offersCount
+		if (null != request.getMaxOffers()) {
+			criterias.and(new Criteria("offersCount").lessThanEqual(request.getMaxOffers()));
+		}
+
+
 		// Setting the query
 		NativeQueryBuilder esQuery = new NativeQueryBuilder().withQuery(new CriteriaQuery(criterias));
-		
+
 		// Pagination
 		if (null != request.getPageNumber() && null != request.getPageSize()) {
 			esQuery = esQuery .withPageable(PageRequest.of(request.getPageNumber(), request.getPageSize()));
@@ -192,8 +192,8 @@ public class SearchService {
 			//TODO(gof) : pageNumber conf
 			esQuery = esQuery .withPageable(PageRequest.of(0, 100));
 		}
-		
-		
+
+
 		// Adding standard aggregations
 		esQuery = esQuery
 				.withAggregation("min_price", 	Aggregation.of(a -> a.min(ta -> ta.field("price.minPrice.price"))))
@@ -201,48 +201,48 @@ public class SearchService {
 
 				.withAggregation("min_offers", 	Aggregation.of(a -> a.min(ta -> ta.field("offersCount"))))
 				.withAggregation("max_offers", 	Aggregation.of(a -> a.max(ta -> ta.field("offersCount"))))
-//
+				//
 				.withAggregation("conditions", 	Aggregation.of(a -> a.terms(ta -> ta.field("price.conditions.keyword").missing(OTHER_BUCKET).size(3)  ))	)
-//				
-//				// TODO : size from conf
+				//
+				//				// TODO : size from conf
 				.withAggregation("brands", 	Aggregation.of(a -> a.terms(ta -> ta.field("attributes.referentielAttributes.BRAND.keyword").missing(OTHER_BUCKET).size(100)  ))	)
-//				
-//				// TODO : size from conf
+				//
+				//				// TODO : size from conf
 				.withAggregation("country", 	Aggregation.of(a -> a.terms(ta -> ta.field("gtinInfos.country.keyword").missing(OTHER_BUCKET).size(100)  ))	)
-//										
+				//
 				;
 		////
 		// Sort order
 		/////
-		
+
 		if (null == request.getSortField()) {
-			esQuery = esQuery.withSort(Sort.by(Order.desc("offersCount")));
+			esQuery = esQuery.withSort(Sort.by(org.springframework.data.domain.Sort.Order.desc("offersCount")));
 		} else {
 			// TODO : check value, remove ignorecase
 			if (request.getSortOrder().equalsIgnoreCase("DESC") ) {
-				esQuery = esQuery.withSort(Sort.by(Order.desc(request.getSortField())));
+				esQuery = esQuery.withSort(Sort.by(org.springframework.data.domain.Sort.Order.desc(request.getSortField())));
 			} else if (request.getSortOrder().equalsIgnoreCase("ASC") ){
-				esQuery = esQuery.withSort(Sort.by(Order.asc(request.getSortField())));
+				esQuery = esQuery.withSort(Sort.by(org.springframework.data.domain.Sort.Order.asc(request.getSortField())));
 			} else {
 				throw new RuntimeException("implement");
 			}
 		}
-		
-		// Adding custom filters aggregations	
+
+		// Adding custom filters aggregations
 		for (AttributeConfig attrConfig : customAttrFilters) {
-			esQuery = esQuery 
+			esQuery = esQuery
 					// TODO : size from conf
-					.withAggregation(attrConfig.getKey(), 	Aggregation.of(a -> a.terms(ta -> ta.field("attributes.aggregatedAttributes."+attrConfig.getKey()+".value.keyword").missing(OTHER_BUCKET).size(100)  ))	);			
+					.withAggregation(attrConfig.getKey(), 	Aggregation.of(a -> a.terms(ta -> ta.field("attributes.aggregatedAttributes."+attrConfig.getKey()+".value.keyword").missing(OTHER_BUCKET).size(100)  ))	);
 		}
-//		
+		//
 
 		SearchHits<Product> results = aggregatedDataRepository.search(esQuery.build(),ALL_VERTICAL_NAME);
-	
+
 
 		// Handling aggregations results if relevant
 		//TODO(gof) : this cast should be avoided
 		ElasticsearchAggregations aggregations = (ElasticsearchAggregations)results.getAggregations();
-					
+
 
 		///////
 		// Numeric aggregations
@@ -251,123 +251,123 @@ public class SearchService {
 		MaxAggregate maxPrice = aggregations.get("max_price").aggregation().getAggregate().max();
 		MaxAggregate maxOffers = aggregations.get("max_offers").aggregation().getAggregate().max();
 		MinAggregate minOffers = aggregations.get("min_offers").aggregation().getAggregate().min();
-//		
+		//
 		vsr.setMaxPrice(maxPrice.value());
 		vsr.setMinPrice(minPrice.value());
 		vsr.setMaxOffers(Double.valueOf(maxOffers.value()).intValue());
 		vsr.setMinOffers(Double.valueOf(minOffers.value()).intValue());
 
-		
+
 		///////
 		// Item condition
 		///////
-		
-		StringTermsAggregate productSate  =  aggregations.get("conditions").aggregation().getAggregate().sterms();	
-		for (StringTermsBucket b :   productSate.buckets().array()) {			
-			vsr.getConditions().add (new VerticalFilterTerm(b.key().stringValue(), b.docCount()));			
+
+		StringTermsAggregate productSate  =  aggregations.get("conditions").aggregation().getAggregate().sterms();
+		for (StringTermsBucket b :   productSate.buckets().array()) {
+			vsr.getConditions().add (new VerticalFilterTerm(b.key().stringValue(), b.docCount()));
 		}
 		vsr.getConditions().sort((o1, o2) -> o2.getCount().compareTo(o1.getCount()));
-		
+
 		//TODO : Add other
-//		// Adding others
-//		if (null != productSate.getBucketByKey(OTHER_BUCKET)) {		
-//			vsr.getConditions().add ( new VerticalFilterTerm(OTHER_BUCKET,productSate.getBucketByKey(OTHER_BUCKET).getDocCount()));
-//		}
-//		
-		
-		///////
-		// Brands
-		///////
-		
-		StringTermsAggregate brands  =  aggregations.get("brands").aggregation().getAggregate().sterms() ;
-		for (StringTermsBucket b :   brands.buckets().array()) {			
-			vsr.getBrands().add (new VerticalFilterTerm(b.key().stringValue(), b.docCount()));			
-		}
-		vsr.getBrands().sort((o1, o2) -> o2.getCount().compareTo(o1.getCount()));
-//		TODO : Add other
-//		// Adding others
-//		if (null != brands.getBucketByKey(OTHER_BUCKET)) {		
-//			vsr.getBrands().add ( new VerticalFilterTerm(OTHER_BUCKET,brands.getBucketByKey(OTHER_BUCKET).getDocCount()));
-//		}
+		//		// Adding others
+		//		if (null != productSate.getBucketByKey(OTHER_BUCKET)) {
+		//			vsr.getConditions().add ( new VerticalFilterTerm(OTHER_BUCKET,productSate.getBucketByKey(OTHER_BUCKET).getDocCount()));
+		//		}
+		//
 
 		///////
 		// Brands
 		///////
-		
-		StringTermsAggregate countries  =  aggregations.get("country").aggregation().getAggregate().sterms() ;		
+
+		StringTermsAggregate brands  =  aggregations.get("brands").aggregation().getAggregate().sterms() ;
+		for (StringTermsBucket b :   brands.buckets().array()) {
+			vsr.getBrands().add (new VerticalFilterTerm(b.key().stringValue(), b.docCount()));
+		}
+		vsr.getBrands().sort((o1, o2) -> o2.getCount().compareTo(o1.getCount()));
+		//		TODO : Add other
+		//		// Adding others
+		//		if (null != brands.getBucketByKey(OTHER_BUCKET)) {
+		//			vsr.getBrands().add ( new VerticalFilterTerm(OTHER_BUCKET,brands.getBucketByKey(OTHER_BUCKET).getDocCount()));
+		//		}
+
+		///////
+		// Brands
+		///////
+
+		StringTermsAggregate countries  =  aggregations.get("country").aggregation().getAggregate().sterms() ;
 		for (StringTermsBucket bucket : countries.buckets().array()) {
 			vsr.getCountries().add (new VerticalFilterTerm(bucket.key().stringValue(), bucket.docCount()));
 		}
 		vsr.getCountries().sort((o1, o2) -> o2.getCount().compareTo(o1.getCount()));
 		//TODO: add missing
 		//		if (null != countries.buckets().keyed().get(OTHER_BUCKET)) {
-////			vsr.getCountries().add ( new VerticalFilterTerm(OTHER_BUCKET,countries. buckets().keyed().get(OTHER_BUCKET).docCount()));
-////		}
-		
-		
+		////			vsr.getCountries().add ( new VerticalFilterTerm(OTHER_BUCKET,countries. buckets().keyed().get(OTHER_BUCKET).docCount()));
+		////		}
+
+
 		//////////////
 		/// Attr filters
 		//////////////
 
-		
-//		// Handling custom filters aggregations	
+
+		//		// Handling custom filters aggregations
 		for (AttributeConfig attrConfig : customAttrFilters) {
 			StringTermsAggregate agg  =  aggregations.get(attrConfig.getKey()).aggregation().getAggregate().sterms() ;
 			vsr.getCustomFilters().put(attrConfig, new ArrayList<>());
 			for (StringTermsBucket bucket : agg.buckets().array()) {
-				
-				if (!bucket.key().stringValue().equals(OTHER_BUCKET)) {					
+
+				if (!bucket.key().stringValue().equals(OTHER_BUCKET)) {
 					vsr.getCustomFilters().get(attrConfig).add (new VerticalFilterTerm(bucket.key().stringValue(), bucket.docCount()));
 				}
 			}
-			
+
 			if (attrConfig.getAttributeValuesOrdering().equals(org.open4goods.config.yml.attributes.Order.COUNT ) ) {
-				vsr.getCustomFilters().get(attrConfig).sort((o1, o2) -> o2.getCount().compareTo(o1.getCount()));				
+				vsr.getCustomFilters().get(attrConfig).sort((o1, o2) -> o2.getCount().compareTo(o1.getCount()));
 			}
 			else {
-				vsr.getCustomFilters().get(attrConfig).sort((o1, o2) -> o1.getText().compareTo(o2.getText()));								
+				vsr.getCustomFilters().get(attrConfig).sort((o1, o2) -> o1.getText().compareTo(o2.getText()));
 			}
 
 			// TODO : add missing
-//			// Adding others
-//			if (null != agg.getBucketByKey(OTHER_BUCKET)) {
-//				vsr.getCustomFilters().get(attrConfig).add ( new VerticalFilterTerm(OTHER_BUCKET,agg.getBucketByKey(OTHER_BUCKET).getDocCount()));
-//			}
-		}		
+			//			// Adding others
+			//			if (null != agg.getBucketByKey(OTHER_BUCKET)) {
+			//				vsr.getCustomFilters().get(attrConfig).add ( new VerticalFilterTerm(OTHER_BUCKET,agg.getBucketByKey(OTHER_BUCKET).getDocCount()));
+			//			}
+		}
 
-//		// Setting the response
+		//		// Setting the response
 		vsr.setTotalResults(results.getTotalHits());
-		vsr.setData(results.get().map(e-> e.getContent()).toList());
-				
-		vsr.setVerticalConfig(vertical);	
+		vsr.setData(results.get().map(SearchHit::getContent).toList());
+
+		vsr.setVerticalConfig(vertical);
 		vsr.setRequest(request);
-		
+
 		return vsr;
 	}
 
-	
-//	/**
-//	 * 
-//	 * @param categorie
-//	 * @return all Product for a categorie
-//	 */
-//	public VerticalSearchResponse categorieSearch(String categorie) {
-//		String translatedVerticalQuery="datasourceCategories:\""+categorie+"\""; 
-//		
-//		
-//		
-//		VerticalSearchResponse vsr = new VerticalSearchResponse();
-//		
-//		//TODO : Handle attributes and limits
-////		 CategoryStatResults statsResult = aggregatedDataRepository.stats(translatedVerticalQuery);
-//		
-//		
-//		// TODO(gof) : Page pageNumber conf
-//		vsr.setData(aggregatedDataRepository.searchValidPrices(translatedVerticalQuery,ALL_VERTICAL_NAME,0,1000) .collect(Collectors.toList()));
-//		
-//		return vsr;
-//	}
-//	
+
+	//	/**
+	//	 *
+	//	 * @param categorie
+	//	 * @return all Product for a categorie
+	//	 */
+	//	public VerticalSearchResponse categorieSearch(String categorie) {
+	//		String translatedVerticalQuery="datasourceCategories:\""+categorie+"\"";
+	//
+	//
+	//
+	//		VerticalSearchResponse vsr = new VerticalSearchResponse();
+	//
+	//		//TODO : Handle attributes and limits
+	////		 CategoryStatResults statsResult = aggregatedDataRepository.stats(translatedVerticalQuery);
+	//
+	//
+	//		// TODO(gof) : Page pageNumber conf
+	//		vsr.setData(aggregatedDataRepository.searchValidPrices(translatedVerticalQuery,ALL_VERTICAL_NAME,0,1000) .collect(Collectors.toList()));
+	//
+	//		return vsr;
+	//	}
+	//
 	public String sanitize(String q) {
 		return StringUtils.normalizeSpace(q.replace("(", " ")
 				.replace(")", " ")
@@ -377,7 +377,7 @@ public class SearchService {
 				.replace("-", " ")
 				.replace(":", " ")
 				.replace("\"", " "));
-	
+
 	}
 
 

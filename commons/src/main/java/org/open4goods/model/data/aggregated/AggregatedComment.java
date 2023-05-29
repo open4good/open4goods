@@ -11,20 +11,20 @@ import org.springframework.data.elasticsearch.annotations.Field;
 import org.springframework.data.elasticsearch.annotations.FieldType;
 
 public class AggregatedComment extends DataFragmentSource {
-	
+
 	@Field(index = false, store = false, type = FieldType.Object)
 	private String title;
 
 	@Field(index = false, store = false, type = FieldType.Object)
 	private String description;
-	
+
 	@Field(index = false, store = false, type = FieldType.Object)
 	private String language;
-	
+
 	@Field(index = false, store = false, type = FieldType.Date, format = DateFormat.epoch_millis)
 	private Long date;
 
-	@Field(index = false, store = false, type = FieldType.Keyword)	
+	@Field(index = false, store = false, type = FieldType.Keyword)
 	private String author;
 
 	@Field(index = false, store = false, type = FieldType.Object)
@@ -36,15 +36,15 @@ public class AggregatedComment extends DataFragmentSource {
 	@Field(index = false, store = false, type = FieldType.Integer)
 	private Integer useless;
 
-	
-		
+
+
 	public AggregatedComment (Comment sourceComment, DataFragment source ) {
 		super(source);
-		this.setAuthor(sourceComment.getAuthor());
-		this.setDate(sourceComment.getDate());
-		this.setRating(sourceComment.getRating());
-		this.setUsefull(sourceComment.getUsefull());
-		this.setUseless(sourceComment.getUseless());
+		setAuthor(sourceComment.getAuthor());
+		setDate(sourceComment.getDate());
+		setRating(sourceComment.getRating());
+		setUsefull(sourceComment.getUsefull());
+		setUseless(sourceComment.getUseless());
 	}
 
 	@Override
@@ -151,8 +151,8 @@ public class AggregatedComment extends DataFragmentSource {
 		return description;
 	}
 
-	
-	
-	
-	
+
+
+
+
 }

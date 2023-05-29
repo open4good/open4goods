@@ -6,12 +6,11 @@ import java.util.Map;
 import java.util.Set;
 
 import org.open4goods.model.constants.ReferentielKey;
-import org.open4goods.model.data.Rating;
 import org.springframework.data.elasticsearch.annotations.Field;
 import org.springframework.data.elasticsearch.annotations.FieldType;
 
 public class AggregatedAttributes  {
-	
+
 	/**
 	 * The referentiel attributes
 	 */
@@ -21,34 +20,34 @@ public class AggregatedAttributes  {
 	@Field(index = true, store = false, type = FieldType.Object)
 	//TODO: rename
 	private Map<String,AggregatedAttribute> aggregatedAttributes = new HashMap<>();
-	
+
 
 	@Field(index = true, store = false, type = FieldType.Object)
 	private Set<AggregatedAttribute> unmapedAttributes = new HashSet<>();
 
-	
+
 	@Field(index = false, store = false, type = FieldType.Object)
 	private Set<AggregatedFeature> features = new HashSet<>();
 
-	
-	
 
-	
+
+
+
 	@Override
 	public String toString() {
 		return "ref-attrs:"+referentielAttributes.size()+ " , attrs:"+aggregatedAttributes.size() ;
 	}
 	public void addReferentielAttribute(ReferentielKey key, String value) {
 		referentielAttributes.put(key, value);
-		
+
 	}
-	
 
 
 
-	
-	
-	
+
+
+
+
 	public Map<String, AggregatedAttribute> getAggregatedAttributes() {
 		return aggregatedAttributes;
 	}
@@ -81,10 +80,10 @@ public class AggregatedAttributes  {
 
 
 
-	
-	
-	
-	
-	
+
+
+
+
+
 
 }

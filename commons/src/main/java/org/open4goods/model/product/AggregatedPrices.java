@@ -25,20 +25,20 @@ public class AggregatedPrices implements Standardisable {
 
 	@Field(index = false, store = false, type = FieldType.Object)
 	private List<PriceHistory> history = new ArrayList<>();
-	
+
 	@Field(index = false, store = false, type = FieldType.Integer)
-	// Price evolution trend : 
+	// Price evolution trend :
 	// 0 -> equals
 	// 1 -> Increasing
 	// 2 -> Decreasing
 	private Integer trend= 0;
-	
+
 	@Field(index = true, store = false, type = FieldType.Keyword)
-	
+
 	// Contains the conditions for this product
 	private Set<ProductState> conditions = new HashSet<>();
-	
-	
+
+
 	/**
 	 * Sort offers, always the cheapest compensated order first, then price sorting
 	 * @return
@@ -46,10 +46,10 @@ public class AggregatedPrices implements Standardisable {
 	public List<AggregatedPrice> sortedOffers() {
 		// Find the cheapest affiliated
 		final AggregatedPrice cheapest = offers.stream()
-				.filter(d -> d.isAffiliated())
-		.sorted(Comparator.comparingDouble(AggregatedPrice::getPrice)).findFirst().orElse(null);
+				.filter(AggregatedPrice::isAffiliated)
+				.sorted(Comparator.comparingDouble(AggregatedPrice::getPrice)).findFirst().orElse(null);
 
-		
+
 		// Find the cheapest in any case
 		final List<AggregatedPrice> res = offers.stream()
 				.sorted(Comparator.comparingDouble(AggregatedPrice::getPrice))
@@ -68,8 +68,8 @@ public class AggregatedPrices implements Standardisable {
 		final Set<Standardisable> ret = new HashSet<>();
 		ret.addAll(offers);
 		ret.add(minPrice);
-//		ret.add(maxPrice);
-//		ret.add(avgPrice);
+		//		ret.add(maxPrice);
+		//		ret.add(avgPrice);
 
 		return ret;
 	}
@@ -85,13 +85,13 @@ public class AggregatedPrices implements Standardisable {
 	 * @return
 	 */
 	public Long affiliatedOffersCount() {
-		return offers.stream().filter(e -> e.isAffiliated()).count();
+		return offers.stream().filter(AggregatedPrice::isAffiliated).count();
 	}
 
 	/////////////////////////////////////////////
 	// Getters / Setters
 	////////////////////////////////////////////
-	
+
 	public Set<AggregatedPrice> getOffers() {
 		return offers;
 	}
@@ -135,21 +135,21 @@ public class AggregatedPrices implements Standardisable {
 
 
 
-//	public AggregatedPrice getMaxPrice() {
-//		return maxPrice;
-//	}
-//
-//	public void setMaxPrice(AggregatedPrice maxPrice) {
-//		this.maxPrice = maxPrice;
-//	}
-//
-//	public AggregatedPrice getAvgPrice() {
-//		return avgPrice;
-//	}
-//
-//	public void setAvgPrice(AggregatedPrice avgPrice) {
-//		this.avgPrice = avgPrice;
-//	}
+	//	public AggregatedPrice getMaxPrice() {
+	//		return maxPrice;
+	//	}
+	//
+	//	public void setMaxPrice(AggregatedPrice maxPrice) {
+	//		this.maxPrice = maxPrice;
+	//	}
+	//
+	//	public AggregatedPrice getAvgPrice() {
+	//		return avgPrice;
+	//	}
+	//
+	//	public void setAvgPrice(AggregatedPrice avgPrice) {
+	//		this.avgPrice = avgPrice;
+	//	}
 
 
 

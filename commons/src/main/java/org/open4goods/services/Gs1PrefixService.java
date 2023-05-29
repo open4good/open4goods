@@ -17,7 +17,7 @@ import com.ibm.icu.util.ULocale;
 
 /**
  * This service renders the GS1 country associated for a bar code
- * 
+ *
  * @author Goulven.Furet
  *
  */
@@ -33,7 +33,7 @@ public class Gs1PrefixService {
 
 	/**
 	 * Schema for gs1 prefix
-	 * 
+	 *
 	 * @author Goulven.Furet
 	 *
 	 */
@@ -41,7 +41,7 @@ public class Gs1PrefixService {
 	/**
 	 * The constructor initlaize the prefix resolution map from the csv, provided as
 	 * resource
-	 * 
+	 *
 	 * @param csvUri
 	 * @param resourceResolver
 	 * @throws IOException
@@ -67,12 +67,12 @@ public class Gs1PrefixService {
 			MappingIterator<Gs1PrefixSchema> iterator = mapper.readerFor(Gs1PrefixSchema.class).with(schema)
 
 					.readValues(resourceResolver.getResource(csvUri)
-					.getInputStream());
+							.getInputStream());
 
 			iterator.readAll().forEach(e -> {
 				prefixes.putAll(e.expand(countryNames));
 			});
-			
+
 			iterator.close();
 
 		} catch (IOException e) {
@@ -83,7 +83,7 @@ public class Gs1PrefixService {
 
 	/**
 	 * Return the country for a given Gtin
-	 * 
+	 *
 	 * @param gtin
 	 * @return
 	 */

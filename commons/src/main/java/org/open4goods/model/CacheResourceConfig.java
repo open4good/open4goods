@@ -6,7 +6,7 @@ public class CacheResourceConfig {
 
 	private Boolean unzip = false;
 
-//	private Boolean untar = false;
+	//	private Boolean untar = false;
 
 	private Integer refreshInDays = 7;
 
@@ -17,9 +17,9 @@ public class CacheResourceConfig {
 
 
 
-//	public String getId() {
-//		return IdHelper.getHashedName(getUrl());
-//	}
+	//	public String getId() {
+	//		return IdHelper.getHashedName(getUrl());
+	//	}
 
 
 	public String getUrl() {

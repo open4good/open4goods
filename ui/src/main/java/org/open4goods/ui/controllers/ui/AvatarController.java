@@ -46,21 +46,21 @@ public class AvatarController {
 
 	@Autowired
 	private ResourceService resourceService;
-	
+
 	private final List<Avatar> avatarBuilders = new ArrayList<>();
 
 
 	public AvatarController () {
 
 
-//		avatarBuilders.add(GitHubAvatar.newAvatarBuilder().layers(new ColorPaintBackgroundLayer(java.awt.Color.WHITE)).build());
-//		avatarBuilders.add(TriangleAvatar.newAvatarBuilder().build());
-//		avatarBuilders.add(SquareAvatar.newAvatarBuilder().build());
+		//		avatarBuilders.add(GitHubAvatar.newAvatarBuilder().layers(new ColorPaintBackgroundLayer(java.awt.Color.WHITE)).build());
+		//		avatarBuilders.add(TriangleAvatar.newAvatarBuilder().build());
+		//		avatarBuilders.add(SquareAvatar.newAvatarBuilder().build());
 		avatarBuilders.add(IdenticonAvatar.newAvatarBuilder().build());
-//		avatarBuilders.add(GitHubAvatar.newAvatarBuilder().build());
+		//		avatarBuilders.add(GitHubAvatar.newAvatarBuilder().build());
 		avatarBuilders.add(CatAvatar.newAvatarBuilder()
-			    .layers(new ShadowLayer(), new RandomColorPaintBackgroundLayer(), new RoundRectMaskLayer())
-			    .padding(8).margin(8).build());
+				.layers(new ShadowLayer(), new RandomColorPaintBackgroundLayer(), new RoundRectMaskLayer())
+				.padding(8).margin(8).build());
 		avatarBuilders.add(SmileyAvatar.newAccessoriesAvatarBuilder().build());
 		avatarBuilders.add(SmileyAvatar.newEyeMouthAvatarBuilder().build());
 		avatarBuilders.add(SmileyAvatar.newGhostAvatarBuilder().build());
@@ -84,7 +84,7 @@ public class AvatarController {
 
 
 		{
-			try (InputStream str = org.apache.commons.io.FileUtils.openInputStream(file)){				
+			try (InputStream str = org.apache.commons.io.FileUtils.openInputStream(file)){
 				IOUtils.copy(str, response.getOutputStream());
 			} catch (final IOException e) {
 				logger.error("Error rendering avatar file  {} : {}", file.getAbsolutePath(), e.getMessage());
@@ -114,9 +114,9 @@ public class AvatarController {
 	}
 
 	private void createAsPngToFile(final int key, final File file) {
-	    final Random rand = new Random();
-	    final Avatar avatar = avatarBuilders.get(rand.nextInt(avatarBuilders.size()));
-	    try {
+		final Random rand = new Random();
+		final Avatar avatar = avatarBuilders.get(rand.nextInt(avatarBuilders.size()));
+		try {
 			avatar.createAsPngToFile(key, file);
 		} catch (final Exception e) {
 			logger.error("Cannot create PNG Avatar for user {} : {}",key,e.getMessage());

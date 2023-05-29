@@ -62,7 +62,7 @@ public class OpenDataService {
 	private AtomicBoolean exportRunning = new AtomicBoolean(false);
 
 	private AtomicInteger concurrentDownloads = new AtomicInteger(0);
-	
+
 
 
 
@@ -73,7 +73,7 @@ public class OpenDataService {
 	}
 
 	/**
-	 * 
+	 *
 	 * @return a limited stream pageSize the opendata set. Limited in bandwith, and
 	 *         limited in number of conccurent downloads Limited
 	 * @throws FileNotFoundException
@@ -110,7 +110,7 @@ public class OpenDataService {
 
 	/**
 	 * Iterates over all aggregatedData pageSize generate the zipped opendata CSV file
-	 * 
+	 *
 	 * TODO : Schedule pageNumber conf
 	 */
 	@Scheduled(initialDelay = 1000L *3600, fixedDelay = 1000L * 3600 * 24 * 7)
@@ -141,16 +141,16 @@ public class OpenDataService {
 			// Fixing the count
 			AtomicLong count = new AtomicLong();
 
-			
+
 			// Iterating on datas
 			LOGGER.info("Starting opendata export");
 			aggregatedDataRepository.exportAll().forEach(e -> {
 				count.incrementAndGet();
 				writer.writeNext(toEntry(e)); // write the contents
 			});
-			
 
-			
+
+
 			writer.flush();
 			zos.closeEntry();
 
@@ -171,7 +171,7 @@ public class OpenDataService {
 
 	/**
 	 * Convert an aggregateddata pageSize a csv row
-	 * 
+	 *
 	 * @param data
 	 * @return
 	 */
@@ -179,26 +179,26 @@ public class OpenDataService {
 
 		String[] line = new String[header.length];
 
-//		"gtin"
+		//		"gtin"
 		line[0] = data.gtin();
-//		"brand"
+		//		"brand"
 		line[1] = data.brand();
-//		"model"
+		//		"model"
 		line[2] = data.model();
-//		"shortest_name"
+		//		"shortest_name"
 		line[3] = data.getNames().shortestOfferName();
-//		"last_updated"
+		//		"last_updated"
 		line[4] = String.valueOf(data.getLastChange());
-//		"gs1_country"
+		//		"gs1_country"
 		line[5] = data.getGtinInfos().getCountry();
-		
-//		"upcType"
+
+		//		"upcType"
 		line[6] = data.getGtinInfos().getUpcType().toString();
-		
-		
-//		"offers_count"
+
+
+		//		"offers_count"
 		line[7] = String.valueOf(data.getOffersCount());
-//		"min_price"
+		//		"min_price"
 		if (null != data.bestPrice()) {
 			line[8] = String.valueOf(data.bestPrice().getPrice());
 			// "compensation"
@@ -209,7 +209,7 @@ public class OpenDataService {
 			// TODO(gof) : i18n the url
 			line[12] = uiConfig.getBaseUrl(Locale.FRANCE) + data.getNames().getName();
 		}
-		
+
 		// Categories
 		line[11] = StringUtils.join(data.getDatasourceCategories()," ; ");
 
@@ -234,7 +234,7 @@ public class OpenDataService {
 	}
 
 	/**
-	 * 
+	 *
 	 * @return the last update date
 	 */
 	@Cacheable(key = "#root.method.name", cacheNames = CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME)
@@ -243,14 +243,14 @@ public class OpenDataService {
 	}
 
 	/**
-	 * 
+	 *
 	 * @return number of items
 	 */
 	@Cacheable(key = "#root.method.name", cacheNames = CacheConstants.ONE_DAY_LOCAL_CACHE_NAME)
 	public long totalItems() {
 		return aggregatedDataRepository.countMainIndex();
 	}
-	
+
 	/**
 	 * Convert a size in human readable form
 	 * @param bytes
@@ -258,15 +258,15 @@ public class OpenDataService {
 	 */
 	public static String humanReadableByteCountBin(long bytes) {
 		if (-1000 < bytes && bytes < 1000) {
-	        return bytes + " B";
-	    }
-	    CharacterIterator ci = new StringCharacterIterator("kMGTPE");
-	    while (bytes <= -999_950 || bytes >= 999_950) {
-	        bytes /= 1000;
-	        ci.next();
-	    }
-	    return String.format("%.1f %cB", bytes / 1000.0, ci.current());
+			return bytes + " B";
+		}
+		CharacterIterator ci = new StringCharacterIterator("kMGTPE");
+		while (bytes <= -999_950 || bytes >= 999_950) {
+			bytes /= 1000;
+			ci.next();
+		}
+		return String.format("%.1f %cB", bytes / 1000.0, ci.current());
 	}
-	
+
 
 }

@@ -12,8 +12,8 @@ import org.open4goods.model.Localised;
 import org.open4goods.model.constants.ProviderType;
 import org.open4goods.model.data.AffiliationToken;
 import org.open4goods.model.data.Description;
-import org.open4goods.model.product.Product;
 import org.open4goods.model.product.AggregatedPrice;
+import org.open4goods.model.product.Product;
 import org.open4goods.services.SerialisationService;
 import org.open4goods.services.VerticalsConfigService;
 import org.open4goods.ui.config.yml.UiConfig;
@@ -53,8 +53,8 @@ public class ProductController extends AbstractUiController {
 	private @Autowired SerialisationService serialisationService;
 
 	private @Autowired VerticalsConfigService verticalConfigService;
-	
-	
+
+
 	//////////////////////////////////////////////////////////////
 	// Mappings
 	//////////////////////////////////////////////////////////////
@@ -64,58 +64,58 @@ public class ProductController extends AbstractUiController {
 	 *
 	 * @param request
 	 * @param response
-	 * @param updatedData 
+	 * @param updatedData
 	 * @return
-	 * @throws IOException 
+	 * @throws IOException
 	 * @throws UnirestException
 	 */
 
-	
+
 	@GetMapping("/{vertical}/*-{id:\\d+}")
 	public ModelAndView productInVertical(@PathVariable String vertical, @PathVariable String id, final HttpServletRequest request, HttpServletResponse response) throws IOException {
 
-		
+
 		VerticalConfig language = verticalConfigService.getLanguageForVerticalPath(vertical);
-		
+
 		if (null == language) {
 			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Produit " + request.getServletPath() + " introuvable !");
 		}
-		
+
 		return product(id, vertical,request, response);
-		
-		
+
+
 	}
-	
-	
+
+
 	@GetMapping("/*-{id:\\d+}")
 	public ModelAndView product(@PathVariable String id, String vertical, final HttpServletRequest request, HttpServletResponse response) throws IOException {
 
 		// Getting the product name
-		String path= URLEncoder.encode(request.getServletPath().substring(1));							
+		String path= URLEncoder.encode(request.getServletPath().substring(1));
 
-		
+
 		// Retrieve the Product
 		Product data;
 		try {
-				data = esDao.getById(id);
+			data = esDao.getById(id);
 
 		} catch (ResourceNotFoundException e) {
 			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Produit " + request.getServletPath() + " introuvable !");
 		}
 
-		
+
 		// TODO(gof) : Handling redirection if on a vertical match
 
-		
+
 		if (null == data) {
 			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Produit " + request.getServletPath() + " introuvable !");
 		}
-		
-	
+
+
 		// Sending 301 id no match with product name
-		
+
 		if (null == vertical) {
-			
+
 			if (!path.equals(data.getNames().getName())) {
 				response.setStatus(HttpServletResponse.SC_MOVED_PERMANENTLY);
 				response.setHeader("Location", config.getBaseUrl(Locale.FRANCE) + data.getNames().getName());
@@ -128,47 +128,47 @@ public class ProductController extends AbstractUiController {
 				return null;
 			}
 		}
-		
-		
-		
-		
-		
+
+
+
+
+
 		//TODO : in a service
 		// Adding the affiliationTokens in all prices
 		for (AggregatedPrice price : data.getPrice().getOffers()) {
 			inferAffiliationToken(data, price);
 		}
-		
+
 		// Adding the affiliationTokens in min and max price
 		//TODO(gof) : could be in price aggregation
 		inferAffiliationToken(data, data.getPrice().getMinPrice());
-//		inferAffiliationToken(data, data.getPrice().getMaxPrice());	
-		
+		//		inferAffiliationToken(data, data.getPrice().getMaxPrice());
+
 		ModelAndView mv = null;
-		
-		
+
+
 		// TODO : Remove this test page
 		if (null != request.getParameter("new")) {
-			 mv = defaultModelAndView("product2", request);
+			mv = defaultModelAndView("product2", request);
 		} else {
-			 mv = defaultModelAndView("product", request);
+			mv = defaultModelAndView("product", request);
 		}
-		
-		
-		
+
+
+
 		mv.addObject("product", data);
-		
+
 		// Adding the diplay country
 		if (null != data.getGtinInfos().getCountry()) {
 			mv.addObject("originCountry", new ULocale("",data.getGtinInfos().getCountry()).getDisplayCountry( new ULocale(request.getLocale().toString())));
 		}
-		
-		// Adding the images resource 
-		
+
+		// Adding the images resource
+
 		return mv;
 	}
 
-	
+
 	@PostMapping("/*-{id:\\d+}")
 	public ModelAndView updateProduct(@RequestParam String productTitle, @RequestParam String productDescription,  @PathVariable String id, final HttpServletRequest request, HttpServletResponse response) throws IOException {
 
@@ -179,38 +179,38 @@ public class ProductController extends AbstractUiController {
 		} catch (ResourceNotFoundException e) {
 			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Produit " + request.getServletPath() + " introuvable !");
 		}
-		
+
 		// Updating
 		data.getNames().setManualName(productTitle);
-		
+
 		Description description = new Description();
-		//TODO(i18n) 
+		//TODO(i18n)
 		description.setContent(new Localised(productDescription, "fr"));
 		description.setProviderType(ProviderType.HUMAN_REDACTED);
-		
+
 		data.setHumanDescription(description);
-		
+
 		esDao.index(data, ProductRepository.MAIN_INDEX_NAME);
-		
+
 		return product(id, null,request, response);
-		
+
 	}
 	/**
 	 * Infer the affiliation token in an aggregated price
-	 * 
+	 *
 	 * @param data
 	 * @param price
-	 * @throws IOException 
+	 * @throws IOException
 	 */
 	private void inferAffiliationToken(Product data, AggregatedPrice price)  {
 
-			try {
-				AffiliationToken token = new AffiliationToken(price, data);
-				String serToken = URLEncoder.encode(serialisationService.compressString(serialisationService.toJson(token)), Charset.defaultCharset());			
-				price.setAffiliationToken(serToken);
-			} catch (Exception e) {
-				LOGGER.error("Error while generating affiliation token for {} : {}", data, e.getMessage());
-			}		
+		try {
+			AffiliationToken token = new AffiliationToken(price, data);
+			String serToken = URLEncoder.encode(serialisationService.compressString(serialisationService.toJson(token)), Charset.defaultCharset());
+			price.setAffiliationToken(serToken);
+		} catch (Exception e) {
+			LOGGER.error("Error while generating affiliation token for {} : {}", data, e.getMessage());
+		}
 	}
 
 }

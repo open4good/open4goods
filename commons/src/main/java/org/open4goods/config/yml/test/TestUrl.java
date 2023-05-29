@@ -68,14 +68,14 @@ public class TestUrl {
 
 
 
-	    // product state
+		// product state
 		if (null != productState) {
 			if (null == data.getProductState()) {
 				ret.addMessage("Was expecting a productState");
 			} else
-			if (productState != data.getProductState()) {
-				ret.addMessage("Was expecting productState " + productState + ", we have : " + data.getProductState());
-			}
+				if (productState != data.getProductState()) {
+					ret.addMessage("Was expecting productState " + productState + ", we have : " + data.getProductState());
+				}
 		}
 
 
@@ -93,9 +93,9 @@ public class TestUrl {
 			if (org.apache.commons.lang3.StringUtils.isEmpty(category)) {
 				ret.addMessage("Was expecting a productTag");
 			} else
-			if (!category.equals(data.getCategory())) {
-				ret.addMessage("Was expecting productTag " + category + ", we have : " + data.getCategory());
-			}
+				if (!category.equals(data.getCategory())) {
+					ret.addMessage("Was expecting productTag " + category + ", we have : " + data.getCategory());
+				}
 		}
 
 		if (null != attributes) {
@@ -137,27 +137,27 @@ public class TestUrl {
 		}
 
 		if (null != comments)
-		 {
+		{
 			comments.test(data.getComments(),ret);
-//
+			//
 		}
 
-//		if (null != ratings) {
-//			for (final Entry<RatingType, RatingsExpectedResult> ratingsEs : ratings.entrySet()) {
-//				if (null == data.ratings(ratingsEs.getKey().toString())) {
-//					ret.addMessage("Was expecting "+ratingsEs.getKey()+"ratings");
-//				} else {
-//					if (null == ratingsEs.getValue()) {
-//						final Rating tmp = data.rating(ratingsEs.getKey());
-//						if (null == tmp ) {
-//							ret.addMessage("No "+ratingsEs.getKey()+" ratings ");
-//						}
-//					} else {
-//						ratingsEs.getValue().test(data.rating(ratingsEs.getKey()),ratingsEs.getKey(),ret);
-//					}
-//				}
-//			}
-//		}
+		//		if (null != ratings) {
+		//			for (final Entry<RatingType, RatingsExpectedResult> ratingsEs : ratings.entrySet()) {
+		//				if (null == data.ratings(ratingsEs.getKey().toString())) {
+		//					ret.addMessage("Was expecting "+ratingsEs.getKey()+"ratings");
+		//				} else {
+		//					if (null == ratingsEs.getValue()) {
+		//						final Rating tmp = data.rating(ratingsEs.getKey());
+		//						if (null == tmp ) {
+		//							ret.addMessage("No "+ratingsEs.getKey()+" ratings ");
+		//						}
+		//					} else {
+		//						ratingsEs.getValue().test(data.rating(ratingsEs.getKey()),ratingsEs.getKey(),ret);
+		//					}
+		//				}
+		//			}
+		//		}
 
 
 		if (null != questions) {
@@ -165,24 +165,24 @@ public class TestUrl {
 		}
 
 
-//
-//		if (null != comments)
-//		comments.test(data.getComments());
-//
-//
-//		if (null != pros)
-//		pros.test(data.getPros());
-//
-//		if (null != cons)
-//			cons.test(data.getCons());
-//
-//
-//		if (null != questions)
-//		questions.test(data.getQuestions());
-//
-//
-//		if (null != seller)
-//		seller.test(data.getSeller());
+		//
+		//		if (null != comments)
+		//		comments.test(data.getComments());
+		//
+		//
+		//		if (null != pros)
+		//		pros.test(data.getPros());
+		//
+		//		if (null != cons)
+		//			cons.test(data.getCons());
+		//
+		//
+		//		if (null != questions)
+		//		questions.test(data.getQuestions());
+		//
+		//
+		//		if (null != seller)
+		//		seller.test(data.getSeller());
 
 
 
@@ -297,19 +297,19 @@ public class TestUrl {
 		this.resources = resources;
 	}
 
-//
-//
-//
-//	public Map<RatingType, RatingsExpectedResult> getRatings() {
-//		return ratings;
-//	}
-//
-//
-//
-//
-//	public void setRatings(final Map<RatingType, RatingsExpectedResult> ratings) {
-//		this.ratings = ratings;
-//	}
+	//
+	//
+	//
+	//	public Map<RatingType, RatingsExpectedResult> getRatings() {
+	//		return ratings;
+	//	}
+	//
+	//
+	//
+	//
+	//	public void setRatings(final Map<RatingType, RatingsExpectedResult> ratings) {
+	//		this.ratings = ratings;
+	//	}
 
 
 

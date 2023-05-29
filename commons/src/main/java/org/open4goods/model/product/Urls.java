@@ -35,6 +35,6 @@ public class Urls {
 		this.urls = urls;
 	}
 
-	
+
 
 }

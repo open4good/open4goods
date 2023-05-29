@@ -20,7 +20,7 @@ public class MediaAggregationConfig {
 	 * If true, resources downloading will be skipped. Usefull for verticals testing
 	 */
 	private Boolean skipResourcesFetching = false;
-	
+
 	/**
 	 * If set to true, the resources will be downlladed / indexed anyway, even if
 	 * cached.
@@ -42,9 +42,9 @@ public class MediaAggregationConfig {
 	 */
 	private Set<Integer> imageBrandsThumbsHeight = new HashSet<>();
 
-	
-	
-	
+
+
+
 
 	public Integer getResourceDownloadConcurentThreads() {
 		return resourceDownloadConcurentThreads;

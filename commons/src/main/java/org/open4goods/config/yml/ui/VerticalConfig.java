@@ -37,43 +37,43 @@ import jakarta.validation.constraints.NotNull;
 public class VerticalConfig{
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(VerticalConfig.class);
-	
+
 	/**
 	 * Vertical ID
 	 */
 	private String id;
-	
-	
+
+
 	/**
 	 * The title on the vertical home page
 	 */
 	@JsonMerge
-	private Localisable homeTitle = new Localisable(); 
+	private Localisable homeTitle = new Localisable();
 
 	/**
 	 * The description on the category section, on the home page
 	 */
 	@JsonMerge
-	private Localisable homeDescription = new Localisable(); 
-	
+	private Localisable homeDescription = new Localisable();
+
 	/**
 	 * The image logo on the vertical home page
 	 */
 	@JsonMerge
-	private Localisable homeLogo = new Localisable(); 
-	
+	private Localisable homeLogo = new Localisable();
+
 	/**
 	 * The url of the vertical home page
 	 */
 	@JsonMerge
-	private Localisable homeUrl = new Localisable(); 
-		
+	private Localisable homeUrl = new Localisable();
+
 
 	/**
 	 * The categories to associate to this vertical
 	 */
 	private List<String> verticalFilters = new ArrayList<>();
-	
+
 	/**
 	 * The categories that MUST BE PRESENT to associate to this vertical
 	 */
@@ -83,14 +83,14 @@ public class VerticalConfig{
 	 * The categories that MUST NOT BE PRESENT to associate to this vertical
 	 */
 	private Set<String> unmatchingCategories = new HashSet<>();
-	
-						
+
+
 	/**
 	 * Configuration for commentsConfig aggregation (tagcloud rules, ...)
 	 */
 	@JsonMerge
 	private CommentsAggregationConfig commentsConfig = new CommentsAggregationConfig();
-	
+
 
 	/**
 	 * The I18n URL Mappings. Think SEO !
@@ -103,15 +103,15 @@ public class VerticalConfig{
 	 */
 	@JsonMerge
 	private MediaAggregationConfig resourcesConfig = new MediaAggregationConfig();
-	
+
 	/**
 	 * The generation config by segments
 	 */
 	@JsonMerge
-	private CapsuleGenerationConfig generationConfig = new CapsuleGenerationConfig();	
-	
+	private CapsuleGenerationConfig generationConfig = new CapsuleGenerationConfig();
 
-	
+
+
 	/** The config for compensation **/
 	@JsonMerge
 	private CompensationConfig compensation = new CompensationConfig();
@@ -122,19 +122,19 @@ public class VerticalConfig{
 	 */
 	@JsonMerge
 	private AttributesConfig attributesConfig = new AttributesConfig();
-		
+
 	/**
 	 * Configuration relativ to ratings aggregation
 	 */
 	@JsonMerge
 	private RatingsConfig ratingsConfig = new RatingsConfig();
-	
+
 	/**
 	 * The behavior of barcode generation
 	 */
 	@JsonMerge
 	private BarcodeAggregationProperties barcodeConfig = new BarcodeAggregationProperties();
-	
+
 	/**
 	 * The segment definition. The API will use it to budle the data dedicated to the capsule.
 	 */
@@ -145,20 +145,20 @@ public class VerticalConfig{
 	 * The recommandations configuration
 	 */
 	private RecommandationsConfig recommandationsConfig = new RecommandationsConfig();
-	
+
 	/**
 	 * The logos configuration
 	 */
 	@JsonMerge
 	private LogosConfig logosConfig = new LogosConfig();
-	
-	
+
+
 	/**
 	 * The config for swagger API
 	 */
 	private ApiConfig apiConfig = new ApiConfig();
 
-		
+
 	/**
 	 * The behavior of relation data aggregation service, by relation type
 	 */
@@ -170,7 +170,7 @@ public class VerticalConfig{
 	 */
 	private DescriptionsAggregationConfig descriptionsAggregationConfig  = new DescriptionsAggregationConfig();
 
-	
+
 	/**
 	 * The product scoring configuration
 	 */
@@ -178,9 +178,9 @@ public class VerticalConfig{
 	private ScoringAggregationConfig scoringAggregationConfig;
 
 
-	
+
 	@Override
-	public String toString() {	
+	public String toString() {
 		return "config:"+ id;
 	}
 
@@ -226,20 +226,20 @@ public class VerticalConfig{
 	}
 
 
-	
+
 	/**
-	 * 
+	 *
 	 * @return the specific attributes config for this vertical
 	 */
 	public List<AttributeConfig> verticalFilters() {
 
 		return verticalFilters.stream()
 				.map(e -> getAttributesConfig().getAttributeConfigByKey(e))
-				.collect(Collectors.toList());				
-		
+				.collect(Collectors.toList());
+
 	}
-	
-	
+
+
 	/**
 	 * Return the root url for a given sitelocale, with the "default" behavior
 	 *
@@ -249,11 +249,11 @@ public class VerticalConfig{
 	public String getBaseUrl(final Locale siteLocale) {
 		return namings.getBaseUrls().getOrDefault(siteLocale.getLanguage(), namings.getBaseUrls().get("default"));
 	}
-	
+
 	public String baseUrl() {
 		return namings.getBaseUrls().get("default");
-	}	
-	
+	}
+
 	public String getBaseUrl(final String siteLocale) {
 		return namings.getBaseUrls().getOrDefault(siteLocale, namings.getBaseUrls().get("default"));
 	}
@@ -274,7 +274,7 @@ public class VerticalConfig{
 			LOGGER.info("Hashing languageByServerName");
 			hashedSiteLocales = new HashMap<>();
 			for (final Entry<String, String> a : getNamings().getServerNames().entrySet()) {
-				
+
 				if (hashedSiteLocales.containsKey(a.getValue())) {
 					LOGGER.error("Duplicate server name for : {} server will be ignored.",a.getKey());
 				}
@@ -340,7 +340,7 @@ public class VerticalConfig{
 	}
 
 
-	
+
 	/**
 	 * Return the name of the product index for this capsule
 	 * @return
@@ -359,7 +359,7 @@ public class VerticalConfig{
 		return indexName()  + "-resources";
 	}
 
-		
+
 	//////////////////////////////////////
 	// Getters / Setters
 	//////////////////////////////////////
@@ -377,7 +377,7 @@ public class VerticalConfig{
 	}
 
 	public void setNamings(final SiteNaming urls) {
-		this.namings = urls;
+		namings = urls;
 	}
 
 	public CommentsAggregationConfig getCommentsConfig() {
@@ -520,7 +520,7 @@ public class VerticalConfig{
 	}
 
 
-	
+
 
 	public Set<String> getMatchingCategories() {
 		return matchingCategories;
@@ -578,7 +578,7 @@ public class VerticalConfig{
 		this.unmatchingCategories = unmatchingCategories;
 	}
 
-	
-	
-	
+
+
+
 }

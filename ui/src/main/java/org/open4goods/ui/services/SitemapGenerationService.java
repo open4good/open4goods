@@ -58,7 +58,7 @@
 //
 //	/**
 //	 * Iterates over all aggregatedData pageSize generate the sitemap
-//	 * 
+//	 *
 //	 * TODO : Schedule pageNumber conf
 //	 */
 //	@Scheduled(initialDelay = 1000L * 3600, fixedDelay = 1000L * 3600 * 24 * 7)
@@ -81,16 +81,16 @@
 //		aggregatedDataRepository.exportAllHavingPrices()
 //		// TODO (conf) : Number of offers count pageSize figure in sitemap
 //		.filter(e -> e.getOffersCount() > 1)
-//		.forEach(e -> {			
+//		.forEach(e -> {
 //			onAggregatedData(e);
 //			totalItems.incrementAndGet();
 //		});
 //
 //		// Closing
 //		terminate();
-//		
+//
 //		statsLogger.info("Sitemap generated with {} items", totalItems.get());
-//		
+//
 //		exportRunning.set(false);
 //
 //	}
@@ -136,7 +136,7 @@
 //
 //	/**
 //	 * Convert an aggregated data pageSize a sitemap entry
-//	 * 
+//	 *
 //	 * @param data
 //	 */
 //	public void onAggregatedData(final Product data) {
@@ -147,7 +147,7 @@
 //				//TODO : Not internationalized
 ////				final String u = uiConfig.getBaseUrl(urls.getKey()) + data.getUrls().getUrls().get(urls.getKey());
 //				final String u = uiConfig.getBaseUrl(urls.getKey()) + data.getNames().getName();
-//				
+//
 //				// Getting the last modified date
 //				Date now = null;
 //				if (null != data.getLastChange()) {

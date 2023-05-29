@@ -60,13 +60,13 @@ public class DataSourceProperties {
 
 	@NotBlank
 	private String favico;
-	
+
 	private String logo;
-	
-	
+
+
 	private String portalUrl;
-	
-	
+
+
 
 	/**
 	 * The percent of reversement for the provider
@@ -80,23 +80,23 @@ public class DataSourceProperties {
 	 *
 	 */
 
-//	 "*/10 * * * * *" = every ten seconds.
-//	 "0 0 8-10 * * *" = 8, 9 and 10 o'clock of every day.
-//	 "0 0 8,10 * * *" = 8 and 10 o'clock of every day.
-//	* "0 0/30 8-10 * * *" = 8:00, 8:30, 9:00, 9:30 and 10 o'clock every day.
-//	* "0 0 9-17 * * MON-FRI" = on the hour nine-to-five weekdays
-//	* "0 0 0 25 12 ?" = every Christmas Day at midnight
-//     *
+	//	 "*/10 * * * * *" = every ten seconds.
+	//	 "0 0 8-10 * * *" = 8, 9 and 10 o'clock of every day.
+	//	 "0 0 8,10 * * *" = 8 and 10 o'clock of every day.
+	//	* "0 0/30 8-10 * * *" = 8:00, 8:30, 9:00, 9:30 and 10 o'clock every day.
+	//	* "0 0 9-17 * * MON-FRI" = on the hour nine-to-five weekdays
+	//	* "0 0 0 25 12 ?" = every Christmas Day at midnight
+	//     *
 	private String cronRefresh;
 
 	// A local instance variable, that cache the computed cron
 	private String internalCron;
 
-//	/**
-//	 * If true, the "debugging" will be outputed as WARN in the dedicatedLogger.
-//	 * Only apply if activeProfile = dev
-//	 */
-//	private Boolean devMode = false;
+	//	/**
+	//	 * If true, the "debugging" will be outputed as WARN in the dedicatedLogger.
+	//	 * Only apply if activeProfile = dev
+	//	 */
+	//	private Boolean devMode = false;
 
 	/**
 	 * If true, a best effort attempt to extract brandUid from offersNames will be
@@ -191,7 +191,7 @@ public class DataSourceProperties {
 	 * If set, this tokens will be removed from descriptions
 	 */
 	private Set<String> descriptionRemoveToken;
-	
+
 	/**
 	 * If set, means this is a CSV datasource.
 	 */
@@ -306,14 +306,14 @@ public class DataSourceProperties {
 	public String getName() {
 		return name;
 	}
-//
-//	public ProviderType getType() {
-//		return type;
-//	}
-//
-//	public void setType(final ProviderType type) {
-//		this.type = type;
-//	}
+	//
+	//	public ProviderType getType() {
+	//		return type;
+	//	}
+	//
+	//	public void setType(final ProviderType type) {
+	//		this.type = type;
+	//	}
 
 	public String getFavico() {
 		return favico;
@@ -331,13 +331,13 @@ public class DataSourceProperties {
 		this.cronRefresh = cronRefresh;
 	}
 
-//	public Boolean getDevMode() {
-//		return devMode;
-//	}
-//
-//	public void setDevMode(Boolean devMode) {
-//		this.devMode = devMode;
-//	}
+	//	public Boolean getDevMode() {
+	//		return devMode;
+	//	}
+	//
+	//	public void setDevMode(Boolean devMode) {
+	//		this.devMode = devMode;
+	//	}
 
 	public Boolean getExtractBrandUidFromName() {
 		return extractBrandUidFromName;
@@ -535,8 +535,8 @@ public class DataSourceProperties {
 		this.descriptionRemoveToken = descriptionRemoveToken;
 	}
 
-	
-	
-	
-	
+
+
+
+
 }

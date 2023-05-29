@@ -13,7 +13,7 @@ import org.open4goods.services.VerticalsConfigService;
  *
  */
 public class VerticalAggregationService extends AbstractAggregationService {
-	
+
 	private VerticalsConfigService verticalService;
 
 	public VerticalAggregationService( final String logsFolder, final VerticalsConfigService verticalService) {
@@ -26,22 +26,22 @@ public class VerticalAggregationService extends AbstractAggregationService {
 	public void onDataFragment(final DataFragment input, final Product output) {
 
 		String category = input.getCategory();
-		
-		
+
+
 		if (!StringUtils.isBlank(category)) {
-			
+
 			output.getDatasourceCategories().add(category);
-			
+
 			// Adding vertical
-			VerticalConfig vertical = verticalService.getVerticalForCategories(output.getDatasourceCategories());	
-			
+			VerticalConfig vertical = verticalService.getVerticalForCategories(output.getDatasourceCategories());
+
 			if (null != vertical) {
 				if ( null != output.getVertical() && !vertical.getId().equals(output.getVertical())) {
 					dedicatedLogger.warn("Will erase existing vertical {} with {} for product {}, because of category {}", output.getVertical(), vertical.getId(), output.bestName(), input.getCategory());
-				} 			
+				}
 				output.setVertical(vertical.getId());
-				
-			}		
+
+			}
 		} else {
 			dedicatedLogger.warn("No category for {}", input);
 		}
@@ -51,6 +51,6 @@ public class VerticalAggregationService extends AbstractAggregationService {
 			dedicatedLogger.warn("No category in {}, removing vertical", output);
 			output.setVertical(null);
 		}
-	
+
 	}
 }

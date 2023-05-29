@@ -66,67 +66,67 @@ public class DatasourceRegressionTest {
 	@Configuration
 	public static class DrtConfig {
 
-//		@Bean
-//		AbstractAlertingService alertingService() {
-//			return new AlertingServiceMock();
-//		}
+		//		@Bean
+		//		AbstractAlertingService alertingService() {
+		//			return new AlertingServiceMock();
+		//		}
 
 		@Bean
 		FetcherProperties fetcherProperties() {
 			return new FetcherProperties();
 		}
 
-//		@Bean
-//		DataFragmentRepository dfRepo() {
-//			return new NoHopCustomDataFragmentRepository();		
-//			
-//		}
+		//		@Bean
+		//		DataFragmentRepository dfRepo() {
+		//			return new NoHopCustomDataFragmentRepository();
+		//
+		//		}
 
-         @Bean RemoteFileCachingService remoteFileCachingService(@Autowired final ApiProperties config) {
+		@Bean RemoteFileCachingService remoteFileCachingService(@Autowired final ApiProperties config) {
 			return new RemoteFileCachingService(config.remoteCachingFolder());
 		}
 
 
-        @Bean
-        WebDatasourceFetchingService webDatasourceFetchingService(@Autowired final ApiProperties apiProperties, @Autowired final FetcherProperties fetcherProperties) {
+		@Bean
+		WebDatasourceFetchingService webDatasourceFetchingService(@Autowired final ApiProperties apiProperties, @Autowired final FetcherProperties fetcherProperties) {
 			return new WebDatasourceFetchingService(null, fetcherProperties, fetcherProperties.getLogsDir());
 		}
 
-        @Bean
-        CsvDatasourceFetchingService csvDatasourceFetchingService(
-                @Autowired final ApiProperties apiProperties, @Autowired final FetcherProperties fetcherProperties,
-                @Autowired final WebDatasourceFetchingService httpFetchingService, @Autowired final  DataFragmentCompletionService dfCompletionService) {
+		@Bean
+		CsvDatasourceFetchingService csvDatasourceFetchingService(
+				@Autowired final ApiProperties apiProperties, @Autowired final FetcherProperties fetcherProperties,
+				@Autowired final WebDatasourceFetchingService httpFetchingService, @Autowired final  DataFragmentCompletionService dfCompletionService) {
 			return new CsvDatasourceFetchingService(dfCompletionService, null, fetcherProperties,  httpFetchingService,fetcherProperties.getLogsDir());
 		}
 
-        @Bean
-        EvaluationService evaluationService() {
+		@Bean
+		EvaluationService evaluationService() {
 			return new EvaluationService();
 		}
 
-        @Bean
-        SerialisationService serialisationService() {
+		@Bean
+		SerialisationService serialisationService() {
 			return new SerialisationService();
 		}
 
-        @Bean
-        IndexationService indexationService() {
+		@Bean
+		IndexationService indexationService() {
 			return new IndexationService() {
 				@Override
 				protected void indexInternal(DataFragment data) {
 					System.out.println("FAKE INDEXING");
-				}				
+				}
 			};
 		}
 
 
-        @Bean
-        ApiProperties apiProperties() {
+		@Bean
+		ApiProperties apiProperties() {
 			return new ApiProperties();
 		}
 
 
-         @Bean ImageMagickService imageService() {
+		@Bean ImageMagickService imageService() {
 			return new ImageMagickService();
 		}
 
@@ -143,14 +143,14 @@ public class DatasourceRegressionTest {
 		}
 
 
-        /** The bean providing datasource configurations **/
-         @Bean DataSourceConfigService datasourceConfigService(@Autowired final ApiProperties config) {
+		/** The bean providing datasource configurations **/
+		@Bean DataSourceConfigService datasourceConfigService(@Autowired final ApiProperties config) {
 			//TODO : properly inject env
 			return new DataSourceConfigService("/home/goulven/git/open4goods-config/datasources");
 		}
 
-        @Bean
-        DataFragmentCompletionService offerCompletionService() {
+		@Bean
+		DataFragmentCompletionService offerCompletionService() {
 			return new DataFragmentCompletionService();
 		}
 
@@ -228,59 +228,59 @@ public class DatasourceRegressionTest {
 
 
 				if (null == dsProperties.getValue().getCsvDatasource().getTestDatas() ||dsProperties.getValue().getCsvDatasource().getTestDatas().size() == 0) {
-									logger.error("WARNING  : " + dsProperties.getKey() + " HAS NO REGRESSION TESTS URLS");
-//					fail("WARNING  : " + dsProperties.getKey() + " HAS NO CSV REGRESSION DATA TESTS ");
-//					continue;
+					logger.error("WARNING  : " + dsProperties.getKey() + " HAS NO REGRESSION TESTS URLS");
+					//					fail("WARNING  : " + dsProperties.getKey() + " HAS NO CSV REGRESSION DATA TESTS ");
+					//					continue;
 				}
 
 
 
-//				for ( final TestCsvLine testData : dsProperties.getValue().getCsvDatasource().getTestDatas()) {
-//
-//					////////////////////////////////
-//					// Case of a CSV datasource
-//					////////////////////////////////
-//
-//					try {
-//						final DataFragment df = csvFetchingService.synchFetch(dsProperties.getKey(), dsProperties.getValue(), dsProperties.getValue().getCsvDatasource().getTestHeaders() , testData.getCsvLine());
-//
-//						// Completing
-//						completionService.complete(df,dsProperties.getKey(), dsProperties.getValue(), logger);
-//
-//						// Validating
-//						try {
-//							df.validate(dsProperties.getValue().getValidationFields());
-//
-//							final TestResultReport report = testData.test(df, dsProperties.getKey());
-//							if (report.getMessages().size() > 0) {
-//								reports.add(report);
-//							}
-//
-//						} catch (final ValidationException e) {
-//							final TestResultReport nodata = new TestResultReport(df,dsProperties.getKey());
-//							nodata.setUrl(testData.getCsvLine() );
-//							nodata.addMessage(  e.getMessage() );
-//							reports.add(nodata);
-//						} catch (final Exception e) {
-//							final TestResultReport nodata = new TestResultReport(df,dsProperties.getKey());
-//							nodata.setUrl(testData.getCsvLine() );
-//							nodata.addMessage(  e.getMessage() );
-//							reports.add(nodata);
-//
-//						}
-//
-//					} catch (IOException | ValidationException e) {
-//						fail("Unexpected exeption");
-//						e.printStackTrace();
-//					}
-//
-//
-//
-//
-//
-//			}
-//
-//
+				//				for ( final TestCsvLine testData : dsProperties.getValue().getCsvDatasource().getTestDatas()) {
+				//
+				//					////////////////////////////////
+				//					// Case of a CSV datasource
+				//					////////////////////////////////
+				//
+				//					try {
+				//						final DataFragment df = csvFetchingService.synchFetch(dsProperties.getKey(), dsProperties.getValue(), dsProperties.getValue().getCsvDatasource().getTestHeaders() , testData.getCsvLine());
+				//
+				//						// Completing
+				//						completionService.complete(df,dsProperties.getKey(), dsProperties.getValue(), logger);
+				//
+				//						// Validating
+				//						try {
+				//							df.validate(dsProperties.getValue().getValidationFields());
+				//
+				//							final TestResultReport report = testData.test(df, dsProperties.getKey());
+				//							if (report.getMessages().size() > 0) {
+				//								reports.add(report);
+				//							}
+				//
+				//						} catch (final ValidationException e) {
+				//							final TestResultReport nodata = new TestResultReport(df,dsProperties.getKey());
+				//							nodata.setUrl(testData.getCsvLine() );
+				//							nodata.addMessage(  e.getMessage() );
+				//							reports.add(nodata);
+				//						} catch (final Exception e) {
+				//							final TestResultReport nodata = new TestResultReport(df,dsProperties.getKey());
+				//							nodata.setUrl(testData.getCsvLine() );
+				//							nodata.addMessage(  e.getMessage() );
+				//							reports.add(nodata);
+				//
+				//						}
+				//
+				//					} catch (IOException | ValidationException e) {
+				//						fail("Unexpected exeption");
+				//						e.printStackTrace();
+				//					}
+				//
+				//
+				//
+				//
+				//
+				//			}
+				//
+				//
 
 
 
@@ -309,7 +309,7 @@ public class DatasourceRegressionTest {
 
 
 				if (null == wds.getTestUrls() || wds.getTestUrls().size() == 0) {
-//					logger.error("WARNING  : " + dsProperties.getName() + " HAS NO REGRESSION TESTS URLS");
+					//					logger.error("WARNING  : " + dsProperties.getName() + " HAS NO REGRESSION TESTS URLS");
 					fail("WARNING  : " + dsProperties.getKey() + " HAS NO REGRESSION TESTS URLS");
 					continue;
 				}

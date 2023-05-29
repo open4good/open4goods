@@ -5,11 +5,11 @@ import org.springframework.data.elasticsearch.annotations.Field;
 import org.springframework.data.elasticsearch.annotations.FieldType;
 
 public class GtinInfo {
-	
+
 
 	@Field(index = false, store = false, type = FieldType.Keyword)
 	private BarcodeType upcType;
-	
+
 	/**
 	 * Manufacturer country, from the gtin
 	 */

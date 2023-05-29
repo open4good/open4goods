@@ -38,8 +38,8 @@ public abstract class Api {
 	/** The serialisation service. */
 	private @Autowired SerialisationService serialisationService;
 
-	
-	
+
+
 	/**
 	 * The main method.
 	 *

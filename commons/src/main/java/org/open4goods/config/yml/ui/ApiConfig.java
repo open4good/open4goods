@@ -62,9 +62,9 @@ public class ApiConfig {
 	public void setApiTermsOfServiceUrl(String apiTermsOfServiceUrl) {
 		this.apiTermsOfServiceUrl = apiTermsOfServiceUrl;
 	}
-	
-	
-	
-	
+
+
+
+
 
 }

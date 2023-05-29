@@ -5,15 +5,15 @@ import java.util.Map;
 
 /**
  * The Class SortBy.
- * 
+ *
  * @author pavan.solapure
  */
 public class FilterBy {
 
 	/** The map of sorts. */
 	private Map<String, String> mapOfFilters;
-	
-	
+
+
 	/** The global search. */
 	private boolean globalSearch;
 

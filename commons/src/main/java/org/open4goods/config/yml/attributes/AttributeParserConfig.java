@@ -14,14 +14,14 @@ public class AttributeParserConfig {
 	 * If true, attribute value will be normalized (spaces)
 	 */
 	private Boolean normalize=true;
-	
+
 	/**
 	 * If true, attribute value will be trimed (spaces)
 	 */
 	private Boolean trim=false;
-	
+
 	/**
-	 * If true, attribute value will be lowercased 
+	 * If true, attribute value will be lowercased
 	 */
 	private Boolean lowerCase=false;
 
@@ -39,7 +39,7 @@ public class AttributeParserConfig {
 	 * If true all parentheses and inner text will be removed
 	 */
 	private boolean removeParenthesis = false;
-	
+
 	/**
 	 * Will delete those texts from attribute value before handling
 	 */
@@ -52,12 +52,12 @@ public class AttributeParserConfig {
 	private List<String> tokenMatch;
 
 
-	
-	
+
+
 	//////////////////////////////////////////
 	// Getters / Setters
 	//////////////////////////////////////////
-	
+
 
 	public List<String> getDeleteTokens() {
 		return deleteTokens;

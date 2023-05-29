@@ -46,7 +46,7 @@
 //		 @Bean AbstractAggregator dataAggregationService() {
 //			return new RealTimeAggregator(aggregationServices());
 //		}
-//		 
+//
 //		 @Bean SerialisationService serialisationService() {
 //			return new SerialisationService();
 //		}

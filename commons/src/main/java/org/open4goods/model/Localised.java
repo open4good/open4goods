@@ -8,11 +8,11 @@ import org.springframework.data.elasticsearch.annotations.Field;
 import org.springframework.data.elasticsearch.annotations.FieldType;
 
 public class Localised implements Validable {
-	
-	
+
+
 	@Field(index = false, store = false, type = FieldType.Text)
 	private String text;
-	
+
 	@Field(index = false, store = false, type = FieldType.Keyword)
 	private String language;
 
@@ -43,7 +43,7 @@ public class Localised implements Validable {
 	public boolean equals(final Object obj) {
 		if (obj instanceof Localised) {
 			final Localised o = (Localised) obj;
-			return Objects.equals(this.getText(), o.getText()) && Objects.equals(this.getLanguage(), o.getLanguage());
+			return Objects.equals(getText(), o.getText()) && Objects.equals(getLanguage(), o.getLanguage());
 		}
 
 		return false;

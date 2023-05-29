@@ -13,7 +13,7 @@ import org.slf4j.LoggerFactory;
 public abstract class StandardiserService {
 
 	protected static final Logger logger = LoggerFactory.getLogger(StandardiserService.class);
-	
+
 	public static Currency DEFAULT_CURRENCY = Currency.EUR;
 
 	public static Double DEFAULT_MAX_RATING = 5.0;
@@ -22,7 +22,7 @@ public abstract class StandardiserService {
 	public abstract void standarise(final Price price, Currency currency) ;
 
 	public  void standarise(final Rating rating) {
-		 standariseRating(rating);
+		standariseRating(rating);
 	}
 
 	public  static void standariseRating(final Rating rating) {

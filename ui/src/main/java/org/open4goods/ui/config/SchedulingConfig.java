@@ -12,14 +12,14 @@ import org.springframework.scheduling.config.ScheduledTaskRegistrar;
 
 public class SchedulingConfig implements SchedulingConfigurer {
 
-@Override
-public void configureTasks(
-  ScheduledTaskRegistrar taskRegistrar) {
-    taskRegistrar.setScheduler(taskExecutor());
-}
+	@Override
+	public void configureTasks(
+			ScheduledTaskRegistrar taskRegistrar) {
+		taskRegistrar.setScheduler(taskExecutor());
+	}
 
-@Bean(destroyMethod = "shutdown")
-public Executor taskExecutor() {
-    return Executors.newScheduledThreadPool(5);
-}
+	@Bean(destroyMethod = "shutdown")
+	public Executor taskExecutor() {
+		return Executors.newScheduledThreadPool(5);
+	}
 }

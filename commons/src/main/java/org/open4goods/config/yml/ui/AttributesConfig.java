@@ -25,7 +25,7 @@ public class AttributesConfig {
 	@JsonMerge
 	private Set<AttributeConfig> configs = new HashSet<AttributeConfig>();
 
-	
+
 	/**
 	 * If true, will extract featured items
 	 */
@@ -36,12 +36,12 @@ public class AttributesConfig {
 	 */
 	@JsonMerge
 	private Set<String> featuredValues = new HashSet<>();
-	
-	
 
-	
-	
-	
+
+
+
+
+
 	/**
 	 * The list of matching on some attribute values. It allows to define custom
 	 * texts / icons / images on products having specific attribute values
@@ -54,18 +54,18 @@ public class AttributesConfig {
 
 	public AttributesConfig(Set<AttributeConfig> configs) {
 		this.configs = configs;
-	
+
 	}
 
-	
+
 	public AttributesConfig() {
 	}
 
-	
-	
+
+
 	/**
 	 * Get all configs synonyms by provider
-	 * 
+	 *
 	 * @return A map-ProviderKey,Synonym, Translated Key
 	 */
 	@Cacheable(cacheNames = CacheConstants.FOREVER_LOCAL_CACHE_NAME)
@@ -97,7 +97,7 @@ public class AttributesConfig {
 		// Sanitization
 		//TODO : from conf
 		translated = translated.replace("(+ D'INFOS)", "");
-		
+
 		if (translated.endsWith(":")) {
 			translated = translated.substring(0, translated.length() - 1).trim();
 		}
@@ -109,8 +109,8 @@ public class AttributesConfig {
 
 		// Not nice, but due to current design, in order to handle attr name on unmatched attrs
 		a.setName(translated);
-		
-		
+
+
 		if (null != p) {
 			// Trying on the specific provider name
 			final String r = p.get(translated);
@@ -146,7 +146,7 @@ public class AttributesConfig {
 
 	/**
 	 * Return the attributeConfig for an attribute, if any
-	 * 
+	 *
 	 * @param value
 	 * @return
 	 */
@@ -171,9 +171,9 @@ public class AttributesConfig {
 		}
 	}
 
-	
-	
-	
+
+
+
 	public Set<String> getAttributeKeys() {
 		singletonHashAttrs();
 		return hashedAttributesByKey.keySet();
@@ -184,7 +184,7 @@ public class AttributesConfig {
 	}
 
 	public void setConfigs(Set<AttributeConfig> attributes) {
-		this.configs = attributes;
+		configs = attributes;
 	}
 
 	public List<AttributeMatching> getAttributesMatching() {

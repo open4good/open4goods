@@ -38,16 +38,16 @@ public class XwikiController extends AbstractUiController {
 	private @Autowired UiConfig config;
 
 	private @Autowired XwikiService xwikiService;
-	
+
 	// TODO : Tweak pageSize handle categories search page
-	private @Autowired VerticalController verticalController;	
+	private @Autowired VerticalController verticalController;
 	private @Autowired VerticalsConfigService verticalService;
-		
-		
 
-	
 
-	
+
+
+
+
 	//////////////////////////////////////////////////////////////
 	// Mappings
 	//////////////////////////////////////////////////////////////
@@ -74,28 +74,28 @@ public class XwikiController extends AbstractUiController {
 		return mv;
 
 	}
-	
+
 	@GetMapping("/{page:[a-z-]+}")
 	public ModelAndView xwiki(
 			@PathVariable(name = "page") String page, final HttpServletRequest request, HttpServletResponse response)
-			throws IOException, TechnicalException, InvalidParameterException {
+					throws IOException, TechnicalException, InvalidParameterException {
 
 		// TODO : Twweak for verticalsLanguagesByUrl
-		
-		
+
+
 		if (null != verticalService.getLanguageForVerticalPath(page)) {
 			return verticalController.home(page,request);
 		} else
-		return xwiki("Main", page, request,response );
+			return xwiki("Main", page, request,response );
 	}
-	
-	
+
+
 
 
 	@GetMapping("/{vertical:[a-z-]+}/{page:[a-z-]+}")
 	public ModelAndView xwiki(@PathVariable(name = "vertical") String vertical,
 			@PathVariable(name = "page") String page, final HttpServletRequest request, HttpServletResponse response)
-			throws IOException, TechnicalException, InvalidParameterException {
+					throws IOException, TechnicalException, InvalidParameterException {
 
 		ModelAndView mv = null;
 		if (null != request.getParameter("edit")) {
@@ -105,15 +105,15 @@ public class XwikiController extends AbstractUiController {
 		} else {
 			// Rendering mode
 
-			
+
 			WikiResult content = xwikiService.getPage(vertical + "/" + page);
 
-			
-			
+
+
 			if (StringUtils.isEmpty(content.getHtml())) {
-//				mv.setStatus(HttpStatus.NOT_FOUND);
+				//				mv.setStatus(HttpStatus.NOT_FOUND);
 				response.sendError(404);
-			} else {			
+			} else {
 				mv = defaultModelAndView(("xwiki-"+content.getLayout()), request);
 				mv.addObject("content", content);
 			}

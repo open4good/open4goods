@@ -9,22 +9,22 @@ public class VerticalFilterTerm {
 	String id;
 	String text;
 	Long count;
-	
-	
-	
-	
-	
-	
-	
+
+
+
+
+
+
+
 	public VerticalFilterTerm(String text, Long count) {
 		super();
 		this.text = text;
 		this.count = count;
-		this.id=text.replaceAll("[^A-Za-z0]", "");
-		
+		id=text.replaceAll("[^A-Za-z0]", "");
+
 	}
-	
-	
+
+
 	public String getId() {
 		return id;
 	}
@@ -49,7 +49,7 @@ public class VerticalFilterTerm {
 	public void setText(String text) {
 		this.text = text;
 	}
-	
-	
-	
+
+
+
 }

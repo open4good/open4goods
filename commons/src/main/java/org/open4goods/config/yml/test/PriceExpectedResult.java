@@ -14,11 +14,11 @@ public class PriceExpectedResult extends NumericExpectedResult {
 			return;
 		}
 
-//
-//		if (null == inStock) {
-//			ret.addMessage("Was expecting a InStock value when price is set");
-//			return;
-//		}
+		//
+		//		if (null == inStock) {
+		//			ret.addMessage("Was expecting a InStock value when price is set");
+		//			return;
+		//		}
 
 
 

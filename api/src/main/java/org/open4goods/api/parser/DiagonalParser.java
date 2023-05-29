@@ -34,7 +34,7 @@ public class DiagonalParser extends AttributeParser {
 
 
 		// A try for
-//		"801 MM (MILLIMETERS)80.1 CM (CENTIMETERS)31.5354 IN (INCHES)2.628 FT (FEET)"
+		//		"801 MM (MILLIMETERS)80.1 CM (CENTIMETERS)31.5354 IN (INCHES)2.628 FT (FEET)"
 
 
 
@@ -47,16 +47,16 @@ public class DiagonalParser extends AttributeParser {
 			}
 		}
 
-//		 (MILLIMÈTRES)
+		//		 (MILLIMÈTRES)
 		if (null == cmVal) {
-			 firstTryOffset = attrVal.indexOf("MM (MILLIMÈTRES)");
+			firstTryOffset = attrVal.indexOf("MM (MILLIMÈTRES)");
 
-				if (firstTryOffset != -1) {
-					final String firstTryVal = attrVal.substring(0,firstTryOffset).trim();
-					if (NumberUtils.isNumber(firstTryVal)) {
-						cmVal = Double.valueOf(firstTryVal) / 10.0;
-					}
+			if (firstTryOffset != -1) {
+				final String firstTryVal = attrVal.substring(0,firstTryOffset).trim();
+				if (NumberUtils.isNumber(firstTryVal)) {
+					cmVal = Double.valueOf(firstTryVal) / 10.0;
 				}
+			}
 		}
 
 
@@ -111,7 +111,7 @@ public class DiagonalParser extends AttributeParser {
 		}
 
 
-//		24"
+		//		24"
 		if (null == pouceVal && null == cmVal) {
 
 			if (NumberUtils.isNumber(attrVal)) {
@@ -159,7 +159,7 @@ public class DiagonalParser extends AttributeParser {
 			} else {
 
 				// TODO(conf) : splitter from conf
-                final String[] frags = attrVal.split("/");
+				final String[] frags = attrVal.split("/");
 				if (frags.length > 1) {
 					if (frags.length > 2) {
 						throw new ParseException("Too many fragments : " + attrVal);

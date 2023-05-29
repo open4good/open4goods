@@ -1,7 +1,6 @@
 package org.open4goods.model.data;
 
 import org.open4goods.model.constants.ResourceType;
-import org.springframework.data.elasticsearch.annotations.Document;
 
 /**
  * In this class, all possible values for resources are flat handled. (for elastic indexxation purpose)

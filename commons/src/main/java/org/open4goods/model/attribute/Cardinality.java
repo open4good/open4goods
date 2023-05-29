@@ -7,7 +7,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Contains min / max / average /sum informations for a rating
- * 
+ *
  * @author goulven
  *
  */
@@ -19,7 +19,7 @@ public class Cardinality {
 	 * The minimum encountered
 	 */
 	private Double min = null;
-	
+
 	/**
 	 * The maximum encountered
 	 */
@@ -37,26 +37,26 @@ public class Cardinality {
 
 	/**
 	 * The sum
-	 */	
+	 */
 	private Double sum = 0.0;
 
-	
-	
+
+
 	public Cardinality() {
 	}
 
-	
-	
-	
+
+
+
 	@Override
 	public String toString() {
 		return min +" < " + avg + " > " +max+" (" + count+ " elements)";
 	}
-	
-	
+
+
 	/**
 	 * Increments rating cardinality with a
-	 * 
+	 *
 	 * @param r
 	 * @throws InvalidParameterException
 	 */

@@ -1,12 +1,12 @@
 package org.open4goods.config.yml.ui;
 
 public class WebConfig {
-	
+
 	public static final String PRODUCT_MONOPAGE_TEMPLATE = "pages/product";
-	
+
 	public static final String PRODUCT_MULTIPAGE_TEMPLATE = "product-multipage";
-	
-	
+
+
 	/**
 	 * The google analytics ID, for page tracking
 	 */
@@ -15,8 +15,8 @@ public class WebConfig {
 	/**
 	 * The google webmaster tools meta content for validating site
 	 */
-	private String googleSiteVerification;	
-	
+	private String googleSiteVerification;
+
 	/**
 	 * If true, the thymleaf templates will be cached (LRU method)
 	 */
@@ -28,13 +28,13 @@ public class WebConfig {
 	 */
 	private Integer productsSearchMaxPageSize = 50;
 
-	
+
 	/** i18n cache duration in seconds**/
-	private Integer i18nFileCache = 10; 
-	
-	
-	
-	
+	private Integer i18nFileCache = 10;
+
+
+
+
 	public String getGoogleAnalyticsId() {
 		return googleAnalyticsId;
 	}
@@ -74,8 +74,8 @@ public class WebConfig {
 	public void setI18nFileCache(Integer i18nFileCache) {
 		this.i18nFileCache = i18nFileCache;
 	}
-	
-	
-	
-	
+
+
+
+
 }

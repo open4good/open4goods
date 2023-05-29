@@ -40,12 +40,12 @@ public class DataFragmentTestBuilder {
 		dataFragment.setUrl(url);
 		return this;
 	}
-	
+
 	public DataFragmentTestBuilder affiliatedUrl(final String url) {
 		dataFragment.setAffiliatedUrl(url);
 		return this;
 	}
-	
+
 
 	public DataFragmentTestBuilder resource(final Resource r) {
 		try {
@@ -119,12 +119,12 @@ public class DataFragmentTestBuilder {
 	}
 
 
-//	public DataFragmentTestBuilder related(final String relationAttribute, final String relationId) {
-//		dataFragment.setQualifier(relationId);
-//		dataFragment.setRelationIdAttribute(relationAttribute);
-//
-//		return this;
-//	}
+	//	public DataFragmentTestBuilder related(final String relationAttribute, final String relationId) {
+	//		dataFragment.setQualifier(relationId);
+	//		dataFragment.setRelationIdAttribute(relationAttribute);
+	//
+	//		return this;
+	//	}
 
 	public DataFragmentTestBuilder indexationDate(final long l) {
 		dataFragment.setLastIndexationDate(l);

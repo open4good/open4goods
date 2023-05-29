@@ -11,16 +11,16 @@ import org.springframework.data.elasticsearch.annotations.FieldType;
 
 public class Answer  implements Validable {
 
-	@Field(index = false, store = false, type = FieldType.Object)	
+	@Field(index = false, store = false, type = FieldType.Object)
 	private Localised answer = new Localised();
 
-	@Field(index = false, store = false, type = FieldType.Date, format = DateFormat.epoch_millis)	
+	@Field(index = false, store = false, type = FieldType.Date, format = DateFormat.epoch_millis)
 	private Long date;
 
-	@Field(index = false, store = false, type = FieldType.Integer)	
+	@Field(index = false, store = false, type = FieldType.Integer)
 	private Integer usefull;
 
-	@Field(index = false, store = false, type = FieldType.Integer)	
+	@Field(index = false, store = false, type = FieldType.Integer)
 	private Integer useless;
 
 	////////////////////////////////////////

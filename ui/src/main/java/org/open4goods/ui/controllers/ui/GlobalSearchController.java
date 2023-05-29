@@ -26,46 +26,46 @@ import jakarta.servlet.http.HttpServletResponse;
 //	TODO(i18n, P2, 0.25) : I18n the pathes
 public class GlobalSearchController extends AbstractUiController {
 
-	
+
 	@Autowired private SearchService searchService;
 	@Autowired UiConfig config;
-	
+
 
 	@PostMapping({"/recherche/{query}"})
 	public ModelAndView searchPost(final HttpServletRequest request, @PathVariable String query, HttpServletResponse response) {
 
 		response.setStatus(HttpServletResponse.SC_MOVED_PERMANENTLY);
-		
+
 		String[] frags = request.getServletPath().substring(1).split("/");
 		response.setHeader("Location", config.getBaseUrl(Locale.FRANCE) +  frags[0]+"/"+ URLEncoder.encode(frags[1],Charset.defaultCharset()) );
 		return null;
-	}	
+	}
 
 	@GetMapping({"/recherche/{query}"})
 	@Cacheable(cacheNames = CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME)
 	public ModelAndView searchGet(final HttpServletRequest request, @PathVariable String query) {
 
 		String q = StringUtils.normalizeSpace(URLDecoder.decode(query, Charset.defaultCharset()));
-		
-		
+
+
 		ModelAndView model = defaultModelAndView("search", request);
 
-//		Set<String> categroies = Sets.newHashSet("JOUR>AUTRES MEUBLES");
-		
-		
+		//		Set<String> categroies = Sets.newHashSet("JOUR>AUTRES MEUBLES");
+
+
 		VerticalSearchResponse results = searchService.globalSearch(q, null, null, null, null,0,25,0, true);
 
 		model.addObject("results",results);
 		model.addObject("query", q);
-		
+
 		return model;
-	}	
-	
-	
+	}
+
+
 	@RequestMapping({"/recherche","/recherche/"})
 	public ModelAndView search(final HttpServletRequest request) {
 		return searchGet(request,"");
-	}	
-	
-	
+	}
+
+
 }

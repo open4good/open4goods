@@ -26,7 +26,7 @@ import com.google.common.base.Optional;
  * This service is in charge to provide the Verticals configurations.
  * Configurations are provided from the classpath AND from a git specific
  * project (fresh local clone on app startup)
- * 
+ *
  * @author goulven
  *
  */
@@ -43,13 +43,13 @@ public class VerticalsConfigService {
 	private SerialisationService serialisationService;
 
 	private Map<String, VerticalConfig> configs = new ConcurrentHashMap<>(100);
-	
+
 	private Map<String,VerticalConfig> categoriesToVertical = new ConcurrentHashMap<>();
-	
+
 	private Map<String,VerticalConfig> verticalsByUrl = new HashMap<>();
 	private Map<String,String> verticalUrlByLanguage = new HashMap<>();
 
-	
+
 
 	private String verticalsFolder;
 
@@ -85,23 +85,23 @@ public class VerticalsConfigService {
 			configs.clear();
 			configs.putAll(configs2);
 		}
-		
+
 		// Associating categoriesToVertical
 		synchronized (categoriesToVertical) {
 			categoriesToVertical.clear();
 			configs.values().stream().forEach(c -> {
-				
+
 				c.getMatchingCategories().stream().forEach(cc -> {
 					categoriesToVertical.put(cc, c);
-				});								
+				});
 			});
 		}
-		
+
 		// Mapping url to i18n
-		getConfigsWithoutDefault().stream().forEach(vc -> {		
-			
+		getConfigsWithoutDefault().stream().forEach(vc -> {
+
 			vc.getHomeUrl().entrySet().stream().forEach(v -> {
-				
+
 				verticalsByUrl.put(v.getValue(), vc);
 				verticalUrlByLanguage.put(v.getKey(), v.getValue());
 			});
@@ -109,11 +109,11 @@ public class VerticalsConfigService {
 
 	}
 
-	
 
-	
+
+
 	/**
-	 * 
+	 *
 	 * @return the available verticals configurations from classpath
 	 */
 	private List<VerticalConfig> getFolderVerticalConfigs() {
@@ -137,7 +137,7 @@ public class VerticalsConfigService {
 
 	/**
 	 * Instanciate a config with a previously defaulted one
-	 * 
+	 *
 	 * @param inputStream
 	 * @param existing
 	 * @return
@@ -152,10 +152,10 @@ public class VerticalsConfigService {
 	}
 
 
-	
+
 	/**
 	 * Instanciate a vertical config for a given category name
-	 * 
+	 *
 	 * @param inputStream
 	 * @param existing
 	 * @return
@@ -165,32 +165,32 @@ public class VerticalsConfigService {
 
 
 		VerticalConfig vc = null;
-		
+
 		for (String category : categories) {
 			vc = categoriesToVertical.get(category);
-	
-			// Discarding if unmatching category			
+
+			// Discarding if unmatching category
 			if (null != vc) {
 				if (vc.getUnmatchingCategories().contains(category)) {
 					vc = null;
 				}
 			}
-			
+
 			if (null != vc) {
 				break;
 			}
 		}
-		
-		return vc;
-		
-		
-	}
-	
-	
 
-	
-	
-	
+		return vc;
+
+
+	}
+
+
+
+
+
+
 	/**
 	 * Return the language for a vertical path, if any
 	 * @param path
@@ -208,9 +208,9 @@ public class VerticalsConfigService {
 	public String getPathForVerticalLanguage(String language) {
 		return verticalUrlByLanguage.get(language);
 	}
-	
+
 	/**
-	 * 
+	 *
 	 * @return
 	 * @throws IOException
 	 */
@@ -221,12 +221,12 @@ public class VerticalsConfigService {
 		f.close();
 		return ret;
 	}
-	
-	
+
+
 
 	/**
 	 * Return a config by it's Id
-	 * 
+	 *
 	 * @param verticalName
 	 * @return
 	 */
@@ -234,16 +234,16 @@ public class VerticalsConfigService {
 		return Optional.of(configs.get(verticalName));
 	}
 
-	
+
 	/**
-	 * 
+	 *
 	 * @return all confifs, except the _default and the "all" one
 	 */
 	public Set<VerticalConfig>  getConfigsWithoutDefault() {
 		return getConfigs().values().stream().filter(e -> (!e.getId().equals("all")) ).collect(Collectors.toSet());
 	}
 	/**
-	 * 
+	 *
 	 * @return all Vertical configs
 	 */
 	public Map<String, VerticalConfig> getConfigs() {
