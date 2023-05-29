@@ -561,8 +561,6 @@ public class CsvDatasourceFetchingService extends DatasourceFetchingService {
 				price.setCurrency(csvProperties.getCurrency());
 				price.setPriceValue(getFromCsvRow(item, csvProperties.getPrice()),
 						Locale.forLanguageTag(config.getLanguage().toUpperCase()));
-//				price.setUrl(p.getUrl());
-//				price.setAffiliationLink(p.getAffiliatedUrl());
 
 				p.setPrice(price);
 			} catch (final Exception e) {
