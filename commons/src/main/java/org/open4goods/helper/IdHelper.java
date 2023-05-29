@@ -1,7 +1,9 @@
 package org.open4goods.helper;
 
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -113,23 +115,24 @@ public class IdHelper {
 
 	}
 
-	/**
-	 * Extract and normalize a category name
-	 *
-	 * @param name
-	 * @return
-	 */
 	public static String getCategoryName(final String name) {
 
 		if (StringUtils.isBlank(name)) {
 			return null;
 		}
-
-
-		return StringUtils.stripAccents(StringUtils.normalizeSpace(name).toUpperCase()).trim();
+		
+		String [] frags = name.split("\n");
+		
+		List<String> frs = Arrays.asList(frags).stream().filter(e ->  ! StringUtils.isBlank(StringUtils.normalizeSpace( e))).collect(Collectors.toList());
+		
+		String ret = StringUtils.join(frs," > "); 
+		ret = StringUtils.stripAccents(ret);
+		ret = ret.toUpperCase();
+		ret = ret.replaceAll("\n", " > ");
+		ret = StringUtils.normalizeSpace(ret);
+		return ret;
 
 	}
-
 
 	public static String azCharAndDigits(final String input) {
 		return input.replaceAll("[^a-zA-Z0-9]", "");

@@ -21,12 +21,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.elasticsearch.client.elc.NativeQueryBuilder;
-import org.springframework.data.elasticsearch.client.elc.QueryBuilders;
-import org.springframework.data.elasticsearch.client.erhlc.NativeSearchQueryBuilder;
 import org.springframework.data.elasticsearch.core.AggregationsContainer;
 import org.springframework.data.elasticsearch.core.SearchHits;
 import org.springframework.data.elasticsearch.core.query.Criteria;
 import org.springframework.data.elasticsearch.core.query.CriteriaQuery;
+import org.springframework.data.elasticsearch.core.query.CriteriaQueryBuilder;
 import org.springframework.data.elasticsearch.core.query.Order;
 
 import ch.qos.logback.classic.Level;
@@ -74,6 +73,9 @@ public class SearchService {
 		
 		String query =  sanitize(initialQuery);
 		
+		
+	
+		
 		// Logging
 		statsLogger.info("Searching {}",initialQuery);
 		
@@ -83,11 +85,10 @@ public class SearchService {
 			c = new Criteria("attributes.referentielAttributes.GTIN.keyword").is(initialQuery);
 		}
 		else {
-			c = aggregatedDataRepository.getValidDateQuery()
-					// TODO(security) : sanitize, web imput !!
-					.and(new Criteria("names.offerNames").in(Arrays.asList(query.split(" ")))
-					.and("offersCount").greaterThanEqual(1)			)	
-
+			c = 	// TODO(security) : sanitize, web imput !!
+					(new Criteria("names.offerNames").matchesAll(Arrays.asList(query.split(" ")))
+					.and("offersCount").greaterThanEqual(1))	
+					.and(aggregatedDataRepository.getValidDateQuery())
 
 					;
 			
@@ -105,8 +106,8 @@ public class SearchService {
 		}
 	
 
-		NativeQueryBuilder esQuery = new NativeQueryBuilder()
-		.withQuery(new CriteriaQuery(c))
+		CriteriaQueryBuilder esQuery = new CriteriaQueryBuilder(c)
+//		.withQuery(new CriteriaQuery(c))
 		.withPageable(PageRequest.of(from, to))
 		.withSort(Sort.by(Order.desc("offersCount")));
 
@@ -183,7 +184,7 @@ public class SearchService {
 
 		
 		// Setting the query
-		NativeQueryBuilder esQuery = new NativeQueryBuilder().withQuery(new CriteriaQuery(criterias));
+		CriteriaQueryBuilder esQuery = new CriteriaQueryBuilder(criterias);
 		
 		if (null != request.getPageNumber() && null != request.getPageSize()) {
 			esQuery = esQuery .withPageable(PageRequest.of(request.getPageNumber(), request.getPageSize()));
@@ -209,7 +210,9 @@ public class SearchService {
 //				// TODO : size from conf
 //				.withAggregation("country", 	Aggregation.of(a -> a.terms(ta -> ta.field("gtinInfos.country").missing(OTHER_BUCKET).size(100)  ))	)
 //						
-				.withQuery(new CriteriaQuery(criterias));
+//				.withQuery(new CriteriaQuery(criterias))
+				
+				;
 		
 		// Sort order
 		
@@ -227,12 +230,12 @@ public class SearchService {
 		}
 		
 		// Adding custom filters aggregations	
-		for (AttributeConfig attrConfig : customAttrFilters) {
-			esQuery = esQuery 
-					// TODO : size from conf
-					.withAggregation(attrConfig.getKey(), 	Aggregation.of(a -> a.terms(ta -> ta.field("attributes.aggregatedAttributes."+attrConfig.getKey()+".value.keyword").missing(OTHER_BUCKET).size(100)  ))	);			
-		}
-		
+//		for (AttributeConfig attrConfig : customAttrFilters) {
+//			esQuery = esQuery 
+//					// TODO : size from conf
+//					.withAggregation(attrConfig.getKey(), 	Aggregation.of(a -> a.terms(ta -> ta.field("attributes.aggregatedAttributes."+attrConfig.getKey()+".value.keyword").missing(OTHER_BUCKET).size(100)  ))	);			
+//		}
+//		
 
 		SearchHits<AggregatedData> results = aggregatedDataRepository.search(esQuery.build(),ALL_VERTICAL_NAME);
 	

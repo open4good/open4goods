@@ -4,7 +4,7 @@
 //import java.util.Set;
 //import java.util.stream.Collectors;
 //
-//import org.open4goods.aggregation.AbstractBatchedAggregationService;
+//import org.open4goods.aggregation.AbstractAggregationService;
 //import org.open4goods.aggregation.tank.AggregatorTank;
 //import org.open4goods.config.yml.ui.RatingsConfig;
 //import org.open4goods.model.attribute.Cardinality;
@@ -27,7 +27,7 @@
 // * @author Goulven.Furet
 // *
 // */
-//public class RatingsAggregationService extends AbstractBatchedAggregationService {
+//public class RatingsAggregationService extends AbstractAggregationService {
 //
 //	private static final Logger LOGGER = LoggerFactory.getLogger(RatingsAggregationService.class);
 //	
@@ -72,7 +72,7 @@
 //	
 //
 //	@Override
-//	public void onDataFragments(final Set<DataFragment> input, final AggregatedData output) {
+//	public void onDataFragment(final Set<DataFragment> input, final AggregatedData output) {
 //		
 //		////////////////////////////////////////////////////////////////
 //		// Creating the comments global rating
@@ -211,20 +211,5 @@
 //		});
 //	}
 //
-//	private String getCardId(SourcedRating r) {
-//		return "card-"+r.getDatasourceName();
-//	}
-//
-//	@Override
-//	public void beforeSecondPass(final AggregatorTank tank) {
-//		
-//	}
-//
 //	
-//	
-//	@Override
-//	public void before(final AggregatorTank tank) {
-//
-//	}
-//
 //}

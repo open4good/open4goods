@@ -63,7 +63,9 @@ public class XpathExtractor extends Extractor {
 
 
 			List<String> cats = evalMultipleAndLogs(document, c.getCategory(), url);
-
+			cats= cats.stream().map(e->e.replaceAll("\n", "")). filter(e -> ! StringUtils.isBlank(StringUtils.normalizeSpace( e))).toList();
+			
+			
 			if (cats.size() > 0) {
 				Integer from = c.getCategoryFrom();
 				if (null == from) {
