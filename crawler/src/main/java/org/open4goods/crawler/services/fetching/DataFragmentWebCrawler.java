@@ -305,12 +305,12 @@ public class DataFragmentWebCrawler extends WebCrawler {
 				if (null != validationFields && 0 != validationFields.size()) {
 					o.validate(validationFields);
 				} else {
-					dedicatedLogger.error(
+					dedicatedLogger.warn(
 							"No validations fields defined for {} !!!!!! Item will be added without any validation",
 							datasourceProperties.getName());
 				}
 			} catch (final ValidationException e) {
-				dedicatedLogger.warn("offer skipped ; validation failed ; {} ; {}",
+				dedicatedLogger.info("offer skipped ; validation failed ; {} ; {}",
 						StringUtils.join(e.getResult(), ", "), url);
 				return;
 			}
