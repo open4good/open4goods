@@ -1,6 +1,6 @@
 package org.open4goods.ui.controllers.ui;
 
-import org.open4goods.dao.AggregatedDataRepository;
+import org.open4goods.dao.ProductRepository;
 import org.open4goods.services.DataSourceConfigService;
 import org.open4goods.services.VerticalsConfigService;
 import org.slf4j.Logger;
@@ -17,7 +17,7 @@ public class HomeController extends AbstractUiController {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(HomeController.class);
 	
-	private @Autowired AggregatedDataRepository aggregatedDataRepository;
+	private @Autowired ProductRepository aggregatedDataRepository;
 	private @Autowired DataSourceConfigService datasourceConfigService;
 
 	private @Autowired VerticalsConfigService verticalConfigService;

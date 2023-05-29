@@ -12,9 +12,9 @@
 //import java.util.concurrent.atomic.AtomicLong;
 //
 //import org.apache.commons.io.FileUtils;
-//import org.open4goods.dao.AggregatedDataRepository;
+//import org.open4goods.dao.ProductRepository;
 //import org.open4goods.helper.GenericFileLogger;
-//import org.open4goods.model.product.AggregatedData;
+//import org.open4goods.model.product.Product;
 //import org.open4goods.ui.config.yml.UiConfig;
 //import org.slf4j.Logger;
 //import org.slf4j.LoggerFactory;
@@ -39,7 +39,7 @@
 //
 //	private static final Logger LOGGER = LoggerFactory.getLogger(SitemapGenerationService.class);
 //
-//	private AggregatedDataRepository aggregatedDataRepository;
+//	private ProductRepository aggregatedDataRepository;
 //	private UiConfig uiConfig;
 //
 //	// The flag that indicates wether opendata export is running or not
@@ -50,7 +50,7 @@
 //	private Logger statsLogger;
 //
 //
-//	public SitemapGenerationService(AggregatedDataRepository aggregatedDataRepository, UiConfig uiConfig) {
+//	public SitemapGenerationService(ProductRepository aggregatedDataRepository, UiConfig uiConfig) {
 //		this.aggregatedDataRepository = aggregatedDataRepository;
 //		this.uiConfig = uiConfig;
 //		this.statsLogger = GenericFileLogger.initLogger("stats-sitemap", Level.INFO, uiConfig.logsFolder(), false);
@@ -139,7 +139,7 @@
 //	 * 
 //	 * @param data
 //	 */
-//	public void onAggregatedData(final AggregatedData data) {
+//	public void onAggregatedData(final Product data) {
 //
 //		for (final Entry<String, String> urls : uiConfig.getNamings().getServerNames().entrySet()) {
 //			try {

@@ -21,11 +21,11 @@ import java.util.zip.ZipOutputStream;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.open4goods.dao.AggregatedDataRepository;
+import org.open4goods.dao.ProductRepository;
 import org.open4goods.exceptions.TechnicalException;
 import org.open4goods.helper.ThrottlingInputStream;
 import org.open4goods.model.constants.CacheConstants;
-import org.open4goods.model.product.AggregatedData;
+import org.open4goods.model.product.Product;
 import org.open4goods.ui.config.yml.UiConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -55,7 +55,7 @@ public class OpenDataService {
 	private static final String[] header = { "code", "brand", "model", "name", "last_updated", "gs1_country", "gtinType",
 			"offers_count", "min_price", "min_price_compensation", "currency", "categories", "url" };
 
-	private AggregatedDataRepository aggregatedDataRepository;
+	private ProductRepository aggregatedDataRepository;
 	private UiConfig uiConfig;
 
 	// The flag that indicates wether opendata export is running or not
@@ -67,7 +67,7 @@ public class OpenDataService {
 
 
 	@Autowired
-	public OpenDataService(AggregatedDataRepository aggregatedDataRepository, UiConfig uiConfig) {
+	public OpenDataService(ProductRepository aggregatedDataRepository, UiConfig uiConfig) {
 		this.aggregatedDataRepository = aggregatedDataRepository;
 		this.uiConfig = uiConfig;
 	}
@@ -175,7 +175,7 @@ public class OpenDataService {
 	 * @param data
 	 * @return
 	 */
-	private String[] toEntry(AggregatedData data) {
+	private String[] toEntry(Product data) {
 
 		String[] line = new String[header.length];
 

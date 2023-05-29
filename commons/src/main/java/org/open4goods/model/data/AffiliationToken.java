@@ -2,7 +2,7 @@ package org.open4goods.model.data;
 
 import java.util.UUID;
 
-import org.open4goods.model.product.AggregatedData;
+import org.open4goods.model.product.Product;
 import org.open4goods.model.product.AggregatedPrice;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.elasticsearch.annotations.Document;
@@ -55,7 +55,7 @@ public class AffiliationToken {
 
 	
 	
-	public AffiliationToken(final DataFragment e, final AggregatedData data) {
+	public AffiliationToken(final DataFragment e, final Product data) {
 		brand = data.brand();
 		brandUid = data.model();
 		gtin= data.gtin();
@@ -67,7 +67,7 @@ public class AffiliationToken {
 		id = UUID.randomUUID().toString();
 
 	}
-	public AffiliationToken(AggregatedPrice e, AggregatedData data) {
+	public AffiliationToken(AggregatedPrice e, Product data) {
 		brand = data.brand();
 		brandUid = data.model();
 		gtin= data.gtin();

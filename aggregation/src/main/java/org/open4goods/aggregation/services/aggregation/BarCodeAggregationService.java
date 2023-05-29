@@ -8,7 +8,7 @@ import org.open4goods.exceptions.AggregationSkipException;
 import org.open4goods.model.BarcodeType;
 import org.open4goods.model.constants.ReferentielKey;
 import org.open4goods.model.data.DataFragment;
-import org.open4goods.model.product.AggregatedData;
+import org.open4goods.model.product.Product;
 import org.open4goods.services.BarcodeValidationService;
 import org.open4goods.services.Gs1PrefixService;
 import org.slf4j.Logger;
@@ -37,7 +37,7 @@ public class BarCodeAggregationService extends AbstractAggregationService {
 	}
 
 	@Override
-	public void onDataFragment(final DataFragment input, final AggregatedData output) throws AggregationSkipException {
+	public void onDataFragment(final DataFragment input, final Product output) throws AggregationSkipException {
 
 		/////////////////////////////
 		// Validating barcodes

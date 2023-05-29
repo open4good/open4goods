@@ -7,7 +7,7 @@
 //import org.open4goods.model.data.DataFragment;
 //import org.open4goods.model.data.aggregated.AggregatedComment;
 //import org.open4goods.model.product.AggregatedComments;
-//import org.open4goods.model.product.AggregatedData;
+//import org.open4goods.model.product.Product;
 //import org.slf4j.Logger;
 //import org.slf4j.LoggerFactory;
 //
@@ -30,7 +30,7 @@
 //	private static final Logger logger = LoggerFactory.getLogger(CommentsAggregationService.class);
 //
 //	@Override
-//	public void onDataFragment(DataFragment input, AggregatedData output) {
+//	public void onDataFragment(DataFragment input, Product output) {
 //			
 //			
 //			// Before, instanciate the holder
@@ -45,7 +45,7 @@
 //				}		
 //						
 //			
-//			// Setting in AggregatedData
+//			// Setting in Product
 //			output.setComments(comments);
 //			
 //			

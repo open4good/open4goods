@@ -27,12 +27,12 @@ import org.springframework.data.elasticsearch.annotations.Field;
 import org.springframework.data.elasticsearch.annotations.FieldType;
 import org.springframework.data.elasticsearch.annotations.Setting;
 
-@Document(indexName = AggregatedData.DEFAULT_REPO)
+@Document(indexName = Product.DEFAULT_REPO)
 @Setting(refreshInterval = "30s", settingPath = "/elastic-settings.json")
 //TODO : Rename to product
-public class AggregatedData implements Standardisable {
+public class Product implements Standardisable {
 
-	private final static Logger logger = LoggerFactory.getLogger(AggregatedData.class);
+	private final static Logger logger = LoggerFactory.getLogger(Product.class);
 
 	public static final String DEFAULT_REPO = "aggregateddata-model";
 
@@ -136,11 +136,11 @@ public class AggregatedData implements Standardisable {
 //	@Field(index = false, store = false, type = FieldType.Object)
 //	private AggregationResult aggregationResult = new AggregationResult();
 
-	public AggregatedData() {
+	public Product() {
 		super();
 	}
 
-	public AggregatedData(final String id) {
+	public Product(final String id) {
 		super();
 		this.id = id;
 
@@ -170,8 +170,8 @@ public class AggregatedData implements Standardisable {
 	@Override
 	public boolean equals(final Object obj) {
 
-		if (obj instanceof AggregatedData) {
-			return id.equals(((AggregatedData) obj).getId());
+		if (obj instanceof Product) {
+			return id.equals(((Product) obj).getId());
 		}
 
 		return super.equals(obj);

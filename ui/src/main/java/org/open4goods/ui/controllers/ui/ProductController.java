@@ -6,13 +6,13 @@ import java.nio.charset.Charset;
 import java.util.Locale;
 
 import org.open4goods.config.yml.ui.VerticalConfig;
-import org.open4goods.dao.AggregatedDataRepository;
+import org.open4goods.dao.ProductRepository;
 import org.open4goods.exceptions.ResourceNotFoundException;
 import org.open4goods.model.Localised;
 import org.open4goods.model.constants.ProviderType;
 import org.open4goods.model.data.AffiliationToken;
 import org.open4goods.model.data.Description;
-import org.open4goods.model.product.AggregatedData;
+import org.open4goods.model.product.Product;
 import org.open4goods.model.product.AggregatedPrice;
 import org.open4goods.services.SerialisationService;
 import org.open4goods.services.VerticalsConfigService;
@@ -48,7 +48,7 @@ public class ProductController extends AbstractUiController {
 
 	// The siteConfig
 	private @Autowired UiConfig config;
-	private @Autowired AggregatedDataRepository esDao;
+	private @Autowired ProductRepository esDao;
 
 	private @Autowired SerialisationService serialisationService;
 
@@ -94,8 +94,8 @@ public class ProductController extends AbstractUiController {
 		String path= URLEncoder.encode(request.getServletPath().substring(1));							
 
 		
-		// Retrieve the AggregatedData
-		AggregatedData data;
+		// Retrieve the Product
+		Product data;
 		try {
 				data = esDao.getById(id);
 
@@ -172,8 +172,8 @@ public class ProductController extends AbstractUiController {
 	@PostMapping("/*-{id:\\d+}")
 	public ModelAndView updateProduct(@RequestParam String productTitle, @RequestParam String productDescription,  @PathVariable String id, final HttpServletRequest request, HttpServletResponse response) throws IOException {
 
-		// Retrieve the AggregatedData
-		AggregatedData data;
+		// Retrieve the Product
+		Product data;
 		try {
 			data = esDao.getById(id);
 		} catch (ResourceNotFoundException e) {
@@ -190,7 +190,7 @@ public class ProductController extends AbstractUiController {
 		
 		data.setHumanDescription(description);
 		
-		esDao.index(data, AggregatedDataRepository.MAIN_INDEX_NAME);
+		esDao.index(data, ProductRepository.MAIN_INDEX_NAME);
 		
 		return product(id, null,request, response);
 		
@@ -202,7 +202,7 @@ public class ProductController extends AbstractUiController {
 	 * @param price
 	 * @throws IOException 
 	 */
-	private void inferAffiliationToken(AggregatedData data, AggregatedPrice price)  {
+	private void inferAffiliationToken(Product data, AggregatedPrice price)  {
 
 			try {
 				AffiliationToken token = new AffiliationToken(price, data);

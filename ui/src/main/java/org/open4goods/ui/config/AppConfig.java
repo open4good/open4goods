@@ -7,7 +7,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-import org.open4goods.dao.AggregatedDataRepository;
+import org.open4goods.dao.ProductRepository;
 import org.open4goods.model.constants.CacheConstants;
 import org.open4goods.model.constants.Currency;
 import org.open4goods.model.data.Price;
@@ -72,14 +72,14 @@ public class AppConfig {
 	}
 
     @Bean
-    OpenDataService openDataService(@Autowired AggregatedDataRepository aggregatedDataRepository, @Autowired UiConfig props) {
+    OpenDataService openDataService(@Autowired ProductRepository aggregatedDataRepository, @Autowired UiConfig props) {
 		return new OpenDataService(aggregatedDataRepository, props);
 	}
 
 	
 	// TODO(note) : DISABLING SITE MAP GENERATION
 //	@Bean
-//	public SitemapGenerationService sitemapGenerationService (@Autowired AggregatedDataRepository aggregatedDataRepository, @Autowired UiConfig props ) {
+//	public SitemapGenerationService sitemapGenerationService (@Autowired ProductRepository aggregatedDataRepository, @Autowired UiConfig props ) {
 //		return new SitemapGenerationService(aggregatedDataRepository, props);
 //	}
 //	
@@ -129,8 +129,8 @@ public class AppConfig {
 
 
     @Bean
-    AggregatedDataRepository aggregatedDataRepo() {
-		return new AggregatedDataRepository();
+    ProductRepository aggregatedDataRepo() {
+		return new ProductRepository();
 	}
 
      @Bean RemoteFileCachingService remoteFileCachingService() {
@@ -139,7 +139,7 @@ public class AppConfig {
 
 
     @Bean
-    SearchService searchService(@Autowired AggregatedDataRepository aggregatedDataRepository, @Autowired final UiConfig uiconfig) {
+    SearchService searchService(@Autowired ProductRepository aggregatedDataRepository, @Autowired final UiConfig uiconfig) {
 		return new SearchService(aggregatedDataRepository, uiconfig.logsFolder());
 	}
 

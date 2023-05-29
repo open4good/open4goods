@@ -5,7 +5,7 @@
 //import org.springframework.data.elasticsearch.annotations.FieldType;
 //
 ///**
-// * Designates a DataFragment that is participant in an AggregatedData
+// * Designates a DataFragment that is participant in an Product
 // * 
 // * @author Goulven.Furet
 // *

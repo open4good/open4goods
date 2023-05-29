@@ -2,7 +2,7 @@ package org.open4goods.test;
 
 import java.util.UUID;
 
-import org.open4goods.model.product.AggregatedData;
+import org.open4goods.model.product.Product;
 
 public class ProductTestProvider {
 
@@ -10,12 +10,12 @@ public class ProductTestProvider {
 
 
 	public static  ProductTestBuilder empty() {
-		final ProductTestBuilder p = new ProductTestBuilder(new AggregatedData());
+		final ProductTestBuilder p = new ProductTestBuilder(new Product());
 		return p;
 	}
 
 	public static  ProductTestBuilder defaulted() {
-		final AggregatedData p = new AggregatedData();
+		final Product p = new Product();
 		p.setId(UUID.randomUUID().toString());
 
 		p.getAlternativeIds().add("alternateId1");

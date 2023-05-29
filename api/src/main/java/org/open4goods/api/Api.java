@@ -4,7 +4,7 @@ package org.open4goods.api;
 import java.io.IOException;
 
 import org.open4goods.crawler.controller.CrawlController;
-import org.open4goods.dao.AggregatedDataRepository;
+import org.open4goods.dao.ProductRepository;
 import org.open4goods.services.SerialisationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,7 +27,7 @@ import jakarta.annotation.PostConstruct;
 
 @EnableAspectJAutoProxy
 @EnableScheduling
-@EnableElasticsearchRepositories(basePackageClasses = AggregatedDataRepository.class)
+@EnableElasticsearchRepositories(basePackageClasses = ProductRepository.class)
 @EnableCaching
 
 public abstract class Api {

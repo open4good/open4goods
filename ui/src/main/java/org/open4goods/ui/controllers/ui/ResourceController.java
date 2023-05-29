@@ -11,14 +11,14 @@ import java.util.Optional;
 
 import org.apache.commons.io.IOUtils;
 import org.open4goods.config.yml.ui.VerticalConfig;
-import org.open4goods.dao.AggregatedDataRepository;
+import org.open4goods.dao.ProductRepository;
 import org.open4goods.exceptions.InvalidParameterException;
 import org.open4goods.exceptions.ResourceNotFoundException;
 import org.open4goods.exceptions.TechnicalException;
 import org.open4goods.exceptions.ValidationException;
 import org.open4goods.model.constants.ResourceTagDictionary;
 import org.open4goods.model.data.Resource;
-import org.open4goods.model.product.AggregatedData;
+import org.open4goods.model.product.Product;
 import org.open4goods.services.DataSourceConfigService;
 import org.open4goods.services.VerticalsConfigService;
 import org.open4goods.ui.config.AppConfig;
@@ -55,7 +55,7 @@ public class ResourceController extends AbstractUiController {
 
 	// The siteConfig
 	private @Autowired ImageService imageService;
-	private @Autowired AggregatedDataRepository esDao;
+	private @Autowired ProductRepository esDao;
 	private @Autowired GtinService gtinService;
 	private @Autowired UiConfig config;
 	private @Autowired DataSourceConfigService dsConfigService;
@@ -94,8 +94,8 @@ public class ResourceController extends AbstractUiController {
 	@GetMapping("/*-{id:\\d+}/"+PNG_IMG)
 	public void image(@PathVariable String id, final HttpServletResponse response, HttpServletRequest request) throws FileNotFoundException, IOException, ValidationException, TechnicalException {
 		
-		// Retrieve the AggregatedData		
-		AggregatedData data;
+		// Retrieve the Product		
+		Product data;
 		try {
 			data = esDao.getById(id);
 		} catch (ResourceNotFoundException e) {
@@ -140,8 +140,8 @@ public class ResourceController extends AbstractUiController {
 	@GetMapping("/*-{id:\\d+}/"+GTIN_IMG)
 	public void gtin(@PathVariable String id, final HttpServletResponse response, HttpServletRequest request) throws FileNotFoundException, IOException, ValidationException, TechnicalException {
 		
-		// Retrieve the AggregatedData		
-		AggregatedData data;
+		// Retrieve the Product		
+		Product data;
 		
 		
 		try {

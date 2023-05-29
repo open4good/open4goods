@@ -5,7 +5,7 @@ import java.util.Set;
 
 import org.open4goods.aggregation.AbstractAggregationService;
 import org.open4goods.exceptions.AggregationSkipException;
-import org.open4goods.model.product.AggregatedData;
+import org.open4goods.model.product.Product;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -18,7 +18,7 @@ import org.slf4j.LoggerFactory;
 public class BatchedAggregator extends AbstractAggregator {
 
 	protected static final Logger logger = LoggerFactory.getLogger(BatchedAggregator.class);
-	private Set<AggregatedData> datas;
+	private Set<Product> datas;
 
 	
 
@@ -27,14 +27,14 @@ public class BatchedAggregator extends AbstractAggregator {
 	}
 
 
-	public void close(Set<AggregatedData> datas) {
+	public void close(Set<Product> datas) {
 		super.close();
 		this.datas = null;
 		
 	}
 
 
-	public void beforeStart(Set<AggregatedData> datas) {
+	public void beforeStart(Set<Product> datas) {
 		super.beforeStart();
 		this.datas =datas;
 		
@@ -44,16 +44,16 @@ public class BatchedAggregator extends AbstractAggregator {
 	
 	
 	/**
-	 * Build the AggregatedData using the services registered on this aggregator
+	 * Build the Product using the services registered on this aggregator
 	 * @param datas
 	 * @return
 	 * @throws AggregationSkipException 
 	 */
-	public AggregatedData update(final AggregatedData data, Set<AggregatedData> datas) throws AggregationSkipException {
+	public Product update(final Product data, Set<Product> datas) throws AggregationSkipException {
 
-		logger.info("Updating AggregatedData with AggragatedData {} and using {} services",data,services.size());
+		logger.info("Updating Product with AggragatedData {} and using {} services",data,services.size());
 
-		AggregatedData ret = null;
+		Product ret = null;
 		// Call transformation building registered service
 		for (final AbstractAggregationService service : services) {
 

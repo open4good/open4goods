@@ -9,7 +9,7 @@ import org.open4goods.aggregation.AbstractAggregationService;
 import org.open4goods.config.yml.ui.SiteNaming;
 import org.open4goods.helper.IdHelper;
 import org.open4goods.model.data.DataFragment;
-import org.open4goods.model.product.AggregatedData;
+import org.open4goods.model.product.Product;
 import org.open4goods.model.product.Names;
 import org.open4goods.services.EvaluationService;
 import org.slf4j.Logger;
@@ -35,7 +35,7 @@ public class NamesAggregationService extends AbstractAggregationService {
 	}
 
 	@Override
-	public void onDataFragment(final DataFragment df, final AggregatedData output) {
+	public void onDataFragment(final DataFragment df, final Product output) {
 
 //		for (final Entry<String, String> tpl : localisationAggregationConfig.getProductNameTemplates().entrySet()) {
 //
@@ -140,7 +140,7 @@ public class NamesAggregationService extends AbstractAggregationService {
 		return result;
 	}
 
-//	public String getProductName(final AggregatedData p, final String language) {
+//	public String getProductName(final Product p, final String language) {
 //		String template = null;
 //		try {
 //			template = localisationAggregationConfig.getProductNameTemplates().getOrDefault(language,

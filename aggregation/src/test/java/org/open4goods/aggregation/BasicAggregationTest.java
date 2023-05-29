@@ -15,7 +15,7 @@
 //import org.open4goods.aggregation.aggregator.RealTimeAggregator;
 //import org.open4goods.aggregation.services.aggregation.PriceAggregationService;
 //import org.open4goods.exceptions.NotAddedException;
-//import org.open4goods.model.product.AggregatedData;
+//import org.open4goods.model.product.Product;
 //import org.open4goods.services.DataSourceConfigService;
 //import org.open4goods.services.SerialisationService;
 //import org.springframework.beans.factory.annotation.Autowired;
@@ -54,7 +54,7 @@
 //
 //	@Test
 //	public void test() {
-//		AggregatedData pr = null;
+//		Product pr = null;
 //		try {
 //			pr = dataAggregationService.build(new HashSet<>(), new HashSet<>());
 //		} catch (final NotAddedException e) {

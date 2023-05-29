@@ -8,7 +8,7 @@ import java.util.stream.Stream;
 
 import org.open4goods.exceptions.ResourceNotFoundException;
 import org.open4goods.model.constants.CacheConstants;
-import org.open4goods.model.product.AggregatedData;
+import org.open4goods.model.product.Product;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,10 +30,10 @@ import org.springframework.data.elasticsearch.core.query.Query;
  * @author goulven
  *
  */
-public class AggregatedDataRepository {
+public class ProductRepository {
 
 
-	private static final Logger logger = LoggerFactory.getLogger(AggregatedDataRepository.class);
+	private static final Logger logger = LoggerFactory.getLogger(ProductRepository.class);
 
 	public static final String MAIN_INDEX_NAME = "all";
 
@@ -46,7 +46,7 @@ public class AggregatedDataRepository {
 	private @Autowired ElasticsearchOperations elasticsearchTemplate;
 	
 	
-	public AggregatedDataRepository () {
+	public ProductRepository () {
 	}
 
 	
@@ -55,12 +55,12 @@ public class AggregatedDataRepository {
 	 * Export all aggregated data
 	 * @return
 	 */
-	public Stream<AggregatedData> exportAll() {
-		return elasticsearchTemplate.searchForStream(Query.findAll(), AggregatedData.class, current_index).stream().map(e -> e.getContent());				
+	public Stream<Product> exportAll() {
+		return elasticsearchTemplate.searchForStream(Query.findAll(), Product.class, current_index).stream().map(e -> e.getContent());				
 	}
 	
 	
-	public Stream<AggregatedData> searchInValidPrices(String query, final String indexName, int from, int to) {
+	public Stream<Product> searchInValidPrices(String query, final String indexName, int from, int to) {
 
 		Criteria c = new Criteria().expression(query)
 						.and(getValidDateQuery());
@@ -70,7 +70,7 @@ public class AggregatedDataRepository {
 													.withPageable(PageRequest.of(from, to))
 													.build();
 		
-		return elasticsearchTemplate.search(initialQuery, AggregatedData.class, current_index)
+		return elasticsearchTemplate.search(initialQuery, Product.class, current_index)
 				.stream()
 				.map(e -> e.getContent());
 		
@@ -83,7 +83,7 @@ public class AggregatedDataRepository {
 	 * @param indexName
 	 * @return
 	 */
-	public Stream<AggregatedData> exportVerticalWithValidDate(String vertical) {
+	public Stream<Product> exportVerticalWithValidDate(String vertical) {
 
 		Criteria c = new Criteria("vertical.keyword").is(vertical)
 						.and(getValidDateQuery());
@@ -92,61 +92,61 @@ public class AggregatedDataRepository {
 													.withQuery(new CriteriaQuery(c))
 													.build();
 		
-		return elasticsearchTemplate.searchForStream(initialQuery, AggregatedData.class, current_index).stream().map(e -> e.getContent());
+		return elasticsearchTemplate.searchForStream(initialQuery, Product.class, current_index).stream().map(e -> e.getContent());
 		
 	}
 	
-	public SearchHits<AggregatedData> search(Query query, final String indexName) {				
-		return elasticsearchTemplate.search(query, AggregatedData.class, IndexCoordinates.of(indexName));
+	public SearchHits<Product> search(Query query, final String indexName) {				
+		return elasticsearchTemplate.search(query, Product.class, IndexCoordinates.of(indexName));
 		
 	}
 	
 	/**
-	 * Index an AggregatedData
+	 * Index an Product
 	 *
 	 * @param p
 	 */
-	public void index(final AggregatedData p, final String indexName) {
+	public void index(final Product p, final String indexName) {
 		elasticsearchTemplate.save(p,IndexCoordinates.of(indexName));
 	}
 
 	/**
-	 * Index an AggregatedData
+	 * Index an Product
 	 *
 	 * @param p
 	 */
-	public void index(final AggregatedData p) {
+	public void index(final Product p) {
 		elasticsearchTemplate.save(p,current_index);
 	}
 	/**
-	 * Bulk Index multiple AggregatedData
+	 * Bulk Index multiple Product
 	 *
 	 * @param p
 	 */
-	public void index(Set<AggregatedData> data, final String indexName) {
+	public void index(Set<Product> data, final String indexName) {
 		elasticsearchTemplate.save(data,IndexCoordinates.of(indexName));
 	}
 	
 	/**
-	 * Bulk Index multiple AggregatedData
+	 * Bulk Index multiple Product
 	 *
 	 * @param p
 	 */
-	public void index(Set<AggregatedData> data) {
+	public void index(Set<Product> data) {
 		elasticsearchTemplate.save(data,current_index);
 	}	
 	
 //	/**
-//	 * Bulk Index multiple AggregatedData
+//	 * Bulk Index multiple Product
 //	 *
 //	 * @param p
 //	 */
-//	public void indexBackup(Set<AggregatedData> data) {
+//	public void indexBackup(Set<Product> data) {
 //		elasticsearchTemplate.save(data,backup_index);
 //	}
 	
 //	/**
-//	 * Reinitialize an AggregatedData elastic index (delete then re-create with)
+//	 * Reinitialize an Product elastic index (delete then re-create with)
 //	 * @param indexName
 //	 */
 //	@SuppressWarnings("rawtypes")
@@ -154,13 +154,13 @@ public class AggregatedDataRepository {
 //		try {
 //			IndexOperations indexOps = elasticsearchTemplate.indexOps(IndexCoordinates.of(indexName));
 //			if (!indexOps.exists() ) {				
-//				final Map mapping =    elasticsearchTemplate.indexOps(IndexCoordinates.of(AggregatedData.DEFAULT_REPO) ). getMapping();
+//				final Map mapping =    elasticsearchTemplate.indexOps(IndexCoordinates.of(Product.DEFAULT_REPO) ). getMapping();
 //				InputStream stream = resolver.getResource("classpath:/elastic-settings.json").getInputStream();
 //				Settings settings =  Settings.parse(IOUtils.toString(stream, Charset.defaultCharset()));
 //				IOUtils.closeQuietly(stream);
 //				
 //				
-//				logger.info("Will create the AggregatedData typed index for {}", indexName);				
+//				logger.info("Will create the Product typed index for {}", indexName);				
 //				elasticsearchTemplate.indexOps(IndexCoordinates.of(indexName)).create(settings,Document.from(mapping));
 //				
 ////				elasticsearchTemplate.indexOps(IndexCoordinates.of(indexName)).putMapping(Document.from(mapping));
@@ -188,13 +188,13 @@ public class AggregatedDataRepository {
 	 * @return
 	 * @throws ResourceNotFoundException
 	 */
-	public AggregatedData getById( final String productId, String indexName)
+	public Product getById( final String productId, String indexName)
 			throws ResourceNotFoundException {
 
-		final AggregatedData result = elasticsearchTemplate.get(productId,AggregatedData.class,IndexCoordinates.of(indexName));
+		final Product result = elasticsearchTemplate.get(productId,Product.class,IndexCoordinates.of(indexName));
 
 		if (null == result) {
-			throw new ResourceNotFoundException("AggregatedData '" + productId + "' does not exists");
+			throw new ResourceNotFoundException("Product '" + productId + "' does not exists");
 		} 
 		
 		return result;
@@ -207,13 +207,13 @@ public class AggregatedDataRepository {
 	 * @return
 	 * @throws ResourceNotFoundException
 	 */
-	public Map<String, AggregatedData> multiGetById( final Collection<String> ids)
+	public Map<String, Product> multiGetById( final Collection<String> ids)
 			throws ResourceNotFoundException {
 
 		NativeQuery query = new NativeQueryBuilder().withIds(ids).build();
 		
-		Map<String, AggregatedData> ret = new HashMap<String, AggregatedData>();
-		 elasticsearchTemplate.multiGet(query, AggregatedData.class,current_index )
+		Map<String, Product> ret = new HashMap<String, Product>();
+		 elasticsearchTemplate.multiGet(query, Product.class,current_index )
 				.stream().map(e -> e.getItem())
 				.filter(e -> e !=null)
 				.forEach(e -> {
@@ -227,7 +227,7 @@ public class AggregatedDataRepository {
 	
 	
 	@Cacheable( cacheNames=CacheConstants.ONE_MINUTE_LOCAL_CACHE_NAME)
-	public AggregatedData getById(String productId) throws ResourceNotFoundException {
+	public Product getById(String productId) throws ResourceNotFoundException {
 		return getById(productId, MAIN_INDEX_NAME);
 		
 	}

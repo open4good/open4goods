@@ -9,10 +9,10 @@ import java.util.Set;
 import org.apache.commons.lang3.StringUtils;
 import org.open4goods.config.yml.attributes.AttributeConfig;
 import org.open4goods.config.yml.ui.VerticalConfig;
-import org.open4goods.dao.AggregatedDataRepository;
+import org.open4goods.dao.ProductRepository;
 import org.open4goods.helper.GenericFileLogger;
 import org.open4goods.model.constants.ProductState;
-import org.open4goods.model.product.AggregatedData;
+import org.open4goods.model.product.Product;
 import org.open4goods.ui.controllers.dto.NumericRangeFilter;
 import org.open4goods.ui.controllers.dto.VerticalFilterTerm;
 import org.open4goods.ui.controllers.dto.VerticalSearchRequest;
@@ -52,12 +52,12 @@ public class SearchService {
 	public static final String OTHER_BUCKET = "ES-UNKNOWN";
 
 	
-	private AggregatedDataRepository aggregatedDataRepository;
+	private ProductRepository aggregatedDataRepository;
 
 	private Logger statsLogger;
 	
 	
-	public SearchService(AggregatedDataRepository aggregatedDataRepository, String logsFolder) {
+	public SearchService(ProductRepository aggregatedDataRepository, String logsFolder) {
 		this.aggregatedDataRepository = aggregatedDataRepository;
 		this.statsLogger  = GenericFileLogger.initLogger("stats-search", Level.INFO, logsFolder, false);
 	}
@@ -110,7 +110,7 @@ public class SearchService {
 		.withPageable(PageRequest.of(from, to))
 		.withSort(Sort.by(Order.desc("offersCount")));
 
-		SearchHits<AggregatedData> results = aggregatedDataRepository.search(esQuery.build(),ALL_VERTICAL_NAME);
+		SearchHits<Product> results = aggregatedDataRepository.search(esQuery.build(),ALL_VERTICAL_NAME);
 		VerticalSearchResponse vsr = new VerticalSearchResponse();			
 
 //		// Setting the response
@@ -236,7 +236,7 @@ public class SearchService {
 		}
 //		
 
-		SearchHits<AggregatedData> results = aggregatedDataRepository.search(esQuery.build(),ALL_VERTICAL_NAME);
+		SearchHits<Product> results = aggregatedDataRepository.search(esQuery.build(),ALL_VERTICAL_NAME);
 	
 
 		// Handling aggregations results if relevant
@@ -349,7 +349,7 @@ public class SearchService {
 //	/**
 //	 * 
 //	 * @param categorie
-//	 * @return all AggregatedData for a categorie
+//	 * @return all Product for a categorie
 //	 */
 //	public VerticalSearchResponse categorieSearch(String categorie) {
 //		String translatedVerticalQuery="datasourceCategories:\""+categorie+"\""; 

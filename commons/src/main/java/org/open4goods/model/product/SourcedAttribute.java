@@ -31,7 +31,7 @@ public class SourcedAttribute extends Attribute{
 	}
 	
 	
-	public SourcedAttribute(IAttribute source, AggregatedData df) {
+	public SourcedAttribute(IAttribute source, Product df) {
 		
 		setRawValue(source.getValue());
 		setLanguage(source.getLanguage());

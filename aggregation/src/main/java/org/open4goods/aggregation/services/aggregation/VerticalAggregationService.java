@@ -4,7 +4,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.open4goods.aggregation.AbstractAggregationService;
 import org.open4goods.config.yml.ui.VerticalConfig;
 import org.open4goods.model.data.DataFragment;
-import org.open4goods.model.product.AggregatedData;
+import org.open4goods.model.product.Product;
 import org.open4goods.services.VerticalsConfigService;
 
 /**
@@ -23,7 +23,7 @@ public class VerticalAggregationService extends AbstractAggregationService {
 	}
 
 	@Override
-	public void onDataFragment(final DataFragment input, final AggregatedData output) {
+	public void onDataFragment(final DataFragment input, final Product output) {
 
 		String category = input.getCategory();
 		
