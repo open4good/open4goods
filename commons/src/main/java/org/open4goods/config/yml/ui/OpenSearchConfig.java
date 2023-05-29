@@ -9,27 +9,27 @@ import org.open4goods.model.Localisable;
  */
 public class OpenSearchConfig {
 
-	
+
 	/**
 	 * A short name for the search engine. It must be 16 or fewer characters of plain text, with no HTML or other markup.
 	 */
 	private Localisable shortName;
-	
-	
+
+
 	/** A brief description of the search engine. It must be 1024 or fewer characters of plain text, with no HTML or other markup. **/
 	private Localisable description;
-	
-	/** 
+
+	/**
 	 * URI of an 16×16 image of type image/x-icon for the search engine.
 	 * The URI may also use the data: URI scheme. (You can generate a data: URI from an icon file at The data: URI kitchen.)
-	 * 
+	 *
 	 * **/
 	private Localisable ico16;
-	
-	/** 
+
+	/**
 	 * URI of an 64×64 image of type image/jpeg or image/png for the search engine.
 	 * The URI may also use the data: URI scheme. (You can generate a data: URI from an icon file at The data: URI kitchen.)
-	 * 
+	 *
 	 * **/
 	private Localisable ico64;
 
@@ -65,8 +65,8 @@ public class OpenSearchConfig {
 		this.ico64 = ico64;
 	}
 
-	
-	
-	
-	
+
+
+
+
 }

@@ -20,7 +20,7 @@
 //
 //	private CommentsAggregationConfig commentsAggregationConfig;
 //
-//	
+//
 //	public CommentsAggregationService( final String logsFolder, CommentsAggregationConfig commentsAggregationConfig) {
 //
 //		super(logsFolder);
@@ -31,37 +31,37 @@
 //
 //	@Override
 //	public void onDataFragment(DataFragment input, Product output) {
-//			
-//			
+//
+//
 //			// Before, instanciate the holder
 //			AggregatedComments comments = new AggregatedComments();
-//			
-//				
+//
+//
 //				// Classical comments
-//				for (Comment c : input.getComments()) {					
-//					AggregatedComment ac = getAggregatedComment(input, c);					
+//				for (Comment c : input.getComments()) {
+//					AggregatedComment ac = getAggregatedComment(input, c);
 //					// Adding
 //					comments.getComments().add(ac);
-//				}		
-//						
-//			
+//				}
+//
+//
 //			// Setting in Product
 //			output.setComments(comments);
-//			
-//			
-//			
-//			
-//			
+//
+//
+//
+//
+//
 //	}
 //
 //	private AggregatedComment getAggregatedComment(DataFragment df, Comment c) {
 //		// Instanciating the aggregated comment
 //		AggregatedComment ac = new AggregatedComment(c, df);
 //		ac.setLanguage(c.getDescription().getLanguage());
-//		
+//
 //		// Description textualisation
 //		ac.setDescription(c.getDescription().getText());
-//		
+//
 //		// Title textualisation
 //		ac.setTitle(c.getTitle().getText());
 //		return ac;

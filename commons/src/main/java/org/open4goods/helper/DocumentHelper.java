@@ -44,14 +44,14 @@ public class DocumentHelper {
 	private static  HtmlCleaner htmlCleaner;
 
 	private static  DomSerializer domSerializer;
-	
-	private static  Transformer transformer; 
-	
+
+	private static  Transformer transformer;
+
 	private static final XPath xpath = XPathFactory.newInstance().newXPath();
-	
+
 	private static final Map<String, XPathExpression> xpathCache = new ConcurrentHashMap<>();
-	
-	 
+
+
 
 	static {
 		logger.info("Initialising html cleaner");
@@ -85,7 +85,7 @@ public class DocumentHelper {
 		try {
 			final URL uUrl = new URL(url);
 			builder.append(uUrl.getProtocol()).append("://").append(uUrl.getHost())
-					.append(uUrl.getPort() == -1 ? "" : ":" + uUrl.getPort()).append("/");
+			.append(uUrl.getPort() == -1 ? "" : ":" + uUrl.getPort()).append("/");
 		} catch (final MalformedURLException e) {
 			logger.error("Error while handling URL : {} ", url, e);
 		}
@@ -103,26 +103,26 @@ public class DocumentHelper {
 		return domSerializer.createDOM(htmlCleaner.clean(string));
 
 	}
-	
-//	//method to convert Document to String
+
+	//	//method to convert Document to String
 	public static String getSourceFromDocument(Node node) throws TechnicalException
 	{
-	    try
-	    {
-	       DOMSource domSource = new DOMSource(node);
-	       StringWriter writer = new StringWriter();
-	       StreamResult result = new StreamResult(writer);
+		try
+		{
+			DOMSource domSource = new DOMSource(node);
+			StringWriter writer = new StringWriter();
+			StreamResult result = new StreamResult(writer);
 
-	       transformer.transform(domSource, result);
-	       return writer.toString();
-	    }
-	    catch(Exception e)
-	    {
-	       throw new TechnicalException("Xpath evaluation fail ",e);
-	    }
-	} 
-	
-	
+			transformer.transform(domSource, result);
+			return writer.toString();
+		}
+		catch(Exception e)
+		{
+			throw new TechnicalException("Xpath evaluation fail ",e);
+		}
+	}
+
+
 	/**
 	 * PErforms a simple XPATH evaluation upon a W3C document
 	 *
@@ -151,6 +151,6 @@ public class DocumentHelper {
 		return nl.item(0).getTextContent();
 
 	}
-	
+
 
 }

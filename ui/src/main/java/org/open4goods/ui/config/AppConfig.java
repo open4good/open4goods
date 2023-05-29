@@ -66,80 +66,80 @@ public class AppConfig {
 	public static final int CACHE_PERIOD_SECONDS = 3600*24*7;
 	private @Autowired UiConfig config;
 
-    @Bean
-    ImageService imageService(@Autowired ImageMagickService imageMagickService, @Autowired ResourceService resourceService) {
+	@Bean
+	ImageService imageService(@Autowired ImageMagickService imageMagickService, @Autowired ResourceService resourceService) {
 		return new ImageService(imageMagickService, resourceService);
 	}
 
-    @Bean
-    OpenDataService openDataService(@Autowired ProductRepository aggregatedDataRepository, @Autowired UiConfig props) {
+	@Bean
+	OpenDataService openDataService(@Autowired ProductRepository aggregatedDataRepository, @Autowired UiConfig props) {
 		return new OpenDataService(aggregatedDataRepository, props);
 	}
 
-	
+
 	// TODO(note) : DISABLING SITE MAP GENERATION
-//	@Bean
-//	public SitemapGenerationService sitemapGenerationService (@Autowired ProductRepository aggregatedDataRepository, @Autowired UiConfig props ) {
-//		return new SitemapGenerationService(aggregatedDataRepository, props);
-//	}
-//	
-	
-	
+	//	@Bean
+	//	public SitemapGenerationService sitemapGenerationService (@Autowired ProductRepository aggregatedDataRepository, @Autowired UiConfig props ) {
+	//		return new SitemapGenerationService(aggregatedDataRepository, props);
+	//	}
+	//
+
+
 	@Bean AuthenticationProvider capsuleAuthenticationProvider() {
 		return new XwikiAuthenticationProvider();
 	}
-	
+
 	@Bean
 	XwikiService xwikiService(@Autowired UiConfig props) {
 		return new XwikiService(props.getWikiConfig());
 	}
 
 
-    /** The bean providing datasource configurations **/
-     @Bean DataSourceConfigService datasourceConfigService(@Autowired final UiConfig config) {
+	/** The bean providing datasource configurations **/
+	@Bean DataSourceConfigService datasourceConfigService(@Autowired final UiConfig config) {
 		return new DataSourceConfigService(config.getDatasourcesfolder());
 	}
 
 
-    @Bean
-    RecaptchaService recaptchaService() {
+	@Bean
+	RecaptchaService recaptchaService() {
 		return new RecaptchaService();
 	}
-	
-	
+
+
 	@Bean MailService mailService(@Autowired final JavaMailSender sender) {
 		return new MailService(sender);
 	}
 
-    @Bean
-    ImageMagickService imageMagickService() {
+	@Bean
+	ImageMagickService imageMagickService() {
 		return new ImageMagickService();
 	}
 
-    @Bean
-    ResourceService resourceService() {
+	@Bean
+	ResourceService resourceService() {
 		return new ResourceService(config.getRemoteCachingFolder());
 	}
 
 
-    @Bean
-    GtinService gtinService(@Autowired ResourceService resourceService) {
+	@Bean
+	GtinService gtinService(@Autowired ResourceService resourceService) {
 		return new GtinService(resourceService);
 	}
 
 
-    @Bean
-    ProductRepository aggregatedDataRepo() {
+	@Bean
+	ProductRepository aggregatedDataRepo() {
 		return new ProductRepository();
 	}
 
-     @Bean RemoteFileCachingService remoteFileCachingService() {
+	@Bean RemoteFileCachingService remoteFileCachingService() {
 		return new RemoteFileCachingService(config.getRemoteCachingFolder());
 	}
 
 
-    @Bean
-    SearchService searchService(@Autowired ProductRepository aggregatedDataRepository, @Autowired final UiConfig uiconfig) {
+	@Bean
+	SearchService searchService(@Autowired ProductRepository aggregatedDataRepository, @Autowired final UiConfig uiconfig) {
 		return new SearchService(aggregatedDataRepository, uiconfig.logsFolder());
 	}
 
@@ -158,44 +158,44 @@ public class AppConfig {
 		return new EvaluationService();
 	}
 
-    @Bean
-    @Autowired
-    VerticalsConfigService verticalConfigsService(SerialisationService serialisationService) throws IOException {
+	@Bean
+	@Autowired
+	VerticalsConfigService verticalConfigsService(SerialisationService serialisationService) throws IOException {
 		return new VerticalsConfigService( serialisationService,config.getVerticalsFolder());
 	}
 
-    ////////////////////////////////////
-    // Locale resolution
-    ////////////////////////////////////
-    
-    @Bean
-    LocaleResolver localeResolver() {
+	////////////////////////////////////
+	// Locale resolution
+	////////////////////////////////////
+
+	@Bean
+	LocaleResolver localeResolver() {
 		return new AcceptHeaderLocaleResolver();
 	}
 
-    @Bean
-    LocaleChangeInterceptor localeChangeInterceptor() {
+	@Bean
+	LocaleChangeInterceptor localeChangeInterceptor() {
 		final LocaleChangeInterceptor lci = new LocaleChangeInterceptor();
 		lci.setParamName("lang");
 		return lci;
 	}
 
-    @Bean
-    HttpFirewall allowUrlEncodedSlashHttpFirewall() {
-	    StrictHttpFirewall firewall = new StrictHttpFirewall();
-	    firewall.setAllowUrlEncodedSlash(true);    
-	    firewall.setAllowBackSlash(true);
-	    firewall.setAllowNull(true);
-	    firewall.setAllowSemicolon(true);
-	    firewall.setUnsafeAllowAnyHttpMethod(true);
-	    firewall.setUnsafeAllowAnyHttpMethod(true);
-	    firewall.setAllowUrlEncodedPercent(true);
-	    
-	    
-	    
-	    return firewall;
+	@Bean
+	HttpFirewall allowUrlEncodedSlashHttpFirewall() {
+		StrictHttpFirewall firewall = new StrictHttpFirewall();
+		firewall.setAllowUrlEncodedSlash(true);
+		firewall.setAllowBackSlash(true);
+		firewall.setAllowNull(true);
+		firewall.setAllowSemicolon(true);
+		firewall.setUnsafeAllowAnyHttpMethod(true);
+		firewall.setUnsafeAllowAnyHttpMethod(true);
+		firewall.setAllowUrlEncodedPercent(true);
+
+
+
+		return firewall;
 	}
-	
+
 
 	///////////////////////////////////
 	// Resources
@@ -214,13 +214,13 @@ public class AppConfig {
 				registry.addInterceptor(localeChangeInterceptor());
 				registry.addInterceptor(new GenericTemplateInterceptor());
 			}
-			
-		    @Override
-		    public void configurePathMatch(PathMatchConfigurer configurer) {
-		        UrlPathHelper urlPathHelper = new UrlPathHelper();
-		        urlPathHelper.setUrlDecode(false);
-		        configurer.setUrlPathHelper(urlPathHelper);
-		    }
+
+			@Override
+			public void configurePathMatch(PathMatchConfigurer configurer) {
+				UrlPathHelper urlPathHelper = new UrlPathHelper();
+				urlPathHelper.setUrlDecode(false);
+				configurer.setUrlPathHelper(urlPathHelper);
+			}
 
 
 			/**
@@ -228,25 +228,25 @@ public class AppConfig {
 			 * CommonPageCOntroller) Also overrides classpath values with the ones pageNumber
 			 * filesystem
 			 */
-		    @Override
+			@Override
 			public void addResourceHandlers(final ResourceHandlerRegistry registry) {
 
 				registry.setOrder(Ordered.LOWEST_PRECEDENCE);
 				registry.addResourceHandler("/sitemap/**").addResourceLocations("file:" + config.siteMapFolder().getAbsolutePath() + "/");
-				
+
 				registry
-	             .addResourceHandler("/assets/**")
-	             .addResourceLocations("classpath:/static/assets/")
-	             .setCachePeriod(CACHE_PERIOD_SECONDS);
-	        
-		        registry
-	            .addResourceHandler("/css/**")
-	            .addResourceLocations("classpath:/static/css/")
-	            .setCachePeriod(CACHE_PERIOD_SECONDS);
-		        
-		        
+				.addResourceHandler("/assets/**")
+				.addResourceLocations("classpath:/static/assets/")
+				.setCachePeriod(CACHE_PERIOD_SECONDS);
+
+				registry
+				.addResourceHandler("/css/**")
+				.addResourceLocations("classpath:/static/css/")
+				.setCachePeriod(CACHE_PERIOD_SECONDS);
+
+
 			}
-		    
+
 
 		};
 	}
@@ -286,15 +286,15 @@ public class AppConfig {
 	}
 
 
-    //////////////////////////////////////////////
-    // The uidMap managers
-    //////////////////////////////////////////////
+	//////////////////////////////////////////////
+	// The uidMap managers
+	//////////////////////////////////////////////
 
-    @Bean
-    CacheManager cacheManager(@Autowired final Ticker ticker) {
+	@Bean
+	CacheManager cacheManager(@Autowired final Ticker ticker) {
 		final CaffeineCache fCache = buildCache(CacheConstants.FOREVER_LOCAL_CACHE_NAME, ticker, 30000000);
 		final CaffeineCache hCache = buildCache(CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME, ticker, 60);
-		final CaffeineCache mCache = buildCache(CacheConstants.ONE_MINUTE_LOCAL_CACHE_NAME, ticker, 1);		
+		final CaffeineCache mCache = buildCache(CacheConstants.ONE_MINUTE_LOCAL_CACHE_NAME, ticker, 1);
 		final CaffeineCache dCache = buildCache(CacheConstants.ONE_DAY_LOCAL_CACHE_NAME, ticker, 60 * 24);
 		final SimpleCacheManager manager = new SimpleCacheManager();
 		manager.setCaches(Arrays.asList(fCache, dCache, hCache,mCache));
@@ -306,8 +306,8 @@ public class AppConfig {
 				Caffeine.newBuilder().expireAfterWrite(minutesToExpire, TimeUnit.MINUTES).ticker(ticker).build());
 	}
 
-    @Bean
-    Ticker ticker() {
+	@Bean
+	Ticker ticker() {
 		return Ticker.systemTicker();
 	}
 

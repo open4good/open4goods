@@ -36,21 +36,21 @@ public class WebSecurityConfig {
 	private @Autowired ApiProperties apiProperties;
 
 	@Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+	public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 		http
-			.csrf().disable()
-			.addFilterBefore(new TokenAuthenticationFilter(), BasicAuthenticationFilter.class)
-			.sessionManagement()
-			.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-			.and()
+		.csrf().disable()
+		.addFilterBefore(new TokenAuthenticationFilter(), BasicAuthenticationFilter.class)
+		.sessionManagement()
+		.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+		.and()
 
-			.authorizeRequests()
-			.anyRequest().permitAll()
-			.and().headers().frameOptions().disable();
-		
-			http.headers().frameOptions().disable();
-			
-			return http.build();
+		.authorizeRequests()
+		.anyRequest().permitAll()
+		.and().headers().frameOptions().disable();
+
+		http.headers().frameOptions().disable();
+
+		return http.build();
 	}
 
 	public class TokenAuthenticationFilter extends GenericFilterBean {
@@ -77,7 +77,7 @@ public class WebSecurityConfig {
 			authorities.add(new SimpleGrantedAuthority(RolesConstants.ROLE_USER));
 
 			if (null != accessToken) {
-			
+
 
 				// Assignation of the ROLE_ADMIN
 				if (accessToken.equals(apiProperties.getAdminKey())) {

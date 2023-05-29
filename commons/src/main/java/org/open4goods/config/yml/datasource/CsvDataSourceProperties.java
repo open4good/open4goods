@@ -40,7 +40,7 @@ public class CsvDataSourceProperties {
 	 */
 	private Character csvQuoteChar;
 
-	
+
 	/**
 	 * csvQuoteChar
 	 */
@@ -48,18 +48,18 @@ public class CsvDataSourceProperties {
 
 	/**
 	 * Encoding of the CSV file
-	 */	
+	 */
 	private String csvEncoding="UTF8";
-	
-	
+
+
 	/**
 	 * If true, will use libreoffice headless to sanitize the CSV file
-	 */	
+	 */
 	private Boolean csvSanitisation=false;
-	
-	
-		
-	
+
+
+
+
 	/**
 	 * If defined, only columns (keys) having one of the values will be handled
 	 */
@@ -92,13 +92,13 @@ public class CsvDataSourceProperties {
 	 * If set, only the cells having the corresponding values will be included
 	 */
 	protected Map<String, String> include = new HashMap<>();
-	
+
 	/**
 	 * If set, only the cells NOT having the corresponding values will be included
 	 */
 	protected Map<String, String> exclude = new HashMap<>();
 
-	
+
 	/**
 	 * If set, those tokens will be replaced in affiliation url's
 	 */
@@ -155,12 +155,12 @@ public class CsvDataSourceProperties {
 	 * Column name(s) containing images
 	 */
 	protected Set<String> image = new HashSet<>();
-	
+
 	/**
 	 * If set and if image name contains one of this token, the image will be skipped
 	 */
 	protected Set<String> imageTokenExclusions;
-	
+
 
 	/**
 	 * The currency, as static expression
@@ -227,7 +227,7 @@ public class CsvDataSourceProperties {
 	 * If set, the key of the attribute will only consiste of the part after attributesKeyKeepAfter, if exists
 	 */
 	protected String attributesKeyKeepAfter;
-	
+
 	/** Describe a rating in CSV format **/
 	private CsvRatingConfig rating;
 
@@ -572,7 +572,7 @@ public class CsvDataSourceProperties {
 	public void setImageTokenExclusions(Set<String> imageTokenExclusions) {
 		this.imageTokenExclusions = imageTokenExclusions;
 	}
-	
-	
+
+
 
 }

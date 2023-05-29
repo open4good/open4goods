@@ -10,8 +10,8 @@ import org.springframework.data.elasticsearch.annotations.Field;
 import org.springframework.data.elasticsearch.annotations.FieldType;
 public class Description implements Validable {
 
-	
-	@Field(index = false, store = false, type = FieldType.Object)	
+
+	@Field(index = false, store = false, type = FieldType.Object)
 	private Localised content = new Localised();
 	/**
 	 * Flagged at the UI level

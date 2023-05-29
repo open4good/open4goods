@@ -1,30 +1,30 @@
 package org.open4goods.model.dto;
 
 public class WikiResult {
-	
-	
+
+
 	private String pageName;
 	private String pageTitle;
 
 	private String html;
-		
+
 	private String author;
 
-	
+
 	private String layout;
-	
+
 	private String width;
-	
-	
+
+
 	private String metaTitle;
 	private String metaDescription;
 	private String metaKeyword;
-	
+
 	private String viewLink;
-	
+
 	private String editLink;
-	
-	
+
+
 
 	public String getHtml() {
 		return html;
@@ -39,7 +39,7 @@ public class WikiResult {
 	}
 
 	public void setPageName(String title) {
-		this.pageName = title;
+		pageName = title;
 	}
 
 
@@ -114,9 +114,9 @@ public class WikiResult {
 	public void setPageTitle(String pageTitle) {
 		this.pageTitle = pageTitle;
 	}
-	
-	
-	
-	
+
+
+
+
 
 }

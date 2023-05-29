@@ -34,21 +34,21 @@ public class PartenairesController extends AbstractUiController {
 
 	// The siteConfig
 	private @Autowired UiConfig config;
-	
+
 	private @Autowired DataSourceConfigService datasourceConfigService;
 
 	private @Autowired SerialisationService serialisationService;
-	
+
 	private Map<DataSourceProperties, String> partners = new HashMap<>();
 
-	
+
 	/**
 	 * Constructor
 	 */
 	@PostConstruct
-	public void post() {	
+	public void post() {
 		for (DataSourceProperties dsp : datasourceConfigService.datasourceConfigs().values()) {
-			
+
 			AffiliationToken token = new AffiliationToken(dsp.getName(),dsp.getPortalUrl());
 			String link;
 			try {
@@ -57,14 +57,14 @@ public class PartenairesController extends AbstractUiController {
 				LOGGER.error("Error while generating link for partner",e);
 				link = dsp.getPortalUrl();
 			}
-						
+
 			partners.put(dsp, link);
 		}
 	}
-	
-	
-	
-	
+
+
+
+
 	//////////////////////////////////////////////////////////////
 	// Mappings
 	//////////////////////////////////////////////////////////////

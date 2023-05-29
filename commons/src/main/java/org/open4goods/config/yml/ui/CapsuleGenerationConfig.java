@@ -8,7 +8,7 @@ import org.springframework.validation.annotation.Validated;
 @Validated
 public class CapsuleGenerationConfig {
 
-	
+
 
 	/**
 	 * If false, we will also generate the products for datafragments that have no affiliated links.
@@ -24,11 +24,11 @@ public class CapsuleGenerationConfig {
 	/**
 	 * If defined, datafragments without this REFERENTIEL attributes keys will not be aggregated
 	 */
-	
+
 	private Set<String> skipIfAttributesNotPresent = new HashSet<>();
 
 
-	
+
 
 	/**
 	 * Frequency in ms for new update lockup agains masterendpoint
@@ -45,7 +45,7 @@ public class CapsuleGenerationConfig {
 	 * The size of elastic bulk for products indexation
 	 */
 	private Integer productsBulkIndexSize = 100;
-		
+
 
 	/**
 	 * The max numbers of  aggregated datas to proceed, can be usefull to limit processing in dev mode

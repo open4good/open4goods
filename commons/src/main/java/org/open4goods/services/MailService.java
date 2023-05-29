@@ -24,7 +24,7 @@ public class MailService {
 	 */
 	private final JavaMailSender mailSender;
 
-	
+
 
 
 

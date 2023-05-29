@@ -26,7 +26,7 @@ import org.springframework.scheduling.support.CronSequenceGenerator;
 /**
  * This service is in charge to provide the DataSource configurations. and informations about them. For now stored in the app config,
  * @author goulven
- * 
+ *
  * TODO : this class is a mess (caching datasource must be done at class init)
  *
  */
@@ -38,12 +38,12 @@ public class DataSourceConfigService {
 	private @Autowired SerialisationService serialisationService;
 
 	private @Autowired RemoteFileCachingService cachingService;
-	
-	
+
+
 	/**
 	 * The folders where are stored datasourcesByFileName
 	 */
-	 private final String datasourceConfigFolder;
+	private final String datasourceConfigFolder;
 
 	// Used to load Datasource configurations from classpath
 	private static final ClassLoader cl = DataSourceConfigService.class.getClassLoader();
@@ -60,8 +60,8 @@ public class DataSourceConfigService {
 		this.datasourceConfigFolder = datasourceConfigFolder;
 	}
 
-	
-	
+
+
 	/**
 	 * Return a cached stream to the datasource favico
 	 * @param datasourceName
@@ -70,25 +70,25 @@ public class DataSourceConfigService {
 	 * @throws IOException
 	 * @throws InvalidParameterException
 	 */
-	public InputStream getFavicon(String datasourceName) throws FileNotFoundException, IOException, InvalidParameterException {		
-		
+	public InputStream getFavicon(String datasourceName) throws FileNotFoundException, IOException, InvalidParameterException {
+
 		// Initialising cache if necessary
 		datasourceConfigs();
-		
-		File f = cachingService.getResource(datasourcesByConfigName.get(datasourceName).getFavico() );		
-		return IOUtils.toBufferedInputStream(new FileInputStream(f));		
+
+		File f = cachingService.getResource(datasourcesByConfigName.get(datasourceName).getFavico() );
+		return IOUtils.toBufferedInputStream(new FileInputStream(f));
 	}
-	
-	
-	public InputStream getLogo(String datasourceName) throws FileNotFoundException, IOException, InvalidParameterException {	
-		
+
+
+	public InputStream getLogo(String datasourceName) throws FileNotFoundException, IOException, InvalidParameterException {
+
 		// Initialising cache if necessary
 		datasourceConfigs();
-		
-		File f = cachingService.getResource(datasourcesByConfigName.get(datasourceName).getLogo() );		
-		return IOUtils.toBufferedInputStream(new FileInputStream(f));		
+
+		File f = cachingService.getResource(datasourcesByConfigName.get(datasourceName).getLogo() );
+		return IOUtils.toBufferedInputStream(new FileInputStream(f));
 	}
-	
+
 	/**
 	 * Return the next Date the given datasource will be fetched
 	 * @param datasourceName
@@ -116,7 +116,7 @@ public class DataSourceConfigService {
 
 
 	//NOTE(gof) : cache not working on inner class calls. SelfMade cache for safety
-//	@Cacheable(cacheNames=CacheConstants.FOREVER_LOCAL_CACHE_NAME)
+	//	@Cacheable(cacheNames=CacheConstants.FOREVER_LOCAL_CACHE_NAME)
 	public Map<String,DataSourceProperties> datasourceConfigs() {
 
 		if (null != datasourcesByFileName) {
@@ -127,15 +127,15 @@ public class DataSourceConfigService {
 		datasourcesByFileName.putAll(additionalDatasources);
 
 		datasourcesByFileName.putAll(getDatasourceConfigs("file:"+datasourceConfigFolder+"/**", resolver));
-		
+
 		// Fill the by config name
-		
+
 		for (DataSourceProperties conf : datasourcesByFileName.values()) {
 			datasourcesByConfigName.put(conf.getName(), conf);
 		}
-		
-		
-		
+
+
+
 		return datasourcesByFileName;
 	}
 

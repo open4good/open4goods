@@ -23,7 +23,7 @@ import org.slf4j.LoggerFactory;
  * The ui customisation of alerting service. Simply log as CSV the affiliated
  * links click
  *
- * 
+ *
  * @author Goulven.Furet
  *
  */
@@ -41,25 +41,25 @@ public class GtinService {
 	public InputStream gtin(String gtin) throws ValidationException, FileNotFoundException, IOException {
 
 
-			/////////////////////////
-			// Generate UEAN image
-			/////////////////////////
-			final String key = IdHelper.generateResourceId(gtin);
-			logger.info("Will generate barcode for {} ", key);
+		/////////////////////////
+		// Generate UEAN image
+		/////////////////////////
+		final String key = IdHelper.generateResourceId(gtin);
+		logger.info("Will generate barcode for {} ", key);
 
-			// 2 : Generate the image
+		// 2 : Generate the image
 
-			final String gtinKey = "gtin-" + key;
-			generateGtin13Img(gtinKey, gtin);
+		final String gtinKey = "gtin-" + key;
+		generateGtin13Img(gtinKey, gtin);
 
-			Resource r = new Resource();
-			r.setCacheKey(gtinKey);
-			r.setTimeStamp(System.currentTimeMillis());
+		Resource r = new Resource();
+		r.setCacheKey(gtinKey);
+		r.setTimeStamp(System.currentTimeMillis());
 
-			// TODO(gof) : if exception render default error image
-			return IOUtils.toBufferedInputStream(new FileInputStream(resourceService.getCacheFile(r)));
+		// TODO(gof) : if exception render default error image
+		return IOUtils.toBufferedInputStream(new FileInputStream(resourceService.getCacheFile(r)));
 
-		
+
 
 	}
 

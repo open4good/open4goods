@@ -31,12 +31,12 @@ public class ApiProperties {
 	 */
 	@NotBlank
 	private String rootFolder="/opt/open4goods/";
-	
+
 	/**
 	 * Folder where verticals configurations are stored
 	 */
 	private String verticalsFolder=rootFolder+"/config/verticals/";
-	
+
 	/**
 	 * Folder where datasources definitions are stored
 	 */
@@ -54,7 +54,7 @@ public class ApiProperties {
 	private Integer proxyport;
 	private String proxyusername;
 	private String proxypassword;
-	
+
 	/**
 	 * Elastic search host
 	 */
@@ -70,7 +70,7 @@ public class ApiProperties {
 	 */
 	private List<String> crawlerKeys = new ArrayList<>();
 
-	
+
 	/**
 	 * The list of crawler api keys to authorize
 	 */
@@ -92,7 +92,7 @@ public class ApiProperties {
 	 * The datafragments dequeue worker size
 	 */
 	private Integer dataFragmentsDequeueWorkers = 4;
-	
+
 	/**
 	 * The datafragments worker dequeue poll period, in ms
 	 */
@@ -112,31 +112,31 @@ public class ApiProperties {
 	 *  If true and if the TextualisationService is involved, indicates if must operates spellchecking and nlp categorization (and so TagClouds, based on categorization)
 	 */
 	private boolean operatesNlpProcessing = true;
-	
-	
+
+
 	/**
 	 *  If true and if the operatesNlpProcessing is true, indicates wether or not to detect the language of texts (heavy cpu usage). If false, will "trust" the datasource provided language, and will compute only if not provided
 	 */
 	private boolean operatesLanguageDetection = false;
-		
-	
-	
-	
-	
-	
+
+
+
+
+
+
 	/**
 	 * The local crawler configuration
 	 */
 	@NotNull
 	private FetcherProperties fetcherProperties;
 
-		
+
 	/////////////////////////
 	// Realtime aggregators configuration
 	/////////////////////////
 	private GlobalAttributeAggregationConfig attributeAggregationConfig = new GlobalAttributeAggregationConfig();
-	
-	
+
+
 
 
 	/**
@@ -148,38 +148,34 @@ public class ApiProperties {
 	 */
 	public String getIncludeExcludeSegmentQuery(final String provider, final List<String> inclusions,
 			final List<String> exclusions) {
-		String ret = "";
+		StringBuilder ret = new StringBuilder();
 
 
 		if (StringUtils.isEmpty(provider)) {
-			ret += "datasourceName:*";
+			ret.append("datasourceName:*");
 		} else {
-			ret += "datasourceName:\"" + provider + "\"";
+			ret.append("datasourceName:\"").append(provider).append("\"");
 		}
 
 
-			if (null != inclusions &&  inclusions.size() > 0) {
+		if (null != inclusions &&  inclusions.size() > 0) {
 
-				ret += " AND (" +
-				StringUtils.join(inclusions.stream()
-						.filter(e -> !StringUtils.isEmpty(e))
-						.map(e -> "productTags:\"*" + e.trim().toUpperCase() + "*\"")
-						.collect(Collectors.toSet()), " OR ")
-		+ ")" ;
-			}
+			ret.append(" AND (").append(StringUtils.join(inclusions.stream()
+					.filter(e -> !StringUtils.isEmpty(e))
+					.map(e -> "productTags:\"*" + e.trim().toUpperCase() + "*\"")
+					.collect(Collectors.toSet()), " OR ")).append(")") ;
+		}
 
 		if (null != exclusions && exclusions.size() > 0) {
-		ret += " AND (" +
-				StringUtils.join(exclusions.stream()
-						.filter(e -> !StringUtils.isEmpty(e))
-						.map(e -> "NOT productTags:\"*" + e.trim().toUpperCase() + "*\"")
-						.collect(Collectors.toSet()), " AND ")
-		+ ")";
+			ret.append(" AND (").append(StringUtils.join(exclusions.stream()
+					.filter(e -> !StringUtils.isEmpty(e))
+					.map(e -> "NOT productTags:\"*" + e.trim().toUpperCase() + "*\"")
+					.collect(Collectors.toSet()), " AND ")).append(")");
 		}
-		return ret;
+		return ret.toString();
 	}
 
-	
+
 
 	public String workFolder() {
 		return rootFolder+"/.work/";
@@ -196,7 +192,7 @@ public class ApiProperties {
 	public String remoteCachingFolder() {
 		return rootFolder+"/.cached/";
 	}
-	
+
 
 	public Integer getAggregatedDataElasticBuffer() {
 		return aggregatedDataElasticBuffer;
@@ -248,7 +244,7 @@ public class ApiProperties {
 		this.crawlerKeys = crawlerKeys;
 	}
 
-	
+
 
 	public Integer getDataFragmentsDequeueSize() {
 		return dataFragmentsDequeueSize;
@@ -344,7 +340,7 @@ public class ApiProperties {
 
 
 	public void setDataFragmentsDequeueWorkers(Integer dataFragmentsDequeueWorker) {
-		this.dataFragmentsDequeueWorkers = dataFragmentsDequeueWorker;
+		dataFragmentsDequeueWorkers = dataFragmentsDequeueWorker;
 	}
 
 

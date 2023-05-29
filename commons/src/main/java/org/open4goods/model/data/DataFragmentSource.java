@@ -16,14 +16,14 @@ public class DataFragmentSource {
 	private String url;
 
 	public DataFragmentSource(DataFragment source) {
-		this.provider = source.getDatasourceName();
-		this.configName = source.getDatasourceConfigName();
-		this.indexationDate = source.getLastIndexationDate();
-		this.url = source.affiliatedUrlIfPossible();
+		provider = source.getDatasourceName();
+		configName = source.getDatasourceConfigName();
+		indexationDate = source.getLastIndexationDate();
+		url = source.affiliatedUrlIfPossible();
 	}
 
-	
-	
+
+
 	public DataFragmentSource() {
 		super();
 	}

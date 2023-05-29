@@ -15,48 +15,48 @@ import org.open4goods.model.product.Product;
  *
  */
 public class VerticalSearchResponse {
-	
+
 
 	private VerticalConfig verticalConfig;
-	
+
 	private VerticalSearchRequest request;
-	
+
 	private List<Product> data;
 
-	
+
 	private Integer maxOffers;
 
 	private Integer minOffers;
-	
+
 	private Double minPrice = null;
-	
+
 	private Double maxPrice = null;
-	
+
 	private Long totalResults;
-	
+
 	private Integer from;
-	
+
 	private Integer to;
 
-	
+
 	private List<VerticalFilterTerm> conditions = new ArrayList<>();
 	private List<VerticalFilterTerm> brands = new ArrayList<>();
 	private List<VerticalFilterTerm> countries = new ArrayList<>();
-	
-	
+
+
 	/** The custom aggregations, pageNumber filters **/
 	private Map<AttributeConfig, List<VerticalFilterTerm>> customFilters = new HashMap<>();
-	
-	
-	
-	
-	
+
+
+
+
+
 	public List<Product> getData() {
 		return data;
 	}
 
 	public void setData(List<Product> results) {
-		this.data = results;
+		data = results;
 	}
 
 
@@ -81,7 +81,7 @@ public class VerticalSearchResponse {
 
 
 	public void setMinPrice(Double min) {
-		this.minPrice = min;
+		minPrice = min;
 	}
 
 
@@ -95,7 +95,7 @@ public class VerticalSearchResponse {
 
 
 	public void setMaxPrice(Double max) {
-		this.maxPrice = max;
+		maxPrice = max;
 	}
 
 	public Long getTotalResults() {
@@ -122,7 +122,7 @@ public class VerticalSearchResponse {
 		this.to = to;
 	}
 
-	
+
 
 
 	public Integer getMaxOffers() {
@@ -181,6 +181,6 @@ public class VerticalSearchResponse {
 		this.customFilters = customFilters;
 	}
 
-	
-	
+
+
 }

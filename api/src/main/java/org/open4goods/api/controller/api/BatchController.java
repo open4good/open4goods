@@ -28,21 +28,21 @@ public class BatchController {
 	private BatchService batchService;
 
 	@Autowired ProductRepository aggDataRepository;
-	
+
 	private static final Logger logger = LoggerFactory.getLogger(BatchController.class);
-	
+
 
 	@GetMapping("/batch/verticals/associateFromCategory")
 	public void backupDatas() throws InvalidParameterException, IOException {
 		batchService.definesVertical();
 	}
-	
-	
+
+
 	@GetMapping("/batch/verticals/score")
 	public void scoreVerticals() throws InvalidParameterException, IOException {
 		batchService.scoreVertical();
-		
-		
+
+
 	}
 
 }

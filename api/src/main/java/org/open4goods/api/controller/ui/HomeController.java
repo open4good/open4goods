@@ -17,15 +17,15 @@ import io.swagger.v3.oas.annotations.Hidden;
 public class HomeController {
 
 	private static final Logger logger = LoggerFactory.getLogger(HomeController.class);
-	
-//	@Autowired DataFragmentRepository repository;
-	
-	
-//
-//
-//	@Autowired SerialisationService serialisationService;
-//	private @Autowired CapsuleGenerationService siteService;
-//	private @Autowired ApiProperties apiProperties;
+
+	//	@Autowired DataFragmentRepository repository;
+
+
+	//
+	//
+	//	@Autowired SerialisationService serialisationService;
+	//	private @Autowired CapsuleGenerationService siteService;
+	//	private @Autowired ApiProperties apiProperties;
 
 
 
@@ -33,9 +33,9 @@ public class HomeController {
 
 
 	@GetMapping(path = "/")
-//	@ResponseBody
+	//	@ResponseBody
 	public RedirectView  home() {
-		
+
 		return new RedirectView("swagger-ui.html");
 
 	}

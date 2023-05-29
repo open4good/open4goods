@@ -31,7 +31,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.elasticsearch.annotations.DateFormat;
-import org.springframework.data.elasticsearch.annotations.Document;
 import org.springframework.data.elasticsearch.annotations.Field;
 import org.springframework.data.elasticsearch.annotations.FieldType;
 
@@ -50,7 +49,7 @@ import jakarta.validation.constraints.NotNull;
 
 
 public class DataFragment implements Standardisable, Validable {
-	
+
 	public static final String DATAFRAGMENTS_INDEX = "datafragments";
 
 	private static final Logger logger = LoggerFactory.getLogger(DataFragment.class);
@@ -76,7 +75,7 @@ public class DataFragment implements Standardisable, Validable {
 	@Field(index = false, store = false, type = FieldType.Date, format = DateFormat.epoch_millis)
 	private Long creationDate;
 
-	
+
 	@NotNull
 	/**
 	 * The merchant (website, or any) providing the offer
@@ -90,7 +89,7 @@ public class DataFragment implements Standardisable, Validable {
 	@Field(index = false, store = false, type = FieldType.Keyword)
 	private String datasourceConfigName;
 
-	
+
 	/**
 	 * The type of support of this datafragment
 	 */
@@ -152,13 +151,13 @@ public class DataFragment implements Standardisable, Validable {
 	/**
 	 * The pros
 	 */
-	@Field(index = false, store = false, type = FieldType.Object)	
+	@Field(index = false, store = false, type = FieldType.Object)
 	private Set<ProsOrCons> pros = new HashSet<>();
 
 	/**
 	 * And the cons
 	 */
-	@Field(index = false, store = false, type = FieldType.Object)	
+	@Field(index = false, store = false, type = FieldType.Object)
 	private Set<ProsOrCons> cons = new HashSet<>();
 
 
@@ -201,7 +200,7 @@ public class DataFragment implements Standardisable, Validable {
 	 */
 	@Field(index = false, store = false, type = FieldType.Object)
 	private Set<Resource> resources = new HashSet<>();
-	
+
 	@Field(index = false, store = false, type = FieldType.Integer)
 	private Integer quantityInStock;
 
@@ -227,7 +226,7 @@ public class DataFragment implements Standardisable, Validable {
 	 */
 	@Field(index = false, store = false, type = FieldType.Keyword)
 	private List<Price> priceHistory = new ArrayList<>();
-	
+
 	@Override
 	public boolean equals(final Object obj) {
 		if (obj instanceof DataFragment) {
@@ -298,10 +297,10 @@ public class DataFragment implements Standardisable, Validable {
 
 		}
 
-//		if (null == providerType) {
-//			ret.add(ValidationMessage.newValidationMessage(url, "NO_DATATYPE"));
-//
-//		}
+		//		if (null == providerType) {
+		//			ret.add(ValidationMessage.newValidationMessage(url, "NO_DATATYPE"));
+		//
+		//		}
 
 		if (StringUtils.isEmpty(category)) {
 			ret.add(ValidationMessage.newValidationMessage(url, "NO_PRODUCTCATEGORY"));
@@ -546,16 +545,16 @@ public class DataFragment implements Standardisable, Validable {
 		return ret == null ? "" : ret;
 	}
 
-	
+
 	/**
-	 * 
+	 *
 	 * TODO  (P1, quality, 1) : Versionning does not work on attributes (maybe comments, and other "complex"). Failing on openfoodfacts, on the added/removedAttributes
-	 * 
+	 *
 	 * Add a versionned state. The version is the "previous" state
 	 * @param newItem
 	 */
 	public void addVersion(@Valid @NotNull final DataFragment newItem) {
-		
+
 		////////////////////
 		// Unversionned data
 		////////////////////
@@ -572,10 +571,10 @@ public class DataFragment implements Standardisable, Validable {
 		warranty = newItem.getWarranty();
 		shippingCost = newItem.shippingCost;
 		shippingTime = newItem.getShippingTime();
-		
+
 		alternateIds.addAll(newItem.getAlternateIds());
-		
-		
+
+
 		// TODO(design, P2, 0.5) : Make update, with hashcode, equals...
 		ratings = newItem.getRatings();
 		descriptions = newItem.getDescriptions();
@@ -585,20 +584,20 @@ public class DataFragment implements Standardisable, Validable {
 		cons = newItem.getCons();
 		attributes = newItem.getAttributes();
 		referentielAttributes = newItem.getReferentielAttributes();
-		resources = newItem.getResources();		
+		resources = newItem.getResources();
 		lastIndexationDate = newItem.getLastIndexationDate();
 
 		// Adding price history (only for ProductState.NEW items)
 		if (productState.equals(ProductState.NEW) &&  !Objects.equal(getPrice(), newItem.getPrice())) {
-			priceHistory.add(getPrice());			
+			priceHistory.add(getPrice());
 			setPrice(newItem.getPrice());
 		}
-		
+
 		productState = newItem.getProductState();
 
 	}
-	
-	
+
+
 	/**
 	 * Return the longest name for this offer
 	 *
@@ -630,17 +629,17 @@ public class DataFragment implements Standardisable, Validable {
 		comments.add(comment);
 	}
 
-//	public void addAttribute(final ReferentielKey refKey, final String value, final String language) {
-//		return addAttribute(refKey.toString(), value, language, null);
-//	}
+	//	public void addAttribute(final ReferentielKey refKey, final String value, final String language) {
+	//		return addAttribute(refKey.toString(), value, language, null);
+	//	}
 
 	/**
 	 * Add referentiel attributes, with cleaning and alternae id's handling
 	 * @param key
 	 * @param value
 	 */
-	
-	
+
+
 	public void addReferentielAttribute(final String key, final String value) {
 		if (StringUtils.isBlank(value)) {
 			logger.info("Cannot add empty referentiel attribute for {} at {}",key,this);
@@ -649,12 +648,12 @@ public class DataFragment implements Standardisable, Validable {
 
 		final String val = StringUtils.normalizeSpace(value).toUpperCase();
 
-//		//TODO(conf, P3,0.25) : Number of spaces from configuration
-//		// If too many spaces, exit
-//		if (StringUtils.countMatches(val," ") > 2) {
-//			logger.warn("Cannot add referentiel attribute, having too many spaces for {}:{} at {}",key,val, this);
-//			return;
-//		}
+		//		//TODO(conf, P3,0.25) : Number of spaces from configuration
+		//		// If too many spaces, exit
+		//		if (StringUtils.countMatches(val," ") > 2) {
+		//			logger.warn("Cannot add referentiel attribute, having too many spaces for {}:{} at {}",key,val, this);
+		//			return;
+		//		}
 
 
 		switch (key) {
@@ -662,15 +661,15 @@ public class DataFragment implements Standardisable, Validable {
 			getReferentielAttributes().put(ReferentielKey.BRAND.toString(),val );
 			break;
 		case "MODEL":
-//			try {
-				final String cleaned = IdHelper.getHashedName(val);
-				getReferentielAttributes().put(ReferentielKey.MODEL.toString(),cleaned);
-				if (!cleaned.equals(val)) {
-					alternateIds.add(val);
-				}
-//			} catch (final InvalidParameterException e) {
-//				logger.warn("{} : cannot add brand for {}",e.getMessage(), this);
-//			}
+			//			try {
+			final String cleaned = IdHelper.getHashedName(val);
+			getReferentielAttributes().put(ReferentielKey.MODEL.toString(),cleaned);
+			if (!cleaned.equals(val)) {
+				alternateIds.add(val);
+			}
+			//			} catch (final InvalidParameterException e) {
+			//				logger.warn("{} : cannot add brand for {}",e.getMessage(), this);
+			//			}
 			break;
 		case "GTIN":
 			if (!NumberUtils.isDigits(val)) {
@@ -696,14 +695,14 @@ public class DataFragment implements Standardisable, Validable {
 	 * @return
 	 */
 	public void addAttribute(final String name, final String value, final String language,
-			 final Boolean ignoreCariageReturns,final Set<String> multivalueSeparators ) {
+			final Boolean ignoreCariageReturns,final Set<String> multivalueSeparators ) {
 		if (null == value || "".equals(value.toString())) {
 			logger.info("Cannot add null or empty values for attribute " + name);
 			return ;
 		}
 
 		final Attribute attr = new Attribute();
-		
+
 		// Attributye name normalisation
 		String sanitizedName =name;
 		sanitizedName= StringUtils.normalizeSpace(sanitizedName).toUpperCase();
@@ -711,7 +710,7 @@ public class DataFragment implements Standardisable, Validable {
 		if (sanitizedName.endsWith(":")) {
 			sanitizedName = sanitizedName.substring(0, sanitizedName.length() -1).trim();
 		}
-		
+
 		attr.setName(sanitizedName);
 
 		if (ignoreCariageReturns.booleanValue()) {
@@ -724,7 +723,7 @@ public class DataFragment implements Standardisable, Validable {
 
 
 
-		 addAttribute(attr, multivalueSeparators);
+		addAttribute(attr, multivalueSeparators);
 	}
 
 	/**
@@ -733,10 +732,10 @@ public class DataFragment implements Standardisable, Validable {
 	 * @param attr
 	 * @return
 	 */
-//	public void addAttribute(final Attribute attr) {
-//
-//		return addAttribute(attr, null);
-//	}
+	//	public void addAttribute(final Attribute attr) {
+	//
+	//		return addAttribute(attr, null);
+	//	}
 
 	/**
 	 * Add attribute and specify separator fields to be used to parse values. If
@@ -750,7 +749,7 @@ public class DataFragment implements Standardisable, Validable {
 
 		attr.setName(attr.getName().trim().toUpperCase());
 
-	
+
 		try {
 			attr.validate();
 		} catch (final ValidationException e) {
@@ -772,7 +771,7 @@ public class DataFragment implements Standardisable, Validable {
 		}
 
 		// Forcing String normalisation
-        attr.normalize();
+		attr.normalize();
 
 	}
 
@@ -792,7 +791,7 @@ public class DataFragment implements Standardisable, Validable {
 
 	public void addUserRating(final Rating rr) throws ValidationException {
 		if (null == rr) {
-			throw new ValidationException("Trying to add a null rating : " + this.toString());
+			throw new ValidationException("Trying to add a null rating : " + toString());
 		}
 		rr.addTag(RatingType.SITES);
 		addRating(rr);
@@ -800,7 +799,7 @@ public class DataFragment implements Standardisable, Validable {
 
 	public void addRseRating(final Rating rr) throws ValidationException {
 		if (null == rr) {
-			throw new ValidationException("Trying to add a null rating : " + this.toString());
+			throw new ValidationException("Trying to add a null rating : " + toString());
 		}
 		rr.addTag(RatingType.RSE);
 		addRating(rr);
@@ -817,8 +816,8 @@ public class DataFragment implements Standardisable, Validable {
 		}
 
 		this.category = IdHelper.getCategoryName(category.trim().toUpperCase());
-		
-				
+
+
 	}
 
 	public void addDescription(final String description, final String language) {
@@ -1032,7 +1031,7 @@ public class DataFragment implements Standardisable, Validable {
 		}
 
 		price =  StringUtils.normalizeSpace(price.toUpperCase());
-	
+
 		// Get the default locale parser
 
 
@@ -1087,7 +1086,7 @@ public class DataFragment implements Standardisable, Validable {
 		return rating(tag.toString());
 	}
 
-	
+
 	public List<Rating> ratings(final String tag) {
 		final List<Rating> ret = ratings.stream().filter(e -> e.getTags().contains(tag))
 				.collect(Collectors.toList());
@@ -1097,15 +1096,15 @@ public class DataFragment implements Standardisable, Validable {
 
 	}
 
-//	public Set<Rating> expertSecondaryRating() {
-//		return ratings.stream().filter(e -> e.getType().equals(RatingType.TECHNICAL))
-//				.collect(Collectors.toSet());
-//	}
-//
-//	public Set<Rating>rseSecondaryRating() {
-//		return ratings.stream().filter(e -> e.getType().equals(RatingType.RSE))
-//				.collect(Collectors.toSet());
-//	}
+	//	public Set<Rating> expertSecondaryRating() {
+	//		return ratings.stream().filter(e -> e.getType().equals(RatingType.TECHNICAL))
+	//				.collect(Collectors.toSet());
+	//	}
+	//
+	//	public Set<Rating>rseSecondaryRating() {
+	//		return ratings.stream().filter(e -> e.getType().equals(RatingType.RSE))
+	//				.collect(Collectors.toSet());
+	//	}
 
 	/**
 	 * Remove an attribute
@@ -1136,7 +1135,7 @@ public class DataFragment implements Standardisable, Validable {
 	}
 
 
-	
+
 	/**
 	 *
 	 * @return a "no dot" version for the stores
@@ -1165,7 +1164,7 @@ public class DataFragment implements Standardisable, Validable {
 		return referentielAttributes.get(ReferentielKey.BRAND.toString());
 	}
 
-	
+
 	public boolean containsAttribute(String attributeName) {
 		return getAttribute(attributeName) != null;
 	}
@@ -1175,7 +1174,7 @@ public class DataFragment implements Standardisable, Validable {
 	 * @return The hash for affiliation url if found, of classical one otherwhile
 	 */
 	public String hashedUrl() {
-			return IdHelper.encrypt(affiliatedUrlIfPossible());
+		return IdHelper.encrypt(affiliatedUrlIfPossible());
 	}
 
 	public String hashedStore() {
@@ -1257,7 +1256,7 @@ public class DataFragment implements Standardisable, Validable {
 		this.descriptions = descriptions;
 	}
 
-	
+
 
 
 	public Map<String, String> getReferentielAttributes() {
@@ -1276,7 +1275,7 @@ public class DataFragment implements Standardisable, Validable {
 		this.price = price;
 	}
 
-	
+
 
 
 
@@ -1301,7 +1300,7 @@ public class DataFragment implements Standardisable, Validable {
 	}
 
 	public void setCategory(final String productTags) {
-		this.category = productTags;
+		category = productTags;
 	}
 
 
@@ -1353,13 +1352,13 @@ public class DataFragment implements Standardisable, Validable {
 		this.inStock = inStock;
 	}
 
-//	public ProviderType getProviderType() {
-//		return providerType;
-//	}
-//
-//	public void setProviderType(final ProviderType providerType) {
-//		this.providerType = providerType;
-//	}
+	//	public ProviderType getProviderType() {
+	//		return providerType;
+	//	}
+	//
+	//	public void setProviderType(final ProviderType providerType) {
+	//		this.providerType = providerType;
+	//	}
 
 
 	public String getAffiliatedUrl() {
@@ -1412,7 +1411,7 @@ public class DataFragment implements Standardisable, Validable {
 		this.productState = productState;
 	}
 
-	
+
 	public ProviderSupportType getProviderSupportType() {
 		return providerSupportType;
 	}

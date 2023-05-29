@@ -28,7 +28,7 @@ public class Comment  implements Validable, Standardisable {
 	@Field(index = false, store = false, type = FieldType.Date, format = DateFormat.epoch_millis)
 	private Long date;
 
-	@Field(index = false, store = false, type = FieldType.Keyword)	
+	@Field(index = false, store = false, type = FieldType.Keyword)
 	private String author;
 
 	@Field(index = false, store = false, type = FieldType.Object)

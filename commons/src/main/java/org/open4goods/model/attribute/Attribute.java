@@ -40,20 +40,20 @@ public class Attribute implements Validable,IAttribute {
 	/**
 	 * The attribute name
 	 */
-	@Field(index = true, store = false, type = FieldType.Text)	
+	@Field(index = true, store = false, type = FieldType.Text)
 	private String name;
 
 	/**
 	 * The attribute language, if pertinent
 	 */
-	@Field(index = true, store = false, type = FieldType.Keyword)	
+	@Field(index = true, store = false, type = FieldType.Keyword)
 	private String language;
 
 	/**
 	 * The attribute raw rawValue
 	 */
 	@Field(index = false, store = false, type = FieldType.Keyword)
-//	TODO : Pass to String
+	//	TODO : Pass to String
 	private Object rawValue;
 
 	public Attribute() {
@@ -66,9 +66,9 @@ public class Attribute implements Validable,IAttribute {
 	}
 
 	@Override
-//	/**
-//	 * NOTE : A choice is made to identify Attributes ONLY by their names.
-//	 */
+	//	/**
+	//	 * NOTE : A choice is made to identify Attributes ONLY by their names.
+	//	 */
 	public boolean equals(final Object obj) {
 
 		if (obj instanceof Attribute) {
@@ -283,14 +283,14 @@ public class Attribute implements Validable,IAttribute {
 
 	public Double numericOrNull() {
 		// Trying to specialize as numeric
-				final String num = rawValue.toString().replace(",", ".");
+		final String num = rawValue.toString().replace(",", ".");
 
-				try {
-					return  Double.valueOf(num);
+		try {
+			return  Double.valueOf(num);
 
-				} catch (final NumberFormatException e) {
-					return null;
-				}
+		} catch (final NumberFormatException e) {
+			return null;
+		}
 	}
 
 	/**
@@ -318,7 +318,7 @@ public class Attribute implements Validable,IAttribute {
 
 				for (final String splitter : multivalueSeparator) {
 
-					final List<String> tmpRet = Arrays.asList(splitsCache.get(splitter).split(rawValue.toString())).stream().map(e -> e.trim()).collect(Collectors.toList());
+					final List<String> tmpRet = Arrays.asList(splitsCache.get(splitter).split(rawValue.toString())).stream().map(String::trim).collect(Collectors.toList());
 					if (tmpRet.size() > 1) {
 						vals.addAll(tmpRet);
 					}
@@ -444,10 +444,12 @@ public class Attribute implements Validable,IAttribute {
 	// Getters and setters
 	////////////////////////////////////////////////
 
+	@Override
 	public String getName() {
 		return name;
 	}
 
+	@Override
 	public void setName(final String name) {
 		this.name = name;
 	}
@@ -460,6 +462,7 @@ public class Attribute implements Validable,IAttribute {
 		this.rawValue = rawValue;
 	}
 
+	@Override
 	public String getLanguage() {
 		return language;
 	}
@@ -473,7 +476,7 @@ public class Attribute implements Validable,IAttribute {
 		return rawValue.toString();
 	}
 
-	
+
 
 
 

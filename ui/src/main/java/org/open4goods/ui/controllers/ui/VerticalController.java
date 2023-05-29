@@ -34,14 +34,14 @@ public class VerticalController extends AbstractUiController {
 
 	// The siteConfig
 	private @Autowired UiConfig config;
-	
+
 	private @Autowired VerticalsConfigService verticalService;
-	
+
 	private @Autowired SearchService searchService;
 
-	
+
 	private @Autowired SerialisationService serialisationService;
-	
+
 	//////////////////////////////////////////////////////////////
 	// Mappings
 	//////////////////////////////////////////////////////////////
@@ -50,35 +50,35 @@ public class VerticalController extends AbstractUiController {
 
 	public ModelAndView home(String vertical, final HttpServletRequest request) {
 		ModelAndView ret = defaultModelAndView(("vertical-home"), request);
-		
+
 
 		VerticalConfig config = verticalService.getLanguageForVerticalPath(vertical);
-				
+
 		// TODO : strategy of injection of products for nativ SEO
-		
-		VerticalSearchRequest vRequest = new VerticalSearchRequest();		
-		
+
+		VerticalSearchRequest vRequest = new VerticalSearchRequest();
+
 		VerticalSearchResponse products = searchService.verticalSearch(config,vRequest);
-		
-		Map<String,String> countryNames = new HashMap<>();		
+
+		Map<String,String> countryNames = new HashMap<>();
 		for (VerticalFilterTerm country : products.getCountries()) {
 			countryNames.put(country.getText(), new ULocale("",country.getText()).getDisplayCountry( new ULocale(request.getLocale().toString())));
 		}
 
-		
-		
+
+
 		ret.addObject("countryNames", countryNames);
 		ret.addObject("products", products);
-		
+
 		ret.addObject("config",config);
-		
+
 		ret.addObject("filters",config.verticalFilters());
-		
+
 		// TODO: i18n
 		ret.addObject("verticalPath",verticalService.getPathForVerticalLanguage("fr"));
-		
-		
-		
+
+
+
 		return ret;
 	}
 

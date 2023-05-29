@@ -46,8 +46,8 @@ public class FetcherOrchestrationService {
 
 	// The status of the registered crawlers, which auto expires the crawlers if not seen
 	private Cache<String, FetcherGlobalStats> crawlerStatuses = CacheBuilder.newBuilder()
-		    .expireAfterWrite(TimeConstants.API_EXPIRED_UNSEEN_CRAWLERS_IN_SECONDS, TimeUnit.SECONDS)
-		    .build( );
+			.expireAfterWrite(TimeConstants.API_EXPIRED_UNSEEN_CRAWLERS_IN_SECONDS, TimeUnit.SECONDS)
+			.build( );
 
 	public FetcherOrchestrationService(final ThreadPoolTaskScheduler threadPoolTaskScheduler,
 			final DataSourceConfigService datasourceConfigService) {
@@ -165,9 +165,9 @@ public class FetcherOrchestrationService {
 
 		try {
 			final RequestEntity<DataSourceProperties> requestEntity = RequestEntity
-								.post(new URL(node.getNodeConfig().getNodeUrl() + UrlConstants.CRAWLER_API_STOP_FETCHING).toURI())
-								.contentType(MediaType.APPLICATION_JSON)
-								.body(p);
+					.post(new URL(node.getNodeConfig().getNodeUrl() + UrlConstants.CRAWLER_API_STOP_FETCHING).toURI())
+					.contentType(MediaType.APPLICATION_JSON)
+					.body(p);
 
 			final ResponseEntity<FetchRequestResponse> ret = restTemplate.exchange(requestEntity, FetchRequestResponse.class);
 
@@ -197,12 +197,12 @@ public class FetcherOrchestrationService {
 
 		try {
 			final RequestEntity<DataSourceProperties> requestEntity = RequestEntity
-								.post(new URL(node.getNodeConfig().getNodeUrl() + UrlConstants.CRAWLER_API_REQUEST_FETCHING+"?datasourceConfName="+datasourceConfName).toURI())
+					.post(new URL(node.getNodeConfig().getNodeUrl() + UrlConstants.CRAWLER_API_REQUEST_FETCHING+"?datasourceConfName="+datasourceConfName).toURI())
 
-								.contentType(MediaType.APPLICATION_JSON)
-								.body(p)
+					.contentType(MediaType.APPLICATION_JSON)
+					.body(p)
 
-								;
+					;
 
 			final ResponseEntity<FetchRequestResponse> ret = restTemplate.exchange(requestEntity, FetchRequestResponse.class);
 
@@ -263,9 +263,9 @@ public class FetcherOrchestrationService {
 
 		try {
 			final RequestEntity<DataSourceProperties> requestEntity = RequestEntity
-								.post(new URL(electedNode.getNodeConfig().getNodeUrl() + UrlConstants.CRAWLER_API_DIRECT_URL_REQUEST_FETCHING  +"?"+UrlConstants.URL_PARAMETER + "=" + URLEncoder.encode( url)).toURI())
-								.contentType(MediaType.APPLICATION_JSON)
-								.body(p);
+					.post(new URL(electedNode.getNodeConfig().getNodeUrl() + UrlConstants.CRAWLER_API_DIRECT_URL_REQUEST_FETCHING  +"?"+UrlConstants.URL_PARAMETER + "=" + URLEncoder.encode( url)).toURI())
+					.contentType(MediaType.APPLICATION_JSON)
+					.body(p);
 
 			final ResponseEntity<DataFragment> ret = restTemplate.exchange(requestEntity, DataFragment.class);
 			return ret.getBody();
@@ -277,38 +277,38 @@ public class FetcherOrchestrationService {
 	}
 
 
-//	/**
-//	 * Trigger a synchronous csv line fetching
-//	 * @param p
-//	 * @return
-//	 */
-//	public DataFragment triggerCsvSynchFetching(final DataSourceProperties p, final String csvLine, final String csvHeaders) {
-//
-//		//////////////
-//		//  Elect the less busy crawler
-//		//////////////
-//		final FetcherGlobalStats electedNode = getLessBusyNode();
-//
-//		////////////////////
-//		// Trigger remote crawl
-//		////////////////
-//
-//		final RestTemplate restTemplate = new RestTemplate();
-//
-//		try {
-//			final RequestEntity<DataSourceProperties> requestEntity = RequestEntity
-//								.post(new URL(electedNode.getNodeConfig().getNodeUrl() + UrlConstants.CRAWLER_API_DIRECT_CSV_REQUEST_FETCHING  +"?"+UrlConstants.CSV_LINE_PARAMETER + "=" + URLEncoder.encode( csvLine)  +"&"+ UrlConstants.CSV_HEADERS_PARAMETER+"="+URLEncoder.encode( csvHeaders)).toURI())
-//								.contentType(MediaType.APPLICATION_JSON)
-//								.body(p);
-//
-//			final ResponseEntity<DataFragment> ret = restTemplate.exchange(requestEntity, DataFragment.class);
-//			return ret.getBody();
-//		} catch (final Exception e) {
-//			logger.error("Unexpected error while in synchronous csv fetch request to : {}. Reason is : {} ", electedNode.getNodeConfig().getNodeUrl(), e.getMessage());
-//
-//		}
-//		return null;
-//	}
+	//	/**
+	//	 * Trigger a synchronous csv line fetching
+	//	 * @param p
+	//	 * @return
+	//	 */
+	//	public DataFragment triggerCsvSynchFetching(final DataSourceProperties p, final String csvLine, final String csvHeaders) {
+	//
+	//		//////////////
+	//		//  Elect the less busy crawler
+	//		//////////////
+	//		final FetcherGlobalStats electedNode = getLessBusyNode();
+	//
+	//		////////////////////
+	//		// Trigger remote crawl
+	//		////////////////
+	//
+	//		final RestTemplate restTemplate = new RestTemplate();
+	//
+	//		try {
+	//			final RequestEntity<DataSourceProperties> requestEntity = RequestEntity
+	//								.post(new URL(electedNode.getNodeConfig().getNodeUrl() + UrlConstants.CRAWLER_API_DIRECT_CSV_REQUEST_FETCHING  +"?"+UrlConstants.CSV_LINE_PARAMETER + "=" + URLEncoder.encode( csvLine)  +"&"+ UrlConstants.CSV_HEADERS_PARAMETER+"="+URLEncoder.encode( csvHeaders)).toURI())
+	//								.contentType(MediaType.APPLICATION_JSON)
+	//								.body(p);
+	//
+	//			final ResponseEntity<DataFragment> ret = restTemplate.exchange(requestEntity, DataFragment.class);
+	//			return ret.getBody();
+	//		} catch (final Exception e) {
+	//			logger.error("Unexpected error while in synchronous csv fetch request to : {}. Reason is : {} ", electedNode.getNodeConfig().getNodeUrl(), e.getMessage());
+	//
+	//		}
+	//		return null;
+	//	}
 
 
 	/**

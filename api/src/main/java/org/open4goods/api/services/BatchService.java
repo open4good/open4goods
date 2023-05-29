@@ -30,25 +30,25 @@ public class BatchService {
 
 
 	private ProductRepository dataRepository;
-	
+
 	private VerticalsConfigService verticalsService;
-	
+
 	private BatchAggregationService batchAggregationService;
-	
-	
+
+
 
 	private final ApiProperties apiProperties;
 
 	private Logger dedicatedLogger;
 
 	public BatchService(
-								ProductRepository dataRepository,
-								ApiProperties apiProperties,
-								VerticalsConfigService verticalsService,
-								BatchAggregationService batchAggregationService) {
+			ProductRepository dataRepository,
+			ApiProperties apiProperties,
+			VerticalsConfigService verticalsService,
+			BatchAggregationService batchAggregationService) {
 		super();
-		
-		dedicatedLogger = GenericFileLogger.initLogger("stats-batch", Level.INFO, apiProperties.logsFolder(), false);		
+
+		dedicatedLogger = GenericFileLogger.initLogger("stats-batch", Level.INFO, apiProperties.logsFolder(), false);
 		this.apiProperties = apiProperties;
 		this.dataRepository =dataRepository;
 		this.verticalsService=verticalsService;
@@ -56,28 +56,28 @@ public class BatchService {
 	}
 
 
-	
-	
-	
+
+
+
 	/**
 	 * Update verticals with the batch Aggragator
 	 */
 	//TODO : cron schedule, at night
 	@Scheduled( initialDelay = 1000 * 3600*24, fixedDelay = 1000 * 3600*24)
 	public void scoreVertical() {
-		
 
-		
+
+
 		for (VerticalConfig vertical : verticalsService.getConfigsWithoutDefault()) {
 			BatchedAggregator agg = batchAggregationService.getAggregator(vertical);
-			
-			// Warning, full vertical load		
+
+			// Warning, full vertical load
 			Set<Product> datas = dataRepository.exportVerticalWithValidDate(vertical.getId()).collect(Collectors.toSet());
-			
+
 			agg.beforeStart(datas);
 
 			for (Product data : datas) {
-				
+
 				try {
 					Product updated = agg.update(data,datas);
 
@@ -87,54 +87,54 @@ public class BatchService {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 					continue;
-				}				
+				}
 			}
-			
+
 			agg.close(datas);
-			
+
 		}
 	}
-	
-	
-	
+
+
+
 	/**
 	 * The batch used to associate verticals on AggregatedDatas based on categories
 	 */
 	public void definesVertical() {
-		
-		
+
+
 		dedicatedLogger.info("Starting batch verticalisation");
 		dataRepository.exportAll().forEach(e -> {
-		
+
 			// Getting the config for the category, if any
 
-				VerticalConfig vConf = verticalsService.getVerticalForCategories(e.getDatasourceCategories());
-				
-				if (null != vConf) {
-					// We have a match. Associate vertical ID annd save
-					e.setVertical(vConf.getId());
-					
-					// Index
-					//TODO : Bulk index for performance
-					dedicatedLogger.warn("Vertical {} for vertical {}", vConf.getId() , e.bestName());
-					dataRepository.index(e);
+			VerticalConfig vConf = verticalsService.getVerticalForCategories(e.getDatasourceCategories());
 
-					
-				} else if (null != e.getVertical() ){
-					dedicatedLogger.warn("Nulling Vertical for {} ", e.bestName());
-					e.setVertical(null);
-					//TODO (gof) : bulkindex
-					dataRepository.index(e);
-				}
-				
+			if (null != vConf) {
+				// We have a match. Associate vertical ID annd save
+				e.setVertical(vConf.getId());
+
+				// Index
+				//TODO : Bulk index for performance
+				dedicatedLogger.warn("Vertical {} for vertical {}", vConf.getId() , e.bestName());
+				dataRepository.index(e);
+
+
+			} else if (null != e.getVertical() ){
+				dedicatedLogger.warn("Nulling Vertical for {} ", e.bestName());
+				e.setVertical(null);
+				//TODO (gof) : bulkindex
+				dataRepository.index(e);
+			}
+
 		});
-		dedicatedLogger.info("End batch verticalisation");		
-		
-	}
-	
+		dedicatedLogger.info("End batch verticalisation");
 
-	
-	
-	
+	}
+
+
+
+
+
 
 }

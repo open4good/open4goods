@@ -42,13 +42,13 @@ public class VerticalProperties {
 	 */
 	private String query;
 
-	
+
 	/**
 	 * Limit the gtin extraction to this limit
 	 */
 	private Long gtinLimit;
-	
-	
+
+
 	/**
 	 * The list of strings that will be removed from model names.
 	 */
@@ -90,16 +90,16 @@ public class VerticalProperties {
 		this.attributesReplacement = attributesReplacement;
 	}
 
-	
+
 	public Integer getPriceValidity() {
 		return priceValidity;
 	}
 
 	public void setPriceValidity(Integer csvPriceValidity) {
-		this.priceValidity = csvPriceValidity;
+		priceValidity = csvPriceValidity;
 	}
 
-	
+
 
 	public Double getMinimumEvictionPrice() {
 		return minimumEvictionPrice;
@@ -116,7 +116,7 @@ public class VerticalProperties {
 	}
 
 	public void setQuery(String elasticQuery) {
-		this.query = elasticQuery;
+		query = elasticQuery;
 	}
 
 
@@ -125,7 +125,7 @@ public class VerticalProperties {
 	}
 
 	public void setModelTokensRemovals(final List<String> brandUidRemovals) {
-		this.modelTokensRemovals = brandUidRemovals;
+		modelTokensRemovals = brandUidRemovals;
 	}
 
 	public Long getGtinLimit() {

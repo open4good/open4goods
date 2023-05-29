@@ -24,7 +24,7 @@ import jakarta.annotation.PreDestroy;
 
 /**
  * This service is in charge of building Product in realtime mode
- * 
+ *
  * @author goulven
  *
  */
@@ -52,17 +52,17 @@ public class BatchAggregationService  {
 	private VerticalsConfigService verticalConfigService;
 
 	private BatchedAggregator aggregator;
-	
-	private BarcodeValidationService barcodeValidationService;
-	
 
-	
-	
+	private BarcodeValidationService barcodeValidationService;
+
+
+
+
 	public BatchAggregationService(EvaluationService evaluationService,
 			ReferentielService referentielService, StandardiserService standardiserService,
 			AutowireCapableBeanFactory autowireBeanFactory, ProductRepository aggregatedDataRepository,
 			ApiProperties apiProperties, Gs1PrefixService gs1prefixService,
-			DataSourceConfigService dataSourceConfigService, VerticalsConfigService configService, 
+			DataSourceConfigService dataSourceConfigService, VerticalsConfigService configService,
 			BarcodeValidationService barcodeValidationService) {
 		super();
 		this.evaluationService = evaluationService;
@@ -73,12 +73,12 @@ public class BatchAggregationService  {
 		this.apiProperties = apiProperties;
 		this.gs1prefixService = gs1prefixService;
 		this.dataSourceConfigService = dataSourceConfigService;
-		this.verticalConfigService = configService;
-		
+		verticalConfigService = configService;
+
 		this.barcodeValidationService = barcodeValidationService;
-		
-		
-		this.aggregator = getAggregator(configService.getConfigById(VerticalsConfigService.MAIN_VERTICAL_NAME).get());
+
+
+		aggregator = getAggregator(configService.getConfigById(VerticalsConfigService.MAIN_VERTICAL_NAME).get());
 	}
 
 
@@ -94,13 +94,13 @@ public class BatchAggregationService  {
 
 	/**
 	 * List of services in the aggregator
-	 * 
+	 *
 	 * @param config
 	 * @return
 	 */
 	public BatchedAggregator getAggregator(VerticalConfig config) {
 
-//		final CapsuleGenerationConfig config = generationConfig;
+		//		final CapsuleGenerationConfig config = generationConfig;
 
 		if (null == config) {
 			logger.error("No capsule generation config");
@@ -112,7 +112,7 @@ public class BatchAggregationService  {
 
 		services.add(new AttributeAggregationService(config.getAttributesConfig(), apiProperties.logsFolder()));
 
-				
+
 		final BatchedAggregator ret = new BatchedAggregator(services);
 
 		autowireBeanFactory.autowireBean(ret);
@@ -122,7 +122,7 @@ public class BatchAggregationService  {
 
 
 
-	
+
 
 
 

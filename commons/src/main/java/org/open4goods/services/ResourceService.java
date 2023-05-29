@@ -24,14 +24,14 @@ public class ResourceService {
 
 	public ResourceService(final String resourceFolder) {
 		super();
-		this.remoteCachingFolder = resourceFolder;
-		
+		remoteCachingFolder = resourceFolder;
+
 		// Creating folder structure
 		initCacheFolders();
 	}
 
 
-	
+
 	/**
 	 * Initialize the folders layout
 	 */
@@ -86,9 +86,9 @@ public class ResourceService {
 	public String getRemoteCachingFolder() {
 		return remoteCachingFolder;
 	}
-	
 
 
-	
+
+
 
 }

@@ -5,19 +5,19 @@ import java.util.Set;
 import com.google.common.collect.Sets;
 
 public class CommentsAggregationConfig {
-	
-	
+
+
 	/**
 	 * List of pos categories to include in comments tagclouds
 	 */
 	private Set<String> posCategoriesToInclude = Sets.newHashSet("ADJ");
-	
+
 	/**
 	 * Minimum number of tokens required to generate tag cloud
 	 */
 	private Integer minimumWordsForTagcloud = 20;
-	
-	
+
+
 
 	public Set<String> getPosCategoriesToInclude() {
 		return posCategoriesToInclude;
@@ -34,8 +34,8 @@ public class CommentsAggregationConfig {
 	public void setMinimumWordsForTagcloud(Integer minimumWordsForTagcloud) {
 		this.minimumWordsForTagcloud = minimumWordsForTagcloud;
 	}
-	
-	
-	
+
+
+
 
 }

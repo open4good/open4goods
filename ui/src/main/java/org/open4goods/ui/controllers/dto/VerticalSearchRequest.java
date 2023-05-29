@@ -8,7 +8,6 @@ import java.util.Map;
 import java.util.Set;
 
 import org.open4goods.model.constants.ProductState;
-import org.springframework.data.elasticsearch.core.query.Order;
 
 /**
  * Results of a search inside a specific vertical
@@ -16,11 +15,11 @@ import org.springframework.data.elasticsearch.core.query.Order;
  *
  */
 public class VerticalSearchRequest {
-	
-	
+
+
 	Integer minPrice;
 	Integer maxPrice;
-	
+
 	Integer minOffers;
 	Integer maxOffers;
 
@@ -30,16 +29,16 @@ public class VerticalSearchRequest {
 	Integer pageSize;
 
 	Set<String> countries = new HashSet<>();
-	
+
 	List<NumericRangeFilter> numericFilters = new ArrayList<>();
-	
+
 	Map<String,Set<String>> termsFilter = new HashMap<>();
-	
+
 
 	private String sortField;
 	private String sortOrder;
-	
-	
+
+
 	/**
 	 * Add a term filter
 	 * @param string
@@ -52,7 +51,7 @@ public class VerticalSearchRequest {
 		}
 		termsFilter.get(attribute).add(term);
 	}
-	
+
 	public Integer getMinPrice() {
 		return minPrice;
 	}
@@ -69,7 +68,7 @@ public class VerticalSearchRequest {
 		this.maxPrice = maxPrice;
 	}
 
-	
+
 
 	public Integer getMinOffers() {
 		return minOffers;
@@ -100,7 +99,7 @@ public class VerticalSearchRequest {
 	}
 
 	public void setPageNumber(Integer from) {
-		this.pageNumber = from;
+		pageNumber = from;
 	}
 
 	public Integer getPageSize() {
@@ -108,7 +107,7 @@ public class VerticalSearchRequest {
 	}
 
 	public void setPageSize(Integer to) {
-		this.pageSize = to;
+		pageSize = to;
 	}
 
 	public Set<String> getCountries() {
@@ -151,5 +150,5 @@ public class VerticalSearchRequest {
 		this.termsFilter = termsFilter;
 	}
 
-	
+
 }

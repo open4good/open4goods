@@ -11,13 +11,13 @@ import com.google.gson.annotations.SerializedName;
  * @param <T> the generic type
  */
 public class DataTableResults<T> {
-	
+
 	/** The draw. */
 	private Integer draw;
-	
+
 	/** The records filtered. */
 	private Long recordsFiltered;
-	
+
 	/** The records total. */
 	private Long recordsTotal;
 
@@ -54,9 +54,9 @@ public class DataTableResults<T> {
 	}
 
 	public void setData(List<T> listOfDataObjects) {
-		this.data = listOfDataObjects;
+		data = listOfDataObjects;
 	}
 
-	
-	
+
+
 }

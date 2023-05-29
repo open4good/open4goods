@@ -13,29 +13,29 @@ import org.slf4j.LoggerFactory;
 
 public class MediaAggregationService extends AbstractAggregationService{
 
-    private static final Logger logger = LoggerFactory.getLogger(MediaAggregationService.class);
+	private static final Logger logger = LoggerFactory.getLogger(MediaAggregationService.class);
 
-//    private final  ImageMagickService imageService;
-//
-//    private final  ElasticsearchRestTemplate esTemplate;
+	//    private final  ImageMagickService imageService;
+	//
+	//    private final  ElasticsearchRestTemplate esTemplate;
 
-    private final  VerticalConfig config;
+	private final  VerticalConfig config;
 
-//    private final ImageClassificationService imageClassificationService;
+	//    private final ImageClassificationService imageClassificationService;
 
-//    private final  ExecutorService executor;
+	//    private final  ExecutorService executor;
 
-//private ResourceService resourceService;
+	//private ResourceService resourceService;
 
-    public MediaAggregationService(final VerticalConfig config, final String logsFolder) {
+	public MediaAggregationService(final VerticalConfig config, final String logsFolder) {
 		super(logsFolder);
-//		this.imageService = imageService;
-//		this.esTemplate = esTemplate;
+		//		this.imageService = imageService;
+		//		this.esTemplate = esTemplate;
 		this.config = config;
-//		this.resourceService = resourceService;
+		//		this.resourceService = resourceService;
 		// Creating executor
-//		executor =  Executors.newFixedThreadPool(config.getResourcesConfig().getResourceDownloadConcurentThreads());
-    }
+		//		executor =  Executors.newFixedThreadPool(config.getResourcesConfig().getResourceDownloadConcurentThreads());
+	}
 
 	@Override
 	public void onDataFragment(final DataFragment input, final Product output) {
@@ -44,23 +44,23 @@ public class MediaAggregationService extends AbstractAggregationService{
 			logger.info("Skipping resource download : {}",input);
 			return;
 		}
-		
-		
-        for (final Resource r : input.getResources()) {
 
-        	// Adding standard tags
-        	r.addTag(input.getDatasourceName());
 
-        	r.setCacheKey(IdHelper .generateResourceId(r.getUrl()));
-	        	
-        	 output.getResources().add(r);        	
-        }
+		for (final Resource r : input.getResources()) {
+
+			// Adding standard tags
+			r.addTag(input.getDatasourceName());
+
+			r.setCacheKey(IdHelper .generateResourceId(r.getUrl()));
+
+			output.getResources().add(r);
+		}
 	}
 
 
 	@Override
 	public void close() throws IOException {
-//		executor.shutdown();
+		//		executor.shutdown();
 	}
 
 }

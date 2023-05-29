@@ -13,8 +13,8 @@ public class EvaluationService {
 
 	private static final String TPL_VAR_START = "${";
 	private static final String TPL_VAR_STOP = "}";
-		
-//	private final  SpringTemplateEngine thymeleafTemplateEngine;
+
+	//	private final  SpringTemplateEngine thymeleafTemplateEngine;
 
 	private static ExpressionParser expressionParser;
 
@@ -24,13 +24,13 @@ public class EvaluationService {
 		/////////////////////////
 		// Thymeleaf engine initialisation
 		/////////////////////////
-//		thymeleafTemplateEngine = new SpringTemplateEngine();
-//		final StringTemplateResolver templateResolver = new StringTemplateResolver();
-//		templateResolver.setTemplateMode(TemplateMode.TEXT);
+		//		thymeleafTemplateEngine = new SpringTemplateEngine();
+		//		final StringTemplateResolver templateResolver = new StringTemplateResolver();
+		//		templateResolver.setTemplateMode(TemplateMode.TEXT);
 		//TODO(conf,p2,0.25) : Cacheable from config (config.getWebConfig().getTemplatesCaching())
-//		templateResolver.setCacheable(true);
+		//		templateResolver.setCacheable(true);
 
-//		thymeleafTemplateEngine.setTemplateResolver(templateResolver);
+		//		thymeleafTemplateEngine.setTemplateResolver(templateResolver);
 
 		///////////////////////////////
 		// Spel engine initialisation
@@ -74,58 +74,58 @@ public class EvaluationService {
 	}
 
 
-//	public String thymeleafEval(final Product p, final String template) {
-//		/**
-//		 * Generate a name from the thymleaf template weared in conf
-//		 *
-//		 * @param p
-//		 * @param siteLocale
-//		 * @return
-//		 */
-//		try {
-//			final Context ctx = new Context();
-//			ctx.setVariable("data", p);
-//			ctx.setVariable("p", p);
-//			ctx.setVariable("product", p);
-//			
-//			// Adding referentiel keys			
-//			for (Entry<ReferentielKey, String> e : p.getAttributes().getReferentielAttributes().entrySet()) {
-//				ctx.setVariable(e.getKey().toString(), e.getValue());
-//			}
-//			
-//			
-//			final String ret = thymeleafTemplateEngine.process(template, ctx);
-//			return ret;
-//
-//		} catch (final RuntimeException e) {
-//			logger.warn("Eval failed for {} :  {} : {}", p, e.getMessage(), e.getCause().getMessage());
-//			return null;
-//		}
-//	}
-//	
-	
-	
-	
+	//	public String thymeleafEval(final Product p, final String template) {
+	//		/**
+	//		 * Generate a name from the thymleaf template weared in conf
+	//		 *
+	//		 * @param p
+	//		 * @param siteLocale
+	//		 * @return
+	//		 */
+	//		try {
+	//			final Context ctx = new Context();
+	//			ctx.setVariable("data", p);
+	//			ctx.setVariable("p", p);
+	//			ctx.setVariable("product", p);
+	//
+	//			// Adding referentiel keys
+	//			for (Entry<ReferentielKey, String> e : p.getAttributes().getReferentielAttributes().entrySet()) {
+	//				ctx.setVariable(e.getKey().toString(), e.getValue());
+	//			}
+	//
+	//
+	//			final String ret = thymeleafTemplateEngine.process(template, ctx);
+	//			return ret;
+	//
+	//		} catch (final RuntimeException e) {
+	//			logger.warn("Eval failed for {} :  {} : {}", p, e.getMessage(), e.getCause().getMessage());
+	//			return null;
+	//		}
+	//	}
+	//
+
+
+
 
 	/**
 	 * Var table replacement. Our format is :
-	 * 
-	 * 
-	 * 
+	 *
+	 *
+	 *
 	 * TODO (feature,p1,0.5) : Add the following var in blablaservice
 	 * datas, comments,proscons,attribute-coverage : NONE,FEW,MEDIUM,LOT
-	 * 
+	 *
 	 * MIN_PRICE
 	 * MAX_PRICE
 	 * AVG_PRICE
-	 * 
+	 *
 	 * DESCRIPTIONS_COUNT
 	 * PROS_COUNT
 	 * CONS_COUNT
-	 * 
+	 *
 	 * @param var
 	 * @param data
-	 * @param blablaContext 
+	 * @param blablaContext
 	 * @return
 	 */
 	private String replaceVar(String var, Product data) {

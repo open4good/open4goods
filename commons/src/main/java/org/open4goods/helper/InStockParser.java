@@ -14,9 +14,9 @@ public class InStockParser {
 	public static InStock parse(String val) throws InvalidParameterException {
 
 		if (null == val) {
-			return null;			
+			return null;
 		}
-		
+
 		val = val.trim().toUpperCase();
 
 		if (StringUtils.isNumeric(val) && Double.valueOf(val) > 1.00) {

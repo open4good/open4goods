@@ -26,7 +26,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
  */
 public class XwikiAuthenticationProvider implements AuthenticationProvider {
 
-	
+
 	@Autowired XwikiService xwikiService;
 	@Override
 	public boolean supports(Class<?> authentication) {
@@ -35,10 +35,10 @@ public class XwikiAuthenticationProvider implements AuthenticationProvider {
 
 	@Override
 	public Authentication authenticate(Authentication authentication) throws AuthenticationException {
-		
+
 		String password = authentication.getCredentials().toString();
 		String user = authentication.getName();
-		
+
 		List<String> groups  = new ArrayList<String>();
 		try {
 			groups = xwikiService.loginAndGetGroups(user, password);
@@ -47,14 +47,14 @@ public class XwikiAuthenticationProvider implements AuthenticationProvider {
 		} catch (InvalidParameterException e) {
 			throw new BadCredentialsException("Bad user/password");
 		}
-		
+
 		List<GrantedAuthority> grantedAuths = new ArrayList<>();
-		
-		groups.stream().forEach(e ->  {			
+
+		groups.stream().forEach(e ->  {
 			grantedAuths.add(new SimpleGrantedAuthority(e));
 			grantedAuths.add(new SimpleGrantedAuthority("ROLE_" +e));
 		});
-		
+
 		return new UsernamePasswordAuthenticationToken(authentication.getName(), authentication.getCredentials(),
 				grantedAuths);
 

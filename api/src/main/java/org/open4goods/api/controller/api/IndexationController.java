@@ -32,6 +32,6 @@ public class IndexationController {
 	public IndexationResponse index(@RequestBody final DataFragment data) {
 		storeService.queueDataFragment(data);
 		return new IndexationResponse();
-    }
+	}
 
 }

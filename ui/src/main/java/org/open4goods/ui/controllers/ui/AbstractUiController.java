@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.servlet.ModelAndView;
 
@@ -19,13 +20,13 @@ import jakarta.servlet.http.HttpServletRequest;
 
 
 public class AbstractUiController {
-	
+
 	private static final Logger LOGGER = LoggerFactory.getLogger(AbstractUiController.class);
-	
+
 	private @Autowired Environment env;
 	private @Autowired UiConfig config;
 	private @Autowired XwikiService xwikiService;
-	
+
 	/**
 	 * Instanciates a ModelAndView and prefills pageNumber conf and pageNumber httpRequest
 	 * with : <br/>
@@ -41,7 +42,7 @@ public class AbstractUiController {
 		ret.addObject("userLocale", request.getLocale());
 		// TODO(i18n,p3, 0,25)
 		ret.addObject("siteLanguage", "fr");
-		final Locale sl = Locale.FRANCE;	
+		final Locale sl = Locale.FRANCE;
 
 		ret.addObject("siteLocale", sl);
 
@@ -50,35 +51,35 @@ public class AbstractUiController {
 		ret.addObject("dev", env.acceptsProfiles("dev","devsec"));
 
 		ret.addObject("url",request.getRequestURL().toString() );
-		
+
 		ret.addObject("baseUrl",config.getBaseUrl(request.getLocale()));
-		
-		
+
+
 		ret.addObject("gaId",config.getWebConfig().getGoogleAnalyticsId());
-		
+
 		ret.addObject("wiki",xwikiService);
-	
+
 		// Retrieve authentication status
 		Authentication authentication = SecurityContextHolder .getContext().getAuthentication();
 		if (authentication instanceof UsernamePasswordAuthenticationToken)  {
 			ret.addObject("user",authentication.getName());
-			
-			Set<String> roles = authentication.getAuthorities().stream().map(e->e.getAuthority()).collect(Collectors.toSet());
+
+			Set<String> roles = authentication.getAuthorities().stream().map(GrantedAuthority::getAuthority).collect(Collectors.toSet());
 			ret.addObject("roles",roles) ;
 
 			// TODO : role editor as const
 			if (roles.contains("SITEEDITOR")) {
 				ret.addObject("editor","true") ;
-				
+
 			}
-			
-			
-			
+
+
+
 		}
-		
-	
-		
-		
+
+
+
+
 		return ret;
 	}
 }

@@ -67,35 +67,35 @@ public class GenericFileLogger {
 				loggers.put(provider, logbackLogger);
 			} else {
 
-//				// Creating dirs if it does not exists
+				//				// Creating dirs if it does not exists
 				new File(path).mkdirs();
 				final String file = path + "/" + provider + ".log";
 
 				final PatternLayoutEncoder logEncoder = new PatternLayoutEncoder();
 				logEncoder.setContext(loggerContext);
-	            logEncoder.setPattern(PATTERN);
-	            logEncoder.start();
+				logEncoder.setPattern(PATTERN);
+				logEncoder.start();
 
 
-	            final RollingFileAppender<ILoggingEvent> rfAppender = new RollingFileAppender<>();
-	            rfAppender.setContext(loggerContext);
-	            rfAppender.setFile(file);
+				final RollingFileAppender<ILoggingEvent> rfAppender = new RollingFileAppender<>();
+				rfAppender.setContext(loggerContext);
+				rfAppender.setFile(file);
 
-	            final FixedWindowRollingPolicy fwRollingPolicy = new FixedWindowRollingPolicy();
-	            fwRollingPolicy.setContext(loggerContext);
-	            fwRollingPolicy.setFileNamePattern(path + "/" + provider + "-%i.log.zip");
-	            fwRollingPolicy.setMaxIndex(MAX_NUMBER_OF_FILE);
-	            fwRollingPolicy.setParent(rfAppender);
-	            fwRollingPolicy.start();
+				final FixedWindowRollingPolicy fwRollingPolicy = new FixedWindowRollingPolicy();
+				fwRollingPolicy.setContext(loggerContext);
+				fwRollingPolicy.setFileNamePattern(path + "/" + provider + "-%i.log.zip");
+				fwRollingPolicy.setMaxIndex(MAX_NUMBER_OF_FILE);
+				fwRollingPolicy.setParent(rfAppender);
+				fwRollingPolicy.start();
 
-	            final SizeBasedTriggeringPolicy<ILoggingEvent> triggeringPolicy = new SizeBasedTriggeringPolicy<>();
-	            triggeringPolicy.setMaxFileSize(FileSize.valueOf(FILE_ROTATION_SIZE));
-	            triggeringPolicy.start();
+				final SizeBasedTriggeringPolicy<ILoggingEvent> triggeringPolicy = new SizeBasedTriggeringPolicy<>();
+				triggeringPolicy.setMaxFileSize(FileSize.valueOf(FILE_ROTATION_SIZE));
+				triggeringPolicy.start();
 
-	            rfAppender.setEncoder(encoder);
-	            rfAppender.setRollingPolicy(fwRollingPolicy);
-	            rfAppender.setTriggeringPolicy(triggeringPolicy);
-	            rfAppender.start();
+				rfAppender.setEncoder(encoder);
+				rfAppender.setRollingPolicy(fwRollingPolicy);
+				rfAppender.setTriggeringPolicy(triggeringPolicy);
+				rfAppender.start();
 
 				// attach the rolling file appender to the logger of your choice
 				logbackLogger = loggerContext.getLogger("GENERIC_LOGGER." + provider);

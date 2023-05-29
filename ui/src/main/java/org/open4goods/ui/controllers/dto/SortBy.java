@@ -9,10 +9,10 @@ import java.util.Map;
  * @author pavan.solapure
  */
 public class SortBy {
-	
+
 	/** The map of sorts. */
 	private Map<String, SortOrder> mapOfSorts;
-	
+
 	/**
 	 * Instantiates a new sort by.
 	 */
@@ -30,7 +30,7 @@ public class SortBy {
 	public Map<String, SortOrder>  getSortBys() {
 		return mapOfSorts;
 	}
-	
+
 	/**
 	 * Adds the sort.
 	 *
@@ -39,7 +39,7 @@ public class SortBy {
 	public void addSort(String sortBy) {
 		mapOfSorts.put(sortBy, SortOrder.ASC);
 	}
-	
+
 	/**
 	 * Adds the sort.
 	 *

@@ -48,7 +48,7 @@ public class CrawlerOrchestrationController {
 	private @Autowired FetcherOrchestrationService fetcherOrchestrationService;
 
 	private @Autowired DataSourceConfigService datasourceConfigService;
-	
+
 	private @Autowired DataFragmentStoreService dataFragmentStoreService;
 
 	@PutMapping(path=UrlConstants.MASTER_API_CRAWLER_UPDATE_PREFIX+"{crawlerNodeName}",consumes=MediaType.APPLICATION_JSON_VALUE,produces=MediaType.APPLICATION_JSON_VALUE)
@@ -115,27 +115,27 @@ public class CrawlerOrchestrationController {
 			throw new InvalidParameterException("Cannot find a matching DatasourceProperties for " + url);
 		}
 		DataFragment df = fetcherOrchestrationService.triggerHttpSynchFetching(dsp, url);
-		
+
 		dataFragmentStoreService.queueDataFragment(df);
 		// TODO : From config
 		dataFragmentStoreService.aggregateAndstore();
 		return df;
-		
-		
+
+
 	}
 
-//
-//	@GetMapping(path=UrlConstants.MASTER_API_CRAWLERS  + UrlConstants.MASTER_API_CRAWLER_SYNCH_CSV_FETCH)
-//	@Operation(summary="Run a csv line direct fetching against the best availlable node")
-//	@PreAuthorize("hasAuthority('"+RolesConstants.ROLE_ADMIN+"')")
-//	public DataFragment testFetchCsv(  @RequestParam @NotBlank final String csvLine, @RequestParam @NotBlank final String csvHeaders, @RequestParam @NotBlank final String datasourceName) throws InvalidParameterException{
-//		// Get the providerName corresponding to the url
-//		final DataSourceProperties dsp = this.datasourceConfigService.getDatasourceConfig(datasourceName);
-//		if (null == dsp) {
-//			throw new InvalidParameterException("Cannot find a matching DatasourceProperties for " + datasourceName);
-//		}
-//		return this.fetcherOrchestrationService.triggerCsvSynchFetching(dsp, csvLine, csvHeaders);
-//	}
+	//
+	//	@GetMapping(path=UrlConstants.MASTER_API_CRAWLERS  + UrlConstants.MASTER_API_CRAWLER_SYNCH_CSV_FETCH)
+	//	@Operation(summary="Run a csv line direct fetching against the best availlable node")
+	//	@PreAuthorize("hasAuthority('"+RolesConstants.ROLE_ADMIN+"')")
+	//	public DataFragment testFetchCsv(  @RequestParam @NotBlank final String csvLine, @RequestParam @NotBlank final String csvHeaders, @RequestParam @NotBlank final String datasourceName) throws InvalidParameterException{
+	//		// Get the providerName corresponding to the url
+	//		final DataSourceProperties dsp = this.datasourceConfigService.getDatasourceConfig(datasourceName);
+	//		if (null == dsp) {
+	//			throw new InvalidParameterException("Cannot find a matching DatasourceProperties for " + datasourceName);
+	//		}
+	//		return this.fetcherOrchestrationService.triggerCsvSynchFetching(dsp, csvLine, csvHeaders);
+	//	}
 
 
 	@PostMapping(path=UrlConstants.MASTER_API_CRAWLERS  + UrlConstants.MASTER_API_CRAWLER_SYNCH_FETCH_WITH_CONFIG)

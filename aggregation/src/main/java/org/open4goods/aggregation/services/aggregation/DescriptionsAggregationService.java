@@ -23,31 +23,31 @@ public class DescriptionsAggregationService extends AbstractAggregationService{
 	@Override
 	public void onDataFragment(DataFragment o, final Product output) {
 
-			
-			for (final Description d : o.getDescriptions()) {
 
-				// Strip html tags
-				String text = Jsoup.parse(d.getContent().getText()).text();
+		for (final Description d : o.getDescriptions()) {
 
-				// Normalizing spaces
-				text = StringUtils.normalizeSpace(text);
+			// Strip html tags
+			String text = Jsoup.parse(d.getContent().getText()).text();
 
-				// Cut text
+			// Normalizing spaces
+			text = StringUtils.normalizeSpace(text);
 
-				// NOTE(gof) : Not really nice, should clone. But i know that the descriptions
-				// are not used after the "computeDescriptions", that's my archi !
-				if (text.length() > config.getDescriptionsTruncationLength()) {
-					text = text.substring(0, config.getDescriptionsTruncationLength()) + config.getDescriptionsTruncationSuffix();
-					d.setTruncated(true);
-				} else {
-					d.setTruncated(false);
-				}
+			// Cut text
 
-				d.getContent().setText(text);
-//				d.setProvider
-				output.getDescriptions().add(d);
+			// NOTE(gof) : Not really nice, should clone. But i know that the descriptions
+			// are not used after the "computeDescriptions", that's my archi !
+			if (text.length() > config.getDescriptionsTruncationLength()) {
+				text = text.substring(0, config.getDescriptionsTruncationLength()) + config.getDescriptionsTruncationSuffix();
+				d.setTruncated(true);
+			} else {
+				d.setTruncated(false);
 			}
-		
+
+			d.getContent().setText(text);
+			//				d.setProvider
+			output.getDescriptions().add(d);
+		}
+
 	}
 
 }

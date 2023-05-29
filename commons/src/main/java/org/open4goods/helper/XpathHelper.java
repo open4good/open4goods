@@ -16,16 +16,16 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 public class XpathHelper {
 
-//	private static final TransformerFactory transfac = TransformerFactory.newInstance();
+	//	private static final TransformerFactory transfac = TransformerFactory.newInstance();
 
 	private static final XPath xpath = XPathFactory.newInstance().newXPath();
 
 	private static final Map<String, XPathExpression> xpathCache = new HashMap<>();
 
 	private static final Logger logger = LoggerFactory.getLogger(XpathHelper.class);
-	
-	
-	
+
+
+
 	/**
 	 * PErforms a simple XPATH evaluation upon a W3C document
 	 *
@@ -54,5 +54,5 @@ public class XpathHelper {
 
 	}
 
-	
+
 }

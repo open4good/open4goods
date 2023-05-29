@@ -6,7 +6,7 @@ import java.util.Map;
 import com.fasterxml.jackson.annotation.JsonMerge;
 
 public class LogosConfig {
-	
+
 	/** Informations about brands present in the system **/
 	@JsonMerge
 	private Map<String, String> brandsLogo = new HashMap<>();
@@ -30,8 +30,8 @@ public class LogosConfig {
 	public void setStoresLogo(Map<String, String> storesLogo) {
 		this.storesLogo = storesLogo;
 	}
-	
-	
-	
+
+
+
 
 }

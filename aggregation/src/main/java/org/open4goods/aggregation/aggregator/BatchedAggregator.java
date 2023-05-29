@@ -20,7 +20,7 @@ public class BatchedAggregator extends AbstractAggregator {
 	protected static final Logger logger = LoggerFactory.getLogger(BatchedAggregator.class);
 	private Set<Product> datas;
 
-	
+
 
 	public BatchedAggregator(final List<AbstractAggregationService> services) {
 		super(services);
@@ -30,24 +30,24 @@ public class BatchedAggregator extends AbstractAggregator {
 	public void close(Set<Product> datas) {
 		super.close();
 		this.datas = null;
-		
+
 	}
 
 
 	public void beforeStart(Set<Product> datas) {
 		super.beforeStart();
 		this.datas =datas;
-		
-		
+
+
 	}
 
-	
-	
+
+
 	/**
 	 * Build the Product using the services registered on this aggregator
 	 * @param datas
 	 * @return
-	 * @throws AggregationSkipException 
+	 * @throws AggregationSkipException
 	 */
 	public Product update(final Product data, Set<Product> datas) throws AggregationSkipException {
 
@@ -69,5 +69,5 @@ public class BatchedAggregator extends AbstractAggregator {
 
 		return ret;
 	}
-	
+
 }

@@ -35,7 +35,7 @@ public class Ui {
 	private SerialisationService serialisationService;
 
 	public static void main(final String[] args) {
-        System.setProperty("org.apache.tomcat.util.buf.UDecoder.ALLOW_ENCODED_SLASH", "true");
+		System.setProperty("org.apache.tomcat.util.buf.UDecoder.ALLOW_ENCODED_SLASH", "true");
 
 		SpringApplication.run(Ui.class, args);
 	}

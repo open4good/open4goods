@@ -25,7 +25,7 @@ import org.slf4j.LoggerFactory;
  * <li>Downloading resources associated to DataFragments</li>
  * <li>Operating data analyze (image type, pdf metadatas, so on))</li>
  * <li>Resource effectiv indexation</li>
- * </ul> 
+ * </ul>
  * @author Goulven.Furet
  *
  */
@@ -33,7 +33,7 @@ public class ResourceCachingTask  {
 
 	private static final Logger logger = LoggerFactory.getLogger(ResourceCachingTask.class);
 
-//	private final VerticalConfig uiConfig;
+	//	private final VerticalConfig uiConfig;
 
 	private final Resource resource;
 
@@ -41,7 +41,7 @@ public class ResourceCachingTask  {
 
 	private static final TikaConfig config = TikaConfig.getDefaultConfig();
 
-//	private final ElasticsearchRestTemplate esTemplate;
+	//	private final ElasticsearchRestTemplate esTemplate;
 
 	private final ImageMagickService imageService;
 
@@ -50,32 +50,32 @@ public class ResourceCachingTask  {
 	public ResourceCachingTask(final Resource r,
 			final ImageMagickService imageService,  ResourceService resourceService) {
 		resource = r;
-//		this.uiConfig = uiConfig;
-//		this.esTemplate = esTemplate;
+		//		this.uiConfig = uiConfig;
+		//		this.esTemplate = esTemplate;
 		this.imageService = imageService;
 		this.resourceService = resourceService;
 	}
-	
 
-	
-//
-//	@Override
-//	public void run() {
-//		IndexedResource ir;
-//		try {
-//			// Fetching
-//			ir = doFetching(resource);
-//
-//			// Indexing in the dedicated index
-//			index(ir);
-//		} catch (ValidationException e) {
-//			logger.info("{} for resource {} ",e.getMessage(), resource);
-//		} catch (TechnicalException e) {
-//			logger.warn("Error while processing resource {}",resource,e);
-//		}
-//		
-//	
-//	}
+
+
+	//
+	//	@Override
+	//	public void run() {
+	//		IndexedResource ir;
+	//		try {
+	//			// Fetching
+	//			ir = doFetching(resource);
+	//
+	//			// Indexing in the dedicated index
+	//			index(ir);
+	//		} catch (ValidationException e) {
+	//			logger.info("{} for resource {} ",e.getMessage(), resource);
+	//		} catch (TechnicalException e) {
+	//			logger.warn("Error while processing resource {}",resource,e);
+	//		}
+	//
+	//
+	//	}
 
 	public IndexedResource doFetching(Resource resource) throws ValidationException, TechnicalException{
 		logger.info("Handling resource : {} ", resource);
@@ -97,17 +97,17 @@ public class ResourceCachingTask  {
 		target =  resourceService.getCacheFile(indexed);
 
 
-//		// Checking if the indexed resource already exists
-//		if (!uiConfig.getResourcesConfig().getOverrideResources() && target.exists()) {
-//
-//			throw new ValidationException("resource already cached : "+ resource);
-//		}
+		//		// Checking if the indexed resource already exists
+		//		if (!uiConfig.getResourcesConfig().getOverrideResources() && target.exists()) {
+		//
+		//			throw new ValidationException("resource already cached : "+ resource);
+		//		}
 
 		if (target.exists()) {
-//			throw new ValidationException("resource already cached : "+ resource);
+			//			throw new ValidationException("resource already cached : "+ resource);
 			return indexed;
 		}
-				
+
 		try {
 
 			// Downloading the file
@@ -115,13 +115,13 @@ public class ResourceCachingTask  {
 				logger.info("Saving resource to local : {}",target);
 				Request.Get(url)
 				//TODO from conf
-					.userAgent("Mozilla/5.0 (Windows NT 5.1; rv:5.0.1) Gecko/20100101 Firefox/5.0.1")
-					.connectTimeout(1000)
-					.socketTimeout(1000)
-					.execute()
-					.saveContent(target);
+				.userAgent("Mozilla/5.0 (Windows NT 5.1; rv:5.0.1) Gecko/20100101 Firefox/5.0.1")
+				.connectTimeout(1000)
+				.socketTimeout(1000)
+				.execute()
+				.saveContent(target);
 			}
-			
+
 			// Computing the MD5
 			try (FileInputStream fis = new FileInputStream(target)) {
 				final String md5 = org.apache.commons.codec.digest.DigestUtils.md5Hex(fis).toUpperCase();
@@ -152,7 +152,7 @@ public class ResourceCachingTask  {
 			case "image/png":
 			case "image/jpg":
 			case "image/jpeg":
-//			case "application/octet-stream":
+				//			case "application/octet-stream":
 			case "image/gif":
 				// Case of image
 
@@ -174,7 +174,7 @@ public class ResourceCachingTask  {
 		} catch (final Exception e) {
 			logger.warn("Resource integration fail : {} : {} ",  e.getMessage(), url);
 		}
-		
+
 		return indexed;
 	}
 
@@ -211,25 +211,25 @@ public class ResourceCachingTask  {
 			logger.warn("Error processing image : ", indexed.getUrl(), e.getMessage());
 		}
 
-//		// Generate thumbnails
-//		for (final Integer height : uiConfig.getResourcesConfig().getImageProductThumbsHeight()) {
-//			if (null != indexed) {
-//				// Detect height / width
-//				try {
-//					imageService.generateThumbnail(resourceService.getTranslatedCacheFile(indexed),
-//							resourceService.getThumbnailCacheFile(indexed, height), height);
-//					indexed.getImageInfo().getAvaillableThumbs().add(height);
-//				} catch (final ValidationException e) {
-//					logger.warn("Cannot generate thumnail for {} : {}", indexed.getUrl(), e.getMessage());
-//				}
-//			}
-//		}
+		//		// Generate thumbnails
+		//		for (final Integer height : uiConfig.getResourcesConfig().getImageProductThumbsHeight()) {
+		//			if (null != indexed) {
+		//				// Detect height / width
+		//				try {
+		//					imageService.generateThumbnail(resourceService.getTranslatedCacheFile(indexed),
+		//							resourceService.getThumbnailCacheFile(indexed, height), height);
+		//					indexed.getImageInfo().getAvaillableThumbs().add(height);
+		//				} catch (final ValidationException e) {
+		//					logger.warn("Cannot generate thumnail for {} : {}", indexed.getUrl(), e.getMessage());
+		//				}
+		//			}
+		//		}
 	}
 
-//	private void index(final IndexedResource indexed) {
-//		final IndexQuery q = new IndexQueryBuilder().withObject(indexed).withId(indexed.getCacheKey()).build();
-//		esTemplate.save(q,IndexCoordinates.of(uiConfig.resourceIndex()) );
-//
-//	}
+	//	private void index(final IndexedResource indexed) {
+	//		final IndexQuery q = new IndexQueryBuilder().withObject(indexed).withId(indexed.getCacheKey()).build();
+	//		esTemplate.save(q,IndexCoordinates.of(uiConfig.resourceIndex()) );
+	//
+	//	}
 
 }

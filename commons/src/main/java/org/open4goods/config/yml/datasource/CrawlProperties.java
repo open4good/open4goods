@@ -141,19 +141,19 @@ public class CrawlProperties {
 	 */
 	private Boolean respectNoFollow = true;
 
-	
+
 	/**
-	 *   For really hard to crawl website. Heavy in perf ! 
+	 *   For really hard to crawl website. Heavy in perf !
 	 */
-	
+
 	private Boolean useSelenium = false;
-	
+
 	/**
 	 * The encoding to use for selenium fetched content
 	 */
 	private String seleniumPageEncoding = "ISO-8859-1";
-	
-	
+
+
 	/**
 	 * Additional headers to be sent
 	 */

@@ -32,14 +32,14 @@ public class TimeConstants {
 	// Delay of brand logo downloads
 	public static final long BRAND_LOGO_GENERATION = 3600 * 1000 * 24 * 10;
 
-//	// Delay for updating maxmind geoloc service
-//	public static final long MAXMIND_DB_UPDATE = 3600 * 1000 * 24 * 7;
+	//	// Delay for updating maxmind geoloc service
+	//	public static final long MAXMIND_DB_UPDATE = 3600 * 1000 * 24 * 7;
 
 	// Frequency against which mail should be send if there are alerting events
 	public static final long ALERTING_MAIL_FREQUENCY  = 1000 *  60  * 30 * 1 ;
 
-//	// In days, when to reload insee datas
-//	public static final long INSEE_DATASOURCE_FETCHING = 90 * 3600 * 24 * 1000;
+	//	// In days, when to reload insee datas
+	//	public static final long INSEE_DATASOURCE_FETCHING = 90 * 3600 * 24 * 1000;
 
 	// Frequency of export and cleanup
 	public static final long DATAFRAGMENT_EXPORT_AND_CLEANUP_FREQUENCY = 3600 * 1000 * 24 * 7;

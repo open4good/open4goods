@@ -28,16 +28,16 @@ public class AggregatedPrice extends Price {
 	 */
 	@Field(index = true, store = false, type = FieldType.Keyword)
 	private ProductState productState;
-	
+
 	/**
 	 * The encoded form of the affiliation token
 	 */
 	@Transient
 	@Field(index = false, store = false, type = FieldType.Keyword)
 	private String affiliationToken;
-	
+
 	/**
-	 * 
+	 *
 	 * @param price Price to initialize from
 	 * @param df    DataFragment to initialize from
 	 */
@@ -47,28 +47,28 @@ public class AggregatedPrice extends Price {
 		datasourceName = df.getDatasourceName();
 		url = df.affiliatedUrlIfPossible();
 		affiliated = df.affiliated();
-		this.offerName = df.longestName();
+		offerName = df.longestName();
 		setCurrency(df.getPrice().getCurrency());
 		setPrice(df.getPrice().getPrice());
-		setTimeStamp(df.getLastIndexationDate());		
+		setTimeStamp(df.getLastIndexationDate());
 		setProductState(df.getProductState());
 	}
 
 	/**
-	 * 
+	 *
 	 * @return the datasource name without tld
 	 */
 	public String shortDataSourceName() {
-		
+
 		int i = datasourceName.indexOf(".");
 		if (i == -1) {
 			return datasourceName;
 		} else {
 			return datasourceName.substring(0,i);
 		}
-		
+
 	}
-	
+
 	/**
 	 * Only used for the "average" price representation
 	 * @param price
@@ -77,10 +77,10 @@ public class AggregatedPrice extends Price {
 	public AggregatedPrice(double price, Currency currency) {
 		setCurrency(currency);
 		setPrice(price);
-	
+
 	}
-	
-	
+
+
 
 	public AggregatedPrice() {
 		super();
@@ -151,6 +151,6 @@ public class AggregatedPrice extends Price {
 	}
 
 
-	
+
 
 }

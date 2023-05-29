@@ -2,15 +2,14 @@ package org.open4goods.model.product;
 
 import org.open4goods.model.attribute.Attribute;
 import org.open4goods.model.data.DataFragment;
-import org.springframework.data.elasticsearch.annotations.DateFormat;
 import org.springframework.data.elasticsearch.annotations.Field;
 import org.springframework.data.elasticsearch.annotations.FieldType;
 
 public class SourcedAttribute extends Attribute{
-	
-	@Field(index = false, store = false, type = FieldType.Keyword)	
+
+	@Field(index = false, store = false, type = FieldType.Keyword)
 	private String datasourceName;
-	
+
 	public SourcedAttribute() {
 		super();
 	}
@@ -22,29 +21,29 @@ public class SourcedAttribute extends Attribute{
 	 */
 	public SourcedAttribute(IAttribute source, DataFragment df) {
 
-		this.datasourceName = df.getDatasourceName();
-		
+		datasourceName = df.getDatasourceName();
+
 		setRawValue(source.getValue());
 		setLanguage(source.getLanguage());
 		setName(source.getName());
 
 	}
-	
-	
+
+
 	public SourcedAttribute(IAttribute source, Product df) {
-		
+
 		setRawValue(source.getValue());
 		setLanguage(source.getLanguage());
 		setName(source.getName());
-//		setReferentiel(source.getReferentiel());
+		//		setReferentiel(source.getReferentiel());
 
 	}
-	
-	
+
+
 	////////////////////////////////
 	// Getters / setters
 	////////////////////////////////
-	
+
 
 
 	public String getDatasourceName() {
@@ -56,6 +55,6 @@ public class SourcedAttribute extends Attribute{
 	}
 
 
-	
+
 
 }

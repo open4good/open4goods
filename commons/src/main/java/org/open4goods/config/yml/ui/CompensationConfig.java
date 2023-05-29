@@ -18,10 +18,10 @@ public class CompensationConfig {
 	 * **/
 	private Double kgCarbonCost = 22.0 / 1000.0;
 
-	
-	
-	
-	
+
+
+
+
 	public String getSpelFormulaCo2Kg() {
 		return spelFormulaCo2Kg;
 	}

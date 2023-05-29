@@ -6,23 +6,23 @@ import org.springframework.data.elasticsearch.annotations.Field;
 import org.springframework.data.elasticsearch.annotations.FieldType;
 
 public class PriceHistory {
-	
+
 	@Field(index = false, store = false, type=FieldType.Date, format = DateFormat.epoch_millis)
 	private Long timestamp;
-	
-	@Field(index = false, store = false, type = FieldType.Double)	
+
+	@Field(index = false, store = false, type = FieldType.Double)
 	private Double price;
 
-	@Field(index = false, store = false, type = FieldType.Keyword)	
+	@Field(index = false, store = false, type = FieldType.Keyword)
 	private Currency currency;
 
 	public PriceHistory() {
 	}
 
 	public PriceHistory(AggregatedPrice minPrice) {
-		this.timestamp = minPrice.getTimeStamp();
-		this.price = minPrice.getPrice();
-		this.currency = minPrice.getCurrency();
+		timestamp = minPrice.getTimeStamp();
+		price = minPrice.getPrice();
+		currency = minPrice.getCurrency();
 	}
 
 	public Long getTimestamp() {
@@ -48,7 +48,7 @@ public class PriceHistory {
 	public void setCurrency(Currency currency) {
 		this.currency = currency;
 	}
-	
-	
-	
+
+
+
 }

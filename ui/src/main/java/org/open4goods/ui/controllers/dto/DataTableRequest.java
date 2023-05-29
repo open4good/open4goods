@@ -16,31 +16,31 @@ import jakarta.servlet.http.HttpServletRequest;
  * @author pavan.solapure
  */
 public class DataTableRequest<T> {
-	
+
 	/** The unique id. */
 	private String uniqueId;
-	
+
 	/** The draw. */
 	private Integer draw;
-	
+
 	/** The start. */
 	private Integer start;
-	
+
 	/** The length. */
 	private Integer length;
-	
+
 	/** The search. */
 	private String search;
-	
+
 	/** The regex. */
 	private boolean regex;
 
 	/** The columns. */
 	private List<DataTableColumnSpecs> columns;
-	
+
 	/** The order. */
 	private DataTableColumnSpecs order;
-	
+
 	/** The is global search. */
 	private boolean isGlobalSearch;
 
@@ -59,83 +59,83 @@ public class DataTableRequest<T> {
 	 * @param request the request
 	 */
 	private void prepareDataTableRequest(HttpServletRequest request) {
-		
+
 		Enumeration<String> parameterNames = request.getParameterNames();
-    	
-    	if(parameterNames.hasMoreElements()) {
-    		
-    		this.setStart(Integer.parseInt(request.getParameter(PaginationCriteria.PAGE_NO)));
-    		this.setLength(Integer.parseInt(request.getParameter(PaginationCriteria.PAGE_SIZE)));
-    		this.setUniqueId(request.getParameter("_"));
-    		this.setDraw(Integer.valueOf(request.getParameter(PaginationCriteria.DRAW)));
-    		
-    		this.setSearch(request.getParameter("search[value]"));
-    		this.setRegex(Boolean.valueOf(request.getParameter("search[regex]")));
-    		
-    		int sortableCol = Integer.parseInt(request.getParameter("order[0][column]"));
-    		
-    		List<DataTableColumnSpecs> columns = new ArrayList<DataTableColumnSpecs>();
-    		
-    		if(!StringUtils.isEmpty(this.getSearch())) {
-    			this.setGlobalSearch(true);
-    		}
-    		
-    		maxParamsToCheck = getNumberOfColumns(request);
-    		
-    		for(int i=0; i < maxParamsToCheck; i++) {
-    			if(null != request.getParameter("columns["+ i +"][data]") 
-    					&& !"null".equalsIgnoreCase(request.getParameter("columns["+ i +"][data]"))  
-    					&& !StringUtils.isEmpty(request.getParameter("columns["+ i +"][data]"))) {
-    				DataTableColumnSpecs colSpec = new DataTableColumnSpecs(request, i);
-    				if(i == sortableCol) {
-    					this.setOrder(colSpec);
-    				}
-    				columns.add(colSpec);
-    				
-    				if(!StringUtils.isEmpty(colSpec.getSearch())) {
-    					this.setGlobalSearch(false);
-    				}
-    			} 
-    		}
-    		
-    		if(columns.size()>0) {
-    			this.setColumns(columns);
-    		}
-    	}
+
+		if(parameterNames.hasMoreElements()) {
+
+			this.setStart(Integer.parseInt(request.getParameter(PaginationCriteria.PAGE_NO)));
+			this.setLength(Integer.parseInt(request.getParameter(PaginationCriteria.PAGE_SIZE)));
+			this.setUniqueId(request.getParameter("_"));
+			this.setDraw(Integer.valueOf(request.getParameter(PaginationCriteria.DRAW)));
+
+			this.setSearch(request.getParameter("search[value]"));
+			this.setRegex(Boolean.parseBoolean(request.getParameter("search[regex]")));
+
+			int sortableCol = Integer.parseInt(request.getParameter("order[0][column]"));
+
+			List<DataTableColumnSpecs> columns = new ArrayList<DataTableColumnSpecs>();
+
+			if(!StringUtils.isEmpty(this.getSearch())) {
+				this.setGlobalSearch(true);
+			}
+
+			maxParamsToCheck = getNumberOfColumns(request);
+
+			for(int i=0; i < maxParamsToCheck; i++) {
+				if(null != request.getParameter("columns["+ i +"][data]")
+						&& !"null".equalsIgnoreCase(request.getParameter("columns["+ i +"][data]"))
+						&& !StringUtils.isEmpty(request.getParameter("columns["+ i +"][data]"))) {
+					DataTableColumnSpecs colSpec = new DataTableColumnSpecs(request, i);
+					if(i == sortableCol) {
+						this.setOrder(colSpec);
+					}
+					columns.add(colSpec);
+
+					if(!StringUtils.isEmpty(colSpec.getSearch())) {
+						this.setGlobalSearch(false);
+					}
+				}
+			}
+
+			if(columns.size()>0) {
+				this.setColumns(columns);
+			}
+		}
 	}
-	
+
 	private int getNumberOfColumns(HttpServletRequest request) {
-		Pattern p = Pattern.compile("columns\\[[0-9]+\\]\\[data\\]");  
+		Pattern p = Pattern.compile("columns\\[[0-9]+\\]\\[data\\]");
 		@SuppressWarnings("rawtypes")
-		Enumeration params = request.getParameterNames(); 
+		Enumeration params = request.getParameterNames();
 		List<String> lstOfParams = new ArrayList<String>();
-		while(params.hasMoreElements()){		
-		 String paramName = (String)params.nextElement();
-		 Matcher m = p.matcher(paramName);
-		 if(m.matches())	{
-			 lstOfParams.add(paramName);
-		 }
+		while(params.hasMoreElements()){
+			String paramName = (String)params.nextElement();
+			Matcher m = p.matcher(paramName);
+			if(m.matches())	{
+				lstOfParams.add(paramName);
+			}
 		}
 		return lstOfParams.size();
 	}
-	
+
 	/**
 	 * Gets the pagination request.
 	 *
 	 * @return the pagination request
 	 */
 	public PaginationCriteria getPaginationRequest() {
-		
+
 		PaginationCriteria pagination = new PaginationCriteria();
 		pagination.setFrom(this.getStart());
 		pagination.setPageSize(this.getLength());
-		
+
 		SortBy sortBy = null;
 		if(null != this.getOrder()) {
 			sortBy = new SortBy();
 			sortBy.addSort(this.getOrder().getData(), SortOrder.valueOf(this.getOrder().getSortDir().toUpperCase()));
 		}
-		
+
 		FilterBy filterBy = new FilterBy();
 		filterBy.setGlobalSearch(this.isGlobalSearch());
 		for(DataTableColumnSpecs colSpec : this.getColumns()) {
@@ -145,13 +145,13 @@ public class DataTableRequest<T> {
 				}
 			}
 		}
-		
+
 		pagination.setSortBy(sortBy);
 		pagination.setFilterBy(filterBy);
-		
+
 		return pagination;
 	}
-	
+
 	/** The max params pageSize check. */
 	private int maxParamsToCheck = 0;
 
@@ -236,9 +236,9 @@ public class DataTableRequest<T> {
 	public void setMaxParamsToCheck(int maxParamsToCheck) {
 		this.maxParamsToCheck = maxParamsToCheck;
 	}
-	
-	
-	
-	
-	
+
+
+
+
+
 }

@@ -16,36 +16,36 @@ import jakarta.servlet.http.HttpServletRequest;
 public class HomeController extends AbstractUiController {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(HomeController.class);
-	
+
 	private @Autowired ProductRepository aggregatedDataRepository;
 	private @Autowired DataSourceConfigService datasourceConfigService;
 
 	private @Autowired VerticalsConfigService verticalConfigService;
-	
-	
-	
+
+
+
 	@GetMapping("/")
 	public ModelAndView index(final HttpServletRequest request) {
 
 		// TODO : Remove this test page
 		ModelAndView model ;
 		if (null != request.getParameter("new")) {
-			 model = defaultModelAndView("index2", request);
+			model = defaultModelAndView("index2", request);
 		} else {
-			 model = defaultModelAndView("index", request);
+			model = defaultModelAndView("index", request);
 		}
-		
+
 		model.addObject("totalItems", aggregatedDataRepository.countMainIndexHavingPrice());
-		
+
 		// TODO(gof) : deduplicate (darty.com / darty.com-CSV)
 		model.addObject("partners",  datasourceConfigService.datasourceConfigs());
 
 		model.addObject("verticals",  verticalConfigService.getConfigsWithoutDefault());
 
 		model.addObject("url",  "/");
-		
+
 		return model;
 	}
-		
-	
+
+
 }

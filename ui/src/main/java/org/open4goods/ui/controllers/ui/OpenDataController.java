@@ -48,7 +48,7 @@ public class OpenDataController extends AbstractUiController {
 		ret.addObject("lastUpdated", openDataService.lastUpdate());
 		ret.addObject("fileSize", openDataService.fileSize());
 		ret.addObject("page","open data");
-		
+
 		return ret;
 	}
 
@@ -58,7 +58,7 @@ public class OpenDataController extends AbstractUiController {
 			response.setHeader("Content-type", "application/octet-stream");
 			response.setHeader("Content-Disposition", "attachment; filename=\"gtin-open-data.zip\"");
 			IOUtils.copy(str, response.getOutputStream());
-		} catch (IOException e) {			
+		} catch (IOException e) {
 			LOGGER.error("opendata file download error or interruption : {}",e.getMessage());
 			openDataService.decrementDownloadCounter();
 		} catch (TechnicalException e) {

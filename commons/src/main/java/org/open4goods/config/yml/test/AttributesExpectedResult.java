@@ -28,7 +28,7 @@ public class AttributesExpectedResult extends NumericExpectedResult {
 					ret.addMessage("Missing referentiel attribute : " + entry.getKey());
 				} else if (!referentielAttributes.get(entry.getKey().toString()).equals(entry.getValue())) {
 					ret.addMessage("Was expecting " + entry.getValue() + " for referentiel attribute  " + entry.getKey()
-							+ ", we have " + referentielAttributes.get(entry.getKey().toString()));
+					+ ", we have " + referentielAttributes.get(entry.getKey().toString()));
 				}
 			}
 		}
@@ -42,7 +42,7 @@ public class AttributesExpectedResult extends NumericExpectedResult {
 					ret.addMessage("Missing attribute : " + entry.getKey());
 				} else if (!entry.getValue().equals(pd.getAttribute(entry.getKey()).getRawValue().toString())) {
 					ret.addMessage("Was expecting " + entry.getValue() + " for attribute  " + entry.getKey()
-							+ ", we have " + pd.getAttribute(entry.getKey()).getRawValue().toString());
+					+ ", we have " + pd.getAttribute(entry.getKey()).getRawValue().toString());
 				}
 
 			}

@@ -6,7 +6,7 @@
 //import org.open4goods.model.data.aggregated.AggregatedComment;
 //
 //public class AggregatedComments {
-//	
+//
 //	/**
 //	 * The by date ordered aggregated comments
 //	 */
@@ -19,5 +19,5 @@
 //	public void setComments(List<AggregatedComment> comments) {
 //		this.comments = comments;
 //	}
-//	
+//
 //}

@@ -6,7 +6,7 @@
 //
 ///**
 // * Designates a DataFragment that is participant in an Product
-// * 
+// *
 // * @author Goulven.Furet
 // *
 // */
@@ -23,7 +23,7 @@
 //
 //
 //	@Override
-//	public int hashCode() {		
+//	public int hashCode() {
 //		return dataUrl.hashCode();
 //	}
 //
@@ -36,8 +36,8 @@
 //
 //		return false;
 //	}
-//	
-//	
+//
+//
 //	@Override
 //	public String toString() {
 //		return providerName + ":" + dataUrl;

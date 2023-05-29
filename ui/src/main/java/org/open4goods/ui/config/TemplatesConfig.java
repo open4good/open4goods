@@ -17,7 +17,7 @@ import org.thymeleaf.templateresolver.ClassLoaderTemplateResolver;
  * <li>classpath template location</li>
  * <li>classpath default location</li>
  * </ul>
- * 
+ *
  * @author goulven
  *
  */
@@ -37,5 +37,5 @@ public class TemplatesConfig {
 		templateResolver.setCacheable(config.getWebConfig().getTemplatesCaching());
 		return templateResolver;
 	}
-	
+
 }

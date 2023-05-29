@@ -5,9 +5,9 @@ public class NumericRangeFilter {
 	private String attribute;
 	private Double minValue;
 	private Double maxValue;
-	
-	
-	
+
+
+
 	public NumericRangeFilter() {
 		super();
 	}
@@ -35,7 +35,7 @@ public class NumericRangeFilter {
 	public void setMaxValue(Double maxValue) {
 		this.maxValue = maxValue;
 	}
-	
-	
-	
+
+
+
 }

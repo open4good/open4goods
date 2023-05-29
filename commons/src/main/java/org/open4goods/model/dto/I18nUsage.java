@@ -9,7 +9,7 @@ public class I18nUsage {
 
 	}
 
-	
+
 	public I18nUsage(Map<String, Long> keys) {
 		super();
 		this.keys = keys;
@@ -22,7 +22,7 @@ public class I18nUsage {
 	public void setKeys(Map<String, Long> keys) {
 		this.keys = keys;
 	}
-	
-	
-	
+
+
+
 }

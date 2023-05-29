@@ -60,7 +60,7 @@ public class ResourceController extends AbstractUiController {
 	private @Autowired UiConfig config;
 	private @Autowired DataSourceConfigService dsConfigService;
 	private @Autowired VerticalsConfigService verticalConfigService;
-	
+
 	//////////////////////////////////////////////////////////////
 	// Mappings
 	//////////////////////////////////////////////////////////////
@@ -71,67 +71,67 @@ public class ResourceController extends AbstractUiController {
 	 * @param request
 	 * @param response
 	 * @return
-	 * @throws TechnicalException 
-	 * @throws ValidationException 
-	 * @throws IOException 
-	 * @throws FileNotFoundException 
+	 * @throws TechnicalException
+	 * @throws ValidationException
+	 * @throws IOException
+	 * @throws FileNotFoundException
 	 * @throws UnirestException
 	 */
 
-	
+
 	@GetMapping("/{vertical}/*-{id:\\d+}/"+PNG_IMG)
 	public void image(@PathVariable String vertical, @PathVariable String id, final HttpServletResponse response, HttpServletRequest request) throws FileNotFoundException, IOException, ValidationException, TechnicalException {
 		VerticalConfig language = verticalConfigService.getLanguageForVerticalPath(vertical);
-		
+
 		if (null == language) {
 			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Image " + request.getServletPath() + " introuvable !");
 		}
-		
+
 		image(id, response, request);
-		
+
 	}
-	
+
 	@GetMapping("/*-{id:\\d+}/"+PNG_IMG)
 	public void image(@PathVariable String id, final HttpServletResponse response, HttpServletRequest request) throws FileNotFoundException, IOException, ValidationException, TechnicalException {
-		
-		// Retrieve the Product		
+
+		// Retrieve the Product
 		Product data;
 		try {
 			data = esDao.getById(id);
 		} catch (ResourceNotFoundException e) {
 			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "image introuvable !");
 		}
-		
+
 		// Handling 404
 		if (null == data) {
 			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "image introuvable !");
 		}
-		
+
 		// Sending 301 id no match with product name
-		String path= URLEncoder.encode(request.getServletPath().substring(1, request.getServletPath().lastIndexOf("/")));								
+		String path= URLEncoder.encode(request.getServletPath().substring(1, request.getServletPath().lastIndexOf("/")));
 		if (!path.equals(data.getNames().getName())) {
 			response.setStatus(HttpServletResponse.SC_MOVED_PERMANENTLY);
 			response.setHeader("Location", config.getBaseUrl(Locale.FRANCE) + data.getNames().getName()+"/"+PNG_IMG);
 			return ;
 		}
-		
-				
+
+
 		//TODO (gof) : not sure pageSize have image, could have any resource
 		// Retrieve one of the cover images
 		Optional<Resource> img = data.getResources().stream().filter(r -> r.getTags().contains(ResourceTagDictionary.CSV)).findAny();
-		
+
 		// If no cover
-		if (img.isEmpty()) {			
+		if (img.isEmpty()) {
 			img = data.getResources().stream().findAny();
 		}
-		
+
 		if (img.isPresent()) {
 			response.addHeader("Content-type","image/png");
 			response.addHeader("Cache-Control","public, max-age="+AppConfig.CACHE_PERIOD_SECONDS);
-			
+
 			InputStream stream = imageService.getCoverPng(img.get());
 			IOUtils.copy(stream ,response.getOutputStream());
-			IOUtils.closeQuietly(stream);			
+			IOUtils.closeQuietly(stream);
 		} else {
 			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "image introuvable !");
 		}
@@ -139,33 +139,33 @@ public class ResourceController extends AbstractUiController {
 
 	@GetMapping("/*-{id:\\d+}/"+GTIN_IMG)
 	public void gtin(@PathVariable String id, final HttpServletResponse response, HttpServletRequest request) throws FileNotFoundException, IOException, ValidationException, TechnicalException {
-		
-		// Retrieve the Product		
+
+		// Retrieve the Product
 		Product data;
-		
-		
+
+
 		try {
 			data = esDao.getById(id);
 		} catch (ResourceNotFoundException e) {
 			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "image introuvable !");
 		}
-		
+
 		// Handling 404
 		if (null == data) {
 			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "image introuvable !");
 		}
-		
+
 		// Sending 301 id no match with product name
-		String path= URLEncoder.encode(request.getServletPath().substring(1, request.getServletPath().lastIndexOf("/")));														
+		String path= URLEncoder.encode(request.getServletPath().substring(1, request.getServletPath().lastIndexOf("/")));
 		if (!path.equals(data.getNames().getName())) {
 			response.setStatus(HttpServletResponse.SC_MOVED_PERMANENTLY);
 			response.setHeader("Location", config.getBaseUrl(Locale.FRANCE) + data.getNames().getName()+"/"+GTIN_IMG);
 			return ;
 		}
-		
+
 		response.addHeader("Content-type","image/png");
-					response.addHeader("Cache-Control","public, max-age="+AppConfig.CACHE_PERIOD_SECONDS);
-		
+		response.addHeader("Cache-Control","public, max-age="+AppConfig.CACHE_PERIOD_SECONDS);
+
 		InputStream stream = gtinService.gtin(data.gtin());
 		IOUtils.copy(stream ,response.getOutputStream());
 		IOUtils.closeQuietly(stream);
@@ -173,13 +173,13 @@ public class ResourceController extends AbstractUiController {
 
 
 
-	
-	
+
+
 	@GetMapping("/icon/{datasourceName}")
 	public void datasourceIcon(@PathVariable String datasourceName, final HttpServletResponse response) throws FileNotFoundException, IOException, InvalidParameterException  {
 		response.addHeader("Content-type","image/png");
-					response.addHeader("Cache-Control","public, max-age="+AppConfig.CACHE_PERIOD_SECONDS);
-		
+		response.addHeader("Cache-Control","public, max-age="+AppConfig.CACHE_PERIOD_SECONDS);
+
 		InputStream stream = dsConfigService.getFavicon(datasourceName);
 		IOUtils.copy(stream ,response.getOutputStream());
 		IOUtils.closeQuietly(stream);
@@ -188,11 +188,11 @@ public class ResourceController extends AbstractUiController {
 	@GetMapping("/logo/{datasourceName}")
 	public void datasourceLogo(@PathVariable String datasourceName, final HttpServletResponse response) throws FileNotFoundException, IOException, InvalidParameterException  {
 		response.addHeader("Content-type","image/png");
-					response.addHeader("Cache-Control","public, max-age="+AppConfig.CACHE_PERIOD_SECONDS);
+		response.addHeader("Cache-Control","public, max-age="+AppConfig.CACHE_PERIOD_SECONDS);
 		InputStream stream = dsConfigService.getLogo(datasourceName);
 		IOUtils.copy(stream ,response.getOutputStream());
 		IOUtils.closeQuietly(stream);
 	}
 
-	
+
 }

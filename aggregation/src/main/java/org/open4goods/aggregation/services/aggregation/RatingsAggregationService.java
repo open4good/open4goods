@@ -22,20 +22,20 @@
 // * <li>Relativisation of ratings (rescaling through computing min max) </li>
 // * <li>Aggregation of comments score</li>
 // * </ul>
-// * 
-// * 
+// *
+// *
 // * @author Goulven.Furet
 // *
 // */
 //public class RatingsAggregationService extends AbstractAggregationService {
 //
 //	private static final Logger LOGGER = LoggerFactory.getLogger(RatingsAggregationService.class);
-//	
-//		
+//
+//
 //	public static final String COMMENTS_RATING_TAG = "COMMENTS";
 //
 //	private static final String COMMENT_KEY = "COMMENT_KEY";
-//	
+//
 //	private final RatingsConfig ratingsConfig;
 //
 //	public RatingsAggregationService(final RatingsConfig ratingsConfig,  final String logsFolder) {
@@ -44,7 +44,7 @@
 //	}
 //
 //	/**
-//	 * 
+//	 *
 //	 * On the fly, increments cardinality through trasversal Map
 //	 * @param d
 //	 * @param p
@@ -52,7 +52,7 @@
 //	 */
 //	@Override
 //	public void onDataFragment(final DataFragment d, final Product output) {
-//				
+//
 //		// Converting to SourcedRatings
 //		Set<SourcedRating> ratings = d.getRatings().stream().map(e -> new SourcedRating(e,d)).collect(Collectors.toSet()) ;
 //
@@ -62,22 +62,22 @@
 //				System.err.println("TECHNICAL");
 //			}
 //		}
-//		
+//
 //		// Adding all ratings in output
 //		output.getRatings().addAll(ratings);
 //
 //	}
 //
 //
-//	
+//
 //
 //	@Override
 //	public void onDataFragment(final Set<DataFragment> input, final Product output) {
-//		
+//
 //		////////////////////////////////////////////////////////////////
 //		// Creating the comments global rating
 //		////////////////////////////////////////////////////////////////
-//		
+//
 //		// Creating a cardinality
 //		Cardinality c = new Cardinality();
 //		// Increment cardinality for all comments, to make an aggregated comments score
@@ -88,13 +88,13 @@
 //			.filter(e -> e != null).forEach(r -> {
 //
 //				// Incrementing
-//				c.increment(r);						
+//				c.increment(r);
 //		});
-//		
-//		
+//
+//
 //		if (c.getCount() > 0) {
 //			SourcedRating r = new SourcedRating();
-//			
+//
 //			r.setDate(System.currentTimeMillis());
 //			r.setDatasourceName(getClass().getSimpleName()+":"+COMMENTS_RATING_TAG);
 //			r.setMax(StandardiserService.DEFAULT_MAX_RATING);
@@ -102,32 +102,32 @@
 //			r.setValue(c.getAvg());
 //			r.setNumberOfVoters(Long.valueOf(c.getCount()));
 //			r.setMin(0);
-//					
+//
 //			output.getRatings().add(r);
-//		
+//
 //			// For the newly computed comment rating
-//			Cardinality gc = (Cardinality) batchDatas.get(COMMENT_KEY);			
+//			Cardinality gc = (Cardinality) batchDatas.get(COMMENT_KEY);
 //			if (null == gc) {
 //				gc = new Cardinality();
-//			}		
+//			}
 //			// Incrementing
 //			gc.increment(r);
-//			
-//			batchDatas.put(COMMENT_KEY,gc);	
-//			
+//
+//			batchDatas.put(COMMENT_KEY,gc);
+//
 //		}
-//		
-//		
-//		////////////////////////////////////////////////////////////////		
+//
+//
+//		////////////////////////////////////////////////////////////////
 //		// Incrementing classical cardinalities
 //		////////////////////////////////////////////////////////////////
 //
-//		// For each ratings of datafragments. 	
+//		// For each ratings of datafragments.
 //		processCardinality(output.getRatings(), batchDatas);
-//		
-//		
-//		
-//	
+//
+//
+//
+//
 //	}
 //
 //
@@ -136,16 +136,16 @@
 //	 */
 //	@Override
 //	public void onAggregatedData(Product data, AggregatorTank tank, Map<String, Object> batchDatas) {
-//		data.getRatings().forEach(r -> {						
-//			
+//		data.getRatings().forEach(r -> {
+//
 //				// Associating cardinality
 //				r.setCardinality((Cardinality) batchDatas.get(getCardId(r)));
 //				// Computing relatives values
 //				relativize(r);
-//				
+//
 //		});
-//		
-//		// The global comment		
+//
+//		// The global comment
 //		SourcedRating sr = data.ratingByTag(COMMENTS_RATING_TAG);
 //		if (null != sr) {
 //			Cardinality cc = (Cardinality) batchDatas.get(COMMENT_KEY);
@@ -159,21 +159,21 @@
 //	 * @param rating
 //	 */
 //	private void relativize(SourcedRating rating) {
-//		
+//
 //		// Substracting unused min
-//		
+//
 //		if (null == rating.getValue()) {
 //			LOGGER.warn("Empty value for rating {} ! Consider normalizing in a futur export/import phase",rating);
 //			return;
 //		}
-//		
+//
 //		try {
 //			// Removing the min range
 //			Double minBorn = rating.getCardinality().getMin() - rating.getMin();
-//			
-//			// Standardizing rating based on real max		
+//
+//			// Standardizing rating based on real max
 //			final Double max = rating.getCardinality().getMax();
-//	
+//
 //			final Double value = rating.getValue();
 //			rating.setRelValue((value -minBorn) * StandardiserService.DEFAULT_MAX_RATING / (max -minBorn));
 //
@@ -191,25 +191,25 @@
 //	 */
 //	private void processCardinality(Set<SourcedRating> ratings, Map<String, Object> batchDatas) {
 //		ratings.forEach(r -> {
-//			
+//
 //			if (null == r.getValue()) {
 //				LOGGER.warn("Empty value for rating {} ! Consider normalizing in a futur export/import phase",r);
 //				return;
 //			}
-//			
+//
 //			// Retrieving cardinality
-//			Cardinality c = (Cardinality) batchDatas.get(getCardId(r));			
+//			Cardinality c = (Cardinality) batchDatas.get(getCardId(r));
 //			if (null == c) {
 //				c = new Cardinality();
 //			}
-//			
+//
 //			// Incrementing
 //			c.increment(r);
-//					
+//
 //			batchDatas.put(getCardId(r),c);
-//			
+//
 //		});
 //	}
 //
-//	
+//
 //}

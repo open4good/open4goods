@@ -63,7 +63,7 @@ public class ShippingTimeParser {
 			//TODO(gof) : test / detect if we have a ending year before appending it
 			final LocalDate localDate = DateTimeFormat.forPattern( "EEEE dd MMM YYYY" ).withLocale( java.util.Locale.FRENCH ).parseLocalDate( tmp + " " + Year.now().getValue());
 
-			return new Long(localDate.toInterval().toDuration().getStandardDays()).intValue();
+			return Long.valueOf(localDate.toInterval().toDuration().getStandardDays()).intValue();
 
 		} catch (final Exception e) {
 			LOGGER.info("Cannot convert {} to a local french date : {}", tmp, e.getMessage());

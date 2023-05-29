@@ -1,8 +1,8 @@
 package org.open4goods.model.constants;
 
 public enum ReferentielKey {
-	BRAND, 
-	GTIN, 	
+	BRAND,
+	GTIN,
 	MODEL
 	;
 
@@ -18,6 +18,6 @@ public enum ReferentielKey {
 			return false;
 		}
 	}
-	
+
 
 }

@@ -25,7 +25,7 @@ public class ProductStateParser {
 		case "USED":
 		case "OCCASION":
 		case "VERY GOOD":
-		case "COLLECTION":	
+		case "COLLECTION":
 			return ProductState.OCCASION;
 
 		case "UNKNOWN":
