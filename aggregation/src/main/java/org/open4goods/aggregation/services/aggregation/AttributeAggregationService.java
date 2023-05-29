@@ -526,7 +526,7 @@ public class AttributeAggregationService extends AbstractAggregationService {
 			if (ac.getNumericMapping().size() > 0) {
 				try {
 					// This is a numeric mapping
-					Rating r = new SourcedRating();
+					Rating r = new Rating();
 					
 					r.setMax(ac.maxRating());											
 					r.setMin(ac.minRating().intValue());

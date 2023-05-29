@@ -740,7 +740,7 @@ public class CsvDatasourceFetchingService extends DatasourceFetchingService {
 
 			final String val = getFromCsvRow(item, refs.getValue());
 			if (null == val) {
-				dedicatedLogger.warn("No data for {} in {}", refs.getValue(), item);
+				dedicatedLogger.info("No data for {} in {}", refs.getValue(), item);
 			} else {
 				p.addReferentielAttribute(refs.getKey().toString(), sanitize(val));
 			}

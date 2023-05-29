@@ -210,10 +210,10 @@ public class DataFragmentStoreService {
 					}
 					
 					try {
-							// TODO : Not the good point. Service ?
+						// TODO : Not the good point. Service ?
 						results.add(generationService.process(df,data));
 					} catch (AggregationSkipException e1) {
-						logger.warn("Aggregation skipped for {} : {}",df,e1.getMessage());
+						logger.info("Aggregation skipped for {} : {}",df,e1.getMessage());
 					}
 					
 				}
