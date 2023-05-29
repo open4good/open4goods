@@ -24,7 +24,7 @@ public class Rating  implements Validable, Standardisable {
 	private Set<String> tags = new HashSet<>();
 	
 
-	@Field(index = false, store = false, type = FieldType.Double)
+	@Field(index = true, store = false, type = FieldType.Double)
 	private Double value;
 	
 	/**

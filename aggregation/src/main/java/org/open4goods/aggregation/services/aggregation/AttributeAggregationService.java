@@ -24,20 +24,25 @@ import org.open4goods.model.attribute.Attribute;
 import org.open4goods.model.attribute.AttributeType;
 import org.open4goods.model.constants.ReferentielKey;
 import org.open4goods.model.data.DataFragment;
+import org.open4goods.model.data.Rating;
+import org.open4goods.model.data.RatingType;
 import org.open4goods.model.product.AggregatedAttribute;
 import org.open4goods.model.product.AggregatedAttributes;
 import org.open4goods.model.product.AggregatedData;
 import org.open4goods.model.product.AggregatedFeature;
 import org.open4goods.model.product.IAttribute;
 import org.open4goods.model.product.SourcedAttribute;
+import org.open4goods.model.product.SourcedRating;
+import org.open4goods.services.StandardiserService;
 
+// TODO : Deduplicate code beween datafragment and aggregateddata
 public class AttributeAggregationService extends AbstractAggregationService {
 
-	private final AttributesConfig attributeConfig;
+	private final AttributesConfig attributesConfig;
 
 	public AttributeAggregationService(final AttributesConfig attributesConfig,  final String logsFolder) {
 		super(logsFolder);
-		this.attributeConfig = attributesConfig;
+		this.attributesConfig = attributesConfig;
 	}
 
 	
@@ -61,13 +66,14 @@ public class AttributeAggregationService extends AbstractAggregationService {
 		
 	
 		for (AggregatedAttribute attr : data.getAttributes().getUnmapedAttributes()) {
-			IAttribute translated = attributeConfig.translateAttribute(attr, data.getVertical());
+			IAttribute translated = attributesConfig.translateAttribute(attr, data.getVertical());
 			
 			if (null != translated) {
 				matchedAttrs.add(new SourcedAttribute(translated, data));
-			} 
+			} else { 			
+				allAttrs.add(new SourcedAttribute(attr, data));
+			}
 			
-			allAttrs.add(new SourcedAttribute(attr, data));
 		}
 
 		
@@ -82,7 +88,8 @@ public class AttributeAggregationService extends AbstractAggregationService {
 		 
 		Set<AggregatedAttribute> aggattrs = aggregateAttributes(matchedAttrs);
 		for (AggregatedAttribute aga : aggattrs) {
-			aa.getAggregatedAttributes().put(aga.getName(), aga);			
+			aa.getAggregatedAttributes().put(aga.getName(), aga);	
+			aga.setScore(generateScoresFromAttribute(aga.getName() ,aga));
 		}
 		 
 		dedicatedLogger.info("{} recognized attributes, {} are not ",matchedAttrs.size(),allAttrs.size());		
@@ -96,6 +103,7 @@ public class AttributeAggregationService extends AbstractAggregationService {
 			aat.setValue(attr.getRawValue().toString());
 			aa.getUnmapedAttributes().add(aat);			
 		}
+		
 		
 		
 		return data;
@@ -128,7 +136,7 @@ public class AttributeAggregationService extends AbstractAggregationService {
 		
 	
 		for (Attribute attr : d.getAttributes()) {
-			IAttribute translated = attributeConfig.translateAttribute(attr, "COMPUTED");
+			IAttribute translated = attributesConfig.translateAttribute(attr, "COMPUTED");
 			if (null != translated) {
 				matchedAttrs.add(new SourcedAttribute(translated, d));
 			} 
@@ -175,7 +183,10 @@ public class AttributeAggregationService extends AbstractAggregationService {
 
 		Set<AggregatedAttribute> aggattrs = aggregateAttributes(matchedAttrs);
 		for (AggregatedAttribute aga : aggattrs) {
-			aa.getAggregatedAttributes().put(aga.getName(), aga);			
+			
+			aga.setScore(generateScoresFromAttribute(aga.getName() ,aga));
+			aa.getAggregatedAttributes().put(aga.getName(), aga);	
+			
 		}
 		dedicatedLogger.info("{} recognized attributes, {} are not ",matchedAttrs.size(),allAttrs.size());		
 		
@@ -186,19 +197,8 @@ public class AttributeAggregationService extends AbstractAggregationService {
 			AggregatedAttribute aat = new AggregatedAttribute();
 			aat.setName(attr.getName());
 			aat.setValue(attr.getRawValue().toString());
-			aa.getUnmapedAttributes().add(aat);			
+			aa.getUnmapedAttributes().add(aat);						
 		}
-		
-		///////////////////////////////////	
-		// Extracting rating
-		//////////////////////////////////
-//		Set<SourcedRating> ratings = generateRatingFromAttributes(aa.getAttributes().values());
-//		
-//		output.getRatings().addAll(ratings);
-		
-
-		
-	
 		
 		
 	}
@@ -251,7 +251,7 @@ public class AttributeAggregationService extends AbstractAggregationService {
 		
 		
 		// Retrieving attrConfig
-		final AttributeConfig aConfig = attributeConfig.getAttributeConfigByKey(name);
+		final AttributeConfig aConfig = attributesConfig.getAttributeConfigByKey(name);
 
 		///////////////////////////////
 		// Best value election, via counting map
@@ -305,8 +305,8 @@ public class AttributeAggregationService extends AbstractAggregationService {
 		
 		//TODO : Update the attributes conflicts / election
 		
-		// Setting potential conflicts
-		ret.setHasConflicts( ret.getSources().size() > 1);
+//		// Setting potential conflicts
+//		ret.setHasConflicts( ret.getSources().size() > 1);
 		
 
 		return ret;
@@ -349,7 +349,7 @@ public class AttributeAggregationService extends AbstractAggregationService {
 	 * @return
 	 */
 	private boolean isFeatureAttribute(Attribute e) {		
-		return attributeConfig.getFeaturedValues().contains(e.getRawValue().toString().trim().toUpperCase());
+		return attributesConfig.getFeaturedValues().contains(e.getRawValue().toString().trim().toUpperCase());
 	}
 
 	/**
@@ -513,66 +513,57 @@ public class AttributeAggregationService extends AbstractAggregationService {
 
 	
 	
-//	/**
-//	 * Derivated attributes that have to be into ratings
-//	 * 
-//	 * @param ret
-//	 */
-//	public Set<SourcedRating> generateRatingFromAttributes(Collection<AggregatedAttribute> collection) {
-//		
-//		Set<SourcedRating> ratings = new HashSet<>();
-//		
-//		for (AggregatedAttribute a : collection) {
-//			AttributeConfig ac = attributeConfig.getAttributeConfigByKey(a.getName());
-//
-//			if (null == ac ) {
-//				dedicatedLogger.error("Was asking to  translate {} into rating, but no AttributeConfiguration found !",a); 
-//				continue;
-//			}
-//			
-//			if ( ac.isAsRating()) {
-//
-//				// transformation required
-//				if (ac.getNumericMapping().size() > 0) {
-//					try {
-//						// This is a numeric mapping
-//						SourcedRating r = new SourcedRating();
-//						
-//						r.setMax(ac.maxRating());											
-//						r.setMin(ac.minRating().intValue());
-//						
-//						r.setValue(ac.getNumericMapping().get(a.getValue()));
-//						
-//						if (null == r.getValue()) {
-//							dedicatedLogger.warn("No matching found in numericMappings for attribute {} and value  {}",ac,a.getValue());	
-//							continue;
-//						}
-//						
-//
-//						// tags
-//						r.getTags().addAll(ac.getRatingTags());
-//						r.getTags().add(RatingType.FROM_ATTRIBUTE.toString());
-//						
-//						// Standardization (re-scaling)
-//						StandardiserService.standariseRating(r);
-//						
-//						// Adding
-//						ratings.add(r);
-//
-//					} catch (NoSuchFieldException | ValidationException e) {
-//						dedicatedLogger.warn("Attribute to rating conversion failed : {}",e.getMessage());						
-//					} 
-//					
-//				} else {
-//					dedicatedLogger.error("Was asking to  translate {} into rating, but no numericMapping definition !",a); 
-//				}
-//			}
-//		}
-//		
-//		
-//		
-//		return ratings;
-//	}
+/**
+ * Generate the score (min, max, value) from an aggregatedattribute
+ * @param attributeKey
+ * @param a
+ * @return
+ */
+	public Rating generateScoresFromAttribute(String attributeKey , AggregatedAttribute a) {
+		
+		AttributeConfig ac = attributesConfig.getAttributeConfigByKey(attributeKey);
+			// transformation required
+			if (ac.getNumericMapping().size() > 0) {
+				try {
+					// This is a numeric mapping
+					Rating r = new SourcedRating();
+					
+					r.setMax(ac.maxRating());											
+					r.setMin(ac.minRating().intValue());
+					
+					r.setValue(ac.getNumericMapping().get(a.getValue()));
+					
+					if (null == r.getValue()) {
+						dedicatedLogger.warn("No matching found in numericMappings for attribute {} and value  {}",ac,a.getValue());	
+						return null;
+					}
+					
+
+					// tags
+					r.getTags().addAll(ac.getRatingTags());
+					r.getTags().add(RatingType.FROM_ATTRIBUTE.toString());
+					
+					// Standardization (re-scaling)
+					StandardiserService.standariseRating(r);
+					
+					// Adding
+					return r;
+
+				} catch (NoSuchFieldException | ValidationException e) {
+					dedicatedLogger.warn("Attribute to rating conversion failed : {}",e.getMessage());						
+				} 
+				
+			} else {
+				dedicatedLogger.error("Was asking to  translate {} into rating, but no numericMapping definition !",a); 
+			}
+		
+		
+		
+		
+		return null;
+	
+
+	}
 
 
 

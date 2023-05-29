@@ -5,6 +5,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.open4goods.model.attribute.AttributeType;
+import org.open4goods.model.data.Rating;
 import org.springframework.data.elasticsearch.annotations.Field;
 import org.springframework.data.elasticsearch.annotations.FieldType;
 
@@ -27,12 +28,6 @@ public class AggregatedAttribute implements IAttribute {
 	@Field(index = false, store = false, type = FieldType.Keyword)
 	private AttributeType type;
 	
-	/**
-	 * Set to true if this aggregatedattribute is build from attributes having different values
-	 */
-	@Field(index = false, store = false, type = FieldType.Boolean)
-	private boolean hasConflicts;
-			
 	
 	/**
 	 * The collections of conflicts for this attribute
@@ -41,6 +36,14 @@ public class AggregatedAttribute implements IAttribute {
 	private Set<ConflictedAttribute> sources = new HashSet<>();
 	
 
+	/**
+	 * If converted to a score, the score.
+	 */
+	@Field(index = true, store = false, type = FieldType.Object)
+	private Rating score;
+	
+
+	
 	
 	// TODO : Simple, but does not allow to handle conflicts, and so on
 	@Override
@@ -119,13 +122,6 @@ public class AggregatedAttribute implements IAttribute {
 		this.value = value;
 	}
 
-	public boolean isHasConflicts() {
-		return hasConflicts;
-	}
-
-	public void setHasConflicts(boolean hasConflicts) {
-		this.hasConflicts = hasConflicts;
-	}
 
 	public Set<ConflictedAttribute> getSources() {
 		return sources;
@@ -152,6 +148,12 @@ public class AggregatedAttribute implements IAttribute {
 
 
 	
+	public Rating getScore() {
+		return score;
+	}
+	public void setScore(Rating score) {
+		this.score = score;
+	}
 	
 	
 	
