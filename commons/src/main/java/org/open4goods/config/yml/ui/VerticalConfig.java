@@ -110,12 +110,6 @@ public class VerticalConfig{
 	@JsonMerge
 	private CapsuleGenerationConfig generationConfig = new CapsuleGenerationConfig();	
 	
-	
-	/**
-	 *  The config for better product election
-	 */
-	
-	private BetterProductConfig betterProductConfig = new BetterProductConfig();
 
 	
 	/** The config for compensation **/
@@ -413,17 +407,6 @@ public class VerticalConfig{
 	public void setGenerationConfig(CapsuleGenerationConfig generationConfig) {
 		this.generationConfig = generationConfig;
 	}
-
-
-	public BetterProductConfig getBetterProductConfig() {
-		return betterProductConfig;
-	}
-
-
-	public void setBetterProductConfig(BetterProductConfig betterProductConfig) {
-		this.betterProductConfig = betterProductConfig;
-	}
-
 
 	public CompensationConfig getCompensation() {
 		return compensation;
