@@ -53,13 +53,13 @@ public class AggregatedData implements Standardisable {
 	/**
 	 * The date this item has been created
 	 */
-	@Field(name = "@timestamp", type = FieldType.Date)
+	@Field(index = true, type = FieldType.Date)
 	private Long creationDate;
 	/**
 	 * The last date this product has changed (new data, price change, new comment,
 	 * so on...)
 	 */
-	@Field(name = "@timestamp", type = FieldType.Date)
+	@Field(index = true, type = FieldType.Date)
 	private Long lastChange;
 
 	/** Namings informations for this product **/
