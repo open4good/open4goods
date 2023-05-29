@@ -34,15 +34,9 @@ public class AggregatedPrices implements Standardisable {
 	private Integer trend= 0;
 	
 	@Field(index = true, store = false, type = FieldType.Keyword)
+	
 	// Contains the conditions for this product
 	private Set<ProductState> conditions = new HashSet<>();
-	
-	
-//	@Field(index = false, store = false, type = FieldType.Object)
-//	private AggregatedPrice maxPrice;
-//
-//	@Field(index = false, store = false, type = FieldType.Object)
-//	private AggregatedPrice avgPrice;
 	
 	
 	/**
