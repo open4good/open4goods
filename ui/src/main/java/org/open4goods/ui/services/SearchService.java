@@ -195,20 +195,20 @@ public class SearchService {
 		
 		// Adding standard aggregations
 		esQuery = esQuery 
-				.withAggregation("min_price", 	Aggregation.of(a -> a.min(ta -> ta.field("price.minPrice.price"))))
-				.withAggregation("max_price", 	Aggregation.of(a -> a.max(ta -> ta.field("price.minPrice.price"))))
-
-				.withAggregation("min_offers", 	Aggregation.of(a -> a.min(ta -> ta.field("offersCount"))))
-				.withAggregation("max_offers", 	Aggregation.of(a -> a.max(ta -> ta.field("offersCount"))))
-
-				.withAggregation("condition", 	Aggregation.of(a -> a.terms(ta -> ta.field("price.conditions").missing(OTHER_BUCKET).size(3)  ))	)
-				
-				// TODO : size from conf
-				.withAggregation("brands", 	Aggregation.of(a -> a.terms(ta -> ta.field("attributes.referentielAttributes.BRAND.keyword").missing(OTHER_BUCKET).size(100)  ))	)
-				
-				// TODO : size from conf
-				.withAggregation("country", 	Aggregation.of(a -> a.terms(ta -> ta.field("gtinInfos.country").missing(OTHER_BUCKET).size(100)  ))	)
-						
+//				.withAggregation("min_price", 	Aggregation.of(a -> a.min(ta -> ta.field("price.minPrice.price"))))
+//				.withAggregation("max_price", 	Aggregation.of(a -> a.max(ta -> ta.field("price.minPrice.price"))))
+//
+//				.withAggregation("min_offers", 	Aggregation.of(a -> a.min(ta -> ta.field("offersCount"))))
+//				.withAggregation("max_offers", 	Aggregation.of(a -> a.max(ta -> ta.field("offersCount"))))
+//
+//				.withAggregation("condition", 	Aggregation.of(a -> a.terms(ta -> ta.field("price.conditions").missing(OTHER_BUCKET).size(3)  ))	)
+//				
+//				// TODO : size from conf
+//				.withAggregation("brands", 	Aggregation.of(a -> a.terms(ta -> ta.field("attributes.referentielAttributes.BRAND.keyword").missing(OTHER_BUCKET).size(100)  ))	)
+//				
+//				// TODO : size from conf
+//				.withAggregation("country", 	Aggregation.of(a -> a.terms(ta -> ta.field("gtinInfos.country").missing(OTHER_BUCKET).size(100)  ))	)
+//						
 				.withQuery(new CriteriaQuery(criterias));
 		
 		// Sort order

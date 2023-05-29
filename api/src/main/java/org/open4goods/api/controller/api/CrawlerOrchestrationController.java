@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import org.open4goods.api.services.FetcherOrchestrationService;
+import org.open4goods.api.services.store.DataFragmentStoreService;
 import org.open4goods.config.yml.datasource.DataSourceProperties;
 import org.open4goods.exceptions.InvalidParameterException;
 import org.open4goods.model.constants.RolesConstants;
@@ -47,6 +48,8 @@ public class CrawlerOrchestrationController {
 	private @Autowired FetcherOrchestrationService fetcherOrchestrationService;
 
 	private @Autowired DataSourceConfigService datasourceConfigService;
+	
+	private @Autowired DataFragmentStoreService dataFragmentStoreService;
 
 	@PutMapping(path=UrlConstants.MASTER_API_CRAWLER_UPDATE_PREFIX+"{crawlerNodeName}",consumes=MediaType.APPLICATION_JSON_VALUE,produces=MediaType.APPLICATION_JSON_VALUE)
 	@Operation(summary="Update the presence and status of a Fetcher")
@@ -111,7 +114,14 @@ public class CrawlerOrchestrationController {
 		if (null == dsp) {
 			throw new InvalidParameterException("Cannot find a matching DatasourceProperties for " + url);
 		}
-		return fetcherOrchestrationService.triggerHttpSynchFetching(dsp, url);
+		DataFragment df = fetcherOrchestrationService.triggerHttpSynchFetching(dsp, url);
+		
+		dataFragmentStoreService.queueDataFragment(df);
+		// TODO : From config
+		dataFragmentStoreService.aggregateAndstore();
+		return df;
+		
+		
 	}
 
 //

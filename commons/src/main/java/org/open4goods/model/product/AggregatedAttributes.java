@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.open4goods.model.constants.ReferentielKey;
+import org.open4goods.model.data.Rating;
 import org.springframework.data.elasticsearch.annotations.Field;
 import org.springframework.data.elasticsearch.annotations.FieldType;
 
@@ -18,10 +19,11 @@ public class AggregatedAttributes  {
 	private Map<ReferentielKey, String> referentielAttributes = new HashMap<>();
 
 	@Field(index = true, store = false, type = FieldType.Object)
+	//TODO: rename
 	private Map<String,AggregatedAttribute> aggregatedAttributes = new HashMap<>();
 	
-	
-	@Field(index = false, store = false, type = FieldType.Object)
+
+	@Field(index = true, store = false, type = FieldType.Object)
 	private Set<AggregatedAttribute> unmapedAttributes = new HashSet<>();
 
 	
@@ -76,6 +78,8 @@ public class AggregatedAttributes  {
 	public void setReferentielAttributes(Map<ReferentielKey, String> referentielAttributes) {
 		this.referentielAttributes = referentielAttributes;
 	}
+
+
 
 	
 	

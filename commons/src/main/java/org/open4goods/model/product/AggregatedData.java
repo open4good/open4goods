@@ -29,6 +29,7 @@ import org.springframework.data.elasticsearch.annotations.Setting;
 
 @Document(indexName = AggregatedData.DEFAULT_REPO)
 @Setting(refreshInterval = "30s", settingPath = "/elastic-settings.json")
+//TODO : Rename to product
 public class AggregatedData implements Standardisable {
 
 	private final static Logger logger = LoggerFactory.getLogger(AggregatedData.class);

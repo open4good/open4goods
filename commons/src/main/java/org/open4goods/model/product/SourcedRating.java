@@ -8,7 +8,7 @@ import org.open4goods.model.data.Rating;
 import org.springframework.data.elasticsearch.annotations.DateFormat;
 import org.springframework.data.elasticsearch.annotations.Field;
 import org.springframework.data.elasticsearch.annotations.FieldType;
-
+// TODO : rename in Score
 public class SourcedRating extends Rating{
 	
 	@Field(index = false, store = false, type = FieldType.Keyword)	
