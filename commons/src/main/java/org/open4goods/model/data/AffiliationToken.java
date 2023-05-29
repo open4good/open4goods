@@ -5,20 +5,18 @@ import java.util.UUID;
 import org.open4goods.model.product.AggregatedData;
 import org.open4goods.model.product.AggregatedPrice;
 import org.springframework.data.annotation.Id;
-import org.springframework.data.elasticsearch.annotations.DateFormat;
 import org.springframework.data.elasticsearch.annotations.Document;
 import org.springframework.data.elasticsearch.annotations.Field;
 import org.springframework.data.elasticsearch.annotations.FieldType;
 
-//TODO : check the refresh interval
-//@Document(indexName = "affiliation-links",  refreshInterval = "60s", createIndex = true)
 @Document(indexName = "affiliation-links", createIndex = true)
 public class AffiliationToken {
 
 	@Id
 	private String id;
-	@Field(index = false, store = false, type = FieldType.Date, format = DateFormat.epoch_millis)
-	private long ts;
+	@Field(index = true, type = FieldType.Date)
+	private Long ts;
+	
 	@Field(index = false, store = false, type = FieldType.Keyword)
 	private Boolean affiliated;
 	@Field(index = false, store = false, type=FieldType.Double)
@@ -122,12 +120,7 @@ public class AffiliationToken {
 	public void setUrl(final String url) {
 		this.url = url;
 	}
-	public long getTs() {
-		return ts;
-	}
-	public void setTs(final long ts) {
-		this.ts = ts;
-	}
+
 
 	public String getIp() {
 		return ip;
