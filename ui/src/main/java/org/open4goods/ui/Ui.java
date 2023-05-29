@@ -3,7 +3,7 @@ package org.open4goods.ui;
 
 import java.io.IOException;
 
-import org.open4goods.dao.AggregatedDataRepository;
+import org.open4goods.dao.ProductRepository;
 import org.open4goods.services.SerialisationService;
 import org.open4goods.ui.repository.AffiliationTokenRepository;
 import org.slf4j.Logger;
@@ -26,7 +26,7 @@ import jakarta.annotation.PreDestroy;
 @EnableScheduling
 @EnableCaching
 @Configuration
-@EnableElasticsearchRepositories(basePackageClasses = {AggregatedDataRepository.class, AffiliationTokenRepository.class})
+@EnableElasticsearchRepositories(basePackageClasses = {ProductRepository.class, AffiliationTokenRepository.class})
 public class Ui {
 
 	private static final Logger logger = LoggerFactory.getLogger(Ui.class);

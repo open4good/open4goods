@@ -28,7 +28,7 @@ import org.open4goods.model.data.Rating;
 import org.open4goods.model.data.RatingType;
 import org.open4goods.model.product.AggregatedAttribute;
 import org.open4goods.model.product.AggregatedAttributes;
-import org.open4goods.model.product.AggregatedData;
+import org.open4goods.model.product.Product;
 import org.open4goods.model.product.AggregatedFeature;
 import org.open4goods.model.product.IAttribute;
 import org.open4goods.model.product.SourcedAttribute;
@@ -48,7 +48,7 @@ public class AttributeAggregationService extends AbstractAggregationService {
 	
 
 	@Override
-	public AggregatedData onAggregatedData(AggregatedData data, Set<AggregatedData> datas) {
+	public Product onAggregatedData(Product data, Set<Product> datas) {
 	
 		
 		AggregatedAttributes aa = data.getAttributes();
@@ -118,7 +118,7 @@ public class AttributeAggregationService extends AbstractAggregationService {
 	 * @param match2
 	 */
 	@Override
-	public void onDataFragment(final DataFragment d, final AggregatedData output) {
+	public void onDataFragment(final DataFragment d, final Product output) {
 		
 		AggregatedAttributes aa = output.getAttributes();
 				
@@ -358,7 +358,7 @@ public class AttributeAggregationService extends AbstractAggregationService {
 	 * @param aa
 	 * @param output 
 	 */
-	private void handleReferentielAttributes(Map<String, String> refAttrs, AggregatedAttributes aa, AggregatedData output) {
+	private void handleReferentielAttributes(Map<String, String> refAttrs, AggregatedAttributes aa, Product output) {
 
 		for (Entry<String, String> attr : refAttrs.entrySet()) {
 			// TODO ( p1, DESIGN, 0.5) : tHIS HOLLY FUCK BUG. ATTR.GETkEY IS an enum, but returns a .. String and goes into classcast.. Sic ! 

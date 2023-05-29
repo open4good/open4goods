@@ -10,7 +10,7 @@
 //import org.open4goods.model.attribute.Cardinality;
 //import org.open4goods.model.data.DataFragment;
 //import org.open4goods.model.data.Rating;
-//import org.open4goods.model.product.AggregatedData;
+//import org.open4goods.model.product.Product;
 //import org.open4goods.model.product.SourcedRating;
 //import org.open4goods.services.StandardiserService;
 //import org.slf4j.Logger;
@@ -51,7 +51,7 @@
 //	 * @param match2
 //	 */
 //	@Override
-//	public void onDataFragment(final DataFragment d, final AggregatedData output) {
+//	public void onDataFragment(final DataFragment d, final Product output) {
 //				
 //		// Converting to SourcedRatings
 //		Set<SourcedRating> ratings = d.getRatings().stream().map(e -> new SourcedRating(e,d)).collect(Collectors.toSet()) ;
@@ -72,7 +72,7 @@
 //	
 //
 //	@Override
-//	public void onDataFragment(final Set<DataFragment> input, final AggregatedData output) {
+//	public void onDataFragment(final Set<DataFragment> input, final Product output) {
 //		
 //		////////////////////////////////////////////////////////////////
 //		// Creating the comments global rating
@@ -135,7 +135,7 @@
 //	 * Associates cardinality to ratings and operates relativisation
 //	 */
 //	@Override
-//	public void onAggregatedData(AggregatedData data, AggregatorTank tank, Map<String, Object> batchDatas) {
+//	public void onAggregatedData(Product data, AggregatorTank tank, Map<String, Object> batchDatas) {
 //		data.getRatings().forEach(r -> {						
 //			
 //				// Associating cardinality

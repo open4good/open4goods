@@ -7,7 +7,7 @@ import java.util.Set;
 import org.open4goods.exceptions.AggregationSkipException;
 import org.open4goods.helper.GenericFileLogger;
 import org.open4goods.model.data.DataFragment;
-import org.open4goods.model.product.AggregatedData;
+import org.open4goods.model.product.Product;
 import org.slf4j.Logger;
 
 import ch.qos.logback.classic.Level;
@@ -32,7 +32,7 @@ public abstract class AbstractAggregationService  implements Closeable {
 	 * Called on each participant DataFragment, in realtime mode
 	 * @param data
 	 */
-	public void onDataFragment (final DataFragment input, final AggregatedData output) throws AggregationSkipException {}
+	public void onDataFragment (final DataFragment input, final Product output) throws AggregationSkipException {}
 
 	
 	/**
@@ -41,7 +41,7 @@ public abstract class AbstractAggregationService  implements Closeable {
 	 * @param datas
 	 * @return
 	 */
-	public  AggregatedData onAggregatedData(AggregatedData data, Set<AggregatedData> datas) {
+	public  Product onAggregatedData(Product data, Set<Product> datas) {
 		return data;
 	};
 	

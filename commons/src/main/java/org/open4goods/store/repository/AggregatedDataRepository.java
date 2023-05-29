@@ -1,6 +1,6 @@
 package org.open4goods.store.repository;
 
-import org.open4goods.model.product.AggregatedData;
+import org.open4goods.model.product.Product;
 import org.springframework.data.elasticsearch.repository.ElasticsearchRepository;
 
 /**
@@ -9,7 +9,7 @@ import org.springframework.data.elasticsearch.repository.ElasticsearchRepository
  *
  */
 
-public interface  AggregatedDataRepository extends ElasticsearchRepository<AggregatedData, String> {
+public interface  AggregatedDataRepository extends ElasticsearchRepository<Product, String> {
 
 
 

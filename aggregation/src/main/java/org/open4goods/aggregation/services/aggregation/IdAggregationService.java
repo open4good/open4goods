@@ -2,7 +2,7 @@ package org.open4goods.aggregation.services.aggregation;
 
 import org.open4goods.aggregation.AbstractAggregationService;
 import org.open4goods.model.data.DataFragment;
-import org.open4goods.model.product.AggregatedData;
+import org.open4goods.model.product.Product;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -16,7 +16,7 @@ public class IdAggregationService extends AbstractAggregationService {
 	}
 
 	@Override
-	public void onDataFragment(final DataFragment input, final AggregatedData output) {
+	public void onDataFragment(final DataFragment input, final Product output) {
 
 		// ID is defined in barcode aggregation service
 		

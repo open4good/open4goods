@@ -7,7 +7,7 @@
 //import org.springframework.data.elasticsearch.annotations.FieldType;
 //
 ///**
-// * Contains the stats / results about the construction of an AggregatedData
+// * Contains the stats / results about the construction of an Product
 // * @author goulven
 // *
 // */

@@ -6,7 +6,7 @@ import org.open4goods.aggregation.AbstractAggregationService;
 import org.open4goods.config.yml.ui.DescriptionsAggregationConfig;
 import org.open4goods.model.data.DataFragment;
 import org.open4goods.model.data.Description;
-import org.open4goods.model.product.AggregatedData;
+import org.open4goods.model.product.Product;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 public class DescriptionsAggregationService extends AbstractAggregationService{
@@ -21,7 +21,7 @@ public class DescriptionsAggregationService extends AbstractAggregationService{
 	}
 
 	@Override
-	public void onDataFragment(DataFragment o, final AggregatedData output) {
+	public void onDataFragment(DataFragment o, final Product output) {
 
 			
 			for (final Description d : o.getDescriptions()) {

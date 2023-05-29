@@ -7,7 +7,7 @@ import org.open4goods.config.yml.ui.VerticalConfig;
 import org.open4goods.helper.IdHelper;
 import org.open4goods.model.data.DataFragment;
 import org.open4goods.model.data.Resource;
-import org.open4goods.model.product.AggregatedData;
+import org.open4goods.model.product.Product;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,7 +38,7 @@ public class MediaAggregationService extends AbstractAggregationService{
     }
 
 	@Override
-	public void onDataFragment(final DataFragment input, final AggregatedData output) {
+	public void onDataFragment(final DataFragment input, final Product output) {
 
 		if (config.getResourcesConfig().getSkipResourcesFetching()) {
 			logger.info("Skipping resource download : {}",input);

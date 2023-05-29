@@ -1,7 +1,7 @@
 package org.open4goods.ui.controllers.ui;
 
 import org.open4goods.config.yml.ui.VerticalConfig;
-import org.open4goods.model.product.AggregatedData;
+import org.open4goods.model.product.Product;
 import org.open4goods.services.VerticalsConfigService;
 import org.open4goods.ui.controllers.dto.DataTableRequest;
 import org.open4goods.ui.controllers.dto.DataTableResults;
@@ -31,10 +31,10 @@ public class DataTableController {
 
 	
 	@RequestMapping(value="/{vertical:[a-z-]+}/paginated", method=RequestMethod.GET)
-	public DataTableResults<AggregatedData> listUsersPaginated(@PathVariable(name = "vertical") String vertical, HttpServletRequest request, HttpServletResponse response) {
+	public DataTableResults<Product> listUsersPaginated(@PathVariable(name = "vertical") String vertical, HttpServletRequest request, HttpServletResponse response) {
 		
 		
-		DataTableRequest<AggregatedData> dataTableInRQ = new DataTableRequest<AggregatedData>(request);
+		DataTableRequest<Product> dataTableInRQ = new DataTableRequest<Product>(request);
 		PaginationCriteria pagination = dataTableInRQ.getPaginationRequest();
 		
 		VerticalConfig vConfig = verticalService.getLanguageForVerticalPath(vertical);
@@ -100,7 +100,7 @@ public class DataTableController {
 		
 		VerticalSearchResponse vResults = searchService.verticalSearch(vConfig, vRequest);
 		
-		DataTableResults<AggregatedData> dataTableResult = new DataTableResults<AggregatedData>();
+		DataTableResults<Product> dataTableResult = new DataTableResults<Product>();
 		dataTableResult.setDraw(dataTableInRQ.getDraw());
 		dataTableResult.setData(vResults.getData());
 

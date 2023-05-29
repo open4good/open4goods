@@ -11,7 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 
 /**
- * Orchestration class that contains and orchestrate AggregationServices against a set of FragmentData to obtain an AggregatedData
+ * Orchestration class that contains and orchestrate AggregationServices against a set of FragmentData to obtain an Product
  * @author goulven
  *
  */

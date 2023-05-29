@@ -1,6 +1,6 @@
 package org.open4goods.services;
 
-import org.open4goods.model.product.AggregatedData;
+import org.open4goods.model.product.Product;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.expression.EvaluationException;
@@ -46,7 +46,7 @@ public class EvaluationService {
 	 * @param spel
 	 * @return
 	 */
-	public Boolean spelEval(final AggregatedData p, final String spel) {
+	public Boolean spelEval(final Product p, final String spel) {
 		final Expression expression = expressionParser.parseExpression(spel);
 		try {
 			return expression.getValue(p, Boolean.class);
@@ -63,7 +63,7 @@ public class EvaluationService {
 	 * @param spel
 	 * @return
 	 */
-	public String spelCompute(final AggregatedData p, final String spel) {
+	public String spelCompute(final Product p, final String spel) {
 		final Expression expression = expressionParser.parseExpression(spel);
 		try {
 			return expression.getValue(p, String.class);
@@ -74,7 +74,7 @@ public class EvaluationService {
 	}
 
 
-//	public String thymeleafEval(final AggregatedData p, final String template) {
+//	public String thymeleafEval(final Product p, final String template) {
 //		/**
 //		 * Generate a name from the thymleaf template weared in conf
 //		 *
@@ -128,7 +128,7 @@ public class EvaluationService {
 	 * @param blablaContext 
 	 * @return
 	 */
-	private String replaceVar(String var, AggregatedData data) {
+	private String replaceVar(String var, Product data) {
 
 		String[] frags = var.trim().toUpperCase().split("\\.");
 

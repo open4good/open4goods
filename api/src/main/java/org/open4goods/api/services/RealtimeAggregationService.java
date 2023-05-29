@@ -17,10 +17,10 @@ import org.open4goods.aggregation.services.aggregation.VerticalAggregationServic
 import org.open4goods.api.config.yml.ApiProperties;
 import org.open4goods.config.yml.ui.VerticalConfig;
 import org.open4goods.config.yml.ui.VerticalProperties;
-import org.open4goods.dao.AggregatedDataRepository;
+import org.open4goods.dao.ProductRepository;
 import org.open4goods.exceptions.AggregationSkipException;
 import org.open4goods.model.data.DataFragment;
-import org.open4goods.model.product.AggregatedData;
+import org.open4goods.model.product.Product;
 import org.open4goods.services.BarcodeValidationService;
 import org.open4goods.services.DataSourceConfigService;
 import org.open4goods.services.EvaluationService;
@@ -35,7 +35,7 @@ import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import jakarta.annotation.PreDestroy;
 
 /**
- * This service is in charge of building AggregatedData in realtime mode
+ * This service is in charge of building Product in realtime mode
  * 
  * @author goulven
  *
@@ -52,7 +52,7 @@ public class RealtimeAggregationService {
 
 	private AutowireCapableBeanFactory autowireBeanFactory;
 
-	private AggregatedDataRepository aggregatedDataRepository;
+	private ProductRepository aggregatedDataRepository;
 
 	private ApiProperties apiProperties;
 
@@ -70,7 +70,7 @@ public class RealtimeAggregationService {
 
 	public RealtimeAggregationService(EvaluationService evaluationService,
 			ReferentielService referentielService, StandardiserService standardiserService,
-			AutowireCapableBeanFactory autowireBeanFactory, AggregatedDataRepository aggregatedDataRepository,
+			AutowireCapableBeanFactory autowireBeanFactory, ProductRepository aggregatedDataRepository,
 			ApiProperties apiProperties, Gs1PrefixService gs1prefixService,
 			DataSourceConfigService dataSourceConfigService, VerticalsConfigService configService, 
 			BarcodeValidationService barcodeValidationService) {
@@ -98,7 +98,7 @@ public class RealtimeAggregationService {
 
 
 
-	public AggregatedData process(DataFragment df, AggregatedData data) throws AggregationSkipException {
+	public Product process(DataFragment df, Product data) throws AggregationSkipException {
 		return aggregator.build(df, data);
 	}
 

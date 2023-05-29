@@ -9,12 +9,12 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.commons.lang3.StringUtils;
 import org.open4goods.api.services.RealtimeAggregationService;
-import org.open4goods.dao.AggregatedDataRepository;
+import org.open4goods.dao.ProductRepository;
 import org.open4goods.exceptions.AggregationSkipException;
 import org.open4goods.exceptions.ValidationException;
 import org.open4goods.model.Standardisable;
 import org.open4goods.model.data.DataFragment;
-import org.open4goods.model.product.AggregatedData;
+import org.open4goods.model.product.Product;
 import org.open4goods.services.StandardiserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -53,7 +53,7 @@ public class DataFragmentStoreService {
 	// The file queue implementation
 	private final Map<String, DataFragment > fileQueue = new ConcurrentHashMap<>();
 
-	private AggregatedDataRepository aggregatedDataRepository;
+	private ProductRepository aggregatedDataRepository;
 
 	private RealtimeAggregationService generationService;
 
@@ -62,7 +62,7 @@ public class DataFragmentStoreService {
 	 *
 	 * @param queueFolder The folder where indexation queued datas will be stored
 	 */
-	public DataFragmentStoreService(StandardiserService standardiserService, RealtimeAggregationService generationService, AggregatedDataRepository aggregatedDataRepository) {
+	public DataFragmentStoreService(StandardiserService standardiserService, RealtimeAggregationService generationService, ProductRepository aggregatedDataRepository) {
 
 
 		this.standardiserService = standardiserService;
@@ -192,7 +192,7 @@ public class DataFragmentStoreService {
 				
 				
 				// Retrieving datafragments
-				Map<String, AggregatedData> aggDatas = aggregatedDataRepository.multiGetById(
+				Map<String, Product> aggDatas = aggregatedDataRepository.multiGetById(
 							
 						buffer.stream()
 						.filter(s -> StringUtils.isNotBlank(s.gtin()))
@@ -200,12 +200,12 @@ public class DataFragmentStoreService {
 
 				
 				// Aggregating to product datas
-				Set<AggregatedData> results = new HashSet<AggregatedData>();
+				Set<Product> results = new HashSet<Product>();
 				
 				for (DataFragment df : buffer) {
-					AggregatedData data = aggDatas.get(df.gtin());						
+					Product data = aggDatas.get(df.gtin());						
 					if (null == data) {
-						data = new AggregatedData();
+						data = new Product();
 						data.setCreationDate(System.currentTimeMillis());
 					}
 					

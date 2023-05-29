@@ -6,7 +6,7 @@
 //import org.open4goods.aggregation.AbstractAggregationService;
 //import org.open4goods.model.Localisable;
 //import org.open4goods.model.data.DataFragment;
-//import org.open4goods.model.product.AggregatedData;
+//import org.open4goods.model.product.Product;
 //import org.open4goods.model.product.Urls;
 //import org.open4goods.services.EvaluationService;
 //import org.slf4j.Logger;
@@ -30,7 +30,7 @@
 //	}
 //
 //	@Override
-//	public void onDataFragment(final DataFragment input, final AggregatedData output) {
+//	public void onDataFragment(final DataFragment input, final Product output) {
 //		final Urls urls = new Urls();
 //
 //		for (final Entry<String, String> tpl : productTemplates.entrySet()) {
@@ -39,7 +39,7 @@
 //		output.setUrls(urls);
 //	}
 //
-//	public String getProductUrl(final AggregatedData p, final String language) {
+//	public String getProductUrl(final Product p, final String language) {
 ////		String template = null;
 ////		try {
 ////				template = productTemplates.getOrDefault(language, productTemplates.get("default")).replace("!{", "${");

@@ -5,7 +5,7 @@ import java.util.List;
 import org.open4goods.aggregation.AbstractAggregationService;
 import org.open4goods.exceptions.AggregationSkipException;
 import org.open4goods.model.data.DataFragment;
-import org.open4goods.model.product.AggregatedData;
+import org.open4goods.model.product.Product;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,14 +26,14 @@ public class RealTimeAggregator extends AbstractAggregator {
 
 	
 	/**
-	 * Build the AggregatedData using the services registered on this aggregator
+	 * Build the Product using the services registered on this aggregator
 	 * @param datas
 	 * @return
 	 * @throws AggregationSkipException 
 	 */
-	public AggregatedData build(final DataFragment fragment, final AggregatedData data ) throws AggregationSkipException {
+	public Product build(final DataFragment fragment, final Product data ) throws AggregationSkipException {
 
-		logger.info("Incrementing AggregatedData with {} DataFragment and using {} services",fragment,services.size());
+		logger.info("Incrementing Product with {} DataFragment and using {} services",fragment,services.size());
 
 		// Call transformation building registered service
 		for (final AbstractAggregationService service : services) {

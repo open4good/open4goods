@@ -12,7 +12,7 @@ import org.open4goods.aggregation.AbstractAggregationService;
 import org.open4goods.config.yml.ui.VerticalProperties;
 import org.open4goods.model.constants.ProductState;
 import org.open4goods.model.data.DataFragment;
-import org.open4goods.model.product.AggregatedData;
+import org.open4goods.model.product.Product;
 import org.open4goods.model.product.AggregatedPrice;
 import org.open4goods.model.product.AggregatedPrices;
 import org.open4goods.model.product.PriceHistory;
@@ -42,7 +42,7 @@ public class PriceAggregationService extends AbstractAggregationService {
 	}
 
 	@Override
-	public void onDataFragment(final DataFragment e, final AggregatedData aggregatedData) {
+	public void onDataFragment(final DataFragment e, final Product aggregatedData) {
 
 	
 		if (!e.hasPrice() || !e.affiliated()) {

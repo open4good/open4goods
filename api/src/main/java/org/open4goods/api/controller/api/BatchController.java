@@ -10,7 +10,7 @@ package org.open4goods.api.controller.api;
 import java.io.IOException;
 
 import org.open4goods.api.services.BatchService;
-import org.open4goods.dao.AggregatedDataRepository;
+import org.open4goods.dao.ProductRepository;
 import org.open4goods.exceptions.InvalidParameterException;
 import org.open4goods.model.constants.RolesConstants;
 import org.slf4j.Logger;
@@ -27,7 +27,7 @@ public class BatchController {
 	@Autowired
 	private BatchService batchService;
 
-	@Autowired AggregatedDataRepository aggDataRepository;
+	@Autowired ProductRepository aggDataRepository;
 	
 	private static final Logger logger = LoggerFactory.getLogger(BatchController.class);
 	

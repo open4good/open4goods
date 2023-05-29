@@ -1,13 +1,13 @@
 package org.open4goods.test;
 
-import org.open4goods.model.product.AggregatedData;
+import org.open4goods.model.product.Product;
 public class ProductTestBuilder {
 
-	private final AggregatedData aggregatedData;
+	private final Product aggregatedData;
 
 
 
-	public ProductTestBuilder(final AggregatedData aggregatedData) {
+	public ProductTestBuilder(final Product aggregatedData) {
 		this.aggregatedData = aggregatedData;
 	}
 
@@ -28,7 +28,7 @@ public class ProductTestBuilder {
 //	}
 
 
-	public AggregatedData build() {
+	public Product build() {
 		return aggregatedData;
 	}
 

@@ -121,7 +121,7 @@ public class DataFragment implements Standardisable, Validable {
 	private Set<Description> descriptions = new HashSet<>();
 
 	/**
-	 * AggregatedData data productTags
+	 * Product data productTags
 	 */
 	@Field(index = false, store = false, type = FieldType.Text)
 	private String category;
