@@ -99,12 +99,17 @@ public class Product implements Standardisable {
 	private GtinInfo gtinInfos = new GtinInfo();
 
 	/**
-	 * The set of participating "productTags", on datasources that build this
+	 * The set of participating "productCategories", on datasources that build this
 	 * aggregatedData
 	 */
 	@Field(index = true, store = false, type = FieldType.Keyword)
 	private Set<String> datasourceCategories = new HashSet<>();
 
+	@Field(index = false, store = false, type = FieldType.Keyword)
+	//TODO : ungly names, could be versionned / merged with datasourceCategories
+	// TODO: ensure ignored
+	private Map<String, String> mappedCategories = new HashMap<>();
+	
 	//	/**
 	//	 * All the ratings
 	//	 */
@@ -347,6 +352,9 @@ public class Product implements Standardisable {
 		return list;
 
 	}
+	
+	
+	
 
 	/**
 	 *
@@ -592,4 +600,14 @@ public class Product implements Standardisable {
 		this.vertical = vertical;
 	}
 
+	public Map<String, String> getMappedCategories() {
+		return mappedCategories;
+	}
+
+	public void setMappedCategories(Map<String, String> mappedCategories) {
+		this.mappedCategories = mappedCategories;
+	}
+
+	
+	
 }
