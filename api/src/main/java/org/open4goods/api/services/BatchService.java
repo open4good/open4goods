@@ -71,6 +71,28 @@ public class BatchService {
 		for (VerticalConfig vertical : verticalsService.getConfigsWithoutDefault()) {
 			BatchedAggregator agg = batchAggregationService.getAggregator(vertical);
 
+			
+			
+			
+			/**
+			 * BrandScore2ProductScore
+
+			 * Attribute2score
+			 *   Cardinality score attributes
+			 *   Relativisation score attributes
+			 * 
+			 * 
+			 * VirtualRatings 
+			 * Score2score génération
+			 *   Cardinality score attributes
+			 *   Relativisation score attributes
+
+			 *  
+			 * 
+			 */
+			
+			
+			
 			// Warning, full vertical load
 			Set<Product> datas = dataRepository.exportVerticalWithValidDate(vertical.getId()).collect(Collectors.toSet());
 
