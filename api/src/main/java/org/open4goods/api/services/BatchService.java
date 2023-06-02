@@ -76,13 +76,16 @@ public class BatchService {
 			
 			/**
 			 * BrandScore2ProductScore
+			 *   Cardinality score attributes
+			 *   Relativisation score attributes
 
 			 * Attribute2score
 			 *   Cardinality score attributes
 			 *   Relativisation score attributes
 			 * 
 			 * 
-			 * VirtualRatings 
+			 * VirtualRatings
+			 *  
 			 * Score2score génération
 			 *   Cardinality score attributes
 			 *   Relativisation score attributes

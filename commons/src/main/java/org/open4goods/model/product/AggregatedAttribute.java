@@ -6,6 +6,7 @@ import java.util.stream.Collectors;
 
 import org.open4goods.model.attribute.AttributeType;
 import org.open4goods.model.data.Rating;
+import org.open4goods.model.data.Score;
 import org.springframework.data.elasticsearch.annotations.Field;
 import org.springframework.data.elasticsearch.annotations.FieldType;
 
@@ -40,7 +41,7 @@ public class AggregatedAttribute implements IAttribute {
 	 * If converted to a score, the score.
 	 */
 	@Field(index = true, store = false, type = FieldType.Object)
-	private Rating score;
+	private Score score;
 
 
 
@@ -149,12 +150,11 @@ public class AggregatedAttribute implements IAttribute {
 		return null;
 	}
 
-
-
-	public Rating getScore() {
+	public Score getScore() {
 		return score;
 	}
-	public void setScore(Rating score) {
+
+	public void setScore(Score score) {
 		this.score = score;
 	}
 
