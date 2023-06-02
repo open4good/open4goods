@@ -8,6 +8,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.open4goods.exceptions.ValidationException;
 import org.open4goods.model.Standardisable;
 import org.open4goods.model.Validable;
+import org.open4goods.model.attribute.Cardinality;
 import org.open4goods.model.constants.Currency;
 import org.open4goods.services.StandardiserService;
 import org.slf4j.Logger;
@@ -27,18 +28,20 @@ public class Score  implements Validable, Standardisable {
 	@Field(index = true, store = false, type = FieldType.Double)
 	private Double value;
 
-	/**
-	 * The max scale for this rating
-	 */
-	@Field(index = false, store = false, type = FieldType.Double)
-	private Double max;
+	
+	@Field(index = true, store = false, type = FieldType.Double)
+	// The relativised value
+	private Double relValue;
+	
 
-	/**
-	 * The (optional) min scale
-	 */
-	@Field(index = false, store = false, type = FieldType.Boolean)
+	@Field(index = true, store = false, type = FieldType.Boolean)
 	private Boolean virtual = false;
-
+	
+	
+	@Field(index = true, store = false, type = FieldType.Object)
+	// 	TODO : CEould be computed and maintained better that stored that way.
+	// The score cardinality if computed
+	private Cardinality cardinality;
 
 	////////////////////////////////////////
 	// Contracts
@@ -65,9 +68,7 @@ public class Score  implements Validable, Standardisable {
 			result.add(ValidationMessage.newValidationMessage("MISSING-VALUE"));
 		}
 
-		if (null == max) {
-			result.add(ValidationMessage.newValidationMessage("MISSING-MAX"));
-		}
+
 
 			
 	}
@@ -84,20 +85,13 @@ public class Score  implements Validable, Standardisable {
 
 
 
-	@Override
-	public int hashCode() {
-		return Objects.hash(value, min, max, tags);
-	}
 
 
 	@Override
 	public boolean equals(final Object obj) {
 		if (obj instanceof Score) {
 			final Score o = (Score) obj;
-			return Objects.equals(value, o.getValue()) && Objects.equals(min, o.getMin())
-					&& Objects.equals(max, o.getMax())
-					//					&& Objects.equals(this.label, o.getLabel())
-					&& Objects.equals(tags, o.getTags());
+			return Objects.equals(name, o.getName()) ;
 		}
 
 		return false;
@@ -133,15 +127,6 @@ public class Score  implements Validable, Standardisable {
 			return false;
 		}
 	}
-
-	public void addTag(RatingType rType) {
-		tags.add(rType.toString());
-	}
-
-	public void addTag(String rType) {
-		tags.add(rType);
-	}
-
 
 
 	@JsonIgnore
@@ -203,14 +188,6 @@ public class Score  implements Validable, Standardisable {
 		this.value = value;
 	}
 
-	public Double getMax() {
-		return max;
-	}
-
-	public void setMax(final Double max) {
-		this.max = max;
-	}
-
 	public String getName() {
 		return name;
 	}
@@ -225,6 +202,22 @@ public class Score  implements Validable, Standardisable {
 
 	public void setVirtual(Boolean virtual) {
 		this.virtual = virtual;
+	}
+
+	public Cardinality getCardinality() {
+		return cardinality;
+	}
+
+	public void setCardinality(Cardinality cardinality) {
+		this.cardinality = cardinality;
+	}
+
+	public Double getRelValue() {
+		return relValue;
+	}
+
+	public void setRelValue(Double relValue) {
+		this.relValue = relValue;
 	}
 
 	
