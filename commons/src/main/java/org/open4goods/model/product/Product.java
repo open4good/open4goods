@@ -17,6 +17,7 @@ import org.open4goods.model.constants.ProviderType;
 import org.open4goods.model.constants.ReferentielKey;
 import org.open4goods.model.data.Description;
 import org.open4goods.model.data.Resource;
+import org.open4goods.model.data.Score;
 import org.open4goods.services.StandardiserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -110,6 +111,9 @@ public class Product implements Standardisable {
 	// TODO: ensure ignored
 	private Map<String, String> mappedCategories = new HashMap<>();
 	
+	@Field(index = true, store = false, type = FieldType.Object)
+	private Set<Score> scores = new HashSet<>();
+	// 
 	//	/**
 	//	 * All the ratings
 	//	 */
@@ -606,6 +610,14 @@ public class Product implements Standardisable {
 
 	public void setMappedCategories(Map<String, String> mappedCategories) {
 		this.mappedCategories = mappedCategories;
+	}
+
+	public Set<Score> getScores() {
+		return scores;
+	}
+
+	public void setScores(Set<Score> scores) {
+		this.scores = scores;
 	}
 
 	

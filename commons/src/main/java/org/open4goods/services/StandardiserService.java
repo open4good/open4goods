@@ -3,6 +3,7 @@ package org.open4goods.services;
 import org.open4goods.model.constants.Currency;
 import org.open4goods.model.data.Price;
 import org.open4goods.model.data.Rating;
+import org.open4goods.model.data.Score;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,6 +37,19 @@ public abstract class StandardiserService {
 			logger.warn("Cannot standardize rating : {}",e.getMessage());
 		}
 
+	}
+
+	public static void standarise(Score score) {
+		final Double max = score.getMax();
+		final Double value = score.getValue();
+
+		try {
+			score.setValue(value * DEFAULT_MAX_RATING / max);
+			score.setMax(DEFAULT_MAX_RATING);
+		} catch (final Exception e) {
+			logger.warn("Cannot standardize rating : {}",e.getMessage());
+		}	
+		
 	}
 
 }

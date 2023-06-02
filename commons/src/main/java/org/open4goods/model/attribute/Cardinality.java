@@ -2,6 +2,7 @@ package org.open4goods.model.attribute;
 
 import org.open4goods.exceptions.InvalidParameterException;
 import org.open4goods.model.data.Rating;
+import org.open4goods.model.data.Score;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -61,6 +62,41 @@ public class Cardinality {
 	 * @throws InvalidParameterException
 	 */
 	public void increment(final Rating r) {
+
+		try {
+			// Min
+			if (null == min || min > r.getValue()) {
+				min = r.getValue();
+			}
+
+			// Max
+			if (null == max || max < r.getValue()) {
+				max = r.getValue();
+			}
+
+			// Count
+			count++;
+
+			// Sum
+			sum += r.getValue();
+
+			// Average
+			avg = sum / Double.valueOf(count);
+
+		} catch (Exception e) {
+			logger.error("Cardinality computation failed : {}", e.getMessage());
+		}
+	}
+	
+	
+	
+	/**
+	 * Increments rating cardinality with a
+	 *
+	 * @param r
+	 * @throws InvalidParameterException
+	 */
+	public void increment(final Score r) {
 
 		try {
 			// Min

@@ -88,7 +88,6 @@ public class AttributeAggregationService extends AbstractAggregationService {
 		Set<AggregatedAttribute> aggattrs = aggregateAttributes(matchedAttrs);
 		for (AggregatedAttribute aga : aggattrs) {
 			aa.getAggregatedAttributes().put(aga.getName(), aga);
-			aga.setScore(generateScoresFromAttribute(aga.getName() ,aga));
 		}
 
 		dedicatedLogger.info("{} recognized attributes, {} are not ",matchedAttrs.size(),allAttrs.size());
@@ -183,7 +182,6 @@ public class AttributeAggregationService extends AbstractAggregationService {
 		Set<AggregatedAttribute> aggattrs = aggregateAttributes(matchedAttrs);
 		for (AggregatedAttribute aga : aggattrs) {
 
-			aga.setScore(generateScoresFromAttribute(aga.getName() ,aga));
 			aa.getAggregatedAttributes().put(aga.getName(), aga);
 
 		}
@@ -509,62 +507,6 @@ public class AttributeAggregationService extends AbstractAggregationService {
 		return attr;
 
 	}
-
-
-
-	/**
-	 * Generate the score (min, max, value) from an aggregatedattribute
-	 * @param attributeKey
-	 * @param a
-	 * @return
-	 */
-	public Rating generateScoresFromAttribute(String attributeKey , AggregatedAttribute a) {
-
-		AttributeConfig ac = attributesConfig.getAttributeConfigByKey(attributeKey);
-		// transformation required
-		if (ac.getNumericMapping().size() > 0) {
-			try {
-				// This is a numeric mapping
-				Rating r = new Rating();
-
-				r.setMax(ac.maxRating());
-				r.setMin(ac.minRating().intValue());
-
-				r.setValue(ac.getNumericMapping().get(a.getValue()));
-
-				if (null == r.getValue()) {
-					dedicatedLogger.warn("No matching found in numericMappings for attribute {} and value  {}",ac,a.getValue());
-					return null;
-				}
-
-
-				// tags
-				r.getTags().addAll(ac.getRatingTags());
-				r.getTags().add(RatingType.FROM_ATTRIBUTE.toString());
-
-				// Standardization (re-scaling)
-				StandardiserService.standariseRating(r);
-
-				// Adding
-				return r;
-
-			} catch (NoSuchFieldException | ValidationException e) {
-				dedicatedLogger.warn("Attribute to rating conversion failed : {}",e.getMessage());
-			}
-
-		} else {
-			dedicatedLogger.error("Was asking to  translate {} into rating, but no numericMapping definition !",a);
-		}
-
-
-
-
-		return null;
-
-
-	}
-
-
 
 
 }
