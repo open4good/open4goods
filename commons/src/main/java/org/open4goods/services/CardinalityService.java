@@ -25,6 +25,19 @@ public class CardinalityService {
 
 	
 	private Map<String, Cardinality> cardinalities = new ConcurrentHashMap<>();
+
+
+	public Map<String, Cardinality> getCardinalities() {
+		return cardinalities;
+	}
+
+
+	public void setCardinalities(Map<String, Cardinality> cardinalities) {
+		this.cardinalities = cardinalities;
+	}
+	
+	
+	
 	
 	
 
