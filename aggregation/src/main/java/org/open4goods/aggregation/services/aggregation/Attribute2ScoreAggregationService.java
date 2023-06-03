@@ -40,13 +40,18 @@ public class Attribute2ScoreAggregationService extends AbstractScoreAggregationS
 		Collection<AggregatedAttribute> aggattrs =    data.getAttributes().getAggregatedAttributes().values()  ;
 		for (AggregatedAttribute aga : aggattrs) {
 			// Scoring from attribute
-			Score score = generateScoresFromAttribute(aga.getName() ,aga);
-			
-			// Processing cardinality
-			processCardinality(score);
-			
-			// Saving in product
-			data.getScores().put(score.getName(), score);
+			if (attributesConfig.getAttributeConfigByKey(aga.getName()).isAsRating()) {
+				Score score = generateScoresFromAttribute(aga.getName() ,aga);
+				if (null == score) {
+					dedicatedLogger.error("Null score generated for attribute {}", aga);
+				} else {
+					// Processing cardinality
+					processCardinality(score);
+					
+					// Saving in product
+					data.getScores().put(score.getName(), score);									
+				}
+			}
 		}
 	}
 

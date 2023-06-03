@@ -136,7 +136,7 @@ public class AbstractScoreAggregationService extends  AbstractAggregationService
 	protected void processCardinality(Score score) {
 
 
-		if (null == score.getValue()) {
+		if (null == score || null == score.getValue()) {
 			LOGGER.warn("Empty value for Score {} ! Consider normalizing in a futur export/import phase",score);
 			return;
 		}

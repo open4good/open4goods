@@ -83,7 +83,7 @@ public class EcoScoreAggregationService extends AbstractScoreAggregationService 
 				return null;
 			}
 			
-			va += score.getCardinality().getRelValue() * Double.valueOf(score.getValue());
+			va += score.getCardinality().getRelValue() * Double.valueOf(config.getValue());
 			// TODO : compute virtual score
 		}
 		
