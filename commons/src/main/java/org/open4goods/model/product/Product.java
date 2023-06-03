@@ -112,7 +112,7 @@ public class Product implements Standardisable {
 	private Map<String, String> mappedCategories = new HashMap<>();
 	
 	@Field(index = true, store = false, type = FieldType.Object)
-	private Set<Score> scores = new HashSet<>();
+	private Map<String, Score> scores = new HashMap<>();
 	// 
 	//	/**
 	//	 * All the ratings
@@ -612,13 +612,14 @@ public class Product implements Standardisable {
 		this.mappedCategories = mappedCategories;
 	}
 
-	public Set<Score> getScores() {
+	public Map<String, Score> getScores() {
 		return scores;
 	}
 
-	public void setScores(Set<Score> scores) {
+	public void setScores(Map<String, Score> scores) {
 		this.scores = scores;
 	}
+
 
 	
 	

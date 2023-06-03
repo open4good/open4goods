@@ -6,7 +6,11 @@ import java.util.List;
 
 import org.open4goods.aggregation.AbstractAggregationService;
 import org.open4goods.aggregation.aggregator.BatchedAggregator;
+import org.open4goods.aggregation.services.aggregation.Attribute2ScoreAggregationService;
 import org.open4goods.aggregation.services.aggregation.AttributeAggregationService;
+import org.open4goods.aggregation.services.aggregation.Brand2ScoreAggregationService;
+import org.open4goods.aggregation.services.aggregation.DataCompletion2ScoreAggregationService;
+import org.open4goods.aggregation.services.aggregation.EcoScoreAggregationService;
 import org.open4goods.api.config.yml.ApiProperties;
 import org.open4goods.config.yml.ui.VerticalConfig;
 import org.open4goods.dao.ProductRepository;
@@ -111,6 +115,10 @@ public class BatchAggregationService  {
 
 
 		services.add(new AttributeAggregationService(config.getAttributesConfig(), apiProperties.logsFolder()));
+		services.add(new Attribute2ScoreAggregationService(config.getAttributesConfig(), apiProperties.logsFolder()));
+		services.add(new Brand2ScoreAggregationService(config.getAttributesConfig(), apiProperties.logsFolder()));
+		services.add(new DataCompletion2ScoreAggregationService(config.getAttributesConfig(), apiProperties.logsFolder()));
+		services.add(new EcoScoreAggregationService(config.getEcoscoreConfig(), apiProperties.logsFolder()));
 
 
 		final BatchedAggregator ret = new BatchedAggregator(services);

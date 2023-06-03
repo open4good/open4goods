@@ -28,16 +28,10 @@ public class Score  implements Validable, Standardisable {
 	@Field(index = true, store = false, type = FieldType.Double)
 	private Double value;
 
-	
-	@Field(index = true, store = false, type = FieldType.Double)
-	// The relativised value
-	private Double relValue;
-	
 	@Field(index = false, store = false, type = FieldType.Double)
-	// The relativised value
-	
-	
 	private Double max;
+
+	@Field(index = true, store = false, type = FieldType.Double)	
 	private Double min;
 	
 
@@ -87,12 +81,15 @@ public class Score  implements Validable, Standardisable {
 
 	@Override
 	public String toString() {
-		return relValue + " :  abs=" + value;
+		return value + " (" + cardinality + ")";
 	}
 
 
 
-
+	@Override
+	public int hashCode() {		
+		return name.hashCode();
+	}
 
 	@Override
 	public boolean equals(final Object obj) {
@@ -219,13 +216,6 @@ public class Score  implements Validable, Standardisable {
 		this.cardinality = cardinality;
 	}
 
-	public Double getRelValue() {
-		return relValue;
-	}
-
-	public void setRelValue(Double relValue) {
-		this.relValue = relValue;
-	}
 
 	public Double getMax() {
 		return max;

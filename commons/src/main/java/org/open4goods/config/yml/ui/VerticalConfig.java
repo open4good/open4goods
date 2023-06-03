@@ -123,6 +123,15 @@ public class VerticalConfig{
 	@JsonMerge
 	private AttributesConfig attributesConfig = new AttributesConfig();
 
+	
+	/**
+	 * Configuration relativ to ecoscore computation. Key / values are : scoreName -> Ponderation (0.1 = 10%)
+	 */ 
+	@JsonMerge
+	private Map<String, String> ecoscoreConfig = new HashMap<>();
+
+	
+	
 	/**
 	 * Configuration relativ to ratings aggregation
 	 */
@@ -576,6 +585,14 @@ public class VerticalConfig{
 
 	public void setUnmatchingCategories(Set<String> unmatchingCategories) {
 		this.unmatchingCategories = unmatchingCategories;
+	}
+
+	public Map<String, String> getEcoscoreConfig() {
+		return ecoscoreConfig;
+	}
+
+	public void setEcoscoreConfig(Map<String, String> ecoscoreConfig) {
+		this.ecoscoreConfig = ecoscoreConfig;
 	}
 
 

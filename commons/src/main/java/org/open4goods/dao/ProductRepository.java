@@ -14,6 +14,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.elasticsearch.client.elc.NativeQuery;
 import org.springframework.data.elasticsearch.client.elc.NativeQueryBuilder;
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
@@ -86,6 +87,7 @@ public class ProductRepository {
 	 */
 	public Stream<Product> exportVerticalWithValidDate(String vertical) {
 
+		
 		Criteria c = new Criteria("vertical.keyword").is(vertical)
 				.and(getValidDateQuery());
 

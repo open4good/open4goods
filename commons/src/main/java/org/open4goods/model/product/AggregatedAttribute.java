@@ -37,14 +37,6 @@ public class AggregatedAttribute implements IAttribute {
 	private Set<ConflictedAttribute> sources = new HashSet<>();
 
 
-	/**
-	 * If converted to a score, the score.
-	 */
-	@Field(index = true, store = false, type = FieldType.Object)
-	private Score score;
-
-
-
 
 	// TODO : Simple, but does not allow to handle conflicts, and so on
 	@Override
@@ -95,7 +87,7 @@ public class AggregatedAttribute implements IAttribute {
 	@Override
 	public String toString() {
 
-		return name + " : " + sources().size() + " source(s), " + (sources.size()-1) +" conflict(s)";
+		return name + " : " +value+ " -> "+  sources().size() + " source(s), " + (sources.size()-1) +" conflict(s)";
 
 
 	}
@@ -148,14 +140,6 @@ public class AggregatedAttribute implements IAttribute {
 	@Override
 	public String getLanguage() {
 		return null;
-	}
-
-	public Score getScore() {
-		return score;
-	}
-
-	public void setScore(Score score) {
-		this.score = score;
 	}
 
 
