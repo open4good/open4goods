@@ -54,6 +54,11 @@ public class Brand2ScoreAggregationService extends AbstractScoreAggregationServi
 	@Override
 	public void onProduct(Product data) {
 
+		
+		if (StringUtils.isEmpty(data.brand())) {
+			return;
+		}
+
 		// Scoring from attribute
 		Score score = generateScoreFromBrand(data.brand());
 		
