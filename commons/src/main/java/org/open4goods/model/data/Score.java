@@ -33,6 +33,13 @@ public class Score  implements Validable, Standardisable {
 	// The relativised value
 	private Double relValue;
 	
+	@Field(index = false, store = false, type = FieldType.Double)
+	// The relativised value
+	
+	
+	private Double max;
+	private Double min;
+	
 
 	@Field(index = true, store = false, type = FieldType.Boolean)
 	private Boolean virtual = false;
@@ -80,7 +87,7 @@ public class Score  implements Validable, Standardisable {
 
 	@Override
 	public String toString() {
-		return StringUtils.join(tags) + " :  abs=" + value;
+		return relValue + " :  abs=" + value;
 	}
 
 
@@ -218,6 +225,22 @@ public class Score  implements Validable, Standardisable {
 
 	public void setRelValue(Double relValue) {
 		this.relValue = relValue;
+	}
+
+	public Double getMax() {
+		return max;
+	}
+
+	public void setMax(Double max) {
+		this.max = max;
+	}
+
+	public Double getMin() {
+		return min;
+	}
+
+	public void setMin(Double min) {
+		this.min = min;
 	}
 
 	

@@ -18,7 +18,6 @@ import org.slf4j.LoggerFactory;
 public class BatchedAggregator extends AbstractAggregator {
 
 	protected static final Logger logger = LoggerFactory.getLogger(BatchedAggregator.class);
-	private Set<Product> datas;
 
 
 
@@ -29,16 +28,13 @@ public class BatchedAggregator extends AbstractAggregator {
 
 	public void close(Set<Product> datas) {
 		super.close();
-		this.datas = null;
+
 
 	}
 
 
 	public void beforeStart(Set<Product> datas) {
 		super.beforeStart();
-		this.datas =datas;
-
-
 	}
 
 
@@ -49,7 +45,7 @@ public class BatchedAggregator extends AbstractAggregator {
 	 * @return
 	 * @throws AggregationSkipException
 	 */
-	public Product update(final Product data, Set<Product> datas) throws AggregationSkipException {
+	public Product update(final Product data) throws AggregationSkipException {
 
 		logger.info("Updating Product with AggragatedData {} and using {} services",data,services.size());
 
@@ -58,7 +54,7 @@ public class BatchedAggregator extends AbstractAggregator {
 		for (final AbstractAggregationService service : services) {
 
 			try {
-				ret = service.onAggregatedData(data,datas);
+				ret = service.onProduct(data);
 
 			}
 			catch (final Exception e) {

@@ -104,7 +104,7 @@ public class BatchService {
 			for (Product data : datas) {
 
 				try {
-					Product updated = agg.update(data,datas);
+					Product updated = agg.update(data);
 
 					//TODO : bulk for performance
 					dataRepository.index(updated);

@@ -48,7 +48,7 @@ public class Attribute2ScoreAggregationService extends AbstractScoreAggregationS
 
 
 	@Override
-	public Product onAggregatedData(Product data, Set<Product> datas) {
+	public Product onProduct(Product data) {
 
 		/////////////////////////////////////////
 		// Update referentiel attributes
@@ -110,7 +110,7 @@ public class Attribute2ScoreAggregationService extends AbstractScoreAggregationS
 				Score r = new Score();
 
 				r.setMax(ac.maxRating());
-				r.setMin(ac.minRating().intValue());
+				r.setMin(ac.minRating());
 
 				r.setValue(ac.getNumericMapping().get(a.getValue()));
 
@@ -118,11 +118,6 @@ public class Attribute2ScoreAggregationService extends AbstractScoreAggregationS
 					dedicatedLogger.warn("No matching found in numericMappings for attribute {} and value  {}",ac,a.getValue());
 					return null;
 				}
-
-
-				// tags
-				r.getTags().addAll(ac.getRatingTags());
-				r.getTags().add(RatingType.FROM_ATTRIBUTE.toString());
 
 				// Standardization (re-scaling)
 				StandardiserService.standarise(r);
