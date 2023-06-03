@@ -41,7 +41,7 @@ public abstract class AbstractAggregationService  implements Closeable {
 	 * @param datas
 	 * @return
 	 */
-	public  Product onAggregatedData(Product data, Set<Product> datas) {
+	public  Product onProduct(Product data) {
 		return data;
 	};
 

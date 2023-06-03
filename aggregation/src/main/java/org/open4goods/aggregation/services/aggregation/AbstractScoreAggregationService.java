@@ -1,29 +1,32 @@
 package org.open4goods.aggregation.services.aggregation;
 
+import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 import org.open4goods.aggregation.AbstractAggregationService;
 import org.open4goods.model.attribute.Cardinality;
-import org.open4goods.model.data.DataFragment;
 import org.open4goods.model.data.Score;
-import org.open4goods.model.product.Product;
-import org.open4goods.model.product.SourcedScore;
 import org.open4goods.services.StandardiserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class AbstractScoreAggregationService extends AbstractAggregationService{
+public class AbstractScoreAggregationService extends  AbstractAggregationService{
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(ScoresAggregationService.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(AbstractScoreAggregationService.class);
 
+	private Map<String, Cardinality>  batchDatas = new HashMap<>();
+	
 	
 	public AbstractScoreAggregationService(String logsFolder) {
 		super(logsFolder);
 	}
 
 
+	@Override
+	public void init() {		
+		super.init();
+		batchDatas.clear();
+	}
 
 
 	/**
@@ -61,24 +64,24 @@ public class AbstractScoreAggregationService extends AbstractAggregationService{
 	 * @param Scores
 	 * @param batchDatas
 	 */
-	private void processCardinality(Score score, Cardinality c ) {
+	private void processCardinality(Score score) {
 
 
 		if (null == score.getValue()) {
-			LOGGER.warn("Empty value for Score {} ! Consider normalizing in a futur export/import phase",r);
+			LOGGER.warn("Empty value for Score {} ! Consider normalizing in a futur export/import phase",score);
 			return;
 		}
 
 		// Retrieving cardinality
-		Cardinality c = (Cardinality) batchDatas.get(r.getName());
+		Cardinality c = (Cardinality) batchDatas.get(score.getName());
 		if (null == c) {
 			c = new Cardinality();
 		}
 
 		// Incrementing
-		c.increment(r);
+		c.increment(score);
 
-		batchDatas.put(getCardId(r),c);
+		batchDatas.put(score.getName(),c);
 
 	
 		

@@ -47,7 +47,7 @@ public class AttributeAggregationService extends AbstractAggregationService {
 
 
 	@Override
-	public Product onAggregatedData(Product data, Set<Product> datas) {
+	public Product onProduct(Product data) {
 
 
 		AggregatedAttributes aa = data.getAttributes();
