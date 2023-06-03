@@ -8,3 +8,14 @@
 		</th:block>
 	</div>
 </div>
+
+<div class="card shadow my-3">
+	<div class="card-header"><h2 class="h5">Mapped Catégories</h2></div>
+	<div class="card-body">	
+		<th:block th:each="item, stat : ${product.mappedCategories}">
+			<div class="alert alert-primary" role="alert">
+			 <a  th:href="'/categorie/'+${item.toLowerCase()}" th:text="${item.key + ' : ' + item.value}"></a>
+			</div>
+		</th:block>
+	</div>
+</div>
