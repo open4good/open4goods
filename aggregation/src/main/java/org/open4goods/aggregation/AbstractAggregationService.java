@@ -41,9 +41,7 @@ public abstract class AbstractAggregationService  implements Closeable {
 	 * @param datas
 	 * @return
 	 */
-	public  Product onProduct(Product data) {
-		return data;
-	};
+	public  void onProduct(Product data) {}
 
 
 
@@ -56,11 +54,33 @@ public abstract class AbstractAggregationService  implements Closeable {
 	}
 
 	/**
-	 * Called before data aggregation
+	 * Called before data aggregation in realtime mode
+	 * @param datas 
 	 */
 	public void init() {
 
 	}
+
+
+	/**
+	 * Called before data aggregation in batch mode
+	 * @param datas 
+	 */
+	public void init(Set<Product> datas) {
+
+	}
+
+
+	
+	
+	/**
+	 * Called after data aggregation in batchmode
+	 * @param datas 
+	 */
+	public void done(Set<Product> datas) {
+		
+	}
+
 
 
 

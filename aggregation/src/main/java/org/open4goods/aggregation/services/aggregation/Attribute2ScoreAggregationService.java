@@ -1,41 +1,16 @@
 package org.open4goods.aggregation.services.aggregation;
 
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Optional;
-import java.util.Set;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Collectors;
 
-import org.apache.commons.lang3.StringUtils;
-import org.open4goods.aggregation.AbstractAggregationService;
 import org.open4goods.config.yml.attributes.AttributeConfig;
-import org.open4goods.config.yml.attributes.AttributeParser;
 import org.open4goods.config.yml.ui.AttributesConfig;
-import org.open4goods.exceptions.ParseException;
-import org.open4goods.exceptions.ResourceNotFoundException;
 import org.open4goods.exceptions.ValidationException;
-import org.open4goods.model.attribute.Attribute;
-import org.open4goods.model.attribute.AttributeType;
-import org.open4goods.model.constants.ReferentielKey;
 import org.open4goods.model.data.DataFragment;
-import org.open4goods.model.data.Rating;
-import org.open4goods.model.data.RatingType;
 import org.open4goods.model.data.Score;
 import org.open4goods.model.product.AggregatedAttribute;
-import org.open4goods.model.product.AggregatedAttributes;
-import org.open4goods.model.product.AggregatedFeature;
-import org.open4goods.model.product.IAttribute;
 import org.open4goods.model.product.Product;
-import org.open4goods.model.product.SourcedAttribute;
 import org.open4goods.services.StandardiserService;
 
-// TODO : Deduplicate code beween datafragment and aggregateddata
 public class Attribute2ScoreAggregationService extends AbstractScoreAggregationService {
 
 	private final AttributesConfig attributesConfig;
@@ -48,7 +23,7 @@ public class Attribute2ScoreAggregationService extends AbstractScoreAggregationS
 
 
 	@Override
-	public Product onProduct(Product data) {
+	public void onProduct(Product data) {
 
 		/////////////////////////////////////////
 		// Update referentiel attributes
@@ -64,9 +39,15 @@ public class Attribute2ScoreAggregationService extends AbstractScoreAggregationS
 		
 		Collection<AggregatedAttribute> aggattrs =    data.getAttributes().getAggregatedAttributes().values()  ;
 		for (AggregatedAttribute aga : aggattrs) {
-			aga.setScore(generateScoresFromAttribute(aga.getName() ,aga));
+			// Scoring from attribute
+			Score score = generateScoresFromAttribute(aga.getName() ,aga);
+			
+			// Processing cardinality
+			processCardinality(score);
+			
+			// Saving in product
+			data.getScores().put(score.getName(), score);
 		}
-		return data;
 	}
 
 
@@ -81,14 +62,14 @@ public class Attribute2ScoreAggregationService extends AbstractScoreAggregationS
 	public void onDataFragment(final DataFragment d, final Product output) {
 
 		// 3 - Applying attribute transformations on matched ones
-		//TODO : handle conflicts
+		//TODO : No scoring in real time, but could be thinked to have score on non verticalised products. But be aware of not erasing the batched scores
 
-		Collection<AggregatedAttribute> aggattrs = (output.getAttributes().getAggregatedAttributes()).values();
-		for (AggregatedAttribute aga : aggattrs) {
-			aga.setScore(generateScoresFromAttribute(aga.getName() ,aga));
-			dedicatedLogger.info("attribute {} : scored {} ",aga.getName(), aga.getScore());
-
-		}
+//		Collection<AggregatedAttribute> aggattrs = (output.getAttributes().getAggregatedAttributes()).values();
+//		for (AggregatedAttribute aga : aggattrs) {
+//			aga.setScore(generateScoresFromAttribute(aga.getName() ,aga));
+//			dedicatedLogger.info("attribute {} : scored {} ",aga.getName(), aga.getScore());
+//
+//		}
 
 
 	}
@@ -108,10 +89,10 @@ public class Attribute2ScoreAggregationService extends AbstractScoreAggregationS
 			try {
 				// This is a numeric mapping
 				Score r = new Score();
-
+				r.setName(a.getName());
 				r.setMax(ac.maxRating());
 				r.setMin(ac.minRating());
-
+				
 				r.setValue(ac.getNumericMapping().get(a.getValue()));
 
 				if (null == r.getValue()) {

@@ -47,7 +47,7 @@ public class AttributeAggregationService extends AbstractAggregationService {
 
 
 	@Override
-	public Product onProduct(Product data) {
+	public void onProduct(Product data) {
 
 
 		AggregatedAttributes aa = data.getAttributes();
@@ -101,10 +101,6 @@ public class AttributeAggregationService extends AbstractAggregationService {
 			aat.setValue(attr.getRawValue().toString());
 			aa.getUnmapedAttributes().add(aat);
 		}
-
-
-
-		return data;
 	}
 
 
@@ -507,6 +503,13 @@ public class AttributeAggregationService extends AbstractAggregationService {
 		return attr;
 
 	}
+
+
+
+
+
+
+
 
 
 }

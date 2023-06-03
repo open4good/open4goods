@@ -33,34 +33,32 @@ public class BatchedAggregator extends AbstractAggregator {
 	}
 
 
-	public void beforeStart(Set<Product> datas) {
-		super.beforeStart();
-	}
-
-
 
 	/**
-	 * Build the Product using the services registered on this aggregator
+	 * Build the Product using the services registered on this aggregator. 
+	 * Will run in batched mode : for each service, do the before start, process datas, then do the done()
 	 * @param datas
 	 * @return
 	 * @throws AggregationSkipException
 	 */
-	public Product update(final Product data) throws AggregationSkipException {
+	public Product update(final Set<Product> datas){
 
-		logger.info("Updating Product with AggragatedData {} and using {} services",data,services.size());
 
 		Product ret = null;
 		// Call transformation building registered service
 		for (final AbstractAggregationService service : services) {
+			logger.info("Updating {} products using {} service",datas.size() ,service.getClass().getSimpleName());
 
-			try {
-				ret = service.onProduct(data);
-
+			// Init
+			service.init(datas);
+			
+			// Processing Products
+			for (Product p : datas) {
+				service.onProduct(p);				
 			}
-			catch (final Exception e) {
-				logger.warn("AggregationService {} throw an exception while processing data {}",service.getClass().getName(), data,e);
 
-			}
+			// Done 
+			service.done(datas);
 		}
 
 		return ret;

@@ -1,5 +1,8 @@
 package org.open4goods.api.services;
 
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -61,10 +64,11 @@ public class BatchService {
 
 	/**
 	 * Update verticals with the batch Aggragator
+	 * @throws AggregationSkipException 
 	 */
 	//TODO : cron schedule, at night
 	@Scheduled( initialDelay = 1000 * 3600*24, fixedDelay = 1000 * 3600*24)
-	public void scoreVertical() {
+	public void scoreVertical()  {
 
 
 
@@ -96,27 +100,22 @@ public class BatchService {
 			
 			
 			
-			// Warning, full vertical load
+			// NOTE : !!!Warning!!!, full vertical load in memory
 			Set<Product> datas = dataRepository.exportVerticalWithValidDate(vertical.getId()).collect(Collectors.toSet());
-
-			agg.beforeStart(datas);
-
+			
+			agg.update(datas);
+			
+			Set<Product> buffer = new HashSet<>(201);
 			for (Product data : datas) {
-
-				try {
-					Product updated = agg.update(data);
-
-					//TODO : bulk for performance
-					dataRepository.index(updated);
-				} catch (AggregationSkipException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-					continue;
+				buffer.add(data);
+				if (buffer.size() > 200) {
+					dataRepository.index(buffer);
+					buffer.clear();
 				}
 			}
-
-			agg.close(datas);
-
+			// Index remainings
+			dataRepository.index(buffer);
+			buffer.clear();
 		}
 	}
 
