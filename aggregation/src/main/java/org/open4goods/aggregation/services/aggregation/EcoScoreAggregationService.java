@@ -57,12 +57,13 @@ public class EcoScoreAggregationService extends AbstractScoreAggregationService 
 		// Scoring from attribute
 		Score score = generateEcoScore(data.getScores());
 		
-		// Processing cardinality
-		processCardinality(score);
-		
-		// Saving in product
-		data.getScores().put(score.getName(), score);
-		
+		if (null != score) {
+			// Processing cardinality
+			processCardinality(score);
+			
+			// Saving in product
+			data.getScores().put(score.getName(), score);
+		}
 	}
 
 
@@ -75,7 +76,15 @@ public class EcoScoreAggregationService extends AbstractScoreAggregationService 
 		
 		for (Entry<String, String> config :  ecoScoreconfig.entrySet()) {
 			Score score = scores.get(config.getKey());
+			
+			if (null == score) {
+				// If one composed score is null, then do not proceed
+				// There will be a virtual score instead
+				return null;
+			}
+			
 			va += score.getCardinality().getRelValue() * Double.valueOf(score.getValue());
+			// TODO : compute virtual score
 		}
 		
 		
