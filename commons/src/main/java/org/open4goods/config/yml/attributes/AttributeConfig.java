@@ -51,12 +51,6 @@ public class AttributeConfig {
 
 
 	/**
-	 * if asRating=true, then the following tags will be added to this rating
-	 *
-	 */
-	private Set<String> ratingTags  =  new HashSet<>();
-
-	/**
 	 * The ordering that must be applied to this attributes values after aggregations. (ie rendered in search attributes selection)
 	 */
 	private Order attributeValuesOrdering = Order.ALPHA;
@@ -442,14 +436,6 @@ public class AttributeConfig {
 	}
 
 
-
-	public Set<String> getRatingTags() {
-		return ratingTags;
-	}
-
-	public void setRatingTags(Set<String> ratingTags) {
-		this.ratingTags = ratingTags;
-	}
 
 	public Localisable getName() {
 		return name;

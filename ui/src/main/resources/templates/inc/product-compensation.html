@@ -1,23 +1,51 @@
 <div class="card">
 	<div class="card-body">
-		<div class="d-flex p-3">
-			<div class="icon icon-primary">
-				<span class="fas fa-globe-europe"></span>
+		
+		<div class ="col-6">
+
+			<div class="d-flex p-3">
+				<div class="icon icon-primary">
+					<span class="fas fa-globe-europe"></span>
+				</div>
+				<div class="ps-4">
+					<h2 class="icon-box-title md-1">Compensation carbone</h2>
+				</div>
 			</div>
-			<div class="ps-4">
-				<h2 class="icon-box-title md-1">Compensation carbone</h2>
-			</div>
+	
+			<p class="icon-box-text text-center" style="font-size: 3em;">
+				
+				<th:block th:text="${#numbers.formatDecimal(product.bestPrice().compensation, 1, 2)}"></th:block> 
+				<span class="align-baseline font-medium" th:text="#{'symbol.'+${product.bestPrice().currency}}"></span>
+				
+			</p>
+	
+			<p>
+			Sur la base de la marge moyenne sur ce commissionaire.
+			<p>
 		</div>
-
-		<p class="icon-box-text text-center" style="font-size: 3em;">
 			
-			<th:block th:text="${#numbers.formatDecimal(product.bestPrice().compensation, 1, 2)}"></th:block> 
-			<span class="align-baseline font-medium" th:text="#{'symbol.'+${product.bestPrice().currency}}"></span>
+		
+		<div class ="col-6">
 			
-		</p>
-
-		<p>
-		Sur la base de la marge moyenne sur ce commissionaire.
-		<p>
+		
+		
+			<table class="table table-hover">
+				<tbody>
+					<tr th:each="score : ${product.scores}">
+						<th scope="row" th:text="${score.key}"></th>
+						<td th:text="${score.value}"></td>
+					</tr>
+				</tbody>
+			</table>		
+		</div>		
+		
+		
+		
+		
+		
+		
+		
+		
+		
 	</div>
 </div>
