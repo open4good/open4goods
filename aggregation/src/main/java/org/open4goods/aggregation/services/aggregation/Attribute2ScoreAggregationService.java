@@ -25,17 +25,6 @@ public class Attribute2ScoreAggregationService extends AbstractScoreAggregationS
 	@Override
 	public void onProduct(Product data) {
 
-		/////////////////////////////////////////
-		// Update referentiel attributes
-		/////////////////////////////////////////
-
-		// 2 - Classifying "matched/unmatched" attributes
-	
-
-		// 3 - Applying attribute transformations on matched ones
-		//TODO : handle conflicts
-		// TODO : attribute removing by name from conf
-		
 		
 		Collection<AggregatedAttribute> aggattrs =    data.getAttributes().getAggregatedAttributes().values()  ;
 		for (AggregatedAttribute aga : aggattrs) {
@@ -118,9 +107,6 @@ public class Attribute2ScoreAggregationService extends AbstractScoreAggregationS
 		} else {
 			dedicatedLogger.error("Was asking to  translate {} into rating, but no numericMapping definition !",a);
 		}
-
-
-
 
 		return null;
 
