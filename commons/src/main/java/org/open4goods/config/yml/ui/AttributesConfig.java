@@ -38,7 +38,11 @@ public class AttributesConfig {
 	private Set<String> featuredValues = new HashSet<>();
 
 
-
+	/**
+	 * If set, the list of attributes names to be excluded from "unmapped attributes"
+	 */
+	@JsonMerge
+	private Set<String> exclusions = new HashSet<>();
 
 
 
@@ -213,6 +217,16 @@ public class AttributesConfig {
 
 	public void setFeaturedValues(Set<String> featuredValues) {
 		this.featuredValues = featuredValues;
+	}
+
+
+	public Set<String> getExclusions() {
+		return exclusions;
+	}
+
+
+	public void setExclusions(Set<String> exclusions) {
+		this.exclusions = exclusions;
 	}
 
 
