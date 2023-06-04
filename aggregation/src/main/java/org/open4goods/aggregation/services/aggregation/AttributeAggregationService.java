@@ -103,7 +103,8 @@ public class AttributeAggregationService extends AbstractAggregationService {
 		}
 		
 		// Cleaning unmatched attributes 
-		aa.setUnmapedAttributes(cleanUnmapped(aa.getUnmapedAttributes(),data));
+		// TODO : put back
+//		aa.setUnmapedAttributes(cleanUnmapped(aa.getUnmapedAttributes(),data));
 		
 		
 	}
@@ -203,8 +204,9 @@ public class AttributeAggregationService extends AbstractAggregationService {
 
 
 
-		// Cleaning unmatched attributes 
-		aa.setUnmapedAttributes(cleanUnmapped(aa.getUnmapedAttributes(),output));
+		// Cleaning unmatched attributes
+// TODO : put back		
+//		aa.setUnmapedAttributes(cleanUnmapped(aa.getUnmapedAttributes(),output));
 	}
 
 
