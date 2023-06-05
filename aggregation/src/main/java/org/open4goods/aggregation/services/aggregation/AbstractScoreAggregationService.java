@@ -1,8 +1,8 @@
 package org.open4goods.aggregation.services.aggregation;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 
 import org.open4goods.aggregation.AbstractAggregationService;
 import org.open4goods.model.attribute.Cardinality;
@@ -24,16 +24,15 @@ public class AbstractScoreAggregationService extends  AbstractAggregationService
 	}
 
 
-
 	@Override
-	public void init(Set<Product> datas) {
+	public void init(Collection<Product> datas) {
 		super.init(datas);
 		batchDatas.clear();
 	}
 
 	
 	@Override
-	public void done(Set<Product> datas) {
+	public void done(Collection<Product> datas) {
 		super.done(datas);
 
 
@@ -71,7 +70,9 @@ public class AbstractScoreAggregationService extends  AbstractAggregationService
 					ret.setSum(cardinality.getSum());
 					
 					ret.setRelValue(cardinality.getAvg());					
-					s.setCardinality(ret);					
+					s.setCardinality(ret);		
+					
+					p.getScores().put(scoreName, s);
 				}
 			}			
 		}

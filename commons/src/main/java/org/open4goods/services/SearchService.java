@@ -1,4 +1,4 @@
-package org.open4goods.ui.services;
+package org.open4goods.services;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -12,11 +12,11 @@ import org.open4goods.config.yml.ui.VerticalConfig;
 import org.open4goods.dao.ProductRepository;
 import org.open4goods.helper.GenericFileLogger;
 import org.open4goods.model.constants.ProductState;
+import org.open4goods.model.dto.NumericRangeFilter;
+import org.open4goods.model.dto.VerticalFilterTerm;
+import org.open4goods.model.dto.VerticalSearchRequest;
+import org.open4goods.model.dto.VerticalSearchResponse;
 import org.open4goods.model.product.Product;
-import org.open4goods.ui.controllers.dto.NumericRangeFilter;
-import org.open4goods.ui.controllers.dto.VerticalFilterTerm;
-import org.open4goods.ui.controllers.dto.VerticalSearchRequest;
-import org.open4goods.ui.controllers.dto.VerticalSearchResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.PageRequest;
@@ -216,13 +216,13 @@ public class SearchService {
 		/////
 
 		if (null == request.getSortField()) {
-			esQuery = esQuery.withSort(Sort.by(org.springframework.data.domain.Sort.Order.desc("offersCount")));
+			esQuery = esQuery.withSort(Sort.by("offersCount").descending());
 		} else {
 			// TODO : check value, remove ignorecase
 			if (request.getSortOrder().equalsIgnoreCase("DESC") ) {
-				esQuery = esQuery.withSort(Sort.by(org.springframework.data.domain.Sort.Order.desc(request.getSortField())));
+				esQuery = esQuery.withSort(Sort.by(request.getSortField()).descending() );
 			} else if (request.getSortOrder().equalsIgnoreCase("ASC") ){
-				esQuery = esQuery.withSort(Sort.by(org.springframework.data.domain.Sort.Order.asc(request.getSortField())));
+				esQuery = esQuery.withSort(Sort.by(request.getSortField()).ascending() );
 			} else {
 				throw new RuntimeException("implement");
 			}

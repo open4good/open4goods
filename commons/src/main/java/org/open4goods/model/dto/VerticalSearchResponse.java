@@ -1,4 +1,4 @@
-package org.open4goods.ui.controllers.dto;
+package org.open4goods.model.dto;
 
 import java.util.ArrayList;
 import java.util.HashMap;

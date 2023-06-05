@@ -4,13 +4,13 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.open4goods.config.yml.ui.VerticalConfig;
+import org.open4goods.model.dto.VerticalFilterTerm;
+import org.open4goods.model.dto.VerticalSearchRequest;
+import org.open4goods.model.dto.VerticalSearchResponse;
+import org.open4goods.services.SearchService;
 import org.open4goods.services.SerialisationService;
 import org.open4goods.services.VerticalsConfigService;
 import org.open4goods.ui.config.yml.UiConfig;
-import org.open4goods.ui.controllers.dto.VerticalFilterTerm;
-import org.open4goods.ui.controllers.dto.VerticalSearchRequest;
-import org.open4goods.ui.controllers.dto.VerticalSearchResponse;
-import org.open4goods.ui.services.SearchService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

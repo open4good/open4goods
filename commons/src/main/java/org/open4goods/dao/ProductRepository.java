@@ -126,7 +126,7 @@ public class ProductRepository {
 	 *
 	 * @param p
 	 */
-	public void index(Set<Product> data, final String indexName) {
+	public void index(Collection<Product> data, final String indexName) {
 		elasticsearchTemplate.save(data,IndexCoordinates.of(indexName));
 	}
 
@@ -135,7 +135,7 @@ public class ProductRepository {
 	 *
 	 * @param p
 	 */
-	public void index(Set<Product> data) {
+	public void index(Collection<Product> data) {
 		elasticsearchTemplate.save(data,current_index);
 	}
 

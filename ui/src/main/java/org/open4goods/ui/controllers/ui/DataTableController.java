@@ -1,13 +1,13 @@
 package org.open4goods.ui.controllers.ui;
 
 import org.open4goods.config.yml.ui.VerticalConfig;
+import org.open4goods.model.dto.VerticalSearchRequest;
+import org.open4goods.model.dto.VerticalSearchResponse;
 import org.open4goods.model.product.Product;
 import org.open4goods.services.VerticalsConfigService;
 import org.open4goods.ui.controllers.dto.DataTableRequest;
 import org.open4goods.ui.controllers.dto.DataTableResults;
 import org.open4goods.ui.controllers.dto.PaginationCriteria;
-import org.open4goods.ui.controllers.dto.VerticalSearchRequest;
-import org.open4goods.ui.controllers.dto.VerticalSearchResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -25,7 +25,7 @@ import jakarta.servlet.http.HttpServletResponse;
 public class DataTableController {
 
 	@Autowired
-	private org.open4goods.ui.services.SearchService searchService;
+	private org.open4goods.services.SearchService searchService;
 
 	private @Autowired VerticalsConfigService verticalService;
 

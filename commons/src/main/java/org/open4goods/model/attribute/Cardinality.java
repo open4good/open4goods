@@ -63,7 +63,7 @@ public class Cardinality {
 
 	@Override
 	public String toString() {
-		return min +" < " + avg + " > " +max+" (" + count+ " elements)";
+		return min +" > " + avg + " < " +max+" (" + count+ " elements)";
 	}
 
 

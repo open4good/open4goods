@@ -1,7 +1,7 @@
 package org.open4goods.ui.controllers.ui;
 
+import org.open4goods.services.SearchService;
 import org.open4goods.ui.config.yml.UiConfig;
-import org.open4goods.ui.services.SearchService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 
