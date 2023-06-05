@@ -81,7 +81,7 @@ public class Score  implements Validable, Standardisable {
 
 	@Override
 	public String toString() {
-		return name+":"+value + " (" + cardinality + ")";
+		return (virtual == true ? "VIRTUAL" : "") + name+":"+value + " (" + cardinality + ")";
 	}
 
 

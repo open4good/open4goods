@@ -7,9 +7,9 @@ import java.util.Locale;
 
 import org.apache.commons.lang3.StringUtils;
 import org.open4goods.model.constants.CacheConstants;
+import org.open4goods.model.dto.VerticalSearchResponse;
+import org.open4goods.services.SearchService;
 import org.open4goods.ui.config.yml.UiConfig;
-import org.open4goods.ui.controllers.dto.VerticalSearchResponse;
-import org.open4goods.ui.services.SearchService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Controller;

@@ -18,6 +18,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController("batch")
@@ -38,11 +39,17 @@ public class BatchController {
 	}
 
 
-	@GetMapping("/batch/verticals/score")
+	@GetMapping("/batch/verticals/")
 	public void scoreVerticals() throws InvalidParameterException, IOException {
 		batchService.scoreVertical();
 
 
+	}
+
+	
+	@GetMapping("/batch/verticals/test")
+	public void testScoring(@RequestParam String vertical) throws InvalidParameterException, IOException {
+		batchService.testScoring(vertical);
 	}
 
 }

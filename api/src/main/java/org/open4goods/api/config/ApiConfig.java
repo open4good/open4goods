@@ -32,6 +32,7 @@ import org.open4goods.services.Gs1PrefixService;
 import org.open4goods.services.ImageMagickService;
 import org.open4goods.services.RemoteFileCachingService;
 import org.open4goods.services.ResourceService;
+import org.open4goods.services.SearchService;
 import org.open4goods.services.SerialisationService;
 import org.open4goods.services.StandardiserService;
 import org.open4goods.services.VerticalsConfigService;
@@ -63,8 +64,6 @@ import io.swagger.v3.oas.models.security.SecurityScheme;
 public class ApiConfig {
 
 	@Autowired ApiProperties apiProperties;
-
-
 	private static final Logger logger = LoggerFactory.getLogger(ApiConfig.class);
 
 
@@ -74,10 +73,17 @@ public class ApiConfig {
 		return new VerticalsConfigService(serialisationService,apiProperties.getVerticalsFolder());
 	}
 
+	
+	@Bean
+	SearchService searchService(@Autowired ProductRepository aggregatedDataRepository, @Autowired  String logsFolder) {
+		return new SearchService(aggregatedDataRepository, logsFolder);
+	}
+
+	
 	@Bean
 	@Autowired
-	BatchService batchService(ProductRepository dataRepository, VerticalsConfigService verticalsConfigService, BatchAggregationService batchAggregationService) throws IOException {
-		return new BatchService(dataRepository, apiProperties, verticalsConfigService,batchAggregationService);
+	BatchService batchService(SearchService searchService, ProductRepository dataRepository, VerticalsConfigService verticalsConfigService, BatchAggregationService batchAggregationService) throws IOException {
+		return new BatchService(dataRepository, apiProperties, verticalsConfigService,batchAggregationService, searchService);
 	}
 
 

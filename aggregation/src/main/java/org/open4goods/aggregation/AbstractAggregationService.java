@@ -2,6 +2,7 @@ package org.open4goods.aggregation;
 
 import java.io.Closeable;
 import java.io.IOException;
+import java.util.Collection;
 import java.util.Set;
 
 import org.open4goods.exceptions.AggregationSkipException;
@@ -66,7 +67,7 @@ public abstract class AbstractAggregationService  implements Closeable {
 	 * Called before data aggregation in batch mode
 	 * @param datas 
 	 */
-	public void init(Set<Product> datas) {
+	public void init(Collection<Product> datas) {
 
 	}
 
@@ -77,7 +78,7 @@ public abstract class AbstractAggregationService  implements Closeable {
 	 * Called after data aggregation in batchmode
 	 * @param datas 
 	 */
-	public void done(Set<Product> datas) {
+	public void done(Collection<Product> datas) {
 		
 	}
 

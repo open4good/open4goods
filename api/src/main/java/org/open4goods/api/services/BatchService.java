@@ -1,6 +1,5 @@
 package org.open4goods.api.services;
 
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -12,7 +11,9 @@ import org.open4goods.config.yml.ui.VerticalConfig;
 import org.open4goods.dao.ProductRepository;
 import org.open4goods.exceptions.AggregationSkipException;
 import org.open4goods.helper.GenericFileLogger;
+import org.open4goods.model.dto.VerticalSearchRequest;
 import org.open4goods.model.product.Product;
+import org.open4goods.services.SearchService;
 import org.open4goods.services.VerticalsConfigService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,13 +43,20 @@ public class BatchService {
 
 	private final ApiProperties apiProperties;
 
+	private SearchService searchService;
+
 	private Logger dedicatedLogger;
+
+
+
 
 	public BatchService(
 			ProductRepository dataRepository,
 			ApiProperties apiProperties,
 			VerticalsConfigService verticalsService,
-			BatchAggregationService batchAggregationService) {
+			BatchAggregationService batchAggregationService,
+			SearchService searchService
+			) {
 		super();
 
 		dedicatedLogger = GenericFileLogger.initLogger("stats-batch", Level.INFO, apiProperties.logsFolder(), false);
@@ -56,11 +64,41 @@ public class BatchService {
 		this.dataRepository =dataRepository;
 		this.verticalsService=verticalsService;
 		this.batchAggregationService=batchAggregationService;
+		this.searchService = searchService;
 	}
 
 
 
 
+	
+	/**
+	 * Update verticals with the batch Aggragator
+	 * @throws AggregationSkipException 
+	 */
+	public void testScoring(String v)  {
+
+		VerticalConfig vertical = verticalsService.getConfigById(v).get();
+		BatchedAggregator agg = batchAggregationService.getAggregator(vertical);
+
+		
+		
+		VerticalSearchRequest vsr = new VerticalSearchRequest();
+		vsr.setPageNumber(0);
+		vsr.setPageSize(100);
+		
+		
+		
+		List<Product> datas =  searchService.verticalSearch(vertical, vsr).getData();
+		
+		agg.update(datas);
+
+		dataRepository.index(datas);
+
+		
+	}
+	
+	
+	
 
 	/**
 	 * Update verticals with the batch Aggragator

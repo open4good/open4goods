@@ -1,5 +1,6 @@
 package org.open4goods.aggregation.aggregator;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
@@ -41,7 +42,7 @@ public class BatchedAggregator extends AbstractAggregator {
 	 * @return
 	 * @throws AggregationSkipException
 	 */
-	public Product update(final Set<Product> datas){
+	public Product update(final Collection<Product> datas){
 
 
 		Product ret = null;
