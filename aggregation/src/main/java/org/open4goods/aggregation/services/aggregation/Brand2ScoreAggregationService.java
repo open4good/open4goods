@@ -77,14 +77,12 @@ public class Brand2ScoreAggregationService extends AbstractScoreAggregationServi
 		Score s = new Score();
 		// TODO : as const
 		s.setName("BRAND-SUSTAINABILITY");
-		s.setMax(20.0);
-		s.setMin(0.0);
 		s.setVirtual(false);
 		
 		switch (brand) {
-		case "SAMSUNG" -> s.setValue(5.0);
-		case "LG" -> s.setValue(4.0);
-		default -> s.setValue(Math.random() * 10);
+		case "SAMSUNG" -> s.setRelativValue(5.0);
+		case "LG" -> s.setRelativValue(4.0);
+		default -> s.setRelativValue(Math.random() * 10);
 		}
 		
 		return s;

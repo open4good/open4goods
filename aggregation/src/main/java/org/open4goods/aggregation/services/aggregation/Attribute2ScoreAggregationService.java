@@ -5,6 +5,7 @@ import java.util.Collection;
 import org.open4goods.config.yml.attributes.AttributeConfig;
 import org.open4goods.config.yml.ui.AttributesConfig;
 import org.open4goods.exceptions.ValidationException;
+import org.open4goods.model.attribute.AttributeType;
 import org.open4goods.model.data.DataFragment;
 import org.open4goods.model.data.Score;
 import org.open4goods.model.product.AggregatedAttribute;
@@ -23,6 +24,16 @@ public class Attribute2ScoreAggregationService extends AbstractScoreAggregationS
 
 
 	@Override
+	public void init(Collection<Product> datas) {
+		super.init(datas);
+		
+		for (Product d : datas) {
+			d.getScores().clear();
+		}
+	}
+	
+	
+	@Override
 	public void onProduct(Product data) {
 
 		
@@ -31,7 +42,7 @@ public class Attribute2ScoreAggregationService extends AbstractScoreAggregationS
 			// Scoring from attribute
 			if (attributesConfig.getAttributeConfigByKey(aga.getName()).isAsRating()) {
 				Score score = generateScoresFromAttribute(aga.getName() ,aga);
-				if (null == score || null == score.getValue()) {
+				if (null == score || null == score.getRelativValue()) {
 					dedicatedLogger.error("Null score generated for attribute {}", aga);
 				} else {
 					// Processing cardinality
@@ -45,6 +56,8 @@ public class Attribute2ScoreAggregationService extends AbstractScoreAggregationS
 	}
 
 
+	
+	
 	/**
 	 * Associate and match a set of nativ attributes in a product
 	 *
@@ -79,38 +92,51 @@ public class Attribute2ScoreAggregationService extends AbstractScoreAggregationS
 
 		AttributeConfig ac = attributesConfig.getAttributeConfigByKey(attributeKey);
 		// transformation required
-		if (ac.getNumericMapping().size() > 0) {
+
+		
+		if (ac.getType().equals(AttributeType.NUMERIC)) {
 			try {
-				// This is a numeric mapping
-				Score r = new Score();
-				r.setName(a.getName());
-				r.setMax(ac.maxRating());
-				r.setMin(ac.minRating());
-				
-				r.setValue(ac.getNumericMapping().get(a.getValue()));
-
-				if (null == r.getValue()) {
-					dedicatedLogger.warn("No matching found in numericMappings for attribute {} and value  {}",ac,a.getValue());
-					return null;
-				}
-
-				// Standardization (re-scaling)
-				StandardiserService.standarise(r);
-
-				// Adding
-				return r;
+				return fromScorableAttribute(a, ac, Double.valueOf(a.getValue()));
+			} catch (NoSuchFieldException | ValidationException e) {
+				dedicatedLogger.warn("Attribute to numeric conversion failed : {}",e.getMessage());
+			}
+			
+		} else if (ac.getNumericMapping().size() > 0) {
+			try {
+				return fromScorableAttribute(a, ac, ac.getNumericMapping().get(a.getValue()));
 
 			} catch (NoSuchFieldException | ValidationException e) {
 				dedicatedLogger.warn("Attribute to rating conversion failed : {}",e.getMessage());
 			}
 
 		} else {
-			dedicatedLogger.error("Was asking to  translate {} into rating, but no numericMapping definition !",a);
+			dedicatedLogger.error("Was asking to  translate {} into rating, but no numericMapping definition nor numeric attribute found !",a);
 		}
 
 		return null;
 
 
+	}
+
+
+
+	private Score fromScorableAttribute(AggregatedAttribute a, AttributeConfig ac, Double value)
+			throws ValidationException, NoSuchFieldException {
+		// This is a numeric mapping
+		Score r = new Score();
+		r.setName(a.getName());
+//		r.setMax(ac.maxRating());
+//		r.setMin(ac.minRating());
+		
+		r.setRelativValue(value);
+
+		if (null == r.getRelativValue()) {
+			dedicatedLogger.warn("No matching found in numericMappings for attribute {} and value  {}",ac,a.getValue());
+			return null;
+		}
+
+		// Adding
+		return r;
 	}
 
 

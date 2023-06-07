@@ -18,30 +18,32 @@ import org.springframework.data.elasticsearch.annotations.FieldType;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.google.common.collect.Sets;
-public class Score  implements Validable, Standardisable {
+public class Score  implements Validable {
 	private static final Logger LOGGER = LoggerFactory.getLogger(Score.class);
 
 	@Field(index = false, store = false, type = FieldType.Keyword)
 	private String name;;
 
 
+
+//	@Field(index = false, store = false, type = FieldType.Double)
+//	private Double max;
+//
+//	@Field(index = true, store = false, type = FieldType.Double)	
+//	private Double min;
+
+	/**
+	 * The relativized score, based on a scale 0 -> StandardizerService.DEFAULT_MAX_RATING
+	 */
 	@Field(index = true, store = false, type = FieldType.Double)
-	private Double value;
-
-	@Field(index = false, store = false, type = FieldType.Double)
-	private Double max;
-
-	@Field(index = true, store = false, type = FieldType.Double)	
-	private Double min;
-	
+	private Double relativValue;
 
 	@Field(index = true, store = false, type = FieldType.Boolean)
 	private Boolean virtual = false;
 	
 	
 	@Field(index = true, store = false, type = FieldType.Object)
-	// 	TODO : CEould be computed and maintained better that stored that way.
-	// The score cardinality if computed
+	/** The cardinalities, containing absolute score**/
 	private Cardinality cardinality;
 
 	////////////////////////////////////////
@@ -49,23 +51,13 @@ public class Score  implements Validable, Standardisable {
 	///////////////////////////////////////
 
 
-	@Override
-	public Set<Standardisable> standardisableChildren() {
-		return Sets.newHashSet(this);
-	}
-
-	@Override
-	public void standardize(final StandardiserService standardiser,final Currency c) {
-		standardiser.standarise(this);
-	}
-
 
 	@Override
 	public void validate() throws ValidationException {
 
 		final Set<ValidationMessage> result = new HashSet<>();
 
-		if (null == value) {
+		if (null == relativValue) {
 			result.add(ValidationMessage.newValidationMessage("MISSING-VALUE"));
 		}
 
@@ -81,7 +73,7 @@ public class Score  implements Validable, Standardisable {
 
 	@Override
 	public String toString() {
-		return (virtual == true ? "VIRTUAL" : "") + name+":"+value + " (" + cardinality + ")";
+		return (virtual == true ? "VIRTUAL" : "") + name+":"+relativValue + " (" + cardinality + ")";
 	}
 
 
@@ -105,7 +97,7 @@ public class Score  implements Validable, Standardisable {
 	// Templates methods
 	///////////////////////////////////////
 	public Long percent() {
-		return Math.round(value * 100 / StandardiserService.DEFAULT_MAX_RATING);
+		return Math.round(relativValue * 100 / StandardiserService.DEFAULT_MAX_RATING);
 	}
 
 
@@ -162,7 +154,7 @@ public class Score  implements Validable, Standardisable {
 
 
 	public String color() {
-		if (null == value) {
+		if (null == relativValue) {
 			return "white";
 		}
 		final Long percent =  percent();
@@ -184,12 +176,12 @@ public class Score  implements Validable, Standardisable {
 	///////////////////////////////////////
 
 
-	public Double getValue() {
-		return value;
+	public Double getRelativValue() {
+		return relativValue;
 	}
 
-	public void setValue(final Double value) {
-		this.value = value;
+	public void setRelativValue(final Double value) {
+		this.relativValue = value;
 	}
 
 	public String getName() {
@@ -216,24 +208,24 @@ public class Score  implements Validable, Standardisable {
 		this.cardinality = cardinality;
 	}
 
-
-	public Double getMax() {
-		return max;
-	}
-
-	public void setMax(Double max) {
-		this.max = max;
-	}
-
-	public Double getMin() {
-		return min;
-	}
-
-	public void setMin(Double min) {
-		this.min = min;
-	}
-
-	
+//
+//	public Double getMax() {
+//		return max;
+//	}
+//
+//	public void setMax(Double max) {
+//		this.max = max;
+//	}
+//
+//	public Double getMin() {
+//		return min;
+//	}
+//
+//	public void setMin(Double min) {
+//		this.min = min;
+//	}
+//
+//	
 
 
 

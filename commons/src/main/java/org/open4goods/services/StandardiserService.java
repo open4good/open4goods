@@ -39,17 +39,6 @@ public abstract class StandardiserService {
 
 	}
 
-	public static void standarise(Score score) {
-		final Double max = score.getMax();
-		final Double value = score.getValue();
 
-		try {
-			score.setValue(value * DEFAULT_MAX_RATING / max);
-			score.setMax(DEFAULT_MAX_RATING);
-		} catch (final Exception e) {
-			logger.warn("Cannot standardize rating : {}",e.getMessage());
-		}	
-		
-	}
 
 }

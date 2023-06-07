@@ -21,7 +21,7 @@ public class Cardinality {
 	
 	@Field(index = true, store = false, type = FieldType.Double)
 	// The relativised value
-	private Double relValue;
+	private Double value;
 	
 	/**
 	 * The minimum encountered
@@ -112,20 +112,20 @@ public class Cardinality {
 
 		try {
 			// Min
-			if (null == min || min > r.getValue()) {
-				min = r.getValue();
+			if (null == min || min > r.getRelativValue()) {
+				min = r.getRelativValue();
 			}
 
 			// Max
-			if (null == max || max < r.getValue()) {
-				max = r.getValue();
+			if (null == max || max < r.getRelativValue()) {
+				max = r.getRelativValue();
 			}
 
 			// Count
 			count++;
 
 			// Sum
-			sum += r.getValue();
+			sum += r.getRelativValue();
 
 			// Average
 			avg = sum / Double.valueOf(count);
@@ -178,15 +178,15 @@ public class Cardinality {
 
 
 
-	public Double getRelValue() {
-		return relValue;
+	public Double getValue() {
+		return value;
 	}
 
 
 
 
-	public void setRelValue(Double relValue) {
-		this.relValue = relValue;
+	public void setValue(Double value) {
+		this.value = value;
 	}
 	
 	
