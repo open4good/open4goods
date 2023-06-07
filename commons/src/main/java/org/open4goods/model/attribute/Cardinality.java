@@ -176,8 +176,6 @@ public class Cardinality {
 	}
 
 
-
-
 	public Double getValue() {
 		return value;
 	}
