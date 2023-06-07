@@ -24,9 +24,35 @@
                     </li>
                    
 					<li class="nav-item dropdown">
+
+
+
+
 						<th:block th:if="${url}">
-	                        <!--/* Home */-->
+	                        <!--/* Home */-->	                        
+	                        <th:block th:if="${product}">
+	    						<th:block th:if="${product.vertical}">
+		                            
+		                            <a th:if="${product}" th:href="${url}" class="nav-link dropdown-toggle" id="frontPagesDropdown" aria-expanded="false" data-bs-toggle="dropdown">
+		                            					»  
+			                        	<th:block th:text="${product.vertical}"><span class="fas fa-angle-down nav-link-arrow ms-1"></span>		                        
+			                        </a>
+			                        »
+			                    </th:block>
+		                        
+	    
+		                        <a th:if="${product}" th:href="${url}" class="nav-link dropdown-toggle" id="frontPagesDropdown" aria-expanded="false" data-bs-toggle="dropdown">
+		                        	Accueil<span class="fas fa-angle-down nav-link-arrow ms-1"></span>		                        
+		                        </a>
+	    
+	                        
+	                        </th:block>
+
+
+	                        <!--/* Home 
 	                        <a th:if="${url == '/'}" th:href="${url}" class="nav-link dropdown-toggle" id="frontPagesDropdown" aria-expanded="false" data-bs-toggle="dropdown">Accueil<span class="fas fa-angle-down nav-link-arrow ms-1"></span></a>
+	                        */-->
+	                        
 	                        <!--/* contact */-->
 	                        <a th:if="${url.endsWith('/contact')}" th:href="${url}" class="nav-link dropdown-toggle" id="frontPagesDropdown" aria-expanded="false" data-bs-toggle="dropdown">Contact<span class="fas fa-angle-down nav-link-arrow ms-1"></span></a>
 	                        <!--/* equipe */-->

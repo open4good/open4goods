@@ -64,16 +64,23 @@
        				<!--/* Header */-->				
 					<th:block th:insert="inc/product-header.html"></th:block>
                								
+
+
 					<div th:if="${null != product.bestPrice()}" class="row mt-3">
 						
-	       				<!--/* Compensation */-->				
-						<div class="col-sm-12 col-md-12 col-lg-6">
-							<th:block th:insert="inc/product-compensation.html"></th:block>
-						</div>
-
 	       				<!--/* Best price */-->				
 						<div class="col-sm-12 col-md-12 col-lg-6 mb-3">
-							<th:block th:insert="inc/product-best-price.html"></th:block>										
+							<th:block th:insert="inc/product-ecoscore.html"></th:block>										
+						</div>
+
+						<div class="col-sm-12 col-md-12 col-lg-6 mb-3">
+
+		       				<!--/* Best price */-->				
+							<th:block th:insert="inc/product-price.html"></th:block>										
+	       					<!--/* Product compensation */-->				
+							<th:block th:insert="inc/product-compensation.html"></th:block>										
+
+
 						</div>
 					</div>	
 					
@@ -173,10 +180,7 @@ $(document).ready(function() {
 				responsive: true		
 		});
 	}
-    
-    
-    
-    
+
 } );
 </script>
 
