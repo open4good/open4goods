@@ -23,8 +23,8 @@ public abstract class AbstractAggregationService  implements Closeable {
 
 	protected Logger dedicatedLogger;
 
-	public AbstractAggregationService (final String logsFolder) {
-		dedicatedLogger = GenericFileLogger.initLogger("aggregation-"+getClass().getSimpleName().toLowerCase(), Level.WARN, logsFolder, false);
+	public AbstractAggregationService (final String logsFolder, final boolean toConsole) {
+		dedicatedLogger = GenericFileLogger.initLogger("aggregation-"+getClass().getSimpleName().toLowerCase(), Level.WARN, logsFolder, toConsole);
 	}
 
 

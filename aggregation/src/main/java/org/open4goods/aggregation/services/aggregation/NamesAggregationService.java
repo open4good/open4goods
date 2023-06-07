@@ -28,8 +28,8 @@ public class NamesAggregationService extends AbstractAggregationService {
 	private final EvaluationService evaluationService;
 
 	public NamesAggregationService(final SiteNaming localisationAggregationConfig,
-			final EvaluationService evaluationService, final String logsFolder) {
-		super(logsFolder);
+			final EvaluationService evaluationService, final String logsFolder,boolean toConsole) {
+		super(logsFolder,toConsole);
 		this.localisationAggregationConfig = localisationAggregationConfig;
 		this.evaluationService = evaluationService;
 	}

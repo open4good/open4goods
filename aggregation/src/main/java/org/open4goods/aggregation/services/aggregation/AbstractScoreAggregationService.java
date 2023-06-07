@@ -19,8 +19,8 @@ public class AbstractScoreAggregationService extends  AbstractAggregationService
 	private Map<String, Cardinality>  batchDatas = new HashMap<>();
 	
 	
-	public AbstractScoreAggregationService(String logsFolder) {
-		super(logsFolder);
+	public AbstractScoreAggregationService(String logsFolder, boolean toConsole) {
+		super(logsFolder, toConsole);
 	}
 
 

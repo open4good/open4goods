@@ -39,8 +39,8 @@ public class AttributeAggregationService extends AbstractAggregationService {
 
 	private final AttributesConfig attributesConfig;
 
-	public AttributeAggregationService(final AttributesConfig attributesConfig,  final String logsFolder) {
-		super(logsFolder);
+	public AttributeAggregationService(final AttributesConfig attributesConfig,  final String logsFolder,boolean toConsole) {
+		super(logsFolder,toConsole);
 		this.attributesConfig = attributesConfig;
 	}
 

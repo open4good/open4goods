@@ -29,8 +29,8 @@ public class BarCodeAggregationService extends AbstractAggregationService {
 
 	private BarcodeValidationService validationService;
 
-	public BarCodeAggregationService(final String logsFolder, final Gs1PrefixService gs1Service, final BarcodeValidationService barcodeValidationService) {
-		super(logsFolder);
+	public BarCodeAggregationService(final String logsFolder, final Gs1PrefixService gs1Service, final BarcodeValidationService barcodeValidationService,boolean toConsole) {
+		super(logsFolder,toConsole);
 		this.gs1Service = gs1Service;
 		validationService = barcodeValidationService;
 

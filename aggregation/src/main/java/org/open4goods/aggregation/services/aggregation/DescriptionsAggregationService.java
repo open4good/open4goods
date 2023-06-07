@@ -15,8 +15,8 @@ public class DescriptionsAggregationService extends AbstractAggregationService{
 
 	private final DescriptionsAggregationConfig config;
 
-	public DescriptionsAggregationService(final DescriptionsAggregationConfig config,final String logsFolder) {
-		super(logsFolder);
+	public DescriptionsAggregationService(final DescriptionsAggregationConfig config,final String logsFolder,boolean toConsole) {
+		super(logsFolder,toConsole);
 		this.config = config;
 	}
 

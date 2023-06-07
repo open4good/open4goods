@@ -10,8 +10,8 @@ public class IdAggregationService extends AbstractAggregationService {
 
 	private static final Logger logger = LoggerFactory.getLogger(IdAggregationService.class);
 
-	public IdAggregationService( final String logsFolder) {
-		super(logsFolder);
+	public IdAggregationService( final String logsFolder,boolean toConsole) {
+		super(logsFolder, toConsole);
 
 	}
 

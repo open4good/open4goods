@@ -15,8 +15,8 @@ public class Attribute2ScoreAggregationService extends AbstractScoreAggregationS
 
 	private final AttributesConfig attributesConfig;
 
-	public Attribute2ScoreAggregationService(final AttributesConfig attributesConfig,  final String logsFolder) {
-		super(logsFolder);
+	public Attribute2ScoreAggregationService(final AttributesConfig attributesConfig,  final String logsFolder,boolean toConsole) {
+		super(logsFolder, toConsole);
 		this.attributesConfig = attributesConfig;
 	}
 
@@ -31,7 +31,7 @@ public class Attribute2ScoreAggregationService extends AbstractScoreAggregationS
 			// Scoring from attribute
 			if (attributesConfig.getAttributeConfigByKey(aga.getName()).isAsRating()) {
 				Score score = generateScoresFromAttribute(aga.getName() ,aga);
-				if (null == score) {
+				if (null == score || null == score.getValue()) {
 					dedicatedLogger.error("Null score generated for attribute {}", aga);
 				} else {
 					// Processing cardinality

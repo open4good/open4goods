@@ -35,8 +35,8 @@ public class PriceAggregationService extends AbstractAggregationService {
 	private VerticalProperties segmentProperties;
 
 	public PriceAggregationService(final String logsFolder, DataSourceConfigService datasourceConfigService,
-			VerticalProperties segmentProperties) {
-		super(logsFolder);
+			VerticalProperties segmentProperties,boolean toConsole) {
+		super(logsFolder, toConsole);
 		this.datasourceConfigService = datasourceConfigService;
 		this.segmentProperties = segmentProperties;
 	}
