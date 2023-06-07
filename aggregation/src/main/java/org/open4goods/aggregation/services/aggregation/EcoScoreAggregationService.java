@@ -44,8 +44,8 @@ public class EcoScoreAggregationService extends AbstractScoreAggregationService 
 
 	private final Map<String, String> ecoScoreconfig;
 
-	public EcoScoreAggregationService(final Map<String, String> ecoScoreconfig,  final String logsFolder) {
-		super(logsFolder);
+	public EcoScoreAggregationService(final Map<String, String> ecoScoreconfig,  final String logsFolder,boolean toConsole) {
+		super(logsFolder, toConsole);
 		this.ecoScoreconfig = ecoScoreconfig;
 	}
 

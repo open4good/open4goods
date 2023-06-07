@@ -47,6 +47,12 @@ public class ApiProperties {
 	 */
 	private String datafragmentsBackupFolder = rootFolder + "backup/data/";
 
+	
+	/**
+	 * If true, all dedicated loggers will be redirected to console (usefull for dev mode)
+	 */
+	private boolean dedicatedLoggerToConsole = false;
+	
 	/*
 	 * Proxy, if neededpsule
 	 */
@@ -412,6 +418,18 @@ public class ApiProperties {
 
 	public void setDatasourcesfolder(String datasourcesfolder) {
 		this.datasourcesfolder = datasourcesfolder;
+	}
+
+
+
+	public boolean isDedicatedLoggerToConsole() {
+		return dedicatedLoggerToConsole;
+	}
+
+
+
+	public void setDedicatedLoggerToConsole(boolean dedicatedLoggerToConsole) {
+		this.dedicatedLoggerToConsole = dedicatedLoggerToConsole;
 	}
 
 

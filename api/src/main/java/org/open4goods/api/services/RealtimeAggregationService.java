@@ -127,34 +127,34 @@ public class RealtimeAggregationService {
 
 		final List<AbstractAggregationService> services = new ArrayList<>();
 
-		services.add(new BarCodeAggregationService(apiProperties.logsFolder(), gs1prefixService,barcodeValidationService));
+		services.add(new BarCodeAggregationService(apiProperties.logsFolder(), gs1prefixService,barcodeValidationService, apiProperties.isDedicatedLoggerToConsole()));
 
-		services.add(new AttributeAggregationService(config.getAttributesConfig(), apiProperties.logsFolder()));
+		services.add(new AttributeAggregationService(config.getAttributesConfig(), apiProperties.logsFolder(), apiProperties.isDedicatedLoggerToConsole()));
 
 
-		services.add(new NamesAggregationService(config.getNamings(), evaluationService, apiProperties.logsFolder()));
+		services.add(new NamesAggregationService(config.getNamings(), evaluationService, apiProperties.logsFolder(), apiProperties.isDedicatedLoggerToConsole()));
 
 		//		services.add(new CategoryService(apiProperties.logsFolder(), taxonomyService));
 
 
-		services.add(new VerticalAggregationService( apiProperties.logsFolder(), verticalConfigService));
+		services.add(new VerticalAggregationService( apiProperties.logsFolder(), verticalConfigService, apiProperties.isDedicatedLoggerToConsole()));
 
-		services.add(new IdAggregationService( apiProperties.logsFolder()));
+		services.add(new IdAggregationService( apiProperties.logsFolder(), apiProperties.isDedicatedLoggerToConsole()));
 
 		//		services.add(new UrlsAggregationService(evaluationService, apiProperties.logsFolder(),
 		//				config.getNamings().getProductUrlTemplates()));
 
-		services.add(new PriceAggregationService(apiProperties.logsFolder(), dataSourceConfigService,config.getSegment()));
+		services.add(new PriceAggregationService(apiProperties.logsFolder(), dataSourceConfigService,config.getSegment(), apiProperties.isDedicatedLoggerToConsole()));
 
 		//		services.add(new CommentsAggregationService(apiProperties.logsFolder(), config.getCommentsConfig()));
 		//		services.add(new ProsAndConsAggregationService(apiProperties.logsFolder()));
 		//		services.add(new QuestionsAggregationService(apiProperties.logsFolder()));
 
 		services.add(new DescriptionsAggregationService(config.getDescriptionsAggregationConfig(),
-				apiProperties.logsFolder()));
+				apiProperties.logsFolder(), apiProperties.isDedicatedLoggerToConsole()));
 
 
-		services.add(new MediaAggregationService(config, apiProperties.logsFolder()));
+		services.add(new MediaAggregationService(config, apiProperties.logsFolder(), apiProperties.isDedicatedLoggerToConsole()));
 
 		final RealTimeAggregator ret = new RealTimeAggregator(services);
 

@@ -27,8 +27,8 @@ public class MediaAggregationService extends AbstractAggregationService{
 
 	//private ResourceService resourceService;
 
-	public MediaAggregationService(final VerticalConfig config, final String logsFolder) {
-		super(logsFolder);
+	public MediaAggregationService(final VerticalConfig config, final String logsFolder,boolean toConsole) {
+		super(logsFolder,toConsole);
 		//		this.imageService = imageService;
 		//		this.esTemplate = esTemplate;
 		this.config = config;

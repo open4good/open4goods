@@ -44,8 +44,8 @@ public class Brand2ScoreAggregationService extends AbstractScoreAggregationServi
 
 	private final AttributesConfig attributesConfig;
 
-	public Brand2ScoreAggregationService(final AttributesConfig attributesConfig,  final String logsFolder) {
-		super(logsFolder);
+	public Brand2ScoreAggregationService(final AttributesConfig attributesConfig,  final String logsFolder,boolean toConsole) {
+		super(logsFolder, toConsole);
 		this.attributesConfig = attributesConfig;
 	}
 

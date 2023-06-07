@@ -44,8 +44,8 @@ public class DataCompletion2ScoreAggregationService extends AbstractScoreAggrega
 
 	private final AttributesConfig attributesConfig;
 
-	public DataCompletion2ScoreAggregationService(final AttributesConfig attributesConfig,  final String logsFolder) {
-		super(logsFolder);
+	public DataCompletion2ScoreAggregationService(final AttributesConfig attributesConfig,  final String logsFolder,boolean toConsole) {
+		super(logsFolder,toConsole);
 		this.attributesConfig = attributesConfig;
 	}
 

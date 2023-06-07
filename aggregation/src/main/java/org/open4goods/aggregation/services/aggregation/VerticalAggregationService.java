@@ -18,8 +18,8 @@ public class VerticalAggregationService extends AbstractAggregationService {
 
 	private VerticalsConfigService verticalService;
 
-	public VerticalAggregationService( final String logsFolder, final VerticalsConfigService verticalService) {
-		super(logsFolder);
+	public VerticalAggregationService( final String logsFolder, final VerticalsConfigService verticalService,boolean toConsole) {
+		super(logsFolder, toConsole);
 		this.verticalService = verticalService;
 
 	}

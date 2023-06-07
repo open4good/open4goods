@@ -114,11 +114,11 @@ public class BatchAggregationService  {
 		final List<AbstractAggregationService> services = new ArrayList<>();
 
 
-		services.add(new AttributeAggregationService(config.getAttributesConfig(), apiProperties.logsFolder()));
-		services.add(new Attribute2ScoreAggregationService(config.getAttributesConfig(), apiProperties.logsFolder()));
-		services.add(new Brand2ScoreAggregationService(config.getAttributesConfig(), apiProperties.logsFolder()));
-		services.add(new DataCompletion2ScoreAggregationService(config.getAttributesConfig(), apiProperties.logsFolder()));
-		services.add(new EcoScoreAggregationService(config.getEcoscoreConfig(), apiProperties.logsFolder()));
+		services.add(new AttributeAggregationService(config.getAttributesConfig(), apiProperties.logsFolder(), apiProperties.isDedicatedLoggerToConsole() ));
+		services.add(new Attribute2ScoreAggregationService(config.getAttributesConfig(), apiProperties.logsFolder(), apiProperties.isDedicatedLoggerToConsole()));
+		services.add(new Brand2ScoreAggregationService(config.getAttributesConfig(), apiProperties.logsFolder(), apiProperties.isDedicatedLoggerToConsole()));
+		services.add(new DataCompletion2ScoreAggregationService(config.getAttributesConfig(), apiProperties.logsFolder(), apiProperties.isDedicatedLoggerToConsole()));
+		services.add(new EcoScoreAggregationService(config.getEcoscoreConfig(), apiProperties.logsFolder(), apiProperties.isDedicatedLoggerToConsole()));
 
 
 		final BatchedAggregator ret = new BatchedAggregator(services);
