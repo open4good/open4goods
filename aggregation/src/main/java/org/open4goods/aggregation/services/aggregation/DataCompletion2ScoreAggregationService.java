@@ -72,10 +72,8 @@ public class DataCompletion2ScoreAggregationService extends AbstractScoreAggrega
 		Score s = new Score();
 		// TODO : from conf / const
 		s.setName("DATA-QUALITY");
-		s.setMax(20.0);
-		s.setMin(0.0);
 		s.setVirtual(false);
-		s.setValue( Double.valueOf(map.values().stream().filter(e -> !e.getVirtual()).filter(e -> !e.getName().equals("DATA-QUALITY")) .count()));		
+		s.setRelativValue( Double.valueOf(map.values().stream().filter(e -> !e.getVirtual()).filter(e -> !e.getName().equals("DATA-QUALITY")) .count()));		
 		return s;
 	}
 

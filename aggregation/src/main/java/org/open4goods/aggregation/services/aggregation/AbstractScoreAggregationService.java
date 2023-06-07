@@ -43,7 +43,7 @@ public class AbstractScoreAggregationService extends  AbstractAggregationService
 			for (String scoreName : batchDatas.keySet()) {
 				Score s = p.getScores().get(scoreName);
 				if (null != s) {
-					s.setCardinality(relativize(s));									
+					relativize(s);									
 				}
 			}			
 		}
@@ -69,7 +69,7 @@ public class AbstractScoreAggregationService extends  AbstractAggregationService
 					ret.setCount(cardinality.getCount());
 					ret.setSum(cardinality.getSum());
 					
-					ret.setRelValue(cardinality.getAvg());					
+					ret.setValue(cardinality.getAvg());					
 					s.setCardinality(ret);		
 					
 					p.getScores().put(scoreName, s);
@@ -87,20 +87,20 @@ public class AbstractScoreAggregationService extends  AbstractAggregationService
 	 * Computes relativ values
 	 * @param score
 	 */
-	protected Cardinality relativize(Score score) {
+	protected void relativize(Score score) {
 
 		// Substracting unused min
 
-		if (null == score.getValue()) {
+		if (null == score.getRelativValue()) {
 			LOGGER.warn("Empty value for Score {} ! Consider normalizing in a futur export/import phase",score);
-			return null;
+			return ;
 		}
 		
 		Cardinality cardinality =  batchDatas.get(score.getName());
 
 		if (null == cardinality) {
 			LOGGER.warn("No cardinality found for score {}",score);
-			return null;
+			return ;
 		}
 		
 		
@@ -111,21 +111,20 @@ public class AbstractScoreAggregationService extends  AbstractAggregationService
 		ret.setCount(cardinality.getCount());
 		ret.setSum(cardinality.getSum());
 		
+		score.setCardinality(ret);
 		try {
 			// Removing the min range
-			Double minBorn = cardinality.getMin() - score.getMin();
+			Double minBorn = cardinality.getMin();
 
 			// Standardizing Score based on real max
 			final Double max = cardinality.getMax();
 
-			final Double value = score.getValue();
-			ret.setRelValue((value -minBorn) * StandardiserService.DEFAULT_MAX_RATING / (max -minBorn));
+			final Double value = score.getRelativValue();
+			score.setRelativValue((value -minBorn) * StandardiserService.DEFAULT_MAX_RATING / (max -minBorn));
 
 		} catch (Exception e) {
 			LOGGER.warn("Relativisation failed",e);
 		}
-
-		return ret;
 	}
 
 
@@ -137,7 +136,7 @@ public class AbstractScoreAggregationService extends  AbstractAggregationService
 	protected void processCardinality(Score score) {
 
 
-		if (null == score || null == score.getValue()) {
+		if (null == score || null == score.getRelativValue()) {
 			LOGGER.warn("Empty value for Score {} ! Consider normalizing in a futur export/import phase",score);
 			return;
 		}

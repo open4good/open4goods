@@ -18,7 +18,7 @@ crawlerKeys:
 
 verticalsFolder: "/home/goulven/git/open4goods-config/verticals/"
 datasourcesfolder: "/home/goulven/git/open4goods-config/datasources/"
-
+dedicatedLoggerToConsole: true
 
 spring:
   thymeleaf:
