@@ -767,6 +767,7 @@ public class CsvDatasourceFetchingService extends DatasourceFetchingService {
 			if (!StringUtils.isEmpty(p.getUrl())) {
 				// Completing the datafragment with the configured url
 				crawler.visitNow(controler, p.getUrl(), p);
+				p.setDatasourceConfigName(datasourceConfigName);
 
 			} else {
 				dedicatedLogger.warn(

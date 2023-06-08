@@ -1,16 +1,44 @@
 <div class="card accordion" id="ecoAccordionFilter" th:with="accordionId=ecoAccordionFilter">
 
+		<!-- The num offers condition 
+		
+		TODO : Min / max
+	                   min=${products.numericFilters.get('CLASSE_ENERGY').getMinValue},
+	                   max=${products.numericFilters.CLASSE_ENERGY.maxValue}">
+		
 
-
-
-		<!-- The num offers condition -->
-	<th:block th:with="title='Classe énergétique',
-	                   id='scores.CLASSE_ENERGY.relativValue',
-					   label='La concurrence correspond au nombre d\'offres disponibles pour le produit. Plus elle est élevée, plus vous avez de chances d\'obtenir un prix juste et intéressant.',
+	<th:block th:with="title='Ecoscore',
+	                   id='scores.ECOSCORE.relativValue',
 					   labelType='alert-success',	
 					   icon='fa-cart-plus',                   
-	                   min=${products.minOffers},
-	                   max=${products.maxOffers}">
+
+	                   min=0,
+	                   max=5">
+
+		<th:block th:insert="inc/vertical-filter-item-numeric.html"></th:block>
+	</th:block>	
+		
+		-->
+	
+	
+	<th:block th:with="title='Classe énergétique',
+	                   id='scores.CLASSE_ENERGY.relativValue',
+					   labelType='alert-success',	
+					   icon='fa-cart-plus',                   
+
+	                   min=0,
+	                   max=5">
+		<th:block th:insert="inc/vertical-filter-item-numeric.html"></th:block>
+	</th:block>	
+	                   
+	                   
+	<th:block th:with="title='Réparabilité',
+	                   id='scores.REPAIRABILITY_INDEX.relativValue',
+					   labelType='alert-success',	
+					   icon='fa-cart-plus',                   
+
+	                   min=0,
+	                   max=5">
 		<th:block th:insert="inc/vertical-filter-item-numeric.html"></th:block>
 	</th:block>	
 	
