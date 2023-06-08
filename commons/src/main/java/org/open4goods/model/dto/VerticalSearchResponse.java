@@ -42,6 +42,9 @@ public class VerticalSearchResponse {
 	private List<VerticalFilterTerm> conditions = new ArrayList<>();
 	private List<VerticalFilterTerm> brands = new ArrayList<>();
 	private List<VerticalFilterTerm> countries = new ArrayList<>();
+	private Map<String,NumericRangeFilter> numericFilters = new HashMap<>();
+	
+	
 
 
 	/** The custom aggregations, pageNumber filters **/
@@ -179,6 +182,14 @@ public class VerticalSearchResponse {
 
 	public void setCustomFilters(Map<AttributeConfig, List<VerticalFilterTerm>> customFilters) {
 		this.customFilters = customFilters;
+	}
+
+	public Map<String, NumericRangeFilter> getNumericFilters() {
+		return numericFilters;
+	}
+
+	public void setNumericFilters(Map<String, NumericRangeFilter> numericFilters) {
+		this.numericFilters = numericFilters;
 	}
 
 

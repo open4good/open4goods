@@ -1,16 +1,18 @@
 <div class="card accordion" id="ecoAccordionFilter" th:with="accordionId=ecoAccordionFilter">
 
 
-	<!-- The eco-score -->		
-	<th:block th:with="id='ecoscore',
-					   title='Eco-score',
-					   icon='fa-globe',
-					   label='Filtrez ici votre recherche sur le niveau d\'impact écologique que vous êtes prèt à accepter.',
-					   labelType='alert-success',					   
-					   min=0,
-					   max=5">
+
+
+		<!-- The num offers condition -->
+	<th:block th:with="title='Classe énergétique',
+	                   id='scores.CLASSE_ENERGY.relativValue',
+					   label='La concurrence correspond au nombre d\'offres disponibles pour le produit. Plus elle est élevée, plus vous avez de chances d\'obtenir un prix juste et intéressant.',
+					   labelType='alert-success',	
+					   icon='fa-cart-plus',                   
+	                   min=${products.minOffers},
+	                   max=${products.maxOffers}">
 		<th:block th:insert="inc/vertical-filter-item-numeric.html"></th:block>
-	</th:block>
+	</th:block>	
 	
 		
 	<!-- The item condition -->

@@ -157,8 +157,10 @@ public class SearchService {
 
 		// Adding custom numeric filters
 		for (NumericRangeFilter filter : request.getNumericFilters()) {
-			criterias.and(new Criteria("filter.getAttribute()").lessThanEqual(filter.getMaxValue()).greaterThanEqual(filter.getMinValue()));
 
+			// TODO : WTF ?
+			criterias.and(new Criteria(filter.getKey()).lessThanEqual(filter.getMaxValue()) );
+			criterias.and(new Criteria(filter.getKey()).greaterThanEqual(Math.ceil(filter.getMinValue())));
 		}
 
 		// Adding custom checkbox filters
@@ -228,14 +230,21 @@ public class SearchService {
 			}
 		}
 
-		// Adding custom filters aggregations
+		// Adding custom attributes terms filters aggregations
 		for (AttributeConfig attrConfig : customAttrFilters) {
 			esQuery = esQuery
 					// TODO : size from conf
 					.withAggregation(attrConfig.getKey(), 	Aggregation.of(a -> a.terms(ta -> ta.field("attributes.aggregatedAttributes."+attrConfig.getKey()+".value.keyword").missing(OTHER_BUCKET).size(100)  ))	);
 		}
-		//
-
+		// Adding custom range aggregations
+		for (NumericRangeFilter filter: request.getNumericFilters()) {
+			esQuery = esQuery
+					// TODO : size from conf
+			.withAggregation("min"+filter.getKey(),  	Aggregation.of(a -> a.min(ta -> ta.field(filter.getKey()))))
+			.withAggregation("max"+filter.getKey(), 	Aggregation.of(a -> a.max(ta -> ta.field(filter.getKey()))))		;		
+		
+		}
+				
 		SearchHits<Product> results = aggregatedDataRepository.search(esQuery.build(),ALL_VERTICAL_NAME);
 
 
@@ -258,6 +267,20 @@ public class SearchService {
 		vsr.setMinOffers(Double.valueOf(minOffers.value()).intValue());
 
 
+		
+		// Adding custom range aggregations
+		for (NumericRangeFilter filter: request.getNumericFilters()) {
+			
+			MinAggregate min = aggregations.get("min"+filter.getKey()).aggregation().getAggregate().min();
+			MaxAggregate max= aggregations.get("max"+filter.getKey()).aggregation().getAggregate().max();
+		
+			NumericRangeFilter nrf = new NumericRangeFilter();
+			nrf.setMaxValue(min.value());
+			nrf.setMinValue(max.value());
+			
+		}
+		
+		
 		///////
 		// Item condition
 		///////
