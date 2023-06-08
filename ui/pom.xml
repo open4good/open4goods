@@ -151,6 +151,12 @@
 		    <artifactId>mustache</artifactId>
 		    <version>4.2.0</version>
 		</dependency>
+		
+		<dependency>
+		    <groupId>org.webjars</groupId>
+		    <artifactId>chartjs</artifactId>
+		    <version>4.1.2</version>
+		</dependency>		
 	
 
 	</dependencies>

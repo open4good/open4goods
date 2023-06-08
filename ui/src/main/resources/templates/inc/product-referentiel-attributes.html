@@ -11,7 +11,7 @@
 
 				<th:block th:each="item, stat : ${product.alternativeBrands}">
 					<tr th:if="${stat.first}">
-						<th scope="row" th:rowspan="${product.alternativeBrands.size()}">Aussi connue sous la marque marque</th>
+						<th scope="row" th:rowspan="${product.alternativeBrands.size()}">Aussi référencé comme  </th>
 						<td th:text="${item}"></td>
 					</tr>
 					<tr th:unless="${stat.first}">

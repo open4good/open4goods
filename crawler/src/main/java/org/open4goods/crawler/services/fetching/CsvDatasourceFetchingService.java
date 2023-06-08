@@ -765,7 +765,8 @@ public class CsvDatasourceFetchingService extends DatasourceFetchingService {
 		}
 
 		// Completing with the web data if defined
-		if (null != crawler && !StringUtils.isEmpty(p.gtin())) {
+		// TODO : && !StringUtils.isEmpty(p.gtin()
+		if (null != crawler) {
 			dedicatedLogger.info("Completing CSV data fragment {} with web data at url {}", p, p.getUrl());
 
 			if (!StringUtils.isEmpty(p.getUrl())) {

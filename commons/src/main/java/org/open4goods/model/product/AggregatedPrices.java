@@ -39,6 +39,18 @@ public class AggregatedPrices implements Standardisable {
 	private Set<ProductState> conditions = new HashSet<>();
 
 
+	
+	public List<AggregatedPrice> occasionOffers() {
+		return sortedOffers().stream().filter(e->e.getProductState().equals(ProductState.OCCASION)).toList();	
+	}
+	
+	public List<AggregatedPrice> newOffers() {
+		return sortedOffers().stream().filter(e->e.getProductState().equals(ProductState.NEW)).toList();	
+	}
+	
+	
+	
+	
 	/**
 	 * Sort offers, always the cheapest compensated order first, then price sorting
 	 * @return
