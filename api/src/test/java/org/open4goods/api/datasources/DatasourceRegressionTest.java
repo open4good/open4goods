@@ -223,68 +223,10 @@ public class DatasourceRegressionTest {
 			if (null != dsProperties.getValue().getApiDatasource()) {
 
 				//TODO(test) : Test api regression here
-			}else if (dsProperties.getValue().getCsvDatasource() != null) {
-
-
-
-				if (null == dsProperties.getValue().getCsvDatasource().getTestDatas() ||dsProperties.getValue().getCsvDatasource().getTestDatas().size() == 0) {
-					logger.error("WARNING  : " + dsProperties.getKey() + " HAS NO REGRESSION TESTS URLS");
-					//					fail("WARNING  : " + dsProperties.getKey() + " HAS NO CSV REGRESSION DATA TESTS ");
-					//					continue;
-				}
-
-
-
-				//				for ( final TestCsvLine testData : dsProperties.getValue().getCsvDatasource().getTestDatas()) {
-				//
-				//					////////////////////////////////
-				//					// Case of a CSV datasource
-				//					////////////////////////////////
-				//
-				//					try {
-				//						final DataFragment df = csvFetchingService.synchFetch(dsProperties.getKey(), dsProperties.getValue(), dsProperties.getValue().getCsvDatasource().getTestHeaders() , testData.getCsvLine());
-				//
-				//						// Completing
-				//						completionService.complete(df,dsProperties.getKey(), dsProperties.getValue(), logger);
-				//
-				//						// Validating
-				//						try {
-				//							df.validate(dsProperties.getValue().getValidationFields());
-				//
-				//							final TestResultReport report = testData.test(df, dsProperties.getKey());
-				//							if (report.getMessages().size() > 0) {
-				//								reports.add(report);
-				//							}
-				//
-				//						} catch (final ValidationException e) {
-				//							final TestResultReport nodata = new TestResultReport(df,dsProperties.getKey());
-				//							nodata.setUrl(testData.getCsvLine() );
-				//							nodata.addMessage(  e.getMessage() );
-				//							reports.add(nodata);
-				//						} catch (final Exception e) {
-				//							final TestResultReport nodata = new TestResultReport(df,dsProperties.getKey());
-				//							nodata.setUrl(testData.getCsvLine() );
-				//							nodata.addMessage(  e.getMessage() );
-				//							reports.add(nodata);
-				//
-				//						}
-				//
-				//					} catch (IOException | ValidationException e) {
-				//						fail("Unexpected exeption");
-				//						e.printStackTrace();
-				//					}
-				//
-				//
-				//
-				//
-				//
-				//			}
-				//
-				//
-
-
-
 			} else if (dsProperties.getValue().getWebDatasource() != null) {
+				
+				
+				
 				////////////////////////////////
 				// Case of a WEB datasource
 				////////////////////////////////
@@ -362,7 +304,72 @@ public class DatasourceRegressionTest {
 				}
 				controler.shutdown();
 
-			} else {
+			}
+			
+			
+			
+			else if (dsProperties.getValue().getCsvDatasource() != null) {
+
+
+
+				if (null == dsProperties.getValue().getCsvDatasource().getTestDatas() ||dsProperties.getValue().getCsvDatasource().getTestDatas().size() == 0) {
+					logger.error("WARNING  : " + dsProperties.getKey() + " HAS NO REGRESSION TESTS URLS");
+					//					fail("WARNING  : " + dsProperties.getKey() + " HAS NO CSV REGRESSION DATA TESTS ");
+					//					continue;
+				}
+
+
+
+				//				for ( final TestCsvLine testData : dsProperties.getValue().getCsvDatasource().getTestDatas()) {
+				//
+				//					////////////////////////////////
+				//					// Case of a CSV datasource
+				//					////////////////////////////////
+				//
+				//					try {
+				//						final DataFragment df = csvFetchingService.synchFetch(dsProperties.getKey(), dsProperties.getValue(), dsProperties.getValue().getCsvDatasource().getTestHeaders() , testData.getCsvLine());
+				//
+				//						// Completing
+				//						completionService.complete(df,dsProperties.getKey(), dsProperties.getValue(), logger);
+				//
+				//						// Validating
+				//						try {
+				//							df.validate(dsProperties.getValue().getValidationFields());
+				//
+				//							final TestResultReport report = testData.test(df, dsProperties.getKey());
+				//							if (report.getMessages().size() > 0) {
+				//								reports.add(report);
+				//							}
+				//
+				//						} catch (final ValidationException e) {
+				//							final TestResultReport nodata = new TestResultReport(df,dsProperties.getKey());
+				//							nodata.setUrl(testData.getCsvLine() );
+				//							nodata.addMessage(  e.getMessage() );
+				//							reports.add(nodata);
+				//						} catch (final Exception e) {
+				//							final TestResultReport nodata = new TestResultReport(df,dsProperties.getKey());
+				//							nodata.setUrl(testData.getCsvLine() );
+				//							nodata.addMessage(  e.getMessage() );
+				//							reports.add(nodata);
+				//
+				//						}
+				//
+				//					} catch (IOException | ValidationException e) {
+				//						fail("Unexpected exeption");
+				//						e.printStackTrace();
+				//					}
+				//
+				//
+				//
+				//
+				//
+				//			}
+				//
+				//
+
+
+
+			}  else {
 				fail ("Not a web or CSV datasource : " + dsProperties.getKey());
 			}
 		}

@@ -109,7 +109,7 @@ public class JsonExtractor extends Extractor {
 				p.setPriceAndCurrency(jsonEval(root, c.getPrice()), locale);
 			}
 		} catch (final Exception e) {
-			dedicatedLogger.info("Error while parsing price : {}  ; {}", e.getMessage(), url);
+			dedicatedLogger.warn("Error while parsing price : {}  ; {}", e.getMessage(), url);
 		}
 
 		////////////////////
