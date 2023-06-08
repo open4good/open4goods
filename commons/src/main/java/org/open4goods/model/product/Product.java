@@ -13,6 +13,7 @@ import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import org.open4goods.model.Standardisable;
 import org.open4goods.model.constants.Currency;
+import org.open4goods.model.constants.ProductState;
 import org.open4goods.model.constants.ProviderType;
 import org.open4goods.model.constants.ReferentielKey;
 import org.open4goods.model.data.Description;
@@ -268,6 +269,16 @@ public class Product implements Standardisable {
 		return alternativeIds.size() > 0;
 	}
 
+	
+	public boolean hasOccasions() {
+		return price.getConditions().contains(ProductState.OCCASION);
+	}
+	
+	
+	
+	
+	
+	
 	//	/**
 	//	 * Return all the specific ratings
 	//	 *

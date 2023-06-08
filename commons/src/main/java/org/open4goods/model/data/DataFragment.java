@@ -416,12 +416,17 @@ public class DataFragment implements Standardisable, Validable {
 	 */
 	public void validate(final Set<String> fields) throws ValidationException {
 		final Set<ValidationMessage> ret = new HashSet<>();
+		if (null == fields) {
+			return;
+		}
+		
 
 		try {
 			this.validate();
 		} catch (final ValidationException e) {
 			ret.addAll(e.getResult());
 		}
+		
 		for (final String field : fields) {
 
 			switch (field.toLowerCase()) {
