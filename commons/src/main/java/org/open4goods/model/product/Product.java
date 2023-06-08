@@ -44,6 +44,13 @@ public class Product implements Standardisable {
 	@Field(index = true, store = false, type = FieldType.Keyword)
 	private Set<String> alternativeIds = new HashSet<>();
 
+	
+	/** The list of other id's known for this product **/
+	@Field(index = false, store = false, type = FieldType.Keyword)
+	private Set<String> alternativeBrands = new HashSet<>();
+
+	
+	
 
 	/** The vertical, if any**/
 	@Field(index = true, store = false, type = FieldType.Keyword)
@@ -618,6 +625,14 @@ public class Product implements Standardisable {
 
 	public void setScores(Map<String, Score> scores) {
 		this.scores = scores;
+	}
+
+	public Set<String> getAlternativeBrands() {
+		return alternativeBrands;
+	}
+
+	public void setAlternativeBrands(Set<String> alternativeBrands) {
+		this.alternativeBrands = alternativeBrands;
 	}
 
 

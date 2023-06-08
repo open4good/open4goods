@@ -8,6 +8,20 @@
 					<td  th:text="${product.brand()}"></td>
 				</tr>
 
+
+				<th:block th:each="item, stat : ${product.alternativeBrands}">
+					<tr th:if="${stat.first}">
+						<th scope="row" th:rowspan="${product.alternativeBrands.size()}">Aussi connue sous la marque marque</th>
+						<td th:text="${item}"></td>
+					</tr>
+					<tr th:unless="${stat.first}">
+						<td th:text="${item}"></td>
+					</tr>
+				</th:block>		
+				
+				
+				
+
 				<tr th:if="${product.model()}">
 					<th scope="row">Modèle</th>
 					<td th:text="${product.model()}"></td>

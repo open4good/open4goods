@@ -19,9 +19,9 @@ public class SourcedAttribute extends Attribute{
 	 * @param translated
 	 * @param df
 	 */
-	public SourcedAttribute(IAttribute source, DataFragment df) {
+	public SourcedAttribute(IAttribute source, String datasourceName) {
 
-		datasourceName = df.getDatasourceName();
+		this.datasourceName = datasourceName;
 
 		setRawValue(source.getValue());
 		setLanguage(source.getLanguage());
