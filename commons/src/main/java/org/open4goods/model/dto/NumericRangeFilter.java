@@ -2,7 +2,7 @@ package org.open4goods.model.dto;
 
 public class NumericRangeFilter {
 
-	private String attribute;
+	private String key;
 	private Double minValue;
 	private Double maxValue;
 
@@ -13,15 +13,22 @@ public class NumericRangeFilter {
 	}
 	public NumericRangeFilter(String attribute, Double minValue, Double maxValue) {
 		super();
-		this.attribute = attribute;
+		this.key = attribute;
 		this.minValue = minValue;
 		this.maxValue = maxValue;
 	}
-	public String getAttribute() {
-		return attribute;
+	
+	@Override
+	public String toString() {
+	
+		return key+ " : " + minValue +"<>" + maxValue;
 	}
-	public void setAttribute(String attribute) {
-		this.attribute = attribute;
+	
+	public String getKey() {
+		return key;
+	}
+	public void setKey(String attribute) {
+		this.key = attribute;
 	}
 	public Double getMinValue() {
 		return minValue;

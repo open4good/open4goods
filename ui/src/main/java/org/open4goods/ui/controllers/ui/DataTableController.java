@@ -1,6 +1,7 @@
 package org.open4goods.ui.controllers.ui;
 
 import org.open4goods.config.yml.ui.VerticalConfig;
+import org.open4goods.model.dto.NumericRangeFilter;
 import org.open4goods.model.dto.VerticalSearchRequest;
 import org.open4goods.model.dto.VerticalSearchResponse;
 import org.open4goods.model.product.Product;
@@ -73,23 +74,16 @@ public class DataTableController {
 
 		// Handle numeric sliders value
 		String[] slidersValue = request.getParameterValues("sliders[]");
-		for (String slider : slidersValue) {
-			String[] sliderValues = slider.split(":");
-
-			if (sliderValues[0].equals("slider-price-minPrice-price")) {
-				// TODO : should have consts shared with javascrippt (vertical-home)
-				vRequest.setMinPrice(Double.valueOf(Math.floor(Double.parseDouble(sliderValues[1]))).intValue() );
-				vRequest.setMaxPrice(Double.valueOf(Math.ceil(Double.parseDouble(sliderValues[2]) )).intValue() );
-			} else if (sliderValues[0].equals("slider-offers")) {
-				// TODO : should have consts shared with javascrippt (vertical-home)
-				vRequest.setMinOffers(Double.valueOf(Math.floor(Double.parseDouble(sliderValues[1]))).intValue() );
-				vRequest.setMaxOffers(Double.valueOf(Math.ceil(Double.parseDouble(sliderValues[2]) )).intValue() );
-			} else {
-				//TODO(gof) : put back when ecoscore computed
-				//vRequest.getNumericFilters().add(new NumericRangeFilter(sliderValues[0] , Double.valueOf(sliderValues[1]), Double.valueOf(sliderValues[2])));
-			}
+		if (null != slidersValue) {
+			
+			for (String slider : slidersValue) {
+				String[] sliderValues = slider.split(":");
+	
+				Double min = Double.valueOf(Math.floor(Double.parseDouble(sliderValues[1])));
+				Double max = Double.valueOf(Math.ceil(Double.parseDouble(sliderValues[2]) ));
+				vRequest.getNumericFilters().add(new NumericRangeFilter(sliderValues[0] ,min, max));
+				}
 		}
-
 		// Sorting
 		if (!pagination.isSortByEmpty()) {
 			String sortKey = pagination.getSortBy().getSortBys().keySet().stream().findFirst().get();

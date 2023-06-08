@@ -4,7 +4,7 @@
 
 	<!-- The price condition -->	
 	<th:block th:with="title='Prix', 
-					   id='price-minPrice-price',
+					   id='price.minPrice.price',
 					   icon='fa-euro-sign',
 					   min=${products.minPrice},
 					   max=${products.maxPrice}">
@@ -13,7 +13,7 @@
 	
 	<!-- The num offers condition -->
 	<th:block th:with="title='Concurrence',
-	                   id='offers',
+	                   id='offersCount',
 					   label='La concurrence correspond au nombre d\'offres disponibles pour le produit. Plus elle est élevée, plus vous avez de chances d\'obtenir un prix juste et intéressant.',
 					   labelType='alert-success',	
 					   icon='fa-cart-plus',                   
@@ -22,6 +22,7 @@
 		<th:block th:insert="inc/vertical-filter-item-numeric.html"></th:block>
 	</th:block>	
 	
+
 	
 
 	
