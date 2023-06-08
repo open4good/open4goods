@@ -302,9 +302,9 @@ public class DataFragment implements Standardisable, Validable {
 		//
 		//		}
 
-		if (StringUtils.isEmpty(category)) {
-			ret.add(ValidationMessage.newValidationMessage(url, "NO_PRODUCTCATEGORY"));
-		}
+//		if (StringUtils.isEmpty(category)) {
+//			ret.add(ValidationMessage.newValidationMessage(url, "NO_PRODUCTCATEGORY"));
+//		}
 
 		if (StringUtils.isEmpty(datasourceName)) {
 			ret.add(ValidationMessage.newValidationMessage(url, "NO_SELLER"));
