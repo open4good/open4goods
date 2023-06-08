@@ -38,7 +38,7 @@
 					<div class="progress-info">
 						<span class="h4 progress-tooltip bg-primary" th:text="${score.name}"></span>
 						<div class="progress-percentage">
-							<span th:text="${score.relativValue*20}+'%'"></span>
+							<span th:if="${score.relativValue}" th:text="${score.relativValue*20}+'%'"></span>
 						</div>
 					</div>
 					<div class="progress">
