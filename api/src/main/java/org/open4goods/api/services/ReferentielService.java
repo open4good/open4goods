@@ -62,7 +62,7 @@ public class ReferentielService {
 
 	/**
 	 * Apply attributes sanitisation rules
-	 * @param statsLogger
+	 * @param dedicatedLogger
 	 * @param DataFragment
 	 * @param conf
 	 */

@@ -96,7 +96,7 @@ public abstract class Extractor {
 	 * @param p
 	 * @param conf
 	 * @param sanitizer
-	 * @param statsLogger
+	 * @param dedicatedLogger
 	 * @return
 	 * @throws ClassNotFoundException
 	 * @throws InstantiationException

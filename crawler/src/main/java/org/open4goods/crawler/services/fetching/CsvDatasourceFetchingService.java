@@ -77,6 +77,10 @@ public class CsvDatasourceFetchingService extends DatasourceFetchingService {
 	private final WebDatasourceFetchingService webFetchingService;
 
 	private final ExecutorService executor;
+	
+	
+	
+	
 
 	// The running job status
 	private final Map<String, FetchingJobStats> running = new ConcurrentHashMap<>();
@@ -97,9 +101,9 @@ public class CsvDatasourceFetchingService extends DatasourceFetchingService {
 	 */
 	public CsvDatasourceFetchingService(final DataFragmentCompletionService completionService,
 			final IndexationService indexationService, final FetcherProperties fetcherProperties,
-			final WebDatasourceFetchingService webFetchingService, final String logsFolder
+			final WebDatasourceFetchingService webFetchingService, final String logsFolder, boolean toConsole
 			) {
-		super(logsFolder);
+		super(logsFolder, toConsole);
 		this.indexationService = indexationService;
 		this.webFetchingService = webFetchingService;
 		this.completionService = completionService;
@@ -397,7 +401,7 @@ public class CsvDatasourceFetchingService extends DatasourceFetchingService {
 					// closing iterator
 					mi.close();
 					
-					statsLogger.info("End csv fetching for {}:{}. {} imported, {} validations failed, {} excluded, {} errors ", dsConfName, url, okItems, validationFailedItems, excludedItems, errorItems);
+					dedicatedLogger.info("End csv fetching for {}:{}. {} imported, {} validations failed, {} excluded, {} errors ", dsConfName, url, okItems, validationFailedItems, excludedItems, errorItems);
 
 					dedicatedLogger.info("Removing fetched CSV file at {}", destFile);
 					if (url.startsWith("http")) {
@@ -405,8 +409,8 @@ public class CsvDatasourceFetchingService extends DatasourceFetchingService {
 					}
 
 				} catch (final Exception e) {
-					statsLogger.error("CSV fetching aborted : {}:{} ",dsConfName ,url,e);
-					statsLogger.info("End csv fetching for {}{}. {} imported, {} validations failed, {} excluded, {} errors ", dsConfName, url,  okItems, validationFailedItems, excludedItems, errorItems);
+					dedicatedLogger.error("CSV fetching aborted : {}:{} ",dsConfName ,url,e);
+					dedicatedLogger.info("End csv fetching for {}{}. {} imported, {} validations failed, {} excluded, {} errors ", dsConfName, url,  okItems, validationFailedItems, excludedItems, errorItems);
 
 				} 
 			}
@@ -766,7 +770,10 @@ public class CsvDatasourceFetchingService extends DatasourceFetchingService {
 
 			if (!StringUtils.isEmpty(p.getUrl())) {
 				// Completing the datafragment with the configured url
-				crawler.visitNow(controler, p.getUrl(), p);
+				DataFragment fragment = crawler.visitNow(controler, p.getUrl(), p);
+				
+				
+				
 				p.setDatasourceConfigName(datasourceConfigName);
 
 			} else {

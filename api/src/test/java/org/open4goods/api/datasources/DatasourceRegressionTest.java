@@ -89,14 +89,14 @@ public class DatasourceRegressionTest {
 
 		@Bean
 		WebDatasourceFetchingService webDatasourceFetchingService(@Autowired final ApiProperties apiProperties, @Autowired final FetcherProperties fetcherProperties) {
-			return new WebDatasourceFetchingService(null, fetcherProperties, fetcherProperties.getLogsDir());
+			return new WebDatasourceFetchingService(null, fetcherProperties, fetcherProperties.getLogsDir(),true);
 		}
 
 		@Bean
 		CsvDatasourceFetchingService csvDatasourceFetchingService(
 				@Autowired final ApiProperties apiProperties, @Autowired final FetcherProperties fetcherProperties,
 				@Autowired final WebDatasourceFetchingService httpFetchingService, @Autowired final  DataFragmentCompletionService dfCompletionService) {
-			return new CsvDatasourceFetchingService(dfCompletionService, null, fetcherProperties,  httpFetchingService,fetcherProperties.getLogsDir());
+			return new CsvDatasourceFetchingService(dfCompletionService, null, fetcherProperties,  httpFetchingService,fetcherProperties.getLogsDir(),true);
 		}
 
 		@Bean

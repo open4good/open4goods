@@ -26,10 +26,10 @@ public abstract class DatasourceFetchingService {
 
 	protected @Autowired Environment env;
 
-	protected Logger statsLogger;
+	protected Logger dedicatedLogger;
 
-	public DatasourceFetchingService (final String logsFolder) {
-		statsLogger = GenericFileLogger.initLogger("stats-datasource", Level.INFO, logsFolder, false);
+	public DatasourceFetchingService (final String logsFolder, boolean toConsole) {
+		dedicatedLogger = GenericFileLogger.initLogger("stats-datasource", Level.INFO, logsFolder, toConsole);
 	}
 
 	/**
@@ -63,12 +63,12 @@ public abstract class DatasourceFetchingService {
 	public void finished(final FetchingJobStats fetchingJobStats, final DataSourceProperties dataSourceProperties) {
 
 		// Logging the number of indexed and number
-		statsLogger.info("Datasource fetching of {} is terminated, with a duration of {}ms. indexed:{}",dataSourceProperties.getName(),  System.currentTimeMillis() -  fetchingJobStats.getStartDate(), fetchingJobStats.getNumberOfIndexedDatas());
+		dedicatedLogger.info("Datasource fetching of {} is terminated, with a duration of {}ms. indexed:{}",dataSourceProperties.getName(),  System.currentTimeMillis() -  fetchingJobStats.getStartDate(), fetchingJobStats.getNumberOfIndexedDatas());
 
 
 		// Triggering an alert if indexed threshold not respected
 		if (fetchingJobStats.getNumberOfIndexedDatas() < dataSourceProperties.getMinimumIndexedItems()   ) {
-			statsLogger.error(fetchingJobStats.getName() + " has indexed " + fetchingJobStats.getNumberOfIndexedDatas() + " datafragments, was expecting at least " + dataSourceProperties.getMinimumIndexedItems());
+			dedicatedLogger.error(fetchingJobStats.getName() + " has indexed " + fetchingJobStats.getNumberOfIndexedDatas() + " datafragments, was expecting at least " + dataSourceProperties.getMinimumIndexedItems());
 		}
 	}
 
@@ -83,7 +83,8 @@ public abstract class DatasourceFetchingService {
 
 		// Logging to console according to dev profile and conf
 		boolean toConsole = false;
-		if (ArrayUtils.contains(env.getActiveProfiles(), "dev")) {
+		// TODO : Not nice, mutualize
+		if (ArrayUtils.contains(env.getActiveProfiles(), "dev") || ArrayUtils.contains(env.getActiveProfiles(), "devsec")) {
 			toConsole = true;
 		}
 
