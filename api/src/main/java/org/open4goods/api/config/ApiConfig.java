@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
 
+import org.apache.commons.lang3.ArrayUtils;
 import org.open4goods.api.config.yml.ApiProperties;
 import org.open4goods.api.services.BatchAggregationService;
 import org.open4goods.api.services.BatchService;
@@ -47,6 +48,7 @@ import org.springframework.cache.caffeine.CaffeineCache;
 import org.springframework.cache.support.SimpleCacheManager;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.env.Environment;
 import org.springframework.core.io.support.ResourcePatternResolver;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
@@ -67,6 +69,8 @@ public class ApiConfig {
 	private static final Logger logger = LoggerFactory.getLogger(ApiConfig.class);
 
 
+	protected @Autowired Environment env;
+
 	@Bean
 	@Autowired
 	VerticalsConfigService verticalConfigsService(SerialisationService serialisationService) throws IOException {
@@ -83,7 +87,13 @@ public class ApiConfig {
 	@Bean
 	@Autowired
 	BatchService batchService(SearchService searchService, ProductRepository dataRepository, VerticalsConfigService verticalsConfigService, BatchAggregationService batchAggregationService) throws IOException {
-		return new BatchService(dataRepository, apiProperties, verticalsConfigService,batchAggregationService, searchService);
+		// Logging to console according to dev profile and conf
+		boolean toConsole = false;
+		// TODO : Not nice, mutualize
+		if (ArrayUtils.contains(env.getActiveProfiles(), "dev") || ArrayUtils.contains(env.getActiveProfiles(), "devsec")) {
+			toConsole = true;
+		}
+		return new BatchService(dataRepository, apiProperties, verticalsConfigService,batchAggregationService, searchService, toConsole);
 	}
 
 
@@ -302,15 +312,32 @@ public class ApiConfig {
 			@Autowired final IndexationService indexationService, @Autowired final ApiProperties apiProperties,
 			@Autowired final WebDatasourceFetchingService webDatasourceFetchingService
 			) {
+		
+		boolean toConsole = false;
+		// TODO : Not nice, mutualize
+		if (ArrayUtils.contains(env.getActiveProfiles(), "dev") || ArrayUtils.contains(env.getActiveProfiles(), "devsec")) {
+			toConsole  = true;
+		}
+		
+		
 		return new CsvDatasourceFetchingService(completionService, indexationService,
-				apiProperties.getFetcherProperties(), webDatasourceFetchingService, apiProperties.logsFolder());
+				apiProperties.getFetcherProperties(), webDatasourceFetchingService, apiProperties.logsFolder(), toConsole);
 	}
 
 	@Bean
 	WebDatasourceFetchingService webDatasourceFetchingService(
 			@Autowired final IndexationService indexationService, @Autowired final ApiProperties apiProperties) {
+
+		// Logging to console according to dev profile and conf
+		boolean toConsole = false;
+		// TODO : Not nice, mutualize
+		if (ArrayUtils.contains(env.getActiveProfiles(), "dev") || ArrayUtils.contains(env.getActiveProfiles(), "devsec")) {
+			toConsole = true;
+		}		
+		
+		
 		return new WebDatasourceFetchingService(indexationService, apiProperties.getFetcherProperties(),
-				apiProperties.logsFolder());
+				apiProperties.logsFolder(), toConsole);
 	}
 
 

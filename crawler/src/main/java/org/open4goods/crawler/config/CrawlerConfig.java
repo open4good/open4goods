@@ -1,5 +1,6 @@
 package org.open4goods.crawler.config;
 
+import org.apache.commons.lang3.ArrayUtils;
 import org.open4goods.crawler.config.yml.FetcherProperties;
 import org.open4goods.crawler.services.ApiSynchService;
 import org.open4goods.crawler.services.DataFragmentCompletionService;
@@ -12,10 +13,16 @@ import org.open4goods.services.SerialisationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.env.Environment;
 
 @Configuration
 public class CrawlerConfig {
 
+	
+
+	protected @Autowired Environment env;
+	
+	
     @Bean
     DataFragmentCompletionService offerCompletionService(@Autowired final FetcherProperties fetcherProperties) {
 		return new DataFragmentCompletionService();
@@ -37,7 +44,16 @@ public class CrawlerConfig {
     @Bean
     WebDatasourceFetchingService webDatasourceFetchingService(@Autowired final FetcherProperties fetcherProperties,
                                                                       @Autowired final IndexationService indexationService) {
-		return new WebDatasourceFetchingService(indexationService, fetcherProperties, fetcherProperties.getLogsDir());
+    	
+		// Logging to console according to dev profile and conf
+		boolean toConsole = false;
+		// TODO : Not nice, mutualize
+		if (ArrayUtils.contains(env.getActiveProfiles(), "dev") || ArrayUtils.contains(env.getActiveProfiles(), "devsec")) {
+			toConsole = true;
+		}
+		
+		
+		return new WebDatasourceFetchingService(indexationService, fetcherProperties, fetcherProperties.getLogsDir(), toConsole);
 	}
 
     @Bean
@@ -47,7 +63,16 @@ public class CrawlerConfig {
             @Autowired final WebDatasourceFetchingService webDatasourceFetchingService,
             @Autowired final IndexationService indexationService
             ) {
-		return new CsvDatasourceFetchingService(completionService, indexationService, fetcherProperties, webDatasourceFetchingService,fetcherProperties.getLogsDir());
+    	
+		// Logging to console according to dev profile and conf
+		boolean toConsole = false;
+		// TODO : Not nice, mutualize
+		if (ArrayUtils.contains(env.getActiveProfiles(), "dev") || ArrayUtils.contains(env.getActiveProfiles(), "devsec")) {
+			toConsole = true;
+		}
+		
+		
+		return new CsvDatasourceFetchingService(completionService, indexationService, fetcherProperties, webDatasourceFetchingService,fetcherProperties.getLogsDir(),  toConsole);
 	}
 
     @Bean

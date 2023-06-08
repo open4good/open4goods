@@ -62,8 +62,8 @@ public class WebDatasourceFetchingService extends DatasourceFetchingService{
 	private final Map<String, DataSourceProperties> controllersConfig = new ConcurrentHashMap<>();
 
 
-	public WebDatasourceFetchingService(final IndexationService indexationService, final FetcherProperties fetcherProperties, final String logsFolder) {
-		super(logsFolder);
+	public WebDatasourceFetchingService(final IndexationService indexationService, final FetcherProperties fetcherProperties, final String logsFolder, boolean toConsole) {
+		super(logsFolder, toConsole);
 		this.fetcherProperties = fetcherProperties;
 		this.indexationService = indexationService;
 	}
@@ -292,7 +292,7 @@ public class WebDatasourceFetchingService extends DatasourceFetchingService{
 	/**
 	 * Instanciate extractors for a given webdatasource
 	 * @param webDatasourceProps
-	 * @param statsLogger
+	 * @param dedicatedLogger
 	 * @return
 	 */
 	public List<Extractor> getExtractors(final HtmlDataSourceProperties webDatasourceProps, final Logger dedicatedLogger) {

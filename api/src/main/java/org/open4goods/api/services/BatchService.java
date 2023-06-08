@@ -55,11 +55,12 @@ public class BatchService {
 			ApiProperties apiProperties,
 			VerticalsConfigService verticalsService,
 			BatchAggregationService batchAggregationService,
-			SearchService searchService
+			SearchService searchService,
+			boolean toConsole
 			) {
 		super();
 
-		dedicatedLogger = GenericFileLogger.initLogger("stats-batch", Level.INFO, apiProperties.logsFolder(), false);
+		dedicatedLogger = GenericFileLogger.initLogger("stats-batch", Level.INFO, apiProperties.logsFolder(), toConsole);
 		this.apiProperties = apiProperties;
 		this.dataRepository =dataRepository;
 		this.verticalsService=verticalsService;

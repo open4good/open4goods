@@ -34,7 +34,7 @@ public class DataFragmentCompletionService {
 	 * DataFragment completion
 	 * @param o
 	 * @param datasourceProperties
-	 * @param statsLogger
+	 * @param dedicatedLogger
 	 */
 	public void complete(final DataFragment o, final String datasourceConfigName, final DataSourceProperties datasourceProperties, final Logger dedicatedLogger) {
 
@@ -169,7 +169,7 @@ public class DataFragmentCompletionService {
 	 *
 	 * @param dataFragment
 	 * @param conf
-	 * @param statsLogger
+	 * @param dedicatedLogger
 	 */
 	public void extractBrandUid(final DataFragment dataFragment, final DataSourceProperties conf, final Logger dedicatedLogger) {
 		final Attribute a = dataFragment.getAttribute(ReferentielKey.MODEL.toString());

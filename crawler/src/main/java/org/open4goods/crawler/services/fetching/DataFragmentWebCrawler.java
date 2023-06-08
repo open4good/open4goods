@@ -8,6 +8,7 @@ import java.util.Locale;
 import java.util.Set;
 import java.util.regex.Pattern;
 
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpStatus;
 import org.open4goods.config.yml.datasource.DataSourceProperties;
@@ -53,6 +54,10 @@ public class DataFragmentWebCrawler extends WebCrawler {
 	@Autowired
 	private FetcherProperties globalConf;
 
+
+	protected @Autowired Environment env;
+	
+	
 	@Autowired
 	private DataFragmentCompletionService completionService;
 
@@ -111,8 +116,16 @@ public class DataFragmentWebCrawler extends WebCrawler {
 
 		// Starting url-logger if defined
 		if (globalConf.isLogAccepted() || globalConf.isLogRejected()) {
+			// Logging to console according to dev profile and conf
+			boolean toConsole = false;
+			// TODO : Not nice, mutualize
+			if (ArrayUtils.contains(env.getActiveProfiles(), "dev") || ArrayUtils.contains(env.getActiveProfiles(), "devsec")) {
+				toConsole = true;
+			}
+			
+			
 			urlsLogger = GenericFileLogger.initLogger(  datasourceProperties.getName()+"-urls", Level.INFO,
-					globalConf.getCrawlerLogDir(), false);
+					globalConf.getCrawlerLogDir(), toConsole);
 		} else {
 			urlsLogger = NOPLogger.NOP_LOGGER;
 		}
@@ -423,7 +436,7 @@ public class DataFragmentWebCrawler extends WebCrawler {
 
 
 	/**
-	 * TODO(gof) : should be made agnostic of statsLogger and datasourceproperties
+	 * TODO(gof) : should be made agnostic of dedicatedLogger and datasourceproperties
 	 * Visit and parse an url immediatly with custom extrcators
 	 * @param url
 	 * @param extractorz
