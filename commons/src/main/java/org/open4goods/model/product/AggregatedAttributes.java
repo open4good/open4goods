@@ -4,10 +4,13 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.open4goods.model.constants.ReferentielKey;
 import org.springframework.data.elasticsearch.annotations.Field;
 import org.springframework.data.elasticsearch.annotations.FieldType;
+
+import co.elastic.clients.elasticsearch.sql.Column;
 
 public class AggregatedAttributes  {
 
@@ -44,7 +47,16 @@ public class AggregatedAttributes  {
 
 
 
-
+	public Map<String, String> getReferentielAttributesAsStringKeys() {
+		// TODO Auto-generated method stub
+		return referentielAttributes.entrySet().stream().collect(Collectors.toMap(
+					e -> e.getKey().toString(),
+					e -> e.getValue()
+					
+				));
+	}
+	
+	
 
 
 
@@ -77,6 +89,7 @@ public class AggregatedAttributes  {
 	public void setReferentielAttributes(Map<ReferentielKey, String> referentielAttributes) {
 		this.referentielAttributes = referentielAttributes;
 	}
+	
 
 
 

@@ -44,93 +44,56 @@ public class AttributeAggregationService extends AbstractAggregationService {
 		this.attributesConfig = attributesConfig;
 	}
 
-
-
 	@Override
+	/**
+	 * Process attribute aggregation in batch mode
+	 */
 	public void onProduct(Product data) {
-
-
-		AggregatedAttributes aa = data.getAttributes();
-
-
+		
+		
 		/////////////////////////////////////////
-		// Update referentiel attributes
+		// mapping matched / unmatched attributes
 		/////////////////////////////////////////
-
 
 
 		// 2 - Classifying "matched/unmatched" attributes
 		List<SourcedAttribute> matchedAttrs = new ArrayList<>();
 		List<SourcedAttribute> allAttrs = new ArrayList<>();
-
-
-		for (AggregatedAttribute attr : data.getAttributes().getUnmapedAttributes()) {
-			IAttribute translated = attributesConfig.translateAttribute(attr, data.getVertical());
-
+		
+		Set<IAttribute> sourceAttrs = new HashSet<>();
+		sourceAttrs.addAll(data.getAttributes().getUnmapedAttributes());
+		sourceAttrs.addAll(data.getAttributes().getAggregatedAttributes().values());
+		
+		
+		for (IAttribute attr :  sourceAttrs ) {
+			IAttribute translated = attributesConfig.translateAttribute(attr, "NUDGER");
 			if (null != translated) {
-				matchedAttrs.add(new SourcedAttribute(translated, data));
-			} else {
-				allAttrs.add(new SourcedAttribute(attr, data));
+				matchedAttrs.add(new SourcedAttribute(translated, "NUDGER"));
 			}
 
+			allAttrs.add(new SourcedAttribute(attr, "NUDGER"));
 		}
 
-
-		////////////////////////////////////
-		// Aggregating standard attributes
-		///////////////////////////////////
-		aa.getAggregatedAttributes().clear();
-		aa.getUnmapedAttributes().clear();
-
-		// 3 - Applying attribute transformations on matched ones
-		//TODO : handle conflicts
-
-		Set<AggregatedAttribute> aggattrs = aggregateAttributes(matchedAttrs);
-		for (AggregatedAttribute aga : aggattrs) {
-			aa.getAggregatedAttributes().put(aga.getName(), aga);
-		}
-
-		dedicatedLogger.info("{} recognized attributes, {} are not ",matchedAttrs.size(),allAttrs.size());
-
-		///////////////////////////////////
-		// Adding unmatched attributes
-		///////////////////////////////////
-		for (SourcedAttribute attr : allAttrs) {
-			AggregatedAttribute aat = new AggregatedAttribute();
-			aat.setName(attr.getName());
-			aat.setValue(attr.getRawValue().toString());
-			aa.getUnmapedAttributes().add(aat);
-		}
 		
-		// Cleaning unmatched attributes 
-		// TODO : put back
-//		aa.setUnmapedAttributes(cleanUnmapped(aa.getUnmapedAttributes(),data));
-		
-		
+		// Generic 	attributes processing		
+		processAttributes(data.getAttributes().getReferentielAttributesAsStringKeys() , matchedAttrs, allAttrs,  "nudger", data);		
 	}
 
 
-
-
-
 	/**
-	 * Associate and match a set of nativ attributes in a product
+	 * Associate and match a set of nativ attributes from a datafragment into  a product
 	 *
-	 * @param d
+	 * @param dataFragment
 	 * @param p
 	 * @param match2
 	 */
 	@Override
-	public void onDataFragment(final DataFragment d, final Product output) {
+	public void onDataFragment(final DataFragment dataFragment, final Product product) {
 
-		AggregatedAttributes aa = output.getAttributes();
-
-
+		
 		/////////////////////////////////////////
-		// Update referentiel attributes
+		// mapping matched / unmatched attributes
 		/////////////////////////////////////////
-		handleReferentielAttributes(d.getReferentielAttributes() ,aa, output);
-		dedicatedLogger.info("{} referentiel attributes merged",aa.getReferentielAttributes().size());
 
 
 		// 2 - Classifying "matched/unmatched" attributes
@@ -138,15 +101,49 @@ public class AttributeAggregationService extends AbstractAggregationService {
 		List<SourcedAttribute> allAttrs = new ArrayList<>();
 
 
-		for (Attribute attr : d.getAttributes()) {
+		
+		Set<IAttribute> sourceAttrs = new HashSet<>();
+
+		sourceAttrs.addAll(dataFragment.getAttributes());
+		sourceAttrs.addAll(product.getAttributes().getUnmapedAttributes());
+		sourceAttrs.addAll(product.getAttributes().getAggregatedAttributes().values());
+
+		
+		
+		for (Attribute attr :  dataFragment.getAttributes()) {
 			IAttribute translated = attributesConfig.translateAttribute(attr, "COMPUTED");
 			if (null != translated) {
-				matchedAttrs.add(new SourcedAttribute(translated, d));
+				matchedAttrs.add(new SourcedAttribute(translated, dataFragment.getDatasourceName()));
 			}
 
-			allAttrs.add(new SourcedAttribute(attr, d));
+			allAttrs.add(new SourcedAttribute(attr, dataFragment.getDatasourceName()));
 		}
 
+		
+		// Generic 	attributes processing
+		processAttributes(dataFragment.getReferentielAttributes() , matchedAttrs, allAttrs ,  dataFragment.getDatasourceName(), product);
+	}
+
+
+
+	/**
+	 * Handle attributes (referentiels, aggregations, unmapped cleanings, ...)
+	 * @param existingReferentielAttributes
+	 * @param matchedAttrs
+	 * @param allAttrs
+	 * @param datasourceName
+	 * @param output
+	 */
+	private void processAttributes(Map<String, String> existingReferentielAttributes, List<SourcedAttribute> matchedAttrs, List<SourcedAttribute> allAttrs,   String datasourceName, final Product output ) {
+
+		
+		
+		/////////////////////////////////////////
+		// Update referentiel attributes
+		/////////////////////////////////////////
+		handleReferentielAttributes(existingReferentielAttributes , output);
+		
+		
 		//////////////////////////////////
 		// Extracting featured attributes
 		//////////////////////////////////
@@ -173,7 +170,7 @@ public class AttributeAggregationService extends AbstractAggregationService {
 
 
 		Collection<AggregatedFeature> af = aggregateFeatures(matchedFeatures,unmatchedFeatures);
-		aa.getFeatures().addAll(af);
+		output.getAttributes().getFeatures().addAll(af);
 
 		////////////////////////////////////
 		// Aggregating standard attributes
@@ -187,7 +184,7 @@ public class AttributeAggregationService extends AbstractAggregationService {
 		Set<AggregatedAttribute> aggattrs = aggregateAttributes(matchedAttrs);
 		for (AggregatedAttribute aga : aggattrs) {
 
-			aa.getAggregatedAttributes().put(aga.getName(), aga);
+			output.getAttributes().getAggregatedAttributes().put(aga.getName(), aga);
 
 		}
 		dedicatedLogger.info("{} recognized attributes, {} are not ",matchedAttrs.size(),allAttrs.size());
@@ -199,14 +196,16 @@ public class AttributeAggregationService extends AbstractAggregationService {
 			AggregatedAttribute aat = new AggregatedAttribute();
 			aat.setName(attr.getName());
 			aat.setValue(attr.getRawValue().toString());
-			aa.getUnmapedAttributes().add(aat);
+			output.getAttributes().getUnmapedAttributes().add(aat);
 		}
-
-
-
+		
+		
+		//////////////////////////
 		// Cleaning unmatched attributes
-// TODO : put back		
-//		aa.setUnmapedAttributes(cleanUnmapped(aa.getUnmapedAttributes(),output));
+		///////////////////////////
+		output.getAttributes().setUnmapedAttributes(cleanUnmapped(output.getAttributes().getUnmapedAttributes(),output));
+
+		
 	}
 
 
@@ -364,27 +363,35 @@ public class AttributeAggregationService extends AbstractAggregationService {
 	 * @param aa
 	 * @param output
 	 */
-	private void handleReferentielAttributes(Map<String, String> refAttrs, AggregatedAttributes aa, Product output) {
+	private void handleReferentielAttributes(Map<String, String> refAttrs, Product output) {
 
 		for (Entry<String, String> attr : refAttrs.entrySet()) {
-			// TODO ( p1, DESIGN, 0.5) : tHIS HOLLY FUCK BUG. ATTR.GETkEY IS an enum, but returns a .. String and goes into classcast.. Sic !
-			//			key = attr.getKey();
-			ReferentielKey key = ReferentielKey.valueOf( String.valueOf( attr.getKey()));
+
+			ReferentielKey key = ReferentielKey.valueOf( attr.getKey());
 
 			String value = attr.getValue();
 
-			String existing = aa.getReferentielAttributes().get(key);
+			String existing = output.getAttributes().getReferentielAttributes().get(key);
 
 			if (!StringUtils.isEmpty(existing) && !existing.equals(value)) {
 				//TODO(0.5,p2,feature) : handle conflicts and "best value" election on referentiel attributes
 				if (key.equals(ReferentielKey.MODEL)) {
 					dedicatedLogger.info("Adding different {} name as alternate id. Existing is {}, would have erased with {}",key,existing, value);
 					output.getAlternativeIds().add(value);
-				} else {
+				} else if (key.equals(ReferentielKey.BRAND)) {
+					
+					//TODO (gof) : elect best brand, exclude "non categorisée", ...
+					dedicatedLogger.info("Adding different {} name as BRAND. Existing is {}, would have erased with {}",key,existing, value);
+					output.getAlternativeBrands().add(value);
+				} 
+				
+				
+				
+				else {
 					dedicatedLogger.warn("Skipping referentiel attribute erasure for {}. Existing is {}, would have erased with {}",key,existing, value);
 				}
 			} else {
-				aa.addReferentielAttribute( key, value);
+				output.getAttributes().addReferentielAttribute( key, value);
 			}
 		}
 

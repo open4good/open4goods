@@ -761,7 +761,7 @@ public class CsvDatasourceFetchingService extends DatasourceFetchingService {
 		}
 
 		// Completing with the web data if defined
-		if (null != crawler) {
+		if (null != crawler && !StringUtils.isEmpty(p.gtin())) {
 			dedicatedLogger.info("Completing CSV data fragment {} with web data at url {}", p, p.getUrl());
 
 			if (!StringUtils.isEmpty(p.getUrl())) {
@@ -771,7 +771,7 @@ public class CsvDatasourceFetchingService extends DatasourceFetchingService {
 
 			} else {
 				dedicatedLogger.warn(
-						"No url to crawl extracted from datafragment {}, will index without crawling completion", p);
+						"No url to crawl extracted from datafragment {}, will index without web crawling completion", p);
 			}
 		} else {
 			// NOTE : completion service is made by completionCrawler
