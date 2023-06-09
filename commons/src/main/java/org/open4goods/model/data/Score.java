@@ -73,7 +73,7 @@ public class Score  implements Validable {
 
 	@Override
 	public String toString() {
-		return (virtual == true ? "VIRTUAL" : "") + name+":"+relativValue + " (" + cardinality + ")";
+		return  name+     (virtual == true ? "(virtual)" : "") +       ":"+relativValue + " (" + cardinality + ")";
 	}
 
 

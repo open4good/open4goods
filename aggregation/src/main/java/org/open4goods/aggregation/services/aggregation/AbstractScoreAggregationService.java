@@ -36,6 +36,8 @@ public class AbstractScoreAggregationService extends  AbstractAggregationService
 		super.done(datas);
 
 
+		
+		dedicatedLogger.info("{} -> Scores relativisation for {} products", this.getClass().getSimpleName(), datas.size());
 		////////////////////////
 		// Scores relativisation 
 		////////////////////////
@@ -47,6 +49,9 @@ public class AbstractScoreAggregationService extends  AbstractAggregationService
 				}
 			}			
 		}
+		
+		
+		dedicatedLogger.info("{} -> Virtual score computing for {} products", this.getClass().getSimpleName(),datas.size());
 		
 		//////////////////////////
 		// Virtual scores computing
@@ -60,17 +65,10 @@ public class AbstractScoreAggregationService extends  AbstractAggregationService
 					s.setName(scoreName);
 					s.setVirtual(true);
 										
-					Cardinality ret = new Cardinality();
-					Cardinality cardinality = batchDatas.get(scoreName);
 					
-					ret.setMax(cardinality.getMax());
-					ret.setMin(cardinality.getMin());
-					ret.setAvg(cardinality.getAvg());
-					ret.setCount(cardinality.getCount());
-					ret.setSum(cardinality.getSum());
-					
-					ret.setValue(cardinality.getAvg());					
-					s.setCardinality(ret);		
+					s.setRelativValue(batchDatas.get(scoreName).getAvg());		
+					relativize(s);
+//					s.getCardinality().setValue(batchDatas.get(scoreName).getAvg());
 					
 					p.getScores().put(scoreName, s);
 				}

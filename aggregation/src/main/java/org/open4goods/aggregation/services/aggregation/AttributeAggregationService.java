@@ -161,7 +161,7 @@ public class AttributeAggregationService extends AbstractAggregationService {
 		List<SourcedAttribute> unmatchedFeatures = allAttrs.stream()
 				.filter(this::isFeatureAttribute)
 				.collect(Collectors.toList());
-		allAttrs.removeAll(unmatchedFeatures);
+//		allAttrs.removeAll(unmatchedFeatures);
 
 		// Merging features
 		List<SourcedAttribute> features = new ArrayList<>();
@@ -537,42 +537,51 @@ public class AttributeAggregationService extends AbstractAggregationService {
 	private Set<AggregatedAttribute> cleanUnmapped(Set<AggregatedAttribute> unmapedAttributes, Product data) {
 
 		
-		Set<AggregatedAttribute> ret = new HashSet<>();
+		// TODO : put back attribute unmapped attributes cleaning
 		
-		//////////////
-		// A dictionary of "to exclude" attributes names
-		//////////////
-		
-		// Adding aggregated attribute names
-		Set<String> excludedAttrNames = new HashSet<>();
-		
-		excludedAttrNames.addAll(data.getAttributes().getAggregatedAttributes().keySet());
-				
-				
-		// Adding referentiel attribute names
-		excludedAttrNames.addAll(data.getAttributes().getReferentielAttributes().keySet().stream().map(e -> e.toString()).toList());
-		// Adding "matching attribute" définitions
-		
-		attributesConfig.synonyms().values().stream().map(e -> e.keySet()).forEach(e -> {
-			excludedAttrNames.addAll(e);
-		}
-		); 
-		
-		// Adding configured exclusions		
-		 excludedAttrNames.addAll(attributesConfig.getExclusions());
+
+		return unmapedAttributes;
 		
 		
-		////
-		// Process exclusions
-		////
-		
-		for (AggregatedAttribute aga : unmapedAttributes) {
-			if (!excludedAttrNames.contains(aga.getName())) {
-				ret.add(aga);
-			}		
-		}
-		
-		return ret;
+//		
+//		
+//		
+//		Set<AggregatedAttribute> ret = new HashSet<>();
+//		
+//		//////////////
+//		// A dictionary of "to exclude" attributes names
+//		//////////////
+//		
+//		// Adding aggregated attribute names
+//		Set<String> excludedAttrNames = new HashSet<>();
+//		
+//		excludedAttrNames.addAll(data.getAttributes().getAggregatedAttributes().keySet());
+//				
+//				
+//		// Adding referentiel attribute names
+//		excludedAttrNames.addAll(data.getAttributes().getReferentielAttributes().keySet().stream().map(e -> e.toString()).toList());
+//		// Adding "matching attribute" définitions
+//		
+//		attributesConfig.synonyms().values().stream().map(e -> e.keySet()).forEach(e -> {
+//			excludedAttrNames.addAll(e);
+//		}
+//		); 
+//		
+//		// Adding configured exclusions		
+//		 excludedAttrNames.addAll(attributesConfig.getExclusions());
+//		
+//		
+//		////
+//		// Process exclusions
+//		////
+//		
+//		for (AggregatedAttribute aga : unmapedAttributes) {
+//			if (!excludedAttrNames.contains(aga.getName())) {
+//				ret.add(aga);
+//			}		
+//		}
+//		
+//		return ret;
 	}
 
 

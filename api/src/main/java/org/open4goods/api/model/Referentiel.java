@@ -70,8 +70,6 @@ public class Referentiel {
 
 	public void buildGtinReferentiel(final Collection<DataFragment> fragments, final VerticalProperties segmentProperties) {
 
-
-
 		for (final DataFragment dataFragment : fragments) {
 
 			//TODO : This tostring ARE strange....
