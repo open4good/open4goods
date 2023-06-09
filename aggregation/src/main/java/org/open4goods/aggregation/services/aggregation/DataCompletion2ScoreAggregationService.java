@@ -42,6 +42,7 @@ import org.open4goods.services.StandardiserService;
  */
 public class DataCompletion2ScoreAggregationService extends AbstractScoreAggregationService {
 
+	private static final String DATA_QUALITY_SCORENAME = "DATA-QUALITY";
 	private final AttributesConfig attributesConfig;
 
 	public DataCompletion2ScoreAggregationService(final AttributesConfig attributesConfig,  final String logsFolder,boolean toConsole) {
@@ -53,28 +54,35 @@ public class DataCompletion2ScoreAggregationService extends AbstractScoreAggrega
 
 	@Override
 	public void onProduct(Product data) {
+		if (StringUtils.isEmpty(data.brand())) {
+			return;
+		}
+		
+		try {
+			Double score = generateScoreFromDataquality(data.getScores());
 
-		// Scoring from attribute
-		Score score = generateScoreFromDataquality(data.getScores());
+			// Processing cardinality
+			processCardinality(DATA_QUALITY_SCORENAME,score);			
+			Score s = new Score(DATA_QUALITY_SCORENAME, score);
+			// Saving in product
+			data.getScores().put(s.getName(),s);
+		} catch (ValidationException e) {
+			dedicatedLogger.warn("DataQuality to score fail for {}",data,e);
+		}								
 		
-		// Processing cardinality
-		processCardinality(score);
-		
-		// Saving in product
-		data.getScores().put(score.getName(), score);
 		
 	}
 
 
-	// TODO : complete with real datas
-	private Score generateScoreFromDataquality(Map<String, Score> map) {
+	/**
+	 * The data score is the number of score that are not virtuals
+	 * @param map
+	 * @return
+	 */
+	private Double generateScoreFromDataquality(Map<String, Score> map) {
 		
-		Score s = new Score();
-		// TODO : from conf / const
-		s.setName("DATA-QUALITY");
-		s.setVirtual(false);
-		s.setRelativValue( Double.valueOf(map.values().stream().filter(e -> !e.getVirtual()).filter(e -> !e.getName().equals("DATA-QUALITY")) .count()));		
-		return s;
+		return  Double.valueOf(map.values().stream().filter(e -> !e.getVirtual()).filter(e -> !e.getName().equals(DATA_QUALITY_SCORENAME)) .count());		
+		
 	}
 
 

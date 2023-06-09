@@ -21,17 +21,6 @@ public class Attribute2ScoreAggregationService extends AbstractScoreAggregationS
 		this.attributesConfig = attributesConfig;
 	}
 
-
-
-	@Override
-	public void init(Collection<Product> datas) {
-		super.init(datas);
-		
-//		 TODO : Should be cleaned in a specific service
-		for (Product d : datas) {
-			d.getScores().clear();
-		}
-	}
 	
 	
 	@Override
@@ -42,16 +31,19 @@ public class Attribute2ScoreAggregationService extends AbstractScoreAggregationS
 		for (AggregatedAttribute aga : aggattrs) {
 			// Scoring from attribute
 			if (attributesConfig.getAttributeConfigByKey(aga.getName()).isAsRating()) {
-				Score score = generateScoresFromAttribute(aga.getName() ,aga);
-				if (null == score || null == score.getRelativValue()) {
-					dedicatedLogger.error("Null score generated for attribute {}", aga);
-				} else {
-					// Processing cardinality
-					processCardinality(score);
-					
-					// Saving in product
-					data.getScores().put(score.getName(), score);									
-				}
+					try {
+						Double score = generateScoresFromAttribute(aga.getName() ,aga);
+
+						// Processing cardinality
+						processCardinality(aga.getName(),score);
+						
+						Score s = new Score(aga.getName(), score);
+						// Saving in product
+						data.getScores().put(s.getName(),s);
+					} catch (ValidationException e) {
+						dedicatedLogger.warn("Attribute to score fail for {}",aga,e);
+					}									
+				
 			}
 		}
 	}
@@ -89,58 +81,32 @@ public class Attribute2ScoreAggregationService extends AbstractScoreAggregationS
 	 * @param a
 	 * @return
 	 */
-	public Score generateScoresFromAttribute(String attributeKey , AggregatedAttribute a) {
+	public Double generateScoresFromAttribute(String attributeKey , AggregatedAttribute a) throws ValidationException{
 
 		AttributeConfig ac = attributesConfig.getAttributeConfigByKey(attributeKey);
 		// transformation required
 
+		if (null == ac) {
+			throw new ValidationException("No attribute config for " + attributeKey);
+		}
 		
 		if (ac.getType().equals(AttributeType.NUMERIC)) {
 			try {
-				return fromScorableAttribute(a, ac, Double.valueOf(a.getValue()));
-			} catch (NoSuchFieldException | ValidationException e) {
-				dedicatedLogger.warn("Attribute to numeric conversion failed : {}",e.getMessage());
+				return Double.valueOf(a.getValue());
+			} catch (Exception e) {
+				throw new ValidationException("Cannot convert to numeric" +a);
 			}
 			
 		} else if (ac.getNumericMapping().size() > 0) {
-			try {
-				return fromScorableAttribute(a, ac, ac.getNumericMapping().get(a.getValue()));
-
-			} catch (NoSuchFieldException | ValidationException e) {
-				dedicatedLogger.warn("Attribute to rating conversion failed : {}",e.getMessage());
-			}
-
+				Double mapping = ac.getNumericMapping().get(a.getValue());
+				if (null == mapping || mapping.isInfinite() || mapping.isNaN()) {
+					throw new ValidationException("Attribute to rating conversion failed "+a);
+				}
+				return mapping;
 		} else {
-			dedicatedLogger.error("Was asking to  translate {} into rating, but no numericMapping definition nor numeric attribute found !",a);
+			throw new ValidationException("Was asking to  translate {} into rating, but no numericMapping definition nor numeric attribute found : " + a);
 		}
 
-		return null;
-
-
 	}
-
-
-
-	private Score fromScorableAttribute(AggregatedAttribute a, AttributeConfig ac, Double value)
-			throws ValidationException, NoSuchFieldException {
-		// This is a numeric mapping
-		Score r = new Score();
-		r.setName(a.getName());
-//		r.setMax(ac.maxRating());
-//		r.setMin(ac.minRating());
-		
-		r.setRelativValue(value);
-
-		if (null == r.getRelativValue()) {
-			dedicatedLogger.warn("No matching found in numericMappings for attribute {} and value  {}",ac,a.getValue());
-			return null;
-		}
-
-		// Adding
-		return r;
-	}
-
-
-
 
 }

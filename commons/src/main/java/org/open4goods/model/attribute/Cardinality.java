@@ -20,7 +20,6 @@ public class Cardinality {
 
 	
 	@Field(index = true, store = false, type = FieldType.Double)
-	// The relativised value
 	private Double value;
 	
 	/**
@@ -61,18 +60,28 @@ public class Cardinality {
 
 
 
+	public Cardinality(Cardinality source) {
+		
+		this.avg = source.avg;
+		this.count=source.count;
+		this.max=source.max;
+		this.min=source.min;
+		this.sum=source.sum;
+		this.value=source.value;
+	}
+
+
+
+
 	@Override
 	public String toString() {
 		return min +" > " + avg + " < " +max+" (" + count+ " elements)";
 	}
 
 
-	/**
-	 * Increments rating cardinality with a
-	 *
-	 * @param r
-	 * @throws InvalidParameterException
-	 */
+
+	
+	
 	public void increment(final Rating r) {
 
 		try {
@@ -99,33 +108,31 @@ public class Cardinality {
 			logger.error("Cardinality computation failed : {}", e.getMessage());
 		}
 	}
-	
-	
-	
+		
 	/**
 	 * Increments rating cardinality with a
 	 *
 	 * @param r
 	 * @throws InvalidParameterException
 	 */
-	public void increment(final Score r) {
+	public void increment(Double value) {
 
 		try {
 			// Min
-			if (null == min || min > r.getRelativValue()) {
-				min = r.getRelativValue();
+			if (null == min || min > value) {
+				min = value;
 			}
 
 			// Max
-			if (null == max || max < r.getRelativValue()) {
-				max = r.getRelativValue();
+			if (null == max || max < value) {
+				max = value;
 			}
 
 			// Count
 			count++;
 
 			// Sum
-			sum += r.getRelativValue();
+			sum += value;
 
 			// Average
 			avg = sum / Double.valueOf(count);
