@@ -27,7 +27,7 @@ public class Attribute2ScoreAggregationService extends AbstractScoreAggregationS
 	public void init(Collection<Product> datas) {
 		super.init(datas);
 		
-		// TODO : Should be cleaned in a specific service
+//		 TODO : Should be cleaned in a specific service
 		for (Product d : datas) {
 			d.getScores().clear();
 		}

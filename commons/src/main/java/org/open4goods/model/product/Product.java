@@ -214,6 +214,12 @@ public class Product implements Standardisable {
 		return ret;
 	}
 
+	
+	public List<Score> realScores() {
+		return scores.values().stream().filter(e -> !e.getVirtual()).toList();
+	}
+	
+	
 	/**
 	 *
 	 * @param language

@@ -1,8 +1,6 @@
 
 package org.open4goods.api.datasources;
 
-
-
 import static org.junit.jupiter.api.Assertions.fail;
 
 import java.util.ArrayList;
@@ -62,41 +60,43 @@ public class DatasourceRegressionTest {
 	// If true, those tests will be bypassed
 	private static final boolean BYPASS = true;
 
-
 	@Configuration
 	public static class DrtConfig {
 
-		//		@Bean
-		//		AbstractAlertingService alertingService() {
-		//			return new AlertingServiceMock();
-		//		}
+		// @Bean
+		// AbstractAlertingService alertingService() {
+		// return new AlertingServiceMock();
+		// }
 
 		@Bean
 		FetcherProperties fetcherProperties() {
 			return new FetcherProperties();
 		}
 
-		//		@Bean
-		//		DataFragmentRepository dfRepo() {
-		//			return new NoHopCustomDataFragmentRepository();
+		// @Bean
+		// DataFragmentRepository dfRepo() {
+		// return new NoHopCustomDataFragmentRepository();
 		//
-		//		}
+		// }
 
-		@Bean RemoteFileCachingService remoteFileCachingService(@Autowired final ApiProperties config) {
+		@Bean
+		RemoteFileCachingService remoteFileCachingService(@Autowired final ApiProperties config) {
 			return new RemoteFileCachingService(config.remoteCachingFolder());
 		}
 
-
 		@Bean
-		WebDatasourceFetchingService webDatasourceFetchingService(@Autowired final ApiProperties apiProperties, @Autowired final FetcherProperties fetcherProperties) {
-			return new WebDatasourceFetchingService(null, fetcherProperties, fetcherProperties.getLogsDir(),true);
+		WebDatasourceFetchingService webDatasourceFetchingService(@Autowired final ApiProperties apiProperties,
+				@Autowired final FetcherProperties fetcherProperties) {
+			return new WebDatasourceFetchingService(null, fetcherProperties, fetcherProperties.getLogsDir(), true);
 		}
 
 		@Bean
-		CsvDatasourceFetchingService csvDatasourceFetchingService(
-				@Autowired final ApiProperties apiProperties, @Autowired final FetcherProperties fetcherProperties,
-				@Autowired final WebDatasourceFetchingService httpFetchingService, @Autowired final  DataFragmentCompletionService dfCompletionService) {
-			return new CsvDatasourceFetchingService(dfCompletionService, null, fetcherProperties,  httpFetchingService,fetcherProperties.getLogsDir(),true);
+		CsvDatasourceFetchingService csvDatasourceFetchingService(@Autowired final ApiProperties apiProperties,
+				@Autowired final FetcherProperties fetcherProperties,
+				@Autowired final WebDatasourceFetchingService httpFetchingService,
+				@Autowired final DataFragmentCompletionService dfCompletionService) {
+			return new CsvDatasourceFetchingService(dfCompletionService, null, fetcherProperties, httpFetchingService,
+					fetcherProperties.getLogsDir(), true);
 		}
 
 		@Bean
@@ -119,14 +119,13 @@ public class DatasourceRegressionTest {
 			};
 		}
 
-
 		@Bean
 		ApiProperties apiProperties() {
 			return new ApiProperties();
 		}
 
-
-		@Bean ImageMagickService imageService() {
+		@Bean
+		ImageMagickService imageService() {
 			return new ImageMagickService();
 		}
 
@@ -142,10 +141,10 @@ public class DatasourceRegressionTest {
 			};
 		}
 
-
 		/** The bean providing datasource configurations **/
-		@Bean DataSourceConfigService datasourceConfigService(@Autowired final ApiProperties config) {
-			//TODO : properly inject env
+		@Bean
+		DataSourceConfigService datasourceConfigService(@Autowired final ApiProperties config) {
+			// TODO : properly inject env
 			return new DataSourceConfigService("/home/goulven/git/open4goods-config/datasources");
 		}
 
@@ -156,11 +155,9 @@ public class DatasourceRegressionTest {
 
 	}
 
-
 	private @Autowired WebDatasourceFetchingService httpFetchingService;
 
 	private @Autowired DataSourceConfigService datasourceService;
-
 
 	private @Autowired CsvDatasourceFetchingService csvFetchingService;
 
@@ -168,10 +165,8 @@ public class DatasourceRegressionTest {
 
 	private @Autowired SerialisationService serialisationService;
 
-
 	@Test
 	public void testRegression() {
-
 
 		if (null == System.getProperty(DATASOURCES_ENV_PARAMETER) && BYPASS) {
 			logger.error("DATASOURCE REGRESSION TESTS WILL BE SKIPPED !");
@@ -179,7 +174,6 @@ public class DatasourceRegressionTest {
 			return;
 
 		}
-
 
 		///////////////////////////////////////
 		// Indexing test data
@@ -191,25 +185,22 @@ public class DatasourceRegressionTest {
 		final List<TestResultReport> reports = new ArrayList<>();
 		int totUrl = 0;
 
-
-
-
 		// Loading all datasources
 		Map<String, DataSourceProperties> dss = datasourceService.datasourceConfigs();
 
-		//TODO(gof) : so ugly !
+		// TODO(gof) : so ugly !
 		final Map<String, DataSourceProperties> dss2 = dss;
 
 		// If
 		if (null != System.getProperty(DATASOURCES_ENV_PARAMETER)) {
-			logger.warn("Running regression against specified datasources : {}",System.getProperty(DATASOURCES_ENV_PARAMETER));
+			logger.warn("Running regression against specified datasources : {}",
+					System.getProperty(DATASOURCES_ENV_PARAMETER));
 			final Map<String, DataSourceProperties> cleaned = new HashMap<>();
 			Sets.newHashSet(System.getProperty(DATASOURCES_ENV_PARAMETER).split(",|;")).stream().forEach(e -> {
 				if (dss2.containsKey(e)) {
 					cleaned.put(e, dss2.get(e));
-				}
-				else {
-					logger.warn("Cannot find datasource {}",e);
+				} else {
+					logger.warn("Cannot find datasource {}", e);
 				}
 			});
 
@@ -217,166 +208,104 @@ public class DatasourceRegressionTest {
 			dss = cleaned;
 		}
 
-
 		for (final Entry<String, DataSourceProperties> dsProperties : dss.entrySet()) {
 
 			if (null != dsProperties.getValue().getApiDatasource()) {
 
-				//TODO(test) : Test api regression here
-			} else if (dsProperties.getValue().getWebDatasource() != null) {
+				// TODO(test) : Test api regression here
+			} else if (dsProperties.getValue().getCsvDatasource().getWebDatasource() != null) {
+
+				
+
+				final HtmlDataSourceProperties wds = dsProperties.getValue().getCsvDatasource().getWebDatasource();
+
+				
+				webCrawl(wds,dsProperties.getValue(),reports);
 				
 				
-				
+			}
+
+			else if (dsProperties.getValue().getWebDatasource() != null) {
+
 				////////////////////////////////
 				// Case of a WEB datasource
 				////////////////////////////////
 
-				CrawlController controler = null;
-				DataFragmentWebCrawler crawler = null;
-
 				final HtmlDataSourceProperties wds = dsProperties.getValue().getWebDatasource();
 
-				try {
-					logger.info("Configuring direct crawler for CSV datasource {}", dsProperties.getKey());
-					final CrawlProperties cc = wds.getCrawlConfig();
-					cc.setCleanupDelaySeconds(1);
-					cc.setCleanupDelaySeconds(1);
-					controler = httpFetchingService.createCrawlController("csv-" + dsProperties.getKey(), cc);
-					crawler = httpFetchingService.createWebCrawler(dsProperties.getKey(), dsProperties.getValue(), wds,logger);
-					crawler.setShouldFollowLinks(false);
-
-				} catch (final Exception e) {
-					logger.error("Error while instanciating crawlers", e);
-				}
-
-
-				if (null == wds.getTestUrls() || wds.getTestUrls().size() == 0) {
-					//					logger.error("WARNING  : " + dsProperties.getName() + " HAS NO REGRESSION TESTS URLS");
-					fail("WARNING  : " + dsProperties.getKey() + " HAS NO REGRESSION TESTS URLS");
-					continue;
-				}
-
-				logger.info("Testing datasource stability for {}", dsProperties.getKey());
-
-				final Map<String, DataFragment> byUrls = new HashMap<>();
-				for (final TestUrl tu : wds.getTestUrls()) {
-					final DataFragment df = crawler.visitNow(controler, tu.getUrl());
-
-					if (null == df) {
-
-						//TODO(bug) : handling special cases where running through authenticated proxy on gitlab runner
-						if (!StringUtils.isEmpty(wds.getCrawlConfig().getProxyHost())) {
-							logger.warn("No data for {} but a proxy is used. Skipping it on IC because of crawl4j authenticated proxy bug",tu.getUrl());
-						} else {
-							final TestResultReport nodata = new TestResultReport(df,dsProperties.getKey());
-							nodata.setUrl(tu.getUrl());
-							nodata.addMessage("no datafragment");
-							reports.add(nodata);
-						}
-
-
-					} else {
-
-						try {
-							df.validate(dsProperties.getValue().getValidationFields());
-
-							byUrls.put(tu.getUrl(), df);
-
-						} catch (final ValidationException e) {
-							final TestResultReport nodata = new TestResultReport(df,dsProperties.getKey());
-							nodata.setUrl(tu.getUrl() );
-							nodata.addMessage(  e.getMessage() );
-							reports.add(nodata);
-						}
-
-
-					}
-				}
-
-				for (final TestUrl tu : wds.getTestUrls()) {
-					totUrl ++;
-					if (byUrls.containsKey(tu.getUrl())) 	{
-						final TestResultReport report = tu.test(byUrls.get(tu.getUrl()),dsProperties.getKey());
-						if (report.getMessages().size() > 0) {
-							reports.add(report);
-						}
-					}
-				}
-				controler.shutdown();
+				
+				webCrawl(wds,dsProperties.getValue(),reports);
 
 			}
-			
-			
-			
+
 			else if (dsProperties.getValue().getCsvDatasource() != null) {
 
-
-
-				if (null == dsProperties.getValue().getCsvDatasource().getTestDatas() ||dsProperties.getValue().getCsvDatasource().getTestDatas().size() == 0) {
+				if (null == dsProperties.getValue().getCsvDatasource().getTestDatas()
+						|| dsProperties.getValue().getCsvDatasource().getTestDatas().size() == 0) {
 					logger.error("WARNING  : " + dsProperties.getKey() + " HAS NO REGRESSION TESTS URLS");
-					//					fail("WARNING  : " + dsProperties.getKey() + " HAS NO CSV REGRESSION DATA TESTS ");
-					//					continue;
+					// fail("WARNING : " + dsProperties.getKey() + " HAS NO CSV REGRESSION DATA
+					// TESTS ");
+					// continue;
 				}
 
+				// for ( final TestCsvLine testData :
+				// dsProperties.getValue().getCsvDatasource().getTestDatas()) {
+				//
+				// ////////////////////////////////
+				// // Case of a CSV datasource
+				// ////////////////////////////////
+				//
+				// try {
+				// final DataFragment df = csvFetchingService.synchFetch(dsProperties.getKey(),
+				// dsProperties.getValue(),
+				// dsProperties.getValue().getCsvDatasource().getTestHeaders() ,
+				// testData.getCsvLine());
+				//
+				// // Completing
+				// completionService.complete(df,dsProperties.getKey(), dsProperties.getValue(),
+				// logger);
+				//
+				// // Validating
+				// try {
+				// df.validate(dsProperties.getValue().getValidationFields());
+				//
+				// final TestResultReport report = testData.test(df, dsProperties.getKey());
+				// if (report.getMessages().size() > 0) {
+				// reports.add(report);
+				// }
+				//
+				// } catch (final ValidationException e) {
+				// final TestResultReport nodata = new
+				// TestResultReport(df,dsProperties.getKey());
+				// nodata.setUrl(testData.getCsvLine() );
+				// nodata.addMessage( e.getMessage() );
+				// reports.add(nodata);
+				// } catch (final Exception e) {
+				// final TestResultReport nodata = new
+				// TestResultReport(df,dsProperties.getKey());
+				// nodata.setUrl(testData.getCsvLine() );
+				// nodata.addMessage( e.getMessage() );
+				// reports.add(nodata);
+				//
+				// }
+				//
+				// } catch (IOException | ValidationException e) {
+				// fail("Unexpected exeption");
+				// e.printStackTrace();
+				// }
+				//
+				//
+				//
+				//
+				//
+				// }
+				//
+				//
 
-
-				//				for ( final TestCsvLine testData : dsProperties.getValue().getCsvDatasource().getTestDatas()) {
-				//
-				//					////////////////////////////////
-				//					// Case of a CSV datasource
-				//					////////////////////////////////
-				//
-				//					try {
-				//						final DataFragment df = csvFetchingService.synchFetch(dsProperties.getKey(), dsProperties.getValue(), dsProperties.getValue().getCsvDatasource().getTestHeaders() , testData.getCsvLine());
-				//
-				//						// Completing
-				//						completionService.complete(df,dsProperties.getKey(), dsProperties.getValue(), logger);
-				//
-				//						// Validating
-				//						try {
-				//							df.validate(dsProperties.getValue().getValidationFields());
-				//
-				//							final TestResultReport report = testData.test(df, dsProperties.getKey());
-				//							if (report.getMessages().size() > 0) {
-				//								reports.add(report);
-				//							}
-				//
-				//						} catch (final ValidationException e) {
-				//							final TestResultReport nodata = new TestResultReport(df,dsProperties.getKey());
-				//							nodata.setUrl(testData.getCsvLine() );
-				//							nodata.addMessage(  e.getMessage() );
-				//							reports.add(nodata);
-				//						} catch (final Exception e) {
-				//							final TestResultReport nodata = new TestResultReport(df,dsProperties.getKey());
-				//							nodata.setUrl(testData.getCsvLine() );
-				//							nodata.addMessage(  e.getMessage() );
-				//							reports.add(nodata);
-				//
-				//						}
-				//
-				//					} catch (IOException | ValidationException e) {
-				//						fail("Unexpected exeption");
-				//						e.printStackTrace();
-				//					}
-				//
-				//
-				//
-				//
-				//
-				//			}
-				//
-				//
-
-
-
-			}  else {
-				fail ("Not a web or CSV datasource : " + dsProperties.getKey());
+			} else {
+				fail("Not a web or CSV datasource : " + dsProperties.getKey());
 			}
 		}
-
-
-
-
 
 		final StringBuilder sb = new StringBuilder();
 		boolean failed = false;
@@ -388,12 +317,10 @@ public class DatasourceRegressionTest {
 		for (final TestResultReport report : reports) {
 			failed = true;
 
-
-			sb.append(
-					"=============================== REGRESSIONS IN "+report.getDatasourceConfigName() +"===================================\n");
+			sb.append("=============================== REGRESSIONS IN " + report.getDatasourceConfigName()
+					+ "===================================\n");
 			sb.append(report.getUrl()).append("\n");
 			sb.append(org.apache.commons.lang3.StringUtils.join(report.getMessages(), "\n"));
-
 
 			if (WITH_DETAILS) {
 				sb.append(
@@ -410,8 +337,87 @@ public class DatasourceRegressionTest {
 			logger.warn(sb.toString());
 			fail("Regressions found on datasources \n" + sb.toString());
 
-
 		}
+	}
+
+	public void webCrawl(HtmlDataSourceProperties wds, DataSourceProperties dsProperties, List<TestResultReport> reports) {
+////////////////////////////////
+// Case of a WEB datasource
+////////////////////////////////
+
+		CrawlController controler = null;
+		DataFragmentWebCrawler crawler = null;
+
+
+
+		try {
+			logger.info("Configuring direct crawler for CSV datasource {}", dsProperties.getName());
+			final CrawlProperties cc = wds.getCrawlConfig();
+			cc.setCleanupDelaySeconds(1);
+			cc.setCleanupDelaySeconds(1);
+			controler = httpFetchingService.createCrawlController("csv-" + dsProperties.getName(), cc);
+			crawler = httpFetchingService.createWebCrawler(dsProperties.getName(), dsProperties, wds, logger);
+			crawler.setShouldFollowLinks(false);
+
+		} catch (final Exception e) {
+			logger.error("Error while instanciating crawlers", e);
+		}
+
+		if (null == wds.getTestUrls() || wds.getTestUrls().size() == 0) {
+//					logger.error("WARNING  : " + dsProperties.getName() + " HAS NO REGRESSION TESTS URLS");
+			fail("WARNING  : " + dsProperties.getName() + " HAS NO REGRESSION TESTS URLS");
+			return;
+		}
+
+		logger.info("Testing datasource stability for {}", dsProperties.getName());
+
+		final Map<String, DataFragment> byUrls = new HashMap<>();
+		for (final TestUrl tu : wds.getTestUrls()) {
+			final DataFragment df = crawler.visitNow(controler, tu.getUrl());
+
+			if (null == df) {
+
+				// TODO(bug) : handling special cases where running through authenticated proxy
+				// on gitlab runner
+				if (!StringUtils.isEmpty(wds.getCrawlConfig().getProxyHost())) {
+					logger.warn(
+							"No data for {} but a proxy is used. Skipping it on IC because of crawl4j authenticated proxy bug",
+							tu.getUrl());
+				} else {
+					final TestResultReport nodata = new TestResultReport(df, dsProperties.getName());
+					nodata.setUrl(tu.getUrl());
+					nodata.addMessage("no datafragment");
+					reports.add(nodata);
+				}
+
+			} else {
+
+				try {
+					df.validate(dsProperties.getValidationFields());
+
+					byUrls.put(tu.getUrl(), df);
+
+				} catch (final ValidationException e) {
+					final TestResultReport nodata = new TestResultReport(df, dsProperties.getName());
+					nodata.setUrl(tu.getUrl());
+					nodata.addMessage(e.getMessage());
+					reports.add(nodata);
+				}
+
+			}
+		}
+
+		for (final TestUrl tu : wds.getTestUrls()) {
+
+			if (byUrls.containsKey(tu.getUrl())) {
+				final TestResultReport report = tu.test(byUrls.get(tu.getUrl()), dsProperties.getName());
+				if (report.getMessages().size() > 0) {
+					reports.add(report);
+				}
+			}
+		}
+		controler.shutdown();
+
 	}
 
 }
