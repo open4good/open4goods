@@ -1,0 +1,53 @@
+
+
+	   
+
+
+
+<div id="description" th:if="${product.namesAndDescriptionsWithoutShortestName().size} > 0"  class="mt-3 card shadow px-5 py-1 mb-3">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+	<div  class="row mt-3">
+		<h2 class="mb-2">Description</h2>
+		<div class="mb-3 d-flex align-items-center col-lg-12">
+			<div>
+			
+			
+				<th:block th:if="${editor}">
+					<textarea th:if="${product.humanDescription}" th:text="${product.humanDescription.content.text}" id="productDescription" name="productDescription" rows="20" cols="100"></textarea>
+					<textarea th:unless="${product.humanDescription}" th:text="${product.namesAndDescriptionsWithoutShortestNameWithCariage()}" id="productDescription" name="productDescription" rows="20" cols="100"></textarea>
+					
+				</th:block>
+				
+				<th:block th:unless="${editor}">
+				
+					<th:block th:if="${product.humanDescription}">
+						<div th:utext="${product.humanDescription.content.text}" style="max-height: 350px" class="overflow-auto card-body"></div>
+					</th:block>
+					<th:block th:unless="${product.humanDescription}">
+						<div style="max-height: 350px" class="overflow-auto card-body">
+							<ul>
+								<li	th:each="name : ${product.namesAndDescriptionsWithoutShortestName()}"><th:block th:text="${name}"></th:block></li>
+							</ul>
+						</div>
+					</th:block>
+				
+					
+				</th:block>
+			</div>
+		</div>
+
+	</div>
+</div>

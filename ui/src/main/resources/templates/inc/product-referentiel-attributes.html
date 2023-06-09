@@ -3,6 +3,13 @@
 	<div class="card-body">
 		<table class="table table-hover">
 			<tbody>
+
+				<tr>
+					<th scope="row" th:text="${product.gtinInfos.upcType}"></th>
+					<td th:text="${product.gtin()}"></td>
+				</tr>
+				
+							
 				<tr th:if="${product.brand()}">
 					<th scope="row">Marque</th>
 					<td  th:text="${product.brand()}"></td>
@@ -11,7 +18,7 @@
 
 				<th:block th:each="item, stat : ${product.alternativeBrands}">
 					<tr th:if="${stat.first}">
-						<th scope="row" th:rowspan="${product.alternativeBrands.size()}">Aussi référencé comme  </th>
+						<td scope="row" th:rowspan="${product.alternativeBrands.size()}">Aussi référencé comme  </td>
 						<td th:text="${item}"></td>
 					</tr>
 					<tr th:unless="${stat.first}">
@@ -27,21 +34,30 @@
 					<td th:text="${product.model()}"></td>
 				</tr>
 
-				<tr>
-					<th scope="row">Gtin / Ean</th>
-					<td th:text="${product.gtin()}"></td>
-				</tr>
+
 				
 				
 				<th:block th:each="item, stat : ${product.alternativeIds}">
 					<tr th:if="${stat.first}">
-						<th scope="row" th:rowspan="${product.alternativeIds.size()}">Autres noms</th>
+						<td scope="row" th:rowspan="${product.alternativeIds.size()}">Autres noms</td>
 						<td th:text="${item}"></td>
 					</tr>
 					<tr th:unless="${stat.first}">
 						<td th:text="${item}"></td>
 					</tr>
-				</th:block>				
+				</th:block>	
+				
+				
+				<tr>
+					<th scope="row">Référencé depuis</th>
+					<td th:text="${product.creationDate}"></td>
+				</tr>
+				
+				<tr>
+					<th scope="row">Mise à jour</th>
+					<td th:text="${product.lastChange}"></td>
+				</tr>
+							
 			</tbody>
 		</table>
 	</div>
