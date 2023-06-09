@@ -216,6 +216,8 @@
 	function initDatatable () {
 		
 		return $('#tableProducts').DataTable({
+			
+			order: [ [4, 'desc'] ],
 	    	searching: false,
 	        "bLengthChange": false,	 
 	        "processing": true,

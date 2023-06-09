@@ -5,19 +5,17 @@
 
 			<div class="d-flex p-3">
 				<div class="icon icon-primary">
-					<span class="fas fa-globe-europe"></span>
+					<p class="icon-box-text text-center" style="font-size: 3em;">				
+						<th:block th:text="${#numbers.formatDecimal(product.bestPrice().compensation, 1, 2)}"></th:block> 
+						<span class="align-baseline font-medium" th:text="#{'symbol.'+${product.bestPrice().currency}}"></span>				
+					</p>
 				</div>
 				<div class="ps-4">
-					<h2 class="icon-box-title md-1">Compensation carbone</h2>
+					<h4 class="icon-box-title md-1"> Compensation carbone</h4>
+					<select width="100%" class="form-select" id="inlineFormCustomSelectPref" aria-label="Default select example"><option selected="selected">Laisser nudger choisir !</option><option value="1">greenpeace</option><option value="2">Sea Shepard</option><option value="3">Fondation goodplanet</option></select>
 				</div>
 			</div>
 	
-			<p class="icon-box-text text-center" style="font-size: 3em;">
-				
-				<th:block th:text="${#numbers.formatDecimal(product.bestPrice().compensation, 1, 2)}"></th:block> 
-				<span class="align-baseline font-medium" th:text="#{'symbol.'+${product.bestPrice().currency}}"></span>
-				
-			</p>
 	
 			<p>
 			Sur la base de la marge moyenne sur ce commissionaire.

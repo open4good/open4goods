@@ -18,13 +18,14 @@
 				</span>
 			</div>
 		</div>
+		
 		<div class="col-sm-6">
 			<!-- Content -->
 			<div class="card-body pb-0">
 				<ul class="list-group list-group-flush price-list mb-4">
 					<li class="list-group-item border-0"><img height="16" width="16" class="me-2" th:src="'/icon/'+${product.bestPrice().datasourceName}" th:title="'icône ' + ${product.bestPrice().shortDataSourceName()}"><span th:text="${product.bestPrice().datasourceName}"></span> </li>
 
-					<li th:if="${product.bestPrice().productState}" class="list-group-item border-0"><span class="fas fa-box"></span><span th:text="#{'condition.'+${product.bestPrice().productState}}"></li>
+					<li th:if="${product.bestPrice().productState}" class="list-group-item border-0"><span class="fas fa-box"></span><span><b th:text="#{'condition.'+${product.bestPrice().productState}}"></b></span></li>
 					<li class="list-group-item border-0"><span class="fas fa-clock"></span><span th:text="'il y a ' + ${product.bestPrice().ago(userLocale)} "></span> </li>
 				
 				</ul>
@@ -34,8 +35,13 @@
 
 		<div class="">
 			<div class="m-3 d-grid">
-				<a rel=”nofollow” th:href="'/compensation/'+${product.bestPrice().affiliationToken}" class="btn btn-secondary animate-up-2">Acheter</a>
+				<a rel=”nofollow” th:href="'/compensation/'+${product.bestPrice().affiliationToken}" class="btn btn-secondary animate-up-2">Nudger</a>
 			</div>
 		</div>
 	</div>
+	
+    <!--/* Product compensation */-->				
+	<th:block th:insert="inc/product-compensation.html"></th:block>			
+	
+	
 </div>

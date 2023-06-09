@@ -77,8 +77,7 @@
 
 		       				<!--/* Best price */-->				
 							<th:block th:insert="inc/product-price.html"></th:block>										
-	       					<!--/* Product compensation */-->				
-							<th:block th:insert="inc/product-compensation.html"></th:block>										
+							
 
 
 						</div>
@@ -87,13 +86,23 @@
 				</div>
 				
 				
+				
+				<div class = "row mt-3">
+					<div class="col-lg-6">
+						<!-- Identity -->
+						<th:block th:insert="inc/product-referentiel-attributes.html"></th:block>										
+					</div>
+					
+					<div class="col-lg-6">
+			      		<!--/* Attributes */-->				
+						<th:block th:insert="inc/product-attributes.html"></th:block>
+					</div>
+				</div>
+						
+						
 	
-				<!-- Identity -->
-				<th:block th:insert="inc/product-referentiel-attributes.html"></th:block>										
 	
 				
-	      		<!--/* Attributes */-->				
-				<th:block th:insert="inc/product-attributes.html"></th:block>
 										
 				
    				<!--/* Descriptions */-->				
@@ -115,12 +124,32 @@
 					
 					<div class=" col-lg-12">
 	
-						
-						<!--/* Attributes */-->				
-						<th:block th:insert="inc/product-unmatched-attributes.html"></th:block>
 
-	      				<!--/* Categories */-->				
-						<th:block th:insert="inc/product-categories.html"></th:block>
+						<!--  Authenticated section -->						
+						 <th:block th:if="${user}">
+						 
+							<div class="card shadow mb-3 my-3">
+								<div class="card-header"><h2 class="h5">Mode développement</h2></div>
+								<p>Cette section n'apparait qu'a là nudger team</p>
+								<div class="card-body">
+									<!--/* Attributes */-->				
+									<th:block th:insert="inc/product-unmatched-attributes.html"></th:block>
+			
+				      				<!--/* Categories */-->				
+									<th:block th:insert="inc/product-categories.html"></th:block>
+		
+				      				<!--/* Texts */-->				
+									<th:block th:insert="inc/product-descriptions-old.html"></th:block>		
+									</div>
+								</div>
+
+						 
+											
+						</th:block>
+						
+						
+						
+						
 					</div>
 					
 										
