@@ -42,6 +42,7 @@ import org.open4goods.services.StandardiserService;
  */
 public class EcoScoreAggregationService extends AbstractScoreAggregationService {
 
+	private static final String ECOSCORE_SCORENAME = "ECOSCORE";
 	private final Map<String, String> ecoScoreconfig;
 
 	public EcoScoreAggregationService(final Map<String, String> ecoScoreconfig,  final String logsFolder,boolean toConsole) {
@@ -54,51 +55,45 @@ public class EcoScoreAggregationService extends AbstractScoreAggregationService 
 	@Override
 	public void onProduct(Product data) {
 
-		// Scoring from attribute
-		Score score = generateEcoScore(data.getScores());
 		
-		if (null != score) {
-			// Processing cardinality
-			processCardinality(score);
-			
-			// Saving in product
-			data.getScores().put(score.getName(), score);
+		
+		if (StringUtils.isEmpty(data.brand())) {
+			return;
 		}
+		
+		try {
+			Double score = generateEcoScore(data.getScores());
+
+			// Processing cardinality
+			processCardinality(ECOSCORE_SCORENAME,score);			
+			Score s = new Score(ECOSCORE_SCORENAME, score);
+			// Saving in product
+			data.getScores().put(s.getName(),s);
+		} catch (ValidationException e) {
+			dedicatedLogger.warn("Brand to score fail for {}",data,e);
+		}								
+		
 	}
 
 
 
-	private Score generateEcoScore(Map<String, Score> scores) {
+	private Double generateEcoScore(Map<String, Score> scores) throws ValidationException {
 		
 		
 		Double va = 0.0;
-		
-		
-		for (Entry<String, String> config :  ecoScoreconfig.entrySet()) {
-			Score score = scores.get(config.getKey());
+		for (String config :  ecoScoreconfig.keySet()) {
+			Score score = scores.get(config);
 			
 			if (null == score) {
-				// If one composed score is null, then do not proceed
-				// There will be a virtual score instead
-				return null;
-			}
-			
-			va += score.getCardinality().getValue() * Double.valueOf(config.getValue());
-			// TODO : compute virtual score
+				throw new ValidationException ("EcoScore rating cannot proceed, missing subscore : " + config);
+			} 			
+			va += score.getValue() * Double.valueOf(ecoScoreconfig.get(config));
 		}
 		
 		
+	
 		
-		
-		Score s = new Score();
-		// TODO : name from conf
-		s.setName("ECOSCORE");
-		s.setVirtual(false);
-		
-		s.setRelativValue(va);
-		
-		
-		return s;
+		return va;
 	}
 
 

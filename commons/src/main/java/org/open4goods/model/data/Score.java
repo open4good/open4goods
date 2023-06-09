@@ -24,47 +24,42 @@ public class Score  implements Validable {
 	@Field(index = false, store = false, type = FieldType.Keyword)
 	private String name;;
 
-
-
-//	@Field(index = false, store = false, type = FieldType.Double)
-//	private Double max;
-//
-//	@Field(index = true, store = false, type = FieldType.Double)	
-//	private Double min;
-
-	/**
-	 * The relativized score, based on a scale 0 -> StandardizerService.DEFAULT_MAX_RATING
-	 */
-	@Field(index = true, store = false, type = FieldType.Double)
-	private Double relativValue;
-
 	@Field(index = true, store = false, type = FieldType.Boolean)
 	private Boolean virtual = false;
 	
+	@Field(index = true, store = false, type = FieldType.Boolean)
+	private Double value;
+
+	@Field(index = true, store = false, type = FieldType.Object)
+	/** The source cardinalities, absolute mode.**/
+	private Cardinality absolute;
+	
 	
 	@Field(index = true, store = false, type = FieldType.Object)
-	/** The cardinalities, containing absolute score**/
-	private Cardinality cardinality;
+	/** The relativised cardinalities, absolute mode.**/
+	private Cardinality relativ;
+	
+	
 
+	
+	
+	
 	////////////////////////////////////////
 	// Contracts
 	///////////////////////////////////////
 
 
 
+	public Score(String name, Double value) {
+		this.name = name;
+		this.value = value;
+	}
+
+
 	@Override
 	public void validate() throws ValidationException {
 
-		final Set<ValidationMessage> result = new HashSet<>();
-
-		if (null == relativValue) {
-			result.add(ValidationMessage.newValidationMessage("MISSING-VALUE"));
 		}
-
-
-
-			
-	}
 
 
 	////////////////////////////////////////
@@ -73,7 +68,19 @@ public class Score  implements Validable {
 
 	@Override
 	public String toString() {
-		return  name+     (virtual == true ? "(virtual)" : "") +       ":"+relativValue + " (" + cardinality + ")";
+		
+		StringBuilder sb = new StringBuilder(name);
+		sb.append((virtual == true ? "(virtual)" : "") );
+		if (null != relativ) {
+			sb.append( relativ.getValue() +  "--> rel:("+ relativ +")");
+		}
+		
+		if (null != absolute) {
+			sb.append( relativ.getValue() +  "--> rel:("+ absolute +")");
+		}
+		
+		
+		return sb.toString();
 	}
 
 
@@ -97,7 +104,7 @@ public class Score  implements Validable {
 	// Templates methods
 	///////////////////////////////////////
 	public Long percent() {
-		return Math.round(relativValue * 100 / StandardiserService.DEFAULT_MAX_RATING);
+		return Math.round(relativ.getValue() * 100 / StandardiserService.DEFAULT_MAX_RATING);
 	}
 
 
@@ -154,7 +161,7 @@ public class Score  implements Validable {
 
 
 	public String color() {
-		if (null == relativValue) {
+		if (null == relativ.getValue()) {
 			return "white";
 		}
 		final Long percent =  percent();
@@ -176,57 +183,54 @@ public class Score  implements Validable {
 	///////////////////////////////////////
 
 
-	public Double getRelativValue() {
-		return relativValue;
-	}
-
-	public void setRelativValue(final Double value) {
-		this.relativValue = value;
-	}
-
 	public String getName() {
 		return name;
 	}
+
 
 	public void setName(String name) {
 		this.name = name;
 	}
 
+
 	public Boolean getVirtual() {
 		return virtual;
 	}
+
 
 	public void setVirtual(Boolean virtual) {
 		this.virtual = virtual;
 	}
 
-	public Cardinality getCardinality() {
-		return cardinality;
+
+	public Cardinality getAbsolute() {
+		return absolute;
 	}
 
-	public void setCardinality(Cardinality cardinality) {
-		this.cardinality = cardinality;
+
+	public void setAbsolute(Cardinality absolute) {
+		this.absolute = absolute;
 	}
 
-//
-//	public Double getMax() {
-//		return max;
-//	}
-//
-//	public void setMax(Double max) {
-//		this.max = max;
-//	}
-//
-//	public Double getMin() {
-//		return min;
-//	}
-//
-//	public void setMin(Double min) {
-//		this.min = min;
-//	}
-//
-//	
 
+	public Cardinality getRelativ() {
+		return relativ;
+	}
+
+
+	public void setRelativ(Cardinality relativ) {
+		this.relativ = relativ;
+	}
+
+
+	public Double getValue() {
+		return value;
+	}
+
+
+	public void setValue(Double value) {
+		this.value = value;
+	}
 
 
 

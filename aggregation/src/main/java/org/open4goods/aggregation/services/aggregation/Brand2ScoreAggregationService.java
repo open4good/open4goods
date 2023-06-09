@@ -42,6 +42,7 @@ import org.open4goods.services.StandardiserService;
  */
 public class Brand2ScoreAggregationService extends AbstractScoreAggregationService {
 
+	private static final String BRAND_SUSTAINABILITY_SCORENAME = "BRAND_SUSTAINABILITY";
 	private final AttributesConfig attributesConfig;
 
 	public Brand2ScoreAggregationService(final AttributesConfig attributesConfig,  final String logsFolder,boolean toConsole) {
@@ -58,31 +59,32 @@ public class Brand2ScoreAggregationService extends AbstractScoreAggregationServi
 		if (StringUtils.isEmpty(data.brand())) {
 			return;
 		}
+		
+		try {
+			Double score = generateScoreFromBrand(data.brand());
 
-		// Scoring from attribute
-		Score score = generateScoreFromBrand(data.brand());
+			// Processing cardinality
+			processCardinality(BRAND_SUSTAINABILITY_SCORENAME,score);			
+			Score s = new Score(BRAND_SUSTAINABILITY_SCORENAME, score);
+			// Saving in product
+			data.getScores().put(s.getName(),s);
+		} catch (ValidationException e) {
+			dedicatedLogger.warn("Brand to score fail for {}",data,e);
+		}								
 		
-		// Processing cardinality
-		processCardinality(score);
-		
-		// Saving in product
-		data.getScores().put(score.getName(), score);
 		
 	}
 
 
 	// TODO : complete with real datas
-	private Score generateScoreFromBrand(String brand) {
+	private Double generateScoreFromBrand(String brand) {
 		
-		Score s = new Score();
-		// TODO : as const
-		s.setName("BRAND-SUSTAINABILITY");
-		s.setVirtual(false);
+		Double s;
 		
 		switch (brand) {
-		case "SAMSUNG" -> s.setRelativValue(5.0);
-		case "LG" -> s.setRelativValue(4.0);
-		default -> s.setRelativValue(Math.random() * 10);
+		case "SAMSUNG" -> s = 5.0;
+		case "LG" -> s = 4.0;
+		default -> s = Math.random() * 10;
 		}
 		
 		return s;

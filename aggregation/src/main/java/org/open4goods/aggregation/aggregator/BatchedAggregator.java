@@ -48,15 +48,20 @@ public class BatchedAggregator extends AbstractAggregator {
 		Product ret = null;
 		// Call transformation building registered service
 		for (final AbstractAggregationService service : services) {
-			logger.info("Updating {} products using {} service",datas.size() ,service.getClass().getSimpleName());
+			logger.warn("Initializing {} products using {} service",datas.size() ,service.getClass().getSimpleName());
 
+			
 			// Init
 			service.init(datas);
 			
+			logger.warn("Processing {} products using {} service",datas.size() ,service.getClass().getSimpleName());
+
 			// Processing Products
 			for (Product p : datas) {
 				service.onProduct(p);				
 			}
+
+			logger.warn("Post computing {} products using {} service",datas.size() ,service.getClass().getSimpleName());
 
 			// Done 
 			service.done(datas);
