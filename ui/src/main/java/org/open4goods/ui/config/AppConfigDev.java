@@ -5,9 +5,11 @@ import java.util.List;
 import org.open4goods.ui.config.yml.UiConfig;
 import org.open4goods.ui.interceptors.GenericTemplateInterceptor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
+import org.springframework.context.support.ReloadableResourceBundleMessageSource;
 import org.springframework.core.Ordered;
 import org.springframework.http.CacheControl;
 import org.springframework.http.converter.HttpMessageConverter;
@@ -22,6 +24,18 @@ import org.springframework.web.util.UrlPathHelper;
 public class AppConfigDev {
 	
 	private @Autowired UiConfig config;
+	
+	
+	@Bean
+	public MessageSource messageSource()
+	{       
+	    ReloadableResourceBundleMessageSource messageSource = new ReloadableResourceBundleMessageSource();
+	    messageSource.setBasenames( "file:" + config.resourceBundleFolder(), "classpath:/i18n/messages" );
+	    messageSource.setCacheMillis(0);
+//	    messageSource.setDefaultEncoding( );
+	    return messageSource;
+	}
+	
 	
 	///////////////////////////////////
 	// Resources
@@ -38,6 +52,7 @@ public class AppConfigDev {
 			@Override
 			public void addInterceptors(final InterceptorRegistry registry) {
 				registry.addInterceptor(AppConfig.localeChangeInterceptor());
+				System.out.println("ADD INTERCEPTOR");
 				registry.addInterceptor(new GenericTemplateInterceptor());
 			}
 

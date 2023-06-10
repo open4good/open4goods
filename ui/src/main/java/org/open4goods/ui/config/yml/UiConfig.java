@@ -97,6 +97,15 @@ public class UiConfig {
 
 		return new File(rootFolder+"/bin/latest/ui-latest.jar");
 	}
+	
+	
+	public String resourceBundleFolder() {
+		
+		return resourceTemplateFolder+"i18n/messages";
+	}
+
+	
+	
 	/**
 	 * Return the root url for a given sitelocale, with the "default" behavior
 	 *
