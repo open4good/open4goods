@@ -3,15 +3,18 @@ package org.open4goods.ui.controllers.ui;
 
 
 import java.io.BufferedInputStream;
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URISyntaxException;
 import java.net.URLEncoder;
 import java.util.Locale;
 import java.util.Optional;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
+import org.checkerframework.checker.guieffect.qual.UI;
 import org.open4goods.config.yml.ui.VerticalConfig;
 import org.open4goods.dao.ProductRepository;
 import org.open4goods.exceptions.InvalidParameterException;
@@ -23,6 +26,7 @@ import org.open4goods.model.data.Resource;
 import org.open4goods.model.product.Product;
 import org.open4goods.services.DataSourceConfigService;
 import org.open4goods.services.VerticalsConfigService;
+import org.open4goods.ui.Ui;
 import org.open4goods.ui.config.AppConfig;
 import org.open4goods.ui.config.yml.UiConfig;
 import org.open4goods.ui.services.GtinService;
@@ -197,8 +201,9 @@ public class ResourceController extends AbstractUiController {
 	}
 
 	
-	@GetMapping("/jars/ui")
-	public void uiJarFile(@PathVariable String datasourceName, final HttpServletResponse response) throws FileNotFoundException, IOException, InvalidParameterException  {
+	@GetMapping("/ui-latest.jar")
+	public void uiJarFile( final HttpServletResponse response) throws FileNotFoundException, IOException, InvalidParameterException, URISyntaxException  {
+		
 		response.addHeader("Content-type","application/java-archive");
 		response.addHeader("Cache-Control","public, max-age="+AppConfig.CACHE_PERIOD_SECONDS);
 		InputStream stream = new BufferedInputStream(FileUtils.openInputStream(config.uiJarFile()));
