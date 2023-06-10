@@ -20,7 +20,7 @@ public class WebConfig {
 	/**
 	 * If true, the thymleaf templates will be cached (LRU method)
 	 */
-	private Boolean templatesCaching = true;
+	private Boolean templatesCaching = false;
 
 
 	/**

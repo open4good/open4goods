@@ -35,6 +35,7 @@ import org.springframework.cache.support.SimpleCacheManager;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.Ordered;
+import org.springframework.http.CacheControl;
 import org.springframework.http.HttpInputMessage;
 import org.springframework.http.HttpOutputMessage;
 import org.springframework.http.MediaType;
@@ -173,8 +174,7 @@ public class AppConfig {
 		return new AcceptHeaderLocaleResolver();
 	}
 
-	@Bean
-	LocaleChangeInterceptor localeChangeInterceptor() {
+	static LocaleChangeInterceptor localeChangeInterceptor() {
 		final LocaleChangeInterceptor lci = new LocaleChangeInterceptor();
 		lci.setParamName("lang");
 		return lci;
@@ -197,93 +197,6 @@ public class AppConfig {
 	}
 
 
-	///////////////////////////////////
-	// Resources
-	///////////////////////////////////
-	@Bean
-	WebMvcConfigurer configurer() {
-		return new WebMvcConfigurer() {
-
-			@Override
-			public void extendMessageConverters(final List<HttpMessageConverter<?>> converters) {
-				converters.add(new YamlHttpMessageConverter<>());
-			}
-
-			@Override
-			public void addInterceptors(final InterceptorRegistry registry) {
-				registry.addInterceptor(localeChangeInterceptor());
-				registry.addInterceptor(new GenericTemplateInterceptor());
-			}
-
-			@Override
-			public void configurePathMatch(PathMatchConfigurer configurer) {
-				UrlPathHelper urlPathHelper = new UrlPathHelper();
-				urlPathHelper.setUrlDecode(false);
-				configurer.setUrlPathHelper(urlPathHelper);
-			}
-
-
-			/**
-			 * Define explicitly each static resources (because of the controller /* in the
-			 * CommonPageCOntroller) Also overrides classpath values with the ones pageNumber
-			 * filesystem
-			 */
-			@Override
-			public void addResourceHandlers(final ResourceHandlerRegistry registry) {
-
-				registry.setOrder(Ordered.LOWEST_PRECEDENCE);
-				registry.addResourceHandler("/sitemap/**").addResourceLocations("file:" + config.siteMapFolder().getAbsolutePath() + "/");
-
-				registry
-				.addResourceHandler("/assets/**")
-				.addResourceLocations("classpath:/static/assets/")
-				.setCachePeriod(CACHE_PERIOD_SECONDS);
-
-				registry
-				.addResourceHandler("/css/**")
-				.addResourceLocations("classpath:/static/css/")
-				.setCachePeriod(CACHE_PERIOD_SECONDS);
-
-
-			}
-
-
-		};
-	}
-
-	///////////////////////////////
-	// The converter for yaml messages
-	///////////////////////////////
-
-	class YamlHttpMessageConverter<T> extends AbstractHttpMessageConverter<T> {
-
-		public YamlHttpMessageConverter() {
-			super(new MediaType("text", "yaml"));
-		}
-
-		@Override
-		protected boolean supports(final Class<?> clazz) {
-			return true;
-		}
-
-		@Override
-		protected T readInternal(final Class<? extends T> clazz, final HttpInputMessage inputMessage)
-				throws IOException, HttpMessageNotReadableException {
-			final Yaml yaml = new Yaml();
-			final T t = yaml.loadAs(inputMessage.getBody(), clazz);
-			return t;
-		}
-
-		@Override
-		protected void writeInternal(final T t, final HttpOutputMessage outputMessage)
-				throws IOException, HttpMessageNotWritableException {
-			final Yaml yaml = new Yaml();
-
-			final OutputStreamWriter writer = new OutputStreamWriter(outputMessage.getBody());
-			yaml.dump(t, writer);
-			writer.close();
-		}
-	}
 
 
 	//////////////////////////////////////////////
