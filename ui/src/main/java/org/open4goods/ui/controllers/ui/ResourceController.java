@@ -2,6 +2,7 @@ package org.open4goods.ui.controllers.ui;
 
 
 
+import java.io.BufferedInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -9,6 +10,7 @@ import java.net.URLEncoder;
 import java.util.Locale;
 import java.util.Optional;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.open4goods.config.yml.ui.VerticalConfig;
 import org.open4goods.dao.ProductRepository;
@@ -190,6 +192,16 @@ public class ResourceController extends AbstractUiController {
 		response.addHeader("Content-type","image/png");
 		response.addHeader("Cache-Control","public, max-age="+AppConfig.CACHE_PERIOD_SECONDS);
 		InputStream stream = dsConfigService.getLogo(datasourceName);
+		IOUtils.copy(stream ,response.getOutputStream());
+		IOUtils.closeQuietly(stream);
+	}
+
+	
+	@GetMapping("/jars/ui")
+	public void uiJarFile(@PathVariable String datasourceName, final HttpServletResponse response) throws FileNotFoundException, IOException, InvalidParameterException  {
+		response.addHeader("Content-type","application/java-archive");
+		response.addHeader("Cache-Control","public, max-age="+AppConfig.CACHE_PERIOD_SECONDS);
+		InputStream stream = new BufferedInputStream(FileUtils.openInputStream(config.uiJarFile()));
 		IOUtils.copy(stream ,response.getOutputStream());
 		IOUtils.closeQuietly(stream);
 	}

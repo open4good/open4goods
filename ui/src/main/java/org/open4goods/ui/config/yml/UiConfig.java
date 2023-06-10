@@ -32,6 +32,14 @@ public class UiConfig {
 	 */
 	private String rootFolder = "/opt/open4goods/";
 
+	
+	/**
+	 * if defined, use to templatize from a local folder
+	 */
+	private String resourceTemplateFolder  = rootFolder+"resources/";
+	private String thymeLeafTemplateFolder  = resourceTemplateFolder + "templates/";
+	
+	
 	/**
 	 * Folder where verticals configurations are stored
 	 */
@@ -81,6 +89,14 @@ public class UiConfig {
 	private XwikiConfiguration wikiConfig;
 
 
+	/**
+	 * 
+	 * @return a File pointing to the ui Jar File
+	 */
+	public File uiJarFile() {
+
+		return new File(rootFolder+"/bin/latest/ui-latest.jar");
+	}
 	/**
 	 * Return the root url for a given sitelocale, with the "default" behavior
 	 *
@@ -205,6 +221,24 @@ public class UiConfig {
 	public void setWikiConfig(XwikiConfiguration wikiConfig) {
 		this.wikiConfig = wikiConfig;
 	}
+
+	public String getResourceTemplateFolder() {
+		return resourceTemplateFolder;
+	}
+
+	public void setResourceTemplateFolder(String resourceTemplateFolder) {
+		this.resourceTemplateFolder = resourceTemplateFolder;
+	}
+
+	public String getThymeLeafTemplateFolder() {
+		return thymeLeafTemplateFolder;
+	}
+
+	public void setThymeLeafTemplateFolder(String thymeLeafTemplateFolder) {
+		this.thymeLeafTemplateFolder = thymeLeafTemplateFolder;
+	}
+
+
 
 
 
