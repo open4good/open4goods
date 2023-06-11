@@ -216,7 +216,7 @@ public class VerticalsConfigService {
 	 */
 	@Cacheable(cacheNames = CacheConstants.FOREVER_LOCAL_CACHE_NAME)
 	public VerticalConfig getDefaultConfig() throws IOException {
-		FileInputStream f = new FileInputStream(new File(verticalsFolder + "/" + DEFAULT_CONFIG_FILENAME));
+		FileInputStream f = new FileInputStream(new File(verticalsFolder + File.separator + DEFAULT_CONFIG_FILENAME));
 		VerticalConfig ret = serialisationService.fromYaml(f, VerticalConfig.class);
 		f.close();
 		return ret;

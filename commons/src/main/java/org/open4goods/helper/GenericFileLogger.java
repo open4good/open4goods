@@ -69,7 +69,7 @@ public class GenericFileLogger {
 
 				//				// Creating dirs if it does not exists
 				new File(path).mkdirs();
-				final String file = path + "/" + provider + ".log";
+				final String file = path + File.separator+  provider + ".log";
 
 				final PatternLayoutEncoder logEncoder = new PatternLayoutEncoder();
 				logEncoder.setContext(loggerContext);
@@ -83,7 +83,7 @@ public class GenericFileLogger {
 
 				final FixedWindowRollingPolicy fwRollingPolicy = new FixedWindowRollingPolicy();
 				fwRollingPolicy.setContext(loggerContext);
-				fwRollingPolicy.setFileNamePattern(path + "/" + provider + "-%i.log.zip");
+				fwRollingPolicy.setFileNamePattern(path + File.separator + provider + "-%i.log.zip");
 				fwRollingPolicy.setMaxIndex(MAX_NUMBER_OF_FILE);
 				fwRollingPolicy.setParent(rfAppender);
 				fwRollingPolicy.start();

@@ -285,7 +285,7 @@ public class CsvDatasourceFetchingService extends DatasourceFetchingService {
 							final ZipFile zipFile = new ZipFile(destFile);
 //							File zipedDestFile = File.createTempFile("csv_zipped", dsProperties.getName());
 
-							final String targetFolder = destFile.getParent() + "/" + "unziped";
+							final String targetFolder = destFile.getParent() + File.separator + "unziped";
 
 							dedicatedLogger.info("Unzipping CSV data from {} to {}", destFile.getAbsolutePath(),
 									targetFolder);
@@ -804,7 +804,7 @@ public class CsvDatasourceFetchingService extends DatasourceFetchingService {
 
 		// libreoffice --headless --convert-to csv:"Text - txt - csv (StarCalc)":59,34,76,,,,true /home/goulven/Bureau/products_405199502.csv --outdir /tmp/libreofficeCSV --infilter=CSV:59,34,UTF8
 		
-		String outDir = System.getProperty("java.io.tmpdir")+"/libreofficeCSV";
+		String outDir = System.getProperty("java.io.tmpdir")+ File.separator+"libreofficeCSV";
 		String fileName = destFile.getName();
 		
 //		int fieldSeparator=59;
@@ -834,7 +834,7 @@ public class CsvDatasourceFetchingService extends DatasourceFetchingService {
 			}
 			else {				
 				destFile.delete();
-				return new File(outDir+"/"+fileName);
+				return new File(outDir+File.separator+fileName);
 			}
 		
 		} catch (IOException | InterruptedException e) {

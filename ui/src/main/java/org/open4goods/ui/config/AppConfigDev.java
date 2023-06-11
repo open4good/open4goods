@@ -1,5 +1,6 @@
 package org.open4goods.ui.config;
 
+import java.io.File;
 import java.util.List;
 
 import org.open4goods.ui.config.yml.UiConfig;
@@ -72,7 +73,7 @@ public class AppConfigDev {
 			public void addResourceHandlers(final ResourceHandlerRegistry registry) {
 
 				registry.setOrder(Ordered.LOWEST_PRECEDENCE);
-				registry.addResourceHandler("/sitemap/**").addResourceLocations("file:" + config.siteMapFolder().getAbsolutePath() + "/");
+				registry.addResourceHandler("/sitemap/**").addResourceLocations("file:" + config.siteMapFolder().getAbsolutePath() + File.separator);
 
 				// NOTE : Register here files / folder to be allowed in devmode
 				registerFolder(registry,"assets");
@@ -93,7 +94,7 @@ public class AppConfigDev {
 	 */
 	public void registerFolder(ResourceHandlerRegistry registry, String location) {
 		registry.addResourceHandler("/" + location + "/**")
-				.addResourceLocations("file:" + config.getResourceTemplateFolder() + "static/" + location+"/", "classpath:/static/" + location + "/")
+				.addResourceLocations("file:" + config.getResourceTemplateFolder() + "static" + File.separator + location+ File.separator, "classpath:/static/" + location + "/")
 				.setCacheControl(CacheControl.noCache())
 				;
 	}
@@ -108,7 +109,7 @@ public class AppConfigDev {
 	 */
 	public void registerFile(ResourceHandlerRegistry registry, String location) {
 		registry.addResourceHandler("/" + location )
-				.addResourceLocations("file:" + config.getResourceTemplateFolder() + "static/" + location, "classpath:/static/" + location )
+				.addResourceLocations("file:" + config.getResourceTemplateFolder() + "static" + File.separator + location, "classpath:/static/" + location )
 				.setCacheControl(CacheControl.noCache())
 				;
 	}	

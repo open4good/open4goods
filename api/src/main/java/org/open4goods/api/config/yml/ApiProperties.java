@@ -1,6 +1,7 @@
 
 package org.open4goods.api.config.yml;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -35,17 +36,17 @@ public class ApiProperties {
 	/**
 	 * Folder where verticals configurations are stored
 	 */
-	private String verticalsFolder=rootFolder+"/config/verticals/";
+	private String verticalsFolder=rootFolder+ File.separator+"config"+File.separator+"verticals"+File.separator;
 
 	/**
 	 * Folder where datasources definitions are stored
 	 */
-	private String datasourcesfolder=rootFolder+"/config/datasources/";
+	private String datasourcesfolder=rootFolder+ File.separator+ "config"+File.separator+"datasources"+File.separator;
 
 	/**
 	 * The folder where cached resource will be stored
 	 */
-	private String datafragmentsBackupFolder = rootFolder + "backup/data/";
+	private String datafragmentsBackupFolder = rootFolder + "backup"+File.separator+"data"+File.separator;
 
 	
 	/**
@@ -192,11 +193,11 @@ public class ApiProperties {
 	}
 
 	public String logsFolder() {
-		return rootFolder+"/logs/";
+		return rootFolder+File.separator+"logs"+File.separator;
 	}
 
 	public String remoteCachingFolder() {
-		return rootFolder+"/.cached/";
+		return rootFolder+File.separator+".cached"+File.separator;
 	}
 
 

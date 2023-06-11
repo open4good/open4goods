@@ -126,7 +126,7 @@ public class DataSourceConfigService {
 		datasourcesByFileName = new HashMap<>();
 		datasourcesByFileName.putAll(additionalDatasources);
 
-		datasourcesByFileName.putAll(getDatasourceConfigs("file:"+datasourceConfigFolder+"/**", resolver));
+		datasourcesByFileName.putAll(getDatasourceConfigs("file:"+datasourceConfigFolder+File.separator+"**", resolver));
 
 		// Fill the by config name
 

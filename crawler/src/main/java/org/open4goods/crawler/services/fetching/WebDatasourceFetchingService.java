@@ -1,5 +1,6 @@
 package org.open4goods.crawler.services.fetching;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -211,7 +212,7 @@ public class WebDatasourceFetchingService extends DatasourceFetchingService{
 
 
 		// Forcing the unshared crawlfolder
-		crawlConfig.setCrawlStorageFolder(fetcherProperties.getCrawlerStorage() + "/" + providerName);
+		crawlConfig.setCrawlStorageFolder(fetcherProperties.getCrawlerStorage() + File.separator + providerName);
 
 		// Validating
 		try {

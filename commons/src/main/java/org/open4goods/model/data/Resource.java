@@ -1,5 +1,6 @@
 package org.open4goods.model.data;
 
+import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.HashSet;
@@ -129,7 +130,7 @@ public class Resource  implements Validable {
 
 
 
-		return hash == null ? null : hash.substring(length-3,length-2).toUpperCase() + "/" + hash.substring(length-2,length-1).toUpperCase() +"/" + hash.substring(length-1,length).toUpperCase()+"/";
+		return hash == null ? null : hash.substring(length-3,length-2).toUpperCase() + File.separator + hash.substring(length-2,length-1).toUpperCase() +File.separator+  hash.substring(length-1,length).toUpperCase()+File.separator;
 	}
 
 	public String folderHashPrefix() {
