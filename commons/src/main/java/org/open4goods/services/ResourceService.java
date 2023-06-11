@@ -45,7 +45,7 @@ public class ResourceService {
 		for (final String l1 : prefixes) {
 			for (final String l2 : prefixes) {
 				for (final String l3 : prefixes) {
-					ret = new File(cacheFolder.getAbsolutePath() + "/" + l1 + "/" + l2 + "/"+l3+"/").mkdirs();
+					ret = new File(cacheFolder.getAbsolutePath() + File.separator + l1 + File.separator + l2 + File.separator+l3+File.separator).mkdirs();
 					if (!ret) {
 						LOGGER.info("Skipping uidMap folders generation, they already exists.");
 						return;
@@ -56,29 +56,29 @@ public class ResourceService {
 	}
 
 	public File getCacheFile(final Resource r) {
-		return new File(remoteCachingFolder + "/" + r.folderHashPrefix() + "/" + r.getCacheKey());
+		return new File(remoteCachingFolder + File.separator+ r.folderHashPrefix() + File.separator+ r.getCacheKey());
 	}
 
 	public File getTranslatedCacheFile(final Resource r) throws ValidationException {
-		return new File(remoteCachingFolder + "/" + r.folderHashPrefix() + "/" + r.getCacheKey() + "_ORIGINAL.png");
+		return new File(remoteCachingFolder + File.separator+ r.folderHashPrefix() + File.separator + r.getCacheKey() + "_ORIGINAL.png");
 	}
 
 	public File getThumbnailCacheFile(final Resource r, final Integer height) throws ValidationException {
 		return new File(
-				remoteCachingFolder + "/" + r.folderHashPrefix() + "/" + r.getCacheKey() + "_" + height + ".png");
+				remoteCachingFolder + File.separator + r.folderHashPrefix() + File.separator + r.getCacheKey() + "_" + height + ".png");
 	}
 
 	public File getCacheFile(final String hash) throws ValidationException {
-		return new File(remoteCachingFolder + "/" + Resource.folderHashPrefix(hash) + "/" + hash);
+		return new File(remoteCachingFolder + File.separator + Resource.folderHashPrefix(hash) + File.separator + hash);
 	}
 
 	public File getTranslatedCacheFile(final String hash) throws ValidationException {
-		return new File(remoteCachingFolder + "/" + Resource.folderHashPrefix(hash) + "/" + hash + "_ORIGINAL.png");
+		return new File(remoteCachingFolder + File.separator + Resource.folderHashPrefix(hash) + File.separator + hash + "_ORIGINAL.png");
 	}
 
 	public File getThumbnailCacheFile(final String hash, final Integer height) throws ValidationException {
 		return new File(
-				remoteCachingFolder + "/" + Resource.folderHashPrefix(hash) + "/" + hash + "_" + height + ".png");
+				remoteCachingFolder + File.separator + Resource.folderHashPrefix(hash) + File.separator + hash + "_" + height + ".png");
 	}
 
 

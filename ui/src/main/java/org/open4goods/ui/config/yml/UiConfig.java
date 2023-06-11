@@ -42,12 +42,12 @@ public class UiConfig {
 	/**
 	 * Folder where verticals configurations are stored
 	 */
-	private String verticalsFolder=rootFolder+"/config/verticals/";
+	private String verticalsFolder=rootFolder+ File.separator+"config"+File.separator+"verticals"+File.separator;
 
 	/**
 	 * Folder where datasources definitions are stored
 	 */
-	private String datasourcesfolder=rootFolder+"/config/datasources/";
+	private String datasourcesfolder=rootFolder+ File.separator+ "config"+File.separator+"datasources"+File.separator;
 
 	/**
 	 * The URL namings
@@ -90,7 +90,7 @@ public class UiConfig {
 
 	
 	public String getThymeLeafTemplateFolder() {
-		return resourceTemplateFolder + "templates/";
+		return resourceTemplateFolder + "templates"+File.separator;
 	}
 
 	
@@ -100,13 +100,13 @@ public class UiConfig {
 	 */
 	public File uiJarFile() {
 
-		return new File(rootFolder+"/bin/latest/ui-latest.jar");
+		return new File(rootFolder+ File.separator+"bin"+File.separator+"latest"+File.separator+"ui-latest.jar");
 	}
 	
 	
 	public String resourceBundleFolder() {
 		
-		return resourceTemplateFolder+"i18n/messages";
+		return resourceTemplateFolder+"i18n"+File.separator+"messages";
 	}
 
 	
@@ -126,24 +126,24 @@ public class UiConfig {
 	}
 
 	public String getRemoteCachingFolder() {
-		return rootFolder + "/.cached/";
+		return rootFolder + File.separator+".cached"+ File.separator;
 	}
 
 	public String logsFolder() {
-		return rootFolder + "/logs/";
+		return rootFolder + File.separator+ "logs" + File.separator;
 	}
 
 
 	public File siteMapFolder() {
-		return new File(rootFolder + "/sitemap/");
+		return new File(rootFolder + File.separator + "sitemap"+ File.separator);
 	}
 
 	public File openDataFile() {
-		return new File(rootFolder + "/opendata/full.zip");
+		return new File(rootFolder + File.separator+"opendata"+File.separator+"full.zip");
 	}
 
 	public File tmpOpenDataFile() {
-		return new File(rootFolder + "/opendata/full-tmp.zip");
+		return new File(rootFolder + File.separator+"opendata"+File.separator+"full-tmp.zip");
 	}
 
 

@@ -3,6 +3,7 @@ package org.open4goods.api.datasources;
 
 import static org.junit.jupiter.api.Assertions.fail;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -145,7 +146,7 @@ public class DatasourceRegressionTest {
 		@Bean
 		DataSourceConfigService datasourceConfigService(@Autowired final ApiProperties config) {
 			// TODO : properly inject env
-			return new DataSourceConfigService("/home/goulven/git/open4goods-config/datasources");
+			return new DataSourceConfigService(File.separator+"home"+File.separator+"goulven"+File.separator+"git"+File.separator+"open4goods-config/datasources");
 		}
 
 		@Bean

@@ -49,7 +49,7 @@ public class RemoteFileCachingService {
 
 	public File getResource(final String url) throws InvalidParameterException {
 
-		File resource = new File(resourceFolder+"/"+IdHelper.getHashedName(url));
+		File resource = new File(resourceFolder+File.separator+IdHelper.getHashedName(url));
 
 		CacheResourceConfig conf = configs.get(url);
 		if (null == conf) {
@@ -80,8 +80,8 @@ public class RemoteFileCachingService {
 	private File retrieve(final CacheResourceConfig conf) throws TechnicalException {
 
 		try {
-			File tmpFile = new File(resourceFolder+"/tmp-"+IdHelper.getHashedName(conf.getUrl()));
-			File destFile = new File(resourceFolder+"/"+IdHelper.getHashedName(conf.getUrl()));
+			File tmpFile = new File(resourceFolder+File.separator+"tmp-"+IdHelper.getHashedName(conf.getUrl()));
+			File destFile = new File(resourceFolder+File.separator+IdHelper.getHashedName(conf.getUrl()));
 
 			tmpFile = download(conf.getUrl(), tmpFile);
 
@@ -93,7 +93,8 @@ public class RemoteFileCachingService {
 				tmpFile.renameTo(destFile);
 			}
 
-
+			FileUtils.deleteQuietly(tmpFile);
+			
 			return destFile;
 		} catch (TechnicalException e) {
 			throw e;
@@ -107,7 +108,7 @@ public class RemoteFileCachingService {
 		final ZipFile zipFile = new ZipFile(tmpFile);
 		//		File zipedDestFile = File.createTempFile("csv_zipped", dsProperties.getName());
 
-		final String targetFolder = tmpFile.getParent() + "/" + "unziped";
+		final String targetFolder = tmpFile.getParent() + File.separator+  "unziped";
 
 		logger.info("Unzipping CSV data from {} to {}", tmpFile.getAbsolutePath(), targetFolder);
 
