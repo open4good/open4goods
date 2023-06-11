@@ -52,7 +52,6 @@ public class AppConfigDev {
 			@Override
 			public void addInterceptors(final InterceptorRegistry registry) {
 				registry.addInterceptor(AppConfig.localeChangeInterceptor());
-				System.out.println("ADD INTERCEPTOR");
 				registry.addInterceptor(new GenericTemplateInterceptor());
 			}
 

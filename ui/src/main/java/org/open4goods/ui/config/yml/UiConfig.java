@@ -36,9 +36,8 @@ public class UiConfig {
 	/**
 	 * if defined, use to templatize from a local folder
 	 */
-	private String resourceTemplateFolder  = rootFolder+"resources/";
-	private String thymeLeafTemplateFolder  = resourceTemplateFolder + "templates/";
-	
+	private String resourceTemplateFolder;
+
 	
 	/**
 	 * Folder where verticals configurations are stored
@@ -89,6 +88,12 @@ public class UiConfig {
 	private XwikiConfiguration wikiConfig;
 
 
+	
+	public String getThymeLeafTemplateFolder() {
+		return resourceTemplateFolder + "templates/";
+	}
+
+	
 	/**
 	 * 
 	 * @return a File pointing to the ui Jar File
@@ -238,15 +243,6 @@ public class UiConfig {
 	public void setResourceTemplateFolder(String resourceTemplateFolder) {
 		this.resourceTemplateFolder = resourceTemplateFolder;
 	}
-
-	public String getThymeLeafTemplateFolder() {
-		return thymeLeafTemplateFolder;
-	}
-
-	public void setThymeLeafTemplateFolder(String thymeLeafTemplateFolder) {
-		this.thymeLeafTemplateFolder = thymeLeafTemplateFolder;
-	}
-
 
 
 
