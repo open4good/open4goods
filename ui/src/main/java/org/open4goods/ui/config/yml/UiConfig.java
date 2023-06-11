@@ -30,7 +30,7 @@ public class UiConfig {
 	/**
 	 * The local folder where capsule data will be stored.
 	 */
-	private String rootFolder = "/opt/open4goods/";
+	private String rootFolder = File.separator+"opt"+File.separator+"open4goods"+File.separator;
 
 	
 	/**
