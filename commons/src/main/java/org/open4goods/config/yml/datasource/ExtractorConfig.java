@@ -156,7 +156,7 @@ public class ExtractorConfig {
 	private QuestionsConfig questionsConfig;
 
 	// custom attributes
-	private Map<String, String> attributes;
+	private Map<String, String> attributes = new HashMap<>();
 
 	/**
 	 * For jsVar extraction, default js equal sign

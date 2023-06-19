@@ -336,7 +336,20 @@ public class DataFragmentWebCrawler extends WebCrawler {
 				// Sending to indexation
 				///////////////////////////
 
-				indexationService.index(o,datasourceConfigName);
+				
+				// If a "non product" indexation, store as CSV
+				
+				
+				if (datasourceProperties.getWebDatasource().isBrand2csv()) {
+					
+					
+					sss
+					
+					
+				} else {
+					indexationService.index(o,datasourceConfigName);					
+				}
+				
 
 			} catch (final Exception e) {
 				logger.error("error at {}", url, e);
@@ -568,5 +581,10 @@ public class DataFragmentWebCrawler extends WebCrawler {
         dedicatedLogger.warn("Can't fetch content of: {}", page.getWebURL().getURL());
     }
 
+    @Override
+    	public void onBeforeExit() {
+    		// TODO Auto-generated method stub
+    		super.onBeforeExit();
+    	}
 
 }
