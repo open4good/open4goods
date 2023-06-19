@@ -342,8 +342,8 @@ public class DataFragmentWebCrawler extends WebCrawler {
 				
 				if (datasourceProperties.getWebDatasource().isBrand2csv()) {
 					
-					
-					sss
+					// TODO
+					throw new RuntimeException("Indexing brand score");
 					
 					
 				} else {
