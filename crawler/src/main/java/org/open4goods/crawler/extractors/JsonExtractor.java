@@ -3,6 +3,7 @@ package org.open4goods.crawler.extractors;
 
 import java.io.IOException;
 import java.util.Locale;
+import java.util.Map.Entry;
 
 import org.apache.commons.lang3.StringUtils;
 import org.open4goods.config.yml.datasource.DataSourceProperties;
@@ -60,6 +61,16 @@ public class JsonExtractor extends Extractor {
 		// Applying config json pointers operations to model
 		///////////////////////////////////////////////////////////////
 
+		
+		
+		////////////////////
+		// Custom attributes
+		////////////////////
+		
+		for (final Entry<String, String> attr : c.getAttributes().entrySet()) {
+			throw new RuntimeException("ATTRIBUTES MAPPING NOT IMPLEMENTED IN JSON EXTRACTOR");
+			
+		}
 		////////////////////
 		// Review Rating
 		////////////////////

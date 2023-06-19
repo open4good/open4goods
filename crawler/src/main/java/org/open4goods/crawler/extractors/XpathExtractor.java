@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map.Entry;
 
+import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.open4goods.config.yml.datasource.DataSourceProperties;
 import org.open4goods.config.yml.datasource.ExtractorConfig;
@@ -46,8 +47,30 @@ public class XpathExtractor extends Extractor {
 
 
 
+		////////////////////
+		// Custom attributes
+		////////////////////
+		
+		for (final Entry<String, String> attr : c.getAttributes().entrySet()) {
+
+			final String xpathVar = evalAndLogs(document, attr.getValue(), url);
+
+			if (StringUtils.isEmpty(xpathVar)) {
+				getDedicatedLogger().warn("Cannot extract attribute {} with xpathExtractor ({}) at {}", attr.getKey(),
+						attr.getValue(), url);
+			} else {
 
 
+				if (ReferentielKey.isValid(attr.getKey().toUpperCase())) {
+					// Adding as referentiel attribute
+					p.addReferentielAttribute(attr.getKey().toUpperCase(), StringEscapeUtils.unescapeHtml4(xpathVar).trim());
+				} else {
+					// Adding as classical attribute
+					p.addAttribute(attr.getKey(), StringEscapeUtils.unescapeHtml4(xpathVar).trim(), locale.getLanguage(),c.getIgnoreCariageReturns(),c.getAttributeSeparators());
+				}
+			}
+		}
+		
 
 		////////////////////
 		// Category

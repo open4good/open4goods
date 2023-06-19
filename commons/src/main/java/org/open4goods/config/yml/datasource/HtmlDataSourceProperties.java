@@ -56,8 +56,16 @@ public class HtmlDataSourceProperties {
 	private List<String> urlExclusionsExtractionFilter;
 
 
+	/**
+	 * If true, this is a brand oriented crawl
+	 */
+	private boolean brand2csv = false;
+	
 
+	
 
+	
+	
 	/**
 	 * If set, those url's will be added to the baseurl as initial crawl url's
 	 */
@@ -206,6 +214,15 @@ public class HtmlDataSourceProperties {
 	public void setUrlExclusionsExtractionFilter(final List<String> urlExclusionsExtractionFilter) {
 		this.urlExclusionsExtractionFilter = urlExclusionsExtractionFilter;
 	}
+
+	public boolean isBrand2csv() {
+		return brand2csv;
+	}
+
+	public void setBrand2csv(boolean brand2csv) {
+		this.brand2csv = brand2csv;
+	}
+
 
 
 
