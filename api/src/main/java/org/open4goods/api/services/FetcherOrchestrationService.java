@@ -210,7 +210,7 @@ public class FetcherOrchestrationService {
 				logger.info("Fetch request of {} has been accepted by : {} ",datasourceConfName, node.getNodeConfig().getNodeName());
 
 			} else {
-				logger.warn("Fetch request of {} has been discarded by : {}. Reason is : {} ", datasourceConfName, node.getNodeConfig().getNodeName(), ret.getBody().getMessage());
+				logger.error("Fetch request of {} has been discarded by : {}. Reason is : {} ", datasourceConfName, node.getNodeConfig().getNodeName(), ret.getBody().getMessage());
 			}
 			return ret.getBody();
 

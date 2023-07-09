@@ -70,13 +70,13 @@ public class Score  implements Validable {
 	public String toString() {
 		
 		StringBuilder sb = new StringBuilder(name);
-		sb.append((virtual == true ? "(virtual)" : "") );
+		sb.append((virtual == true ? "(virtual):" : ":") );
 		if (null != relativ) {
 			sb.append( relativ.getValue() +  "--> rel:("+ relativ +")");
 		}
 		
 		if (null != absolute) {
-			sb.append( relativ.getValue() +  "--> rel:("+ absolute +")");
+			sb.append( relativ.getValue() +  "--> abs:("+ absolute +")");
 		}
 		
 		
@@ -159,6 +159,23 @@ public class Score  implements Validable {
 	}
 
 
+	/**
+	 * 
+	 * @return the color bootsrap class name
+	 */
+	public String colorClassName() {
+		Long p = percent();
+		
+		if (p >= 80) {
+			return "success";
+		} else if (p >=  50) {
+			return "info";			
+		} else {
+			return "danger";
+		}
+		
+	}
+	
 
 	public String color() {
 		if (null == relativ.getValue()) {

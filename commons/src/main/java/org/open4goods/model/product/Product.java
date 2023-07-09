@@ -2,6 +2,7 @@
 package org.open4goods.model.product;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -216,7 +217,13 @@ public class Product implements Standardisable {
 
 	
 	public List<Score> realScores() {
-		return scores.values().stream().filter(e -> !e.getVirtual()).toList();
+		List<Score> ret = scores.values().stream()
+				.filter(e -> !e.getVirtual())
+				.filter(e -> !e.getName().equals("ECOSCORE"))
+				.sorted( (o1, o2) -> o2.getRelativ().getValue().compareTo(o1.getRelativ().getValue()))
+				.toList();
+		
+		return ret;
 	}
 	
 	

@@ -37,33 +37,30 @@
 					
 					
 					
-
-				<div class="text-center">
-		            <h2 class="">Ecoscore</h5>
-		            <strong class="text-success">4.8</strong> / 5
-		            <span class="border rounded p-1 bg-warning text-white"><i class="fas fa-star"></i></span>
-		            <span class="border rounded p-1 bg-warning text-white"><i class="fas fa-star"></i></span>
-		            <span class="border rounded p-1 bg-warning text-white"><i class="fas fa-star"></i></span>
-		            <span class="border rounded p-1 bg-warning text-white"><i class="fas fa-star"></i></span>
-		            <span class="border rounded p-1 bg-light text-dark"><i class="fas fa-star"></i></span>
-				</div>
-				
-				<div th:each="score : ${product.realScores()}" class="progress-wrapper">
-				
-					<div class="progress-info">
-						<span class="h4 progress-tooltip bg-primary" th:text="${score.name}"></span>
-						<div class="progress-percentage">
-							<!-- 
-							<span th:if="${score.relativValue}" th:text="${score.relativValue*20}+'%'"></span>
-							 -->
+					<div>
+						<div class="text-center">
+				           
+				           <img width="350px" src="/icons/ecoscore.png">
+						</div>
+						<div  class="m-5">
+						
+							<div th:each="score : ${product.realScores()}" class="progress-wrapper">
+							
+								<div class="progress-info">
+									<span class="h4 progress-tooltip" th:classappend="'bg-'+${score.colorClassName()}" th:text="${score.name}"></span>
+									<div class="progress-percentage">
+										<!-- 
+										<span th:if="${score.relativValue}" th:text="${score.relativValue*20}+'%'"></span>
+										 -->
+									</div>
+								</div>
+								<div class="progress">
+									<div class="progress-bar" th:classappend="'bg-'+${score.colorClassName()}" role="progressbar"
+										  th:attrappend="aria-valuenow = ${score.percent()}, style='width: '+${score.percent()}+'%;'" aria-valuemin="0" aria-valuemax="100"></div>
+								</div>
+						</div>
 						</div>
 					</div>
-					<div class="progress">
-						<div class="progress-bar bg-primary" role="progressbar"
-							 style="width: 25%;" aria-valuenow="25" aria-valuemin="0"
-							aria-valuemax="100"></div>
-					</div>
-				</div>
 				
 <!-- 				
 				<div class="progress-wrapper">
@@ -179,14 +176,17 @@
 				</div>
 				<div class="tab-pane fade" id="tabs-icons-text-3" role="tabpanel"
 					aria-labelledby="tabs-icons-text-3-tab">
-					<p>Exercitation photo booth stumptown tote bag Banksy, elit
-						small batch freegan sed. Craft beer elit seitan exercitation,
-						photo booth et 8-bit kale chips proident chillwave deep v laborum.
-						Aliquip veniam delectus, Marfa eiusmod Pinterest in do umami
-						readymade swag.</p>
-					<p>Day handsome addition horrible sensible goodness two
-						contempt. Evening for married his account removal. Estimable me
-						disposing of be moonlight cordially curiosity.</p>
+					<p>L'écoscore écologique pour le SAMSUNG OLED-85C8 est composé de 4 critères, dont 2 virtuels. Ce score environnemental est calculé en prenant en compte différentes informations environnentales disponibles pour 
+					ce téléviseur. Voici la composition du score :
+					
+					<br/><br/><br/>
+					
+					table
+					<br/><br/><br/>
+					
+					
+					  </p>
+					<p>En savoir plus<a href="">le mode de calcul et la transparence de l'eco-score</a>. </p>
 				</div>
 			</div>
 		</div>
