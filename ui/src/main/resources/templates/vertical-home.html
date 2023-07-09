@@ -64,7 +64,7 @@
 			                        <span class="col-lg-10">
 			                                <h1 class="mt-2 text-center" th:text="${config.homeTitle.i18n(siteLanguage)}"></h1>
 			                                <div class="row p-2 mb-4"> 
-			                					<th:block th:with="path='WIDGETS/partenaires/'">
+			                					<th:block th:with="path=${vertical} + '/welcome-header'">
 			                     					<th:block th:insert="inc/wiki.html"></th:block>
 			                     				</th:block>
 			                				</div>		

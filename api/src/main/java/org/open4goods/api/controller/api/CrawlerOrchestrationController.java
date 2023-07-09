@@ -1,6 +1,8 @@
 package org.open4goods.api.controller.api;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -51,6 +53,20 @@ public class CrawlerOrchestrationController {
 
 	private @Autowired DataFragmentStoreService dataFragmentStoreService;
 
+	@PostMapping(path=UrlConstants.MASTER_API_CRAWLERS  + UrlConstants.MASTER_API_CRAWLER_TRIGGER_SUFFIX+"/csv/all")
+	@Operation(summary="Run a all CSV datasources retrieving against best availlables node")
+	@PreAuthorize("hasAuthority('"+RolesConstants.ROLE_ADMIN+"')")
+	public List<FetchRequestResponse> triggerAllCsvFetcher() {
+		List<FetchRequestResponse> ret = new ArrayList<>();
+		for (final Entry<String, DataSourceProperties> ds : datasourceConfigService.datasourceConfigs().entrySet()) {
+			if (null != ds.getValue().getCsvDatasource()) {
+				ret.add(fetcherOrchestrationService.triggerRemoteCrawling(ds.getKey()));
+			}
+		}
+		return ret;
+	}
+	
+	
 	@PutMapping(path=UrlConstants.MASTER_API_CRAWLER_UPDATE_PREFIX+"{crawlerNodeName}",consumes=MediaType.APPLICATION_JSON_VALUE,produces=MediaType.APPLICATION_JSON_VALUE)
 	@Operation(summary="Update the presence and status of a Fetcher")
 	@PreAuthorize("hasAuthority('"+RolesConstants.ROLE_CRAWLER+"')")
@@ -84,17 +100,7 @@ public class CrawlerOrchestrationController {
 		return new FetchRequestResponse(true);
 	}
 
-	@PostMapping(path=UrlConstants.MASTER_API_CRAWLERS  + UrlConstants.MASTER_API_CRAWLER_TRIGGER_SUFFIX+"/csv/all")
-	@Operation(summary="Run a all CSV datasources retrieving against best availlables node")
-	@PreAuthorize("hasAuthority('"+RolesConstants.ROLE_ADMIN+"')")
-	public FetchRequestResponse triggerAllCsvFetcher() {
-		for (final Entry<String, DataSourceProperties> ds : datasourceConfigService.datasourceConfigs().entrySet()) {
-			if (null != ds.getValue().getCsvDatasource()) {
-				fetcherOrchestrationService.triggerRemoteCrawling(ds.getKey());
-			}
-		}
-		return new FetchRequestResponse(true);
-	}
+
 
 
 	@PostMapping(path=UrlConstants.MASTER_API_CRAWLERS  + UrlConstants.MASTER_API_CRAWLER_TRIGGER_SUFFIX+"/{datasourceName}")
