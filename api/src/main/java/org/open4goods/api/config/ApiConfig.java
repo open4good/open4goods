@@ -174,18 +174,22 @@ public class ApiConfig {
 
 	@Bean
 	CacheManager cacheManager(@Autowired final Ticker ticker) {
-		final CaffeineCache fCache = buildCache(CacheConstants.FOREVER_LOCAL_CACHE_NAME, ticker, 30000000);
-		final CaffeineCache hCache = buildCache(CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME, ticker, 60);
-		final CaffeineCache mCache = buildCache(CacheConstants.ONE_MINUTE_LOCAL_CACHE_NAME, ticker, 1);
-		final CaffeineCache dCache = buildCache(CacheConstants.ONE_DAY_LOCAL_CACHE_NAME, ticker, 60 * 24);
+		final CaffeineCache fCache = buildExpiryCache(CacheConstants.FOREVER_LOCAL_CACHE_NAME, ticker, 30000000);
+		final CaffeineCache hCache = buildExpiryCache(CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME, ticker, 60);
+		final CaffeineCache mCache = buildExpiryCache(CacheConstants.ONE_MINUTE_LOCAL_CACHE_NAME, ticker, 1);
+		final CaffeineCache dCache = buildExpiryCache(CacheConstants.ONE_DAY_LOCAL_CACHE_NAME, ticker, 60 * 24);
 		final SimpleCacheManager manager = new SimpleCacheManager();
 		manager.setCaches(Arrays.asList(fCache, dCache, hCache,mCache));
 		return manager;
 	}
 
-	private CaffeineCache buildCache(final String name, final Ticker ticker, final int minutesToExpire) {
+	
+	
+	private CaffeineCache buildExpiryCache(final String name, final Ticker ticker, final int minutesToExpire) {
 		return new CaffeineCache(name,
-				Caffeine.newBuilder().expireAfterWrite(minutesToExpire, TimeUnit.MINUTES).ticker(ticker).build());
+				Caffeine.newBuilder()
+				.expireAfterWrite(minutesToExpire, TimeUnit.MINUTES)
+				.ticker(ticker).build());
 	}
 
 	@Bean
