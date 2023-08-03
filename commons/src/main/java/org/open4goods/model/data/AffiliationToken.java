@@ -1,5 +1,6 @@
 package org.open4goods.model.data;
 
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 import org.open4goods.model.product.AggregatedPrice;
@@ -14,82 +15,62 @@ public class AffiliationToken {
 
 	@Id
 	private String id;
-	@Field(index = true, type = FieldType.Date)
-	private Long ts;
-
-	@Field(index = false, store = false, type = FieldType.Keyword)
-	private Boolean affiliated;
-	@Field(index = false, store = false, type=FieldType.Double)
-	private Double price;
-	@Field(index = true, store = false, type = FieldType.Keyword)
-	private String datasourceName;
-	@Field(index = false, store = false, type = FieldType.Keyword)
-	private String brand;
-	@Field(index = false, store = false, type = FieldType.Keyword)
-	private String brandUid;
-	@Field(index = false, store = false, type = FieldType.Ip)
-	private String ip;
-	@Field(index = false, store = false, type = FieldType.Keyword)
-	private String ua;
+	
+	
+	@Field(type = FieldType.Date)
+	private long ts;
+//	
 	@Field(index = false, store = false, type = FieldType.Keyword)
 	private String gtin;
+
+	@Field(index = false, store = false, type=FieldType.Double)
+	private Double price;
+	
+	@Field(index = true, store = false, type = FieldType.Keyword)
+	private String cashback;
+	
+	
+	
+	@Field(index = true, store = false, type = FieldType.Keyword)
+	private String datasourceName;
+	
+	@Field(index = false, store = false, type = FieldType.Ip)
+	private String ip;
+	
+	@Field(index = false, store = false, type = FieldType.Keyword)
+	private String ua;
+	
 	@Field(index = false, store = false, type = FieldType.Keyword)
 	private String url;
+
 
 	public AffiliationToken() {
 		super();
 	}
 
 
-	public AffiliationToken(String datasourceName , String url) {
-		brand = "PARTNER";
-		brandUid = "PARTNER";
-		gtin= "";
-		price=0.0;
-		affiliated = true;
-		this.datasourceName = datasourceName;
-		this.url=url;
-		ts = System.currentTimeMillis();
-		id = UUID.randomUUID().toString();
-	}
 
-
-
-	public AffiliationToken(final DataFragment e, final Product data) {
-		brand = data.brand();
-		brandUid = data.model();
-		gtin= data.gtin();
-		price=e.getPrice().getPrice();
-		affiliated = e.affiliated();
-		datasourceName = e.getDatasourceConfigName();
-		url=e.affiliatedUrlIfPossible();
-		ts = System.currentTimeMillis();
-		id = UUID.randomUUID().toString();
-
-	}
 	public AffiliationToken(AggregatedPrice e, Product data) {
-		brand = data.brand();
-		brandUid = data.model();
 		gtin= data.gtin();
 		price=e.getPrice();
-		affiliated = e.isAffiliated();
 		datasourceName = e.getDatasourceConfigName();
 		url=e.getUrl();
 		ts = System.currentTimeMillis();
+		this.id=UUID.randomUUID().toString();
 	}
 
-	public String getBrand() {
-		return brand;
+	
+	
+	public AffiliationToken(String datasourcename, String url) {
+
+		gtin="PORTAL-LINK";
+		datasourceName = datasourcename;
+		this.url=url;
+		ts = System.currentTimeMillis();
+		this.id=UUID.randomUUID().toString();
 	}
-	public void setBrand(final String brand) {
-		this.brand = brand;
-	}
-	public String getBrandUid() {
-		return brandUid;
-	}
-	public void setBrandUid(final String brandUid) {
-		this.brandUid = brandUid;
-	}
+	
+	
 	public String getGtin() {
 		return gtin;
 	}
@@ -102,12 +83,8 @@ public class AffiliationToken {
 	public void setPrice(final Double price) {
 		this.price = price;
 	}
-	public Boolean getAffiliated() {
-		return affiliated;
-	}
-	public void setAffiliated(final Boolean affiliated) {
-		this.affiliated = affiliated;
-	}
+
+	
 	public String getDatasourceName() {
 		return datasourceName;
 	}
@@ -145,6 +122,30 @@ public class AffiliationToken {
 
 	public void setId(String id) {
 		this.id = id;
+	}
+
+
+
+
+	public long getTs() {
+		return ts;
+	}
+
+
+
+	public void setTs(long ts) {
+		this.ts = ts;
+	}
+
+
+
+	public String getCashback() {
+		return cashback;
+	}
+
+
+	public void setCashback(String cashback) {
+		this.cashback = cashback;
 	}
 
 

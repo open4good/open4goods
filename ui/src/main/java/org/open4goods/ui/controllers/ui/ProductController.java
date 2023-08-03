@@ -136,12 +136,12 @@ public class ProductController extends AbstractUiController {
 		//TODO : in a service
 		// Adding the affiliationTokens in all prices
 		for (AggregatedPrice price : data.getPrice().getOffers()) {
-			inferAffiliationToken(data, price);
+			inferAffiliationToken(request, data, price);
 		}
 
 		// Adding the affiliationTokens in min and max price
 		//TODO(gof) : could be in price aggregation
-		inferAffiliationToken(data, data.getPrice().getMinPrice());
+		inferAffiliationToken(request, data, data.getPrice().getMinPrice());
 		//		inferAffiliationToken(data, data.getPrice().getMaxPrice());
 
 		ModelAndView mv = null;
@@ -202,10 +202,12 @@ public class ProductController extends AbstractUiController {
 	 * @param price
 	 * @throws IOException
 	 */
-	private void inferAffiliationToken(Product data, AggregatedPrice price)  {
+	private void inferAffiliationToken(HttpServletRequest  request, Product data, AggregatedPrice price)  {
 
 		try {
-			AffiliationToken token = new AffiliationToken(price, data);
+			AffiliationToken token = new AffiliationToken( price, data);
+			
+			
 			String serToken = URLEncoder.encode(serialisationService.compressString(serialisationService.toJson(token)), Charset.defaultCharset());
 			price.setAffiliationToken(serToken);
 		} catch (Exception e) {
