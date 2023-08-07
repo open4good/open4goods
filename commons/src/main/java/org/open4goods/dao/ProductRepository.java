@@ -37,7 +37,7 @@ public class ProductRepository {
 
 	private static final Logger logger = LoggerFactory.getLogger(ProductRepository.class);
 
-	public static final String MAIN_INDEX_NAME = "all";
+	public static final String MAIN_INDEX_NAME = Product.DEFAULT_REPO;
 
 	/** Duration in ms where a price is considered to be valid. Only data with a price greater than this one will be returned to the user **/
 	//TODO(gof) : from conf

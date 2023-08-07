@@ -9,7 +9,7 @@ import org.springframework.data.elasticsearch.repository.ElasticsearchRepository
  *
  */
 
-public interface  AggregatedDataRepository extends ElasticsearchRepository<Product, String> {
+public interface  ProductSpringRepository extends ElasticsearchRepository<Product, String> {
 
 
 

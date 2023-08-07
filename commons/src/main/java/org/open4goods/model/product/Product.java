@@ -2,7 +2,6 @@
 package org.open4goods.model.product;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -29,19 +28,31 @@ import org.springframework.data.elasticsearch.annotations.Field;
 import org.springframework.data.elasticsearch.annotations.FieldType;
 import org.springframework.data.elasticsearch.annotations.Setting;
 
-@Document(indexName = Product.DEFAULT_REPO)
-@Setting(refreshInterval = "30s", settingPath = "/elastic-settings.json")
-//TODO : Rename to product
+@Document(indexName = Product.DEFAULT_REPO, createIndex = true)
+@Setting( settingPath = "/elastic-settings.json")
 public class Product implements Standardisable {
 
 	private final static Logger logger = LoggerFactory.getLogger(Product.class);
 
-	public static final String DEFAULT_REPO = "aggregateddata-model";
+	public static final String DEFAULT_REPO = "products";
 
 	@Id
 	@Field(index = true, store = false, type = FieldType.Keyword)
 	private String id;
 
+	
+	/**
+	 * The date this item has been created
+	 */
+	@Field(type = FieldType.Date)
+	private long creationDate;
+	/**
+	 * The last date this product has changed (new data, price change, new comment,
+	 * so on...)
+	 */
+	@Field(type = FieldType.Date)
+	private long lastChange;
+	
 	/** The list of other id's known for this product **/
 	@Field(index = true, store = false, type = FieldType.Keyword)
 	private Set<String> alternativeIds = new HashSet<>();
@@ -59,17 +70,7 @@ public class Product implements Standardisable {
 	private String vertical;
 
 
-	/**
-	 * The date this item has been created
-	 */
-	@Field(index = true, type = FieldType.Date)
-	private Long creationDate;
-	/**
-	 * The last date this product has changed (new data, price change, new comment,
-	 * so on...)
-	 */
-	@Field(index = true, type = FieldType.Date)
-	private Long lastChange;
+
 
 	/** Namings informations for this product **/
 	@Field(index = true, store = false, type = FieldType.Object)
@@ -486,102 +487,67 @@ public class Product implements Standardisable {
 		return tokens;
 	}
 
-
+	
 	//////////////////////////////////////////
 	// Getters / Setters
 	//////////////////////////////////////////
 
+	
+	
 	public String getId() {
 		return id;
 	}
 
-	public void setId(final String id) {
+	public void setId(String id) {
 		this.id = id;
 	}
-	//
-	//	public Map<String, Attribute> getAttributes() {
-	//		return attributes;
-	//	}
-	//
-	//	public void setAttributes(final Map<String, Attribute> attributes) {
-	//		this.attributes = attributes;
-	//	}
 
-	public AggregatedPrices getPrice() {
-		return price;
+	public Set<String> getAlternativeIds() {
+		return alternativeIds;
 	}
 
-	public void setPrice(final AggregatedPrices price) {
-		this.price = price;
+	public void setAlternativeIds(Set<String> alternativeIds) {
+		this.alternativeIds = alternativeIds;
+	}
+
+	public Set<String> getAlternativeBrands() {
+		return alternativeBrands;
+	}
+
+	public void setAlternativeBrands(Set<String> alternativeBrands) {
+		this.alternativeBrands = alternativeBrands;
+	}
+
+	public String getVertical() {
+		return vertical;
+	}
+
+	public void setVertical(String vertical) {
+		this.vertical = vertical;
+	}
+
+	public long getCreationDate() {
+		return creationDate;
+	}
+
+	public void setCreationDate(long creationDate) {
+		this.creationDate = creationDate;
+	}
+
+	public long getLastChange() {
+		return lastChange;
+	}
+
+	public void setLastChange(long lastChange) {
+		this.lastChange = lastChange;
 	}
 
 	public Names getNames() {
 		return names;
 	}
 
-	public void setNames(final Names names) {
+	public void setNames(Names names) {
 		this.names = names;
-	}
-
-	//	public Urls getUrls() {
-	//		return urls;
-	//	}
-	//
-	//	public void setUrls(final Urls urls) {
-	//		this.urls = urls;
-	//	}
-
-	public Long getLastChange() {
-		return lastChange;
-	}
-
-	public void setLastChange(final Long lastChange) {
-		this.lastChange = lastChange;
-	}
-
-	public Set<Description> getDescriptions() {
-		return descriptions;
-	}
-
-	public void setDescriptions(final Set<Description> descriptions) {
-		this.descriptions = descriptions;
-	}
-
-
-	//	public AggregatedComments getComments() {
-	//		return comments;
-	//	}
-	//
-	//	public void setComments(AggregatedComments comments) {
-	//		this.comments = comments;
-	//	}
-
-
-	public Integer getOffersCount() {
-		return offersCount;
-	}
-
-	public void setOffersCount(final Integer offersCount) {
-		this.offersCount = offersCount;
-	}
-
-
-
-	public Set<String> getAlternativeIds() {
-		return alternativeIds;
-	}
-
-	public void setAlternativeIds(final Set<String> alternativeIds) {
-		this.alternativeIds = alternativeIds;
-	}
-
-
-	public Set<String> getDatasourceCategories() {
-		return datasourceCategories;
-	}
-
-	public void setDatasourceCategories(final Set<String> datasourceCategories) {
-		this.datasourceCategories = datasourceCategories;
 	}
 
 	public AggregatedAttributes getAttributes() {
@@ -592,12 +558,12 @@ public class Product implements Standardisable {
 		this.attributes = attributes;
 	}
 
-	public GtinInfo getGtinInfos() {
-		return gtinInfos;
+	public AggregatedPrices getPrice() {
+		return price;
 	}
 
-	public void setGtinInfos(GtinInfo gtinInfos) {
-		this.gtinInfos = gtinInfos;
+	public void setPrice(AggregatedPrices price) {
+		this.price = price;
 	}
 
 	public Set<Resource> getResources() {
@@ -608,14 +574,12 @@ public class Product implements Standardisable {
 		this.resources = resources;
 	}
 
-
-
-	public Long getCreationDate() {
-		return creationDate;
+	public Set<Description> getDescriptions() {
+		return descriptions;
 	}
 
-	public void setCreationDate(Long creationDate) {
-		this.creationDate = creationDate;
+	public void setDescriptions(Set<Description> descriptions) {
+		this.descriptions = descriptions;
 	}
 
 	public Description getHumanDescription() {
@@ -626,13 +590,20 @@ public class Product implements Standardisable {
 		this.humanDescription = humanDescription;
 	}
 
-
-	public String getVertical() {
-		return vertical;
+	public GtinInfo getGtinInfos() {
+		return gtinInfos;
 	}
 
-	public void setVertical(String vertical) {
-		this.vertical = vertical;
+	public void setGtinInfos(GtinInfo gtinInfos) {
+		this.gtinInfos = gtinInfos;
+	}
+
+	public Set<String> getDatasourceCategories() {
+		return datasourceCategories;
+	}
+
+	public void setDatasourceCategories(Set<String> datasourceCategories) {
+		this.datasourceCategories = datasourceCategories;
 	}
 
 	public Map<String, String> getMappedCategories() {
@@ -651,13 +622,14 @@ public class Product implements Standardisable {
 		this.scores = scores;
 	}
 
-	public Set<String> getAlternativeBrands() {
-		return alternativeBrands;
+	public Integer getOffersCount() {
+		return offersCount;
 	}
 
-	public void setAlternativeBrands(Set<String> alternativeBrands) {
-		this.alternativeBrands = alternativeBrands;
+	public void setOffersCount(Integer offersCount) {
+		this.offersCount = offersCount;
 	}
+
 
 
 	
