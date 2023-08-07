@@ -1,6 +1,5 @@
 package org.open4goods.model.data;
 
-import java.time.LocalDateTime;
 import java.util.UUID;
 
 import org.open4goods.model.product.AggregatedPrice;

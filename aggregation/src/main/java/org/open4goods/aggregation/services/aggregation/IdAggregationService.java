@@ -25,8 +25,7 @@ public class IdAggregationService extends AbstractAggregationService {
 		output.getAlternativeIds().addAll(input.getAlternateIds());
 
 		// The last update
-		if (null == output.getLastChange()
-				|| output.getLastChange().longValue() < input.getLastIndexationDate().longValue()) {
+		if ( output.getLastChange() < input.getLastIndexationDate()) {
 			output.setLastChange(input.getLastIndexationDate());
 		}
 	}

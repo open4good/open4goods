@@ -3,9 +3,11 @@ package org.open4goods.api;
 
 import java.io.IOException;
 
+import org.apache.commons.math3.stat.descriptive.summary.Product;
 import org.open4goods.crawler.controller.CrawlController;
 import org.open4goods.dao.ProductRepository;
 import org.open4goods.services.SerialisationService;
+import org.open4goods.store.repository.ProductSpringRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,9 +27,8 @@ import jakarta.annotation.PostConstruct;
 
 @SpringBootApplication (scanBasePackageClasses = {Api.class, CrawlController.class})
 
-@EnableAspectJAutoProxy
 @EnableScheduling
-@EnableElasticsearchRepositories(basePackageClasses = ProductRepository.class)
+@EnableElasticsearchRepositories(basePackageClasses = ProductSpringRepository.class)
 @EnableCaching
 
 public abstract class Api {
