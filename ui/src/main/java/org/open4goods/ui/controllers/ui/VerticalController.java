@@ -52,7 +52,7 @@ public class VerticalController extends AbstractUiController {
 		ModelAndView ret = defaultModelAndView(("vertical-home"), request);
 
 
-		VerticalConfig config = verticalService.getLanguageForVerticalPath(vertical);
+		VerticalConfig config = verticalService.getVerticalForPath(vertical);
 
 		// TODO : strategy of injection of products for nativ SEO
 

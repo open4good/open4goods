@@ -38,7 +38,7 @@ public class DataTableController {
 		DataTableRequest<Product> dataTableInRQ = new DataTableRequest<Product>(request);
 		PaginationCriteria pagination = dataTableInRQ.getPaginationRequest();
 
-		VerticalConfig vConfig = verticalService.getLanguageForVerticalPath(vertical);
+		VerticalConfig vConfig = verticalService.getVerticalForPath(vertical);
 		if (null == vConfig) {
 			// TODO : Raise 404
 			return null;

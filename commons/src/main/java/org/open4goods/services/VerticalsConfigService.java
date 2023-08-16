@@ -196,7 +196,7 @@ public class VerticalsConfigService {
 	 * @param path
 	 * @return
 	 */
-	public VerticalConfig getLanguageForVerticalPath(String path) {
+	public VerticalConfig getVerticalForPath(String path) {
 		return verticalsByUrl.get(path);
 	}
 
