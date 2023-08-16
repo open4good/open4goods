@@ -87,7 +87,7 @@ public class ResourceController extends AbstractUiController {
 
 	@GetMapping("/{vertical}/*-{id:\\d+}/"+PNG_IMG)
 	public void image(@PathVariable String vertical, @PathVariable String id, final HttpServletResponse response, HttpServletRequest request) throws FileNotFoundException, IOException, ValidationException, TechnicalException {
-		VerticalConfig language = verticalConfigService.getLanguageForVerticalPath(vertical);
+		VerticalConfig language = verticalConfigService.getVerticalForPath(vertical);
 
 		if (null == language) {
 			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Image " + request.getServletPath() + " introuvable !");

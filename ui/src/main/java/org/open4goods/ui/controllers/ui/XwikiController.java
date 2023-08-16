@@ -3,6 +3,7 @@ package org.open4goods.ui.controllers.ui;
 import java.io.IOException;
 
 import org.apache.commons.lang3.StringUtils;
+import org.open4goods.config.yml.ui.VerticalConfig;
 import org.open4goods.exceptions.InvalidParameterException;
 import org.open4goods.exceptions.TechnicalException;
 import org.open4goods.model.constants.RolesConstants;
@@ -76,14 +77,24 @@ public class XwikiController extends AbstractUiController {
 	}
 
 	@GetMapping("/{page:[a-z-]+}")
+	//TODO : Ugly url's mappings
 	public ModelAndView xwiki(
 			@PathVariable(name = "page") String page, final HttpServletRequest request, HttpServletResponse response)
 					throws IOException, TechnicalException, InvalidParameterException {
 
+		
+		// Testing if a custom page in this vertical		
+		String tpl = config.getPages().get(page);
+		if (null != tpl) {
+			ModelAndView mv = defaultModelAndView(tpl, request);
+			return mv;
+		}
+		
+		
 		// TODO : Twweak for verticalsLanguagesByUrl
 
 
-		if (null != verticalService.getLanguageForVerticalPath(page)) {
+		if (null != verticalService.getVerticalForPath(page)) {
 			return verticalController.home(page,request);
 		} else
 			return xwiki("Main", page, request,response );
@@ -98,6 +109,19 @@ public class XwikiController extends AbstractUiController {
 					throws IOException, TechnicalException, InvalidParameterException {
 
 		ModelAndView mv = null;
+
+		
+		// Testing if a custom page in this vertical		
+		VerticalConfig vc = verticalService.getVerticalForPath(vertical);
+		if (null != vc) {
+			String tpl = vc.getPages().get(page);
+			if (null != tpl) {
+				mv = defaultModelAndView(tpl, request);
+				return mv;
+			}
+		}
+		
+		
 		if (null != request.getParameter("edit")) {
 			// Edit mode, redirect pageSize the wiki
 

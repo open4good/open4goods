@@ -75,7 +75,7 @@ public class ProductController extends AbstractUiController {
 	public ModelAndView productInVertical(@PathVariable String vertical, @PathVariable String id, final HttpServletRequest request, HttpServletResponse response) throws IOException {
 
 
-		VerticalConfig language = verticalConfigService.getLanguageForVerticalPath(vertical);
+		VerticalConfig language = verticalConfigService.getVerticalForPath(vertical);
 
 		if (null == language) {
 			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Produit " + request.getServletPath() + " introuvable !");
@@ -85,8 +85,7 @@ public class ProductController extends AbstractUiController {
 
 
 	}
-
-
+		
 	@GetMapping("/*-{id:\\d+}")
 	public ModelAndView product(@PathVariable String id, String vertical, final HttpServletRequest request, HttpServletResponse response) throws IOException {
 
@@ -94,6 +93,8 @@ public class ProductController extends AbstractUiController {
 		String path= URLEncoder.encode(request.getServletPath().substring(1));
 
 
+
+		
 		// Retrieve the Product
 		Product data;
 		try {

@@ -1,7 +1,9 @@
 package org.open4goods.ui.config.yml;
 
 import java.io.File;
+import java.util.HashMap;
 import java.util.Locale;
+import java.util.Map;
 
 import org.open4goods.config.yml.XwikiConfiguration;
 import org.open4goods.config.yml.ui.ApiConfig;
@@ -12,6 +14,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
+
+import com.fasterxml.jackson.annotation.JsonMerge;
 
 @Configuration
 @ConfigurationProperties
@@ -49,6 +53,14 @@ public class UiConfig {
 	 */
 	private String datasourcesfolder=rootFolder+ File.separator+ "config"+File.separator+"datasources"+File.separator;
 
+	
+	/**
+	 * The custom pages names and associated templates for this vertical
+	 */
+	@JsonMerge
+	private Map<String,String> pages = new HashMap<>();
+	
+	
 	/**
 	 * The URL namings
 	 */
@@ -242,6 +254,16 @@ public class UiConfig {
 
 	public void setResourceTemplateFolder(String resourceTemplateFolder) {
 		this.resourceTemplateFolder = resourceTemplateFolder;
+	}
+
+
+	public Map<String, String> getPages() {
+		return pages;
+	}
+
+
+	public void setPages(Map<String, String> pages) {
+		this.pages = pages;
 	}
 
 

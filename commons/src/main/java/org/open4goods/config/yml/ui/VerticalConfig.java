@@ -45,6 +45,12 @@ public class VerticalConfig{
 
 
 	/**
+	 * The custom pages names and associated templates for this vertical
+	 */
+	@JsonMerge
+	private Map<String,String> pages = new HashMap<>();
+	
+	/**
 	 * The title on the vertical home page
 	 */
 	@JsonMerge
@@ -593,6 +599,14 @@ public class VerticalConfig{
 
 	public void setEcoscoreConfig(Map<String, String> ecoscoreConfig) {
 		this.ecoscoreConfig = ecoscoreConfig;
+	}
+
+	public Map<String, String> getPages() {
+		return pages;
+	}
+
+	public void setPages(Map<String, String> pages) {
+		this.pages = pages;
 	}
 
 
