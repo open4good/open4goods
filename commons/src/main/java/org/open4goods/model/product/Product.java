@@ -116,7 +116,7 @@ public class Product implements Standardisable {
 	@Field(index = true, store = false, type = FieldType.Keyword)
 	private Set<String> datasourceCategories = new HashSet<>();
 
-	@Field(index = false, store = false, type = FieldType.Keyword)
+	@Field(index = false, store = false, type = FieldType.Object)
 	//TODO : ungly names, could be versionned / merged with datasourceCategories
 	// TODO: ensure ignored
 	private Map<String, String> mappedCategories = new HashMap<>();
