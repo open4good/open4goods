@@ -6,6 +6,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.open4goods.aggregation.AbstractAggregationService;
 import org.open4goods.config.yml.ui.VerticalConfig;
 import org.open4goods.model.data.DataFragment;
+import org.open4goods.model.data.UnindexedKeyVal;
 import org.open4goods.model.product.Product;
 import org.open4goods.services.VerticalsConfigService;
 
@@ -33,7 +34,10 @@ public class VerticalAggregationService extends AbstractAggregationService {
 		if (!StringUtils.isBlank(category)) {
 
 			output.getDatasourceCategories().add(category);
-			output.getMappedCategories().put(input.getDatasourceConfigName(), category);
+			
+			
+			
+			output.getMappedCategories().add(new UnindexedKeyVal(input.getDatasourceConfigName(), category));
 
 			// Adding vertical
 			VerticalConfig vertical = verticalService.getVerticalForCategories(output.getDatasourceCategories());

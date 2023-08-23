@@ -19,6 +19,7 @@ import org.open4goods.model.constants.ReferentielKey;
 import org.open4goods.model.data.Description;
 import org.open4goods.model.data.Resource;
 import org.open4goods.model.data.Score;
+import org.open4goods.model.data.UnindexedKeyVal;
 import org.open4goods.services.StandardiserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -117,9 +118,7 @@ public class Product implements Standardisable {
 	private Set<String> datasourceCategories = new HashSet<>();
 
 	@Field(index = false, store = false, type = FieldType.Object)
-	//TODO : ungly names, could be versionned / merged with datasourceCategories
-	// TODO: ensure ignored
-	private Map<String, String> mappedCategories = new HashMap<>();
+	private Set<UnindexedKeyVal> mappedCategories = new HashSet<>();
 	
 	@Field(index = true, store = false, type = FieldType.Object)
 	private Map<String, Score> scores = new HashMap<>();
@@ -606,11 +605,14 @@ public class Product implements Standardisable {
 		this.datasourceCategories = datasourceCategories;
 	}
 
-	public Map<String, String> getMappedCategories() {
+	
+
+
+	public Set<UnindexedKeyVal> getMappedCategories() {
 		return mappedCategories;
 	}
 
-	public void setMappedCategories(Map<String, String> mappedCategories) {
+	public void setMappedCategories(Set<UnindexedKeyVal> mappedCategories) {
 		this.mappedCategories = mappedCategories;
 	}
 
