@@ -47,7 +47,7 @@ public class SearchService {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(SearchService.class);
 
-	static final String ALL_VERTICAL_NAME = "all";
+
 
 	public static final String OTHER_BUCKET = "ES-UNKNOWN";
 
@@ -110,7 +110,7 @@ public class SearchService {
 				.withPageable(PageRequest.of(from, to))
 				.withSort(Sort.by(org.springframework.data.domain.Sort.Order.desc("offersCount")));
 
-		SearchHits<Product> results = aggregatedDataRepository.search(esQuery.build(),ALL_VERTICAL_NAME);
+		SearchHits<Product> results = aggregatedDataRepository.search(esQuery.build(),ProductRepository.MAIN_INDEX_NAME);
 		VerticalSearchResponse vsr = new VerticalSearchResponse();
 
 		//		// Setting the response
@@ -245,7 +245,7 @@ public class SearchService {
 		
 		}
 				
-		SearchHits<Product> results = aggregatedDataRepository.search(esQuery.build(),ALL_VERTICAL_NAME);
+		SearchHits<Product> results = aggregatedDataRepository.search(esQuery.build(),ProductRepository.MAIN_INDEX_NAME);
 
 
 		// Handling aggregations results if relevant
