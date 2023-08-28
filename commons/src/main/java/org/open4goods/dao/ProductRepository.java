@@ -88,7 +88,7 @@ public class ProductRepository {
 	public Stream<Product> exportVerticalWithValidDate(String vertical) {
 
 		
-		Criteria c = new Criteria("vertical.keyword").is(vertical)
+		Criteria c = new Criteria("vertical").is(vertical)
 				.and(getValidDateQuery());
 
 		final NativeQuery initialQuery = new NativeQueryBuilder()

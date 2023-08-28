@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html th:lang="${siteLocale.language}">
+
+<head>
+
+	<!--/* Metas and CSS */-->
+	<th:block th:insert="inc/header-meta.html"></th:block>
+    
+	<!-- Primary Meta Tags -->
+	<title th:text="Comparateur de prix | Nudger"></title>
+	<meta name="description" th:content="En plus d'être un comparateur écologique, Nudger est également un comparateur de prix.">
+		
+	<!-- Open Graph / Facebook -->
+	<meta property="og:type" content="website">
+	<meta property="og:url" th:content="${url}">
+	<meta property="og:title" th:content="#{ecoscore.title}">
+	<meta property="og:description" th:content="#{ecoscore.meta.description}">
+	<meta property="og:image" th:content="${baseUrl} + 'assets/img/brand/light.svg'">
+	
+	<!-- Twitter -->
+	<meta name="twitter:card" content="summary_large_image">
+	<meta name="twitter:url" th:content="${url}">
+	<meta name="twitter:title" th:content="#{ecoscore.title}">
+	<meta name="twitter:description" th:content="#{ecoscore.meta.description}">
+	<meta name="twitter:image" th:content="${baseUrl} + 'assets/img/brand/light.svg'">
+	
+</head>
+
+<body>
+    
+
+	<!--/* Navbar */-->
+	<header class="header-global">
+    	<nav id="navbar-main" th:aria-label="#{aria.navigation.primary}" class="navbar navbar-main navbar-expand-lg navbar-theme-primary headroom navbar-dark navbar-theme-primary">
+			<th:block th:insert="inc/navbar-non-product.html"></th:block>
+		</nav>
+       <!--/* Loader */-->
+       <th:block th:insert="inc/preloader.html"></th:block>
+	</header>
+	
+    <main>
+
+
+        <!-- Hero -->
+        <section class="section-header bg-secondary text-white">
+            <div class="container container-semi-fluid">
+               <div class="row justify-content-between align-items-center">
+                  <div class="col-12 col-md-8 col-lg-8 text-center text-md-left">
+                        <h1 class="display-2 mb-4">Nudger, également comparateur de prix</h1>
+                        <p class="lead mb-4 text-muted">Nudger.fr vous offre la possibilité de comparer l’écoscore de la grande majorité des produits vendus chez nos commerçants partenaires. En prime de cet indice écologique, Nudger.fr vous permet également de comparer divers indices, et notamment le prix. Ainsi, notre plateforme vous sert d’outil tout-en-un pour l’analyse et la comparaison de vos achats. Pour en savoir plus sur notre comparateur de score écologique, vous pouvez consulter notre page dédiée.</p>
+                    </div>
+                  <div class="col-12 col-md-4 d-none d-md-block text-center"><img src="../../assets/img/illustrations/about-illustration.svg" alt=""></div>
+               </div>
+            </div>
+        </section>
+        <!-- End of Hero section -->
+        
+    
+
+		<section class="mt-5">
+            <div class="container container-semi-fluid">
+                <div class="row align-items-center justify-content-around">
+                    <div class="col-md-6 col-xl-7 text-center text-md-left">
+                        <h2 class="h1 mb-5">Comparateur en ligne </h2>
+                        <p class="lead mb-4 text-muted">Nudger.fr permet de comparer en ligne différents indicateurs d’un article. Vous pouvez ainsi visualiser en seulement quelques clics le montant de compensation carbone, l’écoscore calculé à différentes variables et le prix d’achat de votre article chez nos différentes plateformes partenaires. Grâce à cet outil visuel, vous bénéficiez d’un outil clé en main pour faire votre shopping de manière intelligente et écologique.<br>
+Bien que n’étant pas la fonction première de notre système, le prix est une composante particulièrement utile qui peut vous permettre d’affiner votre choix dans la recherche de votre futur achat. Nos commerçants partenaires vous permettent d’avoir accès à un large panel de produits différents. Nous couvrons l’électroménager, les produits du high-tech et les éléments tels que les téléphones portables, ordinateurs ou encore télévisions.</p>
+					</div>
+                    <div class="col-md-6 col-xl-4 mb-5">
+                        <img class="organic-radius img-fluid" src="../../assets/img/sections/about-us-2.jpg" >
+                    </div>
+                </div>
+            </div>
+        </section>
+
+		<section>
+            <div class="container container-semi-fluid">
+                <div class="row align-items-center justify-content-around">
+                    <div class="col-md-6 col-xl-4 mb-5">
+                        <img class="organic-radius img-fluid" src="../../assets/img/sections/about-us-1.jpg" >
+                    </div>
+                    <div class="col-md-6 col-xl-7 text-center text-md-left">
+                        <p class="lead mb-4 text-muted">Système en ligne bon pour la planète et l’utilisateur</h2>
+                        <p class="lead">Notre comparateur de prix bon pour la planète est disponible en permanence depuis notre site web, sans avoir besoin de créer de compte, et sans aucune collecte de données personnelles. Nudger.fr s’engage à ne pas vous demander de cookies et à vous laisser effectuer votre comparaison sans demande particulière.<br>
+En prime, notre système de comparateur est entièrement disponible en format open-source pour pouvoir être exploité par le plus grand nombre. Notre base de données est également accessible librement et téléchargeable à tout moment.<br>
+Nudger.fr se veut entièrement tourné vers le bien commun. 
+                    	
+						</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+
+		<section>
+            <div class="container container-semi-fluid">
+                <div class="row align-items-center justify-content-around">
+                    <div class="col-md-6 col-xl-7 text-center text-md-left">
+                        <h2 class="h1 mb-5">Comment exploiter le score écologique en tant que professionnel ?</h2>
+                        <p class="lead">                        
+                            <th:block th:with="path='ECOSCORE/4/'">
+                        		<th:block th:insert="inc/wiki.html"></th:block>
+                        	</th:block>                        	
+						</p>                    
+					</div>
+                    <div class="col-md-6 col-xl-4 mb-5">
+                        <img class="organic-radius img-fluid" src="../../assets/img/sections/about-us-1.jpg" >
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+    
+
+	<!--/* Footer */-->
+	<th:block th:insert="inc/footer.html"></th:block>	
+
+    <!-- Core -->
+<script src="../../vendor/@popperjs/core/dist/umd/popper.min.js"></script>
+<script src="/webjars/bootstrap/js/bootstrap.min.js"></script>
+<script src="../../vendor/headroom.js/dist/headroom.min.js"></script>
+
+<!-- Vendor JS -->
+<script src="../../vendor/onscreen/dist/on-screen.umd.min.js"></script>
+<script src="../../vendor/nouislider/distribute/nouislider.min.js"></script>
+<script src="../../vendor/jarallax/dist/jarallax.min.js"></script>
+<script src="../../vendor/smooth-scroll/dist/smooth-scroll.polyfills.min.js"></script>
+<script src="../../vendor/vivus/dist/vivus.min.js"></script>
+<script src="../../vendor/chartist/dist/chartist.min.js"></script>
+<script src="../../vendor/chartist-plugin-tooltips/dist/chartist-plugin-tooltip.min.js"></script>
+<script src="../../vendor/@glidejs/glide/dist/glide.min.js"></script>
+<script src="../../vendor/countup.js/dist/countUp.umd.js"></script>
+<script src="../../vendor/vanillajs-datepicker/dist/js/datepicker.min.js"></script>
+
+<script async defer src="https://buttons.github.io/buttons.js"></script>
+
+<script src="/webjars/jquery/jquery.min.js"></script>
+
+<!-- pixel JS -->
+<script src="../../assets/js/pixel.js"></script>
+<!-- custom sources -->
+<script src="../../assets/js/pixel-custom.js"></script>
+</body>
+
+</html>
