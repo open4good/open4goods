@@ -32,6 +32,17 @@ public class UnindexedKeyVal {
 		return key.hashCode();
 	}
 	
+	@Override
+	public boolean equals(Object obj) {
+	
+		if (obj instanceof UnindexedKeyVal) {
+			return ((UnindexedKeyVal)obj).key.equals(key);
+		}
+		return false;
+		
+		
+	}
+	
 	public void setKey(String key) {
 		this.key = key;
 	}
