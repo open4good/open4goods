@@ -34,7 +34,7 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-security</artifactId>
 		</dependency>
-		
+
 
 		<!-- Commons (model) -->
 		<dependency>
@@ -74,8 +74,8 @@
 		</dependency>
 
 
-
-		<!-- https://mvnrepository.com/artifact/com.github.dfabulich/sitemapgen4j -->
+		<!--
+		https://mvnrepository.com/artifact/com.github.dfabulich/sitemapgen4j -->
 		<dependency>
 			<groupId>com.github.dfabulich</groupId>
 			<artifactId>sitemapgen4j</artifactId>
@@ -115,46 +115,46 @@
 
 		<!-- Webjars-->
 		<dependency>
-		    <groupId>org.webjars</groupId>
-		    <artifactId>webjars-locator</artifactId>
-		    <version>0.47</version>
+			<groupId>org.webjars</groupId>
+			<artifactId>webjars-locator</artifactId>
+			<version>0.47</version>
 		</dependency>
 
 
 		<dependency>
-		    <groupId>org.webjars</groupId>
-		    <artifactId>bootstrap</artifactId>
-		    <version>5.3.1</version>
+			<groupId>org.webjars</groupId>
+			<artifactId>bootstrap</artifactId>
+			<version>5.3.1</version>
 		</dependency>
 		<dependency>
-		    <groupId>org.webjars</groupId>
-		    <artifactId>jquery</artifactId>
-		    <version>3.7.0</version>
-		</dependency>
-		
-		<dependency>
-		    <groupId>org.webjars</groupId>
-		    <artifactId>datatables</artifactId>
-		    <version>1.13.5</version>
-		</dependency>	
-
-		<dependency>
-		    <groupId>org.webjars</groupId>
-		    <artifactId>datatables-responsive</artifactId>
-		    <version>2.2.7</version>
+			<groupId>org.webjars</groupId>
+			<artifactId>jquery</artifactId>
+			<version>3.7.0</version>
 		</dependency>
 
+		<dependency>
+			<groupId>org.webjars</groupId>
+			<artifactId>datatables</artifactId>
+			<version>1.13.5</version>
+		</dependency>
 
 		<dependency>
-		    <groupId>org.webjars.npm</groupId>
-		    <artifactId>mustache</artifactId>
-		    <version>4.2.0</version>
+			<groupId>org.webjars</groupId>
+			<artifactId>datatables-responsive</artifactId>
+			<version>2.2.7</version>
 		</dependency>
-		
+
+
 		<dependency>
-		    <groupId>org.webjars</groupId>
-		    <artifactId>chartjs</artifactId>
-		    <version>4.1.2</version>
+			<groupId>org.webjars.npm</groupId>
+			<artifactId>mustache</artifactId>
+			<version>4.2.0</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.webjars</groupId>
+			<artifactId>chartjs</artifactId>
+			<version>4.1.2</version>
 		</dependency>
 
 
@@ -165,8 +165,32 @@
 		</dependency>
 	</dependencies>
 
+
 	<build>
 		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-jar-plugin</artifactId>
+				<version>3.1.1</version>
+				<configuration>
+					<excludes>
+						<!-- This is where the exclusion occurs -->
+						<exclude>**/application-devsec.yml</exclude>
+					</excludes>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-maven-plugin</artifactId>
+				<executions>
+					<execution>
+						<goals>
+							<goal>repackage</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
