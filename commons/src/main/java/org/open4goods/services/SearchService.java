@@ -140,7 +140,7 @@ public class SearchService {
 		List<AttributeConfig> customAttrFilters = vertical.verticalFilters();
 
 
-		Criteria criterias = new Criteria("vertical.keyword").is(vertical.getId())
+		Criteria criterias = new Criteria("vertical").is(vertical.getId())
 				.and(aggregatedDataRepository.getValidDateQuery())
 				;
 
@@ -170,7 +170,7 @@ public class SearchService {
 
 		// condition
 		if (null != request.getCondition()) {
-			criterias.and(new Criteria("price.conditions.keyword").in(request.getCondition().toString()) );
+			criterias.and(new Criteria("price.conditions").in(request.getCondition().toString()) );
 		}
 
 		// min offersCount
@@ -204,13 +204,13 @@ public class SearchService {
 				.withAggregation("min_offers", 	Aggregation.of(a -> a.min(ta -> ta.field("offersCount"))))
 				.withAggregation("max_offers", 	Aggregation.of(a -> a.max(ta -> ta.field("offersCount"))))
 				//
-				.withAggregation("conditions", 	Aggregation.of(a -> a.terms(ta -> ta.field("price.conditions.keyword").missing(OTHER_BUCKET).size(3)  ))	)
+				.withAggregation("conditions", 	Aggregation.of(a -> a.terms(ta -> ta.field("price.conditions").missing(OTHER_BUCKET).size(3)  ))	)
 				//
 				//				// TODO : size from conf
 				.withAggregation("brands", 	Aggregation.of(a -> a.terms(ta -> ta.field("attributes.referentielAttributes.BRAND.keyword").missing(OTHER_BUCKET).size(100)  ))	)
 				//
 				//				// TODO : size from conf
-				.withAggregation("country", 	Aggregation.of(a -> a.terms(ta -> ta.field("gtinInfos.country.keyword").missing(OTHER_BUCKET).size(100)  ))	)
+				.withAggregation("country", 	Aggregation.of(a -> a.terms(ta -> ta.field("gtinInfos.country").missing(OTHER_BUCKET).size(100)  ))	)
 				//
 				;
 		////
@@ -234,7 +234,7 @@ public class SearchService {
 		for (AttributeConfig attrConfig : customAttrFilters) {
 			esQuery = esQuery
 					// TODO : size from conf
-					.withAggregation(attrConfig.getKey(), 	Aggregation.of(a -> a.terms(ta -> ta.field("attributes.aggregatedAttributes."+attrConfig.getKey()+".value.keyword").missing(OTHER_BUCKET).size(100)  ))	);
+					.withAggregation(attrConfig.getKey(), 	Aggregation.of(a -> a.terms(ta -> ta.field("attributes.aggregatedAttributes."+attrConfig.getKey()+".value").missing(OTHER_BUCKET).size(100)  ))	);
 		}
 		// Adding custom range aggregations
 		for (NumericRangeFilter filter: request.getNumericFilters()) {
