@@ -34,7 +34,6 @@ import org.open4goods.model.product.Product;
 import org.open4goods.model.product.SourcedAttribute;
 import org.open4goods.services.StandardiserService;
 
-// TODO : Deduplicate code beween datafragment and aggregateddata
 public class AttributeAggregationService extends AbstractAggregationService {
 
 	private final AttributesConfig attributesConfig;

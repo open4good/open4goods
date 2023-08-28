@@ -118,7 +118,7 @@ public class Product implements Standardisable {
 	private Set<String> datasourceCategories = new HashSet<>();
 
 	@Field(index = false, store = false, type = FieldType.Object)
-	private Set<UnindexedKeyVal> mappedCategories = new HashSet<>();
+	private Map<String, String> mappedCategories = new HashMap<>();
 	
 	@Field(index = true, store = false, type = FieldType.Object)
 	private Map<String, Score> scores = new HashMap<>();
@@ -606,18 +606,16 @@ public class Product implements Standardisable {
 	}
 
 	
+	public Map<String, Score> getScores() {
+		return scores;
+	}
 
-
-	public Set<UnindexedKeyVal> getMappedCategories() {
+	public Map<String, String> getMappedCategories() {
 		return mappedCategories;
 	}
 
-	public void setMappedCategories(Set<UnindexedKeyVal> mappedCategories) {
+	public void setMappedCategories(Map<String, String> mappedCategories) {
 		this.mappedCategories = mappedCategories;
-	}
-
-	public Map<String, Score> getScores() {
-		return scores;
 	}
 
 	public void setScores(Map<String, Score> scores) {
