@@ -11,7 +11,7 @@
 			<tbody>
 			
 				<tr th:each="attr : ${product.attributes.unmapedAttributes}">
-					<td><span th:text="${attr.key}"></span></td>
+					<td><span th:text="${attr.name}"></span></td>
 					<td><span th:text="${attr.value}"></span> </td>
 				</tr>
 			

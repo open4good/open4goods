@@ -36,8 +36,7 @@ public class VerticalAggregationService extends AbstractAggregationService {
 			output.getDatasourceCategories().add(category);
 			
 					
-//			output.getMappedCategories().add(new UnindexedKeyVal(input.getDatasourceConfigName(), category));
-			output.getMappedCategories().put(input.getDatasourceConfigName(), category);
+			output.getMappedCategories().add(new UnindexedKeyVal(input.getDatasourceConfigName(), category));
 
 			// Adding vertical
 			VerticalConfig vertical = verticalService.getVerticalForCategories(output.getDatasourceCategories());
