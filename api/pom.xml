@@ -67,7 +67,8 @@
 		</dependency>
 
 
-		<!-- <dependency> <groupId>pl.allegro.tech</groupId> <artifactId>embedded-elasticsearch</artifactId> 
+		<!-- <dependency> <groupId>pl.allegro.tech</groupId>
+		<artifactId>embedded-elasticsearch</artifactId> 
 			<version>2.10.0</version> <scope>test</scope> </dependency> -->
 		<!-- web -->
 		<dependency>
@@ -90,13 +91,13 @@
 
 		<!-- API DOC -->
 
-		
-	   <dependency>
-	      <groupId>org.springdoc</groupId>
-	      <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
-	      <version>2.2.0</version>
-	   </dependency>
-	   
+
+		<dependency>
+			<groupId>org.springdoc</groupId>
+			<artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+			<version>2.2.0</version>
+		</dependency>
+
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-configuration-processor</artifactId>
@@ -104,9 +105,20 @@
 		</dependency>
 	</dependencies>
 
+
 	<build>
 		<plugins>
-
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-jar-plugin</artifactId>
+				<version>3.1.1</version>
+				<configuration>
+					<excludes>
+						<!-- This is where the exclusion occurs -->
+						<exclude>**/application-devsec.yml</exclude>
+					</excludes>
+				</configuration>
+			</plugin>
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
@@ -117,13 +129,30 @@
 						</goals>
 					</execution>
 				</executions>
+			</plugin>
+
+			<plugin>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-maven-plugin</artifactId>
+				<version>${springboot.version}</version>
+				<executions>
+					<execution>
+						<goals>
+							<goal>repackage</goal>
+						</goals>
+					</execution>
+				</executions>
+
 				<configuration>
 					<layers>
 						<enabled>true</enabled>
 						<includeLayerTools>true</includeLayerTools>
 					</layers>
 				</configuration>
+
+
 			</plugin>
 		</plugins>
 	</build>
+
 </project>
