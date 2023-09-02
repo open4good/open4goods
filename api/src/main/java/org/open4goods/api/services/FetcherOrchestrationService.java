@@ -84,6 +84,7 @@ public class FetcherOrchestrationService {
 	
 	/**
 	 * Force a crawling of csv datasources at night
+	 * TODO : Should queue the crawl (all is fetched at once here)
 	 */
 	@Scheduled(cron = "0 42 1 * * *")
 	public void triggerAllCsvFetcher() {
