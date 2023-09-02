@@ -2,7 +2,9 @@ package org.open4goods.api.services;
 
 import java.net.URL;
 import java.net.URLEncoder;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.TimeUnit;
@@ -19,6 +21,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.MediaType;
 import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.scheduling.support.CronTrigger;
 import org.springframework.web.client.RestTemplate;
@@ -77,6 +80,21 @@ public class FetcherOrchestrationService {
 			}, t);
 		}
 	}
+	
+	
+	/**
+	 * Force a crawling of csv datasources at night
+	 */
+	@Scheduled(cron = "0 42 1 * * *")
+	public void triggerAllCsvFetcher() {
+		List<FetchRequestResponse> ret = new ArrayList<>();
+		for (final Entry<String, DataSourceProperties> ds : datasourceConfigService.datasourceConfigs().entrySet()) {
+			if (null != ds.getValue().getCsvDatasource()) {
+				triggerRemoteCrawling(ds.getKey());
+			}
+		}
+	}
+	
 
 	/**
 	 * Update the internally maintained map of crawlers with the one given in parameter
