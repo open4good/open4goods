@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html th:lang="${siteLocale.language}">
+
+<head>
+
+	<!--/* Metas and CSS */-->
+	<th:block th:insert="inc/header-meta.html"></th:block>
+    
+	<!-- Primary Meta Tags -->
+	<title th:text="#{compensation.title}"></title>
+	<meta name="title" content="#{compensation.meta.title}">
+	<meta name="description" content="#{compensation.meta.description}">
+	
+	<!-- Twitter -->
+	<meta name="twitter:card" content="summary_large_image">
+	<meta name="twitter:url" th:content="${url}">
+	<meta name="twitter:title" th:content="#{compensation.title}">
+	<meta name="twitter:description" th:content="#{compensation.meta.description}">
+	<meta name="twitter:image" th:content="${baseUrl} + 'assets/img/brand/light.svg'">
+	
+</head>
+
+<body>
+    
+
+	<!--/* Navbar */-->
+	<header class="header-global">
+    	<nav id="navbar-main" th:aria-label="#{aria.navigation.primary}" class="navbar navbar-main navbar-expand-lg navbar-theme-primary headroom navbar-dark navbar-theme-primary">
+			<th:block th:insert="inc/navbar-non-product.html"></th:block>
+		</nav>
+       <!--/* Loader */-->
+       <th:block th:insert="inc/preloader.html"></th:block>
+	</header>
+	
+    <main>
+
+
+        <!-- Hero -->
+        <section class="section-header bg-secondary text-white">
+            <div class="container">
+               <div class="row justify-content-between align-items-center">
+                  <div class="col-12 col-md-8 col-lg-8 text-center text-md-left">
+                        <h1 class="display-2 mb-4">Compensation écologique </h1>
+                        <p class="lead mb-4 text-muted">Nous compensons le poids écologique de votre achat en reversant <b>20% de notre chiffre d'affaire</b>. Vous trouverez ici plus d'explications sur ce principe de compensation carbone, ainsi que le total et l'historique des sommes reversées.</p>
+                    </div>
+                  <div class="col-12 col-md-4 d-none d-md-block text-center"><img src="../../assets/img/illustrations/about-illustration.svg" alt=""></div>
+               </div>
+            </div>
+        </section>
+        <!-- End of Hero section -->
+        <!-- Section -->
+        <section class="section section-md">
+            <div class="container">
+                <div class="row d-flex flex-wrap align-items-center justify-content-around">
+                    <div class="col-lg-5 mb-5">
+                        <img class="organic-radius img-fluid" src="../../assets/img/illustrations/compensation-carbone.jpg" alt="Compensation carbone">
+                    </div>
+                    <div class="col-lg-7 ">
+                        <h2 class="h1 mb-5">Principe</h2>
+                        
+                        <blockquote class="blockquote text-center">
+                    "La compensation carbone consiste à essayer de contrebalancer ses propres émissions de CO₂ par le financement de projets de réduction d'autres émissions ou de séquestration de carbone."
+							<footer class="blockquote-footer mt-3 text-primary"><a href="https://fr.wikipedia.org/wiki/Compensation_carbone" target="_blank">Wikipedia</a></footer>
+			</blockquote>
+					
+                        <p class="lead">Chez <a href="nudger.fr">nudger.fr</a>, nous reversons 20% de notre chiffre d'affaires à des associations ou organismes défendant et oeuvrant pour la cause environnementale. Nous étendons de ce fait 
+                        le principe de compensation carbone (les financements ne sont pas uniquement alloués à des organismes proposant de la séquestration carbone) car nous considerons que la problématique écologique est un sujet global (climat, biodiversité, etc.).</p>                       
+                    </div>
+                </div>
+            </div>
+        </section>
+        <!-- End of section -->
+        <!-- Section -->
+        <section class="section section-lg pt-0">
+            <div class="container">
+                <div class="row">
+                    <div class="col-md-4 col-lg-4 text-center">
+                        <!-- Visit Box -->
+                        <div class="icon-box mb-4">
+                            <div class="icon icon-primary mb-4">
+                                <span class="fas fa-user"></span>
+                            </div>
+                            <h3 class="h5">Organismes</h3>
+                            <span class="counter display-3 text-gray d-block">2</span>
+                        </div>
+                        <!-- End of Visit Box -->
+                    </div>
+                    <div class="col-md-4 col-lg-4 text-center">
+                        <!-- Call Box -->
+                        <div class="icon-box mb-4">
+                            <div class="icon icon-primary mb-4">
+                                <span class="fas fa-money-check"></span>
+                            </div>
+                            <h3 class="h5">Versements effectués</h3>
+                            <span class="counter display-3 text-gray d-block">2</span>
+                        </div>
+                        <!-- End of Call Box -->
+                    </div>
+                    <div class="col-md-4 col-lg-4 text-center">
+                        <!-- Email Box -->
+                        <div class="icon-box mb-4">
+                            <div class="icon icon-primary mb-4">
+                                <span class="fas fa-euro-sign"></span>
+                            </div>
+                            <h3 class="h5">Montant reversé</h3>
+                            <span class="display-3 text-gray d-block">143.5€</span>
+                        </div>
+                        <!-- End of Email Box -->
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        
+        
+        
+        
+        <section class="section">
+        
+        
+        
+			<div class="container container-semi-fluid">
+                <div class="col-12 col-lg-12">
+                    <div class="row justify-content-center ">
+                        <div class="col-12 col-md-6">
+                            <div class="row mt-5 mt-lg-0 px-3">
+                                <!-- Icon Boxes -->
+                                <div id="compensation-carbone" class="card shadow border-gray-300">
+                                    <div class="card-body p-4 p-lg-5">
+                                        <img src="../../assets/img/pages/design.svg" alt="Web design illustration" class="image-md mb-4">
+                                        <h2  class="h4 mb-2">Compensation environnementale</h2>
+                                        <p>
+											<th:block th:with="path='COMPENSATION/1/'">
+				                        		<th:block th:insert="inc/wiki.html"></th:block>
+				                        	</th:block>                                           
+                                        
+                                        </p>
+                                        <a href="/compensation-carbone" class="float-end btn btn-sm btn-primary">En savoir plus sur la compensation carbone</a>
+                                    </div>
+                                </div>
+                                <!-- End of Icon Boxes -->
+                                <!-- Icon Boxes -->
+                                <div id="evaluation-ecologique" class="card shadow border-gray-300 mt-3">
+                                    <div class="card-body p-4 p-lg-5">
+                                        <img src="../../assets/img/pages/technologies.svg" alt="Responsive illustration" class="image-md mb-4">
+                                        <h2 class="h4 mb-2">Evaluation écologique</h2>
+                                        <p>
+											<th:block th:with="path='COMPENSATION/2/'">
+				                        		<th:block th:insert="inc/wiki.html"></th:block>
+				                        	</th:block>                                           	
+										</p>
+                                        <a href="#" class="float-end btn btn-sm btn-primary">En savoir plus sur l'évaluation environnementale</a>
+                                    </div>
+                                </div>
+                                <!-- End of Icon Boxes -->
+
+                                <!-- Icon Boxes -->
+                                <div  class="card shadow border-gray-300 mt-3">
+                                    <div class="card-body p-4 p-lg-5">
+                                        <img src="../../assets/img/pages/technologies.svg" alt="Responsive illustration" class="image-md mb-4">
+                                        <h2 class="h4 mb-2">Comparaison de prix</h2>
+                                        <p>
+											<th:block th:with="path='COMPENSATION/30/'">
+				                        		<th:block th:insert="inc/wiki.html"></th:block>
+				                        	</th:block>                                           
+                                        </p>
+                                        <a href="#" class="float-end btn btn-sm btn-primary">En savoir plus sur la comparaison de prix</a>
+                                    </div>
+                                </div>
+                                <!-- End of Icon Boxes -->
+                                
+                                
+                            </div>
+                        </div>
+                        <div class="col-12 col-md-6 mt-lg-5">
+                            <div class="row mt-3 mt-lg-0 px-3">
+                                <!-- Icon Boxes -->
+                                <div id="modele-ouvert" class="card shadow border-gray-300">
+                                    <div class="card-body p-4 p-lg-5">
+                                        <img src="../../assets/img/pages/code.svg" alt="Code illustration" class="image-md mb-4">
+                                        <h2 class="h4 mb-2">Open-source et Open-data</h2>
+                                        <p>
+											<th:block th:with="path='WIDGETS/accueil-modele-ouvert-full/'">
+				                        		<th:block th:insert="inc/wiki.html"></th:block>
+				                        	</th:block>                                           
+                                        </p>
+                                        <a href="/opendata" class="float-end  btn btn-sm btn-primary">En savoir plus sur le modèle ouvert</a>
+                                    </div>
+                                </div>
+                                <!-- End of Icon Boxes -->
+                                <!-- Icon Boxes -->
+                                <div class="card shadow border-gray-300 mt-3">
+                                    <div id="data-responsable" class="card-body p-4 p-lg-5">
+                                        <img src="../../assets/img/pages/support.svg" alt="Support illustration" class="image-md mb-4">
+                                        <h2 class="h4 mb-2">Data responsable</h2>
+                                        <p>
+											<th:block th:with="path='WIDGETS/accueil-data-responsable-full/'">
+				                        		<th:block th:insert="inc/wiki.html"></th:block>
+				                        	</th:block>                                           
+                                        </p>
+                                        <a href="/donnees-personnelles" class="float-end btn btn-sm btn-primary">En savoir plus sur l'utilisation de vos données</a>
+                                    </div>
+                                </div>
+                                <!-- End of Icon Boxes -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>	          
+        </section>
+        
+        
+        
+        
+        
+        
+        <!-- End of section -->
+        <!-- Section -->
+        <section class=" pb-4 bg-gray-200">
+           <div class="container ">
+                <div class="row text-center">
+                    <div class="col">
+                        <h2 class="my-4 h1 fw-light"><span class="fw-bold">Historique</span> des paiements</h2>
+                        <p>Ces deux premiers paiements correspondent aux commissions récuperées sur le site comparatif-tv.fr depuis 2019. Ce site était un prototype sans aucune promotion, nous pensons pouvoir faire bien mieux avec nudger.fr !
+                        Afin de garantir l'authenticité de la démarche, nous autorisons les organismes ci-dessous à vous délivrer les preuves de virements correspondant à ces montants. (demander les virements cartes pour ce montant, réalisés via l'adresse "web.equitableA_R_O_B_A-S-EgmailPOINTcom").
+                        <br/>
+                        Ce site est tout neuf, nous tenterons d'ici peu de contacter nos organismes partenaires afin d'automatiser la preuve de paiement. Si vous avez des idées en la matière, n'hésitez pas à <a href="/contact">nous contacter</a>
+                        
+                        </p>
+                    </div>
+                </div>
+                
+                <div class="card bg-white border-gray-300 ">
+                            <div class="border-bottom px-4 py-5">
+                                <div class="row align-items-center text-center">
+                                    <div class="col-12 col-md-3 pb-3 pb-md-0">
+                                        <img src="/assets/img/greenpeace_logo.png" alt="Greenpeace">
+                                    </div>
+                                    <div class="col-md-5 pb-2 pb-md-0">
+                                        <h3 class="h5 mb-3">72€</h3>
+                                        <p class="mb-0">Greenpeace</p>
+                                    </div>
+                                    <div class="col-md-4 text-md-right"><span class="badge bg-primary">Novembre 2021</span></div>
+                                </div>
+                            </div>
+                            <div class="border-bottom px-4 py-5">
+                                <div class="row align-items-center text-center">
+                                    <div class="col-12 col-md-3 pb-3 pb-md-0">
+                                        <img src="/assets/img/goodplanet_logo.svg" alt="Fondation Goodplanet">
+                                    </div>
+                                    <div class="col-md-5 pb-2 pb-md-0">
+                                        <h3 class="h5 mb-3">71,5€</h3>
+                                        <p class="mb-0">Fondation GoodPlanet</p>
+                                    </div>
+                                    <div class="col-md-4 text-md-right"><span class="badge bg-primary">Novembre 2021</span></div>
+                                </div>
+                            </div>
+                            
+            </div>
+        </section>
+        
+    </main>
+    
+
+	<!--/* Footer */-->
+	<th:block th:insert="inc/footer.html"></th:block>	
+
+    <!-- Core -->
+<script src="../../vendor/@popperjs/core/dist/umd/popper.min.js"></script>
+<script src="/webjars/bootstrap/js/bootstrap.min.js"></script>
+<script src="../../vendor/headroom.js/dist/headroom.min.js"></script>
+
+<!-- Vendor JS -->
+<script src="../../vendor/onscreen/dist/on-screen.umd.min.js"></script>
+<script src="../../vendor/nouislider/distribute/nouislider.min.js"></script>
+<script src="../../vendor/jarallax/dist/jarallax.min.js"></script>
+<script src="../../vendor/smooth-scroll/dist/smooth-scroll.polyfills.min.js"></script>
+<script src="../../vendor/vivus/dist/vivus.min.js"></script>
+<script src="../../vendor/chartist/dist/chartist.min.js"></script>
+<script src="../../vendor/chartist-plugin-tooltips/dist/chartist-plugin-tooltip.min.js"></script>
+<script src="../../vendor/@glidejs/glide/dist/glide.min.js"></script>
+<script src="../../vendor/countup.js/dist/countUp.umd.js"></script>
+<script src="../../vendor/vanillajs-datepicker/dist/js/datepicker.min.js"></script>
+
+<script async defer src="https://buttons.github.io/buttons.js"></script>
+
+<script src="/webjars/jquery/jquery.min.js"></script>
+
+<!-- pixel JS -->
+<script src="../../assets/js/pixel.js"></script>
+<!-- custom sources -->
+<script src="../../assets/js/pixel-custom.js"></script>
+</body>
+
+</html>

@@ -23,7 +23,7 @@ public class Crawler {
 
 	protected static final Logger logger = LoggerFactory.getLogger(Crawler.class);
 
-	private @Autowired SerialisationService serialisationService;
+//	private @Autowired SerialisationService serialisationService;
 
 	public static void main(final String[] args) {
 		SpringApplication.run(Crawler.class, args);
@@ -39,32 +39,32 @@ public class Crawler {
 		}
 	}
 
-	@PostConstruct
-	private void init() {
-		Unirest.setObjectMapper(new  com.mashape.unirest.http.ObjectMapper() {
-
-
-			@Override
-			public <T> T readValue(final String value, final Class<T> valueType) {
-				try {
-					return serialisationService.getJsonMapper().readValue(value, valueType);
-				} catch (final IOException e) {
-					throw new RuntimeException(e);
-				}
-			}
-
-			@Override
-			public String writeValue(final Object value) {
-				try {
-					return serialisationService.getJsonMapper().writeValueAsString(value);
-				} catch (final JsonProcessingException e) {
-					throw new RuntimeException(e);
-				}
-			}
-		});
-
-
-	}
+//	@PostConstruct
+//	private void init() {
+//		Unirest.setObjectMapper(new  com.mashape.unirest.http.ObjectMapper() {
+//
+//
+//			@Override
+//			public <T> T readValue(final String value, final Class<T> valueType) {
+//				try {
+//					return serialisationService.getJsonMapper().readValue(value, valueType);
+//				} catch (final IOException e) {
+//					throw new RuntimeException(e);
+//				}
+//			}
+//
+//			@Override
+//			public String writeValue(final Object value) {
+//				try {
+//					return serialisationService.getJsonMapper().writeValueAsString(value);
+//				} catch (final JsonProcessingException e) {
+//					throw new RuntimeException(e);
+//				}
+//			}
+//		});
+//
+//
+//	}
 
 
 

@@ -62,7 +62,7 @@
 	<div class="col-12 col-lg-7 order-lg-1">
 
 
-		<div  id="offresNeuves" class="card shadow my-3 p-4">
+		<div th:if="${product.price.newOffers()}" id="offresNeuves" class="card shadow my-3 p-4">
 		
 			<table id="offersTableNew" class="table table-striped" style="width: 100%">
 				<thead>
