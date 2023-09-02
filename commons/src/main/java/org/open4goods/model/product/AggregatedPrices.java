@@ -41,11 +41,23 @@ public class AggregatedPrices implements Standardisable {
 
 	
 	public List<AggregatedPrice> occasionOffers() {
-		return sortedOffers().stream().filter(e->e.getProductState().equals(ProductState.OCCASION)).toList();	
+		List<AggregatedPrice> soffers = sortedOffers();
+		if (null == soffers) {
+			return new ArrayList<>();
+		} else {
+			return soffers.stream().filter(e-> e != null).filter(e->e.getProductState().equals(ProductState.OCCASION)).toList();	
+			
+		}
 	}
 	
 	public List<AggregatedPrice> newOffers() {
-		return sortedOffers().stream().filter(e->e.getProductState().equals(ProductState.NEW)).toList();	
+		List<AggregatedPrice> soffers = sortedOffers();
+		if (null == soffers) {
+			return new ArrayList<>();
+		} else {
+			return soffers.stream().filter(e-> e != null).filter(e->e.getProductState().equals(ProductState.NEW)).toList();	
+			
+		}
 	}
 	
 	

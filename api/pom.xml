@@ -16,11 +16,21 @@
 		<main.basedir>${basedir}/../..</main.basedir>
 	</properties>
 
+
 	<dependencies>
 		<dependency>
 			<groupId>org.open4goods</groupId>
 			<artifactId>aggregation</artifactId>
 			<version>${global.version}</version>
+		</dependency>
+
+		<!--
+		https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-test -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-test</artifactId>
+			<version>3.1.3</version>
+			<scope>test</scope>
 		</dependency>
 
 
