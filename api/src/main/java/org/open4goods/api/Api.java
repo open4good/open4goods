@@ -25,7 +25,7 @@ import jakarta.annotation.PostConstruct;
 
 
 
-@SpringBootApplication (scanBasePackageClasses = { CrawlController.class})
+@SpringBootApplication (scanBasePackageClasses = { Api.class, CrawlController.class})
 
 @EnableScheduling
 @EnableElasticsearchRepositories(basePackageClasses = ProductSpringRepository.class)
