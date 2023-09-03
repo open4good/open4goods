@@ -24,23 +24,23 @@ import org.open4goods.model.attribute.Attribute;
 import org.open4goods.model.attribute.AttributeType;
 import org.open4goods.model.constants.ReferentielKey;
 import org.open4goods.model.data.DataFragment;
-import org.open4goods.model.data.Rating;
-import org.open4goods.model.data.RatingType;
 import org.open4goods.model.product.AggregatedAttribute;
-import org.open4goods.model.product.AggregatedAttributes;
 import org.open4goods.model.product.AggregatedFeature;
 import org.open4goods.model.product.IAttribute;
 import org.open4goods.model.product.Product;
 import org.open4goods.model.product.SourcedAttribute;
-import org.open4goods.services.StandardiserService;
+import org.open4goods.services.BrandService;
 
 public class AttributeAggregationService extends AbstractAggregationService {
 
 	private final AttributesConfig attributesConfig;
+	
+	private final BrandService brandService;
 
-	public AttributeAggregationService(final AttributesConfig attributesConfig,  final String logsFolder,boolean toConsole) {
+	public AttributeAggregationService(final AttributesConfig attributesConfig,  BrandService brandService, final String logsFolder,boolean toConsole) {
 		super(logsFolder,toConsole);
 		this.attributesConfig = attributesConfig;
+		this.brandService = brandService;
 	}
 
 	@Override
@@ -364,6 +364,14 @@ public class AttributeAggregationService extends AbstractAggregationService {
 	 */
 	private void handleReferentielAttributes(Map<String, String> refAttrs, Product output) {
 
+
+		
+		
+		
+		
+		
+		
+		
 		for (Entry<String, String> attr : refAttrs.entrySet()) {
 
 			ReferentielKey key = ReferentielKey.valueOf( attr.getKey());
@@ -377,11 +385,21 @@ public class AttributeAggregationService extends AbstractAggregationService {
 				if (key.equals(ReferentielKey.MODEL)) {
 					dedicatedLogger.info("Adding different {} name as alternate id. Existing is {}, would have erased with {}",key,existing, value);
 					output.getAlternativeIds().add(value);
+					
+					
+					
 				} else if (key.equals(ReferentielKey.BRAND)) {
 					
-					//TODO (gof) : elect best brand, exclude "non categorisée", ...
-					dedicatedLogger.info("Adding different {} name as BRAND. Existing is {}, would have erased with {}",key,existing, value);
-					output.getAlternativeBrands().add(value);
+					value = brandService.normalizeBrand(value);
+					if (null != value && !existing.equals(value)) {
+						//TODO (gof) : elect best brand, exclude "non categorisée", ...
+						dedicatedLogger.info("Adding different {} name as BRAND. Existing is {}, would have erased with {}",key,existing, value);						
+						output.getAlternativeBrands().add(value);
+						// TODO : Historisation of the DataSource / conflict
+						
+					}
+					
+	
 				} 
 				
 				
@@ -389,7 +407,14 @@ public class AttributeAggregationService extends AbstractAggregationService {
 				else {
 					dedicatedLogger.warn("Skipping referentiel attribute erasure for {}. Existing is {}, would have erased with {}",key,existing, value);
 				}
-			} else {
+			} 
+			
+			
+			else {
+				// TODO : Bad design of this method
+				if (key.equals(ReferentielKey.BRAND)) {
+					value = brandService.normalizeBrand(value);
+				}
 				output.getAttributes().addReferentielAttribute( key, value);
 			}
 		}

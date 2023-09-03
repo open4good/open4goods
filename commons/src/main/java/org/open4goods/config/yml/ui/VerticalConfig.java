@@ -161,12 +161,6 @@ public class VerticalConfig{
 	 */
 	private RecommandationsConfig recommandationsConfig = new RecommandationsConfig();
 
-	/**
-	 * The logos configuration
-	 */
-	@JsonMerge
-	private LogosConfig logosConfig = new LogosConfig();
-
 
 	/**
 	 * The config for swagger API
@@ -482,15 +476,6 @@ public class VerticalConfig{
 		this.recommandationsConfig = recommandationsConfig;
 	}
 
-
-	public LogosConfig getLogosConfig() {
-		return logosConfig;
-	}
-
-
-	public void setLogosConfig(LogosConfig logosConfig) {
-		this.logosConfig = logosConfig;
-	}
 
 
 	public ApiConfig getApiConfig() {
