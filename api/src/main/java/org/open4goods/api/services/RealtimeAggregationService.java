@@ -22,6 +22,7 @@ import org.open4goods.exceptions.AggregationSkipException;
 import org.open4goods.model.data.DataFragment;
 import org.open4goods.model.product.Product;
 import org.open4goods.services.BarcodeValidationService;
+import org.open4goods.services.BrandService;
 import org.open4goods.services.DataSourceConfigService;
 import org.open4goods.services.EvaluationService;
 import org.open4goods.services.Gs1PrefixService;
@@ -65,14 +66,15 @@ public class RealtimeAggregationService {
 
 	private BarcodeValidationService barcodeValidationService;
 
-
+	private BrandService brandService;
 
 	public RealtimeAggregationService(EvaluationService evaluationService,
 			ReferentielService referentielService, StandardiserService standardiserService,
 			AutowireCapableBeanFactory autowireBeanFactory, ProductRepository aggregatedDataRepository,
 			ApiProperties apiProperties, Gs1PrefixService gs1prefixService,
 			DataSourceConfigService dataSourceConfigService, VerticalsConfigService configService,
-			BarcodeValidationService barcodeValidationService) {
+			BarcodeValidationService barcodeValidationService,
+			BrandService brandService) {
 		super();
 		this.evaluationService = evaluationService;
 		this.referentielService = referentielService;
@@ -83,7 +85,7 @@ public class RealtimeAggregationService {
 		this.gs1prefixService = gs1prefixService;
 		this.dataSourceConfigService = dataSourceConfigService;
 		verticalConfigService = configService;
-
+		this.brandService=brandService;
 		this.barcodeValidationService = barcodeValidationService;
 
 
@@ -129,7 +131,7 @@ public class RealtimeAggregationService {
 
 		services.add(new BarCodeAggregationService(apiProperties.logsFolder(), gs1prefixService,barcodeValidationService, apiProperties.isDedicatedLoggerToConsole()));
 
-		services.add(new AttributeAggregationService(config.getAttributesConfig(), apiProperties.logsFolder(), apiProperties.isDedicatedLoggerToConsole()));
+		services.add(new AttributeAggregationService(config.getAttributesConfig(), brandService, apiProperties.logsFolder(), apiProperties.isDedicatedLoggerToConsole()));
 
 
 		services.add(new NamesAggregationService(config.getNamings(), evaluationService, apiProperties.logsFolder(), apiProperties.isDedicatedLoggerToConsole()));

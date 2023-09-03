@@ -2,15 +2,14 @@
 package org.open4goods.ui.config;
 
 import java.io.IOException;
-import java.io.OutputStreamWriter;
 import java.util.Arrays;
-import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import org.open4goods.dao.ProductRepository;
 import org.open4goods.model.constants.CacheConstants;
 import org.open4goods.model.constants.Currency;
 import org.open4goods.model.data.Price;
+import org.open4goods.services.BrandService;
 import org.open4goods.services.DataSourceConfigService;
 import org.open4goods.services.EvaluationService;
 import org.open4goods.services.ImageMagickService;
@@ -24,7 +23,6 @@ import org.open4goods.services.StandardiserService;
 import org.open4goods.services.VerticalsConfigService;
 import org.open4goods.services.XwikiService;
 import org.open4goods.ui.config.yml.UiConfig;
-import org.open4goods.ui.interceptors.GenericTemplateInterceptor;
 import org.open4goods.ui.services.GtinService;
 import org.open4goods.ui.services.ImageService;
 import org.open4goods.ui.services.OpenDataService;
@@ -34,28 +32,13 @@ import org.springframework.cache.caffeine.CaffeineCache;
 import org.springframework.cache.support.SimpleCacheManager;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.Ordered;
-import org.springframework.http.CacheControl;
-import org.springframework.http.HttpInputMessage;
-import org.springframework.http.HttpOutputMessage;
-import org.springframework.http.MediaType;
-import org.springframework.http.converter.AbstractHttpMessageConverter;
-import org.springframework.http.converter.HttpMessageConverter;
-import org.springframework.http.converter.HttpMessageNotReadableException;
-import org.springframework.http.converter.HttpMessageNotWritableException;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.web.firewall.HttpFirewall;
 import org.springframework.security.web.firewall.StrictHttpFirewall;
 import org.springframework.web.servlet.LocaleResolver;
-import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
-import org.springframework.web.servlet.config.annotation.PathMatchConfigurer;
-import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
-import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import org.springframework.web.servlet.i18n.AcceptHeaderLocaleResolver;
 import org.springframework.web.servlet.i18n.LocaleChangeInterceptor;
-import org.springframework.web.util.UrlPathHelper;
-import org.yaml.snakeyaml.Yaml;
 
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.Ticker;
@@ -72,6 +55,13 @@ public class AppConfig {
 		return new ImageService(imageMagickService, resourceService);
 	}
 
+
+	@Bean
+	BrandService brandService(@Autowired RemoteFileCachingService rfc, @Autowired  UiConfig properties) {
+		return new BrandService(properties.getBrandConfig(),  rfc);
+	}
+
+	
 	@Bean
 	OpenDataService openDataService(@Autowired ProductRepository aggregatedDataRepository, @Autowired UiConfig props) {
 		return new OpenDataService(aggregatedDataRepository, props);

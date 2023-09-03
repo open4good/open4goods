@@ -46,4 +46,11 @@ attributeAggregationConfig:
     - BRAND
     - MODEL
     - MODELE
-  
+
+
+
+brandConfig:
+  brandsToRemove:
+    - "NON COMMUNIQUE"
+    - "NON COMMUNIQUÉ"
+    - "INCONNU"  

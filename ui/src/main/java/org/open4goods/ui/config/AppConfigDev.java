@@ -21,7 +21,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import org.springframework.web.util.UrlPathHelper;
 
 @Configuration
-@Profile({"dev","docker"})
+@Profile({"dev","devsec"})
 public class AppConfigDev {
 	
 	private @Autowired UiConfig config;

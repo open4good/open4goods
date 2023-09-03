@@ -6,6 +6,9 @@
 	<div class="col-md-9">
 		<div class="info-main text-center">
 			
+			
+			<img th:if="${hasBrandLogo}" th:src="'/images/marques/'+${product.brand()}+'.png'">
+			
 			<th:block th:if="${editor}">
 				<input th:if="${product.names.manualName}" size="50" type="text" name="productTitle" id="productTitle" th:value="${product.names.manualName}">
 				<input th:unless="${product.names.manualName}" size="50" type="text" name="productTitle" id="productTitle" th:value="${product.names.shortestOfferName()}">

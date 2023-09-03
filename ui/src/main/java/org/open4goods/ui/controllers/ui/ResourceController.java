@@ -24,6 +24,7 @@ import org.open4goods.exceptions.ValidationException;
 import org.open4goods.model.constants.ResourceTagDictionary;
 import org.open4goods.model.data.Resource;
 import org.open4goods.model.product.Product;
+import org.open4goods.services.BrandService;
 import org.open4goods.services.DataSourceConfigService;
 import org.open4goods.services.VerticalsConfigService;
 import org.open4goods.ui.Ui;
@@ -66,13 +67,49 @@ public class ResourceController extends AbstractUiController {
 	private @Autowired UiConfig config;
 	private @Autowired DataSourceConfigService dsConfigService;
 	private @Autowired VerticalsConfigService verticalConfigService;
-
+	private @Autowired BrandService brandService;
+	
 	//////////////////////////////////////////////////////////////
 	// Mappings
 	//////////////////////////////////////////////////////////////
 
+	
 	/**
-	 * The Home page.
+	 * The brand logos images.
+	 *
+	 * @param request
+	 * @param response
+	 * @return
+	 * @throws TechnicalException
+	 * @throws ValidationException
+	 * @throws IOException
+	 * @throws FileNotFoundException
+	 * @throws InvalidParameterException 
+	 * @throws UnirestException
+	 */
+
+
+	@GetMapping("/images/marques/{brand}.png")
+	public void brandLogo(@PathVariable String brand, final HttpServletResponse response, HttpServletRequest request) throws FileNotFoundException, IOException, ValidationException, TechnicalException, InvalidParameterException {		
+
+		if (!brandService.hasLogo(brand.toUpperCase())) {
+			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Image " + request.getServletPath() + " introuvable !");
+		}
+		
+		response.addHeader("Content-type","image/png");
+		response.addHeader("Cache-Control","public, max-age="+AppConfig.CACHE_PERIOD_SECONDS);
+
+		InputStream stream = brandService.getLogo(brand.toUpperCase());
+		IOUtils.copy(stream ,response.getOutputStream());
+		IOUtils.closeQuietly(stream);
+		
+		
+	}
+	
+	
+	
+	/**
+	 * The vertical Home page.
 	 *
 	 * @param request
 	 * @param response

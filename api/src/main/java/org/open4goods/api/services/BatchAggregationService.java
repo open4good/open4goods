@@ -16,6 +16,7 @@ import org.open4goods.api.config.yml.ApiProperties;
 import org.open4goods.config.yml.ui.VerticalConfig;
 import org.open4goods.dao.ProductRepository;
 import org.open4goods.services.BarcodeValidationService;
+import org.open4goods.services.BrandService;
 import org.open4goods.services.DataSourceConfigService;
 import org.open4goods.services.EvaluationService;
 import org.open4goods.services.Gs1PrefixService;
@@ -61,6 +62,9 @@ public class BatchAggregationService  {
 	private BarcodeValidationService barcodeValidationService;
 
 
+	private BrandService brandService;
+
+
 
 
 	public BatchAggregationService(EvaluationService evaluationService,
@@ -68,7 +72,8 @@ public class BatchAggregationService  {
 			AutowireCapableBeanFactory autowireBeanFactory, ProductRepository aggregatedDataRepository,
 			ApiProperties apiProperties, Gs1PrefixService gs1prefixService,
 			DataSourceConfigService dataSourceConfigService, VerticalsConfigService configService,
-			BarcodeValidationService barcodeValidationService) {
+			BarcodeValidationService barcodeValidationService,
+			BrandService brandService) {
 		super();
 		this.evaluationService = evaluationService;
 		this.referentielService = referentielService;
@@ -81,7 +86,7 @@ public class BatchAggregationService  {
 		verticalConfigService = configService;
 
 		this.barcodeValidationService = barcodeValidationService;
-
+		this.brandService = brandService;
 
 		aggregator = getAggregator(configService.getConfigById(VerticalsConfigService.MAIN_VERTICAL_NAME).get());
 	}
@@ -115,7 +120,7 @@ public class BatchAggregationService  {
 		final List<AbstractAggregationService> services = new ArrayList<>();
 
 
-		services.add(new AttributeAggregationService(config.getAttributesConfig(), apiProperties.logsFolder(), apiProperties.isDedicatedLoggerToConsole() ));
+		services.add(new AttributeAggregationService(config.getAttributesConfig(), brandService, apiProperties.logsFolder(), apiProperties.isDedicatedLoggerToConsole() ));
 		services.add(new CleanScoreAggregationService(config.getAttributesConfig(), apiProperties.logsFolder(), apiProperties.isDedicatedLoggerToConsole()));
 
 		services.add(new Attribute2ScoreAggregationService(config.getAttributesConfig(), apiProperties.logsFolder(), apiProperties.isDedicatedLoggerToConsole()));

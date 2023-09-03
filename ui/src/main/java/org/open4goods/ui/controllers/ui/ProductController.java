@@ -14,6 +14,7 @@ import org.open4goods.model.data.AffiliationToken;
 import org.open4goods.model.data.Description;
 import org.open4goods.model.product.AggregatedPrice;
 import org.open4goods.model.product.Product;
+import org.open4goods.services.BrandService;
 import org.open4goods.services.SerialisationService;
 import org.open4goods.services.VerticalsConfigService;
 import org.open4goods.ui.config.yml.UiConfig;
@@ -54,6 +55,7 @@ public class ProductController extends AbstractUiController {
 
 	private @Autowired VerticalsConfigService verticalConfigService;
 
+	private @Autowired BrandService brandService;
 
 	//////////////////////////////////////////////////////////////
 	// Mappings
@@ -164,6 +166,10 @@ public class ProductController extends AbstractUiController {
 			mv.addObject("originCountry", new ULocale("",data.getGtinInfos().getCountry()).getDisplayCountry( new ULocale(request.getLocale().toString())));
 		}
 
+		
+		// Adding the brand informations
+		mv.addObject("hasBrandLogo", brandService.hasLogo(data.brand()));
+		
 		// Adding the images resource
 
 		return mv;
