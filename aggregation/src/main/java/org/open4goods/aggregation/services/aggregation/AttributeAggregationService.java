@@ -24,6 +24,7 @@ import org.open4goods.model.attribute.Attribute;
 import org.open4goods.model.attribute.AttributeType;
 import org.open4goods.model.constants.ReferentielKey;
 import org.open4goods.model.data.DataFragment;
+import org.open4goods.model.data.UnindexedKeyValTimestamp;
 import org.open4goods.model.product.AggregatedAttribute;
 import org.open4goods.model.product.AggregatedFeature;
 import org.open4goods.model.product.IAttribute;
@@ -364,13 +365,6 @@ public class AttributeAggregationService extends AbstractAggregationService {
 	 */
 	private void handleReferentielAttributes(Map<String, String> refAttrs, Product output) {
 
-
-		
-		
-		
-		
-		
-		
 		
 		for (Entry<String, String> attr : refAttrs.entrySet()) {
 
@@ -384,22 +378,21 @@ public class AttributeAggregationService extends AbstractAggregationService {
 				//TODO(0.5,p2,feature) : handle conflicts and "best value" election on referentiel attributes
 				if (key.equals(ReferentielKey.MODEL)) {
 					dedicatedLogger.info("Adding different {} name as alternate id. Existing is {}, would have erased with {}",key,existing, value);
-					output.getAlternativeIds().add(value);
-					
-					
-					
+					output.getAlternativeIds().add(new UnindexedKeyValTimestamp(ReferentielKey.BRAND.toString(), value));					
 				} else if (key.equals(ReferentielKey.BRAND)) {
 					
 					value = brandService.normalizeBrand(value);
 					if (null != value && !existing.equals(value)) {
 						//TODO (gof) : elect best brand, exclude "non categorisée", ...
 						dedicatedLogger.info("Adding different {} name as BRAND. Existing is {}, would have erased with {}",key,existing, value);						
-						output.getAlternativeBrands().add(value);
-						// TODO : Historisation of the DataSource / conflict
+						// Adding the old one in alternate brand
+						output.getAlternativeBrands().add(new UnindexedKeyValTimestamp(ReferentielKey.BRAND.toString(), value));
+
+						// Adding the new one
+						output.getAttributes().addReferentielAttribute(ReferentielKey.BRAND, value);
+						
 						
 					}
-					
-	
 				} 
 				
 				

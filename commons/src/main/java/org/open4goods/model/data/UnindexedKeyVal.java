@@ -23,9 +23,6 @@ public class UnindexedKeyVal {
 		this.value = val;
 	}
 
-	public String getKey() {
-		return key;
-	}
 	
 	@Override
 	public int hashCode() {
@@ -39,8 +36,12 @@ public class UnindexedKeyVal {
 			return ((UnindexedKeyVal)obj).key.equals(key);
 		}
 		return false;
-		
-		
+	}
+
+	
+	@Override
+	public String toString() {
+		return value;
 	}
 	
 	public void setKey(String key) {
@@ -52,7 +53,10 @@ public class UnindexedKeyVal {
 	public void setValue(String value) {
 		this.value = value;
 	}
-	
+
+	public String getKey() {
+		return key;
+	}
 	
 	
 }

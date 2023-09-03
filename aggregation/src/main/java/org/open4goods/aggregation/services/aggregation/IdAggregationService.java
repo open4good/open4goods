@@ -1,7 +1,10 @@
 package org.open4goods.aggregation.services.aggregation;
 
+import java.util.Set;
+
 import org.open4goods.aggregation.AbstractAggregationService;
 import org.open4goods.model.data.DataFragment;
+import org.open4goods.model.data.UnindexedKeyVal;
 import org.open4goods.model.product.Product;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
