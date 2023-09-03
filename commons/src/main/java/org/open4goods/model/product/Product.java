@@ -20,6 +20,7 @@ import org.open4goods.model.data.Description;
 import org.open4goods.model.data.Resource;
 import org.open4goods.model.data.Score;
 import org.open4goods.model.data.UnindexedKeyVal;
+import org.open4goods.model.data.UnindexedKeyValTimestamp;
 import org.open4goods.services.StandardiserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -56,12 +57,12 @@ public class Product implements Standardisable {
 	
 	/** The list of other id's known for this product **/
 	@Field(index = true, store = false, type = FieldType.Keyword)
-	private Set<String> alternativeIds = new HashSet<>();
+	private Set<UnindexedKeyValTimestamp> alternativeIds = new HashSet<>();
 
 	
 	/** The list of other id's known for this product **/
 	@Field(index = false, store = false, type = FieldType.Keyword)
-	private Set<String> alternativeBrands = new HashSet<>();
+	private Set<UnindexedKeyValTimestamp> alternativeBrands = new HashSet<>();
 
 	
 	
@@ -501,19 +502,20 @@ public class Product implements Standardisable {
 		this.id = id;
 	}
 
-	public Set<String> getAlternativeIds() {
+
+	public Set<UnindexedKeyValTimestamp> getAlternativeIds() {
 		return alternativeIds;
 	}
 
-	public void setAlternativeIds(Set<String> alternativeIds) {
+	public void setAlternativeIds(Set<UnindexedKeyValTimestamp> alternativeIds) {
 		this.alternativeIds = alternativeIds;
 	}
 
-	public Set<String> getAlternativeBrands() {
+	public Set<UnindexedKeyValTimestamp> getAlternativeBrands() {
 		return alternativeBrands;
 	}
 
-	public void setAlternativeBrands(Set<String> alternativeBrands) {
+	public void setAlternativeBrands(Set<UnindexedKeyValTimestamp> alternativeBrands) {
 		this.alternativeBrands = alternativeBrands;
 	}
 

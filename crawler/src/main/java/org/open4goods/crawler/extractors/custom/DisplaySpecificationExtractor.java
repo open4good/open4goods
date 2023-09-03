@@ -7,7 +7,9 @@ import org.open4goods.crawler.extractors.Extractor;
 import org.open4goods.crawler.services.fetching.DataFragmentWebCrawler;
 import org.open4goods.helper.IdHelper;
 import org.open4goods.model.attribute.Attribute;
+import org.open4goods.model.constants.ReferentielKey;
 import org.open4goods.model.data.DataFragment;
+import org.open4goods.model.data.UnindexedKeyValTimestamp;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -72,7 +74,7 @@ public class DisplaySpecificationExtractor extends Extractor {
 			 final Attribute alias = p.getAttribute("MODEL ALIAS");
 			 if (null != alias) {
 				 if (alias.multivalued()) {
-					 alias.stringValues().stream().forEach(e -> p.getAlternateIds().add(e));
+					 alias.stringValues().stream().forEach(e -> p.getAlternateIds().add( new UnindexedKeyValTimestamp(ReferentielKey.MODEL.toString(), e)));
 				 } else {
 					 getDedicatedLogger().warn("Alias presents ({}) but not multivalued at {} ",alias,url);
 				 }

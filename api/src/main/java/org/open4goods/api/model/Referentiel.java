@@ -16,6 +16,7 @@ import org.open4goods.config.yml.ui.VerticalProperties;
 import org.open4goods.helper.GenericFileLogger;
 import org.open4goods.model.constants.ReferentielKey;
 import org.open4goods.model.data.DataFragment;
+import org.open4goods.model.data.UnindexedKeyValTimestamp;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -94,8 +95,8 @@ public class Referentiel {
 					}
 
 					// Adding alternate brandUid
-					for (final String aId : dataFragment.getAlternateIds()) {
-						gtins.get(gtinNum).add(ReferentielService.sanitizeModel(aId, segmentProperties,dedicatedLogger));
+					for (final UnindexedKeyValTimestamp aId : dataFragment.getAlternateIds()) {
+						gtins.get(gtinNum).add(ReferentielService.sanitizeModel(aId.getValue(), segmentProperties,dedicatedLogger));
 					}
 
 				}
