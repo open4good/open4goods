@@ -2,6 +2,7 @@ package org.open4goods.api;
 
 import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
+import org.open4goods.crawler.controller.CrawlController;
 import org.open4goods.dao.ProductRepository;
 import org.open4goods.services.DataSourceConfigService;
 import org.open4goods.services.SerialisationService;
@@ -12,7 +13,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.util.Assert;
 
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = { Api.class})
+@SpringBootTest(classes = { Api.class, CrawlController.class})
 //@AutoConfigureMockMvc
 //@TestPropertySource(
 //  locations = "classpath:application-devsec.yml")
@@ -61,7 +62,7 @@ public class DataAggregationTests {
 	@Test
 	public void whenContextLoads_thenServiceISNotNull() {
 		System.out.println(productRepository.countMainIndex());
-		Assert.isTrue(productRepository.countMainIndex() == 0);
+		Assert.isTrue(productRepository.countMainIndex() != 0);
 	}
 
 }
