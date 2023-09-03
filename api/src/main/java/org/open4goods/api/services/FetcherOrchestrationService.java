@@ -86,11 +86,12 @@ public class FetcherOrchestrationService {
 	 * Force a crawling of csv datasources at night
 	 * TODO : Should queue the crawl (all is fetched at once here)
 	 */
-	@Scheduled(cron = "0 42 1 * * *")
-	public void triggerAllCsvFetcher() {
-		List<FetchRequestResponse> ret = new ArrayList<>();
+	@Scheduled(cron = "0 42 0 * * *")
+	public void triggerAllCsvFetcher() {		
+		logger.warn("Lauching batch night indexation");
 		for (final Entry<String, DataSourceProperties> ds : datasourceConfigService.datasourceConfigs().entrySet()) {
 			if (null != ds.getValue().getCsvDatasource()) {
+				logger.warn("Lauching night indexation of {}", ds.getKey());
 				triggerRemoteCrawling(ds.getKey());
 			}
 		}
