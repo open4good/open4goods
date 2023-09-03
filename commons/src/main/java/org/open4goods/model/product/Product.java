@@ -56,12 +56,12 @@ public class Product implements Standardisable {
 	private long lastChange;
 	
 	/** The list of other id's known for this product **/
-	@Field(index = true, store = false, type = FieldType.Keyword)
+	@Field(index = true, store = false, type = FieldType.Object)
 	private Set<UnindexedKeyValTimestamp> alternativeIds = new HashSet<>();
 
 	
 	/** The list of other id's known for this product **/
-	@Field(index = false, store = false, type = FieldType.Keyword)
+	@Field(index = false, store = false, type = FieldType.Object)
 	private Set<UnindexedKeyValTimestamp> alternativeBrands = new HashSet<>();
 
 	
