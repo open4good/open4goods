@@ -4,9 +4,6 @@ public class AggregatedFeature {
 
 	private String name;
 
-
-
-
 	@Override
 	public int hashCode() {
 		return name.hashCode();

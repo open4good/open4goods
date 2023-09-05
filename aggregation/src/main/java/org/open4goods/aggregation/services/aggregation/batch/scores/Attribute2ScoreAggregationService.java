@@ -6,11 +6,9 @@ import org.open4goods.config.yml.attributes.AttributeConfig;
 import org.open4goods.config.yml.ui.AttributesConfig;
 import org.open4goods.exceptions.ValidationException;
 import org.open4goods.model.attribute.AttributeType;
-import org.open4goods.model.data.DataFragment;
 import org.open4goods.model.data.Score;
 import org.open4goods.model.product.AggregatedAttribute;
 import org.open4goods.model.product.Product;
-import org.open4goods.services.StandardiserService;
 
 public class Attribute2ScoreAggregationService extends AbstractScoreAggregationService {
 
@@ -67,7 +65,7 @@ public class Attribute2ScoreAggregationService extends AbstractScoreAggregationS
 		
 		if (ac.getType().equals(AttributeType.NUMERIC)) {
 			try {
-				return Double.valueOf(a.getValue());
+				return Double.valueOf(a.getValue().toString());
 			} catch (Exception e) {
 				throw new ValidationException("Cannot convert to numeric" +a);
 			}

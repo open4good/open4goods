@@ -6,7 +6,7 @@ import java.util.List;
 
 import org.open4goods.aggregation.AbstractAggregationService;
 import org.open4goods.aggregation.aggregator.RealTimeAggregator;
-import org.open4goods.aggregation.services.aggregation.AttributeAggregationService;
+import org.open4goods.aggregation.services.aggregation.AttributeRealtimeAggregationService;
 import org.open4goods.aggregation.services.aggregation.realtime.BarCodeAggregationService;
 import org.open4goods.aggregation.services.aggregation.realtime.DescriptionsAggregationService;
 import org.open4goods.aggregation.services.aggregation.realtime.IdAggregationService;
@@ -131,7 +131,7 @@ public class RealtimeAggregationService {
 
 		services.add(new BarCodeAggregationService(apiProperties.logsFolder(), gs1prefixService,barcodeValidationService, apiProperties.isDedicatedLoggerToConsole()));
 
-		services.add(new AttributeAggregationService(config.getAttributesConfig(), brandService, apiProperties.logsFolder(), apiProperties.isDedicatedLoggerToConsole()));
+		services.add(new AttributeRealtimeAggregationService(config.getAttributesConfig(), brandService, apiProperties.logsFolder(), apiProperties.isDedicatedLoggerToConsole()));
 
 
 		services.add(new NamesAggregationService(config.getNamings(), evaluationService, apiProperties.logsFolder(), apiProperties.isDedicatedLoggerToConsole()));
