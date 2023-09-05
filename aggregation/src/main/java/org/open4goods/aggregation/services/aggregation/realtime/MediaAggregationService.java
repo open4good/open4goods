@@ -1,8 +1,9 @@
-package org.open4goods.aggregation.services.aggregation;
+package org.open4goods.aggregation.services.aggregation.realtime;
 
 import java.io.IOException;
 
 import org.open4goods.aggregation.AbstractAggregationService;
+import org.open4goods.aggregation.AbstractRealTimeAggregationService;
 import org.open4goods.config.yml.ui.VerticalConfig;
 import org.open4goods.helper.IdHelper;
 import org.open4goods.model.data.DataFragment;
@@ -11,7 +12,7 @@ import org.open4goods.model.product.Product;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class MediaAggregationService extends AbstractAggregationService{
+public class MediaAggregationService extends AbstractRealTimeAggregationService{
 
 	private static final Logger logger = LoggerFactory.getLogger(MediaAggregationService.class);
 

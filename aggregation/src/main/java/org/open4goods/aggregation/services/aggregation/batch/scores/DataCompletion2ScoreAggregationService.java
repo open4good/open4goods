@@ -1,4 +1,4 @@
-package org.open4goods.aggregation.services.aggregation;
+package org.open4goods.aggregation.services.aggregation.batch.scores;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -36,67 +36,54 @@ import org.open4goods.model.product.SourcedAttribute;
 import org.open4goods.services.StandardiserService;
 
 /**
- * Create an ecoscore based on existing scores aggregations (based on config)
+ * Create a score based on data quality (number of non virtual scores for this product)
  * @author goulven
  *
  */
-public class EcoScoreAggregationService extends AbstractScoreAggregationService {
+public class DataCompletion2ScoreAggregationService extends AbstractScoreAggregationService {
 
-	private static final String ECOSCORE_SCORENAME = "ECOSCORE";
-	private final Map<String, String> ecoScoreconfig;
+	private static final String DATA_QUALITY_SCORENAME = "DATA-QUALITY";
+	private final AttributesConfig attributesConfig;
 
-	public EcoScoreAggregationService(final Map<String, String> ecoScoreconfig,  final String logsFolder,boolean toConsole) {
-		super(logsFolder, toConsole);
-		this.ecoScoreconfig = ecoScoreconfig;
+	public DataCompletion2ScoreAggregationService(final AttributesConfig attributesConfig,  final String logsFolder,boolean toConsole) {
+		super(logsFolder,toConsole);
+		this.attributesConfig = attributesConfig;
 	}
 
 
 
 	@Override
 	public void onProduct(Product data) {
-
-		
-		
 		if (StringUtils.isEmpty(data.brand())) {
 			return;
 		}
 		
 		try {
-			Double score = generateEcoScore(data.getScores());
+			Double score = generateScoreFromDataquality(data.getScores());
 
 			// Processing cardinality
-			processCardinality(ECOSCORE_SCORENAME,score);			
-			Score s = new Score(ECOSCORE_SCORENAME, score);
+			processCardinality(DATA_QUALITY_SCORENAME,score);			
+			Score s = new Score(DATA_QUALITY_SCORENAME, score);
 			// Saving in product
 			data.getScores().put(s.getName(),s);
 		} catch (ValidationException e) {
-			dedicatedLogger.warn("Brand to score fail for {}",data,e);
+			dedicatedLogger.warn("DataQuality to score fail for {}",data,e);
 		}								
 		
+		
 	}
 
 
-
-	private Double generateEcoScore(Map<String, Score> scores) throws ValidationException {
+	/**
+	 * The data score is the number of score that are not virtuals
+	 * @param map
+	 * @return
+	 */
+	private Double generateScoreFromDataquality(Map<String, Score> map) {
 		
+		return  Double.valueOf(map.values().stream().filter(e -> !e.getVirtual()).filter(e -> !e.getName().equals(DATA_QUALITY_SCORENAME)) .count());		
 		
-		Double va = 0.0;
-		for (String config :  ecoScoreconfig.keySet()) {
-			Score score = scores.get(config);
-			
-			if (null == score) {
-				throw new ValidationException ("EcoScore rating cannot proceed, missing subscore : " + config);
-			} 			
-			va += score.getValue() * Double.valueOf(ecoScoreconfig.get(config));
-		}
-		
-		
-	
-		
-		return va;
 	}
-
-
 
 
 }

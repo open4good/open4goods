@@ -1,5 +1,5 @@
 
-package org.open4goods.aggregation.services.aggregation;
+package org.open4goods.aggregation.services.aggregation.realtime;
 
 import java.io.IOException;
 import java.util.Collection;
@@ -9,6 +9,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.open4goods.aggregation.AbstractAggregationService;
+import org.open4goods.aggregation.AbstractRealTimeAggregationService;
 import org.open4goods.config.yml.ui.VerticalProperties;
 import org.open4goods.model.constants.ProductState;
 import org.open4goods.model.data.DataFragment;
@@ -25,7 +26,7 @@ import org.open4goods.services.DataSourceConfigService;
  * @author goulven
  *
  */
-public class PriceAggregationService extends AbstractAggregationService {
+public class PriceAggregationService extends AbstractRealTimeAggregationService {
 
 	// TODO(conf, P3, 0.25) : from conf
 	private static final double REVERSEMENT = 0.2;

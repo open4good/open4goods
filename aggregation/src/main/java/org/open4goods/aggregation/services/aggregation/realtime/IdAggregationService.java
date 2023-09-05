@@ -1,15 +1,12 @@
-package org.open4goods.aggregation.services.aggregation;
+package org.open4goods.aggregation.services.aggregation.realtime;
 
-import java.util.Set;
-
-import org.open4goods.aggregation.AbstractAggregationService;
+import org.open4goods.aggregation.AbstractRealTimeAggregationService;
 import org.open4goods.model.data.DataFragment;
-import org.open4goods.model.data.UnindexedKeyVal;
 import org.open4goods.model.product.Product;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class IdAggregationService extends AbstractAggregationService {
+public class IdAggregationService extends AbstractRealTimeAggregationService {
 
 	private static final Logger logger = LoggerFactory.getLogger(IdAggregationService.class);
 

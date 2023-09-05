@@ -13,7 +13,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
-import org.open4goods.aggregation.AbstractAggregationService;
 import org.open4goods.aggregation.AbstractRealTimeAggregationService;
 import org.open4goods.config.yml.attributes.AttributeConfig;
 import org.open4goods.config.yml.attributes.AttributeParser;
@@ -33,51 +32,16 @@ import org.open4goods.model.product.Product;
 import org.open4goods.model.product.SourcedAttribute;
 import org.open4goods.services.BrandService;
 
-public class AttributeAggregationService extends AbstractRealTimeAggregationService {
+public class AttributeRealtimeAggregationService extends AbstractRealTimeAggregationService {
 
 	private final AttributesConfig attributesConfig;
 	
 	private final BrandService brandService;
 
-	public AttributeAggregationService(final AttributesConfig attributesConfig,  BrandService brandService, final String logsFolder,boolean toConsole) {
+	public AttributeRealtimeAggregationService(final AttributesConfig attributesConfig,  BrandService brandService, final String logsFolder,boolean toConsole) {
 		super(logsFolder,toConsole);
 		this.attributesConfig = attributesConfig;
 		this.brandService = brandService;
-	}
-
-	@Override
-	/**
-	 * Process attribute aggregation in batch mode
-	 */
-	public void onProduct(Product data) {
-		
-		
-		/////////////////////////////////////////
-		// mapping matched / unmatched attributes
-		/////////////////////////////////////////
-
-
-		// 2 - Classifying "matched/unmatched" attributes
-		List<SourcedAttribute> matchedAttrs = new ArrayList<>();
-		List<SourcedAttribute> allAttrs = new ArrayList<>();
-		
-		Set<IAttribute> sourceAttrs = new HashSet<>();
-		sourceAttrs.addAll(data.getAttributes().getUnmapedAttributes());
-		sourceAttrs.addAll(data.getAttributes().getAggregatedAttributes().values());
-		
-		
-		for (IAttribute attr :  sourceAttrs ) {
-			IAttribute translated = attributesConfig.translateAttribute(attr, "NUDGER");
-			if (null != translated) {
-				matchedAttrs.add(new SourcedAttribute(translated, "NUDGER"));
-			}
-
-			allAttrs.add(new SourcedAttribute(attr, "NUDGER"));
-		}
-
-		
-		// Generic 	attributes processing		
-		processAttributes(data.getAttributes().getReferentielAttributesAsStringKeys() , matchedAttrs, allAttrs,  "nudger", data);		
 	}
 
 

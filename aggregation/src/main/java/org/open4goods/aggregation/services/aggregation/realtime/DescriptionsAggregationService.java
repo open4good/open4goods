@@ -1,15 +1,16 @@
-package org.open4goods.aggregation.services.aggregation;
+package org.open4goods.aggregation.services.aggregation.realtime;
 
 import org.apache.commons.lang3.StringUtils;
 import org.jsoup.Jsoup;
 import org.open4goods.aggregation.AbstractAggregationService;
+import org.open4goods.aggregation.AbstractRealTimeAggregationService;
 import org.open4goods.config.yml.ui.DescriptionsAggregationConfig;
 import org.open4goods.model.data.DataFragment;
 import org.open4goods.model.data.Description;
 import org.open4goods.model.product.Product;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-public class DescriptionsAggregationService extends AbstractAggregationService{
+public class DescriptionsAggregationService extends AbstractRealTimeAggregationService{
 
 	private static final Logger logger = LoggerFactory.getLogger(DescriptionsAggregationService.class);
 

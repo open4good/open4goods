@@ -1,4 +1,4 @@
-package org.open4goods.aggregation.services.aggregation;
+package org.open4goods.aggregation.services.aggregation.batch.scores;
 
 import java.util.Collection;
 
@@ -48,31 +48,6 @@ public class Attribute2ScoreAggregationService extends AbstractScoreAggregationS
 		}
 	}
 
-
-	
-	
-	/**
-	 * Associate and match a set of nativ attributes in a product
-	 *
-	 * @param d
-	 * @param p
-	 * @param match2
-	 */
-	@Override
-	public void onDataFragment(final DataFragment d, final Product output) {
-
-		// 3 - Applying attribute transformations on matched ones
-		//TODO : No scoring in real time, but could be thinked to have score on non verticalised products. But be aware of not erasing the batched scores
-
-//		Collection<AggregatedAttribute> aggattrs = (output.getAttributes().getAggregatedAttributes()).values();
-//		for (AggregatedAttribute aga : aggattrs) {
-//			aga.setScore(generateScoresFromAttribute(aga.getName() ,aga));
-//			dedicatedLogger.info("attribute {} : scored {} ",aga.getName(), aga.getScore());
-//
-//		}
-
-
-	}
 
 
 	/**

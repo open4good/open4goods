@@ -1,9 +1,10 @@
 
-package org.open4goods.aggregation.services.aggregation;
+package org.open4goods.aggregation.services.aggregation.realtime;
 
 import java.util.AbstractMap.SimpleEntry;
 
 import org.open4goods.aggregation.AbstractAggregationService;
+import org.open4goods.aggregation.AbstractRealTimeAggregationService;
 import org.open4goods.exceptions.AggregationSkipException;
 import org.open4goods.model.BarcodeType;
 import org.open4goods.model.constants.ReferentielKey;
@@ -21,7 +22,7 @@ import org.slf4j.LoggerFactory;
  * @author Goulven.Furet
  *
  */
-public class BarCodeAggregationService extends AbstractAggregationService {
+public class BarCodeAggregationService extends AbstractRealTimeAggregationService {
 
 	private static final Logger logger = LoggerFactory.getLogger(BarCodeAggregationService.class);
 

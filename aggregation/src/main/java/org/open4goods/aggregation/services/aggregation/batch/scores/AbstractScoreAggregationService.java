@@ -1,10 +1,11 @@
-package org.open4goods.aggregation.services.aggregation;
+package org.open4goods.aggregation.services.aggregation.batch.scores;
 
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
 import org.open4goods.aggregation.AbstractAggregationService;
+import org.open4goods.aggregation.AbstractBatchAggregationService;
 import org.open4goods.exceptions.ValidationException;
 import org.open4goods.model.attribute.Cardinality;
 import org.open4goods.model.data.Score;
@@ -13,7 +14,7 @@ import org.open4goods.services.StandardiserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class AbstractScoreAggregationService extends  AbstractAggregationService{
+public class AbstractScoreAggregationService extends  AbstractBatchAggregationService{
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(AbstractScoreAggregationService.class);
 

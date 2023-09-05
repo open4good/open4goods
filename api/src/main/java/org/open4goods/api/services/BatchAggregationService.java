@@ -6,12 +6,13 @@ import java.util.List;
 
 import org.open4goods.aggregation.AbstractAggregationService;
 import org.open4goods.aggregation.aggregator.BatchedAggregator;
-import org.open4goods.aggregation.services.aggregation.Attribute2ScoreAggregationService;
 import org.open4goods.aggregation.services.aggregation.AttributeAggregationService;
-import org.open4goods.aggregation.services.aggregation.Brand2ScoreAggregationService;
-import org.open4goods.aggregation.services.aggregation.CleanScoreAggregationService;
-import org.open4goods.aggregation.services.aggregation.DataCompletion2ScoreAggregationService;
-import org.open4goods.aggregation.services.aggregation.EcoScoreAggregationService;
+import org.open4goods.aggregation.services.aggregation.batch.VerticalBatchedAggregationService;
+import org.open4goods.aggregation.services.aggregation.batch.scores.Attribute2ScoreAggregationService;
+import org.open4goods.aggregation.services.aggregation.batch.scores.Brand2ScoreAggregationService;
+import org.open4goods.aggregation.services.aggregation.batch.scores.CleanScoreAggregationService;
+import org.open4goods.aggregation.services.aggregation.batch.scores.DataCompletion2ScoreAggregationService;
+import org.open4goods.aggregation.services.aggregation.batch.scores.EcoScoreAggregationService;
 import org.open4goods.api.config.yml.ApiProperties;
 import org.open4goods.config.yml.ui.VerticalConfig;
 import org.open4goods.dao.ProductRepository;
@@ -119,7 +120,8 @@ public class BatchAggregationService  {
 
 		final List<AbstractAggregationService> services = new ArrayList<>();
 
-
+		services.add(new VerticalBatchedAggregationService( apiProperties.logsFolder(), verticalConfigService, apiProperties.isDedicatedLoggerToConsole() ));
+		
 		services.add(new AttributeAggregationService(config.getAttributesConfig(), brandService, apiProperties.logsFolder(), apiProperties.isDedicatedLoggerToConsole() ));
 		services.add(new CleanScoreAggregationService(config.getAttributesConfig(), apiProperties.logsFolder(), apiProperties.isDedicatedLoggerToConsole()));
 

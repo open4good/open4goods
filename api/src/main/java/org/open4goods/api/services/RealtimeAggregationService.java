@@ -7,13 +7,13 @@ import java.util.List;
 import org.open4goods.aggregation.AbstractAggregationService;
 import org.open4goods.aggregation.aggregator.RealTimeAggregator;
 import org.open4goods.aggregation.services.aggregation.AttributeAggregationService;
-import org.open4goods.aggregation.services.aggregation.BarCodeAggregationService;
-import org.open4goods.aggregation.services.aggregation.DescriptionsAggregationService;
-import org.open4goods.aggregation.services.aggregation.IdAggregationService;
-import org.open4goods.aggregation.services.aggregation.MediaAggregationService;
-import org.open4goods.aggregation.services.aggregation.NamesAggregationService;
-import org.open4goods.aggregation.services.aggregation.PriceAggregationService;
-import org.open4goods.aggregation.services.aggregation.VerticalAggregationService;
+import org.open4goods.aggregation.services.aggregation.realtime.BarCodeAggregationService;
+import org.open4goods.aggregation.services.aggregation.realtime.DescriptionsAggregationService;
+import org.open4goods.aggregation.services.aggregation.realtime.IdAggregationService;
+import org.open4goods.aggregation.services.aggregation.realtime.MediaAggregationService;
+import org.open4goods.aggregation.services.aggregation.realtime.NamesAggregationService;
+import org.open4goods.aggregation.services.aggregation.realtime.PriceAggregationService;
+import org.open4goods.aggregation.services.aggregation.realtime.VerticalRealTimeAggregationService;
 import org.open4goods.api.config.yml.ApiProperties;
 import org.open4goods.config.yml.ui.VerticalConfig;
 import org.open4goods.config.yml.ui.VerticalProperties;
@@ -139,7 +139,7 @@ public class RealtimeAggregationService {
 		//		services.add(new CategoryService(apiProperties.logsFolder(), taxonomyService));
 
 
-		services.add(new VerticalAggregationService( apiProperties.logsFolder(), verticalConfigService, apiProperties.isDedicatedLoggerToConsole()));
+		services.add(new VerticalRealTimeAggregationService( apiProperties.logsFolder(), verticalConfigService, apiProperties.isDedicatedLoggerToConsole()));
 
 		services.add(new IdAggregationService( apiProperties.logsFolder(), apiProperties.isDedicatedLoggerToConsole()));
 

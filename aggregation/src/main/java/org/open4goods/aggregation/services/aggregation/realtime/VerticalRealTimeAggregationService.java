@@ -1,9 +1,10 @@
-package org.open4goods.aggregation.services.aggregation;
+package org.open4goods.aggregation.services.aggregation.realtime;
 
 import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
 import org.open4goods.aggregation.AbstractAggregationService;
+import org.open4goods.aggregation.AbstractRealTimeAggregationService;
 import org.open4goods.config.yml.ui.VerticalConfig;
 import org.open4goods.model.data.DataFragment;
 import org.open4goods.model.data.UnindexedKeyVal;
@@ -15,11 +16,11 @@ import org.open4goods.services.VerticalsConfigService;
  * @author goulven
  *
  */
-public class VerticalAggregationService extends AbstractAggregationService {
+public class VerticalRealTimeAggregationService extends AbstractRealTimeAggregationService {
 
 	private VerticalsConfigService verticalService;
 
-	public VerticalAggregationService( final String logsFolder, final VerticalsConfigService verticalService,boolean toConsole) {
+	public VerticalRealTimeAggregationService( final String logsFolder, final VerticalsConfigService verticalService,boolean toConsole) {
 		super(logsFolder, toConsole);
 		this.verticalService = verticalService;
 
