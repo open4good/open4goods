@@ -1,4 +1,4 @@
-package org.open4goods.aggregation.services.aggregation;
+package org.open4goods.aggregation.services.aggregation.batch.scores;
 
 import java.util.Collection;
 

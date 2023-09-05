@@ -19,31 +19,21 @@ import ch.qos.logback.classic.Level;
  * @author Goulven.Furet
  *
  */
-public abstract class AbstractAggregationService  implements Closeable {
+public abstract class AbstractRealTimeAggregationService  extends AbstractAggregationService{
 
 	protected Logger dedicatedLogger;
 
-	public AbstractAggregationService (final String logsFolder, final boolean toConsole) {
-	}
-
-
-
-
-	/**
-	 * Called after aggregation process, used to ending buffers / components (flush datas, close buffers, so on...)
-	 */
-	@Override
-	public void close() throws IOException {
+	public AbstractRealTimeAggregationService (final String logsFolder, final boolean toConsole) {
+		super(logsFolder, toConsole);
+		dedicatedLogger = GenericFileLogger.initLogger("aggregation-realtime-"+getClass().getSimpleName().toLowerCase(), Level.WARN, logsFolder, toConsole);
 
 	}
 
 	/**
-	 * Called before data aggregation
-	 * @param datas 
+	 * Called on each participant DataFragment, in realtime mode
+	 * @param data
 	 */
-	public void init() {
-
-	}
+	public void onDataFragment (final DataFragment input, final Product output) throws AggregationSkipException {}
 
 
 

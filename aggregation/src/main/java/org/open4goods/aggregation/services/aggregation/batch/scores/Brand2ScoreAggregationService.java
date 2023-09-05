@@ -1,4 +1,4 @@
-package org.open4goods.aggregation.services.aggregation;
+package org.open4goods.aggregation.services.aggregation.batch.scores;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -36,17 +36,17 @@ import org.open4goods.model.product.SourcedAttribute;
 import org.open4goods.services.StandardiserService;
 
 /**
- * Create a score based on data quality (number of non virtual scores for this product)
+ * Create a score based on brand sustainality evaluations 
  * @author goulven
  *
  */
-public class DataCompletion2ScoreAggregationService extends AbstractScoreAggregationService {
+public class Brand2ScoreAggregationService extends AbstractScoreAggregationService {
 
-	private static final String DATA_QUALITY_SCORENAME = "DATA-QUALITY";
+	private static final String BRAND_SUSTAINABILITY_SCORENAME = "BRAND_SUSTAINABILITY";
 	private final AttributesConfig attributesConfig;
 
-	public DataCompletion2ScoreAggregationService(final AttributesConfig attributesConfig,  final String logsFolder,boolean toConsole) {
-		super(logsFolder,toConsole);
+	public Brand2ScoreAggregationService(final AttributesConfig attributesConfig,  final String logsFolder,boolean toConsole) {
+		super(logsFolder, toConsole);
 		this.attributesConfig = attributesConfig;
 	}
 
@@ -54,36 +54,43 @@ public class DataCompletion2ScoreAggregationService extends AbstractScoreAggrega
 
 	@Override
 	public void onProduct(Product data) {
+
+		
 		if (StringUtils.isEmpty(data.brand())) {
 			return;
 		}
 		
 		try {
-			Double score = generateScoreFromDataquality(data.getScores());
+			Double score = generateScoreFromBrand(data.brand());
 
 			// Processing cardinality
-			processCardinality(DATA_QUALITY_SCORENAME,score);			
-			Score s = new Score(DATA_QUALITY_SCORENAME, score);
+			processCardinality(BRAND_SUSTAINABILITY_SCORENAME,score);			
+			Score s = new Score(BRAND_SUSTAINABILITY_SCORENAME, score);
 			// Saving in product
 			data.getScores().put(s.getName(),s);
 		} catch (ValidationException e) {
-			dedicatedLogger.warn("DataQuality to score fail for {}",data,e);
+			dedicatedLogger.warn("Brand to score fail for {}",data,e);
 		}								
 		
 		
 	}
 
 
-	/**
-	 * The data score is the number of score that are not virtuals
-	 * @param map
-	 * @return
-	 */
-	private Double generateScoreFromDataquality(Map<String, Score> map) {
+	// TODO : complete with real datas
+	private Double generateScoreFromBrand(String brand) {
 		
-		return  Double.valueOf(map.values().stream().filter(e -> !e.getVirtual()).filter(e -> !e.getName().equals(DATA_QUALITY_SCORENAME)) .count());		
+		Double s;
 		
+		switch (brand) {
+		case "SAMSUNG" -> s = 5.0;
+		case "LG" -> s = 4.0;
+		default -> s = Math.random() * 10;
+		}
+		
+		return s;
 	}
+
+
 
 
 }

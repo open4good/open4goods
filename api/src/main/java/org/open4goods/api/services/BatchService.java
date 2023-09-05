@@ -136,44 +136,5 @@ public class BatchService {
 
 
 
-	/**
-	 * The batch used to associate verticals on AggregatedDatas based on categories
-	 */
-	public void definesVertical() {
-
-
-		dedicatedLogger.info("Starting batch verticalisation");
-		dataRepository.exportAll().forEach(e -> {
-
-			// Getting the config for the category, if any
-
-			VerticalConfig vConf = verticalsService.getVerticalForCategories(e.getDatasourceCategories());
-
-			if (null != vConf) {
-				// We have a match. Associate vertical ID annd save
-				e.setVertical(vConf.getId());
-
-				// Index
-				//TODO : Bulk index for performance
-				dedicatedLogger.warn("Vertical {} for vertical {}", vConf.getId() , e.bestName());
-				dataRepository.index(e);
-
-
-			} else if (null != e.getVertical() ){
-				dedicatedLogger.warn("Nulling Vertical for {} ", e.bestName());
-				e.setVertical(null);
-				//TODO (gof) : bulkindex
-				dataRepository.index(e);
-			}
-
-		});
-		dedicatedLogger.info("End batch verticalisation");
-
-	}
-
-
-
-
-
 
 }

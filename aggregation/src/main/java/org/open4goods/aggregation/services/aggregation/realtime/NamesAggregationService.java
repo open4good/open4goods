@@ -1,4 +1,4 @@
-package org.open4goods.aggregation.services.aggregation;
+package org.open4goods.aggregation.services.aggregation.realtime;
 
 import java.net.URLEncoder;
 import java.util.LinkedHashSet;
@@ -6,6 +6,7 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.open4goods.aggregation.AbstractAggregationService;
+import org.open4goods.aggregation.AbstractRealTimeAggregationService;
 import org.open4goods.config.yml.ui.SiteNaming;
 import org.open4goods.helper.IdHelper;
 import org.open4goods.model.data.DataFragment;
@@ -15,7 +16,7 @@ import org.open4goods.services.EvaluationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class NamesAggregationService extends AbstractAggregationService {
+public class NamesAggregationService extends AbstractRealTimeAggregationService {
 
 	private static final Logger logger = LoggerFactory.getLogger(NamesAggregationService.class);
 

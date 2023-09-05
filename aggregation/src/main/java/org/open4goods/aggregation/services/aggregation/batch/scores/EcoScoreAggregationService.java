@@ -1,4 +1,4 @@
-package org.open4goods.aggregation.services.aggregation;
+package org.open4goods.aggregation.services.aggregation.batch.scores;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -36,18 +36,18 @@ import org.open4goods.model.product.SourcedAttribute;
 import org.open4goods.services.StandardiserService;
 
 /**
- * Create a score based on brand sustainality evaluations 
+ * Create an ecoscore based on existing scores aggregations (based on config)
  * @author goulven
  *
  */
-public class Brand2ScoreAggregationService extends AbstractScoreAggregationService {
+public class EcoScoreAggregationService extends AbstractScoreAggregationService {
 
-	private static final String BRAND_SUSTAINABILITY_SCORENAME = "BRAND_SUSTAINABILITY";
-	private final AttributesConfig attributesConfig;
+	private static final String ECOSCORE_SCORENAME = "ECOSCORE";
+	private final Map<String, String> ecoScoreconfig;
 
-	public Brand2ScoreAggregationService(final AttributesConfig attributesConfig,  final String logsFolder,boolean toConsole) {
+	public EcoScoreAggregationService(final Map<String, String> ecoScoreconfig,  final String logsFolder,boolean toConsole) {
 		super(logsFolder, toConsole);
-		this.attributesConfig = attributesConfig;
+		this.ecoScoreconfig = ecoScoreconfig;
 	}
 
 
@@ -56,38 +56,44 @@ public class Brand2ScoreAggregationService extends AbstractScoreAggregationServi
 	public void onProduct(Product data) {
 
 		
+		
 		if (StringUtils.isEmpty(data.brand())) {
 			return;
 		}
 		
 		try {
-			Double score = generateScoreFromBrand(data.brand());
+			Double score = generateEcoScore(data.getScores());
 
 			// Processing cardinality
-			processCardinality(BRAND_SUSTAINABILITY_SCORENAME,score);			
-			Score s = new Score(BRAND_SUSTAINABILITY_SCORENAME, score);
+			processCardinality(ECOSCORE_SCORENAME,score);			
+			Score s = new Score(ECOSCORE_SCORENAME, score);
 			// Saving in product
 			data.getScores().put(s.getName(),s);
 		} catch (ValidationException e) {
 			dedicatedLogger.warn("Brand to score fail for {}",data,e);
 		}								
 		
-		
 	}
 
 
-	// TODO : complete with real datas
-	private Double generateScoreFromBrand(String brand) {
+
+	private Double generateEcoScore(Map<String, Score> scores) throws ValidationException {
 		
-		Double s;
 		
-		switch (brand) {
-		case "SAMSUNG" -> s = 5.0;
-		case "LG" -> s = 4.0;
-		default -> s = Math.random() * 10;
+		Double va = 0.0;
+		for (String config :  ecoScoreconfig.keySet()) {
+			Score score = scores.get(config);
+			
+			if (null == score) {
+				throw new ValidationException ("EcoScore rating cannot proceed, missing subscore : " + config);
+			} 			
+			va += score.getValue() * Double.valueOf(ecoScoreconfig.get(config));
 		}
 		
-		return s;
+		
+	
+		
+		return va;
 	}
 
 
