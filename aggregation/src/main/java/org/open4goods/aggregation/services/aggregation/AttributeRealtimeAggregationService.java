@@ -58,22 +58,7 @@ public class AttributeRealtimeAggregationService extends AbstractRealTimeAggrega
 		
 		/////////////////////////////////////////
 		// mapping matched / unmatched attributes
-		/////////////////////////////////////////
-
-
-		// 2 - Classifying "matched/unmatched" attributes
-		List<SourcedAttribute> matchedAttrs = new ArrayList<>();
-		List<SourcedAttribute> allAttrs = new ArrayList<>();
-
-
-		
-		Set<IAttribute> sourceAttrs = new HashSet<>();
-
-		sourceAttrs.addAll(dataFragment.getAttributes());
-		sourceAttrs.addAll(product.getAttributes().getUnmapedAttributes());
-		sourceAttrs.addAll(product.getAttributes().getAggregatedAttributes().values());
-
-		
+		/////////////////////////////////////////		
 		
 		for (Attribute attr :  dataFragment.getAttributes()) {
 			IAttribute translated = attributesConfig.translateAttribute(attr, "COMPUTED");

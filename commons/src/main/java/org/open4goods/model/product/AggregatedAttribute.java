@@ -1,12 +1,14 @@
 package org.open4goods.model.product;
 
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.open4goods.model.attribute.AttributeType;
-import org.open4goods.model.data.Rating;
-import org.open4goods.model.data.Score;
+import org.open4goods.model.data.UnindexedKeyValTimestamp;
 import org.springframework.data.elasticsearch.annotations.Field;
 import org.springframework.data.elasticsearch.annotations.FieldType;
 
@@ -17,24 +19,24 @@ public class AggregatedAttribute implements IAttribute {
 	 */
 	@Field(index = true, store = false, type = FieldType.Keyword)
 	private String name;
-
+	
 	/**
 	 * The value of this aggregated attribute
 	 */
-	@Field(index = true, store = false, type = FieldType.Keyword)
-	private String value;
+	@Field(index = true, store = false, type = FieldType.Auto)
+	private Object value;
 
 
-	/** Type of the attribute **/
-	@Field(index = false, store = false, type = FieldType.Keyword)
-	private AttributeType type;
+//	/** Type of the attribute **/
+//	@Field(index = false, store = false, type = FieldType.Keyword)
+//	private AttributeType type;
 
 
 	/**
 	 * The collections of conflicts for this attribute
 	 */
 	@Field(index = false, store = false, type = FieldType.Object)
-	private Set<ConflictedAttribute> sources = new HashSet<>();
+	private Set<UnindexedKeyValTimestamp> sources = new HashSet<>();
 
 
 
@@ -54,40 +56,74 @@ public class AggregatedAttribute implements IAttribute {
 	}
 
 
+	
 
-
-	/**
-	 *
-	 * @return all attributes
-	 */
-	public Set<SourcedAttribute> sources() {
-		return sources.stream().map(ConflictedAttribute::getSources).flatMap(Set::stream) .collect(Collectors.toSet());
-	}
 	/**
 	 * Add an attribute
 	 * @param parsed
+	 * Should handle language ?
 	 */
-	public void addAttribute(SourcedAttribute parsed) {
+	public void addAttribute(String name, UnindexedKeyValTimestamp sourcedValue) {
 
-		ConflictedAttribute existing = sources.stream().filter(e -> e.getValue().equals(parsed.getRawValue().toString())).findAny().orElse(null);
-
-		if (null == existing) {
-			// No previous value with this attribute
-			existing = new ConflictedAttribute();
-			existing.setValue(parsed.getRawValue().toString());
-			sources.add(existing);
+		// Guard
+		if (this.name != null && !name.equals(this.name)) {
+			System.out.println("ERROR : Name mismatch in add attribute");
 		}
-
-		// Updating the source
-		existing.getSources().add(parsed);
+		
+		this.name = name;		
+		sources.add(sourcedValue);		
+		value = bestValue();
+		
 	}
 
 
+/**
+ * 
+ * @return the best value
+ */
+	public String bestValue() {
 
+		// Count values by unique keys... NOTE : Should have a java8+ nice solution here !
+		Map<String, Integer> valueCounter = new HashMap<>();
+		
+		for (UnindexedKeyValTimestamp source : sources) {
+			Integer existing = valueCounter.get(source.getValue());
+			
+			if (null == existing) {
+				valueCounter.put(source.getValue(),1);
+			} else {
+				valueCounter.put(source.getValue(),valueCounter.get(source.getValue())+ 1);
+			}
+		}
+				
+	
+		// sort this map by values
+
+	    
+	    Map<String,Integer> result = valueCounter.entrySet().stream()
+	    		.sorted(Map.Entry.comparingByValue(Comparator.reverseOrder())) 		
+	    	
+	    		.collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue,
+	    		(oldValue, newValue) -> oldValue, LinkedHashMap::new));
+	    
+	    
+	    // Take the first one : will be the "most recommanded" if discriminant number of datasources, a random value otherwise
+	    
+		return result.entrySet().stream().findFirst().get().getKey();
+	}
+
+	/**
+	 * Return the number of distinct values
+	 * @return
+	 */
+	public long getPonderedvalues() {
+		return sources.stream().map(e->e.getValue()).distinct().count();
+	}
+	
 	@Override
 	public String toString() {
 
-		return name + " : " +value+ " -> "+  sources().size() + " source(s), " + (sources.size()-1) +" conflict(s)";
+		return name + " : " +value+ " -> "+  sources.size() + " source(s), " + getPonderedvalues() + " conflict(s)";
 
 
 	}
@@ -110,7 +146,7 @@ public class AggregatedAttribute implements IAttribute {
 
 
 	@Override
-	public String getValue() {
+	public Object getValue() {
 		return value;
 	}
 
@@ -119,22 +155,25 @@ public class AggregatedAttribute implements IAttribute {
 	}
 
 
-	public Set<ConflictedAttribute> getSources() {
+//	public AttributeType getType() {
+//		return type;
+//	}
+//
+//
+//	public void setType(AttributeType type) {
+//		this.type = type;
+//	}
+
+	public Set<UnindexedKeyValTimestamp> getSources() {
 		return sources;
 	}
 
-	public void setSources(Set<ConflictedAttribute> sources) {
+	public void setSources(Set<UnindexedKeyValTimestamp> sources) {
 		this.sources = sources;
 	}
 
-
-	public AttributeType getType() {
-		return type;
-	}
-
-
-	public void setType(AttributeType type) {
-		this.type = type;
+	public void setValue(Object value) {
+		this.value = value;
 	}
 
 	@Override

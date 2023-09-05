@@ -43,6 +43,7 @@ public class Attribute implements Validable,IAttribute {
 	@Field(index = true, store = false, type = FieldType.Text)
 	private String name;
 
+	
 	/**
 	 * The attribute language, if pertinent
 	 */
