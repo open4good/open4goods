@@ -6,7 +6,6 @@ import java.util.List;
 
 import org.open4goods.aggregation.AbstractAggregationService;
 import org.open4goods.aggregation.aggregator.BatchedAggregator;
-import org.open4goods.aggregation.services.aggregation.AttributeAggregationService;
 import org.open4goods.aggregation.services.aggregation.batch.VerticalBatchedAggregationService;
 import org.open4goods.aggregation.services.aggregation.batch.scores.Attribute2ScoreAggregationService;
 import org.open4goods.aggregation.services.aggregation.batch.scores.Brand2ScoreAggregationService;
@@ -122,7 +121,9 @@ public class BatchAggregationService  {
 
 		services.add(new VerticalBatchedAggregationService( apiProperties.logsFolder(), verticalConfigService, apiProperties.isDedicatedLoggerToConsole() ));
 		
-		services.add(new AttributeAggregationService(config.getAttributesConfig(), brandService, apiProperties.logsFolder(), apiProperties.isDedicatedLoggerToConsole() ));
+		
+		// TODO : put back a batchservice for attributes
+//		services.add(new AttributeAggregationService(config.getAttributesConfig(), brandService, apiProperties.logsFolder(), apiProperties.isDedicatedLoggerToConsole() ));
 		services.add(new CleanScoreAggregationService(config.getAttributesConfig(), apiProperties.logsFolder(), apiProperties.isDedicatedLoggerToConsole()));
 
 		services.add(new Attribute2ScoreAggregationService(config.getAttributesConfig(), apiProperties.logsFolder(), apiProperties.isDedicatedLoggerToConsole()));
