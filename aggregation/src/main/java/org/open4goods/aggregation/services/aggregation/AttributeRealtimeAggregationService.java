@@ -115,7 +115,8 @@ public class AttributeRealtimeAggregationService extends AbstractRealTimeAggrega
 				agg = new AggregatedAttribute();
 				agg.setName(attr.getName());
 			} 
-		
+			agg.addAttribute(attr.getName(), new UnindexedKeyValTimestamp(dataFragment.getDatasourceName(), attr.getValue().toString()));
+			
 			product.getAttributes().getUnmapedAttributes().add(agg);			
 		}
 	
