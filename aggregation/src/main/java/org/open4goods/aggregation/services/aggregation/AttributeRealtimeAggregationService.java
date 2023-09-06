@@ -61,7 +61,7 @@ public class AttributeRealtimeAggregationService extends AbstractRealTimeAggrega
 			// We have a "raw" attribute that matches a aggragationconfig
 			if (null != translated) {
 				AggregatedAttribute agg = product.getAttributes().getAggregatedAttributes().get(attr.getName());
-				matchList.add(agg.getName());
+				matchList.add(translated.getName());
 				
 				if (null == agg) {
 					// A first time match
@@ -108,7 +108,7 @@ public class AttributeRealtimeAggregationService extends AbstractRealTimeAggrega
 			
 			// TODO : remove from a config list
 			
-			AggregatedAttribute agg = product.getAttributes().getUnmapedAttributes().stream().filter(e->e.getName().equals(attr.getName())).findAny().get();
+			AggregatedAttribute agg = product.getAttributes().getUnmapedAttributes().stream().filter(e->e.getName().equals(attr.getName())).findAny().orElse(null);
 			
 			if (null == agg) {
 				// A first time match
@@ -319,10 +319,10 @@ public class AttributeRealtimeAggregationService extends AbstractRealTimeAggrega
 	 * @param aa
 	 * @param output
 	 */
-	private void handleReferentielAttributes(Map<String, String> refAttrs, Product output) {
+	private void handleReferentielAttributes(DataFragment fragement, Product output) {
 
 		
-		for (Entry<String, String> attr : refAttrs.entrySet()) {
+		for (Entry<String, String> attr : fragement.getReferentielAttributes().entrySet()) {
 
 			ReferentielKey key = ReferentielKey.valueOf( attr.getKey());
 
@@ -334,7 +334,7 @@ public class AttributeRealtimeAggregationService extends AbstractRealTimeAggrega
 				//TODO(0.5,p2,feature) : handle conflicts and "best value" election on referentiel attributes
 				if (key.equals(ReferentielKey.MODEL)) {
 					dedicatedLogger.info("Adding different {} name as alternate id. Existing is {}, would have erased with {}",key,existing, value);
-					output.getAlternativeIds().add(new UnindexedKeyValTimestamp(ReferentielKey.BRAND.toString(), value));					
+					output.getAlternativeIds().add(new UnindexedKeyValTimestamp(fragement.getDatasourceName(), value));					
 				} else if (key.equals(ReferentielKey.BRAND)) {
 					
 					value = brandService.normalizeBrand(value);
@@ -342,7 +342,7 @@ public class AttributeRealtimeAggregationService extends AbstractRealTimeAggrega
 						//TODO (gof) : elect best brand, exclude "non categorisée", ...
 						dedicatedLogger.info("Adding different {} name as BRAND. Existing is {}, would have erased with {}",key,existing, value);						
 						// Adding the old one in alternate brand
-						output.getAlternativeBrands().add(new UnindexedKeyValTimestamp(ReferentielKey.BRAND.toString(), value));
+						output.getAlternativeBrands().add(new UnindexedKeyValTimestamp(fragement.getDatasourceName(), value));
 						// Adding the new one
 						output.getAttributes().addReferentielAttribute(ReferentielKey.BRAND, value);
 					}

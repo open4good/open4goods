@@ -41,10 +41,10 @@ public class RealTimeAggregator extends AbstractAggregator {
 		for (final AbstractAggregationService s : services) {
 
 			AbstractRealTimeAggregationService service = null;
-			if (service instanceof AbstractRealTimeAggregationService) {
+			if (s instanceof AbstractRealTimeAggregationService) {
 				service = (AbstractRealTimeAggregationService)s;
 			} else {
-				logger.warn("Aggrgegator {} is used in realtime mode, but is a AbstractRealTimeAggregationService", s.getClass().getCanonicalName());
+				logger.warn("Aggrgegator {} is used in realtime mode, but is a AbstractRealTimeAggregationService", s.getClass().getName());
 				continue;
 			}
 			
