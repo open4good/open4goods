@@ -77,7 +77,7 @@ public class AttributeRealtimeAggregationService extends AbstractRealTimeAggrega
 		/////////////////////////////////////////
 		// Update referentiel attributes
 		/////////////////////////////////////////
-		handleReferentielAttributes(dataFragment.getReferentielAttributes() , product);
+		handleReferentielAttributes(dataFragment , product);
 		// TODO : Add BRAND / MODEL from matches from attributes
 
 		/////////////////////////////////////////
