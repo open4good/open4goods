@@ -134,11 +134,6 @@ public class DataFragmentCompletionService {
 
 				if (null != key) {
 
-					if (a.multivalued()) {
-						dedicatedLogger.warn("Referentiel attributes translation can only apply to mono valued. Problem with {}",
-								a);
-						continue;
-					}
 					// A match : must be delocated from classical attributes to
 					// referentiel ones
 					//
