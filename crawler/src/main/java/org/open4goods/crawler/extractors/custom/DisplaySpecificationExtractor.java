@@ -73,11 +73,7 @@ public class DisplaySpecificationExtractor extends Extractor {
 
 			 final Attribute alias = p.getAttribute("MODEL ALIAS");
 			 if (null != alias) {
-				 if (alias.multivalued()) {
-					 alias.stringValues().stream().forEach(e -> p.getAlternateIds().add( new UnindexedKeyValTimestamp(ReferentielKey.MODEL.toString(), e)));
-				 } else {
-					 getDedicatedLogger().warn("Alias presents ({}) but not multivalued at {} ",alias,url);
-				 }
+				 getDedicatedLogger().warn("Alias presents ({}) but not multivalued at {} ",alias,url);
 			 }
 
 

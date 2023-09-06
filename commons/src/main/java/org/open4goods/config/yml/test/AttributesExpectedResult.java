@@ -48,22 +48,7 @@ public class AttributesExpectedResult extends NumericExpectedResult {
 			}
 		}
 
-		// Testing for classical
-		if (null != multivalued) {
 
-			for (final Entry<String, Set<String>> entry : multivalued.entrySet()) {
-
-				if (null == pd.getAttribute(entry.getKey())) {
-					ret.addMessage("Missing multivalued attribute : " + entry.getKey());
-				} else{
-					final Attribute attr = pd.getAttribute(entry.getKey());
-					if (entry.getValue().size() != attr.valuesSize() || !entry.getValue().containsAll(attr.stringValues()) ) {
-						ret.addMessage("Was expecting " + entry.getValue() + " for attribute  " + entry.getKey() + ", we have " + attr.stringValues());
-					}
-				}
-
-			}
-		}
 
 	}
 

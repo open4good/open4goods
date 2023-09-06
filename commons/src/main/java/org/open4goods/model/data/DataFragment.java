@@ -763,7 +763,6 @@ public class DataFragment implements Standardisable, Validable {
 		}
 
 		// Parse the values from rawValue
-		attr.multivalue(multivalueSeparator);
 
 		if (!attributes.add(attr)) {
 			logger.info("Attribute conflict for : {}");

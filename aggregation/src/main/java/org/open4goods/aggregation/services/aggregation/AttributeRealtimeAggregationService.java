@@ -443,22 +443,16 @@ public class AttributeRealtimeAggregationService extends AbstractRealTimeAggrega
 		if (null != conf.getParser().getTokenMatch()) {
 			boolean found = false;
 
-			if (attr.multivalued()) {
-				for (final String match : conf.getParser().getTokenMatch()) {
-					if (attr.stringValues().contains(match)) {
-						attr.setRawValue(conf.getParser().getTokenMatch());
-					}
-				}
-			} else {
-				final String val = attr.getRawValue().toString();
-				for (final String match : conf.getParser().getTokenMatch()) {
-					if (val.contains(match)) {
-						attr.setRawValue(match);
-						found = true;
-						break;
-					}
+
+			final String val = attr.getRawValue().toString();
+			for (final String match : conf.getParser().getTokenMatch()) {
+				if (val.contains(match)) {
+					attr.setRawValue(match);
+					found = true;
+					break;
 				}
 			}
+		
 
 			if (!found) {
 				throw new ValidationException("Token "+ attr.stringValue() + " does not match  attribute " + attr.getName() + " specifiction");
