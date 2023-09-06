@@ -28,7 +28,7 @@ import org.springframework.data.elasticsearch.annotations.FieldType;
  * are also handled as product informations by dedicated sites once standardized.
  *
  * @author goulven
- *
+ *TODO : performance, remove multivalued, specialization
  */
 @SuppressWarnings("rawtypes")
 public class Attribute implements Validable,IAttribute {
@@ -61,6 +61,11 @@ public class Attribute implements Validable,IAttribute {
 
 	}
 
+	public Attribute(final String name, final Object value, final String language) {
+		rawValue = value;
+		this.name = name;
+	}
+	
 	public Attribute(final String name, final Object value) {
 		rawValue = value;
 		this.name = name;
