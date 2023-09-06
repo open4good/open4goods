@@ -51,7 +51,7 @@ public class BatchedAggregator extends AbstractAggregator {
 		for (final AbstractAggregationService s: services) {
 			
 			AbstractBatchAggregationService service = null;
-			if (service instanceof AbstractBatchAggregationService) {
+			if (s instanceof AbstractBatchAggregationService) {
 				service = (AbstractBatchAggregationService)s;
 			} else {
 				logger.warn("Aggrgegator {} is used in batch mode, but is a AbstractBatchAggregationService", s.getClass().getCanonicalName());
