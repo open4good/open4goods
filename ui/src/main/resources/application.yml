@@ -20,6 +20,9 @@ apiConfig:
   apiLicence: "May vary"
 
 
+# A mapping beetween custom page names and page templates
+pages:
+  "comparateur-prix": "pages/comparateur-prix.html"
 
 
 

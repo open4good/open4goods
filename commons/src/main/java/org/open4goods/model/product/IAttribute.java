@@ -6,7 +6,7 @@ public interface IAttribute {
 
 	public String getName() ;
 
-	public Object getValue() ;
+	public String getValue() ;
 
 
 	

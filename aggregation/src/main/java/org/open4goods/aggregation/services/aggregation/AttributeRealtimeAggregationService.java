@@ -1,5 +1,6 @@
 package org.open4goods.aggregation.services.aggregation;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -54,13 +55,22 @@ public class AttributeRealtimeAggregationService extends AbstractRealTimeAggrega
 		/////////////////////////////////////////
 		// Converting to AggregatedAttributes for matches from config
 		/////////////////////////////////////////
-
+		
+		List<Attribute> all = new ArrayList<>();
+		// Handling attributes in datafragment
+		all.addAll(dataFragment.getAttributes());
+		// Add unmatched attributes from the product (case configuration change)
+		all.addAll(product.getAttributes().getUnmapedAttributes().stream().map(e -> new Attribute(e.getName(),e.getValue(),e.getLanguage())).toList());
+		
+		
+		
 		for (Attribute attr :  dataFragment.getAttributes()) {
 			IAttribute translated = attributesConfig.translateAttribute(attr, dataFragment.getDatasourceName());
 			
 			// We have a "raw" attribute that matches a aggragationconfig
 			if (null != translated) {
 				AggregatedAttribute agg = product.getAttributes().getAggregatedAttributes().get(attr.getName());
+				
 				matchList.add(translated.getName());
 				
 				if (null == agg) {
@@ -68,7 +78,7 @@ public class AttributeRealtimeAggregationService extends AbstractRealTimeAggrega
 					agg = new AggregatedAttribute();
 					agg.setName(attr.getName());
 				} 
-				agg.addAttribute(attr.getName(), new UnindexedKeyValTimestamp(dataFragment.getDatasourceName(), translated.getValue().toString()));
+				agg.addAttribute(translated.getName(), new UnindexedKeyValTimestamp(dataFragment.getDatasourceName(), translated.getValue().toString()));
 				product.getAttributes().getAggregatedAttributes().put(agg.getName(), agg);				
 			}
 		}
@@ -120,6 +130,8 @@ public class AttributeRealtimeAggregationService extends AbstractRealTimeAggrega
 			product.getAttributes().getUnmapedAttributes().add(agg);			
 		}
 	
+		// TODO : Removing matchlist again to handle remove of old attributes in case of configuration change
+//		product.getAttributes().getUnmapedAttributes().
 	}
 
 
@@ -488,72 +500,14 @@ public class AttributeRealtimeAggregationService extends AbstractRealTimeAggrega
 		// Typing attribute
 		///////////////////
 
-
-		attr.typeAttribute(conf.getType());
+// No need, all attrs are String now
+//		attr.typeAttribute(conf.getType());
 
 		return attr;
 
 	}
 
 
-
-
-
-	/**
-	 * Removing some useless attributes
-	 * @param unmapedAttributes
-	 * @param data
-	 * @return
-	 */
-//	private Set<AggregatedAttribute> cleanUnmapped(Set<AggregatedAttribute> unmapedAttributes, Product data) {
-//
-//		
-//		// TODO : put back attribute unmapped attributes cleaning
-//		
-//
-//		return unmapedAttributes;
-//		
-//		
-////		
-////		
-////		
-////		Set<AggregatedAttribute> ret = new HashSet<>();
-////		
-////		//////////////
-////		// A dictionary of "to exclude" attributes names
-////		//////////////
-////		
-////		// Adding aggregated attribute names
-////		Set<String> excludedAttrNames = new HashSet<>();
-////		
-////		excludedAttrNames.addAll(data.getAttributes().getAggregatedAttributes().keySet());
-////				
-////				
-////		// Adding referentiel attribute names
-////		excludedAttrNames.addAll(data.getAttributes().getReferentielAttributes().keySet().stream().map(e -> e.toString()).toList());
-////		// Adding "matching attribute" définitions
-////		
-////		attributesConfig.synonyms().values().stream().map(e -> e.keySet()).forEach(e -> {
-////			excludedAttrNames.addAll(e);
-////		}
-////		); 
-////		
-////		// Adding configured exclusions		
-////		 excludedAttrNames.addAll(attributesConfig.getExclusions());
-////		
-////		
-////		////
-////		// Process exclusions
-////		////
-////		
-////		for (AggregatedAttribute aga : unmapedAttributes) {
-////			if (!excludedAttrNames.contains(aga.getName())) {
-////				ret.add(aga);
-////			}		
-////		}
-////		
-////		return ret;
-//	}
 
 
 

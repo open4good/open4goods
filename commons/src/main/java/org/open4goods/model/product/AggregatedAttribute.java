@@ -24,7 +24,7 @@ public class AggregatedAttribute implements IAttribute {
 	 * The value of this aggregated attribute
 	 */
 	@Field(index = true, store = false, type = FieldType.Auto)
-	private Object value;
+	private String value;
 
 
 //	/** Type of the attribute **/
@@ -146,7 +146,7 @@ public class AggregatedAttribute implements IAttribute {
 
 
 	@Override
-	public Object getValue() {
+	public String getValue() {
 		return value;
 	}
 
@@ -172,9 +172,7 @@ public class AggregatedAttribute implements IAttribute {
 		this.sources = sources;
 	}
 
-	public void setValue(Object value) {
-		this.value = value;
-	}
+
 
 	@Override
 	public String getLanguage() {
