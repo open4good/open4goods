@@ -50,12 +50,12 @@ public class VerticalRealTimeAggregationService extends AbstractRealTimeAggregat
 
 			}
 		} else {
-			dedicatedLogger.warn("No category for {}", input);
+			dedicatedLogger.info("No category for {}", input);
 		}
 
 		// Setting no vertical if no category
 		if (output.getDatasourceCategories().size() == 0) {
-			dedicatedLogger.warn("No category in {}, removing vertical", output);
+			dedicatedLogger.info("No category in {}, removing vertical", output);
 			output.setVertical(null);
 		}
 
