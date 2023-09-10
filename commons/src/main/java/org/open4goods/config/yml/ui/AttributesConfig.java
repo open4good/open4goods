@@ -91,7 +91,7 @@ public class AttributesConfig {
 		return hashedSynonyms;
 	}
 
-	public IAttribute translateAttribute(final IAttribute a, final String provider) {
+	public Attribute translateAttribute(final Attribute a, final String provider) {
 
 		Map<String, String> p = synonyms().get(provider);
 
@@ -154,7 +154,7 @@ public class AttributesConfig {
 	 * @param value
 	 * @return
 	 */
-	public AttributeConfig getConfigFor(final Attribute value) {
+	public AttributeConfig getConfigFor(final IAttribute value) {
 
 		if (null == value) {
 			return null;

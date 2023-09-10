@@ -24,7 +24,6 @@ import org.open4goods.model.data.DataFragment;
 import org.open4goods.model.data.UnindexedKeyValTimestamp;
 import org.open4goods.model.product.AggregatedAttribute;
 import org.open4goods.model.product.AggregatedFeature;
-import org.open4goods.model.product.IAttribute;
 import org.open4goods.model.product.Product;
 import org.open4goods.services.BrandService;
 
@@ -51,7 +50,7 @@ public class AttributeRealtimeAggregationService extends AbstractRealTimeAggrega
 	@Override
 	public void onDataFragment(final DataFragment dataFragment, final Product product) {
 
-		Set<String> matchList = new HashSet<>();
+		Set<String> toRemoveFromUnmatched = new HashSet<>();
 		/////////////////////////////////////////
 		// Converting to AggregatedAttributes for matches from config
 		/////////////////////////////////////////
@@ -65,21 +64,37 @@ public class AttributeRealtimeAggregationService extends AbstractRealTimeAggrega
 		
 		
 		for (Attribute attr :  dataFragment.getAttributes()) {
-			IAttribute translated = attributesConfig.translateAttribute(attr, dataFragment.getDatasourceName());
+			
+			// Checking if a potential AggregatedAttribute
+			Attribute translated = attributesConfig.translateAttribute(attr, dataFragment.getDatasourceName());
 			
 			// We have a "raw" attribute that matches a aggragationconfig
 			if (null != translated) {
-				AggregatedAttribute agg = product.getAttributes().getAggregatedAttributes().get(attr.getName());
 				
-				matchList.add(translated.getName());
-				
-				if (null == agg) {
-					// A first time match
-					agg = new AggregatedAttribute();
-					agg.setName(attr.getName());
-				} 
-				agg.addAttribute(translated.getName(), new UnindexedKeyValTimestamp(dataFragment.getDatasourceName(), translated.getValue().toString()));
-				product.getAttributes().getAggregatedAttributes().put(agg.getName(), agg);				
+				try {
+					AttributeConfig attrConfig = attributesConfig.getConfigFor(translated);
+					
+					// Applying parsing rule
+					translated = parseAttributeValue(translated, attrConfig);
+					
+					AggregatedAttribute agg = product.getAttributes().getAggregatedAttributes().get(attr.getName());
+					
+					toRemoveFromUnmatched.add(translated.getName());
+					
+					if (null == agg) {
+						// A first time match
+						agg = new AggregatedAttribute();
+						agg.setName(attr.getName());
+					} 
+									
+					agg.addAttribute(translated,attrConfig, new UnindexedKeyValTimestamp(dataFragment.getDatasourceName(), translated.getValue().toString()));
+					
+					// Replacing new AggAttribute in product
+					product.getAttributes().getAggregatedAttributes().put(agg.getName(), agg);
+				} catch (Exception e) {
+
+					dedicatedLogger.error("Attribute parsing fail for matched attribute {}", translated);
+				}				
 			}
 		}
 
@@ -98,7 +113,7 @@ public class AttributeRealtimeAggregationService extends AbstractRealTimeAggrega
 				.filter(this::isFeatureAttribute)
 				.collect(Collectors.toList());
 
-		matchList.addAll(matchedFeatures.stream().map(e->e.getName()).collect(Collectors.toSet()));
+		toRemoveFromUnmatched.addAll(matchedFeatures.stream().map(e->e.getName()).collect(Collectors.toSet()));
 		
 
 		Collection<AggregatedFeature> af = aggregateFeatures(matchedFeatures);
@@ -112,7 +127,7 @@ public class AttributeRealtimeAggregationService extends AbstractRealTimeAggrega
 		
 		for (Attribute attr : dataFragment.getAttributes()) {
 			// Checking if to be removed
-			if (matchList.contains(attr.getName())) {
+			if (toRemoveFromUnmatched.contains(attr.getName())) {
 				continue;
 			}
 			
@@ -125,7 +140,7 @@ public class AttributeRealtimeAggregationService extends AbstractRealTimeAggrega
 				agg = new AggregatedAttribute();
 				agg.setName(attr.getName());
 			} 
-			agg.addAttribute(attr.getName(), new UnindexedKeyValTimestamp(dataFragment.getDatasourceName(), attr.getValue().toString()));
+			agg.addAttribute(attr, new UnindexedKeyValTimestamp(dataFragment.getDatasourceName(), attr.getValue().toString()));
 			
 			product.getAttributes().getUnmapedAttributes().add(agg);			
 		}
@@ -490,12 +505,6 @@ public class AttributeRealtimeAggregationService extends AbstractRealTimeAggrega
 			}
 		}
 
-		///////////////////
-		// Typing attribute
-		///////////////////
-
-// No need, all attrs are String now
-//		attr.typeAttribute(conf.getType());
 
 		return attr;
 
