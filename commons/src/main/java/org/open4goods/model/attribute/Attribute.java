@@ -1,18 +1,7 @@
 
 package org.open4goods.model.attribute;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.open4goods.exceptions.ValidationException;
@@ -35,7 +24,6 @@ public class Attribute implements Validable,IAttribute {
 
 	private final static Logger logger = LoggerFactory.getLogger(Attribute.class);
 
-	private static final Map<String, Pattern> splitsCache = new HashMap<>();
 
 	/**
 	 * The attribute name
@@ -54,19 +42,19 @@ public class Attribute implements Validable,IAttribute {
 	 * The attribute raw rawValue
 	 */
 	@Field(index = false, store = false, type = FieldType.Keyword)
-	//	TODO : Pass to String
-	private Object rawValue;
+	private String rawValue;
 
 	public Attribute() {
 
 	}
 
-	public Attribute(final String name, final Object value, final String language) {
+	public Attribute(final String name, final String value, final String language) {
 		rawValue = value;
 		this.name = name;
+		this.language = language;
 	}
 	
-	public Attribute(final String name, final Object value) {
+	public Attribute(final String name, final String value) {
 		rawValue = value;
 		this.name = name;
 	}
@@ -91,12 +79,8 @@ public class Attribute implements Validable,IAttribute {
 
 
 	public String stringValue() {
-
 			return rawValue.toString();
 	}
-
-
-
 
 	@Override
 	public void validate() throws ValidationException {
@@ -148,14 +132,40 @@ public class Attribute implements Validable,IAttribute {
 	 *
 	 */
 	public void replaceToken(final String regexp, final String replacement) {
-
 		rawValue = ((String) rawValue).replace(regexp, replacement);
 	}
+
+//	/**
+//	 * Type the rawValue to the given type
+//	 * @throws ValidationException
+//	 */
+//	public void typeAttribute(final AttributeType type) throws ValidationException {
+//		switch (type) {
+//		case BOOLEAN:
+//			AttributeType specialized = specializeBoolean();
+//			if (specialized != AttributeType.BOOLEAN) {
+//				throw new ValidationException("Attribute "+getName()+" cannot be casted to "+type+ " with value " + getRawValue().toString() );
+//			}
+//			break;
+//		case NUMERIC:
+//			specialized = specializeNumeric();
+//			if (specialized != AttributeType.NUMERIC) {
+//				throw new ValidationException("Attribute "+getName()+" cannot be casted to "+type+ " with value " + getRawValue().toString() );
+//			}
+//			break;
+//		case TEXT:
+//			// Nothing to do, text is default
+//			break;
+//
+//		default:
+//			throw new ValidationException("UNKNOWN TYPE :  Attribute "+getName()+" cannot be casted to unknown type "+type+ " with value " + getRawValue().toString() );
+//		}
+//	}
 
 
 	public Double numericOrNull() {
 		// Trying to specialize as numeric
-		final String num = rawValue.toString().replace(",", ".");
+		final String num = rawValue.toString().trim().replace(",", ".");
 
 		try {
 			return  Double.valueOf(num);
@@ -165,7 +175,97 @@ public class Attribute implements Validable,IAttribute {
 		}
 	}
 
-	
+//	
+//
+//	/**
+//	 * Specialize the attribute into a Boolean if possible
+//	 *
+//	 * @return
+//	 * @throws ValidationException
+//	 */
+//	public AttributeType specializeNumeric() throws ValidationException {
+//
+//		final AttributeType type = getType();
+//
+//		if (type == AttributeType.NUMERIC) {
+//			return  AttributeType.NUMERIC;
+//		}
+//
+//		if (type != AttributeType.TEXT) {
+//			throw new ValidationException("Cannot specialize non text attributes");
+//		}
+//
+//		// Trying to specialize as numeric
+//		final String num = rawValue.toString().replace(",", ".");
+//
+//		try {
+//			final Double dblVal = Double.valueOf(num);
+//			rawValue = dblVal;
+//			return AttributeType.NUMERIC;
+//		} catch (final NumberFormatException e) {
+//			throw new ValidationException("Attribute "+getName()+" cannot be casted to numeric with value " + getRawValue().toString() );
+//		}
+//
+//
+//	}
+//
+//	/**
+//	 * Specialize the attribute into a Boolean if possible
+//	 *
+//	 * @return
+//	 * @throws ValidationException
+//	 */
+//	public AttributeType specializeBoolean() throws ValidationException {
+//
+//
+//		final String val = rawValue.toString().toLowerCase().trim();
+//
+//		switch (val) {
+//		case "true":
+//		case "yes":
+//		case "oui":
+//		case "1":
+//			rawValue = Boolean.TRUE;
+//			return AttributeType.BOOLEAN;
+//
+//		case "no":
+//		case "non":
+//		case "false":
+//		case "0":
+//			rawValue = Boolean.FALSE;
+//			return AttributeType.BOOLEAN;
+//
+//		default:
+//			throw new ValidationException("Attribute "+getName()+" cannot be casted to boolean with value " + getRawValue().toString() );
+//		}
+//	}
+//
+//
+//
+//	/**
+//	 * Return AttributeType corresponding to a given object type
+//	 *
+//	 * @param o
+//	 * @return
+//	 */
+//	public  AttributeType getType() {
+//		if (rawValue instanceof String) {
+//			return AttributeType.TEXT;
+//		} else if (rawValue instanceof Integer) {
+//			return AttributeType.NUMERIC;
+//		} else if (rawValue instanceof Long) {
+//			return AttributeType.NUMERIC;
+//		} else if (rawValue instanceof Double) {
+//			return AttributeType.NUMERIC;
+//		} else if (rawValue instanceof Boolean) {
+//			return AttributeType.BOOLEAN;
+//		}
+//
+//		else {
+//			logger.warn("Unknown attribute type : " + rawValue.getClass().getSimpleName());
+//			return null;
+//		}
+//	}
 	////////////////////////////////////////////////
 	// Getters and setters
 	////////////////////////////////////////////////
@@ -180,11 +280,11 @@ public class Attribute implements Validable,IAttribute {
 		this.name = name;
 	}
 
-	public Object getRawValue() {
+	public String getRawValue() {
 		return rawValue;
 	}
 
-	public void setRawValue(final Object rawValue) {
+	public void setRawValue(final String rawValue) {
 		this.rawValue = rawValue;
 	}
 

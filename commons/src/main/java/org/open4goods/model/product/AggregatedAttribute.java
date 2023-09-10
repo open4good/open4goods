@@ -8,6 +8,10 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.open4goods.config.yml.attributes.AttributeConfig;
+import org.open4goods.exceptions.ValidationException;
+import org.open4goods.model.attribute.Attribute;
+import org.open4goods.model.attribute.AttributeType;
 import org.open4goods.model.data.UnindexedKeyValTimestamp;
 import org.springframework.data.elasticsearch.annotations.Field;
 import org.springframework.data.elasticsearch.annotations.FieldType;
@@ -26,6 +30,11 @@ public class AggregatedAttribute implements IAttribute {
 	@Field(index = true, store = false, type = FieldType.Keyword)
 	private String value;
 
+	/**
+	 * The value of this aggregated attribute
+	 */
+	@Field(index = true, store = false, type = FieldType.Double)
+	private Double numericValue;
 
 //	/** Type of the attribute **/
 //	@Field(index = false, store = false, type = FieldType.Keyword)
@@ -59,24 +68,50 @@ public class AggregatedAttribute implements IAttribute {
 	
 
 	/**
-	 * Add an attribute
+	 * Add a "matched" attribute, with dynamic type detection
 	 * @param parsed
 	 * Should handle language ?
 	 */
-	public void addAttribute(String name, UnindexedKeyValTimestamp sourcedValue) {
+	public void addAttribute(Attribute attr, AttributeConfig attrConfig, UnindexedKeyValTimestamp sourcedValue) throws NumberFormatException{
 
 		// Guard
 		if (this.name != null && !name.equals(this.name)) {
+			//TODO
 			System.out.println("ERROR : Name mismatch in add attribute");
 		}
 		
-		this.name = name;		
-		sources.add(sourcedValue);		
+		this.name = attr.getName();		
+		sources.add(sourcedValue);
+		
 		value = bestValue();
 		
+		if (attrConfig.getType().equals(AttributeType.NUMERIC)) {
+			numericValue = numericOrNull(value);			
+		}
 	}
 
+	
 
+	
+	
+
+	public void addAttribute(Attribute attr, UnindexedKeyValTimestamp sourcedValue) {
+		// Guard
+		if (this.name != null && !name.equals(this.name)) {
+			//TODO
+			System.out.println("ERROR : Name mismatch in add attribute");
+		}
+		
+		this.name = attr.getName();		
+		sources.add(sourcedValue);
+		
+		value = bestValue();
+		
+		
+	}
+	
+	
+	
 /**
  * 
  * @return the best value
@@ -122,10 +157,15 @@ public class AggregatedAttribute implements IAttribute {
 	
 	@Override
 	public String toString() {
-
 		return name + " : " +value+ " -> "+  sources.size() + " source(s), " + getPonderedvalues() + " conflict(s)";
+	}
+	
+	
+	public Double numericOrNull(String rawValue) throws NumberFormatException{
+		// Trying to specialize as numeric
+		final String num = rawValue.toString().trim().replace(",", ".");
 
-
+		return  Double.valueOf(num);
 	}
 
 	///////////////////////////////////////
@@ -176,8 +216,19 @@ public class AggregatedAttribute implements IAttribute {
 
 	@Override
 	public String getLanguage() {
+		// TODO : i18n
 		return null;
 	}
+
+	public Double getNumericValue() {
+		return numericValue;
+	}
+
+	public void setNumericValue(Double numericValue) {
+		this.numericValue = numericValue;
+	}
+
+
 
 
 
