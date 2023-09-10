@@ -4,7 +4,7 @@
 <head>
 
 	<!--/* Metas and CSS */-->
-	<th:block th:insert="inc/header-meta.html"></th:block>
+	<th:block th:insert="~{inc/header-meta.html}"></th:block>
     
 	<!-- Primary Meta Tags -->
 	<title th:text="#{index.title}"></title>
@@ -32,10 +32,10 @@
     <!--/* Navbar */-->
 	<header class="header-global">
     	<nav th:with="hideSearch=true" id="navbar-main" aria-label="Primary navigation" class="navbar navbar-main navbar-expand-lg navbar-theme-primary headroom navbar-light navbar-theme-secondary">
-			<th:block th:insert="inc/navbar-non-product.html"></th:block>
+			<th:block th:insert="~{inc/navbar-non-product.html}"></th:block>
 		</nav>
        <!--/* Loader */-->
-       <th:block th:insert="inc/preloader.html"></th:block>
+       <th:block th:insert="~{inc/preloader.html}"></th:block>
 
 	</header>
 	
@@ -60,7 +60,7 @@
 	                       	
 	                      		   <p class="lead text-gray mt-2">
 	  									<th:block th:with="path='WIDGETS/accueil-jumbotron/'">
-			                        		<th:block th:insert="inc/wiki.html"></th:block>
+			                        		<th:block th:insert="~{inc/wiki.html}"></th:block>
 			                        	</th:block>
 	                      		   </p>
 	                       
@@ -118,7 +118,7 @@
 		                            <div class="card-body">
 		                                <p>
 											<th:block th:with="path='WIDGETS/accueil-ecoscore/'">
-				                        		<th:block th:insert="inc/wiki.html"></th:block>
+				                        		<th:block th:insert="~{inc/wiki.html}"></th:block>
 				                        	</th:block>                                
 		                                </p>
 		                                <a href="#evaluation-ecologique" class="btn btn-sm btn-primary animate-up-2 mt-3">Score écologique</a>
@@ -134,7 +134,7 @@
 		                            <div class="card-body">
 		                                <p>
 											<th:block th:with="path='WIDGETS/accueil-compensation/'">
-				                        		<th:block th:insert="inc/wiki.html"></th:block>
+				                        		<th:block th:insert="~{inc/wiki.html}"></th:block>
 				                        	</th:block>                                
 		                                </p>
 		                                <a href="#compensation-carbone" class="btn btn-sm btn-primary animate-up-2 mt-3">Compensation écologique</a>
@@ -150,7 +150,7 @@
 		                            <div class="card-body">
 		                                <p>
 											<th:block th:with="path='WIDGETS/accueil-modele-ouvert/'">
-				                        		<th:block th:insert="inc/wiki.html"></th:block>
+				                        		<th:block th:insert="~{inc/wiki.html}"></th:block>
 				                        	</th:block>                                
 		                                </p>
 		                                <a href="#modele-ouvert" class="btn btn-sm btn-primary animate-up-2 mt-3">Modèle ouvert</a>
@@ -167,7 +167,7 @@
 		                            <div class="card-body">
 		                                <p>
 											<th:block th:with="path='WIDGETS/accueil-data-responsable'">
-				                        		<th:block th:insert="inc/wiki.html"></th:block>
+				                        		<th:block th:insert="~{inc/wiki.html}"></th:block>
 				                        	</th:block>                                
 		                                </p>
 		                                <a href="#data-responsable" class="btn btn-sm btn-primary animate-up-2 mt-3">Data responsable</a>
@@ -315,7 +315,7 @@
                                         <h2  class="h4 mb-2">Compensation environnementale</h2>
                                         <p>
 											<th:block th:with="path='WIDGETS/accueil-compensation-full/'">
-				                        		<th:block th:insert="inc/wiki.html"></th:block>
+				                        		<th:block th:insert="~{inc/wiki.html}"></th:block>
 				                        	</th:block>                                           
                                         
                                         </p>
@@ -332,7 +332,7 @@
                                         <h2 class="h4 mb-2">Data responsable</h2>
                                         <p>
 											<th:block th:with="path='WIDGETS/accueil-data-responsable-full/'">
-				                        		<th:block th:insert="inc/wiki.html"></th:block>
+				                        		<th:block th:insert="~{inc/wiki.html}"></th:block>
 				                        	</th:block>                                           
                                         </p>
                                         <a href="/donnees-personnelles" class="float-end btn btn-sm btn-primary">En savoir plus sur l'utilisation de vos données</a>
@@ -348,7 +348,7 @@
                                         <h2 class="h4 mb-2">Comparaison de prix</h2>
                                         <p>
 											<th:block th:with="path='WIDGETS/accueil-comparaison-prix-full/'">
-				                        		<th:block th:insert="inc/wiki.html"></th:block>
+				                        		<th:block th:insert="~{inc/wiki.html}"></th:block>
 				                        	</th:block>                                           
                                         </p>
                                         <a href="#" class="float-end btn btn-sm btn-primary">En savoir plus sur la comparaison de prix</a>
@@ -369,7 +369,7 @@
                                         <h2 class="h4 mb-2">Evaluation écologique</h2>
                                         <p>
 											<th:block th:with="path='WIDGETS/accueil-ecoscore-full/'">
-				                        		<th:block th:insert="inc/wiki.html"></th:block>
+				                        		<th:block th:insert="~{inc/wiki.html}"></th:block>
 				                        	</th:block>                                           	
 										</p>
                                         <a href="#" class="float-end btn btn-sm btn-primary">En savoir plus sur l'évaluation environnementale</a>
@@ -385,7 +385,7 @@
                                         <h2 class="h4 mb-2">Open-source et Open-data</h2>
                                         <p>
 											<th:block th:with="path='WIDGETS/accueil-modele-ouvert-full/'">
-				                        		<th:block th:insert="inc/wiki.html"></th:block>
+				                        		<th:block th:insert="~{inc/wiki.html}"></th:block>
 				                        	</th:block>                                           
                                         </p>
                                         <a href="/opendata" class="float-end  btn btn-sm btn-primary">En savoir plus sur le modèle ouvert</a>
@@ -401,7 +401,7 @@
     </main>
 
 	<!--/* Footer */-->
-	<th:block th:insert="inc/footer.html"></th:block>	
+	<th:block th:insert="~{inc/footer.html}"></th:block>	
 
 <!-- Core -->
 <script src="../../vendor/@popperjs/core/dist/umd/popper.min.js"></script>
