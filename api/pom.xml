@@ -32,12 +32,6 @@
 			<scope>test</scope>
 		</dependency>
 
-		<dependency>
-		    <groupId>org.testcontainers</groupId>
-		    <artifactId>elasticsearch</artifactId>
-		    <version>1.19.0</version>
-		    <scope>test</scope>
-		</dependency>
 
 		<!-- The API is also a crawler, with a local access to the store -->
 		<dependency>
