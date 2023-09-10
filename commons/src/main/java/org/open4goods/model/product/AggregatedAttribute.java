@@ -23,7 +23,7 @@ public class AggregatedAttribute implements IAttribute {
 	/**
 	 * The value of this aggregated attribute
 	 */
-	@Field(index = true, store = false, type = FieldType.Auto)
+	@Field(index = true, store = false, type = FieldType.Keyword)
 	private String value;
 
 

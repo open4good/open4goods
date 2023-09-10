@@ -2,6 +2,7 @@ package org.open4goods.model.product;
 
 public class AggregatedFeature {
 
+	
 	private String name;
 
 	@Override
