@@ -25,7 +25,7 @@ public class AggregatedAttributes  {
 	private Map<String,AggregatedAttribute> aggregatedAttributes = new HashMap<>();
 
 
-	@Field(index = false, store = false, type = FieldType.Object)
+	@Field(index = false, store = false)
 	private Set<AggregatedAttribute> unmapedAttributes = new HashSet<>();
 
 
