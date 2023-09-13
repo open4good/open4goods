@@ -8,7 +8,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.open4goods.aggregation.AbstractAggregationService;
 import org.open4goods.aggregation.AbstractRealTimeAggregationService;
 import org.open4goods.config.yml.ui.VerticalProperties;
 import org.open4goods.model.constants.ProductState;
@@ -86,21 +85,16 @@ public class PriceAggregationService extends AbstractRealTimeAggregationService 
 
 		for (AggregatedPrice price : filtered) {
 
-			if (price.isAffiliated()) {
-
-				double percent;
-				try {
-					percent = datasourceConfigService.getDatasourceConfig(price.getDatasourceName()).getReversement()
-							.doubleValue();
-				} catch (Exception e1) {
-					dedicatedLogger.info("Cannot get reversement for datasource {}", price.getDatasourceName());
-					percent = 3.0;
-				}
-
-				price.setCompensation(price.getPrice() * (percent / 100) * REVERSEMENT);
-			} else {
-				price.setCompensation(0.0);
+			double percent;
+			try {
+				percent = datasourceConfigService.getDatasourceConfig(price.getDatasourceName()).getReversement()
+						.doubleValue();
+			} catch (Exception e1) {
+				dedicatedLogger.info("Cannot get reversement for datasource {}", price.getDatasourceName());
+				percent = 2.0;
 			}
+
+			price.setCompensation(price.getPrice() * (percent / 100) * REVERSEMENT);
 
 		}
 
@@ -173,35 +167,18 @@ public class PriceAggregationService extends AbstractRealTimeAggregationService 
 	 * @param p
 	 */
 	private void computePrices(final Collection<AggregatedPrice> filtered, final AggregatedPrices p) {
-		double total = 0.0;
-		int count = 0;
+
 
 		// Min / max
 		for (final AggregatedPrice o : filtered) {
 
-			total += o.getPrice();
-			count++;
 			if (null == p.getMinPrice()) {
 				p.setMinPrice(o);
 			}
-
-			//			if (null == p.getMaxPrice()) {
-			//				p.setMaxPrice(o);
-			//			}
-			//
-			//			if (o.greaterThan(p.getMaxPrice())) {
-			//				p.setMaxPrice(o);
-			//			}
-
 			if (o.lowerThan(p.getMinPrice())) {
 				p.setMinPrice(o);
 			}
 		}
-
-		// Average
-		//		if (count != 0) {
-		//			p.setAvgPrice(new AggregatedPrice(total / count, StandardiserService.DEFAULT_CURRENCY));
-		//		}
 	}
 
 	public @Override void close() throws IOException {

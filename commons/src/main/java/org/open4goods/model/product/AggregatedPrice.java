@@ -14,13 +14,9 @@ public class AggregatedPrice extends Price {
 	@Field(index = false, store = false, type = FieldType.Keyword)
 	private String datasourceName;
 	@Field(index = false, store = false, type = FieldType.Keyword)
-	private String datasourceConfigName;
-	@Field(index = false, store = false, type = FieldType.Keyword)
 	private String offerName;
 	@Field(index = false, store = false, type = FieldType.Keyword)
 	private String url;
-	@Field(index = false, store = false, type = FieldType.Boolean)
-	private boolean affiliated;
 	@Field(index = false, store = false, type = FieldType.Double)
 	private Double compensation;
 	/**
@@ -42,11 +38,8 @@ public class AggregatedPrice extends Price {
 	 * @param df    DataFragment to initialize from
 	 */
 	public AggregatedPrice(DataFragment df) {
-
-		datasourceConfigName = df.getDatasourceConfigName();
 		datasourceName = df.getDatasourceName();
 		url = df.affiliatedUrlIfPossible();
-		affiliated = df.affiliated();
 		offerName = df.longestName();
 		setCurrency(df.getPrice().getCurrency());
 		setPrice(df.getPrice().getPrice());
@@ -94,28 +87,12 @@ public class AggregatedPrice extends Price {
 		this.datasourceName = datasourceName;
 	}
 
-	public String getDatasourceConfigName() {
-		return datasourceConfigName;
-	}
-
-	public void setDatasourceConfigName(String datasourceConfigName) {
-		this.datasourceConfigName = datasourceConfigName;
-	}
-
 	public String getUrl() {
 		return url;
 	}
 
 	public void setUrl(String url) {
 		this.url = url;
-	}
-
-	public boolean isAffiliated() {
-		return affiliated;
-	}
-
-	public void setAffiliated(boolean affiliated) {
-		this.affiliated = affiliated;
 	}
 
 	public String getOfferName() {
