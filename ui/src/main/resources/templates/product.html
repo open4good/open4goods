@@ -172,7 +172,6 @@
 
 
 <!-- 
-<script src="../../vendor/@popperjs/core/dist/umd/popper.min.js"></script>
 
 
 <script src="../../vendor/onscreen/dist/on-screen.umd.min.js"></script>
@@ -191,6 +190,7 @@
 <script type="text/javascript" language="javascript" src="/webjars/datatables/js/jquery.dataTables.min.js"></script>
 <script type="text/javascript" language="javascript" src="/webjars/datatables/js/dataTables.bootstrap5.min.js"></script>
 <script type="text/javascript" language="javascript" src="/webjars/datatables-responsive/js/dataTables.responsive.min.js"></script>
+<script src="../../vendor/@popperjs/core/dist/umd/popper.min.js"></script>
 
 
 <!-- pixel JS -->
@@ -199,13 +199,26 @@
 <script src="../../assets/js/pixel-custom.js"></script>
 <script>
 $(document).ready(function() {
-	if (($("#offersTable")).length) {
-		$('#offersTable').DataTable({
+
+	// Enable tooltips
+  	$('[data-toggle="tooltip"]').tooltip();
+
+	// Responsive datatables
+	if (($("#offersTableOccasion")).length) {
+		$('#offersTableOccasion').DataTable({
 				responsive: true		
-		}
-			
+		}			
 		);		
 	}
+	
+	if (($("#offersTableNew")).length) {
+		$('#offersTableNew').DataTable({
+				responsive: true		
+		}			
+		);		
+	}
+	
+	
 	
 	if ($("#allAttributes").length) {
 		$('#allAttributes').DataTable({
