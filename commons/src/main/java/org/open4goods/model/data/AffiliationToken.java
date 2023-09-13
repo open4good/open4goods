@@ -52,7 +52,7 @@ public class AffiliationToken {
 	public AffiliationToken(AggregatedPrice e, Product data) {
 		gtin= data.gtin();
 		price=e.getPrice();
-		datasourceName = e.getDatasourceConfigName();
+		datasourceName = e.getDatasourceName();
 		url=e.getUrl();
 		ts = System.currentTimeMillis();
 		this.id=UUID.randomUUID().toString();
@@ -62,7 +62,6 @@ public class AffiliationToken {
 	
 	public AffiliationToken(String datasourcename, String url) {
 
-		gtin="PORTAL-LINK";
 		datasourceName = datasourcename;
 		this.url=url;
 		ts = System.currentTimeMillis();

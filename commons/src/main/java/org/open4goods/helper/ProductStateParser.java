@@ -28,9 +28,6 @@ public class ProductStateParser {
 		case "COLLECTION":
 			return ProductState.OCCASION;
 
-		case "UNKNOWN":
-			return ProductState.UNKNOWN;
-
 		default:
 			throw new InvalidParameterException("Cannot parse ProductState value : " + val);
 

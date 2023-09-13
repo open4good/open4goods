@@ -4,6 +4,7 @@ package org.open4goods.aggregation.services.aggregation.realtime;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -21,6 +22,9 @@ import org.open4goods.services.DataSourceConfigService;
 /**
  * This service compute price infos from DataFragments computations if not in
  * stock
+ *
+ *
+ * TODO : Could cut the price history after a number / delay of history for elastic size purpose
  *
  * @author goulven
  *
@@ -69,7 +73,7 @@ public class PriceAggregationService extends AbstractRealTimeAggregationService 
 
 			} else {
 
-				final String key = priceKey(df);
+				final String key = pricMerchanteKey(df);
 
 				if (null == reducedPrices.get(key) || reducedPrices.get(key).getPrice() > df.getPrice()) {
 					reducedPrices.put(key, df);
@@ -107,39 +111,16 @@ public class PriceAggregationService extends AbstractRealTimeAggregationService 
 		////////////////////////
 
 		// Compute current prices
-		computePrices(filtered, aggPrices);
+		computeMinPrice(filtered, aggPrices);
 
 
-		// Number of offers
+		// set Number of offers
 		aggregatedData.setOffersCount(reducedPrices.size());
 
 
 		// Computing / incrementing history
-		AggregatedPrice minPrice = aggPrices.getMinPrice();
-		if (null != minPrice && minPrice.getProductState().equals(ProductState.NEW)) {
-
-
-
-			if (aggPrices.getHistory().size() == 0 ) {
-				// First price
-				aggPrices.setTrend(0);
-				aggPrices.getHistory().add(new PriceHistory(minPrice));
-
-			}
-			else {
-				PriceHistory lastPrice = aggPrices.getHistory().get(aggPrices.getHistory().size()-1);
-				if (minPrice.getPrice() == lastPrice.getPrice().doubleValue()) {
-					aggPrices.setTrend(0);
-				} else if (minPrice.getPrice() > lastPrice.getPrice().doubleValue() ) {
-					// Price has increased
-					aggPrices.setTrend(1);
-					aggPrices.getHistory().add(new PriceHistory(minPrice));
-				} else {
-					// Price has decreased
-					aggPrices.setTrend(-1);
-				}
-			}
-		}
+		computePriceHistory(aggPrices, ProductState.OCCASION);
+		computePriceHistory(aggPrices, ProductState.NEW);	
 
 
 		// Setting the product state summary
@@ -156,8 +137,49 @@ public class PriceAggregationService extends AbstractRealTimeAggregationService 
 
 	}
 
-	private String priceKey(final AggregatedPrice df) {
-		return df.getDatasourceName() + (null == df.getProductState() ? "" : df.getProductState()) +  (df.getOfferName()== null ? "" : df.getOfferName().trim().toUpperCase());
+	/**
+	 * Compute the price history
+	 * @param prices
+	 * @param state
+	 */
+	private void computePriceHistory(AggregatedPrices prices, ProductState state) {
+		AggregatedPrice minPrice = prices.getMinPrice(state);
+		List<PriceHistory> history = prices.getHistory(state);
+		
+		
+		if (history.size() == 0 ) {
+			// First price
+			prices.setTrend(0);
+			history.add(new PriceHistory(minPrice));
+
+		}
+		else {
+			PriceHistory lastPrice = history.get(history.size()-1);
+			if (minPrice.getPrice() == lastPrice.getPrice().doubleValue()) {
+				prices.setTrend(0);
+				lastPrice.setTimestamp(System.currentTimeMillis());
+			} else if (minPrice.getPrice() > lastPrice.getPrice().doubleValue() ) {
+				// Price has increased
+				prices.setTrend(1);
+				// TODO : Cut here to a fixed history
+				history.add(new PriceHistory(minPrice));
+			} else {
+				// Price has decreased
+				prices.setTrend(-1);
+				// TODO : Cut here to a fixed history
+				history.add(new PriceHistory(minPrice));
+			}
+		}
+	}
+
+	/**
+	 * Add a key for a aprice and a marketplace. 
+	 * @param df
+	 * @return
+	 */
+	private String pricMerchanteKey(final AggregatedPrice df) {
+		// Not hashing offerdame bypass the sellers (nice for min price logic)
+		return df.getDatasourceName() + (null == df.getProductState() ? "" : df.getProductState());
 	}
 
 	/**
@@ -166,7 +188,7 @@ public class PriceAggregationService extends AbstractRealTimeAggregationService 
 	 * @param filtered
 	 * @param p
 	 */
-	private void computePrices(final Collection<AggregatedPrice> filtered, final AggregatedPrices p) {
+	private void computeMinPrice(final Collection<AggregatedPrice> filtered, final AggregatedPrices p) {
 
 
 		// Min / max
