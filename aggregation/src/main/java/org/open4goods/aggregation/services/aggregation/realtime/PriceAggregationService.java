@@ -6,6 +6,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -143,7 +144,14 @@ public class PriceAggregationService extends AbstractRealTimeAggregationService 
 	 * @param state
 	 */
 	private void computePriceHistory(AggregatedPrices prices, ProductState state) {
-		AggregatedPrice minPrice = prices.getMinPrice(state);
+		Optional<AggregatedPrice> oMinPrice = prices.getMinPrice(state);
+		if (oMinPrice.isEmpty()) {
+			return ;
+		}
+
+		AggregatedPrice minPrice = oMinPrice.get();
+		
+			
 		List<PriceHistory> history = prices.getHistory(state);
 		
 		
@@ -170,6 +178,7 @@ public class PriceAggregationService extends AbstractRealTimeAggregationService 
 				history.add(new PriceHistory(minPrice));
 			}
 		}
+		
 	}
 
 	/**

@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -109,8 +110,8 @@ public class AggregatedPrices implements Standardisable {
 
 	}
 	
-	public AggregatedPrice getMinPrice(ProductState state) {
-		return offers.stream().filter(e -> e.getProductState().equals(state)).min(Comparator.comparing(AggregatedPrice::getPrice)).orElseGet(null) ;
+	public Optional<AggregatedPrice> getMinPrice(ProductState state) {
+		return offers.stream().filter(e -> e.getProductState().equals(state)) .min(Comparator.comparing(AggregatedPrice::getPrice)) ;
 	}
 	
 	
