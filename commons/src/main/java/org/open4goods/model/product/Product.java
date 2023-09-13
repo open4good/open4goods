@@ -458,13 +458,6 @@ public class Product implements Standardisable {
 	//		return builder.toString();
 	//	}
 
-	/**
-	 *
-	 * @return true if this aggregated data dispose of an affiliated link
-	 */
-	public boolean hasAffiliatedLinks() {
-		return price.getOffers().stream().filter(AggregatedPrice::isAffiliated).findAny().isPresent();
-	}
 
 	public List<String> tagCloudTokens() {
 		List<String> tokens = new ArrayList<>();

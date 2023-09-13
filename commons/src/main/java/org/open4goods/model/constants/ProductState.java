@@ -5,6 +5,8 @@ package org.open4goods.model.constants;
  *
  */
 public enum ProductState {
-	UNKNOWN,OCCASION,NEW
+//	UNKNOWN,
+	OCCASION,
+	NEW
 
 }
