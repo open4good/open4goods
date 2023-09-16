@@ -58,22 +58,13 @@ public class AggregatedPrices implements Standardisable {
 	 * @return
 	 */
 	public List<AggregatedPrice> sortedOffers(ProductState productState) {
-		// Find the cheapest affiliated
-		final AggregatedPrice cheapest = offers.stream()
-				.filter(e->e.getProductState().equals(productState))
-				.sorted(Comparator.comparingDouble(AggregatedPrice::getPrice)).findFirst().orElse(null);
 
 		// Find the cheapest in any case
 		final List<AggregatedPrice> res = offers.stream()
 				.sorted(Comparator.comparingDouble(AggregatedPrice::getPrice))
+				.filter(e->e.getProductState().equals(productState))
 				.collect(Collectors.toList());
 
-		res.remove(cheapest);
-		res.add(0, cheapest);
-
-		if (null == res) {
-			return new ArrayList<>();
-		}
 		return res;
 
 
