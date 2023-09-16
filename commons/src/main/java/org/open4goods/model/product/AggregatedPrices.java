@@ -43,16 +43,13 @@ public class AggregatedPrices implements Standardisable {
 	private Set<ProductState> conditions = new HashSet<>();
 
 	public List<AggregatedPrice> newOffers() {
-		List<AggregatedPrice> soffers = sortedOffers(ProductState.NEW);
-		if (null == soffers) {
-			return new ArrayList<>();
-		} else {
-			return soffers.stream().filter(e-> e != null).filter(e->e.getProductState().equals(ProductState.NEW)).toList();	
-			
-		}
+		return sortedOffers(ProductState.NEW);
 	}
 	
 	
+	public List<AggregatedPrice> occasionOffers() {
+		return sortedOffers(ProductState.OCCASION);
+	}
 	
 	
 	/**
@@ -74,6 +71,9 @@ public class AggregatedPrices implements Standardisable {
 		res.remove(cheapest);
 		res.add(0, cheapest);
 
+		if (null == res) {
+			return new ArrayList<>();
+		}
 		return res;
 
 
