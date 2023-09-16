@@ -150,12 +150,7 @@ public class ProductController extends AbstractUiController {
 		ModelAndView mv = null;
 
 
-		// TODO : Remove this test page
-		if (null != request.getParameter("new")) {
-			mv = defaultModelAndView("product2", request);
-		} else {
-			mv = defaultModelAndView("product", request);
-		}
+		mv = defaultModelAndView("product", request);
 
 
 
