@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html th:lang="${siteLocale.language}">
+
+<head>
+
+	<!--/* Metas and CSS */-->
+	<th:block th:insert="inc/header-meta.html"></th:block>
+    
+	<!-- Primary Meta Tags -->
+	<title text="Template /// Contenu imagé"></title>
+	<meta name="description" content="Template /// Contenu imagé">
+		
+	<!-- Open Graph / Facebook -->
+	<meta property="og:type" content="website">
+	<meta property="og:url" th:content="${url}">
+	<meta property="og:title" th:content="#{ecoscore.title}">
+	<meta property="og:description" th:content="#{ecoscore.meta.description}">
+	<meta property="og:image" th:content="${baseUrl} + 'assets/img/brand/light.svg'">
+	
+	<!-- Twitter -->
+	<meta name="twitter:card" content="summary_large_image">
+	<meta name="twitter:url" th:content="${url}">
+	<meta name="twitter:title" th:content="#{ecoscore.title}">
+	<meta name="twitter:description" th:content="#{ecoscore.meta.description}">
+	<meta name="twitter:image" th:content="${baseUrl} + 'assets/img/brand/light.svg'">
+	
+</head>
+
+<body>
+    
+
+	<!--/* Navbar */-->
+	<header class="header-global">
+    	<nav id="navbar-main" th:aria-label="#{aria.navigation.primary}" class="navbar navbar-main navbar-expand-lg navbar-theme-primary headroom navbar-dark navbar-theme-primary">
+			<th:block th:insert="inc/navbar-non-product.html"></th:block>
+		</nav>
+       <!--/* Loader */-->
+       <th:block th:insert="inc/preloader.html"></th:block>
+	</header>
+	
+    <main>
+
+
+        <!-- Hero -->
+        <section class="section-header bg-secondary text-white">
+            <div class="container container-semi-fluid">
+               <div class="row justify-content-between align-items-center">
+                  <div class="col-12 col-md-8 col-lg-8 text-center text-md-left">
+                        <h1 class="display-2 mb-4">Template</h1>
+                        <p class="lead mb-4 text-muted">Template.</p>
+                    </div>
+                  <div class="col-12 col-md-4 d-none d-md-block text-center"><img src="../../assets/img/illustrations/about-illustration.svg" alt=""></div>
+               </div>
+            </div>
+        </section>
+        <!-- End of Hero section -->
+        
+    
+
+		<section class="mt-5">
+            <div class="container container-semi-fluid">
+                <div class="row align-items-center justify-content-around">
+                    <div class="col-md-6 col-xl-7 text-center text-md-left">
+                        <h2 class="h1 mb-5">Template</h2>
+                        <p class="lead mb-4 text-muted">Template.</p>
+					</div>
+                    <div class="col-md-6 col-xl-4 mb-5">
+                        <img class="organic-radius img-fluid" src="../../assets/img/sections/about-us-2.jpg" >
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+    
+
+	<!--/* Footer */-->
+	<th:block th:insert="inc/footer.html"></th:block>	
+
+    <!-- Core -->
+<script src="../../vendor/@popperjs/core/dist/umd/popper.min.js"></script>
+<script src="/webjars/bootstrap/js/bootstrap.min.js"></script>
+<script src="../../vendor/headroom.js/dist/headroom.min.js"></script>
+
+<!-- Vendor JS -->
+<script src="../../vendor/onscreen/dist/on-screen.umd.min.js"></script>
+<script src="../../vendor/nouislider/distribute/nouislider.min.js"></script>
+<script src="../../vendor/jarallax/dist/jarallax.min.js"></script>
+<script src="../../vendor/smooth-scroll/dist/smooth-scroll.polyfills.min.js"></script>
+<script src="../../vendor/vivus/dist/vivus.min.js"></script>
+<script src="../../vendor/chartist/dist/chartist.min.js"></script>
+<script src="../../vendor/chartist-plugin-tooltips/dist/chartist-plugin-tooltip.min.js"></script>
+<script src="../../vendor/@glidejs/glide/dist/glide.min.js"></script>
+<script src="../../vendor/countup.js/dist/countUp.umd.js"></script>
+<script src="../../vendor/vanillajs-datepicker/dist/js/datepicker.min.js"></script>
+
+<script async defer src="https://buttons.github.io/buttons.js"></script>
+
+<script src="/webjars/jquery/jquery.min.js"></script>
+
+<!-- pixel JS -->
+<script src="../../assets/js/pixel.js"></script>
+<!-- custom sources -->
+<script src="../../assets/js/pixel-custom.js"></script>
+</body>
+
+</html>
