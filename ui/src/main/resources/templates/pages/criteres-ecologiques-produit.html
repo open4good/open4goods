@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html th:lang="${siteLocale.language}">
+
+<head>
+
+	<!--/* Metas and CSS */-->
+	<th:block th:insert="inc/header-meta.html"></th:block>
+    
+	<!-- Primary Meta Tags -->
+	<title text="#{compensation.title}"></title>
+	<meta name="title" content="Quels sont les critères écologiques d’un produit ?">
+	<meta name="description" content="Dans cet article, Nudger vous révèle quels sont les critères importants à évaluer pour pouvoir juger de l’aspect écologique d’un produit.">
+		
+	<!-- Open Graph / Facebook -->
+	<meta property="og:type" content="website">
+	<meta property="og:url" th:content="${url}">
+	<meta property="og:title" th:content="#{compensation.title}">
+	<meta property="og:description" th:content="#{compensation.meta.description}">
+	<meta property="og:image" th:content="${baseUrl} + 'assets/img/brand/light.svg'">
+	
+	<!-- Twitter -->
+	<meta name="twitter:card" content="summary_large_image">
+	<meta name="twitter:url" th:content="${url}">
+	<meta name="twitter:title" th:content="#{compensation.title}">
+	<meta name="twitter:description" th:content="#{compensation.meta.description}">
+	<meta name="twitter:image" th:content="${baseUrl} + 'assets/img/brand/light.svg'">
+	
+</head>
+
+<body>
+    
+
+	<!--/* Navbar */-->
+	<header class="header-global">
+    	<nav id="navbar-main" th:aria-label="#{aria.navigation.primary}" class="navbar navbar-main navbar-expand-lg navbar-theme-primary headroom navbar-dark navbar-theme-primary">
+			<th:block th:insert="inc/navbar-non-product.html"></th:block>
+		</nav>
+       <!--/* Loader */-->
+       <th:block th:insert="inc/preloader.html"></th:block>
+	</header>
+	
+    <main>
+
+
+        <!-- Hero -->
+        <section class="section-header bg-secondary text-white">
+            <div class="container">
+               <div class="row justify-content-between align-items-center">
+                  <div class="col-12 col-md-8 col-lg-8 text-center text-md-left">
+                        <h1 class="display-2 mb-4">Quels sont les critères importants pour juger l'aspect écologique d'un produit ?</h1>
+                    </div>
+                  <div class="col-12 col-md-4 d-none d-md-block text-center"><img src="../../assets/img/illustrations/about-illustration.svg" alt=""></div>
+               </div>
+            </div>
+        </section>
+        <!-- End of Hero section -->
+        <!-- Section -->
+        <section class="section section-md">
+            <div class="container">
+                <div class="row d-flex flex-wrap align-items-center justify-content-around">
+                    <div class="col-lg-5 mb-5">
+                        <img class="organic-radius img-fluid" src="../../assets/img/illustrations/durable.jpg" alt="Action responsable">
+						<p>Image de <a href="https://fr.freepik.com/vecteurs-libre/sauvez-concept-planete-gens-qui-prennent-soin-terre_7824979.htm#query=%C3%A9cologie&position=0&from_view=search&track=sph">Freepik</a></p>
+                    </div>
+                    <div class="col-lg-7 ">
+                        <th:block th:with="path='WIDGETS/criteres-ecologiques-intro/'">
+							<th:block th:insert="inc/wiki.html"></th:block>
+						</th:block>                  
+                    </div>
+                </div>
+            </div>
+        </section>
+				        <section class="section section-md">
+            <div class="container">
+                <div class="row d-flex flex-wrap align-items-center justify-content-around">
+
+                    <div class="col-">
+                        <h2 class="h1 mb-5">Quels sont les critères écologiques d’un produit à évaluer lors de sa recherche ?</h2>
+						<div>
+                        <th:block th:with="path='WIDGETS/criteres-ecologiques-quelscriteres/'">
+							<th:block th:insert="inc/wiki.html"></th:block>
+						</th:block>   
+							</div>
+                    </div>
+                </div>
+			<div class="container">
+                <div class="row d-flex flex-wrap align-items-center justify-content-around">
+                    <div class="col-">
+                        <h2 class="h1 mb-5">Comment rechercher les produits les plus vertueux disponibles à l’achat ?</h2>
+						<div>
+                        <th:block th:with="path='WIDGETS/criteres-ecologiques-produitsvertueux/'">
+							<th:block th:insert="inc/wiki.html"></th:block>
+						</th:block>   
+							</div>
+                    </div>
+                </div>
+            </div>
+            </div>
+    </main>
+    
+
+	<!--/* Footer */-->
+	<th:block th:insert="inc/footer.html"></th:block>	
+
+    <!-- Core -->
+<script src="../../vendor/@popperjs/core/dist/umd/popper.min.js"></script>
+<script src="/webjars/bootstrap/js/bootstrap.min.js"></script>
+<script src="../../vendor/headroom.js/dist/headroom.min.js"></script>
+
+<!-- Vendor JS -->
+<script src="../../vendor/onscreen/dist/on-screen.umd.min.js"></script>
+<script src="../../vendor/nouislider/distribute/nouislider.min.js"></script>
+<script src="../../vendor/jarallax/dist/jarallax.min.js"></script>
+<script src="../../vendor/smooth-scroll/dist/smooth-scroll.polyfills.min.js"></script>
+<script src="../../vendor/vivus/dist/vivus.min.js"></script>
+<script src="../../vendor/chartist/dist/chartist.min.js"></script>
+<script src="../../vendor/chartist-plugin-tooltips/dist/chartist-plugin-tooltip.min.js"></script>
+<script src="../../vendor/@glidejs/glide/dist/glide.min.js"></script>
+<script src="../../vendor/countup.js/dist/countUp.umd.js"></script>
+<script src="../../vendor/vanillajs-datepicker/dist/js/datepicker.min.js"></script>
+
+<script async defer src="https://buttons.github.io/buttons.js"></script>
+
+<script src="/webjars/jquery/jquery.min.js"></script>
+
+<!-- pixel JS -->
+<script src="../../assets/js/pixel.js"></script>
+<!-- custom sources -->
+<script src="../../assets/js/pixel-custom.js"></script>
+</body>
+
+</html>
