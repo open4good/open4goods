@@ -23,6 +23,7 @@ import org.open4goods.config.yml.datasource.CsvDataSourceProperties;
 import org.open4goods.config.yml.datasource.DataSourceProperties;
 import org.open4goods.config.yml.datasource.HtmlDataSourceProperties;
 import org.open4goods.crawler.config.yml.FetcherProperties;
+import org.open4goods.crawler.repository.IndexationRepository;
 import org.open4goods.crawler.services.DataFragmentCompletionService;
 import org.open4goods.crawler.services.IndexationService;
 import org.open4goods.exceptions.ValidationException;
@@ -71,6 +72,7 @@ public class CsvDatasourceFetchingService extends DatasourceFetchingService {
 	private final ObjectMapper csvMapper = new CsvMapper().enable((CsvParser.Feature.IGNORE_TRAILING_UNMAPPABLE));
 
 	private final IndexationService indexationService;
+	
 
 	private final DataFragmentCompletionService completionService;
 
@@ -101,14 +103,13 @@ public class CsvDatasourceFetchingService extends DatasourceFetchingService {
 	 */
 	public CsvDatasourceFetchingService(final DataFragmentCompletionService completionService,
 			final IndexationService indexationService, final FetcherProperties fetcherProperties,
-			final WebDatasourceFetchingService webFetchingService, final String logsFolder, boolean toConsole
+			final WebDatasourceFetchingService webFetchingService, IndexationRepository indexationRepository, final String logsFolder, boolean toConsole
 			) {
-		super(logsFolder, toConsole);
+		super(logsFolder, toConsole,indexationRepository);
 		this.indexationService = indexationService;
 		this.webFetchingService = webFetchingService;
 		this.completionService = completionService;
 		this.fetcherProperties = fetcherProperties;
-
 		// The CSV executor can have at most the fetcher max indexation tasks threads
 		executor = Executors.newFixedThreadPool(fetcherProperties.getConcurrentFetcherTask());
 		
@@ -332,6 +333,8 @@ public class CsvDatasourceFetchingService extends DatasourceFetchingService {
 
 					dedicatedLogger.info("Starting {} CSV lines fetching of {} ", linesCount, destFile.getAbsolutePath());
 					
+					running.get(dsConfName).getFilesCounters().put(url, 0L);
+					
 					final MappingIterator<Map<String, String>> mi = oReader.readValues(destFile);
 					
 					while (mi.hasNext() && !running.get(dsConfName).isShuttingDown()) {
@@ -341,7 +344,7 @@ public class CsvDatasourceFetchingService extends DatasourceFetchingService {
 
 							
 							// stats update
-							running.get(dsConfName).incrementProcessed();
+							running.get(dsConfName).incrementProcessed(url);
 							running.get(dsConfName).decrementQueue();
 
 							// Handle the csv line
