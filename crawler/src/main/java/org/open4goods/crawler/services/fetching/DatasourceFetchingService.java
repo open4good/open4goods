@@ -4,6 +4,7 @@ import java.util.Map;
 
 import org.apache.commons.lang3.ArrayUtils;
 import org.open4goods.config.yml.datasource.DataSourceProperties;
+import org.open4goods.crawler.repository.IndexationRepository;
 import org.open4goods.exceptions.TechnicalException;
 import org.open4goods.helper.GenericFileLogger;
 import org.open4goods.model.crawlers.FetchingJobStats;
@@ -28,8 +29,12 @@ public abstract class DatasourceFetchingService {
 
 	protected Logger dedicatedLogger;
 
-	public DatasourceFetchingService (final String logsFolder, boolean toConsole) {
+
+	private IndexationRepository indexationRepository;
+
+	public DatasourceFetchingService (final String logsFolder, boolean toConsole, IndexationRepository indexationRepository) {
 		dedicatedLogger = GenericFileLogger.initLogger("stats-datasource", Level.INFO, logsFolder, toConsole);
+		this.indexationRepository = indexationRepository;
 	}
 
 	/**
@@ -70,6 +75,15 @@ public abstract class DatasourceFetchingService {
 		if (fetchingJobStats.getNumberOfIndexedDatas() < dataSourceProperties.getMinimumIndexedItems()   ) {
 			dedicatedLogger.error(fetchingJobStats.getName() + " has indexed " + fetchingJobStats.getNumberOfIndexedDatas() + " datafragments, was expecting at least " + dataSourceProperties.getMinimumIndexedItems());
 		}
+		
+		// Logging to kibana
+		if (null == indexationRepository) {
+			logger.warn("Null indexationRepository, cannot save stats");
+		}
+		else {
+			indexationRepository.save(fetchingJobStats);
+		}
+		
 	}
 
 

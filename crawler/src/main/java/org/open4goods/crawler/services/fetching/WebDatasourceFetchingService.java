@@ -19,6 +19,7 @@ import org.open4goods.config.yml.datasource.HtmlDataSourceProperties;
 import org.open4goods.crawler.SeleniumPageFetcher;
 import org.open4goods.crawler.config.yml.FetcherProperties;
 import org.open4goods.crawler.extractors.Extractor;
+import org.open4goods.crawler.repository.IndexationRepository;
 import org.open4goods.crawler.services.IndexationService;
 import org.open4goods.exceptions.TechnicalException;
 import org.open4goods.model.constants.TimeConstants;
@@ -63,10 +64,11 @@ public class WebDatasourceFetchingService extends DatasourceFetchingService{
 	private final Map<String, DataSourceProperties> controllersConfig = new ConcurrentHashMap<>();
 
 
-	public WebDatasourceFetchingService(final IndexationService indexationService, final FetcherProperties fetcherProperties, final String logsFolder, boolean toConsole) {
-		super(logsFolder, toConsole);
+	public WebDatasourceFetchingService(final IndexationService indexationService, final FetcherProperties fetcherProperties, IndexationRepository repository, final String logsFolder, boolean toConsole) {
+		super(logsFolder, toConsole,repository);
 		this.fetcherProperties = fetcherProperties;
 		this.indexationService = indexationService;
+	
 	}
 
 	/**

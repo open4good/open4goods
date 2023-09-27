@@ -13,6 +13,7 @@ import org.open4goods.api.services.RealtimeAggregationService;
 import org.open4goods.api.services.ReferentielService;
 import org.open4goods.api.services.store.DataFragmentStoreService;
 import org.open4goods.crawler.config.yml.FetcherProperties;
+import org.open4goods.crawler.repository.IndexationRepository;
 import org.open4goods.crawler.services.ApiSynchService;
 import org.open4goods.crawler.services.DataFragmentCompletionService;
 import org.open4goods.crawler.services.FetchersService;
@@ -328,7 +329,10 @@ public class ApiConfig {
 	CsvDatasourceFetchingService csvDatasourceFetchingService(
 			@Autowired final DataFragmentCompletionService completionService,
 			@Autowired final IndexationService indexationService, @Autowired final ApiProperties apiProperties,
-			@Autowired final WebDatasourceFetchingService webDatasourceFetchingService
+			@Autowired final WebDatasourceFetchingService webDatasourceFetchingService,
+			@Autowired final IndexationRepository indexationRepository
+			
+			
 			) {
 		
 		boolean toConsole = false;
@@ -339,11 +343,11 @@ public class ApiConfig {
 		
 		
 		return new CsvDatasourceFetchingService(completionService, indexationService,
-				apiProperties.getFetcherProperties(), webDatasourceFetchingService, apiProperties.logsFolder(), toConsole);
+				apiProperties.getFetcherProperties(), webDatasourceFetchingService,indexationRepository, apiProperties.logsFolder(), toConsole);
 	}
 
 	@Bean
-	WebDatasourceFetchingService webDatasourceFetchingService(
+	WebDatasourceFetchingService webDatasourceFetchingService(@Autowired final IndexationRepository indexationRepository,
 			@Autowired final IndexationService indexationService, @Autowired final ApiProperties apiProperties) {
 
 		// Logging to console according to dev profile and conf
@@ -354,7 +358,7 @@ public class ApiConfig {
 		}		
 		
 		
-		return new WebDatasourceFetchingService(indexationService, apiProperties.getFetcherProperties(),
+		return new WebDatasourceFetchingService(indexationService, apiProperties.getFetcherProperties(),indexationRepository,
 				apiProperties.logsFolder(), toConsole);
 	}
 
