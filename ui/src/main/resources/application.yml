@@ -7,11 +7,8 @@ server:
     worker-threads: 1000
   http2:
     enabled: true
-  forward-headers-strategy: NATIVE
-  
+  forward-headers-strategy: NATIVE  
 
-
-  
   
 apiConfig:
   apiTitle: "Open4goods API"
@@ -23,7 +20,10 @@ apiConfig:
 # A mapping beetween custom page names and page templates
 pages:
   "comparateur-prix": "pages/comparateur-prix.html"
-
+  "tester-une-tv": "pages/tv/test-tv.html"
+  "criteres-ecologiques": "pages/criteres-ecologiques-produit.html"
+  "template-contenu": "pages/template-contenu.html"
+  "template-image": "pages/template-image.html"
 
 
 brandConfig:
