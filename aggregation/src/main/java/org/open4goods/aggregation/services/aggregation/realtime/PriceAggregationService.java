@@ -103,10 +103,9 @@ public class PriceAggregationService extends AbstractRealTimeAggregationService 
 
 		}
 
-		AggregatedPrices aggPrices = new AggregatedPrices();
-
-		aggPrices.setOffers(filtered);
-
+		AggregatedPrices aggPrices = aggregatedData.getPrice();
+		
+		
 		/////////////////////////
 		// Prices computation
 		////////////////////////
@@ -117,7 +116,6 @@ public class PriceAggregationService extends AbstractRealTimeAggregationService 
 
 		// set Number of offers
 		aggregatedData.setOffersCount(reducedPrices.size());
-
 
 		// Computing / incrementing history
 		computePriceHistory(aggPrices, ProductState.OCCASION);
