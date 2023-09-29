@@ -64,6 +64,19 @@
 			                        	</th:block>
 	                      		   </p>
 	                       
+							                       
+									<div th:each ="vertical : ${verticals}" class="col-12 col-md-3 col-lg-3 mb-5 mb-lg-0">
+						                
+		                       			<a th:href="'/'+${vertical.homeUrl.i18n(siteLanguage)}" class="btn btn-outline-primary" type="button"><span class="me-1"><span class="far fa-save"></span></span> <span th:text="${vertical.homeTitle.i18n(siteLanguage)}">Téléviseurs</span></a>
+			
+						            </div>	                       
+	                       			
+	                       			
+	                       			
+	                       			
+	                       			
+	                       
+	                       
 	                               <form method="post" id="searchForm" action="/recherche">
 				                       <div class="d-flex flex-wrap mt-lg-2">
 				                           <div class="input-group input-group-lg">
@@ -254,45 +267,7 @@
 			</div>
 		</section>
 		
-		<section class="section">
-	   
-	   
-	   
-		<div class="row text-center justify-content-center">
-              <div class="col-md-8 mb-5">
-                  <p class="display-3">Nos catégories évaluées</p>
-                  <p class="lead">L'assurance de bien choisir</p>
-              </div>
-        </div>	   
-        	   
-	   <div class="container container-semi-fluid ">
-        <div class="row justify-content-center">
 
-
-			<div th:each ="vertical : ${verticals}" class="col-12 col-md-3 col-lg-3 mb-5 mb-lg-0">
-                
-                <div class="card shadow">
-                	<a th:href="'/'+${vertical.homeUrl.i18n(siteLanguage)}">
-	                    <img th:src="${vertical.homeLogo.i18n(siteLanguage)}" class="card-img-top rounded-top" th:alt="${vertical.homeTitle.i18n(siteLanguage)}">
-                	</a>
-                    <div class="card-body">
-    					<a th:href="'/'+${vertical.homeUrl.i18n(siteLanguage)}">
-	                        <h2 class="h4 card-title mt-3 text-center" th:text="${vertical.homeTitle.i18n(siteLanguage)}"></h2>
-	                        <p class="card-text" th:text="${vertical.homeDescription.i18n(siteLanguage)}"></p>
-	                        <button class="w-100 btn btn-primary btn-sm">Découvrir</button>
-    					</a>
-                    </div>
-                </div>
-            </div>
-
-
-            
-        </div>
-    </div>
-    
-    
-    
-    </section>
     <section class="section">
 		<div class="row text-center justify-content-center">
               <div class="col-md-8 mb-5">
