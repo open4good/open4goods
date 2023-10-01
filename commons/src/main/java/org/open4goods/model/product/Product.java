@@ -78,8 +78,6 @@ public class Product implements Standardisable {
 	@Field(index = true, store = false, type = FieldType.Object)
 	private Names names = new Names();
 
-	//	@Field(index = true, store = false, type = FieldType.Object)
-	//	private Urls urls = new Urls();
 
 	//	@Field(index = false, store = false, type = FieldType.Object)
 	//	/** The comments, aggregated and nlp processed **/
