@@ -256,15 +256,15 @@ public class VerticalConfig{
 	 * @return
 	 */
 	public String getBaseUrl(final Locale siteLocale) {
-		return namings.getBaseUrls().getOrDefault(siteLocale.getLanguage(), namings.getBaseUrls().get("default"));
+		return homeUrl.getOrDefault(siteLocale.getLanguage(), namings.getBaseUrls().get("default"));
 	}
 
 	public String baseUrl() {
-		return namings.getBaseUrls().get("default");
+		return homeUrl.get("default");
 	}
 
 	public String getBaseUrl(final String siteLocale) {
-		return namings.getBaseUrls().getOrDefault(siteLocale, namings.getBaseUrls().get("default"));
+		return homeUrl.getOrDefault(siteLocale, namings.getBaseUrls().get("default"));
 	}
 
 
