@@ -7,7 +7,6 @@
 		<div class="info-main text-center">
 			
 			
-			<img th:if="${hasBrandLogo}" th:src="'/images/marques/'+${product.brand()}+'.png'">
 			
 			<th:block th:if="${editor}">
 				<input th:if="${product.names.manualName}" size="50" type="text" name="productTitle" id="productTitle" th:value="${product.names.manualName}">
@@ -18,11 +17,15 @@
 				<h1 th:if="${product.names.manualName}" th:text="${product.names.manualName}"></h1>	
 				<h1 th:unless="${product.names.manualName}" th:text="${product.names.shortestOfferName()}"></h1>					
 			</th:block>
-					
+			<br/>
+			<img height="25px" th:if="${hasBrandLogo}" th:src="'/images/marques/'+${product.brand()}+'.png'">
+<!-- 
+
 			<th:block th:if="${null != product.bestPrice()}">
 				<p class="text-left" th:if="${null != product.model() && null != product.brand()}" th:utext="#{product.description.withbrandandmodel(${product.model()}, ${product.brand()}, ${#numbers.formatDecimal(product.bestPrice().compensation, 1, 2)}, ${product.names.shortestOfferName()})}"></p>            
 	            <p class="text-left" th:unless="${null != product.model() && null != product.brand()}" th:utext="#{product.description.withname(${product.names.shortestOfferName()}, ${#numbers.formatDecimal(product.bestPrice().compensation, 1, 2)})}"></p>            
 			</th:block>
+ -->
 		</div>
 	</div>
 	
