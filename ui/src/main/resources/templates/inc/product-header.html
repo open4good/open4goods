@@ -1,6 +1,6 @@
 <div class="row align-items-center text-center">
 	<aside class="col-md-3">
-   		<img height="200" th:src="'/'+${product.names.name}+'/image.png'"	th:alt="${product.names.longestOfferName()}">
+   		<img height="200" th:src="'/images/'+${product.gtin()}+'-cover.png'"	th:alt="${product.names.longestOfferName()}">
 	</aside>
 
 	<div class="col-md-9">

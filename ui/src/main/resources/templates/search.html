@@ -81,7 +81,7 @@
         
 			        <div th:each="item: ${results.data}" class="col-12 col-md-12 mb-3">			        	
 			        	<th:block th:with="item = ${item}">
-				        	<th:block th:insert="inc/search-card.html"></th:block>        
+				        	<th:block th:insert="~{inc/search-card.html}"></th:block>        
 			        	</th:block>   
 			        </div>
 	        	</div>
