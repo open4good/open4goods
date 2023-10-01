@@ -56,12 +56,15 @@ public class NamesAggregationService extends AbstractRealTimeAggregationService 
 
 	private String computeProductName(Product output) {
 		
+		String ret;
 		if (!StringUtils.isEmpty(output.model()) && !StringUtils.isEmpty(output.brand())) {
-			return output.gtin()+"-"+output.brand()+"-"+output.model();
+			ret = output.gtin()+"-"+output.brand()+"-"+output.model();
+		} else {
+			ret = computeProductName(output.getNames(),output.gtin());;
 		}
 		
 		
-		return computeProductName(output.getNames(),output.gtin());
+		return ret;
 	}
 
 	private String computeProductName(Names names, String gtin) {
@@ -100,8 +103,8 @@ public class NamesAggregationService extends AbstractRealTimeAggregationService 
 				//			builder.append(token);
 			}
 
+			builder.append(gtin).append("-");
 			builder.append(StringUtils.join(set,"-"));
-			builder.append("-").append(gtin);
 
 
 			return builder.toString();
