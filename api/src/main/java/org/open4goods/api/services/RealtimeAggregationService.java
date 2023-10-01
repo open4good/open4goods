@@ -134,7 +134,7 @@ public class RealtimeAggregationService {
 		services.add(new AttributeRealtimeAggregationService(config.getAttributesConfig(), brandService, apiProperties.logsFolder(), apiProperties.isDedicatedLoggerToConsole()));
 
 
-		services.add(new NamesAggregationService(config.getNamings(), evaluationService, apiProperties.logsFolder(), apiProperties.isDedicatedLoggerToConsole()));
+		services.add(new NamesAggregationService(apiProperties.logsFolder(), apiProperties.isDedicatedLoggerToConsole()));
 
 		//		services.add(new CategoryService(apiProperties.logsFolder(), taxonomyService));
 
