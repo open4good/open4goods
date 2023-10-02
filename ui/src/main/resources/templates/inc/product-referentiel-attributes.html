@@ -50,12 +50,12 @@
 				
 				<tr>
 					<th scope="row">Référencé depuis</th>
-					<td th:text="${product.creationDate}"></td>
+					<td th:text="${product.creationDate(userLocale)}"></td>
 				</tr>
 				
 				<tr>
 					<th scope="row">Mise à jour</th>
-					<td th:text="${product.lastChange}"></td>
+					<td th:text="${product.ago(userLocale)}"></td>
 				</tr>
 							
 			</tbody>

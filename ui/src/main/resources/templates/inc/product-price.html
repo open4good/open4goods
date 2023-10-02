@@ -3,19 +3,14 @@
 		<div class="col-sm-6">
 			<!-- Header -->
 			<div class="card-header border-0 bg-white text-center pb-0">
-				<h2 class="text-primary mb-0">Meilleur prix</h2>
-				<th:block th:if="${product.offersCount} > 1">
-					<span class="text-success small"> sur </span>
-					<a href="#offres">
-						<span class="h6 mb-0 text-danger">
-						<span th:text='${product.offersCount}'></span> offres</span>
-					</a>
-				</th:block>
-				<span class="d-block my-3"> <span class="display-2 fw-bold">
-					<th:block th:text="${#numbers.formatDecimal(product.bestPrice().price, 1, 2)}"></th:block> 
-					<span class="align-baseline font-medium" th:text="#{'symbol.'+${product.bestPrice().currency}}"></span>
+				<h2 class="h3 ">Meilleur prix</h2>
+				<span class="d-block"> 
+					<span class="display-2 fw-bold">
+						<th:block th:text="${#numbers.formatDecimal(product.bestPrice().price, 1, 2)}"></th:block> 
+						<span class="align-baseline font-medium" th:text="#{'symbol.'+${product.bestPrice().currency}}"></span>
+					</span>
 				</span>
-				</span>
+
 			</div>
 		</div>
 		
@@ -23,10 +18,19 @@
 			<!-- Content -->
 			<div class="card-body pb-0">
 				<ul class="list-group list-group-flush price-list mb-4">
-					<li class="list-group-item border-0"><img height="16" width="16" class="me-2" th:src="'/icon/'+${product.bestPrice().datasourceName}" th:title="'icône ' + ${product.bestPrice().shortDataSourceName()}"><span th:text="${product.bestPrice().datasourceName}"></span> </li>
 
 					<li th:if="${product.bestPrice().productState}" class="list-group-item border-0"><span class="fas fa-box"></span><span><b th:text="#{'condition.'+${product.bestPrice().productState}}"></b></span></li>
-					<li class="list-group-item border-0"><span class="fas fa-clock"></span><span th:text="'il y a ' + ${product.bestPrice().ago(userLocale)} "></span> </li>
+					<li class="list-group-item border-0"><img height="32" width="32" class="me-2" th:src="'/icon/'+${product.bestPrice().datasourceName}" th:title="'icône ' + ${product.bestPrice().shortDataSourceName()}"><span th:text="${product.bestPrice().datasourceName}"></span> </li>
+					
+						<li class="list-group-item border-0">
+									<th:block th:if="${product.offersCount} > 1">
+										<a href="#offres">
+											<span class="text-success small"> Voir les  </span>
+											<span class="h6 mb-0 text-danger">
+												<span th:text='${product.offersCount}'></span> offres</span>
+										</a>
+									</th:block>					
+						</li>
 				
 				</ul>
 			</div>
