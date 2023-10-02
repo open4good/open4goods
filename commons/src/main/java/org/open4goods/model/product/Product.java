@@ -1,16 +1,24 @@
 
 package org.open4goods.model.product;
 
+import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
+import org.joda.time.DurationFieldType;
+import org.joda.time.Period;
+import org.joda.time.PeriodType;
+import org.joda.time.format.PeriodFormat;
+import org.joda.time.format.PeriodFormatter;
 import org.open4goods.model.Standardisable;
 import org.open4goods.model.constants.Currency;
 import org.open4goods.model.constants.ProductState;
@@ -479,6 +487,44 @@ public class Product implements Standardisable {
 	}
 
 	
+	/**
+	 * TODO : merge with the one on price()
+	 * @return a localised formated duration of when the product was last indexed
+	 */
+	public String ago(Locale locale) {
+
+		long duration = System.currentTimeMillis() - lastChange;
+		
+		
+		
+		Period period;
+		if (duration < 3600000) {
+			DurationFieldType[] min = { DurationFieldType.minutes(), DurationFieldType.seconds() };
+			period = new Period(duration, PeriodType.forFields(min)).normalizedStandard();
+		} else {
+			DurationFieldType[] full = { DurationFieldType.days(), DurationFieldType.hours() };
+			period = new Period(duration, PeriodType.forFields(full)).normalizedStandard();
+
+		}
+		
+		PeriodFormatter formatter = PeriodFormat.wordBased();
+
+		String ret = (formatter. print(period));
+		
+		
+		return ret;
+	}
+	
+	/**
+	 * Return text version of the creation date
+	 * @param locale
+	 * @return
+	 */
+	public String creationDate(Locale locale) {
+		DateFormat dateFormat = DateFormat.getDateInstance(DateFormat.DEFAULT, locale);
+		String date = dateFormat.format(new Date(creationDate));
+		return date;
+	}
 	//////////////////////////////////////////
 	// Getters / Setters
 	//////////////////////////////////////////
