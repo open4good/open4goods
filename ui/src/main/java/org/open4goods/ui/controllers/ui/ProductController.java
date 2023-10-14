@@ -187,7 +187,10 @@ public class ProductController extends AbstractUiController {
 
 
 		mv.addObject("product", data);
+		mv.addObject("verticalConfig", verticalConfigService.getConfigById(vertical));
 
+		
+		
 		// Adding the diplay country
 		if (null != data.getGtinInfos().getCountry()) {
 			mv.addObject("originCountry", new ULocale("",data.getGtinInfos().getCountry()).getDisplayCountry( new ULocale(request.getLocale().toString())));
