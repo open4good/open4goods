@@ -11,7 +11,7 @@
 				id="tabs-icons-text-1-tab" data-bs-toggle="tab"
 				href="#panel-ecoscore" role="tab"
 				aria-controls="tabs-icons-text-1" aria-selected="true"><span
-					class="fas fa-palette me-2"></span>Ecoscore</a></li>
+					class="fa-solid fa-n me-2"></span>Ecoscore</a></li>
 					
 					
 
@@ -19,20 +19,15 @@
 				id="tabs-icons-text-2-tab" data-bs-toggle="tab"
 				href="#panel-radar" role="tab"
 				aria-controls="tabs-icons-text-2" aria-selected="false"><span
-					class="fas fa-laptop-code me-2"></span>Radar</a></li>
+					class="fa-solid fa-satellite-dish me-2"></span>Radar</a></li>
 
 			<li class="nav-item"><a class="nav-link mb-sm-3 mb-md-0"
 				id="tabs-icons-text-2-tab" data-bs-toggle="tab"
 				href="#panel-detail-ecoscore" role="tab"
 				aria-controls="tabs-icons-text-2" aria-selected="false"><span
-					class="fas fa-laptop-code me-2"></span>Explications</a></li>
+					class="fa-solid fa-circle-info me-2"></span>Explications</a></li>
 
-			<li class="nav-item"><a class="nav-link mb-sm-3 mb-md-0"
-				id="tabs-icons-text-2-tab" data-bs-toggle="tab"
-				href="#panel-datas" role="tab"
-				aria-controls="tabs-icons-text-2" aria-selected="false"><span
-					class="fas fa-laptop-code me-2"></span>Sources</a></li>
-										
+	
 								
 		</ul>
 	</div>
@@ -127,26 +122,60 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <script>
-  const ctx = document.getElementById('myChart');
 
-  new Chart(ctx, {
-    type: 'bar',
-    data: {
-      labels: ['Red', 'Blue', 'Yellow', 'Green', 'Purple', 'Orange'],
-      datasets: [{
-        label: '# of Votes',
-        data: [12, 19, 3, 5, 2, 3],
-        borderWidth: 1
-      }]
-    },
-    options: {
-      scales: {
-        y: {
-          beginAtZero: true
-        }
+
+
+const data = {
+  labels: [
+    'Eating',
+    'Drinking',
+    'Sleeping',
+    'Designing',
+    'Coding',
+    'Cycling',
+    'Running'
+  ],
+  datasets: [{
+    label: 'My First Dataset',
+    data: [65, 59, 90, 81, 56, 55, 40],
+    fill: true,
+    backgroundColor: 'rgba(255, 99, 132, 0.2)',
+    borderColor: 'rgb(255, 99, 132)',
+    pointBackgroundColor: 'rgb(255, 99, 132)',
+    pointBorderColor: '#fff',
+    pointHoverBackgroundColor: '#fff',
+    pointHoverBorderColor: 'rgb(255, 99, 132)'
+  }, {
+    label: 'My Second Dataset',
+    data: [28, 48, 40, 19, 96, 27, 100],
+    fill: true,
+    backgroundColor: 'rgba(54, 162, 235, 0.2)',
+    borderColor: 'rgb(54, 162, 235)',
+    pointBackgroundColor: 'rgb(54, 162, 235)',
+    pointBorderColor: '#fff',
+    pointHoverBackgroundColor: '#fff',
+    pointHoverBorderColor: 'rgb(54, 162, 235)'
+  }]
+};
+
+
+
+const config = {
+  type: 'radar',
+  data: data,
+  options: {
+    elements: {
+      line: {
+        borderWidth: 3
       }
     }
-  });
+  },
+};
+
+
+  const ctx = document.getElementById('myChart');
+
+  new Chart(ctx, config);
 </script>	
 					
 					
@@ -170,11 +199,7 @@
 					
 				</div>
 				
-				<!-- Radar -->
-				<div class="tab-pane fade" id="panel-datas" role="tabpanel"
-					aria-labelledby="panel-datas">
-					
-				</div>
+			
 				
 				
 			</div>
