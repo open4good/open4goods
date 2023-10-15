@@ -187,7 +187,7 @@ public class ProductController extends AbstractUiController {
 
 
 		mv.addObject("product", data);
-		mv.addObject("verticalConfig", verticalConfigService.getConfigById(vertical));
+		mv.addObject("verticalConfig", verticalConfigService.getVerticalForPath(vertical));
 
 		
 		
