@@ -371,8 +371,13 @@ public class AttributeRealtimeAggregationService extends AbstractRealTimeAggrega
 						dedicatedLogger.info("Adding different {} name as BRAND. Existing is {}, would have erased with {}",key,existing, value);						
 						// Adding the old one in alternate brand
 						output.getAlternativeBrands().add(new UnindexedKeyValTimestamp(fragement.getDatasourceName(), value));
+						
+						
 						// Adding the new one
 						output.getAttributes().addReferentielAttribute(ReferentielKey.BRAND, value);
+
+						// Removing the current brand in any case
+						output.getAlternativeBrands().remove(output.brand());
 					}
 				} 
 				
