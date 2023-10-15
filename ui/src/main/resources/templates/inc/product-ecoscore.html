@@ -5,7 +5,7 @@
 
 
 	<div class="nav-wrapper position-relative mb-2">
-		<ul class="nav nav-tabs nav-fill flex-column flex-md-row"
+		<ul class="nav nav-tabs nav-fill "
 			id="tabs-icons-text" role="tablist">
 			<li class="nav-item"><a class="nav-link mb-sm-3 mb-md-0 active"
 				id="tabs-icons-text-1-tab" data-bs-toggle="tab"
@@ -48,25 +48,20 @@
 
 
 	<div class="card border-0">
-		<div class="card-body p-0">
-			<div class="tab-content" id="tabcontent2">
-				<div class="tab-pane fade active show" id="panel-ecoscore"
-					role="tabpanel" aria-labelledby="panel-ecoscore">
-					
-					
-					
-					
+		<div class="tab-content card-body p-0" id="tabscore">
+			
+				<!-- Score -->
+				<div class="tab-pane fade active show" id="panel-ecoscore"	role="tabpanel" aria-labelledby="panel-ecoscore">					
 					<div>
-						<div class="text-center">
-				           
+						<div class="text-center">				           
 				           <img width="350px" src="/icons/ecoscore.png">
 						</div>
-						<div  class="m-5">
 						
+						<div  class="m-5">						
 							<div th:each="score : ${product.realScores()}" class="progress-wrapper">
 							
 								<div class="progress-info">
-									<span class="h4 progress-tooltip" th:classappend="'bg-'+${score.colorClassName()}" th:text="${score.name}"></span>
+									<span class="h4 progress-tooltip" th:classappend="'bg-'+${score.colorClassName()}" th:text="#{'score-'+${score.name}}"></span>
 									<div class="progress-percentage">
 										<!-- 
 										<span th:if="${score.relativValue}" th:text="${score.relativValue*20}+'%'"></span>
@@ -77,24 +72,26 @@
 									<div class="progress-bar" th:classappend="'bg-'+${score.colorClassName()}" role="progressbar"
 										  th:attrappend="aria-valuenow = ${score.percent()}, style='width: '+${score.percent()}+'%;'" aria-valuemin="0" aria-valuemax="100"></div>
 								</div>
-						</div>
+							</div>
 						</div>
 					</div>
 				
 				</div>
 
-				</div>
+				
 				
 				<!-- Detail -->
-				<div class="tab-pane fade" id="panel-detail-ecoscore" role="tabpanel"
-					aria-labelledby="panel-detail-ecoscore">
-					<p>L'écoscore écologique pour le SAMSUNG OLED-85C8 est composé de 4 critères, dont 2 virtuels. Ce score environnemental est calculé en prenant en compte différentes informations environnentales disponibles pour 
+				<div class=" tab-pane fade" id="panel-detail-ecoscore" role="tabpanel"	aria-labelledby="panel-detail-ecoscore">
+					
+					<div class=" scrollable-panel">
+					
+					<p class="m-2" >L'écoscore écologique pour le SAMSUNG OLED-85C8 est composé de 4 critères, dont 2 virtuels. Ce score environnemental est calculé en prenant en compte différentes informations environnentales disponibles pour 
 					ce téléviseur. Voici la composition du score :
 					
-					<br/><br/><br/>
+	
 					
 	
-						<table class="table table-hover">
+						<table class="">
 							<tbody>
 									<tr th:each="score : ${product.scores}">
 									<th scope="row" th:text="${score.key}"></th>
@@ -102,101 +99,79 @@
 								</tr>
 							</tbody>
 						</table>		
-					<br/><br/><br/>
-					
-					
-					  </p>
+	
 					<p>En savoir plus<a href="">le mode de calcul et la transparence de l'eco-score</a>. </p>
+					</div>
 				</div>
 				
 				
 				<!-- Radar -->
-				<div class="tab-pane fade" id="panel-radar" role="tabpanel"
-					aria-labelledby="panel-radar">
+				<div class="tab-pane fade" id="panel-radar" role="tabpanel"	aria-labelledby="panel-radar">
 					
-					
-<div>
-  <canvas id="myChart"></canvas>
-</div>
-
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-<script>
-
-
-
-const data = {
-  labels: [
-    'Eating',
-    'Drinking',
-    'Sleeping',
-    'Designing',
-    'Coding',
-    'Cycling',
-    'Running'
-  ],
-  datasets: [{
-    label: 'My First Dataset',
-    data: [65, 59, 90, 81, 56, 55, 40],
-    fill: true,
-    backgroundColor: 'rgba(255, 99, 132, 0.2)',
-    borderColor: 'rgb(255, 99, 132)',
-    pointBackgroundColor: 'rgb(255, 99, 132)',
-    pointBorderColor: '#fff',
-    pointHoverBackgroundColor: '#fff',
-    pointHoverBorderColor: 'rgb(255, 99, 132)'
-  }, {
-    label: 'My Second Dataset',
-    data: [28, 48, 40, 19, 96, 27, 100],
-    fill: true,
-    backgroundColor: 'rgba(54, 162, 235, 0.2)',
-    borderColor: 'rgb(54, 162, 235)',
-    pointBackgroundColor: 'rgb(54, 162, 235)',
-    pointBorderColor: '#fff',
-    pointHoverBackgroundColor: '#fff',
-    pointHoverBorderColor: 'rgb(54, 162, 235)'
-  }]
-};
-
-
-
-const config = {
-  type: 'radar',
-  data: data,
-  options: {
-    elements: {
-      line: {
-        borderWidth: 3
-      }
-    }
-  },
-};
-
-
-  const ctx = document.getElementById('myChart');
-
-  new Chart(ctx, config);
-</script>	
-					
-					
-					
-					
-					
-					
-					
-					
-					
-					
-					
-					
-					
-					
-					
-					
-					
-					
-					
-					
+											
+						<div>
+						  <canvas id="myChart"></canvas>
+						</div>
+						
+						<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+						
+						<script>
+						
+						
+						
+						const data = {
+						  labels: [
+						    'Eating',
+						    'Drinking',
+						    'Sleeping',
+						    'Designing',
+						    'Coding',
+						    'Cycling',
+						    'Running'
+						  ],
+						  datasets: [{
+						    label: 'My First Dataset',
+						    data: [65, 59, 90, 81, 56, 55, 40],
+						    fill: true,
+						    backgroundColor: 'rgba(255, 99, 132, 0.2)',
+						    borderColor: 'rgb(255, 99, 132)',
+						    pointBackgroundColor: 'rgb(255, 99, 132)',
+						    pointBorderColor: '#fff',
+						    pointHoverBackgroundColor: '#fff',
+						    pointHoverBorderColor: 'rgb(255, 99, 132)'
+						  }, {
+						    label: 'My Second Dataset',
+						    data: [28, 48, 40, 19, 96, 27, 100],
+						    fill: true,
+						    backgroundColor: 'rgba(54, 162, 235, 0.2)',
+						    borderColor: 'rgb(54, 162, 235)',
+						    pointBackgroundColor: 'rgb(54, 162, 235)',
+						    pointBorderColor: '#fff',
+						    pointHoverBackgroundColor: '#fff',
+						    pointHoverBorderColor: 'rgb(54, 162, 235)'
+						  }]
+						};
+						
+						
+						
+						const config = {
+						  type: 'radar',
+						  data: data,
+						  options: {
+						    elements: {
+						      line: {
+						        borderWidth: 3
+						      }
+						    }
+						  },
+						};
+						
+						
+						  const ctx = document.getElementById('myChart');
+						
+						  new Chart(ctx, config);
+						</script>	
+											
 				</div>
 				
 			
