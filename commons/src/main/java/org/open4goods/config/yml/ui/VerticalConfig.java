@@ -137,12 +137,12 @@ public class VerticalConfig{
 	private Map<String, String> ecoscoreConfig = new HashMap<>();
 
 	
-	
-	/**
-	 * Configuration relativ to ratings aggregation
-	 */
-	@JsonMerge
-	private RatingsConfig ratingsConfig = new RatingsConfig();
+//	
+//	/**
+//	 * Configuration relativ to ratings aggregation
+//	 */
+//	@JsonMerge
+//	private RatingsConfig ratingsConfig = new RatingsConfig();
 
 	/**
 	 * The behavior of barcode generation
@@ -436,15 +436,15 @@ public class VerticalConfig{
 		this.attributesConfig = attributesConfig;
 	}
 
-
-	public RatingsConfig getRatingsConfig() {
-		return ratingsConfig;
-	}
-
-
-	public void setRatingsConfig(RatingsConfig ratingsConfig) {
-		this.ratingsConfig = ratingsConfig;
-	}
+//
+//	public RatingsConfig getRatingsConfig() {
+//		return ratingsConfig;
+//	}
+//
+//
+//	public void setRatingsConfig(RatingsConfig ratingsConfig) {
+//		this.ratingsConfig = ratingsConfig;
+//	}
 
 
 	public BarcodeAggregationProperties getBarcodeConfig() {
