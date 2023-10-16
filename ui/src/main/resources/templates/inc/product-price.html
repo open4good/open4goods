@@ -5,8 +5,10 @@
 			<div class="card-header border-0 bg-white text-center pb-0">
 				<h2 class="h3 ">Meilleur prix</h2>
 				<span class="d-block"> 
-					<span class="display-2 fw-bold">
-						<th:block th:text="${#numbers.formatDecimal(product.bestPrice().price, 1, 2)}"></th:block> 
+					<span class="display-3 fw-bold">
+						<th:block th:text="${product.bestPrice().shortPrice()}"></th:block> 
+						
+						
 						<span class="align-baseline font-medium" th:text="#{'symbol.'+${product.bestPrice().currency}}"></span>
 					</span>
 				</span>
