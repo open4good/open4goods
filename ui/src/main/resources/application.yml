@@ -63,12 +63,6 @@ brandConfig:
     CONTINENTAL EDISON: "http://www.service-client.fr/wp-content/uploads/2016/08/CONTINENTAL-EDISON.jpg"
     CHIQ: "https://www.buysmarte.com.au/media/manufacturer/chiq.jpg"
 
-
-
-
-
-
-
 management:
   
   health:
@@ -110,11 +104,11 @@ spring:
 
     
 #Css and js mimification
-wro4j:
-  filterUrl : /resources
-  cacheGzippedContent: true
-  ignoreMissingResources: false
-  managerFactory:
-    preProcessors: removeSourceMaps, cssImport, jsMin
+#wro4j:
+#  filterUrl : /resources
+#  cacheGzippedContent: true
+#  ignoreMissingResources: false
+ # managerFactory:
+ #   preProcessors: removeSourceMaps, cssImport, jsMin
     
 
