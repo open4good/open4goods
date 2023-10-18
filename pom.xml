@@ -17,7 +17,7 @@
 		<maven.compiler.target>19</maven.compiler.target>
 		<global.version>0.0.1-SNAPSHOT</global.version>
 		<swagger.version>2.9.2</swagger.version>
-		<jacoco.version>0.8.10</jacoco.version>
+		<jacoco.version>0.8.11</jacoco.version>
 		<xwiki.version>11.10.2</xwiki.version>
 
 		<!-- To exclude springboot dependency management -->
