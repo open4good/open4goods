@@ -48,7 +48,47 @@ public class AggregatedAttribute implements IAttribute {
 	private Set<UnindexedKeyValTimestamp> sources = new HashSet<>();
 
 
+	/**
+	 * Number of sources for this attribute
+	 * @return
+	 */
+	public int sourcesCount() {
+		return sources.size();
+	}
+	
+	/**
+	 * The number of different values for this item
+	 * @return
+	 */
+	public long distinctValues () {
+		return sources.stream().map(e-> e.getValue()).distinct().count();
+	}
 
+
+	public boolean hasConflicts() {
+		return distinctValues() > 1;
+	}
+	
+	public String bgRow() {
+		String ret="table-default";
+		int sCount = sourcesCount();
+		long dValues = distinctValues();
+		
+		if (sCount == 0) {
+			ret="table-danger";
+		} else if (sCount == 1) {
+			ret="table-default";
+		} else {
+			ret="table-info";
+		}
+	
+		if (dValues > 1) {
+			ret = "table-danger";
+		}
+		
+		return ret;
+	}
+	
 	// TODO : Simple, but does not allow to handle conflicts, and so on
 	@Override
 	public int hashCode() {
