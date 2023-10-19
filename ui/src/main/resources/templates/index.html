@@ -80,8 +80,8 @@
 	                               <form method="post" id="searchForm" action="/recherche">
 				                       <div class="d-flex flex-wrap mt-lg-2">
 				                           <div class="input-group input-group-lg">
-					                               <input type="text" id="searchInput" class="form-control" th:placeholder="'Chercher dans ' + ${#numbers.formatDecimal(totalItems, 0, 'COMMA', 0, 'POINT')} + ' produits'" aria-label="Search" aria-describedby="basic-addon1" name="query">
-					                               <button onclick="document.getElementById('searchForm').submit()" class="btn btn-primary" type="button"><span class="icon icon-xs me-1"><span class="fas fa-search"></span></span> Chercher</button>
+					                               <input type="text" id="searchInput" class="form-control" th:placeholder="'Nudger dans ' + ${#numbers.formatDecimal(totalItems, 0, 'COMMA', 0, 'POINT')} + ' produits'" aria-label="Search" aria-describedby="basic-addon1" name="query">
+					                               <button onclick="document.getElementById('searchForm').submit()" class="btn btn-primary" type="button"><span class="icon icon-xs me-1"><span class="fas fa-search"></span></span> Nudger</button>
 				                            </div>
 				                       </div>
 		                           </form>
@@ -205,7 +205,7 @@
        <!--/* Numbers */-->       
 	   <section class="section bg-gray-200">
 
-			<div class="container container-semi-fluid">
+			<div id="statistics"  class="container container-semi-fluid">
 				
 				<div class="row justify-content-center mb-5 mb-lg-6">
 					<div class="col-4 text-center mb-4">
@@ -213,7 +213,7 @@
 							class="icon icon-shape icon-lg bg-white shadow-lg border-light rounded-circle mb-4">
 							<span class="fas fa-puzzle-piece text-tertiary"></span>
 						</div>
-						<h3 class="fw-bolder">150€</h3>
+						<h3 id="amount-reversment" class="fw-bolder statvalue" th:attr="numx = 1500">1</h3>
 						<p class="text-gray">Montant du coup de pouce à date de Nudger pour la planète</p>
 					</div>
 					<div class="col-4 text-center mb-4">
@@ -221,8 +221,8 @@
 							class="icon icon-shape icon-lg bg-white shadow-lg border-light rounded-circle mb-4">
 							<span class="fas fa-pager text-tertiary"></span>
 						</div>
-						<h3 class="fw-bolder">15M+ Offres commerciales</h3>
-						<p class="text-gray">Un des comparateurs les plus fournis</p>
+						<h3 class="fw-bolder" th:attr="numx = 1500000"></h3>
+						<p class="text-gray">Nombre d'offres commerciales. Un des comparateurs les plus fournis de la place.</p>
 					</div>
 					<div class="col-4 text-center">
 						<div
@@ -389,6 +389,14 @@
 <script src="../../vendor/headroom.js/dist/headroom.min.js"></script>
 <script src="../../vendor/smooth-scroll/dist/smooth-scroll.polyfills.min.js"></script>
 
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/waypoints/4.0.1/jquery.waypoints.min.js" integrity="sha512-CEiA+78TpP9KAIPzqBvxUv8hy41jyI3f2uHi7DGp/Y/Ka973qgSdybNegWFciqh6GrN2UePx2KkflnQUbUhNIA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+
+<script src="../../vendor/countup.js/dist/countUp.umd.js"></script>
+
+
+
 <!-- Vendor JS -->
 
 <!-- 
@@ -419,6 +427,69 @@ $(document).ready(function() {
     });
 } );
 
+
+
+
+var options = {  
+    useEasing: true,
+      useGrouping: true,
+      separator: ',',
+      decimal: '.',
+      prefix: '',
+      suffix: ''
+};
+
+var counts = [];
+
+$('.statvalue').each(function() {
+    var num = $(this).attr('numx'); //end count
+    var nuen = $(this).text();
+    if (nuen === "") {
+    nuen = 0;
+    }
+  
+   counts.push(new countUp.CountUp(this, nuen, num, 0, 3, options));
+});
+
+var waypoint1 = new Waypoint({
+  element: document.getElementById("statistics"),
+  handler: function(direction) {
+    if (direction == "up") {
+      for (var i = 0; i < counts.length; i++) {
+        counts[i].reset();
+      }
+    } else {
+      for (var i = 0; i < counts.length; i++) {
+        counts[i].start();
+      }
+    }
+  },
+  offset: "50%"
+});
+
+
+
+
+	
+/*	
+// CountUp
+
+var options = {
+  useEasing : true,
+  useGrouping : true,
+  separator : ',',
+  decimal : '.',
+  prefix : '',
+  suffix : ''
+};
+
+
+var reversment = new countUp.CountUp("amount-reversment", 7741, options);
+reversment.start();
+
+
+
+*/
 
 </script>
 
