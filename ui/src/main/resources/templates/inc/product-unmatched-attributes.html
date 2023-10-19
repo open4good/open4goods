@@ -14,9 +14,9 @@
 
 
 					<th:block th:with="sourcesCount = ${attr.sourcesCount()}, conflicts = ${attr.hasConflicts()}">
-						<tr th:class="${attr.bgRow()}" data-bs-toggle="tooltip" data-bs-placement="top" th:title="#{attribute.sourcing(${sourcesCount}, ${attr.distinctValues()})}">
-							<td><span th:text="${attr.name}"></span></td>						
-							<td><span  th:text="${attr.value}"></span> </td>
+						<tr th:class="${attr.bgRow()}" data-bs-toggle="tooltip" data-bs-placement="top" th:title="#{attribute.sourcing(${sourcesCount}, ${attr.distinctValues()-1})}">
+							<td class="help-pointer"><span th:text="${attr.name}"></span></td>						
+							<td class="help-pointer"><span  th:text="${attr.value}"></span> </td>
 						</tr>
 					</th:block>
 

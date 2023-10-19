@@ -3,16 +3,15 @@
 	<div class="card-body">
 		<table class="table table-hover">
 			<tbody>
-  				<tr th:each="item : ${product.attributes.aggregatedAttributes.values()}">
-
-
-
-					<th scope="row" th:text="${item.name}"></th>
-					<th:block th:switch="${item.name}">
-		                <td th:case="'REPAIRABILITY_INDEX'"  th:insert="~{inc/attributes/class_energy.html}"> </td>
-		                <td th:case="*" th:text="${item.value}"></td>
-		            </th:block>
-				</tr>
+				<th:block th:each="item : ${product.attributes.aggregatedAttributes.values()}">
+	  				<tr data-bs-toggle="tooltip" data-bs-placement="top" th:title="#{attribute.sourcing(${item.sourcesCount()}, ${item.distinctValues()-1})}">
+						<th class="help-pointer" scope="row" th:text="${item.name}"></th>
+						<th:block th:switch="${item.name}">
+			                <td class="help-pointer" th:case="'REPAIRABILITY_INDEX'"  th:insert="~{inc/attributes/class_energy.html}"> </td>
+			                <td class="help-pointer" th:case="*" th:text="${item.value}"></td>
+			            </th:block>
+					</tr>
+				</th:block>
 			</tbody>
 		</table>
 	</div>
