@@ -182,7 +182,7 @@
 <script src="../../vendor/jarallax/dist/jarallax.min.js"></script>
 <script src="../../vendor/chartist/dist/chartist.min.js"></script>
 <script src="../../vendor/chartist-plugin-tooltips/dist/chartist-plugin-tooltip.min.js"></script>
-<script src="../../vendor/countup.js/dist/countUp.umd.js"></script>
+
 <script src="../../vendor/vanillajs-datepicker/dist/js/datepicker.min.js"></script>
 <script async defer src="https://buttons.github.io/buttons.js"></script>
 <script src="../../vendor/@glidejs/glide/dist/glide.min.js"></script>
@@ -198,7 +198,7 @@
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-
+<script src="../../vendor/countup.js/dist/countUp.umd.js"></script>
 <!-- pixel JS -->
 <script src="../../assets/js/pixel.js"></script>
 <!-- custom sources -->
@@ -231,6 +231,32 @@ $(document).ready(function() {
 				responsive: true		
 		});
 	}
+
+
+// Countup on reversement
+
+// CountUp
+
+var options = {
+  duration: 3,
+  useEasing : false,
+  useGrouping : false,
+  separator : ',',
+  decimal : '.',
+  decimalPlaces: 2,
+  prefix : '',
+  suffix : ''
+};
+
+
+var reversment = new countUp.CountUp("countup-reversment", $("#countup-reversment").attr("data-max"), options);
+setTimeout(reversment.start(), 5000);
+
+
+
+
+
+
 
 } );
 </script>
