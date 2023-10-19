@@ -12,7 +12,10 @@
 							
 				<tr th:if="${product.brand()}">
 					<th scope="row">Marque</th>
-					<td  th:text="${product.brand()}"></td>
+					<td>
+						<img height="25px" th:if="${hasBrandLogo}" th:src="'/images/marques/'+${product.brand()}+'.png'">
+						<th:block th:unless="${hasBrandLogo}" th:text="${product.brand()}"></th:block>
+					</td>
 				</tr>
 
 
