@@ -163,6 +163,7 @@
     
 
     <!-- Core -->
+<script src="../../vendor/@popperjs/core/dist/umd/popper.min.js"></script>
 <script src="/webjars/bootstrap/js/bootstrap.min.js"></script>
 
 
@@ -188,7 +189,6 @@
  --> 
 
 
-<script src="../../vendor/@popperjs/core/dist/umd/popper.min.js"></script>
 <script src="/webjars/jquery/jquery.min.js"></script>
 <script type="text/javascript" language="javascript" src="/webjars/datatables/js/jquery.dataTables.min.js"></script>
 <script type="text/javascript" language="javascript" src="/webjars/datatables/js/dataTables.bootstrap5.min.js"></script>
@@ -207,7 +207,7 @@
 $(document).ready(function() {
 
 	// Enable tooltips
-  	$('[data-toggle="tooltip"]').tooltip();
+  	$('[data-bs-toggle="tooltip"]').tooltip();
 
 	// Responsive datatables
 	if (($("#offersTableOccasion")).length) {

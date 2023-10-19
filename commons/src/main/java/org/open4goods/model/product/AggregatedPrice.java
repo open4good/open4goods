@@ -13,7 +13,8 @@ import org.springframework.data.elasticsearch.annotations.FieldType;
 
 public class AggregatedPrice extends Price {
 	
-	private static final DecimalFormat df = new DecimalFormat("0.00");
+	//TODO : shared, ugly
+	public static final DecimalFormat numberFormater = new DecimalFormat("0.00");
 	
 	@Field(index = false, store = false, type = FieldType.Keyword)
 	private String datasourceName;
@@ -90,7 +91,7 @@ public class AggregatedPrice extends Price {
 		if (isInt) {
 			return String.valueOf(p.intValue());
 		} else {
-			return String.valueOf(df.format(p));
+			return String.valueOf(numberFormater.format(p));
 		}
 		
 	}

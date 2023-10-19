@@ -56,12 +56,11 @@
 						<div class="text-center">				           
 				           <img width="350px" src="/icons/ecoscore.png">
 						</div>
-						
 						<div  class="m-5">						
 							<div th:each="score : ${product.realScores()}" class="progress-wrapper">
 							
 								<div class="progress-info">
-									<span class="h4 progress-tooltip" th:classappend="'bg-'+${score.colorClassName()}" th:text="#{'score-'+${score.name}}"></span>
+									<span  class="h4 help-pointer progress-tooltip" data-bs-toggle="tooltip" data-bs-placement="top" th:title="#{'ecoscore.' +${score.name}+'.tooltip'(${score.absValue()}, ${score.relValue()}, ${product.attributes.aggregatedAttributes.get(score.name)})}" th:classappend="'bg-'+${score.colorClassName()}" th:text="#{'score-'+${score.name}}"></span>
 									<div class="progress-percentage">
 										<!-- 
 										<span th:if="${score.relativValue}" th:text="${score.relativValue*20}+'%'"></span>
