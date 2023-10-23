@@ -234,8 +234,11 @@ public class SearchService {
 		for (AttributeConfig attrConfig : customAttrFilters) {
 			esQuery = esQuery
 					// TODO : size from conf
-					.withAggregation(attrConfig.getKey(), 	Aggregation.of(a -> a.terms(ta -> ta.field("attributes.aggregatedAttributes."+attrConfig.getKey()+".value").missing(OTHER_BUCKET).size(100)  ))	);
+					.withAggregation(attrConfig.getKey(), 	Aggregation.of(a -> a.terms(ta -> ta.field("attributes.aggregatedAttributes."+attrConfig.getKey()+".value.keyword").missing(OTHER_BUCKET).size(100)  ))	);
 		}
+		
+		
+		
 		// Adding custom range aggregations
 		for (NumericRangeFilter filter: request.getNumericFilters()) {
 			esQuery = esQuery

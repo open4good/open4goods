@@ -19,6 +19,7 @@ import org.open4goods.services.BrandService;
 import org.open4goods.services.SerialisationService;
 import org.open4goods.services.VerticalsConfigService;
 import org.open4goods.ui.config.yml.UiConfig;
+import org.open4goods.ui.helper.UiHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -187,7 +188,9 @@ public class ProductController extends AbstractUiController {
 
 
 		mv.addObject("product", data);
-		mv.addObject("verticalConfig", verticalConfigService.getVerticalForPath(vertical));
+		
+		VerticalConfig verticalConfig = verticalConfigService.getVerticalForPath(vertical);
+		mv.addObject("verticalConfig", verticalConfig);
 
 		
 		
@@ -199,6 +202,9 @@ public class ProductController extends AbstractUiController {
 		
 		// Adding the brand informations
 		mv.addObject("hasBrandLogo", brandService.hasLogo(data.brand()));
+		
+		// Adding the UiHelper class
+		mv.addObject("helper", new UiHelper(request, verticalConfig));
 		
 		// Adding the images resource
 

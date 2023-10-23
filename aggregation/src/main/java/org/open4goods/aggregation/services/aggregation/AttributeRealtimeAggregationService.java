@@ -26,16 +26,19 @@ import org.open4goods.model.product.AggregatedAttribute;
 import org.open4goods.model.product.AggregatedFeature;
 import org.open4goods.model.product.Product;
 import org.open4goods.services.BrandService;
+import org.open4goods.services.VerticalsConfigService;
 
 public class AttributeRealtimeAggregationService extends AbstractRealTimeAggregationService {
 
-	private final AttributesConfig attributesConfig;
+
 	
 	private final BrandService brandService;
 
-	public AttributeRealtimeAggregationService(final AttributesConfig attributesConfig,  BrandService brandService, final String logsFolder,boolean toConsole) {
+	private VerticalsConfigService verticalConfigService;
+
+	public AttributeRealtimeAggregationService(final VerticalsConfigService verticalConfigService,  BrandService brandService, final String logsFolder,boolean toConsole) {
 		super(logsFolder,toConsole);
-		this.attributesConfig = attributesConfig;
+		this.verticalConfigService = verticalConfigService;
 		this.brandService = brandService;
 	}
 
@@ -50,7 +53,13 @@ public class AttributeRealtimeAggregationService extends AbstractRealTimeAggrega
 	@Override
 	public void onDataFragment(final DataFragment dataFragment, final Product product) {
 
+		AttributesConfig attributesConfig = verticalConfigService.getConfigById(product.getVertical() == null ? "all" : product.getVertical() ).get().getAttributesConfig() ;
+
 		Set<String> toRemoveFromUnmatched = new HashSet<>();
+		// Adding the list of "to be removed" attributes
+		toRemoveFromUnmatched.addAll(attributesConfig.getExclusions());
+		
+		
 		/////////////////////////////////////////
 		// Converting to AggregatedAttributes for matches from config
 		/////////////////////////////////////////
@@ -60,7 +69,6 @@ public class AttributeRealtimeAggregationService extends AbstractRealTimeAggrega
 		all.addAll(dataFragment.getAttributes());
 		// Add unmatched attributes from the product (case configuration change)
 		all.addAll(product.getAttributes().getUnmapedAttributes().stream().map(e -> new Attribute(e.getName(),e.getValue(),e.getLanguage())).toList());
-		
 		
 		
 		for (Attribute attr :  dataFragment.getAttributes()) {
@@ -110,7 +118,7 @@ public class AttributeRealtimeAggregationService extends AbstractRealTimeAggrega
 		/////////////////////////////////////////
 		
 		List<Attribute> matchedFeatures = dataFragment.getAttributes().stream()
-				.filter(this::isFeatureAttribute)
+				.filter(e -> isFeatureAttribute(e, attributesConfig))
 				.collect(Collectors.toList());
 
 		toRemoveFromUnmatched.addAll(matchedFeatures.stream().map(e->e.getName()).collect(Collectors.toSet()));
@@ -337,7 +345,7 @@ public class AttributeRealtimeAggregationService extends AbstractRealTimeAggrega
 	 * @param e
 	 * @return
 	 */
-	private boolean isFeatureAttribute(Attribute e) {
+	private boolean isFeatureAttribute(Attribute e, AttributesConfig attributesConfig) {
 		return attributesConfig.getFeaturedValues().contains(e.getRawValue().toString().trim().toUpperCase());
 	}
 

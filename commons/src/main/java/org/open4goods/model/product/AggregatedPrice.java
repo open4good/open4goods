@@ -18,6 +18,7 @@ public class AggregatedPrice extends Price {
 	
 	@Field(index = false, store = false, type = FieldType.Keyword)
 	private String datasourceName;
+	
 	@Field(index = false, store = false, type = FieldType.Keyword)
 	private String offerName;
 	@Field(index = false, store = false, type = FieldType.Keyword)

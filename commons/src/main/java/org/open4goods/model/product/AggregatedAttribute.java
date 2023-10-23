@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.StringUtils;
 import org.open4goods.config.yml.attributes.AttributeConfig;
 import org.open4goods.exceptions.ValidationException;
 import org.open4goods.model.attribute.Attribute;
@@ -62,6 +63,23 @@ public class AggregatedAttribute implements IAttribute {
 	 */
 	public long distinctValues () {
 		return sources.stream().map(e-> e.getValue()).distinct().count();
+	}
+	
+	/**
+	 * For UI, a String representation of all providers names
+	 * @return
+	 */
+	public String providersToString() {		
+		return StringUtils.join( sources.stream().map(e-> e.getKey()).toArray(),", ");
+	}
+
+	/**
+	 * For UI, a String representation of all providers names and values
+	 * @return
+	 */
+	public String sourcesToString() {
+		return StringUtils.join( sources.stream().map(e-> e.getKey() + ":"+e.getValue()).toArray(),", ");
+
 	}
 
 
