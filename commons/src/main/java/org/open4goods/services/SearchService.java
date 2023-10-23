@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.open4goods.config.yml.attributes.AttributeConfig;
@@ -137,7 +138,7 @@ public class SearchService {
 
 		VerticalSearchResponse vsr = new VerticalSearchResponse();
 
-		List<AttributeConfig> customAttrFilters = vertical.verticalFilters();
+		List<AttributeConfig> customAttrFilters = vertical.verticalFilters().stream().filter(e-> e!= null).collect(Collectors.toList());
 
 
 		Criteria criterias = new Criteria("vertical").is(vertical.getId())

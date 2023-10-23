@@ -49,6 +49,14 @@ public class AttributeConfig {
 	 */
 	private boolean asRating = false;
 
+	/**
+	 * If true, this attribute will be used as search filter
+	 */
+	private boolean asSearchFilter = true;
+
+	
+		
+	
 
 	/**
 	 * The ordering that must be applied to this attributes values after aggregations. (ie rendered in search attributes selection)
@@ -69,12 +77,12 @@ public class AttributeConfig {
 
 
 	/** If true, this attribute will be used for aggregations searches **/
-	private Boolean searchable = false;
+	// private Boolean searchable = false;
 
 	/**
 	 * The position in the search page navigation zone
 	 */
-	private Integer searchPresentationOrder = Integer.MIN_VALUE;
+	// private Integer searchPresentationOrder = Integer.MIN_VALUE;
 
 	/**
 	 * If set, this attribute will appear at the given attributeValuesOrdering in tabularised
@@ -89,22 +97,22 @@ public class AttributeConfig {
 	private String searchTemplate;
 
 
-
-	/**
-	 * If non null, present the "count by" stats for this attribute, Will appear at the index designated by the integer value
-	 */
-	private Integer statsOrder;
-
-	/**
-	 * the Chart.js chart type
-	 */
-	private AttrChartType statsType = AttrChartType.bar;
-
-	/**
-	 * If true, will be the default stats rendered. (Should so only have one
-	 * attribute set to true)
-	 */
-	private boolean statsDefaultView = false;
+//
+//	/**
+//	 * If non null, present the "count by" stats for this attribute, Will appear at the index designated by the integer value
+//	 */
+//	private Integer statsOrder;
+//
+//	/**
+//	 * the Chart.js chart type
+//	 */
+//	private AttrChartType statsType = AttrChartType.bar;
+//
+//	/**
+//	 * If true, will be the default stats rendered. (Should so only have one
+//	 * attribute set to true)
+//	 */
+//	private boolean statsDefaultView = false;
 
 
 
@@ -127,6 +135,13 @@ public class AttributeConfig {
 	 * If set, text attributes will be converted to numerics using this table conversion
 	 */
 	private Map<String,Double> numericMapping = new HashMap<>();
+
+
+	/**
+	 * If set, fixed text mappings conversion
+	 */
+	private Map<String,String> mappings = new HashMap<>();
+
 
 
 
@@ -314,15 +329,6 @@ public class AttributeConfig {
 
 
 
-
-	public Boolean getSearchable() {
-		return searchable;
-	}
-
-	public void setSearchable(final Boolean aggregate) {
-		searchable = aggregate;
-	}
-
 	/**
 	 * If set, this attribute will appear at the given attributeValuesOrdering in tabularised
 	 * search results
@@ -341,30 +347,6 @@ public class AttributeConfig {
 
 	public void setFaIcon(final String faIcon) {
 		this.faIcon = faIcon;
-	}
-
-	public Integer getStatsOrder() {
-		return statsOrder;
-	}
-
-	public void setStatsOrder(final Integer presentStats) {
-		statsOrder = presentStats;
-	}
-
-	public AttrChartType getStatsType() {
-		return statsType;
-	}
-
-	public void setStatsType(final AttrChartType statsType) {
-		this.statsType = statsType;
-	}
-
-	public boolean isStatsDefaultView() {
-		return statsDefaultView;
-	}
-
-	public void setStatsDefaultView(final boolean statsDefaultView) {
-		this.statsDefaultView = statsDefaultView;
 	}
 
 
@@ -412,21 +394,6 @@ public class AttributeConfig {
 		this.numericMapping = numericMapping;
 	}
 
-
-
-	public Integer getSearchPresentationOrder() {
-		return searchPresentationOrder;
-	}
-
-
-
-	public void setSearchPresentationOrder(final Integer searchPresentationOrder) {
-		this.searchPresentationOrder = searchPresentationOrder;
-	}
-
-
-
-
 	public boolean isAsRating() {
 		return asRating;
 	}
@@ -443,6 +410,22 @@ public class AttributeConfig {
 
 	public void setName(final Localisable name) {
 		this.name = name;
+	}
+
+	public Map<String, String> getMappings() {
+		return mappings;
+	}
+
+	public void setMappings(Map<String, String> mappings) {
+		this.mappings = mappings;
+	}
+
+	public boolean isAsSearchFilter() {
+		return asSearchFilter;
+	}
+
+	public void setAsSearchFilter(boolean asSearchFilter) {
+		this.asSearchFilter = asSearchFilter;
 	}
 
 
