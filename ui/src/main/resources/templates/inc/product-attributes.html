@@ -1,15 +1,20 @@
-<div th:if="${product.attributes.aggregatedAttributes.size()} > 0" class="card shadow mb-3 my-3">
-	<div class="card-header"><h2 class="h5">Caractéristiques principales</h2></div>
+<div th:if="${product.attributes.aggregatedAttributes.size()} > 0" class="card shadow">
+	<div class="card-header"><h2 class="h5"><span class="fa-solid fa-rectangle-list me-2"></span>Caractéristiques principales</h2></div>
 	<div class="card-body">
 		<table class="table table-hover">
 			<tbody>
-				<th:block th:each="item : ${product.attributes.aggregatedAttributes.values()}">
-	  				<tr data-bs-toggle="tooltip" data-bs-placement="top" th:title="#{attribute.sourcing(${item.sourcesCount()}, ${item.distinctValues()-1})}">
-						<th class="help-pointer" scope="row" th:text="${item.name}"></th>
-						<th:block th:switch="${item.name}">
-			                <td class="help-pointer" th:case="'REPAIRABILITY_INDEX'"  th:insert="~{inc/attributes/class_energy.html}"> </td>
-			                <td class="help-pointer" th:case="*" th:text="${item.value}"></td>
+				<th:block th:each="attribute : ${product.attributes.aggregatedAttributes.values()}">
+	  				<tr>
+						<th class="help-pointer" scope="row" th:text="${helper.attributeName(attribute.name)}"></th>
+						
+						
+						<th:block th:switch="${attribute.name}">
+			                <td class="lead help-pointer" th:case="'REPAIRABILITY_INDEX'"  th:insert="~{inc/attributes/class_energy.html}"> </td>
+			                <td class="lead help-pointer" th:case="*" th:text="${attribute.value}"></td>
 			            </th:block>
+			            <td class="float-end">
+			            		<th:block th:insert="~{inc/attribute-sourcing.html}"></th:block>
+			            </td>
 					</tr>
 				</th:block>
 			</tbody>

@@ -1,20 +1,14 @@
 <div id="caracteristiques" class="card shadow">
-	<div class="card-header"><h2 class="h5">Identification du produit</h2></div>
+	<div class="card-header"><h2 class="h5"><span class="fa-solid fa-circle-info me-2"></span>Identification du produit</h2></div>
 	<div class="card-body">
 		<table class="table table-hover">
 			<tbody>
 
-				<tr>
-					<th scope="row" th:text="${product.gtinInfos.upcType}"></th>
-					<td th:text="${product.gtin()}"></td>
-				</tr>
-				
-							
 				<tr th:if="${product.brand()}">
 					<th scope="row">Marque</th>
 					<td>
 						<img height="25px" th:if="${hasBrandLogo}" th:src="'/images/marques/'+${product.brand()}+'.png'">
-						<th:block th:unless="${hasBrandLogo}" th:text="${product.brand()}"></th:block>
+						<th:block th:unless="${hasBrandLogo}" class="lead"  th:text="${product.brand()}"></th:block>
 					</td>
 				</tr>
 
@@ -34,7 +28,7 @@
 
 				<tr th:if="${product.model()}">
 					<th scope="row">Modèle</th>
-					<td th:text="${product.model()}"></td>
+					<td class="lead" th:text="${product.model()}"></td>
 				</tr>
 
 
@@ -60,7 +54,13 @@
 					<th scope="row">Mise à jour</th>
 					<td th:text="${product.ago(userLocale)}"></td>
 				</tr>
-							
+
+
+				<tr>
+					<th scope="row" th:text="${product.gtinInfos.upcType}"></th>
+					<td > <span th:text="${product.gtin()}"></span>	
+				</tr>
+											
 			</tbody>
 		</table>
 	</div>

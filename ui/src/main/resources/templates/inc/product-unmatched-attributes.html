@@ -6,17 +6,21 @@
 				<tr>
 					<th>Nom</th>
 					<th>Valeur</th>
+					<th>Sources</th>
 				</tr>
 			</thead>
 			<tbody>
 			
-				<th:block th:each="attr : ${product.attributes.unmapedAttributes}">
+				<th:block th:each="attribute : ${product.attributes.unmapedAttributes}">
 
 
-					<th:block th:with="sourcesCount = ${attr.sourcesCount()}, conflicts = ${attr.hasConflicts()}">
-						<tr th:class="${attr.bgRow()}" data-bs-toggle="tooltip" data-bs-placement="top" th:title="#{attribute.sourcing(${sourcesCount}, ${attr.distinctValues()-1})}">
-							<td class="help-pointer"><span th:text="${attr.name}"></span></td>						
-							<td class="help-pointer"><span  th:text="${attr.value}"></span> </td>
+					<th:block>
+						<tr th:class="${attribute.bgRow()}">
+							<td><span th:text="${attribute.name}"></span></td>						
+							<td><span  th:text="${attribute.value}"></span> </td>
+							<td>
+			            		<th:block th:insert="~{inc/attribute-sourcing.html}"></th:block>
+			            	</td>
 						</tr>
 					</th:block>
 
