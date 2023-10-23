@@ -396,7 +396,16 @@ public class Product implements Standardisable {
 	}
 	
 	
-	
+	public String brandAndModel() {
+		String ret = "";
+		if (!StringUtils.isEmpty(brand())) {
+			ret += brand() +"-"; 
+		}
+		
+		ret += model();
+		
+		return ret;
+	}
 
 	/**
 	 *

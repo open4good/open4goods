@@ -213,27 +213,27 @@ public class VerticalConfig{
 		return ret;
 	}
 
-	/**
-	 *
-	 * @return the list of AttributeConfig that have to appear in search results,
-	 *         ordered by their display position
-	 */
-	public List<AttributeConfig> statsAttributes() {
-		final List<AttributeConfig> ret = new ArrayList<>();
-		for (final AttributeConfig a : attributesConfig.getConfigs()) {
-			if (null != a.getStatsOrder()) {
-				try {
-					ret.add(a.getStatsOrder(), a);
-				} catch (final IndexOutOfBoundsException e) {
-					LOGGER.warn("statsOrder {} is invalid for attribute {}. Will place last", a.getStatsOrder(),
-							a.getName());
-					ret.add(a);
-				}
-			}
-		}
-		return ret;
-	}
-
+//	/**
+//	 *
+//	 * @return the list of AttributeConfig that have to appear in search results,
+//	 *         ordered by their display position
+//	 */
+//	public List<AttributeConfig> statsAttributes() {
+//		final List<AttributeConfig> ret = new ArrayList<>();
+//		for (final AttributeConfig a : attributesConfig.getConfigs()) {
+//			if (null != a.getStatsOrder()) {
+//				try {
+//					ret.add(a.getStatsOrder(), a);
+//				} catch (final IndexOutOfBoundsException e) {
+//					LOGGER.warn("statsOrder {} is invalid for attribute {}. Will place last", a.getStatsOrder(),
+//							a.getName());
+//					ret.add(a);
+//				}
+//			}
+//		}
+//		return ret;
+//	}
+//
 
 
 	/**
@@ -243,7 +243,10 @@ public class VerticalConfig{
 	public List<AttributeConfig> verticalFilters() {
 
 		return verticalFilters.stream()
+				
 				.map(e -> getAttributesConfig().getAttributeConfigByKey(e))
+				.filter(e->e != null)
+				.filter(e->e.isAsSearchFilter())
 				.collect(Collectors.toList());
 
 	}

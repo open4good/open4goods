@@ -53,7 +53,7 @@
 				<div class="tab-pane fade active show" id="panel-ecoscore"	role="tabpanel" aria-labelledby="panel-ecoscore">					
 					<div>
 						<div class="text-center">				           
-				           <img width="350px" src="/icons/ecoscore.png">
+				           <img class="mt-4"  width="350px" src="/icons/ecoscore.png">
 						</div>
 						<div  class="m-5">						
 							<div th:each="score : ${product.realScores()}" class="progress-wrapper">
@@ -105,75 +105,8 @@
 				
 				<!-- Radar -->
 				<div class="tab-pane fade" id="panel-radar" role="tabpanel"	aria-labelledby="panel-radar">
-					
-											
-						<div>
-						  <canvas id="myChart"></canvas>
-						</div>
-						
-						<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-						
-						<script>
-						
-						
-						
-						const data = {
-						  labels: [
-						    'Eating',
-						    'Drinking',
-						    'Sleeping',
-						    'Designing',
-						    'Coding',
-						    'Cycling',
-						    'Running'
-						  ],
-						  datasets: [{
-						    label: 'My First Dataset',
-						    data: [65, 59, 90, 81, 56, 55, 40],
-						    fill: true,
-						    backgroundColor: 'rgba(255, 99, 132, 0.2)',
-						    borderColor: 'rgb(255, 99, 132)',
-						    pointBackgroundColor: 'rgb(255, 99, 132)',
-						    pointBorderColor: '#fff',
-						    pointHoverBackgroundColor: '#fff',
-						    pointHoverBorderColor: 'rgb(255, 99, 132)'
-						  }, {
-						    label: 'My Second Dataset',
-						    data: [28, 48, 40, 19, 96, 27, 100],
-						    fill: true,
-						    backgroundColor: 'rgba(54, 162, 235, 0.2)',
-						    borderColor: 'rgb(54, 162, 235)',
-						    pointBackgroundColor: 'rgb(54, 162, 235)',
-						    pointBorderColor: '#fff',
-						    pointHoverBackgroundColor: '#fff',
-						    pointHoverBorderColor: 'rgb(54, 162, 235)'
-						  }]
-						};
-						
-						
-						
-						const config = {
-						  type: 'radar',
-						  data: data,
-						  options: {
-						    elements: {
-						      line: {
-						        borderWidth: 3
-						      }
-						    }
-						  },
-						};
-						
-						
-						  const ctx = document.getElementById('myChart');
-						
-						  new Chart(ctx, config);
-						</script>	
-											
+						  <canvas id="radarScore"></canvas>
 				</div>
-				
-			
-				
 				
 			</div>
 		</div>

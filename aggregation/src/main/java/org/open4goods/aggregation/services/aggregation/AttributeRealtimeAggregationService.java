@@ -58,8 +58,7 @@ public class AttributeRealtimeAggregationService extends AbstractRealTimeAggrega
 		Set<String> toRemoveFromUnmatched = new HashSet<>();
 		// Adding the list of "to be removed" attributes
 		toRemoveFromUnmatched.addAll(attributesConfig.getExclusions());
-		
-		
+				
 		/////////////////////////////////////////
 		// Converting to AggregatedAttributes for matches from config
 		/////////////////////////////////////////
@@ -71,7 +70,7 @@ public class AttributeRealtimeAggregationService extends AbstractRealTimeAggrega
 		all.addAll(product.getAttributes().getUnmapedAttributes().stream().map(e -> new Attribute(e.getName(),e.getValue(),e.getLanguage())).toList());
 		
 		
-		for (Attribute attr :  dataFragment.getAttributes()) {
+		for (Attribute attr :  all) {
 			
 			// Checking if a potential AggregatedAttribute
 			Attribute translated = attributesConfig.translateAttribute(attr, dataFragment.getDatasourceName());
@@ -85,16 +84,22 @@ public class AttributeRealtimeAggregationService extends AbstractRealTimeAggrega
 					// Applying parsing rule
 					translated = parseAttributeValue(translated, attrConfig);
 					
+					if (translated.getRawValue() == null) {
+						continue;
+					}
+
 					AggregatedAttribute agg = product.getAttributes().getAggregatedAttributes().get(attr.getName());
 					
-					toRemoveFromUnmatched.add(translated.getName());
 					
 					if (null == agg) {
 						// A first time match
 						agg = new AggregatedAttribute();
 						agg.setName(attr.getName());
 					} 
-									
+						
+					
+					
+					toRemoveFromUnmatched.add(translated.getName());
 					agg.addAttribute(translated,attrConfig, new UnindexedKeyValTimestamp(dataFragment.getDatasourceName(), translated.getValue().toString()));
 					
 					// Replacing new AggAttribute in product
@@ -153,6 +158,12 @@ public class AttributeRealtimeAggregationService extends AbstractRealTimeAggrega
 			product.getAttributes().getUnmapedAttributes().add(agg);			
 		}
 	
+		
+		// Removing 
+		product.getAttributes().setUnmapedAttributes(product.getAttributes().getUnmapedAttributes().stream().filter(e -> !toRemoveFromUnmatched.contains(e.getName())) .collect(Collectors.toSet()));
+		
+		
+		
 		// TODO : Removing matchlist again to handle remove of old attributes in case of configuration change
 //		product.getAttributes().getUnmapedAttributes().
 	}
@@ -488,6 +499,17 @@ public class AttributeRealtimeAggregationService extends AbstractRealTimeAggrega
 
 		}
 
+		
+		
+		
+		/////////////////////////////////
+		// FIXED TEXT MAPPING
+		/////////////////////////////////
+		if (!conf.getMappings().isEmpty() ) {			
+			String replacement = conf.getMappings().get(attr.getRawValue());
+			attr.setRawValue(replacement);			
+		}
+		
 		/////////////////////////////////
 		// Checking preliminary result
 		/////////////////////////////////

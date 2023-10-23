@@ -27,8 +27,8 @@
 				
 
 				<tr th:if="${product.model()}">
-					<th scope="row">Modèle</th>
-					<td class="lead" th:text="${product.model()}"></td>
+					<th scope="row"><b>Modèle</b></th>
+					<td><b class="lead" th:text="${product.model()}"></b></td>
 				</tr>
 
 
@@ -58,7 +58,10 @@
 
 				<tr>
 					<th scope="row" th:text="${product.gtinInfos.upcType}"></th>
-					<td > <span th:text="${product.gtin()}"></span>	
+					<td class="text-center"> 
+						<span th:text="${product.gtin()}"></span>	
+						<img height="100px" th:title="${product.gtin()}" th:src="'/images/'+${product.gtin()}+'-gtin.png'" th:alt="${product.names.name} +' gtin : ' + ${product.gtin()}">
+					</td>
 				</tr>
 											
 			</tbody>

@@ -107,8 +107,9 @@
 				<th:block th:insert="~{inc/product-descriptions.html}"></th:block>							
 
 							
-   				 <!--/* Product origin */-->				
+   				 <!--/* Product origin 
 				 <th:block th:insert="~{inc/product-origin.html}"></th:block>
+   				 */-->				
              
   				 <!--/* Product all prices */-->
 				 <th:block th:insert="~{inc/product-all-prices.html}"></th:block>
@@ -119,7 +120,14 @@
 	      				<!--/* Fonctionnalites */-->				
 						<div class="mt-3"  th:if="${product.attributes.features.size > 0}" th:insert="~{inc/product-features.html}"></div>
 					</div>
-					
+
+
+
+					<!--/* Attributes */-->				
+						<th:block th:insert="~{inc/product-unmatched-attributes.html}"></th:block>					
+
+
+
 					<div class=" col-lg-12">
 	
 
@@ -130,8 +138,7 @@
 								<div class="card-header"><h2 class="h5">Mode développement</h2></div>
 								<p>Cette section n'apparait qu'a là nudger team</p>
 								<div class="card-body">
-									<!--/* Attributes */-->				
-									<th:block th:insert="~{inc/product-unmatched-attributes.html}"></th:block>
+	
 			
 				      				<!--/* Categories */-->				
 									<th:block th:insert="~{inc/product-categories.html}"></th:block>
@@ -188,6 +195,7 @@
 <script src="../../vendor/@glidejs/glide/dist/glide.min.js"></script>
  --> 
 
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <script src="/webjars/jquery/jquery.min.js"></script>
 <script type="text/javascript" language="javascript" src="/webjars/datatables/js/jquery.dataTables.min.js"></script>
@@ -195,8 +203,6 @@
 <script type="text/javascript" language="javascript" src="/webjars/datatables-responsive/js/dataTables.responsive.min.js"></script>
 
 
-
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <script src="../../vendor/countup.js/dist/countUp.umd.js"></script>
 <!-- pixel JS -->
@@ -251,6 +257,200 @@ var options = {
 
 var reversment = new countUp.CountUp("countup-reversment", $("#countup-reversment").attr("data-max"), options);
 setTimeout(reversment.start(), 5000);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// Ecoscore radar chart
+
+
+						
+						const data = {
+						  labels: [
+						    'Eating',
+						    'Drinking',
+						    'Sleeping',
+						    'Designing',
+						    'Coding',
+						    'Cycling',
+						    'Running'
+						  ],
+						  datasets: [{
+						    label: 'My First Dataset',
+						    data: [65, 59, 90, 81, 56, 55, 40],
+						    fill: true,
+						    backgroundColor: 'rgba(255, 99, 132, 0.2)',
+						    borderColor: 'rgb(255, 99, 132)',
+						    pointBackgroundColor: 'rgb(255, 99, 132)',
+						    pointBorderColor: '#fff',
+						    pointHoverBackgroundColor: '#fff',
+						    pointHoverBorderColor: 'rgb(255, 99, 132)'
+						  }, {
+						    label: 'My Second Dataset',
+						    data: [28, 48, 40, 19, 96, 27, 100],
+						    fill: true,
+						    backgroundColor: 'rgba(54, 162, 235, 0.2)',
+						    borderColor: 'rgb(54, 162, 235)',
+						    pointBackgroundColor: 'rgb(54, 162, 235)',
+						    pointBorderColor: '#fff',
+						    pointHoverBackgroundColor: '#fff',
+						    pointHoverBorderColor: 'rgb(54, 162, 235)'
+						  }]
+						};
+						
+						
+						
+						const config = {
+						  type: 'radar',
+						  data: data,
+						  options: {
+						    elements: {
+						      line: {
+						        borderWidth: 3
+						      }
+						    }
+						  },
+						};
+						
+						
+						  const ctx = document.getElementById('radarScore');
+						
+						  new Chart(ctx, config);
+
+
+
+
+
+
+
+
+
+
+
+// Price chart
+
+
+						
+						const data2 = {
+ labels: [ // Date Objects
+    Utils.newDate(0),
+    Utils.newDate(1),
+    Utils.newDate(2),
+    Utils.newDate(3),
+    Utils.newDate(4),
+    Utils.newDate(5),
+    Utils.newDate(6)
+  ],
+  datasets: [{
+    label: 'My First dataset',
+    backgroundColor: Utils.transparentize(Utils.CHART_COLORS.red, 0.5),
+    borderColor: Utils.CHART_COLORS.red,
+    fill: false,
+    data: Utils.numbers(NUMBER_CFG),
+  }, {
+    label: 'My Second dataset',
+    backgroundColor: Utils.transparentize(Utils.CHART_COLORS.blue, 0.5),
+    borderColor: Utils.CHART_COLORS.blue,
+    fill: false,
+    data: Utils.numbers(NUMBER_CFG),
+  }, {
+    label: 'Dataset with point data',
+    backgroundColor: Utils.transparentize(Utils.CHART_COLORS.green, 0.5),
+    borderColor: Utils.CHART_COLORS.green,
+    fill: false,
+    data: [{
+      x: Utils.newDateString(0),
+      y: Utils.rand(0, 100)
+    }, {
+      x: Utils.newDateString(5),
+      y: Utils.rand(0, 100)
+    }, {
+      x: Utils.newDateString(7),
+      y: Utils.rand(0, 100)
+    }, {
+      x: Utils.newDateString(15),
+      y: Utils.rand(0, 100)
+    }],
+  }]
+						};
+						
+						
+						
+					const config2 = {
+  type: 'line',
+  data: data2,
+  options: {
+    plugins: {
+      title: {
+        text: 'Chart.js Time Scale',
+        display: true
+      }
+    },
+    scales: {
+      x: {
+        type: 'time',
+        time: {
+          // Luxon format string
+          tooltipFormat: 'DD T'
+        },
+        title: {
+          display: true,
+          text: 'Date'
+        }
+      },
+      y: {
+        title: {
+          display: true,
+          text: 'value'
+        }
+      }
+    },
+  },
+};
+						
+						
+						  const ctx2 = document.getElementById('priceChart');
+						
+						  new Chart(ctx2, config2);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

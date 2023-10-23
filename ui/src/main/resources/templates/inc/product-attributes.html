@@ -5,12 +5,12 @@
 			<tbody>
 				<th:block th:each="attribute : ${product.attributes.aggregatedAttributes.values()}">
 	  				<tr>
-						<th class="help-pointer" scope="row" th:text="${helper.attributeName(attribute.name)}"></th>
+						<th  scope="row" th:text="${helper.attributeName(attribute.name)}"></th>
 						
 						
 						<th:block th:switch="${attribute.name}">
-			                <td class="lead help-pointer" th:case="'REPAIRABILITY_INDEX'"  th:insert="~{inc/attributes/class_energy.html}"> </td>
-			                <td class="lead help-pointer" th:case="*" th:text="${attribute.value}"></td>
+			                <td class="lead" th:case="'REPAIRABILITY_INDEX'"  th:insert="~{inc/attributes/class_energy.html}"> </td>
+			                <td class="lead" th:case="*" th:text="${attribute.value}"></td>
 			            </th:block>
 			            <td class="float-end">
 			            		<th:block th:insert="~{inc/attribute-sourcing.html}"></th:block>
