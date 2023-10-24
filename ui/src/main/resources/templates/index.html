@@ -46,7 +46,7 @@
            <div class="container container-semi-fluid">
                <div class="row justify-content-between align-items-center">
                    <div class="col-12 col-md-12">
-                       <p class="display-2 mb-2 text-center">nudger<span class="text-secondary-app fw-bold">.fr</span>
+                       <p class="display-2 mb-2 text-center">nudger<span id="fad1" style="display: none" class="text-secondary-app fw-bold">.</span><span id="fad2" style="display: none" class="text-secondary-app fw-bold">fr</span>
                        </p>
                        
                        
@@ -425,7 +425,21 @@ $(document).ready(function() {
 	$('#searchInput').on("change",function (e) {
     	$('#searchForm').attr("action","/recherche/"+encodeURIComponent($('#searchInput').val()));
     });
+    
+    
+
+	  
+
+ 	setTimeout( function() { 
+ 							    $("#fad1").fadeIn( "slow", function() {$("#fad2").fadeIn("slow");});
+ 							}, 4000);
+	// Fading in title
+
+	
+
 } );
+
+
 
 
 
