@@ -30,13 +30,9 @@
 <body>
     
 	<!--/* Navbar */-->
-	<header class="header-global">
-    	<nav th:with="hideSearch=true" id="navbar-main" aria-label="Primary navigation" class="navbar navbar-main navbar-expand-lg navbar-theme-primary headroom navbar-dark navbar-theme-primary">
-			<th:block th:insert="~{inc/navbar-non-product.html}"></th:block>
-		</nav>
-       <!--/* Loader */-->
-       <th:block th:insert="~{inc/preloader.html}"></th:block>
-	</header>
+	<th:block th:insert="~{inc/navbar-non-product.html}"></th:block>
+    <!--/* Loader */-->
+    <th:block th:insert="~{inc/preloader.html}"></th:block>
 	
     <main>	
 		

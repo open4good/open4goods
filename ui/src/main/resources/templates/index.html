@@ -30,378 +30,352 @@
 <body>
     
     <!--/* Navbar */-->
-	<header class="header-global">
-    	<nav th:with="hideSearch=true" id="navbar-main" aria-label="Primary navigation" class="navbar navbar-main navbar-expand-lg navbar-theme-primary headroom navbar-light navbar-theme-secondary">
-			<th:block th:insert="~{inc/navbar-non-product.html}"></th:block>
-		</nav>
-       <!--/* Loader */-->
-       <th:block th:insert="~{inc/preloader.html}"></th:block>
-
-	</header>
+	<th:block th:insert="~{inc/navbar-non-product.html}"></th:block>
+    <!--/* Loader */-->
+    <th:block th:insert="~{inc/preloader.html}"></th:block>
 	
-    <main>	
+    <main class="bg-gray-200">	
 		
-       <!--/* Central */-->
-       <section class="mt-6 mb-0">
-           <div class="container container-semi-fluid">
-               <div class="row justify-content-between align-items-center">
-                   <div class="col-12 col-md-12">
-                       <p class="display-2 mb-2 text-center">nudger<span class="text-secondary-app fw-bold">.fr</span>
-                       </p>
-                       
-                       
-                       <div class="row">
-	                       	<div class="col-2 ">                       	
-	                       		<img class="navbar-brand-light" src="../../assets/img/nudger-logo.png" alt="nudger.fr logo dark">
-	                       	</div>
-	                       
-	                       
-	                       	<div class="col-10">
-	                       	
-	                      		   <p class="lead text-gray mt-2">
-	  									<th:block th:with="path='WIDGETS/accueil-jumbotron/'">
-			                        		<th:block th:insert="~{inc/wiki.html}"></th:block>
-			                        	</th:block>
-	                      		   </p>
-	                       
-	                               <form method="post" id="searchForm" action="/recherche">
-				                       <div class="d-flex flex-wrap mt-lg-2">
-				                           <div class="input-group input-group-lg">
-					                               <input type="text" id="searchInput" class="form-control" th:placeholder="'Chercher dans ' + ${#numbers.formatDecimal(totalItems, 0, 'COMMA', 0, 'POINT')} + ' produits'" aria-label="Search" aria-describedby="basic-addon1" name="query">
-					                               <button onclick="document.getElementById('searchForm').submit()" class="btn btn-primary" type="button"><span class="icon icon-xs me-1"><span class="fas fa-search"></span></span> Chercher</button>
-				                            </div>
-				                       </div>
-		                           </form>
-		                                                  	
-	                       	</div>
-                       </div>
-                       
-	                           
-	                   <blockquote class="mt-4 blockquote text-center">
-	                       <h1 class="mb-3">Consommons peu, consommons bien</h1>
-	                       <p class="lead px-lg-5">Un coup de main éthique et ouvert pour amoindrir l'impact de votre shopping en ligne.</p>
-						</blockquote>
+       	<!--/* Central */-->
+		<section class="section-header py-3">
+			<div class="col-12">
+				<p class="display-2 mb-2 text-center">nudger<span class="text-secondary-app fw-bold">.fr</span>
+				</p>
+			</div>	
+
+			<div class="container">		
+				<div class="row">
+					<div class="col-12 col-lg-2 d-flex align-items-center justify-content-center">                       	
+						<img class="navbar-brand-light" src="../../assets/img/nudger-logo.png" alt="nudger.fr logo dark">
+					</div>
+				
+				
+					<div class="col-12 col-lg-10">
 					
-                   </div>
-                   
-              </div>
-          </div>
-       </section>
+						<p class="lead text-gray mt-2">
+								<th:block th:with="path='WIDGETS/accueil-jumbotron/'">
+									<th:block th:insert="~{inc/wiki.html}"></th:block>
+								</th:block>
+						</p>
+				
+						<form method="post" id="searchForm" action="/recherche">
+							<div class="d-flex flex-wrap mt-lg-2">
+								<div class="input-group input-group-lg">
+										<input type="text" id="searchInput" class="form-control" th:placeholder="'Rechercher dans ' + ${#numbers.formatDecimal(totalItems, 0, 'COMMA', 0, 'POINT')} + ' produits'" aria-label="Search" aria-describedby="basic-addon1" name="query">
+										<button onclick="document.getElementById('searchForm').submit()" class="btn btn-primary" type="button"><span class="fas fa-search"></span></button>
+									</div>
+							</div>
+						</form>
+													
+					</div>
+				</div>	
+			</div>
+		</section>
+
+		<section class="bg-primary mt-4 text-center py-4">
+			<h1 class="mb-3 text-white-50">Consommons peu, consommons bien</h1>
+			<p class="lead text-white mb-0">Un coup de main éthique et ouvert pour amoindrir l'impact de votre shopping en ligne.</p>
+		</section>
        
 
+		<div class="container container-semi-fluid py-5">
+			<div class="row justify-content-between align-items-center">
+								
+				
+				<div class="col-12 col-md-12 text-center">
+					<div class="row justify-content-center">
+				
+	
+						<div class="col-12 col-md-3 col-lg-3 mb-3 mb-lg-0">
+							<div class="card bg-white border-gray-300 text-gray p-4 h-100">
+								<div class="card-header bg-white border-0 pb-0">
+									<h2 class="h4 m-0">Eco-score</h2>
+								</div>
+								<div class="card-body">
+									<p>
+										<th:block th:with="path='WIDGETS/accueil-ecoscore/'">
+											<th:block th:insert="~{inc/wiki.html}"></th:block>
+										</th:block>                                
+									</p>
+									<a href="#evaluation-ecologique" class="btn btn-sm btn-primary animate-up-2 mt-3">Score écologique</a>
+								</div>
+							</div>
+						</div>                    
 
+						<div class="col-12 col-md-3 col-lg-3 mb-3 mb-lg-0">
+							<div class="card bg-white border-gray-300 text-gray p-4 h-100">
+								<div class="card-header bg-white border-0 pb-0">
+									<h2 class="h4 m-0">Compensation</h2>
+								</div>
+								<div class="card-body">
+									<p>
+										<th:block th:with="path='WIDGETS/accueil-compensation/'">
+											<th:block th:insert="~{inc/wiki.html}"></th:block>
+										</th:block>                                
+									</p>
+									<a href="#compensation-carbone" class="btn btn-sm btn-primary animate-up-2 mt-3">Compensation écologique</a>
+								</div>
+							</div>
+						</div>
+						
+						<div class="col-12 col-md-3 col-lg-3 mb-3 mb-lg-0">
+							<div class="card bg-white border-gray-300 text-gray p-4 h-100">
+								<div class="card-header bg-white border-0 pb-0">
+									<h2 class="h4 m-0">Modèle ouvert</h2>
+								</div>
+								<div class="card-body">
+									<p>
+										<th:block th:with="path='WIDGETS/accueil-modele-ouvert/'">
+											<th:block th:insert="~{inc/wiki.html}"></th:block>
+										</th:block>                                
+									</p>
+									<a href="#modele-ouvert" class="btn btn-sm btn-primary animate-up-2 mt-3">Modèle ouvert</a>
+								</div>
+							</div>
+						</div>
+						
+						
+						<div class="col-12 col-md-3 col-lg-3 mb-3 mb-lg-0">
+							<div class="card bg-white border-gray-300 text-gray p-4 h-100x ">
+								<div class="card-header bg-white border-0 pb-0">
+									<h2 class="h4 m-0">Data responsable</h2>
+								</div>
+								<div class="card-body">
+									<p>
+										<th:block th:with="path='WIDGETS/accueil-data-responsable'">
+											<th:block th:insert="~{inc/wiki.html}"></th:block>
+										</th:block>                                
+									</p>
+									<a href="#data-responsable" class="btn btn-sm btn-primary animate-up-2 mt-3">Data responsable</a>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
 
+		</div>
 
+		<section class="bg-black text-center py-4">
+			<h1 class="mb-3 text-white-50">Nos catégories évaluées</h1>
+			<p class="lead text-white mb-0">L'assurance de bien choisir</p>
+		</section>
 
+	   <section class="container text-center py-4">
+		<div class="row justify-content-center">
+			<div class="col-12 col-md-6 col-lg-4 py-3">
+				<div class="icon icon-shape icon-shape-secondary me-2 me-md-0 mb-2">
+					<span class="fas fa-box-open"></span>
+				</div>
+				<span class="counter display-3 text-secondary d-block">150€</span>
+				<span class="lead">Montant du coup de pouce à date de Nudger pour la planète</span>
+			</div>
 
+			<div class="col-12 col-md-6 col-lg-4 py-3">
+				<div class="icon icon-shape icon-shape-secondary me-2 me-md-0 mb-2">
+					<span class="fas fa-box-open"></span>
+				</div>
+				<span class="counter display-3 text-secondary d-block">15M+ Offres commerciales</span>
+				<span class="lead">Un des comparateurs les plus fournis</span>
+			</div>
 
+			<div class="col-12 col-md-6 col-lg-4 py-3">
+				<div class="icon icon-shape icon-shape-secondary me-2 me-md-0 mb-2">
+					<span class="fas fa-box-open"></span>
+				</div>
+				<span class="counter display-3 text-secondary d-block">8703</span>
+				<span class="lead">Nombre de produits disponibles dans nos univers, pour lesquels nous disposons d'un bilan environnemental.</span>
+			</div>
 
+			<div class="col-12 col-md-6 col-lg-4 py-3">
+				<div class="icon icon-shape icon-shape-secondary me-2 me-md-0 mb-2">
+					<span class="fas fa-box-open"></span>
+				</div>
+				<span class="counter display-3 text-secondary d-block">+50M produits</span>
+				<span class="lead">Disponibles en open data, reprenant l'intégralité de l'inventaire. La référence en matière de bases de codes barres dans l'opendata français.</span>
+			</div>
 
+			<div class="col-12 col-md-6 col-lg-4 py-3">
+				<div class="icon icon-shape icon-shape-secondary me-2 me-md-0 mb-2">
+					<span class="fas fa-box-open"></span>
+				</div>
+				<span class="counter display-3 text-secondary d-block">+270k lignes de codes</span>
+				<span class="lead">Disponibles en open source. Bien commun et transparence !</span>
+			</div>
 
-
-
-           
-       <section>
-           <div class="container container-semi-fluid">
-               <div class="row justify-content-between align-items-center">
-                                  
-                   
-                   <div class="col-12 col-md-12 text-center">
-                       <div class="row justify-content-center">
-                    
-		
-		                    <div class="col-12 col-md-3 col-lg-3 mb-3 mb-lg-0">
-		                        <div class="card bg-white border-gray-300 text-gray p-4">
-		                            <div class="card-header bg-white border-0 pb-0">
-		                                <h2 class="h4 m-0">Eco-score</h2>
-		                            </div>
-		                            <div class="card-body">
-		                                <p>
-											<th:block th:with="path='WIDGETS/accueil-ecoscore/'">
-				                        		<th:block th:insert="~{inc/wiki.html}"></th:block>
-				                        	</th:block>                                
-		                                </p>
-		                                <a href="#evaluation-ecologique" class="btn btn-sm btn-primary animate-up-2 mt-3">Score écologique</a>
-		                            </div>
-		                        </div>
-		                    </div>                    
-
-		                    <div class="col-12 col-md-3 col-lg-3 mb-3 mb-lg-0">
-		                        <div class="card bg-white border-gray-300 text-gray p-4">
-		                            <div class="card-header bg-white border-0 pb-0">
-		                                <h2 class="h4 m-0">Compensation</h2>
-		                            </div>
-		                            <div class="card-body">
-		                                <p>
-											<th:block th:with="path='WIDGETS/accueil-compensation/'">
-				                        		<th:block th:insert="~{inc/wiki.html}"></th:block>
-				                        	</th:block>                                
-		                                </p>
-		                                <a href="#compensation-carbone" class="btn btn-sm btn-primary animate-up-2 mt-3">Compensation écologique</a>
-		                            </div>
-		                        </div>
-		                    </div>
-		                    
-		                    <div class="col-12 col-md-3 col-lg-3 mb-3 mb-lg-0">
-		                        <div class="card bg-white border-gray-300 text-gray p-4">
-		                            <div class="card-header bg-white border-0 pb-0">
-		                                <h2 class="h4 m-0">Modèle ouvert</h2>
-		                            </div>
-		                            <div class="card-body">
-		                                <p>
-											<th:block th:with="path='WIDGETS/accueil-modele-ouvert/'">
-				                        		<th:block th:insert="~{inc/wiki.html}"></th:block>
-				                        	</th:block>                                
-		                                </p>
-		                                <a href="#modele-ouvert" class="btn btn-sm btn-primary animate-up-2 mt-3">Modèle ouvert</a>
-		                            </div>
-		                        </div>
-		                    </div>
-		                    
-		                    
-		                    <div class="col-12 col-md-3 col-lg-3 mb-3 mb-lg-0">
-		                        <div class="card bg-white border-gray-300 text-gray p-4">
-		                            <div class="card-header bg-white border-0 pb-0">
-		                                <h2 class="h4 m-0">Data responsable</h2>
-		                            </div>
-		                            <div class="card-body">
-		                                <p>
-											<th:block th:with="path='WIDGETS/accueil-data-responsable'">
-				                        		<th:block th:insert="~{inc/wiki.html}"></th:block>
-				                        	</th:block>                                
-		                                </p>
-		                                <a href="#data-responsable" class="btn btn-sm btn-primary animate-up-2 mt-3">Data responsable</a>
-		                            </div>
-		                        </div>
-		                    </div>
-		                </div>
-                   </div>
-               </div>
-
-           </div>
-       </section>
-
-
-
+			<div class="col-12 col-md-6 col-lg-4 py-3">
+				<div class="icon icon-shape icon-shape-secondary me-2 me-md-0 mb-2">
+					<span class="fas fa-box-open"></span>
+				</div>
+				<span class="counter display-3 text-secondary d-block" th:text="${partners.size()}"></span>
+				<span class="lead">Nombre de partenaires de notre démarche. Toutes les plus grandes enseignes !</span>
+			</div>
+		</div>
+	   </section>
 	
 
-
-
-
-
-       <!--/* Numbers */-->       
-	   <section class="container section bg-gray-200">
-
-
-			<div class="row justify-content-center mb-5 mb-lg-6">
-				<div class="col-4 text-center mb-4">
-					<div
-						class="icon icon-shape icon-lg bg-white shadow-lg border-light rounded-circle mb-4">
-						<span class="fas fa-puzzle-piece text-tertiary"></span>
+		<section class="container d-none">
+			<div class="row">
+				<div class="col-12 col-md-6 col-lg-3" th:each ="vertical : ${verticals}">
+					<div class="blog-card">
+						<div class="card shadow">
+							<a th:href="'/'+${vertical.homeUrl.i18n(siteLanguage)}"><img th:src="${vertical.homeLogo.i18n(siteLanguage)}" class="card-img-top rounded-top" alt="Themesberg office"></a>
+							<div class="card-body">
+								<h2 class="h5">
+									<a th:href="'/'+${vertical.homeUrl.i18n(siteLanguage)}" th:text="${vertical.homeTitle.i18n(siteLanguage)}"></a>
+								</h2>
+								<p class="card-text my-2" th:text="${vertical.homeDescription.i18n(siteLanguage)}"></p>
+							</div>
+							<div class="card-footer bg-white border-0 px-0 py-0">
+								<div class="d-grid">
+									<a class="btn btn-sm btn-secondary rounded-0 rounded-bottom" th:href="'/'+${vertical.homeUrl.i18n(siteLanguage)}">
+										<span class="fas fa-book-open me-1"></span> Découvrir
+									</a>
+								</div>
+							</div>
+						</div>
 					</div>
-					<h3 class="fw-bolder">150€</h3>
-					<p class="text-gray">Montant du coup de pouce à date de Nudger pour la planète</p>
-				</div>
-				<div class="col-4 text-center mb-4">
-					<div
-						class="icon icon-shape icon-lg bg-white shadow-lg border-light rounded-circle mb-4">
-						<span class="fas fa-pager text-tertiary"></span>
-					</div>
-					<h3 class="fw-bolder">15M+ Offres commerciales</h3>
-					<p class="text-gray">Un des comparateurs les plus fournis</p>
-				</div>
-				<div class="col-4 text-center">
-					<div
-						class="icon icon-shape icon-lg bg-white shadow-lg border-light rounded-circle mb-4">
-						<span class="fab fa-sass text-tertiary"></span>
-					</div>
-					<h3 class="fw-bolder">8703 </h3>
-					<p class="text-gray">Nombre de produits disponibles dans nos univers, pour lesquels nous disposons d'un bilan environnemental.</p>
-				</div>
-
-				<div class="col-4 col-md-3 text-center mb-4">
-					<div
-						class="icon icon-shape icon-lg bg-white shadow-lg border-light rounded-circle mb-4">
-						<span class="fas fa-pager text-tertiary"></span>
-					</div>
-					<h3 class="fw-bolder">+50M produits</h3>
-					<p class="text-gray">Disponibles en open data, reprenant l'intégralité de l'inventaire. La référence en matière de bases de codes barres dans l'opendata français.</p>
-				</div>
-
-				<div class="col-4 text-center mb-4">
-					<div
-						class="icon icon-shape icon-lg bg-white shadow-lg border-light rounded-circle mb-4">
-						<span class="fas fa-pager text-tertiary"></span>
-					</div>
-					<h3 class="fw-bolder">+270k lignes de codes</h3>
-					<p class="text-gray">Disponibles en open source. Bien commun et transparence !</p>
-				</div>
-				
-				
-				
-				
-				
-				
-				
-				<div class="col-2 text-center">
-					<div
-						class="icon icon-shape icon-lg bg-white shadow-lg border-light rounded-circle mb-4">
-						<span class="fab fa-js-square text-tertiary"></span>
-					</div>
-					<h3 class="fw-bolder" th:text="${partners.size()}"></h3>
-					<p class="text-gray">Nombre de partenaires de notre démarche. Toutes les plus grandes enseignes !</p>
 				</div>
 			</div>
 		</section>
-		
-		<section class="section">
+
+   
+		<section class="bg-black mt-4 text-center py-4">
+			<h1 class="mb-3 text-white-50">Notre philosophie : le bien commun</h1>
+			<p class="lead text-white mb-0">Découvrez nos valeurs et nos atouts</p>
+		</section>
 	   
 	   
-	   
-		<div class="row text-center justify-content-center">
-              <div class="col-md-8 mb-5">
-                  <p class="display-3">Nos catégories évaluées</p>
-                  <p class="lead">L'assurance de bien choisir</p>
-              </div>
-        </div>	   
-        	   
-	   <div class="container container-semi-fluid ">
-        <div class="row justify-content-center">
+		<div class="container my-5">
+			<div class="d-flex justify-content-start">
+				<div class="col-12 col-md-10">
+					<!-- Icon Boxes -->
+					<div class="card shadow">
+						<div class="row g-0 align-items-center">
+							<div class="col-md-4">
+								<img src="../../assets/img/pages/design.svg" alt="Web design illustration" class="card-img-top rounded-top">
+							</div>
+							<div class="col-md-8">
+								<div class="card-body">
+									<h3 class="h5 card-title mt-3">Compensation environnementale</h3>
+									<p class="card-text">
+										<th:block th:with="path='WIDGETS/accueil-compensation-full/'">
+											<th:block th:insert="~{inc/wiki.html}"></th:block>
+										</th:block>                                           
+									</p>
+									<a href="/compensation-carbone" class="btn btn-primary btn-sm">En savoir plus sur la compensation carbone</a>
+								</div>
+							</div>
+						</div>
+					</div>
+					<!-- End of Icon Boxes -->
+				</div>
+			</div>
 
+			<div class="d-flex justify-content-end mt-3">
+				<div class="col-12 col-md-10">
+					<!-- Icon Boxes -->
+					<div class="card shadow">
+						<div class="row g-0 align-items-center">
+							<div class="col-md-8">
+								<div class="card-body">
+									<h3 class="h5 card-title mt-3">Data responsable</h3>
+									<p class="card-text">
+										<th:block th:with="path='WIDGETS/accueil-data-responsable-full/'">
+											<th:block th:insert="~{inc/wiki.html}"></th:block>
+										</th:block>
+									</p>
+									<a href="/donnees-personnelles" class="btn btn-primary btn-sm">En savoir plus sur l'utilisation de vos données</a>
+								</div>
+							</div>
+							<div class="col-md-4">
+								<img src="../../assets/img/pages/support.svg" alt="Web design illustration" class="card-img-top rounded-top">
+							</div>
+						</div>
+					</div>
+					<!-- End of Icon Boxes -->
+				</div>
+			</div>    
+			
+			<div class="d-flex justify-content-start mt-3">
+				<div class="col-12 col-md-10">
+					<!-- Icon Boxes -->
+					<div class="card shadow">
+						<div class="row g-0 align-items-center">
+							<div class="col-md-4">
+								<img src="../../assets/img/pages/technologies.svg" alt="Web design illustration" class="card-img-top rounded-top">
+							</div>
+							<div class="col-md-8">
+								<div class="card-body">
+									<h3 class="h5 card-title mt-3">Comparaison de prix</h3>
+									<p class="card-text">
+										<th:block th:with="path='WIDGETS/accueil-comparaison-prix-full/'">
+											<th:block th:insert="~{inc/wiki.html}"></th:block>
+										</th:block>                                          
+									</p>
+									<a href="#" class="btn btn-primary btn-sm">En savoir plus sur la comparaison de prix</a>
+								</div>
+							</div>
+						</div>
+					</div>
+					<!-- End of Icon Boxes -->
+				</div>
+			</div>
 
-			<div th:each ="vertical : ${verticals}" class="col-12 col-md-3 col-lg-3 mb-5 mb-lg-0">
-                
-                <div class="card shadow">
-                	<a th:href="'/'+${vertical.homeUrl.i18n(siteLanguage)}">
-	                    <img th:src="${vertical.homeLogo.i18n(siteLanguage)}" class="card-img-top rounded-top" th:alt="${vertical.homeTitle.i18n(siteLanguage)}">
-                	</a>
-                    <div class="card-body">
-    					<a th:href="'/'+${vertical.homeUrl.i18n(siteLanguage)}">
-	                        <h2 class="h4 card-title mt-3 text-center" th:text="${vertical.homeTitle.i18n(siteLanguage)}"></h2>
-	                        <p class="card-text" th:text="${vertical.homeDescription.i18n(siteLanguage)}"></p>
-	                        <button class="w-100 btn btn-primary btn-sm">Découvrir</button>
-    					</a>
-                    </div>
-                </div>
-            </div>
+			<div class="d-flex justify-content-end mt-3">
+				<div class="col-12 col-md-10">
+					<!-- Icon Boxes -->
+					<div class="card shadow">
+						<div class="row g-0 align-items-center">
+							<div class="col-md-8">
+								<div class="card-body">
+									<h3 class="h5 card-title mt-3">Evaluation écologique</h3>
+									<p class="card-text">
+										<th:block th:with="path='WIDGETS/accueil-ecoscore-full/'">
+											<th:block th:insert="~{inc/wiki.html}"></th:block>
+										</th:block>   
+									</p>
+									<a href="/donnees-personnelles" class="btn btn-primary btn-sm">En savoir plus sur l'évaluation environnementale</a>
+								</div>
+							</div>
+							<div class="col-md-4">
+								<img src="../../assets/img/pages/support.svg" alt="Web design illustration" class="card-img-top rounded-top">
+							</div>
+						</div>
+					</div>
+					<!-- End of Icon Boxes -->
+				</div>
+			</div>  
 
+			<div class="d-flex justify-content-start mt-3">
+				<div class="col-12 col-md-10">
+					<!-- Icon Boxes -->
+					<div class="card shadow">
+						<div class="row g-0 align-items-center">
+							<div class="col-md-4">
+								<img src="../../assets/img/pages/code.svg" alt="Web design illustration" class="card-img-top rounded-top">
+							</div>
+							<div class="col-md-8">
+								<div class="card-body">
+									<h3 class="h5 card-title mt-3">Open-source et Open-data</h3>
+									<p class="card-text">
+										<th:block th:with="path='WIDGETS/accueil-modele-ouvert-full/'">
+											<th:block th:insert="~{inc/wiki.html}"></th:block>
+										</th:block>                                         
+									</p>
+									<a href="/opendata" class="btn btn-primary btn-sm">En savoir plus sur le modèle ouvert</a>
+								</div>
+							</div>
+						</div>
+					</div>
+					<!-- End of Icon Boxes -->
+				</div>
+			</div>        
+		</div>       
+	</main>
 
-            
-        </div>
-    </div>
-    
-    
-    
-    </section>
-    <section class="section">
-		<div class="row text-center justify-content-center">
-              <div class="col-md-8 mb-5">
-                  <p class="display-3">Notre philosophie : le bien commun</p>
-                  <p class="lead">Découvrez nos valeurs et nos atouts</p>
-              </div>
-        </div>	   
-  
-	   
-	   
-			<div class="container container-semi-fluid">
-                <div class="col-12 col-lg-12">
-                    <div class="row justify-content-center ">
-                        <div class="col-12 col-md-6">
-                            <div class="row mt-5 mt-lg-0 px-3">
-                                <!-- Icon Boxes -->
-                                <div id="compensation-carbone" class="card shadow border-gray-300">
-                                    <div class="card-body p-4 p-lg-5">
-                                        <img src="../../assets/img/pages/design.svg" alt="Web design illustration" class="image-md mb-4">
-                                        <h2  class="h4 mb-2">Compensation environnementale</h2>
-                                        <p>
-											<th:block th:with="path='WIDGETS/accueil-compensation-full/'">
-				                        		<th:block th:insert="~{inc/wiki.html}"></th:block>
-				                        	</th:block>                                           
-                                        
-                                        </p>
-                                        <a href="/compensation-carbone" class="float-end btn btn-sm btn-primary">En savoir plus sur la compensation carbone</a>
-                                    </div>
-                                </div>
-                                <!-- End of Icon Boxes -->
-
-
-                                <!-- Icon Boxes -->
-                                <div class="card shadow border-gray-300 mt-3">
-                                    <div id="data-responsable" class="card-body p-4 p-lg-5">
-                                        <img src="../../assets/img/pages/support.svg" alt="Support illustration" class="image-md mb-4">
-                                        <h2 class="h4 mb-2">Data responsable</h2>
-                                        <p>
-											<th:block th:with="path='WIDGETS/accueil-data-responsable-full/'">
-				                        		<th:block th:insert="~{inc/wiki.html}"></th:block>
-				                        	</th:block>                                           
-                                        </p>
-                                        <a href="/donnees-personnelles" class="float-end btn btn-sm btn-primary">En savoir plus sur l'utilisation de vos données</a>
-                                    </div>
-                                </div>
-                                <!-- End of Icon Boxes -->
-
-
-                                <!-- Icon Boxes -->
-                                <div  class="card shadow border-gray-300 mt-3">
-                                    <div class="card-body p-4 p-lg-5">
-                                        <img src="../../assets/img/pages/technologies.svg" alt="Responsive illustration" class="image-md mb-4">
-                                        <h2 class="h4 mb-2">Comparaison de prix</h2>
-                                        <p>
-											<th:block th:with="path='WIDGETS/accueil-comparaison-prix-full/'">
-				                        		<th:block th:insert="~{inc/wiki.html}"></th:block>
-				                        	</th:block>                                           
-                                        </p>
-                                        <a href="#" class="float-end btn btn-sm btn-primary">En savoir plus sur la comparaison de prix</a>
-                                    </div>
-                                </div>
-                                <!-- End of Icon Boxes -->
-                                
-                                
-                            </div>
-                        </div>
-                        <div class="col-12 col-md-6 mt-lg-5">
-
-
-                                <!-- Icon Boxes -->
-                                <div id="evaluation-ecologique" class="card shadow border-gray-300 mt-3">
-                                    <div class="card-body p-4 p-lg-5">
-                                        <img src="../../assets/img/pages/technologies.svg" alt="Responsive illustration" class="image-md mb-4">
-                                        <h2 class="h4 mb-2">Evaluation écologique</h2>
-                                        <p>
-											<th:block th:with="path='WIDGETS/accueil-ecoscore-full/'">
-				                        		<th:block th:insert="~{inc/wiki.html}"></th:block>
-				                        	</th:block>                                           	
-										</p>
-                                        <a href="#" class="float-end btn btn-sm btn-primary">En savoir plus sur l'évaluation environnementale</a>
-                                    </div>
-                                </div>
-                                <!-- End of Icon Boxes -->
-                        
-                            <div class="row mt-3 mt-lg-0 px-3">
-                                <!-- Icon Boxes -->
-                                <div id="modele-ouvert" class="card shadow border-gray-300 mt-3">
-                                    <div class="card-body p-4 p-lg-5">
-                                        <img src="../../assets/img/pages/code.svg" alt="Code illustration" class="image-md mb-4">
-                                        <h2 class="h4 mb-2">Open-source et Open-data</h2>
-                                        <p>
-											<th:block th:with="path='WIDGETS/accueil-modele-ouvert-full/'">
-				                        		<th:block th:insert="~{inc/wiki.html}"></th:block>
-				                        	</th:block>                                           
-                                        </p>
-                                        <a href="/opendata" class="float-end  btn btn-sm btn-primary">En savoir plus sur le modèle ouvert</a>
-                                    </div>
-                                </div>
-                                <!-- End of Icon Boxes -->
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>	   
-	   </section>     
-    </main>
-
-	<!--/* Footer */-->
-	<th:block th:insert="~{inc/footer.html}"></th:block>	
+<!--/* Footer */-->
+<th:block th:insert="~{inc/footer.html}"></th:block>	
 
 <!-- Core -->
 <script src="../../vendor/@popperjs/core/dist/umd/popper.min.js"></script>
