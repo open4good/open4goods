@@ -381,7 +381,25 @@ public class AttributeRealtimeAggregationService extends AbstractRealTimeAggrega
 				//TODO(0.5,p2,feature) : handle conflicts and "best value" election on referentiel attributes
 				if (key.equals(ReferentielKey.MODEL)) {
 					dedicatedLogger.info("Adding different {} name as alternate id. Existing is {}, would have erased with {}",key,existing, value);
-					output.getAlternativeIds().add(new UnindexedKeyValTimestamp(fragement.getDatasourceName(), value));					
+					output.getAlternativeIds().add(new UnindexedKeyValTimestamp(fragement.getDatasourceName(), value));				
+					
+					// Election 
+					String shortest = null;
+					
+					for (UnindexedKeyValTimestamp model : output.getAlternativeIds()) {
+						
+						if (null == shortest) {
+							shortest = model.getValue();
+						} else  if (model.getValue().length() < shortest.length()) {
+							shortest = model.getValue();
+						}
+					}
+					
+					output.getAttributes().addReferentielAttribute(ReferentielKey.MODEL, shortest);					
+					output.getAlternativeIds().removeIf(b -> b.getValue().equals(output.model()));
+					
+					
+					
 				} else if (key.equals(ReferentielKey.BRAND)) {
 					
 					value = brandService.normalizeBrand(value);
@@ -396,7 +414,7 @@ public class AttributeRealtimeAggregationService extends AbstractRealTimeAggrega
 						output.getAttributes().addReferentielAttribute(ReferentielKey.BRAND, value);
 
 						// Removing the current brand in any case
-						output.getAlternativeBrands().remove(output.brand());
+						output.getAlternativeBrands().removeIf(b -> b.getValue().equals(output.brand()));
 					}
 				} 
 				
