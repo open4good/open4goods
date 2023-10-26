@@ -114,7 +114,7 @@ public class RealtimeAggregationService {
 
 	/**
 	 * List of services in the aggregator
-	 *
+	 *TODO : Replace confif with verticalConfigService, to have hot vertical config onDataFragment
 	 * @param config
 	 * @return
 	 */
@@ -131,15 +131,16 @@ public class RealtimeAggregationService {
 
 		services.add(new BarCodeAggregationService(apiProperties.logsFolder(), gs1prefixService,barcodeValidationService, apiProperties.isDedicatedLoggerToConsole()));
 
-		services.add(new AttributeRealtimeAggregationService(config.getAttributesConfig(), brandService, apiProperties.logsFolder(), apiProperties.isDedicatedLoggerToConsole()));
+		services.add(new VerticalRealTimeAggregationService( apiProperties.logsFolder(), verticalConfigService, apiProperties.isDedicatedLoggerToConsole()));
+
+		services.add(new AttributeRealtimeAggregationService(verticalConfigService, brandService, apiProperties.logsFolder(), apiProperties.isDedicatedLoggerToConsole()));
 
 
-		services.add(new NamesAggregationService(config.getNamings(), evaluationService, apiProperties.logsFolder(), apiProperties.isDedicatedLoggerToConsole()));
+		services.add(new NamesAggregationService(apiProperties.logsFolder(), apiProperties.isDedicatedLoggerToConsole()));
 
 		//		services.add(new CategoryService(apiProperties.logsFolder(), taxonomyService));
 
 
-		services.add(new VerticalRealTimeAggregationService( apiProperties.logsFolder(), verticalConfigService, apiProperties.isDedicatedLoggerToConsole()));
 
 		services.add(new IdAggregationService( apiProperties.logsFolder(), apiProperties.isDedicatedLoggerToConsole()));
 

@@ -352,8 +352,7 @@ public class CsvDatasourceFetchingService extends DatasourceFetchingService {
 							if (null == line) {
 								dedicatedLogger.warn("Null line");
 								continue;
-							}
-							
+							}							
 							
 							// Checking inclusions					
 							boolean skip = false;

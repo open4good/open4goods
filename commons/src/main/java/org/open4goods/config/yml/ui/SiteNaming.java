@@ -9,20 +9,6 @@ import jakarta.validation.constraints.NotBlank;
 
 public class SiteNaming {
 
-	/**
-	 * The template for the product ID's
-	 */
-	@NotBlank
-	private String productIdTemplate;
-
-	/**
-	 * The product names templates, by language. use "default" for default languages
-	 */
-	private Localisable productNameTemplates = new Localisable();
-
-	/** The products url template. Think SEO ! **/
-
-	private Localisable productUrlTemplates = new Localisable();
 
 	/**
 	 * The url for the search page
@@ -68,28 +54,5 @@ public class SiteNaming {
 		this.searchUrl = searchUrl;
 	}
 
-	public Localisable getProductUrlTemplates() {
-		return productUrlTemplates;
-	}
-
-	public void setProductUrlTemplates(Localisable productTemplates) {
-		productUrlTemplates = productTemplates;
-	}
-
-	public String getProductIdTemplate() {
-		return productIdTemplate;
-	}
-
-	public void setProductIdTemplate(String productIdTemplate) {
-		this.productIdTemplate = productIdTemplate;
-	}
-
-	public Localisable getProductNameTemplates() {
-		return productNameTemplates;
-	}
-
-	public void setProductNameTemplates(Localisable productNameTemplates) {
-		this.productNameTemplates = productNameTemplates;
-	}
-
+	
 }

@@ -1,18 +1,15 @@
 <div id="caracteristiques" class="card shadow">
-	<div class="card-header"><h2 class="h5">Identification du produit</h2></div>
+	<div class="card-header"><h2 class="h5"><span class="fa-solid fa-circle-info me-2"></span>Identification du produit</h2></div>
 	<div class="card-body">
 		<table class="table table-hover">
 			<tbody>
 
-				<tr>
-					<th scope="row" th:text="${product.gtinInfos.upcType}"></th>
-					<td th:text="${product.gtin()}"></td>
-				</tr>
-				
-							
 				<tr th:if="${product.brand()}">
 					<th scope="row">Marque</th>
-					<td  th:text="${product.brand()}"></td>
+					<td>
+						<img height="25px" th:if="${hasBrandLogo}" th:src="'/images/marques/'+${product.brand()}+'.png'">
+						<th:block th:unless="${hasBrandLogo}" class="lead"  th:text="${product.brand()}"></th:block>
+					</td>
 				</tr>
 
 
@@ -30,8 +27,8 @@
 				
 
 				<tr th:if="${product.model()}">
-					<th scope="row">Modèle</th>
-					<td th:text="${product.model()}"></td>
+					<th scope="row"><b>Modèle</b></th>
+					<td><b class="lead" th:text="${product.model()}"></b></td>
 				</tr>
 
 
@@ -50,14 +47,23 @@
 				
 				<tr>
 					<th scope="row">Référencé depuis</th>
-					<td th:text="${product.creationDate}"></td>
+					<td th:text="${product.creationDate(userLocale)}"></td>
 				</tr>
 				
 				<tr>
 					<th scope="row">Mise à jour</th>
-					<td th:text="${product.lastChange}"></td>
+					<td th:text="${product.ago(userLocale)}"></td>
 				</tr>
-							
+
+
+				<tr>
+					<th scope="row" th:text="${product.gtinInfos.upcType}"></th>
+					<td class="text-center"> 
+						<span th:text="${product.gtin()}"></span>	
+						<img height="100px" th:title="${product.gtin()}" th:src="'/images/'+${product.gtin()}+'-gtin.png'" th:alt="${product.names.name} +' gtin : ' + ${product.gtin()}">
+					</td>
+				</tr>
+											
 			</tbody>
 		</table>
 	</div>

@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.StringUtils;
 import org.open4goods.config.yml.attributes.AttributeConfig;
 import org.open4goods.exceptions.ValidationException;
 import org.open4goods.model.attribute.Attribute;
@@ -48,7 +49,64 @@ public class AggregatedAttribute implements IAttribute {
 	private Set<UnindexedKeyValTimestamp> sources = new HashSet<>();
 
 
+	/**
+	 * Number of sources for this attribute
+	 * @return
+	 */
+	public int sourcesCount() {
+		return sources.size();
+	}
+	
+	/**
+	 * The number of different values for this item
+	 * @return
+	 */
+	public long distinctValues () {
+		return sources.stream().map(e-> e.getValue()).distinct().count();
+	}
+	
+	/**
+	 * For UI, a String representation of all providers names
+	 * @return
+	 */
+	public String providersToString() {		
+		return StringUtils.join( sources.stream().map(e-> e.getKey()).toArray(),", ");
+	}
 
+	/**
+	 * For UI, a String representation of all providers names and values
+	 * @return
+	 */
+	public String sourcesToString() {
+		return StringUtils.join( sources.stream().map(e-> e.getKey() + ":"+e.getValue()).toArray(),", ");
+
+	}
+
+
+	public boolean hasConflicts() {
+		return distinctValues() > 1;
+	}
+	
+	public String bgRow() {
+		String ret="table-default";
+		int sCount = sourcesCount();
+		long dValues = distinctValues();
+		
+		if (sCount == 0) {
+			ret="table-danger";
+		} else if (sCount == 1) {
+			ret="table-default";
+		} else {
+			ret="table-info";
+		}
+	
+		if (dValues > 1) {
+			ret = "table-danger";
+		}
+		
+		return ret;
+	}
+	
 	// TODO : Simple, but does not allow to handle conflicts, and so on
 	@Override
 	public int hashCode() {

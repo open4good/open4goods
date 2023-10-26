@@ -4,22 +4,32 @@
 
 
 
-	<div class="nav-wrapper position-relative mb-2">
-		<ul class="nav nav-tabs nav-fill flex-column flex-md-row"
+		<ul class="nav nav-tabs nav-fill "
 			id="tabs-icons-text" role="tablist">
 			<li class="nav-item"><a class="nav-link mb-sm-3 mb-md-0 active"
 				id="tabs-icons-text-1-tab" data-bs-toggle="tab"
 				href="#panel-ecoscore" role="tab"
 				aria-controls="tabs-icons-text-1" aria-selected="true"><span
-					class="fas fa-palette me-2"></span>Eco score</a></li>
+					class="fa-solid fa-n me-2"></span>Ecoscore</a></li>
+					
+					
+
+			<li class="nav-item"><a class="nav-link mb-sm-3 mb-md-0"
+				id="tabs-icons-text-2-tab" data-bs-toggle="tab"
+				href="#panel-radar" role="tab"
+				aria-controls="tabs-icons-text-2" aria-selected="false"><span
+					class="fa-solid fa-satellite-dish me-2"></span>Radar</a></li>
+
 			<li class="nav-item"><a class="nav-link mb-sm-3 mb-md-0"
 				id="tabs-icons-text-2-tab" data-bs-toggle="tab"
 				href="#panel-detail-ecoscore" role="tab"
 				aria-controls="tabs-icons-text-2" aria-selected="false"><span
-					class="fas fa-laptop-code me-2"></span>Détails et informations de calculs</a></li>
-			
+					class="fa-solid fa-circle-info me-2"></span>Explications</a></li>
+
+	
+								
 		</ul>
-	</div>
+
 
 
 
@@ -37,25 +47,19 @@
 
 
 	<div class="card border-0">
-		<div class="card-body p-0">
-			<div class="tab-content" id="tabcontent2">
-				<div class="tab-pane fade active show" id="panel-ecoscore"
-					role="tabpanel" aria-labelledby="panel-ecoscore">
-					
-					
-					
-					
+		<div class="tab-content card-body p-0" id="tabscore">
+			
+				<!-- Score -->
+				<div class="tab-pane fade active show" id="panel-ecoscore"	role="tabpanel" aria-labelledby="panel-ecoscore">					
 					<div>
-						<div class="text-center">
-				           
-				           <img width="350px" src="/icons/ecoscore.png">
+						<div class="text-center">				           
+				           <img class="mt-4"  width="350px" src="/icons/ecoscore.png">
 						</div>
-						<div  class="m-5">
-						
+						<div  class="m-5">						
 							<div th:each="score : ${product.realScores()}" class="progress-wrapper">
 							
 								<div class="progress-info">
-									<span class="h4 progress-tooltip" th:classappend="'bg-'+${score.colorClassName()}" th:text="${score.name}"></span>
+									<span  class="h4 help-pointer progress-tooltip" data-bs-toggle="tooltip" data-bs-placement="top" th:title="#{'ecoscore.' +${score.name}+'.tooltip'(${score.absValue()}, ${score.relValue()}, ${product.attributes.aggregatedAttributes.get(score.name)})}" th:classappend="'bg-'+${score.colorClassName()}" th:text="#{'score-'+${score.name}}"></span>
 									<div class="progress-percentage">
 										<!-- 
 										<span th:if="${score.relativValue}" th:text="${score.relativValue*20}+'%'"></span>
@@ -66,24 +70,26 @@
 									<div class="progress-bar" th:classappend="'bg-'+${score.colorClassName()}" role="progressbar"
 										  th:attrappend="aria-valuenow = ${score.percent()}, style='width: '+${score.percent()}+'%;'" aria-valuemin="0" aria-valuemax="100"></div>
 								</div>
-						</div>
+							</div>
 						</div>
 					</div>
 				
 				</div>
 
-				</div>
+				
 				
 				<!-- Detail -->
-				<div class="tab-pane fade" id="panel-detail-ecoscore" role="tabpanel"
-					aria-labelledby="panel-detail-ecoscore">
-					<p>L'écoscore écologique pour le SAMSUNG OLED-85C8 est composé de 4 critères, dont 2 virtuels. Ce score environnemental est calculé en prenant en compte différentes informations environnentales disponibles pour 
+				<div class=" tab-pane fade" id="panel-detail-ecoscore" role="tabpanel"	aria-labelledby="panel-detail-ecoscore">
+					
+					<div class=" scrollable-panel">
+					
+					<p class="m-2" >L'écoscore écologique pour le SAMSUNG OLED-85C8 est composé de 4 critères, dont 2 virtuels. Ce score environnemental est calculé en prenant en compte différentes informations environnentales disponibles pour 
 					ce téléviseur. Voici la composition du score :
 					
-					<br/><br/><br/>
+	
 					
 	
-						<table class="table table-hover">
+						<table class="">
 							<tbody>
 									<tr th:each="score : ${product.scores}">
 									<th scope="row" th:text="${score.key}"></th>
@@ -91,12 +97,17 @@
 								</tr>
 							</tbody>
 						</table>		
-					<br/><br/><br/>
-					
-					
-					  </p>
+	
 					<p>En savoir plus<a href="">le mode de calcul et la transparence de l'eco-score</a>. </p>
+					</div>
 				</div>
+				
+				
+				<!-- Radar -->
+				<div class="tab-pane fade" id="panel-radar" role="tabpanel"	aria-labelledby="panel-radar">
+						  <canvas id="radarScore"></canvas>
+				</div>
+				
 			</div>
 		</div>
 	</div>

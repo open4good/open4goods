@@ -26,16 +26,19 @@ import org.open4goods.model.product.AggregatedAttribute;
 import org.open4goods.model.product.AggregatedFeature;
 import org.open4goods.model.product.Product;
 import org.open4goods.services.BrandService;
+import org.open4goods.services.VerticalsConfigService;
 
 public class AttributeRealtimeAggregationService extends AbstractRealTimeAggregationService {
 
-	private final AttributesConfig attributesConfig;
+
 	
 	private final BrandService brandService;
 
-	public AttributeRealtimeAggregationService(final AttributesConfig attributesConfig,  BrandService brandService, final String logsFolder,boolean toConsole) {
+	private VerticalsConfigService verticalConfigService;
+
+	public AttributeRealtimeAggregationService(final VerticalsConfigService verticalConfigService,  BrandService brandService, final String logsFolder,boolean toConsole) {
 		super(logsFolder,toConsole);
-		this.attributesConfig = attributesConfig;
+		this.verticalConfigService = verticalConfigService;
 		this.brandService = brandService;
 	}
 
@@ -50,7 +53,12 @@ public class AttributeRealtimeAggregationService extends AbstractRealTimeAggrega
 	@Override
 	public void onDataFragment(final DataFragment dataFragment, final Product product) {
 
+		AttributesConfig attributesConfig = verticalConfigService.getConfigById(product.getVertical() == null ? "all" : product.getVertical() ).get().getAttributesConfig() ;
+
 		Set<String> toRemoveFromUnmatched = new HashSet<>();
+		// Adding the list of "to be removed" attributes
+		toRemoveFromUnmatched.addAll(attributesConfig.getExclusions());
+				
 		/////////////////////////////////////////
 		// Converting to AggregatedAttributes for matches from config
 		/////////////////////////////////////////
@@ -62,8 +70,7 @@ public class AttributeRealtimeAggregationService extends AbstractRealTimeAggrega
 		all.addAll(product.getAttributes().getUnmapedAttributes().stream().map(e -> new Attribute(e.getName(),e.getValue(),e.getLanguage())).toList());
 		
 		
-		
-		for (Attribute attr :  dataFragment.getAttributes()) {
+		for (Attribute attr :  all) {
 			
 			// Checking if a potential AggregatedAttribute
 			Attribute translated = attributesConfig.translateAttribute(attr, dataFragment.getDatasourceName());
@@ -77,16 +84,22 @@ public class AttributeRealtimeAggregationService extends AbstractRealTimeAggrega
 					// Applying parsing rule
 					translated = parseAttributeValue(translated, attrConfig);
 					
+					if (translated.getRawValue() == null) {
+						continue;
+					}
+
 					AggregatedAttribute agg = product.getAttributes().getAggregatedAttributes().get(attr.getName());
 					
-					toRemoveFromUnmatched.add(translated.getName());
 					
 					if (null == agg) {
 						// A first time match
 						agg = new AggregatedAttribute();
 						agg.setName(attr.getName());
 					} 
-									
+						
+					
+					
+					toRemoveFromUnmatched.add(translated.getName());
 					agg.addAttribute(translated,attrConfig, new UnindexedKeyValTimestamp(dataFragment.getDatasourceName(), translated.getValue().toString()));
 					
 					// Replacing new AggAttribute in product
@@ -110,7 +123,7 @@ public class AttributeRealtimeAggregationService extends AbstractRealTimeAggrega
 		/////////////////////////////////////////
 		
 		List<Attribute> matchedFeatures = dataFragment.getAttributes().stream()
-				.filter(this::isFeatureAttribute)
+				.filter(e -> isFeatureAttribute(e, attributesConfig))
 				.collect(Collectors.toList());
 
 		toRemoveFromUnmatched.addAll(matchedFeatures.stream().map(e->e.getName()).collect(Collectors.toSet()));
@@ -145,6 +158,12 @@ public class AttributeRealtimeAggregationService extends AbstractRealTimeAggrega
 			product.getAttributes().getUnmapedAttributes().add(agg);			
 		}
 	
+		
+		// Removing 
+		product.getAttributes().setUnmapedAttributes(product.getAttributes().getUnmapedAttributes().stream().filter(e -> !toRemoveFromUnmatched.contains(e.getName())) .collect(Collectors.toSet()));
+		
+		
+		
 		// TODO : Removing matchlist again to handle remove of old attributes in case of configuration change
 //		product.getAttributes().getUnmapedAttributes().
 	}
@@ -337,7 +356,7 @@ public class AttributeRealtimeAggregationService extends AbstractRealTimeAggrega
 	 * @param e
 	 * @return
 	 */
-	private boolean isFeatureAttribute(Attribute e) {
+	private boolean isFeatureAttribute(Attribute e, AttributesConfig attributesConfig) {
 		return attributesConfig.getFeaturedValues().contains(e.getRawValue().toString().trim().toUpperCase());
 	}
 
@@ -362,7 +381,25 @@ public class AttributeRealtimeAggregationService extends AbstractRealTimeAggrega
 				//TODO(0.5,p2,feature) : handle conflicts and "best value" election on referentiel attributes
 				if (key.equals(ReferentielKey.MODEL)) {
 					dedicatedLogger.info("Adding different {} name as alternate id. Existing is {}, would have erased with {}",key,existing, value);
-					output.getAlternativeIds().add(new UnindexedKeyValTimestamp(fragement.getDatasourceName(), value));					
+					output.getAlternativeIds().add(new UnindexedKeyValTimestamp(fragement.getDatasourceName(), value));				
+					
+					// Election 
+					String shortest = null;
+					
+					for (UnindexedKeyValTimestamp model : output.getAlternativeIds()) {
+						
+						if (null == shortest) {
+							shortest = model.getValue();
+						} else  if (model.getValue().length() < shortest.length()) {
+							shortest = model.getValue();
+						}
+					}
+					
+					output.getAttributes().addReferentielAttribute(ReferentielKey.MODEL, shortest);					
+					output.getAlternativeIds().removeIf(b -> b.getValue().equals(output.model()));
+					
+					
+					
 				} else if (key.equals(ReferentielKey.BRAND)) {
 					
 					value = brandService.normalizeBrand(value);
@@ -371,8 +408,13 @@ public class AttributeRealtimeAggregationService extends AbstractRealTimeAggrega
 						dedicatedLogger.info("Adding different {} name as BRAND. Existing is {}, would have erased with {}",key,existing, value);						
 						// Adding the old one in alternate brand
 						output.getAlternativeBrands().add(new UnindexedKeyValTimestamp(fragement.getDatasourceName(), value));
+						
+						
 						// Adding the new one
 						output.getAttributes().addReferentielAttribute(ReferentielKey.BRAND, value);
+
+						// Removing the current brand in any case
+						output.getAlternativeBrands().removeIf(b -> b.getValue().equals(output.brand()));
 					}
 				} 
 				
@@ -475,6 +517,17 @@ public class AttributeRealtimeAggregationService extends AbstractRealTimeAggrega
 
 		}
 
+		
+		
+		
+		/////////////////////////////////
+		// FIXED TEXT MAPPING
+		/////////////////////////////////
+		if (!conf.getMappings().isEmpty() ) {			
+			String replacement = conf.getMappings().get(attr.getRawValue());
+			attr.setRawValue(replacement);			
+		}
+		
 		/////////////////////////////////
 		// Checking preliminary result
 		/////////////////////////////////

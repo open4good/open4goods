@@ -122,19 +122,19 @@ public class ResourceController extends AbstractUiController {
 	 */
 
 
-	@GetMapping("/{vertical}/*-{id:\\d+}/"+PNG_IMG)
-	public void image(@PathVariable String vertical, @PathVariable String id, final HttpServletResponse response, HttpServletRequest request) throws FileNotFoundException, IOException, ValidationException, TechnicalException {
-		VerticalConfig language = verticalConfigService.getVerticalForPath(vertical);
+//	@GetMapping("/{vertical}/*-{id:\\d+}/"+PNG_IMG)
+//	public void image(@PathVariable String vertical, @PathVariable String id, final HttpServletResponse response, HttpServletRequest request) throws FileNotFoundException, IOException, ValidationException, TechnicalException {
+//		VerticalConfig language = verticalConfigService.getVerticalForPath(vertical);
+//
+//		if (null == language) {
+//			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Image " + request.getServletPath() + " introuvable !");
+//		}
+//
+//		image(id, response, request);
+//
+//	}
 
-		if (null == language) {
-			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Image " + request.getServletPath() + " introuvable !");
-		}
-
-		image(id, response, request);
-
-	}
-
-	@GetMapping("/*-{id:\\d+}/"+PNG_IMG)
+	@GetMapping("/images/{id:\\d+}-cover.png")
 	public void image(@PathVariable String id, final HttpServletResponse response, HttpServletRequest request) throws FileNotFoundException, IOException, ValidationException, TechnicalException {
 
 		// Retrieve the Product
@@ -150,13 +150,6 @@ public class ResourceController extends AbstractUiController {
 			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "image introuvable !");
 		}
 
-		// Sending 301 id no match with product name
-		String path= URLEncoder.encode(request.getServletPath().substring(1, request.getServletPath().lastIndexOf("/")));
-		if (!path.equals(data.getNames().getName())) {
-			response.setStatus(HttpServletResponse.SC_MOVED_PERMANENTLY);
-			response.setHeader("Location", config.getBaseUrl(Locale.FRANCE) + data.getNames().getName()+"/"+PNG_IMG);
-			return ;
-		}
 
 
 		//TODO (gof) : not sure pageSize have image, could have any resource
@@ -180,12 +173,11 @@ public class ResourceController extends AbstractUiController {
 		}
 	}
 
-	@GetMapping("/*-{id:\\d+}/"+GTIN_IMG)
+	@GetMapping("/images/{id:\\d+}-gtin.png")
 	public void gtin(@PathVariable String id, final HttpServletResponse response, HttpServletRequest request) throws FileNotFoundException, IOException, ValidationException, TechnicalException {
 
 		// Retrieve the Product
 		Product data;
-
 
 		try {
 			data = esDao.getById(id);
@@ -196,14 +188,6 @@ public class ResourceController extends AbstractUiController {
 		// Handling 404
 		if (null == data) {
 			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "image introuvable !");
-		}
-
-		// Sending 301 id no match with product name
-		String path= URLEncoder.encode(request.getServletPath().substring(1, request.getServletPath().lastIndexOf("/")));
-		if (!path.equals(data.getNames().getName())) {
-			response.setStatus(HttpServletResponse.SC_MOVED_PERMANENTLY);
-			response.setHeader("Location", config.getBaseUrl(Locale.FRANCE) + data.getNames().getName()+"/"+GTIN_IMG);
-			return ;
 		}
 
 		response.addHeader("Content-type","image/png");

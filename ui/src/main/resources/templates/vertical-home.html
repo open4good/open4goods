@@ -237,7 +237,7 @@
 					data : data,
 					vertical: vertical,
   					productUrl : baseUrl+verticalPath+'/'+data.names.name,
-  					imageUrl : baseUrl+verticalPath+'/'+data.names.name+'/image.png',           					
+  					imageUrl : baseUrl+'images/'+data.attributes.referentielAttributes.GTIN+'-cover.png',           					
 					name : (data.attributes.referentielAttributes.MODEL == null ? data.names.name : data.attributes.referentielAttributes.MODEL)
 				});                	
        	}

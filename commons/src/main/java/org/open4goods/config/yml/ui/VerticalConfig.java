@@ -137,12 +137,12 @@ public class VerticalConfig{
 	private Map<String, String> ecoscoreConfig = new HashMap<>();
 
 	
-	
-	/**
-	 * Configuration relativ to ratings aggregation
-	 */
-	@JsonMerge
-	private RatingsConfig ratingsConfig = new RatingsConfig();
+//	
+//	/**
+//	 * Configuration relativ to ratings aggregation
+//	 */
+//	@JsonMerge
+//	private RatingsConfig ratingsConfig = new RatingsConfig();
 
 	/**
 	 * The behavior of barcode generation
@@ -213,27 +213,27 @@ public class VerticalConfig{
 		return ret;
 	}
 
-	/**
-	 *
-	 * @return the list of AttributeConfig that have to appear in search results,
-	 *         ordered by their display position
-	 */
-	public List<AttributeConfig> statsAttributes() {
-		final List<AttributeConfig> ret = new ArrayList<>();
-		for (final AttributeConfig a : attributesConfig.getConfigs()) {
-			if (null != a.getStatsOrder()) {
-				try {
-					ret.add(a.getStatsOrder(), a);
-				} catch (final IndexOutOfBoundsException e) {
-					LOGGER.warn("statsOrder {} is invalid for attribute {}. Will place last", a.getStatsOrder(),
-							a.getName());
-					ret.add(a);
-				}
-			}
-		}
-		return ret;
-	}
-
+//	/**
+//	 *
+//	 * @return the list of AttributeConfig that have to appear in search results,
+//	 *         ordered by their display position
+//	 */
+//	public List<AttributeConfig> statsAttributes() {
+//		final List<AttributeConfig> ret = new ArrayList<>();
+//		for (final AttributeConfig a : attributesConfig.getConfigs()) {
+//			if (null != a.getStatsOrder()) {
+//				try {
+//					ret.add(a.getStatsOrder(), a);
+//				} catch (final IndexOutOfBoundsException e) {
+//					LOGGER.warn("statsOrder {} is invalid for attribute {}. Will place last", a.getStatsOrder(),
+//							a.getName());
+//					ret.add(a);
+//				}
+//			}
+//		}
+//		return ret;
+//	}
+//
 
 
 	/**
@@ -243,7 +243,10 @@ public class VerticalConfig{
 	public List<AttributeConfig> verticalFilters() {
 
 		return verticalFilters.stream()
+				
 				.map(e -> getAttributesConfig().getAttributeConfigByKey(e))
+				.filter(e->e != null)
+				.filter(e->e.isAsSearchFilter())
 				.collect(Collectors.toList());
 
 	}
@@ -256,15 +259,15 @@ public class VerticalConfig{
 	 * @return
 	 */
 	public String getBaseUrl(final Locale siteLocale) {
-		return namings.getBaseUrls().getOrDefault(siteLocale.getLanguage(), namings.getBaseUrls().get("default"));
+		return homeUrl.getOrDefault(siteLocale.getLanguage(), namings.getBaseUrls().get("default"));
 	}
 
 	public String baseUrl() {
-		return namings.getBaseUrls().get("default");
+		return homeUrl.get("default");
 	}
 
 	public String getBaseUrl(final String siteLocale) {
-		return namings.getBaseUrls().getOrDefault(siteLocale, namings.getBaseUrls().get("default"));
+		return homeUrl.getOrDefault(siteLocale, namings.getBaseUrls().get("default"));
 	}
 
 
@@ -436,15 +439,15 @@ public class VerticalConfig{
 		this.attributesConfig = attributesConfig;
 	}
 
-
-	public RatingsConfig getRatingsConfig() {
-		return ratingsConfig;
-	}
-
-
-	public void setRatingsConfig(RatingsConfig ratingsConfig) {
-		this.ratingsConfig = ratingsConfig;
-	}
+//
+//	public RatingsConfig getRatingsConfig() {
+//		return ratingsConfig;
+//	}
+//
+//
+//	public void setRatingsConfig(RatingsConfig ratingsConfig) {
+//		this.ratingsConfig = ratingsConfig;
+//	}
 
 
 	public BarcodeAggregationProperties getBarcodeConfig() {
