@@ -157,64 +157,68 @@
 		</div>
 
 		<section class="bg-black text-center py-4">
+			<h1 class="mb-3 text-white-50">Les chiffres clés</h1>
+			<p class="lead text-white mb-0">Avec animation, c'est plus funky</p>
+		</section>
+
+	   <section class="container text-center py-4">
+			<div class="row justify-content-center">
+				<div class="col-12 col-md-6 col-lg-4 py-3">
+					<div class="icon icon-shape icon-shape-secondary me-2 me-md-0 mb-2">
+						<span class="fas fa-box-open"></span>
+					</div>
+					<span class="counter display-3 text-secondary d-block">150€</span>
+					<span class="lead">Montant du coup de pouce à date de Nudger pour la planète</span>
+				</div>
+
+				<div class="col-12 col-md-6 col-lg-4 py-3">
+					<div class="icon icon-shape icon-shape-secondary me-2 me-md-0 mb-2">
+						<span class="fas fa-box-open"></span>
+					</div>
+					<span class="counter display-3 text-secondary d-block">15M+ Offres commerciales</span>
+					<span class="lead">Un des comparateurs les plus fournis</span>
+				</div>
+
+				<div class="col-12 col-md-6 col-lg-4 py-3">
+					<div class="icon icon-shape icon-shape-secondary me-2 me-md-0 mb-2">
+						<span class="fas fa-box-open"></span>
+					</div>
+					<span class="counter display-3 text-secondary d-block">8703</span>
+					<span class="lead">Nombre de produits disponibles dans nos univers, pour lesquels nous disposons d'un bilan environnemental.</span>
+				</div>
+
+				<div class="col-12 col-md-6 col-lg-4 py-3">
+					<div class="icon icon-shape icon-shape-secondary me-2 me-md-0 mb-2">
+						<span class="fas fa-box-open"></span>
+					</div>
+					<span class="counter display-3 text-secondary d-block">+50M produits</span>
+					<span class="lead">Disponibles en open data, reprenant l'intégralité de l'inventaire. La référence en matière de bases de codes barres dans l'opendata français.</span>
+				</div>
+
+				<div class="col-12 col-md-6 col-lg-4 py-3">
+					<div class="icon icon-shape icon-shape-secondary me-2 me-md-0 mb-2">
+						<span class="fas fa-box-open"></span>
+					</div>
+					<span class="counter display-3 text-secondary d-block">+270k lignes de codes</span>
+					<span class="lead">Disponibles en open source. Bien commun et transparence !</span>
+				</div>
+
+				<div class="col-12 col-md-6 col-lg-4 py-3">
+					<div class="icon icon-shape icon-shape-secondary me-2 me-md-0 mb-2">
+						<span class="fas fa-box-open"></span>
+					</div>
+					<span class="counter display-3 text-secondary d-block" th:text="${partners.size()}"></span>
+					<span class="lead">Nombre de partenaires de notre démarche. Toutes les plus grandes enseignes !</span>
+				</div>
+			</div>
+	   </section>
+
+	   <section class="bg-black text-center py-4">
 			<h1 class="mb-3 text-white-50">Nos catégories évaluées</h1>
 			<p class="lead text-white mb-0">L'assurance de bien choisir</p>
 		</section>
 
-	   <section class="container text-center py-4">
-		<div class="row justify-content-center">
-			<div class="col-12 col-md-6 col-lg-4 py-3">
-				<div class="icon icon-shape icon-shape-secondary me-2 me-md-0 mb-2">
-					<span class="fas fa-box-open"></span>
-				</div>
-				<span class="counter display-3 text-secondary d-block">150€</span>
-				<span class="lead">Montant du coup de pouce à date de Nudger pour la planète</span>
-			</div>
-
-			<div class="col-12 col-md-6 col-lg-4 py-3">
-				<div class="icon icon-shape icon-shape-secondary me-2 me-md-0 mb-2">
-					<span class="fas fa-box-open"></span>
-				</div>
-				<span class="counter display-3 text-secondary d-block">15M+ Offres commerciales</span>
-				<span class="lead">Un des comparateurs les plus fournis</span>
-			</div>
-
-			<div class="col-12 col-md-6 col-lg-4 py-3">
-				<div class="icon icon-shape icon-shape-secondary me-2 me-md-0 mb-2">
-					<span class="fas fa-box-open"></span>
-				</div>
-				<span class="counter display-3 text-secondary d-block">8703</span>
-				<span class="lead">Nombre de produits disponibles dans nos univers, pour lesquels nous disposons d'un bilan environnemental.</span>
-			</div>
-
-			<div class="col-12 col-md-6 col-lg-4 py-3">
-				<div class="icon icon-shape icon-shape-secondary me-2 me-md-0 mb-2">
-					<span class="fas fa-box-open"></span>
-				</div>
-				<span class="counter display-3 text-secondary d-block">+50M produits</span>
-				<span class="lead">Disponibles en open data, reprenant l'intégralité de l'inventaire. La référence en matière de bases de codes barres dans l'opendata français.</span>
-			</div>
-
-			<div class="col-12 col-md-6 col-lg-4 py-3">
-				<div class="icon icon-shape icon-shape-secondary me-2 me-md-0 mb-2">
-					<span class="fas fa-box-open"></span>
-				</div>
-				<span class="counter display-3 text-secondary d-block">+270k lignes de codes</span>
-				<span class="lead">Disponibles en open source. Bien commun et transparence !</span>
-			</div>
-
-			<div class="col-12 col-md-6 col-lg-4 py-3">
-				<div class="icon icon-shape icon-shape-secondary me-2 me-md-0 mb-2">
-					<span class="fas fa-box-open"></span>
-				</div>
-				<span class="counter display-3 text-secondary d-block" th:text="${partners.size()}"></span>
-				<span class="lead">Nombre de partenaires de notre démarche. Toutes les plus grandes enseignes !</span>
-			</div>
-		</div>
-	   </section>
-	
-
-		<section class="container d-none">
+		<section class="container">
 			<div class="row">
 				<div class="col-12 col-md-6 col-lg-3" th:each ="vertical : ${verticals}">
 					<div class="blog-card">

@@ -45,8 +45,63 @@
 	
     <main>	
   
-        <div class="section section-lg pt-5 pt-md-7 bg-gray-200">
-            <div class="container container-semi-fluid">
+        <div class="section section-lg bg-gray-200">
+            <div class="container">
+
+				<div class="row">
+					<div class="col-12">
+						<!-- Carousel -->
+						<div id="Carousel2" class="carousel slide" data-ride="carousel">
+							<div class="carousel-inner">
+
+								<div class="carousel-item" th:each="p : ${products.data}">
+									<div th:if="${p.model()}">
+										<a>
+											<p th:text="${p.brand()}"></p>
+										</a>
+									</div>
+									<img class="d-none w-100" src="../../assets/img/carousel/image-2.jpg" alt="Second slide">
+								</div>
+								<div class="carousel-item d-none">
+									<img class="d-block w-100" src="../../assets/img/carousel/image-3.jpg" alt="Third slide">
+								</div>
+
+
+
+								<tr class="d-none" th:each="p : ${products.data}" >
+               
+               
+									<td th:if="${p.model()}"><a th:text="${p.model()}" th:href="'/'+${verticalPath}+ '/'+${p.names.name}"></a></td>
+									<td th:unless="${p.model()}"><a th:text="${p.bestName()}" th:href="'/'+${verticalPath}+ '/'+${p.names.name}"></a></td>
+								   
+								   
+								   
+									<td th:text="${p.brand()}"></td>
+									<td></td>
+									<td 
+									></td>
+									<td th:text="${p.offersCount}"></td>
+									
+									<th:block th:each="filter : ${products.customFilters}">
+										<td th:if="${p.attributes.aggregatedAttributes.get(filter.key.key)}" th:text="${p.attributes.aggregatedAttributes.get(filter.key.key).value }"></td>            
+										<td th:unless="${p.attributes.aggregatedAttributes.get(filter.key.key)}"></td>            
+					
+									</th:block>
+					
+								</tr>
+							</div>
+							<a class="carousel-control-prev" href="#Carousel2" role="button" data-bs-slide="prev">
+								<span class="carousel-control-prev-icon" aria-hidden="true"></span>
+								<span class="sr-only">Previous</span>
+							</a>
+							<a class="carousel-control-next" href="#Carousel2" role="button" data-bs-slide="next">
+								<span class="carousel-control-next-icon" aria-hidden="true"></span>
+								<span class="sr-only">Next</span>
+							</a>
+						</div>
+						<!-- End of Carousel -->
+					</div>
+				</div>
 
 				<!--/* Hero */-->						
 				<div class="row mb-2">							
