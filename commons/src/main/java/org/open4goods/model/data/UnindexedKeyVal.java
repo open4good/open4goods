@@ -32,7 +32,7 @@ public class UnindexedKeyVal {
 	@Override
 	public boolean equals(Object obj) {
 	
-		if (obj instanceof UnindexedKeyVal) {
+		if (obj instanceof UnindexedKeyVal || obj instanceof UnindexedKeyValTimestamp) {
 			return ((UnindexedKeyVal)obj).key.equals(key);
 		}
 		return false;

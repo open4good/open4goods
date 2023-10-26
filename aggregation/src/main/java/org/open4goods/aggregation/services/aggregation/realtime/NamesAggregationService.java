@@ -24,15 +24,9 @@ public class NamesAggregationService extends AbstractRealTimeAggregationService 
 
 	private static final int NUMBER_OF_WORDS_TO_DEDUPLICATE = 3;
 
-	private final SiteNaming localisationAggregationConfig;
 
-	private final EvaluationService evaluationService;
-
-	public NamesAggregationService(final SiteNaming localisationAggregationConfig,
-			final EvaluationService evaluationService, final String logsFolder,boolean toConsole) {
+	public NamesAggregationService(final String logsFolder,boolean toConsole) {
 		super(logsFolder,toConsole);
-		this.localisationAggregationConfig = localisationAggregationConfig;
-		this.evaluationService = evaluationService;
 	}
 
 	@Override
@@ -54,11 +48,24 @@ public class NamesAggregationService extends AbstractRealTimeAggregationService 
 		output.getNames().getOfferNames().addAll(df.getNames().stream()
 				.map(this::normalizeName).collect(Collectors.toSet()));
 
-		output.getNames().setName(URLEncoder.encode(computeProductName(output.getNames(), output.gtin())));
+		output.getNames().setName(URLEncoder.encode(computeProductName(output)));
 
 
 	}
 
+
+	private String computeProductName(Product output) {
+		
+		String ret;
+		if (!StringUtils.isEmpty(output.model()) && !StringUtils.isEmpty(output.brand())) {
+			ret = output.gtin()+"-"+output.brand()+"-"+output.model();
+		} else {
+			ret = computeProductName(output.getNames(),output.gtin());;
+		}
+		
+		
+		return ret;
+	}
 
 	private String computeProductName(Names names, String gtin) {
 
@@ -96,8 +103,8 @@ public class NamesAggregationService extends AbstractRealTimeAggregationService 
 				//			builder.append(token);
 			}
 
+			builder.append(gtin).append("-");
 			builder.append(StringUtils.join(set,"-"));
-			builder.append("-").append(gtin);
 
 
 			return builder.toString();

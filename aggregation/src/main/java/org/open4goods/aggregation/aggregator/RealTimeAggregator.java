@@ -56,6 +56,7 @@ public class RealTimeAggregator extends AbstractAggregator {
 				throw e;
 			}
 			catch (final Exception e) {
+				e.printStackTrace();
 				logger.warn("AggregationService {} throw an exception while processing data {}",service.getClass().getName(), data,e);
 
 			}

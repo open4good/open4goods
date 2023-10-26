@@ -19,6 +19,8 @@ import com.fasterxml.jackson.annotation.JsonMerge;
 
 public class AttributesConfig {
 
+	// Local cache
+	private Map<String, Map<String, String>> cacheHashedSynonyms;
 	/**
 	 * The specific configs configurations
 	 */
@@ -56,6 +58,9 @@ public class AttributesConfig {
 	@JsonIgnore
 	private Map<String, AttributeConfig> hashedAttributesByKey;
 
+
+
+
 	public AttributesConfig(Set<AttributeConfig> configs) {
 		this.configs = configs;
 
@@ -72,23 +77,27 @@ public class AttributesConfig {
 	 *
 	 * @return A map-ProviderKey,Synonym, Translated Key
 	 */
-	@Cacheable(cacheNames = CacheConstants.FOREVER_LOCAL_CACHE_NAME)
+	// Spring cache ineffectiv on internal calls
+//	@Cacheable(cacheNames = CacheConstants.FOREVER_LOCAL_CACHE_NAME)
 	public Map<String, Map<String, String>> synonyms() {
 
-		final Map<String, Map<String, String>> hashedSynonyms = new HashMap<>();
-
-		for (final AttributeConfig ac : configs) {
-			for (final Entry<String, Set<String>> entry : ac.getSynonyms().entrySet()) {
-				if (!hashedSynonyms.containsKey(entry.getKey())) {
-					hashedSynonyms.put(entry.getKey(), new HashMap<>());
-				}
-				for (final String val : entry.getValue()) {
-					hashedSynonyms.get(entry.getKey()).put(val, ac.getKey());
+		if (cacheHashedSynonyms == null) {
+			
+			final Map<String, Map<String, String>> hashedSynonyms = new HashMap<>();
+	
+			for (final AttributeConfig ac : configs) {
+				for (final Entry<String, Set<String>> entry : ac.getSynonyms().entrySet()) {
+					if (!hashedSynonyms.containsKey(entry.getKey())) {
+						hashedSynonyms.put(entry.getKey(), new HashMap<>());
+					}
+					for (final String val : entry.getValue()) {
+						hashedSynonyms.get(entry.getKey()).put(val, ac.getKey());
+					}
 				}
 			}
+			cacheHashedSynonyms = hashedSynonyms;
 		}
-
-		return hashedSynonyms;
+		return cacheHashedSynonyms;
 	}
 
 	public Attribute translateAttribute(final Attribute a, final String provider) {
