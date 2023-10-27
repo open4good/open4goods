@@ -1,19 +1,32 @@
 <div th:if="${product.attributes.unmapedAttributes.size()} > 0"  class="card shadow my-3">
 	<div class="card-header"><h2 class="h5">Toutes les caractéristiques</h2></div>
 	<div class="card-body">
-		<table id="allAttributes" class="table table-striped" style="width: 100%">
+		<table id="allAttributes" class="table table-responsive" style="width: 100%">
 			<thead>
 				<tr>
 					<th>Nom</th>
 					<th>Valeur</th>
+					<th>Sources</th>
 				</tr>
 			</thead>
 			<tbody>
 			
-				<tr th:each="attr : ${product.attributes.unmapedAttributes}">
-					<td><span th:text="${attr.name}"></span></td>
-					<td><span th:text="${attr.value}"></span> </td>
-				</tr>
+				<th:block th:each="attribute : ${product.attributes.unmapedAttributes}">
+
+
+					<th:block>
+						<tr th:class="${attribute.bgRow()}">
+							<td><span th:text="${attribute.name}"></span></td>						
+							<td><span  th:text="${attribute.value}"></span> </td>
+							<td>
+			            		<th:block th:insert="~{inc/attribute-sourcing.html}"></th:block>
+			            	</td>
+						</tr>
+					</th:block>
+
+
+
+				</th:block>
 			
 			</tbody>
 	

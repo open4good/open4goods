@@ -13,6 +13,7 @@ import org.open4goods.api.services.RealtimeAggregationService;
 import org.open4goods.api.services.ReferentielService;
 import org.open4goods.api.services.store.DataFragmentStoreService;
 import org.open4goods.crawler.config.yml.FetcherProperties;
+import org.open4goods.crawler.repository.IndexationRepository;
 import org.open4goods.crawler.services.ApiSynchService;
 import org.open4goods.crawler.services.DataFragmentCompletionService;
 import org.open4goods.crawler.services.FetchersService;
@@ -27,6 +28,7 @@ import org.open4goods.model.constants.UrlConstants;
 import org.open4goods.model.data.DataFragment;
 import org.open4goods.model.data.Price;
 import org.open4goods.services.BarcodeValidationService;
+import org.open4goods.services.BrandService;
 import org.open4goods.services.DataSourceConfigService;
 import org.open4goods.services.EvaluationService;
 import org.open4goods.services.Gs1PrefixService;
@@ -71,6 +73,17 @@ public class ApiConfig {
 
 	protected @Autowired Environment env;
 
+	/**
+	 * Various generation (json, yaml, binary)
+	 *
+	 * @return
+	 */
+	@Bean
+	SerialisationService serialisationService() {
+		return new SerialisationService();
+	}
+
+	
 	@Bean
 	@Autowired
 	VerticalsConfigService verticalConfigsService(SerialisationService serialisationService) throws IOException {
@@ -83,6 +96,12 @@ public class ApiConfig {
 		return new SearchService(aggregatedDataRepository, logsFolder);
 	}
 
+	@Bean
+	BrandService brandService(@Autowired RemoteFileCachingService rfc, @Autowired  ApiProperties properties) {
+		return new BrandService(properties.getBrandConfig(),  rfc);
+	}
+
+	
 	
 	@Bean
 	@Autowired
@@ -97,15 +116,6 @@ public class ApiConfig {
 	}
 
 
-	/**
-	 * Various generation (json, yaml, binary)
-	 *
-	 * @return
-	 */
-	@Bean
-	SerialisationService serialisationService() {
-		return new SerialisationService();
-	}
 
 
 	@Bean
@@ -113,8 +123,11 @@ public class ApiConfig {
 			@Autowired ReferentielService referentielService, @Autowired StandardiserService standardiserService,
 			@Autowired AutowireCapableBeanFactory autowireBeanFactory, @Autowired ProductRepository aggregatedDataRepository,
 			@Autowired ApiProperties apiProperties, @Autowired Gs1PrefixService gs1prefixService,
-			@Autowired DataSourceConfigService dataSourceConfigService, @Autowired VerticalsConfigService configService, @Autowired BarcodeValidationService barcodeValidationService) {
-		return new RealtimeAggregationService(evaluationService, referentielService, standardiserService, autowireBeanFactory, aggregatedDataRepository, apiProperties, gs1prefixService, dataSourceConfigService, configService,  barcodeValidationService);
+			@Autowired DataSourceConfigService dataSourceConfigService, 
+			@Autowired VerticalsConfigService configService, 
+			@Autowired BarcodeValidationService barcodeValidationService,
+			@Autowired BrandService brandservice) {
+		return new RealtimeAggregationService(evaluationService, referentielService, standardiserService, autowireBeanFactory, aggregatedDataRepository, apiProperties, gs1prefixService, dataSourceConfigService, configService,  barcodeValidationService,brandservice);
 	}
 
 	@Bean
@@ -122,8 +135,10 @@ public class ApiConfig {
 			@Autowired ReferentielService referentielService, @Autowired StandardiserService standardiserService,
 			@Autowired AutowireCapableBeanFactory autowireBeanFactory, @Autowired ProductRepository aggregatedDataRepository,
 			@Autowired ApiProperties apiProperties, @Autowired Gs1PrefixService gs1prefixService,
-			@Autowired DataSourceConfigService dataSourceConfigService, @Autowired VerticalsConfigService configService, @Autowired BarcodeValidationService barcodeValidationService) {
-		return new BatchAggregationService(evaluationService, referentielService, standardiserService, autowireBeanFactory, aggregatedDataRepository, apiProperties, gs1prefixService, dataSourceConfigService, configService,  barcodeValidationService);
+			@Autowired DataSourceConfigService dataSourceConfigService, @Autowired VerticalsConfigService configService, 
+			@Autowired BarcodeValidationService barcodeValidationService,
+			@Autowired BrandService brandservice) {
+		return new BatchAggregationService(evaluationService, referentielService, standardiserService, autowireBeanFactory, aggregatedDataRepository, apiProperties, gs1prefixService, dataSourceConfigService, configService,  barcodeValidationService, brandservice);
 	}
 
 
@@ -314,7 +329,10 @@ public class ApiConfig {
 	CsvDatasourceFetchingService csvDatasourceFetchingService(
 			@Autowired final DataFragmentCompletionService completionService,
 			@Autowired final IndexationService indexationService, @Autowired final ApiProperties apiProperties,
-			@Autowired final WebDatasourceFetchingService webDatasourceFetchingService
+			@Autowired final WebDatasourceFetchingService webDatasourceFetchingService,
+			@Autowired final IndexationRepository indexationRepository
+			
+			
 			) {
 		
 		boolean toConsole = false;
@@ -325,11 +343,11 @@ public class ApiConfig {
 		
 		
 		return new CsvDatasourceFetchingService(completionService, indexationService,
-				apiProperties.getFetcherProperties(), webDatasourceFetchingService, apiProperties.logsFolder(), toConsole);
+				apiProperties.getFetcherProperties(), webDatasourceFetchingService,indexationRepository, apiProperties.logsFolder(), toConsole);
 	}
 
 	@Bean
-	WebDatasourceFetchingService webDatasourceFetchingService(
+	WebDatasourceFetchingService webDatasourceFetchingService(@Autowired final IndexationRepository indexationRepository,
 			@Autowired final IndexationService indexationService, @Autowired final ApiProperties apiProperties) {
 
 		// Logging to console according to dev profile and conf
@@ -340,7 +358,7 @@ public class ApiConfig {
 		}		
 		
 		
-		return new WebDatasourceFetchingService(indexationService, apiProperties.getFetcherProperties(),
+		return new WebDatasourceFetchingService(indexationService, apiProperties.getFetcherProperties(),indexationRepository,
 				apiProperties.logsFolder(), toConsole);
 	}
 

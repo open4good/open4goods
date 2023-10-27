@@ -7,15 +7,61 @@ server:
     worker-threads: 1000
   http2:
     enabled: true
-  forward-headers-strategy: NATIVE
-  
-  
+  forward-headers-strategy: NATIVE  
+
   
 apiConfig:
   apiTitle: "Open4goods API"
   apiDescription: "This API allows you to browse eco-nudger content"
   apiVersion: "0.1"
   apiLicence: "May vary"
+
+
+# A mapping beetween custom page names and page templates
+pages:
+  "comparateur-prix": "pages/comparateur-prix.html"
+  "tester-une-tv": "pages/tv/test-tv.html"
+  "criteres-ecologiques": "pages/criteres-ecologiques-produit.html"
+  "template-contenu": "pages/template-contenu.html"
+  "template-image": "pages/template-image.html"
+
+
+brandConfig:
+
+  brandsLogo:
+    SAMSUNG: "https://img.global.news.samsung.com/my/wp-content/uploads/2017/08/Samsung_Logo_Wordmark_CMYK.jpg"
+    PHILIPS: "http://2.bp.blogspot.com/-IwtwBalyxWc/UoN_K8DNMiI/AAAAAAAAcqk/IDYXBwXimlc/s1600/Philips+logo.png"
+    BRANDT: "https://upload.wikimedia.org/wikipedia/fr/4/44/Logo_Brandt_.PNG"
+    FERGUSON: "https://www.thewashhouse.com/media/attributesplash/Ferguson.jpg"
+    ACER: "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a1/Acer_Logo.svg/1280px-Acer_Logo.svg.png"
+    AKAI: "https://d2o7dtsnwzl7g9.cloudfront.net/gcraggs/media/image/86/bd/94/akai.png"
+    ASUS: "https://fr.ubergizmo.com/wp-content/uploads/2015/03/asus-logo.jpg"
+    SONY: "https://www.caraudiogiants.com/wp-content/uploads/2017/04/sony.png"
+    HITACHI: "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b1/Hitachi_Logo.svg/2000px-Hitachi_Logo.svg.png"
+    PANASONIC: "https://upload.wikimedia.org/wikipedia/commons/thumb/8/8e/Panasonic_logo_%28Blue%29.svg/2000px-Panasonic_logo_%28Blue%29.svg.png"
+    SHARP: "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c8/Logo_of_the_Sharp_Corporation.svg/2000px-Logo_of_the_Sharp_Corporation.svg.png"
+    TOSHIBA: "https://upload.wikimedia.org/wikipedia/commons/thumb/0/01/Toshiba_logo.svg/2000px-Toshiba_logo.svg.png"
+    GRUNDIG: "http://www.onbiron.com.tr/wp-content/uploads/2017/02/grundig-logo.png"
+    THOMSON: "https://electromenager.re/img/m/433.jpg"
+    HAIER: "https://upload.wikimedia.org/wikipedia/commons/thumb/6/64/Haier_logo.svg/2000px-Haier_logo.svg.png"
+    LG: "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c5/Logo_of_the_LG_Corporation_%281995-2008%29.svg/1280px-Logo_of_the_LG_Corporation_%281995-2008%29.svg.png"
+    TCL: "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2a/Logo_of_the_TCL_Corporation.svg/1200px-Logo_of_the_TCL_Corporation.svg.png"
+    JVC: "https://upload.wikimedia.org/wikipedia/commons/thumb/0/06/JVC_Logo.svg/1280px-JVC_Logo.svg.png"
+    HISENSE: "https://upload.wikimedia.org/wikipedia/commons/thumb/d/da/Hisense_logo.svg/2000px-Hisense_logo.svg.png"
+    INFOCUS: "https://qwizdomoktopus.com/wordpress/wp-content/uploads/2018/05/Infocus-logo-300x68.png"
+    SCHNEIDER: "http://www.drvomont.com/files/images/Schneider_Electric.svg__.png"
+    BENQ: "http://www.hdfever.fr/wp-content/uploads/2013/12/Logo-BenQ.jpg"
+    MICROVISION: "http://www.fonsshop.net/img/categories/27.jpg"
+    STRONG: "https://upload.wikimedia.org/wikipedia/commons/c/c0/Strong_Digital_TV_%28logo%29.jpg"
+    POLAROID: "https://upload.wikimedia.org/wikipedia/commons/e/e6/Polaroid_logo.jpeg"
+    SALORA: "https://prodbccwebfrontend.blob.core.windows.net/brandlogos/salora_logo.svg"
+    DYON: "https://asset.conrad.com/media10/isa/160267/c1/-/fr/DYON_FL_00/image.jpg"
+    LISTO: "https://static.electroguide.com/wp-content/uploads/2018/09/logo-listo-marque.jpg"
+    NEC: "https://upload.wikimedia.org/wikipedia/commons/thumb/9/96/NEC_logo.svg/1280px-NEC_logo.svg.png"
+    ENGEL: "https://www.reparartv.es/Images/reparar-engel.jpg"
+    SNAKEBYTE: "https://i2.wp.com/www.littlebigpr.com/wp-content/uploads/2018/10/snakebyte-black.png"
+    CONTINENTAL EDISON: "http://www.service-client.fr/wp-content/uploads/2016/08/CONTINENTAL-EDISON.jpg"
+    CHIQ: "https://www.buysmarte.com.au/media/manufacturer/chiq.jpg"
 
 management:
   
@@ -58,11 +104,11 @@ spring:
 
     
 #Css and js mimification
-wro4j:
-  filterUrl : /resources
-  cacheGzippedContent: true
-  ignoreMissingResources: false
-  managerFactory:
-    preProcessors: removeSourceMaps, cssImport, jsMin
+#wro4j:
+#  filterUrl : /resources
+#  cacheGzippedContent: true
+#  ignoreMissingResources: false
+ # managerFactory:
+ #   preProcessors: removeSourceMaps, cssImport, jsMin
     
 

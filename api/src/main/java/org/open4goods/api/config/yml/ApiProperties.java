@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
+import org.open4goods.config.BrandConfiguration;
 import org.open4goods.config.yml.GlobalAttributeAggregationConfig;
 import org.open4goods.config.yml.ui.DescriptionsAggregationConfig;
 import org.open4goods.crawler.config.yml.FetcherProperties;
@@ -127,8 +128,11 @@ public class ApiProperties {
 	private boolean operatesLanguageDetection = false;
 
 
+	/**
+	 * Configuration for the brand service
+	 */
 
-
+	private BrandConfiguration brandConfig;
 
 
 	/**
@@ -431,6 +435,18 @@ public class ApiProperties {
 
 	public void setDedicatedLoggerToConsole(boolean dedicatedLoggerToConsole) {
 		this.dedicatedLoggerToConsole = dedicatedLoggerToConsole;
+	}
+
+
+
+	public BrandConfiguration getBrandConfig() {
+		return brandConfig;
+	}
+
+
+
+	public void setBrandConfig(BrandConfiguration brandConfig) {
+		this.brandConfig = brandConfig;
 	}
 
 

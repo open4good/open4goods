@@ -4,10 +4,13 @@ public interface IAttribute {
 
 	public String getLanguage();
 
-
-	public String getValue() ;
-
 	public String getName() ;
 
+	public Object getValue() ;
+
+
+	
+	
 	public void setName(String name) ;
+	
 }

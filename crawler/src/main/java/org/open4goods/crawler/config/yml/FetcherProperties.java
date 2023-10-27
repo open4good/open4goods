@@ -33,7 +33,7 @@ public class FetcherProperties {
 	/**
 	 * The key to authenticate with against master
 	 */
-	@NotBlank
+//	@NotBlank
 	private String apiKey;
 
 

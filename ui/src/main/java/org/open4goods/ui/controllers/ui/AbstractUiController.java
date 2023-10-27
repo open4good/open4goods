@@ -36,7 +36,19 @@ public class AbstractUiController {
 	 * @param string
 	 * @return
 	 */
-	protected ModelAndView defaultModelAndView(final String template, final HttpServletRequest request) {
+	protected ModelAndView defaultModelAndView(final String tpl, final HttpServletRequest request) {
+		
+		String template;
+		
+		
+		// Checking the "tpl" parameter for A/B testing new pages		
+		String suffix = request.getParameter("tpl");
+		if (null != suffix) {
+			template = tpl + suffix;
+		} else {
+			template = tpl;
+		}
+		
 		final ModelAndView ret = new ModelAndView(template).addObject("config", config);
 
 		ret.addObject("userLocale", request.getLocale());

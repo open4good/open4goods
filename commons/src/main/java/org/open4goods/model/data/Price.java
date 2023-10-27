@@ -144,19 +144,31 @@ public class Price implements Validable, Standardisable, Comparable<Double> {
 
 
 	/**
-	 *
+	 * TODO : merge with the one in product
 	 * @return a localised formated duration of when the price was last indexed
 	 */
 	public String ago(Locale locale) {
 
-		DurationFieldType[] fields = {DurationFieldType.days(), DurationFieldType.hours()};
-		Period period = new Period(System.currentTimeMillis() - timeStamp, PeriodType.forFields(fields)).normalizedStandard();
-		PeriodFormatter formatter = PeriodFormat.wordBased(locale);
+		long duration = System.currentTimeMillis() - timeStamp;
+		
+		
+		
+		Period period;
+		if (duration < 3600000) {
+			DurationFieldType[] min = { DurationFieldType.minutes(), DurationFieldType.seconds() };
+			period = new Period(duration, PeriodType.forFields(min)).normalizedStandard();
+		} else {
+			DurationFieldType[] full = { DurationFieldType.days(), DurationFieldType.hours() };
+			period = new Period(duration, PeriodType.forFields(full)).normalizedStandard();
 
-		period.getDays();
+		}
+		
+		PeriodFormatter formatter = PeriodFormat.wordBased();
 
-
-		return (formatter. print(period));
+		String ret = (formatter. print(period));
+		
+		
+		return ret;
 	}
 
 	public void setCurrency(String currency) throws ParseException {

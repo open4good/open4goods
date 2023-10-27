@@ -1,12 +1,19 @@
 package org.open4goods.model.product;
 
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.StringUtils;
+import org.open4goods.config.yml.attributes.AttributeConfig;
+import org.open4goods.exceptions.ValidationException;
+import org.open4goods.model.attribute.Attribute;
 import org.open4goods.model.attribute.AttributeType;
-import org.open4goods.model.data.Rating;
-import org.open4goods.model.data.Score;
+import org.open4goods.model.data.UnindexedKeyValTimestamp;
 import org.springframework.data.elasticsearch.annotations.Field;
 import org.springframework.data.elasticsearch.annotations.FieldType;
 
@@ -17,27 +24,89 @@ public class AggregatedAttribute implements IAttribute {
 	 */
 	@Field(index = true, store = false, type = FieldType.Keyword)
 	private String name;
-
+	
 	/**
 	 * The value of this aggregated attribute
 	 */
 	@Field(index = true, store = false, type = FieldType.Keyword)
 	private String value;
 
+	/**
+	 * The value of this aggregated attribute
+	 */
+	@Field(index = true, store = false, type = FieldType.Double)
+	private Double numericValue;
 
-	/** Type of the attribute **/
-	@Field(index = false, store = false, type = FieldType.Keyword)
-	private AttributeType type;
+//	/** Type of the attribute **/
+//	@Field(index = false, store = false, type = FieldType.Keyword)
+//	private AttributeType type;
 
 
 	/**
 	 * The collections of conflicts for this attribute
 	 */
 	@Field(index = false, store = false, type = FieldType.Object)
-	private Set<ConflictedAttribute> sources = new HashSet<>();
+	private Set<UnindexedKeyValTimestamp> sources = new HashSet<>();
 
 
+	/**
+	 * Number of sources for this attribute
+	 * @return
+	 */
+	public int sourcesCount() {
+		return sources.size();
+	}
+	
+	/**
+	 * The number of different values for this item
+	 * @return
+	 */
+	public long distinctValues () {
+		return sources.stream().map(e-> e.getValue()).distinct().count();
+	}
+	
+	/**
+	 * For UI, a String representation of all providers names
+	 * @return
+	 */
+	public String providersToString() {		
+		return StringUtils.join( sources.stream().map(e-> e.getKey()).toArray(),", ");
+	}
 
+	/**
+	 * For UI, a String representation of all providers names and values
+	 * @return
+	 */
+	public String sourcesToString() {
+		return StringUtils.join( sources.stream().map(e-> e.getKey() + ":"+e.getValue()).toArray(),", ");
+
+	}
+
+
+	public boolean hasConflicts() {
+		return distinctValues() > 1;
+	}
+	
+	public String bgRow() {
+		String ret="table-default";
+		int sCount = sourcesCount();
+		long dValues = distinctValues();
+		
+		if (sCount == 0) {
+			ret="table-danger";
+		} else if (sCount == 1) {
+			ret="table-default";
+		} else {
+			ret="table-info";
+		}
+	
+		if (dValues > 1) {
+			ret = "table-danger";
+		}
+		
+		return ret;
+	}
+	
 	// TODO : Simple, but does not allow to handle conflicts, and so on
 	@Override
 	public int hashCode() {
@@ -54,42 +123,107 @@ public class AggregatedAttribute implements IAttribute {
 	}
 
 
-
+	
 
 	/**
-	 *
-	 * @return all attributes
-	 */
-	public Set<SourcedAttribute> sources() {
-		return sources.stream().map(ConflictedAttribute::getSources).flatMap(Set::stream) .collect(Collectors.toSet());
-	}
-	/**
-	 * Add an attribute
+	 * Add a "matched" attribute, with dynamic type detection
 	 * @param parsed
+	 * Should handle language ?
 	 */
-	public void addAttribute(SourcedAttribute parsed) {
+	public void addAttribute(Attribute attr, AttributeConfig attrConfig, UnindexedKeyValTimestamp sourcedValue) throws NumberFormatException{
 
-		ConflictedAttribute existing = sources.stream().filter(e -> e.getValue().equals(parsed.getRawValue().toString())).findAny().orElse(null);
-
-		if (null == existing) {
-			// No previous value with this attribute
-			existing = new ConflictedAttribute();
-			existing.setValue(parsed.getRawValue().toString());
-			sources.add(existing);
+		// Guard
+		if (this.name != null && !name.equals(this.name)) {
+			//TODO
+			System.out.println("ERROR : Name mismatch in add attribute");
 		}
-
-		// Updating the source
-		existing.getSources().add(parsed);
+		
+		this.name = attr.getName();		
+		sources.add(sourcedValue);
+		
+		value = bestValue();
+		
+		if (attrConfig.getType().equals(AttributeType.NUMERIC)) {
+			numericValue = numericOrNull(value);			
+		}
 	}
 
+	
 
+	
+	
 
+	public void addAttribute(Attribute attr, UnindexedKeyValTimestamp sourcedValue) {
+		// Guard
+		if (this.name != null && !name.equals(this.name)) {
+			//TODO
+			System.out.println("ERROR : Name mismatch in add attribute");
+		}
+		
+		this.name = attr.getName();		
+		sources.add(sourcedValue);
+		
+		value = bestValue();
+		
+		
+	}
+	
+	
+	
+/**
+ * 
+ * @return the best value
+ */
+	public String bestValue() {
+
+		// Count values by unique keys... NOTE : Should have a java8+ nice solution here !
+		Map<String, Integer> valueCounter = new HashMap<>();
+		
+		for (UnindexedKeyValTimestamp source : sources) {
+			Integer existing = valueCounter.get(source.getValue());
+			
+			if (null == existing) {
+				valueCounter.put(source.getValue(),1);
+			} else {
+				valueCounter.put(source.getValue(),valueCounter.get(source.getValue())+ 1);
+			}
+		}
+				
+	
+		// sort this map by values
+
+	    
+	    Map<String,Integer> result = valueCounter.entrySet().stream()
+	    		.sorted(Map.Entry.comparingByValue(Comparator.reverseOrder())) 		
+	    	
+	    		.collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue,
+	    		(oldValue, newValue) -> oldValue, LinkedHashMap::new));
+	    
+	    
+	    // Take the first one : will be the "most recommanded" if discriminant number of datasources, a random value otherwise
+	    
+		return result.entrySet().stream().findFirst().get().getKey();
+	}
+
+	/**
+	 * Return the number of distinct values
+	 * @return
+	 */
+	public long getPonderedvalues() {
+		return sources.stream().map(e->e.getValue()).distinct().count();
+	}
+	
 	@Override
 	public String toString() {
+		return name + " : " +value+ " -> "+  sources.size() + " source(s), " + getPonderedvalues() + " conflict(s)";
+	}
+	
+	
+	public Double numericOrNull(String rawValue) throws NumberFormatException{
+		// Trying to specialize as numeric
+		final String num = rawValue.toString().trim().replace(",", ".");
 
-		return name + " : " +value+ " -> "+  sources().size() + " source(s), " + (sources.size()-1) +" conflict(s)";
-
-
+		return  Double.valueOf(num);
 	}
 
 	///////////////////////////////////////
@@ -119,28 +253,40 @@ public class AggregatedAttribute implements IAttribute {
 	}
 
 
-	public Set<ConflictedAttribute> getSources() {
+//	public AttributeType getType() {
+//		return type;
+//	}
+//
+//
+//	public void setType(AttributeType type) {
+//		this.type = type;
+//	}
+
+	public Set<UnindexedKeyValTimestamp> getSources() {
 		return sources;
 	}
 
-	public void setSources(Set<ConflictedAttribute> sources) {
+	public void setSources(Set<UnindexedKeyValTimestamp> sources) {
 		this.sources = sources;
 	}
 
 
-	public AttributeType getType() {
-		return type;
-	}
-
-
-	public void setType(AttributeType type) {
-		this.type = type;
-	}
 
 	@Override
 	public String getLanguage() {
+		// TODO : i18n
 		return null;
 	}
+
+	public Double getNumericValue() {
+		return numericValue;
+	}
+
+	public void setNumericValue(Double numericValue) {
+		this.numericValue = numericValue;
+	}
+
+
 
 
 

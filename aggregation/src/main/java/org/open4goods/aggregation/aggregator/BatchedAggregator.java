@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.open4goods.aggregation.AbstractAggregationService;
+import org.open4goods.aggregation.AbstractBatchAggregationService;
 import org.open4goods.exceptions.AggregationSkipException;
 import org.open4goods.model.product.Product;
 import org.slf4j.Logger;
@@ -47,8 +48,17 @@ public class BatchedAggregator extends AbstractAggregator {
 
 		Product ret = null;
 		// Call transformation building registered service
-		for (final AbstractAggregationService service : services) {
-			logger.warn("Initializing {} products using {} service",datas.size() ,service.getClass().getSimpleName());
+		for (final AbstractAggregationService s: services) {
+			
+			AbstractBatchAggregationService service = null;
+			if (s instanceof AbstractBatchAggregationService) {
+				service = (AbstractBatchAggregationService)s;
+			} else {
+				logger.warn("Aggrgegator {} is used in batch mode, but is a AbstractBatchAggregationService", s.getClass().getCanonicalName());
+				continue;
+			}
+			
+			logger.warn("Batching {} products using {} service",datas.size() ,service.getClass().getSimpleName());
 
 			
 			// Init

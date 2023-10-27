@@ -6,14 +6,14 @@ import java.util.List;
 
 import org.open4goods.aggregation.AbstractAggregationService;
 import org.open4goods.aggregation.aggregator.RealTimeAggregator;
-import org.open4goods.aggregation.services.aggregation.AttributeAggregationService;
-import org.open4goods.aggregation.services.aggregation.BarCodeAggregationService;
-import org.open4goods.aggregation.services.aggregation.DescriptionsAggregationService;
-import org.open4goods.aggregation.services.aggregation.IdAggregationService;
-import org.open4goods.aggregation.services.aggregation.MediaAggregationService;
-import org.open4goods.aggregation.services.aggregation.NamesAggregationService;
-import org.open4goods.aggregation.services.aggregation.PriceAggregationService;
-import org.open4goods.aggregation.services.aggregation.VerticalAggregationService;
+import org.open4goods.aggregation.services.aggregation.AttributeRealtimeAggregationService;
+import org.open4goods.aggregation.services.aggregation.realtime.BarCodeAggregationService;
+import org.open4goods.aggregation.services.aggregation.realtime.DescriptionsAggregationService;
+import org.open4goods.aggregation.services.aggregation.realtime.IdAggregationService;
+import org.open4goods.aggregation.services.aggregation.realtime.MediaAggregationService;
+import org.open4goods.aggregation.services.aggregation.realtime.NamesAggregationService;
+import org.open4goods.aggregation.services.aggregation.realtime.PriceAggregationService;
+import org.open4goods.aggregation.services.aggregation.realtime.VerticalRealTimeAggregationService;
 import org.open4goods.api.config.yml.ApiProperties;
 import org.open4goods.config.yml.ui.VerticalConfig;
 import org.open4goods.config.yml.ui.VerticalProperties;
@@ -22,6 +22,7 @@ import org.open4goods.exceptions.AggregationSkipException;
 import org.open4goods.model.data.DataFragment;
 import org.open4goods.model.product.Product;
 import org.open4goods.services.BarcodeValidationService;
+import org.open4goods.services.BrandService;
 import org.open4goods.services.DataSourceConfigService;
 import org.open4goods.services.EvaluationService;
 import org.open4goods.services.Gs1PrefixService;
@@ -65,14 +66,15 @@ public class RealtimeAggregationService {
 
 	private BarcodeValidationService barcodeValidationService;
 
-
+	private BrandService brandService;
 
 	public RealtimeAggregationService(EvaluationService evaluationService,
 			ReferentielService referentielService, StandardiserService standardiserService,
 			AutowireCapableBeanFactory autowireBeanFactory, ProductRepository aggregatedDataRepository,
 			ApiProperties apiProperties, Gs1PrefixService gs1prefixService,
 			DataSourceConfigService dataSourceConfigService, VerticalsConfigService configService,
-			BarcodeValidationService barcodeValidationService) {
+			BarcodeValidationService barcodeValidationService,
+			BrandService brandService) {
 		super();
 		this.evaluationService = evaluationService;
 		this.referentielService = referentielService;
@@ -83,7 +85,7 @@ public class RealtimeAggregationService {
 		this.gs1prefixService = gs1prefixService;
 		this.dataSourceConfigService = dataSourceConfigService;
 		verticalConfigService = configService;
-
+		this.brandService=brandService;
 		this.barcodeValidationService = barcodeValidationService;
 
 
@@ -112,7 +114,7 @@ public class RealtimeAggregationService {
 
 	/**
 	 * List of services in the aggregator
-	 *
+	 *TODO : Replace confif with verticalConfigService, to have hot vertical config onDataFragment
 	 * @param config
 	 * @return
 	 */
@@ -129,15 +131,16 @@ public class RealtimeAggregationService {
 
 		services.add(new BarCodeAggregationService(apiProperties.logsFolder(), gs1prefixService,barcodeValidationService, apiProperties.isDedicatedLoggerToConsole()));
 
-		services.add(new AttributeAggregationService(config.getAttributesConfig(), apiProperties.logsFolder(), apiProperties.isDedicatedLoggerToConsole()));
+		services.add(new VerticalRealTimeAggregationService( apiProperties.logsFolder(), verticalConfigService, apiProperties.isDedicatedLoggerToConsole()));
+
+		services.add(new AttributeRealtimeAggregationService(verticalConfigService, brandService, apiProperties.logsFolder(), apiProperties.isDedicatedLoggerToConsole()));
 
 
-		services.add(new NamesAggregationService(config.getNamings(), evaluationService, apiProperties.logsFolder(), apiProperties.isDedicatedLoggerToConsole()));
+		services.add(new NamesAggregationService(apiProperties.logsFolder(), apiProperties.isDedicatedLoggerToConsole()));
 
 		//		services.add(new CategoryService(apiProperties.logsFolder(), taxonomyService));
 
 
-		services.add(new VerticalAggregationService( apiProperties.logsFolder(), verticalConfigService, apiProperties.isDedicatedLoggerToConsole()));
 
 		services.add(new IdAggregationService( apiProperties.logsFolder(), apiProperties.isDedicatedLoggerToConsole()));
 

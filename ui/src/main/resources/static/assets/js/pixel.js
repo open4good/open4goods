@@ -36,6 +36,7 @@ d.addEventListener("DOMContentLoaded", function (event) {
 
         setTimeout(function () {
             preloader.classList.add('show');
+            $( "#body").trigger( "tplLoaded");
         }, 1500);
     }
 

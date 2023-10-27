@@ -11,13 +11,13 @@
 	<url>https://github.com/open4good/open4goods</url>
 	<properties>
 		<github.global.server>github</github.global.server>
-		<springboot.version>3.1.3</springboot.version>
+		<springboot.version>3.1.5</springboot.version>
 		<java.version>19</java.version>
 		<maven.compiler.source>19</maven.compiler.source>
 		<maven.compiler.target>19</maven.compiler.target>
 		<global.version>0.0.1-SNAPSHOT</global.version>
 		<swagger.version>2.9.2</swagger.version>
-		<jacoco.version>0.8.10</jacoco.version>
+		<jacoco.version>0.8.11</jacoco.version>
 		<xwiki.version>11.10.2</xwiki.version>
 
 		<!-- To exclude springboot dependency management -->
@@ -118,7 +118,7 @@
 		<dependency>
 			<groupId>commons-io</groupId>
 			<artifactId>commons-io</artifactId>
-			<version>2.13.0</version>
+			<version>2.14.0</version>
 		</dependency>
 
 		<dependency>
@@ -174,7 +174,7 @@
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>versions-maven-plugin</artifactId>
-				<version>2.16.0</version>
+				<version>2.16.1</version>
 				<reportSets>
 					<reportSet>
 						<reports>
@@ -250,7 +250,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-enforcer-plugin</artifactId>
-				<version>3.4.0</version>
+				<version>3.4.1</version>
 				<executions>
 					<execution>
 						<id>enforce-banned-dependencies</id>
@@ -324,13 +324,13 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
-				<version>3.1.2</version>
+				<version>3.2.1</version>
 			</plugin>
 
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-failsafe-plugin</artifactId>
-				<version>3.1.2</version>
+				<version>3.2.1</version>
 			</plugin>
 
 		</plugins>

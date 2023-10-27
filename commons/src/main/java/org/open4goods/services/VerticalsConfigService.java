@@ -37,8 +37,8 @@ public class VerticalsConfigService {
 	public static final Logger logger = LoggerFactory.getLogger(VerticalsConfigService.class);
 
 	private static final String DEFAULT_CONFIG_FILENAME = "_default.yml";
-	private static final String CLASSPATH_VERTICALS = "classpath:**verticals/*.yml";
-	private static final String CLASSPATH_VERTICAL_PREFIX = "classpath:verticals/";
+//	private static final String CLASSPATH_VERTICALS = "classpath:**verticals/*.yml";
+//	private static final String CLASSPATH_VERTICAL_PREFIX = "classpath:verticals/";
 
 	private SerialisationService serialisationService;
 

@@ -19,7 +19,7 @@
 			</div>
 
 			<div class="col-lg-4 mt-md-0 text-md-right">
-				<img th:src="'/'+${product.names.name}+'/gtin.png'" th:alt="${product.names.name} +' gtin : ' + ${product.gtin()}">
+				<img th:src="'/images/'+${product.gtin()}+'-gtin.png'" th:alt="${product.names.name} +' gtin : ' + ${product.gtin()}">
 			</div>
 		</div>
 	</div>

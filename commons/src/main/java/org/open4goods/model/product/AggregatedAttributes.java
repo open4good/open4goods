@@ -25,24 +25,20 @@ public class AggregatedAttributes  {
 	private Map<String,AggregatedAttribute> aggregatedAttributes = new HashMap<>();
 
 
-	@Field(index = false, store = false, type = FieldType.Object)
+	@Field(index = false, store = false,type = FieldType.Object)
 	private Set<AggregatedAttribute> unmapedAttributes = new HashSet<>();
 
 
 	@Field(index = false, store = false, type = FieldType.Object)
 	private Set<AggregatedFeature> features = new HashSet<>();
 
-
-
-
-
 	@Override
 	public String toString() {
 		return "ref-attrs:"+referentielAttributes.size()+ " , attrs:"+aggregatedAttributes.size() ;
 	}
+	
 	public void addReferentielAttribute(ReferentielKey key, String value) {
 		referentielAttributes.put(key, value);
-
 	}
 
 

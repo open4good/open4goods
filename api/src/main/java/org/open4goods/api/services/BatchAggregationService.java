@@ -6,16 +6,17 @@ import java.util.List;
 
 import org.open4goods.aggregation.AbstractAggregationService;
 import org.open4goods.aggregation.aggregator.BatchedAggregator;
-import org.open4goods.aggregation.services.aggregation.Attribute2ScoreAggregationService;
-import org.open4goods.aggregation.services.aggregation.AttributeAggregationService;
-import org.open4goods.aggregation.services.aggregation.Brand2ScoreAggregationService;
-import org.open4goods.aggregation.services.aggregation.CleanScoreAggregationService;
-import org.open4goods.aggregation.services.aggregation.DataCompletion2ScoreAggregationService;
-import org.open4goods.aggregation.services.aggregation.EcoScoreAggregationService;
+import org.open4goods.aggregation.services.aggregation.batch.VerticalBatchedAggregationService;
+import org.open4goods.aggregation.services.aggregation.batch.scores.Attribute2ScoreAggregationService;
+import org.open4goods.aggregation.services.aggregation.batch.scores.Brand2ScoreAggregationService;
+import org.open4goods.aggregation.services.aggregation.batch.scores.CleanScoreAggregationService;
+import org.open4goods.aggregation.services.aggregation.batch.scores.DataCompletion2ScoreAggregationService;
+import org.open4goods.aggregation.services.aggregation.batch.scores.EcoScoreAggregationService;
 import org.open4goods.api.config.yml.ApiProperties;
 import org.open4goods.config.yml.ui.VerticalConfig;
 import org.open4goods.dao.ProductRepository;
 import org.open4goods.services.BarcodeValidationService;
+import org.open4goods.services.BrandService;
 import org.open4goods.services.DataSourceConfigService;
 import org.open4goods.services.EvaluationService;
 import org.open4goods.services.Gs1PrefixService;
@@ -61,6 +62,9 @@ public class BatchAggregationService  {
 	private BarcodeValidationService barcodeValidationService;
 
 
+	private BrandService brandService;
+
+
 
 
 	public BatchAggregationService(EvaluationService evaluationService,
@@ -68,7 +72,8 @@ public class BatchAggregationService  {
 			AutowireCapableBeanFactory autowireBeanFactory, ProductRepository aggregatedDataRepository,
 			ApiProperties apiProperties, Gs1PrefixService gs1prefixService,
 			DataSourceConfigService dataSourceConfigService, VerticalsConfigService configService,
-			BarcodeValidationService barcodeValidationService) {
+			BarcodeValidationService barcodeValidationService,
+			BrandService brandService) {
 		super();
 		this.evaluationService = evaluationService;
 		this.referentielService = referentielService;
@@ -81,7 +86,7 @@ public class BatchAggregationService  {
 		verticalConfigService = configService;
 
 		this.barcodeValidationService = barcodeValidationService;
-
+		this.brandService = brandService;
 
 		aggregator = getAggregator(configService.getConfigById(VerticalsConfigService.MAIN_VERTICAL_NAME).get());
 	}
@@ -114,8 +119,11 @@ public class BatchAggregationService  {
 
 		final List<AbstractAggregationService> services = new ArrayList<>();
 
-
-		services.add(new AttributeAggregationService(config.getAttributesConfig(), apiProperties.logsFolder(), apiProperties.isDedicatedLoggerToConsole() ));
+		services.add(new VerticalBatchedAggregationService( apiProperties.logsFolder(), verticalConfigService, apiProperties.isDedicatedLoggerToConsole() ));
+		
+		
+		// TODO : put back a batchservice for attributes
+//		services.add(new AttributeAggregationService(config.getAttributesConfig(), brandService, apiProperties.logsFolder(), apiProperties.isDedicatedLoggerToConsole() ));
 		services.add(new CleanScoreAggregationService(config.getAttributesConfig(), apiProperties.logsFolder(), apiProperties.isDedicatedLoggerToConsole()));
 
 		services.add(new Attribute2ScoreAggregationService(config.getAttributesConfig(), apiProperties.logsFolder(), apiProperties.isDedicatedLoggerToConsole()));

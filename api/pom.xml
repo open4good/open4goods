@@ -16,11 +16,20 @@
 		<main.basedir>${basedir}/../..</main.basedir>
 	</properties>
 
+
 	<dependencies>
 		<dependency>
 			<groupId>org.open4goods</groupId>
 			<artifactId>aggregation</artifactId>
 			<version>${global.version}</version>
+		</dependency>
+
+		<!--
+		https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-test -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-test</artifactId>
+			<scope>test</scope>
 		</dependency>
 
 
@@ -111,7 +120,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-jar-plugin</artifactId>
-				<version>3.1.1</version>
+				<version>3.3.0</version>
 				<configuration>
 					<excludes>
 						<!-- This is where the exclusion occurs -->

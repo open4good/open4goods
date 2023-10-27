@@ -2,6 +2,7 @@ package org.open4goods.crawler.config;
 
 import org.apache.commons.lang3.ArrayUtils;
 import org.open4goods.crawler.config.yml.FetcherProperties;
+import org.open4goods.crawler.repository.IndexationRepository;
 import org.open4goods.crawler.services.ApiSynchService;
 import org.open4goods.crawler.services.DataFragmentCompletionService;
 import org.open4goods.crawler.services.FetchersService;
@@ -43,7 +44,7 @@ public class CrawlerConfig {
 
     @Bean
     WebDatasourceFetchingService webDatasourceFetchingService(@Autowired final FetcherProperties fetcherProperties,
-                                                                      @Autowired final IndexationService indexationService) {
+                                                                      @Autowired final IndexationService indexationService,  @Autowired final IndexationRepository indexationRepository) {
     	
 		// Logging to console according to dev profile and conf
 		boolean toConsole = false;
@@ -53,7 +54,7 @@ public class CrawlerConfig {
 		}
 		
 		
-		return new WebDatasourceFetchingService(indexationService, fetcherProperties, fetcherProperties.getLogsDir(), toConsole);
+		return new WebDatasourceFetchingService(indexationService, fetcherProperties, indexationRepository, fetcherProperties.getLogsDir(), toConsole);
 	}
 
     @Bean
@@ -61,7 +62,8 @@ public class CrawlerConfig {
             @Autowired final DataFragmentCompletionService completionService,
             @Autowired final FetcherProperties fetcherProperties,
             @Autowired final WebDatasourceFetchingService webDatasourceFetchingService,
-            @Autowired final IndexationService indexationService
+            @Autowired final IndexationService indexationService,
+            @Autowired IndexationRepository indexationRepository
             ) {
     	
 		// Logging to console according to dev profile and conf
@@ -72,7 +74,7 @@ public class CrawlerConfig {
 		}
 		
 		
-		return new CsvDatasourceFetchingService(completionService, indexationService, fetcherProperties, webDatasourceFetchingService,fetcherProperties.getLogsDir(),  toConsole);
+		return new CsvDatasourceFetchingService(completionService, indexationService, fetcherProperties, webDatasourceFetchingService, indexationRepository,fetcherProperties.getLogsDir(),  toConsole);
 	}
 
     @Bean
