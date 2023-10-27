@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -24,8 +25,11 @@ public class AggregatedPrices implements Standardisable {
 	private AggregatedPrice minPrice;
 
 	@Field(index = false, store = false, type = FieldType.Object)
-	private List<PriceHistory> history = new ArrayList<>();
+	private List<PriceHistory> newPricehistory = new ArrayList<>();
 
+	@Field(index = false, store = false, type = FieldType.Object)
+	private List<PriceHistory> occasionPricehistory = new ArrayList<>();
+		
 	@Field(index = false, store = false, type = FieldType.Integer)
 	// Price evolution trend :
 	// 0 -> equals
@@ -35,45 +39,50 @@ public class AggregatedPrices implements Standardisable {
 
 	@Field(index = true, store = false, type = FieldType.Keyword)
 
-	// Contains the conditions for this product
+	// Contains the conditions for this product. Shortcut for elastic queryng
 	private Set<ProductState> conditions = new HashSet<>();
 
-
+	public List<AggregatedPrice> newOffers() {
+		return sortedOffers(ProductState.NEW);
+	}
+	
 	
 	public List<AggregatedPrice> occasionOffers() {
-		return sortedOffers().stream().filter(e->e.getProductState().equals(ProductState.OCCASION)).toList();	
+		return sortedOffers(ProductState.OCCASION);
 	}
-	
-	public List<AggregatedPrice> newOffers() {
-		return sortedOffers().stream().filter(e->e.getProductState().equals(ProductState.NEW)).toList();	
-	}
-	
-	
 	
 	
 	/**
 	 * Sort offers, always the cheapest compensated order first, then price sorting
+	 * @param productState 
 	 * @return
 	 */
-	public List<AggregatedPrice> sortedOffers() {
-		// Find the cheapest affiliated
-		final AggregatedPrice cheapest = offers.stream()
-				.filter(AggregatedPrice::isAffiliated)
-				.sorted(Comparator.comparingDouble(AggregatedPrice::getPrice)).findFirst().orElse(null);
-
+	public List<AggregatedPrice> sortedOffers(ProductState productState) {
 
 		// Find the cheapest in any case
 		final List<AggregatedPrice> res = offers.stream()
 				.sorted(Comparator.comparingDouble(AggregatedPrice::getPrice))
+				.filter(e->e.getProductState().equals(productState))
 				.collect(Collectors.toList());
-
-		res.remove(cheapest);
-		res.add(0, cheapest);
 
 		return res;
 
 
 	}
+	
+
+	public List<PriceHistory> getHistory(ProductState state) {
+
+		return switch (state) {
+	    case OCCASION  -> this.occasionPricehistory;
+	    case NEW -> this.newPricehistory;
+		default -> throw new IllegalArgumentException("Unexpected value: " + state);
+
+	};
+	}
+
+	
+	
 
 	@Override
 	public Set<Standardisable> standardisableChildren() {
@@ -91,15 +100,13 @@ public class AggregatedPrices implements Standardisable {
 		// NOTE(gof) : handled externally
 
 	}
-
-	/**
-	 * Number of affiliated offers
-	 * @return
-	 */
-	public Long affiliatedOffersCount() {
-		return offers.stream().filter(AggregatedPrice::isAffiliated).count();
+	
+	public Optional<AggregatedPrice> getMinPrice(ProductState state) {
+		return offers.stream().filter(e -> e.getProductState().equals(state)) .min(Comparator.comparing(AggregatedPrice::getPrice)) ;
 	}
-
+	
+	
+	
 	/////////////////////////////////////////////
 	// Getters / Setters
 	////////////////////////////////////////////
@@ -120,13 +127,6 @@ public class AggregatedPrices implements Standardisable {
 		this.minPrice = minPrice;
 	}
 
-	public List<PriceHistory> getHistory() {
-		return history;
-	}
-
-	public void setHistory(List<PriceHistory> history) {
-		this.history = history;
-	}
 
 	public Integer getTrend() {
 		return trend;
@@ -147,22 +147,21 @@ public class AggregatedPrices implements Standardisable {
 
 
 
-	//	public AggregatedPrice getMaxPrice() {
-	//		return maxPrice;
-	//	}
-	//
-	//	public void setMaxPrice(AggregatedPrice maxPrice) {
-	//		this.maxPrice = maxPrice;
-	//	}
-	//
-	//	public AggregatedPrice getAvgPrice() {
-	//		return avgPrice;
-	//	}
-	//
-	//	public void setAvgPrice(AggregatedPrice avgPrice) {
-	//		this.avgPrice = avgPrice;
-	//	}
+	public List<PriceHistory> getNewPricehistory() {
+		return newPricehistory;
+	}
 
+	public void setNewPricehistory(List<PriceHistory> newPricehistory) {
+		this.newPricehistory = newPricehistory;
+	}
+
+	public List<PriceHistory> getOccasionPricehistory() {
+		return occasionPricehistory;
+	}
+
+	public void setOccasionPricehistory(List<PriceHistory> occasionPricehistory) {
+		this.occasionPricehistory = occasionPricehistory;
+	}
 
 
 }

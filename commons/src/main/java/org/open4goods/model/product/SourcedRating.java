@@ -54,16 +54,6 @@ public class SourcedRating extends Rating{
 		setValue(source.getValue());
 	}
 
-	/**
-	 * Constructor from a rating and an attribute
-	 * @param translated
-	 * @param df
-	 */
-	public SourcedRating(SourcedAttribute df) {
-
-		datasourceName = df.getDatasourceName();
-	}
-
 
 
 

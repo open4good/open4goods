@@ -1,6 +1,8 @@
 
 package org.open4goods.model.product;
 
+import java.text.DecimalFormat;
+
 import org.open4goods.model.constants.Currency;
 import org.open4goods.model.constants.ProductState;
 import org.open4goods.model.data.DataFragment;
@@ -10,17 +12,17 @@ import org.springframework.data.elasticsearch.annotations.Field;
 import org.springframework.data.elasticsearch.annotations.FieldType;
 
 public class AggregatedPrice extends Price {
-
+	
+	//TODO : shared, ugly
+	public static final DecimalFormat numberFormater = new DecimalFormat("0.00");
+	
 	@Field(index = false, store = false, type = FieldType.Keyword)
 	private String datasourceName;
-	@Field(index = false, store = false, type = FieldType.Keyword)
-	private String datasourceConfigName;
+	
 	@Field(index = false, store = false, type = FieldType.Keyword)
 	private String offerName;
 	@Field(index = false, store = false, type = FieldType.Keyword)
 	private String url;
-	@Field(index = false, store = false, type = FieldType.Boolean)
-	private boolean affiliated;
 	@Field(index = false, store = false, type = FieldType.Double)
 	private Double compensation;
 	/**
@@ -42,11 +44,8 @@ public class AggregatedPrice extends Price {
 	 * @param df    DataFragment to initialize from
 	 */
 	public AggregatedPrice(DataFragment df) {
-
-		datasourceConfigName = df.getDatasourceConfigName();
 		datasourceName = df.getDatasourceName();
 		url = df.affiliatedUrlIfPossible();
-		affiliated = df.affiliated();
 		offerName = df.longestName();
 		setCurrency(df.getPrice().getCurrency());
 		setPrice(df.getPrice().getPrice());
@@ -81,7 +80,24 @@ public class AggregatedPrice extends Price {
 	}
 
 
-
+	/**
+	 * A human readable price (2 decimals max, skipped if int)
+	 * @return
+	 */
+	public String shortPrice() {
+		
+		Double p = super.getPrice();		
+		boolean isInt = p == Math.rint(p);
+		
+		if (isInt) {
+			return String.valueOf(p.intValue());
+		} else {
+			return String.valueOf(numberFormater.format(p));
+		}
+		
+	}
+	
+	
 	public AggregatedPrice() {
 		super();
 	}
@@ -94,28 +110,12 @@ public class AggregatedPrice extends Price {
 		this.datasourceName = datasourceName;
 	}
 
-	public String getDatasourceConfigName() {
-		return datasourceConfigName;
-	}
-
-	public void setDatasourceConfigName(String datasourceConfigName) {
-		this.datasourceConfigName = datasourceConfigName;
-	}
-
 	public String getUrl() {
 		return url;
 	}
 
 	public void setUrl(String url) {
 		this.url = url;
-	}
-
-	public boolean isAffiliated() {
-		return affiliated;
-	}
-
-	public void setAffiliated(boolean affiliated) {
-		this.affiliated = affiliated;
 	}
 
 	public String getOfferName() {

@@ -1,16 +1,24 @@
 
 package org.open4goods.model.product;
 
+import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
+import org.joda.time.DurationFieldType;
+import org.joda.time.Period;
+import org.joda.time.PeriodType;
+import org.joda.time.format.PeriodFormat;
+import org.joda.time.format.PeriodFormatter;
 import org.open4goods.model.Standardisable;
 import org.open4goods.model.constants.Currency;
 import org.open4goods.model.constants.ProductState;
@@ -20,6 +28,7 @@ import org.open4goods.model.data.Description;
 import org.open4goods.model.data.Resource;
 import org.open4goods.model.data.Score;
 import org.open4goods.model.data.UnindexedKeyVal;
+import org.open4goods.model.data.UnindexedKeyValTimestamp;
 import org.open4goods.services.StandardiserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -55,13 +64,13 @@ public class Product implements Standardisable {
 	private long lastChange;
 	
 	/** The list of other id's known for this product **/
-	@Field(index = true, store = false, type = FieldType.Keyword)
-	private Set<String> alternativeIds = new HashSet<>();
+	@Field(index = true, store = false, type = FieldType.Object)
+	private Set<UnindexedKeyValTimestamp> alternativeIds = new HashSet<>();
 
 	
 	/** The list of other id's known for this product **/
-	@Field(index = false, store = false, type = FieldType.Keyword)
-	private Set<String> alternativeBrands = new HashSet<>();
+	@Field(index = false, store = false, type = FieldType.Object)
+	private Set<UnindexedKeyValTimestamp> alternativeBrands = new HashSet<>();
 
 	
 	
@@ -77,8 +86,6 @@ public class Product implements Standardisable {
 	@Field(index = true, store = false, type = FieldType.Object)
 	private Names names = new Names();
 
-	//	@Field(index = true, store = false, type = FieldType.Object)
-	//	private Urls urls = new Urls();
 
 	//	@Field(index = false, store = false, type = FieldType.Object)
 	//	/** The comments, aggregated and nlp processed **/
@@ -389,7 +396,16 @@ public class Product implements Standardisable {
 	}
 	
 	
-	
+	public String brandAndModel() {
+		String ret = "";
+		if (!StringUtils.isEmpty(brand())) {
+			ret += brand() +"-"; 
+		}
+		
+		ret += model();
+		
+		return ret;
+	}
 
 	/**
 	 *
@@ -457,13 +473,6 @@ public class Product implements Standardisable {
 	//		return builder.toString();
 	//	}
 
-	/**
-	 *
-	 * @return true if this aggregated data dispose of an affiliated link
-	 */
-	public boolean hasAffiliatedLinks() {
-		return price.getOffers().stream().filter(AggregatedPrice::isAffiliated).findAny().isPresent();
-	}
 
 	public List<String> tagCloudTokens() {
 		List<String> tokens = new ArrayList<>();
@@ -487,6 +496,44 @@ public class Product implements Standardisable {
 	}
 
 	
+	/**
+	 * TODO : merge with the one on price()
+	 * @return a localised formated duration of when the product was last indexed
+	 */
+	public String ago(Locale locale) {
+
+		long duration = System.currentTimeMillis() - lastChange;
+		
+		
+		
+		Period period;
+		if (duration < 3600000) {
+			DurationFieldType[] min = { DurationFieldType.minutes(), DurationFieldType.seconds() };
+			period = new Period(duration, PeriodType.forFields(min)).normalizedStandard();
+		} else {
+			DurationFieldType[] full = { DurationFieldType.days(), DurationFieldType.hours() };
+			period = new Period(duration, PeriodType.forFields(full)).normalizedStandard();
+
+		}
+		
+		PeriodFormatter formatter = PeriodFormat.wordBased();
+
+		String ret = (formatter. print(period));
+		
+		
+		return ret;
+	}
+	
+	/**
+	 * Return text version of the creation date
+	 * @param locale
+	 * @return
+	 */
+	public String creationDate(Locale locale) {
+		DateFormat dateFormat = DateFormat.getDateInstance(DateFormat.DEFAULT, locale);
+		String date = dateFormat.format(new Date(creationDate));
+		return date;
+	}
 	//////////////////////////////////////////
 	// Getters / Setters
 	//////////////////////////////////////////
@@ -501,19 +548,20 @@ public class Product implements Standardisable {
 		this.id = id;
 	}
 
-	public Set<String> getAlternativeIds() {
+
+	public Set<UnindexedKeyValTimestamp> getAlternativeIds() {
 		return alternativeIds;
 	}
 
-	public void setAlternativeIds(Set<String> alternativeIds) {
+	public void setAlternativeIds(Set<UnindexedKeyValTimestamp> alternativeIds) {
 		this.alternativeIds = alternativeIds;
 	}
 
-	public Set<String> getAlternativeBrands() {
+	public Set<UnindexedKeyValTimestamp> getAlternativeBrands() {
 		return alternativeBrands;
 	}
 
-	public void setAlternativeBrands(Set<String> alternativeBrands) {
+	public void setAlternativeBrands(Set<UnindexedKeyValTimestamp> alternativeBrands) {
 		this.alternativeBrands = alternativeBrands;
 	}
 

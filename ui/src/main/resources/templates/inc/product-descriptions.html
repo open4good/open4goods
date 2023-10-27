@@ -35,10 +35,12 @@
                                 <div  class="card shadow mt-3 border-gray-300">
                                     <div class="card-body text-center p-4 p-lg-5">
                                         <img src="../../assets/img/pages/design.svg" alt="Web design illustration" class="image-md mb-4">
-                                        <h2  class="h4 mb-2">Information sur les prix</h2>
+                                        <h2  class="h4 mb-2">Evolution des prix</h2>
                                         <span  class="h5 text-light "></span>
                                         
-                                        <img src="https://s3.amazonaws.com/assets.fullstack.io/n/20200309095518221_react-chartjs.png">
+                                        <div>
+                                        		 <canvas id="priceChart"></canvas>
+                                        </div>
                                         <p>
 											lorem ipsum
                                         </p>
@@ -69,13 +71,13 @@
    							<!-- Icon Boxes -->
                                 <div id="evaluation-ecologique" class="card shadow border-gray-300 mt-3">
                                      <div class="card-body text-center p-4 p-lg-5">
-                                        <img src="../../assets/img/pages/design.svg" alt="Web design illustration" class="image-md mb-4">
-                                        <h2  class="h4 mb-2">Points de vigilance</h2>
-                                        <span  class="h5 text-light ">SAMSUNG-75C9</span>
-                                        <p>
-											lorem ipsum
-                                        </p>
-                                    </div>
+                                        <img th:title="${originCountry}" th:src="'/assets/img/flags/'+${product.gtinInfos.country.toLowerCase()}+'.png'" th:alt="${originCountry}" class="image-md mb-4">
+                                        <h2  class="h4 mb-2">Origine</h2>
+                                        <span  class="h5 text-light mb-2 " th:text="${originCountry}"></span>
+											<p class="mb-4">Cette information est récuperée par les
+											premiers chiffres du code barre  (<b><span th:text="${product.gtin().substring(0,3)}"></span></b>), et indique la nationalité de 
+											l'organisme qui a délivré le code barre. Cela n'indique pas nécessairement le lieu de production.</p>
+				                                    </div>
                                 </div>
                                 <!-- End of Icon Boxes -->
                                 

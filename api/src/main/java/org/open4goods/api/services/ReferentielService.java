@@ -16,6 +16,7 @@ import org.open4goods.helper.IdHelper;
 import org.open4goods.model.attribute.Attribute;
 import org.open4goods.model.constants.ReferentielKey;
 import org.open4goods.model.data.DataFragment;
+import org.open4goods.model.data.UnindexedKeyValTimestamp;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -132,7 +133,7 @@ public class ReferentielService {
 
 				if (!newVal.equals(val)) {
 					// Adding the old branduid as alternate id
-					dataFragment.getAlternateIds().add(val);
+					dataFragment.getAlternateIds().add(new UnindexedKeyValTimestamp(ReferentielKey.BRAND.toString(),val));
 				}
 				a.setRawValue(newVal);
 				dataFragment.addReferentielAttribute(ReferentielKey.MODEL.toString(), newVal);

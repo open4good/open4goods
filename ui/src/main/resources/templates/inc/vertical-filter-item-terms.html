@@ -18,7 +18,7 @@
 							<th:block th:if="${index.index} < ${visibleSection}">
 							
 								<th:block th:if="${termsLineWidget}">
-									<th:block th:insert="'inc/'+${termsLineWidget}+'.html'"></th:block>
+									<th:block th:insert="~{'inc/'+${termsLineWidget}+'.html'}"></th:block>
 								</th:block>
 								
 								<th:block th:unless="${termsLineWidget}">
@@ -41,7 +41,7 @@
 								<div th:each="term, index: ${terms}" class="col-12">
 									<th:block th:if="${index.index} >= ${visibleSection}">
 												<th:block th:if="${termsLineWidget}">
-													<th:block th:insert="'inc/'+${termsLineWidget}+'.html'"></th:block>
+													<th:block th:insert="~{'inc/'+${termsLineWidget}+'.html'}"></th:block>
 												</th:block>
 												
 												<th:block th:unless="${termsLineWidget}">

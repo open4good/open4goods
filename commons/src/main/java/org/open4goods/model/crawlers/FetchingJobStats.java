@@ -1,28 +1,59 @@
 
 package org.open4goods.model.crawlers;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
+
+import org.springframework.data.annotation.Id;
+import org.springframework.data.elasticsearch.annotations.Document;
+import org.springframework.data.elasticsearch.annotations.Field;
+import org.springframework.data.elasticsearch.annotations.FieldType;
+
+@Document(indexName = "indexations", createIndex = true)
 public class FetchingJobStats {
 
+	@Id
+	@Field(index = true, store = false, type = FieldType.Keyword)
+	private String id; 
+	
+	@Field(index = true, store = false, type = FieldType.Keyword)
 	private String name;
 
+	@Field(index = true, store = false, type = FieldType.Date)
 	private long startDate;
 
+	@Field(index = true, store = false, type = FieldType.Long)
 	private long queueLength = 0;
 
+	@Field(index = true, store = false, type = FieldType.Long)
 	private long numberOfProcessedDatas = 0;
 
+	@Field(index = true, store = false, type = FieldType.Long)
 	private long numberOfIndexedDatas = 0;
 
+	@Field(index = true, store = false, type = FieldType.Boolean)
 	private boolean finished = false;
 
+	@Field(index = true, store = false, type = FieldType.Boolean)
 	private boolean shuttingDown = false;
+	
+	private Map<String,Long> filesCounters = new HashMap();
 
 
 	public void incrementProcessed(final int size) {
 		numberOfProcessedDatas += size;
 	}
-
-	public void incrementProcessed() {
+	
+	
+	public void incrementProcessed(String url) {
+		
+		Long count = filesCounters.get(url);
+		if (null == count) {
+			filesCounters.put(url, 1L);
+		} else {
+			filesCounters.put(url, count+1);
+		}
 		numberOfProcessedDatas++;
 	}
 
@@ -36,6 +67,7 @@ public class FetchingJobStats {
 
 	public FetchingJobStats(final String name, final long startDate) {
 		super();
+		this.id = UUID.randomUUID().toString();
 		this.name = name;
 		this.startDate = startDate;
 	}
@@ -97,6 +129,28 @@ public class FetchingJobStats {
 	public void setNumberOfIndexedDatas(final long numberOfIndexedPages) {
 		numberOfIndexedDatas = numberOfIndexedPages;
 	}
+
+
+	public String getId() {
+		return id;
+	}
+
+
+	public void setId(String id) {
+		this.id = id;
+	}
+
+
+	public Map<String, Long> getFilesCounters() {
+		return filesCounters;
+	}
+
+
+	public void setFilesCounters(Map<String, Long> filesCounters) {
+		this.filesCounters = filesCounters;
+	}
+
+
 
 
 

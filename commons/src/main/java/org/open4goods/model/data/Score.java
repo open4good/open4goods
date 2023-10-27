@@ -10,6 +10,7 @@ import org.open4goods.model.Standardisable;
 import org.open4goods.model.Validable;
 import org.open4goods.model.attribute.Cardinality;
 import org.open4goods.model.constants.Currency;
+import org.open4goods.model.product.AggregatedPrice;
 import org.open4goods.services.StandardiserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -107,6 +108,13 @@ public class Score  implements Validable {
 		return Math.round(relativ.getValue() * 100 / StandardiserService.DEFAULT_MAX_RATING);
 	}
 
+	public String absValue () {
+		return AggregatedPrice.numberFormater.format(absolute.getValue());
+	}
+
+	public String relValue () {
+		return AggregatedPrice.numberFormater.format(relativ.getValue());
+	}
 
 	///////////////////////
 	// The following helper allow to know the ranking, on a 5 scale

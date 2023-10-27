@@ -48,7 +48,6 @@ public class OpenDataController extends AbstractUiController {
 		ret.addObject("lastUpdated", openDataService.lastUpdate());
 		ret.addObject("fileSize", openDataService.fileSize());
 		ret.addObject("page","open data");
-
 		return ret;
 	}
 

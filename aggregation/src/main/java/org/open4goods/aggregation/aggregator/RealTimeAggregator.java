@@ -3,6 +3,8 @@ package org.open4goods.aggregation.aggregator;
 import java.util.List;
 
 import org.open4goods.aggregation.AbstractAggregationService;
+import org.open4goods.aggregation.AbstractBatchAggregationService;
+import org.open4goods.aggregation.AbstractRealTimeAggregationService;
 import org.open4goods.exceptions.AggregationSkipException;
 import org.open4goods.model.data.DataFragment;
 import org.open4goods.model.product.Product;
@@ -36,8 +38,16 @@ public class RealTimeAggregator extends AbstractAggregator {
 		logger.info("Incrementing Product with {} DataFragment and using {} services",fragment,services.size());
 
 		// Call transformation building registered service
-		for (final AbstractAggregationService service : services) {
+		for (final AbstractAggregationService s : services) {
 
+			AbstractRealTimeAggregationService service = null;
+			if (s instanceof AbstractRealTimeAggregationService) {
+				service = (AbstractRealTimeAggregationService)s;
+			} else {
+				logger.warn("Aggrgegator {} is used in realtime mode, but is a AbstractRealTimeAggregationService", s.getClass().getName());
+				continue;
+			}
+			
 			try {
 				service.onDataFragment(fragment, data);
 
@@ -46,6 +56,7 @@ public class RealTimeAggregator extends AbstractAggregator {
 				throw e;
 			}
 			catch (final Exception e) {
+				e.printStackTrace();
 				logger.warn("AggregationService {} throw an exception while processing data {}",service.getClass().getName(), data,e);
 
 			}

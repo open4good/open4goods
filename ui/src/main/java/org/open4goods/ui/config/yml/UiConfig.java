@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
+import org.open4goods.config.BrandConfiguration;
 import org.open4goods.config.yml.XwikiConfiguration;
 import org.open4goods.config.yml.ui.ApiConfig;
 import org.open4goods.config.yml.ui.OpenSearchConfig;
@@ -121,6 +122,12 @@ public class UiConfig {
 		return resourceTemplateFolder+"i18n"+File.separator+"messages";
 	}
 
+	/**
+	 * Configuration for the brand service
+	 */
+
+	private BrandConfiguration brandConfig;
+	
 	
 	
 	/**
@@ -264,6 +271,16 @@ public class UiConfig {
 
 	public void setPages(Map<String, String> pages) {
 		this.pages = pages;
+	}
+
+
+	public BrandConfiguration getBrandConfig() {
+		return brandConfig;
+	}
+
+
+	public void setBrandConfig(BrandConfiguration brandConfig) {
+		this.brandConfig = brandConfig;
 	}
 
 
