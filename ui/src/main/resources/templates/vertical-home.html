@@ -45,134 +45,93 @@
 	
     <main>	
   
-        <div class="section section-lg bg-gray-200">
-            <div class="container">
-
-				<div class="row">
-					<div class="col-12">
-						<!-- Carousel -->
-						<div id="Carousel2" class="carousel slide" data-ride="carousel">
-							<div class="carousel-inner">
-
-								<div class="carousel-item" th:each="p : ${products.data}">
-									<div th:if="${p.model()}">
-										<a>
-											<p th:text="${p.brand()}"></p>
-										</a>
-									</div>
-									<img class="d-none w-100" src="../../assets/img/carousel/image-2.jpg" alt="Second slide">
-								</div>
-								<div class="carousel-item d-none">
-									<img class="d-block w-100" src="../../assets/img/carousel/image-3.jpg" alt="Third slide">
-								</div>
-
-
-
-								<tr class="d-none" th:each="p : ${products.data}" >
-               
-               
-									<td th:if="${p.model()}"><a th:text="${p.model()}" th:href="'/'+${verticalPath}+ '/'+${p.names.name}"></a></td>
-									<td th:unless="${p.model()}"><a th:text="${p.bestName()}" th:href="'/'+${verticalPath}+ '/'+${p.names.name}"></a></td>
-								   
-								   
-								   
-									<td th:text="${p.brand()}"></td>
-									<td></td>
-									<td 
-									></td>
-									<td th:text="${p.offersCount}"></td>
-									
-									<th:block th:each="filter : ${products.customFilters}">
-										<td th:if="${p.attributes.aggregatedAttributes.get(filter.key.key)}" th:text="${p.attributes.aggregatedAttributes.get(filter.key.key).value }"></td>            
-										<td th:unless="${p.attributes.aggregatedAttributes.get(filter.key.key)}"></td>            
-					
-									</th:block>
-					
-								</tr>
-							</div>
-							<a class="carousel-control-prev" href="#Carousel2" role="button" data-bs-slide="prev">
-								<span class="carousel-control-prev-icon" aria-hidden="true"></span>
-								<span class="sr-only">Previous</span>
-							</a>
-							<a class="carousel-control-next" href="#Carousel2" role="button" data-bs-slide="next">
-								<span class="carousel-control-next-icon" aria-hidden="true"></span>
-								<span class="sr-only">Next</span>
-							</a>
-						</div>
-						<!-- End of Carousel -->
-					</div>
-				</div>
+        <div class="section bg-gray-200">
+            <div class="container container-semi-fluid">
 
 				<!--/* Hero */-->						
-				<div class="row mb-2">							
-					<div class="card shadow">
-						<div class=" align-items-center">
-							
-								<div class="d-flex flex-wrap align-items-center row">
-			                        <div class="col-lg-2 text-center">
-			                                <img class="mt-2" width="150" th:src="${config.homeLogo.i18n(siteLanguage)}">
-			                        </div>
-			                        <span class="col-lg-10">
-			                                <h1 class="mt-2 text-center" th:text="${config.homeTitle.i18n(siteLanguage)}"></h1>
-			                                <div class="row p-2 mb-4"> 
-			                					<th:block th:with="path=${vertical} + '/welcome-header'">
-			                     					<th:block th:insert="~{inc/wiki.html}"></th:block>
-			                     				</th:block>
-			                				</div>		
-			                				
-			                        </span> 
-								</div>
-	                    </div>
+				<div class="row mb-3">							
+					<div class="">
+						<!--div class="col-lg-2 text-center">
+								<img class="mt-2" width="150" th:src="${config.homeLogo.i18n(siteLanguage)}">
+						</div-->
+						<h1 class="mb-3 text-center" th:text="${config.homeTitle.i18n(siteLanguage)}"></h1>
+
+						<p class="text-center">
+							<th:block th:with="path=${vertical} + '/welcome-header'">
+								<th:block th:insert="~{inc/wiki.html}"></th:block>
+							</th:block>
+						</p>
 					</div>
 				</div>
 						
-                <div class="row ">
+                <div class="container">
                 
-                	<!--/* Left column */-->                	
-                    <div class="col-lg-3 mb-3 mb-lg-0">
-                    
-                		<!--/* Guides */-->	
-						<div class="row card shadow mb-2">
-							<div class="card-header"><h2 class="h5">Les guides</h2></div>
-							<div class="card-body">
-								<ul class="list-group list-group-flush price-list">
-									<li class="list-group-item border-0"><img height="16" width="16" class="me-2" src="/icon/fnac.com" title="icône fnac"><a href="http://nudger.fr/televiseurs/impact-ecologique-televiseurs">Téléviseurs : quel impact écologique ?</a> </li>
-									<li class="list-group-item border-0"><span class="fas fa-box"></span><a href="https://nudger.fr/televiseurs/comment-trouver-televiseur-ecologique">Bien choisir sa TV ! </a></li>
-									<li class="list-group-item border-0"><span class="fas fa-clock"></span><a href="https://nudger.fr/televiseurs/quelle-difference-qled-oled">OLED, QLED, LCD : Les différences</a> </li>
-								
-								</ul>
-							</div>
-						</div>                    
-                                        
-				        <!--/* Ecological Filters */-->	
-						<div class="row card shadow mb-2 border-success text-secondary">
-							<div class="card-header"><h2 class="h5">Eco-Filtres</h2></div>
-							<div class="card-body">
-                    			<th:block th:insert="~{inc/vertical-filters-eco.html}"></th:block>
-								
-							</div>
-						</div>
-
-				        <!--/* Classical Filters */-->							
-						<div class="row card shadow mb-2">
-							<div class="card-header"><h2 class="h5">Filtres</h2></div>
-							<div class="card-body">
-                    			<th:block th:insert="~{inc/vertical-filters.html}"></th:block>
-								
+                	<hr>
+					<div class="mb-3">
+						<button class="btn btn-outline-primary mb-sm-3 mb-lg-0" type="button" data-bs-toggle="modal" data-bs-target="#modal-guides">Les guides</button>
+						<button class="btn btn-outline-primary mb-sm-3 mb-lg-0 mx-md-3" type="button" data-bs-toggle="modal" data-bs-target="#modal-eco-filtres">Eco-Filtres</button>
+						<button class="btn btn-outline-primary mb-lg-0 mb-sm-3" type="button" data-bs-toggle="modal" data-bs-target="#modal-filtres">Filtres</button>
+					</div>  
+					<hr>		
+					<div class="modal fade" id="modal-guides" tabindex="-1" role="dialog" aria-labelledby="modal-guides" aria-hidden="true">
+						<div class="modal-dialog modal-dialog-centered" role="document">
+							<div class="modal-content">
+								<div class="modal-header">
+									<h2 class="h6 modal-title">Les guides</h2>
+									<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+								</div>
+								<div class="modal-body">
+									<ul class="list-group list-group-flush price-list">
+										<li class="list-group-item border-0"><img height="16" width="16" class="me-2" src="/icon/fnac.com" title="icône fnac"><a href="http://nudger.fr/televiseurs/impact-ecologique-televiseurs">Téléviseurs : quel impact écologique ?</a> </li>
+										<li class="list-group-item border-0"><span class="fas fa-box"></span><a href="https://nudger.fr/televiseurs/comment-trouver-televiseur-ecologique">Bien choisir sa TV ! </a></li>
+										<li class="list-group-item border-0"><span class="fas fa-clock"></span><a href="https://nudger.fr/televiseurs/quelle-difference-qled-oled">OLED, QLED, LCD : Les différences</a> </li>
+									</ul>
+								</div>
+								<div class="modal-footer">
+									<button type="button" class="btn btn-link text-gray ms-auto" data-bs-dismiss="modal">Close</button>
+								</div>
 							</div>
 						</div>
-						
-						
-						  				        					
 					</div>
 
-					<!--/* Right column */-->
-					<div class="col-lg-9">
-						<div class="ms-1 row card shadow">
-							<th:block th:insert="~{inc/vertical-table.html}"></th:block>
+					<div class="modal fade" id="modal-eco-filtres" tabindex="-1" role="dialog" aria-labelledby="modal-eco-filtres" aria-hidden="true">
+						<div class="modal-dialog modal-dialog-centered" role="document">
+							<div class="modal-content">
+								<div class="modal-header">
+									<h2 class="h6 modal-title">Eco-Filtres</h2>
+									<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+								</div>
+								<div class="modal-body">
+									<th:block th:insert="~{inc/vertical-filters-eco.html}"></th:block>
+								</div>
+								<div class="modal-footer">
+									<button type="button" class="btn btn-link text-gray ms-auto" data-bs-dismiss="modal">Close</button>
+								</div>
+							</div>
 						</div>
-
 					</div>
+
+					<div class="modal fade" id="modal-filtres" tabindex="-1" role="dialog" aria-labelledby="modal-filtres" aria-hidden="true">
+						<div class="modal-dialog modal-dialog-centered" role="document">
+							<div class="modal-content">
+								<div class="modal-header">
+									<h2 class="h6 modal-title">Filtres</h2>
+									<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+								</div>
+								<div class="modal-body">
+									<th:block th:insert="~{inc/vertical-filters.html}"></th:block>
+								</div>
+								<div class="modal-footer">
+									<button type="button" class="btn btn-link text-gray ms-auto" data-bs-dismiss="modal">Close</button>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+
+				<!--/* Right column */-->
+				<div class="col-12 mb-3">
+					<th:block th:insert="~{inc/vertical-table.html}"></th:block>
 				</div>
         	</div>
        	</div>

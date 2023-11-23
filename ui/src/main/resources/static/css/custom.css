@@ -1,4 +1,4 @@
-* {
+/** {
 	font-family: 'League Spartan', sans-serif!important;
 }
 .fa, .far, .fas {
@@ -7,7 +7,7 @@
 .fab {
 	font-family: "Font Awesome 5 Brands"!important;
   }
-
+*/
 
 /***********************************************
 CUSTOM
@@ -177,4 +177,33 @@ Xwiki css
 
 .expandright:focus {
 	padding: 0 0 0 16px;
+}
+
+
+.bg-gray-200 {
+	background-color: #f1efe7!important;
+}
+
+.btn-primary {
+	background-color: #1e851a!important;
+	border-color: #1e851a!important;
+}
+
+.text-gray .h4 {
+	color: #1e851a!important
+}
+/* bandeau séparateur */
+.bg-primary .text-white-50 {
+	color: #1e851a!important
+}
+/* bandeau séparateur */
+
+/* les titre avec la font spartan */
+h1[class^="h"],
+h2[class^="h"],
+h3[class^="h"],
+h4[class^="h"],
+h5[class^="h"],
+h6[class^="h"] {
+	font-family: 'League Spartan', sans-serif!important;
 }
