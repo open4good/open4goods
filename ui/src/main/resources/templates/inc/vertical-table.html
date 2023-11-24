@@ -1,42 +1,45 @@
 
-<table id="tableProducts" class="table compact">
+<div class="table-responsive-sm">
+    <table id="tableProducts" class="table">
         <thead>
             <tr>
-                <th>Nom</th>
-                <th>Marque</th>
-                <th>Eco-score</th>
-                <th>Prix</th>
-                <th>Offres</th>
+                <th><small>Nom</small></th>
+                <th><small>Marque</small></th>
+                <th><small>Eco-score</small></th>
+                <th><small>Prix</small></th>
+                <th><small>Offres</small></th>
                 
                 <th:block th:each="filter : ${products.customFilters}">
 	                <th th:text="${filter.key.name.get(siteLanguage)}"></th>            
                 </th:block>
-                
-                
             </tr>
         </thead>
         <tbody>
-            <tr th:each="p : ${products.data}" >
-               
-               
-                <td th:if="${p.model()}"><a th:text="${p.model()}" th:href="'/'+${verticalPath}+ '/'+${p.names.name}"></a></td>
-                <td th:unless="${p.model()}"><a th:text="${p.bestName()}" th:href="'/'+${verticalPath}+ '/'+${p.names.name}"></a></td>
-               
-               
-               
-                <td th:text="${p.brand()}"></td>
-                <td></td>
-                <td th:text="${p.bestPrice.price}"></td>
-                <td th:text="${p.offersCount}"></td>
-				
-                <th:block th:each="filter : ${products.customFilters}">
-	                <td th:if="${p.attributes.aggregatedAttributes.get(filter.key.key)}" th:text="${p.attributes.aggregatedAttributes.get(filter.key.key).value }"></td>            
-	                <td th:unless="${p.attributes.aggregatedAttributes.get(filter.key.key)}"></td>            
+            <tr>
+                <td>
+                    <div th:each="p : ${products.data}" >
+                        
+                            <p th:if="${p.model()}"><a th:text="${p.model()}" th:href="'/'+${verticalPath}+ '/'+${p.names.name}"></a></p>
+                            <p th:unless="${p.model()}"><a th:text="${p.bestName()}" th:href="'/'+${verticalPath}+ '/'+${p.names.name}"></a></p>
+                        
+                        
+                        
+                            <p th:text="${p.brand()}"></p>
+                            <p></p>
+                            <p th:text="${p.bestPrice.price}"></p>
+                            <p th:text="${p.offersCount}"></p>
+                            
+                            <th:block th:each="filter : ${products.customFilters}">
+                                <p th:if="${p.attributes.aggregatedAttributes.get(filter.key.key)}" th:text="${p.attributes.aggregatedAttributes.get(filter.key.key).value }"></p>            
+                                <p th:unless="${p.attributes.aggregatedAttributes.get(filter.key.key)}"></p>            
+                            </th:block>
 
-                </th:block>
-
+                       
+                    </div>
+                </td>
             </tr>
  
         </tbody>
 
     </table>
+</div>
