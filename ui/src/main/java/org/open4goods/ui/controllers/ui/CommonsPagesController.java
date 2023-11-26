@@ -52,7 +52,7 @@ public class CommonsPagesController extends AbstractUiController {
 		return defaultModelAndView("opensearch", request).addObject("opensearch", config.getOpenSearchConfig());
 	}
 
-	@GetMapping("/compensation-carbone")
+	@GetMapping("/compensation-ecologique")
 	public ModelAndView compensation(final HttpServletRequest request) {
 		ModelAndView ret = defaultModelAndView(("compensation"), request);
 		ret.addObject("page","compensation écologique");
