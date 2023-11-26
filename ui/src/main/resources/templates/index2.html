@@ -7,8 +7,9 @@
 	<th:block th:insert="~{inc/header-meta.html}"></th:block>
     
 	<!-- Primary Meta Tags -->
-	<title>Comparateur écologique en ligne | Nudger</title>
-	<meta name="description" content="Nudger vous aide à comparer les scores écologiques des différents produits du marché. Utilisation gratuite !">
+	<title th:text="#{index.title}"></title>
+	<meta name="title" th:content="#{index.meta.title}">
+	<meta name="description" th:content="#{index.meta.description}">
 		
 	<!-- Open Graph / Facebook -->
 	<meta property="og:type" content="website">
@@ -29,7 +30,7 @@
 <body>
     
     <!--/* Navbar */-->
-	<th:block th:insert="~{inc/navbar-home.html}"></th:block>
+	<th:block th:insert="~{inc/navbar.html}"></th:block>
     <!--/* Loader */-->
     <th:block th:insert="~{inc/preloader.html}"></th:block>
 	
@@ -71,9 +72,9 @@
 			</div>
 		</section>
 
-		<section class="bg-white mt-4 text-center py-4">
-			<h1 class="mb-3">Consommons peu, consommons bien</h1>
-			<p class="lead mb-0">Un coup de main éthique et ouvert pour amoindrir l'impact de votre shopping en ligne.</p>
+		<section class="bg-primary mt-4 text-center py-4">
+			<h1 class="mb-3 text-white-50">Consommons peu, consommons bien</h1>
+			<p class="lead text-white mb-0">Un coup de main éthique et ouvert pour amoindrir l'impact de votre shopping en ligne.</p>
 		</section>
        
 
@@ -155,9 +156,9 @@
 
 		</div>
 
-		<section class="bg-white mt-4 text-center py-4">
-			<h1 class="mb-3">Les chiffres clés</h1>
-			<p class="lead mb-0">Avec animation, c'est plus funky</p>
+		<section class="bg-black text-center py-4">
+			<h1 class="mb-3 text-white-50">Les chiffres clés</h1>
+			<p class="lead text-white mb-0">Avec animation, c'est plus funky</p>
 		</section>
 
 	   <section class="container text-center py-4">
@@ -212,9 +213,9 @@
 			</div>
 	   </section>
 
-	   <section class="bg-white mt-4 text-center py-4">
-			<h1 class="mb-3">Nos catégories évaluées</h1>
-			<p class="lead mb-0">L'assurance de bien choisir</p>
+	   <section class="bg-black text-center py-4">
+			<h1 class="mb-3 text-white-50">Nos catégories évaluées</h1>
+			<p class="lead text-white mb-0">L'assurance de bien choisir</p>
 		</section>
 
 		<section class="container">
@@ -243,9 +244,9 @@
 		</section>
 
    
-		<section class="bg-white mt-4 text-center py-4">
-			<h1 class="mb-3">Notre philosophie : le bien commun</h1>
-			<p class="lead mb-0">Découvrez nos valeurs et nos atouts</p>
+		<section class="bg-black mt-4 text-center py-4">
+			<h1 class="mb-3 text-white-50">Notre philosophie : le bien commun</h1>
+			<p class="lead text-white mb-0">Découvrez nos valeurs et nos atouts</p>
 		</section>
 	   
 	   
