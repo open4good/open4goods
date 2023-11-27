@@ -150,15 +150,15 @@ public class Score  implements Validable {
 		Long percent = percent();
 		
 		if (percent <= 20.0) {
-			return "A";
+			return "E";
 		} else if (percent <= 40.0) {
-			return "B";
+			return "D";
 		}else if (percent <= 60.0) {
 			return "C";
 		}else if (percent <= 80.0) {
-			return "D";
+			return "B";
 		} else {
-			return "E";
+			return "A";
 		}
 	}
 
