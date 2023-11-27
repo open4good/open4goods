@@ -233,6 +233,14 @@ public class Product implements Standardisable {
 		return ret;
 	}
 	
+	/**
+	 * 
+	 * @return the ecoscore or null
+	 */
+	public Score ecoscore() {
+		// TODO : const
+		return scores.get("ECOSCORE");
+	}
 	
 	/**
 	 *
