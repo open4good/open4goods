@@ -52,13 +52,14 @@
 				<!-- Score -->
 				<div class="tab-pane fade active show" id="panel-ecoscore"	role="tabpanel" aria-labelledby="panel-ecoscore">					
 					<div>
-						<div class="text-center">				           
-				           <img class="mt-4"  width="350px" src="/icons/ecoscore.png">
+						<div th:if="${product.ecoscore}" class="text-center">				           
+				           <img class="mt-4"  width="350px" th:alt="'Ecoscore : ' + ${product.ecoscore.letter()}" th:title="'éco-score : ' + ${product.ecoscore.letter()}" th:src="'/icons/ecoscore/scoring-'+${product.ecoscore.letter()}+'.png'">
 						</div>
 						<div  class="m-5">						
 							<div th:each="score : ${product.realScores()}" class="progress-wrapper">
-							
+								
 								<div class="progress-info">
+									<span><img height="50" th:src="'/icons/ecoscore/'+${score.letter()}+'.png'"></span>
 									<span  class="h4 help-pointer progress-tooltip" data-bs-toggle="tooltip" data-bs-placement="top" th:title="#{'ecoscore.' +${score.name}+'.tooltip'(${score.absValue()}, ${score.relValue()}, ${product.attributes.aggregatedAttributes.get(score.name)})}" th:classappend="'bg-'+${score.colorClassName()}" th:text="#{'score-'+${score.name}}"></span>
 									<div class="progress-percentage">
 										<!-- 

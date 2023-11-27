@@ -139,6 +139,28 @@ public class Score  implements Validable {
 		}
 	}
 
+	
+	
+	
+	/**
+	 * Generate the letter score 
+	 * @return
+	 */
+	public String letter() {
+		Long percent = percent();
+		
+		if (percent <= 20.0) {
+			return "A";
+		} else if (percent <= 40.0) {
+			return "B";
+		}else if (percent <= 60.0) {
+			return "C";
+		}else if (percent <= 80.0) {
+			return "D";
+		} else {
+			return "E";
+		}
+	}
 
 	@JsonIgnore
 	public boolean is1() {
