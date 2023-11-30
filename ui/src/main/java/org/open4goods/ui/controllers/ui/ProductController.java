@@ -3,6 +3,7 @@ package org.open4goods.ui.controllers.ui;
 import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.Locale;
 
 import org.apache.commons.lang3.StringUtils;
@@ -132,7 +133,7 @@ public class ProductController extends AbstractUiController {
 			HttpServletResponse response) {
 		
 		// Getting the product name
-		String path= URLEncoder.encode(request.getServletPath().substring(1));
+		String path= URLEncoder.encode(request.getServletPath().substring(1), StandardCharsets.UTF_8);
 		
 		
 		// Retrieve the Product

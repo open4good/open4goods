@@ -71,7 +71,7 @@ public class ShippingTimeParser {
 
 
 
-		if (!NumberUtils.isNumber(tmp)) {
+		if (!NumberUtils.isCreatable(tmp)) {
 			throw new InvalidParameterException("Not a numeric parsable ShippingTime value : " + val);
 		}
 

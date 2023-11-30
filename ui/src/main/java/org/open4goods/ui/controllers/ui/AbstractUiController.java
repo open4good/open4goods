@@ -10,6 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
+import org.springframework.core.env.Profiles;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -60,7 +61,7 @@ public class AbstractUiController {
 
 		ret.addObject("config",config);
 
-		ret.addObject("dev", env.acceptsProfiles("dev","devsec"));
+		ret.addObject("dev", env.acceptsProfiles(Profiles.of("dev","devsec")));
 
 		ret.addObject("url",request.getRequestURL().toString() );
 

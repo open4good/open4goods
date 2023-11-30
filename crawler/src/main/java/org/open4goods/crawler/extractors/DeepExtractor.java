@@ -100,11 +100,11 @@ public class DeepExtractor extends Extractor {
 
 		while (more) {
 
-			if (!StringUtils.isEmpty(ec.getParameterPage())) {
+			if (StringUtils.hasLength(ec.getParameterPage())) {
 				targetUrl = getPaginatedUrl(targetUrl,ec.getParameterPage(),current);
 			}
 
-			if (!StringUtils.isEmpty(ec.getPathIncrementVariablePrefix())) {
+			if (StringUtils.hasLength(ec.getPathIncrementVariablePrefix())) {
 				targetUrl = getPathIncrementVariable(targetUrl,ec.getPathIncrementVariablePrefix(),ec.getPathIncrementVariableSuffix(), current);
 			}
 
@@ -151,7 +151,7 @@ public class DeepExtractor extends Extractor {
 
 
 
-			if (StringUtils.isEmpty(ec.getPathIncrementVariablePrefix()) && StringUtils.isEmpty(ec.getParameterPage())) {
+			if (!StringUtils.hasLength(ec.getPathIncrementVariablePrefix()) && !StringUtils.hasLength(ec.getParameterPage())) {
 				// If no parameter page url, this is a one shot deep crawling
 				more = false;
 			}
@@ -184,7 +184,7 @@ public class DeepExtractor extends Extractor {
 		b.append(parsedUrl.getScheme());
 		b.append("://");
 		b.append(parsedUrl.getHost());
-		if (StringUtils.isEmpty(parsedUrl.getPath())) {
+		if (!StringUtils.hasLength(parsedUrl.getPath())) {
 			b.append("/");
 		} else {
 			b.append(parsedUrl.getPath());

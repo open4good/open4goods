@@ -133,18 +133,14 @@ public class EvaluationService {
 		String[] frags = var.trim().toUpperCase().split("\\.");
 
 		if (frags.length == 1) {
-			switch (frags[0]) {
-			case "BRAND":
-				return data.brand();
-			case "UID":
-			case "MODEL":
-			case "BRANDUID":
-			case "BRAND_UID":
-				return data.model();
-			default:
-				logger.warn("Var {} is unknown", var);
-				return "!!${" + var + "}!!";
-			}
+            return switch (frags[0]) {
+                case "BRAND" -> data.brand();
+                case "UID", "MODEL", "BRANDUID", "BRAND_UID" -> data.model();
+                default -> {
+                    logger.warn("Var {} is unknown", var);
+                    yield "!!${" + var + "}!!";
+                }
+            };
 
 			////////////////////////////////////////////
 			// Simple form :

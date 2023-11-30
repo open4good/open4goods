@@ -23,9 +23,12 @@ public class IndexationController {
 
 	private static final Logger logger = LoggerFactory.getLogger(IndexationController.class);
 
-	@Autowired
-	private DataFragmentStoreService storeService;
 
+	private final DataFragmentStoreService storeService;
+
+	public IndexationController(DataFragmentStoreService storeService) {
+		this.storeService = storeService;
+	}
 
 	@PostMapping(path = UrlConstants.API_INDEXATION_ENDPOINT)
 	//TODO(perf,0.75, p2) : could optimize with "bulk" frow crawler

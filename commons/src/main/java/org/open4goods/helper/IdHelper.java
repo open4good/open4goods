@@ -9,8 +9,8 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import org.apache.commons.codec.binary.Base64;
-import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.text.StringEscapeUtils;
 import org.open4goods.exceptions.InvalidParameterException;
 import org.open4goods.model.data.DataFragment;
 import org.slf4j.Logger;

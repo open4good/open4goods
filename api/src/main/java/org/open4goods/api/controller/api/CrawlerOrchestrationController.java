@@ -45,13 +45,20 @@ import jakarta.validation.constraints.NotBlank;
 public class CrawlerOrchestrationController {
 
 
-	private @Autowired SerialisationService serialisationService;
+	private final SerialisationService serialisationService;
 
-	private @Autowired FetcherOrchestrationService fetcherOrchestrationService;
+	private final FetcherOrchestrationService fetcherOrchestrationService;
 
-	private @Autowired DataSourceConfigService datasourceConfigService;
+	private final DataSourceConfigService datasourceConfigService;
 
-	private @Autowired DataFragmentStoreService dataFragmentStoreService;
+	private final DataFragmentStoreService dataFragmentStoreService;
+
+	public CrawlerOrchestrationController(SerialisationService serialisationService, FetcherOrchestrationService fetcherOrchestrationService, DataSourceConfigService datasourceConfigService, DataFragmentStoreService dataFragmentStoreService) {
+		this.serialisationService = serialisationService;
+		this.fetcherOrchestrationService = fetcherOrchestrationService;
+		this.dataFragmentStoreService = dataFragmentStoreService;
+		this.datasourceConfigService = datasourceConfigService;
+	}
 
 	@PostMapping(path=UrlConstants.MASTER_API_CRAWLERS  + UrlConstants.MASTER_API_CRAWLER_TRIGGER_SUFFIX+"/csv/all")
 	@Operation(summary="Run a all CSV datasources retrieving against best availlables node")

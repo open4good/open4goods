@@ -70,8 +70,7 @@ public class Resource  implements Validable {
 	@Override
 	public boolean equals(final Object obj) {
 
-		if (obj instanceof Resource) {
-			final Resource o = (Resource) obj;
+		if (obj instanceof Resource o) {
 			return getUrl().equals(o.getUrl());
 		}
 

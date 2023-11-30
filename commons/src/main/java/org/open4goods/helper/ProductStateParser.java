@@ -12,26 +12,12 @@ public class ProductStateParser {
 		}
 		val = val.trim().toUpperCase();
 
-		switch (val) {
-		case "NEUF":
-		case "NEW":
-		case "PRODUIT NEUF":
-		case "PRODUIT NEW":
-		case "HTTP://SCHEMA.ORG/NEWCONDITION":
-			return ProductState.NEW;
-
-		case "PRODUIT RECONDITIONNÉ":
-		case "RECONDITIONNÉ":
-		case "USED":
-		case "OCCASION":
-		case "VERY GOOD":
-		case "COLLECTION":
-			return ProductState.OCCASION;
-
-		default:
-			throw new InvalidParameterException("Cannot parse ProductState value : " + val);
-
-		}
+        return switch (val) {
+            case "NEUF", "NEW", "PRODUIT NEUF", "PRODUIT NEW", "HTTP://SCHEMA.ORG/NEWCONDITION" -> ProductState.NEW;
+            case "PRODUIT RECONDITIONNÉ", "RECONDITIONNÉ", "USED", "OCCASION", "VERY GOOD", "COLLECTION" ->
+                    ProductState.OCCASION;
+            default -> throw new InvalidParameterException("Cannot parse ProductState value : " + val);
+        };
 
 	}
 }

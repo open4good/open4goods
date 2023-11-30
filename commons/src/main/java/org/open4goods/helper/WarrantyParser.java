@@ -30,7 +30,7 @@ public class WarrantyParser {
 		}
 
 
-		if (!NumberUtils.isNumber(tmp)) {
+		if (!NumberUtils.isCreatable(tmp)) {
 			throw new InvalidParameterException("Not a numeric parsable Warranty value : " + tmp);
 		}
 

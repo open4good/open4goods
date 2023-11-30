@@ -2,6 +2,7 @@
 package org.open4goods.crawler.services;
 
 import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
@@ -92,7 +93,7 @@ public class DataFragmentCompletionService {
 
 		// If data is a computed affiliation link
 		if (!StringUtils.isEmpty(datasourceProperties.getAffiliationLinkPrefix())) {
-			o.setAffiliatedUrl(datasourceProperties.getAffiliationLinkPrefix() + URLEncoder.encode(o.getUrl()));
+			o.setAffiliatedUrl(datasourceProperties.getAffiliationLinkPrefix() + URLEncoder.encode(o.getUrl(), StandardCharsets.UTF_8));
 
 			// The suffix
 			if (!StringUtils.isEmpty(datasourceProperties.getAffiliationLinkSuffix())) {

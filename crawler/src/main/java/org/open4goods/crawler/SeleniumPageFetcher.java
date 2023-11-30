@@ -62,7 +62,7 @@ public class SeleniumPageFetcher extends PageFetcher {
 
 		String content = fetchingService.getHtmlContent(url);
 		fetchResult.setStatusCode(200);
-		fetchResult.setEntity(new StringEntity(content, ContentType.TEXT_HTML.toString(), crawlProperties.getSeleniumPageEncoding()));
+		fetchResult.setEntity(new StringEntity(content, ContentType.create(ContentType.TEXT_HTML.toString(), crawlProperties.getSeleniumPageEncoding())));
 
 		return fetchResult;
 	}
