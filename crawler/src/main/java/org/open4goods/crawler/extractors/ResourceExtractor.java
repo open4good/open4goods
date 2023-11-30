@@ -5,7 +5,7 @@ import java.util.Locale;
 
 import javax.xml.xpath.XPathExpressionException;
 
-import org.apache.commons.lang3.StringEscapeUtils;
+import org.apache.commons.text.StringEscapeUtils;
 import org.open4goods.config.yml.datasource.DataSourceProperties;
 import org.open4goods.crawler.services.fetching.DataFragmentWebCrawler;
 import org.open4goods.exceptions.ValidationException;

@@ -1,6 +1,7 @@
 package org.open4goods.aggregation.services.aggregation.realtime;
 
 import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.LinkedHashSet;
 import java.util.stream.Collectors;
 
@@ -48,7 +49,7 @@ public class NamesAggregationService extends AbstractRealTimeAggregationService 
 		output.getNames().getOfferNames().addAll(df.getNames().stream()
 				.map(this::normalizeName).collect(Collectors.toSet()));
 
-		output.getNames().setName(URLEncoder.encode(computeProductName(output)));
+		output.getNames().setName(URLEncoder.encode(computeProductName(output), StandardCharsets.UTF_8));
 
 
 	}

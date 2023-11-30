@@ -29,9 +29,14 @@ import jakarta.validation.constraints.NotBlank;
 @PreAuthorize("hasAuthority('"+RolesConstants.ROLE_ADMIN+"')")
 public class DataSourceConfigurationsController {
 
-	private @Autowired DataSourceConfigService datasourceConfigService;
+	private final DataSourceConfigService datasourceConfigService;
 
-	public @Autowired IndexationService indexationService;
+	public final IndexationService indexationService;
+
+	public DataSourceConfigurationsController(DataSourceConfigService datasourceConfigService, IndexationService indexationService) {
+		this.datasourceConfigService = datasourceConfigService;
+		this.indexationService = indexationService;
+	}
 
 	@GetMapping(path=UrlConstants.MASTER_API_DATASOURCES_CONFIG)
 	@Operation(summary="List all availlable datasource configurations")

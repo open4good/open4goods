@@ -87,7 +87,7 @@ public class AffiliatedController {
 
 		// Redirecting user pageSize the offer
 		RedirectView rv = new RedirectView();
-		rv.setStatusCode(HttpStatus.MOVED_TEMPORARILY);
+		rv.setStatusCode(HttpStatus.FOUND);
 		rv.setUrl(aff.getUrl());
 		ModelAndView mv = new ModelAndView(rv);
 		return mv;

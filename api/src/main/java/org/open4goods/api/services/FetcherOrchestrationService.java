@@ -2,6 +2,7 @@ package org.open4goods.api.services;
 
 import java.net.URL;
 import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -283,7 +284,7 @@ public class FetcherOrchestrationService {
 
 		try {
 			final RequestEntity<DataSourceProperties> requestEntity = RequestEntity
-					.post(new URL(electedNode.getNodeConfig().getNodeUrl() + UrlConstants.CRAWLER_API_DIRECT_URL_REQUEST_FETCHING  +"?"+UrlConstants.URL_PARAMETER + "=" + URLEncoder.encode( url)).toURI())
+					.post(new URL(electedNode.getNodeConfig().getNodeUrl() + UrlConstants.CRAWLER_API_DIRECT_URL_REQUEST_FETCHING  +"?"+UrlConstants.URL_PARAMETER + "=" + URLEncoder.encode( url, StandardCharsets.UTF_8)).toURI())
 					.contentType(MediaType.APPLICATION_JSON)
 					.body(p);
 

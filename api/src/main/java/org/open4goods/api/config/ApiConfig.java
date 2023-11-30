@@ -67,11 +67,16 @@ import io.swagger.v3.oas.models.security.SecurityScheme;
 @Configuration
 public class ApiConfig {
 
-	@Autowired ApiProperties apiProperties;
+	private final ApiProperties apiProperties;
 	private static final Logger logger = LoggerFactory.getLogger(ApiConfig.class);
 
 
-	protected @Autowired Environment env;
+	protected final Environment env;
+
+	public ApiConfig(ApiProperties apiProperties, Environment env) {
+		this.env =	env;
+		this.apiProperties = apiProperties;
+	}
 
 	/**
 	 * Various generation (json, yaml, binary)

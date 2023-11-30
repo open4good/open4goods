@@ -65,8 +65,7 @@ public class Attribute implements Validable,IAttribute {
 	//	 */
 	public boolean equals(final Object obj) {
 
-		if (obj instanceof Attribute) {
-			final Attribute o = (Attribute) obj;
+		if (obj instanceof Attribute o) {
 			return Objects.equals(name, o.getName());
 		}
 		return false;
