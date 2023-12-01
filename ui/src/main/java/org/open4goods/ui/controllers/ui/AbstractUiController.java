@@ -1,6 +1,5 @@
 package org.open4goods.ui.controllers.ui;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.Locale;
 import java.util.Random;
@@ -14,6 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
+import org.springframework.core.env.Profiles;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.core.io.support.ResourcePatternResolver;
@@ -35,6 +35,7 @@ public class AbstractUiController {
 	private @Autowired UiConfig config;
 	private @Autowired XwikiService xwikiService;
 
+	
 
 	
 	// Used to load Datasource configurations from classpath
@@ -42,7 +43,7 @@ public class AbstractUiController {
 	private static final ResourcePatternResolver resolver = new PathMatchingResourcePatternResolver(cl);
 	private  int maxImg;
 	
-	// TODO :  in a service (hot, controllers are multiply ionstanciated)
+	// TODO :  in a service (hot, controllers are multiply instanciated)
 	@PostConstruct
 	public  void init() {
 		try {
@@ -53,11 +54,9 @@ public class AbstractUiController {
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		}
-		
-		
-		
+		}	
 	}
+	
 	
 	/**
 	 * Instanciates a ModelAndView and prefills pageNumber conf and pageNumber httpRequest
@@ -92,13 +91,9 @@ public class AbstractUiController {
 
 		ret.addObject("config",config);
 
-		ret.addObject("dev", env.acceptsProfiles("dev","devsec"));
+		ret.addObject("dev", env.acceptsProfiles(Profiles.of("dev","devsec")));
 
 		ret.addObject("url",request.getRequestURL().toString() );
-		
-		ret.addObject("loaderImg",loaderImage() );
-		
-		
 
 		ret.addObject("baseUrl",config.getBaseUrl(request.getLocale()));
 
@@ -131,7 +126,6 @@ public class AbstractUiController {
 		return ret;
 	}
 	
-	
 	public String loaderImage() {
 		Random random = new Random();
 		int nb;
@@ -139,5 +133,4 @@ public class AbstractUiController {
 		return "/assets/img/loader/"+nb+".jpg";
 		
 	}
-	
 }
