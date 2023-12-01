@@ -98,6 +98,8 @@ public class AbstractUiController {
 		ret.addObject("baseUrl",config.getBaseUrl(request.getLocale()));
 
 
+		ret.addObject("loaderImg",loaderImage() );
+		
 		ret.addObject("gaId",config.getWebConfig().getGoogleAnalyticsId());
 
 		ret.addObject("wiki",xwikiService);
