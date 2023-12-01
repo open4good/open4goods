@@ -37,6 +37,8 @@ d.addEventListener("DOMContentLoaded", function (event) {
         setTimeout(function () {
             preloader.classList.add('show');
             $( "#body").trigger( "tplLoaded");
+            $("#preloader-img").fadeOut(200);
+            //alert($(".preloader-img"));
         }, 1500);
     }
 
