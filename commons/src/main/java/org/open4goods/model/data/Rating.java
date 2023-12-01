@@ -112,8 +112,7 @@ public class Rating  implements Validable, Standardisable {
 
 	@Override
 	public boolean equals(final Object obj) {
-		if (obj instanceof Rating) {
-			final Rating o = (Rating) obj;
+		if (obj instanceof Rating o) {
 			return Objects.equals(value, o.getValue()) && Objects.equals(min, o.getMin())
 					&& Objects.equals(max, o.getMax())
 					//					&& Objects.equals(this.label, o.getLabel())
@@ -137,21 +136,17 @@ public class Rating  implements Validable, Standardisable {
 
 	public boolean is(Integer number) {
 
-		switch (number) {
-		case 1:
-			return is1();
-		case 2:
-			return is2();
-		case 3:
-			return is3();
-		case 4:
-			return is4();
-		case 5:
-			return is5();
-		default:
-			LOGGER.warn("Cannot get rating is({})",number);
-			return false;
-		}
+        return switch (number) {
+            case 1 -> is1();
+            case 2 -> is2();
+            case 3 -> is3();
+            case 4 -> is4();
+            case 5 -> is5();
+            default -> {
+                LOGGER.warn("Cannot get rating is({})", number);
+                yield false;
+            }
+        };
 	}
 
 	public void addTag(RatingType rType) {

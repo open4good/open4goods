@@ -23,28 +23,13 @@ public class InStockParser {
 			return InStock.INSTOCK;
 		}
 
-		switch (val) {
-		case "1":
-		case "TRUE":
-		case "INSTOCK":
-		case "HTTP://SCHEMA.ORG/INSTOCK":
-		case "HTTPS://SCHEMA.ORG/INSTOCK":
-
-			return InStock.INSTOCK;
-
-		case "0":
-		case "FALSE":
-		case "HTTP://SCHEMA.ORG/OUTOFSTOCK":
-		case "HTTP://SCHEMA.ORG/PREORDER":
-		case "HTTP://SCHEMA.ORG/DISCONTINUED":
-			return InStock.OUTOFSTOCK;
-
-		case "UNKNOWN":
-			return InStock.UNKNOWN;
-		default:
-			throw new InvalidParameterException("Cannot parse inStock value : " + val);
-
-		}
+        return switch (val) {
+            case "1", "TRUE", "INSTOCK", "HTTP://SCHEMA.ORG/INSTOCK", "HTTPS://SCHEMA.ORG/INSTOCK" -> InStock.INSTOCK;
+            case "0", "FALSE", "HTTP://SCHEMA.ORG/OUTOFSTOCK", "HTTP://SCHEMA.ORG/PREORDER", "HTTP://SCHEMA.ORG/DISCONTINUED" ->
+                    InStock.OUTOFSTOCK;
+            case "UNKNOWN" -> InStock.UNKNOWN;
+            default -> throw new InvalidParameterException("Cannot parse inStock value : " + val);
+        };
 
 	}
 }

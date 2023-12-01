@@ -98,8 +98,7 @@ public class Comment  implements Validable, Standardisable {
 
 	@Override
 	public boolean equals(final Object obj) {
-		if (obj instanceof Comment) {
-			final Comment o = (Comment) obj;
+		if (obj instanceof Comment o) {
 			return Objects.equals(title, o.getTitle()) && Objects.equals(description, o.getDescription())
 					&& Objects.equals(date, o.getDate()) && Objects.equals(author, o.getAuthor());
 		}

@@ -61,8 +61,7 @@ public class Question  implements Validable {
 
 	@Override
 	public boolean equals(final Object obj) {
-		if (obj instanceof Question) {
-			final Question o = (Question) obj;
+		if (obj instanceof Question o) {
 			return  Objects.equals(title, o.getTitle())
 					&& Objects.equals(description, o.getDescription()) && Objects.equals(author, o.getAuthor())
 					&& Objects.equals(answers, o.getAnswers());

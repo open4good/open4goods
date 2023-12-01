@@ -41,8 +41,7 @@ public class Localised implements Validable {
 
 	@Override
 	public boolean equals(final Object obj) {
-		if (obj instanceof Localised) {
-			final Localised o = (Localised) obj;
+		if (obj instanceof Localised o) {
 			return Objects.equals(getText(), o.getText()) && Objects.equals(getLanguage(), o.getLanguage());
 		}
 

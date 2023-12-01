@@ -25,12 +25,16 @@ import org.springframework.web.bind.annotation.RestController;
 @PreAuthorize("hasAuthority('" + RolesConstants.ROLE_ADMIN + "')")
 public class BatchController {
 
-	@Autowired
-	private BatchService batchService;
+	private final BatchService batchService;
 
-	@Autowired ProductRepository aggDataRepository;
+	private final ProductRepository aggDataRepository;
 
 	private static final Logger logger = LoggerFactory.getLogger(BatchController.class);
+
+	public BatchController(BatchService batchService, ProductRepository aggDataRepository) {
+		this.batchService = batchService;
+		this.aggDataRepository = aggDataRepository;
+	}
 
 //
 //	@GetMapping("/batch/verticals/associateFromCategory")

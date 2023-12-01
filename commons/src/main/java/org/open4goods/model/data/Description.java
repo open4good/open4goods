@@ -60,8 +60,7 @@ public class Description implements Validable {
 	@Override
 	public boolean equals(final Object obj) {
 
-		if (obj instanceof Description) {
-			final Description o = (Description) obj;
+		if (obj instanceof Description o) {
 			return Objects.equals(content, o.getContent());
 		}
 

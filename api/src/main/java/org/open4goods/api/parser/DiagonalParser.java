@@ -42,8 +42,8 @@ public class DiagonalParser extends AttributeParser {
 
 		if (firstTryOffset != -1) {
 			final String firstTryVal = attrVal.substring(0,firstTryOffset).trim();
-			if (NumberUtils.isNumber(firstTryVal)) {
-				cmVal = Double.valueOf(firstTryVal) / 10.0;
+			if (NumberUtils.isCreatable(firstTryVal)) {
+				cmVal = Double.parseDouble(firstTryVal) / 10.0;
 			}
 		}
 
@@ -53,8 +53,8 @@ public class DiagonalParser extends AttributeParser {
 
 			if (firstTryOffset != -1) {
 				final String firstTryVal = attrVal.substring(0,firstTryOffset).trim();
-				if (NumberUtils.isNumber(firstTryVal)) {
-					cmVal = Double.valueOf(firstTryVal) / 10.0;
+				if (NumberUtils.isCreatable(firstTryVal)) {
+					cmVal = Double.parseDouble(firstTryVal) / 10.0;
 				}
 			}
 		}
@@ -66,8 +66,8 @@ public class DiagonalParser extends AttributeParser {
 
 			if (firstTryOffset != -1) {
 				final String firstTryVal = attrVal.substring(0,firstTryOffset).trim();
-				if (NumberUtils.isNumber(firstTryVal)) {
-					cmVal = Double.valueOf( firstTryVal);
+				if (NumberUtils.isCreatable(firstTryVal)) {
+					cmVal = Double.valueOf(firstTryVal);
 				}
 			}
 		}
@@ -81,7 +81,7 @@ public class DiagonalParser extends AttributeParser {
 
 			if (firstTryOffset != -1) {
 				final String firstTryVal = attrVal.substring(0,firstTryOffset).trim();
-				if (NumberUtils.isNumber(firstTryVal)) {
+				if (NumberUtils.isCreatable(firstTryVal)) {
 					pouceVal = Double.valueOf(firstTryVal);
 				}
 			}
@@ -93,7 +93,7 @@ public class DiagonalParser extends AttributeParser {
 
 			if (firstTryOffset != -1) {
 				final String firstTryVal = attrVal.substring(0,firstTryOffset).trim();
-				if (NumberUtils.isNumber(firstTryVal)) {
+				if (NumberUtils.isCreatable(firstTryVal)) {
 					pouceVal = Double.valueOf(firstTryVal);
 				}
 			}
@@ -114,7 +114,7 @@ public class DiagonalParser extends AttributeParser {
 		//		24"
 		if (null == pouceVal && null == cmVal) {
 
-			if (NumberUtils.isNumber(attrVal)) {
+			if (NumberUtils.isCreatable(attrVal)) {
 				////////////////////////////
 				// CASE 1 : A simple numeric
 				// Have to look in attr title for an indication

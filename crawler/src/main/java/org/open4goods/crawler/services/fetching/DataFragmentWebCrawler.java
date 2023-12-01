@@ -383,7 +383,7 @@ public class DataFragmentWebCrawler extends WebCrawler {
 		// Getting the default locale for "default" price parsing
 		Locale locale;
 		if (!StringUtils.isEmpty(page.getLanguage())) {
-			locale = new Locale(page.getLanguage());
+			locale = Locale.of(page.getLanguage());
 		} else {
 			locale = Locale.getDefault(Locale.Category.FORMAT);
 		}

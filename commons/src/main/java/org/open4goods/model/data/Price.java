@@ -77,8 +77,7 @@ public class Price implements Validable, Standardisable, Comparable<Double> {
 			return true;
 		}
 
-		if (obj instanceof Price) {
-			final Price p = (Price) obj;
+		if (obj instanceof Price p) {
 			return Objects.equals(getCurrency(), p.getCurrency()) && Objects.equals(getPrice(), p.getPrice());
 
 		}

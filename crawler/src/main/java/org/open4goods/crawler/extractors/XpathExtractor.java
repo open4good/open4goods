@@ -5,8 +5,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map.Entry;
 
-import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.text.StringEscapeUtils;
 import org.open4goods.config.yml.datasource.DataSourceProperties;
 import org.open4goods.config.yml.datasource.ExtractorConfig;
 import org.open4goods.config.yml.datasource.RatingConfig;
