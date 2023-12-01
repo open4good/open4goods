@@ -13,7 +13,7 @@ public class ShippingCostParser {
 			return 0.0;
 		}
 
-		if (!NumberUtils.isNumber(tmp)) {
+		if (!NumberUtils.isCreatable(tmp)) {
 			throw new InvalidParameterException("Not a numeric parsable shipping cost value : " + val);
 		}
 

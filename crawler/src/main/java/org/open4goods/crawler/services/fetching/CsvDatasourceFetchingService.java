@@ -4,7 +4,9 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.net.URLDecoder;
+import java.net.URLEncoder;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -17,8 +19,8 @@ import java.util.concurrent.Executors;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.text.StringEscapeUtils;
 import org.open4goods.config.yml.datasource.CsvDataSourceProperties;
 import org.open4goods.config.yml.datasource.DataSourceProperties;
 import org.open4goods.config.yml.datasource.HtmlDataSourceProperties;
@@ -532,7 +534,7 @@ public class CsvDatasourceFetchingService extends DatasourceFetchingService {
 			if (!StringUtils.isEmpty(csvProperties.getExtractUrlFromParam())) {
 				String u = getFromCsvRow(item, csvProperties.getUrl());
 				final UriComponents parsedUrl = UriComponentsBuilder.fromUriString(u).build();
-				u = URLDecoder.decode(parsedUrl.getQueryParams().getFirst(csvProperties.getExtractUrlFromParam()));
+				u = URLDecoder.decode(parsedUrl.getQueryParams().getFirst(csvProperties.getExtractUrlFromParam()), StandardCharsets.UTF_8);
 				p.setUrl(u);
 			} else {
 				p.setUrl(getFromCsvRow(item, csvProperties.getUrl()));

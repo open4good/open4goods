@@ -80,8 +80,7 @@ public class SourcedRating extends Rating{
 
 	@Override
 	public boolean equals(final Object obj) {
-		if (obj instanceof SourcedRating) {
-			final SourcedRating o = (SourcedRating) obj;
+		if (obj instanceof SourcedRating o) {
 			return Objects.equals(getValue(), o.getValue()) && Objects.equals(getMin(), o.getMin())
 					&& Objects.equals(getMax(), o.getMax())
 					//					&& Objects.equals(this.label, o.getLabel())

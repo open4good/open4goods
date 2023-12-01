@@ -41,8 +41,7 @@ public class ProsOrCons  implements Validable {
 
 	@Override
 	public boolean equals(final Object obj) {
-		if (obj instanceof ProsOrCons) {
-			final ProsOrCons o = (ProsOrCons) obj;
+		if (obj instanceof ProsOrCons o) {
 			return Objects.equals(label, o.getLabel()) && Objects.equals(author, o.getAuthor());
 		}
 

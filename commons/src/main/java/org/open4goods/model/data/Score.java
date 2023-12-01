@@ -93,8 +93,7 @@ public class Score  implements Validable {
 
 	@Override
 	public boolean equals(final Object obj) {
-		if (obj instanceof Score) {
-			final Score o = (Score) obj;
+		if (obj instanceof Score o) {
 			return Objects.equals(name, o.getName()) ;
 		}
 
@@ -122,21 +121,17 @@ public class Score  implements Validable {
 
 	public boolean is(Integer number) {
 
-		switch (number) {
-		case 1:
-			return is1();
-		case 2:
-			return is2();
-		case 3:
-			return is3();
-		case 4:
-			return is4();
-		case 5:
-			return is5();
-		default:
-			LOGGER.warn("Cannot get rating is({})",number);
-			return false;
-		}
+        return switch (number) {
+            case 1 -> is1();
+            case 2 -> is2();
+            case 3 -> is3();
+            case 4 -> is4();
+            case 5 -> is5();
+            default -> {
+                LOGGER.warn("Cannot get rating is({})", number);
+                yield false;
+            }
+        };
 	}
 
 	

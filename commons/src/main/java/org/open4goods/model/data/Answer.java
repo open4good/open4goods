@@ -49,8 +49,7 @@ public class Answer  implements Validable {
 
 	@Override
 	public boolean equals(final Object obj) {
-		if (obj instanceof Answer) {
-			final Answer o = (Answer) obj;
+		if (obj instanceof Answer o) {
 			return Objects.equals(answer, o.getAnswer());
 		}
 

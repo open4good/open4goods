@@ -15,13 +15,13 @@ import org.open4goods.config.yml.datasource.DataSourceProperties;
 import org.open4goods.config.yml.datasource.HtmlDataSourceProperties;
 import org.open4goods.exceptions.InvalidParameterException;
 import org.open4goods.model.constants.CacheConstants;
+import org.quartz.CronExpression;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.core.io.support.ResourcePatternResolver;
-import org.springframework.scheduling.support.CronSequenceGenerator;
 
 /**
  * This service is in charge to provide the DataSource configurations. and informations about them. For now stored in the app config,
@@ -170,9 +170,8 @@ public class DataSourceConfigService {
 	 */
 	public Date getNextDateForCron(final String cron) {
 		try {
-
-			final CronSequenceGenerator generator = new CronSequenceGenerator(cron);
-			return generator.next(new Date());
+			final CronExpression cronExpression = new CronExpression(cron);
+			cronExpression.getNextValidTimeAfter(new Date());
 		} catch (final Exception e) {
 			logger.warn("Error while generating date from cron ", e);
 		}

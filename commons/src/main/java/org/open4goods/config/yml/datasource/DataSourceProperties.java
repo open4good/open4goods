@@ -246,23 +246,14 @@ public class DataSourceProperties {
 
 		}
 
-		switch (cronRefresh.toUpperCase()) {
-		case TimeConstants.CRON_DAY:
-			c = "0 " + getRandomMinute() + " " + getRandomHour() + " ? * *";
-			break;
-
-		case TimeConstants.CRON_WEEK:
-			c = "0 " + getRandomMinute() + " " + getRandomHour() + " ? * " + getRandomDayOfWeek();
-			break;
-
-		case TimeConstants.CRON_MONTH:
-			c = "0 " + getRandomMinute() + " " + getRandomHour() + " " + getRandomDayOfMonth() + " * ?";
-			break;
-
-		default:
-			c = cronRefresh;
-			break;
-		}
+        c = switch (cronRefresh.toUpperCase()) {
+            case TimeConstants.CRON_DAY -> "0 " + getRandomMinute() + " " + getRandomHour() + " ? * *";
+            case TimeConstants.CRON_WEEK ->
+                    "0 " + getRandomMinute() + " " + getRandomHour() + " ? * " + getRandomDayOfWeek();
+            case TimeConstants.CRON_MONTH ->
+                    "0 " + getRandomMinute() + " " + getRandomHour() + " " + getRandomDayOfMonth() + " * ?";
+            default -> cronRefresh;
+        };
 
 		internalCron = c;
 		return internalCron;
