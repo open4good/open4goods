@@ -1,21 +1,29 @@
 package org.open4goods.ui.controllers.ui;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.Locale;
+import java.util.Random;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.open4goods.services.DataSourceConfigService;
 import org.open4goods.services.XwikiService;
 import org.open4goods.ui.config.yml.UiConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
+import org.springframework.core.io.support.ResourcePatternResolver;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.servlet.ModelAndView;
 
+import jakarta.annotation.PostConstruct;
 import jakarta.servlet.http.HttpServletRequest;
 
 
@@ -27,6 +35,30 @@ public class AbstractUiController {
 	private @Autowired UiConfig config;
 	private @Autowired XwikiService xwikiService;
 
+
+	
+	// Used to load Datasource configurations from classpath
+	private static final ClassLoader cl = DataSourceConfigService.class.getClassLoader();
+	private static final ResourcePatternResolver resolver = new PathMatchingResourcePatternResolver(cl);
+	private  int maxImg;
+	
+	// TODO :  in a service (hot, controllers are multiply ionstanciated)
+	@PostConstruct
+	public  void init() {
+		try {
+			// TODO : from conf
+			Resource[] resources = resolver.getResources("classpath:/static/assets/img/loader/**");
+			
+			maxImg = resources.length;
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		
+		
+	}
+	
 	/**
 	 * Instanciates a ModelAndView and prefills pageNumber conf and pageNumber httpRequest
 	 * with : <br/>
@@ -63,6 +95,10 @@ public class AbstractUiController {
 		ret.addObject("dev", env.acceptsProfiles("dev","devsec"));
 
 		ret.addObject("url",request.getRequestURL().toString() );
+		
+		ret.addObject("loaderImg",loaderImage() );
+		
+		
 
 		ret.addObject("baseUrl",config.getBaseUrl(request.getLocale()));
 
@@ -94,4 +130,14 @@ public class AbstractUiController {
 
 		return ret;
 	}
+	
+	
+	public String loaderImage() {
+		Random random = new Random();
+		int nb;
+		nb = random.nextInt(1,maxImg+1);
+		return "/assets/img/loader/"+nb+".jpg";
+		
+	}
+	
 }
