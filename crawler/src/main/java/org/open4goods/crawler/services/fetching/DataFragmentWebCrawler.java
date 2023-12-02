@@ -117,14 +117,11 @@ public class DataFragmentWebCrawler extends WebCrawler {
 		// Starting url-logger if defined
 		if (globalConf.isLogAccepted() || globalConf.isLogRejected()) {
 			// Logging to console according to dev profile and conf
-			boolean toConsole = false;
+			boolean toConsole = ArrayUtils.contains(env.getActiveProfiles(), "dev") || ArrayUtils.contains(env.getActiveProfiles(), "devsec");
 			// TODO : Not nice, mutualize
-			if (ArrayUtils.contains(env.getActiveProfiles(), "dev") || ArrayUtils.contains(env.getActiveProfiles(), "devsec")) {
-				toConsole = true;
-			}
-			
-			
-			urlsLogger = GenericFileLogger.initLogger(  datasourceProperties.getName()+"-urls", Level.INFO,
+
+
+            urlsLogger = GenericFileLogger.initLogger(  datasourceProperties.getName()+"-urls", Level.INFO,
 					globalConf.getCrawlerLogDir(), toConsole);
 		} else {
 			urlsLogger = NOPLogger.NOP_LOGGER;

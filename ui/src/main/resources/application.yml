@@ -83,6 +83,9 @@ management:
 #      show-details: always   
           
 spring:
+  threads:
+    virtual:
+      enabled: true
   mail:
 #   host: 
     port: 587

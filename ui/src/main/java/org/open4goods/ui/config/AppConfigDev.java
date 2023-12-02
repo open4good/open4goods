@@ -24,9 +24,13 @@ import org.springframework.web.util.UrlPathHelper;
 @Profile({"dev","devsec"})
 public class AppConfigDev {
 	
-	private @Autowired UiConfig config;
-	
-	
+	private final UiConfig config;
+
+	public AppConfigDev(UiConfig config) {
+		this.config = config;
+	}
+
+
 	@Bean
 	public MessageSource messageSource()
 	{       

@@ -11,8 +11,11 @@ import jakarta.servlet.http.HttpServletRequest;
 @Controller
 public class TeamController extends AbstractUiController {
 
-	@Autowired
-	UiConfig uiConfig;
+	final UiConfig uiConfig;
+
+	public TeamController(UiConfig uiConfig) {
+		this.uiConfig = uiConfig;
+	}
 
 	@GetMapping("/equipe")
 	public ModelAndView index(final HttpServletRequest request) {

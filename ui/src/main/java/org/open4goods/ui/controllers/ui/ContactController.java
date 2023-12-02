@@ -16,13 +16,17 @@ import jakarta.servlet.http.HttpServletRequest;
 @Controller
 public class ContactController extends AbstractUiController {
 
-	@Autowired
-	MailService mailService;
+	private final MailService mailService;
 
-	@Autowired
-	UiConfig uiConfig;
+	private final UiConfig uiConfig;
 
-	@Autowired RecaptchaService captchaService;
+	private final RecaptchaService captchaService;
+
+	public ContactController(MailService mailService, UiConfig uiConfig, RecaptchaService captchaService) {
+		this.mailService = mailService;
+		this.uiConfig = uiConfig;
+		this.captchaService = captchaService;
+	}
 
 	@GetMapping("/contact")
 	public ModelAndView index(final HttpServletRequest request) {

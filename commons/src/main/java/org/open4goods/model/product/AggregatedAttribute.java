@@ -10,9 +10,9 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.open4goods.config.yml.attributes.AttributeConfig;
-import org.open4goods.exceptions.ValidationException;
 import org.open4goods.model.attribute.Attribute;
 import org.open4goods.model.attribute.AttributeType;
+import org.open4goods.model.data.UnindexedKeyVal;
 import org.open4goods.model.data.UnindexedKeyValTimestamp;
 import org.springframework.data.elasticsearch.annotations.Field;
 import org.springframework.data.elasticsearch.annotations.FieldType;
@@ -62,7 +62,7 @@ public class AggregatedAttribute implements IAttribute {
 	 * @return
 	 */
 	public long distinctValues () {
-		return sources.stream().map(e-> e.getValue()).distinct().count();
+		return sources.stream().map(UnindexedKeyVal::getValue).distinct().count();
 	}
 	
 	/**
@@ -70,7 +70,7 @@ public class AggregatedAttribute implements IAttribute {
 	 * @return
 	 */
 	public String providersToString() {		
-		return StringUtils.join( sources.stream().map(e-> e.getKey()).toArray(),", ");
+		return StringUtils.join( sources.stream().map(UnindexedKeyVal::getKey).toArray(),", ");
 	}
 
 	/**
@@ -180,13 +180,8 @@ public class AggregatedAttribute implements IAttribute {
 		Map<String, Integer> valueCounter = new HashMap<>();
 		
 		for (UnindexedKeyValTimestamp source : sources) {
-			Integer existing = valueCounter.get(source.getValue());
-			
-			if (null == existing) {
-				valueCounter.put(source.getValue(),1);
-			} else {
-				valueCounter.put(source.getValue(),valueCounter.get(source.getValue())+ 1);
-			}
+
+            valueCounter.merge(source.getValue(), 1, Integer::sum);
 		}
 				
 	
@@ -210,7 +205,7 @@ public class AggregatedAttribute implements IAttribute {
 	 * @return
 	 */
 	public long getPonderedvalues() {
-		return sources.stream().map(e->e.getValue()).distinct().count();
+		return sources.stream().map(UnindexedKeyVal::getValue).distinct().count();
 	}
 	
 	@Override
@@ -221,7 +216,7 @@ public class AggregatedAttribute implements IAttribute {
 	
 	public Double numericOrNull(String rawValue) throws NumberFormatException{
 		// Trying to specialize as numeric
-		final String num = rawValue.toString().trim().replace(",", ".");
+		final String num = rawValue.trim().replace(",", ".");
 
 		return  Double.valueOf(num);
 	}

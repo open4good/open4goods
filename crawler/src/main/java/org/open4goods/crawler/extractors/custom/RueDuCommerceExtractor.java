@@ -73,7 +73,7 @@ public class RueDuCommerceExtractor extends Extractor {
 
 		final JsonNode root = getJsonRootNode(Unirest.get(commentsUrl).header("x-requested-with", "XMLHttpRequest"));
 		// Evaluation through JsonPointers
-		final Integer reviewsCount = root.get("Results").size();
+		final int reviewsCount = root.get("Results").size();
 
 		for (int i = 0; i < reviewsCount; i++) {
 

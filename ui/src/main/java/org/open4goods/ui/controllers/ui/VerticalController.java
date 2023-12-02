@@ -33,14 +33,21 @@ public class VerticalController extends AbstractUiController {
 	private static final Logger LOGGER = LoggerFactory.getLogger(VerticalController.class);
 
 	// The siteConfig
-	private @Autowired UiConfig config;
+	private final UiConfig config;
 
-	private @Autowired VerticalsConfigService verticalService;
+	private final VerticalsConfigService verticalService;
 
-	private @Autowired SearchService searchService;
+	private final SearchService searchService;
 
 
-	private @Autowired SerialisationService serialisationService;
+	private final SerialisationService serialisationService;
+
+	public VerticalController(UiConfig config, VerticalsConfigService verticalService, SearchService searchService, SerialisationService serialisationService) {
+		this.config = config;
+		this.verticalService = verticalService;
+		this.searchService = searchService;
+		this.serialisationService = serialisationService;
+	}
 
 	//////////////////////////////////////////////////////////////
 	// Mappings

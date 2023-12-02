@@ -487,7 +487,7 @@ public class DataFragment implements Standardisable, Validable {
 
 				final Attribute a = getAttribute(field);
 
-				if (null == a || StringUtils.isEmpty(a.getRawValue().toString())) {
+				if (null == a || StringUtils.isEmpty(a.getRawValue())) {
 					ret.add(ValidationMessage.newValidationMessage(url, "NO_" + field));
 					break;
 				}
@@ -701,7 +701,7 @@ public class DataFragment implements Standardisable, Validable {
 	 */
 	public void addAttribute(final String name, final String value, final String language,
 			final Boolean ignoreCariageReturns,final Set<String> multivalueSeparators ) {
-		if (null == value || "".equals(value.toString())) {
+		if (null == value || value.toString().isEmpty()) {
 			logger.info("Cannot add null or empty values for attribute " + name);
 			return ;
 		}
@@ -795,7 +795,7 @@ public class DataFragment implements Standardisable, Validable {
 
 	public void addUserRating(final Rating rr) throws ValidationException {
 		if (null == rr) {
-			throw new ValidationException("Trying to add a null rating : " + toString());
+			throw new ValidationException("Trying to add a null rating : " + this);
 		}
 		rr.addTag(RatingType.SITES);
 		addRating(rr);
@@ -803,7 +803,7 @@ public class DataFragment implements Standardisable, Validable {
 
 	public void addRseRating(final Rating rr) throws ValidationException {
 		if (null == rr) {
-			throw new ValidationException("Trying to add a null rating : " + toString());
+			throw new ValidationException("Trying to add a null rating : " + this);
 		}
 		rr.addTag(RatingType.RSE);
 		addRating(rr);

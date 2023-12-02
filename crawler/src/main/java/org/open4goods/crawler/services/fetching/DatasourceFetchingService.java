@@ -96,13 +96,10 @@ public abstract class DatasourceFetchingService {
 		}
 
 		// Logging to console according to dev profile and conf
-		boolean toConsole = false;
+		boolean toConsole = ArrayUtils.contains(env.getActiveProfiles(), "dev") || ArrayUtils.contains(env.getActiveProfiles(), "devsec");
 		// TODO : Not nice, mutualize
-		if (ArrayUtils.contains(env.getActiveProfiles(), "dev") || ArrayUtils.contains(env.getActiveProfiles(), "devsec")) {
-			toConsole = true;
-		}
 
-		final Logger dedicatedLogger = GenericFileLogger.initLogger(datasourceConfigName, level, logDir,
+        final Logger dedicatedLogger = GenericFileLogger.initLogger(datasourceConfigName, level, logDir,
 				toConsole);
 		return dedicatedLogger;
 	}

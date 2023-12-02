@@ -2,7 +2,6 @@ package org.open4goods.aggregation.services.aggregation.realtime;
 
 import java.io.IOException;
 
-import org.open4goods.aggregation.AbstractAggregationService;
 import org.open4goods.aggregation.AbstractRealTimeAggregationService;
 import org.open4goods.config.yml.ui.VerticalConfig;
 import org.open4goods.helper.IdHelper;

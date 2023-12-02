@@ -77,7 +77,7 @@ public class RealtimeSearchResponse {
 	 * @return the total number of results
 	 */
 	public Integer getTotalResults() {
-		Integer ret = nameMatches.size();
+		int ret = nameMatches.size();
 
 		for (Set<DataFragment> c : gtinMatches.values()) {
 			ret += c.size();

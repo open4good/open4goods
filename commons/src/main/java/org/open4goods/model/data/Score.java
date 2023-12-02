@@ -1,15 +1,10 @@
 package org.open4goods.model.data;
 
-import java.util.HashSet;
 import java.util.Objects;
-import java.util.Set;
 
-import org.apache.commons.lang3.StringUtils;
 import org.open4goods.exceptions.ValidationException;
-import org.open4goods.model.Standardisable;
 import org.open4goods.model.Validable;
 import org.open4goods.model.attribute.Cardinality;
-import org.open4goods.model.constants.Currency;
 import org.open4goods.model.product.AggregatedPrice;
 import org.open4goods.services.StandardiserService;
 import org.slf4j.Logger;
@@ -18,7 +13,7 @@ import org.springframework.data.elasticsearch.annotations.Field;
 import org.springframework.data.elasticsearch.annotations.FieldType;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.google.common.collect.Sets;
+
 public class Score  implements Validable {
 	private static final Logger LOGGER = LoggerFactory.getLogger(Score.class);
 
@@ -71,13 +66,13 @@ public class Score  implements Validable {
 	public String toString() {
 		
 		StringBuilder sb = new StringBuilder(name);
-		sb.append((virtual == true ? "(virtual):" : ":") );
+		sb.append((virtual ? "(virtual):" : ":") );
 		if (null != relativ) {
-			sb.append( relativ.getValue() +  "--> rel:("+ relativ +")");
+			sb.append(relativ.getValue()).append("--> rel:(").append(relativ).append(")");
 		}
 		
 		if (null != absolute) {
-			sb.append( relativ.getValue() +  "--> abs:("+ absolute +")");
+			sb.append(relativ.getValue()).append("--> abs:(").append(absolute).append(")");
 		}
 		
 		

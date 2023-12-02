@@ -12,9 +12,9 @@
 	<properties>
 		<github.global.server>github</github.global.server>
 		<springboot.version>3.2.0</springboot.version>
-		<java.version>19</java.version>
-		<maven.compiler.source>19</maven.compiler.source>
-		<maven.compiler.target>19</maven.compiler.target>
+		<java.version>21</java.version>
+		<maven.compiler.source>21</maven.compiler.source>
+		<maven.compiler.target>21</maven.compiler.target>
 		<global.version>0.0.1-SNAPSHOT</global.version>
 		<swagger.version>2.9.2</swagger.version>
 		<jacoco.version>0.8.11</jacoco.version>
@@ -360,9 +360,9 @@
 					<artifactId>maven-compiler-plugin</artifactId>
 					<version>${maven-compiler-plugin-version}</version>
 					<configuration>
-						<release>19</release>
-						<source>19</source>
-						<target>19</target>
+						<release>21</release>
+						<source>21</source>
+						<target>21</target>
 						<forceJavacCompilerUse>true</forceJavacCompilerUse>
 					</configuration>
 				</plugin>

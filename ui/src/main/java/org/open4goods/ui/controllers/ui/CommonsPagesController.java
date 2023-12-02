@@ -25,7 +25,11 @@ public class CommonsPagesController extends AbstractUiController {
 	private static final Logger LOGGER = LoggerFactory.getLogger(CommonsPagesController.class);
 
 	// The siteConfig
-	private @Autowired UiConfig config;
+	private final UiConfig config;
+
+	public CommonsPagesController(UiConfig config) {
+		this.config = config;
+	}
 
 	//////////////////////////////////////////////////////////////
 	// Mappings

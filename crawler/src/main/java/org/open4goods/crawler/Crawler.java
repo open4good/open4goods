@@ -4,20 +4,15 @@ package org.open4goods.crawler;
 import java.io.IOException;
 
 import org.open4goods.crawler.repository.IndexationRepository;
-import org.open4goods.services.SerialisationService;
-import org.open4goods.store.repository.ProductSpringRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.data.elasticsearch.repository.config.EnableElasticsearchRepositories;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.mashape.unirest.http.Unirest;
 
-import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 
 @SpringBootApplication

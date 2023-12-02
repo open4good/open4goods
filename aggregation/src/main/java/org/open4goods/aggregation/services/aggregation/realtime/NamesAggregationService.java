@@ -6,14 +6,11 @@ import java.util.LinkedHashSet;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
-import org.open4goods.aggregation.AbstractAggregationService;
 import org.open4goods.aggregation.AbstractRealTimeAggregationService;
-import org.open4goods.config.yml.ui.SiteNaming;
 import org.open4goods.helper.IdHelper;
 import org.open4goods.model.data.DataFragment;
 import org.open4goods.model.product.Names;
 import org.open4goods.model.product.Product;
-import org.open4goods.services.EvaluationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -74,7 +71,7 @@ public class NamesAggregationService extends AbstractRealTimeAggregationService 
 			return gtin;
 		}
 		else {
-			String frags[] = names.shortestOfferName().split(" ");
+			String[] frags = names.shortestOfferName().split(" ");
 
 			int maxchars = 70;
 			int curChars = 0;
@@ -117,7 +114,7 @@ public class NamesAggregationService extends AbstractRealTimeAggregationService 
 
 		String normalized = StringUtils.normalizeSpace(name.toLowerCase());
 
-		String frags[] = normalized.split(" ");
+		String[] frags = normalized.split(" ");
 
 		LinkedHashSet<String> linkedHashSet = new LinkedHashSet<>();
 		StringBuilder ret = new StringBuilder();

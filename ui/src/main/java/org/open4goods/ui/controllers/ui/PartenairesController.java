@@ -33,13 +33,19 @@ public class PartenairesController extends AbstractUiController {
 	private static final Logger LOGGER = LoggerFactory.getLogger(PartenairesController.class);
 
 	// The siteConfig
-	private @Autowired UiConfig config;
+	private final UiConfig config;
 
-	private @Autowired DataSourceConfigService datasourceConfigService;
+	private final DataSourceConfigService datasourceConfigService;
 
-	private @Autowired SerialisationService serialisationService;
+	private final SerialisationService serialisationService;
 
 	private Map<DataSourceProperties, String> partners = new HashMap<>();
+
+	public PartenairesController(UiConfig config, DataSourceConfigService datasourceConfigService, SerialisationService serialisationService) {
+		this.config = config;
+		this.datasourceConfigService = datasourceConfigService;
+		this.serialisationService = serialisationService;
+	}
 
 
 	/**

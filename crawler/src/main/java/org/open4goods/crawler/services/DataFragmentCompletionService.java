@@ -89,7 +89,7 @@ public class DataFragmentCompletionService {
 		extractBrandUid(o, datasourceProperties,dedicatedLogger);
 
 		// Tagging resources
-		o.getResources().stream().forEach(d -> d.addTag(o.getDatasourceName()));
+		o.getResources().forEach(d -> d.addTag(o.getDatasourceName()));
 
 		// If data is a computed affiliation link
 		if (!StringUtils.isEmpty(datasourceProperties.getAffiliationLinkPrefix())) {
@@ -140,7 +140,7 @@ public class DataFragmentCompletionService {
 					//
 
 					if (null == dataFragment.getReferentielAttributes().get(key.toString())) {
-						dataFragment.addReferentielAttribute(key.toString(), a.getRawValue().toString());
+						dataFragment.addReferentielAttribute(key.toString(), a.getRawValue());
 						dedicatedLogger.info("Adding referentiel attribute {}:{} from attribute {}",key,a.getRawValue(),a.getName());
 					} else {
 						dedicatedLogger.info("Referentiel attribute {}:{} not added because attr with value {} already exists ",key,a.getRawValue(),a.getName(),dataFragment.getReferentielAttributes().get(key));

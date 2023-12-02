@@ -2,7 +2,7 @@ package org.open4goods.crawler.services.todo;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Date;
@@ -67,19 +67,14 @@ public class TodoService {
 					if (NumberUtils.isParsable(tmp)) {
 						this.estimation = tmp;
 					} else  {
-						if (tmp.equals("p1")) {
-							priority="1";
-						} else if (tmp.equals("p2")) {
-							priority="2";
-						} else if (tmp.equals("p3")) {
-							priority="3";
-						}  else if (tmp.equals("p4")) {
-							priority="4";
-						}  else if (tmp.equals("p5")) {
-							priority="5";
-						}   else {
-							category = tmp;
-						}
+                        switch (tmp) {
+                            case "p1" -> priority = "1";
+                            case "p2" -> priority = "2";
+                            case "p3" -> priority = "3";
+                            case "p4" -> priority = "4";
+                            case "p5" -> priority = "5";
+                            default -> category = tmp;
+                        }
 					}
 				}
 
@@ -186,7 +181,7 @@ public class TodoService {
 	 * @throws XPathExpressionException
 	 */
 	public List<Todo> getTodos(File taglistFile) throws Exception, IOException, XPathExpressionException {
-		Document doc = DocumentHelper.getDocument(FileUtils.readFileToString(taglistFile,Charset.forName("UTF-8")));
+		Document doc = DocumentHelper.getDocument(FileUtils.readFileToString(taglistFile, StandardCharsets.UTF_8));
 
 		
 		// Getting todos from taglist.txt

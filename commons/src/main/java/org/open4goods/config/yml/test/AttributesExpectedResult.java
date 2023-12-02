@@ -4,7 +4,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import org.open4goods.model.attribute.Attribute;
 import org.open4goods.model.constants.ReferentielKey;
 import org.open4goods.model.data.DataFragment;
 
@@ -40,9 +39,9 @@ public class AttributesExpectedResult extends NumericExpectedResult {
 
 				if (null == pd.getAttribute(entry.getKey())) {
 					ret.addMessage("Missing attribute : " + entry.getKey());
-				} else if (!entry.getValue().equals(pd.getAttribute(entry.getKey()).getRawValue().toString())) {
+				} else if (!entry.getValue().equals(pd.getAttribute(entry.getKey()).getRawValue())) {
 					ret.addMessage("Was expecting " + entry.getValue() + " for attribute  " + entry.getKey()
-					+ ", we have " + pd.getAttribute(entry.getKey()).getRawValue().toString());
+					+ ", we have " + pd.getAttribute(entry.getKey()).getRawValue());
 				}
 
 			}

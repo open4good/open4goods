@@ -10,9 +10,7 @@ import java.util.Set;
 
 import org.open4goods.config.yml.attributes.AttributeConfig;
 import org.open4goods.model.attribute.Attribute;
-import org.open4goods.model.constants.CacheConstants;
 import org.open4goods.model.product.IAttribute;
-import org.springframework.cache.annotation.Cacheable;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonMerge;

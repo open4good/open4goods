@@ -1,17 +1,6 @@
 package org.open4goods.services;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Collectors;
-
+import com.fasterxml.jackson.databind.ObjectReader;
 import org.open4goods.config.yml.ui.VerticalConfig;
 import org.open4goods.model.constants.CacheConstants;
 import org.slf4j.Logger;
@@ -19,8 +8,13 @@ import org.slf4j.LoggerFactory;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.scheduling.annotation.Scheduled;
 
-import com.fasterxml.jackson.databind.ObjectReader;
-import com.google.common.base.Optional;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 /**
  * This service is in charge to provide the Verticals configurations.
@@ -42,9 +36,9 @@ public class VerticalsConfigService {
 
 	private SerialisationService serialisationService;
 
-	private Map<String, VerticalConfig> configs = new ConcurrentHashMap<>(100);
+	private final Map<String, VerticalConfig> configs = new ConcurrentHashMap<>(100);
 
-	private Map<String,VerticalConfig> categoriesToVertical = new ConcurrentHashMap<>();
+	private final Map<String,VerticalConfig> categoriesToVertical = new ConcurrentHashMap<>();
 
 	private Map<String,VerticalConfig> verticalsByUrl = new HashMap<>();
 	private Map<String,String> verticalUrlByLanguage = new HashMap<>();
@@ -89,23 +83,15 @@ public class VerticalsConfigService {
 		// Associating categoriesToVertical
 		synchronized (categoriesToVertical) {
 			categoriesToVertical.clear();
-			configs.values().stream().forEach(c -> {
-
-				c.getMatchingCategories().stream().forEach(cc -> {
-					categoriesToVertical.put(cc, c);
-				});
-			});
+			configs.values().forEach(c -> c.getMatchingCategories().forEach(cc -> categoriesToVertical.put(cc, c)));
 		}
 
 		// Mapping url to i18n
-		getConfigsWithoutDefault().stream().forEach(vc -> {
+		getConfigsWithoutDefault().forEach(vc -> vc.getHomeUrl().forEach((key, value) -> {
 
-			vc.getHomeUrl().entrySet().stream().forEach(v -> {
-
-				verticalsByUrl.put(v.getValue(), vc);
-				verticalUrlByLanguage.put(v.getKey(), v.getValue());
-			});
-		});
+verticalsByUrl.put(value, vc);
+verticalUrlByLanguage.put(key, value);
+}));
 
 	}
 
@@ -216,7 +202,7 @@ public class VerticalsConfigService {
 	 */
 	@Cacheable(cacheNames = CacheConstants.FOREVER_LOCAL_CACHE_NAME)
 	public VerticalConfig getDefaultConfig() throws IOException {
-		FileInputStream f = new FileInputStream(new File(verticalsFolder + File.separator + DEFAULT_CONFIG_FILENAME));
+		FileInputStream f = new FileInputStream(verticalsFolder + File.separator + DEFAULT_CONFIG_FILENAME);
 		VerticalConfig ret = serialisationService.fromYaml(f, VerticalConfig.class);
 		f.close();
 		return ret;

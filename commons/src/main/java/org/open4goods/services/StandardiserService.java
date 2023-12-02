@@ -3,7 +3,6 @@ package org.open4goods.services;
 import org.open4goods.model.constants.Currency;
 import org.open4goods.model.data.Price;
 import org.open4goods.model.data.Rating;
-import org.open4goods.model.data.Score;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

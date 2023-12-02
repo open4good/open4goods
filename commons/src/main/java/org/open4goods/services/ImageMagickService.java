@@ -1,6 +1,7 @@
 package org.open4goods.services;
 
 import java.io.File;
+import java.nio.charset.StandardCharsets;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -36,8 +37,8 @@ public class ImageMagickService {
 			final Process p = pb.start();
 			p.waitFor();
 
-			final String err = IOUtils.toString(p.getErrorStream(), "UTF-8");
-			final String std = IOUtils.toString(p.getInputStream(), "UTF-8");
+			final String err = IOUtils.toString(p.getErrorStream(), StandardCharsets.UTF_8);
+			final String std = IOUtils.toString(p.getInputStream(), StandardCharsets.UTF_8);
 
 			IOUtils.closeQuietly(p.getErrorStream());
 			IOUtils.closeQuietly(p.getInputStream());
@@ -75,8 +76,8 @@ public class ImageMagickService {
 			final Process p = pb.start();
 			p.waitFor();
 
-			final String err = IOUtils.toString(p.getErrorStream(), "UTF-8");
-			final String std = IOUtils.toString(p.getInputStream(), "UTF-8");
+			final String err = IOUtils.toString(p.getErrorStream(), StandardCharsets.UTF_8);
+			final String std = IOUtils.toString(p.getInputStream(), StandardCharsets.UTF_8);
 
 			IOUtils.closeQuietly(p.getErrorStream());
 			IOUtils.closeQuietly(p.getInputStream());
@@ -111,8 +112,8 @@ public class ImageMagickService {
 			final Process p = pb.start();
 			p.waitFor();
 
-			final String err = IOUtils.toString(p.getErrorStream(), "UTF-8");
-			final String std = IOUtils.toString(p.getInputStream(), "UTF-8");
+			final String err = IOUtils.toString(p.getErrorStream(), StandardCharsets.UTF_8);
+			final String std = IOUtils.toString(p.getInputStream(), StandardCharsets.UTF_8);
 
 			IOUtils.closeQuietly(p.getErrorStream());
 			IOUtils.closeQuietly(p.getInputStream());
