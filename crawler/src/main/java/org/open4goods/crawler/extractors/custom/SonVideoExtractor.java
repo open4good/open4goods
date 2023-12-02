@@ -76,7 +76,7 @@ public class SonVideoExtractor extends Extractor {
 
 		final JsonNode root = getJsonRootNode(Unirest.get(questionsUrl).header("x-requested-with", "XMLHttpRequest"));
 		// Evaluation through JsonPointers
-		final Integer questionsCount = root.get("questions").size();
+		final int questionsCount = root.get("questions").size();
 
 		for (int i = 0; i < questionsCount; i++) {
 
@@ -95,7 +95,7 @@ public class SonVideoExtractor extends Extractor {
 
 			// Parsing the answers
 
-			final Integer answersCount = root.get("questions").get(i).get("answers").size();
+			final int answersCount = root.get("questions").get(i).get("answers").size();
 
 			for (int j = 0; j < answersCount; j++) {
 				final Answer a = new Answer();
@@ -127,7 +127,7 @@ public class SonVideoExtractor extends Extractor {
 
 		final JsonNode root = getJsonRootNode(Unirest.get(url).header("x-requested-with", "XMLHttpRequest"));
 		// Evaluation through JsonPointers
-		final Integer reviewsCount = root.get("reviews").size();
+		final int reviewsCount = root.get("reviews").size();
 
 		for (int i = 0; i < reviewsCount; i++) {
 

@@ -1,6 +1,7 @@
 
 package org.open4goods.config.yml.attributes;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -181,13 +182,13 @@ public class AttributeConfig {
 		// Instanciating / caching the parser
 		if (null == parserInstances.get(clazz)) {
 			try {
-				parser = (AttributeParser) Class.forName(clazz).newInstance();
+				parser = (AttributeParser) Class.forName(clazz).getDeclaredConstructor().newInstance();
 				LOGGER.info("{} parser has been placed in uidMap");
 				parserInstances.put(clazz, parser);
-			} catch (InstantiationException | IllegalAccessException | ClassNotFoundException e) {
+			} catch (InstantiationException | IllegalAccessException | ClassNotFoundException | NoSuchMethodException | InvocationTargetException e) {
 				throw new ResourceNotFoundException("Cannot instanciate type : " + clazz,e);
 			}
-		}
+        }
 
 		return parserInstances.get(clazz);
 	}

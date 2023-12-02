@@ -92,7 +92,7 @@ public class AggregatedPrice extends Price {
 		if (isInt) {
 			return String.valueOf(p.intValue());
 		} else {
-			return String.valueOf(numberFormater.format(p));
+			return numberFormater.format(p);
 		}
 		
 	}

@@ -1,15 +1,5 @@
 package org.open4goods.aggregation.services.aggregation;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-import java.util.stream.Collectors;
-
 import org.apache.commons.lang3.StringUtils;
 import org.open4goods.aggregation.AbstractRealTimeAggregationService;
 import org.open4goods.config.yml.attributes.AttributeConfig;
@@ -27,6 +17,10 @@ import org.open4goods.model.product.AggregatedFeature;
 import org.open4goods.model.product.Product;
 import org.open4goods.services.BrandService;
 import org.open4goods.services.VerticalsConfigService;
+
+import java.util.*;
+import java.util.Map.Entry;
+import java.util.stream.Collectors;
 
 public class AttributeRealtimeAggregationService extends AbstractRealTimeAggregationService {
 
@@ -55,9 +49,8 @@ public class AttributeRealtimeAggregationService extends AbstractRealTimeAggrega
 
 		AttributesConfig attributesConfig = verticalConfigService.getConfigById(product.getVertical() == null ? "all" : product.getVertical() ).get().getAttributesConfig() ;
 
-		Set<String> toRemoveFromUnmatched = new HashSet<>();
-		// Adding the list of "to be removed" attributes
-		toRemoveFromUnmatched.addAll(attributesConfig.getExclusions());
+        // Adding the list of "to be removed" attributes
+        Set<String> toRemoveFromUnmatched = new HashSet<>(attributesConfig.getExclusions());
 				
 		/////////////////////////////////////////
 		// Converting to AggregatedAttributes for matches from config
@@ -100,7 +93,7 @@ public class AttributeRealtimeAggregationService extends AbstractRealTimeAggrega
 					
 					
 					toRemoveFromUnmatched.add(translated.getName());
-					agg.addAttribute(translated,attrConfig, new UnindexedKeyValTimestamp(dataFragment.getDatasourceName(), translated.getValue().toString()));
+					agg.addAttribute(translated,attrConfig, new UnindexedKeyValTimestamp(dataFragment.getDatasourceName(), translated.getValue()));
 					
 					// Replacing new AggAttribute in product
 					product.getAttributes().getAggregatedAttributes().put(agg.getName(), agg);
@@ -126,7 +119,7 @@ public class AttributeRealtimeAggregationService extends AbstractRealTimeAggrega
 				.filter(e -> isFeatureAttribute(e, attributesConfig))
 				.collect(Collectors.toList());
 
-		toRemoveFromUnmatched.addAll(matchedFeatures.stream().map(e->e.getName()).collect(Collectors.toSet()));
+		toRemoveFromUnmatched.addAll(matchedFeatures.stream().map(Attribute::getName).collect(Collectors.toSet()));
 		
 
 		Collection<AggregatedFeature> af = aggregateFeatures(matchedFeatures);
@@ -153,7 +146,7 @@ public class AttributeRealtimeAggregationService extends AbstractRealTimeAggrega
 				agg = new AggregatedAttribute();
 				agg.setName(attr.getName());
 			} 
-			agg.addAttribute(attr, new UnindexedKeyValTimestamp(dataFragment.getDatasourceName(), attr.getValue().toString()));
+			agg.addAttribute(attr, new UnindexedKeyValTimestamp(dataFragment.getDatasourceName(), attr.getValue()));
 			
 			product.getAttributes().getUnmapedAttributes().add(agg);			
 		}
@@ -357,7 +350,7 @@ public class AttributeRealtimeAggregationService extends AbstractRealTimeAggrega
 	 * @return
 	 */
 	private boolean isFeatureAttribute(Attribute e, AttributesConfig attributesConfig) {
-		return attributesConfig.getFeaturedValues().contains(e.getRawValue().toString().trim().toUpperCase());
+		return attributesConfig.getFeaturedValues().contains(e.getRawValue().trim().toUpperCase());
 	}
 
 	/**
@@ -501,7 +494,7 @@ public class AttributeRealtimeAggregationService extends AbstractRealTimeAggrega
 			boolean found = false;
 
 
-			final String val = attr.getRawValue().toString();
+			final String val = attr.getRawValue();
 			for (final String match : conf.getParser().getTokenMatch()) {
 				if (val.contains(match)) {
 					attr.setRawValue(match);
@@ -544,7 +537,7 @@ public class AttributeRealtimeAggregationService extends AbstractRealTimeAggrega
 		if (!StringUtils.isEmpty(conf.getParser().getClazz())) {
 			try {
 				final AttributeParser parser = conf.getParserInstance();
-				final String parserRes = parser.parse(attr.getRawValue().toString(), attr, conf);
+				final String parserRes = parser.parse(attr.getRawValue(), attr, conf);
 				attr.setRawValue(parserRes);
 			} catch (final ResourceNotFoundException e) {
 				dedicatedLogger.warn("Error while applying specific parser for {}", conf.getParser().getClazz(), e);

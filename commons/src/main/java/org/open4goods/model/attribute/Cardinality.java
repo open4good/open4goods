@@ -2,7 +2,6 @@ package org.open4goods.model.attribute;
 
 import org.open4goods.exceptions.InvalidParameterException;
 import org.open4goods.model.data.Rating;
-import org.open4goods.model.data.Score;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.elasticsearch.annotations.Field;

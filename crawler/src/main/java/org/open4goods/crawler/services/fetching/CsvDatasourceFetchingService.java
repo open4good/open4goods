@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.net.URLDecoder;
-import java.net.URLEncoder;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -113,7 +112,7 @@ public class CsvDatasourceFetchingService extends DatasourceFetchingService {
 		this.completionService = completionService;
 		this.fetcherProperties = fetcherProperties;
 		// The CSV executor can have at most the fetcher max indexation tasks threads
-		executor = Executors.newFixedThreadPool(fetcherProperties.getConcurrentFetcherTask());
+		executor = Executors.newFixedThreadPool(fetcherProperties.getConcurrentFetcherTask(), Thread.ofVirtual().factory());
 		
 
 	}

@@ -65,7 +65,7 @@ public class Attribute2ScoreAggregationService extends AbstractScoreAggregationS
 		
 		if (ac.getType().equals(AttributeType.NUMERIC)) {
 			try {
-				return Double.valueOf(a.getValue().toString());
+				return Double.valueOf(a.getValue());
 			} catch (Exception e) {
 				throw new ValidationException("Cannot convert to numeric" +a);
 			}

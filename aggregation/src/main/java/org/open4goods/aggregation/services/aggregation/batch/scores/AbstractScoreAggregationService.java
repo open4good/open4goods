@@ -4,7 +4,6 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.open4goods.aggregation.AbstractAggregationService;
 import org.open4goods.aggregation.AbstractBatchAggregationService;
 import org.open4goods.exceptions.ValidationException;
 import org.open4goods.model.attribute.Cardinality;

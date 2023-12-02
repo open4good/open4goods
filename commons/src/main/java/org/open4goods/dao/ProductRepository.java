@@ -1,9 +1,6 @@
 package org.open4goods.dao;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Stream;
 
 import org.open4goods.exceptions.ResourceNotFoundException;
@@ -14,7 +11,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
 import org.springframework.data.elasticsearch.client.elc.NativeQuery;
 import org.springframework.data.elasticsearch.client.elc.NativeQueryBuilder;
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
@@ -218,10 +214,8 @@ public class ProductRepository {
 		Map<String, Product> ret = new HashMap<String, Product>();
 		elasticsearchTemplate.multiGet(query, Product.class,current_index )
 		.stream().map(MultiGetItem::getItem)
-		.filter(e -> e !=null)
-		.forEach(e -> {
-			ret.put(e.gtin(), e);
-		});
+		.filter(Objects::nonNull)
+		.forEach(e -> ret.put(e.gtin(), e));
 
 		return ret;
 

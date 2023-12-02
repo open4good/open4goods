@@ -1,7 +1,5 @@
 package org.open4goods.model;
 
-import java.util.List;
-
 public class SourcedStringHistory {
 
 	

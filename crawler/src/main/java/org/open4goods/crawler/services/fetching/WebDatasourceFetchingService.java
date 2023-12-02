@@ -78,9 +78,7 @@ public class WebDatasourceFetchingService extends DatasourceFetchingService{
 	private void cleanControllers() {
 
 		// Calling the terminate to collect stats
-		controllers.entrySet().stream().filter(e -> e.getValue().isFinished()).forEach(s -> {
-			super.finished(stats().get(s.getKey()), controllersConfig.get(s.getKey()));
-		});
+		controllers.entrySet().stream().filter(e -> e.getValue().isFinished()).forEach(s -> super.finished(stats().get(s.getKey()), controllersConfig.get(s.getKey())));
 		controllersConfig.entrySet().removeIf(e -> controllers.get(e.getKey()).isFinished());
 		controllersDate.entrySet().removeIf(e -> controllers.get(e.getKey()).isFinished());
 		controllers.entrySet().removeIf(e -> e.getValue().isFinished());
@@ -145,10 +143,7 @@ public class WebDatasourceFetchingService extends DatasourceFetchingService{
 
 		// Class loading
 		logger.info("Starting async crawler {} with {} threads", datasourceConfName, provider.getWebDatasource().getCrawlConfig().getThreads());
-		controllers.get(datasourceConfName).startNonBlocking(() -> {
-
-			return webCrawler;
-		}, provider.getWebDatasource().getCrawlConfig().getThreads() );
+		controllers.get(datasourceConfName).startNonBlocking(() -> webCrawler, provider.getWebDatasource().getCrawlConfig().getThreads() );
 
 	}
 
@@ -207,9 +202,7 @@ public class WebDatasourceFetchingService extends DatasourceFetchingService{
 
 		// Custom headers
 		final Set<BasicHeader> defaultHeaders = new HashSet<>();
-		crawlProperties.getDefaultHeaders().stream().forEach((h) -> {
-			defaultHeaders.add(new BasicHeader(h.getName(), h.getValue()));
-		})  ;
+		crawlProperties.getDefaultHeaders().stream().forEach((h) -> defaultHeaders.add(new BasicHeader(h.getName(), h.getValue())))  ;
 		crawlConfig.setDefaultHeaders(defaultHeaders );
 
 

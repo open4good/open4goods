@@ -3,7 +3,6 @@ package org.open4goods.aggregation.services.aggregation.realtime;
 
 import java.util.AbstractMap.SimpleEntry;
 
-import org.open4goods.aggregation.AbstractAggregationService;
 import org.open4goods.aggregation.AbstractRealTimeAggregationService;
 import org.open4goods.exceptions.AggregationSkipException;
 import org.open4goods.model.BarcodeType;

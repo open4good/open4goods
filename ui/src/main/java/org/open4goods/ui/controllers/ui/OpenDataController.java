@@ -30,7 +30,11 @@ public class OpenDataController extends AbstractUiController {
 	private static final Logger LOGGER = LoggerFactory.getLogger(OpenDataController.class);
 
 	// The siteConfig
-	private @Autowired OpenDataService openDataService;
+	private final OpenDataService openDataService;
+
+	public OpenDataController(OpenDataService openDataService) {
+		this.openDataService = openDataService;
+	}
 
 	/**
 	 * The Home page.

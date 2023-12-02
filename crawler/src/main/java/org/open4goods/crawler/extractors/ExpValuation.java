@@ -163,7 +163,7 @@ public class ExpValuation {
 	}
 
 	public static String boulangerReviewValue(final String input) {
-		final Integer pos = input.indexOf("star_");
+		final int pos = input.indexOf("star_");
 		final char[] middle = input.substring(pos + 5,pos+7).toCharArray();
 
 		return middle[0]+"."+middle[1];
@@ -189,7 +189,7 @@ public class ExpValuation {
             new SimpleEntry<>("E-", "3"),
             new SimpleEntry<>("F+", "2"),
             new SimpleEntry<>("F-", "1"))
-            .collect(Collectors.toMap((e) -> e.getKey(), (e) -> e.getValue())));
+            .collect(Collectors.toMap(SimpleEntry::getKey, SimpleEntry::getValue)));
 
 	public static String ecoguideParseRating(final String input) {
 

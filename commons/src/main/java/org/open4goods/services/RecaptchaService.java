@@ -45,7 +45,7 @@ public class RecaptchaService {
 		if (!recaptchaSucess) {
 			final List<String> errorCodes = (List) responseBody.get("error-codes");
 
-			final String errorMessage = errorCodes.stream().map(s -> RecaptchaUtil.RECAPTCHA_ERROR_CODE.get(s))
+			final String errorMessage = errorCodes.stream().map(RecaptchaUtil.RECAPTCHA_ERROR_CODE::get)
 					.collect(Collectors.joining(", "));
 
 			throw new SecurityException(errorMessage);

@@ -10,8 +10,13 @@ import org.springframework.stereotype.Controller;
 public class VerticalSearchController extends AbstractUiController {
 
 
-	@Autowired private SearchService searchService;
-	@Autowired UiConfig config;
+	private final SearchService searchService;
+	private final UiConfig config;
+
+	public VerticalSearchController(SearchService searchService, UiConfig config) {
+		this.searchService = searchService;
+		this.config = config;
+	}
 
 
 	//	@GetMapping({"/{vertical}/{query}"})

@@ -1,13 +1,8 @@
 package org.open4goods.aggregation;
 
-import java.io.Closeable;
-import java.io.IOException;
 import java.util.Collection;
-import java.util.Set;
 
-import org.open4goods.exceptions.AggregationSkipException;
 import org.open4goods.helper.GenericFileLogger;
-import org.open4goods.model.data.DataFragment;
 import org.open4goods.model.product.Product;
 import org.slf4j.Logger;
 

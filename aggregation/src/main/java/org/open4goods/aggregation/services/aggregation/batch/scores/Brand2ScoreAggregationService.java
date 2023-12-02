@@ -50,7 +50,7 @@ public class Brand2ScoreAggregationService extends AbstractScoreAggregationServi
 	// TODO : complete with real datas
 	private Double generateScoreFromBrand(String brand) {
 		
-		Double s;
+		double s;
 		
 		switch (brand) {
 		case "SAMSUNG" -> s = 5.0;
