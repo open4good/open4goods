@@ -1,7 +1,5 @@
 version: '3.3'
 services:
-    
-
 ####################################################################
 # Xwiki
 ###################################################################             
@@ -28,20 +26,21 @@ services:
 
 ####################################################################
 # Mysql
-###################################################################
-  
-  
+###################################################################  
   # The container that runs MySQL
   xwiki-mysql-db:
-    image: "mysql:5.7"
+    image: "mysql:8.2.0"
     container_name: xwiki-mysql-db
+    restart: always
+    command: ['mysqld', '--character-set-server=utf8mb4', '--collation-server=utf8mb4_unicode_ci']
+
     # - We provide a xwiki.cnf file in order to configure the mysql db to support UTF8 and be case-insensitive
     # We have to do it here since we use an existing image and that's how this image allows customizations.
     # See https://hub.docker.com/_/mysql/ for more details.
     # - Provide a name instead of an auto-generated id for the mysql data, to make it simpler to identify in
     # 'docker volume ls'
     volumes:
-      - ./xwiki.cnf:/etc/mysql/conf.d/xwiki.cnf
+#      - ./xwiki.cnf:/etc/mysql/conf.d/xwiki.cnf
       - /opt/open4goods/mysql-data:/var/lib/mysql
       - ./init.sql:/docker-entrypoint-initdb.d/init.sql
     # Configure the MySQL database and create a user with provided name/password.
@@ -51,7 +50,7 @@ services:
       - MYSQL_USER=xwiki
       - MYSQL_PASSWORD=xwiki
       - MYSQL_DATABASE=xwiki
-             
+                 
     networks:
       - o4g-network
     ports:
@@ -62,7 +61,7 @@ services:
 ###################################################################
        
   elastic:
-    image: docker.elastic.co/elasticsearch/elasticsearch:8.10.3
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.11.1
     container_name: elastic
     environment:
       - http.max_content_length=200mb
@@ -96,7 +95,7 @@ services:
 ###################################################################
 
   kibana:
-    image: docker.elastic.co/kibana/kibana:8.10.3
+    image: docker.elastic.co/kibana/kibana:8.11.1
     container_name: kibana
     depends_on: 
       - elastic
