@@ -3,7 +3,6 @@ package org.open4goods.aggregation.aggregator;
 import java.util.List;
 
 import org.open4goods.aggregation.AbstractAggregationService;
-import org.open4goods.aggregation.AbstractBatchAggregationService;
 import org.open4goods.aggregation.AbstractRealTimeAggregationService;
 import org.open4goods.exceptions.AggregationSkipException;
 import org.open4goods.model.data.DataFragment;

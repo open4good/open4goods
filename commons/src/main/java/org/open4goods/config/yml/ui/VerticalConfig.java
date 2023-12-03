@@ -1,13 +1,7 @@
 package org.open4goods.config.yml.ui;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.open4goods.config.yml.CommentsAggregationConfig;
@@ -245,8 +239,8 @@ public class VerticalConfig{
 		return verticalFilters.stream()
 				
 				.map(e -> getAttributesConfig().getAttributeConfigByKey(e))
-				.filter(e->e != null)
-				.filter(e->e.isAsSearchFilter())
+				.filter(Objects::nonNull)
+				.filter(AttributeConfig::isAsSearchFilter)
 				.collect(Collectors.toList());
 
 	}

@@ -10,8 +10,6 @@ import org.open4goods.model.constants.ReferentielKey;
 import org.springframework.data.elasticsearch.annotations.Field;
 import org.springframework.data.elasticsearch.annotations.FieldType;
 
-import co.elastic.clients.elasticsearch.sql.Column;
-
 public class AggregatedAttributes  {
 
 	/**
@@ -47,7 +45,7 @@ public class AggregatedAttributes  {
 		// TODO Auto-generated method stub
 		return referentielAttributes.entrySet().stream().collect(Collectors.toMap(
 					e -> e.getKey().toString(),
-					e -> e.getValue()
+				Map.Entry::getValue
 					
 				));
 	}

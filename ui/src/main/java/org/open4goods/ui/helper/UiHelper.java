@@ -2,7 +2,6 @@ package org.open4goods.ui.helper;
 
 import org.open4goods.config.yml.attributes.AttributeConfig;
 import org.open4goods.config.yml.ui.VerticalConfig;
-import org.open4goods.services.VerticalsConfigService;
 
 import jakarta.servlet.http.HttpServletRequest;
 

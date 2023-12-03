@@ -112,12 +112,9 @@ public class ApiConfig {
 	@Autowired
 	BatchService batchService(SearchService searchService, ProductRepository dataRepository, VerticalsConfigService verticalsConfigService, BatchAggregationService batchAggregationService) throws IOException {
 		// Logging to console according to dev profile and conf
-		boolean toConsole = false;
+		boolean toConsole = ArrayUtils.contains(env.getActiveProfiles(), "dev") || ArrayUtils.contains(env.getActiveProfiles(), "devsec");
 		// TODO : Not nice, mutualize
-		if (ArrayUtils.contains(env.getActiveProfiles(), "dev") || ArrayUtils.contains(env.getActiveProfiles(), "devsec")) {
-			toConsole = true;
-		}
-		return new BatchService(dataRepository, apiProperties, verticalsConfigService,batchAggregationService, searchService, toConsole);
+        return new BatchService(dataRepository, apiProperties, verticalsConfigService,batchAggregationService, searchService, toConsole);
 	}
 
 
@@ -340,14 +337,11 @@ public class ApiConfig {
 			
 			) {
 		
-		boolean toConsole = false;
+		boolean toConsole = ArrayUtils.contains(env.getActiveProfiles(), "dev") || ArrayUtils.contains(env.getActiveProfiles(), "devsec");
 		// TODO : Not nice, mutualize
-		if (ArrayUtils.contains(env.getActiveProfiles(), "dev") || ArrayUtils.contains(env.getActiveProfiles(), "devsec")) {
-			toConsole  = true;
-		}
-		
-		
-		return new CsvDatasourceFetchingService(completionService, indexationService,
+
+
+        return new CsvDatasourceFetchingService(completionService, indexationService,
 				apiProperties.getFetcherProperties(), webDatasourceFetchingService,indexationRepository, apiProperties.logsFolder(), toConsole);
 	}
 
@@ -356,14 +350,11 @@ public class ApiConfig {
 			@Autowired final IndexationService indexationService, @Autowired final ApiProperties apiProperties) {
 
 		// Logging to console according to dev profile and conf
-		boolean toConsole = false;
+		boolean toConsole = ArrayUtils.contains(env.getActiveProfiles(), "dev") || ArrayUtils.contains(env.getActiveProfiles(), "devsec");
 		// TODO : Not nice, mutualize
-		if (ArrayUtils.contains(env.getActiveProfiles(), "dev") || ArrayUtils.contains(env.getActiveProfiles(), "devsec")) {
-			toConsole = true;
-		}		
-		
-		
-		return new WebDatasourceFetchingService(indexationService, apiProperties.getFetcherProperties(),indexationRepository,
+
+
+        return new WebDatasourceFetchingService(indexationService, apiProperties.getFetcherProperties(),indexationRepository,
 				apiProperties.logsFolder(), toConsole);
 	}
 

@@ -98,7 +98,7 @@ public class FetchersService{
 		ret.putAll( csvDatasourceFetchingService.stats());
 
 
-		Long totQueue = 0L, totProcessed = 0L, totIndexed = 0L;
+		long totQueue = 0L, totProcessed = 0L, totIndexed = 0L;
 		// Computing the global stats from each crawlers one
 		for (final FetchingJobStats s : ret. values()) {
 			totQueue += s.getQueueLength();

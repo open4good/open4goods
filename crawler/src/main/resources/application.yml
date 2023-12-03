@@ -10,3 +10,6 @@ logging:
 spring:
   application:
     name: crawler
+  threads:
+    virtual:
+      enabled: true

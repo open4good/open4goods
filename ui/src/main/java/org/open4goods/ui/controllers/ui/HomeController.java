@@ -17,11 +17,16 @@ public class HomeController extends AbstractUiController {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(HomeController.class);
 
-	private @Autowired ProductRepository aggregatedDataRepository;
-	private @Autowired DataSourceConfigService datasourceConfigService;
+	private final ProductRepository aggregatedDataRepository;
+	private final DataSourceConfigService datasourceConfigService;
 
-	private @Autowired VerticalsConfigService verticalConfigService;
+	private final VerticalsConfigService verticalConfigService;
 
+	public HomeController(ProductRepository aggregatedDataRepository, DataSourceConfigService datasourceConfigService, VerticalsConfigService verticalConfigService) {
+		this.aggregatedDataRepository = aggregatedDataRepository;
+		this.datasourceConfigService = datasourceConfigService;
+		this.verticalConfigService = verticalConfigService;
+	}
 
 
 	@GetMapping("/")

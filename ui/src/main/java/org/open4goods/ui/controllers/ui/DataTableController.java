@@ -5,6 +5,7 @@ import org.open4goods.model.dto.NumericRangeFilter;
 import org.open4goods.model.dto.VerticalSearchRequest;
 import org.open4goods.model.dto.VerticalSearchResponse;
 import org.open4goods.model.product.Product;
+import org.open4goods.services.SearchService;
 import org.open4goods.services.VerticalsConfigService;
 import org.open4goods.ui.controllers.dto.DataTableRequest;
 import org.open4goods.ui.controllers.dto.DataTableResults;
@@ -25,10 +26,14 @@ import jakarta.servlet.http.HttpServletResponse;
 @RestController
 public class DataTableController {
 
-	@Autowired
-	private org.open4goods.services.SearchService searchService;
+	private final org.open4goods.services.SearchService searchService;
 
-	private @Autowired VerticalsConfigService verticalService;
+	private final VerticalsConfigService verticalService;
+
+	public DataTableController(SearchService searchService, VerticalsConfigService verticalService) {
+		this.searchService = searchService;
+		this.verticalService = verticalService;
+	}
 
 
 	@RequestMapping(value="/{vertical:[a-z-]+}/paginated", method=RequestMethod.GET)
@@ -54,19 +59,15 @@ public class DataTableController {
 		String[] checkboxes = request.getParameterValues("checkboxes[]");
 		if (null != checkboxes) {
 			for (String checkbox : checkboxes) {
-				String attr[] = checkbox.split("-");
+				String[] attr = checkbox.split("-");
 
 				// TODO : should have consts shared with javascript (vertical-home)
-				if (attr[0].equals("condition")) {
-					vRequest.addTermFilter("price.offers.productState.keyword",attr[1]);
-				} else if (attr[0].equals("brand")) {
-					vRequest.addTermFilter("attributes.referentielAttributes.BRAND.keyword",attr[1]);
-				} else if (attr[0].equals("countries")) {
-					vRequest.addTermFilter("gtinInfos.country.keyword",attr[1]);
-				}
-				else {
-					vRequest.addTermFilter(attr[0],attr[1]);
-				}
+                switch (attr[0]) {
+                    case "condition" -> vRequest.addTermFilter("price.offers.productState.keyword", attr[1]);
+                    case "brand" -> vRequest.addTermFilter("attributes.referentielAttributes.BRAND.keyword", attr[1]);
+                    case "countries" -> vRequest.addTermFilter("gtinInfos.country.keyword", attr[1]);
+                    default -> vRequest.addTermFilter(attr[0], attr[1]);
+                }
 			}
 		}
 

@@ -123,7 +123,7 @@ public class IdHelper {
 
 		String [] frags = name.split("\n");
 
-		List<String> frs = Arrays.asList(frags).stream().filter(e ->  ! StringUtils.isBlank(StringUtils.normalizeSpace( e))).collect(Collectors.toList());
+		List<String> frs = Arrays.stream(frags).filter(e ->  ! StringUtils.isBlank(StringUtils.normalizeSpace( e))).collect(Collectors.toList());
 
 		String ret = StringUtils.join(frs," > ");
 		ret = StringUtils.stripAccents(ret);

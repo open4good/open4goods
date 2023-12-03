@@ -122,11 +122,8 @@ public class PaginationCriteria {
 	 * @return true, if is filter by empty
 	 */
 	public boolean isFilterByEmpty() {
-		if(null == filterBy || null == filterBy.getMapOfFilters() || filterBy.getMapOfFilters().size() == 0) {
-			return true;
-		}
-		return false;
-	}
+        return null == filterBy || null == filterBy.getMapOfFilters() || filterBy.getMapOfFilters().size() == 0;
+    }
 
 	/**
 	 * Checks if is sort by empty.
@@ -134,11 +131,8 @@ public class PaginationCriteria {
 	 * @return true, if is sort by empty
 	 */
 	public boolean isSortByEmpty() {
-		if(null == sortBy || null == sortBy.getSortBys() || sortBy.getSortBys().size() == 0) {
-			return true;
-		}
-		return false;
-	}
+        return null == sortBy || null == sortBy.getSortBys() || sortBy.getSortBys().size() == 0;
+    }
 
 	/**
 	 * Gets the filter by clause.

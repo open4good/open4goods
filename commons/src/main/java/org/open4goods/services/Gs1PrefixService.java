@@ -69,9 +69,7 @@ public class Gs1PrefixService {
 					.readValues(resourceResolver.getResource(csvUri)
 							.getInputStream());
 
-			iterator.readAll().forEach(e -> {
-				prefixes.putAll(e.expand(countryNames));
-			});
+			iterator.readAll().forEach(e -> prefixes.putAll(e.expand(countryNames)));
 
 			iterator.close();
 

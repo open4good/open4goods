@@ -2,13 +2,7 @@
 package org.open4goods.aggregation.services.aggregation.realtime;
 
 import java.io.IOException;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
+import java.util.*;
 
 import org.open4goods.aggregation.AbstractRealTimeAggregationService;
 import org.open4goods.config.yml.ui.VerticalProperties;
@@ -82,7 +76,7 @@ public class PriceAggregationService extends AbstractRealTimeAggregationService 
 			}
 		}
 
-		final Set<AggregatedPrice> filtered = reducedPrices.values().stream().collect(Collectors.toSet());
+		final Set<AggregatedPrice> filtered = new HashSet<>(reducedPrices.values());
 
 		////////////////////////////
 		// Computing the compensation
@@ -123,9 +117,7 @@ public class PriceAggregationService extends AbstractRealTimeAggregationService 
 
 
 		// Setting the product state summary
-		aggPrices.getOffers().stream().forEach(i -> {
-			aggPrices.getConditions().add(i.getProductState());
-		});
+		aggPrices.getOffers().forEach(i -> aggPrices.getConditions().add(i.getProductState()));
 
 		// Setting the result
 		aggregatedData.setPrice(aggPrices);

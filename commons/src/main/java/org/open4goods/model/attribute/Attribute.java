@@ -78,7 +78,7 @@ public class Attribute implements Validable,IAttribute {
 
 
 	public String stringValue() {
-			return rawValue.toString();
+			return rawValue;
 	}
 
 	@Override
@@ -98,7 +98,7 @@ public class Attribute implements Validable,IAttribute {
 	 * Normalize the value
 	 */
 	public void normalize() {
-		rawValue = StringUtils.normalizeSpace(rawValue.toString());
+		rawValue = StringUtils.normalizeSpace(rawValue);
 	}
 
 	
@@ -108,7 +108,7 @@ public class Attribute implements Validable,IAttribute {
 	 */
 	public void trim() {
 
-			rawValue = rawValue.toString().trim();
+			rawValue = rawValue.trim();
 		
 	}
 
@@ -116,14 +116,14 @@ public class Attribute implements Validable,IAttribute {
 	 * Convert to lowerCase
 	 */
 	public void lowerCase() {
-			rawValue = rawValue.toString().toLowerCase();
+			rawValue = rawValue.toLowerCase();
 	}
 
 	/**
 	 * Convert to upperCase
 	 */
 	public void upperCase() {
-			rawValue = rawValue.toString().toUpperCase();
+			rawValue = rawValue.toUpperCase();
 	}
 
 	/**
@@ -131,7 +131,7 @@ public class Attribute implements Validable,IAttribute {
 	 *
 	 */
 	public void replaceToken(final String regexp, final String replacement) {
-		rawValue = ((String) rawValue).replace(regexp, replacement);
+		rawValue = rawValue.replace(regexp, replacement);
 	}
 
 //	/**
@@ -164,7 +164,7 @@ public class Attribute implements Validable,IAttribute {
 
 	public Double numericOrNull() {
 		// Trying to specialize as numeric
-		final String num = rawValue.toString().trim().replace(",", ".");
+		final String num = rawValue.trim().replace(",", ".");
 
 		try {
 			return  Double.valueOf(num);
@@ -298,7 +298,7 @@ public class Attribute implements Validable,IAttribute {
 
 	@Override
 	public String getValue() {
-		return rawValue.toString();
+		return rawValue;
 	}
 
 

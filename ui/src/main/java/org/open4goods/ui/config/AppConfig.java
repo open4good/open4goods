@@ -48,7 +48,11 @@ public class AppConfig {
 
 	// TODO : Cache period pageNumber conf
 	public static final int CACHE_PERIOD_SECONDS = 3600*24*7;
-	private @Autowired UiConfig config;
+	private final UiConfig config;
+
+	public AppConfig(UiConfig config) {
+		this.config = config;
+	}
 
 	@Bean
 	ImageService imageService(@Autowired ImageMagickService imageMagickService, @Autowired ResourceService resourceService) {

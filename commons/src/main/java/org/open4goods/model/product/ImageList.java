@@ -275,7 +275,7 @@ public class ImageList {
 	 * @return
 	 */
 	public Optional<IndexedResource> one() {
-		return medias == null ? null : medias.stream().findFirst();
+		return medias == null ? Optional.empty() : medias.stream().findFirst();
 	}
 
 	public Set<IndexedResource> getMedias() {

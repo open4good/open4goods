@@ -3,10 +3,8 @@ package org.open4goods.api;
 
 import java.io.IOException;
 
-import org.apache.commons.math3.stat.descriptive.summary.Product;
 import org.open4goods.crawler.controller.CrawlController;
 import org.open4goods.crawler.repository.IndexationRepository;
-import org.open4goods.dao.ProductRepository;
 import org.open4goods.services.SerialisationService;
 import org.open4goods.store.repository.ProductSpringRepository;
 import org.slf4j.Logger;
@@ -15,7 +13,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cache.annotation.EnableCaching;
-import org.springframework.context.annotation.EnableAspectJAutoProxy;
 import org.springframework.data.elasticsearch.repository.config.EnableElasticsearchRepositories;
 import org.springframework.scheduling.annotation.EnableScheduling;
 

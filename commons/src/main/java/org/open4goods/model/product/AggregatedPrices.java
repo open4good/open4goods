@@ -86,8 +86,7 @@ public class AggregatedPrices implements Standardisable {
 
 	@Override
 	public Set<Standardisable> standardisableChildren() {
-		final Set<Standardisable> ret = new HashSet<>();
-		ret.addAll(offers);
+        final Set<Standardisable> ret = new HashSet<>(offers);
 		ret.add(minPrice);
 		//		ret.add(maxPrice);
 		//		ret.add(avgPrice);

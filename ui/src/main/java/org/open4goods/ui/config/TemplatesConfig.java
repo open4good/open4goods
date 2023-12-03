@@ -27,7 +27,11 @@ import org.thymeleaf.templateresolver.FileTemplateResolver;
  */
 public class TemplatesConfig {
 
-	private @Autowired UiConfig config;
+	private final UiConfig config;
+
+	public TemplatesConfig(UiConfig config) {
+		this.config = config;
+	}
 
 	@Bean
 	public ClassLoaderTemplateResolver classpathTemplateResolver() {

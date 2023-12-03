@@ -107,7 +107,7 @@ public class ReferentielService {
 		///////////////////////////////////
 
 		if (null != a) {
-			String val = IdHelper.sanitize(a.getRawValue().toString().toUpperCase()).trim();
+			String val = IdHelper.sanitize(a.getRawValue().toUpperCase()).trim();
 
 			if (StringUtils.isEmpty(val)) {
 				logger.info("{} will be removed because MODEL is empty after trimming", dataFragment);
@@ -121,9 +121,9 @@ public class ReferentielService {
 			//////////////////////////////////
 			final Attribute brand = dataFragment.getAttribute(ReferentielKey.BRAND.toString());
 
-			if (null != brand && val.startsWith(brand.getRawValue().toString().toUpperCase())) {
+			if (null != brand && val.startsWith(brand.getRawValue().toUpperCase())) {
 				logger.info("Removing BRAND from MODEL");
-				val = val.substring(brand.getRawValue().toString().length());
+				val = val.substring(brand.getRawValue().length());
 			}
 
 
