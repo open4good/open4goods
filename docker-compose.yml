@@ -8,13 +8,13 @@ services:
     image: "xwiki:stable-mysql-tomcat"
     container_name: xwiki-mysql-tomcat-web
     depends_on:
-      - xwiki-mysql-db
+      - mysql
     # The DB_USER/DB_PASSWORD/DB_HOST variables are used in the hibernate.cfg.xml file.
     environment:
       - DB_USER=xwiki
       - DB_PASSWORD=xwiki
       - DB_DATABASE=xwiki
-      - DB_HOST=xwiki-mysql-db
+      - DB_HOST=mysql
     # Provide a name instead of an auto-generated id for the xwiki permanent directory configured in the Dockerfile,
     # to make it simpler to identify in 'docker volume ls'.
     volumes:
@@ -28,9 +28,9 @@ services:
 # Mysql
 ###################################################################  
   # The container that runs MySQL
-  xwiki-mysql-db:
-    image: "mysql:8.2.0"
-    container_name: xwiki-mysql-db
+  mysql:
+    image: "mysql:5.7"
+    container_name: mysql
     restart: always
     command: ['mysqld', '--character-set-server=utf8mb4', '--collation-server=utf8mb4_unicode_ci']
 
@@ -56,7 +56,8 @@ services:
     ports:
       - "3306"
 
-        ####################################################################
+
+####################################################################
 # Elastic Search
 ###################################################################
        
