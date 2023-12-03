@@ -21,6 +21,8 @@ public class SchedulingConfig implements SchedulingConfigurer {
 
 	@Bean(destroyMethod = "shutdown")
 	public Executor taskExecutor() {
-		return Executors.newScheduledThreadPool(5, Thread.ofVirtual().factory());
+		// TODO : Virtual threads not working
+//		return Executors.newScheduledThreadPool(5, Thread.ofVirtual().factory());
+		return Executors.newScheduledThreadPool(5);
 	}
 }
