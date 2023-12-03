@@ -17,7 +17,6 @@ import org.open4goods.model.data.DataFragment;
 import org.open4goods.model.dto.FetchRequestResponse;
 import org.open4goods.services.DataSourceConfigService;
 import org.open4goods.services.SerialisationService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;

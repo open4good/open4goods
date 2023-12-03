@@ -21,9 +21,13 @@ public class CrawlerConfig {
 
 	
 
-	protected @Autowired Environment env;
-	
-	
+	protected final Environment env;
+
+    public CrawlerConfig(Environment env) {
+        this.env = env;
+    }
+
+
     @Bean
     DataFragmentCompletionService offerCompletionService(@Autowired final FetcherProperties fetcherProperties) {
 		return new DataFragmentCompletionService();
@@ -47,14 +51,11 @@ public class CrawlerConfig {
                                                                       @Autowired final IndexationService indexationService,  @Autowired final IndexationRepository indexationRepository) {
     	
 		// Logging to console according to dev profile and conf
-		boolean toConsole = false;
+		boolean toConsole = ArrayUtils.contains(env.getActiveProfiles(), "dev") || ArrayUtils.contains(env.getActiveProfiles(), "devsec");
 		// TODO : Not nice, mutualize
-		if (ArrayUtils.contains(env.getActiveProfiles(), "dev") || ArrayUtils.contains(env.getActiveProfiles(), "devsec")) {
-			toConsole = true;
-		}
-		
-		
-		return new WebDatasourceFetchingService(indexationService, fetcherProperties, indexationRepository, fetcherProperties.getLogsDir(), toConsole);
+
+
+        return new WebDatasourceFetchingService(indexationService, fetcherProperties, indexationRepository, fetcherProperties.getLogsDir(), toConsole);
 	}
 
     @Bean
@@ -67,14 +68,11 @@ public class CrawlerConfig {
             ) {
     	
 		// Logging to console according to dev profile and conf
-		boolean toConsole = false;
+		boolean toConsole = ArrayUtils.contains(env.getActiveProfiles(), "dev") || ArrayUtils.contains(env.getActiveProfiles(), "devsec");
 		// TODO : Not nice, mutualize
-		if (ArrayUtils.contains(env.getActiveProfiles(), "dev") || ArrayUtils.contains(env.getActiveProfiles(), "devsec")) {
-			toConsole = true;
-		}
-		
-		
-		return new CsvDatasourceFetchingService(completionService, indexationService, fetcherProperties, webDatasourceFetchingService, indexationRepository,fetcherProperties.getLogsDir(),  toConsole);
+
+
+        return new CsvDatasourceFetchingService(completionService, indexationService, fetcherProperties, webDatasourceFetchingService, indexationRepository,fetcherProperties.getLogsDir(),  toConsole);
 	}
 
     @Bean

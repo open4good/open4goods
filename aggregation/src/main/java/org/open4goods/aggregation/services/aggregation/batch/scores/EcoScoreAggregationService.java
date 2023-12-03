@@ -52,7 +52,7 @@ public class EcoScoreAggregationService extends AbstractScoreAggregationService 
 	private Double generateEcoScore(Map<String, Score> scores) throws ValidationException {
 		
 		
-		Double va = 0.0;
+		double va = 0.0;
 		for (String config :  ecoScoreconfig.keySet()) {
 			Score score = scores.get(config);
 			

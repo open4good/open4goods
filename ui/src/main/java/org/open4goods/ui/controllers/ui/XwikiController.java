@@ -36,17 +36,20 @@ public class XwikiController extends AbstractUiController {
 	private static final Logger LOGGER = LoggerFactory.getLogger(XwikiController.class);
 
 	// The siteConfig
-	private @Autowired UiConfig config;
+	private final UiConfig config;
 
-	private @Autowired XwikiService xwikiService;
+	private final XwikiService xwikiService;
 
 	// TODO : Tweak pageSize handle categories search page
-	private @Autowired VerticalController verticalController;
-	private @Autowired VerticalsConfigService verticalService;
+	private final VerticalController verticalController;
+	private final VerticalsConfigService verticalService;
 
-
-
-
+	public XwikiController(UiConfig config, XwikiService xwikiService, VerticalController verticalController, VerticalsConfigService verticalsConfigService) {
+		this.config = config;
+		this.xwikiService = xwikiService;
+		this.verticalController = verticalController;
+		this.verticalService = verticalsConfigService;
+	}
 
 
 	//////////////////////////////////////////////////////////////

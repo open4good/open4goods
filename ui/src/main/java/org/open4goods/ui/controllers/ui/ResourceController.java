@@ -3,19 +3,14 @@ package org.open4goods.ui.controllers.ui;
 
 
 import java.io.BufferedInputStream;
-import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URISyntaxException;
-import java.net.URLEncoder;
-import java.util.Locale;
 import java.util.Optional;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
-import org.checkerframework.checker.guieffect.qual.UI;
-import org.open4goods.config.yml.ui.VerticalConfig;
 import org.open4goods.dao.ProductRepository;
 import org.open4goods.exceptions.InvalidParameterException;
 import org.open4goods.exceptions.ResourceNotFoundException;
@@ -27,7 +22,6 @@ import org.open4goods.model.product.Product;
 import org.open4goods.services.BrandService;
 import org.open4goods.services.DataSourceConfigService;
 import org.open4goods.services.VerticalsConfigService;
-import org.open4goods.ui.Ui;
 import org.open4goods.ui.config.AppConfig;
 import org.open4goods.ui.config.yml.UiConfig;
 import org.open4goods.ui.services.GtinService;
@@ -61,14 +55,24 @@ public class ResourceController extends AbstractUiController {
 	private static final String GTIN_IMG = "gtin.png";
 
 	// The siteConfig
-	private @Autowired ImageService imageService;
-	private @Autowired ProductRepository esDao;
-	private @Autowired GtinService gtinService;
-	private @Autowired UiConfig config;
-	private @Autowired DataSourceConfigService dsConfigService;
-	private @Autowired VerticalsConfigService verticalConfigService;
-	private @Autowired BrandService brandService;
-	
+	private final ImageService imageService;
+	private final ProductRepository esDao;
+	private final GtinService gtinService;
+	private final UiConfig config;
+	private final DataSourceConfigService dsConfigService;
+	private final VerticalsConfigService verticalConfigService;
+	private final BrandService brandService;
+
+	public ResourceController(ImageService imageService, ProductRepository esDao, GtinService gtinService, UiConfig config, DataSourceConfigService dsConfigService, VerticalsConfigService verticalConfigService, BrandService brandService) {
+		this.imageService = imageService;
+		this.esDao = esDao;
+		this.gtinService = gtinService;
+		this.config = config;
+		this.dsConfigService = dsConfigService;
+		this.verticalConfigService = verticalConfigService;
+		this.brandService = brandService;
+	}
+
 	//////////////////////////////////////////////////////////////
 	// Mappings
 	//////////////////////////////////////////////////////////////

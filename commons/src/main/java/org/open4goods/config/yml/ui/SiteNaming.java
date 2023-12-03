@@ -5,8 +5,6 @@ import java.util.Locale;
 
 import org.open4goods.model.Localisable;
 
-import jakarta.validation.constraints.NotBlank;
-
 public class SiteNaming {
 
 

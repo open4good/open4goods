@@ -2,7 +2,6 @@ package org.open4goods.aggregation.services.aggregation.realtime;
 
 import org.apache.commons.lang3.StringUtils;
 import org.jsoup.Jsoup;
-import org.open4goods.aggregation.AbstractAggregationService;
 import org.open4goods.aggregation.AbstractRealTimeAggregationService;
 import org.open4goods.config.yml.ui.DescriptionsAggregationConfig;
 import org.open4goods.model.data.DataFragment;

@@ -187,9 +187,9 @@ public class Price implements Validable, Standardisable, Comparable<Double> {
 	public void setPriceValue(final String price, final Locale locale) throws ParseException {
 
 
-		Double p;
+		double p;
 		try {
-			p = Double.valueOf(price);
+			p = Double.parseDouble(price);
 		} catch (final NumberFormatException e) {
 
 			final NumberFormat nf = NumberFormat.getInstance(locale);

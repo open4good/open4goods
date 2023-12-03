@@ -44,13 +44,12 @@ public class AvatarController {
 
 	RuntimeMXBean runtimeBean = ManagementFactory.getRuntimeMXBean();
 
-	@Autowired
-	private ResourceService resourceService;
+	private final ResourceService resourceService;
 
 	private final List<Avatar> avatarBuilders = new ArrayList<>();
 
 
-	public AvatarController () {
+	public AvatarController (ResourceService resourceService) {
 
 
 		//		avatarBuilders.add(GitHubAvatar.newAvatarBuilder().layers(new ColorPaintBackgroundLayer(java.awt.Color.WHITE)).build());
@@ -67,6 +66,7 @@ public class AvatarController {
 		avatarBuilders.add(SmileyAvatar.newDefaultAvatarBuilder().build());
 		avatarBuilders.add(EightBitAvatar.newMaleAvatarBuilder().build());
 		avatarBuilders.add(EightBitAvatar.newFemaleAvatarBuilder().build());
+		this.resourceService = resourceService;
 	}
 
 

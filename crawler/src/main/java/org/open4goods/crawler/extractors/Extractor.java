@@ -1,5 +1,6 @@
 package org.open4goods.crawler.extractors;
 
+import java.lang.reflect.InvocationTargetException;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
@@ -103,10 +104,10 @@ public abstract class Extractor {
 	 * @throws IllegalAccessException
 	 */
 	public static Extractor getInstance( final ExtractorConfig conf, final Logger dedicatedLogger)
-			throws ClassNotFoundException, InstantiationException, IllegalAccessException {
+			throws ClassNotFoundException, InstantiationException, IllegalAccessException, NoSuchMethodException, InvocationTargetException {
 
 		final Class<? extends Extractor> extractorClass = (Class<? extends Extractor>) Class.forName(conf.getClassName());
-		final Extractor extractor = extractorClass.newInstance();
+		final Extractor extractor = extractorClass.getDeclaredConstructor().newInstance();
 
 		extractor.setExtractorConfig(conf);
 
@@ -151,19 +152,19 @@ public abstract class Extractor {
 
 		for (final String script : scripts) {
 
-			Integer pos = script.indexOf(varName);
+			int pos = script.indexOf(varName);
 			if (pos != -1) {
 				pos = script.indexOf(equalSign, pos);
 
 				if (pos != -1) {
-					Integer start = script.indexOf('"', pos);
+					int start = script.indexOf('"', pos);
 					if (-1 == start) {
 						start = script.indexOf('\'', pos);
 					}
 
 					if (-1 != start) {
 						start++;
-						Integer end = script.indexOf('"', start);
+						int end = script.indexOf('"', start);
 						if (-1 == end) {
 							end = script.indexOf('\'', start);
 						}

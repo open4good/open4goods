@@ -23,6 +23,9 @@ spring:
     default-property-inclusion: non-empty
   application:
     name: open4goods-api
+  threads:
+    virtual:
+      enabled: true
             
 management:
   health:

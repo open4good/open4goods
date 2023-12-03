@@ -17,16 +17,13 @@ public class BoundedExecutor {
 			throws InterruptedException, RejectedExecutionException {
 		semaphore.acquire();
 		try {
-			exec.execute(new Runnable() {
-				@Override
-				public void run() {
-					try {
-						command.run();
-					} finally {
-						semaphore.release();
-					}
-				}
-			});
+			exec.execute(() -> {
+                try {
+                    command.run();
+                } finally {
+                    semaphore.release();
+                }
+            });
 		} catch (RejectedExecutionException e) {
 			semaphore.release();
 			throw e;

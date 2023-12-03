@@ -172,8 +172,7 @@ public class Product implements Standardisable {
 
 	@Override
 	public Set<Standardisable> standardisableChildren() {
-		final Set<Standardisable> ret = new HashSet<>();
-		ret.addAll(price.standardisableChildren());
+        final Set<Standardisable> ret = new HashSet<>(price.standardisableChildren());
 		return ret;
 	}
 
@@ -328,7 +327,7 @@ public class Product implements Standardisable {
 	 * @return
 	 */
 	public List<Description> productDescriptions() {
-		return descriptions.stream().collect(Collectors.toList());
+		return new ArrayList<>(descriptions);
 	}
 
 	public String alternateIdsAsText() {
@@ -389,13 +388,11 @@ public class Product implements Standardisable {
 	 */
 	public List<String> datasourceCategoriesWithoutShortest() {
 
-		Set<String> ret = new HashSet<>();
-		ret.addAll(datasourceCategories.stream().toList());
+        Set<String> ret = new HashSet<>(datasourceCategories.stream().toList());
 
 		ret.remove(shortestCategory());
 
-		List<String> list = new ArrayList<>();
-		list.addAll(ret);
+        List<String> list = new ArrayList<>(ret);
 
 		list.sort(Comparator.comparingInt(String::length));
 
@@ -434,8 +431,7 @@ public class Product implements Standardisable {
 		ret.addAll(descriptions.stream().map(e -> e.getContent().getText()).collect(Collectors.toSet()));
 		ret.remove(names.shortestOfferName());
 
-		List<String> list = new ArrayList<>();
-		list.addAll(ret);
+        List<String> list = new ArrayList<>(ret);
 
 		list.sort(Comparator.naturalOrder());
 
@@ -458,8 +454,7 @@ public class Product implements Standardisable {
 		ret.addAll(descriptions.stream().map(e -> e.getContent().getText()).collect(Collectors.toSet()));
 		ret.remove(names.longestOfferName());
 
-		List<String> list = new ArrayList<>();
-		list.addAll(ret);
+        List<String> list = new ArrayList<>(ret);
 
 		list.sort(Comparator.naturalOrder());
 

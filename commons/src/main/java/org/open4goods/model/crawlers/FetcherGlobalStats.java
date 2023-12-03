@@ -27,7 +27,7 @@ public class FetcherGlobalStats {
 		if (null == crawlerStats) {
 			return false;
 		}
-		return crawlerStats.values().stream().filter(e -> e.getName().equals(datasource)).findAny().isPresent();
+		return crawlerStats.values().stream().anyMatch(e -> e.getName().equals(datasource));
 	}
 
 	public Map<String, FetchingJobStats> getCrawlerStats() {

@@ -1,10 +1,6 @@
 package org.open4goods.api.services;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
-
+import ch.qos.logback.classic.Level;
 import org.open4goods.aggregation.aggregator.BatchedAggregator;
 import org.open4goods.api.config.yml.ApiProperties;
 import org.open4goods.config.yml.ui.VerticalConfig;
@@ -19,7 +15,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Scheduled;
 
-import ch.qos.logback.classic.Level;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * This service is in charge of various batches

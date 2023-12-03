@@ -11,7 +11,6 @@ import org.open4goods.model.constants.RolesConstants;
 import org.open4goods.model.constants.UrlConstants;
 import org.open4goods.model.data.DataFragment;
 import org.open4goods.services.DataSourceConfigService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;

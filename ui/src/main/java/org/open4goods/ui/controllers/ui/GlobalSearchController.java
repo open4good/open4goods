@@ -27,8 +27,13 @@ import jakarta.servlet.http.HttpServletResponse;
 public class GlobalSearchController extends AbstractUiController {
 
 
-	@Autowired private SearchService searchService;
-	@Autowired UiConfig config;
+	private final SearchService searchService;
+	private final UiConfig config;
+
+	public GlobalSearchController(SearchService searchService, UiConfig config) {
+		this.searchService = searchService;
+		this.config = config;
+	}
 
 
 	@PostMapping({"/recherche/{query}"})
