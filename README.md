@@ -7,7 +7,7 @@ The first open source tool that operates ecological scoring, doing its best for 
  * Financially contributing to the environmental cause, through a repayment of 20% of the site incomes. 
 
 -----
-  
+   
 ## The project  
   
 open4goods project is an open-source and open-data product aggregator, search engine and comparator. It is build upon Maven, Java, SpringBoot, Elasticsearch and some other cool libraries.It is designed to :  
