@@ -129,10 +129,12 @@ public class AbstractUiController {
 	}
 	
 	public String loaderImage() {
-		Random random = new Random();
-		int nb;
-		nb = random.nextInt(1,maxImg+1);
-		return "/assets/img/loader/"+nb+".jpg";
 		
+		return "/assets/img/loader/"+random(1, maxImg)+".png";
+		
+	}
+	
+	public int random(int min, int max) {
+		return min + (int)(Math.random() * ((max - min) + 1));
 	}
 }
