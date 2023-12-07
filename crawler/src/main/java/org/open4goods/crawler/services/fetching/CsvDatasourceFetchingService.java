@@ -112,8 +112,9 @@ public class CsvDatasourceFetchingService extends DatasourceFetchingService {
 		this.completionService = completionService;
 		this.fetcherProperties = fetcherProperties;
 		// The CSV executor can have at most the fetcher max indexation tasks threads
-		executor = Executors.newFixedThreadPool(fetcherProperties.getConcurrentFetcherTask(), Thread.ofVirtual().factory());
-		
+// TODO : see with @Nico
+		//		executor = Executors.newFixedThreadPool(fetcherProperties.getConcurrentFetcherTask(), Thread.ofVirtual().factory());
+		executor = Executors.newFixedThreadPool(fetcherProperties.getConcurrentFetcherTask());
 
 	}
 
