@@ -90,7 +90,7 @@ public class DataFragmentStoreService {
 	 *
 	 * @param dataFragment
 	 */
-	@Timed(value = "queueDataFragment", description = "Validation, standardisation and addding to queue a DataFragment")
+//	@Timed(value = "queueDataFragment", description = "Validation, standardisation and addding to queue a DataFragment")
 	public void queueDataFragment(final DataFragment data) {
 
 		try {
