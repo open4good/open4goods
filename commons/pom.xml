@@ -98,11 +98,12 @@
 			<version>1.17.1</version>
 		</dependency>
 
+<!--
 		<dependency>
 			<groupId>io.micrometer</groupId>
 			<artifactId>micrometer-core</artifactId>
 		</dependency>
-
+-->
 		<dependency>
 			<groupId>net.lingala.zip4j</groupId>
 			<artifactId>zip4j</artifactId>
