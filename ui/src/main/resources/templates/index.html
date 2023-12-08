@@ -33,7 +33,7 @@
     <!--/* Loader */-->
     <th:block th:insert="~{inc/preloader.html}"></th:block>
 	
-    <main class="bg-gray-200">	
+    <main class="bg-gray-200" style="background-color: #ffffff!important;">	
 		
        	<!--/* Central */-->
 		<section class="section-header py-3">
@@ -74,6 +74,36 @@
 		<section class="bg-white mt-4 text-center py-4">
 			<h1 class="mb-3">Consommons peu, consommons bien</h1>
 			<p class="lead mb-0">Un coup de main éthique et ouvert pour amoindrir l'impact de votre shopping en ligne.</p>
+		</section>
+
+		<section class="bg-white my-4 text-center py-4" style="background-color: #f1efe7!important;">
+			<h1 class="mb-3">Nos catégories évaluées</h1>
+			<p class="lead mb-0">L'assurance de bien choisir</p>
+		</section>
+
+		<section class="container">
+			<div class="row">
+				<div class="col-12 col-md-6 col-lg-3" th:each ="vertical : ${verticals}">
+					<div class="blog-card">
+						<div class="card shadow">
+							<a th:href="'/'+${vertical.homeUrl.i18n(siteLanguage)}"><img th:src="${vertical.homeLogo.i18n(siteLanguage)}" class="card-img-top rounded-top" alt="Themesberg office"></a>
+							<div class="card-body">
+								<h2 class="h5">
+									<a th:href="'/'+${vertical.homeUrl.i18n(siteLanguage)}" th:text="${vertical.homeTitle.i18n(siteLanguage)}"></a>
+								</h2>
+								<p class="card-text my-2" th:text="${vertical.homeDescription.i18n(siteLanguage)}"></p>
+							</div>
+							<div class="card-footer bg-white border-0 px-0 py-0">
+								<div class="d-grid">
+									<a class="btn btn-sm btn-secondary rounded-0 rounded-bottom" th:href="'/'+${vertical.homeUrl.i18n(siteLanguage)}">
+										<span class="fas fa-book-open me-1"></span> Découvrir
+									</a>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
 		</section>
        
 
@@ -155,7 +185,7 @@
 
 		</div>
 
-		<section class="bg-white mt-4 text-center py-4">
+		<section class="bg-white mt-4 text-center py-4" style="background-color: #f1efe7!important;">
 			<h1 class="mb-3">Les chiffres clés</h1>
 			<p class="lead mb-0">Avec animation, c'est plus funky</p>
 		</section>
@@ -212,38 +242,8 @@
 			</div>
 	   </section>
 
-	   <section class="bg-white mt-4 text-center py-4">
-			<h1 class="mb-3">Nos catégories évaluées</h1>
-			<p class="lead mb-0">L'assurance de bien choisir</p>
-		</section>
-
-		<section class="container">
-			<div class="row">
-				<div class="col-12 col-md-6 col-lg-3" th:each ="vertical : ${verticals}">
-					<div class="blog-card">
-						<div class="card shadow">
-							<a th:href="'/'+${vertical.homeUrl.i18n(siteLanguage)}"><img th:src="${vertical.homeLogo.i18n(siteLanguage)}" class="card-img-top rounded-top" alt="Themesberg office"></a>
-							<div class="card-body">
-								<h2 class="h5">
-									<a th:href="'/'+${vertical.homeUrl.i18n(siteLanguage)}" th:text="${vertical.homeTitle.i18n(siteLanguage)}"></a>
-								</h2>
-								<p class="card-text my-2" th:text="${vertical.homeDescription.i18n(siteLanguage)}"></p>
-							</div>
-							<div class="card-footer bg-white border-0 px-0 py-0">
-								<div class="d-grid">
-									<a class="btn btn-sm btn-secondary rounded-0 rounded-bottom" th:href="'/'+${vertical.homeUrl.i18n(siteLanguage)}">
-										<span class="fas fa-book-open me-1"></span> Découvrir
-									</a>
-								</div>
-							</div>
-						</div>
-					</div>
-				</div>
-			</div>
-		</section>
-
    
-		<section class="bg-white mt-4 text-center py-4">
+		<section class="bg-white mt-4 text-center py-4" style="background-color: #f1efe7!important;">
 			<h1 class="mb-3">Notre philosophie : le bien commun</h1>
 			<p class="lead mb-0">Découvrez nos valeurs et nos atouts</p>
 		</section>
