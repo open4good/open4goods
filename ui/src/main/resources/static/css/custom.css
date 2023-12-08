@@ -179,10 +179,10 @@ Xwiki css
 	padding: 0 0 0 16px;
 }
 
-
+/*
 .bg-gray-200 {
 	background-color: #f1efe7!important;
-}
+}*/
 
 .btn-primary {
 	background-color: #1e851a!important;
@@ -206,4 +206,19 @@ h4[class^="h"],
 h5[class^="h"],
 h6[class^="h"] {
 	font-family: 'League Spartan', sans-serif!important;
+}
+
+.absolute-center {
+	position:absolute;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%);
+}
+/* css surcharge test Goulven ; on inverse le crême du blanc sur la home page */
+
+main.bg-gray-200 {
+	background-color: #ffffff!important;
+}
+main section.bg-white {
+	background-color: #f1efe7 !important;
 }
