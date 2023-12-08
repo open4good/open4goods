@@ -160,13 +160,13 @@
 			<p class="lead mb-0">Avec animation, c'est plus funky</p>
 		</section>
 
-	   <section class="container text-center py-4">
+	   <section class="level container text-center py-4">
 			<div class="row justify-content-center">
 				<div class="col-12 col-md-6 col-lg-4 py-3">
 					<div class="icon icon-shape icon-shape-secondary me-2 me-md-0 mb-2">
 						<span class="fas fa-box-open"></span>
 					</div>
-					<span class="counter display-3 text-secondary d-block">150€</span>
+					<span class="counter display-3 text-secondary d-block" data-value="150" ></span>
 					<span class="lead">Montant du coup de pouce à date de Nudger pour la planète</span>
 				</div>
 
@@ -174,7 +174,7 @@
 					<div class="icon icon-shape icon-shape-secondary me-2 me-md-0 mb-2">
 						<span class="fas fa-box-open"></span>
 					</div>
-					<span class="counter display-3 text-secondary d-block">15M+ Offres commerciales</span>
+					<span class="counter display-3 text-secondary d-block" data-value="1230000" >15M+ Offres commerciales</span>
 					<span class="lead">Un des comparateurs les plus fournis</span>
 				</div>
 
@@ -182,7 +182,7 @@
 					<div class="icon icon-shape icon-shape-secondary me-2 me-md-0 mb-2">
 						<span class="fas fa-box-open"></span>
 					</div>
-					<span class="counter display-3 text-secondary d-block">8703</span>
+					<span class="counter display-3 text-secondary d-block" data-value="8703">8703</span>
 					<span class="lead">Nombre de produits disponibles dans nos univers, pour lesquels nous disposons d'un bilan environnemental.</span>
 				</div>
 
@@ -190,7 +190,7 @@
 					<div class="icon icon-shape icon-shape-secondary me-2 me-md-0 mb-2">
 						<span class="fas fa-box-open"></span>
 					</div>
-					<span class="counter display-3 text-secondary d-block">+50M produits</span>
+					<span class="counter display-3 text-secondary d-block" data-value="123" >+50M produits</span>
 					<span class="lead">Disponibles en open data, reprenant l'intégralité de l'inventaire. La référence en matière de bases de codes barres dans l'opendata français.</span>
 				</div>
 
@@ -198,7 +198,7 @@
 					<div class="icon icon-shape icon-shape-secondary me-2 me-md-0 mb-2">
 						<span class="fas fa-box-open"></span>
 					</div>
-					<span class="counter display-3 text-secondary d-block">+270k lignes de codes</span>
+					<span class="counter display-3 text-secondary d-block" data-value="270" >+270k lignes de codes</span>
 					<span class="lead">Disponibles en open source. Bien commun et transparence !</span>
 				</div>
 
@@ -402,6 +402,10 @@
 
 <script src="/webjars/jquery/jquery.min.js"></script>
 
+
+<script src="../../vendor/countup.js/dist/countUp.umd.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/waypoints/4.0.1/jquery.waypoints.min.js" integrity="sha512-CEiA+78TpP9KAIPzqBvxUv8hy41jyI3f2uHi7DGp/Y/Ka973qgSdybNegWFciqh6GrN2UePx2KkflnQUbUhNIA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/lettering.js/0.7.0/jquery.lettering.min.js" integrity="sha512-9ex1Kp3S7uKHVZmQ44o5qPV6PnP8/kYp8IpUHLDJ+GZ/qpKAqGgEEH7rhYlM4pTOSs/WyHtPubN2UePKTnTSww==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script src="http://textillate.js.org/jquery.textillate.js"></script>
 
@@ -454,6 +458,37 @@ function animateText() {
 }
 
 
+
+
+
+
+
+function countStart(){
+  const $counters = document.querySelectorAll(".counter"),
+        options = {
+          useEasing: true,
+          useGrouping: true,
+          separator: ",",
+          decimal: "."
+        };
+
+  $counters.forEach( (item) => {
+    const value = item.dataset.value;
+    const counter = new countUp.CountUp(item, value, options);
+    counter.start();
+  });
+}
+
+
+
+new Waypoint({
+  element: document.querySelector('.level'),
+  handler: function() {
+    countStart()
+    //this.destroy() //for once
+  },
+  offset: '50%'
+});
 
 
 
