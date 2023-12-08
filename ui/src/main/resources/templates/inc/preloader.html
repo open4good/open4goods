@@ -1,15 +1,21 @@
-<section class="preloader bg-gray-200 h-100 w-100">
+<div class="preloader bg-dark flex-column justify-content-center align-items-center">
+	<img class="mb-4" id="preloader-img" style=" border-radius: 8px; width:550px; height:auto" th:src="${loaderImg}">
+	<br/>
+	<svg id="loader-logo" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="100px" height="100px" viewBox="0 0 100 100" enable-background="new 0 0 100 100" xml:space="preserve">
+		
+		
+		<circle fill="none" stroke="#fff" stroke-width="4" stroke-miterlimit="10" cx="50" cy="50" r="48" />
+		<line fill="none" stroke-linecap="round" stroke="#fff" stroke-width="4" stroke-miterlimit="10" x1="50" y1="50" x2="85" y2="50.5">
+		  <animateTransform attributeName="transform" dur="2s" type="rotate" from="0 50 50" to="360 50 50" repeatCount="indefinite" />
+		</line>
+		<line fill="none" stroke-linecap="round" stroke="#fff" stroke-width="4"	stroke-miterlimit="10" x1="50" y1="50" x2="49.5" y2="74">
+		  <animateTransform attributeName="transform" dur="15s" type="rotate" from="0 50 50" to="360 50 50" repeatCount="indefinite" />
+		</line>
 
-	<article class="d-flex justify-content-center align-items-center position-relative">
-		<img class="absolute-center" id="preloader-img" style=" border-radius: 8px; width:550px;" th:src="${loaderImg}">
-		<svg id="loader-logo" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="100px" height="100px" viewBox="0 0 100 100" enable-background="new 0 0 100 100" xml:space="preserve">
-			<circle fill="none" stroke="#fff" stroke-width="4" stroke-miterlimit="10" cx="50" cy="50" r="48" />
-			<line fill="none" stroke-linecap="round" stroke="#fff" stroke-width="4" stroke-miterlimit="10" x1="50" y1="50" x2="85" y2="50.5">
-			<animateTransform attributeName="transform" dur="2s" type="rotate" from="0 50 50" to="360 50 50" repeatCount="indefinite" />
-			</line>
-			<line fill="none" stroke-linecap="round" stroke="#fff" stroke-width="4"	stroke-miterlimit="10" x1="50" y1="50" x2="49.5" y2="74">
-			<animateTransform attributeName="transform" dur="15s" type="rotate" from="0 50 50" to="360 50 50" repeatCount="indefinite" />
-			</line>
-		</svg>
-	</article>
-</section>
+
+
+	</svg>
+	
+	
+	
+</div>
