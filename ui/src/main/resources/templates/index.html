@@ -23,7 +23,7 @@
 	<meta name="twitter:title" th:content="#{index.title}">
 	<meta name="twitter:description" th:content="#{index.meta.description}">
 	<meta name="twitter:image" th:content="${url} + 'assets/img/brand/light.svg'">
-	
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" integrity="sha512-c42qTSw/wPZ3/5LBzD+Bw5f7bSF2oxou6wEb+I/lqeaKV5FDIfMvvRp772y4jcJLKuGUOpbJMdg/BTl50fJYAw==" crossorigin="anonymous" referrerpolicy="no-referrer" />	
 </head>
 
 <body>
@@ -38,7 +38,7 @@
        	<!--/* Central */-->
 		<section class="section-header py-3">
 			<div class="col-12">
-				<p class="display-2 mb-2 text-center">nudger<span class="text-secondary-app fw-bold">.fr</span>
+				<p style="visibility: hidden;" class="tlt display-2 mb-2 text-center">nudger<span class="text-secondary-app fw-bold">.fr</span>
 				</p>
 			</div>	
 
@@ -402,8 +402,8 @@
 
 <script src="/webjars/jquery/jquery.min.js"></script>
 
-
-
+<script src="https://cdnjs.cloudflare.com/ajax/libs/lettering.js/0.7.0/jquery.lettering.min.js" integrity="sha512-9ex1Kp3S7uKHVZmQ44o5qPV6PnP8/kYp8IpUHLDJ+GZ/qpKAqGgEEH7rhYlM4pTOSs/WyHtPubN2UePKTnTSww==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script src="http://textillate.js.org/jquery.textillate.js"></script>
 
 <!-- pixel JS -->
 <script src="../../assets/js/pixel.js"></script>
@@ -412,12 +412,63 @@
 <script src="../../assets/js/pixel-custom.js"></script>
 
 <script>
+
+
+
+
+function animateText() {
+	$('.tlt').textillate({
+		loop: true,
+		initialDelay: 200,
+		 in: {
+		  	// set the effect name
+		    //effect: "",
+		
+		    // set the delay factor applied to each consecutive character
+		    delayScale: 1.5,
+		
+		    // set the delay between each character
+		    delay: 50,
+		
+		    // set to true to animate all the characters at the same time
+		    sync: false,
+		
+		    // randomize the character sequence
+		    // (note that shuffle doesn't make sense with sync = true)
+		    shuffle: Math.random() < 0.5,
+		
+		    // reverse the character sequence
+		    // (note that reverse doesn't make sense with sync = true)
+		    reverse: false,
+		
+		    // callback that executes once the animation has finished
+		    callback: function () {
+		    	alert("dd");
+		    	$("#nudgerEnd").fadeIn();
+		    }
+		  }
+	});
+	
+	
+	
+}
+
+
+
+
+
 $(document).ready(function() {
 	// Product search input
 	$('#searchInput').on("change",function (e) {
     	$('#searchForm').attr("action","/recherche/"+encodeURIComponent($('#searchInput').val()));
     });
+        
+        
+      $( "body").on( "tplLoaded",function() {
+    	  animateText();
+		});
 } );
+
 
 
 </script>
