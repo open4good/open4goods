@@ -23,6 +23,13 @@ public class CsvDataSourceProperties {
 	 */
 	private String testHeaders;
 
+	
+	/**
+	 * In an awin datasource, the awin Advertiser Name
+	 */
+	private String awinEntry;
+	
+	
 	@NotNull
 	@NotEmpty
 	/**
@@ -571,6 +578,14 @@ public class CsvDataSourceProperties {
 
 	public void setImageTokenExclusions(Set<String> imageTokenExclusions) {
 		this.imageTokenExclusions = imageTokenExclusions;
+	}
+
+	public String getAwinEntry() {
+		return awinEntry;
+	}
+
+	public void setAwinEntry(String awinEntry) {
+		this.awinEntry = awinEntry;
 	}
 
 

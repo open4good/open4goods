@@ -36,7 +36,17 @@ public class FetcherProperties {
 //	@NotBlank
 	private String apiKey;
 
-
+	/**
+	 * The awin catalog URL
+	 */
+	private String awinCatalogUrl;
+	
+	/**
+	 * The templated download url 
+	 */
+	private String awinTemplateUrl;
+	
+	
 	/**
 	 * the configuration for synchronisation
 	 */
@@ -195,6 +205,22 @@ public class FetcherProperties {
 
 	public void setChromeDriverPath(String chromeDriverPath) {
 		this.chromeDriverPath = chromeDriverPath;
+	}
+
+	public String getAwinCatalogUrl() {
+		return awinCatalogUrl;
+	}
+
+	public void setAwinCatalogUrl(String awinCatalogUrl) {
+		this.awinCatalogUrl = awinCatalogUrl;
+	}
+
+	public String getAwinTemplateUrl() {
+		return awinTemplateUrl;
+	}
+
+	public void setAwinTemplateUrl(String awinTemplateUrl) {
+		this.awinTemplateUrl = awinTemplateUrl;
 	}
 
 
