@@ -47,7 +47,7 @@ public class BarCodeAggregationService extends AbstractRealTimeAggregationServic
 
 
 		if (valResult.getKey().equals(BarcodeType.UNKNOWN)) {
-			dedicatedLogger.info("{} is not a valid ISBN/UEAN13 barcode : {}",valResult.getValue() ,input);
+			dedicatedLogger.warn("{} is not a valid ISBN/UEAN13 barcode : {}",valResult.getValue() ,input);
 			throw new AggregationSkipException("Invalid barcode : " + output.gtin());
 		}
 

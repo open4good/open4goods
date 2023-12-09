@@ -1,6 +1,8 @@
 package org.open4goods.crawler.services.fetching;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URL;
 import java.net.URLDecoder;
@@ -15,6 +17,10 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.stream.Collectors;
+import java.util.zip.GZIPInputStream;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
@@ -24,6 +30,7 @@ import org.open4goods.config.yml.datasource.CsvDataSourceProperties;
 import org.open4goods.config.yml.datasource.DataSourceProperties;
 import org.open4goods.config.yml.datasource.HtmlDataSourceProperties;
 import org.open4goods.crawler.config.yml.FetcherProperties;
+import org.open4goods.crawler.repository.CsvIndexationRepository;
 import org.open4goods.crawler.repository.IndexationRepository;
 import org.open4goods.crawler.services.DataFragmentCompletionService;
 import org.open4goods.crawler.services.IndexationService;
@@ -35,6 +42,7 @@ import org.open4goods.helper.ShippingTimeParser;
 import org.open4goods.model.constants.InStock;
 import org.open4goods.model.constants.ReferentielKey;
 import org.open4goods.model.constants.ResourceTagDictionary;
+import org.open4goods.model.crawlers.FetchCsvStats;
 import org.open4goods.model.crawlers.FetchingJobStats;
 import org.open4goods.model.data.DataFragment;
 import org.open4goods.model.data.Price;
@@ -81,6 +89,7 @@ public class CsvDatasourceFetchingService extends DatasourceFetchingService {
 
 	private final ExecutorService executor;
 	
+	private AwinCatalogService awinService;
 	
 	
 	
@@ -89,6 +98,9 @@ public class CsvDatasourceFetchingService extends DatasourceFetchingService {
 	private final Map<String, FetchingJobStats> running = new ConcurrentHashMap<>();
 
 	private final FetcherProperties fetcherProperties;
+
+	private CsvIndexationRepository csvIndexationRepository;
+
 
 	// The chars used in CSV after libreoffice sanitisation
 	private static final char SANITISED_COLUMN_SEPARATOR = ';';
@@ -102,7 +114,7 @@ public class CsvDatasourceFetchingService extends DatasourceFetchingService {
 	 * @param fetcherProperties
 	 * @param webFetchingService
 	 */
-	public CsvDatasourceFetchingService(final DataFragmentCompletionService completionService,
+	public CsvDatasourceFetchingService(final CsvIndexationRepository csvIndexationRepository, AwinCatalogService awinCatalogService,   final DataFragmentCompletionService completionService,
 			final IndexationService indexationService, final FetcherProperties fetcherProperties,
 			final WebDatasourceFetchingService webFetchingService, IndexationRepository indexationRepository, final String logsFolder, boolean toConsole
 			) {
@@ -111,10 +123,12 @@ public class CsvDatasourceFetchingService extends DatasourceFetchingService {
 		this.webFetchingService = webFetchingService;
 		this.completionService = completionService;
 		this.fetcherProperties = fetcherProperties;
+		this.awinService = awinCatalogService;
 		// The CSV executor can have at most the fetcher max indexation tasks threads
 // TODO : see with @Nico
 		//		executor = Executors.newFixedThreadPool(fetcherProperties.getConcurrentFetcherTask(), Thread.ofVirtual().factory());
 		executor = Executors.newFixedThreadPool(fetcherProperties.getConcurrentFetcherTask());
+		this.csvIndexationRepository = csvIndexationRepository;
 
 	}
 
@@ -244,10 +258,23 @@ public class CsvDatasourceFetchingService extends DatasourceFetchingService {
 				 }
 			}
 
-
 			
 			
-			for (final String url : config.getDatasourceUrls()) {
+			Set<String> urls ;
+			if (null != config.getAwinEntry()) {
+				urls = awinService.getEntriesFor(config.getAwinEntry()).stream().map(e-> e.getUrl())
+						.collect(Collectors.toSet());
+			} else {
+				// Classical full datafeed config
+				urls = config.getDatasourceUrls();
+			}
+			
+			
+			
+			
+			for (final String url : urls) {
+				
+				FetchCsvStats stats = new FetchCsvStats(url, dsConfName);
 				
 				int okItems = 0;
 				int validationFailedItems = 0;
@@ -279,7 +306,24 @@ public class CsvDatasourceFetchingService extends DatasourceFetchingService {
 						destFile = new File(url);
 					}
 
-					if (config.getZiped()) {
+					
+					if (null != config.getAwinEntry()) {
+						// Awin are gziped
+						
+						File tmpFile = File.createTempFile("gzip","awin");
+						
+						decompressGzipFile(destFile.getAbsolutePath(), tmpFile.getAbsolutePath());
+						
+						
+					      
+					      // Switching and cleaning
+					      String toDelete = destFile.getAbsolutePath();
+					      destFile = new File(tmpFile.getAbsolutePath());
+					      new File(toDelete).delete();
+					      
+					      	
+						
+					} else	if (config.getZiped()) {
 
 						// Unzipping the files
 						try {
@@ -343,7 +387,7 @@ public class CsvDatasourceFetchingService extends DatasourceFetchingService {
 						Map<String, String> line = null;
 						try {
 
-
+							stats.incrementLines();
 							
 							// stats update
 							running.get(dsConfName).incrementProcessed(url);
@@ -353,50 +397,56 @@ public class CsvDatasourceFetchingService extends DatasourceFetchingService {
 							line = mi.next();
 							if (null == line) {
 								dedicatedLogger.warn("Null line");
+								stats.incrementErrors();
 								continue;
 							}							
-							
-							// Checking inclusions					
-							boolean skip = false;
-							for (Entry<String, String> entry : config.getInclude().entrySet()) {
-								String val = getFromCsvRow(line, entry.getKey());
-								if (null != val && !val.equalsIgnoreCase(entry.getValue())) {
-									excludedItems++;
-									skip = true;
-									break;
-								}								
-							}
-							if (skip) {
-								continue;
-							}
-							
+
+//							TODO : remove also from conf, not used
+//							// Checking inclusions					
+//							boolean skip = false;
+//							for (Entry<String, String> entry : config.getInclude().entrySet()) {
+//								String val = getFromCsvRow(line, entry.getKey());
+//								if (null != val && !val.equalsIgnoreCase(entry.getValue())) {
+//									excludedItems++;
+//									skip = true;
+//									break;
+//								}								
+//							}
+//							if (skip) {
+//								continue;
+//							}
+//							
 							// Checking exclusions					
-							for (Entry<String, String> entry : config.getExclude().entrySet()) {									
-								String val = getFromCsvRow(line, entry.getKey());
-								if (null != val && val.equalsIgnoreCase(entry.getValue())) {
-									excludedItems++;
-									skip = true;
-									break;
-								}								
-							}
-							if (skip) {
-								continue;
-							}
-							
+//							for (Entry<String, String> entry : config.getExclude().entrySet()) {									
+//								String val = getFromCsvRow(line, entry.getKey());
+//								if (null != val && val.equalsIgnoreCase(entry.getValue())) {
+//									excludedItems++;
+//									skip = true;
+//									break;
+//								}								
+//							}
+//							if (skip) {
+//								continue;
+//							}
+//							
 							final DataFragment df = parseCsvLine(crawler, controler, dsProperties, line, dsConfName, dedicatedLogger);
 
 							// Effectiv indexation
 							if (null != df) {
 								indexationService.index(df, dsConfName);
+								stats.incrementIndexed();
 								okItems++;
 							} else {
 								dedicatedLogger.error("Cannot index null datafragment");
+								stats.incrementErrors();
 							}
 
 						} catch (final ValidationException e) {
+							stats.incrementValidationFail();
 							validationFailedItems++;
 							dedicatedLogger.info("Validation exception while parsing {} : {}", line, e.getMessage());
 						} catch (final Exception e) {
+							stats.incrementErrors();
 							errorItems++;
 							dedicatedLogger.warn("error while parsing {} at {}.", url, e.getMessage());
 						}
@@ -407,6 +457,11 @@ public class CsvDatasourceFetchingService extends DatasourceFetchingService {
 					
 					dedicatedLogger.info("End csv fetching for {}:{}. {} imported, {} validations failed, {} excluded, {} errors ", dsConfName, url, okItems, validationFailedItems, excludedItems, errorItems);
 
+					// Saving stats 
+					stats.terminate();					
+					csvIndexationRepository.save(stats);
+					
+					
 					dedicatedLogger.info("Removing fetched CSV file at {}", destFile);
 					if (url.startsWith("http")) {
 						FileUtils.deleteQuietly(destFile);
@@ -506,6 +561,9 @@ public class CsvDatasourceFetchingService extends DatasourceFetchingService {
 		final CsvDataSourceProperties csvProperties = config.getCsvDatasource();
 
 		dedicatedLogger.info("Parsing line : {}", item);
+		
+		
+		
 		/////////////////////////////////////
 		// Applying filtering rules
 		//////////////////////////////////////
@@ -523,6 +581,13 @@ public class CsvDatasourceFetchingService extends DatasourceFetchingService {
 			}
 		}
 
+		/////////////////////////////////////
+		// Applying replacements rules
+		//////////////////////////////////////
+		
+		
+		
+		
 		/////////////////////////////////
 		// DataFragments mapping
 		//////////////////////////////////
@@ -588,6 +653,18 @@ public class CsvDatasourceFetchingService extends DatasourceFetchingService {
 		if (!StringUtils.isEmpty(csvProperties.getAttrs())) {
 			handleAttributes(p, config, getFromCsvRow(item, csvProperties.getAttrs()),dedicatedLogger);
 		}
+		
+		
+		// Adding all columns as attributes
+		for (Entry<String, String> kv : item.entrySet()) {
+			String key = kv.getKey();
+			String val = kv.getValue();
+			
+			if (!StringUtils.isEmpty(val)) {
+				p.addAttribute(key,val,config.getLanguage(), csvProperties.getAttributesIgnoreCariageReturns(),csvProperties.getAttributesSplitSeparators());
+			}
+			
+		}
 
 		// Attributes
 		for (final Entry<String, String> desc : csvProperties.getAttributes().entrySet()) {
@@ -597,6 +674,9 @@ public class CsvDatasourceFetchingService extends DatasourceFetchingService {
 		}
 
 		// Rating
+		
+		
+		
 
 		if (null != csvProperties.getRating()) {
 			try {
@@ -851,7 +931,24 @@ public class CsvDatasourceFetchingService extends DatasourceFetchingService {
 	}
 
 	
-	
+    private  void decompressGzipFile(String gzipFile, String newFile) {
+        try {
+            FileInputStream fis = new FileInputStream(gzipFile);
+            GZIPInputStream gis = new GZIPInputStream(fis);
+            FileOutputStream fos = new FileOutputStream(newFile);
+            byte[] buffer = new byte[1024];
+            int len;
+            while((len = gis.read(buffer)) != -1){
+                fos.write(buffer, 0, len);
+            }
+            //close resources
+            fos.close();
+            gis.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        
+    }
 	
 	
 }

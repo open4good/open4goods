@@ -13,11 +13,13 @@ import org.open4goods.api.services.RealtimeAggregationService;
 import org.open4goods.api.services.ReferentielService;
 import org.open4goods.api.services.store.DataFragmentStoreService;
 import org.open4goods.crawler.config.yml.FetcherProperties;
+import org.open4goods.crawler.repository.CsvIndexationRepository;
 import org.open4goods.crawler.repository.IndexationRepository;
 import org.open4goods.crawler.services.ApiSynchService;
 import org.open4goods.crawler.services.DataFragmentCompletionService;
 import org.open4goods.crawler.services.FetchersService;
 import org.open4goods.crawler.services.IndexationService;
+import org.open4goods.crawler.services.fetching.AwinCatalogService;
 import org.open4goods.crawler.services.fetching.CsvDatasourceFetchingService;
 import org.open4goods.crawler.services.fetching.WebDatasourceFetchingService;
 import org.open4goods.dao.ProductRepository;
@@ -327,12 +329,19 @@ public class ApiConfig {
 		return apiProperties.getFetcherProperties();
 	}
 
+    @Bean
+    AwinCatalogService awinCatalogService(@Autowired final FetcherProperties fetcherProperties) {
+		return new AwinCatalogService(fetcherProperties.getAwinCatalogUrl());
+	}
+    
 	@Bean
 	CsvDatasourceFetchingService csvDatasourceFetchingService(
 			@Autowired final DataFragmentCompletionService completionService,
 			@Autowired final IndexationService indexationService, @Autowired final ApiProperties apiProperties,
 			@Autowired final WebDatasourceFetchingService webDatasourceFetchingService,
-			@Autowired final IndexationRepository indexationRepository
+			@Autowired final IndexationRepository indexationRepository,
+			@Autowired final AwinCatalogService awinCatalogService,
+			  @Autowired CsvIndexationRepository csvIndexationRepo
 			
 			
 			) {
@@ -341,7 +350,7 @@ public class ApiConfig {
 		// TODO : Not nice, mutualize
 
 
-        return new CsvDatasourceFetchingService(completionService, indexationService,
+        return new CsvDatasourceFetchingService(csvIndexationRepo, awinCatalogService, completionService, indexationService,
 				apiProperties.getFetcherProperties(), webDatasourceFetchingService,indexationRepository, apiProperties.logsFolder(), toConsole);
 	}
 

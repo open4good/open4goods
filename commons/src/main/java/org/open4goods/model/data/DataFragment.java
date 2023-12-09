@@ -651,7 +651,7 @@ public class DataFragment implements Standardisable, Validable {
 			return;
 		}
 
-		final String val = StringUtils.normalizeSpace(value).toUpperCase();
+		String val = StringUtils.normalizeSpace(value).toUpperCase();
 
 		//		//TODO(conf, P3,0.25) : Number of spaces from configuration
 		//		// If too many spaces, exit
@@ -677,10 +677,23 @@ public class DataFragment implements Standardisable, Validable {
 			//			}
 			break;
 		case "GTIN":
-			if (!NumberUtils.isDigits(val)) {
-				logger.info("Cannot add non numeric GTIN, for {} at {}",val, this);
-			}else {
+			if (NumberUtils.isDigits(val)) {
 				getReferentielAttributes().put(ReferentielKey.GTIN.toString(),val);
+			}else {
+				
+				// Searching for finishing by ".00", in a few providers
+				
+				int pos = val.indexOf(".");
+				if (pos != - 1) {
+					val = val.substring(0,pos);
+				}
+				
+				if (NumberUtils.isDigits(val)) {
+					getReferentielAttributes().put(ReferentielKey.GTIN.toString(),val);
+				} else {					
+					logger.info("Cannot add non numeric GTIN, for {} at {}",val, this);
+				}
+				
 			}
 			break;
 		default:
@@ -719,7 +732,7 @@ public class DataFragment implements Standardisable, Validable {
 		attr.setName(sanitizedName);
 
 		if (ignoreCariageReturns.booleanValue()) {
-			attr.setRawValue(value.trim().replaceAll("[\\r\\n]+", ""));
+			attr.setRawValue(value.trim().replaceAll("[\\r\\n]+", " "));
 		} else {
 			attr.setRawValue(value);
 		}
