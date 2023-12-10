@@ -174,40 +174,16 @@
 					<div class="icon icon-shape icon-shape-secondary me-2 me-md-0 mb-2">
 						<span class="fas fa-box-open"></span>
 					</div>
-					<span class="counter display-3 text-secondary d-block" data-value="1230000" >15M+ Offres commerciales</span>
-					<span class="lead">Un des comparateurs les plus fournis</span>
+					<span class="counter display-3 text-secondary d-block" th:data-value="${totalItems}" >15M+ Offres commerciales</span>
+					<span class="lead">Un des comparateurs français les plus fournis</span>
 				</div>
 
 				<div class="col-12 col-md-6 col-lg-4 py-3">
 					<div class="icon icon-shape icon-shape-secondary me-2 me-md-0 mb-2">
 						<span class="fas fa-box-open"></span>
 					</div>
-					<span class="counter display-3 text-secondary d-block" data-value="8703">8703</span>
-					<span class="lead">Nombre de produits disponibles dans nos univers, pour lesquels nous disposons d'un bilan environnemental.</span>
-				</div>
-
-				<div class="col-12 col-md-6 col-lg-4 py-3">
-					<div class="icon icon-shape icon-shape-secondary me-2 me-md-0 mb-2">
-						<span class="fas fa-box-open"></span>
-					</div>
-					<span class="counter display-3 text-secondary d-block" data-value="123" >+50M produits</span>
-					<span class="lead">Disponibles en open data, reprenant l'intégralité de l'inventaire. La référence en matière de bases de codes barres dans l'opendata français.</span>
-				</div>
-
-				<div class="col-12 col-md-6 col-lg-4 py-3">
-					<div class="icon icon-shape icon-shape-secondary me-2 me-md-0 mb-2">
-						<span class="fas fa-box-open"></span>
-					</div>
-					<span class="counter display-3 text-secondary d-block" data-value="270" >+270k lignes de codes</span>
-					<span class="lead">Disponibles en open source. Bien commun et transparence !</span>
-				</div>
-
-				<div class="col-12 col-md-6 col-lg-4 py-3">
-					<div class="icon icon-shape icon-shape-secondary me-2 me-md-0 mb-2">
-						<span class="fas fa-box-open"></span>
-					</div>
-					<span class="counter display-3 text-secondary d-block" th:text="${partners.size()}"></span>
-					<span class="lead">Nombre de partenaires de notre démarche. Toutes les plus grandes enseignes !</span>
+					<span class="counter display-3 text-secondary d-block" th:data-value="${partners}" th:text="${partners}"></span>
+					<span class="lead">Nombre de <a href="/partenaires"> de notre démarche. Toutes les plus grandes enseignes !</a></span>
 				</div>
 			</div>
 	   </section>
