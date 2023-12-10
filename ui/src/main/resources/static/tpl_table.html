@@ -1,37 +1,47 @@
 <div style="display:none">	
 	<div id="template-product-search">
-        <div class="row">
-            <article class="col-12 col-md-3">
-                <div class="card shadow">
-                    <div class="card-header bg-gray-200 border-0 text-center">
-                        <img src="{{imageUrl}}" alt="{{name}}">
-                    </div>
-                    <div class="card-body border-top border-gray-300">
-                        <a href="{{productUrl}}" class="h5">{{data.attributes.referentielAttributes.BRAND}} - {{name}}</a>
-                        <p class="h6 fw-light text-gray mt-2">
-                            Monitor your health. Track your workouts. Get the motivation you need to achieve your fitness goals. And stay connected to the people and information you care about.
-                        </p>
-                        <div class="d-flex mt-3">
-                            <span class="star fas fa-star text-warning me-1"></span> 
-                            <span class="star fas fa-star text-warning me-1"></span> 
-                            <span class="star fas fa-star text-warning me-1"></span> 
-                            <span class="star fas fa-star text-warning me-1"></span> 
-                            <span class="star fas fa-star text-warning"></span> 
-                            <span class="badge badge-pill badge-gray ms-2">4.7</span>
-                            <span class="small text-success ms-3">{{data.offersCount}} offre(s)</span>
-                        </div>
-                    </div>
-                    <div class="card-footer bg-gray-200 border-top border-gray-300 p-4">
-                        <div class="mb-3">
-                            <p class="h5 my-0 text-gray me-2">
-                                {{data.price.minPrice.price}} {{data.price.minPrice.currency}}
-                            </p>
+	
+			<div class="card shadow p-4">
+                    <div class="row align-items-center">
+                        <aside class="col-md-3">
+                            <a href="{{productUrl}}">
+                                <img src="{{imageUrl}}" alt="{{name}}">
+                            </a>
+                        </aside> <!-- col.// -->
+                        <div class="col-md-6">
+                            <div class="info-main">
+                                <a href="{{productUrl}}" class="h5 title">{{data.attributes.referentielAttributes.BRAND}} - {{name}}</a>
+                                <div class="d-flex my-3">
+                                    <span class="star fas fa-star text-warning me-1"></span> 
+                                    <span class="star fas fa-star text-warning me-1"></span> 
+                                    <span class="star fas fa-star text-warning me-1"></span> 
+                                    <span class="star fas fa-star text-warning me-1"></span> 
+                                    <span class="star fas fa-star text-warning"></span> 
+                                    <span class="badge badge-pill badge-gray ms-2">4.7</span>
+                                    <span class="small text-success ms-3"><span class="fas fa-shopping-cart me-1"></span>{{data.offersCount}} offre(s)</span>
+                                </div>
+                                <p>Monitor your health. Track your workouts. Get the motivation you need to achieve your fitness goals. And stay connected to the people and information you care about.</p>
+                            </div>
+                        </div> 
+                        <div class="col-12 col-md-3">
+                            <div class="d-flex align-items-center">
+                                <span class="h5 mb-0 text-danger me-2">
+                                    {{data.price.minPrice.price}} {{data.price.minPrice.currency}}
+                                </span>
+                            </div> <!-- info-price-detail // -->
                             <span class="text-success small"><span class="fas fa-shopping-cart me-1"></span>Compensation : {{data.price.minPrice.compensation}} {{data.price.minPrice.currency}}</span>
-                        </div>
-                    </div>
-                </div> 
-            </article>
-	    </div>
-    </div>
+                            <div class="d-grid gap-2 mt-4">
+                                <a class="btn btn-tertiary btn-sm" href="{{productUrl}}">
+                                    Details
+                                </a>
+                                <a href="#" class="btn btn-tertiary btn-sm"><span class="fa fa-heart me-1"></span> 
+                                    Acheter
+                                </a>
+                            </div>
+                            
+                        </div> 
+                    </div> 
+                </div>
+	</div>
 </div>
 
