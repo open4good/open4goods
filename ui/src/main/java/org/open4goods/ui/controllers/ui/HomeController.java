@@ -3,9 +3,9 @@ package org.open4goods.ui.controllers.ui;
 import org.open4goods.dao.ProductRepository;
 import org.open4goods.services.DataSourceConfigService;
 import org.open4goods.services.VerticalsConfigService;
+import org.open4goods.ui.services.OpenDataService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.servlet.ModelAndView;
@@ -21,6 +21,7 @@ public class HomeController extends AbstractUiController {
 	private final DataSourceConfigService datasourceConfigService;
 
 	private final VerticalsConfigService verticalConfigService;
+	private OpenDataService openDataService;
 
 	public HomeController(ProductRepository aggregatedDataRepository, DataSourceConfigService datasourceConfigService, VerticalsConfigService verticalConfigService) {
 		this.aggregatedDataRepository = aggregatedDataRepository;
@@ -38,7 +39,7 @@ public class HomeController extends AbstractUiController {
 		model.addObject("totalItems", aggregatedDataRepository.countMainIndexHavingPrice());
 
 		// TODO(gof) : deduplicate (darty.com / darty.com-CSV)
-		model.addObject("partners",  datasourceConfigService.datasourceConfigs());
+		model.addObject("partners",  datasourceConfigService.datasourceConfigs().size());
 
 		model.addObject("verticals",  verticalConfigService.getConfigsWithoutDefault());
 
