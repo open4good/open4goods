@@ -43,7 +43,11 @@ public class BarcodeTest {
 		assertEquals(BarcodeType.ISBN_13, service.sanitize("0198526636").getKey());
 
 
+		assertEquals(BarcodeType.ISBN_13, service.sanitize("9780786296323").getKey());
 
+		
+
+		
 		// Testing invalid
 		assertEquals(BarcodeType.UNKNOWN, service.sanitize("8436542859045").getKey());
 
