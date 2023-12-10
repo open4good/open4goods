@@ -161,7 +161,7 @@ public class DataFragmentStoreService {
 		//TODO(conf) : elastinc bulk size from conf
 
 
-		if (fileQueue.size() > 400) {
+		if (fileQueue.size() > 200) {
 			aggregateAndstore();
 		}
 	}
@@ -189,7 +189,7 @@ public class DataFragmentStoreService {
 			// There is data to consume and queue consummation is enabled
 			final Collection<DataFragment> buffer = fileQueue.values();
 
-
+			logger.error("Dequeuing {} datafragments", buffer.size());
 
 			// Retrieving datafragments
 			Map<String, Product> aggDatas = aggregatedDataRepository.multiGetById(
