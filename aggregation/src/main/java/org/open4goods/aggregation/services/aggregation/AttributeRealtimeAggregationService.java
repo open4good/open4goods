@@ -47,118 +47,124 @@ public class AttributeRealtimeAggregationService extends AbstractRealTimeAggrega
 	@Override
 	public void onDataFragment(final DataFragment dataFragment, final Product product) {
 
-		AttributesConfig attributesConfig = verticalConfigService.getConfigById(product.getVertical() == null ? "all" : product.getVertical() ).get().getAttributesConfig() ;
+		try {
+			AttributesConfig attributesConfig = verticalConfigService.getConfigById(product.getVertical() == null ? "all" : product.getVertical() ).get().getAttributesConfig() ;
 
-        // Adding the list of "to be removed" attributes
-        Set<String> toRemoveFromUnmatched = new HashSet<>(attributesConfig.getExclusions());
-				
-		/////////////////////////////////////////
-		// Converting to AggregatedAttributes for matches from config
-		/////////////////////////////////////////
-		
-		List<Attribute> all = new ArrayList<>();
-		// Handling attributes in datafragment
-		all.addAll(dataFragment.getAttributes());
-		// Add unmatched attributes from the product (case configuration change)
-		all.addAll(product.getAttributes().getUnmapedAttributes().stream().map(e -> new Attribute(e.getName(),e.getValue(),e.getLanguage())).toList());
-		
-		
-		for (Attribute attr :  all) {
+			// Adding the list of "to be removed" attributes
+			Set<String> toRemoveFromUnmatched = new HashSet<>(attributesConfig.getExclusions());
+					
+			/////////////////////////////////////////
+			// Converting to AggregatedAttributes for matches from config
+			/////////////////////////////////////////
 			
-			// Checking if a potential AggregatedAttribute
-			Attribute translated = attributesConfig.translateAttribute(attr, dataFragment.getDatasourceName());
+			List<Attribute> all = new ArrayList<>();
+			// Handling attributes in datafragment
+			all.addAll(dataFragment.getAttributes());
+			// Add unmatched attributes from the product (case configuration change)
+			all.addAll(product.getAttributes().getUnmapedAttributes().stream().map(e -> new Attribute(e.getName(),e.getValue(),e.getLanguage())).toList());
 			
-			// We have a "raw" attribute that matches a aggragationconfig
-			if (null != translated) {
+			
+			for (Attribute attr :  all) {
 				
-				try {
-					AttributeConfig attrConfig = attributesConfig.getConfigFor(translated);
+				// Checking if a potential AggregatedAttribute
+				Attribute translated = attributesConfig.translateAttribute(attr, dataFragment.getDatasourceName());
+				
+				// We have a "raw" attribute that matches a aggragationconfig
+				if (null != translated) {
 					
-					// Applying parsing rule
-					translated = parseAttributeValue(translated, attrConfig);
-					
-					if (translated.getRawValue() == null) {
-						continue;
-					}
-
-					AggregatedAttribute agg = product.getAttributes().getAggregatedAttributes().get(attr.getName());
-					
-					
-					if (null == agg) {
-						// A first time match
-						agg = new AggregatedAttribute();
-						agg.setName(attr.getName());
-					} 
+					try {
+						AttributeConfig attrConfig = attributesConfig.getConfigFor(translated);
 						
-					
-					
-					toRemoveFromUnmatched.add(translated.getName());
-					agg.addAttribute(translated,attrConfig, new UnindexedKeyValTimestamp(dataFragment.getDatasourceName(), translated.getValue()));
-					
-					// Replacing new AggAttribute in product
-					product.getAttributes().getAggregatedAttributes().put(agg.getName(), agg);
-				} catch (Exception e) {
+						// Applying parsing rule
+						translated = parseAttributeValue(translated, attrConfig);
+						
+						if (translated.getRawValue() == null) {
+							continue;
+						}
 
-					dedicatedLogger.error("Attribute parsing fail for matched attribute {}", translated);
-				}				
+						AggregatedAttribute agg = product.getAttributes().getAggregatedAttributes().get(attr.getName());
+						
+						
+						if (null == agg) {
+							// A first time match
+							agg = new AggregatedAttribute();
+							agg.setName(attr.getName());
+						} 
+							
+						
+						
+						toRemoveFromUnmatched.add(translated.getName());
+						agg.addAttribute(translated,attrConfig, new UnindexedKeyValTimestamp(dataFragment.getDatasourceName(), translated.getValue()));
+						
+						// Replacing new AggAttribute in product
+						product.getAttributes().getAggregatedAttributes().put(agg.getName(), agg);
+					} catch (Exception e) {
+
+						dedicatedLogger.error("Attribute parsing fail for matched attribute {}", translated);
+					}				
+				}
 			}
-		}
 
-		
-		/////////////////////////////////////////
-		// Update referentiel attributes
-		/////////////////////////////////////////
-		handleReferentielAttributes(dataFragment , product);
-		// TODO : Add BRAND / MODEL from matches from attributes
+			
+			/////////////////////////////////////////
+			// Update referentiel attributes
+			/////////////////////////////////////////
+			handleReferentielAttributes(dataFragment , product);
+			// TODO : Add BRAND / MODEL from matches from attributes
 
-		/////////////////////////////////////////
-		// EXTRACTING FEATURES 
-		/////////////////////////////////////////
-		
-		List<Attribute> matchedFeatures = dataFragment.getAttributes().stream()
-				.filter(e -> isFeatureAttribute(e, attributesConfig))
-				.collect(Collectors.toList());
+			/////////////////////////////////////////
+			// EXTRACTING FEATURES 
+			/////////////////////////////////////////
+			
+			List<Attribute> matchedFeatures = dataFragment.getAttributes().stream()
+					.filter(e -> isFeatureAttribute(e, attributesConfig))
+					.collect(Collectors.toList());
 
-		toRemoveFromUnmatched.addAll(matchedFeatures.stream().map(Attribute::getName).collect(Collectors.toSet()));
-		
+			toRemoveFromUnmatched.addAll(matchedFeatures.stream().map(Attribute::getName).collect(Collectors.toSet()));
+			
 
-		Collection<AggregatedFeature> af = aggregateFeatures(matchedFeatures);
-		product.getAttributes().getFeatures().addAll(af);
-		
+			Collection<AggregatedFeature> af = aggregateFeatures(matchedFeatures);
+			product.getAttributes().getFeatures().addAll(af);
+			
 
-		
-		//////////////////////////
-		// Aggregating unmatched attributes
-		///////////////////////////
-		
-		for (Attribute attr : dataFragment.getAttributes()) {
-			// Checking if to be removed
-			if (toRemoveFromUnmatched.contains(attr.getName())) {
-				continue;
+			
+			//////////////////////////
+			// Aggregating unmatched attributes
+			///////////////////////////
+			
+			for (Attribute attr : dataFragment.getAttributes()) {
+				// Checking if to be removed
+				if (toRemoveFromUnmatched.contains(attr.getName())) {
+					continue;
+				}
+				
+				// TODO : remove from a config list
+				
+				AggregatedAttribute agg = product.getAttributes().getUnmapedAttributes().stream().filter(e->e.getName().equals(attr.getName())).findAny().orElse(null);
+				
+				if (null == agg) {
+					// A first time match
+					agg = new AggregatedAttribute();
+					agg.setName(attr.getName());
+				} 
+				agg.addAttribute(attr, new UnindexedKeyValTimestamp(dataFragment.getDatasourceName(), attr.getValue()));
+				
+				product.getAttributes().getUnmapedAttributes().add(agg);			
 			}
+
 			
-			// TODO : remove from a config list
+			// Removing 
+			product.getAttributes().setUnmapedAttributes(product.getAttributes().getUnmapedAttributes().stream().filter(e -> !toRemoveFromUnmatched.contains(e.getName())) .collect(Collectors.toSet()));
 			
-			AggregatedAttribute agg = product.getAttributes().getUnmapedAttributes().stream().filter(e->e.getName().equals(attr.getName())).findAny().orElse(null);
 			
-			if (null == agg) {
-				// A first time match
-				agg = new AggregatedAttribute();
-				agg.setName(attr.getName());
-			} 
-			agg.addAttribute(attr, new UnindexedKeyValTimestamp(dataFragment.getDatasourceName(), attr.getValue()));
 			
-			product.getAttributes().getUnmapedAttributes().add(agg);			
-		}
-	
-		
-		// Removing 
-		product.getAttributes().setUnmapedAttributes(product.getAttributes().getUnmapedAttributes().stream().filter(e -> !toRemoveFromUnmatched.contains(e.getName())) .collect(Collectors.toSet()));
-		
-		
-		
-		// TODO : Removing matchlist again to handle remove of old attributes in case of configuration change
+			// TODO : Removing matchlist again to handle remove of old attributes in case of configuration change
 //		product.getAttributes().getUnmapedAttributes().
+		} catch (Exception e) {
+			// TODO
+			dedicatedLogger.error("Unexpected error",e);
+			e.printStackTrace();
+		}
 	}
 
 
