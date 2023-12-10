@@ -432,7 +432,7 @@ function animateText() {
 		    delayScale: 1.5,
 		
 		    // set the delay between each character
-		    delay: 50,
+		    delay: 30,
 		
 		    // set to true to animate all the characters at the same time
 		    sync: false,
@@ -443,13 +443,11 @@ function animateText() {
 		
 		    // reverse the character sequence
 		    // (note that reverse doesn't make sense with sync = true)
-		    reverse: false,
+		    reverse: false
 		
 		    // callback that executes once the animation has finished
-		    callback: function () {
-		    	alert("dd");
-		    	$("#nudgerEnd").fadeIn();
-		    }
+		    //callback: function () {
+		    // }
 		  }
 	});
 	
