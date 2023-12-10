@@ -133,7 +133,7 @@ public class AbstractUiController {
 	
 	public String loaderImage() {
 		
-		return "/assets/img/loader/"+random(1, maxImg)+".png";
+		return "/assets/img/loader/"+random(1, maxImg)+".webp";
 		
 	}
 	
