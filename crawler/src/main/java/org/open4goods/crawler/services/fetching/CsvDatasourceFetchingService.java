@@ -266,7 +266,7 @@ public class CsvDatasourceFetchingService extends DatasourceFetchingService {
 						.collect(Collectors.toSet());
 			}
 			
-			if (null != config.getDatasourceUrls() || config.getDatasourceUrls().size() == 0) {
+			if (null != config.getDatasourceUrls() && config.getDatasourceUrls().size() > 0) {
 				// Classical full datafeed config
 				urls = config.getDatasourceUrls();
 			}
