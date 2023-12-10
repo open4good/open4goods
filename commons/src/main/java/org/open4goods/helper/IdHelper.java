@@ -128,7 +128,7 @@ public class IdHelper {
 		String ret = StringUtils.join(frs," > ");
 		ret = StringUtils.stripAccents(ret);
 		ret = ret.toUpperCase();
-		ret = ret.replaceAll("\n", " > ");
+		ret = ret.replace("\n", " > ");
 		ret = StringUtils.normalizeSpace(ret);
 		return ret;
 
