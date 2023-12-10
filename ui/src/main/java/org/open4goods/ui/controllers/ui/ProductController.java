@@ -160,7 +160,7 @@ public class ProductController extends AbstractUiController {
 				return mv;
 			}
 		} else {
-			if (!path.equals(vertical+ "%2F" + data.getNames().getName())) {
+			if (!path.equals(vertical+ "%2F" + URLEncoder.encode(data.getNames().getName(), StandardCharsets.UTF_8))) {
 				ModelAndView mv = new ModelAndView("redirect:/"+ vertical+"/"+data.getNames().getName());
 				mv.setStatus(HttpStatus.MOVED_PERMANENTLY);
 				mv.addObject("product", data);
