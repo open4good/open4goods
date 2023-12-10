@@ -260,11 +260,13 @@ public class CsvDatasourceFetchingService extends DatasourceFetchingService {
 
 			
 			
-			Set<String> urls ;
+			Set<String> urls = null ;
 			if (null != config.getAwinEntry()) {
 				urls = awinService.getEntriesFor(config.getAwinEntry()).stream().map(e-> e.getUrl())
 						.collect(Collectors.toSet());
-			} else {
+			}
+			
+			if (null != config.getDatasourceUrls() || config.getDatasourceUrls().size() == 0) {
 				// Classical full datafeed config
 				urls = config.getDatasourceUrls();
 			}
