@@ -91,6 +91,9 @@ public class AbstractUiController {
 
 		ret.addObject("config",config);
 
+		
+		ret.addObject("tpl",suffix == null ? "" : suffix);
+		
 		ret.addObject("dev", env.acceptsProfiles(Profiles.of("dev","devsec")));
 
 		ret.addObject("url",request.getRequestURL().toString() );
