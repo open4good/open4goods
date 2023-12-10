@@ -48,7 +48,7 @@ public class AbstractUiController {
 	public  void init() {
 		try {
 			// TODO : from conf
-			Resource[] resources = resolver.getResources("classpath:/static/assets/img/loader/**");
+			Resource[] resources = resolver.getResources("classpath:/static/assets/img/loader/*");
 			
 			maxImg = resources.length;
 		} catch (IOException e) {
