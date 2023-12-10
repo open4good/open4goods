@@ -15,7 +15,9 @@ public class WarrantyParser {
 		tmp = StringUtils.normalizeSpace(tmp);
 
 		switch (tmp) {
-		case "1 an":
+		case "6 months", "6 mois":
+			return 6;
+		case "1 an", "12 months":
 			return 12;
 		case "2 ans":
 			return 24;
