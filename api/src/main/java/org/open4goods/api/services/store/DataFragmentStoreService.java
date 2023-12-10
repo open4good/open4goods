@@ -227,15 +227,12 @@ public class DataFragmentStoreService {
 
 			logger.info("Indexed {} DataFragments in {}ms.",  buffer.size(),System.currentTimeMillis()-now);
 
-			// Clearing queue
-			fileQueue.clear();
-
-
-
 		} catch (final Exception e) {
 			logger.error("Error while dequeing DataFragments",e);
 		}
 
+		// Clearing queue
+		fileQueue.clear();
 
 	}
 
