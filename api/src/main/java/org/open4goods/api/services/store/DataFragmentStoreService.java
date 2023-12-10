@@ -161,7 +161,7 @@ public class DataFragmentStoreService {
 		//TODO(conf) : elastinc bulk size from conf
 
 
-		if (fileQueue.size() > 200) {
+		if (fileQueue.size() > 250) {
 			aggregateAndstore();
 		}
 	}
