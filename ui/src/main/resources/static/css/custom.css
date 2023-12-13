@@ -207,3 +207,76 @@ h5[class^="h"],
 h6[class^="h"] {
 	font-family: 'League Spartan', sans-serif!important;
 }
+
+/* preloader style */
+
+.wrapper__preloader-img {
+	width:550px;
+	height:550px;
+}
+#preloader-img {
+	position: absolute;
+	border-radius: 8px;
+	width:100%;
+	height:100%;
+}
+
+.wrapper__preloader-img svg {
+	position: absolute;
+	width:50px;
+	height:50px;
+	bottom: 10px;
+	right: 10px;
+	mix-blend-mode:difference;
+}
+
+/* flip card */
+
+.card-flip {
+	perspective: 1000px;
+}
+
+.card-flip-inner {
+	position: relative;
+	width: 100%;
+	height: 100%;
+	text-align: center;
+	transition: transform 0.8s;
+	transform-style: preserve-3d;
+	border-radius: 1rem;
+}
+
+.card-flip:hover .card-flip-inner {
+	transform: rotateY(180deg);
+}
+
+.card-flip .wrapper-card-img {
+	position: relative;
+	background-color: #fff;
+	border-radius: 1rem;
+}
+
+.card-flip .card-body {
+	position: absolute;
+	top: 0;
+	width: 100%;
+	height: 100%;
+	-webkit-backface-visibility: hidden; /* Safari */
+	backface-visibility: hidden;
+	border-radius: 1rem;
+
+	color: white;
+	transform: rotateY(180deg);
+}
+
+
+
+/* PAGES */
+
+.home-page > main.bg-gray-200 {
+	background-color: #fff !important;
+}
+
+.home-page > main.bg-gray-200 > section.bg-white{
+	background-color: #f1efe7 !important;
+}
