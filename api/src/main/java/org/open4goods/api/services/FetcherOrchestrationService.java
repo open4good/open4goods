@@ -20,6 +20,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.MediaType;
 import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
+import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.scheduling.support.CronTrigger;
@@ -42,7 +43,7 @@ public class FetcherOrchestrationService {
 
 	protected static final Logger logger = LoggerFactory.getLogger(FetcherOrchestrationService.class);
 
-	private final  ThreadPoolTaskScheduler threadPoolTaskScheduler;
+	private final  TaskScheduler  threadPoolTaskScheduler;
 
 	private final  DataSourceConfigService datasourceConfigService;
 
@@ -51,7 +52,7 @@ public class FetcherOrchestrationService {
 			.expireAfterWrite(TimeConstants.API_EXPIRED_UNSEEN_CRAWLERS_IN_SECONDS, TimeUnit.SECONDS)
 			.build( );
 
-	public FetcherOrchestrationService(final ThreadPoolTaskScheduler threadPoolTaskScheduler,
+	public FetcherOrchestrationService(final TaskScheduler threadPoolTaskScheduler,
 			final DataSourceConfigService datasourceConfigService) {
 		super();
 		this.threadPoolTaskScheduler = threadPoolTaskScheduler;
