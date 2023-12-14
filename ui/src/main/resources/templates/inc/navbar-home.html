@@ -1,14 +1,29 @@
-<nav class="navbar navbar-expand-lg navbar-transparent navbar-light navbar-theme-soft">
-    <div class="container-fluid  position-relative">
-        <a class="navbar-brand me-lg-5" href="/"><img height="35" src="/assets/img/nudger-logo-small.png"></a>
-
-        <div class="navbar-collapse collapse me-auto" id="navbar_global">
-	 		<!--/* Navbar mantras*/-->
-			<th:block th:insert="~{inc/navbar-logo.html}"></th:block>
+<header class="navbar navbar-expand-lg navbar-light navbar-theme-soft">
+	<div class="container">
+		<div class="d-flex align-items-center">
+			<a class="navbar-brand me-lg-3" href="/">
+				<img height="35" src="/assets/img/nudger-logo-small.png">
+			</a>
+			
+			<div class="navbar-collapse collapse me-auto" id="navbar_global">
+				<!--/* Navbar mantras*/-->
+				<th:block th:insert="~{inc/navbar-logo.html}"></th:block>
+			</div>
 		</div>
 
- 		<!--/* Navbar mantras*/-->
-		<th:block th:insert="~{inc/navbar-mantras.html}"></th:block>        
- 
-    </div>
-</nav>
+		<div class="d-flex align-items-center">
+			<!--/* Navbar mantras*/-->
+			<ul class="navbar-nav navbar-nav-hover align-items-lg-center">
+				<li class="nav-item dropdown">
+					<a href="#" class="nav-link dropdown-toggle" id="mantrasDropdown" aria-expanded="false" data-bs-toggle="dropdown">Nos mantras <span class="fas fa-angle-down nav-link-arrow ms-1"></span></a>
+					<div class="dropdown-menu dropdown-megamenu-sm px-0 py-2 p-lg-4" aria-labelledby="mantrasDropdown">
+						<ul class="list-style-none">
+							<li class="mb-2 megamenu-item"><a class="megamenu-link" href="/ecoscore">Evaluation écologique : eco-score</a></li>
+							<li class="mb-2 megamenu-item"><a class="megamenu-link" href="/compensation-ecologique">Compensation environnementale</a></li>
+							<li class="mb-2 megamenu-item"><a class="megamenu-link" href="/opendata">Numérique Responsable</a></li>
+						</ul>                 
+					</div>
+				</li>
+			</ul>
+		</div>
+</header>
