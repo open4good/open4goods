@@ -54,6 +54,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
 import org.springframework.core.io.support.ResourcePatternResolver;
+import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 
@@ -180,7 +181,15 @@ public class ApiConfig {
 	// The scheduling thread pool executor
 	//////////////////////////////////////////////////////////
 
-	@Bean ThreadPoolTaskScheduler threadPoolTaskScheduler() {
+	
+
+	
+//	@Bean
+//	public TaskScheduler heartBeatScheduler() {
+//	    return new ThreadPoolTaskScheduler();
+//	}
+//	
+	@Bean TaskScheduler threadPoolTaskScheduler() {
 		final ThreadPoolTaskScheduler threadPoolTaskScheduler = new ThreadPoolTaskScheduler();
 		threadPoolTaskScheduler.setPoolSize(2);
 		threadPoolTaskScheduler.setThreadNamePrefix("ThreadPoolTaskScheduler");
@@ -397,7 +406,7 @@ public class ApiConfig {
 
 	@Bean
 	@Autowired
-	FetcherOrchestrationService fetcherOrchestrationService(ThreadPoolTaskScheduler taskScheduler, DataSourceConfigService dataSourceConfigService) {
+	FetcherOrchestrationService fetcherOrchestrationService(TaskScheduler taskScheduler, DataSourceConfigService dataSourceConfigService) {
 		return new FetcherOrchestrationService(taskScheduler, dataSourceConfigService);
 	}
 

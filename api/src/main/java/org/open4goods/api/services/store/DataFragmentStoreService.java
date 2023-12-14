@@ -96,7 +96,7 @@ public class DataFragmentStoreService {
 		try {
 			preHandle(data);
 		} catch (final ValidationException e) {
-			logger.warn("Cannot index data {} because of validation errors : {}", data.getUrl(), e.getMessage());
+			logger.info("Cannot index data {} because of validation errors : {}", data.getUrl(), e.getMessage());
 			return;
 		}
 
@@ -129,22 +129,10 @@ public class DataFragmentStoreService {
 			s.standardize(standardiserService, StandardiserService.DEFAULT_CURRENCY);
 		}
 
-		//////////////////////////////////////////////////////////
-		// Providing it to the store service (favicon / logo update)
-		//////////////////////////////////////////////////////////
-
-		//TODO(gof) : handle store icons other where
-		//		storeService.updateStoreIcon(data);
 	}
 
 
-	//	public void indexNow(Set<DataFragment> dataFragments) {
-	//
-	//	}
-	//
-	//	public void indexNow(DataFragment dataFragment) {
-	//
-	//	}
+
 
 	/**
 	 * Add an element to the persisted queue
