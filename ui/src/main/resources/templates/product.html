@@ -63,17 +63,18 @@
 
 					<div th:if="${null != product.bestPrice()}" class="row mt-3">
 						
-	       				<!--/* Best price */-->				
-						<div id="markerEcoscore" class="col-sm-12 col-md-12 col-lg-6 mb-3">
-							<th:block th:insert="~{inc/product-ecoscore.html}"></th:block>										
-						</div>
-
 						<div class="col-sm-12 col-md-12 col-lg-6 mb-3">
 
 		       				<!--/* Best price */-->				
 							<th:block th:insert="~{inc/product-price.html}"></th:block>										
 							
 						</div>
+
+	       				<!--/* Best price */-->				
+						<div id="markerEcoscore" class="col-sm-12 col-md-12 col-lg-6 mb-3">
+							<th:block th:insert="~{inc/product-ecoscore.html}"></th:block>										
+						</div>
+
 					</div>	
 					
 				</div>
