@@ -52,7 +52,7 @@ public class Attribute2ScoreAggregationService extends AbstractScoreAggregationS
 					
 				}
 			} catch (Exception e) {
-				dedicatedLogger.error("Error while processing attribute {}",aga,e);
+				dedicatedLogger.error("Error while processing attribute {}",aga);
 			}
 		}
 	}
