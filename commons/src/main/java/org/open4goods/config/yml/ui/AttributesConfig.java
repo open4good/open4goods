@@ -18,8 +18,11 @@ import com.fasterxml.jackson.annotation.JsonMerge;
 public class AttributesConfig {
 
 	// Local cache
-	//TODO : Huge perf ! Should be static
 	private Map<String, Map<String, String>> cacheHashedSynonyms;
+
+	private Map<String, String> valueKeyMap = new HashMap<String, String>();
+
+	
 	/**
 	 * The specific configs configurations
 	 */
@@ -70,7 +73,20 @@ public class AttributesConfig {
 	}
 
 
-
+	/**
+	 * Return the attribute config key name for an attribute name 
+	 * @param value
+	 * @return
+	 */
+	public String getKeyForValue(final String value) {
+		
+		if (cacheHashedSynonyms == null) {
+			synonyms();
+		}
+        return valueKeyMap.get(value);
+    }
+	
+	
 	/**
 	 * Get all configs synonyms by provider
 	 *
@@ -88,9 +104,13 @@ public class AttributesConfig {
 				for (final Entry<String, Set<String>> entry : ac.getSynonyms().entrySet()) {
 					if (!hashedSynonyms.containsKey(entry.getKey())) {
 						hashedSynonyms.put(entry.getKey(), new HashMap<>());
+						
 					}
+					valueKeyMap.put(ac.getKey(), ac.getKey());
 					for (final String val : entry.getValue()) {
 						hashedSynonyms.get(entry.getKey()).put(val, ac.getKey());
+						// Also build a reverse map
+						valueKeyMap.put(val, ac.getKey());
 					}
 				}
 			}

@@ -30,7 +30,7 @@ public class Attribute2ScoreAggregationService extends AbstractScoreAggregationS
 			// Scoring from attribute
 			try {
 				
-				AttributeConfig attrConfig = attributesConfig.getAttributeConfigByKey(aga.getName());
+				AttributeConfig attrConfig = attributesConfig.getAttributeConfigByKey(attributesConfig.getKeyForValue(aga.getName()));
 				if (null == attrConfig) {
                     dedicatedLogger.error("No attribute config for {}",aga);
                     continue;
@@ -76,7 +76,7 @@ public class Attribute2ScoreAggregationService extends AbstractScoreAggregationS
 		
 		if (ac.getType().equals(AttributeType.NUMERIC)) {
 			try {
-				return Double.valueOf(a.getValue());
+				return Double.valueOf(a.getValue().replace(",", "."));
 			} catch (Exception e) {
 				throw new ValidationException("Cannot convert to numeric" +a);
 			}
