@@ -112,18 +112,20 @@ public class BatchService {
 		// Realtime aggregation
 		productsStream.forEach(data -> {
 			try {
+				dedicatedLogger.debug("Realtime aggregation for {}", data);
 				productBag.add( rtAgg.build(data.getFragment(), data));
 			} catch (AggregationSkipException e) {
 				dedicatedLogger.warn("Error on realtimeaggregation aggregation for {}", data, e);
 			}
 		});
 		
-		logger.info("Starting batch aggregation");
+		dedicatedLogger.info("Starting batch aggregation");
 		// Batched (scoring) aggregation
 		batchAgg.update(productBag);
 		
 		// TODO : Bulk size from conf
 		Lists.partition(productBag, 200).forEach(p -> {
+			dedicatedLogger.info("Indexing {} products", p.size());
 			dataRepository.index(p);
 		});
 
