@@ -18,6 +18,7 @@ import com.fasterxml.jackson.annotation.JsonMerge;
 public class AttributesConfig {
 
 	// Local cache
+	//TODO : Huge perf ! Should be static
 	private Map<String, Map<String, String>> cacheHashedSynonyms;
 	/**
 	 * The specific configs configurations
@@ -98,6 +99,9 @@ public class AttributesConfig {
 		return cacheHashedSynonyms;
 	}
 
+
+	
+	
 	public Attribute translateAttribute(final Attribute a, final String provider) {
 
 		Map<String, String> p = synonyms().get(provider);

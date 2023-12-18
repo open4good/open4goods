@@ -16,18 +16,18 @@ public class AttributesExpectedResult extends NumericExpectedResult {
 	public Map<String, Set<String>> multivalued;
 
 
-	public void test(final Map<String, String> referentielAttributes, final DataFragment pd, final TestResultReport ret) {
+	public void test(final Map<ReferentielKey, String> referentielAttributes, final DataFragment pd, final TestResultReport ret) {
 
 		// Testing for referentiel
 		if (null != referentiel) {
 
 			for (final Entry<ReferentielKey, String> entry : referentiel.entrySet()) {
 
-				if (!referentielAttributes.containsKey(entry.getKey().toString())) {
+				if (!referentielAttributes.containsKey(entry.getKey())) {
 					ret.addMessage("Missing referentiel attribute : " + entry.getKey());
-				} else if (!referentielAttributes.get(entry.getKey().toString()).equals(entry.getValue())) {
+				} else if (!referentielAttributes.get(entry.getKey()).equals(entry.getValue())) {
 					ret.addMessage("Was expecting " + entry.getValue() + " for referentiel attribute  " + entry.getKey()
-					+ ", we have " + referentielAttributes.get(entry.getKey().toString()));
+					+ ", we have " + referentielAttributes.get(entry.getKey()));
 				}
 			}
 		}

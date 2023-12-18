@@ -28,20 +28,31 @@ public class Attribute2ScoreAggregationService extends AbstractScoreAggregationS
 		Collection<AggregatedAttribute> aggattrs =    data.getAttributes().getAggregatedAttributes().values()  ;
 		for (AggregatedAttribute aga : aggattrs) {
 			// Scoring from attribute
-			if (attributesConfig.getAttributeConfigByKey(aga.getName()).isAsRating()) {
-					try {
-						Double score = generateScoresFromAttribute(aga.getName() ,aga);
-
-						// Processing cardinality
-						processCardinality(aga.getName(),score);
-						
-						Score s = new Score(aga.getName(), score);
-						// Saving in product
-						data.getScores().put(s.getName(),s);
-					} catch (ValidationException e) {
-						dedicatedLogger.warn("Attribute to score fail for {}",aga,e);
-					}									
+			try {
 				
+				AttributeConfig attrConfig = attributesConfig.getAttributeConfigByKey(aga.getName());
+				if (null == attrConfig) {
+                    dedicatedLogger.error("No attribute config for {}",aga);
+                    continue;
+                }
+				
+				if (attrConfig.isAsRating()) {
+						try {
+							Double score = generateScoresFromAttribute(aga.getName() ,aga);
+
+							// Processing cardinality
+							processCardinality(aga.getName(),score);
+							
+							Score s = new Score(aga.getName(), score);
+							// Saving in product
+							data.getScores().put(s.getName(),s);
+						} catch (ValidationException e) {
+							dedicatedLogger.warn("Attribute to score fail for {}",aga,e);
+						}									
+					
+				}
+			} catch (Exception e) {
+				dedicatedLogger.error("Error while processing attribute {}",aga,e);
 			}
 		}
 	}
