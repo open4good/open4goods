@@ -37,7 +37,10 @@ public class VerticalsConfigService {
 	private SerialisationService serialisationService;
 
 	private final Map<String, VerticalConfig> configs = new ConcurrentHashMap<>(100);
-
+	
+	// Configs not persisted, from api endpoints 
+	private final Map<String, VerticalConfig> memConfigs = new ConcurrentHashMap<>(100);
+	
 	private final Map<String,VerticalConfig> categoriesToVertical = new ConcurrentHashMap<>();
 
 	private Map<String,VerticalConfig> verticalsByUrl = new HashMap<>();
@@ -78,6 +81,7 @@ public class VerticalsConfigService {
 		synchronized (configs) {
 			configs.clear();
 			configs.putAll(configs2);
+			configs.putAll(memConfigs);
 		}
 
 		// Associating categoriesToVertical
@@ -89,9 +93,9 @@ public class VerticalsConfigService {
 		// Mapping url to i18n
 		getConfigsWithoutDefault().forEach(vc -> vc.getHomeUrl().forEach((key, value) -> {
 
-verticalsByUrl.put(value, vc);
-verticalUrlByLanguage.put(key, value);
-}));
+			verticalsByUrl.put(value, vc);
+			verticalUrlByLanguage.put(key, value);
+		}));
 
 	}
 
@@ -137,7 +141,12 @@ verticalUrlByLanguage.put(key, value);
 		return ret;
 	}
 
-
+	/**	Add a config from api endpoint **/
+	public void addMemConfig(VerticalConfig vc) {
+        memConfigs.put(vc.getId(), vc);
+        // Reload configs
+        loadConfigs();
+    }
 
 	/**
 	 * Instanciate a vertical config for a given category name
@@ -171,9 +180,6 @@ verticalUrlByLanguage.put(key, value);
 
 
 	}
-
-
-
 
 
 

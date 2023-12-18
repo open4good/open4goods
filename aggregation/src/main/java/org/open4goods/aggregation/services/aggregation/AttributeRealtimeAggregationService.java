@@ -368,9 +368,9 @@ public class AttributeRealtimeAggregationService extends AbstractRealTimeAggrega
 	private void handleReferentielAttributes(DataFragment fragement, Product output) {
 
 		
-		for (Entry<String, String> attr : fragement.getReferentielAttributes().entrySet()) {
+		for (Entry<ReferentielKey, String> attr : fragement.getReferentielAttributes().entrySet()) {
 
-			ReferentielKey key = ReferentielKey.valueOf( attr.getKey());
+			ReferentielKey key = attr.getKey();
 
 			String value = attr.getValue();
 
