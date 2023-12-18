@@ -71,7 +71,7 @@
    							<!-- Icon Boxes -->
                                 <div id="evaluation-ecologique" class="card shadow border-gray-300 mt-3">
                                      <div class="card-body text-center p-4 p-lg-5">
-                                        <img th:title="${originCountry}" th:src="'/assets/img/flags/'+${product.gtinInfos.country.toLowerCase()}+'.png'" th:alt="${originCountry}" class="image-md mb-4">
+                                        <img th:if="${product.gtinInfos.country}" th:title="${originCountry}" th:src="'/assets/img/flags/'+${product.gtinInfos.country.toLowerCase()}+'.png'" th:alt="${originCountry}" class="image-md mb-4">
                                         <h2  class="h4 mb-2">Origine</h2>
                                         <span  class="h5 text-light mb-2 " th:text="${originCountry}"></span>
 											<p class="mb-4">Cette information est récuperée par les
