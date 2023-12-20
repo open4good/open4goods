@@ -40,7 +40,7 @@ public class AggregatedAttributes  {
 	}
 
 
-
+		
 	public Map<String, String> getReferentielAttributesAsStringKeys() {
 		// TODO Auto-generated method stub
 		return referentielAttributes.entrySet().stream().collect(Collectors.toMap(

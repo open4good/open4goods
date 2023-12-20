@@ -52,7 +52,7 @@ public class VerticalConfigurationsController {
 		
 		// Adding the verticam to the vertical service
 		VerticalConfig v = serialisationService.fromYaml(verticalConfig, VerticalConfig.class);
-		service.addMemConfig(v);
+		service.addTmpConfig(v);
 		
 		// This is initial submission, batching the products to update catégories				
 		batchService.fullUpdate(v);

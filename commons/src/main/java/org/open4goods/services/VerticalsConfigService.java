@@ -1,6 +1,19 @@
 package org.open4goods.services;
 
-import com.fasterxml.jackson.databind.ObjectReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Optional;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
+
 import org.open4goods.config.yml.ui.VerticalConfig;
 import org.open4goods.model.Localisable;
 import org.open4goods.model.constants.CacheConstants;
@@ -9,14 +22,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.scheduling.annotation.Scheduled;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.*;
-import java.util.Map.Entry;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Collectors;
+import com.fasterxml.jackson.databind.ObjectReader;
 
 /**
  * This service is in charge to provide the Verticals configurations.
@@ -39,9 +45,6 @@ public class VerticalsConfigService {
 	private SerialisationService serialisationService;
 
 	private final Map<String, VerticalConfig> configs = new ConcurrentHashMap<>(100);
-	
-	// Configs not persisted, from api endpoints 
-	private final Map<String, VerticalConfig> memConfigs = new ConcurrentHashMap<>(100);
 	
 	private final Map<String,VerticalConfig> categoriesToVertical = new ConcurrentHashMap<>();
 
@@ -83,7 +86,6 @@ public class VerticalsConfigService {
 		synchronized (configs) {
 			configs.clear();
 			configs.putAll(configs2);
-			configs.putAll(memConfigs);
 		}
 
 		// Associating categoriesToVertical
@@ -144,10 +146,18 @@ public class VerticalsConfigService {
 	}
 
 	/**	Add a config from api endpoint **/
-	public void addMemConfig(VerticalConfig vc) {
-        memConfigs.put(vc.getId(), vc);
-        // Reload configs
-        loadConfigs();
+	public void addTmpConfig(VerticalConfig vc) {
+
+		try {
+			logger.warn("Adding a non versionned vertical config file. Have to do a PR on open4goods-config to persist it");
+			File dest = new File(verticalsFolder + File.separator + vc.getId() + ".yml");
+			serialisationService.getYamlMapper().writeValue(dest, vc);
+
+			// Reload configs
+			loadConfigs();
+		} catch (Exception e) {
+			logger.error("Cannot persist vertical config", e);
+		}
     }
 
 	/**
@@ -179,8 +189,6 @@ public class VerticalsConfigService {
 		}
 
 		return vc;
-
-
 	}
 
 
@@ -252,11 +260,4 @@ public class VerticalsConfigService {
 	public Map<String, VerticalConfig> getConfigs() {
 		return configs;
 	}
-
-
-
-
-
-
-
 }
