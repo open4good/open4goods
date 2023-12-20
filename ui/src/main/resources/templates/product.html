@@ -44,11 +44,20 @@
 <!--/* Loader */-->
 <th:block th:insert="~{inc/preloader.html}"></th:block>
 
-<main>
+<main class="bg-gray-200">
 
-        <div class="section section-lg pt-5 bg-gray-200">
-			        
-            <div class="container test">
+        <div class="section section-lg pt-5 pt-md-7">
+            <div class="container-fluid">
+				<th:block th:if="${editor}">
+					<input th:if="${product.names.manualName}" size="50" type="text" name="productTitle" id="productTitle" th:value="${product.names.manualName}">
+					<input th:unless="${product.names.manualName}" size="50" type="text" name="productTitle" id="productTitle" th:value="${product.names.shortestOfferName()}">
+				</th:block>
+				
+				<th:block th:unless="${editor}">
+					<h1 class="h1 title text-uppercase" th:if="${product.names.manualName}" th:text="${product.names.manualName}"></h1>	
+					<h1  class="h1 title text-uppercase" th:unless="${product.names.manualName}" th:text="${product.names.shortestOfferName()}"></h1>					
+				</th:block>
+
 				<div class="card shadow p-4">
 				
 					<th:block th:if="${editor}">
@@ -58,39 +67,29 @@
 							
        				<!--/* Header */-->				
 					<th:block th:insert="~{inc/product-header.html}"></th:block>
-               								
 
 
-					<div th:if="${null != product.bestPrice()}" class="row mt-3">
-						
-	       				<!--/* Best price */-->				
-						<div id="markerEcoscore" class="col-sm-12 col-md-12 col-lg-6 mb-3">
-							<th:block th:insert="~{inc/product-ecoscore.html}"></th:block>										
+					<div class="row" th:if="${null != product.bestPrice()}">			
+						<div id="markerInfosProduits" class="col-sm-12 col-md-12 col-lg-6 mb-3">
+							<!-- Identity -->
+							<th:block th:insert="~{inc/product-referentiel-attributes.html}"></th:block>
+
+							<!--/* Attributes */-->				
+							<th:block th:insert="~{inc/product-attributes.html}"></th:block>
 						</div>
-
-						<div class="col-sm-12 col-md-12 col-lg-6 mb-3">
-
-		       				<!--/* Best price */-->				
-							<th:block th:insert="~{inc/product-price.html}"></th:block>										
+		
+						<div id="markerEcoscore" class="col-sm-12 col-md-12 col-lg-6 mb-3">
+							<div class="row">
+								<th:block th:insert="~{inc/product-ecoscore.html}"></th:block>
+							</div>
 							
 						</div>
 					</div>	
-					
 				</div>
+
 				
 				
 				
-				<div class = "row mt-3">
-					<div id="markerInfosProduits" class="col-lg-6">
-						<!-- Identity -->
-						<th:block th:insert="~{inc/product-referentiel-attributes.html}"></th:block>										
-					</div>
-					
-					<div class="col-lg-6">
-			      		<!--/* Attributes */-->				
-						<th:block th:insert="~{inc/product-attributes.html}"></th:block>
-					</div>
-				</div>
 						
 						
 	
