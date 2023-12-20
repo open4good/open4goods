@@ -273,10 +273,56 @@ h6[class^="h"] {
 
 /* PAGES */
 
-.home-page > main.bg-gray-200 {
+/*.home-page > main.bg-gray-200 {
 	background-color: #fff !important;
 }
 
 .home-page > main.bg-gray-200 > section.bg-white{
 	background-color: #f1efe7 !important;
+}*/
+
+/* CUSTOM COLOR NUDGER */
+
+.degrade--green {
+	background: rgb(30,133,26);
+	background: linear-gradient(180deg, rgba(30,133,26,0.33) 0%, rgba(30,133,26,0.08) 33%, rgba(30,133,26,0) 100%);
+}
+
+.table-caracteristics-fs,
+.table-caracteristics-fs * {
+	font-size:13px!important;
+}
+
+.table-caracteristics-fs h6 {
+	width: 100% !important;
+	min-height: 30px;
+	border-bottom: none !important;
+	font-size:17px!important;
+}
+.table-caracteristics-fs h6::before {
+	content: '';
+	border-bottom: 1px solid #9e9e9e;
+	position: absolute;
+	bottom: 13px;
+	right: 15px;
+	width: calc(100% - 15px) !important;
+}
+.table-caracteristics-fs h6 span {
+	min-height: 30px;
+	background-color: #fff;
+	display: inline-block;
+	position: absolute;
+	padding: 8px;
+}
+.table-caracteristics-fs tr td {
+	padding: 8px;
+	background-color: #ffffff;
+	border-bottom: 1px solid #d7dde1;
+}
+.table-caracteristics-fs tr td:nth-of-type(1) {
+	background-color: #f3f3f3;
+	width: 50%;
+}
+.table-caracteristics-fs tr td svg {
+	height: 35px!important;
 }

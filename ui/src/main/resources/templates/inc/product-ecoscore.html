@@ -1,59 +1,27 @@
+<div id="ecoScore" class="col-lg-3">
+	<ul class="nav nav-pills square nav-fill flex-column vertical-tab" id="tabs-icons-text" role="tablist">
+		<!--li class="nav-item"><a class="nav-link mb-sm-3 mb-md-0 active"
+			id="tabs-icons-text-1-tab" data-bs-toggle="tab"
+			href="#panel-ecoscore" role="tab"
+			aria-controls="tabs-icons-text-1" aria-selected="true"><span
+				class="fa-solid fa-n me-2"></span>Ecoscore</a></li-->
+		<li class="nav-item">
+			<a class="nav-link active" id="tabs-icons-text-2-tab" data-bs-toggle="tab" href="#panel-radar" role="tab" aria-controls="tabs-icons-text-2" aria-selected="false"><span
+				class="fa-solid fa-satellite-dish me-2"></span>Radar</a></li>
 
-
-<div id="ecoScore" class="card" style="">
-
-
-
-		<ul class="nav nav-tabs nav-fill "
-			id="tabs-icons-text" role="tablist">
-			<li class="nav-item"><a class="nav-link mb-sm-3 mb-md-0 active"
-				id="tabs-icons-text-1-tab" data-bs-toggle="tab"
-				href="#panel-ecoscore" role="tab"
-				aria-controls="tabs-icons-text-1" aria-selected="true"><span
-					class="fa-solid fa-n me-2"></span>Ecoscore</a></li>
-					
-					
-
-			<li class="nav-item"><a class="nav-link mb-sm-3 mb-md-0"
-				id="tabs-icons-text-2-tab" data-bs-toggle="tab"
-				href="#panel-radar" role="tab"
-				aria-controls="tabs-icons-text-2" aria-selected="false"><span
-					class="fa-solid fa-satellite-dish me-2"></span>Radar</a></li>
-
-			<li class="nav-item"><a class="nav-link mb-sm-3 mb-md-0"
-				id="tabs-icons-text-2-tab" data-bs-toggle="tab"
-				href="#panel-detail-ecoscore" role="tab"
-				aria-controls="tabs-icons-text-2" aria-selected="false"><span
-					class="fa-solid fa-circle-info me-2"></span>Explications</a></li>
-
-	
-								
-		</ul>
-
-
-
-
-<!-- 
-	<ul class="nav nav-tabs">
-		<li class="nav-item"><a class="nav-link active"
-			aria-current="page" href="#tabs-icons-text-1">Eco-score</a></li>
-		<li class="nav-item"><a class="nav-link" href="tabs-icons-text-2">Link</a></li>
-		<li class="nav-item"><a class="nav-link" href="#">Link</a></li>
-		<li class="nav-item"><a class="nav-link disabled" href="#"
-			tabindex="-1" aria-disabled="true">Disabled</a></li>
+		<li class="nav-item"><a class="nav-link" id="tabs-icons-text-2-tab" data-bs-toggle="tab" href="#panel-detail-ecoscore" role="tab" aria-controls="tabs-icons-text-2" aria-selected="false"><span
+				class="fa-solid fa-circle-info me-2"></span>Explications</a></li>		
 	</ul>
-
- -->
-
-
+</div>
+<div class="col-lg-9">
 	<div class="card border-0">
-		<div class="tab-content card-body p-0" id="tabscore">
-			
-				<!-- Score -->
-				<div class="tab-pane fade active show" id="panel-ecoscore"	role="tabpanel" aria-labelledby="panel-ecoscore">					
-					<div>
+		<div class="card-body py-0">
+			<div class="card-body py-0">
+				<section class="tab-content" id="tabscore">
+					<!--article class="tab-pane fade" id="panel-ecoscore"	role="tabpanel" aria-labelledby="panel-ecoscore">					
+
 						<div th:if="${product.ecoscore}" class="text-center">				           
-				           <img class="mt-4"  width="350px" th:alt="'Ecoscore : ' + ${product.ecoscore.letter()}" th:title="'éco-score : ' + ${product.ecoscore.letter()}" th:src="'/icons/ecoscore/scoring-'+${product.ecoscore.letter()}+'.png'">
+							<img class="mt-4"  width="350px" th:alt="'Ecoscore : ' + ${product.ecoscore.letter()}" th:title="'éco-score : ' + ${product.ecoscore.letter()}" th:src="'/icons/ecoscore/scoring-'+${product.ecoscore.letter()}+'.png'">
 						</div>
 						<div  class="m-5">						
 							<div th:each="score : ${product.realScores()}" class="progress-wrapper">
@@ -62,53 +30,43 @@
 									<span><img height="50" th:src="'/icons/ecoscore/'+${score.letter()}+'.png'"></span>
 									<span  class="h4 help-pointer progress-tooltip" data-bs-toggle="tooltip" data-bs-placement="top" th:title="#{'ecoscore.' +${score.name}+'.tooltip'(${score.absValue()}, ${score.relValue()}, ${product.attributes.aggregatedAttributes.get(score.name)})}" th:classappend="'bg-'+${score.colorClassName()}" th:text="#{'score-'+${score.name}}"></span>
 									<div class="progress-percentage">
-										<!-- 
 										<span th:if="${score.relativValue}" th:text="${score.relativValue*20}+'%'"></span>
-										 -->
 									</div>
 								</div>
 								<div class="progress">
 									<div class="progress-bar" th:classappend="'bg-'+${score.colorClassName()}" role="progressbar"
-										  th:attrappend="aria-valuenow = ${score.percent()}, style='width: '+${score.percent()}+'%;'" aria-valuemin="0" aria-valuemax="100"></div>
+											th:attrappend="aria-valuenow = ${score.percent()}, style='width: '+${score.percent()}+'%;'" aria-valuemin="0" aria-valuemax="100"></div>
 								</div>
 							</div>
 						</div>
-					</div>
-				
-				</div>
+					
+					</article-->
 
-				
-				
-				<!-- Detail -->
-				<div class=" tab-pane fade" id="panel-detail-ecoscore" role="tabpanel"	aria-labelledby="panel-detail-ecoscore">
-					
-					<div class=" scrollable-panel">
-					
-					<p class="m-2" >L'écoscore écologique pour le SAMSUNG OLED-85C8 est composé de 4 critères, dont 2 virtuels. Ce score environnemental est calculé en prenant en compte différentes informations environnentales disponibles pour 
-					ce téléviseur. Voici la composition du score :
-					
-	
-					
-	
-						<table class="">
-							<tbody>
-									<tr th:each="score : ${product.scores}">
-									<th scope="row" th:text="${score.key}"></th>
-									<td th:text="${score.value}"></td>
-								</tr>
-							</tbody>
-						</table>		
-	
-					<p>En savoir plus<a href="">le mode de calcul et la transparence de l'eco-score</a>. </p>
+					<!-- Radar -->
+					<div class="tab-pane active" id="panel-radar" role="tabpanel" aria-labelledby="panel-radar">
+						<canvas id="radarScore"></canvas>
 					</div>
-				</div>
-				
-				
-				<!-- Radar -->
-				<div class="tab-pane fade" id="panel-radar" role="tabpanel"	aria-labelledby="panel-radar">
-						  <canvas id="radarScore"></canvas>
-				</div>
-				
+					
+					<!-- Detail -->
+					<div class="tab-pane" id="panel-detail-ecoscore" role="tabpanel" aria-labelledby="panel-detail-ecoscore">
+						<p>L'écoscore écologique pour le SAMSUNG OLED-85C8 est composé de 4 critères, dont 2 virtuels. Ce score environnemental est calculé en prenant en compte différentes informations environnentales disponibles pour 
+						ce téléviseur.
+						</p>
+						
+						<div class="table-responsive table-caracteristics-fs" th:if="${product.attributes.aggregatedAttributes.size()} > 0">
+							<h6 class="h6 bg-white position-relative"><span>Composition du score</span></h6>
+							<table class="table">
+								<tr th:each="score : ${product.scores}">
+									<td class="align-middle" th:text="${score.key}"></td>
+									<td class="align-middle" th:text="${score.value}"></td>
+								</tr>
+							</table>
+						</div>	
+		
+						<p>En savoir plus<a href="">le mode de calcul et la transparence de l'eco-score</a>.</p>
+					</div>
+				</section>
 			</div>
 		</div>
 	</div>
+</div>
