@@ -1,3 +1,43 @@
+<section class="row align-items-center">
+	<aside class="col-lg-4 text-center">
+		   <img height="400" th:src="'/images/'+${product.gtin()}+'-cover.png'"	th:alt="${product.names.longestOfferName()}">
+	</aside>
+	<div class="col-lg-4">
+		<!--/* Best price */-->				
+		<!--th:block th:insert="~{inc/product-price.html}"></th:block-->
+
+		<div class="p-4">
+			<!--div th:if="${product.ecoscore}" class="text-center">				           
+			   <img class="mt-4"  width="350px" th:alt="'Ecoscore : ' + ${product.ecoscore.letter()}" th:title="'éco-score : ' + ${product.ecoscore.letter()}" th:src="'/icons/ecoscore/scoring-'+${product.ecoscore.letter()}+'.png'">
+			</div-->
+			<div>						
+				<div th:each="score : ${product.realScores()}" class="progress-wrapper">
+					
+					<div class="progress-info">
+						<span><img height="50" th:src="'/icons/ecoscore/'+${score.letter()}+'.png'"></span>
+						<span  class="h4 help-pointer progress-tooltip" data-bs-toggle="tooltip" data-bs-placement="top" th:title="#{'ecoscore.' +${score.name}+'.tooltip'(${score.absValue()}, ${score.relValue()}, ${product.attributes.aggregatedAttributes.get(score.name)})}" th:classappend="'bg-'+${score.colorClassName()}" th:text="#{'score-'+${score.name}}"></span>
+						<div class="progress-percentage">
+							<!-- 
+							<span th:if="${score.relativValue}" th:text="${score.relativValue*20}+'%'"></span>
+							 -->
+						</div>
+					</div>
+					<div class="progress">
+						<div class="progress-bar" th:classappend="'bg-'+${score.colorClassName()}" role="progressbar"
+							  th:attrappend="aria-valuenow = ${score.percent()}, style='width: '+${score.percent()}+'%;'" aria-valuemin="0" aria-valuemax="100"></div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+	</div>
+	<div class="col-lg-4 p-3 border">
+		<!--/* Product compensation */-->				
+		<th:block th:insert="~{inc/product-compensation.html}"></th:block>
+	</div>
+</section>
+
+<!--
 <div class="row align-items-center text-center">
 	<aside class="col-md-3">
    		<img height="200" th:src="'/images/'+${product.gtin()}+'-cover.png'"	th:alt="${product.names.longestOfferName()}">
@@ -19,16 +59,13 @@
 			</th:block>
 			<br/>
 			<img height="25px" th:if="${hasBrandLogo}" th:src="'/images/marques/'+${product.brand()}+'.png'">
-<!-- 
 
 			<th:block th:if="${null != product.bestPrice()}">
 				<p class="text-left" th:if="${null != product.model() && null != product.brand()}" th:utext="#{product.description.withbrandandmodel(${product.model()}, ${product.brand()}, ${#numbers.formatDecimal(product.bestPrice().compensation, 1, 2)}, ${product.names.shortestOfferName()})}"></p>            
 	            <p class="text-left" th:unless="${null != product.model() && null != product.brand()}" th:utext="#{product.description.withname(${product.names.shortestOfferName()}, ${#numbers.formatDecimal(product.bestPrice().compensation, 1, 2)})}"></p>            
 			</th:block>
- -->
+
 		</div>
 	</div>
-	
-
-	
 </div>
+-->
