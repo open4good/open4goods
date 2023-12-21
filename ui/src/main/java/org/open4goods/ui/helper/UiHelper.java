@@ -27,6 +27,10 @@ public class UiHelper {
 	 */
 	public String attributeName(String key) {
 		
+		if (null == verticalConfig) {
+			return key;
+		}
+		
 		 AttributeConfig attr = verticalConfig.getAttributesConfig().getAttributeConfigByKey(key);
 		 
 		 if (null == attr) {

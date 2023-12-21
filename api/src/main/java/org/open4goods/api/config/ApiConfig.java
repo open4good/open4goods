@@ -113,11 +113,11 @@ public class ApiConfig {
 	
 	@Bean
 	@Autowired
-	BatchService batchService(SearchService searchService, ProductRepository dataRepository, VerticalsConfigService verticalsConfigService, BatchAggregationService batchAggregationService) throws IOException {
+	BatchService batchService(RealtimeAggregationService rtService,  SearchService searchService, ProductRepository dataRepository, VerticalsConfigService verticalsConfigService, BatchAggregationService batchAggregationService) throws IOException {
 		// Logging to console according to dev profile and conf
 		boolean toConsole = ArrayUtils.contains(env.getActiveProfiles(), "dev") || ArrayUtils.contains(env.getActiveProfiles(), "devsec");
 		// TODO : Not nice, mutualize
-        return new BatchService(dataRepository, apiProperties, verticalsConfigService,batchAggregationService, searchService, toConsole);
+        return new BatchService(rtService,dataRepository, apiProperties, verticalsConfigService,batchAggregationService, searchService, toConsole);
 	}
 
 

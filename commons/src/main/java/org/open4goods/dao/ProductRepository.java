@@ -3,6 +3,7 @@ package org.open4goods.dao;
 import java.util.*;
 import java.util.stream.Stream;
 
+import org.open4goods.config.yml.ui.VerticalConfig;
 import org.open4goods.exceptions.ResourceNotFoundException;
 import org.open4goods.model.constants.CacheConstants;
 import org.open4goods.model.product.Product;
@@ -48,6 +49,30 @@ public class ProductRepository {
 	}
 
 
+	
+	/**
+	 * Return all products matching the vertical in the config or already having a vertical defined
+	 * 
+	 * @param v
+	 * @return
+	 */
+	public Stream<Product> getProductsMatchingVertical(VerticalConfig v) {
+		Criteria c = new Criteria("datasourceCategories").in(v.getMatchingCategories())
+				// TODO : Add exclusion
+//				.and(new Criteria("datasourceCategories").notIn(v.getMatchingCategories()))
+				.or(new Criteria("vertical").is(v.getId()))
+				;
+
+		final NativeQuery initialQuery = new NativeQueryBuilder()
+				.withQuery(new CriteriaQuery(c))
+				.build();
+
+		return elasticsearchTemplate.searchForStream(initialQuery, Product.class, current_index).stream().map(SearchHit::getContent);
+		
+	}
+	
+	
+	
 
 	/**
 	 * Export all aggregated data
@@ -257,5 +282,9 @@ public class ProductRepository {
 	public long expirationClause() {
 		return System.currentTimeMillis() - VALID_UNTIL_DURATION;
 	}
+
+
+
+
 
 }

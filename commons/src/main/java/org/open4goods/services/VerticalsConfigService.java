@@ -2,6 +2,7 @@ package org.open4goods.services;
 
 import com.fasterxml.jackson.databind.ObjectReader;
 import org.open4goods.config.yml.ui.VerticalConfig;
+import org.open4goods.model.Localisable;
 import org.open4goods.model.constants.CacheConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,6 +14,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.*;
+import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
@@ -37,11 +39,14 @@ public class VerticalsConfigService {
 	private SerialisationService serialisationService;
 
 	private final Map<String, VerticalConfig> configs = new ConcurrentHashMap<>(100);
-
+	
+	// Configs not persisted, from api endpoints 
+	private final Map<String, VerticalConfig> memConfigs = new ConcurrentHashMap<>(100);
+	
 	private final Map<String,VerticalConfig> categoriesToVertical = new ConcurrentHashMap<>();
 
 	private Map<String,VerticalConfig> verticalsByUrl = new HashMap<>();
-	private Map<String,String> verticalUrlByLanguage = new HashMap<>();
+//	private Map<String,String> verticalUrlByLanguage = new HashMap<>();
 
 
 
@@ -78,6 +83,7 @@ public class VerticalsConfigService {
 		synchronized (configs) {
 			configs.clear();
 			configs.putAll(configs2);
+			configs.putAll(memConfigs);
 		}
 
 		// Associating categoriesToVertical
@@ -89,9 +95,9 @@ public class VerticalsConfigService {
 		// Mapping url to i18n
 		getConfigsWithoutDefault().forEach(vc -> vc.getHomeUrl().forEach((key, value) -> {
 
-verticalsByUrl.put(value, vc);
-verticalUrlByLanguage.put(key, value);
-}));
+			verticalsByUrl.put(value, vc);
+//			verticalUrlByLanguage.put(key, value);
+		}));
 
 	}
 
@@ -137,7 +143,12 @@ verticalUrlByLanguage.put(key, value);
 		return ret;
 	}
 
-
+	/**	Add a config from api endpoint **/
+	public void addMemConfig(VerticalConfig vc) {
+        memConfigs.put(vc.getId(), vc);
+        // Reload configs
+        loadConfigs();
+    }
 
 	/**
 	 * Instanciate a vertical config for a given category name
@@ -174,9 +185,6 @@ verticalUrlByLanguage.put(key, value);
 
 
 
-
-
-
 	/**
 	 * Return the language for a vertical path, if any
 	 * @param path
@@ -188,11 +196,20 @@ verticalUrlByLanguage.put(key, value);
 
 	/**
 	 * Return the path for a vertical language, if any
+	 * @param config 
 	 * @param path
 	 * @return
 	 */
-	public String getPathForVerticalLanguage(String language) {
-		return verticalUrlByLanguage.get(language);
+	public String getPathForVerticalLanguage(String language, VerticalConfig config) {
+		Localisable pathes = configs.get(config.getId()).getHomeUrl();
+		
+		for (Entry<String, String> key : pathes.entrySet()) {
+            if (key.getKey().equals(language)) {
+                return key.getValue() ;
+            }
+        }
+		
+		return null;
 	}
 
 	/**

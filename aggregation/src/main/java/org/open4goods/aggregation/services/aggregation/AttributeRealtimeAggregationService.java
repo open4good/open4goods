@@ -47,6 +47,10 @@ public class AttributeRealtimeAggregationService extends AbstractRealTimeAggrega
 	@Override
 	public void onDataFragment(final DataFragment dataFragment, final Product product) {
 
+		if (dataFragment.getAttributes().size() == 0) {
+			return;
+		}
+		
 		try {
 			AttributesConfig attributesConfig = verticalConfigService.getConfigById(product.getVertical() == null ? "all" : product.getVertical() ).get().getAttributesConfig() ;
 
@@ -61,13 +65,15 @@ public class AttributeRealtimeAggregationService extends AbstractRealTimeAggrega
 			// Handling attributes in datafragment
 			all.addAll(dataFragment.getAttributes());
 			// Add unmatched attributes from the product (case configuration change)
+			
+			// TODO : BIG BUG : Override the providername. Must be only in batch mode
 			all.addAll(product.getAttributes().getUnmapedAttributes().stream().map(e -> new Attribute(e.getName(),e.getValue(),e.getLanguage())).toList());
 			
 			
 			for (Attribute attr :  all) {
 				
 				// Checking if a potential AggregatedAttribute
-				Attribute translated = attributesConfig.translateAttribute(attr, dataFragment.getDatasourceName());
+				Attribute translated = attributesConfig.translateAttribute(attr,  dataFragment.getDatasourceName());
 				
 				// We have a "raw" attribute that matches a aggragationconfig
 				if (null != translated) {
@@ -368,9 +374,9 @@ public class AttributeRealtimeAggregationService extends AbstractRealTimeAggrega
 	private void handleReferentielAttributes(DataFragment fragement, Product output) {
 
 		
-		for (Entry<String, String> attr : fragement.getReferentielAttributes().entrySet()) {
+		for (Entry<ReferentielKey, String> attr : fragement.getReferentielAttributes().entrySet()) {
 
-			ReferentielKey key = ReferentielKey.valueOf( attr.getKey());
+			ReferentielKey key = attr.getKey();
 
 			String value = attr.getValue();
 

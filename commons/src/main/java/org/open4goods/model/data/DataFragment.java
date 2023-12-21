@@ -63,16 +63,12 @@ public class DataFragment implements Standardisable, Validable {
 	/**
 	 * The url is the url
 	 */
-	@Id
-	@Field(index = false, store = false, type = FieldType.Keyword)
 	private String url;
 
 	@NotNull
-	@Field(index = false, store = false, type = FieldType.Date, format = DateFormat.epoch_millis)
 	private Long lastIndexationDate;
 
 	@NotNull
-	@Field(index = false, store = false, type = FieldType.Date, format = DateFormat.epoch_millis)
 	private Long creationDate;
 
 
@@ -80,13 +76,11 @@ public class DataFragment implements Standardisable, Validable {
 	/**
 	 * The merchant (website, or any) providing the offer
 	 */
-	@Field(index = false, store = false, type = FieldType.Keyword)
 	private String datasourceName;
 
 	/**
 	 * The name of the datasource config file
 	 */
-	@Field(index = false, store = false, type = FieldType.Keyword)
 	private String datasourceConfigName;
 
 
@@ -94,7 +88,6 @@ public class DataFragment implements Standardisable, Validable {
 	 * The type of support of this datafragment
 	 */
 	@NotNull
-	@Field(index = false, store = false, type = FieldType.Keyword)
 	private ProviderSupportType providerSupportType;
 
 
@@ -103,61 +96,49 @@ public class DataFragment implements Standardisable, Validable {
 	 * The real merchant (website, or any) providing the offer, sometimes
 	 * exposed by datasourceName
 	 */
-	@Field(index = false, store = false, type = FieldType.Keyword)
 	private String merchantName;
 
 	@NotNull
-	@Field(index = false, store = false, type = FieldType.Text)
 	private Set<String> names = new HashSet<>();
 
-	@Field(index = false, store = false, type = FieldType.Object)
 	private Price price;
 
 	/**
 	 * The descriptions associated with this product
 	 */
-	@Field(index = false, store = false, type = FieldType.Object)
 	private Set<Description> descriptions = new HashSet<>();
 
 	/**
 	 * Product data productTags
 	 */
-	@Field(index = false, store = false, type = FieldType.Text)
 	private String category;
 
 	/** The different ratings **/
-	@Field(index = false, store = false, type = FieldType.Object)
 	private Set<Rating> ratings = new HashSet<>();
 
 	/** The comments, by provider **/
-	@Field(index = false, store = false, type = FieldType.Object,format = DateFormat.epoch_millis)
 	private Set<Comment> comments = new HashSet<>();
 
 
 	/** The questions and answers, by provider **/
-	@Field(index = false, store = false, type = FieldType.Object)
 	private Set<Question> questions = new HashSet<>();
 
 	/** The affiliated url, if any **/
-	@Field(index = false, store = false, type = FieldType.Keyword)
 	private String affiliatedUrl;
 
 	/**
 	 * The InStock, if this is a "seller" data
 	 */
-	@Field(index = false, store = false, type = FieldType.Keyword)
 	private InStock inStock;
 
 	/**
 	 * The pros
 	 */
-	@Field(index = false, store = false, type = FieldType.Object)
 	private Set<ProsOrCons> pros = new HashSet<>();
 
 	/**
 	 * And the cons
 	 */
-	@Field(index = false, store = false, type = FieldType.Object)
 	private Set<ProsOrCons> cons = new HashSet<>();
 
 
@@ -166,13 +147,11 @@ public class DataFragment implements Standardisable, Validable {
 	 * It his built (or completed) at the ui level, when
 	 * got matching with longest ids
 	 */
-	@Field(index = false, store = false, type = FieldType.Keyword)
 	private Set<UnindexedKeyValTimestamp> alternateIds = new HashSet<>();
 
 	/**
 	 * The unmapped / uncategorized attributes
 	 */
-	@Field(index = false, store = false, type = FieldType.Object)
 	private Set<Attribute> attributes = new HashSet<>();
 
 	@JsonIgnore
@@ -184,47 +163,37 @@ public class DataFragment implements Standardisable, Validable {
 	 * The referentiel attributes
 	 */
 	// @Field(index = false, datasourceName = true, type = FieldType.Keyword)
-	@Field(index = true, store = false, type = FieldType.Object)
-	//TODO(p1, bug, 2) : What he hell, having the ReferentielKey enum causes jackson "com.fasterxml.jackson.databind.JsonMappingException: class java.lang.String cannot be cast to class java.lang.Enum"
-	private Map<String, String> referentielAttributes = new HashMap<>();
+	private Map<ReferentielKey, String> referentielAttributes = new HashMap<>();
 
 	/**
 	 * If true, means that the referentiel attributes (eg. brandUid) are to be
 	 * considered as the "graal".
 	 */
-	@Field(index = false, store = false, type = FieldType.Boolean)
 	private Boolean referentielData = false;
 
 	/**
 	 * The resources representation
 	 */
-	@Field(index = false, store = false, type = FieldType.Object)
 	private Set<Resource> resources = new HashSet<>();
 
-	@Field(index = false, store = false, type = FieldType.Integer)
 	private Integer quantityInStock;
 
 	// warranty, in monthes
-	@Field(index = false, store = false, type = FieldType.Integer)
 	private Integer warranty;
 
 	// The shipping time, in days
-	@Field(index = false, store = false, type = FieldType.Integer)
 	private Integer shippingTime;
 
-	@Field(index = false, store = false, type = FieldType.Double)
 	private Double shippingCost;
 
 	/**
 	 * The state of the product (new, occasion, ...)
 	 */
-	@Field(index = false, store = false, type = FieldType.Keyword)
 	private ProductState productState;
 
 	/**
 	 * The price history
 	 */
-	@Field(index = false, store = false, type = FieldType.Keyword)
 	private List<Price> priceHistory = new ArrayList<>();
 
 	@Override
@@ -475,7 +444,7 @@ public class DataFragment implements Standardisable, Validable {
 				try {
 					final ReferentielKey refKey = ReferentielKey.valueOf(field.toUpperCase());
 					//TODO : Always this necessary toString. Should be Enum !!
-					if (!StringUtils.isEmpty(referentielAttributes.get(refKey.toString()))) {
+					if (!StringUtils.isEmpty(referentielAttributes.get(refKey))) {
 						continue;
 					}
 				} catch (final IllegalArgumentException e) {
@@ -663,12 +632,12 @@ public class DataFragment implements Standardisable, Validable {
 
 		switch (key) {
 		case "BRAND":
-			getReferentielAttributes().put(ReferentielKey.BRAND.toString(),val );
+			getReferentielAttributes().put(ReferentielKey.BRAND,val );
 			break;
 		case "MODEL":
 			//			try {
 			final String cleaned = IdHelper.getHashedName(val);
-			getReferentielAttributes().put(ReferentielKey.MODEL.toString(),cleaned);
+			getReferentielAttributes().put(ReferentielKey.MODEL,cleaned);
 			if (!cleaned.equals(val)) {
 				alternateIds.add(new UnindexedKeyValTimestamp(ReferentielKey.MODEL.toString(),val));
 			}
@@ -678,7 +647,7 @@ public class DataFragment implements Standardisable, Validable {
 			break;
 		case "GTIN":
 			if (NumberUtils.isDigits(val)) {
-				getReferentielAttributes().put(ReferentielKey.GTIN.toString(),val);
+				getReferentielAttributes().put(ReferentielKey.GTIN,val);
 			}else {
 				
 				// Searching for finishing by ".00", in a few providers
@@ -689,7 +658,7 @@ public class DataFragment implements Standardisable, Validable {
 				}
 				
 				if (NumberUtils.isDigits(val)) {
-					getReferentielAttributes().put(ReferentielKey.GTIN.toString(),val);
+					getReferentielAttributes().put(ReferentielKey.GTIN,val);
 				} else {					
 					logger.info("Cannot add non numeric GTIN, for {} at {}",val, this);
 				}
@@ -1170,15 +1139,15 @@ public class DataFragment implements Standardisable, Validable {
 
 
 	public String brandUid() {
-		return referentielAttributes.get(ReferentielKey.MODEL.toString());
+		return referentielAttributes.get(ReferentielKey.MODEL);
 	}
 
 	public String gtin (){
-		return referentielAttributes.get(ReferentielKey.GTIN.toString());
+		return referentielAttributes.get(ReferentielKey.GTIN);
 	}
 
 	public String brand() {
-		return referentielAttributes.get(ReferentielKey.BRAND.toString());
+		return referentielAttributes.get(ReferentielKey.BRAND);
 	}
 
 
@@ -1276,11 +1245,13 @@ public class DataFragment implements Standardisable, Validable {
 
 
 
-	public Map<String, String> getReferentielAttributes() {
+
+
+	public Map<ReferentielKey, String> getReferentielAttributes() {
 		return referentielAttributes;
 	}
 
-	public void setReferentielAttributes(Map<String, String> referentielAttributes) {
+	public void setReferentielAttributes(Map<ReferentielKey, String> referentielAttributes) {
 		this.referentielAttributes = referentielAttributes;
 	}
 

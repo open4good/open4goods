@@ -24,6 +24,7 @@ import org.open4goods.model.constants.Currency;
 import org.open4goods.model.constants.ProductState;
 import org.open4goods.model.constants.ProviderType;
 import org.open4goods.model.constants.ReferentielKey;
+import org.open4goods.model.data.DataFragment;
 import org.open4goods.model.data.Description;
 import org.open4goods.model.data.Resource;
 import org.open4goods.model.data.Score;
@@ -537,6 +538,23 @@ public class Product implements Standardisable {
 		String date = dateFormat.format(new Date(creationDate));
 		return date;
 	}
+	
+	
+	
+	/**
+	 * Initialize a dummy DataFragment from this product, (used to "touch" products to replay batch scenarios with realtimeAggregationService)
+	 * @return
+	 */
+	public DataFragment getFragment() {
+		DataFragment ret = new DataFragment();
+		ret.setLastIndexationDate(lastChange);
+		ret.setCreationDate(creationDate);
+		ret.setReferentielAttributes(attributes.getReferentielAttributes());
+		
+		return ret;
+		
+	}
+
 	//////////////////////////////////////////
 	// Getters / Setters
 	//////////////////////////////////////////
@@ -682,6 +700,7 @@ public class Product implements Standardisable {
 	public void setOffersCount(Integer offersCount) {
 		this.offersCount = offersCount;
 	}
+
 
 
 

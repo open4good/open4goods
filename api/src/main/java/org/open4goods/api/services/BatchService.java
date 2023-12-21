@@ -1,13 +1,16 @@
 package org.open4goods.api.services;
 
-import ch.qos.logback.classic.Level;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Stream;
+
 import org.open4goods.aggregation.aggregator.BatchedAggregator;
+import org.open4goods.aggregation.aggregator.RealTimeAggregator;
 import org.open4goods.api.config.yml.ApiProperties;
 import org.open4goods.config.yml.ui.VerticalConfig;
 import org.open4goods.dao.ProductRepository;
 import org.open4goods.exceptions.AggregationSkipException;
 import org.open4goods.helper.GenericFileLogger;
-import org.open4goods.model.dto.VerticalSearchRequest;
 import org.open4goods.model.product.Product;
 import org.open4goods.services.SearchService;
 import org.open4goods.services.VerticalsConfigService;
@@ -15,10 +18,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Scheduled;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
+import com.google.common.collect.Lists;
+
+import ch.qos.logback.classic.Level;
 
 /**
  * This service is in charge of various batches
@@ -38,11 +40,11 @@ public class BatchService {
 
 	private BatchAggregationService batchAggregationService;
 
+	private RealtimeAggregationService realtimeAggregationService;
+
 
 
 	private final ApiProperties apiProperties;
-
-	private SearchService searchService;
 
 	private Logger dedicatedLogger;
 
@@ -50,6 +52,7 @@ public class BatchService {
 
 
 	public BatchService(
+			RealtimeAggregationService realtimeAggregationService,
 			ProductRepository dataRepository,
 			ApiProperties apiProperties,
 			VerticalsConfigService verticalsService,
@@ -64,74 +67,93 @@ public class BatchService {
 		this.dataRepository =dataRepository;
 		this.verticalsService=verticalsService;
 		this.batchAggregationService=batchAggregationService;
-		this.searchService = searchService;
+		this.realtimeAggregationService = realtimeAggregationService;
 	}
-
 
 
 
 	
 	/**
-	 * Update verticals with the batch Aggragator
-	 * @throws AggregationSkipException 
+	 * update all verticals. Scheduled
+     *
 	 */
-	public void testScoring(String v)  {
-
-		VerticalConfig vertical = verticalsService.getConfigById(v).get();
-		BatchedAggregator agg = batchAggregationService.getAggregator(vertical);
-
-		
-		
-		VerticalSearchRequest vsr = new VerticalSearchRequest();
-		vsr.setPageNumber(0);
-		vsr.setPageSize(100);
-		
-		
-		
-		List<Product> datas =  searchService.verticalSearch(vertical, vsr).getData();
-		
-		agg.update(datas);
-
-		dataRepository.index(datas);
-
-		
-	}
-	
-	
-	
-
-	/**
-	 * Update verticals with the batch Aggragator
-	 * @throws AggregationSkipException 
-	 */
-	//TODO : cron schedule, at night
 	@Scheduled( initialDelay = 1000 * 3600*24, fixedDelay = 1000 * 3600*24)
-	public void scoreVertical()  {
-
-
-
+	public void scoreAll()  {
 		for (VerticalConfig vertical : verticalsService.getConfigsWithoutDefault()) {
-			BatchedAggregator agg = batchAggregationService.getAggregator(vertical);
-			
-			// NOTE : !!!Warning!!!, full vertical load in memory
-			Set<Product> datas = dataRepository.exportVerticalWithValidDate(vertical.getId()).collect(Collectors.toSet());
-			
-			agg.update(datas);
-			
-			Set<Product> buffer = new HashSet<>(201);
-			for (Product data : datas) {
-				buffer.add(data);
-				// TODO : from conf
-				if (buffer.size() > 200) {
-					dataRepository.index(buffer);
-					buffer.clear();
-				}
-			}
-			// Index remainings
-			dataRepository.index(buffer);
-			buffer.clear();
+			batchUpdate(vertical);
 		}
 	}
+	 
+	 
+
+	/**
+	 * Update a vertical
+	 * @param verticalId
+	 */
+	public void fullUpdate(String verticalId) {
+		VerticalConfig vertical = verticalsService.getConfigById(verticalId).orElseThrow();
+		fullUpdate(vertical);
+	}
+	
+	/**
+	 * Update verticals with the batch Aggragator
+	 * @throws AggregationSkipException 
+	 */
+	public void fullUpdate(VerticalConfig vertical)  {
+
+		logger.info("Full update for {}", vertical.getId());
+		BatchedAggregator batchAgg = batchAggregationService.getAggregator(vertical);
+		RealTimeAggregator rtAgg = realtimeAggregationService.getAggregator(vertical);
+		
+		Stream<Product> productsStream = dataRepository.getProductsMatchingVertical(vertical);
+		
+		List<Product> productBag = new ArrayList<>();
+		logger.info("Starting realtime aggregation");
+		// Realtime aggregation
+		productsStream.forEach(data -> {
+			try {
+				dedicatedLogger.debug("Realtime aggregation for {}", data);
+				productBag.add( rtAgg.build(data.getFragment(), data));
+			} catch (AggregationSkipException e) {
+				dedicatedLogger.warn("Error on realtimeaggregation aggregation for {}", data, e);
+			}
+		});
+		
+		dedicatedLogger.info("Starting batch aggregation");
+		// Batched (scoring) aggregation
+		batchAgg.update(productBag);
+		
+		// TODO : Bulk size from conf
+		Lists.partition(productBag, 200).forEach(p -> {
+			dedicatedLogger.info("Indexing {} products", p.size());
+			dataRepository.index(p);
+		});
+
+	}
+	
+	
+	
+	/**
+	 * Update verticals with the batch Aggragator
+	 * @throws AggregationSkipException 
+	 */
+	public void batchUpdate(VerticalConfig vertical)  {
+
+		logger.info("Batch update for {}", vertical.getId());
+
+		BatchedAggregator batchAgg = batchAggregationService.getAggregator(vertical);
+
+		List<Product> productBag = dataRepository.getProductsMatchingVertical(vertical).toList();
+		// Batched (scoring) aggregation
+		batchAgg.update(productBag);
+		// TODO : Bulk size from conf
+		Lists.partition(productBag, 200).forEach(p -> {
+			logger.info("Indexing {} products", p.size());
+			dataRepository.index(p);
+		});
+
+	}
+	
 
 
 
