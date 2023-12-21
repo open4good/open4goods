@@ -1,70 +1,58 @@
-<div id="caracteristiques" class="card shadow">
-	<div class="card-header"><h2 class="h5"><span class="fa-solid fa-circle-info me-2"></span>Identification du produit</h2></div>
-	<div class="card-body">
-		<table class="table table-hover">
-			<tbody>
+<div class="table-responsive table-caracteristics-fs" th:if="${product.attributes.aggregatedAttributes.size()} > 0">
+	<h6 class="h6 bg-white position-relative"><span>Identification du produit</span></h6>
+	<table class="table">
+		<tr th:if="${product.brand()}">
+			<td class="align-middle">Marque</td>
+			<td class="align-middle">
+				<img height="35" th:if="${hasBrandLogo}" th:src="'/images/marques/'+${product.brand()}+'.png'">
+				<th:block th:unless="${hasBrandLogo}" class="lead" th:text="${product.brand()}"></th:block>
+			</td>
+		</tr>
 
-				<tr th:if="${product.brand()}">
-					<th scope="row">Marque</th>
-					<td>
-						<img height="25px" th:if="${hasBrandLogo}" th:src="'/images/marques/'+${product.brand()}+'.png'">
-						<th:block th:unless="${hasBrandLogo}" class="lead"  th:text="${product.brand()}"></th:block>
-					</td>
-				</tr>
+		<th:block th:each="item, stat : ${product.alternativeBrands}">
+			<tr th:if="${stat.first}">
+				<td class="align-middle" th:rowspan="${product.alternativeBrands.size()}">Aussi référencé comme</td>
+				<td class="align-middle" th:text="${item}"></td>
+			</tr>
+			<tr th:unless="${stat.first}">
+				<td class="align-middle" th:text="${item}"></td>
+				<td class="align-middle" th:text="${item}"></td>
+			</tr>
+		</th:block>	
 
+		<tr th:if="${product.model()}">
+			<td class="align-middle">Modèle</td>
+			<td class="align-middle" th:text="${product.model()}"></td>
+		</tr>
 
-				<th:block th:each="item, stat : ${product.alternativeBrands}">
-					<tr th:if="${stat.first}">
-						<td scope="row" th:rowspan="${product.alternativeBrands.size()}">Aussi référencé comme  </td>
-						<td th:text="${item}"></td>
-					</tr>
-					<tr th:unless="${stat.first}">
-						<td th:text="${item}"></td>
-					</tr>
-				</th:block>		
-				
-				
-				
+		<th:block th:each="item, stat : ${product.alternativeIds}">
+			<tr th:if="${stat.first}">
+				<td class="align-middle" th:rowspan="${product.alternativeIds.size()}">Autres noms</td>
+				<td class="align-middle" th:text="${item}"></td>
+			</tr>
+			<tr th:unless="${stat.first}">
+				<td class="align-middle" th:text="${item}"></td>
+				<td class="align-middle" th:text="${item}"></td>
+			</tr>
+		</th:block>
+		
+		<tr>
+			<td class="align-middle">Référencé depuis</td>
+			<td class="align-middle" th:text="${product.creationDate(userLocale)}"></td>
+		</tr>
 
-				<tr th:if="${product.model()}">
-					<th scope="row"><b>Modèle</b></th>
-					<td><b class="lead" th:text="${product.model()}"></b></td>
-				</tr>
-
-
-				
-				
-				<th:block th:each="item, stat : ${product.alternativeIds}">
-					<tr th:if="${stat.first}">
-						<td scope="row" th:rowspan="${product.alternativeIds.size()}">Autres noms</td>
-						<td th:text="${item}"></td>
-					</tr>
-					<tr th:unless="${stat.first}">
-						<td th:text="${item}"></td>
-					</tr>
-				</th:block>	
-				
-				
-				<tr>
-					<th scope="row">Référencé depuis</th>
-					<td th:text="${product.creationDate(userLocale)}"></td>
-				</tr>
-				
-				<tr>
-					<th scope="row">Mise à jour</th>
-					<td th:text="${product.ago(userLocale)}"></td>
-				</tr>
+		<tr>
+			<td class="align-middle">Mise à jour</td>
+			<td class="align-middle" th:text="${product.ago(userLocale)}"></td>
+		</tr>
 
 
-				<tr>
-					<th scope="row" th:text="${product.gtinInfos.upcType}"></th>
-					<td class="text-center"> 
-						<span th:text="${product.gtin()}"></span>	
-						<img height="100px" th:title="${product.gtin()}" th:src="'/images/'+${product.gtin()}+'-gtin.png'" th:alt="${product.names.name} +' gtin : ' + ${product.gtin()}">
-					</td>
-				</tr>
-											
-			</tbody>
-		</table>
-	</div>
+		<tr>
+			<td class="align-middle" th:text="${product.gtinInfos.upcType}"></td>
+			<td class="align-middle"> 	
+				<img height="35" class="mlr-3" th:title="${product.gtin()}" th:src="'/images/'+${product.gtin()}+'-gtin.png'" th:alt="${product.names.name} +' gtin : ' + ${product.gtin()}">
+				<span th:text="${product.gtin()}"></span>
+			</td>
+		</tr>
+	</table>
 </div>
