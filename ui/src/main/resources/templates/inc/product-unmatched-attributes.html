@@ -1,35 +1,29 @@
-<div th:if="${product.attributes.unmapedAttributes.size()} > 0"  class="card shadow my-3">
-	<div class="card-header"><h2 class="h5">Toutes les caractéristiques</h2></div>
-	<div class="card-body">
-		<table id="allAttributes" class="table table-responsive" style="width: 100%">
+<section class="card shadow p-4" th:if="${product.attributes.unmapedAttributes.size()} > 0">
+	<div class="table-responsive table-caracteristics-fs">
+		<h6 class="h6 bg-white position-relative"><span>Toutes les caractéristiques</span></h6>
+		<table id="allAttributes" class="table">
 			<thead>
-				<tr>
-					<th>Nom</th>
-					<th>Valeur</th>
-					<th>Sources</th>
-				</tr>
+				<th>Nom</th>
+				<th>Valeur</th>
+				<th>Sources</th>
 			</thead>
-			<tbody>
-			
-				<th:block th:each="attribute : ${product.attributes.unmapedAttributes}">
+			<tr th:each="score : ${product.scores}">
+				<td class="align-middle" th:text="${score.key}"></td>
+				<td class="align-middle" th:text="${score.value}"></td>
+				<td></td>
+			</tr>
 
-
-					<th:block>
-						<tr th:class="${attribute.bgRow()}">
-							<td><span th:text="${attribute.name}"></span></td>						
-							<td><span  th:text="${attribute.value}"></span> </td>
-							<td>
-			            		<th:block th:insert="~{inc/attribute-sourcing.html}"></th:block>
-			            	</td>
-						</tr>
-					</th:block>
-
-
-
+			<th:block th:each="attribute : ${product.attributes.unmapedAttributes}">
+				<th:block>
+					<tr th:class="${attribute.bgRow()}">
+						<td class="align-middle"><span th:text="${attribute.name}"></span></td>					
+						<td class="align-middle"><span th:text="${attribute.value}"></span></td>
+						<td class="align-middle">
+							<th:block th:insert="~{inc/attribute-sourcing.html}"></th:block>
+						</td>
+					</tr>
 				</th:block>
-			
-			</tbody>
-	
-		</table>		
+			</th:block>
+		</table>
 	</div>
-</div>
+</section>

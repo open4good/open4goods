@@ -1,36 +1,18 @@
-<div  class="card mb-2">
-	<div class="card-body">
-		<form method="POST" action="/nudge">
+<form method="POST" action="/nudge">
+	<h5 class="h5 title">Compensation carbone</h6>
+	<h2 class="h1 mb-0 text-gray mb-3">				
+		<span id="countup-reversment" th:data-max="${product.bestPrice().compensation}"></span> 
+		<span th:text="#{'symbol.'+${product.bestPrice().currency}}"></span>				
+	</h2>
 
+	<label class="my-1 me-2" for="inlineFormCustomSelectPref">Reversés au nom de votre achat</label>
+	<select name="nudge" width="100%" class="form-select mb-3" id="inlineFormCustomSelectPref" aria-label="Default select example">
+		<option selected="selected" value="DEFAULT">Laisser nudger choisir !</option>
+		<option value="1">greenpeace</option>
+		<option value="3">Fondation goodplanet</option>
+	</select>
+			
+	<input type ="submit" value="Nudger" formtarget="_blank" class="btn btn-tertiary">
+	<input type="hidden" name="token" th:value="${product.bestPrice().affiliationToken}">			
 
-			<div class="d-flex p-3">
-				<div class="icon icon-primary">
-					<p  class="icon-box-text text-center" style="font-size: 3em;">				
-						<span  id="countup-reversment" th:data-max="${product.bestPrice().compensation}"></span> 
-						<span class="align-baseline font-medium" th:text="#{'symbol.'+${product.bestPrice().currency}}"></span>				
-					</p>
-				</div>
-				<div class="ps-4">
-					<h4 class="icon-box-title md-1"> Compensation carbone</h4>
-					<select name="nudge" width="100%" class="form-select" id="inlineFormCustomSelectPref" aria-label="Default select example">
-					<option selected="selected" value="DEFAULT">Laisser nudger choisir !</option>
-					<option value="1">greenpeace</option>
-					<option value="3">Fondation goodplanet</option></select>
-				</div>
-			</div>
-	
-	
-			<p>
-				Reversés au nom de votre achat.
-			<p>
-
-			<div class="">
-				<div class="m-3 d-grid">				
-						<input type = "submit" value="Nudger" class="btn btn-secondary animate-up-2">
-						<input type="hidden" name="token" th:value="${product.bestPrice().affiliationToken}">				
-				</div>
-			</div>
-		
-		</form>
-	</div>
-</div>
+</form>
