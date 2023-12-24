@@ -27,6 +27,7 @@ public class Resource  implements Validable {
 	private String url;
 
 	@Field(index = false, store = false, type = FieldType.Keyword)
+	// TODO : could remove
 	private String providerName;
 
 	@Field(index = false, store = false, type = FieldType.Date, format = DateFormat.epoch_millis)
@@ -37,6 +38,7 @@ public class Resource  implements Validable {
 
 	/**
 	 * The text, ot the title associated with this resource
+	 * TODO : could remove
 	 */
 	@Field(index = false, store = false, type = FieldType.Keyword)
 	private String text;
@@ -62,6 +64,15 @@ public class Resource  implements Validable {
 		setUrl(url);
 	}
 
+	
+	public Resource(String url, String tag) {
+		
+		this(url);
+		tags.add(tag);
+		
+	}
+
+	
 	@Override
 	public String toString() {
 		return  getUrl();

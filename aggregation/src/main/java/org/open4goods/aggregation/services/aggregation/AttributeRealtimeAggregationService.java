@@ -8,6 +8,7 @@ import org.open4goods.config.yml.ui.AttributesConfig;
 import org.open4goods.exceptions.ParseException;
 import org.open4goods.exceptions.ResourceNotFoundException;
 import org.open4goods.exceptions.ValidationException;
+import org.open4goods.helper.ResourceHelper;
 import org.open4goods.model.attribute.Attribute;
 import org.open4goods.model.constants.ReferentielKey;
 import org.open4goods.model.data.DataFragment;
@@ -76,6 +77,15 @@ public class AttributeRealtimeAggregationService extends AbstractRealTimeAggrega
 				Attribute translated = attributesConfig.translateAttribute(attr,  dataFragment.getDatasourceName());
 				
 				// We have a "raw" attribute that matches a aggragationconfig
+				
+				
+				
+				if (ResourceHelper.isImage(attr.getValue())) {
+					product.addImage(attr.getValue(), attr.getName());
+					toRemoveFromUnmatched.add(attr.getName());
+					continue;
+				}
+				
 				if (null != translated) {
 					
 					try {
@@ -100,6 +110,9 @@ public class AttributeRealtimeAggregationService extends AbstractRealTimeAggrega
 						
 						
 						toRemoveFromUnmatched.add(translated.getName());
+					
+						
+						
 						agg.addAttribute(translated,attrConfig, new UnindexedKeyValTimestamp(dataFragment.getDatasourceName(), translated.getValue()));
 						
 						// Replacing new AggAttribute in product
