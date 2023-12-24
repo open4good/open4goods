@@ -555,6 +555,17 @@ public class Product implements Standardisable {
 		
 	}
 
+
+	/**
+	 * Add an image to this product
+	 * @param url
+	 */
+	public void addImage(String url, String tag) {
+		if (!StringUtils.isEmpty(url)) {
+			resources.add(new Resource(url, tag));			
+		}
+	}
+	
 	//////////////////////////////////////////
 	// Getters / Setters
 	//////////////////////////////////////////
@@ -700,6 +711,7 @@ public class Product implements Standardisable {
 	public void setOffersCount(Integer offersCount) {
 		this.offersCount = offersCount;
 	}
+
 
 
 

@@ -19,8 +19,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 import java.util.zip.GZIPInputStream;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
@@ -37,6 +35,7 @@ import org.open4goods.crawler.services.IndexationService;
 import org.open4goods.exceptions.ValidationException;
 import org.open4goods.helper.InStockParser;
 import org.open4goods.helper.ProductStateParser;
+import org.open4goods.helper.ResourceHelper;
 import org.open4goods.helper.ShippingCostParser;
 import org.open4goods.helper.ShippingTimeParser;
 import org.open4goods.model.constants.InStock;
@@ -657,13 +656,15 @@ public class CsvDatasourceFetchingService extends DatasourceFetchingService {
 		}
 		
 		
+		/////////////////////////////////////
 		// Adding all columns as attributes
+		/////////////////////////////////////
 		for (Entry<String, String> kv : item.entrySet()) {
 			String key = kv.getKey();
 			String val = kv.getValue();
-			
-			if (!StringUtils.isEmpty(val)) {
-				p.addAttribute(key,val,config.getLanguage(), csvProperties.getAttributesIgnoreCariageReturns(),csvProperties.getAttributesSplitSeparators());
+						
+			if (!StringUtils.isEmpty(val)) {				
+					p.addAttribute(key,val,config.getLanguage(), csvProperties.getAttributesIgnoreCariageReturns(),csvProperties.getAttributesSplitSeparators());
 			}
 			
 		}
@@ -878,6 +879,7 @@ public class CsvDatasourceFetchingService extends DatasourceFetchingService {
 		return p;
 
 	}
+
 
 	/**
 	 * Sanitisation using libreoffice
