@@ -129,8 +129,7 @@ public class CrawlerOrchestrationController {
 		DataFragment df = fetcherOrchestrationService.triggerHttpSynchFetching(dsp, url);
 
 		dataFragmentStoreService.queueDataFragment(df);
-		// TODO : From config
-		dataFragmentStoreService.aggregateAndstore();
+
 		return df;
 
 
