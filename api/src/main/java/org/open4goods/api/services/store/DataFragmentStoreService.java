@@ -1,6 +1,5 @@
 package org.open4goods.api.services.store;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Map;
@@ -21,7 +20,6 @@ import org.open4goods.services.StandardiserService;
 import org.open4goods.store.repository.ProductIndexationWorker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.scheduling.annotation.Scheduled;
 
 import jakarta.annotation.PreDestroy;
 
@@ -76,15 +74,15 @@ public class DataFragmentStoreService {
 		this.aggregatedDataRepository = aggregatedDataRepository;
 		this.generationService=generationService;
 
-//		int dequeueSize = 200;
-//		int workers = 4;
-//		int pauseDuration = 1000;
+		int dequeueSize = 200;
+		int workers = 4;
+		int pauseDuration = 1000;
 //		
-//		logger.info("Starting file queue consumer thread, with bulk page size of {} items", dequeueSize );
+		logger.info("Starting file queue consumer thread, with bulk page size of {} items", dequeueSize );
 //				
-//		for (int i = 0; i < workers; i++) {			
-//			new Thread(new ProductIndexationWorker(this, dequeueSize, pauseDuration,"dequeue-worker-"+i)).start();
-//		}
+		for (int i = 0; i < workers; i++) {			
+			new Thread(new DataFragmentAggregationWorker(this, dequeueSize, pauseDuration,"dequeue-worker-"+i)).start();
+		}
 		
 		
 
@@ -162,42 +160,16 @@ public class DataFragmentStoreService {
 	 * @param df
 	 */
 	void enqueue(final DataFragment df) {
-		queue.add(df);
-		if (queue.size() > DATAFRAGMENT_INDEXATION_BULK_SIZE) {
-			aggregateAndstore();
-		}
+		queue.add(df);		
 	}
 
 
 	/**
 	 * Aggregates datafragments to already known aggregatedDatas, then store the results
-	 * Scheduled evey hour to flush buffer
 	 */
-
-	@Scheduled( fixedDelay = 3600 * 1000)
-	public void aggregateAndstore() {
-
-		
+	public void aggregateAndstore(Collection<DataFragment> buffer) {
 		
 		try {
-
-			if (queue.isEmpty()) {
-				logger.info("No datafragments to index");
-				return;
-			}
-
-			logger.info("Aggregating {} items",queue.size());
-			// Store operation retrieve fragments, historize and re-index
-			long now = System.currentTimeMillis();
-
-			// There is data to consume and queue consummation is enabled
-			logger.info("Dequeuing {} datafragments", queue.size());			
-			final Collection<DataFragment> buffer = new ArrayList<>();
-			
-			for (int i = 0; i < DATAFRAGMENT_INDEXATION_BULK_SIZE; i++) {
-				buffer.add(queue.take());
-			}
-
 			// Retrieving datafragments
 			Map<String, Product> aggDatas = aggregatedDataRepository.multiGetById(
 
@@ -232,7 +204,7 @@ public class DataFragmentStoreService {
 			aggregatedDataRepository.index(results);
 
 
-			logger.info("Indexed {} DataFragments in {}ms.",  buffer.size(),System.currentTimeMillis()-now);
+			logger.info("Indexed {} DataFragments",  buffer.size(),System.currentTimeMillis());
 
 		} catch (final Exception e) {
 			logger.error("Error while dequeing DataFragments",e);
@@ -249,6 +221,17 @@ public class DataFragmentStoreService {
 	public AtomicBoolean getServiceShutdown() {
 		return serviceShutdown;
 	}
+
+
+	public BlockingQueue<DataFragment> getQueue() {
+		return queue;
+	}
+
+
+	public void setQueue(BlockingQueue<DataFragment> queue) {
+		this.queue = queue;
+	}
+
 
 
 
