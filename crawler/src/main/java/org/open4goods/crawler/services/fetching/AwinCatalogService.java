@@ -60,15 +60,10 @@ public class AwinCatalogService {
 
 			for (AwinCatalogEntry awinCatalogEntry : catalog.stream().filter(e -> e.getStatus().equals("active"))
 					.toList()) {
-
 				String key = awinCatalogEntry.getAdvertiserName();
-				if (!entries.containsKey(key)) {
-					entries.put(key, new ArrayList<>());
-				}
-
-				entries.get(key).add(awinCatalogEntry);
-
+				entries.computeIfAbsent(key, k -> new ArrayList<>()).add(awinCatalogEntry);
 			}
+
 
 			logger.info("Loaded {} entries", catalog.size());
 
