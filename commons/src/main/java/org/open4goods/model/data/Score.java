@@ -44,7 +44,9 @@ public class Score  implements Validable {
 	// Contracts
 	///////////////////////////////////////
 
-
+	public Score() {
+	}
+	
 
 	public Score(String name, Double value) {
 		this.name = name;

@@ -17,6 +17,9 @@ import org.open4goods.model.data.UnindexedKeyValTimestamp;
 import org.springframework.data.elasticsearch.annotations.Field;
 import org.springframework.data.elasticsearch.annotations.FieldType;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class AggregatedAttribute implements IAttribute {
 
 	/**
@@ -24,7 +27,7 @@ public class AggregatedAttribute implements IAttribute {
 	 */
 	@Field(index = true, store = false, type = FieldType.Keyword)
 	private String name;
-	
+
 	/**
 	 * The value of this aggregated attribute
 	 */
@@ -41,72 +44,73 @@ public class AggregatedAttribute implements IAttribute {
 //	@Field(index = false, store = false, type = FieldType.Keyword)
 //	private AttributeType type;
 
-
 	/**
 	 * The collections of conflicts for this attribute
 	 */
 	@Field(index = false, store = false, type = FieldType.Object)
 	private Set<UnindexedKeyValTimestamp> sources = new HashSet<>();
 
-
 	/**
 	 * Number of sources for this attribute
+	 * 
 	 * @return
 	 */
 	public int sourcesCount() {
 		return sources.size();
 	}
-	
+
 	/**
 	 * The number of different values for this item
+	 * 
 	 * @return
 	 */
-	public long distinctValues () {
+	public long distinctValues() {
 		return sources.stream().map(UnindexedKeyVal::getValue).distinct().count();
 	}
-	
+
 	/**
 	 * For UI, a String representation of all providers names
+	 * 
 	 * @return
 	 */
-	public String providersToString() {		
-		return StringUtils.join( sources.stream().map(UnindexedKeyVal::getKey).toArray(),", ");
+	public String providersToString() {
+		return StringUtils.join(sources.stream().map(UnindexedKeyVal::getKey).toArray(), ", ");
 	}
 
 	/**
 	 * For UI, a String representation of all providers names and values
+	 * 
 	 * @return
 	 */
 	public String sourcesToString() {
-		return StringUtils.join( sources.stream().map(e-> e.getKey() + ":"+e.getValue()).toArray(),", ");
+		return StringUtils.join(sources.stream().map(e -> e.getKey() + ":" + e.getValue()).toArray(), ", ");
 
 	}
-
 
 	public boolean hasConflicts() {
 		return distinctValues() > 1;
 	}
-	
+
 	public String bgRow() {
-		String ret="table-default";
+		String ret = "table-default";
 		int sCount = sourcesCount();
 		long dValues = distinctValues();
-		
+
 		if (sCount == 0) {
-			ret="table-danger";
+			ret = "table-danger";
 		} else if (sCount == 1) {
-			ret="table-default";
+			ret = "table-default";
 		} else {
-			ret="table-info";
+			ret = "table-info";
 		}
-	
+
 		if (dValues > 1) {
 			ret = "table-danger";
 		}
-		
+
 		return ret;
 	}
-	
+
 	// TODO : Simple, but does not allow to handle conflicts, and so on
 	@Override
 	public int hashCode() {
@@ -117,114 +121,102 @@ public class AggregatedAttribute implements IAttribute {
 	public boolean equals(Object obj) {
 
 		if (obj instanceof AggregatedAttribute) {
-			return name.equals(((AggregatedAttribute)obj).name);
+			return name.equals(((AggregatedAttribute) obj).name);
 		}
 		return false;
 	}
 
-
-	
-
 	/**
 	 * Add a "matched" attribute, with dynamic type detection
-	 * @param parsed
-	 * Should handle language ?
+	 * 
+	 * @param parsed Should handle language ?
 	 */
-	public void addAttribute(Attribute attr, AttributeConfig attrConfig, UnindexedKeyValTimestamp sourcedValue) throws NumberFormatException{
+	public void addAttribute(Attribute attr, AttributeConfig attrConfig, UnindexedKeyValTimestamp sourcedValue)
+			throws NumberFormatException {
 
 		// Guard
 		if (this.name != null && !name.equals(this.name)) {
-			//TODO
+			// TODO
 			System.out.println("ERROR : Name mismatch in add attribute");
 		}
-		
-		this.name = attr.getName();		
+
+		this.name = attr.getName();
 		sources.add(sourcedValue);
-		
+
 		value = bestValue();
-		
+
 		if (attrConfig.getType().equals(AttributeType.NUMERIC)) {
-			numericValue = numericOrNull(value);			
+			numericValue = numericOrNull(value);
 		}
 	}
-
-	
-
-	
-	
 
 	public void addAttribute(Attribute attr, UnindexedKeyValTimestamp sourcedValue) {
 		// Guard
 		if (this.name != null && !name.equals(this.name)) {
-			//TODO
+			// TODO
 			System.out.println("ERROR : Name mismatch in add attribute");
 		}
-		
-		this.name = attr.getName();		
+
+		this.name = attr.getName();
 		sources.add(sourcedValue);
-		
+
 		value = bestValue();
-		
-		
+
 	}
-	
-	
-	
-/**
- * 
- * @return the best value
- */
+
+	/**
+	 * 
+	 * @return the best value
+	 */
 	public String bestValue() {
 
-		// Count values by unique keys... NOTE : Should have a java8+ nice solution here !
+		// Count values by unique keys... NOTE : Should have a java8+ nice solution here
+		// !
 		Map<String, Integer> valueCounter = new HashMap<>();
-		
+
 		for (UnindexedKeyValTimestamp source : sources) {
 
-            valueCounter.merge(source.getValue(), 1, Integer::sum);
+			valueCounter.merge(source.getValue(), 1, Integer::sum);
 		}
-				
-	
+
 		// sort this map by values
 
-	    
-	    Map<String,Integer> result = valueCounter.entrySet().stream()
-	    		.sorted(Map.Entry.comparingByValue(Comparator.reverseOrder())) 		
-	    	
-	    		.collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue,
-	    		(oldValue, newValue) -> oldValue, LinkedHashMap::new));
-	    
-	    
-	    // Take the first one : will be the "most recommanded" if discriminant number of datasources, a random value otherwise
-	    
+		Map<String, Integer> result = valueCounter.entrySet().stream()
+				.sorted(Map.Entry.comparingByValue(Comparator.reverseOrder()))
+
+				.collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (oldValue, newValue) -> oldValue,
+						LinkedHashMap::new));
+
+		// Take the first one : will be the "most recommanded" if discriminant number of
+		// datasources, a random value otherwise
+
 		return result.entrySet().stream().findFirst().get().getKey();
 	}
 
 	/**
 	 * Return the number of distinct values
+	 * 
 	 * @return
 	 */
-	public long getPonderedvalues() {
+	public long ponderedvalues() {
 		return sources.stream().map(UnindexedKeyVal::getValue).distinct().count();
 	}
-	
+
 	@Override
 	public String toString() {
-		return name + " : " +value+ " -> "+  sources.size() + " source(s), " + getPonderedvalues() + " conflict(s)";
+		return name + " : " + value + " -> " + sources.size() + " source(s), " + ponderedvalues() + " conflict(s)";
 	}
-	
-	
-	public Double numericOrNull(String rawValue) throws NumberFormatException{
+
+	public Double numericOrNull(String rawValue) throws NumberFormatException {
 		// Trying to specialize as numeric
 		final String num = rawValue.trim().replace(",", ".");
 
-		return  Double.valueOf(num);
+		return Double.valueOf(num);
 	}
 
 	///////////////////////////////////////
 	// Getters / Setters
 	///////////////////////////////////////
-
 
 	@Override
 	public String getName() {
@@ -236,8 +228,6 @@ public class AggregatedAttribute implements IAttribute {
 		this.name = name;
 	}
 
-
-
 	@Override
 	public String getValue() {
 		return value;
@@ -246,7 +236,6 @@ public class AggregatedAttribute implements IAttribute {
 	public void setValue(String value) {
 		this.value = value;
 	}
-
 
 //	public AttributeType getType() {
 //		return type;
@@ -265,8 +254,6 @@ public class AggregatedAttribute implements IAttribute {
 		this.sources = sources;
 	}
 
-
-
 	@Override
 	public String getLanguage() {
 		// TODO : i18n
@@ -280,14 +267,5 @@ public class AggregatedAttribute implements IAttribute {
 	public void setNumericValue(Double numericValue) {
 		this.numericValue = numericValue;
 	}
-
-
-
-
-
-
-
-
-
 
 }

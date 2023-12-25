@@ -29,6 +29,7 @@ import org.open4goods.model.constants.TimeConstants;
 import org.open4goods.model.constants.UrlConstants;
 import org.open4goods.model.data.DataFragment;
 import org.open4goods.model.data.Price;
+import org.open4goods.model.product.Product;
 import org.open4goods.services.BarcodeValidationService;
 import org.open4goods.services.BrandService;
 import org.open4goods.services.DataSourceConfigService;
@@ -54,6 +55,10 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
 import org.springframework.core.io.support.ResourcePatternResolver;
+import org.springframework.data.redis.connection.RedisConnectionFactory;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
+import org.springframework.data.redis.serializer.StringRedisSerializer;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
@@ -81,6 +86,30 @@ public class ApiConfig {
 		this.apiProperties = apiProperties;
 	}
 
+	
+//	 @Bean
+//	  public JedisConnectionFactory redisConnectionFactory() {
+//
+//	    RedisStandaloneConfiguration config = new RedisStandaloneConfiguration("server", 6379);
+//	    return new JedisConnectionFactory(config);
+////			return new JedisConnectionFactory();
+//	 }
+////	 
+	 
+	  @Bean
+	  public RedisTemplate<String, Product> redisTemplate(RedisConnectionFactory connectionFactory) {
+		  RedisTemplate<String, Product> template = new RedisTemplate<>();
+		    template.setConnectionFactory(connectionFactory);
+		    
+		    // Configure serialization
+		    template.setKeySerializer(new StringRedisSerializer());
+		    template.setValueSerializer(new GenericJackson2JsonRedisSerializer());
+
+		    
+		    // Add some specific configuration here. Key serializers, etc.
+		    return template;
+	  }
+	 
 	/**
 	 * Various generation (json, yaml, binary)
 	 *

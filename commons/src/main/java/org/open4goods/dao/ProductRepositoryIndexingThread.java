@@ -2,13 +2,12 @@ package org.open4goods.dao;
 
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.LinkedBlockingQueue;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -16,9 +15,7 @@ import java.util.stream.Stream;
 import org.open4goods.config.yml.ui.VerticalConfig;
 import org.open4goods.exceptions.ResourceNotFoundException;
 import org.open4goods.model.constants.CacheConstants;
-import org.open4goods.model.data.DataFragment;
 import org.open4goods.model.product.Product;
-import org.open4goods.store.repository.ProductIndexationWorker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,18 +40,12 @@ import org.springframework.data.redis.core.RedisOperations;
  * @author goulven
  *
  */
-public class ProductRepository {
+public class ProductRepositoryIndexingThread {
 
-	private static final Logger logger = LoggerFactory.getLogger(ProductRepository.class);
+	private static final Logger logger = LoggerFactory.getLogger(ProductRepositoryIndexingThread.class);
 
 	public static final String MAIN_INDEX_NAME = Product.DEFAULT_REPO;
 
-	
-	// The file queue implementation
-	// TODO : Limit from conf
-	private BlockingQueue<Product> queue = new LinkedBlockingQueue<>(300000);
-	
-	
 	/**
 	 * Duration in ms where a price is considered to be valid. Only data with a
 	 * price greater than this one will be returned to the user
@@ -68,20 +59,10 @@ public class ProductRepository {
 
 	private @Autowired RedisOperations<String, Product> redisRepo;
 
-	public ProductRepository() {
-		
-		int dequeueSize = 200;
-		int workers = 3;
-		int pauseDuration = 1000;
-		
-		logger.info("Starting file queue consumer thread, with bulk page size of {} items", dequeueSize );
-				
-		for (int i = 0; i < workers; i++) {			
-			new Thread(new ProductIndexationWorker(this, dequeueSize, pauseDuration,"dequeue-worker-"+i)).start();
-		}
+	public ProductRepositoryIndexingThread() {
 	}
 
-//	private ExecutorService executor = Executors.newVirtualThreadPerTaskExecutor();
+	private ExecutorService executor = Executors.newVirtualThreadPerTaskExecutor();
 
 	/**
 	 * Return all products matching the vertical in the config or already having a
@@ -149,22 +130,22 @@ public class ProductRepository {
 
 	}
 
-//	/**
-//	 * Index an Product
-//	 *
-//	 * @param p
-//	 */
-//	public void index(final Product p, final String indexName) {
-//
-//		logger.info("Indexing single product : {} in index {}", p.gtin(), indexName);
-//
-////		executor.submit(() -> {
-//			elasticsearchTemplate.save(p, IndexCoordinates.of(indexName));
-////		});
-//
-//		saveToRedis(p);
-//
-//	}
+	/**
+	 * Index an Product
+	 *
+	 * @param p
+	 */
+	public void index(final Product p, final String indexName) {
+
+		logger.info("Indexing single product : {} in index {}", p.gtin(), indexName);
+
+//		executor.submit(() -> {
+			elasticsearchTemplate.save(p, IndexCoordinates.of(indexName));
+//		});
+
+		saveToRedis(p);
+
+	}
 
 	/**
 	 * Index an Product
@@ -173,30 +154,34 @@ public class ProductRepository {
 	 */
 	public void index(final Product p) {
 
-		logger.info("Queuing single product : {}", p.gtin());
+		logger.info("Indexing single product : {}", p.gtin());
 
-		queue.add(p);
+//		executor.submit(() -> {
+			elasticsearchTemplate.save(p);
+//		});
+
+		saveToRedis(p);
 
 	}
 
-//	/**
-//	 * Bulk Index multiple Product
-//	 *
-//	 * @param p
-//	 */
-//	public void index(Collection<Product> data, final String indexName) {
-//
-//		logger.info("Queuing {} products in index {}", data.size(), indexName);
-//
-////		executor.submit(() -> {
-//			elasticsearchTemplate.save(data, IndexCoordinates.of(indexName));
-////		});
-//
-////		executor.submit(() -> {
-//			redisRepo.opsForValue().multiSet(data.stream().collect(Collectors.toMap(Product::gtin, Function.identity())));
-////		});
-//
-//	}
+	/**
+	 * Bulk Index multiple Product
+	 *
+	 * @param p
+	 */
+	public void index(Collection<Product> data, final String indexName) {
+
+		logger.info("Indexing {} products in index {}", data.size(), indexName);
+
+//		executor.submit(() -> {
+			elasticsearchTemplate.save(data, IndexCoordinates.of(indexName));
+//		});
+
+//		executor.submit(() -> {
+			redisRepo.opsForValue().multiSet(data.stream().collect(Collectors.toMap(Product::gtin, Function.identity())));
+//		});
+
+	}
 
 	/**
 	 * Bulk Index multiple Product
@@ -205,14 +190,6 @@ public class ProductRepository {
 	 */
 	public void index(Collection<Product> data) {
 
-		logger.info("Queuing {} products", data.size());
-		queue.addAll(data);
-		
-
-	}
-
-	
-	public void store(Set<Product> data) {
 		logger.info("Indexing {} products", data.size());
 
 //		executor.submit(() -> {
@@ -222,9 +199,9 @@ public class ProductRepository {
 //		executor.submit(() -> {
 			redisRepo.opsForValue().multiSet(data.stream().collect(Collectors.toMap(Product::gtin, Function.identity())));
 //		});
+
 	}
-	
-	
+
 	/**
 	 * Return an aggregated data by it's ID
 	 * 
@@ -233,16 +210,15 @@ public class ProductRepository {
 	 * @return
 	 * @throws ResourceNotFoundException
 	 */
-	@Cacheable(cacheNames = CacheConstants.ONE_MINUTE_LOCAL_CACHE_NAME)
-	public Product getById(final String productId) throws ResourceNotFoundException {
+	public Product getById(final String productId, String indexName) throws ResourceNotFoundException {
 
-		logger.info("Getting product {}", productId);
+		logger.info("Getting product {} from index {}", productId, indexName);
 		// Getting from redis
 		Product result = redisRepo.opsForValue().get(productId);
 
 		if (null == result) {
 			// Fail, getting from elastic
-			result = elasticsearchTemplate.get(productId, Product.class);
+			result = elasticsearchTemplate.get(productId, Product.class, IndexCoordinates.of(indexName));
 
 			if (null == result) {
 				throw new ResourceNotFoundException("Product '" + productId + "' does not exists");
@@ -271,11 +247,7 @@ public class ProductRepository {
 		
 		// Getting from redis
 		Iterable<Product> redisResults = redisRepo.opsForValue().multiGet(ids);
-		redisResults.forEach(e -> {
-			if (null != e) {
-				ret.put(e.gtin(), e);
-			}
-		});
+		redisResults.forEach(e -> ret.put(e.gtin(), e));
 		
 		// Getting the one we don't have in redis from elastic 		
 		Set<String> missingIds = ids.stream().filter(e -> !ret.containsKey(e)).collect(Collectors.toSet());
@@ -293,14 +265,9 @@ public class ProductRepository {
 			.forEach(e -> ret.put(e.gtin(), e));
 	
 			
-			// Filtrer et collecter les produits à partir d'une liste en utilisant leur GTIN comme clé dans une map
-			Map<String, Product> redisItems = ret.values().stream()
-			    // Filtrer les éléments non nuls
-			    .filter(Objects::nonNull)
-			    // Filtrer les éléments dont le GTIN est présent dans la liste des IDs manquants
-			    .filter(e -> missingIds.contains(e.gtin()))
-			    // Collecter les produits dans une map avec le GTIN comme clé
-			    .collect(Collectors.toMap(Product::gtin, Function.identity()));
+			
+			// Saving the remaining ones in redis
+			Map<String,Product> redisItems = ret.values().stream().filter(e -> missingIds.contains(e.gtin())).collect(Collectors.toMap(Product::gtin, Function.identity()));
 			
 			logger.info("Saving {} products in redis",redisItems.size());
 //			executor.submit(() -> {
@@ -311,6 +278,11 @@ public class ProductRepository {
 		return ret;
 	}
 
+	@Cacheable(cacheNames = CacheConstants.ONE_MINUTE_LOCAL_CACHE_NAME)
+	public Product getById(String productId) throws ResourceNotFoundException {
+		return getById(productId, MAIN_INDEX_NAME);
+
+	}
 
 	@Cacheable(key = "#root.method.name", cacheNames = CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME)
 	public Long countMainIndex() {
@@ -347,14 +319,5 @@ public class ProductRepository {
 			redisRepo.opsForValue().set(result.gtin(), result);
 //		});
 	}
-
-	public BlockingQueue<Product> getQueue() {
-		return queue;
-	}
-
-
-
-
-
 
 }
