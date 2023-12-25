@@ -6,7 +6,7 @@ import java.io.IOException;
 import org.open4goods.crawler.controller.CrawlController;
 import org.open4goods.crawler.repository.IndexationRepository;
 import org.open4goods.services.SerialisationService;
-import org.open4goods.store.repository.ProductSpringRepository;
+import org.open4goods.store.repository.ElasticProductRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,7 +26,7 @@ import jakarta.annotation.PostConstruct;
 @SpringBootApplication (scanBasePackageClasses = { Api.class, CrawlController.class})
 
 @EnableScheduling
-@EnableElasticsearchRepositories(basePackageClasses = {ProductSpringRepository.class, IndexationRepository.class})
+@EnableElasticsearchRepositories(basePackageClasses = {ElasticProductRepository.class, IndexationRepository.class})
 @EnableCaching
 
 public abstract class Api {

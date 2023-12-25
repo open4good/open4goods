@@ -1,10 +1,12 @@
 package org.open4goods.api.services.store;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.commons.lang3.StringUtils;
@@ -16,27 +18,31 @@ import org.open4goods.model.Standardisable;
 import org.open4goods.model.data.DataFragment;
 import org.open4goods.model.product.Product;
 import org.open4goods.services.StandardiserService;
+import org.open4goods.store.repository.ProductIndexationWorker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Scheduled;
 
-import io.micrometer.core.annotation.Timed;
 import jakarta.annotation.PreDestroy;
 
 /**
  * This service is in charge of DataFragments update and persistence. All
  * indexation request are queued in a file. This queue is asynchronously read by
- * {@link DataFragmentQueueWorker} in order to "bulk" and delay the
+ * {@link ProductIndexationWorker} in order to "bulk" and delay the
  * DataFragments update operations through {@link DataFragmentRepository} .<br/>
  *
  * It also provides mechanism to stop indexation (and keep data in the persisted
  * file), and to perform "direct" updates without giving up to the file buffer
- *
+ * TODO : Could also have a thread pool here to increase performances
  * @author Goulven.Furet
  *
  */
 
 public class DataFragmentStoreService {
+
+	// TODO : from conf
+	private static final int DATAFRAGMENT_INDEXATION_BULK_SIZE = 250;
+
 
 	private static final Logger logger = LoggerFactory.getLogger(DataFragmentStoreService.class);
 
@@ -50,8 +56,9 @@ public class DataFragmentStoreService {
 	// Queue worker shutdown condition
 	private final AtomicBoolean serviceShutdown = new AtomicBoolean(false);
 
-	// The file queue implementation
-	private final Map<String, DataFragment > fileQueue = new ConcurrentHashMap<>();
+	// The queue implementation
+	// TODO : Limit from conf
+	private BlockingQueue<DataFragment> queue = new LinkedBlockingQueue<>(3000000);
 
 	private ProductRepository aggregatedDataRepository;
 
@@ -69,10 +76,26 @@ public class DataFragmentStoreService {
 		this.aggregatedDataRepository = aggregatedDataRepository;
 		this.generationService=generationService;
 
-
+//		int dequeueSize = 200;
+//		int workers = 4;
+//		int pauseDuration = 1000;
+//		
+//		logger.info("Starting file queue consumer thread, with bulk page size of {} items", dequeueSize );
+//				
+//		for (int i = 0; i < workers; i++) {			
+//			new Thread(new ProductIndexationWorker(this, dequeueSize, pauseDuration,"dequeue-worker-"+i)).start();
+//		}
+		
+		
 
 	}
 
+	
+	public @PreDestroy void destroy() {
+		serviceShutdown.set(true);
+	}
+	
+	
 	/**
 	 * Add multiple dataFragments to the indexing queue
 	 *
@@ -100,7 +123,7 @@ public class DataFragmentStoreService {
 			return;
 		}
 
-		logger.info("Queuing datafragment {}",data);
+		logger.debug("Queuing datafragment {}",data);
 
 		enqueue(data);
 	}
@@ -124,7 +147,6 @@ public class DataFragmentStoreService {
 		// Standardisation (currencies, ratings scales, ...)
 		////////////////////////////////////////////////////////
 
-
 		for (final Standardisable s : data.standardisableChildren()) {
 			s.standardize(standardiserService, StandardiserService.DEFAULT_CURRENCY);
 		}
@@ -140,16 +162,8 @@ public class DataFragmentStoreService {
 	 * @param df
 	 */
 	void enqueue(final DataFragment df) {
-
-
-
-		fileQueue.put(df.getUrl(),df);
-
-		// Trigger hard indexing
-		//TODO(conf) : elastinc bulk size from conf
-
-
-		if (fileQueue.size() > 250) {
+		queue.add(df);
+		if (queue.size() > DATAFRAGMENT_INDEXATION_BULK_SIZE) {
 			aggregateAndstore();
 		}
 	}
@@ -163,21 +177,26 @@ public class DataFragmentStoreService {
 	@Scheduled( fixedDelay = 3600 * 1000)
 	public void aggregateAndstore() {
 
+		
+		
 		try {
 
-			if (fileQueue.isEmpty()) {
+			if (queue.isEmpty()) {
 				logger.info("No datafragments to index");
 				return;
 			}
 
-			logger.info("Aggregating {} items",fileQueue.size());
+			logger.info("Aggregating {} items",queue.size());
 			// Store operation retrieve fragments, historize and re-index
 			long now = System.currentTimeMillis();
 
 			// There is data to consume and queue consummation is enabled
-			final Collection<DataFragment> buffer = fileQueue.values();
-
-			logger.error("Dequeuing {} datafragments", buffer.size());
+			logger.info("Dequeuing {} datafragments", queue.size());			
+			final Collection<DataFragment> buffer = new ArrayList<>();
+			
+			for (int i = 0; i < DATAFRAGMENT_INDEXATION_BULK_SIZE; i++) {
+				buffer.add(queue.take());
+			}
 
 			// Retrieving datafragments
 			Map<String, Product> aggDatas = aggregatedDataRepository.multiGetById(
@@ -220,18 +239,18 @@ public class DataFragmentStoreService {
 		}
 
 		// Clearing queue
-		fileQueue.clear();
+		queue.clear();
 
 	}
 
 
-	public @PreDestroy void destroy() {
-		serviceShutdown.set(true);
-	}
+
 
 	public AtomicBoolean getServiceShutdown() {
 		return serviceShutdown;
 	}
+
+
 
 
 

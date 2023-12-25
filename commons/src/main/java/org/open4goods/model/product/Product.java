@@ -38,9 +38,15 @@ import org.springframework.data.elasticsearch.annotations.Document;
 import org.springframework.data.elasticsearch.annotations.Field;
 import org.springframework.data.elasticsearch.annotations.FieldType;
 import org.springframework.data.elasticsearch.annotations.Setting;
+import org.springframework.data.redis.core.RedisHash;
+
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @Document(indexName = Product.DEFAULT_REPO, createIndex = true)
+@RedisHash(Product.DEFAULT_REPO)
 @Setting( settingPath = "/elastic-settings.json")
+@JsonIgnoreProperties(ignoreUnknown = true)
+// TODO : Disabling to see/test  if a clean jackson serial
 public class Product implements Standardisable {
 
 	private final static Logger logger = LoggerFactory.getLogger(Product.class);
@@ -207,7 +213,7 @@ public class Product implements Standardisable {
 	 * @param language
 	 * @return
 	 */
-	public Map<String, Set<Description>> getDescriptions(final String language) {
+	public Map<String, Set<Description>> descriptions(final String language) {
 		final Map<String, Set<Description>> ret = new HashMap<>();
 
 		for (final Description d : getDescriptions()) {

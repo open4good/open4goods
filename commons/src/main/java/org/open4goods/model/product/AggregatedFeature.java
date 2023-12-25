@@ -19,6 +19,11 @@ public class AggregatedFeature {
 		return false;
 	}
 
+	
+
+	public AggregatedFeature() {
+	}
+
 
 	public AggregatedFeature(String name) {
 		super();

@@ -241,7 +241,7 @@ public class ProductController extends AbstractUiController {
 
 		data.setHumanDescription(description);
 
-		productRepository.index(data, ProductRepository.MAIN_INDEX_NAME);
+		productRepository.index(data);
 
 		return buildProductView(id, null,request, response);
 

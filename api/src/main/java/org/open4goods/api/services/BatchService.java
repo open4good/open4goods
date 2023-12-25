@@ -113,6 +113,7 @@ public class BatchService {
 		productsStream.forEach(data -> {
 			try {
 				dedicatedLogger.debug("Realtime aggregation for {}", data);
+				//TODO : Bad design
 				productBag.add( rtAgg.build(data.getFragment(), data));
 			} catch (AggregationSkipException e) {
 				dedicatedLogger.warn("Error on realtimeaggregation aggregation for {}", data, e);

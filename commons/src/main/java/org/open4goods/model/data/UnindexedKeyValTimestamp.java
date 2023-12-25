@@ -9,6 +9,11 @@ public class UnindexedKeyValTimestamp extends UnindexedKeyVal{
 	@Field(index = false, store = false, type = FieldType.Date)
 	private long ts;
 	
+	
+	public UnindexedKeyValTimestamp() {
+		super();
+	}
+
 	public UnindexedKeyValTimestamp(String key, String value) {
 		super(key, value);
 		this.ts=System.currentTimeMillis();

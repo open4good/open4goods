@@ -34,7 +34,7 @@ public class RealTimeAggregator extends AbstractAggregator {
 	 */
 	public Product build(final DataFragment fragment, final Product data ) throws AggregationSkipException {
 
-		logger.info("Incrementing Product with {} DataFragment and using {} services",fragment,services.size());
+		logger.debug("Incrementing Product with {} DataFragment and using {} services",fragment,services.size());
 
 		// Call transformation building registered service
 		for (final AbstractAggregationService s : services) {
