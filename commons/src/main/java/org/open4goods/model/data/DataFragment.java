@@ -616,7 +616,7 @@ public class DataFragment implements Standardisable, Validable {
 
 	public void addReferentielAttribute(final String key, final String value) {
 		if (StringUtils.isBlank(value)) {
-			logger.info("Cannot add empty referentiel attribute for {} at {}",key,this);
+			logger.debug("Cannot add empty referentiel attribute for {} at {}",key,this.url);
 			return;
 		}
 
