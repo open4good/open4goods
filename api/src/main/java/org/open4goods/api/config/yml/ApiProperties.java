@@ -4,11 +4,8 @@ package org.open4goods.api.config.yml;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
-import org.apache.commons.lang3.StringUtils;
 import org.open4goods.config.BrandConfiguration;
-import org.open4goods.config.yml.GlobalAttributeAggregationConfig;
 import org.open4goods.config.yml.ui.DescriptionsAggregationConfig;
 import org.open4goods.crawler.config.yml.FetcherProperties;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -140,52 +137,6 @@ public class ApiProperties {
 	 */
 	@NotNull
 	private FetcherProperties fetcherProperties;
-
-
-	/////////////////////////
-	// Realtime aggregators configuration
-	/////////////////////////
-	private GlobalAttributeAggregationConfig attributeAggregationConfig = new GlobalAttributeAggregationConfig();
-
-
-
-
-	/**
-	 * Return the datafragments retrieving query against global tags
-	 * @param provider
-	 * @param inclusions
-	 * @param exclusions
-	 * @return
-	 */
-	public String getIncludeExcludeSegmentQuery(final String provider, final List<String> inclusions,
-			final List<String> exclusions) {
-		StringBuilder ret = new StringBuilder();
-
-
-		if (StringUtils.isEmpty(provider)) {
-			ret.append("datasourceName:*");
-		} else {
-			ret.append("datasourceName:\"").append(provider).append("\"");
-		}
-
-
-		if (null != inclusions &&  inclusions.size() > 0) {
-
-			ret.append(" AND (").append(StringUtils.join(inclusions.stream()
-					.filter(e -> !StringUtils.isEmpty(e))
-					.map(e -> "productTags:\"*" + e.trim().toUpperCase() + "*\"")
-					.collect(Collectors.toSet()), " OR ")).append(")") ;
-		}
-
-		if (null != exclusions && exclusions.size() > 0) {
-			ret.append(" AND (").append(StringUtils.join(exclusions.stream()
-					.filter(e -> !StringUtils.isEmpty(e))
-					.map(e -> "NOT productTags:\"*" + e.trim().toUpperCase() + "*\"")
-					.collect(Collectors.toSet()), " AND ")).append(")");
-		}
-		return ret.toString();
-	}
-
 
 
 	public String workFolder() {
@@ -330,17 +281,6 @@ public class ApiProperties {
 	}
 
 
-
-
-	public GlobalAttributeAggregationConfig getAttributeAggregationConfig() {
-		return attributeAggregationConfig;
-	}
-
-
-
-	public void setAttributeAggregationConfig(GlobalAttributeAggregationConfig attributeAggregationConfig) {
-		this.attributeAggregationConfig = attributeAggregationConfig;
-	}
 
 
 
