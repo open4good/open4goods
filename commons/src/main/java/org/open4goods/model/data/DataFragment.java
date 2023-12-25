@@ -683,8 +683,8 @@ public class DataFragment implements Standardisable, Validable {
 	 */
 	public void addAttribute(final String name, final String value, final String language,
 			final Boolean ignoreCariageReturns,final Set<String> multivalueSeparators ) {
-		if (null == value || value.toString().isEmpty()) {
-			logger.info("Cannot add null or empty values for attribute " + name);
+		if (null == value || value.isBlank()) {
+			logger.debug("Cannot add null or empty values for attribute " + name);
 			return ;
 		}
 
