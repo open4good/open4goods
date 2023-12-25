@@ -110,41 +110,45 @@ public class NamesAggregationService extends AbstractRealTimeAggregationService 
 	}
 
 
-	private String normalizeName(String name) {
-
-		String normalized = StringUtils.normalizeSpace(name.toLowerCase());
-
-		String[] frags = normalized.split(" ");
-
-		LinkedHashSet<String> linkedHashSet = new LinkedHashSet<>();
-		StringBuilder ret = new StringBuilder();
-
-		for (int i = 0; i < frags.length; i++) {
-
-			// Special case on the last word
-			if (i == frags.length - 1) {
-				if (frags[i].length() < LAST_WORD_MIN_LENGTH) {
-					continue;
-				}
-				if (frags[i].endsWith("...")) {
-					continue;
-				}
-
-			}
-
-			if (i <= NUMBER_OF_WORDS_TO_DEDUPLICATE) {
-				// Dedup this word
-				linkedHashSet.add(frags[i].toLowerCase());
-			} else {
-				ret.append(frags[i]).append(" ");
-
-			}
-
-		}
-		String result = (StringUtils.join(linkedHashSet, " ") + " " + ret.toString()).trim();
-
-		return result;
+	private String normalizeName( String name) {
+		return name.trim();
 	}
+	
+//	private String normalizeName(String name) {
+//
+//		String normalized = StringUtils.normalizeSpace(name.toLowerCase());
+//
+//		String[] frags = normalized.split(" ");
+//
+//		LinkedHashSet<String> linkedHashSet = new LinkedHashSet<>();
+//		StringBuilder ret = new StringBuilder();
+//
+//		for (int i = 0; i < frags.length; i++) {
+//
+//			// Special case on the last word
+//			if (i == frags.length - 1) {
+//				if (frags[i].length() < LAST_WORD_MIN_LENGTH) {
+//					continue;
+//				}
+//				if (frags[i].endsWith("...")) {
+//					continue;
+//				}
+//
+//			}
+//
+//			if (i <= NUMBER_OF_WORDS_TO_DEDUPLICATE) {
+//				// Dedup this word
+//				linkedHashSet.add(frags[i].toLowerCase());
+//			} else {
+//				ret.append(frags[i]).append(" ");
+//
+//			}
+//
+//		}
+//		String result = (StringUtils.join(linkedHashSet, " ") + " " + ret.toString()).trim();
+//
+//		return result;
+//	}
 
 	//	public String getProductName(final Product p, final String language) {
 	//		String template = null;
