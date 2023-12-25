@@ -831,7 +831,7 @@ public class CsvDatasourceFetchingService extends DatasourceFetchingService {
 			if (null == val) {
 				dedicatedLogger.info("No data for {} in {}", refs.getValue(), item);
 			} else {
-				p.addReferentielAttribute(refs.getKey().toString(), sanitize(val));
+				p.addReferentielAttribute(refs.getKey().toString(), val);
 			}
 		}
 
