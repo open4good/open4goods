@@ -1,0 +1,45 @@
+
+
+    <section class="section">
+		<div class="row text-center justify-content-center">
+              <div class="col-md-8 mb-5">
+                  <h3 class="display-3">Ressources associées </h3>
+                  <p class="lead">Que en dev mode</p>
+              </div>
+        </div>	   
+	   
+			<div class="container container-semi-fluid">
+                <div class="col-12 col-lg-12">
+                    
+               <div class="table-responsive table-caracteristics-fs">
+					<table id="allAttributes" class="table">
+						<thead>
+							<th>url</th>
+							<th>providerName</th>
+							<th>timeStamp</th>
+							<th>cacheKey</th>
+							<th>text</th>
+							<th>tags</th>							
+						</thead>
+			
+						<th:block th:each="r : ${product.resources}">
+							<th:block>
+								<tr>
+									<td class="align-middle"><span th:text="${r.url}"></span><br/><img th:src="${r.url}"> </td>					
+									<td class="align-middle"><span th:text="${r.providerName}"></span></td>					
+									<td class="align-middle"><span th:text="${r.timeStamp}"></span></td>					
+									<td class="align-middle"><span th:text="${r.cacheKey}"></span></td>					
+									<td class="align-middle"><span th:text="${r.text}"></span></td>					
+									<td class="align-middle"><span th:text="${r.tags}"></span></td>					
+								</tr>
+							</th:block>
+						</th:block>
+					</table>                  
+                </div>
+            </div>	   
+	   </section> 
+	   
+	   
+	   
+	   
+
