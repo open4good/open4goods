@@ -9,6 +9,7 @@ import org.open4goods.dao.ProductRepository;
 import org.open4goods.model.constants.CacheConstants;
 import org.open4goods.model.constants.Currency;
 import org.open4goods.model.data.Price;
+import org.open4goods.model.product.Product;
 import org.open4goods.services.BrandService;
 import org.open4goods.services.DataSourceConfigService;
 import org.open4goods.services.EvaluationService;
@@ -32,6 +33,10 @@ import org.springframework.cache.caffeine.CaffeineCache;
 import org.springframework.cache.support.SimpleCacheManager;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.data.redis.connection.RedisConnectionFactory;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
+import org.springframework.data.redis.serializer.StringRedisSerializer;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.web.firewall.HttpFirewall;
@@ -54,6 +59,20 @@ public class AppConfig {
 		this.config = config;
 	}
 
+	  @Bean
+	  public RedisTemplate<String, Product> redisTemplate(RedisConnectionFactory connectionFactory) {
+		  RedisTemplate<String, Product> template = new RedisTemplate<>();
+		    template.setConnectionFactory(connectionFactory);
+		    
+		    // Configure serialization
+		    template.setKeySerializer(new StringRedisSerializer());
+		    template.setValueSerializer(new GenericJackson2JsonRedisSerializer());
+
+		    
+		    // Add some specific configuration here. Key serializers, etc.
+		    return template;
+	  }
+	  
 	@Bean
 	ImageService imageService(@Autowired ImageMagickService imageMagickService, @Autowired ResourceService resourceService) {
 		return new ImageService(imageMagickService, resourceService);
