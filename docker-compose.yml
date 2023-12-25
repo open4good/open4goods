@@ -99,11 +99,12 @@ services:
   redis:
     image: bitnami/redis:latest
     container_name: redis
+    command: ["redis-server", "--appendonly", "no", "--maxmemory", "20gb", "--maxmemory-policy", "allkeys-lru"]
     ports:
       - 6379:6379        
     environment:
       - ALLOW_EMPTY_PASSWORD=yes
-      - maxmemory=512mb
+ 
     networks:
       - o4g-network
       
