@@ -212,7 +212,7 @@ public class ProductRepository {
 	}
 
 	
-	public void store(Set<Product> data) {
+	public void store(Collection<Product> data) {
 		logger.info("Indexing {} products", data.size());
 
 //		executor.submit(() -> {

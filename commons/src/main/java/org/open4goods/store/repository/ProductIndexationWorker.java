@@ -1,7 +1,7 @@
 package org.open4goods.store.repository;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.open4goods.dao.ProductRepository;
 import org.open4goods.model.product.Product;
@@ -51,16 +51,27 @@ public class ProductIndexationWorker implements Runnable {
 			try {
 				if (!service.getQueue().isEmpty()) {
 					// There is data to consume and queue consummation is enabled
-					final Set<Product> buffer = new HashSet<>();	
+					// A map to deduplicate --> MEANS WE CAN SOMETIMES LOOSE DATAFRAMENTS IF 2 ENTRIES ARE IN THE SAME BAG (no because we put back in queue)
+					final Map<String,Product> buffer = new HashMap<>();	
 										
+					
+					
+					
 					for (int i = 0; i < dequeuePageSize; i++) {
-						buffer.add(service.getQueue().take());
+						Product item = service.getQueue().take();
+						
+						if (buffer.containsKey(item.gtin())) {
+							logger.warn("Putting back in queue : {}", item.gtin() );
+							service.getQueue().add(item);
+						} else {
+							buffer.put(item.gtin(),item);							
+						}
 					}
 					
 					// Store operation retrieve fragments, historize and re-index
 					long now = System.currentTimeMillis();
 					
-					service.store(buffer);
+					service.store(buffer.values());
 					
 					logger.info("{} has indexed {} DataFragments in {}ms. {} Remaining in queue",workerName,  buffer.size(),System.currentTimeMillis()-now, service.getQueue().size());
 
