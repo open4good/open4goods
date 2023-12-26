@@ -99,7 +99,7 @@ services:
   redis:
     image: bitnami/redis:latest
     container_name: redis
-    command: ["redis-server", "--appendonly", "no", "--maxmemory", "20gb", "--maxmemory-policy", "allkeys-lru"]
+    command: ["redis-server", "--stop-writes-on-bgsave-error","no",--protected-mode","no", "--appendonly", "no", "--maxmemory", "20mb", "--maxmemory-policy", "allkeys-lru"]
     ports:
       - 6379:6379        
     environment:
