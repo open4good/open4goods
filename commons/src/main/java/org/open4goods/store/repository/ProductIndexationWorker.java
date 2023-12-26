@@ -56,7 +56,7 @@ public class ProductIndexationWorker implements Runnable {
 										
 					
 					
-					
+					// Dequeuing
 					for (int i = 0; i < dequeuePageSize; i++) {
 						Product item = service.getQueue().take();
 						
@@ -68,12 +68,11 @@ public class ProductIndexationWorker implements Runnable {
 						}
 					}
 					
-					// Store operation retrieve fragments, historize and re-index
-					long now = System.currentTimeMillis();
+	
 					
 					service.store(buffer.values());
 					
-					logger.info("{} has indexed {} DataFragments in {}ms. {} Remaining in queue",workerName,  buffer.size(),System.currentTimeMillis()-now, service.getQueue().size());
+					logger.info("{} has indexed {} DataFragments. {} Remaining in queue",workerName,  buffer.size(), service.getQueue().size());
 
 				} else {
 					try {
