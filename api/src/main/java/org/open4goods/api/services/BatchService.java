@@ -4,9 +4,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
 
-import org.open4goods.aggregation.aggregator.BatchedAggregator;
-import org.open4goods.aggregation.aggregator.RealTimeAggregator;
 import org.open4goods.api.config.yml.ApiProperties;
+import org.open4goods.api.services.aggregation.aggregator.BatchedAggregator;
+import org.open4goods.api.services.aggregation.aggregator.RealTimeAggregator;
 import org.open4goods.config.yml.ui.VerticalConfig;
 import org.open4goods.dao.ProductRepository;
 import org.open4goods.exceptions.AggregationSkipException;

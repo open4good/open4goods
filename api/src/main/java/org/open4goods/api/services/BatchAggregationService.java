@@ -1,21 +1,34 @@
 
 package org.open4goods.api.services;
 
-import jakarta.annotation.PreDestroy;
-import org.open4goods.aggregation.AbstractAggregationService;
-import org.open4goods.aggregation.aggregator.BatchedAggregator;
-import org.open4goods.aggregation.services.aggregation.batch.VerticalBatchedAggregationService;
-import org.open4goods.aggregation.services.aggregation.batch.scores.*;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.open4goods.api.config.yml.ApiProperties;
+import org.open4goods.api.services.aggregation.AbstractAggregationService;
+import org.open4goods.api.services.aggregation.aggregator.BatchedAggregator;
+import org.open4goods.api.services.aggregation.services.batch.VerticalBatchedAggregationService;
+import org.open4goods.api.services.aggregation.services.batch.scores.Attribute2ScoreAggregationService;
+import org.open4goods.api.services.aggregation.services.batch.scores.Brand2ScoreAggregationService;
+import org.open4goods.api.services.aggregation.services.batch.scores.CleanScoreAggregationService;
+import org.open4goods.api.services.aggregation.services.batch.scores.DataCompletion2ScoreAggregationService;
+import org.open4goods.api.services.aggregation.services.batch.scores.EcoScoreAggregationService;
 import org.open4goods.config.yml.ui.VerticalConfig;
 import org.open4goods.dao.ProductRepository;
-import org.open4goods.services.*;
+import org.open4goods.services.BarcodeValidationService;
+import org.open4goods.services.BrandService;
+import org.open4goods.services.DataSourceConfigService;
+import org.open4goods.services.EvaluationService;
+import org.open4goods.services.Gs1PrefixService;
+import org.open4goods.services.StandardiserService;
+import org.open4goods.services.VerticalsConfigService;
+import org.open4goods.services.ai.AiCompletionAggregationService;
+import org.open4goods.services.ai.AiService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 
-import java.util.ArrayList;
-import java.util.List;
+import jakarta.annotation.PreDestroy;
 
 /**
  * This service is in charge of building Product in realtime mode
@@ -54,6 +67,9 @@ public class BatchAggregationService  {
 	private BrandService brandService;
 
 
+	private AiService aiService;
+
+
 
 
 	public BatchAggregationService(EvaluationService evaluationService,
@@ -62,7 +78,9 @@ public class BatchAggregationService  {
 			ApiProperties apiProperties, Gs1PrefixService gs1prefixService,
 			DataSourceConfigService dataSourceConfigService, VerticalsConfigService configService,
 			BarcodeValidationService barcodeValidationService,
-			BrandService brandService) {
+			BrandService brandService,
+			AiService aiService
+			) {
 		super();
 		this.evaluationService = evaluationService;
 		this.referentielService = referentielService;
@@ -76,7 +94,7 @@ public class BatchAggregationService  {
 
 		this.barcodeValidationService = barcodeValidationService;
 		this.brandService = brandService;
-
+		this.aiService = aiService;
 		aggregator = getAggregator(configService.getConfigById(VerticalsConfigService.MAIN_VERTICAL_NAME).get());
 	}
 
@@ -120,7 +138,10 @@ public class BatchAggregationService  {
 		services.add(new DataCompletion2ScoreAggregationService(config.getAttributesConfig(), apiProperties.logsFolder(), apiProperties.isDedicatedLoggerToConsole()));
 		services.add(new EcoScoreAggregationService(config.getEcoscoreConfig(), apiProperties.logsFolder(), apiProperties.isDedicatedLoggerToConsole()));
 
+		
+		services.add(new AiCompletionAggregationService(apiProperties.logsFolder(), verticalConfigService, aiService, evaluationService, apiProperties.isDedicatedLoggerToConsole()));
 
+		
 		final BatchedAggregator ret = new BatchedAggregator(services);
 
 		autowireBeanFactory.autowireBean(ret);

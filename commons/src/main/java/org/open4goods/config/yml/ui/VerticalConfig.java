@@ -5,6 +5,7 @@ import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
 import org.open4goods.config.yml.CommentsAggregationConfig;
+import org.open4goods.config.yml.attributes.AiConfig;
 import org.open4goods.config.yml.attributes.AttributeConfig;
 import org.open4goods.model.Localisable;
 import org.open4goods.model.constants.CacheConstants;
@@ -92,6 +93,14 @@ public class VerticalConfig{
 	private CommentsAggregationConfig commentsConfig = new CommentsAggregationConfig();
 
 
+	/**
+	 * Configuration for ai generation tool
+	 */
+	@JsonMerge
+	private List<AiConfig> aiConfig = new ArrayList<>();
+	
+	
+	
 	/**
 	 * The I18n URL Mappings. Think SEO !
 	 */
@@ -589,6 +598,14 @@ public class VerticalConfig{
 
 	public void setPages(Map<String, String> pages) {
 		this.pages = pages;
+	}
+
+	public List<AiConfig> getAiConfig() {
+		return aiConfig;
+	}
+
+	public void setAiConfig(List<AiConfig> aiConfig) {
+		this.aiConfig = aiConfig;
 	}
 
 
