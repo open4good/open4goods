@@ -33,7 +33,6 @@
 		<module>commons</module>
 		<module>crawler</module>
 		<module>api</module>
-		<module>aggregation</module>
 		<module>ui</module>
 	</modules>
 

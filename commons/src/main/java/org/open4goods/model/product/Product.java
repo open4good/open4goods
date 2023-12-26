@@ -10,6 +10,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -24,6 +25,7 @@ import org.open4goods.model.constants.Currency;
 import org.open4goods.model.constants.ProductState;
 import org.open4goods.model.constants.ProviderType;
 import org.open4goods.model.constants.ReferentielKey;
+import org.open4goods.model.data.AiDescription;
 import org.open4goods.model.data.DataFragment;
 import org.open4goods.model.data.Description;
 import org.open4goods.model.data.Resource;
@@ -78,7 +80,7 @@ public class Product implements Standardisable {
 	/** The list of other id's known for this product **/
 	@Field(index = false, store = false, type = FieldType.Object)
 	private Set<UnindexedKeyValTimestamp> alternativeBrands = new HashSet<>();
-
+	
 	
 	
 
@@ -88,7 +90,7 @@ public class Product implements Standardisable {
 
 
 
-
+	
 	/** Namings informations for this product **/
 	@Field(index = true, store = false, type = FieldType.Object)
 	private Names names = new Names();
@@ -114,7 +116,15 @@ public class Product implements Standardisable {
 	@Field(index = false, store = false, type = FieldType.Object)
 	private Set<Description> descriptions = new HashSet<>();
 
+	/** The ai generated texts**/
+	@Field(index = false, store = false, type = FieldType.Object)
+	private Map<String,AiDescription> aiDescriptions = new HashMap<>();
+
+	
+	
+	
 	/** The human crafted description**/
+	// TODO : remove
 	@Field(index = false, store = false, type = FieldType.Object)
 	private Description humanDescription;
 
@@ -248,6 +258,36 @@ public class Product implements Standardisable {
 		return scores.get("ECOSCORE");
 	}
 	
+	
+
+	public String ecological() {
+		
+		
+		return id;
+	}
+		
+		
+	public String caracteristics() {
+		
+		StringBuilder sb = new StringBuilder();
+		
+		for (Entry<String, AggregatedAttribute> attr : attributes.getAggregatedAttributes().entrySet()) {
+			sb.append(" - ").append(attr.getKey().toString()).append(" : ").append(attr.getValue().getValue()).append("\n");
+		}
+		
+		for (AggregatedAttribute attr : attributes.getUnmapedAttributes()) {
+			sb.append(" - ").append(attr.getName().toString()).append(" : ").append(attr.getValue()).append("\n");
+		}
+		
+		for (Entry<ReferentielKey, String> attr : attributes.getReferentielAttributes().entrySet()) {
+			sb.append(" - ").append(attr.getKey().toString()).append(" : ").append(attr.getValue()).append("\n");
+		}
+		
+	
+
+		return sb.toString();
+		
+	}
 	/**
 	 *
 	 * @param language
@@ -718,6 +758,15 @@ public class Product implements Standardisable {
 		this.offersCount = offersCount;
 	}
 
+	public Map<String, AiDescription> getAiDescriptions() {
+		return aiDescriptions;
+	}
+
+	public void setAiDescriptions(Map<String, AiDescription> aiDescriptions) {
+		this.aiDescriptions = aiDescriptions;
+	}
+
+	
 
 
 

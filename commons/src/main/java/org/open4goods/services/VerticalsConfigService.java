@@ -2,6 +2,7 @@ package org.open4goods.services;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -226,10 +227,15 @@ public class VerticalsConfigService {
 	 * @throws IOException
 	 */
 	@Cacheable(cacheNames = CacheConstants.FOREVER_LOCAL_CACHE_NAME)
-	public VerticalConfig getDefaultConfig() throws IOException {
-		FileInputStream f = new FileInputStream(verticalsFolder + File.separator + DEFAULT_CONFIG_FILENAME);
-		VerticalConfig ret = serialisationService.fromYaml(f, VerticalConfig.class);
-		f.close();
+	public VerticalConfig getDefaultConfig() {
+		VerticalConfig ret = null;
+		try {
+			FileInputStream f = new FileInputStream(verticalsFolder + File.separator + DEFAULT_CONFIG_FILENAME);
+			ret = serialisationService.fromYaml(f, VerticalConfig.class);
+			f.close();
+		} catch (Exception e) {
+			logger.error("Error getting default config", e);
+		}
 		return ret;
 	}
 

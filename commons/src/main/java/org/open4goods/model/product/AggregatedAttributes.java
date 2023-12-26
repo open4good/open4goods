@@ -34,8 +34,22 @@ public class AggregatedAttributes  {
 
 	@Override
 	public String toString() {
-		return "ref-attrs:"+referentielAttributes.size()+ " , attrs:"+aggregatedAttributes.size() ;
+		return "ref:"+referentielAttributes.size()+ " , agg:"+aggregatedAttributes.size() +" , unmaped:"+unmapedAttributes.size() +" , features:"+features.size();
 	}
+	
+	
+
+	/**
+	 * 
+	 * @return a count of all kind of attributes
+	 * TODO : could use as a strong data quality score
+	 */
+	public int count() {		
+		return referentielAttributes.size() + aggregatedAttributes.size() + unmapedAttributes.size() + features.size();
+	}
+	
+
+	
 	
 	public void addReferentielAttribute(ReferentielKey key, String value) {
 		referentielAttributes.put(key, value);
@@ -85,7 +99,6 @@ public class AggregatedAttributes  {
 	public void setReferentielAttributes(Map<ReferentielKey, String> referentielAttributes) {
 		this.referentielAttributes = referentielAttributes;
 	}
-	
 
 
 

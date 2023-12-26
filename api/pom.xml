@@ -18,11 +18,6 @@
 
 
 	<dependencies>
-		<dependency>
-			<groupId>org.open4goods</groupId>
-			<artifactId>aggregation</artifactId>
-			<version>${global.version}</version>
-		</dependency>
 
 		<!--
 		https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-test -->
@@ -48,6 +43,18 @@
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-security</artifactId>
+		</dependency>
+		
+		<dependency>
+			<groupId>dev.langchain4j</groupId>
+			<artifactId>langchain4j</artifactId>
+			<version>0.25.0</version>
+		</dependency>
+
+		<dependency>
+			<groupId>dev.langchain4j</groupId>
+			<artifactId>langchain4j-open-ai-spring-boot-starter</artifactId>
+			<version>0.25.0</version>
 		</dependency>
 
 		<dependency>
@@ -112,12 +119,12 @@
 			<artifactId>spring-boot-configuration-processor</artifactId>
 			<optional>true</optional>
 		</dependency>
-        <dependency>
-            <groupId>org.springframework.security</groupId>
-            <artifactId>spring-security-config</artifactId>
-            <version>6.2.1</version>
-        </dependency>
-    </dependencies>
+		<dependency>
+			<groupId>org.springframework.security</groupId>
+			<artifactId>spring-security-config</artifactId>
+			<version>6.2.1</version>
+		</dependency>
+	</dependencies>
 
 
 	<build>

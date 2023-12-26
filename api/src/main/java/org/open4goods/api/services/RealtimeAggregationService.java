@@ -1,25 +1,38 @@
 
 package org.open4goods.api.services;
 
-import jakarta.annotation.PreDestroy;
-import org.open4goods.aggregation.AbstractAggregationService;
-import org.open4goods.aggregation.aggregator.RealTimeAggregator;
-import org.open4goods.aggregation.services.aggregation.AttributeRealtimeAggregationService;
-import org.open4goods.aggregation.services.aggregation.realtime.*;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.open4goods.api.config.yml.ApiProperties;
+import org.open4goods.api.services.aggregation.AbstractAggregationService;
+import org.open4goods.api.services.aggregation.aggregator.RealTimeAggregator;
+import org.open4goods.api.services.aggregation.services.AttributeRealtimeAggregationService;
+import org.open4goods.api.services.aggregation.services.realtime.BarCodeAggregationService;
+import org.open4goods.api.services.aggregation.services.realtime.DescriptionsAggregationService;
+import org.open4goods.api.services.aggregation.services.realtime.IdAggregationService;
+import org.open4goods.api.services.aggregation.services.realtime.MediaAggregationService;
+import org.open4goods.api.services.aggregation.services.realtime.NamesAggregationService;
+import org.open4goods.api.services.aggregation.services.realtime.PriceAggregationService;
+import org.open4goods.api.services.aggregation.services.realtime.VerticalRealTimeAggregationService;
 import org.open4goods.config.yml.ui.VerticalConfig;
 import org.open4goods.config.yml.ui.VerticalProperties;
 import org.open4goods.dao.ProductRepository;
 import org.open4goods.exceptions.AggregationSkipException;
 import org.open4goods.model.data.DataFragment;
 import org.open4goods.model.product.Product;
-import org.open4goods.services.*;
+import org.open4goods.services.BarcodeValidationService;
+import org.open4goods.services.BrandService;
+import org.open4goods.services.DataSourceConfigService;
+import org.open4goods.services.EvaluationService;
+import org.open4goods.services.Gs1PrefixService;
+import org.open4goods.services.StandardiserService;
+import org.open4goods.services.VerticalsConfigService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 
-import java.util.ArrayList;
-import java.util.List;
+import jakarta.annotation.PreDestroy;
 
 /**
  * This service is in charge of building Product in realtime mode
