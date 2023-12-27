@@ -375,7 +375,7 @@ public class AttributeRealtimeAggregationService extends AbstractRealTimeAggrega
 	 * @return
 	 */
 	private boolean isFeatureAttribute(Attribute e, AttributesConfig attributesConfig) {
-		return attributesConfig.getFeaturedValues().contains(e.getRawValue().trim().toUpperCase());
+		return e.getRawValue() == null ? false :  attributesConfig.getFeaturedValues().contains(e.getRawValue().trim().toUpperCase());
 	}
 
 	/**
