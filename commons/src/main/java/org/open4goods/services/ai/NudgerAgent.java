@@ -1,4 +1,4 @@
-package org.open4goods.api.services.ai;
+package org.open4goods.services.ai;
 
 import dev.langchain4j.service.SystemMessage;
 
