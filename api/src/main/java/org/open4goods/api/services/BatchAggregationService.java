@@ -22,8 +22,6 @@ import org.open4goods.services.EvaluationService;
 import org.open4goods.services.Gs1PrefixService;
 import org.open4goods.services.StandardiserService;
 import org.open4goods.services.VerticalsConfigService;
-import org.open4goods.services.ai.AiCompletionAggregationService;
-import org.open4goods.services.ai.AiService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
@@ -67,9 +65,6 @@ public class BatchAggregationService  {
 	private BrandService brandService;
 
 
-	private AiService aiService;
-
-
 
 
 	public BatchAggregationService(EvaluationService evaluationService,
@@ -78,9 +73,7 @@ public class BatchAggregationService  {
 			ApiProperties apiProperties, Gs1PrefixService gs1prefixService,
 			DataSourceConfigService dataSourceConfigService, VerticalsConfigService configService,
 			BarcodeValidationService barcodeValidationService,
-			BrandService brandService,
-			AiService aiService
-			) {
+			BrandService brandService) {
 		super();
 		this.evaluationService = evaluationService;
 		this.referentielService = referentielService;
@@ -94,7 +87,7 @@ public class BatchAggregationService  {
 
 		this.barcodeValidationService = barcodeValidationService;
 		this.brandService = brandService;
-		this.aiService = aiService;
+
 		aggregator = getAggregator(configService.getConfigById(VerticalsConfigService.MAIN_VERTICAL_NAME).get());
 	}
 
@@ -138,10 +131,7 @@ public class BatchAggregationService  {
 		services.add(new DataCompletion2ScoreAggregationService(config.getAttributesConfig(), apiProperties.logsFolder(), apiProperties.isDedicatedLoggerToConsole()));
 		services.add(new EcoScoreAggregationService(config.getEcoscoreConfig(), apiProperties.logsFolder(), apiProperties.isDedicatedLoggerToConsole()));
 
-		
-		services.add(new AiCompletionAggregationService(apiProperties.logsFolder(), verticalConfigService, aiService, evaluationService, apiProperties.isDedicatedLoggerToConsole()));
 
-		
 		final BatchedAggregator ret = new BatchedAggregator(services);
 
 		autowireBeanFactory.autowireBean(ret);

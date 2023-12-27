@@ -29,7 +29,7 @@ public class AttributeConfig {
 
 	private static final Map<String,AttributeParser> parserInstances = new HashMap<>();
 
-	
+
 	/**
 	 * The identifier for this attribute.
 	 */
