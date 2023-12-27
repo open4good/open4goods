@@ -1,0 +1,20 @@
+ <th:block th:if="${user}">
+	<ul class="navbar-nav navbar-nav-hover align-items-lg-center">
+		<li class="nav-item dropdown">
+			<a href="#" class="nav-link dropdown-toggle" id="mantrasDropdown" aria-expanded="false" data-bs-toggle="dropdown">Nos mantras <span class="fas fa-angle-down nav-link-arrow ms-1"></span></a>
+			<div class="dropdown-menu dropdown-megamenu-sm px-0 py-2 p-lg-4" aria-labelledby="mantrasDropdown">
+					<ul class="list-style-none">
+		                    <li class="ms-3" >Connecté en tant que <b><span th:text="${user}"> </span></b>, avec les rôles :</li>
+	                        <ul th:each="role : ${roles}" class="ms-3">
+	                        	<li th:text="${role}" class="ms-3"></li>
+	                        </ul>                            
+	    	                <li class="ms-3" th:if="${editLink}"><a target="_blank" th:href="${editLink}">Editer cette page sur le wiki</a></li>
+	    	                <li class="ms-3"><a href="/flushCache">Purger le cache</a></li>
+	    	                <li class="ms-3"><a href="/reloadConfigs">Recharger les verticales</a></li>    	                
+	    	                <li class="ms-3"><a href="/logout">Se déconnecter</a></li>
+					</ul>                 
+			</div>
+		</li>
+	</ul>
+</th:block>
+        
