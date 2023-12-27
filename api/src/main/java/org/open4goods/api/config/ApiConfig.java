@@ -11,7 +11,6 @@ import org.open4goods.api.services.BatchService;
 import org.open4goods.api.services.FetcherOrchestrationService;
 import org.open4goods.api.services.RealtimeAggregationService;
 import org.open4goods.api.services.ReferentielService;
-import org.open4goods.api.services.aggregation.services.batch.AiCompletionAggregationService;
 import org.open4goods.api.services.store.DataFragmentStoreService;
 import org.open4goods.crawler.config.yml.FetcherProperties;
 import org.open4goods.crawler.repository.CsvIndexationRepository;
@@ -43,8 +42,8 @@ import org.open4goods.services.SearchService;
 import org.open4goods.services.SerialisationService;
 import org.open4goods.services.StandardiserService;
 import org.open4goods.services.VerticalsConfigService;
-import org.open4goods.services.ai.AiService;
 import org.open4goods.services.ai.AiAgent;
+import org.open4goods.services.ai.AiService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springdoc.core.customizers.OpenApiCustomizer;
@@ -101,11 +100,6 @@ public class ApiConfig {
 //	 }
 ////	 
 	
-	 @Bean
-	 @Autowired
-	  public AiCompletionAggregationService aiCompletionAggregationService(final String logsFolder, final VerticalsConfigService verticalService, AiService aiService) {
-		 return new AiCompletionAggregationService( logsFolder, aiService,   false);
-	 }
 	
 	  @Bean
 	  public RedisTemplate<String, Product> redisTemplate(RedisConnectionFactory connectionFactory) {
@@ -151,10 +145,19 @@ public class ApiConfig {
 
 	@Bean
 	@Autowired  
-	AiService aiService (ApiProperties properties, AiAgent nudgerAgent, VerticalsConfigService verticalService, EvaluationService spelEvaluationService) {
+	AiService aiService (AiAgent nudgerAgent, VerticalsConfigService verticalService, EvaluationService spelEvaluationService) {
 		return new AiService(nudgerAgent, verticalService, spelEvaluationService);
 	}
-		
+	
+	 @Bean
+	 AiAgent nudgerAgent(@Autowired ChatLanguageModel chatLanguageModel) {
+	        return AiServices.builder(AiAgent.class)
+	                .chatLanguageModel(chatLanguageModel)	                
+//	                .retriever(retriever)
+	                .build();
+	    }
+	 
+	 
 	@Bean
 	@Autowired
 	BatchService batchService(RealtimeAggregationService rtService,  SearchService searchService, ProductRepository dataRepository, VerticalsConfigService verticalsConfigService, BatchAggregationService batchAggregationService) throws IOException {
@@ -163,14 +166,6 @@ public class ApiConfig {
 		// TODO : Not nice, mutualize
         return new BatchService(rtService,dataRepository, apiProperties, verticalsConfigService,batchAggregationService, searchService, toConsole);
 	}
-
-	 @Bean
-	 AiAgent nudgerAgent(@Autowired ChatLanguageModel chatLanguageModel) {
-	        return AiServices.builder(AiAgent.class)
-	                .chatLanguageModel(chatLanguageModel)	                
-//	                .retriever(retriever)
-	                .build();
-	    }
 
 
 

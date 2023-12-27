@@ -1,6 +1,7 @@
 package org.open4goods.ui.controllers.ui;
 
 import java.io.IOException;
+import java.util.Locale;
 
 import org.apache.commons.lang3.StringUtils;
 import org.open4goods.config.yml.ui.VerticalConfig;
@@ -13,11 +14,12 @@ import org.open4goods.services.XwikiService;
 import org.open4goods.ui.config.yml.UiConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.ModelAndView;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -65,16 +67,19 @@ public class XwikiController extends AbstractUiController {
 	@GetMapping("/flushCache")
 	@PreAuthorize("hasAuthority('"+RolesConstants.ROLE_XWIKI_ALL+"')")
 	//TODO (security) : protect with role
-	public ModelAndView flushCache(final HttpServletRequest request) {
+	public ModelAndView flushCache(final HttpServletRequest request, @RequestParam(name = "r", required = false) String redircectUrl) {
 		xwikiService.invalidateAll();
 		ModelAndView mv = defaultModelAndView(("xwiki-layout1"), request);
 
 		WikiResult res = new WikiResult();
 		res.setHtml("All xwiki caches are invalidated");
 		res.setPageTitle("SUCCESS, CACHE FLUSHED");
-
 		mv.addObject("content", res);
-
+		
+		if (null != redircectUrl) {
+			mv = new ModelAndView("redirect:"+ redircectUrl);
+			mv.setStatus(HttpStatus.MOVED_TEMPORARILY);				
+		}
 		return mv;
 
 	}

@@ -50,15 +50,13 @@ import org.springframework.web.servlet.i18n.LocaleChangeInterceptor;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.Ticker;
 
+import dev.langchain4j.model.chat.ChatLanguageModel;
+import dev.langchain4j.service.AiServices;
+
 @Configuration
 public class AppConfig {
 
 	
-	@Bean
-	@Autowired  
-	AiService aiService (AiAgent nudgerAgent, VerticalsConfigService verticalService, EvaluationService spelEvaluationService) {
-		return new AiService(nudgerAgent, verticalService, spelEvaluationService);
-	}
 	
 	// TODO : Cache period pageNumber conf
 	public static final int CACHE_PERIOD_SECONDS = 3600*24*7;
@@ -87,7 +85,21 @@ public class AppConfig {
 		return new ImageService(imageMagickService, resourceService);
 	}
 
-
+	@Bean
+	@Autowired  
+	AiService aiService (AiAgent nudgerAgent, VerticalsConfigService verticalService, EvaluationService spelEvaluationService) {
+		return new AiService(nudgerAgent, verticalService, spelEvaluationService);
+	}
+	
+	 @Bean
+	 AiAgent nudgerAgent(@Autowired ChatLanguageModel chatLanguageModel) {
+	        return AiServices.builder(AiAgent.class)
+	                .chatLanguageModel(chatLanguageModel)	                
+//	                .retriever(retriever)
+	                .build();
+	    }
+	 
+	 
 	@Bean
 	BrandService brandService(@Autowired RemoteFileCachingService rfc, @Autowired  UiConfig properties) {
 		return new BrandService(properties.getBrandConfig(),  rfc);

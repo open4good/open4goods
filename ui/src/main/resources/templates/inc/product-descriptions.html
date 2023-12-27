@@ -4,27 +4,25 @@
 		<div class="row text-center justify-content-center">
               <div class="col-md-8 mb-5">
                   <h3 class="display-3">Présentation du SAMSUNG-OLED75C9</h3>
-                  <p class="lead">Tout savoir pour mieux acheter</p>
+                  <p class="lead">Les grandes lignes</p>
 
-                  <h1 class="h1 my-5">PERTINENT d'avoir une prez complete du produit ?</h1>
               </div>
         </div>	   
   
 	   
 	   
-			<div class="container container-semi-fluid">
+			<div  class="container container-semi-fluid">
                 <div class="col-12 col-lg-12">
                     <div class="row justify-content-center ">
                         <div class="col-12 col-md-6">
-                            <div class="row mt-5 mt-lg-0 px-3">
+                            <div th:if="${product.aiDescriptions.get('global-description')}" class="row mt-5 mt-lg-0 px-3">
                                 <!-- Icon Boxes -->
                                 <div id="compensation-carbone" class="card shadow border-gray-300">
                                     <div class="card-body text-center p-4 p-lg-5">
                                         <img src="../../assets/img/pages/design.svg" alt="Web design illustration" class="image-md mb-4">
                                         <h2  class="h4 mb-2">Description générale</h2>
                                         <span  class="h5 text-light "></span>
-                                        <p>
-											lorem ipsum
+                                        <p th:utext="${product.aiDescriptions.get('global-description').content.text}">
                                         </p>
                                     </div>
                                 </div>
@@ -59,13 +57,12 @@
 
 
                                 <!-- Icon Boxes -->
-                                <div id="evaluation-ecologique" class="card shadow border-gray-300 mt-3">
+                                <div th:if="${product.aiDescriptions.get('ecological-description')}" id="evaluation-ecologique" class="card shadow border-gray-300 mt-3">
                                      <div class="card-body text-center p-4 p-lg-5">
                                         <img src="../../assets/img/pages/design.svg" alt="Web design illustration" class="image-md mb-4">
                                         <h2  class="h4 mb-2">Bilan écologique</h2>
                                         <span  class="h5 text-light ">SAMSUNG-75C9</span>
-                                        <p>
-											il va falloir réflechir à comment design ça pour le rendre sympa
+                                        <p th:utext="${product.aiDescriptions.get('ecological-description').content.text}">
                                         </p>
                                     </div>
                                 </div>
