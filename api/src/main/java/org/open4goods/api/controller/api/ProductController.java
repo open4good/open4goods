@@ -4,12 +4,12 @@ package org.open4goods.api.controller.api;
 
 import java.util.Map;
 
-import org.open4goods.api.services.ai.AiService;
 import org.open4goods.dao.ProductRepository;
 import org.open4goods.exceptions.ResourceNotFoundException;
 import org.open4goods.model.constants.RolesConstants;
 import org.open4goods.model.data.AiDescription;
 import org.open4goods.model.product.Product;
+import org.open4goods.services.ai.AiService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;

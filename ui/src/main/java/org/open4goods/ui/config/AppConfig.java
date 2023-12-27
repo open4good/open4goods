@@ -23,6 +23,8 @@ import org.open4goods.services.SerialisationService;
 import org.open4goods.services.StandardiserService;
 import org.open4goods.services.VerticalsConfigService;
 import org.open4goods.services.XwikiService;
+import org.open4goods.services.ai.AiService;
+import org.open4goods.services.ai.NudgerAgent;
 import org.open4goods.ui.config.yml.UiConfig;
 import org.open4goods.ui.services.GtinService;
 import org.open4goods.ui.services.ImageService;
@@ -51,6 +53,13 @@ import com.github.benmanes.caffeine.cache.Ticker;
 @Configuration
 public class AppConfig {
 
+	
+	@Bean
+	@Autowired  
+	AiService aiService (NudgerAgent nudgerAgent, VerticalsConfigService verticalService, EvaluationService spelEvaluationService) {
+		return new AiService(nudgerAgent, verticalService, spelEvaluationService);
+	}
+	
 	// TODO : Cache period pageNumber conf
 	public static final int CACHE_PERIOD_SECONDS = 3600*24*7;
 	private final UiConfig config;
