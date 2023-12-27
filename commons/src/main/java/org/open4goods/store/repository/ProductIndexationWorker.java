@@ -61,7 +61,7 @@ public class ProductIndexationWorker implements Runnable {
 						Product item = service.getQueue().take();
 						
 						if (buffer.containsKey(item.gtin())) {
-							logger.warn("Putting back in queue : {}", item.gtin() );
+							logger.info("Putting back in queue : {}", item.gtin() );
 							service.getQueue().add(item);
 						} else {
 							buffer.put(item.gtin(),item);							
