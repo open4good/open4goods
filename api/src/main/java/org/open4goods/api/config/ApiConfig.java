@@ -11,6 +11,9 @@ import org.open4goods.api.services.BatchService;
 import org.open4goods.api.services.FetcherOrchestrationService;
 import org.open4goods.api.services.RealtimeAggregationService;
 import org.open4goods.api.services.ReferentielService;
+import org.open4goods.api.services.aggregation.services.batch.AiCompletionAggregationService;
+import org.open4goods.api.services.ai.AiService;
+import org.open4goods.api.services.ai.NudgerAgent;
 import org.open4goods.api.services.store.DataFragmentStoreService;
 import org.open4goods.crawler.config.yml.FetcherProperties;
 import org.open4goods.crawler.repository.CsvIndexationRepository;
@@ -42,9 +45,6 @@ import org.open4goods.services.SearchService;
 import org.open4goods.services.SerialisationService;
 import org.open4goods.services.StandardiserService;
 import org.open4goods.services.VerticalsConfigService;
-import org.open4goods.services.ai.AiCompletionAggregationService;
-import org.open4goods.services.ai.AiService;
-import org.open4goods.services.ai.NudgerAgent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springdoc.core.customizers.OpenApiCustomizer;
@@ -83,13 +83,15 @@ public class ApiConfig {
 	private final ApiProperties apiProperties;
 	private static final Logger logger = LoggerFactory.getLogger(ApiConfig.class);
 
+
 	protected final Environment env;
 
 	public ApiConfig(ApiProperties apiProperties, Environment env) {
-		this.env = env;
+		this.env =	env;
 		this.apiProperties = apiProperties;
 	}
 
+	
 //	 @Bean
 //	  public JedisConnectionFactory redisConnectionFactory() {
 //
@@ -98,28 +100,27 @@ public class ApiConfig {
 ////			return new JedisConnectionFactory();
 //	 }
 ////	 
+	
+	 @Bean
+	 @Autowired
+	  public AiCompletionAggregationService aiCompletionAggregationService(final String logsFolder, final VerticalsConfigService verticalService, AiService aiService) {
+		 return new AiCompletionAggregationService( logsFolder, aiService,   false);
+	 }
+	
+	  @Bean
+	  public RedisTemplate<String, Product> redisTemplate(RedisConnectionFactory connectionFactory) {
+		  RedisTemplate<String, Product> template = new RedisTemplate<>();
+		    template.setConnectionFactory(connectionFactory);
+		    
+		    // Configure serialization
+		    template.setKeySerializer(new StringRedisSerializer());
+		    template.setValueSerializer(new GenericJackson2JsonRedisSerializer());
 
-	@Bean
-	@Autowired
-	public AiCompletionAggregationService aiCompletionAggregationService(final String logsFolder,
-			final VerticalsConfigService verticalService, AiService aiService,
-			EvaluationService spelEvaluationService) {
-		return new AiCompletionAggregationService(logsFolder, verticalService, aiService, spelEvaluationService, false);
-	}
-
-	@Bean
-	public RedisTemplate<String, Product> redisTemplate(RedisConnectionFactory connectionFactory) {
-		RedisTemplate<String, Product> template = new RedisTemplate<>();
-		template.setConnectionFactory(connectionFactory);
-
-		// Configure serialization
-		template.setKeySerializer(new StringRedisSerializer());
-		template.setValueSerializer(new GenericJackson2JsonRedisSerializer());
-
-		// Add some specific configuration here. Key serializers, etc.
-		return template;
-	}
-
+		    
+		    // Add some specific configuration here. Key serializers, etc.
+		    return template;
+	  }
+	 
 	/**
 	 * Various generation (json, yaml, binary)
 	 *
@@ -130,75 +131,76 @@ public class ApiConfig {
 		return new SerialisationService();
 	}
 
+	
 	@Bean
 	@Autowired
 	VerticalsConfigService verticalConfigsService(SerialisationService serialisationService) throws IOException {
-		return new VerticalsConfigService(serialisationService, apiProperties.getVerticalsFolder());
+		return new VerticalsConfigService(serialisationService,apiProperties.getVerticalsFolder());
 	}
 
+	
 	@Bean
-	SearchService searchService(@Autowired ProductRepository aggregatedDataRepository, @Autowired String logsFolder) {
+	SearchService searchService(@Autowired ProductRepository aggregatedDataRepository, @Autowired  String logsFolder) {
 		return new SearchService(aggregatedDataRepository, logsFolder);
 	}
 
 	@Bean
-	BrandService brandService(@Autowired RemoteFileCachingService rfc, @Autowired ApiProperties properties) {
-		return new BrandService(properties.getBrandConfig(), rfc);
+	BrandService brandService(@Autowired RemoteFileCachingService rfc, @Autowired  ApiProperties properties) {
+		return new BrandService(properties.getBrandConfig(),  rfc);
 	}
 
 	@Bean
-	AiService aiService(@Autowired ApiProperties properties, @Autowired NudgerAgent nudgerAgent) {
-		return new AiService(nudgerAgent);
+	@Autowired  
+	AiService aiService (ApiProperties properties, NudgerAgent nudgerAgent, VerticalsConfigService verticalService, EvaluationService spelEvaluationService) {
+		return new AiService(nudgerAgent, verticalService, spelEvaluationService);
 	}
-
+		
 	@Bean
 	@Autowired
-	BatchService batchService(RealtimeAggregationService rtService, SearchService searchService,
-			ProductRepository dataRepository, VerticalsConfigService verticalsConfigService,
-			BatchAggregationService batchAggregationService) throws IOException {
+	BatchService batchService(RealtimeAggregationService rtService,  SearchService searchService, ProductRepository dataRepository, VerticalsConfigService verticalsConfigService, BatchAggregationService batchAggregationService) throws IOException {
 		// Logging to console according to dev profile and conf
-		boolean toConsole = ArrayUtils.contains(env.getActiveProfiles(), "dev")
-				|| ArrayUtils.contains(env.getActiveProfiles(), "devsec");
+		boolean toConsole = ArrayUtils.contains(env.getActiveProfiles(), "dev") || ArrayUtils.contains(env.getActiveProfiles(), "devsec");
 		// TODO : Not nice, mutualize
-		return new BatchService(rtService, dataRepository, apiProperties, verticalsConfigService,
-				batchAggregationService, searchService, toConsole);
+        return new BatchService(rtService,dataRepository, apiProperties, verticalsConfigService,batchAggregationService, searchService, toConsole);
 	}
 
-	@Bean
-	NudgerAgent nudgerAgent(@Autowired ChatLanguageModel chatLanguageModel) {
-		return AiServices.builder(NudgerAgent.class).chatLanguageModel(chatLanguageModel)
+	 @Bean
+	 NudgerAgent nudgerAgent(@Autowired ChatLanguageModel chatLanguageModel) {
+	        return AiServices.builder(NudgerAgent.class)
+	                .chatLanguageModel(chatLanguageModel)	                
 //	                .retriever(retriever)
-				.build();
+	                .build();
+	    }
+
+
+
+
+	@Bean
+	RealtimeAggregationService realtimeAggregationService( @Autowired EvaluationService evaluationService,
+			@Autowired ReferentielService referentielService, @Autowired StandardiserService standardiserService,
+			@Autowired AutowireCapableBeanFactory autowireBeanFactory, @Autowired ProductRepository aggregatedDataRepository,
+			@Autowired ApiProperties apiProperties, @Autowired Gs1PrefixService gs1prefixService,
+			@Autowired DataSourceConfigService dataSourceConfigService, 
+			@Autowired VerticalsConfigService configService, 
+			@Autowired BarcodeValidationService barcodeValidationService,
+			@Autowired BrandService brandservice) {
+		return new RealtimeAggregationService(evaluationService, referentielService, standardiserService, autowireBeanFactory, aggregatedDataRepository, apiProperties, gs1prefixService, dataSourceConfigService, configService,  barcodeValidationService,brandservice);
 	}
 
 	@Bean
-	RealtimeAggregationService realtimeAggregationService(@Autowired EvaluationService evaluationService,
+	BatchAggregationService batchAggregationService( @Autowired EvaluationService evaluationService,
 			@Autowired ReferentielService referentielService, @Autowired StandardiserService standardiserService,
-			@Autowired AutowireCapableBeanFactory autowireBeanFactory,
-			@Autowired ProductRepository aggregatedDataRepository, @Autowired ApiProperties apiProperties,
-			@Autowired Gs1PrefixService gs1prefixService, @Autowired DataSourceConfigService dataSourceConfigService,
-			@Autowired VerticalsConfigService configService,
-			@Autowired BarcodeValidationService barcodeValidationService, @Autowired BrandService brandservice) {
-		return new RealtimeAggregationService(evaluationService, referentielService, standardiserService,
-				autowireBeanFactory, aggregatedDataRepository, apiProperties, gs1prefixService, dataSourceConfigService,
-				configService, barcodeValidationService, brandservice);
-	}
-
-	@Bean
-	BatchAggregationService batchAggregationService(@Autowired EvaluationService evaluationService,
-			@Autowired ReferentielService referentielService, @Autowired StandardiserService standardiserService,
-			@Autowired AutowireCapableBeanFactory autowireBeanFactory,
-			@Autowired ProductRepository aggregatedDataRepository, @Autowired ApiProperties apiProperties,
-			@Autowired Gs1PrefixService gs1prefixService, @Autowired DataSourceConfigService dataSourceConfigService,
-			@Autowired VerticalsConfigService configService,
-			@Autowired BarcodeValidationService barcodeValidationService, @Autowired BrandService brandservice,
+			@Autowired AutowireCapableBeanFactory autowireBeanFactory, @Autowired ProductRepository aggregatedDataRepository,
+			@Autowired ApiProperties apiProperties, @Autowired Gs1PrefixService gs1prefixService,
+			@Autowired DataSourceConfigService dataSourceConfigService, @Autowired VerticalsConfigService configService, 
+			@Autowired BarcodeValidationService barcodeValidationService,
+			@Autowired BrandService brandservice,
 			@Autowired AiService aiService
-
-	) {
-		return new BatchAggregationService(evaluationService, referentielService, standardiserService,
-				autowireBeanFactory, aggregatedDataRepository, apiProperties, gs1prefixService, dataSourceConfigService,
-				configService, barcodeValidationService, brandservice, aiService);
+			
+			) {
+		return new BatchAggregationService(evaluationService, referentielService, standardiserService, autowireBeanFactory, aggregatedDataRepository, apiProperties, gs1prefixService, dataSourceConfigService, configService,  barcodeValidationService, brandservice);
 	}
+
 
 	//////////////////////////////////////////////////////////
 	// SwaggerConfig
@@ -206,9 +208,11 @@ public class ApiConfig {
 
 	@Bean
 	GroupedOpenApi adminApi() {
-		return GroupedOpenApi.builder().group("api")
-				// .pathsToMatch("/admin/**")
-				.packagesToScan("org.open4goods.api").addOpenApiCustomizer(apiSecurizer())
+		return GroupedOpenApi.builder()
+				.group("api")
+				//	              .pathsToMatch("/admin/**")
+				.packagesToScan("org.open4goods.api")
+				.addOpenApiCustomizer(apiSecurizer())
 
 				.build();
 	}
@@ -216,25 +220,31 @@ public class ApiConfig {
 	@Bean
 	OpenApiCustomizer apiSecurizer() {
 		return openApi -> openApi.addSecurityItem(new SecurityRequirement().addList("Authorization"))
-				.components(new Components().addSecuritySchemes(UrlConstants.APIKEY_PARAMETER,
-						new SecurityScheme().in(SecurityScheme.In.HEADER).type(SecurityScheme.Type.APIKEY)
-								.name(UrlConstants.APIKEY_PARAMETER))
+				.components(new Components()
+						.addSecuritySchemes(UrlConstants.APIKEY_PARAMETER, new SecurityScheme()
+								.in(SecurityScheme.In.HEADER)
+								.type(SecurityScheme.Type.APIKEY)
+								.name(UrlConstants.APIKEY_PARAMETER)
+								)
 
-				);
+						);
 
 	}
+
 
 	//////////////////////////////////////////////////////////
 	// The scheduling thread pool executor
 	//////////////////////////////////////////////////////////
 
+	
+
+	
 //	@Bean
 //	public TaskScheduler heartBeatScheduler() {
 //	    return new ThreadPoolTaskScheduler();
 //	}
 //	
-	@Bean
-	TaskScheduler threadPoolTaskScheduler() {
+	@Bean TaskScheduler threadPoolTaskScheduler() {
 		final ThreadPoolTaskScheduler threadPoolTaskScheduler = new ThreadPoolTaskScheduler();
 		threadPoolTaskScheduler.setPoolSize(2);
 		threadPoolTaskScheduler.setThreadNamePrefix("ThreadPoolTaskScheduler");
@@ -252,13 +262,17 @@ public class ApiConfig {
 		final CaffeineCache mCache = buildExpiryCache(CacheConstants.ONE_MINUTE_LOCAL_CACHE_NAME, ticker, 1);
 		final CaffeineCache dCache = buildExpiryCache(CacheConstants.ONE_DAY_LOCAL_CACHE_NAME, ticker, 60 * 24);
 		final SimpleCacheManager manager = new SimpleCacheManager();
-		manager.setCaches(Arrays.asList(fCache, dCache, hCache, mCache));
+		manager.setCaches(Arrays.asList(fCache, dCache, hCache,mCache));
 		return manager;
 	}
 
+	
+	
 	private CaffeineCache buildExpiryCache(final String name, final Ticker ticker, final int minutesToExpire) {
 		return new CaffeineCache(name,
-				Caffeine.newBuilder().expireAfterWrite(minutesToExpire, TimeUnit.MINUTES).ticker(ticker).build());
+				Caffeine.newBuilder()
+				.expireAfterWrite(minutesToExpire, TimeUnit.MINUTES)
+				.ticker(ticker).build());
 	}
 
 	@Bean
@@ -276,8 +290,7 @@ public class ApiConfig {
 	 * @param registry
 	 * @return
 	 */
-	@Bean
-	TimedAspect timedAspect(final MeterRegistry registry) {
+	@Bean TimedAspect timedAspect(final MeterRegistry registry) {
 		return new TimedAspect(registry);
 	}
 
@@ -286,41 +299,37 @@ public class ApiConfig {
 	//////////////////////////////////////////////////////////
 
 	/** The bean providing datasource configurations **/
-	@Bean
-	DataSourceConfigService datasourceConfigService(@Autowired final ApiProperties config) {
+	@Bean DataSourceConfigService datasourceConfigService(@Autowired final ApiProperties config) {
 		return new DataSourceConfigService(config.getDatasourcesfolder());
 	}
 
-	@Bean
-	ResourceService resourceService() {
+
+	@Bean ResourceService resourceService() {
 		return new ResourceService(apiProperties.remoteCachingFolder());
 	}
+
 
 	@Bean
 	String logsFolder(@Autowired final ApiProperties config) {
 		return config.logsFolder();
 	}
 
-	@Bean
-	ImageMagickService imageService() {
+
+	@Bean ImageMagickService imageService() {
 		return new ImageMagickService();
 	}
 
-	@Bean
-	ReferentielService referentielService(@Autowired final ApiProperties config) {
+	@Bean ReferentielService referentielService(@Autowired final ApiProperties config) {
 		return new ReferentielService(config.logsFolder());
 	}
 
-	@Bean
-	RemoteFileCachingService remoteFileCachingService(@Autowired final ApiProperties config) {
+	@Bean RemoteFileCachingService remoteFileCachingService(@Autowired final ApiProperties config) {
 		return new RemoteFileCachingService(config.remoteCachingFolder());
 	}
 
-	@Bean
-	DataFragmentStoreService dataFragmentStoreService(@Autowired final ApiProperties config,
-			@Autowired final SerialisationService serialisationService,
-			@Autowired StandardiserService standardiserService, @Autowired RealtimeAggregationService generationService,
-			@Autowired ProductRepository aggregatedDataRepository) {
+
+	@Bean DataFragmentStoreService dataFragmentStoreService(
+			@Autowired final ApiProperties config, @Autowired final SerialisationService serialisationService, @Autowired StandardiserService standardiserService, @Autowired RealtimeAggregationService generationService, @Autowired ProductRepository aggregatedDataRepository) {
 		return new DataFragmentStoreService(standardiserService, generationService, aggregatedDataRepository);
 	}
 
@@ -329,8 +338,7 @@ public class ApiConfig {
 	 *
 	 * @return
 	 */
-	@Bean
-	EvaluationService evaluationService() {
+	@Bean EvaluationService evaluationService() {
 		return new EvaluationService();
 	}
 
@@ -338,6 +346,7 @@ public class ApiConfig {
 	ProductRepository aggregatedDatasRepository(@Autowired final ApiProperties config) {
 		return new ProductRepository();
 	}
+
 
 	@Bean
 	StandardiserService standardiserService() {
@@ -350,33 +359,26 @@ public class ApiConfig {
 		};
 	}
 
+
 	@Bean
-	BarcodeValidationService barcodeValidationService() {
+	BarcodeValidationService barcodeValidationService () {
 		return new BarcodeValidationService();
 	}
 
-	// @Bean
-	// RealtimeAggregationService fullGenerationService( @Autowired
-	// EvaluationService evaluationService,
-	// @Autowired ReferentielService referentielService, @Autowired
-	// StandardiserService standardiserService,
-	// @Autowired AutowireCapableBeanFactory autowireBeanFactory, @Autowired
-	// ProductRepository aggregatedDataRepository,
-	// @Autowired ApiProperties apiProperties, @Autowired Gs1PrefixService
-	// gs1prefixService,
-	// @Autowired DataSourceConfigService dataSourceConfigService, @Autowired
-	// VerticalsConfigService configService, @Autowired BarcodeValidationService
-	// barcodeValidationService, @Autowired GoogleTaxonomyService taxonomyService) {
-	// return new RealtimeAggregationService(repository, evaluationService,
-	// referentielService, standardiserService, autowireBeanFactory,
-	// aggregatedDataRepository, apiProperties, gs1prefixService,
-	// dataSourceConfigService, configService, barcodeValidationService,
-	// taxonomyService);
-	// }
+
+
+	//	@Bean
+	//	RealtimeAggregationService fullGenerationService( @Autowired EvaluationService evaluationService,
+	//			@Autowired ReferentielService referentielService, @Autowired StandardiserService standardiserService,
+	//			@Autowired AutowireCapableBeanFactory autowireBeanFactory, @Autowired ProductRepository aggregatedDataRepository,
+	//			@Autowired ApiProperties apiProperties, @Autowired Gs1PrefixService gs1prefixService,
+	//			@Autowired DataSourceConfigService dataSourceConfigService, @Autowired VerticalsConfigService configService, @Autowired BarcodeValidationService barcodeValidationService, @Autowired GoogleTaxonomyService taxonomyService) {
+	//		return new RealtimeAggregationService(repository, evaluationService, referentielService, standardiserService, autowireBeanFactory, aggregatedDataRepository, apiProperties, gs1prefixService, dataSourceConfigService, configService,  barcodeValidationService, taxonomyService);
+	//	}
 	//
 
-	@Bean
-	Gs1PrefixService gs1prefixService(@Autowired ResourcePatternResolver resourceResolver) throws IOException {
+
+	@Bean Gs1PrefixService gs1prefixService (@Autowired ResourcePatternResolver resourceResolver) throws IOException{
 		return new Gs1PrefixService("classpath:/gs1-prefix.csv", resourceResolver);
 
 	}
@@ -385,49 +387,50 @@ public class ApiConfig {
 	// Embeded crawler configuration
 	//////////////////////////////////////////////
 
+
 	// For the crawlController, inported from crawler
-	@Bean
-	FetcherProperties fetcherProperties(@Autowired final ApiProperties apiProperties) {
+	@Bean FetcherProperties fetcherProperties(@Autowired final ApiProperties apiProperties) {
 		return apiProperties.getFetcherProperties();
 	}
 
-	@Bean
-	AwinCatalogService awinCatalogService(@Autowired final FetcherProperties fetcherProperties) {
+    @Bean
+    AwinCatalogService awinCatalogService(@Autowired final FetcherProperties fetcherProperties) {
 		return new AwinCatalogService(fetcherProperties.getAwinCatalogUrl());
 	}
-
+    
 	@Bean
 	CsvDatasourceFetchingService csvDatasourceFetchingService(
 			@Autowired final DataFragmentCompletionService completionService,
 			@Autowired final IndexationService indexationService, @Autowired final ApiProperties apiProperties,
 			@Autowired final WebDatasourceFetchingService webDatasourceFetchingService,
 			@Autowired final IndexationRepository indexationRepository,
-			@Autowired final AwinCatalogService awinCatalogService, @Autowired CsvIndexationRepository csvIndexationRepo
-
-	) {
-
-		boolean toConsole = ArrayUtils.contains(env.getActiveProfiles(), "dev")
-				|| ArrayUtils.contains(env.getActiveProfiles(), "devsec");
+			@Autowired final AwinCatalogService awinCatalogService,
+			  @Autowired CsvIndexationRepository csvIndexationRepo
+			
+			
+			) {
+		
+		boolean toConsole = ArrayUtils.contains(env.getActiveProfiles(), "dev") || ArrayUtils.contains(env.getActiveProfiles(), "devsec");
 		// TODO : Not nice, mutualize
 
-		return new CsvDatasourceFetchingService(csvIndexationRepo, awinCatalogService, completionService,
-				indexationService, apiProperties.getFetcherProperties(), webDatasourceFetchingService,
-				indexationRepository, apiProperties.logsFolder(), toConsole);
+
+        return new CsvDatasourceFetchingService(csvIndexationRepo, awinCatalogService, completionService, indexationService,
+				apiProperties.getFetcherProperties(), webDatasourceFetchingService,indexationRepository, apiProperties.logsFolder(), toConsole);
 	}
 
 	@Bean
-	WebDatasourceFetchingService webDatasourceFetchingService(
-			@Autowired final IndexationRepository indexationRepository,
+	WebDatasourceFetchingService webDatasourceFetchingService(@Autowired final IndexationRepository indexationRepository,
 			@Autowired final IndexationService indexationService, @Autowired final ApiProperties apiProperties) {
 
 		// Logging to console according to dev profile and conf
-		boolean toConsole = ArrayUtils.contains(env.getActiveProfiles(), "dev")
-				|| ArrayUtils.contains(env.getActiveProfiles(), "devsec");
+		boolean toConsole = ArrayUtils.contains(env.getActiveProfiles(), "dev") || ArrayUtils.contains(env.getActiveProfiles(), "devsec");
 		// TODO : Not nice, mutualize
 
-		return new WebDatasourceFetchingService(indexationService, apiProperties.getFetcherProperties(),
-				indexationRepository, apiProperties.logsFolder(), toConsole);
+
+        return new WebDatasourceFetchingService(indexationService, apiProperties.getFetcherProperties(),indexationRepository,
+				apiProperties.logsFolder(), toConsole);
 	}
+
 
 	/**
 	 * A custom "direct" implementation to update directly the local crawler status,
@@ -450,15 +453,15 @@ public class ApiConfig {
 	@Bean
 	FetchersService crawlersInterface(@Autowired final ApiProperties apiProperties,
 			@Autowired final CsvDatasourceFetchingService csvDatasourceFetchingService,
-			@Autowired final WebDatasourceFetchingService webDatasourceFetchingService) {
+			@Autowired final WebDatasourceFetchingService webDatasourceFetchingService
+			) {
 		return new FetchersService(apiProperties.getFetcherProperties(), webDatasourceFetchingService,
 				csvDatasourceFetchingService);
 	}
 
 	@Bean
 	@Autowired
-	FetcherOrchestrationService fetcherOrchestrationService(TaskScheduler taskScheduler,
-			DataSourceConfigService dataSourceConfigService) {
+	FetcherOrchestrationService fetcherOrchestrationService(TaskScheduler taskScheduler, DataSourceConfigService dataSourceConfigService) {
 		return new FetcherOrchestrationService(taskScheduler, dataSourceConfigService);
 	}
 
@@ -466,6 +469,7 @@ public class ApiConfig {
 	DataFragmentCompletionService offerCompletionService() {
 		return new DataFragmentCompletionService();
 	}
+
 
 	@Bean
 	/**
@@ -475,8 +479,7 @@ public class ApiConfig {
 	 * @return
 	 */
 	@Autowired
-	ApiSynchService apiSynchService(final ApiProperties apiProperties, FetchersService crawlersInterface,
-			FetcherOrchestrationService fetcherOrchestrationService) {
+	ApiSynchService apiSynchService(final ApiProperties apiProperties, FetchersService crawlersInterface, FetcherOrchestrationService fetcherOrchestrationService) {
 		return new ApiSynchService(apiProperties.getFetcherProperties().getApiSynchConfig(), crawlersInterface, null,
 				null) {
 			@Override
@@ -486,5 +489,7 @@ public class ApiConfig {
 			}
 		};
 	}
+
+
 
 }

@@ -39,12 +39,8 @@ public class AggregatedAttributes  {
 	
 	
 
-	/**
-	 * 
-	 * @return a count of all kind of attributes
-	 * TODO : could use as a strong data quality score
-	 */
-	public int count() {		
+	public int count() {
+		
 		return referentielAttributes.size() + aggregatedAttributes.size() + unmapedAttributes.size() + features.size();
 	}
 	

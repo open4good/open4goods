@@ -1,7 +1,0 @@
-/target/
-/.attach*
-/bin/*
-/.classpath
-/.project
-/*.log
-/.settings/

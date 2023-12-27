@@ -15,14 +15,12 @@ public class Description implements Validable {
 	private Localised content = new Localised();
 	/**
 	 * Flagged at the UI level
-	 * TODO : remove this, as it is not used anymore
 	 */
 	@Field(index = false, store = false, type = FieldType.Boolean)
 	private Boolean truncated;
 
 	/**
 	 * The type of the provider giving this description
-	 * TODO : remove this, as it is not used anymore
 	 */
 	@Field(index = false, store = false, type = FieldType.Keyword)
 	private ProviderType providerType;

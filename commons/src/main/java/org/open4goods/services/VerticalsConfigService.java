@@ -163,14 +163,15 @@ public class VerticalsConfigService {
 
 	/**
 	 * Instanciate a vertical config for a given category name
-	 *
+	 * TODO :	Performance : cache the result
 	 * @param inputStream
 	 * @param existing
 	 * @return
 	 * @throws IOException
 	 */
+	@Cacheable(cacheNames = CacheConstants.FOREVER_LOCAL_CACHE_NAME)
 	public VerticalConfig getVerticalForCategories(Set<String> categories) {
-
+		System.out.println("NOT CACHED");
 
 		VerticalConfig vc = null;
 
