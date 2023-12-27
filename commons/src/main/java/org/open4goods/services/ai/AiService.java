@@ -18,11 +18,11 @@ import org.slf4j.LoggerFactory;
 public class AiService {
 
 	private Logger logger = LoggerFactory.getLogger(AiService.class);
-	private NudgerAgent nudgerAgent;
+	private AiAgent nudgerAgent;
 	private VerticalsConfigService verticalService;
 	private EvaluationService spelEvaluationService;
 
-	public AiService(NudgerAgent customerSupportAgent, final VerticalsConfigService verticalService, EvaluationService spelEvaluationService) {
+	public AiService(AiAgent customerSupportAgent, final VerticalsConfigService verticalService, EvaluationService spelEvaluationService) {
 
 		this.nudgerAgent = customerSupportAgent;
 		this.verticalService = verticalService;

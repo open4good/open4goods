@@ -24,7 +24,7 @@ import org.open4goods.services.StandardiserService;
 import org.open4goods.services.VerticalsConfigService;
 import org.open4goods.services.XwikiService;
 import org.open4goods.services.ai.AiService;
-import org.open4goods.services.ai.NudgerAgent;
+import org.open4goods.services.ai.AiAgent;
 import org.open4goods.ui.config.yml.UiConfig;
 import org.open4goods.ui.services.GtinService;
 import org.open4goods.ui.services.ImageService;
@@ -56,7 +56,7 @@ public class AppConfig {
 	
 	@Bean
 	@Autowired  
-	AiService aiService (NudgerAgent nudgerAgent, VerticalsConfigService verticalService, EvaluationService spelEvaluationService) {
+	AiService aiService (AiAgent nudgerAgent, VerticalsConfigService verticalService, EvaluationService spelEvaluationService) {
 		return new AiService(nudgerAgent, verticalService, spelEvaluationService);
 	}
 	

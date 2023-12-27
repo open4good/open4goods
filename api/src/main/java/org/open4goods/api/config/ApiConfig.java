@@ -44,7 +44,7 @@ import org.open4goods.services.SerialisationService;
 import org.open4goods.services.StandardiserService;
 import org.open4goods.services.VerticalsConfigService;
 import org.open4goods.services.ai.AiService;
-import org.open4goods.services.ai.NudgerAgent;
+import org.open4goods.services.ai.AiAgent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springdoc.core.customizers.OpenApiCustomizer;
@@ -151,7 +151,7 @@ public class ApiConfig {
 
 	@Bean
 	@Autowired  
-	AiService aiService (ApiProperties properties, NudgerAgent nudgerAgent, VerticalsConfigService verticalService, EvaluationService spelEvaluationService) {
+	AiService aiService (ApiProperties properties, AiAgent nudgerAgent, VerticalsConfigService verticalService, EvaluationService spelEvaluationService) {
 		return new AiService(nudgerAgent, verticalService, spelEvaluationService);
 	}
 		
@@ -165,8 +165,8 @@ public class ApiConfig {
 	}
 
 	 @Bean
-	 NudgerAgent nudgerAgent(@Autowired ChatLanguageModel chatLanguageModel) {
-	        return AiServices.builder(NudgerAgent.class)
+	 AiAgent nudgerAgent(@Autowired ChatLanguageModel chatLanguageModel) {
+	        return AiServices.builder(AiAgent.class)
 	                .chatLanguageModel(chatLanguageModel)	                
 //	                .retriever(retriever)
 	                .build();
