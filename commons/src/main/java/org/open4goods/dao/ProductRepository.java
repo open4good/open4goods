@@ -224,6 +224,19 @@ public class ProductRepository {
 //		});
 	}
 	
+	public void store(Product data) {
+		logger.info("Indexing  product {}", data.gtin());
+
+//		executor.submit(() -> {
+			elasticsearchTemplate.save(data, current_index);
+//		});
+
+//		executor.submit(() -> {
+			redisRepo.opsForValue().set(data.gtin(), data);
+//		});
+	}
+	
+	
 	
 	/**
 	 * Return an aggregated data by it's ID
