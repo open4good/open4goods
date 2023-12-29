@@ -163,7 +163,7 @@ public class VerticalsConfigService {
 
 	/**
 	 * Instanciate a vertical config for a given category name
-	 * TODO :	Performance : cache the result
+	 * TODO :	Performance : cache the result : https://stackoverflow.com/questions/44529029/spring-cache-with-collection-of-items-entities
 	 * @param inputStream
 	 * @param existing
 	 * @return

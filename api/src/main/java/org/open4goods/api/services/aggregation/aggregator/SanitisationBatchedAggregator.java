@@ -13,17 +13,17 @@ import org.slf4j.LoggerFactory;
 
 
 /**
- * The real time AggregationService is stateless and thread safe.
+ * A batched sanitisation aggregator that do not load all elements in memory (used to process all items)
  * @author goulven
  *
  */
-public class BatchedAggregator extends AbstractAggregator {
+public class SanitisationBatchedAggregator extends AbstractAggregator {
 
-	protected static final Logger logger = LoggerFactory.getLogger(BatchedAggregator.class);
+	protected static final Logger logger = LoggerFactory.getLogger(SanitisationBatchedAggregator.class);
 
 
 
-	public BatchedAggregator(final List<AbstractAggregationService> services) {
+	public SanitisationBatchedAggregator(final List<AbstractAggregationService> services) {
 		super(services);
 	}
 
@@ -43,7 +43,7 @@ public class BatchedAggregator extends AbstractAggregator {
 	 * @return
 	 * @throws AggregationSkipException
 	 */
-	public Product update(final Collection<Product> datas){
+	public Product update(final Product data){
 
 
 		Product ret = null;
@@ -58,23 +58,8 @@ public class BatchedAggregator extends AbstractAggregator {
 				continue;
 			}
 			
-			logger.warn("Batching {} products using {} service",datas.size() ,service.getClass().getSimpleName());
+			service.onProduct(data);				
 
-			
-			// Init
-			service.init(datas);
-			
-			logger.warn("Processing {} products using {} service",datas.size() ,service.getClass().getSimpleName());
-
-			// Processing Products
-			for (Product p : datas) {
-				service.onProduct(p);				
-			}
-
-			logger.warn("Post computing {} products using {} service",datas.size() ,service.getClass().getSimpleName());
-
-			// Done 
-			service.done(datas);
 		}
 
 		return ret;

@@ -184,6 +184,7 @@ public class DataFragmentStoreService {
 			for (DataFragment df : buffer) {
 				Product data = aggDatas.get(df.gtin());
 				if (null == data) {
+					// This is a first product
 					data = new Product();
 					data.setCreationDate(System.currentTimeMillis());
 				}

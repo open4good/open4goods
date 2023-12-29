@@ -587,19 +587,19 @@ public class Product implements Standardisable {
 	
 	
 	
-	/**
-	 * Initialize a dummy DataFragment from this product, (used to "touch" products to replay batch scenarios with realtimeAggregationService)
-	 * @return
-	 */
-	public DataFragment getFragment() {
-		DataFragment ret = new DataFragment();
-		ret.setLastIndexationDate(lastChange);
-		ret.setCreationDate(creationDate);
-		ret.setReferentielAttributes(attributes.getReferentielAttributes());
-		
-		return ret;
-		
-	}
+//	/**
+//	 * Initialize a dummy DataFragment from this product, (used to "touch" products to replay batch scenarios with realtimeAggregationService)
+//	 * @return
+//	 */
+//	public DataFragment getFragment() {
+//		DataFragment ret = new DataFragment();
+//		ret.setLastIndexationDate(lastChange);
+//		ret.setCreationDate(creationDate);
+//		ret.setReferentielAttributes(attributes.getReferentielAttributes());
+//		
+//		return ret;
+//		
+//	}
 
 
 	/**

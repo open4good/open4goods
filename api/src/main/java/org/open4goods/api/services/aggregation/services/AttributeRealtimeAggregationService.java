@@ -68,7 +68,7 @@ public class AttributeRealtimeAggregationService extends AbstractRealTimeAggrega
 			// Add unmatched attributes from the product (case configuration change)
 			
 			// TODO : BIG BUG : Override the providername. Must be only in batch mode
-			all.addAll(product.getAttributes().getUnmapedAttributes().stream().map(e -> new Attribute(e.getName(),e.getValue(),e.getLanguage())).toList());
+			//all.addAll(product.getAttributes().getUnmapedAttributes().stream().map(e -> new Attribute(e.getName(),e.getValue(),e.getLanguage())).toList());
 			
 			
 			for (Attribute attr :  all) {
@@ -76,9 +76,7 @@ public class AttributeRealtimeAggregationService extends AbstractRealTimeAggrega
 				// Checking if a potential AggregatedAttribute
 				Attribute translated = attributesConfig.translateAttribute(attr,  dataFragment.getDatasourceName());
 				
-				// We have a "raw" attribute that matches a aggragationconfig
-				
-				
+				// We have a "raw" attribute that matches a aggragationconfig								
 				
 				if (ResourceHelper.isImage(attr.getValue())) {
 					product.addImage(attr.getValue(), attr.getName());
