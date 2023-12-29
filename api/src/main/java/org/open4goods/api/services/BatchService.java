@@ -159,6 +159,7 @@ public class BatchService {
 			logger.info("started : Sanitisation batching for all items");
 			SanitisationBatchedAggregator batchAgg = batchAggregationService.getFullSanitisationAggregator();
 
+			// TODO : Performance, could parallelize
 			dataRepository.exportAll().forEach(p -> {
                 batchAgg.update(p);
 				dataRepository.index(p);
