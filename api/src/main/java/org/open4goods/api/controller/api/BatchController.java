@@ -31,7 +31,7 @@ import jakarta.validation.constraints.NotBlank;
  */
 @RestController
 @PreAuthorize("hasAuthority('"+RolesConstants.ROLE_ADMIN+"')")
-public class VerticalConfigurationsController {
+public class BatchController {
 
 	private final VerticalsConfigService service;
 	
@@ -39,13 +39,13 @@ public class VerticalConfigurationsController {
 	
 	private final BatchService batchService;
 	
-	public VerticalConfigurationsController(BatchService batchService, SerialisationService serialisationService, VerticalsConfigService verticalsConfigService) {
+	public BatchController(BatchService batchService, SerialisationService serialisationService, VerticalsConfigService verticalsConfigService) {
 		this.serialisationService = serialisationService;
 		this.service = verticalsConfigService;
 		this.batchService = batchService;
 	}
 
-	@PutMapping(path="/vertical/")
+	@PutMapping(path="/batch/verticals/")
 	@Operation(summary="Create or update a vertical with a full yaml config. Can be long time processing")
 	@PreAuthorize("hasAuthority('"+RolesConstants.ROLE_ADMIN+"')")
 	public String fullUpdateFromConf( @RequestBody @NotBlank final String verticalConfig ) throws InvalidParameterException, JsonParseException, JsonMappingException, IOException{
@@ -55,31 +55,35 @@ public class VerticalConfigurationsController {
 		service.addTmpConfig(v);
 		
 		// This is initial submission, batching the products to update catégories				
-		batchService.fullUpdate(v);
+		batchService.batchScore(v);
 		
 		
 		return "done";
 	}
 
 
-	@PostMapping(path="/vertical/")
+	@PostMapping(path="/batch/verticals/")
 	@Operation(summary="Create or update a vertical with a given config name. Can be long time processing")
 	@PreAuthorize("hasAuthority('"+RolesConstants.ROLE_ADMIN+"')")
 	public String fullUpdateFromName( @RequestParam @NotBlank final String verticalConfig ) throws InvalidParameterException, JsonParseException, JsonMappingException, IOException{
 		
-
 		// This is initial submission, batching the products to update catégories				
-		batchService.fullUpdate(verticalConfig);
-		
+		batchService.batchScore(service.getConfigById(verticalConfig).orElse(null));		
 		
 		return "done";
 	}
 
 	
-	@GetMapping("/verticals/score")
+	@GetMapping("/batch/verticals")
+	@Operation(summary="Update all verticlas (launch the scheduled batch that score all verticals)")
 	public void scoreVerticals() throws InvalidParameterException, IOException {
 		batchService.scoreAll();
 	}
-	
+
+	@GetMapping("/sanitisation")
+	@Operation(summary="Launch sanitisation of all products")
+	public void sanitize() throws InvalidParameterException, IOException {
+		batchService.sanitize();
+	}
 	
 }

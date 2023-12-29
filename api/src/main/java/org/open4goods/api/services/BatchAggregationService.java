@@ -6,7 +6,10 @@ import java.util.List;
 
 import org.open4goods.api.config.yml.ApiProperties;
 import org.open4goods.api.services.aggregation.AbstractAggregationService;
-import org.open4goods.api.services.aggregation.aggregator.BatchedAggregator;
+import org.open4goods.api.services.aggregation.aggregator.RealTimeAggregator;
+import org.open4goods.api.services.aggregation.aggregator.SanitisationBatchedAggregator;
+import org.open4goods.api.services.aggregation.aggregator.ScoringBatchedAggregator;
+import org.open4goods.api.services.aggregation.services.batch.UnmappedAttributeCleaningBatchAggregationService;
 import org.open4goods.api.services.aggregation.services.batch.VerticalBatchedAggregationService;
 import org.open4goods.api.services.aggregation.services.batch.scores.Attribute2ScoreAggregationService;
 import org.open4goods.api.services.aggregation.services.batch.scores.Brand2ScoreAggregationService;
@@ -57,7 +60,7 @@ public class BatchAggregationService  {
 
 	private VerticalsConfigService verticalConfigService;
 
-	private BatchedAggregator aggregator;
+	private ScoringBatchedAggregator aggregator;
 
 	private BarcodeValidationService barcodeValidationService;
 
@@ -88,7 +91,7 @@ public class BatchAggregationService  {
 		this.barcodeValidationService = barcodeValidationService;
 		this.brandService = brandService;
 
-		aggregator = getAggregator(configService.getConfigById(VerticalsConfigService.MAIN_VERTICAL_NAME).get());
+		aggregator = getScoringAggregator(configService.getConfigById(VerticalsConfigService.MAIN_VERTICAL_NAME).get());
 	}
 
 
@@ -103,12 +106,12 @@ public class BatchAggregationService  {
 	}
 
 	/**
-	 * List of services in the aggregator
+	 * The aggregator used to batch score verticals
 	 *
 	 * @param config
 	 * @return
 	 */
-	public BatchedAggregator getAggregator(VerticalConfig config) {
+	public ScoringBatchedAggregator getScoringAggregator(VerticalConfig config) {
 
 		//		final CapsuleGenerationConfig config = generationConfig;
 
@@ -122,8 +125,6 @@ public class BatchAggregationService  {
 		services.add(new VerticalBatchedAggregationService( apiProperties.logsFolder(), verticalConfigService, apiProperties.isDedicatedLoggerToConsole() ));
 		
 		
-		// TODO : put back a batchservice for attributes
-//		services.add(new AttributeAggregationService(config.getAttributesConfig(), brandService, apiProperties.logsFolder(), apiProperties.isDedicatedLoggerToConsole() ));
 		services.add(new CleanScoreAggregationService(config.getAttributesConfig(), apiProperties.logsFolder(), apiProperties.isDedicatedLoggerToConsole()));
 
 		services.add(new Attribute2ScoreAggregationService(config.getAttributesConfig(), apiProperties.logsFolder(), apiProperties.isDedicatedLoggerToConsole()));
@@ -132,7 +133,7 @@ public class BatchAggregationService  {
 		services.add(new EcoScoreAggregationService(config.getEcoscoreConfig(), apiProperties.logsFolder(), apiProperties.isDedicatedLoggerToConsole()));
 
 
-		final BatchedAggregator ret = new BatchedAggregator(services);
+		final ScoringBatchedAggregator ret = new ScoringBatchedAggregator(services);
 
 		autowireBeanFactory.autowireBean(ret);
 
@@ -141,9 +142,49 @@ public class BatchAggregationService  {
 
 
 
+	/**
+	 * The aggregator used for sanitisation 
+	 * @param config
+	 * @return
+	 */
+	public SanitisationBatchedAggregator getFullSanitisationAggregator() {
+
+		final List<AbstractAggregationService> services = new ArrayList<>();
+
+		services.add(new VerticalBatchedAggregationService( apiProperties.logsFolder(), verticalConfigService, apiProperties.isDedicatedLoggerToConsole() ));
+		
+		services.add(new UnmappedAttributeCleaningBatchAggregationService(apiProperties.logsFolder(), verticalConfigService, apiProperties.isDedicatedLoggerToConsole()));
 
 
+		final SanitisationBatchedAggregator ret = new SanitisationBatchedAggregator(services);
 
+		autowireBeanFactory.autowireBean(ret);
+
+		return ret;
+	}
+
+
+	/**
+	 * The aggregator used for sanitisation of all items (sanitisation do not need the all products buffering, so here is a trick
+	 * to avoid memory load, by using a customized realtimeaggregator
+	 * @param configalT
+	 * @return
+	 */
+	public RealTimeAggregator getVerticalisedSanitisationAggregator() {
+
+		final List<AbstractAggregationService> services = new ArrayList<>();
+
+		services.add(new VerticalBatchedAggregationService( apiProperties.logsFolder(), verticalConfigService, apiProperties.isDedicatedLoggerToConsole() ));
+		
+		services.add(new UnmappedAttributeCleaningBatchAggregationService(apiProperties.logsFolder(), verticalConfigService, apiProperties.isDedicatedLoggerToConsole()));
+
+
+		final RealTimeAggregator ret = new RealTimeAggregator(services);
+
+		autowireBeanFactory.autowireBean(ret);
+
+		return ret;
+	}
 
 
 

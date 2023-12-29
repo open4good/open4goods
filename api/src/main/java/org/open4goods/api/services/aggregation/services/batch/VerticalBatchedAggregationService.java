@@ -27,7 +27,7 @@ public class VerticalBatchedAggregationService extends AbstractBatchAggregationS
 		VerticalConfig vConf = verticalService.getVerticalForCategories(data.getDatasourceCategories());
 
 		if (null != vConf) {
-			// We have a match. Associate vertical ID annd save
+			// We have a match. Associate vertical ID and save
 			data.setVertical(vConf.getId());
 
 		} else if (null != data.getVertical() ){
