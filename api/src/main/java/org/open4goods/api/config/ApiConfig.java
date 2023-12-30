@@ -23,6 +23,7 @@ import org.open4goods.crawler.services.fetching.AwinCatalogService;
 import org.open4goods.crawler.services.fetching.CsvDatasourceFetchingService;
 import org.open4goods.crawler.services.fetching.WebDatasourceFetchingService;
 import org.open4goods.dao.ProductRepository;
+import org.open4goods.exceptions.InvalidParameterException;
 import org.open4goods.model.constants.CacheConstants;
 import org.open4goods.model.constants.Currency;
 import org.open4goods.model.constants.TimeConstants;
@@ -34,6 +35,7 @@ import org.open4goods.services.BarcodeValidationService;
 import org.open4goods.services.BrandService;
 import org.open4goods.services.DataSourceConfigService;
 import org.open4goods.services.EvaluationService;
+import org.open4goods.services.GoogleTaxonomyService;
 import org.open4goods.services.Gs1PrefixService;
 import org.open4goods.services.ImageMagickService;
 import org.open4goods.services.RemoteFileCachingService;
@@ -149,6 +151,23 @@ public class ApiConfig {
 		return new AiService(nudgerAgent, verticalService, spelEvaluationService);
 	}
 	
+    @Bean
+	public GoogleTaxonomyService googleTaxonomyService(@Autowired RemoteFileCachingService remoteFileCachingService) {
+		GoogleTaxonomyService gts = new GoogleTaxonomyService(remoteFileCachingService);
+		
+		// TODO : From conf 
+		// TODO : Add others
+        try {
+			gts.loadGoogleTaxonUrl("https://www.google.com/basepages/producttype/taxonomy-with-ids.fr-FR.txt", "fr");
+			gts.loadGoogleTaxonUrl("https://www.google.com/basepages/producttype/taxonomy-with-ids.en-US.txt", "fr");
+		} catch (Exception e) {
+			logger.error("Error loading google taxonomy", e);
+		}        
+        
+        
+        return gts;
+	}
+    
 	 @Bean
 	 AiAgent nudgerAgent(@Autowired ChatLanguageModel chatLanguageModel) {
 	        return AiServices.builder(AiAgent.class)
@@ -178,8 +197,10 @@ public class ApiConfig {
 			@Autowired DataSourceConfigService dataSourceConfigService, 
 			@Autowired VerticalsConfigService configService, 
 			@Autowired BarcodeValidationService barcodeValidationService,
-			@Autowired BrandService brandservice) {
-		return new RealtimeAggregationService(evaluationService, referentielService, standardiserService, autowireBeanFactory, aggregatedDataRepository, apiProperties, gs1prefixService, dataSourceConfigService, configService,  barcodeValidationService,brandservice);
+			@Autowired BrandService brandservice,
+			@Autowired GoogleTaxonomyService gts
+			) {
+		return new RealtimeAggregationService(evaluationService, referentielService, standardiserService, autowireBeanFactory, aggregatedDataRepository, apiProperties, gs1prefixService, dataSourceConfigService, configService,  barcodeValidationService,brandservice, gts);
 	}
 
 	@Bean

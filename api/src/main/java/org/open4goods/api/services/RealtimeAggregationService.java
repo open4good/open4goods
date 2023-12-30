@@ -14,7 +14,7 @@ import org.open4goods.api.services.aggregation.services.realtime.IdAggregationSe
 import org.open4goods.api.services.aggregation.services.realtime.MediaAggregationService;
 import org.open4goods.api.services.aggregation.services.realtime.NamesAggregationService;
 import org.open4goods.api.services.aggregation.services.realtime.PriceAggregationService;
-import org.open4goods.api.services.aggregation.services.realtime.VerticalRealTimeAggregationService;
+import org.open4goods.api.services.aggregation.services.realtime.TaxonomyRealTimeAggregationService;
 import org.open4goods.config.yml.ui.VerticalConfig;
 import org.open4goods.config.yml.ui.VerticalProperties;
 import org.open4goods.dao.ProductRepository;
@@ -25,6 +25,7 @@ import org.open4goods.services.BarcodeValidationService;
 import org.open4goods.services.BrandService;
 import org.open4goods.services.DataSourceConfigService;
 import org.open4goods.services.EvaluationService;
+import org.open4goods.services.GoogleTaxonomyService;
 import org.open4goods.services.Gs1PrefixService;
 import org.open4goods.services.StandardiserService;
 import org.open4goods.services.VerticalsConfigService;
@@ -67,6 +68,8 @@ public class RealtimeAggregationService {
 	private BarcodeValidationService barcodeValidationService;
 
 	private BrandService brandService;
+	
+	private GoogleTaxonomyService taxonomyService;
 
 	public RealtimeAggregationService(EvaluationService evaluationService,
 			ReferentielService referentielService, StandardiserService standardiserService,
@@ -74,7 +77,9 @@ public class RealtimeAggregationService {
 			ApiProperties apiProperties, Gs1PrefixService gs1prefixService,
 			DataSourceConfigService dataSourceConfigService, VerticalsConfigService configService,
 			BarcodeValidationService barcodeValidationService,
-			BrandService brandService) {
+			BrandService brandService,
+			GoogleTaxonomyService taxonomyService
+			) {
 		super();
 		this.evaluationService = evaluationService;
 		this.referentielService = referentielService;
@@ -87,7 +92,7 @@ public class RealtimeAggregationService {
 		verticalConfigService = configService;
 		this.brandService=brandService;
 		this.barcodeValidationService = barcodeValidationService;
-
+		this.taxonomyService = taxonomyService;
 
 		aggregator = getAggregator(configService.getConfigById(VerticalsConfigService.MAIN_VERTICAL_NAME).get());
 
@@ -131,7 +136,7 @@ public class RealtimeAggregationService {
 
 		services.add(new BarCodeAggregationService(apiProperties.logsFolder(), gs1prefixService,barcodeValidationService, apiProperties.isDedicatedLoggerToConsole()));
 
-		services.add(new VerticalRealTimeAggregationService( apiProperties.logsFolder(), verticalConfigService, apiProperties.isDedicatedLoggerToConsole()));
+		services.add(new TaxonomyRealTimeAggregationService( apiProperties.logsFolder(), verticalConfigService, taxonomyService, apiProperties.isDedicatedLoggerToConsole()));
 
 		services.add(new AttributeRealtimeAggregationService(verticalConfigService, brandService, apiProperties.logsFolder(), apiProperties.isDedicatedLoggerToConsole()));
 
@@ -159,6 +164,9 @@ public class RealtimeAggregationService {
 
 		services.add(new MediaAggregationService(config, apiProperties.logsFolder(), apiProperties.isDedicatedLoggerToConsole()));
 
+
+	
+		
 		final RealTimeAggregator ret = new RealTimeAggregator(services);
 
 		autowireBeanFactory.autowireBean(ret);
