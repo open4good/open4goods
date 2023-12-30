@@ -23,7 +23,7 @@ public class GoogleTaxonomyServiceTest {
         
         // Call the loadFile method
         gts.loadGoogleTaxonUrl("https://www.google.com/basepages/producttype/taxonomy-with-ids.fr-FR.txt", "fr");
-        gts.loadGoogleTaxonUrl("https://www.google.com/basepages/producttype/taxonomy-with-ids.fr-CH.txt", "fr");
+        gts.loadGoogleTaxonUrl("https://www.google.com/basepages/producttype/taxonomy-with-ids.fr-CH.txt", "fr_ch");
         
         
         // Primary resolution
