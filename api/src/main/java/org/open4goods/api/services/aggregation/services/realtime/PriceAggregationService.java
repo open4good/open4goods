@@ -19,7 +19,8 @@ import org.open4goods.services.DataSourceConfigService;
  * stock
  *
  *
- * TODO : Could cut the price history after a number / delay of history for elastic size purpose
+ * TODO : Could cut the price history after a number / delay of history for
+ * elastic size purpose
  *
  * @author goulven
  *
@@ -34,7 +35,7 @@ public class PriceAggregationService extends AbstractRealTimeAggregationService 
 	private VerticalProperties segmentProperties;
 
 	public PriceAggregationService(final String logsFolder, DataSourceConfigService datasourceConfigService,
-			VerticalProperties segmentProperties,boolean toConsole) {
+			VerticalProperties segmentProperties, boolean toConsole) {
 		super(logsFolder, toConsole);
 		this.datasourceConfigService = datasourceConfigService;
 		this.segmentProperties = segmentProperties;
@@ -42,7 +43,6 @@ public class PriceAggregationService extends AbstractRealTimeAggregationService 
 
 	@Override
 	public void onDataFragment(final DataFragment e, final Product aggregatedData) {
-
 
 		if (!e.hasPrice() || !e.affiliated()) {
 			return;
@@ -98,8 +98,7 @@ public class PriceAggregationService extends AbstractRealTimeAggregationService 
 		}
 
 		AggregatedPrices aggPrices = aggregatedData.getPrice();
-		
-		
+
 		/////////////////////////
 		// Prices computation
 		////////////////////////
@@ -107,14 +106,12 @@ public class PriceAggregationService extends AbstractRealTimeAggregationService 
 		// Compute current prices
 		computeMinPrice(filtered, aggPrices);
 
-
 		// set Number of offers
 		aggregatedData.setOffersCount(reducedPrices.size());
 
 		// Computing / incrementing history
 		computePriceHistory(aggPrices, ProductState.OCCASION);
-		computePriceHistory(aggPrices, ProductState.NEW);	
-
+		computePriceHistory(aggPrices, ProductState.NEW);
 
 		// Setting the product state summary
 		aggPrices.getOffers().forEach(i -> aggPrices.getConditions().add(i.getProductState()));
@@ -124,39 +121,35 @@ public class PriceAggregationService extends AbstractRealTimeAggregationService 
 
 		// Setting if has an occasion offer
 
-
-
 	}
 
 	/**
 	 * Compute the price history
+	 * 
 	 * @param prices
 	 * @param state
 	 */
 	private void computePriceHistory(AggregatedPrices prices, ProductState state) {
 		Optional<AggregatedPrice> oMinPrice = prices.getMinPrice(state);
 		if (oMinPrice.isEmpty()) {
-			return ;
+			return;
 		}
 
 		AggregatedPrice minPrice = oMinPrice.get();
-		
-			
+
 		List<PriceHistory> history = prices.getHistory(state);
-		
-		
-		if (history.size() == 0 ) {
+
+		if (history.size() == 0) {
 			// First price
 			prices.setTrend(0);
 			history.add(new PriceHistory(minPrice));
 
-		}
-		else {
-			PriceHistory lastPrice = history.get(history.size()-1);
+		} else {
+			PriceHistory lastPrice = history.get(history.size() - 1);
 			if (minPrice.getPrice() == lastPrice.getPrice().doubleValue()) {
 				prices.setTrend(0);
 				lastPrice.setTimestamp(System.currentTimeMillis());
-			} else if (minPrice.getPrice() > lastPrice.getPrice().doubleValue() ) {
+			} else if (minPrice.getPrice() > lastPrice.getPrice().doubleValue()) {
 				// Price has increased
 				prices.setTrend(1);
 				// TODO : Cut here to a fixed history
@@ -169,10 +162,22 @@ public class PriceAggregationService extends AbstractRealTimeAggregationService 
 			}
 		}
 		
+		
+		// Setting
+		switch (state) {
+		case NEW:
+			prices.setNewPricehistory(history);
+			break;
+		case OCCASION:
+			prices.setOccasionPricehistory(history);
+			break;
+		}
+
 	}
 
 	/**
-	 * Add a key for a aprice and a marketplace. 
+	 * Add a key for a aprice and a marketplace.
+	 * 
 	 * @param df
 	 * @return
 	 */
@@ -189,7 +194,6 @@ public class PriceAggregationService extends AbstractRealTimeAggregationService 
 	 */
 	private void computeMinPrice(final Collection<AggregatedPrice> filtered, final AggregatedPrices p) {
 
-
 		// Min / max
 		for (final AggregatedPrice o : filtered) {
 
@@ -204,8 +208,6 @@ public class PriceAggregationService extends AbstractRealTimeAggregationService 
 
 	public @Override void close() throws IOException {
 	}
-
-
 
 	/**
 	 * Convert days to ms
