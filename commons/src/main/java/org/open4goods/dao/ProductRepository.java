@@ -52,7 +52,7 @@ public class ProductRepository {
 	
 	// The file queue implementation
 	// TODO : Limit from conf
-	private BlockingQueue<Product> queue = new LinkedBlockingQueue<>(5000);
+	private BlockingQueue<Product> queue = new LinkedBlockingQueue<>(15000);
 	
 	
 	/**
@@ -71,7 +71,7 @@ public class ProductRepository {
 	public ProductRepository() {
 		
 		int dequeueSize = 200;
-		int workers = 3;
+		int workers = 6;
 		int pauseDuration = 5000;
 		
 		logger.info("Starting file queue consumer thread, with bulk page size of {} items", dequeueSize );
@@ -292,7 +292,7 @@ public class ProductRepository {
 		
 		// Getting the one we don't have in redis from elastic 		
 		Set<String> missingIds = ids.stream().filter(e -> !ret.containsKey(e)).collect(Collectors.toSet());
-		logger.info("Got {} products from redis, looking for the {} missing in elastic",ret.size(), missingIds.size());
+		logger.info("Got {} products from redis, looking for the {} missing in elastic. Queue size is : {}",ret.size(), missingIds.size(),queue.size());
 		
 		
 		if (missingIds.size() != 0) {
