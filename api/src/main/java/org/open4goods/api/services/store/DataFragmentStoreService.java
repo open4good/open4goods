@@ -56,7 +56,7 @@ public class DataFragmentStoreService {
 
 	// The queue implementation
 	// TODO : Limit from conf
-	private BlockingQueue<DataFragment> queue = new LinkedBlockingQueue<>(3000000);
+	private BlockingQueue<DataFragment> queue = new LinkedBlockingQueue<>(5000);
 
 	private ProductRepository aggregatedDataRepository;
 
@@ -76,7 +76,7 @@ public class DataFragmentStoreService {
 
 		int dequeueSize = 200;
 		int workers = 4;
-		int pauseDuration = 1000;
+		int pauseDuration = 5000;
 //		
 		logger.info("Starting file queue consumer thread, with bulk page size of {} items", dequeueSize );
 //				
