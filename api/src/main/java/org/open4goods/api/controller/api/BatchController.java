@@ -6,12 +6,16 @@ import java.io.IOException;
 
 import org.open4goods.api.services.BatchService;
 import org.open4goods.config.yml.ui.VerticalConfig;
+import org.open4goods.dao.ProductRepository;
 import org.open4goods.exceptions.InvalidParameterException;
+import org.open4goods.exceptions.ResourceNotFoundException;
 import org.open4goods.model.constants.RolesConstants;
 import org.open4goods.services.SerialisationService;
 import org.open4goods.services.VerticalsConfigService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -38,6 +42,11 @@ public class BatchController {
 	private final SerialisationService serialisationService;
 	
 	private final BatchService batchService;
+	
+
+	@Autowired
+	private  ProductRepository repository;
+	
 	
 	public BatchController(BatchService batchService, SerialisationService serialisationService, VerticalsConfigService verticalsConfigService) {
 		this.serialisationService = serialisationService;
@@ -85,5 +94,12 @@ public class BatchController {
 	public void sanitize() throws InvalidParameterException, IOException {
 		batchService.sanitize();
 	}
+
+	@GetMapping("/sanitisation/{gtin}")
+	@Operation(summary="Launch sanitisation of all products")
+	public void sanitizeOne(@PathVariable String gtin ) throws InvalidParameterException, IOException, ResourceNotFoundException {
+		batchService.sanitizeOne(repository.getById(gtin));
+	}
+	
 	
 }

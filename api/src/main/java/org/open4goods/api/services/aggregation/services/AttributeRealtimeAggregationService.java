@@ -171,7 +171,12 @@ public class AttributeRealtimeAggregationService extends AbstractRealTimeAggrega
 
 			
 			// Removing 
-			product.getAttributes().setUnmapedAttributes(product.getAttributes().getUnmapedAttributes().stream().filter(e -> !toRemoveFromUnmatched.contains(e.getName())) .collect(Collectors.toSet()));
+			product.getAttributes().setUnmapedAttributes(product.getAttributes().getUnmapedAttributes().stream()
+					// TODO : Should be from path
+					// TODO : apply from sanitisation
+					.filter(e -> !e.getName().contains("CATEGORY")) 
+					.filter(e -> !toRemoveFromUnmatched.contains(e.getName())) 
+					.collect(Collectors.toSet()));
 			
 			
 			

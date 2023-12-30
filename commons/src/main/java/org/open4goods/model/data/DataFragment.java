@@ -801,7 +801,7 @@ public class DataFragment implements Standardisable, Validable {
 			return;
 		}
 
-		this.category = IdHelper.getCategoryName(category.trim().toUpperCase());
+		this.category = IdHelper.getCategoryName(category);
 
 
 	}

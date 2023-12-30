@@ -134,6 +134,14 @@ public class Product implements Standardisable {
 	@Field(index = false, store = false, type = FieldType.Object)
 	private GtinInfo gtinInfos = new GtinInfo();
 
+
+	/**
+	 * The google taxonomy id
+	 */
+	@Field(index = true, store = false, type = FieldType.Integer)
+	private Integer googleTaxonomyId;
+	
+	
 	/**
 	 * The set of participating "productCategories", on datasources that build this
 	 * aggregatedData
@@ -764,6 +772,14 @@ public class Product implements Standardisable {
 
 	public void setAiDescriptions(Map<String, AiDescription> aiDescriptions) {
 		this.aiDescriptions = aiDescriptions;
+	}
+
+	public Integer getGoogleTaxonomyId() {
+		return googleTaxonomyId;
+	}
+
+	public void setGoogleTaxonomyId(Integer googleTaxonomyId) {
+		this.googleTaxonomyId = googleTaxonomyId;
 	}
 
 	

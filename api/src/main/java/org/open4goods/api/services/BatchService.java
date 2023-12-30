@@ -66,8 +66,6 @@ public class BatchService {
 		this.realtimeAggregationService = realtimeAggregationService;
 	}
 
-
-
 	
 	/**
 	 * update all verticals. Scheduled
@@ -82,53 +80,6 @@ public class BatchService {
 	 
 	 
 
-//	/**
-//	 * Update a vertical
-//	 * @param verticalId
-//	 */
-//	public void fullUpdate(String verticalId) {
-//		VerticalConfig vertical = verticalsService.getConfigById(verticalId).orElseThrow();
-//		fullUpdate(vertical);
-//	}
-	
-//	/**
-//	 * Update verticals with the batch Aggragator
-//	 * @throws AggregationSkipException 
-//	 */
-//	public void fullUpdate(VerticalConfig vertical)  {
-//
-//		logger.info("Full update for {}", vertical.getId());
-//		ScoringBatchedAggregator batchAgg = batchAggregationService.getAggregator(vertical);
-//		RealTimeAggregator rtAgg = realtimeAggregationService.getAggregator(vertical);
-//		
-//		Stream<Product> productsStream = dataRepository.getProductsMatchingVertical(vertical);
-//		
-//		List<Product> productBag = new ArrayList<>();
-//		logger.info("Starting realtime aggregation");
-//		// Realtime aggregation
-//		productsStream.forEach(data -> {
-//			try {
-//				dedicatedLogger.debug("Realtime aggregation for {}", data);
-//				//TODO : Bad design
-//				productBag.add( rtAgg.build(data.getFragment(), data));
-//			} catch (AggregationSkipException e) {
-//				dedicatedLogger.warn("Error on realtimeaggregation aggregation for {}", data, e);
-//			}
-//		});
-//		
-//		dedicatedLogger.info("Starting batch aggregation");
-//		// Batched (scoring) aggregation
-//		batchAgg.update(productBag);
-//		
-//		// TODO : Bulk size from conf
-//		Lists.partition(productBag, 200).forEach(p -> {
-//			dedicatedLogger.info("Indexing {} products", p.size());
-//			dataRepository.index(p);
-//		});
-//
-//	}
-//	
-	
 	
 	/**
 	 * Score verticals with the batch Aggragator
@@ -140,7 +91,7 @@ public class BatchService {
 
 		ScoringBatchedAggregator batchAgg = batchAggregationService.getScoringAggregator(vertical);
 
-		List<Product> productBag = dataRepository.getProductsMatchingVertical(vertical).toList();
+		List<Product> productBag = dataRepository.getProductsMatchingCategories(vertical).toList();
 		// Batched (scoring) aggregation
 		batchAgg.update(productBag);
 		logger.info("Score batching : indexing {} products", productBag.size());
@@ -164,8 +115,20 @@ public class BatchService {
                 batchAgg.update(p);
 				dataRepository.index(p);
             });
-			logger.info("started : Sanitisation batching for all items");
-			
+			logger.info("done: Sanitisation batching for all items");			
+	}
+
+	/**
+	 * Launch the sanitisation of one product
+	 * @param product
+	 */
+	public void sanitizeOne(Product product) {
+		logger.info("started : Sanitisation batching for {}",product);
+		SanitisationBatchedAggregator batchAgg = batchAggregationService.getFullSanitisationAggregator();
+
+	    batchAgg.update(product);
+		dataRepository.index(product);
+		logger.info("done : Sanitisation batching for {}", product);		
 	}
 	
 
