@@ -205,7 +205,7 @@ public class DataFragmentStoreService {
 			aggregatedDataRepository.index(results);
 
 
-			logger.info("Indexed {} DataFragments",  buffer.size(),System.currentTimeMillis());
+			logger.info("Indexed {} DataFragments. Queue size is {}",  buffer.size(),queue.size());
 
 		} catch (final Exception e) {
 			logger.error("Error while dequeing DataFragments",e);
