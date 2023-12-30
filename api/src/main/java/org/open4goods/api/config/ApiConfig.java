@@ -159,7 +159,7 @@ public class ApiConfig {
 		// TODO : Add others
         try {
 			gts.loadGoogleTaxonUrl("https://www.google.com/basepages/producttype/taxonomy-with-ids.fr-FR.txt", "fr");
-//			gts.loadGoogleTaxonUrl("https://www.google.com/basepages/producttype/taxonomy-with-ids.en-US.txt", "fr_ch");
+			gts.loadGoogleTaxonUrl("https://www.google.com/basepages/producttype/taxonomy-with-ids.en-US.txt", "en");
 		} catch (Exception e) {
 			logger.error("Error loading google taxonomy", e);
 		}        

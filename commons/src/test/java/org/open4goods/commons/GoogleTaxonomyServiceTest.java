@@ -22,8 +22,8 @@ public class GoogleTaxonomyServiceTest {
     public void testLoadFile() throws IOException, InvalidParameterException {
         
         // Call the loadFile method
-        gts.loadGoogleTaxonUrl("https://www.google.com/basepages/producttype/taxonomy-with-ids.fr-FR.txt", "fr");
-        gts.loadGoogleTaxonUrl("https://www.google.com/basepages/producttype/taxonomy-with-ids.fr-CH.txt", "fr_ch");
+		gts.loadGoogleTaxonUrl("https://www.google.com/basepages/producttype/taxonomy-with-ids.fr-FR.txt", "fr");
+		gts.loadGoogleTaxonUrl("https://www.google.com/basepages/producttype/taxonomy-with-ids.en-US.txt", "en");
         
         
         // Primary resolution
