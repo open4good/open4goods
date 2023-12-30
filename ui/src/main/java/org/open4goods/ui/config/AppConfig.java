@@ -168,10 +168,6 @@ public class AppConfig {
 		return new ProductRepository();
 	}
 
-	@Bean RemoteFileCachingService remoteFileCachingService() {
-		return new RemoteFileCachingService(config.getRemoteCachingFolder());
-	}
-
 
 	@Bean
 	SearchService searchService(@Autowired ProductRepository aggregatedDataRepository, @Autowired final UiConfig uiconfig) {

@@ -52,7 +52,7 @@ public class ProductRepository {
 	
 	// The file queue implementation
 	// TODO : Limit from conf
-	private BlockingQueue<Product> queue = new LinkedBlockingQueue<>(300000);
+	private BlockingQueue<Product> queue = new LinkedBlockingQueue<>(5000);
 	
 	
 	/**
@@ -72,7 +72,7 @@ public class ProductRepository {
 		
 		int dequeueSize = 200;
 		int workers = 3;
-		int pauseDuration = 1000;
+		int pauseDuration = 5000;
 		
 		logger.info("Starting file queue consumer thread, with bulk page size of {} items", dequeueSize );
 				
