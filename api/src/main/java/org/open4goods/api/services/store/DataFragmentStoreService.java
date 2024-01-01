@@ -160,7 +160,11 @@ public class DataFragmentStoreService {
 	 * @param df
 	 */
 	void enqueue(final DataFragment df) {
-		queue.add(df);		
+		try {
+			queue.put(df);
+		} catch (InterruptedException e) {
+			logger.error("Cannot enqueue datafragment {}",df,e);
+		}		
 	}
 
 
