@@ -21,13 +21,13 @@ public class BarcodeTest {
 
 
 		// Testing ean8
-		assertEquals(BarcodeType.GTIN_8, service.sanitize("40170725").getKey());
+		assertEquals(BarcodeType.GTIN_13, service.sanitize("40170725").getKey());
 
 
 
 
 		// Gtin12
-		assertEquals(BarcodeType.GTIN_12, service.sanitize("123601057072").getKey());
+		assertEquals(BarcodeType.GTIN_13, service.sanitize("123601057072").getKey());
 
 
 		// Gtin 14
@@ -45,15 +45,18 @@ public class BarcodeTest {
 
 		assertEquals(BarcodeType.ISBN_13, service.sanitize("9780786296323").getKey());
 
-		
-
-		
+	
 		// Testing invalid
 		assertEquals(BarcodeType.UNKNOWN, service.sanitize("8436542859045").getKey());
 
-
-
-
+		
+		// Testing the padded resolution
+		assertEquals(BarcodeType.UNKNOWN, service.sanitize("000	88381694858").getKey());
+		assertEquals(BarcodeType.GTIN_13, service.sanitize("88381694858").getKey());
+		assertEquals(BarcodeType.GTIN_13, service.sanitize("088381694858").getKey());
+		assertEquals(BarcodeType.GTIN_13, service.sanitize("0088381694858").getKey());
+		// Reduced GTIN 13
+		assertEquals(BarcodeType.GTIN_13, service.sanitize("00088381694858").getKey());
 
 	}
 	//
