@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html th:lang="fr">
+
+<head>
+
+    
+	<!-- Primary Meta Tags -->
+	<title>Nudger admin</title>
+	
+		<!-- CSS -->
+	<link rel="stylesheet" type="text/css" href="/webjars/datatables/css/dataTables.bootstrap5.min.css">
+	<link rel="stylesheet" type="text/css" href="/webjars/datatables-responsive/css/responsive.dataTables.min.css">
+
+	
+	
+</head>
+
+<body class="home-page">
+    
+
+	
+    <main class="bg-gray-200">	
+		
+       	<!--/* Central */-->
+		<section class="section-header py-3">
+			<div class="col-12">
+				<p style="visibility: hidden;" class="tlt display-2 mb-2 text-center">admin.nudger<span class="text-secondary-app fw-bold">.fr</span>
+				</p>
+			</div>	
+
+			<div class="container container-semi-fluid">		
+				<div class="row">
+					<div class="col-12 col-lg-2 d-flex align-items-center justify-content-center">                       	
+						<img class="navbar-brand-light" src="../../assets/img/nudger-dernier-logo.png" alt="nudger.fr logo dark">
+					</div>
+				
+				
+					<div class="col-12 col-lg-10">
+					
+			
+			
+			
+			
+			
+			
+			
+			
+			
+													
+					</div>
+				</div>	
+			</div>
+		</section>
+
+		<section class="bg-white text-center py-4">
+			<h1 class="mb-3">Les taxonomies</h1>
+			<p class="lead mb-0">L'assurance de bien choisir</p>
+		</section>
+
+		<section class="container py-5">
+		
+		<table id="taxonomies" class="table table-striped" style="width: 100%">
+				<thead>
+					<tr>
+						<th>id</th>
+						<th>Nom</th>
+						<th>Total</th>
+						<th>vertical</th>
+					</tr>
+				</thead>
+				<tbody>
+				
+					<tr th:each="taxon : ${taxonomies}">
+						<td th:text="${taxon.taxonomyId}"> </td>
+						<td th:text="${taxon.taxonomyName}" > </td>
+						<td th:text="${taxon.total}"> </td>
+						<td th:text="${taxon.associatedVertical}"> </td>
+					</tr>
+				
+				</tbody>
+		
+			</table>
+			
+			
+			
+		</section>
+
+
+
+
+			<div class="d-flex justify-content-start mt-3">
+				<div class="col-12 col-md-10">
+					<!-- Icon Boxes -->
+					<div class="card shadow">
+						<div class="row g-0 align-items-center">
+							<div class="col-md-4">
+								<img src="../../assets/img/pages/code.svg" alt="Web design illustration" class="card-img-top rounded-top">
+							</div>
+							
+						</div>
+					</div>
+					<!-- End of Icon Boxes -->
+				</div>
+			</div>        
+		</div>       
+	</main>
+
+
+<!-- Core -->
+<script src="../../vendor/@popperjs/core/dist/umd/popper.min.js"></script>
+<script src="/webjars/bootstrap/js/bootstrap.min.js"></script>
+<script src="/webjars/jquery/jquery.min.js"></script>
+
+
+<script src="../../vendor/headroom.js/dist/headroom.min.js"></script>
+<script src="../../vendor/smooth-scroll/dist/smooth-scroll.polyfills.min.js"></script>
+
+<!-- Vendor JS -->
+
+<!-- 
+<script src="/webjars/headroom.js/headroom.min.js"></script>
+<script src="/webjars/smooth-scroll/smooth-scroll.polyfills.min.js"></script>
+ -->
+
+
+
+<script src="../../vendor/vivus/dist/vivus.min.js"></script>
+
+<script src="/webjars/jquery/jquery.min.js"></script>
+
+
+<script src="../../vendor/countup.js/dist/countUp.umd.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/waypoints/4.0.1/jquery.waypoints.min.js" integrity="sha512-CEiA+78TpP9KAIPzqBvxUv8hy41jyI3f2uHi7DGp/Y/Ka973qgSdybNegWFciqh6GrN2UePx2KkflnQUbUhNIA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/lettering.js/0.7.0/jquery.lettering.min.js" integrity="sha512-9ex1Kp3S7uKHVZmQ44o5qPV6PnP8/kYp8IpUHLDJ+GZ/qpKAqGgEEH7rhYlM4pTOSs/WyHtPubN2UePKTnTSww==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script src="../../assets/js/jquery.textillate.js"></script>
+
+<!-- pixel JS -->
+<script src="../../assets/js/pixel.js"></script>
+
+<!-- custom sources -->
+<script src="../../assets/js/pixel-custom.js"></script>
+
+
+
+<script src="/webjars/jquery/jquery.min.js"></script>
+<script type="text/javascript" language="javascript" src="/webjars/datatables/js/jquery.dataTables.min.js"></script>
+<script type="text/javascript" language="javascript" src="/webjars/datatables/js/dataTables.bootstrap5.min.js"></script>
+<script type="text/javascript" language="javascript" src="/webjars/datatables-responsive/js/dataTables.responsive.min.js"></script>
+
+
+<script>
+
+
+
+</script>
+
+</body>
+
+</html>

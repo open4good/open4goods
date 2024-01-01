@@ -158,13 +158,13 @@ public class GoogleTaxonomyService {
 	 * @param taxonomyIds
 	 * @return
 	 */
-	public int selectDeepest( String language, List<Integer> taxonomyIds) {
+	public Integer selectDeepest( String language, List<Integer> taxonomyIds) {
 		
 		int deepest = -1;
 		int deepestSize = -1;
 		
 		
-		for (int i = 0; i < taxonomyIds.size(); i++) {
+		for (Integer i = 0; i < taxonomyIds.size(); i++) {
 			
 			int size = localizedTaxonomy.get(language).get(taxonomyIds.get(i)).size();
 			if (  size  > deepestSize) {
@@ -176,6 +176,17 @@ public class GoogleTaxonomyService {
 		return deepest;
 				
 	}
+	
+	/**
+	 * Get the FR taxonomy name from an id
+	 * @param taxonomyId
+	 * @return
+	 */
+	public List<String> getTaxonomyName(Integer taxonomyId) {		
+		return localizedTaxonomy.get("fr").get(taxonomyId);
+	}
+	
+	
 	
 	/**
 	 * Resolve the deepest category if from several one
@@ -211,5 +222,7 @@ public class GoogleTaxonomyService {
 	public void setFullCategoriesId(Map<String, Integer> fullCategoriesId) {
 		this.fullCategoriesId = fullCategoriesId;
 	}
+
+
 
 }
