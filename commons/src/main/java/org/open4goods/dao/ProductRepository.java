@@ -199,7 +199,11 @@ public class ProductRepository {
 
 		logger.info("Queuing single product : {}", p.gtin());
 
-		queue.add(p);
+		try {
+			queue.put(p);
+		} catch (InterruptedException e) {
+			logger.error("Cannot enqueue product {}",p,e);			
+		}
 
 	}
 
