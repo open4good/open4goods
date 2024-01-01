@@ -199,7 +199,11 @@
 <script src="../../vendor/@glidejs/glide/dist/glide.min.js"></script>
  --> 
 
+
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+ <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
+
+
 
 <script src="/webjars/jquery/jquery.min.js"></script>
 <script type="text/javascript" language="javascript" src="/webjars/datatables/js/jquery.dataTables.min.js"></script>
@@ -213,9 +217,45 @@
 <script src="../../assets/js/pixel.js"></script>
 <!-- custom sources -->
 <script src="../../assets/js/pixel-custom.js"></script>
-<script>
+
+
+<script th:inline="javascript">
+
+
 $(document).ready(function() {
 
+	// Getting price histories
+    const newPriceHistory = [[${product.price.newPricehistory}]].map(({
+    	  timestamp: x,
+    	  ...rest
+    	}) => ({
+    	  x,
+    	  ...rest
+    	})).map(({
+    	  price: y,
+    	  ...rest
+    	}) => ({
+    	  y,
+    	  ...rest
+    	}));
+
+	
+	// Getting price histories
+    const occasionPriceHistory = [[${product.price.occasionPricehistory}]].map(({
+    	  timestamp: x,
+    	  ...rest
+    	}) => ({
+    	  x,
+    	  ...rest
+    	})).map(({
+    	  price: y,
+    	  ...rest
+    	}) => ({
+    	  y,
+    	  ...rest
+    	}));
+	
+	
 	// Enable tooltips
   	$('[data-bs-toggle="tooltip"]').tooltip();
 
@@ -267,88 +307,68 @@ setTimeout(reversment.start(), 5000);
 
 
 
+// Price chart
+
+const ctx = document.getElementById('priceChart');
+var priceChart = new Chart(ctx, {
+	  type: 'line',
+	  data: {
+	    datasets: [{
+	      label: 'Prix neuf',
+	      data: newPriceHistory,               
+	      backgroundColor: 'transparent',
+	      borderColor: 'blue',
+	      borderWidth: 2,
+	      tension: 0.5
+	    },{
+		      label: 'Prix d\'occasion',
+		      data: occasionPriceHistory,               
+		      backgroundColor: 'transparent',
+		      borderColor: 'red',
+		      borderWidth: 2,
+		      tension: 0.5
+		    }
+	    
+	    
+	    
+	    ]
+	  },
+	  
+	  
+	  
+	  options: {
+	    scales: {
+	      x: {
+	        type: 'time',
+	        time: {
+	          unit: 'day',
+	          displayFormats: {
+	        	  quarter: 'MMM YYYY'
+	          },
+	          tooltipFormat: 'dd T'
+	        },
+	        title: {
+	          display: true,
+	          text: 'Date'
+	        }
+	      },
+	      y: {
+	        title: {
+	          display: true,
+	          text: 'Prix'
+	        }
+	      }
+	    }
+	  }
+	});
 
 
 
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-// Ecoscore radar chart
-
-
-						
-						const data = {
-						  labels: [
-						    'Eating',
-						    'Drinking',
-						    'Sleeping',
-						    'Designing',
-						    'Coding',
-						    'Cycling',
-						    'Running'
-						  ],
-						  datasets: [{
-						    label: 'My First Dataset',
-						    data: [65, 59, 90, 81, 56, 55, 40],
-						    fill: true,
-						    backgroundColor: 'rgba(255, 99, 132, 0.2)',
-						    borderColor: 'rgb(255, 99, 132)',
-						    pointBackgroundColor: 'rgb(255, 99, 132)',
-						    pointBorderColor: '#fff',
-						    pointHoverBackgroundColor: '#fff',
-						    pointHoverBorderColor: 'rgb(255, 99, 132)'
-						  }, {
-						    label: 'My Second Dataset',
-						    data: [28, 48, 40, 19, 96, 27, 100],
-						    fill: true,
-						    backgroundColor: 'rgba(54, 162, 235, 0.2)',
-						    borderColor: 'rgb(54, 162, 235)',
-						    pointBackgroundColor: 'rgb(54, 162, 235)',
-						    pointBorderColor: '#fff',
-						    pointHoverBackgroundColor: '#fff',
-						    pointHoverBorderColor: 'rgb(54, 162, 235)'
-						  }]
-						};
-						
-						
-						
-						const config = {
-						  type: 'radar',
-						  data: data,
-						  options: {
-						    elements: {
-						      line: {
-						        borderWidth: 3
-						      }
-						    }
-						  },
-						};
-						
-						
-						  const ctx = document.getElementById('radarScore');
-						
-						  new Chart(ctx, config);
-
-
-
-
-
-
-
-
-
-
+/**
+ * 
 
 // Price chart
 
@@ -369,13 +389,13 @@ setTimeout(reversment.start(), 5000);
     backgroundColor: Utils.transparentize(Utils.CHART_COLORS.red, 0.5),
     borderColor: Utils.CHART_COLORS.red,
     fill: false,
-    data: Utils.numbers(NUMBER_CFG),
+    data: 25,
   }, {
     label: 'My Second dataset',
     backgroundColor: Utils.transparentize(Utils.CHART_COLORS.blue, 0.5),
     borderColor: Utils.CHART_COLORS.blue,
     fill: false,
-    data: Utils.numbers(NUMBER_CFG),
+    data: 18,
   }, {
     label: 'Dataset with point data',
     backgroundColor: Utils.transparentize(Utils.CHART_COLORS.green, 0.5),
@@ -431,10 +451,9 @@ setTimeout(reversment.start(), 5000);
   },
 };
 						
-						
-						  const ctx2 = document.getElementById('priceChart');
-						
-						  new Chart(ctx2, config2);
+
+					 */						
+
 
 
 
