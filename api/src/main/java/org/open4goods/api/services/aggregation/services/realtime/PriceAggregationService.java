@@ -14,6 +14,8 @@ import org.open4goods.model.product.PriceHistory;
 import org.open4goods.model.product.Product;
 import org.open4goods.services.DataSourceConfigService;
 
+import com.google.common.collect.Sets;
+
 /**
  * This service compute price infos from DataFragments computations if not in
  * stock
@@ -108,6 +110,9 @@ public class PriceAggregationService extends AbstractRealTimeAggregationService 
 
 		// set Number of offers
 		aggregatedData.setOffersCount(reducedPrices.size());
+		
+		// Reseting prices (reducing)
+		aggregatedData.getPrice().setOffers(Sets.newHashSet(reducedPrices.values()));
 
 		// Computing / incrementing history
 		computePriceHistory(aggPrices, ProductState.OCCASION);
