@@ -283,6 +283,7 @@ public class ProductRepository {
 
 		if (null == result) {
 			// Fail, getting from elastic
+			logger.info("Cache miss, getting product {} from elastic", productId);
 			result = elasticsearchTemplate.get(productId, Product.class);
 
 			if (null == result) {
@@ -291,6 +292,8 @@ public class ProductRepository {
 
 			// found, adding it in redis cache
 			saveToRedis(result);
+		} else {
+			logger.info("Cache hit, got product {} from redis", productId);
 		}
 
 		return result;
