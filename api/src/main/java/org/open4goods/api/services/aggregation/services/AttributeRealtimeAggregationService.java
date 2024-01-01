@@ -437,10 +437,17 @@ public class AttributeRealtimeAggregationService extends AbstractRealTimeAggrega
 						// Removing the current brand in any case
 						output.getAlternativeBrands().removeIf(b -> b.getValue().equals(output.brand()));
 					}
+				} else if (key.equals(ReferentielKey.GTIN)) {
+					if (null != value && !existing.equals(value)) {
+						// If the same gtin but in a different UPC form
+						if (Long.valueOf(value).longValue() == Long.valueOf(existing).longValue()) {	
+							dedicatedLogger.info("Overiding GTIN from {} to {} ",existing, value);
+							output.getAttributes().getReferentielAttributes().put(ReferentielKey.GTIN, value);
+						} else {							
+							dedicatedLogger.info("Cannot overide GTIN from {} to {} ",existing, value);						
+						}
+					}
 				} 
-				
-				
-				
 				else {
 					dedicatedLogger.warn("Skipping referentiel attribute erasure for {}. Existing is {}, would have erased with {}",key,existing, value);
 				}
