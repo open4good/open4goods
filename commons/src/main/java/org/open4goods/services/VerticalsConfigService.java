@@ -16,8 +16,10 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 import org.open4goods.config.yml.ui.VerticalConfig;
+import org.open4goods.dao.ProductRepository;
 import org.open4goods.model.Localisable;
 import org.open4goods.model.constants.CacheConstants;
+import org.open4goods.model.dto.ExpandedTaxonomy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cache.annotation.Cacheable;
@@ -49,17 +51,27 @@ public class VerticalsConfigService {
 	
 	private final Map<String,VerticalConfig> categoriesToVertical = new ConcurrentHashMap<>();
 
-	private Map<String,VerticalConfig> verticalsByUrl = new HashMap<>();
+	private Map<String,VerticalConfig> byUrl = new HashMap<>();
+	
+	private Map<Integer,VerticalConfig> byTaxonomy = new HashMap<>();
+	
+	
 //	private Map<String,String> verticalUrlByLanguage = new HashMap<>();
 
 
 
 	private String verticalsFolder;
 
-	public VerticalsConfigService(SerialisationService serialisationService, String verticalsFolder) {
+	private ProductRepository productRepository;
+
+	private GoogleTaxonomyService googleTaxonomyService;
+
+	public VerticalsConfigService(SerialisationService serialisationService, String verticalsFolder, GoogleTaxonomyService googleTaxonomyService, ProductRepository productRepository) {
 		super();
 		this.serialisationService = serialisationService;
 		this.verticalsFolder = verticalsFolder;
+		this.googleTaxonomyService = googleTaxonomyService;
+		this.productRepository = productRepository;
 
 		// initial configs loads
 		loadConfigs();
@@ -98,7 +110,8 @@ public class VerticalsConfigService {
 		// Mapping url to i18n
 		getConfigsWithoutDefault().forEach(vc -> vc.getHomeUrl().forEach((key, value) -> {
 
-			verticalsByUrl.put(value, vc);
+			byUrl.put(value, vc);
+			byTaxonomy.put(vc.getTaxonomyId(), vc);
 //			verticalUrlByLanguage.put(key, value);
 		}));
 
@@ -201,7 +214,7 @@ public class VerticalsConfigService {
 	 * @return
 	 */
 	public VerticalConfig getVerticalForPath(String path) {
-		return verticalsByUrl.get(path);
+		return byUrl.get(path);
 	}
 
 	/**
@@ -240,7 +253,34 @@ public class VerticalsConfigService {
 		return ret;
 	}
 
+	/**
+	 * Return all expanded taxonomies, from the taxonomy service and from queryning on the store
+	 * @return
+	 */
+	@Cacheable(cacheNames = CacheConstants.ONE_DAY_LOCAL_CACHE_NAME)
+	public List<ExpandedTaxonomy> expandedTaxonomies() {
+		List<ExpandedTaxonomy> ret = new ArrayList<>();
+		productRepository.byTaxonomy().entrySet().forEach(t -> {
+            ExpandedTaxonomy et = new ExpandedTaxonomy();
+            et.setTaxonomyId(t.getKey());
+            et.setTaxonomyName(googleTaxonomyService.getTaxonomyName(t.getKey())+"");
+            et.setTotal(t.getValue());
+            et.setAssociatedVertical(getVerticalForTaxonomy(t.getKey()));
+            ret.add(et);
+        });
+		
+		return ret;
+	}
+	
+	/**
+	 * Return a vertical config for a given taxonomy id
+	 * @param key
+	 * @return
+	 */
 
+	public VerticalConfig getVerticalForTaxonomy(Integer key) {
+		return byTaxonomy.get(key);
+	}
 
 	/**
 	 * Return a config by it's Id
@@ -267,4 +307,5 @@ public class VerticalsConfigService {
 	public Map<String, VerticalConfig> getConfigs() {
 		return configs;
 	}
+	
 }

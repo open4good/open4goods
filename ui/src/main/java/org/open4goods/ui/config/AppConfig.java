@@ -13,6 +13,7 @@ import org.open4goods.model.product.Product;
 import org.open4goods.services.BrandService;
 import org.open4goods.services.DataSourceConfigService;
 import org.open4goods.services.EvaluationService;
+import org.open4goods.services.GoogleTaxonomyService;
 import org.open4goods.services.ImageMagickService;
 import org.open4goods.services.MailService;
 import org.open4goods.services.RecaptchaService;
@@ -191,8 +192,8 @@ public class AppConfig {
 
 	@Bean
 	@Autowired
-	VerticalsConfigService verticalConfigsService(SerialisationService serialisationService) throws IOException {
-		return new VerticalsConfigService( serialisationService,config.getVerticalsFolder());
+	VerticalsConfigService verticalConfigsService(SerialisationService serialisationService,  GoogleTaxonomyService googleTaxonomyService, ProductRepository productRepository) throws IOException {
+		return new VerticalsConfigService( serialisationService,config.getVerticalsFolder(), googleTaxonomyService, productRepository);
 	}
 
 	////////////////////////////////////

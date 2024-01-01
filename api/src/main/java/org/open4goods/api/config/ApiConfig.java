@@ -130,8 +130,8 @@ public class ApiConfig {
 	
 	@Bean
 	@Autowired
-	VerticalsConfigService verticalConfigsService(SerialisationService serialisationService) throws IOException {
-		return new VerticalsConfigService(serialisationService,apiProperties.getVerticalsFolder());
+	VerticalsConfigService verticalConfigsService(SerialisationService serialisationService,  GoogleTaxonomyService googleTaxonomyService, ProductRepository productRepository) throws IOException {
+		return new VerticalsConfigService(serialisationService,apiProperties.getVerticalsFolder(), googleTaxonomyService, productRepository);
 	}
 
 	

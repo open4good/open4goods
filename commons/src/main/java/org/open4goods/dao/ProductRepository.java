@@ -1,10 +1,14 @@
 package org.open4goods.dao;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.Map.Entry;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -13,17 +17,24 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.open4goods.config.yml.attributes.AttributeConfig;
 import org.open4goods.config.yml.ui.VerticalConfig;
 import org.open4goods.exceptions.ResourceNotFoundException;
 import org.open4goods.model.constants.CacheConstants;
 import org.open4goods.model.data.DataFragment;
+import org.open4goods.model.dto.NumericRangeFilter;
+import org.open4goods.model.dto.VerticalFilterTerm;
+import org.open4goods.model.dto.VerticalSearchResponse;
 import org.open4goods.model.product.Product;
+import org.open4goods.store.repository.ElasticProductRepository;
 import org.open4goods.store.repository.ProductIndexationWorker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.elasticsearch.client.elc.ElasticsearchAggregations;
 import org.springframework.data.elasticsearch.client.elc.NativeQuery;
 import org.springframework.data.elasticsearch.client.elc.NativeQueryBuilder;
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
@@ -33,8 +44,17 @@ import org.springframework.data.elasticsearch.core.SearchHits;
 import org.springframework.data.elasticsearch.core.mapping.IndexCoordinates;
 import org.springframework.data.elasticsearch.core.query.Criteria;
 import org.springframework.data.elasticsearch.core.query.CriteriaQuery;
+import org.springframework.data.elasticsearch.core.query.CriteriaQueryBuilder;
 import org.springframework.data.elasticsearch.core.query.Query;
 import org.springframework.data.redis.core.RedisOperations;
+
+import co.elastic.clients.elasticsearch._types.aggregations.Aggregation;
+import co.elastic.clients.elasticsearch._types.aggregations.LongTermsAggregate;
+import co.elastic.clients.elasticsearch._types.aggregations.LongTermsBucket;
+import co.elastic.clients.elasticsearch._types.aggregations.MaxAggregate;
+import co.elastic.clients.elasticsearch._types.aggregations.MinAggregate;
+import co.elastic.clients.elasticsearch._types.aggregations.StringTermsAggregate;
+import co.elastic.clients.elasticsearch._types.aggregations.StringTermsBucket;
 
 /**
  * The Elastic Data Access Object for products TODO : Could maintain the elastic
@@ -66,6 +86,10 @@ public class ProductRepository {
 
 	private @Autowired ElasticsearchOperations elasticsearchTemplate;
 
+	private @Autowired ElasticProductRepository elasticProductRepository;
+	
+	
+	
 	private @Autowired RedisOperations<String, Product> redisRepo;
 
 	public ProductRepository() {
@@ -325,17 +349,56 @@ public class ProductRepository {
 	}
 
 
-	@Cacheable(key = "#root.method.name", cacheNames = CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME)
+	@Cacheable( cacheNames = CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME)
 	public Long countMainIndex() {
 		return elasticsearchTemplate.count(Query.findAll(), current_index);
 	}
 
-	@Cacheable(key = "#root.method.name", cacheNames = CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME)
+	@Cacheable(cacheNames = CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME)
 	public Long countMainIndexHavingPrice() {
 		CriteriaQuery query = new CriteriaQuery(getValidDateQuery());
 		return elasticsearchTemplate.count(query, current_index);
 	}
 
+	
+	@Cacheable(cacheNames = CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME)
+	public Map<Integer, Long> byTaxonomy() {
+
+		// Setting the query
+		NativeQueryBuilder esQuery = new NativeQueryBuilder().withQuery(new CriteriaQuery( new Criteria("id").exists()));
+
+
+
+		// Adding standard aggregations
+		esQuery = esQuery
+				.withAggregation("taxonomy", 	Aggregation.of(a -> a.terms(ta -> ta.field("googleTaxonomyId").size(50000))  ))
+				;
+	
+		SearchHits<Product> results = search(esQuery.build(),ProductRepository.MAIN_INDEX_NAME);
+
+
+		// Handling aggregations results if relevant
+		//TODO(gof) : this cast should be avoided
+		ElasticsearchAggregations aggregations = (ElasticsearchAggregations)results.getAggregations();
+
+
+		///////
+		// Numeric aggregations
+		///////
+		LongTermsAggregate taxonomy = aggregations.get("taxonomy").aggregation().getAggregate().lterms();
+
+		Map<Integer, Long> ret = new HashMap<>();
+		for (LongTermsBucket b : taxonomy.buckets().array()) {
+			ret.put(new Long(b.key()).intValue(), b.docCount());
+		}
+ 		
+		
+		return ret;
+		
+	}
+	
+	
+	
 	/**
 	 *
 	 * @return Criteria representing the valid dates
@@ -364,10 +427,4 @@ public class ProductRepository {
 	public BlockingQueue<Product> getQueue() {
 		return queue;
 	}
-
-
-
-
-
-
 }

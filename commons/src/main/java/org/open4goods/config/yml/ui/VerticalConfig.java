@@ -38,6 +38,10 @@ public class VerticalConfig{
 	 */
 	private String id;
 
+	/**
+	 * The corresponding google taxonomy ID 
+	 */
+	private Integer taxonomyId;
 
 	/**
 	 * The custom pages names and associated templates for this vertical
@@ -608,6 +612,15 @@ public class VerticalConfig{
 		this.aiConfig = aiConfig;
 	}
 
+	public Integer getTaxonomyId() {
+		return taxonomyId;
+	}
+
+	public void setTaxonomyId(Integer taxonomyId) {
+		this.taxonomyId = taxonomyId;
+	}
+
+	
 
 
 
