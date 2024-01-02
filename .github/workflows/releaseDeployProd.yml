@@ -3,7 +3,7 @@ name: Create a release, publish the documentation, and deploy the production bin
 
 jobs:
   release:
-    name:release-deploy-prod
+    name: release-deploy-prod
     runs-on: ubuntu-latest
     steps:
     
