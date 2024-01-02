@@ -4,7 +4,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 
 @Configuration
-@Profile({"ic","prod"})
+@Profile({"beta","prod"})
 public class ApiConfigProd {
 
 
