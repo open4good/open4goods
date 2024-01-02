@@ -2,11 +2,11 @@
 # restart application with the latest artefacts version
 on: workflow_dispatch
     
-name: Restart applications on qualification environment
+name: Beta - Restart applications
 
 jobs:
   deploy:
-    name: publish-jars-beta
+    name: beta-publish-jars
     runs-on: self-hosted
 
     steps:

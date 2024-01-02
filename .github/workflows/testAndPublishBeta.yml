@@ -2,11 +2,11 @@
 
 on: [push, workflow_dispatch]
     
-name: Build, Test and publish on qualification environment
+name: Beta - Build, Test and publish
 
 jobs:
   deploy:
-    name: test-build-publish-beta
+    name: beta-test-build-publish
     runs-on: self-hosted
 
     steps:

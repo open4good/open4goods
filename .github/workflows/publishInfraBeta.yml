@@ -1,11 +1,11 @@
 # This workflow will trigger the remote ssh script to restart infrastructure with the latest artefacts version
 on: workflow_dispatch
     
-name: Publish latest infrastructure on qualification environment
+name: Beta - Publish latest infrastructure
 
 jobs:
   deploy:
-    name: publish-infra-beta
+    name: beta-publish-infra
     runs-on: self-hosted
 
     steps:
