@@ -35,7 +35,6 @@ jobs:
       - name: Build  Maven site
         run: mvn --batch-mode clean site site:stage scm-publish:publish-scm
         
-
       ############################################
       # Build the changelogs
       ###########################################   
