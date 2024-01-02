@@ -101,7 +101,7 @@ public class ProductRepository {
 		logger.info("Starting file queue consumer thread, with bulk page size of {} items", dequeueSize );
 				
 		for (int i = 0; i < workers; i++) {			
-			new Thread(new ProductIndexationWorker(this, dequeueSize, pauseDuration,"dequeue-worker-"+i)).start();
+			Thread.startVirtualThread((new ProductIndexationWorker(this, dequeueSize, pauseDuration,"dequeue-worker-"+i)));
 		}
 	}
 
