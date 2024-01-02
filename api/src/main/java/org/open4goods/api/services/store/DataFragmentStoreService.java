@@ -80,8 +80,8 @@ public class DataFragmentStoreService {
 //		
 		logger.info("Starting file queue consumer thread, with bulk page size of {} items", dequeueSize );
 //				
-		for (int i = 0; i < workers; i++) {			
-			new Thread(new DataFragmentAggregationWorker(this, dequeueSize, pauseDuration,"dequeue-worker-"+i)).start();
+		for (int i = 0; i < workers; i++) {					
+			Thread.startVirtualThread(new DataFragmentAggregationWorker(this, dequeueSize, pauseDuration,"dequeue-worker-"+i));
 		}
 		
 		
