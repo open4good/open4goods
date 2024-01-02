@@ -1,9 +1,9 @@
 on: workflow_dispatch
-name: Create a release, publish the documentation, and deploy the production binaries
+name: Prod - Create a release, publish the documentation, and deploy the binaries
 
 jobs:
   release:
-    name: release-deploy-prod
+    name: prod-release-deploy
     runs-on: ubuntu-latest
     steps:
     
