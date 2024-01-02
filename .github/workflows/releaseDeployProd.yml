@@ -33,8 +33,8 @@ jobs:
       # Build maven site
       ###########################################   
                       
-      - name: Build  Maven site
-        run: mvn --batch-mode clean site site:stage scm-publish:publish-scm
+#      - name: Build  Maven site
+#        run: mvn --batch-mode clean site site:stage scm-publish:publish-scm
         
       ############################################
       # Build the changelogs

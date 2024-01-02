@@ -2,7 +2,7 @@
 
 on: [push, workflow_dispatch]
     
-name: Build, Test and publish on beta.nudger.fr 
+name: Build, Test and publish on qualification environment
 
 jobs:
   deploy:
