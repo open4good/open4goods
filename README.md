@@ -43,7 +43,6 @@ The project will do its best to maximize community and user contributions, with 
 There are several ways to contribute.  
  * **Use it** ! By buying your products on official sites, you "create" money through the affiliation system, that allows to reverse the "by law" 20% environmental compensation. By using it you will also able to provide us some feedback  
  * **Speak about it** ! Communication will be the lack of this Odyssey, any kind of help is welcome. Talking about this the project to your granny or your dog could help us a lot.  
-  
  * **Feedback us** ! Ideas (philosophicals or pragmaticals ) are greatly welcome ! Allow us to get the truth (the user's one) with your enhancements, bug report.  
   
  
