@@ -2,19 +2,19 @@
 # restart application with the latest artefacts version
 on: workflow_dispatch
     
-name: Publish latest apps
+name: Restart applications on qualification environment
 
 jobs:
   deploy:
-    name: publish-jars
+    name: publish-jars-beta
     runs-on: self-hosted
 
     steps:
       - name: Publish via ssh
-        uses: appleboy/ssh-action@v0.1.10
+        uses: appleboy/ssh-action@v1.0.2
         with:
-          host: ${{ secrets.REMOTE_HOST }}
-          username: ${{ secrets.REMOTE_USER }}
+          host: ${{ secrets.REMOTE_BETA_HOST }}
+          username: ${{ secrets.REMOTE_BETA_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY}}
           script: sh /opt/open4goods/bin/publish-jars.sh
 

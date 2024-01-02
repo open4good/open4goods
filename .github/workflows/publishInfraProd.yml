@@ -2,16 +2,16 @@
 # restart infrastructure with the latest artefacts version
 on: workflow_dispatch
     
-name: Publish latest infrastructure 
+name: Publish latest infrastructure on production environment
 
 jobs:
   deploy:
-    name: publish-infra
+    name: publish-infra-prod
     runs-on: self-hosted
 
     steps:
       - name: Publish via ssh
-        uses: appleboy/ssh-action@v1.0.0
+        uses: appleboy/ssh-action@v1.0.2
         with:
           host: ${{ secrets.REMOTE_HOST }}
           username: ${{ secrets.REMOTE_USER }}
