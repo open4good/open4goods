@@ -1,6 +1,6 @@
 # This workflow will build, test and push the latest version on the beta environment.
 
-on: push
+on: [push, workflow_dispatch]
     
 name: Build, Test and publish on beta.nudger.fr 
 
