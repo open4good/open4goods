@@ -45,12 +45,6 @@
 		</dependency>
 
 		<dependency>
-			<groupId>org.open4goods</groupId>
-			<artifactId>aggregation</artifactId>
-			<version>${global.version}</version>
-		</dependency>
-
-		<dependency>
 			<groupId>com.talanlabs</groupId>
 			<artifactId>avatar-generator</artifactId>
 			<version>1.1.0</version>
