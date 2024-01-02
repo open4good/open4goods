@@ -13,7 +13,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import org.springframework.web.util.UrlPathHelper;
 
 @Configuration
-@Profile({"ic","prod"})
+@Profile({"beta","prod"})
 public class AppConfigProd {
 
 
