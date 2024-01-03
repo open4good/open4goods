@@ -59,7 +59,7 @@ jobs:
           fetchReleaseInformation: true
           configurationJson: |
             {
-              "template": "# 🥳 Welcome to this new version\nWe hope you will appreciate the following improvements, you can see the #{{TO_TAG}} release in action : <ul><li><a target='_blank' href='https://nudger.fr'>nudger.fr</a></li><li><a target='_blank' href='https://open4good.github.io/open4goods/'>documentation</a></li></ul>\n## Editions\n<ul><li><a href='#{{RELEASE_DIFF}}'>Changed files</a>  : **#{{CHANGED_FILES}}** </li><li>Commits : **#{{COMMITS}}** </li><li>additions : **#{{ADDITIONS}}**</li><li>deletions: **#{{DELETIONS}}**</li> </ul>\n This release covers #{{DAYS_SINCE}} day(s) (or night) of work, ending at #{{TO_TAG_DATE}}.\n# What's up ?\n  #{{CHANGELOG}}\n\n<details>\n<summary>Uncategorized</summary>\n\n#{{UNCATEGORIZED}}\n</details>",
+              "template": "# 🥳 Welcome to this new version\nWe hope you will appreciate the following improvements, you can see the #{{TO_TAG}} release in action : <ul><li><a target='_blank' href='https://nudger.fr'>nudger.fr</a></li><li><a target='_blank' href='https://open4good.github.io/open4goods/'>documentation</a></li></ul>\n## Editions\n<ul><li><a href='#{{RELEASE_DIFF}}'>Changed files</a>  : __#{{CHANGED_FILES}}__ </li><li>Commits : __#{{COMMITS}}__ </li><li>additions : __#{{ADDITIONS}}__</li><li>deletions: __#{{DELETIONS}}__</li> </ul>\n This release covers #{{DAYS_SINCE}} day(s) (or night) of work, ending at #{{TO_TAG_DATE}}.\n\n## What's up ?\n#{{CHANGELOG}}\n\n<details>\n<summary>Uncategorized</summary>\n\n#{{UNCATEGORIZED}}\n</details>",
               "pr_template": "##{{NUMBER}} - #{{TITLE}} (#{{AUTHOR}})",
               "custom_placeholders": [
                {
