@@ -59,7 +59,7 @@ jobs:
         with:
           configurationJson: |
             {
-              "template": "Our new version : \n\n #{{CHANGELOG}}\n\n<details>\n<summary>Uncategorized</summary>\n\n#{{UNCATEGORIZED}}\n</details>",
+              "template": "Proud to announce this new version ! \n You can access : <ul><li>The nudger website</li><li>The documentation</li></ul>  Our new version : \n\n #{{CHANGELOG}}\n\n<details>\n<summary>Uncategorized</summary>\n\n#{{UNCATEGORIZED}}\n</details>",
               "pr_template": "##{{NUMBER}} - #{{TITLE}}",
               "categories": [
                  {
@@ -81,15 +81,15 @@ jobs:
               ]
             }     
 
-          files: |
-            LICENSE
-            ./api/target/api-0.0.1-SNAPSHOT.jar
-            ./ui/target/ui-0.0.1-SNAPSHOT.jar
 
       - name: Create Release
         uses: mikepenz/action-gh-release@v0.2.0-a03 #softprops/action-gh-release
         with:
          body: ${{ steps.build_changelog.outputs.changelog }}
+         files: |
+            LICENSE
+            ./api/target/api-0.0.1-SNAPSHOT.jar
+            ./ui/target/ui-0.0.1-SNAPSHOT.jar
             
       ############################################
       # Deploy API to production server
@@ -142,18 +142,8 @@ jobs:
       - name: Upload pen4goods custom site
         uses: actions/upload-pages-artifact@v3
         with:	
-          name: o4gsite
-          path: '.'
+          path: './target/staging'
 
-
-      - name: Upload maven site
-        uses: actions/upload-pages-artifact@v3
-        with:	
-          # Upload entire repository
-          name: mavensite
-          path: '.'
-
-          
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
