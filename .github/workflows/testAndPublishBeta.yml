@@ -22,7 +22,7 @@ jobs:
       - name: "TODO2Issue"
         uses: "alstr/todo-to-issue-action@v4"
         with:
-          IDENTIFIERS: ISSUE
+          IDENTIFIERS: '[{"name": "ISSUE", "labels": ["Todo"]}]'
             
           
       ############################################
