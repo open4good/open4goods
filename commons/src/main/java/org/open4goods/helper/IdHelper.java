@@ -35,8 +35,7 @@ public class IdHelper {
 	 */
 	private static final String KEY = "that'sawonderfulkeyno??";
 
-	// ISSUE : test
-	// TODO : Test2
+
 	/**
 	 * Generates a resource hash
 	 *
@@ -46,6 +45,7 @@ public class IdHelper {
 	public static String generateResourceId(final String url) {
 		return FNV.hash64(url);
 	}
+	// ISSUE : test
 
 	/**
 	 * Sanitize (html unescape, space normalisations)
@@ -65,6 +65,8 @@ public class IdHelper {
 
 		return ret;
 	}
+
+	// TODO : test
 
 	/**
 	 * Extract brandUid from product name
