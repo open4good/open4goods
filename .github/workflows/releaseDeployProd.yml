@@ -72,24 +72,7 @@ jobs:
       - name: Create Release
         uses: mikepenz/action-gh-release@v0.2.0-a03 #softprops/action-gh-release
         with:
-          commitMode: true,
-          configurationJson: |
-            {
-              "template": "#{{CHANGELOG}}\n\n<details>\n<summary>Uncategorized</summary>\n\n#{{UNCATEGORIZED}}\n</details>",
-              "categories": [
-                {
-                    "title": "## 💬 Other",
-                    "labels": ["other"]
-                },
-                {
-                    "title": "## 📦 Dependencies",
-                    "labels": ["dependencies"]
-                }
-              ]
-            }        
-          tag_name: ${{ steps.tag.outputs.tag }}
-          files: |
-            LICENSE
+          body: ${{steps.github_release.outputs.changelog}}
 
       ############################################
       # Deploy API to production server
