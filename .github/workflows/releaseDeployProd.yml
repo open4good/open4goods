@@ -53,8 +53,7 @@ jobs:
                       
       - name: Build  Maven site
         run: mvn --batch-mode clean install site site:stage
-        
-                        
+                                
       ############################################
       # Build the changelogs
       ###########################################   
@@ -70,6 +69,7 @@ jobs:
       - name: Create Release
         uses: mikepenz/action-gh-release@v0.2.0-a03 #softprops/action-gh-release
         with:
+          commitMode: true,
           configurationJson: |
             {
               "template": "#{{CHANGELOG}}\n\n<details>\n<summary>Uncategorized</summary>\n\n#{{UNCATEGORIZED}}\n</details>",
