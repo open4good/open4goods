@@ -15,6 +15,15 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+
+      ############################################
+      # Install Java
+      ###########################################     
+      - name: "TODO to Issue"
+        uses: "alstr/todo-to-issue-action@v4"
+        with:
+          IDENTIFIERS: "ISSUE"
+          
       ############################################
       # Install Java
       ###########################################      
