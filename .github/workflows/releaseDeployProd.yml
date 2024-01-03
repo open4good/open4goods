@@ -16,7 +16,6 @@ concurrency:
   group: "pages"
   cancel-in-progress: false
   
-  
 jobs:
   release:
     if: startsWith(github.ref, 'refs/tags/')
@@ -59,7 +58,8 @@ jobs:
         with:
           configurationJson: |
             {
-              "template": "# Welcome to this new version 🥳\n We hope this improvements will make you happy. <ul><li>Changed files : #{{CHANGED_FILES}}</li><li>+ lines : #{{ADDITIONS}}</li><li>- lines : #{{DELETIONS}}</li><li>#{{RELEASE_DIFF}}</li> </ul>\n To see it in action : <ul><li><a target="_blank" href="https://nudger.fr">nudger.fr</a></li><li><a href="">documentation</a></li></ul> \n  # What's up ? \n\n  #{{CHANGELOG}}\n\n<details>\n<summary>Uncategorized</summary>\n\n#{{UNCATEGORIZED}}\n</details>",
+              "template": "<ul><li>Changed files : #{{CHANGED_FILES}}</li><li>+ lines : #{{ADDITIONS}}</li><li>- lines : #{{DELETIONS}}</li><li>#{{RELEASE_DIFF}}</li> </ul>\n To see it in action : <ul><li><a target="_blank" href="https://nudger.fr">nudger.fr</a></li><li>documentation</li></ul> \n What's up ? \n\n  #{{CHANGELOG}}\n\n<details>\n<summary>Uncategorized</summary>\n\n#{{UNCATEGORIZED}}\n</details>",
+ 
               "pr_template": "##{{NUMBER}} - #{{TITLE}} (#{{AUTHOR}})",
               "empty_template": "Nothing",
               
@@ -148,7 +148,7 @@ jobs:
       - name: Upload pen4goods custom site
         uses: actions/upload-pages-artifact@v3
         with:	
-          path: './target/staging'
+          path: './src/main/site/maven/'
 
       - name: Deploy to GitHub Pages
         id: deployment
