@@ -2,7 +2,7 @@
 # restart application with the latest artefacts version
 on: workflow_dispatch
     
-name: Prod - Restart applications
+name: ▶ Prod - Restart applications
 
 jobs:
   deploy:
