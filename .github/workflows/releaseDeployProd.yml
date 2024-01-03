@@ -58,6 +58,8 @@ jobs:
           TAG=v$(date -Iseconds | sed 's/[T:\+]/-/g')
           echo "$TAG"
           echo "tag=$TAG" >> $GITHUB_OUTPUT
+          git config user.name "GitHub Action"
+          git config user.email "nudger@nudger.com"
           git tag -a $TAG -m "Published version $TAG" ${GITHUB_SHA}
           git push origin $TAG
           
