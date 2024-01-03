@@ -1,8 +1,5 @@
-name: TEST RELEASE
-on:
-  push:
-    tags:
-      - '*'
+name: Release
+on: release
 
 # Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
 permissions:
