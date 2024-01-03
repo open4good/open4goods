@@ -36,7 +36,6 @@
 		<module>ui</module>
 	</modules>
 
-
 	<issueManagement>
 		<url>https://github.com/open4good/open4goods/issues</url>
 		<system>GitHub Issues</system>
