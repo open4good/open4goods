@@ -55,9 +55,9 @@ jobs:
       # Build the changelogs
       ###########################################   
        
-      - name: Build Changelog
-        id: github_release
-        uses: mikepenz/release-changelog-builder-action@v3
+#      - name: Build Changelog
+#        id: github_release
+#        uses: mikepenz/release-changelog-builder-action@v3
 
       ############################################
       # Tag the repository
