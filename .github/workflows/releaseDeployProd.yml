@@ -46,6 +46,24 @@ jobs:
 #        env:
 #          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+
+      ############################################
+      # Tag the repository
+      ###########################################  
+
+      - name: Tag the repository
+        id: tag
+        run: |
+          # See https://docs.github.com/en/get-started/using-git/dealing-with-special-characters-in-branch-and-tag-names
+          TAG=v$(date -Iseconds | sed 's/[T:\+]/-/g')
+          echo "$TAG"
+          echo "tag=$TAG" >> $GITHUB_OUTPUT
+          git tag -a $TAG -m "Published version $TAG" ${GITHUB_SHA}
+          git push origin $TAG
+          
+    
+    
+    
       ############################################
       # Create the release
       ###########################################  
@@ -54,6 +72,7 @@ jobs:
         uses: mikepenz/action-gh-release@v0.2.0-a03 #softprops/action-gh-release
         with:
           body: ${{steps.github_release.outputs.changelog}}
+          tag_name: ${{ steps.tag.outputs.tag }}
 #          files: |
 #            Release.txt
 #            LICENSE
