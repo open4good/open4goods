@@ -35,6 +35,8 @@ public class IdHelper {
 	 */
 	private static final String KEY = "that'sawonderfulkeyno??";
 
+	// ISSUE : test
+	// TODO : Test2
 	/**
 	 * Generates a resource hash
 	 *
