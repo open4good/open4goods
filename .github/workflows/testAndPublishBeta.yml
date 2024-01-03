@@ -5,7 +5,7 @@ on:
     branches:
       - 'main'
           
-name: Beta - Build, Test and publish
+name: 🔘 Beta - Build, Test and publish
 
 jobs:
   deploy:

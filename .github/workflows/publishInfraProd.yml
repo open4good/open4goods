@@ -2,7 +2,7 @@
 # restart infrastructure with the latest artefacts version
 on: workflow_dispatch
     
-name: Prod - Publish latest infrastructure
+name: ▶ Prod - Publish latest infrastructure
 
 jobs:
   deploy:
