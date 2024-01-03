@@ -19,10 +19,10 @@ jobs:
       ############################################
       # Install Java
       ###########################################     
-      - name: "TODO to Issue"
+      - name: "TODO2Issue"
         uses: "alstr/todo-to-issue-action@v4"
         with:
-          IDENTIFIERS: "ISSUE"
+          identifier: "ISSUE"
           
       ############################################
       # Install Java
