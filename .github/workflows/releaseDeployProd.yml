@@ -141,9 +141,9 @@ jobs:
         
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
-        with:	
+#        with:	
           # Upload entire repository
-          path: './target/staging'
+#          path: './target/staging'
 
       - name: Deploy to GitHub Pages
         id: deployment
