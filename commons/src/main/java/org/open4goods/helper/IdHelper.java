@@ -45,7 +45,7 @@ public class IdHelper {
 	public static String generateResourceId(final String url) {
 		return FNV.hash64(url);
 	}
-	// ISSUE : test
+	// ISSUE : test2
 
 	/**
 	 * Sanitize (html unescape, space normalisations)
