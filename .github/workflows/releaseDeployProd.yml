@@ -63,9 +63,7 @@ jobs:
       
       - name: "Build Changelog"
         uses: mikepenz/release-changelog-builder-action@v4.1.0
-        with:
-          commitMode: true
-          configuration: "changelog.json"
+
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}      
       
@@ -120,18 +118,16 @@ jobs:
       # Github pages deployment 
       ###########################################   
           
-      - name: Setup Pages
-        uses: actions/configure-pages@v4
-        
+#      - name: Setup Pages
+#        uses: actions/configure-pages@v4       
 #      - name: Upload artifact
 #        uses: actions/upload-pages-artifact@v3
 #        with:	
 #          # Upload entire repository
 #          path: './target/staging'
-
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
+#      - name: Deploy to GitHub Pages
+#        id: deployment
+#        uses: actions/deploy-pages@v4
 
 
           
