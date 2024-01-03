@@ -1,6 +1,8 @@
-on: workflow_dispatch
-name: Prod - Create a release, publish the documentation, and deploy the binaries
-
+name: TEST RELEASE
+on:
+  push:
+    tags:
+      - '*'
 
 # Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
 permissions:
@@ -17,8 +19,9 @@ concurrency:
   
 jobs:
   release:
+    if: startsWith(github.ref, 'refs/tags/')
     environment:
-      name: github-pages
+      name: test-github-pages
       url: ${{ steps.deployment.outputs.page_url }} 
     name: prod-release-deploy
     runs-on: ubuntu-latest
@@ -51,32 +54,14 @@ jobs:
       - name: Build  Maven site
         run: mvn --batch-mode clean install site site:stage
         
+                        
       ############################################
       # Build the changelogs
       ###########################################   
        
-#      - name: Build Changelog
-#        id: github_release
-#        uses: mikepenz/release-changelog-builder-action@v3
-
-      ############################################
-      # Tag the repository
-      ###########################################  
-
-      - name: Tag the repository
-        id: tag
-        run: |
-          # See https://docs.github.com/en/get-started/using-git/dealing-with-special-characters-in-branch-and-tag-names
-          TAG=v$(date -Iseconds | sed 's/[T:\+]/-/g')
-          echo "$TAG"
-          echo "tag=$TAG" >> $GITHUB_OUTPUT
-          git config user.name "Nudger bot"
-          git config user.email "nudger@nudger.com"
-          git tag -a $TAG -m "Published version $TAG" ${GITHUB_SHA}
-          git push origin $TAG
-          
-    
-    
+      - name: Build Changelog
+        id: github_release
+        uses: mikepenz/release-changelog-builder-action@v3    
     
       ############################################
       # Create the release
@@ -85,6 +70,20 @@ jobs:
       - name: Create Release
         uses: mikepenz/action-gh-release@v0.2.0-a03 #softprops/action-gh-release
         with:
+          configurationJson: |
+            {
+              "template": "#{{CHANGELOG}}\n\n<details>\n<summary>Uncategorized</summary>\n\n#{{UNCATEGORIZED}}\n</details>",
+              "categories": [
+                {
+                    "title": "## 💬 Other",
+                    "labels": ["other"]
+                },
+                {
+                    "title": "## 📦 Dependencies",
+                    "labels": ["dependencies"]
+                }
+              ]
+            }        
           body: ${{steps.github_release.outputs.changelog}}
           tag_name: ${{ steps.tag.outputs.tag }}
           files: |
