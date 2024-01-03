@@ -76,8 +76,8 @@ jobs:
 #          tag_name: ${{ steps.tag.outputs.tag }}
           files: |
             LICENSE
-            api/target/api-0.0.1-SNAPSHOT.jar
-            ui/target/ui-0.0.1-SNAPSHOT.jar
+            /api/target/api-0.0.1-SNAPSHOT.jar
+            /ui/target/ui-0.0.1-SNAPSHOT.jar
             
       ############################################
       # Deploy API to production server
