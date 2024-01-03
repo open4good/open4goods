@@ -138,6 +138,13 @@ jobs:
         
       - name: Setup github Pages
         uses: actions/configure-pages@v4    
+
+      - name: Group of log lines
+        run: |            
+            echo "Copying the site to the staging directory"
+            echo "cp src/main/site/* target/staging"
+            
+            
           
       - name: Upload pen4goods custom site
         uses: actions/upload-pages-artifact@v3
