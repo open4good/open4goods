@@ -56,11 +56,12 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}      
         with:
-          fetchReleaseInformation: true
           configurationJson: |
             {
               "template": "# Welcome to this new version 🥳\n We hope you will appreciate the following improvements, covering the period from #{{FROM_TAG_DATE}} to #{{TO_TAG_DATE}} (#{{DAYS_SINCE}}). You can see this release in action : <ul><li><a target='_blank' href='https://nudger.fr'>nudger.fr</a></li><li><a target='_blank' href='https://open4good.github.io/open4goods/'>documentation</a></li></ul> \n   ## Editions \n <ul><li>Changed files : ** #{{CHANGED_FILES}} ** </li><li>Commits : ** #{{COMMITS}} ** </li><li>additions : ** #{{ADDITIONS}} **</li><li>deletions: ** #{{DELETIONS}} **</li><li>  #{{RELEASE_DIFF}}</li> </ul>\n # What's up ? \n\n  #{{CHANGELOG}}\n\n<details>\n<summary>Uncategorized</summary>\n\n#{{UNCATEGORIZED}}\n</details>",
               "pr_template": "##{{NUMBER}} - #{{TITLE}} (#{{AUTHOR}})",
+
+             
               "empty_template": "Nothing",
               
               "categories": [
