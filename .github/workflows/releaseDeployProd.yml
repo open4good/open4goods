@@ -62,7 +62,7 @@ jobs:
       
       
       - name: "Build Changelog"
-        uses: mikepenz/release-changelog-builder-action@v4.1.0}
+        uses: mikepenz/release-changelog-builder-action@v4.1.0
         with:
           configuration: "changelog.json"
         env:
