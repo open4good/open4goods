@@ -59,8 +59,10 @@ jobs:
         with:
           configurationJson: |
             {
-              "template": "Proud to announce this new version ! \n You can access : <ul><li>The nudger website</li><li>The documentation</li></ul>  Our new version : \n\n #{{CHANGELOG}}\n\n<details>\n<summary>Uncategorized</summary>\n\n#{{UNCATEGORIZED}}\n</details>",
-              "pr_template": "##{{NUMBER}} - #{{TITLE}}",
+              "template": "Proud to announce this new version ! It covers the evolutions on the platform for the period going from #{{FROM_TAG_DATE}} to #{{TO_TAG_DATE}}. You can consult the full diff here : #{{RELEASE_DIFF}}  . Changed files : #{{CHANGED_FILES}}, #{{ADDITIONS}}, #{{DELETIONS}}  \n You can access : <ul><li>The nudger website</li><li>The documentation</li></ul>  Our new version : \n\n #{{CHANGELOG}}\n\n<details>\n<summary>Uncategorized</summary>\n\n#{{UNCATEGORIZED}}\n</details>",
+              "pr_template": "##{{NUMBER}} - #{{TITLE}} (#{{AUTHOR}})",
+              "empty_template": "Nothing",
+              
               "categories": [
                  {
                     "title": "## <h1> 😃 Features</h1>",
@@ -139,10 +141,8 @@ jobs:
       - name: Setup github Pages
         uses: actions/configure-pages@v4    
 
-      - name: Group of log lines
-        run: |            
-            echo "Copying the site to the staging directory"
-            echo "cp src/main/site/* target/staging"
+      - name: Merge site
+        run: cp src/main/site/* target/staging
             
             
           
