@@ -403,7 +403,7 @@ public class CsvDatasourceFetchingService extends DatasourceFetchingService {
 							}							
 
 //							TODO : remove also from conf, not used
-//							ISSUE : remove also from conf, not used
+
 							
 							// Checking inclusions					
 //							boolean skip = false;
