@@ -59,7 +59,7 @@ jobs:
         with:
           configurationJson: |
             {
-              "template": "Proud to announce this new version ! It covers the evolutions on the platform for the period going from #{{FROM_TAG_DATE}} to #{{TO_TAG_DATE}}. You can consult the full diff here : #{{RELEASE_DIFF}}  . Changed files : #{{CHANGED_FILES}}, #{{ADDITIONS}}, #{{DELETIONS}}  \n You can access : <ul><li>The nudger website</li><li>The documentation</li></ul>  Our new version : \n\n #{{CHANGELOG}}\n\n<details>\n<summary>Uncategorized</summary>\n\n#{{UNCATEGORIZED}}\n</details>",
+              "template": "# Welcome to this new version 🥳\n We hope this improvements will make you happy. <ul><li>Changed files : #{{CHANGED_FILES}}</li><li>+ lines : #{{ADDITIONS}}</li><li>- lines : #{{DELETIONS}}</li><li>#{{RELEASE_DIFF}}</li> </ul>\n To see it in action : <ul><li><a target="_blank" href="https://nudger.fr">nudger.fr</a></li><li><a href="">documentation</a></li></ul>  Our new version : \n\n #{{CHANGELOG}}\n\n<details>\n<summary>Uncategorized</summary>\n\n#{{UNCATEGORIZED}}\n</details>",
               "pr_template": "##{{NUMBER}} - #{{TITLE}} (#{{AUTHOR}})",
               "empty_template": "Nothing",
               
@@ -69,7 +69,7 @@ jobs:
                     "labels": ["feature"]
                 },
                 {
-                    "title": "## 🐜 Bugfixes",
+                    "title": "## 🐜 Bug Fixes",
                     "labels": ["bug"]
                 },
                 {
@@ -142,9 +142,8 @@ jobs:
         uses: actions/configure-pages@v4    
 
       - name: Merge site
-        run: cp src/main/site/* target/staging
-            
-            
+        run: cp -r target/staging/* src/main/site/maven/
+                        
           
       - name: Upload pen4goods custom site
         uses: actions/upload-pages-artifact@v3
