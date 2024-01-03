@@ -41,15 +41,15 @@ jobs:
       # Build jars
       ###########################################   
                       
-      - name: Build jars with Maven
-        run: mvn --batch-mode --update-snapshots install -Dmaven.test.skip=true
+#      - name: Build jars with Maven
+#        run: mvn --batch-mode --update-snapshots install -Dmaven.test.skip=true
         
       ############################################
-      # Build maven site
+      # Build jars + maven site
       ###########################################   
                       
       - name: Build  Maven site
-        run: mvn --batch-mode clean site
+        run: mvn --batch-mode clean install site site:stage
         
       ############################################
       # Build the changelogs
