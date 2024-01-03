@@ -126,8 +126,8 @@ jobs:
       - name: copy maven site to staged
         uses: canastro/copy-file-action@master
         with:
-          source: "./target/staging"
-          target: "./src/main/site"
+          source: "./target/staging/*"
+          target: "./src/main/site/maven"
         
       - name: Setup github Pages
         uses: actions/configure-pages@v4    
