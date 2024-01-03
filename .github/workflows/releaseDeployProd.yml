@@ -40,20 +40,20 @@ jobs:
       # Build the changelogs
       ###########################################   
        
-      - name: Build Changelog
-        id: github_release
-        uses: mikepenz/release-changelog-builder-action@v3
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#      - name: Build Changelog
+#        id: github_release
+#        uses: mikepenz/release-changelog-builder-action@v3
+#        env:
+#          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       ############################################
       # Create the release
       ###########################################  
       
-      - name: Create Release
-        uses: mikepenz/action-gh-release@v0.2.0-a03 #softprops/action-gh-release
-        with:
-          body: ${{steps.github_release.outputs.changelog}}
+#      - name: Create Release
+#        uses: mikepenz/action-gh-release@v0.2.0-a03 #softprops/action-gh-release
+#        with:
+#          body: ${{steps.github_release.outputs.changelog}}
           
           
 
@@ -97,8 +97,4 @@ jobs:
           username: ${{ secrets.REMOTE_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY}}
           script: sh /opt/open4goods/bin/publish-jars.sh
-          
-          
-       
-          
           
