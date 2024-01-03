@@ -403,7 +403,9 @@ public class CsvDatasourceFetchingService extends DatasourceFetchingService {
 							}							
 
 //							TODO : remove also from conf, not used
-//							// Checking inclusions					
+//							ISSUE : remove also from conf, not used
+							
+							// Checking inclusions					
 //							boolean skip = false;
 //							for (Entry<String, String> entry : config.getInclude().entrySet()) {
 //								String val = getFromCsvRow(line, entry.getKey());
