@@ -127,7 +127,7 @@ jobs:
         uses: actions/upload-pages-artifact@v3
         with:	
           name: o4gsite
-          path: '/src/main/site/maven'
+          path: '/src/main/site/'
 
 
       - name: Upload open4goods custom site
