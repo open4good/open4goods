@@ -1,7 +1,10 @@
 # This workflow will build, test and push the latest version on the beta environment.
 
-on: [push, workflow_dispatch]
-    
+on: 
+  push:
+    branches:
+      - 'main'
+          
 name: Beta - Build, Test and publish
 
 jobs:
