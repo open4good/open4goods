@@ -37,16 +37,28 @@ jobs:
         uses: mikepenz/release-changelog-builder-action@v4.1.0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}      
+        with:
+          configurationJson: |
+            {
+              "template": "#{{steps.tag.outputs.tag}} #{{CHANGELOG}}\n\n<details>\n<summary>Uncategorized</summary>\n\n#{{UNCATEGORIZED}}\n</details>",
+              "categories": [
+                {
+                    "title": "## 💬 Other",
+                    "labels": ["other"]
+                },
+                {
+                    "title": "## 📦 Dependencies",
+                    "labels": ["dependencies"]
+                }
+              ]
+            }     
+
+          files: |
+            LICENSE
 
       - name: Create Release
         uses: mikepenz/action-gh-release@v0.2.0-a03 #softprops/action-gh-release
 
-        with:
-          configuration: "changelog.json"        
-#          body: ${{steps.build_changelog.outputs.changelog}}
-#          tag_name: ${{ steps.tag.outputs.tag }}
-          files: |
-            LICENSE
 
 
 
