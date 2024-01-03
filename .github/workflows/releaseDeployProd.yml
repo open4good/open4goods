@@ -119,24 +119,24 @@ jobs:
       ############################################
       # Github pages deployment 
       ###########################################   
-
-
-
-
-      - name: copy maven site to staged
-        uses: canastro/copy-file-action@master
-        with:
-          source: "target/staging/*"
-          target: "./src/main/site/maven"
         
       - name: Setup github Pages
         uses: actions/configure-pages@v4    
           
+      - name: Upload maven site
+        uses: actions/upload-pages-artifact@v3
+        with:	
+          name: o4gsite
+          path: '/src/main/site/maven'
+
+
       - name: Upload open4goods custom site
         uses: actions/upload-pages-artifact@v3
         with:	
           # Upload entire repository
-          path: './src/main/site'
+          name: mavensite
+          path: '/taget/staging'
+
           
       - name: Deploy to GitHub Pages
         id: deployment
