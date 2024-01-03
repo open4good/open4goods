@@ -36,7 +36,7 @@ public class AwinCatalogService {
 
 	@Scheduled(initialDelay = 0, fixedRate = 1000 * 3600 * 24)
 	public void loadCatalog() {
-
+//		ISSUE : Test that issue
 		try {
 			logger.info("Loading CSV catalog");
 
