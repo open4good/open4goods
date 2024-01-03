@@ -59,7 +59,8 @@ jobs:
         with:
           configurationJson: |
             {
-              "template": "This new version engage #{{CHANGELOG}}\n\n<details>\n<summary>Uncategorized</summary>\n\n#{{UNCATEGORIZED}}\n</details>",
+              "template": "Our new version : \n\n #{{CHANGELOG}}\n\n<details>\n<summary>Uncategorized</summary>\n\n#{{UNCATEGORIZED}}\n</details>",
+              "pr_template": "##{{NUMBER}} - #{{TITLE}}",
               "categories": [
                  {
                     "title": "## <h1> 😃 Features</h1>",
@@ -142,7 +143,7 @@ jobs:
         uses: actions/upload-pages-artifact@v3
         with:	
           name: o4gsite
-          path: '/src/main/site'
+          path: '.'
 
 
       - name: Upload maven site
@@ -150,7 +151,7 @@ jobs:
         with:	
           # Upload entire repository
           name: mavensite
-          path: '/target/staging'
+          path: '.'
 
           
       - name: Deploy to GitHub Pages
