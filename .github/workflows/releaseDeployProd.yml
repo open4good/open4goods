@@ -64,11 +64,19 @@ jobs:
         with:
           configurationJson: |
             {
-              "template": "#{{CHANGELOG}}\n\n<details>\n<summary>Uncategorized</summary>\n\n#{{UNCATEGORIZED}}\n</details>",
+              "template": "This new version engage #{{CHANGELOG}}\n\n<details>\n<summary>Uncategorized</summary>\n\n#{{UNCATEGORIZED}}\n</details>",
               "categories": [
                  {
-                    "title": "## 💬 Other",
-                    "labels": ["other"]
+                    "title": "## 💬 Features",
+                    "labels": ["feature"]
+                },
+                {
+                    "title": "## 💬 Bugfixes",
+                    "labels": ["bug"]
+                },
+                {
+                    "title": "## 💬 Documentation",
+                    "labels": ["documentation"]
                 },
                 {
                     "title": "## 📦 Dependencies",
