@@ -72,8 +72,8 @@ jobs:
 #          tag_name: ${{ steps.tag.outputs.tag }}
           files: |
             LICENSE
-            /api/target/api-0.0.1-SNAPSHOT.jar
-            /ui/target/ui-0.0.1-SNAPSHOT.jar
+            ./api/target/api-0.0.1-SNAPSHOT.jar
+            ./ui/target/ui-0.0.1-SNAPSHOT.jar
             
       ############################################
       # Deploy API to production server
@@ -119,14 +119,18 @@ jobs:
       ############################################
       # Github pages deployment 
       ###########################################   
-          
+
+
+
+
+      - name: copy maven site to staged
+        uses: canastro/copy-file-action@master
+        with:
+          source: "./target/staging"
+          target: "./src/main/site"
+        
       - name: Setup github Pages
         uses: actions/configure-pages@v4    
-           
-      - name: Upload maven site 
-        uses: actions/upload-pages-artifact@v3
-        with:	
-          path: './target/staging'
           
       - name: Upload open4goods custom site
         uses: actions/upload-pages-artifact@v3
