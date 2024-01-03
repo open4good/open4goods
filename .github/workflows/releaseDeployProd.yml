@@ -70,9 +70,15 @@ jobs:
       
       - name: Create Release
         uses: mikepenz/action-gh-release@v0.2.0-a03 #softprops/action-gh-release
+
         with:
           body: ${{steps.github_release.outputs.changelog}}
-
+#          tag_name: ${{ steps.tag.outputs.tag }}
+          files: |
+            LICENSE
+            api/target/api-0.0.1-SNAPSHOT.jar
+            ui/target/ui-0.0.1-SNAPSHOT.jar
+            
       ############################################
       # Deploy API to production server
       ###########################################   
