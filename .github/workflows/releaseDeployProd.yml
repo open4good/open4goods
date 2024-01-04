@@ -29,10 +29,9 @@ jobs:
  
     
       ############################################
-      # Create the release with changelog
-      ###########################################  
-
-            
+      # Create the release with changelog,
+      # PR Oriented
+      ###########################################    
       - name: "Build Changelog"
         id: build_changelog
         uses: mikepenz/release-changelog-builder-action@v4.1.0
@@ -80,6 +79,11 @@ jobs:
             }     
 
 
+      ############################################
+      # Create the release with changelog,
+      # push Oriented
+      ###########################################    
+
       - name: "Build Changelog push oriented"
         id: build_changelog_push
         uses: mikepenz/release-changelog-builder-action@v4.1.0
@@ -91,7 +95,7 @@ jobs:
          commitMode: true
          configurationJson: |
             {
-              "template": "## Commits\n#{{UNCATEGORIZED}}",
+              "template": "# 🙈 All the commits\n#{{UNCATEGORIZED}}",
               "pr_template": "#{{TITLE}} (#{{AUTHOR}})",
              
               "empty_template": "Nothing",
@@ -99,20 +103,22 @@ jobs:
               "categories": []
             }     
 
+      ############################################
+      # Merge the backlogs
+      ###########################################    
 
       - name: Merge site
         run: cat PUSH-CHANGELOG.txt >> PR-CHANGELOG.txt          
     
-    
+      ############################################
+      # Create the release
+      ###########################################    
 
       - name: Create Release
         uses: mikepenz/action-gh-release@v0.2.0-a03 #softprops/action-gh-release
         with:
-         body: ${{ steps.build_changelog.outputs.changelog }}
          body_path: ${{ github.workspace }}/PR-CHANGELOG.txt
+         body: ${{ steps.build_changelog.outputs.changelog }}
 
-      
-
-
-          
-          
+         
+ 
