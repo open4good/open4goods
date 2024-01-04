@@ -17,12 +17,12 @@ jobs:
 
 
       ############################################
-      # Install Java
+      # TODO 2 Issue
       ###########################################     
       - name: "TODO2Issue"
         uses: "alstr/todo-to-issue-action@v4"
         with:
-          IDENTIFIERS: '[{"name": "ISSUE", "labels": ["Todo"]}]'
+          IDENTIFIERS: '[{"name": "ISSUE", "labels": ["codeTodo"]}]'
             
           
       ############################################
@@ -81,8 +81,4 @@ jobs:
           username: ${{ secrets.REMOTE_BETA_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY}}
           script: sh /opt/open4goods/bin/publish-jars.sh
-                      
-
-                      
-
-                                    
+                                                 
