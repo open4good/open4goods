@@ -32,13 +32,66 @@ jobs:
       # Create the release with changelog
       ###########################################  
 
+            
       - name: "Build Changelog"
         id: build_changelog
         uses: mikepenz/release-changelog-builder-action@v4.1.0
         env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}      
+        with:
+          fetchReleaseInformation: true
+          configurationJson: |
+            {
+              "template": "# 🥳 Welcome to this new version !\nWe hope you will appreciate the following improvements, you may want to see the <b>#{{TO_TAG}}</b> release in action here : <ul><li><a target='_blank' href='https://nudger.fr'>nudger.fr</a></li><li><a target='_blank' href='https://open4good.github.io/open4goods/'>documentation</a></li></ul>\n## Editions\n<ul><li><a href='#{{RELEASE_DIFF}}'>Changed files</a>  : <b>#{{CHANGED_FILES}}</b> </li><li>Commits : <b>#{{COMMITS}}</b> </li><li>Additions : <b>#{{ADDITIONS}}</b></li><li>Deletions : <b>#{{DELETIONS}}</b></li> </ul>\n This release <b>covers #{{DAYS_SINCE}} day</b> (or night) of work, starting the #{{FROM_TAG_DATE}} and ending at #{{TO_TAG_DATE}}.\n\n## What's up ?\n#{{CHANGELOG}}\n\n<details>\n<summary>Uncategorized</summary>\n\n#{{UNCATEGORIZED}}\n</details>",
+              "pr_template": "##{{NUMBER}} - #{{TITLE}} (#{{AUTHOR}})",
+              "custom_placeholders": [
+               {
+                 "name": "EPIC",
+                 "source": "BODY",
+                 "transformer": {
+                   "pattern": "[\\S\\s]*?(https:\\/\\/corp\\.atlassian\\.net\\/browse\\/EPIC-.{2,4})[\\S\\s]*",
+                   "target": "- $1"
+                 }
+             }
+             
+             ],
+             
+              "empty_template": "Nothing",
+              
+              "categories": [
+                 {
+                    "title": "## 😃 Features",
+                    "labels": ["feature"]
+                },
+                {
+                    "title": "## 🐜 Bug Fixes",
+                    "labels": ["bug"]
+                },
+                {
+                    "title": "## 💬 Documentation",
+                    "labels": ["documentation"]
+                },
+                {
+                    "title": "## 📦 Dependencies",
+                    "labels": ["dependencies"]
+                }
+              ]
+            }     
+
+
+
+      - name: "Build Changelog push oriented"
+        id: build_changelog_push
+        uses: mikepenz/release-changelog-builder-action@v4.1.0
+        env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}   
         with:
-          commitMode: true
+         fetchReleaseInformation: true
+         commitMode: true
+         
+         
+         
+         
     
     
 
