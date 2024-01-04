@@ -33,6 +33,7 @@ jobs:
       ###########################################  
 
       - name: Build Changelog
+        id: build_changelog_push
         uses: https://github.com/mikepenz/release-changelog-builder-action@v4.1.0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -45,7 +46,7 @@ jobs:
       - name: Create Release
         uses: mikepenz/action-gh-release@v0.2.0-a03 #softprops/action-gh-release
         with:
-         body: ${{ steps.build_changelog.outputs.changelog }}
+         body: ${{ steps.build_changelog_push.outputs.changelog }}
 
 
       
