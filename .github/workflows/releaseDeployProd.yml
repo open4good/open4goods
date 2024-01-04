@@ -38,7 +38,6 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          fetchReleaseInformation: true
           commitMode: true
     
     
@@ -47,7 +46,7 @@ jobs:
         uses: mikepenz/action-gh-release@v0.2.0-a03 #softprops/action-gh-release
         with:
          body: ${{ steps.build_changelog_push.outputs.changelog }}
-
+#         body_path: ${{ github.workspace }}-CHANGELOG.txt
 
       
 
