@@ -11,22 +11,17 @@
 			   <img class="mt-4"  width="350px" th:alt="'Ecoscore : ' + ${product.ecoscore.letter()}" th:title="'éco-score : ' + ${product.ecoscore.letter()}" th:src="'/icons/ecoscore/scoring-'+${product.ecoscore.letter()}+'.png'">
 			</div-->
 			<div>						
-				<div th:each="score : ${product.realScores()}" class="progress-wrapper">
-					
-					<div class="progress-info">
-						<span><img height="50" th:src="'/icons/ecoscore/'+${score.letter()}+'.png'"></span>
-						<span  class="h4 help-pointer progress-tooltip" data-bs-toggle="tooltip" data-bs-placement="top" th:title="#{'ecoscore.' +${score.name}+'.tooltip'(${score.absValue()}, ${score.relValue()}, ${product.attributes.aggregatedAttributes.get(score.name)})}" th:classappend="'bg-'+${score.colorClassName()}" th:text="#{'score-'+${score.name}}"></span>
-						<div class="progress-percentage">
-							<!-- 
-							<span th:if="${score.relativValue}" th:text="${score.relativValue*20}+'%'"></span>
-							 -->
+			
+			<img class="mb-4"  width="350px" th:alt="'Ecoscore : ' + ${product.ecoscore.letter()}" th:title="'éco-score : ' + ${product.ecoscore.letter()}" th:src="'/icons/ecoscore/scoring-'+${product.ecoscore.letter()}+'.png'">
+			
+			
+			
+		
+						<div id="markerEcoscore" class="col-sm-12 col-md-12 col-lg-12 mb-3">
+								<th:block th:insert="~{inc/product-ecoscore.html}"></th:block>
 						</div>
-					</div>
-					<div class="progress">
-						<div class="progress-bar" th:classappend="'bg-'+${score.colorClassName()}" role="progressbar"
-							  th:attrappend="aria-valuenow = ${score.percent()}, style='width: '+${score.percent()}+'%;'" aria-valuemin="0" aria-valuemax="100"></div>
-					</div>
-				</div>
+		
+		
 			</div>
 		</div>
 
