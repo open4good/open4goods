@@ -273,13 +273,13 @@ h6[class^="h"] {
 
 /* PAGES */
 
-/*.home-page > main.bg-gray-200 {
+.home-page > main.bg-gray-200 {
 	background-color: #fff !important;
 }
 
 .home-page > main.bg-gray-200 > section.bg-white{
 	background-color: #f1efe7 !important;
-}*/
+}
 
 /* CUSTOM COLOR NUDGER */
 
