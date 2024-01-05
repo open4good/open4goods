@@ -1,0 +1,27 @@
+<table th:id="${offersId}" class="table table-striped" style="width: 100%">
+	<thead>
+		<tr>
+			<th>Marchand</th>
+			<th>Prix</th>
+		</tr>
+	</thead>
+	<tbody>
+	
+		<th:block  th:each="offer , stats: ${offers}">
+			<tr th:data-token="${offer.affiliationToken}" th:data-compensation="${offer.compensation}"  th:class =" ${stats.first} ? 'selected' : ''">
+				<td data-toggle="tooltip" data-placement="top" th:title="${offer.offerName}" nowrap>
+					<img height="16" width="16" class="me-2" th:src="'/icon/'+${offer.datasourceName}" th:title="'icône ' + ${offer.shortDataSourceName()}">  
+				
+					<span>
+						 <span th:text="${offer.datasourceName}"></span>
+					</span>
+				
+				</td>
+				<td><span th:text="${offer.price}"></span> <span th:text="#{'symbol.'+${offer.currency}}"></span></td>
+			</tr>
+		
+		</th:block>
+	
+	</tbody>
+
+</table>
