@@ -1,5 +1,4 @@
 <div class="table-responsive table-caracteristics-fs mt-4" th:if="${product.attributes.aggregatedAttributes.size()} > 0">
-	<h6 class="h6 bg-white position-relative"><span>Caractéristiques principales</span></h6>
 	<table class="table">
 		<th:block th:each="attribute : ${product.attributes.aggregatedAttributes.values()}">
 			<tr>
