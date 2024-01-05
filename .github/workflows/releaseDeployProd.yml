@@ -133,10 +133,10 @@ jobs:
             ./api/target/api-0.0.1-SNAPSHOT.jar
             ./ui/target/ui-0.0.1-SNAPSHOT.jar
             ./target/staging/taglist/taglist.xml
-            ./api/target/site/jacoco/jacoco.csv
-            ./ui/target/site/jacoco/jacoco.csv
-            ./commons/target/site/jacoco/jacoco.csv
-            ./crawler/target/site/jacoco/jacoco.csv
+#            ./api/target/site/jacoco/jacoco.csv
+#            ./ui/target/site/jacoco/jacoco.csv
+#            ./commons/target/site/jacoco/jacoco.csv
+#            ./crawler/target/site/jacoco/jacoco.csv
             
       ############################################
       # Deploy API to production server
