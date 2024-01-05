@@ -15,6 +15,7 @@
                 <div class="col-12 col-lg-12">
                     <div class="row justify-content-center ">
                         <div class="col-12 col-md-6">
+                        
                             <div th:if="${product.aiDescriptions.get('global-description')}" class="row mt-5 mt-lg-0 px-3">
                                 <!-- Icon Boxes -->
                                 <div id="compensation-carbone" class="card shadow border-gray-300">
@@ -28,28 +29,60 @@
                                 </div>
                                 <!-- End of Icon Boxes -->
                             </div>
+                            
+                            
 
-
-                            <div class="row mt-5 mt-lg-0 px-3">
+                            
+                            
+                           <div class="row mt-5 mt-lg-0 px-3">
                                 <!-- Icon Boxes -->
                                 <div  class="card shadow mt-3 border-gray-300">
                                     <div class="card-body text-center p-4 p-lg-5">
                                         <img src="../../assets/img/pages/design.svg" alt="Web design illustration" class="image-md mb-4">
-                                        <h2  class="h4 mb-2">Evolution des prix</h2>
+                                        <h2  class="h4 mb-2">Caracteristiques</h2>
                                         <span  class="h5 text-light "></span>
                                         
                                         <div>
-                                        		 <canvas id="priceChart"></canvas>
+											<!--/* Attributes */-->				
+											<th:block th:insert="~{inc/product-attributes.html}"></th:block>
                                         </div>
                                     </div>
                                 </div>
                                 <!-- End of Icon Boxes -->
                             </div>
+                            
+                            
+                            
+                        
+
+
+
+                           
+                            
+                        
 
 
                         </div>
                         <div class="col-12 col-md-6 mt-lg-5">
 
+                         <div class="row mt-5 mt-lg-0 px-3">
+                                <!-- Icon Boxes -->
+                                <div  class="card shadow mt-3 border-gray-300">
+                                    <div class="card-body text-center p-4 p-lg-5">
+                                        <img src="../../assets/img/pages/design.svg" alt="Web design illustration" class="image-md mb-4">
+                                        <h2  class="h4 mb-2">Fiche d'identité</h2>
+                                        <span  class="h5 text-light "></span>
+                                        
+                                        <div>
+				 							<!-- Identity -->
+											<th:block th:insert="~{inc/product-referentiel-attributes.html}"></th:block>
+
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- End of Icon Boxes -->
+                            </div>
+                        
 
                                 <!-- Icon Boxes -->
                                 <div th:if="${product.aiDescriptions.get('ecological-description')}" id="evaluation-ecologique" class="card shadow border-gray-300 mt-3">
