@@ -31,6 +31,9 @@
 	<!-- CSS -->
 	<link rel="stylesheet" type="text/css" href="/webjars/datatables/css/dataTables.bootstrap5.min.css">
 	<link rel="stylesheet" type="text/css" href="/webjars/datatables-responsive/css/responsive.dataTables.min.css">
+	<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/select/1.7.0/css/select.dataTables.min.css">
+	<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/buttons/2.4.2/css/buttons.dataTables.min.css">
+
 
 
 
@@ -67,19 +70,6 @@
 							
        				<!--/* Header */-->				
 					<th:block th:insert="~{inc/product-header.html}"></th:block>
-
-
-					<div class="row" th:if="${null != product.bestPrice()}">			
-						<div id="markerInfosProduits" class="col-sm-12 col-md-12 col-lg-6 mb-3">
-							<!-- Identity -->
-							<th:block th:insert="~{inc/product-referentiel-attributes.html}"></th:block>
-
-							<!--/* Attributes */-->				
-							<th:block th:insert="~{inc/product-attributes.html}"></th:block>
-						</div>
-		
-
-					</div>	
 				</div>
 
 				
@@ -102,7 +92,9 @@
              
   				 <!--/* Product all prices */-->
 				 <div id="markerPrices">
-					 <th:block th:insert="~{inc/product-all-prices.html}"></th:block>
+					 <!-- 
+						  <th:block th:insert="~{inc/product-all-prices.html}"></th:block>
+					  -->
 				 </div>
   				 
 				 <div class="row mt-3">
@@ -217,9 +209,81 @@
 <script th:inline="javascript">
 
 
+
+var reversment;
+function initTable (tableId) {
+	
+
+	tableNew = $(tableId).DataTable({
+			searching: false, 
+			paging: false,
+			info: false,
+		    "order": [ [ 1, 'asc' ]]
+	}			
+	);	
+	
+	tableNew.on('click', 'tbody tr', (e) => {
+	    let classList = e.currentTarget.classList;
+	 	
+	    token = $(e.currentTarget).attr('data-token');
+	    compensation = $(e.currentTarget).attr('data-compensation');
+	    
+	    $("#token").val(token);
+
+	    var countUpUpdateoptions = {
+//	    		   startVal: $("#countup-reversment").attr("data-max"),
+	    		   duration: 1,
+	    		   useEasing : false,
+	    		   useGrouping : false,
+	    		   separator : ',',
+	    		   decimal : '.',
+	    		   decimalPlaces: 2,
+	    		   prefix : '',
+	    		   suffix : ''
+	    		 };
+//	    alert($("#countup-reversment").attr("data-max"));
+	    
+	  
+	    $("#countup-reversment").attr("data-max", compensation);
+	    reversment.update(compensation);
+	    
+	    
+	    
+
+	    	tableNew.rows('.selected').nodes().each((row) => row.classList.remove('selected'));
+	        classList.add('selected');
+	    
+	});
+	
+	
+	
+	
+}
+
+
 $(document).ready(function() {
 
+	/////////////////////////////////	
+	// CountUp
+	/////////////////////////////////
+	 var countUpoptions = {
+	   duration: 3,
+	   useEasing : false,
+	   useGrouping : false,
+	   separator : ',',
+	   decimal : '.',
+	   decimalPlaces: 2,
+	   prefix : '',
+	   suffix : ''
+	 };
+
+
+	  reversment = new countUp.CountUp("countup-reversment", $("#countup-reversment").attr("data-max"), countUpoptions);
+	 setTimeout(reversment.start(), 5000);
+		
+	/////////////////////////////////
 	// Getting price histories
+	/////////////////////////////////
     const newPriceHistory = [[${product.price.newPricehistory}]].map(({
     	  timestamp: x,
     	  ...rest
@@ -234,8 +298,6 @@ $(document).ready(function() {
     	  ...rest
     	}));
 
-	
-	// Getting price histories
     const occasionPriceHistory = [[${product.price.occasionPricehistory}]].map(({
     	  timestamp: x,
     	  ...rest
@@ -251,25 +313,23 @@ $(document).ready(function() {
     	}));
 	
 	
-	// Enable tooltips
-  	$('[data-bs-toggle="tooltip"]').tooltip();
+	/////////////////////////////////
+	// Price datatables
+	/////////////////////////////////
+		
+	if (($("#offresOccasion")).length) {
+		initTable('#offresOccasion');
+	}
+	
+	if (($("#offresNeuves")).length) {
+		initTable('#offresNeuves');
+		
+	}
+	
 
-	// Responsive datatables
-	if (($("#offersTableOccasion")).length) {
-		$('#offersTableOccasion').DataTable({
-				responsive: true		
-		}			
-		);		
-	}
-	
-	if (($("#offersTableNew")).length) {
-		$('#offersTableNew').DataTable({
-				responsive: true		
-		}			
-		);		
-	}
-	
-	
+	/////////////////////////////////
+	// Attributes datatables
+	/////////////////////////////////	
 	
 	if ($("#allAttributes").length) {
 		$('#allAttributes').DataTable({
@@ -277,33 +337,27 @@ $(document).ready(function() {
 		});
 	}
 
-
-// Countup on reversement
-
-// CountUp
-
-var options = {
-  duration: 3,
-  useEasing : false,
-  useGrouping : false,
-  separator : ',',
-  decimal : '.',
-  decimalPlaces: 2,
-  prefix : '',
-  suffix : ''
-};
-
-
-var reversment = new countUp.CountUp("countup-reversment", $("#countup-reversment").attr("data-max"), options);
-setTimeout(reversment.start(), 5000);
+	$('#pills-new-tab').on("click", function(){
+		token = $("#offresNeuves>tbody>tr:first").attr('data-token');	
+		$("#token").val(token);	    
+	});
+  
+	$('#pills-occasion-tab').on("click", function(){
+		token = $("#offresOccasion>tbody>tr:first").attr('data-token');
+		alert(token);		
+		$("#token").val(token);	    
+	});
+	
+	/////////////////////////////////
+	// Enable tooltips
+	/////////////////////////////////	
+  	$('[data-bs-toggle="tooltip"]').tooltip();
 
 
 
-
-
-
-// Price chart
-
+	/////////////////////////////////
+	// Price chart
+	/////////////////////////////////
 const ctx = document.getElementById('priceChart');
 var priceChart = new Chart(ctx, {
 	  type: 'line',
@@ -360,94 +414,6 @@ var priceChart = new Chart(ctx, {
 
 
 
-
-
-/**
- * 
-
-// Price chart
-
-
-						
-						const data2 = {
- labels: [ // Date Objects
-    Utils.newDate(0),
-    Utils.newDate(1),
-    Utils.newDate(2),
-    Utils.newDate(3),
-    Utils.newDate(4),
-    Utils.newDate(5),
-    Utils.newDate(6)
-  ],
-  datasets: [{
-    label: 'My First dataset',
-    backgroundColor: Utils.transparentize(Utils.CHART_COLORS.red, 0.5),
-    borderColor: Utils.CHART_COLORS.red,
-    fill: false,
-    data: 25,
-  }, {
-    label: 'My Second dataset',
-    backgroundColor: Utils.transparentize(Utils.CHART_COLORS.blue, 0.5),
-    borderColor: Utils.CHART_COLORS.blue,
-    fill: false,
-    data: 18,
-  }, {
-    label: 'Dataset with point data',
-    backgroundColor: Utils.transparentize(Utils.CHART_COLORS.green, 0.5),
-    borderColor: Utils.CHART_COLORS.green,
-    fill: false,
-    data: [{
-      x: Utils.newDateString(0),
-      y: Utils.rand(0, 100)
-    }, {
-      x: Utils.newDateString(5),
-      y: Utils.rand(0, 100)
-    }, {
-      x: Utils.newDateString(7),
-      y: Utils.rand(0, 100)
-    }, {
-      x: Utils.newDateString(15),
-      y: Utils.rand(0, 100)
-    }],
-  }]
-						};
-						
-						
-						
-					const config2 = {
-  type: 'line',
-  data: data2,
-  options: {
-    plugins: {
-      title: {
-        text: 'Chart.js Time Scale',
-        display: true
-      }
-    },
-    scales: {
-      x: {
-        type: 'time',
-        time: {
-          // Luxon format string
-          tooltipFormat: 'DD T'
-        },
-        title: {
-          display: true,
-          text: 'Date'
-        }
-      },
-      y: {
-        title: {
-          display: true,
-          text: 'value'
-        }
-      }
-    },
-  },
-};
-						
-
-					 */						
 
 
 
