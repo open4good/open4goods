@@ -51,16 +51,10 @@
 
         <div class="section section-lg pt-5">
             <div class="container-fluid">
-				<th:block th:if="${editor}">
-					<input th:if="${product.names.manualName}" size="50" type="text" name="productTitle" id="productTitle" th:value="${product.names.manualName}">
-					<input th:unless="${product.names.manualName}" size="50" type="text" name="productTitle" id="productTitle" th:value="${product.names.shortestOfferName()}">
-				</th:block>
+	
 				
-				<th:block th:unless="${editor}">
-					<h1 class="h1 title text-uppercase text-center" th:if="${product.names.manualName}" th:text="${product.names.manualName}"></h1>	
-					<h1  class="h1 title text-uppercase text-center" th:unless="${product.names.manualName}" th:text="${product.names.shortestOfferName()}"></h1>					
-				</th:block>
-
+		<h1 class="h1 title text-uppercase text-center" th:text="${product.names.manualName}"></h1>	
+	
 				<div class="card shadow p-4">
 				
 					<th:block th:if="${editor}">

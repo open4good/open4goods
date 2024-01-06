@@ -109,7 +109,7 @@ public class ProductController extends AbstractUiController {
 		
 		if (null != product && !StringUtils.isEmpty(product.getVertical())) {
 			// TODO : I18n
-			String vPath = verticalConfigService.getConfigById(product.getVertical()).get().getBaseUrl(Locale.FRANCE); 
+			String vPath = verticalConfigService.getConfigById(product.getVertical()).getBaseUrl(Locale.FRANCE); 
 			ModelAndView mv = new ModelAndView("redirect:/"  + vPath+ "/"+product.getNames().getName());
 			mv.setStatus(HttpStatus.MOVED_PERMANENTLY);				
 			return mv;			
@@ -230,9 +230,6 @@ public class ProductController extends AbstractUiController {
 		} catch (ResourceNotFoundException e) {
 			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Produit " + request.getServletPath() + " introuvable !");
 		}
-
-		// Updating
-		data.getNames().setManualName(productTitle);
 
 		Description description = new Description();
 		//TODO(i18n)
