@@ -460,9 +460,6 @@ public class CsvDatasourceFetchingService extends DatasourceFetchingService {
 					
 					dedicatedLogger.info("End csv fetching for {}:{}. {} imported, {} validations failed, {} excluded, {} errors ", dsConfName, url, okItems, validationFailedItems, excludedItems, errorItems);
 
-					// Saving stats 
-					stats.terminate();					
-					csvIndexationRepository.save(stats);
 					
 					
 					dedicatedLogger.info("Removing fetched CSV file at {}", destFile);
@@ -473,12 +470,19 @@ public class CsvDatasourceFetchingService extends DatasourceFetchingService {
 				} catch (final Exception e) {
 					dedicatedLogger.error("CSV fetching aborted : {}:{} ",dsConfName ,url,e);
 					dedicatedLogger.info("End csv fetching for {}{}. {} imported, {} validations failed, {} excluded, {} errors ", dsConfName, url,  okItems, validationFailedItems, excludedItems, errorItems);
-
 				} 
+
+				// Saving stats 
+				stats.terminate();					
+				csvIndexationRepository.save(stats);
 			}
 			// Calling the finished to collect stats
 			finished(stats().get(dsConfName), dsProperties);
 
+			
+
+			
+			
 			if (null != crawler) {
 				dedicatedLogger.info("Terminating the CSV direct crawl controller for {}", dsConfName);
 				controler.shutdown();
