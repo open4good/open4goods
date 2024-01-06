@@ -183,7 +183,10 @@ public class VerticalsConfigService {
 	 * @throws IOException
 	 */
 	@Cacheable(cacheNames = CacheConstants.FOREVER_LOCAL_CACHE_NAME)
+	// ISSUE : Performance issue here, cache as a unique hash of categories
+	//labels:bug,perf
 	public VerticalConfig getVerticalForCategories(Set<String> categories) {
+		
 		System.out.println("NOT CACHED");
 
 		VerticalConfig vc = null;
@@ -288,14 +291,34 @@ public class VerticalsConfigService {
 	 * @param verticalName
 	 * @return
 	 */
-	public Optional<VerticalConfig> getConfigById(String verticalName) {
-		return Optional.of(configs.get(verticalName));
+	public VerticalConfig getConfigById(String verticalName) {
+		if (null == verticalName) {
+			return null;
+		} else {			
+			return configs.get(verticalName);
+		}
 	}
 
+	/**
+	 * Return a config by it's Id, or the default one if not found
+	 * @param vertical
+	 * @return
+	 */
+	@Cacheable(cacheNames = CacheConstants.ONE_DAY_LOCAL_CACHE_NAME)
+	public VerticalConfig getConfigByIdOrDefault(String vertical) {
+		// Getting the config for the category, if any
+		VerticalConfig vConf = getConfigById(vertical);
+		
+		if (null == vConf) {
+			vConf = getDefaultConfig();
+		}
+		return vConf;
+	}
+	
 
 	/**
 	 *
-	 * @return all confifs, except the _default and the "all" one
+	 * @return all configs, except the _default and the "all" one
 	 */
 	public Set<VerticalConfig>  getConfigsWithoutDefault() {
 		return getConfigs().values().stream().filter(e -> (!e.getId().equals("all")) ).collect(Collectors.toSet());
@@ -307,5 +330,5 @@ public class VerticalsConfigService {
 	public Map<String, VerticalConfig> getConfigs() {
 		return configs;
 	}
-	
+
 }

@@ -31,7 +31,7 @@ public class UnmappedAttributeCleaningBatchAggregationService extends AbstractBa
 		
 		try {
 			
-			AttributesConfig attributesConfig = verticalConfigService.getConfigById(product.getVertical() == null ? "all" : product.getVertical() ).get().getAttributesConfig() ;
+			AttributesConfig attributesConfig = verticalConfigService.getConfigById(product.getVertical() == null ? "all" : product.getVertical() ).getAttributesConfig() ;
 
 			// Adding the list of "to be removed" attributes
 			Set<String> toRemoveFromUnmatched = new HashSet<>(attributesConfig.getExclusions());

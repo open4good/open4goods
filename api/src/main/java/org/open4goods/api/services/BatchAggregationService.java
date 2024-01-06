@@ -6,6 +6,7 @@ import java.util.List;
 
 import org.open4goods.api.config.yml.ApiProperties;
 import org.open4goods.api.services.aggregation.AbstractAggregationService;
+import org.open4goods.api.services.aggregation.AbstractBatchAggregationService;
 import org.open4goods.api.services.aggregation.aggregator.RealTimeAggregator;
 import org.open4goods.api.services.aggregation.aggregator.SanitisationBatchedAggregator;
 import org.open4goods.api.services.aggregation.aggregator.ScoringBatchedAggregator;
@@ -16,8 +17,10 @@ import org.open4goods.api.services.aggregation.services.batch.scores.Brand2Score
 import org.open4goods.api.services.aggregation.services.batch.scores.CleanScoreAggregationService;
 import org.open4goods.api.services.aggregation.services.batch.scores.DataCompletion2ScoreAggregationService;
 import org.open4goods.api.services.aggregation.services.batch.scores.EcoScoreAggregationService;
+import org.open4goods.api.services.aggregation.services.realtime.NamesAggregationService;
 import org.open4goods.config.yml.ui.VerticalConfig;
 import org.open4goods.dao.ProductRepository;
+import org.open4goods.model.product.Product;
 import org.open4goods.services.BarcodeValidationService;
 import org.open4goods.services.BrandService;
 import org.open4goods.services.DataSourceConfigService;
@@ -91,7 +94,7 @@ public class BatchAggregationService  {
 		this.barcodeValidationService = barcodeValidationService;
 		this.brandService = brandService;
 
-		aggregator = getScoringAggregator(configService.getConfigById(VerticalsConfigService.MAIN_VERTICAL_NAME).get());
+		aggregator = getScoringAggregator(configService.getConfigById(VerticalsConfigService.MAIN_VERTICAL_NAME));
 	}
 
 
@@ -155,6 +158,14 @@ public class BatchAggregationService  {
 		
 		services.add(new UnmappedAttributeCleaningBatchAggregationService(apiProperties.logsFolder(), verticalConfigService, apiProperties.isDedicatedLoggerToConsole()));
 
+		services.add(new AbstractBatchAggregationService(apiProperties.logsFolder(), apiProperties.isDedicatedLoggerToConsole()) {
+
+			private NamesAggregationService nameAggregationService = new NamesAggregationService(apiProperties.logsFolder(), apiProperties.isDedicatedLoggerToConsole(), verticalConfigService, evaluationService);
+			@Override
+			public void onProduct(Product data) {
+				data = nameAggregationService.productHandling(data);
+			}
+		});
 
 		final SanitisationBatchedAggregator ret = new SanitisationBatchedAggregator(services);
 
