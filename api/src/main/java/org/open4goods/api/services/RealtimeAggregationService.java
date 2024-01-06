@@ -94,7 +94,7 @@ public class RealtimeAggregationService {
 		this.barcodeValidationService = barcodeValidationService;
 		this.taxonomyService = taxonomyService;
 
-		aggregator = getAggregator(configService.getConfigById(VerticalsConfigService.MAIN_VERTICAL_NAME).get());
+		aggregator = getAggregator(configService.getConfigById(VerticalsConfigService.MAIN_VERTICAL_NAME));
 
 
 		// Calling aggregator.BEFORE
@@ -141,7 +141,7 @@ public class RealtimeAggregationService {
 		services.add(new AttributeRealtimeAggregationService(verticalConfigService, brandService, apiProperties.logsFolder(), apiProperties.isDedicatedLoggerToConsole()));
 
 
-		services.add(new NamesAggregationService(apiProperties.logsFolder(), apiProperties.isDedicatedLoggerToConsole()));
+		services.add(new NamesAggregationService(apiProperties.logsFolder(), apiProperties.isDedicatedLoggerToConsole(), verticalConfigService, evaluationService));
 
 		//		services.add(new CategoryService(apiProperties.logsFolder(), taxonomyService));
 

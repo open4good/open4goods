@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 import org.open4goods.config.yml.CommentsAggregationConfig;
 import org.open4goods.config.yml.attributes.AiConfig;
 import org.open4goods.config.yml.attributes.AttributeConfig;
+import org.open4goods.config.yml.attributes.NamesConfig;
 import org.open4goods.model.Localisable;
 import org.open4goods.model.constants.CacheConstants;
 import org.open4goods.model.constants.UrlConstants;
@@ -43,6 +44,14 @@ public class VerticalConfig{
 	 */
 	private Integer taxonomyId;
 
+	
+	/**
+	 * The custom pages names and associated templates for this vertical
+	 */
+	@JsonMerge
+	private List<NamesConfig> namesConfig = new ArrayList<>();
+	
+	
 	/**
 	 * The custom pages names and associated templates for this vertical
 	 */
@@ -618,6 +627,14 @@ public class VerticalConfig{
 
 	public void setTaxonomyId(Integer taxonomyId) {
 		this.taxonomyId = taxonomyId;
+	}
+
+	public List<NamesConfig> getNamesConfig() {
+		return namesConfig;
+	}
+
+	public void setNamesConfig(List<NamesConfig> namesConfig) {
+		this.namesConfig = namesConfig;
 	}
 
 	

@@ -77,7 +77,7 @@ public class BatchController {
 	public String fullUpdateFromName( @RequestParam @NotBlank final String verticalConfig ) throws InvalidParameterException, JsonParseException, JsonMappingException, IOException{
 		
 		// This is initial submission, batching the products to update catégories				
-		batchService.batchScore(service.getConfigById(verticalConfig).orElse(null));		
+		batchService.batchScore(service.getConfigById(verticalConfig));		
 		
 		return "done";
 	}
