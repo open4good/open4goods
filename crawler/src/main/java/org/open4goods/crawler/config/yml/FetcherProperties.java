@@ -75,7 +75,7 @@ public class FetcherProperties {
 
 
 	/** The max number of running data fetcher **/
-	private Integer concurrentFetcherTask=3;
+	private Integer concurrentFetcherTask=1;
 
 	/**
 	 * The default crawl4j configuration that will be applied to the crawlers
