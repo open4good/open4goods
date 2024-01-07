@@ -13,8 +13,8 @@ jobs:
       - name: Publish via ssh
         uses: appleboy/ssh-action@v1.0.2
         with:
-          host: ${{ secrets.REMOTE_BETA_HOST }}
-          username: ${{ secrets.REMOTE_BETA_USER }}
+          host: ${{ secrets.REMOTE_HOST }}
+          username: ${{ secrets.REMOTE_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY}}
           script: sh /opt/open4goods/bin/publish-jars.sh
 
