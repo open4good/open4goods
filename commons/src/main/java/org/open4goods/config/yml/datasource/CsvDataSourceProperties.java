@@ -1,5 +1,6 @@
 package org.open4goods.config.yml.datasource;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -23,19 +24,12 @@ public class CsvDataSourceProperties {
 	 */
 	private String testHeaders;
 
+
 	
-	/**
-	 * In an awin datasource, the awin Advertiser Name
-	 */
-	private String awinEntry;
-	
-	
-	@NotNull
-	@NotEmpty
 	/**
 	 * For datasourceregression tests, the conditions to satisfy
 	 */
-	private List<TestCsvLine> testDatas;
+	private List<TestCsvLine> testDatas = new ArrayList<>();
 
 	/**
 	 * csvSeparator
@@ -58,15 +52,6 @@ public class CsvDataSourceProperties {
 	 */
 	private String csvEncoding="UTF8";
 
-
-	/**
-	 * If true, will use libreoffice headless to sanitize the CSV file
-	 */
-	private Boolean csvSanitisation=false;
-
-
-
-
 	/**
 	 * If defined, only columns (keys) having one of the values will be handled
 	 */
@@ -83,6 +68,12 @@ public class CsvDataSourceProperties {
 	 */
 	private Boolean ziped = false;
 
+	
+	/**
+	 * If true, means the data is in GZ format
+	 */
+	private Boolean gzip = false;
+	
 	/**
 	 * Column name containing the url of the product (can be null if affiliatedUrl
 	 * is empty)
@@ -109,7 +100,7 @@ public class CsvDataSourceProperties {
 	/**
 	 * If set, those tokens will be replaced in affiliation url's
 	 */
-	protected Map<String, String> affiliatedUrlReplacementTokens;
+	protected Map<String, String> affiliatedUrlReplacementTokens = new HashMap<>();
 
 	/**
 	 * If set, the definitive url will be the extraction of this parameter name in
@@ -125,22 +116,22 @@ public class CsvDataSourceProperties {
 	/**
 	 * Column name indicating the productCategory
 	 */
-	protected List<String> productTags;
+	protected List<String> productTags = new ArrayList<>();
 
 	/**
 	 * If true, all columns of this datasource will ba added as attributes
 	 */
-	protected Boolean importAllAttributes = false;
+	protected Boolean importAllAttributes = true;
 
 	/**
 	 * Column name containing the price
 	 */
-	protected String price;
+	protected Set<String> price;
 
 	/**
 	 * The map of column names by referentiel attributes
 	 */
-	protected Map<ReferentielKey, String> referentiel = new HashMap<>();
+	protected Map<ReferentielKey, Set<String>> referentiel = new HashMap<>();
 
 	/**
 	 * A mapping of CSV cells (by colname) / attribute
@@ -182,7 +173,7 @@ public class CsvDataSourceProperties {
 	/**
 	 * Column name containing the availlability
 	 */
-	protected String inStock;
+	protected Set<String> inStock;
 
 	/**
 	 * Column name containing the quantity in stock
@@ -207,7 +198,7 @@ public class CsvDataSourceProperties {
 	/**
 	 * Column name that contains product state
 	 **/
-	protected String productState;
+	protected Set<String> productState;
 
 	/**
 	 * Column name(s) containing the descriptions
@@ -276,13 +267,6 @@ public class CsvDataSourceProperties {
 		this.datasourceUrls = datasourceUrls;
 	}
 
-	public Map<ReferentielKey, String> getReferentiel() {
-		return referentiel;
-	}
-
-	public void setReferentiel(final Map<ReferentielKey, String> referentiel) {
-		this.referentiel = referentiel;
-	}
 
 	public String getUrl() {
 		return url;
@@ -316,11 +300,13 @@ public class CsvDataSourceProperties {
 		this.productTags = productTags;
 	}
 
-	public String getPrice() {
+
+
+	public Set<String> getPrice() {
 		return price;
 	}
 
-	public void setPrice(final String price) {
+	public void setPrice(Set<String> price) {
 		this.price = price;
 	}
 
@@ -332,13 +318,7 @@ public class CsvDataSourceProperties {
 		this.currency = currency;
 	}
 
-	public String getInStock() {
-		return inStock;
-	}
 
-	public void setInStock(final String inStock) {
-		this.inStock = inStock;
-	}
 
 	public String getName() {
 		return name;
@@ -492,14 +472,6 @@ public class CsvDataSourceProperties {
 		this.warranty = warranty;
 	}
 
-	public String getProductState() {
-		return productState;
-	}
-
-	public void setProductState(final String productState) {
-		this.productState = productState;
-	}
-
 	public CsvRatingConfig getRating() {
 		return rating;
 	}
@@ -548,16 +520,34 @@ public class CsvDataSourceProperties {
 		this.csvEncoding = csvEncoding;
 	}
 
-	public Boolean getCsvSanitisation() {
-		return csvSanitisation;
-	}
 
-	public void setCsvSanitisation(Boolean csvSanitisation) {
-		this.csvSanitisation = csvSanitisation;
-	}
 
 	public Map<String, String> getInclude() {
 		return include;
+	}
+
+	public Map<ReferentielKey, Set<String>> getReferentiel() {
+		return referentiel;
+	}
+
+	public void setReferentiel(Map<ReferentielKey, Set<String>> referentiel) {
+		this.referentiel = referentiel;
+	}
+
+	public Set<String> getInStock() {
+		return inStock;
+	}
+
+	public void setInStock(Set<String> inStock) {
+		this.inStock = inStock;
+	}
+
+	public Set<String> getProductState() {
+		return productState;
+	}
+
+	public void setProductState(Set<String> productState) {
+		this.productState = productState;
 	}
 
 	public void setInclude(Map<String, String> include) {
@@ -580,12 +570,13 @@ public class CsvDataSourceProperties {
 		this.imageTokenExclusions = imageTokenExclusions;
 	}
 
-	public String getAwinEntry() {
-		return awinEntry;
+
+	public Boolean getGzip() {
+		return gzip;
 	}
 
-	public void setAwinEntry(String awinEntry) {
-		this.awinEntry = awinEntry;
+	public void setGzip(Boolean gzip) {
+		this.gzip = gzip;
 	}
 
 

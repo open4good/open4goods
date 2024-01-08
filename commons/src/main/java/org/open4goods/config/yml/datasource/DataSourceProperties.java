@@ -58,6 +58,16 @@ public class DataSourceProperties {
 	@NotBlank
 	private String name;
 
+	/**
+	 * The eventual feedKey, if a match from catalog (feedservice)
+	 */
+	private String feedKey;
+	
+	/**
+	 * Hot time populated
+	 */
+	private String datasourceConfigName;
+	
 	@NotBlank
 	private String favico;
 
@@ -524,6 +534,22 @@ public class DataSourceProperties {
 
 	public void setDescriptionRemoveToken(Set<String> descriptionRemoveToken) {
 		this.descriptionRemoveToken = descriptionRemoveToken;
+	}
+
+	public String getFeedKey() {
+		return feedKey;
+	}
+
+	public void setFeedKey(String feedKey) {
+		this.feedKey = feedKey;
+	}
+
+	public String getDatasourceConfigName() {
+		return datasourceConfigName;
+	}
+
+	public void setDatasourceConfigName(String datasourceConfigName) {
+		this.datasourceConfigName = datasourceConfigName;
 	}
 
 
