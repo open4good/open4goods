@@ -671,7 +671,7 @@ public class CsvIndexationWorker implements Runnable {
 			}
 			
 			if (null == p.getReferentielAttributes().get(refs.getKey())) {
-				dedicatedLogger.warn("No referentiel attribute found for {} in {}", refs.getKey(), item);
+				dedicatedLogger.info("No referentiel attribute found for {} in {}", refs.getKey(), item);
 			}
 			
 			
