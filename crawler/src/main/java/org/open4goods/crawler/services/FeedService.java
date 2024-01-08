@@ -3,6 +3,7 @@ package org.open4goods.crawler.services;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -49,13 +50,30 @@ public class FeedService {
 	public void fetchFeeds() {
 		logger.info("Fetching CSV affiliation feeds");
 		// 1 - Loads the whole feeds as a list of DataSourceProperties, eventually hot defaulted
+		
+		Map<String, DataSourceProperties> ds = new HashMap<String, DataSourceProperties>();
+		
 		feedConfigs.entrySet().stream().forEach(entry -> {
 			try {
-				loadCatalog(entry.getValue().getCatalogUrl(), entry.getValue());
+				ds.putAll(loadCatalog(entry.getValue().getCatalogUrl(),entry.getValue()));
 			} catch (Exception e) {
-				logger.error("Error loading catalog {}", entry.getValue().getCatalogUrl(), e);
+				logger.error("Error loading catalog {} - {} ", entry.getKey(),entry.getValue(), e);
 			}
 		});
+
+		logger.info("{} feeds to fetch", ds.size());
+		
+		
+		ds.forEach((k, v) -> {
+			try {
+			logger.info("Fetching feed {} - {}", k, v);
+			fetchingService.start(v,k);
+			} catch (Exception e) {
+				logger.error("Error loading feed {}", k, e);
+			}
+		});
+		
+		
 	}
 
 	/**
@@ -65,12 +83,13 @@ public class FeedService {
 	 * @throws MalformedURLException
 	 * @throws IOException
 	 */
-	public void loadCatalog(String url, FeedConfiguration feedConfig) throws MalformedURLException, IOException {
+	public Map<String, DataSourceProperties> loadCatalog(String url, FeedConfiguration feedConfig) throws MalformedURLException, IOException {
 		/////////////////////////////
 		// Csv Shema definition
 		////////////////////////////
 		logger.info("Loading CSV catalog from : {}", url);
 		
+		Map<String, DataSourceProperties> ret = new HashMap<String, DataSourceProperties>();
 		CsvSchema schema;
 		
 		
@@ -170,12 +189,13 @@ public class FeedService {
 						// Add the csv fetching request to the queue
 						//////////////////////////
 						
-						fetchingService.start(ds, ds.getDatasourceConfigName());
+						ret.put(ds.getDatasourceConfigName(),ds);
 						
 					} catch (Exception e) {
                         logger.error("Error handling line {}", e);
                     }
 				}
+				return ret;
 	}
 
 }

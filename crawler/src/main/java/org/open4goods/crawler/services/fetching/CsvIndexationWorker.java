@@ -319,7 +319,7 @@ public class CsvIndexationWorker implements Runnable {
 					} catch (final Exception e) {
 						stats.incrementErrors();
 						errorItems++;
-						logger.warn("error while parsing {} at {}.", url, e.getMessage());
+						logger.warn("error in {}, while parsing {} :\n {}.", dsProperties.getDatasourceConfigName(), e.getMessage());
 					}
 				}
 				
