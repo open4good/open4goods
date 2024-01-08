@@ -8,7 +8,6 @@ import org.open4goods.crawler.services.ApiSynchService;
 import org.open4goods.crawler.services.DataFragmentCompletionService;
 import org.open4goods.crawler.services.FetchersService;
 import org.open4goods.crawler.services.IndexationService;
-import org.open4goods.crawler.services.fetching.AwinCatalogService;
 import org.open4goods.crawler.services.fetching.CsvDatasourceFetchingService;
 import org.open4goods.crawler.services.fetching.WebDatasourceFetchingService;
 import org.open4goods.services.EvaluationService;
@@ -36,10 +35,10 @@ public class CrawlerConfig {
 	}
 
     
-    @Bean
-    AwinCatalogService awinCatalogService(@Autowired final FetcherProperties fetcherProperties) {
-		return new AwinCatalogService(fetcherProperties.getAwinCatalogUrl());
-	}
+//    @Bean
+//    AwinCatalogService awinCatalogService(@Autowired final FetcherProperties fetcherProperties) {
+//		return new AwinCatalogService(fetcherProperties.getAwinCatalogUrl());
+//	}
     
     
     @Bean
@@ -67,6 +66,7 @@ public class CrawlerConfig {
         return new WebDatasourceFetchingService(indexationService, fetcherProperties, indexationRepository, fetcherProperties.getLogsDir(), toConsole);
 	}
 
+ 
     @Bean
     CsvDatasourceFetchingService csvDatasourceFetchingService(
             @Autowired final DataFragmentCompletionService completionService,
@@ -74,11 +74,9 @@ public class CrawlerConfig {
             @Autowired final WebDatasourceFetchingService webDatasourceFetchingService,
             @Autowired final IndexationService indexationService,
             @Autowired IndexationRepository indexationRepository,
-            @Autowired AwinCatalogService awinCatalogService,
+//            @Autowired AwinCatalogService awinCatalogService,
             @Autowired CsvIndexationRepository csvIndexationRepo
-            
-            
-            
+
             ) {
     	
 		// Logging to console according to dev profile and conf
@@ -86,7 +84,7 @@ public class CrawlerConfig {
 		// TODO : Not nice, mutualize
 
 
-        return new CsvDatasourceFetchingService(csvIndexationRepo, awinCatalogService, completionService, indexationService, fetcherProperties, webDatasourceFetchingService, indexationRepository,fetcherProperties.getLogsDir(),  toConsole);
+        return new CsvDatasourceFetchingService(csvIndexationRepo, completionService, indexationService, fetcherProperties, webDatasourceFetchingService, indexationRepository,webDatasourceFetchingService, fetcherProperties.getLogsDir(),  toConsole);
 	}
 
     @Bean
