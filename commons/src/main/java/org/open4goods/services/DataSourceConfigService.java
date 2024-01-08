@@ -12,6 +12,7 @@ import java.util.Map;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.open4goods.config.yml.datasource.DataSourceProperties;
+import org.open4goods.config.yml.datasource.FeedConfiguration;
 import org.open4goods.config.yml.datasource.HtmlDataSourceProperties;
 import org.open4goods.exceptions.InvalidParameterException;
 import org.open4goods.model.constants.CacheConstants;
@@ -54,7 +55,9 @@ public class DataSourceConfigService {
 	// Self maintened cache (@Cacheable problem when internaly called)
 	private Map<String,DataSourceProperties> datasourcesByFileName = null;
 	private Map<String,DataSourceProperties> datasourcesByConfigName = new HashMap<>();
-
+	private Map<String,DataSourceProperties> datasourcesByFeedKey = new HashMap<>();
+	
+	
 	public DataSourceConfigService(final String datasourceConfigFolder) {
 		super();
 		this.datasourceConfigFolder = datasourceConfigFolder;
@@ -132,6 +135,7 @@ public class DataSourceConfigService {
 
 		for (DataSourceProperties conf : datasourcesByFileName.values()) {
 			datasourcesByConfigName.put(conf.getName(), conf);
+			datasourcesByFeedKey.put(conf.getFeedKey(), conf);
 		}
 
 
@@ -218,4 +222,21 @@ public class DataSourceConfigService {
 
 		return ret;
 	}
+
+
+	/**
+	 * Return a datasource for a given feedKey
+	 * @param feedKey
+	 * @return
+	 */
+	public DataSourceProperties getDatasourcePropertiesForFeed(String feedKey) {
+		return datasourcesByFeedKey.get(feedKey);
+	}
+
+
+
+	public DataSourceProperties getDefaultDataSource() {
+		return new DataSourceProperties();
+	}
+
 }

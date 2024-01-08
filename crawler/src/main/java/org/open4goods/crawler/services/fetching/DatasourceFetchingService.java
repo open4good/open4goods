@@ -68,7 +68,7 @@ public abstract class DatasourceFetchingService {
 	public void finished(final FetchingJobStats fetchingJobStats, final DataSourceProperties dataSourceProperties) {
 
 		// Logging the number of indexed and number
-		dedicatedLogger.info("Datasource fetching of {} is terminated, with a duration of {}ms. indexed:{}",dataSourceProperties.getName(),  System.currentTimeMillis() -  fetchingJobStats.getStartDate(), fetchingJobStats.getNumberOfIndexedDatas());
+		dedicatedLogger.info("Datasource fetching of {} is terminated",dataSourceProperties.getName());
 
 
 		// Triggering an alert if indexed threshold not respected

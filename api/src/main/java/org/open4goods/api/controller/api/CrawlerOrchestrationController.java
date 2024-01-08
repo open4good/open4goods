@@ -9,12 +9,14 @@ import java.util.Map.Entry;
 import org.open4goods.api.services.FetcherOrchestrationService;
 import org.open4goods.api.services.store.DataFragmentStoreService;
 import org.open4goods.config.yml.datasource.DataSourceProperties;
+import org.open4goods.crawler.services.FeedService;
 import org.open4goods.exceptions.InvalidParameterException;
 import org.open4goods.model.constants.RolesConstants;
 import org.open4goods.model.constants.UrlConstants;
 import org.open4goods.model.crawlers.FetcherGlobalStats;
 import org.open4goods.model.data.DataFragment;
 import org.open4goods.model.dto.FetchRequestResponse;
+import org.open4goods.model.dto.api.IndexationResponse;
 import org.open4goods.services.DataSourceConfigService;
 import org.open4goods.services.SerialisationService;
 import org.springframework.http.MediaType;
@@ -52,13 +54,24 @@ public class CrawlerOrchestrationController {
 
 	private final DataFragmentStoreService dataFragmentStoreService;
 
-	public CrawlerOrchestrationController(SerialisationService serialisationService, FetcherOrchestrationService fetcherOrchestrationService, DataSourceConfigService datasourceConfigService, DataFragmentStoreService dataFragmentStoreService) {
+	private final FeedService feedService;
+	
+	public CrawlerOrchestrationController(SerialisationService serialisationService, FetcherOrchestrationService fetcherOrchestrationService, DataSourceConfigService datasourceConfigService, DataFragmentStoreService dataFragmentStoreService, FeedService feedService) {
 		this.serialisationService = serialisationService;
 		this.fetcherOrchestrationService = fetcherOrchestrationService;
 		this.dataFragmentStoreService = dataFragmentStoreService;
 		this.datasourceConfigService = datasourceConfigService;
+		this.feedService = feedService;
 	}
 
+	
+	@PostMapping(path = "/index/feed")
+	public IndexationResponse indexFeed() {
+		feedService.fetchFeeds();
+		return new IndexationResponse();
+	}
+	
+	
 	@PostMapping(path=UrlConstants.MASTER_API_CRAWLERS  + UrlConstants.MASTER_API_CRAWLER_TRIGGER_SUFFIX+"/csv/all")
 	@Operation(summary="Run a all CSV datasources retrieving against best availlables node")
 	@PreAuthorize("hasAuthority('"+RolesConstants.ROLE_ADMIN+"')")

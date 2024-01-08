@@ -96,8 +96,8 @@ public class DatasourceRegressionTest {
 				@Autowired final FetcherProperties fetcherProperties,
 				@Autowired final WebDatasourceFetchingService httpFetchingService,
 				@Autowired final DataFragmentCompletionService dfCompletionService) {
-			return new CsvDatasourceFetchingService(null, null,dfCompletionService, null, fetcherProperties, httpFetchingService,
-					null,fetcherProperties.getLogsDir(), true);
+			return new CsvDatasourceFetchingService(null, dfCompletionService, null, fetcherProperties, httpFetchingService,
+					null,httpFetchingService, fetcherProperties.getLogsDir(), true);
 		}
 
 		@Bean

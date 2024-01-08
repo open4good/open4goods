@@ -46,12 +46,12 @@ public class CrawlController {
 			return ret;
 		}
 
-		if (fetchersService.stats().getCrawlerStats().size() >  config.getConcurrentFetcherTask() ) {
-			logger.warn("Cannot process crawl of {}, queue is full ({})",datasourceConfName,fetchersService.stats().getCrawlerStats().size());
-			ret.setCrawlAccepted(false);
-			ret.setMessage("Crawler queue is full");
-			return ret;
-		}
+//		if (fetchersService.stats().getCrawlerStats().size() >  config.getConcurrentFetcherTask() ) {
+//			logger.warn("Cannot process crawl of {}, queue is full ({})",datasourceConfName,fetchersService.stats().getCrawlerStats().size());
+//			ret.setCrawlAccepted(false);
+//			ret.setMessage("Crawler queue is full");
+//			return ret;
+//		}
 
 		logger.info("Starting crawl of {})",datasourceConfName);
 		fetchersService.start(p,datasourceConfName);
