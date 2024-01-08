@@ -10,7 +10,7 @@ jobs:
 
     steps:
       - name: Publish via ssh
-        uses: appleboy/ssh-action@v1.0.2
+        uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.REMOTE_BETA_HOST }}
           username: ${{ secrets.REMOTE_BETA_USER }}
