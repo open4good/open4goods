@@ -198,12 +198,17 @@ public class FeedService {
 
 						// Handle the csv line
 						Map<String, String> line = mi.next();
+						
+						//////////////////////////
+						// Retrieving the feed key
+						//////////////////////////
+						String feedKey =  line.get(feedConfig.getDatasourceKeyAttribute());
+
+						
 						//////////
 						// Filter the line on defined attributes
 						//////////
 						boolean abort = false;
-						
-						
 						for (Entry<String, String> filter : feedConfig.getFilterAttributes().entrySet()) {
 							if (!filter.getValue().equals(line.get(filter.getKey()))) {
                                 abort = true;		
@@ -215,10 +220,18 @@ public class FeedService {
 							continue;
 						}
 
-						//////////////////////////
-						// Retrieving the feed key
-						//////////////////////////
-						String feedKey =  line.get(feedConfig.getDatasourceKeyAttribute());
+						
+						for (String filter : feedConfig.getExcludeFeedKeyContains()) {
+							if (feedKey.toLowerCase().contains(filter.toLowerCase())) {
+                                abort = true;		
+                                break;
+                            }
+						}						
+						if (abort) {
+							logger.info("Skipping line {} because of config filters", line);
+							continue;
+						}
+						
 						
 						//////////////////////////
 						// Fetch the corresponding datasource, default one if none

@@ -1,7 +1,9 @@
 package org.open4goods.config.yml.datasource;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 public class FeedConfiguration {
 
@@ -13,6 +15,7 @@ public class FeedConfiguration {
     private String datasourceRegionAttribute;
     private String datasourceLanguageAttribute;
     private Map<String, String> filterAttributes = new HashMap<>();
+    private Set<String> excludeFeedKeyContains = new HashSet<>();
     
     private CsvDataSourceProperties defaultCsvProperties;
     
@@ -80,9 +83,11 @@ public class FeedConfiguration {
 	public void setDefaultCsvProperties(CsvDataSourceProperties defaultCsvProperties) {
 		this.defaultCsvProperties = defaultCsvProperties;
 	}
+	public Set<String> getExcludeFeedKeyContains() {
+		return excludeFeedKeyContains;
+	}
+	public void setExcludeFeedKeyContains(Set<String> excludeFeedKeyContains) {
+		this.excludeFeedKeyContains = excludeFeedKeyContains;
+	}
 
-    
-    
-    
-    
 }
