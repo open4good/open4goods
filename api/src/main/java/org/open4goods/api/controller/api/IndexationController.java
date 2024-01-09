@@ -2,6 +2,7 @@
 package org.open4goods.api.controller.api;
 
 import org.open4goods.api.services.store.DataFragmentStoreService;
+import org.open4goods.crawler.services.FeedService;
 import org.open4goods.model.constants.RolesConstants;
 import org.open4goods.model.constants.UrlConstants;
 import org.open4goods.model.data.DataFragment;
@@ -23,11 +24,15 @@ public class IndexationController {
 	private static final Logger logger = LoggerFactory.getLogger(IndexationController.class);
 
 
-	private final DataFragmentStoreService storeService;
+	private final DataFragmentStoreService storeService;	
+
+	
+	
 
 	public IndexationController(DataFragmentStoreService storeService) {
+		super();
 		this.storeService = storeService;
-	}
+	}	
 
 	@PostMapping(path = UrlConstants.API_INDEXATION_ENDPOINT)
 	//TODO(perf,0.75, p2) : could optimize with "bulk" frow crawler
@@ -35,5 +40,7 @@ public class IndexationController {
 		storeService.queueDataFragment(data);
 		return new IndexationResponse();
 	}
+
+
 
 }

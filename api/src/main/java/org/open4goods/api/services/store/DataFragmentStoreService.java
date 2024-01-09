@@ -74,6 +74,7 @@ public class DataFragmentStoreService {
 		this.aggregatedDataRepository = aggregatedDataRepository;
 		this.generationService=generationService;
 
+		// TODO : from conf
 		int dequeueSize = 200;
 		int workers = 6;
 		int pauseDuration = 5000;

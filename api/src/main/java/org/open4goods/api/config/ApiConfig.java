@@ -17,13 +17,12 @@ import org.open4goods.crawler.repository.CsvIndexationRepository;
 import org.open4goods.crawler.repository.IndexationRepository;
 import org.open4goods.crawler.services.ApiSynchService;
 import org.open4goods.crawler.services.DataFragmentCompletionService;
+import org.open4goods.crawler.services.FeedService;
 import org.open4goods.crawler.services.FetchersService;
 import org.open4goods.crawler.services.IndexationService;
-import org.open4goods.crawler.services.fetching.AwinCatalogService;
 import org.open4goods.crawler.services.fetching.CsvDatasourceFetchingService;
 import org.open4goods.crawler.services.fetching.WebDatasourceFetchingService;
 import org.open4goods.dao.ProductRepository;
-import org.open4goods.exceptions.InvalidParameterException;
 import org.open4goods.model.constants.CacheConstants;
 import org.open4goods.model.constants.Currency;
 import org.open4goods.model.constants.TimeConstants;
@@ -127,6 +126,14 @@ public class ApiConfig {
 		return new SerialisationService();
 	}
 
+	
+    @Bean
+    @Autowired
+    FeedService feedService(SerialisationService serialisationService, DataSourceConfigService datasourceConfigService, CsvDatasourceFetchingService fetchingService,FetcherProperties  fetcherProperties) {
+		return new FeedService(serialisationService, datasourceConfigService, fetchingService, fetcherProperties.getFeedConfigs());
+    }
+   
+    	
 	
 	@Bean
 	@Autowired
@@ -409,10 +416,7 @@ public class ApiConfig {
 		return apiProperties.getFetcherProperties();
 	}
 
-    @Bean
-    AwinCatalogService awinCatalogService(@Autowired final FetcherProperties fetcherProperties) {
-		return new AwinCatalogService(fetcherProperties.getAwinCatalogUrl());
-	}
+ 
     
 	@Bean
 	CsvDatasourceFetchingService csvDatasourceFetchingService(
@@ -420,7 +424,6 @@ public class ApiConfig {
 			@Autowired final IndexationService indexationService, @Autowired final ApiProperties apiProperties,
 			@Autowired final WebDatasourceFetchingService webDatasourceFetchingService,
 			@Autowired final IndexationRepository indexationRepository,
-			@Autowired final AwinCatalogService awinCatalogService,
 			  @Autowired CsvIndexationRepository csvIndexationRepo
 			
 			
@@ -430,8 +433,8 @@ public class ApiConfig {
 		// TODO : Not nice, mutualize
 
 
-        return new CsvDatasourceFetchingService(csvIndexationRepo, awinCatalogService, completionService, indexationService,
-				apiProperties.getFetcherProperties(), webDatasourceFetchingService,indexationRepository, apiProperties.logsFolder(), toConsole);
+        return new CsvDatasourceFetchingService(csvIndexationRepo, completionService, indexationService,
+				apiProperties.getFetcherProperties(), webDatasourceFetchingService,indexationRepository, webDatasourceFetchingService, apiProperties.logsFolder(), toConsole);
 	}
 
 	@Bean
