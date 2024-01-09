@@ -314,11 +314,11 @@ public class CsvIndexationWorker implements Runnable {
 					} catch (final ValidationException e) {
 						stats.incrementValidationFail();
 						validationFailedItems++;
-						logger.info("Validation exception while parsing {} : {}", line, e.getMessage());
+						logger.info("Validation exception () while parsing {} : {}", e.getMessage(), line );
 					} catch (final Exception e) {
 						stats.incrementErrors();
 						errorItems++;
-						logger.warn("error in {}, while parsing {} :\n {}.", dsProperties.getDatasourceConfigName(), e.getMessage());
+						logger.error("error in {}, while parsing {}", dsProperties.getDatasourceConfigName(), url, e);
 					}
 				}
 				
@@ -563,20 +563,22 @@ public class CsvIndexationWorker implements Runnable {
 		
 		// Assuming that by default, for referentiels they are in stock
 		p.setInStock(InStock.INSTOCK);
-		for (String inStock : csvProperties.getInStock()) {
-			// Instock
-				try {
-					String val = getFromCsvRow(item, inStock);
-					if (!StringUtils.isEmpty(val)) {
-						InStock stock = InStockParser.parse(val);
-						if (null != stock) {
-							p.setInStock(stock);
-							break;
+		if (null != csvProperties.getInStock()) {			
+			for (String inStock : csvProperties.getInStock()) {
+				// Instock
+					try {
+						String val = getFromCsvRow(item, inStock);
+						if (!StringUtils.isEmpty(val)) {
+							InStock stock = InStockParser.parse(val);
+							if (null != stock) {
+								p.setInStock(stock);
+								break;
+							}
 						}
-					}
-				} catch (final Exception e1) {
-					dedicatedLogger.warn("Cannot parse InStock : {} ", e1.getMessage());
-				}			
+					} catch (final Exception e1) {
+						dedicatedLogger.warn("Cannot parse InStock : {} ", e1.getMessage());
+					}			
+			}
 		}
 
 		// Shipping time
@@ -637,23 +639,24 @@ public class CsvIndexationWorker implements Runnable {
 
 		// ProductState
 		p.setProductState(config.getDefaultItemCondition());
-		for (String productState : csvProperties.getProductState()) {
-
-				try {
-					String raw = getFromCsvRow(item, productState);
-					if (StringUtils.isEmpty(raw)) {
-                        continue;
-                    }
-					ProductState state = ProductStateParser.parse(raw);
-					
-					if (null != state) {
-						p.setProductState(state);
-						break;
-					}
-				} catch (final Exception e1) {				
-						dedicatedLogger.warn("Cannot parse product state : {} ", e1.getMessage());
-				}
-
+		if (null != csvProperties.getProductState()) {			
+			for (String productState : csvProperties.getProductState()) {
+	
+					try {
+						String raw = getFromCsvRow(item, productState);
+						if (StringUtils.isEmpty(raw)) {
+	                        continue;
+	                    }
+						ProductState state = ProductStateParser.parse(raw);
+						
+						if (null != state) {
+							p.setProductState(state);
+							break;
+						}
+					} catch (final Exception e1) {				
+							dedicatedLogger.warn("Cannot parse product state : {} ", e1.getMessage());
+					}	
+			}
 		}
 		
 

@@ -71,10 +71,10 @@ public abstract class DatasourceFetchingService {
 		dedicatedLogger.info("Datasource fetching of {} is terminated",dataSourceProperties.getName());
 
 
-		// Triggering an alert if indexed threshold not respected
-		if (fetchingJobStats.getNumberOfIndexedDatas() < dataSourceProperties.getMinimumIndexedItems()   ) {
-			dedicatedLogger.error(fetchingJobStats.getName() + " has indexed " + fetchingJobStats.getNumberOfIndexedDatas() + " datafragments, was expecting at least " + dataSourceProperties.getMinimumIndexedItems());
-		}
+//		// Triggering an alert if indexed threshold not respected
+//		if (fetchingJobStats.getNumberOfIndexedDatas() < dataSourceProperties.getMinimumIndexedItems()   ) {
+//			dedicatedLogger.error(fetchingJobStats.getName() + " has indexed " + fetchingJobStats.getNumberOfIndexedDatas() + " datafragments, was expecting at least " + dataSourceProperties.getMinimumIndexedItems());
+//		}
 		
 		// Logging to kibana
 		if (null == indexationRepository) {
