@@ -53,23 +53,15 @@ public class CrawlerOrchestrationController {
 	private final DataSourceConfigService datasourceConfigService;
 
 	private final DataFragmentStoreService dataFragmentStoreService;
-
-	private final FeedService feedService;
 	
-	public CrawlerOrchestrationController(SerialisationService serialisationService, FetcherOrchestrationService fetcherOrchestrationService, DataSourceConfigService datasourceConfigService, DataFragmentStoreService dataFragmentStoreService, FeedService feedService) {
+	public CrawlerOrchestrationController(SerialisationService serialisationService, FetcherOrchestrationService fetcherOrchestrationService, DataSourceConfigService datasourceConfigService, DataFragmentStoreService dataFragmentStoreService) {
 		this.serialisationService = serialisationService;
 		this.fetcherOrchestrationService = fetcherOrchestrationService;
 		this.dataFragmentStoreService = dataFragmentStoreService;
 		this.datasourceConfigService = datasourceConfigService;
-		this.feedService = feedService;
 	}
 
-	
-	@PostMapping(path = "/index/feed")
-	public IndexationResponse indexFeed() {
-		feedService.fetchFeeds();
-		return new IndexationResponse();
-	}
+
 	
 	
 	@PostMapping(path=UrlConstants.MASTER_API_CRAWLERS  + UrlConstants.MASTER_API_CRAWLER_TRIGGER_SUFFIX+"/csv/all")

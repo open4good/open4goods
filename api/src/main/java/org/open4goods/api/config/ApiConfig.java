@@ -129,8 +129,8 @@ public class ApiConfig {
 	
     @Bean
     @Autowired
-    FeedService feedService(DataSourceConfigService datasourceConfigService, CsvDatasourceFetchingService fetchingService,FetcherProperties  fetcherProperties) {
-		return new FeedService(datasourceConfigService, fetchingService, fetcherProperties.getFeedConfigs());
+    FeedService feedService(SerialisationService serialisationService, DataSourceConfigService datasourceConfigService, CsvDatasourceFetchingService fetchingService,FetcherProperties  fetcherProperties) {
+		return new FeedService(serialisationService, datasourceConfigService, fetchingService, fetcherProperties.getFeedConfigs());
     }
    
     	
