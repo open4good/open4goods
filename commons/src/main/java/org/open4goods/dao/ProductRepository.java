@@ -323,7 +323,7 @@ public class ProductRepository {
 		
 		// Getting the one we don't have in redis from elastic 		
 		Set<String> missingIds = ids.stream().filter(e -> !ret.containsKey(e)).collect(Collectors.toSet());
-		logger.info("Got {} products from redis, looking for the {} missing in elastic. Queue size is : {}",ret.size(), missingIds.size(),queue.size());
+		logger.warn("Got {} products from redis, looking for the {} missing in elastic. Queue size is : {}",ret.size(), missingIds.size(),queue.size());
 		
 		
 		if (missingIds.size() != 0) {
