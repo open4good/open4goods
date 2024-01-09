@@ -613,6 +613,11 @@ public class DataFragment implements Standardisable, Validable {
 	 * @param value
 	 */
 
+	public void addReferentielAttribute(ReferentielKey key, String val) {
+		referentielAttributes.put(key, val);
+		
+	}
+	
 
 	public void addReferentielAttribute(final String key, final String value) {
 		if (StringUtils.isBlank(value)) {
@@ -1427,5 +1432,7 @@ public class DataFragment implements Standardisable, Validable {
 	public void setCreationDate(Long creationDate) {
 		this.creationDate = creationDate;
 	}
+
+
 
 }

@@ -1,7 +1,11 @@
 
 package org.open4goods.crawler.config.yml;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.open4goods.config.yml.datasource.CrawlProperties;
+import org.open4goods.config.yml.datasource.FeedConfiguration;
 import org.open4goods.model.constants.UrlConstants;
 import org.open4goods.model.crawlers.ApiSynchConfig;
 import org.slf4j.Logger;
@@ -45,6 +49,9 @@ public class FetcherProperties {
 	 * The templated download url 
 	 */
 	private String awinTemplateUrl;
+	
+	
+	private Map<String, FeedConfiguration> feedConfigs = new HashMap<>();
 	
 	
 	/**
@@ -221,6 +228,14 @@ public class FetcherProperties {
 
 	public void setAwinTemplateUrl(String awinTemplateUrl) {
 		this.awinTemplateUrl = awinTemplateUrl;
+	}
+
+	public Map<String, FeedConfiguration> getFeedConfigs() {
+		return feedConfigs;
+	}
+
+	public void setFeedConfigs(Map<String, FeedConfiguration> feedConfigs) {
+		this.feedConfigs = feedConfigs;
 	}
 
 
