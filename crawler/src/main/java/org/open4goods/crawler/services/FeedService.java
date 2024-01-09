@@ -17,6 +17,7 @@ import org.open4goods.services.DataSourceConfigService;
 import org.open4goods.services.SerialisationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.scheduling.annotation.Scheduled;
 
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
@@ -29,6 +30,7 @@ import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 
 /**
  * TODO : Optimize by checking last updated dates sometimes provided by the platforms
+ * TODO : Should merge with CsvDatasourceFetchingService
  */
 public class FeedService {
 		
@@ -51,8 +53,10 @@ public class FeedService {
 	
 	/**
 	 * Fetch the feeds
+	 * TODO : Make it from conf, not to retrive datasources at the same time than beta.nudger.fr
+	 * ISSUE : MAke it from conf, not to retrieve datasources at the exact same time than beta.nudger.fr
 	 */
-	 
+	@Scheduled( initialDelay = 1000 * 3600*12, fixedDelay = 1000 * 3600*24)
 	public void fetchFeeds() {
 		logger.info("Fetching CSV affiliation feeds");
 		// 1 - Loads the whole feeds as a list of DataSourceProperties, eventually hot defaulted
