@@ -167,15 +167,15 @@ public class CsvIndexationWorker implements Runnable {
 					.withColumnSeparator(config.getCsvSeparator())						
 					;
 
-			 if (null != config.getCsvQuoteChar()) {
-				 schema = schema.withQuoteChar(config.getCsvQuoteChar().charValue());
-			 } else {
-				 schema = schema.withoutQuoteChar();
-			 }
-			 
-			 if (null != config.getCsvEscapeChar()) {
-				 schema = schema.withEscapeChar(config.getCsvEscapeChar());
-			 }
+		 if (null != config.getCsvQuoteChar()) {
+			 schema = schema.withQuoteChar(config.getCsvQuoteChar().charValue());
+		 } else {
+			 schema = schema.withoutQuoteChar();
+		 }
+		 
+		 if (null != config.getCsvEscapeChar()) {
+			 schema = schema.withEscapeChar(config.getCsvEscapeChar());
+		 }
 		
 		
 		Set<String> urls = config.getDatasourceUrls() ;	
@@ -308,8 +308,7 @@ public class CsvIndexationWorker implements Runnable {
 							stats.incrementIndexed();
 							okItems++;
 						} else {
-							logger.error("Cannot index null datafragment");
-							stats.incrementErrors();
+							throw new ValidationException("Null data fragment");
 						}
 
 					} catch (final ValidationException e) {
