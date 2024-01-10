@@ -26,6 +26,7 @@ import org.open4goods.crawler.services.DataFragmentCompletionService;
 import org.open4goods.crawler.services.IndexationService;
 import org.open4goods.exceptions.ValidationException;
 import org.open4goods.helper.GenericFileLogger;
+import org.open4goods.helper.IdHelper;
 import org.open4goods.helper.InStockParser;
 import org.open4goods.helper.ProductStateParser;
 import org.open4goods.helper.ShippingCostParser;
@@ -144,7 +145,7 @@ public class CsvIndexationWorker implements Runnable {
 	public void fetch(DataSourceProperties dsProperties) {
 		
 		// TODO : Review the toConsole, bad design
-		Logger dedicatedLogger = GenericFileLogger.initLogger(dsProperties.getDatasourceConfigName() == null ? dsProperties.getName() : dsProperties.getDatasourceConfigName(), dsProperties.getLogLevel(), logsFolder+"/crawler/", toConsole);
+		Logger dedicatedLogger = GenericFileLogger.initLogger(dsProperties.getDatasourceConfigName() == null ? dsProperties.getName() : IdHelper.azCharAndDigits(dsProperties.getDatasourceConfigName()), dsProperties.getLogLevel(), logsFolder+"/crawler/", toConsole);
 		
 		dedicatedLogger.warn("STARTING CRAWL OF {}", dsProperties);
 		// Creating a direct web crawler if the csv fetching is followed by webFetching
