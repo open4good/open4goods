@@ -147,7 +147,7 @@ public class CsvIndexationWorker implements Runnable {
 		
 		// TODO : Review the toConsole, bad design
 		String safeName = IdHelper.azCharAndDigitsPointsDash(dsProperties.getName()).toLowerCase();
-		Logger dedicatedLogger = GenericFileLogger.initLogger(safeName, dsProperties.getLogLevel(), logsFolder+"crawler/", toConsole);
+		Logger dedicatedLogger = csvService.createDatasourceLogger(safeName	, dsProperties, logsFolder+"/crawler/");
 		
 		dedicatedLogger.warn("STARTING CRAWL OF {}", dsProperties);
 		// Creating a direct web crawler if the csv fetching is followed by webFetching
