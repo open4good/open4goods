@@ -25,6 +25,7 @@ import org.open4goods.crawler.repository.CsvIndexationRepository;
 import org.open4goods.crawler.services.DataFragmentCompletionService;
 import org.open4goods.crawler.services.IndexationService;
 import org.open4goods.exceptions.ValidationException;
+import org.open4goods.helper.GenericFileLogger;
 import org.open4goods.helper.InStockParser;
 import org.open4goods.helper.ProductStateParser;
 import org.open4goods.helper.ShippingCostParser;
@@ -51,6 +52,7 @@ import com.fasterxml.jackson.dataformat.csv.CsvParser;
 import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 import com.google.common.collect.Sets;
 
+import ch.qos.logback.classic.Level;
 import edu.uci.ics.crawler4j.crawler.CrawlController;
 import net.lingala.zip4j.ZipFile;
 import net.lingala.zip4j.exception.ZipException;
@@ -84,18 +86,27 @@ public class CsvIndexationWorker implements Runnable {
 	/** The duration of the worker thread pause when nothing to get from the queue **/
 	private final int pauseDuration;
 
+
+	private String logsFolder;
+
+
+	private boolean toConsole;
+
 	/**
 	 * Constructor
 	 * @param csvService
+	 * @param toConsole 
 	 * @param dequeuePageSize
 	 */
-	public CsvIndexationWorker(final CsvDatasourceFetchingService csvService, DataFragmentCompletionService completionService, IndexationService indexationService, WebDatasourceFetchingService webFetchingService, CsvIndexationRepository csvIndexationRepository,  final int pauseDuration) {
+	public CsvIndexationWorker(final CsvDatasourceFetchingService csvService, DataFragmentCompletionService completionService, IndexationService indexationService, WebDatasourceFetchingService webFetchingService, CsvIndexationRepository csvIndexationRepository,  final int pauseDuration, String logsFolder, boolean toConsole) {
 		this.csvService = csvService;
 		this.pauseDuration = pauseDuration;
 		this.completionService = completionService;
 		this.indexationService = indexationService;
 		this.webFetchingService = webFetchingService;
 		this.csvIndexationRepository = csvIndexationRepository;
+		this.logsFolder = logsFolder;
+		this.toConsole = toConsole;
 
 	}
 
@@ -132,6 +143,10 @@ public class CsvIndexationWorker implements Runnable {
 	
 	public void fetch(DataSourceProperties dsProperties) {
 		
+		// TODO : Review the toConsole, bad design
+		Logger dedicatedLogger = GenericFileLogger.initLogger(dsProperties.getDatasourceConfigName() == null ? dsProperties.getName() : dsProperties.getDatasourceConfigName(), dsProperties.getLogLevel(), logsFolder+"/crawler/", toConsole);
+		
+		dedicatedLogger.warn("STARTING CRAWL OF {}", dsProperties);
 		// Creating a direct web crawler if the csv fetching is followed by webFetching
 
 		final HtmlDataSourceProperties crawlConfig = dsProperties.getCsvDatasource().getWebDatasource();
@@ -141,7 +156,7 @@ public class CsvIndexationWorker implements Runnable {
 		String dsConfName = dsProperties.getDatasourceConfigName();
 		if (null != crawlConfig) {
 			try {
-				logger.info("Configuring direct crawler for CSV datasource {}", dsProperties.getDatasourceConfigName());
+				dedicatedLogger.info("Configuring direct web crawler for CSV datasource {}", dsProperties.getDatasourceConfigName());
 				controler = webFetchingService.createCrawlController("csv-" + dsConfName,
 						dsProperties.getCsvDatasource().getWebDatasource().getCrawlConfig());
 				crawler = webFetchingService.createWebCrawler(dsConfName, dsProperties,
@@ -150,13 +165,11 @@ public class CsvIndexationWorker implements Runnable {
 				crawler.setShouldFollowLinks(false);
 
 			} catch (final Exception e) {
-				logger.error("Error while starting the CSV associated web crawler", e);
+				dedicatedLogger.error("Error while starting the CSV associated web crawler", e);
 			}
 		}
 
 		final CsvDataSourceProperties config = dsProperties.getCsvDatasource();
-		logger.info("Fetching CSV datasource {} ", dsConfName);
-
 		
 		/////////////////////////////
 		// Csv Shema definition
@@ -198,7 +211,7 @@ public class CsvIndexationWorker implements Runnable {
 				// local file download, then estimate number of rows
 //					TODO(design,P2,0.5) : Allow CSV file forwarding on remote crawl (for now, CSV with classpath fetching only works on local node)
 				File destFile = File.createTempFile("csv", dsConfName+".csv");
-				logger.info("Downloading CSV for {} from {} to {}", dsConfName, url, destFile);
+				dedicatedLogger.info ("Downloading CSV for {} from {} to {}", dsConfName, url, destFile);
 
 				if (url.startsWith("http")) {
 					// These are http resources
@@ -238,7 +251,7 @@ public class CsvIndexationWorker implements Runnable {
 
 						final String targetFolder = destFile.getParent() + File.separator + "unziped";
 
-						logger.info("Unzipping CSV data from {} to {}", destFile.getAbsolutePath(),
+						dedicatedLogger.info("Unzipping CSV data from {} to {}", destFile.getAbsolutePath(),
 								targetFolder);
 
 						new File(targetFolder).mkdirs();
@@ -249,7 +262,7 @@ public class CsvIndexationWorker implements Runnable {
 						final File zipedDestFolder = new File(targetFolder);
 
 						if (zipedDestFolder.list().length > 1) {
-							logger.error("Multiple files in {}, cannot operate",
+							dedicatedLogger.error("Multiple files in {}, cannot operate",
 									destFile.getAbsolutePath());
 							csvService.getRunning().remove(dsConfName);
 							FileUtils.deleteQuietly(zipedDestFolder);
@@ -261,14 +274,14 @@ public class CsvIndexationWorker implements Runnable {
 						}
 
 					} catch (final ZipException e) {
-						logger.error("Error extracting CSV data", e);
+						dedicatedLogger.error("Error extracting CSV data", e);
 					}
 				}
 				
 				
 				// Row number counting
 
-				logger.info("Counting lines for {} ", destFile.getAbsolutePath());
+				dedicatedLogger.info("Counting lines for {} ", destFile.getAbsolutePath());
 
 				// NOTE : Choice is made not to have the queue, to avoid this long line counting
 //					final Path path = Paths.get(destFile.getAbsolutePath());
@@ -276,7 +289,7 @@ public class CsvIndexationWorker implements Runnable {
 				final long linesCount = 0L;
 				csvService.getRunning().get(dsConfName).setQueueLength(linesCount);
 
-				logger.info("Starting {} CSV lines fetching of {} ", linesCount, destFile.getAbsolutePath());
+				dedicatedLogger.info("Starting {} CSV lines fetching of {} ", linesCount, destFile.getAbsolutePath());
 				
 				csvService.getRunning().get(dsConfName).getFilesCounters().put(url, 0L);
 				
@@ -295,7 +308,7 @@ public class CsvIndexationWorker implements Runnable {
 						// Handle the csv line
 						line = mi.next();
 						if (null == line) {
-							logger.warn("Null line");
+							dedicatedLogger.warn("Null line");
 							stats.incrementErrors();
 							continue;
 						}							
@@ -314,7 +327,7 @@ public class CsvIndexationWorker implements Runnable {
 					} catch (final ValidationException e) {
 						stats.incrementValidationFail();
 						validationFailedItems++;
-						logger.info("Validation exception () while parsing {} : {}", e.getMessage(), line );
+						dedicatedLogger.info("Validation exception () while parsing {} : {}", e.getMessage(), line );
 					} catch (final Exception e) {
 						stats.incrementErrors();
 						errorItems++;
@@ -325,19 +338,15 @@ public class CsvIndexationWorker implements Runnable {
 				// closing iterator
 				mi.close();
 				
-				logger.info("End csv fetching for {}:{}. {} imported, {} validations failed, {} excluded, {} errors ", dsConfName, url, okItems, validationFailedItems, excludedItems, errorItems);
-
-				
-				
-				logger.info("Removing fetched CSV file at {}", destFile);
+				dedicatedLogger.info("Removing fetched CSV file at {}", destFile);
 				if (url.startsWith("http")) {
 					FileUtils.deleteQuietly(destFile);
 				}
 
 			} catch (final Exception e) {
-				logger.error("CSV fetching aborted : {}:{} ",dsConfName ,url,e);
-				logger.info("End csv fetching for {}{}. {} imported, {} validations failed, {} excluded, {} errors ", dsConfName, url,  okItems, validationFailedItems, excludedItems, errorItems);
+				dedicatedLogger.error("CSV fetching aborted : {}:{} ",dsConfName ,url,e);
 			} 
+			dedicatedLogger.warn("CRAWL TERMINATED : {} ({} imported, {} validations failed, {} excluded, {} errors {}) -  {} ", dsConfName,  okItems, validationFailedItems, excludedItems, errorItems, url);
 
 			// Saving stats 
 			stats.terminate();					
@@ -351,13 +360,13 @@ public class CsvIndexationWorker implements Runnable {
 		
 		
 		if (null != crawler) {
-			logger.info("Terminating the CSV direct crawl controller for {}", dsConfName);
+			dedicatedLogger.info("Terminating the CSV direct crawl controller for {}", dsConfName);
 			controler.shutdown();
 
 		}
 		csvService.getRunning().remove(dsConfName);
 
-		logger.info("End csv direct fetching for {}", dsConfName);
+		dedicatedLogger.info("End csv direct fetching for {}", dsConfName);
 
 	}
 
