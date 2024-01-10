@@ -23,10 +23,6 @@ public class IndexationService {
 	 */
 	protected Map<String, Long> byProviderCounters = new ConcurrentHashMap<>();
 
-	/**
-	 * Map containing the last indexed data fragment per provider
-	 */
-	protected Map<String, DataFragment> lastIndexed = new ConcurrentHashMap<>();
 
 	private String indexationEndpoint;
 	private String apiKey;
@@ -44,7 +40,6 @@ public class IndexationService {
 	public void index(final DataFragment data, final String datasourceConfigName) {
 		// Incrementing the counters
 		byProviderCounters.compute(datasourceConfigName, (k, v) -> v == null ? 1 : v + 1);
-		lastIndexed.put(datasourceConfigName, data);
 
 		// Effectiv indexation
 		indexInternal(data);
@@ -70,8 +65,5 @@ public class IndexationService {
 		byProviderCounters.remove(providerName);
 	}
 
-	public DataFragment getLastIndexed(@NotBlank final String datasourceName) {
-		return lastIndexed.get(datasourceName);
-	}
 
 }
