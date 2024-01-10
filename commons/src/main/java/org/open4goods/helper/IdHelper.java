@@ -145,6 +145,12 @@ public class IdHelper {
 	public static String azCharAndDigits(final String input) {
 		return input.replaceAll("[^a-zA-Z0-9]", "");
 	}
+	
+	public static String azCharAndDigitsPointsDash(String input) {
+		return input.replaceAll("[^a-zA-Z0-9.-]", "");	}
+
+	
+	
 	/**
 	 * Return a clean hashed name
 	 *
@@ -215,5 +221,6 @@ public class IdHelper {
 		}
 		return output;
 	}
+
 
 }

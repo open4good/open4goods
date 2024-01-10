@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import org.apache.commons.lang3.StringUtils;
 import org.open4goods.config.yml.datasource.DataSourceProperties;
 import org.open4goods.config.yml.datasource.FeedConfiguration;
 import org.open4goods.crawler.services.fetching.CsvDatasourceFetchingService;
@@ -133,12 +134,12 @@ public class FeedService {
 	 * @return
 	 */
 	private Set<DataSourceProperties> matchingKey(String feedKey) {
+		String cleanedKey = IdHelper.azCharAndDigits(feedKey).toLowerCase();
 		Set<DataSourceProperties> ds = getFeedsUrl();
 		Set<DataSourceProperties> ret = new HashSet<DataSourceProperties>();
 		ds.forEach((k) -> {
 			try {
-
-				if (IdHelper.azCharAndDigits(feedKey).toLowerCase().equals(IdHelper.azCharAndDigits(k.getDatasourceConfigName()).toLowerCase())) {
+				if (cleanedKey.equals(IdHelper.azCharAndDigits(k.getDatasourceConfigName()).toLowerCase()) || cleanedKey.equals(IdHelper.azCharAndDigits(k.getName()).toLowerCase())) {
 					ret.add(k);
 					logger.info("Found feed byKey :  {}", k);
 				} else {
@@ -172,8 +173,10 @@ public class FeedService {
 		
 		datasourceConfigService.datasourceConfigs(). forEach((k,v) -> {
 			try {
-				if (v.getFeedKey() == null) {
+				if (null != v.getCsvDatasource() && StringUtils.isEmpty(v.getFeedKey())) {
 					logger.info("Adding orphan feed {} ", k);
+					// TODO : ugly Tweak
+					v.setDatasourceConfigName(k);
 					ds.add(v);
 				}
 			} catch (Exception e) {
@@ -335,7 +338,7 @@ public class FeedService {
 		if (null == existing) {
 			String name = IdHelper.azCharAndDigits(feedKey);
 			ret.setName(name);
-		} else {
+		} else {			
 			ret.setDatasourceConfigName(ds.getName()); 
 		}
 
