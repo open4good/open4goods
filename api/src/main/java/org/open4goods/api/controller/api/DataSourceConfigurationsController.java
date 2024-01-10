@@ -49,11 +49,6 @@ public class DataSourceConfigurationsController {
 		return datasourceConfigService.getDatasourceConfig(datasourceName);
 	}
 
-	@GetMapping(path=UrlConstants.MASTER_API_DATASOURCE_CONFIG_PREFIX+"{datasourceName}/lastindexed")
-	@Operation(summary="Get the last indexed datafragment for a specific datasource")
-	public DataFragment datasourceLastIndexed (@PathVariable @NotBlank final String datasourceName) {
-		return indexationService.getLastIndexed(datasourceName);
-	}
 
 	@GetMapping(path=UrlConstants.MASTER_API_DATASOURCE_CONFIG_PREFIX+"{datasourceName}"+UrlConstants.MASTER_API_DATASOURCE_CONFIG_NEXT_SCHEDULE_SUFFIX)
 	@Operation(summary="Get a specific datasource configuration")
