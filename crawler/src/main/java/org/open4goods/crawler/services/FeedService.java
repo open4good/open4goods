@@ -129,7 +129,7 @@ public class FeedService {
 		ds.forEach((k) -> {
 			try {
 
-				if (IdHelper.azCharAndDigits(feedKey).equals(IdHelper.azCharAndDigits(k.getDatasourceConfigName()))) {
+				if (IdHelper.azCharAndDigits(feedKey).toLowerCase().equals(IdHelper.azCharAndDigits(k.getDatasourceConfigName()).toLowerCase())) {
 					ret.add(k);
 					logger.info("Found feed byKey :  {}", k);
 				} else {
@@ -294,6 +294,7 @@ public class FeedService {
 			ds.setCsvDatasource(feedConfig.getDefaultCsvProperties());
 			ds.setDatasourceConfigName(feedKey);
 		} else {
+			logger.error("DATASOURCE found for feed key {}", feedKey);
 			ds = existing;
 		}
 		
