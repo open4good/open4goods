@@ -2,7 +2,7 @@
 	<aside class="col-lg-4 text-center">
 		   <img height="400" th:src="'/images/'+${product.gtin()}+'-cover.png'"	th:alt="${product.names.longestOfferName()}">
 	</aside>
-	<div class="col-lg-4">
+	<div th:if="${product.ecoscore}" class="col-lg-4">
 		<!--/* Best price */-->				
 		<!--th:block th:insert="~{inc/product-price.html}"></th:block-->
 
