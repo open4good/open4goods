@@ -146,8 +146,8 @@ public class CsvIndexationWorker implements Runnable {
 	public void fetch(DataSourceProperties dsProperties) {
 		
 		// TODO : Review the toConsole, bad design
-		String logerName = IdHelper.azCharAndDigitsPointsDash(dsProperties.getName()).toLowerCase();
-		Logger dedicatedLogger = GenericFileLogger.initLogger(logerName, dsProperties.getLogLevel(), logsFolder+"/crawler/", toConsole);
+		String safeName = IdHelper.azCharAndDigitsPointsDash(dsProperties.getName()).toLowerCase();
+		Logger dedicatedLogger = GenericFileLogger.initLogger(safeName, dsProperties.getLogLevel(), logsFolder+"crawler/", toConsole);
 		
 		dedicatedLogger.warn("STARTING CRAWL OF {}", dsProperties);
 		// Creating a direct web crawler if the csv fetching is followed by webFetching
@@ -216,8 +216,8 @@ public class CsvIndexationWorker implements Runnable {
 
 				// local file download, then estimate number of rows
 //					TODO(design,P2,0.5) : Allow CSV file forwarding on remote crawl (for now, CSV with classpath fetching only works on local node)
-				File destFile = File.createTempFile("csv", dsConfName+".csv");
-				dedicatedLogger.info ("Downloading CSV for {} from {} to {}", dsConfName, url, destFile);
+				File destFile = File.createTempFile("csv", safeName+".csv");
+				dedicatedLogger.info ("Downloading CSV for {} from {} to {}", safeName, url, destFile);
 
 				if (url.startsWith("http")) {
 					// These are http resources
@@ -350,7 +350,7 @@ public class CsvIndexationWorker implements Runnable {
 				stats.setFail(true);
 				e.printStackTrace();
 			} 
-			dedicatedLogger.warn("CRAWL TERMINATED : {} ({} imported, {} validations failed, {} excluded, {} errors {}) -  {} ", dsConfName,  okItems, validationFailedItems, excludedItems, errorItems, url);
+			dedicatedLogger.warn("CSV IMPORT TERMINATED : {} ({} imported, {} validations failed, {} excluded, {} errors {}) -  {} ", dsConfName,  okItems, validationFailedItems, excludedItems, errorItems, url);
 
 			// Saving stats 
 			stats.terminate();					
