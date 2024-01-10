@@ -268,7 +268,10 @@ public class DataSourceProperties {
 		internalCron = c;
 		return internalCron;
 	}
+	
+	
 
+	
 	///////////////////////////////
 	// Random generation
 	//////////////////////////////
@@ -297,7 +300,7 @@ public class DataSourceProperties {
 
 	@Override
 	public String toString() {
-		return name;
+		return name + null == datasourceConfigName ? "" : " (" + datasourceConfigName + ")";
 	}
 
 	public Level getLogLevel() {
