@@ -314,8 +314,8 @@ public class FeedService {
 			ret.setDatasourceConfigName(ds.getName()); 
 		}
 
-		// Adding the url associated with the catalog entry (ensure only this url)
-//		ret.getCsvDatasource().getDatasourceUrls().clear();
+		// Adding the url associated with the catalog entry (ensure only this url, removing other one inherited from specific ds configs)
+		ret.getCsvDatasource().getDatasourceUrls().clear();
 		ret.getCsvDatasource().getDatasourceUrls().add(feedUrl);
 
 		return ret;
