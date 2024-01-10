@@ -184,10 +184,10 @@ public class VerticalsConfigService {
 	 */
 	@Cacheable(cacheNames = CacheConstants.FOREVER_LOCAL_CACHE_NAME)
 	// ISSUE : Performance issue here, cache as a unique hash of categories
+	// TODO : Performance issue here, cache as a unique hash of categories
 	//labels:bug,perf
 	public VerticalConfig getVerticalForCategories(Set<String> categories) {
 		
-		System.out.println("NOT CACHED");
 
 		VerticalConfig vc = null;
 
