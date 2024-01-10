@@ -196,6 +196,9 @@ public class CsvIndexationWorker implements Runnable {
 		
 		Set<String> urls = config.getDatasourceUrls() ;	
 		
+		FetchingJobStats legacyStat = new FetchingJobStats(dsProperties.getDatasourceConfigName(), System.currentTimeMillis());
+		csvService.getRunning().put(dsProperties.getDatasourceConfigName(), legacyStat);
+		
 		for (final String url : urls) {
 			
 			FetchCsvStats stats = new FetchCsvStats(url, dsConfName);
@@ -289,12 +292,8 @@ public class CsvIndexationWorker implements Runnable {
 				// NOTE : Choice is made not to have the queue, to avoid this long line counting
 //					final Path path = Paths.get(destFile.getAbsolutePath());
 //					final long linesCount = Files.lines(path).count();
-				final long linesCount = 0L;
-				csvService.getRunning().get(dsConfName).setQueueLength(linesCount);
-
-				dedicatedLogger.info("Starting {} CSV lines fetching of {} ", linesCount, destFile.getAbsolutePath());
-				
-				csvService.getRunning().get(dsConfName).getFilesCounters().put(url, 0L);
+				final long linesCount = 0L;			
+				legacyStat.setQueueLength(linesCount);
 				
 				final MappingIterator<Map<String, String>> mi = oReader.readValues(destFile);
 				
@@ -305,8 +304,8 @@ public class CsvIndexationWorker implements Runnable {
 						stats.incrementLines();
 						
 						// stats update
-						csvService.getRunning().get(dsConfName).incrementProcessed(url);
-						csvService.getRunning().get(dsConfName).decrementQueue();
+						legacyStat.incrementProcessed(url);
+						legacyStat.decrementQueue();
 
 						// Handle the csv line
 						line = mi.next();
@@ -347,7 +346,9 @@ public class CsvIndexationWorker implements Runnable {
 				}
 
 			} catch (final Exception e) {
-				dedicatedLogger.error("CSV fetching aborted : {}:{} ",dsConfName ,url,e);
+				dedicatedLogger.error("CSV fetching aborted : {}:{}",dsConfName ,url,e);
+				stats.setFail(true);
+				e.printStackTrace();
 			} 
 			dedicatedLogger.warn("CRAWL TERMINATED : {} ({} imported, {} validations failed, {} excluded, {} errors {}) -  {} ", dsConfName,  okItems, validationFailedItems, excludedItems, errorItems, url);
 
