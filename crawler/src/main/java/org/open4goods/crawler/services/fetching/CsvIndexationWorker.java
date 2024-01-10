@@ -437,12 +437,16 @@ public class CsvIndexationWorker implements Runnable {
 
 		if (!StringUtils.isEmpty(csvProperties.getAffiliatedUrl())) {
 			String u = getFromCsvRow(item, csvProperties.getAffiliatedUrl());
-			if (null != csvProperties.getAffiliatedUrlReplacementTokens()) {
-				for (Entry<String, String> a : csvProperties.getAffiliatedUrlReplacementTokens().entrySet()) {
-					u = u.replace(a.getKey(), a.getValue());
+			if (null == u) {
+				dedicatedLogger.warn("Null affiliated url in {}", item);	
+			} else {
+				if (null != csvProperties.getAffiliatedUrlReplacementTokens()) {
+					for (Entry<String, String> a : csvProperties.getAffiliatedUrlReplacementTokens().entrySet()) {
+						u = u.replace(a.getKey(), a.getValue());
+					}
 				}
+				p.setAffiliatedUrl(u);				
 			}
-			p.setAffiliatedUrl(u);
 		}
 
 		if (csvProperties.getTrimUrlParameters()) {
