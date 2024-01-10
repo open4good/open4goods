@@ -11,6 +11,7 @@ import org.open4goods.api.services.FetcherOrchestrationService;
 import org.open4goods.api.services.store.DataFragmentStoreService;
 import org.open4goods.config.yml.datasource.DataSourceProperties;
 import org.open4goods.crawler.services.FeedService;
+import org.open4goods.crawler.services.fetching.CsvDatasourceFetchingService;
 import org.open4goods.exceptions.InvalidParameterException;
 import org.open4goods.model.constants.RolesConstants;
 import org.open4goods.model.constants.UrlConstants;
@@ -56,14 +57,17 @@ public class FeedController {
 
 	private final DataFragmentStoreService dataFragmentStoreService;
 
+	private final CsvDatasourceFetchingService  csvDatasourceFetchingService;
+	
 	private final FeedService feedService;
 	
-	public FeedController(SerialisationService serialisationService, FetcherOrchestrationService fetcherOrchestrationService, DataSourceConfigService datasourceConfigService, DataFragmentStoreService dataFragmentStoreService, FeedService feedService) {
+	public FeedController(SerialisationService serialisationService, FetcherOrchestrationService fetcherOrchestrationService, DataSourceConfigService datasourceConfigService, DataFragmentStoreService dataFragmentStoreService, FeedService feedService, CsvDatasourceFetchingService  csvDatasourceFetchingService) {
 		this.serialisationService = serialisationService;
 		this.fetcherOrchestrationService = fetcherOrchestrationService;
 		this.dataFragmentStoreService = dataFragmentStoreService;
 		this.datasourceConfigService = datasourceConfigService;
 		this.feedService = feedService;
+		this.csvDatasourceFetchingService = csvDatasourceFetchingService;
 	}
 
 	
@@ -80,6 +84,14 @@ public class FeedController {
 	@PreAuthorize("hasAuthority('"+RolesConstants.ROLE_ADMIN+"')")
 	public Set<DataSourceProperties> getFeeds() {
 		return feedService.getFeedsUrl();
+	}
+
+	
+	@GetMapping(path = "/feed/queue")
+	@Operation(summary="Show feeds awaiting indexation")
+	@PreAuthorize("hasAuthority('"+RolesConstants.ROLE_ADMIN+"')")
+	public Object[] getQueue() {
+		return csvDatasourceFetchingService.getQueue().toArray();
 	}
 	
 	@PatchMapping(path = "/feedsByKey")
