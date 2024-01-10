@@ -300,7 +300,7 @@ public class DataSourceProperties {
 
 	@Override
 	public String toString() {
-		return name + null == datasourceConfigName ? "" : " (" + datasourceConfigName + ")";
+		return name;
 	}
 
 	public Level getLogLevel() {
