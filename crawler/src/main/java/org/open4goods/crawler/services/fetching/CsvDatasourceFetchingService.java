@@ -128,7 +128,7 @@ public class CsvDatasourceFetchingService extends DatasourceFetchingService {
 	 */
 	@Override
 	public void start(final DataSourceProperties pConfig, final String datasourceConfName) {
-		running.put(datasourceConfName, new FetchingJobStats(datasourceConfName, System.currentTimeMillis()));
+	
 
 		final Logger dedicatedLogger = createDatasourceLogger(datasourceConfName, pConfig,
 				fetcherProperties.getCrawlerLogDir());

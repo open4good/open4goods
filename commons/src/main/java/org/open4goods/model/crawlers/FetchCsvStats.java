@@ -41,6 +41,8 @@ public class FetchCsvStats {
 	@Field(index = true, store = false, type = FieldType.Long)
 	private long exceptions = 0;
 
+	@Field(index = true, store = false, type = FieldType.Boolean)
+	private Boolean fail;
 	
 	public FetchCsvStats() {
 	}	
@@ -49,6 +51,7 @@ public class FetchCsvStats {
 		this.startDate=System.currentTimeMillis();
 		this.datasource=dsName;
 		this.url = url;
+		this.fail = false;
 		this.id=UUID.randomUUID().toString();
 	}
 
@@ -151,6 +154,14 @@ public class FetchCsvStats {
 
 	public void setDuration(long duration) {
 		this.duration = duration;
+	}
+
+	public Boolean getFail() {
+		return fail;
+	}
+
+	public void setFail(Boolean fail) {
+		this.fail = fail;
 	}
 
 
