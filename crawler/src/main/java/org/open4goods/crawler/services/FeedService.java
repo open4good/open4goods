@@ -63,6 +63,12 @@ public class FeedService {
 		
 		Set<DataSourceProperties> ds = getFeedsUrl();
 
+
+
+		
+		// Fetching the feeds
+		
+		
 		logger.info("{} feeds to fetch", ds.size());		
 		ds.forEach((k) -> {
 			try {
@@ -72,6 +78,9 @@ public class FeedService {
 				logger.error("Error loading feed {}", k, e);
 			}
 		});
+		
+		
+		
 	}
 
 	/**
@@ -156,6 +165,22 @@ public class FeedService {
 				logger.error("Error loading catalog {} - {} ", entry.getKey(),entry.getValue(), e);
 			}
 		});
+		
+		
+		// Adding all datasources that do not belong to a catalog (not having feedkey defined)
+		
+		
+		datasourceConfigService.datasourceConfigs(). forEach((k,v) -> {
+			try {
+				if (v.getFeedKey() == null) {
+					logger.info("Adding orphan feed {} ", k);
+					ds.add(v);
+				}
+			} catch (Exception e) {
+				logger.error("Error loading feed {}", k, e);
+			}
+		});
+		
 		return ds;
 	}
 
