@@ -14,7 +14,7 @@ public class ProductStateParser {
 
         return switch (val) {
             case "NEUF", "NEW", "PRODUIT NEUF", "NOUVEAU", "PRODUIT NEW", "HTTP://SCHEMA.ORG/NEWCONDITION" -> ProductState.NEW;
-            case "PRODUIT RECONDITIONNÉ", "RECONDITIONNÉ", "USED", "OCCASION", "VERY GOOD", "COLLECTION", "REFURBISHED" -> ProductState.OCCASION;
+            case "PRODUIT RECONDITIONNÉ", "RECONDITIONNÉ", "USED", "OCCASION", "VERY GOOD", "COLLECTION", "REFURBISHED", "GOOD", "FAIR", "EXCELLENT" -> ProductState.OCCASION;
             default -> {            	
             	throw new InvalidParameterException("Cannot parse ProductState value : " + val);
             }
