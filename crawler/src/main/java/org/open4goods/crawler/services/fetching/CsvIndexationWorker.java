@@ -36,6 +36,7 @@ import org.open4goods.model.constants.ProductState;
 import org.open4goods.model.constants.ReferentielKey;
 import org.open4goods.model.constants.ResourceTagDictionary;
 import org.open4goods.model.crawlers.FetchCsvStats;
+import org.open4goods.model.crawlers.FetchingJobStats;
 import org.open4goods.model.data.DataFragment;
 import org.open4goods.model.data.Price;
 import org.open4goods.model.data.Rating;
@@ -145,7 +146,8 @@ public class CsvIndexationWorker implements Runnable {
 	public void fetch(DataSourceProperties dsProperties) {
 		
 		// TODO : Review the toConsole, bad design
-		Logger dedicatedLogger = GenericFileLogger.initLogger(dsProperties.getDatasourceConfigName() == null ? dsProperties.getName() : IdHelper.azCharAndDigits(dsProperties.getDatasourceConfigName()), dsProperties.getLogLevel(), logsFolder+"/crawler/", toConsole);
+		String logerName = IdHelper.azCharAndDigitsPointsDash(dsProperties.getName()).toLowerCase();
+		Logger dedicatedLogger = GenericFileLogger.initLogger(logerName, dsProperties.getLogLevel(), logsFolder+"/crawler/", toConsole);
 		
 		dedicatedLogger.warn("STARTING CRAWL OF {}", dsProperties);
 		// Creating a direct web crawler if the csv fetching is followed by webFetching
@@ -296,7 +298,7 @@ public class CsvIndexationWorker implements Runnable {
 				
 				final MappingIterator<Map<String, String>> mi = oReader.readValues(destFile);
 				
-				while (mi.hasNext() && !csvService.getRunning().get(dsConfName).isShuttingDown()) {
+				while (mi.hasNext()) {
 					Map<String, String> line = null;
 					try {
 
@@ -354,11 +356,13 @@ public class CsvIndexationWorker implements Runnable {
 			csvIndexationRepository.save(stats);
 		}
 		// Calling the finished to collect stats
-		csvService.finished(csvService.stats().get(dsConfName), dsProperties);
-
 		
-
 		
+		FetchingJobStats sObject = csvService.stats().get(dsConfName);
+		if (null != sObject) {
+			csvService.finished(sObject, dsProperties);
+		}
+
 		
 		if (null != crawler) {
 			dedicatedLogger.info("Terminating the CSV direct crawl controller for {}", dsConfName);
