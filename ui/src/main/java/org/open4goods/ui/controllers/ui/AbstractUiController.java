@@ -102,7 +102,10 @@ public class AbstractUiController {
 
 
 		ret.addObject("loaderImg",loaderImage() );
-		
+		/* test Laurent */
+		ret.addObject("loaderImgLogo",loaderImageLogo() );
+		/* test Laurent */
+
 		ret.addObject("gaId",config.getWebConfig().getGoogleAnalyticsId());
 
 		ret.addObject("wiki",xwikiService);
@@ -134,6 +137,12 @@ public class AbstractUiController {
 	public String loaderImage() {
 		
 		return "/assets/img/loader/"+random(1, maxImg)+".webp";
+		
+	}
+
+	public String loaderImageLogo() {
+		
+		return "/assets/img/logo/NUDGER.png";
 		
 	}
 	
