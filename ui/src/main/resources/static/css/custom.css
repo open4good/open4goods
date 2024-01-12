@@ -211,14 +211,20 @@ h6[class^="h"] {
 /* preloader style */
 
 .wrapper__preloader-img {
-	width:550px;
-	height:550px;
+	width:700px;
+	height:auto;
+	min-height:350px;
 }
 #preloader-img {
 	position: absolute;
 	border-radius: 8px;
 	width:100%;
 	height:100%;
+}
+
+.logo_loader {
+	width: 500px!important;
+	height: auto!important;
 }
 
 .wrapper__preloader-img svg {
@@ -269,24 +275,107 @@ h6[class^="h"] {
 	transform: rotateY(180deg);
 }
 
+/*
 
+HOME PAGE STEP
+
+*/
+
+.containerNavigation {
+    width: 100vh;
+    height: 100vw;
+    transform: rotate(-90deg) translateX(-100vh);
+    transform-origin: top left;
+    overflow-x: hidden;
+
+    -ms-overlow-style: none;
+    scrollbar-width: none;
+}
+::-webkit-scrollbar {
+    display: none;
+}
+
+.navigationHorizontal {
+    display: flex;
+    flex-direction: row;
+    width: 300vw;
+    transform: rotate(90deg) translateY(-100vh);
+    transform-origin: top left;
+}
+
+.slide {
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.containerNavigation .action-buttons {
+	position: fixed;
+	left: 31%;
+	top: 97%;
+	z-index: 100;
+	box-sizing: border-box;
+	margin: 0;
+	padding: 0;
+}
+
+.containerNavigation .action-buttons button {
+	background-color: #fff;
+	border: none;
+	color: #aaa;
+	cursor: pointer;
+	font-size: 16px;
+	padding: 15px;
+}
+
+.containerNavigation .action-buttons .down-button {
+	border-top-left-radius: 5px;
+	border-bottom-left-radius: 5px;
+}
+.containerNavigation .action-buttons .up-button {
+	border-top-right-radius: 5px;
+	border-bottom-right-radius: 5px;
+}
 
 /* PAGES */
-
+/*
 .home-page > main.bg-gray-200 {
 	background-color: #fff !important;
 }
 
 .home-page > main.bg-gray-200 > section.bg-white{
 	background-color: #f1efe7 !important;
-}
+}*/
 
 /* CUSTOM COLOR NUDGER */
 
+.nudger_vert--bg {
+	background-color: #1E851A;
+}
+.nudger_vert--bg_opacity {
+	background-color: rgba(30,133,26,0.33);
+}
+.nudger_vert--text {
+	color: #1E851A;
+}
 .degrade--green {
 	background: rgb(30,133,26);
 	background: linear-gradient(180deg, rgba(30,133,26,0.33) 0%, rgba(30,133,26,0.08) 33%, rgba(30,133,26,0) 100%);
 }
+
+
+/* ***************** */
+
+.badge--nudger {
+	padding: .25rem 1rem;
+	display: inline-flex;
+	vertical-align: baseline;
+	border-radius: .6rem;
+}
+
+/* ***************** */
 
 .table-caracteristics-fs,
 .table-caracteristics-fs * {
