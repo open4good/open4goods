@@ -3,15 +3,25 @@ package org.open4goods.helper;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.open4goods.exceptions.InvalidParameterException;
+import org.slf4j.Logger;
+
+import ch.qos.logback.classic.Level;
+
+
 
 public class WarrantyParser {
 
+	private static final Logger logger = GenericFileLogger.initLogger("product-warranty-parser", Level.INFO, "/opt/open4goods/logs/", false);
 	public static Integer parse(final String val) throws InvalidParameterException {
 
+		if (StringUtils.isEmpty(val)) {
+			throw new InvalidParameterException("Cannot evaluate empty Warranty value");
+		}
+		
 		String tmp = val.toLowerCase();
 
-		tmp = tmp.replace("*", "");
-		tmp = tmp.replace("garantie", "");
+//		tmp = tmp.replace("*", "");
+//		tmp = tmp.replace("garantie", "");
 		tmp = StringUtils.normalizeSpace(tmp);
 
 		switch (tmp) {
@@ -33,12 +43,15 @@ public class WarrantyParser {
 
 
 		if (!NumberUtils.isCreatable(tmp)) {
-			throw new InvalidParameterException("Not a numeric parsable Warranty value : " + tmp);
 		}
 
-		// Default numeric is year
-		//TODO(feature, P1, 0.5) : Redesign through regexp
-		return NumberUtils.createInteger(tmp)*12;
-
+		try {
+			// Default numeric is year
+			//TODO(feature, P1, 0.5) : Redesign through regexp
+			return NumberUtils.createInteger(tmp)*12;
+		} catch (Exception e) {
+			logger.error("Unknown Warranty value : " + tmp);
+			throw new InvalidParameterException("Unknown Warranty value: " + tmp);
+		}
 	}
 }

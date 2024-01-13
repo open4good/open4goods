@@ -601,14 +601,10 @@ public class CsvIndexationWorker implements Runnable {
 		// Shipping time
 		if (!StringUtils.isEmpty(csvProperties.getShippingTime())) {
 			final String strW = getFromCsvRow(item, csvProperties.getShippingTime());
-			if (StringUtils.isEmpty(strW)) {
-				dedicatedLogger.warn("No  ShippingTime in csv column {}", csvProperties.getShippingTime());
-			} else {
-				try {
-					p.setShippingTime(ShippingTimeParser.parse(strW));
-				} catch (final Exception e1) {
-					dedicatedLogger.warn("Cannot parse shippingTime : {} ", e1.getMessage());
-				}
+			try {
+				p.setShippingTime(ShippingTimeParser.parse(strW));
+			} catch (final Exception e1) {
+				dedicatedLogger.warn("Cannot parse shippingTime : {} ", e1.getMessage());
 			}
 		}
 
