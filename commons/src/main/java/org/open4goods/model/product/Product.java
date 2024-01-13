@@ -23,7 +23,7 @@ import org.joda.time.format.PeriodFormatter;
 import org.open4goods.dao.ProductRepository;
 import org.open4goods.model.Standardisable;
 import org.open4goods.model.constants.Currency;
-import org.open4goods.model.constants.ProductState;
+import org.open4goods.model.constants.ProductCondition;
 import org.open4goods.model.constants.ProviderType;
 import org.open4goods.model.constants.ReferentielKey;
 import org.open4goods.model.data.AiDescription;
@@ -353,7 +353,7 @@ public class Product implements Standardisable {
 
 	
 	public boolean hasOccasions() {
-		return price.getConditions().contains(ProductState.OCCASION);
+		return price.getConditions().contains(ProductCondition.OCCASION);
 	}
 	
 	

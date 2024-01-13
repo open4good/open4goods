@@ -3,7 +3,7 @@ package org.open4goods.config.yml.test;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
-import org.open4goods.model.constants.ProductState;
+import org.open4goods.model.constants.ProductCondition;
 import org.open4goods.model.data.DataFragment;
 import org.open4goods.model.data.RatingType;
 
@@ -35,7 +35,7 @@ public class TestUrl {
 	private SellerExpectedResult seller;
 
 
-	private ProductState productState;
+	private ProductCondition productState;
 	private NumericExpectedResult shippingCost;
 	private NumericExpectedResult shippingTime;
 	private NumericExpectedResult warranty;
@@ -424,11 +424,11 @@ public class TestUrl {
 		this.warranty = warranty;
 	}
 
-	public ProductState getProductState() {
+	public ProductCondition getProductState() {
 		return productState;
 	}
 
-	public void setProductState(final ProductState productState) {
+	public void setProductState(final ProductCondition productState) {
 		this.productState = productState;
 	}
 

@@ -8,7 +8,7 @@ import org.open4goods.config.yml.attributes.AttributeConfig;
 import org.open4goods.config.yml.ui.VerticalConfig;
 import org.open4goods.dao.ProductRepository;
 import org.open4goods.helper.GenericFileLogger;
-import org.open4goods.model.constants.ProductState;
+import org.open4goods.model.constants.ProductCondition;
 import org.open4goods.model.dto.NumericRangeFilter;
 import org.open4goods.model.dto.VerticalFilterTerm;
 import org.open4goods.model.dto.VerticalSearchRequest;
@@ -68,7 +68,7 @@ public class SearchService {
 	 * @return
 	 */
 	// TODO(perf : cache)
-	public VerticalSearchResponse globalSearch(String initialQuery, Integer fromPrice, Integer toPrice, Set<String> categories, ProductState condition, int from, int to, int minOffers, boolean sort) {
+	public VerticalSearchResponse globalSearch(String initialQuery, Integer fromPrice, Integer toPrice, Set<String> categories, ProductCondition condition, int from, int to, int minOffers, boolean sort) {
 
 		String query =  sanitize(initialQuery);
 

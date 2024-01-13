@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.open4goods.model.constants.ProductState;
+import org.open4goods.model.constants.ProductCondition;
 
 /**
  * Results of a search inside a specific vertical
@@ -23,7 +23,7 @@ public class VerticalSearchRequest {
 	Integer minOffers;
 	Integer maxOffers;
 
-	ProductState condition;
+	ProductCondition condition;
 
 	Integer pageNumber;
 	Integer pageSize;
@@ -86,11 +86,11 @@ public class VerticalSearchRequest {
 		this.maxOffers = maxOffers;
 	}
 
-	public ProductState getCondition() {
+	public ProductCondition getCondition() {
 		return condition;
 	}
 
-	public void setCondition(ProductState condition) {
+	public void setCondition(ProductCondition condition) {
 		this.condition = condition;
 	}
 

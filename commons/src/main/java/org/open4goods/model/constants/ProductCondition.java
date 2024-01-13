@@ -4,7 +4,7 @@ package org.open4goods.model.constants;
  * @author goulven
  *
  */
-public enum ProductState {
+public enum ProductCondition {
 //	UNKNOWN,
 	OCCASION,
 	NEW

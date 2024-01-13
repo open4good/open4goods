@@ -11,7 +11,7 @@ import java.util.stream.Collectors;
 
 import org.open4goods.model.Standardisable;
 import org.open4goods.model.constants.Currency;
-import org.open4goods.model.constants.ProductState;
+import org.open4goods.model.constants.ProductCondition;
 import org.open4goods.services.StandardiserService;
 import org.springframework.data.elasticsearch.annotations.Field;
 import org.springframework.data.elasticsearch.annotations.FieldType;
@@ -40,15 +40,15 @@ public class AggregatedPrices implements Standardisable {
 	@Field(index = true, store = false, type = FieldType.Keyword)
 
 	// Contains the conditions for this product. Shortcut for elastic queryng
-	private Set<ProductState> conditions = new HashSet<>();
+	private Set<ProductCondition> conditions = new HashSet<>();
 
 	public List<AggregatedPrice> newOffers() {
-		return sortedOffers(ProductState.NEW);
+		return sortedOffers(ProductCondition.NEW);
 	}
 	
 	
 	public List<AggregatedPrice> occasionOffers() {
-		return sortedOffers(ProductState.OCCASION);
+		return sortedOffers(ProductCondition.OCCASION);
 	}
 	
 	
@@ -57,7 +57,7 @@ public class AggregatedPrices implements Standardisable {
 	 * @param productState 
 	 * @return
 	 */
-	public List<AggregatedPrice> sortedOffers(ProductState productState) {
+	public List<AggregatedPrice> sortedOffers(ProductCondition productState) {
 
 		// Find the cheapest in any case
 		final List<AggregatedPrice> res = offers.stream()
@@ -71,7 +71,7 @@ public class AggregatedPrices implements Standardisable {
 	}
 	
 
-	public List<PriceHistory> getHistory(ProductState state) {
+	public List<PriceHistory> getHistory(ProductCondition state) {
 
 		return switch (state) {
 	    case OCCASION  -> this.occasionPricehistory;
@@ -100,7 +100,7 @@ public class AggregatedPrices implements Standardisable {
 
 	}
 	
-	public Optional<AggregatedPrice> getMinPrice(ProductState state) {
+	public Optional<AggregatedPrice> getMinPrice(ProductCondition state) {
 		return offers.stream().filter(e -> e.getProductState().equals(state)) .min(Comparator.comparing(AggregatedPrice::getPrice)) ;
 	}
 	
@@ -135,11 +135,11 @@ public class AggregatedPrices implements Standardisable {
 		this.trend = trend;
 	}
 
-	public Set<ProductState> getConditions() {
+	public Set<ProductCondition> getConditions() {
 		return conditions;
 	}
 
-	public void setConditions(Set<ProductState> conditions) {
+	public void setConditions(Set<ProductCondition> conditions) {
 		this.conditions = conditions;
 	}
 
