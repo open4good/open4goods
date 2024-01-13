@@ -54,8 +54,6 @@ public class ProductIndexationWorker implements Runnable {
 					// A map to deduplicate --> MEANS WE CAN SOMETIMES LOOSE DATAFRAMENTS IF 2 ENTRIES ARE IN THE SAME BAG (no because we put back in queue)
 					final Map<String,Product> buffer = new HashMap<>();	
 										
-					
-					
 					// Dequeuing
 					for (int i = 0; i < dequeuePageSize; i++) {
 						Product item = service.getQueue().take();
@@ -67,8 +65,6 @@ public class ProductIndexationWorker implements Runnable {
 							buffer.put(item.gtin(),item);							
 						}
 					}
-					
-	
 					
 					service.store(buffer.values());
 					
