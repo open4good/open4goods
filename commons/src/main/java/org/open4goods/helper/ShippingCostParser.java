@@ -1,23 +1,39 @@
 package org.open4goods.helper;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.open4goods.exceptions.InvalidParameterException;
+import org.slf4j.Logger;
+
+import ch.qos.logback.classic.Level;
 
 public class ShippingCostParser {
 
+	// TODO : Path from conf
+	private static final Logger logger = GenericFileLogger.initLogger("product-shippingcost-parser", Level.INFO, "/opt/open4goods/logs/", false);
+
 	public static Double parse(final String val) throws InvalidParameterException {
 
-		final String tmp = val.toLowerCase();
-
-		if (val.contains("offerte")) {
-			return 0.0;
+		if (StringUtils.isEmpty(val)) {
+			throw new InvalidParameterException("Cannot evaluate empty ShippingCost value");
 		}
 
-		if (!NumberUtils.isCreatable(tmp)) {
-			throw new InvalidParameterException("Not a numeric parsable shipping cost value : " + val);
+		if (!NumberUtils.isCreatable(val)) {
+			return switch (val) {
+			case "offerte" -> 0.0;
+			default -> {
+				logger.error("Unknown ProductCondition value : " + val);
+				throw new InvalidParameterException("Cannot parse text ShippingCostvalue : " + val);
+			}
+			};
+
+		} else {
+			try {
+				final String tmp = val.toLowerCase();
+				return NumberUtils.createDouble(tmp);
+			} catch (Exception e) {
+				throw new InvalidParameterException("Cannot parse numeric ShippingCost value : " + val);
+			}
 		}
-
-		return NumberUtils.createDouble(tmp);
-
 	}
 }

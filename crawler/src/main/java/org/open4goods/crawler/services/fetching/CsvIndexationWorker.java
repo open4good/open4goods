@@ -629,14 +629,10 @@ public class CsvIndexationWorker implements Runnable {
 		// Shipping price
 		if (!StringUtils.isEmpty(csvProperties.getShippingCost())) {
 			final String strW = getFromCsvRow(item, csvProperties.getShippingCost());
-			if (StringUtils.isEmpty(strW)) {
-				dedicatedLogger.warn("No  ShippingCost in csv column {}", csvProperties.getShippingCost());
-			} else {
-				try {
-					p.setShippingCost(ShippingCostParser.parse(strW));
-				} catch (final Exception e1) {
-					dedicatedLogger.warn("Cannot parse ShippingCost : {} ", e1.getMessage());
-				}
+			try {
+				p.setShippingCost(ShippingCostParser.parse(strW));
+			} catch (final Exception e1) {
+				dedicatedLogger.info("Cannot parse ShippingCost : {} ", e1.getMessage());
 			}
 		}
 
