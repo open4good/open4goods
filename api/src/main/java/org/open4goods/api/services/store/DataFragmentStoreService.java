@@ -76,8 +76,8 @@ public class DataFragmentStoreService {
 
 		// TODO : from conf
 		int dequeueSize = 200;
-		int workers = 6;
-		int pauseDuration = 5000;
+		int workers = 4;
+		int pauseDuration = 4000;
 //		
 		logger.info("Starting file queue consumer thread, with bulk page size of {} items", dequeueSize );
 //				
