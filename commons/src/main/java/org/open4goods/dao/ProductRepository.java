@@ -1,39 +1,26 @@
 package org.open4goods.dao;
 
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Comparator;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-import java.util.Map.Entry;
 import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.open4goods.config.yml.attributes.AttributeConfig;
 import org.open4goods.config.yml.ui.VerticalConfig;
 import org.open4goods.exceptions.ResourceNotFoundException;
 import org.open4goods.model.constants.CacheConstants;
-import org.open4goods.model.data.DataFragment;
-import org.open4goods.model.dto.NumericRangeFilter;
-import org.open4goods.model.dto.VerticalFilterTerm;
-import org.open4goods.model.dto.VerticalSearchResponse;
 import org.open4goods.model.product.Product;
-import org.open4goods.store.repository.ElasticProductRepository;
 import org.open4goods.store.repository.ProductIndexationWorker;
+import org.open4goods.store.repository.RedisProductRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
 import org.springframework.data.elasticsearch.client.elc.ElasticsearchAggregations;
 import org.springframework.data.elasticsearch.client.elc.NativeQuery;
 import org.springframework.data.elasticsearch.client.elc.NativeQueryBuilder;
@@ -44,17 +31,11 @@ import org.springframework.data.elasticsearch.core.SearchHits;
 import org.springframework.data.elasticsearch.core.mapping.IndexCoordinates;
 import org.springframework.data.elasticsearch.core.query.Criteria;
 import org.springframework.data.elasticsearch.core.query.CriteriaQuery;
-import org.springframework.data.elasticsearch.core.query.CriteriaQueryBuilder;
 import org.springframework.data.elasticsearch.core.query.Query;
-import org.springframework.data.redis.core.RedisOperations;
 
 import co.elastic.clients.elasticsearch._types.aggregations.Aggregation;
 import co.elastic.clients.elasticsearch._types.aggregations.LongTermsAggregate;
 import co.elastic.clients.elasticsearch._types.aggregations.LongTermsBucket;
-import co.elastic.clients.elasticsearch._types.aggregations.MaxAggregate;
-import co.elastic.clients.elasticsearch._types.aggregations.MinAggregate;
-import co.elastic.clients.elasticsearch._types.aggregations.StringTermsAggregate;
-import co.elastic.clients.elasticsearch._types.aggregations.StringTermsBucket;
 
 /**
  * The Elastic Data Access Object for products TODO : Could maintain the elastic
@@ -76,21 +57,19 @@ public class ProductRepository {
 	
 	
 	/**
-	 * Duration in ms where a price is considered to be valid. Only data with a
-	 * price greater than this one will be returned to the user
+	 * !!!MAJOR CONST !!! Duration in ms where a price is considered to be valid. Only data with a
+	 * price greater than this one will be returned to the user. Also defines the caching TTL of redis
 	 **/
 	// TODO(gof) : from conf
-	private long VALID_UNTIL_DURATION = 1000 * 3600 * 24 * 2;
+	public final static long VALID_UNTIL_DURATION = 1000 * 3600 * 24 * 2;
 
 	public IndexCoordinates current_index = IndexCoordinates.of(MAIN_INDEX_NAME);
 
 	private @Autowired ElasticsearchOperations elasticsearchTemplate;
 
-	private @Autowired ElasticProductRepository elasticProductRepository;
+	private @Autowired RedisProductRepository redisRepository;
 	
-	
-	
-	private @Autowired RedisOperations<String, Product> redisRepo;
+//	private @Autowired RedisOperations<String, Product> redisRepo;
 
 	public ProductRepository() {
 		
@@ -248,7 +227,8 @@ public class ProductRepository {
 //		});
 
 //		executor.submit(() -> {
-			redisRepo.opsForValue().multiSet(data.stream().collect(Collectors.toMap(Product::gtin, Function.identity())));
+			redisRepository.saveAll(data);
+//			redisRepo.opsForValue().multiSet(data.stream().collect(Collectors.toMap(Product::gtin, Function.identity())));
 //		});
 	}
 	
@@ -260,7 +240,8 @@ public class ProductRepository {
 //		});
 
 //		executor.submit(() -> {
-			redisRepo.opsForValue().set(data.gtin(), data);
+//			redisRepo.opsForValue().set(data.gtin(), data);
+			redisRepository.save(data);
 //		});
 	}
 	
@@ -279,7 +260,11 @@ public class ProductRepository {
 
 		logger.info("Getting product {}", productId);
 		// Getting from redis
-		Product result = redisRepo.opsForValue().get(productId);
+		
+		
+		
+//		Product result = redisRepo.opsForValue().get(productId);
+		Product result = redisRepository.findById(productId).orElseThrow(ResourceNotFoundException::new);
 
 		if (null == result) {
 			// Fail, getting from elastic
@@ -314,7 +299,8 @@ public class ProductRepository {
 		
 		
 		// Getting from redis
-		Iterable<Product> redisResults = redisRepo.opsForValue().multiGet(ids);
+//		Iterable<Product> redisResults = redisRepo.opsForValue().multiGet(ids);
+		Iterable<Product> redisResults = redisRepository.findAllById(ids);
 		redisResults.forEach(e -> {
 			if (null != e) {
 				ret.put(e.gtin(), e);
@@ -338,17 +324,19 @@ public class ProductRepository {
 	
 			
 			// Filtrer et collecter les produits à partir d'une liste en utilisant leur GTIN comme clé dans une map
-			Map<String, Product> redisItems = ret.values().stream()
+			Set<Product> redisItems = ret.values().stream()
 			    // Filtrer les éléments non nuls
 			    .filter(Objects::nonNull)
 			    // Filtrer les éléments dont le GTIN est présent dans la liste des IDs manquants
 			    .filter(e -> missingIds.contains(e.gtin()))
 			    // Collecter les produits dans une map avec le GTIN comme clé
-			    .collect(Collectors.toMap(Product::gtin, Function.identity()));
+			    .collect(Collectors.toSet());
 			
 			logger.info("Saving {} products in redis",redisItems.size());
 //			executor.submit(() -> {
-				redisRepo.opsForValue().multiSet(redisItems);
+				
+			redisRepository.saveAll(redisItems);
+//				redisRepo.opsForValue().multiSet();
 //			});
 		}
 		
@@ -427,7 +415,8 @@ public class ProductRepository {
 	 */
 	private void saveToRedis(Product result) {
 //		executor.submit(() -> {
-			redisRepo.opsForValue().set(result.gtin(), result);
+//			redisRepo.opsForValue().set(result.gtin(), result);
+			redisRepository.save(result);
 //		});
 	}
 

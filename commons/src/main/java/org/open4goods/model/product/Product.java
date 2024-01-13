@@ -20,13 +20,13 @@ import org.joda.time.Period;
 import org.joda.time.PeriodType;
 import org.joda.time.format.PeriodFormat;
 import org.joda.time.format.PeriodFormatter;
+import org.open4goods.dao.ProductRepository;
 import org.open4goods.model.Standardisable;
 import org.open4goods.model.constants.Currency;
 import org.open4goods.model.constants.ProductState;
 import org.open4goods.model.constants.ProviderType;
 import org.open4goods.model.constants.ReferentielKey;
 import org.open4goods.model.data.AiDescription;
-import org.open4goods.model.data.DataFragment;
 import org.open4goods.model.data.Description;
 import org.open4goods.model.data.Resource;
 import org.open4goods.model.data.Score;
@@ -45,10 +45,10 @@ import org.springframework.data.redis.core.RedisHash;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @Document(indexName = Product.DEFAULT_REPO, createIndex = true)
-@RedisHash(Product.DEFAULT_REPO)
+@RedisHash(value=Product.DEFAULT_REPO, timeToLive = ProductRepository.VALID_UNTIL_DURATION)
 @Setting( settingPath = "/elastic-settings.json")
-@JsonIgnoreProperties(ignoreUnknown = true)
 // TODO : Disabling to see/test  if a clean jackson serial
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class Product implements Standardisable {
 
 	private final static Logger logger = LoggerFactory.getLogger(Product.class);
