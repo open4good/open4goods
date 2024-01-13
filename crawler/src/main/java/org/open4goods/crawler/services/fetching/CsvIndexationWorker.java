@@ -593,7 +593,7 @@ public class CsvIndexationWorker implements Runnable {
 							break;
 						}
 					} catch (final Exception e1) {
-						dedicatedLogger.warn("Cannot parse InStock : {} ", e1.getMessage());
+						dedicatedLogger.info("Cannot parse InStock : {} ", e1.getMessage());
 					}			
 			}
 		}
@@ -604,7 +604,7 @@ public class CsvIndexationWorker implements Runnable {
 			try {
 				p.setShippingTime(ShippingTimeParser.parse(strW));
 			} catch (final Exception e1) {
-				dedicatedLogger.warn("Cannot parse shippingTime : {} ", e1.getMessage());
+				dedicatedLogger.info("Cannot parse shippingTime : {} ", e1.getMessage());
 			}
 		}
 
@@ -612,12 +612,12 @@ public class CsvIndexationWorker implements Runnable {
 		if (!StringUtils.isEmpty(csvProperties.getQuantityInStock())) {
 			final String strW = getFromCsvRow(item, csvProperties.getQuantityInStock());
 			if (StringUtils.isEmpty(strW)) {
-				dedicatedLogger.warn("No  ShippingCost in csv column {}", csvProperties.getQuantityInStock());
+				dedicatedLogger.info("No  ShippingCost in csv column {}", csvProperties.getQuantityInStock());
 			} else {
 				try {
 					p.setQuantityInStock(Integer.valueOf(strW));
 				} catch (final Exception e1) {
-					dedicatedLogger.warn("Cannot parse QuantityInStock : {} ", e1.getMessage());
+					dedicatedLogger.info("Cannot parse QuantityInStock : {} ", e1.getMessage());
 				}
 			}
 		}
@@ -642,7 +642,7 @@ public class CsvIndexationWorker implements Runnable {
 					p.setWarranty(Integer.valueOf(strW));
 				}
 			} catch (final Exception e1) {
-				dedicatedLogger.warn("Cannot parse Warranty : {} ", e1.getMessage());
+				dedicatedLogger.info("Cannot parse Warranty : {} ", e1.getMessage());
 			}
 		}
 
@@ -658,7 +658,7 @@ public class CsvIndexationWorker implements Runnable {
 							break;
 						}
 					} catch (final Exception e1) {				
-							dedicatedLogger.warn("Cannot parse product state : {} ", e1.getMessage());
+							dedicatedLogger.info("Cannot parse product state : {} ", e1.getMessage());
 					}	
 			}
 		}
