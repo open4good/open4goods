@@ -66,7 +66,7 @@ public class DataFragmentAggregationWorker implements Runnable {
 				} else {
 					try {
 						logger.debug("No DataFragments to dequeue. Will sleep {}ms",pauseDuration);
-						Thread.sleep(pauseDuration);
+						Thread.sleep(pauseDuration + (int) (Math.random() * 1000));
 					} catch (final InterruptedException e) {
 					}
 				}
