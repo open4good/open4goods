@@ -4,9 +4,13 @@ import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Random;
 import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
@@ -63,15 +67,18 @@ public class FeedService {
 		// 1 - Loads the whole feeds as a list of DataSourceProperties, eventually hot defaulted
 		
 		Set<DataSourceProperties> ds = getFeedsUrl();
+		List<DataSourceProperties> dsl =new ArrayList<DataSourceProperties>(ds);
 
 
-
+		long seed = System.nanoTime();
+		Collections.shuffle(dsl, new Random(seed));
+		
 		
 		// Fetching the feeds
 		
 		
 		logger.info("{} feeds to fetch", ds.size());		
-		ds.forEach((k) -> {
+		dsl.forEach((k) -> {
 			try {
 			logger.info("Fetching feed {} ", k);
 			fetchingService.start(k,k.getDatasourceConfigName());
