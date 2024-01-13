@@ -38,10 +38,6 @@ import jakarta.annotation.PreDestroy;
 
 public class DataFragmentStoreService {
 
-	// TODO : from conf
-	private static final int DATAFRAGMENT_INDEXATION_BULK_SIZE = 250;
-
-
 	private static final Logger logger = LoggerFactory.getLogger(DataFragmentStoreService.class);
 
 
@@ -202,9 +198,6 @@ public class DataFragmentStoreService {
 				}
 
 			}
-
-
-
 
 			// Saving the result
 			aggregatedDataRepository.index(results);
