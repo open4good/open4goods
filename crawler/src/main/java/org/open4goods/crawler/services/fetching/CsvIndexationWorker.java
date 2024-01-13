@@ -587,12 +587,10 @@ public class CsvIndexationWorker implements Runnable {
 				// Instock
 					try {
 						String val = getFromCsvRow(item, inStock);
-						if (!StringUtils.isEmpty(val)) {
-							InStock stock = InStockParser.parse(val);
-							if (null != stock) {
-								p.setInStock(stock);
-								break;
-							}
+						InStock stock = InStockParser.parse(val);
+						if (null != stock) {
+							p.setInStock(stock);
+							break;
 						}
 					} catch (final Exception e1) {
 						dedicatedLogger.warn("Cannot parse InStock : {} ", e1.getMessage());
@@ -604,7 +602,7 @@ public class CsvIndexationWorker implements Runnable {
 		if (!StringUtils.isEmpty(csvProperties.getShippingTime())) {
 			final String strW = getFromCsvRow(item, csvProperties.getShippingTime());
 			if (StringUtils.isEmpty(strW)) {
-				dedicatedLogger.warn("No  ShippingCost in csv column {}", csvProperties.getShippingTime());
+				dedicatedLogger.warn("No  ShippingTime in csv column {}", csvProperties.getShippingTime());
 			} else {
 				try {
 					p.setShippingTime(ShippingTimeParser.parse(strW));
