@@ -4,16 +4,18 @@ package org.open4goods.helper;
 
 import java.time.Year;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.joda.time.LocalDate;
 import org.joda.time.format.DateTimeFormat;
 import org.open4goods.exceptions.InvalidParameterException;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
+import ch.qos.logback.classic.Level;
 //TODO(feature) : Shipping time could be greatly improved (jours ouvrés, inneficient parsing ..., log unresolved and so on for ShippingCostParser, ...)
 public class ShippingTimeParser {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(ShippingTimeParser.class);
+	private static final Logger logger = GenericFileLogger.initLogger("product-shipping-time-parser", Level.INFO, "/opt/open4goods/logs/", false);
 	/**
 	 * Parse a shipping time
 	 * @param val
@@ -23,9 +25,13 @@ public class ShippingTimeParser {
 	public static Integer parse(final String val) throws InvalidParameterException {
 
 		String tmp = val.toLowerCase();
-		tmp = tmp.replace("en stock", "");
 
 		tmp = tmp.trim();
+		
+		
+		if (StringUtils.isEmpty(tmp)) {
+			throw new InvalidParameterException("Cannot evaluate empty ShippingTime value");
+		}
 
 		switch (tmp) {
 
@@ -46,36 +52,27 @@ public class ShippingTimeParser {
 		default:
 			break;
 		}
+//
+//		// Parsing as french full date
+//		try {
+//			//TODO(gof) : test / detect if we have a ending year before appending it
+//			final LocalDate localDate = DateTimeFormat.forPattern( "EEEE dd MMM YYYY" ).withLocale( java.util.Locale.FRENCH ).parseLocalDate( tmp + " " + Year.now().getValue());
+//
+//			return Long.valueOf(localDate.toInterval().toDuration().getStandardDays()).intValue();
+//
+//		} catch (final Exception e) {
+//			LOGGER.info("Cannot convert {} to a local french date : {}", tmp, e.getMessage());
+//		}
 
 
 
-
-
-		if (tmp.startsWith("dès")) {
-			tmp = tmp.substring("dès".length()).trim();
-		}
-
-
-
-
-		// Parsing as french full date
 		try {
-			//TODO(gof) : test / detect if we have a ending year before appending it
-			final LocalDate localDate = DateTimeFormat.forPattern( "EEEE dd MMM YYYY" ).withLocale( java.util.Locale.FRENCH ).parseLocalDate( tmp + " " + Year.now().getValue());
-
-			return Long.valueOf(localDate.toInterval().toDuration().getStandardDays()).intValue();
-
-		} catch (final Exception e) {
-			LOGGER.info("Cannot convert {} to a local french date : {}", tmp, e.getMessage());
+			return NumberUtils.createInteger(tmp);
+		} catch (Exception e) {
+			throw new InvalidParameterException("Unknown ShippingTime value : " + tmp);
 		}
 
 
-
-		if (!NumberUtils.isCreatable(tmp)) {
-			throw new InvalidParameterException("Not a numeric parsable ShippingTime value : " + val);
-		}
-
-		return NumberUtils.createInteger(tmp);
 
 	}
 }
