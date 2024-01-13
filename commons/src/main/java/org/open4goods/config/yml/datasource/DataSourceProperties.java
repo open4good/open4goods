@@ -8,7 +8,7 @@ import java.util.Random;
 import java.util.Set;
 
 import org.open4goods.model.constants.Currency;
-import org.open4goods.model.constants.ProductState;
+import org.open4goods.model.constants.ProductCondition;
 import org.open4goods.model.constants.ReferentielKey;
 import org.open4goods.model.constants.TimeConstants;
 import org.slf4j.Logger;
@@ -159,7 +159,7 @@ public class DataSourceProperties {
 	/**
 	 * The condition of the item
 	 */
-	private ProductState defaultItemCondition;
+	private ProductCondition defaultItemCondition;
 
 	/**
 	 * The date format
@@ -471,11 +471,11 @@ public class DataSourceProperties {
 		this.minimumIndexedItems = minimumIndexedItems;
 	}
 
-	public ProductState getDefaultItemCondition() {
+	public ProductCondition getDefaultItemCondition() {
 		return defaultItemCondition;
 	}
 
-	public void setDefaultItemCondition(final ProductState defaultProductState) {
+	public void setDefaultItemCondition(final ProductCondition defaultProductState) {
 		defaultItemCondition = defaultProductState;
 	}
 

@@ -6,7 +6,7 @@ import java.util.*;
 
 import org.open4goods.api.services.aggregation.AbstractRealTimeAggregationService;
 import org.open4goods.config.yml.ui.VerticalProperties;
-import org.open4goods.model.constants.ProductState;
+import org.open4goods.model.constants.ProductCondition;
 import org.open4goods.model.data.DataFragment;
 import org.open4goods.model.product.AggregatedPrice;
 import org.open4goods.model.product.AggregatedPrices;
@@ -115,8 +115,8 @@ public class PriceAggregationService extends AbstractRealTimeAggregationService 
 		aggregatedData.getPrice().setOffers(Sets.newHashSet(reducedPrices.values()));
 
 		// Computing / incrementing history
-		computePriceHistory(aggPrices, ProductState.OCCASION);
-		computePriceHistory(aggPrices, ProductState.NEW);
+		computePriceHistory(aggPrices, ProductCondition.OCCASION);
+		computePriceHistory(aggPrices, ProductCondition.NEW);
 
 		// Setting the product state summary
 		aggPrices.getOffers().forEach(i -> aggPrices.getConditions().add(i.getProductState()));
@@ -134,7 +134,7 @@ public class PriceAggregationService extends AbstractRealTimeAggregationService 
 	 * @param prices
 	 * @param state
 	 */
-	private void computePriceHistory(AggregatedPrices prices, ProductState state) {
+	private void computePriceHistory(AggregatedPrices prices, ProductCondition state) {
 		Optional<AggregatedPrice> oMinPrice = prices.getMinPrice(state);
 		if (oMinPrice.isEmpty()) {
 			return;

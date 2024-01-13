@@ -24,7 +24,7 @@ import org.open4goods.model.Validable;
 import org.open4goods.model.attribute.Attribute;
 import org.open4goods.model.constants.Currency;
 import org.open4goods.model.constants.InStock;
-import org.open4goods.model.constants.ProductState;
+import org.open4goods.model.constants.ProductCondition;
 import org.open4goods.model.constants.ReferentielKey;
 import org.open4goods.services.StandardiserService;
 import org.slf4j.Logger;
@@ -189,7 +189,7 @@ public class DataFragment implements Standardisable, Validable {
 	/**
 	 * The state of the product (new, occasion, ...)
 	 */
-	private ProductState productState;
+	private ProductCondition productState;
 
 	/**
 	 * The price history
@@ -561,8 +561,8 @@ public class DataFragment implements Standardisable, Validable {
 		resources = newItem.getResources();
 		lastIndexationDate = newItem.getLastIndexationDate();
 
-		// Adding price history (only for ProductState.NEW items)
-		if (productState.equals(ProductState.NEW) &&  !Objects.equal(getPrice(), newItem.getPrice())) {
+		// Adding price history (only for ProductCondition.NEW items)
+		if (productState.equals(ProductCondition.NEW) &&  !Objects.equal(getPrice(), newItem.getPrice())) {
 			priceHistory.add(getPrice());
 			setPrice(newItem.getPrice());
 		}
@@ -1399,11 +1399,11 @@ public class DataFragment implements Standardisable, Validable {
 		this.shippingCost = shippingCost;
 	}
 
-	public ProductState getProductState() {
+	public ProductCondition getProductState() {
 		return productState;
 	}
 
-	public void setProductState(final ProductState productState) {
+	public void setProductState(final ProductCondition productState) {
 		this.productState = productState;
 	}
 

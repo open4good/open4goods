@@ -1,24 +1,30 @@
 package org.open4goods.helper;
 
+import org.apache.commons.lang3.StringUtils;
 import org.open4goods.exceptions.InvalidParameterException;
-import org.open4goods.model.constants.ProductState;
+import org.open4goods.model.constants.ProductCondition;
+import org.slf4j.Logger;
+
+import ch.qos.logback.classic.Level;
 
 public class ProductStateParser {
 
-	public static ProductState parse(String val) throws InvalidParameterException {
+	// TODO : Path from conf
+	private static final Logger logger = GenericFileLogger.initLogger("product-condition-parser", Level.INFO, "/opt/open4goods/logs/", false);
+	public static ProductCondition parse(String val) throws InvalidParameterException {
 
-		if (null == val) {
-			throw new InvalidParameterException("Cannot parse null ProductState ");
+		if (StringUtils.isEmpty(val)) {
+			throw new InvalidParameterException("Cannot evaluate null or empty ProductCondition");
 		}
-		val = val.trim().toUpperCase();
-
-        return switch (val) {
-            case "NEUF", "NEW", "PRODUIT NEUF", "NOUVEAU", "PRODUIT NEW", "HTTP://SCHEMA.ORG/NEWCONDITION" -> ProductState.NEW;
-            case "PRODUIT RECONDITIONNÉ", "RECONDITIONNÉ", "USED", "OCCASION", "VERY GOOD", "COLLECTION", "REFURBISHED", "GOOD", "FAIR", "EXCELLENT" -> ProductState.OCCASION;
-            default -> {            	
-            	throw new InvalidParameterException("Cannot parse ProductState value : " + val);
-            }
-        };
+			val = val.trim().toUpperCase();
+			return switch (val) {
+			    case "NEUF", "NEW", "PRODUIT NEUF", "NOUVEAU", "PRODUIT NEW", "HTTP://SCHEMA.ORG/NEWCONDITION" -> ProductCondition.NEW;
+			    case "PRODUIT RECONDITIONNÉ", "RECONDITIONNÉ", "USED", "OCCASION", "VERY GOOD", "COLLECTION", "REFURBISHED", "GOOD", "FAIR", "EXCELLENT" -> ProductCondition.OCCASION;
+			    default -> {   
+                    logger.error("Unknown ProductCondition value : " + val);
+			    	throw new InvalidParameterException("Cannot parse ProductCondition value : " + val);
+			    }
+			};
 
 	}
 }

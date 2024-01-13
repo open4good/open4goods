@@ -32,7 +32,7 @@ import org.open4goods.helper.ProductStateParser;
 import org.open4goods.helper.ShippingCostParser;
 import org.open4goods.helper.ShippingTimeParser;
 import org.open4goods.model.constants.InStock;
-import org.open4goods.model.constants.ProductState;
+import org.open4goods.model.constants.ProductCondition;
 import org.open4goods.model.constants.ReferentielKey;
 import org.open4goods.model.constants.ResourceTagDictionary;
 import org.open4goods.model.crawlers.FetchCsvStats;
@@ -656,18 +656,13 @@ public class CsvIndexationWorker implements Runnable {
 			}
 		}
 
-		// ProductState
+		// ProductCondition
 		p.setProductState(config.getDefaultItemCondition());
 		if (null != csvProperties.getProductState()) {			
 			for (String productState : csvProperties.getProductState()) {
 	
 					try {
-						String raw = getFromCsvRow(item, productState);
-						if (StringUtils.isEmpty(raw)) {
-	                        continue;
-	                    }
-						ProductState state = ProductStateParser.parse(raw);
-						
+						ProductCondition state = ProductStateParser.parse(getFromCsvRow(item, productState));						
 						if (null != state) {
 							p.setProductState(state);
 							break;

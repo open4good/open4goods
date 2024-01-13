@@ -158,7 +158,7 @@ public class XpathExtractor extends Extractor {
 				p.setProductState(ProductStateParser.parse(evalAndLogs(document, c.getProductState(), url)));
 			}
 		} catch (final Exception e) {
-			parserLogger.warn("Error while parsing ProductState : {}  ; {}", e.getMessage(), url);
+			parserLogger.warn("Error while parsing ProductCondition : {}  ; {}", e.getMessage(), url);
 		}
 
 

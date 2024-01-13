@@ -4,7 +4,7 @@ package org.open4goods.model.product;
 import java.text.DecimalFormat;
 
 import org.open4goods.model.constants.Currency;
-import org.open4goods.model.constants.ProductState;
+import org.open4goods.model.constants.ProductCondition;
 import org.open4goods.model.data.DataFragment;
 import org.open4goods.model.data.Price;
 import org.springframework.data.annotation.Transient;
@@ -29,7 +29,7 @@ public class AggregatedPrice extends Price {
 	 * The state of the product (new, occasion, ...)
 	 */
 	@Field(index = true, store = false, type = FieldType.Keyword)
-	private ProductState productState;
+	private ProductCondition productState;
 
 	/**
 	 * The encoded form of the affiliation token
@@ -126,11 +126,11 @@ public class AggregatedPrice extends Price {
 		this.offerName = offerName;
 	}
 
-	public ProductState getProductState() {
+	public ProductCondition getProductState() {
 		return productState;
 	}
 
-	public void setProductState(ProductState productState) {
+	public void setProductState(ProductCondition productState) {
 		this.productState = productState;
 	}
 
