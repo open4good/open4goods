@@ -20,6 +20,7 @@ import org.open4goods.api.services.aggregation.services.batch.scores.EcoScoreAgg
 import org.open4goods.api.services.aggregation.services.realtime.NamesAggregationService;
 import org.open4goods.config.yml.ui.VerticalConfig;
 import org.open4goods.dao.ProductRepository;
+import org.open4goods.exceptions.AggregationSkipException;
 import org.open4goods.model.product.Product;
 import org.open4goods.services.BarcodeValidationService;
 import org.open4goods.services.BrandService;
@@ -28,6 +29,7 @@ import org.open4goods.services.EvaluationService;
 import org.open4goods.services.Gs1PrefixService;
 import org.open4goods.services.StandardiserService;
 import org.open4goods.services.VerticalsConfigService;
+import org.open4goods.services.textgen.BlablaService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
@@ -70,7 +72,7 @@ public class BatchAggregationService  {
 
 	private BrandService brandService;
 
-
+	private BlablaService blablaService;
 
 
 	public BatchAggregationService(EvaluationService evaluationService,
@@ -79,7 +81,9 @@ public class BatchAggregationService  {
 			ApiProperties apiProperties, Gs1PrefixService gs1prefixService,
 			DataSourceConfigService dataSourceConfigService, VerticalsConfigService configService,
 			BarcodeValidationService barcodeValidationService,
-			BrandService brandService) {
+			BrandService brandService,
+			BlablaService blablaService
+			) {
 		super();
 		this.evaluationService = evaluationService;
 		this.referentielService = referentielService;
@@ -90,7 +94,8 @@ public class BatchAggregationService  {
 		this.gs1prefixService = gs1prefixService;
 		this.dataSourceConfigService = dataSourceConfigService;
 		verticalConfigService = configService;
-
+		
+		this.blablaService = blablaService;
 		this.barcodeValidationService = barcodeValidationService;
 		this.brandService = brandService;
 
@@ -160,10 +165,15 @@ public class BatchAggregationService  {
 
 		services.add(new AbstractBatchAggregationService(apiProperties.logsFolder(), apiProperties.isDedicatedLoggerToConsole()) {
 
-			private NamesAggregationService nameAggregationService = new NamesAggregationService(apiProperties.logsFolder(), apiProperties.isDedicatedLoggerToConsole(), verticalConfigService, evaluationService);
+			private NamesAggregationService nameAggregationService = new NamesAggregationService(apiProperties.logsFolder(), apiProperties.isDedicatedLoggerToConsole(), verticalConfigService, evaluationService, blablaService);
 			@Override
 			public void onProduct(Product data) {
-				data = nameAggregationService.productHandling(data);
+				try {
+					nameAggregationService.handle(data);
+				} catch (AggregationSkipException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 			}
 		});
 
