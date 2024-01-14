@@ -369,6 +369,7 @@
 						<source>21</source>
 						<target>21</target>
 						<forceJavacCompilerUse>true</forceJavacCompilerUse>
+						<parameters>true</parameters>
 					</configuration>
 				</plugin>
 
