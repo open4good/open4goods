@@ -29,6 +29,7 @@ import org.open4goods.services.GoogleTaxonomyService;
 import org.open4goods.services.Gs1PrefixService;
 import org.open4goods.services.StandardiserService;
 import org.open4goods.services.VerticalsConfigService;
+import org.open4goods.services.textgen.BlablaService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
@@ -71,6 +72,8 @@ public class RealtimeAggregationService {
 	
 	private GoogleTaxonomyService taxonomyService;
 
+	private BlablaService blablaService;
+	
 	public RealtimeAggregationService(EvaluationService evaluationService,
 			ReferentielService referentielService, StandardiserService standardiserService,
 			AutowireCapableBeanFactory autowireBeanFactory, ProductRepository aggregatedDataRepository,
@@ -78,7 +81,8 @@ public class RealtimeAggregationService {
 			DataSourceConfigService dataSourceConfigService, VerticalsConfigService configService,
 			BarcodeValidationService barcodeValidationService,
 			BrandService brandService,
-			GoogleTaxonomyService taxonomyService
+			GoogleTaxonomyService taxonomyService,
+			BlablaService blablaService
 			) {
 		super();
 		this.evaluationService = evaluationService;
@@ -93,7 +97,7 @@ public class RealtimeAggregationService {
 		this.brandService=brandService;
 		this.barcodeValidationService = barcodeValidationService;
 		this.taxonomyService = taxonomyService;
-
+		this.blablaService = blablaService;
 		aggregator = getAggregator(configService.getConfigById(VerticalsConfigService.MAIN_VERTICAL_NAME));
 
 
@@ -141,7 +145,7 @@ public class RealtimeAggregationService {
 		services.add(new AttributeRealtimeAggregationService(verticalConfigService, brandService, apiProperties.logsFolder(), apiProperties.isDedicatedLoggerToConsole()));
 
 
-		services.add(new NamesAggregationService(apiProperties.logsFolder(), apiProperties.isDedicatedLoggerToConsole(), verticalConfigService, evaluationService));
+		services.add(new NamesAggregationService(apiProperties.logsFolder(), apiProperties.isDedicatedLoggerToConsole(), verticalConfigService, evaluationService, blablaService));
 
 		//		services.add(new CategoryService(apiProperties.logsFolder(), taxonomyService));
 
