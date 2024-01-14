@@ -43,11 +43,15 @@ public class BarCodeAggregationService extends AbstractRealTimeAggregationServic
 		// Validating barcodes
 		/////////////////////////////
 
-		SimpleEntry<BarcodeType, String> valResult = validationService.sanitize(input.gtin());
+		handle(output);
+	}
 
+	@Override
+	public void handle(Product output) throws AggregationSkipException {
 
+		SimpleEntry<BarcodeType, String> valResult = validationService.sanitize(output.gtin());
 		if (valResult.getKey().equals(BarcodeType.UNKNOWN)) {
-			dedicatedLogger.info("{} is not a valid ISBN/UEAN13 barcode : {}",valResult.getValue() ,input);
+			dedicatedLogger.info("{} is not a valid ISBN/UEAN13 barcode : {}",valResult.getValue() ,output.gtin());
 			throw new AggregationSkipException("Invalid barcode : " + output.gtin());
 		}
 
@@ -69,8 +73,7 @@ public class BarCodeAggregationService extends AbstractRealTimeAggregationServic
 
 		// Setting barcode type
 		output.getGtinInfos().setUpcType(valResult.getKey());
-
-
+		
 	}
 
 }

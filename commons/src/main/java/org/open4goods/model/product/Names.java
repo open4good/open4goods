@@ -12,22 +12,32 @@ import org.springframework.data.elasticsearch.annotations.FieldType;
 
 public class Names {
 
-	@Field(index = true, store = false, type = FieldType.Text)
-	private String name;
+	private Localisable url = new Localisable();
+	
+	private Localisable h1Title = new Localisable();
+	
+	private Localisable metaTitle = new Localisable();
+	
+	private Localisable metaDescription = new Localisable();
+	
+	private Localisable opengraphTitle = new Localisable();
+	
+	private Localisable openGraphDescription = new Localisable();
+	
+	private Localisable twitterTitle = new Localisable();
+	
+	private Localisable twitterDescription = new Localisable();
+	
+	@Field(index = false, store = false, type = FieldType.Object)
+	private Map<String,Localisable> others = new HashMap<>();
+//	
 
-
-	@Field(index = true, store = false, type = FieldType.Text)
-	private String manualName;
-
-
+	
 	@Field(index = true, store = false, type = FieldType.Text, analyzer = "french")
 	//	@Field(index = true, store = false, type = FieldType.Text)
 	private Set<String> offerNames = new HashSet<>();
 
 
-	// language, key, value
-	@Field(index = true, store = false, type = FieldType.Object)
-	private Map<String,Localisable> names = new HashMap<>();
 	
 	
 	
@@ -37,13 +47,13 @@ public class Names {
 	 * @param key
 	 * @param value
 	 */
-	public void addName(String lang, String key, String value) {
+	public void addOther(String lang, String key, String value) {
 	
-		if (!names.containsKey(lang)) {
-			names.put(lang, new  Localisable());
+		if (!others.containsKey(lang)) {
+			others.put(lang, new  Localisable());
 		}
 		
-		names.get(lang).put(key, value);
+		others.get(lang).put(key, value);
 	}
 	
 	
@@ -70,32 +80,75 @@ public class Names {
 		this.offerNames = offerNames;
 	}
 
-	public String getName() {
-		return name;
+	
+	public Localisable getUrl() {
+		return url;
 	}
 
-	public void setName(String name) {
-		this.name = name;
+	public void setUrl(Localisable url) {
+		this.url = url;
 	}
 
-	public String getManualName() {
-		return manualName;
+	public Localisable getH1Title() {
+		return h1Title;
 	}
 
-	public void setManualName(String manualName) {
-		this.manualName = manualName;
+	public void setH1Title(Localisable h1Title) {
+		this.h1Title = h1Title;
 	}
 
-
-
-	public Map<String, Localisable> getNames() {
-		return names;
+	public Localisable getMetaTitle() {
+		return metaTitle;
 	}
 
-	public void setNames(Map<String, Localisable> names) {
-		this.names = names;
+	public void setMetaTitle(Localisable metaTitle) {
+		this.metaTitle = metaTitle;
 	}
 
+	public Localisable getMetaDescription() {
+		return metaDescription;
+	}
 
+	public void setMetaDescription(Localisable metaDescription) {
+		this.metaDescription = metaDescription;
+	}
 
+	public Localisable getOpengraphTitle() {
+		return opengraphTitle;
+	}
+
+	public void setOpengraphTitle(Localisable opengraphTitle) {
+		this.opengraphTitle = opengraphTitle;
+	}
+
+	public Localisable getOpenGraphDescription() {
+		return openGraphDescription;
+	}
+
+	public void setOpenGraphDescription(Localisable openGraphDescription) {
+		this.openGraphDescription = openGraphDescription;
+	}
+
+	public Localisable getTwitterTitle() {
+		return twitterTitle;
+	}
+
+	public void setTwitterTitle(Localisable twitterTitle) {
+		this.twitterTitle = twitterTitle;
+	}
+
+	public Localisable getTwitterDescription() {
+		return twitterDescription;
+	}
+	public void setTwitterDescription(Localisable twitterDescription) {
+		this.twitterDescription = twitterDescription;
+	}
+
+	public Map<String, Localisable> getOthers() {
+		return others;
+	}
+
+	public void setOthers(Map<String, Localisable> others) {
+		this.others = others;
+	}
 }

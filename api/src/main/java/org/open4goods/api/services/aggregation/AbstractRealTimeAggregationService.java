@@ -28,8 +28,16 @@ public abstract class AbstractRealTimeAggregationService  extends AbstractAggreg
 	 * Called on each participant DataFragment, in realtime mode
 	 * @param data
 	 */
-	public void onDataFragment (final DataFragment input, final Product output) throws AggregationSkipException {}
+	public abstract void onDataFragment (final DataFragment input, final Product output) throws AggregationSkipException;
 
+
+	/**
+	 * Delegation of handlings than can operate at the product level, call when availlable from onDataFragment.
+	 * This allow the re-use of realTime aggregation for safety / cleaning / update scenaris
+	 * @param output
+	 * @throws AggregationSkipException
+	 */
+	public abstract void handle(Product output) throws AggregationSkipException;
 
 
 

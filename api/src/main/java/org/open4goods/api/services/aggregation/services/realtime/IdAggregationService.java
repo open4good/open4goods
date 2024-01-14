@@ -1,6 +1,7 @@
 package org.open4goods.api.services.aggregation.services.realtime;
 
 import org.open4goods.api.services.aggregation.AbstractRealTimeAggregationService;
+import org.open4goods.exceptions.AggregationSkipException;
 import org.open4goods.model.data.DataFragment;
 import org.open4goods.model.product.Product;
 import org.slf4j.Logger;
@@ -28,6 +29,12 @@ public class IdAggregationService extends AbstractRealTimeAggregationService {
 		if ( output.getLastChange() < input.getLastIndexationDate()) {
 			output.setLastChange(input.getLastIndexationDate());
 		}
+	}
+
+	@Override
+	public void handle(Product output) throws AggregationSkipException {
+
+		
 	}
 
 

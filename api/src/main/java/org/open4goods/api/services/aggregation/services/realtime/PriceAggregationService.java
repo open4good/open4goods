@@ -6,6 +6,8 @@ import java.util.*;
 
 import org.open4goods.api.services.aggregation.AbstractRealTimeAggregationService;
 import org.open4goods.config.yml.ui.VerticalProperties;
+import org.open4goods.dao.ProductRepository;
+import org.open4goods.exceptions.AggregationSkipException;
 import org.open4goods.model.constants.ProductCondition;
 import org.open4goods.model.data.DataFragment;
 import org.open4goods.model.product.AggregatedPrice;
@@ -65,7 +67,7 @@ public class PriceAggregationService extends AbstractRealTimeAggregationService 
 		for (final AggregatedPrice df : aggregatedData.getPrice().getOffers()) {
 
 			// TODO : compute price history
-			if (System.currentTimeMillis() - toMs(segmentProperties.getPriceValidity()) > df.getTimeStamp()) {
+			if (System.currentTimeMillis() - ProductRepository.VALID_UNTIL_DURATION > df.getTimeStamp()) {
 				dedicatedLogger.info("price too old for CSV datafragment {}, removing it", df);
 
 			} else {
@@ -214,14 +216,11 @@ public class PriceAggregationService extends AbstractRealTimeAggregationService 
 	public @Override void close() throws IOException {
 	}
 
-	/**
-	 * Convert days to ms
-	 *
-	 * @param webPriceValidity
-	 * @return
-	 */
-	private long toMs(Integer days) {
-		return days * 24 * 3600 * 1000L;
+	@Override
+	public void handle(Product output) throws AggregationSkipException {
+		// TODO Auto-generated method stub
+		
 	}
+
 
 }
