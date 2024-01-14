@@ -304,7 +304,7 @@ public class VerticalsConfigService {
 	 * @param vertical
 	 * @return
 	 */
-	@Cacheable(cacheNames = CacheConstants.ONE_DAY_LOCAL_CACHE_NAME)
+	@Cacheable(cacheNames = CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME)
 	public VerticalConfig getConfigByIdOrDefault(String vertical) {
 		// Getting the config for the category, if any
 		VerticalConfig vConf = getConfigById(vertical);

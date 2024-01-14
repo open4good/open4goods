@@ -1,10 +1,21 @@
-package org.open4goods.api.services.aggregation.services;
+package org.open4goods.api.services.aggregation.services.realtime;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.open4goods.api.services.aggregation.AbstractRealTimeAggregationService;
 import org.open4goods.config.yml.attributes.AttributeConfig;
 import org.open4goods.config.yml.attributes.AttributeParser;
 import org.open4goods.config.yml.ui.AttributesConfig;
+import org.open4goods.exceptions.AggregationSkipException;
 import org.open4goods.exceptions.ParseException;
 import org.open4goods.exceptions.ResourceNotFoundException;
 import org.open4goods.exceptions.ValidationException;
@@ -19,10 +30,6 @@ import org.open4goods.model.product.Product;
 import org.open4goods.services.BrandService;
 import org.open4goods.services.VerticalsConfigService;
 
-import java.util.*;
-import java.util.Map.Entry;
-import java.util.stream.Collectors;
-
 public class AttributeRealtimeAggregationService extends AbstractRealTimeAggregationService {
 
 
@@ -36,7 +43,6 @@ public class AttributeRealtimeAggregationService extends AbstractRealTimeAggrega
 		this.verticalConfigService = verticalConfigService;
 		this.brandService = brandService;
 	}
-
 
 	/**
 	 * Associate and match a set of nativ attributes from a datafragment into  a product
@@ -53,7 +59,10 @@ public class AttributeRealtimeAggregationService extends AbstractRealTimeAggrega
 		}
 		
 		try {
-			AttributesConfig attributesConfig = verticalConfigService.getConfigById(product.getVertical() == null ? "all" : product.getVertical() ).getAttributesConfig() ;
+			
+
+
+			AttributesConfig attributesConfig = verticalConfigService.getConfigByIdOrDefault(product.getVertical()).getAttributesConfig();
 
 			// Adding the list of "to be removed" attributes
 			Set<String> toRemoveFromUnmatched = new HashSet<>(attributesConfig.getExclusions());
@@ -431,6 +440,13 @@ public class AttributeRealtimeAggregationService extends AbstractRealTimeAggrega
 
 		return attr;
 
+	}
+
+
+	@Override
+	public void handle(Product output) throws AggregationSkipException {
+
+		
 	}
 
 

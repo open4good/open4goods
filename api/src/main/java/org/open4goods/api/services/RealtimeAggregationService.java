@@ -7,7 +7,7 @@ import java.util.List;
 import org.open4goods.api.config.yml.ApiProperties;
 import org.open4goods.api.services.aggregation.AbstractAggregationService;
 import org.open4goods.api.services.aggregation.aggregator.RealTimeAggregator;
-import org.open4goods.api.services.aggregation.services.AttributeRealtimeAggregationService;
+import org.open4goods.api.services.aggregation.services.realtime.AttributeRealtimeAggregationService;
 import org.open4goods.api.services.aggregation.services.realtime.BarCodeAggregationService;
 import org.open4goods.api.services.aggregation.services.realtime.DescriptionsAggregationService;
 import org.open4goods.api.services.aggregation.services.realtime.IdAggregationService;

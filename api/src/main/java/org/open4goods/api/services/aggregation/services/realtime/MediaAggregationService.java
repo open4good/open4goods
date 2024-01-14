@@ -4,6 +4,7 @@ import java.io.IOException;
 
 import org.open4goods.api.services.aggregation.AbstractRealTimeAggregationService;
 import org.open4goods.config.yml.ui.VerticalConfig;
+import org.open4goods.exceptions.AggregationSkipException;
 import org.open4goods.helper.IdHelper;
 import org.open4goods.model.data.DataFragment;
 import org.open4goods.model.data.Resource;
@@ -61,6 +62,10 @@ public class MediaAggregationService extends AbstractRealTimeAggregationService{
 	@Override
 	public void close() throws IOException {
 		//		executor.shutdown();
+	}
+
+	@Override
+	public void handle(Product output) throws AggregationSkipException {
 	}
 
 }

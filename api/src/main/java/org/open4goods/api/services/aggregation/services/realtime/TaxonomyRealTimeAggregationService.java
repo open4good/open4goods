@@ -6,6 +6,7 @@ import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 import org.open4goods.api.services.aggregation.AbstractRealTimeAggregationService;
 import org.open4goods.config.yml.ui.VerticalConfig;
+import org.open4goods.exceptions.AggregationSkipException;
 import org.open4goods.model.data.DataFragment;
 import org.open4goods.model.data.UnindexedKeyVal;
 import org.open4goods.model.product.Product;
@@ -111,6 +112,12 @@ public class TaxonomyRealTimeAggregationService extends AbstractRealTimeAggregat
 			dedicatedLogger.info("No category in {}, removing vertical", output);
 			output.setVertical(null);
 		}
+	}
+
+	@Override
+	public void handle(Product output) throws AggregationSkipException {
+		// TODO Auto-generated method stub
+		
 	}
 
 }

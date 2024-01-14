@@ -1,13 +1,19 @@
 package org.open4goods.config.yml.ui;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.open4goods.config.yml.CommentsAggregationConfig;
 import org.open4goods.config.yml.attributes.AiConfig;
 import org.open4goods.config.yml.attributes.AttributeConfig;
-import org.open4goods.config.yml.attributes.NamesConfig;
 import org.open4goods.model.Localisable;
 import org.open4goods.model.constants.CacheConstants;
 import org.open4goods.model.constants.UrlConstants;
@@ -50,6 +56,15 @@ public class VerticalConfig{
 	 */
 	@JsonMerge
 	private List<NamesConfig> namesConfig = new ArrayList<>();
+	
+	
+	/**
+	 * The product url, metas title, description, ....
+	 */
+	@JsonMerge
+	private Map<String,TextsConfig> texts = new HashMap<>();
+	
+	
 	
 	
 	/**
@@ -635,6 +650,14 @@ public class VerticalConfig{
 
 	public void setNamesConfig(List<NamesConfig> namesConfig) {
 		this.namesConfig = namesConfig;
+	}
+
+	public Map<String, TextsConfig> getTexts() {
+		return texts;
+	}
+
+	public void setTexts(Map<String, TextsConfig> texts) {
+		this.texts = texts;
 	}
 
 	

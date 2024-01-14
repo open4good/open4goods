@@ -45,6 +45,7 @@ import org.open4goods.services.StandardiserService;
 import org.open4goods.services.VerticalsConfigService;
 import org.open4goods.services.ai.AiAgent;
 import org.open4goods.services.ai.AiService;
+import org.open4goods.services.textgen.BlablaService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springdoc.core.customizers.OpenApiCustomizer;
@@ -71,8 +72,8 @@ import com.github.benmanes.caffeine.cache.Ticker;
 
 import dev.langchain4j.model.chat.ChatLanguageModel;
 import dev.langchain4j.service.AiServices;
-import io.micrometer.core.aop.TimedAspect;
-import io.micrometer.core.instrument.MeterRegistry;
+//import io.micrometer.core.aop.TimedAspect;
+//import io.micrometer.core.instrument.MeterRegistry;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.security.SecurityRequirement;
 import io.swagger.v3.oas.models.security.SecurityScheme;
@@ -91,17 +92,7 @@ public class ApiConfig {
 		this.apiProperties = apiProperties;
 	}
 
-	
-//	 @Bean
-//	  public JedisConnectionFactory redisConnectionFactory() {
-//
-//	    RedisStandaloneConfiguration config = new RedisStandaloneConfiguration("server", 6379);
-//	    return new JedisConnectionFactory(config);
-////			return new JedisConnectionFactory();
-//	 }
-////	 
-	
-	
+		
 	  @Bean
 	  public RedisTemplate<String, Product> redisTemplate(RedisConnectionFactory connectionFactory) {
 		  RedisTemplate<String, Product> template = new RedisTemplate<>();
@@ -111,19 +102,18 @@ public class ApiConfig {
 		    template.setKeySerializer(new StringRedisSerializer());
 		    template.setValueSerializer(new GenericJackson2JsonRedisSerializer());
 
-		    
-		    // Add some specific configuration here. Key serializers, etc.
 		    return template;
 	  }
 	 
-	/**
-	 * Various generation (json, yaml, binary)
-	 *
-	 * @return
-	 */
 	@Bean
 	SerialisationService serialisationService() {
 		return new SerialisationService();
+	}
+
+	@Bean
+	
+	BlablaService blablaService(@Autowired EvaluationService evaluationService) {
+		return new BlablaService(evaluationService);
 	}
 
 	
@@ -307,15 +297,15 @@ public class ApiConfig {
 	// Metrics
 	//////////////////////////
 
-	/**
-	 * To enable metrics on all methods / services
-	 *
-	 * @param registry
-	 * @return
-	 */
-	@Bean TimedAspect timedAspect(final MeterRegistry registry) {
-		return new TimedAspect(registry);
-	}
+//	/**
+//	 * To enable metrics on all methods / services
+//	 *
+//	 * @param registry
+//	 * @return
+//	 */
+//	@Bean TimedAspect timedAspect(final MeterRegistry registry) {
+//		return new TimedAspect(registry);
+//	}
 
 	//////////////////////////////////////////////////////////
 	// API services
