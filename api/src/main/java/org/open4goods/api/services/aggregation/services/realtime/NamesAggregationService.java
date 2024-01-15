@@ -7,7 +7,7 @@ import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import org.open4goods.api.services.aggregation.AbstractRealTimeAggregationService;
 import org.open4goods.config.yml.ui.TextsConfig;
-import org.open4goods.config.yml.ui.TextsConfigUrl;
+import org.open4goods.config.yml.ui.PrefixedAttrText;
 import org.open4goods.exceptions.AggregationSkipException;
 import org.open4goods.exceptions.InvalidParameterException;
 import org.open4goods.helper.IdHelper;
@@ -51,8 +51,6 @@ public class NamesAggregationService extends AbstractRealTimeAggregationService 
 
 	}
 
-
-
 	@Override
 	public void handle(Product data) throws AggregationSkipException {
 		logger.info("Name generation for product {}", data.getId());
@@ -67,22 +65,36 @@ public class NamesAggregationService extends AbstractRealTimeAggregationService 
 				String lang = e.getKey();
 				TextsConfig tConf = e.getValue();
 				
-				///////////////////////
 				// Computing url
-				//////////////////////
-				String url = computeUrl(data, tConf.getUrl());
-				data.getNames().getUrl().put(lang, url);
+
+				data.getNames().getUrl().put(lang, computePrefixedText(data, tConf.getUrl()));
 				
+				// h1Title			
+				data.getNames().getH1Title().put(lang, computePrefixedText(data, tConf.getH1Title()));
 				
+				// metaTitle
+				data.getNames().getMetaTitle().put(lang, blablaService.generateBlabla(tConf.getMetaTitle(), data));
 				
+				// metaDescription
+				data.getNames().getMetaDescription().put(lang, blablaService.generateBlabla(tConf.getMetaDescription(), data));
 				
+				// opengraphTitle
+				data.getNames().getOpengraphTitle().put(lang, blablaService.generateBlabla(tConf.getOpengraphTitle(), data));
+				
+				// openGraphDescription
+				data.getNames().getOpenGraphDescription().put(lang, blablaService.generateBlabla(tConf.getOpenGraphDescription(), data));
+				
+				// twitterTitle
+				data.getNames().getTwitterTitle().put(lang, blablaService.generateBlabla(tConf.getTwitterTitle(), data));
+				
+				// twitterDescription
+				data.getNames().getTwitterDescription().put(lang, blablaService.generateBlabla(tConf.getTwitterDescription(), data));
+				
+
 			} catch (InvalidParameterException e1) {
 				logger.error("Error while computing url for product {}", data.getId(), e1);
 			}
 
-			
-			
-			
 		}
 		
 		
@@ -114,7 +126,7 @@ public class NamesAggregationService extends AbstractRealTimeAggregationService 
 	 * @return
 	 * @throws InvalidParameterException 
 	 */
-	private String computeUrl(Product data, TextsConfigUrl textsConfigUrl) throws InvalidParameterException {
+	private String computePrefixedText(Product data, PrefixedAttrText textsConfigUrl) throws InvalidParameterException {
 		
 		StringBuilder sb = new StringBuilder(data.gtin());
 		
