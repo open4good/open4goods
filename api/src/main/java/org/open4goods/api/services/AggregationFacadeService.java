@@ -105,7 +105,7 @@ public class AggregationFacadeService {
 		this.taxonomyService = taxonomyService;
 		this.blablaService = blablaService;
 		
-		this.StandardAggregator = getStandardAggregator();
+		this.StandardAggregator = getStandardAggregator("realtime");
 	
 	}
 
@@ -212,9 +212,9 @@ public class AggregationFacadeService {
 	 * @param config
 	 * @return
 	 */
-	StandardAggregator getStandardAggregator() {		
+	StandardAggregator getStandardAggregator(String name) {		
 		
-		Logger logger = GenericFileLogger.initLogger("realtime", apiProperties.aggLogLevel(), apiProperties.logsFolder()+"/aggregation", apiProperties.isDevMode());
+		Logger logger = GenericFileLogger.initLogger(name, apiProperties.aggLogLevel(), apiProperties.logsFolder()+"/aggregation", apiProperties.isDevMode());
 
 		final List<AbstractAggregationService> services = new ArrayList<>();
 
@@ -269,7 +269,7 @@ public class AggregationFacadeService {
 	 * @return
 	 */
 	public StandardAggregator getFullSanitisationAggregator() {
-		return getStandardAggregator();
+		return getStandardAggregator("saninitisation");
 	}
 
 }
