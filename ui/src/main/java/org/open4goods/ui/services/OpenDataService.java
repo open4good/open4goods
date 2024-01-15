@@ -207,7 +207,7 @@ public class OpenDataService {
 			line[10] = data.bestPrice().getCurrency().toString();
 			// "url"
 			// TODO(gof) : i18n the url
-			line[12] = uiConfig.getBaseUrl(Locale.FRANCE) + data.getNames().getName();
+			line[12] = ""; //uiConfig.getBaseUrl(Locale.FRANCE) + data.getNames().getName();
 		}
 
 		// Categories

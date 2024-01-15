@@ -100,17 +100,16 @@ public class ProductController extends AbstractUiController {
 	@GetMapping("/{id:\\d+}-*")
 	public ModelAndView product(@PathVariable String id, final HttpServletRequest request, HttpServletResponse response) throws IOException {
 
-		
 		ModelAndView ret = buildProductView(id, null, request, response);;
-		
+		UiHelper uiHelper = (UiHelper) ret.getModel().get("helper");
+		String url = uiHelper.url();
 	
 		// Testing if on a vertical, redirect if so
 		Product product = (Product) ret.getModel().get("product");
 		
 		if (null != product && !StringUtils.isEmpty(product.getVertical())) {
-			// TODO : I18n
-			String vPath = verticalConfigService.getConfigById(product.getVertical()).getBaseUrl(Locale.FRANCE); 
-			ModelAndView mv = new ModelAndView("redirect:/"  + vPath+ "/"+product.getNames().getName());
+			String vPath = verticalConfigService.getConfigById(product.getVertical()).getBaseUrl(request.getLocale()); 
+			ModelAndView mv = new ModelAndView("redirect:/"  + vPath+ "/"+url);
 			mv.setStatus(HttpStatus.MOVED_PERMANENTLY);				
 			return mv;			
 		}			
@@ -147,21 +146,34 @@ public class ProductController extends AbstractUiController {
 		}
 
 
-		// Sending 301 id no match with product name
+		ModelAndView mv = null;
 
+
+		mv = defaultModelAndView("product", request);
+
+
+
+		mv.addObject("product", data);
+		
+		VerticalConfig verticalConfig = verticalConfigService.getVerticalForPath(vertical);
+		mv.addObject("verticalConfig", verticalConfig);
+
+		UiHelper uiHelper = new UiHelper(request, verticalConfig, data);
+		
 		if (null == vertical) {
 
-			if (!path.equals(data.getNames().getName())) {
+			// Sending 301 id no match with product name
+			if (!path.equals(uiHelper.url())) {
 				response.setStatus(HttpServletResponse.SC_MOVED_PERMANENTLY);
 				// TODO : I18n
-				ModelAndView mv = new ModelAndView("redirect:/" + data.getNames().getName());
+				mv = new ModelAndView("redirect:/" + uiHelper.url());
 				mv.setStatus(HttpStatus.MOVED_PERMANENTLY);
 				mv.addObject("product", data);
 				return mv;
 			}
 		} else {
-			if (!path.equals(vertical+ "%2F" + URLEncoder.encode(data.getNames().getName(), StandardCharsets.UTF_8))) {
-				ModelAndView mv = new ModelAndView("redirect:/"+ vertical+"/"+data.getNames().getName());
+			if (!path.equals(vertical+ "%2F" + URLEncoder.encode(uiHelper.url(), StandardCharsets.UTF_8))) {
+				mv = new ModelAndView("redirect:/"+ vertical+"/"+uiHelper.url());
 				mv.setStatus(HttpStatus.MOVED_PERMANENTLY);
 				mv.addObject("product", data);
 				return mv;
@@ -178,18 +190,11 @@ public class ProductController extends AbstractUiController {
 		inferAffiliationToken(request, data, data.getPrice().getMinPrice());
 		//		inferAffiliationToken(data, data.getPrice().getMaxPrice());
 
-		ModelAndView mv = null;
-
-
-		mv = defaultModelAndView("product", request);
-
-
-
-		mv.addObject("product", data);
 		
-		VerticalConfig verticalConfig = verticalConfigService.getVerticalForPath(vertical);
-		mv.addObject("verticalConfig", verticalConfig);
-
+		
+	
+		
+		
 		
 		
 		// Adding the diplay country
@@ -202,7 +207,7 @@ public class ProductController extends AbstractUiController {
 		mv.addObject("hasBrandLogo", brandService.hasLogo(data.brand()));
 		
 		// Adding the UiHelper class
-		mv.addObject("helper", new UiHelper(request, verticalConfig));
+		mv.addObject("helper", uiHelper);
 		
 		// Adding the images resource
 
