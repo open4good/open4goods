@@ -15,6 +15,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
 import org.springframework.validation.annotation.Validated;
 
+import ch.qos.logback.classic.Level;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
@@ -131,6 +132,34 @@ public class ApiProperties {
 	 */
 
 	private BrandConfiguration brandConfig;
+
+
+	/**
+	 * The log level for aggregation
+     *
+	 */
+	private String aggregationLogLevel = "INFO";
+	
+	
+	public Level aggLogLevel() {
+		return Level.toLevel(aggregationLogLevel);
+	}
+
+	
+	
+	public Environment getEnv() {
+		return env;
+	}
+	public void setEnv(Environment env) {
+		this.env = env;
+	}
+	public String getAggregationLogLevel() {
+		return aggregationLogLevel;
+	}
+	public void setAggregationLogLevel(String aggregationLogLevel) {
+		this.aggregationLogLevel = aggregationLogLevel;
+	}
+
 
 
 	/**
