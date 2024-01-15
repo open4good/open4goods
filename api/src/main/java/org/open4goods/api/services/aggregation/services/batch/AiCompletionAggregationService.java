@@ -1,35 +1,29 @@
 package org.open4goods.api.services.aggregation.services.batch;
 
-import java.util.List;
-import java.util.Map.Entry;
-
-import org.open4goods.api.services.aggregation.AbstractBatchAggregationService;
-import org.open4goods.config.yml.attributes.AiConfig;
+import org.open4goods.api.services.aggregation.AbstractAggregationService;
 import org.open4goods.config.yml.ui.VerticalConfig;
-import org.open4goods.model.data.AiDescription;
 import org.open4goods.model.product.Product;
-import org.open4goods.services.EvaluationService;
-import org.open4goods.services.VerticalsConfigService;
 import org.open4goods.services.ai.AiService;
+import org.slf4j.Logger;
 
 /**
  * Service in charge of mapping product categories to verticals
  * @author goulven
  *
  */
-public class AiCompletionAggregationService extends AbstractBatchAggregationService {
+public class AiCompletionAggregationService extends AbstractAggregationService {
 
 	private AiService aiService;
 
 
-	public AiCompletionAggregationService( final String logsFolder, AiService aiService, boolean toConsole) {
-		super(logsFolder, toConsole);
+	public AiCompletionAggregationService( final Logger logger, AiService aiService) {
+		super(logger);
 		this.aiService = aiService;
 		
 	}
 
 	@Override
-	public void onProduct(Product data) {
+	public void onProduct(Product data, VerticalConfig vConf) {
 
 		aiService.complete(data);
 

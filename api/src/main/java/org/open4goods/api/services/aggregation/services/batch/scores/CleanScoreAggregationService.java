@@ -3,15 +3,15 @@ package org.open4goods.api.services.aggregation.services.batch.scores;
 import java.util.Collection;
 
 import org.open4goods.config.yml.ui.AttributesConfig;
+import org.open4goods.config.yml.ui.VerticalConfig;
+import org.open4goods.exceptions.AggregationSkipException;
 import org.open4goods.model.product.Product;
+import org.slf4j.Logger;
 
 public class CleanScoreAggregationService extends AbstractScoreAggregationService {
 
-	private final AttributesConfig attributesConfig;
-
-	public CleanScoreAggregationService(final AttributesConfig attributesConfig,  final String logsFolder,boolean toConsole) {
-		super(logsFolder, toConsole);
-		this.attributesConfig = attributesConfig;
+	public CleanScoreAggregationService(final Logger logger) {
+		super(logger);
 	}
 
 
@@ -23,6 +23,13 @@ public class CleanScoreAggregationService extends AbstractScoreAggregationServic
 		for (Product d : datas) {
 			d.getScores().clear();
 		}
+	}
+
+
+
+	@Override
+	public void onProduct(Product data, VerticalConfig vConf) throws AggregationSkipException {
+		
 	}
 	
 }

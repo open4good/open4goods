@@ -5,9 +5,10 @@ import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
-import org.open4goods.api.services.aggregation.AbstractRealTimeAggregationService;
-import org.open4goods.config.yml.ui.TextsConfig;
+import org.open4goods.api.services.aggregation.AbstractAggregationService;
 import org.open4goods.config.yml.ui.PrefixedAttrText;
+import org.open4goods.config.yml.ui.TextsConfig;
+import org.open4goods.config.yml.ui.VerticalConfig;
 import org.open4goods.exceptions.AggregationSkipException;
 import org.open4goods.exceptions.InvalidParameterException;
 import org.open4goods.helper.IdHelper;
@@ -21,7 +22,7 @@ import org.open4goods.services.textgen.BlablaService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class NamesAggregationService extends AbstractRealTimeAggregationService {
+public class NamesAggregationService extends AbstractAggregationService {
 
 	private static final Logger logger = LoggerFactory.getLogger(NamesAggregationService.class);
 
@@ -31,28 +32,29 @@ public class NamesAggregationService extends AbstractRealTimeAggregationService 
 
 	private BlablaService blablaService;
 	
-	public NamesAggregationService(final String logsFolder, boolean toConsole,
+	public NamesAggregationService(final Logger logger,
 			final VerticalsConfigService verticalService, EvaluationService evaluationService, BlablaService blablaService) {
-		super(logsFolder, toConsole);
+		super(logger);
 		this.evaluationService = evaluationService;
 		this.verticalService = verticalService;
 		this.blablaService = blablaService;
 	}
 
 	@Override
-	public void onDataFragment(final DataFragment df, Product output) throws AggregationSkipException {
+	public void onDataFragment(final DataFragment df, Product output, VerticalConfig vConf) throws AggregationSkipException {
 
 		// Adding raw offer names
 		// TODO : names are not localized
 		output.getNames().getOfferNames()
 				.addAll(df.getNames().stream().map(this::normalizeName).collect(Collectors.toSet()));
 
-		handle(output);
+		onProduct(output,vConf);
 
 	}
 
 	@Override
-	public void handle(Product data) throws AggregationSkipException {
+	public void onProduct(Product data, VerticalConfig vConf) throws AggregationSkipException {
+
 		logger.info("Name generation for product {}", data.getId());
 
 		// Getting the config for the category, if any
@@ -89,16 +91,14 @@ public class NamesAggregationService extends AbstractRealTimeAggregationService 
 				
 				// twitterDescription
 				data.getNames().getTwitterDescription().put(lang, blablaService.generateBlabla(tConf.getTwitterDescription(), data));
-				
+		
 
 			} catch (InvalidParameterException e1) {
 				logger.error("Error while computing url for product {}", data.getId(), e1);
 			}
 
 		}
-		
-		
-		
+
 		
 //		if (null != vConf) {
 //
@@ -161,5 +161,6 @@ public class NamesAggregationService extends AbstractRealTimeAggregationService 
 	private String normalizeName(String name) {
 		return name.trim();
 	}
+
 	
 }

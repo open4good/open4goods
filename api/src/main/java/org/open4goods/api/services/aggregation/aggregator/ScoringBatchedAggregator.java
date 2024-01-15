@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.open4goods.api.services.aggregation.AbstractAggregationService;
-import org.open4goods.api.services.aggregation.AbstractBatchAggregationService;
+import org.open4goods.config.yml.ui.VerticalConfig;
 import org.open4goods.exceptions.AggregationSkipException;
 import org.open4goods.model.product.Product;
 import org.slf4j.Logger;
@@ -13,7 +13,7 @@ import org.slf4j.LoggerFactory;
 
 
 /**
- * The real time AggregationService is stateless and thread safe.
+ * The real time AggregationFacadeService is stateless and thread safe.
  * @author goulven
  *
  */
@@ -43,20 +43,12 @@ public class ScoringBatchedAggregator extends AbstractAggregator {
 	 * @return
 	 * @throws AggregationSkipException
 	 */
-	public Product update(final Collection<Product> datas){
+	public Product score(final Collection<Product> datas, VerticalConfig vConf) throws AggregationSkipException{
 
 
 		Product ret = null;
 		// Call transformation building registered service
-		for (final AbstractAggregationService s: services) {
-			
-			AbstractBatchAggregationService service = null;
-			if (s instanceof AbstractBatchAggregationService) {
-				service = (AbstractBatchAggregationService)s;
-			} else {
-				logger.warn("Aggrgegator {} is used in batch mode, but is a AbstractBatchAggregationService", s.getClass().getCanonicalName());
-				continue;
-			}
+		for (final AbstractAggregationService service: services) {
 			
 			logger.warn("Batching {} products using {} service",datas.size() ,service.getClass().getSimpleName());
 
@@ -68,7 +60,7 @@ public class ScoringBatchedAggregator extends AbstractAggregator {
 
 			// Processing Products
 			for (Product p : datas) {
-				service.onProduct(p);				
+				service.onProduct(p,vConf);				
 			}
 
 			logger.warn("Post computing {} products using {} service",datas.size() ,service.getClass().getSimpleName());

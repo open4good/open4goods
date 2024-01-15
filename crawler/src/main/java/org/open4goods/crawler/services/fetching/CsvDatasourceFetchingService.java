@@ -1,54 +1,20 @@
 package org.open4goods.crawler.services.fetching;
 
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.net.URLDecoder;
-import java.nio.charset.StandardCharsets;
-import java.time.Duration;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Locale;
 import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingQueue;
-import java.util.zip.GZIPInputStream;
 
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.text.StringEscapeUtils;
-import org.open4goods.config.yml.datasource.CsvDataSourceProperties;
 import org.open4goods.config.yml.datasource.DataSourceProperties;
 import org.open4goods.crawler.config.yml.FetcherProperties;
 import org.open4goods.crawler.repository.CsvIndexationRepository;
 import org.open4goods.crawler.repository.IndexationRepository;
 import org.open4goods.crawler.services.DataFragmentCompletionService;
 import org.open4goods.crawler.services.IndexationService;
-import org.open4goods.exceptions.ValidationException;
-import org.open4goods.helper.InStockParser;
-import org.open4goods.helper.ProductStateParser;
-import org.open4goods.helper.ShippingCostParser;
-import org.open4goods.helper.ShippingTimeParser;
-import org.open4goods.model.constants.InStock;
-import org.open4goods.model.constants.ReferentielKey;
-import org.open4goods.model.constants.ResourceTagDictionary;
 import org.open4goods.model.crawlers.FetchingJobStats;
-import org.open4goods.model.data.DataFragment;
-import org.open4goods.model.data.Price;
-import org.open4goods.model.data.Rating;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.web.util.UriComponents;
-import org.springframework.web.util.UriComponentsBuilder;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.dataformat.csv.CsvMapper;
-import com.fasterxml.jackson.dataformat.csv.CsvParser;
-import com.google.common.collect.Sets;
-
-import edu.uci.ics.crawler4j.crawler.CrawlController;
 import jakarta.annotation.PreDestroy;
 
 /**

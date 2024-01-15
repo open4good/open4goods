@@ -10,7 +10,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
-import org.open4goods.api.services.aggregation.AbstractRealTimeAggregationService;
+import org.open4goods.api.services.aggregation.AbstractAggregationService;
+import org.open4goods.config.yml.ui.VerticalConfig;
 import org.open4goods.dao.ProductRepository;
 import org.open4goods.exceptions.AggregationSkipException;
 import org.open4goods.model.constants.ProductCondition;
@@ -20,6 +21,7 @@ import org.open4goods.model.product.AggregatedPrices;
 import org.open4goods.model.product.PriceHistory;
 import org.open4goods.model.product.Product;
 import org.open4goods.services.DataSourceConfigService;
+import org.slf4j.Logger;
 
 import com.google.common.collect.Sets;
 
@@ -34,21 +36,20 @@ import com.google.common.collect.Sets;
  * @author goulven
  *
  */
-public class PriceAggregationService extends AbstractRealTimeAggregationService {
+public class PriceAggregationService extends AbstractAggregationService {
 
 	// TODO(conf, P3, 0.25) : from conf
 	private static final double REVERSEMENT = 0.2;
 
 	private DataSourceConfigService datasourceConfigService;
 
-	public PriceAggregationService(final String logsFolder, DataSourceConfigService datasourceConfigService,
-			 boolean toConsole) {
-		super(logsFolder, toConsole);
+	public PriceAggregationService(final Logger logger, DataSourceConfigService datasourceConfigService) {
+		super(logger);
 		this.datasourceConfigService = datasourceConfigService;
 	}
 
 	@Override
-	public void onDataFragment(final DataFragment e, final Product aggregatedData) {
+	public void onDataFragment(final DataFragment e, final Product aggregatedData,VerticalConfig vConf) throws AggregationSkipException {
 
 		if (!e.hasPrice() || !e.affiliated()) {
 			return;
@@ -218,9 +219,9 @@ public class PriceAggregationService extends AbstractRealTimeAggregationService 
 	public @Override void close() throws IOException {
 	}
 
+
 	@Override
-	public void handle(Product output) throws AggregationSkipException {
-		// TODO Auto-generated method stub
+	public void onProduct(Product data, VerticalConfig vConf) throws AggregationSkipException {
 		
 	}
 

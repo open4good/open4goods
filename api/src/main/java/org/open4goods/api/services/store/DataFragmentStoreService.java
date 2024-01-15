@@ -9,7 +9,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.commons.lang3.StringUtils;
-import org.open4goods.api.services.RealtimeAggregationService;
+import org.open4goods.api.services.AggregationFacadeService;
 import org.open4goods.dao.ProductRepository;
 import org.open4goods.exceptions.AggregationSkipException;
 import org.open4goods.exceptions.ValidationException;
@@ -56,14 +56,14 @@ public class DataFragmentStoreService {
 
 	private ProductRepository aggregatedDataRepository;
 
-	private RealtimeAggregationService generationService;
+	private AggregationFacadeService generationService;
 
 
 	/**
 	 *
 	 * @param queueFolder The folder where indexation queued datas will be stored
 	 */
-	public DataFragmentStoreService(StandardiserService standardiserService, RealtimeAggregationService generationService, ProductRepository aggregatedDataRepository) {
+	public DataFragmentStoreService(StandardiserService standardiserService, AggregationFacadeService generationService, ProductRepository aggregatedDataRepository) {
 
 
 		this.standardiserService = standardiserService;
@@ -192,7 +192,7 @@ public class DataFragmentStoreService {
 
 				try {
 					// TODO : Not the good point. Service ?
-					results.add(generationService.process(df,data));
+					results.add(generationService.updateOne(df,data));
 				} catch (AggregationSkipException e1) {
 					logger.info("Aggregation skipped for {} : {}",df,e1.getMessage());
 				}

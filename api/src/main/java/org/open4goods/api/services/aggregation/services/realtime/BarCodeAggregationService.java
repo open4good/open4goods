@@ -3,7 +3,8 @@ package org.open4goods.api.services.aggregation.services.realtime;
 
 import java.util.AbstractMap.SimpleEntry;
 
-import org.open4goods.api.services.aggregation.AbstractRealTimeAggregationService;
+import org.open4goods.api.services.aggregation.AbstractAggregationService;
+import org.open4goods.config.yml.ui.VerticalConfig;
 import org.open4goods.exceptions.AggregationSkipException;
 import org.open4goods.model.BarcodeType;
 import org.open4goods.model.constants.ReferentielKey;
@@ -21,7 +22,7 @@ import org.slf4j.LoggerFactory;
  * @author Goulven.Furet
  *
  */
-public class BarCodeAggregationService extends AbstractRealTimeAggregationService {
+public class BarCodeAggregationService extends AbstractAggregationService {
 
 	private static final Logger logger = LoggerFactory.getLogger(BarCodeAggregationService.class);
 
@@ -29,25 +30,26 @@ public class BarCodeAggregationService extends AbstractRealTimeAggregationServic
 
 	private BarcodeValidationService validationService;
 
-	public BarCodeAggregationService(final String logsFolder, final Gs1PrefixService gs1Service, final BarcodeValidationService barcodeValidationService,boolean toConsole) {
-		super(logsFolder,toConsole);
+	public BarCodeAggregationService(final Logger logger, final Gs1PrefixService gs1Service, final BarcodeValidationService barcodeValidationService) {
+		super(logger);
 		this.gs1Service = gs1Service;
 		validationService = barcodeValidationService;
 
 	}
 
 	@Override
-	public void onDataFragment(final DataFragment input, final Product output) throws AggregationSkipException {
+	public void onDataFragment(final DataFragment input, final Product output, VerticalConfig vConf) throws AggregationSkipException {
 
 		/////////////////////////////
 		// Validating barcodes
 		/////////////////////////////
 
-		handle(output);
+		onProduct(output, vConf);
 	}
 
 	@Override
-	public void handle(Product output) throws AggregationSkipException {
+	public void onProduct(Product output, VerticalConfig vConf) throws AggregationSkipException {
+
 
 		SimpleEntry<BarcodeType, String> valResult = validationService.sanitize(output.gtin());
 		if (valResult.getKey().equals(BarcodeType.UNKNOWN)) {

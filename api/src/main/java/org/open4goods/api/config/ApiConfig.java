@@ -6,10 +6,9 @@ import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.lang3.ArrayUtils;
 import org.open4goods.api.config.yml.ApiProperties;
-import org.open4goods.api.services.BatchAggregationService;
 import org.open4goods.api.services.BatchService;
 import org.open4goods.api.services.FetcherOrchestrationService;
-import org.open4goods.api.services.RealtimeAggregationService;
+import org.open4goods.api.services.AggregationFacadeService;
 import org.open4goods.api.services.store.DataFragmentStoreService;
 import org.open4goods.crawler.config.yml.FetcherProperties;
 import org.open4goods.crawler.repository.CsvIndexationRepository;
@@ -175,18 +174,15 @@ public class ApiConfig {
 	 
 	@Bean
 	@Autowired
-	BatchService batchService(RealtimeAggregationService rtService,  SearchService searchService, ProductRepository dataRepository, VerticalsConfigService verticalsConfigService, BatchAggregationService batchAggregationService) throws IOException {
-		// Logging to console according to dev profile and conf
-		boolean toConsole = ArrayUtils.contains(env.getActiveProfiles(), "dev") || ArrayUtils.contains(env.getActiveProfiles(), "devsec");
-		// TODO : Not nice, mutualize
-        return new BatchService(rtService,dataRepository, apiProperties, verticalsConfigService,batchAggregationService, searchService, toConsole);
+	BatchService batchService(AggregationFacadeService rtService,  SearchService searchService, ProductRepository dataRepository, VerticalsConfigService verticalsConfigService) throws IOException {
+        return new BatchService(rtService,dataRepository, apiProperties, verticalsConfigService, searchService);
 	}
 
 
 
 
 	@Bean
-	RealtimeAggregationService realtimeAggregationService( @Autowired EvaluationService evaluationService,
+	AggregationFacadeService realtimeAggregationService( @Autowired EvaluationService evaluationService,
 			@Autowired StandardiserService standardiserService,
 			@Autowired AutowireCapableBeanFactory autowireBeanFactory, @Autowired ProductRepository aggregatedDataRepository,
 			@Autowired ApiProperties apiProperties, @Autowired Gs1PrefixService gs1prefixService,
@@ -197,23 +193,9 @@ public class ApiConfig {
 			@Autowired GoogleTaxonomyService gts,
 			@Autowired BlablaService blablaService
 			) {
-		return new RealtimeAggregationService(evaluationService, standardiserService, autowireBeanFactory, aggregatedDataRepository, apiProperties, gs1prefixService, dataSourceConfigService, configService,  barcodeValidationService,brandservice, gts, blablaService);
+		return new AggregationFacadeService(evaluationService, standardiserService, autowireBeanFactory, aggregatedDataRepository, apiProperties, gs1prefixService, dataSourceConfigService, configService,  barcodeValidationService,brandservice, gts, blablaService);
 	}
 
-	@Bean
-	BatchAggregationService batchAggregationService( @Autowired EvaluationService evaluationService,
-			@Autowired StandardiserService standardiserService,
-			@Autowired AutowireCapableBeanFactory autowireBeanFactory, @Autowired ProductRepository aggregatedDataRepository,
-			@Autowired ApiProperties apiProperties, @Autowired Gs1PrefixService gs1prefixService,
-			@Autowired DataSourceConfigService dataSourceConfigService, @Autowired VerticalsConfigService configService, 
-			@Autowired BarcodeValidationService barcodeValidationService,
-			@Autowired BrandService brandservice,
-			@Autowired AiService aiService,
-			@Autowired BlablaService blablaService
-			
-			) {
-		return new BatchAggregationService(evaluationService, standardiserService, autowireBeanFactory, aggregatedDataRepository, apiProperties, gs1prefixService, dataSourceConfigService, configService,  barcodeValidationService, brandservice, blablaService);
-	}
 
 
 	//////////////////////////////////////////////////////////
@@ -339,7 +321,7 @@ public class ApiConfig {
 
 
 	@Bean DataFragmentStoreService dataFragmentStoreService(
-			@Autowired final ApiProperties config, @Autowired final SerialisationService serialisationService, @Autowired StandardiserService standardiserService, @Autowired RealtimeAggregationService generationService, @Autowired ProductRepository aggregatedDataRepository) {
+			@Autowired final ApiProperties config, @Autowired final SerialisationService serialisationService, @Autowired StandardiserService standardiserService, @Autowired AggregationFacadeService generationService, @Autowired ProductRepository aggregatedDataRepository) {
 		return new DataFragmentStoreService(standardiserService, generationService, aggregatedDataRepository);
 	}
 
@@ -378,12 +360,12 @@ public class ApiConfig {
 
 
 	//	@Bean
-	//	RealtimeAggregationService fullGenerationService( @Autowired EvaluationService evaluationService,
+	//	AggregationFacadeService fullGenerationService( @Autowired EvaluationService evaluationService,
 	//			@Autowired ReferentielService referentielService, @Autowired StandardiserService standardiserService,
 	//			@Autowired AutowireCapableBeanFactory autowireBeanFactory, @Autowired ProductRepository aggregatedDataRepository,
 	//			@Autowired ApiProperties apiProperties, @Autowired Gs1PrefixService gs1prefixService,
 	//			@Autowired DataSourceConfigService dataSourceConfigService, @Autowired VerticalsConfigService configService, @Autowired BarcodeValidationService barcodeValidationService, @Autowired GoogleTaxonomyService taxonomyService) {
-	//		return new RealtimeAggregationService(repository, evaluationService, referentielService, standardiserService, autowireBeanFactory, aggregatedDataRepository, apiProperties, gs1prefixService, dataSourceConfigService, configService,  barcodeValidationService, taxonomyService);
+	//		return new AggregationFacadeService(repository, evaluationService, referentielService, standardiserService, autowireBeanFactory, aggregatedDataRepository, apiProperties, gs1prefixService, dataSourceConfigService, configService,  barcodeValidationService, taxonomyService);
 	//	}
 	//
 
