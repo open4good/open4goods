@@ -5,9 +5,10 @@ import java.util.List;
 public class TextsConfig {
 
 	
-	  private String url;
+	
+	  private TextsConfigUrl url = new TextsConfigUrl();
       private String prefix;
-      private List<String> attr;
+      private List<String> attrs;
       private List<String> h1Title;
       private List<String> metaTitle;
       private List<String> metaDescription;
@@ -19,28 +20,30 @@ public class TextsConfig {
 
       // Getters and setters
 
-      public String getUrl() {
-          return url;
-      }
-
-      public void setUrl(String url) {
-          this.url = url;
-      }
+ 
 
       public String getPrefix() {
           return prefix;
       }
 
-      public void setPrefix(String prefix) {
+      public TextsConfigUrl getUrl() {
+		return url;
+	}
+
+	public void setUrl(TextsConfigUrl url) {
+		this.url = url;
+	}
+
+	public void setPrefix(String prefix) {
           this.prefix = prefix;
       }
 
-      public List<String> getAttr() {
-          return attr;
+      public List<String> getAttrs() {
+          return attrs;
       }
 
-      public void setAttr(List<String> attr) {
-          this.attr = attr;
+      public void setAttrs(List<String> attr) {
+          this.attrs = attr;
       }
 
       public List<String> getH1Title() {
