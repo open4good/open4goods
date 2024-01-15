@@ -10,7 +10,6 @@ import org.open4goods.api.services.BatchAggregationService;
 import org.open4goods.api.services.BatchService;
 import org.open4goods.api.services.FetcherOrchestrationService;
 import org.open4goods.api.services.RealtimeAggregationService;
-import org.open4goods.api.services.ReferentielService;
 import org.open4goods.api.services.store.DataFragmentStoreService;
 import org.open4goods.crawler.config.yml.FetcherProperties;
 import org.open4goods.crawler.repository.CsvIndexationRepository;
@@ -188,7 +187,7 @@ public class ApiConfig {
 
 	@Bean
 	RealtimeAggregationService realtimeAggregationService( @Autowired EvaluationService evaluationService,
-			@Autowired ReferentielService referentielService, @Autowired StandardiserService standardiserService,
+			@Autowired StandardiserService standardiserService,
 			@Autowired AutowireCapableBeanFactory autowireBeanFactory, @Autowired ProductRepository aggregatedDataRepository,
 			@Autowired ApiProperties apiProperties, @Autowired Gs1PrefixService gs1prefixService,
 			@Autowired DataSourceConfigService dataSourceConfigService, 
@@ -198,12 +197,12 @@ public class ApiConfig {
 			@Autowired GoogleTaxonomyService gts,
 			@Autowired BlablaService blablaService
 			) {
-		return new RealtimeAggregationService(evaluationService, referentielService, standardiserService, autowireBeanFactory, aggregatedDataRepository, apiProperties, gs1prefixService, dataSourceConfigService, configService,  barcodeValidationService,brandservice, gts, blablaService);
+		return new RealtimeAggregationService(evaluationService, standardiserService, autowireBeanFactory, aggregatedDataRepository, apiProperties, gs1prefixService, dataSourceConfigService, configService,  barcodeValidationService,brandservice, gts, blablaService);
 	}
 
 	@Bean
 	BatchAggregationService batchAggregationService( @Autowired EvaluationService evaluationService,
-			@Autowired ReferentielService referentielService, @Autowired StandardiserService standardiserService,
+			@Autowired StandardiserService standardiserService,
 			@Autowired AutowireCapableBeanFactory autowireBeanFactory, @Autowired ProductRepository aggregatedDataRepository,
 			@Autowired ApiProperties apiProperties, @Autowired Gs1PrefixService gs1prefixService,
 			@Autowired DataSourceConfigService dataSourceConfigService, @Autowired VerticalsConfigService configService, 
@@ -213,7 +212,7 @@ public class ApiConfig {
 			@Autowired BlablaService blablaService
 			
 			) {
-		return new BatchAggregationService(evaluationService, referentielService, standardiserService, autowireBeanFactory, aggregatedDataRepository, apiProperties, gs1prefixService, dataSourceConfigService, configService,  barcodeValidationService, brandservice, blablaService);
+		return new BatchAggregationService(evaluationService, standardiserService, autowireBeanFactory, aggregatedDataRepository, apiProperties, gs1prefixService, dataSourceConfigService, configService,  barcodeValidationService, brandservice, blablaService);
 	}
 
 
@@ -332,10 +331,6 @@ public class ApiConfig {
 
 	@Bean ImageMagickService imageService() {
 		return new ImageMagickService();
-	}
-
-	@Bean ReferentielService referentielService(@Autowired final ApiProperties config) {
-		return new ReferentielService(config.logsFolder());
 	}
 
 	@Bean RemoteFileCachingService remoteFileCachingService(@Autowired final ApiProperties config) {

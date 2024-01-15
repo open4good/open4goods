@@ -49,8 +49,6 @@ public class BatchAggregationService  {
 
 	private EvaluationService evaluationService;
 
-	private ReferentielService referentielService;
-
 	private StandardiserService standardiserService;
 
 	private AutowireCapableBeanFactory autowireBeanFactory;
@@ -76,7 +74,7 @@ public class BatchAggregationService  {
 
 
 	public BatchAggregationService(EvaluationService evaluationService,
-			ReferentielService referentielService, StandardiserService standardiserService,
+		    StandardiserService standardiserService,
 			AutowireCapableBeanFactory autowireBeanFactory, ProductRepository aggregatedDataRepository,
 			ApiProperties apiProperties, Gs1PrefixService gs1prefixService,
 			DataSourceConfigService dataSourceConfigService, VerticalsConfigService configService,
@@ -86,7 +84,6 @@ public class BatchAggregationService  {
 			) {
 		super();
 		this.evaluationService = evaluationService;
-		this.referentielService = referentielService;
 		this.standardiserService = standardiserService;
 		this.autowireBeanFactory = autowireBeanFactory;
 		this.aggregatedDataRepository = aggregatedDataRepository;
