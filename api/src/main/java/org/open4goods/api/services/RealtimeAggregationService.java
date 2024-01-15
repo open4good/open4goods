@@ -16,7 +16,6 @@ import org.open4goods.api.services.aggregation.services.realtime.NamesAggregatio
 import org.open4goods.api.services.aggregation.services.realtime.PriceAggregationService;
 import org.open4goods.api.services.aggregation.services.realtime.TaxonomyRealTimeAggregationService;
 import org.open4goods.config.yml.ui.VerticalConfig;
-import org.open4goods.config.yml.ui.VerticalProperties;
 import org.open4goods.dao.ProductRepository;
 import org.open4goods.exceptions.AggregationSkipException;
 import org.open4goods.model.data.DataFragment;
@@ -48,8 +47,6 @@ public class RealtimeAggregationService {
 
 	private EvaluationService evaluationService;
 
-	private ReferentielService referentielService;
-
 	private StandardiserService standardiserService;
 
 	private AutowireCapableBeanFactory autowireBeanFactory;
@@ -75,7 +72,7 @@ public class RealtimeAggregationService {
 	private BlablaService blablaService;
 	
 	public RealtimeAggregationService(EvaluationService evaluationService,
-			ReferentielService referentielService, StandardiserService standardiserService,
+			StandardiserService standardiserService,
 			AutowireCapableBeanFactory autowireBeanFactory, ProductRepository aggregatedDataRepository,
 			ApiProperties apiProperties, Gs1PrefixService gs1prefixService,
 			DataSourceConfigService dataSourceConfigService, VerticalsConfigService configService,
@@ -86,7 +83,6 @@ public class RealtimeAggregationService {
 			) {
 		super();
 		this.evaluationService = evaluationService;
-		this.referentielService = referentielService;
 		this.standardiserService = standardiserService;
 		this.autowireBeanFactory = autowireBeanFactory;
 		this.aggregatedDataRepository = aggregatedDataRepository;
@@ -98,7 +94,7 @@ public class RealtimeAggregationService {
 		this.barcodeValidationService = barcodeValidationService;
 		this.taxonomyService = taxonomyService;
 		this.blablaService = blablaService;
-		aggregator = getAggregator(configService.getConfigById(VerticalsConfigService.MAIN_VERTICAL_NAME));
+		aggregator = getAggregator(configService.getDefaultConfig());
 
 
 		// Calling aggregator.BEFORE
@@ -156,7 +152,7 @@ public class RealtimeAggregationService {
 		//		services.add(new UrlsAggregationService(evaluationService, apiProperties.logsFolder(),
 		//				config.getNamings().getProductUrlTemplates()));
 
-		services.add(new PriceAggregationService(apiProperties.logsFolder(), dataSourceConfigService,config.getSegment(), apiProperties.isDedicatedLoggerToConsole()));
+		services.add(new PriceAggregationService(apiProperties.logsFolder(), dataSourceConfigService, apiProperties.isDedicatedLoggerToConsole()));
 
 		//		services.add(new CommentsAggregationService(apiProperties.logsFolder(), config.getCommentsConfig()));
 		//		services.add(new ProsAndConsAggregationService(apiProperties.logsFolder()));
@@ -177,50 +173,6 @@ public class RealtimeAggregationService {
 
 		return ret;
 	}
-
-
-
-	/**
-	 * Add a Capsule Generation job to the working queue
-	 *
-	 * @param capsuleProperties
-	 */
-
-	DataFragment cleanDataFragment(final DataFragment data, final VerticalProperties segmentProperties) {
-
-		//		if (null == data.gtin()) {
-		//			return null;
-		//		}
-		//
-		//		// Evicting items that do not meet the minimum price
-		//		if (data.hasPrice() && null != segmentProperties.getMinimumEvictionPrice()
-		//				&& data.getPrice().getPrice() < segmentProperties.getMinimumEvictionPrice()) {
-		//			return null;
-		//		}
-
-		//		// Updating the  compensation
-		//		if ( data.hasPrice() && data.affiliated()) {
-		//			try {
-		//				final Double reversment = segmentProperties.getDatasources().get(data.getDatasourceName()).getPercentCompensation();
-		//				if (null == reversment ) {
-		//					logger.warn("No compensation defined for {}",data.getDatasourceName());
-		//				} else {
-		//					data.setEcologicalCompensationAmount(reversment*data.getPrice().getPrice());
-		//				}
-		//			} catch (final Exception e) {
-		//				logger.error("Cannot compute compensation for {} : {}",data,e);
-		//			}
-		//		}
-
-		// Sanitizing the branduid
-		referentielService.sanitizeBrandUid(data, segmentProperties);
-
-		return data;
-
-	}
-
-
-
 
 
 

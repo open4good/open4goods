@@ -182,12 +182,6 @@ public class VerticalConfig{
 	private BarcodeAggregationProperties barcodeConfig = new BarcodeAggregationProperties();
 
 	/**
-	 * The segment definition. The API will use it to budle the data dedicated to the capsule.
-	 */
-	@JsonMerge
-	private VerticalProperties segment = new VerticalProperties();
-
-	/**
 	 * The recommandations configuration
 	 */
 	private RecommandationsConfig recommandationsConfig = new RecommandationsConfig();
@@ -489,17 +483,6 @@ public class VerticalConfig{
 	public void setBarcodeConfig(BarcodeAggregationProperties barcodeConfig) {
 		this.barcodeConfig = barcodeConfig;
 	}
-
-
-	public VerticalProperties getSegment() {
-		return segment;
-	}
-
-
-	public void setSegment(VerticalProperties segment) {
-		this.segment = segment;
-	}
-
 
 	public RecommandationsConfig getRecommandationsConfig() {
 		return recommandationsConfig;

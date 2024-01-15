@@ -2,10 +2,15 @@
 package org.open4goods.api.services.aggregation.services.realtime;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 
 import org.open4goods.api.services.aggregation.AbstractRealTimeAggregationService;
-import org.open4goods.config.yml.ui.VerticalProperties;
 import org.open4goods.dao.ProductRepository;
 import org.open4goods.exceptions.AggregationSkipException;
 import org.open4goods.model.constants.ProductCondition;
@@ -36,13 +41,10 @@ public class PriceAggregationService extends AbstractRealTimeAggregationService 
 
 	private DataSourceConfigService datasourceConfigService;
 
-	private VerticalProperties segmentProperties;
-
 	public PriceAggregationService(final String logsFolder, DataSourceConfigService datasourceConfigService,
-			VerticalProperties segmentProperties, boolean toConsole) {
+			 boolean toConsole) {
 		super(logsFolder, toConsole);
 		this.datasourceConfigService = datasourceConfigService;
-		this.segmentProperties = segmentProperties;
 	}
 
 	@Override
