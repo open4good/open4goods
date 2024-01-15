@@ -6,8 +6,6 @@ import java.util.List;
 
 import org.open4goods.api.config.yml.ApiProperties;
 import org.open4goods.api.services.aggregation.AbstractAggregationService;
-import org.open4goods.api.services.aggregation.aggregator.StandardAggregator;
-import org.open4goods.api.services.aggregation.aggregator.SanitisationBatchedAggregator;
 import org.open4goods.api.services.aggregation.aggregator.ScoringBatchedAggregator;
 import org.open4goods.api.services.aggregation.aggregator.StandardAggregator;
 import org.open4goods.api.services.aggregation.services.batch.scores.Attribute2ScoreAggregationService;
