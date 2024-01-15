@@ -3,9 +3,11 @@ package org.open4goods.api.services.aggregation.services.batch.scores;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
+import org.open4goods.config.yml.ui.VerticalConfig;
 import org.open4goods.exceptions.ValidationException;
 import org.open4goods.model.data.Score;
 import org.open4goods.model.product.Product;
+import org.slf4j.Logger;
 
 /**
  * Create an ecoscore based on existing scores aggregations (based on config)
@@ -15,17 +17,15 @@ import org.open4goods.model.product.Product;
 public class EcoScoreAggregationService extends AbstractScoreAggregationService {
 
 	private static final String ECOSCORE_SCORENAME = "ECOSCORE";
-	private final Map<String, String> ecoScoreconfig;
 
-	public EcoScoreAggregationService(final Map<String, String> ecoScoreconfig,  final String logsFolder,boolean toConsole) {
-		super(logsFolder, toConsole);
-		this.ecoScoreconfig = ecoScoreconfig;
+	public EcoScoreAggregationService(final Logger logger) {
+		super(logger);
 	}
 
 
 
 	@Override
-	public void onProduct(Product data) {
+	public void onProduct(Product data, VerticalConfig vConf) {
 
 		
 		
@@ -34,7 +34,7 @@ public class EcoScoreAggregationService extends AbstractScoreAggregationService 
 		}
 		
 		try {
-			Double score = generateEcoScore(data.getScores());
+			Double score = generateEcoScore(data.getScores(),vConf);
 
 			// Processing cardinality
 			processCardinality(ECOSCORE_SCORENAME,score);			
@@ -49,17 +49,17 @@ public class EcoScoreAggregationService extends AbstractScoreAggregationService 
 
 
 
-	private Double generateEcoScore(Map<String, Score> scores) throws ValidationException {
+	private Double generateEcoScore(Map<String, Score> scores, VerticalConfig vConf) throws ValidationException {
 		
 		
 		double va = 0.0;
-		for (String config :  ecoScoreconfig.keySet()) {
+		for (String config :  vConf.getEcoscoreConfig().keySet()) {
 			Score score = scores.get(config);
 			
 			if (null == score) {
 				throw new ValidationException ("EcoScore rating cannot proceed, missing subscore : " + config);
 			} 			
-			va += score.getValue() * Double.valueOf(ecoScoreconfig.get(config));
+			va += score.getValue() * Double.valueOf(vConf.getEcoscoreConfig().get(config));
 		}
 		
 		

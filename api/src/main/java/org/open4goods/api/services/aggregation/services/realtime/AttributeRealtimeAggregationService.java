@@ -11,10 +11,11 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
-import org.open4goods.api.services.aggregation.AbstractRealTimeAggregationService;
+import org.open4goods.api.services.aggregation.AbstractAggregationService;
 import org.open4goods.config.yml.attributes.AttributeConfig;
 import org.open4goods.config.yml.attributes.AttributeParser;
 import org.open4goods.config.yml.ui.AttributesConfig;
+import org.open4goods.config.yml.ui.VerticalConfig;
 import org.open4goods.exceptions.AggregationSkipException;
 import org.open4goods.exceptions.ParseException;
 import org.open4goods.exceptions.ResourceNotFoundException;
@@ -29,8 +30,9 @@ import org.open4goods.model.product.AggregatedFeature;
 import org.open4goods.model.product.Product;
 import org.open4goods.services.BrandService;
 import org.open4goods.services.VerticalsConfigService;
+import org.slf4j.Logger;
 
-public class AttributeRealtimeAggregationService extends AbstractRealTimeAggregationService {
+public class AttributeRealtimeAggregationService extends AbstractAggregationService {
 
 
 	
@@ -38,8 +40,8 @@ public class AttributeRealtimeAggregationService extends AbstractRealTimeAggrega
 
 	private VerticalsConfigService verticalConfigService;
 
-	public AttributeRealtimeAggregationService(final VerticalsConfigService verticalConfigService,  BrandService brandService, final String logsFolder,boolean toConsole) {
-		super(logsFolder,toConsole);
+	public AttributeRealtimeAggregationService(final VerticalsConfigService verticalConfigService,  BrandService brandService, final Logger logger) {
+		super(logger);
 		this.verticalConfigService = verticalConfigService;
 		this.brandService = brandService;
 	}
@@ -52,7 +54,7 @@ public class AttributeRealtimeAggregationService extends AbstractRealTimeAggrega
 	 * @param match2
 	 */
 	@Override
-	public void onDataFragment(final DataFragment dataFragment, final Product product) {
+	public void onDataFragment(final DataFragment dataFragment, final Product product, VerticalConfig vConf) throws AggregationSkipException {
 
 		if (dataFragment.getAttributes().size() == 0) {
 			return;
@@ -60,9 +62,7 @@ public class AttributeRealtimeAggregationService extends AbstractRealTimeAggrega
 		
 		try {
 			
-
-
-			AttributesConfig attributesConfig = verticalConfigService.getConfigByIdOrDefault(product.getVertical()).getAttributesConfig();
+			AttributesConfig attributesConfig = vConf.getAttributesConfig();
 
 			// Adding the list of "to be removed" attributes
 			Set<String> toRemoveFromUnmatched = new HashSet<>(attributesConfig.getExclusions());
@@ -443,9 +443,10 @@ public class AttributeRealtimeAggregationService extends AbstractRealTimeAggrega
 	}
 
 
-	@Override
-	public void handle(Product output) throws AggregationSkipException {
 
+	@Override
+	public void onProduct(Product data, VerticalConfig vConf) throws AggregationSkipException {
+		// TODO Handle the batch processing
 		
 	}
 

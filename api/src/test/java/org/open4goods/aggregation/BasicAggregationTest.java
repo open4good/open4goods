@@ -12,7 +12,7 @@
 //import org.junit.jupiter.api.Test;
 //import org.open4goods.api.services.aggregation.AbstractAggregationService;
 //import org.open4goods.api.services.aggregation.aggregator.AbstractAggregator;
-//import org.open4goods.api.services.aggregation.aggregator.RealTimeAggregator;
+//import org.open4goods.api.services.aggregation.aggregator.StandardAggregator;
 //import org.open4goods.api.services.aggregation.services.PriceAggregationService;
 //import org.open4goods.exceptions.NotAddedException;
 //import org.open4goods.model.product.Product;
@@ -44,7 +44,7 @@
 //		}
 //
 //		 @Bean AbstractAggregator dataAggregationService() {
-//			return new RealTimeAggregator(aggregationServices());
+//			return new StandardAggregator(aggregationServices());
 //		}
 //
 //		 @Bean SerialisationService serialisationService() {

@@ -2,6 +2,7 @@ package org.open4goods.api.services.aggregation.aggregator;
 
 import java.io.Closeable;
 import java.io.IOException;
+import java.util.HashSet;
 import java.util.List;
 
 import org.open4goods.api.services.aggregation.AbstractAggregationService;
@@ -42,7 +43,7 @@ public abstract class AbstractAggregator implements Closeable{
 		services.stream().forEach(s -> {autowireBeanFactory.autowireBean(s); }) ;
 
 		// Calling init
-		services.stream().forEach(s -> {s.init();}) ;
+		services.stream().forEach(s -> {s.init(new HashSet<>());}) ;
 
 	}
 

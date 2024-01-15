@@ -8,11 +8,7 @@
 	<!-- Primary Meta Tags -->
 	<title th:text="#{product.title(${product.names.shortestOfferName()})}"></title>
 	<meta name="title" th:content="#{product.meta.title(${product.names.shortestOfferName()})}">	
-
-	<th:block th:if="${null != product.bestPrice()}">
-		<meta name="description" th:if="${null != product.model() && null != product.brand()}" th:content="#{product.meta.description.withbrandandmodel(${product.model()}, ${product.brand()}, ${#numbers.formatDecimal(product.bestPrice().compensation, 1, 2)}, ${product.names.shortestOfferName()})}">              
-	    <meta name="description" th:unless="${null != product.model() && null != product.brand()}" th:content="#{product.meta.description.withname(${product.names.shortestOfferName()}, ${#numbers.formatDecimal(product.bestPrice().compensation, 1, 2)})}">
-	</th:block>
+    <meta name="description"  th:content="${helper.texts.title}">              
 	
 	<!-- Open Graph / Facebook -->
 	<meta property="og:type" content="website">

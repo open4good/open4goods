@@ -4,25 +4,25 @@ import java.util.Collection;
 
 import org.open4goods.config.yml.attributes.AttributeConfig;
 import org.open4goods.config.yml.ui.AttributesConfig;
+import org.open4goods.config.yml.ui.VerticalConfig;
 import org.open4goods.exceptions.ValidationException;
 import org.open4goods.model.attribute.AttributeType;
 import org.open4goods.model.data.Score;
 import org.open4goods.model.product.AggregatedAttribute;
 import org.open4goods.model.product.Product;
+import org.slf4j.Logger;
 
 public class Attribute2ScoreAggregationService extends AbstractScoreAggregationService {
 
-	private final AttributesConfig attributesConfig;
 
-	public Attribute2ScoreAggregationService(final AttributesConfig attributesConfig,  final String logsFolder,boolean toConsole) {
-		super(logsFolder, toConsole);
-		this.attributesConfig = attributesConfig;
+	public Attribute2ScoreAggregationService(final Logger logger) {
+		super(logger);
 	}
 
 	
 	
 	@Override
-	public void onProduct(Product data) {
+	public void onProduct(Product data, VerticalConfig vConf) {
 
 		
 		Collection<AggregatedAttribute> aggattrs =    data.getAttributes().getAggregatedAttributes().values()  ;
@@ -30,6 +30,7 @@ public class Attribute2ScoreAggregationService extends AbstractScoreAggregationS
 			// Scoring from attribute
 			try {
 				
+				AttributesConfig attributesConfig = vConf.getAttributesConfig();
 				AttributeConfig attrConfig = attributesConfig.getAttributeConfigByKey(attributesConfig.getKeyForValue(aga.getName()));
 				if (null == attrConfig) {
                     dedicatedLogger.error("No attribute config for {}",aga);
@@ -38,7 +39,7 @@ public class Attribute2ScoreAggregationService extends AbstractScoreAggregationS
 				
 				if (attrConfig.isAsRating()) {
 						try {
-							Double score = generateScoresFromAttribute(aga.getName() ,aga);
+							Double score = generateScoresFromAttribute(aga.getName() ,aga, vConf.getAttributesConfig());
 
 							// Processing cardinality
 							processCardinality(aga.getName(),score);
@@ -65,7 +66,7 @@ public class Attribute2ScoreAggregationService extends AbstractScoreAggregationS
 	 * @param a
 	 * @return
 	 */
-	public Double generateScoresFromAttribute(String attributeKey , AggregatedAttribute a) throws ValidationException{
+	public Double generateScoresFromAttribute(String attributeKey , AggregatedAttribute a, AttributesConfig attributesConfig) throws ValidationException{
 
 		AttributeConfig ac = attributesConfig.getAttributeConfigByKey(attributeKey);
 		// transformation required

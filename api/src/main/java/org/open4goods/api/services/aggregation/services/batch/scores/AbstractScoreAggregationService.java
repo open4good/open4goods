@@ -4,7 +4,8 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.open4goods.api.services.aggregation.AbstractBatchAggregationService;
+import org.open4goods.api.services.aggregation.AbstractAggregationService;
+import org.open4goods.config.yml.ui.VerticalConfig;
 import org.open4goods.exceptions.ValidationException;
 import org.open4goods.model.attribute.Cardinality;
 import org.open4goods.model.data.Score;
@@ -13,15 +14,14 @@ import org.open4goods.services.StandardiserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class AbstractScoreAggregationService extends  AbstractBatchAggregationService{
+public abstract class AbstractScoreAggregationService extends  AbstractAggregationService{
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(AbstractScoreAggregationService.class);
 
 	private Map<String, Cardinality>  batchDatas = new HashMap<>();
 	
 	
-	public AbstractScoreAggregationService(String logsFolder, boolean toConsole) {
-		super(logsFolder, toConsole);
+	public AbstractScoreAggregationService(Logger logger) {
+		super(logger);
 	}
 
 
@@ -40,13 +40,6 @@ public class AbstractScoreAggregationService extends  AbstractBatchAggregationSe
 		
 		dedicatedLogger.info("{} -> Scores relativisation for {} products", this.getClass().getSimpleName(), datas.size());
 
-		
-		
-		
-		
-		
-		
-				
 		//////////////////////////
 		// Virtual scores computing
 		// Operated on absolute values
@@ -112,14 +105,14 @@ public class AbstractScoreAggregationService extends  AbstractBatchAggregationSe
 		// Substracting unused min
 
 		if (null == score.getAbsolute()) {
-			LOGGER.warn("Empty value for Score {} ! Consider normalizing in a futur export/import phase",score);
+			dedicatedLogger.warn("Empty value for Score {} ! Consider normalizing in a futur export/import phase",score);
 			return ;
 		}
 		
 		Cardinality cardinality =  batchDatas.get(score.getName());
 
 		if (null == cardinality) {
-			LOGGER.warn("No source cardinality found for score {}",score);
+			dedicatedLogger.warn("No source cardinality found for score {}",score);
 			return ;
 		}
 		
@@ -138,7 +131,7 @@ public class AbstractScoreAggregationService extends  AbstractBatchAggregationSe
 
 
 		} catch (Exception e) {
-			LOGGER.warn("Relativisation failed",e);
+			dedicatedLogger.warn("Relativisation failed",e);
 		}
 	}
 
@@ -196,5 +189,10 @@ public class AbstractScoreAggregationService extends  AbstractBatchAggregationSe
 
 		batchDatas.put(scoreName,c);
 	}
+
+
+
+
+
 
 }

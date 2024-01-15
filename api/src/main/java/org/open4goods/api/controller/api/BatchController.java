@@ -64,7 +64,7 @@ public class BatchController {
 		service.addTmpConfig(v);
 		
 		// This is initial submission, batching the products to update catégories				
-		batchService.batchScore(v);
+		batchService.score(v);
 		
 		
 		return "done";
@@ -77,7 +77,7 @@ public class BatchController {
 	public String fullUpdateFromName( @RequestParam @NotBlank final String verticalConfig ) throws InvalidParameterException, JsonParseException, JsonMappingException, IOException{
 		
 		// This is initial submission, batching the products to update catégories				
-		batchService.batchScore(service.getConfigById(verticalConfig));		
+		batchService.score(service.getConfigById(verticalConfig));		
 		
 		return "done";
 	}
@@ -92,7 +92,7 @@ public class BatchController {
 	@GetMapping("/sanitisation")
 	@Operation(summary="Launch sanitisation of all products")
 	public void sanitize() throws InvalidParameterException, IOException {
-		batchService.sanitize();
+		batchService.sanitizeAll();
 	}
 
 	@GetMapping("/sanitisation/{gtin}")

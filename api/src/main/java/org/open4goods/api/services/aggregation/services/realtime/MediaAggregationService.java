@@ -2,7 +2,7 @@ package org.open4goods.api.services.aggregation.services.realtime;
 
 import java.io.IOException;
 
-import org.open4goods.api.services.aggregation.AbstractRealTimeAggregationService;
+import org.open4goods.api.services.aggregation.AbstractAggregationService;
 import org.open4goods.config.yml.ui.VerticalConfig;
 import org.open4goods.exceptions.AggregationSkipException;
 import org.open4goods.helper.IdHelper;
@@ -12,7 +12,7 @@ import org.open4goods.model.product.Product;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class MediaAggregationService extends AbstractRealTimeAggregationService{
+public class MediaAggregationService extends AbstractAggregationService{
 
 	private static final Logger logger = LoggerFactory.getLogger(MediaAggregationService.class);
 
@@ -20,7 +20,7 @@ public class MediaAggregationService extends AbstractRealTimeAggregationService{
 	//
 	//    private final  ElasticsearchRestTemplate esTemplate;
 
-	private final  VerticalConfig config;
+
 
 	//    private final ImageClassificationService imageClassificationService;
 
@@ -28,20 +28,20 @@ public class MediaAggregationService extends AbstractRealTimeAggregationService{
 
 	//private ResourceService resourceService;
 
-	public MediaAggregationService(final VerticalConfig config, final String logsFolder,boolean toConsole) {
-		super(logsFolder,toConsole);
+	public MediaAggregationService(final Logger logger) {
+		super(logger);
 		//		this.imageService = imageService;
 		//		this.esTemplate = esTemplate;
-		this.config = config;
+//		this.config = config;
 		//		this.resourceService = resourceService;
 		// Creating executor
 		//		executor =  Executors.newFixedThreadPool(config.getResourcesConfig().getResourceDownloadConcurentThreads());
 	}
 
 	@Override
-	public void onDataFragment(final DataFragment input, final Product output) {
+	public void onDataFragment(final DataFragment input, final Product output, VerticalConfig vConf) throws AggregationSkipException {
 
-		if (config.getResourcesConfig().getSkipResourcesFetching()) {
+		if (vConf.getResourcesConfig().getSkipResourcesFetching()) {
 			logger.info("Skipping resource download : {}",input);
 			return;
 		}
@@ -65,7 +65,8 @@ public class MediaAggregationService extends AbstractRealTimeAggregationService{
 	}
 
 	@Override
-	public void handle(Product output) throws AggregationSkipException {
+	public void onProduct(Product data, VerticalConfig vConf) throws AggregationSkipException {
 	}
+
 
 }

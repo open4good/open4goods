@@ -5,11 +5,14 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.lang3.ArrayUtils;
 import org.open4goods.config.BrandConfiguration;
 import org.open4goods.config.yml.ui.DescriptionsAggregationConfig;
 import org.open4goods.crawler.config.yml.FetcherProperties;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.env.Environment;
 import org.springframework.validation.annotation.Validated;
 
 import jakarta.validation.constraints.NotBlank;
@@ -24,6 +27,9 @@ import jakarta.validation.constraints.NotNull;
  *
  */
 public class ApiProperties {
+
+	
+	@Autowired Environment env;	
 
 	/**
 	 * The location where dedicated snapshots will be stored
@@ -46,12 +52,7 @@ public class ApiProperties {
 	 */
 	private String datafragmentsBackupFolder = rootFolder + "backup"+File.separator+"data"+File.separator;
 
-	
-	/**
-	 * If true, all dedicated loggers will be redirected to console (usefull for dev mode)
-	 */
-	private boolean dedicatedLoggerToConsole = false;
-	
+		
 	/*
 	 * Proxy, if neededpsule
 	 */
@@ -139,6 +140,14 @@ public class ApiProperties {
 	private FetcherProperties fetcherProperties;
 
 
+	/**
+	 * Indicates if the application is in dev mode
+	 * @return
+	 */
+	public boolean isDevMode() {
+		return ArrayUtils.contains(env.getActiveProfiles(), "dev") || ArrayUtils.contains(env.getActiveProfiles(), "devsec");
+        
+	}
 	public String workFolder() {
 		return rootFolder+"/.work/";
 	}
@@ -367,15 +376,6 @@ public class ApiProperties {
 
 
 
-	public boolean isDedicatedLoggerToConsole() {
-		return dedicatedLoggerToConsole;
-	}
-
-
-
-	public void setDedicatedLoggerToConsole(boolean dedicatedLoggerToConsole) {
-		this.dedicatedLoggerToConsole = dedicatedLoggerToConsole;
-	}
 
 
 

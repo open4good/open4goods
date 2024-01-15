@@ -2,18 +2,16 @@ package org.open4goods.services;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Collectors;
 
 import org.open4goods.config.yml.ui.VerticalConfig;
 import org.open4goods.dao.ProductRepository;
@@ -36,8 +34,6 @@ import com.fasterxml.jackson.databind.ObjectReader;
  *
  */
 public class VerticalsConfigService {
-
-	public static final String MAIN_VERTICAL_NAME = "all";
 
 	public static final Logger logger = LoggerFactory.getLogger(VerticalsConfigService.class);
 
@@ -318,10 +314,10 @@ public class VerticalsConfigService {
 
 	/**
 	 *
-	 * @return all configs, except the _default and the "all" one
+	 * @return all configs, except the _default 
 	 */
-	public Set<VerticalConfig>  getConfigsWithoutDefault() {
-		return getConfigs().values().stream().filter(e -> (!e.getId().equals("all")) ).collect(Collectors.toSet());
+	public Collection<VerticalConfig>  getConfigsWithoutDefault() {
+		return getConfigs().values();
 	}
 	/**
 	 *
