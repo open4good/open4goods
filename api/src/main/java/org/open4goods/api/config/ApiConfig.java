@@ -195,9 +195,10 @@ public class ApiConfig {
 			@Autowired VerticalsConfigService configService, 
 			@Autowired BarcodeValidationService barcodeValidationService,
 			@Autowired BrandService brandservice,
-			@Autowired GoogleTaxonomyService gts
+			@Autowired GoogleTaxonomyService gts,
+			@Autowired BlablaService blablaService
 			) {
-		return new RealtimeAggregationService(evaluationService, referentielService, standardiserService, autowireBeanFactory, aggregatedDataRepository, apiProperties, gs1prefixService, dataSourceConfigService, configService,  barcodeValidationService,brandservice, gts);
+		return new RealtimeAggregationService(evaluationService, referentielService, standardiserService, autowireBeanFactory, aggregatedDataRepository, apiProperties, gs1prefixService, dataSourceConfigService, configService,  barcodeValidationService,brandservice, gts, blablaService);
 	}
 
 	@Bean
@@ -208,10 +209,11 @@ public class ApiConfig {
 			@Autowired DataSourceConfigService dataSourceConfigService, @Autowired VerticalsConfigService configService, 
 			@Autowired BarcodeValidationService barcodeValidationService,
 			@Autowired BrandService brandservice,
-			@Autowired AiService aiService
+			@Autowired AiService aiService,
+			@Autowired BlablaService blablaService
 			
 			) {
-		return new BatchAggregationService(evaluationService, referentielService, standardiserService, autowireBeanFactory, aggregatedDataRepository, apiProperties, gs1prefixService, dataSourceConfigService, configService,  barcodeValidationService, brandservice);
+		return new BatchAggregationService(evaluationService, referentielService, standardiserService, autowireBeanFactory, aggregatedDataRepository, apiProperties, gs1prefixService, dataSourceConfigService, configService,  barcodeValidationService, brandservice, blablaService);
 	}
 
 

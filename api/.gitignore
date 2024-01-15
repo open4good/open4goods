@@ -1,4 +1,4 @@
-/target/
+/target/*
 /.attach*
 /bin/*
 /.classpath
