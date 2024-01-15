@@ -4,9 +4,10 @@ package org.open4goods.api.controller.api;
 
 import java.io.IOException;
 
-import org.open4goods.api.services.BatchService;
+import org.open4goods.api.services.AggregationFacadeService;
 import org.open4goods.config.yml.ui.VerticalConfig;
 import org.open4goods.dao.ProductRepository;
+import org.open4goods.exceptions.AggregationSkipException;
 import org.open4goods.exceptions.InvalidParameterException;
 import org.open4goods.exceptions.ResourceNotFoundException;
 import org.open4goods.model.constants.RolesConstants;
@@ -41,14 +42,14 @@ public class BatchController {
 	
 	private final SerialisationService serialisationService;
 	
-	private final BatchService batchService;
+	private final AggregationFacadeService batchService;
 	
 
 	@Autowired
 	private  ProductRepository repository;
 	
 	
-	public BatchController(BatchService batchService, SerialisationService serialisationService, VerticalsConfigService verticalsConfigService) {
+	public BatchController(AggregationFacadeService batchService, SerialisationService serialisationService, VerticalsConfigService verticalsConfigService) {
 		this.serialisationService = serialisationService;
 		this.service = verticalsConfigService;
 		this.batchService = batchService;
@@ -97,7 +98,7 @@ public class BatchController {
 
 	@GetMapping("/sanitisation/{gtin}")
 	@Operation(summary="Launch sanitisation of all products")
-	public void sanitizeOne(@PathVariable String gtin ) throws InvalidParameterException, IOException, ResourceNotFoundException {
+	public void sanitizeOne(@PathVariable String gtin ) throws InvalidParameterException, IOException, ResourceNotFoundException, AggregationSkipException {
 		batchService.sanitizeOne(repository.getById(gtin));
 	}
 	

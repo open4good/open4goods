@@ -6,9 +6,8 @@ import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.lang3.ArrayUtils;
 import org.open4goods.api.config.yml.ApiProperties;
-import org.open4goods.api.services.BatchService;
-import org.open4goods.api.services.FetcherOrchestrationService;
 import org.open4goods.api.services.AggregationFacadeService;
+import org.open4goods.api.services.FetcherOrchestrationService;
 import org.open4goods.api.services.store.DataFragmentStoreService;
 import org.open4goods.crawler.config.yml.FetcherProperties;
 import org.open4goods.crawler.repository.CsvIndexationRepository;
@@ -171,16 +170,6 @@ public class ApiConfig {
 	                .build();
 	    }
 	 
-	 
-	@Bean
-	@Autowired
-	BatchService batchService(AggregationFacadeService rtService,  SearchService searchService, ProductRepository dataRepository, VerticalsConfigService verticalsConfigService) throws IOException {
-        return new BatchService(rtService,dataRepository, apiProperties, verticalsConfigService, searchService);
-	}
-
-
-
-
 	@Bean
 	AggregationFacadeService realtimeAggregationService( @Autowired EvaluationService evaluationService,
 			@Autowired StandardiserService standardiserService,
