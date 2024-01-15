@@ -46,7 +46,7 @@ import jakarta.annotation.PreDestroy;
 
 /**
  * This service is in charge of building Product in realtime mode
- *
+ * TODO : Maintain a state machine to disable multiple launching
  * @author goulven
  *
  */
@@ -214,8 +214,7 @@ public class AggregationFacadeService {
 	 */
 	StandardAggregator getStandardAggregator() {		
 		
-		// TODO : Log level from conf
-		Logger logger = GenericFileLogger.initLogger("realtime", Level.INFO, apiProperties.logsFolder()+"/aggregation", apiProperties.isDevMode());
+		Logger logger = GenericFileLogger.initLogger("realtime", apiProperties.aggLogLevel(), apiProperties.logsFolder()+"/aggregation", apiProperties.isDevMode());
 
 		final List<AbstractAggregationService> services = new ArrayList<>();
 
@@ -249,8 +248,7 @@ public class AggregationFacadeService {
 	public ScoringBatchedAggregator getScoringAggregator() {
 		final List<AbstractAggregationService> services = new ArrayList<>();
 	
-		// TODO : Log level from conf
-		Logger logger = GenericFileLogger.initLogger("score", Level.INFO, apiProperties.logsFolder()+"/aggregation", apiProperties.isDevMode());
+		Logger logger = GenericFileLogger.initLogger("score", apiProperties.aggLogLevel(), apiProperties.logsFolder()+"/aggregation", apiProperties.isDevMode());
 		
 		services.add(new CleanScoreAggregationService(logger));
 		services.add(new Attribute2ScoreAggregationService(logger));
