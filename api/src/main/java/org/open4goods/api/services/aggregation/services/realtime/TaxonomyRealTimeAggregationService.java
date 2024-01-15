@@ -33,12 +33,16 @@ public class TaxonomyRealTimeAggregationService extends AbstractRealTimeAggregat
 	@Override
 	public void onDataFragment(final DataFragment input, final Product output) {
 
-		setVerticalFromCategories(input, output);
+		VerticalConfig vConf = verticalService.getConfigByIdOrDefault(output.getVertical());
 		
-		Integer taxonomy =   googleTaxonomy(input);
-		
-		if (null != taxonomy) {			
-			output.setGoogleTaxonomyId(taxonomy);
+		if (null != vConf.getTaxonomyId() ) {
+			output.setGoogleTaxonomyId(vConf.getTaxonomyId());
+		} else {
+			setVerticalFromCategories(input, output);
+			Integer taxonomy =   googleTaxonomy(input);
+			if (null != taxonomy) {			
+				output.setGoogleTaxonomyId(taxonomy);
+			}
 		}
 	}
 
