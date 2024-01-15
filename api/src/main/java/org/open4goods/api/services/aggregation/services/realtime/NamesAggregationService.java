@@ -67,10 +67,10 @@ public class NamesAggregationService extends AbstractRealTimeAggregationService 
 				
 				// Computing url
 
-				data.getNames().getUrl().put(lang, computePrefixedText(data, tConf.getUrl()));
+				data.getNames().getUrl().put(lang, data.gtin() + "-" + computePrefixedText(data, tConf.getUrl(), "-"));
 				
 				// h1Title			
-				data.getNames().getH1Title().put(lang, computePrefixedText(data, tConf.getH1Title()));
+				data.getNames().getH1Title().put(lang, computePrefixedText(data, tConf.getH1Title(), " "));
 				
 				// metaTitle
 				data.getNames().getMetaTitle().put(lang, blablaService.generateBlabla(tConf.getMetaTitle(), data));
@@ -126,14 +126,14 @@ public class NamesAggregationService extends AbstractRealTimeAggregationService 
 	 * @return
 	 * @throws InvalidParameterException 
 	 */
-	private String computePrefixedText(Product data, PrefixedAttrText textsConfigUrl) throws InvalidParameterException {
+	private String computePrefixedText(Product data, PrefixedAttrText textsConfigUrl, String separator) throws InvalidParameterException {
 		
-		StringBuilder sb = new StringBuilder(data.gtin());
+		StringBuilder sb = new StringBuilder();
 		
 		// Adding the prefix
 		String prefix = blablaService.generateBlabla(textsConfigUrl.getPrefix(), data);
 		if (!StringUtils.isEmpty(prefix)) {			
-			sb.append("-").append(prefix);
+			sb.append(prefix);
 		}
 		
 		// Adding the mentioned attrs if existing		
@@ -145,12 +145,12 @@ public class NamesAggregationService extends AbstractRealTimeAggregationService 
 			}
 			
 			if (null != refVal) {
-				sb.append("-").append(IdHelper.azCharAndDigits(refVal).toLowerCase());
+				sb.append(separator).append(IdHelper.azCharAndDigits(refVal).toLowerCase());
 			} else {
 				// Checking in aggregated attrs
 				AggregatedAttribute attrValue = data.getAttributes().getAggregatedAttributes().get(attr);
 				if (null != attrValue) {
-					sb.append("-").append(attrValue.getValue().toLowerCase());
+					sb.append(separator).append(attrValue.getValue().toLowerCase());
 				} 
 			}
 		}
