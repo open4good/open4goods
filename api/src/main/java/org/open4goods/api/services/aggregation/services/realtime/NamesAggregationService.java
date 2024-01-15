@@ -4,11 +4,16 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.StringUtils;
 import org.open4goods.api.services.aggregation.AbstractRealTimeAggregationService;
 import org.open4goods.config.yml.ui.TextsConfig;
+import org.open4goods.config.yml.ui.TextsConfigUrl;
 import org.open4goods.exceptions.AggregationSkipException;
 import org.open4goods.exceptions.InvalidParameterException;
+import org.open4goods.helper.IdHelper;
+import org.open4goods.model.constants.ReferentielKey;
 import org.open4goods.model.data.DataFragment;
+import org.open4goods.model.product.AggregatedAttribute;
 import org.open4goods.model.product.Product;
 import org.open4goods.services.EvaluationService;
 import org.open4goods.services.VerticalsConfigService;
@@ -105,14 +110,40 @@ public class NamesAggregationService extends AbstractRealTimeAggregationService 
 	/**
 	 * 
 	 * @param data
-	 * @param url
+	 * @param textsConfigUrl
 	 * @return
 	 * @throws InvalidParameterException 
 	 */
-	private String computeUrl(Product data, String url) throws InvalidParameterException {
+	private String computeUrl(Product data, TextsConfigUrl textsConfigUrl) throws InvalidParameterException {
 		
+		StringBuilder sb = new StringBuilder(data.gtin());
 		
-		return blablaService.generateBlabla(url, data);
+		// Adding the prefix
+		String prefix = blablaService.generateBlabla(textsConfigUrl.getPrefix(), data);
+		if (!StringUtils.isEmpty(prefix)) {			
+			sb.append("-").append(prefix);
+		}
+		
+		// Adding the mentioned attrs if existing		
+		for (String attr : textsConfigUrl.getAttrs()) {
+			// Checking in referentiel attrs
+			String refVal = null;
+			if (ReferentielKey.isValid(attr)) {
+				refVal = data.getAttributes().getReferentielAttributes().get(ReferentielKey.valueOf(attr));
+			}
+			
+			if (null != refVal) {
+				sb.append("-").append(IdHelper.azCharAndDigits(refVal).toLowerCase());
+			} else {
+				// Checking in aggregated attrs
+				AggregatedAttribute attrValue = data.getAttributes().getAggregatedAttributes().get(attr);
+				if (null != attrValue) {
+					sb.append("-").append(attrValue.getValue().toLowerCase());
+				} 
+			}
+		}
+		
+		return sb.toString();
 	}
 
 	private String normalizeName(String name) {
