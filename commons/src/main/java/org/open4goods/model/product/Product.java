@@ -620,6 +620,12 @@ public class Product implements Standardisable {
 		}
 	}
 	
+	
+	
+	public String url (String language) {
+		return names.getUrl().getOrDefault(language, names.getUrl().get("default"));
+	}
+	
 	//////////////////////////////////////////
 	// Getters / Setters
 	//////////////////////////////////////////

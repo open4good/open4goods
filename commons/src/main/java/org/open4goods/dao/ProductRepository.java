@@ -98,7 +98,9 @@ public class ProductRepository {
 		// TODO : Add exclusion
 //				.and(new Criteria("datasourceCategories").notIn(v.getMatchingCategories()))
 				.or(new Criteria("vertical").is(v.getId()));
-
+// TODO : Add or get by taxonomyId
+		
+		
 		final NativeQuery initialQuery = new NativeQueryBuilder().withQuery(new CriteriaQuery(c)).build();
 
 		return elasticsearchTemplate.searchForStream(initialQuery, Product.class, current_index).stream()
