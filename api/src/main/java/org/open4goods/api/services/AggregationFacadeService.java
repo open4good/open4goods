@@ -172,6 +172,15 @@ public class AggregationFacadeService {
 			logger.info("done: Sanitisation batching for all items");			
 	}
 
+	
+	/**
+	 * Launch batch sanitization on all verticals
+	 */
+	public void sanitizeAllVerticals()  {
+		for (VerticalConfig vertical : verticalConfigService.getConfigsWithoutDefault()) {
+			sanitizeVertical(vertical);
+		}
+	}
 	/**
 	 * Launch batch sanitization : on a vertical if specified, on all items if not
 	 * Sanitizer aggregator
