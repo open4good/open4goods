@@ -71,13 +71,15 @@ public class TaxonomyRealTimeAggregationService extends AbstractAggregationServi
 		if (null != vertical &&  null != vertical.getTaxonomyId()) {
 			data.setGoogleTaxonomyId(vertical.getTaxonomyId());
 		} else {
-			Integer taxonomy =   googleTaxonomy(data);
-			if (null != taxonomy) {			
-				data.setGoogleTaxonomyId(taxonomy);
-				dedicatedLogger.info("No taxonomy found for categories : {}", data.getDatasourceCategories());
-
-			} else {
-				dedicatedLogger.info("No taxonomy found for categories : {}", data.getDatasourceCategories());
+			if (data.getDatasourceCategories().size() != 0) {
+				Integer taxonomy =   googleTaxonomy(data);
+				if (null != taxonomy) {			
+					data.setGoogleTaxonomyId(taxonomy);
+					dedicatedLogger.info("No taxonomy found for categories : {}", data.getDatasourceCategories());
+					
+				} else {
+					dedicatedLogger.info("No taxonomy found for categories : {}", data.getDatasourceCategories());
+				}
 			}
 		}		
 	}
