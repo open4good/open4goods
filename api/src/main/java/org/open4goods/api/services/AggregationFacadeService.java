@@ -173,6 +173,29 @@ public class AggregationFacadeService {
 	}
 
 	/**
+	 * Launch batch sanitization : on a vertical if specified, on all items if not
+	 * Sanitizer aggregator
+	 * @throws AggregationSkipException 
+	 */
+	public void sanitizeVertical(VerticalConfig vertical)  {
+
+			logger.info("started : Sanitisation batching for vertical : {}",vertical);
+			StandardAggregator batchAgg = getFullSanitisationAggregator();
+
+			// TODO : Performance, could parallelize
+			dataRepository.getProductsMatchingCategories(vertical) .forEach(p -> {
+                try {
+					batchAgg.onProduct(p);
+					dataRepository.index(p);
+				} catch (AggregationSkipException e) {
+					logger.error("Skipping product during batched sanitisation : ",e);
+				}
+            });
+			logger.info("done: Sanitisation batching for all items");			
+	}
+	
+	
+	/**
 	 * Launch the sanitisation of one product
 	 * @param product
 	 * @throws AggregationSkipException 
@@ -269,7 +292,7 @@ public class AggregationFacadeService {
 	 * @return
 	 */
 	public StandardAggregator getFullSanitisationAggregator() {
-		return getStandardAggregator("saninitisation");
+		return getStandardAggregator("sanitisation");
 	}
 
 }

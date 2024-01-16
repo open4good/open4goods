@@ -58,15 +58,16 @@ public class BatchController {
 	@PutMapping(path="/batch/verticals/")
 	@Operation(summary="Create or update a vertical with a full yaml config. Can be long time processing")
 	@PreAuthorize("hasAuthority('"+RolesConstants.ROLE_ADMIN+"')")
-	public String fullUpdateFromConf( @RequestBody @NotBlank final String verticalConfig ) throws InvalidParameterException, JsonParseException, JsonMappingException, IOException{
+	public String fullUpdateFromConf( @RequestBody @NotBlank final String verticalConfig ) throws InvalidParameterException, JsonParseException, JsonMappingException, IOException, InterruptedException{
 		
 		// Adding the verticam to the vertical service
 		VerticalConfig v = serialisationService.fromYaml(verticalConfig, VerticalConfig.class);
 		service.addTmpConfig(v);
 		
 		// This is initial submission, batching the products to update catégories				
-		batchService.score(v);
-		
+		batchService. sanitizeVertical(v);
+		Thread.sleep(5000);
+		batchService. score(v);
 		
 		return "done";
 	}
@@ -75,11 +76,12 @@ public class BatchController {
 	@PostMapping(path="/batch/verticals/")
 	@Operation(summary="Create or update a vertical with a given config name. Can be long time processing")
 	@PreAuthorize("hasAuthority('"+RolesConstants.ROLE_ADMIN+"')")
-	public String fullUpdateFromName( @RequestParam @NotBlank final String verticalConfig ) throws InvalidParameterException, JsonParseException, JsonMappingException, IOException{
+	public String fullUpdateFromName( @RequestParam @NotBlank final String verticalConfig ) throws InvalidParameterException, JsonParseException, JsonMappingException, IOException, InterruptedException{
 		
 		// This is initial submission, batching the products to update catégories				
-		batchService.score(service.getConfigById(verticalConfig));		
-		
+		batchService.sanitizeVertical(service.getConfigById(verticalConfig));		
+		Thread.sleep(5000);
+		batchService. score(service.getConfigById(verticalConfig));
 		return "done";
 	}
 

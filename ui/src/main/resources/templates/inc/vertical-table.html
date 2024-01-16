@@ -19,8 +19,8 @@
                 <td>
                     <div th:each="p : ${products.data}" >
                         
-                            <p th:if="${p.model()}"><a th:text="${p.model()}" th:href="'/'+${verticalPath}+ '/'+${p.names.name}"></a></p>
-                            <p th:unless="${p.model()}"><a th:text="${p.bestName()}" th:href="'/'+${verticalPath}+ '/'+${p.names.name}"></a></p>
+                            <p th:if="${p.model()}"><a th:text="${p.model()}" th:href="'/'+${verticalPath}+ '/'+${p.url(lang)}"></a></p>
+                            <p th:unless="${p.model()}"><a th:text="${p.bestName()}" th:href="'/'+${verticalPath}+ '/'+${p.url(lang)}"></a></p>
                         
                         
                         

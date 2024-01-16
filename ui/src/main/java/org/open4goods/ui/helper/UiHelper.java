@@ -71,5 +71,19 @@ public class UiHelper {
 
 
 
+	public Map<String, String> getTexts() {
+		return texts;
+	}
+
+
+
+
+	public void setTexts(Map<String, String> texts) {
+		this.texts = texts;
+	}
+
+
+
+
 
 }
