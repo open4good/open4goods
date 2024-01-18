@@ -1,18 +1,80 @@
 package org.open4goods.config.yml.ui;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.open4goods.config.yml.attributes.AiConfig;
+
+import com.fasterxml.jackson.annotation.JsonMerge;
+
 public class I18nElements {
-
+	@JsonMerge
 	private PrefixedAttrText url = new PrefixedAttrText();
-
+	@JsonMerge
 	private PrefixedAttrText h1Title = new PrefixedAttrText();
-	private String metaTitle;
-	private String metaDescription;
-	private String opengraphTitle;
-	private String openGraphDescription;
-	private String twitterTitle;
-	private String twitterDescription;
+	@JsonMerge
+	private String productMetaTitle;
+	@JsonMerge
+	private String productMetaDescription;
+	@JsonMerge
+	private String productMetaOpenGraphTitle;
+	@JsonMerge
+	private String productMetaOpenGraphDescription;
+	@JsonMerge
+	private String productMetaTwitterTitle;
+	@JsonMerge
+	private String productMetaTwitterDescription;
+	
 
-	// Getters and setters
+	/**
+	 * The url of the vertical home page
+	 */
+	@JsonMerge
+	private String verticalHomeUrl ;
+
+	
+	@JsonMerge
+	private String verticalMetaTitle;
+	@JsonMerge
+	private String verticalMetaDescription;
+	@JsonMerge
+	private String verticalMetaOpenGraphTitle;
+	@JsonMerge
+	private String verticalMetaOpenGraphDescription;
+	@JsonMerge
+	private String verticalMetaTwitterTitle;
+	@JsonMerge
+	private String verticalMetaTwitterDescription;
+	/**
+	 * The title on the vertical home page
+	 */
+	@JsonMerge
+	private String verticalHomeTitle ;
+
+	/**
+	 * The description on the category section, on the home page
+	 */
+	@JsonMerge
+	private String verticalHomeDescription ;
+
+	/**
+	 * The image logo on the vertical home page
+	 */
+	@JsonMerge
+	private String verticalHomeLogo ;
+	/**
+	 * The custom pages names and associated templates for this vertical
+	 */
+	@JsonMerge
+	private Map<String,String> pages = new HashMap<>();
+	
+	/**
+	 * Configuration for ai generation tool
+	 */
+	@JsonMerge
+	private List<AiConfig> aiConfig = new ArrayList<>();
 
 	public PrefixedAttrText getUrl() {
 		return url;
@@ -22,54 +84,6 @@ public class I18nElements {
 		this.url = url;
 	}
 
-	public String getOpengraphTitle() {
-		return opengraphTitle;
-	}
-
-	public void setOpengraphTitle(String opengraphTitle) {
-		this.opengraphTitle = opengraphTitle;
-	}
-
-	public String getOpenGraphDescription() {
-		return openGraphDescription;
-	}
-
-	public void setOpenGraphDescription(String openGraphDescription) {
-		this.openGraphDescription = openGraphDescription;
-	}
-
-	public String getTwitterTitle() {
-		return twitterTitle;
-	}
-
-	public void setTwitterTitle(String twitterTitle) {
-		this.twitterTitle = twitterTitle;
-	}
-
-	public String getTwitterDescription() {
-		return twitterDescription;
-	}
-
-	public void setTwitterDescription(String twitterDescription) {
-		this.twitterDescription = twitterDescription;
-	}
-
-	public String getMetaTitle() {
-		return metaTitle;
-	}
-
-	public void setMetaTitle(String metaTitle) {
-		this.metaTitle = metaTitle;
-	}
-
-	public String getMetaDescription() {
-		return metaDescription;
-	}
-
-	public void setMetaDescription(String metaDescription) {
-		this.metaDescription = metaDescription;
-	}
-
 	public PrefixedAttrText getH1Title() {
 		return h1Title;
 	}
@@ -77,6 +91,152 @@ public class I18nElements {
 	public void setH1Title(PrefixedAttrText h1Title) {
 		this.h1Title = h1Title;
 	}
+
+	public String getProductMetaTitle() {
+		return productMetaTitle;
+	}
+
+	public void setProductMetaTitle(String productMetaTitle) {
+		this.productMetaTitle = productMetaTitle;
+	}
+
+	public String getProductMetaDescription() {
+		return productMetaDescription;
+	}
+
+	public void setProductMetaDescription(String productMetaDescription) {
+		this.productMetaDescription = productMetaDescription;
+	}
+
+	public String getProductMetaOpenGraphTitle() {
+		return productMetaOpenGraphTitle;
+	}
+
+	public void setProductMetaOpenGraphTitle(String productMetaOpenGraphTitle) {
+		this.productMetaOpenGraphTitle = productMetaOpenGraphTitle;
+	}
+
+	public String getProductMetaOpenGraphDescription() {
+		return productMetaOpenGraphDescription;
+	}
+
+	public void setProductMetaOpenGraphDescription(String productMetaOpenGraphDescription) {
+		this.productMetaOpenGraphDescription = productMetaOpenGraphDescription;
+	}
+
+	public String getProductMetaTwitterTitle() {
+		return productMetaTwitterTitle;
+	}
+
+	public void setProductMetaTwitterTitle(String productMetaTwitterTitle) {
+		this.productMetaTwitterTitle = productMetaTwitterTitle;
+	}
+
+	public String getProductMetaTwitterDescription() {
+		return productMetaTwitterDescription;
+	}
+
+	public void setProductMetaTwitterDescription(String productMetaTwitterDescription) {
+		this.productMetaTwitterDescription = productMetaTwitterDescription;
+	}
+
+	public String getVerticalHomeUrl() {
+		return verticalHomeUrl;
+	}
+
+	public void setVerticalHomeUrl(String verticalHomeUrl) {
+		this.verticalHomeUrl = verticalHomeUrl;
+	}
+
+	public String getVerticalMetaTitle() {
+		return verticalMetaTitle;
+	}
+
+	public void setVerticalMetaTitle(String verticalMetaTitle) {
+		this.verticalMetaTitle = verticalMetaTitle;
+	}
+
+	public String getVerticalMetaDescription() {
+		return verticalMetaDescription;
+	}
+
+	public void setVerticalMetaDescription(String verticalMetaDescription) {
+		this.verticalMetaDescription = verticalMetaDescription;
+	}
+
+	public String getVerticalMetaOpenGraphTitle() {
+		return verticalMetaOpenGraphTitle;
+	}
+
+	public void setVerticalMetaOpenGraphTitle(String verticalMetaOpenGraphTitle) {
+		this.verticalMetaOpenGraphTitle = verticalMetaOpenGraphTitle;
+	}
+
+	public String getVerticalMetaOpenGraphDescription() {
+		return verticalMetaOpenGraphDescription;
+	}
+
+	public void setVerticalMetaOpenGraphDescription(String verticalMetaOpenGraphDescription) {
+		this.verticalMetaOpenGraphDescription = verticalMetaOpenGraphDescription;
+	}
+
+	public String getVerticalMetaTwitterTitle() {
+		return verticalMetaTwitterTitle;
+	}
+
+	public void setVerticalMetaTwitterTitle(String verticalMetaTwitterTitle) {
+		this.verticalMetaTwitterTitle = verticalMetaTwitterTitle;
+	}
+
+	public String getVerticalMetaTwitterDescription() {
+		return verticalMetaTwitterDescription;
+	}
+
+	public void setVerticalMetaTwitterDescription(String verticalMetaTwitterDescription) {
+		this.verticalMetaTwitterDescription = verticalMetaTwitterDescription;
+	}
+
+	public String getVerticalHomeTitle() {
+		return verticalHomeTitle;
+	}
+
+	public void setVerticalHomeTitle(String verticalHomeTitle) {
+		this.verticalHomeTitle = verticalHomeTitle;
+	}
+
+	public String getVerticalHomeDescription() {
+		return verticalHomeDescription;
+	}
+
+	public void setVerticalHomeDescription(String verticalHomeDescription) {
+		this.verticalHomeDescription = verticalHomeDescription;
+	}
+
+	public String getVerticalHomeLogo() {
+		return verticalHomeLogo;
+	}
+
+	public void setVerticalHomeLogo(String verticalHomeLogo) {
+		this.verticalHomeLogo = verticalHomeLogo;
+	}
+
+	public Map<String, String> getPages() {
+		return pages;
+	}
+
+	public void setPages(Map<String, String> pages) {
+		this.pages = pages;
+	}
+
+	public List<AiConfig> getAiConfig() {
+		return aiConfig;
+	}
+
+	public void setAiConfig(List<AiConfig> aiConfig) {
+		this.aiConfig = aiConfig;
+	}
+	
+	
 	
 	
 

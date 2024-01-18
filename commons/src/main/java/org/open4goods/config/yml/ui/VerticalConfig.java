@@ -58,38 +58,8 @@ public class VerticalConfig{
 	private Map<String,I18nElements> i18n = new HashMap<>();
 	
 	
-	/**
-	 * The url of the vertical home page
-	 */
-	@JsonMerge
-	private Localisable homeUrl = new Localisable();
-
-	/**
-	 * The title on the vertical home page
-	 */
-	@JsonMerge
-	private Localisable homeTitle = new Localisable();
-
-	/**
-	 * The description on the category section, on the home page
-	 */
-	@JsonMerge
-	private Localisable homeDescription = new Localisable();
-
-	/**
-	 * The image logo on the vertical home page
-	 */
-	@JsonMerge
-	private Localisable homeLogo = new Localisable();
-
-
-
-	/**
-	 * The custom pages names and associated templates for this vertical
-	 */
-	@JsonMerge
-	private Map<String,String> pages = new HashMap<>();
 	
+
 	
 	/**
 	 * The categories to associate to this vertical
@@ -114,11 +84,6 @@ public class VerticalConfig{
 	private CommentsAggregationConfig commentsConfig = new CommentsAggregationConfig();
 
 
-	/**
-	 * Configuration for ai generation tool
-	 */
-	@JsonMerge
-	private List<AiConfig> aiConfig = new ArrayList<>();
 	
 	
 	
@@ -203,6 +168,11 @@ public class VerticalConfig{
 		return "config:"+ id;
 	}
 
+	
+	
+	public I18nElements i18n(String lang) {		
+		return i18n.getOrDefault(lang, i18n.get("default"));		
+	}
 	/**
 	 *
 	 * @return the list of AttributeConfig that have to appear in search results,
@@ -269,15 +239,12 @@ public class VerticalConfig{
 	 * @return
 	 */
 	public String getBaseUrl(final Locale siteLocale) {
-		return homeUrl.getOrDefault(siteLocale.getLanguage(), namings.getBaseUrls().get("default"));
+		return i18n.getOrDefault(siteLocale, i18n.get("default")).getVerticalHomeUrl();
 	}
 
-	public String baseUrl() {
-		return homeUrl.get("default");
-	}
 
 	public String getBaseUrl(final String siteLocale) {
-		return homeUrl.getOrDefault(siteLocale, namings.getBaseUrls().get("default"));
+		return i18n.getOrDefault(siteLocale, i18n.get("default")).getVerticalHomeUrl();
 	}
 
 
@@ -531,38 +498,7 @@ public class VerticalConfig{
 		this.verticalFilters = verticalFilters;
 	}
 
-	public Localisable getHomeTitle() {
-		return homeTitle;
-	}
-
-	public void setHomeTitle(Localisable homeTitle) {
-		this.homeTitle = homeTitle;
-	}
-
-	public Localisable getHomeLogo() {
-		return homeLogo;
-	}
-
-	public void setHomeLogo(Localisable homeLogo) {
-		this.homeLogo = homeLogo;
-	}
-
-	public Localisable getHomeUrl() {
-		return homeUrl;
-	}
-
-	public void setHomeUrl(Localisable homeUrl) {
-		this.homeUrl = homeUrl;
-	}
-
-	public Localisable getHomeDescription() {
-		return homeDescription;
-	}
-
-	public void setHomeDescription(Localisable homeDescription) {
-		this.homeDescription = homeDescription;
-	}
-
+	
 	public Set<String> getUnmatchingCategories() {
 		return unmatchingCategories;
 	}
@@ -577,22 +513,6 @@ public class VerticalConfig{
 
 	public void setEcoscoreConfig(Map<String, String> ecoscoreConfig) {
 		this.ecoscoreConfig = ecoscoreConfig;
-	}
-
-	public Map<String, String> getPages() {
-		return pages;
-	}
-
-	public void setPages(Map<String, String> pages) {
-		this.pages = pages;
-	}
-
-	public List<AiConfig> getAiConfig() {
-		return aiConfig;
-	}
-
-	public void setAiConfig(List<AiConfig> aiConfig) {
-		this.aiConfig = aiConfig;
 	}
 
 	public Integer getTaxonomyId() {

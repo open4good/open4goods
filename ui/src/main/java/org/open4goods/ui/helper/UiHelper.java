@@ -29,10 +29,10 @@ public class UiHelper {
 		texts.put("title", product.getNames().getH1Title().i18n(request));
 		texts.put("meta-description", product.getNames().getMetaDescription().i18n(request));
 		texts.put("meta-title", product.getNames().getMetaTitle().i18n(request));
-		texts.put("twitter-description", product.getNames().getTwitterDescription().i18n(request));
-		texts.put("twitter-title", product.getNames().getTwitterTitle().i18n(request));
-		texts.put("opengraph-description", product.getNames().getOpenGraphDescription().i18n(request));
-		texts.put("opengraph-title", product.getNames().getOpengraphTitle().i18n(request));
+		texts.put("twitter-description", product.getNames().getproductMetaTwitterDescription().i18n(request));
+		texts.put("twitter-title", product.getNames().getproductMetaTwitterTitle().i18n(request));
+		texts.put("opengraph-description", product.getNames().getproductMetaOpenGraphDescription().i18n(request));
+		texts.put("opengraph-title", product.getNames().getProductMetaOpenGraphTitle().i18n(request));
 		
 	}
 	

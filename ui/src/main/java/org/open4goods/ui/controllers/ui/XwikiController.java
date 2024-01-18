@@ -121,8 +121,11 @@ public class XwikiController extends AbstractUiController {
 		
 		// Testing if a custom page in this vertical		
 		VerticalConfig vc = verticalService.getVerticalForPath(vertical);
+		String lang = verticalService.getLanguageForPath(vertical);
+		
+		
 		if (null != vc) {
-			String tpl = vc.getPages().get(page);
+			String tpl = vc.i18n(lang). getPages().get(page);
 			if (null != tpl) {
 				mv = defaultModelAndView(tpl, request);
 				return mv;
@@ -137,10 +140,7 @@ public class XwikiController extends AbstractUiController {
 		} else {
 			// Rendering mode
 
-
 			WikiResult content = xwikiService.getPage(vertical + "/" + page);
-
-
 
 			if (StringUtils.isEmpty(content.getHtml())) {
 				//				mv.setStatus(HttpStatus.NOT_FOUND);
@@ -149,7 +149,6 @@ public class XwikiController extends AbstractUiController {
 				mv = defaultModelAndView(("xwiki-"+content.getLayout()), request);
 				mv.addObject("content", content);
 			}
-
 		}
 
 		return mv;

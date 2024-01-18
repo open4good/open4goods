@@ -10,7 +10,7 @@ import org.open4goods.model.Localisable;
 import org.springframework.data.elasticsearch.annotations.Field;
 import org.springframework.data.elasticsearch.annotations.FieldType;
 
-public class Names {
+public class ProductTexts {
 
 	private Localisable url = new Localisable();
 	
@@ -20,18 +20,14 @@ public class Names {
 	
 	private Localisable metaDescription = new Localisable();
 	
-	private Localisable opengraphTitle = new Localisable();
+	private Localisable productMetaOpenGraphTitle = new Localisable();
 	
-	private Localisable openGraphDescription = new Localisable();
+	private Localisable productMetaOpenGraphDescription = new Localisable();
 	
-	private Localisable twitterTitle = new Localisable();
+	private Localisable productMetaTwitterTitle = new Localisable();
 	
-	private Localisable twitterDescription = new Localisable();
+	private Localisable productMetaTwitterDescription = new Localisable();
 	
-	@Field(index = false, store = false, type = FieldType.Object)
-	private Map<String,Localisable> others = new HashMap<>();
-//	
-
 	
 	@Field(index = true, store = false, type = FieldType.Text, analyzer = "french")
 	//	@Field(index = true, store = false, type = FieldType.Text)
@@ -39,25 +35,25 @@ public class Names {
 
 
 	
-	
-	
-	/**
-	 * 	Adds a keyed name for a language
-	 * @param lang
-	 * @param key
-	 * @param value
-	 */
-	public void addOther(String lang, String key, String value) {
-	
-		if (!others.containsKey(lang)) {
-			others.put(lang, new  Localisable());
-		}
-		
-		others.get(lang).put(key, value);
-	}
-	
-	
-	
+//	
+//	
+//	/**
+//	 * 	Adds a keyed name for a language
+//	 * @param lang
+//	 * @param key
+//	 * @param value
+//	 */
+//	public void addOther(String lang, String key, String value) {
+//	
+//		if (!others.containsKey(lang)) {
+//			others.put(lang, new  Localisable());
+//		}
+//		
+//		others.get(lang).put(key, value);
+//	}
+//	
+//	
+//	
 
 	
 	
@@ -113,42 +109,36 @@ public class Names {
 		this.metaDescription = metaDescription;
 	}
 
-	public Localisable getOpengraphTitle() {
-		return opengraphTitle;
+	public Localisable getProductMetaOpenGraphTitle() {
+		return productMetaOpenGraphTitle;
 	}
 
-	public void setOpengraphTitle(Localisable opengraphTitle) {
-		this.opengraphTitle = opengraphTitle;
+	public void setproductMetaOpenGraphTitle(Localisable productMetaOpenGraphTitle) {
+		this.productMetaOpenGraphTitle = productMetaOpenGraphTitle;
 	}
 
-	public Localisable getOpenGraphDescription() {
-		return openGraphDescription;
+	public Localisable getproductMetaOpenGraphDescription() {
+		return productMetaOpenGraphDescription;
 	}
 
-	public void setOpenGraphDescription(Localisable openGraphDescription) {
-		this.openGraphDescription = openGraphDescription;
+	public void setproductMetaOpenGraphDescription(Localisable productMetaOpenGraphDescription) {
+		this.productMetaOpenGraphDescription = productMetaOpenGraphDescription;
 	}
 
-	public Localisable getTwitterTitle() {
-		return twitterTitle;
+	public Localisable getproductMetaTwitterTitle() {
+		return productMetaTwitterTitle;
 	}
 
-	public void setTwitterTitle(Localisable twitterTitle) {
-		this.twitterTitle = twitterTitle;
+	public void setproductMetaTwitterTitle(Localisable productMetaTwitterTitle) {
+		this.productMetaTwitterTitle = productMetaTwitterTitle;
 	}
 
-	public Localisable getTwitterDescription() {
-		return twitterDescription;
+	public Localisable getproductMetaTwitterDescription() {
+		return productMetaTwitterDescription;
 	}
-	public void setTwitterDescription(Localisable twitterDescription) {
-		this.twitterDescription = twitterDescription;
-	}
-
-	public Map<String, Localisable> getOthers() {
-		return others;
+	public void setproductMetaTwitterDescription(Localisable productMetaTwitterDescription) {
+		this.productMetaTwitterDescription = productMetaTwitterDescription;
 	}
 
-	public void setOthers(Map<String, Localisable> others) {
-		this.others = others;
-	}
+	
 }

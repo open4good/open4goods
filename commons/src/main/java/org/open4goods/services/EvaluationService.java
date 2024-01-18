@@ -113,7 +113,7 @@ public class EvaluationService {
 				final String ret = thymeleafTemplateEngine.process(template, ctx);
 				return ret;
 	
-			} catch (final RuntimeException e) {
+			} catch (final Exception e) {
 				logger.warn("Eval failed for {} :  {} : {}", p, e.getMessage(), e.getCause().getMessage());
 				return null;
 			}

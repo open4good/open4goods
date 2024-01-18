@@ -76,12 +76,12 @@
 								<div class="card card-flip shadow">
 									<div class="card-flip-inner">
 										<div class="wrapper-card-img">
-											<img th:src="${vertical.homeLogo.i18n(siteLanguage)}" class="card-img-top rounded-top" alt="img TV">
+											<img th:src="${vertical.i18n(siteLanguage).verticalHomeLogo}" class="card-img-top rounded-top" alt="img TV">
 										</div>
 										<div class="card-body bg-primary">
-											<h3 class="h5 card-title text-white mt-3" th:text="${vertical.homeTitle.i18n(siteLanguage)}"></h3>
-											<p class="card-text" th:text="${vertical.homeDescription.i18n(siteLanguage)}"></p>
-											<a th:href="'/'+${vertical.homeUrl.i18n(siteLanguage)}" class="btn btn-primary btn-sm">Découvrir</a>
+											<h3 class="h5 card-title text-white mt-3" th:text="${vertical.i18n(siteLanguage).verticalHomeTitle}"></h3>
+											<p class="card-text" th:text="${vertical.i18n(siteLanguage).verticalHomeDescription}"></p>
+											<a th:href="'/'+${vertical.i18n(siteLanguage).verticalHomeUrl}" class="btn btn-primary btn-sm">Découvrir</a>
 										</div>
 									</div>
 								</div>
@@ -179,12 +179,12 @@
 					<div class="card card-flip shadow">
 						<div class="card-flip-inner">
 							<div class="wrapper-card-img">
-								<img th:src="${vertical.homeLogo.i18n(siteLanguage)}" class="card-img-top rounded-top" alt="img TV">
+								<img th:src="${vertical.i18n(siteLanguage).verticalHomeLogo}" class="card-img-top rounded-top" alt="img TV">
 							</div>
 							<div class="card-body bg-primary">
-								<h3 class="h5 card-title text-white mt-3" th:text="${vertical.homeTitle.i18n(siteLanguage)}"></h3>
-								<p class="card-text" th:text="${vertical.homeDescription.i18n(siteLanguage)}"></p>
-								<a th:href="'/'+${vertical.homeUrl.i18n(siteLanguage)}" class="btn btn-primary btn-sm">Découvrir</a>
+								<h3 class="h5 card-title text-white mt-3" th:text="${vertical.i18n(siteLanguage).verticalHomeTitle}"></h3>
+								<p class="card-text" th:text="${vertical.i18n(siteLanguage).verticalHomeDescription}"></p>
+								<a th:href="'/'+${vertical.i18n(siteLanguage).verticalHomeUrl}" class="btn btn-primary btn-sm">Découvrir</a>
 							</div>
 						</div>
 					</div>

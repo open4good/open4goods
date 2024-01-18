@@ -6,33 +6,28 @@
 	<th:block th:insert="~{inc/header-meta.html}"></th:block>
     
 	<!-- Primary Meta Tags -->
-	<title th:text="#{product.title(${product.names.shortestOfferName()})}"></title>
-	<meta name="title" th:content="#{product.meta.title(${product.names.shortestOfferName()})}">	
-    <meta name="description"  th:content="${helper.texts.title}">              
+	<title th:text="${helper.texts.get('meta-title')}"></title>
+    <meta name="description"  th:content="${helper.texts.get('meta-description')}">              
 	
 	<!-- Open Graph / Facebook -->
 	<meta property="og:type" content="website">
 	<meta property="og:url" th:content="${url}">
-	<meta property="og:title" th:content="#{product.title(${product.names.shortestOfferName()})}">
-	<meta property="og:description" th:content="#{product.meta.description(${product.names.shortestOfferName()})}">
-	<meta property="og:image" th:content="${baseUrl} + '/assets/img/brand/light.svg'">
+	<meta property="og:title" th:content="${helper.texts.get('opengraph-title')}">
+	<meta property="og:description" th:content="${helper.texts.get('opengraph-description')}">
+	<meta property="og:image" th:content="${baseUrl} + '/images/'+${product.gtin()}+'-cover.png'">
 	
 	<!-- Twitter -->
 	<meta name="twitter:card" content="summary_large_image">
 	<meta name="twitter:url" th:content="${url}">
-	<meta name="twitter:title" th:content="#{product.title(${product.names.shortestOfferName()})}">
-	<meta name="twitter:description" th:content="#{product.meta.description(${product.names.shortestOfferName()})}">
-	<meta name="twitter:image" th:content="${baseUrl} + 'assets/img/brand/light.svg'">
+	<meta name="twitter:title" th:content="${helper.texts.get('twitter-title')}">
+	<meta name="twitter:description" th:content="${helper.texts.get('twitter-description')}">
+	<meta name="twitter:image" th:content="${baseUrl} + '/images/'+${product.gtin()}+'-cover.png'">
 	
 	<!-- CSS -->
 	<link rel="stylesheet" type="text/css" href="/webjars/datatables/css/dataTables.bootstrap5.min.css">
 	<link rel="stylesheet" type="text/css" href="/webjars/datatables-responsive/css/responsive.dataTables.min.css">
 	<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/select/1.7.0/css/select.dataTables.min.css">
 	<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/buttons/2.4.2/css/buttons.dataTables.min.css">
-
-
-
-
 </head>
 
 <body>

@@ -4,9 +4,11 @@ package org.open4goods.services.ai;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 
 import org.open4goods.config.yml.attributes.AiConfig;
+import org.open4goods.config.yml.ui.I18nElements;
 import org.open4goods.config.yml.ui.VerticalConfig;
 import org.open4goods.model.data.AiDescription;
 import org.open4goods.model.product.Product;
@@ -14,7 +16,9 @@ import org.open4goods.services.EvaluationService;
 import org.open4goods.services.VerticalsConfigService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
+/**
+ * TODO : Paralelisation
+ */
 public class AiService {
 
 	private Logger logger = LoggerFactory.getLogger(AiService.class);
@@ -50,7 +54,7 @@ public class AiService {
 	 * @param data
 	 * @return 
 	 */
-	public Collection<AiDescription> complete(Product data) {
+	public Collection<AiDescription> complete(Product data, VerticalConfig vConf) {
 		////////////////
 		// Getting the config		
 		/////////////////
@@ -66,38 +70,27 @@ public class AiService {
 				
 		logger.info("AI completion for product {}", data.getId());
 		
-		// Getting the config for the category, if any
-		VerticalConfig vConf = verticalService.getVerticalForCategories(data.getDatasourceCategories());		
-		// defaulting		
-		if (null == vConf) {	
-				vConf = verticalService.getDefaultConfig();			
-		} 
-		
-		
-		if (null != vConf ){
-		
 			////////////////
 			// AI generation		
 			/////////////////
-			List<AiConfig> aiConfigs = vConf.getAiConfig();
+			Map<String, I18nElements> aiConfigs = vConf.getI18n();
 			
 			
 			
 //			var executorService = Executors.newVirtualThreadPerTaskExecutor();
 			// TODO : perf : we could parallelize this
-			for (AiConfig aiConfig : aiConfigs) {
-				
-				List<AiDescription> desc = generateDescriptions(aiConfig, data);
-				desc.forEach(d -> data.getAiDescriptions().put(aiConfig.getKey(), d));				
+			for (Entry<String, I18nElements> elements : aiConfigs.entrySet()) {
 				
 				
+				for ( AiConfig aic: elements.getValue().getAiConfig()) {
+					
+					List<AiDescription> desc = generateProductTexts(aic.getKey(), aic.getPrompt(), elements.getKey(), data);
+					desc.forEach(d -> data.getAiDescriptions().put(elements.getKey(), d));				
+				}
 //				executorService.submit(() -> {
 					// your code here
 					
 //				});
-			
-			}
-
 			
 		}
 		return data.getAiDescriptions().values();
@@ -109,30 +102,24 @@ public class AiService {
 	 * @param data
 	 * @return
 	 */
-	private List<AiDescription> generateDescriptions( AiConfig ai, Product data) {
+	private List<AiDescription> generateProductTexts( String key, String prompt, String lang, Product data) {
 		
 		
 		// Multi thread / synchronisation
 		List<AiDescription> ret = new ArrayList<>();
+				
+		logger.info("AI completion for product {} with key {} and lang {} and prompt {}", data.getId(), key, lang, prompt);
+		// Passing the spel evaluation
+		String value = spelEvaluationService.thymeleafEval(data, prompt);
 		
-		for (Entry<String, String> entry : ai.getPrompts().entrySet()) {
-			
-			String key = ai.getKey();
-			String lang = entry.getKey();
-			String value = entry.getValue();
-			
-			logger.info("AI completion for product {} with key {} and lang {} and value {}", data.getId(), key, lang, value);
-			// Passing the spel evaluation
-			value = spelEvaluationService.thymeleafEval(data, value);
-			
-			String aiText = prompt(value).replace("\n", "");
-								
-			AiDescription aiDesc = new AiDescription(aiText, lang);
-			aiDesc.setPrompt(entry.getValue());
-			ret.add(aiDesc);
-			
-			logger.warn("AI completion for product {}-{} : \n{}", data.getId(), key,aiText);
-		}
+		String aiText = prompt(value).replace("\n", "<br/>");
+							
+		AiDescription aiDesc = new AiDescription(aiText, lang);
+		aiDesc.setPrompt(prompt);
+		ret.add(aiDesc);
+		
+		logger.warn("AI completion for product {}-{} : \n{}", data.getId(), key,aiText);
+	
 		return ret;
 	}
 
