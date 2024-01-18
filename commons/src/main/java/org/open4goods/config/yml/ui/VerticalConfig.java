@@ -52,27 +52,18 @@ public class VerticalConfig{
 
 	
 	/**
-	 * The custom pages names and associated templates for this vertical
-	 */
-	@JsonMerge
-	private List<NamesConfig> namesConfig = new ArrayList<>();
-	
-	
-	/**
 	 * The product url, metas title, description, ....
 	 */
 	@JsonMerge
-	private Map<String,TextsConfig> texts = new HashMap<>();
-	
-	
+	private Map<String,I18nElements> i18n = new HashMap<>();
 	
 	
 	/**
-	 * The custom pages names and associated templates for this vertical
+	 * The url of the vertical home page
 	 */
 	@JsonMerge
-	private Map<String,String> pages = new HashMap<>();
-	
+	private Localisable homeUrl = new Localisable();
+
 	/**
 	 * The title on the vertical home page
 	 */
@@ -91,13 +82,15 @@ public class VerticalConfig{
 	@JsonMerge
 	private Localisable homeLogo = new Localisable();
 
+
+
 	/**
-	 * The url of the vertical home page
+	 * The custom pages names and associated templates for this vertical
 	 */
 	@JsonMerge
-	private Localisable homeUrl = new Localisable();
-
-
+	private Map<String,String> pages = new HashMap<>();
+	
+	
 	/**
 	 * The categories to associate to this vertical
 	 */
@@ -140,14 +133,6 @@ public class VerticalConfig{
 	 */
 	@JsonMerge
 	private MediaAggregationConfig resourcesConfig = new MediaAggregationConfig();
-
-	/**
-	 * The generation config by segments
-	 */
-	@JsonMerge
-	private CapsuleGenerationConfig generationConfig = new CapsuleGenerationConfig();
-
-
 
 	/** The config for compensation **/
 	@JsonMerge
@@ -436,15 +421,6 @@ public class VerticalConfig{
 		this.resourcesConfig = resourcesConfig;
 	}
 
-	public CapsuleGenerationConfig getGenerationConfig() {
-		return generationConfig;
-	}
-
-
-	public void setGenerationConfig(CapsuleGenerationConfig generationConfig) {
-		this.generationConfig = generationConfig;
-	}
-
 	public CompensationConfig getCompensation() {
 		return compensation;
 	}
@@ -627,20 +603,12 @@ public class VerticalConfig{
 		this.taxonomyId = taxonomyId;
 	}
 
-	public List<NamesConfig> getNamesConfig() {
-		return namesConfig;
+	public Map<String, I18nElements> getI18n() {
+		return i18n;
 	}
 
-	public void setNamesConfig(List<NamesConfig> namesConfig) {
-		this.namesConfig = namesConfig;
-	}
-
-	public Map<String, TextsConfig> getTexts() {
-		return texts;
-	}
-
-	public void setTexts(Map<String, TextsConfig> texts) {
-		this.texts = texts;
+	public void setI18n(Map<String, I18nElements> texts) {
+		this.i18n = texts;
 	}
 
 	
