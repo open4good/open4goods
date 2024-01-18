@@ -1,6 +1,6 @@
 package org.open4goods.config.yml.ui;
 
-public class TextsConfig {
+public class I18nElements {
 
 	private PrefixedAttrText url = new PrefixedAttrText();
 
