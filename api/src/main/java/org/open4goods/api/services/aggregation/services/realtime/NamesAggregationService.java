@@ -7,7 +7,7 @@ import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import org.open4goods.api.services.aggregation.AbstractAggregationService;
 import org.open4goods.config.yml.ui.PrefixedAttrText;
-import org.open4goods.config.yml.ui.TextsConfig;
+import org.open4goods.config.yml.ui.I18nElements;
 import org.open4goods.config.yml.ui.VerticalConfig;
 import org.open4goods.exceptions.AggregationSkipException;
 import org.open4goods.exceptions.InvalidParameterException;
@@ -58,41 +58,34 @@ public class NamesAggregationService extends AbstractAggregationService {
 		logger.info("Name generation for product {}", data.getId());
 
 		// Getting the config for the category, if any
-		Map<String, TextsConfig> tConfs = verticalService.getConfigByIdOrDefault(data.getVertical()).getTexts();
+		Map<String, I18nElements> tConfs = verticalService.getConfigByIdOrDefault(data.getVertical()).getI18n();
 
 		// For each language
-		for (Entry<String, TextsConfig> e : tConfs.entrySet()) {
+		for (Entry<String, I18nElements> e : tConfs.entrySet()) {
 
 			try {
 				String lang = e.getKey();
-				TextsConfig tConf = e.getValue();
+				I18nElements tConf = e.getValue();
 				
 				// Computing url
-
 				data.getNames().getUrl().put(lang, data.gtin() + "-" + computePrefixedText(data, tConf.getUrl(), "-"));
-				
 				// h1Title			
 				data.getNames().getH1Title().put(lang, computePrefixedText(data, tConf.getH1Title(), " "));
-				
 				// metaTitle
-				data.getNames().getMetaTitle().put(lang, blablaService.generateBlabla(tConf.getMetaTitle(), data));
-				
+				data.getNames().getMetaTitle().put(lang, blablaService.generateBlabla(tConf.getProductMetaTitle(), data));
 				// metaDescription
-				data.getNames().getMetaDescription().put(lang, blablaService.generateBlabla(tConf.getMetaDescription(), data));
-				
-				// opengraphTitle
-				data.getNames().getOpengraphTitle().put(lang, blablaService.generateBlabla(tConf.getOpengraphTitle(), data));
-				
-				// openGraphDescription
-				data.getNames().getOpenGraphDescription().put(lang, blablaService.generateBlabla(tConf.getOpenGraphDescription(), data));
-				
-				// twitterTitle
-				data.getNames().getTwitterTitle().put(lang, blablaService.generateBlabla(tConf.getTwitterTitle(), data));
-				
-				// twitterDescription
-				data.getNames().getTwitterDescription().put(lang, blablaService.generateBlabla(tConf.getTwitterDescription(), data));
-		
+				data.getNames().getMetaDescription().put(lang, blablaService.generateBlabla(tConf.getProductMetaDescription(), data));
+				// productMetaOpenGraphTitle
+				data.getNames().getProductMetaOpenGraphTitle().put(lang, blablaService.generateBlabla(tConf.getProductMetaOpenGraphTitle(), data));
+				// productMetaOpenGraphDescription
+				data.getNames().getproductMetaOpenGraphDescription().put(lang, blablaService.generateBlabla(tConf.getProductMetaOpenGraphDescription(), data));
+				// productMetaTwitterTitle
+				data.getNames().getproductMetaTwitterTitle().put(lang, blablaService.generateBlabla(tConf.getProductMetaTwitterTitle(), data));
+				// productMetaTwitterDescription
+				data.getNames().getproductMetaTwitterDescription().put(lang, blablaService.generateBlabla(tConf.getProductMetaTwitterDescription(), data));
 
+			
+			
 			} catch (InvalidParameterException e1) {
 				logger.error("Error while computing url for product {}", data.getId(), e1);
 			}

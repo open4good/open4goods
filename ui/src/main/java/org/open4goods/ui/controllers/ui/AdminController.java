@@ -44,7 +44,9 @@ public class AdminController extends AbstractUiController {
 	// The siteConfig
 	private final UiConfig config;
 
-
+	@Autowired
+	private  VerticalsConfigService configService;
+	
 	private final VerticalsConfigService verticalService;
 	
 	private final AiService aiService;
@@ -95,7 +97,7 @@ public class AdminController extends AbstractUiController {
 		
 		Product data = repository.getById(gtin);
 		
-		aiService.complete(data);
+		aiService.complete(data, configService.getConfigByIdOrDefault(data.getVertical()));
 		
 		repository.store(data);
 

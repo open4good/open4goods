@@ -8,21 +8,23 @@
     
 	<!-- Primary Meta Tags -->
 	<title th:text="#{index.title}"></title>
-	<meta name="title" th:content="#{index.meta.title}">
-	<meta name="description" th:content="#{index.meta.description}">
+	<meta name="title" th:content="${config.i18n(siteLanguage).verticalMetaTitle}">
+	<meta name="description" th:content="${config.i18n(siteLanguage).verticalMetaDescription}">
 		
 	<!-- Open Graph / Facebook -->
 	<meta property="og:type" content="website">
 	<meta property="og:url" th:content="${url}">
-	<meta property="og:title" th:content="#{index.title}">
-	<meta property="og:description" th:content="#{index.meta.description}">
+	<meta property="og:title" th:content="${config.i18n(siteLanguage).productMetaOpenGraphTitle}">
+	<meta property="og:description" th:content="${config.i18n(siteLanguage).productMetaOpenGraphTitle}">
 	<meta property="og:image" th:content="${url} + 'assets/img/brand/light.svg'">
 	
 	<!-- Twitter -->
 	<meta name="twitter:card" content="summary_large_image">
+	<!-- TODO : Image of the category -->
 	<meta name="twitter:url" th:content="${url}">
-	<meta name="twitter:title" th:content="#{index.title}">
-	<meta name="twitter:description" th:content="#{index.meta.description}">
+	<meta name="twitter:title" th:content="${config.i18n(siteLanguage).productMetaTwitterTitle}">
+	<meta name="twitter:description" th:content="${config.i18n(siteLanguage).productMetaTwitterDescription}">
+	<!-- TODO : Image of the category -->
 	<meta name="twitter:image" th:content="${url} + 'assets/img/brand/light.svg'">
 
 	<link rel="stylesheet" type="text/css" href="/webjars/datatables/css/dataTables.bootstrap5.min.css">
@@ -54,10 +56,10 @@
 							
 								<div class="d-flex flex-wrap align-items-center row">
 			                        <div class="col-lg-2 text-center">
-			                                <img class="mt-2" width="150" th:src="${config.homeLogo.i18n(siteLanguage)}">
+			                                <img class="mt-2" width="150" th:src="${config.i18n(siteLanguage).verticalHomeLogo}">
 			                        </div>
 			                        <span class="col-lg-10">
-			                                <h1 class="mt-2 text-center" th:text="${config.homeTitle.i18n(siteLanguage)}"></h1>
+			                                <h1 class="mt-2 text-center" th:text="${config.i18n(siteLanguage).verticalHomeTitle}"></h1>
 			                                <div class="row p-2 mb-4"> 
 			                					<th:block th:with="path=${vertical} + '/welcome-header'">
 			                     					<th:block th:insert="~{inc/wiki.html}"></th:block>

@@ -13,6 +13,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.open4goods.config.yml.ui.I18nElements;
 import org.open4goods.config.yml.ui.VerticalConfig;
 import org.open4goods.dao.ProductRepository;
 import org.open4goods.model.Localisable;
@@ -48,13 +49,10 @@ public class VerticalsConfigService {
 	private final Map<String,VerticalConfig> categoriesToVertical = new ConcurrentHashMap<>();
 
 	private Map<String,VerticalConfig> byUrl = new HashMap<>();
+
+	private Map<String,String> toLang = new HashMap<>();
 	
 	private Map<Integer,VerticalConfig> byTaxonomy = new HashMap<>();
-	
-	
-//	private Map<String,String> verticalUrlByLanguage = new HashMap<>();
-
-
 
 	private String verticalsFolder;
 
@@ -104,9 +102,10 @@ public class VerticalsConfigService {
 		}
 
 		// Mapping url to i18n
-		getConfigsWithoutDefault().forEach(vc -> vc.getHomeUrl().forEach((key, value) -> {
+		getConfigsWithoutDefault().forEach(vc -> vc.getI18n().forEach((key, value) -> {
 
-			byUrl.put(value, vc);
+			toLang.put(value.getVerticalHomeUrl(), key);
+			byUrl.put(value.getVerticalHomeUrl(), vc);
 			byTaxonomy.put(vc.getTaxonomyId(), vc);
 //			verticalUrlByLanguage.put(key, value);
 		}));
@@ -216,6 +215,14 @@ public class VerticalsConfigService {
 		return byUrl.get(path);
 	}
 
+	
+	public String getLanguageForPath(String vertical) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	
+	
 	/**
 	 * Return the path for a vertical language, if any
 	 * @param config 
@@ -223,15 +230,8 @@ public class VerticalsConfigService {
 	 * @return
 	 */
 	public String getPathForVerticalLanguage(String language, VerticalConfig config) {
-		Localisable pathes = configs.get(config.getId()).getHomeUrl();
-		
-		for (Entry<String, String> key : pathes.entrySet()) {
-            if (key.getKey().equals(language)) {
-                return key.getValue() ;
-            }
-        }
-		
-		return null;
+		String path = configs.get(config.getId()).i18n(language).getVerticalHomeUrl();		
+		return path;
 	}
 
 	/**
@@ -326,5 +326,6 @@ public class VerticalsConfigService {
 	public Map<String, VerticalConfig> getConfigs() {
 		return configs;
 	}
+
 
 }

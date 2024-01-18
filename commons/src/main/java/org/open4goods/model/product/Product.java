@@ -55,19 +55,21 @@ public class Product implements Standardisable {
 
 	public static final String DEFAULT_REPO = "products";
 
+	/**
+	 * The ID is the I18n
+	 */
 	@Id
 	@Field(index = true, store = false, type = FieldType.Keyword)
 	private String id;
 
-	
 	/**
 	 * The date this item has been created
 	 */
 	@Field(type = FieldType.Date)
 	private long creationDate;
+	
 	/**
-	 * The last date this product has changed (new data, price change, new comment,
-	 * so on...)
+	 * The last date this product has changed (new data, price change, new comment,	 * so on...)
 	 */
 	@Field(type = FieldType.Date)
 	private long lastChange;
@@ -76,25 +78,17 @@ public class Product implements Standardisable {
 	@Field(index = true, store = false, type = FieldType.Object)
 	private Set<UnindexedKeyValTimestamp> alternativeIds = new HashSet<>();
 
-	
 	/** The list of other id's known for this product **/
 	@Field(index = false, store = false, type = FieldType.Object)
 	private Set<UnindexedKeyValTimestamp> alternativeBrands = new HashSet<>();
 	
-	
-	
-
 	/** The vertical, if any**/
 	@Field(index = true, store = false, type = FieldType.Keyword)
 	private String vertical;
-
-
-
 	
 	/** Namings informations for this product **/
 	@Field(index = true, store = false, type = FieldType.Object)
-	private Names names = new Names();
-
+	private ProductTexts names = new ProductTexts();
 
 	//	@Field(index = false, store = false, type = FieldType.Object)
 	//	/** The comments, aggregated and nlp processed **/
@@ -120,9 +114,6 @@ public class Product implements Standardisable {
 	@Field(index = false, store = false, type = FieldType.Object)
 	private Map<String,AiDescription> aiDescriptions = new HashMap<>();
 
-	
-	
-	
 	/** The human crafted description**/
 	// TODO : remove
 	@Field(index = false, store = false, type = FieldType.Object)
@@ -134,13 +125,11 @@ public class Product implements Standardisable {
 	@Field(index = false, store = false, type = FieldType.Object)
 	private GtinInfo gtinInfos = new GtinInfo();
 
-
 	/**
 	 * The google taxonomy id
 	 */
 	@Field(index = true, store = false, type = FieldType.Integer)
 	private Integer googleTaxonomyId;
-	
 	
 	/**
 	 * The set of participating "productCategories", on datasources that build this
@@ -681,11 +670,11 @@ public class Product implements Standardisable {
 		this.lastChange = lastChange;
 	}
 
-	public Names getNames() {
+	public ProductTexts getNames() {
 		return names;
 	}
 
-	public void setNames(Names names) {
+	public void setNames(ProductTexts names) {
 		this.names = names;
 	}
 

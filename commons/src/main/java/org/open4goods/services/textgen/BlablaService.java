@@ -54,15 +54,17 @@ public class BlablaService {
 	 * @param data
 	 * @return
 	 */
-	public String generateBlabla(String xmlBlabla, final Product data) throws InvalidParameterException {
+	public String generateBlabla(String input, final Product data) throws InvalidParameterException {
 
 		//////////////////////////////////
 		// Aleas computation;
 		/////////////////////////////////
-		if (null == xmlBlabla) {
+		if (StringUtils.isEmpty(input)) {
 			throw new InvalidParameterException("Null input");
 		}
 
+		String xmlBlabla = input;
+		
 		Long hash = Long.valueOf(xmlBlabla.hashCode())
 				+ ((null == data || null == data.getId()) ? 0L : Long.valueOf(data.getId().hashCode()));
 		final BlaBlaSecGenerator seqGen = new BlaBlaSecGenerator(hash.hashCode());
@@ -83,7 +85,11 @@ public class BlablaService {
 		xmlBlabla = evaluationService.thymeleafEval(data, xmlBlabla);
 		logger.info("generating thymeleaf version {}:{} >> {}", seqGen.getSequenceCount(), seqGen.hashCode(), xmlBlabla);
 		
-			return StringUtils.normalizeSpace(xmlBlabla.toString());
+		if (null == xmlBlabla) {
+			logger.error("Empty blabla (invalid expressions in template ?) generated for {} : {} > {}",data.gtin(), input, xmlBlabla);
+			return "";
+		}
+		return StringUtils.normalizeSpace(xmlBlabla);
 	}
 
 	

@@ -31,7 +31,7 @@ public class AiConfig {
 	private String key;
 
 
-	private Localisable prompts ;
+	private String prompt ;
 
 
 	public String getKey() {
@@ -44,13 +44,13 @@ public class AiConfig {
 	}
 
 
-	public Localisable getPrompts() {
-		return prompts;
+	public String getPrompt() {
+		return prompt;
 	}
 
 
-	public void setPrompts(Localisable prompts) {
-		this.prompts = prompts;
+	public void setPrompt(String prompt) {
+		this.prompt = prompt;
 	}
 
 

@@ -9,6 +9,7 @@ import org.open4goods.exceptions.ResourceNotFoundException;
 import org.open4goods.model.constants.RolesConstants;
 import org.open4goods.model.data.AiDescription;
 import org.open4goods.model.product.Product;
+import org.open4goods.services.VerticalsConfigService;
 import org.open4goods.services.ai.AiService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -33,6 +34,9 @@ public class ProductController {
 	private  ProductRepository repository;
 	
 	@Autowired
+	private  VerticalsConfigService configService;
+		
+	@Autowired
 	private   AiService aiService;
 
 	@GetMapping(path="/product/")
@@ -50,16 +54,10 @@ public class ProductController {
 		
 		Product data = repository.getById(gtin);
 		
-		aiService.complete(data);
-		
+		aiService.complete(data, configService.getConfigByIdOrDefault(data.getVertical()));		
 		repository.index(data);
 
 		return data.getAiDescriptions();
 	}
-	
-	
-	
-	
-	
-	
+
 }
