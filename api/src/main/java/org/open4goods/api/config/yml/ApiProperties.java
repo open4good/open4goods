@@ -7,6 +7,7 @@ import java.util.List;
 
 import org.apache.commons.lang3.ArrayUtils;
 import org.open4goods.config.BrandConfiguration;
+import org.open4goods.config.yml.GithubConfiguration;
 import org.open4goods.config.yml.ui.DescriptionsAggregationConfig;
 import org.open4goods.crawler.config.yml.FetcherProperties;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -133,6 +134,7 @@ public class ApiProperties {
 
 	private BrandConfiguration brandConfig;
 
+	private GithubConfiguration githubConfig;
 
 	/**
 	 * The log level for aggregation
@@ -416,6 +418,18 @@ public class ApiProperties {
 
 	public void setBrandConfig(BrandConfiguration brandConfig) {
 		this.brandConfig = brandConfig;
+	}
+
+
+
+	public GithubConfiguration getGithubConfig() {
+		return githubConfig;
+	}
+
+
+
+	public void setGithubConfig(GithubConfiguration githubConfig) {
+		this.githubConfig = githubConfig;
 	}
 
 
