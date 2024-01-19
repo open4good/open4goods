@@ -34,7 +34,13 @@ jobs:
           java-version: '21'
           distribution: 'temurin'
           cache: maven
-          
+
+      ############################################
+      # Install Maven dependency submission
+      ###########################################      
+      - name: Maven Dependency Tree Dependency Submission
+        uses: advanced-security/maven-dependency-submission-action@v3.0.3
+                  
       ############################################
       # Maven build and testing
       ###########################################    
