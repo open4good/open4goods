@@ -49,14 +49,14 @@
 							</th:block>
 						</div>
 
-						<form method="post" id="searchForm" action="/recherche">
+						<form method="get" id="searchForm" action="/recherche">
 							<div class="row g-3 align-items-center">
 								<div class="col-12 col-sm-5 mr-sm-1 col-md-4">
 									<label for="rechercheProduit" class="badge--nudger nudger_vert--bg text-white mb-0">Pour Nudger, tapez ici le produit recherché</label>
 								</div>
 								<div class="col-12 col-sm-5 ml-sm-1 col-md-8">
 									<div class="input-group">
-										<input type="text" class="form-control" id="rechercheProduit" placeholder="Type, nom, code barre du produit" aria-label="Search" aria-describedby="basic-addon1" name="query">
+										<input type="text" class="form-control" id="rechercheProduit" placeholder="Type, nom, code barre du produit" aria-label="Search" aria-describedby="basic-addon1" name="q">
 										<button type="button" onclick="document.getElementById('searchForm').submit()" class="input-group-text"><span class="fas fa-search"></span></button>
 									</div>
 								</div>

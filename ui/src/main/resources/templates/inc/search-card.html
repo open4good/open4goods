@@ -5,7 +5,7 @@
                    </aside>
                  <div class="col-md-7">
                      <div class="info-main">
-                         <a th:href="'/'+${item.names.name}" class="h5 title mb-2" th:text="${item.names.longestOfferName()}"></a>
+                         <a th:href="'/'+${item.names.url.get(siteLocale)}" class="h5 title mb-2" th:text="${item.brandAndModel()}"></a>
                   
                      </div>
                  </div> 
@@ -18,7 +18,7 @@
 					 </th:block>                    
                     
                     <div class="d-grid gap-2 mt-4">
-                        <a class="btn btn-tertiary btn-sm" th:href="'/'+${item.names.name}">Details</a>
+                        <a class="btn btn-tertiary btn-sm" th:href="'/'+${item.names.url.get(siteLocale)}">Details</a>
                         
                     </div>
                     

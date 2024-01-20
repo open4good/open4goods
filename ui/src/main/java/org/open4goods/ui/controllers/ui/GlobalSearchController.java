@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.ModelAndView;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -46,14 +47,11 @@ public class GlobalSearchController extends AbstractUiController {
 		return null;
 	}
 
-	@GetMapping({"/recherche/{query}"})
+	@GetMapping({"/recherche"})
 	@Cacheable(cacheNames = CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME)
-	public ModelAndView searchGet(final HttpServletRequest request, @PathVariable String query) {
+	public ModelAndView searchGet(final HttpServletRequest request, @RequestParam String q) {
 
-		String q = StringUtils.normalizeSpace(URLDecoder.decode(query, Charset.defaultCharset()));
-
-
-		ModelAndView model = defaultModelAndView("search", request);
+			ModelAndView model = defaultModelAndView("search", request);
 
 		//		Set<String> categroies = Sets.newHashSet("JOUR>AUTRES MEUBLES");
 
