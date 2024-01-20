@@ -46,13 +46,13 @@
                     <div class="col-12 col-md-10 text-center">
                         <h1 class="mb-3">Rechercher dans les produits</h1>
                         <p class="lead px-lg-5 mb-5">Vous êtes dans la recherche globale, une recherche détaillée est disponible dans chaque catégorie de produits.</p>
-                        <form id="searchForm" method="post">
+                        <form id="searchForm" method="get">
                             <div class="form-group bg-white shadow-soft rounded-pill mb-4 px-3 py-2">
                                 <div class="row align-items-center">
                                     <div class="col">
                                         <div class="input-group input-group-merge shadow-none">
                                             <div class="input-group-text bg-transparent border-0"><span class="fas fa-search"></span></div>
-                                            <input id="searchInput" name="query" th:value="${query}" type="text" class="form-control border-0 form-control-flush shadow-none pb-2" placeholder="Rechercher un produit" required>
+                                            <input id="searchInput" name="q" th:value="${query}" type="text" class="form-control border-0 form-control-flush shadow-none pb-2" placeholder="Rechercher un produit" required>
                                         </div>
                                     </div>
                                     <div class="col-auto">
