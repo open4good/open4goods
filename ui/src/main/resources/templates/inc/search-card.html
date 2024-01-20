@@ -1,11 +1,11 @@
-<div class="card shadow p-2 animate-up-3">
+<div th:with="purl = ${item.names.url.get(siteLocale)}" class="card shadow p-2 animate-up-3">
                <div class="row align-items-center">
                    <aside class="col-md-2">
                        <img height="150" th:src="'/images/'+${item.gtin()}+'-cover.png'" th:alt="${item.names.longestOfferName()}">
                    </aside>
                  <div class="col-md-7">
                      <div class="info-main">
-                         <a th:href="'/'+${item.names.url.get(siteLocale)}" class="h5 title mb-2" th:text="${item.brandAndModel()}"></a>
+                         <a th:href="'/'+${purl == null ? item.gtin() : purl}" class="h5 title mb-2" th:text="${item.brandAndModel()}"></a>
                   
                      </div>
                  </div> 
@@ -17,9 +17,8 @@
 	                     <span class="text-success small">Meilleur prix sur </span>   <span class="h6 mb-0 text-danger"><span th:text='${item.offersCount}'></span> offres</span>
 					 </th:block>                    
                     
-                    <div class="d-grid gap-2 mt-4">
-                        <a class="btn btn-tertiary btn-sm" th:href="'/'+${item.names.url.get(siteLocale)}">Details</a>
-                        
+                    <div  class="d-grid gap-2 mt-4">
+                        <a class="btn btn-tertiary btn-sm" th:href="'/'+${purl == null ? item.gtin() : purl}">Details</a>                        
                     </div>
                     
                 </div> 

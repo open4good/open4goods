@@ -23,6 +23,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -97,10 +98,15 @@ public class ProductController extends AbstractUiController {
 	 * @throws UnirestException
 	 */
 	
-	@GetMapping("/{id:\\d+}-*")
+	@GetMapping("/{id:\\d+}*")
 	public ModelAndView product(@PathVariable String id, final HttpServletRequest request, HttpServletResponse response) throws IOException {
 
 		ModelAndView ret = buildProductView(id, null, request, response);;
+		
+		if (null!= ret.getStatus() && ret.getStatus().is3xxRedirection() ) {
+			return ret;
+		}
+		
 		UiHelper uiHelper = (UiHelper) ret.getModel().get("helper");
 		String url = uiHelper.url();
 	
@@ -159,6 +165,8 @@ public class ProductController extends AbstractUiController {
 		mv.addObject("verticalConfig", verticalConfig);
 
 		UiHelper uiHelper = new UiHelper(request, verticalConfig, data);
+		// Adding the UiHelper class
+		mv.addObject("helper", uiHelper);
 		
 		if (null == vertical) {
 
@@ -205,9 +213,6 @@ public class ProductController extends AbstractUiController {
 		
 		// Adding the brand informations
 		mv.addObject("hasBrandLogo", brandService.hasLogo(data.brand()));
-		
-		// Adding the UiHelper class
-		mv.addObject("helper", uiHelper);
 		
 		// Adding the images resource
 
