@@ -65,8 +65,12 @@ public class VerticalController extends AbstractUiController {
 
 		VerticalSearchRequest vRequest = new VerticalSearchRequest();
 
-		VerticalSearchResponse products = searchService.verticalSearch(config,vRequest);
+		// TODO : do not fetch any
+//		VerticalSearchResponse products = searchService.verticalSearch(config,vRequest);
+		VerticalSearchResponse products = new VerticalSearchResponse();
 
+		
+		
 		Map<String,String> countryNames = new HashMap<>();
 		for (VerticalFilterTerm country : products.getCountries()) {
 			countryNames.put(country.getText(), new ULocale("",country.getText()).getDisplayCountry( new ULocale(request.getLocale().toString())));
