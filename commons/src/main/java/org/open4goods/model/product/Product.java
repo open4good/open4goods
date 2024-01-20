@@ -56,7 +56,7 @@ public class Product implements Standardisable {
 	public static final String DEFAULT_REPO = "products";
 
 	/**
-	 * The ID is the I18n
+	 * The ID is the gtin
 	 */
 	@Id
 	@Field(index = true, store = false, type = FieldType.Keyword)
