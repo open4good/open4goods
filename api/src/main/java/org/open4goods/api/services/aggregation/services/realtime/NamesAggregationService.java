@@ -124,9 +124,13 @@ public class NamesAggregationService extends AbstractAggregationService {
 		StringBuilder sb = new StringBuilder();
 		
 		// Adding the prefix
-		String prefix = blablaService.generateBlabla(textsConfigUrl.getPrefix(), data);
-		if (!StringUtils.isEmpty(prefix)) {			
-			sb.append(prefix);
+		String p = textsConfigUrl.getPrefix();
+		
+		if (!StringUtils.isEmpty(p)) {
+			String prefix = blablaService.generateBlabla(p, data);
+			if (!StringUtils.isEmpty(prefix)) {			
+				sb.append(prefix);
+			}
 		}
 		
 		// Adding the mentioned attrs if existing		
