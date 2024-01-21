@@ -54,6 +54,20 @@ public class VerticalSearchResponse {
 
 
 
+	public VerticalSearchResponse(VerticalConfig config, VerticalSearchRequest vRequest) {
+		this.data = new ArrayList<>();
+		this.to=0;
+		this.from=0;
+		this.totalResults=0L;
+		this.minOffers=0;
+		this.maxOffers=0;
+		this.verticalConfig=config;
+		this.request=vRequest;
+	}
+
+	public VerticalSearchResponse() {
+	}
+
 	public List<Product> getData() {
 		return data;
 	}

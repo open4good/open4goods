@@ -1,5 +1,6 @@
 package org.open4goods.ui.controllers.ui;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -65,10 +66,13 @@ public class VerticalController extends AbstractUiController {
 
 		VerticalSearchRequest vRequest = new VerticalSearchRequest();
 
-		// TODO : do not fetch any
-//		VerticalSearchResponse products = searchService.verticalSearch(config,vRequest);
-		VerticalSearchResponse products = new VerticalSearchResponse();
+		VerticalSearchResponse products = searchService.verticalSearch(config,vRequest);
+//		VerticalSearchResponse products = new VerticalSearchResponse(config,vRequest);
 
+		// TODO : should must not need the initial call
+		// TODO : do not fetch any in nativ html
+		products.setData(new ArrayList<>());
+		
 		
 		
 		Map<String,String> countryNames = new HashMap<>();

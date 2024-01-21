@@ -171,7 +171,7 @@ public class ProductController extends AbstractUiController {
 		if (null == vertical) {
 
 			// Sending 301 id no match with product name
-			if (!path.equals(uiHelper.url())) {
+			if (uiHelper.url() != null && !path.equals(uiHelper.url())) {
 				response.setStatus(HttpServletResponse.SC_MOVED_PERMANENTLY);
 				// TODO : I18n
 				mv = new ModelAndView("redirect:/" + uiHelper.url());
