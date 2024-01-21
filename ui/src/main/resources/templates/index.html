@@ -29,111 +29,14 @@
 <body class="home-page">
     
     <!--/* Navbar */-->
-	<!-- tant que le menu n'a pas été corrigé, je suis obligé de le mettre en com' pour faire l'effet de la page en step
 	<th:block th:insert="~{inc/navbar/navbar-home.html}"></th:block>
-	-->
     <!--/* Loader */-->
     <th:block th:insert="~{inc/preloader.html}"></th:block>
 	
     <main class="bg-gray-200">	
-
-		<section class="containerNavigation bg-white">
-			<div class="navigationHorizontal position-relative">
-				<article class="slide">
-					<div class="row justify-content-md-center w-75">
-						<h1 class="h1 mb-2 nudger_vert--text text-center">Bienvenue sur Nudger.fr</h1>
-						<h3 class="h3 badge--nudger nudger_vert--bg_opacity nudger_vert--text text-center col-md-auto mt-2">Votre comparateur d’achat, bon pour la planète !</h3>
-						<div class="lead text-gray mt-2">
-							<th:block th:with="path='WIDGETS/accueil-jumbotron/'">
-								<th:block th:insert="~{inc/wiki.html}"></th:block>
-							</th:block>
-						</div>
-
-						<form method="get" id="searchForm" action="/recherche">
-							<div class="row g-3 align-items-center">
-								<div class="col-12 col-sm-5 mr-sm-1 col-md-4">
-									<label for="rechercheProduit" class="badge--nudger nudger_vert--bg text-white mb-0">Pour Nudger, tapez ici le produit recherché</label>
-								</div>
-								<div class="col-12 col-sm-5 ml-sm-1 col-md-8">
-									<div class="input-group">
-										<input type="text" class="form-control" id="rechercheProduit" placeholder="Type, nom, code barre du produit" aria-label="Search" aria-describedby="basic-addon1" name="q">
-										<button type="button" onclick="document.getElementById('searchForm').submit()" class="input-group-text"><span class="fas fa-search"></span></button>
-									</div>
-								</div>
-							</div>
-							<aside class="col-12 text-center mt-3">
-								<a class="nudger_vert--text mb-0" href="#exit_slide"><span class="pr-3">Nudger curieux ? Parcourez les catégories de produits</span> <i class="fas fa-arrow-right"></i></a>
-							</aside>
-						</form>
-					</div>
-					
-				</article>
-				<article class="slide">
-					<div class="row justify-content-md-center w-75">
-						<h3 class="h3 badge--nudger nudger_vert--bg_opacity nudger_vert--text text-center col-md-auto mt-2">Notre sélection de produits, plus responsables pour la planète</h3>
-						<div class="">
-							<div class="col-12 col-md-6 col-lg-3 mb-3" th:each ="vertical : ${verticals}">
-								<div class="card card-flip shadow">
-									<div class="card-flip-inner">
-										<div class="wrapper-card-img">
-											<img th:src="${vertical.i18n(siteLanguage).verticalHomeLogo}" class="card-img-top rounded-top" alt="img TV">
-										</div>
-										<div class="card-body bg-primary">
-											<h3 class="h5 card-title text-white mt-3" th:text="${vertical.i18n(siteLanguage).verticalHomeTitle}"></h3>
-											<p class="card-text" th:text="${vertical.i18n(siteLanguage).verticalHomeDescription}"></p>
-											<a th:href="'/'+${vertical.i18n(siteLanguage).verticalHomeUrl}" class="btn btn-primary btn-sm">Découvrir</a>
-										</div>
-									</div>
-								</div>
-							</div>
-						</div>
-					</div>
-				</article>
-				<article class="slide">
-					<div class="row justify-content-md-center w-75">
-						<h3 class="h3 badge--nudger nudger_vert--bg_opacity nudger_vert--text text-center col-md-auto mt-2">Nos réalisations pour le bien commun</h3>
-						<section class="text-center py-4">
-							<div class="row justify-content-center">
-								<div class="col-12 col-md-6 col-lg-4 py-3">
-									<div class="icon icon-shape icon-shape-secondary me-2 me-md-0 mb-2">
-										<span class="fas fa-box-open"></span>
-									</div>
-									<span class="counter display-3 text-secondary d-block" data-value="150" ></span>
-									<span class="lead">Montant du coup de pouce à date de Nudger pour la planète</span>
-								</div>
-			
-								<div class="col-12 col-md-6 col-lg-4 py-3">
-									<div class="icon icon-shape icon-shape-secondary me-2 me-md-0 mb-2">
-										<span class="fas fa-box-open"></span>
-									</div>
-									<span class="counter display-3 text-secondary d-block" th:data-value="${totalItems}" >15M+ Offres commerciales</span>
-									<span class="lead">Un des comparateurs français les plus fournis</span>
-								</div>
-			
-								<div class="col-12 col-md-6 col-lg-4 py-3">
-									<div class="icon icon-shape icon-shape-secondary me-2 me-md-0 mb-2">
-										<span class="fas fa-box-open"></span>
-									</div>
-									<span class="counter display-3 text-secondary d-block" th:data-value="${partners}" th:text="${partners}"></span>
-									<span class="lead">Nombre de <a href="/partenaires"> de notre démarche. Toutes les plus grandes enseignes !</a></span>
-								</div>
-							</div>
-						</section>
-					</div>
-				</article>
-			</div>
-			<!--aside class="action-buttons d-flex flex-row">
-				<button type="button" class="down-button">
-				 <i class="fas fa-arrow-down"></i>
-				</button>
-				<button type="button" class="up-button">
-				 <i class="fas fa-arrow-up"></i>
-				</button>
-			</aside-->
-		</section>
 		
        	<!--/* Central */-->
-		<!--section class="section-header py-3">
+		<section class="section-header py-3">
 			<div class="col-12">
 				<p style="visibility: hidden;" class="tlt display-2 mb-2 text-center">nudger<span class="text-secondary-app fw-bold">.fr</span>
 				</p>
@@ -166,9 +69,9 @@
 					</div>
 				</div>	
 			</div>
-		</section-->
+		</section>
 
-		<section id="exit_slide" class="bg-white text-center py-4">
+		<section class="bg-white text-center py-4">
 			<h1 class="mb-3">Nos catégories évaluées</h1>
 			<p class="lead mb-0">L'assurance de bien choisir</p>
 		</section>
@@ -178,14 +81,14 @@
 				<div class="col-12 col-md-6 col-lg-3 mb-3" th:each ="vertical : ${verticals}">
 					<div class="card card-flip shadow">
 						<div class="card-flip-inner">
-							<div class="wrapper-card-img">
-								<img th:src="${vertical.i18n(siteLanguage).verticalHomeLogo}" class="card-img-top rounded-top" alt="img TV">
-							</div>
-							<div class="card-body bg-primary">
-								<h3 class="h5 card-title text-white mt-3" th:text="${vertical.i18n(siteLanguage).verticalHomeTitle}"></h3>
-								<p class="card-text" th:text="${vertical.i18n(siteLanguage).verticalHomeDescription}"></p>
-								<a th:href="'/'+${vertical.i18n(siteLanguage).verticalHomeUrl}" class="btn btn-primary btn-sm">Découvrir</a>
-							</div>
+							   <div class="wrapper-card-img">
+									<img th:src="${vertical.i18n(siteLanguage).verticalHomeLogo}" class="card-img-top rounded-top" alt="img TV">
+								</div>
+								<div class="card-body bg-primary">
+									<h3 class="h5 card-title text-white mt-3" th:text="${vertical.i18n(siteLanguage).verticalHomeTitle}"></h3>
+									<p class="card-text" th:text="${vertical.i18n(siteLanguage).verticalHomeDescription}"></p>
+									<a th:href="'/'+${vertical.i18n(siteLanguage).verticalHomeUrl}" class="btn btn-primary btn-sm">Découvrir</a>
+								</div>
 						</div>
 					</div>
 				</div>
