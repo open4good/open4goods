@@ -208,12 +208,6 @@ public class AttributesConfig {
 
 
 
-
-	public Set<String> getAttributeKeys() {
-		singletonHashAttrs();
-		return hashedAttributesByKey.keySet();
-	}
-
 	public Set<AttributeConfig> getConfigs() {
 		return configs;
 	}
