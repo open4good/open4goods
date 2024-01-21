@@ -58,6 +58,12 @@ public class BarcodeTest {
 		// Reduced GTIN 13
 		assertEquals(BarcodeType.GTIN_13, service.sanitize("00088381694858").getKey());
 
+		
+		// Alimentary : 
+		assertEquals(BarcodeType.GTIN_13, service.sanitize("11225416712").getKey());
+		assertEquals(BarcodeType.GTIN_13, service.sanitize("790310044").getKey());
+		
+
 	}
 	//
 
