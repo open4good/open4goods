@@ -13,7 +13,7 @@
 	                        <li class="ms-3" th:if="${product}"><a th:href="'/aiAssist?gtin='+${product.gtin}+'&r='+${url}">GenAi completion</a></li>                           
 	    	                <li class="ms-3" th:if="${editLink}"><a target="_blank" th:href="${editLink}">Editer cette page sur le wiki</a></li>
 	    	                <li class="ms-3"><a th:href="'/flushCache?r='+${url}">Purger le cache</a></li>
-	    	                <li class="ms-3"><a href="'/reloadConfigs?r='+${url}">Recharger les verticales</a></li>    	                
+	    	                <li class="ms-3"><a th:href="'/reloadConfigs?r='+${url}">Recharger les verticales</a></li>    	                
 	    	                <li class="ms-3"><a href="/logout">Se déconnecter</a></li>
 					</ul>                 
 			</div>
