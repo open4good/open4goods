@@ -445,6 +445,14 @@ public class Product implements Standardisable {
 	}
 	
 	
+	public String ecoscoreAsString() {
+		Score s = ecoscore();
+		if (null == s) {
+			return "";
+		} else {
+			return s.getRelativ().getValue() + "/" + StandardiserService.DEFAULT_MAX_RATING;
+		}
+	}
 	public String brandAndModel() {
 		String ret = "";
 		if (!StringUtils.isEmpty(brand())) {
@@ -456,6 +464,10 @@ public class Product implements Standardisable {
 		return ret;
 	}
 
+	
+	public String compensation () {
+		return String.format("%.2f", bestPrice().getCompensation());
+	}
 	/**
 	 *
 	 * @return The shortest category for this product
