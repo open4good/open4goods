@@ -32,6 +32,10 @@ public class WebConfig {
 	/** i18n cache duration in seconds**/
 	private Integer i18nFileCache = 10;
 
+	/**
+	 * If true, will have to be logged to navigate on the website
+	 */
+	private Boolean webAuthentication = true;
 
 
 
@@ -73,6 +77,14 @@ public class WebConfig {
 
 	public void setI18nFileCache(Integer i18nFileCache) {
 		this.i18nFileCache = i18nFileCache;
+	}
+
+	public Boolean getWebAuthentication() {
+		return webAuthentication;
+	}
+
+	public void setWebAuthentication(Boolean webAuthentication) {
+		this.webAuthentication = webAuthentication;
 	}
 
 

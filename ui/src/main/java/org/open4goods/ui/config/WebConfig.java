@@ -1,5 +1,6 @@
 package org.open4goods.ui.config;
 
+import org.open4goods.ui.config.yml.UiConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -24,6 +25,8 @@ import org.springframework.security.web.SecurityFilterChain;
 public class WebConfig {
 
 	private final AuthenticationProvider  authProvider;
+	
+	private @Autowired UiConfig config;
 
 	public WebConfig(AuthenticationProvider authProvider) {
 		this.authProvider = authProvider;
@@ -33,18 +36,37 @@ public class WebConfig {
 	@Bean
 	SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 
-		http.authorizeRequests()
-		//		.anyRequest().permitAll()
-		.anyRequest().authenticated()
+		
+		if (config.getWebConfig().getWebAuthentication().booleanValue()) {
+
+			http.authorizeRequests()
+			//		.anyRequest().permitAll()
+			.anyRequest().authenticated()
 
 
-		.and().formLogin().permitAll()
-		.and().logout().permitAll();
+			.and().formLogin().permitAll()
+			.and().logout().permitAll();
 
-		http.csrf().disable();
-		http.headers().frameOptions().disable();
+			http.csrf().disable();
+			http.headers().frameOptions().disable();
 
-		return http.build();
+			return http.build();
+		} else {
+			http.authorizeRequests()
+					.anyRequest().permitAll()
+//			.anyRequest().authenticated()
+
+
+			.and().formLogin().permitAll()
+			.and().logout().permitAll();
+
+			http.csrf().disable();
+			http.headers().frameOptions().disable();
+
+			return http.build();
+		}
+			
+
 	}
 
 
