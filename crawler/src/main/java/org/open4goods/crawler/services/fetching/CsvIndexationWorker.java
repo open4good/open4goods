@@ -457,28 +457,31 @@ public class CsvIndexationWorker implements Runnable {
 			}
 		}
 
-		for(String pc : csvProperties.getPrice()) {
-			try {
-
-				final Price price = new Price();
-				String val = getFromCsvRow(item, pc);
-				
-				if (StringUtils.isEmpty(val)) {
-					continue;
-				}
-				
-				price.setPriceValue(val, Locale.forLanguageTag(config.getLanguage().toUpperCase()));
-				price.setCurrency(csvProperties.getCurrency());
-
-				p.setPrice(price);
-				break;
-			} catch (final Exception e) {
-				dedicatedLogger.info("Error setting price, trying setPriceAndCurrency : {}", p.getUrl());
+		if (null != csvProperties.getPrice()) {
+			
+			for(String pc : csvProperties.getPrice()) {
 				try {
-					p.setPriceAndCurrency(getFromCsvRow(item, pc),
-							Locale.forLanguageTag(config.getLanguage().toUpperCase()));
-				} catch (final Exception e1) {
-					dedicatedLogger.warn("Error setting fallback price with setPriceAndCurrency(): {}", p.getUrl());
+	
+					final Price price = new Price();
+					String val = getFromCsvRow(item, pc);
+					
+					if (StringUtils.isEmpty(val)) {
+						continue;
+					}
+					
+					price.setPriceValue(val, Locale.forLanguageTag(config.getLanguage().toUpperCase()));
+					price.setCurrency(csvProperties.getCurrency());
+	
+					p.setPrice(price);
+					break;
+				} catch (final Exception e) {
+					dedicatedLogger.info("Error setting price, trying setPriceAndCurrency : {}", p.getUrl());
+					try {
+						p.setPriceAndCurrency(getFromCsvRow(item, pc),
+								Locale.forLanguageTag(config.getLanguage().toUpperCase()));
+					} catch (final Exception e1) {
+						dedicatedLogger.warn("Error setting fallback price with setPriceAndCurrency(): {}", p.getUrl());
+					}
 				}
 			}
 		}
