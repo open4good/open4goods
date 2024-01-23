@@ -295,7 +295,7 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 							dedicatedLogger.info("Overiding GTIN from {} to {} ",existing, value);
 							output.getAttributes().getReferentielAttributes().put(ReferentielKey.GTIN, value);
 						} else {							
-							dedicatedLogger.info("Cannot overide GTIN from {} to {} ",existing, value);						
+							dedicatedLogger.error("Cannot overide GTIN from {} to {} ",existing, value);						
 						}
 					}
 				} 

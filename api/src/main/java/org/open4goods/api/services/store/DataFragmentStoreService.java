@@ -194,7 +194,7 @@ public class DataFragmentStoreService {
 					// TODO : Not the good point. Service ?
 					results.add(generationService.updateOne(df,data));
 				} catch (AggregationSkipException e1) {
-					logger.info("Aggregation skipped for {} : {}",df,e1.getMessage());
+					logger.warn("Aggregation skipped for {} : {}",df,e1.getMessage());
 				}
 
 			}
