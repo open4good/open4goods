@@ -3,6 +3,7 @@ package org.open4goods.api.services.aggregation.services.realtime;
 
 import java.util.AbstractMap.SimpleEntry;
 
+import org.apache.commons.lang3.StringUtils;
 import org.open4goods.api.services.aggregation.AbstractAggregationService;
 import org.open4goods.config.yml.ui.VerticalConfig;
 import org.open4goods.exceptions.AggregationSkipException;
@@ -43,17 +44,30 @@ public class BarCodeAggregationService extends AbstractAggregationService {
 		/////////////////////////////
 		// Validating barcodes
 		/////////////////////////////
-
+		
+		if (null == output.gtin()) {
+			output.setId(input.gtin());
+		} else {
+			if (!output.gtin().equals(input.gtin())) {
+				dedicatedLogger.error("GTIN Mismatch : product {], dataFragment {}", output.gtin(), input.gtin());
+			}
+		}
+		
 		onProduct(output, vConf);
 	}
 
 	@Override
 	public void onProduct(Product output, VerticalConfig vConf) throws AggregationSkipException {
 
+		if (StringUtils.isEmpty(output.gtin())) {
+			dedicatedLogger.warn("Skipping product aggregation, empty barcode");
+			throw new AggregationSkipException("Cannot proceed, empty barcode");
+		} 
 
 		SimpleEntry<BarcodeType, String> valResult = validationService.sanitize(output.gtin());
+
 		if (valResult.getKey().equals(BarcodeType.UNKNOWN)) {
-			dedicatedLogger.info("{} is not a valid ISBN/UEAN13 barcode : {}",valResult.getValue() ,output.gtin());
+			dedicatedLogger.warn("{} is not a valid ISBN/UEAN13 barcode : {}",valResult.getValue() ,output.gtin());
 			throw new AggregationSkipException("Invalid barcode : " + output.gtin());
 		}
 
