@@ -79,7 +79,7 @@ public class AggregationFacadeService {
 
 	private BlablaService blablaService;
 
-	private StandardAggregator StandardAggregator;
+	private StandardAggregator realtimeAggregator;
 	
 	public AggregationFacadeService(EvaluationService evaluationService,
 			StandardiserService standardiserService,
@@ -105,7 +105,7 @@ public class AggregationFacadeService {
 		this.taxonomyService = taxonomyService;
 		this.blablaService = blablaService;
 		
-		this.StandardAggregator = getStandardAggregator("realtime");
+		this.realtimeAggregator = getStandardAggregator("realtime");
 	
 	}
 
@@ -227,14 +227,14 @@ public class AggregationFacadeService {
 	 * @throws AggregationSkipException
 	 */
 	public Product updateOne(DataFragment df, Product data) throws AggregationSkipException {
-		return StandardAggregator.onDatafragment(df, data);
+		return realtimeAggregator.onDatafragment(df, data);
 	}
 
 
 
 	@PreDestroy
 	public void shutdown() {
-		StandardAggregator.close();
+		realtimeAggregator.close();
 
 
 	}

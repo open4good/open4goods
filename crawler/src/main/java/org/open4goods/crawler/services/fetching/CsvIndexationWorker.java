@@ -145,7 +145,6 @@ public class CsvIndexationWorker implements Runnable {
 	
 	public void fetch(DataSourceProperties dsProperties) {
 		
-		// TODO : Review the toConsole, bad design
 		String safeName = IdHelper.azCharAndDigitsPointsDash(dsProperties.getName()).toLowerCase();
 		Logger dedicatedLogger = csvService.createDatasourceLogger(safeName	, dsProperties, logsFolder+"/crawler/");
 		
@@ -160,15 +159,11 @@ public class CsvIndexationWorker implements Runnable {
 		if (null != crawlConfig) {
 			try {
 				dedicatedLogger.info("Configuring direct web crawler for CSV datasource {}", dsProperties.getDatasourceConfigName());
-				controler = webFetchingService.createCrawlController("csv-" + dsConfName,
-						dsProperties.getCsvDatasource().getWebDatasource().getCrawlConfig());
-				crawler = webFetchingService.createWebCrawler(dsConfName, dsProperties,
-						dsProperties.getCsvDatasource().getWebDatasource());
-
+				controler = webFetchingService.createCrawlController("csv-" + dsConfName, dsProperties.getCsvDatasource().getWebDatasource().getCrawlConfig());
+				crawler = webFetchingService.createWebCrawler(dsConfName, dsProperties, 	dsProperties.getCsvDatasource().getWebDatasource());
 				crawler.setShouldFollowLinks(false);
-
 			} catch (final Exception e) {
-				dedicatedLogger.error("Error while starting the CSV associated web crawler", e);
+				dedicatedLogger.error("Error while starting the CSV driven web crawler", e);
 			}
 		}
 

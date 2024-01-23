@@ -393,7 +393,7 @@ public class Product implements Standardisable {
 	 */
 	public String gtin() {
 		try {
-			return attributes.getReferentielAttributes().get(ReferentielKey.GTIN);
+			return id;
 		} catch (final Exception e) {
 			return null;
 		}
