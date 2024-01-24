@@ -20,6 +20,7 @@ import org.open4goods.crawler.services.IndexationService;
 import org.open4goods.crawler.services.fetching.CsvDatasourceFetchingService;
 import org.open4goods.crawler.services.fetching.WebDatasourceFetchingService;
 import org.open4goods.dao.ProductRepository;
+import org.open4goods.exceptions.ValidationException;
 import org.open4goods.model.constants.CacheConstants;
 import org.open4goods.model.constants.Currency;
 import org.open4goods.model.constants.TimeConstants;
@@ -420,7 +421,7 @@ public class ApiConfig {
 		return new IndexationService() {
 
 			@Override
-			protected void indexInternal(final DataFragment data) {
+			protected void indexInternal(final DataFragment data) throws ValidationException {
 				// Direct indexation on the store service
 				dataFragmentStoreService.queueDataFragment(data);
 			}
