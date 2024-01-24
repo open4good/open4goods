@@ -11,6 +11,7 @@ import org.open4goods.api.services.store.DataFragmentStoreService;
 import org.open4goods.config.yml.datasource.DataSourceProperties;
 import org.open4goods.crawler.services.FeedService;
 import org.open4goods.exceptions.InvalidParameterException;
+import org.open4goods.exceptions.ValidationException;
 import org.open4goods.model.constants.RolesConstants;
 import org.open4goods.model.constants.UrlConstants;
 import org.open4goods.model.crawlers.FetcherGlobalStats;
@@ -125,7 +126,7 @@ public class CrawlerOrchestrationController {
 	@PostMapping(path=UrlConstants.MASTER_API_CRAWLERS  + UrlConstants.MASTER_API_CRAWLER_SYNCH_HTTP_FETCH)
 	@Operation(summary="Run an url direct fetching against the best availlable node")
 	@PreAuthorize("hasAuthority('"+RolesConstants.ROLE_ADMIN+"')")
-	public DataFragment testFetchUrl(  @RequestBody @NotBlank final String url) throws InvalidParameterException{
+	public DataFragment testFetchUrl(  @RequestBody @NotBlank final String url) throws InvalidParameterException, ValidationException{
 		// Get the providerName corresponding to the url
 		final DataSourceProperties dsp = datasourceConfigService.getDatasourcePropertiesForUrl(url);
 		if (null == dsp) {

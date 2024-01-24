@@ -3,6 +3,7 @@ package org.open4goods.crawler.services;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.open4goods.exceptions.ValidationException;
 import org.open4goods.model.constants.UrlConstants;
 import org.open4goods.model.data.DataFragment;
 import org.open4goods.model.dto.api.IndexationResponse;
@@ -37,7 +38,7 @@ public class IndexationService {
 		this.apiKey = apiKey;
 	}
 
-	public void index(final DataFragment data, final String datasourceConfigName) {
+	public void index(final DataFragment data, final String datasourceConfigName) throws ValidationException {
 		// Incrementing the counters
 		byProviderCounters.compute(datasourceConfigName, (k, v) -> v == null ? 1 : v + 1);
 
@@ -46,7 +47,7 @@ public class IndexationService {
 	}
 
 
-	protected void indexInternal(final DataFragment data) {
+	protected void indexInternal(final DataFragment data) throws ValidationException {
 		try {
 			Unirest.post(indexationEndpoint).header("accept", "application/json")
 					.header("Content-Type", "application/json").header(UrlConstants.APIKEY_PARAMETER, apiKey).body(data)

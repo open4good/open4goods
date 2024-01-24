@@ -98,8 +98,11 @@ public class DataFragmentStoreService {
 	 */
 	public void queueDataFragments(final Set<DataFragment> dataFragments) {
 		for (final DataFragment df : dataFragments) {
-			queueDataFragment(df);
-
+			try {
+				queueDataFragment(df);
+			} catch (ValidationException e) {
+				logger.warn("Cannot add {} because of validation errors : {}",df,e.getMessage());
+			}
 		}
 	}
 
@@ -107,17 +110,13 @@ public class DataFragmentStoreService {
 	 * Add an element to the indexing queue
 	 *
 	 * @param dataFragment
+	 * @throws ValidationException 
 	 */
 //	@Timed(value = "queueDataFragment", description = "Validation, standardisation and addding to queue a DataFragment")
-	public void queueDataFragment(final DataFragment data) {
+	public void queueDataFragment(final DataFragment data) throws ValidationException {
 
-		try {
-			preHandle(data);
-		} catch (final ValidationException e) {
-			logger.info("Cannot index data {} because of validation errors : {}", data.getUrl(), e.getMessage());
-			return;
-		}
-
+		
+		preHandle(data);
 		logger.debug("Queuing datafragment {}",data);
 
 		enqueue(data);
