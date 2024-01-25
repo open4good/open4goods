@@ -59,10 +59,10 @@
 								</th:block>
 						</p>
 				
-						<form method="post" id="searchForm" action="/recherche">
+						<form method="get" id="searchForm" action="/recherche">
 							<div class="d-flex flex-wrap mt-lg-2">
 								<div class="input-group input-group-lg">
-										<input type="text" id="searchInput" class="form-control" th:placeholder="'Rechercher dans ' + ${#numbers.formatDecimal(totalItems, 0, 'COMMA', 0, 'POINT')} + ' produits'" aria-label="Search" aria-describedby="basic-addon1" name="query">
+										<input type="text" id="searchInput" class="form-control" th:placeholder="'Rechercher dans ' + ${#numbers.formatDecimal(totalItems, 0, 'COMMA', 0, 'POINT')} + ' produits'" aria-label="Search" aria-describedby="basic-addon1" name="q">
 										<button onclick="document.getElementById('searchForm').submit()" class="btn btn-primary" type="button"><span class="fas fa-search"></span></button>
 									</div>
 							</div>
