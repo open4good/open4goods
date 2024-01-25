@@ -16,7 +16,7 @@ logging:
       max-size: 200MB      
       
 
-aggregationLogLevel: info
+aggregationLogLevel: warn
    
 spring:
   jackson:
