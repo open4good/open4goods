@@ -173,20 +173,22 @@ public class CsvIndexationWorker implements Runnable {
 		// Csv Shema definition
 		////////////////////////////
 		
-		CsvSchema schema = CsvSchema.emptySchema()
-					.withHeader()
-					.withColumnSeparator(config.getCsvSeparator())						
-					;
+//		CsvSchema schema = CsvSchema.emptySchema()
+//					.withHeader()
+//					.withColumnSeparator(config.getCsvSeparator())						
+//					;
+//
+//		 if (null != config.getCsvQuoteChar()) {
+//			 schema = schema.withQuoteChar(config.getCsvQuoteChar().charValue());
+//		 } else {
+//			 schema = schema.withoutQuoteChar();
+//		 }
+//		 
+//		 if (null != config.getCsvEscapeChar()) {
+//			 schema = schema.withEscapeChar(config.getCsvEscapeChar());
+//		 }
+		
 
-		 if (null != config.getCsvQuoteChar()) {
-			 schema = schema.withQuoteChar(config.getCsvQuoteChar().charValue());
-		 } else {
-			 schema = schema.withoutQuoteChar();
-		 }
-		 
-		 if (null != config.getCsvEscapeChar()) {
-			 schema = schema.withEscapeChar(config.getCsvEscapeChar());
-		 }
 		
 		
 		Set<String> urls = config.getDatasourceUrls() ;	
@@ -207,7 +209,7 @@ public class CsvIndexationWorker implements Runnable {
 
 				// configure the reader on what bean to read and how we want to write
 				// that bean
-				final ObjectReader oReader = csvMapper.readerFor(Map.class).with(schema);
+
 
 				// local file download, then estimate number of rows
 //					TODO(design,P2,0.5) : Allow CSV file forwarding on remote crawl (for now, CSV with classpath fetching only works on local node)
@@ -281,8 +283,11 @@ public class CsvIndexationWorker implements Runnable {
 				
 				
 				// Row number counting
+				dedicatedLogger.info("Detecting schema for {} ", destFile.getAbsolutePath());
+				CsvSchema schema  = csvService.detectSchema(destFile);
 
-				dedicatedLogger.info("Counting lines for {} ", destFile.getAbsolutePath());
+				final ObjectReader oReader = csvMapper.readerFor(Map.class).with(schema);
+				
 
 				// NOTE : Choice is made not to have the queue, to avoid this long line counting
 //					final Path path = Paths.get(destFile.getAbsolutePath());
