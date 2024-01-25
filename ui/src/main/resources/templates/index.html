@@ -465,12 +465,6 @@ new Waypoint({
 
 
 $(document).ready(function() {
-	// Product search input
-	$('#searchInput').on("change",function (e) {
-    	$('#searchForm').attr("action","/recherche/"+encodeURIComponent($('#searchInput').val()));
-    });
-        
-        
       $( "body").on( "tplLoaded",function() {
     	  animateText();
 		});
