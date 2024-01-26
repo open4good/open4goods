@@ -36,7 +36,7 @@ public class HomeController extends AbstractUiController {
 		// TODO : Remove this test page
 		ModelAndView model = defaultModelAndView("index", request);
 
-		model.addObject("totalItems", aggregatedDataRepository.countMainIndexHavingPrice());
+		model.addObject("totalItems", aggregatedDataRepository.countMainIndex());
 
 		// TODO(gof) : deduplicate (darty.com / darty.com-CSV)
 		model.addObject("partners",  datasourceConfigService.datasourceConfigs().size());
