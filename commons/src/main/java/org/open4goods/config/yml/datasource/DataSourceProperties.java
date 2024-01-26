@@ -157,9 +157,9 @@ public class DataSourceProperties {
 	private Integer ratingMin;
 
 	/**
-	 * The condition of the item
+	 * The default condition of the item
 	 */
-	private ProductCondition defaultItemCondition;
+	private ProductCondition defaultItemCondition = ProductCondition.NEW;
 
 	/**
 	 * The date format

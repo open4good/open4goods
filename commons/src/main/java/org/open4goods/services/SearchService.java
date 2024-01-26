@@ -74,7 +74,7 @@ public class SearchService {
 
 
 		// Logging
-		statsLogger.info("Searching {}",initialQuery);
+		statsLogger.info("global search : {}",initialQuery);
 
 		Criteria c = null;
 		if (StringUtils.isNumeric(query)) {
@@ -130,7 +130,7 @@ public class SearchService {
 	public VerticalSearchResponse verticalSearch(VerticalConfig vertical, VerticalSearchRequest request) {
 
 		// Logging
-		statsLogger.info("Searching {}",request);
+		statsLogger.info("Searching in vertical {}",vertical.getId());
 
 		VerticalSearchResponse vsr = new VerticalSearchResponse();
 
