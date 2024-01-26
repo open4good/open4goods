@@ -1,5 +1,5 @@
 <form method="POST" action="/nudge">
-	<div class="row">
+	<div th:if="${product.bestPrice()}" class="row">
 		<div class="col-8">
 			<h3 class="h4 title">Compensation écologique</h3>
 		</div>
@@ -76,7 +76,7 @@
 			
 			
 			
-	<input type="hidden" id="token" name="token" th:value="${product.bestPrice().affiliationToken}">			
-	<input type ="submit" style="width:100%" value="Nudger" formtarget="_blank" class="btn btn-tertiary">
+	<input  th:if="${product.bestPrice()}" type="hidden" id="token" name="token" th:value="${product.bestPrice().affiliationToken}">			
+	<input th:if="${product.bestPrice()}" type ="submit" style="width:100%" value="Nudger" formtarget="_blank" class="btn btn-tertiary">
 
 </form>
