@@ -215,7 +215,14 @@ public class ProductRepository {
 	public void index(Collection<Product> data) {
 
 		logger.info("Queuing {} products", data.size());
-		queue.addAll(data);
+		
+		data.forEach(e -> {
+			
+			if (!queue.offer(e)) {
+				logger.error("!!!! Cannot enqueue product {}",e);
+			}
+			
+		});
 		
 
 	}
