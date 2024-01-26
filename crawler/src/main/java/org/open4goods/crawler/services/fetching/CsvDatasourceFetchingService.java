@@ -1,9 +1,15 @@
 package org.open4goods.crawler.services.fetching;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.stream.Collectors;
 
 import org.open4goods.config.yml.datasource.DataSourceProperties;
 import org.open4goods.crawler.config.yml.FetcherProperties;
@@ -14,6 +20,8 @@ import org.open4goods.crawler.services.IndexationService;
 import org.open4goods.model.crawlers.FetchingJobStats;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 
 import jakarta.annotation.PreDestroy;
 
@@ -51,9 +59,9 @@ public class CsvDatasourceFetchingService extends DatasourceFetchingService {
 	private BlockingQueue<DataSourceProperties> queue = null;
 
 	// The chars used in CSV after libreoffice sanitisation
-	private static final char SANITISED_COLUMN_SEPARATOR = ';';
-	private static final char SANITIZED_ESCAPE_CHAR = '"';
-	private static final char SANITIZED_QUOTE_CHAR = '"';
+//	private static final char SANITISED_COLUMN_SEPARATOR = ';';
+//	private static final char SANITIZED_ESCAPE_CHAR = '"';
+//	private static final char SANITIZED_QUOTE_CHAR = '"';
 	
 	/**
 	 * Constructor
@@ -119,6 +127,107 @@ public class CsvDatasourceFetchingService extends DatasourceFetchingService {
 	}
 
 
+	/**
+	 * CSV Schema autodetection
+	 * @param f
+	 * @return
+	 * @throws IOException 
+	 */
+	public CsvSchema detectSchema (File f) throws IOException {
+		
+		logger.info("Autodetecting CSV schema for file {}",f.getAbsolutePath());
+		// TODO : Numer of lines from conf
+		 List<String> lines = Files.lines(f.toPath()).limit(1000).collect(Collectors.toList());
+	
+
+		 // The potential columns separators
+		 Map<String,Long> columnsSeparatorsCandidates = new HashMap<>();
+		 // TODO from conf
+		 columnsSeparatorsCandidates.put(";", 0L);
+		 columnsSeparatorsCandidates.put(",", 0L);
+		 columnsSeparatorsCandidates.put("|", 0L);
+		 columnsSeparatorsCandidates.put("\t", 0L);
+		 
+
+		 Map<String,Long> quoteCharsCandidates = new HashMap<>();
+		 // TODO from conf
+		 quoteCharsCandidates.put("\"", 0L);
+		 quoteCharsCandidates.put("'", 0L);
+		 quoteCharsCandidates.put("`", 0L);
+		 
+		 
+		 Map<String,Long> escapeCharsCandidates = new HashMap<>();
+		 // TODO from conf		 
+		 escapeCharsCandidates.put("\\", 0L);
+		 
+		 
+		 // Counting the number of lines containing the separator
+		for (String line : lines) {
+			for (String separator : columnsSeparatorsCandidates.keySet()) {
+				if (line.contains(separator)) {
+					columnsSeparatorsCandidates.put(separator, columnsSeparatorsCandidates.get(separator) + 1);
+				}
+			}
+
+			for (String quote : quoteCharsCandidates.keySet()) {
+				if (line.contains(quote)) {
+					quoteCharsCandidates.put(quote, quoteCharsCandidates.get(quote) + 1);
+				}
+			}
+
+			for (String escape : escapeCharsCandidates.keySet()) {
+				if (line.contains(escape)) {
+					escapeCharsCandidates.put(escape, escapeCharsCandidates.get(escape) + 1);
+				}
+			}
+		}
+		
+		
+		// Electing the most frequent separator
+		
+		String columnSeparator = columnsSeparatorsCandidates.entrySet().stream().max((e1,e2) -> e1.getValue().compareTo(e2.getValue())).get().getKey();
+		String quoteChar = quoteCharsCandidates.entrySet().stream().max((e1,e2) -> e1.getValue().compareTo(e2.getValue())).get().getKey();
+		String escapeChar = null ; // escapeCharsCandidates.entrySet().stream().max((e1,e2) -> e1.getValue().compareTo(e2.getValue())).get().getKey();
+		
+		
+		// Evicting to unset the use of separator if not a minimum of occurences
+		
+		if (columnsSeparatorsCandidates.get(columnSeparator) < 10) {
+			columnSeparator = null;
+		}
+		
+		if (quoteCharsCandidates.get(quoteChar) < 10) {
+			quoteChar = null;
+		}
+		
+		
+		// Special handling escape char if no quote separator
+		if (quoteChar == null && null != escapeChar) {
+			escapeChar = null;
+			// TODO : test
+		}
+		
+		CsvSchema.Builder builder = CsvSchema.builder();
+		
+		if (columnSeparator != null) {
+			builder.setColumnSeparator(columnSeparator.charAt(0));
+		}
+	
+		if (quoteChar != null) {
+			builder.setQuoteChar(quoteChar.charAt(0));
+		}
+		
+		
+		logger.warn("Autodetected CSV schema for file {} : separator {}, quote {}, escape {}",f.getAbsolutePath(),columnSeparator,quoteChar,escapeChar);
+		// All catalogs use header
+		builder.setUseHeader(true);
+		
+		return builder.build();
+	}
+	
+	
+	
+	
 
 	/**
 	 * Stopping jobs on application exit

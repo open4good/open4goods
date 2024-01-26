@@ -34,7 +34,7 @@ public class CsvDataSourceProperties {
 	/**
 	 * csvSeparator
 	 */
-	private char csvSeparator = ';';
+	private char csvSeparator;
 
 	/**
 	 * csvQuoteChar
@@ -45,7 +45,7 @@ public class CsvDataSourceProperties {
 	/**
 	 * csvQuoteChar
 	 */
-	private Character csvEscapeChar='"';
+	private Character csvEscapeChar;
 
 	/**
 	 * Encoding of the CSV file

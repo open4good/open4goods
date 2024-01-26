@@ -19,10 +19,7 @@ public class FeedConfiguration {
     
     private CsvDataSourceProperties defaultCsvProperties;
     
-    
-//    private FilterConfig filterEqual;
-    private String defaultCsvSeparator;
-    private String defaultCsvQuoteDelimiter;
+   
 	public String getCatalogUrl() {
 		return catalogUrl;
 	}
@@ -53,18 +50,7 @@ public class FeedConfiguration {
 	public void setDatasourceLanguageAttribute(String datasourceLanguageAttribute) {
 		this.datasourceLanguageAttribute = datasourceLanguageAttribute;
 	}
-	public String getDefaultCsvSeparator() {
-		return defaultCsvSeparator;
-	}
-	public void setDefaultCsvSeparator(String defaultCsvSeparator) {
-		this.defaultCsvSeparator = defaultCsvSeparator;
-	}
-	public String getDefaultCsvQuoteDelimiter() {
-		return defaultCsvQuoteDelimiter;
-	}
-	public void setDefaultCsvQuoteDelimiter(String defaultCsvQuoteDelimiter) {
-		this.defaultCsvQuoteDelimiter = defaultCsvQuoteDelimiter;
-	}
+
 	public Map<String, String> getFilterAttributes() {
 		return filterAttributes;
 	}
