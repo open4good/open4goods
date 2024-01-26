@@ -13,7 +13,7 @@ import org.open4goods.config.yml.datasource.RatingConfig;
 import org.open4goods.crawler.services.fetching.DataFragmentWebCrawler;
 import org.open4goods.exceptions.ValidationException;
 import org.open4goods.helper.InStockParser;
-import org.open4goods.helper.ProductStateParser;
+import org.open4goods.helper.ProductConditionParser;
 import org.open4goods.helper.ShippingCostParser;
 import org.open4goods.helper.ShippingTimeParser;
 import org.open4goods.helper.WarrantyParser;
@@ -155,7 +155,7 @@ public class XpathExtractor extends Extractor {
 		////////////////////
 		try {
 			if (!StringUtils.isEmpty(c.getProductState())) {
-				p.setProductState(ProductStateParser.parse(evalAndLogs(document, c.getProductState(), url)));
+				p.setProductState(ProductConditionParser.parse(evalAndLogs(document, c.getProductState(), url)));
 			}
 		} catch (final Exception e) {
 			parserLogger.warn("Error while parsing ProductCondition : {}  ; {}", e.getMessage(), url);

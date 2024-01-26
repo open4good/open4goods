@@ -28,7 +28,7 @@ import org.open4goods.exceptions.ValidationException;
 import org.open4goods.helper.GenericFileLogger;
 import org.open4goods.helper.IdHelper;
 import org.open4goods.helper.InStockParser;
-import org.open4goods.helper.ProductStateParser;
+import org.open4goods.helper.ProductConditionParser;
 import org.open4goods.helper.ShippingCostParser;
 import org.open4goods.helper.ShippingTimeParser;
 import org.open4goods.model.constants.InStock;
@@ -647,7 +647,7 @@ public class CsvIndexationWorker implements Runnable {
 			for (String productState : csvProperties.getProductState()) {
 	
 					try {
-						ProductCondition state = ProductStateParser.parse(getFromCsvRow(item, productState));						
+						ProductCondition state = ProductConditionParser.parse(getFromCsvRow(item, productState));						
 						if (null != state) {
 							p.setProductState(state);
 							break;
