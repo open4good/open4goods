@@ -342,7 +342,7 @@ public class CsvIndexationWorker implements Runnable {
 				stats.setFail(true);
 				e.printStackTrace();
 			} 
-			dedicatedLogger.warn("CSV IMPORT TERMINATED : {} ({} imported, {} validations failed, {} excluded, {} errors {}) -  {} ", dsConfName,  okItems, validationFailedItems, excludedItems, errorItems, url);
+			dedicatedLogger.warn("Done : {} (imported:{}, errors:{}, validations failed:{}, excluded:{}) -  {} ", dsConfName,  okItems, errorItems, validationFailedItems, excludedItems, url);
 
 			// Saving stats 
 			stats.terminate();					
