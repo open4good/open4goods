@@ -27,13 +27,10 @@ public abstract class DatasourceFetchingService {
 
 	protected @Autowired Environment env;
 
-	protected Logger dedicatedLogger;
-
 
 	private IndexationRepository indexationRepository;
 
 	public DatasourceFetchingService (final String logsFolder, boolean toConsole, IndexationRepository indexationRepository) {
-		dedicatedLogger = GenericFileLogger.initLogger("stats-datasource", Level.INFO, logsFolder, toConsole);
 		this.indexationRepository = indexationRepository;
 	}
 
@@ -68,7 +65,7 @@ public abstract class DatasourceFetchingService {
 	public void finished(final FetchingJobStats fetchingJobStats, final DataSourceProperties dataSourceProperties) {
 
 		// Logging the number of indexed and number
-		dedicatedLogger.info("Datasource fetching of {} is terminated",dataSourceProperties.getName());
+		logger.info("Datasource fetching of {} is terminated",dataSourceProperties.getName());
 
 
 //		// Triggering an alert if indexed threshold not respected
