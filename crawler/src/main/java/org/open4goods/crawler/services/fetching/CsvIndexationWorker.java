@@ -169,25 +169,6 @@ public class CsvIndexationWorker implements Runnable {
 
 		final CsvDataSourceProperties config = dsProperties.getCsvDatasource();
 		
-		/////////////////////////////
-		// Csv Shema definition
-		////////////////////////////
-		
-//		CsvSchema schema = CsvSchema.emptySchema()
-//					.withHeader()
-//					.withColumnSeparator(config.getCsvSeparator())						
-//					;
-//
-//		 if (null != config.getCsvQuoteChar()) {
-//			 schema = schema.withQuoteChar(config.getCsvQuoteChar().charValue());
-//		 } else {
-//			 schema = schema.withoutQuoteChar();
-//		 }
-//		 
-//		 if (null != config.getCsvEscapeChar()) {
-//			 schema = schema.withEscapeChar(config.getCsvEscapeChar());
-//		 }
-		
 
 		
 		
@@ -282,10 +263,21 @@ public class CsvIndexationWorker implements Runnable {
 				}
 				
 				
-				// Row number counting
+				// CSV Schema auto detection
+				
 				dedicatedLogger.info("Detecting schema for {} ", destFile.getAbsolutePath());
 				CsvSchema schema  = csvService.detectSchema(destFile);
+				// Overiding with custom				
+				 if (null != config.getCsvQuoteChar()) {
+					 schema = schema.withQuoteChar(config.getCsvQuoteChar().charValue());
+				 } 				 
+				 if (null != config.getCsvEscapeChar()) {
+					 schema = schema.withEscapeChar(config.getCsvEscapeChar());
+				 }
+				
 
+				
+				
 				final ObjectReader oReader = csvMapper.readerFor(Map.class).with(schema);
 				
 
