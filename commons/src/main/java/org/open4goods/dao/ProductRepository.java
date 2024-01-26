@@ -7,6 +7,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -181,7 +182,7 @@ public class ProductRepository {
 		logger.info("Queuing single product : {}", p.gtin());
 
 		try {
-			queue.put(p);
+			queue.offer(p, 300, TimeUnit.SECONDS);
 		} catch (InterruptedException e) {
 			logger.error("Cannot enqueue product {}",p,e);			
 		}
@@ -218,8 +219,12 @@ public class ProductRepository {
 		
 		data.forEach(e -> {
 			
-			if (!queue.offer(e)) {
-				logger.error("!!!! Cannot enqueue product {}",e);
+			try {
+				if (!queue.offer(e, 300, TimeUnit.SECONDS)) {
+					logger.error("!!!! Cannot enqueue product {}",e);
+				}
+			} catch (InterruptedException e1) {
+				logger.error("!!!! exception, cannot enqueue product {}",e);
 			}
 			
 		});
@@ -318,7 +323,7 @@ public class ProductRepository {
 		
 		// Getting the one we don't have in redis from elastic 		
 		Set<String> missingIds = ids.stream().filter(e -> !ret.containsKey(e)).collect(Collectors.toSet());
-		logger.warn("Got {} products from redis, looking for the {} missing in elastic. Queue size is : {}",ret.size(), missingIds.size(),queue.size());
+		logger.warn("redis hits : {}, missing : {}, queue size : {}",ret.size(), missingIds.size(),queue.size());
 		
 		
 		if (missingIds.size() != 0) {
