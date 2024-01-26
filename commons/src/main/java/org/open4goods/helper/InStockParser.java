@@ -32,7 +32,7 @@ public class InStockParser {
 
         return switch (val) {
             case "1", "TRUE", "INSTOCK","IN_STOCK", "AVAILABLE", "EN STOCK", "HTTP://SCHEMA.ORG/INSTOCK", "IN STOCK", "HTTPS://SCHEMA.ORG/INSTOCK" -> InStock.INSTOCK;
-            case "0", "FALSE", "OUT OF STOCK","OUTOFSTOCK", "HTTP://SCHEMA.ORG/OUTOFSTOCK", "HTTP://SCHEMA.ORG/PREORDER", "HTTP://SCHEMA.ORG/DISCONTINUED" ->
+            case "0", "FALSE", "NON DISPONIBLE","OUT OF STOCK","OUTOFSTOCK", "HTTP://SCHEMA.ORG/OUTOFSTOCK", "HTTP://SCHEMA.ORG/PREORDER", "HTTP://SCHEMA.ORG/DISCONTINUED" ->
                     InStock.OUTOFSTOCK;
             case "UNKNOWN" -> InStock.UNKNOWN;
             default -> {

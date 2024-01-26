@@ -29,7 +29,7 @@ public class WarrantyParser {
 			return 6;
 		case "1 an", "12 months":
 			return 12;
-		case "2 ans":
+		case "2 ans","gartie 2":
 			return 24;
 		case "3 ans":
 			return 36;
