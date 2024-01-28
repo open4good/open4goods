@@ -24,9 +24,10 @@ import org.open4goods.services.SerialisationService;
 import org.open4goods.services.StandardiserService;
 import org.open4goods.services.VerticalsConfigService;
 import org.open4goods.services.XwikiService;
-import org.open4goods.services.ai.AiService;
 import org.open4goods.services.ai.AiAgent;
+import org.open4goods.services.ai.AiService;
 import org.open4goods.ui.config.yml.UiConfig;
+import org.open4goods.ui.services.BlogService;
 import org.open4goods.ui.services.GtinService;
 import org.open4goods.ui.services.ImageService;
 import org.open4goods.ui.services.OpenDataService;
@@ -80,6 +81,12 @@ public class AppConfig {
 		    // Add some specific configuration here. Key serializers, etc.
 		    return template;
 	  }
+	  
+	  
+	  @Bean
+		public BlogService blogService(@Autowired XwikiService xwikiService, @Autowired UiConfig config) {
+			return new BlogService(xwikiService, config.getBlogConfig(), config.getNamings().getBaseUrls());
+		}
 	  
 	@Bean
 	ImageService imageService(@Autowired ImageMagickService imageMagickService, @Autowired ResourceService resourceService) {
