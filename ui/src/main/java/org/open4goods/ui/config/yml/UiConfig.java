@@ -6,6 +6,7 @@ import java.util.Locale;
 import java.util.Map;
 
 import org.open4goods.config.BrandConfiguration;
+import org.open4goods.config.yml.BlogConfiguration;
 import org.open4goods.config.yml.XwikiConfiguration;
 import org.open4goods.config.yml.ui.ApiConfig;
 import org.open4goods.config.yml.ui.OpenSearchConfig;
@@ -98,9 +99,10 @@ public class UiConfig {
 	/**
 	 * The Xwiki instance configuration
 	 */
-	private XwikiConfiguration wikiConfig;
+	private XwikiConfiguration wikiConfig = new XwikiConfiguration();
 
 
+	private BlogConfiguration blogConfig = new BlogConfiguration();
 	
 	public String getThymeLeafTemplateFolder() {
 		return resourceTemplateFolder + "templates"+File.separator;
@@ -281,6 +283,16 @@ public class UiConfig {
 
 	public void setBrandConfig(BrandConfiguration brandConfig) {
 		this.brandConfig = brandConfig;
+	}
+
+
+	public BlogConfiguration getBlogConfig() {
+		return blogConfig;
+	}
+
+
+	public void setBlogConfig(BlogConfiguration blogConfig) {
+		this.blogConfig = blogConfig;
 	}
 
 

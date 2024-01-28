@@ -4,6 +4,7 @@ server:
     mime-types: text/html,text/xml,text/plain,text/css,text/javascript,application/javascript,application/json
     min-response-size: 1024
   undertow:
+    
     worker-threads: 1000
   http2:
     enabled: true
@@ -25,6 +26,17 @@ pages:
   "template-contenu": "pages/template-contenu.html"
   "template-image": "pages/template-image.html"
 
+blogConfig:
+   feedTitle:
+      default: "The Nudger blog"
+      fr: "Le blog Nudger"
+   feedDescription:
+      default: "The Nudger blog, the best way to keep up with the latest news about eco-nudging"
+      fr: "Le blog Nudger, la meilleure façon de suivre les dernières actualités sur l'éco-nudging"
+      
+  
+  
+  
 
 brandConfig:
 

@@ -13,6 +13,8 @@ public class XwikiConfiguration {
 
 	private static final String XWIKI_GROUPES_URL = "bin/view/Main/listeGroupes/";
 
+	private static final String XWIKI_REST_PATH = "rest/wikis/xwiki/spaces/";
+
 
 	private String user ;
 	private String password ;
@@ -32,6 +34,10 @@ public class XwikiConfiguration {
 		return baseUrl +"/"+ XWIKI_VIEW_PATH;
 	}
 
+	public String restPath() {
+		return baseUrl +"/"+ XWIKI_REST_PATH;
+	}
+	
 	/**
 	 * Return the edit url for a vertical (space) and a page
 	 * @param vertical

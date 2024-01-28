@@ -272,7 +272,7 @@ public class DataFragmentWebCrawler extends WebCrawler {
 
 			final HtmlParseData parseData = (HtmlParseData) page.getParseData();
 
-			final Document doc = DocumentHelper.getDocument(parseData.getHtml());
+			final Document doc = DocumentHelper.cleanAndGetDocument(parseData.getHtml());
 
 			///////////////////////////
 			// Delegating data parsing
@@ -522,7 +522,7 @@ public class DataFragmentWebCrawler extends WebCrawler {
 				} else {
 					// Classical crawler4j one
 					final HtmlParseData parseData = (HtmlParseData) page.getParseData();
-					doc = DocumentHelper.getDocument(parseData.getHtml());
+					doc = DocumentHelper.cleanAndGetDocument(parseData.getHtml());
 					ret = processExtraction(existing, page, doc, extractorz,crawlController);
 					completionService.complete(ret,datasourceConfigName, datasourceProperties, dedicatedLogger);
 				}

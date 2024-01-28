@@ -1,6 +1,7 @@
 package org.open4goods.ui.controllers.ui;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Locale;
 
 import org.apache.commons.lang3.StringUtils;
@@ -8,6 +9,7 @@ import org.open4goods.config.yml.ui.VerticalConfig;
 import org.open4goods.exceptions.InvalidParameterException;
 import org.open4goods.exceptions.TechnicalException;
 import org.open4goods.model.constants.RolesConstants;
+import org.open4goods.model.dto.WikiAttachment;
 import org.open4goods.model.dto.WikiResult;
 import org.open4goods.services.VerticalsConfigService;
 import org.open4goods.services.XwikiService;
@@ -109,7 +111,32 @@ public class XwikiController extends AbstractUiController {
 	}
 
 
+	@GetMapping("/attachments/{space}/{page}/{filename}")
+	
+	// TODO : Caching
+	public void xwiki(@PathVariable(name = "space") String space, @PathVariable(name = "page") String page,
+            @PathVariable(name = "filename") String filename, final HttpServletRequest request,
+            HttpServletResponse response) throws IOException, TechnicalException, InvalidParameterException {
 
+        // TODO : Twweak for verticalsLanguagesByUrl
+
+        String url = xwikiService.getAttachmentUrl(space, page, filename);
+        
+        // TODO : ugly, should fetch the meta (mime type is availlable in xwiki service), but does not work for the blog image, special class and not appears in attachments list
+		if (url.endsWith(".pdf")) {
+			response.setContentType("application/pdf");
+		} else if (url.endsWith(".jpg") || url.endsWith(".jpeg")) {
+			response.setContentType("image/jpeg");
+		} else if (url.endsWith(".png")) {
+			response.setContentType("image/png");
+		} else if (url.endsWith(".gif")) {
+			response.setContentType("image/gif");
+		}
+        
+        response.getOutputStream().write(xwikiService.downloadAttachment(url));
+                
+	}
+			
 
 	@GetMapping("/{vertical:[a-z-]+}/{page:[a-z-]+}")
 	public ModelAndView xwiki(@PathVariable(name = "vertical") String vertical,
