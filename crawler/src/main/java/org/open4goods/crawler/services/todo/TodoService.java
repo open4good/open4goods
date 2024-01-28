@@ -181,7 +181,7 @@ public class TodoService {
 	 * @throws XPathExpressionException
 	 */
 	public List<Todo> getTodos(File taglistFile) throws Exception, IOException, XPathExpressionException {
-		Document doc = DocumentHelper.getDocument(FileUtils.readFileToString(taglistFile, StandardCharsets.UTF_8));
+		Document doc = DocumentHelper.cleanAndGetDocument(FileUtils.readFileToString(taglistFile, StandardCharsets.UTF_8));
 
 		
 		// Getting todos from taglist.txt

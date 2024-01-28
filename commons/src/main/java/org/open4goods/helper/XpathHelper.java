@@ -1,6 +1,8 @@
 package org.open4goods.helper;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.xml.xpath.XPath;
@@ -54,5 +56,34 @@ public class XpathHelper {
 
 	}
 
+	/**
+	 * PErforms a simple XPATH evaluation upon a W3C document
+	 *
+	 * @param document
+	 * @param expression
+	 * @return
+	 * @throws XPathExpressionException
+	 */
+	public static List<String> xpathMultipleEval(final Node document,  String expression)
+			throws XPathExpressionException, ResourceNotFoundException {
 
+		
+		List<String> ret = new ArrayList<>();
+		XPathExpression expr = xpathCache.get(expression);
+		if (null == expr) {
+			expr = xpath.compile(expression);
+			xpathCache.put(expression, expr);
+		}
+
+		final NodeList nl = (NodeList) expr.evaluate(document, XPathConstants.NODESET);
+		// Benchmarker.log("Xpath eval done", b,3);
+	
+		
+		for (int i = 0; i < nl.getLength(); i++) {
+			ret.add(nl.item(i).getTextContent());
+		}
+		
+		return ret;
+
+	}
 }

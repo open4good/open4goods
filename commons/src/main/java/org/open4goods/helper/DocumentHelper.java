@@ -4,12 +4,16 @@
 
 package org.open4goods.helper;
 
+import java.io.IOException;
+import java.io.StringReader;
 import java.io.StringWriter;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
@@ -30,6 +34,8 @@ import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
 
 /**
  * @author gof
@@ -39,7 +45,9 @@ public class DocumentHelper {
 	private static final Logger logger = LoggerFactory.getLogger(DocumentHelper.class);
 
 
-
+	static DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+    static DocumentBuilder builder;
+	   
 	// create an instance of HtmlCleaner
 	private static  HtmlCleaner htmlCleaner;
 
@@ -68,6 +76,8 @@ public class DocumentHelper {
 
 			TransformerFactory tf = TransformerFactory.newInstance();
 			transformer = tf.newTransformer();
+			
+			builder =  factory.newDocumentBuilder();
 		} catch (Exception e) {
 			logger.error("Cannot instanciate xpath factory",e);
 		}
@@ -93,14 +103,28 @@ public class DocumentHelper {
 	}
 
 	/**
-	 * Get a clean (using htmlCleaner) W3C document from an URL.
+	 * Get a clean (using htmlCleaner) W3C document from an string content.
+	 *
+	 * @param string
+	 * @return
+	 * @throws java.text.ParseException
+	 */
+	public static Document cleanAndGetDocument(final String string) throws Exception {
+		return domSerializer.createDOM(htmlCleaner.clean(string));
+
+	}
+	
+	/**
+	 * Get a  W3C document from a string content.
 	 *
 	 * @param string
 	 * @return
 	 * @throws java.text.ParseException
 	 */
 	public static Document getDocument(final String string) throws Exception {
-		return domSerializer.createDOM(htmlCleaner.clean(string));
+		    InputSource is = new InputSource(new StringReader(string));
+		   return  builder.parse(is);
+		    
 
 	}
 
