@@ -2,6 +2,7 @@ package org.open4goods.services;
 
 
 import java.io.File;
+import java.io.StringReader;
 import java.net.URI;
 import java.net.URLDecoder;
 import java.nio.charset.Charset;
@@ -44,6 +45,13 @@ import org.springframework.web.client.ResponseExtractor;
 import org.springframework.web.client.RestTemplate;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
+import org.xwiki.component.embed.EmbeddableComponentManager;
+import org.xwiki.component.manager.ComponentLookupException;
+import org.xwiki.rendering.converter.ConversionException;
+import org.xwiki.rendering.converter.Converter;
+import org.xwiki.rendering.renderer.printer.DefaultWikiPrinter;
+import org.xwiki.rendering.renderer.printer.WikiPrinter;
+import org.xwiki.rendering.syntax.Syntax;
 
 /**
  * This service handles XWiki content bridges :
@@ -711,22 +719,22 @@ public class XwikiService {
 	
 	
 //	
-//    public String renderXWiki20SyntaxAsXHTML(String contentXwiki21) throws ConversionException, ComponentLookupException
-//    {
-//        // Initialize Rendering components and allow getting instances
-//        EmbeddableComponentManager cm = new EmbeddableComponentManager();
-//        cm.initialize(this.getClass().getClassLoader());
-//
-//        // Use the Converter component to convert between one syntax to another.
-//        Converter converter = cm.getInstance(Converter.class);
-//
-//        // Convert input in XWiki Syntax 2.1 into XHTML. The result is stored in the printer.
-//        WikiPrinter printer = new DefaultWikiPrinter();
-//        converter.convert(new StringReader(contentXwiki21), Syntax.XWIKI_2_1, Syntax.XHTML_1_0, printer);
-//
-//        return printer.toString();
-//       
-//    }
+    public String renderXWiki20SyntaxAsXHTML(String contentXwiki21) throws ComponentLookupException, ConversionException
+    {
+        // Initialize Rendering components and allow getting instances
+        EmbeddableComponentManager cm = new EmbeddableComponentManager();
+        cm.initialize(this.getClass().getClassLoader());
+
+        // Use the Converter component to convert between one syntax to another.
+        Converter converter = cm.getInstance(Converter.class);
+
+        // Convert input in XWiki Syntax 2.1 into XHTML. The result is stored in the printer.
+        WikiPrinter printer = new DefaultWikiPrinter();
+        converter.convert(new StringReader(contentXwiki21), Syntax.XWIKI_2_1, Syntax.XHTML_1_0, printer);
+
+        return printer.toString();
+       
+    }
 //
 //	
 	

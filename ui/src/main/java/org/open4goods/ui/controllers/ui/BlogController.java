@@ -70,7 +70,7 @@ public class BlogController extends AbstractUiController {
 	@GetMapping(value="/blog/rss",  produces = "application/xml")
 	public void rss(HttpServletResponse response, HttpServletRequest request ) throws FeedException, IOException {
 
-		response.setContentType("application/xml");
+		response.setContentType("application/rss+xml");
 		response.setCharacterEncoding("UTF-8");
 		response.setHeader("Cache-Control", "no-cache");
 		response.setHeader("Pragma", "no-cache");
