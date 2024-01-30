@@ -36,17 +36,17 @@
 						<div
 							class="col-10 signin-inner my-4 my-lg-0 bg-white shadow-soft border rounded border-gray-300 p-4 p-lg-5 ">
 							<div class="text-center text-md-center mb-4 mt-md-0">
-								<h1 class="mb-0 h3"><span><img class="mt-2" width="75" src="/icons/bug.png"></span> Déclarer un bug ! </h1>
+								<h1 class="mb-0 h3"><span><img class="mt-2" width="75" src="/icons/idea.jpg"></span> J'ai une idée ! </h1>
 							</div>
 							
 							<div class="mt-3 mb-4 text-center">
-								<span class="fw-normal">Cette déclaration d'incident sera <a target="_blank" href="https://github.com/open4good/open4goods/issues">disponible publiquement sur github</a>. Vous pourrez y suivre la prise en charge. </span>
+								<span class="fw-normal">Merci de nous faire part de votre idée d'évolution, elle sera <a target="_blank" href="https://github.com/open4good/open4goods/issues">disponible publiquement sur github</a>. Vous pourrez y suivre la prise en charge. </span>
 							</div>
 							
 							<form action="/feedback" method="post" class="mt-4">
 								
 							<div class="mb-4">
-									<label for="name">Url du problème</label>
+									<label for="name">Url (facultative)</label>
 									<div class="input-group">
 										<span class="input-group-text" id="basic-addon3"><span
 											class="fas fa-link"></span></span> 
@@ -74,11 +74,11 @@
 	
 
 								<div class="mb-4">
-									<label for="name">Titre du problème</label>
+									<label for="name">Titre de l'idée</label>
 									<div class="input-group">
 										<span class="input-group-text" id="basic-addon3"><span
 											class="fas fa-header"></span></span> <input type="text"
-											class="form-control" placeholder="Problème en quelques mots"
+											class="form-control" placeholder="Idée en quelques mots"
 											id="title" name="title" required="required" >
 									</div>
 								</div>
@@ -87,7 +87,7 @@
 								<div class="mb-4">
 									<label for="message">Détails</label>
 									<textarea  class="form-control"
-										id="message" name="message" rows="4" required="required" placeholder="N'hésitez pas à donner le maximum de détails, plus la demande est précise plus elle a de chance d'être résolue !"></textarea>
+										id="message" name="message" rows="4" required="required" placeholder="N'hésitez pas à donner le maximum de détails, plus la demande est précise plus elle a de chance d'être prise en compte !"></textarea>
 								</div>
 
 
@@ -103,8 +103,8 @@
 
 								
 								<div class="d-grid">
-									<input type="hidden" name="type" value="bug">
-									<button type="submit" class="btn btn-primary">Déclarer l'incident</button>
+									<input type="hidden" name="type" value="idea">
+									<button type="submit" class="btn btn-primary">Envoyer mon idée</button>
 								</div>
 							</form>
 							
