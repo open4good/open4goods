@@ -69,13 +69,13 @@ public class BlablaService {
 				+ ((null == data || null == data.getId()) ? 0L : Long.valueOf(data.getId().hashCode()));
 		final BlaBlaSecGenerator seqGen = new BlaBlaSecGenerator(hash.hashCode());
 
-		logger.info("generating blabla {}:{} >> {}", seqGen.getSequenceCount(), seqGen.hashCode(), xmlBlabla);
+		logger.debug("generating blabla {}:{} >> {}", seqGen.getSequenceCount(), seqGen.hashCode(), xmlBlabla);
 
 		//////////////////////////////////
 		// Fast or
 		/////////////////////////////////
 
-		logger.info("generating fastor {}:{} >> {}", seqGen.getSequenceCount(), seqGen.hashCode(), xmlBlabla);
+		logger.debug("generating fastor {}:{} >> {}", seqGen.getSequenceCount(), seqGen.hashCode(), xmlBlabla);
 		xmlBlabla = fastOr(xmlBlabla, seqGen);
 
 	
