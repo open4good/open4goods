@@ -13,6 +13,7 @@ import org.open4goods.model.product.Product;
 import org.open4goods.services.BrandService;
 import org.open4goods.services.DataSourceConfigService;
 import org.open4goods.services.EvaluationService;
+import org.open4goods.services.FeedbackService;
 import org.open4goods.services.GoogleTaxonomyService;
 import org.open4goods.services.ImageMagickService;
 import org.open4goods.services.MailService;
@@ -64,6 +65,8 @@ public class AppConfig {
 	public static final int CACHE_PERIOD_SECONDS = 3600*24*7;
 	private final UiConfig config;
 
+	
+	
 	public AppConfig(UiConfig config) {
 		this.config = config;
 	}
@@ -87,6 +90,12 @@ public class AppConfig {
 		public BlogService blogService(@Autowired XwikiService xwikiService, @Autowired UiConfig config) {
 			return new BlogService(xwikiService, config.getBlogConfig(), config.getNamings().getBaseUrls());
 		}
+	  
+	  
+	@Bean
+	FeedbackService feedbackService(@Autowired UiConfig config) {
+		return new FeedbackService(config.getFeedbackConfig());
+	}
 	  
 	@Bean
 	ImageService imageService(@Autowired ImageMagickService imageMagickService, @Autowired ResourceService resourceService) {
