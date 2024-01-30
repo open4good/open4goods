@@ -40,7 +40,7 @@
 		<dependency>
 			<groupId>org.xwiki.rendering</groupId>
 			<artifactId>xwiki-rendering-api</artifactId>
-		    <version>16.0.0-rc-1</version>
+		    <version>16.0.0</version>
 		</dependency>
 
 		<dependency>
