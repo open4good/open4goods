@@ -78,7 +78,12 @@ public class DataSourceConfigService {
 		// Initialising cache if necessary
 		datasourceConfigs();
 
-		File f = cachingService.getResource(datasourcesByConfigName.get(datasourceName).getFavico() );
+		DataSourceProperties dataSourceProperties = datasourcesByConfigName.get(datasourceName);
+		
+		if (null == dataSourceProperties) {
+			throw new InvalidParameterException("Datasource " + datasourceName + " not found");
+		}
+		File f = cachingService.getResource(dataSourceProperties.getFavico() );
 		return IOUtils.toBufferedInputStream(new FileInputStream(f));
 	}
 

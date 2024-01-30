@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html th:lang="${siteLocale.language}">
+
+<head>
+
+	<!--/* Metas and CSS */-->
+	<th:block th:insert="~{inc/header-meta.html}"></th:block>
+    
+
+	
+	<style>
+	tbody, td, tfoot, th, thead, tr {
+    	 border-style: none;
+	}	
+	
+	</style>
+	
+</head>
+
+<body>
+ 	<!--/* Navbar */-->
+	<th:block th:with="page = 'feedback >> Bug'" th:insert="~{inc/navbar/navbar-page.html}"></th:block>
+ 
+    <!--/* Loader */-->
+    <th:block th:insert="~{inc/preloader.html}"></th:block>
+	
+    <main>	
+  		<section
+			class="min-vh-100 d-flex align-items-center section-image overlay-soft-dark"
+			data-background="../../assets/img/pages/form-image.jpg"
+			style="background: url(&quot;../../assets/img/pages/form-image.jpg&quot;);">
+			<div class="container">
+				<div class="row justify-content-center">
+					<div
+						class="col-12 d-flex align-items-center justify-content-center">
+						<div
+							class="alert alert-danger col-10 signin-inner my-4 my-lg-0 bg-white shadow-soft border rounded border-gray-300 p-4 p-lg-5 ">
+							<div class="text-center text-md-center mb-4 mt-md-0">
+								<h1 class="mb-0 h3"> Une erreur a été rencontrée, votre feedback n'a pu être envoyé. </h1>
+							</div>
+							
+							<div class="mt-3 mb-4 text-center">
+								<span class="fw-normal" th:text="${msg}"></span>
+							</div>
+							
+							
+							
+						</div>
+					</div>
+				</div>
+			</div>
+		</section>
+
+
+
+	</main>
+
+	<!--/* Footer */-->
+	<th:block th:insert="~{inc/footer.html}"></th:block>	
+
+<!-- Core -->
+<script src="/webjars/bootstrap/js/bootstrap.min.js"></script>
+<script src="../../vendor/headroom.js/dist/headroom.min.js"></script>
+
+<!-- Vendor JS -->
+
+<script src="../../vendor/smooth-scroll/dist/smooth-scroll.polyfills.min.js"></script>
+<script src="../../vendor/vivus/dist/vivus.min.js"></script>
+<script src="/webjars/jquery/jquery.min.js"></script>
+
+<script type="text/javascript" language="javascript" src="/webjars/datatables/js/jquery.dataTables.min.js"></script>
+<script type="text/javascript" language="javascript" src="/webjars/datatables/js/dataTables.bootstrap5.min.js"></script>
+
+<script src="../../vendor/nouislider/distribute/nouislider.min.js"></script>
+
+<!-- pixel JS -->
+<script src="../../assets/js/pixel.js"></script>
+
+<!-- custom sources -->
+<script src="../../assets/js/pixel-custom.js"></script>
+
+<script src="/webjars/mustache/mustache.min.js"></script>
+
+<!-- Ajax loaded table template -->
+<div id="tpl_place" class="hidden"></div>
+
+</body>
+
+</html>

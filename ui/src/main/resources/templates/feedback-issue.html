@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html th:lang="${siteLocale.language}">
+
+<head>
+
+	<!--/* Metas and CSS */-->
+	<th:block th:insert="~{inc/header-meta.html}"></th:block>
+    
+
+	
+	<style>
+	tbody, td, tfoot, th, thead, tr {
+    	 border-style: none;
+	}	
+	
+	</style>
+	
+</head>
+
+<body>
+ 	<!--/* Navbar */-->
+	<th:block th:with="page = 'feedback >> Bug'" th:insert="~{inc/navbar/navbar-page.html}"></th:block>
+ 
+    <!--/* Loader */-->
+    <th:block th:insert="~{inc/preloader.html}"></th:block>
+	
+    <main>	
+  		<section
+			class="min-vh-100 d-flex align-items-center section-image overlay-soft-dark"
+			data-background="../../assets/img/pages/form-image.jpg"
+			style="background: url(&quot;../../assets/img/pages/form-image.jpg&quot;);">
+			<div class="container">
+				<div class="row justify-content-center">
+					<div
+						class="col-12 d-flex align-items-center justify-content-center">
+						<div
+							class="col-10 signin-inner my-4 my-lg-0 bg-white shadow-soft border rounded border-gray-300 p-4 p-lg-5 ">
+							<div class="text-center text-md-center mb-4 mt-md-0">
+								<h1 class="mb-0 h3"><span><img class="mt-2" width="75" src="/icons/bug.png"></span> Déclarer un bug ! </h1>
+							</div>
+							
+							<div class="mt-3 mb-4 text-center">
+								<span class="fw-normal">Cette déclaration d'incident sera <a target="_blank" href="https://github.com/open4good/open4goods/issues">disponible publiquement sur github</a>. Vous pourrez y suivre la prise en charge. </span>
+							</div>
+							
+							<form action="/feedback" method="post" class="mt-4">
+								
+							<div class="mb-4">
+									<label for="name">Url du problème</label>
+									<div class="input-group">
+										<span class="input-group-text" id="basic-addon3"><span
+											class="fas fa-link"></span></span> 
+											
+											<input type="text"
+											class="form-control" disabled="disabled"
+											 th:value="${urlSource}" >
+											
+											<input type="hidden"
+											id="url" name="url" th:value="${urlSource}" >
+											
+									</div>
+								</div>
+																
+								<div class="mb-4">
+									<label for="name">Votre pseudo</label>
+									<div class="input-group">
+										<span class="input-group-text" id="basic-addon3"><span
+											class="fas fa-user-circle"></span></span> <input type="text"
+											class="form-control" placeholder="e.g. LouloueDu29"
+											id="author" name="author" value="NudgerAnonyme" >
+									</div>
+								</div>
+
+	
+
+								<div class="mb-4">
+									<label for="name">Titre du problème</label>
+									<div class="input-group">
+										<span class="input-group-text" id="basic-addon3"><span
+											class="fas fa-header"></span></span> <input type="text"
+											class="form-control" placeholder="Problème en quelques mots"
+											id="title" name="title" required="required" >
+									</div>
+								</div>
+								
+
+								<div class="mb-4">
+									<label for="message">Détails</label>
+									<textarea  class="form-control"
+										id="message" name="message" rows="4" required="required" placeholder="N'hésitez pas à donner le maximum de détails, plus la demande est précise plus elle a de chance d'être résolue !"></textarea>
+								</div>
+
+
+								<div class="mb-4">
+									<label for="name">Combien de "air" dans "nudger" ?</label>
+									<div class="input-group">
+										<span class="input-group-text" id="basic-addon3"><span
+											class="fas fa-user-question"></span></span> <input type="text"
+											class="form-control" placeholder="?"
+											id="captcha" name="captcha" >
+									</div>
+								</div>
+
+								
+								<div class="d-grid">
+									<input type="hidden" name="type" value="bug">
+									<button type="submit" class="btn btn-primary">Déclarer l'incident</button>
+								</div>
+							</form>
+							
+						</div>
+					</div>
+				</div>
+			</div>
+		</section>
+
+
+
+	</main>
+
+	<!--/* Footer */-->
+	<th:block th:insert="~{inc/footer.html}"></th:block>	
+
+<!-- Core -->
+<script src="/webjars/bootstrap/js/bootstrap.min.js"></script>
+<script src="../../vendor/headroom.js/dist/headroom.min.js"></script>
+
+<!-- Vendor JS -->
+
+<script src="../../vendor/smooth-scroll/dist/smooth-scroll.polyfills.min.js"></script>
+<script src="../../vendor/vivus/dist/vivus.min.js"></script>
+<script src="/webjars/jquery/jquery.min.js"></script>
+
+<script type="text/javascript" language="javascript" src="/webjars/datatables/js/jquery.dataTables.min.js"></script>
+<script type="text/javascript" language="javascript" src="/webjars/datatables/js/dataTables.bootstrap5.min.js"></script>
+
+<script src="../../vendor/nouislider/distribute/nouislider.min.js"></script>
+
+<!-- pixel JS -->
+<script src="../../assets/js/pixel.js"></script>
+
+<!-- custom sources -->
+<script src="../../assets/js/pixel-custom.js"></script>
+
+<script src="/webjars/mustache/mustache.min.js"></script>
+
+<!-- Ajax loaded table template -->
+<div id="tpl_place" class="hidden"></div>
+
+</body>
+
+</html>
