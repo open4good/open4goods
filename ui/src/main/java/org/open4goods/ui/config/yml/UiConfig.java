@@ -7,6 +7,7 @@ import java.util.Map;
 
 import org.open4goods.config.BrandConfiguration;
 import org.open4goods.config.yml.BlogConfiguration;
+import org.open4goods.config.yml.FeedbackConfiguration;
 import org.open4goods.config.yml.XwikiConfiguration;
 import org.open4goods.config.yml.ui.ApiConfig;
 import org.open4goods.config.yml.ui.OpenSearchConfig;
@@ -103,6 +104,9 @@ public class UiConfig {
 
 
 	private BlogConfiguration blogConfig = new BlogConfiguration();
+	
+	private FeedbackConfiguration feedbackConfig = new FeedbackConfiguration();
+	
 	
 	public String getThymeLeafTemplateFolder() {
 		return resourceTemplateFolder + "templates"+File.separator;
@@ -293,6 +297,16 @@ public class UiConfig {
 
 	public void setBlogConfig(BlogConfiguration blogConfig) {
 		this.blogConfig = blogConfig;
+	}
+
+
+	public FeedbackConfiguration getFeedbackConfig() {
+		return feedbackConfig;
+	}
+
+
+	public void setFeedbackConfig(FeedbackConfiguration feedbackConfig) {
+		this.feedbackConfig = feedbackConfig;
 	}
 
 
