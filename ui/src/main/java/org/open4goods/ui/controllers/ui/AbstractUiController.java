@@ -32,7 +32,7 @@ public class AbstractUiController {
 	private static final Logger LOGGER = LoggerFactory.getLogger(AbstractUiController.class);
 
 	private @Autowired Environment env;
-	private @Autowired UiConfig config;
+	protected @Autowired UiConfig config;
 	private @Autowired XwikiService xwikiService;
 
 	
