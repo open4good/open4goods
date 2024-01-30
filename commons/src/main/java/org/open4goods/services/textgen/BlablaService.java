@@ -21,18 +21,9 @@ public class BlablaService {
 
 	private final EvaluationService evaluationService;
 
-	private  SAXParser saxParser;
 
 	public BlablaService(final EvaluationService evaluationService) {
 		super();
-
-		SAXParserFactory factory = SAXParserFactory.newInstance();
-		try {
-
-			saxParser = factory.newSAXParser();
-		} catch (Exception e) {
-			logger.error("Unable to initialize SAX parser", e);
-		}
 		this.evaluationService = evaluationService;
 
 	}
