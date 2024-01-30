@@ -5,6 +5,14 @@
 	<artifactId>crawler</artifactId>
 	<name>crawler</name>
 
+	<repositories>
+		<repository>
+		    <id>in-project</id>
+		    <name>In Project Repo</name>
+		    <url>file://${project.basedir}/libs</url>
+		</repository>
+	</repositories>
+
 	<parent>
 		<groupId>org.open4goods</groupId>
 		<artifactId>org.open4goods</artifactId>
@@ -16,7 +24,12 @@
 		<main.basedir>${basedir}/../..</main.basedir>
 	</properties>
 
-	<dependencies>
+	<dependencies> 
+		<dependency>  
+		    <groupId>com.amazon.paapi5</groupId>
+		    <artifactId>paapi5-java-sdk</artifactId>
+		    <version>1.1.0</version>
+		</dependency> 
 
 		<dependency>
 			<groupId>org.open4goods</groupId>
@@ -76,8 +89,9 @@
         </dependency>
 
 
-    </dependencies>
 
+
+    </dependencies>
 
 
 
