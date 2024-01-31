@@ -182,6 +182,7 @@ public class ProductRepository {
 		logger.info("Queuing single product : {}", p.gtin());
 
 		try {
+			//TODO : timeout from conf
 			queue.offer(p, 300, TimeUnit.SECONDS);
 		} catch (InterruptedException e) {
 			logger.error("Cannot enqueue product {}",p,e);			
