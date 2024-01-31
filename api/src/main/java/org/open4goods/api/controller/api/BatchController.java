@@ -87,7 +87,7 @@ public class BatchController {
 
 	
 	@GetMapping("/batch/verticals")
-	@Operation(summary="Update all verticlas (sanitisation + launch the scheduled batch that score all verticals)")
+	@Operation(summary="Update all verticals (sanitisation + launch the scheduled batch that score all verticals)")
 	public void scoreVerticals() throws InvalidParameterException, IOException, InterruptedException {
 		batchService.scoreAll();
 		Thread.sleep(5000);
