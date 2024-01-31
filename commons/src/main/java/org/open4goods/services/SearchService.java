@@ -153,12 +153,14 @@ public class SearchService {
 
 
 		// Adding custom numeric filters
-		for (NumericRangeFilter filter : request.getNumericFilters()) {
 
-			// TODO : WTF ?
-			criterias.and(new Criteria(filter.getKey()).lessThanEqual(filter.getMaxValue()) );
-			criterias.and(new Criteria(filter.getKey()).greaterThanEqual(Math.ceil(filter.getMinValue())));
-		}
+		// TODO : Not working, buggy when no ecoscore
+		//		for (NumericRangeFilter filter : request.getNumericFilters()) {
+//
+//			// TODO : WTF ?
+//			criterias.and(new Criteria(filter.getKey()).lessThanEqual(filter.getMaxValue()) );
+//			criterias.and(new Criteria(filter.getKey()).greaterThanEqual(Math.ceil(filter.getMinValue())));
+//		}
 
 		// Adding custom checkbox filters
 		for (Entry<String, Set<String>> filter : request.getTermsFilter().entrySet()) {
