@@ -42,7 +42,7 @@ public class EcoScoreAggregationService extends AbstractScoreAggregationService 
 			// Saving in product
 			data.getScores().put(s.getName(),s);
 		} catch (ValidationException e) {
-			dedicatedLogger.warn("Brand to score fail for {}",data,e);
+			dedicatedLogger.warn("Brand to score fail for {} : {}",data,e.getMessage());
 		}								
 		
 	}
