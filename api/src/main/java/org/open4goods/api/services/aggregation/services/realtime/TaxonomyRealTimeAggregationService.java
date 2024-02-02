@@ -48,6 +48,7 @@ public class TaxonomyRealTimeAggregationService extends AbstractAggregationServi
 		////////////////////////////
 		// Setting vertical from category
 		////////////////////////////
+		data.setVertical(null);
 		VerticalConfig vertical = verticalService.getVerticalForCategories(data.getDatasourceCategories());
 		if (null != vertical) {
 			if ( null != data.getVertical() && !vertical.getId().equals(data.getVertical())) {
@@ -68,20 +69,23 @@ public class TaxonomyRealTimeAggregationService extends AbstractAggregationServi
 		// Setting google taxonomy
 		////////////////////////////
 		data.setGoogleTaxonomyId(null);
-		if (null != vertical &&  null != vertical.getTaxonomyId()) {
-			data.setGoogleTaxonomyId(vertical.getTaxonomyId());
-		} else {
-			if (data.getDatasourceCategories().size() != 0) {
-				Integer taxonomy =   googleTaxonomy(data);
-				if (null != taxonomy) {			
-					data.setGoogleTaxonomyId(taxonomy);
-					dedicatedLogger.info("No taxonomy found for categories : {}", data.getDatasourceCategories());
-					
-				} else {
-					dedicatedLogger.info("No taxonomy found for categories : {}", data.getDatasourceCategories());
-				}
-			}
-		}		
+		
+		// TODO : Disabling google taxonomy for now
+		
+		//		if (null != vertical &&  null != vertical.getTaxonomyId()) {
+//			data.setGoogleTaxonomyId(vertical.getTaxonomyId());
+//		} else {
+//			if (data.getDatasourceCategories().size() != 0) {
+//				Integer taxonomy =   googleTaxonomy(data);
+//				if (null != taxonomy) {			
+//					data.setGoogleTaxonomyId(taxonomy);
+//					dedicatedLogger.info("No taxonomy found for categories : {}", data.getDatasourceCategories());
+//					
+//				} else {
+//					dedicatedLogger.info("No taxonomy found for categories : {}", data.getDatasourceCategories());
+//				}
+//			}
+//		}		
 	}
 	
 	
