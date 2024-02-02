@@ -195,10 +195,13 @@ public class AttributesConfig {
 	}
 
 	private void singletonHashAttrs() {
+		
 		// Caching if needed
 		if (null == hashedAttributesByKey) {
 			hashedAttributesByKey = new HashMap<>();
-
+			if (null == configs) {
+				return;
+			}
 			for (final AttributeConfig a : configs) {
 				hashedAttributesByKey.put(a.getKey(), a);
 
