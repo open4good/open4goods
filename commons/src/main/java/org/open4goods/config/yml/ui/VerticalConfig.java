@@ -221,7 +221,10 @@ public class VerticalConfig{
 	 * @return the specific attributes config for this vertical
 	 */
 	public List<AttributeConfig> verticalFilters() {
-
+		if (null == verticalFilters) {
+			return new ArrayList<>();
+		}
+		
 		return verticalFilters.stream()
 				
 				.map(e -> getAttributesConfig().getAttributeConfigByKey(e))
