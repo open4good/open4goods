@@ -52,7 +52,7 @@ public class AmazonServiceTest {
         client.setRegion("us-east-1");
 
         DefaultApi api = new DefaultApi(client);
-
+ 
         // Request initialization
         /*
          * Choose resources you want from GetItemsResource enum For more
