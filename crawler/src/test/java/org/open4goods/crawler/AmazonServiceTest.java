@@ -39,9 +39,6 @@ public class AmazonServiceTest {
 
         // Add your credentials
         // Please add your access key here
-        client.setAccessKey("AKIAIUXDVYSIB4UH56DA");
-        // Please add your secret key here
-        client.setSecretKey("RFW0GXf3Fky/BxsPmDfUzuK8ghYyAlIzOKcPzh/G");
 
         // Enter your partner tag (store/tracking id)
         String partnerTag = "nudger-21";
