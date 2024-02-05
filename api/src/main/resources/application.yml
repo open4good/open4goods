@@ -27,6 +27,20 @@ spring:
     virtual:
       enabled: true
             
+            
+# Configuration for the langchain chat model            
+langchain4j:
+  open-ai:
+    chat-model:
+      api-key: YOUR API KEY
+      model-name: gpt-4
+      temperature: 0.0
+      timeout: PT60S
+      log-requests: false
+      log-responses: false
+      
+      
+                  
 management:
   health:
     diskspace:
