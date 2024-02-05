@@ -39,12 +39,9 @@ public class AmazonServiceTest {
 
         // Add your credentials
         // Please add your access key here
-        client.setAccessKey("<YOUR-ACCESS-KEY-HERE>");
-        // Please add your secret key here
-        client.setSecretKey("<YOUR-SECRET-KEY-HERE>");
 
         // Enter your partner tag (store/tracking id)
-        String partnerTag = "<YOUR-PARTNER-TAG-HERE>";
+        String partnerTag = "nudger-21";
 
         /*
          * PAAPI Host and Region to which you want to send request. For more
@@ -55,7 +52,7 @@ public class AmazonServiceTest {
         client.setRegion("us-east-1");
 
         DefaultApi api = new DefaultApi(client);
-
+ 
         // Request initialization
         /*
          * Choose resources you want from GetItemsResource enum For more
@@ -75,8 +72,8 @@ public class AmazonServiceTest {
         // Choose item id(s)
         List<String> itemIds = new ArrayList<String>();
         itemIds.add("059035342X");
-        itemIds.add("B00X4WHP55");
-        itemIds.add("1401263119");
+//        itemIds.add("B00X4WHP55");
+//        itemIds.add("1401263119");
 
         // Forming the request
         GetItemsRequest getItemsRequest = new GetItemsRequest().itemIds(itemIds).partnerTag(partnerTag)
