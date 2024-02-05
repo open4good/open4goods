@@ -1,4 +1,4 @@
-# Salut Tiff
+# Open4goods project  
 
 [![Build and test](https://github.com/open4good/open4goods/actions/workflows/buildDeploy.yml/badge.svg?branch=main)](https://github.com/open4good/open4goods/actions/workflows/buildDeploy.yml)
 
