@@ -28,7 +28,20 @@ langchain4j:
       log-requests: false
       log-responses: false
       
-      
+reversements:
+  - date: 2021-11-01
+    amount: 72
+    orgName: "Greenpeace"
+    orgImg: "/assets/img/greenpeace_logo.png"
+    comment: "Sur le prototype comparatif-tv.fr, avant une longue pause !"
+    
+  - date: 2022-02-01
+    amount: "71.5"
+    orgName: "Fondation Good Planet"
+    orgImg: "/assets/img/goodplanet_logo.svg"
+    comment: "Sur le prototype comparatif-tv.fr"
+    
+          
 # A mapping beetween custom page names and page templates
 pages:
   "comparateur-prix": "pages/comparateur-prix.html"
