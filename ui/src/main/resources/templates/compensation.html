@@ -8,7 +8,7 @@
     
 	<!-- Primary Meta Tags -->
 	<title>La compensation environnementale | Nudger</title>
-	<meta name="description" content="Nudger vous révèle ce qu'est la compensation environnementale et vous donne toutes les astuces pour la comprendre !">
+	<meta name="description" content="Compenseaion écologique et environnementale gratuite pour vous | Nudger">
 		
 	<!-- Open Graph / Facebook -->
 	<meta property="og:type" content="website">
@@ -86,7 +86,7 @@
                                 <span class="fas fa-user"></span>
                             </div>
                             <h3 class="h5">Organismes</h3>
-                            <span class="counter display-3 text-gray d-block">2</span>
+                            <span class="counter display-3 text-gray d-block" th:text="${config.getDistingReversementsOrganisation()}"></span>
                         </div>
                         <!-- End of Visit Box -->
                     </div>
@@ -108,7 +108,7 @@
                                 <span class="fas fa-euro-sign"></span>
                             </div>
                             <h3 class="h5">Montant reversé</h3>
-                            <span class="display-3 text-gray d-block">143.5€</span>
+                            <span><span class="display-3 text-gray d-block" th:text="${config.getTotalReversements()}"></span>€</span>
                         </div>
                         <!-- End of Email Box -->
                     </div>
@@ -131,31 +131,18 @@
 
                 
                 <div class="card bg-white border-gray-300 ">
-	                            <div class="border-bottom px-4 py-5">
+	                            <div th:each="item : ${config.reversements}" class="border-bottom px-4 py-5">
 	                                <div class="row align-items-center text-center">
 	                                    <div class="col-12 col-md-3 pb-3 pb-md-0">
-	                                        <img src="/assets/img/greenpeace_logo.png" alt="Greenpeace">
+	                                        <img th:src="${item.orgImg}" th:alt="${item.orgName}">
 	                                    </div>
 	                                    <div class="col-md-5 pb-2 pb-md-0">
-	                                        <h3 class="h5 mb-3">72€</h3>
-	                                        <p class="mb-0">Greenpeace</p>
+	                                        <h3 class="h5 mb-3"><span th:text="${item.amount}"></span> €</h3>
+	                                        <p class="mb-0" th:text="${item.orgName}"></p>
 	                                    </div>
-	                                    <div class="col-md-4 text-md-right"><span class="badge bg-primary">Novembre 2021</span></div>
+	                                    <div class="col-md-4 text-md-right"><span class="badge bg-primary" th:text="${item.date}" th:title="${item.comment}"></span></div>
 	                                </div>
 	                            </div>
-	                            <div class="border-bottom px-4 py-5">
-	                                <div class="row align-items-center text-center">
-	                                    <div class="col-12 col-md-3 pb-3 pb-md-0">
-	                                        <img src="/assets/img/goodplanet_logo.svg" alt="Fondation Goodplanet">
-	                                    </div>
-	                                    <div class="col-md-5 pb-2 pb-md-0">
-	                                        <h3 class="h5 mb-3">71,5€</h3>
-	                                        <p class="mb-0">Fondation GoodPlanet</p>
-	                                    </div>
-	                                    <div class="col-md-4 text-md-right"><span class="badge bg-primary">Novembre 2021</span></div>
-	                                </div>
-	                            </div>
-	                            
 	            </div>
             </div>
         </section>
@@ -177,7 +164,7 @@
                 <div class="row d-flex flex-wrap align-items-center justify-content-around">
 
                     <div class="col-">
-                        <h2 class="h1 mb-5">Pourquoi effectuer un acte de compensation carbone ?</h2>
+                        <h2 class="h1 mb-5">Quelle différence avec la compensation carbone ?</h2>
 						<div>
                         <th:block th:with="path='compensation-3'">
 							<th:block th:insert="inc/wiki.html"></th:block>
@@ -191,8 +178,7 @@
 							<th:block th:insert="inc/wiki.html"></th:block>
 						</th:block>   
 							</div>
-                    </div>
-					<button class="btn btn-secondary animate-up-2" type="button"><a href="https://nudger.fr/">Je nudge mes achats</button>
+                    </div>				
             </div>
         </section>
         
@@ -200,45 +186,7 @@
         
         
         
-        <section class="section">
-        
-        
-        
-			<div class="container container-semi-fluid">
-                <div class="col-12 col-lg-12">
-                    <div class="row justify-content-center ">
-                        <div class="col-12 col-md-12">
-                            <div class="row mt-5 mt-lg-0 px-3">
-                                <!-- Icon Boxes -->
-                                <div id="compensation-carbone" class="card shadow border-gray-300">
-                                    <div class="card-body p-4 p-lg-5">
-                                        <img src="../../assets/img/pages/design.svg" alt="Web design illustration" class="image-md mb-4">
-                                        <h2  class="h4 mb-2">Compensation environnementale</h2>
-                                        <p>
-											<th:block th:with="path='COMPENSATION/1/'">
-				                        		<th:block th:insert="~{inc/wiki.html}"></th:block>
-				                        	</th:block>                                           
-                                        
-                                        </p>
-                                        <a href="/compensation-carbone" class="float-end btn btn-sm btn-primary">En savoir plus sur la compensation carbone</a>
-                                    </div>
-                                </div>
-                            
-                                
-                                
-                            </div>
-                        </div>
-                        
-                    </div>
-                </div>
-            </div>	          
-        </section>
-        
-        
-        
-        
-        
-        
+      
   
         
     </main>

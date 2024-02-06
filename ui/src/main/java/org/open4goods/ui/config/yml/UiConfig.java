@@ -1,7 +1,9 @@
 package org.open4goods.ui.config.yml;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
@@ -134,8 +136,27 @@ public class UiConfig {
 
 	private BrandConfiguration brandConfig;
 	
+	/**
+	 * The list of reversments (cashback) to ecologgical organisations
+	 */
+	private List<Reversement> reversements = new ArrayList<>();
 	
 	
+	/**
+	 * get the total amount of reversements
+	 * @return
+	 */
+	public Double getTotalReversements() {
+		return reversements.stream().mapToDouble(Reversement::getAmount).sum();
+	}
+	
+	/**
+	 * 	* get the total amount of reversements organisations
+	 * @return
+	 */
+	public int getDistingReversementsOrganisation() {
+		return reversements.stream().map(Reversement::getOrgName).distinct().toArray().length;
+	}
 	/**
 	 * Return the root url for a given sitelocale, with the "default" behavior
 	 *
@@ -307,6 +328,16 @@ public class UiConfig {
 
 	public void setFeedbackConfig(FeedbackConfiguration feedbackConfig) {
 		this.feedbackConfig = feedbackConfig;
+	}
+
+
+	public List<Reversement> getReversements() {
+		return reversements;
+	}
+
+
+	public void setReversements(List<Reversement> reversements) {
+		this.reversements = reversements;
 	}
 
 
