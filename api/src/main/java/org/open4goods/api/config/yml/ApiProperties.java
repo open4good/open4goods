@@ -82,6 +82,13 @@ public class ApiProperties {
 	/**
 	 * The list of crawler api keys to authorize
 	 */
+	private List<String> testKeys = new ArrayList<>();
+
+
+	
+	/**
+	 * The list of crawler api keys to authorize
+	 */
 	@NotBlank
 	private String adminKey;
 
@@ -430,6 +437,18 @@ public class ApiProperties {
 
 	public void setGithubConfig(GithubConfiguration githubConfig) {
 		this.githubConfig = githubConfig;
+	}
+
+
+
+	public List<String> getTestKeys() {
+		return testKeys;
+	}
+
+
+
+	public void setTestKeys(List<String> testKeys) {
+		this.testKeys = testKeys;
 	}
 
 
