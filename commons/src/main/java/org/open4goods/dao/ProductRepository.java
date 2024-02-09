@@ -279,7 +279,15 @@ public class ProductRepository {
 		
 		
 //		Product result = redisRepo.opsForValue().get(productId);
-		Product result = redisRepository.findById(productId).orElseThrow(ResourceNotFoundException::new);
+		Product result;
+		try {
+			result = redisRepository.findById(productId).orElseThrow(ResourceNotFoundException::new);
+		} catch (ResourceNotFoundException e) {
+			throw e;
+		} catch (Exception e) {
+			logger.error("Error getting product {} from redis", productId, e);
+			result = null;
+		}
 
 		if (null == result) {
 			// Fail, getting from elastic
