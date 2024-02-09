@@ -95,7 +95,10 @@ public class WebSecurityConfig {
 					authorities.add(new SimpleGrantedAuthority(RolesConstants.ROLE_CRAWLER));
 				}
 
-
+				// Assignation of the ROLE_CRAWLER
+				if (apiProperties.getTestKeys().contains(accessToken) ) {
+					authorities.add(new SimpleGrantedAuthority(RolesConstants.ROLE_TESTER));
+				}
 			}
 
 			// Populate SecurityContextHolder
