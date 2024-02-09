@@ -1,0 +1,57 @@
+version: '3.3'
+services:
+####################################################################
+# Xwiki
+###################################################################             
+  xwiki:
+    # Use an already built XWiki image from DockerHub.
+    image: "xwiki:stable-mysql-tomcat"
+    container_name: xwiki-mysql-tomcat-web
+    depends_on:
+      - mysql
+    # The DB_USER/DB_PASSWORD/DB_HOST variables are used in the hibernate.cfg.xml file.
+    environment:
+      - DB_USER=xwiki
+      - DB_PASSWORD=xwiki
+      - DB_DATABASE=xwiki
+      - DB_HOST=mysql
+    # Provide a name instead of an auto-generated id for the xwiki permanent directory configured in the Dockerfile,
+    # to make it simpler to identify in 'docker volume ls'.
+    volumes:
+      - /opt/open4goods/xwiki:/usr/local/xwiki
+    networks:
+      - o4g-network
+    ports:
+      - "8080:8080"
+
+####################################################################
+# Mysql
+###################################################################  
+  # The container that runs MySQL
+  mysql:
+    image: "mysql:5.7"
+    container_name: mysql
+    restart: always
+    command: ['mysqld', '--character-set-server=utf8mb4', '--collation-server=utf8mb4_unicode_ci']
+
+    # - We provide a xwiki.cnf file in order to configure the mysql db to support UTF8 and be case-insensitive
+    # We have to do it here since we use an existing image and that's how this image allows customizations.
+    # See https://hub.docker.com/_/mysql/ for more details.
+    # - Provide a name instead of an auto-generated id for the mysql data, to make it simpler to identify in
+    # 'docker volume ls'
+    volumes:
+#      - ./xwiki.cnf:/etc/mysql/conf.d/xwiki.cnf
+      - /opt/open4goods/mysql-data:/var/lib/mysql
+#      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    # Configure the MySQL database and create a user with provided name/password.
+    # See https://hub.docker.com/_/mysql/ for more details.
+    environment:
+      - MYSQL_ROOT_PASSWORD=xwiki
+      - MYSQL_USER=xwiki
+      - MYSQL_PASSWORD=xwiki
+      - MYSQL_DATABASE=xwiki
+                 
+    networks:
+      - o4g-network
+    ports:
+      - "3306"
