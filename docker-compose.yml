@@ -1,0 +1,79 @@
+version: '3.3'
+services:
+####################################################################
+# Elastic Search
+###################################################################
+       
+  elastic:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.11.1
+    container_name: elastic
+    environment:
+      - http.max_content_length=200mb
+      - node.name=elastic
+      - cluster.name=es-docker-cluster
+      - cluster.initial_master_nodes=elastic
+      - bootstrap.memory_lock=true
+      - "ES_JAVA_OPTS=-Xms256m -Xmx256m"
+      - xpack.security.enabled=false
+      
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1    
+      nproc: 65536
+      nofile:
+        soft: 65536
+        hard: 65536
+
+#    volumes:
+#      - /tmp/elastic-data:/usr/share/elasticsearch/data
+
+    ports:
+      - "9200:9200"
+    networks:
+      - o4g-network
+
+####################################################################
+# Redis
+###################################################################
+       
+  redis:
+    image: bitnami/redis:latest
+    container_name: redis
+    command: ["redis-server", "--stop-writes-on-bgsave-error","no","--protected-mode","no", "--appendonly", "no", "--maxmemory", "20mb", "--maxmemory-policy", "allkeys-lru"]
+    ports:
+      - 6379:6379        
+    environment:
+      - ALLOW_EMPTY_PASSWORD=yes
+ 
+    networks:
+      - o4g-network
+      
+      
+
+####################################################################
+# Kibana
+###################################################################
+
+  kibana:
+    image: docker.elastic.co/kibana/kibana:8.11.1
+    container_name: kibana
+    depends_on: 
+      - elastic
+    ports:
+      - "5601:5601"
+    environment:
+      ELASTICSEARCH_URL: http://elastic:9200
+      ELASTICSEARCH_HOSTS: http://elastic:9200
+
+    networks:
+      - o4g-network
+
+    
+volumes:
+  elastic-data:
+    driver: local
+
+networks:
+  o4g-network:
+    driver: bridge
