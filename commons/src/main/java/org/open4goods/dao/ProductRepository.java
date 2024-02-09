@@ -273,7 +273,7 @@ public class ProductRepository {
 	@Cacheable(cacheNames = CacheConstants.ONE_MINUTE_LOCAL_CACHE_NAME)
 	public Product getById(final String productId) throws ResourceNotFoundException {
 
-		logger.info("Getting product {}", productId);
+		logger.info("Getting product  {}", productId);
 		// Getting from redis
 		
 		
