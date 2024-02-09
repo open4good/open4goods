@@ -8,7 +8,4 @@
 /open4goods/
 /open4goods-data/
 /.factorypath
-/hs_err_pid16974.log
-/hs_err_pid17282.log
-/hs_err_pid17829.log
-/hs_err_pid18216.log
+/hs_err_*
