@@ -32,9 +32,8 @@ public class FeedbackService {
 		try {
 			this.github = new GitHubBuilder().withOAuthToken(feedbackConfiguration.getGithubConfig().getAccessToken()).build()
 					.getRepository(feedbackConfiguration.getGithubConfig().getOrganization() +  "/" + feedbackConfiguration.getGithubConfig().getRepo());
-		} catch (IOException e) {
-			logger.error("Error while setuping github access",e);
-			
+		} catch (Exception e) {
+			logger.error("Error while setuping github access : " + e.getMessage());			
 		}
 	}
 
