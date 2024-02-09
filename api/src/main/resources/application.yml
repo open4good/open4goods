@@ -6,6 +6,7 @@ server:
   http2:
     enabled: true
   forward-headers-strategy: NATIVE
+
     
 ########################
 # Logging configuration
@@ -19,6 +20,10 @@ logging:
 aggregationLogLevel: warn
    
 spring:
+  servlet:
+    multipart:
+      max-file-size: -1
+      max-request-size: -1
   jackson:
     default-property-inclusion: non-empty
   application:

@@ -257,7 +257,7 @@
 						<div class="icon icon-shape icon-shape-secondary me-2 me-md-0 mb-2">
 							<span class="fas fa-box-open"></span>
 						</div>
-						<span class="counter display-3 text-secondary d-block" data-value="150" ></span>
+						<span class="counter display-3 text-secondary d-block" th:data-value="${config.getTotalReversements()}" ></span>
 						<span class="lead">Montant du coup de pouce à date de Nudger pour la planète</span>
 					</div>
 
@@ -374,7 +374,7 @@
 											<th:block th:insert="~{inc/wiki.html}"></th:block>
 										</th:block>   
 									</p>
-									<a href="/donnees-personnelles" class="btn btn-primary btn-sm">En savoir plus sur l'évaluation environnementale</a>
+									<a href="/ecoscore" class="btn btn-primary btn-sm">En savoir plus sur l'évaluation environnementale</a>
 								</div>
 							</div>
 							<div class="col-md-4">
