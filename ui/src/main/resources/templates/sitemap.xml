@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset
+      xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9
+            http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd">
+<!-- created with Free Online Sitemap Generator www.xml-sitemaps.com -->
+
+
+<url>
+  <loc>https://nudger.fr/</loc>
+  <lastmod>2024-02-09T06:34:19+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+<url>
+  <loc>https://nudger.fr/blog</loc>
+  <lastmod>2024-02-09T06:34:19+00:00</lastmod>
+  <priority>0.80</priority>
+</url>
+<url>
+  <loc>https://nudger.fr/ecoscore</loc>
+  <lastmod>2024-02-09T06:34:19+00:00</lastmod>
+  <priority>0.80</priority>
+</url>
+<url>
+  <loc>https://nudger.fr/compensation-ecologique</loc>
+  <lastmod>2024-02-09T06:34:19+00:00</lastmod>
+  <priority>0.80</priority>
+</url>
+<url>
+  <loc>https://nudger.fr/cafetieres</loc>
+  <lastmod>2024-02-09T06:34:19+00:00</lastmod>
+  <priority>0.80</priority>
+</url>
+<url>
+  <loc>https://nudger.fr/televiseurs</loc>
+  <lastmod>2024-02-09T06:34:19+00:00</lastmod>
+  <priority>0.80</priority>
+</url>
+<url>
+  <loc>https://nudger.fr/partenaires</loc>
+  <lastmod>2024-02-09T06:34:19+00:00</lastmod>
+  <priority>0.80</priority>
+</url>
+<url>
+  <loc>https://nudger.fr/opendata</loc>
+  <lastmod>2024-02-09T06:34:19+00:00</lastmod>
+  <priority>0.80</priority>
+</url>
+<url>
+  <loc>https://nudger.fr/equipe</loc>
+  <lastmod>2024-02-09T06:34:19+00:00</lastmod>
+  <priority>0.80</priority>
+</url>
+
+
+</urlset>
