@@ -60,7 +60,7 @@ import jakarta.servlet.http.HttpServletResponse;
 @PreAuthorize("hasAuthority('" + RolesConstants.ROLE_TESTER + "')")
 public class CsvEnrichmentController {
 
-	private static final String O4G_ERROR = "o4g-error";
+	private static final String O4G_MSG = "o4g-completion-message";
 	Logger logger = LoggerFactory.getLogger(CsvEnrichmentController.class);
 	
 	private final static ObjectMapper csvMapper = new CsvMapper().configure(JsonGenerator.Feature.AUTO_CLOSE_TARGET, false);
@@ -158,6 +158,7 @@ public class CsvEnrichmentController {
 			// Write the data back
 			SequenceWriter writer = null;
 			while (mi.hasNext()) {
+				Long ts = System.currentTimeMillis();
 				///////////////////////////////////////////////////////
 				// On each line
 				///////////////////////////////////////////////////////
@@ -172,10 +173,11 @@ public class CsvEnrichmentController {
 						sb.addColumn(c);
 					});
 					
+					sb.addColumn(O4G_MSG);
+
 					for (EnrichmentFacet facet : facets) {
 			            sb.addColumn("o4g-facet-"+facet.name().toLowerCase());
 			        }
-					sb.addColumn(O4G_ERROR);
 					
 					outSchema = sb.build();
  					csvOut = csvMapper.writer(outSchema);
@@ -208,15 +210,15 @@ public class CsvEnrichmentController {
 						
 						List<Product> products = repository.getByTitle(title);
 						if (products.size() == 0) {
-							enriched.put(O4G_ERROR, "NO_TITLE_MATCH");	
+							enriched.put(O4G_MSG, "NO_TITLE_MATCH");	
 						} else if (products.size() > 1) {
-							enriched.put(O4G_ERROR, "MULTIPLE_TITLE_MATCH : "+ StringUtils.join( products.stream().map(e->e.gtin()).toArray() , ", "));
+							enriched.put(O4G_MSG, "MULTIPLE_TITLE_MATCH : "+ StringUtils.join( products.stream().map(e->e.gtin()).toArray() , ", "));
 						} else {
 							p = products.get(0);
 						}
 						
 					} else {
-						enriched.put(O4G_ERROR, "NO_GTIN_AND_NO_TITLE_PROVIDED");						
+						enriched.put(O4G_MSG, "NO_GTIN_AND_NO_TITLE_PROVIDED");						
 					}
 					
 				} else {
@@ -232,10 +234,10 @@ public class CsvEnrichmentController {
 						p = repository.getById(gtin);
 					} catch (ResourceNotFoundException e) {
 						logger.info("Product not found in database : " + gtin);
-						enriched.put(O4G_ERROR, "NOT_FOUND_IN_DATABASE");
+						enriched.put(O4G_MSG, "NOT_FOUND_IN_DATABASE");
 					} catch (Exception e) {
 						logger.error("Error while querying product", e);
-						enriched.put(O4G_ERROR, "ERROR-QUERYING-PRODUCT");
+						enriched.put(O4G_MSG, "ERROR-QUERYING-PRODUCT");
 					}
 				}
 					
@@ -243,6 +245,10 @@ public class CsvEnrichmentController {
 				if (null != p) {
 					// To data enrichment
 					enrich(p, enriched, facets);
+				}
+				
+				if (enriched.get(O4G_MSG) == null) {
+					enriched.put(O4G_MSG, "OK, " + (System.currentTimeMillis() - ts) + " ms");
 				}
 				
 				writer.write(enriched);
