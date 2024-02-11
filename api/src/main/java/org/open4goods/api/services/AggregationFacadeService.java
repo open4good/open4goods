@@ -214,7 +214,7 @@ public class AggregationFacadeService {
 		StandardAggregator batchAgg = getFullSanitisationAggregator();
 
 	    batchAgg.onProduct(product);
-	    dataRepository.index(product);
+	    dataRepository.forceIndex(product);
 		logger.info("done : Sanitisation batching for {}", product);		
 	}
 	

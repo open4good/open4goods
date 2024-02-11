@@ -99,7 +99,7 @@ public class AdminController extends AbstractUiController {
 		
 		aiService.complete(data, configService.getConfigByIdOrDefault(data.getVertical()));
 		
-		repository.store(data);
+		repository.forceIndex(data);
 
 	
 		
