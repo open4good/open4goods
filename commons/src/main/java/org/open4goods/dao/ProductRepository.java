@@ -2,6 +2,7 @@ package org.open4goods.dao;
 
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -32,6 +33,7 @@ import org.springframework.data.elasticsearch.core.SearchHits;
 import org.springframework.data.elasticsearch.core.mapping.IndexCoordinates;
 import org.springframework.data.elasticsearch.core.query.Criteria;
 import org.springframework.data.elasticsearch.core.query.CriteriaQuery;
+import org.springframework.data.elasticsearch.core.query.CriteriaQueryBuilder;
 import org.springframework.data.elasticsearch.core.query.Query;
 
 import co.elastic.clients.elasticsearch._types.aggregations.Aggregation;
@@ -63,6 +65,8 @@ public class ProductRepository {
 	 **/
 	// TODO(gof) : from conf
 	public final static long VALID_UNTIL_DURATION = 1000 * 3600 * 24 * 2;
+
+	private static final int MAX_TITLE_ITEMS_TO_FETCH = 5;
 
 	public IndexCoordinates current_index = IndexCoordinates.of(MAIN_INDEX_NAME);
 
@@ -310,6 +314,21 @@ public class ProductRepository {
 
 	/**
 	 * Get multiple data from ids
+	 * @param title
+	 * @return
+	 */
+	public List<Product> getByTitle(String title) {
+		// Setting the query
+		
+		List<String> words = List.of(title.split(" "));		
+		NativeQueryBuilder esQuery = new NativeQueryBuilder().withQuery(new CriteriaQuery(new Criteria("names.offerNames").matchesAll(words) ));
+		SearchHits<Product> results = search(esQuery.withPageable(PageRequest.of(0, MAX_TITLE_ITEMS_TO_FETCH)).build(),ProductRepository.MAIN_INDEX_NAME);
+		return results.stream().map(SearchHit::getContent).collect(Collectors.toList());
+		
+	}
+	
+	/**
+	 * Get multiple data from ids
 	 * @param ids
 	 * @return
 	 * @throws ResourceNotFoundException
@@ -446,4 +465,6 @@ public class ProductRepository {
 	public BlockingQueue<Product> getQueue() {
 		return queue;
 	}
+
+
 }

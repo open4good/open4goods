@@ -7,11 +7,8 @@ import java.io.Reader;
 import java.nio.charset.Charset;
 import java.util.AbstractMap.SimpleEntry;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
 import org.open4goods.api.model.EnrichmentFacet;
@@ -20,8 +17,6 @@ import org.open4goods.exceptions.ResourceNotFoundException;
 import org.open4goods.model.BarcodeType;
 import org.open4goods.model.constants.ProductCondition;
 import org.open4goods.model.constants.RolesConstants;
-import org.open4goods.model.data.Description;
-import org.open4goods.model.product.AggregatedPrice;
 import org.open4goods.model.product.Product;
 import org.open4goods.services.BarcodeValidationService;
 import org.open4goods.services.SerialisationService;
@@ -65,7 +60,6 @@ import jakarta.servlet.http.HttpServletResponse;
 @PreAuthorize("hasAuthority('" + RolesConstants.ROLE_TESTER + "')")
 public class CsvEnrichmentController {
 
-	private static final String O4G_GTIN_TYPE = "o4g-gtin-type";
 	private static final String O4G_ERROR = "o4g-error";
 	Logger logger = LoggerFactory.getLogger(CsvEnrichmentController.class);
 	
@@ -182,7 +176,6 @@ public class CsvEnrichmentController {
 			            sb.addColumn("o4g-facet-"+facet.name().toLowerCase());
 			        }
 					sb.addColumn(O4G_ERROR);
-					sb.addColumn(O4G_GTIN_TYPE);
 					
 					outSchema = sb.build();
  					csvOut = csvMapper.writer(outSchema);
@@ -194,22 +187,47 @@ public class CsvEnrichmentController {
 				}								
 
 				// Set the data that will be returned, add all initial datas
-				Map<String, String> enriched = new HashMap<String, String>();
+				Map<String, Object> enriched = new HashMap<String, Object>();
 				enriched.putAll(line);
 
 				String gtin = line.get(gtinField);
 				String title = line.get(titleField);
 
+
+				Product p = null;
+				
 				// Sanitisation and GTIN information
-				if (null == gtin) {
-					enriched.put(O4G_ERROR, "NO_GTIN_PROVIDED");
+				if (StringUtils.isEmpty(gtin)) {
+					/////////////////////////////
+					// By TITLE query
+					/////////////////////////////
+					
+					if (!StringUtils.isEmpty(title)) {
+						// GTIN resolution
+						logger.info("Product resolution from title : " + title);
+						
+						List<Product> products = repository.getByTitle(title);
+						if (products.size() == 0) {
+							enriched.put(O4G_ERROR, "NO_TITLE_MATCH");	
+						} else if (products.size() > 1) {
+							enriched.put(O4G_ERROR, "MULTIPLE_TITLE_MATCH : "+ StringUtils.join( products.stream().map(e->e.gtin()).toArray() , ", "));
+						} else {
+							p = products.get(0);
+						}
+						
+					} else {
+						enriched.put(O4G_ERROR, "NO_GTIN_AND_NO_TITLE_PROVIDED");						
+					}
+					
 				} else {
+					/////////////////////////////
+					// By EAN query
+					/////////////////////////////
+					
 					SimpleEntry<BarcodeType, String> sanitizedGtin = barcodeService.sanitize(gtin);
-					enriched.put(O4G_GTIN_TYPE, sanitizedGtin.getValue());
 					gtin = sanitizedGtin.getValue();
 
-					// Getting the product
-					Product p = null;
+
 					try {
 						p = repository.getById(gtin);
 					} catch (ResourceNotFoundException e) {
@@ -219,13 +237,14 @@ public class CsvEnrichmentController {
 						logger.error("Error while querying product", e);
 						enriched.put(O4G_ERROR, "ERROR-QUERYING-PRODUCT");
 					}
-					
-					if (null != p) {
-						// To data enrichment
-						enrich(p, enriched, facets);
-					}
 				}
 					
+				// Processing csv line enrichment with product data
+				if (null != p) {
+					// To data enrichment
+					enrich(p, enriched, facets);
+				}
+				
 				writer.write(enriched);
 
 			}
@@ -248,26 +267,23 @@ public class CsvEnrichmentController {
 	 * @param enriched
 	 * @param facets
 	 */
-	private void enrich(Product p, Map<String, String> enriched, List<EnrichmentFacet> facets) {
+	private void enrich(Product p, Map<String, Object> enriched, List<EnrichmentFacet> facets) {
 
 		for (EnrichmentFacet facet : facets) {
 
+//			String f = facet.toString();
 			try {
 				if (null == facet) {
 					continue;
 				}
 
 				String key = "o4g-facet-" + facet.name().toLowerCase();
-
-				Optional<Description> desc;
-				Optional<AggregatedPrice> Price pr;
+				
 				switch (facet) {
-			
+//				// TODO :  Add id's (alternate models, ...)
 				case EnrichmentFacet.BRAND:
 					enriched.put(key, p.brand());
 					break;
-
-					
 					
 				case EnrichmentFacet.MODEL:
 					enriched.put(key, p.model());
@@ -277,73 +293,56 @@ public class CsvEnrichmentController {
 					// TODO : Review / customize the title strategy
 					enriched.put(key, p.bestName());
 					break;
-//				case EnrichmentFacet.DESCRIPTION:
-//					// TODO : I18n
-//					Description d = p.getDescriptions().stream().findFirst().orElse(null);
-//					enriched.put(key, d== null ? "" :  d.getContent().getText());
-//					break;
+
 				case EnrichmentFacet.RAW_ATTRIBUTES:
 					// TODO : I18n
-
 					Map<String, String> raw = p.getAttributes().getUnmapedAttributes().stream().collect(HashMap::new, (m, a) -> m.put(a.getName(), a.getValue()), HashMap::putAll);
 					enriched.put(key, serialisationService.toJson(raw));
 					break;
 					
-					
-//				case EnrichmentFacet.FEATURES:
-//					// TODO : I18n
-//
-//					Set<String> feat = p.getAttributes().getFeatures().stream().collect(HashSet::new,
-//							(s, a) -> s.add(a.getName()), HashSet::addAll);
-//					enriched.put(key, serialisationService.toJson(feat));
-//					break;
-
 				case EnrichmentFacet.CLASSIFIED_ATTRIBUTES:
-					// TODO : I18n
-
+//					// TODO : I18n
 					Map<String, String> attrs = p.getAttributes().getAggregatedAttributes().entrySet().stream()
 							.collect(HashMap::new, (m, a) -> m.put(a.getKey(), a.getValue().getValue()), HashMap::putAll);
 					enriched.put(key, serialisationService.toJson(attrs));
 					break;
-
-					
-//					+  
-//					// TODO :  id's,
 
 				case EnrichmentFacet.GTIN_INFOS:				
 					enriched.put(key, serialisationService.toJson(p.getGtinInfos() ));
 					break;
 					
 				case EnrichmentFacet.DATES:
-					Map<String,String> dates = new HashMap<>();
-					pricesHistory.put("created", p.getCreationDate());
-					pricesHistory.put("updated", p.getLastChange());					
+					Map<String,Long> dates = new HashMap<>();
+					dates.put("created", p.getCreationDate());
+					dates.put("updated", p.getLastChange());					
 					enriched.put(key, serialisationService.toJson(dates ));
 					break;
 					
 				case EnrichmentFacet.GOOGLE_TAXONOMY:
-                    enriched.put(key, p.getGoogleTaxonomy());
+                    enriched.put(key, p.getGoogleTaxonomyId());
                     break;
 				
 				case EnrichmentFacet.PRICE_HISTORY:
 					Map<String,String> pricesHistory = new HashMap<>();
 					pricesHistory.put("new", serialisationService.toJson(p.getPrice().getHistory(ProductCondition.NEW) ) );
-					pricesHistory.put("occasion", serialisationService.toJson(p.getPrice().getHistory(ProductCondition.OCCASION) ) );
-					
+					pricesHistory.put("occasion", serialisationService.toJson(p.getPrice().getHistory(ProductCondition.OCCASION) ) );					
 					enriched.put(key, serialisationService.toJson(pricesHistory ));
-
 					break;
+					
 				case EnrichmentFacet.PRICES:
-					Map<String,String> prices = new HashMap<>();
+					Map<String,Object> prices = new HashMap<>();
 					prices.put("offers",p.getOffersCount()+"");;
 					prices.put("bestPriceNew", p.getPrice().getMinPrice(ProductCondition.NEW) );
 					prices.put("bestPriceOccasion", p.getPrice().getMinPrice(ProductCondition.OCCASION) );
-
 					enriched.put(key, serialisationService.toJson(prices));
 					break;
 					
 				case EnrichmentFacet.IMAGES:
-					enriched.put(key, serialisationService.toJson(p.getResources().stream().map(r -> r.getUrl())) );
+					enriched.put(key, serialisationService.toJson(p.getResources().stream().map(r -> r.getUrl() ).toList()) );
+					break;
+
+				case EnrichmentFacet.CATEGORIES:
+					enriched.put(key, serialisationService.toJson(p.getDatasourceCategories()) );
 					break;
 					
 				default:
