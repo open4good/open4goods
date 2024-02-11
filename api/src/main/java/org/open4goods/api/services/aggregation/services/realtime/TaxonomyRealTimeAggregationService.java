@@ -48,11 +48,12 @@ public class TaxonomyRealTimeAggregationService extends AbstractAggregationServi
 		////////////////////////////
 		// Setting google taxonomy
 		////////////////////////////
+		data.setGoogleTaxonomyId(null);
 		if (data.getDatasourceCategories().size() != 0) {
 			Integer taxonomy =   googleTaxonomy(data);
 			if (null != taxonomy) {			
 				data.setGoogleTaxonomyId(taxonomy);
-				dedicatedLogger.info("No taxonomy found for categories : {}", data.getDatasourceCategories());
+				dedicatedLogger.info("Detected taxonomy {} for categories : {}", taxonomy, data.getDatasourceCategories());
 				
 			} else {
 				dedicatedLogger.info("No taxonomy found for categories : {}", data.getDatasourceCategories());
