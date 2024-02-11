@@ -251,7 +251,7 @@ public class ProductRepository {
 //		});
 	}
 	
-	public void store(Product data) {
+	public void forceIndex(Product data) {
 		logger.info("Indexing  product {}", data.gtin());
 
 //		executor.submit(() -> {
