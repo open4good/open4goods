@@ -180,7 +180,24 @@ public class ProductController extends AbstractUiController {
 				return mv;
 			}
 		} else {
-			if (!path.equals(vertical+ "%2F" + URLEncoder.encode(uiHelper.url(), StandardCharsets.UTF_8))) {
+			if (null == data.getVertical()) {
+				// TODO : I18n path (fr)
+				mv = new ModelAndView(
+						"redirect:/" + uiHelper.url());
+				mv.setStatus(HttpStatus.MOVED_PERMANENTLY);
+				mv.addObject("product", data);
+				return mv;
+			} else
+			
+			if (!vertical.equals(data.getVertical())) {
+				
+				
+				// TODO : I18n path (fr)
+				mv = new ModelAndView("redirect:/"+ verticalConfigService.getPathForVerticalLanguage("fr", verticalConfig)+"/"+uiHelper.url());
+				mv.setStatus(HttpStatus.MOVED_PERMANENTLY);
+				mv.addObject("product", data);
+				return mv;
+			} else if (!path.equals(vertical+ "%2F" + URLEncoder.encode(uiHelper.url(), StandardCharsets.UTF_8))) {
 				mv = new ModelAndView("redirect:/"+ vertical+"/"+uiHelper.url());
 				mv.setStatus(HttpStatus.MOVED_PERMANENTLY);
 				mv.addObject("product", data);
