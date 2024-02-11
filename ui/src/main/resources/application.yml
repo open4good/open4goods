@@ -27,6 +27,14 @@ langchain4j:
       timeout: PT60S
       log-requests: false
       log-responses: false
+
+
+feedbackConfig:      
+  githubConfig:
+    accessToken: GITHUB_ACCESS_TOKEN
+    organization: open4good
+    repo: open4goods       
+
       
 reversements:
   - date: 2021-11-01
