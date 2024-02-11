@@ -18,8 +18,10 @@ import org.open4goods.api.model.EnrichmentFacet;
 import org.open4goods.dao.ProductRepository;
 import org.open4goods.exceptions.ResourceNotFoundException;
 import org.open4goods.model.BarcodeType;
+import org.open4goods.model.constants.ProductCondition;
 import org.open4goods.model.constants.RolesConstants;
 import org.open4goods.model.data.Description;
+import org.open4goods.model.product.AggregatedPrice;
 import org.open4goods.model.product.Product;
 import org.open4goods.services.BarcodeValidationService;
 import org.open4goods.services.SerialisationService;
@@ -167,6 +169,7 @@ public class CsvEnrichmentController {
 				///////////////////////////////////////////////////////
 				line = mi.next();
 
+				logger.info("Processing line : " + line);
 				
 				// First line, init the output schema
 				if (first) {
@@ -257,11 +260,15 @@ public class CsvEnrichmentController {
 				String key = "o4g-facet-" + facet.name().toLowerCase();
 
 				Optional<Description> desc;
+				Optional<AggregatedPrice> Price pr;
 				switch (facet) {
+			
 				case EnrichmentFacet.BRAND:
 					enriched.put(key, p.brand());
 					break;
 
+					
+					
 				case EnrichmentFacet.MODEL:
 					enriched.put(key, p.model());
 					break;
@@ -270,26 +277,26 @@ public class CsvEnrichmentController {
 					// TODO : Review / customize the title strategy
 					enriched.put(key, p.bestName());
 					break;
-				case EnrichmentFacet.DESCRIPTION:
-					// TODO : I18n
-					Description d = p.getDescriptions().stream().findFirst().orElse(null);
-					enriched.put(key, d== null ? "" :  d.getContent().getText());
-					break;
+//				case EnrichmentFacet.DESCRIPTION:
+//					// TODO : I18n
+//					Description d = p.getDescriptions().stream().findFirst().orElse(null);
+//					enriched.put(key, d== null ? "" :  d.getContent().getText());
+//					break;
 				case EnrichmentFacet.RAW_ATTRIBUTES:
 					// TODO : I18n
 
-					Map<String, String> raw = p.getAttributes().getUnmapedAttributes().stream().collect(HashMap::new,
-							(m, a) -> m.put(a.getName(), a.getValue()), HashMap::putAll);
+					Map<String, String> raw = p.getAttributes().getUnmapedAttributes().stream().collect(HashMap::new, (m, a) -> m.put(a.getName(), a.getValue()), HashMap::putAll);
 					enriched.put(key, serialisationService.toJson(raw));
 					break;
-
-				case EnrichmentFacet.FEATURES:
-					// TODO : I18n
-
-					Set<String> feat = p.getAttributes().getFeatures().stream().collect(HashSet::new,
-							(s, a) -> s.add(a.getName()), HashSet::addAll);
-					enriched.put(key, serialisationService.toJson(feat));
-					break;
+					
+					
+//				case EnrichmentFacet.FEATURES:
+//					// TODO : I18n
+//
+//					Set<String> feat = p.getAttributes().getFeatures().stream().collect(HashSet::new,
+//							(s, a) -> s.add(a.getName()), HashSet::addAll);
+//					enriched.put(key, serialisationService.toJson(feat));
+//					break;
 
 				case EnrichmentFacet.CLASSIFIED_ATTRIBUTES:
 					// TODO : I18n
@@ -299,6 +306,46 @@ public class CsvEnrichmentController {
 					enriched.put(key, serialisationService.toJson(attrs));
 					break;
 
+					
+//					+  
+//					// TODO :  id's,
+
+				case EnrichmentFacet.GTIN_INFOS:				
+					enriched.put(key, serialisationService.toJson(p.getGtinInfos() ));
+					break;
+					
+				case EnrichmentFacet.DATES:
+					Map<String,String> dates = new HashMap<>();
+					pricesHistory.put("created", p.getCreationDate());
+					pricesHistory.put("updated", p.getLastChange());					
+					enriched.put(key, serialisationService.toJson(dates ));
+					break;
+					
+				case EnrichmentFacet.GOOGLE_TAXONOMY:
+                    enriched.put(key, p.getGoogleTaxonomy());
+                    break;
+				
+				case EnrichmentFacet.PRICE_HISTORY:
+					Map<String,String> pricesHistory = new HashMap<>();
+					pricesHistory.put("new", serialisationService.toJson(p.getPrice().getHistory(ProductCondition.NEW) ) );
+					pricesHistory.put("occasion", serialisationService.toJson(p.getPrice().getHistory(ProductCondition.OCCASION) ) );
+					
+					enriched.put(key, serialisationService.toJson(pricesHistory ));
+
+					break;
+				case EnrichmentFacet.PRICES:
+					Map<String,String> prices = new HashMap<>();
+					prices.put("offers",p.getOffersCount()+"");;
+					prices.put("bestPriceNew", p.getPrice().getMinPrice(ProductCondition.NEW) );
+					prices.put("bestPriceOccasion", p.getPrice().getMinPrice(ProductCondition.OCCASION) );
+
+					enriched.put(key, serialisationService.toJson(prices));
+					break;
+					
+				case EnrichmentFacet.IMAGES:
+					enriched.put(key, serialisationService.toJson(p.getResources().stream().map(r -> r.getUrl())) );
+					break;
+					
 				default:
 					logger.error("Unknown facet : " + facet);
 					break;

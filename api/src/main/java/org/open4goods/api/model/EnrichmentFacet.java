@@ -2,12 +2,14 @@ package org.open4goods.api.model;
 
 public enum EnrichmentFacet {
 	
-//	IMAGE,
+	IMAGES,
 	TITLE,
-	DESCRIPTION,
-	RAW_ATTRIBUTES,
-	CLASSIFIED_ATTRIBUTES,
-	FEATURES,
 	BRAND, 
-	MODEL
+	MODEL,
+	PRICES,
+//	DESCRIPTION,
+	RAW_ATTRIBUTES,
+	CLASSIFIED_ATTRIBUTES
+//	FEATURES,
+
 }
