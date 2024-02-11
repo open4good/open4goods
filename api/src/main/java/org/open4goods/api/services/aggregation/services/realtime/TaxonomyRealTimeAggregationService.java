@@ -46,6 +46,23 @@ public class TaxonomyRealTimeAggregationService extends AbstractAggregationServi
 	public void onProduct(Product data, VerticalConfig vConf) throws AggregationSkipException {
 		
 		////////////////////////////
+		// Setting google taxonomy
+		////////////////////////////
+		if (data.getDatasourceCategories().size() != 0) {
+			Integer taxonomy =   googleTaxonomy(data);
+			if (null != taxonomy) {			
+				data.setGoogleTaxonomyId(taxonomy);
+				dedicatedLogger.info("No taxonomy found for categories : {}", data.getDatasourceCategories());
+				
+			} else {
+				dedicatedLogger.info("No taxonomy found for categories : {}", data.getDatasourceCategories());
+			}
+		}
+
+		
+		
+		
+		////////////////////////////
 		// Setting vertical from category
 		////////////////////////////
 		data.setVertical(null);
@@ -64,11 +81,6 @@ public class TaxonomyRealTimeAggregationService extends AbstractAggregationServi
 			data.setVertical(null);
 		}
 		
-		
-		////////////////////////////
-		// Setting google taxonomy
-		////////////////////////////
-		data.setGoogleTaxonomyId(null);
 		
 		// TODO : Disabling google taxonomy for now
 		
