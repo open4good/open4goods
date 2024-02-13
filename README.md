@@ -1,13 +1,13 @@
 # Open4goods project  
 
-[![Beta](https://github.com/open4good/open4goods/actions/workflows/testAndPubmishBeta.yml/badge.svg?branch=main)](https://github.com/open4good/open4goods/actions/workflows/testAndPubmishBeta.yml)
+[![Beta](https://github.com/open4good/open4goods/actions/workflows/testAndPublishBeta.yml/badge.svg?branch=main)](https://github.com/open4good/open4goods/actions/workflows/testAndPublishBeta.yml)
 
 [![Production](https://github.com/open4good/open4goods/actions/workflows/releaseDeployProd.yml/badge.svg?branch=main)](https://github.com/open4good/open4goods/actions/workflows/releaseDeployProd.yml)
 
 The first open source tool that operates ecological scoring, doing its best for the common good. 
  
  * Financially contributing to the environmental cause, through a repayment of 20% of the company incomes. 
- * Provide products datasets as [open data](https://www.data.gouv.fr/fr/datasets/base-de-codes-barres-noms-et-categories-produits/)
+ * Provide products datasets in [open data](https://www.data.gouv.fr/fr/datasets/base-de-codes-barres-noms-et-categories-produits/)
 
 This project is for now deployed on : 
 
@@ -16,7 +16,6 @@ This project is for now deployed on :
 Technical metrics and maven site is deployed on Github Pages: 
 
  * [https://open4good.github.io/open4goods/](https://open4good.github.io/open4goods/)
-
 
 -----
    
@@ -38,7 +37,6 @@ The project will do its best to maximize community and user contributions, with 
  * provides and deliver the best price comparison and product information platform, in a collaborative and open-sourced manner.  
   
 
-  
 ## <i class="icon-upload"></i> How to contribute  
   
 There are several ways to contribute.  
@@ -53,6 +51,11 @@ There are several ways to contribute.
 Open4goods is based on verticals, that are the categories of the products. From yaml configs, we can totaly set the behavior, scorings, texts of our verticals, and they are also open-source. That means that simple PR's to TODO can directly make new products of enhance the user experience of all open4goods users.
 
 *  TODO
+
+# Documentation
+
+TODO : Some documentation is available here
+
   
 # Run in dev mode
   
@@ -69,7 +72,7 @@ You will need :
 Elasticsearch and Redis are  used by the open4goods project. It is packaged with a [https://www.elastic.co/fr/kibana](Kibana) instance in the docker-compose.yml file. Go to the project root, then start the compose file
   
 ```  
-$ docker-compose up  
+docker-compose up  
 ```
 Elastic, kibana and Redis should be available on :  
   
@@ -80,7 +83,7 @@ Elastic, kibana and Redis should be available on :
 Note that you could have to raise your max vm args to be able to rune the Elastic image 
  
 ```    
-$ sudo sysctl -w vm.max_map_count=262144  
+sudo sysctl -w vm.max_map_count=262144  
 ```
 
 To permanently set the max virtual memory :  
@@ -93,7 +96,7 @@ To permanently set the max virtual memory :
 Jars are not published to any central repo (nor planned to, it seems not to make any particular sense). To build, please go into the project folder. Then : 
  
 ```    
-$ mvn install 
+mvn install 
 ```  
 
 This will build and run tests, hope in your terminal you'll get a  
@@ -130,7 +133,7 @@ From the project root folder, you can now launch the aspects of the platform you
 **UI**
 
 ```
-$ java -Dspring.profiles.active=dev -jar ui/target/ui-[VERSION].jar  
+java -Dspring.profiles.active=dev -jar ui/target/ui-[VERSION].jar  
 ```
 
 You should be able to access the open4goods user interface at [http://localhost:8082](http://localhost:8082)  
@@ -138,7 +141,7 @@ You should be able to access the open4goods user interface at [http://localhost:
 **Api**
 
 ```
-$ java -Dspring.profiles.active=dev -jar api/target/api-[VERSION].jar  
+java -Dspring.profiles.active=dev -jar api/target/api-[VERSION].jar  
 ```
 
 You should be able to access the open4goods API at [http://localhost:8081](http://localhost:8081)  
@@ -147,7 +150,7 @@ You should be able to access the open4goods API at [http://localhost:8081](http:
 You should not need to run a separate crawler, since an embedded one is instanciated in the API. However, if you want to play, or register as a open4goods web scrapper and help us in crawling the world, you could setup an individual crawler node.
   
 ```
-$ java -Dspring.profiles.active=dev -jar target/bin/open4goods-crawler.jar  
+java -Dspring.profiles.active=dev -jar target/bin/open4goods-crawler.jar  
 ```
 
 You should be able to access the open4goods crawler interface at [http://localhost:8080](http://localhost:8080)  
