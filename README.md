@@ -1,16 +1,28 @@
 # Open4goods project  
 
-[![Build and test](https://github.com/open4good/open4goods/actions/workflows/buildDeploy.yml/badge.svg?branch=main)](https://github.com/open4good/open4goods/actions/workflows/buildDeploy.yml)
+[![Beta](https://github.com/open4good/open4goods/actions/workflows/testAndPubmishBeta.yml/badge.svg?branch=main)](https://github.com/open4good/open4goods/actions/workflows/testAndPubmishBeta.yml)
+
+[![Production](https://github.com/open4good/open4goods/actions/workflows/releaseDeployProd.yml/badge.svg?branch=main)](https://github.com/open4good/open4goods/actions/workflows/releaseDeployProd.yml)
 
 The first open source tool that operates ecological scoring, doing its best for the common good. 
  
- * Financially contributing to the environmental cause, through a repayment of 20% of the site incomes. 
+ * Financially contributing to the environmental cause, through a repayment of 20% of the company incomes. 
+ * Provide products datasets as [open data](https://www.data.gouv.fr/fr/datasets/base-de-codes-barres-noms-et-categories-produits/)
+
+This project is for now deployed on : 
+
+ * fr - [nudger.fr](https://nudger.fr)
+
+Technical metrics and maven site is deployed on Github Pages: 
+
+ * [https://open4good.github.io/open4goods/](https://open4good.github.io/open4goods/)
+
 
 -----
    
 ## The project  
   
-open4goods project is an open-source and open-data product aggregator, search engine and comparator. It is build upon Maven, Java, SpringBoot, Elasticsearch and some other cool libraries.It is designed to :  
+Open4goods project (o4g) is an open-source and open-data product aggregator, search engine and comparator. More over, it aims at handling large product datasets identified by GTIN's. It is build upon Maven, Java, SpringBoot, Elasticsearch, Redis, and some other cool libraries. It is mainly designed to :  
   
  * **crawl and ingest product based datas** (merchant offers, reviews, brands ratings). This is the job of the [crawler](crawler/) sub-project. Designed to ingest any kind of data, if having an UPC code, a BRAND or a MODEL_NAME  
   
@@ -25,54 +37,52 @@ The project will do its best to maximize community and user contributions, with 
  * provide the hugest set of barcodes in open data 
  * provides and deliver the best price comparison and product information platform, in a collaborative and open-sourced manner.  
   
-## <i class="icon-upload"></i> Not only code...  
-  
-**Mostly**, it is a try and an attempt for an ethical and ecological business model. Made on blue time and after having lost in too much complexity, the actual platform is still missing a lot of cool features :
- * green scoring
- * developper documentation
- * product filtering
- * SEO optimisations
- * A community
- * And so more....
-  
-**I will try to improve it over time**, please feel free to get your feedback on the [contact page](https://nudger.fr/contact), to contribute through code or with your ideas or issues on this github.
 
   
 ## <i class="icon-upload"></i> How to contribute  
   
 There are several ways to contribute.  
- * **Use it** ! By buying your products on official sites, you "create" money through the affiliation system, that allows to reverse the "by law" 20% environmental compensation. By using it you will also able to provide us some feedback  
+ * **Use it** ! By buying your products on official sites, you "create" money through the affiliation system, that allows to reverse the "by law" 20% environmental compensation. By using it you will also able to provide us some feedbacks  
  * **Speak about it** ! Communication will be the lack of this Odyssey, any kind of help is welcome. Talking about this the project to your granny or your dog could help us a lot.  
- * **Feedback us** ! Ideas (philosophicals or pragmaticals ) are greatly welcome ! Allow us to get the truth (the user's one) with your enhancements, bug report.  
-  
- 
+ * **Feedback us** ! Ideas (philosophicals or pragmaticals ) are greatly welcome ! Allow us to get the truth (the user's one) with your enhancements, bug report. We have a specific feedback system on our frontend that allows you to report feedback to Github Issues directly from your navigation on frontends.     
  * **Development** (Docker, Elastic, Java, SpringBoot, Bootstrap, Jquery, ...)   
+
+
+### Special gift : build your own comparator
+
+Open4goods is based on verticals, that are the categories of the products. From yaml configs, we can totaly set the behavior, scorings, texts of our verticals, and they are also open-source. That means that simple PR's to TODO can directly make new products of enhance the user experience of all open4goods users.
+
+*  TODO
   
 # Run in dev mode
   
 ### Software Requirements  
 You will need :  
   
-- [Java 11+](https://adoptopenjdk.net/)  
+- [Java 21+](https://adoptopenjdk.net/)  
 - [Maven](http://maven.apache.org/install.html)  
-- [Elasticsearch](https://github.com/elastic/elasticsearch), that can be transparently provided through [Docker](https://docs.docker.com/engine/install/) and [Docker Compose](https://docs.docker.com/compose/install/)  
+- [Elasticsearch](https://github.com/elastic/elasticsearch) and [Redis](https://redis.io/),  that can be transparently provided through [Docker](https://docs.docker.com/engine/install/) and [Docker Compose](https://docs.docker.com/compose/install/)  
   
 - Unfortunately a Linux / Mac os, cause Java Path Separators are hardcoded. Not (really) a tooth against Windows User ;)  
   
-### running Elasticsearch / Kibana (docker-compose)  
-Elasticsearch is the only store used by the open4goods project. It is packaged with a [https://www.elastic.co/fr/kibana](Kibana) instance in the docker-compose.yml file. Go to the project root, then start the compose file  
+### running through docker-compose 
+Elasticsearch and Redis are  used by the open4goods project. It is packaged with a [https://www.elastic.co/fr/kibana](Kibana) instance in the docker-compose.yml file. Go to the project root, then start the compose file
+  
 ```  
 $ docker-compose up  
-```  
-Elastic and kibana should be available on :  
+```
+Elastic, kibana and Redis should be available on :  
   
 * Elastic Search : [http://localhost:9200](http://localhost:9200)  
 * Kibana : [http://localhost:5601](http://localhost:5601)  
+* Redis : [http://localhost:6379](http://localhost:6379)  
   
-Note that you could have to raise your max vm args to be able to rune the Elastic image  
+Note that you could have to raise your max vm args to be able to rune the Elastic image 
+ 
 ```    
 $ sudo sysctl -w vm.max_map_count=262144  
-```    
+```
+
 To permanently set the max virtual memory :  
   
 1. edit /etc/sysctl.conf  
@@ -80,13 +90,15 @@ To permanently set the max virtual memory :
 3. sudo service sysctl restart  
   
 ### Building the open4goods project from code base  
-Jars are not published to any central repo (nor planned to, it seems not to make any particular sense). To build, please go into the project folder. Then :  
+Jars are not published to any central repo (nor planned to, it seems not to make any particular sense). To build, please go into the project folder. Then : 
+ 
 ```    
 $ mvn install 
 ```  
 
 This will build and run tests, hope in your terminal you'll get a  
-```  
+
+```
 [INFO] ------------------------------------------------------------------------  
 [INFO] Reactor Summary for parent 0.0.1-SNAPSHOT:  
 [INFO]  
@@ -102,9 +114,8 @@ This will build and run tests, hope in your terminal you'll get a
 [INFO] ------------------------------------------------------------------------  
 [INFO] Total time: 01:07 min  
 [INFO] Finished at: 2021-01-31T15:20:30+01:00  
-[INFO] ------------------------------------------------------------------------  
-  
-```  
+[INFO] ------------------------------------------------------------------------    
+```
     
 ### Launching  
 The open4goods project is packaged under the form of several SpringBoot web applications. You will probably want to launch :  
@@ -116,27 +127,28 @@ The open4goods project is packaged under the form of several SpringBoot web appl
   
 From the project root folder, you can now launch the aspects of the platform you are interested in :  
   
-**UI**  
-```  
+**UI**
+
+```
 $ java -Dspring.profiles.active=dev -jar ui/target/ui-[VERSION].jar  
-```  
+```
 
 You should be able to access the open4goods user interface at [http://localhost:8082](http://localhost:8082)  
   
-**Api**  
+**Api**
 
-```  
+```
 $ java -Dspring.profiles.active=dev -jar api/target/api-[VERSION].jar  
-```  
+```
 
 You should be able to access the open4goods API at [http://localhost:8081](http://localhost:8081)  
   
 **Crawler**  
-You should not need to run a separate crawler, since an embedded one is instanciated in the API. However, if you want to play, or register as a open4goods web scrapper and help us in crawling the world, you could setup an individual crawler node.  
-
-```  
+You should not need to run a separate crawler, since an embedded one is instanciated in the API. However, if you want to play, or register as a open4goods web scrapper and help us in crawling the world, you could setup an individual crawler node.
+  
+```
 $ java -Dspring.profiles.active=dev -jar target/bin/open4goods-crawler.jar  
-```  
+```
 
 You should be able to access the open4goods crawler interface at [http://localhost:8080](http://localhost:8080)  
   
@@ -149,14 +161,20 @@ If using any kind of IDE (tested with Eclipse and Intellij), please import as ma
   
 > Don't forget to specify the profile to use (probably you'll want "dev" to run in development mode)  
 
-## Import data
-**TODO** : provide a playground dataset
-  
-### Check dependencies update  
-You can use maven to get spring-boot and other dependencies update.  
-```  
-$ mvn versions:display-dependency-updates -DprocessDependencyManagement=false -DallowIncrementalUpdates=false  
-```  
+
+## Playing with datas
+
+For now, you have a up and running open4good platform. You will like to play with some datasets, and like it's not so easy to get them, we provide some live datas directly from our websites. 
+**TODO** : provide a playground dataset, explain the behaviour and the involved classes
+
+
+## A note on tree structure
+TODO /opt/open4goods
+
+
+## A note on Xwiki
+TODO
+
 ### Elastic space crash  
   
 After a space crash, elastic indexes are locked. You can get hand back on them by using :  
