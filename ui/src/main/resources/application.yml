@@ -10,6 +10,30 @@ server:
     enabled: true
   forward-headers-strategy: NATIVE  
 
+
+spring:
+  threads:
+    virtual:
+      enabled: true
+  mail:
+#   host: 
+    port: 587
+#    username: 
+#    password: 
+    properties:
+        mail.smtp.auth: true
+        mail.smtp.starttls.enable: true        
+  messages:
+    basename: i18n/messages
+  application:
+    name: open4goods-ui
+  thymeleaf:
+      cache: false
+  data:
+    elasticsearch:
+      repositories:
+        enabled: true
+
   
 apiConfig:
   apiTitle: "Open4goods API"
@@ -106,48 +130,6 @@ brandConfig:
     SNAKEBYTE: "https://i2.wp.com/www.littlebigpr.com/wp-content/uploads/2018/10/snakebyte-black.png"
     CONTINENTAL EDISON: "http://www.service-client.fr/wp-content/uploads/2016/08/CONTINENTAL-EDISON.jpg"
     CHIQ: "https://www.buysmarte.com.au/media/manufacturer/chiq.jpg"
-
-management:
-  
-  health:
-    diskspace:
-      threshold: 10000MB  
-             
-  endpoints:
-    web:
-      exposure:
-        include:
-        - "*"
-        exclude:
-        - "shutdown"
-        
-#  endpoint:
-        
-#    health:
-#      show-details: always   
-          
-spring:
-  threads:
-    virtual:
-      enabled: true
-  mail:
-#   host: 
-    port: 587
-#    username: 
-#    password: 
-    properties:
-        mail.smtp.auth: true
-        mail.smtp.starttls.enable: true        
-  messages:
-    basename: i18n/messages
-  application:
-    name: open4goods-ui
-  thymeleaf:
-      cache: false
-  data:
-    elasticsearch:
-      repositories:
-        enabled: true
 
     
 #Css and js mimification

@@ -7,6 +7,7 @@ import java.util.List;
 
 import org.apache.commons.lang3.ArrayUtils;
 import org.open4goods.config.BrandConfiguration;
+import org.open4goods.config.yml.DevModeConfiguration;
 import org.open4goods.config.yml.GithubConfiguration;
 import org.open4goods.config.yml.ui.DescriptionsAggregationConfig;
 import org.open4goods.crawler.config.yml.FetcherProperties;
@@ -143,6 +144,12 @@ public class ApiProperties {
 
 	private GithubConfiguration githubConfig;
 
+	/**
+	 * The configuration for developpement mode services
+	 */
+	private DevModeConfiguration devModeConfig = new DevModeConfiguration();
+	
+	
 	/**
 	 * The log level for aggregation
      *
@@ -449,6 +456,18 @@ public class ApiProperties {
 
 	public void setTestKeys(List<String> testKeys) {
 		this.testKeys = testKeys;
+	}
+
+
+
+	public DevModeConfiguration getDevModeConfig() {
+		return devModeConfig;
+	}
+
+
+
+	public void setDevModeConfig(DevModeConfiguration devModeConfig) {
+		this.devModeConfig = devModeConfig;
 	}
 
 

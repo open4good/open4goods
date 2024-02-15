@@ -9,6 +9,7 @@ import java.util.Map;
 
 import org.open4goods.config.BrandConfiguration;
 import org.open4goods.config.yml.BlogConfiguration;
+import org.open4goods.config.yml.DevModeConfiguration;
 import org.open4goods.config.yml.FeedbackConfiguration;
 import org.open4goods.config.yml.XwikiConfiguration;
 import org.open4goods.config.yml.ui.ApiConfig;
@@ -109,6 +110,10 @@ public class UiConfig {
 	
 	private FeedbackConfiguration feedbackConfig = new FeedbackConfiguration();
 	
+	/**
+	 * The configuration for developpement mode services
+	 */
+	private DevModeConfiguration devModeConfig = new DevModeConfiguration();
 	
 	public String getThymeLeafTemplateFolder() {
 		return resourceTemplateFolder + "templates"+File.separator;
@@ -338,6 +343,16 @@ public class UiConfig {
 
 	public void setReversements(List<Reversement> reversements) {
 		this.reversements = reversements;
+	}
+
+
+	public DevModeConfiguration getDevModeConfig() {
+		return devModeConfig;
+	}
+
+
+	public void setDevModeConfig(DevModeConfiguration devModeConfig) {
+		this.devModeConfig = devModeConfig;
 	}
 
 
