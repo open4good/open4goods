@@ -4,7 +4,7 @@
 
 [![Production](https://github.com/open4good/open4goods/actions/workflows/releaseDeployProd.yml/badge.svg?branch=main)](https://github.com/open4good/open4goods/actions/workflows/releaseDeployProd.yml)
 
-The first open source tool that operates ecological scoring, doing its best for the common good. 
+The first (and only) open source online comparator that operates ecological scoring, following a common good mindset. 
  
  * Financially contributing to the environmental cause, through a repayment of 20% of the company incomes. 
  * Provide products datasets in [open data](https://www.data.gouv.fr/fr/datasets/base-de-codes-barres-noms-et-categories-produits/)
@@ -48,9 +48,12 @@ There are several ways to contribute.
 
 ### Special gift : build your own comparator
 
-Open4goods is based on verticals, that are the categories of the products. From yaml configs, we can totaly set the behavior, scorings, texts of our verticals, and they are also open-source. That means that simple PR's to TODO can directly make new products of enhance the user experience of all open4goods users.
+Open4goods is based on verticals, that are the categories of the products. From yaml configs, we have full control on the behavior, scorings, texts and rendering of our verticals, and they are also open-sourced.
 
 *  TODO
+
+ That means that simple PR's to TODO can directly make new products of enhance the user experience of all open4goods users.
+
 
 # Documentation
 
@@ -167,7 +170,7 @@ If using any kind of IDE (tested with Eclipse and Intellij), please import as ma
 
 ## Playing with datas
 
-For now, you have a up and running open4good platform. You will like to play with some datasets, and like it's not so easy to get them, we provide some live datas directly from our websites. 
+For now, you have an up and running open4good platform. You will like to play with some datasets, and like it's not so easy to get them, we provide some live datas directly from our websites. 
 **TODO** : provide a playground dataset, explain the behaviour and the involved classes
 
 
