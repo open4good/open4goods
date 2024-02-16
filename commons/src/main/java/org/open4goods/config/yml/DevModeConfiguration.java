@@ -2,7 +2,7 @@ package org.open4goods.config.yml;
 
 public class DevModeConfiguration {
 
-	private String devModeProductEndpoint = "https://beta.nudger.fr/devmode/products";
+	private String devModeProductEndpoint = "https://beta.api.nudger.fr/devmode/products";
 	
 	public String getDevModeProductEndpoint() {
 		return devModeProductEndpoint;
