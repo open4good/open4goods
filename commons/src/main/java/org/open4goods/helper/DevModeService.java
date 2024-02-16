@@ -73,7 +73,7 @@ public class DevModeService {
 	 * @throws MalformedURLException
 	 */
 	public void indexProductsFromEndpoint() throws IOException, MalformedURLException {
-		LOGGER.info("DevMode : Indexing products from endpoint : "+productLoadEndpoint);
+		LOGGER.info("DevMode : Indexing products from endpoint : "+productLoadEndpoint.getDevModeProductEndpoint());
 		try (InputStream is = new URL(productLoadEndpoint.getDevModeProductEndpoint()).openConnection().getInputStream();
 				BufferedReader reader = new BufferedReader(new InputStreamReader(is));
 				Stream<String> stream = reader.lines()) {
