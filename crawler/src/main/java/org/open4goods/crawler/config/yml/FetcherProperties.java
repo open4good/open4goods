@@ -100,10 +100,6 @@ public class FetcherProperties {
 	 */
 	private String seleniumUseragent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.116 Safari/537.36";
 
-	/**
-	 * 
-	 */
-	private String chromeDriverPath="/home/goulven/Bureau/chromedriver";
 
 	public String indexationEndpoint() {
 		return masterEndpoint+UrlConstants.API_INDEXATION_ENDPOINT;
@@ -206,13 +202,6 @@ public class FetcherProperties {
 		this.seleniumUseragent = seleniumUseragent;
 	}
 
-	public String getChromeDriverPath() {
-		return chromeDriverPath;
-	}
-
-	public void setChromeDriverPath(String chromeDriverPath) {
-		this.chromeDriverPath = chromeDriverPath;
-	}
 
 	public String getAwinCatalogUrl() {
 		return awinCatalogUrl;

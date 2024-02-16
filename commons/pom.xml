@@ -8,7 +8,6 @@
 		<version>0.0.1-SNAPSHOT</version>
 	</parent>
 
-
 	<artifactId>commons</artifactId>
 	<name>commons</name>
 
@@ -30,6 +29,14 @@
 	</build>
 
 	<dependencies>
+
+		<!-- verticals definitions -->
+		<dependency>
+			<groupId>org.open4goods</groupId>
+			<artifactId>verticals</artifactId>
+			<version>${global.version}</version>
+		</dependency>
+		
 
 		<dependency>
 			<groupId>org.xwiki.commons</groupId>
