@@ -35,12 +35,7 @@ public class AppConfigDev {
 	}
 
 
-	
-	@Bean
-	@Autowired
-	public DevModeService devModeService (ProductRepository repository, SerialisationService serialisationService, VerticalsConfigService verticalsConfigService) {
-		return new DevModeService(config.getDevModeConfig(),repository, serialisationService, verticalsConfigService);
-	}
+
 	
 	@Bean
 	public MessageSource messageSource()

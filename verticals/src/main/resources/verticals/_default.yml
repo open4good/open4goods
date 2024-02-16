@@ -1,0 +1,434 @@
+#####################################################################################################################################
+#  													VERTICAL DEFAULT CONFUGURATION FILE
+# Verticals definition works on an inheritance mode : 
+#    > All verticals inherits properties from the "_default.yml" configuration file
+#    > All verticals can override settings by redefining them in the dedicated vertical configuration file
+#####################################################################################################################################
+
+
+
+#####################################################################################################################################
+# I18N CONFIGURATION
+# Configure in a i18n way all the texts of a product, including the Url, the title, the description, the open graph metas, ....
+# Use a micro templated language, that allows to introduce variables and "if condition", which allows to generate dynamic texts 
+######################################################################################################################################
+i18n:
+  # Apply for the default site / language (english, on the .com website)
+  default:
+      url: 
+        prefix: ""
+        attrs:
+          - BRAND
+          - MODEL
+      
+      h1Title:  
+        prefix: ""
+        attrs:
+          - BRAND
+          - MODEL
+        
+      productMetaTitle: "[(${p.brand()})] [(${p.model()})] : Eco-score, compensation écologique et meilleurs prix"
+      productMetaDescription:  "[(${p.brand()})] [(${p.model()})] : Eco-score, compensation écologique et meilleurs prix. "
+              
+      productMetaOpenGraphTitle: "productMetaOpenGraphTitle"
+      productMetaOpenGraphDescription: "productMetaOpenGraphDescription"
+      productMetaTwitterTitle: "productMetaTwitterTitle"
+      productMetaTwitterDescription: "productMetaTwitterDescription"
+
+
+      ####################################################################################
+      # AI TEXTS CONFIGS
+      ####################################################################################  
+      aiConfig:
+        - key: "global-description" 
+          prompt: " écris un texte de maximum 100 mots, dans un style académique, une description avec des listes à puce en html, comprenant les principaux avantages et inconvénients de  [(${p.brand()})] [(${p.model()})], sur la base des caracteriques suivantes : [(${p.caracteristics()})]"
+        - key: "ecological-description" 
+          prompt: "écris un texte de maximum 100 mots, dans un style académique, une analyse de l'impact environnemental de [(${p.brand()})] [(${p.model()})], sur la base des caracteriques suivantes : [(${p.caracteristics()})]"
+
+
+####################################################################################
+# RESOURCES CONFIGURATION
+####################################################################################  
+
+resourcesConfig:
+  resourceDownloadConcurentThreads: 3
+  overrideResources: false
+  resourceIdExclusions: []
+  imageProductThumbsHeight:
+  - 100
+  - 200
+  - 300
+  imageBrandsThumbsHeight:
+  - 20
+  - 12
+  - 30
+
+####################################################################################
+# SITEMAP CONFIG
+# Possible values are : 
+#     > NONE : No products from this vertical included in the sitemap
+#     > ALL : All products from this vertical included in the sitemap
+#     > DATA_QUALITY : All products having a minimum data quality are included in the sitemap
+#     > TEXTIALIZED : Only products having texts generated  are included in the sitemap
+#
+# TODO : To be implemented
+#
+####################################################################################    
+siteMapStrategy : NONE
+
+####################################################################################
+# BARCODE CONFIG
+####################################################################################    
+
+barcodeConfig:  
+  qrCodeSize: 300
+  gtinSize: 300
+  datamatrixSize: 600
+
+####################################################################################
+# EXTERNAL DESCRIPTIONS CONFIG
+####################################################################################    
+
+descriptionsAggregationConfig:
+  descriptionsTruncationLength: 4000
+  descriptionsTruncationSuffix: "..."
+
+####################################################################################
+# 						ATTRIBUTES CONFIGURATION
+####################################################################################  
+  
+attributesConfig:
+
+  # Those attributes will be removed from unmatchedAttributes if found
+  exclusions:
+    - "CNET INLINE CONTENT"
+    - "CRAWLER"
+    - "EAN GGSHOPPING"
+    - "SEARCH KEYWORDS"
+    - "ALTERNATE_IMAGE"
+    - "AVERAGE_RATING"
+    - "AW_DEEP_LINK"
+    - "AW_PRODUCT_ID"
+    - "BRAND_ID"
+    - "BRAND_NAME"
+    - "CATEGORY_ID"
+    - "CONDITION"
+    - "CURRENCY"
+    - "CUSTOM_1"
+    - "CUSTOM_2"
+    - "CUSTOM_3"
+    - "CUSTOM_4"
+    - "CUSTOM_5"
+    - "CUSTOM_6"
+    - "CUSTOM_7"
+    - "CUSTOM_8"
+    - "CUSTOM_9"
+    - "DATA_FEED_ID"
+    - "DELIVERY_COST"
+    - "DELIVERY_TIME"
+    - "DELIVERY_WEIGHT"
+    - "DESCRIPTION"
+    - "EAN"
+    - "IN_STOCK"
+    - "IS_FOR_SALE"
+    - "MERCHANT_DEEP_LINK"
+    - "MERCHANT_ID"
+    - "MERCHANT_IMAGE_URL"
+    - "MERCHANT_NAME"
+    - "MERCHANT_PRODUCT_ID"
+    - "MPN"
+    - "PARENT_PRODUCT_ID"
+    - "PRE_ORDER"
+    - "PRODUCT_GTIN"
+    - "PRODUCT_SHORT_DESCRIPTION"
+    - "RATING"
+    - "SEARCH_PRICE"
+    - "STOCK_QUANTITY"
+    - "STOCK_STATUS"
+    - "WEB_OFFER"
+    - "BASE_PRICE"
+    - "CODEBARRE"
+    - "DATEEXPEDITION"
+    - "ETAT"
+    - "DISPONIBILITE"
+    - "PRIX"
+    - "REFURBISHED"
+    - "REVIEWS"
+    - "SAVING"
+    - "SAVINGS_PERCENT"
+    - "SOLDES"
+    - "TOP100"
+
+  # Attributes having the following value will be classified as product features
+  featuredValues:
+    - YES
+    - OUI
+    
+####################################################################################
+# ATTRIBUTES DEFINITIONS
+# Those attributes will be availlable for all products if found
+####################################################################################      
+  configs:
+  ## TODO : HAUTEUR, PROFONDEUR, LARGEUR, ...
+  
+
+  ##################################
+  # Disponibilité des pièces détachées
+  ##################################
+  - key: "PARTS_AVAILLABILITY"
+    faIcon: "fa-bolt"
+    name:
+      default: "Parts availlability"
+      fr: "Disponibilité des pièces détachées"
+    type: "TEXT"
+
+    asRating: true
+
+    attributeValuesOrdering: "MAPPED"
+    attributeValuesReverseOrder: false
+    #searchable: true
+    #searchPresentationOrder: -2147483648
+    #searchTableOrder: 2
+    #statsOrder: 6
+    #statsType: "bar"
+    #statsDefaultView: false
+    synonyms:
+      all:
+      - "DISPONIBILITÉ DES PIÈCES DÉTACHÉES"
+
+    parser:
+      normalize: true
+      trim: false
+      lowerCase: false
+      upperCase: true
+      removeParenthesis: false
+      deleteTokens:
+      - "PENDANT"
+      - ", A COMPTER DE LA DATE D'ACHAT"
+      - "(DONNÉES FOURNISSEUR)"
+    numericMapping:
+      10 ANS: 10.0
+      9 ANS: 9.0
+      8 ANS: 8.0
+      7 ANS: 7.0
+      6 ANS: 6.0
+      5 ANS: 5.0
+      4 ANS: 4.0
+      3 ANS: 3.0
+      2 ANS: 2.0
+      1 AN: 1.0
+      PIÈCES NON DISPONIBLES: 0.0
+      
+
+  ##################################
+  # CLASSE ENERGETIQUE
+  ##################################
+  
+  - key: "CLASSE_ENERGY"
+    faIcon: "fa-bolt"
+    name:
+      default: "Energy class"
+      fr: "Classe énergétique"
+    type: "TEXT"
+    asRating: true
+
+
+    attributeValuesOrdering: "MAPPED"
+    synonyms:
+      all:
+      - "CLASSE ÉNERGÉTIQUE"
+      - "CLASSE ECO"
+      - "CLASSE ENERGÉTIQUE"
+      - "CLASSE D'EFFICACITÉ ÉNERGÉTIQUE"
+      - "ENERGY EFFICIENCY CLASS"
+      - "CLASSE_ENERGY"
+#      - "CLASSE D'EFFICACITÉ ÉNERGÉTIQUE (HDR)"
+#      - "CLASSE D'EFFICACITÉ ÉNERGÉTIQUE (SDR)"
+      
+    parser:
+      normalize: true
+      trim: true
+      lowerCase: false
+      upperCase: true
+      removeParenthesis: false
+      deleteTokens:
+      - "CLASSE"
+      - "(ÉCHELLE A++ À E)"
+    numericMapping:
+      A+++: 18.0    
+      A++: 18.0
+      A+: 17.0
+      A: 16.0
+      B++: 15.0
+      B+: 14.0
+      B: 13.0
+      C++: 12.0
+      C+: 11.0
+      C: 10.0
+      D++: 9.0
+      D+: 8.0
+      D: 7.0
+      E++: 6.0
+      E+: 5.0
+      E: 4.0
+      F++: 3.0
+      F+: 2.0
+      F: 1.0
+      G: 0.0      
+      
+
+
+
+  ##################################
+  # REPAIRABILITY INDEX
+  ##################################
+  
+  - key: "REPAIRABILITY_INDEX"
+    faIcon: "fa-screwdriver-wrench"
+    name:
+      default: "Repairability index"
+      fr: "Indice de réparabilité"
+    type: "NUMERIC"
+    asRating: true
+
+
+    attributeValuesOrdering: "MAPPED"
+
+    synonyms:
+      all:
+      - "REPAIRABILITY INDEX"
+      - "INDICE DE RÉPARABILITÉ (NOTE SUR 10)"
+      - "INDICE DE RÉPARABILITÉ"
+      
+    parser:
+      normalize: true
+      trim: false
+      lowerCase: false
+      upperCase: true
+      removeParenthesis: false
+      deleteTokens:
+      - "/10"
+
+
+
+  ##################################
+  # WARRANTY
+  ##################################
+  
+  - key: "WARRANTY"
+    faIcon: "check-double"
+    name:
+      default: "Warranty"
+      fr: "Garantie"
+    type: "NUMERIC"
+    asRating: true
+
+
+    attributeValuesOrdering: "MAPPED"
+    attributeValuesReverseOrder: false
+    synonyms:
+      all:
+      - "GARANTIE"
+      - "WARRANTY"
+      
+    parser:
+      normalize: true
+      trim: false
+      lowerCase: false
+      upperCase: true
+      removeParenthesis: false
+      replaceTokens:
+        "12 MONTHS": "1"
+      deleteTokens:
+      - "ANS"
+      - "AN"
+      - "GARANTIE"
+
+
+  ##################################
+  # ANNEE DE SORTIE
+  ##################################
+  
+  - key: "YEAR"
+    faIcon: "calendar-days"
+    name:
+      default: "Year"
+      fr: "Année de mise en service"
+    type: "NUMERIC"
+    asRating: false
+    
+    synonyms:
+      all:
+      - "ANNÉE DE LANCEMENT"
+      - "ANNÉE DE SORTIE"
+      - "ANNÉE DE MODÈLE"
+      
+    parser:
+      normalize: true
+      trim: false
+      lowerCase: false
+      upperCase: true
+      removeParenthesis: false
+#      deleteTokens:
+#      - "ANS"
+
+
+
+
+  ##################################
+  # COULEUR
+  ##################################
+  
+  - key: "COLOR"
+    faIcon: "droplet"
+    name:
+      default: "Color"
+      fr: "Couleur"
+    type: "TEXT"
+    asRating: false
+    
+    synonyms:
+      all:
+      - "COULEUR"
+      - "COULEUR DU PRODUIT"
+      - "CATÉGORIE DE COULEUR"
+      - "COULEUR GÉNÉRIQUE"
+      
+    parser:
+      normalize: true
+      trim: false
+      lowerCase: false
+      upperCase: true
+      removeParenthesis: false
+#      deleteTokens:
+#      - "ANS"
+      
+
+
+    ##################################
+     # DECIBELS_MAX
+     ##################################
+  - key: "DECIBELS_MAX"
+    faIcon: "up-right-and-down-left-from-center"
+    name:
+      default: "Niveau sonore (Db)"
+      fr: "Niveau sonore (Db)"
+    type: "NUMERIC"
+    
+    asRating: true
+    
+    synonyms:
+      all:      
+      - "NIVEAU SONORE MAXIMUM"
+   
+    parser:
+      normalize: true
+      trim: true
+      lowerCase: true
+      upperCase: false
+      removeParenthesis: false
+      deleteTokens: 
+        - "db"
+
+
+
