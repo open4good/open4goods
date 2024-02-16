@@ -6,6 +6,7 @@ import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
 
 import org.open4goods.dao.ProductRepository;
+import org.open4goods.helper.DevModeService;
 import org.open4goods.model.constants.CacheConstants;
 import org.open4goods.model.constants.Currency;
 import org.open4goods.model.data.Price;
@@ -38,6 +39,7 @@ import org.springframework.cache.caffeine.CaffeineCache;
 import org.springframework.cache.support.SimpleCacheManager;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.io.support.ResourcePatternResolver;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
@@ -71,6 +73,14 @@ public class AppConfig {
 		this.config = config;
 	}
 
+	
+	@Bean
+	@Autowired
+	public DevModeService devModeService (ProductRepository repository, SerialisationService serialisationService, VerticalsConfigService verticalsConfigService) {
+		return new DevModeService(config.getDevModeConfig(),repository, serialisationService, verticalsConfigService);
+	}
+	
+	
 	  @Bean
 	  public RedisTemplate<String, Product> redisTemplate(RedisConnectionFactory connectionFactory) {
 		  RedisTemplate<String, Product> template = new RedisTemplate<>();
@@ -208,8 +218,8 @@ public class AppConfig {
 
 	@Bean
 	@Autowired
-	VerticalsConfigService verticalConfigsService(SerialisationService serialisationService,  GoogleTaxonomyService googleTaxonomyService, ProductRepository productRepository) throws IOException {
-		return new VerticalsConfigService( serialisationService,config.getVerticalsFolder(), googleTaxonomyService, productRepository);
+	VerticalsConfigService verticalConfigsService(ResourcePatternResolver resourceResolver, SerialisationService serialisationService,  GoogleTaxonomyService googleTaxonomyService, ProductRepository productRepository) throws IOException {
+		return new VerticalsConfigService( serialisationService,config.getVerticalsFolder(), googleTaxonomyService, productRepository, resourceResolver);
 	}
 
 	////////////////////////////////////
