@@ -55,19 +55,22 @@ services:
 # Kibana
 ###################################################################
 
-  kibana:
-    image: docker.elastic.co/kibana/kibana:8.11.1
-    container_name: kibana
-    depends_on: 
-      - elastic
-    ports:
-      - "5601:5601"
-    environment:
-      ELASTICSEARCH_URL: http://elastic:9200
-      ELASTICSEARCH_HOSTS: http://elastic:9200
+# Uncomment the below section to enable kibana 
 
-    networks:
-      - o4g-network
+
+#  kibana:
+#    image: docker.elastic.co/kibana/kibana:8.11.1
+#    container_name: kibana
+#    depends_on: 
+#      - elastic
+#    ports:
+#      - "5601:5601"
+#    environment:
+#      ELASTICSEARCH_URL: http://elastic:9200
+#      ELASTICSEARCH_HOSTS: http://elastic:9200
+
+#    networks:
+#      - o4g-network
 
     
 volumes:

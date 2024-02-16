@@ -1,4 +1,13 @@
+rootFolder: ./
 
+
+
+wikiConfig:
+    user: nudger
+    password: nudger 
+    baseUrl: https://wiki.nudger.fr
+    
+    
 # Spring classical config
 server:
   port: 8082
@@ -12,11 +21,7 @@ logging:
         ROOT: info
         org.open4goods: info
 
-verticalsFolder: "/home/goulven/git/open4goods-config/verticals/"
-datasourcesfolder: "/home/goulven/git/open4goods-config/datasources/"
-
 spring:
-
   docker:
     compose:
       enabled: true
@@ -55,6 +60,3 @@ namings:
     fr: http://localhost:8082/
 #    default: http://127.0.0.1:8080/  
 
-elasticsearch.username: 
-elasticsearch.password:  
-elasticsearch.host: 127.0.0.1 

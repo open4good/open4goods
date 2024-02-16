@@ -3,6 +3,10 @@ package org.open4goods.ui.config;
 import java.io.File;
 import java.util.List;
 
+import org.open4goods.dao.ProductRepository;
+import org.open4goods.helper.DevModeService;
+import org.open4goods.services.SerialisationService;
+import org.open4goods.services.VerticalsConfigService;
 import org.open4goods.ui.config.yml.UiConfig;
 import org.open4goods.ui.interceptors.GenericTemplateInterceptor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,6 +35,8 @@ public class AppConfigDev {
 	}
 
 
+
+	
 	@Bean
 	public MessageSource messageSource()
 	{       
