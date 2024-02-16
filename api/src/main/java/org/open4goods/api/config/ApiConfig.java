@@ -21,6 +21,7 @@ import org.open4goods.crawler.services.fetching.CsvDatasourceFetchingService;
 import org.open4goods.crawler.services.fetching.WebDatasourceFetchingService;
 import org.open4goods.dao.ProductRepository;
 import org.open4goods.exceptions.ValidationException;
+import org.open4goods.helper.DevModeService;
 import org.open4goods.model.constants.CacheConstants;
 import org.open4goods.model.constants.Currency;
 import org.open4goods.model.constants.TimeConstants;
@@ -114,6 +115,12 @@ public class ApiConfig {
 		return new BlablaService(evaluationService);
 	}
 
+	@Bean
+	@Autowired
+	public DevModeService devModeService (ProductRepository repository, SerialisationService serialisationService, VerticalsConfigService verticalsConfigService) {
+		return new DevModeService(apiProperties.getDevModeConfig(),repository, serialisationService, verticalsConfigService);
+	}
+	
 	
     @Bean
     @Autowired
@@ -125,8 +132,8 @@ public class ApiConfig {
 	
 	@Bean
 	@Autowired
-	VerticalsConfigService verticalConfigsService(SerialisationService serialisationService,  GoogleTaxonomyService googleTaxonomyService, ProductRepository productRepository) throws IOException {
-		return new VerticalsConfigService(serialisationService,apiProperties.getVerticalsFolder(), googleTaxonomyService, productRepository);
+	VerticalsConfigService verticalConfigsService(ResourcePatternResolver resolver,  SerialisationService serialisationService,  GoogleTaxonomyService googleTaxonomyService, ProductRepository productRepository) throws IOException {
+		return new VerticalsConfigService(serialisationService,apiProperties.getVerticalsFolder(), googleTaxonomyService, productRepository, resolver);
 	}
 
 	

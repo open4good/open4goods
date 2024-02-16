@@ -39,7 +39,8 @@ public class AmazonServiceTest {
 
         // Add your credentials
         // Please add your access key here
-
+        client.setAccessKey("ACCESSKEY");
+        client.setSecretKey("SECRETKEY");
         // Enter your partner tag (store/tracking id)
         String partnerTag = "nudger-21";
 
@@ -61,6 +62,7 @@ public class AmazonServiceTest {
          */
         List<GetItemsResource> getItemsResources = new ArrayList<GetItemsResource>();
         getItemsResources.add(GetItemsResource.ITEMINFO_TITLE);
+        /*
         getItemsResources.add(GetItemsResource.ITEMINFO_CLASSIFICATIONS);
         getItemsResources.add(GetItemsResource.ITEMINFO_FEATURES);
         getItemsResources.add(GetItemsResource.ITEMINFO_MANUFACTUREINFO);
@@ -68,7 +70,7 @@ public class AmazonServiceTest {
         getItemsResources.add(GetItemsResource.ITEMINFO_TECHNICALINFO);
         getItemsResources.add(GetItemsResource.ITEMINFO_TRADEININFO);                
         getItemsResources.add(GetItemsResource.OFFERS_LISTINGS_PRICE);
-
+*/
         // Choose item id(s)
         List<String> itemIds = new ArrayList<String>();
         itemIds.add("059035342X");
