@@ -124,7 +124,6 @@ From the project root folder, you can now launch the aspects of the platform you
 
 ```
 java -Dspring.profiles.active=dev -jar ui/target/ui-[VERSION].jar
-
 ```
 
 
@@ -134,7 +133,6 @@ You should be able to access the open4goods user interface at [http://localhost:
 
 ```
 java -Dspring.profiles.active=dev -jar api/target/api-[VERSION].jar
-
 ```
 You should be able to access the open4goods API at [http://localhost:8081](http://localhost:8081)
 
@@ -144,7 +142,6 @@ You should not need to run a separate crawler, since an embedded one is instanci
 
 ```
 java -Dspring.profiles.active=dev -jar target/bin/open4goods-crawler.jar
-
 ```
 
 You should be able to access the open4goods crawler interface at [http://localhost:8080](http://localhost:8080)
