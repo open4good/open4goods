@@ -1,4 +1,5 @@
 
+
 # Open4goods
 | [![Beta](https://github.com/open4good/open4goods/actions/workflows/testAndPublishBeta.yml/badge.svg?branch=main)](https://github.com/open4good/open4goods/actions/workflows/testAndPublishBeta.yml) | [![Production](https://github.com/open4good/open4goods/actions/workflows/releaseDeployProd.yml/badge.svg?branch=main)](https://github.com/open4good/open4goods/actions/workflows/releaseDeployProd.yml) |
 |--|--|
@@ -123,7 +124,6 @@ From the project root folder, you can now launch the aspects of the platform you
 
 ```
 java -Dspring.profiles.active=dev -jar ui/target/ui-[VERSION].jar
-
 ```
 
 
@@ -136,6 +136,7 @@ java -Dspring.profiles.active=dev -jar api/target/api-[VERSION].jar
 
 ```
 You should be able to access the open4goods API at [http://localhost:8081](http://localhost:8081)
+> You will need an authentication token. The default one is **open4goods**, this is defined in the [configuration file](https://github.com/open4good/open4goods/blob/main/api/src/main/resources/application-dev.yml) through the "adminKey" parameter
 
 **Crawler**
 
