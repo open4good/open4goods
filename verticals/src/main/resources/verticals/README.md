@@ -1,6 +1,7 @@
 # open4goods-verticals
 The verticals yaml configuration files
 
+> TODO : Documentation
 
 Automatically fetched from UI and API. 
 
