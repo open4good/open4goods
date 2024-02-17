@@ -73,7 +73,7 @@ Elastic, kibana and Redis should be available on :
 * Elastic Search : [http://localhost:9200](http://localhost:9200)
 * Kibana : [http://localhost:5601](http://localhost:5601)
 * Redis : [http://localhost:6379](http://localhost:6379)
-> Note that you could have to raise your max map  args to be able to rune the Elastic image, see the Hint's section
+> Note that you could have to raise your max map  args to be able to rune the Elastic image, see the (https://github.com/open4good/open4goods?tab=readme-ov-file#elastic-max-map-count)[Hint's section]
 
 
 ### Building the open4goods project from code base
