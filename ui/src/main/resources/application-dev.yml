@@ -1,25 +1,25 @@
+# Folder where work data will be store
 rootFolder: ./
 
+# Port the server will be running on
+server:
+  port: 8082
 
 
+# Logging configuration
+logging: 
+    level:
+        ROOT: info
+        org.open4goods: info
+        
+# XWiki instance that holds website contents
 wikiConfig:
     user: nudger
     password: nudger 
     baseUrl: https://wiki.nudger.fr
     
     
-# Spring classical config
-server:
-  port: 8082
 
-########################
-# Logging configuration
-########################
-
-logging: 
-    level:
-        ROOT: info
-        org.open4goods: info
 
 spring:
   docker:

@@ -1,13 +1,16 @@
+# Folder where work data will be store
+rootFolder: ./
 
+# Port the server will be running on
 server:
   port: 8081
 
-
+# Logging configuration
 logging:
     level:
-      ROOT: warn
-      org.open4goods: warn
-      GENERIC_LOGGER: error
+      ROOT: info
+      org.open4goods: info
+      GENERIC_LOGGER: info
 
 # The key to provide to get ADMIN_ROLE
 adminKey: open4goods
