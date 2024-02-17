@@ -1,24 +1,23 @@
+
 # Open4goods
 | [![Beta](https://github.com/open4good/open4goods/actions/workflows/testAndPublishBeta.yml/badge.svg?branch=main)](https://github.com/open4good/open4goods/actions/workflows/testAndPublishBeta.yml) | [![Production](https://github.com/open4good/open4goods/actions/workflows/releaseDeployProd.yml/badge.svg?branch=main)](https://github.com/open4good/open4goods/actions/workflows/releaseDeployProd.yml) |
 |--|--|
 An open source online comparator  that operates ecological scoring, following a common good mindset.
-* financially contributing to the environmental cause, through a repayment of 20% of the company incomes.
+* financially contributing to the environmental cause, [through a repayment of 20%](https://raw.githubusercontent.com/open4good/open4goods/main/LICENSE) of the company incomes.
 * provide products datasets in [open data](https://www.data.gouv.fr/fr/datasets/base-de-codes-barres-noms-et-categories-produits/)
 * 
   This project is for now deployed on  the frenchy [nudger.fr](https://nudger.fr)
 
 Technical metrics and maven site is deployed on Github Pages:
 * [https://open4good.github.io/open4goods/](https://open4good.github.io/open4goods/)
-  
-# The project
 
-Open4goods (o4g) is an open-source and open-data product aggregator, search engine and comparator. More over, it aims at handling large product datasets identified by GTIN's. It is build upon Maven, Java, SpringBoot, Elasticsearch, Redis, and some other cool libraries. It is mainly designed to :
+Open4goods (o4g) is an open-source and open-data product aggregator, search engine and comparator. More over, it is a stack aiming at handling large product datasets identified by GTIN's. It is build upon Maven, Java, SpringBoot, Elasticsearch, Redis, and some other cool libraries. It is mainly designed to :
 
-* **crawl and ingest product based datas** (merchant offers, reviews, brands ratings). This is the job of the [crawler](crawler/) sub-project. Designed to ingest any kind of data, if having an UPC code, a BRAND or a MODEL_NAME
+* **crawl and ingest product based datas** (merchant offers, reviews, brands ratings). This is the job of the [crawler](crawler/) sub-project. Designed to ingest any kind of data, if having an UPC/GTIN code.
 
 * **aggregate data fragments into well structured product-data**, by verticals. Features are -among others- scoring, attributes merging and conflict detection, comments NLP processing... The business intelligence of product construction is weared in the [aggregation](aggregation/) sub-project, and the orchestration and product data construction is operated through the scalable [API](api/) component.
 
-* **Renders the data through an open API, and through open data sets**, exposed through the [API](api/) component.
+* **Renders the data through API's, UI's, and through open data sets**, exposed through the [API](api/) component.
 
 * Make the truth available for everyone on **officially supported websites**, (only french [nudger.fr](https://nudger.fr) for now), through the [UI](ui/) component. The affiliation revenue business model is used to deliver ecological compensation, maintain the user service and the open-data delivery
   
@@ -28,30 +27,27 @@ Open4goods (o4g) is an open-source and open-data product aggregator, search engi
 There are several ways to contribute to the project.
 
 ## Use it
-By buying your products on official sites, you "create" money through the affiliation system, that allows to reverse the "by law" 20% environmental compensation. By using it you will also able to provide us some feedbacks
+By buying your products on official sites, you "create" money through the affiliation system, that allows to reverse the ["by law" 20% environmental compensation](https://raw.githubusercontent.com/open4good/open4goods/main/LICENSE). By using it you will also able to provide us some feedbacks
 
 ## Speak about it 
 Communication will be the lack of this Odyssey, any kind of help is welcome. Talking about this the project to your granny or even to your dog could help us a lot.
 
 ## Feedback us
-Bugs and ideas are greatly welcome !  We have a specific feedback system that allows you to report feedback to Github Issues directly from your navigation on our frontends.
+Bugs and ideas are greatly welcome !  We have a [specific feedback system](https://github.com/open4good/open4goods/blob/a35a37032218a20f3020e717773f1a6633b78122/commons/src/main/java/org/open4goods/services/FeedbackService.java#L19) that allows you to report feedback to [Github Issues](https://github.com/open4good/open4goods/blob/a35a37032218a20f3020e717773f1a6633b78122/commons/src/main/java/org/open4goods/services/FeedbackService.java#L19) directly from your navigation on our frontends.
 
 ## Eco-score and vertical definitions
-TODO
+Verticals (eg : tv's, washing machines, ...) are defined through yaml configuration files. The ecoscore is part of the verticals configurations.
 
-Our ecoscore is part of the verticals confugurations. Verticals (and eco-score) are fine tunable, their configurations are totaly open.
+Our [verticals definitions are totaly open](https://github.com/open4good/open4goods/tree/main/verticals/src/main/resources/verticals), meaning that you are very welcome to : 
 
-You are very welcome : 
-* To inspect it : How to
-* To comment / question : 
-* To contribute : through PR's
+* **inspect them**,  by reviewing the [verticals configuration](https://github.com/open4good/open4goods/tree/main/verticals/src/main/resources/verticals%29)
+* **comment / question**, by posting [issues](https://github.com/open4good/open4goods/issues) with your concerns
+* **contribute**, by creating new verticals or by updating existing ones with [Pull Requests](https://github.com/open4good/open4goods/pulls)
 
-TODO : French guide
 
 ## Geek it ! 
 
 Contribute to the websites, on the UI, on the content, or on the data aspects. Quiet simple to set-up, you can run open4goods website localy with the below instructions. 
-
 
  
 # Run in dev mode
@@ -62,16 +58,12 @@ We will see here how to run open4goods frontends and API's on tour computer.
 You will need :
 
 - [Java 21+](https://adoptopenjdk.net/)
-
 - [Maven](http://maven.apache.org/install.html)
-
 - [Elasticsearch](https://github.com/elastic/elasticsearch) and [Redis](https://redis.io/), that can be transparently provided through [Docker](https://docs.docker.com/engine/install/) and [Docker Compose](https://docs.docker.com/compose/install/)
-
-- Unfortunately a Linux / Mac  os, cause Java Path Separators are hardcoded. Not (really) a tooth against Windows User ;)
 
 ### running through docker-compose
 
-Elasticsearch and Redis are used by the open4goods project. It is packaged with a [https://www.elastic.co/fr/kibana](Kibana) instance in the docker-compose.yml file. Go to the project root, then start the compose file
+Elasticsearch and Redis are used by the open4goods project. A [Kibana instance](https://www.elastic.co/fr/kibana) is commented in the docker-compose.yml file, if you want to browse data's by yourself. Go to the project root, then start the compose file
 
 ```
 docker-compose up
@@ -81,18 +73,8 @@ Elastic, kibana and Redis should be available on :
 * Elastic Search : [http://localhost:9200](http://localhost:9200)
 * Kibana : [http://localhost:5601](http://localhost:5601)
 * Redis : [http://localhost:6379](http://localhost:6379)
+> Note that you could have to raise your max map  args to be able to rune the Elastic image, see the Hint's section
 
-Note that you could have to raise your max vm  args to be able to rune the Elastic image
-
-```
-sudo  sysctl -w vm.max_map_count=262144
-```
-
-To permanently set the max virtual memory :
-
-1. edit /etc/sysctl.conf
-2. add line vm.max_map_count=262144
-3. sudo service sysctl restart
 
 ### Building the open4goods project from code base
 
@@ -179,7 +161,8 @@ If using any kind of IDE (tested with Eclipse and Intellij), please import as ma
 For now, you have an up and running open4good platform. You will like to play with some datasets, and like it's not so easy to get them, we provide some live datas directly from our websites.
 
 ### Products auto-loading
-> TODO : Document
+
+A special service will automaticaly load sample datas on applications startup, allowing you to easily play with the project.
 
 
 ## A note on the work directory
@@ -218,80 +201,23 @@ For now, you have an up and running open4good platform. You will like to play wi
 TODO
 That means that simple PR's to TODO can directly make new products of enhance the user experience of all open4goods users.
 
+## Elastic max map count
+You will probably need to raise your max map  args in order to be able to start elastic
+```
+sudo  sysctl -w vm.max_map_count=262144
+```
+
+To permanently set the max virtual memory :
+
+1. edit /etc/sysctl.conf
+2. add line vm.max_map_count=262144
+3. sudo service sysctl restart
+
 ## Elastic space crash
 
 After a space crash, elastic indexes are locked. You can get hand back on them by using :
 
 ```
-
 curl -XPUT -H "Content-Type: application/json" http://localhost:9200/_all/_settings -d '{"index.blocks.read_only_allow_delete": null}'
 
-```
-
-
-
-
-
-
-
-
-
-
-
-
-# Markdown extensions
-
-StackEdit extends the standard Markdown syntax by adding extra **Markdown extensions**, providing you with some nice features.
-
-> **ProTip:** You can disable any **Markdown extension** in the **File properties** dialog.
-
-
-## SmartyPants
-
-SmartyPants converts ASCII punctuation characters into "smart" typographic punctuation HTML entities. For example:
-
-|                |ASCII                          |HTML                         |
-|----------------|-------------------------------|-----------------------------|
-|Single backticks|`'Isn't this fun?'`            |'Isn't this fun?'            |
-|Quotes          |`"Isn't this fun?"`            |"Isn't this fun?"            |
-|Dashes          |`-- is en-dash, --- is em-dash`|-- is en-dash, --- is em-dash|
-
-
-## KaTeX
-
-You can render LaTeX mathematical expressions using [KaTeX](https://khan.github.io/KaTeX/):
-
-The *Gamma function* satisfying $\Gamma(n) = (n-1)!\quad\forall n\in\mathbb N$ is via the Euler integral
-
-$$
-\Gamma(z) = \int_0^\infty t^{z-1}e^{-t}dt\,.
-$$
-
-> You can find more information about **LaTeX** mathematical expressions [here](http://meta.math.stackexchange.com/questions/5020/mathjax-basic-tutorial-and-quick-reference).
-
-
-## UML diagrams
-
-You can render UML diagrams using [Mermaid](https://mermaidjs.github.io/). For example, this will produce a sequence diagram:
-
-```mermaid
-sequenceDiagram
-Alice ->> Bob: Hello Bob, how are you?
-Bob-->>John: How about you John?
-Bob--x Alice: I am good thanks!
-Bob-x John: I am good thanks!
-Note right of John: Bob thinks a long<br/>long time, so long<br/>that the text does<br/>not fit on a row.
-
-Bob-->Alice: Checking with John...
-Alice->John: Yes... John, how are you?
-```
-
-And this will produce a flow chart:
-
-```mermaid
-graph LR
-A[Square Rect] -- Link text --> B((Circle))
-A --> C(Round Rect)
-B --> D{Rhombus}
-C --> D
 ```
