@@ -73,7 +73,7 @@ Elastic, kibana and Redis should be available on :
 * Elastic Search : [http://localhost:9200](http://localhost:9200)
 * Kibana : [http://localhost:5601](http://localhost:5601)
 * Redis : [http://localhost:6379](http://localhost:6379)
-> Note that you could have to raise your max map  args to be able to rune the Elastic image, see the (https://github.com/open4good/open4goods?tab=readme-ov-file#elastic-max-map-count)[Hint's section]
+> Note that you could have to raise your max map  args to be able to rune the Elastic image, see the [https://github.com/open4good/open4goods?tab=readme-ov-file#elastic-max-map-count](Hint's section)
 
 
 ### Building the open4goods project from code base
@@ -162,7 +162,7 @@ For now, you have an up and running open4good platform. You will like to play wi
 
 ### Products auto-loading
 
-A special service will automaticaly load sample datas on applications startup, allowing you to easily play with the project.
+A [special service](https://github.com/open4good/open4goods/blob/main/commons/src/main/java/org/open4goods/helper/DevModeService.java) will automaticaly load sample datas on applications startup, allowing you to easily play with the project.
 
 
 ## A note on the work directory
