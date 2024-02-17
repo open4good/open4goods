@@ -1,15 +1,13 @@
 package org.open4goods.ui.controllers.ui;
 
 import java.io.IOException;
-import java.util.List;
-import java.util.Locale;
 
 import org.apache.commons.lang3.StringUtils;
 import org.open4goods.config.yml.ui.VerticalConfig;
 import org.open4goods.exceptions.InvalidParameterException;
+import org.open4goods.exceptions.ResourceNotFoundException;
 import org.open4goods.exceptions.TechnicalException;
 import org.open4goods.model.constants.RolesConstants;
-import org.open4goods.model.dto.WikiAttachment;
 import org.open4goods.model.dto.WikiResult;
 import org.open4goods.services.VerticalsConfigService;
 import org.open4goods.services.XwikiService;
@@ -22,6 +20,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.ModelAndView;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -140,8 +139,8 @@ public class XwikiController extends AbstractUiController {
 
 	@GetMapping("/{vertical:[a-z-]+}/{page:[a-z-]+}")
 	public ModelAndView xwiki(@PathVariable(name = "vertical") String vertical,
-			@PathVariable(name = "page") String page, final HttpServletRequest request, HttpServletResponse response)
-					throws IOException, TechnicalException, InvalidParameterException {
+			@PathVariable(name = "page") String page, final HttpServletRequest request, HttpServletResponse response) throws IOException
+					 {
 
 		ModelAndView mv = null;
 
@@ -167,11 +166,18 @@ public class XwikiController extends AbstractUiController {
 		} else {
 			// Rendering mode
 
-			WikiResult content = xwikiService.getPage(vertical + "/" + page);
+			WikiResult content = null;
+			try {
+				content = xwikiService.getPage(vertical + "/" + page);
+			} catch (TechnicalException e) {
+				throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Internal error");	
+			} catch (ResourceNotFoundException e) {
+				throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Content Not Found");	
+			}
 
 			if (StringUtils.isEmpty(content.getHtml())) {
 				//				mv.setStatus(HttpStatus.NOT_FOUND);
-				response.sendError(404);
+				throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Content Not Found");		    
 			} else {
 				mv = defaultModelAndView(("xwiki-"+content.getLayout()), request);
 				mv.addObject("content", content);
