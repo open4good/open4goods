@@ -9,3 +9,5 @@
 /capsule-data/
 /hs_err_*.log
 /.factorypath
+/.cached/
+/logs/

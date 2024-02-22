@@ -14,11 +14,5 @@ import org.springframework.context.annotation.Profile;
 @Profile({"dev","docker"})
 public class ApiConfigDev {
 
-	@Autowired ApiProperties apiConfig;
-	
-	@Bean
-	@Autowired
-	public DevModeService devModeService (ProductRepository repository, SerialisationService serialisationService, VerticalsConfigService verticalsConfigService) {
-		return new DevModeService(apiConfig.getDevModeConfig(),repository, serialisationService, verticalsConfigService);
-	}
+
 }

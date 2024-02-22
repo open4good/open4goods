@@ -62,7 +62,7 @@ public class DevModeService {
 	 * @return
 	 */
 	public boolean needsUpdate() {
-		boolean ret = repository.countMainIndexHavingPrice() >0;
+		boolean ret = repository.countMainIndexHavingPrice() == 0;
 		LOGGER.info("DevMode : Products needs update : "+ret);
 		return ret;
 	}
@@ -73,7 +73,7 @@ public class DevModeService {
 	 * @throws MalformedURLException
 	 */
 	public void indexProductsFromEndpoint() throws IOException, MalformedURLException {
-		LOGGER.info("DevMode : Indexing products from endpoint : "+productLoadEndpoint);
+		LOGGER.info("DevMode : Indexing products from endpoint : "+productLoadEndpoint.getDevModeProductEndpoint());
 		try (InputStream is = new URL(productLoadEndpoint.getDevModeProductEndpoint()).openConnection().getInputStream();
 				BufferedReader reader = new BufferedReader(new InputStreamReader(is));
 				Stream<String> stream = reader.lines()) {
@@ -81,8 +81,9 @@ public class DevModeService {
 				try {
 					Product p = serialisationService.fromJson(e, Product.class);
 					p.getPrice().getMinPrice().setTimeStamp(System.currentTimeMillis());
-					repository.index(p);
-				} catch (IOException e1) {
+					LOGGER.info("DevMode : Indexing product : "+p.getId());
+					repository.forceIndex(p);
+				} catch (Exception e1) {
 					LOGGER.error("Error while importing product", e1);
 				}
 
@@ -109,17 +110,12 @@ public class DevModeService {
 			repository.exportVerticalWithValidDate(c.getId()).limit(100).forEach(p -> {
 				try {
 					// Set last offer date to provide a longer product visibility in UI
-					response.getWriter().write(serialisationService.toJson(p));
+					response.getWriter().write(serialisationService.toJson(p)+"\n");
 				} catch (IOException e) {
 					LOGGER.error("Error while streaming products", e);
 				}
 			});
 		});
 	}
-
-
-
-
-
 
 }

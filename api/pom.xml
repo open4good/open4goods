@@ -19,6 +19,11 @@
 
 	<dependencies>
 
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-docker-compose</artifactId>
+		</dependency>
+		
 		<!--
 		https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-test -->
 		<dependency>
@@ -35,6 +40,13 @@
 			<version>${global.version}</version>
 		</dependency>
 
+		<!-- verticals definitions -->
+		<dependency>
+			<groupId>org.open4goods</groupId>
+			<artifactId>verticals</artifactId>
+			<version>${global.version}</version>
+		</dependency>
+		
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-cache</artifactId>
@@ -68,7 +80,7 @@
 		<dependency>
 			<groupId>com.squareup.okio</groupId>
 			<artifactId>okio</artifactId>
-			<version>3.7.0</version>
+			<version>3.8.0</version>
 		</dependency>
 
 

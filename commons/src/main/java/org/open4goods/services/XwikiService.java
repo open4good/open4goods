@@ -233,9 +233,10 @@ public class XwikiService {
 	 * @param password
 	 * @return
 	 * @throws TechnicalException
+	 * @throws ResourceNotFoundException 
 	 * @throws InvalidParameterException
 	 */
-	public WikiResult getPage (String xwikiPath) throws TechnicalException, InvalidParameterException{
+	public WikiResult getPage (String xwikiPath) throws TechnicalException, ResourceNotFoundException{
 
 
 		WikiResult cached = contentCache.get(xwikiPath);
@@ -261,7 +262,7 @@ public class XwikiService {
 			//			throw new TechnicalException("Cannot execute get request to " + url,e );
 			logger.error("Cannot parse wiki page at {} : {}" , url,e.getMessage());
 		}
-
+		
 		if (null != response && response.getStatusCode().is2xxSuccessful()) {
 			try {
 				String raw= response.getBody();
@@ -292,7 +293,10 @@ public class XwikiService {
 			} catch (Exception e) {
 
 				logger.error("Cannot parse wiki page at " + url,e);
+				throw new TechnicalException("Cannot parse wiki page at " + url,e);
 			}
+		} else {
+			throw new ResourceNotFoundException("Cannot find wiki page at " + url);
 		}
 		res.setViewLink(url );
 		res.setEditLink(url.replace("/view/", "/edit/"));
