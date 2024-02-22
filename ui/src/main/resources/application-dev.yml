@@ -18,10 +18,6 @@ wikiConfig:
     password: nudger 
     baseUrl: https://wiki.nudger.fr
     
-    
-
-verticalsFolder: "/opt/open4goods/config/verticals/"
-datasourcesfolder: "/opt/open4goods/config/datasources/"
 
 spring:
   docker:
@@ -61,10 +57,3 @@ namings:
   baseUrls:
     fr: http://localhost:8082/
 #    default: http://127.0.0.1:8080/  
-
-
-xwiki-o4g:
-  baseUrl: = https://wiki.nudger.fr
-  auth:
-    password: couilledu22
-    username: Tif

@@ -42,9 +42,3 @@ fetcherProperties:
 elasticsearch.username: 
 elasticsearch.password:  
 elasticsearch.host: 127.0.0.1
-
-xwiki-o4g:
-  baseUrl: = https://wiki.nudger.fr
-  auth:
-    password: couilledu22
-    username: Tif
