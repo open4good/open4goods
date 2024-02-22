@@ -72,22 +72,51 @@ You will need :
 - Unfortunately a Linux / Mac os, cause Java Path Separators are hardcoded. Not (really) a tooth against Windows User ;)  
   
 ### running through docker-compose 
+
+
+Note that you could have to raise some max vm args to be able to run the Elastic image.
+
+Before running the docker compose check that the value of 'vm.max_map_count' is higher or equal to 262144.
+
+```
+cat /proc/sys/vm/max_map_count
+
+```
+or
+
+```
+/sbin/sysctl vm.max_map_count
+
+```
+
+If not increase this value.
+
+```   
+
+sudo sysctl -w vm.max_map_count=262144 
+
+```
+
 Elasticsearch and Redis are  used by the open4goods project. It is packaged with a [https://www.elastic.co/fr/kibana](Kibana) instance in the docker-compose.yml file. Go to the project root, then start the compose file
-  
+
 ```  
 docker-compose up  
 ```
+If the command was not found try
+
+```  
+docker compose up  
+```
+> **Note:**
+> The original python project, called 'docker-compose', aka v1 of docker/compose repo, has now been deprecated and development has moved over to v2 . To install the v2 'docker compose' as a CLI plugin on Linux, supported distribution can now install the docker-compose-plugin package. E.g. on debian run 'apt-get install docker-compose-plugin'
+
+
 Elastic, kibana and Redis should be available on :  
   
 * Elastic Search : [http://localhost:9200](http://localhost:9200)  
 * Kibana : [http://localhost:5601](http://localhost:5601)  
 * Redis : [http://localhost:6379](http://localhost:6379)  
-  
-Note that you could have to raise your max vm args to be able to rune the Elastic image 
- 
-```    
-sudo sysctl -w vm.max_map_count=262144  
-```
+
 
 To permanently set the max virtual memory :  
   
