@@ -9,19 +9,18 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.open4goods.config.yml.ui.I18nElements;
 import org.open4goods.config.yml.ui.VerticalConfig;
 import org.open4goods.dao.ProductRepository;
-import org.open4goods.model.Localisable;
 import org.open4goods.model.constants.CacheConstants;
 import org.open4goods.model.dto.ExpandedTaxonomy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.support.ResourcePatternResolver;
 import org.springframework.scheduling.annotation.Scheduled;
 
 import com.fasterxml.jackson.databind.ObjectReader;
@@ -30,7 +29,7 @@ import com.fasterxml.jackson.databind.ObjectReader;
  * This service is in charge to provide the Verticals configurations.
  * Configurations are provided from the classpath AND from a git specific
  * project (fresh local clone on app startup)
- *
+ * TODO : Should be in the verticals sub projetc
  * @author goulven
  *
  */
@@ -39,8 +38,9 @@ public class VerticalsConfigService {
 	public static final Logger logger = LoggerFactory.getLogger(VerticalsConfigService.class);
 
 	private static final String DEFAULT_CONFIG_FILENAME = "_default.yml";
-//	private static final String CLASSPATH_VERTICALS = "classpath:**verticals/*.yml";
-//	private static final String CLASSPATH_VERTICAL_PREFIX = "classpath:verticals/";
+
+	private static final String CLASSPATH_VERTICALS = "classpath:/verticals/*.yml";
+	private static final String CLASSPATH_VERTICALS_DEFAULT = "classpath:/verticals/_default.yml";
 
 	private SerialisationService serialisationService;
 
@@ -60,12 +60,15 @@ public class VerticalsConfigService {
 
 	private GoogleTaxonomyService googleTaxonomyService;
 
-	public VerticalsConfigService(SerialisationService serialisationService, String verticalsFolder, GoogleTaxonomyService googleTaxonomyService, ProductRepository productRepository) {
+	private ResourcePatternResolver resourceResolver;
+	
+	public VerticalsConfigService(SerialisationService serialisationService, String verticalsFolder, GoogleTaxonomyService googleTaxonomyService, ProductRepository productRepository, ResourcePatternResolver resourceResolver) {
 		super();
 		this.serialisationService = serialisationService;
 		this.verticalsFolder = verticalsFolder;
 		this.googleTaxonomyService = googleTaxonomyService;
 		this.productRepository = productRepository;
+		this.resourceResolver = resourceResolver;
 
 		// initial configs loads
 		loadConfigs();
@@ -79,20 +82,25 @@ public class VerticalsConfigService {
 	@Scheduled(fixedDelay = 1000 * 60 * 10, initialDelay = 1000 * 60 * 10)
 	public synchronized void loadConfigs() {
 
-		Map<String, VerticalConfig> configs2 = new ConcurrentHashMap<>(100);
+		Map<String, VerticalConfig> vConfs = new ConcurrentHashMap<>(100);
 
 		/////////////////////////////////////////
 		// Load configurations from classpath
 		/////////////////////////////////////////
 
-		for (VerticalConfig uc : getFolderVerticalConfigs()) {
+		for (VerticalConfig uc : loadFromFolder()) {
+			logger.info("Adding config {} from frolder", uc.getId());
+			vConfs.put(uc.getId(), uc);
+		}
+		
+		for (VerticalConfig uc : loadFromClasspath()) {
 			logger.info("Adding config {} from classpath", uc.getId());
-			configs2.put(uc.getId(), uc);
+			vConfs.put(uc.getId(), uc);
 		}
 		// Switching confs
 		synchronized (configs) {
 			configs.clear();
-			configs.putAll(configs2);
+			configs.putAll(vConfs);
 		}
 
 		// Associating categoriesToVertical
@@ -114,16 +122,49 @@ public class VerticalsConfigService {
 
 
 
+	/**
+	 * 
+	 * @return the available verticals configurations from classpath
+	 */
+	private List<VerticalConfig> loadFromClasspath() {
+		List<VerticalConfig> ret = new ArrayList<>();
+		Resource[] resources = null;
+		try {
+			resources = resourceResolver.getResources(CLASSPATH_VERTICALS);
+		} catch (IOException e) {
+			logger.error("Cannot load  verticals from {} : {}", CLASSPATH_VERTICALS, e.getMessage());
+			return ret;
+		}
 
+		for (Resource r : resources) {
+			if (r.getFilename().equals(DEFAULT_CONFIG_FILENAME)) {
+				continue;
+			}
+			try {
+				ret.add(getConfig(r.getInputStream(), getDefaultConfig()));
+			} catch (IOException e) {
+				logger.error("Cannot retrieve vertical config",e);
+			}
+		}
+			
+		return ret;
+	}
+	
+	
+	
 	/**
 	 *
 	 * @return the available verticals configurations from classpath
 	 */
-	private List<VerticalConfig> getFolderVerticalConfigs() {
+	private List<VerticalConfig> loadFromFolder() {
 		List<VerticalConfig> ret = new ArrayList<>();
 
 		File verticalFolder = new File(verticalsFolder);
-
+		if (!verticalFolder.isDirectory()) {
+			logger.warn("Cannot load verticals from {} : not a valid directory", verticalsFolder);
+			return ret;
+		}
+		
 		for (File filename : verticalFolder.listFiles((dir, name) -> name.toLowerCase().endsWith(".yml"))) {
 			if (filename.getName().equals(DEFAULT_CONFIG_FILENAME)) {
 				continue;
@@ -241,15 +282,26 @@ public class VerticalsConfigService {
 	 */
 	@Cacheable(cacheNames = CacheConstants.FOREVER_LOCAL_CACHE_NAME)
 	public VerticalConfig getDefaultConfig() {
-		VerticalConfig ret = null;
+//		VerticalConfig ret = null;
+//		try {
+//			FileInputStream f = new FileInputStream(verticalsFolder + File.separator + DEFAULT_CONFIG_FILENAME);
+//			ret = serialisationService.fromYaml(f, VerticalConfig.class);
+//			f.close();
+//		} catch (Exception e) {
+//			logger.error("Error getting default config", e);
+//		}
+//		return ret;
+		
+		
+		
+		List<VerticalConfig> ret = new ArrayList<>();
 		try {
-			FileInputStream f = new FileInputStream(verticalsFolder + File.separator + DEFAULT_CONFIG_FILENAME);
-			ret = serialisationService.fromYaml(f, VerticalConfig.class);
-			f.close();
-		} catch (Exception e) {
-			logger.error("Error getting default config", e);
+			Resource r = resourceResolver.getResource(CLASSPATH_VERTICALS_DEFAULT);
+			return serialisationService.fromYaml(r.getInputStream(), VerticalConfig.class);
+		} catch (IOException e) {
+			logger.error("Cannot load  verticals from {} : {}", CLASSPATH_VERTICALS, e.getMessage());
+			return null;
 		}
-		return ret;
 	}
 
 	/**

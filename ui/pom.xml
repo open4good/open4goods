@@ -26,6 +26,12 @@
 
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-docker-compose</artifactId>
+		</dependency>
+
+
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-devtools</artifactId>
 			<optional>true</optional>
 		</dependency>
@@ -41,8 +47,14 @@
 			<artifactId>spring-boot-starter-security</artifactId>
 		</dependency>
 
+		<!-- verticals definitions -->
+		<dependency>
+			<groupId>org.open4goods</groupId>
+			<artifactId>verticals</artifactId>
+			<version>${global.version}</version>
+		</dependency>
 
-		<!-- Commons (model) -->
+		<!-- Commons  -->
 		<dependency>
 			<groupId>org.open4goods</groupId>
 			<artifactId>commons</artifactId>
@@ -67,18 +79,18 @@
 			<version>1.1.0</version>
 		</dependency>
 
-       <dependency>
-            <groupId>jakarta.mail</groupId>
-            <artifactId>jakarta.mail-api</artifactId>
-            <scope>provided</scope>
-        </dependency>
+		<dependency>
+			<groupId>jakarta.mail</groupId>
+			<artifactId>jakarta.mail-api</artifactId>
+			<scope>provided</scope>
+		</dependency>
 
-       <dependency>
-            <groupId>org.eclipse.angus</groupId>
-            <artifactId>jakarta.mail</artifactId>
-            
-        </dependency>
-        
+		<dependency>
+			<groupId>org.eclipse.angus</groupId>
+			<artifactId>jakarta.mail</artifactId>
+
+		</dependency>
+
 		<dependency>
 			<groupId>com.talanlabs</groupId>
 			<artifactId>avatar-generator-8bit</artifactId>

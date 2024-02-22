@@ -1,22 +1,29 @@
+# Folder where work data will be store
+rootFolder: ./
 
-# Spring classical config
+# Port the server will be running on
 server:
   port: 8082
 
-########################
-# Logging configuration
-########################
 
+# Logging configuration
 logging: 
     level:
         ROOT: info
         org.open4goods: info
+        
+# XWiki instance that holds website contents
+wikiConfig:
+    user: nudger
+    password: nudger 
+    baseUrl: https://wiki.nudger.fr
+    
+    
 
 verticalsFolder: "/opt/open4goods/config/verticals/"
 datasourcesfolder: "/opt/open4goods/config/datasources/"
 
 spring:
-
   docker:
     compose:
       enabled: true
@@ -55,9 +62,6 @@ namings:
     fr: http://localhost:8082/
 #    default: http://127.0.0.1:8080/  
 
-elasticsearch.username: 
-elasticsearch.password:  
-elasticsearch.host: 127.0.0.1 
 
 xwiki-o4g:
   baseUrl: = https://wiki.nudger.fr
