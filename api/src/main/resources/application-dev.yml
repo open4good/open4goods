@@ -1,5 +1,6 @@
 # Folder where work data will be store
 rootFolder: ./
+datasourcesfolder: "./datasources/"
 
 # Port the server will be running on
 server:
@@ -19,9 +20,6 @@ adminKey: open4goods
 crawlerKeys:
   - open4goods
 
-verticalsFolder: "/home/goulven/git/open4goods-config/verticals/"
-datasourcesfolder: "/home/goulven/git/open4goods-config/datasources/"
-dedicatedLoggerToConsole: true
 
 spring:
   thymeleaf:
