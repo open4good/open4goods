@@ -76,7 +76,8 @@ Elastic, kibana and Redis should be available on :
 * Elastic Search : [http://localhost:9200](http://localhost:9200)
 * Kibana : [http://localhost:5601](http://localhost:5601)
 * Redis : [http://localhost:6379](http://localhost:6379)
-> Note that you could have to raise your max map  args to be able to rune the Elastic image, see the [Hint's section](https://github.com/open4good/open4goods?tab=readme-ov-file#elastic-max-map-count)
+
+> Before running the docker compose check that the value of 'vm.max_map_count' is higher or equal to 262144. If not, you will have to raise your max map  args to be able to rune the Elastic image, see the [Hint's section](https://github.com/open4good/open4goods?tab=readme-ov-file#elastic-max-map-count)
 
 
 ### Building the open4goods project from code base
