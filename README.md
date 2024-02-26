@@ -68,7 +68,7 @@ You will need :
 Elasticsearch and Redis are used by the open4goods project. A [Kibana instance](https://www.elastic.co/fr/kibana) is commented in the docker-compose.yml file, if you want to browse data's by yourself. Go to the project root, then start the compose file
 
 ```
-docker-compose up
+docker compose up
 ```
 > Docker compose is managed by spring-boot-docker-compose. That means that the manual launching of docker-compose is not mandatory, containers will be started by the application if not present.
 
