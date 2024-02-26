@@ -9,3 +9,6 @@
 /open4goods-data/
 /.factorypath
 /hs_err_*
+/.cached/
+/logs/
+/target/
