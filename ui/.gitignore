@@ -10,4 +10,4 @@
 /hs_err_*.log
 /.factorypath
 /.cached/
-/logs/
+/logs/*
