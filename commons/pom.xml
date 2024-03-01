@@ -30,6 +30,12 @@
 
 	<dependencies>
 
+		<dependency>
+			<groupId>org.open4goods</groupId>
+			<artifactId>o4g-xwiki-spring-boot-starter</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+		</dependency>
+		
 		<!-- verticals definitions -->
 		<dependency>
 			<groupId>org.open4goods</groupId>
