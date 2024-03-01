@@ -25,10 +25,12 @@ import org.open4goods.services.SearchService;
 import org.open4goods.services.SerialisationService;
 import org.open4goods.services.StandardiserService;
 import org.open4goods.services.VerticalsConfigService;
+import org.open4goods.services.Xwiki2Service;
 import org.open4goods.services.XwikiService;
 import org.open4goods.services.ai.AiAgent;
 import org.open4goods.services.ai.AiService;
 import org.open4goods.ui.config.yml.UiConfig;
+import org.open4goods.ui.services.Blog2Service;
 import org.open4goods.ui.services.BlogService;
 import org.open4goods.ui.services.GtinService;
 import org.open4goods.ui.services.ImageService;
@@ -100,6 +102,11 @@ public class AppConfig {
 		public BlogService blogService(@Autowired XwikiService xwikiService, @Autowired UiConfig config) {
 			return new BlogService(xwikiService, config.getBlogConfig(), config.getNamings().getBaseUrls());
 		}
+
+	  @Bean
+	  public Blog2Service blog2Service(@Autowired Xwiki2Service xwiki2Service, @Autowired UiConfig config) {
+		  return new Blog2Service(xwiki2Service, config.getBlogConfig(), config.getNamings().getBaseUrls());
+	  }
 	  
 	  
 	@Bean
@@ -156,6 +163,11 @@ public class AppConfig {
 		return new XwikiService(props.getWikiConfig());
 	}
 
+	@Bean
+	Xwiki2Service xwiki2Service(@Autowired UiConfig props) {
+		return new Xwiki2Service(props.getWikiConfig());
+	}
+	
 
 	/** The bean providing datasource configurations **/
 	@Bean DataSourceConfigService datasourceConfigService(@Autowired final UiConfig config) {
