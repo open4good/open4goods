@@ -41,13 +41,13 @@
 		<dependency>
 			<groupId>org.xwiki.commons</groupId>
 			<artifactId>xwiki-commons-component-default</artifactId>
-		    <version>16.0.0</version>
+		    <version>16.1.0</version>
 		</dependency>
 
 		<dependency>
 			<groupId>org.xwiki.rendering</groupId>
 			<artifactId>xwiki-rendering-api</artifactId>
-		    <version>16.0.0</version>
+		    <version>16.1.0</version>
 		</dependency>
 
 		<dependency>
