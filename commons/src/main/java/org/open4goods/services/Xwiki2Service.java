@@ -74,6 +74,7 @@ public class Xwiki2Service {
 					WikiAttachment2 wikiAttachment = null;
 					for(Attachment attachment: attachments) {
 						wikiAttachment = new WikiAttachment2();
+						// get an updated and clean url : https instead of http, request params added... 
 						wikiAttachment.setUrl(xwikiServices.getAttachmentUrl(attachment));
 						wikiAttachment.setId(attachment.getId());
 						wikiAttachment.setName(attachment.getName());
