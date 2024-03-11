@@ -11,6 +11,7 @@ import org.open4goods.model.constants.CacheConstants;
 import org.open4goods.model.constants.Currency;
 import org.open4goods.model.data.Price;
 import org.open4goods.model.product.Product;
+import org.open4goods.services.BarcodeValidationService;
 import org.open4goods.services.BrandService;
 import org.open4goods.services.DataSourceConfigService;
 import org.open4goods.services.EvaluationService;
@@ -73,6 +74,10 @@ public class AppConfig {
 		this.config = config;
 	}
 
+	@Bean
+	BarcodeValidationService barcodeValidationService () {
+		return new BarcodeValidationService();
+	}
 	
 	@Bean
 	@Autowired

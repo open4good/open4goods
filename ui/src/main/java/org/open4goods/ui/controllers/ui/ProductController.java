@@ -4,17 +4,21 @@ import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.util.AbstractMap.SimpleEntry;
+import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
 import org.open4goods.config.yml.ui.VerticalConfig;
 import org.open4goods.dao.ProductRepository;
 import org.open4goods.exceptions.ResourceNotFoundException;
+import org.open4goods.model.BarcodeType;
 import org.open4goods.model.Localised;
 import org.open4goods.model.constants.ProviderType;
 import org.open4goods.model.data.AffiliationToken;
 import org.open4goods.model.data.Description;
 import org.open4goods.model.product.AggregatedPrice;
 import org.open4goods.model.product.Product;
+import org.open4goods.services.BarcodeValidationService;
 import org.open4goods.services.BrandService;
 import org.open4goods.services.SerialisationService;
 import org.open4goods.services.VerticalsConfigService;
@@ -59,6 +63,7 @@ public class ProductController extends AbstractUiController {
 
 	private @Autowired BrandService brandService;
 
+	private @Autowired BarcodeValidationService barcodeValidationService;
 
 	/**
 	 * A product, associated with a vertical at the home level.
@@ -123,6 +128,77 @@ public class ProductController extends AbstractUiController {
 		return ret;
 	}
 
+	
+	// TODO : in specific controller
+	@GetMapping("/webextension/product")
+	public ModelAndView webExtensionProduct(@RequestParam(required = false) Long gtin,@RequestParam(required = false) String title , final HttpServletRequest request, HttpServletResponse response) throws IOException {
+
+
+		ModelAndView mv = null;
+
+
+		mv = defaultModelAndView("webextension/product-single", request);
+
+
+		// Checking through GTIN
+		if (null != gtin) {
+			
+			SimpleEntry<BarcodeType, String> bCode = barcodeValidationService.sanitize(gtin.toString());
+			
+			if (bCode.getKey().equals(BarcodeType.UNKNOWN)) {
+				mv.setViewName("webextension/product-notfound");
+				throw new ResponseStatusException(HttpStatus.BAD_REQUEST,	"Invalid GTIN Format");
+			} else {
+				Product data;
+				try {
+					data = productRepository.getById(bCode.getValue());
+				} catch (ResourceNotFoundException e) {
+					mv.setViewName("webextension/product-notfound");
+					throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No product found ");
+				}
+				if (null != data) {
+					mv.addObject("product", data);
+				} else {
+					mv.setViewName("webextension/product-notfound");
+					throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No product found ");
+				}
+			}
+			
+		} else {
+			// Lookup by title
+			
+			List<Product> data = productRepository.getByTitle(title);
+			if (data.size() == 0) {
+				mv.setViewName("webextension/product-notfound");
+				throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No product found ");
+			} else if (data.size() == 1) {
+				mv.addObject("product", data.get(0));
+			} else {
+				mv.setViewName("webextension/webextension-multiple");
+				mv.addObject("products", data);
+			}
+		}
+		
+		
+		
+
+		Product p = (Product) mv.getModel().get("product");
+		
+		if (null != p) {			
+			VerticalConfig verticalConfig = verticalConfigService.getConfigByIdOrDefault(p.getVertical());
+			mv.addObject("verticalConfig", verticalConfig);
+			UiHelper uiHelper = new UiHelper(request, verticalConfig, p);
+			// Adding the UiHelper class
+			mv.addObject("helper", uiHelper);
+		}
+
+				
+		return mv;
+	}
+
+	
+	
+	
 	/**
 	 * Product rendering build logic
 	 * @param id
@@ -211,11 +287,6 @@ public class ProductController extends AbstractUiController {
 		inferAffiliationToken(request, data, data.getPrice().getMinPrice());
 		//		inferAffiliationToken(data, data.getPrice().getMaxPrice());
 
-		
-		
-	
-		
-		
 		
 		
 		// Adding the diplay country
