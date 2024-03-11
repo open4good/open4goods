@@ -90,20 +90,6 @@ blogConfig:
       default: "The Nudger blog, the best way to keep up with the latest news about eco-nudging"
       fr: "Le blog Nudger, la meilleure façon de suivre les dernières actualités sur l'éco-nudging"
       
-  
-xwiki-o4g:
-    baseUrl: "https://wiki.nudger.fr"
-    auth:
-        password: "nudger"
-        username: "nudger" 
-    httpsOnly: true
-    media: "json"
-    api:
-        entryPoint: "https://wiki.nudger.fr/rest"
-        wiki: "xwiki"
-  
-  
-
 brandConfig:
 
   brandsLogo:
