@@ -11,7 +11,8 @@ public class RolesConstants {
 	public static final String ROLE_ADMIN = "ROLE_ADMIN";
 	public static final String ROLE_TESTER = "ROLE_TESTER";
 	
-	public static final String ROLE_XWIKI_ALL = "ROLE_XWIKIALLGROUP";
+	//public static final String ROLE_XWIKI_ALL = "ROLE_XWIKIALLGROUP";
+	public static final String ROLE_XWIKI_ALL = "XWIKIALLGROUP";
 
 
 }
