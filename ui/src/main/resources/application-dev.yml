@@ -13,14 +13,23 @@ logging:
         org.open4goods: info
         
 # XWiki instance that holds website contents
-wikiConfig:
-    user: nudger
-    password: nudger 
-    baseUrl: https://wiki.nudger.fr
-    
-    
+#wikiConfig:
+#    user: 
+#    password:  
+#    baseUrl: https://wiki.nudger.fr
 
-
+xwiki:
+    baseUrl: "https://wiki.nudger.fr"
+    auth:
+        password:
+        username:
+    httpsOnly: true
+    media: "json"
+    api:
+        entryPoint: "rest"
+        wiki: "xwiki"
+        
+        
 spring:
   docker:
     compose:
@@ -59,4 +68,3 @@ namings:
   baseUrls:
     fr: http://localhost:8082/
 #    default: http://127.0.0.1:8080/  
-
