@@ -2,7 +2,6 @@ package org.open4goods.services;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import org.open4goods.config.yml.XwikiConfiguration;
 import org.open4goods.model.dto.WikiAttachment2;
@@ -67,14 +66,18 @@ public class Xwiki2Service {
 		for(Page page: pages) {
 			try {
 				wikiPage = new WikiPage2(page);
+				
 				// manage attachments (with right scheme for url)
-				List<Attachment> attachments = xwikiServices.getAttachmentList(page);
-				if( attachments != null && attachments.size() > 0 ) {
+				if( page.getAttachments() != null && 
+					page.getAttachments().getAttachments() != null && 
+					page.getAttachments().getAttachments().size() > 0 ) {
+					
 					List<WikiAttachment2> wikiAttachments = new ArrayList<WikiAttachment2>();
 					WikiAttachment2 wikiAttachment = null;
-					for(Attachment attachment: attachments) {
+					for(Attachment attachment: page.getAttachments().getAttachments()) {
 						wikiAttachment = new WikiAttachment2();
-						wikiAttachment.setUrl(xwikiServices.getAttachmentUrl(attachment));
+						// get an updated and clean url : https instead of http, request params added... 
+						wikiAttachment.setUrl(attachment.getXwikiAbsoluteUrl());
 						wikiAttachment.setId(attachment.getId());
 						wikiAttachment.setName(attachment.getName());
 						wikiAttachment.setSize(attachment.getSize());
@@ -127,15 +130,12 @@ public class Xwiki2Service {
 	 * @param string
 	 * @return
 	 */
-	public String getAttachmentUrl(String space, String name, String attachmentName) {
-		
-		return config.getBaseUrl()+"/bin/download/"+space+"/"+name+"/"+attachmentName;
-	}
-	/**
-	 * 
-	 * @param date
-	 * @return
-	 */
+//	public String getAttachmentUrl(String space, String name, String attachmentName) {
+//		
+//		return config.getBaseUrl()+"/bin/download/"+space+"/"+name+"/"+attachmentName;
+//	}
+
+	
 //	public long parseWikiDate (String date) {
 //        // Parse the date string into a LocalDateTime object
 //        LocalDateTime dateTime = LocalDateTime.parse(date, formatter);
@@ -148,6 +148,7 @@ public class Xwiki2Service {
 //		logger.warn("Invalidating wiki cache : {}",doc);
 //		contentCache.remove(doc.replace(".", "/"));
 //	}
+	
 //
 //	public void invalidateAll() {
 //		contentCache.clear();

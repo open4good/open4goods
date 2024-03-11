@@ -1,7 +1,5 @@
 package org.open4goods.model.dto;
 
-import org.xwiki.rest.model.jaxb.Attachment;
-
 /**
  * A xwiki attachment broker
  * 
