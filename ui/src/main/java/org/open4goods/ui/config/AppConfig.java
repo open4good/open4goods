@@ -47,7 +47,6 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.web.firewall.HttpFirewall;
 import org.springframework.security.web.firewall.StrictHttpFirewall;
 import org.springframework.web.servlet.LocaleResolver;
@@ -152,11 +151,6 @@ public class AppConfig {
 	//		return new SitemapGenerationService(aggregatedDataRepository, props);
 	//	}
 	//
-
-
-	@Bean AuthenticationProvider capsuleAuthenticationProvider() {
-		return new XwikiAuthenticationProvider();
-	}
 
 	@Bean
 	XwikiService xwikiService(@Autowired UiConfig props) {
