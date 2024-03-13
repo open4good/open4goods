@@ -320,9 +320,21 @@ public class ProductRepository {
 	public List<Product> getByTitle(String title) {
 		// Setting the query
 		
+		return getByTitle(title, MAX_TITLE_ITEMS_TO_FETCH);
+		
+	}
+	
+	/**
+	 * Get multiple data from ids
+	 * @param title
+	 * @return
+	 */
+	public List<Product> getByTitle(String title, int maxItems) {
+		// Setting the query
+		
 		List<String> words = List.of(title.split(" "));		
 		NativeQueryBuilder esQuery = new NativeQueryBuilder().withQuery(new CriteriaQuery(new Criteria("names.offerNames").matchesAll(words) ));
-		SearchHits<Product> results = search(esQuery.withPageable(PageRequest.of(0, MAX_TITLE_ITEMS_TO_FETCH)).build(),ProductRepository.MAIN_INDEX_NAME);
+		SearchHits<Product> results = search(esQuery.withPageable(PageRequest.of(0, maxItems)).build(),ProductRepository.MAIN_INDEX_NAME);
 		return results.stream().map(SearchHit::getContent).collect(Collectors.toList());
 		
 	}

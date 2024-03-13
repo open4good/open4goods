@@ -130,7 +130,7 @@ public class ProductController extends AbstractUiController {
 
 	
 	// TODO : in specific controller
-	@GetMapping("/webextension/product")
+	@GetMapping("/webextension")
 	public ModelAndView webExtensionProduct(@RequestParam(required = false) Long gtin,@RequestParam(required = false) String title , final HttpServletRequest request, HttpServletResponse response) throws IOException {
 
 
@@ -146,8 +146,8 @@ public class ProductController extends AbstractUiController {
 			SimpleEntry<BarcodeType, String> bCode = barcodeValidationService.sanitize(gtin.toString());
 			
 			if (bCode.getKey().equals(BarcodeType.UNKNOWN)) {
-				mv.setViewName("webextension/product-notfound");
-				throw new ResponseStatusException(HttpStatus.BAD_REQUEST,	"Invalid GTIN Format");
+				mv.setViewName("/webextension/product-notfound");
+//				throw new ResponseStatusException(HttpStatus.BAD_REQUEST,	"Invalid GTIN Format");
 			} else {
 				Product data;
 				try {
@@ -174,7 +174,7 @@ public class ProductController extends AbstractUiController {
 			} else if (data.size() == 1) {
 				mv.addObject("product", data.get(0));
 			} else {
-				mv.setViewName("webextension/webextension-multiple");
+				mv.setViewName("webextension/product-multiple");
 				mv.addObject("products", data);
 			}
 		}

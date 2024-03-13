@@ -7,10 +7,7 @@
 	<title th:text="${helper.texts.get('meta-title')}"></title>
  
 	<!-- CSS -->
-	<link rel="stylesheet" type="text/css" href="/webjars/datatables/css/dataTables.bootstrap5.min.css">
-	<link rel="stylesheet" type="text/css" href="/webjars/datatables-responsive/css/responsive.dataTables.min.css">
-	<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/select/1.7.0/css/select.dataTables.min.css">
-	<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/buttons/2.4.2/css/buttons.dataTables.min.css">
+
 </head>
 
 <body>
@@ -21,17 +18,28 @@
 			
 		<h1 class="h1 title text-uppercase text-center" th:text="${helper.texts.title}"></h1>	
 	
-				<div class="card shadow p-4">
-				
-					<th:block th:if="${editor}">
-						<form method="post" th:action="${url}">	
-							<input value="Enregistrer les modifications" type="submit">			
-					</th:block>
-							
-       				<!--/* Header */-->				
-					<th:block th:insert="~{inc/product-header.html}"></th:block>
-				</div>
+		<div th:if="${product.ecoscore}" class="col-lg-4">
+		<!--/* Best price */-->				
+		<!--th:block th:insert="~{inc/product-price.html}"></th:block-->
 
+		<div class="p-4">
+			<!--div th:if="${product.ecoscore}" class="text-center">				           
+			   <img class="mt-4"  width="350px" th:alt="'Ecoscore : ' + ${product.ecoscore.letter()}" th:title="'éco-score : ' + ${product.ecoscore.letter()}" th:src="'/icons/ecoscore/scoring-'+${product.ecoscore.letter()}+'.png'">
+			</div-->
+			<div>						
+			
+			<img class="mb-4"  width="350px" th:alt="'Ecoscore : ' + ${product.ecoscore.letter()}" th:title="'éco-score : ' + ${product.ecoscore.letter()}" th:src="'/icons/ecoscore/scoring-'+${product.ecoscore.letter()}+'.png'">
+			
+			
+			
+		
+				
+		
+		
+			</div>
+		</div>
+
+	</div>
 				
 				
 				
@@ -43,269 +51,6 @@
 
 </main>
 
-<!--/* Product footer */-->				
-<th:block th:insert="~{inc/footer.html}"></th:block>
-    
-
-    <!-- Core -->
-<script src="../../vendor/@popperjs/core/dist/umd/popper.min.js"></script>
-<script src="/webjars/bootstrap/js/bootstrap.min.js"></script>
-
-
-<script src="../../vendor/headroom.js/dist/headroom.min.js"></script>
-
-<!-- Vendor JS -->
-<script src="../../vendor/smooth-scroll/dist/smooth-scroll.polyfills.min.js"></script>
-<script src="../../vendor/vivus/dist/vivus.min.js"></script>
-
-
-<!-- 
-
-
-<script src="../../vendor/onscreen/dist/on-screen.umd.min.js"></script>
-<script src="../../vendor/nouislider/distribute/nouislider.min.js"></script>
-<script src="../../vendor/jarallax/dist/jarallax.min.js"></script>
-<script src="../../vendor/chartist/dist/chartist.min.js"></script>
-<script src="../../vendor/chartist-plugin-tooltips/dist/chartist-plugin-tooltip.min.js"></script>
-
-<script src="../../vendor/vanillajs-datepicker/dist/js/datepicker.min.js"></script>
-<script async defer src="https://buttons.github.io/buttons.js"></script>
-<script src="../../vendor/@glidejs/glide/dist/glide.min.js"></script>
- --> 
-
-
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
- <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
-
-
-
-<script src="/webjars/jquery/jquery.min.js"></script>
-<script type="text/javascript" language="javascript" src="/webjars/datatables/js/jquery.dataTables.min.js"></script>
-<script type="text/javascript" language="javascript" src="/webjars/datatables/js/dataTables.bootstrap5.min.js"></script>
-<script type="text/javascript" language="javascript" src="/webjars/datatables-responsive/js/dataTables.responsive.min.js"></script>
-
-
-
-<script src="../../vendor/countup.js/dist/countUp.umd.js"></script>
-<!-- pixel JS -->
-<script src="../../assets/js/pixel.js"></script>
-<!-- custom sources -->
-<script src="../../assets/js/pixel-custom.js"></script>
-
-
-<script th:inline="javascript">
-
-
-
-var reversment;
-function initTable (tableId) {
-	
-
-	tableNew = $(tableId).DataTable({
-			searching: false, 
-			paging: false,
-			info: false,
-		    "order": [ [ 1, 'asc' ]]
-	}			
-	);	
-	
-	tableNew.on('click', 'tbody tr', (e) => {
-	    let classList = e.currentTarget.classList;
-	 	
-	    token = $(e.currentTarget).attr('data-token');
-	    compensation = $(e.currentTarget).attr('data-compensation');
-	    
-	    $("#token").val(token);
-
-	    var countUpUpdateoptions = {
-//	    		   startVal: $("#countup-reversment").attr("data-max"),
-	    		   duration: 1,
-	    		   useEasing : false,
-	    		   useGrouping : false,
-	    		   separator : ',',
-	    		   decimal : '.',
-	    		   decimalPlaces: 2,
-	    		   prefix : '',
-	    		   suffix : ''
-	    		 };
-//	    alert($("#countup-reversment").attr("data-max"));
-	    
-	  
-	    $("#countup-reversment").attr("data-max", compensation);
-	    reversment.update(compensation);
-	    
-	    
-	    
-
-	    	tableNew.rows('.selected').nodes().each((row) => row.classList.remove('selected'));
-	        classList.add('selected');
-	    
-	});
-	
-	
-	
-	
-}
-
-
-$(document).ready(function() {
-
-	/////////////////////////////////	
-	// CountUp
-	/////////////////////////////////
-	 var countUpoptions = {
-	   duration: 3,
-	   useEasing : false,
-	   useGrouping : false,
-	   separator : ',',
-	   decimal : '.',
-	   decimalPlaces: 2,
-	   prefix : '',
-	   suffix : ''
-	 };
-
-
-	  reversment = new countUp.CountUp("countup-reversment", $("#countup-reversment").attr("data-max"), countUpoptions);
-	 setTimeout(reversment.start(), 5000);
-		
-	/////////////////////////////////
-	// Getting price histories
-	/////////////////////////////////
-    const newPriceHistory = [[${product.price.newPricehistory}]].map(({
-    	  timestamp: x,
-    	  ...rest
-    	}) => ({
-    	  x,
-    	  ...rest
-    	})).map(({
-    	  price: y,
-    	  ...rest
-    	}) => ({
-    	  y,
-    	  ...rest
-    	}));
-
-    const occasionPriceHistory = [[${product.price.occasionPricehistory}]].map(({
-    	  timestamp: x,
-    	  ...rest
-    	}) => ({
-    	  x,
-    	  ...rest
-    	})).map(({
-    	  price: y,
-    	  ...rest
-    	}) => ({
-    	  y,
-    	  ...rest
-    	}));
-	
-	
-	/////////////////////////////////
-	// Price datatables
-	/////////////////////////////////
-		
-	if (($("#offresOccasion")).length) {
-		initTable('#offresOccasion');
-	}
-	
-	if (($("#offresNeuves")).length) {
-		initTable('#offresNeuves');
-		
-	}
-	
-
-	/////////////////////////////////
-	// Attributes datatables
-	/////////////////////////////////	
-	
-	if ($("#allAttributes").length) {
-		$('#allAttributes').DataTable({
-				responsive: true		
-		});
-	}
-
-	$('#pills-new-tab').on("click", function(){
-		token = $("#offresNeuves>tbody>tr:first").attr('data-token');	
-		$("#token").val(token);	    
-	});
-  
-	$('#pills-occasion-tab').on("click", function(){
-		token = $("#offresOccasion>tbody>tr:first").attr('data-token');
-		$("#token").val(token);	    
-	});
-	
-	/////////////////////////////////
-	// Enable tooltips
-	/////////////////////////////////	
-  	$('[data-bs-toggle="tooltip"]').tooltip();
-
-
-
-	/////////////////////////////////
-	// Price chart
-	/////////////////////////////////
-const ctx = document.getElementById('priceChart');
-var priceChart = new Chart(ctx, {
-	  type: 'line',
-	  data: {
-	    datasets: [{
-	      label: 'Prix neuf',
-	      data: newPriceHistory,               
-	      backgroundColor: 'transparent',
-	      borderColor: 'blue',
-	      borderWidth: 2,
-	      tension: 0.5
-	    },{
-		      label: 'Prix d\'occasion',
-		      data: occasionPriceHistory,               
-		      backgroundColor: 'transparent',
-		      borderColor: 'red',
-		      borderWidth: 2,
-		      tension: 0.5
-		    }
-	    
-	    
-	    
-	    ]
-	  },
-	  
-	  
-	  
-	  options: {
-	    scales: {
-	      x: {
-	        type: 'time',
-	        time: {
-	          unit: 'day',
-	          displayFormats: {
-	        	  quarter: 'MMM YYYY'
-	          },
-	          tooltipFormat: 'dd T'
-	        },
-	        title: {
-	          display: true,
-	          text: 'Date'
-	        }
-	      },
-	      y: {
-	        title: {
-	          display: true,
-	          text: 'Prix'
-	        }
-	      }
-	    }
-	  }
-	});
-
-
-
-
-
-
-
-
-} );
-</script>
 
 </body>
 

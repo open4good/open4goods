@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html th:lang="${siteLocale.language}">
+
+<head>
+
+	
+
+	<!-- CSS -->
+	<link rel="stylesheet" type="text/css" href="/webjars/datatables/css/dataTables.bootstrap5.min.css">
+	<link rel="stylesheet" type="text/css" href="/webjars/datatables-responsive/css/responsive.dataTables.min.css">
+	<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/select/1.7.0/css/select.dataTables.min.css">
+	<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/buttons/2.4.2/css/buttons.dataTables.min.css">
+	
+	<style>
+	tbody, td, tfoot, th, thead, tr {
+    	 border-style: none;
+	}	
+	
+	</style>
+	
+</head>
+
+<body>
+ 
+	
+    <main>	
+ 
+		 
+		<div class="table-responsive-sm">
+		    <table id="tableProducts" class="table">
+		        <thead>
+		            <tr>
+		                <th><small>Nom</small></th>
+		                <th><small>Marque</small></th>
+		                <th><small>Eco-score</small></th>
+		                <th><small>Prix</small></th>
+		                <th><small>Offres</small></th>
+	
+		            </tr>
+		        </thead>
+		        <tbody>
+		            <tr  th:each="p : ${products}">
+		                
+		 
+		                        
+		                            <td th:if="${p.model()}"><a th:text="${p.model()}" th:href="'/webextension?gtin='+${p.gtin()}"></a></td>
+		                            <td th:unless="${p.model()}"><a th:text="${p.bestName()}" th:href="'/webextension?gtin='+${p.gtin()}"></a></td>
+		                            <td th:text="${p.brand()}"></td>
+		                            <td th:text="${p.bestPrice.price}"></td>
+		                            <td th:text="${p.offersCount}"></td>
+		            </tr>
+		 
+		        </tbody>
+		
+		    </table>
+		</div>
+ 
+    </main>
+    
+ 
+<!-- Core -->
+<script src="/webjars/bootstrap/js/bootstrap.min.js"></script>
+
+<script src="/webjars/jquery/jquery.min.js"></script>
+<script type="text/javascript" language="javascript" src="/webjars/datatables/js/jquery.dataTables.min.js"></script>
+<script type="text/javascript" language="javascript" src="/webjars/datatables/js/dataTables.bootstrap5.min.js"></script>
+<script type="text/javascript" language="javascript" src="/webjars/datatables-responsive/js/dataTables.responsive.min.js"></script>
+
+<!-- Ajax loaded table template -->
+<div id="tpl_place" class="hidden"></div>
+
+
+<script>
+
+	// On document Load
+	$(document).ready(function() {
+		
+	//	new DataTable('#tableProducts');
+		});
+
+	</script>
+
+</body>
+
+</html>
