@@ -26,12 +26,10 @@ import org.open4goods.services.SearchService;
 import org.open4goods.services.SerialisationService;
 import org.open4goods.services.StandardiserService;
 import org.open4goods.services.VerticalsConfigService;
-import org.open4goods.services.Xwiki2Service;
 import org.open4goods.services.XwikiService;
 import org.open4goods.services.ai.AiAgent;
 import org.open4goods.services.ai.AiService;
 import org.open4goods.ui.config.yml.UiConfig;
-import org.open4goods.ui.services.Blog2Service;
 import org.open4goods.ui.services.BlogService;
 import org.open4goods.ui.services.GtinService;
 import org.open4goods.ui.services.ImageService;
@@ -48,6 +46,7 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.web.firewall.HttpFirewall;
 import org.springframework.security.web.firewall.StrictHttpFirewall;
 import org.springframework.web.servlet.LocaleResolver;
@@ -107,11 +106,7 @@ public class AppConfig {
 			return new BlogService(xwikiService, config.getBlogConfig(), config.getNamings().getBaseUrls());
 		}
 
-	  @Bean
-	  public Blog2Service blog2Service(@Autowired Xwiki2Service xwiki2Service, @Autowired UiConfig config) {
-		  return new Blog2Service(xwiki2Service, config.getBlogConfig(), config.getNamings().getBaseUrls());
-	  }
-	  
+
 	  
 	@Bean
 	FeedbackService feedbackService(@Autowired UiConfig config) {
@@ -156,16 +151,16 @@ public class AppConfig {
 	//		return new SitemapGenerationService(aggregatedDataRepository, props);
 	//	}
 	//
-
+	@Bean AuthenticationProvider capsuleAuthenticationProvider(@Autowired XwikiService xwikiService) {
+		return new XwikiAuthenticationProvider(xwikiService);
+	}
+	
 	@Bean
 	XwikiService xwikiService(@Autowired UiConfig props) {
 		return new XwikiService(props.getWikiConfig());
 	}
 
-	@Bean
-	Xwiki2Service xwiki2Service(@Autowired UiConfig props) {
-		return new Xwiki2Service(props.getWikiConfig());
-	}
+
 	
 
 	/** The bean providing datasource configurations **/
