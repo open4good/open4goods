@@ -15,6 +15,7 @@ import org.open4goods.model.product.Product;
 import org.open4goods.services.BarcodeValidationService;
 import org.open4goods.services.VerticalsConfigService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -43,6 +44,7 @@ public class ApiProductController {
 	
 
 	@GetMapping(path="/webextension/exists")
+	@CrossOrigin(origins = "*")
 	public Entry<String,Boolean> webExtensionProduct(@RequestParam(required = false) String gtin,@RequestParam(required = false) String title , final HttpServletRequest request, HttpServletResponse response) throws IOException {
 
 
