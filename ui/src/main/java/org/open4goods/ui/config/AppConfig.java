@@ -151,7 +151,7 @@ public class AppConfig {
 	//		return new SitemapGenerationService(aggregatedDataRepository, props);
 	//	}
 	//
-	@Bean AuthenticationProvider capsuleAuthenticationProvider(@Autowired XwikiService xwikiService) {
+	@Bean AuthenticationProvider xwikiAuthenticationProvider(@Autowired XwikiService xwikiService) {
 		return new XwikiAuthenticationProvider(xwikiService);
 	}
 	
