@@ -47,6 +47,8 @@ public class WebConfig {
 			.and().formLogin().permitAll()
 			.and().logout().permitAll();
 
+			
+			// TODO : Security review
 			http.csrf().disable();
 			http.cors().disable();
 			http.headers().frameOptions().disable();
