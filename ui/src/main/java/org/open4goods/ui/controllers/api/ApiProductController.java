@@ -5,6 +5,8 @@ package org.open4goods.ui.controllers.api;
 import java.io.IOException;
 import java.util.AbstractMap.SimpleEntry;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import org.open4goods.dao.ProductRepository;
 import org.open4goods.exceptions.ResourceNotFoundException;
@@ -12,7 +14,6 @@ import org.open4goods.model.BarcodeType;
 import org.open4goods.model.product.Product;
 import org.open4goods.services.BarcodeValidationService;
 import org.open4goods.services.VerticalsConfigService;
-import org.open4goods.services.ai.AiService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -40,11 +41,9 @@ public class ApiProductController {
 	private @Autowired BarcodeValidationService barcodeValidationService;
 
 	
-	@Autowired
-	private   AiService aiService;
 
 	@GetMapping(path="/webextension/exists")
-	public boolean webExtensionProduct(@RequestParam(required = false) String gtin,@RequestParam(required = false) String title , final HttpServletRequest request, HttpServletResponse response) throws IOException {
+	public Entry<String,Boolean> webExtensionProduct(@RequestParam(required = false) String gtin,@RequestParam(required = false) String title , final HttpServletRequest request, HttpServletResponse response) throws IOException {
 
 
 		// Checking through GTIN
@@ -53,19 +52,19 @@ public class ApiProductController {
 			SimpleEntry<BarcodeType, String> bCode = barcodeValidationService.sanitize(gtin.toString());
 			
 			if (bCode.getKey().equals(BarcodeType.UNKNOWN)) {
-				return false;
+				return Map.entry("exists", false);
 //				throw new ResponseStatusException(HttpStatus.BAD_REQUEST,	"Invalid GTIN Format");
 			} else {
 				Product data;
 				try {
 					data = productRepository.getById(bCode.getValue());
 				} catch (ResourceNotFoundException e) {
-					return false;
+					return Map.entry("exists", false);
 				}
 				if (null != data) {
-                    return true;
+                    return Map.entry("exists", true);
 				} else {
-					return false;
+					return Map.entry("exists", false);
 				}
 			}
 			
@@ -74,9 +73,9 @@ public class ApiProductController {
 			
 			List<Product> data = productRepository.getByTitle(title);
 			if (data.size() == 0) {
-				return false;
+				return Map.entry("exists", false);
 			} else {
-                return true;
+                return Map.entry("exists", true);
 			}
 		}
 		
