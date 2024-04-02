@@ -14,6 +14,7 @@ import com.amazon.paapi5.v1.GetItemsRequest;
 import com.amazon.paapi5.v1.GetItemsResource;
 import com.amazon.paapi5.v1.GetItemsResponse;
 import com.amazon.paapi5.v1.Item;
+import com.amazon.paapi5.v1.ItemIdType;
 import com.amazon.paapi5.v1.PartnerType;
 import com.amazon.paapi5.v1.api.DefaultApi;
 
@@ -39,8 +40,8 @@ public class AmazonServiceTest {
 
         // Add your credentials
         // Please add your access key here
-        client.setAccessKey("ACCESSKEY");
-        client.setSecretKey("SECRETKEY");
+        client.setAccessKey("");
+        client.setSecretKey("");
         // Enter your partner tag (store/tracking id)
         String partnerTag = "nudger-21";
 
@@ -49,8 +50,8 @@ public class AmazonServiceTest {
          * details refer:
          * https://webservices.amazon.com/paapi5/documentation/common-request-parameters.html#host-and-region
          */
-        client.setHost("webservices.amazon.com");
-        client.setRegion("us-east-1");
+        client.setHost("webservices.amazon.fr");
+        client.setRegion("eu-west-1");
 
         DefaultApi api = new DefaultApi(client);
  
@@ -62,7 +63,6 @@ public class AmazonServiceTest {
          */
         List<GetItemsResource> getItemsResources = new ArrayList<GetItemsResource>();
         getItemsResources.add(GetItemsResource.ITEMINFO_TITLE);
-        /*
         getItemsResources.add(GetItemsResource.ITEMINFO_CLASSIFICATIONS);
         getItemsResources.add(GetItemsResource.ITEMINFO_FEATURES);
         getItemsResources.add(GetItemsResource.ITEMINFO_MANUFACTUREINFO);
@@ -70,15 +70,15 @@ public class AmazonServiceTest {
         getItemsResources.add(GetItemsResource.ITEMINFO_TECHNICALINFO);
         getItemsResources.add(GetItemsResource.ITEMINFO_TRADEININFO);                
         getItemsResources.add(GetItemsResource.OFFERS_LISTINGS_PRICE);
-*/
+
         // Choose item id(s)
         List<String> itemIds = new ArrayList<String>();
-        itemIds.add("059035342X");
+        itemIds.add("B0C7K1YKSV");
 //        itemIds.add("B00X4WHP55");
 //        itemIds.add("1401263119");
 
         // Forming the request
-        GetItemsRequest getItemsRequest = new GetItemsRequest().itemIds(itemIds).partnerTag(partnerTag)
+        GetItemsRequest getItemsRequest = new GetItemsRequest().itemIdType(ItemIdType.ASIN). itemIds(itemIds).partnerTag(partnerTag)
                 .resources(getItemsResources).partnerType(PartnerType.ASSOCIATES);
 
         try {
@@ -113,6 +113,11 @@ public class AmazonServiceTest {
                                 System.out.println("Buying price: "
                                         + item.getOffers().getListings().get(0).getPrice().getDisplayAmount());
                             }
+                            
+
+							
+							item.getBrowseNodeInfo();
+							
                         } else {
                             System.out.println("Item not found, check errors");
                         }
