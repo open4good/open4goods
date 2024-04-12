@@ -124,7 +124,7 @@ jobs:
       ###########################################    
 
       - name: Create Release
-        uses: mikepenz/action-gh-release@v0.2.0-a03 #softprops/action-gh-release
+        uses: mikepenz/action-gh-release@v1 #softprops/action-gh-release
         with:
          body_path: ${{ github.workspace }}/PR-CHANGELOG.txt
          body: ${{ steps.build_changelog.outputs.changelog }}
