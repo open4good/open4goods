@@ -29,6 +29,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -131,6 +132,7 @@ public class ProductController extends AbstractUiController {
 	
 	// TODO : in specific controller
 	@GetMapping("/webextension")
+	@CrossOrigin(origins = "*")
 	public ModelAndView webExtensionProduct(@RequestParam(required = false) Long gtin,@RequestParam(required = false) String title , final HttpServletRequest request, HttpServletResponse response) throws IOException {
 
 
