@@ -181,6 +181,7 @@ public class ProductController extends AbstractUiController {
 			}
 		}
 		
+	
 		
 		
 
@@ -199,7 +200,15 @@ public class ProductController extends AbstractUiController {
 	}
 
 	
-	
+	// TODO : in specific controller
+		@PostMapping("/webextension")
+		@CrossOrigin(origins = "*")
+		public ModelAndView webExtensionProduct(@RequestParam(required = false) String dom , final HttpServletRequest request, HttpServletResponse response) throws IOException {
+			
+				// TODO : implement the dom parsing logic
+				return webExtensionProduct(9338716005387L, "", request, response);
+			
+		}
 	
 	/**
 	 * Product rendering build logic
