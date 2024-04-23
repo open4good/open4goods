@@ -101,6 +101,7 @@ public class AppConfig {
 	  }
 	  
 	  
+	  
 	  @Bean
 		public BlogService blogService(@Autowired XwikiService xwikiService, @Autowired UiConfig config) {
 			return new BlogService(xwikiService, config.getBlogConfig(), config.getNamings().getBaseUrls());

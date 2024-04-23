@@ -6,7 +6,8 @@ import java.io.IOException;
 import org.open4goods.crawler.controller.CrawlController;
 import org.open4goods.crawler.repository.IndexationRepository;
 import org.open4goods.services.SerialisationService;
-import org.open4goods.store.repository.ElasticProductRepository;
+import org.open4goods.store.repository.elastic.ElasticProductRepository;
+import org.open4goods.store.repository.redis.RedisProductRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,6 +15,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.data.elasticsearch.repository.config.EnableElasticsearchRepositories;
+import org.springframework.data.redis.repository.configuration.EnableRedisRepositories;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -27,6 +29,7 @@ import jakarta.annotation.PostConstruct;
 
 @EnableScheduling
 @EnableElasticsearchRepositories(basePackageClasses = {ElasticProductRepository.class, IndexationRepository.class})
+@EnableRedisRepositories(basePackageClasses = RedisProductRepository.class)
 @EnableCaching
 
 public abstract class Api {

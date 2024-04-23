@@ -5,7 +5,8 @@ import java.io.IOException;
 
 import org.open4goods.dao.ProductRepository;
 import org.open4goods.services.SerialisationService;
-import org.open4goods.store.repository.ElasticProductRepository;
+import org.open4goods.store.repository.elastic.ElasticProductRepository;
+import org.open4goods.store.repository.redis.RedisProductRepository;
 import org.open4goods.ui.repository.AffiliationTokenRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,6 +16,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.elasticsearch.repository.config.EnableElasticsearchRepositories;
+import org.springframework.data.redis.repository.configuration.EnableRedisRepositories;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
 import com.mashape.unirest.http.ObjectMapper;
@@ -27,7 +29,8 @@ import jakarta.annotation.PreDestroy;
 @EnableScheduling
 @EnableCaching
 @Configuration
-@EnableElasticsearchRepositories(basePackageClasses = {ProductRepository.class, AffiliationTokenRepository.class, ElasticProductRepository.class})
+@EnableElasticsearchRepositories(basePackageClasses = {AffiliationTokenRepository.class, ElasticProductRepository.class})
+@EnableRedisRepositories(basePackageClasses = RedisProductRepository.class)
 public class Ui {
 
 	private static final Logger logger = LoggerFactory.getLogger(Ui.class);

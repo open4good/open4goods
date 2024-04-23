@@ -17,7 +17,7 @@ import org.open4goods.exceptions.ResourceNotFoundException;
 import org.open4goods.model.constants.CacheConstants;
 import org.open4goods.model.product.Product;
 import org.open4goods.store.repository.ProductIndexationWorker;
-import org.open4goods.store.repository.RedisProductRepository;
+import org.open4goods.store.repository.redis.RedisProductRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -274,7 +274,7 @@ public class ProductRepository {
 	 * @return
 	 * @throws ResourceNotFoundException
 	 */
-	@Cacheable(cacheNames = CacheConstants.ONE_MINUTE_LOCAL_CACHE_NAME)
+//	@Cacheable(cacheNames = CacheConstants.ONE_MINUTE_LOCAL_CACHE_NAME)
 	public Product getById(final String productId) throws ResourceNotFoundException {
 
 		logger.info("Getting product  {}", productId);
@@ -287,7 +287,9 @@ public class ProductRepository {
 		try {
 			result = redisRepository.findById(productId).orElseThrow(ResourceNotFoundException::new);
 		} catch (ResourceNotFoundException e) {
-			throw e;
+			
+			result = null;
+			
 		} catch (Exception e) {
 			logger.error("Error getting product {} from redis", productId, e);
 			result = null;
