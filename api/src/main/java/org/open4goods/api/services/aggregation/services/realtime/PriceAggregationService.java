@@ -39,7 +39,7 @@ import com.google.common.collect.Sets;
 public class PriceAggregationService extends AbstractAggregationService {
 
 	// TODO(conf, P3, 0.25) : from conf
-	private static final double REVERSEMENT = 0.2;
+	private static final double REVERSEMENT = 0.2 * 0.8;
 
 	private DataSourceConfigService datasourceConfigService;
 
@@ -88,7 +88,7 @@ public class PriceAggregationService extends AbstractAggregationService {
 		////////////////////////////
 		// Computing the compensation
 		////////////////////////////
-
+		// TODO : have to be clear, and to expose the code
 		for (AggregatedPrice price : filtered) {
 
 			double percent;

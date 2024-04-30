@@ -24,6 +24,7 @@ public class AggregatedPrice extends Price {
 	@Field(index = false, store = false, type = FieldType.Keyword)
 	private String url;
 	@Field(index = false, store = false, type = FieldType.Double)
+	// TODO : Compute, do not store
 	private Double compensation;
 	/**
 	 * The state of the product (new, occasion, ...)
