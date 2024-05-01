@@ -12,6 +12,8 @@ import org.open4goods.model.dto.WikiResult;
 import org.open4goods.services.VerticalsConfigService;
 import org.open4goods.services.XwikiService;
 import org.open4goods.ui.config.yml.UiConfig;
+import org.open4goods.xwiki.services.XwikiMappingService;
+import org.open4goods.xwiki.services.XWikiReadService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -41,15 +43,18 @@ public class XwikiController extends AbstractUiController {
 	// The siteConfig
 	private final UiConfig config;
 
-	private final XwikiService xwikiService;
+	private final XWikiReadService xwikiService;
 
 	// TODO : Tweak pageSize handle categories search page
 	private final VerticalController verticalController;
 	private final VerticalsConfigService verticalService;
 
-	public XwikiController(UiConfig config, XwikiService xwikiService, VerticalController verticalController, VerticalsConfigService verticalsConfigService) {
+	private XwikiMappingService mappingService;
+
+	public XwikiController(UiConfig config, XwikiMappingService mappingService, XWikiReadService xwikiService, VerticalController verticalController, VerticalsConfigService verticalsConfigService) {
 		this.config = config;
 		this.xwikiService = xwikiService;
+		this.mappingService = mappingService;
 		this.verticalController = verticalController;
 		this.verticalService = verticalsConfigService;
 	}
@@ -60,30 +65,30 @@ public class XwikiController extends AbstractUiController {
 	//////////////////////////////////////////////////////////////
 
 
-	/**
-	 * Endpoint pageSize flush the wiki
-	 * @param request
-	 * @return
-	 */
-	@GetMapping("/flushCache")
-	@PreAuthorize("hasAuthority('"+RolesConstants.ROLE_XWIKI_ALL+"')")
-	//TODO (security) : protect with role
-	public ModelAndView flushCache(final HttpServletRequest request, @RequestParam(name = "r", required = false) String redircectUrl) {
-		xwikiService.invalidateAll();
-		ModelAndView mv = defaultModelAndView(("xwiki-layout1"), request);
-
-		WikiResult res = new WikiResult();
-		res.setHtml("All xwiki caches are invalidated");
-		res.setPageTitle("SUCCESS, CACHE FLUSHED");
-		mv.addObject("content", res);
-		
-		if (null != redircectUrl) {
-			mv = new ModelAndView("redirect:"+ redircectUrl);
-			mv.setStatus(HttpStatus.MOVED_TEMPORARILY);				
-		}
-		return mv;
-
-	}
+//	/**
+//	 * Endpoint pageSize flush the wiki
+//	 * @param request
+//	 * @return
+//	 */
+//	@GetMapping("/flushCache")
+//	@PreAuthorize("hasAuthority('"+RolesConstants.ROLE_XWIKI_ALL+"')")
+//	//TODO (gof) : put back 
+//	public ModelAndView flushCache(final HttpServletRequest request, @RequestParam(name = "r", required = false) String redircectUrl) {
+//		xwikiService.invalidateAll();
+//		ModelAndView mv = defaultModelAndView(("xwiki-layout1"), request);
+//
+//		WikiResult res = new WikiResult();
+//		res.setHtml("All xwiki caches are invalidated");
+//		res.setPageTitle("SUCCESS, CACHE FLUSHED");
+//		mv.addObject("content", res);
+//		
+//		if (null != redircectUrl) {
+//			mv = new ModelAndView("redirect:"+ redircectUrl);
+//			mv.setStatus(HttpStatus.MOVED_TEMPORARILY);				
+//		}
+//		return mv;
+//
+//	}
 
 	@GetMapping("/{page:[a-z-]+}")
 	//TODO : Ugly url's mappings
@@ -119,7 +124,7 @@ public class XwikiController extends AbstractUiController {
 
         // TODO : Twweak for verticalsLanguagesByUrl
 
-        String url = xwikiService.getAttachmentUrl(space, page, filename);
+        String url = mappingService. getAttachmentUrl(space, page, filename);
         
         // TODO : ugly, should fetch the meta (mime type is availlable in xwiki service), but does not work for the blog image, special class and not appears in attachments list
 		if (url.endsWith(".pdf")) {
@@ -132,7 +137,7 @@ public class XwikiController extends AbstractUiController {
 			response.setContentType("image/gif");
 		}
         
-        response.getOutputStream().write(xwikiService.downloadAttachment(url));
+        response.getOutputStream().write(xwikiAttachmentService.downloadAttachment(url));
                 
 	}
 			
