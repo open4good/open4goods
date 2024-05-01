@@ -65,14 +65,23 @@ public class BlogService {
 		logger.info("Getting blog posts");
 		Map<String, BlogPost> postsByUrl = new HashMap<>();
 		
+<<<<<<< Upstream, based on origin/main
 
+=======
+		List<WikiPage> pages = xwikiReadService.getPages("Blog");
+>>>>>>> f9c909d Ending first round
 		
+<<<<<<< Upstream, based on origin/main
 		
 		
 		Pages pages = xwikiReadService.getPages("Blog");
 		
 		for (PageSummary page : pages.getPageSummaries()) {
 			Page fullPage = xwikiReadService.getPage(page.getSpace(), page.getName());
+=======
+		for (WikiPage page : pages) {
+			WikiPage fullPage = xwikiReadService.getPage(page.getSpace(), page.getName());
+>>>>>>> f9c909d Ending first round
 			BlogPost post = new BlogPost();
 			
 			post.setUrl(IdHelper.azCharAndDigits(fullPage.getTitle().toLowerCase().replace(" ", "-")));

@@ -35,10 +35,14 @@ import org.open4goods.ui.services.ImageService;
 import org.open4goods.ui.services.OpenDataService;
 import org.open4goods.xwiki.authentication.XwikiAuthenticationProvider;
 <<<<<<< Upstream, based on origin/main
+<<<<<<< Upstream, based on origin/main
 import org.open4goods.xwiki.services.XwikiMappingService;
 =======
 import org.open4goods.xwiki.services.MappingService;
 >>>>>>> 2242445 First draft of integration, but needs a higher xwikiservice
+=======
+import org.open4goods.xwiki.services.XwikiMappingService;
+>>>>>>> f9c909d Ending first round
 import org.open4goods.xwiki.services.XWikiAuthenticationService;
 import org.open4goods.xwiki.services.XWikiReadService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -178,7 +182,7 @@ public class AppConfig {
 //	}
 =======
 	@Bean
-	XWikiReadService readService(@Autowired UiConfig props, @Autowired MappingService mappingService) {
+	XWikiReadService readService(@Autowired UiConfig props, @Autowired XwikiMappingService mappingService) {
 		return new XWikiReadService(mappingService, props.getWikiConfig());
 	}
 >>>>>>> 2242445 First draft of integration, but needs a higher xwikiservice
