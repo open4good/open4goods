@@ -34,6 +34,10 @@ import org.open4goods.ui.services.BlogService;
 import org.open4goods.ui.services.GtinService;
 import org.open4goods.ui.services.ImageService;
 import org.open4goods.ui.services.OpenDataService;
+import org.open4goods.xwiki.authentication.XwikiAuthenticationProvider;
+import org.open4goods.xwiki.services.MappingService;
+import org.open4goods.xwiki.services.XWikiAuthenticationService;
+import org.open4goods.xwiki.services.XWikiReadService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.caffeine.CaffeineCache;
@@ -152,13 +156,13 @@ public class AppConfig {
 	//		return new SitemapGenerationService(aggregatedDataRepository, props);
 	//	}
 	//
-	@Bean AuthenticationProvider xwikiAuthenticationProvider(@Autowired XwikiService xwikiService) {
-		return new XwikiAuthenticationProvider(xwikiService);
+	@Bean AuthenticationProvider xwikiAuthenticationProvider(@Autowired XWikiAuthenticationService xwikiAuthenticationService) {
+		return new XwikiAuthenticationProvider(xwikiAuthenticationService);
 	}
 	
 	@Bean
-	XwikiService xwikiService(@Autowired UiConfig props) {
-		return new XwikiService(props.getWikiConfig());
+	XWikiReadService readService(@Autowired UiConfig props, @Autowired MappingService mappingService) {
+		return new XWikiReadService(mappingService, props.getWikiConfig());
 	}
 
 
