@@ -16,6 +16,7 @@ import org.open4goods.config.yml.ui.ApiConfig;
 import org.open4goods.config.yml.ui.OpenSearchConfig;
 import org.open4goods.config.yml.ui.SiteNaming;
 import org.open4goods.config.yml.ui.WebConfig;
+import org.open4goods.xwiki.config.XWikiServiceProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -103,7 +104,7 @@ public class UiConfig {
 	/**
 	 * The Xwiki instance configuration
 	 */
-	private XwikiConfiguration wikiConfig = new XwikiConfiguration();
+	private XWikiServiceProperties wikiConfig = new XWikiServiceProperties();
 
 
 	private BlogConfiguration blogConfig = new BlogConfiguration();
@@ -279,13 +280,17 @@ public class UiConfig {
 		this.email = email;
 	}
 
-	public XwikiConfiguration getWikiConfig() {
+
+
+	public XWikiServiceProperties getWikiConfig() {
 		return wikiConfig;
 	}
 
-	public void setWikiConfig(XwikiConfiguration wikiConfig) {
+
+	public void setWikiConfig(XWikiServiceProperties wikiConfig) {
 		this.wikiConfig = wikiConfig;
 	}
+
 
 	public String getResourceTemplateFolder() {
 		return resourceTemplateFolder;
