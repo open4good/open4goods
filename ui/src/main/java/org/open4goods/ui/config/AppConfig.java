@@ -34,7 +34,11 @@ import org.open4goods.ui.services.GtinService;
 import org.open4goods.ui.services.ImageService;
 import org.open4goods.ui.services.OpenDataService;
 import org.open4goods.xwiki.authentication.XwikiAuthenticationProvider;
+<<<<<<< Upstream, based on origin/main
 import org.open4goods.xwiki.services.XwikiMappingService;
+=======
+import org.open4goods.xwiki.services.MappingService;
+>>>>>>> 2242445 First draft of integration, but needs a higher xwikiservice
 import org.open4goods.xwiki.services.XWikiAuthenticationService;
 import org.open4goods.xwiki.services.XWikiReadService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -155,7 +159,14 @@ public class AppConfig {
 	//		return new SitemapGenerationService(aggregatedDataRepository, props);
 	//	}
 	//
+<<<<<<< Upstream, based on origin/main
+=======
+	@Bean AuthenticationProvider xwikiAuthenticationProvider(@Autowired XWikiAuthenticationService xwikiAuthenticationService) {
+		return new XwikiAuthenticationProvider(xwikiAuthenticationService);
+	}
+>>>>>>> 2242445 First draft of integration, but needs a higher xwikiservice
 	
+<<<<<<< Upstream, based on origin/main
 	
 //	@Bean AuthenticationProvider xwikiAuthenticationProvider(@Autowired XWikiAuthenticationService xwikiAuthenticationService) {
 //		return new XwikiAuthenticationProvider(xwikiAuthenticationService);
@@ -165,6 +176,12 @@ public class AppConfig {
 //	XWikiReadService readService(@Autowired UiConfig props, @Autowired XwikiMappingService mappingService) {
 //		return new XWikiReadService(mappingService, props.getWikiConfig());
 //	}
+=======
+	@Bean
+	XWikiReadService readService(@Autowired UiConfig props, @Autowired MappingService mappingService) {
+		return new XWikiReadService(mappingService, props.getWikiConfig());
+	}
+>>>>>>> 2242445 First draft of integration, but needs a higher xwikiservice
 
 
 	
