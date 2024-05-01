@@ -2,13 +2,12 @@ package org.open4goods.ui.controllers.ui;
 
 import java.io.IOException;
 import java.util.Locale;
-import java.util.Random;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.open4goods.services.DataSourceConfigService;
-import org.open4goods.services.XwikiService;
 import org.open4goods.ui.config.yml.UiConfig;
+import org.open4goods.xwiki.services.XWikiReadService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,7 +32,7 @@ public class AbstractUiController {
 
 	private @Autowired Environment env;
 	protected @Autowired UiConfig config;
-	private @Autowired XwikiService xwikiService;
+	private @Autowired XWikiReadService xwikiService;
 
 	
 

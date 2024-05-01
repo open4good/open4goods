@@ -13,7 +13,7 @@ import org.open4goods.helper.IdHelper;
 import org.open4goods.model.Localisable;
 import org.open4goods.model.blog.BlogPost;
 import org.open4goods.model.dto.WikiPage;
-import org.open4goods.services.XwikiService;
+import org.open4goods.xwiki.services.XWikiReadService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,7 +42,7 @@ public class BlogService {
 
 	
 	private BlogConfiguration config;
-	private XwikiService xwikiService;
+	private XWikiReadService xwikiReadService;
 
 	private Map<String, BlogPost> postsByUrl = new HashMap<>();
 
@@ -50,9 +50,9 @@ public class BlogService {
 	private Localisable baseUrl;
 	
 	
-	public BlogService(XwikiService wikiService,  BlogConfiguration config, Localisable localisable) {
+	public BlogService(XWikiReadService wikiService,  BlogConfiguration config, Localisable localisable) {
 		this.config = config;
-		this.xwikiService = wikiService;
+		this.xwikiReadService = wikiService;
 		this.baseUrl = localisable;
 	}
 	
@@ -62,10 +62,10 @@ public class BlogService {
 		logger.info("Getting blog posts");
 		Map<String, BlogPost> postsByUrl = new HashMap<>();
 		
-		List<WikiPage> pages = xwikiService.getPages("Blog");
+		List<WikiPage> pages = xwikiReadService.getPages("Blog");
 		
 		for (WikiPage page : pages) {
-			WikiPage fullPage = xwikiService.getPage(page.getSpace(), page.getName());
+			WikiPage fullPage = xwikiReadService.getPage(page.getSpace(), page.getName());
 			BlogPost post = new BlogPost();
 			
 			post.setUrl(IdHelper.azCharAndDigits(fullPage.getTitle().toLowerCase().replace(" ", "-")));
