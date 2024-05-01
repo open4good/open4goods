@@ -11,7 +11,6 @@ import org.open4goods.config.BrandConfiguration;
 import org.open4goods.config.yml.BlogConfiguration;
 import org.open4goods.config.yml.DevModeConfiguration;
 import org.open4goods.config.yml.FeedbackConfiguration;
-import org.open4goods.config.yml.XwikiConfiguration;
 import org.open4goods.config.yml.ui.ApiConfig;
 import org.open4goods.config.yml.ui.OpenSearchConfig;
 import org.open4goods.config.yml.ui.SiteNaming;
