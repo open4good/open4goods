@@ -26,7 +26,6 @@ import org.open4goods.services.SearchService;
 import org.open4goods.services.SerialisationService;
 import org.open4goods.services.StandardiserService;
 import org.open4goods.services.VerticalsConfigService;
-import org.open4goods.services.XwikiService;
 import org.open4goods.services.ai.AiAgent;
 import org.open4goods.services.ai.AiService;
 import org.open4goods.ui.config.yml.UiConfig;
@@ -35,7 +34,7 @@ import org.open4goods.ui.services.GtinService;
 import org.open4goods.ui.services.ImageService;
 import org.open4goods.ui.services.OpenDataService;
 import org.open4goods.xwiki.authentication.XwikiAuthenticationProvider;
-import org.open4goods.xwiki.services.MappingService;
+import org.open4goods.xwiki.services.XwikiMappingService;
 import org.open4goods.xwiki.services.XWikiAuthenticationService;
 import org.open4goods.xwiki.services.XWikiReadService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -107,8 +106,8 @@ public class AppConfig {
 	  
 	  
 	  @Bean
-		public BlogService blogService(@Autowired XwikiService xwikiService, @Autowired UiConfig config) {
-			return new BlogService(xwikiService, config.getBlogConfig(), config.getNamings().getBaseUrls());
+		public BlogService blogService(@Autowired XWikiReadService xwikiReadService, @Autowired UiConfig config) {
+			return new BlogService(xwikiReadService, config.getBlogConfig(), config.getNamings().getBaseUrls());
 		}
 
 
@@ -161,7 +160,7 @@ public class AppConfig {
 	}
 	
 	@Bean
-	XWikiReadService readService(@Autowired UiConfig props, @Autowired MappingService mappingService) {
+	XWikiReadService readService(@Autowired UiConfig props, @Autowired XwikiMappingService mappingService) {
 		return new XWikiReadService(mappingService, props.getWikiConfig());
 	}
 
