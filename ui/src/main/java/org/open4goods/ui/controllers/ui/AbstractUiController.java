@@ -7,7 +7,11 @@ import java.util.stream.Collectors;
 
 import org.open4goods.services.DataSourceConfigService;
 import org.open4goods.ui.config.yml.UiConfig;
+<<<<<<< Upstream, based on origin/main
 import org.open4goods.xwiki.services.XWikiHtmlService;
+=======
+import org.open4goods.xwiki.services.XWikiReadService;
+>>>>>>> f9c909d Ending first round
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,7 +36,11 @@ public class AbstractUiController {
 
 	private @Autowired Environment env;
 	protected @Autowired UiConfig config;
+<<<<<<< Upstream, based on origin/main
 	private @Autowired XWikiHtmlService xwikiService;
+=======
+	private @Autowired XWikiReadService xwikiService;
+>>>>>>> f9c909d Ending first round
 
 		
 	// Used to load Datasource configurations from classpath
