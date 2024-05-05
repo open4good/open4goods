@@ -16,6 +16,9 @@ import org.open4goods.model.dto.WikiPage;
 import org.open4goods.xwiki.services.XWikiReadService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.xwiki.rest.model.jaxb.Page;
+import org.xwiki.rest.model.jaxb.PageSummary;
+import org.xwiki.rest.model.jaxb.Pages;
 
 import com.rometools.rome.feed.synd.SyndCategory;
 import com.rometools.rome.feed.synd.SyndCategoryImpl;
@@ -62,10 +65,14 @@ public class BlogService {
 		logger.info("Getting blog posts");
 		Map<String, BlogPost> postsByUrl = new HashMap<>();
 		
-		List<WikiPage> pages = xwikiReadService.getPages("Blog");
+
 		
-		for (WikiPage page : pages) {
-			WikiPage fullPage = xwikiReadService.getPage(page.getSpace(), page.getName());
+		
+		
+		Pages pages = xwikiReadService.getPages("Blog");
+		
+		for (PageSummary page : pages.getPageSummaries()) {
+			Page fullPage = xwikiReadService.getPage(page.getSpace(), page.getName());
 			BlogPost post = new BlogPost();
 			
 			post.setUrl(IdHelper.azCharAndDigits(fullPage.getTitle().toLowerCase().replace(" ", "-")));
@@ -77,14 +84,17 @@ public class BlogService {
 				// TODO : Update when xwiki update to jakarta
 //				post.setSummary(xwikiService.renderXWiki20SyntaxAsXHTML(fullPage.getProps().get("summary")));			
 //				post.setBody(xwikiService.renderXWiki20SyntaxAsXHTML(fullPage.getProps().get("content")));
-				post.setSummary(fullPage.getProps().get("summary"));
-				post.setBody(fullPage.getProps().get("content"));
+				
+				
+//				post.setSummary(fullPage.getProps().get("summary"));
+				System.out.println(fullPage.getContent());
+				post.setBody(fullPage.getContent());
 							
 			} catch (Exception e) {
 				logger.error("Error while rendering XWiki content", e);
 			}
 			
-			post.setHidden("1".equals(fullPage.getProps().get("hidden")));
+			post.setHidden(fullPage.isHidden());
 			// Skipping if hidden
 			if (post.getHidden()) {
 				continue;
@@ -96,17 +106,18 @@ public class BlogService {
 			}
 			
 			
-			post.setAttachments(fullPage.getAttachments());
-			post.setCreated(fullPage.getCreated());
-			post.setModified(fullPage.getModified());
+			post.setCreated(fullPage.getCreated().getTimeInMillis()  );
+			post.setModified(fullPage.getModified().getTimeInMillis());
 
-			String cats = fullPage.getProps().get("category");
+			// TODO : put back
+//			post.setAttachments(fullPage.getAttachments());
+//			String cats = fullPage.getProps().get("category");
 			
-			if (null != cats) {
-				post.setCategory(Arrays.asList(cats.replace("Blog.","").split("\\|")));				
-			}
+//			if (null != cats) {
+//				post.setCategory(Arrays.asList(cats.replace("Blog.","").split("\\|")));				
+//			}
 			
-			post.setImage(getProxyUrl(fullPage.getSpace(), fullPage.getName(), fullPage.getProps().get("image")));
+//			post.setImage(getProxyUrl(fullPage.getSpace(), fullPage.getName(), fullPage.getProps().get("image")));
 						
 			postsByUrl.put(post.getUrl(), post);
 			
