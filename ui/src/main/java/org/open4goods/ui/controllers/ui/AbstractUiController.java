@@ -7,7 +7,7 @@ import java.util.stream.Collectors;
 
 import org.open4goods.services.DataSourceConfigService;
 import org.open4goods.ui.config.yml.UiConfig;
-import org.open4goods.xwiki.services.XWikiReadService;
+import org.open4goods.xwiki.services.XWikiHtmlService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,11 +32,9 @@ public class AbstractUiController {
 
 	private @Autowired Environment env;
 	protected @Autowired UiConfig config;
-	private @Autowired XWikiReadService xwikiService;
+	private @Autowired XWikiHtmlService xwikiService;
 
-	
-
-	
+		
 	// Used to load Datasource configurations from classpath
 	private static final ClassLoader cl = DataSourceConfigService.class.getClassLoader();
 	private static final ResourcePatternResolver resolver = new PathMatchingResourcePatternResolver(cl);
