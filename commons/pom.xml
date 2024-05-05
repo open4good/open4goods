@@ -38,6 +38,7 @@
 		</dependency>
 		
 
+<<<<<<< Upstream, based on origin/main
 		<dependency>
 			<groupId>org.xwiki.commons</groupId>
 			<artifactId>xwiki-commons-component-default</artifactId>
@@ -49,6 +50,8 @@
 			<artifactId>xwiki-rendering-api</artifactId>
 		    <version>16.3.1</version>
 		</dependency>
+=======
+>>>>>>> cbcd929 xwiki-spring-boot-starter integration
 
 		<dependency>
 			<groupId>com.ibm.icu</groupId>
