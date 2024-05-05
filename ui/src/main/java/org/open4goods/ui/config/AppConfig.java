@@ -155,14 +155,16 @@ public class AppConfig {
 	//		return new SitemapGenerationService(aggregatedDataRepository, props);
 	//	}
 	//
-	@Bean AuthenticationProvider xwikiAuthenticationProvider(@Autowired XWikiAuthenticationService xwikiAuthenticationService) {
-		return new XwikiAuthenticationProvider(xwikiAuthenticationService);
-	}
 	
-	@Bean
-	XWikiReadService readService(@Autowired UiConfig props, @Autowired XwikiMappingService mappingService) {
-		return new XWikiReadService(mappingService, props.getWikiConfig());
-	}
+	
+//	@Bean AuthenticationProvider xwikiAuthenticationProvider(@Autowired XWikiAuthenticationService xwikiAuthenticationService) {
+//		return new XwikiAuthenticationProvider(xwikiAuthenticationService);
+//	}
+	
+//	@Bean
+//	XWikiReadService readService(@Autowired UiConfig props, @Autowired XwikiMappingService mappingService) {
+//		return new XWikiReadService(mappingService, props.getWikiConfig());
+//	}
 
 
 	

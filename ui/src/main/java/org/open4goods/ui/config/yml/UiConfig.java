@@ -15,6 +15,7 @@ import org.open4goods.config.yml.ui.ApiConfig;
 import org.open4goods.config.yml.ui.OpenSearchConfig;
 import org.open4goods.config.yml.ui.SiteNaming;
 import org.open4goods.config.yml.ui.WebConfig;
+import org.open4goods.model.Localisable;
 import org.open4goods.xwiki.config.XWikiServiceProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -105,6 +106,12 @@ public class UiConfig {
 	 */
 	private XWikiServiceProperties wikiConfig = new XWikiServiceProperties();
 
+	/**
+	 * The localised mapping of exposed spaces in the wiki. Eg : "/mentions-legales" -> "/", "legalspace" -> "/legals""     
+	 */
+	private Map<String,Localisable> wikiPagesMapping = new HashMap<>();
+	
+	
 
 	private BlogConfiguration blogConfig = new BlogConfiguration();
 	
@@ -358,6 +365,18 @@ public class UiConfig {
 	public void setDevModeConfig(DevModeConfiguration devModeConfig) {
 		this.devModeConfig = devModeConfig;
 	}
+
+
+	public Map<String, Localisable> getWikiPagesMapping() {
+		return wikiPagesMapping;
+	}
+
+
+	public void setWikiPagesMapping(Map<String, Localisable> wikiPagesMapping) {
+		this.wikiPagesMapping = wikiPagesMapping;
+	}
+
+
 
 
 

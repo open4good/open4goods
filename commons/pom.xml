@@ -38,17 +38,6 @@
 		</dependency>
 		
 
-		<dependency>
-			<groupId>org.xwiki.commons</groupId>
-			<artifactId>xwiki-commons-component-default</artifactId>
-		    <version>16.3.0</version>
-		</dependency>
-
-		<dependency>
-			<groupId>org.xwiki.rendering</groupId>
-			<artifactId>xwiki-rendering-api</artifactId>
-		    <version>16.3.0</version>
-		</dependency>
 
 		<dependency>
 			<groupId>com.ibm.icu</groupId>
