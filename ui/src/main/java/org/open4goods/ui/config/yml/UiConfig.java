@@ -16,9 +16,13 @@ import org.open4goods.config.yml.ui.OpenSearchConfig;
 import org.open4goods.config.yml.ui.SiteNaming;
 import org.open4goods.config.yml.ui.WebConfig;
 <<<<<<< Upstream, based on origin/main
+<<<<<<< Upstream, based on origin/main
 import org.open4goods.model.Localisable;
 =======
 >>>>>>> 2242445 First draft of integration, but needs a higher xwikiservice
+=======
+import org.open4goods.model.Localisable;
+>>>>>>> cbcd929 xwiki-spring-boot-starter integration
 import org.open4goods.xwiki.config.XWikiServiceProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -375,6 +379,7 @@ public class UiConfig {
 	}
 
 
+<<<<<<< Upstream, based on origin/main
 	public String getCaptchaSecret() {
 		return captchaSecret;
 	}
@@ -404,6 +409,19 @@ public class UiConfig {
 	public void setWikiPagesMapping(Map<String, Localisable> wikiPagesMapping) {
 		this.wikiPagesMapping = wikiPagesMapping;
 	}
+=======
+	public Map<String, Localisable> getWikiPagesMapping() {
+		return wikiPagesMapping;
+	}
+
+
+	public void setWikiPagesMapping(Map<String, Localisable> wikiPagesMapping) {
+		this.wikiPagesMapping = wikiPagesMapping;
+	}
+
+
+
+>>>>>>> cbcd929 xwiki-spring-boot-starter integration
 
 
 

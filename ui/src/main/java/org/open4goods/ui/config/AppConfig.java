@@ -164,12 +164,16 @@ public class AppConfig {
 	//	}
 	//
 <<<<<<< Upstream, based on origin/main
+<<<<<<< Upstream, based on origin/main
 =======
 	@Bean AuthenticationProvider xwikiAuthenticationProvider(@Autowired XWikiAuthenticationService xwikiAuthenticationService) {
 		return new XwikiAuthenticationProvider(xwikiAuthenticationService);
 	}
 >>>>>>> 2242445 First draft of integration, but needs a higher xwikiservice
+=======
+>>>>>>> cbcd929 xwiki-spring-boot-starter integration
 	
+<<<<<<< Upstream, based on origin/main
 <<<<<<< Upstream, based on origin/main
 	
 //	@Bean AuthenticationProvider xwikiAuthenticationProvider(@Autowired XWikiAuthenticationService xwikiAuthenticationService) {
@@ -186,6 +190,17 @@ public class AppConfig {
 		return new XWikiReadService(mappingService, props.getWikiConfig());
 	}
 >>>>>>> 2242445 First draft of integration, but needs a higher xwikiservice
+=======
+	
+//	@Bean AuthenticationProvider xwikiAuthenticationProvider(@Autowired XWikiAuthenticationService xwikiAuthenticationService) {
+//		return new XwikiAuthenticationProvider(xwikiAuthenticationService);
+//	}
+	
+//	@Bean
+//	XWikiReadService readService(@Autowired UiConfig props, @Autowired XwikiMappingService mappingService) {
+//		return new XWikiReadService(mappingService, props.getWikiConfig());
+//	}
+>>>>>>> cbcd929 xwiki-spring-boot-starter integration
 
 
 	

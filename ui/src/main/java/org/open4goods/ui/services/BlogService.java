@@ -66,11 +66,16 @@ public class BlogService {
 		Map<String, BlogPost> postsByUrl = new HashMap<>();
 		
 <<<<<<< Upstream, based on origin/main
+<<<<<<< Upstream, based on origin/main
 
 =======
 		List<WikiPage> pages = xwikiReadService.getPages("Blog");
 >>>>>>> f9c909d Ending first round
+=======
+
+>>>>>>> cbcd929 xwiki-spring-boot-starter integration
 		
+<<<<<<< Upstream, based on origin/main
 <<<<<<< Upstream, based on origin/main
 		
 		
@@ -82,6 +87,14 @@ public class BlogService {
 		for (WikiPage page : pages) {
 			WikiPage fullPage = xwikiReadService.getPage(page.getSpace(), page.getName());
 >>>>>>> f9c909d Ending first round
+=======
+		
+		
+		Pages pages = xwikiReadService.getPages("Blog");
+		
+		for (PageSummary page : pages.getPageSummaries()) {
+			Page fullPage = xwikiReadService.getPage(page.getSpace(), page.getName());
+>>>>>>> cbcd929 xwiki-spring-boot-starter integration
 			BlogPost post = new BlogPost();
 			
 			post.setUrl(IdHelper.azCharAndDigits(fullPage.getTitle().toLowerCase().replace(" ", "-")));
