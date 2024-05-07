@@ -37,7 +37,7 @@ public class ContactController extends AbstractUiController {
 	}
 
 	@PostMapping("/contact")
-	public ModelAndView index(@RequestParam String name, @RequestParam String email, @RequestParam String message,@RequestParam(name="g-recaptcha-response") String recaptchaResponse,	final HttpServletRequest request) {
+	public ModelAndView index(@RequestParam String name, @RequestParam String email, @RequestParam String message,@RequestParam(name="h-captcha-response") String recaptchaResponse,	final HttpServletRequest request) {
 
 		ModelAndView model = defaultModelAndView("contact", request);
 		model.addObject("page","nous contacter");
