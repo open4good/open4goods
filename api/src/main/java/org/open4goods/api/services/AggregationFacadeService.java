@@ -247,10 +247,10 @@ public class AggregationFacadeService {
 		Logger logger = GenericFileLogger.initLogger(name, apiProperties.aggLogLevel(), apiProperties.logsFolder()+"/aggregation", apiProperties.isDevMode());
 
 		final List<AbstractAggregationService> services = new ArrayList<>();
-
+		
 		services.add(new IdentityAggregationService( logger, gs1prefixService,barcodeValidationService));
-		services.add(new AttributeRealtimeAggregationService(verticalConfigService, brandService, logger));
 		services.add(new TaxonomyRealTimeAggregationService(  logger, verticalConfigService, taxonomyService));
+		services.add(new AttributeRealtimeAggregationService(verticalConfigService, brandService, logger));
 		services.add(new NamesAggregationService( logger, verticalConfigService, evaluationService, blablaService));
 		//		services.add(new CategoryService( taxonomyService));
 		//		services.add(new UrlsAggregationService(evaluationService, 
