@@ -24,7 +24,6 @@ public class AiCompletionAggregationService extends AbstractAggregationService {
 
 	@Override
 	public void onProduct(Product data, VerticalConfig vConf) {
-
 		aiService.complete(data, vConf);
 
 	}

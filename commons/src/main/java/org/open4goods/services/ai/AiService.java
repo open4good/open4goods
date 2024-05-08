@@ -80,8 +80,7 @@ public class AiService {
 //			var executorService = Executors.newVirtualThreadPerTaskExecutor();
 			// TODO : perf : we could parallelize this
 			for (Entry<String, I18nElements> elements : aiConfigs.entrySet()) {
-				
-				
+								
 				for ( AiConfig aic: elements.getValue().getAiConfig()) {
 					
 					List<AiDescription> desc = generateProductTexts(aic.getKey(), aic.getPrompt(), elements.getKey(), data);
