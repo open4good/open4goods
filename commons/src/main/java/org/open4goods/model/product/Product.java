@@ -73,6 +73,10 @@ public class Product implements Standardisable {
 	 */
 	@Field(type = FieldType.Date)
 	private long lastChange;
+
+	/** The associated vertical, if any**/
+	@Field(index = true, store = false, type = FieldType.Keyword)
+	private String vertical;
 	
 	/** The list of other id's known for this product **/
 	@Field(index = true, store = false, type = FieldType.Object)
@@ -81,12 +85,9 @@ public class Product implements Standardisable {
 	/** The list of other id's known for this product **/
 	@Field(index = false, store = false, type = FieldType.Object)
 	private Set<UnindexedKeyValTimestamp> alternativeBrands = new HashSet<>();
-	
-	/** The vertical, if any**/
-	@Field(index = true, store = false, type = FieldType.Keyword)
-	private String vertical;
-	
+		
 	/** Namings informations for this product **/
+	// TODO : Should be computed
 	@Field(index = true, store = false, type = FieldType.Object)
 	private ProductTexts names = new ProductTexts();
 
@@ -100,6 +101,9 @@ public class Product implements Standardisable {
 	@Field(index = false, store = false, type = FieldType.Object)
 	private AggregatedPrices price = new AggregatedPrices();
 
+	@Field(index = false, store = false, type = FieldType.Keyword)
+	private Set<String> datasourceNames = new HashSet<>();
+	
 	/**
 	 * The media resources for this data
 	 */
@@ -787,6 +791,14 @@ public class Product implements Standardisable {
 
 	public void setGoogleTaxonomyId(Integer googleTaxonomyId) {
 		this.googleTaxonomyId = googleTaxonomyId;
+	}
+
+	public Set<String> getDatasourceNames() {
+		return datasourceNames;
+	}
+
+	public void setDatasourceNames(Set<String> datasourceNames) {
+		this.datasourceNames = datasourceNames;
 	}
 
 	

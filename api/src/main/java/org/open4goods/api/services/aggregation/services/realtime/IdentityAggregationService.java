@@ -23,15 +23,15 @@ import org.slf4j.LoggerFactory;
  * @author Goulven.Furet
  *
  */
-public class BarCodeAggregationService extends AbstractAggregationService {
+public class IdentityAggregationService extends AbstractAggregationService {
 
-	private static final Logger logger = LoggerFactory.getLogger(BarCodeAggregationService.class);
+	private static final Logger logger = LoggerFactory.getLogger(IdentityAggregationService.class);
 
 	private Gs1PrefixService gs1Service;
 
 	private BarcodeValidationService validationService;
 
-	public BarCodeAggregationService(final Logger logger, final Gs1PrefixService gs1Service, final BarcodeValidationService barcodeValidationService) {
+	public IdentityAggregationService(final Logger logger, final Gs1PrefixService gs1Service, final BarcodeValidationService barcodeValidationService) {
 		super(logger);
 		this.gs1Service = gs1Service;
 		validationService = barcodeValidationService;
@@ -52,6 +52,26 @@ public class BarCodeAggregationService extends AbstractAggregationService {
 				dedicatedLogger.error("GTIN Mismatch : product {], dataFragment {}", output.gtin(), input.gtin());
 			}
 		}
+		
+		/////////////////////////////
+		// Adding alternate id's
+		/////////////////////////////		
+		output.getAlternativeIds().addAll(input.getAlternateIds());
+
+		/////////////////////////////
+		// Setting the dates
+		/////////////////////////////
+		
+		// The last update
+		if ( output.getLastChange() < input.getLastIndexationDate()) {
+			output.setLastChange(input.getLastIndexationDate());
+		}
+
+		/////////////////////////////
+		// Updating the datasources
+		/////////////////////////////
+		output.getDatasourceNames().add(input.getDatasourceName());
+
 		
 		onProduct(output, vConf);
 	}
