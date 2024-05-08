@@ -97,7 +97,9 @@
 						<th:block th:insert="~{inc/product-unmatched-attributes.html}"></th:block>					
 
 
-
+	      				<!--/* Categories */-->				
+						<th:block th:insert="~{inc/product-categories.html}"></th:block>
+									
 					<div class=" col-lg-12">
 	
 
@@ -113,8 +115,7 @@
 									<h1 th:text="'taxonomy : ' + ${product.googleTaxonomyId}"></h1>
 									
 									
-				      				<!--/* Categories */-->				
-									<th:block th:insert="~{inc/product-categories.html}"></th:block>
+
 		
 				      				<!--/* Texts */-->				
 									<th:block th:insert="~{inc/product-descriptions-old.html}"></th:block>		
