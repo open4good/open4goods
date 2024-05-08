@@ -35,14 +35,10 @@ public class AggregatedAttribute implements IAttribute {
 	private String value;
 
 	/**
-	 * The value of this aggregated attribute
+	 * The numeric value (if any) of this aggregated attribute
 	 */
 	@Field(index = true, store = false, type = FieldType.Double)
 	private Double numericValue;
-
-//	/** Type of the attribute **/
-//	@Field(index = false, store = false, type = FieldType.Keyword)
-//	private AttributeType type;
 
 	/**
 	 * The collections of conflicts for this attribute

@@ -13,10 +13,9 @@ import org.open4goods.api.services.aggregation.services.batch.scores.Brand2Score
 import org.open4goods.api.services.aggregation.services.batch.scores.CleanScoreAggregationService;
 import org.open4goods.api.services.aggregation.services.batch.scores.DataCompletion2ScoreAggregationService;
 import org.open4goods.api.services.aggregation.services.batch.scores.EcoScoreAggregationService;
-import org.open4goods.api.services.aggregation.services.realtime.AltIdAggregationService;
 import org.open4goods.api.services.aggregation.services.realtime.AttributeRealtimeAggregationService;
-import org.open4goods.api.services.aggregation.services.realtime.BarCodeAggregationService;
 import org.open4goods.api.services.aggregation.services.realtime.DescriptionsAggregationService;
+import org.open4goods.api.services.aggregation.services.realtime.IdentityAggregationService;
 import org.open4goods.api.services.aggregation.services.realtime.MediaAggregationService;
 import org.open4goods.api.services.aggregation.services.realtime.NamesAggregationService;
 import org.open4goods.api.services.aggregation.services.realtime.PriceAggregationService;
@@ -41,7 +40,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.scheduling.annotation.Scheduled;
 
-import ch.qos.logback.classic.Level;
 import jakarta.annotation.PreDestroy;
 
 /**
@@ -250,12 +248,11 @@ public class AggregationFacadeService {
 
 		final List<AbstractAggregationService> services = new ArrayList<>();
 
-		services.add(new BarCodeAggregationService( logger, gs1prefixService,barcodeValidationService));
+		services.add(new IdentityAggregationService( logger, gs1prefixService,barcodeValidationService));
 		services.add(new AttributeRealtimeAggregationService(verticalConfigService, brandService, logger));
 		services.add(new TaxonomyRealTimeAggregationService(  logger, verticalConfigService, taxonomyService));
 		services.add(new NamesAggregationService( logger, verticalConfigService, evaluationService, blablaService));
 		//		services.add(new CategoryService( taxonomyService));
-		services.add(new AltIdAggregationService(logger ));
 		//		services.add(new UrlsAggregationService(evaluationService, 
 		//				config.getNamings().getProductUrlTemplates()));
 		services.add(new PriceAggregationService( logger, dataSourceConfigService));

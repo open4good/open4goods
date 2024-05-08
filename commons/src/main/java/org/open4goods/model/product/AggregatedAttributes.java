@@ -21,6 +21,8 @@ public class AggregatedAttributes  {
 	private Map<ReferentielKey, String> referentielAttributes = new HashMap<>();
 
 	@Field(index = true, store = false, type = FieldType.Object)
+
+	
 	//TODO: rename
 	private Map<String,AggregatedAttribute> aggregatedAttributes = new HashMap<>();
 
