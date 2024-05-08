@@ -39,7 +39,9 @@ public class TaxonomyRealTimeAggregationService extends AbstractAggregationServi
 		if (!StringUtils.isEmpty(category)) {
 			output.getDatasourceCategories().add(category);
 			output.getMappedCategories().add(new UnindexedKeyVal(input.getDatasourceConfigName(), category));
-		} 
+		}
+		
+		onProduct(output, vConf);
 	}
 
 	@Override
