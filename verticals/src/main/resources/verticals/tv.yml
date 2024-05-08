@@ -12,7 +12,7 @@
 id: tv
 
 # The associated google taxonomyID. (Ex : FR - https://www.google.com/basepages/producttype/taxonomy-with-ids.fr-FR.txt)
-# If set, will be forced for all products in this vertical
+# SHOULD be set, it will then force this taxonomy for all products in this vertical
 taxonomyId: 404
 
 ##############################################################################
@@ -96,6 +96,7 @@ i18n:
 # Eco score configuration 
 # Specify here the specific ecoscore for this vertical. Format : 
 # >> EXISTING_SCORE: WEIGHT
+# Weight sum MUST BE equals to 1
 ##############################################################################
 
 ecoscoreConfig:
@@ -123,12 +124,19 @@ verticalFilters:
 
 
 
-####################################################################################
-# ATTRIBUTES DEFINITIONS
-# Those attributes will be availlable for all products if found
-####################################################################################      
 
+####################################################################################
+# ATTRIBUTES CONFIGURATION
+####################################################################################
 attributesConfig:
+  # If one of the following attribute is missing on a product, the product will be disassociated from this vertical. (setting vertical to null)
+  mandatory:
+   - "DIAGONALE_POUCES"
+   
+  ####################################################################################
+  # ATTRIBUTES DEFINITIONS
+  # Those attributes will be availlable for all products if one is found.
+  ####################################################################################      
   configs:  
      ##################################
      # DIAGONALE

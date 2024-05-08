@@ -46,6 +46,26 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 		this.brandService = brandService;
 	}
 
+	
+	
+	
+	
+
+
+	@Override
+	public void onProduct(Product data, VerticalConfig vConf) throws AggregationSkipException {
+
+		//////////////////////////////////////////////////////////////////////////		
+		// Checking if all mandatory attributes are present for this product
+		//////////////////////////////////////////////////////////////////////////
+		if (!data.getAttributes().getAggregatedAttributes().keySet().containsAll(vConf.getAttributesConfig().getMandatory())) {
+			// Missing attributes.
+			dedicatedLogger.warn("Missing mandatory attributes for product {}. Will be unmatched from vertical {}", data.getId(), vConf.getId());
+			data.setVertical(null);			
+		}
+	}
+
+	
 	/**
 	 * Associate and match a set of nativ attributes from a datafragment into  a product
 	 *
@@ -196,6 +216,9 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 			dedicatedLogger.error("Unexpected error",e);
 			e.printStackTrace();
 		}
+		
+		
+		onProduct(product, vConf);
 	}
 
 
@@ -440,14 +463,6 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 
 		return attr;
 
-	}
-
-
-
-	@Override
-	public void onProduct(Product data, VerticalConfig vConf) throws AggregationSkipException {
-		// TODO Handle the batch processing
-		
 	}
 
 
