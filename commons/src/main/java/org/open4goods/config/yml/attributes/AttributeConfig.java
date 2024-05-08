@@ -46,8 +46,9 @@ public class AttributeConfig {
 
 
 	/**
-	 * If true, this attribute will be added as a rating, mapped through the numericMapping configuration attribute
+	 * If true, this attribute will be added as a score, mapped through the numericMapping configuration attribute and an application of the scoring (min/max) mechanism
 	 */
+	// TODO : Rename to asScore
 	private boolean asRating = false;
 
 	/**

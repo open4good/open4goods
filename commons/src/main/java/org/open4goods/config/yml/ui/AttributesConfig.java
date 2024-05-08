@@ -22,6 +22,12 @@ public class AttributesConfig {
 
 	private Map<String, String> valueKeyMap = new HashMap<String, String>();
 
+	/**
+	 * The mandatoryattributes
+	 */
+	@JsonMerge
+	private Set<String> mandatory = new HashSet<>();
+
 	
 	/**
 	 * The specific configs configurations
@@ -255,6 +261,16 @@ public class AttributesConfig {
 
 	public void setExclusions(Set<String> exclusions) {
 		this.exclusions = exclusions;
+	}
+
+
+	public Set<String> getMandatory() {
+		return mandatory;
+	}
+
+
+	public void setMandatory(Set<String> mandatory) {
+		this.mandatory = mandatory;
 	}
 
 
