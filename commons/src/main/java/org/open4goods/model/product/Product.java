@@ -21,6 +21,7 @@ import org.joda.time.PeriodType;
 import org.joda.time.format.PeriodFormat;
 import org.joda.time.format.PeriodFormatter;
 import org.open4goods.dao.ProductRepository;
+import org.open4goods.model.EcoScoreRanking;
 import org.open4goods.model.Standardisable;
 import org.open4goods.model.constants.Currency;
 import org.open4goods.model.constants.ProductCondition;
@@ -147,6 +148,13 @@ public class Product implements Standardisable {
 	
 	@Field(index = true, store = false, type = FieldType.Object)
 	private Map<String, Score> scores = new HashMap<>();
+	
+	@Field(index = false, store = false, type = FieldType.Object)
+	private EcoScoreRanking ranking = new EcoScoreRanking();
+	
+	
+	
+	
 	// 
 	//	/**
 	//	 * All the ratings
@@ -728,6 +736,14 @@ public class Product implements Standardisable {
 
 	public Description getHumanDescription() {
 		return humanDescription;
+	}
+
+	public EcoScoreRanking getRanking() {
+		return ranking;
+	}
+
+	public void setRanking(EcoScoreRanking ranking) {
+		this.ranking = ranking;
 	}
 
 	public void setHumanDescription(Description humanDescription) {

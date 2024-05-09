@@ -1,8 +1,11 @@
 package org.open4goods.api.services.aggregation.services.batch.scores;
 
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.open4goods.api.services.aggregation.AbstractAggregationService;
 import org.open4goods.config.yml.ui.VerticalConfig;
@@ -85,9 +88,6 @@ public abstract class AbstractScoreAggregationService extends  AbstractAggregati
 				}
 			}			
 		}
-		
-		
-		dedicatedLogger.info("{} -> Virtual score computing for {} products", this.getClass().getSimpleName(),datas.size());
 		
 
 	}

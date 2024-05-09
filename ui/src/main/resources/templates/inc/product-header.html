@@ -14,7 +14,8 @@
 			
 			<img class="mb-4"  width="350px" th:alt="'Ecoscore : ' + ${product.ecoscore.letter()}" th:title="'éco-score : ' + ${product.ecoscore.letter()}" th:src="'/icons/ecoscore/scoring-'+${product.ecoscore.letter()}+'.png'">
 			
-			
+			<hr/>
+			ranking global :  <span th:text="${product.ranking.globalPosition}"></span>/<span th:text="${product.ranking.globalCount}"></span>, better : <span th:text="${product.ranking.globalBetter}"></span>, best : <span th:text="${product.ranking.globalBest}"></span>
 			
 		
 						<div id="markerEcoscore" class="col-sm-12 col-md-12 col-lg-12 mb-3">

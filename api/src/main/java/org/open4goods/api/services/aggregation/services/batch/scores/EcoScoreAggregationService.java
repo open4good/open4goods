@@ -1,5 +1,9 @@
 package org.open4goods.api.services.aggregation.services.batch.scores;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
@@ -61,14 +65,39 @@ public class EcoScoreAggregationService extends AbstractScoreAggregationService 
 			} 			
 			va += score.getValue() * Double.valueOf(vConf.getEcoscoreConfig().get(config));
 		}
-		
-		
-	
-		
+
 		return va;
 	}
 
 
+	@Override
+	public void done(Collection<Product> datas) {
+		super.done(datas);
+		
+		///////////////////////
+		// EcoScore ranking and "best alternativ" reach
+		///////////////////////
+		List<Product> sorted = new ArrayList<>();
+		sorted.addAll(datas);
+
+		Collections.sort(sorted, (o1, o2) -> Double.compare(o1.ecoscore().getRelativ().getValue() , o2.ecoscore().getRelativ().getValue()));
+		
+		int count = sorted.size();
+		for (int i = 0; i < count; i++) {
+			Product p = sorted.get(i);
+			p.getRanking().setGlobalCount(count);
+			p.getRanking().setGlobalPosition(count - i);
+			p.getRanking().setGlobalBest(sorted.getLast().getId());
+			
+			if (i < count - 1) {
+				p.getRanking().setGlobalBetter(sorted.get(i+1).getId());
+			}
+
+		}
+		
+		
+		
+	}
 
 
 }
