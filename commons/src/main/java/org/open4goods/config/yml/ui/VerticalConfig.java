@@ -55,9 +55,10 @@ public class VerticalConfig{
 	 * The product url, metas title, description, ....
 	 */
 	@JsonMerge
-	private Map<String,I18nElements> i18n = new HashMap<>();
+	private Map<String,ProductI18nElements> i18n = new HashMap<>();
 	
-	
+	@JsonMerge
+	private GenAiConfig genAiConfig = new GenAiConfig();
 	
 
 	
@@ -170,7 +171,7 @@ public class VerticalConfig{
 
 	
 	
-	public I18nElements i18n(String lang) {		
+	public ProductI18nElements i18n(String lang) {		
 		return i18n.getOrDefault(lang, i18n.get("default"));		
 	}
 	/**
@@ -526,12 +527,24 @@ public class VerticalConfig{
 		this.taxonomyId = taxonomyId;
 	}
 
-	public Map<String, I18nElements> getI18n() {
+	public Map<String, ProductI18nElements> getI18n() {
 		return i18n;
 	}
 
-	public void setI18n(Map<String, I18nElements> texts) {
+	public void setI18n(Map<String, ProductI18nElements> texts) {
 		this.i18n = texts;
+	}
+
+
+
+	public GenAiConfig getGenAiConfig() {
+		return genAiConfig;
+	}
+
+
+
+	public void setGenAiConfig(GenAiConfig genAiConfig) {
+		this.genAiConfig = genAiConfig;
 	}
 
 	

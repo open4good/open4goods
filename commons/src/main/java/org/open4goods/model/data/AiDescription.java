@@ -8,9 +8,6 @@ public class AiDescription extends Description {
 	
 	@Field(index = false, store = false, type = FieldType.Date)
 	private long ts;
-
-	@Field(index = false, store = false, type = FieldType.Keyword)
-	private String prompt;
 	
 	public AiDescription() {
 		super();
@@ -35,11 +32,5 @@ public class AiDescription extends Description {
 		this.ts = ts;
 	}
 
-	public String getPrompt() {
-		return prompt;
-	}
 
-	public void setPrompt(String prompt) {
-		this.prompt = prompt;
-	}
 }

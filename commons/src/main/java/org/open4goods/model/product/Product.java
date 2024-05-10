@@ -280,16 +280,21 @@ public class Product implements Standardisable {
 		
 		StringBuilder sb = new StringBuilder();
 		
+		for (Entry<ReferentielKey, String> attr : attributes.getReferentielAttributes().entrySet()) {
+			sb.append(" - ").append(attr.getKey().toString()).append(" : ").append(attr.getValue()).append("\n");
+		}
+		
+
 		for (Entry<String, AggregatedAttribute> attr : attributes.getAggregatedAttributes().entrySet()) {
 			sb.append(" - ").append(attr.getKey().toString()).append(" : ").append(attr.getValue().getValue()).append("\n");
 		}
 		
+		for (AggregatedFeature attr : attributes.getFeatures()) {
+			sb.append(" - ").append(attr.getName().toString()).append("\n");
+		}
+
 		for (AggregatedAttribute attr : attributes.getUnmapedAttributes()) {
 			sb.append(" - ").append(attr.getName().toString()).append(" : ").append(attr.getValue()).append("\n");
-		}
-		
-		for (Entry<ReferentielKey, String> attr : attributes.getReferentielAttributes().entrySet()) {
-			sb.append(" - ").append(attr.getKey().toString()).append(" : ").append(attr.getValue()).append("\n");
 		}
 		
 	

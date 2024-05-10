@@ -32,6 +32,12 @@ public class AiConfig {
 
 
 	private String prompt ;
+	
+	
+	/**
+	 * If true, texts will be regenerated
+	 */
+	private boolean override = false;
 
 
 	public String getKey() {
@@ -52,6 +58,18 @@ public class AiConfig {
 	public void setPrompt(String prompt) {
 		this.prompt = prompt;
 	}
+
+
+	public boolean isOverride() {
+		return override;
+	}
+
+
+	public void setOverride(boolean override) {
+		this.override = override;
+	}
+	
+	
 
 
 }

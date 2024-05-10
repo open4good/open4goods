@@ -23,6 +23,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.elasticsearch.client.elc.ElasticsearchAggregations;
 import org.springframework.data.elasticsearch.client.elc.NativeQuery;
 import org.springframework.data.elasticsearch.client.elc.NativeQueryBuilder;
@@ -146,14 +147,31 @@ public class ProductRepository {
 	public Stream<Product> exportVerticalWithValidDate(String vertical) {
 
 		Criteria c = new Criteria("vertical").is(vertical).and(getValidDateQuery());
-
 		final NativeQuery initialQuery = new NativeQueryBuilder().withQuery(new CriteriaQuery(c)).build();
-
 		return elasticsearchTemplate.searchForStream(initialQuery, Product.class, current_index).stream()
 				.map(SearchHit::getContent);
-
 	}
 
+	/**
+	 * Export all aggregateddatas for a vertical, ordered by ecoscore descending
+	 * 
+	 * @param vertical
+	 * @param max 
+	 * @param max
+	 * @param indexName
+	 * @return
+	 */
+	public Stream<Product> exportVerticalWithValidDateOrderByEcoscore(String vertical, int max) {
+
+		Criteria c = new Criteria("vertical").is(vertical).and(getValidDateQuery());
+		final NativeQuery initialQuery = new NativeQueryBuilder().withQuery(new CriteriaQuery(c))
+				.withMaxResults(max)
+				.withSort(Sort.by(org.springframework.data.domain.Sort.Order.desc("scores.ECOSCORE.value")))				
+				.build();
+		return elasticsearchTemplate.searchForStream(initialQuery, Product.class, current_index).stream()
+				.map(SearchHit::getContent);
+	}
+	
 	public SearchHits<Product> search(Query query, final String indexName) {
 		return elasticsearchTemplate.search(query, Product.class, IndexCoordinates.of(indexName));
 
@@ -310,6 +328,7 @@ public class ProductRepository {
 			logger.info("Cache hit, got product {} from redis", productId);
 		}
 
+		
 		return result;
 
 	}

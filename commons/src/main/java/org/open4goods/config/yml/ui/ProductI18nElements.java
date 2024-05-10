@@ -9,7 +9,7 @@ import org.open4goods.config.yml.attributes.AiConfig;
 
 import com.fasterxml.jackson.annotation.JsonMerge;
 
-public class I18nElements {
+public class ProductI18nElements {
 	@JsonMerge
 	private PrefixedAttrText url = new PrefixedAttrText();
 	@JsonMerge
