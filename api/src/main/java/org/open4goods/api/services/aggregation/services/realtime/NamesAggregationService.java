@@ -7,7 +7,7 @@ import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import org.open4goods.api.services.aggregation.AbstractAggregationService;
 import org.open4goods.config.yml.ui.PrefixedAttrText;
-import org.open4goods.config.yml.ui.I18nElements;
+import org.open4goods.config.yml.ui.ProductI18nElements;
 import org.open4goods.config.yml.ui.VerticalConfig;
 import org.open4goods.exceptions.AggregationSkipException;
 import org.open4goods.exceptions.InvalidParameterException;
@@ -58,14 +58,14 @@ public class NamesAggregationService extends AbstractAggregationService {
 		logger.info("Name generation for product {}", data.getId());
 
 		// Getting the config for the category, if any
-		Map<String, I18nElements> tConfs = verticalService.getConfigByIdOrDefault(data.getVertical()).getI18n();
+		Map<String, ProductI18nElements> tConfs = verticalService.getConfigByIdOrDefault(data.getVertical()).getI18n();
 
 		// For each language
-		for (Entry<String, I18nElements> e : tConfs.entrySet()) {
+		for (Entry<String, ProductI18nElements> e : tConfs.entrySet()) {
 
 			try {
 				String lang = e.getKey();
-				I18nElements tConf = e.getValue();
+				ProductI18nElements tConf = e.getValue();
 				
 				// Computing url
 				data.getNames().getUrl().put(lang, data.gtin() + "-" + computePrefixedText(data, tConf.getUrl(), "-"));

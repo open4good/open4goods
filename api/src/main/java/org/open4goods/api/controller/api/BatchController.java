@@ -5,6 +5,7 @@ package org.open4goods.api.controller.api;
 import java.io.IOException;
 
 import org.open4goods.api.services.AggregationFacadeService;
+import org.open4goods.api.services.AiCompletionService;
 import org.open4goods.config.yml.ui.VerticalConfig;
 import org.open4goods.dao.ProductRepository;
 import org.open4goods.exceptions.AggregationSkipException;
@@ -38,21 +39,23 @@ import jakarta.validation.constraints.NotBlank;
 @PreAuthorize("hasAuthority('"+RolesConstants.ROLE_ADMIN+"')")
 public class BatchController {
 
-	private final VerticalsConfigService service;
+	private final VerticalsConfigService verticalConfigService;
 	
 	private final SerialisationService serialisationService;
 	
 	private final AggregationFacadeService batchService;
-	
+
+	private final AiCompletionService aiCompletionService;
 
 	@Autowired
 	private  ProductRepository repository;
 	
 	
-	public BatchController(AggregationFacadeService batchService, SerialisationService serialisationService, VerticalsConfigService verticalsConfigService) {
+	public BatchController(AggregationFacadeService batchService, SerialisationService serialisationService, VerticalsConfigService verticalsConfigService, AiCompletionService aiCompletionService) {
 		this.serialisationService = serialisationService;
-		this.service = verticalsConfigService;
+		this.verticalConfigService = verticalsConfigService;
 		this.batchService = batchService;
+		this.aiCompletionService =  aiCompletionService;
 	}
 
 	@PutMapping(path="/batch/verticals/")
@@ -62,7 +65,7 @@ public class BatchController {
 		
 		// Adding the verticam to the vertical service
 		VerticalConfig v = serialisationService.fromYaml(verticalConfig, VerticalConfig.class);
-		service.addTmpConfig(v);
+		verticalConfigService.addTmpConfig(v);
 		
 		// This is initial submission, batching the products to update catégories				
 		batchService. sanitizeVertical(v);
@@ -79,9 +82,9 @@ public class BatchController {
 	public String fullUpdateFromName( @RequestParam @NotBlank final String verticalConfig ) throws InvalidParameterException, JsonParseException, JsonMappingException, IOException, InterruptedException{
 		
 		// This is initial submission, batching the products to update catégories				
-		batchService.sanitizeVertical(service.getConfigById(verticalConfig));		
+		batchService.sanitizeVertical(verticalConfigService.getConfigById(verticalConfig));		
 		Thread.sleep(5000);
-		batchService. score(service.getConfigById(verticalConfig));
+		batchService. score(verticalConfigService.getConfigById(verticalConfig));
 		return "done";
 	}
 
@@ -100,6 +103,18 @@ public class BatchController {
 		batchService.sanitizeAll();
 	}
 
+	@GetMapping("/contentGeneration/all")
+	@Operation(summary="Launch Gen AI content generation on all verticals")
+	public void genAiAll() throws InvalidParameterException, IOException {
+		aiCompletionService.completeAll();
+	}
+
+	@GetMapping("/contentGeneration")
+	@Operation(summary="Launch Gen AI content generation on all verticals")
+	public void genAiVertical(@RequestParam @NotBlank final String verticalConfig ) throws InvalidParameterException, IOException {
+		aiCompletionService.complete(verticalConfigService.getConfigById(verticalConfig));
+	}
+	
 	@GetMapping("/sanitisation/{gtin}")
 	@Operation(summary="Launch sanitisation of all products")
 	public void sanitizeOne(@PathVariable String gtin ) throws InvalidParameterException, IOException, ResourceNotFoundException, AggregationSkipException {

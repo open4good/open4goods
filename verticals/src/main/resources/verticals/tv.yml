@@ -85,13 +85,31 @@ i18n:
       # AI TEXTS CONFIGS
       ####################################################################################  
       aiConfig:
-        - key: "global-description" 
-          prompt: " écris un texte de maximum 100 mots, dans un style académique, une description avec des listes à puce en html, comprenant les principaux avantages et inconvénients de  [(${p.brand()})] [(${p.model()})], sur la base des caracteriques suivantes : [(${p.caracteristics()})]"
+        - key: "global-description"
+#        You are a review writer, specialized in technologies and environmental concerns 
+          prompt: >
+           écris une description objective du téléviseur  [(${p.brand()})] [(${p.model()})],
+           dans un style académique et ludique,           
+           un texte de maximum 200 mots,
+           en présentant les principales caracteristiques techniques,
+           sur la base des caracteriques suivantes : [(${p.caracteristics()})]
+          override: true
         - key: "ecological-description" 
-          prompt: "écris un texte de maximum 100 mots, dans un style académique, une analyse de l'impact environnemental de [(${p.brand()})] [(${p.model()})], sur la base des caracteriques suivantes : [(${p.caracteristics()})]"
+          prompt: > 
+           écris un texte de maximum 200 mots,
+           dans un style académique et ludique,
+           une analyse détaillée de l'impact environnemental de [(${p.brand()})] [(${p.model()})],
+           sur la base des caracteriques suivantes : [(${p.caracteristics()})]"
+          override: true
 
-
-
+# GenAiConfig for this vertical
+genAiConfig:
+  # If false, will bypass the generativ ia texts generation  
+  enabled: true
+  # Max products to be generated. Products are ordered by ecoscore
+  maxPerVerticals: 100
+  
+  
 ##############################################################################
 # Eco score configuration 
 # Specify here the specific ecoscore for this vertical. Format : 

@@ -2,13 +2,15 @@ package org.open4goods.services.ai;
 
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 
 import org.open4goods.config.yml.attributes.AiConfig;
-import org.open4goods.config.yml.ui.I18nElements;
+import org.open4goods.config.yml.ui.ProductI18nElements;
 import org.open4goods.config.yml.ui.VerticalConfig;
 import org.open4goods.model.data.AiDescription;
 import org.open4goods.model.product.Product;
@@ -18,6 +20,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 /**
  * TODO : Paralelisation
+ * TODO : Storing the prompt in product (disabled for now) could allow to regenerate if changes
  */
 public class AiService {
 
@@ -26,6 +29,9 @@ public class AiService {
 	private VerticalsConfigService verticalService;
 	private EvaluationService spelEvaluationService;
 
+	// TODO : pool size from conf
+	ExecutorService executor = Executors.newFixedThreadPool(3);
+			
 	public AiService(AiAgent customerSupportAgent, final VerticalsConfigService verticalService, EvaluationService spelEvaluationService) {
 
 		this.nudgerAgent = customerSupportAgent;
@@ -54,7 +60,7 @@ public class AiService {
 	 * @param data
 	 * @return 
 	 */
-	public Collection<AiDescription> complete(Product data, VerticalConfig vConf) {
+	public void complete(Product data, VerticalConfig vConf) {
 		////////////////
 		// Getting the config		
 		/////////////////
@@ -63,7 +69,7 @@ public class AiService {
 		
 		// TODO : From config
 		if (data.getAttributes().count() < 15 || data.getScores().size() < 3 ) {
-			return new ArrayList<>();
+			return;
 		}
 		
 		// TODO : Will have to "expire" the generated texts and re generate it, in certain conditions
@@ -73,26 +79,32 @@ public class AiService {
 			////////////////
 			// AI generation		
 			/////////////////
-			Map<String, I18nElements> aiConfigs = vConf.getI18n();
-			
-			
-			
+			Map<String, ProductI18nElements> i18nConf = vConf.getI18n();
+
 //			var executorService = Executors.newVirtualThreadPerTaskExecutor();
-			// TODO : perf : we could parallelize this
-			for (Entry<String, I18nElements> elements : aiConfigs.entrySet()) {
-								
-				for ( AiConfig aic: elements.getValue().getAiConfig()) {
-					
-					List<AiDescription> desc = generateProductTexts(aic.getKey(), aic.getPrompt(), elements.getKey(), data);
-					desc.forEach(d -> data.getAiDescriptions().put(elements.getKey(), d));				
-				}
-//				executorService.submit(() -> {
-					// your code here
-					
-//				});
+//			executor.execute(() -> {
+				logger.info("Started generation for {}",data);
+				doGeneration(data, i18nConf);
+				logger.info("Ended generation for {}",data);				
+//			});
+	}
+
+	private void doGeneration(Product data, Map<String, ProductI18nElements> i18nConf) {
+		for (Entry<String, ProductI18nElements> elements : i18nConf.entrySet()) {
 			
+			for ( AiConfig aic: elements.getValue().getAiConfig()) {
+
+				if (!aic.isOverride() &&  (null != data.getAiDescriptions().get(aic.getKey()) && i18nConf.keySet().contains(data.getAiDescriptions().get(aic.getKey()).getContent().getLanguage()))) {
+					logger.info("Skipping because generated AI text is already present");
+					continue;
+				}
+				
+				AiDescription desc = generateProductTexts(aic.getKey(), aic.getPrompt(), elements.getKey(), data);
+				data.getAiDescriptions().put(aic.getKey(), desc);				
+			}
+
+		
 		}
-		return data.getAiDescriptions().values();
 	}
 
 	/**
@@ -101,7 +113,7 @@ public class AiService {
 	 * @param data
 	 * @return
 	 */
-	private List<AiDescription> generateProductTexts( String key, String prompt, String lang, Product data) {
+	private AiDescription generateProductTexts( String key, String prompt, String lang, Product data) {
 		
 		
 		// Multi thread / synchronisation
@@ -114,12 +126,11 @@ public class AiService {
 		String aiText = prompt(value).replace("\n", "<br/>");
 							
 		AiDescription aiDesc = new AiDescription(aiText, lang);
-		aiDesc.setPrompt(prompt);
 		ret.add(aiDesc);
 		
 		logger.warn("AI completion for product {}-{} : \n{}", data.getId(), key,aiText);
 	
-		return ret;
+		return aiDesc;
 	}
 
 }

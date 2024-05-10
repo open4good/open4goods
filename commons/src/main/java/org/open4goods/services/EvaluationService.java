@@ -86,6 +86,7 @@ public class EvaluationService {
 	/**
 	 * Generate a name from the thymleaf template weared in conf
 	 * Sample : "blabla de [(${p.vertical})]"
+	 * TODO : Should raise exception if unresolvable variable
 	 * @param p
 	 * @param template
 	 * @return
@@ -103,7 +104,7 @@ public class EvaluationService {
 				ctx.setVariable("data", p);
 				ctx.setVariable("p", p);
 				ctx.setVariable("product", p);
-	
+				
 				// Adding referentiel keys
 				for (Entry<ReferentielKey, String> e : p.getAttributes().getReferentielAttributes().entrySet()) {
 					ctx.setVariable(e.getKey().toString(), e.getValue());
