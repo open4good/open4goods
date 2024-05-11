@@ -26,6 +26,11 @@ public class Resource  implements Validable {
 	@Field(index = false, store = false, type = FieldType.Keyword)
 	private String url;
 
+	
+	@Field(index = false, store = false, type = FieldType.Keyword)
+	private String mimeType;
+
+	
 	@Field(index = false, store = false, type = FieldType.Keyword)
 	// TODO : could remove
 	private String providerName;
@@ -36,13 +41,15 @@ public class Resource  implements Validable {
 	@Field(index = false, store = false, type = FieldType.Keyword)
 	private String cacheKey;
 
-	/**
-	 * The text, ot the title associated with this resource
-	 * TODO : could remove
-	 */
-	@Field(index = false, store = false, type = FieldType.Keyword)
-	private String text;
+	@Field(index = false, store = false, type = FieldType.Boolean)
+	// If true, this media has been tested and is not retained
+	private Boolean evicted;
 
+	@Field(index = false, store = false, type = FieldType.Boolean)
+	// A complementary status, on eviction cause, or whatever
+	private String status;
+	
+	
 	/**
 	 * From ResourceTagDictionary
 	 */
@@ -175,12 +182,13 @@ public class Resource  implements Validable {
 		this.tags = tags;
 	}
 
-	public String getText() {
-		return text;
+
+	public String getMimeType() {
+		return mimeType;
 	}
 
-	public void setText(final String text) {
-		this.text = text;
+	public void setMimeType(String mimeType) {
+		this.mimeType = mimeType;
 	}
 
 	public String getProviderName() {
@@ -205,6 +213,22 @@ public class Resource  implements Validable {
 
 	public void setUrl(String url) {
 		this.url = url;
+	}
+
+	public Boolean getEvicted() {
+		return evicted;
+	}
+
+	public void setEvicted(Boolean evicted) {
+		this.evicted = evicted;
+	}
+
+	public String getStatus() {
+		return status;
+	}
+
+	public void setStatus(String status) {
+		this.status = status;
 	}
 
 
