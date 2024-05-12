@@ -45,10 +45,15 @@ public class Resource  implements Validable {
 	// If true, this media has been tested and is not retained
 	private Boolean evicted;
 
-	@Field(index = false, store = false, type = FieldType.Boolean)
+	@Field(index = false, store = false, type = FieldType.Keyword)
 	// A complementary status, on eviction cause, or whatever
 	private String status;
-	
+
+	@Field(index = false, store = false, type = FieldType.Keyword)
+	private Long fileSize;
+
+	@Field(index = false, store = false, type = FieldType.Keyword)
+	private String fileName;
 	
 	/**
 	 * From ResourceTagDictionary
@@ -229,6 +234,22 @@ public class Resource  implements Validable {
 
 	public void setStatus(String status) {
 		this.status = status;
+	}
+
+	public Long getFileSize() {
+		return fileSize;
+	}
+
+	public void setFileSize(Long fileSize) {
+		this.fileSize = fileSize;
+	}
+
+	public String getFileName() {
+		return fileName;
+	}
+
+	public void setFileName(String fileName) {
+		this.fileName = fileName;
 	}
 
 
