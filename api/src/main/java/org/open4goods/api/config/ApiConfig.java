@@ -7,8 +7,8 @@ import java.util.concurrent.TimeUnit;
 import org.apache.commons.lang3.ArrayUtils;
 import org.open4goods.api.config.yml.ApiProperties;
 import org.open4goods.api.services.AggregationFacadeService;
-import org.open4goods.api.services.AiCompletionService;
 import org.open4goods.api.services.FetcherOrchestrationService;
+import org.open4goods.api.services.completion.GenAiCompletionService;
 import org.open4goods.api.services.store.DataFragmentStoreService;
 import org.open4goods.crawler.config.yml.FetcherProperties;
 import org.open4goods.crawler.repository.CsvIndexationRepository;
@@ -113,8 +113,8 @@ public class ApiConfig {
 	
 	@Bean
 	@Autowired
-	AiCompletionService aiCompletionService(AiService aiService, ProductRepository productRepository, VerticalsConfigService verticalConfigService) {
-		return new AiCompletionService(aiService, productRepository, verticalConfigService, apiProperties);
+	GenAiCompletionService aiCompletionService(AiService aiService, ProductRepository productRepository, VerticalsConfigService verticalConfigService) {
+		return new GenAiCompletionService(aiService, productRepository, verticalConfigService, apiProperties);
 	}
 
 	@Bean
