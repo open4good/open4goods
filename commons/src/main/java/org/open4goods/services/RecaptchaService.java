@@ -20,9 +20,9 @@ import org.springframework.http.ResponseEntity;
 public class RecaptchaService {
 
 
-	private static final String GOOGLE_RECAPTCHA_VERIFY_URL = "https://www.google.com/recaptcha/api/siteverify";
+	private static final String H_CAPTCHA_VERIFY_URL = "https://api.hcaptcha.com/siteverify";
 
-	@Value("${google.recaptcha.secret}")
+	@Value("${h.recaptcha.secret}")
 	String recaptchaSecret;
 
 	@Autowired
@@ -36,7 +36,7 @@ public class RecaptchaService {
 		body.put("remoteip", ip);
 
 		final ResponseEntity<Map> recaptchaResponseEntity = restTemplateBuilder.build().postForEntity(
-				GOOGLE_RECAPTCHA_VERIFY_URL + "?secret={secret}&response={response}&remoteip={remoteip}", body,
+				H_CAPTCHA_VERIFY_URL + "?response={response}&secret={secret}&remoteip={remoteip}", body,
 				Map.class, body);
 
 		final Map<String, Object> responseBody = recaptchaResponseEntity.getBody();
