@@ -1,4 +1,4 @@
-package org.open4goods.api.services;
+package org.open4goods.api.services.completion;
 
 import java.util.List;
 
@@ -16,9 +16,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Scheduled;
 
 
-public class AiCompletionService  {
+public class GenAiCompletionService  {
 
-	protected static final Logger logger = LoggerFactory.getLogger(AiCompletionService.class);
+	protected static final Logger logger = LoggerFactory.getLogger(GenAiCompletionService.class);
 
 	private AiService aiService;
 
@@ -29,7 +29,7 @@ public class AiCompletionService  {
 	private ApiProperties apiProperties;
 	
 	
-	public AiCompletionService( AiService aiService, ProductRepository dataRepository, VerticalsConfigService verticalConfigService, ApiProperties apiProperties) {
+	public GenAiCompletionService( AiService aiService, ProductRepository dataRepository, VerticalsConfigService verticalConfigService, ApiProperties apiProperties) {
 		
 		this.aiService = aiService;
 		this.dataRepository = dataRepository;
