@@ -145,6 +145,10 @@ public class ResourceController extends AbstractUiController {
 	@GetMapping("/images/{gtin:\\d+}-cover.png")
 	public void image(@PathVariable String gtin, final HttpServletResponse response, HttpServletRequest request) throws IOException  {
 
+		
+		
+		
+		
 		 image(gtin, 0, response, request);
 	}
 	@GetMapping("/images/{gtin:\\d+}-{imgNumber:\\d+}.png")
@@ -181,10 +185,6 @@ public class ResourceController extends AbstractUiController {
 			IOUtils.copy(stream ,response.getOutputStream());
 			IOUtils.closeQuietly(stream);
 		} else {
-			
-			
-			
-			
 			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "image introuvable !");
 		}
 	}
