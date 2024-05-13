@@ -56,6 +56,7 @@ resourcesConfig:
   overrideResources: true
   md5Exclusions:
     - 84fe74f622f163b924b962997adda0e1
+    - de819179308dcec8c172e72d06b9e757
 
 
 ####################################################################################
