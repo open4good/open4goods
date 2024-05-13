@@ -6,6 +6,7 @@ import java.io.IOException;
 
 import org.open4goods.api.services.AggregationFacadeService;
 import org.open4goods.api.services.completion.GenAiCompletionService;
+import org.open4goods.api.services.completion.ResourceCompletionService;
 import org.open4goods.config.yml.ui.VerticalConfig;
 import org.open4goods.dao.ProductRepository;
 import org.open4goods.exceptions.AggregationSkipException;
@@ -32,6 +33,7 @@ import jakarta.validation.constraints.NotBlank;
 
 /**
  * This controller allows informations and communications about DatasourceConfigurations
+ * TODO : Should split, into scoringController / resourceController, ....
  * @author goulven
  *
  */
@@ -49,13 +51,16 @@ public class BatchController {
 
 	@Autowired
 	private  ProductRepository repository;
+
+	private ResourceCompletionService resourceCompletionService;
 	
 	
-	public BatchController(AggregationFacadeService batchService, SerialisationService serialisationService, VerticalsConfigService verticalsConfigService, GenAiCompletionService aiCompletionService) {
+	public BatchController(AggregationFacadeService batchService, SerialisationService serialisationService, VerticalsConfigService verticalsConfigService, GenAiCompletionService aiCompletionService, ResourceCompletionService resourceCompletionService) {
 		this.serialisationService = serialisationService;
 		this.verticalConfigService = verticalsConfigService;
 		this.batchService = batchService;
 		this.aiCompletionService =  aiCompletionService;
+		this.resourceCompletionService = resourceCompletionService;
 	}
 
 	@PutMapping(path="/batch/verticals/")
@@ -103,6 +108,25 @@ public class BatchController {
 		batchService.sanitizeAll();
 	}
 
+	@GetMapping("/sanitisation/{gtin}")
+	@Operation(summary="Launch sanitisation of all products")
+	public void sanitizeOne(@PathVariable String gtin ) throws InvalidParameterException, IOException, ResourceNotFoundException, AggregationSkipException {
+		batchService.sanitizeOne(repository.getById(gtin));
+	}
+	
+	@GetMapping("/resourceCompletion/all")
+	@Operation(summary="Launch resource completion on all verticals")
+	public void resourceCompletionAll() throws InvalidParameterException, IOException {
+		resourceCompletionService.completeAll();
+	}
+
+	@GetMapping("/resourceCompletion")
+	@Operation(summary="Launch resource completion on the specified vertical")
+	public void resourceCompletionVertical(@RequestParam @NotBlank final String verticalConfig ) throws InvalidParameterException, IOException {
+		resourceCompletionService.complete(verticalConfigService.getConfigById(verticalConfig));
+	}
+	
+
 	@GetMapping("/contentGeneration/all")
 	@Operation(summary="Launch Gen AI content generation on all verticals")
 	public void genAiAll() throws InvalidParameterException, IOException {
@@ -110,16 +134,8 @@ public class BatchController {
 	}
 
 	@GetMapping("/contentGeneration")
-	@Operation(summary="Launch Gen AI content generation on all verticals")
+	@Operation(summary="Launch Gen AI content generation on the specified vertical")
 	public void genAiVertical(@RequestParam @NotBlank final String verticalConfig ) throws InvalidParameterException, IOException {
 		aiCompletionService.complete(verticalConfigService.getConfigById(verticalConfig));
 	}
-	
-	@GetMapping("/sanitisation/{gtin}")
-	@Operation(summary="Launch sanitisation of all products")
-	public void sanitizeOne(@PathVariable String gtin ) throws InvalidParameterException, IOException, ResourceNotFoundException, AggregationSkipException {
-		batchService.sanitizeOne(repository.getById(gtin));
-	}
-	
-	
 }

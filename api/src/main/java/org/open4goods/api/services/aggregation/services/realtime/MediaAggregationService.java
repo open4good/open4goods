@@ -41,12 +41,6 @@ public class MediaAggregationService extends AbstractAggregationService{
 	@Override
 	public void onDataFragment(final DataFragment input, final Product output, VerticalConfig vConf) throws AggregationSkipException {
 
-		if (vConf.getResourcesConfig().getSkipResourcesFetching()) {
-			logger.info("Skipping resource download : {}",input);
-			return;
-		}
-
-
 		for (final Resource r : input.getResources()) {
 
 			// Adding standard tags

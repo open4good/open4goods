@@ -9,6 +9,7 @@ import org.open4goods.api.config.yml.ApiProperties;
 import org.open4goods.api.services.AggregationFacadeService;
 import org.open4goods.api.services.FetcherOrchestrationService;
 import org.open4goods.api.services.completion.GenAiCompletionService;
+import org.open4goods.api.services.completion.ResourceCompletionService;
 import org.open4goods.api.services.store.DataFragmentStoreService;
 import org.open4goods.crawler.config.yml.FetcherProperties;
 import org.open4goods.crawler.repository.CsvIndexationRepository;
@@ -160,7 +161,14 @@ public class ApiConfig {
 	AiService aiService (AiAgent nudgerAgent, VerticalsConfigService verticalService, EvaluationService spelEvaluationService) {
 		return new AiService(nudgerAgent, verticalService, spelEvaluationService);
 	}
-	
+
+	@Bean
+	@Autowired  
+	ResourceCompletionService resourceCompletionService (ImageMagickService imageService, VerticalsConfigService verticalConfigService, ResourceService resourceService, ProductRepository dataRepository, ApiProperties apiProperties) {
+		return new ResourceCompletionService(imageService, verticalConfigService, resourceService, dataRepository, apiProperties);
+		
+		
+	}
     @Bean
 	public GoogleTaxonomyService googleTaxonomyService(@Autowired RemoteFileCachingService remoteFileCachingService) {
 		GoogleTaxonomyService gts = new GoogleTaxonomyService(remoteFileCachingService);

@@ -1,13 +1,8 @@
 package org.open4goods.api.services.completion;
 
-import java.util.List;
-
 import org.open4goods.api.config.yml.ApiProperties;
-import org.open4goods.api.services.aggregation.aggregator.ScoringBatchedAggregator;
-import org.open4goods.api.services.aggregation.aggregator.StandardAggregator;
 import org.open4goods.config.yml.ui.VerticalConfig;
 import org.open4goods.dao.ProductRepository;
-import org.open4goods.exceptions.AggregationSkipException;
 import org.open4goods.model.product.Product;
 import org.open4goods.services.VerticalsConfigService;
 import org.open4goods.services.ai.AiService;
@@ -15,7 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Scheduled;
 
-
+//TODO : Should have an abstract kind of completionService
 public class GenAiCompletionService  {
 
 	protected static final Logger logger = LoggerFactory.getLogger(GenAiCompletionService.class);
@@ -38,9 +33,6 @@ public class GenAiCompletionService  {
 	}
 
 
-	public void onProduct(Product data, VerticalConfig vConf) {
-		aiService.complete(data, vConf);
-	}	
 	
 	/**
 	 * Score verticals with the batch Aggregator

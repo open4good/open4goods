@@ -111,6 +111,12 @@ public class Product implements Standardisable {
 	@Field(index = false, store = false, type = FieldType.Object)
 	private Set<Resource> resources = new HashSet<>();
 
+	/**
+	 * The post computed images, if any. Means images are cached, and ordered by relevance
+	 */
+	@Field(index = false, store = false, type = FieldType.Object)
+	private List<Resource> images = new ArrayList<>();
+	
 	/** The descriptions **/
 	@Field(index = false, store = false, type = FieldType.Object)
 	private Set<Description> descriptions = new HashSet<>();
@@ -820,6 +826,14 @@ public class Product implements Standardisable {
 
 	public void setDatasourceNames(Set<String> datasourceNames) {
 		this.datasourceNames = datasourceNames;
+	}
+
+	public List<Resource> getImages() {
+		return images;
+	}
+
+	public void setImages(List<Resource> images) {
+		this.images = images;
 	}
 
 	

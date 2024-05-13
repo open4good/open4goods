@@ -21,6 +21,7 @@ import org.open4goods.model.data.Resource;
 import org.open4goods.model.product.Product;
 import org.open4goods.services.BrandService;
 import org.open4goods.services.DataSourceConfigService;
+import org.open4goods.services.ResourceService;
 import org.open4goods.services.VerticalsConfigService;
 import org.open4goods.ui.config.AppConfig;
 import org.open4goods.ui.config.yml.UiConfig;
@@ -62,8 +63,10 @@ public class ResourceController extends AbstractUiController {
 	private final DataSourceConfigService dsConfigService;
 	private final VerticalsConfigService verticalConfigService;
 	private final BrandService brandService;
+	private final ResourceService resourceService;
+	
 
-	public ResourceController(ImageService imageService, ProductRepository esDao, GtinService gtinService, UiConfig config, DataSourceConfigService dsConfigService, VerticalsConfigService verticalConfigService, BrandService brandService) {
+	public ResourceController(ImageService imageService, ProductRepository esDao, GtinService gtinService, UiConfig config, DataSourceConfigService dsConfigService,  ResourceService resourceService, VerticalsConfigService verticalConfigService, BrandService brandService) {
 		this.imageService = imageService;
 		this.esDao = esDao;
 		this.gtinService = gtinService;
@@ -71,6 +74,7 @@ public class ResourceController extends AbstractUiController {
 		this.dsConfigService = dsConfigService;
 		this.verticalConfigService = verticalConfigService;
 		this.brandService = brandService;
+		this.resourceService = resourceService;
 	}
 
 	//////////////////////////////////////////////////////////////
@@ -138,13 +142,18 @@ public class ResourceController extends AbstractUiController {
 //
 //	}
 
-	@GetMapping("/images/{id:\\d+}-cover.png")
-	public void image(@PathVariable String id, final HttpServletResponse response, HttpServletRequest request) throws FileNotFoundException, IOException, ValidationException, TechnicalException {
+	@GetMapping("/images/{gtin:\\d+}-cover.png")
+	public void image(@PathVariable String gtin, final HttpServletResponse response, HttpServletRequest request) throws IOException  {
+
+		 image(gtin, 0, response, request);
+	}
+	@GetMapping("/images/{gtin:\\d+}-{imgNumber:\\d+}.png")
+	public void image(@PathVariable String gtin, @PathVariable int imgNumber, final HttpServletResponse response, HttpServletRequest request) throws IOException  {
 
 		// Retrieve the Product
 		Product data;
 		try {
-			data = esDao.getById(id);
+			data = esDao.getById(gtin);
 		} catch (ResourceNotFoundException e) {
 			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "image introuvable !");
 		}
@@ -155,28 +164,28 @@ public class ResourceController extends AbstractUiController {
 		}
 
 
-
 		//TODO (gof) : not sure pageSize have image, could have any resource
 		// Retrieve one of the cover images
-		Optional<Resource> img = data.getResources().stream().filter(r -> r.getTags().contains(ResourceTagDictionary.CSV)).findAny();
+		Resource img = data.getImages().get(imgNumber);
 
-		// If no cover
-		if (img.isEmpty()) {
-			img = data.getResources().stream().findAny();
-		}
 
-		if (img.isPresent()) {
+		if (null != img) {
+			// TODO : Should be webp
 			response.addHeader("Content-type","image/png");
 			response.addHeader("Cache-Control","public, max-age="+AppConfig.CACHE_PERIOD_SECONDS);
-
-			InputStream stream = imageService.getCoverPng(img.get());
+			InputStream stream = resourceService.getFileStream(img);
 			IOUtils.copy(stream ,response.getOutputStream());
 			IOUtils.closeQuietly(stream);
 		} else {
+			
+			
+			
+			
 			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "image introuvable !");
 		}
 	}
 
+	
 	@GetMapping("/images/{id:\\d+}-gtin.png")
 	public void gtin(@PathVariable String id, final HttpServletResponse response, HttpServletRequest request) throws FileNotFoundException, IOException, ValidationException, TechnicalException {
 

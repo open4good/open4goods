@@ -51,17 +51,12 @@ i18n:
 ####################################################################################  
 
 resourcesConfig:
-  resourceDownloadConcurentThreads: 3
-  overrideResources: false
-  resourceIdExclusions: []
-  imageProductThumbsHeight:
-  - 100
-  - 200
-  - 300
-  imageBrandsThumbsHeight:
-  - 20
-  - 12
-  - 30
+  # In case of images, the min number of pixels the img must have
+  minPixelsEvictionSize: 20000
+  overrideResources: true
+  md5Exclusions:
+    - 84fe74f622f163b924b962997adda0e1
+
 
 ####################################################################################
 # SITEMAP CONFIG

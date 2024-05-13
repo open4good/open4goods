@@ -1,7 +1,6 @@
 package org.open4goods.model.data;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.math.BigInteger;
 
 public class ImageInfo {
 
@@ -9,14 +8,53 @@ public class ImageInfo {
 	private Integer width;
 
 
-	private Set<Integer> availlableThumbs = new HashSet<>();
+	/**
+	 * Hash value representation
+	 * 
+	 * Hashes are constructed by left shifting BigIntegers with either Zero or One
+	 * depending on the condition found in the image. Preceding 0's will be
+	 * truncated therefore it is the algorithms responsibility to add a 1 padding
+	 * bit at the beginning new BigInteger("011011) new BigInteger("000101) 1xxxxx
+	 * 
+	 */
+	private Long pHashValue;
 
-
-
-
+	/**
+	 * How many bits does this hash represent. Necessary due to suffix 0 bits
+	 * beginning dropped.
+	 */
+	private int pHashLength;
+	
+	
+	
 	public ImageInfo() {
 		super();
 	}
+	
+	@Override
+	public String toString() {
+		return height+"*"+width ;
+	}
+
+	/**
+	 * 
+	 * @return the number of pixels this image contains
+	 */
+	public Integer pixels() {
+		return height*width;
+	}
+
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
 	public Integer getHeight() {
 		return height;
 	}
@@ -29,11 +67,24 @@ public class ImageInfo {
 	public void setWidth(final Integer width) {
 		this.width = width;
 	}
-	public Set<Integer> getAvaillableThumbs() {
-		return availlableThumbs;
+
+
+
+
+	public int getpHashLength() {
+		return pHashLength;
 	}
-	public void setAvaillableThumbs(final Set<Integer> availlableThumbs) {
-		this.availlableThumbs = availlableThumbs;
+
+	public void setpHashLength(int pHashLength) {
+		this.pHashLength = pHashLength;
+	}
+
+	public Long getpHashValue() {
+		return pHashValue;
+	}
+
+	public void setpHashValue(Long pHashValue) {
+		this.pHashValue = pHashValue;
 	}
 
 
