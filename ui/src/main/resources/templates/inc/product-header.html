@@ -1,6 +1,8 @@
 <section class="row align-items-center">
 	<aside class="col-lg-4 text-center">
-		   <img height="400" th:src="'/images/'+${product.gtin()}+'-cover.png'"	th:alt="${product.names.longestOfferName()}">
+		   <img th:if="${product.images.size() > 0}" height="400" th:src="'/images/'+${product.gtin()}+'-cover.png'"	th:alt="${product.names.longestOfferName()}">
+		   <img th:unless="${product.images.size() > 0}" height="300" src="/icons/no-image.png"	th:alt="${product.names.longestOfferName()}">
+
 		   <div>
 		   
 		   <span th:each="img, stat : ${product.images}" >
