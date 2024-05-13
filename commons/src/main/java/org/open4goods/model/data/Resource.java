@@ -31,10 +31,6 @@ public class Resource  implements Validable {
 	private String mimeType;
 
 	
-	@Field(index = false, store = false, type = FieldType.Keyword)
-	// TODO : could remove
-	private String providerName;
-
 	@Field(index = false, store = false, type = FieldType.Date, format = DateFormat.epoch_millis)
 	private Long timeStamp;
 
@@ -216,14 +212,6 @@ public class Resource  implements Validable {
 
 	public void setMimeType(String mimeType) {
 		this.mimeType = mimeType;
-	}
-
-	public String getProviderName() {
-		return providerName;
-	}
-
-	public void setProviderName(String providerName) {
-		this.providerName = providerName;
 	}
 
 	public Long getTimeStamp() {

@@ -61,7 +61,6 @@ public class DataFragmentTestBuilder {
 		r.setCacheKey(key);
 		r.setUrl(url);
 		r.setTimeStamp(System.currentTimeMillis());
-		r.setProviderName("a_test_provider");
 		try {
 			dataFragment.addResource(r);
 		} catch (final ValidationException e) {
