@@ -51,7 +51,7 @@ public class ResourceCompletionService  {
 
 
 	// TODO : From yaml
-	private static final double SIMILARITY_SCORE = 0.30;
+	private static final double SIMILARITY_SCORE = 0.40;
 	private static final int PERCEPTIV_HASH_SIZE = 32;
 
 	// TODO : Dedicated logger
@@ -126,6 +126,12 @@ public class ResourceCompletionService  {
 		////////////////////
 		// Update all new items
 		/////////////////////
+		
+		
+		// Deleting existing groups
+		data.getResources().forEach(e -> e.setGroup(null));
+		
+		
 		List<Resource> resources = data.getResources().stream()
 				// Exclude already processed
 				.filter( e ->  vertical.getResourcesConfig().getOverrideResources() || !e.isProcessed() )
@@ -138,6 +144,9 @@ public class ResourceCompletionService  {
 		data.getResources().removeAll(resources);
 		data.getResources().addAll(resources);
 
+		
+		
+		
 		////////////////////////////////////////
 		// Filtering images by validity
 		////////////////////////////////////////
@@ -145,6 +154,7 @@ public class ResourceCompletionService  {
 		Set<String> md5s = new HashSet<>();
 		
 		List<Resource> images = data.getResources().stream()
+				.filter(e -> !e.isEvicted())
 				// Filtering on images
 				.filter(e -> e.getResourceType() == ResourceType.IMAGE)
 				// Checking if not a blacklisted md5
@@ -171,7 +181,7 @@ public class ResourceCompletionService  {
 				})
 				// Filtering by number of pixels
 				.map(e -> {
-					
+
 					if (e.getImageInfo().pixels() < vertical.getResourcesConfig().getMinPixelsEvictionSize()) {
 						logger.warn("Excluded because image is too small : {}", e.getUrl());
 						e.setStatus(ResourceStatus.TOO_SMALL);
@@ -441,18 +451,26 @@ public class ResourceCompletionService  {
 		// Detect height / width
 		final ImageInfo ii = imageService.buildImageInfo(src);
 
-		// Detect image phash
-		try {
-			Hash hash = hasher.hash(src);
-			// TODO : Could remove as we always use the same
-//			ii.setpHashAlgorithmId(hash.getAlgorithmId());
-			ii.setpHashValue(hash.getHashValue().longValue());
-			ii.setpHashLength(hash.getBitResolution());
-		} catch (IOException e) {
-			logger.error("Cannot compute perceptive hash({}) : {}", e.getMessage(), resource.getUrl());
-			resource.setStatus(ResourceStatus.NO_MIME_TYPE);
+		if (null == ii) {
+			logger.error("Cannot analyse image : {}", resource.getUrl());
+			resource.setStatus(ResourceStatus.CANNOT_ANALYSE);
 			resource.setEvicted(true);
+			return ;
+		} else {
+			// Detect image phash
+			try {
+				Hash hash = hasher.hash(src);
+				// TODO : Could remove as we always use the same
+	//			ii.setpHashAlgorithmId(hash.getAlgorithmId());
+				ii.setpHashValue(hash.getHashValue().longValue());
+				ii.setpHashLength(hash.getBitResolution());
+			} catch (IOException e) {
+				logger.error("Cannot compute perceptive hash({}) : {}", e.getMessage(), resource.getUrl());
+				resource.setStatus(ResourceStatus.PERCEPTIV_HASH_FAIL);
+				resource.setEvicted(true);
+			}
 		}
+	
 		resource.setImageInfo(ii);
 		
 		
