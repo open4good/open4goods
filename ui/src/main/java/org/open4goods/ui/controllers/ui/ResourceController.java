@@ -166,7 +166,11 @@ public class ResourceController extends AbstractUiController {
 
 		//TODO (gof) : not sure pageSize have image, could have any resource
 		// Retrieve one of the cover images
-		Resource img = data.getImages().get(imgNumber);
+		Resource img = null;
+		
+		if (imgNumber <   data.getImages().size()) {
+			img = data.getImages().get(imgNumber);
+		} 
 
 
 		if (null != img) {
