@@ -58,17 +58,7 @@
        				<!--/* Header */-->				
 					<th:block th:insert="~{inc/product-header.html}"></th:block>
 				</div>
-
-				
-				
-				
-						
-						
-	
-	
-				
-										
-				
+			
    				<!--/* Descriptions */-->				
 				<th:block th:insert="~{inc/product-descriptions.html}"></th:block>							
 
@@ -324,6 +314,22 @@ $(document).ready(function() {
 		});
 	}
 
+	/////////////////////////////////
+	// Images table
+	/////////////////////////////////	
+	
+	if ($("#imagesTable").length) {
+		$('#imagesTable').DataTable({
+				responsive: true		
+		});
+	}
+
+	
+	
+	imagesTable
+	
+	
+	
 	$('#pills-new-tab').on("click", function(){
 		token = $("#offresNeuves>tbody>tr:first").attr('data-token');	
 		$("#token").val(token);	    

@@ -1,6 +1,15 @@
 <section class="row align-items-center">
 	<aside class="col-lg-4 text-center">
 		   <img height="400" th:src="'/images/'+${product.gtin()}+'-cover.png'"	th:alt="${product.names.longestOfferName()}">
+		   <div>
+		   
+		   <span th:each="img, stat : ${product.images}" >
+		  	 <img th:unless="${stat.first}" height="120" th:src="'/images/'+${product.gtin()}+'-'+${stat.index}+'.png'"	th:alt="${product.names.longestOfferName()}">
+		   </span>
+		   	
+		   </div>
+		   
+		   
 	</aside>
 	<div th:if="${product.ecoscore}" class="col-lg-4">
 		<!--/* Best price */-->				
