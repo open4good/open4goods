@@ -186,7 +186,7 @@
 					data : data,
 					vertical: vertical,
   					productUrl : baseUrl+verticalPath+'/'+data.names.url['default'],
-  					imageUrl : baseUrl+'images/'+data.attributes.referentielAttributes.GTIN+'-cover.png',           					
+  					imageUrl : (data.images.length == 0 ? "/icons/no-image.png" : baseUrl+'images/'+data.attributes.referentielAttributes.GTIN+'-cover.png'),           					
 					name : (data.attributes.referentielAttributes.MODEL == null ? data.names.name : data.attributes.referentielAttributes.MODEL)
 				});                	
        	}
