@@ -40,14 +40,12 @@ import dev.brachtendorf.jimagehash.hash.Hash;
 import dev.brachtendorf.jimagehash.hashAlgorithms.HashingAlgorithm;
 import dev.brachtendorf.jimagehash.hashAlgorithms.PerceptiveHash;
 
-// TODO : Should have an abstract kind of completionService
 // TODO : Detect / Prefer image transparency
 // TODO : Delete evicted cache file
 // TODO : Convert images to WEBP
-// TODO : dedicated logs
 // TODO : Clean config on MediaAggregationConfig
 // TODO : Should put the processed flag on majority of evicted cases
-public class ResourceCompletionService  {
+public class ResourceCompletionService  extends AbstractCompletionService{
 
 
 	// TODO : From yaml
@@ -58,8 +56,6 @@ public class ResourceCompletionService  {
 	protected static final Logger logger = LoggerFactory.getLogger(ResourceCompletionService.class);
 
 	private final ApiProperties apiProperties;
-	private final ProductRepository dataRepository;
-	private final VerticalsConfigService verticalConfigService;
 	private final ImageMagickService imageService;	
 	private final ResourceService resourceService;
 
@@ -74,9 +70,12 @@ public class ResourceCompletionService  {
 
 	public ResourceCompletionService(ImageMagickService imageService, VerticalsConfigService verticalConfigService,
 			ResourceService resourceService, ProductRepository dataRepository, ApiProperties apiProperties) {
+		
+		// TODO : Should set a specific log level here (not "agg(regation)" one)
+		super(dataRepository, verticalConfigService, apiProperties.logsFolder(), apiProperties.aggLogLevel());		
+
 		this.apiProperties = apiProperties;
-		this.dataRepository = dataRepository;
-		this.verticalConfigService = verticalConfigService;
+		
 		this.imageService = imageService;
 		this.resourceService = resourceService;
 
@@ -88,40 +87,14 @@ public class ResourceCompletionService  {
 	}
 
 	/**
-	 * Score verticals with the batch Aggregator TODO : Schedule delay from conf
-	 */
-	@Scheduled(fixedRate = 5000 + 1000 * 3600 * 24, initialDelay = 1000 * 3600 * 24)
-	public void completeAll() {
-		logger.info("Generating AI texts for all verticals");
-		for (VerticalConfig vConf : verticalConfigService.getConfigsWithoutDefault()) {
-			if (vConf.getGenAiConfig().isEnabled()) {
-				complete(vConf);
-			}
-		}
-	}
-
-	/**
-	 * Proceed to the AI texts generation for a vertical TODO : Limit to the "TOP N
-	 * / WORSE N"
-	 */
-	public void complete(VerticalConfig vertical) {
-
-		logger.info("Processing resources for {}", vertical.getId());
-
-		dataRepository.exportVerticalWithValidDate(vertical.getId()).forEach(data -> {
-			logger.info("Image completion for {}", data.getId());
-			processProduct(data, vertical);
-			dataRepository.index(data);
-		});
-	}
-
-	/**
 	 * Process resources for one product
 	 * 
 	 * @param data
 	 * @param vertical
 	 */
-	private void processProduct(Product data, VerticalConfig vertical) {
+	
+	@Override
+	public void completeProduct(VerticalConfig vertical, Product data ) {
 
 		////////////////////
 		// Update all new items
@@ -475,4 +448,6 @@ public class ResourceCompletionService  {
 		
 		
 	}
+
+
 }

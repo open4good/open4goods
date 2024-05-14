@@ -114,28 +114,4 @@ public class BatchController {
 		batchService.sanitizeOne(repository.getById(gtin));
 	}
 	
-	@GetMapping("/resourceCompletion/all")
-	@Operation(summary="Launch resource completion on all verticals")
-	public void resourceCompletionAll() throws InvalidParameterException, IOException {
-		resourceCompletionService.completeAll();
-	}
-
-	@GetMapping("/resourceCompletion")
-	@Operation(summary="Launch resource completion on the specified vertical")
-	public void resourceCompletionVertical(@RequestParam @NotBlank final String verticalConfig ) throws InvalidParameterException, IOException {
-		resourceCompletionService.complete(verticalConfigService.getConfigById(verticalConfig));
-	}
-	
-
-	@GetMapping("/contentGeneration/all")
-	@Operation(summary="Launch Gen AI content generation on all verticals")
-	public void genAiAll() throws InvalidParameterException, IOException {
-		aiCompletionService.completeAll();
-	}
-
-	@GetMapping("/contentGeneration")
-	@Operation(summary="Launch Gen AI content generation on the specified vertical")
-	public void genAiVertical(@RequestParam @NotBlank final String verticalConfig ) throws InvalidParameterException, IOException {
-		aiCompletionService.complete(verticalConfigService.getConfigById(verticalConfig));
-	}
 }
