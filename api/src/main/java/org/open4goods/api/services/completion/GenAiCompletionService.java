@@ -1,6 +1,7 @@
 package org.open4goods.api.services.completion;
 
 import org.open4goods.api.config.yml.ApiProperties;
+import org.open4goods.api.services.AbstractCompletionService;
 import org.open4goods.config.yml.ui.VerticalConfig;
 import org.open4goods.dao.ProductRepository;
 import org.open4goods.model.product.Product;
@@ -25,10 +26,9 @@ public class GenAiCompletionService  extends AbstractCompletionService{
 		this.apiProperties = apiProperties;
 	}
 
-	public void completeProduct(VerticalConfig vertical, Product data) {
+	public void processProduct(VerticalConfig vertical, Product data) {
 		logger.info("AI text completion for {}", data.getId());
 		aiService.complete(data, vertical);
-		dataRepository.index(data);
 	}
 
 }

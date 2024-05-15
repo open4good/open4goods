@@ -113,9 +113,6 @@ public class AmazonServiceTest {
                                 System.out.println("Buying price: "
                                         + item.getOffers().getListings().get(0).getPrice().getDisplayAmount());
                             }
-                            
-
-							
 							item.getBrowseNodeInfo();
 							
                         } else {
