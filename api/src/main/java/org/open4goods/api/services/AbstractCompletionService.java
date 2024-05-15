@@ -1,4 +1,4 @@
-package org.open4goods.api.services.completion;
+package org.open4goods.api.services;
 
 import org.open4goods.config.yml.ui.VerticalConfig;
 import org.open4goods.dao.ProductRepository;
@@ -55,7 +55,14 @@ public abstract class AbstractCompletionService {
 		logger.info("Generating AI texts for {} products {}",limit == null ? "all" : limit, vertical.getId());
 		dataRepository.exportVerticalWithValidDateOrderByEcoscore(vertical.getId(), limit).forEach(data -> {
 			completeProduct(vertical, data);
+			
 		});
+	}
+
+	public void completeProduct(VerticalConfig vertical, Product data) {
+		processProduct(vertical, data);
+		dataRepository.index(data);
+		
 	}
 
 	/**
@@ -70,6 +77,9 @@ public abstract class AbstractCompletionService {
 	 * @param vertical
 	 * @param data
 	 */
-	public abstract void completeProduct(VerticalConfig vertical, Product data);
+	public abstract void processProduct(VerticalConfig vertical, Product data);
 
+	
+	
+	
 }

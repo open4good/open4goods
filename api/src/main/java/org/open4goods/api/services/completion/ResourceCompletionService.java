@@ -19,6 +19,7 @@ import org.apache.http.client.fluent.Request;
 import org.apache.tika.Tika;
 import org.apache.tika.config.TikaConfig;
 import org.open4goods.api.config.yml.ApiProperties;
+import org.open4goods.api.services.AbstractCompletionService;
 import org.open4goods.config.yml.ui.VerticalConfig;
 import org.open4goods.dao.ProductRepository;
 import org.open4goods.exceptions.TechnicalException;
@@ -94,7 +95,7 @@ public class ResourceCompletionService  extends AbstractCompletionService{
 	 */
 	
 	@Override
-	public void completeProduct(VerticalConfig vertical, Product data ) {
+	public void processProduct(VerticalConfig vertical, Product data ) {
 
 		////////////////////
 		// Update all new items

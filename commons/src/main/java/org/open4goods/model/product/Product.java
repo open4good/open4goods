@@ -63,6 +63,13 @@ public class Product implements Standardisable {
 	@Field(index = true, store = false, type = FieldType.Keyword)
 	private String id;
 
+	
+	/**
+	 * The list of external id's for this product
+	 */
+	private ExternalIds externalId = new ExternalIds();
+	
+	
 	/**
 	 * The date this item has been created
 	 */
@@ -834,6 +841,14 @@ public class Product implements Standardisable {
 
 	public void setImages(List<Resource> images) {
 		this.images = images;
+	}
+
+	public ExternalIds getExternalId() {
+		return externalId;
+	}
+
+	public void setExternalId(ExternalIds externalId) {
+		this.externalId = externalId;
 	}
 
 	
