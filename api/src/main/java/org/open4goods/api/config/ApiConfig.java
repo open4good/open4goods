@@ -8,6 +8,7 @@ import org.apache.commons.lang3.ArrayUtils;
 import org.open4goods.api.config.yml.ApiProperties;
 import org.open4goods.api.services.AggregationFacadeService;
 import org.open4goods.api.services.FetcherOrchestrationService;
+import org.open4goods.api.services.completion.AmazonCompletionService;
 import org.open4goods.api.services.completion.GenAiCompletionService;
 import org.open4goods.api.services.completion.ResourceCompletionService;
 import org.open4goods.api.services.store.DataFragmentStoreService;
@@ -118,8 +119,19 @@ public class ApiConfig {
 		return new GenAiCompletionService(aiService, productRepository, verticalConfigService, apiProperties);
 	}
 
-	@Bean
 	
+	@Bean	
+	@Autowired
+	AmazonCompletionService amazonCompletionService(ProductRepository dataRepository, VerticalsConfigService verticalConfigService,
+			ApiProperties apiProperties, DataSourceConfigService dataSourceConfigService) {
+		return new AmazonCompletionService(dataRepository, verticalConfigService, apiProperties, dataSourceConfigService);
+	}
+
+	
+	
+	
+	
+	@Bean	
 	BlablaService blablaService(@Autowired EvaluationService evaluationService) {
 		return new BlablaService(evaluationService);
 	}

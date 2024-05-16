@@ -68,8 +68,7 @@ public class Product implements Standardisable {
 	 * The list of external id's for this product
 	 */
 	private ExternalIds externalId = new ExternalIds();
-	
-	
+		
 	/**
 	 * The date this item has been created
 	 */

@@ -9,7 +9,9 @@ public class AmazonCompletionConfig {
 	private String host;        
 	private String region;
 	// Wait time between 2 calls
-	private Long sleepDuration = 1000L;
+//	https://webservices.amazon.com/paapi5/documentation/troubleshooting/api-rates.html
+	private Long sleepDuration = 1100L;	
+	private int maxCallsPerBatch = 8640;
 	
 	
 	public String getAccessKey() {
@@ -47,6 +49,12 @@ public class AmazonCompletionConfig {
 	}
 	public void setSleepDuration(Long sleepDuration) {
 		this.sleepDuration = sleepDuration;
+	}
+	public int getMaxCallsPerBatch() {
+		return maxCallsPerBatch;
+	}
+	public void setMaxCallsPerBatch(int maxCallsPerBatch) {
+		this.maxCallsPerBatch = maxCallsPerBatch;
 	}
 	
 	
