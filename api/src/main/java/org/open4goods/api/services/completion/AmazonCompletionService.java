@@ -12,6 +12,8 @@ import org.open4goods.api.services.AbstractCompletionService;
 import org.open4goods.api.services.aggregation.services.realtime.PriceAggregationService;
 import org.open4goods.config.yml.ui.VerticalConfig;
 import org.open4goods.dao.ProductRepository;
+import org.open4goods.helper.IdHelper;
+import org.open4goods.model.data.UnindexedKeyVal;
 import org.open4goods.model.product.Product;
 import org.open4goods.services.DataSourceConfigService;
 import org.open4goods.services.VerticalsConfigService;
@@ -21,8 +23,13 @@ import org.slf4j.LoggerFactory;
 import com.amazon.paapi5.v1.ApiClient;
 import com.amazon.paapi5.v1.ApiException;
 import com.amazon.paapi5.v1.BrowseNodeInfo;
+import com.amazon.paapi5.v1.ByLineInfo;
+import com.amazon.paapi5.v1.Classifications;
+import com.amazon.paapi5.v1.ContentInfo;
+import com.amazon.paapi5.v1.ContentRating;
 import com.amazon.paapi5.v1.CustomerReviews;
 import com.amazon.paapi5.v1.ErrorData;
+import com.amazon.paapi5.v1.ExternalIds;
 import com.amazon.paapi5.v1.GetItemsRequest;
 import com.amazon.paapi5.v1.GetItemsResource;
 import com.amazon.paapi5.v1.GetItemsResponse;
@@ -30,12 +37,18 @@ import com.amazon.paapi5.v1.Images;
 import com.amazon.paapi5.v1.Item;
 import com.amazon.paapi5.v1.ItemIdType;
 import com.amazon.paapi5.v1.ItemInfo;
+import com.amazon.paapi5.v1.ManufactureInfo;
+import com.amazon.paapi5.v1.MultiValuedAttribute;
 import com.amazon.paapi5.v1.Offers;
 import com.amazon.paapi5.v1.PartnerType;
+import com.amazon.paapi5.v1.ProductInfo;
 import com.amazon.paapi5.v1.RentalOffers;
 import com.amazon.paapi5.v1.SearchItemsRequest;
 import com.amazon.paapi5.v1.SearchItemsResource;
 import com.amazon.paapi5.v1.SearchItemsResponse;
+import com.amazon.paapi5.v1.SingleStringValuedAttribute;
+import com.amazon.paapi5.v1.TechnicalInfo;
+import com.amazon.paapi5.v1.TradeInInfo;
 import com.amazon.paapi5.v1.VariationAttribute;
 import com.amazon.paapi5.v1.api.DefaultApi;
 
@@ -108,14 +121,24 @@ public class AmazonCompletionService extends AbstractCompletionService {
 	 */
 	public void processProduct(VerticalConfig vertical, Product data) {
 		logger.info("Amazon completion for {}", data.getId());
-		if (StringUtils.isEmpty(data.getExternalId().getAsin())) {
+		String asin = data.getExternalId().getAsin();
+		if (StringUtils.isEmpty(asin)) {
 			// First time API Call, we operate through the search method
 			logger.info("Initial amazon call (get) for {}", data.gtin());
 			completeSearch(vertical, data);
 		} else {
-			// If we already have the ASIN, we operate a direct get request
-			logger.info("Further amazon call (get) for {}", data.gtin());
-			completeGet(vertical, data);
+			
+			if (!asin.equals("NOT_FOUND")) {
+			
+				// If we already have the ASIN, we operate a direct get request
+				logger.info("Further amazon call (get) for {}", data.gtin());
+				// TODO : Do not proceed, have a delay threshold
+				completeGet(vertical, data);
+			} else {
+//				TODO : Could hve a strategy to try back items, after a while
+				logger.info("Amazon fetch of {} skipped because failed in a previous attempt", data.gtin());
+				return;
+			}
 		}
 		// Indexing the result
 		dataRepository.index(data);
@@ -185,12 +208,13 @@ public class AmazonCompletionService extends AbstractCompletionService {
 				}
 			}
 
-			response.getSearchResult().getItems();
-			response.getSearchResult().getSearchRefinements();
+			
 
-			if (response.getSearchResult().getItems().size() == 0) {
+			if (null == response.getSearchResult() || response.getSearchResult().getItems().size() == 0) {
 				logger.warn("No amazon product for {}", data.gtin());
-			} else if (response.getSearchResult().getItems().size() == 0) {
+				data.getExternalId().setAsin("NOT_FOUND");
+				return;
+			} else if (response.getSearchResult().getItems().size() > 1) {
 				logger.warn("Multiple amazon product for {}", data.gtin());
 			}
 
@@ -205,8 +229,9 @@ public class AmazonCompletionService extends AbstractCompletionService {
 
 	private void processAmazonItem(Item item, VerticalConfig vertical, Product data) {
 		
+		logger.info("Setting amazon data for {}:{}", vertical.getId(), data.gtin());
 		
-		
+		// Setting the ASIN
 		String asin = item.getASIN();
 		if (!StringUtils.isEmpty(asin)) {
 			data.getExternalId().setAsin(asin);
@@ -214,20 +239,106 @@ public class AmazonCompletionService extends AbstractCompletionService {
 			logger.warn("Empty ASIN returned for {}", data.gtin());
 		}
 		
-		Images images = item.getImages();
+		 performa// Handling images		
+		Images images = item.getImages();		
+		if (null != images) {
+			if (null != images.getPrimary()) {	
+				logger.info("Adding primary image for {} : {}", data.gtin(), images.getPrimary().getLarge());
+				data.addImage(images.getPrimary().getLarge().getURL(), "amazon");
+			}
+			
+			if (null != images.getVariants()) {						
+				images.getVariants().forEach(e -> {					
+					logger.info("Adding variant image for {} : {}", data.gtin(), e.getLarge().getURL());
+					data.addImage(e.getLarge().getURL(), "amazon");										
+				});				
+			}			
+		}		
 		
-		String detailPageUrl = item.getDetailPageURL();
-		Offers offers = item.getOffers();
+		// Handling offers
+		String detailPageUrl = item.getDetailPageURL();			
+		Offers offers = item.getOffers();		
+		if (null != offers) {
+			logger.info("Adding price for {}", data.gtin());
+			offers.getSummaries().getFirst().getLowestPrice();			
+		}
 		
+		// Handling customer reviews
 		CustomerReviews customerReviews = item.getCustomerReviews();
+		if (null != customerReviews) {
+			customerReviews.getCount(); 
+// @formatter:on
+
+		}
 		
-		
+		// Handling product infos
 		ItemInfo itemInfo = item.getItemInfo();
+		if (null != itemInfo) {
+			ByLineInfo lineInfo = itemInfo.getByLineInfo();
+			if (null != lineInfo) {
+				String brand = lineInfo.getBrand().getDisplayValue();
+				String manufacturer = lineInfo.getManufacturer().getDisplayValue();
+				
+//				data.bra
+				
+				
+			}
+			
+			
+			
+			Classifications classifications = itemInfo.getClassifications();
+			ContentInfo contentInfo = itemInfo.getContentInfo();
+			ContentRating contentRating = itemInfo.getContentRating();
+			ExternalIds externalIds = itemInfo.getExternalIds();
+			MultiValuedAttribute features = itemInfo.getFeatures();
+			ManufactureInfo manufactureInfo = itemInfo.getManufactureInfo();
+			ProductInfo productInfo = itemInfo.getProductInfo();
+			TechnicalInfo technicalInfo = itemInfo.getTechnicalInfo();
+			SingleStringValuedAttribute title = itemInfo.getTitle();
+			TradeInInfo tradeInfo = itemInfo.getTradeInInfo();
+		}
+		
+		
+		// ParentASIN
 		String parentAsin = item.getParentASIN();
-		RentalOffers rentalOffers = item.getRentalOffers();
-		BigDecimal score = item.getScore();
+		if (!StringUtils.isEmpty(parentAsin)) {
+			logger.info("Found a parent ASIN for {}", data.gtin());
+		}
+		
 		List<VariationAttribute> variationAttributes = item.getVariationAttributes();
+		if (null != variationAttributes) {
+			variationAttributes.forEach(e ->  {
+				String varName = e.getName();
+				String varValue = e.getValue();
+				logger.info("Found a variation attribute for {} : {}, {}", data.gtin(), varName, varValue);				
+			});
+		}
+		
+		
+		
+		////////////////////
+		// Adding category
+		////////////////////
 		BrowseNodeInfo browseNodeInfo = item.getBrowseNodeInfo();
+		String category = IdHelper.getCategoryName(StringUtils.join(browseNodeInfo.getBrowseNodes().stream().map(e->e.getDisplayName()).toList()," > "));
+		
+		data.getDatasourceCategories().add(category);
+		data.getMappedCategories().add(new UnindexedKeyVal("amazon",category));
+		
+		
+		
+		
+		
+		
+		BigDecimal score = item.getScore();
+		if (null != score) {
+			logger.info("Score : {}", score);
+		}
+		
+		// RentalOffers rentalOffers = item.getRentalOffers();
+
+		
+		logger.info("Amazon completion done for {}", data.gtin());
 		
 	}
 

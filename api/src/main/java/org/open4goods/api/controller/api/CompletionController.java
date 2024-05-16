@@ -46,10 +46,11 @@ public class CompletionController {
 	private ProductRepository repository;
 
 	public CompletionController(VerticalsConfigService verticalsConfigService,
-			GenAiCompletionService aiCompletionService, ResourceCompletionService resourceCompletionService) {
+			GenAiCompletionService aiCompletionService, ResourceCompletionService resourceCompletionService, AmazonCompletionService amazonCompletionService) {
 		this.verticalConfigService = verticalsConfigService;
 		this.aiCompletionService = aiCompletionService;
 		this.resourceCompletionService = resourceCompletionService;
+		this.amazonCompletionService = amazonCompletionService;
 	}
 
 	///////////////////////////////////
