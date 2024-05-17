@@ -1,9 +1,9 @@
 package org.open4goods.api.services.completion;
 
 import java.math.BigDecimal;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 import org.open4goods.api.config.yml.AmazonCompletionConfig;
@@ -12,7 +12,11 @@ import org.open4goods.api.services.AbstractCompletionService;
 import org.open4goods.api.services.aggregation.services.realtime.PriceAggregationService;
 import org.open4goods.config.yml.ui.VerticalConfig;
 import org.open4goods.dao.ProductRepository;
+import org.open4goods.exceptions.AggregationSkipException;
 import org.open4goods.helper.IdHelper;
+import org.open4goods.model.constants.ProductCondition;
+import org.open4goods.model.data.DataFragment;
+import org.open4goods.model.data.Price;
 import org.open4goods.model.data.UnindexedKeyVal;
 import org.open4goods.model.product.Product;
 import org.open4goods.services.DataSourceConfigService;
@@ -39,10 +43,10 @@ import com.amazon.paapi5.v1.ItemIdType;
 import com.amazon.paapi5.v1.ItemInfo;
 import com.amazon.paapi5.v1.ManufactureInfo;
 import com.amazon.paapi5.v1.MultiValuedAttribute;
+import com.amazon.paapi5.v1.OfferListing;
 import com.amazon.paapi5.v1.Offers;
 import com.amazon.paapi5.v1.PartnerType;
 import com.amazon.paapi5.v1.ProductInfo;
-import com.amazon.paapi5.v1.RentalOffers;
 import com.amazon.paapi5.v1.SearchItemsRequest;
 import com.amazon.paapi5.v1.SearchItemsResource;
 import com.amazon.paapi5.v1.SearchItemsResponse;
@@ -239,7 +243,7 @@ public class AmazonCompletionService extends AbstractCompletionService {
 			logger.warn("Empty ASIN returned for {}", data.gtin());
 		}
 		
-		 performa// Handling images		
+		 // Handling images		
 		Images images = item.getImages();		
 		if (null != images) {
 			if (null != images.getPrimary()) {	
@@ -255,21 +259,76 @@ public class AmazonCompletionService extends AbstractCompletionService {
 			}			
 		}		
 		
+		
+		
+		
+		////////////////////
 		// Handling offers
+		///////////////////
 		String detailPageUrl = item.getDetailPageURL();			
 		Offers offers = item.getOffers();		
 		if (null != offers) {
-			logger.info("Adding price for {}", data.gtin());
-			offers.getSummaries().getFirst().getLowestPrice();			
+			logger.info("Adding prices for {}", data.gtin());
+			OfferListing minNewPrice = null;
+			OfferListing minOccasionPrice = null;
+			
+			for (OfferListing o : offers.getListings()) {
+				
+				//o.getAvailability();
+				// TODO : As constant
+				if (o.getCondition().getLabel().equals("OCCASION")) {
+					// Handling occasion product
+					if (minOccasionPrice == null) {
+						minOccasionPrice = o;
+					} else {
+						if (minOccasionPrice.getPrice().getAmount().doubleValue() > o.getPrice().getAmount().doubleValue()) {
+							minOccasionPrice = o;
+						}
+					}
+				} else {
+					// Handling occasion product
+					if (minNewPrice == null) {
+						minNewPrice = o;
+					} else {
+						if (minNewPrice.getPrice().getAmount().doubleValue() > o.getPrice().getAmount().doubleValue()) {
+							minNewPrice = o;
+						}
+					}				
+				}			
+			}
+			
+			// Handling the best new offer if any
+			if (null != minNewPrice) {
+				DataFragment df = mapOfferToDataFragment(minNewPrice, detailPageUrl);
+				try {
+					priceAggregationService.onDataFragment(df, data, vertical);
+				} catch (AggregationSkipException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+			
+			// Handling the best occasion offer if any
+			if (null != minOccasionPrice) {
+				DataFragment df = mapOfferToDataFragment(minOccasionPrice, detailPageUrl);
+				try {
+					priceAggregationService.onDataFragment(df, data, vertical);
+				} catch (AggregationSkipException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+			
+//			offers.getSummaries().getFirst().getLowestPrice();			
 		}
 		
-		// Handling customer reviews
-		CustomerReviews customerReviews = item.getCustomerReviews();
-		if (null != customerReviews) {
-			customerReviews.getCount(); 
-// @formatter:on
-
-		}
+		
+		
+//		// Handling customer reviews
+//		CustomerReviews customerReviews = item.getCustomerReviews();
+//		if (null != customerReviews) {
+//			customerReviews.getCount(); 
+//		}
 		
 		// Handling product infos
 		ItemInfo itemInfo = item.getItemInfo();
@@ -278,10 +337,6 @@ public class AmazonCompletionService extends AbstractCompletionService {
 			if (null != lineInfo) {
 				String brand = lineInfo.getBrand().getDisplayValue();
 				String manufacturer = lineInfo.getManufacturer().getDisplayValue();
-				
-//				data.bra
-				
-				
 			}
 			
 			
@@ -324,12 +379,7 @@ public class AmazonCompletionService extends AbstractCompletionService {
 		
 		data.getDatasourceCategories().add(category);
 		data.getMappedCategories().add(new UnindexedKeyVal("amazon",category));
-		
-		
-		
-		
-		
-		
+	
 		BigDecimal score = item.getScore();
 		if (null != score) {
 			logger.info("Score : {}", score);
@@ -340,6 +390,36 @@ public class AmazonCompletionService extends AbstractCompletionService {
 		
 		logger.info("Amazon completion done for {}", data.gtin());
 		
+	}
+
+	/**
+	 * Map an amazon offer to a DataFragment
+	 * @param o
+	 * @param url
+	 * @return
+	 */
+	private DataFragment mapOfferToDataFragment(OfferListing o, String url) {
+		DataFragment df = new DataFragment();
+		Price p = new Price();
+		if (o.getCondition().getLabel().equals("OCCASION")) {
+			df.setProductState(ProductCondition.OCCASION);
+		} else if (o.getCondition().getLabel().equals("NEW")) {
+			df.setProductState(ProductCondition.NEW);
+		} else {
+			logger.warn("Unlnow amazon product condition : {}", o.getCondition().getLabel());
+		}
+		
+		p.setPrice(o.getPrice().getAmount().doubleValue());
+		try {
+			p.setCurrency(o.getPrice().getCurrency());
+		} catch (ParseException e) {
+			logger.warn("Error setting amazoncurrency", e);
+		}
+				
+		df.setAffiliatedUrl(url);		
+		df.setPrice(p);
+		
+		return df;
 	}
 
 }
