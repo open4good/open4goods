@@ -13,6 +13,8 @@ public class AmazonCompletionConfig {
 	private Long sleepDuration = 1100L;	
 	private int maxCallsPerBatch = 8640;
 	
+	// Yaml datasource config for amazon
+	private String datasourceName = "amazon.fr.yml";
 	
 	public String getAccessKey() {
 		return accessKey;
@@ -56,7 +58,13 @@ public class AmazonCompletionConfig {
 	public void setMaxCallsPerBatch(int maxCallsPerBatch) {
 		this.maxCallsPerBatch = maxCallsPerBatch;
 	}
-	
+	public String getDatasourceName() {
+		return datasourceName;
+	}
+	public void setDatasourceName(String datasourceName) {
+		this.datasourceName = datasourceName;
+	}
+
 	
 	
     

@@ -52,7 +52,7 @@ public class CompletionFacadeService {
 	// Genai completion
 	///////////////////////////////////
 
-	@Scheduled(timeUnit = TimeUnit.HOURS, fixedDelay = 24, initialDelay = 0)
+	@Scheduled(timeUnit = TimeUnit.HOURS, fixedDelay = 24, initialDelay = 2)
 	public void genaiCompletionAll() throws InvalidParameterException, IOException {
 		logger.warn("Completing verticals with genAI content");
 		aiCompletionService.completeAll();

@@ -75,7 +75,7 @@ public class IdHelper {
 	/**
 	 * Extract brandUid from product name
 	 *
-
+     // TODO : Rename to extractModelName
 	 * @return
 	 * @throws InvalidParameterException
 	 */
@@ -99,7 +99,7 @@ public class IdHelper {
 
 	/**
 	 * Extract brandUid from a String
-	 *
+	 * TODO : rename extract brand -> extractModel
 
 	 * @return
 	 */

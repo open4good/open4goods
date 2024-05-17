@@ -69,6 +69,7 @@ public class DataFragment implements Standardisable, Validable {
 	private Long lastIndexationDate;
 
 	@NotNull
+	// TODO : Should remove, creation is computed at Product level
 	private Long creationDate;
 
 
