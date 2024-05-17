@@ -61,7 +61,7 @@ public abstract class AbstractCompletionService {
 
 	public void completeProduct(VerticalConfig vertical, Product data) {
 		processProduct(vertical, data);
-		dataRepository.index(data);
+		dataRepository.forceIndex(data);
 		
 	}
 
