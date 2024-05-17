@@ -89,7 +89,6 @@ public class CompletionController {
 
 	@GetMapping("/completion/genai")
 	@Operation(summary = "Launch genai completion on all verticals")
-	@Scheduled(fixedRate = 5000 + 1000 * 3600 * 24, initialDelay = 1000 * 3600)
 	public void genaiCompletionAll() throws InvalidParameterException, IOException {
 		// TODO : From conf
 		aiCompletionService.completeAll(10);
@@ -120,7 +119,6 @@ public class CompletionController {
 
 	@GetMapping("/completion/amazon")
 	@Operation(summary = "Launch amazon completion on all verticals")
-	@Scheduled(fixedRate = 5000 + 1000 * 3600 * 24, initialDelay = 1000 * 3600)
 	public void amazonCompletionAll() throws InvalidParameterException, IOException {
 // TODO : From conf
 		amazonCompletionService.completeAll();
