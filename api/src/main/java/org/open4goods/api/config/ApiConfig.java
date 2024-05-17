@@ -23,6 +23,7 @@ import org.open4goods.crawler.services.IndexationService;
 import org.open4goods.crawler.services.fetching.CsvDatasourceFetchingService;
 import org.open4goods.crawler.services.fetching.WebDatasourceFetchingService;
 import org.open4goods.dao.ProductRepository;
+import org.open4goods.exceptions.TechnicalException;
 import org.open4goods.exceptions.ValidationException;
 import org.open4goods.helper.DevModeService;
 import org.open4goods.model.constants.CacheConstants;
@@ -123,8 +124,8 @@ public class ApiConfig {
 	@Bean	
 	@Autowired
 	AmazonCompletionService amazonCompletionService(ProductRepository dataRepository, VerticalsConfigService verticalConfigService,
-			ApiProperties apiProperties, DataSourceConfigService dataSourceConfigService) {
-		return new AmazonCompletionService(dataRepository, verticalConfigService, apiProperties, dataSourceConfigService);
+			ApiProperties apiProperties, DataSourceConfigService dataSourceConfigService, AggregationFacadeService aggregationFacade) throws TechnicalException {
+		return new AmazonCompletionService(dataRepository, verticalConfigService, apiProperties, dataSourceConfigService, aggregationFacade);
 	}
 
 	

@@ -646,7 +646,9 @@ public class Product implements Standardisable {
 	 */
 	public void addImage(String url, String tag) {
 		if (!StringUtils.isEmpty(url)) {
-			resources.add(new Resource(url, tag));			
+			Resource r = new Resource(url, tag);
+			resources.remove(r);
+			resources.add(r);			
 		}
 	}
 	

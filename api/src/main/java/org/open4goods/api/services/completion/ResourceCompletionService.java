@@ -255,17 +255,34 @@ public class ResourceCompletionService  extends AbstractCompletionService{
 		// Formating output
 		ArrayList<List<Resource>> sortedCluster = new ArrayList<List<Resource>>();
 		
+		
+		
+		
 		// Sorting buckets content by image size (best image first)
+		List<Resource> forcedFirst = null;
 		for (Set<Resource> resourceGroups : cluster.values() ) {
 			List<Resource> tmpList = new ArrayList<>();
 			tmpList.addAll(resourceGroups);
 			Collections.sort(tmpList, (o1, o2) -> o2.getImageInfo().pixels().compareTo(o1.getImageInfo().pixels()));
 			sortedCluster.add(tmpList);			
+			
+			// We priorize on amazon primary image
+			boolean primary =  resourceGroups.stream().map(e->e.getTags()).anyMatch(e -> e.contains(AmazonCompletionService.AMAZON_PRIMARY_TAG));
+			if (primary) {
+				forcedFirst = tmpList;
+			}
 		}
 				
 		// Sorting bucketsby number of occurences
 		Collections.sort(sortedCluster, (o1, o2) -> Integer.compare(o2.size(), o1.size()));
 
+		if (null != forcedFirst) {
+			sortedCluster.remove(forcedFirst);
+			sortedCluster.addFirst(forcedFirst);
+		}
+		// But 
+		
+		
 		// Adding the group number		
 		for (int i = 0; i < sortedCluster.size(); i++) {			
 			for (Resource res : sortedCluster.get(i)) {

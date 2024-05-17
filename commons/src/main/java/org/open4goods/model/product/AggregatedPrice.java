@@ -60,11 +60,15 @@ public class AggregatedPrice extends Price {
 	 */
 	public String shortDataSourceName() {
 
-		int i = datasourceName.indexOf(".");
-		if (i == -1) {
-			return datasourceName;
+		if (null == datasourceName) {
+			return "ERROR_NOT_SET";
 		} else {
-			return datasourceName.substring(0,i);
+			int i = datasourceName.indexOf(".");
+			if (i == -1) {
+				return datasourceName;
+			} else {
+				return datasourceName.substring(0,i);
+			}			
 		}
 
 	}
