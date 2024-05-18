@@ -155,12 +155,12 @@ public class SearchService {
 		// Adding custom numeric filters
 
 		// TODO : Not working, buggy when no ecoscore
-		//		for (NumericRangeFilter filter : request.getNumericFilters()) {
-//
-//			// TODO : WTF ?
-//			criterias.and(new Criteria(filter.getKey()).lessThanEqual(filter.getMaxValue()) );
-//			criterias.and(new Criteria(filter.getKey()).greaterThanEqual(Math.ceil(filter.getMinValue())));
-//		}
+		for (NumericRangeFilter filter : request.getNumericFilters()) {
+
+			// TODO : WTF ?
+			criterias.and(new Criteria(filter.getKey()).lessThanEqual(Math.ceil(filter.getMaxValue())) );
+			criterias.and(new Criteria(filter.getKey()).greaterThanEqual(Math.floor(filter.getMinValue())));
+		}
 
 		// Adding custom checkbox filters
 		for (Entry<String, Set<String>> filter : request.getTermsFilter().entrySet()) {

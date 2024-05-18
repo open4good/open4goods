@@ -30,6 +30,7 @@ public class AggregatedPrice extends Price {
 	 * The state of the product (new, occasion, ...)
 	 */
 	@Field(index = true, store = false, type = FieldType.Keyword)
+	//TODO : Rename to productCondition
 	private ProductCondition productState;
 
 	/**
