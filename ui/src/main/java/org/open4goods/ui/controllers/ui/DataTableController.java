@@ -63,9 +63,9 @@ public class DataTableController {
 
 				// TODO : should have consts shared with javascript (vertical-home)
                 switch (attr[0]) {
-                    case "condition" -> vRequest.addTermFilter("price.offers.productState.keyword", attr[1]);
+                    case "condition" -> vRequest.addTermFilter("price.offers.productState", attr[1]);
                     case "brand" -> vRequest.addTermFilter("attributes.referentielAttributes.BRAND.keyword", attr[1]);
-                    case "countries" -> vRequest.addTermFilter("gtinInfos.country.keyword", attr[1]);
+                    case "countries" -> vRequest.addTermFilter("gtinInfos.country", attr[1]);
                     default -> vRequest.addTermFilter(attr[0], attr[1]);
                 }
 			}
