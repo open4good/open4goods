@@ -1,5 +1,6 @@
 package org.open4goods.ui.controllers.ui;
 
+<<<<<<< Upstream, based on origin/main
 import org.open4goods.ui.config.yml.UiConfig;
 <<<<<<< Upstream, based on origin/main
 <<<<<<< Upstream, based on origin/main
@@ -15,25 +16,34 @@ import org.open4goods.xwiki.services.XWikiReadService;
 =======
 import org.open4goods.xwiki.services.XwikiMappingService;
 >>>>>>> cbcd929 xwiki-spring-boot-starter integration
+=======
+import org.open4goods.xwiki.model.FullPage;
+import org.open4goods.xwiki.services.XwikiFacadeService;
+>>>>>>> 0235dd4 Wiki integration
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.servlet.mvc.AbstractController;
+
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 @Controller
 
 /**
  * This controller pages pageSize Xwiki content
- *
  * @author gof
  *
  */
-public class XwikiController extends AbstractUiController {
+public class XwikiController extends AbstractController  {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(XwikiController.class);
 
 	// The siteConfig
-	private final UiConfig config;
+//	private final UiConfig config;
 
+<<<<<<< Upstream, based on origin/main
 	private final XWikiReadService xwikiService;
 <<<<<<< Upstream, based on origin/main
 <<<<<<< Upstream, based on origin/main
@@ -51,7 +61,11 @@ public class XwikiController extends AbstractUiController {
 =======
 >>>>>>> cbcd929 xwiki-spring-boot-starter integration
 	private XwikiMappingService mappingService;
+=======
+	private  XwikiFacadeService xwikiService;
+>>>>>>> 0235dd4 Wiki integration
 
+<<<<<<< Upstream, based on origin/main
 <<<<<<< Upstream, based on origin/main
 	public XwikiController(UiConfig config, XwikiMappingService mappingService, XWikiReadService xwikiService, VerticalController verticalController, VerticalsConfigService verticalsConfigService) {
 >>>>>>> f9c909d Ending first round
@@ -59,7 +73,17 @@ public class XwikiController extends AbstractUiController {
 	public XwikiController(UiConfig config, XwikiMappingService mappingService, XWikiReadService xwikiService) {
 >>>>>>> cbcd929 xwiki-spring-boot-starter integration
 		this.config = config;
+=======
+	private String[] frags;
+	
+	public XwikiController() {
+		super();
+	}
+	public XwikiController(XwikiFacadeService xwikiService) {
+		super();
+>>>>>>> 0235dd4 Wiki integration
 		this.xwikiService = xwikiService;
+<<<<<<< Upstream, based on origin/main
 		this.mappingService = mappingService;
 <<<<<<< Upstream, based on origin/main
 <<<<<<< Upstream, based on origin/main
@@ -69,8 +93,35 @@ public class XwikiController extends AbstractUiController {
 >>>>>>> f9c909d Ending first round
 =======
 >>>>>>> cbcd929 xwiki-spring-boot-starter integration
+=======
+>>>>>>> 0235dd4 Wiki integration
 	}
 
+	
+	public XwikiController(XwikiFacadeService xwikiService, String wikiPage) {
+		super();
+//		this.config = config;
+		this.xwikiService = xwikiService;
+		this.frags =  wikiPage.split(":");
+	}
+	
+	@Override
+	protected ModelAndView handleRequestInternal(HttpServletRequest arg0, HttpServletResponse arg1) throws Exception {
+	    // TODO : I18n
+	    try {
+			FullPage fullPage = xwikiService.getFullPage(frags);
+			System.out.println(fullPage);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	    
+	    ModelAndView mv = new ModelAndView("xwiki-layout1");
+	    
+	    return mv;
+	     }
+
+	 }
 
 	//////////////////////////////////////////////////////////////
 	// Mappings
@@ -383,4 +434,3 @@ public class XwikiController extends AbstractUiController {
 //	}
 >>>>>>> cbcd929 xwiki-spring-boot-starter integration
 
-}
