@@ -21,7 +21,7 @@
 
 		<dependency>
 			<groupId>org.open4goods</groupId>
-			<artifactId>spring-boot-starter-xwiki</artifactId>
+			<artifactId>xwiki-spring-boot-starter</artifactId>
 			<version>0.0.1</version>
 		</dependency>
 
