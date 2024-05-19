@@ -61,11 +61,13 @@ public class DataTableColumnSpecs {
 		setSearch(request.getParameter("columns["+ i +"][search][value]"));
 		setSearchable(Boolean.parseBoolean(request.getParameter("columns["+ i +"][searchable]")));
 
-		int sortableCol = Integer.parseInt(request.getParameter("order[0][column]"));
-		String sortDir = request.getParameter("order[0][dir]");
-
-		if(i == sortableCol) {
-			setSortDir(sortDir);
+		if (null != request.getParameter("order[0][column]")) {
+			int sortableCol = Integer.parseInt(request.getParameter("order[0][column]"));
+			String sortDir = request.getParameter("order[0][dir]");
+	
+			if(i == sortableCol) {
+				setSortDir(sortDir);
+			}
 		}
 	}
 
