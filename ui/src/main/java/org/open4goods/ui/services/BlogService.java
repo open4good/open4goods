@@ -205,7 +205,5 @@ public class BlogService {
 	}
 	
 	
-	private String getProxyUrl(String space, String name, String file) {		
-		return "/attachments/" + space + "/" + name + "/" + file;
-	}
+
 }
