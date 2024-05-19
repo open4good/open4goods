@@ -72,7 +72,12 @@ public class DataTableRequest<T> {
 			this.setSearch(request.getParameter("search[value]"));
 			this.setRegex(Boolean.parseBoolean(request.getParameter("search[regex]")));
 
-			int sortableCol = Integer.parseInt(request.getParameter("order[0][column]"));
+			String orderParameter = request.getParameter("order[0][column]");
+			// Theres is an "unsorted" state
+			int sortableCol = -1;
+			if (null != orderParameter) {				
+				 sortableCol = Integer.parseInt(orderParameter);
+			} 
 
 			List<DataTableColumnSpecs> columns = new ArrayList<DataTableColumnSpecs>();
 
