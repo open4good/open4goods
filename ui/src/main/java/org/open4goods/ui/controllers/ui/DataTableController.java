@@ -53,8 +53,6 @@ public class DataTableController {
 		vRequest.setPageNumber(pagination.getFrom() / pagination.getPageSize() );
 		vRequest.setPageSize( pagination.getPageSize() );
 
-		request.getParameterMap();
-
 		// Handle checkboxes values
 		String[] checkboxes = request.getParameterValues("checkboxes[]");
 		if (null != checkboxes) {
@@ -80,8 +78,8 @@ public class DataTableController {
 			for (String slider : slidersValue) {
 				String[] sliderValues = slider.split(":");
 	
-				Double min = Double.valueOf(Math.floor(Double.parseDouble(sliderValues[1])));
-				Double max = Double.valueOf(Math.ceil(Double.parseDouble(sliderValues[2]) ));
+				Double min = Double.parseDouble(sliderValues[1]);
+				Double max = Double.parseDouble(sliderValues[2]) ;
 				vRequest.getNumericFilters().add(new NumericRangeFilter(sliderValues[0] ,min, max));
 				}
 		}
