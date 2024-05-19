@@ -171,7 +171,7 @@ public abstract class AbstractScoreAggregationService extends  AbstractAggregati
 	 * @param Scores
 	 * @param batchDatas
 	 */
-	protected void processCardinality(String scoreName, Double value) throws ValidationException{
+	protected void incrementCardinality(String scoreName, Double value) throws ValidationException{
 
 
 		if (null == value) {
