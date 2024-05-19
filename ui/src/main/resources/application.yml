@@ -53,9 +53,13 @@ langchain4j:
       log-responses: false
 
 wikiPagesMapping:
-  "xwiki:nudger-pages:mentions-legales":
+  "[BROUILLONS:testbrouillon:WebHome]":
     default: "pages/comparateur-prix.html"
-    fr: "pages/comparateur-prix-fr.html"
+ 
+  "[Blog:Ouverture du prototype !]":
+    default: "test"
+    
+    
 
 feedbackConfig:      
   githubConfig:

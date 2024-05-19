@@ -1,36 +1,67 @@
 package org.open4goods.ui.controllers.ui;
 
-import org.open4goods.ui.config.yml.UiConfig;
-import org.open4goods.xwiki.services.XWikiReadService;
-import org.open4goods.xwiki.services.XwikiMappingService;
+import org.open4goods.xwiki.model.FullPage;
+import org.open4goods.xwiki.services.XwikiFacadeService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.servlet.mvc.AbstractController;
+
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 @Controller
 
 /**
  * This controller pages pageSize Xwiki content
- *
  * @author gof
  *
  */
-public class XwikiController extends AbstractUiController {
+public class XwikiController extends AbstractController  {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(XwikiController.class);
 
 	// The siteConfig
-	private final UiConfig config;
+//	private final UiConfig config;
 
-	private final XWikiReadService xwikiService;
-	private XwikiMappingService mappingService;
+	private  XwikiFacadeService xwikiService;
 
-	public XwikiController(UiConfig config, XwikiMappingService mappingService, XWikiReadService xwikiService) {
-		this.config = config;
+	private String[] frags;
+	
+	public XwikiController() {
+		super();
+	}
+	public XwikiController(XwikiFacadeService xwikiService) {
+		super();
 		this.xwikiService = xwikiService;
-		this.mappingService = mappingService;
 	}
 
+	
+	public XwikiController(XwikiFacadeService xwikiService, String wikiPage) {
+		super();
+//		this.config = config;
+		this.xwikiService = xwikiService;
+		this.frags =  wikiPage.split(":");
+	}
+	
+	@Override
+	protected ModelAndView handleRequestInternal(HttpServletRequest arg0, HttpServletResponse arg1) throws Exception {
+	    // TODO : I18n
+	    try {
+			FullPage fullPage = xwikiService.getFullPage(frags);
+			System.out.println(fullPage);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	    
+	    ModelAndView mv = new ModelAndView("xwiki-layout1");
+	    
+	    return mv;
+	     }
+
+	 }
 
 	//////////////////////////////////////////////////////////////
 	// Mappings
@@ -164,4 +195,3 @@ public class XwikiController extends AbstractUiController {
 //		return mv;
 //	}
 
-}
