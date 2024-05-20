@@ -23,7 +23,8 @@ public class RecaptchaService {
 	private static final String H_RECAPTCHA_VERIFY_URL = "https://api.hcaptcha.com/siteverify";
 
 	@Value("${hcaptcha.secret}")
-	String recaptchaSecret;
+
+  String recaptchaSecret;
 
 	@Autowired
 	RestTemplateBuilder restTemplateBuilder;
@@ -36,7 +37,7 @@ public class RecaptchaService {
 		body.put("remoteip", ip);
 
 		final ResponseEntity<Map> recaptchaResponseEntity = restTemplateBuilder.build().postForEntity(
-				H_RECAPTCHA_VERIFY_URL + "?secret={secret}&response={response}&remoteip={remoteip}", body,
+				H_CAPTCHA_VERIFY_URL + "?response={response}&secret={secret}&remoteip={remoteip}", body,
 				Map.class, body);
 
 		final Map<String, Object> responseBody = recaptchaResponseEntity.getBody();
