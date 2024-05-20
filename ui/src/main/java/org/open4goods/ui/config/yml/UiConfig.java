@@ -93,10 +93,10 @@ public class UiConfig {
 	private String email;
 
     /**
-     * Secret for captcha system
+     * Secret and key  for captcha system
      */
+	private String captchaKey;	
 	private String captchaSecret;
-	
 	
 	//	/**
 	//	 * Relativ pageSize the web ( trackings id, ....)
@@ -368,6 +368,16 @@ public class UiConfig {
 
 	public void setCaptchaSecret(String captchaSecret) {
 		this.captchaSecret = captchaSecret;
+	}
+
+
+	public String getCaptchaKey() {
+		return captchaKey;
+	}
+
+
+	public void setCaptchaKey(String captchaKey) {
+		this.captchaKey = captchaKey;
 	}
 
 	
