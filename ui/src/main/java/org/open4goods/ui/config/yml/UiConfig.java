@@ -92,7 +92,12 @@ public class UiConfig {
 	 */
 	private String email;
 
-
+    /**
+     * Secret for captcha system
+     */
+	private String captchaSecret;
+	
+	
 	//	/**
 	//	 * Relativ pageSize the web ( trackings id, ....)
 	//	 */
@@ -355,6 +360,17 @@ public class UiConfig {
 		this.devModeConfig = devModeConfig;
 	}
 
+
+	public String getCaptchaSecret() {
+		return captchaSecret;
+	}
+
+
+	public void setCaptchaSecret(String captchaSecret) {
+		this.captchaSecret = captchaSecret;
+	}
+
+	
 
 
 

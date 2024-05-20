@@ -22,7 +22,7 @@ public class RecaptchaService {
 
 	private static final String H_RECAPTCHA_VERIFY_URL = "https://api.hcaptcha.com/siteverify";
 
-	@Value("${hcaptcha.secret}")
+	@Value("${captchaSecret")
 	String recaptchaSecret;
 
 	@Autowired
