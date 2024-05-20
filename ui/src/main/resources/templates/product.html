@@ -58,17 +58,7 @@
        				<!--/* Header */-->				
 					<th:block th:insert="~{inc/product-header.html}"></th:block>
 				</div>
-
-				
-				
-				
-						
-						
-	
-	
-				
-										
-				
+			
    				<!--/* Descriptions */-->				
 				<th:block th:insert="~{inc/product-descriptions.html}"></th:block>							
 
@@ -123,6 +113,19 @@
 									
 									<!--/* Resources */-->				
 									<th:block th:insert="~{inc/product-resources.html}"></th:block>		
+									
+									<!--/* Mapped categories */-->													
+									<div class="card shadow my-3">
+										<div class="card-header"><h2 class="h5">Mapped Catégories</h2></div>
+										<div class="card-body">	
+											<th:block th:each="item, stat : ${product.mappedCategories}">
+												<div class="alert alert-primary" role="alert">
+												 <span  th:text="${item.key + ' : ' + item.value}"></span>
+												</div>
+											</th:block>
+										</div>
+									</div>
+
 									
 									</div>
 								</div>
@@ -324,6 +327,18 @@ $(document).ready(function() {
 		});
 	}
 
+	/////////////////////////////////
+	// Images table
+	/////////////////////////////////	
+	
+	if ($("#imagesTable").length) {
+		$('#imagesTable').DataTable({
+				responsive: true		
+		});
+	}
+
+	
+		
 	$('#pills-new-tab').on("click", function(){
 		token = $("#offresNeuves>tbody>tr:first").attr('data-token');	
 		$("#token").val(token);	    

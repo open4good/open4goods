@@ -42,7 +42,7 @@ public class Attribute2ScoreAggregationService extends AbstractScoreAggregationS
 							Double score = generateScoresFromAttribute(aga.getName() ,aga, vConf.getAttributesConfig());
 
 							// Processing cardinality
-							processCardinality(aga.getName(),score);
+							incrementCardinality(aga.getName(),score);
 							
 							Score s = new Score(aga.getName(), score);
 							// Saving in product

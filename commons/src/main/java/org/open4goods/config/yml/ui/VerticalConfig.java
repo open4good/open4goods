@@ -98,7 +98,7 @@ public class VerticalConfig{
 	 * The behavior of resource aggregation
 	 */
 	@JsonMerge
-	private MediaAggregationConfig resourcesConfig = new MediaAggregationConfig();
+	private ResourcesAggregationConfig resourcesConfig = new ResourcesAggregationConfig();
 
 	/** The config for compensation **/
 	@JsonMerge
@@ -383,12 +383,12 @@ public class VerticalConfig{
 	}
 
 
-	public MediaAggregationConfig getResourcesConfig() {
+	public ResourcesAggregationConfig getResourcesConfig() {
 		return resourcesConfig;
 	}
 
 
-	public void setResourcesConfig(MediaAggregationConfig resourcesConfig) {
+	public void setResourcesConfig(ResourcesAggregationConfig resourcesConfig) {
 		this.resourcesConfig = resourcesConfig;
 	}
 

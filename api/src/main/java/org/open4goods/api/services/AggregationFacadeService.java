@@ -236,7 +236,7 @@ public class AggregationFacadeService {
 	 * @param config
 	 * @return
 	 */
-	StandardAggregator getStandardAggregator(String name) {		
+	public StandardAggregator getStandardAggregator(String name) {		
 		
 		Logger logger = GenericFileLogger.initLogger(name, apiProperties.aggLogLevel(), apiProperties.logsFolder()+"/aggregation", apiProperties.isDevMode());
 

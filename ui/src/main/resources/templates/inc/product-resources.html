@@ -11,26 +11,44 @@
 			<div class="container container-semi-fluid">
                 <div class="col-12 col-lg-12">
                     
-               <div class="table-responsive table-caracteristics-fs">
-					<table id="allAttributes" class="table">
+               <div class="datatable">
+					<table id="imagesTable" class="table">
 						<thead>
+							<th>group</th>
 							<th>url</th>
-							<th>providerName</th>
-							<th>timeStamp</th>
-							<th>cacheKey</th>
-							<th>text</th>
-							<th>tags</th>							
+							<th>resourceType</th>
+							<th>mimeType</th>
+							<th>evicted</th>
+							<th>processed</th>
+							<th>status</th>
+							<th>size</th>
+							<th>filename</th>
+							<th>ext</th>
+							<th>dimensions</th>
+							<th>md5</th>
+							<th>timestamp</th>
+							<th>cachekey</th>
+							<th>tags</th>
 						</thead>
 			
 						<th:block th:each="r : ${product.resources}">
 							<th:block>
 								<tr>
-									<td class="align-middle"><span th:text="${r.url}"></span><br/><img th:src="${r.url}"> </td>					
-									<td class="align-middle"><span th:text="${r.providerName}"></span></td>					
+									<td class="align-middle"><span th:text="${r.group}"></span></td>
+									<td class="align-middle"><a th:href="${r.url}">lien</a><br/><img th:src="${r.url}"> </td>					
+									<td class="align-middle"><span th:text="${r.resourceType}"></span></td>
+								    <td class="align-middle"><span th:text="${r.mimeType}"></span></td>	
+									<td class="align-middle"><span th:text="${r.evicted}"></span></td>
+									<td class="align-middle"><span th:text="${r.processed}"></span></td>
+									<td class="align-middle"><span th:text="${r.status}"></span></td>
+									<td class="align-middle"><span th:text="${r.fileSize}"></span></td>
+									<td class="align-middle"><span th:text="${r.fileName}"></span></td>
+									<td class="align-middle"><span th:text="${r.extension}"></span></td>
+									<td class="align-middle"><span th:text="${r.imageInfo}"></span></td>														
+									<td class="align-middle"><span th:text="${r.md5}"></span></td>
 									<td class="align-middle"><span th:text="${r.timeStamp}"></span></td>					
 									<td class="align-middle"><span th:text="${r.cacheKey}"></span></td>					
-									<td class="align-middle"><span th:text="${r.text}"></span></td>					
-									<td class="align-middle"><span th:text="${r.tags}"></span></td>					
+								    <td class="align-middle"><span th:text="${r.tags}"></span></td>									
 								</tr>
 							</th:block>
 						</th:block>
@@ -38,8 +56,4 @@
                 </div>
             </div>	   
 	   </section> 
-	   
-	   
-	   
-	   
 

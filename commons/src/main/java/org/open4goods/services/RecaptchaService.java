@@ -12,7 +12,7 @@ import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.http.ResponseEntity;
 
 /**
- * This service allow Google Recaptcha validation
+ * This service allow Hcaptcha Recaptcha validation
  *
  * @author Goulven.Furet
  *
@@ -20,10 +20,11 @@ import org.springframework.http.ResponseEntity;
 public class RecaptchaService {
 
 
-	private static final String H_CAPTCHA_VERIFY_URL = "https://api.hcaptcha.com/siteverify";
+	private static final String H_RECAPTCHA_VERIFY_URL = "https://api.hcaptcha.com/siteverify";
 
-	@Value("${h.recaptcha.secret}")
-	String recaptchaSecret;
+	@Value("${hcaptcha.secret}")
+
+  String recaptchaSecret;
 
 	@Autowired
 	RestTemplateBuilder restTemplateBuilder;

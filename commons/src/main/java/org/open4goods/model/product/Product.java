@@ -63,6 +63,12 @@ public class Product implements Standardisable {
 	@Field(index = true, store = false, type = FieldType.Keyword)
 	private String id;
 
+	
+	/**
+	 * The list of external id's for this product
+	 */
+	private ExternalIds externalId = new ExternalIds();
+		
 	/**
 	 * The date this item has been created
 	 */
@@ -111,6 +117,12 @@ public class Product implements Standardisable {
 	@Field(index = false, store = false, type = FieldType.Object)
 	private Set<Resource> resources = new HashSet<>();
 
+	/**
+	 * The post computed images, if any. Means images are cached, and ordered by relevance
+	 */
+	@Field(index = false, store = false, type = FieldType.Object)
+	private List<Resource> images = new ArrayList<>();
+	
 	/** The descriptions **/
 	@Field(index = false, store = false, type = FieldType.Object)
 	private Set<Description> descriptions = new HashSet<>();
@@ -634,7 +646,9 @@ public class Product implements Standardisable {
 	 */
 	public void addImage(String url, String tag) {
 		if (!StringUtils.isEmpty(url)) {
-			resources.add(new Resource(url, tag));			
+			Resource r = new Resource(url, tag);
+			resources.remove(r);
+			resources.add(r);			
 		}
 	}
 	
@@ -820,6 +834,22 @@ public class Product implements Standardisable {
 
 	public void setDatasourceNames(Set<String> datasourceNames) {
 		this.datasourceNames = datasourceNames;
+	}
+
+	public List<Resource> getImages() {
+		return images;
+	}
+
+	public void setImages(List<Resource> images) {
+		this.images = images;
+	}
+
+	public ExternalIds getExternalId() {
+		return externalId;
+	}
+
+	public void setExternalId(ExternalIds externalId) {
+		this.externalId = externalId;
 	}
 
 	

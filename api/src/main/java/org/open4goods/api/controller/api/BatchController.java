@@ -5,7 +5,8 @@ package org.open4goods.api.controller.api;
 import java.io.IOException;
 
 import org.open4goods.api.services.AggregationFacadeService;
-import org.open4goods.api.services.AiCompletionService;
+import org.open4goods.api.services.completion.GenAiCompletionService;
+import org.open4goods.api.services.completion.ResourceCompletionService;
 import org.open4goods.config.yml.ui.VerticalConfig;
 import org.open4goods.dao.ProductRepository;
 import org.open4goods.exceptions.AggregationSkipException;
@@ -32,6 +33,7 @@ import jakarta.validation.constraints.NotBlank;
 
 /**
  * This controller allows informations and communications about DatasourceConfigurations
+ * TODO : Should split, into scoringController / resourceController, ....
  * @author goulven
  *
  */
@@ -45,17 +47,20 @@ public class BatchController {
 	
 	private final AggregationFacadeService batchService;
 
-	private final AiCompletionService aiCompletionService;
+	private final GenAiCompletionService aiCompletionService;
 
 	@Autowired
 	private  ProductRepository repository;
+
+	private ResourceCompletionService resourceCompletionService;
 	
 	
-	public BatchController(AggregationFacadeService batchService, SerialisationService serialisationService, VerticalsConfigService verticalsConfigService, AiCompletionService aiCompletionService) {
+	public BatchController(AggregationFacadeService batchService, SerialisationService serialisationService, VerticalsConfigService verticalsConfigService, GenAiCompletionService aiCompletionService, ResourceCompletionService resourceCompletionService) {
 		this.serialisationService = serialisationService;
 		this.verticalConfigService = verticalsConfigService;
 		this.batchService = batchService;
 		this.aiCompletionService =  aiCompletionService;
+		this.resourceCompletionService = resourceCompletionService;
 	}
 
 	@PutMapping(path="/batch/verticals/")
@@ -103,23 +108,10 @@ public class BatchController {
 		batchService.sanitizeAll();
 	}
 
-	@GetMapping("/contentGeneration/all")
-	@Operation(summary="Launch Gen AI content generation on all verticals")
-	public void genAiAll() throws InvalidParameterException, IOException {
-		aiCompletionService.completeAll();
-	}
-
-	@GetMapping("/contentGeneration")
-	@Operation(summary="Launch Gen AI content generation on all verticals")
-	public void genAiVertical(@RequestParam @NotBlank final String verticalConfig ) throws InvalidParameterException, IOException {
-		aiCompletionService.complete(verticalConfigService.getConfigById(verticalConfig));
-	}
-	
 	@GetMapping("/sanitisation/{gtin}")
 	@Operation(summary="Launch sanitisation of all products")
 	public void sanitizeOne(@PathVariable String gtin ) throws InvalidParameterException, IOException, ResourceNotFoundException, AggregationSkipException {
 		batchService.sanitizeOne(repository.getById(gtin));
 	}
-	
 	
 }

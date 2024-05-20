@@ -8,6 +8,7 @@ import java.util.Set;
 
 import org.open4goods.exceptions.ValidationException;
 import org.open4goods.model.Validable;
+import org.open4goods.model.constants.ResourceType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.elasticsearch.annotations.DateFormat;
@@ -27,27 +28,54 @@ public class Resource  implements Validable {
 	private String url;
 
 	@Field(index = false, store = false, type = FieldType.Keyword)
-	// TODO : could remove
-	private String providerName;
+	private String mimeType;
 
+	
 	@Field(index = false, store = false, type = FieldType.Date, format = DateFormat.epoch_millis)
 	private Long timeStamp;
 
 	@Field(index = false, store = false, type = FieldType.Keyword)
 	private String cacheKey;
 
-	/**
-	 * The text, ot the title associated with this resource
-	 * TODO : could remove
-	 */
-	@Field(index = false, store = false, type = FieldType.Keyword)
-	private String text;
+	@Field(index = false, store = false, type = FieldType.Boolean)
+	// If true, this media has been tested and is not retained
+	private boolean evicted = false;
 
+	@Field(index = false, store = false, type = FieldType.Boolean)
+	// If true, this media has been downloaded and analysed
+	private boolean processed = false;
+
+	
+	@Field(index = false, store = false, type = FieldType.Keyword)
+	// A complementary status, on eviction cause, or whatever
+	private ResourceStatus status;
+
+	@Field(index = false, store = false, type = FieldType.Keyword)
+	private Long fileSize;
+
+	@Field(index = false, store = false, type = FieldType.Keyword)
+	private String fileName;
+
+	@Field(index = false, store = false, type = FieldType.Keyword)
+	private String extension;
+
+	@Field(index = false, store = false, type = FieldType.Keyword)
+	private String md5;
+
+	@Field(index = false, store = false, type = FieldType.Keyword)
+	private ResourceType resourceType;
+
+	@Field(index = false, store = false, type = FieldType.Object)
+	private ImageInfo imageInfo;
+
+	@Field(index = false, store = false, type = FieldType.Integer)
+	// The group (similarity based and popularity ranked) this resource belongs to
+	private Integer group;
+	
 	/**
 	 * From ResourceTagDictionary
 	 */
 	@Field(index = false, store = false, type = FieldType.Keyword)
-
 	private Set<String> tags = new HashSet<>();
 
 
@@ -55,6 +83,8 @@ public class Resource  implements Validable {
 		super();
 	}
 
+	
+	
 	public Resource(String url) {
 		super();
 
@@ -175,20 +205,13 @@ public class Resource  implements Validable {
 		this.tags = tags;
 	}
 
-	public String getText() {
-		return text;
+
+	public String getMimeType() {
+		return mimeType;
 	}
 
-	public void setText(final String text) {
-		this.text = text;
-	}
-
-	public String getProviderName() {
-		return providerName;
-	}
-
-	public void setProviderName(String providerName) {
-		this.providerName = providerName;
+	public void setMimeType(String mimeType) {
+		this.mimeType = mimeType;
 	}
 
 	public Long getTimeStamp() {
@@ -205,6 +228,88 @@ public class Resource  implements Validable {
 
 	public void setUrl(String url) {
 		this.url = url;
+	}
+
+
+	public boolean isEvicted() {
+		return evicted;
+	}
+
+	public void setEvicted(boolean evicted) {
+		this.evicted = evicted;
+	}
+
+
+	public Long getFileSize() {
+		return fileSize;
+	}
+
+	public void setFileSize(Long fileSize) {
+		this.fileSize = fileSize;
+	}
+
+	public String getFileName() {
+		return fileName;
+	}
+
+	public void setFileName(String fileName) {
+		this.fileName = fileName;
+	}
+
+	public String getExtension() {
+		return extension;
+	}
+
+	public void setExtension(String extension) {
+		this.extension = extension;
+	}
+
+	public String getMd5() {
+		return md5;
+	}
+
+	public void setMd5(String md5) {
+		this.md5 = md5;
+	}
+
+	public ResourceType getResourceType() {
+		return resourceType;
+	}
+
+	public void setResourceType(ResourceType resourceType) {
+		this.resourceType = resourceType;
+	}
+
+	public ImageInfo getImageInfo() {
+		return imageInfo;
+	}
+
+	public void setImageInfo(ImageInfo imageInfo) {
+		this.imageInfo = imageInfo;
+	}
+
+	public ResourceStatus getStatus() {
+		return status;
+	}
+
+	public void setStatus(ResourceStatus status) {
+		this.status = status;
+	}
+
+	public boolean isProcessed() {
+		return processed;
+	}
+
+	public void setProcessed(boolean processed) {
+		this.processed = processed;
+	}
+
+	public Integer getGroup() {
+		return group;
+	}
+
+	public void setGroup(Integer group) {
+		this.group = group;
 	}
 
 

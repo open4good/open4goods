@@ -3,23 +3,19 @@
 	
 			<div class="card shadow p-4">
                     <div class="row align-items-center">
-                        <aside class="col-md-3">
+                        <aside class="col-md-3 text-center">
                             <a href="{{productUrl}}">
-                                <img src="{{imageUrl}}" alt="{{name}}">
+                                <img height="200" src="{{imageUrl}}" alt="{{name}}">
                             </a>
                         </aside> <!-- col.// -->
                         <div class="col-md-6">
                             <div class="info-main">
                                 <a href="{{productUrl}}" class="h5 title">{{data.attributes.referentielAttributes.BRAND}} - {{name}}</a>
                                 <div class="d-flex my-3">
-                                    <span class="star fas fa-star text-warning me-1"></span> 
-                                    <span class="star fas fa-star text-warning me-1"></span> 
-                                    <span class="star fas fa-star text-warning me-1"></span> 
-                                    <span class="star fas fa-star text-warning me-1"></span> 
-                                    <span class="star fas fa-star text-warning"></span> 
-                                    <span class="badge badge-pill badge-gray ms-2">4.7</span>
+                                    <span class="">Ecoscore : {{data.scores.ECOSCORE.relativ.value}} / 5</span>
                                     <span class="small text-success ms-3"><span class="fas fa-shopping-cart me-1"></span>{{data.offersCount}} offre(s)</span>
                                 </div>
+
                                 <p>Monitor your health. Track your workouts. Get the motivation you need to achieve your fitness goals. And stay connected to the people and information you care about.</p>
                             </div>
                         </div> 
