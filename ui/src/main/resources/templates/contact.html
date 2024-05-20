@@ -117,7 +117,7 @@
                                     <!-- End of Form -->
 								        
                                     <div class="d-grid">
-                                        <button type="submit" class="h-captcha btn rounded btn-secondary"  th:attr="data-sitekey=${config.captchaSecret}" data-callback='onSubmit' data-action='submit'>
+                                        <button type="submit" class="h-captcha btn rounded btn-secondary"  th:attr="data-sitekey=${config.captchaKey}" data-callback='onSubmit' data-action='submit'>
                                         	Envoyer le message
                                         </button>
                                     </div>
@@ -153,8 +153,7 @@
 
 <script async defer src="https://buttons.github.io/buttons.js"></script>
 
-<script src="https://hcaptcha.com/1/api.js" async defer></script>
-
+<script src="https://js.hcaptcha.com/1/api.js?hl=fr" async defer></script>
  <script>
    function onSubmit(token) {
      document.getElementById("contact-form").submit();
