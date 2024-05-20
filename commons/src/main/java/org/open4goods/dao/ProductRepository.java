@@ -161,16 +161,35 @@ public class ProductRepository {
 	 * @param indexName
 	 * @return
 	 */
-	public Stream<Product> exportVerticalWithValidDateOrderByEcoscore(String vertical, int max) {
+	public Stream<Product> exportVerticalWithValidDateOrderByEcoscore(String vertical, Integer max) {
 
 		Criteria c = new Criteria("vertical").is(vertical).and(getValidDateQuery());
-		final NativeQuery initialQuery = new NativeQueryBuilder().withQuery(new CriteriaQuery(c))
-				.withMaxResults(max)
-				.withSort(Sort.by(org.springframework.data.domain.Sort.Order.desc("scores.ECOSCORE.value")))				
-				.build();
+		NativeQueryBuilder initialQueryBuilder = new NativeQueryBuilder().withQuery(new CriteriaQuery(c)).withMaxResults(max);
+		
+				if (null != max) {
+					initialQueryBuilder =  initialQueryBuilder.withSort(Sort.by(org.springframework.data.domain.Sort.Order.desc("scores.ECOSCORE.value")));									
+				}
+		
+				NativeQuery initialQuery = initialQueryBuilder.build();
 		return elasticsearchTemplate.searchForStream(initialQuery, Product.class, current_index).stream()
 				.map(SearchHit::getContent);
 	}
+
+	/**
+	 * Export all aggregateddatas for a vertical, ordered by ecoscore descending
+	 * 
+	 * @param vertical
+	 * @param max 
+	 * @param max
+	 * @param indexName
+	 * @return
+	 */
+
+	public Stream<Product> exportVerticalWithValidDateOrderByEcoscore(String vertical) {
+		return exportVerticalWithValidDateOrderByEcoscore(vertical, null);
+	}
+
+	
 	
 	public SearchHits<Product> search(Query query, final String indexName) {
 		return elasticsearchTemplate.search(query, Product.class, IndexCoordinates.of(indexName));

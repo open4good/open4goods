@@ -24,6 +24,8 @@ public class Score  implements Validable {
 	private Boolean virtual = false;
 	
 	@Field(index = true, store = false, type = FieldType.Boolean)
+	// Is equals to relativ.value
+	// TODO : Remove field ?
 	private Double value;
 
 	@Field(index = true, store = false, type = FieldType.Object)
@@ -32,13 +34,10 @@ public class Score  implements Validable {
 	
 	
 	@Field(index = true, store = false, type = FieldType.Object)
-	/** The relativised cardinalities, absolute mode.**/
+	/** The relativised cardinalities, relativ mode.**/
 	private Cardinality relativ;
 	
-	
-
-	
-	
+		
 	
 	////////////////////////////////////////
 	// Contracts

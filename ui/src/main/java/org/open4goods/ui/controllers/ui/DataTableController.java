@@ -53,8 +53,6 @@ public class DataTableController {
 		vRequest.setPageNumber(pagination.getFrom() / pagination.getPageSize() );
 		vRequest.setPageSize( pagination.getPageSize() );
 
-		request.getParameterMap();
-
 		// Handle checkboxes values
 		String[] checkboxes = request.getParameterValues("checkboxes[]");
 		if (null != checkboxes) {
@@ -63,9 +61,9 @@ public class DataTableController {
 
 				// TODO : should have consts shared with javascript (vertical-home)
                 switch (attr[0]) {
-                    case "condition" -> vRequest.addTermFilter("price.offers.productState.keyword", attr[1]);
+                    case "condition" -> vRequest.addTermFilter("price.offers.productState", attr[1]);
                     case "brand" -> vRequest.addTermFilter("attributes.referentielAttributes.BRAND.keyword", attr[1]);
-                    case "countries" -> vRequest.addTermFilter("gtinInfos.country.keyword", attr[1]);
+                    case "countries" -> vRequest.addTermFilter("gtinInfos.country", attr[1]);
                     default -> vRequest.addTermFilter(attr[0], attr[1]);
                 }
 			}
@@ -80,8 +78,8 @@ public class DataTableController {
 			for (String slider : slidersValue) {
 				String[] sliderValues = slider.split(":");
 	
-				Double min = Double.valueOf(Math.floor(Double.parseDouble(sliderValues[1])));
-				Double max = Double.valueOf(Math.ceil(Double.parseDouble(sliderValues[2]) ));
+				Double min = Double.parseDouble(sliderValues[1]);
+				Double max = Double.parseDouble(sliderValues[2]) ;
 				vRequest.getNumericFilters().add(new NumericRangeFilter(sliderValues[0] ,min, max));
 				}
 		}

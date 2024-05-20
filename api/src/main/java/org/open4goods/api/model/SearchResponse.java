@@ -16,8 +16,8 @@ public class SearchResponse {
 
 	public void add(final DataFragment p) {
 		final SearchResult r = new SearchResult();
-		r.setBrand(p.getReferentielAttributes().get(ReferentielKey.BRAND.toString()) );
-		r.setBrandUid(p.getReferentielAttributes().get(ReferentielKey.MODEL.toString()) );
+		r.setBrand(p.getReferentielAttributes().get(ReferentielKey.BRAND) );
+		r.setBrandUid(p.getReferentielAttributes().get(ReferentielKey.MODEL) );
 		r.setDateIndexed(p.getLastIndexationDate());
 		r.setPrice(p.getPrice());
 		r.setUrl(getAffiliatedUrl(p));

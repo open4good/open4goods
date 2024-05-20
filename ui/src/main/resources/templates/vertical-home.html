@@ -136,6 +136,7 @@
 <script src="../../vendor/smooth-scroll/dist/smooth-scroll.polyfills.min.js"></script>
 <script src="../../vendor/vivus/dist/vivus.min.js"></script>
 <script src="/webjars/jquery/jquery.min.js"></script>
+<script src="../../vendor/@popperjs/core/dist/umd/popper.min.js"></script>
 
 <script type="text/javascript" language="javascript" src="/webjars/datatables/js/dataTables.min.js"></script>
 <script type="text/javascript" language="javascript" src="/webjars/datatables/js/dataTables.bootstrap5.min.js"></script>
@@ -149,6 +150,8 @@
 <script src="../../assets/js/pixel-custom.js"></script>
 
 <script src="/webjars/mustache/mustache.min.js"></script>
+
+
 
 <!-- Ajax loaded table template -->
 <div id="tpl_place" class="hidden"></div>
@@ -186,7 +189,7 @@
 					data : data,
 					vertical: vertical,
   					productUrl : baseUrl+verticalPath+'/'+data.names.url['default'],
-  					imageUrl : baseUrl+'images/'+data.attributes.referentielAttributes.GTIN+'-cover.png',           					
+  					imageUrl : (data.images.length == 0 ? "/icons/no-image.png" : baseUrl+'images/'+data.attributes.referentielAttributes.GTIN+'-cover.png'),           					
 					name : (data.attributes.referentielAttributes.MODEL == null ? data.names.name : data.attributes.referentielAttributes.MODEL)
 				});                	
        	}
@@ -200,7 +203,7 @@
                return  "" ;
            }
        },
-       { "data": "id", "name" : "Ecoscore", "title" : "Ecoscore"  },
+       { "data": "scores.ECOSCORE.relativ.value", "name" : "Ecoscore", "title" : "Ecoscore"  },
        { "data": "price.minPrice.price", "name" : "Prix", "title" : "Prix"  },
        { "data": "offersCount", "name" : "Concurrence", "title" : "Concurrence"  }
            ];
@@ -217,7 +220,7 @@
 		
 		return $('#tableProducts').DataTable({
 			
-			order: [ [4, 'desc'] ],
+			order: [ [2, 'desc'] ],
 	    	searching: false,
 	        "bLengthChange": false,	 
 	        "processing": true,

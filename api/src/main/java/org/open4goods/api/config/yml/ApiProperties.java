@@ -156,7 +156,25 @@ public class ApiProperties {
 	 */
 	private String aggregationLogLevel = "INFO";
 	
+	/**
+	 * The configuration for amazon completion
+	 */
+	private AmazonCompletionConfig amazonConfig = new AmazonCompletionConfig();
 	
+	
+	
+	public AmazonCompletionConfig getAmazonConfig() {
+		return amazonConfig;
+	}
+
+
+
+	public void setAmazonConfig(AmazonCompletionConfig amazonConfig) {
+		this.amazonConfig = amazonConfig;
+	}
+
+
+
 	public Level aggLogLevel() {
 		return Level.toLevel(aggregationLogLevel);
 	}

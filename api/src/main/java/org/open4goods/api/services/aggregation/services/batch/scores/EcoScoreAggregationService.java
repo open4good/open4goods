@@ -14,7 +14,7 @@ import org.open4goods.model.product.Product;
 import org.slf4j.Logger;
 
 /**
- * Create an ecoscore based on existing scores aggregations (based on config)
+ * Create an ecoscore based on existing scores, (see yaml config files)
  * @author goulven
  *
  */
@@ -30,20 +30,20 @@ public class EcoScoreAggregationService extends AbstractScoreAggregationService 
 
 	@Override
 	public void onProduct(Product data, VerticalConfig vConf) {
-
-		
-		
 		if (StringUtils.isEmpty(data.brand())) {
 			return;
 		}
 		
 		try {
+
+			// Compute the ecoscore from existing scores
 			Double score = generateEcoScore(data.getScores(),vConf);
 
 			// Processing cardinality
-			processCardinality(ECOSCORE_SCORENAME,score);			
+			incrementCardinality(ECOSCORE_SCORENAME,score);
+			
+			// Saving the actual score in the product, it will be relativized after (see super().done())
 			Score s = new Score(ECOSCORE_SCORENAME, score);
-			// Saving in product
 			data.getScores().put(s.getName(),s);
 		} catch (ValidationException e) {
 			dedicatedLogger.warn("Brand to score fail for {} : {}",data,e.getMessage());
@@ -63,7 +63,10 @@ public class EcoScoreAggregationService extends AbstractScoreAggregationService 
 			if (null == score) {
 				throw new ValidationException ("EcoScore rating cannot proceed, missing subscore : " + config);
 			} 			
-			va += score.getValue() * Double.valueOf(vConf.getEcoscoreConfig().get(config));
+			
+		
+			// Taking on the relativ
+			va += score. getRelativ().getValue() * Double.valueOf(vConf.getEcoscoreConfig().get(config));
 		}
 
 		return va;

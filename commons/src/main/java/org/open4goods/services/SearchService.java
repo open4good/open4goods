@@ -1,7 +1,12 @@
 package org.open4goods.services;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.List;
 import java.util.Map.Entry;
+import java.util.Objects;
+import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
 import org.open4goods.config.yml.attributes.AttributeConfig;
@@ -152,15 +157,11 @@ public class SearchService {
 		}
 
 
-		// Adding custom numeric filters
-
-		// TODO : Not working, buggy when no ecoscore
-		//		for (NumericRangeFilter filter : request.getNumericFilters()) {
-//
-//			// TODO : WTF ?
-//			criterias.and(new Criteria(filter.getKey()).lessThanEqual(filter.getMaxValue()) );
-//			criterias.and(new Criteria(filter.getKey()).greaterThanEqual(Math.ceil(filter.getMinValue())));
-//		}
+		// Adding custom numeric filters		
+		for (NumericRangeFilter filter : request.getNumericFilters()) {
+			criterias.and(new Criteria(filter.getKey()).lessThanEqual(filter.getMaxValue()) );
+			criterias.and(new Criteria(filter.getKey()).greaterThanEqual(filter.getMinValue()));
+		}
 
 		// Adding custom checkbox filters
 		for (Entry<String, Set<String>> filter : request.getTermsFilter().entrySet()) {
@@ -186,6 +187,9 @@ public class SearchService {
 		// Setting the query
 		NativeQueryBuilder esQuery = new NativeQueryBuilder().withQuery(new CriteriaQuery(criterias));
 
+
+		
+		
 		// Pagination
 		if (null != request.getPageNumber() && null != request.getPageSize()) {
 			esQuery = esQuery .withPageable(PageRequest.of(request.getPageNumber(), request.getPageSize()));
@@ -366,7 +370,9 @@ public class SearchService {
 
 		vsr.setVerticalConfig(vertical);
 		vsr.setRequest(request);
-
+		String queryString = StringUtils.join(criterias.getCriteriaChain(), "\n-> ");
+		LOGGER.info("{} results for query \n-> {}", vsr.getTotalResults(), queryString);
+	
 		return vsr;
 	}
 

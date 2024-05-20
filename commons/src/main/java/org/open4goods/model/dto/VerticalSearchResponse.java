@@ -65,6 +65,12 @@ public class VerticalSearchResponse {
 		this.request=vRequest;
 	}
 
+	@Override
+	public String toString() {
+		return totalResults + " results";
+	}
+	
+	
 	public VerticalSearchResponse() {
 	}
 

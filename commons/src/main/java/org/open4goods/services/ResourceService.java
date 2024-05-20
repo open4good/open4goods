@@ -1,6 +1,11 @@
 package org.open4goods.services;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
 
+import org.apache.commons.io.IOUtils;
 import org.open4goods.exceptions.ValidationException;
 import org.open4goods.model.data.Resource;
 import org.slf4j.Logger;
@@ -14,8 +19,6 @@ import org.slf4j.LoggerFactory;
 
  */
 public class ResourceService {
-
-
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(ResourceService.class);
 
@@ -55,6 +58,20 @@ public class ResourceService {
 		}
 	}
 
+
+	/**
+	 * Return an inputStream to the cached file
+	 * @param r
+	 * @return
+	 * @throws FileNotFoundException
+	 * @throws IOException
+	 */
+	public InputStream getFileStream(final Resource r) throws FileNotFoundException, IOException {
+		return IOUtils.toBufferedInputStream(new FileInputStream(getCacheFile(r)));
+		
+	}
+	
+	
 	public File getCacheFile(final Resource r) {
 		return new File(remoteCachingFolder + File.separator+ r.folderHashPrefix() + File.separator+ r.getCacheKey());
 	}

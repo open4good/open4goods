@@ -7,8 +7,10 @@ import java.util.concurrent.TimeUnit;
 import org.apache.commons.lang3.ArrayUtils;
 import org.open4goods.api.config.yml.ApiProperties;
 import org.open4goods.api.services.AggregationFacadeService;
-import org.open4goods.api.services.AiCompletionService;
 import org.open4goods.api.services.FetcherOrchestrationService;
+import org.open4goods.api.services.completion.AmazonCompletionService;
+import org.open4goods.api.services.completion.GenAiCompletionService;
+import org.open4goods.api.services.completion.ResourceCompletionService;
 import org.open4goods.api.services.store.DataFragmentStoreService;
 import org.open4goods.crawler.config.yml.FetcherProperties;
 import org.open4goods.crawler.repository.CsvIndexationRepository;
@@ -21,6 +23,7 @@ import org.open4goods.crawler.services.IndexationService;
 import org.open4goods.crawler.services.fetching.CsvDatasourceFetchingService;
 import org.open4goods.crawler.services.fetching.WebDatasourceFetchingService;
 import org.open4goods.dao.ProductRepository;
+import org.open4goods.exceptions.TechnicalException;
 import org.open4goods.exceptions.ValidationException;
 import org.open4goods.helper.DevModeService;
 import org.open4goods.model.constants.CacheConstants;
@@ -113,12 +116,23 @@ public class ApiConfig {
 	
 	@Bean
 	@Autowired
-	AiCompletionService aiCompletionService(AiService aiService, ProductRepository productRepository, VerticalsConfigService verticalConfigService) {
-		return new AiCompletionService(aiService, productRepository, verticalConfigService, apiProperties);
+	GenAiCompletionService aiCompletionService(AiService aiService, ProductRepository productRepository, VerticalsConfigService verticalConfigService) {
+		return new GenAiCompletionService(aiService, productRepository, verticalConfigService, apiProperties);
 	}
 
-	@Bean
 	
+	@Bean	
+	@Autowired
+	AmazonCompletionService amazonCompletionService(ProductRepository dataRepository, VerticalsConfigService verticalConfigService,
+			ApiProperties apiProperties, DataSourceConfigService dataSourceConfigService, AggregationFacadeService aggregationFacade) throws TechnicalException {
+		return new AmazonCompletionService(dataRepository, verticalConfigService, apiProperties, dataSourceConfigService, aggregationFacade);
+	}
+
+	
+	
+	
+	
+	@Bean	
 	BlablaService blablaService(@Autowired EvaluationService evaluationService) {
 		return new BlablaService(evaluationService);
 	}
@@ -160,7 +174,14 @@ public class ApiConfig {
 	AiService aiService (AiAgent nudgerAgent, VerticalsConfigService verticalService, EvaluationService spelEvaluationService) {
 		return new AiService(nudgerAgent, verticalService, spelEvaluationService);
 	}
-	
+
+	@Bean
+	@Autowired  
+	ResourceCompletionService resourceCompletionService (ImageMagickService imageService, VerticalsConfigService verticalConfigService, ResourceService resourceService, ProductRepository dataRepository, ApiProperties apiProperties) {
+		return new ResourceCompletionService(imageService, verticalConfigService, resourceService, dataRepository, apiProperties);
+		
+		
+	}
     @Bean
 	public GoogleTaxonomyService googleTaxonomyService(@Autowired RemoteFileCachingService remoteFileCachingService) {
 		GoogleTaxonomyService gts = new GoogleTaxonomyService(remoteFileCachingService);

@@ -108,9 +108,9 @@ i18n:
 ecoscoreConfig:
    BRAND_SUSTAINABILITY: 0.2
 #   PARTS_AVAILLABILITY: 0.2
-   REPAIRABILITY_INDEX: 0.3
-   CLASSE_ENERGY : 0.3
-   WARRANTY: 0.1
+#   REPAIRABILITY_INDEX: 0.3
+#   CLASSE_ENERGY : 0.3
+#   WARRANTY: 0.1
    DATA-QUALITY: 0.1
 
 ##############################################################################

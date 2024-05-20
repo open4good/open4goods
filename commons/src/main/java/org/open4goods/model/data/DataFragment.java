@@ -69,6 +69,7 @@ public class DataFragment implements Standardisable, Validable {
 	private Long lastIndexationDate;
 
 	@NotNull
+	// TODO : Should remove, creation is computed at Product level
 	private Long creationDate;
 
 
@@ -868,7 +869,6 @@ public class DataFragment implements Standardisable, Validable {
 		final Resource r = new Resource(url);
 
 		// A resource is also a source, but not automatically marked
-		r.setProviderName(getDatasourceName());
 		r.setTimeStamp(System.currentTimeMillis());
 
 		r.setTags(tags);

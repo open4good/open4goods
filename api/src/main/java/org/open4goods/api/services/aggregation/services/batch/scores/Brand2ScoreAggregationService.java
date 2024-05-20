@@ -35,7 +35,7 @@ public class Brand2ScoreAggregationService extends AbstractScoreAggregationServi
 			Double score = generateScoreFromBrand(data.brand());
 
 			// Processing cardinality
-			processCardinality(BRAND_SUSTAINABILITY_SCORENAME,score);			
+			incrementCardinality(BRAND_SUSTAINABILITY_SCORENAME,score);			
 			Score s = new Score(BRAND_SUSTAINABILITY_SCORENAME, score);
 			// Saving in product
 			data.getScores().put(s.getName(),s);
