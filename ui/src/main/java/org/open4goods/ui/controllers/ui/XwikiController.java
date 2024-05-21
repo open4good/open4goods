@@ -1,6 +1,7 @@
 package org.open4goods.ui.controllers.ui;
 
 <<<<<<< Upstream, based on origin/main
+<<<<<<< Upstream, based on origin/main
 import org.open4goods.ui.config.yml.UiConfig;
 <<<<<<< Upstream, based on origin/main
 <<<<<<< Upstream, based on origin/main
@@ -17,12 +18,19 @@ import org.open4goods.xwiki.services.XWikiReadService;
 import org.open4goods.xwiki.services.XwikiMappingService;
 >>>>>>> cbcd929 xwiki-spring-boot-starter integration
 =======
+=======
+import java.io.IOException;
+import java.util.Locale;
+
+>>>>>>> 6c3b5b0 Wiki backed pages rendering on the way !
 import org.open4goods.xwiki.model.FullPage;
 import org.open4goods.xwiki.services.XwikiFacadeService;
 >>>>>>> 0235dd4 Wiki integration
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.AbstractController;
 
@@ -34,9 +42,20 @@ import jakarta.servlet.http.HttpServletResponse;
 /**
  * This controller pages pageSize Xwiki content
  * @author gof
+ * TODO : Could put in the xwiki-starter
  *
  */
 public class XwikiController extends AbstractController  {
+
+	private static final String WEBPAGE_CLASS_META_TITLE = "metaTitle";
+
+	private static final String WEBPAGE_CLASS_META_DESCRIPTION = "metaDescription";
+
+	private static final String WEBPAGE_CLASS_PAGE_TITLE = "pageTitle";
+
+	private static final String WEBPAGE_CLASS_HTML = "html";
+
+	private static final String WEBPAGE_CLASS_WIDTH = "width";
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(XwikiController.class);
 
@@ -102,26 +121,43 @@ public class XwikiController extends AbstractController  {
 		super();
 //		this.config = config;
 		this.xwikiService = xwikiService;
-		this.frags =  wikiPage.split(":");
+		this.frags =  wikiPage.split(":|/");
 	}
 	
 	@Override
-	protected ModelAndView handleRequestInternal(HttpServletRequest arg0, HttpServletResponse arg1) throws Exception {
-	    // TODO : I18n
-	    try {
-			FullPage fullPage = xwikiService.getFullPage(frags);
-			System.out.println(fullPage);
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+	protected ModelAndView handleRequestInternal(HttpServletRequest request, HttpServletResponse response) throws Exception {
+	    FullPage fullPage = xwikiService.getFullPage(frags);
 	    
-	    ModelAndView mv = new ModelAndView("xwiki-layout1");
+	    ModelAndView mv = new ModelAndView("xwiki-"+ fullPage.getProp("layout"));
 	    
+	    mv.addObject(WEBPAGE_CLASS_META_TITLE,fullPage.getProp(WEBPAGE_CLASS_META_TITLE));
+		mv.addObject(WEBPAGE_CLASS_META_DESCRIPTION,fullPage.getProp(WEBPAGE_CLASS_META_DESCRIPTION));
+		mv.addObject(WEBPAGE_CLASS_PAGE_TITLE,fullPage.getProp(WEBPAGE_CLASS_PAGE_TITLE));
+		mv.addObject(WEBPAGE_CLASS_HTML,getHtml(fullPage));
+		mv.addObject(WEBPAGE_CLASS_WIDTH,fullPage.getProp(WEBPAGE_CLASS_WIDTH));
+		
+		mv.addObject("userLocale", request.getLocale());
+		// TODO(i18n,p3, 0,25)
+		mv.addObject("siteLanguage", "fr");
+		final Locale sl = Locale.FRANCE;
+		mv.addObject("siteLocale", sl);
+		
+		
 	    return mv;
-	     }
+	}
+	/**
+	 * TODO : So dirty, so fragile.... In a hurry of xwiki jakarta migration for client side rendering
+	 * 
+	 * @param fullPage
+	 * @return
+	 */
+	private String getHtml(FullPage fullPage) {	
+		String ret = xwikiService.getxWikiHtmlService().getHtmlClassWebPage(fullPage.getWikiPage().getId());
 
-	 }
+		return ret;
+	}
+
+
 
 	//////////////////////////////////////////////////////////////
 	// Mappings
@@ -155,6 +191,7 @@ public class XwikiController extends AbstractController  {
 <<<<<<< Upstream, based on origin/main
 <<<<<<< Upstream, based on origin/main
 //
+<<<<<<< Upstream, based on origin/main
 //	@GetMapping("/{page:[a-z-]+}")
 //	//TODO : Ugly url's mappings
 //	public ModelAndView xwiki(
@@ -223,7 +260,10 @@ public class XwikiController extends AbstractController  {
 //			return xwiki("Main", page, request,response );
 //	}
 >>>>>>> cbcd929 xwiki-spring-boot-starter integration
+=======
+>>>>>>> 6c3b5b0 Wiki backed pages rendering on the way !
 
+<<<<<<< Upstream, based on origin/main
 
 //	@GetMapping("/attachments/{space}/{page}/{filename}")
 //	
@@ -433,4 +473,7 @@ public class XwikiController extends AbstractController  {
 //		return mv;
 //	}
 >>>>>>> cbcd929 xwiki-spring-boot-starter integration
+=======
+	}
+>>>>>>> 6c3b5b0 Wiki backed pages rendering on the way !
 

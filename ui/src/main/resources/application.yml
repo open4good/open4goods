@@ -53,10 +53,7 @@ langchain4j:
       log-responses: false
 
 wikiPagesMapping:
-#  "[BROUILLONS:testbrouillon:WebHome]":
-#    default: "pages/comparateur-prix.html"
- 
-  "[Blog:BlogIntroduction]":
+  "[webpages/default/test/WebHome]":
     default: "test"
     
     
