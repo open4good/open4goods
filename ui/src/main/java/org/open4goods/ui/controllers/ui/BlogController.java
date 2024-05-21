@@ -10,6 +10,7 @@ import org.open4goods.services.DataSourceConfigService;
 import org.open4goods.services.VerticalsConfigService;
 import org.open4goods.ui.services.BlogService;
 import org.open4goods.ui.services.OpenDataService;
+import org.open4goods.xwiki.services.XWikiHtmlService;
 import org.open4goods.xwiki.services.XWikiReadService;
 import org.open4goods.xwiki.services.XwikiFacadeService;
 import org.slf4j.Logger;
@@ -100,4 +101,21 @@ public class BlogController extends AbstractUiController {
 		// TODO : Have a streamed version
 		response.getOutputStream().write(bytes);
 	}
+	
+	
+	@GetMapping(XWikiHtmlService.PROXYFIED_FOLDER+ "/**")	
+	// TODO : Caching
+	// TODO : Mutualize with the one in blog controller (?)
+	// TODO : Serve here the classical xwiki download content, because of XwikiController not being @nnotated
+	// TODO : Security warning 
+	public void attachment( final HttpServletRequest request, HttpServletResponse response) throws IOException  {
+		// TODO : Blog
+		String path = request.getServletPath().replace(XWikiHtmlService.PROXYFIED_FOLDER+"/", "");
+		byte[] bytes = xwikiFacadeService.downloadAttachment(path);
+		response.setContentType(xwikiFacadeService.detectMimeType(path));
+		// TODO : Have a streamed version
+		response.getOutputStream().write(bytes);
+	}
+	
+	
 }
