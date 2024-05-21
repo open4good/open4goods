@@ -1,5 +1,6 @@
 package org.open4goods.ui.controllers.ui;
 
+<<<<<<< HEAD
 <<<<<<< Upstream, based on origin/main
 <<<<<<< Upstream, based on origin/main
 import org.open4goods.ui.config.yml.UiConfig;
@@ -26,6 +27,13 @@ import java.util.Locale;
 import org.open4goods.xwiki.model.FullPage;
 import org.open4goods.xwiki.services.XwikiFacadeService;
 >>>>>>> 0235dd4 Wiki integration
+=======
+import java.io.IOException;
+import java.util.Locale;
+
+import org.open4goods.xwiki.model.FullPage;
+import org.open4goods.xwiki.services.XwikiFacadeService;
+>>>>>>> branch 'spring-boot-starter-xwiki' of https://github.com/open4good/open4goods.git
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
@@ -61,6 +69,7 @@ public class XwikiController extends AbstractController  {
 	// The siteConfig
 //	private final UiConfig config;
 
+<<<<<<< HEAD
 <<<<<<< Upstream, based on origin/main
 	private final XWikiReadService xwikiService;
 <<<<<<< Upstream, based on origin/main
@@ -68,7 +77,11 @@ public class XwikiController extends AbstractController  {
 	private XwikiMappingService mappingService;
 =======
 >>>>>>> f9c909d Ending first round
+=======
+	private  XwikiFacadeService xwikiService;
+>>>>>>> branch 'spring-boot-starter-xwiki' of https://github.com/open4good/open4goods.git
 
+<<<<<<< HEAD
 <<<<<<< Upstream, based on origin/main
 	public XwikiController(UiConfig config, XwikiMappingService mappingService, XWikiReadService xwikiService) {
 =======
@@ -113,7 +126,59 @@ public class XwikiController extends AbstractController  {
 >>>>>>> cbcd929 xwiki-spring-boot-starter integration
 =======
 >>>>>>> 0235dd4 Wiki integration
+=======
+	private String[] frags;
+	
+	public XwikiController() {
+		super();
+>>>>>>> branch 'spring-boot-starter-xwiki' of https://github.com/open4good/open4goods.git
 	}
+	public XwikiController(XwikiFacadeService xwikiService) {
+		super();
+		this.xwikiService = xwikiService;
+	}
+
+	
+	public XwikiController(XwikiFacadeService xwikiService, String wikiPage) {
+		super();
+//		this.config = config;
+		this.xwikiService = xwikiService;
+		this.frags =  wikiPage.split(":|/");
+	}
+	
+	@Override
+	protected ModelAndView handleRequestInternal(HttpServletRequest request, HttpServletResponse response) throws Exception {
+	    FullPage fullPage = xwikiService.getFullPage(frags);
+	    
+	    ModelAndView mv = new ModelAndView("xwiki-"+ fullPage.getProp("layout"));
+	    
+	    mv.addObject(WEBPAGE_CLASS_META_TITLE,fullPage.getProp(WEBPAGE_CLASS_META_TITLE));
+		mv.addObject(WEBPAGE_CLASS_META_DESCRIPTION,fullPage.getProp(WEBPAGE_CLASS_META_DESCRIPTION));
+		mv.addObject(WEBPAGE_CLASS_PAGE_TITLE,fullPage.getProp(WEBPAGE_CLASS_PAGE_TITLE));
+		mv.addObject(WEBPAGE_CLASS_HTML,getHtml(fullPage));
+		mv.addObject(WEBPAGE_CLASS_WIDTH,fullPage.getProp(WEBPAGE_CLASS_WIDTH));
+		
+		mv.addObject("userLocale", request.getLocale());
+		// TODO(i18n,p3, 0,25)
+		mv.addObject("siteLanguage", "fr");
+		final Locale sl = Locale.FRANCE;
+		mv.addObject("siteLocale", sl);
+		
+		
+	    return mv;
+	}
+	/**
+	 * TODO : So dirty, so fragile.... In a hurry of xwiki jakarta migration for client side rendering
+	 * 
+	 * @param fullPage
+	 * @return
+	 */
+	private String getHtml(FullPage fullPage) {	
+		String ret = xwikiService.getxWikiHtmlService().getHtmlClassWebPage(fullPage.getWikiPage().getId());
+
+		return ret;
+	}
+
 
 	
 	public XwikiController(XwikiFacadeService xwikiService, String wikiPage) {
@@ -187,6 +252,7 @@ public class XwikiController extends AbstractController  {
 //		return mv;
 //
 //	}
+<<<<<<< HEAD
 <<<<<<< Upstream, based on origin/main
 <<<<<<< Upstream, based on origin/main
 //
@@ -215,7 +281,13 @@ public class XwikiController extends AbstractController  {
 //			return xwiki("Main", page, request,response );
 //	}
 =======
+=======
+//
 
+	}
+>>>>>>> branch 'spring-boot-starter-xwiki' of https://github.com/open4good/open4goods.git
+
+<<<<<<< HEAD
 	@GetMapping("/{page:[a-z-]+}")
 	//TODO : Ugly url's mappings
 	public ModelAndView xwiki(
@@ -476,3 +548,5 @@ public class XwikiController extends AbstractController  {
 	}
 >>>>>>> 6c3b5b0 Wiki backed pages rendering on the way !
 
+=======
+>>>>>>> branch 'spring-boot-starter-xwiki' of https://github.com/open4good/open4goods.git

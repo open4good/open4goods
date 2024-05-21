@@ -80,6 +80,7 @@ public class BlogService {
 	// TODO : Cacheable, or better @scheduled
 	public void updateBlogPosts() {
 		logger.info("Getting blog posts");
+<<<<<<< HEAD
 <<<<<<< Upstream, based on origin/main
 		Map<String, BlogPost> postsByUrl = new HashMap<>();
 		
@@ -122,6 +123,15 @@ public class BlogService {
 			}
 			FullPage fullPage = xwikiFacadeService.getFullPage(page.getSpace(), page.getName());
 >>>>>>> 73f03a9 First iteration for blog service
+=======
+		Pages pages = xwikiFacadeService.getPages("Blog");
+		List<BlogPost> posts = new ArrayList<>();
+		for (PageSummary page : pages.getPageSummaries()) {		
+			if (page.getFullName().endsWith(XWIKI_WEB_HOME_SUFFIX)) {
+				continue;
+			}
+			FullPage fullPage = xwikiFacadeService.getFullPage(page.getSpace(), page.getName());
+>>>>>>> branch 'spring-boot-starter-xwiki' of https://github.com/open4good/open4goods.git
 			BlogPost post = new BlogPost();
 			
 			String image = fullPage.getProperties().get("image");
