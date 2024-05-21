@@ -51,6 +51,7 @@ import com.rometools.rome.io.SyndFeedOutput;
  */
 public class BlogService {
 
+	private static final String XWIKI_WEB_HOME_SUFFIX = ".WebHome";
 	private static final String XWIKI_BLOGPOST_START_MARKUP = "<div class=\"entry-content\">";
 	private static final String XWIKI_BLOGPOST_STOP_MARKUP = "<div class=\"entry-footer\">";
 	
@@ -116,6 +117,9 @@ public class BlogService {
 		Pages pages = xwikiFacadeService.getPages("Blog");
 		List<BlogPost> posts = new ArrayList<>();
 		for (PageSummary page : pages.getPageSummaries()) {		
+			if (page.getFullName().endsWith(XWIKI_WEB_HOME_SUFFIX)) {
+				continue;
+			}
 			FullPage fullPage = xwikiFacadeService.getFullPage(page.getSpace(), page.getName());
 >>>>>>> 73f03a9 First iteration for blog service
 			BlogPost post = new BlogPost();
