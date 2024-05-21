@@ -29,6 +29,7 @@ import org.open4goods.services.VerticalsConfigService;
 import org.open4goods.services.ai.AiAgent;
 import org.open4goods.services.ai.AiService;
 import org.open4goods.ui.config.yml.UiConfig;
+import org.open4goods.ui.controllers.ui.UiService;
 import org.open4goods.ui.services.BlogService;
 import org.open4goods.ui.services.GtinService;
 import org.open4goods.ui.services.ImageService;
@@ -81,6 +82,10 @@ public class AppConfig {
 	@Bean
 	BarcodeValidationService barcodeValidationService () {
 		return new BarcodeValidationService();
+	}
+	
+	@Bean UiService uiService () {
+		return new UiService();
 	}
 	
 	@Bean

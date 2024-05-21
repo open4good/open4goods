@@ -25,13 +25,13 @@ import jakarta.servlet.http.HttpServletResponse;
  * @author gof
  *
  */
-public class OpenDataController extends AbstractUiController {
+public class OpenDataController  {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(OpenDataController.class);
 
 	// The siteConfig
 	private final OpenDataService openDataService;
-
+	private @Autowired UiService uiService;
 	public OpenDataController(OpenDataService openDataService) {
 		this.openDataService = openDataService;
 	}
@@ -47,7 +47,7 @@ public class OpenDataController extends AbstractUiController {
 
 	@GetMapping("/opendata")
 	public ModelAndView opendata(final HttpServletRequest request) {
-		final ModelAndView ret = defaultModelAndView("opendata", request);
+		final ModelAndView ret = uiService.defaultModelAndView("opendata", request);
 		ret.addObject("count", openDataService.totalItems());
 		ret.addObject("lastUpdated", openDataService.lastUpdate());
 		ret.addObject("fileSize", openDataService.fileSize());

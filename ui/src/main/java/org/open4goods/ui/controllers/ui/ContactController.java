@@ -14,10 +14,10 @@ import org.springframework.web.servlet.ModelAndView;
 import jakarta.servlet.http.HttpServletRequest;
 
 @Controller
-public class ContactController extends AbstractUiController {
+public class ContactController  {
 
 	private final MailService mailService;
-
+	private @Autowired UiService uiService;
 	private final UiConfig uiConfig;
 
 	private final RecaptchaService captchaService;
@@ -31,7 +31,7 @@ public class ContactController extends AbstractUiController {
 	@GetMapping("/contact")
 	public ModelAndView index(final HttpServletRequest request) {
 
-		ModelAndView model = defaultModelAndView("contact", request);
+		ModelAndView model = uiService.defaultModelAndView("contact", request);
 		model.addObject("page","nous contacter");
 		return model;
 	}
@@ -39,7 +39,7 @@ public class ContactController extends AbstractUiController {
 	@PostMapping("/contact")
 	public ModelAndView index(@RequestParam String name, @RequestParam String email, @RequestParam String message,@RequestParam(name="h-captcha-response") String recaptchaResponse,	final HttpServletRequest request) {
 
-		ModelAndView model = defaultModelAndView("contact", request);
+		ModelAndView model = uiService.defaultModelAndView("contact", request);
 		model.addObject("page","nous contacter");
 		try {
 			captchaService.verifyRecaptcha(IpHelper.getIp(request), recaptchaResponse);
