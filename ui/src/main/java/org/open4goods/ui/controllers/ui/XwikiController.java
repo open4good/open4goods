@@ -80,18 +80,6 @@ public class XwikiController extends AbstractController  {
 	}
 	
 
-	// TODO : Caching
-	// TODO : Mutualize with the one in blog controller (?)
-	// TODO : Serve here the classical xwiki download content, because of XwikiController not being @nnotated
-	// TODO : Security warning 
-	public void attachment( final HttpServletRequest request, HttpServletResponse response) throws IOException  {
-		// TODO : Blog
-		String path = request.getServletPath().replace(XWikiHtmlService.PROXYFIED_FOLDER+"/", "");
-		byte[] bytes = xwikiService.downloadAttachment(path);
-		response.setContentType(xwikiService.detectMimeType(path));
-		// TODO : Have a streamed version
-		response.getOutputStream().write(bytes);
-	}
 	
 	/**
 	 * TODO : So dirty, so fragile.... In a hurry of xwiki jakarta migration for client side rendering
