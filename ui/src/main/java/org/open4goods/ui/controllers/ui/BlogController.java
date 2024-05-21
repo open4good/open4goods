@@ -103,19 +103,6 @@ public class BlogController extends AbstractUiController {
 	}
 	
 	
-	@GetMapping(XWikiHtmlService.PROXYFIED_FOLDER+ "/**")	
-	// TODO : Caching
-	// TODO : Mutualize with the one in blog controller (?)
-	// TODO : Serve here the classical xwiki download content, because of XwikiController not being @nnotated
-	// TODO : Security warning 
-	public void attachment( final HttpServletRequest request, HttpServletResponse response) throws IOException  {
-		// TODO : Blog
-		String path = request.getServletPath().replace(XWikiHtmlService.PROXYFIED_FOLDER+"/", "");
-		byte[] bytes = xwikiFacadeService.downloadAttachment(path);
-		response.setContentType(xwikiFacadeService.detectMimeType(path));
-		// TODO : Have a streamed version
-		response.getOutputStream().write(bytes);
-	}
-	
+
 	
 }
