@@ -50,11 +50,13 @@
         </section>
         <section class="section section-lg line-bottom-light">
             <div class="container mt-n10 mt-lg-n12 z-2">
-                <div class="row">
+                <div th:if="${posts.size() > 0}" class="row">
                     
                     <div th:with="post = ${posts.getFirst()}"class="col-lg-12 mb-5">
                         <div class="card shadow bg-white border-gray-300 flex-lg-row align-items-center g-0 p-4">
-                            <a th:href="'/blog/'+${post.url}" class="col-12 col-lg-6"><img th:src="${post.image}" th:alt="${post.title}" class="card-img-top rounded"></a>
+                            <a th:href="'/blog/'+${post.url}" class="col-12 col-lg-6">
+                            	<img th:src="${post.image}" th:alt="${post.title}" class="card-img-top rounded">
+                            </a>
                             <div class="card-body d-flex flex-column justify-content-between col-auto py-4 p-0 p-lg-3 p-xl-5">
                                 <a th:href="'/blog/'+${post.url}">
                                     <h2 th:text="${post.title}"></h2>
@@ -91,14 +93,7 @@
 	                    </div>
                     </th:block>
                     
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
+
                     <div class="col-12 col-md-6 col-lg-4 mb-4 mb-lg-5">
                         <div class="card shadow bg-white border-gray-300  p-4 rounded">
                             <a href="./blog-post.html">

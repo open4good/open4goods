@@ -146,8 +146,13 @@ public class IdHelper {
 		return input.replaceAll("[^a-zA-Z0-9]", "");
 	}
 	
+	public static String azCharAndDigits(final String input, String replacement) {
+		return input.replaceAll("[^a-zA-Z0-9]", replacement);
+	}
+	
 	public static String azCharAndDigitsPointsDash(String input) {
-		return input.replaceAll("[^a-zA-Z0-9.-]", "");	}
+		return azCharAndDigits(input,"");
+		}
 
 	
 	
