@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 
 import org.open4goods.services.DataSourceConfigService;
 import org.open4goods.ui.config.yml.UiConfig;
+<<<<<<< HEAD
 <<<<<<< Upstream, based on origin/main
 <<<<<<< Upstream, based on origin/main
 import org.open4goods.xwiki.services.XWikiHtmlService;
@@ -16,6 +17,9 @@ import org.open4goods.xwiki.services.XWikiReadService;
 =======
 import org.open4goods.xwiki.services.XWikiHtmlService;
 >>>>>>> cbcd929 xwiki-spring-boot-starter integration
+=======
+import org.open4goods.xwiki.services.XWikiHtmlService;
+>>>>>>> branch 'spring-boot-starter-xwiki' of https://github.com/open4good/open4goods.git
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,6 +44,7 @@ public class AbstractUiController {
 
 	private @Autowired Environment env;
 	protected @Autowired UiConfig config;
+<<<<<<< HEAD
 <<<<<<< Upstream, based on origin/main
 <<<<<<< Upstream, based on origin/main
 	private @Autowired XWikiHtmlService xwikiService;
@@ -49,6 +54,9 @@ public class AbstractUiController {
 =======
 	private @Autowired XWikiHtmlService xwikiService;
 >>>>>>> cbcd929 xwiki-spring-boot-starter integration
+=======
+	private @Autowired XWikiHtmlService xwikiService;
+>>>>>>> branch 'spring-boot-starter-xwiki' of https://github.com/open4good/open4goods.git
 
 		
 	// Used to load Datasource configurations from classpath

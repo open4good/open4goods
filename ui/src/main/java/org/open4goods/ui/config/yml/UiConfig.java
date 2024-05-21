@@ -15,6 +15,7 @@ import org.open4goods.config.yml.ui.ApiConfig;
 import org.open4goods.config.yml.ui.OpenSearchConfig;
 import org.open4goods.config.yml.ui.SiteNaming;
 import org.open4goods.config.yml.ui.WebConfig;
+<<<<<<< HEAD
 <<<<<<< Upstream, based on origin/main
 <<<<<<< Upstream, based on origin/main
 import org.open4goods.model.Localisable;
@@ -23,6 +24,9 @@ import org.open4goods.model.Localisable;
 =======
 import org.open4goods.model.Localisable;
 >>>>>>> cbcd929 xwiki-spring-boot-starter integration
+=======
+import org.open4goods.model.Localisable;
+>>>>>>> branch 'spring-boot-starter-xwiki' of https://github.com/open4good/open4goods.git
 import org.open4goods.xwiki.config.XWikiServiceProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -379,6 +383,7 @@ public class UiConfig {
 	}
 
 
+<<<<<<< HEAD
 <<<<<<< Upstream, based on origin/main
 	public String getCaptchaSecret() {
 		return captchaSecret;
@@ -422,6 +427,19 @@ public class UiConfig {
 
 
 >>>>>>> cbcd929 xwiki-spring-boot-starter integration
+=======
+	public Map<String, Localisable> getWikiPagesMapping() {
+		return wikiPagesMapping;
+	}
+
+
+	public void setWikiPagesMapping(Map<String, Localisable> wikiPagesMapping) {
+		this.wikiPagesMapping = wikiPagesMapping;
+	}
+
+
+
+>>>>>>> branch 'spring-boot-starter-xwiki' of https://github.com/open4good/open4goods.git
 
 
 

@@ -34,6 +34,7 @@ import org.open4goods.ui.services.GtinService;
 import org.open4goods.ui.services.ImageService;
 import org.open4goods.ui.services.OpenDataService;
 import org.open4goods.xwiki.authentication.XwikiAuthenticationProvider;
+<<<<<<< HEAD
 <<<<<<< Upstream, based on origin/main
 <<<<<<< Upstream, based on origin/main
 import org.open4goods.xwiki.services.XwikiMappingService;
@@ -43,6 +44,9 @@ import org.open4goods.xwiki.services.MappingService;
 =======
 import org.open4goods.xwiki.services.XwikiMappingService;
 >>>>>>> f9c909d Ending first round
+=======
+import org.open4goods.xwiki.services.XwikiMappingService;
+>>>>>>> branch 'spring-boot-starter-xwiki' of https://github.com/open4good/open4goods.git
 import org.open4goods.xwiki.services.XWikiAuthenticationService;
 import org.open4goods.xwiki.services.XWikiReadService;
 import org.open4goods.xwiki.services.XwikiFacadeService;
@@ -160,6 +164,7 @@ public class AppConfig {
 	//		return new SitemapGenerationService(aggregatedDataRepository, props);
 	//	}
 	//
+<<<<<<< HEAD
 <<<<<<< Upstream, based on origin/main
 <<<<<<< Upstream, based on origin/main
 =======
@@ -169,7 +174,10 @@ public class AppConfig {
 >>>>>>> 2242445 First draft of integration, but needs a higher xwikiservice
 =======
 >>>>>>> cbcd929 xwiki-spring-boot-starter integration
+=======
+>>>>>>> branch 'spring-boot-starter-xwiki' of https://github.com/open4good/open4goods.git
 	
+<<<<<<< HEAD
 <<<<<<< Upstream, based on origin/main
 <<<<<<< Upstream, based on origin/main
 	
@@ -198,6 +206,17 @@ public class AppConfig {
 //		return new XWikiReadService(mappingService, props.getWikiConfig());
 //	}
 >>>>>>> cbcd929 xwiki-spring-boot-starter integration
+=======
+	
+//	@Bean AuthenticationProvider xwikiAuthenticationProvider(@Autowired XWikiAuthenticationService xwikiAuthenticationService) {
+//		return new XwikiAuthenticationProvider(xwikiAuthenticationService);
+//	}
+	
+//	@Bean
+//	XWikiReadService readService(@Autowired UiConfig props, @Autowired XwikiMappingService mappingService) {
+//		return new XWikiReadService(mappingService, props.getWikiConfig());
+//	}
+>>>>>>> branch 'spring-boot-starter-xwiki' of https://github.com/open4good/open4goods.git
 
 
 	
