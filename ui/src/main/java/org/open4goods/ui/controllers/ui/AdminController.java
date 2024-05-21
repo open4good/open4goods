@@ -27,7 +27,7 @@ import jakarta.servlet.http.HttpServletRequest;
  * @author gof
  *
  */
-public class AdminController extends AbstractUiController {
+public class AdminController  {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(AdminController.class);
 

@@ -15,6 +15,7 @@ import org.open4goods.xwiki.services.XWikiReadService;
 import org.open4goods.xwiki.services.XwikiFacadeService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -27,7 +28,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 @Controller
-public class BlogController extends AbstractUiController {
+public class BlogController  {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(BlogController.class);
 
@@ -36,7 +37,8 @@ public class BlogController extends AbstractUiController {
 	private final VerticalsConfigService verticalConfigService;
 	private final XwikiFacadeService xwikiFacadeService;
 	private BlogService blogService;
-
+	private @Autowired UiService uiService;
+	
 	public BlogController(ProductRepository aggregatedDataRepository, DataSourceConfigService datasourceConfigService, VerticalsConfigService verticalConfigService, BlogService blogService, XwikiFacadeService xwikiFacadeService) {
 		this.aggregatedDataRepository = aggregatedDataRepository;
 		this.datasourceConfigService = datasourceConfigService;
@@ -48,7 +50,7 @@ public class BlogController extends AbstractUiController {
 
 	@GetMapping("/blog")
 	public ModelAndView blogIndex(final HttpServletRequest request, @RequestParam(required = false) String tag) {
-		ModelAndView model = defaultModelAndView("blog", request);
+		ModelAndView model = uiService.defaultModelAndView("blog", request);
 		model.addObject("totalItems", aggregatedDataRepository.countMainIndex());
 		model.addObject("url",  "/");
 		List<BlogPost> posts = blogService.getPosts();
@@ -77,7 +79,7 @@ public class BlogController extends AbstractUiController {
 	
 	@GetMapping("/blog/{post}")
 	public ModelAndView post(@PathVariable String post, final HttpServletRequest request) {
-		ModelAndView model = defaultModelAndView("blog-post", request);
+		ModelAndView model = uiService.defaultModelAndView("blog-post", request);
 
 				BlogPost blogPost = blogService.getPostsByUrl().get(post);
 		

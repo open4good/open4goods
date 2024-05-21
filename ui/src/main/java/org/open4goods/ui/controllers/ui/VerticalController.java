@@ -29,10 +29,10 @@ import jakarta.servlet.http.HttpServletRequest;
  * @author gof
  *
  */
-public class VerticalController extends AbstractUiController {
+public class VerticalController  {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(VerticalController.class);
-
+	private @Autowired UiService uiService;
 	// The siteConfig
 	private final UiConfig config;
 
@@ -57,7 +57,7 @@ public class VerticalController extends AbstractUiController {
 
 
 	public ModelAndView home(String vertical, final HttpServletRequest request) {
-		ModelAndView ret = defaultModelAndView(("vertical-home"), request);
+		ModelAndView ret = uiService.defaultModelAndView(("vertical-home"), request);
 
 
 		VerticalConfig config = verticalService.getVerticalForPath(vertical);

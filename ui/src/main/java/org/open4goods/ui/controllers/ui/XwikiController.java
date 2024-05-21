@@ -110,7 +110,7 @@ public class XwikiController extends AbstractController  {
 //	//TODO (gof) : put back 
 //	public ModelAndView flushCache(final HttpServletRequest request, @RequestParam(name = "r", required = false) String redircectUrl) {
 //		xwikiService.invalidateAll();
-//		ModelAndView mv = defaultModelAndView(("xwiki-layout1"), request);
+//		ModelAndView mv = uiService.defaultModelAndView(("xwiki-layout1"), request);
 //
 //		WikiResult res = new WikiResult();
 //		res.setHtml("All xwiki caches are invalidated");

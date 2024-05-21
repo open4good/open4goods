@@ -28,13 +28,13 @@ import jakarta.servlet.http.HttpServletRequest;
  * @author gof
  *
  */
-public class PartenairesController extends AbstractUiController {
+public class PartenairesController  {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(PartenairesController.class);
 
 	// The siteConfig
 	private final UiConfig config;
-
+	private @Autowired UiService uiService;
 	private final DataSourceConfigService datasourceConfigService;
 
 	private final SerialisationService serialisationService;
@@ -77,7 +77,7 @@ public class PartenairesController extends AbstractUiController {
 
 	@GetMapping("/partenaires")
 	public ModelAndView partenaires(final HttpServletRequest request) {
-		ModelAndView ret = defaultModelAndView(("partenaires"), request);
+		ModelAndView ret = uiService.defaultModelAndView(("partenaires"), request);
 		ret.addObject("page","compensation écologique");
 		ret.addObject("partners",  partners);
 		return ret;

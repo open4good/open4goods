@@ -26,9 +26,9 @@ import jakarta.annotation.PostConstruct;
 import jakarta.servlet.http.HttpServletRequest;
 
 
-public class AbstractUiController {
+public class UiService {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(AbstractUiController.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(UiService.class);
 
 	private @Autowired Environment env;
 	protected @Autowired UiConfig config;
@@ -64,7 +64,7 @@ public class AbstractUiController {
 	 * @param string
 	 * @return
 	 */
-	protected ModelAndView defaultModelAndView(final String tpl, final HttpServletRequest request) {
+	public ModelAndView defaultModelAndView(final String tpl, final HttpServletRequest request) {
 		
 		String template;
 		
