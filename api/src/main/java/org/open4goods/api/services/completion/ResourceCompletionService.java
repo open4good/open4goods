@@ -203,12 +203,11 @@ public class ResourceCompletionService  extends AbstractCompletionService{
 				// If an evicted resource, systematicaly delete file.
 				File evicted = resourceService.getCacheFile(r);
 				logger.info("Deleting evicted resource :{} -> {}",r, evicted);
-// TODO : uncomment to effectivly rm files				
-//				if (!evicted.delete()) {
-//					logger.error("Could not delete evicted resource : {}",resourceService.getCacheFile(r));
-//				}
-			
-//				data.getResources().remove(r);
+				// TODO : uncomment to effectivly rm files				
+				//				if (!evicted.delete()) {
+				//					logger.error("Could not delete evicted resource : {}",resourceService.getCacheFile(r));
+				//				}							
+				//				data.getResources().remove(r);
 			}
 			
 		}

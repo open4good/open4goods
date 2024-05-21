@@ -37,6 +37,7 @@ import org.open4goods.xwiki.authentication.XwikiAuthenticationProvider;
 import org.open4goods.xwiki.services.XwikiMappingService;
 import org.open4goods.xwiki.services.XWikiAuthenticationService;
 import org.open4goods.xwiki.services.XWikiReadService;
+import org.open4goods.xwiki.services.XwikiFacadeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.caffeine.CaffeineCache;
@@ -103,14 +104,10 @@ public class AppConfig {
 		    return template;
 	  }
 	  
-	  
-	  
-	  @Bean
-		public BlogService blogService(@Autowired XWikiReadService xwikiReadService, @Autowired UiConfig config) {
-			return new BlogService(xwikiReadService, config.getBlogConfig(), config.getNamings().getBaseUrls());
-		}
-
-
+    @Bean
+	public BlogService blogService(@Autowired XwikiFacadeService xwikiReadService, @Autowired UiConfig config) {
+		return new BlogService(xwikiReadService, config.getBlogConfig(), config.getNamings().getBaseUrls());
+	}
 	  
 	@Bean
 	FeedbackService feedbackService(@Autowired UiConfig config) {
