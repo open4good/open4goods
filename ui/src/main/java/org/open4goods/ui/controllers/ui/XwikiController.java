@@ -21,7 +21,6 @@ import jakarta.servlet.http.HttpServletResponse;
 /**
  * This controller pages pageSize Xwiki content
  * @author gof
- * TODO : Could put in the xwiki-starter
  *
  */
 public class XwikiController extends AbstractController  {
