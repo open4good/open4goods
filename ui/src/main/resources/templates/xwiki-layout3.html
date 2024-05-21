@@ -6,9 +6,9 @@
 	<th:block th:insert="~{inc/header-meta.html}"></th:block>
     
 	<!-- Primary Meta Tags -->
-	<title th:text="${content.metaTitle}"></title>
-	<meta th:if="${content.metaDescription}" name="description" th:content="${content.metaDescription}">	
-	<meta th:if="${content.metaKeyword}" name="keywords" th:content="${content.metaKeyword}">
+	<title th:text="${metaTitle}"></title>
+	<meta th:if="${metaDescription}" name="description" th:content="${metaDescription}">	
+	<meta th:if="${metaKeyword}" name="keywords" th:content="${metaKeyword}">
 	
 </head>
 
@@ -26,23 +26,23 @@
     <main>	
 		
         <!-- Hero -->
-        <section class="section-header bg-primary text-white pb-9 pb-lg-12 mb-4 mb-lg-6">
-            <div th:class="${content.width}">
+        <section th:if="${pageTitle}" class="section-header bg-primary text-white pb-9 pb-lg-12 mb-4 mb-lg-6">
+            <div class="container" th:classappend="${width}">
                 <div class="row justify-content-center">
                     <div class="col-12 col-md-8 text-center">
-                        <h1 th:text=${content.pageTitle} class="display-2 mb-3"></h1>
+                        <h1 th:text=${pageTitle} class="display-2 mb-3"></h1>
                     </div>
                 </div>
             </div>
         </section>
         
         
- <section class="section section-lg pt-0">
-            <div class="mt-n8 mt-lg-n12 z-2" th:classappend="${content.width}">
+ 		<section class="section section-lg pt-0">
+            <div class="mt-n8 mt-lg-n12 z-2" th:classappend="${width}">
                 <div class="row justify-content-center">
                     <div class="col">
                         <div class="card shadow border-gray-300 p-4 p-lg-5">
-                            <p th:utext="${content.html}" class="lead"></p>
+                            <p th:utext="${html}" class="lead"></p>
                       
                             </div>
                         </div>

@@ -83,7 +83,6 @@ public class AbstractUiController {
 		// TODO(i18n,p3, 0,25)
 		ret.addObject("siteLanguage", "fr");
 		final Locale sl = Locale.FRANCE;
-
 		ret.addObject("siteLocale", sl);
 
 		ret.addObject("config",config);
