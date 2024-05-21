@@ -13,8 +13,10 @@ public class BlogPost {
 	private String summary;
 	
 	private String body;
-	private long created;
-	private long modified;
+	private String created;
+	private Long createdMs;
+	
+	private String modified;
 	
 	
 	private List<String> category = new ArrayList<>();
@@ -51,17 +53,8 @@ public class BlogPost {
 	}
 
 	
-	public long getCreated() {
-		return created;
-	}
-	public void setCreated(long created) {
+	public void setCreated(String created) {
 		this.created = created;
-	}
-	public long getModified() {
-		return modified;
-	}
-	public void setModified(long modified) {
-		this.modified = modified;
 	}
 	public List<WikiAttachment> getAttachments() {
 		return attachments;
@@ -94,6 +87,21 @@ public class BlogPost {
 	}
 	public void setUrl(String url) {
 		this.url = url;
+	}
+	public String getModified() {
+		return modified;
+	}
+	public void setModified(String modified) {
+		this.modified = modified;
+	}
+	public String getCreated() {
+		return created;
+	}
+	public Long getCreatedMs() {
+		return createdMs;
+	}
+	public void setCreatedMs(Long createdMs) {
+		this.createdMs = createdMs;
 	}
 
 
