@@ -17,6 +17,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.ModelAndView;
 
 import com.rometools.rome.io.FeedException;
@@ -45,11 +46,18 @@ public class BlogController extends AbstractUiController {
 
 
 	@GetMapping("/blog")
-	public ModelAndView blogIndex(final HttpServletRequest request) {
+	public ModelAndView blogIndex(final HttpServletRequest request, @RequestParam(required = false) String tag) {
 		ModelAndView model = defaultModelAndView("blog", request);
 		model.addObject("totalItems", aggregatedDataRepository.countMainIndex());
 		model.addObject("url",  "/");
 		List<BlogPost> posts = blogService.getPosts();
+		
+		// Filtering by tag
+		if (null != tag) {
+			posts = posts.stream().filter(e->e.getCategory().contains(tag)).toList();
+		}
+		
+		
 		model.addObject("posts", posts);		
 		return model;
 	}
