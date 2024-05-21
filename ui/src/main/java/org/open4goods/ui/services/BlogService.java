@@ -6,7 +6,6 @@ import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -14,19 +13,14 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.text.WordUtils;
 import org.open4goods.config.yml.BlogConfiguration;
-import org.open4goods.config.yml.datasource.DataSourceProperties;
 import org.open4goods.helper.IdHelper;
 import org.open4goods.model.Localisable;
 import org.open4goods.model.blog.BlogPost;
-import org.open4goods.model.dto.WikiPage;
-import org.open4goods.xwiki.config.XWikiConstantsResourcesPath;
 import org.open4goods.xwiki.model.FullPage;
-import org.open4goods.xwiki.services.XWikiReadService;
 import org.open4goods.xwiki.services.XwikiFacadeService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Scheduled;
-import org.xwiki.rest.model.jaxb.Page;
 import org.xwiki.rest.model.jaxb.PageSummary;
 import org.xwiki.rest.model.jaxb.Pages;
 
@@ -51,7 +45,6 @@ import com.rometools.rome.io.SyndFeedOutput;
  */
 public class BlogService {
 
-	private static final String XWIKI_WEB_HOME_SUFFIX = ".WebHome";
 	private static final String XWIKI_BLOGPOST_START_MARKUP = "<div class=\"entry-content\">";
 	private static final String XWIKI_BLOGPOST_STOP_MARKUP = "<div class=\"entry-footer\">";
 	
@@ -80,58 +73,13 @@ public class BlogService {
 	// TODO : Cacheable, or better @scheduled
 	public void updateBlogPosts() {
 		logger.info("Getting blog posts");
-<<<<<<< HEAD
-<<<<<<< Upstream, based on origin/main
-		Map<String, BlogPost> postsByUrl = new HashMap<>();
-		
-<<<<<<< Upstream, based on origin/main
-<<<<<<< Upstream, based on origin/main
-
-=======
-		List<WikiPage> pages = xwikiReadService.getPages("Blog");
->>>>>>> f9c909d Ending first round
-=======
-
->>>>>>> cbcd929 xwiki-spring-boot-starter integration
-		
-<<<<<<< Upstream, based on origin/main
-<<<<<<< Upstream, based on origin/main
-		
-		
-		Pages pages = xwikiReadService.getPages("Blog");
-		
-		for (PageSummary page : pages.getPageSummaries()) {
-			Page fullPage = xwikiReadService.getPage(page.getSpace(), page.getName());
-=======
-		for (WikiPage page : pages) {
-			WikiPage fullPage = xwikiReadService.getPage(page.getSpace(), page.getName());
->>>>>>> f9c909d Ending first round
-=======
-		
-		
-		Pages pages = xwikiReadService.getPages("Blog");
-		
-		for (PageSummary page : pages.getPageSummaries()) {
-			Page fullPage = xwikiReadService.getPage(page.getSpace(), page.getName());
->>>>>>> cbcd929 xwiki-spring-boot-starter integration
-=======
 		Pages pages = xwikiFacadeService.getPages("Blog");
 		List<BlogPost> posts = new ArrayList<>();
 		for (PageSummary page : pages.getPageSummaries()) {		
-			if (page.getFullName().endsWith(XWIKI_WEB_HOME_SUFFIX)) {
+			if (page.getFullName().endsWith(".WebHome")) {
 				continue;
 			}
 			FullPage fullPage = xwikiFacadeService.getFullPage(page.getSpace(), page.getName());
->>>>>>> 73f03a9 First iteration for blog service
-=======
-		Pages pages = xwikiFacadeService.getPages("Blog");
-		List<BlogPost> posts = new ArrayList<>();
-		for (PageSummary page : pages.getPageSummaries()) {		
-			if (page.getFullName().endsWith(XWIKI_WEB_HOME_SUFFIX)) {
-				continue;
-			}
-			FullPage fullPage = xwikiFacadeService.getFullPage(page.getSpace(), page.getName());
->>>>>>> branch 'spring-boot-starter-xwiki' of https://github.com/open4good/open4goods.git
 			BlogPost post = new BlogPost();
 			
 			String image = fullPage.getProperties().get("image");
