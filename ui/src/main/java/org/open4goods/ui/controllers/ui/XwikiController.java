@@ -35,6 +35,8 @@ public class XwikiController extends AbstractController  {
 	private static final String WEBPAGE_CLASS_WIDTH = "width";
 
 	private  XwikiFacadeService xwikiService;
+	private  UiService uiService;
+	
 
 	private String[] frags;	
 
@@ -42,25 +44,27 @@ public class XwikiController extends AbstractController  {
 		super();
 	}
 
-	public XwikiController(	 XwikiFacadeService xwikiService, 	 String wikiPage) {
+	public XwikiController(	 XwikiFacadeService xwikiService, 	UiService uiService,  String wikiPage) {
 		super();
 //		this.config = config;
 		this.xwikiService = xwikiService;
+		this.uiService = uiService;
 		this.frags =  wikiPage.split(":|/");
 	}
 	
 	@Override
 	protected ModelAndView handleRequestInternal(HttpServletRequest request, HttpServletResponse response) throws Exception {
 	    FullPage fullPage = xwikiService.getFullPage(frags);
-	    
-	    ModelAndView mv = new ModelAndView("xwiki-"+ fullPage.getProp("layout"));
-	    
+
+	    ModelAndView mv = uiService.defaultModelAndView("xwiki-"+ fullPage.getProp("layout"), request);
+
 	    mv.addObject(WEBPAGE_CLASS_META_TITLE,fullPage.getProp(WEBPAGE_CLASS_META_TITLE));
 		mv.addObject(WEBPAGE_CLASS_META_DESCRIPTION,fullPage.getProp(WEBPAGE_CLASS_META_DESCRIPTION));
 		mv.addObject(WEBPAGE_CLASS_PAGE_TITLE,fullPage.getProp(WEBPAGE_CLASS_PAGE_TITLE));
 		mv.addObject(WEBPAGE_CLASS_HTML,getHtml(fullPage));
 		mv.addObject(WEBPAGE_CLASS_WIDTH,fullPage.getProp(WEBPAGE_CLASS_WIDTH));
-		
+				
+		mv.addObject("editLink",xwikiService.getPathHelper().getEditpath(frags));
 		mv.addObject("userLocale", request.getLocale());
 		// TODO(i18n,p3, 0,25)
 		mv.addObject("siteLanguage", "fr");
@@ -68,8 +72,6 @@ public class XwikiController extends AbstractController  {
 		mv.addObject("siteLocale", sl);				
 	    return mv;
 	}
-	
-
 	
 	/**
 	 * TODO : So dirty, so fragile.... In a hurry of xwiki jakarta migration for client side rendering
@@ -81,8 +83,6 @@ public class XwikiController extends AbstractController  {
 		String ret = xwikiService.getxWikiHtmlService().getHtmlClassWebPage(fullPage.getWikiPage().getId());
 		return ret;
 	}
-
-
 
 	//////////////////////////////////////////////////////////////
 	// Mappings

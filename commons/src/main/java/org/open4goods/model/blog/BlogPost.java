@@ -11,6 +11,7 @@ public class BlogPost {
 	private String title;
 	private String author;
 	private String summary;
+	private String editLink;
 	
 	private String body;
 	private String created;
@@ -102,6 +103,12 @@ public class BlogPost {
 	}
 	public void setCreatedMs(Long createdMs) {
 		this.createdMs = createdMs;
+	}
+	public String getEditLink() {
+		return editLink;
+	}
+	public void setEditLink(String editLink) {
+		this.editLink = editLink;
 	}
 
 

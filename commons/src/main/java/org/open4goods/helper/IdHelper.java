@@ -143,11 +143,11 @@ public class IdHelper {
 	}
 
 	public static String azCharAndDigits(final String input) {
-		return input.replaceAll("[^a-zA-Z0-9]", "");
+		return StringUtils.stripAccents(input).replaceAll("[^a-zA-Z0-9]", "");
 	}
 	
 	public static String azCharAndDigits(final String input, String replacement) {
-		return input.replaceAll("[^a-zA-Z0-9]", replacement);
+		return StringUtils.stripAccents(input).replaceAll("[^a-zA-Z0-9]", replacement);
 	}
 	
 	public static String azCharAndDigitsPointsDash(String input) {

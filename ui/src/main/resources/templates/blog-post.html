@@ -38,6 +38,8 @@
 
         <!-- Hero -->
         <section class="section-header pb-5 pb-sm-7 bg-primary text-white">
+        	
+
             <div class="container">
                 <div class="row justify-content-center">
                     <div class="col-12 col-lg-10 text-center">
@@ -50,12 +52,24 @@
                         <div class="post-meta">                         	
                            le <span class="post-date me-3" th:text="${post.created}"></span>, par <span class="fw-bold me-3" th:text="${post.author}"></span>
                         </div>
+                        
                     </div>
                 </div>
             </div>
         </section>
         <div class="section section-sm bg-white pt-5 pt-lg-6 text-black">
+        
+
+        
+        
             <article class="container">
+
+	           	<div th:if="${editor}">
+						<div class=" alert-danger text-center">
+							<b><a th:href="${post.editLink}" target="_blank"> ✎ EDITER</a></b>
+						</div>
+				</div>
+				            
                 <div class="row justify-content-center">
                     <div th:utext="${post.body}" class="col-12 col-lg-8"></div>
                 </div>
