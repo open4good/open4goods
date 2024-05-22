@@ -70,6 +70,17 @@ public class BlogService {
 		updateBlogPosts();
 	}
 	
+
+	/**
+	 * Return blog posts for a given tag
+	 * @param vertical
+	 * @return
+	 */
+	public List<BlogPost> getPosts(String vertical) {
+		return posts.stream().filter(e->e.getCategory().contains(vertical)).toList();
+	}
+	
+	
 	// TODO : Cacheable, or better @scheduled
 	public void updateBlogPosts() {
 		logger.info("Getting blog posts");
@@ -126,6 +137,10 @@ public class BlogService {
 				if (-1 != pos) {
 					html = html.substring(0,pos);
 				}
+				
+				
+				//TODO : Markup should be mutualized with BlogController / downloadAttachment mapping
+				html = html.replace("\"/bin/download/Blog","\"/blog");
 				
 				
 				post.setBody(html);
@@ -249,6 +264,7 @@ public class BlogService {
 	public void setPosts(List<BlogPost> posts) {
 		this.posts = posts;
 	}
+
 
 
 	
