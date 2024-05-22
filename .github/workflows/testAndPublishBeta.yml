@@ -36,7 +36,7 @@ jobs:
           repository: 'open4good/xwiki-spring-boot-starter'
    
       - name: Build and test xwiki-springboot-starter
-        working-directory: ./spring-boot-starter-xwiki        
+        working-directory: ./xwiki-spring-boot-starter        
         run: mvn --batch-mode --update-snapshots install   
    
    
