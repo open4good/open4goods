@@ -6,6 +6,7 @@ import org.open4goods.services.VerticalsConfigService;
 import org.open4goods.ui.services.OpenDataService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.servlet.ModelAndView;
@@ -13,13 +14,13 @@ import org.springframework.web.servlet.ModelAndView;
 import jakarta.servlet.http.HttpServletRequest;
 
 @Controller
-public class HomeController extends AbstractUiController {
+public class HomeController  {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(HomeController.class);
 
 	private final ProductRepository aggregatedDataRepository;
 	private final DataSourceConfigService datasourceConfigService;
-
+	private @Autowired UiService uiService;
 	private final VerticalsConfigService verticalConfigService;
 	private OpenDataService openDataService;
 
@@ -34,7 +35,7 @@ public class HomeController extends AbstractUiController {
 	public ModelAndView index(final HttpServletRequest request) {
 
 		// TODO : Remove this test page
-		ModelAndView model = defaultModelAndView("index", request);
+		ModelAndView model = uiService.defaultModelAndView("index", request);
 
 		model.addObject("totalItems", aggregatedDataRepository.countMainIndex());
 

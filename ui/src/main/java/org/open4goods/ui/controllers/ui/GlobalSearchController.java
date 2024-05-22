@@ -25,12 +25,12 @@ import jakarta.servlet.http.HttpServletResponse;
 
 @Controller
 //	TODO(i18n, P2, 0.25) : I18n the pathes
-public class GlobalSearchController extends AbstractUiController {
+public class GlobalSearchController  {
 
 
 	private final SearchService searchService;
 	private final UiConfig config;
-
+	private @Autowired UiService uiService;
 	public GlobalSearchController(SearchService searchService, UiConfig config) {
 		this.searchService = searchService;
 		this.config = config;
@@ -51,7 +51,7 @@ public class GlobalSearchController extends AbstractUiController {
 	@Cacheable(cacheNames = CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME)
 	public ModelAndView searchGet(final HttpServletRequest request, @RequestParam String q) {
 
-			ModelAndView model = defaultModelAndView("search", request);
+			ModelAndView model = uiService.defaultModelAndView("search", request);
 
 		//		Set<String> categroies = Sets.newHashSet("JOUR>AUTRES MEUBLES");
 

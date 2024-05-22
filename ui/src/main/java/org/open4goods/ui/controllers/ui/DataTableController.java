@@ -27,7 +27,7 @@ import jakarta.servlet.http.HttpServletResponse;
 public class DataTableController {
 
 	private final org.open4goods.services.SearchService searchService;
-
+	private @Autowired UiService uiService;
 	private final VerticalsConfigService verticalService;
 
 	public DataTableController(SearchService searchService, VerticalsConfigService verticalService) {
