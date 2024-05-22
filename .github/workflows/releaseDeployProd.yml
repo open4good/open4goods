@@ -25,18 +25,16 @@ jobs:
     name: prod-release-deploy
     runs-on: ubuntu-latest
     steps:
-    
       ############################################
       # Install Java
-      ###########################################    
-            
+      ###########################################      
       - name: Set up JDK 21
         uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
           java-version: '21'
-          cache: 'maven'    
-    
+          cache: 'maven'
+
       ############################################
       # Setting up the xwiki repo (in a maven centraml publication compatible way)
       ###########################################   
@@ -59,11 +57,13 @@ jobs:
         run: mvn --batch-mode --update-snapshots install   
    
    
-       
+      
+    
+    
+    
+    
       - uses: actions/checkout@v4
       
-
-
       ############################################
       # Build jars + maven site
       ###########################################   
@@ -218,7 +218,7 @@ jobs:
           
       - name: Upload pen4goods custom site
         uses: actions/upload-pages-artifact@v3
-        with:	
+        with:
           path: './src/main/site/'
 
       - name: Deploy to GitHub Pages
