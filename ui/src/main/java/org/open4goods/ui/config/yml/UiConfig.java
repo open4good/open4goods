@@ -11,11 +11,12 @@ import org.open4goods.config.BrandConfiguration;
 import org.open4goods.config.yml.BlogConfiguration;
 import org.open4goods.config.yml.DevModeConfiguration;
 import org.open4goods.config.yml.FeedbackConfiguration;
-import org.open4goods.config.yml.XwikiConfiguration;
 import org.open4goods.config.yml.ui.ApiConfig;
 import org.open4goods.config.yml.ui.OpenSearchConfig;
 import org.open4goods.config.yml.ui.SiteNaming;
 import org.open4goods.config.yml.ui.WebConfig;
+import org.open4goods.model.Localisable;
+import org.open4goods.xwiki.config.XWikiServiceProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -108,8 +109,14 @@ public class UiConfig {
 	/**
 	 * The Xwiki instance configuration
 	 */
-	private XwikiConfiguration wikiConfig = new XwikiConfiguration();
+	private XWikiServiceProperties wikiConfig = new XWikiServiceProperties();
 
+	/**
+	 * The localised mapping of exposed spaces in the wiki. Eg : "/mentions-legales" -> "/", "legalspace" -> "/legals""     
+	 */
+	private Map<String,Localisable> wikiPagesMapping = new HashMap<>();
+	
+	
 
 	private BlogConfiguration blogConfig = new BlogConfiguration();
 	
@@ -284,13 +291,17 @@ public class UiConfig {
 		this.email = email;
 	}
 
-	public XwikiConfiguration getWikiConfig() {
+
+
+	public XWikiServiceProperties getWikiConfig() {
 		return wikiConfig;
 	}
 
-	public void setWikiConfig(XwikiConfiguration wikiConfig) {
+
+	public void setWikiConfig(XWikiServiceProperties wikiConfig) {
 		this.wikiConfig = wikiConfig;
 	}
+
 
 	public String getResourceTemplateFolder() {
 		return resourceTemplateFolder;
@@ -361,6 +372,7 @@ public class UiConfig {
 	}
 
 
+
 	public String getCaptchaSecret() {
 		return captchaSecret;
 	}
@@ -382,6 +394,16 @@ public class UiConfig {
 
 	
 
+	public Map<String, Localisable> getWikiPagesMapping() {
+		return wikiPagesMapping;
+	}
+
+
+
+
+	public void setWikiPagesMapping(Map<String, Localisable> wikiPagesMapping) {
+		this.wikiPagesMapping = wikiPagesMapping;
+	}
 
 
 

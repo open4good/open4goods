@@ -20,10 +20,10 @@ import jakarta.servlet.http.HttpServletRequest;
  * @author gof
  *
  */
-public class CommonsPagesController extends AbstractUiController {
+public class CommonsPagesController  {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CommonsPagesController.class);
-
+	private @Autowired UiService uiService;
 	// The siteConfig
 	private final UiConfig config;
 
@@ -47,25 +47,25 @@ public class CommonsPagesController extends AbstractUiController {
 
 	@GetMapping(path= "/robots.txt", produces = MediaType.TEXT_PLAIN_VALUE)
 	public ModelAndView robots(final HttpServletRequest request) {
-		final ModelAndView ret = defaultModelAndView("robots", request);
+		final ModelAndView ret = uiService.defaultModelAndView("robots", request);
 		return ret;
 	}
 
 	@GetMapping(path = "/opensearch.xml", produces = MediaType.APPLICATION_XML_VALUE)
 	public ModelAndView opensearch(final HttpServletRequest request) {
-		return defaultModelAndView("opensearch", request).addObject("opensearch", config.getOpenSearchConfig());
+		return uiService.defaultModelAndView("opensearch", request).addObject("opensearch", config.getOpenSearchConfig());
 	}
 
 	@GetMapping("/compensation-ecologique")
 	public ModelAndView compensation(final HttpServletRequest request) {
-		ModelAndView ret = defaultModelAndView(("compensation"), request);
+		ModelAndView ret = uiService.defaultModelAndView(("compensation"), request);
 		ret.addObject("page","compensation écologique");
 		return ret;
 	}
 
 	@GetMapping("/ecoscore")
 	public ModelAndView api(final HttpServletRequest request) {
-		ModelAndView ret = defaultModelAndView(("ecoscore"), request);
+		ModelAndView ret = uiService.defaultModelAndView(("ecoscore"), request);
 		ret.addObject("page","évaluation environnementale");
 		return ret;
 	}
