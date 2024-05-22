@@ -6,8 +6,10 @@ import java.util.Set;
 
 import org.open4goods.exceptions.InvalidParameterException;
 import org.open4goods.services.FeedbackService;
+import org.open4goods.ui.config.yml.UiConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -19,10 +21,12 @@ import org.springframework.web.servlet.ModelAndView;
 import jakarta.servlet.http.HttpServletRequest;
 
 @Controller
-public class FeedbackController extends AbstractUiController {
+public class FeedbackController {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(FeedbackController.class);
-
+	private @Autowired UiService uiService;
+	private @Autowired UiConfig config;
+	
 	private FeedbackService feedbackService;
 
 	public FeedbackController(FeedbackService feedbackService) {
@@ -32,7 +36,7 @@ public class FeedbackController extends AbstractUiController {
 	@GetMapping("/feedback/issue")
 	public ModelAndView issue(final HttpServletRequest request,  @RequestParam(required = false, name = "url") String url) {
 		
-		ModelAndView model = defaultModelAndView("feedback-issue", request);
+		ModelAndView model = uiService.defaultModelAndView("feedback-issue", request);
 
 		// Adding authenticated user
 		if (null != model.getModel().get("user")) {
@@ -46,7 +50,7 @@ public class FeedbackController extends AbstractUiController {
 	@GetMapping("/feedback/idea")
 	public ModelAndView idea(final HttpServletRequest request,  @RequestParam(required = false, name = "url") String url) {
 		
-		ModelAndView model = defaultModelAndView("feedback-idea", request);
+		ModelAndView model = uiService.defaultModelAndView("feedback-idea", request);
 
 		// Adding authenticated user
 		if (null != model.getModel().get("user")) {
@@ -64,12 +68,12 @@ public class FeedbackController extends AbstractUiController {
 		if (formData == null) {
 			LOGGER.warn("No form data");
 			
-			return defaultModelAndView("feedback-error", request).addObject("msg","No form data");
+			return uiService.defaultModelAndView("feedback-error", request).addObject("msg","No form data");
 		}
 		
 		if (formData.getFirst("captcha") == null || !formData.getFirst("captcha").equals("1")) {
 			LOGGER.warn("Captcha is not valid");
-			return defaultModelAndView("feedback-error", request).addObject("msg","Invalid captcha");
+			return uiService.defaultModelAndView("feedback-error", request).addObject("msg","Invalid captcha");
 		}
 
 
@@ -96,13 +100,13 @@ public class FeedbackController extends AbstractUiController {
 		
 		} catch (IOException e) {
 			LOGGER.error("Error while creating issue", e);
-			return defaultModelAndView("feedback-error", request).addObject("msg","Internal exception : "+e.getMessage());
+			return uiService.defaultModelAndView("feedback-error", request).addObject("msg","Internal exception : "+e.getMessage());
 		} catch (InvalidParameterException e) {
 			LOGGER.error("Error while creating issue, invalid parameters", e);
-			return defaultModelAndView("feedback-error", request).addObject("msg","Invalid parameter exception : "+e.getMessage());
+			return uiService.defaultModelAndView("feedback-error", request).addObject("msg","Invalid parameter exception : "+e.getMessage());
 		}
 		
-		return defaultModelAndView("feedback-success", request).addObject("backUrl",formData.getFirst("url"));
+		return uiService.defaultModelAndView("feedback-success", request).addObject("backUrl",formData.getFirst("url"));
 	}
 
 

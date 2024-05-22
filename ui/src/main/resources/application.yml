@@ -52,6 +52,11 @@ langchain4j:
       log-requests: false
       log-responses: false
 
+wikiPagesMapping:
+  "[webpages/default/test/WebHome]":
+    default: "test"
+    
+    
 
 feedbackConfig:      
   githubConfig:

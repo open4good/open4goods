@@ -2,13 +2,12 @@ package org.open4goods.ui.controllers.ui;
 
 import java.io.IOException;
 import java.util.Locale;
-import java.util.Random;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.open4goods.services.DataSourceConfigService;
-import org.open4goods.services.XwikiService;
 import org.open4goods.ui.config.yml.UiConfig;
+import org.open4goods.xwiki.services.XWikiHtmlService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,17 +26,15 @@ import jakarta.annotation.PostConstruct;
 import jakarta.servlet.http.HttpServletRequest;
 
 
-public class AbstractUiController {
+public class UiService {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(AbstractUiController.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(UiService.class);
 
 	private @Autowired Environment env;
 	protected @Autowired UiConfig config;
-	private @Autowired XwikiService xwikiService;
+	private @Autowired XWikiHtmlService xwikiService;
 
-	
-
-	
+		
 	// Used to load Datasource configurations from classpath
 	private static final ClassLoader cl = DataSourceConfigService.class.getClassLoader();
 	private static final ResourcePatternResolver resolver = new PathMatchingResourcePatternResolver(cl);
@@ -67,7 +64,7 @@ public class AbstractUiController {
 	 * @param string
 	 * @return
 	 */
-	protected ModelAndView defaultModelAndView(final String tpl, final HttpServletRequest request) {
+	public ModelAndView defaultModelAndView(final String tpl, final HttpServletRequest request) {
 		
 		String template;
 		

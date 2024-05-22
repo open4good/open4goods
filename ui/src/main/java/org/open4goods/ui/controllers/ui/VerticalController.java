@@ -9,45 +9,37 @@ import org.open4goods.model.dto.VerticalFilterTerm;
 import org.open4goods.model.dto.VerticalSearchRequest;
 import org.open4goods.model.dto.VerticalSearchResponse;
 import org.open4goods.services.SearchService;
-import org.open4goods.services.SerialisationService;
 import org.open4goods.services.VerticalsConfigService;
-import org.open4goods.ui.config.yml.UiConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.servlet.mvc.AbstractController;
 
 import com.ibm.icu.util.ULocale;
 
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
-@Controller
 /**
  * This controller maps the verticals pages
  *
  * @author gof
  *
  */
-public class VerticalController extends AbstractUiController {
+public class VerticalController  extends AbstractController {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(VerticalController.class);
-
-	// The siteConfig
-	private final UiConfig config;
-
+	private  final UiService uiService;
 	private final VerticalsConfigService verticalService;
-
 	private final SearchService searchService;
+	private String vertical;
 
-
-	private final SerialisationService serialisationService;
-
-	public VerticalController(UiConfig config, VerticalsConfigService verticalService, SearchService searchService, SerialisationService serialisationService) {
-		this.config = config;
+	public VerticalController( VerticalsConfigService verticalService, SearchService searchService, UiService uiService, String vertical) {
 		this.verticalService = verticalService;
 		this.searchService = searchService;
-		this.serialisationService = serialisationService;
+		this.uiService = uiService;
+		this.vertical = vertical;
 	}
 
 	//////////////////////////////////////////////////////////////
@@ -55,12 +47,13 @@ public class VerticalController extends AbstractUiController {
 	//////////////////////////////////////////////////////////////
 
 
+	@Override
+	protected ModelAndView handleRequestInternal(HttpServletRequest request, HttpServletResponse response)
+			throws Exception {
+		ModelAndView ret = uiService.defaultModelAndView(("vertical-home"), request);
 
-	public ModelAndView home(String vertical, final HttpServletRequest request) {
-		ModelAndView ret = defaultModelAndView(("vertical-home"), request);
 
-
-		VerticalConfig config = verticalService.getVerticalForPath(vertical);
+		VerticalConfig config = verticalService.getConfigById(this.vertical);
 
 		// TODO : strategy of injection of products for nativ SEO
 
@@ -73,14 +66,10 @@ public class VerticalController extends AbstractUiController {
 		// TODO : do not fetch any in nativ html
 		products.setData(new ArrayList<>());
 		
-		
-		
 		Map<String,String> countryNames = new HashMap<>();
 		for (VerticalFilterTerm country : products.getCountries()) {
 			countryNames.put(country.getText(), new ULocale("",country.getText()).getDisplayCountry( new ULocale(request.getLocale().toString())));
 		}
-
-
 
 		ret.addObject("countryNames", countryNames);
 		ret.addObject("products", products);
@@ -88,11 +77,9 @@ public class VerticalController extends AbstractUiController {
 		ret.addObject("config",config);
 
 		ret.addObject("filters",config.verticalFilters());
-		ret.addObject("vertical",vertical);
+		ret.addObject("vertical",this.vertical);
 		// TODO: i18n
 		ret.addObject("verticalPath",verticalService.getPathForVerticalLanguage("fr",config));
-
-
 
 		return ret;
 	}

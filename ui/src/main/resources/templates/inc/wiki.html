@@ -1,9 +1,9 @@
 <th:block th:with="res = ${wiki.html(path)}">
-	<th:block th:utext="${res.html}"></th:block>	
+	<th:block th:utext="${res}"></th:block>	
 
 	<div th:if="${editor}">
-		<div class="alert alert-danger text-center">
-			<b><a th:href="${res.editLink}" target="_blank">!!! EDITER SUR LE WIKI !!!</a></b>
+		<div style="position: absolute; top: 0px; right: 0px;" class=" alert-danger text-center">
+			<b><a th:href="${wiki.getEditPageUrl(path)}" target="_blank"> ✎ EDITER</a></b>
 		</div>
 	</div>
 </th:block>
