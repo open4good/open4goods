@@ -26,16 +26,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
 
-
-
-     ############################################
-      # Setting up the xwiki repo (in a maven centraml publication compatible way)
-      ###########################################   
-      - uses: s4u/maven-settings-action@v3.0.0
-        with:
-          repositories: '[{"id":"xwiki-releases","name":"xwiki-releases","url":"https://maven.xwiki.org/releases/","snapshots":{"enabled":false}}]'
-    
-
       ############################################
       # Tweak until maven central publication
       ############################################
@@ -46,7 +36,23 @@ jobs:
           repository: 'open4good/xwiki-spring-boot-starter'
    
    
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+          cache: 'maven'
    
+
+
+
+     ############################################
+      # Setting up the xwiki repo (in a maven centraml publication compatible way)
+      ###########################################   
+      - uses: s4u/maven-settings-action@v3.0.0
+        with:
+          repositories: '[{"id":"xwiki-releases","name":"xwiki-releases","url":"https://maven.xwiki.org/releases/","snapshots":{"enabled":false}}]'
+    
    
    
       - name: Build and test xwiki-springboot-starter
@@ -70,12 +76,7 @@ jobs:
       # Install Java
       ###########################################    
             
-      - name: Set up JDK 21
-        uses: actions/setup-java@v4
-        with:
-          distribution: 'temurin'
-          java-version: '21'
-          cache: 'maven'
+
 
       ############################################
       # Build jars + maven site
