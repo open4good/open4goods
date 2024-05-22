@@ -31,7 +31,14 @@
         
       
 		<section class="section section-lg pt-0">
-            <div class="mt-n7 mt-lg-n12 z-2" th:classappend="${width}">
+            <div class="container mt-n7 mt-lg-n12 z-2" th:classappend="${width}">
+
+	           	<div th:if="${editor}">
+						<div class=" alert-danger text-center">
+							<b><a th:href="${editLink}" target="_blank"> ✎ EDITER</a></b>
+						</div>
+				</div>
+				            
                 <div class="row justify-content-center">
                     <div class="col">
                         <div class="card border-gray-300 p-4 p-md-5">

@@ -35,8 +35,14 @@
                 </div>
             </div>
         </section>
-        <div class="section section-sm bg-white pt-5 pt-lg-6 text-black">
+        <div class="section section-sm bg-white pt-5 pt-lg-6 text-black">        
             <article class="container" th:classappend="${width}">
+	           	<div th:if="${editor}">
+						<div class=" alert-danger text-center">
+							<b><a th:href="${editLink}" target="_blank"> ✎ EDITER</a></b>
+						</div>
+				</div>
+				            
                 <div th:utext="${html}" class="row justify-content-center"></div>
                 
             </article>

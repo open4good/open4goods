@@ -101,6 +101,7 @@ public class BlogService {
 			postsByUrl.put(post.getUrl(), post);
 						
 			post.setTitle(title);
+			post.setEditLink(xwikiFacadeService.getPathHelper().getEditpath(page.getId().replace("xwiki:", "").split("\\.")));
 			
 			if (!StringUtils.isEmpty(image)) {
 				String fullImage = getBlogImageUrl( URLEncoder.encode(page.getName(), Charset.defaultCharset()), URLEncoder.encode(image, Charset.defaultCharset()));

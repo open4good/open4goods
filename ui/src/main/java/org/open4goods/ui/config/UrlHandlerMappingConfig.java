@@ -49,7 +49,7 @@ public class UrlHandlerMappingConfig {
 				String url = "/" + localizedValue;
 				// TODO : Forward i18n
 				LOGGER.info("Adding wiki page mapping : {}", url);
-				urlMap.put(url, new XwikiController(xwikiService, item.getKey()));
+				urlMap.put(url, new XwikiController(xwikiService, uiService, item.getKey()));
 			}
 		}
 		
