@@ -21,6 +21,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.Ordered;
 import org.springframework.web.servlet.handler.SimpleUrlHandlerMapping;
 
 @Configuration
@@ -52,7 +53,6 @@ public class UrlHandlerMappingConfig {
 				LOGGER.info("Adding wiki page mapping : {}", url);
 				urlMap.put(url, new XwikiController(xwikiService, item.getKey()));
 			}
-			wikiUrlHandlerMapping.setUrlMap(urlMap);
 		}
 		
 		//////////////////////////////////
@@ -65,9 +65,11 @@ public class UrlHandlerMappingConfig {
 				LOGGER.info("Adding vertical page mapping : {}", url);				
 				urlMap.put(url, new VerticalController(verticalService, searchService, uiService, item.getId())  );
 			}
-			wikiUrlHandlerMapping.setUrlMap(urlMap);
 		}
 
+		wikiUrlHandlerMapping.setUrlMap(urlMap);
+		wikiUrlHandlerMapping.setOrder(Ordered.HIGHEST_PRECEDENCE);
+		
 		return wikiUrlHandlerMapping;
 	}
 
