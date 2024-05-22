@@ -24,6 +24,8 @@ jobs:
           java-version: '21'
           cache: 'maven'
 
+
+#<TWEAK> : To localy install xwiki-springboot-starter until maven publication
       ############################################
       # Setting up the xwiki repo (in a maven centraml publication compatible way)
       ###########################################   
@@ -45,7 +47,7 @@ jobs:
         working-directory: ./xwiki-spring-boot-starter        
         run: mvn --batch-mode --update-snapshots install   
    
-   
+#</TWEAK> : To localy install xwiki-springboot-starter until maven publication   
    
    
    
