@@ -9,8 +9,10 @@ import org.springframework.web.servlet.ModelAndView;
 import jakarta.servlet.http.HttpServletRequest;
 
 @Controller
-public class TeamController extends AbstractUiController {
+public class TeamController  {
 
+	private @Autowired UiService uiService;
+	
 	final UiConfig uiConfig;
 
 	public TeamController(UiConfig uiConfig) {
@@ -20,7 +22,7 @@ public class TeamController extends AbstractUiController {
 	@GetMapping("/equipe")
 	public ModelAndView index(final HttpServletRequest request) {
 
-		ModelAndView model = defaultModelAndView("team", request);
+		ModelAndView model = uiService.defaultModelAndView("team", request);
 		return model;
 	}
 

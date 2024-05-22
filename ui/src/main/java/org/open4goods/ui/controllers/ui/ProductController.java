@@ -50,7 +50,7 @@ import jakarta.servlet.http.HttpServletResponse;
  * @author gof
  *
  */
-public class ProductController extends AbstractUiController {
+public class ProductController  {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(ProductController.class);
 
@@ -63,7 +63,7 @@ public class ProductController extends AbstractUiController {
 	private @Autowired VerticalsConfigService verticalConfigService;
 
 	private @Autowired BrandService brandService;
-
+	private @Autowired UiService uiService;
 	private @Autowired BarcodeValidationService barcodeValidationService;
 
 	/**
@@ -139,7 +139,7 @@ public class ProductController extends AbstractUiController {
 		ModelAndView mv = null;
 
 
-		mv = defaultModelAndView("webextension/product-single", request);
+		mv = uiService.defaultModelAndView("webextension/product-single", request);
 
 
 		// Checking through GTIN
@@ -242,7 +242,7 @@ public class ProductController extends AbstractUiController {
 		ModelAndView mv = null;
 
 
-		mv = defaultModelAndView("product", request);
+		mv = uiService.defaultModelAndView("product", request);
 
 
 

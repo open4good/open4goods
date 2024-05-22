@@ -6,9 +6,9 @@
 	<th:block th:insert="~{inc/header-meta.html}"></th:block>
     
 	<!-- Primary Meta Tags -->
-	<title th:text="${content.metaTitle}"></title>
-	<meta th:if="${content.metaDescription}" name="description" th:content="${content.metaDescription}">	
-	<meta th:if="${content.metaKeyword}" name="keywords" th:content="${content.metaKeyword}">
+	<title th:text="${metaTitle}"></title>
+	<meta th:if="${metaDescription}" name="description" th:content="${metaDescription}">	
+	<meta th:if="${metaKeyword}" name="keywords" th:content="${metaKeyword}">
 	
 </head>
 
@@ -26,18 +26,18 @@
     <main>	
 		
          <!-- Hero -->
-        <section class="section-header pb-2 pb-sm-2 bg-primary text-white">
+        <section th:if="${pageTitle}" class="section-header pb-2 pb-sm-2 bg-primary text-white">
             <div class="container">
                 <div class="row justify-content-center">
                     <div class="col-12 col-lg-10 text-center">
-                        <h1 th:text="${content.pageTitle}" class="display-3 mb-4 px-lg-5"></h1>
+                        <h1 th:text="${pageTitle}" class="display-3 mb-4 px-lg-5"></h1>
                     </div>
                 </div>
             </div>
         </section>
         <div class="section section-sm bg-white pt-5 pt-lg-6 text-black">
-            <article th:class="${content.width}">
-                <div th:utext="${content.html}" class="row justify-content-center"></div>
+            <article class="container" th:classappend="${width}">
+                <div th:utext="${html}" class="row justify-content-center"></div>
                 
             </article>
         </div>

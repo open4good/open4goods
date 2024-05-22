@@ -6,10 +6,8 @@
 	<th:block th:insert="~{inc/header-meta.html}"></th:block>
     
 	<!-- Primary Meta Tags -->
-	<title th:text="${content.metaTitle}"></title>
-	<meta th:if="${content.metaDescription}" name="description" th:content="${content.metaDescription}">	
-	<meta th:if="${content.metaKeyword}" name="keywords" th:content="${content.metaKeyword}">
-	
+	<title th:text="${metaTitle}"></title>
+	<meta th:if="${metaDescription}" name="description" th:content="${metaDescription}">	
 </head>
 
 <body>
@@ -21,11 +19,11 @@
 	
     <main>	
 		
-      <section class="section-header pb-9 pb-lg-12">
-            <div th:class="${content.width}">
+      <section th:if="${pageTitle}" class="section-header pb-9 pb-lg-12">
+            <div class="container" th:classappend="${width}">
                 <div class="row justify-content-center">
                     <div class="col-12 col-md-8 text-center">
-                        <p class="display-2" th:utext="${content.pageTitle}"></p>                       
+                        <p class="display-2" th:utext="${pageTitle}"></p>                       
                     </div>
                 </div>
             </div>
@@ -33,12 +31,12 @@
         
       
 		<section class="section section-lg pt-0">
-            <div class="mt-n7 mt-lg-n12 z-2" th:classappend="${content.width}">
+            <div class="mt-n7 mt-lg-n12 z-2" th:classappend="${width}">
                 <div class="row justify-content-center">
                     <div class="col">
                         <div class="card border-gray-300 p-4 p-md-5">
                     
-                          <th:block th:utext="${content.html}"></th:block>
+                          <th:block th:utext="${html}"></th:block>
                           
                           
                         </div>
@@ -46,16 +44,6 @@
                 </div>
             </div>
         </section>
-        
-        
-              
-      
-      
-      
-      
-       
-       
-    
     </main>
 
 	<!--/* Footer */-->

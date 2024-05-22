@@ -35,7 +35,6 @@ import org.open4goods.services.ResourceService;
 import org.open4goods.services.VerticalsConfigService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.scheduling.annotation.Scheduled;
 
 import dev.brachtendorf.jimagehash.hash.Hash;
 import dev.brachtendorf.jimagehash.hashAlgorithms.HashingAlgorithm;
@@ -203,12 +202,11 @@ public class ResourceCompletionService  extends AbstractCompletionService{
 				// If an evicted resource, systematicaly delete file.
 				File evicted = resourceService.getCacheFile(r);
 				logger.info("Deleting evicted resource :{} -> {}",r, evicted);
-// TODO : uncomment to effectivly rm files				
-//				if (!evicted.delete()) {
-//					logger.error("Could not delete evicted resource : {}",resourceService.getCacheFile(r));
-//				}
-			
-//				data.getResources().remove(r);
+				// TODO : uncomment to effectivly rm files				
+				//				if (!evicted.delete()) {
+				//					logger.error("Could not delete evicted resource : {}",resourceService.getCacheFile(r));
+				//				}							
+				//				data.getResources().remove(r);
 			}
 			
 		}

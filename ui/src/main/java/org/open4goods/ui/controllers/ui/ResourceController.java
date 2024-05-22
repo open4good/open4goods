@@ -48,7 +48,7 @@ import jakarta.servlet.http.HttpServletResponse;
  * @author gof
  *
  */
-public class ResourceController extends AbstractUiController {
+public class ResourceController  {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(ResourceController.class);
 
@@ -65,7 +65,7 @@ public class ResourceController extends AbstractUiController {
 	private final BrandService brandService;
 	private final ResourceService resourceService;
 	
-
+	private @Autowired UiService uiService;
 	public ResourceController(ImageService imageService, ProductRepository esDao, GtinService gtinService, UiConfig config, DataSourceConfigService dsConfigService,  ResourceService resourceService, VerticalsConfigService verticalConfigService, BrandService brandService) {
 		this.imageService = imageService;
 		this.esDao = esDao;

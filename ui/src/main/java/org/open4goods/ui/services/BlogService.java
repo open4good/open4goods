@@ -1,21 +1,28 @@
 package org.open4goods.ui.services;
 
 
+import java.net.URLEncoder;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.text.WordUtils;
 import org.open4goods.config.yml.BlogConfiguration;
 import org.open4goods.helper.IdHelper;
 import org.open4goods.model.Localisable;
 import org.open4goods.model.blog.BlogPost;
-import org.open4goods.model.dto.WikiPage;
-import org.open4goods.services.XwikiService;
+import org.open4goods.xwiki.model.FullPage;
+import org.open4goods.xwiki.services.XwikiFacadeService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.xwiki.rest.model.jaxb.PageSummary;
+import org.xwiki.rest.model.jaxb.Pages;
 
 import com.rometools.rome.feed.synd.SyndCategory;
 import com.rometools.rome.feed.synd.SyndCategoryImpl;
@@ -33,58 +40,104 @@ import com.rometools.rome.io.SyndFeedOutput;
  * > Authentication, through the registered users/password on the wiki
  * > RBAC, through roles
  * > Content retrieving, through the REST API
- * TODO : This class is a mess
+ * TODO : Localisation
  * @author Goulven.Furet
  */
 public class BlogService {
 
+	private static final String XWIKI_BLOGPOST_START_MARKUP = "<div class=\"entry-content\">";
+	private static final String XWIKI_BLOGPOST_STOP_MARKUP = "<div class=\"entry-footer\">";
+	
 	private static final Logger logger = LoggerFactory.getLogger(BlogService.class);
 
 	
 	private BlogConfiguration config;
-	private XwikiService xwikiService;
-
-	private Map<String, BlogPost> postsByUrl = new HashMap<>();
-
-
+	private XwikiFacadeService xwikiFacadeService;
+	private Map<String, BlogPost> postsByUrl = new ConcurrentHashMap<>();
+	private List<BlogPost> posts = new ArrayList<>();
 	private Localisable baseUrl;
+
 	
 	
-	public BlogService(XwikiService wikiService,  BlogConfiguration config, Localisable localisable) {
+	public BlogService(XwikiFacadeService xwikiFacadeService,  BlogConfiguration config, Localisable localisable) {
 		this.config = config;
-		this.xwikiService = wikiService;
+		this.xwikiFacadeService = xwikiFacadeService;
 		this.baseUrl = localisable;
 	}
+		
+	@Scheduled(initialDelay = 2000, fixedDelay = 1000 * 3600*2)
+	public void refreshPosts() {
+		updateBlogPosts();
+	}
 	
-	// TODO : Cacheable
-	public Map<String, BlogPost> getBlogPosts() {
-	
+	// TODO : Cacheable, or better @scheduled
+	public void updateBlogPosts() {
 		logger.info("Getting blog posts");
-		Map<String, BlogPost> postsByUrl = new HashMap<>();
-		
-		List<WikiPage> pages = xwikiService.getPages("Blog");
-		
-		for (WikiPage page : pages) {
-			WikiPage fullPage = xwikiService.getPage(page.getSpace(), page.getName());
+		Pages pages = xwikiFacadeService.getPages("Blog");
+		List<BlogPost> posts = new ArrayList<>();
+		for (PageSummary page : pages.getPageSummaries()) {		
+			if (page.getFullName().endsWith(".WebHome")) {
+				continue;
+			}
+			FullPage fullPage = xwikiFacadeService.getFullPage(page.getSpace(), page.getName());
 			BlogPost post = new BlogPost();
 			
-			post.setUrl(IdHelper.azCharAndDigits(fullPage.getTitle().toLowerCase().replace(" ", "-")));
-			post.setTitle(fullPage.getTitle());
+			String image = fullPage.getProperties().get("image");
+			
+						
+			String extract = fullPage.getProperties().get("extract");
+//			int hidden = Integer.valueOf(fullPage.getProperties().get("hidden"));
+//			String  publishDate = fullPage.getProperties().get("publishDate");
+//			int published =   Integer.valueOf(fullPage.getProperties().get("published"));
+			String category =  fullPage.getProperties().get("category");
+			String title = fullPage.getProperties().get("title");
+//			String content = fullPage.getProperties().get("content");
+			
+//			List<String> categories = Arrays.asList(category.replace("Blog.", "").split("|"));
+			
+			post.setUrl(getPostUrl(title));
+			posts.add(post);
+			// Maintain the inversed map
+			postsByUrl.put(post.getUrl(), post);
+						
+			post.setTitle(title);
+			
+			if (!StringUtils.isEmpty(image)) {
+				String fullImage = getBlogImageUrl( URLEncoder.encode(page.getName(), Charset.defaultCharset()), URLEncoder.encode(image, Charset.defaultCharset()));
+				post.setImage(fullImage);				
+			}
+			
 			
 			// Substring(7) : Remove "XWiki." from author
-			post.setAuthor(WordUtils.capitalizeFully(fullPage.getAuthor().substring(6)));			
+			post.setAuthor(WordUtils.capitalizeFully(fullPage.getWikiPage().getAuthor().substring(6)));			
 			try {
-				// TODO : Update when xwiki update to jakarta
-//				post.setSummary(xwikiService.renderXWiki20SyntaxAsXHTML(fullPage.getProps().get("summary")));			
-//				post.setBody(xwikiService.renderXWiki20SyntaxAsXHTML(fullPage.getProps().get("content")));
-				post.setSummary(fullPage.getProps().get("summary"));
-				post.setBody(fullPage.getProps().get("content"));
+				post.setSummary(extract);
+				
+				
+				String html = fullPage.getHtmlContent();
+				// Remove the leading xwiki edit markup pages
+				int pos = html.indexOf(XWIKI_BLOGPOST_START_MARKUP);
+				if (-1 != pos) {
+					html = html.substring(pos);
+				}
+				
+				pos = html.indexOf(XWIKI_BLOGPOST_STOP_MARKUP);
+				if (-1 != pos) {
+					html = html.substring(0,pos);
+				}
+				
+				
+				post.setBody(html);
 							
+				// Remove the trailing markup
+				
+				
+				
 			} catch (Exception e) {
 				logger.error("Error while rendering XWiki content", e);
 			}
 			
-			post.setHidden("1".equals(fullPage.getProps().get("hidden")));
+			post.setHidden(fullPage.getWikiPage().isHidden());
 			// Skipping if hidden
 			if (post.getHidden()) {
 				continue;
@@ -95,21 +148,22 @@ public class BlogService {
 				continue;
 			}
 			
-			
-			post.setAttachments(fullPage.getAttachments());
-			post.setCreated(fullPage.getCreated());
-			post.setModified(fullPage.getModified());
+			String date = fullPage.getWikiPage().getCreated().getTime().toLocaleString();
+			// TODO : Proper i18n, 
+			date = date.substring(0,date.indexOf(','));			
+			post.setCreated(date);
+			post.setCreatedMs(fullPage.getWikiPage().getCreated().getTimeInMillis());
+			post.setModified(fullPage.getWikiPage().getModified().toString());
 
-			String cats = fullPage.getProps().get("category");
+			// TODO : Handle attachment
+//			post.setAttachments(fullPage.getAttachments());
 			
-			if (null != cats) {
-				post.setCategory(Arrays.asList(cats.replace("Blog.","").split("\\|")));				
+			if (null != category) {
+				post.setCategory(Arrays.asList(category.replace("Blog.","").split("\\|")));				
 			}
-			
-			post.setImage(getProxyUrl(fullPage.getSpace(), fullPage.getName(), fullPage.getProps().get("image")));
+			// TODO : handle image
+//			post.setImage(getProxyUrl(fullPage.getSpace(), fullPage.getName(), fullPage.getProps().get("image")));
 						
-			postsByUrl.put(post.getUrl(), post);
-			
 			// If we have no summary, truncate the first 100 chars
 			// TODO : Truncation from config
 			if (null != post.getBody() &&  null == post.getSummary() && post.getBody().length() > 100) {
@@ -117,10 +171,18 @@ public class BlogService {
 			}
 			
 		}
+		this.posts.clear();
+		Collections.sort(posts, (o1, o2) -> Long.compare(o2.getCreatedMs(), o1.getCreatedMs()));
+		this.posts.addAll(posts);
 		
+	}
 
-		
-		return postsByUrl;
+	private String getBlogImageUrl( String name, String image) {
+		return "/blog/"+name+"/"+image;
+	}
+
+	private String getPostUrl(String title) {
+		return StringUtils.strip(IdHelper.azCharAndDigits(StringUtils.normalizeSpace(title).toLowerCase(),"-"),"-");
 	}
 
 
@@ -146,7 +208,7 @@ public class BlogService {
 				
 		// TODO : i18n filtering
 		feed.setEntries(new ArrayList<>());
-		for (BlogPost post : getBlogPosts().values()) {
+		for (BlogPost post : postsByUrl.values()) {
 			SyndEntry entry = new SyndEntryImpl();
 			entry.setTitle(post.getTitle());
 			entry.setLink(baseUrl.i18n(lang) + config.getBlogUrl() + post.getUrl());
@@ -170,9 +232,24 @@ public class BlogService {
 		SyndFeedOutput syndFeedOutput = new SyndFeedOutput();
 		return syndFeedOutput.outputString(feed,true);
 	}
-	
-	
-	private String getProxyUrl(String space, String name, String file) {		
-		return "/attachments/" + space + "/" + name + "/" + file;
+
+	public Map<String, BlogPost> getPostsByUrl() {
+		return postsByUrl;
 	}
+
+	public void setPostsByUrl(Map<String, BlogPost> postsByUrl) {
+		this.postsByUrl = postsByUrl;
+	}
+
+	public List<BlogPost> getPosts() {
+		return posts;
+	}
+
+	public void setPosts(List<BlogPost> posts) {
+		this.posts = posts;
+	}
+
+
+	
+
 }

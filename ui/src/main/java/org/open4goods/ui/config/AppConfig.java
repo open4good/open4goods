@@ -26,14 +26,19 @@ import org.open4goods.services.SearchService;
 import org.open4goods.services.SerialisationService;
 import org.open4goods.services.StandardiserService;
 import org.open4goods.services.VerticalsConfigService;
-import org.open4goods.services.XwikiService;
 import org.open4goods.services.ai.AiAgent;
 import org.open4goods.services.ai.AiService;
 import org.open4goods.ui.config.yml.UiConfig;
+import org.open4goods.ui.controllers.ui.UiService;
 import org.open4goods.ui.services.BlogService;
 import org.open4goods.ui.services.GtinService;
 import org.open4goods.ui.services.ImageService;
 import org.open4goods.ui.services.OpenDataService;
+import org.open4goods.xwiki.authentication.XwikiAuthenticationProvider;
+import org.open4goods.xwiki.services.XwikiMappingService;
+import org.open4goods.xwiki.services.XWikiAuthenticationService;
+import org.open4goods.xwiki.services.XWikiReadService;
+import org.open4goods.xwiki.services.XwikiFacadeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.caffeine.CaffeineCache;
@@ -79,6 +84,10 @@ public class AppConfig {
 		return new BarcodeValidationService();
 	}
 	
+	@Bean UiService uiService () {
+		return new UiService();
+	}
+	
 	@Bean
 	@Autowired
 	public DevModeService devModeService (ProductRepository repository, SerialisationService serialisationService, VerticalsConfigService verticalsConfigService) {
@@ -102,10 +111,10 @@ public class AppConfig {
 	  
 	  
 	  
-	  @Bean
-		public BlogService blogService(@Autowired XwikiService xwikiService, @Autowired UiConfig config) {
-			return new BlogService(xwikiService, config.getBlogConfig(), config.getNamings().getBaseUrls());
-		}
+    @Bean
+	public BlogService blogService(@Autowired XwikiFacadeService xwikiReadService, @Autowired UiConfig config) {
+		return new BlogService(xwikiReadService, config.getBlogConfig(), config.getNamings().getBaseUrls());
+	}
 
 
 	  
@@ -152,14 +161,16 @@ public class AppConfig {
 	//		return new SitemapGenerationService(aggregatedDataRepository, props);
 	//	}
 	//
-	@Bean AuthenticationProvider xwikiAuthenticationProvider(@Autowired XwikiService xwikiService) {
-		return new XwikiAuthenticationProvider(xwikiService);
-	}
 	
-	@Bean
-	XwikiService xwikiService(@Autowired UiConfig props) {
-		return new XwikiService(props.getWikiConfig());
-	}
+	
+//	@Bean AuthenticationProvider xwikiAuthenticationProvider(@Autowired XWikiAuthenticationService xwikiAuthenticationService) {
+//		return new XwikiAuthenticationProvider(xwikiAuthenticationService);
+//	}
+	
+//	@Bean
+//	XWikiReadService readService(@Autowired UiConfig props, @Autowired XwikiMappingService mappingService) {
+//		return new XWikiReadService(mappingService, props.getWikiConfig());
+//	}
 
 
 	
