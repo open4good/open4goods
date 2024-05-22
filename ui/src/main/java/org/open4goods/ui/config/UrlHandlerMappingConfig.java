@@ -13,6 +13,7 @@ import org.open4goods.ui.config.yml.UiConfig;
 import org.open4goods.ui.controllers.ui.UiService;
 import org.open4goods.ui.controllers.ui.VerticalController;
 import org.open4goods.ui.controllers.ui.XwikiController;
+import org.open4goods.ui.services.BlogService;
 import org.open4goods.xwiki.services.XwikiFacadeService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,7 +35,8 @@ public class UrlHandlerMappingConfig {
 	@Autowired  UiService uiService;
 	@Autowired  VerticalsConfigService verticalService;
 	@Autowired  SearchService searchService;
-
+	@Autowired  BlogService blogService;
+	
 	@Bean
 	public SimpleUrlHandlerMapping wikiUrlHandlerMapping() {
 		SimpleUrlHandlerMapping wikiUrlHandlerMapping = new SimpleUrlHandlerMapping();
@@ -61,7 +63,7 @@ public class UrlHandlerMappingConfig {
 				// TODO : Forward i18n
 				String url = "/" + i18n.getValue().getVerticalHomeUrl();
 				LOGGER.info("Adding vertical page mapping : {}", url);				
-				urlMap.put(url, new VerticalController(verticalService, searchService, uiService, item.getId())  );
+				urlMap.put(url, new VerticalController(verticalService, searchService, uiService, item.getId(), blogService)  );
 			}
 		}
 
