@@ -37,14 +37,7 @@ jobs:
           distribution: 'temurin'
           java-version: '21'
           cache: 'maven'
-          
-      ############################################
-      # Setting up the xwiki repo (in a maven centraml publication compatible way)
-      ###########################################   
-      - uses: s4u/maven-settings-action@v3.0.0
-        with:
-          repositories: '[{"id":"xwiki-releases","name":"xwiki-releases","url":"https://maven.xwiki.org/releases/","snapshots":{"enabled":false}}]'
-          
+
       ############################################
       # Build jars + maven site
       ###########################################   
@@ -199,7 +192,7 @@ jobs:
           
       - name: Upload pen4goods custom site
         uses: actions/upload-pages-artifact@v3
-        with:
+        with:	
           path: './src/main/site/'
 
       - name: Deploy to GitHub Pages
