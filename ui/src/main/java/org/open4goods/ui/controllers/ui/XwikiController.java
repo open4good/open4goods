@@ -26,25 +26,17 @@ import jakarta.servlet.http.HttpServletResponse;
  */
 public class XwikiController extends AbstractController  {
 
-	private static final String WEBPAGE_CLASS_META_TITLE = "metaTitle";
-
-	private static final String WEBPAGE_CLASS_META_DESCRIPTION = "metaDescription";
-
-	private static final String WEBPAGE_CLASS_PAGE_TITLE = "pageTitle";
-
-	private static final String WEBPAGE_CLASS_HTML = "html";
-
-	private static final String WEBPAGE_CLASS_WIDTH = "width";
-
 	private static final Logger LOGGER = LoggerFactory.getLogger(XwikiController.class);
 
-	// The siteConfig
-//	private final UiConfig config;
+	private static final String WEBPAGE_CLASS_META_TITLE = "metaTitle";
+	private static final String WEBPAGE_CLASS_META_DESCRIPTION = "metaDescription";
+	private static final String WEBPAGE_CLASS_PAGE_TITLE = "pageTitle";
+	private static final String WEBPAGE_CLASS_HTML = "html";
+	private static final String WEBPAGE_CLASS_WIDTH = "width";
 
 	private  XwikiFacadeService xwikiService;
 
-	private String[] frags;
-	
+	private String[] frags;	
 
 	public XwikiController(	 ) {
 		super();
@@ -73,9 +65,7 @@ public class XwikiController extends AbstractController  {
 		// TODO(i18n,p3, 0,25)
 		mv.addObject("siteLanguage", "fr");
 		final Locale sl = Locale.FRANCE;
-		mv.addObject("siteLocale", sl);
-		
-		
+		mv.addObject("siteLocale", sl);				
 	    return mv;
 	}
 	
@@ -89,7 +79,6 @@ public class XwikiController extends AbstractController  {
 	 */
 	private String getHtml(FullPage fullPage) {	
 		String ret = xwikiService.getxWikiHtmlService().getHtmlClassWebPage(fullPage.getWikiPage().getId());
-
 		return ret;
 	}
 
