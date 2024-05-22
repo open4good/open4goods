@@ -88,7 +88,24 @@
 								
 								</ul>
 							</div>
-						</div>                    
+						</div>   
+						
+
+                		<!--/* Blog posts */-->	
+						<div th:if="${posts.size()>0}" class="row card shadow mb-2">
+							<div class="card-header"><h2 class="h5">On en parle dans le blog</h2></div>
+							<div class="card-body">
+								<ul class="list-group list-group-flush price-list">
+									<li th:each="post : ${posts}" class="list-group-item border-0">										
+										<a th:href="'/blog/'+${post.url}" th:text="${post.title}"></a> 
+									</li>
+								</ul>
+							</div>
+						</div>   
+						
+
+						
+						                 
                                         
 				        <!--/* Ecological Filters */-->	
 						<div class="row card shadow mb-2 border-success text-secondary">

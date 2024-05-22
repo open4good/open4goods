@@ -10,6 +10,7 @@ import org.open4goods.model.dto.VerticalSearchRequest;
 import org.open4goods.model.dto.VerticalSearchResponse;
 import org.open4goods.services.SearchService;
 import org.open4goods.services.VerticalsConfigService;
+import org.open4goods.ui.services.BlogService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
@@ -33,13 +34,16 @@ public class VerticalController  extends AbstractController {
 	private  final UiService uiService;
 	private final VerticalsConfigService verticalService;
 	private final SearchService searchService;
+	private final BlogService blogService;
+
 	private String vertical;
 
-	public VerticalController( VerticalsConfigService verticalService, SearchService searchService, UiService uiService, String vertical) {
+	public VerticalController( VerticalsConfigService verticalService, SearchService searchService, UiService uiService, String vertical, BlogService blogService) {
 		this.verticalService = verticalService;
 		this.searchService = searchService;
 		this.uiService = uiService;
 		this.vertical = vertical;
+		this.blogService = blogService;
 	}
 
 	//////////////////////////////////////////////////////////////
@@ -73,7 +77,7 @@ public class VerticalController  extends AbstractController {
 
 		ret.addObject("countryNames", countryNames);
 		ret.addObject("products", products);
-
+		ret.addObject("posts",blogService.getPosts(vertical));
 		ret.addObject("config",config);
 
 		ret.addObject("filters",config.verticalFilters());
