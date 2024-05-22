@@ -25,8 +25,7 @@ jobs:
     name: prod-release-deploy
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      
+    
       ############################################
       # Install Java
       ###########################################    
@@ -36,7 +35,34 @@ jobs:
         with:
           distribution: 'temurin'
           java-version: '21'
-          cache: 'maven'
+          cache: 'maven'    
+    
+      ############################################
+      # Setting up the xwiki repo (in a maven centraml publication compatible way)
+      ###########################################   
+      - uses: s4u/maven-settings-action@v3.0.0
+        with:
+          repositories: '[{"id":"xwiki-releases","name":"xwiki-releases","url":"https://maven.xwiki.org/releases/","snapshots":{"enabled":false}}]'
+    
+
+############################################
+# Tweak until maven central publication
+############################################
+
+
+      - uses: actions/checkout@v4
+        with:
+          repository: 'open4good/xwiki-spring-boot-starter'
+   
+      - name: Build and test xwiki-springboot-starter
+        working-directory: ./xwiki-spring-boot-starter        
+        run: mvn --batch-mode --update-snapshots install   
+   
+   
+       
+      - uses: actions/checkout@v4
+      
+
 
       ############################################
       # Build jars + maven site
