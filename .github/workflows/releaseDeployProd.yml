@@ -27,6 +27,16 @@ jobs:
     steps:
  
       ############################################
+      # Install Java
+      ###########################################      
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+          cache: 'maven'
+          
+      ############################################
       # Setting up the xwiki repo (in a maven centraml publication compatible way)
       ###########################################   
       - uses: s4u/maven-settings-action@v3.0.0
@@ -44,15 +54,7 @@ jobs:
           repository: 'open4good/xwiki-spring-boot-starter'
 
 
-     ############################################
-      # Install Java
-      ###########################################      
-      - name: Set up JDK 21
-        uses: actions/setup-java@v4
-        with:
-          distribution: 'temurin'
-          java-version: '21'
-          cache: 'maven'
+
 
 
    
