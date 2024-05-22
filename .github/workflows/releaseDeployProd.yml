@@ -25,7 +25,6 @@ jobs:
     name: prod-release-deploy
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
       
       ############################################
       # Install Java
@@ -37,6 +36,10 @@ jobs:
           distribution: 'temurin'
           java-version: '21'
           cache: 'maven'
+
+
+      - uses: actions/checkout@v4
+
 
       ############################################
       # Build jars + maven site
