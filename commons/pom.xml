@@ -89,7 +89,7 @@
 		<dependency>
 			<groupId>dev.langchain4j</groupId>
 			<artifactId>langchain4j-open-ai-spring-boot-starter</artifactId>
-			<version>0.30.1</version>
+			<version>0.31.0</version>
 		</dependency>
 
 		<dependency>
