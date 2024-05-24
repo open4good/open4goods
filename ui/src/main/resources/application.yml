@@ -36,6 +36,11 @@ spring:
       repositories:
         enabled: true
 
+wikiPagesMapping:
+  "[webpages:default:legal-notice:WebHome]":
+    default: "mentions-legales"
+    
+    
   
 apiConfig:
   apiTitle: "Open4goods API"
@@ -54,12 +59,7 @@ langchain4j:
       log-requests: false
       log-responses: false
 
-wikiPagesMapping:
-  "[webpages/default/test/WebHome]":
-    default: "test"
 
-  "[webpages/default/legal-notice/WebHome]":
-    default: "mentions-legales"
     
 feedbackConfig:      
   githubConfig:
@@ -80,15 +80,6 @@ reversements:
     orgName: "Fondation Good Planet"
     orgImg: "/assets/img/goodplanet_logo.svg"
     comment: "Sur le prototype comparatif-tv.fr"
-    
-          
-# A mapping beetween custom page names and page templates
-pages:
-  "comparateur-prix": "pages/comparateur-prix.html"
-  "tester-une-tv": "pages/tv/test-tv.html"
-  "criteres-ecologiques": "pages/criteres-ecologiques-produit.html"
-  "template-contenu": "pages/template-contenu.html"
-  "template-image": "pages/template-image.html"
 
 blogConfig:
    feedTitle:

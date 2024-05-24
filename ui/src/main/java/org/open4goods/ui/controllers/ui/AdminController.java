@@ -7,6 +7,7 @@ import org.open4goods.model.product.Product;
 import org.open4goods.services.VerticalsConfigService;
 import org.open4goods.services.ai.AiService;
 import org.open4goods.ui.config.yml.UiConfig;
+import org.open4goods.ui.services.SitemapGenerationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,7 +28,7 @@ import jakarta.servlet.http.HttpServletRequest;
  * @author gof
  *
  */
-public class AdminController  {
+public class AdminController {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(AdminController.class);
 
@@ -35,42 +36,71 @@ public class AdminController  {
 	private final UiConfig config;
 
 	@Autowired
-	private  VerticalsConfigService configService;
-	
+	private VerticalsConfigService configService;
+
 	private final VerticalsConfigService verticalService;
-	
+
+	private final SitemapGenerationService sitemapService;
+
 	private final AiService aiService;
 
+	private ProductRepository repository;
 
-	private  ProductRepository repository;
-	
-	
-	public AdminController(UiConfig config, VerticalsConfigService verticalsConfigService, AiService aiService, ProductRepository repository) {
+	public AdminController(UiConfig config, VerticalsConfigService verticalsConfigService, AiService aiService,
+			ProductRepository repository, SitemapGenerationService sitemapService) {
 		this.config = config;
 		this.verticalService = verticalsConfigService;
+		this.sitemapService = sitemapService;
 		this.aiService = aiService;
 		this.repository = repository;
 	}
-
 
 	//////////////////////////////////////////////////////////////
 	// Mappings
 	//////////////////////////////////////////////////////////////
 
-
 	/**
-	 * reload verticals config 
+	 * reload verticals config
+	 * 
 	 * @param request
-	 * @return 
+	 * @return
 	 */
 	@GetMapping("/reloadConfigs")
-	@PreAuthorize("hasAuthority('"+RolesConstants.ROLE_XWIKI_ALL+"')")
-	public ModelAndView reloadConfigs(final HttpServletRequest request, @RequestParam(name = "r", required = false) String redircectUrl) {
+	@PreAuthorize("hasAuthority('" + RolesConstants.ROLE_XWIKI_ALL + "')")
+	public ModelAndView reloadConfigs(final HttpServletRequest request,
+			@RequestParam(name = "r", required = false) String redircectUrl) {
 		verticalService.loadConfigs();
 		ModelAndView mv = null;
 		if (null != redircectUrl) {
-			 mv = new ModelAndView("redirect:"+ redircectUrl);
-			mv.setStatus(HttpStatus.MOVED_TEMPORARILY);				
+			mv = new ModelAndView("redirect:" + redircectUrl);
+			mv.setStatus(HttpStatus.MOVED_TEMPORARILY);
+		}
+		return mv;
+	}
+
+	/**
+	 * reload verticals config
+	 * 
+	 * @param request
+	 * @return
+	 * @throws ResourceNotFoundException
+	 */
+	@GetMapping("/aiAssist")
+	@PreAuthorize("hasAuthority('" + RolesConstants.ROLE_XWIKI_ALL + "')")
+	public ModelAndView aiAssist(final HttpServletRequest request,
+			@RequestParam(name = "r", required = false) String redircectUrl,
+			@RequestParam(name = "gtin", required = false) String gtin) throws ResourceNotFoundException {
+
+		Product data = repository.getById(gtin);
+
+		aiService.complete(data, configService.getConfigByIdOrDefault(data.getVertical()));
+
+		repository.forceIndex(data);
+
+		ModelAndView mv = null;
+		if (null != redircectUrl) {
+			mv = new ModelAndView("redirect:" + redircectUrl);
+			mv.setStatus(HttpStatus.MOVED_TEMPORARILY);
 		}
 		return mv;
 	}
@@ -81,23 +111,13 @@ public class AdminController  {
 	 * @return 
 	 * @throws ResourceNotFoundException 
 	 */
-	@GetMapping("/aiAssist")
+	@GetMapping("/sitemap")
 	@PreAuthorize("hasAuthority('"+RolesConstants.ROLE_XWIKI_ALL+"')")
-	public ModelAndView aiAssist(final HttpServletRequest request, @RequestParam(name = "r", required = false) String redircectUrl,  @RequestParam(name = "gtin", required = false) String gtin) throws ResourceNotFoundException {
+	public ModelAndView sitemap(final HttpServletRequest request) throws ResourceNotFoundException {
 		
-		Product data = repository.getById(gtin);
-		
-		aiService.complete(data, configService.getConfigByIdOrDefault(data.getVertical()));
-		
-		repository.forceIndex(data);
-
-	
-		
-		ModelAndView mv = null;
-		if (null != redircectUrl) {
-			 mv = new ModelAndView("redirect:"+ redircectUrl);
-			mv.setStatus(HttpStatus.MOVED_TEMPORARILY);				
-		}
+		sitemapService.generate();
+		ModelAndView mv = new ModelAndView("redirect:/");
+		mv.setStatus(HttpStatus.MOVED_TEMPORARILY);
 		return mv;
 	}
 

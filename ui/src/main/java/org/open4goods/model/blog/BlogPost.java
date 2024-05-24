@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.open4goods.model.dto.WikiAttachment;
+import org.open4goods.xwiki.model.FullPage;
 
 public class BlogPost {
 	
@@ -19,6 +20,8 @@ public class BlogPost {
 	
 	private String modified;
 	
+	// For conveniency
+	private FullPage wikiPage;
 	
 	private List<String> category = new ArrayList<>();
 	private Boolean hidden;
@@ -109,6 +112,12 @@ public class BlogPost {
 	}
 	public void setEditLink(String editLink) {
 		this.editLink = editLink;
+	}
+	public FullPage getWikiPage() {
+		return wikiPage;
+	}
+	public void setWikiPage(FullPage wikiPage) {
+		this.wikiPage = wikiPage;
 	}
 
 

@@ -92,7 +92,7 @@ public class BlogService {
 			}
 			FullPage fullPage = xwikiFacadeService.getFullPage(page.getSpace(), page.getName());
 			BlogPost post = new BlogPost();
-			
+			post.setWikiPage(fullPage);
 			String image = fullPage.getProperties().get("image");
 			
 						
