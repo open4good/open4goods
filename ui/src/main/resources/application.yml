@@ -15,6 +15,8 @@ spring:
   threads:
     virtual:
       enabled: true
+      
+      
   mail:
 #   host: 
     port: 587
@@ -56,7 +58,7 @@ wikiPagesMapping:
   "[webpages/default/test/WebHome]":
     default: "test"
 
-  "[webpages/default/legal-notice/]":
+  "[webpages/default/legal-notice/WebHome]":
     default: "mentions-legales"
     
 feedbackConfig:      
