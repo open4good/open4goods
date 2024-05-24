@@ -127,8 +127,8 @@
 									</div>
 
 									
-									</div>
 								</div>
+							</div>
 
 						 
 											
@@ -179,15 +179,10 @@
 
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
- <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
-
-
-
+<script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
 <script src="/webjars/jquery/jquery.min.js"></script>
 <script type="text/javascript" language="javascript" src="/webjars/datatables/js/dataTables.min.js"></script>
 <script type="text/javascript" language="javascript" src="/webjars/datatables/js/dataTables.bootstrap5.min.js"></script>
-
-
 
 <script src="../../vendor/countup.js/dist/countUp.umd.js"></script>
 <!-- pixel JS -->
@@ -197,8 +192,6 @@
 
 
 <script th:inline="javascript">
-
-
 
 var reversment;
 function initTable (tableId) {
@@ -236,18 +229,11 @@ function initTable (tableId) {
 	  
 	    $("#countup-reversment").attr("data-max", compensation);
 	    reversment.update(compensation);
-	    
-	    
-	    
 
 	    	tableNew.rows('.selected').nodes().each((row) => row.classList.remove('selected'));
 	        classList.add('selected');
 	    
 	});
-	
-	
-	
-	
 }
 
 
