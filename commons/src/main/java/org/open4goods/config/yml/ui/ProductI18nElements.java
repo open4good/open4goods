@@ -5,7 +5,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.open4goods.config.yml.WikiPageConfig;
 import org.open4goods.config.yml.attributes.AiConfig;
+import org.open4goods.model.dto.WikiPage;
 
 import com.fasterxml.jackson.annotation.JsonMerge;
 
@@ -68,7 +70,7 @@ public class ProductI18nElements {
 	 * The custom pages names and associated templates for this vertical
 	 */
 	@JsonMerge
-	private Map<String,String> pages = new HashMap<>();
+	private List<WikiPageConfig> wikiPages = new ArrayList<>();
 	
 	/**
 	 * Configuration for ai generation tool
@@ -220,12 +222,13 @@ public class ProductI18nElements {
 		this.verticalHomeLogo = verticalHomeLogo;
 	}
 
-	public Map<String, String> getPages() {
-		return pages;
+
+	public List<WikiPageConfig> getWikiPages() {
+		return wikiPages;
 	}
 
-	public void setPages(Map<String, String> pages) {
-		this.pages = pages;
+	public void setWikiPages(List<WikiPageConfig> wikiPages) {
+		this.wikiPages = wikiPages;
 	}
 
 	public List<AiConfig> getAiConfig() {

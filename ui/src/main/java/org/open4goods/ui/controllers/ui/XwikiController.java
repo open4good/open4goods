@@ -38,7 +38,7 @@ public class XwikiController extends AbstractController  {
 	private  UiService uiService;
 	
 
-	private String[] frags;	
+	private String frags;	
 
 	public XwikiController(	 ) {
 		super();
@@ -49,7 +49,7 @@ public class XwikiController extends AbstractController  {
 //		this.config = config;
 		this.xwikiService = xwikiService;
 		this.uiService = uiService;
-		this.frags =  wikiPage.split(":|/");
+		this.frags =  wikiPage;
 	}
 	
 	@Override

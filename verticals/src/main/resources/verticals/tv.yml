@@ -32,7 +32,7 @@ unmatchingCategories:
 # Use a micro templated language, that allows to introduce variables and "if condition", which allows to generate dynamic texts 
 ######################################################################################################################################
 i18n:
-  default:
+  fr:
       # The layout a product url will have. Ex : 81234555-tv-led-samsung-QL659P 2023
       url: 
         # We can add ta custom prefix (with our conditional templating language if we want)
@@ -76,10 +76,15 @@ i18n:
       # The image used as a logo
       verticalHomeLogo: "https://media.istockphoto.com/id/173240143/fr/photo/t%C3%A9l%C3%A9vision-avec-deux-masques-de-d%C3%A9tourage.jpg?s=612x612&w=0&k=20&c=GhzC3IyvkmRp9shUBHICxM_1Lsur2uWkpNKf2F22p8s="
 
-     # A mapping beetween custom page names behind this vertical and page templates
-      pages:
-        "tester-une-tv": "pages/tv/test-tv.html"
-        "tester-une-tv2": "pages/tv/test-tv-2.html"
+     # A mapping beetween custom page names behind this vertical and wiki pages
+     # TODO : Need an icon
+      wikiPages:
+        - wikiUrl: webpages:default:legal-notice:WebHome
+          verticalUrl: "guide-achat"
+          title: "Guide d'achat"
+          faIcon: "fa-star"
+          
+        
 
       ####################################################################################
       # AI TEXTS CONFIGS

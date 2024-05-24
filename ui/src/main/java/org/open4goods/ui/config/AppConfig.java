@@ -34,6 +34,7 @@ import org.open4goods.ui.services.BlogService;
 import org.open4goods.ui.services.GtinService;
 import org.open4goods.ui.services.ImageService;
 import org.open4goods.ui.services.OpenDataService;
+import org.open4goods.ui.services.SitemapGenerationService;
 import org.open4goods.xwiki.authentication.XwikiAuthenticationProvider;
 import org.open4goods.xwiki.services.XwikiMappingService;
 import org.open4goods.xwiki.services.XWikiAuthenticationService;
@@ -79,6 +80,13 @@ public class AppConfig {
 		this.config = config;
 	}
 
+	
+	@Bean 
+	@Autowired
+	SitemapGenerationService sitemapGenerationService(ProductRepository repository, VerticalsConfigService verticalConfigService, BlogService blogService, XwikiFacadeService wikiService) {
+		return new SitemapGenerationService(repository, config, verticalConfigService, blogService, wikiService);
+	}
+	
 	@Bean
 	BarcodeValidationService barcodeValidationService () {
 		return new BarcodeValidationService();
