@@ -55,9 +55,10 @@ langchain4j:
 wikiPagesMapping:
   "[webpages/default/test/WebHome]":
     default: "test"
-    
-    
 
+  "[webpages/default/legal-notice/]":
+    default: "mentions-legales"
+    
 feedbackConfig:      
   githubConfig:
     accessToken: GITHUB_ACCESS_TOKEN
