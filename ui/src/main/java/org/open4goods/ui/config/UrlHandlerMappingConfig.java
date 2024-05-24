@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.open4goods.config.yml.WikiPageConfig;
 import org.open4goods.config.yml.ui.ProductI18nElements;
 import org.open4goods.config.yml.ui.VerticalConfig;
 import org.open4goods.model.Localisable;
@@ -60,10 +61,24 @@ public class UrlHandlerMappingConfig {
 		/////////////////////////////////
 		for (VerticalConfig item : verticalConfigService.getConfigsWithoutDefault()) {
 			for (Entry<String, ProductI18nElements> i18n : item.getI18n().entrySet() ) {
+				
+				/////////////////
+				// Adding vertical home page
+				//////////////// 
 				// TODO : Forward i18n
 				String url = "/" + i18n.getValue().getVerticalHomeUrl();
-				LOGGER.info("Adding vertical page mapping : {}", url);				
+				LOGGER.info("Adding vertical home page mapping : {}", url);				
 				urlMap.put(url, new VerticalController(verticalService, searchService, uiService, item.getId(), blogService)  );
+				
+				/////////////////
+				// Adding vertical specific wikipages
+				//////////////// 
+				for (WikiPageConfig page : i18n.getValue().getWikiPages()) {
+					String pUrl =  "/" + i18n.getValue().getVerticalHomeUrl() + "/" + page.getVerticalUrl();
+					LOGGER.info("Adding vertical specific page mapping : {}", url);				
+					urlMap.put(pUrl, new  XwikiController(xwikiService, uiService, page.getWikiUrl()));					
+				}
+				
 			}
 		}
 

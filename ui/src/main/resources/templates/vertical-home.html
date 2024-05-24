@@ -78,14 +78,14 @@
                     <div class="col-lg-3 mb-3 mb-lg-0">
                     
                 		<!--/* Guides */-->	
-						<div class="row card shadow mb-2">
+						<div th:if="${config.i18n(siteLanguage).getWikiPages().size() > 0}" class="row card shadow mb-2">
 							<div class="card-header"><h2 class="h5">Les guides</h2></div>
 							<div class="card-body">
 								<ul class="list-group list-group-flush price-list">
-									<li class="list-group-item border-0"><img height="16" width="16" class="me-2" src="/icon/fnac.com" title="icône fnac"><a href="">Téléviseurs : quel impact écologique ?</a> </li>
-									<li class="list-group-item border-0"><span class="fas fa-box"></span><a href="">Bien choisir sa TV ! </a></li>
-									<li class="list-group-item border-0"><span class="fas fa-clock"></span><a>OLED, QLED, LCD : Les différences</a> </li>
-								
+									<li th:each="item : ${config.i18n(siteLanguage).getWikiPages()}" class="list-group-item border-0">
+										<span class="fas" th:classappend="${item.faIcon}" ></span>
+										<a th:href="'/' + ${verticalPath} + '/'+ ${item.verticalUrl}" th:text="${item.title}"></a> 
+									</li>								
 								</ul>
 							</div>
 						</div>   
