@@ -122,22 +122,15 @@ public class SitemapGenerationService {
 			// Adding vertical relativ material
 			verticalsConfigService.getConfigsWithoutDefault().forEach(v -> {
 				addVerticalPages(v, v.i18n(lang),sitemap, baseUrl);
+				// TODO : Activate when sure of quality
+				// addProductsPages(v,sitemap, baseUrl,lang);
 			});
 			
 			// Adding products
-			// TODO
 			
 		});
 		
 		AtomicLong totalItems= new AtomicLong(0);
-//		// Processing each data
-//		aggregatedDataRepository.exportAllHavingPrices()
-
-//		.filter(e -> e.getOffersCount() > 1)
-//		.forEach(e -> {
-//			onAggregatedData(e);
-//			totalItems.incrementAndGet();
-//		});
 
 		// Closing / flushing files
 		terminate();
@@ -148,6 +141,23 @@ public class SitemapGenerationService {
 
 	}
 
+
+	/**
+	 * Add valid products with (ecoscore, activOffers and genAi completed) 
+	 * @param vertical
+	 * @param sitemap
+	 * @param baseUrl
+	 * @param language
+	 */
+	private void addProductsPages(VerticalConfig vertical, WebSitemapGenerator sitemap, String baseUrl, String language) {		
+		aggregatedDataRepository.exportVerticalWithValidDate(vertical.getId())
+		// Filtering on products having genAI content
+		.filter(e -> null != e.getAiDescriptions().get(language))
+		.forEach(data -> {
+			addUrl(sitemap, data.url(language), ChangeFreq.DAILY, 1,  Date.from(Instant.ofEpochMilli(data.getLastChange())));
+		});
+		
+	}
 
 	/**
 	 * Init the simaps files
