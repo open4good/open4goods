@@ -48,7 +48,7 @@ public class UrlHandlerMappingConfig {
 		/////////////////////////////////
 		for (Entry<String, Localisable> item : config.getWikiPagesMapping().entrySet()) {
 			for (String localizedValue : item.getValue().values()) {
-				String url = "/" + localizedValue;
+				String url = localizedValue.startsWith("/") ? localizedValue : "/" + localizedValue;
 				// TODO : Forward i18n
 				LOGGER.info("Adding wiki page mapping : {}", url);
 				urlMap.put(url, new XwikiController(xwikiService, uiService, item.getKey()));
