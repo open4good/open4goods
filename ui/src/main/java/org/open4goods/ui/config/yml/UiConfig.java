@@ -16,6 +16,7 @@ import org.open4goods.config.yml.ui.OpenSearchConfig;
 import org.open4goods.config.yml.ui.SiteNaming;
 import org.open4goods.config.yml.ui.WebConfig;
 import org.open4goods.model.Localisable;
+import org.open4goods.model.Localised;
 import org.open4goods.xwiki.config.XWikiServiceProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -61,8 +62,20 @@ public class UiConfig {
 	private String datasourcesfolder=rootFolder+ File.separator+ "config"+File.separator+"datasources"+File.separator;
 
 	
+	
 	/**
-	 * The custom pages names and associated templates for this vertical
+	 * The mapped controllers (dynamic declaration cause spring config does not allows us to have full enforced
+	 * access on i18n controller exposed paths
+	 * key : controller name
+	 * value : i18n paths
+	 * 
+	 */
+	@JsonMerge
+	private Map<String,Localisable> controllers = new HashMap<>();
+	
+	
+	/**
+	 * The mapped wiki pages
 	 */
 	@JsonMerge
 	private Map<String,String> pages = new HashMap<>();
@@ -405,6 +418,18 @@ public class UiConfig {
 		this.wikiPagesMapping = wikiPagesMapping;
 	}
 
+
+	public Map<String, Localisable> getControllers() {
+		return controllers;
+	}
+
+
+	public void setControllers(Map<String, Localisable> controllers) {
+		this.controllers = controllers;
+	}
+
+	
+	
 
 
 

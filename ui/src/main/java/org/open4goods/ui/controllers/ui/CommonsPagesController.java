@@ -56,18 +56,5 @@ public class CommonsPagesController  {
 		return uiService.defaultModelAndView("opensearch", request).addObject("opensearch", config.getOpenSearchConfig());
 	}
 
-	@GetMapping("/compensation-ecologique")
-	public ModelAndView compensation(final HttpServletRequest request) {
-		ModelAndView ret = uiService.defaultModelAndView(("compensation"), request);
-		ret.addObject("page","compensation écologique");
-		return ret;
-	}
-
-	@GetMapping("/ecoscore")
-	public ModelAndView api(final HttpServletRequest request) {
-		ModelAndView ret = uiService.defaultModelAndView(("ecoscore"), request);
-		ret.addObject("page","évaluation environnementale");
-		return ret;
-	}
 
 }

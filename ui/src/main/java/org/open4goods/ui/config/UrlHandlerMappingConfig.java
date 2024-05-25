@@ -19,6 +19,7 @@ import org.open4goods.xwiki.services.XwikiFacadeService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.Ordered;
@@ -37,6 +38,11 @@ public class UrlHandlerMappingConfig {
 	@Autowired  VerticalsConfigService verticalService;
 	@Autowired  SearchService searchService;
 	@Autowired  BlogService blogService;
+	
+	// To load @Controller
+	@Autowired	private ApplicationContext context;
+	
+	
 	
 	@Bean
 	public SimpleUrlHandlerMapping wikiUrlHandlerMapping() {

@@ -32,7 +32,7 @@ unmatchingCategories:
 # Use a micro templated language, that allows to introduce variables and "if condition", which allows to generate dynamic texts 
 ######################################################################################################################################
 i18n:
-  fr:
+  default:
       # The layout a product url will have. Ex : 81234555-tv-led-samsung-QL659P 2023
       url: 
         # We can add ta custom prefix (with our conditional templating language if we want)

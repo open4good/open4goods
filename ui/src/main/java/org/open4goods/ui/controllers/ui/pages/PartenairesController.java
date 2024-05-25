@@ -1,4 +1,4 @@
-package org.open4goods.ui.controllers.ui;
+package org.open4goods.ui.controllers.ui.pages;
 
 import java.io.IOException;
 import java.net.URLEncoder;
@@ -11,12 +11,15 @@ import org.open4goods.model.data.AffiliationToken;
 import org.open4goods.services.DataSourceConfigService;
 import org.open4goods.services.SerialisationService;
 import org.open4goods.ui.config.yml.UiConfig;
+import org.open4goods.ui.controllers.ui.UiService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.servlet.ModelAndView;
+
+import com.redfin.sitemapgenerator.ChangeFreq;
 
 import jakarta.annotation.PostConstruct;
 import jakarta.servlet.http.HttpServletRequest;
@@ -28,8 +31,11 @@ import jakarta.servlet.http.HttpServletRequest;
  * @author gof
  *
  */
-public class PartenairesController  {
+public class PartenairesController  implements SitemapExposedController{
 
+	public static final String DEFAULT_PATH="/partners";
+	public static final String FR_PATH="/partenaires";
+	
 	private static final Logger LOGGER = LoggerFactory.getLogger(PartenairesController.class);
 
 	// The siteConfig
@@ -71,11 +77,18 @@ public class PartenairesController  {
 
 
 
+	
+	@Override
+	public SitemapEntry getExposedUrls() {
+		return SitemapEntry.of(SitemapEntry.LANGUAGE_DEFAULT, DEFAULT_PATH, 0.3, ChangeFreq.YEARLY)
+						   .add(SitemapEntry.LANGUAGE_FR, FR_PATH);
+	}
+
 	//////////////////////////////////////////////////////////////
 	// Mappings
 	//////////////////////////////////////////////////////////////
-
-	@GetMapping("/partenaires")
+	
+	@GetMapping(value = {DEFAULT_PATH, FR_PATH})	
 	public ModelAndView partenaires(final HttpServletRequest request) {
 		ModelAndView ret = uiService.defaultModelAndView(("partenaires"), request);
 		ret.addObject("page","compensation écologique");

@@ -36,6 +36,13 @@ spring:
       repositories:
         enabled: true
 
+
+controlersMapping:
+  ContactController:
+    url:
+      fr: contact
+      default: contact
+      
 wikiPagesMapping:
   "[webpages:default:legal-notice:WebHome]":
     default: "mentions-legales"
@@ -58,6 +65,8 @@ langchain4j:
       timeout: PT60S
       log-requests: false
       log-responses: false
+
+
 
 
     

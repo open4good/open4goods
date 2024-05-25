@@ -1,10 +1,11 @@
-package org.open4goods.ui.controllers.ui;
+package org.open4goods.ui.controllers.ui.pages;
 
 import java.io.IOException;
 import java.io.InputStream;
 
 import org.apache.commons.io.IOUtils;
 import org.open4goods.exceptions.TechnicalException;
+import org.open4goods.ui.controllers.ui.UiService;
 import org.open4goods.ui.services.OpenDataService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.servlet.ModelAndView;
 
 import com.mashape.unirest.http.exceptions.UnirestException;
+import com.redfin.sitemapgenerator.ChangeFreq;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -25,8 +27,10 @@ import jakarta.servlet.http.HttpServletResponse;
  * @author gof
  *
  */
-public class OpenDataController  {
+public class OpenDataController  implements SitemapExposedController{
 
+	public static final String DEFAULT_PATH="/opendata";
+	
 	private static final Logger LOGGER = LoggerFactory.getLogger(OpenDataController.class);
 
 	// The siteConfig
@@ -45,7 +49,12 @@ public class OpenDataController  {
 	 * @throws UnirestException
 	 */
 
-	@GetMapping("/opendata")
+	@Override
+	public SitemapEntry getExposedUrls() {
+		return SitemapEntry.of(SitemapEntry.LANGUAGE_DEFAULT, DEFAULT_PATH, 0.3, ChangeFreq.YEARLY);
+	}
+	
+	@GetMapping(value = {DEFAULT_PATH})	
 	public ModelAndView opendata(final HttpServletRequest request) {
 		final ModelAndView ret = uiService.defaultModelAndView("opendata", request);
 		ret.addObject("count", openDataService.totalItems());
