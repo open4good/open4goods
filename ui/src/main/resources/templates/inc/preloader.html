@@ -21,7 +21,9 @@
 -->
 
 
-<article class="preloader nudger_vert--bg justify-content-center align-items-center">
+
+
+<article th:unless="${internalReferer}" class="preloader nudger_vert--bg justify-content-center align-items-center">
 	<div class="position-relative wrapper__preloader-img text-center">
 		<img class="logo_loader img-fluid" src="/assets/img/logo/NUDGER.png">
 		<p class="h3 text-white">Consommer moins, consommer mieux.</p>

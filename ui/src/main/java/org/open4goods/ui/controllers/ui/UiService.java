@@ -5,6 +5,7 @@ import java.util.Locale;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.StringUtils;
 import org.open4goods.services.DataSourceConfigService;
 import org.open4goods.ui.config.yml.UiConfig;
 import org.open4goods.xwiki.services.XWikiHtmlService;
@@ -107,6 +108,9 @@ public class UiService {
 
 		ret.addObject("wiki",xwikiService);
 
+		ret.addObject("internalReferer", isInternalReferer(request));
+		
+		
 		// Retrieve authentication status
 		Authentication authentication = SecurityContextHolder .getContext().getAuthentication();
 		if (authentication instanceof UsernamePasswordAuthenticationToken)  {
@@ -120,27 +124,36 @@ public class UiService {
 				ret.addObject("editor","true") ;
 
 			}
-
-
-
 		}
-
-
-
-
 		return ret;
 	}
 	
-	public String loaderImage() {
-		
-		return "/assets/img/loader/"+random(1, maxImg)+".webp";
-		
+	
+	/**
+	 * Return true if an internal source
+	 * @param request
+	 * @return
+	 */
+	private boolean isInternalReferer(HttpServletRequest request) {
+		String referer=request.getHeader("referer");
+		if (StringUtils.isEmpty(referer)) {
+			LOGGER.info("Empty referer");
+			return false;
+		} else if (referer.startsWith(config.getBaseUrl(request.getLocale()))) {
+			LOGGER.info("Request from internal source");
+			return true;
+		} else {
+			return false;			
+		}
 	}
 
-	public String loaderImageLogo() {
-		
-		return "/assets/img/logo/NUDGER.png";
-		
+
+	public String loaderImage() {		
+		return "/assets/img/loader/"+random(1, maxImg)+".webp";		
+	}
+
+	public String loaderImageLogo() {		
+		return "/assets/img/logo/NUDGER.png";		
 	}
 	
 	public int random(int min, int max) {
