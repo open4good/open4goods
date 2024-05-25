@@ -2,9 +2,9 @@
 	<th:block th:utext="${res}"></th:block>	
 
 	<div th:if="${editor}">
-		<div style="position: absolute; top: 0px; right: 0px;" class=" alert-danger text-center">
-			<b><a th:href="${wiki.getEditPageUrl(path)}" target="_blank"> ✎ EDITER</a></b>
-		</div>
+		<span  class=" alert-danger text-right p-1">
+			<strong><a th:href="${wiki.getEditPageUrl(path)}" target="_blank"> EDITER</a></strong>
+		</span>
 	</div>
 </th:block>
 
