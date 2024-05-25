@@ -63,8 +63,9 @@ public class XwikiController extends AbstractController  {
 		mv.addObject(WEBPAGE_CLASS_PAGE_TITLE,fullPage.getProp(WEBPAGE_CLASS_PAGE_TITLE));
 		mv.addObject(WEBPAGE_CLASS_HTML,getHtml(fullPage));
 		mv.addObject(WEBPAGE_CLASS_WIDTH,fullPage.getProp(WEBPAGE_CLASS_WIDTH));
-				
-		mv.addObject("editLink",xwikiService.getPathHelper().getEditpath(frags));
+
+		// TODO : ugly, see in natively in Xwiki
+		mv.addObject("editLink",xwikiService.getPathHelper().getEditpath(frags.replace('.', '/')));
 		mv.addObject("userLocale", request.getLocale());
 		// TODO(i18n,p3, 0,25)
 		mv.addObject("siteLanguage", "fr");
