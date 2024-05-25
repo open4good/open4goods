@@ -1,4 +1,4 @@
-package org.open4goods.ui.controllers.ui;
+package org.open4goods.ui.controllers.ui.pages;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -8,6 +8,7 @@ import org.open4goods.dao.ProductRepository;
 import org.open4goods.model.blog.BlogPost;
 import org.open4goods.services.DataSourceConfigService;
 import org.open4goods.services.VerticalsConfigService;
+import org.open4goods.ui.controllers.ui.UiService;
 import org.open4goods.ui.services.BlogService;
 import org.open4goods.ui.services.OpenDataService;
 import org.open4goods.xwiki.services.XWikiHtmlService;
@@ -22,13 +23,16 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.ModelAndView;
 
+import com.redfin.sitemapgenerator.ChangeFreq;
 import com.rometools.rome.io.FeedException;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 @Controller
-public class BlogController  {
+public class BlogController  implements SitemapExposedController{
+
+	public static final String DEFAULT_PATH="/blog";
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(BlogController.class);
 
@@ -48,7 +52,13 @@ public class BlogController  {
 	}
 
 
-	@GetMapping("/blog")
+	@Override
+	public SitemapEntry getExposedUrls() {
+		return SitemapEntry.of(SitemapEntry.LANGUAGE_DEFAULT, DEFAULT_PATH, 0.5, ChangeFreq.WEEKLY);
+				
+	}
+	
+	@GetMapping(DEFAULT_PATH)
 	public ModelAndView blogIndex(final HttpServletRequest request, @RequestParam(required = false) String tag) {
 		ModelAndView model = uiService.defaultModelAndView("blog", request);
 		model.addObject("totalItems", aggregatedDataRepository.countMainIndex());
@@ -66,7 +76,7 @@ public class BlogController  {
 	}
 
 
-	@GetMapping(value="/blog/rss",  produces = "application/xml")
+	@GetMapping(value=DEFAULT_PATH+"rss",  produces = "application/xml")
 	public void rss(HttpServletResponse response, HttpServletRequest request ) throws FeedException, IOException {
 		response.setContentType("application/rss+xml");
 		response.setCharacterEncoding("UTF-8");
@@ -77,7 +87,7 @@ public class BlogController  {
 	}
 	
 	
-	@GetMapping("/blog/{post}")
+	@GetMapping(DEFAULT_PATH + "/{post}")
 	public ModelAndView post(@PathVariable String post, final HttpServletRequest request) {
 		ModelAndView model = uiService.defaultModelAndView("blog-post", request);
 
@@ -94,7 +104,7 @@ public class BlogController  {
 		return model;
 	}
 
-	@GetMapping("/blog/{page}/{filename}")	
+	@GetMapping(DEFAULT_PATH + "/{page}/{filename}")	
 	// TODO : Caching
 	public void attachment( @PathVariable(name = "page") String page, @PathVariable(name = "filename") String filename, final HttpServletRequest request, HttpServletResponse response) throws IOException  {
 		// TODO : Blog

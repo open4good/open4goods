@@ -20,10 +20,13 @@ import org.open4goods.helper.GenericFileLogger;
 import org.open4goods.model.blog.BlogPost;
 import org.open4goods.services.VerticalsConfigService;
 import org.open4goods.ui.config.yml.UiConfig;
+import org.open4goods.ui.controllers.ui.pages.SitemapEntry;
+import org.open4goods.ui.controllers.ui.pages.SitemapExposedController;
 import org.open4goods.xwiki.model.FullPage;
 import org.open4goods.xwiki.services.XwikiFacadeService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.ApplicationContext;
 import org.springframework.scheduling.annotation.Scheduled;
 
 import com.redfin.sitemapgenerator.ChangeFreq;
@@ -58,14 +61,21 @@ public class SitemapGenerationService {
 	private BlogService blogService;
 	// TODO : To allow last mod date and check existence
 	private final XwikiFacadeService xwikiService;
+	
+	private ApplicationContext context;
 
-	public SitemapGenerationService(ProductRepository aggregatedDataRepository, UiConfig uiConfig, VerticalsConfigService verticalConfigService,  BlogService blogService, XwikiFacadeService xwikiService) {
+	private Map<String, SitemapExposedController> annotatedControllers;
+	
+	public SitemapGenerationService(ProductRepository aggregatedDataRepository, UiConfig uiConfig, VerticalsConfigService verticalConfigService,  BlogService blogService, XwikiFacadeService xwikiService, ApplicationContext context) {
 		this.aggregatedDataRepository = aggregatedDataRepository;
 		this.uiConfig = uiConfig;
 		this.verticalsConfigService = verticalConfigService;
 		this.blogService = blogService;
 		this.statsLogger = GenericFileLogger.initLogger("stats-sitemap", Level.INFO, uiConfig.logsFolder(), false);
 		this.xwikiService = xwikiService;
+		
+		this.annotatedControllers =  context.getBeansOfType(SitemapExposedController.class);
+
 	}
 
 	/**
@@ -102,7 +112,7 @@ public class SitemapGenerationService {
 			addUrl(sitemap, baseUrl, ChangeFreq.MONTHLY, 1.0);
 			
 			// Adding contoller based pages
-			// TODO
+			addControllerPages(sitemap,baseUrl, lang);
 			
 			// Adding blog posts
 			addBlogPost(blogService.getPosts(), sitemap, baseUrl );
@@ -143,6 +153,29 @@ public class SitemapGenerationService {
 
 
 	/**
+	 * List annotated bean controllers and set language accordingly
+	 * @param sitemap
+	 * @param baseUrl	
+	 */
+	private void addControllerPages(WebSitemapGenerator sitemap, String baseUrl, String language) {
+		 
+		
+		annotatedControllers.entrySet().forEach(e -> {
+			try {
+				e.getValue().getMultipleExposedUrls().forEach(value -> {					
+					// .substrint : remove the //
+					String url =  baseUrl+value.i18n(language).substring(1);
+					LOGGER.info("Adding controller page to {} sitemap : {}",language, url);
+					addUrl(sitemap,url, value.getFrequency(), value.getPriority());
+				});
+			} catch (Exception e1) {
+				LOGGER.error("Cannot add controller to sitemap : {}",e,e1);
+			}
+		});
+		
+	}
+
+	/**
 	 * Add valid products with (ecoscore, activOffers and genAi completed) 
 	 * @param vertical
 	 * @param sitemap
@@ -154,7 +187,9 @@ public class SitemapGenerationService {
 		// Filtering on products having genAI content
 		.filter(e -> null != e.getAiDescriptions().get(language))
 		.forEach(data -> {
-			addUrl(sitemap, data.url(language), ChangeFreq.DAILY, 1,  Date.from(Instant.ofEpochMilli(data.getLastChange())));
+			String url = data.url(language);
+			LOGGER.info("Adding product page to sitemap : {}",url);
+			addUrl(sitemap, url, ChangeFreq.DAILY, 1,  Date.from(Instant.ofEpochMilli(data.getLastChange())));
 		});
 		
 	}
