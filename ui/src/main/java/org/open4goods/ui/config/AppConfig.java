@@ -35,6 +35,7 @@ import org.open4goods.ui.services.GtinService;
 import org.open4goods.ui.services.ImageService;
 import org.open4goods.ui.services.OpenDataService;
 import org.open4goods.ui.services.SitemapGenerationService;
+import org.open4goods.ui.services.todo.TodoService;
 import org.open4goods.xwiki.authentication.XwikiAuthenticationProvider;
 import org.open4goods.xwiki.services.XwikiMappingService;
 import org.open4goods.xwiki.services.XWikiAuthenticationService;
@@ -81,6 +82,11 @@ public class AppConfig {
 		this.config = config;
 	}
 
+	
+	@Bean
+	TodoService todoService() {
+		return new TodoService(config.getTagListUrl());
+	}
 	
 	@Bean 
 	@Autowired
