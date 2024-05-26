@@ -75,22 +75,21 @@ public class AppConfigDev {
 
 
 			/**
-			 * Define explicitly each static resources (because of the controller /* in the
-			 * CommonPageCOntroller) Also overrides classpath values with the ones pageNumber
+			 * Define explicitly each static resources ( Also overrides classpath values with the ones pageNumber
 			 * filesystem
 			 */
 			@Override
 			public void addResourceHandlers(final ResourceHandlerRegistry registry) {
 
-				registry.setOrder(Ordered.LOWEST_PRECEDENCE);
+//				registry.setOrder(Ordered.LOWEST_PRECEDENCE);
 				registry.addResourceHandler("/sitemap/**").addResourceLocations("file:" + config.siteMapFolder().getAbsolutePath() + File.separator);
 
-				// NOTE : Register here files / folder to be allowed in devmode
-				registerFolder(registry,"assets");
-				registerFolder(registry,"css");
-				registerFolder(registry,"icons");
-				registerFolder(registry,"vendor");
-				registerFile(registry,"tpl_table.html");
+//				// NOTE : Register here files / folder to be allowed in devmode
+//				registerFallbackFolder(registry,"assets");
+//				registerFallbackFolder(registry,"css");
+//				registerFallbackFolder(registry,"icons");
+//				registerFallbackFolder(registry,"vendor");
+//				registerFile(registry,"tpl_table.html");
 			}
 		};
 	}
@@ -102,7 +101,7 @@ public class AppConfigDev {
 	 * @param registry
 	 * @param location
 	 */
-	public void registerFolder(ResourceHandlerRegistry registry, String location) {
+	public void registerFallbackFolder(ResourceHandlerRegistry registry, String location) {
 		registry.addResourceHandler("/" + location + "/**")
 				.addResourceLocations("file:" + config.getResourceTemplateFolder() + "static" + File.separator + location+ File.separator, "classpath:/static/" + location + "/")
 				.setCacheControl(CacheControl.noCache())
