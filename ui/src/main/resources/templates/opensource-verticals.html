@@ -133,32 +133,56 @@
         
         
         
-            <section class="section  bg-gray-200">
+        
+      	<section class="section  bg-gray-200">
             <div class="container-fluid z-2">
                 <div class="row justify-content-center">
                     <div class="col-md-10 text-center">
-                        <h2 class="h1">Verticale parente (<a href="https://github.com/open4good/open4goods/blob/main/verticals/src/main/resources/verticals/_default.yml">_default.yml</a>) </h2>
+                        <h2 class="h1">Verticale exemple : Les TV's <br/>(<a href="https://github.com/open4good/open4goods/blob/main/verticals/src/main/resources/verticals/tv.yml">tv.yml</a>) </h2>
                         <p class="lead py-4 text-gray">
-                        	Les verticales sont les différentes catégories de produits que vous retrouverez sur le site de Nudger. Ce sont des fichiers de configuration au format YAML
-                        	qui configurent le fonctionnement et le comportement d'une catégorie de produit, y compris dans les textes affichés ou générés par IA, dans l'évaluation de l'ecoscore, les attributs. Ces fichiers de 
-                        	configuration sont conséquents et ammenés à s'enrichir régulièrement  
+                        	Si vous souhaitez créer une nouvelle verticale, ou modifier une verticale existante, une simple PR suffit (répertoire <a href="https://github.com/open4good/open4goods/tree/main/verticals/src/main/resources/verticals">/verticals/src/main/resources/verticals</a> ). Ici aussi, la documentation est faite au travers des commentaires. Si certains points ne vous semblent pas clairs, n'hésitez pas à nous adresser une demande via l'outil de <a href="/feedback/idea">feedback</a> ! 
                         </p>
                     </div>
                 </div>
             </div>  
             
             
-            <div class="overflow-auto" style="max-height:500px" >
+            <div class="container container-semi-fluid overflow-auto" style="max-height:500px" >
             	<pre>
-            		<code class="language-yaml" th:text=${defaultYaml}></code>
+            		<code class="language-yaml" th:text="${sampleYaml}"></code>
             	</pre>
             </div>
+        </section>        
+        
+        
+        
+        
+        
+      	<section class="section  bg-white-200">
+            <div class="container-fluid z-2">
+                <div class="row justify-content-center">
+                    <div class="col-md-10 text-center">
+                        <h2 class="h1">Verticale parente <br/>(<a href="https://github.com/open4good/open4goods/blob/main/verticals/src/main/resources/verticals/_default.yml">_default.yml</a>) </h2>
+                        <p class="lead py-4 text-gray">
+                        	La documentation est faite au travers des commentaires. Si certains points ne vous semblent pas clairs, n'hésitez pas à nous adresser une demande via l'outil de <a href="/feedback/idea">feedback</a> ! 
+                        </p>
+                    </div>
+                </div>
+            </div>  
             
             
-            
+            <div class="container container-semi-fluid overflow-auto" style="max-height:500px" >
+            	<pre>
+            		<code class="language-yaml" th:text="${defaultYaml}"></code>
+            	</pre>
+            </div>
         </section>
        
-       
+
+
+
+        
+               
        
        
         
