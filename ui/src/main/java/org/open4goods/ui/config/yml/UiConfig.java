@@ -106,6 +106,10 @@ public class UiConfig {
 	 */
 	private String email;
 
+	/**
+	 * For the TODO service, the taglist.xml url to be scanned
+	 */
+	private String tagListUrl = "";
     /**
      * Secret and key  for captcha system
      */
@@ -426,6 +430,16 @@ public class UiConfig {
 
 	public void setControllers(Map<String, Localisable> controllers) {
 		this.controllers = controllers;
+	}
+
+
+	public String getTagListUrl() {
+		return tagListUrl;
+	}
+
+
+	public void setTagListUrl(String tagListUrl) {
+		this.tagListUrl = tagListUrl;
 	}
 
 	

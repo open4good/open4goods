@@ -67,6 +67,7 @@ langchain4j:
       log-responses: false
 
 
+tagListUrl: https://open4good.github.io/open4goods/maven/taglist/taglist.xml 
 
 
     

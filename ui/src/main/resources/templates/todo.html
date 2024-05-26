@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html th:lang="${siteLocale.language}">
+
+<head>
+
+	<!--/* Metas and CSS */-->
+	<th:block th:insert="~{inc/header-meta.html}"></th:block>
+    
+	<!-- Primary Meta Tags -->
+	<title>TODO's | Nudger</title>
+
+	<link rel="stylesheet" type="text/css" href="/webjars/datatables/css/dataTables.bootstrap5.min.css">
+	
+	<style>
+	tbody, td, tfoot, th, thead, tr {
+    	 border-style: none;
+	}	
+	
+	</style>
+	
+</head>
+
+<body>
+ 	<!--/* Navbar */-->
+	<th:block th:insert="~{inc/navbar/navbar-vertical.html}"></th:block>
+    <!--/* Loader */-->
+    <th:block th:insert="~{inc/preloader.html}"></th:block>
+	
+    <main>	
+  
+        <div class="section section-lg pt-5 pt-md-7 bg-gray-200">
+            <div class="container container-semi-fluid">
+
+				<!--/* Hero */-->						
+				<div class="row mb-2">							
+					<div class="card shadow">
+						<div class=" align-items-center">
+							
+								<div class="d-flex flex-wrap align-items-center row">
+			                        <div class="col-lg-2 text-center">
+			                                <img class="mt-2" width="150" src="/assets/img/todo.jpg">
+			                        </div>
+			                        <span class="col-lg-10">
+			                                <h1 class="mt-2 text-center" text="code TODO's"></h1>
+			                                <div class="row p-2 mb-4"> 
+			                					<th:block th:with="path=${vertical} + '/welcome-header'">
+			                     					<th:block th:insert="~{inc/wiki.html}"></th:block>
+			                     				</th:block>
+			                				</div>		
+			                				
+			                        </span> 
+								</div>
+	                    </div>
+					</div>
+				</div>
+						
+                <div class="row ">
+                
+                	<table id="todoTable" class="table display">
+					    <thead>
+					        <tr>
+					            <th>Component</th>
+					            <th>Priorité</th>
+					            <th>Categorie</th>
+					            <th>Description</th>
+					            <th>estimation</th>
+					            <th>class</th>
+					            <th>line</th>
+					            
+					            
+					        </tr>
+					    </thead>
+					    <tbody>
+					        <tr th:each="todo : ${todos}">
+								<td th:text="${todo.component}"></td>
+								<td th:text="${todo.priority}"></td>
+								<td th:text="${todo.category}"></td>
+								<td th:text="${todo.content}"></td>
+								<td th:text="${todo.estimation}"></td>
+								<td th:text="${todo.className}"></td>
+								<td th:text="${todo.lineNumber}"></td>	         
+					        </tr>
+					    </tbody>
+					</table>
+                	
+                	
+                	
+				</div>
+        	</div>
+       	</div>
+    </main>
+
+	<!--/* Footer */-->
+	<th:block th:insert="~{inc/footer.html}"></th:block>	
+
+<!-- Core -->
+<script src="/webjars/bootstrap/js/bootstrap.min.js"></script>
+<script src="../../vendor/headroom.js/dist/headroom.min.js"></script>
+
+<!-- Vendor JS -->
+
+<script src="../../vendor/smooth-scroll/dist/smooth-scroll.polyfills.min.js"></script>
+<script src="../../vendor/vivus/dist/vivus.min.js"></script>
+<script src="/webjars/jquery/jquery.min.js"></script>
+<script src="../../vendor/@popperjs/core/dist/umd/popper.min.js"></script>
+
+<script type="text/javascript" language="javascript" src="/webjars/datatables/js/dataTables.min.js"></script>
+<script type="text/javascript" language="javascript" src="/webjars/datatables/js/dataTables.bootstrap5.min.js"></script>
+
+<script src="../../vendor/nouislider/distribute/nouislider.min.js"></script>
+
+<!-- pixel JS -->
+<script src="../../assets/js/pixel.js"></script>
+
+<!-- custom sources -->
+<script src="../../assets/js/pixel-custom.js"></script>
+
+<script src="/webjars/mustache/mustache.min.js"></script>
+
+
+
+<!-- Ajax loaded table template -->
+<div id="tpl_place" class="hidden"></div>
+
+<!-- Setting up variables -->
+<script th:inline="javascript">
+
+$(document).ready( function () {
+    $('#todoTable').DataTable();
+} );
+
+</script>
+
+</body>
+
+</html>

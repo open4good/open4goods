@@ -14,6 +14,7 @@ import javax.xml.xpath.XPathFactory;
 import org.open4goods.exceptions.ResourceNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 public class XpathHelper {
@@ -56,6 +57,13 @@ public class XpathHelper {
 
 	}
 
+	
+	public static List<String> xpathMultipleEvalString(Node doc, String string) throws XPathExpressionException, ResourceNotFoundException {
+		return xpathMultipleEval(doc, string).stream().map(e->e.getTextContent()).toList();
+	}
+	
+	
+	
 	/**
 	 * PErforms a simple XPATH evaluation upon a W3C document
 	 *
@@ -64,11 +72,11 @@ public class XpathHelper {
 	 * @return
 	 * @throws XPathExpressionException
 	 */
-	public static List<String> xpathMultipleEval(final Node document,  String expression)
+	public static List<Node> xpathMultipleEval(final Node document,  String expression)
 			throws XPathExpressionException, ResourceNotFoundException {
 
 		
-		List<String> ret = new ArrayList<>();
+		List<Node> ret = new ArrayList<>();
 		XPathExpression expr = xpathCache.get(expression);
 		if (null == expr) {
 			expr = xpath.compile(expression);
@@ -78,12 +86,15 @@ public class XpathHelper {
 		final NodeList nl = (NodeList) expr.evaluate(document, XPathConstants.NODESET);
 		// Benchmarker.log("Xpath eval done", b,3);
 	
-		
 		for (int i = 0; i < nl.getLength(); i++) {
-			ret.add(nl.item(i).getTextContent());
+			ret.add(nl.item(i));
 		}
 		
 		return ret;
 
+
 	}
+
+
+
 }

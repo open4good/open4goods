@@ -1,4 +1,4 @@
-package org.open4goods.crawler.services.todo;
+package org.open4goods.ui.services.todo;
 
 import java.util.Date;
 import java.util.HashMap;
