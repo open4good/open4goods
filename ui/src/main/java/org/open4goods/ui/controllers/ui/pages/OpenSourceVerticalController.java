@@ -20,7 +20,7 @@ import jakarta.servlet.http.HttpServletRequest;
 @Controller
 public class OpenSourceVerticalController  implements SitemapExposedController{
 
-	public static final String DEFAULT_PATH="/opensource/categories-produits";
+	public static final String DEFAULT_PATH="/opensource/products-definitions";
 	public static final String FR_PATH="/opensource/categories-produits";
 	
 	
@@ -28,6 +28,7 @@ public class OpenSourceVerticalController  implements SitemapExposedController{
 	private @Autowired UiConfig uiConfig;
 	
 	private String defaultYaml;
+	private String sampleYaml;
 
 
 	@Override
@@ -40,7 +41,7 @@ public class OpenSourceVerticalController  implements SitemapExposedController{
 	@GetMapping(value = {DEFAULT_PATH, FR_PATH})
 	public ModelAndView index(final HttpServletRequest request) {
 
-		ModelAndView model = uiService.defaultModelAndView("opensource", request);
+		ModelAndView model = uiService.defaultModelAndView("opensource-verticals", request);
 
 		if (null == defaultYaml) {
 			// TODO : from conf
@@ -53,8 +54,20 @@ public class OpenSourceVerticalController  implements SitemapExposedController{
 					} 
 			}
 
-			model.addObject("defaultYaml", defaultYaml);
+		if (null == sampleYaml) {
+			// TODO : from conf
+					// TODO : Cache
+					try {
+						this.sampleYaml =  IOUtils.toString(new URL("https://raw.githubusercontent.com/open4good/open4goods/main/verticals/src/main/resources/verticals/_default.yml"));
+					} catch (Exception e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} 
+			}
 		
+		
+			model.addObject("defaultYaml", defaultYaml);
+			model.addObject("sampleYaml", sampleYaml);
 	
 		return model;
 	}
