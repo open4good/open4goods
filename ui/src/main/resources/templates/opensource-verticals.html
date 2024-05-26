@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html th:lang="${siteLocale.language}">
+
+<head>
+
+	<!--/* Metas and CSS */-->
+	<th:block th:insert="~{inc/header-meta.html}"></th:block>
+    
+	<!-- Primary Meta Tags -->
+	<title>Comparateur de prix écologique en open source | Nudger</title>
+	<meta name="description" content="Nudger est libre, gratuit et opensource. C'est ainsi le premier comparateur dont le code est ouvert à tous. ">
+		
+	<!-- Open Graph / Facebook -->
+	<meta property="og:type" content="website">
+	<meta property="og:url" th:content="${url}">
+	<meta property="og:title" th:content="#{opensource.title}">
+	<meta property="og:description" th:content="#{opensource.meta.description}">
+	<meta property="og:image" th:content="${baseUrl} + 'assets/img/brand/light.svg'">
+	
+	<!-- Twitter -->
+	<meta name="twitter:card" content="summary_large_image">
+	<meta name="twitter:url" th:content="${url}">
+	<meta name="twitter:title" th:content="#{opensource.title}">
+	<meta name="twitter:description" th:content="#{opensource.meta.description}">
+	<meta name="twitter:image" th:content="${baseUrl} + 'assets/img/brand/light.svg'">
+	
+	
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/default.min.css">
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+	
+	<!-- and it's easy to individually load additional languages -->
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/go.min.js"></script>
+	
+
+
+
+</head>
+
+<body>
+    
+	<!--/* Navbar */-->
+	<th:block th:with="page = 'opensource'" th:insert="~{inc/navbar/navbar-page.html}"></th:block>
+
+    <!--/* Loader */-->
+    <th:block th:insert="~{inc/preloader.html}"></th:block>
+	
+    <main>
+    
+    
+        <!-- Hero -->
+        <section class="section  bg-primary text-white">
+            <div class="container-fluid">
+                <div class="row justify-content-center">
+                    <div class="col-lg-8 col-xl-8 text-center">
+                        <h1 class="display-2 fw-light mb-4"> <span class="fw-bold">Open Source - Guide d'édition des verticales</span>
+                        </h1>
+                        <p class="lead">  Ce comparateur est open source, la première intention est l'ouverture de nos catégories produits (appelées verticales dans le jargon de Nudger),
+                         et de l'eco score qui est défini dans ces mêmes fichiers de configuration. Ce sont des fichiers au format YAML qui définissent le fonctionnement et le comportement 
+                         d'une catégorie de produit, par exemple dans les textes affichés ou générés par IA, dans le calcul de l'ecoscore, ou encore  l'interpretation des attributs. 
+                         Ces fichiers de configuration sont conséquents et ammenés à s'enrichir régulièrement
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+   
+
+
+       
+       
+       
+       <section class="section section-lg">
+            <div class="container">
+                <div class="row justify-content-between align-items-center">
+                    <div class="col-12 col-lg-6">    
+                        <div class="d-flex flex-wrap justify-content-lg-start">
+                            <h2 class="h3 text-center text-lg-left mb-5">Un principe d'héritage</h2>
+                            <div class="my-4">
+                                <div class="d-flex">
+                                    <div class="me-3 me-md-4">
+                                        <div class="icon icon-md icon-secondary-app">
+                                            <span class="fas fa-shield-alt"></span>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <h3 class="h4">Mutualisation</h3>
+                                        <p>
+                                            Une partie du fonctionnement d'une verticale est généralisable à l'ensemble des univers produits. C'est pourquoi toutes les verticales héritent d'une verticale parente, nommée <a href="https://github.com/open4good/open4goods/blob/main/verticals/src/main/resources/verticals/_default.yml">_default.yml</a>.                                            
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="my-4">
+                                <div class="d-flex">
+                                    <div class="me-3 me-md-4">
+                                        <div class="icon icon-md icon-secondary-app">
+                                            <span class="fas fa-user-circle"></span>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <h3 class="h4">Spécialisation</h3>
+                                        <p>
+                                            Toutes les verticales définissent ensuite leur comportement spécifique : attributs supplémentaires, définition de l'écoscore, textes..... On retrouve ces définitions dans le répertoire <a href="https://github.com/open4good/open4goods/tree/main/verticals/src/main/resources/verticals">/verticals/src/main/resources/verticals</a>                                       
+                                         </p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="my-4">
+                                <div class="d-flex">
+                                    <div class="me-3 me-md-4">
+                                        <div class="icon icon-md icon-secondary-app">
+                                            <span class="fas fa-file-alt"></span>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <h3 class="h4">Un mapping Java</h3>
+                                        <p>
+                                            Ces fichiers de configuration correspondent aux classes Java Spring <a href="https://github.com/open4good/open4goods/blob/main/commons/src/main/java/org/open4goods/config/yml/ui/VerticalConfig.java">VerticalConfig</a>, et sont utilisées par les différents services 
+                                            pour construire les verticales et calculer les ecoscores à partir des données dont nous disposons.                                       
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>  
+                    </div>
+                    <div class="col-12 col-lg-5">
+                        <img class="d-none d-lg-inline-block" src="/assets/img/opensource/verticals-inheritance.png" alt="Système d'héritage des verticales de Nudger">
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        
+        
+        
+            <section class="section  bg-gray-200">
+            <div class="container-fluid z-2">
+                <div class="row justify-content-center">
+                    <div class="col-md-10 text-center">
+                        <h2 class="h1">Verticale parente (<a href="https://github.com/open4good/open4goods/blob/main/verticals/src/main/resources/verticals/_default.yml">_default.yml</a>) </h2>
+                        <p class="lead py-4 text-gray">
+                        	Les verticales sont les différentes catégories de produits que vous retrouverez sur le site de Nudger. Ce sont des fichiers de configuration au format YAML
+                        	qui configurent le fonctionnement et le comportement d'une catégorie de produit, y compris dans les textes affichés ou générés par IA, dans l'évaluation de l'ecoscore, les attributs. Ces fichiers de 
+                        	configuration sont conséquents et ammenés à s'enrichir régulièrement  
+                        </p>
+                    </div>
+                </div>
+            </div>  
+            
+            
+            <div class="overflow-auto" style="max-height:500px" >
+            	<pre>
+            		<code class="language-yaml" th:text=${defaultYaml}></code>
+            	</pre>
+            </div>
+            
+            
+            
+        </section>
+       
+       
+       
+       
+        
+    </main>
+
+
+	<!--/* Footer */-->
+	<th:block th:insert="~{inc/footer.html}"></th:block>	
+
+<!-- Core -->
+<script src="../../vendor/@popperjs/core/dist/umd/popper.min.js"></script>
+<script src="/webjars/bootstrap/js/bootstrap.min.js"></script>
+<script src="../../vendor/headroom.js/dist/headroom.min.js"></script>
+
+<!-- Vendor JS -->
+
+<script src="../../vendor/smooth-scroll/dist/smooth-scroll.polyfills.min.js"></script>
+<script src="../../vendor/vivus/dist/vivus.min.js"></script>
+<script src="/webjars/jquery/jquery.min.js"></script>
+
+<script src="/webjars/jquery/jquery.min.js"></script>
+
+<!-- pixel JS -->
+<script src="../../assets/js/pixel.js"></script>
+<!-- custom sources -->
+<script src="../../assets/js/pixel-custom.js"></script>
+<script>
+$(document).ready(function() {
+    
+    	hljs.highlightAll();
+    	
+    	
+} );
+</script>
+
+</body>
+
+</html>
