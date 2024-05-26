@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html th:lang="${siteLocale.language}">
+
+<head>
+
+	<!--/* Metas and CSS */-->
+	<th:block th:insert="~{inc/header-meta.html}"></th:block>
+    
+	<!-- Primary Meta Tags -->
+	<title>Comparateur de prix écologique en open source | Nudger</title>
+	<meta name="description" content="Nudger est libre, gratuit et opensource. C'est ainsi le premier comparateur dont le code est ouvert à tous. ">
+		
+	<!-- Open Graph / Facebook -->
+	<meta property="og:type" content="website">
+	<meta property="og:url" th:content="${url}">
+	<meta property="og:title" th:content="#{opensource.title}">
+	<meta property="og:description" th:content="#{opensource.meta.description}">
+	<meta property="og:image" th:content="${baseUrl} + 'assets/img/brand/light.svg'">
+	
+	<!-- Twitter -->
+	<meta name="twitter:card" content="summary_large_image">
+	<meta name="twitter:url" th:content="${url}">
+	<meta name="twitter:title" th:content="#{opensource.title}">
+	<meta name="twitter:description" th:content="#{opensource.meta.description}">
+	<meta name="twitter:image" th:content="${baseUrl} + 'assets/img/brand/light.svg'">
+	
+</head>
+
+<body>
+    
+	<!--/* Navbar */-->
+	<th:block th:with="page = 'opensource'" th:insert="~{inc/navbar/navbar-page.html}"></th:block>
+
+    <!--/* Loader */-->
+    <th:block th:insert="~{inc/preloader.html}"></th:block>
+	
+    <main>
+    
+    
+        <!-- Hero -->
+        <section class="section  bg-primary text-white">
+            <div class="container-fluid">
+                <div class="row justify-content-center">
+                    <div class="col-lg-8 col-xl-8 text-center">
+                        <h1 class="display-2 fw-light mb-4"> <span class="fw-bold">Open Source</span>
+                        </h1>
+                        <p class="lead">Dans notre logique de communs numériques, Nudger est opensource et <a href="/opendata">opendata</a>. Rendre notre code disponible pour tous permet de garantir la transparence de l'écoscore et de faire de ce comparateur écologique une aventure collective.  
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <!-- Section -->
+        
+        <!-- End of Section -->
+        <section class="section section-lg pt-5">
+            <div class="container text-center">
+
+                <div class="row align-items-center justify-content-around">
+                    <div class="col-12 col-lg-4">
+                        <!-- Icon Box -->
+                        <div class="icon-box text-center mb-5">
+                            <div class="icon icon-shape icon-shape-secondary rounded-circle mb-4">
+                                <span class="far fa-lightbulb"></span>
+                            </div>
+                            <h3 class="h5">Les catégories produits</h3>
+                            <p class="icon-box-text">La modification ou la création d'une catégorie produit est relativement simple, tout est basé sur un fichier de configuration YAML !
+                            </p>
+                            <a href="/opensource/categories-produits" class="btn btn-white btn-sm border-gray-300">En savoir plus</a>
+                        </div>
+                        <!-- End of Icon Box -->
+                        <!-- Icon Box -->
+                        <div class="icon-box text-center mb-5 mb-lg-0">
+                            <div class="icon icon-shape icon-shape-secondary rounded-circle mb-4">
+                                <span class="fas fa-leaf"></span>
+                            </div>
+                            <h3 class="h5">L'ecoscore</h3>
+                            <p class="icon-box-text">Intégré dans le fichier de configuration des catégories produits, nous proposons un zoom spécifique sur la compréhension et la contribution à notre eco-score.
+                            </p>
+                            <a href="#" class="btn btn-white btn-sm border-gray-300">En savoir plus</a>
+                        </div>
+                        <!-- End of Icon Box -->
+                    </div>
+                    <div class="col-md-6 col-lg-4">
+                        <!-- Illustration -->
+                        <a href="https://github.com/open4good/open4goods">
+	                        <img class="d-none d-lg-block" src="https://logos-world.net/wp-content/uploads/2020/11/GitHub-Logo.png" alt="le code de Nudger est sur github">
+	                        open4good/open4goods
+                        </a>
+                        <!-- / Illustration -->
+                    </div>
+                    <div class="col-12 col-lg-4">
+                        <!-- Icon Box -->
+                        <div class="icon-box text-center mb-5">
+                            <div class="icon icon-shape icon-shape-secondary rounded-circle mb-4">
+                                <span class="fas fa-grin-stars"></span>
+                            </div>
+                            <h3 class="h5">Les logos marques et marchands</h3>
+                            <p class="icon-box-text">Pas forcément simple de maintenir à jour les logos des marques et des marchands. Vous pouvez nous aider à ajouter et mettre à jour ces logos simplement !  
+                            </p>
+                            <a href="#" class="btn btn-white btn-sm border-gray-300">En savoir plus</a>
+                        </div>
+                        <!-- End of Icon Box -->
+                        <!-- Icon Box -->
+                        <div class="icon-box text-center mb-5 mb-lg-0">
+                            <div class="icon icon-shape icon-shape-secondary rounded-circle mb-4">
+                                <span class="fas fa-code"></span>
+                            </div>
+                            <h3 class="h5">Du code ! </h3>
+                            <p class="icon-box-text">Qu'il soit plutôt sur le back ou sur le front, nous sommes preneurs de toute contribution ! La première étape est sans doute alors de faire tourner le projet nudger (open4goods) directement sur votre machine, la procédure est décrite sur notre dépôt Github. Certaines tâches (issues) sont spécialement adaptées pour une première intervention sur le projet.
+                            </p>
+                            <a href="https://github.com/open4good/open4goods/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22" class="btn btn-white btn-sm border-gray-300">En savoir plus</a>
+                        </div>
+                        <!-- End of Icon Box -->
+                    </div>
+                </div>
+                
+                
+                
+                
+            </div>
+            
+
+        </section>
+
+
+    <section class="section section-lg bg-gray-200">
+            <div class="container z-2">
+                <div class="row justify-content-center">
+                    <div class="col-md-10 text-center">
+                        <h2 class="h1">Comment contribuer ?</h2>
+                        <p class="lead py-4 text-gray">Si vous souhaitez simplement comprendre ou auditer le fonctionnement du site vous pouvez vous laisser guider simplement dans les documentations ci-dessus. Si vous souhaitez contribuer, tout fonctionne par <strong>Pull Request</strong>. C'est plutôt réservé aux Geeks mais cela reste abordable à tous ! 
+                        <br/><br/>                        
+                        Enfin, une belle façon de nous aider est aussi de d'utiliser Nudger, d'en parler autour de vous et de nous faire retour de vos idées directement sur le dépôt github ou via notre outil de <a href="/feedback/idea">feedback</a> !
+                        
+                        Enfin, nous serons heureux d'échanger avec vous de façon plus traditionnelle via notre formulaire de contact si vous le souhaitez !  
+                        
+                        </p>
+                        <a href="/contact" class="btn btn-lg btn-secondary animate-up-2">Nous contacter</a>
+                    </div>
+                </div>
+            </div>  
+        </section>
+       
+    </main>
+
+
+	<!--/* Footer */-->
+	<th:block th:insert="~{inc/footer.html}"></th:block>	
+
+<!-- Core -->
+<script src="../../vendor/@popperjs/core/dist/umd/popper.min.js"></script>
+<script src="/webjars/bootstrap/js/bootstrap.min.js"></script>
+<script src="../../vendor/headroom.js/dist/headroom.min.js"></script>
+
+<!-- Vendor JS -->
+
+<script src="../../vendor/smooth-scroll/dist/smooth-scroll.polyfills.min.js"></script>
+<script src="../../vendor/vivus/dist/vivus.min.js"></script>
+<script src="/webjars/jquery/jquery.min.js"></script>
+
+<script src="/webjars/jquery/jquery.min.js"></script>
+
+<!-- pixel JS -->
+<script src="../../assets/js/pixel.js"></script>
+<!-- custom sources -->
+<script src="../../assets/js/pixel-custom.js"></script>
+<script>
+$(document).ready(function() {
+    $('#searchInput').on("change",function (e) {
+    	$('#searchForm').attr("action","/recherche/"+encodeURIComponent($('#searchInput').val()));
+    });
+} );
+</script>
+
+</body>
+
+</html>
