@@ -211,16 +211,60 @@ public class ResourceController  {
 
 		//TODO (gof) : not sure pageSize have image, could have any resource
 		// Retrieve one of the cover images
+		Resource img = data.getResources().stream().filter(e->e.getCacheKey().equals(hash)).findAny().orElse(null);		
+
+		if (null != img) {
+			try {
+				// TODO : Should be webp
+				response.addHeader("Content-type","application/pdf");
+				response.addHeader("Cache-Control","public, max-age="+AppConfig.CACHE_PERIOD_SECONDS);
+				InputStream stream = resourceService.getFileStream(img);
+				IOUtils.copy(stream ,response.getOutputStream());
+				IOUtils.closeQuietly(stream);
+			} catch (Exception e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+		} else {
+			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "image introuvable !");
+		}
+	}
+	
+	@GetMapping("/video/{gtin:\\d+}-{hash:\\d+}.mp4")
+	// TODO : Add the PDF name in url
+	public void video(@PathVariable String gtin, @PathVariable String hash, final HttpServletResponse response, HttpServletRequest request) throws IOException  {
+
+		// Retrieve the Product
+		Product data;
+		try {
+			data = esDao.getById(gtin);
+		} catch (ResourceNotFoundException e) {
+			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "video introuvable !");
+		}
+
+		// Handling 404
+		if (null == data) {
+			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "video introuvable !");
+		}
+
+
+		//TODO (gof) : not sure pageSize have image, could have any resource
+		// Retrieve one of the cover images
 		Resource img = data.getResources().stream().filter(e->e.getCacheKey().equals(hash)).findAny().orElse(null);
 		
 
 		if (null != img) {
-			// TODO : Should be webp
-			response.addHeader("Content-type","application/pdf");
-			response.addHeader("Cache-Control","public, max-age="+AppConfig.CACHE_PERIOD_SECONDS);
-			InputStream stream = resourceService.getFileStream(img);
-			IOUtils.copy(stream ,response.getOutputStream());
-			IOUtils.closeQuietly(stream);
+			try {
+				// TODO : Should be webp
+				response.addHeader("Content-type",img.getMimeType());
+				response.addHeader("Cache-Control","public, max-age="+AppConfig.CACHE_PERIOD_SECONDS);
+				InputStream stream = resourceService.getFileStream(img);
+				IOUtils.copy(stream ,response.getOutputStream());
+				IOUtils.closeQuietly(stream);
+			} catch (Exception e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
 		} else {
 			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "image introuvable !");
 		}
