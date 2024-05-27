@@ -146,7 +146,7 @@ public class DatasourceRegressionTest {
 		@Bean
 		DataSourceConfigService datasourceConfigService(@Autowired final ApiProperties config) {
 			// TODO : properly inject env
-			return new DataSourceConfigService(File.separator+"home"+File.separator+"goulven"+File.separator+"git"+File.separator+"open4goods-config/datasources");
+			return   new DataSourceConfigService(File.separator+"home"+File.separator+"Goulven.Furet"+File.separator+"git"+File.separator+"open4goods-config/datasources");
 		}
 
 		@Bean
