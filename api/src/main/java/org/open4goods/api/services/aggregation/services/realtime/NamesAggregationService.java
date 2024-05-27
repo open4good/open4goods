@@ -68,7 +68,7 @@ public class NamesAggregationService extends AbstractAggregationService {
 				ProductI18nElements tConf = e.getValue();
 				
 				// Computing url
-				data.getNames().getUrl().put(lang, data.gtin() + "-" + computePrefixedText(data, tConf.getUrl(), "-"));
+				data.getNames().getUrl().put(lang, data.gtin() + "-" + StringUtils.stripAccents(computePrefixedText(data, tConf.getUrl(), "-")));
 				// h1Title			
 				data.getNames().getH1Title().put(lang, computePrefixedText(data, tConf.getH1Title(), " "));
 				// metaTitle
