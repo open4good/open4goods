@@ -106,19 +106,22 @@ public class AttributesConfig {
 			
 			final Map<String, Map<String, String>> hashedSynonyms = new HashMap<>();
 	
-			for (final AttributeConfig ac : configs) {
-				for (final Entry<String, Set<String>> entry : ac.getSynonyms().entrySet()) {
-					if (!hashedSynonyms.containsKey(entry.getKey())) {
-						hashedSynonyms.put(entry.getKey(), new HashMap<>());
-						
-					}
-					valueKeyMap.put(ac.getKey(), ac.getKey());
-					for (final String val : entry.getValue()) {
-						hashedSynonyms.get(entry.getKey()).put(val, ac.getKey());
-						// Also build a reverse map
-						valueKeyMap.put(val, ac.getKey());
+			if (null != configs) {
+				for (final AttributeConfig ac : configs) {
+					for (final Entry<String, Set<String>> entry : ac.getSynonyms().entrySet()) {
+						if (!hashedSynonyms.containsKey(entry.getKey())) {
+							hashedSynonyms.put(entry.getKey(), new HashMap<>());
+							
+						}
+						valueKeyMap.put(ac.getKey(), ac.getKey());
+						for (final String val : entry.getValue()) {
+							hashedSynonyms.get(entry.getKey()).put(val, ac.getKey());
+							// Also build a reverse map
+							valueKeyMap.put(val, ac.getKey());
+						}
 					}
 				}
+				
 			}
 			cacheHashedSynonyms = hashedSynonyms;
 		}

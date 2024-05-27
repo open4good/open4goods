@@ -323,7 +323,7 @@ public class Product implements Standardisable {
 	
 	
 	public List<Resource> pdfs () {
-		return resources.stream().filter(e->e.getResourceType().equals(ResourceType.PDF)).toList();
+		return resources.stream().filter(e-> e.getResourceType() != null &&  e.getResourceType().equals(ResourceType.PDF)).toList();
 	}
 	
 	

@@ -294,8 +294,9 @@ public class IcecatCompletionService extends AbstractCompletionService {
 	 */
 	private DataFragment initDataFragment( Product data) {
 		DataFragment df = new DataFragment();
+		// TODO : Constants
 		df.setDatasourceName("icecat.biz");
-		df.setDatasourceConfigName("icecat.biz");
+		df.setDatasourceConfigName("icecat.biz.yml");
 		df.setLastIndexationDate(System.currentTimeMillis());
 		df.setCreationDate(System.currentTimeMillis());
 		df.addReferentielAttribute(ReferentielKey.GTIN, data.getId() );
