@@ -8,6 +8,17 @@
 		   <span th:each="img, stat : ${product.images}" >
 		  	 <img th:unless="${stat.first}" height="120" th:src="'/images/'+${product.gtin()}+'-'+${stat.index}+'.png'"	th:alt="${product.names.longestOfferName()}">
 		   </span>
+		   
+		   <span th:each="img, stat : ${product.videos}" >
+		   
+		   <video width="320" height="240" controls>
+			  <source th:src="'/videos/'+${product.gtin()}+'-'+${stat.index}+'.mp4'">			  
+			  Your browser does not support the video tag.
+			</video>
+			
+
+		  	
+		   </span>
 		   	
 		   </div>
 		   

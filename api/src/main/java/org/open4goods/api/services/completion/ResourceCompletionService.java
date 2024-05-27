@@ -113,7 +113,7 @@ public class ResourceCompletionService  extends AbstractCompletionService{
 				// Download the resources and do the analyze
 				.map(e -> fetchResource(e, vertical)).toList();
 
-		
+		// Updating
 		data.getResources().removeAll(resources);
 		data.getResources().addAll(resources);
 
@@ -265,7 +265,8 @@ public class ResourceCompletionService  extends AbstractCompletionService{
 			sortedCluster.add(tmpList);			
 			
 			// We priorize on amazon primary image
-			boolean primary =  resourceGroups.stream().map(e->e.getTags()).anyMatch(e -> e.contains(AmazonCompletionService.AMAZON_PRIMARY_TAG));
+			// TODO : Share const
+			boolean primary =  resourceGroups.stream().map(e->e.getTags()).anyMatch(e -> e.contains("cover"));
 			if (primary) {
 				forcedFirst = tmpList;
 			}
@@ -320,6 +321,9 @@ public class ResourceCompletionService  extends AbstractCompletionService{
 		resource.setCacheKey(IdHelper.generateResourceId(resource.getUrl()));
 		resource.setTimeStamp(System.currentTimeMillis());
 
+		// Overiding the resource group
+		resource.setGroup(null);
+		
 		// Extracting filename
 		resource.setFileName(resource.getUrl().substring(resource.getUrl().lastIndexOf('/')));
 		int posPoint = resource.getFileName().indexOf('.');
@@ -332,7 +336,10 @@ public class ResourceCompletionService  extends AbstractCompletionService{
 
 		// Downloading the file if not cached
 		// TODO : A specific config property to force re-download
-		if (!target.exists()) {
+		if (target.exists()) { 
+			logger.info("resource in file cache: {}", target);
+		} else {
+			
 			logger.info("Downloading resource to local : {}", target);
 
 			try {
@@ -403,7 +410,12 @@ public class ResourceCompletionService  extends AbstractCompletionService{
 				// Case of PDF
 				processPdf(resource, target);
 				break;
-
+			
+			case "video/quicktime":
+				// Case of video
+				processVideo(resource, target);
+				break;
+				
 			default:
 				logger.warn("Unknown resource type : {} : {}", resource.getMimeType(), resource.getUrl());
 				// Case of Unknown
@@ -416,6 +428,11 @@ public class ResourceCompletionService  extends AbstractCompletionService{
 		}
 
 		return resource;
+	}
+
+	private void processVideo(Resource resource, File target) {
+		resource.setResourceType(ResourceType.VIDEO);
+		
 	}
 
 	private void processPdf(final Resource indexed, final File target) {

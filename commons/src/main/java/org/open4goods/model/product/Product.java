@@ -302,7 +302,6 @@ public class Product implements Standardisable {
 			sb.append(" - ").append(attr.getKey().toString()).append(" : ").append(attr.getValue()).append("\n");
 		}
 		
-
 		for (Entry<String, AggregatedAttribute> attr : attributes.getAggregatedAttributes().entrySet()) {
 			sb.append(" - ").append(attr.getKey().toString()).append(" : ").append(attr.getValue().getValue()).append("\n");
 		}
@@ -314,8 +313,6 @@ public class Product implements Standardisable {
 		for (AggregatedAttribute attr : attributes.getUnmapedAttributes()) {
 			sb.append(" - ").append(attr.getName().toString()).append(" : ").append(attr.getValue()).append("\n");
 		}
-		
-	
 
 		return sb.toString();
 		
@@ -324,6 +321,10 @@ public class Product implements Standardisable {
 	
 	public List<Resource> pdfs () {
 		return resources.stream().filter(e-> e.getResourceType() != null &&  e.getResourceType().equals(ResourceType.PDF)).toList();
+	}
+	
+	public List<Resource> videos () {
+		return resources.stream().filter(e-> e.getResourceType() != null &&  e.getResourceType().equals(ResourceType.VIDEO)).toList();
 	}
 	
 	
