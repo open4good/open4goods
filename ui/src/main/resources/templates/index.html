@@ -122,24 +122,26 @@
 
 		<section class="bg-white text-center py-4">
 			<h2> <span class="h1 mb-3">Nos catégories évaluées</span></h2>
-			<p class="lead mb-0">L'assurance de bien choisir</p>
+			<p class="lead mb-0">Peu de verticales pour l'instant. C'est exprès, c'est une Beta !</p>
 		</section>
 
 		<section class="container py-5">
 			<div class="row">
 				<div class="col-12 col-md-6 col-lg-3 mb-3" th:each ="vertical : ${verticals}">
-					<div class="card card-flip shadow">
-						<div class="card-flip-inner">
-							   <div class="wrapper-card-img">
-									<img th:src="${vertical.i18n(siteLanguage).verticalHomeLogo}" class="card-img-top rounded-top" alt="img TV">
-								</div>
-								<div class="card-body bg-primary">
-									<h3 class="h5 card-title text-white mt-3" th:text="${vertical.i18n(siteLanguage).verticalHomeTitle}"></h3>
-									<p class="card-text" th:text="${vertical.i18n(siteLanguage).verticalHomeDescription}"></p>
-									<a th:href="'/'+${vertical.i18n(siteLanguage).verticalHomeUrl}" class="btn btn-primary btn-sm">Découvrir</a>
-								</div>
+					<a th:href="'/'+${vertical.i18n(siteLanguage).verticalHomeUrl}" >
+						<div class="card card-flip shadow">
+							<div class="card-flip-inner">
+								   <div class="wrapper-card-img">
+										<img th:src="${vertical.i18n(siteLanguage).verticalHomeLogo}" class="card-img-top rounded-top" alt="img TV">
+									</div>
+									<div class="card-body bg-primary">
+										<h3 class="h5 card-title text-white mt-3" th:text="${vertical.i18n(siteLanguage).verticalHomeTitle}"></h3>
+										<p class="card-text" th:text="${vertical.i18n(siteLanguage).verticalHomeDescription}"></p>
+										<span class="btn btn-primary btn-sm">Découvrir</span>
+									</div>
+							</div>
 						</div>
-					</div>
+					</a>
 				</div>
 			</div>
 		</section>
