@@ -135,8 +135,8 @@ ecoscoreConfig:
 ##############################################################################
 
 verticalFilters:
-  - "PARTS_AVAILLABILITY"
-  - "DIAGONALE_POUCE"
+  - "DIAGONALE_POUCES"
+  - "TV_TYPE"
 #  - "CLASSE_ENERGY"   
 #  - "PARTS_AVAILLABILITY"
 #  - "WARRANTY"
