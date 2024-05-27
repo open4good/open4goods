@@ -11,6 +11,13 @@ public class ExternalIds {
 	private String asin;
 	
 	/**
+	 * The icecat identifier
+	 */
+	private String icecat;
+	
+	
+	
+	/**
 	 * Known mpn's
 	 */
 	private Set<String> mpn = new HashSet<>();
@@ -42,6 +49,14 @@ public class ExternalIds {
 
 	public void setSku(Set<String> sku) {
 		this.sku = sku;
+	}
+
+	public String getIcecat() {
+		return icecat;
+	}
+
+	public void setIcecat(String icecat) {
+		this.icecat = icecat;
 	}
 	
 	
