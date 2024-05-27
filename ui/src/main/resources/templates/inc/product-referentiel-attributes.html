@@ -55,9 +55,8 @@
 		</tr>
 		
 		
-			<tr>
-				<td colspan="2" class="h2  m-2 "><strong>Documentation</strong></td>
-					
+			<tr th:if="${product.pdfs().size()>0}">
+				<td colspan="2" class="h2  m-2 "><strong>Documentation</strong></td>					
 			</tr>
 			
 			<tr th:each="item,stat : ${product.pdfs()}">
