@@ -169,12 +169,13 @@ public class IcecatCompletionService extends AbstractCompletionService {
 		
 		iceItem.taxonomyDescriptions.forEach(e->{
 			
-			System.out.println("TAXONOMY : ");
+			// TODO : Handle taxonomy
 		});
 		
 		
 		
 		iceItem.productRelated.forEach(e-> {
+			// TODO : HAndle related products
 			System.out.println("RELATED : " + e.icecatID);
 		});
 // TODO
