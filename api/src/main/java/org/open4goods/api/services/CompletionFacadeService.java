@@ -6,6 +6,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.open4goods.api.services.completion.AmazonCompletionService;
 import org.open4goods.api.services.completion.GenAiCompletionService;
+import org.open4goods.api.services.completion.IcecatCompletionService;
 import org.open4goods.api.services.completion.ResourceCompletionService;
 import org.open4goods.exceptions.InvalidParameterException;
 import org.slf4j.Logger;
@@ -14,28 +15,29 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 /**
- * This service is in charge of building Product in realtime mode
- * TODO : Maintain a state machine to disable multiple launching
+ * This service is in charge of building Product in realtime mode TODO :
+ * Maintain a state machine to disable multiple launching
+ * 
  * @author goulven
  *
  */
-@Service
+
 // TODO : Scheduling from conf
 public class CompletionFacadeService {
 
 	protected static final Logger logger = LoggerFactory.getLogger(CompletionFacadeService.class);
 
-
 	private final GenAiCompletionService aiCompletionService;
 	private ResourceCompletionService resourceCompletionService;
 	private AmazonCompletionService amazonCompletionService;
+	private IcecatCompletionService icecatCompletionService;
 
-
-
-	public CompletionFacadeService(GenAiCompletionService aiCompletionService, ResourceCompletionService resourceCompletionService, AmazonCompletionService amazonCompletionService) {
+	public CompletionFacadeService(GenAiCompletionService aiCompletionService,
+			ResourceCompletionService resourceCompletionService, AmazonCompletionService amazonCompletionService, IcecatCompletionService icecatCompletionService) {
 		this.aiCompletionService = aiCompletionService;
 		this.resourceCompletionService = resourceCompletionService;
 		this.amazonCompletionService = amazonCompletionService;
+		this.icecatCompletionService = icecatCompletionService;
 	}
 
 	///////////////////////////////////
@@ -47,7 +49,6 @@ public class CompletionFacadeService {
 		resourceCompletionService.completeAll();
 	}
 
-
 	///////////////////////////////////
 	// Genai completion
 	///////////////////////////////////
@@ -58,15 +59,22 @@ public class CompletionFacadeService {
 		aiCompletionService.completeAll();
 	}
 
-
 	///////////////////////////////////
 	// Amazon completion
 	///////////////////////////////////
 	@Scheduled(timeUnit = TimeUnit.HOURS, fixedDelay = 24, initialDelay = 3)
 	public void amazonCompletionAll() throws InvalidParameterException, IOException {
- 		logger.warn("Completing verticals with amazon");
+		logger.warn("Completing verticals with amazon");
 		amazonCompletionService.completeAll();
 	}
 
+	///////////////////////////////////
+	// Amazon completion
+	///////////////////////////////////
+	@Scheduled(timeUnit = TimeUnit.HOURS, fixedDelay = 24, initialDelay = 4)
+	public void icecatCompletionAll() throws InvalidParameterException, IOException {
+		logger.warn("Completing verticals with amazon");
+		icecatCompletionService.completeAll();
+	}
 
 }
