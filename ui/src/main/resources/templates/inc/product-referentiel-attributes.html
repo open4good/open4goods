@@ -53,5 +53,27 @@
 				<span th:text="${product.gtin()}"></span>
 			</td>
 		</tr>
+		
+		
+			<tr>
+				<td colspan="2" class="h2  m-2 "><strong>Documentation</strong></td>
+					
+			</tr>
+			
+			<tr th:each="item,stat : ${product.pdfs()}">
+			
+				<td class="align-middle" th:text="${item.bestNameFromTag()}"></td>				
+				<td class="align-middle">
+					<span class="fa-solid fa-circle-info me-2"></span>
+					<a target="_blank" th:href="'/pdf/'+${product.gtin} +'-' + ${item.cacheKey}+'.pdf'"> Fichier PDF (<span th:text="${item.humanReadableSize()}"></span>)</a>
+				</td>
+				
+				
+				</td>
+
+			</tr>
+			
+			
+			
 	</table>
 </div>
