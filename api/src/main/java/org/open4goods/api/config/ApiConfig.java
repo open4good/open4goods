@@ -10,6 +10,7 @@ import org.open4goods.api.services.AggregationFacadeService;
 import org.open4goods.api.services.FetcherOrchestrationService;
 import org.open4goods.api.services.completion.AmazonCompletionService;
 import org.open4goods.api.services.completion.GenAiCompletionService;
+import org.open4goods.api.services.completion.IcecatCompletionService;
 import org.open4goods.api.services.completion.ResourceCompletionService;
 import org.open4goods.api.services.store.DataFragmentStoreService;
 import org.open4goods.crawler.config.yml.FetcherProperties;
@@ -120,7 +121,12 @@ public class ApiConfig {
 		return new GenAiCompletionService(aiService, productRepository, verticalConfigService, apiProperties);
 	}
 
-	
+	@Bean
+	@Autowired
+	IcecatCompletionService icecatCompletionService( ProductRepository productRepository, VerticalsConfigService verticalConfigService, DataSourceConfigService dataSourceConfigService, AggregationFacadeService aggregationFacade) throws TechnicalException {
+		return new IcecatCompletionService(productRepository, verticalConfigService, apiProperties, dataSourceConfigService, aggregationFacade);
+	}
+
 	@Bean	
 	@Autowired
 	AmazonCompletionService amazonCompletionService(ProductRepository dataRepository, VerticalsConfigService verticalConfigService,

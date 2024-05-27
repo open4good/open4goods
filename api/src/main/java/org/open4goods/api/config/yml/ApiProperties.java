@@ -162,6 +162,12 @@ public class ApiProperties {
 	private AmazonCompletionConfig amazonConfig = new AmazonCompletionConfig();
 	
 	
+	/**
+	 * The configuration for icecat
+	 */
+	private IcecatCompletionConfig icecatConfig = new IcecatCompletionConfig();
+	
+	
 	
 	public AmazonCompletionConfig getAmazonConfig() {
 		return amazonConfig;
@@ -486,6 +492,18 @@ public class ApiProperties {
 
 	public void setDevModeConfig(DevModeConfiguration devModeConfig) {
 		this.devModeConfig = devModeConfig;
+	}
+
+
+
+	public IcecatCompletionConfig getIcecatConfig() {
+		return icecatConfig;
+	}
+
+
+
+	public void setIcecatConfig(IcecatCompletionConfig icecatConfig) {
+		this.icecatConfig = icecatConfig;
 	}
 
 

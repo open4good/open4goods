@@ -27,6 +27,7 @@ import org.open4goods.model.constants.Currency;
 import org.open4goods.model.constants.ProductCondition;
 import org.open4goods.model.constants.ProviderType;
 import org.open4goods.model.constants.ReferentielKey;
+import org.open4goods.model.constants.ResourceType;
 import org.open4goods.model.data.AiDescription;
 import org.open4goods.model.data.Description;
 import org.open4goods.model.data.Resource;
@@ -117,6 +118,11 @@ public class Product implements Standardisable {
 	@Field(index = false, store = false, type = FieldType.Object)
 	private Set<Resource> resources = new HashSet<>();
 
+	
+	
+	
+	
+	
 	/**
 	 * The post computed images, if any. Means images are cached, and ordered by relevance
 	 */
@@ -314,6 +320,13 @@ public class Product implements Standardisable {
 		return sb.toString();
 		
 	}
+	
+	
+	public List<Resource> pdfs () {
+		return resources.stream().filter(e->e.getResourceType().equals(ResourceType.PDF)).toList();
+	}
+	
+	
 	/**
 	 *
 	 * @param language

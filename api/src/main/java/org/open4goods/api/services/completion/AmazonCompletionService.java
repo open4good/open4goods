@@ -140,16 +140,14 @@ public class AmazonCompletionService extends AbstractCompletionService {
 			logger.info("Initial amazon call (get) for {}", data.gtin());
 			fragments.addAll(completeSearch(vertical, data));
 		} else {
-			if (!asin.equals(NOT_FOUND_ASIN_MARKUP)) {
-				// If we already have the ASIN, we operate a direct get request
-				logger.info("Further amazon call (get) for {}", data.gtin());
-				// TODO : Do not proceed, have a delay threshold
-				fragments.addAll(completeGet(vertical, data));
-			} else {
-//				TODO : Could hve a strategy to try back items, after a while. Based on a NOT_FOUND:timestamp ?
-				logger.info("Amazon fetch of {} skipped because failed in a previous attempt", data.gtin());
-				return;
-			}
+				if (asin.equals(NOT_FOUND_ASIN_MARKUP)) {
+					data.getExternalId().setAsin(null);
+				} else {
+					// If we already have the ASIN, we operate a direct get request
+					logger.info("Further amazon call (get) for {}", data.gtin());
+					// TODO : Do not proceed, have a delay threshold
+					fragments.addAll(completeGet(vertical, data));
+				}
 		}
 		
 		// Apply aggregation

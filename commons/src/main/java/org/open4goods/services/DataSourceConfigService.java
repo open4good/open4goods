@@ -200,7 +200,7 @@ public class DataSourceConfigService {
 		final Map<String,DataSourceProperties> ret = new HashMap<>();
 		org.springframework.core.io.Resource[] resources = null;
 
-		logger.info("Reading datasourcesByFileName from: {}", path);
+		logger.info("Reading datasources ByFileName from: {}", path);
 
 		try {
 			resources = resolver.getResources(path);
