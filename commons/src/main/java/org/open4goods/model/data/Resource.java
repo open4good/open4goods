@@ -6,6 +6,7 @@ import java.net.URL;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.apache.commons.io.FileUtils;
 import org.open4goods.exceptions.ValidationException;
 import org.open4goods.model.Validable;
 import org.open4goods.model.constants.ResourceType;
@@ -103,6 +104,8 @@ public class Resource  implements Validable {
 	}
 
 	
+	
+	
 	@Override
 	public String toString() {
 		return  getUrl();
@@ -140,6 +143,13 @@ public class Resource  implements Validable {
 	}
 
 
+	/**
+	 * 
+	 * @return
+	 */
+	public String bestNameFromTag() {
+		return tags.stream().filter(e-> !e.contains(".")).findAny().orElse(nameFromUrl());
+	}
 
 
 	public String nameFromUrl() {
@@ -157,7 +167,7 @@ public class Resource  implements Validable {
 			return ret;
 		} else {
 			logger.warn("Cannot extract nice name from url {}",getUrl());
-			return getUrl();
+			return cacheKey;
 		}
 
 	}
@@ -177,6 +187,9 @@ public class Resource  implements Validable {
 		return folderHashPrefix(cacheKey);
 	}
 
+	public String humanReadableSize() {
+		return FileUtils.byteCountToDisplaySize( fileSize);
+	}
 
 	//////////////////////////////////
 	// Getters / Setters

@@ -423,6 +423,9 @@ public class ResourceCompletionService  extends AbstractCompletionService{
 		// config, html version, so on...
 		// handle metadatas
 		indexed.setResourceType(ResourceType.PDF);
+		
+		
+		
 
 	}
 
