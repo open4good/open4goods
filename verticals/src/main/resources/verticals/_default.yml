@@ -160,6 +160,7 @@ attributesConfig:
   featuredValues:
     - YES
     - OUI
+    - Y
     
 ####################################################################################
 # ATTRIBUTES DEFINITIONS
