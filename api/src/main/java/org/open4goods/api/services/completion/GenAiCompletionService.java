@@ -29,6 +29,13 @@ public class GenAiCompletionService  extends AbstractCompletionService{
 	public void processProduct(VerticalConfig vertical, Product data) {
 		logger.info("AI text completion for {}", data.getId());
 		aiService.complete(data, vertical);
+		
+		try {
+			// TODO : For rate limit, from conf
+			Thread.sleep(3000);
+		} catch (InterruptedException e) {
+			logger.error("Errot while sleeping");
+		}
 	}
 
 }
