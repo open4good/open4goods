@@ -7,6 +7,7 @@ import java.util.concurrent.TimeUnit;
 import org.apache.commons.lang3.ArrayUtils;
 import org.open4goods.api.config.yml.ApiProperties;
 import org.open4goods.api.services.AggregationFacadeService;
+import org.open4goods.api.services.CompletionFacadeService;
 import org.open4goods.api.services.FetcherOrchestrationService;
 import org.open4goods.api.services.completion.AmazonCompletionService;
 import org.open4goods.api.services.completion.GenAiCompletionService;
@@ -135,8 +136,12 @@ public class ApiConfig {
 	}
 
 	
-	
-	
+	@Bean
+	@Autowired
+	 CompletionFacadeService completionFacadeService(GenAiCompletionService aiCompletionService,
+			ResourceCompletionService resourceCompletionService, AmazonCompletionService amazonCompletionService, IcecatCompletionService icecatCompletionService) {
+		return new CompletionFacadeService(aiCompletionService, resourceCompletionService, amazonCompletionService, icecatCompletionService);
+	}
 	
 	@Bean	
 	BlablaService blablaService(@Autowired EvaluationService evaluationService) {
