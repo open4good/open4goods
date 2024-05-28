@@ -176,7 +176,7 @@ public class IcecatCompletionService extends AbstractCompletionService {
 		
 		iceItem.productRelated.forEach(e-> {
 			// TODO : HAndle related products
-			System.out.println("RELATED : " + e.icecatID);
+			//System.out.println("RELATED : " + e.icecatID);
 		});
 // TODO
 //TaxonomyDescriptions
@@ -210,6 +210,7 @@ public class IcecatCompletionService extends AbstractCompletionService {
 
 		for (Gallery g : gallery) {
 			try {
+				// TODO : mutualize tag
 				df.addResource(g.pic ,  Sets.newHashSet(g.type,"gallery"));
 			} catch (ValidationException e) {
 				// TODO Auto-generated catch block
@@ -236,7 +237,16 @@ public class IcecatCompletionService extends AbstractCompletionService {
 
 	private void completeImage(Image image, DataFragment df) {
 		try {
-			df.addResource(image.highPic, "cover");
+			
+			// Tweak to exclude "brand" images sometimes used as logo
+			if (image.highPic.contains("brand")) {
+				df.addResource(image.highPic);
+			} else {
+				// TODO : mutualize cover cponst
+				df.addResource(image.highPic,"cover");
+				
+			}
+			
 		} catch (ValidationException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
