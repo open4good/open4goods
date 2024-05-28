@@ -29,6 +29,7 @@ import org.open4goods.model.product.AggregatedAttribute;
 import org.open4goods.model.product.AggregatedFeature;
 import org.open4goods.model.product.Product;
 import org.open4goods.services.BrandService;
+import org.open4goods.services.IcecatFeatureService;
 import org.open4goods.services.VerticalsConfigService;
 import org.slf4j.Logger;
 
@@ -39,11 +40,13 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 	private final BrandService brandService;
 
 	private VerticalsConfigService verticalConfigService;
+	private IcecatFeatureService featureService;
 
-	public AttributeRealtimeAggregationService(final VerticalsConfigService verticalConfigService,  BrandService brandService, final Logger logger) {
+	public AttributeRealtimeAggregationService(final VerticalsConfigService verticalConfigService,  BrandService brandService, final Logger logger, IcecatFeatureService featureService) {
 		super(logger);
 		this.verticalConfigService = verticalConfigService;
 		this.brandService = brandService;
+		this.featureService = featureService;
 	}
 
 	
@@ -61,8 +64,19 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 		if (!data.getAttributes().getAggregatedAttributes().keySet().containsAll(vConf.getAttributesConfig().getMandatory())) {
 			// Missing attributes.
 			dedicatedLogger.warn("Missing mandatory attributes for product {}. Will be unmatched from vertical {}", data.getId(), vConf.getId());
+			// TODO : better have a flag, that is param on the query in the DAO
 			data.setVertical(null);			
 		}
+
+		
+		// Attributing taxomy to attributes
+		data.getAttributes().getUnmapedAttributes().forEach(a -> {
+			a.setIcecatTaxonomyIds(featureService.resolve(a.getName()) );
+		});
+		
+		
+	
+	
 	}
 
 	

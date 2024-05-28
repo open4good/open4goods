@@ -9,6 +9,7 @@ import org.apache.commons.lang3.ArrayUtils;
 import org.open4goods.config.BrandConfiguration;
 import org.open4goods.config.yml.DevModeConfiguration;
 import org.open4goods.config.yml.GithubConfiguration;
+import org.open4goods.config.yml.IcecatFeatureConfiguration;
 import org.open4goods.config.yml.ui.DescriptionsAggregationConfig;
 import org.open4goods.crawler.config.yml.FetcherProperties;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -167,6 +168,11 @@ public class ApiProperties {
 	 */
 	private IcecatCompletionConfig icecatConfig = new IcecatCompletionConfig();
 	
+	/**
+	 * The configuration for icecat features
+     
+	 */
+	private IcecatFeatureConfiguration icecatFeatureConfig = new IcecatFeatureConfiguration();
 	
 	
 	public AmazonCompletionConfig getAmazonConfig() {
@@ -504,6 +510,18 @@ public class ApiProperties {
 
 	public void setIcecatConfig(IcecatCompletionConfig icecatConfig) {
 		this.icecatConfig = icecatConfig;
+	}
+
+
+
+	public IcecatFeatureConfiguration getIcecatFeatureConfig() {
+		return icecatFeatureConfig;
+	}
+
+
+
+	public void setIcecatFeatureConfig(IcecatFeatureConfiguration icecatFeatureConfig) {
+		this.icecatFeatureConfig = icecatFeatureConfig;
 	}
 
 
