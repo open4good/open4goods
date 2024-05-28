@@ -97,9 +97,7 @@ public class BatchController {
 	@Operation(summary="Update all verticals (sanitisation + launch the scheduled batch that score all verticals)")
 	public void scoreVerticals() throws InvalidParameterException, IOException, InterruptedException {
 		
-		batchService.sanitizeAll();	
-		Thread.sleep(5000);
-		batchService.scoreAll();
+		batchService.sanitizeAllVerticals();	
 		Thread.sleep(5000);
 		batchService.scoreAll();
 	}
