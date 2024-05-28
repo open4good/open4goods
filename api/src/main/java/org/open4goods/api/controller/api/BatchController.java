@@ -61,6 +61,7 @@ public class BatchController {
 		this.batchService = batchService;
 		this.aiCompletionService =  aiCompletionService;
 		this.resourceCompletionService = resourceCompletionService;
+		
 	}
 
 	@PutMapping(path="/batch/verticals/")
