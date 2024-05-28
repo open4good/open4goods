@@ -3,7 +3,7 @@
 	<div class="card-body">	
 		<th:block th:each="item, stat : ${product.datasourceCategories}">
 			<div class="alert alert-primary" role="alert">
-			 <a  th:href="'/categorie/'+${item.toLowerCase()}" th:text="${item}"></a>
+			 <span> th:text="${item}"></span>
 			</div>
 		</th:block>
 	</div>
