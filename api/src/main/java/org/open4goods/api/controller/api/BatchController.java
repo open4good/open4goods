@@ -83,7 +83,6 @@ public class BatchController {
 
 	@PostMapping(path="/batch/verticals/")
 	@Operation(summary="Create or update a vertical with a given config name. Can be long time processing")
-	@PreAuthorize("hasAuthority('"+RolesConstants.ROLE_ADMIN+"')")
 	public String fullUpdateFromName( @RequestParam @NotBlank final String verticalConfig ) throws InvalidParameterException, JsonParseException, JsonMappingException, IOException, InterruptedException{
 		
 		// This is initial submission, batching the products to update catégories				
@@ -97,6 +96,9 @@ public class BatchController {
 	@GetMapping("/batch/verticals")
 	@Operation(summary="Update all verticals (sanitisation + launch the scheduled batch that score all verticals)")
 	public void scoreVerticals() throws InvalidParameterException, IOException, InterruptedException {
+		
+		batchService.sanitizeAll();	
+		Thread.sleep(5000);
 		batchService.scoreAll();
 		Thread.sleep(5000);
 		batchService.scoreAll();
