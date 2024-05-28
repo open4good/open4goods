@@ -41,6 +41,7 @@ import org.open4goods.services.DataSourceConfigService;
 import org.open4goods.services.EvaluationService;
 import org.open4goods.services.GoogleTaxonomyService;
 import org.open4goods.services.Gs1PrefixService;
+import org.open4goods.services.IcecatFeatureService;
 import org.open4goods.services.ImageMagickService;
 import org.open4goods.services.RemoteFileCachingService;
 import org.open4goods.services.ResourceService;
@@ -72,6 +73,7 @@ import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 
+import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.Ticker;
 
@@ -97,7 +99,11 @@ public class ApiConfig {
 		this.apiProperties = apiProperties;
 	}
 
-		
+    @Bean
+    public XmlMapper xmlMapper() {
+        return new XmlMapper();
+    }
+    
 	  @Bean
 	  public RedisTemplate<String, Product> redisTemplate(RedisConnectionFactory connectionFactory) {
 		  RedisTemplate<String, Product> template = new RedisTemplate<>();
@@ -115,6 +121,12 @@ public class ApiConfig {
 		return new SerialisationService();
 	}
 
+	
+	@Bean
+	@Autowired
+	IcecatFeatureService icecatFeatureService(XmlMapper xmlMapper) {
+		return new IcecatFeatureService(xmlMapper, apiProperties.getIcecatFeatureConfig());
+	}
 	
 	@Bean
 	@Autowired
@@ -228,9 +240,9 @@ public class ApiConfig {
 			@Autowired BarcodeValidationService barcodeValidationService,
 			@Autowired BrandService brandservice,
 			@Autowired GoogleTaxonomyService gts,
-			@Autowired BlablaService blablaService
-			) {
-		return new AggregationFacadeService(evaluationService, standardiserService, autowireBeanFactory, aggregatedDataRepository, apiProperties, gs1prefixService, dataSourceConfigService, configService,  barcodeValidationService,brandservice, gts, blablaService);
+			@Autowired BlablaService blablaService,
+			@Autowired IcecatFeatureService icecatFeatureService) {
+		return new AggregationFacadeService(evaluationService, standardiserService, autowireBeanFactory, aggregatedDataRepository, apiProperties, gs1prefixService, dataSourceConfigService, configService,  barcodeValidationService,brandservice, gts, blablaService, icecatFeatureService);
 	}
 
 

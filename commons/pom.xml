@@ -24,20 +24,25 @@
 
 				</configuration>
 			</plugin>
+			
 
 		</plugins>
 	</build>
 
 	<dependencies>
-		
+
 		<!-- verticals definitions -->
 		<dependency>
 			<groupId>org.open4goods</groupId>
 			<artifactId>verticals</artifactId>
 			<version>${global.version}</version>
 		</dependency>
-		
 
+
+<dependency>
+    <groupId>com.fasterxml.jackson.dataformat</groupId>
+    <artifactId>jackson-dataformat-xml</artifactId>
+</dependency>
 
 		<dependency>
 			<groupId>com.ibm.icu</groupId>
@@ -111,7 +116,7 @@
 			<version>4.5.14</version>
 		</dependency>
 
-	<dependency>
+		<dependency>
 			<groupId>org.apache.tika</groupId>
 			<artifactId>tika-parsers</artifactId>
 			<version>1.28.5</version>
