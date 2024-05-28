@@ -1,6 +1,8 @@
 package org.open4goods.api.services.aggregation.services.realtime;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.open4goods.api.services.aggregation.AbstractAggregationService;
 import org.open4goods.config.yml.ui.VerticalConfig;
@@ -41,6 +43,15 @@ public class MediaAggregationService extends AbstractAggregationService{
 	@Override
 	public void onDataFragment(final DataFragment input, final Product output, VerticalConfig vConf) throws AggregationSkipException {
 
+		
+		
+		Map<String,Resource> olds = new HashMap<>();
+		output.getResources().forEach(r -> {
+			olds.put(r.getUrl(), r);
+		});
+		
+		
+		
 		for (final Resource r : input.getResources()) {
 
 			// Adding standard tags
@@ -48,7 +59,17 @@ public class MediaAggregationService extends AbstractAggregationService{
 
 			r.setCacheKey(IdHelper .generateResourceId(r.getUrl()));
 
-			output.getResources().add(r);
+			
+			
+			// a special case here. to update tags. 
+			
+			Resource old = olds.get(r.getUrl());
+			
+			if (null != old) {
+				old.setTags(r.getTags());
+			} else {
+				output.getResources().add(r);				
+			}
 		}
 	}
 
