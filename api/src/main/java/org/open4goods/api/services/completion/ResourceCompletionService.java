@@ -11,6 +11,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
@@ -190,6 +191,20 @@ public class ResourceCompletionService  extends AbstractCompletionService{
 		logger.info("{}/{} images selected for product {} : \n  {}",resultingImages.size(),images.size(), data.gtin(), StringUtils.join(resultingImages,"\n  ") );
 		
 		// TODO : Delete all evicted items after a given time
+		
+		
+		
+		// Extracting the cover image first
+		// TODO : cover as const
+		Resource cover = resultingImages.stream().filter(e->e.getTags().contains("cover")).findAny().orElse(null);		
+		if (null != cover) {
+			resultingImages.remove(cover);
+			resultingImages.addFirst(cover);
+		}
+		
+		
+		
+		
 		
 		
 		// Setting the images on the product
