@@ -49,7 +49,7 @@ public class ResourceCompletionService  extends AbstractCompletionService{
 
 
 	// TODO : From yaml
-	private static final double SIMILARITY_SCORE = 0.40;
+	private static final double SIMILARITY_SCORE = 0.30;
 	private static final int PERCEPTIV_HASH_SIZE = 32;
 
 	// TODO : Dedicated logger
@@ -257,7 +257,7 @@ public class ResourceCompletionService  extends AbstractCompletionService{
 		
 		
 		// Sorting buckets content by image size (best image first)
-		List<Resource> forcedFirst = null;
+//		List<Resource> forcedFirst = null;
 		for (Set<Resource> resourceGroups : cluster.values() ) {
 			List<Resource> tmpList = new ArrayList<>();
 			tmpList.addAll(resourceGroups);
@@ -266,19 +266,19 @@ public class ResourceCompletionService  extends AbstractCompletionService{
 			
 			// We priorize on amazon primary image
 			// TODO : Share const
-			boolean primary =  resourceGroups.stream().map(e->e.getTags()).anyMatch(e -> e.contains("cover"));
-			if (primary) {
-				forcedFirst = tmpList;
-			}
+//			boolean primary =  resourceGroups.stream().map(e->e.getTags()).anyMatch(e -> e.contains("cover"));
+//			if (primary) {
+//				forcedFirst = tmpList;
+//			}
 		}
 				
 		// Sorting bucketsby number of occurences
 		Collections.sort(sortedCluster, (o1, o2) -> Integer.compare(o2.size(), o1.size()));
 
-		if (null != forcedFirst) {
-			sortedCluster.remove(forcedFirst);
-			sortedCluster.addFirst(forcedFirst);
-		}
+//		if (null != forcedFirst) {
+//			sortedCluster.remove(forcedFirst);
+//			sortedCluster.addFirst(forcedFirst);
+//		}
 		// But 
 		
 		
