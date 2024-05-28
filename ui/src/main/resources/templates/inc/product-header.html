@@ -12,7 +12,7 @@
 		   <span th:each="img, stat : ${product.videos}" >
 		   
 		   <video width="320" height="240" controls>
-			  <source th:src="'/videos/'+${product.gtin()}+'-'+${stat.index}+'.mp4'">			  
+			  <source th:src="'/video/'+${product.gtin()}+'-'+${img.cacheKey}+'.mp4'">			  
 			  Your browser does not support the video tag.
 			</video>
 			
