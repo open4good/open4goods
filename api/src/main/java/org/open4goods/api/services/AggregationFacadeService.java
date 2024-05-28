@@ -184,6 +184,7 @@ public class AggregationFacadeService {
 			StandardAggregator batchAgg = getFullSanitisationAggregator();
 
 			// TODO : Performance, could parallelize
+			// Note : a strong choice to rely on categories, to replay aggregation process from unmapped / unverticalized items
 			dataRepository.getProductsMatchingCategories(vertical) .forEach(p -> {
                 try {
 					batchAgg.onProduct(p);
