@@ -105,7 +105,7 @@ i18n:
            écris un texte de maximum 200 mots,
            dans un style écologique engagé mais,
            en utilisant que du text brut,
-           une analyse détaillée de l'impact environnemental de [(${p.brand()})] [(${p.model()})],
+           une analyse détaillée de l'impact environnemental du téléviseur [(${p.brand()})] [(${p.model()})],
            sur la base des caracteriques suivantes : [(${p.caracteristics()})]"
           override: false
 

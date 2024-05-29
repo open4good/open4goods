@@ -91,12 +91,25 @@ i18n:
       ####################################################################################
       # AI TEXTS CONFIGS
       ####################################################################################  
-      aiConfig:
-        - key: "global-description" 
-          prompt: " écris un texte de maximum 100 mots, dans un style académique, une description avec des listes à puce en html, comprenant les principaux avantages et inconvénients de  [(${p.brand()})] [(${p.model()})], sur la base des caracteriques suivantes : [(${p.caracteristics()})]"
+       aiConfig:
+        - key: "global-description"
+#        You are a review writer, specialized in technologies and environmental concerns 
+          prompt: >
+           écris une description objective de la cafetiere  [(${p.brand()})] [(${p.model()})],
+           dans un style académique et ludique,           
+           un texte de maximum 200 mots,
+           en utilisant que du text brut,
+           en présentant les principales caracteristiques techniques,
+           sur la base des caracteriques suivantes : [(${p.caracteristics()})]
+          override: false
         - key: "ecological-description" 
-          prompt: "écris un texte de maximum 100 mots, dans un style académique, une analyse de l'impact environnemental de [(${p.brand()})] [(${p.model()})], sur la base des caracteriques suivantes : [(${p.caracteristics()})]"
-
+          prompt: > 
+           écris un texte de maximum 200 mots,
+           dans un style écologique engagé mais,
+           en utilisant que du text brut,
+           une analyse détaillée de l'impact environnemental de la cafetiere [(${p.brand()})] [(${p.model()})],
+           sur la base des caracteriques suivantes : [(${p.caracteristics()})]"
+          override: false
 
 
 ##############################################################################
