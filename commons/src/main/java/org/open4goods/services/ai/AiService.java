@@ -70,7 +70,7 @@ public class AiService {
 		// We only apply on items having some data quality
 		
 		// TODO : From config
-		if (data.getAttributes().count() < 15 ) {
+		if (!force && data.getAttributes().count() < 15 ) {
 			return;
 		}
 		
