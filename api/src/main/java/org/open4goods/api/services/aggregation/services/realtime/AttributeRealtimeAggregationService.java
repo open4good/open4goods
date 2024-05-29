@@ -50,11 +50,6 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 		this.featureService = featureService;
 	}
 
-	
-	
-	
-	
-
 
 	@Override
 	public void onProduct(Product data, VerticalConfig vConf) throws AggregationSkipException {
@@ -78,7 +73,12 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 		
 		// Attributing taxomy to attributes
 		data.getAttributes().getUnmapedAttributes().forEach(a -> {
-			a.setIcecatTaxonomyIds(featureService.resolve(a.getName()) );
+			Set<Long> icecatTaxonomyIds = featureService.resolve(a.getName());
+			if (null != icecatTaxonomyIds) {
+				dedicatedLogger.info("Found icecat taxonomy for {} : {}", a.getName(), icecatTaxonomyIds);
+				a.setIcecatTaxonomyIds(icecatTaxonomyIds );
+				
+			}
 		});
 		
 		

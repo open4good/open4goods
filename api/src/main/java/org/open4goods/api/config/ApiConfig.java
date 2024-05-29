@@ -100,10 +100,6 @@ public class ApiConfig {
 		this.apiProperties = apiProperties;
 	}
 
-    @Bean
-    public XmlMapper xmlMapper() {
-        return new XmlMapper();
-    }
     
 	  @Bean
 	  public RedisTemplate<String, Product> redisTemplate(RedisConnectionFactory connectionFactory) {
@@ -125,8 +121,9 @@ public class ApiConfig {
 	
 	@Bean
 	@Autowired
-	IcecatFeatureService icecatFeatureService(XmlMapper xmlMapper) {
-		return new IcecatFeatureService(xmlMapper, apiProperties.getIcecatFeatureConfig());
+	IcecatFeatureService icecatFeatureService( RemoteFileCachingService fileCachingService, String remoteCacheFolder) {
+		// TODO : xmlMapper not injected because corruct the springdoc used one. Should use a @Primary derivation
+		return new IcecatFeatureService(new XmlMapper(), apiProperties.getIcecatFeatureConfig(), fileCachingService, remoteCacheFolder);
 	}
 	
 	@Bean
@@ -255,6 +252,7 @@ public class ApiConfig {
 	@Bean
 	GroupedOpenApi adminApi() {
 		return GroupedOpenApi.builder()
+				
 				.group("api")
 				//	              .pathsToMatch("/admin/**")
 				.packagesToScan("org.open4goods.api")
