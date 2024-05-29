@@ -35,7 +35,11 @@ spring:
   threads:
     virtual:
       enabled: true
-            
+
+springdoc:
+  swagger-ui:
+    disable-swagger-default-url: true
+
             
 # Configuration for the langchain chat model            
 langchain4j:
