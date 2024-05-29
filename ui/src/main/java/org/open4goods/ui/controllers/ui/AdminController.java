@@ -93,7 +93,8 @@ public class AdminController {
 
 		Product data = repository.getById(gtin);
 
-		aiService.complete(data, configService.getConfigByIdOrDefault(data.getVertical()));
+		// We always force when human triggered
+		aiService.complete(data, configService.getConfigByIdOrDefault(data.getVertical()),true);
 
 		repository.forceIndex(data);
 

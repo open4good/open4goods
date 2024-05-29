@@ -9,6 +9,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 
+import org.apache.commons.lang3.StringUtils;
 import org.open4goods.config.yml.attributes.AiConfig;
 import org.open4goods.config.yml.ui.ProductI18nElements;
 import org.open4goods.config.yml.ui.VerticalConfig;
@@ -58,9 +59,10 @@ public class AiService {
 	/**
 	 * Complete the product with AI
 	 * @param data
+	 * @param force 
 	 * @return 
 	 */
-	public void complete(Product data, VerticalConfig vConf) {
+	public void complete(Product data, VerticalConfig vConf, boolean force) {
 		////////////////
 		// Getting the config		
 		/////////////////
@@ -68,7 +70,7 @@ public class AiService {
 		// We only apply on items having some data quality
 		
 		// TODO : From config
-		if (data.getAttributes().count() < 15 || data.getScores().size() < 3 ) {
+		if (data.getAttributes().count() < 15 ) {
 			return;
 		}
 		
@@ -84,26 +86,28 @@ public class AiService {
 //			var executorService = Executors.newVirtualThreadPerTaskExecutor();
 //			executor.execute(() -> {
 				logger.info("Started generation for {}",data);
-				doGeneration(data, i18nConf);
+				doGeneration(data, i18nConf,force);
 				logger.info("Ended generation for {}",data);				
 //			});
 	}
 
-	private void doGeneration(Product data, Map<String, ProductI18nElements> i18nConf) {
+	private void doGeneration(Product data, Map<String, ProductI18nElements> i18nConf, boolean force) {
 		for (Entry<String, ProductI18nElements> elements : i18nConf.entrySet()) {
 			
 			for ( AiConfig aic: elements.getValue().getAiConfig()) {
 
-				if (!aic.isOverride() &&  (null != data.getAiDescriptions().get(aic.getKey()) && i18nConf.keySet().contains(data.getAiDescriptions().get(aic.getKey()).getContent().getLanguage()))) {
+				if (!force && !aic.isOverride() &&  (null != data.getAiDescriptions().get(aic.getKey()) && i18nConf.keySet().contains(data.getAiDescriptions().get(aic.getKey()).getContent().getLanguage()))) {
 					logger.info("Skipping because generated AI text is already present");
 					continue;
 				}
 				
 				AiDescription desc = generateProductTexts(aic.getKey(), aic.getPrompt(), elements.getKey(), data);
-				data.getAiDescriptions().put(aic.getKey(), desc);				
-			}
-
-		
+				if (StringUtils.isEmpty(desc.getContent().getText())) {
+					logger.error("Empty AI text for product {} with key {} and lang {} and prompt {}", data.getId(), aic.getKey(), elements.getKey(), aic.getPrompt());
+				} else {
+					data.getAiDescriptions().put(aic.getKey(), desc);									
+				}
+			}		
 		}
 	}
 
@@ -124,7 +128,8 @@ public class AiService {
 		String value = spelEvaluationService.thymeleafEval(data, prompt);
 		
 		String aiText = prompt(value).replace("\n", "<br/>");
-							
+
+		
 		AiDescription aiDesc = new AiDescription(aiText, lang);
 		ret.add(aiDesc);
 		

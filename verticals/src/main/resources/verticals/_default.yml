@@ -297,6 +297,7 @@ attributesConfig:
       - "REPAIRABILITY INDEX"
       - "INDICE DE RÉPARABILITÉ (NOTE SUR 10)"
       - "INDICE DE RÉPARABILITÉ"
+      - "L’INDICE DE RÉPARABILITÉ"
       
     parser:
       normalize: true

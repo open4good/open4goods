@@ -96,16 +96,18 @@ i18n:
            écris une description objective du téléviseur  [(${p.brand()})] [(${p.model()})],
            dans un style académique et ludique,           
            un texte de maximum 200 mots,
+           en utilisant que du text brut,
            en présentant les principales caracteristiques techniques,
            sur la base des caracteriques suivantes : [(${p.caracteristics()})]
-          override: true
+          override: false
         - key: "ecological-description" 
           prompt: > 
            écris un texte de maximum 200 mots,
-           dans un style académique et ludique,
+           dans un style écologique engagé mais,
+           en utilisant que du text brut,
            une analyse détaillée de l'impact environnemental de [(${p.brand()})] [(${p.model()})],
            sur la base des caracteriques suivantes : [(${p.caracteristics()})]"
-          override: true
+          override: false
 
 # GenAiConfig for this vertical
 genAiConfig:

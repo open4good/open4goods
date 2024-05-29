@@ -54,7 +54,7 @@ public class ProductController {
 		
 		Product data = repository.getById(gtin);
 		
-		aiService.complete(data, configService.getConfigByIdOrDefault(data.getVertical()));		
+		aiService.complete(data, configService.getConfigByIdOrDefault(data.getVertical()),true);		
 		repository.index(data);
 
 		return data.getAiDescriptions();
