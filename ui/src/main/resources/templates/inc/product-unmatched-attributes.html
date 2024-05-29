@@ -7,12 +7,6 @@
 				<th>Valeur</th>
 				<th>Sources</th>
 			</thead>
-			<tr th:each="score : ${product.scores}">
-				<td class="align-middle" th:text="${score.key}"></td>
-				<td class="align-middle" th:text="${score.value}"></td>
-				<td></td>
-			</tr>
-
 			<th:block th:each="attribute : ${product.attributes.unmapedAttributes}">
 				<th:block>
 					<tr th:class="${attribute.bgRow()}">

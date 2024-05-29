@@ -28,7 +28,7 @@ public class GenAiCompletionService  extends AbstractCompletionService{
 
 	public void processProduct(VerticalConfig vertical, Product data) {
 		logger.info("AI text completion for {}", data.getId());
-		aiService.complete(data, vertical);
+		aiService.complete(data, vertical,false);
 		
 		try {
 			// TODO : For rate limit, from conf
