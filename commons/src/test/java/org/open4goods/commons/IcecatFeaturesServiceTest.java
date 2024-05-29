@@ -6,6 +6,7 @@ import java.io.IOException;
 import org.junit.jupiter.api.Test;
 import org.open4goods.config.TestConfig;
 import org.open4goods.exceptions.InvalidParameterException;
+import org.open4goods.exceptions.TechnicalException;
 import org.open4goods.services.GoogleTaxonomyService;
 import org.open4goods.services.IcecatFeatureService;
 import org.open4goods.services.RemoteFileCachingService;
@@ -18,17 +19,17 @@ public class IcecatFeaturesServiceTest {
 	@Autowired private IcecatFeatureService featureService;
 
     
-//    @Test
-//    public void testLoadFile() throws IOException, InvalidParameterException {
-//        
-//       
-//    	
-//    	
-//    	featureService.loadFeatures();
-//        
-//    	
-//    	assertTrue(featureService.resolve("COULEUR").equals(""));
-//        
-//       
-//    }
+    @Test
+    public void testLoadFile() throws IOException, InvalidParameterException, TechnicalException {
+        
+       
+    	
+    	
+    	featureService.loadFeatures();
+        
+    	
+    	assertTrue(featureService.resolve("COULEUR").equals(""));
+        
+       
+    }
 }
