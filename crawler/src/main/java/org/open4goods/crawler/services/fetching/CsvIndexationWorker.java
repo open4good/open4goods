@@ -784,8 +784,8 @@ public class CsvIndexationWorker implements Runnable {
 
 	
 	
-	
-    private  void decompressGzipFile(String gzipFile, String newFile) {
+	// TODO : Mutualize with RemoteFileCachingService
+    public  void decompressGzipFile(String gzipFile, String newFile) {
         try {
             FileInputStream fis = new FileInputStream(gzipFile);
             GZIPInputStream gis = new GZIPInputStream(fis);

@@ -3,19 +3,16 @@
 		<h6 class="h6 bg-white position-relative"><span>Toutes les caractéristiques</span></h6>
 		<table id="allAttributes" class="table">
 			<thead>
+				<th>Taxo</th>
 				<th>Nom</th>
 				<th>Valeur</th>
 				<th>Sources</th>
 			</thead>
-			<tr th:each="score : ${product.scores}">
-				<td class="align-middle" th:text="${score.key}"></td>
-				<td class="align-middle" th:text="${score.value}"></td>
-				<td></td>
-			</tr>
 
 			<th:block th:each="attribute : ${product.attributes.unmapedAttributes}">
 				<th:block>
 					<tr th:class="${attribute.bgRow()}">
+						<td class="align-middle"><span th:text="${attribute.icecatTaxonomyIds}"></span></td>					
 						<td class="align-middle"><span th:text="${attribute.name}"></span></td>					
 						<td class="align-middle"><span th:text="${attribute.value}"></span></td>
 						<td class="align-middle">
