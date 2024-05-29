@@ -27,11 +27,10 @@ public class TestConfig {
     
 
     @Bean
-    public IcecatFeatureService xmlMapper() {
+    public IcecatFeatureService xmlMapper(@Autowired RemoteFileCachingService remoteFileCachingService) {
     	IcecatFeatureConfiguration c = new IcecatFeatureConfiguration();
-    	// TODO
-    	c.setFeaturesListFileUri("/home/Goulven.Furet/Bureau/icecat/FeaturesList.xml");
-        return new IcecatFeatureService(new XmlMapper(), c);
+    	// TODO : Not windows OK
+        return new IcecatFeatureService(new XmlMapper(), c, remoteFileCachingService, "/tmp");
     }
     
     
