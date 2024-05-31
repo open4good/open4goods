@@ -23,8 +23,32 @@
 					<show>private</show>
 
 				</configuration>
+				
 			</plugin>
-			
+
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>jaxb2-maven-plugin</artifactId>
+				<version>3.2.0</version>
+				<executions>
+					<execution>
+						<goals>
+							<goal>xjc</goal>
+						</goals>
+					</execution>
+				</executions>
+				<configuration>
+					
+					<sources>
+						<source>src/main/resources/xsd</source>
+					</sources>
+					<bindings>
+                        <binding>src/main/resources/bindings/icecat.xjb</binding>
+                    </bindings>
+                    
+					<outputDirectory>${project.basedir}/src/generated/java</outputDirectory>
+				</configuration>
+			</plugin>
 
 		</plugins>
 	</build>
@@ -39,7 +63,10 @@
 		</dependency>
 
 
-
+		<dependency>
+			<groupId>org.glassfish.jaxb</groupId>
+			<artifactId>jaxb-runtime</artifactId>
+		</dependency>
 
 		<dependency>
 			<groupId>com.ibm.icu</groupId>
