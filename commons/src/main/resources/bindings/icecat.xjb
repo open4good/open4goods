@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jxb:bindings xmlns:jxb="http://java.sun.com/xml/ns/jaxb"
+              xmlns:xs="http://www.w3.org/2001/XMLSchema"
+              xmlns:xjc="http://java.sun.com/xml/ns/jaxb/xjc"
+              jxb:version="2.0"
+              jxb:extensionBindingPrefixes="xjc"
+              xmlns:annox="http://annox.dev.java.net"
+              xmlns:inheritance="http://jaxb2-commons.dev.java.net/basic/inheritance"
+              xmlns:super="http://jaxb2-commons.dev.java.net/basic/superclass"
+              xmlns:pl="http://jaxb2-commons.dev.java.net/plugin/code-injector">
+              
+    <!-- Utilisez la fonction generateIsSetMethod pour rendre chaque nom d'attribut unique -->
+    <jxb:globalBindings>
+        <xjc:superClass name="YourBaseClass"/>
+        <xjc:serializable uid="1"/>
+        <xjc:generateIsSetMethod/>
+    </jxb:globalBindings>
+
+    <!-- Insérez ici vos liaisons spécifiques -->
+</jxb:bindings>

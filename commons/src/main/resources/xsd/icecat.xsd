@@ -1,0 +1,1283 @@
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+
+    <xs:element name="ICECAT-interface">
+        <xs:complexType>
+            <xs:choice>
+                <xs:element name="Response" type="Response"/>
+                <xs:element name="Product" type="Product"/>
+            </xs:choice>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:complexType name="Response">
+        <xs:all>
+            <xs:element name="DistributorList" type="DistributorList" minOccurs="0"/>
+            <xs:element name="LanguageList" type="LanguageList" minOccurs="0"/>
+            <xs:element name="MeasuresList" type="MeasuresList" minOccurs="0"/>
+            <xs:element name="FeaturesList" type="FeaturesList" minOccurs="0"/>
+            <xs:element name="FeatureGroupsList" type="FeatureGroupsList" minOccurs="0"/>
+            <xs:element name="CategoriesList" type="CategoriesList" minOccurs="0"/>
+            <xs:element name="SuppliersList" type="SuppliersList" minOccurs="0"/>
+            <xs:element name="CategoryFeaturesList" type="CategoryFeaturesList" minOccurs="0"/>
+            <xs:element name="SupplierCategoriesList" type="SupplierCategoriesList" minOccurs="0"/>
+            <xs:element name="ProductsList" type="ProductsList" minOccurs="0"/>
+            <xs:element name="ProductsListLookup" type="ProductsListLookup" minOccurs="0"/>
+            <xs:element name="FeatureLogosList" type="FeatureLogoList" minOccurs="0"/>
+            <xs:element name="ProductsStatistic" type="ProductsStatistic" minOccurs="0"/>
+            <xs:element name="DescribeProductsResponse" type="DescribeProductsResponse" minOccurs="0"/>
+            <xs:element name="StatisticQueryListResponse" type="StatisticQueryListResponse" minOccurs="0"/>
+            <xs:element name="StatisticQueryDatesListResponse" type="StatisticQueryDatesListResponse" minOccurs="0"/>
+            <xs:element name="StatisticQueryDateDataReportResponse" type="StatisticQueryDateDataReportResponse" minOccurs="0"/>
+            <xs:element name="SupplierProductFamiliesList" type="SupplierProductFamiliesList" minOccurs="0"/>
+            <xs:element name="ProductsComplaintResponse" type="ProductsComplaintResponse" minOccurs="0"/>
+            <xs:element name="FulltextProductsSearchResponse" type="FulltextProductsSearchResponse" minOccurs="0"/>
+            <xs:element name="FeatureValuesVocabularyList" type="FeatureValuesVocabularyList" minOccurs="0"/>
+            <xs:element name="LogisticsDataList" type="LogisticsDataList" minOccurs="0"/>
+        </xs:all>
+        <xs:attribute name="Status" type="xs:string" use="required"/>
+        <xs:attribute name="Request_ID" type="xs:integer" use="required"/>
+        <xs:attribute name="ID" type="xs:integer" use="required"/>
+        <xs:attribute name="Date" type="xs:string" use="required"/>
+        <xs:attribute name="Error" type="xs:string"/>
+    </xs:complexType>
+
+
+    <xs:complexType name="LanguageList">
+        <xs:sequence>
+            <xs:element name="Language" type="Language" minOccurs="0" maxOccurs="unbounded"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="Language">
+        <xs:sequence>
+            <xs:element name="Countries" type="Countries" minOccurs="0" maxOccurs="unbounded"/>
+            <xs:element name="Name" type="Name" minOccurs="0" maxOccurs="unbounded"/>
+        </xs:sequence>
+        <xs:attribute name="ID" type="xs:integer" use="required"/>
+        <xs:attribute name="Code" type="xs:string"/>
+        <xs:attribute name="ShortCode" type="xs:string"/>
+        <xs:attribute name="Sid" type="xs:string"/>
+        <xs:attribute name="Updated" type="xs:string"/>
+    </xs:complexType>
+
+
+    <xs:complexType name="Countries">
+        <xs:sequence>
+            <xs:element name="Country" minOccurs="0" maxOccurs="unbounded">
+                <xs:complexType>
+                    <xs:attribute name="ID" type="xs:integer" use="required"/>
+                    <xs:attribute name="Code" type="xs:string"/>
+                    <xs:attribute name="System_Of_Measurement" type="xs:string"/>
+                    <xs:attribute name="Updated" type="xs:string" use="required"/>
+                </xs:complexType>
+            </xs:element>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="DistributorList">
+        <xs:sequence>
+            <xs:element name="Distributor" minOccurs="0" maxOccurs="unbounded">
+                <xs:complexType>
+                    <xs:attribute name="ID" type="xs:integer" use="required"/>
+                    <xs:attribute name="Code" type="xs:string" use="required"/>
+                    <xs:attribute name="Name" type="xs:string" use="required"/>
+                    <xs:attribute name="Updated" type="xs:string" use="required"/>
+                </xs:complexType>
+            </xs:element>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="Name">
+        <xs:simpleContent>
+            <xs:extension base="xs:string">
+                <xs:attribute name="ID" type="xs:integer"/>
+                <xs:attribute name="langid" type="xs:integer"/>
+                <xs:attribute name="Value" type="xs:string"/>
+                <xs:attribute name="Updated" type="xs:string"/>
+            </xs:extension>
+        </xs:simpleContent>
+    </xs:complexType>
+
+    <xs:complexType name="MeasuresList">
+        <xs:sequence>
+            <xs:element name="Measure" type="Measure" minOccurs="0" maxOccurs="unbounded"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="Measure">
+        <xs:all>
+            <xs:element name="Sign" type="xs:string" maxOccurs="1" minOccurs="0"/>
+            <xs:element name="Signs" type="Signs" maxOccurs="1" minOccurs="0"/>
+            <xs:element name="Names" type="Names" maxOccurs="1" minOccurs="0"/>
+            <xs:element name="Descriptions" type="Descriptions" maxOccurs="1" minOccurs="0"/>
+        </xs:all>
+        <xs:attribute name="ID" type="xs:integer" use="required"/>
+        <xs:attribute name="Sign" type="xs:string"/>
+        <xs:attribute name="Updated" type="xs:string"/>
+    </xs:complexType>
+
+    <xs:complexType name="Signs">
+        <xs:sequence>
+            <xs:element name="Sign" type="Sign" minOccurs="0" maxOccurs="unbounded"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="Sign">
+        <xs:simpleContent>
+            <xs:extension base="xs:string">
+                <xs:attribute name="ID" type="xs:integer"/>
+                <xs:attribute name="langid" type="xs:integer"/>
+                <xs:attribute name="Value" type="xs:string"/>
+                <xs:attribute name="Updated" type="xs:string"/>
+            </xs:extension>
+        </xs:simpleContent>
+    </xs:complexType>
+
+    <xs:complexType name="Names">
+        <xs:sequence>
+            <xs:element name="Name" type="Name" minOccurs="0" maxOccurs="unbounded"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="Descriptions">
+        <xs:sequence>
+            <xs:element name="Description" type="Description" minOccurs="0" maxOccurs="unbounded"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="Description" mixed="true">
+        <xs:attribute name="ID" type="xs:integer" use="required"/>
+        <xs:attribute name="langid" type="xs:integer" use="required"/>
+        <xs:attribute name="Value" type="xs:string"/>
+        <xs:attribute name="Updated" type="xs:string"/>
+    </xs:complexType>
+
+    <xs:complexType name="FeaturesList">
+        <xs:sequence>
+            <xs:element name="Feature" type="Feature" minOccurs="0" maxOccurs="unbounded"/>
+        </xs:sequence>
+    </xs:complexType>
+
+
+    <xs:complexType name="Feature">
+        <xs:sequence>
+            <xs:element name="Descriptions" type="Descriptions" minOccurs="0" maxOccurs="1"/>
+            <xs:element name="Measure" type="Measure" minOccurs="0" maxOccurs="1"/>
+            <xs:element name="Name" type="Name" minOccurs="0" maxOccurs="unbounded"/>
+            <xs:element name="Names" type="Names" minOccurs="0" maxOccurs="1"/>
+            <xs:element name="RestrictedValue" type="SimpleString" minOccurs="0" maxOccurs="unbounded"/>
+            <xs:element name="RestrictedValues" type="RestrictedValues" minOccurs="0" maxOccurs="1"/>
+        </xs:sequence>
+        <xs:attribute name="ID" type="xs:integer" use="required"/>
+        <xs:attribute name="LimitDirection" type="xs:integer"/>
+        <xs:attribute name="Searchable" type="xs:boolean"/>
+        <xs:attribute name="CategoryFeatureGroup_ID" type="xs:integer"/>
+        <xs:attribute name="No" type="xs:integer"/>
+        <xs:attribute name="DefaultDisplayUnit" type="xs:boolean"/>
+        <xs:attribute name="Class" type="xs:boolean"/>
+        <xs:attribute name="CategoryFeature_ID" type="xs:integer"/>
+        <xs:attribute name="Type" type="xs:string"/>
+        <xs:attribute name="Mandatory" type="xs:integer"/>
+        <xs:attribute name="Use_Dropdown_Input" type="xs:string"/>
+        <xs:attribute name="ValueSorting" type="xs:integer"/>
+        <xs:attribute name="Updated" type="xs:string"/>
+    </xs:complexType>
+
+    <xs:complexType name="LocalValue">
+        <xs:sequence>
+            <xs:element name="Measure" type="Measure" minOccurs="0" maxOccurs="1"/>
+        </xs:sequence>
+        <xs:attribute name="Value" type="xs:string" use="required"/>
+        <xs:attribute name="langid" type="xs:int"/>
+    </xs:complexType>
+
+    <xs:complexType name="PresentationValues">
+        <xs:sequence>
+            <xs:element name="PresentationValue" type="PresentationValue" minOccurs="0" maxOccurs="unbounded"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="PresentationValue">
+        <xs:attribute name="langid" type="xs:int"/>
+        <xs:attribute name="Value" type="xs:string" use="required"/>
+    </xs:complexType>
+
+    <xs:complexType name="LocalValues">
+        <xs:sequence>
+            <xs:element name="LocalValue" type="LocalValue" minOccurs="0" maxOccurs="unbounded"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="RestrictedValues">
+        <xs:sequence>
+            <xs:element name="RestrictedValue" type="SimpleString" minOccurs="1" maxOccurs="unbounded"/>
+        </xs:sequence>
+        <xs:attribute name="ValueSorting" type="xs:integer"/>
+    </xs:complexType>
+
+    <xs:complexType name="CategoriesList">
+        <xs:sequence>
+            <xs:element name="Category" type="Category" minOccurs="0" maxOccurs="unbounded"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="Category">
+        <xs:sequence>
+            <xs:element name="CategoryFeatureGroup" type="CategoryFeatureGroup" minOccurs="0" maxOccurs="unbounded"/>
+            <xs:element name="Versions" type="Versions" minOccurs="0" maxOccurs="unbounded"/>
+            <xs:element name="Description" type="Description" minOccurs="0" maxOccurs="unbounded"/>
+            <xs:element name="Feature" type="Feature" minOccurs="0" maxOccurs="unbounded"/>
+            <xs:element name="Keywords" type="Keywords" minOccurs="0" maxOccurs="unbounded"/>
+            <xs:element name="Name" type="Name" minOccurs="0" maxOccurs="unbounded"/>
+            <xs:element name="Names" type="Names" minOccurs="0" maxOccurs="unbounded"/>
+            <xs:element name="ParentCategory" type="ParentCategory" minOccurs="0" maxOccurs="1"/>
+            <xs:element name="UNCATID" type="xs:string" minOccurs="0" maxOccurs="unbounded"/>
+            <xs:element name="VirtualCategories" type="VirtualCategories" minOccurs="0" maxOccurs="1"/>
+        </xs:sequence>
+        <xs:attribute name="UNCATID" type="xs:string"/>
+        <xs:attribute name="Searchable" type="xs:boolean"/>
+        <xs:attribute name="Visible" type="xs:boolean"/>
+        <xs:attribute name="Score" type="xs:integer"/>
+        <xs:attribute name="ThumbPic" type="xs:anyURI"/>
+        <xs:attribute name="ID" type="xs:integer"/>
+        <xs:attribute name="LowPic" type="xs:anyURI"/>
+        <xs:attribute name="Updated" type="xs:string"/>
+    </xs:complexType>
+
+    <xs:complexType name="Versions">
+        <xs:sequence>
+            <xs:element name="UNSPSC" type="UNSPSC" minOccurs="0" maxOccurs="unbounded"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="UNSPSC">
+        <xs:attribute name="code" type="xs:string" use="required"/>
+        <xs:attribute name="version" type="xs:string" use="required"/>
+        <xs:attribute name="date_added" type="xs:string" use="required"/>
+        <xs:attribute name="Updated" type="xs:string" use="required"/>
+    </xs:complexType>
+
+    <xs:complexType name="ParentCategory">
+        <xs:sequence>
+            <xs:element name="Names" type="Names" minOccurs="0" maxOccurs="unbounded"/>
+        </xs:sequence>
+        <xs:attribute name="ID" type="xs:integer" use="required"/>
+    </xs:complexType>
+
+    <xs:complexType name="Keywords">
+        <xs:attribute name="ID" type="xs:integer" use="required"/>
+        <xs:attribute name="langid" type="xs:integer" use="required"/>
+        <xs:attribute name="Value" type="xs:string" use="required"/>
+        <xs:attribute name="Updated" type="xs:string"/>
+    </xs:complexType>
+
+    <xs:complexType name="CategoryFeatureGroup">
+        <xs:sequence>
+            <xs:element name="FeatureGroup" type="FeatureGroup" minOccurs="0" maxOccurs="unbounded"/>
+        </xs:sequence>
+        <xs:attribute name="No" type="xs:integer"/>
+        <xs:attribute name="ID" type="xs:integer"/>
+        <xs:attribute name="FeatureGroup" type="xs:string"/>
+    </xs:complexType>
+
+    <xs:complexType name="FeatureGroupsList">
+        <xs:sequence>
+            <xs:element name="FeatureGroup" type="FeatureGroup" minOccurs="0" maxOccurs="unbounded"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="FeatureGroup">
+        <xs:sequence>
+            <xs:element name="Name" type="Name" minOccurs="0" maxOccurs="unbounded"/>
+        </xs:sequence>
+        <xs:attribute name="ID" type="xs:integer" use="required"/>
+        <xs:attribute name="sid" type="xs:integer"/>
+        <xs:attribute name="Updated" type="xs:string"/>
+    </xs:complexType>
+
+    <xs:complexType name="SuppliersList">
+        <xs:sequence>
+            <xs:element name="Supplier" type="Supplier" minOccurs="0" maxOccurs="unbounded"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="Supplier">
+        <xs:choice maxOccurs="unbounded">
+            <xs:element name="CustomerService" type="CustomerService" minOccurs="0" maxOccurs="unbounded"/>
+            <xs:element name="Names" type="SupplierNames" minOccurs="0" maxOccurs="unbounded"/>
+        </xs:choice>
+        <xs:attribute name="ID" type="xs:integer" use="required"/>
+        <xs:attribute name="Name" type="xs:string"/>
+        <xs:attribute name="name" type="xs:string"/>
+        <xs:attribute name="LogoPic" type="xs:anyURI"/>
+        <xs:attribute name="LogoPicHeight" type="xs:integer"/>
+        <xs:attribute name="LogoPicWidth" type="xs:integer"/>
+        <xs:attribute name="LogoPicSize" type="xs:integer"/>
+        <xs:attribute name="LogoLowPic" type="xs:anyURI"/>
+        <xs:attribute name="LogoLowPicHeight" type="xs:integer"/>
+        <xs:attribute name="LogoLowPicWidth" type="xs:integer"/>
+        <xs:attribute name="LogoLowPicSize" type="xs:integer"/>
+        <xs:attribute name="LogoMediumPic" type="xs:anyURI"/>
+        <xs:attribute name="LogoMediumPicHeight" type="xs:integer"/>
+        <xs:attribute name="LogoMediumPicWidth" type="xs:integer"/>
+        <xs:attribute name="LogoMediumPicSize" type="xs:integer"/>
+        <xs:attribute name="LogoHighPic" type="xs:anyURI"/>
+        <xs:attribute name="LogoHighPicHeight" type="xs:integer"/>
+        <xs:attribute name="LogoHighPicWidth" type="xs:integer"/>
+        <xs:attribute name="LogoHighPicSize" type="xs:integer"/>
+        <xs:attribute name="LogoOriginal" type="xs:anyURI"/>
+        <xs:attribute name="LogoOriginalSize" type="xs:integer"/>
+        <xs:attribute name="Sponsor" type="xs:string"/>
+        <xs:attribute name="Updated" type="xs:string"/>
+        <xs:attribute name="updated" type="xs:string"/>
+    </xs:complexType>
+
+    <xs:complexType name="ProductModelDescriptions">
+        <xs:sequence>
+            <xs:element name="Name" type="Name" minOccurs="0" maxOccurs="unbounded"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="ProductTitles">
+        <xs:sequence>
+            <xs:element name="Titles" type="Titles" minOccurs="0" maxOccurs="unbounded"/>
+            <xs:element name="GeneratedLocalTitles" type="GeneratedLocalTitles" minOccurs="0" maxOccurs="unbounded"/>
+            <xs:element name="BrandLocalTitles" type="BrandLocalTitles" minOccurs="0" maxOccurs="unbounded"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="Titles">
+        <xs:sequence>
+            <xs:element name="Title" type="Title" minOccurs="0" maxOccurs="unbounded"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="Title">
+        <xs:attribute name="langid" type="xs:integer" use="required"/>
+        <xs:attribute name="Value" type="xs:string"/>
+    </xs:complexType>
+
+    <xs:complexType name="GeneratedLocalTitles">
+        <xs:sequence>
+            <xs:element name="GeneratedLocalTitle" type="GeneratedLocalTitle" minOccurs="0" maxOccurs="unbounded"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="GeneratedLocalTitle">
+        <xs:attribute name="langid" type="xs:integer" use="required"/>
+        <xs:attribute name="Value" type="xs:string" use="required"/>
+    </xs:complexType>
+
+    <xs:complexType name="BrandLocalTitles">
+        <xs:sequence>
+            <xs:element name="BrandLocalTitle" type="BrandLocalTitle" minOccurs="0" maxOccurs="unbounded"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="BrandLocalTitle">
+        <xs:attribute name="langid" type="xs:integer" use="required"/>
+        <xs:attribute name="Value" type="xs:string" use="required"/>
+    </xs:complexType>
+
+    <xs:complexType name="SupplierNames">
+        <xs:sequence>
+            <xs:element name="Name" type="SupplierName" minOccurs="0" maxOccurs="unbounded"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="SupplierName">
+        <xs:simpleContent>
+            <xs:extension base="xs:string">
+                <xs:attribute name="ID" type="xs:integer"/>
+                <xs:attribute name="langid" type="xs:integer"/>
+                <xs:attribute name="Value" type="xs:string"/>
+                <xs:attribute name="Name" type="xs:string"/>
+                <xs:attribute name="Updated" type="xs:string"/>
+            </xs:extension>
+        </xs:simpleContent>
+    </xs:complexType>
+
+    <xs:complexType name="CustomerService">
+        <xs:attribute name="ID" type="xs:integer" use="required"/>
+        <xs:attribute name="Country_ID" type="xs:integer"/>
+        <xs:attribute name="Country_Code" type="xs:string"/>
+        <xs:attribute name="Country" type="xs:string"/>
+        <xs:attribute name="Phone" type="xs:string"/>
+        <xs:attribute name="AddressDetails" type="xs:string"/>
+        <xs:attribute name="Website" type="xs:string"/>
+    </xs:complexType>
+
+    <xs:complexType name="CategoryFeaturesList">
+        <xs:sequence>
+            <xs:element name="Category" type="Category" minOccurs="0" maxOccurs="unbounded"/>
+        </xs:sequence>
+        <xs:attribute name="Code" type="xs:integer" use="required"/>
+    </xs:complexType>
+
+    <xs:complexType name="SupplierCategoriesList">
+        <xs:sequence>
+            <xs:element name="Category" type="Category" minOccurs="0" maxOccurs="unbounded"/>
+            <xs:element name="Supplier" type="Supplier" minOccurs="0" maxOccurs="unbounded"/>
+        </xs:sequence>
+        <xs:attribute name="Code" type="xs:integer" use="required"/>
+    </xs:complexType>
+
+    <xs:complexType name="ProductsList">
+        <xs:sequence>
+            <xs:element name="Product" type="Product" maxOccurs="unbounded"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <!-- ##################################################################################################################################  -->
+
+
+    <xs:complexType name="Product">
+        <xs:choice maxOccurs="unbounded">
+            <xs:element name="CategoryFeatureGroup" type="CategoryFeatureGroup" minOccurs="0" maxOccurs="unbounded"/>
+            <xs:element name="Category" type="Category" minOccurs="1" maxOccurs="unbounded"/>
+            <xs:element name="ReleaseDate" type="LifeCycles" minOccurs="0" maxOccurs="1"/>
+            <xs:element name="EndOfLifeDate" type="LifeCycles" minOccurs="0" maxOccurs="1"/>
+            <xs:element name="EANCode" type="EANCode" minOccurs="0" maxOccurs="unbounded"/>
+            <xs:element name="FeatureLogo" type="FeatureLogo" minOccurs="0" maxOccurs="unbounded"/>
+            <xs:element name="ProductBullets" type="ProductBullets" minOccurs="0" maxOccurs="1"/>
+            <xs:element name="BulletPoints" type="BulletPoints" minOccurs="0" maxOccurs="1"/>
+            <xs:element name="GeneratedBulletPoints" type="GeneratedBulletPoints" minOccurs="0" maxOccurs="1"/>
+            <xs:element name="ProductBullets_HTMLs" type="ProductBullets_HTMLs" minOccurs="0" maxOccurs="1"/>
+            <xs:element name="ReasonsToBuy" type="ReasonsToBuy" minOccurs="0" maxOccurs="1"/>
+            <xs:element name="ProductBundled" type="ProductBundled" minOccurs="0" maxOccurs="unbounded"/>
+            <xs:element name="ProductDescription" type="ProductDescription" minOccurs="1" maxOccurs="unbounded"/>
+            <xs:element name="TaxonomyDescriptions" type="TaxonomyDescriptions" minOccurs="1" maxOccurs="1"/>
+            <xs:element name="Disclaimers" type="Disclaimers" minOccurs="0" maxOccurs="1"/>
+            <xs:element name="ProductFamily" type="ProductFamily" minOccurs="0" maxOccurs="1"/>
+            <xs:element name="ProductFeature" type="ProductFeature" minOccurs="0" maxOccurs="unbounded"/>
+            <xs:element name="ProductGallery" type="ProductGallery" minOccurs="0" maxOccurs="unbounded"/>
+            <xs:element name="ProductMultimediaObject" type="ProductMultimediaObject" minOccurs="0" maxOccurs="unbounded"/>
+            <xs:element name="ProductRelated" type="ProductRelated" minOccurs="0" maxOccurs="unbounded"/>
+            <xs:element name="SEOs" type="SEOs" minOccurs="0" maxOccurs="1"/>
+            <xs:element name="SummaryDescription" type="SummaryDescription" minOccurs="0" maxOccurs="1"/>
+            <xs:element name="SummaryDescriptionLocal" type="SummaryDescriptionLocal" minOccurs="0" maxOccurs="1"/>
+            <xs:element name="Supplier" type="Supplier" minOccurs="1" maxOccurs="1"/>
+            <xs:element name="ProductModelDescriptions" type="ProductModelDescriptions" minOccurs="1" maxOccurs="1"/>
+            <xs:element name="ProductTitles" type="ProductTitles" minOccurs="1" maxOccurs="1"/>
+            <xs:element name="Variants" type="Variants" minOccurs="0" maxOccurs="1"/>
+            <xs:element name="Reviews" type="Reviews" minOccurs="0" maxOccurs="1"/>
+        </xs:choice>
+        <xs:attribute name="ID" type="xs:string" use="required"/>
+        <xs:attribute name="Name" type="xs:string" use="required"/>
+        <xs:attribute name="Prod_id" type="xs:string" use="required"/>
+        <xs:attribute name="ThumbPic" type="xs:anyURI" use="required"/>
+        <xs:attribute name="Quality" type="xs:string"/>
+        <xs:attribute name="Code" type="xs:integer"/>
+        <xs:attribute name="EANCode" type="xs:string"/>
+        <xs:attribute name="HighPic" type="xs:anyURI"/>
+        <xs:attribute name="LowPic" type="xs:anyURI"/>
+        <xs:attribute name="Score" type="xs:integer"/>
+        <xs:attribute name="ProductsDescription" type="xs:string"/>
+        <xs:attribute name="Relevance" type="xs:integer"/>
+        <xs:attribute name="LowPicSize" type="xs:integer"/>
+        <xs:attribute name="LowPicWidth" type="xs:integer"/>
+        <xs:attribute name="LowPicHeight" type="xs:integer"/>
+        <xs:attribute name="HighPicSize" type="xs:integer"/>
+        <xs:attribute name="HighPicWidth" type="xs:integer"/>
+        <xs:attribute name="HighPicHeight" type="xs:integer"/>
+        <xs:attribute name="ThumbPicSize" type="xs:integer"/>
+        <xs:attribute name="ErrorMessage" type="xs:string"/>
+        <xs:attribute name="Map_product_id" type="xs:integer"/>
+        <xs:attribute name="ReleaseDate" type="xs:string"/>
+        <xs:attribute name="BrandStartOfSaleDate" type="xs:string"/>
+        <xs:attribute name="BrandEndOfSaleDate" type="xs:string"/>
+        <xs:attribute name="Title" type="xs:string"/>
+        <xs:attribute name="Pic500x500" type="xs:anyURI"/>
+        <xs:attribute name="Pic500x500Size" type="xs:integer"/>
+        <xs:attribute name="Pic500x500Width" type="xs:integer"/>
+        <xs:attribute name="Pic500x500Height" type="xs:integer"/>
+        <xs:attribute name="Original" type="xs:anyURI"/>
+        <xs:attribute name="Source" type="xs:anyURI"/>
+        <xs:attribute name="BrandLocalTitle" type="xs:string"/>
+        <xs:attribute name="GeneratedIntTitle" type="xs:string"/>
+        <xs:attribute name="GeneratedLocalTitle" type="xs:string"/>
+        <xs:attribute name="LocalName" type="xs:string"/>
+        <xs:attribute name="IntName" type="xs:string"/>
+    </xs:complexType>
+
+    <xs:complexType name="ReasonsToBuy">
+        <xs:sequence>
+            <xs:element name="ReasonToBuy" type="ProductBullet" minOccurs="0" maxOccurs="unbounded"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="ProductBullets">
+        <xs:sequence>
+            <xs:element name="ProductBulletGroup" type="ProductBulletGroup" minOccurs="0" maxOccurs="unbounded"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="LifeCycles">
+        <xs:sequence>
+            <xs:element name="Date" type="LifeCycle" minOccurs="0" maxOccurs="unbounded"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="LifeCycle">
+        <xs:attribute name="Value" type="xs:string" use="required"/>
+        <xs:attribute name="CountryID" type="xs:int" use="optional"/>
+        <xs:attribute name="CountryName" type="xs:string" use="optional"/>
+        <xs:attribute name="langid" type="xs:int" use="optional"/>
+    </xs:complexType>
+
+    <xs:complexType name="TaxonomyDescriptions">
+        <xs:sequence>
+            <xs:element name="TaxonomyDescription" type="TaxonomyDescription" minOccurs="0" maxOccurs="unbounded"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="TaxonomyDescription">
+        <xs:all>
+            <xs:element name="TaxonomyBulletPoints" type="TaxonomyBulletPoints" minOccurs="0" maxOccurs="1"/>
+            <xs:element name="TaxonomySEO" type="SEO" minOccurs="0" maxOccurs="1"/>
+        </xs:all>
+        <xs:attribute name="ID" type="xs:int" use="required"/>
+        <xs:attribute name="ExtenalTaxonomyID" type="xs:int" use="required"/>
+        <xs:attribute name="LongDesc" type="xs:string" use="required"/>
+        <xs:attribute name="MiddleDesc" type="xs:string" use="required"/>
+        <xs:attribute name="URL" type="xs:string" use="required"/>
+        <xs:attribute name="ShortDesc" type="xs:string" use="required"/>
+        <xs:attribute name="WarrantyInfo" type="xs:string" use="required"/>
+        <xs:attribute name="langid" type="xs:int" use="required"/>
+    </xs:complexType>
+
+    <xs:complexType name="TaxonomyBulletPoints">
+        <xs:sequence>
+            <xs:element name="BulletPoint" type="BulletPoint" minOccurs="0" maxOccurs="unbounded"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="Variants">
+        <xs:sequence>
+            <xs:element name="Variant" type="Variant" minOccurs="0" maxOccurs="unbounded"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="Variant">
+        <xs:all>
+            <xs:element name="VariantFeatures" type="VariantFeatures" minOccurs="0" maxOccurs="1"/>
+            <xs:element name="VariantImages" type="VariantImages" minOccurs="0" maxOccurs="1"/>
+            <xs:element name="VariantMultimedias" type="VariantMultimedias" minOccurs="0" maxOccurs="1"/>
+            <xs:element name="VariantIdentifiers" type="VariantIdentifiers" minOccurs="0" maxOccurs="1"/>
+        </xs:all>
+        <xs:attribute name="ID" type="xs:int" use="required"/>
+        <xs:attribute name="Desc" type="xs:string" use="optional"/>
+    </xs:complexType>
+
+    <xs:complexType name="VariantIdentifiers">
+        <xs:sequence>
+            <xs:element name="Identifier" minOccurs="1" maxOccurs="unbounded">
+                <xs:complexType>
+                    <xs:attribute name="Value" type="xs:string" use="required"/>
+                    <xs:attribute name="Type" use="required">
+                        <xs:simpleType>
+                            <xs:restriction base="xs:string">
+                                <xs:enumeration value="BrandProductCode"/>
+                                <xs:enumeration value="GTIN13"/>
+                                <xs:enumeration value="GTIN12"/>
+                                <xs:enumeration value="GTIN14"/>
+                                <xs:enumeration value="GTIN8"/>
+                            </xs:restriction>
+                        </xs:simpleType>
+                    </xs:attribute>
+                </xs:complexType>
+            </xs:element>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="VariantFeatures">
+        <xs:sequence>
+            <xs:element name="VariantFeature" minOccurs="0" maxOccurs="unbounded">
+                <xs:complexType>
+                    <xs:attribute name="Feature_ID" type="xs:int" use="required"/>
+                    <xs:attribute name="langid" type="xs:int" use="required"/>
+                    <xs:attribute name="Value" type="xs:string" use="required"/>
+                </xs:complexType>
+            </xs:element>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="VariantImages">
+        <xs:sequence>
+            <xs:element name="VariantImage" type="ProductPicture" minOccurs="0" maxOccurs="unbounded"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="VariantMultimedias">
+        <xs:sequence>
+            <xs:element name="VariantMultimedia" type="MultimediaObject" minOccurs="0" maxOccurs="unbounded"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="VariantFeature">
+        <xs:attribute name="Feature_ID" type="xs:int" use="required"/>
+        <xs:attribute name="langid" type="xs:int" use="required"/>
+        <xs:attribute name="Value" type="xs:string" use="required"/>
+    </xs:complexType>
+
+    <xs:complexType name="Reviews">
+        <xs:sequence>
+            <xs:element name="Review" type="Review" minOccurs="1" maxOccurs="unbounded"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="Review">
+        <xs:sequence>
+            <xs:element name="URL" type="URL"/>
+            <xs:element name="Comment" type="SimpleString"/>
+            <xs:element name="Good" type="SimpleString"/>
+            <xs:element name="Bad" type="SimpleString"/>
+            <xs:element name="Bottomline" type="SimpleString"/>
+        </xs:sequence>
+        <xs:attribute name="ID" type="xs:int" use="required"/>
+        <xs:attribute name="langid" type="xs:int" use="required"/>
+        <xs:attribute name="Score" type="xs:int" use="required"/>
+        <xs:attribute name="Published" type="xs:string" use="required"/>
+        <xs:attribute name="Author" type="xs:string"/>
+    </xs:complexType>
+
+    <xs:complexType name="URL">
+        <xs:simpleContent>
+            <xs:extension base="xs:anyURI"/>
+        </xs:simpleContent>
+    </xs:complexType>
+
+    <xs:complexType name="SimpleString">
+        <xs:simpleContent>
+            <xs:extension base="xs:string"/>
+        </xs:simpleContent>
+    </xs:complexType>
+
+    <xs:complexType name="BulletPoints">
+        <xs:sequence>
+            <xs:element name="BulletPoint" type="BulletPoint" minOccurs="0" maxOccurs="unbounded"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="GeneratedBulletPoints">
+        <xs:sequence>
+            <xs:element name="GeneratedBulletPoint" type="BulletPoint" minOccurs="0" maxOccurs="unbounded"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="BulletPoint">
+        <xs:attribute name="Value" type="xs:string" use="required"/>
+        <xs:attribute name="langid" type="xs:int" use="required"/>
+        <xs:attribute name="No" type="xs:int" use="required"/>
+    </xs:complexType>
+
+    <xs:complexType name="ProductBulletGroup">
+        <xs:sequence>
+            <xs:element name="ProductBullet" minOccurs="0" type="ProductBullet" maxOccurs="unbounded"/>
+        </xs:sequence>
+        <xs:attribute name="Class" type="xs:string" use="optional"/>
+        <xs:attribute name="ID" type="xs:integer" use="optional"/>
+        <xs:attribute name="Value" type="xs:string" use="optional"/>
+        <xs:attribute name="langid" type="xs:int" use="optional"/>
+    </xs:complexType>
+
+    <xs:complexType name="ProductBullet">
+        <xs:sequence>
+            <xs:element name="FeatureList" type="FeatureLogoAsRTB" minOccurs="0" maxOccurs="1"/>
+        </xs:sequence>
+        <xs:attribute name="Class" type="xs:string" use="optional"/>
+        <xs:attribute name="ID" type="xs:string" use="optional"/>
+        <xs:attribute name="Value" type="xs:string" use="optional"/>
+        <xs:attribute name="No" type="xs:int" use="optional"/>
+        <xs:attribute name="Title" type="xs:string" use="optional"/>
+        <xs:attribute name="langid" type="xs:int" use="optional"/>
+        <xs:attribute name="HighPic" type="xs:string" use="optional"/>
+        <xs:attribute name="HighPicSize" type="xs:int" use="optional"/>
+        <xs:attribute name="origin" type="xs:string" use="optional"/>
+        <xs:attribute name="Feature_ID" type="xs:int" use="optional"/>
+        <xs:attribute name="IsRich" type="xs:integer" use="optional"/>
+    </xs:complexType>
+
+    <xs:complexType name="FeatureLogoAsRTB">
+        <xs:sequence>
+            <xs:element name="Feature" minOccurs="0" maxOccurs="unbounded">
+                <xs:complexType>
+                    <xs:all>
+                        <xs:element name="Titles" minOccurs="0" maxOccurs="1">
+                            <xs:complexType>
+                                <xs:sequence>
+                                    <xs:element name="Title" type="FeatureLogoAsRTBTag" minOccurs="0" maxOccurs="unbounded"/>
+                                </xs:sequence>
+                            </xs:complexType>
+                        </xs:element>
+                        <xs:element name="Values" minOccurs="0" maxOccurs="1">
+                            <xs:complexType>
+                                <xs:sequence>
+                                    <xs:element name="Value" type="FeatureLogoAsRTBTag" minOccurs="0" maxOccurs="unbounded"/>
+                                </xs:sequence>
+                            </xs:complexType>
+                        </xs:element>
+                    </xs:all>
+                    <xs:attribute name="ID" type="xs:integer" use="optional"/>
+                </xs:complexType>
+            </xs:element>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="FeatureLogoAsRTBTag">
+        <xs:simpleContent>
+            <xs:extension base="xs:string">
+                <xs:attribute name="langid" type="xs:integer"/>
+            </xs:extension>
+        </xs:simpleContent>
+    </xs:complexType>
+
+    <xs:complexType name="ProductBullets_HTMLs">
+        <xs:sequence>
+            <xs:element name="ProductBullets_HTML" type="ProductBullets_HTML" minOccurs="0" maxOccurs="unbounded"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="ProductBullets_HTML">
+        <xs:attribute name="Class" type="xs:string" use="optional"/>
+        <xs:attribute name="langid" type="xs:int" use="optional"/>
+    </xs:complexType>
+
+    <xs:complexType name="VirtualCategories">
+        <xs:sequence>
+            <xs:element name="VirtualCategory" type="VirtualCategory" minOccurs="0" maxOccurs="unbounded"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="VirtualCategory">
+        <xs:sequence>
+            <xs:element name="Name" type="Name" minOccurs="0" maxOccurs="unbounded"/>
+        </xs:sequence>
+        <xs:attribute name="ID" type="xs:integer"/>
+        <xs:attribute name="UNCATID" type="xs:string"/>
+    </xs:complexType>
+
+    <xs:complexType name="ProductRelated">
+        <xs:all>
+            <xs:element name="Product" type="Product_related" minOccurs="0" maxOccurs="1"/>
+            <xs:element name="ProductRelatedLocales" type="ProductRelatedLocales" minOccurs="0" maxOccurs="1"/>
+        </xs:all>
+        <xs:attribute name="ID" type="xs:integer"/>
+        <xs:attribute name="Category_ID" type="xs:integer"/>
+        <xs:attribute name="Reversed" type="xs:integer" use="optional"/>
+        <xs:attribute name="Preferred" type="xs:integer"/>
+        <xs:attribute name="Order" type="xs:integer"/>
+    </xs:complexType>
+
+    <xs:complexType name="Product_related">
+        <xs:all>
+            <xs:element name="Supplier" type="Supplier" minOccurs="0" maxOccurs="1"/>
+        </xs:all>
+        <xs:attribute name="ID" type="xs:integer" use="required"/>
+        <xs:attribute name="Name" type="xs:string" use="required"/>
+        <xs:attribute name="Prod_id" type="xs:string" use="required"/>
+        <xs:attribute name="ThumbPic" type="xs:anyURI"/>
+        <xs:attribute name="Quality" type="xs:string"/>
+        <xs:attribute name="Code" type="xs:integer"/>
+        <xs:attribute name="HighPic" type="xs:anyURI"/>
+        <xs:attribute name="LowPic" type="xs:anyURI"/>
+        <xs:attribute name="Score" type="xs:integer"/>
+        <xs:attribute name="ProductsDescription" type="xs:string"/>
+        <xs:attribute name="Relevance" type="xs:integer"/>
+        <xs:attribute name="LowPicSize" type="xs:integer"/>
+        <xs:attribute name="HighPicSize" type="xs:integer"/>
+        <xs:attribute name="ThumbPicSize" type="xs:integer"/>
+        <xs:attribute name="ErrorMessage" type="xs:string"/>
+        <xs:attribute name="ReleaseDate" type="xs:string"/>
+    </xs:complexType>
+
+    <xs:complexType name="ProductRelatedLocales">
+        <xs:sequence>
+            <xs:element name="ProductRelatedLocale" type="ProductRelatedLocale" minOccurs="0" maxOccurs="unbounded"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="ProductRelatedLocale">
+        <xs:attribute name="ID" type="xs:integer" use="required"/>
+        <xs:attribute name="langid" type="xs:integer" use="required"/>
+        <xs:attribute name="Preferred" type="xs:integer" use="required"/>
+        <xs:attribute name="StartDate" type="xs:string" use="required"/>
+        <xs:attribute name="EndDate" type="xs:string" use="required"/>
+    </xs:complexType>
+
+    <xs:complexType name="ProductBundled">
+        <xs:sequence>
+            <xs:element name="Product" type="Product" minOccurs="0" maxOccurs="unbounded"/>
+        </xs:sequence>
+        <xs:attribute name="ID" type="xs:integer"/>
+    </xs:complexType>
+
+    <xs:complexType name="ProductDescription">
+        <xs:attribute name="URL" type="xs:string"/>
+        <xs:attribute name="WarrantyInfo" type="xs:string"/>
+        <xs:attribute name="ID" type="xs:integer"/>
+        <xs:attribute name="PDFURL" type="xs:anyURI"/>
+        <xs:attribute name="PDFSize" type="xs:integer"/>
+        <xs:attribute name="ManualPDFURL" type="xs:anyURI"/>
+        <xs:attribute name="ManualPDFSize" type="xs:integer"/>
+        <xs:attribute name="langid" type="xs:integer"/>
+        <xs:attribute name="LongDesc" type="xs:string"/>
+        <xs:attribute name="ShortDesc" type="xs:string"/>
+        <xs:attribute name="MiddleDesc" type="xs:string"/>
+    </xs:complexType>
+
+    <xs:complexType name="Disclaimers">
+        <xs:sequence>
+            <xs:element name="Disclaimer" type="Disclaimer" minOccurs="0" maxOccurs="unbounded"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="Disclaimer">
+        <xs:attribute name="langid" type="xs:integer"/>
+        <xs:attribute name="value" type="xs:string"/>
+    </xs:complexType>
+
+    <xs:complexType name="SEOs">
+        <xs:sequence>
+            <xs:element name="SEO" type="SEO" minOccurs="0" maxOccurs="unbounded"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="SEO">
+        <xs:attribute name="langid" type="xs:integer"/>
+        <xs:attribute name="Description" type="xs:string"/>
+        <xs:attribute name="Keywords" type="xs:string"/>
+        <xs:attribute name="Title" type="xs:string"/>
+    </xs:complexType>
+
+
+    <xs:complexType name="SummaryDescription">
+        <xs:all>
+            <xs:element name="LongSummaryDescription" type="SummaryDescriptionAttr"/>
+            <xs:element name="ShortSummaryDescription" type="SummaryDescriptionAttr"/>
+        </xs:all>
+    </xs:complexType>
+
+    <xs:complexType name="SummaryDescriptionLocal">
+        <xs:choice maxOccurs="unbounded">
+            <xs:element name="LongSummaryDescriptionLocal" type="SummaryDescriptionAttr"/>
+            <xs:element name="ShortSummaryDescriptionLocal" type="SummaryDescriptionAttr"/>
+        </xs:choice>
+    </xs:complexType>
+
+    <xs:complexType name="SummaryDescriptionAttr">
+        <xs:simpleContent>
+            <xs:extension base="xs:string">
+                <xs:attribute name="langid" type="xs:integer"/>
+            </xs:extension>
+        </xs:simpleContent>
+    </xs:complexType>
+
+    <xs:complexType name="ProductFeature">
+        <xs:sequence>
+            <xs:element name="PresentationValues" type="PresentationValues" minOccurs="0" maxOccurs="unbounded"/>
+            <xs:element name="LocalValues" type="LocalValues" minOccurs="0" maxOccurs="unbounded"/>
+            <xs:element name="LocalValue" type="LocalValue" minOccurs="0" maxOccurs="unbounded"/>
+            <xs:element name="Feature" type="Feature" minOccurs="0" maxOccurs="unbounded"/>
+        </xs:sequence>
+        <xs:attribute name="CategoryFeatureGroup_ID" type="xs:integer" use="required"/>
+        <xs:attribute name="CategoryFeature_ID" type="xs:integer" use="required"/>
+        <xs:attribute name="Value" type="xs:string" use="required"/>
+        <xs:attribute name="Local_Value" type="xs:string"/>
+        <xs:attribute name="Presentation_Value" type="xs:string"/>
+        <xs:attribute name="No" type="xs:integer" use="required"/>
+        <xs:attribute name="ID" type="xs:integer" use="required"/>
+        <xs:attribute name="Local_ID" type="xs:integer"/>
+        <xs:attribute name="Localized" type="xs:boolean" use="required"/>
+        <xs:attribute name="Translated" type="xs:boolean"/>
+        <xs:attribute name="Mandatory" type="xs:boolean"/>
+        <xs:attribute name="Searchable" type="xs:boolean"/>
+        <xs:attribute name="Optional" type="xs:boolean"/>
+    </xs:complexType>
+
+    <xs:complexType name="FeatureLogoList">
+        <xs:sequence>
+            <xs:element name="FeatureLogo" type="FeatureLogo" minOccurs="0" maxOccurs="unbounded"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="FeatureLogo">
+        <xs:all>
+            <xs:element name="Descriptions" type="Descriptions" minOccurs="0" maxOccurs="1"/>
+            <xs:element name="FeatureLogoFeatures" type="FeatureLogoFeaturesList" minOccurs="0" maxOccurs="1"/>
+            <xs:element name="FeatureLogoCategories" type="FeatureLogoCategoriesList" minOccurs="0" maxOccurs="1"/>
+        </xs:all>
+
+        <xs:attribute name="ID" type="xs:integer" use="required"/>
+        <xs:attribute name="Value" type="xs:string" use="optional"/>
+        <xs:attribute name="LogoPic" type="xs:anyURI"/>
+        <xs:attribute name="Link" type="xs:anyURI"/>
+        <xs:attribute name="Width" type="xs:integer" use="required"/>
+        <xs:attribute name="SupplierId" type="xs:integer" use="optional"/>
+        <xs:attribute name="Height" type="xs:integer" use="required"/>
+        <xs:attribute name="Size" type="xs:integer" use="required"/>
+        <xs:attribute name="Feature_ID" type="xs:integer" use="optional"/>
+    </xs:complexType>
+
+    <xs:complexType name="FeatureLogoFeaturesList">
+        <xs:sequence>
+            <xs:element name="FeatureLogoFeature" type="FeatureLogoFeature" minOccurs="0" maxOccurs="unbounded"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="FeatureLogoFeature">
+        <xs:sequence>
+            <xs:element name="FeatureLogoValues" type="FeatureValuesList" minOccurs="0" maxOccurs="unbounded"/>
+        </xs:sequence>
+        <xs:attribute name="ID" type="xs:integer" use="required"/>
+    </xs:complexType>
+
+
+    <xs:complexType name="FeatureValuesList">
+        <xs:sequence>
+            <xs:element name="FeatureLogoValue" type="FeatureLogoValue" minOccurs="0" maxOccurs="unbounded"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="FeatureLogoValue">
+        <xs:simpleContent>
+            <xs:extension base="xs:string">
+                <xs:attribute name="ID" type="xs:integer" use="required"/>
+            </xs:extension>
+        </xs:simpleContent>
+    </xs:complexType>
+
+    <xs:complexType name="FeatureLogoCategoriesList">
+        <xs:sequence>
+            <xs:element name="FeatureLogoCategory" type="FeatureLogoCategory" minOccurs="0" maxOccurs="unbounded"/>
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="FeatureLogoCategory">
+        <xs:attribute name="catid" type="xs:integer" use="required"/>
+    </xs:complexType>
+
+
+    <xs:complexType name="ProductFamily">
+        <xs:sequence>
+            <xs:element name="Description" type="Description" minOccurs="0" maxOccurs="unbounded"/>
+            <xs:element name="Name" type="Name" minOccurs="0" maxOccurs="unbounded"/>
+            <xs:element name="ParentProductFamily" type="ParentProductFamily" minOccurs="0" maxOccurs="unbounded"/>
+            <xs:element name="ProductFamilySlogans" type="ProductFamilySlogans" minOccurs="0" maxOccurs="unbounded"/>
+            <xs:element name="Series" type="Series" minOccurs="0" maxOccurs="unbounded"/>
+            <xs:element name="Supplier" type="Supplier" minOccurs="0" maxOccurs="unbounded"/>
+        </xs:sequence>
+        <xs:attribute name="ID" type="xs:integer" use="required"/>
+        <xs:attribute name="ThumbPic" type="xs:anyURI"/>
+        <xs:attribute name="LowPic" type="xs:anyURI"/>
+        <xs:attribute name="Category_ID" type="xs:integer"/>
+        <xs:attribute name="Name" type="xs:string"/>
+        <xs:attribute name="Updated" type="xs:string"/>
+    </xs:complexType>
+
+    <xs:complexType name="ProductFamilySlogans">
+        <xs:sequence>
+            <xs:element name="ProductFamilySlogan" type="Name" minOccurs="0" maxOccurs="unbounded"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="ParentProductFamily">
+        <xs:attribute name="ID" type="xs:integer" use="required"/>
+    </xs:complexType>
+
+    <xs:complexType name="Series">
+        <xs:sequence>
+            <xs:element name="Name" type="Name" minOccurs="0" maxOccurs="unbounded"/>
+            <xs:element name="ProductSeriesSlogans" type="ProductSeriesSlogans" minOccurs="0" maxOccurs="unbounded"/>
+        </xs:sequence>
+        <xs:attribute name="ID" type="xs:integer"/>
+    </xs:complexType>
+
+    <xs:complexType name="ProductSeriesSlogans">
+        <xs:sequence>
+            <xs:element name="ProductSeriesSlogan" type="Name" minOccurs="0" maxOccurs="unbounded"/>
+        </xs:sequence>
+    </xs:complexType>
+
+
+    <xs:complexType name="ProductGallery">
+        <xs:sequence>
+            <xs:element name="ProductPicture" minOccurs="0" maxOccurs="unbounded" type="ProductPicture"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="Attributes">
+        <xs:sequence>
+            <xs:element name="Attribute" minOccurs="0" maxOccurs="unbounded">
+                <xs:complexType>
+                    <xs:attribute name="Name" type="xs:string" use="required"/>
+                    <xs:attribute name="Value" type="xs:string" use="required"/>
+                </xs:complexType>
+            </xs:element>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="ProductPicture">
+        <xs:sequence>
+            <xs:element name="Attributes" type="Attributes" minOccurs="0" maxOccurs="unbounded"/>
+        </xs:sequence>
+        <xs:attribute name="ProductPicture_ID" type="xs:string" use="required"/>
+        <xs:attribute name="Pic" type="xs:anyURI" use="required"/>
+        <xs:attribute name="ThumbPic" type="xs:anyURI" use="required"/>
+        <xs:attribute name="PicHeight" type="xs:integer" use="required"/>
+        <xs:attribute name="PicWidth" type="xs:integer" use="required"/>
+        <xs:attribute name="Size" type="xs:integer" use="required"/>
+        <xs:attribute name="ThumbSize" type="xs:integer"/>
+        <xs:attribute name="LowPic" type="xs:anyURI"/>
+        <xs:attribute name="LowSize" type="xs:integer"/>
+        <xs:attribute name="LowPicWidth" type="xs:integer"/>
+        <xs:attribute name="LowPicHeight" type="xs:integer"/>
+        <xs:attribute name="Pic500x500" type="xs:anyURI"/>
+        <xs:attribute name="Pic500x500Size" type="xs:integer"/>
+        <xs:attribute name="Pic500x500Width" type="xs:integer"/>
+        <xs:attribute name="Pic500x500Height" type="xs:integer"/>
+        <xs:attribute name="Original" type="xs:anyURI"/>
+        <xs:attribute name="OriginalSize" type="xs:integer"/>
+        <xs:attribute name="Source" type="xs:anyURI"/>
+        <xs:attribute name="langid" type="xs:integer"/>
+        <xs:attribute name="logo" type="xs:integer"/>
+        <xs:attribute name="IsRich" type="xs:integer"/>
+        <xs:attribute name="IsMain" type="xs:string"/>
+        <xs:attribute name="No" type="xs:integer"/>
+        <xs:attribute name="ExpirationDate" type="xs:string" use="optional"/>
+        <xs:attribute name="Type" type="xs:string" use="optional"/>
+        <xs:attribute name="UpdatedDate" type="xs:string" use="optional"/>
+    </xs:complexType>
+
+    <xs:complexType name="MultimediaObject">
+        <xs:all>
+            <xs:element name="ImagesList360" minOccurs="0" maxOccurs="1">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element name="Image" type="Image360" minOccurs="1"
+                                    maxOccurs="unbounded"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+        </xs:all>
+        <xs:attribute name="MultimediaObject_ID" type="xs:integer" use="required"/>
+        <xs:attribute name="URL" type="xs:anyURI"/>
+        <xs:attribute name="ConvertedURL" type="xs:anyURI"/>
+        <xs:attribute name="Description" type="xs:string"/>
+        <xs:attribute name="Size" type="xs:integer"/>
+        <xs:attribute name="ConvertedSize" type="xs:integer"/>
+        <xs:attribute name="Date" type="xs:string" use="required"/>
+        <xs:attribute name="langid" type="xs:integer" use="required"/>
+        <xs:attribute name="ContentType" type="xs:string" use="required"/>
+        <xs:attribute name="ConvertedContentType" type="xs:string"/>
+        <xs:attribute name="KeepAsURL" type="xs:boolean" use="required"/>
+        <xs:attribute name="Type" type="xs:string" use="required"/>
+        <xs:attribute name="Height" type="xs:integer" use="required"/>
+        <xs:attribute name="Width" type="xs:integer" use="required"/>
+        <xs:attribute name="IsRich" type="xs:integer"/>
+        <xs:attribute name="UUID" type="xs:string"/>
+        <xs:attribute name="PreviewUrl" type="xs:string"/>
+        <xs:attribute name="PreviewHeight" type="xs:integer"/>
+        <xs:attribute name="PreviewWidth" type="xs:integer"/>
+        <xs:attribute name="PreviewSize" type="xs:integer"/>
+        <xs:attribute name="ThumbUrl" type="xs:string"/>
+        <xs:attribute name="Original" type="xs:anyURI"/>
+        <xs:attribute name="Source" type="xs:anyURI"/>
+        <xs:attribute name="Original_URL" type="xs:anyURI"/>
+        <xs:attribute name="IsConverted" type="xs:integer"/>
+        <xs:attribute name="OriginalMD5" type="xs:string"/>
+        <xs:attribute name="ExpirationDate" type="xs:string"/>
+        <xs:attribute name="LabelType" type="xs:string"/>
+        <xs:attribute name="EprelLink" type="xs:string"/>
+    </xs:complexType>
+
+    <xs:complexType name="ProductMultimediaObject">
+        <xs:sequence>
+            <xs:element name="MultimediaObject" type="MultimediaObject" minOccurs="0" maxOccurs="unbounded"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="Image360">
+        <xs:attribute name="Link" type="xs:string" use="required"/>
+        <xs:attribute name="No" type="xs:integer" use="required"/>
+    </xs:complexType>
+
+    <xs:complexType name="EANCode">
+        <xs:sequence>
+            <xs:element name="LogisticAttribute" minOccurs="0" maxOccurs="unbounded">
+                <xs:complexType>
+                    <xs:simpleContent>
+                        <xs:extension base="xs:string">
+                            <xs:attribute name="ID" type="xs:integer" use="required"/>
+                            <xs:attribute name="LogisticAttribute_ID" type="xs:integer" use="required"/>
+                        </xs:extension>
+                    </xs:simpleContent>
+                </xs:complexType>
+            </xs:element>
+        </xs:sequence>
+        <xs:attribute name="EAN" type="xs:integer"/>
+        <xs:attribute name="VariantID" type="xs:integer"/>
+        <xs:attribute name="Format" type="xs:string"/>
+    </xs:complexType>
+
+    <xs:complexType name="ProductsListLookup">
+        <xs:sequence>
+            <xs:element name="Product" type="Product" minOccurs="0" maxOccurs="unbounded"/>
+        </xs:sequence>
+        <xs:attribute name="CODE" type="xs:integer"/>
+    </xs:complexType>
+
+    <xs:complexType name="ProductsStatistic">
+        <xs:sequence>
+            <xs:element name="Product" type="Product" minOccurs="0" maxOccurs="unbounded"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="DescribeProductsResponse">
+        <xs:sequence>
+            <xs:element name="DescribeProductResponse" minOccurs="0" maxOccurs="unbounded">
+                <xs:complexType>
+                    <xs:attribute name="Product_id" type="xs:integer"/>
+                    <xs:attribute name="Status" type="xs:integer"/>
+                    <xs:attribute name="DescribeProductRequest_ID" type="xs:integer"/>
+                    <xs:attribute name="Error" type="xs:string"/>
+                </xs:complexType>
+            </xs:element>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="StatisticQueryListResponse">
+        <xs:sequence>
+            <xs:element name="StatisticQuery" type="StatisticQuery" minOccurs="0" maxOccurs="unbounded"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:element name="files">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="file" minOccurs="0" maxOccurs="unbounded">
+                    <xs:complexType>
+                        <xs:attribute name="path" type="xs:anyURI"/>
+                        <xs:attribute name="Product_id" type="xs:integer"/>
+                        <xs:attribute name="Updated" type="xs:string"/>
+                        <xs:attribute name="Quality" type="xs:string"/>
+                        <xs:attribute name="Supplier_id" type="xs:integer"/>
+                        <xs:attribute name="Prod_ID" type="xs:string"/>
+                    </xs:complexType>
+                </xs:element>
+            </xs:sequence>
+            <xs:attribute name="Generated" type="xs:integer"/>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:complexType name="StatisticQuery">
+        <xs:attribute name="ID" type="xs:integer" use="required"/>
+        <xs:attribute name="Code" type="xs:integer"/>
+        <xs:attribute name="Period" type="xs:string"/>
+    </xs:complexType>
+
+    <xs:complexType name="StatisticQueryDate">
+        <xs:attribute name="ID" type="xs:integer" use="required"/>
+        <xs:attribute name="StatisticQuery_ID" type="xs:integer"/>
+        <xs:attribute name="Date" type="xs:string"/>
+        <xs:attribute name="Period" type="xs:string"/>
+    </xs:complexType>
+
+    <xs:complexType name="StatisticQueryDatesListResponse">
+        <xs:sequence>
+            <xs:element name="StatisticQueryDate" type="StatisticQueryDate" minOccurs="0" maxOccurs="unbounded"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="StatisticQueryDateDataReportResponse">
+        <xs:sequence>
+            <xs:element name="StatisticQueryDateDataReport" minOccurs="0" maxOccurs="unbounded">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element name="Body" type="Body" minOccurs="0" maxOccurs="unbounded"/>
+                    </xs:sequence>
+                    <xs:attribute name="StatisticQueryDate_ID" type="xs:integer" use="required"/>
+                    <xs:attribute name="Date" type="xs:string"/>
+                    <xs:attribute name="Code" type="xs:integer"/>
+                    <xs:attribute name="Period" type="xs:string" use="required"/>
+                </xs:complexType>
+            </xs:element>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="Body">
+        <xs:sequence>
+            <xs:element name="Line" minOccurs="0" maxOccurs="unbounded">
+                <xs:complexType>
+                    <xs:attribute name="Number" type="xs:string"/>
+                    <xs:attribute name="Level" type="xs:string"/>
+                    <xs:attribute name="Text" type="xs:string" use="required"/>
+                    <xs:attribute name="Count" type="xs:string" use="required"/>
+                </xs:complexType>
+            </xs:element>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="SupplierProductFamiliesList">
+        <xs:sequence>
+            <xs:element name="ProductFamily" type="ProductFamily" minOccurs="0" maxOccurs="unbounded"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="ProductsComplaintResponse">
+        <xs:sequence>
+            <xs:element name="ProductComplaintReponse" minOccurs="0" maxOccurs="unbounded">
+                <xs:complexType>
+                    <xs:attribute name="Product_id" type="xs:integer"/>
+                    <xs:attribute name="ComplaintStatus_ID" type="xs:integer"/>
+                    <xs:attribute name="ProductComplaintRequest_ID" type="xs:integer"/>
+                    <xs:attribute name="Error" type="xs:string"/>
+                    <xs:attribute name="Confirmation" type="xs:string"/>
+                </xs:complexType>
+            </xs:element>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="FulltextProductsSearchResponse">
+        <xs:sequence>
+            <xs:element name="ProductsList" type="ProductsList" minOccurs="0" maxOccurs="unbounded"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="FeatureValuesVocabularyList">
+        <xs:sequence>
+            <xs:element name="FeatureValuesVocabulary" minOccurs="0" maxOccurs="unbounded">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element name="FeatureValue" type="FeatureValue" minOccurs="0" maxOccurs="unbounded"/>
+                    </xs:sequence>
+                    <xs:attribute name="Key_Value" type="xs:string" use="required"/>
+                    <xs:attribute name="Group_ID" type="xs:integer" use="required"/>
+                    <xs:attribute name="Updated" type="xs:string" use="required"/>
+                </xs:complexType>
+            </xs:element>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="FeatureValue">
+        <xs:attribute name="langid" type="xs:integer"/>
+        <xs:attribute name="ID" type="xs:integer"/>
+        <xs:attribute name="Updated" type="xs:string" use="required"/>
+    </xs:complexType>
+
+    <xs:complexType name="LogisticsDataList">
+        <xs:sequence>
+            <xs:element name="LogisticsData" type="LogisticsData" minOccurs="0" maxOccurs="unbounded"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="LogisticsData">
+        <xs:sequence>
+            <xs:element name="Names" type="Names" minOccurs="1" maxOccurs="1"/>
+        </xs:sequence>
+        <xs:attribute name="ID" type="xs:integer" use="required"/>
+        <xs:attribute name="type" type="xs:string" use="required"/>
+        <xs:attribute name="Updated" type="xs:string" use="required"/>
+        <xs:attribute name="measure_id" type="xs:integer" use="required"/>
+    </xs:complexType>
+
+</xs:schema>
