@@ -1,13 +1,10 @@
 package org.open4goods.ui.controllers.ui;
 
-
-
 import java.io.BufferedInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URISyntaxException;
-import java.util.Optional;
+import java.util.function.Predicate;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
@@ -16,7 +13,6 @@ import org.open4goods.exceptions.InvalidParameterException;
 import org.open4goods.exceptions.ResourceNotFoundException;
 import org.open4goods.exceptions.TechnicalException;
 import org.open4goods.exceptions.ValidationException;
-import org.open4goods.model.constants.ResourceTagDictionary;
 import org.open4goods.model.data.Resource;
 import org.open4goods.model.product.Product;
 import org.open4goods.services.BrandService;
@@ -29,307 +25,209 @@ import org.open4goods.ui.services.GtinService;
 import org.open4goods.ui.services.ImageService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.server.ResponseStatusException;
 
-import com.mashape.unirest.http.exceptions.UnirestException;
-
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 @Controller
 /**
- * This controller maps the index page
- *
- * @author gof
- *
+ * This controller maps Resources to web endpoints.
  */
-public class ResourceController  {
+public class ResourceController {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(ResourceController.class);
 
-	private static final String PNG_IMG = "image.png";
-	private static final String GTIN_IMG = "gtin.png";
+	private static final String CONTENT_TYPE_IMAGE_PNG = "image/png";
+	private static final String CONTENT_TYPE_JAVA_ARCHIVE = "application/java-archive";
+	private static final String HEADER_CONTENT_TYPE = "Content-type";
+	private static final String HEADER_CACHE_CONTROL = "Cache-Control";
 
-	// The siteConfig
 	private final ImageService imageService;
 	private final ProductRepository esDao;
 	private final GtinService gtinService;
 	private final UiConfig config;
-	private final DataSourceConfigService dsConfigService;
+	private final DataSourceConfigService datasourceConfigService;
 	private final VerticalsConfigService verticalConfigService;
 	private final BrandService brandService;
 	private final ResourceService resourceService;
-	
-	private @Autowired UiService uiService;
-	public ResourceController(ImageService imageService, ProductRepository esDao, GtinService gtinService, UiConfig config, DataSourceConfigService dsConfigService,  ResourceService resourceService, VerticalsConfigService verticalConfigService, BrandService brandService) {
+
+	public ResourceController(ImageService imageService, ProductRepository esDao, GtinService gtinService, UiConfig config, DataSourceConfigService dsConfigService, ResourceService resourceService, VerticalsConfigService verticalConfigService, BrandService brandService) {
 		this.imageService = imageService;
 		this.esDao = esDao;
 		this.gtinService = gtinService;
 		this.config = config;
-		this.dsConfigService = dsConfigService;
+		this.datasourceConfigService = dsConfigService;
 		this.verticalConfigService = verticalConfigService;
 		this.brandService = brandService;
 		this.resourceService = resourceService;
 	}
 
-	//////////////////////////////////////////////////////////////
-	// Mappings
-	//////////////////////////////////////////////////////////////
 
-	
+
 	/**
-	 * The brand logos images.
+	 * Serves the resource specified by type, GTIN, hash key, and resource name.
 	 *
-	 * @param request
-	 * @param response
-	 * @return
-	 * @throws TechnicalException
-	 * @throws ValidationException
-	 * @throws IOException
-	 * @throws FileNotFoundException
-	 * @throws InvalidParameterException 
-	 * @throws UnirestException
+	 * @param type         the type of the resource.
+	 * @param gtin         the GTIN of the resource.
+	 * @param hashKey      the hash key of the resource.
+	 * @param resourceName the name of the resource.
+	 * @param response     the HttpServletResponse to write the resource to.
+	 * @param request      the HttpServletRequest.
+	 * @throws IOException if an I/O error occurs.
 	 */
+	@GetMapping("/{type}/{gtin:\\d+}-{hashkey:\\d+}-{resourceName}")
+	public void resource(@PathVariable String type, @PathVariable String gtin, @PathVariable String hashKey, @PathVariable String resourceName, final HttpServletResponse response, HttpServletRequest request)	throws IOException {
 
+		Product data = handleResourceNotFoundException(gtin);
+		Resource img = retrieveResource(data, e -> e.getCacheKey().equals(hashKey));
 
+		if (img != null) {
+			try (InputStream stream = resourceService.getResourceFileStream(img)) {
+				setResponseAndCopyStream(response, stream, img.getMimeType());
+			}
+		} else {
+			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Resource not found!");
+		}
+	}
+
+	/**
+	 * Serves the logo image of the specified brand.
+	 *
+	 * @param brand    the brand name.
+	 * @param response the HttpServletResponse to write the image to.
+	 * @throws IOException               if an I/O error occurs.
+	 * @throws ValidationException       if validation fails.
+	 * @throws TechnicalException        if a technical error occurs.
+	 * @throws InvalidParameterException if an invalid parameter is provided.
+	 */
 	@GetMapping("/images/marques/{brand}.png")
-	public void brandLogo(@PathVariable String brand, final HttpServletResponse response, HttpServletRequest request) throws FileNotFoundException, IOException, ValidationException, TechnicalException, InvalidParameterException {		
+	public void brandLogo(@PathVariable String brand, final HttpServletResponse response) throws IOException, ValidationException, TechnicalException, InvalidParameterException {
 
 		if (!brandService.hasLogo(brand.toUpperCase())) {
-			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Image " + request.getServletPath() + " introuvable !");
+			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Image introuvable !");
 		}
-		
-		response.addHeader("Content-type","image/png");
-		response.addHeader("Cache-Control","public, max-age="+AppConfig.CACHE_PERIOD_SECONDS);
 
-		InputStream stream = brandService.getLogo(brand.toUpperCase());
-		IOUtils.copy(stream ,response.getOutputStream());
-		IOUtils.closeQuietly(stream);
-		
-		
+		response.addHeader(HEADER_CONTENT_TYPE, CONTENT_TYPE_IMAGE_PNG);
+		response.addHeader(HEADER_CACHE_CONTROL, "public, max-age=" + AppConfig.CACHE_PERIOD_SECONDS);
+
+		try (InputStream stream = brandService.getLogo(brand.toUpperCase())) {
+			IOUtils.copy(stream, response.getOutputStream());
+		}
 	}
-	
-	
 	
 	/**
-	 * The vertical Home page.
+	 * Serves the icon image of the specified data source.
 	 *
-	 * @param request
-	 * @param response
-	 * @return
-	 * @throws TechnicalException
-	 * @throws ValidationException
-	 * @throws IOException
-	 * @throws FileNotFoundException
-	 * @throws UnirestException
+	 * @param datasourceName the name of the data source.
+	 * @param response       the HttpServletResponse to write the icon to.
+	 * @throws IOException               if an I/O error occurs.
+	 * @throws InvalidParameterException if an invalid parameter is provided.
 	 */
+	@GetMapping("/icon/{datasourceName}")
+	public void datasourceIcon(@PathVariable String datasourceName, final HttpServletResponse response)	throws IOException, InvalidParameterException {
 
+		response.addHeader(HEADER_CONTENT_TYPE, CONTENT_TYPE_IMAGE_PNG);
+		response.addHeader(HEADER_CACHE_CONTROL, "public, max-age=" + AppConfig.CACHE_PERIOD_SECONDS);
 
-//	@GetMapping("/{vertical}/*-{id:\\d+}/"+PNG_IMG)
-//	public void image(@PathVariable String vertical, @PathVariable String id, final HttpServletResponse response, HttpServletRequest request) throws FileNotFoundException, IOException, ValidationException, TechnicalException {
-//		VerticalConfig language = verticalConfigService.getVerticalForPath(vertical);
-//
-//		if (null == language) {
-//			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Image " + request.getServletPath() + " introuvable !");
-//		}
-//
-//		image(id, response, request);
-//
-//	}
-
-	@GetMapping("/images/{gtin:\\d+}-cover.png")
-	public void image(@PathVariable String gtin, final HttpServletResponse response, HttpServletRequest request) throws IOException  {
-
-		
-		
-		
-		
-		 image(gtin, 0, response, request);
+		try (InputStream stream = datasourceConfigService.getFavicon(datasourceName)) {
+			IOUtils.copy(stream, response.getOutputStream());
+		}
 	}
-	@GetMapping("/images/{gtin:\\d+}-{imgNumber:\\d+}.png")
-	public void image(@PathVariable String gtin, @PathVariable int imgNumber, final HttpServletResponse response, HttpServletRequest request) throws IOException  {
 
-		// Retrieve the Product
-		Product data;
-		try {
-			data = esDao.getById(gtin);
-		} catch (ResourceNotFoundException e) {
-			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "image introuvable !");
+	/**
+	 * Serves the logo image of the specified data source.
+	 *
+	 * @param datasourceName the name of the data source.
+	 * @param response       the HttpServletResponse to write the logo to.
+	 * @throws IOException               if an I/O error occurs.
+	 * @throws InvalidParameterException if an invalid parameter is provided.
+	 */
+	@GetMapping("/logo/{datasourceName}")
+	public void datasourceLogo(@PathVariable String datasourceName, final HttpServletResponse response)	throws IOException, InvalidParameterException {
+
+		response.addHeader(HEADER_CONTENT_TYPE, CONTENT_TYPE_IMAGE_PNG);
+		response.addHeader(HEADER_CACHE_CONTROL, "public, max-age=" + AppConfig.CACHE_PERIOD_SECONDS);
+
+		try (InputStream stream = datasourceConfigService.getLogo(datasourceName)) {
+			IOUtils.copy(stream, response.getOutputStream());
 		}
+	}
 
-		// Handling 404
-		if (null == data) {
-			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "image introuvable !");
-		}
+	/**
+	 * Serves the latest UI jar file.
+	 *
+	 * @param response the HttpServletResponse to write the jar file to.
+	 * @throws IOException               if an I/O error occurs.
+	 * @throws InvalidParameterException if an invalid parameter is provided.
+	 * @throws URISyntaxException        if the URI syntax is incorrect.
+	 */
+	@GetMapping("/ui-latest.jar")
+	public void uiJarFile(final HttpServletResponse response) throws IOException, InvalidParameterException, URISyntaxException {
 
+		response.addHeader(HEADER_CONTENT_TYPE, CONTENT_TYPE_JAVA_ARCHIVE);
+		response.addHeader(HEADER_CACHE_CONTROL, "public, max-age=" + AppConfig.CACHE_PERIOD_SECONDS);
 
-		//TODO (gof) : not sure pageSize have image, could have any resource
-		// Retrieve one of the cover images
-		Resource img = null;
-		
-		if (imgNumber <   data.getImages().size()) {
-			img = data.getImages().get(imgNumber);
-		} 
-
-
-		if (null != img) {
-			// TODO : Should be webp
-			response.addHeader("Content-type","image/png");
-			response.addHeader("Cache-Control","public, max-age="+AppConfig.CACHE_PERIOD_SECONDS);
-			InputStream stream = resourceService.getFileStream(img);
-			IOUtils.copy(stream ,response.getOutputStream());
-			IOUtils.closeQuietly(stream);
-		} else {
-			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "image introuvable !");
+		try (InputStream stream = new BufferedInputStream(FileUtils.openInputStream(config.uiJarFile()))) {
+			IOUtils.copy(stream, response.getOutputStream());
 		}
 	}
 
 	
-	
-	@GetMapping("/pdf/{gtin:\\d+}-{hash:\\d+}.pdf")
-	// TODO : Add the PDF name in url
-	public void pdf(@PathVariable String gtin, @PathVariable String hash, final HttpServletResponse response, HttpServletRequest request) throws IOException  {
-
-		// Retrieve the Product
-		Product data;
-		try {
-			data = esDao.getById(gtin);
-		} catch (ResourceNotFoundException e) {
-			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "image introuvable !");
-		}
-
-		// Handling 404
-		if (null == data) {
-			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "image introuvable !");
-		}
-
-
-		//TODO (gof) : not sure pageSize have image, could have any resource
-		// Retrieve one of the cover images
-		Resource img = data.getResources().stream().filter(e->e.getCacheKey().equals(hash)).findAny().orElse(null);		
-
-		if (null != img) {
-			try {
-				// TODO : Should be webp
-				response.addHeader("Content-type","application/pdf");
-				response.addHeader("Cache-Control","public, max-age="+AppConfig.CACHE_PERIOD_SECONDS);
-				InputStream stream = resourceService.getFileStream(img);
-				IOUtils.copy(stream ,response.getOutputStream());
-				IOUtils.closeQuietly(stream);
-			} catch (Exception e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-			}
-		} else {
-			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "image introuvable !");
-		}
+	//////////////////////////
+	// Response helpers
+	/////////////////////////
+	/**
+	 * Sets the response headers and copies the input stream to the response output
+	 * stream.
+	 *
+	 * @param response    the HttpServletResponse to write the data to.
+	 * @param stream      the InputStream to read the data from.
+	 * @param contentType the content type of the response.
+	 * @throws IOException if an I/O error occurs.
+	 */
+	private void setResponseAndCopyStream(HttpServletResponse response, InputStream stream, String contentType)
+			throws IOException {
+		response.addHeader(HEADER_CONTENT_TYPE, contentType);
+		response.addHeader(HEADER_CACHE_CONTROL, "public, max-age=" + AppConfig.CACHE_PERIOD_SECONDS);
+		IOUtils.copy(stream, response.getOutputStream());
 	}
-	
-	@GetMapping("/video/{gtin:\\d+}-{hash:\\d+}.mp4")
-	// TODO : Add the PDF name in url
-	public void video(@PathVariable String gtin, @PathVariable String hash, final HttpServletResponse response, HttpServletRequest request) throws IOException  {
 
-		// Retrieve the Product
+	/**
+	 * Handles resource not found exception for the given GTIN.
+	 *
+	 * @param id the GTIN of the resource.
+	 * @return the Product corresponding to the given GTIN.
+	 * @throws ResponseStatusException if the resource is not found.
+	 */
+	private Product handleResourceNotFoundException(String id) {
 		Product data;
-		try {
-			data = esDao.getById(gtin);
-		} catch (ResourceNotFoundException e) {
-			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "video introuvable !");
-		}
-
-		// Handling 404
-		if (null == data) {
-			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "video introuvable !");
-		}
-
-
-		//TODO (gof) : not sure pageSize have image, could have any resource
-		// Retrieve one of the cover images
-		Resource img = data.getResources().stream().filter(e->e.getCacheKey().equals(hash)).findAny().orElse(null);
-		
-
-		if (null != img) {
-			try {
-				// TODO : Should be webp
-				response.addHeader("Content-type",img.getMimeType());
-				response.addHeader("Cache-Control","public, max-age="+AppConfig.CACHE_PERIOD_SECONDS);
-				InputStream stream = resourceService.getFileStream(img);
-				IOUtils.copy(stream ,response.getOutputStream());
-				IOUtils.closeQuietly(stream);
-			} catch (Exception e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-			}
-		} else {
-			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "image introuvable !");
-		}
-	}
-	
-	
-	
-	@GetMapping("/images/{id:\\d+}-gtin.png")
-	public void gtin(@PathVariable String id, final HttpServletResponse response, HttpServletRequest request) throws FileNotFoundException, IOException, ValidationException, TechnicalException {
-
-		// Retrieve the Product
-		Product data;
-
 		try {
 			data = esDao.getById(id);
 		} catch (ResourceNotFoundException e) {
-			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "image introuvable !");
+			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Resource not found!");
 		}
 
-		// Handling 404
-		if (null == data) {
-			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "image introuvable !");
+		if (data == null) {
+			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Resource not found!");
 		}
 
-		response.addHeader("Content-type","image/png");
-		response.addHeader("Cache-Control","public, max-age="+AppConfig.CACHE_PERIOD_SECONDS);
-
-		InputStream stream = gtinService.gtin(data.gtin());
-		IOUtils.copy(stream ,response.getOutputStream());
-		IOUtils.closeQuietly(stream);
+		return data;
 	}
 
-
-
-
-
-	@GetMapping("/icon/{datasourceName}")
-	public void datasourceIcon(@PathVariable String datasourceName, final HttpServletResponse response) throws FileNotFoundException, IOException, InvalidParameterException  {
-		response.addHeader("Content-type","image/png");
-		response.addHeader("Cache-Control","public, max-age="+AppConfig.CACHE_PERIOD_SECONDS);
-
-		InputStream stream = dsConfigService.getFavicon(datasourceName);
-		IOUtils.copy(stream ,response.getOutputStream());
-		IOUtils.closeQuietly(stream);
+	/**
+	 * Retrieves the resource from the product that matches the given predicate.
+	 *
+	 * @param data      the Product containing the resources.
+	 * @param predicate the Predicate to match the resource.
+	 * @return the Resource that matches the predicate, or null if no match is
+	 *         found.
+	 */
+	private Resource retrieveResource(Product data, Predicate<Resource> predicate) {
+		return data.getResources().stream().filter(predicate).findAny().orElse(null);
 	}
-
-	@GetMapping("/logo/{datasourceName}")
-	public void datasourceLogo(@PathVariable String datasourceName, final HttpServletResponse response) throws FileNotFoundException, IOException, InvalidParameterException  {
-		response.addHeader("Content-type","image/png");
-		response.addHeader("Cache-Control","public, max-age="+AppConfig.CACHE_PERIOD_SECONDS);
-		InputStream stream = dsConfigService.getLogo(datasourceName);
-		IOUtils.copy(stream ,response.getOutputStream());
-		IOUtils.closeQuietly(stream);
-	}
-
-	
-	@GetMapping("/ui-latest.jar")
-	public void uiJarFile( final HttpServletResponse response) throws FileNotFoundException, IOException, InvalidParameterException, URISyntaxException  {
-		
-		response.addHeader("Content-type","application/java-archive");
-		response.addHeader("Cache-Control","public, max-age="+AppConfig.CACHE_PERIOD_SECONDS);
-		InputStream stream = new BufferedInputStream(FileUtils.openInputStream(config.uiJarFile()));
-		IOUtils.copy(stream ,response.getOutputStream());
-		IOUtils.closeQuietly(stream);
-	}
-
-
 }
