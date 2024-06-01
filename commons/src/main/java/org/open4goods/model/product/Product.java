@@ -61,6 +61,10 @@ public class Product implements Standardisable {
 
 	public static final String DEFAULT_REPO = "products";
 
+	// TODO : Conf
+	// If true, the referentiel atrribute will be updated if a shortes version exists in alternativeModels
+	private static final boolean FORCE = true;
+
 	/**
 	 * The ID is the gtin
 	 */
@@ -91,9 +95,13 @@ public class Product implements Standardisable {
 	private String vertical;
 	
 	/** The list of other id's known for this product **/
-	@Field(index = true, store = false, type = FieldType.Object)
-	private Set<UnindexedKeyValTimestamp> alternativeIds = new HashSet<>();
+	// TODO : Rename to alternativ model names
+//	private Set<UnindexedKeyValTimestamp> alternativeIds = new HashSet<>();
 
+	@Field(index = true, store = false, type = FieldType.Keyword)
+	private Set<String> alternativeModels = new HashSet<>();
+	
+	
 	/** The list of other id's known for this product **/
 	@Field(index = false, store = false, type = FieldType.Object)
 	private Set<UnindexedKeyValTimestamp> alternativeBrands = new HashSet<>();
@@ -431,7 +439,7 @@ public class Product implements Standardisable {
 	 * @return true if this AggrgatedData has alternateIds
 	 */
 	public Boolean hasAlternateIds() {
-		return alternativeIds.size() > 0;
+		return alternativeModels.size() > 0;
 	}
 
 	
@@ -469,7 +477,7 @@ public class Product implements Standardisable {
 	}
 
 	public String alternateIdsAsText() {
-		return StringUtils.join(alternativeIds, ", ");
+		return StringUtils.join(alternativeModels, ", ");
 	}
 
 	/**
@@ -502,13 +510,10 @@ public class Product implements Standardisable {
 	}
 
 
-	public String randomModel() {
-	
+	public String randomModel() {	
 		List<String> names =  new ArrayList<>();
-		names.add(model());
-				
-		alternativeIds.stream().map(e -> e.getValue()).forEach(e -> names.add(e));
-
+		names.add(model());				
+		alternativeModels.forEach(e -> names.add(e));
 		Random rand = new Random();
 		return names.get(rand.nextInt(names.size()));
 		
@@ -738,6 +743,51 @@ public class Product implements Standardisable {
 		return names.getUrl().getOrDefault(language, names.getUrl().get("default"));
 	}
 	
+	/**
+	 * Add the model referentiel attribute, applying some spliting mechanism and cleaning pass
+	 * @param value
+	 */
+	public void addModel(String value) {
+		
+		String model = StringUtils.normalizeSpace(value).toUpperCase();
+		
+		// TODO : Eviction size from conf
+		if (StringUtils.isEmpty(value) || value.length() < 3) {
+			return;
+		}
+		// Splitting on conventionnal suffixes (/ - .)
+		// TODO : Const / conf
+		String[]frags = model.split("/|\\|.|-");
+
+		alternativeModels.add(value);
+		if (frags.length > 1) {
+			logger.info("Found an alternative model : " + frags[0]);
+			alternativeModels.add(frags[0]);
+		}
+
+		// Case ref attribute is already set, we keep as it and we remove the elected one from alternativeModels
+		String existing = model();
+		
+		if ( StringUtils.isEmpty(existing) || FORCE) {
+			String shortest = shortestModel();
+			attributes.getReferentielAttributes().put(ReferentielKey.MODEL, shortest);
+			alternativeModels.remove(shortest);
+		} else {
+			alternativeModels.remove(existing);
+		}		
+	}
+
+	/**
+	 * 
+	 * @return the shortest model name	
+	 */
+	public String shortestModel() {		
+		Set<String> names = new HashSet<>();
+		names.add(model());
+		names.addAll(alternativeModels);		
+		return names.stream().min(Comparator.comparingInt(String::length)).orElse(null);
+	}
+	
 	//////////////////////////////////////////
 	// Getters / Setters
 	//////////////////////////////////////////
@@ -753,13 +803,6 @@ public class Product implements Standardisable {
 	}
 
 
-	public Set<UnindexedKeyValTimestamp> getAlternativeIds() {
-		return alternativeIds;
-	}
-
-	public void setAlternativeIds(Set<UnindexedKeyValTimestamp> alternativeIds) {
-		this.alternativeIds = alternativeIds;
-	}
 
 	public Set<UnindexedKeyValTimestamp> getAlternativeBrands() {
 		return alternativeBrands;
@@ -932,6 +975,16 @@ public class Product implements Standardisable {
 	public void setCoverImagePath(String coverImagePath) {
 		this.coverImagePath = coverImagePath;
 	}
+
+	public Set<String> getAlternativeModels() {
+		return alternativeModels;
+	}
+
+	public void setAlternativeModels(Set<String> alternativeModels) {
+		this.alternativeModels = alternativeModels;
+	}
+
+
 
 
 	

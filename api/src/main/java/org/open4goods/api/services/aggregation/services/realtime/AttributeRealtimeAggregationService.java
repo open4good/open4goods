@@ -1,6 +1,7 @@
 package org.open4goods.api.services.aggregation.services.realtime;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -152,6 +153,9 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 			}
 
 			
+			// Checking model name from product words
+//			completeModelNames(product, dataFragment.getReferentielAttributes().get(ReferentielKey.MODEL));
+			
 			/////////////////////////////////////////
 			// Update referentiel attributes
 			/////////////////////////////////////////
@@ -223,6 +227,53 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 
 
 
+//	/**
+//	 * Complete the model names by looking in product words for sequence starting with the shortest model name.
+//	 * @param product
+//	 * @param string
+//	 */
+//	private void completeModelNames(Product product, String string) {
+//		// Get the known model names
+//		Set<String> models = new HashSet<>();
+//		if (!StringUtils.isEmpty(string)) {
+//			models.add(string);
+//		}
+//		product.getAlternativeBrands().forEach(e -> models.add(e.getValue()));
+//		
+//		
+//		// Compute the bag of known words
+//		Set<String> words = new HashSet<>();
+//		product.getDescriptions().forEach(e -> {
+//			words.addAll(Arrays.asList(e.getContent().getText().split(" ")));
+//		});
+//		
+//		product.getNames().getOfferNames().forEach(e -> {
+//			words.addAll(Arrays.asList(e.split(" ")));
+//		});
+//		
+//		
+//		String shortest = product.shortestModel();
+//		// Iterating on words to find the one who have matching starts with known model names
+//		for (String w : words) {
+//			w = w.toUpperCase();
+//			if ((w.startsWith(shortest) || shortest.startsWith(w))  && !w.equals(shortest)) {
+//				
+//				if (StringUtils.isAlpha(w.substring(w.length()-1))) {
+//					dedicatedLogger.info("Found a alternate model for {} in texts : {}", shortest, w);
+//					product.addModel(w);
+//					
+//				}
+//				
+//			}
+//		}
+//	}
+//
+
+
+
+
+
+
 	/**
 	 *
 	 * @param matchedFeatures
@@ -275,25 +326,8 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 			if (!StringUtils.isEmpty(existing) && !existing.equals(value)) {
 				//TODO(0.5,p2,feature) : handle conflicts and "best value" election on referentiel attributes
 				if (key.equals(ReferentielKey.MODEL)) {
-					dedicatedLogger.info("Adding different {} name as alternate id. Existing is {}, would have erased with {}",key,existing, value);
-					output.getAlternativeIds().add(new UnindexedKeyValTimestamp(fragement.getDatasourceName(), value));				
-					
-					// Election 
-					String shortest = null;
-					
-					for (UnindexedKeyValTimestamp model : output.getAlternativeIds()) {
-						
-						if (null == shortest) {
-							shortest = model.getValue();
-						} else  if (model.getValue().length() < shortest.length()) {
-							shortest = model.getValue();
-						}
-					}
-					
-					output.getAttributes().addReferentielAttribute(ReferentielKey.MODEL, shortest);					
-					output.getAlternativeIds().removeIf(b -> b.getValue().equals(output.model()));
-					
-					
+					dedicatedLogger.info("Adding different {} name as alternate id. Existing is {}, would have erased with {}",key,existing, value);					
+					output.addModel(value);					
 					
 				} else if (key.equals(ReferentielKey.BRAND)) {
 					
@@ -333,7 +367,13 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 				if (key.equals(ReferentielKey.BRAND)) {
 					value = brandService.normalizeBrand(value);
 				}
-				output.getAttributes().addReferentielAttribute( key, value);
+				
+				
+				if (key.equals(ReferentielKey.MODEL)) {
+					output.addModel(value);
+				} else {
+					output.getAttributes().addReferentielAttribute( key, value);
+				}
 			}
 		}
 

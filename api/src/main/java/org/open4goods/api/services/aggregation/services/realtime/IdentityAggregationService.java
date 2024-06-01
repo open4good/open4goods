@@ -2,6 +2,7 @@
 package org.open4goods.api.services.aggregation.services.realtime;
 
 import java.util.AbstractMap.SimpleEntry;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.open4goods.api.services.aggregation.AbstractAggregationService;
@@ -54,9 +55,9 @@ public class IdentityAggregationService extends AbstractAggregationService {
 		}
 		
 		/////////////////////////////
-		// Adding alternate id's
+		// Adding alternate models's
 		/////////////////////////////		
-		output.getAlternativeIds().addAll(input.getAlternateIds());
+		output.getAlternativeModels().addAll(input.getAlternateIds().stream().map(e-> e.getValue()).collect(Collectors.toSet()) );
 
 		/////////////////////////////
 		// Setting the dates
