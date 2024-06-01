@@ -151,10 +151,14 @@ public class IdHelper {
 	}
 	
 	public static String azCharAndDigitsPointsDash(String input) {
-		return azCharAndDigits(input,"");
-		}
+		return azCharAndDigits(input);
+	}
 
-	
+
+	public static String azCharAndDigitsPointsDash(String input, String string) {
+		return StringUtils.stripAccents(input).replaceAll("[^a-zA-Z0-9_-]",string);
+	}
+
 	
 	/**
 	 * Return a clean hashed name
@@ -225,6 +229,14 @@ public class IdHelper {
 			}
 		}
 		return output;
+	}
+
+	public static String normalizeFileName(String name) {
+		String ret =  azCharAndDigitsPointsDash(name.toLowerCase(),"-");
+		ret = ret.replaceAll("[-]+", "-");
+		ret = StringUtils.removeStart(ret, '-');
+		ret = StringUtils.removeEnd(ret, "-");
+		return ret;
 	}
 
 

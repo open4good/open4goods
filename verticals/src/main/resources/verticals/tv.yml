@@ -77,7 +77,6 @@ i18n:
       verticalHomeLogo: "https://media.istockphoto.com/id/173240143/fr/photo/t%C3%A9l%C3%A9vision-avec-deux-masques-de-d%C3%A9tourage.jpg?s=612x612&w=0&k=20&c=GhzC3IyvkmRp9shUBHICxM_1Lsur2uWkpNKf2F22p8s="
 
      # A mapping beetween custom page names behind this vertical and wiki pages
-     # TODO : Need an icon
       wikiPages:
         - wikiUrl: verticals.tv.default.technologies-tv.WebHome
           verticalUrl: "oled-qled-lcd-que-choisir"

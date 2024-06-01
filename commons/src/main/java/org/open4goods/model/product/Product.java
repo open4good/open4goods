@@ -3,6 +3,7 @@ package org.open4goods.model.product;
 
 import java.text.DateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
@@ -11,6 +12,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Random;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -45,6 +47,8 @@ import org.springframework.data.elasticsearch.annotations.Setting;
 import org.springframework.data.redis.core.RedisHash;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 
 @Document(indexName = Product.DEFAULT_REPO, createIndex = true)
 @RedisHash(value=Product.DEFAULT_REPO, timeToLive = ProductRepository.VALID_UNTIL_DURATION)
@@ -117,17 +121,10 @@ public class Product implements Standardisable {
 	 */
 	@Field(index = false, store = false, type = FieldType.Object)
 	private Set<Resource> resources = new HashSet<>();
+	
+	@Field(index = false, store = false, type = FieldType.Keyword)
+	private String coverImagePath;
 
-	
-	
-	
-	
-	
-	/**
-	 * The post computed images, if any. Means images are cached, and ordered by relevance
-	 */
-	@Field(index = false, store = false, type = FieldType.Object)
-	private List<Resource> images = new ArrayList<>();
 	
 	/** The descriptions **/
 	@Field(index = false, store = false, type = FieldType.Object)
@@ -269,6 +266,7 @@ public class Product implements Standardisable {
 	public List<Score> realScores() {
 		List<Score> ret = scores.values().stream()
 				.filter(e -> !e.getVirtual())
+				// TODO : Const
 				.filter(e -> !e.getName().equals("ECOSCORE"))
 				.sorted( (o1, o2) -> o2.getRelativ().getValue().compareTo(o1.getRelativ().getValue()))
 				.toList();
@@ -322,11 +320,64 @@ public class Product implements Standardisable {
 	public List<Resource> pdfs () {
 		return resources.stream().filter(e-> e.getResourceType() != null &&  e.getResourceType().equals(ResourceType.PDF)).toList();
 	}
+		
+	// TODO : Should be outsided / cached
+	public List<Resource> images() {
+	    // Filter resources of type IMAGE
+	    List<Resource> images = resources.stream()
+	                                     .filter(e -> e.getResourceType() != null && e.getResourceType().equals(ResourceType.IMAGE))
+	                                     .toList();
+	    
+	    //////////////////////////////////
+	    // Applying filtering / ordering
+	    //////////////////////////////////
+	    
+	    // Keep the covers
+	    List<Resource> covers = images.stream()
+	                                  .filter(e -> e.getTags().contains("cover"))
+	                                  .toList();
+	    Set<Integer> coversGroupsId = covers.stream()
+	                                        .map(Resource::getGroup)
+	                                        .collect(Collectors.toSet());
+	    Set<Integer> otherGroupsId = images.stream()
+	                                       .filter(e -> !coversGroupsId.contains(e.getGroup()))
+	                                       .map(Resource::getGroup)
+	                                       .collect(Collectors.toSet());
+	    
+	    List<Resource> ret = new ArrayList<>();
+	    
+	    // First, add the best cover images
+	    coversGroupsId.forEach(coverGroupId -> ret.add(bestByGroup(images, coverGroupId)));
+	    
+	    // Then, add the other images by groups
+	    otherGroupsId.forEach(otherGroupId -> ret.add(bestByGroup(images, otherGroupId)));
+	    
+	    // TODO : perf : null check Could be avoided
+	    return ret.stream().filter(e-> null != e).toList();
+	}
+
+	/**
+	 * Finds the best resource by group based on the number of pixels
+	 * 
+	 * @param images The list of images
+	 * @param groupId The group identifier
+	 * @return The best resource in the group
+	 */
+	private Resource bestByGroup(List<Resource> images, Integer groupId) {
+		return images.stream()
+		        .filter(image -> image.getGroup() != null && image.getGroup().equals(groupId)) // Filtrer les images du groupe spécifié
+		        .max(Comparator.comparingInt(image -> image.getImageInfo().pixels())) // Trouver l'image avec le plus de pixels
+		        .orElse(null); // Retourner null si aucune image n'est trouvée
+
+		
+	}
 	
+
+	
+
 	public List<Resource> videos () {
 		return resources.stream().filter(e-> e.getResourceType() != null &&  e.getResourceType().equals(ResourceType.VIDEO)).toList();
 	}
-	
 	
 	/**
 	 *
@@ -450,6 +501,21 @@ public class Product implements Standardisable {
 		return attributes.getReferentielAttributes().get(ReferentielKey.MODEL);
 	}
 
+
+	public String randomModel() {
+	
+		List<String> names =  new ArrayList<>();
+		names.add(model());
+				
+		alternativeIds.stream().map(e -> e.getValue()).forEach(e -> names.add(e));
+
+		Random rand = new Random();
+		return names.get(rand.nextInt(names.size()));
+		
+	}
+	
+	
+	
 	//	/**
 	//	 * Returns the name (brand - model)
 	//	 */
@@ -850,13 +916,6 @@ public class Product implements Standardisable {
 		this.datasourceNames = datasourceNames;
 	}
 
-	public List<Resource> getImages() {
-		return images;
-	}
-
-	public void setImages(List<Resource> images) {
-		this.images = images;
-	}
 
 	public ExternalIds getExternalId() {
 		return externalId;
@@ -865,6 +924,15 @@ public class Product implements Standardisable {
 	public void setExternalId(ExternalIds externalId) {
 		this.externalId = externalId;
 	}
+
+	public String getCoverImagePath() {
+		return coverImagePath;
+	}
+
+	public void setCoverImagePath(String coverImagePath) {
+		this.coverImagePath = coverImagePath;
+	}
+
 
 	
 
