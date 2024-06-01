@@ -24,9 +24,9 @@
 			<td class="align-middle" th:text="${product.model()}"></td>
 		</tr>
 
-		<th:block th:each="item, stat : ${product.alternativeIds}">
+		<th:block th:each="item, stat : ${product.alternativeModels}">
 			<tr th:if="${stat.first}">
-				<td class="align-middle" th:rowspan="${product.alternativeIds.size()}">Autres noms</td>
+				<td class="align-middle" th:rowspan="${product.alternativeModels.size()}">Autres noms</td>
 				<td class="align-middle" th:text="${item}"></td>
 			</tr>
 			<tr th:unless="${stat.first}">
