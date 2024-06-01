@@ -15,13 +15,17 @@ import org.slf4j.LoggerFactory;
 import org.springframework.data.elasticsearch.annotations.DateFormat;
 import org.springframework.data.elasticsearch.annotations.Field;
 import org.springframework.data.elasticsearch.annotations.FieldType;
+
 /**
- * Resources represents documents, images, binaries , etc.. associated with a product or a DataFragment.
- * They are also indexed externaly (in a dedicated index) at the UI level, to be able to handle efficient caching, resizeing, mimetype detection and conversions...
+ * Resources represents documents, images, binaries , etc.. associated with a
+ * product or a DataFragment. They are also indexed externaly (in a dedicated
+ * index) at the UI level, to be able to handle efficient caching, resizeing,
+ * mimetype detection and conversions...
+ * 
  * @author goulven
  *
  */
-public class Resource  implements Validable {
+public class Resource implements Validable {
 
 	private static final Logger logger = LoggerFactory.getLogger(Resource.class);
 
@@ -31,7 +35,6 @@ public class Resource  implements Validable {
 	@Field(index = false, store = false, type = FieldType.Keyword)
 	private String mimeType;
 
-	
 	@Field(index = false, store = false, type = FieldType.Date, format = DateFormat.epoch_millis)
 	private Long timeStamp;
 
@@ -46,7 +49,6 @@ public class Resource  implements Validable {
 	// If true, this media has been downloaded and analysed
 	private boolean processed = false;
 
-	
 	@Field(index = false, store = false, type = FieldType.Keyword)
 	// A complementary status, on eviction cause, or whatever
 	private ResourceStatus status;
@@ -72,20 +74,17 @@ public class Resource  implements Validable {
 	@Field(index = false, store = false, type = FieldType.Integer)
 	// The group (similarity based and popularity ranked) this resource belongs to
 	private Integer group;
-	
+
 	/**
 	 * From ResourceTagDictionary
 	 */
 	@Field(index = false, store = false, type = FieldType.Keyword)
 	private Set<String> tags = new HashSet<>();
 
-
 	public Resource() {
 		super();
 	}
 
-	
-	
 	public Resource(String url) {
 		super();
 
@@ -95,20 +94,16 @@ public class Resource  implements Validable {
 		setUrl(url);
 	}
 
-	
 	public Resource(String url, String tag) {
-		
+
 		this(url);
 		tags.add(tag);
-		
+
 	}
 
-	
-	
-	
 	@Override
 	public String toString() {
-		return  getUrl();
+		return getUrl();
 	}
 
 	@Override
@@ -131,7 +126,6 @@ public class Resource  implements Validable {
 		return getUrl().hashCode();
 	}
 
-
 	@Override
 	public void validate() throws ValidationException {
 		try {
@@ -139,48 +133,74 @@ public class Resource  implements Validable {
 		} catch (final MalformedURLException e) {
 			throw new ValidationException("invalid URL : " + getUrl());
 		}
-
 	}
-
 
 	/**
 	 * 
 	 * @return
 	 */
 	public String bestNameFromTag() {
-		return tags.stream().filter(e-> !e.contains(".")).findAny().orElse(nameFromUrl());
+		return tags.stream().filter(e -> !e.contains(".")).findAny().orElse(nameFromUrl());
 	}
 
+	public String path() {
+		StringBuilder sb = new StringBuilder();
+		
+		
+		switch (resourceType) {
+		case IMAGE:
+			sb.append("/images/");
+			break;
+		case PDF:
+			sb.append("/pdfs/");
+			break;
+		case VIDEO:
+			sb.append("/videos/");
+			break;
+		default:
+//			TODO : better handling
+			return "/404";
+		}
+		
+		sb.append(fileName);
+		sb.append("_");
+		sb.append(cacheKey);
+		sb.append(".");
+		sb.append(extension);
+		return sb.toString();
+
+	}
 
 	public String nameFromUrl() {
-
 
 		final int from = getUrl().lastIndexOf('/');
 		final int to = getUrl().indexOf('?', from);
 
 		if (from != -1 && to != -1 && from < to) {
-			String ret = getUrl().substring(from+1, to);
+			String ret = getUrl().substring(from + 1, to);
 			int to2 = ret.indexOf('?');
 			if (-1 != to2) {
-				ret = ret.substring(0,to2-1);
+				ret = ret.substring(0, to2 - 1);
 			}
 			return ret;
 		} else {
-			logger.warn("Cannot extract nice name from url {}",getUrl());
+			logger.warn("Cannot extract nice name from url {}", getUrl());
 			return cacheKey;
 		}
 
 	}
+
 	public static String folderHashPrefix(final String hash) {
-		//NOTE(gof) : performances
+		// NOTE(gof) : performances
 		int length = hash.lastIndexOf(".");
 		if (-1 == length) {
-			length=hash.length();
+			length = hash.length();
 		}
 
-
-
-		return hash == null ? null : hash.substring(length-3,length-2).toUpperCase() + File.separator + hash.substring(length-2,length-1).toUpperCase() +File.separator+  hash.substring(length-1,length).toUpperCase()+File.separator;
+		return hash == null ? null
+				: hash.substring(length - 3, length - 2).toUpperCase() + File.separator
+						+ hash.substring(length - 2, length - 1).toUpperCase() + File.separator
+						+ hash.substring(length - 1, length).toUpperCase() + File.separator;
 	}
 
 	public String folderHashPrefix() {
@@ -188,14 +208,12 @@ public class Resource  implements Validable {
 	}
 
 	public String humanReadableSize() {
-		return FileUtils.byteCountToDisplaySize( fileSize);
+		return FileUtils.byteCountToDisplaySize(fileSize);
 	}
 
 	//////////////////////////////////
 	// Getters / Setters
 	/////////////////////////////////
-
-
 
 	public String getCacheKey() {
 		return cacheKey;
@@ -213,11 +231,9 @@ public class Resource  implements Validable {
 		return tags;
 	}
 
-
 	public void setTags(final Set<String> tags) {
 		this.tags = tags;
 	}
-
 
 	public String getMimeType() {
 		return mimeType;
@@ -243,7 +259,6 @@ public class Resource  implements Validable {
 		this.url = url;
 	}
 
-
 	public boolean isEvicted() {
 		return evicted;
 	}
@@ -251,7 +266,6 @@ public class Resource  implements Validable {
 	public void setEvicted(boolean evicted) {
 		this.evicted = evicted;
 	}
-
 
 	public Long getFileSize() {
 		return fileSize;
@@ -324,8 +338,5 @@ public class Resource  implements Validable {
 	public void setGroup(Integer group) {
 		this.group = group;
 	}
-
-
-
 
 }

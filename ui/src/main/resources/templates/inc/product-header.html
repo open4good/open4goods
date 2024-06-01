@@ -1,26 +1,33 @@
-<section class="row align-items-center">
+<section  th:with="images = ${product.images()}"  class="row align-items-center">
 	<aside class="col-lg-4 text-center">
-		   <img th:if="${product.images.size() > 0}" height="400" th:src="'/images/'+${product.gtin()}+'-cover.png'"	th:alt="${product.names.longestOfferName()}">
-		   <img th:unless="${product.images.size() > 0}" height="300" src="/icons/no-image.png"	th:alt="${product.names.longestOfferName()}">
+	
+		   <img th:unless="${images.size() > 0}" height="300" src="/icons/no-image.png"	alt="Pas d'image !">
 
 		   <div>
-		   
-		   <span th:each="img, stat : ${product.images}" >
-		  	 <img th:unless="${stat.first}" height="120" th:src="'/images/'+${product.gtin()}+'-'+${stat.index}+'.png'"	th:alt="${product.names.longestOfferName()}">
-		   </span>
-		   
-		   <span th:each="img, stat : ${product.videos}" >
-		   
-		   <video width="320" height="240" controls>
-			  <source th:src="'/video/'+${product.gtin()}+'-'+${img.cacheKey}+'.mp4'">			  
-			  Your browser does not support the video tag.
-			</video>
+			<span th:each="img, stat : ${images}"> 
+		   		<img 
+		   		  th:if="${stat.first}" height="400" 
+		   		  th:src="${img.path()}"
+		   		  th:alt="'image principale : ' + ${product.names.longestOfferName()}"	>
+				
+			  	<img
+					th:unless="${stat.first}" height="120"
+					th:src="${img.path()}"
+					th:alt="${product.names.longestOfferName()}">
+			</span> 
+			
 			
 
-		  	
-		   </span>
-		   	
-		   </div>
+
+
+			<span th:each="img, stat : ${product.videos}"> 
+				<video width="320" height="240" controls>
+					<source	th:src="${img.path()}">
+				</video>
+			</span>
+
+
+		</div>
 		   
 		   
 	</aside>

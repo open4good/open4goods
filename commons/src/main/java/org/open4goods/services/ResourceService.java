@@ -66,7 +66,7 @@ public class ResourceService {
 	 * @throws FileNotFoundException
 	 * @throws IOException
 	 */
-	public InputStream getFileStream(final Resource r) throws FileNotFoundException, IOException {
+	public InputStream getResourceFileStream(final Resource r) throws FileNotFoundException, IOException {
 		return IOUtils.toBufferedInputStream(new FileInputStream(getCacheFile(r)));
 		
 	}

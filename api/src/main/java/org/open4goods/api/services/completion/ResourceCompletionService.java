@@ -11,7 +11,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
+import java.util.Random;
 import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
@@ -50,7 +50,9 @@ public class ResourceCompletionService  extends AbstractCompletionService{
 
 
 	// TODO : From yaml
-	private static final double SIMILARITY_SCORE = 0.30;
+	// TODO : Set to false before prod
+	private static boolean forceEraseFileName = true;
+	private static final double SIMILARITY_SCORE = 0.20;
 	private static final int PERCEPTIV_HASH_SIZE = 32;
 
 	// TODO : Dedicated logger
@@ -69,8 +71,7 @@ public class ResourceCompletionService  extends AbstractCompletionService{
 
 	// private final ElasticsearchRestTemplate esTemplate;
 
-	public ResourceCompletionService(ImageMagickService imageService, VerticalsConfigService verticalConfigService,
-			ResourceService resourceService, ProductRepository dataRepository, ApiProperties apiProperties) {
+	public ResourceCompletionService(ImageMagickService imageService, VerticalsConfigService verticalConfigService, ResourceService resourceService, ProductRepository dataRepository, ApiProperties apiProperties) {
 		
 		// TODO : Should set a specific log level here (not "agg(regation)" one)
 		super(dataRepository, verticalConfigService, apiProperties.logsFolder(), apiProperties.aggLogLevel());		
@@ -103,8 +104,10 @@ public class ResourceCompletionService  extends AbstractCompletionService{
 		
 		
 		// Deleting existing groups
-		data.getResources().forEach(e -> e.setGroup(null));
-		
+		data.getResources().forEach(e -> {
+			e.setGroup(null);
+			
+		});
 		
 		List<Resource> resources = data.getResources().stream()
 				// Exclude already processed
@@ -117,9 +120,59 @@ public class ResourceCompletionService  extends AbstractCompletionService{
 		// Updating
 		data.getResources().removeAll(resources);
 		data.getResources().addAll(resources);
+		
+		
+		// Setting the file names if new
+		resources.forEach(r -> {
+	
+			if (forceEraseFileName || StringUtils.isEmpty(r.getFileName())) {
+				String name;
+				
+				
+				
+				// TODO : OfferNAme size from conf
+				List<String> offerNames = data.getNames().getOfferNames().stream().filter(e->e.length() < 60).toList();
+				
+				// No offer names, we generate a title by our own
+				if (offerNames.size() ==  0) {
+					// First, we try to put brand and model				
+					if (!StringUtils.isEmpty(data.brand()) && !StringUtils.isEmpty(data.model())) {
+						name = (data.brand() + "-" + data.randomModel());
+					} else {
+						// Extracting filename
+	
+						name = r.getUrl();
+						if (name.contains("/")) {
+							name = (name.substring(name.lastIndexOf('/')+1));							
+						}
+					
+						int p = name.indexOf('?');
+						if (p != -1) {
+							name = name.substring(0, p);
+						}
+	
+						int posPoint = name.indexOf('.');
+						if (-1 != posPoint) {
+							name = (name.substring(0, posPoint));
+						}					
+					}	
+				} else {
+					Random rand = new Random();
+					name = offerNames.get(rand.nextInt(offerNames.size()));
+				}
 
-		
-		
+				
+				// Normalisation
+				name = IdHelper.normalizeFileName(name);
+
+				if (!StringUtils.isEmpty(name)) {
+					r.setFileName(name);
+				} else {
+					// At last, we put by default the gtin
+					r.setFileName(data.gtin());
+				}
+			}
+		});
 		
 		////////////////////////////////////////
 		// Filtering images by validity
@@ -164,8 +217,6 @@ public class ResourceCompletionService  extends AbstractCompletionService{
 					}
 					return e;
 				})
-				
-
 				.toList();
 
 
@@ -196,19 +247,16 @@ public class ResourceCompletionService  extends AbstractCompletionService{
 		
 		// Extracting the cover image first
 		// TODO : cover as const
-		Resource cover = resultingImages.stream().filter(e->e.getTags().contains("cover")).findAny().orElse(null);		
-		if (null != cover) {
-			resultingImages.remove(cover);
-			resultingImages.addFirst(cover);
+		Resource cover = resultingImages.stream().filter(e->e.getTags().contains("cover")).max((o1,o2) -> o1.getImageInfo().pixels().compareTo(o2.getImageInfo().pixels())).orElse(null);
+		// No cover tagged file
+		if (null == cover) {
+			cover = resultingImages.stream().findAny().orElse(null);
 		}
 		
 		
+		data.setCoverImagePath(cover.path());
 		
-		
-		
-		
-		// Setting the images on the product
-		data.setImages(resultingImages);
+
 		
 		// Deleting useless files and unsetting attributes to preserve space
 		for (Resource r : data.getResources()) {
@@ -335,16 +383,6 @@ public class ResourceCompletionService  extends AbstractCompletionService{
 		// Set FNV cache key based on url
 		resource.setCacheKey(IdHelper.generateResourceId(resource.getUrl()));
 		resource.setTimeStamp(System.currentTimeMillis());
-
-		// Overiding the resource group
-		resource.setGroup(null);
-		
-		// Extracting filename
-		resource.setFileName(resource.getUrl().substring(resource.getUrl().lastIndexOf('/')));
-		int posPoint = resource.getFileName().indexOf('.');
-		if (-1 != posPoint) {
-			resource.setFileName(resource.getFileName().substring(1, posPoint));
-		}
 
 		// Get cached file reference if exists
 		File target = resourceService.getCacheFile(resource);
