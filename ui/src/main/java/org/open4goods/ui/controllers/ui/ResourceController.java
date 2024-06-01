@@ -74,7 +74,7 @@ public class ResourceController {
 	 * @param request      the HttpServletRequest.
 	 * @throws IOException if an I/O error occurs.
 	 */
-	@GetMapping("/{type:images|videos|pdfs}/{resourceName:[\\w|\\-]+}_{hashkey:\\d+}.{ext:[a-z]{3,4}}")
+	@GetMapping("/{type:images|videos|pdfs}/{resourceName:[\\w|\\-]+}_{hashkey:\\d+}.{ext:[a-z]{2,4}}")
 	public void resource(
 			@PathVariable String type, 
 	        @PathVariable String hashkey, 
