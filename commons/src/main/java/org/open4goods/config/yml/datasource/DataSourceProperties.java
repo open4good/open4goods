@@ -77,7 +77,15 @@ public class DataSourceProperties {
 	private String portalUrl;
 
 
+	/**
+	 * If true, will be computed as a brand score
+	 */
+	private boolean brandScore = false;
 
+	
+	
+	
+	
 	/**
 	 * The percent of reversement for the provider
 	 */
@@ -553,6 +561,14 @@ public class DataSourceProperties {
 
 	public void setDatasourceConfigName(String datasourceConfigName) {
 		this.datasourceConfigName = datasourceConfigName;
+	}
+
+	public boolean isBrandScore() {
+		return brandScore;
+	}
+
+	public void setBrandScore(boolean brandScore) {
+		this.brandScore = brandScore;
 	}
 
 

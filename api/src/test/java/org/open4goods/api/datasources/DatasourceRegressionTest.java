@@ -28,6 +28,7 @@ import org.open4goods.exceptions.ValidationException;
 import org.open4goods.model.constants.Currency;
 import org.open4goods.model.data.DataFragment;
 import org.open4goods.model.data.Price;
+import org.open4goods.services.BrandService;
 import org.open4goods.services.DataSourceConfigService;
 import org.open4goods.services.EvaluationService;
 import org.open4goods.services.ImageMagickService;
@@ -150,8 +151,13 @@ public class DatasourceRegressionTest {
 		}
 
 		@Bean
-		DataFragmentCompletionService offerCompletionService() {
-			return new DataFragmentCompletionService();
+		BrandService brandService() {
+			return new BrandService(null, null);
+		}
+		
+		@Bean
+		DataFragmentCompletionService offerCompletionService(@Autowired  BrandService brandService) {
+			return new DataFragmentCompletionService(brandService);
 		}
 
 	}

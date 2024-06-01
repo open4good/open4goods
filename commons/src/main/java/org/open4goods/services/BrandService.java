@@ -10,6 +10,7 @@ import java.io.InputStream;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.open4goods.config.BrandConfiguration;
+import org.open4goods.config.yml.datasource.DataSourceProperties;
 import org.open4goods.exceptions.InvalidParameterException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -107,6 +108,12 @@ public class BrandService {
 //		remoteFileCachingService.
 		return IOUtils.toBufferedInputStream(new FileInputStream(f));
 	}
+
+	public void addBrandScore(String brand, DataSourceProperties datasourceProperties, String rawValue) {
+		// TODO Auto-generated method stub
+		System.out.println("TODO");
+	}
 	
+
 
 }
