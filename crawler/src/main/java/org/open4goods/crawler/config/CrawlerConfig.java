@@ -29,10 +29,7 @@ public class CrawlerConfig {
     }
 
 
-    @Bean
-    DataFragmentCompletionService offerCompletionService(@Autowired final FetcherProperties fetcherProperties) {
-		return new DataFragmentCompletionService();
-	}
+
 
     
 //    @Bean

@@ -491,8 +491,8 @@ public class ApiConfig {
 	}
 
 	@Bean
-	DataFragmentCompletionService offerCompletionService() {
-		return new DataFragmentCompletionService();
+	DataFragmentCompletionService offerCompletionService(@Autowired BrandService brandService) {
+		return new DataFragmentCompletionService(brandService);
 	}
 
 

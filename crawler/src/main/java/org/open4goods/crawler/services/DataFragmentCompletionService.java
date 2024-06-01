@@ -16,6 +16,7 @@ import org.open4goods.model.attribute.Attribute;
 import org.open4goods.model.constants.ReferentielKey;
 import org.open4goods.model.data.DataFragment;
 import org.open4goods.model.data.ProviderSupportType;
+import org.open4goods.services.BrandService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,6 +30,14 @@ public class DataFragmentCompletionService {
 
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(DataFragmentCompletionService.class);
+	private BrandService brandService;
+
+
+	public DataFragmentCompletionService(BrandService brandService) {
+		this.brandService = brandService;
+	}
+
+
 
 
 	/**
@@ -108,7 +117,27 @@ public class DataFragmentCompletionService {
 				o.setProductState(datasourceProperties.getDefaultItemCondition());
 			}
 		}
-	
+		
+		////////////////////////////////
+		// Special hook for brand score handlings.
+		// Not the better way, but this is the central point.
+		// specific service are triggered here, the datafragment will after classicaly fail because of no gtin, and will be discarded of products 
+		// *pipeline*
+		///////////////////////////////
+		
+		if (datasourceProperties.isBrandScore()) {
+			Attribute score = o.getAttributes().stream().filter(e-> e.getName().equals("SCORE")).findFirst().get();
+			if (null != score) {
+				LOGGER.info("Found a brand score for brand {} : {}",o.brand(),score.getRawValue());
+				brandService.addBrandScore(o.brand(), datasourceProperties, score.getRawValue());								
+			} else {
+				LOGGER.warn("Empty brand score found for brand {} ",o.brand());
+			}
+			
+			
+			
+			
+		}
 	}
 
 

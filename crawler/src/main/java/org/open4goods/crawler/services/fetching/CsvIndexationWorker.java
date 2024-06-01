@@ -83,11 +83,9 @@ public class CsvIndexationWorker implements Runnable {
 	
 	private final CsvIndexationRepository csvIndexationRepository;
 
-	
-	
+		
 	/** The duration of the worker thread pause when nothing to get from the queue **/
 	private final int pauseDuration;
-
 
 	private String logsFolder;
 
