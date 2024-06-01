@@ -82,7 +82,11 @@ public class DataSourceProperties {
 	 */
 	private boolean brandScore = false;
 
-	
+	/**
+	 * If set, the score will be inverted (invertedScaleBase - score).
+	 * (used to "reverse" a score. eg. a score presenting a risk, we want to get the associated performance)
+	 */
+	private Double invertScaleBase;
 	
 	
 	
@@ -569,6 +573,14 @@ public class DataSourceProperties {
 
 	public void setBrandScore(boolean brandScore) {
 		this.brandScore = brandScore;
+	}
+
+	public Double getInvertScaleBase() {
+		return invertScaleBase;
+	}
+
+	public void setInvertScaleBase(Double invertScaleBase) {
+		this.invertScaleBase = invertScaleBase;
 	}
 
 

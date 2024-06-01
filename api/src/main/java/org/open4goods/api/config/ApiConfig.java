@@ -51,6 +51,7 @@ import org.open4goods.services.VerticalsConfigService;
 import org.open4goods.services.ai.AiAgent;
 import org.open4goods.services.ai.AiService;
 import org.open4goods.services.textgen.BlablaService;
+import org.open4goods.store.repository.elastic.BrandRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springdoc.core.customizers.OpenApiCustomizer;
@@ -176,8 +177,8 @@ public class ApiConfig {
 	}
 
 	@Bean
-	BrandService brandService(@Autowired RemoteFileCachingService rfc, @Autowired  ApiProperties properties) {
-		return new BrandService(properties.getBrandConfig(),  rfc);
+	BrandService brandService(@Autowired RemoteFileCachingService rfc, @Autowired  ApiProperties properties, @Autowired BrandRepository brandRepository) {
+		return new BrandService(properties.getBrandConfig(),  rfc, brandRepository);
 	}
 
 	@Bean
