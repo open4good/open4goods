@@ -12,6 +12,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.open4goods.config.BrandConfiguration;
 import org.open4goods.config.yml.datasource.DataSourceProperties;
 import org.open4goods.exceptions.InvalidParameterException;
+import org.open4goods.model.data.Brand;
+import org.open4goods.store.repository.elastic.BrandRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,9 +33,12 @@ public class BrandService {
 
 	private BrandConfiguration brandsConfig;
 
-	public BrandService(BrandConfiguration config, RemoteFileCachingService remoteFileCachingService) {
+	private BrandRepository brandRepository;
+
+	public BrandService(BrandConfiguration config, RemoteFileCachingService remoteFileCachingService, BrandRepository brandRepository) {
 		this.brandsConfig = config;
 		this.remoteFileCachingService = remoteFileCachingService;
+		this.brandRepository = brandRepository;
 	}
 
 	
@@ -109,9 +114,45 @@ public class BrandService {
 		return IOUtils.toBufferedInputStream(new FileInputStream(f));
 	}
 
-	public void addBrandScore(String brand, DataSourceProperties datasourceProperties, String rawValue) {
-		// TODO Auto-generated method stub
-		System.out.println("TODO");
+	
+	/**
+	 * Create or update a score for a given brand
+	 * @param brand
+	 * @param datasourceProperties
+	 * @param scoreValue
+	 */
+	public void addBrandScore(String brand, DataSourceProperties datasourceProperties, String scoreValue) {
+		
+		String normalizedBrand = normalizeBrand(brand);
+		
+		if (StringUtils.isEmpty(normalizedBrand)) {
+			logger.info("Brand {} is not valid, skipping", brand);
+            return;
+        }
+		
+		logger.info("Adding brand score {}:{} for brand {} ({}) ",datasourceProperties.getName(), scoreValue, normalizedBrand, brand);
+		
+		Brand b = brandRepository.findById(normalizedBrand).orElse(new Brand(normalizedBrand));		
+		b.setLastUpdate(System.currentTimeMillis());
+
+		try {
+			if (null != datasourceProperties.getInvertScaleBase()) {
+				b.getScores().put(datasourceProperties.getName(),  (datasourceProperties.getInvertScaleBase() - Double.valueOf(scoreValue)));			
+			} else {			
+				b.getScores().put(datasourceProperties.getName(), Double.valueOf(scoreValue));
+			}
+			logger.info("Saving brand {}", b);
+			brandRepository.save(b);
+		} catch (NumberFormatException e) {
+			logger.error("Cannot parse score value {} for brand {}", scoreValue, brand);
+		}
+		
+		
+		
+		
+		
+		
+		
 	}
 	
 

@@ -152,7 +152,7 @@ public class DatasourceRegressionTest {
 
 		@Bean
 		BrandService brandService() {
-			return new BrandService(null, null);
+			return new BrandService(null, null, null);
 		}
 		
 		@Bean

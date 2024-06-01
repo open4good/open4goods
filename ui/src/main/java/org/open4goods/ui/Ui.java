@@ -5,6 +5,7 @@ import java.io.IOException;
 
 import org.open4goods.dao.ProductRepository;
 import org.open4goods.services.SerialisationService;
+import org.open4goods.store.repository.elastic.BrandRepository;
 import org.open4goods.store.repository.elastic.ElasticProductRepository;
 import org.open4goods.store.repository.redis.RedisProductRepository;
 import org.open4goods.ui.repository.AffiliationTokenRepository;
@@ -29,7 +30,7 @@ import jakarta.annotation.PreDestroy;
 @EnableScheduling
 @EnableCaching
 @Configuration
-@EnableElasticsearchRepositories(basePackageClasses = {AffiliationTokenRepository.class, ElasticProductRepository.class})
+@EnableElasticsearchRepositories(basePackageClasses = {AffiliationTokenRepository.class, ElasticProductRepository.class, BrandRepository.class})
 @EnableRedisRepositories(basePackageClasses = RedisProductRepository.class)
 public class Ui {
 
