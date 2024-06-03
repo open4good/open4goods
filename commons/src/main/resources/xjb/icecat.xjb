@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jxb:bindings version="3.0"
+			xmlns:jxb="https://jakarta.ee/xml/ns/jaxb"
+			xmlns:xs="http://www.w3.org/2001/XMLSchema">
+
+    
+    <jxb:bindings schemaLocation="../xsd/icecat.xsd" >
+    
+      <jxb:globalBindings generateIsSetMethod="true" 
+
+                          choiceContentProperty="true" >
+      </jxb:globalBindings>
+         
+         
+         
+        <!-- Renommer tous les éléments 
+        <jxb:bindings multiple="true" node="//xs:element">
+            <jxb:property name="{../@name}-{@name}"/>
+        </jxb:bindings>
+        -->
+
+        <!-- Renommer tous les attributs 
+        <jxb:bindings multiple="true" node="//xs:attribute[@name='Value']">
+             <jxb:property name="{../@name}-{@name}"/>
+        </jxb:bindings>
+        -->
+
+
+        
+        
+        
+    </jxb:bindings>
+</jxb:bindings>
