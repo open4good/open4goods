@@ -39,11 +39,11 @@ i18n:
       ####################################################################################
       # AI TEXTS CONFIGS
       ####################################################################################  
-      aiConfig:
-        - key: "global-description" 
-          prompt: " écris un texte de maximum 100 mots, dans un style académique, une description avec des listes à puce en html, comprenant les principaux avantages et inconvénients de  [(${p.brand()})] [(${p.model()})], sur la base des caracteriques suivantes : [(${p.caracteristics()})]"
-        - key: "ecological-description" 
-          prompt: "écris un texte de maximum 100 mots, dans un style académique, une analyse de l'impact environnemental de [(${p.brand()})] [(${p.model()})], sur la base des caracteriques suivantes : [(${p.caracteristics()})]"
+#      aiConfig:
+#        - key: "global-description" 
+#          prompt: " écris un texte de maximum 100 mots, dans un style académique, une description avec des listes à puce en html, comprenant les principaux avantages et inconvénients de  [(${p.brand()})] [(${p.model()})], sur la base des caracteriques suivantes : [(${p.caracteristics()})]"
+#        - key: "ecological-description" 
+#          prompt: "écris un texte de maximum 100 mots, dans un style académique, une analyse de l'impact environnemental de [(${p.brand()})] [(${p.model()})], sur la base des caracteriques suivantes : [(${p.caracteristics()})]"
 
 
 ####################################################################################

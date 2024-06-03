@@ -67,14 +67,14 @@ public class CompletionController {
 	@GetMapping("/completion/resources")
 	@Operation(summary = "Launch resource completion on all verticals")
 	public void resourceCompletionAll() throws InvalidParameterException, IOException {
-		resourceCompletionService.completeAll();
+		resourceCompletionService.completeAll(false);
 	}
 
 	@GetMapping("/completion/resources/")
 	@Operation(summary = "Launch resource completion on the specified vertical")
 	public void resourceCompletionVertical(@RequestParam @NotBlank final String verticalConfig)
 			throws InvalidParameterException, IOException {
-		resourceCompletionService.complete(verticalConfigService.getConfigById(verticalConfig));
+		resourceCompletionService.complete(verticalConfigService.getConfigById(verticalConfig),false);
 	}
 
 	@GetMapping("/completion/resources/gtin/")
@@ -97,15 +97,14 @@ public class CompletionController {
 	@GetMapping("/completion/genai")
 	@Operation(summary = "Launch genai completion on all verticals")
 	public void genaiCompletionAll() throws InvalidParameterException, IOException {
-		// TODO : From conf
-		aiCompletionService.completeAll(10);
+		aiCompletionService.completeAll(false);
 	}
 
 	@GetMapping("/completion/genai/")
 	@Operation(summary = "Launch genai completion on the specified vertical")
 	public void genaiCompletionVertical(@RequestParam @NotBlank final String verticalConfig, @RequestParam Integer max)
 			throws InvalidParameterException, IOException {
-		aiCompletionService.complete(verticalConfigService.getConfigById(verticalConfig), max);
+		aiCompletionService.complete(verticalConfigService.getConfigById(verticalConfig), max,false);
 	}
 
 	@GetMapping("/completion/genai/gtin/")
@@ -128,14 +127,14 @@ public class CompletionController {
 	@Operation(summary = "Launch amazon completion on all verticals")
 	public void amazonCompletionAll() throws InvalidParameterException, IOException {
 // TODO : From conf
-		amazonCompletionService.completeAll();
+		amazonCompletionService.completeAll(false);
 	}
 
 	@GetMapping("/completion/amazon/")
 	@Operation(summary = "Launch amazon completion on the specified vertical")
 	public void amazonCompletionVertical(@RequestParam @NotBlank final String verticalConfig, @RequestParam Integer max)
 			throws InvalidParameterException, IOException {
-		amazonCompletionService.complete(verticalConfigService.getConfigById(verticalConfig), max);
+		amazonCompletionService.complete(verticalConfigService.getConfigById(verticalConfig), max, false);
 	}
 
 	@GetMapping("/completion/amazon/gtin/")
@@ -162,14 +161,14 @@ public class CompletionController {
 	@Operation(summary = "Launch icecat completion on all verticals")
 	public void icecatCompletionAll() throws InvalidParameterException, IOException {
 // TODO : From conf
-		iceCatService.completeAll();
+		iceCatService.completeAll(true);
 	}
 
 	@GetMapping("/completion/icecat/")
 	@Operation(summary = "Launch icecat completion on the specified vertical")
 	public void icecatCompletionVertical(@RequestParam @NotBlank final String verticalConfig, @RequestParam Integer max)
 			throws InvalidParameterException, IOException {
-		iceCatService.complete(verticalConfigService.getConfigById(verticalConfig), max);
+		iceCatService.complete(verticalConfigService.getConfigById(verticalConfig), max,true);
 	}
 
 	@GetMapping("/completion/icecat/gtin/")

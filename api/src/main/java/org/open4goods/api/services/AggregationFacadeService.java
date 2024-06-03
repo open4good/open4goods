@@ -129,7 +129,7 @@ public class AggregationFacadeService {
 
 		ScoringBatchedAggregator batchAgg = getScoringAggregator();
 
-		List<Product> productBag = dataRepository.exportVerticalWithValidDate (vertical.getId()).toList();
+		List<Product> productBag = dataRepository.exportVerticalWithValidDate (vertical.getId(), false).toList();
 		// Batched (scoring) aggregation
 		try {
 			batchAgg.score(productBag, verticalConfigService.getConfigByIdOrDefault(vertical.getId()));

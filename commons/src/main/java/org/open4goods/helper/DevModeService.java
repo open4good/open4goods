@@ -107,7 +107,7 @@ public class DevModeService {
 			////////////////////
 			// Export a subset
 			///////////////////
-			repository.exportVerticalWithValidDate(c.getId()).limit(100).forEach(p -> {
+			repository.exportVerticalWithValidDate(c.getId(), false).limit(100).forEach(p -> {
 				try {
 					// Set last offer date to provide a longer product visibility in UI
 					response.getWriter().write(serialisationService.toJson(p)+"\n");

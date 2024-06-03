@@ -30,18 +30,18 @@ public abstract class AbstractCompletionService {
 	/**
 	 * Score verticals with the batch Aggregator
 	 */
-	public void completeAll()  {
-		completeAll(null);
+	public void completeAll(boolean withExcluded)  {
+		completeAll(null,withExcluded);
 	}
 	
 	/**
 	 * Score verticals with the batch Aggregator
 	 */
-	public void completeAll(Integer max)  {
-		logger.info("Generating AI texts for all verticals");
+	public void completeAll(Integer max, boolean withExcluded)  {
+		logger.info("Completion for all verticals");
 		for (VerticalConfig vConf : verticalConfigService.getConfigsWithoutDefault()) {
 			if (vConf.getGenAiConfig().isEnabled()) {
-				complete(vConf);				
+				complete(vConf, withExcluded);				
 			}
 		}
 	}
@@ -51,9 +51,9 @@ public abstract class AbstractCompletionService {
 	/**
 	 * Proceed to the AI texts generation for a vertical
 	 */
-	public void complete(VerticalConfig vertical, Integer limit)  {
+	public void complete(VerticalConfig vertical, Integer limit, boolean withExcluded)  {
 		logger.info("Generating AI texts for {} products {}",limit == null ? "all" : limit, vertical.getId());
-		dataRepository.exportVerticalWithValidDateOrderByEcoscore(vertical.getId(), limit).forEach(data -> {
+		dataRepository.exportVerticalWithValidDateOrderByEcoscore(vertical.getId(), limit,withExcluded).forEach(data -> {
 			completeProduct(vertical, data);
 			
 		});
@@ -68,8 +68,8 @@ public abstract class AbstractCompletionService {
 	/**
 	 * Proceed to the AI texts generation for a vertical
 	 */
-	public void complete(VerticalConfig vertical)  {
-		 this.complete(vertical,null);
+	public void complete(VerticalConfig vertical,boolean withExcluded)  {
+		 this.complete(vertical,null, withExcluded);
 	}
 	
 	/**

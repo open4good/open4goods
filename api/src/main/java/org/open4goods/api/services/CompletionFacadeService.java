@@ -46,7 +46,7 @@ public class CompletionFacadeService {
 	@Scheduled(timeUnit = TimeUnit.HOURS, fixedDelay = 12, initialDelay = 1)
 	public void resourceCompletionAll() throws InvalidParameterException, IOException {
 		logger.warn("Completing verticals with resources");
-		resourceCompletionService.completeAll();
+		resourceCompletionService.completeAll(false);
 	}
 
 	///////////////////////////////////
@@ -56,7 +56,7 @@ public class CompletionFacadeService {
 	@Scheduled(timeUnit = TimeUnit.HOURS, fixedDelay = 24, initialDelay = 2)
 	public void genaiCompletionAll() throws InvalidParameterException, IOException {
 		logger.warn("Completing verticals with genAI content");
-		aiCompletionService.completeAll();
+		aiCompletionService.completeAll(false);
 	}
 
 	///////////////////////////////////
@@ -65,7 +65,7 @@ public class CompletionFacadeService {
 	@Scheduled(timeUnit = TimeUnit.HOURS, fixedDelay = 24, initialDelay = 3)
 	public void amazonCompletionAll() throws InvalidParameterException, IOException {
 		logger.warn("Completing verticals with amazon");
-		amazonCompletionService.completeAll();
+		amazonCompletionService.completeAll(false);
 	}
 
 	///////////////////////////////////
@@ -74,7 +74,7 @@ public class CompletionFacadeService {
 	@Scheduled(timeUnit = TimeUnit.HOURS, fixedDelay = 24, initialDelay = 4)
 	public void icecatCompletionAll() throws InvalidParameterException, IOException {
 		logger.warn("Completing verticals with amazon");
-		icecatCompletionService.completeAll();
+		icecatCompletionService.completeAll(true);
 	}
 
 }

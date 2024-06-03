@@ -34,6 +34,8 @@ public class VerticalSearchRequest {
 
 	Map<String,Set<String>> termsFilter = new HashMap<>();
 
+	// If true, will search in vertical excluded products
+	boolean excluded = false;
 
 	private String sortField;
 	private String sortOrder;
@@ -150,5 +152,14 @@ public class VerticalSearchRequest {
 		this.termsFilter = termsFilter;
 	}
 
+	public boolean isExcluded() {
+		return excluded;
+	}
+
+	public void setExcluded(boolean excluded) {
+		this.excluded = excluded;
+	}
+
+	
 
 }
