@@ -69,15 +69,13 @@ langchain4j:
 
 tagListUrl: https://open4good.github.io/open4goods/maven/taglist/taglist.xml 
 
-
-    
+  
 feedbackConfig:      
   githubConfig:
     accessToken: GITHUB_ACCESS_TOKEN
     organization: open4good
     repo: open4goods       
-
-      
+     
 reversements:
   - date: 2021-11-01
     amount: 72
