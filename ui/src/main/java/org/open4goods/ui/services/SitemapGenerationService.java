@@ -107,8 +107,6 @@ public class SitemapGenerationService {
 			
 			String lang = e.getKey();
 			
-			
-			
 			String baseUrl = uiConfig.getNamings().getBaseUrls().get(lang) ;
 			
 			// Adding contoller based pages
@@ -122,7 +120,7 @@ public class SitemapGenerationService {
 			addWikiPages( baseUrl, lang);
 				
 			// Adding products
-			addProductsPages(baseUrl, lang);
+//			addProductsPages(baseUrl, lang);
 			
 			// Adding vertical relativ material
 			addVerticalPages( baseUrl, lang);
@@ -143,17 +141,11 @@ public class SitemapGenerationService {
 				} catch (IOException e1) {
 					LOGGER.error("Error while generating sitemap index",e1);
 				}
-					
-				
 		});
-		
-		
-		
 		
 		statsLogger.info("Sitemap generated ");
 
 		exportRunning.set(false);
-
 	}
 
 
@@ -164,7 +156,6 @@ public class SitemapGenerationService {
 	 */
 	private void addControllerPages(String baseUrl, String language) {
 		 
-		
 		SitemapGenerator sitemap = SitemapGenerator.of(baseUrl);
 		
 		// Adding the home page
@@ -180,12 +171,10 @@ public class SitemapGenerationService {
 					LOGGER.info("Adding controller page to {} sitemap : {}",language, url);
 					
 					sitemap = sitemap.addPage(getWebPage(url, value.getFrequency(), value.getPriority()));
-					
 				}
 			} catch (Exception e1) {
 				LOGGER.error("Cannot add controller to sitemap : {}",e,e1);
 			}
-			
 		}
 
 		// Writing sitemap
@@ -223,7 +212,6 @@ public class SitemapGenerationService {
 				LOGGER.info("Adding product page to sitemap : {}",url);
 				sitemap = sitemap.addPage(getWebPage(url, ChangeFreq.DAILY, 1.0, Date.from(Instant.ofEpochMilli(data.getLastChange()))));			
 			}
-		
 		}
 		
 		// Writing sitemap
