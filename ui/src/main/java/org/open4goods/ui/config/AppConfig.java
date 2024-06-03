@@ -28,6 +28,7 @@ import org.open4goods.services.StandardiserService;
 import org.open4goods.services.VerticalsConfigService;
 import org.open4goods.services.ai.AiAgent;
 import org.open4goods.services.ai.AiService;
+import org.open4goods.store.repository.elastic.BrandRepository;
 import org.open4goods.ui.config.yml.UiConfig;
 import org.open4goods.ui.controllers.ui.UiService;
 import org.open4goods.ui.services.BlogService;
@@ -36,10 +37,6 @@ import org.open4goods.ui.services.ImageService;
 import org.open4goods.ui.services.OpenDataService;
 import org.open4goods.ui.services.SitemapGenerationService;
 import org.open4goods.ui.services.todo.TodoService;
-import org.open4goods.xwiki.authentication.XwikiAuthenticationProvider;
-import org.open4goods.xwiki.services.XwikiMappingService;
-import org.open4goods.xwiki.services.XWikiAuthenticationService;
-import org.open4goods.xwiki.services.XWikiReadService;
 import org.open4goods.xwiki.services.XwikiFacadeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.CacheManager;
@@ -54,7 +51,6 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.web.firewall.HttpFirewall;
 import org.springframework.security.web.firewall.StrictHttpFirewall;
 import org.springframework.web.servlet.LocaleResolver;
@@ -159,8 +155,8 @@ public class AppConfig {
 	 
 	 
 	@Bean
-	BrandService brandService(@Autowired RemoteFileCachingService rfc, @Autowired  UiConfig properties) {
-		return new BrandService(properties.getBrandConfig(),  rfc);
+	BrandService brandService(@Autowired RemoteFileCachingService rfc, @Autowired  UiConfig properties, @Autowired  BrandRepository brandRepository) {
+		return new BrandService(properties.getBrandConfig(),  rfc,brandRepository);
 	}
 
 	
