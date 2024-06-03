@@ -12,12 +12,12 @@
                 	<span> » </span>    
                 </li>
                 
-                <li class="nav-item ">
+                <li th:if="${verticalConfig}" class="nav-item ">
                     <a th:href="'/'+${verticalConfig.i18n(siteLocale).verticalHomeUrl}" class="nav-link" th:text="${verticalConfig.i18n(siteLocale).verticalHomeTitle}"> <span class="fas fa-angle-down nav-link-arrow ms-1"></span></a>
                     
                 </li>
                 
-                <li class="nav-item ">
+                <li th:if="${verticalConfig}" class="nav-item ">
                 	<span> » </span>    
                 </li>
                 
