@@ -1,9 +1,6 @@
 package org.open4goods.ui.controllers.ui.pages;
 
-import java.io.IOException;
-import java.net.MalformedURLException;
 import java.net.URL;
-import java.nio.charset.Charset;
 
 import org.apache.commons.io.IOUtils;
 import org.open4goods.ui.config.yml.UiConfig;
@@ -13,8 +10,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.servlet.ModelAndView;
 
-import com.redfin.sitemapgenerator.ChangeFreq;
-
+import cz.jiripinkas.jsitemapgenerator.ChangeFreq;
 import jakarta.servlet.http.HttpServletRequest;
 
 @Controller

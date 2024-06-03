@@ -2,7 +2,7 @@ package org.open4goods.ui.controllers.ui.pages;
 
 import org.open4goods.model.Localisable;
 
-import com.redfin.sitemapgenerator.ChangeFreq;
+import cz.jiripinkas.jsitemapgenerator.ChangeFreq;
 
 public class SitemapEntry extends Localisable{
 	

@@ -1,11 +1,9 @@
 package org.open4goods.ui.controllers.ui.pages;
 
-import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.nio.charset.Charset;
 import java.util.Locale;
 
-import org.apache.commons.lang3.StringUtils;
 import org.open4goods.model.constants.CacheConstants;
 import org.open4goods.model.dto.VerticalSearchResponse;
 import org.open4goods.services.SearchService;
@@ -21,8 +19,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.ModelAndView;
 
-import com.redfin.sitemapgenerator.ChangeFreq;
-
+import cz.jiripinkas.jsitemapgenerator.ChangeFreq;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 

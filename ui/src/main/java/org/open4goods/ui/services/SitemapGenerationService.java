@@ -2,22 +2,24 @@ package org.open4goods.ui.services;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.MalformedURLException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.time.Instant;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicLong;
 
-import org.apache.commons.io.FileUtils;
+import org.open4goods.config.yml.WikiPageConfig;
 import org.open4goods.config.yml.ui.ProductI18nElements;
 import org.open4goods.config.yml.ui.VerticalConfig;
 import org.open4goods.dao.ProductRepository;
 import org.open4goods.helper.GenericFileLogger;
+import org.open4goods.model.Localisable;
 import org.open4goods.model.blog.BlogPost;
+import org.open4goods.model.dto.WikiPage;
+import org.open4goods.model.product.Product;
 import org.open4goods.services.VerticalsConfigService;
 import org.open4goods.ui.config.yml.UiConfig;
 import org.open4goods.ui.controllers.ui.pages.SitemapEntry;
@@ -29,12 +31,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.scheduling.annotation.Scheduled;
 
-import com.redfin.sitemapgenerator.ChangeFreq;
-import com.redfin.sitemapgenerator.WebSitemapGenerator;
-import com.redfin.sitemapgenerator.WebSitemapUrl;
-import com.redfin.sitemapgenerator.WebSitemapUrl.Options;
-
 import ch.qos.logback.classic.Level;
+import cz.jiripinkas.jsitemapgenerator.ChangeFreq;
+import cz.jiripinkas.jsitemapgenerator.WebPage;
+import cz.jiripinkas.jsitemapgenerator.generator.SitemapGenerator;
+import cz.jiripinkas.jsitemapgenerator.generator.SitemapIndexGenerator;
 
 /**
  * Service in charge of generating the localised sitemaps
@@ -47,13 +48,18 @@ public class SitemapGenerationService {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(SitemapGenerationService.class);
 
+	private static final String SITEMAP_NAME_ROOT_PAGES = "main-pages.xml";
+	private static final String SITEMAP_NAME_PRODUCT_PAGES = "product-pages.xml";
+	private static final String SITEMAP_NAME_BLOG_PAGES = "blog-pages.xml";
+	private static final String SITEMAP_NAME_WIKI_PAGES = "wiki-pages.xml";
+	private static final String SITEMAP_NAME_VERTICAL_PAGES = "verticals-pages.xml";	
+	
 	private ProductRepository aggregatedDataRepository;
 	private UiConfig uiConfig;
 
 	// The flag that indicates wether opendata export is running or not
 	private AtomicBoolean exportRunning = new AtomicBoolean(false);
 
-	private final Map<String, WebSitemapGenerator> siteGens = new HashMap<>();
 
 	private Logger statsLogger;
 
@@ -68,14 +74,12 @@ public class SitemapGenerationService {
 	
 	public SitemapGenerationService(ProductRepository aggregatedDataRepository, UiConfig uiConfig, VerticalsConfigService verticalConfigService,  BlogService blogService, XwikiFacadeService xwikiService, ApplicationContext context) {
 		this.aggregatedDataRepository = aggregatedDataRepository;
-		this.uiConfig = uiConfig;
 		this.verticalsConfigService = verticalConfigService;
 		this.blogService = blogService;
 		this.statsLogger = GenericFileLogger.initLogger("stats-sitemap", Level.INFO, uiConfig.logsFolder(), false);
 		this.xwikiService = xwikiService;
-		
+		this.uiConfig = uiConfig;
 		this.annotatedControllers =  context.getBeansOfType(SitemapExposedController.class);
-
 	}
 
 	/**
@@ -96,56 +100,57 @@ public class SitemapGenerationService {
 
 		statsLogger.info("Starting sitemap generation");
 
-		// Sitemap files initialisation 
-		initSitemapsFiles();
-		
 		///////////////////////////////////
 		// Adding pages, per languages
 		///////////////////////////////////
-		siteGens.entrySet().stream().forEach(e-> {
+		uiConfig.getNamings().getBaseUrls().entrySet() .forEach(e-> {
 			
 			String lang = e.getKey();
-			WebSitemapGenerator sitemap = siteGens.get(lang);
-						
-			// Adding home page
+			
+			
+			
 			String baseUrl = uiConfig.getNamings().getBaseUrls().get(lang) ;
-			addUrl(sitemap, baseUrl, ChangeFreq.MONTHLY, 1.0);
 			
 			// Adding contoller based pages
-			addControllerPages(sitemap,baseUrl, lang);
+			addControllerPages(baseUrl, lang);
+			
 			
 			// Adding blog posts
-			addBlogPost(blogService.getPosts(), sitemap, baseUrl );
+			addBlogPost(blogService.getPosts(),  baseUrl, lang );
 			
-			// Adding wiki pages
-			
-			
-			
-			uiConfig.getWikiPagesMapping().entrySet().stream().forEach(entry -> {
-				// 
-				addWikiPage(entry.getKey(),entry.getValue().i18n(entry.getKey()), sitemap, baseUrl);
+			// Adding wiki pages			
+			addWikiPages( baseUrl, lang);
 				
-				
-				
-			});
+			// Adding products
+			addProductsPages(baseUrl, lang);
 			
 			// Adding vertical relativ material
-			verticalsConfigService.getConfigsWithoutDefault().forEach(v -> {
-				addVerticalPages(v, v.i18n(lang),sitemap, baseUrl);
-				// TODO : Activate when sure of quality
-				// addProductsPages(v,sitemap, baseUrl,lang);
-			});
-			
+			addVerticalPages( baseUrl, lang);
 			// Adding products
 			
+			// Generating the sitemap index
+				
+			SitemapIndexGenerator index = SitemapIndexGenerator.of(baseUrl+"sitemap/" );
+			index = index
+				.addPage(SITEMAP_NAME_ROOT_PAGES)
+				.addPage(SITEMAP_NAME_BLOG_PAGES)
+				.addPage(SITEMAP_NAME_WIKI_PAGES)
+				.addPage(SITEMAP_NAME_VERTICAL_PAGES)
+				.addPage(SITEMAP_NAME_PRODUCT_PAGES);
+				
+				try {
+					index.toFile(getSitemapFile("sitemap.xml", lang));
+				} catch (IOException e1) {
+					LOGGER.error("Error while generating sitemap index",e1);
+				}
+					
+				
 		});
 		
-		AtomicLong totalItems= new AtomicLong(0);
-
-		// Closing / flushing files
-		terminate();
-
-		statsLogger.info("Sitemap generated with {} items", totalItems.get());
+		
+		
+		
+		statsLogger.info("Sitemap generated ");
 
 		exportRunning.set(false);
 
@@ -153,27 +158,46 @@ public class SitemapGenerationService {
 
 
 	/**
-	 * List annotated bean controllers and set language accordingly
+	 * Generate a sitemap in a language for controller exposed pages
 	 * @param sitemap
 	 * @param baseUrl	
 	 */
-	private void addControllerPages(WebSitemapGenerator sitemap, String baseUrl, String language) {
+	private void addControllerPages(String baseUrl, String language) {
 		 
 		
-		annotatedControllers.entrySet().forEach(e -> {
+		SitemapGenerator sitemap = SitemapGenerator.of(baseUrl);
+		
+		// Adding the home page
+		sitemap = sitemap.addPage(getWebPage("/", ChangeFreq.WEEKLY, 1.0));
+		
+		for (Entry<String, SitemapExposedController> e : annotatedControllers.entrySet()) {
+			
 			try {
-				e.getValue().getMultipleExposedUrls().forEach(value -> {					
+				for (SitemapEntry value : e.getValue().getMultipleExposedUrls())
+				{					
 					// .substrint : remove the //
 					String url =  baseUrl+value.i18n(language).substring(1);
 					LOGGER.info("Adding controller page to {} sitemap : {}",language, url);
-					addUrl(sitemap,url, value.getFrequency(), value.getPriority());
-				});
+					
+					sitemap = sitemap.addPage(getWebPage(url, value.getFrequency(), value.getPriority()));
+					
+				}
 			} catch (Exception e1) {
 				LOGGER.error("Cannot add controller to sitemap : {}",e,e1);
 			}
-		});
-		
+			
+		}
+
+		// Writing sitemap
+		try {
+			sitemap.toFile(getSitemapFile(SITEMAP_NAME_ROOT_PAGES, language));
+		} catch (IOException e1) {
+			LOGGER.error("Error while writing controller sitemap",e1);
+		}
 	}
+
+	
+
 
 	/**
 	 * Add valid products with (ecoscore, activOffers and genAi completed) 
@@ -182,70 +206,72 @@ public class SitemapGenerationService {
 	 * @param baseUrl
 	 * @param language
 	 */
-	private void addProductsPages(VerticalConfig vertical, WebSitemapGenerator sitemap, String baseUrl, String language) {		
-		aggregatedDataRepository.exportVerticalWithValidDate(vertical.getId())
-		// Filtering on products having genAI content
-		.filter(e -> null != e.getAiDescriptions().get(language))
-		.forEach(data -> {
-			String url = data.url(language);
-			LOGGER.info("Adding product page to sitemap : {}",url);
-			addUrl(sitemap, url, ChangeFreq.DAILY, 1,  Date.from(Instant.ofEpochMilli(data.getLastChange())));
-		});
+	private void addProductsPages( String baseUrl, String language) {	
+		SitemapGenerator sitemap = SitemapGenerator.of(baseUrl);
+		
+		for (VerticalConfig vertical : verticalsConfigService.getConfigsWithoutDefault()) {
+			List<Product> datas = aggregatedDataRepository.exportVerticalWithValidDateOrderByEcoscore(vertical.getId())
+			// Filtering on products having genAI content
+					.filter(e -> null != e.getAiDescriptions())
+					// TODO : Not really filtered per language
+					.filter(e -> e.getAiDescriptions().size() > 1)
+					
+			.toList();
+			
+			for (Product data : datas) {
+				String url = data.url(language);
+				LOGGER.info("Adding product page to sitemap : {}",url);
+				sitemap = sitemap.addPage(getWebPage(url, ChangeFreq.DAILY, 1.0, Date.from(Instant.ofEpochMilli(data.getLastChange()))));			
+			}
+		
+		}
+		
+		// Writing sitemap
+		try {
+			sitemap.toFile(getSitemapFile(SITEMAP_NAME_PRODUCT_PAGES, language));
+		} catch (IOException e1) {
+			LOGGER.error("Error while writing product sitemap",e1);
+		}
 		
 	}
 
-	/**
-	 * Init the simaps files
-	 */
-	public void initSitemapsFiles() {
-
-		LOGGER.info("Starting site maps generation");
-
-		// For each internationalized website
-		for (final Entry<String, String> urls : uiConfig.getNamings().getServerNames().entrySet()) {
-			File folder = uiConfig.siteMapFolder();
-			folder = new File(folder.getAbsolutePath() + "/" + urls.getKey());
-			LOGGER.info("Creating folder {}", folder.getAbsolutePath());
-			try {
-				FileUtils.deleteDirectory(folder);
-			} catch (final IOException e1) {
-				LOGGER.error("Error while deleting old sitemap");
-			}
-
-			folder.mkdirs();
-
-			try {
-				siteGens.put(urls.getKey(), new WebSitemapGenerator(uiConfig.getBaseUrl(urls.getKey()) + "sitemap/" + urls.getKey() + "/", folder));
-			} catch (final MalformedURLException e) {
-				LOGGER.warn("Invalid url in sitemap : {}", e.getMessage());
-			}
-
-		}
-
-	}
+	
 
 	/**
 	 * Add conf defined wiki pages to sitemap
 	 * @param list
 	 * @param sitemap
 	 * @param baseUrl 
+	 * @param language 
 	 */
-	private void addWikiPage(String wikiPath, String nudgerPath, WebSitemapGenerator sitemap, String baseUrl) {
+	private void addWikiPages( String baseUrl, String language) {
 				
-		FullPage page = null;
-		try {
-			page = xwikiService.getFullPage(wikiPath);
-		} catch (Exception e) {
-			LOGGER.error("Error while retrieving wiki page  {} : {}",wikiPath,e.getMessage() ,e);
-		}
-		if (null == page) {
-			return;
+		SitemapGenerator sitemap = SitemapGenerator.of(baseUrl);
+		
+		for (Entry<String, Localisable> entry : uiConfig.getWikiPagesMapping().entrySet()) {
+			FullPage page = null;
+			try {
+				page = xwikiService.getFullPage(entry.getKey());
+			} catch (Exception e) {
+				LOGGER.error("Error while retrieving wiki page  {} : {}",entry.getValue(),e.getMessage() ,e);
+			}
+			if (null == page) {
+				return;
+			}
+			
+			String u =  baseUrl+entry.getValue().i18n(language);
+			LOGGER.info("Adding wiki page to sitemap : {}",u);
+			sitemap = sitemap.addPage(getWebPage(u, ChangeFreq.MONTHLY, 0.8, page.getWikiPage().getModified().getTime()));
+			
+			
 		}
 		
-		String u =  baseUrl+nudgerPath;
-		LOGGER.info("Adding wiki page to sitemap : {}",u);
-
-		addUrl(sitemap, u, ChangeFreq.MONTHLY, 0.7, page.getWikiPage().getModified().getTime());			
+		// Writing sitemap
+		try {
+			sitemap.toFile(getSitemapFile(SITEMAP_NAME_WIKI_PAGES, language));
+		} catch (IOException e) {
+			LOGGER.error("Error while writing wiki sitemap",e);
+		}
 	}
 	
 	/**
@@ -254,14 +280,20 @@ public class SitemapGenerationService {
 	 * @param sitemap
 	 * @param baseUrl 
 	 */
-	private void addBlogPost(List<BlogPost> posts, WebSitemapGenerator sitemap, String baseUrl) {
-		posts.forEach(post -> {			
-			// TODO : Blog is immutable (not translated). At last have it in conf / constants
-			String url = baseUrl+"blog/"+  post.getUrl();
-			LOGGER.info("Adding blog entry to sitemap : {}",url);
-
-			addUrl(sitemap, url , ChangeFreq.YEARLY, 0.6, Date.from(Instant.ofEpochMilli(post.getCreatedMs())));			
-		});		
+	private void addBlogPost(List<BlogPost> posts, String baseUrl, String language) {
+		SitemapGenerator sitemap = SitemapGenerator.of(baseUrl);
+		for (BlogPost post : posts) {
+				// TODO : Blog is immutable (not translated). At last have it in conf / constants
+				String url = baseUrl+"blog/"+  post.getUrl();
+				LOGGER.info("Adding blog entry to sitemap : {}",url);
+				sitemap = sitemap.addPage(getWebPage(url, ChangeFreq.MONTHLY, 0.8, Date.from(Instant.ofEpochMilli(post.getCreatedMs()))));
+		}
+		// Writing sitemap
+		try {
+			sitemap.toFile(getSitemapFile(SITEMAP_NAME_BLOG_PAGES, language));
+		} catch (IOException e) {
+			LOGGER.error("Error while writing blog sitemap",e);
+		}
 	}
 	
 	/**
@@ -270,101 +302,91 @@ public class SitemapGenerationService {
 	 * @param productI18nElements
 	 * @param sitemap
 	 * @param baseUrl 
+	 * @param language 
+	 * @throws IOException 
 	 */
-	private void addVerticalPages(VerticalConfig v, ProductI18nElements i18n, WebSitemapGenerator sitemap, String baseUrl) {
-		//  >> Vertical home page
-		addUrl(sitemap, baseUrl+ i18n.getVerticalHomeUrl(), ChangeFreq.WEEKLY, 0.9);
-				
-		//  >> Vertical specific pages
-		i18n.getWikiPages().forEach(e-> {
-			
-			FullPage page = null;
-			try {
-				page = xwikiService.getFullPage(e.getWikiUrl());
-				
-				String url = baseUrl+ i18n.getVerticalHomeUrl()+"/" + e.getVerticalUrl();
-				LOGGER.info("Adding to sitemap : {}",url);
-				addUrl(sitemap, url , ChangeFreq.MONTHLY, 0.9  );
-			} catch (Exception ex) {
-				LOGGER.error("Error while retrieving wiki page  {} : {}",e.getWikiUrl(),ex.getMessage());
-			}
-			if (null == page) {
-				return;
-			}
-		});
+	private void addVerticalPages( String baseUrl, String language){
 		
+		SitemapGenerator sitemap = SitemapGenerator.of(baseUrl);
 		
-		//  
+		for (VerticalConfig v : verticalsConfigService.getConfigsWithoutDefault() )
+		{
 
+			ProductI18nElements i18n = v.i18n(language) ;
+			sitemap = sitemap.addPage(getWebPage( baseUrl+ i18n.getVerticalHomeUrl(), ChangeFreq.WEEKLY, 1.0));
+			//  >> Vertical home page
+				
+			
+			//  >> Vertical specific pages
+			for (WikiPageConfig e : i18n.getWikiPages()) {
+				FullPage page = null;
+				try {
+					page = xwikiService.getFullPage(e.getWikiUrl());
+					
+					String url = baseUrl+ i18n.getVerticalHomeUrl()+"/" + e.getVerticalUrl();
+					LOGGER.info("Adding to sitemap : {}",url);
+					sitemap = sitemap.addPage(getWebPage(url, ChangeFreq.MONTHLY, 0.9 ));
+				} catch (Exception ex) {
+					LOGGER.error("Error while retrieving wiki page  {} : {}",e.getWikiUrl(),ex.getMessage());
+				}
+				if (null == page) {
+					return;
+				}
+			}
+		}
 		
+		// Writing sitemap
+		try {
+			sitemap.toFile(getSitemapFile(SITEMAP_NAME_VERTICAL_PAGES, language));
+		} catch (IOException e) {
+			LOGGER.error("Error while writing vertical sitemap",e);
+		}
 	}
 	
-
-//	/**
-//	 * Convert an aggregated data pageSize a sitemap entry
-//	 *
-//	 * @param data
-//	 */
-//	public void onAggregatedData(final Product data) {
-//
-//		for (final Entry<String, String> urls : uiConfig.getNamings().getServerNames().entrySet()) {
-//			try {
-//
-//				//
-////				final String u = uiConfig.getBaseUrl(urls.getKey()) + data.getUrls().getUrls().get(urls.getKey());
-//				final String u = uiConfig.getBaseUrl(urls.getKey()) + data.getNames().getName();
-//
-//				// Getting the last modified date
-//				Date now = null;
-//				if (null != data.getLastChange()) {
-//					now = Date.from(Instant.ofEpochMilli(data.getLastChange()));
-//				}
-//
-//				// Adding page
-//				addUrl(siteGens.get(urls.getKey()), u, ChangeFreq.WEEKLY, 0.9, now);
-//
-//			} catch (final Exception e) {
-//				LOGGER.warn("Error while adding url in sitemap : {}", e.getMessage());
-//			}
-//		}
-//	}
 
 	/**
-	 * Add an url pageSize the sitemap
-	 *
-	 * @param sitemap
-	 * @param url
+	 * Get a site map file
+	 * @param name
+	 * @param language
+	 * @return
+	 */
+	public File getSitemapFile(String name, String language) {
+		try {
+			Files.createDirectories(Path.of(uiConfig.siteMapFolder().getAbsolutePath()+"/" + language + "/" ));
+		} catch (IOException e) {
+			LOGGER.error("Error while creating sitemap folder",e);
+		}
+		return new File(uiConfig.siteMapFolder().getAbsolutePath()+"/" + language + "/" + name);
+	}
+
+	/**
+	 * Helper method to get a webpage instance
+	 * @param path
 	 * @param changeFreq
 	 * @param priority
-	 * @param lastMod
+	 * @return
 	 */
-	private void addUrl(final WebSitemapGenerator sitemap, final String url, final ChangeFreq changeFreq, final double priority, final Date lastMod) {
-		try {
-			final Options options = new Options(url);
-			options.changeFreq(changeFreq);
-			if (null != lastMod) {
-				options.lastMod(lastMod);
-			}
-			options.priority(priority);
-			sitemap.addUrl(new WebSitemapUrl(options));
-		} catch (final Exception e) {
-			LOGGER.error("Error while adding {} pageSize sitemap : {}", url, e.getMessage());
-		}
-
+	private WebPage getWebPage(String path, ChangeFreq changeFreq, double priority) {
+		return getWebPage(path, changeFreq, priority,null);
 	}
 
-	private void addUrl(final WebSitemapGenerator sg, final String string, final ChangeFreq freq, final double d) {
-		addUrl(sg, string, freq, d, null);
+	/**
+	 * Helper method to get a webpage instance
+	 * @param path
+	 * @param changeFreq
+	 * @param priority
+	 * @return
+	 */
+	private WebPage getWebPage(String path, ChangeFreq changeFreq, double priority, Date lastMod ) {
+		
+		WebPage w = WebPage.of(path);
+		w.setChangeFreq(changeFreq);
+		w.setPriority(priority);
+		if (null != lastMod) { 
+			w.setLastMod(lastMod);
+		}
+		return w;
 	}
 	
-	public void terminate() {
-
-		LOGGER.info("Ending site map generation");
-		for (final WebSitemapGenerator w : siteGens.values()) {
-			w.write();
-			w.writeSitemapsWithIndex();
-		}
-	}
 	
-
 }
