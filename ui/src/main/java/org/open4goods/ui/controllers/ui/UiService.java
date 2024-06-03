@@ -153,11 +153,20 @@ public class UiService {
 	 * @return
 	 */
 	private boolean isInternalReferer(HttpServletRequest request) {
+		if (null == request) {
+			return false;
+		}
+		
 		String referer=request.getHeader("referer");
+		String baseUrl= config.getBaseUrl(request.getLocale());
+		if (StringUtils.isEmpty(baseUrl)) {
+			LOGGER.info("Empty baseUrl for locale {}",request.getLocale());
+			return false;
+		}
 		if (StringUtils.isEmpty(referer)) {
 			LOGGER.info("Empty referer");
 			return false;
-		} else if (referer.startsWith(config.getBaseUrl(request.getLocale()))) {
+		} else if (referer.startsWith(baseUrl)) {
 			LOGGER.info("Request from internal source");
 			return true;
 		} else {
@@ -166,11 +175,13 @@ public class UiService {
 	}
 
 
-	
-	public Locale getSiteLocale(HttpServletRequest request) {
-		
-		String language = getSiteLanguage(request);
-		
+	/**
+	 * Return the SITE locale for a request
+	 * @param request
+	 * @return
+	 */
+	public Locale getSiteLocale(HttpServletRequest request) {		
+		String language = getSiteLanguage(request);		
 		if ("default".equals(language)) {
 			return Locale.ENGLISH;
 		} else {
@@ -178,12 +189,16 @@ public class UiService {
 		}
 	}
 	
+	/**
+	 * Return the SITE language for a request
+	 * @param request
+	 * @return
+	 */
 	public String getSiteLanguage(HttpServletRequest request) {
-		// TODO : Check with nginx
 		String serverName = request.getServerName();
-
-		String language = languageByserverNames.get(serverName);
-		
+		// TODO : Check with nginx
+		LOGGER.error("Server name {}",serverName);
+		String language = languageByserverNames.get(serverName);		
 		if (null == language) {
 			return "default";
 		} else {
