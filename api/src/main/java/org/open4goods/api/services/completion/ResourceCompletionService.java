@@ -254,13 +254,16 @@ public class ResourceCompletionService  extends AbstractCompletionService{
 		}
 		
 		
-		data.setCoverImagePath(cover.path());
-		
-
+		if (null == cover) {
+			logger.warn("No cover image found for product : {}", data.gtin());
+			// TODO : from const
+			data.setCoverImagePath("/icons/no-image.png");
+		} else {
+			data.setCoverImagePath(cover.path());			
+		}
 		
 		// Deleting useless files and unsetting attributes to preserve space
 		for (Resource r : data.getResources()) {
-			
 			if (r.isEvicted()) {
 				// If an evicted resource, systematicaly delete file.
 				File evicted = resourceService.getCacheFile(r);
