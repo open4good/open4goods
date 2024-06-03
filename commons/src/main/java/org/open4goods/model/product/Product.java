@@ -770,8 +770,10 @@ public class Product implements Standardisable {
 		
 		if ( StringUtils.isEmpty(existing) || FORCE) {
 			String shortest = shortestModel();
-			attributes.getReferentielAttributes().put(ReferentielKey.MODEL, shortest);
-			alternativeModels.remove(shortest);
+			if (null != shortest) {
+				attributes.getReferentielAttributes().put(ReferentielKey.MODEL, shortest);
+				alternativeModels.remove(shortest);
+			}
 		} else {
 			alternativeModels.remove(existing);
 		}		
@@ -784,8 +786,12 @@ public class Product implements Standardisable {
 	public String shortestModel() {		
 		Set<String> names = new HashSet<>();
 		names.add(model());
-		names.addAll(alternativeModels);		
-		return names.stream().min(Comparator.comparingInt(String::length)).orElse(null);
+		names.addAll(alternativeModels);
+		if (names.size() == 0) {
+			return null;
+		} else {
+			return names.stream().min(Comparator.comparingInt(String::length)).orElse(null);
+		}
 	}
 	
 	//////////////////////////////////////////
