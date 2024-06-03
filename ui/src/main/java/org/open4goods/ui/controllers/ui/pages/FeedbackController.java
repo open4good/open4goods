@@ -21,8 +21,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.ModelAndView;
 
-import com.redfin.sitemapgenerator.ChangeFreq;
-
+import cz.jiripinkas.jsitemapgenerator.ChangeFreq;
 import jakarta.servlet.http.HttpServletRequest;
 
 @Controller

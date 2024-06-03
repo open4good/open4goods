@@ -1,7 +1,9 @@
 package org.open4goods.ui.controllers.ui;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -41,9 +43,20 @@ public class UiService {
 	private static final ResourcePatternResolver resolver = new PathMatchingResourcePatternResolver(cl);
 	private  int maxImg;
 	
+	
+	private Map<String,String> languageByserverNames = new HashMap<>();
+	
 	// TODO :  in a service (hot, controllers are multiply instanciated)
 	@PostConstruct
 	public  void init() {
+		
+		// Setting server names
+		config.getNamings().getServerNames().entrySet().forEach(e -> {
+          languageByserverNames.put(e.getValue(),e.getKey());
+        });
+		
+		
+		
 		try {
 			// TODO : from conf
 			Resource[] resources = resolver.getResources("classpath:/static/assets/img/loader/*");
@@ -81,12 +94,17 @@ public class UiService {
 		final ModelAndView ret = new ModelAndView(template).addObject("config", config);
 
 		ret.addObject("userLocale", request.getLocale());
+		
+		
+		
 		// TODO(i18n,p3, 0,25)
-		ret.addObject("siteLanguage", "fr");
+		ret.addObject("siteLanguage", getSiteLanguage(request));
 		final Locale sl = Locale.FRANCE;
+		ret.addObject("siteLocale", getSiteLocale(request));
 
-		ret.addObject("siteLocale", sl);
-
+		
+		
+		
 		ret.addObject("config",config);
 
 		
@@ -148,6 +166,31 @@ public class UiService {
 	}
 
 
+	
+	public Locale getSiteLocale(HttpServletRequest request) {
+		
+		String language = getSiteLanguage(request);
+		
+		if ("default".equals(language)) {
+			return Locale.ENGLISH;
+		} else {
+			return Locale.forLanguageTag(language);
+		}
+	}
+	
+	public String getSiteLanguage(HttpServletRequest request) {
+		// TODO : Check with nginx
+		String serverName = request.getServerName();
+
+		String language = languageByserverNames.get(serverName);
+		
+		if (null == language) {
+			return "default";
+		} else {
+			return language;			
+		}
+	}
+	
 	public String loaderImage() {		
 		return "/assets/img/loader/"+random(1, maxImg)+".webp";		
 	}

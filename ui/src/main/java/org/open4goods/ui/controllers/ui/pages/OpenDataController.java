@@ -15,8 +15,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.servlet.ModelAndView;
 
 import com.mashape.unirest.http.exceptions.UnirestException;
-import com.redfin.sitemapgenerator.ChangeFreq;
 
+import cz.jiripinkas.jsitemapgenerator.ChangeFreq;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 

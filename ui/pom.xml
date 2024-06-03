@@ -111,9 +111,9 @@
 		<!--
 		https://mvnrepository.com/artifact/com.github.dfabulich/sitemapgen4j -->
 		<dependency>
-			<groupId>com.github.dfabulich</groupId>
-			<artifactId>sitemapgen4j</artifactId>
-			<version>1.1.2</version>
+		  <groupId>cz.jiripinkas</groupId>
+		  <artifactId>jsitemapgenerator</artifactId>
+		  <version>4.5</version>
 		</dependency>
 
 		<dependency>

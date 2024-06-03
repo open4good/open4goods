@@ -1,7 +1,6 @@
 package org.open4goods.ui.controllers.ui.pages;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 
 import org.open4goods.dao.ProductRepository;
@@ -10,9 +9,7 @@ import org.open4goods.services.DataSourceConfigService;
 import org.open4goods.services.VerticalsConfigService;
 import org.open4goods.ui.controllers.ui.UiService;
 import org.open4goods.ui.services.BlogService;
-import org.open4goods.ui.services.OpenDataService;
 import org.open4goods.xwiki.services.XWikiHtmlService;
-import org.open4goods.xwiki.services.XWikiReadService;
 import org.open4goods.xwiki.services.XwikiFacadeService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,9 +20,9 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.ModelAndView;
 
-import com.redfin.sitemapgenerator.ChangeFreq;
 import com.rometools.rome.io.FeedException;
 
+import cz.jiripinkas.jsitemapgenerator.ChangeFreq;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
