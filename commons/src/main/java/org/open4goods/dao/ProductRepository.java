@@ -144,10 +144,14 @@ public class ProductRepository {
 	 * @param indexName
 	 * @return
 	 */
-	public Stream<Product> exportVerticalWithValidDate(String vertical) {
+	public Stream<Product> exportVerticalWithValidDate(String vertical, boolean withExcluded) {
 
-		Criteria c = new Criteria("vertical").is(vertical).and(getValidDateQuery());
-		final NativeQuery initialQuery = new NativeQueryBuilder().withQuery(new CriteriaQuery(c)).build();
+		Criteria c = new Criteria("vertical").is(vertical)
+				.and(getValidDateQuery())
+				.and(new Criteria("excluded").is(withExcluded))
+				;
+		final NativeQuery initialQuery = new NativeQueryBuilder()
+				.withQuery(new CriteriaQuery(c)).build();
 		return elasticsearchTemplate.searchForStream(initialQuery, Product.class, current_index).stream()
 				.map(SearchHit::getContent);
 	}
@@ -158,12 +162,16 @@ public class ProductRepository {
 	 * @param vertical
 	 * @param max 
 	 * @param max
+	 * @param withExcluded 
 	 * @param indexName
 	 * @return
 	 */
-	public Stream<Product> exportVerticalWithValidDateOrderByEcoscore(String vertical, Integer max) {
+	public Stream<Product> exportVerticalWithValidDateOrderByEcoscore(String vertical, Integer max, boolean withExcluded) {
 
-		Criteria c = new Criteria("vertical").is(vertical).and(getValidDateQuery());
+		Criteria c = new Criteria("vertical").is(vertical)
+				.and(getValidDateQuery())
+				.and(new Criteria("excluded").is(withExcluded))
+				;
 		NativeQueryBuilder initialQueryBuilder = new NativeQueryBuilder().withQuery(new CriteriaQuery(c)).withMaxResults(max);
 		
 				if (null != max) {
@@ -185,8 +193,8 @@ public class ProductRepository {
 	 * @return
 	 */
 
-	public Stream<Product> exportVerticalWithValidDateOrderByEcoscore(String vertical) {
-		return exportVerticalWithValidDateOrderByEcoscore(vertical, null);
+	public Stream<Product> exportVerticalWithValidDateOrderByEcoscore(String vertical, boolean withExcluded) {
+		return exportVerticalWithValidDateOrderByEcoscore(vertical, null, withExcluded);
 	}
 
 	

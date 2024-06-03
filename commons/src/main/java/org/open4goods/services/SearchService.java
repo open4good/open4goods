@@ -144,6 +144,7 @@ public class SearchService {
 
 		Criteria criterias = new Criteria("vertical").is(vertical.getId())
 				.and(aggregatedDataRepository.getValidDateQuery())
+				.and(new Criteria("excluded"). is(request.isExcluded()))
 				;
 
 		// min price

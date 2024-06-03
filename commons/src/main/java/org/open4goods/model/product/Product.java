@@ -94,6 +94,11 @@ public class Product implements Standardisable {
 	@Field(index = true, store = false, type = FieldType.Keyword)
 	private String vertical;
 	
+	
+	/** If true, means the item is excluded from vertical representation (because not enough data, ....)**/
+	@Field(index = true, store = false, type = FieldType.Boolean)
+	private boolean excluded = false;
+	
 	/** The list of other id's known for this product **/
 	// TODO : Rename to alternativ model names
 //	private Set<UnindexedKeyValTimestamp> alternativeIds = new HashSet<>();
@@ -988,6 +993,14 @@ public class Product implements Standardisable {
 
 	public void setAlternativeModels(Set<String> alternativeModels) {
 		this.alternativeModels = alternativeModels;
+	}
+
+	public boolean isExcluded() {
+		return excluded;
+	}
+
+	public void setExcluded(boolean excluded) {
+		this.excluded = excluded;
 	}
 
 
