@@ -101,11 +101,11 @@ i18n:
           override: false
         - key: "ecological-description" 
           prompt: > 
-           écris un texte de maximum 200 mots,
-           dans un style écologique engagé mais,
+           ecris une analyse détaillée de l'impact environnemental du téléviseur [(${p.brand()})] [(${p.model()})],
+           un texte de maximum 200 mots,
+           dans un style écologique engagé mais objectif,
            en utilisant que du text brut,
-           une analyse détaillée de l'impact environnemental du téléviseur [(${p.brand()})] [(${p.model()})],
-           sur la base des caracteriques suivantes : [(${p.caracteristics()})]"
+           sur la base des caracteriques suivantes : [(${p.caracteristics()})]
           override: false
 
 # GenAiConfig for this vertical
@@ -155,6 +155,8 @@ attributesConfig:
   # If one of the following attribute is missing on a product, the product will be disassociated from this vertical. (setting vertical to null)
   mandatory:
    - "DIAGONALE_POUCES"
+   - "REPAIRABILITY_INDEX"
+   - "TV_TYPE"
    
   ####################################################################################
   # ATTRIBUTES DEFINITIONS

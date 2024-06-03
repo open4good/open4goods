@@ -104,11 +104,11 @@ i18n:
           override: false
         - key: "ecological-description" 
           prompt: > 
-           écris un texte de maximum 200 mots,
-           dans un style écologique engagé mais,
+           ecris une analyse détaillée de l'impact environnemental de la cafetiere [(${p.brand()})] [(${p.model()})],
+           un texte de maximum 200 mots,
+           dans un style écologique engagé mais objectif,
            en utilisant que du text brut,
-           une analyse détaillée de l'impact environnemental de la cafetiere [(${p.brand()})] [(${p.model()})],
-           sur la base des caracteriques suivantes : [(${p.caracteristics()})]"
+           sur la base des caracteriques suivantes : [(${p.caracteristics()})]
           override: false
 
 
