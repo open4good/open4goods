@@ -1,8 +1,10 @@
 package org.open4goods.config.yml;
 
-public class IcecatFeatureConfiguration {
+public class IcecatConfiguration {
 
 	private String featuresListFileUri;
+	private String categoryFeatureListFileUri;
+	private String languageListFileUri;
 	private String user;
 	private String password;
 	
@@ -31,7 +33,24 @@ public class IcecatFeatureConfiguration {
 	public void setPassword(String password) {
 		this.password = password;
 	}
-	
+
+	public String getLanguageListFileUri() {
+		return languageListFileUri;
+	}
+
+	public void setLanguageListFileUri(String languagesListFileUri) {
+		this.languageListFileUri = languagesListFileUri;
+	}
+
+	public String getCategoryFeatureListFileUri() {
+		return categoryFeatureListFileUri;
+	}
+
+	public void setCategoryFeatureListFileUri(String categoryFeatureListFileUri) {
+		this.categoryFeatureListFileUri = categoryFeatureListFileUri;
+	}
+
+
 	
 	
 }

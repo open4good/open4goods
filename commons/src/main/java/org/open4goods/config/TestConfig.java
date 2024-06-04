@@ -1,12 +1,13 @@
 package org.open4goods.config;
 
-import org.open4goods.config.yml.IcecatFeatureConfiguration;
+import org.open4goods.config.yml.IcecatConfiguration;
 import org.open4goods.services.GoogleTaxonomyService;
-import org.open4goods.services.IcecatFeatureService;
+import org.open4goods.services.IcecatService;
 import org.open4goods.services.RemoteFileCachingService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.xml.sax.SAXException;
 
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 
@@ -27,10 +28,10 @@ public class TestConfig {
     
 
     @Bean
-    public IcecatFeatureService xmlMapper(@Autowired RemoteFileCachingService remoteFileCachingService) {
-    	IcecatFeatureConfiguration c = new IcecatFeatureConfiguration();
+    public IcecatService xmlMapper(@Autowired RemoteFileCachingService remoteFileCachingService) throws SAXException {
+    	IcecatConfiguration c = new IcecatConfiguration();
     	// TODO : Not windows OK
-        return new IcecatFeatureService(new XmlMapper(), c, remoteFileCachingService, "/tmp");
+        return new IcecatService(new XmlMapper(), c, remoteFileCachingService, "/tmp");
     }
     
     

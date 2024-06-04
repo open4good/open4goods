@@ -68,7 +68,7 @@ public class IcecatCompletionService extends AbstractCompletionService {
 		
 		this.aggregator = aggregationFacadeService.getStandardAggregator("icecat");;
 		this.aggregator.beforeStart();
-		this.icecatConfig = apiProperties.getIcecatConfig();
+		this.icecatConfig = apiProperties.getIcecatCompletionConfig();
 		
 		
 	}
