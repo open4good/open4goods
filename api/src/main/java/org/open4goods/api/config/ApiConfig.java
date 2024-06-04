@@ -41,7 +41,7 @@ import org.open4goods.services.DataSourceConfigService;
 import org.open4goods.services.EvaluationService;
 import org.open4goods.services.GoogleTaxonomyService;
 import org.open4goods.services.Gs1PrefixService;
-import org.open4goods.services.IcecatFeatureService;
+import org.open4goods.services.IcecatService;
 import org.open4goods.services.ImageMagickService;
 import org.open4goods.services.RemoteFileCachingService;
 import org.open4goods.services.ResourceService;
@@ -72,6 +72,7 @@ import org.springframework.data.redis.serializer.StringRedisSerializer;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
+import org.xml.sax.SAXException;
 
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import com.github.benmanes.caffeine.cache.Caffeine;
@@ -120,9 +121,9 @@ public class ApiConfig {
 	
 	@Bean
 	@Autowired
-	IcecatFeatureService icecatFeatureService( RemoteFileCachingService fileCachingService, String remoteCacheFolder) {
+	IcecatService icecatFeatureService( RemoteFileCachingService fileCachingService, String remoteCacheFolder) throws SAXException {
 		// TODO : xmlMapper not injected because corruct the springdoc used one. Should use a @Primary derivation
-		return new IcecatFeatureService(new XmlMapper(), apiProperties.getIcecatFeatureConfig(), fileCachingService, remoteCacheFolder);
+		return new IcecatService(new XmlMapper(), apiProperties.getIcecatFeatureConfig(), fileCachingService, remoteCacheFolder);
 	}
 	
 	@Bean
@@ -238,7 +239,7 @@ public class ApiConfig {
 			@Autowired BrandService brandservice,
 			@Autowired GoogleTaxonomyService gts,
 			@Autowired BlablaService blablaService,
-			@Autowired IcecatFeatureService icecatFeatureService) {
+			@Autowired IcecatService icecatFeatureService) {
 		return new AggregationFacadeService(evaluationService, standardiserService, autowireBeanFactory, aggregatedDataRepository, apiProperties, gs1prefixService, dataSourceConfigService, configService,  barcodeValidationService,brandservice, gts, blablaService, icecatFeatureService);
 	}
 

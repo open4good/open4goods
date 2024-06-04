@@ -29,7 +29,7 @@ import org.open4goods.model.product.AggregatedAttribute;
 import org.open4goods.model.product.AggregatedFeature;
 import org.open4goods.model.product.Product;
 import org.open4goods.services.BrandService;
-import org.open4goods.services.IcecatFeatureService;
+import org.open4goods.services.IcecatService;
 import org.open4goods.services.VerticalsConfigService;
 import org.slf4j.Logger;
 
@@ -40,9 +40,9 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 	private final BrandService brandService;
 
 	private VerticalsConfigService verticalConfigService;
-	private IcecatFeatureService featureService;
+	private IcecatService featureService;
 
-	public AttributeRealtimeAggregationService(final VerticalsConfigService verticalConfigService,  BrandService brandService, final Logger logger, IcecatFeatureService featureService) {
+	public AttributeRealtimeAggregationService(final VerticalsConfigService verticalConfigService,  BrandService brandService, final Logger logger, IcecatService featureService) {
 		super(logger);
 		this.verticalConfigService = verticalConfigService;
 		this.brandService = brandService;
@@ -66,7 +66,7 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 		
 		// Attributing taxomy to attributes
 		data.getAttributes().getUnmapedAttributes().forEach(a -> {
-			Set<Long> icecatTaxonomyIds = featureService.resolve(a.getName());
+			Set<Long> icecatTaxonomyIds = featureService.resolveFeatureName(a.getName());
 			if (null != icecatTaxonomyIds) {
 				dedicatedLogger.info("Found icecat taxonomy for {} : {}", a.getName(), icecatTaxonomyIds);
 				a.setIcecatTaxonomyIds(icecatTaxonomyIds );

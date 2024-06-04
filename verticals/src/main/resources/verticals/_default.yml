@@ -235,6 +235,7 @@ attributesConfig:
     synonyms:
       all:
       - "CLASSE ÉNERGÉTIQUE"
+      - "CLASSE D'EFFICACITÉ ÉNERGÉTIQUE (HDR)"
       - "CLASSE ECO"
       - "CLASSE ENERGÉTIQUE"
       - "CLASSE D'EFFICACITÉ ÉNERGÉTIQUE"
