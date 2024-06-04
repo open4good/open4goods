@@ -60,14 +60,9 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 		if (!data.getAttributes().getAggregatedAttributes().keySet().containsAll(vConf.getAttributesConfig().getMandatory())) {
 			// Missing attributes.
 			dedicatedLogger.warn("Missing mandatory attributes for product {}. Will be unmatched from vertical {}", data.getId(), vConf.getId());
-<<<<<<< Upstream, based on origin/main
 			data.setExcluded(true);			
 		} else {
 			data.setExcluded(false);			
-=======
-			// TODO : better have a flag, that is param on the query in the DAO
-			data.setVertical(null);			
->>>>>>> 0c86ae0 first approach
 		}
 
 		
