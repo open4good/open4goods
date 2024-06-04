@@ -18,6 +18,9 @@ public class IcecatResponse {
 	@JacksonXmlProperty(localName = "FeaturesList")
 	private IcecatFeaturesList featuresList;
 
+	@JacksonXmlProperty(localName = "SuppliersList")
+	private IcecatSuppliersList suppliersList;
+	
     @JacksonXmlProperty(localName = "CategoryFeaturesList")
     private CategoryFeaturesList categoryFeaturesList;
     
@@ -68,6 +71,14 @@ public class IcecatResponse {
 
 	public void setCategoryFeaturesList(CategoryFeaturesList categoryFeaturesList) {
 		this.categoryFeaturesList = categoryFeaturesList;
+	}
+
+	public IcecatSuppliersList getSuppliersList() {
+		return suppliersList;
+	}
+
+	public void setSuppliersList(IcecatSuppliersList suppliersList) {
+		this.suppliersList = suppliersList;
 	}
 	
 	

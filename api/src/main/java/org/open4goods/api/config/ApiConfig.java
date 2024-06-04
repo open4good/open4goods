@@ -52,7 +52,7 @@ import org.open4goods.services.VerticalsConfigService;
 import org.open4goods.services.ai.AiAgent;
 import org.open4goods.services.ai.AiService;
 import org.open4goods.services.textgen.BlablaService;
-import org.open4goods.store.repository.elastic.BrandRepository;
+import org.open4goods.store.repository.elastic.BrandScoresRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springdoc.core.customizers.OpenApiCustomizer;
@@ -122,9 +122,9 @@ public class ApiConfig {
 	
 	@Bean
 	@Autowired
-	IcecatService icecatFeatureService( RemoteFileCachingService fileCachingService) throws SAXException {
+	IcecatService icecatFeatureService( RemoteFileCachingService fileCachingService, BrandService brandService) throws SAXException {
 		// TODO : xmlMapper not injected because corruct the springdoc used one. Should use a @Primary derivation
-		return new IcecatService(new XmlMapper(), apiProperties.getIcecatFeatureConfig(), fileCachingService, apiProperties.remoteCachingFolder());
+		return new IcecatService(new XmlMapper(), apiProperties.getIcecatFeatureConfig(), fileCachingService, apiProperties.remoteCachingFolder(), brandService);
 	}
 	
 	@Bean
@@ -187,7 +187,7 @@ public class ApiConfig {
 	}
 
 	@Bean
-	BrandService brandService(@Autowired RemoteFileCachingService rfc, @Autowired  ApiProperties properties, @Autowired BrandRepository brandRepository) {
+	BrandService brandService(@Autowired RemoteFileCachingService rfc, @Autowired  ApiProperties properties, @Autowired BrandScoresRepository brandRepository) {
 		return new BrandService(properties.getBrandConfig(),  rfc, brandRepository);
 	}
 

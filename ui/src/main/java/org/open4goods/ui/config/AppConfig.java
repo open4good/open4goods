@@ -28,7 +28,7 @@ import org.open4goods.services.StandardiserService;
 import org.open4goods.services.VerticalsConfigService;
 import org.open4goods.services.ai.AiAgent;
 import org.open4goods.services.ai.AiService;
-import org.open4goods.store.repository.elastic.BrandRepository;
+import org.open4goods.store.repository.elastic.BrandScoresRepository;
 import org.open4goods.ui.config.yml.UiConfig;
 import org.open4goods.ui.controllers.ui.UiService;
 import org.open4goods.ui.services.BlogService;
@@ -155,7 +155,7 @@ public class AppConfig {
 	 
 	 
 	@Bean
-	BrandService brandService(@Autowired RemoteFileCachingService rfc, @Autowired  UiConfig properties, @Autowired  BrandRepository brandRepository) {
+	BrandService brandService(@Autowired RemoteFileCachingService rfc, @Autowired  UiConfig properties, @Autowired  BrandScoresRepository brandRepository) {
 		return new BrandService(properties.getBrandConfig(),  rfc,brandRepository);
 	}
 

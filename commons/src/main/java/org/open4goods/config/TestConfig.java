@@ -31,7 +31,7 @@ public class TestConfig {
     public IcecatService xmlMapper(@Autowired RemoteFileCachingService remoteFileCachingService) throws SAXException {
     	IcecatConfiguration c = new IcecatConfiguration();
     	// TODO : Not windows OK
-        return new IcecatService(new XmlMapper(), c, remoteFileCachingService, "/tmp");
+        return new IcecatService(new XmlMapper(), c, remoteFileCachingService, "/tmp",null);
     }
     
     
