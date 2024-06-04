@@ -5,8 +5,8 @@ import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class IcecatFeature {
-	@JacksonXmlProperty(isAttribute = true)
-	private String Class;
+	@JacksonXmlProperty(isAttribute = true, localName = "Class")
+	private String Clazz;
 
 	@JacksonXmlProperty(isAttribute = true)
 	private String DefaultDisplayUnit;
@@ -29,12 +29,44 @@ public class IcecatFeature {
 	@JacksonXmlProperty(localName = "Names")
 	private IcecatNames names;
 	
-	public String getClassAttribute() { // `getClass` is reserved in Java, so use another name
-		return Class;
+	
+	
+	   @JacksonXmlProperty(isAttribute = true)
+       private int CategoryFeatureGroup_ID;
+
+       @JacksonXmlProperty(isAttribute = true)
+       private int CategoryFeature_ID;
+
+
+       @JacksonXmlProperty(isAttribute = true)
+       private int LimitDirection;
+
+       @JacksonXmlProperty(isAttribute = true)
+       private int Mandatory;
+
+       @JacksonXmlProperty(isAttribute = true)
+       private String No;
+
+       @JacksonXmlProperty(isAttribute = true)
+       private int Searchable;
+
+   
+       @JacksonXmlProperty(isAttribute = true)
+       private String Use_Dropdown_Input;
+
+       @JacksonXmlProperty(isAttribute = true)
+       private int ValueSorting;
+
+       
+       
+       
+
+	public String getClazz() {
+		return Clazz;
 	}
 
-	public void setClassAttribute(String Class) {
-		this.Class = Class;
+	public void setClazz(String clazz) {
+		Clazz = clazz;
 	}
 
 	public String getDefaultDisplayUnit() {
@@ -91,6 +123,73 @@ public class IcecatFeature {
 
 	public void setNames(IcecatNames names) {
 		this.names = names;
+	}
+
+	
+
+	public int getCategoryFeatureGroup_ID() {
+		return CategoryFeatureGroup_ID;
+	}
+
+	public void setCategoryFeatureGroup_ID(int categoryFeatureGroup_ID) {
+		CategoryFeatureGroup_ID = categoryFeatureGroup_ID;
+	}
+
+	public int getCategoryFeature_ID() {
+		return CategoryFeature_ID;
+	}
+
+	public void setCategoryFeature_ID(int categoryFeature_ID) {
+		CategoryFeature_ID = categoryFeature_ID;
+	}
+
+	public int getLimitDirection() {
+		return LimitDirection;
+	}
+
+	public void setLimitDirection(int limitDirection) {
+		LimitDirection = limitDirection;
+	}
+
+	public int getMandatory() {
+		return Mandatory;
+	}
+
+	public void setMandatory(int mandatory) {
+		Mandatory = mandatory;
+	}
+
+
+	public String getNo() {
+		return No;
+	}
+
+	public void setNo(String no) {
+		No = no;
+	}
+
+	public int getSearchable() {
+		return Searchable;
+	}
+
+	public void setSearchable(int searchable) {
+		Searchable = searchable;
+	}
+
+	public String getUse_Dropdown_Input() {
+		return Use_Dropdown_Input;
+	}
+
+	public void setUse_Dropdown_Input(String use_Dropdown_Input) {
+		Use_Dropdown_Input = use_Dropdown_Input;
+	}
+
+	public int getValueSorting() {
+		return ValueSorting;
+	}
+
+	public void setValueSorting(int valueSorting) {
+		ValueSorting = valueSorting;
 	}
 	
 	
