@@ -11,21 +11,7 @@ import org.open4goods.model.constants.CacheConstants;
 import org.open4goods.model.constants.Currency;
 import org.open4goods.model.data.Price;
 import org.open4goods.model.product.Product;
-import org.open4goods.services.BarcodeValidationService;
-import org.open4goods.services.BrandService;
-import org.open4goods.services.DataSourceConfigService;
-import org.open4goods.services.EvaluationService;
-import org.open4goods.services.FeedbackService;
-import org.open4goods.services.GoogleTaxonomyService;
-import org.open4goods.services.ImageMagickService;
-import org.open4goods.services.MailService;
-import org.open4goods.services.RecaptchaService;
-import org.open4goods.services.RemoteFileCachingService;
-import org.open4goods.services.ResourceService;
-import org.open4goods.services.SearchService;
-import org.open4goods.services.SerialisationService;
-import org.open4goods.services.StandardiserService;
-import org.open4goods.services.VerticalsConfigService;
+import org.open4goods.services.*;
 import org.open4goods.services.ai.AiAgent;
 import org.open4goods.services.ai.AiService;
 import org.open4goods.store.repository.elastic.BrandRepository;
@@ -38,6 +24,7 @@ import org.open4goods.ui.services.OpenDataService;
 import org.open4goods.ui.services.SitemapGenerationService;
 import org.open4goods.ui.services.todo.TodoService;
 import org.open4goods.xwiki.services.XwikiFacadeService;
+import org.springframework.ai.image.ImageClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.caffeine.CaffeineCache;
@@ -127,7 +114,10 @@ public class AppConfig {
 		return new BlogService(xwikiReadService, config.getBlogConfig(), config.getNamings().getBaseUrls());
 	}
 
-
+	@Bean
+	public ImageGenerationService imageGenerationService(@Autowired ImageClient imageClient, @Autowired UiConfig uiConfig) {
+		return new ImageGenerationService(imageClient, uiConfig.getImageGenerationConfig(), uiConfig.getGeneratedImagesFolder());
+	}
 	  
 	@Bean
 	FeedbackService feedbackService(@Autowired UiConfig config) {

@@ -11,10 +11,7 @@ import org.open4goods.config.BrandConfiguration;
 import org.open4goods.config.yml.BlogConfiguration;
 import org.open4goods.config.yml.DevModeConfiguration;
 import org.open4goods.config.yml.FeedbackConfiguration;
-import org.open4goods.config.yml.ui.ApiConfig;
-import org.open4goods.config.yml.ui.OpenSearchConfig;
-import org.open4goods.config.yml.ui.SiteNaming;
-import org.open4goods.config.yml.ui.WebConfig;
+import org.open4goods.config.yml.ui.*;
 import org.open4goods.model.Localisable;
 import org.open4goods.model.Localised;
 import org.open4goods.xwiki.config.XWikiServiceProperties;
@@ -61,7 +58,10 @@ public class UiConfig {
 	 */
 	private String datasourcesfolder=rootFolder+ File.separator+ "config"+File.separator+"datasources"+File.separator;
 
-	
+	/**
+	 * Folder where AI generated images are stored
+	 */
+	private String generatedImagesFolder = rootFolder + "generated-images" + File.separator;
 	
 	/**
 	 * The mapped controllers (dynamic declaration cause spring config does not allows us to have full enforced
@@ -167,8 +167,12 @@ public class UiConfig {
 	/**
 	 * Configuration for the brand service
 	 */
-
 	private BrandConfiguration brandConfig;
+
+	/**
+	 * Configuration for the AI Image Generation service
+	 */
+	private ImageGenerationConfig imageGenerationConfig = new ImageGenerationConfig();
 	
 	/**
 	 * The list of reversments (cashback) to ecologgical organisations
@@ -283,6 +287,21 @@ public class UiConfig {
 		this.namings = namings;
 	}
 
+	public ImageGenerationConfig getImageGenerationConfig() {
+		return imageGenerationConfig;
+	}
+
+	public void setImageGenerationConfig(ImageGenerationConfig imageGenerationConfig) {
+		this.imageGenerationConfig = imageGenerationConfig;
+	}
+
+	public String getGeneratedImagesFolder() {
+		return generatedImagesFolder;
+	}
+
+	public void setGeneratedImagesFolder(String generatedImagesFolder) {
+		this.generatedImagesFolder = generatedImagesFolder;
+	}
 
 	public String getVerticalsFolder() {
 		return verticalsFolder;
