@@ -1,22 +1,30 @@
 package org.open4goods.services;
 
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.open4goods.config.yml.IcecatConfiguration;
 import org.open4goods.exceptions.TechnicalException;
 import org.open4goods.helper.IdHelper;
-import org.open4goods.model.icecat.CategoryFeatureListHandler;
+import org.open4goods.model.icecat.IcecatCategory;
+import org.open4goods.model.icecat.IcecatCategoryFeatureGroup;
 import org.open4goods.model.icecat.IcecatFeature;
-import org.open4goods.model.icecat.IcecatModel;
+import org.open4goods.model.icecat.IcecatFeatureGroup;
 import org.open4goods.model.icecat.IcecatLanguageHandler;
+import org.open4goods.model.icecat.IcecatModel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xml.sax.InputSource;
@@ -30,7 +38,11 @@ import jakarta.annotation.PostConstruct;
 
 
 /**
- * This service maps expose Icat features.
+ * This service preloads some open4goods with (great) icecat data. 
+ * Brands are injected in BrandService
+ * FeatureGroups are injected in verticals
+ * 
+ *   It also provides endpoints to access icecat features, languages, and so on....
  * 
  */
 public class IcecatService {
@@ -66,6 +78,13 @@ public class IcecatService {
 
 	}
 
+
+	@PostConstruct
+	public void icecatInit () throws TechnicalException {
+		loadFeatures();
+		loadCategoryFeatureList();
+		
+	}
 	/**
 	 * Load features from the IceCat XML file.
 	 * @throws TechnicalException 
@@ -157,7 +176,6 @@ public class IcecatService {
 		 LOGGER.info("End loading of features from {}", iceCatConfig.getFeaturesListFileUri());
 	}
 
-	@PostConstruct
 	public void loadCategoryFeatureList() throws TechnicalException {
 		
 		// 1 - Download the file with basic auth
@@ -168,26 +186,126 @@ public class IcecatService {
 			return;
 		}
 		
+		
+		
+		
+		
 		LOGGER.info("Getting file from {}", iceCatConfig.getCategoryFeatureListFileUri());
-		File icecatFile = getCachedFile(iceCatConfig.getCategoryFeatureListFileUri(), iceCatConfig.getUser(), iceCatConfig.getPassword());
-
-		 try {
+		
+		// Tweak, we cache directly the minified version (7Mb vs 7Gb ;) 
+		
+		File icecatMimified = new File(remoteCachingFolder+File.separator+IdHelper.getHashedName(iceCatConfig.getCategoryFeatureListFileUri()+".min"));
+		
+		if (!icecatMimified.exists()) {
+			LOGGER.info("Minified file not found, Downloading and generating mimified version.. Can take a long time !");	
+			File icecatFile = new File(remoteCachingFolder+File.separator+IdHelper.getHashedName(iceCatConfig.getCategoryFeatureListFileUri()));
+			icecatFile = getCachedFile(iceCatConfig.getCategoryFeatureListFileUri(), iceCatConfig.getUser(), iceCatConfig.getPassword());
 	
-			 XMLReader xmlReader = XMLReaderFactory.createXMLReader();
-			 
-			 
-			 // Créez une instance de votre gestionnaire
-			 CategoryFeatureListHandler handler = new CategoryFeatureListHandler();
-			 
-			 // Configurez le XMLReader pour utiliser votre gestionnaire
-			 xmlReader.setContentHandler(handler);
-			 
-			 // Parse le fichier XML
-			 FileInputStream inputStream = new FileInputStream(icecatFile);
-			 xmlReader.parse(new InputSource(inputStream));
-			 
+			LOGGER.info("Start generating mimified version");
+			icecatMimified.delete();
 
-			 
+			// Starting file minification
+			
+			AtomicBoolean inMeasure= new AtomicBoolean(false);
+			try {
+				BufferedWriter writer = new BufferedWriter(new FileWriter(icecatMimified, true));
+				
+				Files.lines(icecatFile.toPath())
+				.forEach(l -> {
+					try {
+						
+						if (l.contains("<Measure ")) {
+							inMeasure.set(true);
+						}
+						
+						if (!inMeasure.get()) {
+							if (!l.contains("<Name") && ! l.contains("<RestrictedValue"))  {
+								
+								writer.write(l);
+								writer.newLine();
+							}
+						}
+						
+						
+						if (l.contains("</Measure")) {
+							inMeasure.set(false);
+						}
+						
+						
+					} catch (IOException e) {
+						LOGGER.error("Error writing line", e);
+					}
+				});
+				
+				IOUtils.closeQuietly(writer);
+			} catch (IOException e) {
+				LOGGER.error("Error writing file", e);
+			}
+			LOGGER.info("End generating mimified version : {} ", icecatMimified.getAbsolutePath());
+			
+			LOGGER.info("Cleaning up the uncompressed file");
+//			icecatFile.delete();
+		}
+		
+		///////////////////////////
+		// Loading models 
+		//////////////////////////
+		
+		
+		
+//		Category 
+//		    FeatureGroup
+//			Feature		
+		 try {
+			 LOGGER.info("DOM Parsing of {}", icecatMimified);
+			 List<IcecatCategory> features = xmlMapper.readValue(icecatMimified, IcecatModel.class).getResponse().getCategoryFeaturesList().getCategories();
+				
+			 for (IcecatCategory category : features) 
+			 {
+
+				// The ID of the category
+				 
+				 
+				 
+				 
+				 
+				Integer catId = category.getID();
+				category.getLowPic();
+				category.getParentCategory();
+				
+				
+				
+				
+				
+				for (IcecatFeature feature : category.getFeatures()) {
+					 feature.getCategoryFeature_ID();
+					 feature.getCategoryFeatureGroup_ID();
+					 feature.getDefaultDisplayUnit();
+					 feature.getID();
+					 
+					 featuresById.get(Long.valueOf(feature.getID()));
+					 feature.getNames();
+				 }
+				 
+				 for (IcecatCategoryFeatureGroup catFeatGroup :  category.getCategoryFeatureGroups()) {
+					 
+						catFeatGroup.getFeatureGroup();
+//						catFeatGroup.feat
+						for (IcecatFeatureGroup featureGroup :  catFeatGroup.getFeatureGroups()) {
+
+							featureGroup.getID();
+//							featureGroup.
+//							for (IcecatFeature feature : featureGroup. )
+							featureGroup.getNames();
+						
+						}
+				 }
+
+
+					System.out.println(category);
+				}
+					
+//			 			 
 		 } catch (Exception e) {
 			LOGGER.error("Error while loading languages", e);
 		}
