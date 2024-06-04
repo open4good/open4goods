@@ -23,11 +23,11 @@
 					<show>private</show>
 
 				</configuration>
-				
+
 			</plugin>
 
 
-<!-- 
+			<!-- 
 
 
 			<plugin>
@@ -104,6 +104,12 @@
 		<dependency>
 			<groupId>redis.clients</groupId>
 			<artifactId>jedis</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>com.googlecode.concurrent-trees</groupId>
+			<artifactId>concurrent-trees</artifactId>
+			<version>2.6.1</version>
 		</dependency>
 
 		<!---
@@ -207,10 +213,10 @@
 			<groupId>com.fasterxml.jackson.dataformat</groupId>
 			<artifactId>jackson-dataformat-csv</artifactId>
 		</dependency>
-		
+
 		<dependency>
-		    <groupId>com.fasterxml.jackson.dataformat</groupId>
-		    <artifactId>jackson-dataformat-xml</artifactId>
+			<groupId>com.fasterxml.jackson.dataformat</groupId>
+			<artifactId>jackson-dataformat-xml</artifactId>
 		</dependency>
 
 		<dependency>

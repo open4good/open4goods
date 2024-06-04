@@ -24,6 +24,7 @@ import org.open4goods.exceptions.ValidationException;
 import org.open4goods.helper.ResourceHelper;
 import org.open4goods.model.attribute.Attribute;
 import org.open4goods.model.constants.ReferentielKey;
+import org.open4goods.model.data.Brand;
 import org.open4goods.model.data.DataFragment;
 import org.open4goods.model.data.UnindexedKeyValTimestamp;
 import org.open4goods.model.product.AggregatedAttribute;
@@ -345,16 +346,16 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 					
 				} else if (key.equals(ReferentielKey.BRAND)) {
 					
-					value = brandService.normalizeBrand(value);
-					if (null != value && !existing.equals(value)) {
+					Brand model = brandService.resolveBrandName(value);
+					if (null != model && !existing.equals(model.getName())) {
 						//TODO (gof) : elect best brand, exclude "non categorisée", ...
-						dedicatedLogger.info("Adding different {} name as BRAND. Existing is {}, would have erased with {}",key,existing, value);						
+						dedicatedLogger.info("Adding different {} name as BRAND. Existing is {}, would have erased with {}",key,existing, model.getName());						
 						// Adding the old one in alternate brand
-						output.getAlternativeBrands().add(new UnindexedKeyValTimestamp(fragement.getDatasourceName(), value));
+						output.getAlternativeBrands().add(new UnindexedKeyValTimestamp(fragement.getDatasourceName(), model.getName()));
 						
 						
 						// Adding the new one
-						output.getAttributes().addReferentielAttribute(ReferentielKey.BRAND, value);
+						output.getAttributes().addReferentielAttribute(ReferentielKey.BRAND, model.getName());
 
 						// Removing the current brand in any case
 						output.getAlternativeBrands().removeIf(b -> b.getValue().equals(output.brand()));
@@ -379,7 +380,12 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 			else {
 				// TODO : Bad design of this method
 				if (key.equals(ReferentielKey.BRAND)) {
-					value = brandService.normalizeBrand(value);
+					Brand b = brandService.resolveBrandName(value);
+					if (null == b) {
+						dedicatedLogger.error("Should nor ! Unresolvable already set brand : {}", value);
+					} else {
+						value = b.getName();;						
+					}
 				}
 				
 				
