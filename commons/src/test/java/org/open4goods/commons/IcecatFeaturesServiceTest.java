@@ -8,7 +8,7 @@ import org.open4goods.config.TestConfig;
 import org.open4goods.exceptions.InvalidParameterException;
 import org.open4goods.exceptions.TechnicalException;
 import org.open4goods.services.GoogleTaxonomyService;
-import org.open4goods.services.IcecatFeatureService;
+import org.open4goods.services.IcecatService;
 import org.open4goods.services.RemoteFileCachingService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -16,7 +16,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 @SpringBootTest(classes = TestConfig.class)
 public class IcecatFeaturesServiceTest {
 
-	@Autowired private IcecatFeatureService featureService;
+	@Autowired private IcecatService featureService;
 
     
     @Test
@@ -28,7 +28,7 @@ public class IcecatFeaturesServiceTest {
     	featureService.loadFeatures();
         
     	
-    	assertTrue(featureService.resolve("COULEUR").equals(""));
+    	assertTrue(featureService.resolveFeatureName("COULEUR").equals(""));
         
        
     }
