@@ -60,7 +60,6 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 		if (!data.getAttributes().getAggregatedAttributes().keySet().containsAll(vConf.getAttributesConfig().getMandatory())) {
 			// Missing attributes.
 			dedicatedLogger.warn("Missing mandatory attributes for product {}. Will be unmatched from vertical {}", data.getId(), vConf.getId());
-			data.setExcluded(true);			
 		} else {
 			data.setExcluded(false);			
 		}
