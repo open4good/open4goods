@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.stream.Collectors;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
@@ -18,12 +19,14 @@ import org.apache.commons.lang3.StringUtils;
 import org.open4goods.config.yml.IcecatConfiguration;
 import org.open4goods.exceptions.TechnicalException;
 import org.open4goods.helper.IdHelper;
+import org.open4goods.model.data.Brand;
 import org.open4goods.model.icecat.IcecatCategory;
 import org.open4goods.model.icecat.IcecatCategoryFeatureGroup;
 import org.open4goods.model.icecat.IcecatFeature;
 import org.open4goods.model.icecat.IcecatFeatureGroup;
 import org.open4goods.model.icecat.IcecatLanguageHandler;
 import org.open4goods.model.icecat.IcecatModel;
+import org.open4goods.model.icecat.IcecatSupplier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xml.sax.InputSource;
@@ -47,6 +50,10 @@ import jakarta.annotation.PostConstruct;
 public class IcecatService {
 
 		private  Logger LOGGER = LoggerFactory.getLogger(IcecatService.class);
+		
+		
+		private BrandService brandService;
+		
 		private XmlMapper xmlMapper;
 		private IcecatConfiguration iceCatConfig;
 
@@ -68,22 +75,24 @@ public class IcecatService {
 		private RemoteFileCachingService fileCachingService;
 		private String remoteCachingFolder;
 	
-	public IcecatService(XmlMapper xmlMapper, IcecatConfiguration iceCatConfig, RemoteFileCachingService fileCachingService, String remoteCacheFolder) throws SAXException {
+	public IcecatService(XmlMapper xmlMapper, IcecatConfiguration iceCatConfig, RemoteFileCachingService fileCachingService, String remoteCacheFolder, BrandService brandService) throws SAXException {
 		super();
 		this.xmlMapper = xmlMapper;
 		this.iceCatConfig = iceCatConfig;
 		this.fileCachingService = fileCachingService;
 		this.remoteCachingFolder = remoteCacheFolder;
+		this.brandService = brandService;
 
 	}
 
 
 	@PostConstruct
 	public void icecatInit () throws TechnicalException {
-		loadFeatures();
-		loadCategoryFeatureList();
-		
+//		loadFeatures();
+//		loadCategoryFeatureList();
+		loadBrands();
 	}
+	
 	/**
 	 * Load features from the IceCat XML file.
 	 * @throws TechnicalException 
@@ -137,6 +146,54 @@ public class IcecatService {
 		 LOGGER.info("End loading of features from {}", iceCatConfig.getFeaturesListFileUri());
 	}
 
+	
+	/**
+	 * Load features from the IceCat XML file.
+	 * @throws TechnicalException 
+
+	 */
+
+	public void loadBrands() throws TechnicalException {
+		
+		// 1 - Download the file with basic auth
+		
+		// Unzip it
+		if (null == iceCatConfig.getBrandsListFileUri()) {
+			LOGGER.error("No brands list file uri configured");
+			return;
+		}
+		LOGGER.info("Getting brands file from {}", iceCatConfig.getBrandsListFileUri());
+		File icecatFile = getCachedFile(iceCatConfig.getBrandsListFileUri(), iceCatConfig.getUser(), iceCatConfig.getPassword());
+		
+
+		 try {
+			 List<IcecatSupplier> suppliers = xmlMapper.readValue(icecatFile, IcecatModel.class).getResponse().getSuppliersList().getSuppliers();
+			
+				for (IcecatSupplier supplier : suppliers) {
+					Brand brand = brandService.getBrandByName(supplier.getName());
+					if (null == brand) {
+						// The icecat brand has not been defined by YAML config, we add it
+						brand = new Brand();
+						brand.setName(supplier.getName());
+						brand.setLogo(supplier.getLogoHighPic());
+//						brand.setAka(supplier.getNames().stream().colect(Collectors.toSet()));
+					} else {
+						if (null == brand.getLogo()) {
+							// We update the logo if none was defined
+							brand.setLogo(supplier.getLogoHighPic());
+						}						
+					}
+					
+					// Updating the brand
+					brandService.saveBrand(brand);
+				}
+			
+			
+		} catch (Exception e) {
+			LOGGER.error("Error while loading features", e);
+		}
+		 LOGGER.info("End loading of features from {}", iceCatConfig.getFeaturesListFileUri());
+	}
 	
 	public void loadLanguages() throws TechnicalException {
 		

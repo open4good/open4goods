@@ -33,6 +33,7 @@ public class TestConfig {
     public IcecatService xmlMapper(@Autowired RemoteFileCachingService remoteFileCachingService) throws SAXException {
     	IcecatConfiguration c = new IcecatConfiguration();
     	// TODO : Not windows OK
+<<<<<<< Upstream, based on origin/main
         return new IcecatService(new XmlMapper(), c, remoteFileCachingService, "/tmp");
 =======
     public IcecatFeatureService xmlMapper(@Autowired RemoteFileCachingService remoteFileCachingService) {
@@ -48,6 +49,9 @@ public class TestConfig {
 =======
         return new IcecatService(new XmlMapper(), c, remoteFileCachingService, "/tmp");
 >>>>>>> 464b249 icecat
+=======
+        return new IcecatService(new XmlMapper(), c, remoteFileCachingService, "/tmp",null);
+>>>>>>> abed882 Brands : layout, icecat preloading, resolution mechanism against sustainalytics (first approach, buggy)
     }
     
     

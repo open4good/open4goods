@@ -82,9 +82,14 @@ attributeAggregationConfig:
     - MODELE
 
 
-
 brandConfig:
   brandsToRemove:
     - "NON COMMUNIQUE"
     - "NON COMMUNIQUÉ"
     - "INCONNU"  
+  brands:
+    - name: SAMSUNG
+    - name: LG
+      aka:
+       -LG1
+       -LG2 

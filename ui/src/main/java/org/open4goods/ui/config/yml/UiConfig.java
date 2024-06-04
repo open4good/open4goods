@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-import org.open4goods.config.BrandConfiguration;
+import org.open4goods.config.BrandsConfiguration;
 import org.open4goods.config.yml.BlogConfiguration;
 import org.open4goods.config.yml.DevModeConfiguration;
 import org.open4goods.config.yml.FeedbackConfiguration;
@@ -168,7 +168,7 @@ public class UiConfig {
 	 * Configuration for the brand service
 	 */
 
-	private BrandConfiguration brandConfig;
+	private BrandsConfiguration brandConfig;
 	
 	/**
 	 * The list of reversments (cashback) to ecologgical organisations
@@ -339,12 +339,12 @@ public class UiConfig {
 	}
 
 
-	public BrandConfiguration getBrandConfig() {
+	public BrandsConfiguration getBrandConfig() {
 		return brandConfig;
 	}
 
 
-	public void setBrandConfig(BrandConfiguration brandConfig) {
+	public void setBrandConfig(BrandsConfiguration brandConfig) {
 		this.brandConfig = brandConfig;
 	}
 
