@@ -1,6 +1,7 @@
 package org.open4goods.services;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -9,13 +10,19 @@ import java.util.Set;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.open4goods.config.yml.IcecatFeatureConfiguration;
+import org.open4goods.config.yml.IcecatConfiguration;
 import org.open4goods.exceptions.TechnicalException;
 import org.open4goods.helper.IdHelper;
+import org.open4goods.model.icecat.CategoryFeatureListHandler;
 import org.open4goods.model.icecat.IcecatFeature;
 import org.open4goods.model.icecat.IcecatModel;
+import org.open4goods.model.icecat.IcecatLanguageHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
+import org.xml.sax.XMLReader;
+import org.xml.sax.helpers.XMLReaderFactory;
 
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 
@@ -26,25 +33,37 @@ import jakarta.annotation.PostConstruct;
  * This service maps expose Icat features.
  * 
  */
-public class IcecatFeatureService {
+public class IcecatService {
 
-		private  Logger LOGGER = LoggerFactory.getLogger(IcecatFeatureService.class);
+		private  Logger LOGGER = LoggerFactory.getLogger(IcecatService.class);
 		private XmlMapper xmlMapper;
-		private IcecatFeatureConfiguration iceCatConfig;
+		private IcecatConfiguration iceCatConfig;
 
+
+		// For features
 		private Map<Long, IcecatFeature> featuresById = new HashMap<>();
 		private Map<String, Set<Long>> featuresByNames = new HashMap<>();
+		
+		
+		// For language
+		private Map<String, String> codeByLanguage;
+		private Map<String, String> languageByCode;
+		
+		
+		 // Créez un XMLReader
+		
+		
 		
 		private RemoteFileCachingService fileCachingService;
 		private String remoteCachingFolder;
 	
-	
-	public IcecatFeatureService(XmlMapper xmlMapper, IcecatFeatureConfiguration iceCatConfig, RemoteFileCachingService fileCachingService, String remoteCacheFolder) {
+	public IcecatService(XmlMapper xmlMapper, IcecatConfiguration iceCatConfig, RemoteFileCachingService fileCachingService, String remoteCacheFolder) throws SAXException {
 		super();
 		this.xmlMapper = xmlMapper;
 		this.iceCatConfig = iceCatConfig;
 		this.fileCachingService = fileCachingService;
 		this.remoteCachingFolder = remoteCacheFolder;
+
 	}
 
 	/**
@@ -52,7 +71,7 @@ public class IcecatFeatureService {
 	 * @throws TechnicalException 
 	 * TODO : Should be done in a separate thread 
 	 */
-	@PostConstruct
+
 	public void loadFeatures() throws TechnicalException {
 		
 		// 1 - Download the file with basic auth
@@ -62,6 +81,7 @@ public class IcecatFeatureService {
 			LOGGER.error("No features list file uri configured");
 			return;
 		}
+		LOGGER.info("Getting file from {}", iceCatConfig.getFeaturesListFileUri());
 		File icecatFile = getCachedFile(iceCatConfig.getFeaturesListFileUri(), iceCatConfig.getUser(), iceCatConfig.getPassword());
 		
 
@@ -98,6 +118,83 @@ public class IcecatFeatureService {
 		}
 		 LOGGER.info("End loading of features from {}", iceCatConfig.getFeaturesListFileUri());
 	}
+
+	
+	public void loadLanguages() throws TechnicalException {
+		
+		// 1 - Download the file with basic auth
+		
+		// Unzip it
+		if (null == iceCatConfig.getLanguageListFileUri()) {
+			LOGGER.error("No features list file uri configured");
+			return;
+		}
+		LOGGER.info("Getting file from {}", iceCatConfig.getLanguageListFileUri());
+		File icecatFile = getCachedFile(iceCatConfig.getLanguageListFileUri(), iceCatConfig.getUser(), iceCatConfig.getPassword());
+
+		 try {
+	
+			 XMLReader xmlReader = XMLReaderFactory.createXMLReader();
+			 
+			 
+			 // Créez une instance de votre gestionnaire
+			 IcecatLanguageHandler handler = new IcecatLanguageHandler();
+			 
+			 // Configurez le XMLReader pour utiliser votre gestionnaire
+			 xmlReader.setContentHandler(handler);
+			 
+			 // Parse le fichier XML
+			 FileInputStream inputStream = new FileInputStream(icecatFile);
+			 xmlReader.parse(new InputSource(inputStream));
+			 
+			 // Récupérez et affichez la map des languages
+			 this.languageByCode  = handler.getLanguageByCode();
+			 this.codeByLanguage  = handler.getCodeBylanguage();
+			 
+		 } catch (Exception e) {
+			LOGGER.error("Error while loading languages", e);
+		}
+		 LOGGER.info("End loading of features from {}", iceCatConfig.getFeaturesListFileUri());
+	}
+
+	@PostConstruct
+	public void loadCategoryFeatureList() throws TechnicalException {
+		
+		// 1 - Download the file with basic auth
+		
+		// Unzip it
+		if (null == iceCatConfig.getLanguageListFileUri()) {
+			LOGGER.error("No category features list file uri configured");
+			return;
+		}
+		
+		LOGGER.info("Getting file from {}", iceCatConfig.getCategoryFeatureListFileUri());
+		File icecatFile = getCachedFile(iceCatConfig.getCategoryFeatureListFileUri(), iceCatConfig.getUser(), iceCatConfig.getPassword());
+
+		 try {
+	
+			 XMLReader xmlReader = XMLReaderFactory.createXMLReader();
+			 
+			 
+			 // Créez une instance de votre gestionnaire
+			 CategoryFeatureListHandler handler = new CategoryFeatureListHandler();
+			 
+			 // Configurez le XMLReader pour utiliser votre gestionnaire
+			 xmlReader.setContentHandler(handler);
+			 
+			 // Parse le fichier XML
+			 FileInputStream inputStream = new FileInputStream(icecatFile);
+			 xmlReader.parse(new InputSource(inputStream));
+			 
+
+			 
+		 } catch (Exception e) {
+			LOGGER.error("Error while loading languages", e);
+		}
+		 LOGGER.info("End loading of features from {}", iceCatConfig.getFeaturesListFileUri());
+	}
+	
+	
 	
 
 	/**
@@ -105,7 +202,7 @@ public class IcecatFeatureService {
 	 * @param featureName
 	 * @return
 	 */
-	public Set<Long> resolve (String featureName) {		
+	public Set<Long> resolveFeatureName (String featureName) {		
 		String f = normalize(featureName);
 		return featuresByNames.get(f);		
 	}
