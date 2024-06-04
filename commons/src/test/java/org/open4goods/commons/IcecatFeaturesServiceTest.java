@@ -29,10 +29,14 @@ public class IcecatFeaturesServiceTest {
         
     	
 <<<<<<< Upstream, based on origin/main
+<<<<<<< Upstream, based on origin/main
     	assertTrue(featureService.resolveFeatureName("COULEUR").equals(""));
 =======
     	assertTrue(featureService.resolve("COULEUR").equals(""));
 >>>>>>> 666f12d First working taxonomy identification. But have to rework the design, (shared redis / scheduled loads)
+=======
+    	assertTrue(featureService.resolveFeatureName("COULEUR").equals(""));
+>>>>>>> 464b249 icecat
         
        
     }

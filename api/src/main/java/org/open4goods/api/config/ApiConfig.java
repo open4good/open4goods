@@ -122,9 +122,17 @@ public class ApiConfig {
 	
 	@Bean
 	@Autowired
+<<<<<<< Upstream, based on origin/main
 	IcecatService icecatFeatureService( RemoteFileCachingService fileCachingService) throws SAXException {
+=======
+	IcecatService icecatFeatureService( RemoteFileCachingService fileCachingService, String remoteCacheFolder) throws SAXException {
+>>>>>>> 464b249 icecat
 		// TODO : xmlMapper not injected because corruct the springdoc used one. Should use a @Primary derivation
+<<<<<<< Upstream, based on origin/main
 		return new IcecatService(new XmlMapper(), apiProperties.getIcecatFeatureConfig(), fileCachingService, apiProperties.remoteCachingFolder());
+=======
+		return new IcecatService(new XmlMapper(), apiProperties.getIcecatFeatureConfig(), fileCachingService, remoteCacheFolder);
+>>>>>>> 464b249 icecat
 	}
 	
 	@Bean
