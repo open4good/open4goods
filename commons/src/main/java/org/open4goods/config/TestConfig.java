@@ -29,6 +29,7 @@ public class TestConfig {
 
     @Bean
 <<<<<<< Upstream, based on origin/main
+<<<<<<< Upstream, based on origin/main
     public IcecatService xmlMapper(@Autowired RemoteFileCachingService remoteFileCachingService) throws SAXException {
     	IcecatConfiguration c = new IcecatConfiguration();
     	// TODO : Not windows OK
@@ -36,9 +37,17 @@ public class TestConfig {
 =======
     public IcecatFeatureService xmlMapper(@Autowired RemoteFileCachingService remoteFileCachingService) {
     	IcecatFeatureConfiguration c = new IcecatFeatureConfiguration();
+=======
+    public IcecatService xmlMapper(@Autowired RemoteFileCachingService remoteFileCachingService) throws SAXException {
+    	IcecatConfiguration c = new IcecatConfiguration();
+>>>>>>> 464b249 icecat
     	// TODO : Not windows OK
+<<<<<<< Upstream, based on origin/main
         return new IcecatFeatureService(new XmlMapper(), c, remoteFileCachingService, "/tmp");
 >>>>>>> 666f12d First working taxonomy identification. But have to rework the design, (shared redis / scheduled loads)
+=======
+        return new IcecatService(new XmlMapper(), c, remoteFileCachingService, "/tmp");
+>>>>>>> 464b249 icecat
     }
     
     

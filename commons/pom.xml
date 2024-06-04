@@ -26,6 +26,10 @@
 				
 			</plugin>
 
+
+<!-- 
+
+
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>jaxb2-maven-plugin</artifactId>
@@ -54,6 +58,7 @@
 					<outputDirectory>${project.basedir}/src/generated/java</outputDirectory>
 				</configuration>
 			</plugin>
+-->
 
 
 <!-- 
