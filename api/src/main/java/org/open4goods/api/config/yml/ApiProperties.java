@@ -9,7 +9,7 @@ import org.apache.commons.lang3.ArrayUtils;
 import org.open4goods.config.BrandConfiguration;
 import org.open4goods.config.yml.DevModeConfiguration;
 import org.open4goods.config.yml.GithubConfiguration;
-import org.open4goods.config.yml.IcecatFeatureConfiguration;
+import org.open4goods.config.yml.IcecatConfiguration;
 import org.open4goods.config.yml.ui.DescriptionsAggregationConfig;
 import org.open4goods.crawler.config.yml.FetcherProperties;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -166,13 +166,13 @@ public class ApiProperties {
 	/**
 	 * The configuration for icecat
 	 */
-	private IcecatCompletionConfig icecatConfig = new IcecatCompletionConfig();
+	private IcecatCompletionConfig icecatCompletionConfig = new IcecatCompletionConfig();
 	
 	/**
 	 * The configuration for icecat features
      
 	 */
-	private IcecatFeatureConfiguration icecatFeatureConfig = new IcecatFeatureConfiguration();
+	private IcecatConfiguration icecatFeatureConfig = new IcecatConfiguration();
 	
 	
 	public AmazonCompletionConfig getAmazonConfig() {
@@ -502,25 +502,25 @@ public class ApiProperties {
 
 
 
-	public IcecatCompletionConfig getIcecatConfig() {
-		return icecatConfig;
+	public IcecatCompletionConfig getIcecatCompletionConfig() {
+		return icecatCompletionConfig;
 	}
 
 
 
-	public void setIcecatConfig(IcecatCompletionConfig icecatConfig) {
-		this.icecatConfig = icecatConfig;
+	public void setIcecatCompletionConfig(IcecatCompletionConfig icecatConfig) {
+		this.icecatCompletionConfig = icecatConfig;
 	}
 
 
 
-	public IcecatFeatureConfiguration getIcecatFeatureConfig() {
+	public IcecatConfiguration getIcecatFeatureConfig() {
 		return icecatFeatureConfig;
 	}
 
 
 
-	public void setIcecatFeatureConfig(IcecatFeatureConfiguration icecatFeatureConfig) {
+	public void setIcecatFeatureConfig(IcecatConfiguration icecatFeatureConfig) {
 		this.icecatFeatureConfig = icecatFeatureConfig;
 	}
 

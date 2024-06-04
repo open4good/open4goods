@@ -32,7 +32,7 @@ import org.open4goods.services.DataSourceConfigService;
 import org.open4goods.services.EvaluationService;
 import org.open4goods.services.GoogleTaxonomyService;
 import org.open4goods.services.Gs1PrefixService;
-import org.open4goods.services.IcecatFeatureService;
+import org.open4goods.services.IcecatService;
 import org.open4goods.services.StandardiserService;
 import org.open4goods.services.VerticalsConfigService;
 import org.open4goods.services.textgen.BlablaService;
@@ -80,7 +80,7 @@ public class AggregationFacadeService {
 
 	private StandardAggregator realtimeAggregator;
 	
-	private IcecatFeatureService icecatFeatureService;
+	private IcecatService icecatFeatureService;
 	
 	public AggregationFacadeService(EvaluationService evaluationService,
 			StandardiserService standardiserService,
@@ -91,7 +91,7 @@ public class AggregationFacadeService {
 			BrandService brandService,
 			GoogleTaxonomyService taxonomyService,
 			BlablaService blablaService,
-			IcecatFeatureService icecatFeatureService
+			IcecatService icecatFeatureService
 			) {
 		super();
 		this.evaluationService = evaluationService;
