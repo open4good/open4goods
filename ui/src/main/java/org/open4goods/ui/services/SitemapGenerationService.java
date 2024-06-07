@@ -49,10 +49,10 @@ public class SitemapGenerationService {
 	private static final Logger LOGGER = LoggerFactory.getLogger(SitemapGenerationService.class);
 
 	private static final String SITEMAP_NAME_ROOT_PAGES = "main-pages.xml";
-	private static final String SITEMAP_NAME_PRODUCT_PAGES = "product-pages.xml";
-	private static final String SITEMAP_NAME_BLOG_PAGES = "blog-pages.xml";
+	private static final String SITEMAP_NAME_PRODUCT_PAGES = "product-wiki-pages.xml";
+	private static final String SITEMAP_NAME_BLOG_PAGES = "blog-posts.xml";
 	private static final String SITEMAP_NAME_WIKI_PAGES = "wiki-pages.xml";
-	private static final String SITEMAP_NAME_VERTICAL_PAGES = "verticals-pages.xml";	
+	private static final String SITEMAP_NAME_VERTICAL_PAGES = "category-pages.xml";	
 	
 	private ProductRepository aggregatedDataRepository;
 	private UiConfig uiConfig;
