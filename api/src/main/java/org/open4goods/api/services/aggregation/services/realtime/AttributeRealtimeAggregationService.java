@@ -61,7 +61,6 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 		if (!data.getAttributes().getAggregatedAttributes().keySet().containsAll(vConf.getAttributesConfig().getMandatory())) {
 			// Missing attributes.
 			dedicatedLogger.warn("Missing mandatory attributes for product {}. Will be unmatched from vertical {}", data.getId(), vConf.getId());
-			data.setExcluded(true);			
 		} else {
 			data.setExcluded(false);			
 		}
@@ -69,15 +68,7 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 		
 		// Attributing taxomy to attributes
 		data.getAttributes().getUnmapedAttributes().forEach(a -> {
-<<<<<<< Upstream, based on origin/main
-<<<<<<< Upstream, based on origin/main
 			Set<Long> icecatTaxonomyIds = featureService.resolveFeatureName(a.getName());
-=======
-			Set<Long> icecatTaxonomyIds = featureService.resolve(a.getName());
->>>>>>> 666f12d First working taxonomy identification. But have to rework the design, (shared redis / scheduled loads)
-=======
-			Set<Long> icecatTaxonomyIds = featureService.resolveFeatureName(a.getName());
->>>>>>> 464b249 icecat
 			if (null != icecatTaxonomyIds) {
 				dedicatedLogger.info("Found icecat taxonomy for {} : {}", a.getName(), icecatTaxonomyIds);
 				a.setIcecatTaxonomyIds(icecatTaxonomyIds );

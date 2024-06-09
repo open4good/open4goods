@@ -27,72 +27,7 @@
 			</plugin>
 
 
-			<!-- 
-
-
-			<plugin>
-				<groupId>org.codehaus.mojo</groupId>
-				<artifactId>jaxb2-maven-plugin</artifactId>
-				<version>3.2.0</version>
-				<executions>
-					<execution>
-						<goals>
-							<goal>xjc</goal>
-						</goals>
-					</execution>
-				</executions>
-				<configuration>
-					
-				   <locale>en</locale>
-	
-					  <xjbSources>
-			            <xjbSource>src/main/resources/xjb/icecat.xjb</xjbSource>
-			        </xjbSources>
-			        
-					<sources>
-						<source>src/main/resources/xsd/icecat.xsd</source>
-					</sources>
-		            <packageName>org.open4goods.commons.model</packageName>
-
-                    
-					<outputDirectory>${project.basedir}/src/generated/java</outputDirectory>
-				</configuration>
-			</plugin>
--->
-
-
-<!-- 
-
-
-			<plugin>
-				<groupId>org.codehaus.mojo</groupId>
-				<artifactId>jaxb2-maven-plugin</artifactId>
-				<version>3.2.0</version>
-				<executions>
-					<execution>
-						<goals>
-							<goal>xjc</goal>
-						</goals>
-					</execution>
-				</executions>
-				<configuration>
-					
-				   <locale>en</locale>
-	
-					  <xjbSources>
-			            <xjbSource>src/main/resources/xjb/icecat.xjb</xjbSource>
-			        </xjbSources>
-			        
-					<sources>
-						<source>src/main/resources/xsd/icecat.xsd</source>
-					</sources>
-		            <packageName>org.open4goods.commons.model</packageName>
-
-                    
-					<outputDirectory>${project.basedir}/src/generated/java</outputDirectory>
-				</configuration>
-			</plugin>
--->
+		
 
 		</plugins>
 	</build>
@@ -106,16 +41,6 @@
 			<version>${global.version}</version>
 		</dependency>
 
-
-		<dependency>
-			<groupId>org.glassfish.jaxb</groupId>
-			<artifactId>jaxb-runtime</artifactId>
-		</dependency>
-
-		<dependency>
-			<groupId>org.glassfish.jaxb</groupId>
-			<artifactId>jaxb-runtime</artifactId>
-		</dependency>
 
 		<dependency>
 			<groupId>com.ibm.icu</groupId>
