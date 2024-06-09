@@ -2,18 +2,20 @@ package org.open4goods.model.icecat;
 import java.net.URI;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 
+@JsonIgnoreProperties(value = { "Versions","Keywords","VirtualCategories" })
 public class IcecatCategory {
     @JacksonXmlProperty(isAttribute = true)
     private String UNCATID;
 
     @JacksonXmlProperty(isAttribute = true)
-    private Boolean Searchable;
+    private String Searchable;
 
     @JacksonXmlProperty(isAttribute = true)
-    private Boolean Visible;
+    private String Visible;
 
     @JacksonXmlProperty(isAttribute = true)
     private Integer Score;
@@ -69,19 +71,21 @@ public class IcecatCategory {
 		UNCATID = uNCATID;
 	}
 
-	public Boolean getSearchable() {
+	public String getSearchable() {
 		return Searchable;
 	}
 
-	public void setSearchable(Boolean searchable) {
+	public void setSearchable(String searchable) {
 		Searchable = searchable;
 	}
 
-	public Boolean getVisible() {
+
+
+	public String getVisible() {
 		return Visible;
 	}
 
-	public void setVisible(Boolean visible) {
+	public void setVisible(String visible) {
 		Visible = visible;
 	}
 
