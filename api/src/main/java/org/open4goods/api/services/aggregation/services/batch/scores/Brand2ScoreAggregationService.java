@@ -1,15 +1,16 @@
 package org.open4goods.api.services.aggregation.services.batch.scores;
 
 import org.apache.commons.lang3.StringUtils;
-import org.open4goods.config.yml.ui.AttributesConfig;
 import org.open4goods.config.yml.ui.VerticalConfig;
 import org.open4goods.exceptions.ValidationException;
 import org.open4goods.model.data.Score;
 import org.open4goods.model.product.Product;
+import org.open4goods.services.BrandService;
 import org.slf4j.Logger;
 
 /**
- * Create a score based on brand sustainality evaluations 
+ * Create a score based on brand sustainality evaluations
+ * TODO : Needs evolution to handle multiple brand score providers. (have to go through an intermediate score) 
  * @author goulven
  *
  */
@@ -17,11 +18,16 @@ public class Brand2ScoreAggregationService extends AbstractScoreAggregationServi
 
 	private static final String BRAND_SUSTAINABILITY_SCORENAME = "BRAND_SUSTAINABILITY";
 
-	public Brand2ScoreAggregationService(final Logger logger) {
+	private BrandService brandService;
+	
+	public Brand2ScoreAggregationService(final Logger logger, BrandService brandService) {
 		super(logger);
+		this.brandService = brandService;
 	}
 
 
+	
+	
 
 	@Override
 	public void onProduct(Product data, VerticalConfig vConf) {
@@ -33,7 +39,11 @@ public class Brand2ScoreAggregationService extends AbstractScoreAggregationServi
 		
 		try {
 			Double score = generateScoreFromBrand(data.brand());
-
+			if (null == score) {
+				dedicatedLogger.error("No score found for brand {}",data.brand());
+				return;
+			}
+			
 			// Processing cardinality
 			incrementCardinality(BRAND_SUSTAINABILITY_SCORENAME,score);			
 			Score s = new Score(BRAND_SUSTAINABILITY_SCORENAME, score);
@@ -50,15 +60,8 @@ public class Brand2ScoreAggregationService extends AbstractScoreAggregationServi
 	// TODO : complete with real datas
 	private Double generateScoreFromBrand(String brand) {
 		
-		double s;
-		
-		switch (brand) {
-		case "SAMSUNG" -> s = 5.0;
-		case "LG" -> s = 4.0;
-		default -> s = Math.random() * 10;
-		}
-		
-		return s;
+		// TODO : involve when multiple brands score providers
+		return brandService.getBrandScore(brand,"sustainalytics.com");
 	}
 
 

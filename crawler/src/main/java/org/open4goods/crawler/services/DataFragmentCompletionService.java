@@ -39,7 +39,6 @@ public class DataFragmentCompletionService {
 
 
 
-
 	/**
 	 * DataFragment completion
 	 * @param o
@@ -126,7 +125,8 @@ public class DataFragmentCompletionService {
 		///////////////////////////////
 		
 		if (datasourceProperties.isBrandScore()) {
-			Attribute score = o.getAttributes().stream().filter(e-> e.getName().equals("SCORE")).findFirst().get();
+			o.setBrandFragment(true);
+			Attribute score = o.getAttributes().stream().filter(e-> e.getName().equals("SCORE")).findFirst().orElse(null);
 			if (null != score) {
 				LOGGER.info("Found a brand score for brand {} : {}",o.brand(),score.getRawValue());
 				brandService.addBrandScore(o.brand(), datasourceProperties, score.getRawValue());								

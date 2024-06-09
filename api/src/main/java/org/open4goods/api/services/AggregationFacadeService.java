@@ -280,7 +280,7 @@ public class AggregationFacadeService {
 		
 		services.add(new CleanScoreAggregationService(logger));
 		services.add(new Attribute2ScoreAggregationService(logger));
-		services.add(new Brand2ScoreAggregationService( logger));
+		services.add(new Brand2ScoreAggregationService( logger, brandService));
 		services.add(new DataCompletion2ScoreAggregationService(logger));
 		services.add(new EcoScoreAggregationService( logger));
 

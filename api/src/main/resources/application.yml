@@ -35,9 +35,6 @@ spring:
   threads:
     virtual:
       enabled: true
-<<<<<<< Upstream, based on origin/main
-            
-=======
 
 springdoc:
   swagger-ui:
@@ -55,9 +52,7 @@ langchain4j:
       log-requests: false
       log-responses: false
       
-      
-                  
->>>>>>> 666f12d First working taxonomy identification. But have to rework the design, (shared redis / scheduled loads)
+
 management:
   health:
     diskspace:
