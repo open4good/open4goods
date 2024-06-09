@@ -1,5 +1,6 @@
 package org.open4goods.services;
 
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileWriter;
@@ -11,7 +12,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.stream.Collectors;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
@@ -260,11 +260,7 @@ public class IcecatService {
 			LOGGER.info("Start generating mimified version");
 			icecatMimified.delete();
 
-<<<<<<< Upstream, based on origin/main
-			 
->>>>>>> 464b249 icecat
-=======
-			// Starting file minification
+// Starting file minification
 			
 			AtomicBoolean inMeasure= new AtomicBoolean(false);
 			try {
