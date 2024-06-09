@@ -13,8 +13,8 @@ class IcecatDescription {
 	@JacksonXmlProperty(isAttribute = true)
 	private String Updated;
 
-	@JacksonXmlText
-	private String text;
+	@JacksonXmlProperty(isAttribute = true)
+	private String Value;
 
 	public String getID() {
 		return ID;
@@ -40,11 +40,13 @@ class IcecatDescription {
 		this.Updated = Updated;
 	}
 
-	public String getText() {
-		return text;
+	public String getValue() {
+		return Value;
 	}
 
-	public void setText(String text) {
-		this.text = text;
+	public void setValue(String value) {
+		Value = value;
 	}
+
+
 }

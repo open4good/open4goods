@@ -5,7 +5,9 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.net.URI;
 import java.nio.file.Files;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -20,12 +22,14 @@ import org.open4goods.config.yml.IcecatConfiguration;
 import org.open4goods.exceptions.TechnicalException;
 import org.open4goods.helper.IdHelper;
 import org.open4goods.model.data.Brand;
+import org.open4goods.model.data.FeatureGroup;
 import org.open4goods.model.icecat.IcecatCategory;
 import org.open4goods.model.icecat.IcecatCategoryFeatureGroup;
 import org.open4goods.model.icecat.IcecatFeature;
 import org.open4goods.model.icecat.IcecatFeatureGroup;
 import org.open4goods.model.icecat.IcecatLanguageHandler;
 import org.open4goods.model.icecat.IcecatModel;
+import org.open4goods.model.icecat.IcecatParentCategory;
 import org.open4goods.model.icecat.IcecatSupplier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -69,7 +73,8 @@ public class IcecatService {
 		
 		
 		 // Créez un XMLReader
-		
+		private Map<Integer,List<FeatureGroup>> featureGroupsByCategoryId = new HashMap<>();
+		private Map<Integer, IcecatCategory> categoriesById = new HashMap<>();
 		
 		
 		private RemoteFileCachingService fileCachingService;
@@ -88,9 +93,13 @@ public class IcecatService {
 
 	@PostConstruct
 	public void icecatInit () throws TechnicalException {
-//		loadFeatures();
-//		loadCategoryFeatureList();
-		loadBrands();
+		loadCategories();
+		loadCategoryFeatureList();
+
+		
+		//		loadFeatures();
+//		loadBrands();
+//		loadLanguages();
 	}
 	
 	/**
@@ -132,9 +141,9 @@ public class IcecatService {
                     fIds.add(id);
                     featuresByNames.put(val, fIds);
 
-                    if (fIds.size() > 1) {
-                    	LOGGER.info("Feature name {} map's multiple features ({}) ", name.getValue(), fIds);
-                    }
+//                    if (fIds.size() > 1) {
+//                    	LOGGER.debug("Feature name {} map's multiple features ({}) ", name.getValue(), fIds);
+//                    }
 
                 });
 			});
@@ -144,6 +153,40 @@ public class IcecatService {
 			LOGGER.error("Error while loading features", e);
 		}
 		 LOGGER.info("End loading of features from {}", iceCatConfig.getFeaturesListFileUri());
+	}
+
+	
+	
+	public void loadCategories() throws TechnicalException {
+
+		// 1 - Download the file with basic auth
+
+		// Unzip it
+		if (null == iceCatConfig.getCategoriesListFileUri()) {
+			LOGGER.error("No categories list file uri configured");
+			return;
+		}
+		LOGGER.info("Getting file from {}", iceCatConfig.getCategoriesListFileUri());
+		File icecatFile = getCachedFile(iceCatConfig.getCategoriesListFileUri(), iceCatConfig.getUser(), iceCatConfig.getPassword());
+
+		try {
+			List<IcecatCategory> categories = xmlMapper.readValue(icecatFile, IcecatModel.class).getResponse()
+					.getCategoryList().getCategories();
+
+			categories.forEach(category -> {
+				List<IcecatFeature> features = category.getFeatures();
+				category.getCategoryFeatureGroups();
+				category.getDescriptions();
+				category.getID();
+				category.getLowPic();
+				categoriesById.put(category.getID(), category);
+
+			});
+
+		} catch (Exception e) {
+			LOGGER.error("Error while loading categories", e);
+		}
+		LOGGER.info("End loading of categories from {}", iceCatConfig.getCategoriesListFileUri());
 	}
 
 	
@@ -237,7 +280,7 @@ public class IcecatService {
 		// 1 - Download the file with basic auth
 		
 		// Unzip it
-		if (null == iceCatConfig.getLanguageListFileUri()) {
+		if (null == iceCatConfig.getCategoryFeatureListFileUri()) {
 			LOGGER.error("No category features list file uri configured");
 			return;
 		}
@@ -293,14 +336,15 @@ public class IcecatService {
 					}
 				});
 				
+				LOGGER.info("End generating mimified version : {} ", icecatMimified.getAbsolutePath());
+				
+				LOGGER.info("Cleaning up the uncompressed file");
+				//TODO
+//			icecatFile.delete();
 				IOUtils.closeQuietly(writer);
 			} catch (IOException e) {
 				LOGGER.error("Error writing file", e);
 			}
-			LOGGER.info("End generating mimified version : {} ", icecatMimified.getAbsolutePath());
-			
-			LOGGER.info("Cleaning up the uncompressed file");
-//			icecatFile.delete();
 		}
 		
 		///////////////////////////
@@ -321,45 +365,38 @@ public class IcecatService {
 
 				// The ID of the category
 				 
-				 
-				 
-				 
-				 
-				Integer catId = category.getID();
-				category.getLowPic();
-				category.getParentCategory();
-				
-				
-				
-				
+				 Integer catId = category.getID();
+				 IcecatCategory fullCategory = categoriesById.get(catId);
+				 fullCategory.setFeatures(category.getFeatures());
+				 fullCategory.setCategoryFeatureGroups(category.getCategoryFeatureGroups());
 				
 				for (IcecatFeature feature : category.getFeatures()) {
-					 feature.getCategoryFeature_ID();
-					 feature.getCategoryFeatureGroup_ID();
-					 feature.getDefaultDisplayUnit();
-					 feature.getID();
-					 
-					 featuresById.get(Long.valueOf(feature.getID()));
-					 feature.getNames();
+					IcecatFeature fullFeature = featuresById.get(Long.valueOf(feature.getID()));
+					int categoryFeatureId =    feature.getCategoryFeature_ID();
+					int categoryFeatureGroupId = feature.getCategoryFeatureGroup_ID();
+					
+					// Update the feature
+					fullFeature.setCategoryFeature_ID(categoryFeatureId);
+			
+					FeatureGroup fg = new FeatureGroup();
+					fg.setCategoryFeatureId(categoryFeatureId);
+					fg.setCategoryFeatureGroupId(categoryFeatureGroupId);
+					
+					featureGroupsByCategoryId.computeIfAbsent(catId, k -> new ArrayList<>()).add(fg);
 				 }
 				 
-				 for (IcecatCategoryFeatureGroup catFeatGroup :  category.getCategoryFeatureGroups()) {
-					 
-						catFeatGroup.getFeatureGroup();
-//						catFeatGroup.feat
-						for (IcecatFeatureGroup featureGroup :  catFeatGroup.getFeatureGroups()) {
-
-							featureGroup.getID();
-//							featureGroup.
-//							for (IcecatFeature feature : featureGroup. )
-							featureGroup.getNames();
-						
-						}
-				 }
-
-
-					System.out.println(category);
-				}
+//				 for (IcecatCategoryFeatureGroup catFeatGroup :  category.getCategoryFeatureGroups()) {
+//						String fGroup = catFeatGroup.getFeatureGroup();
+//						Integer fGroupId = catFeatGroup.getID();
+////						catFeatGroup.feat
+//						for (IcecatFeatureGroup featureGroup :  catFeatGroup.getFeatureGroups()) {
+//							featureGroup.getID();
+////							featureGroup.
+////							for (IcecatFeature feature : featureGroup. )
+//							featureGroup.getNames();
+//						}
+//				 }
+			}
 					
 		 } catch (Exception e) {
 			LOGGER.error("Error while loading languages", e);
