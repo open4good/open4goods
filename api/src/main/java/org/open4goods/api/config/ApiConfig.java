@@ -122,14 +122,9 @@ public class ApiConfig {
 	
 	@Bean
 	@Autowired
-<<<<<<< Upstream, based on origin/main
-	IcecatService icecatService( RemoteFileCachingService fileCachingService) throws SAXException {
-		return new IcecatService(new XmlMapper(), apiProperties.getIcecatFeatureConfig(), fileCachingService, apiProperties.remoteCachingFolder());
-=======
 	IcecatService icecatFeatureService( RemoteFileCachingService fileCachingService, BrandService brandService) throws SAXException {
 		// TODO : xmlMapper not injected because corruct the springdoc used one. Should use a @Primary derivation
 		return new IcecatService(new XmlMapper(), apiProperties.getIcecatFeatureConfig(), fileCachingService, apiProperties.remoteCachingFolder(), brandService);
->>>>>>> abed882 Brands : layout, icecat preloading, resolution mechanism against sustainalytics (first approach, buggy)
 	}
 	
 	@Bean
