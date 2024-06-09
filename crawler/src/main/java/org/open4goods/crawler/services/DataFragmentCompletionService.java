@@ -133,10 +133,6 @@ public class DataFragmentCompletionService {
 			} else {
 				LOGGER.warn("Empty brand score found for brand {} ",o.brand());
 			}
-			
-			
-			
-			
 		}
 	}
 

@@ -94,6 +94,14 @@ public class BatchController {
 	}
 
 	
+	@PostMapping(path="/score/verticals/")
+	@Operation(summary="Create or update a vertical with a given config name. Can be long time processing")
+	public String scoreFromName( @RequestParam @NotBlank final String verticalConfig ) throws InvalidParameterException, JsonParseException, JsonMappingException, IOException, InterruptedException{
+		
+		batchService. score(verticalConfigService.getConfigById(verticalConfig));
+		return "done";
+	}
+	
 	@GetMapping("/full/verticals")
 	@Operation(summary="Update all verticals (sanitisation + launch the scheduled batch that score all verticals)")
 	public void fullVerticals() throws InvalidParameterException, IOException, InterruptedException {

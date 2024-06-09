@@ -35,7 +35,7 @@ public class BrandScore {
 	public BrandScore(String datasourceName, String brandName, String scoreValue) {
 		super();
 		this.datasourceName = datasourceName;
-		this.brandName = brandName;
+		this.brandName = brandName.toLowerCase().trim();
 		this.id=id(datasourceName, brandName);
 		this.lastUpdate = System.currentTimeMillis();
 		this.scoreValue = scoreValue;

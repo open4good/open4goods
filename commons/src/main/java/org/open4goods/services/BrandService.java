@@ -242,6 +242,8 @@ public class BrandService {
 	public Double getBrandScore(String brand, String datasourceName) {
 		Double score = null;
 		
+		brand = brand.trim().toLowerCase();
+		
 		// 1 : Trying a direct resolution
 		// TODO : With a find byid
 		
@@ -260,7 +262,7 @@ public class BrandService {
 		if (null == score) {
 			// Trying a prefix resolution
 			logger.info("Trying a prefix resolution for brand {} and datasource {}", brand, datasourceName);
-			results = brandRepository.findByDatasourceNameAndBrandNameIsStartingWith(datasourceName, bName );
+			results = brandRepository.findByDatasourceNameAndBrandNameStartingWith(datasourceName, bName );
 			score = handleExtractionResult(brand, datasourceName, score, results);
 			if (null != score) {				
 				logger.info("Score found with a prefix resolution for brand {} and datasource {}", brand, datasourceName);
@@ -270,7 +272,7 @@ public class BrandService {
 		if (null == score) {
 			// Trying a contains resolution
 			logger.info("Trying a contains resolution for brand {} and datasource {}", brand, datasourceName);
-			results = brandRepository.findByDatasourceNameAndBrandNameIsContaining(datasourceName, bName);
+			results = brandRepository.findByDatasourceNameAndBrandNameLike(datasourceName, bName);
 			score = handleExtractionResult(brand, datasourceName, score, results);
 			if (null != score) {
 				logger.info("Score found with a contains resolution for brand {} and datasource {}", brand,	datasourceName);
@@ -278,7 +280,10 @@ public class BrandService {
 		}
 		
 		if (null == score) {
-			logger.warn("No score found for brand {} and datasource {}", brand, datasourceName);
+			//TODO : Log to vertical reporter
+			logger.warn("No score found for brand {} and datasource {}, was {} possibilities", brand, datasourceName,results.size());
+		} else {
+			logger.info("Score found for brand {} and datasource {} : {}", brand, datasourceName, score);
 		}
 		return score;
 	}
@@ -287,7 +292,10 @@ public class BrandService {
 		if (results.size() == 1) {
 			score = Double.valueOf(results.get(0).getScoreValue());
 		} else if (results.size() > 1) {
-			logger.warn("Multiple scores found for brand {} and datasource {}", brand, datasourceName);
+			// TODO : log to vertical reporter
+			logger.warn("Multiple scores found for brand {} and datasource {}. Please consider a specific matching defintion in the vertical", brand, datasourceName);
+			logger.warn("\n  - {}\n    - {}", brand, StringUtils.join(results.stream().map(e->e.getBrandName()).toArray(), "\n    - "));
+			logger.warn("");
 		} else {
 			logger.warn("No score found for brand {} and datasource {}", brand, datasourceName);
 		}
