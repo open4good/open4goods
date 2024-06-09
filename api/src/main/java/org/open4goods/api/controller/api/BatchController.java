@@ -82,7 +82,7 @@ public class BatchController {
 	}
 
 
-	@PostMapping(path="/batch/verticals/")
+	@PostMapping(path="/full/verticals/")
 	@Operation(summary="Create or update a vertical with a given config name. Can be long time processing")
 	public String fullUpdateFromName( @RequestParam @NotBlank final String verticalConfig ) throws InvalidParameterException, JsonParseException, JsonMappingException, IOException, InterruptedException{
 		
@@ -94,15 +94,25 @@ public class BatchController {
 	}
 
 	
-	@GetMapping("/batch/verticals")
+	@GetMapping("/full/verticals")
 	@Operation(summary="Update all verticals (sanitisation + launch the scheduled batch that score all verticals)")
-	public void scoreVerticals() throws InvalidParameterException, IOException, InterruptedException {
+	public void fullVerticals() throws InvalidParameterException, IOException, InterruptedException {
 		
 		batchService.sanitizeAllVerticals();	
 		Thread.sleep(5000);
 		batchService.scoreAll();
 	}
 
+	
+	@GetMapping("/score/verticals")
+	@Operation(summary="Score all verticals (sanitisation + launch the scheduled batch that score all verticals)")
+	public void scoreVerticals() throws InvalidParameterException, IOException, InterruptedException {
+		batchService.scoreAll();
+	}
+	
+	
+	
+	
 	@GetMapping("/sanitisation")
 	@Operation(summary="Launch sanitisation of all products")
 	public void sanitize() throws InvalidParameterException, IOException {
