@@ -146,6 +146,16 @@ verticalFilters:
 #  - "BRAND-SUSTAINABILITY"
 
 
+##############################################################################
+# We cannot always identify manually what comppany operates a brand, and there is often 
+# confilicts or multiple possibilities that need to be manually adressed. (eg. samsung a lot of activities / brand through different companies)
+#
+##############################################################################
+
+brandsCompanyMapping:
+  SAMSUNG: "Samsung Electronics Co., Ltd."
+
+
 
 
 ####################################################################################

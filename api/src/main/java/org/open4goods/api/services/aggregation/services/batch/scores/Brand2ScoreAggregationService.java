@@ -6,6 +6,7 @@ import org.open4goods.exceptions.ValidationException;
 import org.open4goods.model.data.Score;
 import org.open4goods.model.product.Product;
 import org.open4goods.services.BrandService;
+import org.open4goods.services.VerticalsConfigService;
 import org.slf4j.Logger;
 
 /**
@@ -20,9 +21,12 @@ public class Brand2ScoreAggregationService extends AbstractScoreAggregationServi
 
 	private BrandService brandService;
 	
-	public Brand2ScoreAggregationService(final Logger logger, BrandService brandService) {
+	private VerticalsConfigService verticalsConfigService;
+	
+	public Brand2ScoreAggregationService(final Logger logger, BrandService brandService, VerticalsConfigService verticalsConfigService) {
 		super(logger);
 		this.brandService = brandService;
+		this.verticalsConfigService = verticalsConfigService;
 	}
 
 
@@ -38,7 +42,12 @@ public class Brand2ScoreAggregationService extends AbstractScoreAggregationServi
 		}
 		
 		try {
-			Double score = generateScoreFromBrand(data.brand());
+			VerticalConfig vertical = verticalsConfigService.getConfigByIdOrDefault(data.getVertical());
+			
+			String company = vertical.resolveCompany(data.brand());
+			
+			// TODO : Handle aggragtion, for multiple brand RSE score providers
+			Double score = brandService.getBrandScore(company,"sustainalytics.com");
 			if (null == score) {
 				dedicatedLogger.error("No score found for brand {}",data.brand());
 				return;
@@ -55,16 +64,4 @@ public class Brand2ScoreAggregationService extends AbstractScoreAggregationServi
 		
 		
 	}
-
-
-	// TODO : complete with real datas
-	private Double generateScoreFromBrand(String brand) {
-		
-		// TODO : involve when multiple brands score providers
-		return brandService.getBrandScore(brand,"sustainalytics.com");
-	}
-
-
-
-
 }
