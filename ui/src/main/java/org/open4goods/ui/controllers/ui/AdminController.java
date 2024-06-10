@@ -4,6 +4,7 @@ import org.open4goods.dao.ProductRepository;
 import org.open4goods.exceptions.ResourceNotFoundException;
 import org.open4goods.model.constants.RolesConstants;
 import org.open4goods.model.product.Product;
+import org.open4goods.services.ImageGenerationService;
 import org.open4goods.services.VerticalsConfigService;
 import org.open4goods.services.ai.AiService;
 import org.open4goods.ui.config.yml.UiConfig;
@@ -15,6 +16,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.ModelAndView;
 
@@ -35,7 +37,6 @@ public class AdminController {
 	// The siteConfig
 	private final UiConfig config;
 
-	@Autowired
 	private VerticalsConfigService configService;
 
 	private final VerticalsConfigService verticalService;
@@ -46,13 +47,16 @@ public class AdminController {
 
 	private ProductRepository repository;
 
+	private ImageGenerationService imageGenerationService;
+
 	public AdminController(UiConfig config, VerticalsConfigService verticalsConfigService, AiService aiService,
-			ProductRepository repository, SitemapGenerationService sitemapService) {
+			ProductRepository repository, SitemapGenerationService sitemapService, ImageGenerationService imageGenerationService) {
 		this.config = config;
 		this.verticalService = verticalsConfigService;
 		this.sitemapService = sitemapService;
 		this.aiService = aiService;
 		this.repository = repository;
+		this.imageGenerationService = imageGenerationService;
 	}
 
 	//////////////////////////////////////////////////////////////
@@ -121,5 +125,13 @@ public class AdminController {
 		mv.setStatus(HttpStatus.MOVED_TEMPORARILY);
 		return mv;
 	}
+
+//	@GetMapping("/reloadVerticalImage/{verticalId}")
+//	@PreAuthorize("hasAuthority('"+RolesConstants.ROLE_XWIKI_ALL+"')")
+//	public ModelAndView reloadVerticalImage (@PathVariable(name= "verticalId") String verticalId) {
+//	imageGenerationService.generateImage(verticalId);
+//
+//
+//	}
 
 }

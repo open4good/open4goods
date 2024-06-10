@@ -2,6 +2,7 @@
 package org.open4goods.ui.config;
 
 import java.io.IOException;
+import java.time.Duration;
 import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
 
@@ -26,6 +27,9 @@ import org.open4goods.ui.services.todo.TodoService;
 import org.open4goods.xwiki.services.XwikiFacadeService;
 import org.springframework.ai.image.ImageClient;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.web.client.ClientHttpRequestFactories;
+import org.springframework.boot.web.client.ClientHttpRequestFactorySettings;
+import org.springframework.boot.web.client.RestClientCustomizer;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.caffeine.CaffeineCache;
 import org.springframework.cache.support.SimpleCacheManager;
@@ -142,7 +146,15 @@ public class AppConfig {
 //	                .retriever(retriever)
 	                .build();
 	    }
-	 
+
+	/** Override the default RestTemplate with a custom one that has a longer timeout (For ImageGenerationService) **/
+	@Bean
+	public RestClientCustomizer restClientCustomizer() {
+		return restClientBuilder -> restClientBuilder
+				.requestFactory(ClientHttpRequestFactories.get(ClientHttpRequestFactorySettings.DEFAULTS
+						.withConnectTimeout(Duration.ofSeconds(60))
+						.withReadTimeout(Duration.ofSeconds(60))));
+	}
 	 
 	@Bean
 	BrandService brandService(@Autowired RemoteFileCachingService rfc, @Autowired  UiConfig properties, @Autowired  BrandRepository brandRepository) {
@@ -237,8 +249,8 @@ public class AppConfig {
 
 	@Bean
 	@Autowired
-	VerticalsConfigService verticalConfigsService(ResourcePatternResolver resourceResolver, SerialisationService serialisationService,  GoogleTaxonomyService googleTaxonomyService, ProductRepository productRepository) throws IOException {
-		return new VerticalsConfigService( serialisationService,config.getVerticalsFolder(), googleTaxonomyService, productRepository, resourceResolver);
+	VerticalsConfigService verticalConfigsService(ResourcePatternResolver resourceResolver, SerialisationService serialisationService,  GoogleTaxonomyService googleTaxonomyService, ProductRepository productRepository, ImageGenerationService imageGenerationService) throws IOException {
+		return new VerticalsConfigService( serialisationService,config.getVerticalsFolder(), googleTaxonomyService, productRepository, resourceResolver, imageGenerationService);
 	}
 
 	////////////////////////////////////

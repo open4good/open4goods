@@ -153,6 +153,7 @@ imageGenerationConfig:
     - The background color must be full white without any gradient or texture.
     - There must be absolutely no shadows or drop shadows.
     - No design elements should extend beyond the circle.
+  forceOverride: false
 
 #Css and js mimification
 #wro4j:

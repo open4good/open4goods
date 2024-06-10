@@ -1,31 +1,28 @@
 package org.open4goods.ui.controllers.ui;
 
-import java.io.BufferedInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.net.URISyntaxException;
 import java.net.URLConnection;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
+import org.open4goods.config.yml.ui.VerticalConfig;
 import org.open4goods.exceptions.InvalidParameterException;
 import org.open4goods.exceptions.TechnicalException;
 import org.open4goods.exceptions.ValidationException;
 import org.open4goods.model.data.Resource;
-import org.open4goods.services.BrandService;
-import org.open4goods.services.DataSourceConfigService;
-import org.open4goods.services.ResourceService;
-import org.open4goods.services.VerticalsConfigService;
+import org.open4goods.services.*;
 import org.open4goods.ui.config.AppConfig;
 import org.open4goods.ui.config.yml.UiConfig;
 import org.open4goods.ui.services.ImageService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.server.ResponseStatusException;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -47,18 +44,21 @@ public class ResourceController {
 
 	
 	private final ImageService imageService;
-	
+	private final ImageGenerationService imageGenerationService;
 	private final UiConfig config;
 	private final DataSourceConfigService datasourceConfigService;
 	private final BrandService brandService;
 	private final ResourceService resourceService;
+	private final VerticalsConfigService verticalsConfigService;
 
-	public ResourceController(ImageService imageService,  UiConfig config, DataSourceConfigService dsConfigService, ResourceService resourceService, VerticalsConfigService verticalConfigService, BrandService brandService) {
+	public ResourceController(ImageService imageService,  UiConfig config, DataSourceConfigService dsConfigService, ResourceService resourceService, VerticalsConfigService verticalConfigService, BrandService brandService, ImageGenerationService imageGenerationService, VerticalsConfigService verticalsConfigService) {
 		this.imageService = imageService;
+		this.imageGenerationService = imageGenerationService;
 		this.config = config;
 		this.datasourceConfigService = dsConfigService;
 		this.brandService = brandService;
 		this.resourceService = resourceService;
+		this.verticalsConfigService = verticalsConfigService;
 	}
 
 
@@ -207,6 +207,41 @@ public class ResourceController {
 		
 	}
 
-	
+	/**
+	 * Serves the generated image for the specified vertical.
+	 *
+	 * @param verticalId the ID of the vertical.
+	 * @param response   the HttpServletResponse to write the image to.
+	 * @throws IOException if an I/O error occurs.
+	 */
+	@GetMapping("/images/verticals/{verticalId}.png")
+	public void serveVerticalImage(@PathVariable String verticalId, final HttpServletResponse response) throws IOException {
+		String fileName = verticalId + ".png";
+		File imageFile = new File(imageGenerationService.getImagesFolder(), fileName);
+
+		if (!imageFile.exists()) {
+			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Image not found");
+		}
+
+		response.addHeader(HEADER_CONTENT_TYPE, CONTENT_TYPE_IMAGE_PNG);
+		response.addHeader(HEADER_CACHE_CONTROL, "public, max-age=" + AppConfig.CACHE_PERIOD_SECONDS);
+
+		try (InputStream stream = new FileInputStream(imageFile)) {
+			IOUtils.copy(stream, response.getOutputStream());
+		} catch (FileNotFoundException e) {
+			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Image not found", e);
+		} catch (IOException e) {
+			throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Error rendering image", e);
+		}
+	}
+
+	@PostMapping("/images/verticals/{verticalId}/regenerate")
+	public ResponseEntity<String> regenerateVerticalImage(@PathVariable String verticalId) throws IOException {
+			VerticalConfig verticalConfig = verticalsConfigService.getConfigById(verticalId);
+			String verticalTitle = verticalConfig.getI18n().get("default").getVerticalHomeTitle();
+			String fileName = verticalId + ".png";
+			imageGenerationService.fullGenerate(verticalTitle, fileName);
+			return ResponseEntity.ok("/images/verticals/" + fileName);
+	}
 
 }

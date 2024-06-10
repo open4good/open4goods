@@ -14,6 +14,7 @@ import org.open4goods.api.services.completion.GenAiCompletionService;
 import org.open4goods.api.services.completion.IcecatCompletionService;
 import org.open4goods.api.services.completion.ResourceCompletionService;
 import org.open4goods.api.services.store.DataFragmentStoreService;
+import org.open4goods.config.yml.ui.ImageGenerationConfig;
 import org.open4goods.crawler.config.yml.FetcherProperties;
 import org.open4goods.crawler.repository.CsvIndexationRepository;
 import org.open4goods.crawler.repository.IndexationRepository;
@@ -35,19 +36,7 @@ import org.open4goods.model.constants.UrlConstants;
 import org.open4goods.model.data.DataFragment;
 import org.open4goods.model.data.Price;
 import org.open4goods.model.product.Product;
-import org.open4goods.services.BarcodeValidationService;
-import org.open4goods.services.BrandService;
-import org.open4goods.services.DataSourceConfigService;
-import org.open4goods.services.EvaluationService;
-import org.open4goods.services.GoogleTaxonomyService;
-import org.open4goods.services.Gs1PrefixService;
-import org.open4goods.services.ImageMagickService;
-import org.open4goods.services.RemoteFileCachingService;
-import org.open4goods.services.ResourceService;
-import org.open4goods.services.SearchService;
-import org.open4goods.services.SerialisationService;
-import org.open4goods.services.StandardiserService;
-import org.open4goods.services.VerticalsConfigService;
+import org.open4goods.services.*;
 import org.open4goods.services.ai.AiAgent;
 import org.open4goods.services.ai.AiService;
 import org.open4goods.services.textgen.BlablaService;
@@ -56,6 +45,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springdoc.core.customizers.OpenApiCustomizer;
 import org.springdoc.core.models.GroupedOpenApi;
+import org.springframework.ai.image.ImageClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.cache.CacheManager;
@@ -161,12 +151,11 @@ public class ApiConfig {
     FeedService feedService(SerialisationService serialisationService, DataSourceConfigService datasourceConfigService, CsvDatasourceFetchingService fetchingService,FetcherProperties  fetcherProperties) {
 		return new FeedService(serialisationService, datasourceConfigService, fetchingService, fetcherProperties.getFeedConfigs());
     }
-   
-    	
-	
+
+
 	@Bean
 	@Autowired
-	VerticalsConfigService verticalConfigsService(ResourcePatternResolver resolver,  SerialisationService serialisationService,  GoogleTaxonomyService googleTaxonomyService, ProductRepository productRepository) throws IOException {
+	VerticalsConfigService verticalConfigsService(ResourcePatternResolver resolver, SerialisationService serialisationService, GoogleTaxonomyService googleTaxonomyService, ProductRepository productRepository) throws IOException {
 		return new VerticalsConfigService(serialisationService,apiProperties.getVerticalsFolder(), googleTaxonomyService, productRepository, resolver);
 	}
 
