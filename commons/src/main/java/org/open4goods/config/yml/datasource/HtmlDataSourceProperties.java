@@ -62,6 +62,10 @@ public class HtmlDataSourceProperties {
 	private boolean brand2csv = false;
 	
 
+	/**
+	 * If set, the url's will be provided through a custom provider class, that must implement CustomUrlProvider onterface
+	 */
+	private String customUrlProviderClass;
 	
 
 	
@@ -221,6 +225,14 @@ public class HtmlDataSourceProperties {
 
 	public void setBrand2csv(boolean brand2csv) {
 		this.brand2csv = brand2csv;
+	}
+
+	public String getCustomUrlProviderClass() {
+		return customUrlProviderClass;
+	}
+
+	public void setCustomUrlProviderClass(String customUrlProviderClass) {
+		this.customUrlProviderClass = customUrlProviderClass;
 	}
 
 
