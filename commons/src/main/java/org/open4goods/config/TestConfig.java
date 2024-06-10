@@ -29,10 +29,10 @@ public class TestConfig {
     
 
     @Bean
-    public IcecatService xmlMapper(@Autowired RemoteFileCachingService remoteFileCachingService, BrandService brandService) throws SAXException {
+    public IcecatService xmlMapper(@Autowired RemoteFileCachingService remoteFileCachingService, BrandService brandService,GoogleTaxonomyService googleTaxonomyService) throws SAXException {
     	IcecatConfiguration c = new IcecatConfiguration();
     	// TODO : Not windows OK
-        return new IcecatService(new XmlMapper(), c, remoteFileCachingService, "/tmp",brandService);
+        return new IcecatService(new XmlMapper(), c, remoteFileCachingService, "/tmp",brandService, googleTaxonomyService);
     }
     
     

@@ -29,6 +29,7 @@ import org.open4goods.model.icecat.IcecatFeature;
 import org.open4goods.model.icecat.IcecatFeatureGroup;
 import org.open4goods.model.icecat.IcecatLanguageHandler;
 import org.open4goods.model.icecat.IcecatModel;
+import org.open4goods.model.icecat.IcecatName;
 import org.open4goods.model.icecat.IcecatParentCategory;
 import org.open4goods.model.icecat.IcecatSupplier;
 import org.slf4j.Logger;
@@ -79,14 +80,18 @@ public class IcecatService {
 		
 		private RemoteFileCachingService fileCachingService;
 		private String remoteCachingFolder;
+
+
+		private GoogleTaxonomyService googleTaxonomyService;
 	
-	public IcecatService(XmlMapper xmlMapper, IcecatConfiguration iceCatConfig, RemoteFileCachingService fileCachingService, String remoteCacheFolder, BrandService brandService) throws SAXException {
+	public IcecatService(XmlMapper xmlMapper, IcecatConfiguration iceCatConfig, RemoteFileCachingService fileCachingService, String remoteCacheFolder, BrandService brandService, GoogleTaxonomyService gTaxo) throws SAXException {
 		super();
 		this.xmlMapper = xmlMapper;
 		this.iceCatConfig = iceCatConfig;
 		this.fileCachingService = fileCachingService;
 		this.remoteCachingFolder = remoteCacheFolder;
 		this.brandService = brandService;
+		this.googleTaxonomyService = gTaxo;
 
 	}
 
@@ -170,17 +175,25 @@ public class IcecatService {
 		File icecatFile = getCachedFile(iceCatConfig.getCategoriesListFileUri(), iceCatConfig.getUser(), iceCatConfig.getPassword());
 
 		try {
-			List<IcecatCategory> categories = xmlMapper.readValue(icecatFile, IcecatModel.class).getResponse()
-					.getCategoryList().getCategories();
+			List<IcecatCategory> categories = xmlMapper.readValue(icecatFile, IcecatModel.class).getResponse().getCategoryList().getCategories();
 
 			categories.forEach(category -> {
-				List<IcecatFeature> features = category.getFeatures();
-				category.getCategoryFeatureGroups();
-				category.getDescriptions();
-				category.getID();
-				category.getLowPic();
+				if (null != category.getNames()) {					
+					for (IcecatName name : category.getNames()) {
+						
+						
+						// TODO : Google taxo resolution test
+						Integer gTaxonomyId = googleTaxonomyService.resolve(name.getValue());
+						if (null != gTaxonomyId) {
+							LOGGER.info("Google taxonomy id {} resolved for category {}", gTaxonomyId, name.getValue());
+							break;
+						} else {
+							LOGGER.warn("No Google taxonomy id resolved for category {}", name.getValue());
+						}
+					}
+				}
+				
 				categoriesById.put(category.getID(), category);
-
 			});
 
 		} catch (Exception e) {

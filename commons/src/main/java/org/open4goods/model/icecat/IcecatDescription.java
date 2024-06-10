@@ -16,6 +16,11 @@ class IcecatDescription {
 	@JacksonXmlProperty(isAttribute = true)
 	private String Value;
 
+	
+	@Override
+	public String toString() {
+		return  ID + ", langid=" + langid + ":" + Value;
+	}
 	public String getID() {
 		return ID;
 	}
