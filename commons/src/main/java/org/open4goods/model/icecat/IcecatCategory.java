@@ -63,6 +63,12 @@ public class IcecatCategory {
     @JacksonXmlProperty(localName = "ParentCategory")
     private IcecatParentCategory parentCategory;
 
+    
+    @Override
+    public String toString() {
+    	return ID+":"+names;
+    	
+    }
 	public String getUNCATID() {
 		return UNCATID;
 	}

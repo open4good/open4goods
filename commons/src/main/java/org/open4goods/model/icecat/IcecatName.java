@@ -16,9 +16,14 @@ public class IcecatName {
     @JacksonXmlProperty(isAttribute = true, localName = "Updated")
     private String updated;
 
-    @JacksonXmlText
+    @JacksonXmlProperty(isAttribute = true, localName = "Value")
     private String value;
 
+	@Override
+	public String toString() {
+		return  id + ", langid=" + langId + ":" + value;
+	}
+	
     // Getters and Setters
     public int getId() {
         return id;
