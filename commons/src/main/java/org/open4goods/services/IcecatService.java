@@ -100,11 +100,10 @@ public class IcecatService {
 	public void icecatInit () throws TechnicalException {
 		loadCategories();
 		loadCategoryFeatureList();
-
 		
-		//		loadFeatures();
-//		loadBrands();
-//		loadLanguages();
+		loadFeatures();
+		loadBrands();
+		loadLanguages();
 	}
 	
 	/**
@@ -162,45 +161,6 @@ public class IcecatService {
 
 	
 	
-	public void loadCategories() throws TechnicalException {
-
-		// 1 - Download the file with basic auth
-
-		// Unzip it
-		if (null == iceCatConfig.getCategoriesListFileUri()) {
-			LOGGER.error("No categories list file uri configured");
-			return;
-		}
-		LOGGER.info("Getting file from {}", iceCatConfig.getCategoriesListFileUri());
-		File icecatFile = getCachedFile(iceCatConfig.getCategoriesListFileUri(), iceCatConfig.getUser(), iceCatConfig.getPassword());
-
-		try {
-			List<IcecatCategory> categories = xmlMapper.readValue(icecatFile, IcecatModel.class).getResponse().getCategoryList().getCategories();
-
-			categories.forEach(category -> {
-				if (null != category.getNames()) {					
-					for (IcecatName name : category.getNames()) {
-						
-						
-						// TODO : Google taxo resolution test
-						Integer gTaxonomyId = googleTaxonomyService.resolve(name.getValue());
-						if (null != gTaxonomyId) {
-							LOGGER.info("Google taxonomy id {} resolved for category {}", gTaxonomyId, name.getValue());
-							break;
-						} else {
-							LOGGER.warn("No Google taxonomy id resolved for category {}", name.getValue());
-						}
-					}
-				}
-				
-				categoriesById.put(category.getID(), category);
-			});
-
-		} catch (Exception e) {
-			LOGGER.error("Error while loading categories", e);
-		}
-		LOGGER.info("End loading of categories from {}", iceCatConfig.getCategoriesListFileUri());
-	}
 
 	
 	/**
@@ -288,6 +248,55 @@ public class IcecatService {
 		 LOGGER.info("End loading of features from {}", iceCatConfig.getFeaturesListFileUri());
 	}
 
+	
+
+	public void loadCategories() throws TechnicalException {
+
+		// 1 - Download the file with basic auth
+
+		// Unzip it
+		if (null == iceCatConfig.getCategoriesListFileUri()) {
+			LOGGER.error("No categories list file uri configured");
+			return;
+		}
+		LOGGER.info("Getting file from {}", iceCatConfig.getCategoriesListFileUri());
+		File icecatFile = getCachedFile(iceCatConfig.getCategoriesListFileUri(), iceCatConfig.getUser(), iceCatConfig.getPassword());
+
+		try {
+			List<IcecatCategory> categories = xmlMapper.readValue(icecatFile, IcecatModel.class).getResponse().getCategoryList().getCategories();
+
+			categories.forEach(category -> {
+				Integer gTaxonomyId = null;
+				if (null != category.getNames()) {					
+					for (IcecatName name : category.getNames()) {
+						
+						
+						// TODO : Google taxo resolution test
+						 gTaxonomyId = googleTaxonomyService.resolve(name.getValue());
+						if (null != gTaxonomyId) {
+							LOGGER.info("Google taxonomy id {} resolved for category {}", gTaxonomyId, name.getValue());
+							break;
+						} 
+					}
+				}
+				
+				if (null != gTaxonomyId) {
+					LOGGER.info("Google taxonomy id {} resolved for category {}", gTaxonomyId, category.getNames());
+				} else {
+					LOGGER.warn("No Google taxonomy id resolved for category {}", category.getNames());
+
+				}
+
+				categoriesById.put(category.getID(), category);
+			});
+
+		} catch (Exception e) {
+			LOGGER.error("Error while loading categories", e);
+		}
+		LOGGER.info("End loading of categories from {}", iceCatConfig.getCategoriesListFileUri());
+	}
+	
+	
 	public void loadCategoryFeatureList() throws TechnicalException {
 		
 		// 1 - Download the file with basic auth
