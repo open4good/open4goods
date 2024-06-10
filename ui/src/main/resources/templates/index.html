@@ -132,16 +132,20 @@
 						<div class="card card-flip shadow">
 							<div class="card-flip-inner">
 								   <div class="wrapper-card-img">
-										<img th:src="${vertical.i18n(siteLanguage).verticalHomeLogo}" class="card-img-top rounded-top" alt="img TV">
+										<img th:src="'/images/verticals/' + ${vertical.id} + '.png'" class="card-img-top rounded-top" alt="img TV">
 									</div>
 									<div class="card-body bg-primary">
 										<h3 class="h5 card-title text-white mt-3" th:text="${vertical.i18n(siteLanguage).verticalHomeTitle}"></h3>
 										<p class="card-text" th:text="${vertical.i18n(siteLanguage).verticalHomeDescription}"></p>
 										<span class="btn btn-primary btn-sm">Découvrir</span>
+										<form id="regenerate-form-${vertical.id}" th:action="@{'/images/verticals/' + ${vertical.id} + '/regenerate'}" method="post" target="hidden-iframe-${vertical.id}">
+											<button type="submit" class="btn btn-warning btn-sm">Changer l'image</button>
+										</form>
 									</div>
 							</div>
 						</div>
 					</a>
+					<iframe name="hidden-iframe-${vertical.id}" style="display:none;"></iframe>
 				</div>
 			</div>
 		</section>
@@ -441,8 +445,6 @@
 <script>
 
 
-
-
 function animateText() {
 	$('.tlt').textillate({
 		loop: true,
@@ -450,32 +452,32 @@ function animateText() {
 		 in: {
 		  	// set the effect name
 		    //effect: "",
-		
+
 		    // set the delay factor applied to each consecutive character
 		    delayScale: 1.5,
-		
+
 		    // set the delay between each character
 		    delay: 30,
-		
+
 		    // set to true to animate all the characters at the same time
 		    sync: false,
-		
+
 		    // randomize the character sequence
 		    // (note that shuffle doesn't make sense with sync = true)
 		    shuffle: Math.random() < 0.5,
-		
+
 		    // reverse the character sequence
 		    // (note that reverse doesn't make sense with sync = true)
 		    reverse: false
-		
+
 		    // callback that executes once the animation has finished
 		    //callback: function () {
 		    // }
 		  }
 	});
-	
-	
-	
+
+
+
 }
 
 
@@ -518,7 +520,6 @@ $(document).ready(function() {
     	  animateText();
 		});
 } );
-
 
 
 </script>

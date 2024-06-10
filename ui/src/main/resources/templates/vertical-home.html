@@ -56,7 +56,7 @@
 							
 								<div class="d-flex flex-wrap align-items-center row">
 			                        <div class="col-lg-2 text-center">
-			                                <img class="mt-2" width="150" th:src="${config.i18n(siteLanguage).verticalHomeLogo}">
+			                                <img class="mt-2" width="150" th:src="'/images/verticals/' + ${vertical} + '.png'">
 			                        </div>
 			                        <span class="col-lg-10">
 			                                <h1 class="mt-2 text-center" th:text="${config.i18n(siteLanguage).verticalHomeTitle}"></h1>

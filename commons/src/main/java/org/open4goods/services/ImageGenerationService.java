@@ -1,8 +1,11 @@
 package org.open4goods.services;
 
 import org.open4goods.config.yml.ui.ImageGenerationConfig;
+import org.open4goods.config.yml.ui.VerticalConfig;
 import org.springframework.ai.image.*;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -16,6 +19,7 @@ import java.net.URL;
  */
 public class ImageGenerationService {
 
+    private static final Logger logger = LoggerFactory.getLogger(ImageGenerationService.class);
     private final ImageClient imageClient;
     private final ImageGenerationConfig imageGenerationConfig;
     private String imagesFolder;
@@ -40,6 +44,16 @@ public class ImageGenerationService {
         URL url = new URL(imageUrl);
         InputStream in = url.openStream();
         String outputDirectory = imagesFolder;
+        File outputDir = new File(outputDirectory);
+
+        if (!outputDir.exists()) {
+            logger.warn("Output directory {} does not exist. Creating it.", outputDirectory);
+            if (!outputDir.mkdirs()) {
+                logger.error("Failed to create output directory {}", outputDirectory);
+                throw new IOException("Failed to create directory " + outputDirectory);
+            }
+        }
+
         File outputFile = new File(outputDirectory, fileName);
 
         try (FileOutputStream out = new FileOutputStream(outputFile)) {
@@ -53,5 +67,24 @@ public class ImageGenerationService {
         }
 
         return outputFile;
+    }
+
+    public String generatePrompt(String vertical) {
+        return imageGenerationConfig.getPrompt().replace("{VERTICAL}", vertical);
+    }
+
+    public String getImagesFolder() {
+        return imagesFolder;
+    }
+
+    public boolean shouldGenerateImage(String fileName) {
+        File file = new File(imagesFolder, fileName);
+        return !file.exists() || imageGenerationConfig.isForceOverride();
+    }
+
+    public File fullGenerate(String verticalTitle, String fileName) throws IOException {
+        String promptContent = generatePrompt(verticalTitle);
+        String imageUrl = generateImage(promptContent).getResult().getOutput().getUrl();
+        return saveImage(imageUrl, fileName);
     }
 }
