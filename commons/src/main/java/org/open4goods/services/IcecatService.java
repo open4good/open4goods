@@ -97,13 +97,14 @@ public class IcecatService {
 
 
 	@PostConstruct
+	//TODO : PArametize to not load full content on ui and api side
 	public void icecatInit () throws TechnicalException {
-		loadCategories();
-		loadCategoryFeatureList();
+//		loadCategoryFeatureList();
+//		loadCategories();
 		
-		loadFeatures();
-		loadBrands();
-		loadLanguages();
+//		loadFeatures();
+//		loadBrands();
+//		loadLanguages();
 	}
 	
 	/**

@@ -19,6 +19,7 @@ import org.open4goods.config.yml.datasource.HtmlDataSourceProperties;
 import org.open4goods.crawler.SeleniumPageFetcher;
 import org.open4goods.crawler.config.yml.FetcherProperties;
 import org.open4goods.crawler.extractors.Extractor;
+import org.open4goods.crawler.model.CustomUrlProvider;
 import org.open4goods.crawler.repository.IndexationRepository;
 import org.open4goods.crawler.services.IndexationService;
 import org.open4goods.exceptions.TechnicalException;
@@ -28,6 +29,7 @@ import org.open4goods.model.data.DataFragment;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.scheduling.annotation.Scheduled;
 
@@ -63,6 +65,9 @@ public class WebDatasourceFetchingService extends DatasourceFetchingService{
 	/**	The internally maintained map of activ crawl config	 */
 	private final Map<String, DataSourceProperties> controllersConfig = new ConcurrentHashMap<>();
 
+	@Autowired
+	private  AutowireCapableBeanFactory autowireCapableBeanFactory;
+	
 
 	public WebDatasourceFetchingService(final IndexationService indexationService, final FetcherProperties fetcherProperties, IndexationRepository repository, final String logsFolder, boolean toConsole) {
 		super(logsFolder, toConsole,repository);
@@ -131,6 +136,32 @@ public class WebDatasourceFetchingService extends DatasourceFetchingService{
 			}
 		}
 
+		// Adding optional initial url's
+		if (null != provider.getWebDatasource().getCustomUrlProviderClass()) {
+				
+			try {
+				CustomUrlProvider seedProvider = ((CustomUrlProvider)Class.forName(provider.getWebDatasource().getCustomUrlProviderClass()).newInstance());
+				autowireCapableBeanFactory.autowireBean(seedProvider);
+				Set<String> urls = seedProvider.getUrls();
+				urls.stream().forEach(e -> controller.addSeed(e));
+//				controller.addSeed(datasourceConfName);
+				
+				
+			} catch (InstantiationException | IllegalAccessException | ClassNotFoundException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			
+			
+			
+		}
+
+		
+		
+		
+		
+		
+		
 		final DataFragmentWebCrawler webCrawler = createWebCrawler(datasourceConfName, provider, provider.getWebDatasource());
 
 		controllers.put(datasourceConfName, controller);

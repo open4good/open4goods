@@ -192,7 +192,11 @@ public class BrandService {
 
 		logger.info("Adding brand score {}:{} for brand {}", datasourceProperties.getName(), scoreValue, brand);
 
-		BrandScore brandScore = new BrandScore(datasourceProperties.getName(), brand, scoreValue);
+		BrandScore brandScore = new BrandScore(datasourceProperties, brand, scoreValue);
+		
+
+		
+		
 //		String id = brandScore.getId();
 		
 //		BrandScore b = brandRepository.findById(id).orElse(newBrand);
@@ -253,7 +257,7 @@ public class BrandService {
 		BrandScore result = brandRepository.findById(id).orElse(null);		
 		if (null != result) {
 			logger.info("Score found with a direct resolution for brand {} and datasource {}", brand, datasourceName);
-			score = Double.valueOf(result.getScoreValue());
+			score = Double.valueOf(result.getNormalized());
 			return score;
 		}
 		
@@ -290,7 +294,7 @@ public class BrandService {
 
 	private Double handleExtractionResult(String brand, String datasourceName, Double score, List<BrandScore> results) {
 		if (results.size() == 1) {
-			score = Double.valueOf(results.get(0).getScoreValue());
+			score = Double.valueOf(results.get(0).getNormalized());
 		} else if (results.size() > 1) {
 			// TODO : log to vertical reporter
 			logger.warn("Multiple scores found for brand {} and datasource {}. Please consider a specific matching defintion in the vertical", brand, datasourceName);

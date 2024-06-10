@@ -3,7 +3,10 @@ package org.open4goods.model.data;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.open4goods.config.yml.datasource.DataSourceProperties;
 import org.open4goods.helper.IdHelper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.elasticsearch.annotations.Document;
 import org.springframework.data.elasticsearch.annotations.Field;
@@ -12,6 +15,8 @@ import org.springframework.data.elasticsearch.annotations.FieldType;
 @Document(indexName = "brand-scores", createIndex = true)
 public class BrandScore {
 
+	private static final Logger logger = LoggerFactory.getLogger(BrandScore.class);
+	
 	@Id
 	private String id;
 	
@@ -29,16 +34,36 @@ public class BrandScore {
 	@Field(index = true, store = false, type = FieldType.Keyword)
 	private String scoreValue;
 	
+	@Field(index = true, store = false, type = FieldType.Double)
+	private Double normalized;
+	
 	@Field(index = true, store = false, type = FieldType.Keyword)
 	private Set<String> tags = new HashSet<>();
 	
-	public BrandScore(String datasourceName, String brandName, String scoreValue) {
+	public BrandScore(DataSourceProperties datasourceProperties, String brandName, String scoreValue) {
 		super();
-		this.datasourceName = datasourceName;
+		this.datasourceName = datasourceProperties.getName();
 		this.brandName = brandName.toLowerCase().trim();
-		this.id=id(datasourceName, brandName);
+		this.id=id(datasourceProperties.getName(), brandName);
 		this.lastUpdate = System.currentTimeMillis();
 		this.scoreValue = scoreValue;
+		
+		try {
+			Double norm;
+			if (null != datasourceProperties.getInvertScaleBase()) {
+				norm = 	(datasourceProperties.getInvertScaleBase() - Double.valueOf(scoreValue));
+			} else {
+				norm = Double.valueOf(scoreValue);
+			}
+			logger.info("Normalized score for brand {} with score {} is {}",brandName,scoreValue,norm);
+			this.normalized = norm;
+			
+		} catch (Exception e) {
+			logger.error("Error with score normalization for brand {} with score {}",brandName,scoreValue);
+		}
+		
+		
+		
 	}
 
 	
@@ -109,6 +134,16 @@ public class BrandScore {
 
 	public void setTags(Set<String> tags) {
 		this.tags = tags;
+	}
+
+
+	public Double getNormalized() {
+		return normalized;
+	}
+
+
+	public void setNormalized(Double normalized) {
+		this.normalized = normalized;
 	}
 	
 	
