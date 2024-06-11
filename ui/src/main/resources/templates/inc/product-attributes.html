@@ -30,22 +30,25 @@
 
 
 
-<div class="table-responsive table-caracteristics-fs mt-4" th:if="${product.attributes.aggregatedAttributes.size()} > 0">
+<div class="table-responsive table-caracteristics-fs mt-4">
 
 	<div th:each="featureGroup : ${verticalConfig.featureGroups}">
 		
 		<table class="table">
-		<th:block th:each="feature : ${featureGroup.featuresId}">
-			<tr th:with="attr = ${product.attributes.attributeByFeatureId(feature)}" >
-
-					<th:block th:if="${attr}">
-						<td class="align-middle" th:text="${attr.name}"></td>
-						<td  class="align-middle" th:text="${attr.value}"></td>
-					</th:block>
-
+			<th:block th:each="feature,stat : ${featureGroup.featuresId}">
+				<tr th:if="${stat.first}">
+					<th colspan="2" class="h2  m-2 "><strong th:text="${featureGroup.name.i18n(siteLanguange)}"></strong></th>			
 				</tr>
-		</th:block>
-	</table>
+			
+				<tr th:with="attr = ${product.attributes.attributeByFeatureId(feature)}" >
+						<th:block th:if="${attr}">
+							<td class="align-middle" th:text="${attr.name}"></td>
+							<td  class="align-middle" th:text="${attr.value}"></td>
+						</th:block>
+	
+				</tr>
+			</th:block>
+		</table>
 	</div>
 </div>
 

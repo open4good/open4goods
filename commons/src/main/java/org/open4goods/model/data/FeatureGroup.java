@@ -9,9 +9,7 @@ import org.open4goods.model.Localisable;
  * Strong icecat mapping, thanks to them !
  */
 public class FeatureGroup {
-	
-	private Integer categoryFeatureId;
-	private Integer categoryFeatureGroupId;
+
 	
 	private Integer icecatCategoryFeatureGroupId;
 	
@@ -19,7 +17,7 @@ public class FeatureGroup {
 	 * Erased name if needed
 	 * @param categoryFeatureGroupId
 	 */
-	private Localisable name;
+	private Localisable name = new Localisable();
 	
 	private List<Integer> featuresId = new ArrayList<>();
 	
@@ -31,15 +29,7 @@ public class FeatureGroup {
 		this.icecatCategoryFeatureGroupId = categoryFeatureGroupId;
 	
 	}
-	public void setCategoryFeatureId(Integer categoryFeatureId) {
-		this.categoryFeatureId = categoryFeatureId;
-	}
-	public Integer getCategoryFeatureGroupId() {
-		return categoryFeatureGroupId;
-	}
-	public void setCategoryFeatureGroupId(Integer categoryFeatureGroupId) {
-		this.categoryFeatureGroupId = categoryFeatureGroupId;
-	}
+
 	public Integer getIcecatCategoryFeatureGroupId() {
 		return icecatCategoryFeatureGroupId;
 	}
@@ -58,10 +48,7 @@ public class FeatureGroup {
 	public void setFeaturesId(List<Integer> featuresId) {
 		this.featuresId = featuresId;
 	}
-	public Integer getCategoryFeatureId() {
-		return categoryFeatureId;
-	}
-	
+
 	
 	
 }
