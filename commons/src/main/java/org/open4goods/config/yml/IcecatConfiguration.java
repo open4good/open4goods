@@ -11,8 +11,6 @@ public class IcecatConfiguration {
 	private String user;
 	private String password;
 	
-	
-	
 	public String getFeaturesListFileUri() {
 		return featuresListFileUri;
 	}

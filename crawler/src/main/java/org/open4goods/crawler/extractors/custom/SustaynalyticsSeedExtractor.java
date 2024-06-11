@@ -38,7 +38,7 @@ public class SustaynalyticsSeedExtractor implements CustomUrlProvider {
 		Set<String> ret = new HashSet<>();
 		
 		// TODO : Hard limit from conf
-		for (int i =1; i < 2000; i++) {
+		for (int i =1; i < 2; i++) {
 			
 			List<String> urls = getCompanyRatings(i);
 			if (urls.size() == 0) {

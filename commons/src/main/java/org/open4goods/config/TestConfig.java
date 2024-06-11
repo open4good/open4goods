@@ -32,7 +32,7 @@ public class TestConfig {
     public IcecatService xmlMapper(@Autowired RemoteFileCachingService remoteFileCachingService, BrandService brandService,GoogleTaxonomyService googleTaxonomyService) throws SAXException {
     	IcecatConfiguration c = new IcecatConfiguration();
     	// TODO : Not windows OK
-        return new IcecatService(new XmlMapper(), c, remoteFileCachingService, "/tmp",brandService, googleTaxonomyService);
+        return new IcecatService(new XmlMapper(), c, remoteFileCachingService, "/tmp",brandService, googleTaxonomyService, null);
     }
     
     

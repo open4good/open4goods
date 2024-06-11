@@ -81,7 +81,7 @@ public class BrandService {
 
 	/**
 	 * Resolve a brand name, by trying to find it in the list of known brands
-	 * 
+	 *  TODO : A lot of call.. See impact of radix / and have a fast cache
 	 * @param name
 	 * @return
 	 */
@@ -189,6 +189,13 @@ public class BrandService {
 			logger.info("Cannot proceed empty brand or score, skipping");
 			return;
 		}
+		
+//		Brand rb = resolveBrandName(brand);
+//		if (null == rb) {
+//			logger.warn("Unknown brand {}. Brand score will be added", brand);
+//			return;
+//		}
+//		
 
 		logger.info("Adding brand score {}:{} for brand {}", datasourceProperties.getName(), scoreValue, brand);
 
@@ -297,7 +304,7 @@ public class BrandService {
 			score = Double.valueOf(results.get(0).getNormalized());
 		} else if (results.size() > 1) {
 			// TODO : log to vertical reporter
-			logger.warn("Multiple scores found for brand {} and datasource {}. Please consider a specific matching defintion in the vertical", brand, datasourceName);
+			logger.warn("Multiple companies found for brand {} and datasource {}. Please consider a specific matching defintion in the vertical", brand, datasourceName);
 			logger.warn("\n  - {}\n    - {}", brand, StringUtils.join(results.stream().map(e->e.getBrandName()).toArray(), "\n    - "));
 			logger.warn("");
 		} else {
