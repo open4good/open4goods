@@ -47,7 +47,12 @@ public class AggregatedAttributes  {
 	}
 	
 
-	
+	// TODO : performance
+	public AggregatedAttribute attributeByFeatureId(String featureId) {
+		AggregatedAttribute ret = unmapedAttributes.stream().filter(a -> a.getIcecatTaxonomyIds().contains(Long.valueOf(featureId))).findFirst()
+				.orElse(null);
+				return ret;
+	}
 	
 	public void addReferentielAttribute(ReferentielKey key, String value) {
 		referentielAttributes.put(key, value);

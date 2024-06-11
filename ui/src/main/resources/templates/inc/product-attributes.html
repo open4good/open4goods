@@ -27,3 +27,25 @@
 		</th:block>
 	</table>
 </div>
+
+
+
+<div class="table-responsive table-caracteristics-fs mt-4" th:if="${product.attributes.aggregatedAttributes.size()} > 0">
+
+	<div th:each="featureGroup : ${verticalConfig.featureGroups}">
+		
+		<table class="table">
+		<th:block th:each="feature : ${featureGroup.featuresId}">
+			<tr th:with="attr = ${product.attributes.attributeByFeatureId(feature)}" >
+
+					<th:block th:if="${attr}">
+						<td class="align-middle" th:text="${attr.name}"></td>
+						<td  class="align-middle" th:text="${attr.value}"></td>
+					</th:block>
+
+				</tr>
+		</th:block>
+	</table>
+	</div>
+</div>
+

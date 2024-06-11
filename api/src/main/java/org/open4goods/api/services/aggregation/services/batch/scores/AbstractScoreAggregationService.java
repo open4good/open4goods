@@ -175,7 +175,7 @@ public abstract class AbstractScoreAggregationService extends  AbstractAggregati
 
 
 		if (null == value) {
-			throw new ValidationException("Empty value for Score {} ! Consider normalizing in a futur export/import phase");
+			throw new ValidationException("Empty value for Score "+scoreName+" ! Consider normalizing in a futur export/import phase");
 		}
 
 		// Retrieving cardinality

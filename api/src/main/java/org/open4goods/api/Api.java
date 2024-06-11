@@ -6,7 +6,7 @@ import java.io.IOException;
 import org.open4goods.crawler.controller.CrawlController;
 import org.open4goods.crawler.repository.IndexationRepository;
 import org.open4goods.services.SerialisationService;
-import org.open4goods.store.repository.elastic.BrandRepository;
+import org.open4goods.store.repository.elastic.BrandScoresRepository;
 import org.open4goods.store.repository.elastic.ElasticProductRepository;
 import org.open4goods.store.repository.redis.RedisProductRepository;
 import org.slf4j.Logger;
@@ -29,7 +29,7 @@ import jakarta.annotation.PostConstruct;
 @SpringBootApplication (scanBasePackageClasses = { Api.class, CrawlController.class})
 
 @EnableScheduling
-@EnableElasticsearchRepositories(basePackageClasses = {ElasticProductRepository.class, IndexationRepository.class, BrandRepository.class})
+@EnableElasticsearchRepositories(basePackageClasses = {ElasticProductRepository.class, IndexationRepository.class, BrandScoresRepository.class})
 @EnableRedisRepositories(basePackageClasses = RedisProductRepository.class)
 @EnableCaching
 

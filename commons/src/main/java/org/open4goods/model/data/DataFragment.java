@@ -68,6 +68,10 @@ public class DataFragment implements Standardisable, Validable {
 	@NotNull
 	private Long lastIndexationDate;
 
+	// If true, is a brand related score, will be discarded before indexation
+	private boolean brandFragment = false;
+	
+	
 	@NotNull
 	// TODO : Should remove, creation is computed at Product level
 	private Long creationDate;
@@ -1431,6 +1435,14 @@ public class DataFragment implements Standardisable, Validable {
 
 	public void setCreationDate(Long creationDate) {
 		this.creationDate = creationDate;
+	}
+
+	public boolean isBrandFragment() {
+		return brandFragment;
+	}
+
+	public void setBrandFragment(boolean brandFragment) {
+		this.brandFragment = brandFragment;
 	}
 
 

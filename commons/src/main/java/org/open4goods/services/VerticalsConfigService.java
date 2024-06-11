@@ -79,7 +79,7 @@ public class VerticalsConfigService {
 	 * Loads configs from classpath and from giit repositories. Thread safe
 	 * operation, so can be used in refresh
 	 */
-	@Scheduled(fixedDelay = 1000 * 60 * 10, initialDelay = 1000 * 60 * 10)
+//	@Scheduled(fixedDelay = 1000 * 60 * 10, initialDelay = 1000 * 60 * 10)
 	public synchronized void loadConfigs() {
 
 		Map<String, VerticalConfig> vConfs = new ConcurrentHashMap<>(100);
@@ -114,7 +114,7 @@ public class VerticalsConfigService {
 
 			toLang.put(value.getVerticalHomeUrl(), key);
 			byUrl.put(value.getVerticalHomeUrl(), vc);
-			byTaxonomy.put(vc.getTaxonomyId(), vc);
+			byTaxonomy.put(vc.getGoogleTaxonomyId(), vc);
 //			verticalUrlByLanguage.put(key, value);
 		}));
 
@@ -304,6 +304,26 @@ public class VerticalsConfigService {
 		}
 	}
 
+
+	/**
+	 * Return a config by it's icecat categoryId
+	 * @param icecatCategoryId
+	 * TODO : PErf : Maintain a map for key/val access
+	 * @return
+	 */
+	public VerticalConfig getByIcecatCategoryId(Integer icecatCategoryId) {
+		return configs.values().stream().filter(e ->icecatCategoryId.equals(e.getIcecatTaxonomyId())).findFirst().orElse(null);
+	}
+
+	/**
+	 * Return a config by it's google taxonomy id
+	 * @param icecatCategoryId
+	 * @return
+	 */
+	public VerticalConfig getByGoogleTaxonomy(Integer googleCategoryId) {
+		return configs.values().stream().filter(e ->googleCategoryId.equals(e.getGoogleTaxonomyId())).findFirst().orElse(null);
+	}
+	
 	/**
 	 * Return all expanded taxonomies, from the taxonomy service and from queryning on the store
 	 * @return
