@@ -27,6 +27,9 @@ public class IcecatResponse {
     @JacksonXmlProperty(localName = "CategoriesList")
     private IcecatCategoriesList categoryList;
     
+    @JacksonXmlProperty(localName = "FeatureGroupsList")
+    private IcecatFeatureGroupsList featureGroupsList;
+    
     
 	public String getDate() {
 		return Date;
@@ -90,6 +93,14 @@ public class IcecatResponse {
 
 	public void setCategoryList(IcecatCategoriesList categoryList) {
 		this.categoryList = categoryList;
+	}
+
+	public IcecatFeatureGroupsList getFeatureGroupsList() {
+		return featureGroupsList;
+	}
+
+	public void setFeatureGroupsList(IcecatFeatureGroupsList featureGroupsList) {
+		this.featureGroupsList = featureGroupsList;
 	}
 	
 	

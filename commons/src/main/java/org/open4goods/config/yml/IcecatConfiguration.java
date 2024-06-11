@@ -7,6 +7,7 @@ public class IcecatConfiguration {
 	private String languageListFileUri;
 	private String brandsListFileUri;
 	private String categoriesListFileUri;
+	private String featureGroupsFileUri;
 	
 	private String user;
 	private String password;
@@ -65,6 +66,14 @@ public class IcecatConfiguration {
 
 	public void setCategoriesListFileUri(String categoriesListFileUri) {
 		this.categoriesListFileUri = categoriesListFileUri;
+	}
+
+	public String getFeatureGroupsFileUri() {
+		return featureGroupsFileUri;
+	}
+
+	public void setFeatureGroupsFileUri(String featureGroupsFileUri) {
+		this.featureGroupsFileUri = featureGroupsFileUri;
 	}
 
 

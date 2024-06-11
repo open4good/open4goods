@@ -2,6 +2,7 @@ package org.open4goods.api.services.completion;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.List;
 
+// TODO : Merge with xml model ?
 public class IcecatData {
 
     @JsonProperty("msg")
