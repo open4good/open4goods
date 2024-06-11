@@ -8,15 +8,9 @@
 				<th>Valeur</th>
 				<th>Sources</th>
 			</thead>
-<<<<<<< HEAD
-<<<<<<< Upstream, based on origin/main
-=======
-=======
->>>>>>> branch 'features-taxonomy' of https://github.com/open4good/open4goods.git
 
->>>>>>> 666f12d First working taxonomy identification. But have to rework the design, (shared redis / scheduled loads)
 			<th:block th:each="attribute : ${product.attributes.unmapedAttributes}">
-				<th:block>
+				<th:block t:if="${attribute.icecatTaxonomyIds.size() == 0">
 					<tr th:class="${attribute.bgRow()}">
 						<td class="align-middle"><span th:text="${attribute.icecatTaxonomyIds}"></span></td>					
 						<td class="align-middle"><span th:text="${attribute.name}"></span></td>					

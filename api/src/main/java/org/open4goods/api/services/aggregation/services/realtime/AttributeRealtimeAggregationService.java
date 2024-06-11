@@ -73,13 +73,8 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 			if (null != icecatTaxonomyIds) {
 				dedicatedLogger.info("Found icecat taxonomy for {} : {}", a.getName(), icecatTaxonomyIds);
 				a.setIcecatTaxonomyIds(icecatTaxonomyIds );
-				
 			}
 		});
-		
-		
-	
-	
 	}
 
 	

@@ -19,6 +19,11 @@ public class IcecatName {
     @JacksonXmlProperty(isAttribute = true, localName = "Value")
     private String value;
 
+    @JacksonXmlText
+    private String textValue;
+
+    
+    
 	@Override
 	public String toString() {
 		return  id + ", langid=" + langId + ":" + value;
@@ -56,4 +61,14 @@ public class IcecatName {
     public void setValue(String value) {
         this.value = value;
     }
+
+	public String getTextValue() {
+		return textValue;
+	}
+
+	public void setTextValue(String textValue) {
+		this.textValue = textValue;
+	}
+    
+    
 }

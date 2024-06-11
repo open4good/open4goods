@@ -19,6 +19,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.open4goods.config.yml.IcecatConfiguration;
+import org.open4goods.config.yml.ui.VerticalConfig;
 import org.open4goods.exceptions.TechnicalException;
 import org.open4goods.helper.IdHelper;
 import org.open4goods.model.data.Brand;
@@ -50,41 +51,37 @@ import jakarta.annotation.PostConstruct;
  * FeatureGroups are injected in verticals
  * 
  *   It also provides endpoints to access icecat features, languages, and so on....
- * 
+ * TODO : all Long to Integer
  */
 public class IcecatService {
 
 		private  Logger LOGGER = LoggerFactory.getLogger(IcecatService.class);
 		
-		
 		private BrandService brandService;
+		private RemoteFileCachingService fileCachingService;
+		private GoogleTaxonomyService googleTaxonomyService;
+		private VerticalsConfigService verticalsConfigService;
+		private String remoteCachingFolder;
 		
 		private XmlMapper xmlMapper;
 		private IcecatConfiguration iceCatConfig;
-
 
 		// For features
 		private Map<Long, IcecatFeature> featuresById = new HashMap<>();
 		private Map<String, Set<Long>> featuresByNames = new HashMap<>();
 		
-		
 		// For language
 		private Map<String, String> codeByLanguage;
 		private Map<String, String> languageByCode;
 		
-		
 		 // Créez un XMLReader
 		private Map<Integer,List<FeatureGroup>> featureGroupsByCategoryId = new HashMap<>();
 		private Map<Integer, IcecatCategory> categoriesById = new HashMap<>();
-		
-		
-		private RemoteFileCachingService fileCachingService;
-		private String remoteCachingFolder;
-
-
-		private GoogleTaxonomyService googleTaxonomyService;
 	
-	public IcecatService(XmlMapper xmlMapper, IcecatConfiguration iceCatConfig, RemoteFileCachingService fileCachingService, String remoteCacheFolder, BrandService brandService, GoogleTaxonomyService gTaxo) throws SAXException {
+		/**
+		 * Constructor
+		 */
+	public IcecatService(XmlMapper xmlMapper, IcecatConfiguration iceCatConfig, RemoteFileCachingService fileCachingService, String remoteCacheFolder, BrandService brandService, GoogleTaxonomyService gTaxo, VerticalsConfigService verticalsConfigService) throws SAXException {
 		super();
 		this.xmlMapper = xmlMapper;
 		this.iceCatConfig = iceCatConfig;
@@ -92,6 +89,7 @@ public class IcecatService {
 		this.remoteCachingFolder = remoteCacheFolder;
 		this.brandService = brandService;
 		this.googleTaxonomyService = gTaxo;
+		this.verticalsConfigService = verticalsConfigService;
 
 	}
 
@@ -99,12 +97,13 @@ public class IcecatService {
 	@PostConstruct
 	//TODO : PArametize to not load full content on ui and api side
 	public void icecatInit () throws TechnicalException {
-//		loadCategoryFeatureList();
-//		loadCategories();
+		loadCategories();
 		
-//		loadFeatures();
+		loadFeatures();
 //		loadBrands();
 //		loadLanguages();
+		loadCategoryFeatureList();
+		LOGGER.info("Icecat up and running");
 	}
 	
 	/**
@@ -136,9 +135,9 @@ public class IcecatService {
 				featuresById.put(id, feature);
 				
 				// Loading the by name map
-				feature.getNames().getNames().forEach(name -> {
+				feature.getNames().getNames(). forEach(name -> {
                   
-					String val = normalize(name.getValue());
+					String val = normalize(name.getTextValue());
 					Set<Long> fIds = featuresByNames.get(val);
                     if (fIds == null) {
                         fIds = new HashSet<>();
@@ -379,56 +378,108 @@ public class IcecatService {
 //		Category 
 //		    FeatureGroup
 //			Feature		
-		 try {
-			 LOGGER.info("DOM Parsing of {}", icecatMimified);
-			 List<IcecatCategory> features = xmlMapper.readValue(icecatMimified, IcecatModel.class).getResponse().getCategoryFeaturesList().getCategories();
-				
-			 for (IcecatCategory category : features) 
-			 {
+		try {
+			LOGGER.info("DOM Parsing of {}", icecatMimified);
+			List<IcecatCategory> features = xmlMapper.readValue(icecatMimified, IcecatModel.class).getResponse().getCategoryFeaturesList().getCategories();
+
+			for (IcecatCategory category : features) {
 
 				// The ID of the category
-				 
-				 Integer catId = category.getID();
-				 IcecatCategory fullCategory = categoriesById.get(catId);
-				 fullCategory.setFeatures(category.getFeatures());
-				 fullCategory.setCategoryFeatureGroups(category.getCategoryFeatureGroups());
+				int catId = category.getID().intValue();
+
+				// Updating the category with features
+				IcecatCategory fullCategory = categoriesById.get(catId);
+				fullCategory.setFeatures(category.getFeatures());
+				fullCategory.setCategoryFeatureGroups(category.getCategoryFeatureGroups());
 				
-				for (IcecatFeature feature : category.getFeatures()) {
-					IcecatFeature fullFeature = featuresById.get(Long.valueOf(feature.getID()));
-					int categoryFeatureId =    feature.getCategoryFeature_ID();
-					int categoryFeatureGroupId = feature.getCategoryFeatureGroup_ID();
-					
-					// Update the feature
-					fullFeature.setCategoryFeature_ID(categoryFeatureId);
-			
-					FeatureGroup fg = new FeatureGroup();
-					fg.setCategoryFeatureId(categoryFeatureId);
-					fg.setCategoryFeatureGroupId(categoryFeatureGroupId);
-					
-					featureGroupsByCategoryId.computeIfAbsent(catId, k -> new ArrayList<>()).add(fg);
-				 }
-				 
-//				 for (IcecatCategoryFeatureGroup catFeatGroup :  category.getCategoryFeatureGroups()) {
-//						String fGroup = catFeatGroup.getFeatureGroup();
-//						Integer fGroupId = catFeatGroup.getID();
-////						catFeatGroup.feat
-//						for (IcecatFeatureGroup featureGroup :  catFeatGroup.getFeatureGroups()) {
-//							featureGroup.getID();
-////							featureGroup.
-////							for (IcecatFeature feature : featureGroup. )
-//							featureGroup.getNames();
-//						}
-//				 }
+//				// TODO : maintain here the feature group by category
+//				if (null != category.getFeatures()) {
+//					for (IcecatFeature feature : category.getFeatures()) {
+//						int categoryFeatureId = feature.getCategoryFeature_ID();
+//						int categoryFeatureGroupId = feature.getCategoryFeatureGroup_ID();
+//
+//						FeatureGroup fg = new FeatureGroup();
+//						fg.setCategoryFeatureId(categoryFeatureId);
+//						fg.setCategoryFeatureGroupId(categoryFeatureGroupId);
+//
+//						featureGroupsByCategoryId.computeIfAbsent(catId, k -> new ArrayList<>()).add(fg);
+//					}
+//				}
+				
+				
+
+				// Retriving the defined vertical if any
+				VerticalConfig vertical = verticalsConfigService.getByIcecatCategoryId(catId);
+				if (null != vertical) {
+					// Update the nudger vertical
+					updateVertical(category, vertical);
+				}
+				
+				
 			}
-					
-		 } catch (Exception e) {
-			LOGGER.error("Error while loading languages", e);
+		} catch (Exception e) {
+			LOGGER.error("Error while loading category features list", e);
 		}
-		 LOGGER.info("End loading of features from {}", iceCatConfig.getFeaturesListFileUri());
+		LOGGER.info("End loading of features from {}", iceCatConfig.getFeaturesListFileUri());
 	}
 	
-	
-	
+
+	/**
+	 * Update the vertical with the category features from icecat
+	 * 
+	 * @param category
+	 * @param vertical
+	 */
+	private void updateVertical(IcecatCategory category, VerticalConfig vertical) {
+
+		Map<Integer,FeatureGroup> featureGroupById = new HashMap<>();
+		
+		// TODO : We don't use the category feature group from icecat, see if relevant...
+//		if (null != category.getCategoryFeatureGroups()) {
+//			for (IcecatCategoryFeatureGroup cfg : category.getCategoryFeatureGroups()) {
+//				int cfgId = cfg.getID();
+//				
+//				List<IcecatFeatureGroup> cfgGroupId = cfg.getFeatureGroups();
+//				for (IcecatFeatureGroup fg : cfgGroupId) {
+//					int fgId = fg.getID();
+//					featureGroupById.put(cfgId, new FeatureGroup());
+//				}
+//				
+//				
+//			}
+//		}
+
+		if (null != category.getFeatures()) {
+			for (IcecatFeature feature : category.getFeatures()) {
+				
+//				IcecatFeature fullFeature = featuresById.get(Long.valueOf(feature.getID()));
+				
+				int categoryFeatureGroupId = feature.getCategoryFeatureGroup_ID();
+				int categoryFeatureId = feature.getCategoryFeature_ID();
+
+				FeatureGroup fg = vertical.getOrCreateByIceCatCategoryFeatureGroup(categoryFeatureGroupId);
+				
+				if (null != fg) {
+					// fg.setCategoryFeatureId(categoryFeatureId);
+					//fg.setCategoryFeatureGroupId(categoryFeatureGroupId);
+					
+					
+					Integer fId = Integer.valueOf(feature.getID());
+					if (fg.getFeaturesId().contains(fId)) {
+						LOGGER.warn("Feature {} already present in feature group {}", fId, fg);
+					} else {
+						fg.getFeaturesId().add(fId);
+					}
+					
+				} else {
+					LOGGER.warn("No feature group found for feature {}", feature);
+				}
+
+
+			}
+		}
+	}
+
 
 	/**
 	 * Resolve a feature name to one or more feature ID.
@@ -443,6 +494,9 @@ public class IcecatService {
 
 
 	private String normalize(String featureName) {
+		if (StringUtils.isEmpty(featureName)) {
+			return featureName;
+		}
 		return StringUtils.normalizeSpace(StringUtils.stripAccents(featureName)).toLowerCase();
 	}
 	
@@ -484,4 +538,28 @@ public class IcecatService {
 		}
 	}
 	
+	
+	// TODO : Perf, caching
+	public String getFeatureName(Long featureID, String language) {
+		
+		IcecatFeature feature = featuresById.get(featureID);
+		Integer icecatLanguage = getIceCatLangId(language);
+		if (null != feature) {
+			
+			List<IcecatName> names = feature.getNames().getNames();
+			for (IcecatName name : names) {
+				if (name.getLangId() == icecatLanguage.intValue()) {
+					return name.getValue();
+				}
+			}			
+		}
+		return "Unsolved : " + featureID + ","+ icecatLanguage;
+	}
+
+
+	private Integer getIceCatLangId(String language) {
+		// TODO : check default language is english
+		return Integer.valueOf(languageByCode.getOrDefault(language, "1"));
+//		return null;
+	}
 }
