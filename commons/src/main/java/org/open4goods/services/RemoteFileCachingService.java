@@ -1,8 +1,13 @@
 package org.open4goods.services;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.net.URL;
+import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.zip.GZIPInputStream;
 
 import org.apache.commons.compress.utils.IOUtils;
 import org.apache.commons.io.FileUtils;
@@ -12,6 +17,13 @@ import org.open4goods.helper.IdHelper;
 import org.open4goods.model.CacheResourceConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
+import org.springframework.http.client.ClientHttpRequest;
+import org.springframework.http.client.ClientHttpResponse;
+import org.springframework.web.client.RequestCallback;
+import org.springframework.web.client.ResponseExtractor;
+import org.springframework.web.client.RestTemplate;
 
 import net.lingala.zip4j.ZipFile;
 import net.lingala.zip4j.exception.ZipException;
@@ -32,6 +44,9 @@ public class RemoteFileCachingService {
 	private static final Logger logger = LoggerFactory.getLogger(RemoteFileCachingService.class);
 
 	private final String resourceFolder;
+	
+	// TODO : Inject
+	private RestTemplate restTemplate = new RestTemplate();
 
 
 	public RemoteFileCachingService(final String resourceFolder) {
@@ -88,7 +103,7 @@ public class RemoteFileCachingService {
 
 
 			if (conf.getUnzip()) {
-				destFile = unzip(tmpFile,destFile,conf);
+				destFile = unzip(tmpFile,destFile,conf.getExtractedFileName());
 			} else {
 				tmpFile.renameTo(destFile);
 			}
@@ -103,8 +118,33 @@ public class RemoteFileCachingService {
 		}
 	}
 
+	
+	
+	// TODO : Mutualize with CsvIndexationWorker
+    public  void decompressGzipFile(File gzipFile, File newFile) {
+        try {
+            FileInputStream fis = new FileInputStream(gzipFile);
+            GZIPInputStream gis = new GZIPInputStream(fis);
+            FileOutputStream fos = new FileOutputStream(newFile);
+            byte[] buffer = new byte[1024];
+            int len;
+            while((len = gis.read(buffer)) != -1){
+                fos.write(buffer, 0, len);
+            }
+            //close resources
+            fos.close();
+            gis.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        
+    }
+    
+    
+    
 
-	private File unzip(final File tmpFile, final File destFile, final CacheResourceConfig conf) throws ZipException {
+	// TODO : Should not expose the tmpFile
+	public File unzip(final File tmpFile, final File destFile, String fileToKeep) throws ZipException {
 		final ZipFile zipFile = new ZipFile(tmpFile);
 		//		File zipedDestFile = File.createTempFile("csv_zipped", dsProperties.getName());
 
@@ -122,7 +162,7 @@ public class RemoteFileCachingService {
 		if (zipedDestFolder.list().length > 1) {
 
 			for (final File child : zipedDestFolder.listFiles()) {
-				if (child.getName().equals(conf.getExtractedFileName())) {
+				if (null != fileToKeep && child.getName().equals(fileToKeep)) {
 					res = child;
 					break;
 				}
@@ -143,9 +183,15 @@ public class RemoteFileCachingService {
 
 	}
 
-
+	/**
+	 * TODO : Should use a streamed, threaded pool caped version
+	 * @param url
+	 * @param tmpFile
+	 * @return
+	 * @throws TechnicalException
+	 */
 	public File download(final String url,final File tmpFile) throws TechnicalException {
-		// local file download, then estimate number of rows
+
 
 		try {
 			logger.info("Downloading resource  from {} to {}", url, tmpFile);
@@ -154,6 +200,40 @@ public class RemoteFileCachingService {
 		} catch (Exception e) {
 			throw new TechnicalException("Cannot download resource " + url  + " : " + e.getMessage());
 		}
+	}
+	
+	
+	/**
+	 * TODO : Should mutualize
+	 * @param user
+	 * @param password
+	 * @param url
+	 * @param dest
+	 * @return
+	 */
+	public void downloadTo( String user, String password, String url, File dest ){
+		restTemplate.execute(
+			    url,
+			    HttpMethod.POST,
+			    new RequestCallback() {
+			        @Override
+			        public void doWithRequest(ClientHttpRequest request) throws IOException {
+			        	if (user != null && password != null) {
+			        		request.getHeaders().add("Authorization", "Basic " + Base64.getEncoder().encodeToString((user + ":"+password) .getBytes()));			        		
+			        	}
+			        }
+			    },
+			    new ResponseExtractor<ResponseEntity<Void>>() {
+			        @Override
+			        public ResponseEntity<Void> extractData(ClientHttpResponse response) throws IOException {
+			            FileOutputStream fos = new FileOutputStream(dest);
+			        	IOUtils.copy(response.getBody(), fos);
+			        	fos.close();
+						return null;
+			        }
+			    }
+			);
+
 	}
 
 }

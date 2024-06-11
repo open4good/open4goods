@@ -115,11 +115,15 @@ public class DataFragmentStoreService {
 //	@Timed(value = "queueDataFragment", description = "Validation, standardisation and addding to queue a DataFragment")
 	public void queueDataFragment(final DataFragment data) throws ValidationException {
 
-		
-		preHandle(data);
-		logger.debug("Queuing datafragment {}",data);
-
-		enqueue(data);
+		if (data.isBrandFragment()) {
+			logger.debug("Skipping brand fragment classical indexation {}",data);
+		} else {
+			preHandle(data);
+			logger.debug("Queuing datafragment {}",data);
+			
+			enqueue(data);
+			
+		}
 	}
 
 	/**

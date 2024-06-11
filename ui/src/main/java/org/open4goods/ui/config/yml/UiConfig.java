@@ -7,10 +7,11 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-import org.open4goods.config.BrandConfiguration;
+import org.open4goods.config.BrandsConfiguration;
 import org.open4goods.config.yml.BlogConfiguration;
 import org.open4goods.config.yml.DevModeConfiguration;
 import org.open4goods.config.yml.FeedbackConfiguration;
+import org.open4goods.config.yml.IcecatConfiguration;
 import org.open4goods.config.yml.ui.ApiConfig;
 import org.open4goods.config.yml.ui.OpenSearchConfig;
 import org.open4goods.config.yml.ui.SiteNaming;
@@ -124,6 +125,14 @@ public class UiConfig {
 
 
 	/**
+	 * The configuration for icecat features
+     
+	 */
+	private IcecatConfiguration icecatFeatureConfig = new IcecatConfiguration();
+	
+	
+	
+	/**
 	 * The Xwiki instance configuration
 	 */
 	private XWikiServiceProperties wikiConfig = new XWikiServiceProperties();
@@ -168,7 +177,7 @@ public class UiConfig {
 	 * Configuration for the brand service
 	 */
 
-	private BrandConfiguration brandConfig;
+	private BrandsConfiguration brandConfig = new BrandsConfiguration();
 	
 	/**
 	 * The list of reversments (cashback) to ecologgical organisations
@@ -339,12 +348,12 @@ public class UiConfig {
 	}
 
 
-	public BrandConfiguration getBrandConfig() {
+	public BrandsConfiguration getBrandConfig() {
 		return brandConfig;
 	}
 
 
-	public void setBrandConfig(BrandConfiguration brandConfig) {
+	public void setBrandConfig(BrandsConfiguration brandConfig) {
 		this.brandConfig = brandConfig;
 	}
 
@@ -440,6 +449,16 @@ public class UiConfig {
 
 	public void setTagListUrl(String tagListUrl) {
 		this.tagListUrl = tagListUrl;
+	}
+
+
+	public IcecatConfiguration getIcecatFeatureConfig() {
+		return icecatFeatureConfig;
+	}
+
+
+	public void setIcecatFeatureConfig(IcecatConfiguration icecatFeatureConfig) {
+		this.icecatFeatureConfig = icecatFeatureConfig;
 	}
 
 	

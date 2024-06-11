@@ -1,7 +1,9 @@
 
 package org.open4goods.model.attribute;
 
+import java.util.HashSet;
 import java.util.Objects;
+import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
 import org.open4goods.exceptions.ValidationException;
@@ -44,6 +46,8 @@ public class Attribute implements Validable,IAttribute {
 	@Field(index = false, store = false, type = FieldType.Keyword)
 	private String rawValue;
 
+
+	
 	public Attribute() {
 
 	}
@@ -300,6 +304,7 @@ public class Attribute implements Validable,IAttribute {
 	public String getValue() {
 		return rawValue;
 	}
+
 
 
 

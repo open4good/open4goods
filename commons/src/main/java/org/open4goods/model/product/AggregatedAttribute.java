@@ -46,6 +46,14 @@ public class AggregatedAttribute implements IAttribute {
 	@Field(index = false, store = false, type = FieldType.Object)
 	private Set<UnindexedKeyValTimestamp> sources = new HashSet<>();
 
+	
+	/**
+	 * The attribute raw rawValue
+	 */
+	@Field(index = false, store = false, type = FieldType.Keyword)
+	private Set<Long> icecatTaxonomyIds = new HashSet<>();
+	
+	
 	/**
 	 * Number of sources for this attribute
 	 * 
@@ -263,5 +271,15 @@ public class AggregatedAttribute implements IAttribute {
 	public void setNumericValue(Double numericValue) {
 		this.numericValue = numericValue;
 	}
+
+	public Set<Long> getIcecatTaxonomyIds() {
+		return icecatTaxonomyIds;
+	}
+
+	public void setIcecatTaxonomyIds(Set<Long> icecatTaxonomyIds) {
+		this.icecatTaxonomyIds = icecatTaxonomyIds;
+	}
+	
+	
 
 }
