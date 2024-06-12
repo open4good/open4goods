@@ -13,8 +13,8 @@ import org.open4goods.model.constants.Currency;
 import org.open4goods.model.data.Price;
 import org.open4goods.model.product.Product;
 import org.open4goods.services.*;
-import org.open4goods.services.ai.AiAgent;
-import org.open4goods.services.ai.AiService;
+//import org.open4goods.services.ai.AiAgent;
+//import org.open4goods.services.ai.AiService;
 import org.open4goods.store.repository.elastic.BrandRepository;
 import org.open4goods.ui.config.yml.UiConfig;
 import org.open4goods.ui.controllers.ui.UiService;
@@ -25,7 +25,8 @@ import org.open4goods.ui.services.OpenDataService;
 import org.open4goods.ui.services.SitemapGenerationService;
 import org.open4goods.ui.services.todo.TodoService;
 import org.open4goods.xwiki.services.XwikiFacadeService;
-import org.springframework.ai.image.ImageClient;
+import org.springframework.ai.image.ImageModel;
+import org.springframework.ai.openai.OpenAiImageModel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.web.client.ClientHttpRequestFactories;
 import org.springframework.boot.web.client.ClientHttpRequestFactorySettings;
@@ -119,8 +120,8 @@ public class AppConfig {
 	}
 
 	@Bean
-	public ImageGenerationService imageGenerationService(@Autowired ImageClient imageClient, @Autowired UiConfig uiConfig) {
-		return new ImageGenerationService(imageClient, uiConfig.getImageGenerationConfig(), uiConfig.getGeneratedImagesFolder());
+	public ImageGenerationService imageGenerationService(@Autowired OpenAiImageModel imageModel, @Autowired UiConfig uiConfig) {
+		return new ImageGenerationService(imageModel, uiConfig.getImageGenerationConfig(), uiConfig.getGeneratedImagesFolder());
 	}
 	  
 	@Bean
@@ -133,19 +134,19 @@ public class AppConfig {
 		return new ImageService(imageMagickService, resourceService);
 	}
 
-	@Bean
-	@Autowired  
-	AiService aiService (AiAgent nudgerAgent, VerticalsConfigService verticalService, EvaluationService spelEvaluationService) {
-		return new AiService(nudgerAgent, verticalService, spelEvaluationService);
-	}
-	
-	 @Bean
-	 AiAgent nudgerAgent(@Autowired ChatLanguageModel chatLanguageModel) {
-	        return AiServices.builder(AiAgent.class)
-	                .chatLanguageModel(chatLanguageModel)	                
-//	                .retriever(retriever)
-	                .build();
-	    }
+//	@Bean
+//	@Autowired
+//	AiService aiService (AiAgent nudgerAgent, VerticalsConfigService verticalService, EvaluationService spelEvaluationService) {
+//		return new AiService(nudgerAgent, verticalService, spelEvaluationService);
+//	}
+//
+//	 @Bean
+//	 AiAgent nudgerAgent(@Autowired ChatLanguageModel chatLanguageModel) {
+//	        return AiServices.builder(AiAgent.class)
+//	                .chatLanguageModel(chatLanguageModel)
+////	                .retriever(retriever)
+//	                .build();
+//	    }
 
 	/** Override the default RestTemplate with a custom one that has a longer timeout (For ImageGenerationService) **/
 	@Bean

@@ -1,11 +1,15 @@
 package org.open4goods.services;
 
 import org.open4goods.config.yml.ui.ImageGenerationConfig;
-import org.open4goods.config.yml.ui.VerticalConfig;
-import org.springframework.ai.image.*;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.ai.image.ImageOptions;
+import org.springframework.ai.image.ImageOptionsBuilder;
+import org.springframework.ai.image.ImagePrompt;
+import org.springframework.ai.image.ImageResponse;
+import org.springframework.ai.openai.OpenAiImageModel;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -20,12 +24,12 @@ import java.net.URL;
 public class ImageGenerationService {
 
     private static final Logger logger = LoggerFactory.getLogger(ImageGenerationService.class);
-    private final ImageClient imageClient;
+    private final OpenAiImageModel imageModel;
     private final ImageGenerationConfig imageGenerationConfig;
     private String imagesFolder;
 
-    public ImageGenerationService(ImageClient imageClient, ImageGenerationConfig imageGenerationConfig, String imagesFolder) {
-        this.imageClient = imageClient;
+    public ImageGenerationService(OpenAiImageModel imageModel, ImageGenerationConfig imageGenerationConfig, String imagesFolder) {
+        this.imageModel = imageModel;
         this.imageGenerationConfig = imageGenerationConfig;
         this.imagesFolder = imagesFolder;
     }
@@ -37,7 +41,7 @@ public class ImageGenerationService {
                 .withWidth(1024)
                 .build();
 
-        return imageClient.call(new ImagePrompt(promptContent, imageOptions));
+        return imageModel.call(new ImagePrompt(promptContent, imageOptions));
     }
 
     public File saveImage(String imageUrl, String fileName) throws IOException {

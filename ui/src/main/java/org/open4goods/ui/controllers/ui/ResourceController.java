@@ -49,16 +49,14 @@ public class ResourceController {
 	private final DataSourceConfigService datasourceConfigService;
 	private final BrandService brandService;
 	private final ResourceService resourceService;
-	private final VerticalsConfigService verticalsConfigService;
 
-	public ResourceController(ImageService imageService,  UiConfig config, DataSourceConfigService dsConfigService, ResourceService resourceService, VerticalsConfigService verticalConfigService, BrandService brandService, ImageGenerationService imageGenerationService, VerticalsConfigService verticalsConfigService) {
+	public ResourceController(ImageService imageService,  UiConfig config, DataSourceConfigService dsConfigService, ResourceService resourceService, BrandService brandService, ImageGenerationService imageGenerationService) {
 		this.imageService = imageService;
 		this.imageGenerationService = imageGenerationService;
 		this.config = config;
 		this.datasourceConfigService = dsConfigService;
 		this.brandService = brandService;
 		this.resourceService = resourceService;
-		this.verticalsConfigService = verticalsConfigService;
 	}
 
 
@@ -233,15 +231,6 @@ public class ResourceController {
 		} catch (IOException e) {
 			throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Error rendering image", e);
 		}
-	}
-
-	@PostMapping("/images/verticals/{verticalId}/regenerate")
-	public ResponseEntity<String> regenerateVerticalImage(@PathVariable String verticalId) throws IOException {
-			VerticalConfig verticalConfig = verticalsConfigService.getConfigById(verticalId);
-			String verticalTitle = verticalConfig.getI18n().get("default").getVerticalHomeTitle();
-			String fileName = verticalId + ".png";
-			imageGenerationService.fullGenerate(verticalTitle, fileName);
-			return ResponseEntity.ok("/images/verticals/" + fileName);
 	}
 
 }
