@@ -62,15 +62,15 @@ apiConfig:
   apiLicence: "May vary"
 
 # Configuration for the langchain chat model            
-langchain4j:
-  open-ai:
-    chat-model:
-      api-key: YOUR API KEY
-      model-name: gpt-4o
-      temperature: 0.0
-      timeout: PT60S
-      log-requests: false
-      log-responses: false
+#langchain4j:
+#  open-ai:
+#    chat-model:
+#      api-key: YOUR API KEY
+#      model-name: gpt-4o
+#      temperature: 0.0
+#      timeout: PT60S
+#      log-requests: false
+#      log-responses: false
 
 
 tagListUrl: https://open4good.github.io/open4goods/maven/taglist/taglist.xml 

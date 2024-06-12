@@ -1,26 +1,31 @@
 package org.open4goods.ui.controllers.ui;
 
+import org.open4goods.config.yml.ui.VerticalConfig;
 import org.open4goods.dao.ProductRepository;
 import org.open4goods.exceptions.ResourceNotFoundException;
 import org.open4goods.model.constants.RolesConstants;
 import org.open4goods.model.product.Product;
 import org.open4goods.services.ImageGenerationService;
 import org.open4goods.services.VerticalsConfigService;
-import org.open4goods.services.ai.AiService;
+//import org.open4goods.services.ai.AiService;
 import org.open4goods.ui.config.yml.UiConfig;
 import org.open4goods.ui.services.SitemapGenerationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.ModelAndView;
 
 import jakarta.servlet.http.HttpServletRequest;
+
+import java.io.IOException;
 
 @Controller
 
@@ -43,20 +48,23 @@ public class AdminController {
 
 	private final SitemapGenerationService sitemapService;
 
-	private final AiService aiService;
+//	private final AiService aiService;
 
 	private ProductRepository repository;
 
 	private ImageGenerationService imageGenerationService;
 
-	public AdminController(UiConfig config, VerticalsConfigService verticalsConfigService, AiService aiService,
+	private VerticalsConfigService verticalsConfigService;
+
+	public AdminController(UiConfig config, VerticalsConfigService verticalsConfigService,
 			ProductRepository repository, SitemapGenerationService sitemapService, ImageGenerationService imageGenerationService) {
 		this.config = config;
 		this.verticalService = verticalsConfigService;
 		this.sitemapService = sitemapService;
-		this.aiService = aiService;
+//		this.aiService = aiService;
 		this.repository = repository;
 		this.imageGenerationService = imageGenerationService;
+		this.verticalsConfigService = verticalsConfigService;
 	}
 
 	//////////////////////////////////////////////////////////////
@@ -82,33 +90,33 @@ public class AdminController {
 		return mv;
 	}
 
-	/**
-	 * reload verticals config
-	 * 
-	 * @param request
-	 * @return
-	 * @throws ResourceNotFoundException
-	 */
-	@GetMapping("/aiAssist")
-	@PreAuthorize("hasAuthority('" + RolesConstants.ROLE_XWIKI_ALL + "')")
-	public ModelAndView aiAssist(final HttpServletRequest request,
-			@RequestParam(name = "r", required = false) String redircectUrl,
-			@RequestParam(name = "gtin", required = false) String gtin) throws ResourceNotFoundException {
-
-		Product data = repository.getById(gtin);
-
-		// We always force when human triggered
-		aiService.complete(data, configService.getConfigByIdOrDefault(data.getVertical()),true);
-
-		repository.forceIndex(data);
-
-		ModelAndView mv = null;
-		if (null != redircectUrl) {
-			mv = new ModelAndView("redirect:" + redircectUrl);
-			mv.setStatus(HttpStatus.MOVED_TEMPORARILY);
-		}
-		return mv;
-	}
+//	/**
+//	 * reload verticals config
+//	 *
+//	 * @param request
+//	 * @return
+//	 * @throws ResourceNotFoundException
+//	 */
+//	@GetMapping("/aiAssist")
+//	@PreAuthorize("hasAuthority('" + RolesConstants.ROLE_XWIKI_ALL + "')")
+//	public ModelAndView aiAssist(final HttpServletRequest request,
+//			@RequestParam(name = "r", required = false) String redircectUrl,
+//			@RequestParam(name = "gtin", required = false) String gtin) throws ResourceNotFoundException {
+//
+//		Product data = repository.getById(gtin);
+//
+//		// We always force when human triggered
+//		aiService.complete(data, configService.getConfigByIdOrDefault(data.getVertical()),true);
+//
+//		repository.forceIndex(data);
+//
+//		ModelAndView mv = null;
+//		if (null != redircectUrl) {
+//			mv = new ModelAndView("redirect:" + redircectUrl);
+//			mv.setStatus(HttpStatus.MOVED_TEMPORARILY);
+//		}
+//		return mv;
+//	}
 
 	/**
 	 * reload verticals config 
@@ -133,5 +141,16 @@ public class AdminController {
 //
 //
 //	}
+
+//	@PostMapping("/images/verticals/{verticalId}/regenerate")
+	@PostMapping("regenerate/{verticalId}")
+//	@PreAuthorize("hasAuthority('"+RolesConstants.ROLE_XWIKI_ALL+"')")
+	public ResponseEntity<String> regenerateVerticalImage(@PathVariable String verticalId) throws IOException {
+		VerticalConfig verticalConfig = verticalsConfigService.getConfigById(verticalId);
+		String verticalTitle = verticalConfig.getI18n().get("default").getVerticalHomeTitle();
+		String fileName = verticalId + ".png";
+		imageGenerationService.fullGenerate(verticalTitle, fileName);
+		return ResponseEntity.ok("/images/verticals/" + fileName);
+	}
 
 }
