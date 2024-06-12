@@ -35,7 +35,7 @@
 		<table class="table">
 			<th:block th:each="feature,stat : ${featureGroup.featuresId}">
 				<tr th:if="${stat.first}">
-					<th colspan="2" class="h2  m-2 "><strong th:text="${featureGroup.name.i18n(siteLanguange)}"></strong></th>			
+					<th colspan="2" class="h2  m-2 "><strong th:text="${featureGroup.name.i18n(#locale)}"></strong></th>			
 				</tr>
 			
 				<tr th:with="attr = ${product.attributes.attributeByFeatureId(feature)}" >

@@ -48,7 +48,11 @@ public class AggregatedAttributes  {
 	
 
 	// TODO : performance
-	public AggregatedAttribute attributeByFeatureId(String featureId) {
+	public AggregatedAttribute attributeByFeatureId(Integer featureId) {
+		if (null == featureId) {
+			return null;
+		}
+		
 		AggregatedAttribute ret = unmapedAttributes.stream().filter(a -> a.getIcecatTaxonomyIds().contains(Long.valueOf(featureId))).findFirst()
 				.orElse(null);
 				return ret;

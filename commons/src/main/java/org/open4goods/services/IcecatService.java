@@ -94,11 +94,14 @@ public class IcecatService {
 		this.googleTaxonomyService = gTaxo;
 		this.verticalsConfigService = verticalsConfigService;
 
+		try {
+			icecatInit();
+		} catch (TechnicalException e) {
+			LOGGER.error("Error while initializing Icecat", e);
+		}
 	}
 
 
-	@PostConstruct
-	//TODO : PArametize to not load full content on ui and api side
 	public void icecatInit () throws TechnicalException {
 		
 		// Orders matters
