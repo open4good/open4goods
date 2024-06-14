@@ -37,7 +37,11 @@
 			<version>${global.version}</version>
 		</dependency>
 		
-
+		<dependency>
+			<groupId>org.springframework.ai</groupId>
+			<artifactId>spring-ai-openai-spring-boot-starter</artifactId>
+			<version>1.0.0-SNAPSHOT</version>
+		</dependency>
 
 		<dependency>
 			<groupId>com.ibm.icu</groupId>
