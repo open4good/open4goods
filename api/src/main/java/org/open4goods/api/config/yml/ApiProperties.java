@@ -10,6 +10,7 @@ import org.open4goods.config.BrandConfiguration;
 import org.open4goods.config.yml.DevModeConfiguration;
 import org.open4goods.config.yml.GithubConfiguration;
 import org.open4goods.config.yml.ui.DescriptionsAggregationConfig;
+import org.open4goods.config.yml.ui.ImageGenerationConfig;
 import org.open4goods.crawler.config.yml.FetcherProperties;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -55,7 +56,11 @@ public class ApiProperties {
 	 */
 	private String datafragmentsBackupFolder = rootFolder + "backup"+File.separator+"data"+File.separator;
 
-		
+	/**
+	 * Folder where AI generated images are stored
+	 */
+	private String generatedImagesFolder = rootFolder + "generated-images" + File.separator;
+	
 	/*
 	 * Proxy, if neededpsule
 	 */
@@ -136,6 +141,11 @@ public class ApiProperties {
 	private boolean operatesLanguageDetection = false;
 
 
+	/**
+	 * Config gor IA Generated images
+	 */
+	private ImageGenerationConfig imageGenerationConfig = new ImageGenerationConfig();
+	
 	/**
 	 * Configuration for the brand service
 	 */
@@ -504,6 +514,30 @@ public class ApiProperties {
 
 	public void setIcecatConfig(IcecatCompletionConfig icecatConfig) {
 		this.icecatConfig = icecatConfig;
+	}
+
+
+
+	public String getGeneratedImagesFolder() {
+		return generatedImagesFolder;
+	}
+
+
+
+	public void setGeneratedImagesFolder(String generatedImagesFolder) {
+		this.generatedImagesFolder = generatedImagesFolder;
+	}
+
+
+
+	public ImageGenerationConfig getImageGenerationConfig() {
+		return imageGenerationConfig;
+	}
+
+
+
+	public void setImageGenerationConfig(ImageGenerationConfig imageGenerationConfig) {
+		this.imageGenerationConfig = imageGenerationConfig;
 	}
 
 
