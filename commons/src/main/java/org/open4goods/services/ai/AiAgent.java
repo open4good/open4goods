@@ -1,12 +1,12 @@
-//package org.open4goods.services.ai;
+package org.open4goods.services.ai;
+
+import dev.langchain4j.service.SystemMessage;
+
+public interface AiAgent {
 //
-//import dev.langchain4j.service.SystemMessage;
+//    @SystemMessage({
+//            "You are a review writer, specialized in technologies and environmental concerns",
 //
-//public interface AiAgent {
-////
-////    @SystemMessage({
-////            "You are a review writer, specialized in technologies and environmental concerns",
-////
-////    })
-//    String chat(String userMessage);
-//}
+//    })
+    String chat(String userMessage);
+}

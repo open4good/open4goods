@@ -127,21 +127,23 @@
 
 		<section class="container py-5">
 			<div class="row">
-				<div class="col-12 col-md-6 col-lg-3 mb-3" th:each ="vertical : ${verticals}">
-					<a th:href="'/'+${vertical.i18n(siteLanguage).verticalHomeUrl}" >
+				<div class="col-12 col-md-6 col-lg-3 mb-3" th:each="vertical : ${verticals}">
+					<a th:href="'/'+${vertical.i18n(siteLanguage).verticalHomeUrl}">
 						<div class="card card-flip shadow">
 							<div class="card-flip-inner">
-								   <div class="wrapper-card-img">
-										<img th:src="'/images/verticals/' + ${vertical.id} + '.png'" class="card-img-top rounded-top" alt="img TV">
-									</div>
-									<div class="card-body bg-primary">
-										<h3 class="h5 card-title text-white mt-3" th:text="${vertical.i18n(siteLanguage).verticalHomeTitle}"></h3>
-										<p class="card-text" th:text="${vertical.i18n(siteLanguage).verticalHomeDescription}"></p>
-										<span class="btn btn-primary btn-sm">Découvrir</span>
+								<div class="wrapper-card-img">
+									<img th:src="'/images/verticals/' + ${vertical.id} + '.png'" class="card-img-top rounded-top" alt="img TV">
+								</div>
+								<div class="card-body bg-primary">
+									<h3 class="h5 card-title text-white mt-3" th:text="${vertical.i18n(siteLanguage).verticalHomeTitle}"></h3>
+									<p class="card-text" th:text="${vertical.i18n(siteLanguage).verticalHomeDescription}"></p>
+									<span class="btn btn-primary btn-sm">Découvrir</span>
+<!--									<div th:if="${editor}">-->
 										<form id="regenerate-form-${vertical.id}" th:action="@{'/regenerate/' + ${vertical.id}}" method="post" target="hidden-iframe-${vertical.id}">
 											<button type="submit" class="btn btn-warning btn-sm">Changer l'image</button>
 										</form>
-									</div>
+<!--									</div>-->
+								</div>
 							</div>
 						</div>
 					</a>
