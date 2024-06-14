@@ -37,7 +37,7 @@ import java.io.IOException;
  */
 public class AdminController {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(AdminController.class);
+	private static final Logger logger = LoggerFactory.getLogger(AdminController.class);
 
 	// The siteConfig
 	private final UiConfig config;
@@ -142,7 +142,6 @@ public class AdminController {
 //
 //	}
 
-//	@PostMapping("/images/verticals/{verticalId}/regenerate")
 	@PostMapping("regenerate/{verticalId}")
 //	@PreAuthorize("hasAuthority('"+RolesConstants.ROLE_XWIKI_ALL+"')")
 	public ResponseEntity<String> regenerateVerticalImage(@PathVariable String verticalId) throws IOException {
@@ -150,6 +149,7 @@ public class AdminController {
 		String verticalTitle = verticalConfig.getI18n().get("default").getVerticalHomeTitle();
 		String fileName = verticalId + ".png";
 		imageGenerationService.fullGenerate(verticalTitle, fileName);
+		logger.info("Image for vertical {} with title '{}' has been regenerated", verticalId, verticalTitle);
 		return ResponseEntity.ok("/images/verticals/" + fileName);
 	}
 
