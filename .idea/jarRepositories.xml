@@ -17,14 +17,14 @@
       <option name="url" value="https://repo1.maven.org/maven2" />
     </remote-repository>
     <remote-repository>
-      <option name="id" value="in-project" />
-      <option name="name" value="In Project Repo" />
-      <option name="url" value="file://C:\Users\Louis\Code\Forks\open4goods\crawler/libs" />
-    </remote-repository>
-    <remote-repository>
       <option name="id" value="spring-snapshots" />
       <option name="name" value="Spring Snapshots" />
       <option name="url" value="https://repo.spring.io/snapshot" />
+    </remote-repository>
+    <remote-repository>
+      <option name="id" value="in-project" />
+      <option name="name" value="In Project Repo" />
+      <option name="url" value="file://C:\Users\Louis\Code\Forks\open4goods\crawler/libs" />
     </remote-repository>
     <remote-repository>
       <option name="id" value="jboss.community" />
