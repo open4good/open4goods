@@ -12,7 +12,23 @@ import org.open4goods.model.constants.CacheConstants;
 import org.open4goods.model.constants.Currency;
 import org.open4goods.model.data.Price;
 import org.open4goods.model.product.Product;
-import org.open4goods.services.*;
+import org.open4goods.services.BarcodeValidationService;
+import org.open4goods.services.BrandService;
+import org.open4goods.services.DataSourceConfigService;
+import org.open4goods.services.EvaluationService;
+import org.open4goods.services.FeedbackService;
+import org.open4goods.services.GoogleTaxonomyService;
+import org.open4goods.services.ImageGenerationService;
+import org.open4goods.services.ImageMagickService;
+import org.open4goods.services.MailService;
+import org.open4goods.services.RecaptchaService;
+import org.open4goods.services.RemoteFileCachingService;
+import org.open4goods.services.ResourceService;
+import org.open4goods.services.SearchService;
+import org.open4goods.services.SerialisationService;
+import org.open4goods.services.StandardiserService;
+import org.open4goods.services.VerticalsConfigService;
+import org.open4goods.services.ai.AiService;
 //import org.open4goods.services.ai.AiAgent;
 //import org.open4goods.services.ai.AiService;
 import org.open4goods.store.repository.elastic.BrandRepository;
@@ -25,7 +41,7 @@ import org.open4goods.ui.services.OpenDataService;
 import org.open4goods.ui.services.SitemapGenerationService;
 import org.open4goods.ui.services.todo.TodoService;
 import org.open4goods.xwiki.services.XwikiFacadeService;
-import org.springframework.ai.image.ImageModel;
+import org.springframework.ai.openai.OpenAiChatModel;
 import org.springframework.ai.openai.OpenAiImageModel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.web.client.ClientHttpRequestFactories;
@@ -51,9 +67,6 @@ import org.springframework.web.servlet.i18n.LocaleChangeInterceptor;
 
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.Ticker;
-
-import dev.langchain4j.model.chat.ChatLanguageModel;
-import dev.langchain4j.service.AiServices;
 
 @Configuration
 public class AppConfig {
@@ -128,25 +141,21 @@ public class AppConfig {
 	FeedbackService feedbackService(@Autowired UiConfig config) {
 		return new FeedbackService(config.getFeedbackConfig());
 	}
+
 	  
+	
 	@Bean
 	ImageService imageService(@Autowired ImageMagickService imageMagickService, @Autowired ResourceService resourceService) {
 		return new ImageService(imageMagickService, resourceService);
 	}
 
-//	@Bean
-//	@Autowired
-//	AiService aiService (AiAgent nudgerAgent, VerticalsConfigService verticalService, EvaluationService spelEvaluationService) {
-//		return new AiService(nudgerAgent, verticalService, spelEvaluationService);
-//	}
-//
-//	 @Bean
-//	 AiAgent nudgerAgent(@Autowired ChatLanguageModel chatLanguageModel) {
-//	        return AiServices.builder(AiAgent.class)
-//	                .chatLanguageModel(chatLanguageModel)
-////	                .retriever(retriever)
-//	                .build();
-//	    }
+	@Bean
+	@Autowired
+	AiService aiService (OpenAiChatModel chatModel, VerticalsConfigService verticalService, EvaluationService spelEvaluationService) {
+		return new AiService(chatModel, verticalService, spelEvaluationService);
+	}
+
+
 
 	/** Override the default RestTemplate with a custom one that has a longer timeout (For ImageGenerationService) **/
 	@Bean
