@@ -41,7 +41,6 @@ import org.open4goods.services.DataSourceConfigService;
 import org.open4goods.services.EvaluationService;
 import org.open4goods.services.GoogleTaxonomyService;
 import org.open4goods.services.Gs1PrefixService;
-import org.open4goods.services.IcecatService;
 import org.open4goods.services.ImageMagickService;
 import org.open4goods.services.RemoteFileCachingService;
 import org.open4goods.services.ResourceService;
@@ -49,7 +48,6 @@ import org.open4goods.services.SearchService;
 import org.open4goods.services.SerialisationService;
 import org.open4goods.services.StandardiserService;
 import org.open4goods.services.VerticalsConfigService;
-import org.open4goods.services.ai.AiAgent;
 import org.open4goods.services.ai.AiService;
 import org.open4goods.services.textgen.BlablaService;
 import org.open4goods.store.repository.elastic.BrandScoresRepository;
@@ -57,6 +55,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springdoc.core.customizers.OpenApiCustomizer;
 import org.springdoc.core.models.GroupedOpenApi;
+import org.springframework.ai.openai.OpenAiImageModel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.cache.CacheManager;
@@ -79,8 +78,6 @@ import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.Ticker;
 
-import dev.langchain4j.model.chat.ChatLanguageModel;
-import dev.langchain4j.service.AiServices;
 //import io.micrometer.core.aop.TimedAspect;
 //import io.micrometer.core.instrument.MeterRegistry;
 import io.swagger.v3.oas.models.Components;
@@ -171,15 +168,19 @@ public class ApiConfig {
     FeedService feedService(SerialisationService serialisationService, DataSourceConfigService datasourceConfigService, CsvDatasourceFetchingService fetchingService,FetcherProperties  fetcherProperties) {
 		return new FeedService(serialisationService, datasourceConfigService, fetchingService, fetcherProperties.getFeedConfigs());
     }
-   
-    	
-	
+
+
 	@Bean
 	@Autowired
-	VerticalsConfigService verticalConfigsService(ResourcePatternResolver resolver,  SerialisationService serialisationService,  GoogleTaxonomyService googleTaxonomyService, ProductRepository productRepository) throws IOException {
-		return new VerticalsConfigService(serialisationService,apiProperties.getVerticalsFolder(), googleTaxonomyService, productRepository, resolver);
+	VerticalsConfigService verticalConfigsService(ResourcePatternResolver resolver, SerialisationService serialisationService, GoogleTaxonomyService googleTaxonomyService, ProductRepository productRepository, ImageGenerationService imageGenService) throws IOException {
+		return new VerticalsConfigService(serialisationService,apiProperties.getVerticalsFolder(), googleTaxonomyService, productRepository, resolver,imageGenService);
 	}
-
+	
+	@Bean
+	public ImageGenerationService imageGenerationService(@Autowired OpenAiImageModel imageModel) {
+		return new ImageGenerationService(imageModel, apiProperties.getImageGenerationConfig(), apiProperties.getGeneratedImagesFolder());
+	}
+	  
 	
 	@Bean
 	SearchService searchService(@Autowired ProductRepository aggregatedDataRepository, @Autowired  String logsFolder) {
@@ -191,11 +192,7 @@ public class ApiConfig {
 		return new BrandService(properties.getBrandConfig(),  rfc, brandRepository);
 	}
 
-	@Bean
-	@Autowired  
-	AiService aiService (AiAgent nudgerAgent, VerticalsConfigService verticalService, EvaluationService spelEvaluationService) {
-		return new AiService(nudgerAgent, verticalService, spelEvaluationService);
-	}
+
 
 	@Bean
 	@Autowired  
@@ -227,14 +224,7 @@ public class ApiConfig {
         
         return gts;
 	}
-    
-	 @Bean
-	 AiAgent nudgerAgent(@Autowired ChatLanguageModel chatLanguageModel) {
-	        return AiServices.builder(AiAgent.class)
-	                .chatLanguageModel(chatLanguageModel)	                
-//	                .retriever(retriever)
-	                .build();
-	    }
+
 	 
 	@Bean
 	AggregationFacadeService realtimeAggregationService( @Autowired EvaluationService evaluationService,

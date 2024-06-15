@@ -11,7 +11,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
+import jakarta.annotation.PreDestroy;
 import org.open4goods.config.yml.ui.VerticalConfig;
 import org.open4goods.dao.ProductRepository;
 import org.open4goods.model.constants.CacheConstants;
@@ -45,13 +49,13 @@ public class VerticalsConfigService {
 	private SerialisationService serialisationService;
 
 	private final Map<String, VerticalConfig> configs = new ConcurrentHashMap<>(100);
-	
+
 	private final Map<String,VerticalConfig> categoriesToVertical = new ConcurrentHashMap<>();
 
 	private Map<String,VerticalConfig> byUrl = new HashMap<>();
 
 	private Map<String,String> toLang = new HashMap<>();
-	
+
 	private Map<Integer,VerticalConfig> byTaxonomy = new HashMap<>();
 
 	private String verticalsFolder;
@@ -61,14 +65,21 @@ public class VerticalsConfigService {
 	private GoogleTaxonomyService googleTaxonomyService;
 
 	private ResourcePatternResolver resourceResolver;
-	
-	public VerticalsConfigService(SerialisationService serialisationService, String verticalsFolder, GoogleTaxonomyService googleTaxonomyService, ProductRepository productRepository, ResourcePatternResolver resourceResolver) {
+
+	private ImageGenerationService imageGenerationService;
+
+	//
+	private final ExecutorService executorService = Executors.newFixedThreadPool(1);
+
+
+	public VerticalsConfigService(SerialisationService serialisationService, String verticalsFolder, GoogleTaxonomyService googleTaxonomyService, ProductRepository productRepository, ResourcePatternResolver resourceResolver, ImageGenerationService imageGenerationService) {
 		super();
 		this.serialisationService = serialisationService;
 		this.verticalsFolder = verticalsFolder;
 		this.googleTaxonomyService = googleTaxonomyService;
 		this.productRepository = productRepository;
 		this.resourceResolver = resourceResolver;
+		this.imageGenerationService = imageGenerationService;
 
 		// initial configs loads
 		loadConfigs();
@@ -92,7 +103,7 @@ public class VerticalsConfigService {
 			logger.info("Adding config {} from frolder", uc.getId());
 			vConfs.put(uc.getId(), uc);
 		}
-		
+
 		for (VerticalConfig uc : loadFromClasspath()) {
 			logger.info("Adding config {} from classpath", uc.getId());
 			vConfs.put(uc.getId(), uc);
@@ -118,6 +129,7 @@ public class VerticalsConfigService {
 //			verticalUrlByLanguage.put(key, value);
 		}));
 
+		generateImagesForVerticals(vConfs);
 	}
 
 
@@ -398,5 +410,53 @@ public class VerticalsConfigService {
 		return configs;
 	}
 
+
+	/**
+	 * Submits tasks to generate images for each vertical configuration using ExecutorService.
+	 * Images are generated only if they do not already exist or if forceOverride is enabled.
+	 *
+	 * @param vConfs A map of vertical configurations.
+	 */
+	private void generateImagesForVerticals(Map<String, VerticalConfig> vConfs) {
+		vConfs.values().forEach(vc -> executorService.submit(() -> {
+			String fileName = vc.getId() + ".png";
+			if (!imageGenerationService.shouldGenerateImage(fileName)) {
+				logger.info("Image for vertical {} already exists with file name {}. Skipping generation.", vc.getId(), fileName);
+				return;
+			}
+
+			String threadName = Thread.currentThread().getName();
+			logger.info("Starting image generation for vertical {} in thread {}", vc.getId(), threadName);
+
+			try {
+				String verticalTitle = vc.getI18n().get("default").getVerticalHomeTitle();
+				imageGenerationService.fullGenerate(verticalTitle, fileName);
+				logger.info("Generated and saved image for vertical {} with file name {} in thread {}", vc.getId(), fileName, threadName);
+			} catch (Exception e) {
+				logger.error("Failed to generate or save image for vertical {} in thread {}", vc.getId(), threadName, e);
+			}
+		}));
+	}
+
+
+	/**
+	 * Shuts down the ExecutorService gracefully, waiting for existing tasks to complete.
+	 * If the tasks do not complete within the timeout, it forces a shutdown.
+	 */
+	@PreDestroy
+	public void shutdownExecutorService() {
+		executorService.shutdown();
+		try {
+			if (!executorService.awaitTermination(60, TimeUnit.SECONDS)) {
+				executorService.shutdownNow();
+				if (!executorService.awaitTermination(60, TimeUnit.SECONDS)) {
+					logger.error("ExecutorService did not terminate");
+				}
+			}
+		} catch (InterruptedException ie) {
+			executorService.shutdownNow();
+			Thread.currentThread().interrupt();
+		}
+	}
 
 }

@@ -19,6 +19,8 @@ import org.open4goods.services.EvaluationService;
 import org.open4goods.services.VerticalsConfigService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.ai.openai.OpenAiChatModel;
+import org.springframework.ai.openai.OpenAiImageModel;
 /**
  * TODO : Paralelisation
  * TODO : Storing the prompt in product (disabled for now) could allow to regenerate if changes
@@ -26,60 +28,54 @@ import org.slf4j.LoggerFactory;
 public class AiService {
 
 	private Logger logger = LoggerFactory.getLogger(AiService.class);
-	private AiAgent nudgerAgent;
+    private final OpenAiChatModel chatModel;
 	private VerticalsConfigService verticalService;
 	private EvaluationService spelEvaluationService;
-
-	// TODO : pool size from conf
-	ExecutorService executor = Executors.newFixedThreadPool(3);
-			
-	public AiService(AiAgent customerSupportAgent, final VerticalsConfigService verticalService, EvaluationService spelEvaluationService) {
-
-		this.nudgerAgent = customerSupportAgent;
+	
+	public AiService(OpenAiChatModel chatModel, final VerticalsConfigService verticalService, EvaluationService spelEvaluationService) {
+		this.chatModel = chatModel;
 		this.verticalService = verticalService;
 		this.spelEvaluationService = spelEvaluationService;
-	
 	}
 
 	/**
 	 * Prompt the AI
-	 * 
+	 *
 	 * @param value
 	 * @return
 	 */
 	public String prompt(String value) {
-		
+
 		long now = System.currentTimeMillis();
-		
-		String ret = nudgerAgent.chat(value);
+		String ret =chatModel.call(value);
 		logger.info("GenAI request ({}ms} : \n ----------request :\n{} \n----------response\n", System.currentTimeMillis()-now, value, ret);
 		return ret;
 	}
-	
+
 	/**
 	 * Complete the product with AI
 	 * @param data
-	 * @param force 
-	 * @return 
+	 * @param force
+	 * @return
 	 */
 	public void complete(Product data, VerticalConfig vConf, boolean force) {
 		////////////////
-		// Getting the config		
+		// Getting the config
 		/////////////////
 
 		// We only apply on items having some data quality
-		
+
 		// TODO : From config
 		if (!force && data.getAttributes().count() < 15 ) {
 			return;
 		}
-		
+
 		// TODO : Will have to "expire" the generated texts and re generate it, in certain conditions
-				
+
 		logger.info("AI completion for product {}", data.getId());
-		
+
 			////////////////
-			// AI generation		
+			// AI generation
 			/////////////////
 			Map<String, ProductI18nElements> i18nConf = vConf.getI18n();
 
@@ -87,27 +83,27 @@ public class AiService {
 //			executor.execute(() -> {
 				logger.info("Started generation for {}",data);
 				doGeneration(data, i18nConf,force);
-				logger.info("Ended generation for {}",data);				
+				logger.info("Ended generation for {}",data);
 //			});
 	}
 
 	private void doGeneration(Product data, Map<String, ProductI18nElements> i18nConf, boolean force) {
 		for (Entry<String, ProductI18nElements> elements : i18nConf.entrySet()) {
-			
+
 			for ( AiConfig aic: elements.getValue().getAiConfig()) {
 
 				if (!force && !aic.isOverride() &&  (null != data.getAiDescriptions().get(aic.getKey()) && i18nConf.keySet().contains(data.getAiDescriptions().get(aic.getKey()).getContent().getLanguage()))) {
 					logger.info("Skipping because generated AI text is already present");
 					continue;
 				}
-				
+
 				AiDescription desc = generateProductTexts(aic.getKey(), aic.getPrompt(), elements.getKey(), data);
 				if (StringUtils.isEmpty(desc.getContent().getText())) {
 					logger.error("Empty AI text for product {} with key {} and lang {} and prompt {}", data.getId(), aic.getKey(), elements.getKey(), aic.getPrompt());
 				} else {
-					data.getAiDescriptions().put(aic.getKey(), desc);									
+					data.getAiDescriptions().put(aic.getKey(), desc);
 				}
-			}		
+			}
 		}
 	}
 
@@ -118,23 +114,23 @@ public class AiService {
 	 * @return
 	 */
 	private AiDescription generateProductTexts( String key, String prompt, String lang, Product data) {
-		
-		
+
+
 		// Multi thread / synchronisation
 		List<AiDescription> ret = new ArrayList<>();
-				
+
 		logger.info("AI completion for product {} with key {} and lang {} and prompt {}", data.getId(), key, lang, prompt);
 		// Passing the spel evaluation
 		String value = spelEvaluationService.thymeleafEval(data, prompt);
-		
+
 		String aiText = prompt(value).replace("\n", "<br/>");
 
-		
+
 		AiDescription aiDesc = new AiDescription(aiText, lang);
 		ret.add(aiDesc);
-		
+
 		logger.warn("AI completion for product {}-{} : \n{}", data.getId(), key,aiText);
-	
+
 		return aiDesc;
 	}
 

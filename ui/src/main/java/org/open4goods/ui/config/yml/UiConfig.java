@@ -11,6 +11,7 @@ import org.open4goods.config.BrandsConfiguration;
 import org.open4goods.config.yml.BlogConfiguration;
 import org.open4goods.config.yml.DevModeConfiguration;
 import org.open4goods.config.yml.FeedbackConfiguration;
+import org.open4goods.config.yml.ui.*;
 import org.open4goods.config.yml.IcecatConfiguration;
 import org.open4goods.config.yml.ui.ApiConfig;
 import org.open4goods.config.yml.ui.OpenSearchConfig;
@@ -62,7 +63,10 @@ public class UiConfig {
 	 */
 	private String datasourcesfolder=rootFolder+ File.separator+ "config"+File.separator+"datasources"+File.separator;
 
-	
+	/**
+	 * Folder where AI generated images are stored
+	 */
+	private String generatedImagesFolder = rootFolder + "generated-images" + File.separator;
 	
 	/**
 	 * The mapped controllers (dynamic declaration cause spring config does not allows us to have full enforced
@@ -176,6 +180,11 @@ public class UiConfig {
 	/**
 	 * Configuration for the brand service
 	 */
+  
+	/**
+	 * Configuration for the AI Image Generation service
+	 */
+	private ImageGenerationConfig imageGenerationConfig = new ImageGenerationConfig();
 
 	private BrandsConfiguration brandConfig = new BrandsConfiguration();
 	
@@ -292,6 +301,21 @@ public class UiConfig {
 		this.namings = namings;
 	}
 
+	public ImageGenerationConfig getImageGenerationConfig() {
+		return imageGenerationConfig;
+	}
+
+	public void setImageGenerationConfig(ImageGenerationConfig imageGenerationConfig) {
+		this.imageGenerationConfig = imageGenerationConfig;
+	}
+
+	public String getGeneratedImagesFolder() {
+		return generatedImagesFolder;
+	}
+
+	public void setGeneratedImagesFolder(String generatedImagesFolder) {
+		this.generatedImagesFolder = generatedImagesFolder;
+	}
 
 	public String getVerticalsFolder() {
 		return verticalsFolder;
