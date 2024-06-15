@@ -32,6 +32,7 @@ import org.open4goods.services.DataSourceConfigService;
 import org.open4goods.services.EvaluationService;
 import org.open4goods.services.GoogleTaxonomyService;
 import org.open4goods.services.Gs1PrefixService;
+import org.open4goods.services.IcecatService;
 import org.open4goods.services.StandardiserService;
 import org.open4goods.services.VerticalsConfigService;
 import org.open4goods.services.textgen.BlablaService;
@@ -79,6 +80,8 @@ public class AggregationFacadeService {
 
 	private StandardAggregator realtimeAggregator;
 	
+	private IcecatService icecatFeatureService;
+	
 	public AggregationFacadeService(EvaluationService evaluationService,
 			StandardiserService standardiserService,
 			AutowireCapableBeanFactory autowireBeanFactory, ProductRepository aggregatedDataRepository,
@@ -87,7 +90,8 @@ public class AggregationFacadeService {
 			BarcodeValidationService barcodeValidationService,
 			BrandService brandService,
 			GoogleTaxonomyService taxonomyService,
-			BlablaService blablaService
+			BlablaService blablaService,
+			IcecatService icecatFeatureService
 			) {
 		super();
 		this.evaluationService = evaluationService;
@@ -102,7 +106,7 @@ public class AggregationFacadeService {
 		this.barcodeValidationService = barcodeValidationService;
 		this.taxonomyService = taxonomyService;
 		this.blablaService = blablaService;
-		
+		this.icecatFeatureService = icecatFeatureService;
 		this.realtimeAggregator = getStandardAggregator("realtime");
 	
 	}
@@ -245,7 +249,7 @@ public class AggregationFacadeService {
 		
 		services.add(new IdentityAggregationService( logger, gs1prefixService,barcodeValidationService));
 		services.add(new TaxonomyRealTimeAggregationService(  logger, verticalConfigService, taxonomyService));
-		services.add(new AttributeRealtimeAggregationService(verticalConfigService, brandService, logger));
+		services.add(new AttributeRealtimeAggregationService(verticalConfigService, brandService, logger,icecatFeatureService));
 		services.add(new NamesAggregationService( logger, verticalConfigService, evaluationService, blablaService));
 		//		services.add(new CategoryService( taxonomyService));
 		//		services.add(new UrlsAggregationService(evaluationService, 
@@ -276,7 +280,7 @@ public class AggregationFacadeService {
 		
 		services.add(new CleanScoreAggregationService(logger));
 		services.add(new Attribute2ScoreAggregationService(logger));
-		services.add(new Brand2ScoreAggregationService( logger));
+		services.add(new Brand2ScoreAggregationService( logger, brandService, verticalConfigService));
 		services.add(new DataCompletion2ScoreAggregationService(logger));
 		services.add(new EcoScoreAggregationService( logger));
 

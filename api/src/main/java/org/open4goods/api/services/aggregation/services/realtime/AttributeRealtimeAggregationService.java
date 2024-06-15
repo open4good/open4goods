@@ -24,12 +24,14 @@ import org.open4goods.exceptions.ValidationException;
 import org.open4goods.helper.ResourceHelper;
 import org.open4goods.model.attribute.Attribute;
 import org.open4goods.model.constants.ReferentielKey;
+import org.open4goods.model.data.Brand;
 import org.open4goods.model.data.DataFragment;
 import org.open4goods.model.data.UnindexedKeyValTimestamp;
 import org.open4goods.model.product.AggregatedAttribute;
 import org.open4goods.model.product.AggregatedFeature;
 import org.open4goods.model.product.Product;
 import org.open4goods.services.BrandService;
+import org.open4goods.services.IcecatService;
 import org.open4goods.services.VerticalsConfigService;
 import org.slf4j.Logger;
 
@@ -40,17 +42,14 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 	private final BrandService brandService;
 
 	private VerticalsConfigService verticalConfigService;
+	private IcecatService featureService;
 
-	public AttributeRealtimeAggregationService(final VerticalsConfigService verticalConfigService,  BrandService brandService, final Logger logger) {
+	public AttributeRealtimeAggregationService(final VerticalsConfigService verticalConfigService,  BrandService brandService, final Logger logger, IcecatService featureService) {
 		super(logger);
 		this.verticalConfigService = verticalConfigService;
 		this.brandService = brandService;
+		this.featureService = featureService;
 	}
-
-	
-	
-	
-	
 
 
 	@Override
@@ -62,10 +61,20 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 		if (!data.getAttributes().getAggregatedAttributes().keySet().containsAll(vConf.getAttributesConfig().getMandatory())) {
 			// Missing attributes.
 			dedicatedLogger.warn("Missing mandatory attributes for product {}. Will be unmatched from vertical {}", data.getId(), vConf.getId());
-			data.setExcluded(true);			
+			data.setExcluded(true);
 		} else {
 			data.setExcluded(false);			
 		}
+
+		
+		// Attributing taxomy to attributes
+		data.getAttributes().getUnmapedAttributes().forEach(a -> {
+			Set<Long> icecatTaxonomyIds = featureService.resolveFeatureName(a.getName());
+			if (null != icecatTaxonomyIds) {
+				dedicatedLogger.info("Found icecat taxonomy for {} : {}", a.getName(), icecatTaxonomyIds);
+				a.setIcecatTaxonomyIds(icecatTaxonomyIds );
+			}
+		});
 	}
 
 	
@@ -333,16 +342,16 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 					
 				} else if (key.equals(ReferentielKey.BRAND)) {
 					
-					value = brandService.normalizeBrand(value);
-					if (null != value && !existing.equals(value)) {
+					Brand model = brandService.resolveBrandName(value);
+					if (null != model && !existing.equals(model.getName())) {
 						//TODO (gof) : elect best brand, exclude "non categorisée", ...
-						dedicatedLogger.info("Adding different {} name as BRAND. Existing is {}, would have erased with {}",key,existing, value);						
+						dedicatedLogger.info("Adding different {} name as BRAND. Existing is {}, would have erased with {}",key,existing, model.getName());						
 						// Adding the old one in alternate brand
-						output.getAlternativeBrands().add(new UnindexedKeyValTimestamp(fragement.getDatasourceName(), value));
+						output.getAlternativeBrands().add(new UnindexedKeyValTimestamp(fragement.getDatasourceName(), model.getName()));
 						
 						
 						// Adding the new one
-						output.getAttributes().addReferentielAttribute(ReferentielKey.BRAND, value);
+						output.getAttributes().addReferentielAttribute(ReferentielKey.BRAND, model.getName());
 
 						// Removing the current brand in any case
 						output.getAlternativeBrands().removeIf(b -> b.getValue().equals(output.brand()));
@@ -367,7 +376,12 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 			else {
 				// TODO : Bad design of this method
 				if (key.equals(ReferentielKey.BRAND)) {
-					value = brandService.normalizeBrand(value);
+					Brand b = brandService.resolveBrandName(value);
+					if (null == b) {
+						dedicatedLogger.error("Should nor ! Unresolvable already set brand : {}", value);
+					} else {
+						value = b.getName();;						
+					}
 				}
 				
 				
