@@ -41,6 +41,8 @@ import org.open4goods.services.DataSourceConfigService;
 import org.open4goods.services.EvaluationService;
 import org.open4goods.services.GoogleTaxonomyService;
 import org.open4goods.services.Gs1PrefixService;
+import org.open4goods.services.IcecatService;
+import org.open4goods.services.ImageGenerationService;
 import org.open4goods.services.ImageMagickService;
 import org.open4goods.services.RemoteFileCachingService;
 import org.open4goods.services.ResourceService;
