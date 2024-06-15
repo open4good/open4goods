@@ -2,6 +2,7 @@
 package org.open4goods.ui.config;
 
 import java.io.IOException;
+import java.time.Duration;
 import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
 
@@ -17,6 +18,7 @@ import org.open4goods.services.DataSourceConfigService;
 import org.open4goods.services.EvaluationService;
 import org.open4goods.services.FeedbackService;
 import org.open4goods.services.GoogleTaxonomyService;
+import org.open4goods.services.ImageGenerationService;
 import org.open4goods.services.IcecatService;
 import org.open4goods.services.ImageMagickService;
 import org.open4goods.services.MailService;
@@ -27,8 +29,8 @@ import org.open4goods.services.SearchService;
 import org.open4goods.services.SerialisationService;
 import org.open4goods.services.StandardiserService;
 import org.open4goods.services.VerticalsConfigService;
-import org.open4goods.services.ai.AiAgent;
 import org.open4goods.services.ai.AiService;
+import org.open4goods.store.repository.elastic.BrandRepository;
 import org.open4goods.store.repository.elastic.BrandScoresRepository;
 import org.open4goods.ui.config.yml.UiConfig;
 import org.open4goods.ui.controllers.ui.UiService;
@@ -39,7 +41,12 @@ import org.open4goods.ui.services.OpenDataService;
 import org.open4goods.ui.services.SitemapGenerationService;
 import org.open4goods.ui.services.todo.TodoService;
 import org.open4goods.xwiki.services.XwikiFacadeService;
+import org.springframework.ai.openai.OpenAiChatModel;
+import org.springframework.ai.openai.OpenAiImageModel;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.web.client.ClientHttpRequestFactories;
+import org.springframework.boot.web.client.ClientHttpRequestFactorySettings;
+import org.springframework.boot.web.client.RestClientCustomizer;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.caffeine.CaffeineCache;
 import org.springframework.cache.support.SimpleCacheManager;
@@ -62,9 +69,6 @@ import org.xml.sax.SAXException;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.Ticker;
-
-import dev.langchain4j.model.chat.ChatLanguageModel;
-import dev.langchain4j.service.AiServices;
 
 @Configuration
 public class AppConfig {
@@ -130,32 +134,39 @@ public class AppConfig {
 		return new BlogService(xwikiReadService, config.getBlogConfig(), config.getNamings().getBaseUrls());
 	}
 
-
+	@Bean
+	public ImageGenerationService imageGenerationService(@Autowired OpenAiImageModel imageModel, @Autowired UiConfig uiConfig) {
+		return new ImageGenerationService(imageModel, uiConfig.getImageGenerationConfig(), uiConfig.getGeneratedImagesFolder());
+	}
 	  
 	@Bean
 	FeedbackService feedbackService(@Autowired UiConfig config) {
 		return new FeedbackService(config.getFeedbackConfig());
 	}
+
 	  
+	
 	@Bean
 	ImageService imageService(@Autowired ImageMagickService imageMagickService, @Autowired ResourceService resourceService) {
 		return new ImageService(imageMagickService, resourceService);
 	}
 
 	@Bean
-	@Autowired  
-	AiService aiService (AiAgent nudgerAgent, VerticalsConfigService verticalService, EvaluationService spelEvaluationService) {
-		return new AiService(nudgerAgent, verticalService, spelEvaluationService);
+	@Autowired
+	AiService aiService (OpenAiChatModel chatModel, VerticalsConfigService verticalService, EvaluationService spelEvaluationService) {
+		return new AiService(chatModel, verticalService, spelEvaluationService);
 	}
-	
-	 @Bean
-	 AiAgent nudgerAgent(@Autowired ChatLanguageModel chatLanguageModel) {
-	        return AiServices.builder(AiAgent.class)
-	                .chatLanguageModel(chatLanguageModel)	                
-//	                .retriever(retriever)
-	                .build();
-	    }
-	 
+
+
+
+	/** Override the default RestTemplate with a custom one that has a longer timeout (For ImageGenerationService) **/
+	@Bean
+	public RestClientCustomizer restClientCustomizer() {
+		return restClientBuilder -> restClientBuilder
+				.requestFactory(ClientHttpRequestFactories.get(ClientHttpRequestFactorySettings.DEFAULTS
+						.withConnectTimeout(Duration.ofSeconds(60))
+						.withReadTimeout(Duration.ofSeconds(60))));
+	}
 	 
 	@Bean
 	BrandService brandService(@Autowired RemoteFileCachingService rfc, @Autowired  UiConfig properties, @Autowired  BrandScoresRepository brandRepository) {
@@ -257,8 +268,8 @@ public class AppConfig {
 
 	@Bean
 	@Autowired
-	VerticalsConfigService verticalConfigsService(ResourcePatternResolver resourceResolver, SerialisationService serialisationService,  GoogleTaxonomyService googleTaxonomyService, ProductRepository productRepository) throws IOException {
-		return new VerticalsConfigService( serialisationService,config.getVerticalsFolder(), googleTaxonomyService, productRepository, resourceResolver);
+	VerticalsConfigService verticalConfigsService(ResourcePatternResolver resourceResolver, SerialisationService serialisationService,  GoogleTaxonomyService googleTaxonomyService, ProductRepository productRepository, ImageGenerationService imageGenerationService) throws IOException {
+		return new VerticalsConfigService( serialisationService,config.getVerticalsFolder(), googleTaxonomyService, productRepository, resourceResolver, imageGenerationService);
 	}
 
 	////////////////////////////////////

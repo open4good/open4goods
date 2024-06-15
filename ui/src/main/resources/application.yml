@@ -15,6 +15,7 @@ spring:
   threads:
     virtual:
       enabled: true
+
       
       
   mail:
@@ -56,15 +57,15 @@ apiConfig:
   apiLicence: "May vary"
 
 # Configuration for the langchain chat model            
-langchain4j:
-  open-ai:
-    chat-model:
-      api-key: YOUR API KEY
-      model-name: gpt-4o
-      temperature: 0.0
-      timeout: PT60S
-      log-requests: false
-      log-responses: false
+#langchain4j:
+#  open-ai:
+#    chat-model:
+#      api-key: YOUR API KEY
+#      model-name: gpt-4o
+#      temperature: 0.0
+#      timeout: PT60S
+#      log-requests: false
+#      log-responses: false
 
 
 tagListUrl: https://open4good.github.io/open4goods/maven/taglist/taglist.xml 
@@ -134,7 +135,17 @@ brandConfig:
     CONTINENTAL EDISON: "http://www.service-client.fr/wp-content/uploads/2016/08/CONTINENTAL-EDISON.jpg"
     CHIQ: "https://www.buysmarte.com.au/media/manufacturer/chiq.jpg"
 
-    
+# Configuration for the Image Generation service
+imageGenerationConfig:
+  prompt: |
+    Create a simple icon of a {VERTICAL} that strictly adheres to the following guidelines:
+    - The icon should be flat, in a modern, minimalist style.
+    - The lines must be clean and simple.
+    - Use a soft color palette consisting primarily of shades of green and off-white.
+    - The overall mood must be fresh and eco-friendly, evoking a sense of calm and simplicity.
+    - The background color must be fully white without any gradient or texture.
+  forceOverride: false
+
 #Css and js mimification
 #wro4j:
 #  filterUrl : /resources
