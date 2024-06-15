@@ -19,6 +19,7 @@ import org.open4goods.services.EvaluationService;
 import org.open4goods.services.FeedbackService;
 import org.open4goods.services.GoogleTaxonomyService;
 import org.open4goods.services.ImageGenerationService;
+import org.open4goods.services.IcecatService;
 import org.open4goods.services.ImageMagickService;
 import org.open4goods.services.MailService;
 import org.open4goods.services.RecaptchaService;
@@ -29,9 +30,8 @@ import org.open4goods.services.SerialisationService;
 import org.open4goods.services.StandardiserService;
 import org.open4goods.services.VerticalsConfigService;
 import org.open4goods.services.ai.AiService;
-//import org.open4goods.services.ai.AiAgent;
-//import org.open4goods.services.ai.AiService;
 import org.open4goods.store.repository.elastic.BrandRepository;
+import org.open4goods.store.repository.elastic.BrandScoresRepository;
 import org.open4goods.ui.config.yml.UiConfig;
 import org.open4goods.ui.controllers.ui.UiService;
 import org.open4goods.ui.services.BlogService;
@@ -64,7 +64,9 @@ import org.springframework.security.web.firewall.StrictHttpFirewall;
 import org.springframework.web.servlet.LocaleResolver;
 import org.springframework.web.servlet.i18n.AcceptHeaderLocaleResolver;
 import org.springframework.web.servlet.i18n.LocaleChangeInterceptor;
+import org.xml.sax.SAXException;
 
+import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.Ticker;
 
@@ -167,10 +169,17 @@ public class AppConfig {
 	}
 	 
 	@Bean
-	BrandService brandService(@Autowired RemoteFileCachingService rfc, @Autowired  UiConfig properties, @Autowired  BrandRepository brandRepository) {
+	BrandService brandService(@Autowired RemoteFileCachingService rfc, @Autowired  UiConfig properties, @Autowired  BrandScoresRepository brandRepository) {
 		return new BrandService(properties.getBrandConfig(),  rfc,brandRepository);
 	}
 
+	@Bean
+	@Autowired
+	IcecatService icecatFeatureService(UiConfig properties, RemoteFileCachingService fileCachingService, BrandService brandService, GoogleTaxonomyService googleTaxonomyService, VerticalsConfigService verticalConfigService) throws SAXException {
+		// TODO : xmlMapper not injected because corruct the springdoc used one. Should use a @Primary derivation
+		return new IcecatService(new XmlMapper(), properties.getIcecatFeatureConfig(), fileCachingService, properties.getRemoteCachingFolder(), brandService, googleTaxonomyService, verticalConfigService);
+	}
+	
 	
 	@Bean
 	OpenDataService openDataService(@Autowired ProductRepository aggregatedDataRepository, @Autowired UiConfig props) {

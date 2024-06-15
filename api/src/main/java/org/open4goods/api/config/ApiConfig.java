@@ -41,7 +41,6 @@ import org.open4goods.services.DataSourceConfigService;
 import org.open4goods.services.EvaluationService;
 import org.open4goods.services.GoogleTaxonomyService;
 import org.open4goods.services.Gs1PrefixService;
-import org.open4goods.services.ImageGenerationService;
 import org.open4goods.services.ImageMagickService;
 import org.open4goods.services.RemoteFileCachingService;
 import org.open4goods.services.ResourceService;
@@ -51,7 +50,7 @@ import org.open4goods.services.StandardiserService;
 import org.open4goods.services.VerticalsConfigService;
 import org.open4goods.services.ai.AiService;
 import org.open4goods.services.textgen.BlablaService;
-import org.open4goods.store.repository.elastic.BrandRepository;
+import org.open4goods.store.repository.elastic.BrandScoresRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springdoc.core.customizers.OpenApiCustomizer;
@@ -73,7 +72,9 @@ import org.springframework.data.redis.serializer.StringRedisSerializer;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
+import org.xml.sax.SAXException;
 
+import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.Ticker;
 
@@ -97,7 +98,7 @@ public class ApiConfig {
 		this.apiProperties = apiProperties;
 	}
 
-		
+    
 	  @Bean
 	  public RedisTemplate<String, Product> redisTemplate(RedisConnectionFactory connectionFactory) {
 		  RedisTemplate<String, Product> template = new RedisTemplate<>();
@@ -115,6 +116,13 @@ public class ApiConfig {
 		return new SerialisationService();
 	}
 
+	
+	@Bean
+	@Autowired
+	IcecatService icecatFeatureService( RemoteFileCachingService fileCachingService, BrandService brandService, GoogleTaxonomyService googleTaxonomyService, VerticalsConfigService verticalConfigService) throws SAXException {
+		// TODO : xmlMapper not injected because corruct the springdoc used one. Should use a @Primary derivation
+		return new IcecatService(new XmlMapper(), apiProperties.getIcecatFeatureConfig(), fileCachingService, apiProperties.remoteCachingFolder(), brandService, googleTaxonomyService, verticalConfigService);
+	}
 	
 	@Bean
 	@Autowired
@@ -180,7 +188,7 @@ public class ApiConfig {
 	}
 
 	@Bean
-	BrandService brandService(@Autowired RemoteFileCachingService rfc, @Autowired  ApiProperties properties, @Autowired BrandRepository brandRepository) {
+	BrandService brandService(@Autowired RemoteFileCachingService rfc, @Autowired  ApiProperties properties, @Autowired BrandScoresRepository brandRepository) {
 		return new BrandService(properties.getBrandConfig(),  rfc, brandRepository);
 	}
 
@@ -202,6 +210,13 @@ public class ApiConfig {
         try {
 			gts.loadGoogleTaxonUrl("https://www.google.com/basepages/producttype/taxonomy-with-ids.fr-FR.txt", "fr");
 			gts.loadGoogleTaxonUrl("https://www.google.com/basepages/producttype/taxonomy-with-ids.en-US.txt", "en");
+			gts.loadGoogleTaxonUrl("https://www.google.com/basepages/producttype/taxonomy-with-ids.de-DE.txt", "de");
+			gts.loadGoogleTaxonUrl("https://www.google.com/basepages/producttype/taxonomy-with-ids.es-ES.txt", "es");
+			gts.loadGoogleTaxonUrl("https://www.google.com/basepages/producttype/taxonomy-with-ids.nl-NL.txt", "nl");
+			
+			
+			
+			
 		} catch (Exception e) {
 			logger.error("Error loading google taxonomy", e);
 		}        
@@ -221,9 +236,9 @@ public class ApiConfig {
 			@Autowired BarcodeValidationService barcodeValidationService,
 			@Autowired BrandService brandservice,
 			@Autowired GoogleTaxonomyService gts,
-			@Autowired BlablaService blablaService
-			) {
-		return new AggregationFacadeService(evaluationService, standardiserService, autowireBeanFactory, aggregatedDataRepository, apiProperties, gs1prefixService, dataSourceConfigService, configService,  barcodeValidationService,brandservice, gts, blablaService);
+			@Autowired BlablaService blablaService,
+			@Autowired IcecatService icecatFeatureService) {
+		return new AggregationFacadeService(evaluationService, standardiserService, autowireBeanFactory, aggregatedDataRepository, apiProperties, gs1prefixService, dataSourceConfigService, configService,  barcodeValidationService,brandservice, gts, blablaService, icecatFeatureService);
 	}
 
 
@@ -235,6 +250,7 @@ public class ApiConfig {
 	@Bean
 	GroupedOpenApi adminApi() {
 		return GroupedOpenApi.builder()
+				
 				.group("api")
 				//	              .pathsToMatch("/admin/**")
 				.packagesToScan("org.open4goods.api")

@@ -8,15 +8,15 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.open4goods.config.yml.CommentsAggregationConfig;
-import org.open4goods.config.yml.attributes.AiConfig;
 import org.open4goods.config.yml.attributes.AttributeConfig;
-import org.open4goods.model.Localisable;
 import org.open4goods.model.constants.CacheConstants;
 import org.open4goods.model.constants.UrlConstants;
+import org.open4goods.model.data.FeatureGroup;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -48,8 +48,12 @@ public class VerticalConfig{
 	/**
 	 * The corresponding google taxonomy ID 
 	 */
-	private Integer taxonomyId;
+	private Integer googleTaxonomyId;
 
+	/**
+	 * The corresponding icecat taxonomy ID 
+	 */
+	private Integer icecatTaxonomyId;
 	
 	/**
 	 * The product url, metas title, description, ....
@@ -84,8 +88,8 @@ public class VerticalConfig{
 	@JsonMerge
 	private CommentsAggregationConfig commentsConfig = new CommentsAggregationConfig();
 
-
-	
+	@JsonMerge
+	private Map<String, String> brandsCompanyMapping = new HashMap<>();
 	
 	
 	/**
@@ -162,6 +166,10 @@ public class VerticalConfig{
 	@NotNull
 	private ScoringAggregationConfig scoringAggregationConfig;
 
+	/**
+	 * The feature groups, to order / render attributes
+	 */
+	private List<FeatureGroup> featureGroups = new ArrayList<>();
 
 
 	@Override
@@ -251,7 +259,24 @@ public class VerticalConfig{
 		return i18n.getOrDefault(siteLocale, i18n.get("default")).getVerticalHomeUrl();
 	}
 
+	/**
+	 * Return the company for a given brand, if defined in vertical configuration
+	 * @param brand
+	 * @return
+	 */
+	public String resolveCompany(String brand) {
+		String resolved = brandsCompanyMapping.get(brand.toUpperCase());
+		
+		if (null == resolved) {
+			return brand;
+		} else {
+			return resolved.toLowerCase();
+		}
+		
+		
+	}
 
+	
 	/**
 	 * Retrieves the locale for the site through the request.
 	 *
@@ -352,6 +377,25 @@ public class VerticalConfig{
 		return indexName()  + "-resources";
 	}
 
+	
+	// TODO : Perf, could use a cached map
+	public FeatureGroup getOrCreateByIceCatCategoryFeatureGroup(int categoryFeatureGroupId) {
+		
+		
+		Optional<FeatureGroup> existing = featureGroups.stream().filter(e -> e.getIcecatCategoryFeatureGroupId() == categoryFeatureGroupId).findFirst();
+		if (existing.isPresent()) {
+			return existing.get();
+		} else {
+			FeatureGroup fg = new FeatureGroup(categoryFeatureGroupId);
+			featureGroups.add(fg);
+			return fg;
+		}
+//		
+//		
+//		return .orElse(new FeatureGroup(categoryFeatureGroupId));
+	}
+	
+	
 
 	//////////////////////////////////////
 	// Getters / Setters
@@ -519,12 +563,12 @@ public class VerticalConfig{
 		this.ecoscoreConfig = ecoscoreConfig;
 	}
 
-	public Integer getTaxonomyId() {
-		return taxonomyId;
+	public Integer getGoogleTaxonomyId() {
+		return googleTaxonomyId;
 	}
 
-	public void setTaxonomyId(Integer taxonomyId) {
-		this.taxonomyId = taxonomyId;
+	public void setGoogleTaxonomyId(Integer taxonomyId) {
+		this.googleTaxonomyId = taxonomyId;
 	}
 
 	public Map<String, ProductI18nElements> getI18n() {
@@ -547,7 +591,43 @@ public class VerticalConfig{
 		this.genAiConfig = genAiConfig;
 	}
 
-	
+
+
+	public Map<String, String> getBrandsCompanyMapping() {
+		return brandsCompanyMapping;
+	}
+
+
+
+	public void setBrandsCompanyMapping(Map<String, String> brandsCompanyMapping) {
+		this.brandsCompanyMapping = brandsCompanyMapping;
+	}
+
+
+
+	public List<FeatureGroup> getFeatureGroups() {
+		return featureGroups;
+	}
+
+
+
+	public void setFeatureGroups(List<FeatureGroup> featureGroups) {
+		this.featureGroups = featureGroups;
+	}
+
+
+
+	public Integer getIcecatTaxonomyId() {
+		return icecatTaxonomyId;
+	}
+
+
+
+	public void setIcecatTaxonomyId(Integer icecatTaxonomyId) {
+		this.icecatTaxonomyId = icecatTaxonomyId;
+	}
+
+
 
 
 
