@@ -123,6 +123,7 @@ public class AiService {
 		// Passing the spel evaluation
 		String value = spelEvaluationService.thymeleafEval(data, prompt);
 
+		// TODO : should remove the replace
 		String aiText = prompt(value).replace("\n", "<br/>");
 
 
