@@ -795,7 +795,7 @@ public class Product implements Standardisable {
 		if (names.size() == 0) {
 			return null;
 		} else {
-			return names.stream().min(Comparator.comparingInt(String::length)).orElse(null);
+			return names.stream().filter(e-> e != null). min(Comparator.comparingInt(String::length)).orElse(null);
 		}
 	}
 	
