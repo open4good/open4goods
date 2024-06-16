@@ -49,6 +49,15 @@ public class BatchService {
 		logger.info("Starting batch");
 
 		try {
+			//  complete with icecat
+			completionFacadeService.icecatCompletionAll();
+			Thread.sleep(5000L);
+		} catch (Exception e) {
+			logger.error("Error in batch : icecat completion fail", e);
+		}
+
+		
+		try {
 			// Scoring
 			aggregationFacadeService.scoreAll();
 			Thread.sleep(5000L);
@@ -56,13 +65,6 @@ public class BatchService {
 			logger.error("Error in batch : scoring fail", e);
 		}
 
-		try {
-			//  complete with icecat
-			completionFacadeService.icecatCompletionAll();
-			Thread.sleep(5000L);
-		} catch (Exception e) {
-			logger.error("Error in batch : icecat completion fail", e);
-        }
 		
 		
 		try {
