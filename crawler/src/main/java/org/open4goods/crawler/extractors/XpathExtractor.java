@@ -317,7 +317,13 @@ public class XpathExtractor extends Extractor {
 		}
 		if (!StringUtils.isEmpty(c.getGtin13())) {
 			
-					p.addAttribute(ReferentielKey.GTIN.toString(), evalAndLogs(document, c.getGtin13(), url), page.getLanguage(),c.getIgnoreCariageReturns(),c.getAttributeSeparators());
+					
+					String gtin = evalAndLogs(document, c.getGtin13(), url);
+					if (!StringUtils.isEmpty(gtin)) {
+						p.getReferentielAttributes().put(ReferentielKey.GTIN, gtin);
+					}
+			
+					
 		}
 		////////////////////
 		// subSeller
@@ -333,7 +339,10 @@ public class XpathExtractor extends Extractor {
 
 		if (!StringUtils.isEmpty(c.getBrand())) {
 			
-					p.addAttribute(ReferentielKey.BRAND.toString(), evalAndLogs(document, c.getBrand(), url), page.getLanguage(),c.getIgnoreCariageReturns(),c.getAttributeSeparators());
+			String brand = evalAndLogs(document, c.getBrand(), url);
+			if (!StringUtils.isEmpty(brand)) {
+				p.getReferentielAttributes().put(ReferentielKey.BRAND, brand);
+			}
 		}
 		////////////////////
 		// Image
