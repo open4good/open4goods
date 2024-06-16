@@ -115,7 +115,6 @@ public class AggregationFacadeService {
 	 * update all verticals. Scheduled
      *
 	 */
-	@Scheduled( initialDelay = 1000 * 3600*24, fixedDelay = 1000 * 3600*24)
 	public void scoreAll()  {
 		for (VerticalConfig vertical : verticalConfigService.getConfigsWithoutDefault()) {
 			score(vertical);
