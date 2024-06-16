@@ -7,6 +7,7 @@ import java.util.concurrent.TimeUnit;
 import org.apache.commons.lang3.ArrayUtils;
 import org.open4goods.api.config.yml.ApiProperties;
 import org.open4goods.api.services.AggregationFacadeService;
+import org.open4goods.api.services.BatchService;
 import org.open4goods.api.services.CompletionFacadeService;
 import org.open4goods.api.services.FetcherOrchestrationService;
 import org.open4goods.api.services.completion.AmazonCompletionService;
@@ -152,6 +153,14 @@ public class ApiConfig {
 		return new AmazonCompletionService(dataRepository, verticalConfigService, apiProperties, dataSourceConfigService, aggregationFacade);
 	}
 
+	
+	@Bean
+	@Autowired
+	BatchService batchService(AggregationFacadeService aggregationFacadeService,
+			CompletionFacadeService completionFacadeService, VerticalsConfigService verticalsConfigService) {
+		return new BatchService(aggregationFacadeService, completionFacadeService, verticalsConfigService);
+	}
+	
 	
 	@Bean
 	@Autowired
