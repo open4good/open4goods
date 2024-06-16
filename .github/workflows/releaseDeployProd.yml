@@ -53,9 +53,25 @@ jobs:
       ###########################################   
       - uses: s4u/maven-settings-action@v3.0.0
         with:
-          repositories: '[{"id":"xwiki-releases","name":"xwiki-releases","url":"https://maven.xwiki.org/releases/","snapshots":{"enabled":false}}]'
-    
-   
+         repositories: |
+            [
+              {
+                "id": "xwiki-releases",
+                "name": "xwiki-releases",
+                "url": "https://maven.xwiki.org/releases/",
+                "snapshots": {
+                  "enabled": false
+                }
+              },
+              {
+                "id": "spring-snapshots",
+                "name": "spring-snapshots",
+                "url": "https://repo.spring.io/snapshot",
+                "snapshots": {
+                  "enabled": true
+                }
+              } 
+            ]  
    
       - name: Build and test xwiki-springboot-starter
         working-directory: ./xwiki-spring-boot-starter        
