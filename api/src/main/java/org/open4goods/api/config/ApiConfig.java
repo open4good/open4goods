@@ -57,6 +57,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springdoc.core.customizers.OpenApiCustomizer;
 import org.springdoc.core.models.GroupedOpenApi;
+import org.springframework.ai.openai.OpenAiChatModel;
 import org.springframework.ai.openai.OpenAiImageModel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
@@ -132,6 +133,12 @@ public class ApiConfig {
 		return new GenAiCompletionService(aiService, productRepository, verticalConfigService, apiProperties);
 	}
 
+	@Bean
+	@Autowired
+	AiService aiService(OpenAiChatModel chatModel, final VerticalsConfigService verticalService, EvaluationService spelEvaluationService) {
+		return new AiService(chatModel, verticalService, spelEvaluationService);
+	}
+	
 	@Bean
 	@Autowired
 	IcecatCompletionService icecatCompletionService( ProductRepository productRepository, VerticalsConfigService verticalConfigService, DataSourceConfigService dataSourceConfigService, AggregationFacadeService aggregationFacade) throws TechnicalException {
