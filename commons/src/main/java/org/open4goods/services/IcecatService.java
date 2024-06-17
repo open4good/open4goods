@@ -5,7 +5,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.net.URI;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -24,6 +23,7 @@ import org.open4goods.exceptions.TechnicalException;
 import org.open4goods.helper.IdHelper;
 import org.open4goods.model.data.Brand;
 import org.open4goods.model.data.FeatureGroup;
+import org.open4goods.model.dto.UiFeatureGroups;
 import org.open4goods.model.icecat.IcecatCategory;
 import org.open4goods.model.icecat.IcecatCategoryFeatureGroup;
 import org.open4goods.model.icecat.IcecatFeature;
@@ -31,8 +31,9 @@ import org.open4goods.model.icecat.IcecatFeatureGroup;
 import org.open4goods.model.icecat.IcecatLanguageHandler;
 import org.open4goods.model.icecat.IcecatModel;
 import org.open4goods.model.icecat.IcecatName;
-import org.open4goods.model.icecat.IcecatParentCategory;
 import org.open4goods.model.icecat.IcecatSupplier;
+import org.open4goods.model.product.AggregatedAttribute;
+import org.open4goods.model.product.Product;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xml.sax.InputSource;
@@ -41,8 +42,6 @@ import org.xml.sax.XMLReader;
 import org.xml.sax.helpers.XMLReaderFactory;
 
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
-
-import jakarta.annotation.PostConstruct;
 
 
 /**
@@ -67,8 +66,8 @@ public class IcecatService {
 		private IcecatConfiguration iceCatConfig;
 
 		// For features
-		private Map<Long, IcecatFeature> featuresById = new HashMap<>();
-		private Map<String, Set<Long>> featuresByNames = new HashMap<>();
+		private Map<Integer, IcecatFeature> featuresById = new HashMap<>();
+		private Map<String, Set<Integer>> featuresByNames = new HashMap<>();
 		
 		// For language
 		private Map<String, String> codeByLanguage;
@@ -84,14 +83,13 @@ public class IcecatService {
 		/**
 		 * Constructor
 		 */
-	public IcecatService(XmlMapper xmlMapper, IcecatConfiguration iceCatConfig, RemoteFileCachingService fileCachingService, String remoteCacheFolder, BrandService brandService, GoogleTaxonomyService gTaxo, VerticalsConfigService verticalsConfigService) throws SAXException {
+	public IcecatService(XmlMapper xmlMapper, IcecatConfiguration iceCatConfig, RemoteFileCachingService fileCachingService, String remoteCacheFolder, BrandService brandService, VerticalsConfigService verticalsConfigService) throws SAXException {
 		super();
 		this.xmlMapper = xmlMapper;
 		this.iceCatConfig = iceCatConfig;
 		this.fileCachingService = fileCachingService;
 		this.remoteCachingFolder = remoteCacheFolder;
 		this.brandService = brandService;
-		this.googleTaxonomyService = gTaxo;
 		this.verticalsConfigService = verticalsConfigService;
 
 		try {
@@ -143,7 +141,7 @@ public class IcecatService {
 			
 			features.forEach(feature -> {
 				
-				Long id = Long.valueOf(feature.getID());
+				Integer id = Integer.valueOf(feature.getID());
 				// Loading the by id map
 				featuresById.put(id, feature);
 				
@@ -151,7 +149,7 @@ public class IcecatService {
 				feature.getNames().getNames(). forEach(name -> {
                   
 					String val = normalize(name.getTextValue());
-					Set<Long> fIds = featuresByNames.get(val);
+					Set<Integer> fIds = featuresByNames.get(val);
                     if (fIds == null) {
                         fIds = new HashSet<>();
                     }
@@ -583,7 +581,7 @@ public class IcecatService {
 	 * @param featureName
 	 * @return
 	 */
-	public Set<Long> resolveFeatureName (String featureName) {		
+	public Set<Integer> resolveFeatureName (String featureName) {		
 		String f = normalize(featureName);
 		return featuresByNames.get(f);		
 	}
@@ -659,4 +657,51 @@ public class IcecatService {
 		return Integer.valueOf(languageByCode.getOrDefault(language, "1"));
 	}
 
+	
+	
+	/**
+	 * Loads the FeatureGroups for a given product, according to Icecat taxonomy
+	 * @param vertical
+	 * @param language
+	 * @param product
+	 * @return
+	 */
+	// TODO : perf, quiet expensive with the "iteration" model. Must be fixed by proper injection
+	// of icecat stuff to open4goods attribute model
+	public List<UiFeatureGroups> features(VerticalConfig vertical, String language, Product product) {
+		List<UiFeatureGroups> ret = new ArrayList<>();
+		
+		Integer icecatLanguage = getIceCatLangId(language);
+			
+		// Initial building
+		if (null != vertical) {
+			for (FeatureGroup fg : vertical.getFeatureGroups()) {
+				UiFeatureGroups ufg = new UiFeatureGroups();
+				ufg.setFeatureGroup(fg);
+				ufg.setName(ufg.getFeatureGroup().getName().i18n(language));
+				for (Integer fId : fg.getFeaturesId()) {
+					AggregatedAttribute a = product.getAttributes().attributeByFeatureId(fId);
+					if (null != a) {
+						ufg.getAttributes().add(a);
+						// Updating attribute name
+						IcecatFeature f = featuresById.get(fId);
+						IcecatName i18nName = f.getNames().getNames().stream().filter(e->e.getLangId() == icecatLanguage).findFirst().orElse(null);
+						if (null != i18nName) {
+							a.setName(i18nName.getTextValue());
+						}
+						
+					}
+				}
+				
+				if (ufg.getAttributes().size() > 0) {
+					ret.add(ufg);
+				}
+			}
+		}
+		
+		return ret;
+		
+	}
+	
+	
 }
