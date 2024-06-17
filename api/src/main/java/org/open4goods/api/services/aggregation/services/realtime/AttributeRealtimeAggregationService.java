@@ -69,7 +69,7 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 		
 		// Attributing taxomy to attributes
 		data.getAttributes().getUnmapedAttributes().forEach(a -> {
-			Set<Long> icecatTaxonomyIds = featureService.resolveFeatureName(a.getName());
+			Set<Integer> icecatTaxonomyIds = featureService.resolveFeatureName(a.getName());
 			if (null != icecatTaxonomyIds) {
 				dedicatedLogger.info("Found icecat taxonomy for {} : {}", a.getName(), icecatTaxonomyIds);
 				a.setIcecatTaxonomyIds(icecatTaxonomyIds );
@@ -195,9 +195,9 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 			
 			for (Attribute attr : dataFragment.getAttributes()) {
 				// Checking if to be removed
-				if (toRemoveFromUnmatched.contains(attr.getName())) {
-					continue;
-				}
+//				if (toRemoveFromUnmatched.contains(attr.getName())) {
+//					continue;
+//				}
 				
 				// TODO : remove from a config list
 				
@@ -219,7 +219,7 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 					// TODO : Should be from path
 					// TODO : apply from sanitisation
 					.filter(e -> !e.getName().contains("CATEGORY")) 
-					.filter(e -> !toRemoveFromUnmatched.contains(e.getName())) 
+//					.filter(e -> !toRemoveFromUnmatched.contains(e.getName())) 
 					.collect(Collectors.toSet()));
 			
 			
