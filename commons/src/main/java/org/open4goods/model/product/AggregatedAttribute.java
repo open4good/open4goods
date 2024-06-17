@@ -51,7 +51,7 @@ public class AggregatedAttribute implements IAttribute {
 	 * The attribute raw rawValue
 	 */
 	@Field(index = false, store = false, type = FieldType.Keyword)
-	private Set<Long> icecatTaxonomyIds = new HashSet<>();
+	private Set<Integer> icecatTaxonomyIds = new HashSet<>();
 	
 	
 	/**
@@ -272,11 +272,11 @@ public class AggregatedAttribute implements IAttribute {
 		this.numericValue = numericValue;
 	}
 
-	public Set<Long> getIcecatTaxonomyIds() {
+	public Set<Integer> getIcecatTaxonomyIds() {
 		return icecatTaxonomyIds;
 	}
 
-	public void setIcecatTaxonomyIds(Set<Long> icecatTaxonomyIds) {
+	public void setIcecatTaxonomyIds(Set<Integer> icecatTaxonomyIds) {
 		this.icecatTaxonomyIds = icecatTaxonomyIds;
 	}
 	
