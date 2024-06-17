@@ -252,9 +252,15 @@ public class ProductController  {
 		
 		mv = uiService.defaultModelAndView("product", request);
 
+		if (mv.getModel().get("user") != null) {
+			mv.addObject("raw", serialisationService.toJson(data, true));
+		}
 
 
 		mv.addObject("product", data);
+		
+		
+		
 		
 		VerticalConfig verticalConfig = verticalConfigService.getVerticalForPath(vertical);
 		

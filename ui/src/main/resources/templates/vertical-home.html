@@ -190,6 +190,29 @@
 
    var dummyRender = function(cell, type, data) {return  "" ;}
    
+   function description (data) {
+   	
+   	if (data.aiDescriptions == null) {
+   		return "";
+   	}
+   	
+   	if (data.aiDescriptions['ecological-description'] == null) {
+   		return "";
+   	}
+   	
+   	if (data.aiDescriptions['ecological-description'] != null) {
+   		ret = data.aiDescriptions['ecological-description'].content.text;
+   		if (ret.length > 200) {
+   			return ret.slice(0, 200) + "...";
+   		} else {
+   		    return ret;
+   		}
+   	} 
+   	
+   	return "";
+   }
+   
+   
    var columns = [
        { 
        	"data": "attributes.referentielAttributes.MODEL.keyword", 
@@ -203,6 +226,12 @@
 					data : data,
 					vertical: vertical,
   					productUrl : baseUrl+verticalPath+'/'+data.names.url['default'],
+  					ecoscore: Math.round((data.scores.ECOSCORE.relativ.value + Number.EPSILON) * 100) / 100 ,
+  					compensation: Math.round((data.price.minPrice.compensation + Number.EPSILON) * 100) / 100 ,
+  					
+  					
+// TODO : Default as a hack until full i18n is implemented
+  					desc:   description(data),
   					imageUrl : (data.coverImagePath),           					
 					name : (data.attributes.referentielAttributes.MODEL == null ? data.names.name : data.attributes.referentielAttributes.MODEL)
 				});                	
