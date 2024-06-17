@@ -62,6 +62,7 @@ public class IcecatName {
         this.value = value;
     }
 
+    // TODO : Micmac, should merge with getValue (either icecat bug, either using same POJO for 2 xsd definitions
 	public String getTextValue() {
 		return textValue;
 	}

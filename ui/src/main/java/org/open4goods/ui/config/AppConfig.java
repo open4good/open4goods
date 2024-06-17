@@ -174,9 +174,9 @@ public class AppConfig {
 
 	@Bean
 	@Autowired
-	IcecatService icecatFeatureService(UiConfig properties, RemoteFileCachingService fileCachingService, BrandService brandService, GoogleTaxonomyService googleTaxonomyService, VerticalsConfigService verticalConfigService) throws SAXException {
+	IcecatService icecatFeatureService(UiConfig properties, RemoteFileCachingService fileCachingService, BrandService brandService, VerticalsConfigService verticalConfigService) throws SAXException {
 		// TODO : xmlMapper not injected because corruct the springdoc used one. Should use a @Primary derivation
-		return new IcecatService(new XmlMapper(), properties.getIcecatFeatureConfig(), fileCachingService, properties.getRemoteCachingFolder(), brandService, googleTaxonomyService, verticalConfigService);
+		return new IcecatService(new XmlMapper(), properties.getIcecatFeatureConfig(), fileCachingService, properties.getRemoteCachingFolder(), brandService, verticalConfigService);
 	}
 	
 	
@@ -265,6 +265,41 @@ public class AppConfig {
 		return new EvaluationService();
 	}
 
+	
+	
+
+	// TODO : should not be required at ui side
+	@Bean RemoteFileCachingService remoteFileCachingService() {
+		return new RemoteFileCachingService(config.getRemoteCachingFolder());
+	}
+	
+    @Bean
+	// TODO : should not be required at ui side
+    public GoogleTaxonomyService googleTaxonomyService(@Autowired RemoteFileCachingService remoteFileCachingService) {
+		GoogleTaxonomyService gts = new GoogleTaxonomyService(remoteFileCachingService);
+		
+		// TODO : From conf 
+		// TODO : Add others
+        try {
+			gts.loadGoogleTaxonUrl("https://www.google.com/basepages/producttype/taxonomy-with-ids.fr-FR.txt", "fr");
+			gts.loadGoogleTaxonUrl("https://www.google.com/basepages/producttype/taxonomy-with-ids.en-US.txt", "en");
+			gts.loadGoogleTaxonUrl("https://www.google.com/basepages/producttype/taxonomy-with-ids.de-DE.txt", "de");
+			gts.loadGoogleTaxonUrl("https://www.google.com/basepages/producttype/taxonomy-with-ids.es-ES.txt", "es");
+			gts.loadGoogleTaxonUrl("https://www.google.com/basepages/producttype/taxonomy-with-ids.nl-NL.txt", "nl");
+			
+			
+			
+			
+		} catch (Exception e) {
+			// TODO
+			e.printStackTrace();
+		}        
+        
+        
+        return gts;
+	}
+    
+    
 	@Bean
 	@Autowired
 	VerticalsConfigService verticalConfigsService(ResourcePatternResolver resourceResolver, SerialisationService serialisationService,  GoogleTaxonomyService googleTaxonomyService, ProductRepository productRepository, ImageGenerationService imageGenerationService) throws IOException {

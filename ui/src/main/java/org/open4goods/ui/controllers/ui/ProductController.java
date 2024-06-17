@@ -16,10 +16,12 @@ import org.open4goods.model.Localised;
 import org.open4goods.model.constants.ProviderType;
 import org.open4goods.model.data.AffiliationToken;
 import org.open4goods.model.data.Description;
+import org.open4goods.model.dto.UiFeatureGroups;
 import org.open4goods.model.product.AggregatedPrice;
 import org.open4goods.model.product.Product;
 import org.open4goods.services.BarcodeValidationService;
 import org.open4goods.services.BrandService;
+import org.open4goods.services.IcecatService;
 import org.open4goods.services.SerialisationService;
 import org.open4goods.services.VerticalsConfigService;
 import org.open4goods.ui.config.yml.UiConfig;
@@ -66,6 +68,9 @@ public class ProductController  {
 	private @Autowired UiService uiService;
 	private @Autowired BarcodeValidationService barcodeValidationService;
 
+	// TODO: Should not have a direct dependency to the icecat service,
+	// icecat stuff should be exposed through preloading vertical config 
+	private @Autowired 	IcecatService icecatService;
 	/**
 	 * A product, associated with a vertical at the home level.
 	 *
@@ -242,6 +247,9 @@ public class ProductController  {
 		ModelAndView mv = null;
 
 
+		
+		
+		
 		mv = uiService.defaultModelAndView("product", request);
 
 
@@ -249,6 +257,11 @@ public class ProductController  {
 		mv.addObject("product", data);
 		
 		VerticalConfig verticalConfig = verticalConfigService.getVerticalForPath(vertical);
+		
+		List<UiFeatureGroups> features = icecatService.features(verticalConfig, mv.getModelMap().get("siteLanguage").toString(), data);
+		mv.addObject("features",features);
+		
+		
 		mv.addObject("verticalConfig", verticalConfig);
 
 		UiHelper uiHelper = new UiHelper(request, verticalConfig, data);
