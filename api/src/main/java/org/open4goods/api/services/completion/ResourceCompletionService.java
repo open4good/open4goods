@@ -20,6 +20,7 @@ import org.apache.http.client.fluent.Request;
 import org.apache.tika.Tika;
 import org.apache.tika.config.TikaConfig;
 import org.open4goods.api.config.yml.ApiProperties;
+import org.open4goods.api.config.yml.ResourceCompletionUrlTemplate;
 import org.open4goods.api.services.AbstractCompletionService;
 import org.open4goods.config.yml.ui.VerticalConfig;
 import org.open4goods.dao.ProductRepository;
@@ -102,6 +103,12 @@ public class ResourceCompletionService  extends AbstractCompletionService{
 		// Update all new items
 		/////////////////////
 		
+		
+		// Adding computed url's from availlable url's templates
+		
+		apiProperties.getResourceCompletionConfig().getUrlTemplates().forEach(e -> {
+			data.getResources().add(processUrlTemplate(e, String.valueOf(data.gtin())));
+		});
 		
 		// Deleting existing groups
 		data.getResources().forEach(e -> {
@@ -276,6 +283,17 @@ public class ResourceCompletionService  extends AbstractCompletionService{
 			}
 			
 		}
+	}
+
+	private Resource processUrlTemplate(ResourceCompletionUrlTemplate ut, String gtin) {
+		
+		Resource r = new Resource();
+		r.getTags().addAll(ut.getTags());
+		
+		// TODO : add resource language
+		r.setUrl(ut.getUrl().replace("{GTIN}", gtin));
+		
+		return r;
 	}
 
 	/**
