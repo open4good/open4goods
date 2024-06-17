@@ -27,6 +27,8 @@
 	<link rel="stylesheet" type="text/css" href="/webjars/datatables/css/dataTables.bootstrap5.min.css">
 	<link rel="stylesheet" type="text/css" href="/webjars/datatables-responsive/css/responsive.dataTables.min.css">
 	
+	<link th:if="${user}" rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/11.6.0/styles/default.min.css">
+	
 	
 	<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/select/1.7.0/css/select.dataTables.min.css">
 	<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/buttons/2.4.2/css/buttons.dataTables.min.css">
@@ -86,14 +88,19 @@
 		
 
 
-	      				<!--/* Categories */-->				
-						<th:block th:insert="~{inc/product-categories.html}"></th:block>
+
 									
 					<div class=" col-lg-12">
 	
 
 						<!--  Authenticated section -->						
 						 <th:block th:if="${user}">
+					
+								
+									
+	      				<!--/* Categories */-->				
+						<th:block th:insert="~{inc/product-categories.html}"></th:block>
+								 
 						 
 						 
 						 					<!--/* Attributes */-->				
@@ -143,7 +150,42 @@
 							</div>
 
 						 
+							
+							
+<!--  The Raw JSON -->	 
+								
+								
+									<!--/* Mapped categories */-->													
+									<div class="card shadow my-3">
+										<div class="card-header"><h2 class="h5">JSON</h2></div>
+										<div class="card-body">	
+												
+			    					        <pre style="height:500px" ><code id="json-output" class="json"></code></pre>
+									 	    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.5.0/highlight.min.js"></script>
 											
+
+											<script th:inline="javascript">
+												/*<![CDATA[*/
+												
+												    const jsonObject = /*[[${raw}]]*/ '';
+												        	    
+												/*]]>*/
+												
+												
+										        // Stringify and format the JSON object
+										        const jsonString = JSON.stringify(jsonObject, null, 2);
+										
+										        // Insert formatted JSON into the <code> element
+										        document.getElementById('json-output').textContent = jsonObject;
+										
+										        // Highlight the JSON
+										        hljs.highlightAll();
+										        
+											</script>
+											
+										</div>
+									</div>
+																				
 						</th:block>
 
 					</div>
