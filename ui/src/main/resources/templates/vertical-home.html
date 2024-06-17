@@ -46,7 +46,7 @@
 	
     <main>	
   
-        <div class="section section-lg pt-5 pt-md-7 bg-gray-200">
+        <div class="section section-lg pt-5 pt-md-3 bg-gray-200">
             <div class="container container-semi-fluid">
 
 				<!--/* Hero */-->						
@@ -58,15 +58,11 @@
 			                        <div class="col-lg-2 text-center">
 			                                <img class="mt-2" width="150" th:src="'/images/verticals/' + ${vertical} + '.png'">
 			                        </div>
-			                        <span class="col-lg-10">
+			                        <div class="col-lg-10">
 			                                <h1 class="mt-2 text-center" th:text="${config.i18n(siteLanguage).verticalHomeTitle}"></h1>
-			                                <div class="row p-2 mb-4"> 
-			                					<th:block th:with="path=${vertical} + '/welcome-header'">
-			                     					<th:block th:insert="~{inc/wiki.html}"></th:block>
-			                     				</th:block>
-			                				</div>		
+			                                <p class="row p-2 mb-4" th:text="${config.i18n(siteLanguage).verticalHomeDescription}"> </p>		
 			                				
-			                        </span> 
+			                        </div> 
 								</div>
 	                    </div>
 					</div>
