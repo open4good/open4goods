@@ -144,6 +144,7 @@ public class Product implements Standardisable {
 	private Set<Description> descriptions = new HashSet<>();
 
 	/** The ai generated texts**/
+	// TODO : Buggy for i18n
 	@Field(index = false, store = false, type = FieldType.Object)
 	private Map<String,AiDescription> aiDescriptions = new HashMap<>();
 
