@@ -74,8 +74,8 @@
 		</section>
 
 		<section class="bg-white text-center py-4">
-			<h2> <span class="h1 mb-3">Nos catégories évaluées</span></h2>
-			<p class="lead mb-0">Peu de verticales pour l'instant. C'est exprès, c'est une Beta !</p>
+			<h2> <span class="h1 mb-3">Nos univers produits</span></h2>
+			<p class="lead mb-0">Peu de catégories pour l'instant. C'est normal, c'est une version beta !</p>
 		</section>
 
 		<section class="container py-5">
@@ -118,7 +118,51 @@
 	
 						
 						
-						<div class="col-12 col-md-6 mb-3">
+
+						
+						
+						<div class="col-12 col-md-6 col-lg-6 mb-3">
+							<div class="card bg-white border-gray-300 text-gray p-4 h-100">
+								<div class="card-header bg-white border-0 pb-0">
+									<h3 class="h4 m-0">Écoscore</h3>
+								</div>
+								<div class="card-body">
+									<p>
+										<th:block th:with="path='WIDGETS/accueil-ecoscore/'">
+											<th:block th:insert="~{inc/wiki.html}"></th:block>
+										</th:block>                                
+									</p>
+									<a href="#ecoscore" class="btn btn-sm btn-primary animate-up-2 mt-3">Score écologique</a>
+								</div>
+							</div>
+						</div>                    
+
+						<div class="col-12 col-md-6 col-lg-6 mb-3 ">
+							<div class="card bg-white border-gray-300 text-gray p-4 h-100">
+								<div class="card-header bg-white border-0 pb-0">
+									<h3 class="h4 m-0">Compensation</h3>
+								</div>
+								<div class="card-body">
+									<p>
+										<th:block th:with="path='WIDGETS/accueil-compensation/'">
+											<th:block th:insert="~{inc/wiki.html}"></th:block>
+										</th:block>                                
+									</p>
+									<a href="#compensation" class="btn btn-sm btn-primary animate-up-2 mt-3">Compensation écologique</a>
+								</div>
+							</div>
+						</div>
+						
+						
+						
+						
+						
+						
+						
+						
+						
+						
+						<div class="col-12 col-md-6 mb-3 mb-lg-0">
 							<div class="card bg-white border-gray-300 text-gray p-4 h-100">
 								<div class="card-header bg-white border-0 pb-0">
 									<h3 class="h4 m-0">Modèle ouvert</h3>
@@ -135,7 +179,7 @@
 						</div>
 						
 						
-						<div class="col-12 col-md-6 mb-3">
+						<div class="col-12 col-md-6 mb-3  mb-lg-0">
 							<div class="card bg-white border-gray-300 text-gray p-4 h-100x ">
 								<div class="card-header bg-white border-0 pb-0">
 									<h3 class="h4 m-0">Numérique responsable</h3>
@@ -149,40 +193,24 @@
 									<a href="#opendata" class=" level btn btn-sm btn-primary animate-up-2 mt-3">Data responsable</a>
 								</div>
 							</div>
-						</div>
+						</div>						
 						
 						
-						<div class="col-12 col-md-3 col-lg-3 mb-3 mb-lg-0">
-							<div class="card bg-white border-gray-300 text-gray p-4 h-100">
-								<div class="card-header bg-white border-0 pb-0">
-									<h3 class="h4 m-0">Écoscore</h3>
-								</div>
-								<div class="card-body">
-									<p>
-										<th:block th:with="path='WIDGETS/accueil-ecoscore/'">
-											<th:block th:insert="~{inc/wiki.html}"></th:block>
-										</th:block>                                
-									</p>
-									<a href="#ecoscore" class="btn btn-sm btn-primary animate-up-2 mt-3">Score écologique</a>
-								</div>
-							</div>
-						</div>                    
-
-						<div class="col-12 col-md-3 col-lg-3 mb-3 mb-lg-0">
-							<div class="card bg-white border-gray-300 text-gray p-4 h-100">
-								<div class="card-header bg-white border-0 pb-0">
-									<h3 class="h4 m-0">Compensation</h3>
-								</div>
-								<div class="card-body">
-									<p>
-										<th:block th:with="path='WIDGETS/accueil-compensation/'">
-											<th:block th:insert="~{inc/wiki.html}"></th:block>
-										</th:block>                                
-									</p>
-									<a href="#compensation" class="btn btn-sm btn-primary animate-up-2 mt-3">Compensation écologique</a>
-								</div>
-							</div>
-						</div>
+						
+						
+						
+						
+						
+						
+						
+						
+						
+						
+						
+						
+						
+						
+						
 					</div>
 				</div>
 			</div>
@@ -216,7 +244,7 @@
 						<div class="icon icon-shape icon-shape-secondary me-2 me-md-0 mb-2">
 							<span class="fas fa-box-open"></span>
 						</div>
-						<span class="counter display-3 text-secondary d-block" th:data-value="${partners}" th:text="${partners}"></span>
+						<span class="counter display-3 text-secondary d-block" th:data-value="'53'" th:text="'53'"></span>
 						<span class="lead"><a href="/partenaires"> Nombre de partenaires</a> de notre démarche. Toutes les plus grandes enseignes !</span>
 					</div>
 				</div>
