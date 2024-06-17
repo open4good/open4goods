@@ -177,7 +177,15 @@ public class VerticalConfig{
 		return "config:"+ id;
 	}
 
+	@Override
+	public int hashCode() {
+		return id.hashCode();
+	}
 	
+	@Override
+	public boolean equals(Object obj) {
+		return id.equals(((VerticalConfig)obj).id);
+	}
 	
 	public ProductI18nElements i18n(String lang) {		
 		return i18n.getOrDefault(lang, i18n.get("default"));		
