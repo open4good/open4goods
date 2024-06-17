@@ -62,6 +62,12 @@ public class ApiProperties {
 	 */
 	private String generatedImagesFolder = rootFolder + "generated-images" + File.separator;
 	
+	/**
+	 * Configuration for resource completion
+	 */
+	private ResourceCompletionConfig resourceCompletionConfig = new ResourceCompletionConfig();
+	
+	
 	/*
 	 * Proxy, if neededpsule
 	 */
@@ -556,6 +562,18 @@ public class ApiProperties {
 
 	public void setImageGenerationConfig(ImageGenerationConfig imageGenerationConfig) {
 		this.imageGenerationConfig = imageGenerationConfig;
+	}
+
+
+
+	public ResourceCompletionConfig getResourceCompletionConfig() {
+		return resourceCompletionConfig;
+	}
+
+
+
+	public void setResourceCompletionConfig(ResourceCompletionConfig resourceCompletionConfig) {
+		this.resourceCompletionConfig = resourceCompletionConfig;
 	}
 
 
