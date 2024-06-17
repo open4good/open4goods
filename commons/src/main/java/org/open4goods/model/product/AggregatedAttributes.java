@@ -55,7 +55,7 @@ public class AggregatedAttributes  {
 			return null;
 		}
 		
-		AggregatedAttribute ret = unmapedAttributes.stream().filter(a -> a.getIcecatTaxonomyIds().contains(Long.valueOf(featureId))).findFirst()
+		AggregatedAttribute ret = unmapedAttributes.stream().filter(a -> a.getIcecatTaxonomyIds().contains(featureId)).findFirst()
 				.orElse(null);
 				return ret;
 	}
