@@ -38,7 +38,7 @@ i18n:
       # The layout a product url will have. Ex : 81234555-tv-led-samsung-QL659P 2023
       url: 
         # We can add ta custom prefix (with our conditional templating language if we want)
-        prefix: "|| tv | television | television | televiseur ||"
+        prefix: "|| tv | television | televiseur ||"
         # Then we add some attributes values with hyphens if present (ex : led-samsung-QL659P-2023)
         attrs:
           - TV_TYPE
@@ -74,7 +74,7 @@ i18n:
       # TODO : Make verticalHomeTitle/ verticalHomeDescription templatable
       verticalHomeTitle: "Televiseurs"
       # Text displaid as title for the vertical
-      verticalHomeDescription: "Notre eco-score vous permet de choisir un téléviseur moins impactant pour la planète"  
+      verticalHomeDescription: "Bienvenue dans notre rubrique téléviseurs. Devenus des objets quasi-nécessaires, nos TV's ne sont malheureusement pas neutres pour l'environnement 🌏 ! Heureusement, Nudger est là pour vous informer et vous aider à choisir la TV la plus écologique et la plus adaptée à votre besoin."  
       # The image used as a logo
       verticalHomeLogo: "https://media.istockphoto.com/id/173240143/fr/photo/t%C3%A9l%C3%A9vision-avec-deux-masques-de-d%C3%A9tourage.jpg?s=612x612&w=0&k=20&c=GhzC3IyvkmRp9shUBHICxM_1Lsur2uWkpNKf2F22p8s="
 
