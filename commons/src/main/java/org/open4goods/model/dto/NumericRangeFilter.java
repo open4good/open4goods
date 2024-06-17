@@ -24,6 +24,20 @@ public class NumericRangeFilter {
 		return key+ " : " + minValue +"<>" + maxValue;
 	}
 	
+	@Override
+	public int hashCode() {
+		return toString().hashCode();
+	}
+	
+	@Override
+	public boolean equals(Object obj) {
+		if (obj instanceof NumericRangeFilter) {
+			return this.toString().equals(obj.toString());
+		}
+		return false;
+	}
+	
+	
 	public String getKey() {
 		return key;
 	}

@@ -7,159 +7,185 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.open4goods.model.constants.ProductCondition;
 
-/**
- * Results of a search inside a specific vertical
- * @author goulven
- *
- */
 public class VerticalSearchRequest {
 
+    Integer minPrice;
+    Integer maxPrice;
 
-	Integer minPrice;
-	Integer maxPrice;
+    Integer minOffers;
+    Integer maxOffers;
 
-	Integer minOffers;
-	Integer maxOffers;
+    ProductCondition condition;
 
-	ProductCondition condition;
+    Integer pageNumber;
+    Integer pageSize;
 
-	Integer pageNumber;
-	Integer pageSize;
+    Set<String> countries = new HashSet<>();
 
-	Set<String> countries = new HashSet<>();
+    List<NumericRangeFilter> numericFilters = new ArrayList<>();
 
-	List<NumericRangeFilter> numericFilters = new ArrayList<>();
+    Map<String, Set<String>> termsFilter = new HashMap<>();
 
-	Map<String,Set<String>> termsFilter = new HashMap<>();
+    boolean excluded = false;
 
-	// If true, will search in vertical excluded products
-	boolean excluded = false;
+    private String sortField;
+    private String sortOrder;
 
-	private String sortField;
-	private String sortOrder;
+    public void addTermFilter(String attribute, String term) {
+        if (!termsFilter.containsKey(attribute)) {
+            termsFilter.put(attribute, new HashSet<>());
+        }
+        termsFilter.get(attribute).add(term);
+    }
 
+    public Integer getMinPrice() {
+        return minPrice;
+    }
 
-	/**
-	 * Add a term filter
-	 * @param string
-	 * @param string2
-	 */
-	public void addTermFilter(String attribute, String term) {
+    public void setMinPrice(Integer minPrice) {
+        this.minPrice = minPrice;
+    }
 
-		if (!termsFilter.containsKey(attribute)) {
-			termsFilter.put(attribute, new HashSet<>());
-		}
-		termsFilter.get(attribute).add(term);
-	}
+    public Integer getMaxPrice() {
+        return maxPrice;
+    }
 
-	public Integer getMinPrice() {
-		return minPrice;
-	}
+    public void setMaxPrice(Integer maxPrice) {
+        this.maxPrice = maxPrice;
+    }
 
-	public void setMinPrice(Integer minPrice) {
-		this.minPrice = minPrice;
-	}
+    public Integer getMinOffers() {
+        return minOffers;
+    }
 
-	public Integer getMaxPrice() {
-		return maxPrice;
-	}
+    public void setMinOffers(Integer minOffers) {
+        this.minOffers = minOffers;
+    }
 
-	public void setMaxPrice(Integer maxPrice) {
-		this.maxPrice = maxPrice;
-	}
+    public Integer getMaxOffers() {
+        return maxOffers;
+    }
 
+    public void setMaxOffers(Integer maxOffers) {
+        this.maxOffers = maxOffers;
+    }
 
+    public ProductCondition getCondition() {
+        return condition;
+    }
 
-	public Integer getMinOffers() {
-		return minOffers;
-	}
+    public void setCondition(ProductCondition condition) {
+        this.condition = condition;
+    }
 
-	public void setMinOffers(Integer minOffers) {
-		this.minOffers = minOffers;
-	}
+    public Integer getPageNumber() {
+        return pageNumber;
+    }
 
-	public Integer getMaxOffers() {
-		return maxOffers;
-	}
+    public void setPageNumber(Integer from) {
+        pageNumber = from;
+    }
 
-	public void setMaxOffers(Integer maxOffers) {
-		this.maxOffers = maxOffers;
-	}
+    public Integer getPageSize() {
+        return pageSize;
+    }
 
-	public ProductCondition getCondition() {
-		return condition;
-	}
+    public void setPageSize(Integer to) {
+        pageSize = to;
+    }
 
-	public void setCondition(ProductCondition condition) {
-		this.condition = condition;
-	}
+    public Set<String> getCountries() {
+        return countries;
+    }
 
-	public Integer getPageNumber() {
-		return pageNumber;
-	}
+    public void setCountries(Set<String> countries) {
+        this.countries = countries;
+    }
 
-	public void setPageNumber(Integer from) {
-		pageNumber = from;
-	}
+    public String getSortField() {
+        return sortField;
+    }
 
-	public Integer getPageSize() {
-		return pageSize;
-	}
+    public void setSortField(String sortField) {
+        this.sortField = sortField;
+    }
 
-	public void setPageSize(Integer to) {
-		pageSize = to;
-	}
+    public String getSortOrder() {
+        return sortOrder;
+    }
 
-	public Set<String> getCountries() {
-		return countries;
-	}
+    public void setSortOrder(String sortOrder) {
+        this.sortOrder = sortOrder;
+    }
 
-	public void setCountries(Set<String> countries) {
-		this.countries = countries;
-	}
+    public List<NumericRangeFilter> getNumericFilters() {
+        return numericFilters;
+    }
 
-	public String getSortField() {
-		return sortField;
-	}
+    public void setNumericFilters(List<NumericRangeFilter> numericFilters) {
+        this.numericFilters = numericFilters;
+    }
 
-	public void setSortField(String sortField) {
-		this.sortField = sortField;
-	}
+    public Map<String, Set<String>> getTermsFilter() {
+        return termsFilter;
+    }
 
-	public String getSortOrder() {
-		return sortOrder;
-	}
+    public void setTermsFilter(Map<String, Set<String>> termsFilter) {
+        this.termsFilter = termsFilter;
+    }
 
-	public void setSortOrder(String sortOrder) {
-		this.sortOrder = sortOrder;
-	}
+    public boolean isExcluded() {
+        return excluded;
+    }
 
-	public List<NumericRangeFilter> getNumericFilters() {
-		return numericFilters;
-	}
+    public void setExcluded(boolean excluded) {
+        this.excluded = excluded;
+    }
 
-	public void setNumericFilters(List<NumericRangeFilter> numericFilters) {
-		this.numericFilters = numericFilters;
-	}
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (obj == null || getClass() != obj.getClass()) return false;
 
-	public Map<String, Set<String>> getTermsFilter() {
-		return termsFilter;
-	}
+        VerticalSearchRequest that = (VerticalSearchRequest) obj;
 
-	public void setTermsFilter(Map<String, Set<String>> termsFilter) {
-		this.termsFilter = termsFilter;
-	}
+        return new EqualsBuilder()
+            .append(excluded, that.excluded)
+            .append(minPrice, that.minPrice)
+            .append(maxPrice, that.maxPrice)
+            .append(minOffers, that.minOffers)
+            .append(maxOffers, that.maxOffers)
+            .append(condition, that.condition)
+            .append(pageNumber, that.pageNumber)
+            .append(pageSize, that.pageSize)
+            .append(countries, that.countries)
+            .append(numericFilters, that.numericFilters)
+            .append(termsFilter, that.termsFilter)
+            .append(sortField, that.sortField)
+            .append(sortOrder, that.sortOrder)
+            .isEquals();
+    }
 
-	public boolean isExcluded() {
-		return excluded;
-	}
-
-	public void setExcluded(boolean excluded) {
-		this.excluded = excluded;
-	}
-
-	
-
+    @Override
+    public int hashCode() {
+        return new HashCodeBuilder(17, 37)
+            .append(minPrice)
+            .append(maxPrice)
+            .append(minOffers)
+            .append(maxOffers)
+            .append(condition)
+            .append(pageNumber)
+            .append(pageSize)
+            .append(countries)
+            .append(numericFilters)
+            .append(termsFilter)
+            .append(excluded)
+            .append(sortField)
+            .append(sortOrder)
+            .toHashCode();
+    }
 }
