@@ -14,6 +14,7 @@ import org.open4goods.model.data.Resource;
 import org.open4goods.services.*;
 import org.open4goods.ui.config.AppConfig;
 import org.open4goods.ui.config.yml.UiConfig;
+import org.open4goods.ui.services.GtinService;
 import org.open4goods.ui.services.ImageService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,14 +50,16 @@ public class ResourceController {
 	private final DataSourceConfigService datasourceConfigService;
 	private final BrandService brandService;
 	private final ResourceService resourceService;
+	private final GtinService gtinService;
 
-	public ResourceController(ImageService imageService,  UiConfig config, DataSourceConfigService dsConfigService, ResourceService resourceService, BrandService brandService, ImageGenerationService imageGenerationService) {
+	public ResourceController(ImageService imageService,  UiConfig config, DataSourceConfigService dsConfigService, ResourceService resourceService, BrandService brandService, ImageGenerationService imageGenerationService, GtinService gtinService) {
 		this.imageService = imageService;
 		this.imageGenerationService = imageGenerationService;
 		this.config = config;
 		this.datasourceConfigService = dsConfigService;
 		this.brandService = brandService;
 		this.resourceService = resourceService;
+		this.gtinService = gtinService;
 	}
 
 
@@ -141,6 +144,30 @@ public class ResourceController {
 			throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Error rendering image");
 		} 
 	}
+
+	/**
+	 * Serves the gtin image of the specified data source.
+	 *
+	 * @param datasourceName the name of the data source.
+	 * @param response       the HttpServletResponse to write the icon to.
+	 * @throws IOException               if an I/O error occurs.
+	 * @throws InvalidParameterException if an invalid parameter is provided.
+	 */
+	@GetMapping("/images/{id:\\d+}-gtin.png")
+	// TODO : sec, IP Filter protection
+	public void gtinImage(@PathVariable String id, final HttpServletResponse response) {
+
+		response.addHeader(HEADER_CONTENT_TYPE, CONTENT_TYPE_IMAGE_PNG);
+		response.addHeader(HEADER_CACHE_CONTROL, "public, max-age=" + AppConfig.CACHE_PERIOD_SECONDS);
+
+		try (InputStream stream = gtinService.gtin(id)) {
+			IOUtils.copy(stream, response.getOutputStream());
+		} catch (Exception e) {
+			throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Error rendering image");
+		} 
+	}
+	
+
 
 	/**
 	 * Serves the logo image of the specified data source.
