@@ -82,6 +82,9 @@ public class VerticalController  extends AbstractController {
 
 		ret.addObject("filters",config.verticalFilters());
 		ret.addObject("vertical",this.vertical);
+		ret.addObject("verticals",verticalService.getConfigsWithoutDefault());
+		
+		
 		// TODO: i18n
 		ret.addObject("verticalPath",verticalService.getPathForVerticalLanguage("fr",config));
 
