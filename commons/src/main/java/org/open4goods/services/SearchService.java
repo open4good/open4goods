@@ -13,6 +13,7 @@ import org.open4goods.config.yml.attributes.AttributeConfig;
 import org.open4goods.config.yml.ui.VerticalConfig;
 import org.open4goods.dao.ProductRepository;
 import org.open4goods.helper.GenericFileLogger;
+import org.open4goods.model.constants.CacheConstants;
 import org.open4goods.model.constants.ProductCondition;
 import org.open4goods.model.dto.NumericRangeFilter;
 import org.open4goods.model.dto.VerticalFilterTerm;
@@ -21,6 +22,7 @@ import org.open4goods.model.dto.VerticalSearchResponse;
 import org.open4goods.model.product.Product;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.elasticsearch.client.elc.ElasticsearchAggregations;
@@ -132,11 +134,11 @@ public class SearchService {
 	 * @param request
 	 * @return
 	 */
+	@Cacheable(cacheNames = CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME)
 	public VerticalSearchResponse verticalSearch(VerticalConfig vertical, VerticalSearchRequest request) {
 
 		// Logging
 		statsLogger.info("Searching in vertical {}",vertical.getId());
-
 		VerticalSearchResponse vsr = new VerticalSearchResponse();
 
 		List<AttributeConfig> customAttrFilters = vertical.verticalFilters().stream().filter(Objects::nonNull).toList();
