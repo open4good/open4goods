@@ -13,7 +13,8 @@
 <body>
     
 	<!--/* Navbar */-->
-	<th:block th:insert="~{inc/navbar/navbar-non-product.html}"></th:block>
+	<th:block th:with="page = ${pageTitle}" th:insert="~{inc/navbar/navbar-page.html}"></th:block>
+
     <!--/* Loader */-->
     <th:block th:insert="~{inc/preloader.html}"></th:block>
 	
@@ -57,6 +58,7 @@
 	<th:block th:insert="~{inc/footer.html}"></th:block>	
 
 <!-- Core -->
+<script src="../../vendor/@popperjs/core/dist/umd/popper.min.js"></script>
 <script src="/webjars/bootstrap/js/bootstrap.min.js"></script>
 <script src="../../vendor/headroom.js/dist/headroom.min.js"></script>
 
