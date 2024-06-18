@@ -1,19 +1,33 @@
-<div class="table-responsive table-caracteristics-fs mt-4">
 
-	<div th:each="featureGroup, stat : ${features}">
-		
-		<table class="table">
-			<th:block th:each="attr,stat : ${featureGroup.attributes}">
-				<tr th:if="${stat.first}">
-					<th colspan="2" class="h2  m-2 "><strong th:text="${featureGroup.name}"></strong></th>			
-				</tr>
-			
-				<tr>
-					<td class="align-middle" th:text="${attr.name}"></td>
-					<td  class="align-middle" th:text="${attr.value}"></td>
-				</tr>
-			</th:block>
-		</table>
-	</div>
+<div class="accordion" id="accordionExample1">
+	<th:block th:each="featureGroup, stat : ${features}">
+		<div class="accordion-item">
+			<h2 class="accordion-header" th:id="'accordion-'+${stat.count}">
+				<button class="accordion-button collapsed" type="button"
+					data-bs-toggle="collapse" th:data-bs-target="'#accordion-id'+${stat.count}"
+					aria-expanded="false" aria-controls="collapseOne" th:text="${featureGroup.name}"></button>
+			</h2>
+			<div th:id="'accordion-id'+${stat.count}" class="accordion-collapse collapse"
+				th:aria-labelledby="'accordion-'+${stat.count}" data-bs-parent="#accordionExample1"
+				style="">
+				<div class="accordion-body">
+					<table class="table">
+						<th:block th:each="attr,stat : ${featureGroup.attributes}">
+							<tr th:if="${stat.first}">
+								<th colspan="2" class="h2  m-2 "><strong th:text="${featureGroup.name}"></strong></th>			
+							</tr>
+						
+							<tr>
+								<td class="align-middle" th:text="${attr.name}"></td>
+								<td  class="align-middle" th:utext="${attr.value}"></td>
+							</tr>
+						</th:block>
+					</table>
+				</div>
+			</div>
+		</div>
+	</th:block>
+	
+	
+	
 </div>
-
