@@ -54,10 +54,12 @@ public class DataFragmentAggregationWorker implements Runnable {
 					// There is data to consume and queue consummation is enabled
 					final Set<DataFragment> buffer = new HashSet<>();	
 					
-					int qSize = service.getQueue().size();
-					
-					for (int i = 0; (i < dequeuePageSize && i < qSize); i++) {
-						buffer.add(service.getQueue().take());
+					for (int i = 0; i < dequeuePageSize; i++) {
+						if (service.getQueue().isEmpty()) {
+							break;
+						} else {
+							buffer.add(service.getQueue().take());
+						}
 					}
 					
 					// Aggregating
