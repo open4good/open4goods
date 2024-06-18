@@ -73,7 +73,7 @@ public class DataFragmentStoreService {
 
 		// TODO : from conf
 		int dequeueSize = 200;
-		int workers = 1;
+		int workers = 3;
 		int pauseDuration = 4000;
 //		
 		logger.info("Starting file queue consumer thread, with bulk page size of {} items", dequeueSize );
@@ -162,9 +162,9 @@ public class DataFragmentStoreService {
 	 */
 	void enqueue(final DataFragment df) {
 		try {
-			queue.offer(df,300, TimeUnit.SECONDS);
+			queue.offer(df,10, TimeUnit.SECONDS);
 		} catch (InterruptedException e) {
-			logger.error("Error while adding to queue",e);			
+			logger.error("Expiration error while waiting to add in the queue, ",e);			
 		}	
 	}
 
