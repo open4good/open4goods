@@ -139,7 +139,8 @@ brandConfig:
 imageGenerationConfig:
   prompt: |
     Create a simple icon of a {VERTICAL} that strictly adheres to the following guidelines:
-    - The background color must be fully white without any gradient or texture.
+    - The background color must be fully (#FFFFFF).
+    - The white background does not contains any gradient or texture.
     - The icon should be flat, in a modern, minimalist style.
     - The lines must be clean and simple.
     - Use a soft color palette consisting primarily of shades of green and off-white.
