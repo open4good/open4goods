@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.commons.lang3.StringUtils;
@@ -72,7 +73,7 @@ public class DataFragmentStoreService {
 
 		// TODO : from conf
 		int dequeueSize = 200;
-		int workers = 5;
+		int workers = 2;
 		int pauseDuration = 4000;
 //		
 		logger.info("Starting file queue consumer thread, with bulk page size of {} items", dequeueSize );
@@ -160,7 +161,11 @@ public class DataFragmentStoreService {
 	 * @param df
 	 */
 	void enqueue(final DataFragment df) {
-		queue.offer(df);		
+		try {
+			queue.offer(df,300, TimeUnit.SECONDS);
+		} catch (InterruptedException e) {
+			logger.error("Error while adding to queue",e);			
+		}	
 	}
 
 
