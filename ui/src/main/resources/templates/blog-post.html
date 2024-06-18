@@ -7,30 +7,16 @@
 	<th:block th:insert="~{inc/header-meta.html}"></th:block>
     
 	<!-- Primary Meta Tags -->
-	<title>La compensation environnementale | Nudger</title>
-	<meta name="description" content="Nudger vous révèle ce qu'est la compensation environnementale et vous donne toutes les astuces pour la comprendre !">
-		
-	<!-- Open Graph / Facebook -->
-	<meta property="og:type" content="website">
-	<meta property="og:url" th:content="${url}">
-	<meta property="og:title" th:content="#{compensation.title}">
-	<meta property="og:description" th:content="#{compensation.meta.description}">
-	<meta property="og:image" th:content="${baseUrl} + 'assets/img/brand/light.svg'">
-	
-	<!-- Twitter -->
-	<meta name="twitter:card" content="summary_large_image">
-	<meta name="twitter:url" th:content="${url}">
-	<meta name="twitter:title" th:content="#{compensation.title}">
-	<meta name="twitter:description" th:content="#{compensation.meta.description}">
-	<meta name="twitter:image" th:content="${baseUrl} + 'assets/img/brand/light.svg'">
-	
+	<title th:text="${post.title}"></title>
+	<meta name="description" th:content="${post.summary}">
+			
 </head>
 
 <body>
     
 
 	<!--/* Navbar */-->
-	<th:block th:with="page = 'compensation'" th:insert="~{inc/navbar/navbar-page.html}"></th:block>
+	<th:block th:with="page = ${post.title}" th:insert="~{inc/navbar/navbar-blog-post.html}"></th:block>
     <!--/* Loader */-->
     <th:block th:insert="~{inc/preloader.html}"></th:block>
 	
