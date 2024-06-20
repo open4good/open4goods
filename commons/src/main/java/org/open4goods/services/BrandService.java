@@ -221,6 +221,9 @@ public class BrandService {
 	 * @return
 	 */
 	private String getKeyName(String name) {
+		if (StringUtils.isEmpty(name)) {
+			return "";
+		}
 		return StringUtils.stripAccents(name.toUpperCase()).trim();
 	}
 
