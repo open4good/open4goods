@@ -167,7 +167,7 @@ attributesConfig:
   # If one of the following attribute is missing on a product, the product will be disassociated from this vertical. (setting vertical to null)
   mandatory:
    - "DIAGONALE_POUCES"
-   - "REPAIRABILITY_INDEX"
+#   - "REPAIRABILITY_INDEX"
    - "TV_TYPE"
    
   ####################################################################################
