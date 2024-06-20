@@ -27,6 +27,7 @@ matchingCategories:
 - "TV, VIDEO, HOME CINEMA>TELEVISEUR>TV LED"
 - "TV - VIDEO - SON > TELEVISEUR > TELEVISEUR LED"
 - "TV & VIDEO & HOME CINEMA > TELEVISEUR > TV LED/LCD"
+- "TV, VIDEO, HOME CINEMA / TELEVISEUR / TV LED"
 - "TV"
 - "HIGH-TECH > TELEVISION, HI-FI > TELEVISION"
 
@@ -170,10 +171,10 @@ brandsCompanyMapping:
 ####################################################################################
 attributesConfig:
   # If one of the following attribute is missing on a product, the product will be disassociated from this vertical. (setting vertical to null)
-  mandatory:
-   - "DIAGONALE_POUCES"
+#  mandatory:
+#   - "DIAGONALE_POUCES"
 #   - "REPAIRABILITY_INDEX"
-   - "TV_TYPE"
+#   - "TV_TYPE"
    
   ####################################################################################
   # ATTRIBUTES DEFINITIONS
