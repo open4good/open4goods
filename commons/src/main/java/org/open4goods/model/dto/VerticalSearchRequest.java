@@ -9,6 +9,8 @@ import java.util.Set;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
 import org.open4goods.model.constants.ProductCondition;
 
 public class VerticalSearchRequest {
@@ -188,4 +190,25 @@ public class VerticalSearchRequest {
             .append(sortOrder)
             .toHashCode();
     }
+    
+    @Override
+    public String toString() {
+        return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
+            .append("minPrice", minPrice)
+            .append("maxPrice", maxPrice)
+            .append("minOffers", minOffers)
+            .append("maxOffers", maxOffers)
+            .append("condition", condition)
+            .append("pageNumber", pageNumber)
+            .append("pageSize", pageSize)
+            .append("countries", countries)
+            .append("numericFilters", numericFilters)
+            .append("termsFilter", termsFilter)
+            .append("excluded", excluded)
+            .append("sortField", sortField)
+            .append("sortOrder", sortOrder)
+            .toString();
+    }
+    
+    
 }
