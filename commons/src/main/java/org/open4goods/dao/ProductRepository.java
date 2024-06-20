@@ -172,15 +172,16 @@ public class ProductRepository {
 				.and(getValidDateQuery())
 				.and(new Criteria("excluded").is(withExcluded))
 				;
-		NativeQueryBuilder initialQueryBuilder = new NativeQueryBuilder().withQuery(new CriteriaQuery(c)).withMaxResults(max);
+		NativeQueryBuilder initialQueryBuilder = new NativeQueryBuilder().withQuery(new CriteriaQuery(c));
 		
-				if (null != max) {
-					initialQueryBuilder =  initialQueryBuilder.withSort(Sort.by(org.springframework.data.domain.Sort.Order.desc("scores.ECOSCORE.value")));									
-				}
+		initialQueryBuilder =  initialQueryBuilder.withSort(Sort.by(org.springframework.data.domain.Sort.Order.desc("scores.ECOSCORE.value")));									
+		if (null != max) {
+			initialQueryBuilder = initialQueryBuilder.withMaxResults(max);
+		}
+
+		NativeQuery initialQuery = initialQueryBuilder.build();
 		
-				NativeQuery initialQuery = initialQueryBuilder.build();
-		return elasticsearchTemplate.searchForStream(initialQuery, Product.class, current_index).stream()
-				.map(SearchHit::getContent);
+		return elasticsearchTemplate.searchForStream(initialQuery, Product.class, current_index).stream().map(SearchHit::getContent);
 	}
 
 	/**
