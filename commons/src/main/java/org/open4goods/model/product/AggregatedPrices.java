@@ -34,7 +34,7 @@ public class AggregatedPrices implements Standardisable {
 	// Price evolution trend :
 	// 0 -> equals
 	// 1 -> Increasing
-	// 2 -> Decreasing
+	// -1 -> Decreasing
 	private Integer trend= 0;
 
 	@Field(index = true, store = false, type = FieldType.Keyword)
