@@ -83,8 +83,14 @@ public class DataSourceConfigService {
 		if (null == dataSourceProperties) {
 			throw new InvalidParameterException("Datasource " + datasourceName + " not found");
 		}
-		File f = cachingService.getResource(dataSourceProperties.getFavico() );
-		return IOUtils.toBufferedInputStream(new FileInputStream(f));
+		try {File f = cachingService.getResource(dataSourceProperties.getFavico() );
+			return IOUtils.toBufferedInputStream(new FileInputStream(f));
+		} catch (Exception e) {
+			logger.error("Error while loading favicon for datasource {} : {} --> {}",  datasourceName, dataSourceProperties.getFavico(), e.getMessage() );
+			// TODO : Return empty image bytes
+			// TODO : Log for action
+			return null;
+		}
 	}
 
 
