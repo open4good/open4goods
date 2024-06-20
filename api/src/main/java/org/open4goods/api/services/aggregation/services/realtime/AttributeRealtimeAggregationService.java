@@ -346,7 +346,8 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 					
 				} else if (key.equals(ReferentielKey.BRAND)) {
 					
-					Brand model = brandService.resolveBrandName(value);
+					// TODO : Not good.... Here is in fact a company resolution
+					Brand model = brandService.resolveCompanyFromBrandName(value);
 					if (null != model && !existing.equals(model.getName())) {
 						//TODO (gof) : elect best brand, exclude "non categorisée", ...
 						dedicatedLogger.info("Adding different {} name as BRAND. Existing is {}, would have erased with {}",key,existing, model.getName());						
@@ -380,7 +381,7 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 			else {
 				// TODO : Bad design of this method
 				if (key.equals(ReferentielKey.BRAND)) {
-					Brand b = brandService.resolveBrandName(value);
+					Brand b = brandService.resolveCompanyFromBrandName(value);
 					if (null == b) {
 						dedicatedLogger.error("Should nor ! Unresolvable already set brand : {}", value);
 					} else {
