@@ -58,12 +58,16 @@ public class SearchService {
 
 	private ProductRepository aggregatedDataRepository;
 
-	private Logger statsLogger;
+
+	// Dedicated loggers, to get some stats
+	private Logger verticalstatsLogger;
+	private Logger globalstatsLogger;
 
 
 	public SearchService(ProductRepository aggregatedDataRepository, String logsFolder) {
 		this.aggregatedDataRepository = aggregatedDataRepository;
-		statsLogger  = GenericFileLogger.initLogger("stats-search", Level.INFO, logsFolder, false);
+		globalstatsLogger  = GenericFileLogger.initLogger("stats-search-global", Level.INFO, logsFolder, false);
+		verticalstatsLogger  = GenericFileLogger.initLogger("stats-search-vertical", Level.INFO, logsFolder, false);
 	}
 
 	/**
@@ -81,7 +85,7 @@ public class SearchService {
 
 
 		// Logging
-		statsLogger.info("global search : {}",initialQuery);
+		globalstatsLogger.info("global search : {}",initialQuery);
 
 		Criteria c = null;
 		if (StringUtils.isNumeric(query)) {
@@ -138,7 +142,7 @@ public class SearchService {
 	public VerticalSearchResponse verticalSearch(VerticalConfig vertical, VerticalSearchRequest request) {
 
 		// Logging
-		statsLogger.info("Searching in vertical {}",vertical.getId());
+		verticalstatsLogger.info("Searching in vertical {} : {}",vertical.getId(), request.toString());
 		VerticalSearchResponse vsr = new VerticalSearchResponse();
 
 		List<AttributeConfig> customAttrFilters = vertical.verticalFilters().stream().filter(Objects::nonNull).toList();
