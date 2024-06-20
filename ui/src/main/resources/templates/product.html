@@ -32,6 +32,12 @@
 	
 	<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/select/1.7.0/css/select.dataTables.min.css">
 	<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/buttons/2.4.2/css/buttons.dataTables.min.css">
+	<link href="/vendor/lightgallery/dist/css/lightgallery-bundle.min.css" rel="stylesheet">	
+	
+	
+
+    
+
 </head>
 
 <body>
@@ -47,124 +53,138 @@
         <div class="section section-lg pt-5">
             <div class="container-fluid">
 	
-				
-		<h1 class="h1 title text-uppercase text-center" th:text="${helper.texts.title}"></h1>	
-	
-				<div class="card shadow p-4">
-				
-					<th:block th:if="${editor}">
-						<form method="post" th:action="${url}">	
-							<input value="Enregistrer les modifications" type="submit">			
-					</th:block>
-							
-       				<!--/* Header */-->				
-					<th:block th:insert="~{inc/product-header.html}"></th:block>
-				</div>
-			
-   				<!--/* Descriptions */-->				
-				<th:block th:insert="~{inc/product-descriptions.html}"></th:block>							
+								<h1 class="h1 title text-uppercase text-center"
+									th:text="${helper.texts.title}"></h1>
 
-							
-   				 <!--/* Product origin 
-				 <th:block th:insert="~{inc/product-origin.html}"></th:block>
-   				 */-->				
-             
-  				 <!--/* Product all prices */-->
-				 <div id="markerPrices">
-					 <!-- 
+								<div class="card shadow p-4">
+
+									<th:block th:if="${editor}">
+										<form method="post" th:action="${url}">
+											<input value="Enregistrer les modifications" type="submit">
+									</th:block>
+
+									<!--/* Header */-->
+									<th:block th:insert="~{inc/product-header.html}"></th:block>
+								</div>
+
+								<!--/* Descriptions */-->
+								<th:block th:insert="~{inc/product-descriptions.html}"></th:block>
+
+
+								<!--/* Product origin 
+				
+   				 */-->
+
+								<!--/* Product all prices */-->
+								<div class="container container-semi-fluid" id="markerPrices">
+									<!-- 
 						  <th:block th:insert="~{inc/product-all-prices.html}"></th:block>
 					  -->
-				 </div>
-  				 
-				 <div class="row mt-3">
-      				<!--/* Referentiel attributes */-->									
-					<div id="markerCaracteristiques" class="col-lg-12">
-	      				<!--/* Fonctionnalites */-->				
-						<div class="mt-3"  th:if="${product.attributes.features.size > 0}" th:insert="~{inc/product-features.html}"></div>
-					</div>
+									<th:block th:insert="~{inc/product-price.html}"></th:block>
+								</div>
 
-
-
-		
-
-
-
-									
-					<div class=" col-lg-12">
-	
-
-						<!--  Authenticated section -->						
-						 <th:block th:if="${user}">
-					
-								
-									
-	      				<!--/* Categories */-->				
-						<th:block th:insert="~{inc/product-categories.html}"></th:block>
-								 
-						 
-						 
-						 					<!--/* Attributes */-->				
-						<th:block th:insert="~{inc/product-unmatched-attributes.html}"></th:block>			
-						
-						
-						
-							<div class="card shadow mb-3 my-3">
-								<div class="card-header"><h2 class="h5">Mode développement</h2></div>
-								<p>Cette section n'apparait qu'a là nudger team</p>
-								
-								
-								
-								
-								
-								
-								
-								<div class="card-body">
-	
-			
-									<h1 th:text="'taxonomy : ' + ${product.googleTaxonomyId}"></h1>
-									
-									
-
-		
-				      				<!--/* Texts */-->				
-									<th:block th:insert="~{inc/product-descriptions-old.html}"></th:block>		
-									
-									
-									<!--/* Resources */-->				
-									<th:block th:insert="~{inc/product-resources.html}"></th:block>		
-									
-									<!--/* Mapped categories */-->													
-									<div class="card shadow my-3">
-										<div class="card-header"><h2 class="h5">Mapped Catégories</h2></div>
-										<div class="card-body">	
-											<th:block th:each="item, stat : ${product.mappedCategories}">
-												<div class="alert alert-primary" role="alert">
-												 <span  th:text="${item.key + ' : ' + item.value}"></span>
-												</div>
-											</th:block>
-										</div>
+								<div class="row mt-3">
+									<!--/* Referentiel attributes */-->
+									<div id="markerCaracteristiques" class="col-lg-12">
+										<!--/* Fonctionnalites */-->
 									</div>
 
-									
-								</div>
-							</div>
 
-						 
-							
-							
-<!--  The Raw JSON -->	 
-								
-								
-									<!--/* Mapped categories */-->													
-									<div class="card shadow my-3">
-										<div class="card-header"><h2 class="h5">JSON</h2></div>
-										<div class="card-body">	
-												
-			    					        <pre style="height:500px" ><code id="json-output" class="json"></code></pre>
-									 	    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
-											
 
-											<script th:inline="javascript">
+
+
+
+
+
+									<div class=" col-lg-12">
+
+
+										<!--  Authenticated section -->
+										<th:block th:if="${user}">
+
+											<div class="mt-3"
+												th:if="${product.attributes.features.size > 0}"
+												th:insert="~{inc/product-features.html}"></div>
+
+
+											<!--/* Categories */-->
+											<th:block th:insert="~{inc/product-categories.html}"></th:block>
+
+
+
+											<!--/* Attributes */-->
+											<th:block
+												th:insert="~{inc/product-unmatched-attributes.html}"></th:block>
+
+
+
+											<div class="card shadow mb-3 my-3">
+												<div class="card-header">
+													<h2 class="h5">Mode développement</h2>
+												</div>
+												<p>Cette section n'apparait qu'a là nudger team</p>
+
+
+
+
+
+
+
+												<div class="card-body">
+
+
+													<h1 th:text="'taxonomy : ' + ${product.googleTaxonomyId}"></h1>
+
+
+
+
+													<!--/* Texts */-->
+													<th:block th:insert="~{inc/product-descriptions-old.html}"></th:block>
+
+
+													<!--/* Resources */-->
+													<th:block th:insert="~{inc/product-resources.html}"></th:block>
+
+													<!--/* Mapped categories */-->
+													<div class="card shadow my-3">
+														<div class="card-header">
+															<h2 class="h5">Mapped Catégories</h2>
+														</div>
+														<div class="card-body">
+															<th:block
+																th:each="item, stat : ${product.mappedCategories}">
+																<div class="alert alert-primary" role="alert">
+																	<span th:text="${item.key + ' : ' + item.value}"></span>
+																</div>
+															</th:block>
+														</div>
+													</div>
+
+
+												</div>
+											</div>
+
+
+
+
+											<!--  The Raw JSON -->
+
+
+											<!--/* Mapped categories */-->
+											<div class="card shadow my-3">
+												<div class="card-header">
+													<h2 class="h5">JSON</h2>
+												</div>
+												<div class="card-body">
+
+													<pre style="height: 500px">
+														<code id="json-output" class="json"></code>
+													</pre>
+													<script
+														src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+
+
+													<script th:inline="javascript">
 												/*<![CDATA[*/
 												
 												    const jsonObject = /*[[${raw}]]*/ '';
@@ -182,20 +202,19 @@
 										        hljs.highlightAll();
 										        
 											</script>
-											
-										</div>
-									</div>
-																				
-						</th:block>
 
+												</div>
+											</div>
+
+										</th:block>
+
+									</div>
+
+
+								</div>
 					</div>
-					
-										
-				</div>	
-  				 			
-			</div>
-			
-			<th:block th:if="${editor}">
+
+					<th:block th:if="${editor}">
 				</form>				
 			</th:block>			
 		</div>  
@@ -243,6 +262,9 @@
 <script src="../../assets/js/pixel.js"></script>
 <!-- custom sources -->
 <script src="../../assets/js/pixel-custom.js"></script>
+
+<script src="/vendor/lightgallery/dist/lightgallery.min.js"></script>
+<script src="/vendor/lightgallery/dist/plugins/thumbnail/lg-thumbnail.min.js"></script>
 
 
 <script th:inline="javascript">
@@ -347,14 +369,8 @@ $(document).ready(function() {
 	// Price datatables
 	/////////////////////////////////
 		
-	if (($("#offresOccasion")).length) {
-		initTable('#offresOccasion');
-	}
 	
-	if (($("#offresNeuves")).length) {
-		initTable('#offresNeuves');
-		
-	}
+	initTable('#offres');
 	
 
 	/////////////////////////////////
@@ -409,7 +425,7 @@ var priceChart = new Chart(ctx, {
 	      backgroundColor: 'transparent',
 	      borderColor: 'blue',
 	      borderWidth: 2,
-	      tension: 0.5
+	      tension: 0
 	    },{
 		      label: 'Prix d\'occasion',
 		      data: occasionPriceHistory,               
@@ -427,6 +443,7 @@ var priceChart = new Chart(ctx, {
 	  
 	  
 	  options: {
+	    normalized: false,
 	    scales: {
 	      x: {
 	        type: 'time',
@@ -453,9 +470,25 @@ var priceChart = new Chart(ctx, {
 	});
 
 
+// Image gallery
 
+// Get the carousel element by its ID
+let carouselEl = document.getElementById('bootstrap-gallery-carousel');
 
+// Create a new Bootstrap 5 Carousel instance with specified options
+const carousel = new bootstrap.Carousel(carouselEl, {
+    interval: 10000,
+    wrap: false,
+});
 
+// Add an event listener for the 'slide.bs.carousel' event, fires immediately when the slide instance method is invoked.
+carouselEl.addEventListener('slide.bs.carousel', (event) => {
+    const container = document.querySelector('.carousel-inner');
+    window.lightGallery(container, {
+        plugins: [lgThumbnail],
+        selector: '.lg-item',
+    });
+});
 
 
 
