@@ -197,7 +197,14 @@ public class UiService {
 	public String getSiteLanguage(HttpServletRequest request) {
 		String serverName = request.getServerName();
 		// TODO : Check with nginx
-		LOGGER.error("Server name {}",serverName);
+		
+		if (config.getNamings().getServerNames().containsValue(serverName)) {
+			LOGGER.info("Server name {} found in configuration", serverName);
+		} else {
+			// TODO : Raise 403 ?
+			LOGGER.error("Server name {} not found in configuration", serverName);
+		}
+		
 		String language = languageByserverNames.get(serverName);		
 		if (null == language) {
 			return "default";
