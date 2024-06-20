@@ -66,7 +66,7 @@ public class IcecatCompletionService extends AbstractCompletionService {
 		// TODO : Should set a specific log level here (not "agg(regation)" one)
 		super(dataRepository, verticalConfigService, apiProperties.logsFolder(), apiProperties.aggLogLevel());
 		
-		this.aggregator = aggregationFacadeService.getStandardAggregator("icecat");;
+		this.aggregator = aggregationFacadeService.getStandardAggregator("icecat-aggregation");;
 		this.aggregator.beforeStart();
 		this.icecatConfig = apiProperties.getIcecatCompletionConfig();
 		
