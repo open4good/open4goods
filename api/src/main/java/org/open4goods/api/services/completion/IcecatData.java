@@ -373,6 +373,7 @@ public class IcecatData {
         // Getters and Setters
     }
 
+    
     public static class Multimedia {
     	  @JsonProperty("ID")
     	    public String id;
@@ -388,6 +389,10 @@ public class IcecatData {
     	    
     	    @JsonProperty("PreviewUrl")
     	    public String previewUrl;
+    	    
+    	    @JsonProperty("EprelId")
+    	    public String eprelId;
+    	    
     	    
     	    
     	    
