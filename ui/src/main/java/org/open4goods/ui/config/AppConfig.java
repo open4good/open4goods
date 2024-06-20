@@ -169,7 +169,7 @@ public class AppConfig {
 	 
 	@Bean
 	BrandService brandService(@Autowired RemoteFileCachingService rfc, @Autowired  UiConfig properties, @Autowired  BrandScoresRepository brandRepository) {
-		return new BrandService(properties.getBrandConfig(),  rfc,brandRepository);
+		return new BrandService(properties.getBrandConfig(),  rfc,brandRepository,properties.logsFolder());
 	}
 
 	@Bean
