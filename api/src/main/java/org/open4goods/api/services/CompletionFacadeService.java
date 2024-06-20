@@ -66,7 +66,7 @@ public class CompletionFacadeService {
 	}
 
 	///////////////////////////////////
-	// Amazon completion
+	// Icecat completion
 	///////////////////////////////////
 	public void icecatCompletionAll() throws InvalidParameterException, IOException {
 		logger.warn("Completing verticals with amazon");
