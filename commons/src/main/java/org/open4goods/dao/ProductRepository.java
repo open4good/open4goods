@@ -144,10 +144,14 @@ public class ProductRepository {
 	 * @param indexName
 	 * @return
 	 */
-	public Stream<Product> exportVerticalWithValidDate(String vertical, boolean withExcluded) {
+	public Stream<Product> exportVerticalWithValidDate(VerticalConfig vertical, boolean withExcluded) {
 
-		Criteria c = new Criteria("vertical").is(vertical)
-				.and(getValidDateQuery())
+		
+		
+		
+		Criteria c = getValidDateQuery()
+				// TODO : Warning : check nehaviour
+				.and(new Criteria("datasourceCategories").in(vertical.getMatchingCategories()).or( new Criteria("vertical").is(vertical.getId())))
 				.and(new Criteria("excluded").is(withExcluded))
 				;
 		final NativeQuery initialQuery = new NativeQueryBuilder()
