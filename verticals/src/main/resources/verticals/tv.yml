@@ -25,9 +25,10 @@ matchingCategories:
 - "HIFI>TELEVISION"
 - "APPAREILS ELECTRONIQUES > VIDEO > TELEVISEURS"
 - "TV, VIDEO, HOME CINEMA>TELEVISEUR>TV LED"
-- "TV"
 - "TV - VIDEO - SON > TELEVISEUR > TELEVISEUR LED"
-
+- "TV & VIDEO & HOME CINEMA > TELEVISEUR > TV LED/LCD"
+- "TV"
+- "HIGH-TECH > TELEVISION, HI-FI > TELEVISION"
 
 # The categories that disengage a mapping in this vertical  
 unmatchingCategories:
@@ -89,8 +90,6 @@ i18n:
           verticalUrl: "oled-qled-lcd-que-choisir"
           title: "OLED, QLED,LCD, ... Quelle technologie choisir ?"
           faIcon: "fa-star"
-          
-        
 
       ####################################################################################
       # AI TEXTS CONFIGS
