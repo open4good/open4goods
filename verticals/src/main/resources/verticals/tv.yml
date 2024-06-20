@@ -23,6 +23,11 @@ icecatTaxonomyId: 1584
 # Will associate to this vertical if one of the following categorie is present for the product  
 matchingCategories:
 - "HIFI>TELEVISION"
+- "APPAREILS ELECTRONIQUES > VIDEO > TELEVISEURS"
+- "TV, VIDEO, HOME CINEMA>TELEVISEUR>TV LED"
+- "TV"
+- "TV - VIDEO - SON > TELEVISEUR > TELEVISEUR LED"
+
 
 # The categories that disengage a mapping in this vertical  
 unmatchingCategories:
