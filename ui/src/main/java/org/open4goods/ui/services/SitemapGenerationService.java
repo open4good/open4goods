@@ -49,7 +49,7 @@ public class SitemapGenerationService {
 	private static final Logger LOGGER = LoggerFactory.getLogger(SitemapGenerationService.class);
 
 	private static final String SITEMAP_NAME_ROOT_PAGES = "main-pages.xml";
-	private static final String SITEMAP_NAME_PRODUCT_PAGES = "product-wiki-pages.xml";
+	private static final String SITEMAP_NAME_PRODUCT_PAGES = "product-pages.xml";
 	private static final String SITEMAP_NAME_BLOG_PAGES = "blog-posts.xml";
 	private static final String SITEMAP_NAME_WIKI_PAGES = "wiki-pages.xml";
 	private static final String SITEMAP_NAME_VERTICAL_PAGES = "category-pages.xml";	
@@ -120,7 +120,7 @@ public class SitemapGenerationService {
 			addWikiPages( baseUrl, lang);
 				
 			// Adding products
-//			addProductsPages(baseUrl, lang);
+			addProductsPages(baseUrl, lang);
 			
 			// Adding vertical relativ material
 			addVerticalPages( baseUrl, lang);
@@ -134,7 +134,9 @@ public class SitemapGenerationService {
 				.addPage(SITEMAP_NAME_BLOG_PAGES)
 				.addPage(SITEMAP_NAME_WIKI_PAGES)
 				.addPage(SITEMAP_NAME_VERTICAL_PAGES)
-				.addPage(SITEMAP_NAME_PRODUCT_PAGES);
+				// TODO : Uncomment when ok on products
+//				.addPage(SITEMAP_NAME_PRODUCT_PAGES)
+				;
 				
 				try {
 					index.toFile(getSitemapFile("sitemap.xml", lang));
