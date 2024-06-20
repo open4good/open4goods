@@ -207,7 +207,7 @@ public class ApiConfig {
 
 	@Bean
 	BrandService brandService(@Autowired RemoteFileCachingService rfc, @Autowired  ApiProperties properties, @Autowired BrandScoresRepository brandRepository) {
-		return new BrandService(properties.getBrandConfig(),  rfc, brandRepository);
+		return new BrandService(properties.getBrandConfig(),  rfc, brandRepository, properties.logsFolder());
 	}
 
 

@@ -20,6 +20,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.open4goods.config.BrandsConfiguration;
 import org.open4goods.config.yml.datasource.DataSourceProperties;
 import org.open4goods.exceptions.InvalidParameterException;
+import org.open4goods.helper.GenericFileLogger;
 import org.open4goods.model.constants.CacheConstants;
 import org.open4goods.model.data.Brand;
 import org.open4goods.model.data.BrandScore;
@@ -32,6 +33,8 @@ import com.googlecode.concurrenttrees.radix.ConcurrentRadixTree;
 import com.googlecode.concurrenttrees.radix.RadixTree;
 import com.googlecode.concurrenttrees.radix.node.concrete.DefaultCharArrayNodeFactory;
 
+import ch.qos.logback.classic.Level;
+
 /**
  * This service handles XWiki auth and xwiki content retrieving TODO : Should
  * have strong images (instead of dependant on various datasources) TODO :
@@ -42,7 +45,7 @@ import com.googlecode.concurrenttrees.radix.node.concrete.DefaultCharArrayNodeFa
  */
 public class BrandService {
 
-	private static final Logger logger = LoggerFactory.getLogger(BrandService.class);
+	private  final Logger logger ;
 
 	private RemoteFileCachingService remoteFileCachingService;
 
@@ -55,11 +58,11 @@ public class BrandService {
     RadixTree<Brand> brandsByRadix = new ConcurrentRadixTree<Brand>(new DefaultCharArrayNodeFactory());
 
 
-	public BrandService(BrandsConfiguration config, RemoteFileCachingService remoteFileCachingService, BrandScoresRepository brandRepository) {
+	public BrandService(BrandsConfiguration config, RemoteFileCachingService remoteFileCachingService, BrandScoresRepository brandRepository, String logsFolder) {
 		this.brandsConfig = config;
 		this.remoteFileCachingService = remoteFileCachingService;
 		this.brandRepository = brandRepository;
-
+		this.logger = 	GenericFileLogger.initLogger("brand-service", Level.INFO, logsFolder, false);
 		// Updating maps
 		for (Brand b : brandsConfig.getBrands()) {
 			saveBrand(b);
@@ -85,7 +88,7 @@ public class BrandService {
 	 * @param name
 	 * @return
 	 */
-	public Brand resolveBrandName(String name) {
+	public Brand resolveCompanyFromBrandName(String name) {
 		String input = getKeyName(name);
 
 		logger.info("Resolving brand {} ({})", name, input);
@@ -141,7 +144,7 @@ public class BrandService {
 	 * @return
 	 */
 	public boolean hasLogo(String brand) {
-		Brand b = resolveBrandName(brand);
+		Brand b = resolveCompanyFromBrandName(brand);
 		if (null == b) {
 			return false;
 		} else {
@@ -160,7 +163,7 @@ public class BrandService {
 	 */
 	public InputStream getLogo(String brand) throws InvalidParameterException, FileNotFoundException, IOException {
 
-		Brand b = resolveBrandName(brand);
+		Brand b = resolveCompanyFromBrandName(brand);
 
 		if (b == null || StringUtils.isEmpty(b.getLogo())) {
 			return null;
