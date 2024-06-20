@@ -1,7 +1,4 @@
-<div  th:with="img = ${product.images().getFirst()}" class="card shadow border-gray-300 text-center">
-                       <div th:if="${img}" class="profile-thumbnail mx-auto mt-n6">
-                           <img th:src="${img.path()}" class="card-img-top rounded-circle border-0" alt="Joseph Avatar">
-                       </div>
+<div class="card shadow border-gray-300 text-center">
                        <div class="card-body">
                            <h2 class="h4 card-title mb-2"><span th:text="${product.brand()}"></span> - <span th:text="${product.randomModel()}"></span> : une bonne affaire ? </h2>
                            <p class="card-text my-2">Vouloir acheter responsable ne veut pas dire être vigilant sur les prix. Pour acheter le <span th:text="${product.randomModel()}"></span> au meilleur prix, n'hésitez pas à prendre un peu                           
