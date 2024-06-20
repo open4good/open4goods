@@ -303,14 +303,7 @@ HOME PAGE STEP
     transform-origin: top left;
 }
 
-.slide {
-    width: 100vw;
-    height: 100vh;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
+x
 .containerNavigation .action-buttons {
 	position: fixed;
 	left: 31%;

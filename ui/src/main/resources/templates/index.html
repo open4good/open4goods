@@ -89,7 +89,7 @@
 								</div>
 								<div class="card-body bg-primary">
 									<h3 class="h5 card-title text-white mt-3" th:text="${vertical.i18n(siteLanguage).verticalHomeTitle}"></h3>
-									<p class="card-text" th:text="${vertical.i18n(siteLanguage).verticalHomeDescription}"></p>
+									<!-- <p class="card-text" th:text="${vertical.i18n(siteLanguage).verticalHomeDescription}"></p>  -->
 									<span class="btn btn-primary btn-sm">Découvrir</span>
 									<div th:if="${user}">
 											<a type="submit" class="btn btn-warning btn-sm" th:href="'/regenerate/' + ${vertical.id}">Changer l'image</a>

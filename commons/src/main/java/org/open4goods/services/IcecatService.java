@@ -694,17 +694,17 @@ public class IcecatService {
 						// Splitting on "," for multi values
 						if (a.getValue().contains(",")) {
 							String[] values = a.getValue().split(",");
-							if (values.length < 2) {
-								// No real multi value
-								continue;
+							if (values.length > 2) 
+							{
+									// No real multi value
+								StringBuilder sb =	new StringBuilder();
+								sb.append("<ul>");
+								for (String value : values) {
+	                                sb.append("<li>").append(value).append("</li>");
+	                            }
+								sb.append("</ul>");
+								a.setValue(sb.toString());
 							}
-							StringBuilder sb =	new StringBuilder();
-							sb.append("<ul>");
-							for (String value : values) {
-                                sb.append("<li>").append(value).append("</li>");
-                            }
-							sb.append("</ul>");
-							a.setValue(sb.toString());
 						}
 					}
 				}

@@ -2,7 +2,7 @@
 	<div th:if="${product.bestPrice()}" class="row">
 		<div class="col-8">
 			<span class="h4 title">Compensation écologique</span>
-			<span class="h4 title">Gratuite pour vous</span>
+			<div class="h5 title">Gratuite pour vous</div>
 		</div>
 
 		<div class="col-4">
@@ -22,62 +22,45 @@
 		<option value="3">Fondation goodplanet</option>
 	</select>
 			
+	<a href="#markerPrices">   <span th:text="#{'trend.'+${product.price.trend}}"></span> </a>
 			
 			
-			
-		<!-- Prices -->	
-			
-			<ul class="nav nav-pills mb-3" id="pills-tab" role="tablist">
-			  <li th:if="${product.price.occasionOffers().size() > 0}" class="nav-item" role="presentation">
-			    <button class="updatePrice nav-link" th:classappend="${product.price.occasionOffers().size() > 0} ? 'active' : '' "  id="pills-occasion-tab" data-bs-toggle="pill" data-bs-target="#pills-occasion" type="button" role="tab" aria-controls="pills-occasion" aria-selected="true">Occasion</button>
-			  </li>
-			  <li th:if="${product.price.newOffers().size() > 0}" class="nav-item" role="presentation">
-			    <button class="updatePrice nav-link" th:classappend="${product.price.occasionOffers().size() > 0} ? '' : 'active' " id="pills-new-tab" data-bs-toggle="pill" data-bs-target="#pills-new" type="button" role="tab" aria-controls="pills-new" aria-selected="false">Neuf</button>
-			  </li>
-			  <li class="nav-item" role="presentation">
-			    <button class="nav-link" id="pills-history-tab" data-bs-toggle="pill" data-bs-target="#pills-history" type="button" role="tab" aria-controls="pills-history" aria-selected="false">Evolution des prix</button>
-			  </li>
-			</ul>
+<table th:id="offres" class="table table-striped" style="width: 100%">
+	<thead>
+		<tr>
+			<th>Marchand</th>
+			<th>Prix</th>
+			<th>Etat</th>
+		</tr>
+	</thead>
+	<tbody>
+	
+		<th:block  th:each="offer , stats: ${product.price.offers}">
+			<tr th:data-token="${offer.affiliationToken}" th:data-compensation="${offer.compensation}"  th:class =" ${stats.first} ? 'selected' : ''">
+				<td data-toggle="tooltip" data-placement="top" th:title="${offer.offerName}" nowrap>
+					<img height="16" width="16" class="me-2" th:src="'/icon/'+${offer.datasourceName}" th:title="'icône ' + ${offer.shortDataSourceName()}">  
+				
+					<span>
+						 <span th:text="${offer.datasourceName}"></span>
+					</span>
+				
+				</td>
+				<td><span th:text="${offer.price}"></span> <span th:text="#{'symbol.'+${offer.currency}}"></span></td>
+				<td><span th:text="#{'condition.'+${offer.productState}}"></span></td>
+			</tr>
+		
+		</th:block>
+	
+	</tbody>
 
-			<div class="tab-content">
-			  <!-- occasion offers -->
+</table>
+			
+			
 
-			  <div th:if="${product.price.occasionOffers().size() > 0}" class="tab-pane fade" th:classappend="${product.price.occasionOffers().size() > 0} ? 'active show' : '' " id="pills-occasion" role="tabpanel" aria-labelledby="pills-occasion-tab">
-			  	   <div  th:with="offersId = 'offresOccasion', offers=${product.price.occasionOffers()}" >
-						<th:block th:insert="~{inc/offers-table.html}"></th:block>					
-					</div>
-			  </div>
-			  
-			  <!-- new offers -->
-			  <div th:if="${product.price.newOffers().size() > 0}" class="tab-pane fade" id="pills-new" role="tabpanel" th:classappend="${product.price.occasionOffers().size() > 0} ? '' : 'active show' " aria-labelledby="pills-new-tab">
-				  
-				  <div th:if="${product.price.newOffers()}">
-			
-			  	   <div  th:with="offersId = 'offresNeuves', offers=${product.price.newOffers()}">
-						<th:block th:insert="~{inc/offers-table.html}"></th:block>					
-					</div>
-					
-					</div>
-			  
-			  </div>
-			  
-			  <div class="tab-pane fade" id="pills-history" role="tabpanel" aria-labelledby="pills-history-tab">
-			   	<canvas id="priceChart"></canvas>
-			  </div>
-			  
-			  
-			</div>
-			
-			
-			
-			
-			
-			
-			
-			
-			
-			
-	<input  th:if="${product.bestPrice()}" type="hidden" id="token" name="token" th:value="${product.bestPrice().affiliationToken}">			
 	<input th:if="${product.bestPrice()}" type ="submit" style="width:100%" value="Nudger" formtarget="_blank" class="btn btn-tertiary">
+
+	<input  th:if="${product.bestPrice()}" type="hidden" id="token" name="token" th:value="${product.bestPrice().affiliationToken}">			
+			
+			
 
 </form>

@@ -1,0 +1,94 @@
+<th:block th:with="images = ${product.images()}" >
+	<img th:unless="${images.size() > 0}" height="300" src="/icons/no-image.png" alt="Pas d'image !">
+
+<!-- 
+
+	<span th:each="img, stat : ${product.videos}"> 
+		<video width="320" height="240" controls>
+			<source th:src="${img.path()}">
+		</video>
+	</span>
+
+
+ -->
+
+
+	<div th:if="${images.size() > 0}" id="bootstrap-gallery-carousel" class="carousel slide" data-bs-ride="carousel">
+		<div class="carousel-indicators">
+			<button th:each="img, stat : ${images}" type="button" 
+					data-bs-target="#bootstrap-gallery-carousel"
+					th:data-bs-slide-to="${stat.count-1}" 
+					th:class="${stat.first ? 'active' : ''}"
+					th:aria-current="${stat.first ? 'true' : ''}"
+					th:aria-label="'Image ' + ${stat.count}">
+			</button>
+		</div>
+		<div class="carousel-inner">
+			<div th:each="img, stat : ${images}" class="carousel-item" th:classappend="${stat.first ? 'active' : ''}">
+				<a 
+				    th:data-lg-size="${img.imageInfo.width}+  '-' + ${img.imageInfo.height}" 
+					class="lg-item"
+					
+					th:data-src="${img.path()}"
+					> 
+					<img class="img-fluid" th:src="${img.path()}">
+				</a>
+			</div>
+		</div>
+		<button class="carousel-control-prev" type="button"
+			data-bs-target="#bootstrap-gallery-carousel" data-bs-slide="prev">
+			<span class="carousel-control-prev-icon" aria-hidden="true"></span> <span
+				class="visually-hidden">Précédent</span>
+		</button>
+		<button class="carousel-control-next" type="button"
+			data-bs-target="#bootstrap-gallery-carousel" data-bs-slide="next">
+			<span class="carousel-control-next-icon" aria-hidden="true"></span> <span
+				class="visually-hidden">Suivant</span>
+		</button>
+	</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!-- 
+
+
+	<div    id="bootstrap-gallery-carousel" class="carousel slide">
+				<div class="carousel-inner">
+					<th:block >
+						<div class="carousel-item" >
+							<img
+		   		  				 th:src="${img.path()}"
+		   		  				 th:alt="'image principale : ' + ${product.names.longestOfferName()}"	>
+ 						</div>
+					
+					</th:block>
+				
+
+				</div>
+				<button class="carousel-control-prev" type="button"
+					data-bs-target="#bootstrap-gallery-carousel" data-bs-slide="prev">
+					<span class="carousel-control-prev-icon" aria-hidden="true"></span>
+					<span class="visually-hidden">Previous</span>
+				</button>
+				<button class="carousel-control-next" type="button"
+					data-bs-target="#bootstrap-gallery-carousel" data-bs-slide="next">
+					<span class="carousel-control-next-icon" aria-hidden="true"></span>
+					<span class="visually-hidden">Next</span>
+				</button>
+			</div>
+ -->
+</th:block>

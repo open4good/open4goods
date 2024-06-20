@@ -1,58 +1,22 @@
-<section  th:with="images = ${product.images()}"  class="row align-items-center">
-	<aside class="col-lg-4 text-center">
-	
-		   <img th:unless="${images.size() > 0}" height="300" src="/icons/no-image.png"	alt="Pas d'image !">
-
-		   <div>
-			<span th:each="img, stat : ${images}"> 
-		   		<img 
-		   		  th:if="${stat.first}" height="400" 
-		   		  th:src="${img.path()}"
-		   		  th:alt="'image principale : ' + ${product.names.longestOfferName()}"	>
-				
-			  	<img
-					th:unless="${stat.first}" height="120"
-					th:src="${img.path()}"
-					th:alt="${product.names.longestOfferName()}">
-			</span> 
-			
-			
+						
 
 
+<section   class="row align-items-center">
+	<aside class="col-lg-3 text-center">
 
-			<span th:each="img, stat : ${product.videos}"> 
-				<video width="320" height="240" controls>
-					<source	th:src="${img.path()}">
-				</video>
-			</span>
-
-
-		</div>
-		   
-		   
+				 
+		   <th:block th:insert="~{inc/product-images.html}">	
 	</aside>
-	<div th:if="${product.ecoscore}" class="col-lg-4">
+	
+	<div th:if="${product.ecoscore}" class="col-lg-5">
 		<!--/* Best price */-->				
 		<!--th:block th:insert="~{inc/product-price.html}"></th:block-->
 
 		<div class="p-4">
-			<!--div th:if="${product.ecoscore}" class="text-center">				           
-			   <img class="mt-4"  width="350px" th:alt="'Ecoscore : ' + ${product.ecoscore.letter()}" th:title="'éco-score : ' + ${product.ecoscore.letter()}" th:src="'/icons/ecoscore/scoring-'+${product.ecoscore.letter()}+'.png'">
-			</div-->
-			<div>						
-			
-			<img class="mb-4"  width="350px" th:alt="'Ecoscore : ' + ${product.ecoscore.letter()}" th:title="'éco-score : ' + ${product.ecoscore.letter()}" th:src="'/icons/ecoscore/scoring-'+${product.ecoscore.letter()}+'.png'">
-			
-			<hr/>
-			ranking global :  <span th:text="${product.ranking.globalPosition}"></span>/<span th:text="${product.ranking.globalCount}"></span>, better : <span th:text="${product.ranking.globalBetter}"></span>, best : <span th:text="${product.ranking.globalBest}"></span>
-			
-		
 						<div id="markerEcoscore" class="col-sm-12 col-md-12 col-lg-12 mb-3">
 								<th:block th:insert="~{inc/product-ecoscore.html}"></th:block>
 						</div>
 		
-		
-			</div>
 		</div>
 
 	</div>
