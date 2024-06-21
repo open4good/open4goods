@@ -48,46 +48,38 @@
 <!--/* Loader */-->
 <th:block th:insert="~{inc/preloader.html}"></th:block>
 
-<main class="bg-gray-200">
+<main th:with="images = ${product.images()}" class="bg-gray-200">
 
-        <div class="section section-lg pt-5">
+        <div th:with="cover = ${images.getFirst() == null ? 'nocover.png' : images.getFirst()}" class="section section-lg pt-5">
             <div class="container-fluid">
 	
 								<h1 class="h1 title text-uppercase text-center"
 									th:text="${helper.texts.title}"></h1>
 
 								<div class="card shadow p-4">
-
-									<th:block th:if="${editor}">
-										<form method="post" th:action="${url}">
-											<input value="Enregistrer les modifications" type="submit">
-									</th:block>
-
 									<!--/* Header */-->
 									<th:block th:insert="~{inc/product-header.html}"></th:block>
 								</div>
 
+
+								<!--/* Presentation */-->
+								<th:block th:insert="~{inc/product-presentation.html}"></th:block>
+
 								<!--/* Descriptions */-->
-								<th:block th:insert="~{inc/product-descriptions.html}"></th:block>
+								<th:block th:insert="~{inc/product-ecological.html}"></th:block>
+
+								<!--/* Product prices  */-->
+								<th:block th:insert="~{inc/product-price.html}"></th:block>
 
 
-								<!--/* Product origin 
-				
-   				 */-->
+								<!--/* Product prices  */-->
+								<th:block th:insert="~{inc/product-attributes-details.html}"></th:block>
 
-								<!--/* Product all prices */-->
-								<div class="container container-semi-fluid" id="markerPrices">
-									<!-- 
-						  <th:block th:insert="~{inc/product-all-prices.html}"></th:block>
-					  -->
-									<th:block th:insert="~{inc/product-price.html}"></th:block>
-								</div>
+
+
 
 								<div class="row mt-3">
-									<!--/* Referentiel attributes */-->
-									<div id="markerCaracteristiques" class="col-lg-12">
-										<!--/* Fonctionnalites */-->
-									</div>
+						
 
 
 
@@ -213,10 +205,6 @@
 
 								</div>
 					</div>
-
-					<th:block th:if="${editor}">
-				</form>				
-			</th:block>			
 		</div>  
 </main>
 

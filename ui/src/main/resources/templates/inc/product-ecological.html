@@ -1,0 +1,184 @@
+    <section class="container container-semi-fluid">
+		<div class="row text-center justify-content-center">
+               <div class="col-md-8 mb-5">
+				<h2 class="display-3">
+					Bilan écologique du <span th:text="${product.brandAndModel()}"></span> 
+					: 
+					<span class="mx-3 badge bg-success"><span th:text="${product.scores.ECOSCORE.relativ.value}"></span>/5</span>
+				</h2>
+		</div>
+        </div>	   
+  
+	
+	   
+	   <div class="mt-3 card shadow px-4 py-1 mb-3">
+				<div class="card-body text-center text-md-left">
+					<div class="row align-items-center">
+						<div class="col-12 col-md-3 ">
+							<div class="text-center">
+								<img class="mb-1" width="350px"
+									th:alt="'Ecoscore : ' + ${product.ecoscore.letter()}"
+									th:title="'éco-score : ' + ${product.ecoscore.letter()}"
+									th:src="'/icons/ecoscore/scoring-'+${product.ecoscore.letter()}+'.png'">									
+							</div>
+							
+							
+																		<!-- Icon Box -->
+											<div class="card border-gray-300 my-2">
+												<div class="card-body">
+													<div class="d-flex p-3">														
+														<div class="icon icon-primary">
+															<span class="fas fa-trophy"></span>
+														</div>														
+														<div class="ps-4">
+															<h2 class="h5 icon-box-title md-1">Classement</h2>
+														</div>
+													</div>
+										
+													<ul class="list-group list-group-flush price-list ms-3">
+																<!-- <li class="list-group-item border-0"><span class="far fa-lightbulb"></span>Petites télévision : <span>25/150</span></li> -->
+																<li class="list-group-item border-0"><span class="far fa-hdd"></span>Téléviseurs : <span th:text="${product.ranking.globalPosition}"></span>/<span th:text="${product.ranking.globalCount}"></span></li>
+													</ul>	
+													
+												</div>
+											</div>
+											
+											
+							<a style="width:100%" href="#markerEcoscore" class="mt-2 btn btn-tertiary animate-up-2 text-center">Détail du score</a>
+							
+							<a style="width:100%" href="/ecoscore" class="mt-2 btn btn-outline-tertiary animate-up-2 text-center">Tout savoir sur l'ecoscore Nudger</a>
+
+		<!-- 					<img th:src="${cover.path()}">  -->
+                              
+                                
+							
+						</div>
+						<div class="col-md-9">
+							
+							
+						   <th:block th:if="${product.aiDescriptions.get('ecological-description')}" id="evaluation-ecologique" class="card shadow border-gray-300 mt-3">
+                                       <p class="lead  p-4" th:utext="${product.aiDescriptions.get('ecological-description').content.text}"></p>
+                            </th:block>
+                            
+                            
+                            
+     
+                            
+                            
+                            
+						</div>
+					</div>
+				</div>
+			</div>
+			
+			
+			
+			
+			
+			<div class="row mt-3">
+						<!-- Avantages -->
+						<div class="col-sm-12 col-md-12 col-lg-4">
+							<!-- Icon Box -->
+							<div class="card border-gray-300 ">
+								<div class="card-body">
+									<div class="d-flex p-3">
+										<div class="icon icon-primary">
+											<span class="fas fa-user-md"></span>
+										</div>
+										<div class="ps-4">
+											<h2 class="h5 icon-box-title md-1">Origine</h2>
+										</div>
+									</div>
+		
+<div class="card-body text-center p-4 p-lg-5">
+                                        <div  class="h4 mb-2" th:text="${originCountry}"></div>
+                                        <img th:if="${product.gtinInfos.country}" th:title="${originCountry}" th:src="'/assets/img/flags/'+${product.gtinInfos.country.toLowerCase()}+'.png'" th:alt="${originCountry}" class="image-md mb-4">
+                                        <div  class="h3 text-light mb-2 " ></div>
+											<p class="mb-4">Cette information est récuperée par les
+											premiers chiffres du code barre  (<b><span th:text="${product.gtin().substring(0,3)}"></span></b>), et indique la nationalité de 
+											l'organisme qui a délivré le code barre. Cela n'indique pas nécessairement le lieu de production.</p>
+				                                    </div>
+								</div>
+							</div>
+							<!-- End of Icon Box -->
+						</div>
+		
+						<!-- Avantages -->
+		<div class="col-sm-12 col-md-12 col-lg-8">
+			<!-- Icon Box -->
+			<div class="card border-gray-300 ">
+				<div class="card-body">
+					<div class="d-flex p-3">
+						<div class="icon icon-primary">
+							<span class="fas fa-user-md"></span>
+						</div>
+						<div class="ps-4">
+							<h2 class="h5 icon-box-title md-1">Avez vous regardé ?</h2>
+						</div>
+					</div>
+
+					<div class="d-flex align-items-center justify-content-center">
+
+
+						<div class=" mt-3">
+							<!-- Avantages -->
+							<div class="col-sm-12 col-md-12 col-lg-6">
+								<!-- Icon Box -->
+								<div class="card border-gray-300 ">
+									<div class="card-body">
+										<div class="d-flex p-3">
+
+											<div class="ps-4">
+												<h2 class="h5 icon-box-title md-1">Un peu mieux...</h2>
+
+												better : <span th:text="${product.ranking.globalBetter}"></span>,
+												best : <span th:text="${product.ranking.globalBest}"></span>
+											</div>
+										</div>
+
+										<div class="d-flex align-items-center justify-content-center">
+											bla bla bla</div>
+									</div>
+								</div>
+								<!-- End of Icon Box -->
+							</div>
+
+							<!-- Avantages -->
+							<div class="col-sm-12 col-md-12 col-lg-6">
+								<!-- Icon Box -->
+								<div class="card border-gray-300 ">
+									<div class="card-body">
+										<div class="ps-4">
+											<h2 class="h5 icon-box-title md-1">1er du classement !</h2>
+										</div>
+									</div>
+
+									<div class="d-flex align-items-center justify-content-center">
+										bla bla bla</div>
+								</div>
+							</div>
+							<!-- End of Icon Box -->
+						</div>
+
+
+					</div>
+
+
+
+
+
+
+
+
+				</div>
+			</div>
+		</div>
+		<!-- End of Icon Box -->
+						</div>
+		
+		
+					</div>
+			
+			
+ 
+	   </section> 
