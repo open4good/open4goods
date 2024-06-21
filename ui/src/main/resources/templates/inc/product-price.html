@@ -1,34 +1,44 @@
-<div class="card shadow border-gray-300 text-center">
-                       <div class="card-body">
-                           <h2 class="h4 card-title mb-2"><span th:text="${product.brand()}"></span> - <span th:text="${product.randomModel()}"></span> : une bonne affaire ? </h2>
-                           <p class="card-text my-2">Vouloir acheter responsable ne veut pas dire être vigilant sur les prix. Pour acheter le <span th:text="${product.randomModel()}"></span> au meilleur prix, n'hésitez pas à prendre un peu                           
-                           de temps pour comparer l'évolution des prix. De même, le niveau de conccurence (pour les produits neufs) est un bon indicateur, afin de savoir si vous êtes dans une  situation plutôt favorable à l'achetezur ou ou vendeur.
-                           
-                           </p>
-                       </div>
-                       
-		<div class="row align-items-center">
-			      <div class="col-md-4">
-			          <h2 class="h1 mb-3">Concurrence</h2>
-			          
-			          
-			          <p class="lead mb-4">
-			          
-			              Do you want to join our team and work remotely from anywhere you’d like? We can’t wait to hear from you!
-			          <img src="https://c.tenor.com/M0S81BfvJQEAAAAC/tenor.gif">
-			          </p>
-			          <a href="#markerEcoscore" style="width: 95%" class="text-center btn btn-primary">
-			              <span class="me-1">
-			                  <span class="fas fa-file-invoice"></span>
-			              </span>
-			              Voir les prix
-			          </a>
-			      </div>
-			      <div class="col-12 col-md-8 mt-5 mt-md-0 text-md-right">
-			         	<canvas class="mt-4" id="priceChart"></canvas>	
-			      </div>
-		</div>                                         
-</div>
-                        
+<section class="section container container-semi-fluid" id="markerPrices">
+
+<div class="row text-center justify-content-center">
+              <div class="col-md-8 mb-5">
+                  <h2 class="display-3"><span th:text="${product.brandAndModel()}"></span> : une bonne affaire ?</h2>
+              </div>
+</div>	   
+        
+        
+	<div class="card shadow border-gray-300 text-center">
+	                       <div class="card-body">
+	                           <p class="card-text my-2">Vouloir acheter responsable ne veut pas dire se faire avoir sur les prix. Pour acheter le <span th:text="${product.randomModel()}"></span> au meilleur prix, n'hésitez pas à prendre un peu                           
+	                           de temps pour comparer l'évolution des prix. De même, le niveau de conccurence (pour les produits neufs) est un bon indicateur, afin de savoir si vous êtes dans une  situation plutôt favorable à l'achetezur ou ou vendeur.
+	                           
+	                           </p>
+	                       </div>
+	                       
+			<div class="row align-items-center">
+				      <div class="col-md-4">
+				          <h2 class="h1 mb-3">Concurrence</h2>
+				          
+				          
+				          <p class="lead mb-4">
+				          
+				              Do you want to join our team and work remotely from anywhere you’d like? We can’t wait to hear from you!
+				          <img src="https://c.tenor.com/M0S81BfvJQEAAAAC/tenor.gif">
+				          </p>
+				          <a href="#markerEcoscore" style="width: 95%" class="text-center btn btn-primary">
+				              <span class="me-1">
+				                  <span class="fas fa-file-invoice"></span>
+				              </span>
+				              Voir les prix
+				          </a>
+				      </div>
+				      <div class="col-12 col-md-8 mt-5 mt-md-0 text-md-right">
+				         	<canvas class="mt-4" id="priceChart"></canvas>	
+				      </div>
+			</div>                                         
+	</div>
+	                     
+                     
+</section>   
                         
    

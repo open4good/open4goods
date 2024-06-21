@@ -1,0 +1,133 @@
+    <section class="container container-semi-fluid section">
+		<div class="row text-center justify-content-center">
+              <div class="col-md-8 mb-5">
+                  <h2 class="display-3"><span th:text="${product.brandAndModel()}"></span> :  présentation</h2>
+              </div>
+        </div>	   
+  
+	   
+	   
+			<div class="row">
+                  
+               <!-- Identity -->
+               
+               <div class="col-3 col-lg-4">
+            
+					<!-- Identity -->
+                   <div  class="card shadow border-gray-300">
+                      <div class="card-body p-4 p-lg-5">
+                          	<div class="d-flex p-3 justify-content-center">														
+								<div class="icon icon-primary">
+									<span class="fas fa-id-card"></span>
+								</div>														
+								<div class="ps-4">
+									<h3 class="h5 icon-box-title md-1">Identité</h3>
+								</div>
+							</div>
+							<th:block th:insert="~{inc/product-referentiel-attributes.html}"></th:block>
+                      </div>
+                  </div>
+                  
+                  
+               <!-- Caracteristiques principales -->
+                 <div  class="card shadow mt-3 border-gray-300">
+                           <div class="card-body p-4 p-lg-5">
+                          	<div class="d-flex p-3 justify-content-center">														
+								<div class="icon icon-primary">
+									<span class="fas fa-list-check"></span>
+								</div>														
+								<div class="ps-4">
+									<h3 class="h5 icon-box-title md-1">Caractéristiques</h3>
+								</div>
+							</div>			
+									<th:block th:insert="~{inc/product-attributes.html}"></th:block>
+									<a href="#characteristics" style="width:100%" class="btn btn-tertiary">Toutes les caractéristiques</a>
+                           </div>
+                  </div>
+                  
+               </div>                  
+               
+               <!-- Description -->
+                <div class=" col-lg-8">
+					<div th:if="${product.aiDescriptions.get('global-description')}" class="row mt-5 mt-lg-0 px-3">
+                         <!-- Icon Boxes -->
+                         <div  >
+                             <div class="card-body text-center p-4 p-lg-5">
+                             <!-- 
+                                 <img src="../../assets/img/pages/design.svg" alt="Web design illustration" class="image-md mb-4">
+                                 <h2  class="h4 mb-2">Description générale</h2>
+                                 <span  class="h5 text-light "></span>
+                              -->
+                                 <p class="lead" th:utext="${product.aiDescriptions.get('global-description').content.text}">
+                                 </p>
+                             </div>
+                         </div>
+                         <!-- End of Icon Boxes -->
+                     </div>
+
+					<div class="row mt-3">
+						<!-- Avantages -->
+						<div class="col-sm-12 col-md-12 col-lg-6">
+							<!-- Icon Box -->
+							<div class="card border-gray-300 ">
+								<div class="card-body">
+									<div class="d-flex p-3">
+										<div class="icon icon-primary">
+											<span class="fas fa-user-md"></span>
+										</div>
+										<div class="ps-4">
+											<h2 class="h5 icon-box-title md-1">Avantages</h2>
+										</div>
+									</div>
+		
+									<div class="d-flex align-items-center justify-content-center">
+										bla bla bla</div>
+								</div>
+							</div>
+							<!-- End of Icon Box -->
+						</div>
+		
+						<!-- Avantages -->
+						<div class="col-sm-12 col-md-12 col-lg-6">
+							<!-- Icon Box -->
+							<div class="card border-gray-300 ">
+								<div class="card-body">
+									<div class="d-flex p-3">
+										<div class="icon icon-primary">
+											<span class="fas fa-user-md"></span>
+										</div>
+										<div class="ps-4">
+											<h2 class="h5 icon-box-title md-1">Inconvénients</h2>
+										</div>
+									</div>
+		
+									<div class="d-flex align-items-center justify-content-center">
+										bla bla bla</div>
+								</div>
+							</div>
+							<!-- End of Icon Box -->
+						</div>
+		
+		
+					</div>
+		
+				</div>
+               
+               
+    
+ 
+               
+               
+               
+               
+               
+               
+               
+                
+            </div>	   
+	   </section> 
+	   
+	   
+	   
+	   
+

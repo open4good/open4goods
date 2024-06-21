@@ -141,19 +141,16 @@ public class SearchService {
 	@Cacheable(cacheNames = CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME)
 	public VerticalSearchResponse verticalSearch(VerticalConfig vertical, VerticalSearchRequest request) {
 
-		// Logging
-		verticalstatsLogger.info("Searching in vertical {} : {}",vertical.getId(), request.toString());
 		VerticalSearchResponse vsr = new VerticalSearchResponse();
 
 		List<AttributeConfig> customAttrFilters = vertical.verticalFilters().stream().filter(Objects::nonNull).toList();
-
 
 		Criteria criterias = new Criteria("vertical").is(vertical.getId())
 				.and(aggregatedDataRepository.getValidDateQuery())
 				.and(new Criteria("excluded"). is(request.isExcluded()))
 				;
 
-		// min price
+//		// min price
 		if (null != request.getMinPrice()) {
 			criterias.and(new Criteria("price.minPrice.price").greaterThanEqual(Math.floor(request.getMinPrice())));
 		}
@@ -189,14 +186,11 @@ public class SearchService {
 		if (null != request.getMaxOffers()) {
 			criterias.and(new Criteria("offersCount").lessThanEqual(request.getMaxOffers()));
 		}
-
+//
 
 		// Setting the query
 		NativeQueryBuilder esQuery = new NativeQueryBuilder().withQuery(new CriteriaQuery(criterias));
 
-
-		
-		
 		// Pagination
 		if (null != request.getPageNumber() && null != request.getPageSize()) {
 			esQuery = esQuery .withPageable(PageRequest.of(request.getPageNumber(), request.getPageSize()));
@@ -378,8 +372,9 @@ public class SearchService {
 		vsr.setVerticalConfig(vertical);
 		vsr.setRequest(request);
 		String queryString = StringUtils.join(criterias.getCriteriaChain(), "\n-> ");
-		LOGGER.info("{} results for query \n-> {}", vsr.getTotalResults(), queryString);
-	
+		verticalstatsLogger.info("Searching in vertical {} : {} results for query \n-> {}", vertical.getId(), vsr.getTotalResults(), queryString);
+//		verticalstatsLogger.info("Searching in vertical {} : {}",vertical.getId(), request.toString());
+
 		return vsr;
 	}
 
