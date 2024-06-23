@@ -30,7 +30,7 @@ public class PriceTrend {
             PriceHistory last = history.get(history.size() - 2);
             trend.setActualPrice(actual.getPrice());
             trend.setLastPrice(last.getPrice());
-            trend.setVariation(actual.getPrice() - last.getPrice());
+            trend.setVariation(Math.abs(actual.getPrice() - last.getPrice()));
             trend.setPeriod(actual.getTimestamp() - last.getTimestamp());
             trend.setTrend(trend.getVariation() > 0 ? 1 : (trend.getVariation() < 0 ? -1 : 0));
         }

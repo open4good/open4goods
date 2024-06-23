@@ -25,9 +25,9 @@
 	<a href="#markerPrices">
 	
 		
-		   <div th:if="${newTrend.trend == 0}" class="text-center alert alert-info" role="alert">Le prix neuf est stable depuis <span th:text="${newTrend.formatedDuration()}"></span></div>
-		   <div th:if="${newTrend.trend == 1}"  class="text-center alert alert-tertiary" role="alert">Le prix neuf a augmenté de <b><span th:text="${#numbers.formatDecimal(newTrend.variation == null ? 0 : newTrend.variation, 0, 0)}"></span>€</b> depuis <span th:text="${newTrend.formatedDuration()}"></span></div>
-		   <div th:if="${newTrend.trend == -1}" class="text-center alert alert-success" role="alert">Le prix neuf a baissé de <b><span th:text="${#numbers.formatDecimal(newTrend.variation == null ? 0 : newTrend.variation, 0, 0)}"></span>€</b> depuis <span th:text="${newTrend.formatedDuration()}"></span></div>
+		   <div th:if="${newTrend.trend == 0}" class="text-center alert alert-info" role="alert">😶‍🌫️ Le prix neuf est stable depuis <span th:text="${newTrend.formatedDuration()}"></span></div>
+		   <div th:if="${newTrend.trend == 1}"  class="text-center alert alert-tertiary" role="alert">🧐 Le prix neuf a augmenté de <b><span th:text="${#numbers.formatDecimal(newTrend.variation == null ? 0 : newTrend.variation, 0, 0)}"></span>€</b> depuis <span th:text="${newTrend.formatedDuration()}"></span> </div>
+		   <div th:if="${newTrend.trend == -1}" class="text-center alert alert-success" role="alert">Le prix neuf a baissé de <b><span th:text="${#numbers.formatDecimal(newTrend.variation == null ? 0 : newTrend.variation, 0, 0)}"></span>€</b> depuis <span th:text="${newTrend.formatedDuration()}"></span> 😊</div>
 		   <!--  
 		   <span th:text="#{'trend.'+${product.price.trend}}"></span> 
 		   -->
@@ -66,7 +66,7 @@
 			
 			
 
-	<input th:if="${product.bestPrice()}" type ="submit" style="width:100%" value="Nudger" formtarget="_blank" class="btn-lg btn-tertiary">
+	<input th:if="${product.bestPrice()}" type ="submit" style="width:100%" value="Nudger" formtarget="_blank" class="btn-lg btn-primary">
 
 	<input  th:if="${product.bestPrice()}" type="hidden" id="token" name="token" th:value="${product.bestPrice().affiliationToken}">			
 			
