@@ -103,7 +103,7 @@ i18n:
            dans un style académique et ludique,           
            un texte de maximum 200 mots,
            en utilisant que du text brut,
-           en présentant les principales caracteristiques techniques,
+           sans balises markdown ni html
            sur la base des caracteriques suivantes : [(${p.caracteristics()})]
           override: false
         - key: "ecological-description" 
@@ -112,8 +112,32 @@ i18n:
            un texte de maximum 200 mots,
            dans un style écologique engagé mais objectif,
            en utilisant que du text brut,
+           sans balises markdown ni html
            sur la base des caracteriques suivantes : [(${p.caracteristics()})]
           override: false
+        - key: "pros" 
+          prompt: > 
+           ecris une liste d'avantages techniques pour le téléviseur [(${p.brand()})] [(${p.model()})],
+           cinq avantages au maximum,
+           un par ligne,
+           dans un style formel,
+           en utilisant que du text brut,
+           sans balises markdown ni html
+           sur la base des caracteriques suivantes : [(${p.caracteristics()})]
+          override: false
+        - key: "cons" 
+          prompt: > 
+           ecris une liste d'inconvénients techniques pour le téléviseur [(${p.brand()})] [(${p.model()})],
+           cinq inconvénients au maximum,
+           un par ligne,
+           dans un style formel,
+           en utilisant que du text brut,
+           sans balises markdown ni html
+           sur la base des caracteriques suivantes : [(${p.caracteristics()})]
+          override: false
+
+
+
 
 # GenAiConfig for this vertical
 genAiConfig:
