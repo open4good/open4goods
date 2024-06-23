@@ -13,18 +13,21 @@
 	   
 	   <div th:if="${product.ecoscore()}" class="mt-3 card shadow px-4 py-1 mb-3">
 				<div class="card-body text-center text-md-left">
-					<div class="row align-items-center">
+					<div class="row">
 						<div class="col-12 col-md-3 ">
-							<div class="text-center">
+						
+						<div class="">
+						
+							<div class="  text-center">
 								<img class="mb-1" width="350px"
 									th:alt="'Ecoscore : ' + ${product.ecoscore.letter()}"
 									th:title="'éco-score : ' + ${product.ecoscore.letter()}"
 									th:src="'/icons/ecoscore/scoring-'+${product.ecoscore.letter()}+'.png'">									
 							</div>
-							
-							
-																		<!-- Icon Box -->
-											<div class="card border-gray-300 my-2">
+						
+							<br/>
+						
+							<div class="card border-gray-300 my-2">
 												<div class="card-body">
 													<div class="d-flex p-3">														
 														<div class="icon icon-primary">
@@ -41,12 +44,41 @@
 													</ul>	
 													
 												</div>
-											</div>
-											
-											
-							<a style="width:100%" href="#markerEcoscore" class="mt-2 btn btn-tertiary animate-up-2 text-center">Détail du score</a>
+								</div>
+								
+								
+								
+								
+								
+							<div class="align-text-bottom ">
+							<br/>
+							<br/>
+								<a style="width:100%" href="#markerEcoscore" class="mt-2 btn btn-primary animate-up-2 text-center">Détail du score</a>
+								
+								<a style="width:100%" href="/ecoscore" class="mt-2 btn btn-outline-tertiary animate-up-2 text-center">Tout savoir sur l'ecoscore Nudger</a>
+							</div>				
+								
+						
+						</div>		
+								
+								
+						
+						
+						
+						
+						
+						
+						
+						
+						
+						
+						
+
 							
-							<a style="width:100%" href="/ecoscore" class="mt-2 btn btn-outline-tertiary animate-up-2 text-center">Tout savoir sur l'ecoscore Nudger</a>
+							
+																		<!-- Icon Box -->
+	
+											
 
 		<!-- 					<img th:src="${cover.path()}">  -->
                               
@@ -80,7 +112,7 @@
 						<div class="col-sm-12 col-md-12 col-lg-4">
 							<!-- Icon Box -->
 							<div class="card border-gray-300 ">
-								<div class="card-body">
+								<div class="">
 									<div class="d-flex p-3">
 										<div class="icon icon-primary">
 											<span class="fas fa-earth"></span>
@@ -90,14 +122,14 @@
 										</div>
 									</div>
 		
-<div class="card-body text-center p-4 p-lg-5">
-                                        <div  class="h4 mb-2" th:text="${originCountry}"></div>
+									<div class="card-body text-center ">
+                                        <div  class="h4" th:text="${originCountry}"></div>
                                         <img th:if="${product.gtinInfos.country}" th:title="${originCountry}" th:src="'/assets/img/flags/'+${product.gtinInfos.country.toLowerCase()}+'.png'" th:alt="${originCountry}" class="image-md mb-4">
                                         <div  class="h3 text-light mb-2 " ></div>
 											<p class="mb-4">Cette information est récuperée par les
 											premiers chiffres du code barre  (<b><span th:text="${product.gtin().substring(0,3)}"></span></b>), et indique la nationalité de 
 											l'organisme qui a délivré le code barre. Cela n'indique pas nécessairement le lieu de production.</p>
-				                                    </div>
+                                 	 </div>
 								</div>
 							</div>
 							<!-- End of Icon Box -->

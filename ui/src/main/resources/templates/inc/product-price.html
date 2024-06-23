@@ -8,31 +8,30 @@
         
         
 	<div class="card shadow border-gray-300 text-center">
-	                       <div class="card-body">
-	                           <p class="card-text my-2 lead text-left">On peut acheter responsable, et être vigilant sur les prix. Pour acheter le <span th:text="${product.randomModel()}"></span> au meilleur prix, n'hésitez pas à prendre un peu                           
-	                           de temps : 
-	                           </p>
-	                           	<ul>
-									<li>Regarder l'historique du prix pour ce produit. Les prix peuvent varier de façon importante d'un jour à l'autre. Prenez le temps d'attendre que votre produit soit à un prix acceptable, proche du plus bas "historique le plus bas".</li>  
-									<li>Soyez vigilants aux nombres d'offres : plus il y'a d'offres marchandes disponibles, plus le niveau conccurentiel est élevé sur ce produit, ce qui est avantageux pour l'acheteur</li>
-		                          </ul>
-	                       </div>
+
 	                       
 			<div class="row align-items-center">
 				      <div class="col-md-4">
 
-				<th:block th:with = "gap = ${product.price.historyPriceGap()}">
-					<div  th:if="${gap}" class="card shadow m-4">
+				<th:block>
+				
+			<div class="m-4">
+			   <div th:if="${newTrend.trend == 0}" class="text-center alert alert-info" role="alert">😶‍🌫️ Le prix neuf est stable depuis <span th:text="${newTrend.formatedDuration()}"></span></div>
+			   <div th:if="${newTrend.trend == 1}"  class="text-center alert alert-tertiary" role="alert">🧐 Le prix neuf a augmenté de <b><span th:text="${#numbers.formatDecimal(newTrend.variation == null ? 0 : newTrend.variation, 0, 0)}"></span>€</b> depuis <span th:text="${newTrend.formatedDuration()}"></span> </div>
+			   <div th:if="${newTrend.trend == -1}" class="text-center alert alert-success" role="alert">Le prix neuf a baissé de <b><span th:text="${#numbers.formatDecimal(newTrend.variation == null ? 0 : newTrend.variation, 0, 0)}"></span>€</b> depuis <span th:text="${newTrend.formatedDuration()}"></span> 😊</div>
+			</div>	
+	
+	
+					<div  class="card shadow m-4">
 						<div class="card-body  text-center text-md-left">
 							<div class="row align-items-center">
 								<div class="col-md-8">
 									<h2 class="mb-3">Ecart de prix </h2>
-									<span class="h4"> (produit neuf)</span>
-									<p class="mb-0">Ceci est l'écart de prix calculé avec le prix historique le plus bas <span></span> jamais relevé par Nudger sur le <span th:text="${product.brandAndModel()}"></span></p>
+									<p class="mb-0">Ecart de prix calculé avec le prix historique le plus bas ()<span th:text="${newTrend.historicalLowestPrice}"></span>€) jamais relevé par Nudger sur le <span th:text="${product.brandAndModel()}"></span></p>
 								</div>
 								<div class="col-12 col-md-4 mt-4 mt-md-0 text-md-right">
 									<span class="d-block my-3"><span
-										class="display-2 fw-bold" th:text="${gap}"></span><span
+										class="h3 fw-bold" th:text="${#numbers.formatDecimal(newTrend.variation == null ? 0 : newTrend.variation, 2, 2)}"></span><span
 											class="align-baseline font-medium">€</span></span>
 								</div>
 							</div>
