@@ -33,7 +33,32 @@
 	<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/select/1.7.0/css/select.dataTables.min.css">
 	<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/buttons/2.4.2/css/buttons.dataTables.min.css">
 	<link href="/vendor/lightgallery/dist/css/lightgallery-bundle.min.css" rel="stylesheet">	
+<style>
 
+.carousel-control-prev-icon::before {
+    content: '\f060';
+    font-family: "Font Awesome 5 Free";
+    font-size: 5rem;
+    color: gray;
+    font-weight: 900;
+}
+
+.carousel-control-next-icon:before {
+    font-family: "Font Awesome 5 Free";
+    content: "\f061";
+    font-size: 5rem;
+    color: gray;
+    font-weight: 900;
+  
+}
+
+
+table.dataTable tbody tr.selected {
+    font-size: 1.5em;
+}
+
+
+</style>
 </head>
 
 <body>
@@ -251,9 +276,12 @@ function initTable (tableId) {
 			searching: false, 
 			paging: false,
 			info: false,
+			select: 'single',
 		    "order": [ [ 1, 'asc' ]]
 	}			
 	);	
+	
+	
 	
 	tableNew.on('click', 'tbody tr', (e) => {
 	    let classList = e.currentTarget.classList;
@@ -274,7 +302,6 @@ function initTable (tableId) {
 	    		   prefix : '',
 	    		   suffix : ''
 	    		 };
-//	    alert($("#countup-reversment").attr("data-max"));
 	    
 	  
 	    $("#countup-reversment").attr("data-max", compensation);
@@ -368,16 +395,7 @@ $(document).ready(function() {
 	}
 
 	
-		
-	$('#pills-new-tab').on("click", function(){
-		token = $("#offresNeuves>tbody>tr:first").attr('data-token');	
-		$("#token").val(token);	    
-	});
-  
-	$('#pills-occasion-tab').on("click", function(){
-		token = $("#offresOccasion>tbody>tr:first").attr('data-token');
-		$("#token").val(token);	    
-	});
+
 	
 	/////////////////////////////////
 	// Enable tooltips
@@ -453,6 +471,7 @@ let carouselEl = document.getElementById('bootstrap-gallery-carousel');
 const carousel = new bootstrap.Carousel(carouselEl, {
     interval: 10000,
     wrap: false,
+    
 });
 
 // Add an event listener for the 'slide.bs.carousel' event, fires immediately when the slide instance method is invoked.

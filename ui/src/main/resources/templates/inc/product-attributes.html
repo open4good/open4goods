@@ -5,7 +5,7 @@
 				<td class="align-middle" th:text="${helper.attributeName(attribute.name)}"></td>
 				
 				<th:block th:switch="${attribute.name}">
-					<td class="align-middle" th:case="'REPAIRABILITY_INDEX'"  th:insert="~{inc/attributes/class_energy.html}"> </td>
+					<!-- <td class="align-middle" th:case="'REPAIRABILITY_INDEX'"  th:insert="~{inc/attributes/class_energy.html}"> </td>-->
 					<td class="align-middle" th:case="*" th:text="${attribute.value}"></td>
 				</th:block>
 				<td class="align-middle">
