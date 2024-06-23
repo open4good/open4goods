@@ -90,20 +90,10 @@
 										<!--  Authenticated section -->
 										<th:block th:if="${user}">
 
-											<div class="mt-3"
-												th:if="${product.attributes.features.size > 0}"
-												th:insert="~{inc/product-features.html}"></div>
 
 
 											<!--/* Categories */-->
 											<th:block th:insert="~{inc/product-categories.html}"></th:block>
-
-
-
-											<!--/* Attributes */-->
-											<th:block
-												th:insert="~{inc/product-unmatched-attributes.html}"></th:block>
-
 
 
 											<div class="card shadow mb-3 my-3">
