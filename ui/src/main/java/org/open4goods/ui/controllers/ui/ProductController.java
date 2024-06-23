@@ -5,7 +5,6 @@ import java.net.URLEncoder;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.AbstractMap.SimpleEntry;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -21,6 +20,7 @@ import org.open4goods.model.data.AiDescription;
 import org.open4goods.model.data.Description;
 import org.open4goods.model.dto.UiFeatureGroups;
 import org.open4goods.model.product.AggregatedPrice;
+import org.open4goods.model.product.PriceTrend;
 import org.open4goods.model.product.Product;
 import org.open4goods.services.BarcodeValidationService;
 import org.open4goods.services.BrandService;
@@ -315,6 +315,18 @@ public class ProductController  {
 
 		mv.addObject("pros", pros);
 		mv.addObject("cons", cons);
+		
+		
+		
+		// Building the pricetrend
+		
+		PriceTrend newTrends = PriceTrend.of(data.getPrice().getNewPricehistory());
+		
+		mv.addObject("newTrend", newTrends);
+		
+		
+		
+		
 		
 		
 		VerticalConfig verticalConfig = verticalConfigService.getVerticalForPath(vertical);

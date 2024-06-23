@@ -81,7 +81,28 @@ public class AggregatedPrices implements Standardisable {
 	};
 	}
 
-	
+	/**
+	 * Get the gap between cureent best price and the lowest price ever measured
+	 * @return
+	 */
+	public Double historyPriceGap() {
+		List<PriceHistory> histo = getHistory(ProductCondition.NEW);
+		if (null == histo || histo.isEmpty()) {
+			return null;
+		}
+		PriceHistory lowest = histo.stream().min(Comparator.comparing(PriceHistory::getPrice)).get();
+		
+		if (null != lowest) {
+            
+			if (minPrice.getPrice() > lowest.getPrice()) {
+				return lowest.getPrice();		
+			} else {
+				return minPrice.getPrice();
+			}
+        }
+		
+		return null;
+	}
 	
 
 	@Override
