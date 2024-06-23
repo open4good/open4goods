@@ -46,7 +46,7 @@
 
 <main th:with="images = ${product.images()}" class="bg-gray-200">
 
-        <div th:with="cover = ${images.getFirst() == null ? 'nocover.png' : images.getFirst()}" class="section section-lg pt-5">
+        <div th:with="cover = ${($images == null || images.getFirst() == null) ? 'nocover.png' : images.getFirst()}" class="section section-lg pt-5">
             <div class="container-fluid">
 	
 								<h1 class="h1 title text-uppercase text-center"

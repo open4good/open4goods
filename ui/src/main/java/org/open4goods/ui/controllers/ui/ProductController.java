@@ -5,6 +5,8 @@ import java.net.URLEncoder;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.AbstractMap.SimpleEntry;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
@@ -15,6 +17,7 @@ import org.open4goods.model.BarcodeType;
 import org.open4goods.model.Localised;
 import org.open4goods.model.constants.ProviderType;
 import org.open4goods.model.data.AffiliationToken;
+import org.open4goods.model.data.AiDescription;
 import org.open4goods.model.data.Description;
 import org.open4goods.model.dto.UiFeatureGroups;
 import org.open4goods.model.product.AggregatedPrice;
@@ -259,7 +262,59 @@ public class ProductController  {
 
 		mv.addObject("product", data);
 		
+		// Fetching better and best objects
+		if (null != data.ecoscore()) {
+			
+			String globalBestId = data.getRanking().getGlobalBest();
+			String globalBetter = data.getRanking().getGlobalBetter();
+			
+			if (null != globalBestId) {
+				Product best = null;
+				try {
+					best = productRepository.getById(globalBestId);
+				} catch (ResourceNotFoundException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				mv.addObject("best", best);
+			}
+			
+			if (null != globalBetter) {
+				Product better = null;
+				try {
+					better = productRepository.getById(globalBetter);
+				} catch (ResourceNotFoundException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				mv.addObject("better", better);
+			}
+			
+			
+		}
 		
+		
+		
+		
+		// Easiying accessess to pros and cons
+		
+		List<String> pros = null;
+		List<String> cons = null;
+		
+		AiDescription ps = data.getAiDescriptions().get("pros");
+		if (null != ps) {
+			pros = (Arrays.asList(ps.getContent().getText().split("\n|<br/>")));
+		}
+		
+		
+		
+		AiDescription cs = data.getAiDescriptions().get("cons");
+		if (null != cs) {
+			cons = (Arrays.asList(cs.getContent().getText().split("\n|<br/>")));
+		}
+
+		mv.addObject("pros", pros);
+		mv.addObject("cons", cons);
 		
 		
 		VerticalConfig verticalConfig = verticalConfigService.getVerticalForPath(vertical);

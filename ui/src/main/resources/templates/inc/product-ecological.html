@@ -4,14 +4,14 @@
 				<h2 class="display-3">
 					Bilan écologique du <span th:text="${product.brandAndModel()}"></span> 
 					: 
-					<span class="mx-3 badge bg-success"><span th:text="${product.scores.ECOSCORE.relativ.value}"></span>/5</span>
+					<span class="mx-3 badge bg-success"><span th:if="${null != product.scores.get('ECOSCORE')}" th:text="${product.scores.ECOSCORE.relativ.value}"></span>/5</span>
 				</h2>
 		</div>
         </div>	   
   
 	
 	   
-	   <div class="mt-3 card shadow px-4 py-1 mb-3">
+	   <div th:if="${product.ecoscore()}" class="mt-3 card shadow px-4 py-1 mb-3">
 				<div class="card-body text-center text-md-left">
 					<div class="row align-items-center">
 						<div class="col-12 col-md-3 ">
@@ -120,42 +120,16 @@
 
 
 						<div class=" row">
-							<!-- Avantages -->
+							<!-- Better -->
 							<div class="col-sm-12 col-md-6 col-lg-6">
-								<!-- Icon Box -->
-								<div class="card border-gray-300 ">
-									<div class="card-body">
-										<div class="d-flex p-3">
-
-											<div class="ps-4">
-												<h2 class="h5 icon-box-title md-1">Un peu mieux...</h2>
-
-												better : <span th:text="${product.ranking.globalBetter}"></span>,
-												best : <span th:text="${product.ranking.globalBest}"></span>
-											</div>
-										</div>
-
-										<div class="d-flex align-items-center justify-content-center">
-											bla bla bla</div>
-									</div>
-								</div>
-								<!-- End of Icon Box -->
+								<th:block th:with="item = ${better}" th:insert="~{inc/product-mini.html}"></th:block>
 							</div>
 
-							<!-- Avantages -->
+							<!-- Best -->
 							<div class="col-sm-12 col-md-6 col-lg-6">
-								<!-- Icon Box -->
-								<div class="card border-gray-300 ">
-									<div class="card-body">
-										<div class="ps-4">
-											<h2 class="h5 icon-box-title md-1">1er du classement !</h2>
-										</div>
-									</div>
-
-									<div class="d-flex align-items-center justify-content-center">
-										bla bla bla</div>
-								</div>
+								<th:block th:with="item = ${best}" th:insert="~{inc/product-mini.html}"></th:block>
 							</div>
+
 							<!-- End of Icon Box -->
 						</div>
 

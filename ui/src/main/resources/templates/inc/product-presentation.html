@@ -1,12 +1,9 @@
-    <section id="markerPresentation" class="container container-semi-fluid section">
+<section id="markerPresentation" class="container container-semi-fluid section">
 		<div class="row text-center justify-content-center">
               <div class="col-md-8 mb-5">
                   <h2 class="display-3"><span th:text="${product.brandAndModel()}"></span> :  présentation</h2>
               </div>
         </div>	   
-  
-	   
-	   
 			<div class="row">
                   
                <!-- Identity -->
@@ -67,65 +64,52 @@
 
 					<div class="row mt-3">
 						<!-- Avantages -->
-						<div class="col-sm-12 col-md-12 col-lg-6">
+						<div th:if="${product.aiDescriptions.get('pros')}" class="col-sm-12 col-md-12 col-lg-6">
 							<!-- Icon Box -->
 							<div class="card border-gray-300 ">
 								<div class="card-body">
 									<div class="d-flex p-3">
 										<div class="icon icon-primary">
-											<span class="fas fa-user-md"></span>
+											<span class="fas fa-plus"></span>
 										</div>
 										<div class="ps-4">
 											<h2 class="h5 icon-box-title md-1">Avantages</h2>
 										</div>
 									</div>
-		
-									<div class="d-flex align-items-center justify-content-center">
-										bla bla bla</div>
+									<ul class="list-group list-group-flush price-list mb-4">
+										<li th:each="pro : ${pros}" class="list-group-item border-0" th:text="${pro}"></li>
+									</ul>
 								</div>
 							</div>
 							<!-- End of Icon Box -->
 						</div>
 		
-						<!-- Avantages -->
-						<div class="col-sm-12 col-md-12 col-lg-6">
+						<!-- Inconvénients -->
+						<div th:if="${pros}" class="col-sm-12 col-md-12 col-lg-6">
 							<!-- Icon Box -->
 							<div class="card border-gray-300 ">
 								<div class="card-body">
 									<div class="d-flex p-3">
 										<div class="icon icon-primary">
-											<span class="fas fa-user-md"></span>
+											<span class="fas fa-minus"></span>
 										</div>
 										<div class="ps-4">
 											<h2 class="h5 icon-box-title md-1">Inconvénients</h2>
 										</div>
 									</div>
-		
-									<div class="d-flex align-items-center justify-content-center">
-										bla bla bla</div>
+									<ul class="list-group list-group-flush price-list mb-4">
+										<li th:each="con : ${cons}" class="list-group-item border-0" th:text="${con}"></li>
+									</ul>
+									
+									
 								</div>
 							</div>
 							<!-- End of Icon Box -->
 						</div>
-		
-		
 					</div>
-		
 				</div>
-               
-               
-    
- 
-               
-               
-               
-               
-               
-               
-               
-                
-            </div>	   
-	   </section> 
+	</div>	   
+</section> 
 	   
 	   
 	   

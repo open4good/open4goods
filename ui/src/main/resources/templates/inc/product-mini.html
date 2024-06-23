@@ -1,0 +1,29 @@
+<div th:with="betterCover = ${(item.images == null || item.images.getFirst() == null) ? 'nocover.png' : item.images.getFirst().path()}" class="card shadow p-4">
+         <div class="row align-items-center">
+                 <div class="info-main">
+                     <a th:href="${item.names.url.i18n(siteLanguage)}" class="h5 title" >
+	                     <span  class="h5 title" th:text="${item.brandAndModel()}" ></span>                     
+	                     <img height="200" th:src="${betterCover}">
+                     </a>
+                     <div class="d-flex my-3">
+                         <span class="">Ecoscore : <strong><span th:text="${item.ecoscore().relValue()}"></span> / 5</strong></span>
+                         
+                     </div>
+                 </div>
+                 <div class="d-flex align-items-center">
+                     <span class="h5 mb-2 text-danger me-2">
+                         <span th:text="${item.bestPrice().price}"></span>
+                         <span th:text="${item.bestPrice().currency}"></span>
+                         
+                     </span>
+                 </div> <!-- info-price-detail // -->
+                 <span class="text-success small"><span class="fas fa-leaf me-1"></span>Compensation : <span th:text="${item.bestPrice().compensation}"> </span></span>
+                
+                 <div class="d-grid gap-2 mt-4">
+                     <a class="btn btn-tertiary btn-sm" th:href="${item.names.url.i18n(siteLanguage)}">
+                         Details
+                     </a>
+                 </div>
+                 
+         </div> 
+</div>
