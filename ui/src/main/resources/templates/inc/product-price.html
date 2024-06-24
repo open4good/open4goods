@@ -15,23 +15,31 @@
 
 				<th:block>
 				
-			<div class="m-4">
-			   <div th:if="${newTrend.trend == 0}" class="text-center alert alert-info" role="alert">😶‍🌫️ Le prix neuf est stable depuis <span th:text="${newTrend.formatedDuration()}"></span></div>
-			   <div th:if="${newTrend.trend == 1}"  class="text-center alert alert-tertiary" role="alert">🧐 Le prix neuf a augmenté de <b><span th:text="${#numbers.formatDecimal(newTrend.variation == null ? 0 : newTrend.variation, 0, 0)}"></span>€</b> depuis <span th:text="${newTrend.formatedDuration()}"></span> </div>
-			   <div th:if="${newTrend.trend == -1}" class="text-center alert alert-success" role="alert">Le prix neuf a baissé de <b><span th:text="${#numbers.formatDecimal(newTrend.variation == null ? 0 : newTrend.variation, 0, 0)}"></span>€</b> depuis <span th:text="${newTrend.formatedDuration()}"></span> 😊</div>
-			</div>	
-	
+					<div class="m-4">
+					   <div th:if="${newTrend.trend == 0}" class="text-center alert alert-info" role="alert">😶‍🌫️ Le prix neuf est stable depuis <span th:text="${newTrend.formatedDuration()}"></span></div>
+					   <div th:if="${newTrend.trend == 1}"  class="text-center alert alert-tertiary" role="alert">🧐 Le prix neuf a augmenté de <b><span th:text="${#numbers.formatDecimal(newTrend.variation == null ? 0 : newTrend.variation, 0, 0)}"></span>€</b> depuis le dernier pointage (<span th:text="${newTrend.formatedDuration()}"></span>) </div>
+					   <div th:if="${newTrend.trend == -1}" class="text-center alert alert-success" role="alert">Le prix neuf a baissé de <b><span th:text="${#numbers.formatDecimal(newTrend.variation == null ? 0 : newTrend.variation, 0, 0)}"></span>€</b> depuis le dernier relevé (<span th:text="${newTrend.formatedDuration()}"></span>) 😊</div>
+					</div>	
+			
 	
 					<div  class="card shadow m-4">
 						<div class="card-body  text-center text-md-left">
 							<div class="row align-items-center">
-								<div class="col-md-8">
-									<h2 class="mb-3">Ecart de prix historique</h2>
-									<p class="mb-0">Ecart de prix calculé avec le prix historique le plus bas ()<span th:text="${newTrend.historicalLowestPrice}"></span>€) jamais relevé par Nudger sur le <span th:text="${product.brandAndModel()}"></span></p>
+								<div th:if="${newTrend.historicalLowestPrice != 0}" class="col-md-8">
+									<h2 class="mb-3">Prix le plus bas historique ! </h2>
+									<p class="mb-0">Nous n'avons jamais relevé de prix aussi bas pour le <span th:text="${product.brandAndModel()}"></span>.</p>
 								</div>
-								<div class="col-12 col-md-4 mt-4 mt-md-0 text-md-right">
+								
+								<div th:unless="${newTrend.historicalLowestPrice != 0}" class="col-md-8">
+									<h2 class="mb-3">Ecart de prix historique</h2>
+									<p class="mb-0">Ecart de prix calculé avec le prix historique le plus bas (<span th:text="${newTrend.historicalLowestPrice}"></span>€) jamais relevé par Nudger sur le <span th:text="${product.brandAndModel()}"></span></p>
+								</div>
+								
+								
+								
+								<div th:unless="${newTrend.historicalLowestPrice != 0}"  class="col-12 col-md-4 mt-4 mt-md-0 text-md-right">
 									<span class="d-block my-3"><span
-										class="h3 fw-bold" th:text="${#numbers.formatDecimal(newTrend.variation == null ? 0 : newTrend.variation, 2, 2)}"></span><span
+										class="h3 fw-bold" th:text="${#numbers.formatDecimal(newTrend.historicalVariation == null ? 0 : newTrend.historicalVariation, 0, 1)}"></span><span
 											class="align-baseline font-medium">€</span></span>
 								</div>
 							</div>
