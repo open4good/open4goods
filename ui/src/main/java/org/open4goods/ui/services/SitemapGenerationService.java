@@ -161,7 +161,7 @@ public class SitemapGenerationService {
 		SitemapGenerator sitemap = SitemapGenerator.of(baseUrl);
 		
 		// Adding the home page
-		sitemap = sitemap.addPage(getWebPage("/", ChangeFreq.WEEKLY, 1.0));
+		sitemap = sitemap.addPage(getWebPage("/", ChangeFreq.WEEKLY, 0.8));
 		
 		for (Entry<String, SitemapExposedController> e : annotatedControllers.entrySet()) {
 			
