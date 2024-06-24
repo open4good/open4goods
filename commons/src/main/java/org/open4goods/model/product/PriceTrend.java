@@ -30,10 +30,14 @@ public class PriceTrend {
             PriceHistory last = history.get(history.size() - 2);
             trend.setActualPrice(actual.getPrice());
             trend.setLastPrice(last.getPrice());
-            trend.setVariation(Math.abs(actual.getPrice() - last.getPrice()));
+            trend.setVariation(actual.getPrice() - last.getPrice());
             trend.setPeriod(actual.getTimestamp() - last.getTimestamp());
             trend.setTrend(trend.getVariation() > 0 ? 1 : (trend.getVariation() < 0 ? -1 : 0));
+            trend.setHistoricalLowestPrice(history.stream().mapToDouble(PriceHistory::getPrice).min().orElse(0));
+            trend.setHistoricalVariation(trend.getActualPrice() - trend.getHistoricalLowestPrice());
         }
+        
+        
         return trend;
     }
 
@@ -69,6 +73,10 @@ public class PriceTrend {
 		return ret;
 	}
 	
+	
+	public Double absVariation() {
+		return Math.abs(variation);
+	}
 	
 	
 	public Integer getTrend() {

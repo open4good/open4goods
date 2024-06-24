@@ -1,4 +1,4 @@
-<div  class="card shadow p-4">
+<div  th:if="${item}" class="card shadow p-4">
          <div class="row align-items-center">
                  <div class="text-center ">
                      <a th:href="${item.names.url.i18n(siteLanguage)}" class="h5 title" >
@@ -11,7 +11,6 @@
                      <span class="h5 mb-2 text-danger me-2">
                          <span th:text="${item.bestPrice().price}"></span>
                          <span th:text="${item.bestPrice().currency}"></span>
-                         
                      </span>
                  </div> <!-- info-price-detail // -->
                 
