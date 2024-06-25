@@ -17,7 +17,7 @@
         <tbody>
             <tr>
                 <td>
-                    <div th:each="p : ${products.data}" >
+                    <div th:each="p : ${products.limitedDatas(20)}" >
                         
                             <p th:if="${p.model()}"><a th:text="${p.model()}" th:href="'/'+${verticalPath}+ '/'+${p.url(lang)}"></a></p>
                             <p th:unless="${p.model()}"><a th:text="${p.bestName()}" th:href="'/'+${verticalPath}+ '/'+${p.url(lang)}"></a></p>

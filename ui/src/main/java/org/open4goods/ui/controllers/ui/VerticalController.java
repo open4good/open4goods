@@ -62,13 +62,10 @@ public class VerticalController  extends AbstractController {
 		// TODO : strategy of injection of products for nativ SEO
 
 		VerticalSearchRequest vRequest = new VerticalSearchRequest();
-
+		vRequest.setSortField("scores.ECOSCORE.relativ.value");
+		vRequest.setSortOrder("desc");
+		
 		VerticalSearchResponse products = searchService.verticalSearch(config,vRequest);
-//		VerticalSearchResponse products = new VerticalSearchResponse(config,vRequest);
-
-		// TODO : should must not need the initial call
-		// TODO : do not fetch any in nativ html
-		products.setData(new ArrayList<>());
 		
 		Map<String,String> countryNames = new HashMap<>();
 		for (VerticalFilterTerm country : products.getCountries()) {
@@ -77,6 +74,7 @@ public class VerticalController  extends AbstractController {
 
 		ret.addObject("countryNames", countryNames);
 		ret.addObject("products", products);
+		
 		ret.addObject("posts",blogService.getPosts(vertical));
 		ret.addObject("config",config);
 
