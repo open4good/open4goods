@@ -74,8 +74,14 @@ table.dataTable tbody tr.selected {
         <div  class="section section-lg pt-5">
             <div class="container-fluid">
 	
-								<h1 class="h1 title text-uppercase text-center"
+								<h1 th:unless="${product.vertical}"class="h1 title text-uppercase text-center"
+									th:text="${product.bestName()}"></h1>
+
+ 								<h1 th:if="${product.vertical}" class="h1 title text-uppercase text-center"
 									th:text="${helper.texts.title}"></h1>
+
+
+
 
 								<div class="card shadow p-4">
 									<!--/* Header */-->
