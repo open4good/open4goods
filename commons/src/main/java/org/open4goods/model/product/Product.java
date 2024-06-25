@@ -335,6 +335,29 @@ public class Product implements Standardisable {
 		return resources.stream().filter(e-> e.getResourceType() != null &&  e.getResourceType().equals(ResourceType.PDF)).toList();
 	}
 		
+	
+	public String externalCover() {
+		String coverPath="/icons/no-image.png";
+
+		List<Resource> images = unprocessedimages();
+		if (images != null && images.size() > 0) {
+			Resource first = images.getFirst();
+			if (null != first) {
+				coverPath = (first.getUrl());
+			}
+		}
+		return coverPath;
+	}
+	
+	
+	public List<Resource> unprocessedimages() {
+		// TODO Auto-generated method stub
+		return resources.stream()
+				.filter(e-> e.getUrl() != null)
+				.filter(e -> e.getUrl().endsWith(".jpg") || e.getUrl().endsWith(".png") || e.getUrl().endsWith(".jpeg"))
+				.toList();
+	}
+	
 	// TODO : Should be outsided / cached
 	public List<Resource> images() {
 	    // Filter resources of type IMAGE
@@ -1003,6 +1026,8 @@ public class Product implements Standardisable {
 	public void setExcluded(boolean excluded) {
 		this.excluded = excluded;
 	}
+
+
 
 
 

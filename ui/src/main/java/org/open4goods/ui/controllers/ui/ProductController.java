@@ -18,6 +18,7 @@ import org.open4goods.model.constants.ProviderType;
 import org.open4goods.model.data.AffiliationToken;
 import org.open4goods.model.data.AiDescription;
 import org.open4goods.model.data.Description;
+import org.open4goods.model.data.Resource;
 import org.open4goods.model.dto.UiFeatureGroups;
 import org.open4goods.model.product.AggregatedPrice;
 import org.open4goods.model.product.PriceTrend;
@@ -294,7 +295,15 @@ public class ProductController  {
 		}
 		
 		
+		// Adding the cover image
 		
+		String cover = "/icons/no-image.png";
+		if (data.getCoverImagePath() != null) {
+            cover =  data.getCoverImagePath();
+        } else {
+        	cover = data.externalCover();
+        }
+		mv.addObject("cover", cover);
 		
 		// Easiying accessess to pros and cons
 		

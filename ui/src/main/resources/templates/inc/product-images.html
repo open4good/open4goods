@@ -1,6 +1,4 @@
 <th:block  >
-	<img th:unless="${images.size() > 0}" height="300" src="/icons/no-image.png" alt="Pas d'image !">
-
 <!-- 
 
 	<span th:each="img, stat : ${product.videos}"> 
@@ -12,7 +10,9 @@
 
  -->
 
-
+	<div th:unless="${images.size() > 0}">
+		<img class="img-fluid" th:src="${cover}">
+	</div>
 	<div th:if="${images.size() > 0}" id="bootstrap-gallery-carousel" class="carousel slide" data-bs-ride="carousel">
 		<div class="carousel-indicators">
 			<button th:each="img, stat : ${images}" type="button" 
