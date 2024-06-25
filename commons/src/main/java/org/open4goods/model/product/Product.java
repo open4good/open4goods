@@ -561,12 +561,18 @@ public class Product implements Standardisable {
 	 * Returns the best human readable name
 	 */
 	public String bestName() {
+		String ret;
 		if (null == brand() || null == model()) {
-			return names.shortestOfferName();
+			ret = names.shortestOfferName();
 		} else {
-			return gtin();
+			ret =  brandAndModel();
+		}
+		
+		if (null == ret) {
+			ret = gtin();
 		}
 
+		return ret;
 	}
 
 	/**
