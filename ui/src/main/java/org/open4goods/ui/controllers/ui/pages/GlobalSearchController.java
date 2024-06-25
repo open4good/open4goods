@@ -5,7 +5,9 @@ import java.nio.charset.Charset;
 import java.util.Locale;
 
 import org.open4goods.model.constants.CacheConstants;
+import org.open4goods.model.data.Resource;
 import org.open4goods.model.dto.VerticalSearchResponse;
+import org.open4goods.model.product.Product;
 import org.open4goods.services.SearchService;
 import org.open4goods.ui.config.yml.UiConfig;
 import org.open4goods.ui.controllers.ui.UiService;
