@@ -65,7 +65,7 @@ public class SitemapGenerationService {
 
 	private VerticalsConfigService verticalsConfigService;
 	private BlogService blogService;
-	// TODO : To allow last mod date and check existence
+	//  To allow last mod date and check existence
 	private final XwikiFacadeService xwikiService;
 	
 	private ApplicationContext context;
@@ -134,8 +134,8 @@ public class SitemapGenerationService {
 				.addPage(SITEMAP_NAME_BLOG_PAGES)
 				.addPage(SITEMAP_NAME_WIKI_PAGES)
 				.addPage(SITEMAP_NAME_VERTICAL_PAGES)
-				// TODO : Uncomment when ok on products
-//				.addPage(SITEMAP_NAME_PRODUCT_PAGES)
+
+				.addPage(SITEMAP_NAME_PRODUCT_PAGES)
 				;
 				
 				try {
