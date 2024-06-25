@@ -73,7 +73,7 @@ public class BlogController  implements SitemapExposedController{
 	}
 
 
-	@GetMapping(value=DEFAULT_PATH+"rss",  produces = "application/xml")
+	@GetMapping(value=DEFAULT_PATH+"/rss",  produces = "application/xml")
 	public void rss(HttpServletResponse response, HttpServletRequest request ) throws FeedException, IOException {
 		response.setContentType("application/rss+xml");
 		response.setCharacterEncoding("UTF-8");
