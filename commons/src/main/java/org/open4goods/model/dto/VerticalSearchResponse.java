@@ -74,6 +74,13 @@ public class VerticalSearchResponse {
 	public VerticalSearchResponse() {
 	}
 
+	public List<Product> limitedDatas(Integer to) {
+		if (to > data.size()) {
+			return data;
+		}
+		return data.subList(0, to);
+	}
+	
 	public List<Product> getData() {
 		return data;
 	}
