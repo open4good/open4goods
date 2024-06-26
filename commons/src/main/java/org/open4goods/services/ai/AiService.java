@@ -19,6 +19,7 @@ import org.open4goods.services.EvaluationService;
 import org.open4goods.services.VerticalsConfigService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.ai.converter.MapOutputConverter;
 import org.springframework.ai.openai.OpenAiChatModel;
 import org.springframework.ai.openai.OpenAiImageModel;
 /**
@@ -31,11 +32,13 @@ public class AiService {
     private final OpenAiChatModel chatModel;
 	private VerticalsConfigService verticalService;
 	private EvaluationService spelEvaluationService;
+	private MapOutputConverter mapOutputConverter;
 	
-	public AiService(OpenAiChatModel chatModel, final VerticalsConfigService verticalService, EvaluationService spelEvaluationService) {
+	public AiService(OpenAiChatModel chatModel, final VerticalsConfigService verticalService, EvaluationService spelEvaluationService, MapOutputConverter mapOutputConverter) {
 		this.chatModel = chatModel;
 		this.verticalService = verticalService;
 		this.spelEvaluationService = spelEvaluationService;
+		this.mapOutputConverter = mapOutputConverter;
 	}
 
 	/**
