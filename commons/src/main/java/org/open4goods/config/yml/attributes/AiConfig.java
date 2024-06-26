@@ -31,7 +31,12 @@ public class AiConfig {
 	private String key;
 
 
-	private String prompt ;
+	private String prompt;
+
+	/**
+	 * Rate limit delay in milliseconds.
+	 */
+	private int rateLimitDelay;
 	
 	
 	/**
@@ -68,8 +73,12 @@ public class AiConfig {
 	public void setOverride(boolean override) {
 		this.override = override;
 	}
-	
-	
 
+	public int getRateLimitDelay() {
+		return rateLimitDelay;
+	}
 
+	public void setRateLimitDelay(int rateLimitDelay) {
+		this.rateLimitDelay = rateLimitDelay;
+	}
 }
