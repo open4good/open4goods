@@ -106,6 +106,7 @@ i18n:
             pros : Une liste des avantages techniques du produit. Cinq avantages maximum, un avantage par ligne, dans un style formel.
             cons : Une liste d'inconvénients techniques du produit. Cinq inconvénients maximum, un avantage par ligne, dans un style formel.
           override: false
+          rateLimitDelay: 3000
 
 
 
