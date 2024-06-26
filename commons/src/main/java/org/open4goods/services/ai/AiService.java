@@ -29,16 +29,16 @@ import org.springframework.ai.openai.OpenAiImageModel;
 public class AiService {
 
 	private Logger logger = LoggerFactory.getLogger(AiService.class);
-    private final OpenAiChatModel chatModel;
+	private final OpenAiChatModel chatModel;
 	private VerticalsConfigService verticalService;
 	private EvaluationService spelEvaluationService;
 	private MapOutputConverter mapOutputConverter;
-	
-	public AiService(OpenAiChatModel chatModel, final VerticalsConfigService verticalService, EvaluationService spelEvaluationService, MapOutputConverter mapOutputConverter) {
+
+	public AiService(OpenAiChatModel chatModel, final VerticalsConfigService verticalService, EvaluationService spelEvaluationService) {
 		this.chatModel = chatModel;
 		this.verticalService = verticalService;
 		this.spelEvaluationService = spelEvaluationService;
-		this.mapOutputConverter = mapOutputConverter;
+		this.mapOutputConverter = new MapOutputConverter();
 	}
 
 	/**
@@ -92,10 +92,8 @@ public class AiService {
 
 	private void doGeneration(Product data, Map<String, ProductI18nElements> i18nConf, boolean force) {
 		for (Entry<String, ProductI18nElements> elements : i18nConf.entrySet()) {
-
-			for ( AiConfig aic: elements.getValue().getAiConfig()) {
-
-				if (!force && !aic.isOverride() &&  (null != data.getAiDescriptions().get(aic.getKey()) && i18nConf.keySet().contains(data.getAiDescriptions().get(aic.getKey()).getContent().getLanguage()))) {
+			for (AiConfig aic : elements.getValue().getAiConfig()) {
+				if (!force && !aic.isOverride() && (null != data.getAiDescriptions().get(aic.getKey()) && i18nConf.keySet().contains(data.getAiDescriptions().get(aic.getKey()).getContent().getLanguage()))) {
 					logger.info("Skipping because generated AI text is already present");
 					continue;
 				}
@@ -104,7 +102,14 @@ public class AiService {
 				if (StringUtils.isEmpty(desc.getContent().getText())) {
 					logger.error("Empty AI text for product {} with key {} and lang {} and prompt {}", data.getId(), aic.getKey(), elements.getKey(), aic.getPrompt());
 				} else {
-					data.getAiDescriptions().put(aic.getKey(), desc);
+					try {
+						Map<String, Object> responseMap = mapOutputConverter.convert(desc.getContent().getText());
+
+						data.getAiDescriptions().put("global-description", new AiDescription((String) responseMap.get("global-description"), elements.getKey()));
+						data.getAiDescriptions().put("ecological-description", new AiDescription((String) responseMap.get("ecological-description"), elements.getKey()));
+					} catch (Exception e) {
+						logger.error("Error parsing AI response for product {}: {}", data.getId(), e.getMessage());
+					}
 				}
 			}
 		}
