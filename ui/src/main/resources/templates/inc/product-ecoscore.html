@@ -1,44 +1,216 @@
-<div id="ecoScore">
+<style>
+.flex-wrapper {
+  display: flex;
+  flex-flow: row nowrap;
+}
 
-	<div  id="panel-ecoscore"	role="tabpanel" aria-labelledby="panel-ecoscore">					
-					
-			<div>
-			
+.single-chart {
+  width: 33%;
+  justify-content: space-around ;
+}
+
+.circular-chart {
+  display: block;
+  margin: 10px auto;
+  max-width: 80%;
+  max-height: 250px;
+}
+
+.circle-bg {
+  fill: none;
+  stroke: #eee;
+  stroke-width: 3.8;
+}
+
+.circle {
+  fill: none;
+  stroke-width: 2.8;
+  stroke-linecap: round;
+  animation: progress 1s ease-out forwards;
+}
+
+@keyframes progress {
+  0% {
+    stroke-dasharray: 0 100;
+  }
+}
+
+.circle-A .circle {
+  stroke: #1e851a;
+}
+
+.circle-B .circle {
+  stroke: #3fc83c;
+}
+
+.circle-C .circle {
+  stroke: #ffde56;
+}
+.circle-D .circle {
+  stroke: #ff904c;
+}
+
+.circle-E .circle {
+  stroke: #ff302f;
+}
+
+.percentage {
+  fill: #666;
+  font-family: sans-serif;
+  font-size: 0.5em;
+  text-anchor: middle;
+}
+
+</style>
+
+
+
+<div id="ecoScore" class="card shadow p-0">
+	<!-- Header -->
+	<div class="card-header bg-white">
+		<div class="row align-items-center">
+			<div class="col-lg-3">
+				<span class="d-block">
+					<span class="display-1 text-secondary fw-bold" th:text="${product.ecoscore.on20()}"></span>
+					 <span class="font-small">/20</span>
+				</span>
+			</div>
+			<div class="col-lg-9">
+				<!--  Ecoscore  -->
 				<div class="text-center">
-					<a href="#markerEcological">
-						<img class="mb-1"  width="350px" th:alt="'Ecoscore : ' + ${product.ecoscore.letter()}" th:title="'éco-score : ' + ${product.ecoscore.letter()}" th:src="'/icons/ecoscore/scoring-'+${product.ecoscore.letter()}+'.png'">
+					<a href="#markerEcological"> <img class="mb-1" width="350px"
+						th:alt="'Ecoscore : ' + ${product.ecoscore.letter()}"
+						th:title="'éco-score : ' + ${product.ecoscore.letter()}"
+						th:src="'/icons/ecoscore/scoring-'+${product.ecoscore.letter()}+'.png'">
 					</a>
 				</div>
+			</div>
+		</div>
 	
-			
-				<!--/* Best price */-->				
-				<!--th:block th:insert="~{inc/product-price.html}"></th:block-->
+	
+
+	
+	
+	</div>
+	<!-- End Header -->
+	
+	
+	
+	<!-- Content -->
+	<div class="">
+
+
+
+
+
+
 		
-				<div class="p-4">
-					<!--div th:if="${product.ecoscore}" class="text-center">				           
-					   <img class="mt-4"  width="350px" th:alt="'Ecoscore : ' + ${product.ecoscore.letter()}" th:title="'éco-score : ' + ${product.ecoscore.letter()}" th:src="'/icons/ecoscore/scoring-'+${product.ecoscore.letter()}+'.png'">
-					</div-->
-					<div>						
-								
-						<div th:each="score : ${product.realScores()}" class="mt-4 ms-4 progress-wrapper">
+
+
+
+
+
+		<div id="accordionScore"  class="progress-wrapper accordion">
 							
-							<div class="progress-info">
-								<span><img height="50" th:src="'/icons/ecoscore/'+${score.letter()}+'.png'"></span>
+							
+							
+			<div th:each="score, stat : ${product.realScores()}" class="">
+				<div style="max-height: 100px" class="flex-wrapper accordion-header " th:id="'score-'+${stat.count}">
+					<button class="accordion-button collapsed" 
+						type="button"
+						data-bs-toggle="collapse" 
+						th:data-bs-target="'#collapse-score-'+${stat.count}"
+						th:aria-expanded="${stat.first == true ? 'true' : 'false'}" 
+						th:aria-controls="'collapse-score-'+${stat.count}">
+						
+						
+						
+						
+						
+						
+							<span class="single-chart">
+									
+									    <svg viewBox="0 0 70 70" style="margin-top: 85px;" class="circular-chart" th:classappend="'circle-'+${score.letter()}">
+									      <path class="circle-bg"
+									        d="M18 2.0845
+									          a 15.9155 15.9155 0 0 1 0 31.831
+									          a 15.9155 15.9155 0 0 1 0 -31.831"
+									      />
+									      <path class="circle"
+									        th:stroke-dasharray="${score.percent()}+', 100'"
+									        
+									        d="M18 2.0845
+									          a 15.9155 15.9155 0 0 1 0 31.831
+									          a 15.9155 15.9155 0 0 1 0 -31.831"
+									      />
+									      <text x="18" y="20.35" class="percentage" th:text="${score.percent()+'%'}"></text>
+									    </svg>
+								</span>
+						
+						
+						
+						
+						
+						
+						<span class="h5" th:text="#{'score-'+${score.name}}"></span>
+						
+					</button>
+				</div>
+				<div th:id="'collapse-score-'+${stat.count}" class="accordion-collapse collapse "
+					th:aria-labelledby="'collapse-score-'+${stat.count}"
+					data-bs-parent="#accordionScore">
+					<div class="accordion-body">
+						<strong>This is the first item's accordion body.</strong> It is
+						hidden by default, until the collapse plugin adds the appropriate
+						classes that we use to style each element. These classes control
+						the overall appearance, as well as the showing and hiding via CSS
+						transitions. You can modify any of this with custom CSS or
+						overriding our default variables. It's also worth noting that just
+						about any HTML can go within the
+						<code>.accordion-body</code>
+						, though the transition does limit overflow.
+					</div>
+				</div>
+			</div>
+			
+			
+			<!--  
+							<div class="  progress-info">
+
 								<span  class="h4 help-pointer progress-tooltip" data-bs-toggle="tooltip" data-bs-placement="top" th:title="#{'ecoscore.' +${score.name}+'.tooltip'(${score.absValue()}, ${score.relValue()}, ${product.attributes.aggregatedAttributes.get(score.name)})}" th:classappend="'bg-'+${score.colorClassName()}" th:text="#{'score-'+${score.name}}"></span>
 								<div class="progress-percentage">
-									<!-- 
-									<span th:if="${score.relativValue}" th:text="${score.relativValue*20}+'%'"></span>
-									 -->
 								</div>
 							</div>
 							<div class="progress">
 								<div class="progress-bar" th:classappend="'bg-'+${score.colorClassName()}" role="progressbar"
 									  th:attrappend="aria-valuenow = ${score.percent()}, style='width: '+${score.percent()}+'%;'" aria-valuemin="0" aria-valuemax="100"></div>
 							</div>
-						</div>
-					</div>
-				</div>
-		
-			</div>
-	</div>	
+							
+							
+			-->
+							
+						</div>	
+	
+	
+	
+	
+	
+	
+	
+
+	</div>
+	<!-- End Content -->
+	<div class="card-footer bg-white border-0 p-0">
+		<div class="d-grid">
+			<a href="#markerEcological" class="btn btn-primary rounded-0 rounded-bottom">Bilan écologique</a>
+		</div>
+	</div>
 </div>
+
+
+
+
+
+
+
+	
