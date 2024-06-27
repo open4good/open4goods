@@ -29,7 +29,7 @@
 		<div id="accordionScore"  class="progress-wrapper accordion">
 			<!-- Sub scores -->
 			<div th:each="score, stat : ${product.realScores()}" class="">
-				<div style="max-height: 100px" 
+				<div style="max-height: 70px" 
 					 class="flex-wrapper accordion-header"
 					 th:id="'score-'+${stat.count}">
 					<button class="accordion-button collapsed" 
@@ -40,7 +40,7 @@
 						th:aria-controls="'collapse-score-'+${stat.count}">
 						
 							<span class="single-chart">
-									    <svg viewBox="0 0 100 100" style="margin-top: 120px;" class="circular-chart" th:classappend="'circle-'+${score.letter()}">
+									    <svg viewBox="0 0 100 100" style="margin-top: 100px;" class="circular-chart" th:classappend="'circle-'+${score.letter()}">
 									      <path class="circle-bg"
 									        d="M18 2.0845
 									          a 15.9155 15.9155 0 0 1 0 31.831
