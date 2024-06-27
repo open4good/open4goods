@@ -15,7 +15,7 @@ import org.open4goods.api.services.completion.GenAiCompletionService;
 import org.open4goods.api.services.completion.IcecatCompletionService;
 import org.open4goods.api.services.completion.ResourceCompletionService;
 import org.open4goods.api.services.store.DataFragmentStoreService;
-import org.open4goods.config.yml.attributes.AiConfig;
+import org.open4goods.config.yml.attributes.PromptConfig;
 import org.open4goods.crawler.config.yml.FetcherProperties;
 import org.open4goods.crawler.repository.CsvIndexationRepository;
 import org.open4goods.crawler.repository.IndexationRepository;
@@ -131,7 +131,7 @@ public class ApiConfig {
 	
 	@Bean
 	@Autowired
-	GenAiCompletionService aiCompletionService(AiService aiService, ProductRepository productRepository, VerticalsConfigService verticalConfigService, AiConfig aiConfig) {
+	GenAiCompletionService aiCompletionService(AiService aiService, ProductRepository productRepository, VerticalsConfigService verticalConfigService, PromptConfig aiConfig) {
 		return new GenAiCompletionService(aiService, productRepository, verticalConfigService, apiProperties, aiConfig);
 	}
 
@@ -212,7 +212,7 @@ public class ApiConfig {
 	}
 
 	@Bean
-	public AiConfig aiConfig() { return new AiConfig(); }
+	public PromptConfig aiConfig() { return new PromptConfig(); }
 
 	@Bean
 	@Autowired  
