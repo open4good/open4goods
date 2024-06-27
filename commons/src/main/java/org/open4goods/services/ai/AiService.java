@@ -6,7 +6,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import org.apache.commons.lang3.StringUtils;
-import org.open4goods.config.yml.attributes.AiConfig;
+import org.open4goods.config.yml.attributes.PromptConfig;
+import org.open4goods.config.yml.attributes.AiPromptsConfig;
 import org.open4goods.config.yml.ui.ProductI18nElements;
 import org.open4goods.config.yml.ui.VerticalConfig;
 import org.open4goods.model.data.AiDescription;
@@ -52,6 +53,7 @@ public class AiService {
 	 * Completes AI descriptions for a product based on the provided vertical configuration.
 	 */
 	public void complete(Product product, VerticalConfig verticalConfig, boolean force) {
+		// TODO : Gof (filter on icecat validated chars)
 		if (!force && product.getAttributes().count() < 15) {
 			return;
 		}
@@ -71,13 +73,19 @@ public class AiService {
 	 */
 	private void generateDescriptionsForProduct(Product product, Map<String, ProductI18nElements> i18nConfig, boolean force) {
 		for (Entry<String, ProductI18nElements> entry : i18nConfig.entrySet()) {
-			for (AiConfig aiConfig : entry.getValue().getAiConfig()) {
+			
+			
+			
+			Map<String, AiDescription> description = createAiDescriptions(entry.getValue().getAiConfigs(), entry.getKey(), product);
+			
+			
+			
+			for (PromptConfig aiConfig : entry.getValue().getAiConfigs().getPrompts()) {
 				if (shouldSkipDescriptionGeneration(product, aiConfig, i18nConfig, force)) {
 					logger.info("Skipping because generated AI text is already present");
 					continue;
 				}
 
-				AiDescription description = createAiDescription(aiConfig, entry.getKey(), product);
 				if (StringUtils.isBlank(description.getContent().getText())) {
 					logger.error("Empty AI text for product {} with key {} and lang {} and prompt {}", product.getId(), aiConfig.getKey(), entry.getKey(), aiConfig.getPrompt());
 				} else {
@@ -87,23 +95,34 @@ public class AiService {
 		}
 	}
 
+
+
 	/**
 	 * Determines if the description generation should be skipped.
 	 */
-	private boolean shouldSkipDescriptionGeneration(Product product, AiConfig aiConfig, Map<String, ProductI18nElements> i18nConfig, boolean force) {
+	private boolean shouldSkipDescriptionGeneration(Product product, PromptConfig aiConfig, Map<String, ProductI18nElements> i18nConfig, boolean force) {
 		return !force && !aiConfig.isOverride() && product.getAiDescriptions().containsKey(aiConfig.getKey()) && i18nConfig.keySet().contains(product.getAiDescriptions().get(aiConfig.getKey()).getContent().getLanguage());
 	}
 
 	/**
 	 * Creates an AI description for a product.
+	 * @param rootPrompt 
 	 *
 	 * @param aiConfig The AI configuration.
 	 * @param language The language of the description.
 	 * @param product The product to generate the description for.
 	 * @return The generated AI description.
 	 */
-	private AiDescription createAiDescription(AiConfig aiConfig, String language, Product product) {
+	private AiDescription createAiDescriptions(String rootPrompt, PromptConfig aiConfig, String language, Product product) {
 
+		// 1 - Evaluate the root prompt
+		
+		String evaluatedRootPrompt = spelEvaluationService.thymeleafEval(product, rootPrompt);
+		
+		
+		
+		
+		
 		String evaluatedPrompt = spelEvaluationService.thymeleafEval(product, aiConfig.getPrompt());
 
 		String aiResponse = generatePromptResponse(evaluatedPrompt);
@@ -112,6 +131,48 @@ public class AiService {
 		return new AiDescription(aiResponse, language);
 	}
 
+	
+	private Map<String, AiDescription> createAiDescriptions(AiPromptsConfig aiConfigs, String key, Product product) {
+
+		
+		// 1 - Evaluate the root prompt
+		String evaluatedRootPrompt = spelEvaluationService.thymeleafEval(product, aiConfigs.getRootPrompt());
+		
+		// 2 - Evaluate the prompts
+		Map<String, String> promptsRepsponse = new HashMap<>();
+		for (PromptConfig promptConfig :  aiConfigs.getPrompts()) {
+			// For each
+			promptsRepsponse.put(promptConfig.getKey(), spelEvaluationService.thymeleafEval(product, promptConfig.getPrompt()));
+		}
+		
+		String template = """
+		  given : 
+		      {evaluatedRootPrompt}
+		  
+		  generate a key/value json string, which contains the following entries:
+			- global-description : {promptsRepsponse.get("global-description")}
+		  
+				""";
+		
+		
+		// TODO : chatmodel.execute
+		
+		
+		// TODO : Json parsing
+		Map<String, Object> responseMap = objectMapper.readValue(description.getContent().getText(), HashMap.class);
+
+		
+		// TODO Auto-generated method stub
+		return null;
+	}
+	
+	
+	
+	
+	
+	
+	
+	
 	/**
 	 * Stores the generated AI descriptions in the product.
 	 *
