@@ -314,6 +314,18 @@ public class Product implements Standardisable {
 			sb.append(" - ").append(attr.getKey().toString()).append(" : ").append(attr.getValue()).append("\n");
 		}
 		
+
+		for (AggregatedAttribute attr : attributes.getUnmapedAttributes()) {
+			
+			if (attr.getIcecatTaxonomyIds().size() > 0) {
+				sb.append(" - ").append(attr.getName().toString()).append(" : ").append(attr.getValue()).append("\n");
+			}
+		}
+
+		
+		
+		/**
+		 
 		for (Entry<String, AggregatedAttribute> attr : attributes.getAggregatedAttributes().entrySet()) {
 			sb.append(" - ").append(attr.getKey().toString()).append(" : ").append(attr.getValue().getValue()).append("\n");
 		}
@@ -325,6 +337,7 @@ public class Product implements Standardisable {
 		for (AggregatedAttribute attr : attributes.getUnmapedAttributes()) {
 			sb.append(" - ").append(attr.getName().toString()).append(" : ").append(attr.getValue()).append("\n");
 		}
+		 */
 
 		return sb.toString();
 		
