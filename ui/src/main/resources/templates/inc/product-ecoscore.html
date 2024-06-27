@@ -1,80 +1,15 @@
-<style>
-.flex-wrapper {
-  display: flex;
-  flex-flow: row nowrap;
-}
-
-.single-chart {
-  width: 33%;
-  justify-content: space-around ;
-}
-
-.circular-chart {
-  display: block;
-  margin: 10px auto;
-  max-width: 80%;
-  max-height: 250px;
-}
-
-.circle-bg {
-  fill: none;
-  stroke: #eee;
-  stroke-width: 3.8;
-}
-
-.circle {
-  fill: none;
-  stroke-width: 2.8;
-  stroke-linecap: round;
-  animation: progress 1s ease-out forwards;
-}
-
-@keyframes progress {
-  0% {
-    stroke-dasharray: 0 100;
-  }
-}
-
-.circle-A .circle {
-  stroke: #1e851a;
-}
-
-.circle-B .circle {
-  stroke: #3fc83c;
-}
-
-.circle-C .circle {
-  stroke: #ffde56;
-}
-.circle-D .circle {
-  stroke: #ff904c;
-}
-
-.circle-E .circle {
-  stroke: #ff302f;
-}
-
-.percentage {
-  fill: #666;
-  font-family: sans-serif;
-  font-size: 0.5em;
-  text-anchor: middle;
-}
-
-</style>
-
-
-
 <div id="ecoScore" class="card shadow p-0">
 	<!-- Header -->
 	<div class="card-header bg-white">
 		<div class="row align-items-center">
+			<!-- 20 rating -->
 			<div class="col-lg-3">
 				<span class="d-block">
 					<span class="display-1 text-secondary fw-bold" th:text="${product.ecoscore.on20()}"></span>
 					 <span class="font-small">/20</span>
 				</span>
 			</div>
+			<!-- Ecoscore -->
 			<div class="col-lg-9">
 				<!--  Ecoscore  -->
 				<div class="text-center">
@@ -86,36 +21,17 @@
 				</div>
 			</div>
 		</div>
-	
-	
-
-	
-	
 	</div>
 	<!-- End Header -->
 	
-	
-	
 	<!-- Content -->
-	<div class="">
-
-
-
-
-
-
-		
-
-
-
-
-
+	<div>
 		<div id="accordionScore"  class="progress-wrapper accordion">
-							
-							
-							
+			<!-- Sub scores -->
 			<div th:each="score, stat : ${product.realScores()}" class="">
-				<div style="max-height: 100px" class="flex-wrapper accordion-header " th:id="'score-'+${stat.count}">
+				<div style="max-height: 100px" 
+					 class="flex-wrapper accordion-header"
+					 th:id="'score-'+${stat.count}">
 					<button class="accordion-button collapsed" 
 						type="button"
 						data-bs-toggle="collapse" 
@@ -123,14 +39,8 @@
 						th:aria-expanded="${stat.first == true ? 'true' : 'false'}" 
 						th:aria-controls="'collapse-score-'+${stat.count}">
 						
-						
-						
-						
-						
-						
 							<span class="single-chart">
-									
-									    <svg viewBox="0 0 70 70" style="margin-top: 85px;" class="circular-chart" th:classappend="'circle-'+${score.letter()}">
+									    <svg viewBox="0 0 100 100" style="margin-top: 120px;" class="circular-chart" th:classappend="'circle-'+${score.letter()}">
 									      <path class="circle-bg"
 									        d="M18 2.0845
 									          a 15.9155 15.9155 0 0 1 0 31.831
@@ -147,11 +57,6 @@
 									    </svg>
 								</span>
 						
-						
-						
-						
-						
-						
 						<span class="h5" th:text="#{'score-'+${score.name}}"></span>
 						
 					</button>
@@ -160,15 +65,9 @@
 					th:aria-labelledby="'collapse-score-'+${stat.count}"
 					data-bs-parent="#accordionScore">
 					<div class="accordion-body">
-						<strong>This is the first item's accordion body.</strong> It is
-						hidden by default, until the collapse plugin adds the appropriate
-						classes that we use to style each element. These classes control
-						the overall appearance, as well as the showing and hiding via CSS
-						transitions. You can modify any of this with custom CSS or
-						overriding our default variables. It's also worth noting that just
-						about any HTML can go within the
-						<code>.accordion-body</code>
-						, though the transition does limit overflow.
+					
+						<th:block th:insert="~{inc/score/__${score.name.toLowerCase()}__.html}"></th:block>
+						
 					</div>
 				</div>
 			</div>
