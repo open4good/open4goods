@@ -2,7 +2,7 @@ package org.open4goods.api.services.completion;
 
 import org.open4goods.api.config.yml.ApiProperties;
 import org.open4goods.api.services.AbstractCompletionService;
-import org.open4goods.config.yml.attributes.AiConfig;
+import org.open4goods.config.yml.attributes.PromptConfig;
 import org.open4goods.config.yml.ui.VerticalConfig;
 import org.open4goods.dao.ProductRepository;
 import org.open4goods.model.product.Product;
@@ -18,10 +18,10 @@ public class GenAiCompletionService  extends AbstractCompletionService{
 
 	private AiService aiService;
 	private ApiProperties apiProperties;
-	private AiConfig aiConfig;
+	private PromptConfig aiConfig;
 	
 	
-	public GenAiCompletionService( AiService aiService, ProductRepository dataRepository, VerticalsConfigService verticalConfigService, ApiProperties apiProperties, AiConfig aiConfig) {
+	public GenAiCompletionService( AiService aiService, ProductRepository dataRepository, VerticalsConfigService verticalConfigService, ApiProperties apiProperties, PromptConfig aiConfig) {
 		// TODO : Should set a specific log level here (not "agg(regation)" one)
 		super(dataRepository, verticalConfigService, apiProperties.logsFolder(), apiProperties.aggLogLevel());		
 		this.aiService = aiService;

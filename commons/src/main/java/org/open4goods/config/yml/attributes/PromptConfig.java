@@ -23,7 +23,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
  * @author goulven
  *
  */
-public class AiConfig {
+public class PromptConfig {
 
 	/**
 	 * The identifier for this attribute.
