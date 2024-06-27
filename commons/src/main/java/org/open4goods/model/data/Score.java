@@ -103,6 +103,11 @@ public class Score  implements Validable {
 		return Math.round(relativ.getValue() * 100 / StandardiserService.DEFAULT_MAX_RATING);
 	}
 
+	public Long on20() {
+		return Math.round(relativ.getValue() * 20 / StandardiserService.DEFAULT_MAX_RATING);
+	}
+	
+	
 	public String absValue () {
 		return AggregatedPrice.numberFormater.format(absolute.getValue());
 	}
