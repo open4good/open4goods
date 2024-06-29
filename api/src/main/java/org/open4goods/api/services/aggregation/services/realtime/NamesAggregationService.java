@@ -73,8 +73,6 @@ public class NamesAggregationService extends AbstractAggregationService {
 				data.getNames().getUrl().put(lang, data.gtin() + "-" + urlSuffix);
 				// h1Title			
 				data.getNames().getH1Title().put(lang, computePrefixedText(data, tConf.getH1Title(), " "));
-				// metaTitle
-				data.getNames().getMetaTitle().put(lang, blablaService.generateBlabla(tConf.getProductMetaTitle(), data));
 				// metaDescription
 				data.getNames().getMetaDescription().put(lang, blablaService.generateBlabla(tConf.getProductMetaDescription(), data));
 				// productMetaOpenGraphTitle
