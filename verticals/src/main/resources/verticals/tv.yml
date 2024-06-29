@@ -45,9 +45,12 @@ i18n:
       # The layout a product url will have. Ex : 81234555-tv-led-samsung-QL659P 2023
       url: 
         # We can add ta custom prefix (with our conditional templating language if we want)
-        prefix: "|| tv | television | televiseur ||"
+        # TODO : Ensure this is not causing 301
+        #prefix: "|| tv | television | televiseur ||"
+        prefix: "tv"
         # Then we add some attributes values with hyphens if present (ex : led-samsung-QL659P-2023)
         attrs:
+#TODO : Should be in required attributes to avoid 301            
           - TV_TYPE
           - BRAND
           - MODEL
@@ -64,7 +67,6 @@ i18n:
           - MODEL
           - YEAR
         
-      productMetaTitle: "[(${p.brand()})] [(${p.model()})] : Eco-score, compensation écologique et meilleurs prix"
       productMetaDescription:  "[(${p.brand()})] [(${p.model()})] : Eco-score, compensation || écologique | environnementale || et meilleurs prix."              
       productMetaOpenGraphTitle: "[(${p.brand()})] - [(${p.model()})] : Ecoscore de [(${p.ecoscore()})]. Venez nudger ce téléviseur au meilleur prix, et reversez gratuitement [(${p.compensation()})]"
       productMetaOpenGraphDescription: "productMetaOpenGraphDescription"
