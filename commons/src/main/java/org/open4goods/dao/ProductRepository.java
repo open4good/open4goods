@@ -160,6 +160,37 @@ public class ProductRepository {
 				.map(SearchHit::getContent);
 	}
 
+	
+	/**
+	 * Export all aggregateddatas for a vertical, ordered by ecoscore descending
+	 * 
+	 * @param vertical
+	 * @param max 
+	 * @param max
+	 * @param withExcluded 
+	 * @param indexName
+	 * @return
+	 */
+	public Stream<Product> exportAllVerticalizedProductsWithGenAiSinceEpoch(Long epoch) {
+
+		Criteria c = new Criteria("vertical").exists()
+				.and(getSinceDateQuery(epoch))
+				.and(new Criteria("aiDescriptions").exists())
+				;
+		NativeQueryBuilder initialQueryBuilder = new NativeQueryBuilder().withQuery(new CriteriaQuery(c));
+		
+		initialQueryBuilder =  initialQueryBuilder.withSort(Sort.by(org.springframework.data.domain.Sort.Order.desc("scores.ECOSCORE.value")));									
+
+		NativeQuery initialQuery = initialQueryBuilder.build();
+		
+		return elasticsearchTemplate.searchForStream(initialQuery, Product.class, current_index).stream().map(SearchHit::getContent);
+	}
+	
+	
+	
+	
+	
+	
 	/**
 	 * Export all aggregateddatas for a vertical, ordered by ecoscore descending
 	 * 
@@ -507,6 +538,14 @@ public class ProductRepository {
 	 */
 	public Criteria getValidDateQuery() {
 		return new Criteria("price.minPrice.timeStamp").greaterThan(expirationClause());
+	}
+
+	/**
+	 *
+	 * @return Criteria representing the valid dates
+	 */
+	public Criteria getSinceDateQuery(Long epoch) {
+		return new Criteria("price.minPrice.timeStamp").greaterThan(epoch);
 	}
 
 	/**

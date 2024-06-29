@@ -63,6 +63,11 @@ public class UiConfig {
 	 */
 	private String datasourcesfolder=rootFolder+ File.separator+ "config"+File.separator+"datasources"+File.separator;
 
+	
+	/**
+	 * Folder of the indexation API Key
+	 */
+	private String googleApiKeyJsonFile = rootFolder + File.separator + "config" + File.separator + "google-api-key.json";
 	/**
 	 * Folder where AI generated images are stored
 	 */
@@ -120,6 +125,11 @@ public class UiConfig {
      */
 	private String captchaKey;	
 	private String captchaSecret;
+	
+	/**
+	 * The google API, for indexing services
+	 */
+	private String googleApiJson;
 	
 	//	/**
 	//	 * Relativ pageSize the web ( trackings id, ....)
@@ -483,6 +493,26 @@ public class UiConfig {
 
 	public void setIcecatFeatureConfig(IcecatConfiguration icecatFeatureConfig) {
 		this.icecatFeatureConfig = icecatFeatureConfig;
+	}
+
+
+	public String getGoogleApiJson() {
+		return googleApiJson;
+	}
+
+
+	public void setGoogleApiJson(String googleApiJson) {
+		this.googleApiJson = googleApiJson;
+	}
+
+
+	public String getGoogleApiKeyJsonFile() {
+		return googleApiKeyJsonFile;
+	}
+
+
+	public void setGoogleApiKeyJsonFile(String googleApiKeyJsonFile) {
+		this.googleApiKeyJsonFile = googleApiKeyJsonFile;
 	}
 
 	

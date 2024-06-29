@@ -12,6 +12,7 @@ import org.open4goods.services.VerticalsConfigService;
 import org.open4goods.services.ai.AiService;
 //import org.open4goods.services.ai.AiService;
 import org.open4goods.ui.config.yml.UiConfig;
+import org.open4goods.ui.services.GoogleIndexationService;
 import org.open4goods.ui.services.SitemapGenerationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -53,8 +54,10 @@ public class AdminController {
 
 	private VerticalsConfigService verticalsConfigService;
 
+	private GoogleIndexationService googleIndexationService;
+	
 	public AdminController(UiConfig config, VerticalsConfigService verticalsConfigService,
-			ProductRepository repository, SitemapGenerationService sitemapService, ImageGenerationService imageGenerationService, AiService aiService) {
+			ProductRepository repository, SitemapGenerationService sitemapService, ImageGenerationService imageGenerationService, AiService aiService, GoogleIndexationService googleIndexationService) {
 		this.config = config;
 		this.verticalService = verticalsConfigService;
 		this.sitemapService = sitemapService;
@@ -62,6 +65,7 @@ public class AdminController {
 		this.imageGenerationService = imageGenerationService;
 		this.verticalsConfigService = verticalsConfigService;
 		this.aiService = aiService;
+		this.googleIndexationService = googleIndexationService;
 	}
 
 	//////////////////////////////////////////////////////////////
@@ -153,4 +157,17 @@ public class AdminController {
 		return mv;
 	}
 
+	
+	
+	@GetMapping("/index/{verticalId}")
+	@PreAuthorize("hasAuthority('"+RolesConstants.ROLE_XWIKI_ALL+"')")
+	public ModelAndView index(@PathVariable String verticalId) throws IOException {
+		
+		googleIndexationService.indexVertical(verticalId, config.getBaseUrl());
+		
+		ModelAndView mv = new ModelAndView("redirect:/");
+		mv.setStatus(HttpStatus.MOVED_TEMPORARILY);
+		return mv;
+	}
+	
 }

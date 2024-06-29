@@ -44,6 +44,12 @@
 		</dependency>
 
 		<dependency>
+			<groupId>com.google.apis</groupId>
+			<artifactId>google-api-services-indexing</artifactId>
+			<version>v3-rev79-1.25.0</version>
+		</dependency>
+
+		<dependency>
 			<groupId>com.rometools</groupId>
 			<artifactId>rome</artifactId>
 			<version>2.1.0</version>
@@ -74,7 +80,7 @@
 			<version>1.1.0</version>
 		</dependency>
 
-<!-- 
+		<!-- 
 
 		<dependency>
 			<groupId>com.talanlabs</groupId>
@@ -110,9 +116,9 @@
 		<!--
 		https://mvnrepository.com/artifact/com.github.dfabulich/sitemapgen4j -->
 		<dependency>
-		  <groupId>cz.jiripinkas</groupId>
-		  <artifactId>jsitemapgenerator</artifactId>
-		  <version>4.5</version>
+			<groupId>cz.jiripinkas</groupId>
+			<artifactId>jsitemapgenerator</artifactId>
+			<version>4.5</version>
 		</dependency>
 
 		<dependency>
@@ -196,7 +202,7 @@
 			<artifactId>spring-boot-configuration-processor</artifactId>
 			<optional>true</optional>
 		</dependency>
-    </dependencies>
+	</dependencies>
 
 	<build>
 		<plugins>
