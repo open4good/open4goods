@@ -6,7 +6,7 @@
 	<th:block th:insert="~{inc/header-meta.html}"></th:block>
     
 	<!-- Primary Meta Tags -->
-	<title th:text="${helper.texts.get('meta-title')}"></title>
+	<title th:text="${helper.getMetaTitle()}"></title>
     <meta name="description"  th:content="${helper.texts.get('meta-description')}">              
 	
 	<!-- Open Graph / Facebook -->

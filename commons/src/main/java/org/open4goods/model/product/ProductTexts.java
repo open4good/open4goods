@@ -16,8 +16,6 @@ public class ProductTexts {
 	
 	private Localisable h1Title = new Localisable();
 	
-	private Localisable metaTitle = new Localisable();
-	
 	private Localisable metaDescription = new Localisable();
 	
 	private Localisable productMetaOpenGraphTitle = new Localisable();
@@ -93,13 +91,6 @@ public class ProductTexts {
 		this.h1Title = h1Title;
 	}
 
-	public Localisable getMetaTitle() {
-		return metaTitle;
-	}
-
-	public void setMetaTitle(Localisable metaTitle) {
-		this.metaTitle = metaTitle;
-	}
 
 	public Localisable getMetaDescription() {
 		return metaDescription;

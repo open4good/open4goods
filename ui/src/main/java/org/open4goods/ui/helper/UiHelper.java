@@ -1,5 +1,6 @@
 package org.open4goods.ui.helper;
 
+import java.text.DecimalFormat;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -18,6 +19,8 @@ public class UiHelper {
 	private Map<String,String> texts = new HashMap<>();
 	private Product product;
 	
+	public static final DecimalFormat numberFormater = new DecimalFormat("0.#");
+
 	
 	public UiHelper(HttpServletRequest request, VerticalConfig verticalConfig, Product product) {
 		super();
@@ -28,7 +31,6 @@ public class UiHelper {
 		// Maybe not the best way to inject texts
 		texts.put("title", product.getNames().getH1Title().i18n(request));
 		texts.put("meta-description", product.getNames().getMetaDescription().i18n(request));
-		texts.put("meta-title", product.getNames().getMetaTitle().i18n(request));
 		texts.put("twitter-description", product.getNames().getproductMetaTwitterDescription().i18n(request));
 		texts.put("twitter-title", product.getNames().getproductMetaTwitterTitle().i18n(request));
 		texts.put("opengraph-description", product.getNames().getproductMetaOpenGraphDescription().i18n(request));
@@ -36,8 +38,29 @@ public class UiHelper {
 		
 	}
 	
-	
-	
+	/**
+	 * TODO : i18n
+	 * Programmatic because much so easy
+	 * @return
+	 */
+	public String getMetaTitle() {
+		StringBuilder sb = new StringBuilder();
+		
+			sb.append(product.bestName());
+
+			if (product.ecoscore() != null) {
+				sb.append(" > Eco-score : ");
+				sb.append(numberFormater.format(product.ecoscore().getRelativ().getValue()));
+				sb.append("/5");
+			}
+			
+			if (null != product.bestPrice()) {
+				sb.append(" - contribution écologique : ");
+				sb.append(numberFormater.format(product.bestPrice().getCompensation()));
+				sb.append("€");
+			}
+			return sb.toString();
+	}
 	
 	/**
 	 * Return the utl
@@ -46,6 +69,9 @@ public class UiHelper {
 	public String url() {
 		return product.getNames().getUrl().i18n(request);
 	}
+	
+	
+	
 	
 	/**
 	 * Return the i18n for an attribute
