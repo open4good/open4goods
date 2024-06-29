@@ -146,7 +146,8 @@ public class Resource implements Validable {
 	public String path() {
 		StringBuilder sb = new StringBuilder();
 		
-		
+		// TODO : share const with the resourcecontroller
+
 		switch (resourceType) {
 		case IMAGE:
 			sb.append("/images/");
