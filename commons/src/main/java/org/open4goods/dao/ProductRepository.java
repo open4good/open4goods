@@ -151,9 +151,15 @@ public class ProductRepository {
 		
 		Criteria c = getValidDateQuery()
 				// TODO : Warning : check nehaviour
-				.and(new Criteria("datasourceCategories").in(vertical.getMatchingCategories()).or( new Criteria("vertical").is(vertical.getId())))
-				.and(new Criteria("excluded").is(withExcluded))
+				.and(new Criteria("datasourceCategories")
+						.in(vertical.getMatchingCategories())
+						.or( new Criteria("vertical").is(vertical.getId())))
 				;
+		
+		if (!withExcluded) {
+            c = c.and(new Criteria("excluded").is(false));
+        }
+		
 		final NativeQuery initialQuery = new NativeQueryBuilder()
 				.withQuery(new CriteriaQuery(c)).build();
 		return elasticsearchTemplate.searchForStream(initialQuery, Product.class, current_index).stream()
@@ -205,8 +211,11 @@ public class ProductRepository {
 
 		Criteria c = new Criteria("vertical").is(vertical)
 				.and(getValidDateQuery())
-				.and(new Criteria("excluded").is(withExcluded))
 				;
+		if (!withExcluded) {
+            c = c.and(new Criteria("excluded").is(false));
+        }
+		
 		NativeQueryBuilder initialQueryBuilder = new NativeQueryBuilder().withQuery(new CriteriaQuery(c));
 		
 		initialQueryBuilder =  initialQueryBuilder.withSort(Sort.by(org.springframework.data.domain.Sort.Order.desc("scores.ECOSCORE.value")));									

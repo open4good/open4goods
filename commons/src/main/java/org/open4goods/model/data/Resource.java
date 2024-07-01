@@ -7,6 +7,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.open4goods.exceptions.ValidationException;
 import org.open4goods.model.Validable;
 import org.open4goods.model.constants.ResourceType;
@@ -95,9 +96,12 @@ public class Resource implements Validable {
 		super();
 	}
 
-	public Resource(String url) {
+	public Resource(String url) throws ValidationException {
 		super();
 
+		if (StringUtils.isBlank(url)) {
+			throw new ValidationException("url cannot be null");
+		}
 		if (url.startsWith("//")) {
 			url = "http:" + url;
 		}
