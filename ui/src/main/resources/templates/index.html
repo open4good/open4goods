@@ -25,86 +25,121 @@
 	<meta name="twitter:image" th:content="${url} + 'assets/img/brand/light.svg'">
 	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" integrity="sha512-c42qTSw/wPZ3/5LBzD+Bw5f7bSF2oxou6wEb+I/lqeaKV5FDIfMvvRp772y4jcJLKuGUOpbJMdg/BTl50fJYAw==" crossorigin="anonymous" referrerpolicy="no-referrer" />	
 
+
+
 	<meta name="google-site-verification" content="I2wSyJnnRSjrLjadtNgFzHHmtSN8DPbjhPePTkQNhp4" />
 </head>
 
-<body class="home-page">
+<body style="zoom: 125%;" class="home-page">
     
     <!--/* Navbar */-->
 	<th:block th:insert="~{inc/navbar/navbar-home.html}"></th:block>
     <!--/* Loader */-->
     <th:block th:insert="~{inc/preloader.html}"></th:block>
 	
-    <main class="bg-gray-200">	
+    <main>	
 
-       	<!--/* Central */-->
-		<section class="section-header py-3">
-			<div class="col-12">
-				<h1 id=recherche style="visibility: hidden;" class="tlt display-2 mb-2 text-center">nudger<span class="text-secondary-app fw-bold">.fr</span>
-				</h1>
-			</div>	
-
-			<div class="container container-semi-fluid">		
+		<section id="section1"
+			class="section-header overflow-hidden bg-white vh-100 d-flex align-items-center navigation">
+			<div class="container">
 				<div class="row">
-					<div class="col-12 col-lg-2 d-flex align-items-center justify-content-center">                       	
-						<img class="navbar-brand-light" src="../../assets/img/nudger-dernier-logo.png" alt="nudger.fr logo dark">
-					</div>
-				
-				
-					<div class="col-12 col-lg-10">
-					
-						<p class="lead text-gray mt-2">
-								<th:block th:with="path='WIDGETS/accueil-jumbotron/'">
+					<div style="    margin-top: -350px;" class="col-12 text-center">
+						<span class="h1 fw-bolder display-2">
+							Bienvenue sur <img height="75"
+								src="https://nudger.fr/assets/img/nudger-logo-small.png"
+								alt="Nudger.fr">
+						</span>
+						<h2 class="h2 text-green-bg-transparent d-inline-flex px-3 my-3 mb-5">Réconcilier écologie et pouvoir d'achat !</h2>
+						<p class="lead fw-normal text-muted mb-4"> 
+						<th:block th:with="path='WIDGETS/accueil-jumbotron/'">
 									<th:block th:insert="~{inc/wiki.html}"></th:block>
 								</th:block>
+						
 						</p>
-				
+						<!-- Button Modal -->
 						<form method="get" id="searchForm" action="/recherche">
-							<div class="d-flex flex-wrap mt-lg-2">
-								<div class="input-group input-group-lg">
-										<input type="text" id="searchInput" class="form-control" th:placeholder="'Rechercher dans ' + ${#numbers.formatDecimal(totalItems, 0, 'COMMA', 0, 'POINT')} + ' produits'" aria-label="Search" aria-describedby="basic-addon1" name="q">
-										<button onclick="document.getElementById('searchForm').submit()" class="btn btn-primary" type="button"><span class="fas fa-search"></span></button>
+							<div class="d-flex align-items-center row mt-lg-2">
+								<div class="col-12 mb-3 mb-md-0 col-md-6 col-lg-4">
+									<label for="searchInput" class="bg-green px-3 py-2 mb-0">Pour
+										Nudger, tapez ici le produit recherché</label>
+								</div>
+								<div class="col-12 col-md-6 col-lg-8">
+									<div class="input-group">
+										<input type="text" id="searchInput" class="form-control"
+											th:placeholder="'Rechercher dans ' + ${#numbers.formatDecimal(totalItems, 0, 'COMMA', 0, 'POINT')} + ' produits'" aria-label="Search"
+											name="q" data-dashlane-rid="c04fc15a353ceabb"
+											data-form-type="">
+										<button
+											onclick="document.getElementById('searchForm').submit()"
+											class="btn btn-primary" type="button"
+											data-dashlane-label="true"
+											data-dashlane-rid="4c876b4b5578a952" data-form-type="">
+											<span class="fas fa-search"></span>
+										</button>
 									</div>
+								</div>
 							</div>
 						</form>
-													
 					</div>
-				</div>	
-			</div>
+				</div>
+			</div>			
 		</section>
 
-		<section class="bg-white text-center py-4">
-			<h2> <span class="h1 mb-3">Nos univers produits</span></h2>
-			<p class="lead mb-0">Peu de catégories pour l'instant. C'est normal, c'est une version beta !</p>
-		</section>
 
-		<section class="container py-5">
+
+
+
+
+		<div id="section2" class="container-fluid mt-4 navigation">
+			<section class="text-center py-4">
+				<h2 class="h2 text-green-bg-transparent d-inline-flex px-3 my-3">Nos catégories de produits</h2>
+			</section>
+		</div>
+
+
+
+
+
+		<div id="section3" class="container mt-4 navigation">
 			<div class="row">
-				<div class="col-12 col-md-6 col-lg-3 mb-3" th:each="vertical : ${verticals}">
-					<a th:href="'/'+${vertical.i18n(siteLanguage).verticalHomeUrl}">
-						<div class="card card-flip shadow">
-							<div class="card-flip-inner">
-								<div class="wrapper-card-img">
-									<img th:src="'/images/verticals/' + ${vertical.id} + '.png'" class="card-img-top rounded-top">						
+
+
+				<div class="col-12 col-md-6 col-lg-3 mb-3">
+				
+					<div th:each="vertical : ${verticals}" class="card text-center border-gray-300">
+						<img
+							class="profile-thumbnail small-thumbnail rounded mx-auto mt-4"
+							th:src="'/images/verticals/' + ${vertical.id} + '.png'"
+							alt="Christopher Portrait">
+						<div class="card-body">
+							<h3 class="h5 card-title" th:text="${vertical.i18n(siteLanguage).verticalHomeTitle}"></h3>
+							<p class="card-text" th:text="${vertical.i18n(siteLanguage).verticalHomeDescription}"></p>
+						</div>
+						<div class="card-footer bg-white border-0 p-0">
+							<div class="d-grid">
+								<div th:if="${user}">
+										<a type="submit" class="btn btn-warning btn-sm" th:href="'/regenerate/' + ${vertical.id}">Changer l'image</a>
 								</div>
-								<div class="card-body bg-primary">
-									<h3 class="h5 card-title text-white mt-3" th:text="${vertical.i18n(siteLanguage).verticalHomeTitle}"></h3>
-									<!-- <p class="card-text" th:text="${vertical.i18n(siteLanguage).verticalHomeDescription}"></p>  -->
-									<br/>
-									<br/>
-									<span class="btn btn-primary btn-sm">Découvrir</span>
-									<div th:if="${user}">
-											<a type="submit" class="btn btn-warning btn-sm" th:href="'/regenerate/' + ${vertical.id}">Changer l'image</a>
-									</div>
-								</div>
+								<a class="btn btn-primary rounded-0 rounded-bottom" th:href="'/'+${vertical.i18n(siteLanguage).verticalHomeUrl}">Découvrir</a>
 							</div>
 						</div>
-					</a>
+					</div>
 				</div>
+				
+				
+				
+				
+			
 			</div>
-		</section>
+		</div>
 
-		<section class="bg-white text-center py-4">
+
+
+
+
+
+
+		<section class="bg-green-transparent text-center py-4">
 			<h2> <span class="h1 mb-3">Consommons peu, consommons bien</span></h2>
 			<p class="lead mb-0">Un coup de main éthique et ouvert pour amoindrir l'impact de votre shopping en ligne.</p>
 		</section>
@@ -219,12 +254,12 @@
 
 		</div>
 
-		<section class=" bg-white text-center py-4">
+		<section class="bg-green-transparent text-center py-4">
 			<h2> <span class="h1 mb-3">Les chiffres clés</span></h2>
 			<p class="lead mb-0">Nudger en quelques chiffres, c'est :</p>
 		</section>
 
-		<section class=" container text-center py-4">
+		<section class="container text-center py-4">
 				<div class="row justify-content-center">
 					<div class="col-12 col-md-6 col-lg-4 py-3">
 						<div class="icon icon-shape icon-shape-secondary me-2 me-md-0 mb-2">
@@ -252,7 +287,7 @@
 				</div>
 		</section>
    
-		<section class="bg-white text-center py-4">
+		<section class="bg-green-transparent text-center py-4">
 			<h2> <span class="h1 mb-3">Notre philosophie : le bien commun</span></h3>
 			<p class="lead mb-0">Nous sommes engagés à faire de la consommation un acte réfléchi et moins impactant pour la planète :</p>
 		</section>
@@ -383,7 +418,17 @@
 					<!-- End of Icon Boxes -->
 				</div>
 			</div>        
-		</div>       
+		</div>
+
+
+		<div class="step position-fixed mb-0"
+			style="bottom: 30px; right: 30px">
+			<a href="#section7"
+				class="step-shape shape-gray-300 rounded-circle mb-4"
+				style="max-width: 4rem; max-height: 4rem; display: inline-flex;"><span
+				class="step-icon icon-primary"><i class="fas fa-arrow-down"
+					style="font-size: 1.75rem;"></i></span></a>
+		</div>
 	</main>
 
 <!--/* Footer */-->
