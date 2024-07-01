@@ -22,6 +22,8 @@ import org.open4goods.model.constants.ProductCondition;
 import org.open4goods.model.constants.ReferentielKey;
 import org.open4goods.model.data.DataFragment;
 import org.open4goods.model.data.Price;
+import org.open4goods.model.data.Resource;
+import org.open4goods.model.data.ResourceTag;
 import org.open4goods.model.product.Product;
 import org.open4goods.services.DataSourceConfigService;
 import org.open4goods.services.VerticalsConfigService;
@@ -51,7 +53,6 @@ import com.amazon.paapi5.v1.SearchItemsResource;
 import com.amazon.paapi5.v1.SearchItemsResponse;
 import com.amazon.paapi5.v1.SingleStringValuedAttribute;
 import com.amazon.paapi5.v1.TechnicalInfo;
-import com.amazon.paapi5.v1.TradeInInfo;
 import com.amazon.paapi5.v1.UnitBasedAttribute;
 import com.amazon.paapi5.v1.VariationAttribute;
 import com.amazon.paapi5.v1.api.DefaultApi;
@@ -62,7 +63,6 @@ public class AmazonCompletionService extends AbstractCompletionService {
 	protected static final Logger logger = LoggerFactory.getLogger(AmazonCompletionService.class);
 
 	// Constants
-	public static final String AMAZON_PRIMARY_TAG = "primary";
 	private static final String NOT_FOUND_ASIN_MARKUP = "NOT_FOUND";
 	private static final String AMAZON_PRODUCTSTATE_NEW = "New";
 	private static final String AMAZON_PRODUCTSTATE_OCCASION = "Occasion";
@@ -268,13 +268,20 @@ public class AmazonCompletionService extends AbstractCompletionService {
 		if (null != images) {
 			if (null != images.getPrimary()) {
 				logger.info("Adding primary image for {} : {}", data.gtin(), images.getPrimary().getLarge());
-				data.addImage(images.getPrimary(). getLarge().getURL(), AMAZON_PRIMARY_TAG);
+				Resource r = new Resource(images.getPrimary(). getLarge().getURL());
+				r.getHardTags().add(ResourceTag.AMAZON_PRIMARY_TAG);
+				r.getHardTags().add(ResourceTag.PRIMARY);
+				r.setDatasourceName(amazonDatasource.getName());
+				data.getResources().add(r);
 			}
 
 			if (null != images.getVariants()) {
 				images.getVariants().forEach(e -> {
 					logger.info("Adding variant image for {} : {}", data.gtin(), e.getLarge().getURL());
-					data.addImage(e.getLarge().getURL(), amazonDatasource.getName());
+					Resource r = new Resource(e.getLarge().getURL());
+					r.getHardTags().add(ResourceTag.AMAZON_VARIANT_TAG);
+					r.setDatasourceName(amazonDatasource.getName());
+					data.getResources().add(r);
 				});
 			}
 		}

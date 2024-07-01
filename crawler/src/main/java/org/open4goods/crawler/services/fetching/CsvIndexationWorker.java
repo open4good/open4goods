@@ -563,7 +563,7 @@ public class CsvIndexationWorker implements Runnable {
 						}						
 					}
 					
-					p.addResource(r, ResourceTagDictionary.CSV);
+					p.addResource(r);
 				
 				
 				}

@@ -55,7 +55,7 @@ public class MediaAggregationService extends AbstractAggregationService{
 		for (final Resource r : input.getResources()) {
 
 			// Adding standard tags
-			r.addTag(input.getDatasourceName());
+			r.setDatasourceName(input.getDatasourceName());
 
 			r.setCacheKey(IdHelper .generateResourceId(r.getUrl()));
 

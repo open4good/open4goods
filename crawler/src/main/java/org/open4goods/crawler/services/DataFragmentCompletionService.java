@@ -97,7 +97,7 @@ public class DataFragmentCompletionService {
 		extractBrandUid(o, datasourceProperties,dedicatedLogger);
 
 		// Tagging resources
-		o.getResources().forEach(d -> d.addTag(o.getDatasourceName()));
+		o.getResources().forEach(r -> r.setDatasourceName(o.getDatasourceName()));
 
 		// If data is a computed affiliation link
 		if (!StringUtils.isEmpty(datasourceProperties.getAffiliationLinkPrefix())) {
@@ -107,7 +107,6 @@ public class DataFragmentCompletionService {
 			if (!StringUtils.isEmpty(datasourceProperties.getAffiliationLinkSuffix())) {
 				o.setAffiliatedUrl(o.getAffiliatedUrl() +  datasourceProperties.getAffiliationLinkSuffix());
 			}
-
 		}
 
 		// Default product state if defined

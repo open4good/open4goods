@@ -1,12 +1,15 @@
 package org.open4goods.api.config.yml;
 
+import java.util.ArrayList;
 import java.util.List;
+
+import org.open4goods.model.data.ResourceTag;
 
 public class ResourceCompletionUrlTemplate {
     private String url;
     private String datasourceName;
     private String language;
-    private List<String> tags;
+    private List<ResourceTag> tags = new ArrayList<>();
 
     // Getters and Setters
     public String getUrl() {
@@ -33,11 +36,11 @@ public class ResourceCompletionUrlTemplate {
         this.language = language;
     }
 
-    public List<String> getTags() {
-        return tags;
-    }
+	public List<ResourceTag> getTags() {
+		return tags;
+	}
 
-    public void setTags(List<String> tags) {
-        this.tags = tags;
-    }
+	public void setTags(List<ResourceTag> tags) {
+		this.tags = tags;
+	}
 }

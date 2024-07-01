@@ -27,6 +27,8 @@ import org.open4goods.exceptions.AggregationSkipException;
 import org.open4goods.exceptions.ValidationException;
 import org.open4goods.model.constants.ReferentielKey;
 import org.open4goods.model.data.DataFragment;
+import org.open4goods.model.data.Resource;
+import org.open4goods.model.data.ResourceTag;
 import org.open4goods.model.product.Product;
 import org.open4goods.services.DataSourceConfigService;
 import org.open4goods.services.VerticalsConfigService;
@@ -239,11 +241,10 @@ public class IcecatCompletionService extends AbstractCompletionService {
 		try {
 			
 			// Tweak to exclude "brand" images sometimes used as logo
-			if (image.highPic.contains("brand")) {
-				df.addResource(image.highPic);
-			} else {
-				// TODO : mutualize cover cponst
-				df.addResource(image.highPic,"cover");
+			if (!image.highPic.contains("brand")) {
+				Resource r = new Resource(image.highPic);
+				r.getHardTags().add(ResourceTag.PRIMARY);
+				df.addResource(r);
 				
 			}
 			
@@ -280,12 +281,19 @@ public class IcecatCompletionService extends AbstractCompletionService {
 		
 		// Adding PDFs
 		try {
-			df.addResource(e.description.leafletPDFURL, "leaflet");
+			
+			Resource r = new Resource(e.description.leafletPDFURL);
+			r.getHardTags().add(ResourceTag.LEAFLET);
+			df.addResource(r);
+			
+			
 		} catch (ValidationException e1) {
 			logger.error("Error while adding leaflet pdf {}", e.description.leafletPDFURL, e);
 		}
 		try {
-			df.addResource(e.description.manualPDFURL, "manual");
+			Resource r = new Resource(e.description.manualPDFURL);
+			r.getHardTags().add(ResourceTag.MANUAL);
+			df.addResource(r);
 		} catch (ValidationException e1) {
 			logger.error("Error while adding manual pdf {}", e.description.leafletPDFURL, e);
 
