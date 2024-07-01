@@ -14,7 +14,6 @@ import org.open4goods.dao.ProductRepository;
 import org.open4goods.services.VerticalsConfigService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.scheduling.annotation.Scheduled;
 
 import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
 import com.google.api.client.googleapis.batch.BatchRequest;
@@ -43,7 +42,8 @@ import com.google.common.collect.Lists;
 public class GoogleIndexationService  {
 	
 	
-    public static List<HttpResponse> addedCalendarsUsingBatch = Lists.newArrayList();
+    private static final String GOOGLE_API_SCOPE = "https://www.googleapis.com/auth/indexing";
+	public static List<HttpResponse> addedCalendarsUsingBatch = Lists.newArrayList();
     // TODO : const
     public static final String appName = "nudger";
 	private GoogleCredential credentials;
@@ -52,90 +52,72 @@ public class GoogleIndexationService  {
 
 	private ProductRepository productRepository;
 	private VerticalsConfigService verticalsConfigService;
+	private String markerFileName;
 	
 	private static final Logger LOGGER = LoggerFactory.getLogger(SitemapGenerationService.class);
 
 	
 //    private static com.google.api.services.calendar.Calendar client;
 	
-	public GoogleIndexationService(String googleJsonConfig,  ProductRepository productRepository, VerticalsConfigService verticalsConfigService) {
+	public GoogleIndexationService(String googleJsonConfig, String markerFileName, ProductRepository productRepository, VerticalsConfigService verticalsConfigService) {
 		
 		this.productRepository = productRepository;
+		this.markerFileName = markerFileName;
 		
-		String scopes = "https://www.googleapis.com/auth/indexing";
 		
-		try (InputStream in = IOUtils.toInputStream(googleJsonConfig)){
-			this.credentials = GoogleCredential.fromStream(in, httpTransport, jsonFactory).createScoped(Collections.singleton(scopes));
-		} catch (IOException e) {
-			LOGGER.error("Error while creating google credentials", e);
+		String scopes = GOOGLE_API_SCOPE;
+		
+		if (null == googleJsonConfig) {
+			LOGGER.error("No google json config provided");
+		} else {
+			try (InputStream in = IOUtils.toInputStream(googleJsonConfig)){
+				this.credentials = GoogleCredential.fromStream(in, httpTransport, jsonFactory).createScoped(Collections.singleton(scopes));
+			} catch (IOException e) {
+				LOGGER.error("Error while creating google credentials", e);
+			}
 		}
 	}
 
 //	@Scheduled(fixedRate = 1000 * 60 * 60 * 24)
-//	// TODO : Timing from conf
-//	public void indexNewProducts() {
-//		
-//		try {
-//			Long lastFetch = Long.valueOf(FileUtils.readFileToString(new File(lastIndexationMarkerFile), Charset.forName("UTF-8") ).trim());
-//			
-//			Object newProducts = productRepository.exportVerticalWithValidDateOrderByEcoscore(verticalId,false)
-//					// Filtering on products having genAI content
-//					.filter(e -> null != e.getAiDescriptions())
-//					// TODO : Not really filtered per language
-//					.filter(e -> e.getAiDescriptions().size() > 1)
-//					// TODO ; Localisation
-//					.map(e -> e.url("fr"))
-//					
-//					.toList();
-//			
-//			
-//		} catch (NumberFormatException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		} catch (IOException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		}
-//		
-//		
-//		
-//	}
-//	
+	// TODO : Timing from conf
+	public void indexNewProducts() {		
+			indexAllSince(readLastTimeStamp());
+	}
 	
 	
-    /**
-     * Index a list or URL's to google indexation service
-     * @param urls
-     * @throws IOException 
-     */
-    public  void requestBatchIndex(List<String> urls) throws IOException {
 
-        		JsonBatchCallback<PublishUrlNotificationResponse> callback = new JsonBatchCallback<PublishUrlNotificationResponse>() {
+	/**
+	 * Read the last indexation timestamp
+	 * 
+	 * @return
+	 */
+	private long readLastTimeStamp() {
+		Long ret;
+		try {
+			ret = Long.valueOf(FileUtils.readFileToString(new File(markerFileName), Charset.forName("UTF-8")).trim());
+		} catch (Exception e) {
+			LOGGER.error("Error while reading last indexation timestamp, will default it ({})", e.getMessage());
+			ret = System.currentTimeMillis();
+			
+			// Writing the file
+			writeFileTimestamp();
+		}
+		return ret;
+	}	
+	
+	/** 
+	 * update the indexation timestamp
+	 */
+    private void writeFileTimestamp() {
+		Long now = System.currentTimeMillis();
+		try {
+			FileUtils.writeStringToFile(new File(markerFileName), now.toString(), Charset.forName("UTF-8"));
+		} catch (IOException e) {
+			LOGGER.error("Error while writing last indexation timestamp", e);
+		}
+	}
 
-			    public void onSuccess(PublishUrlNotificationResponse res, HttpHeaders responseHeaders) {
-			            LOGGER.info("Google indexation success : " + res.getUrlNotificationMetadata().getUrl());
-			    }
-			    public void onFailure(GoogleJsonError e, HttpHeaders responseHeaders) {
-			    	
-		        	LOGGER.error("Error while pushing url to google indexation", e);                        
-			    }
-			};
-
-			Indexing client = new Indexing(httpTransport, jsonFactory, credentials);
-			BatchRequest batch = client.batch();
-			batch.setBatchUrl(new GenericUrl("https://indexing.googleapis.com/batch"));
-
-			for (String url : urls) {
-			    UrlNotification unf = new UrlNotification();
-			    unf.setUrl(url);
-			    unf.setType("URL_UPDATED");
-			    client.urlNotifications().publish(unf).queue(batch, callback);
-			}
-			batch.execute();
-    }
-    
-    
-    /**
+	/**
      * Get all urls for a vertical
      * @param verticalId
      * @param baseUrl
@@ -151,18 +133,12 @@ public class GoogleIndexationService  {
 						.filter(e -> e.getAiDescriptions().size() > 1)
 						// TODO : i18n
 						.map(e -> baseUrl+ e.url("fr"))
-						
 						.toList();
-				
-				
 			} catch (Exception e) {
 				LOGGER.error("Error while exporting vertical", e);
 			}
 			return new ArrayList<String>();
 	}
-
-    
-    
     
     
     /**
@@ -183,7 +159,7 @@ public class GoogleIndexationService  {
     
 
     /**
-     * Index a vertical
+     * Index all new products having texts since a given epoch
      * @param verticalId
      * @param baseUrl
      */
@@ -198,7 +174,7 @@ public class GoogleIndexationService  {
 				.map(e -> e.url("fr"))
 				
 				.toList();
-		LOGGER.info("Starting Indexation of all products since epoch {} : {} urls", epoch, urls.size());
+		LOGGER.warn("Starting Indexation of all products since epoch {} : {} urls", epoch, urls.size());
 		
 		try {
 			requestBatchIndex(urls);
@@ -206,23 +182,56 @@ public class GoogleIndexationService  {
 			LOGGER.error("Error while pushing new urls to google indexation", e1);
 		}
 	}
-    
+	
+	/**
+	 * Index a single page
+	 * @param redircectUrl
+	 */
+	public void indexPage(String url) {
+		List<String> urls = Lists.newArrayList();
+        urls.add(url);
+        try {
+            requestBatchIndex(urls);
+        } catch (IOException e) {
+            LOGGER.error("Error while pushing url {} to google indexation", url, e);
+        }
+    }
 	
 	
-//    public  static void main(String[] args) {
-//
-//    	  
-//        
-//    	String jsonFile = "/home/Goulven.Furet/git/open4goods-config/configs/ui/google-api.json";
-//    	GoogleIndexationService main = new GoogleIndexationService(jsonFile,null);
-//    	
-//    	List<String> urls = Lists.newArrayList();
-//    	urls.add("https://nudger.fr");
-//    	
-//    	main.requestBatchIndex(urls);
-//
-//  
-//
-//}
 	
+    /**
+     * Index a list or URL's to google indexation service
+     * @param urls
+     * @throws IOException 
+     */
+    public  void requestBatchIndex(List<String> urls) throws IOException {
+
+        		JsonBatchCallback<PublishUrlNotificationResponse> callback = new JsonBatchCallback<PublishUrlNotificationResponse>() {
+
+			    public void onSuccess(PublishUrlNotificationResponse res, HttpHeaders responseHeaders) {
+			            LOGGER.info("Google indexation success : " + res.getUrlNotificationMetadata().getUrl());
+			    }
+			    public void onFailure(GoogleJsonError e, HttpHeaders responseHeaders) {
+			    	
+		        	try {
+						LOGGER.error("Error while pushing url to google indexation : {}", e.toPrettyString());
+					} catch (IOException e1) {
+						LOGGER.error("Error while pushing url to google indexation", e);
+					}                        
+			    }
+			};
+
+			Indexing client = new Indexing(httpTransport, jsonFactory, credentials);
+			BatchRequest batch = client.batch();
+			batch.setBatchUrl(new GenericUrl("https://indexing.googleapis.com/batch"));
+
+			for (String url : urls) {
+			    UrlNotification unf = new UrlNotification();
+			    unf.setUrl(url);
+			    unf.setType("URL_UPDATED");
+			    client.urlNotifications().publish(unf).queue(batch, callback);
+			}
+			batch.execute();
+    }
 }
+	

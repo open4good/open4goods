@@ -65,10 +65,6 @@ public class UiConfig {
 
 	
 	/**
-	 * Folder of the indexation API Key
-	 */
-	private String googleApiKeyJsonFile = rootFolder + File.separator + "config" + File.separator + "google-api-key.json";
-	/**
 	 * Folder where AI generated images are stored
 	 */
 	private String generatedImagesFolder = rootFolder + "generated-images" + File.separator;
@@ -237,6 +233,11 @@ public class UiConfig {
 		return rootFolder + File.separator+".cached"+ File.separator;
 	}
 
+	public String getGoogleIndexationMarkerFile() {
+		return getRemoteCachingFolder() + "google-indexation-timestamp";
+	}
+
+	
 	public String logsFolder() {
 		return rootFolder + File.separator+ "logs" + File.separator;
 	}
@@ -504,20 +505,5 @@ public class UiConfig {
 	public void setGoogleApiJson(String googleApiJson) {
 		this.googleApiJson = googleApiJson;
 	}
-
-
-	public String getGoogleApiKeyJsonFile() {
-		return googleApiKeyJsonFile;
-	}
-
-
-	public void setGoogleApiKeyJsonFile(String googleApiKeyJsonFile) {
-		this.googleApiKeyJsonFile = googleApiKeyJsonFile;
-	}
-
-	
-	
-
-
 
 }

@@ -161,13 +161,37 @@ public class AdminController {
 	
 	@GetMapping("/index/{verticalId}")
 	@PreAuthorize("hasAuthority('"+RolesConstants.ROLE_XWIKI_ALL+"')")
-	public ModelAndView index(@PathVariable String verticalId) throws IOException {
+	public ModelAndView index(@PathVariable String verticalId, HttpServletRequest request) throws IOException {
 		
-		googleIndexationService.indexVertical(verticalId, config.getBaseUrl());
+		googleIndexationService.indexVertical(verticalId, config.getBaseUrl(request.getLocale()));
 		
 		ModelAndView mv = new ModelAndView("redirect:/");
 		mv.setStatus(HttpStatus.MOVED_TEMPORARILY);
 		return mv;
 	}
 	
+	@GetMapping("/index")
+	@PreAuthorize("hasAuthority('"+RolesConstants.ROLE_XWIKI_ALL+"')")
+	public ModelAndView indexPage(HttpServletRequest request, @RequestParam(name = "r", required = false) String redircectUrl) throws IOException {
+		
+		googleIndexationService.indexPage(redircectUrl);
+		
+		ModelAndView mv = new ModelAndView("redirect:/");
+		mv.setStatus(HttpStatus.MOVED_TEMPORARILY);
+		return mv;
+	}
+	
+	@GetMapping("/indexNew")
+	@PreAuthorize("hasAuthority('"+RolesConstants.ROLE_XWIKI_ALL+"')")
+	public ModelAndView indexNew(HttpServletRequest request ) throws IOException {
+		
+		googleIndexationService.indexNewProducts();
+		
+		ModelAndView mv = new ModelAndView("redirect:/");
+		mv.setStatus(HttpStatus.MOVED_TEMPORARILY);
+		return mv;
+	}
+	
+
+
 }

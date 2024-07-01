@@ -10,8 +10,14 @@
 	                        	<li th:text="${role}" class="ms-3"></li>
 	                        </ul> 
 	                         -->
-	                        <li class="ms-3" th:if="${product}"><a th:href="'/aiAssist?gtin='+${product.gtin}+'&r='+${url}">GenAi completion</a></li>                           
+	                        <li class="ms-3" th:if="${product}"><a th:href="'/aiAssist?gtin='+${product.gtin}+'&r='+${url}">Génération des textes</a></li>                           
 	    	                <li class="ms-3" th:if="${editLink}"><a target="_blank" th:href="${editLink}">Editer cette page sur le wiki</a></li>
+							
+							<li class="ms-3"><a th:href="'/index'+'?r='+ ${baseUrl} + ${url}">Indexation Google de cette page</a></li>                           
+	    	                <li th:if="${vertical}" class="ms-3"><a th:href="'/index/'+${vertical}">Indexation Google de cette verticale</a></li>                           
+	    	                
+	    	                
+	    	                
 	    	                <li class="ms-3"><a th:href="'/flushCache?r='+${url}">Purger le cache</a></li>
 	    	                <li class="ms-3"><a th:href="'/reloadConfigs?r='+${url}">Recharger les verticales</a></li>    	                
 	    	                <li class="ms-3"><a href="/logout">Se déconnecter</a></li>

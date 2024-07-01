@@ -34,6 +34,7 @@ import org.open4goods.store.repository.elastic.BrandScoresRepository;
 import org.open4goods.ui.config.yml.UiConfig;
 import org.open4goods.ui.controllers.ui.UiService;
 import org.open4goods.ui.services.BlogService;
+import org.open4goods.ui.services.GoogleIndexationService;
 import org.open4goods.ui.services.GtinService;
 import org.open4goods.ui.services.ImageService;
 import org.open4goods.ui.services.OpenDataService;
@@ -97,6 +98,12 @@ public class AppConfig {
 	}
 	
 	@Bean
+	@Autowired
+	GoogleIndexationService googleIndexationService(ProductRepository repository, VerticalsConfigService verticalConfigService) {
+		return new GoogleIndexationService(config.getGoogleApiJson(), config.getGoogleIndexationMarkerFile(), repository, verticalConfigService);
+	}
+
+	@Bean
 	BarcodeValidationService barcodeValidationService () {
 		return new BarcodeValidationService();
 	}
@@ -104,6 +111,7 @@ public class AppConfig {
 	@Bean UiService uiService () {
 		return new UiService();
 	}
+	
 	
 	@Bean
 	@Autowired
