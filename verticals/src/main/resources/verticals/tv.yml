@@ -117,7 +117,7 @@ i18n:
    
            - key: "cons"
              prompt: |           
-               cons : Une liste d'inconvénients techniques du produit. Cinq inconvénients maximum, dans un style formel.
+                : Une liste d'inconvénients techniques du produit. Cinq inconvénients maximum, dans un style formel.
              override: false
 
 
