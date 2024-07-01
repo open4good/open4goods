@@ -31,6 +31,7 @@ import org.open4goods.model.constants.ResourceType;
 import org.open4goods.model.data.ImageInfo;
 import org.open4goods.model.data.Resource;
 import org.open4goods.model.data.ResourceStatus;
+import org.open4goods.model.data.ResourceTag;
 import org.open4goods.model.product.Product;
 import org.open4goods.services.ImageMagickService;
 import org.open4goods.services.ResourceService;
@@ -135,8 +136,6 @@ public class ResourceCompletionService  extends AbstractCompletionService{
 			if (forceEraseFileName || StringUtils.isEmpty(r.getFileName())) {
 				String name;
 				
-				
-				
 				// TODO : OfferNAme size from conf
 				List<String> offerNames = data.getNames().getOfferNames().stream().filter(e->e.length() < 60).toList();
 				
@@ -172,6 +171,15 @@ public class ResourceCompletionService  extends AbstractCompletionService{
 				// Normalisation
 				name = IdHelper.normalizeFileName(name);
 
+				// Prepending PDF info
+				if (r.getResourceType() == ResourceType.PDF) {
+					if (r.getHardTags().size() > 0) {
+						name = StringUtils.join(r.getHardTags(),"-").toLowerCase()+ "-" + name;
+						
+					}
+				}
+				
+				
 				if (!StringUtils.isEmpty(name)) {
 					r.setFileName(name);
 				} else {
@@ -254,7 +262,10 @@ public class ResourceCompletionService  extends AbstractCompletionService{
 		
 		// Extracting the cover image first
 		// TODO : cover as const
-		Resource cover = resultingImages.stream().filter(e->e.getTags().contains("cover")).max((o1,o2) -> o1.getImageInfo().pixels().compareTo(o2.getImageInfo().pixels())).orElse(null);
+		Resource cover = resultingImages.stream()
+					.filter(e->e.getHardTags().contains(ResourceTag.PRIMARY))
+					.max((o1,o2) -> o1.getImageInfo().pixels().compareTo(o2.getImageInfo().pixels()))
+					.orElse(null);
 		// No cover tagged file
 		if (null == cover) {
 			cover = resultingImages.stream().findAny().orElse(null);
@@ -288,7 +299,7 @@ public class ResourceCompletionService  extends AbstractCompletionService{
 	private Resource processUrlTemplate(ResourceCompletionUrlTemplate ut, String gtin) {
 		
 		Resource r = new Resource();
-		r.getTags().addAll(ut.getTags());
+		r.getHardTags().addAll(ut.getTags());
 		
 		// TODO : add resource language
 		r.setUrl(ut.getUrl().replace("{GTIN}", gtin));

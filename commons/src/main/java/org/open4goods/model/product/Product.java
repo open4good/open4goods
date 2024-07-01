@@ -23,6 +23,7 @@ import org.joda.time.PeriodType;
 import org.joda.time.format.PeriodFormat;
 import org.joda.time.format.PeriodFormatter;
 import org.open4goods.dao.ProductRepository;
+import org.open4goods.exceptions.ValidationException;
 import org.open4goods.model.EcoScoreRanking;
 import org.open4goods.model.Standardisable;
 import org.open4goods.model.constants.Currency;
@@ -777,14 +778,47 @@ public class Product implements Standardisable {
 	 * Add an image to this product
 	 * @param url
 	 */
-	public void addImage(String url, String tag) {
-		if (!StringUtils.isEmpty(url)) {
-			Resource r = new Resource(url, tag);
-			resources.remove(r);
-			resources.add(r);			
-		}
-	}
+//	public void addImage(String url, String tag) {
+//		if (!StringUtils.isEmpty(url)) {
+//			Resource r = new Resource(url);
+//			r.addTag(tag);
+// TODO : Check incidence			
+//			resources.remove(r);
 	
+	
+//			resources.add(r);			
+//		}
+//	}
+	
+	public void addResource(final Resource resource) throws ValidationException {
+
+		
+		if (null == resource) {
+			return;
+		}
+
+		resource.validate();
+
+		// Smart update, time consuming but necessary.
+		// TODO : Involve on a map on the new model
+		
+		Resource existing = resources.stream().filter(e -> e.equals(resource)).findFirst().orElse(null);
+		
+		if (null == existing) {
+			logger.info("Adding new resource : {}",resource);
+			resources.add(resource);
+		} else {
+			logger.info("Updating existing resource : {}",resource);
+			// Smart update
+			existing.setTags(resource.getTags());
+			existing.setHardTags(resource.getHardTags());
+			existing.setDatasourceName(resource.getDatasourceName());
+			
+			resources.remove(resource);
+			resources.add(existing);
+		}
+		
+	}
 	
 	
 	public String url (String language) {

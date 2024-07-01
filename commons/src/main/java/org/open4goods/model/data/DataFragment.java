@@ -837,8 +837,21 @@ public class DataFragment implements Standardisable, Validable {
 	 * @throws ValidationException
 	 */
 
-	public void addResource(final String url) throws ValidationException {
-		addResource(url,new HashSet<String>());
+	public void addResource( String url) throws ValidationException {
+		if (StringUtils.isEmpty(url)) {
+			return;
+		}
+
+		if (url.startsWith("//")) {
+			url = "https:"+url;
+		} else if (!url.startsWith("http") && url.startsWith("/")) {
+			url = getBaseUrl() + url;
+		}
+
+		final Resource r = new Resource(url);
+
+		// A resource is also a source, but not automatically marked
+		r.setTimeStamp(System.currentTimeMillis());
 	}
 
 
@@ -849,19 +862,15 @@ public class DataFragment implements Standardisable, Validable {
 	 * @throws ValidationException
 	 */
 
-	public void addResource(final String url, final String tag) throws ValidationException {
-		addResource(url,Sets.newHashSet(tag));
-	}
+//	public void addResource(final String url, final String tag) throws ValidationException {
+//		addResource(url,Sets.newHashSet(tag));
+//	}
 
 
 	public void addResource(String url, final Set<String> tags) throws ValidationException {
 
 		if (StringUtils.isEmpty(url)) {
 			return;
-		}
-
-		if (null == resources) {
-			resources = new HashSet<>();
 		}
 
 		if (url.startsWith("//")) {
@@ -877,9 +886,8 @@ public class DataFragment implements Standardisable, Validable {
 
 		r.setTags(tags);
 
-		r.validate();
 
-		resources.add(r);
+		addResource(r);
 	}
 
 	/**
@@ -894,17 +902,32 @@ public class DataFragment implements Standardisable, Validable {
 
 	public void addResource(final Resource resource) throws ValidationException {
 
+		
 		if (null == resource) {
 			return;
 		}
 
-		if (null == resources) {
-			resources = new HashSet<>();
-		}
-
 		resource.validate();
 
-		resources.add(resource);
+		// Smart update, time consuming but necessary.
+		// TODO : Involve on a map on the new model
+		
+		Resource existing = resources.stream().filter(e -> e.equals(resource)).findFirst().orElse(null);
+		
+		if (null == existing) {
+			logger.info("Adding new resource : {}",resource);
+			resources.add(resource);
+		} else {
+			logger.info("Updating existing resource : {}",resource);
+			// Smart update
+			existing.setTags(resource.getTags());
+			existing.setHardTags(resource.getHardTags());
+			existing.setDatasourceName(resource.getDatasourceName());
+			
+			resources.remove(resource);
+			resources.add(existing);
+		}
+		
 	}
 
 	public void addSubSeller(final String subSeller) throws ParseException {

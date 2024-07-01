@@ -61,7 +61,10 @@
 			
 			<tr th:each="item,stat : ${product.pdfs()}">
 			
-				<td class="align-middle" th:text="${item.bestNameFromTag()}"></td>				
+				<td th:if="${item.getHardTags().size >0}" class="align-middle" th:text="#{${item.firstHardTag()}}"></td>	
+				<td th:unless="${item.getHardTags().size >0}" class="align-middle" th:text="${item.bestNameFromTag()}"></td>	
+				
+							
 				<td class="align-middle">
 					<span class="fa-solid fa-circle-info me-2"></span>
 					<a target="_blank" th:href="${item.path()}"> Fichier PDF (<span th:text="${item.humanReadableSize()}"></span>)</a>

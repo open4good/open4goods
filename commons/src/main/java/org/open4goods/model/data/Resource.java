@@ -73,14 +73,24 @@ public class Resource implements Validable {
 
 	@Field(index = false, store = false, type = FieldType.Integer)
 	// The group (similarity based and popularity ranked) this resource belongs to
+	// TODO : Move into imageinfo
 	private Integer group;
 
+	@Field(index = false, store = false, type = FieldType.Keyword)
+	// The group (similarity based and popularity ranked) this resource belongs to
+	private String datasourceName;
+
+
+	
 	/**
 	 * From ResourceTagDictionary
 	 */
 	@Field(index = false, store = false, type = FieldType.Keyword)
 	private Set<String> tags = new HashSet<>();
 
+	@Field(index = false, store = false, type = FieldType.Keyword)
+	private Set<ResourceTag> hardTags = new HashSet<>();
+	
 	public Resource() {
 		super();
 	}
@@ -94,12 +104,17 @@ public class Resource implements Validable {
 		setUrl(url);
 	}
 
-	public Resource(String url, String tag) {
-
-		this(url);
-		tags.add(tag);
-
+//	public Resource(String url, String tag) {
+//
+//		this(url);
+//		tags.add(tag);
+//
+//	}
+	
+	public ResourceTag  firstHardTag() {
+		return hardTags.stream().findFirst().orElse(null);
 	}
+	
 
 	@Override
 	public String toString() {
@@ -116,10 +131,9 @@ public class Resource implements Validable {
 		return false;
 	}
 
-	public void addTag(final String datasourceName) {
-		tags.add(datasourceName);
-
-	}
+//	public void addTag(final String datasourceName) {
+//		tags.add(datasourceName);
+//	}
 
 	@Override
 	public int hashCode() {
@@ -338,6 +352,22 @@ public class Resource implements Validable {
 
 	public void setGroup(Integer group) {
 		this.group = group;
+	}
+
+	public String getDatasourceName() {
+		return datasourceName;
+	}
+
+	public void setDatasourceName(String datasourceName) {
+		this.datasourceName = datasourceName;
+	}
+
+	public Set<ResourceTag> getHardTags() {
+		return hardTags;
+	}
+
+	public void setHardTags(Set<ResourceTag> hardTags) {
+		this.hardTags = hardTags;
 	}
 
 }

@@ -1,7 +1,6 @@
 package org.open4goods.api.services.aggregation.services.realtime;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -26,6 +25,7 @@ import org.open4goods.model.attribute.Attribute;
 import org.open4goods.model.constants.ReferentielKey;
 import org.open4goods.model.data.Brand;
 import org.open4goods.model.data.DataFragment;
+import org.open4goods.model.data.Resource;
 import org.open4goods.model.data.UnindexedKeyValTimestamp;
 import org.open4goods.model.product.AggregatedAttribute;
 import org.open4goods.model.product.AggregatedFeature;
@@ -124,7 +124,9 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 				// We have a "raw" attribute that matches a aggragationconfig								
 				
 				if (ResourceHelper.isImage(attr.getValue())) {
-					product.addImage(attr.getValue(), attr.getName());
+					Resource r = new Resource(attr.getValue());
+					r.getTags().add(attr.getName());
+					product.addResource(r);
 					toRemoveFromUnmatched.add(attr.getName());
 					continue;
 				}
