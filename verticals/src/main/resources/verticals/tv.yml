@@ -45,9 +45,7 @@ i18n:
       # The layout a product url will have. Ex : 81234555-tv-led-samsung-QL659P 2023
       url: 
         # We can add ta custom prefix (with our conditional templating language if we want)
-        # TODO : Ensure this is not causing 301
-        #prefix: "|| tv | television | televiseur ||"
-        prefix: "tv"
+        prefix: "|| tv | television | televiseur ||"
         # Then we add some attributes values with hyphens if present (ex : led-samsung-QL659P-2023)
         attrs:
 #TODO : Should be in required attributes to avoid 301            
