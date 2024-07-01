@@ -15,7 +15,7 @@ import org.apache.commons.text.WordUtils;
 import org.open4goods.config.yml.BlogConfiguration;
 import org.open4goods.helper.IdHelper;
 import org.open4goods.model.Localisable;
-import org.open4goods.model.blog.BlogPost;
+import org.open4goods.ui.model.BlogPost;
 import org.open4goods.xwiki.model.FullPage;
 import org.open4goods.xwiki.services.XwikiFacadeService;
 import org.slf4j.Logger;

@@ -4,10 +4,10 @@ import java.io.IOException;
 import java.util.List;
 
 import org.open4goods.dao.ProductRepository;
-import org.open4goods.model.blog.BlogPost;
 import org.open4goods.services.DataSourceConfigService;
 import org.open4goods.services.VerticalsConfigService;
 import org.open4goods.ui.controllers.ui.UiService;
+import org.open4goods.ui.model.BlogPost;
 import org.open4goods.ui.services.BlogService;
 import org.open4goods.xwiki.services.XWikiHtmlService;
 import org.open4goods.xwiki.services.XwikiFacadeService;
