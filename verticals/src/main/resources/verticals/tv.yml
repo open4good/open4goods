@@ -98,6 +98,7 @@ i18n:
       aiConfigs:
 ##          rateLimitDelay: 3000
         rootPrompt: |
+<<<<<<< HEAD
             Ta réponse devra être au format JSON. La structure des données doit correspondre à cette classe Java : %s. N'inclue aucune explication, fournis uniquement une réponse JSON conforme à la norme RFC8259 en suivant ce format à la lettre. Supprime le balisage ```json de la sortie.
             Nom de l'objet : [(${p.brand()})] [(${p.model()})] Caractéristiques : [(${p.caracteristics()})].
             Génère un fichier JSON clé-valeur pour l'objet concerné répondant aux prompts suivants :      
@@ -118,6 +119,28 @@ i18n:
            - key: "cons"
              prompt: |           
                cons : Une liste d'inconvénients techniques du produit. Cinq inconvénients maximum, un avantage par ligne, dans un style formel.
+=======
+            Ta réponse devra être au format JSON. N'inclue aucune explication, fournis uniquement une réponse JSON conforme à la norme RFC8259 en suivant ce format à la lettre. Supprime le balisage ```json de la sortie.
+            Nom de l'objet : [(${p.brand()})] [(${p.model()})] Caractéristiques : [(${p.caracteristics()})].
+            Génère un fichier JSON clé-valeur pour l'objet concerné répondant aux prompts suivants :      
+
+        prompts: 
+           - key: "global-description"
+             prompt: |           
+                : Une description objective de l'objet, dans un style académique et ludique, uniquement du texte brut d'un maximum de 200 mots, en présentant les caractéristiques techniques principales.
+   
+           - key: "ecological-description"
+             prompt: |           
+                : Une analyse détaillée de l'impact environnemental de l'objet, un texte de maximum 200 mots, dans un style écologique engagé mais objectif, en utilisant que du texte brut.
+   
+           - key: "pros"
+             prompt: |           
+                : Liste cinq avantages techniques du produit dans une seule ligne, séparés par des points-virgules, dans un style formel.
+   
+           - key: "cons"
+             prompt: |           
+                : Liste cinq inconvénients techniques du produit dans une seule ligne, séparés par des points-virgules, dans un style formel.
+>>>>>>> branch 'prompt-engineering' of https://github.com/open4good/open4goods.git
              override: false
 
 
