@@ -20,17 +20,13 @@ import org.springframework.ai.openai.OpenAiChatModel;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-/**
- * TODO : Paralelisation
- * TODO : Storing the prompt in product (disabled for now) could allow to regenerate if changes
- */
 public class AiService {
 
 	private final Logger logger = LoggerFactory.getLogger(AiService.class);
 	private final OpenAiChatModel chatModel;
 	private final VerticalsConfigService verticalService;
 	private final EvaluationService spelEvaluationService;
-	private ObjectMapper objectMapper;
+	private final ObjectMapper objectMapper;
 
 	public AiService(OpenAiChatModel chatModel, VerticalsConfigService verticalService, EvaluationService spelEvaluationService) {
 		this.chatModel = chatModel;
@@ -53,7 +49,6 @@ public class AiService {
 	 * Completes AI descriptions for a product based on the provided vertical configuration.
 	 */
 	public void complete(Product product, VerticalConfig verticalConfig, boolean force) {
-		// TODO : Gof (filter on icecat validated chars)
 		if (!force && product.getAttributes().count() < 15) {
 			return;
 		}
@@ -73,29 +68,23 @@ public class AiService {
 	 */
 	private void generateDescriptionsForProduct(Product product, Map<String, ProductI18nElements> i18nConfig, boolean force) {
 		for (Entry<String, ProductI18nElements> entry : i18nConfig.entrySet()) {
-			
-			
-			
-			Map<String, AiDescription> description = createAiDescriptions(entry.getValue().getAiConfigs(), entry.getKey(), product);
-			
-			
-			
+			Map<String, AiDescription> descriptions = createAiDescriptions(entry.getValue().getAiConfigs(), entry.getKey(), product);
+
 			for (PromptConfig aiConfig : entry.getValue().getAiConfigs().getPrompts()) {
 				if (shouldSkipDescriptionGeneration(product, aiConfig, i18nConfig, force)) {
 					logger.info("Skipping because generated AI text is already present");
 					continue;
 				}
 
-				if (StringUtils.isBlank(description.getContent().getText())) {
+				AiDescription description = descriptions.get(aiConfig.getKey());
+				if (description == null || StringUtils.isBlank(description.getContent().getText())) {
 					logger.error("Empty AI text for product {} with key {} and lang {} and prompt {}", product.getId(), aiConfig.getKey(), entry.getKey(), aiConfig.getPrompt());
 				} else {
-					storeGeneratedDescriptions(product, entry, description);
+					storeGeneratedDescriptions(product, entry, descriptions);
 				}
 			}
 		}
 	}
-
-
 
 	/**
 	 * Determines if the description generation should be skipped.
@@ -105,91 +94,55 @@ public class AiService {
 	}
 
 	/**
-	 * Creates an AI description for a product.
-	 * @param rootPrompt 
+	 * Creates AI descriptions for a product.
 	 *
-	 * @param aiConfig The AI configuration.
-	 * @param language The language of the description.
-	 * @param product The product to generate the description for.
-	 * @return The generated AI description.
+	 * @param aiConfigs The AI configuration.
+	 * @param language The language of the descriptions.
+	 * @param product The product to generate the descriptions for.
+	 * @return The generated AI descriptions.
 	 */
-	private AiDescription createAiDescriptions(String rootPrompt, PromptConfig aiConfig, String language, Product product) {
-
-		// 1 - Evaluate the root prompt
-		
-		String evaluatedRootPrompt = spelEvaluationService.thymeleafEval(product, rootPrompt);
-		
-		
-		
-		
-		
-		String evaluatedPrompt = spelEvaluationService.thymeleafEval(product, aiConfig.getPrompt());
-
-		String aiResponse = generatePromptResponse(evaluatedPrompt);
-		logger.info("AI response for product {}: \n{}", product.getId(), aiResponse);
-
-		return new AiDescription(aiResponse, language);
-	}
-
-	
-	private Map<String, AiDescription> createAiDescriptions(AiPromptsConfig aiConfigs, String key, Product product) {
-
-		
+	private Map<String, AiDescription> createAiDescriptions(AiPromptsConfig aiConfigs, String language, Product product) {
 		// 1 - Evaluate the root prompt
 		String evaluatedRootPrompt = spelEvaluationService.thymeleafEval(product, aiConfigs.getRootPrompt());
-		
-		// 2 - Evaluate the prompts
-		Map<String, String> promptsRepsponse = new HashMap<>();
-		for (PromptConfig promptConfig :  aiConfigs.getPrompts()) {
-			// For each
-			promptsRepsponse.put(promptConfig.getKey(), spelEvaluationService.thymeleafEval(product, promptConfig.getPrompt()));
-		}
-		
-		String template = """
-		  given : 
-		      {evaluatedRootPrompt}
-		  
-		  generate a key/value json string, which contains the following entries:
-			- global-description : {promptsRepsponse.get("global-description")}
-		  
-				""";
-		
-		
-		// TODO : chatmodel.execute
-		
-		
-		// TODO : Json parsing
-		Map<String, Object> responseMap = objectMapper.readValue(description.getContent().getText(), HashMap.class);
 
-		
-		// TODO Auto-generated method stub
-		return null;
+		// 2 - Evaluate the other prompts
+		StringBuilder combinedPrompts = new StringBuilder(evaluatedRootPrompt);
+		for (PromptConfig promptConfig : aiConfigs.getPrompts()) {
+			combinedPrompts.append("\n").append(promptConfig.getKey()).append(promptConfig.getPrompt());
+		}
+
+		// 3 - Generate the final prompt response
+		String aiResponse = generatePromptResponse(combinedPrompts.toString());
+		logger.info("AI response for product {}: \n{}", product.getId(), aiResponse);
+
+		// 4 - Parse the JSON response
+		Map<String, Object> responseMap;
+		try {
+			responseMap = objectMapper.readValue(aiResponse, HashMap.class);
+		} catch (IOException e) {
+			logger.error("Error parsing AI response for product {}: {}", product.getId(), e.getMessage());
+			return new HashMap<>();
+		}
+
+		// 5 - Create AiDescription objects
+		Map<String, AiDescription> descriptions = new HashMap<>();
+		for (String key : responseMap.keySet()) {
+			descriptions.put(key, new AiDescription((String) responseMap.get(key), language));
+		}
+
+		return descriptions;
 	}
-	
-	
-	
-	
-	
-	
-	
-	
+
 	/**
 	 * Stores the generated AI descriptions in the product.
 	 *
 	 * @param product The product to store the descriptions in.
 	 * @param entry The entry containing the AI configuration.
-	 * @param description The AI description to store.
+	 * @param descriptions The AI descriptions to store.
 	 */
-	private void storeGeneratedDescriptions(Product product, Entry<String, ProductI18nElements> entry, AiDescription description) {
-		try {
-			Map<String, Object> responseMap = objectMapper.readValue(description.getContent().getText(), HashMap.class);
-
-			logger.info("Parsed AI response for product {}", product.getId());
-
-			product.getAiDescriptions().put("global-description", new AiDescription((String) responseMap.get("global-description"), entry.getKey()));
-			product.getAiDescriptions().put("ecological-description", new AiDescription((String) responseMap.get("ecological-description"), entry.getKey()));
-		} catch (IOException e) {
-			logger.error("Error parsing AI response for product {}: {}", product.getId(), e.getMessage());
+	private void storeGeneratedDescriptions(Product product, Entry<String, ProductI18nElements> entry, Map<String, AiDescription> descriptions) {
+		for (String key : descriptions.keySet()) {
+			product.getAiDescriptions().put(key, descriptions.get(key));
 		}
 	}
 }
