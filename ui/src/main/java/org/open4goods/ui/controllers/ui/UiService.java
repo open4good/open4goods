@@ -28,7 +28,7 @@ import org.springframework.web.servlet.ModelAndView;
 import jakarta.annotation.PostConstruct;
 import jakarta.servlet.http.HttpServletRequest;
 
-
+// TODO : MErge with uihelper
 public class UiService {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(UiService.class);

@@ -10,6 +10,7 @@ import org.open4goods.model.product.Product;
 
 import jakarta.servlet.http.HttpServletRequest;
 
+// TODO : merge with uiservice
 public class UiHelper {
 
 	
