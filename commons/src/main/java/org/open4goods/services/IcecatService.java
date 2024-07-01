@@ -654,6 +654,9 @@ public class IcecatService {
 
 	private Integer getIceCatLangId(String language) {
 		// TODO : check default language is english
+		if (null == languageByCode) {
+			return 1;
+		}
 		return Integer.valueOf(languageByCode.getOrDefault(language, "1"));
 	}
 
