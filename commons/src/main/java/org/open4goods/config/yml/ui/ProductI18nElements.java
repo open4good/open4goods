@@ -78,6 +78,17 @@ public class ProductI18nElements {
 	@JsonMerge
 	private List<AiConfig> aiConfig = new ArrayList<>();
 
+	
+	/**
+	 * Return the truncated home description
+	 * @param max
+	 * @return
+	 */
+	public String truncatedHomeDescription(int max) {
+		return verticalHomeDescription.length() > max ? verticalHomeDescription.substring(0, max)+"..." : verticalHomeDescription;
+	}
+	
+	
 	public PrefixedAttrText getUrl() {
 		return url;
 	}
