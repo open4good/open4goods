@@ -6,7 +6,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.open4goods.config.yml.WikiPageConfig;
-import org.open4goods.config.yml.attributes.AiConfig;
+import org.open4goods.config.yml.attributes.PromptConfig;
+import org.open4goods.config.yml.attributes.AiPromptsConfig;
 import org.open4goods.model.dto.WikiPage;
 
 import com.fasterxml.jackson.annotation.JsonMerge;
@@ -76,7 +77,7 @@ public class ProductI18nElements {
 	 * Configuration for ai generation tool
 	 */
 	@JsonMerge
-	private List<AiConfig> aiConfig = new ArrayList<>();
+	private AiPromptsConfig aiConfigs = new AiPromptsConfig();
 
 	
 	/**
@@ -242,14 +243,15 @@ public class ProductI18nElements {
 		this.wikiPages = wikiPages;
 	}
 
-	public List<AiConfig> getAiConfig() {
-		return aiConfig;
+	public AiPromptsConfig getAiConfigs() {
+		return aiConfigs;
 	}
 
-	public void setAiConfig(List<AiConfig> aiConfig) {
-		this.aiConfig = aiConfig;
+	public void setAiConfigs(AiPromptsConfig aiConfigs) {
+		this.aiConfigs = aiConfigs;
 	}
-	
+
+
 	
 	
 	
