@@ -17,6 +17,7 @@ import org.open4goods.config.yml.ui.VerticalConfig;
 import org.open4goods.dao.ProductRepository;
 import org.open4goods.exceptions.AggregationSkipException;
 import org.open4goods.exceptions.TechnicalException;
+import org.open4goods.exceptions.ValidationException;
 import org.open4goods.helper.IdHelper;
 import org.open4goods.model.constants.ProductCondition;
 import org.open4goods.model.constants.ReferentielKey;
@@ -268,20 +269,28 @@ public class AmazonCompletionService extends AbstractCompletionService {
 		if (null != images) {
 			if (null != images.getPrimary()) {
 				logger.info("Adding primary image for {} : {}", data.gtin(), images.getPrimary().getLarge());
-				Resource r = new Resource(images.getPrimary(). getLarge().getURL());
-				r.getHardTags().add(ResourceTag.AMAZON_PRIMARY_TAG);
-				r.getHardTags().add(ResourceTag.PRIMARY);
-				r.setDatasourceName(amazonDatasource.getName());
-				data.getResources().add(r);
+				try {
+					Resource r = new Resource(images.getPrimary(). getLarge().getURL());
+					r.getHardTags().add(ResourceTag.AMAZON_PRIMARY_TAG);
+					r.getHardTags().add(ResourceTag.PRIMARY);
+					r.setDatasourceName(amazonDatasource.getName());
+					data.getResources().add(r);
+				} catch (ValidationException e) {
+					logger.error("Error while setting primary image", e);
+				}
 			}
 
 			if (null != images.getVariants()) {
 				images.getVariants().forEach(e -> {
 					logger.info("Adding variant image for {} : {}", data.gtin(), e.getLarge().getURL());
-					Resource r = new Resource(e.getLarge().getURL());
-					r.getHardTags().add(ResourceTag.AMAZON_VARIANT_TAG);
-					r.setDatasourceName(amazonDatasource.getName());
-					data.getResources().add(r);
+					try {
+						Resource r = new Resource(e.getLarge().getURL());
+						r.getHardTags().add(ResourceTag.AMAZON_VARIANT_TAG);
+						r.setDatasourceName(amazonDatasource.getName());
+						data.getResources().add(r);
+					} catch (ValidationException e1) {
+						logger.error("Error while setting variant image", e1);
+					}
 				});
 			}
 		}
