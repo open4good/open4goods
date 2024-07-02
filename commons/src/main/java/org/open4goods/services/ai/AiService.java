@@ -1,16 +1,13 @@
 package org.open4goods.services.ai;
 
-
-import java.util.ArrayList;
-import java.util.List;
+import java.io.IOException;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
 
 import org.apache.commons.lang3.StringUtils;
-import org.open4goods.config.yml.attributes.AiConfig;
+import org.open4goods.config.yml.attributes.PromptConfig;
+import org.open4goods.config.yml.attributes.AiPromptsConfig;
 import org.open4goods.config.yml.ui.ProductI18nElements;
 import org.open4goods.config.yml.ui.VerticalConfig;
 import org.open4goods.model.data.AiDescription;
@@ -20,119 +17,132 @@ import org.open4goods.services.VerticalsConfigService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ai.openai.OpenAiChatModel;
-import org.springframework.ai.openai.OpenAiImageModel;
-/**
- * TODO : Paralelisation
- * TODO : Storing the prompt in product (disabled for now) could allow to regenerate if changes
- */
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 public class AiService {
 
-	private Logger logger = LoggerFactory.getLogger(AiService.class);
-    private final OpenAiChatModel chatModel;
-	private VerticalsConfigService verticalService;
-	private EvaluationService spelEvaluationService;
-	
-	public AiService(OpenAiChatModel chatModel, final VerticalsConfigService verticalService, EvaluationService spelEvaluationService) {
+	private final Logger logger = LoggerFactory.getLogger(AiService.class);
+	private final OpenAiChatModel chatModel;
+	private final VerticalsConfigService verticalService;
+	private final EvaluationService spelEvaluationService;
+	private final ObjectMapper objectMapper;
+
+	public AiService(OpenAiChatModel chatModel, VerticalsConfigService verticalService, EvaluationService spelEvaluationService) {
 		this.chatModel = chatModel;
 		this.verticalService = verticalService;
 		this.spelEvaluationService = spelEvaluationService;
+		this.objectMapper = new ObjectMapper();
 	}
 
 	/**
-	 * Prompt the AI
-	 *
-	 * @param value
-	 * @return
+	 * Generates a prompt response using the AI model.
 	 */
-	public String prompt(String value) {
-
-		long now = System.currentTimeMillis();
-		String ret =chatModel.call(value);
-		logger.info("GenAI request ({}ms} : \n ----------request :\n{} \n----------response\n", System.currentTimeMillis()-now, value, ret);
-		return ret;
+	public String generatePromptResponse(String value) {
+		long startTime = System.currentTimeMillis();
+		String response = chatModel.call(value);
+		logger.info("GenAI request ({}ms) : \n ----------request :\n{} \n----------response\n{}", System.currentTimeMillis() - startTime, value, response);
+		return response;
 	}
 
 	/**
-	 * Complete the product with AI
-	 * @param data
-	 * @param force
-	 * @return
+	 * Completes AI descriptions for a product based on the provided vertical configuration.
 	 */
-	public void complete(Product data, VerticalConfig vConf, boolean force) {
-		////////////////
-		// Getting the config
-		/////////////////
-
-		// We only apply on items having some data quality
-
-		// TODO : From config
-		if (!force && data.getAttributes().count() < 15 ) {
+	public void complete(Product product, VerticalConfig verticalConfig, boolean force) {
+		if (!force && product.getAttributes().count() < 15) {
 			return;
 		}
 
-		// TODO : Will have to "expire" the generated texts and re generate it, in certain conditions
+		logger.info("AI completion for product {}", product.getId());
 
-		logger.info("AI completion for product {}", data.getId());
-
-			////////////////
-			// AI generation
-			/////////////////
-			Map<String, ProductI18nElements> i18nConf = vConf.getI18n();
-
-//			var executorService = Executors.newVirtualThreadPerTaskExecutor();
-//			executor.execute(() -> {
-				logger.info("Started generation for {}",data);
-				doGeneration(data, i18nConf,force);
-				logger.info("Ended generation for {}",data);
-//			});
+		Map<String, ProductI18nElements> i18nConfig = verticalConfig.getI18n();
+		generateDescriptionsForProduct(product, i18nConfig, force);
 	}
 
-	private void doGeneration(Product data, Map<String, ProductI18nElements> i18nConf, boolean force) {
-		for (Entry<String, ProductI18nElements> elements : i18nConf.entrySet()) {
+	/**
+	 * Generates AI descriptions for the given product and configuration.
+	 *
+	 * @param product The product to generate descriptions for.
+	 * @param i18nConfig The internationalization configuration.
+	 * @param force Whether to force generation even if not necessary.
+	 */
+	private void generateDescriptionsForProduct(Product product, Map<String, ProductI18nElements> i18nConfig, boolean force) {
+		for (Entry<String, ProductI18nElements> entry : i18nConfig.entrySet()) {
+			Map<String, AiDescription> descriptions = createAiDescriptions(entry.getValue().getAiConfigs(), entry.getKey(), product);
 
-			for ( AiConfig aic: elements.getValue().getAiConfig()) {
-
-				if (!force && !aic.isOverride() &&  (null != data.getAiDescriptions().get(aic.getKey()) && i18nConf.keySet().contains(data.getAiDescriptions().get(aic.getKey()).getContent().getLanguage()))) {
+			for (PromptConfig aiConfig : entry.getValue().getAiConfigs().getPrompts()) {
+				if (shouldSkipDescriptionGeneration(product, aiConfig, i18nConfig, force)) {
 					logger.info("Skipping because generated AI text is already present");
 					continue;
 				}
 
-				AiDescription desc = generateProductTexts(aic.getKey(), aic.getPrompt(), elements.getKey(), data);
-				if (StringUtils.isEmpty(desc.getContent().getText())) {
-					logger.error("Empty AI text for product {} with key {} and lang {} and prompt {}", data.getId(), aic.getKey(), elements.getKey(), aic.getPrompt());
+				AiDescription description = descriptions.get(aiConfig.getKey());
+				if (description == null || StringUtils.isBlank(description.getContent().getText())) {
+					logger.error("Empty AI text for product {} with key {} and lang {} and prompt {}", product.getId(), aiConfig.getKey(), entry.getKey(), aiConfig.getPrompt());
 				} else {
-					data.getAiDescriptions().put(aic.getKey(), desc);
+					storeGeneratedDescriptions(product, entry, descriptions);
 				}
 			}
 		}
 	}
 
 	/**
-	 * Generate the descriptions for an AiConfig (meaning the localized prompts of an ai config)
-	 * @param ai
-	 * @param data
-	 * @return
+	 * Determines if the description generation should be skipped.
 	 */
-	private AiDescription generateProductTexts( String key, String prompt, String lang, Product data) {
-
-
-		// Multi thread / synchronisation
-		List<AiDescription> ret = new ArrayList<>();
-
-		logger.info("AI completion for product {} with key {} and lang {} and prompt {}", data.getId(), key, lang, prompt);
-		// Passing the spel evaluation
-		String value = spelEvaluationService.thymeleafEval(data, prompt);
-
-		// TODO : should remove the replace
-		String aiText = prompt(value).replace("\n", "<br/>");
-
-
-		AiDescription aiDesc = new AiDescription(aiText, lang);
-		ret.add(aiDesc);
-
-		logger.warn("AI completion for product {}-{} : \n{}", data.getId(), key,aiText);
-
-		return aiDesc;
+	private boolean shouldSkipDescriptionGeneration(Product product, PromptConfig aiConfig, Map<String, ProductI18nElements> i18nConfig, boolean force) {
+		return !force && !aiConfig.isOverride() && product.getAiDescriptions().containsKey(aiConfig.getKey()) && i18nConfig.keySet().contains(product.getAiDescriptions().get(aiConfig.getKey()).getContent().getLanguage());
 	}
 
+	/**
+	 * Creates AI descriptions for a product.
+	 *
+	 * @param aiConfigs The AI configuration.
+	 * @param language The language of the descriptions.
+	 * @param product The product to generate the descriptions for.
+	 * @return The generated AI descriptions.
+	 */
+	private Map<String, AiDescription> createAiDescriptions(AiPromptsConfig aiConfigs, String language, Product product) {
+		// 1 - Evaluate the root prompt
+		String evaluatedRootPrompt = spelEvaluationService.thymeleafEval(product, aiConfigs.getRootPrompt());
+
+		// 2 - Evaluate the other prompts
+		StringBuilder combinedPrompts = new StringBuilder(evaluatedRootPrompt);
+		for (PromptConfig promptConfig : aiConfigs.getPrompts()) {
+			combinedPrompts.append("\n").append(promptConfig.getKey()).append(promptConfig.getPrompt());
+		}
+
+		// 3 - Generate the final prompt response
+		String aiResponse = generatePromptResponse(combinedPrompts.toString());
+		logger.info("AI response for product {}: \n{}", product.getId(), aiResponse);
+
+		// 4 - Parse the JSON response
+		Map<String, Object> responseMap;
+		try {
+			responseMap = objectMapper.readValue(aiResponse, HashMap.class);
+		} catch (IOException e) {
+			logger.error("Error parsing AI response for product {}: {}", product.getId(), e.getMessage());
+			return new HashMap<>();
+		}
+
+		// 5 - Create AiDescription objects
+		Map<String, AiDescription> descriptions = new HashMap<>();
+		for (String key : responseMap.keySet()) {
+			descriptions.put(key, new AiDescription((String) responseMap.get(key), language));
+		}
+
+		return descriptions;
+	}
+
+	/**
+	 * Stores the generated AI descriptions in the product.
+	 *
+	 * @param product The product to store the descriptions in.
+	 * @param entry The entry containing the AI configuration.
+	 * @param descriptions The AI descriptions to store.
+	 */
+	private void storeGeneratedDescriptions(Product product, Entry<String, ProductI18nElements> entry, Map<String, AiDescription> descriptions) {
+		for (String key : descriptions.keySet()) {
+			product.getAiDescriptions().put(key, descriptions.get(key));
+		}
+	}
 }
