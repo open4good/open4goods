@@ -14,7 +14,7 @@ import org.springframework.data.elasticsearch.annotations.FieldType;
 public class AggregatedPrice extends Price {
 	
 	//TODO : shared, ugly
-	public static final DecimalFormat numberFormater = new DecimalFormat("0.00");
+	public static final DecimalFormat numberFormater = new DecimalFormat("0.#");
 	
 	@Field(index = false, store = false, type = FieldType.Keyword)
 	private String datasourceName;
