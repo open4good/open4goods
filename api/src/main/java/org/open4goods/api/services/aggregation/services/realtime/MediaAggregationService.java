@@ -56,7 +56,7 @@ public class MediaAggregationService extends AbstractAggregationService{
 
 			// Adding standard tags
 			r.setDatasourceName(input.getDatasourceName());
-
+			
 			r.setCacheKey(IdHelper .generateResourceId(r.getUrl()));
 
 			
@@ -67,6 +67,7 @@ public class MediaAggregationService extends AbstractAggregationService{
 			
 			if (null != old) {
 				old.setTags(r.getTags());
+				old.setHardTags(r.getHardTags());
 			} else {
 				output.getResources().add(r);				
 			}
