@@ -216,6 +216,7 @@ public class DataSourceConfigService {
 				try {
 					logger.info("found provider config : {}", resource.getFilename());
 					final DataSourceProperties provider = serialisationService.fromYaml(resource.getInputStream(), DataSourceProperties.class);
+					provider.setDatasourceConfigName(resource.getFilename());
 					ret.put(resource.getFilename(),provider);
 				} catch (final Exception e) {
 					try {
