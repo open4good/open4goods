@@ -37,7 +37,9 @@ public class Score  implements Validable {
 	/** The relativised cardinalities, relativ mode.**/
 	private Cardinality relativ;
 	
-		
+	
+	
+	
 	
 	////////////////////////////////////////
 	// Contracts

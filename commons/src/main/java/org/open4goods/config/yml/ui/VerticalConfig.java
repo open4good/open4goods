@@ -17,6 +17,7 @@ import org.open4goods.config.yml.attributes.AttributeConfig;
 import org.open4goods.model.constants.CacheConstants;
 import org.open4goods.model.constants.UrlConstants;
 import org.open4goods.model.data.FeatureGroup;
+import org.open4goods.services.StandardiserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -118,9 +119,10 @@ public class VerticalConfig{
 	
 	/**
 	 * Configuration relativ to ecoscore computation. Key / values are : scoreName -> Ponderation (0.1 = 10%)
+	 * TODO : Ensure sum is 1
 	 */ 
 	@JsonMerge
-	private Map<String, String> ecoscoreConfig = new HashMap<>();
+	private Map<String, Double> ecoscoreConfig = new HashMap<>();
 
 	
 //	
@@ -210,6 +212,42 @@ public class VerticalConfig{
 		return ret;
 	}
 
+	
+	/**
+	 * Return the participation in percentage of a score in the ecoscore
+	 * @param scoreName
+	 * @return
+	 */
+	public Integer ecoscorePercentOf(String scoreName) {
+		
+		Double ponderation = ecoscoreConfig.get(scoreName);
+		if (null == ponderation) {
+			return -1;
+		} else {
+			return (int) Math.round(ponderation * 100);
+		}
+	}
+	
+	/**
+	 * Return the participation in points of  the score
+	 * @param scoreName
+	 * @return
+	 */
+	public Double ecoscoreParticipationPointsOf20(String scoreName, Double relValue) {
+		
+		return  ecoscoreParticipationMaxPointsOf20(scoreName) * relValue  / StandardiserService.DEFAULT_MAX_RATING;
+	}
+	
+	/**
+	 * Return the max participation  points of the score 
+	 * @param scoreName
+	 * @return
+	 */
+	public Double ecoscoreParticipationMaxPointsOf20(String scoreName) {
+		return Double.valueOf(ecoscorePercentOf(scoreName)) / 5;
+	}
+	
+	
 //	/**
 //	 *
 //	 * @return the list of AttributeConfig that have to appear in search results,
@@ -563,11 +601,11 @@ public class VerticalConfig{
 		this.unmatchingCategories = unmatchingCategories;
 	}
 
-	public Map<String, String> getEcoscoreConfig() {
+	public Map<String, Double> getEcoscoreConfig() {
 		return ecoscoreConfig;
 	}
 
-	public void setEcoscoreConfig(Map<String, String> ecoscoreConfig) {
+	public void setEcoscoreConfig(Map<String, Double> ecoscoreConfig) {
 		this.ecoscoreConfig = ecoscoreConfig;
 	}
 
