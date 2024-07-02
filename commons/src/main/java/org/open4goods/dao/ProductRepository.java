@@ -151,11 +151,12 @@ public class ProductRepository {
 		
 		Criteria c = getValidDateQuery()
 				// TODO : Warning : check nehaviour
-				.and(new Criteria("datasourceCategories").in(vertical.getMatchingCategories()).or( new Criteria("vertical").is(vertical.getId())))
+				.and( new Criteria("vertical").is(vertical.getId()))
+//				.or(new Criteria("datasourceCategories").in(vertical.getMatchingCategories())
 				;
 		
-		if (withExcluded) {
-            c = c.and(new Criteria("excluded").is(withExcluded));
+		if (!withExcluded) {
+            c = c.and(new Criteria("excluded").is(false));
         }
 		
 		final NativeQuery initialQuery = new NativeQueryBuilder()
@@ -210,8 +211,9 @@ public class ProductRepository {
 		Criteria c = new Criteria("vertical").is(vertical)
 				.and(getValidDateQuery())
 				;
-		if (withExcluded) {
-            c = c.and(new Criteria("excluded").is(withExcluded));
+		
+		if (!withExcluded) {
+            c = c.and(new Criteria("excluded").is(false));
         }
 		
 		NativeQueryBuilder initialQueryBuilder = new NativeQueryBuilder().withQuery(new CriteriaQuery(c));
