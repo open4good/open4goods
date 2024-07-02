@@ -5,8 +5,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.open4goods.config.yml.attributes.AiPromptsConfig;
+import org.apache.commons.lang3.StringUtils;
 import org.open4goods.config.yml.attributes.PromptConfig;
+import org.open4goods.config.yml.attributes.AiPromptsConfig;
 import org.open4goods.config.yml.ui.ProductI18nElements;
 import org.open4goods.config.yml.ui.VerticalConfig;
 import org.open4goods.model.data.AiDescription;
@@ -19,17 +20,13 @@ import org.springframework.ai.openai.OpenAiChatModel;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-/**
- * TODO : Paralelisation
- * TODO : Storing the prompt in product (disabled for now) could allow to regenerate if changes
- */
 public class AiService {
 
 	private final Logger logger = LoggerFactory.getLogger(AiService.class);
 	private final OpenAiChatModel chatModel;
 	private final VerticalsConfigService verticalService;
 	private final EvaluationService spelEvaluationService;
-	private ObjectMapper objectMapper;
+	private final ObjectMapper objectMapper;
 
 	public AiService(OpenAiChatModel chatModel, VerticalsConfigService verticalService, EvaluationService spelEvaluationService) {
 		this.chatModel = chatModel;
@@ -71,9 +68,21 @@ public class AiService {
 	 */
 	private void generateDescriptionsForProduct(Product product, Map<String, ProductI18nElements> i18nConfig, boolean force) {
 		for (Entry<String, ProductI18nElements> entry : i18nConfig.entrySet()) {
-			
 			Map<String, AiDescription> descriptions = createAiDescriptions(entry.getValue().getAiConfigs(), entry.getKey(), product);
-			storeGeneratedDescriptions(product, entry, descriptions);
+
+			for (PromptConfig aiConfig : entry.getValue().getAiConfigs().getPrompts()) {
+				if (shouldSkipDescriptionGeneration(product, aiConfig, i18nConfig, force)) {
+					logger.info("Skipping because generated AI text is already present");
+					continue;
+				}
+
+				AiDescription description = descriptions.get(aiConfig.getKey());
+				if (description == null || StringUtils.isBlank(description.getContent().getText())) {
+					logger.error("Empty AI text for product {} with key {} and lang {} and prompt {}", product.getId(), aiConfig.getKey(), entry.getKey(), aiConfig.getPrompt());
+				} else {
+					storeGeneratedDescriptions(product, entry, descriptions);
+				}
+			}
 		}
 	}
 
@@ -84,7 +93,8 @@ public class AiService {
 		return !force && !aiConfig.isOverride() && product.getAiDescriptions().containsKey(aiConfig.getKey()) && i18nConfig.keySet().contains(product.getAiDescriptions().get(aiConfig.getKey()).getContent().getLanguage());
 	}
 
-	 /** Creates AI descriptions for a product.
+	/**
+	 * Creates AI descriptions for a product.
 	 *
 	 * @param aiConfigs The AI configuration.
 	 * @param language The language of the descriptions.
