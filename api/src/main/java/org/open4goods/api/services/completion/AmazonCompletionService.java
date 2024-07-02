@@ -268,6 +268,7 @@ public class AmazonCompletionService extends AbstractCompletionService {
 		Images images = item.getImages();
 		if (null != images) {
 			if (null != images.getPrimary()) {
+
 				try {
 					logger.info("Adding primary image for {} : {}", data.gtin(), images.getPrimary().getLarge());
 					Resource r = new Resource(images.getPrimary(). getLarge().getURL());

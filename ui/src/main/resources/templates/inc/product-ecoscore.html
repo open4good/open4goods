@@ -5,7 +5,7 @@
 			<!-- 20 rating -->
 			<div class="col-lg-3">
 				<span class="d-block">
-					<span class="display-1 text-secondary fw-bold" th:text="${product.ecoscore.on20()}"></span>
+					<span class="display-2 text-secondary fw-bold" th:text="${product.ecoscore.on20()}"></span>
 					 <span class="font-small">/20</span>
 				</span>
 			</div>
@@ -13,10 +13,11 @@
 			<div class="col-lg-9">
 				<!--  Ecoscore  -->
 				<div class="text-center">
-					<a href="#markerEcological"> <img class="mb-1" width="350px"
-						th:alt="'Ecoscore : ' + ${product.ecoscore.letter()}"
-						th:title="'éco-score : ' + ${product.ecoscore.letter()}"
-						th:src="'/icons/ecoscore/scoring-'+${product.ecoscore.letter()}+'.png'">
+					<a href="#markerEcological">
+					 	<img class="mb-1" width="310px"
+							th:alt="'Ecoscore : ' + ${product.ecoscore.letter()}"
+							th:title="'éco-score : ' + ${product.ecoscore.letter()}"
+							th:src="'/icons/ecoscore/scoring-'+${product.ecoscore.letter()}+'.png'">
 					</a>
 				</div>
 			</div>
