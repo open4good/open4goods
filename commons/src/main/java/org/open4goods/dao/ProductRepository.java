@@ -211,7 +211,7 @@ public class ProductRepository {
 		Criteria c = new Criteria("vertical").is(vertical)
 				.and(getValidDateQuery())
 				;
-		
+
 		if (!withExcluded) {
             c = c.and(new Criteria("excluded").is(false));
         }

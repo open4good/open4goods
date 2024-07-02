@@ -30,7 +30,7 @@
 	<meta name="google-site-verification" content="I2wSyJnnRSjrLjadtNgFzHHmtSN8DPbjhPePTkQNhp4" />
 </head>
 
-<body style="zoom: 125%;" class="home-page">
+<body style="zoom: 120%;" class="home-page">
     
     <!--/* Navbar */-->
 	<th:block th:insert="~{inc/navbar/navbar-home.html}"></th:block>
@@ -49,8 +49,8 @@
 								src="https://nudger.fr/assets/img/nudger-logo-small.png"
 								alt="Nudger.fr">
 						</span>
-						<h2 class="h2 text-green-bg-transparent d-inline-flex px-3 my-3 mb-5">Réconcilier écologie et pouvoir d'achat !</h2>
-						<p class="lead fw-normal text-muted mb-4"> 
+						<h2 class="h2 text-green-bg-transparent d-inline-flex px-3 mt-5 mb-5">Réconcilier écologie et pouvoir d'achat !</h2>
+						<p class="lead fw-normal text-muted mb-5"> 
 						<th:block th:with="path='WIDGETS/accueil-jumbotron/'">
 									<th:block th:insert="~{inc/wiki.html}"></th:block>
 								</th:block>
@@ -113,7 +113,7 @@
 							alt="Christopher Portrait">
 						<div class="card-body">
 							<h3 class="h5 card-title" th:text="${vertical.i18n(siteLanguage).verticalHomeTitle}"></h3>
-							<p class="card-text" th:text="${vertical.i18n(siteLanguage).verticalHomeDescription}"></p>
+							<p class="card-text" th:text="${vertical.i18n(siteLanguage).truncatedHomeDescription(75)}"></p>
 						</div>
 						<div class="card-footer bg-white border-0 p-0">
 							<div class="d-grid">
