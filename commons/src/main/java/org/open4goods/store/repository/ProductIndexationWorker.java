@@ -49,13 +49,20 @@ public class ProductIndexationWorker implements Runnable {
 		// TODO : exit thread condition
 		while (true) {
 			try {
-				if (!service.getQueue().isEmpty()) {
+				
+				// Computing if items presents, and how many to take
+				int items = service.getQueue().size();
+				if (items > dequeuePageSize) {
+					items = dequeuePageSize;
+				}
+				
+				if (items > 0) {
 					// There is data to consume and queue consummation is enabled
 					// A map to deduplicate --> MEANS WE CAN SOMETIMES LOOSE DATAFRAMENTS IF 2 ENTRIES ARE IN THE SAME BAG (no because we put back in queue)
 					final Map<String,Product> buffer = new HashMap<>();	
 										
 					// Dequeuing
-					for (int i = 0; i < dequeuePageSize; i++) {
+					for (int i = 0; i < items; i++) {
 						Product item = service.getQueue().take();
 						
 						if (buffer.containsKey(item.gtin())) {
