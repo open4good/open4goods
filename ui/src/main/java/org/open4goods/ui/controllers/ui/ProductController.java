@@ -312,14 +312,14 @@ public class ProductController  {
 		
 		AiDescription ps = data.getAiDescriptions().get("pros");
 		if (null != ps) {
-			pros = (Arrays.asList(ps.getContent().getText().split("\n|<br/>")));
+			pros = (Arrays.asList(ps.getContent().getText().split("\n|<br/>|;")));
 		}
 		
 		
 		
 		AiDescription cs = data.getAiDescriptions().get("cons");
 		if (null != cs) {
-			cons = (Arrays.asList(cs.getContent().getText().split("\n|<br/>")));
+			cons = (Arrays.asList(cs.getContent().getText().split("\n|<br/>|;")));
 		}
 
 		mv.addObject("pros", pros);
