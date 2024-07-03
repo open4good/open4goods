@@ -9,7 +9,7 @@ public class ResourceCompletionUrlTemplate {
     private String url;
     private String datasourceName;
     private String language;
-    private List<ResourceTag> tags = new ArrayList<>();
+    private List<ResourceTag> hardTags = new ArrayList<>();
 
     // Getters and Setters
     public String getUrl() {
@@ -36,11 +36,14 @@ public class ResourceCompletionUrlTemplate {
         this.language = language;
     }
 
-	public List<ResourceTag> getTags() {
-		return tags;
+	public List<ResourceTag> getHardTags() {
+		return hardTags;
 	}
 
-	public void setTags(List<ResourceTag> tags) {
-		this.tags = tags;
+	public void setHardTags(List<ResourceTag> hardTags) {
+		this.hardTags = hardTags;
 	}
+
+    
+
 }

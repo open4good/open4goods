@@ -299,7 +299,7 @@ public class ResourceCompletionService  extends AbstractCompletionService{
 	private Resource processUrlTemplate(ResourceCompletionUrlTemplate ut, String gtin) {
 		
 		Resource r = new Resource();
-		r.getHardTags().addAll(ut.getTags());
+		r.getHardTags().addAll(ut.getHardTags());
 		
 		// TODO : add resource language
 		r.setUrl(ut.getUrl().replace("{GTIN}", gtin));
