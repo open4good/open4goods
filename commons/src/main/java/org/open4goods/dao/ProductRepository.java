@@ -79,8 +79,9 @@ public class ProductRepository {
 
 	public ProductRepository() {
 		
-		int dequeueSize = 250;
-		int workers = 5;
+		// TODO : from conf
+		int dequeueSize = 20;
+		int workers = 3;
 		int pauseDuration = 5000;
 		
 		logger.info("Starting file queue consumer thread, with bulk page size of {} items", dequeueSize );
