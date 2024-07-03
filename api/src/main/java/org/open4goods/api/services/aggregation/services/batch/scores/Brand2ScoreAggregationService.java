@@ -36,6 +36,9 @@ public class Brand2ScoreAggregationService extends AbstractScoreAggregationServi
 	@Override
 	public void onProduct(Product data, VerticalConfig vConf) {
 
+		// Enforce score removing
+		data.getScores().remove(BRAND_SUSTAINABILITY_SCORENAME);
+		
 		
 		if (StringUtils.isEmpty(data.brand())) {
 			return;
