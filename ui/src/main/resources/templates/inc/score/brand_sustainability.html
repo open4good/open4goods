@@ -1,1 +1,49 @@
-TODO
+<div class="row g-0 align-items-center">
+	<div class="col-sm-3">
+		<!-- Header -->
+		<div class="card-header border-0 bg-white text-center pb-0">
+		
+				Indice de risque <th:block th:text="${product.brand()}"></th:block>
+                                    
+                                    
+				<span class="display-3 fw-bold">
+				<span class="display-3 fw-bold">
+					<th:block th:text="${#numbers.formatDecimal((100- score.absolute.value), 0, 'COMMA', 1, 'POINT')}"></th:block>
+					
+					
+				</span>
+				</span>
+		</div>
+	</div>
+	
+	
+	<div class="col-sm-9">
+		<!-- Content -->
+		<div class="card-body pb-0">
+			<ul class="list-group list-group-flush price-list mb-4">
+				<li class="list-group-item border-0">
+					La performance RSE de <th:block th:text="${product.brand()}"></th:block> (obtenue auprès de l'agence de notation sustainalytics) compte pour <b><th:block th:text="${verticalConfig.ecoscorePercentOf(score.name)}"></th:block> %</b>
+					 dans la note totale (<th:block th:text="${verticalConfig.ecoscoreParticipationPointsOf20(score.name, score.relativ.value)}"> </th:block> points attribués, sur les 
+					<th:block th:text="${verticalConfig.ecoscoreParticipationMaxPointsOf20(score.name)}"> </th:block>  possibles)
+				</li>
+				<li class="list-group-item border-0">
+					<span class="far fa-lightbulb"></span>
+					Relativisons : 
+					
+					<ul>
+						<li>si on met 20/20 aux <th:block th:text="${verticalConfig.i18n(siteLanguage).getVerticalHomeTitle().toLowerCase()}"></th:block> 
+						avec la meilleur classe énergétique</li>
+						<li>et 0/20 aux plus mauvais </li>
+						<li>ce produit obtient alors la note de <b> <th:block th:text="${score.on20}"></th:block>/20</b></li>
+						
+					</ul>
+					
+					
+				</li>				
+				
+				
+			</ul>
+		</div>
+		<!-- End Content -->
+	</div>
+</div>
