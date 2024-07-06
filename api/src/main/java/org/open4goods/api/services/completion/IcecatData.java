@@ -167,12 +167,18 @@ public class IcecatData {
         public BulletPoints bulletPoints;
         @JsonProperty("GeneratedBulletPoints")
         public GeneratedBulletPoints generatedBulletPoints;
+        @JsonProperty("GTINs")
+        public List<GTIN> gtins;
 
-        
-        
-        // Getters and Setters
     }
+    public static class GTIN {
 
+        @JsonProperty("GTIN")
+        public String gtin;
+        @JsonProperty("IsApproved")
+        public boolean isApproved;
+
+    }
     public static class TitleInfo {
         @JsonProperty("GeneratedIntTitle")
         public String generatedIntTitle;
