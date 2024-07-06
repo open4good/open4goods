@@ -78,7 +78,7 @@ public class GoogleIndexationService  {
 		}
 	}
 
-//	@Scheduled(fixedRate = 1000 * 60 * 60 * 24)
+	@Scheduled(fixedRate = 1000 * 60 * 60 * 12)
 	// TODO : Timing from conf
 	public void indexNewProducts() {		
 			indexAllSince(readLastTimeStamp());
