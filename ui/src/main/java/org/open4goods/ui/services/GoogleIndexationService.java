@@ -9,11 +9,14 @@ import java.util.Collections;
 import java.util.List;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.tika.io.IOUtils;
 import org.open4goods.dao.ProductRepository;
 import org.open4goods.services.VerticalsConfigService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.env.Environment;
 import org.springframework.scheduling.annotation.Scheduled;
 
 import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
@@ -57,6 +60,9 @@ public class GoogleIndexationService  {
 	
 	private static final Logger LOGGER = LoggerFactory.getLogger(SitemapGenerationService.class);
 
+	@Autowired Environment env;	
+
+	
 	
 //    private static com.google.api.services.calendar.Calendar client;
 	
@@ -81,8 +87,11 @@ public class GoogleIndexationService  {
 
 	@Scheduled(fixedRate = 1000 * 60 * 60 * 12)
 	// TODO : Timing from conf
-	public void indexNewProducts() {		
+	public void indexNewProducts() {	
+		if (!ArrayUtils.contains(env.getActiveProfiles(), "dev") && !ArrayUtils.contains(env.getActiveProfiles(), "devsec")) {
 			indexAllSince(readLastTimeStamp());
+			
+		}
 	}
 	
 	
