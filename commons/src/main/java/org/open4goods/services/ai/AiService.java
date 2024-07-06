@@ -67,22 +67,26 @@ public class AiService {
 	 * @param force Whether to force generation even if not necessary.
 	 */
 	private void generateDescriptionsForProduct(Product product, Map<String, ProductI18nElements> i18nConfig, boolean force) {
-		for (Entry<String, ProductI18nElements> entry : i18nConfig.entrySet()) {
-			Map<String, AiDescription> descriptions = createAiDescriptions(entry.getValue().getAiConfigs(), entry.getKey(), product);
+		try {
+			for (Entry<String, ProductI18nElements> entry : i18nConfig.entrySet()) {
+				Map<String, AiDescription> descriptions = createAiDescriptions(entry.getValue().getAiConfigs(), entry.getKey(), product);
 
-			for (PromptConfig aiConfig : entry.getValue().getAiConfigs().getPrompts()) {
-				if (shouldSkipDescriptionGeneration(product, aiConfig, i18nConfig, force)) {
-					logger.info("Skipping because generated AI text is already present");
-					continue;
-				}
+				for (PromptConfig aiConfig : entry.getValue().getAiConfigs().getPrompts()) {
+					if (shouldSkipDescriptionGeneration(product, aiConfig, i18nConfig, force)) {
+						logger.info("Skipping because generated AI text is already present");
+						continue;
+					}
 
-				AiDescription description = descriptions.get(aiConfig.getKey());
-				if (description == null || StringUtils.isBlank(description.getContent().getText())) {
-					logger.error("Empty AI text for product {} with key {} and lang {} and prompt {}", product.getId(), aiConfig.getKey(), entry.getKey(), aiConfig.getPrompt());
-				} else {
-					storeGeneratedDescriptions(product, entry, descriptions);
+					AiDescription description = descriptions.get(aiConfig.getKey());
+					if (description == null || StringUtils.isBlank(description.getContent().getText())) {
+						logger.error("Empty AI text for product {} with key {} and lang {} and prompt {}", product.getId(), aiConfig.getKey(), entry.getKey(), aiConfig.getPrompt());
+					} else {
+						storeGeneratedDescriptions(product, entry, descriptions);
+					}
 				}
 			}
+		} catch (Exception e) {
+			logger.error("Error while generating AI descriptions for product {}: {}", product.getId(), e.getMessage());
 		}
 	}
 
@@ -116,9 +120,9 @@ public class AiService {
 		logger.info("AI response for product {}: \n{}", product.getId(), aiResponse);
 
 		// 4 - Parse the JSON response
-		Map<String, Object> responseMap;
+		Map<String, String> responseMap;
 		try {
-			responseMap = objectMapper.readValue(aiResponse, HashMap.class);
+			responseMap = objectMapper.readValue(aiResponse, Map.class);
 		} catch (IOException e) {
 			logger.error("Error parsing AI response for product {}: {}", product.getId(), e.getMessage());
 			return new HashMap<>();
@@ -127,7 +131,7 @@ public class AiService {
 		// 5 - Create AiDescription objects
 		Map<String, AiDescription> descriptions = new HashMap<>();
 		for (String key : responseMap.keySet()) {
-			descriptions.put(key, new AiDescription((String) responseMap.get(key), language));
+			descriptions.put(key, new AiDescription( responseMap.get(key), language));
 		}
 
 		return descriptions;
