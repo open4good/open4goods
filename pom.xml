@@ -207,7 +207,7 @@
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>taglist-maven-plugin</artifactId>
-				<version>3.0.0</version>
+				<version>3.1.0</version>
 				<configuration>
 					<aggregate>true</aggregate>
 					<xmlOutputDirectory>${project.build.directory}/site/taglist</xmlOutputDirectory>
