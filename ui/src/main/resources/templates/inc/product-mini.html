@@ -1,5 +1,5 @@
 <div  th:if="${item}" class="card shadow p-4">
-         <div class="row align-items-center">
+         <div th:if="${item.ecoscore()}" class="row align-items-center">
                  <div class="text-center ">
                      <a th:href="${item.names.url.i18n(siteLanguage)}" class="h5 title" >
 	                     <div  class="h3 title " th:text="${item.brandAndModel()}" ></div>                     
