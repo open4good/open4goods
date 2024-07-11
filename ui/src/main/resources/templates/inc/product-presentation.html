@@ -45,26 +45,27 @@
                </div>                  
                
                <!-- Description -->
-                <div class=" col-lg-8">
-					<div th:if="${product.aiDescriptions.get('global-description')}" class="row mt-5 mt-lg-0 px-3">
-                         <!-- Icon Boxes -->
-                         <div  >
-                             <div class="card-body text-center p-4 p-lg-5">
-                             <!-- 
-                                 <img src="../../assets/img/pages/design.svg" alt="Web design illustration" class="image-md mb-4">
-                                 <h2  class="h4 mb-2">Description générale</h2>
-                                 <span  class="h5 text-light "></span>
-                              -->
-                                 <p class="lead" th:utext="${product.aiDescriptions.get('global-description').content.text}">
-                                 </p>
-                             </div>
-                         </div>
-                         <!-- End of Icon Boxes -->
-                     </div>
+				<div class="col-lg-8">
+					<div th:if="${globalDescriptionParagraphs}" class="row mt-5 mt-lg-0 px-3">
+						<!-- Icon Boxes -->
+						<div>
+							<div class="card-body text-center p-4 p-lg-5">
+								<!--
+                                    <img src="../../assets/img/pages/design.svg" alt="Web design illustration" class="image-md mb-4">
+                                    <h2  class="h4 mb-2">Description générale</h2>
+                                    <span  class="h5 text-light "></span>
+                                -->
+								<p class="lead">
+									<span th:each="paragraph : ${globalDescriptionParagraphs}" th:utext="${paragraph + '<br/><br/>'}"></span>
+								</p>
+							</div>
+						</div>
+						<!-- End of Icon Boxes -->
+					</div>
 
 					<div class="row ">
 						<!-- Avantages -->
-						<div th:if="${product.aiDescriptions.get('pros')}" class="col-sm-12 col-md-12 col-lg-6 mt-3">
+						<div th:if="${pros}" class="col-sm-12 col-md-12 col-lg-6 mt-3">
 							<!-- Icon Box -->
 							<div class="card border-gray-300 ">
 								<div class="card-body">
@@ -83,9 +84,9 @@
 							</div>
 							<!-- End of Icon Box -->
 						</div>
-		
+
 						<!-- Inconvénients -->
-						<div th:if="${pros}" class="col-sm-12 col-md-12 col-lg-6 mt-3">
+						<div th:if="${cons}" class="col-sm-12 col-md-12 col-lg-6 mt-3">
 							<!-- Icon Box -->
 							<div class="card border-gray-300 ">
 								<div class="card-body">
@@ -100,15 +101,13 @@
 									<ul class="list-group list-group-flush price-list mb-4">
 										<li th:each="con : ${cons}" class="list-group-item border-0" th:text="${con}"></li>
 									</ul>
-									
-									
 								</div>
 							</div>
 							<!-- End of Icon Box -->
 						</div>
 					</div>
 				</div>
-	</div>	   
+			</div>
 </section> 
 	   
 	   
