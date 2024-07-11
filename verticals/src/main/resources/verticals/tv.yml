@@ -98,18 +98,22 @@ i18n:
       aiConfigs:
 ##          rateLimitDelay: 3000
         rootPrompt: |
-            Ta réponse devra être au format JSON. N'inclue aucune explication, fournis uniquement une réponse JSON conforme à la norme RFC8259 en suivant ce format à la lettre. Supprime le balisage ```json de la sortie.
-            Nom de l'objet : [(${p.brand()})] [(${p.model()})] Caractéristiques : [(${p.caracteristics()})].
-            Génère un fichier JSON clé-valeur pour l'objet concerné répondant aux prompts suivants :      
+            Ta réponse devra être au format JSON. N'inclue aucune explication, fournis uniquement une réponse JSON conforme à la norme RFC8259. Supprime le balisage ```json de la sortie.
+          
+            Nom de l'objet : [(${p.brand()})] [(${p.model()})] 
+            Caractéristiques : 
+            [(${p.caracteristics()})]
+          
+            Génère un fichier JSON clé-valeur pour l'objet concerné répondant uniquement aux prompts suivants :      
 
         prompts: 
            - key: "global-description"
              prompt: |           
-                : Une description objective de l'objet, dans un style académique et ludique, uniquement du texte brut d'un maximum de 200 mots, en présentant les caractéristiques techniques principales.
+                : Rédige une description de l'objet en mettant en avant ses principales caractéristiques techniques. Le texte doit comporter entre 180 et 200 mots et être composé de deux paragraphes distincts, séparés par un point-virgule. Veille à ce que chaque paragraphe soit équilibré en termes de longueur.
    
            - key: "ecological-description"
              prompt: |           
-                : Une analyse détaillée de l'impact environnemental de l'objet, un texte de maximum 200 mots, dans un style écologique engagé mais objectif, en utilisant que du texte brut.
+                : Rédige une analyse de l'impact environnemental de  l'objet. Le texte doit comporter entre 180 et 200 mots et être composé de deux paragraphes distincts, séparés par un point-virgule. Veille à ce que chaque paragraphe soit équilibré en termes de longueur.
    
            - key: "pros"
              prompt: |           
