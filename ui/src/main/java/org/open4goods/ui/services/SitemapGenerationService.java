@@ -210,7 +210,7 @@ public class SitemapGenerationService {
 			.toList();
 			
 			for (Product data : datas) {
-				String url = data.url(language);
+				String url = vertical.getBaseUrl(language) + "/" + data.url(language);
 				LOGGER.info("Adding product page to sitemap : {}",url);
 				sitemap = sitemap.addPage(getWebPage(url, ChangeFreq.DAILY, 1.0, Date.from(Instant.ofEpochMilli(data.getLastChange()))));			
 			}
