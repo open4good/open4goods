@@ -273,7 +273,27 @@ public class OpenDataService implements HealthIndicator {
 		processAndAddToZip(zos, filename, barcodeType, false);
 	}
 
-	private void processAndAddToZip(ZipOutputStream zos, String filename, BarcodeType barcodeType, boolean invertCondition) throws IOException {}
+	private void processAndAddToZip(ZipOutputStream zos, String filename, BarcodeType barcodeType, boolean invertCondition) throws IOException {
+		ZipEntry entry = new ZipEntry(filename);
+		zos.putNextEntry(entry);
+		CSVWriter writer = new CSVWriter(new OutputStreamWriter(zos));
+		writer.writeNext(header);
+
+		AtomicLong count = new AtomicLong();
+		try {
+			aggregatedDataRepository.exportAll().filter(e ->
+					invertCondition ? !e.getGtinInfos().getUpcType().equals(barcodeType) : e.getGtinInfos().getUpcType().equals(barcodeType)
+			).forEach(e -> {
+				count.incrementAndGet();
+				writer.writeNext(toEntry(e));
+			});
+			writer.flush();
+			zos.closeEntry();
+			LOGGER.info("{} rows exported in {}.", count.get(), filename);
+		} catch (Exception e) {
+			LOGGER.error("Error during processing of {}: {}", filename, e.getMessage());
+		}
+	}
 
 
 
