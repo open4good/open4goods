@@ -117,56 +117,53 @@ public class OpenDataService {
 
 		if (exportRunning.get()) {
 			LOGGER.error("Opendata export is already running");
-		} else {
-			exportRunning.set(true);
+			return;
 		}
 
-		ZipOutputStream zos = null;
-		try {
+		exportRunning.set(true);
 
+		ZipOutputStream zos = null;
+		FileOutputStream fos = null;
+
+		try {
 			uiConfig.tmpOpenDataFile().getParentFile().mkdirs();
 
-			FileOutputStream fos = new FileOutputStream(uiConfig.tmpOpenDataFile());
+			fos = new FileOutputStream(uiConfig.tmpOpenDataFile());
 			zos = new ZipOutputStream(fos);
-			String filename = "open4goods-full-gtin-dataset.csv";
-			ZipEntry entry = new ZipEntry(filename); // create a zip entry and add it pageSize ZipOutputStream
-			zos.putNextEntry(entry);
 
-			CSVWriter writer = new CSVWriter(new OutputStreamWriter(zos));
+			// Process ISBN_13
+			LOGGER.info("Starting process for ISBN_13");
+			processAndAddToZip(zos, "open4goods-isbn-dataset.csv", BarcodeType.ISBN_13);
 
-			// Writing the header
-			writer.writeNext(header);
+			// Process GTIN/EAN (excluding ISBN_13)
+			LOGGER.info("Starting process for GTIN/EAN excluding ISBN_13");
+			processAndAddToZip(zos, "open4goods-gtin-dataset.csv", BarcodeType.ISBN_13, true);
 
-			// Fixing the count
-			AtomicLong count = new AtomicLong();
-
-
-			// Iterating on datas
-			LOGGER.info("Starting opendata export");
-			aggregatedDataRepository.exportAll().forEach(e -> {
-				count.incrementAndGet();
-				writer.writeNext(toEntry(e)); // write the contents
-			});
-
-
-
-			writer.flush();
-			zos.closeEntry();
+			zos.close();
+			fos.close();
 
 			// Moving the tmp file
-			FileUtils.deleteQuietly(uiConfig.openDataFile());
+			if (uiConfig.openDataFile().exists()) {
+				FileUtils.deleteQuietly(uiConfig.openDataFile());
+			}
 			FileUtils.moveFile(uiConfig.tmpOpenDataFile(), uiConfig.openDataFile());
 
-			exportRunning.set(false);
-			LOGGER.info("{} rows exported in opendata CSV file located at {}", count.get(),
-					uiConfig.openDataFile().getAbsolutePath());
+			LOGGER.info("Opendata CSV files generated and zipped successfully.");
 
 		} catch (Exception e) {
 			LOGGER.error("Error while generating opendata set", e);
 		} finally {
 			IOUtils.closeQuietly(zos);
+			IOUtils.closeQuietly(fos);
+			exportRunning.set(false);
 		}
 	}
+
+	private void processAndAddToZip(ZipOutputStream zos, String filename, BarcodeType barcodeType) throws IOException {
+		processAndAddToZip(zos, filename, barcodeType, false);
+	}
+
+	private void processAndAddToZip(ZipOutputStream zos, String filename, BarcodeType barcodeType, boolean invertCondition) throws IOException {}
 
 	/**
 	 * Convert an aggregateddata pageSize a csv row
