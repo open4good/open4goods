@@ -16,12 +16,12 @@ management:
     web:
       exposure:
         include:
-          - "*"          
+          - "*"
   endpoint:
-    health:      
+    health:
       enabled: true
       show-details: always
-      
+
 amazonConfig:
   affiliate-tag: nudger-21
   amazon-search-link: "https://www.amazon.fr/s?k={search_terms}&tag={affiliate_tag}"
@@ -161,7 +161,7 @@ blogConfig:
    feedDescription:
       default: "The Nudger blog, the best way to keep up with the latest news about eco-nudging"
       fr: "Le blog Nudger, la meilleure façon de suivre les dernières actualités sur l'éco-nudging"
-      
+
 # Configuration for the Image Generation service
 imageGenerationConfig:
   prompt: |
