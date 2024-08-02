@@ -140,7 +140,15 @@ public class OpenDataService implements HealthIndicator {
 			return;
 		}
 
+		exportRunning.set(true);
+			return;
+		}
+
+		ZipOutputStream zos = null;
+		FileOutputStream fos = null;
+
 		try {
+			uiConfig.tmpOpenDataFile().getParentFile().mkdirs();
 			prepareDirectories();
 			processDataFiles();
 			moveTmpFilesToFinalDestination();
@@ -189,6 +197,8 @@ public class OpenDataService implements HealthIndicator {
 		FileUtils.moveFile(src, dest);
 	}
 
+			fos = new FileOutputStream(uiConfig.tmpOpenDataFile());
+			zos = new ZipOutputStream(fos);
 	private void processAndCreateZip(String filename, BarcodeType barcodeType, File zipFile) throws IOException {
 		processAndCreateZip(filename, barcodeType, zipFile, false);
 	}
@@ -220,8 +230,17 @@ public class OpenDataService implements HealthIndicator {
 				types = new BarcodeType[]{BarcodeType.ISBN_13};
 			}
 
+			// Process ISBN_13
+			LOGGER.info("Starting process for ISBN_13");
+			processAndAddToZip(zos, "open4goods-isbn-dataset.csv", BarcodeType.ISBN_13);
+
+			// Process GTIN/EAN (excluding ISBN_13)
+			LOGGER.info("Starting process for GTIN/EAN excluding ISBN_13");
+			processAndAddToZip(zos, "open4goods-gtin-dataset.csv", BarcodeType.ISBN_13, true);
 			AtomicLong count = new AtomicLong();
 
+			zos.close();
+			fos.close();
 			aggregatedDataRepository.exportAll(types)
 					.forEach(e -> {
 						count.incrementAndGet();
@@ -231,12 +250,30 @@ public class OpenDataService implements HealthIndicator {
 			writer.flush();
 			zos.closeEntry();
 
+			// Moving the tmp file
+			if (uiConfig.openDataFile().exists()) {
+				FileUtils.deleteQuietly(uiConfig.openDataFile());
+			}
+			FileUtils.moveFile(uiConfig.tmpOpenDataFile(), uiConfig.openDataFile());
+
+			LOGGER.info("Opendata CSV files generated and zipped successfully.");
 			LOGGER.info("{} rows exported in {}.", count.get(), filename);
 
 		} catch (Exception e) {
+			LOGGER.error("Error while generating opendata set", e);
+		} finally {
+			IOUtils.closeQuietly(zos);
+			IOUtils.closeQuietly(fos);
+			exportRunning.set(false);
 			LOGGER.error("Error during processing of {}: {}", filename, e.getMessage());
 		}
 	}
+
+	private void processAndAddToZip(ZipOutputStream zos, String filename, BarcodeType barcodeType) throws IOException {
+		processAndAddToZip(zos, filename, barcodeType, false);
+	}
+
+	private void processAndAddToZip(ZipOutputStream zos, String filename, BarcodeType barcodeType, boolean invertCondition) throws IOException {}
 
 
 
