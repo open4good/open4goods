@@ -11,7 +11,7 @@ server:
 management:
   health:
     diskspace:
-      threshold: 100GB  
+      threshold: 100GB
   endpoints:
     web:
       exposure:
@@ -40,6 +40,7 @@ spring:
       enabled: true
 
       
+      
   mail:
 #   host: 
     port: 587
@@ -63,20 +64,20 @@ wikiPagesMapping:
   "[webpages/default/legal-notice/WebHome]":
     fr: "mentions-legales"
   "[webpages/opensource-contribution/WebHome]":
-      fr: "opensource/contribution-ecologique"    
+      fr: "opensource/contribution-ecologique"
 
 team-config:
   cores:
   - name: Goulven Furet
     title: CEO / CTO
-    linkedInUrl: https://www.linkedin.com/in/goulven-furet-b448b582/ 
+    linkedInUrl: https://www.linkedin.com/in/goulven-furet-b448b582/
     imageUrl: /assets/img/team/Goulven.jpeg
-  
+
   - name: Bérangère Leven
     title: Communication et pilotage
     linkedInUrl: https://www.linkedin.com/in/b%C3%A9rang%C3%A8re-leven/
     imageUrl: /assets/img/team/Berangere.jpeg
-    
+
   - name: Thomas Vandewalle
     title: Stratégie SEO & contenus
     linkedInUrl: https://www.linkedin.com/in/thomas-vandewalle-fr001/
@@ -85,13 +86,13 @@ team-config:
   - name: Louis-Marie Toudoire
     title: Développeur Backend
     linkedInUrl: https://www.linkedin.com/in/scezen/?originalSubdomain=fr
-    imageUrl: /assets/img/team/Louis-Marie.jpeg      
+    imageUrl: /assets/img/team/Louis-Marie.jpeg
 
   - name: Laurent Blondel
     title: Développeur & intégrateur frontend
     linkedInUrl: https://www.linkedin.com/in/laurent-blondel-33543532/
-    imageUrl: /assets/img/team/Laurent.jpeg            
-    
+    imageUrl: /assets/img/team/Laurent.jpeg
+
   - name: Max Ziliani
     title: Identité visuelle et artistique
     linkedInUrl: https://www.linkedin.com/in/maxziliani/
@@ -103,14 +104,14 @@ team-config:
     linkedInUrl: https://www.linkedin.com/in/thierry-ledan-43650a183/
     imageUrl: /assets/img/team/Thierry.jpeg
 
-    
+
   - name: Nicolas Bonamy
     title: Dev backend & infra
     linkedInUrl: https://www.linkedin.com/in/nicolas-bonamy-827b63a3/
     imageUrl: /assets/img/team/Nicolas.jpeg
-        
-      
-      
+
+
+
 apiConfig:
   apiTitle: "Open4goods API"
   apiDescription: "This API allows you to browse eco-nudger content"
@@ -129,7 +130,7 @@ feedbackConfig:
      
 reversement-config:
   contributed-organisations:
-    greenpeace: 
+    greenpeace:
       name: Green Peace
       img: /assets/img/greenpeace_logo.png
       url: https://www.greenpeace.fr/
@@ -139,7 +140,7 @@ reversement-config:
       img: /assets/img/goodplanet_logo.svg
       url: https://www.goodplanet.org/fr/
       description: La Fondation GoodPlanet, créée par Yann Arthus-Bertrand en 2005, est une organisation dédiée à la promotion du développement durable et de la sensibilisation environnementale. Elle œuvre pour la protection de la biodiversité, la lutte contre le changement climatique, et la promotion d'une transition écologique et solidaire. La fondation mène des projets éducatifs, organise des événements, et soutient des initiatives locales et internationales. Elle propose également des solutions concrètes pour réduire l'empreinte écologique, tout en favorisant l'engagement citoyen et en cultivant une prise de conscience collective autour des enjeux environnementaux.
-           
+
   reversements:
   - date: 2021-11-01
     amount: 72
