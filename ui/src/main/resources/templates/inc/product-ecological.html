@@ -86,11 +86,13 @@
 							
 						</div>
 						<div class="col-md-9">
-							
-							
-						   <th:block th:if="${product.aiDescriptions.get('ecological-description')}" id="evaluation-ecologique" class="card shadow border-gray-300 mt-3">
-                                       <p class="lead  p-4" th:utext="${product.aiDescriptions.get('ecological-description').content.text}"></p>
-                            </th:block>
+
+
+							<th:block th:if="${ecologicalDescriptionParagraphs}" id="evaluation-ecologique" class="card shadow border-gray-300 mt-3">
+								<p class="lead p-4">
+									<span th:each="paragraph : ${ecologicalDescriptionParagraphs}" th:utext="${paragraph + '<br/><br/>'}"></span>
+								</p>
+							</th:block>
                             
                             
                             

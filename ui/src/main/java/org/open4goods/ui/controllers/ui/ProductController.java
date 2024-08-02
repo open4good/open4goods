@@ -309,23 +309,33 @@ public class ProductController  {
 		
 		List<String> pros = null;
 		List<String> cons = null;
+		List<String> globalDescriptionParagraphs = null;
+		List<String> ecologicalDescriptionParagraphs = null;
 		
 		AiDescription ps = data.getAiDescriptions().get("pros");
 		if (null != ps) {
 			pros = (Arrays.asList(ps.getContent().getText().split("\n|<br/>|;")));
 		}
 		
-		
-		
 		AiDescription cs = data.getAiDescriptions().get("cons");
 		if (null != cs) {
 			cons = (Arrays.asList(cs.getContent().getText().split("\n|<br/>|;")));
 		}
 
+		AiDescription gd = data.getAiDescriptions().get("global-description");
+		if (gd != null) {
+			globalDescriptionParagraphs = Arrays.asList(gd.getContent().getText().split(";"));
+		}
+
+		AiDescription ed = data.getAiDescriptions().get("ecological-description");
+		if (ed != null) {
+			ecologicalDescriptionParagraphs = Arrays.asList(ed.getContent().getText().split(";"));
+		}
+
 		mv.addObject("pros", pros);
 		mv.addObject("cons", cons);
-		
-		
+		mv.addObject("globalDescriptionParagraphs", globalDescriptionParagraphs);
+		mv.addObject("ecologicalDescriptionParagraphs", ecologicalDescriptionParagraphs);
 		
 		// Building the pricetrend
 		
