@@ -155,7 +155,6 @@ public class OpenDataService {
 		FileUtils.moveFile(src, dest);
 	}
 
-
 	private void processAndCreateZip(String filename, BarcodeType barcodeType, File zipFile, boolean invertCondition) throws IOException {
 		try (FileOutputStream fos = new FileOutputStream(zipFile);
 			 ZipOutputStream zos = new ZipOutputStream(fos);
@@ -166,7 +165,7 @@ public class OpenDataService {
 			writer.writeNext(header);
 
 			AtomicLong count = new AtomicLong();
-			aggregatedDataRepository.exportAll().limit(500).filter(e ->
+			aggregatedDataRepository.exportAll().filter(e ->
 					invertCondition ? !e.getGtinInfos().getUpcType().equals(barcodeType) : e.getGtinInfos().getUpcType().equals(barcodeType)
 			).forEach(e -> {
 				count.incrementAndGet();
