@@ -1,12 +1,6 @@
 package org.open4goods.ui.services;
 
-import java.io.BufferedInputStream;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStreamWriter;
+import java.io.*;
 import java.text.CharacterIterator;
 import java.text.StringCharacterIterator;
 import java.time.Instant;
@@ -139,6 +133,27 @@ public class OpenDataService {
 		uiConfig.tmpIsbnZipFile().getParentFile().mkdirs();
 		uiConfig.tmpGtinZipFile().getParentFile().mkdirs();
 	}
+
+	private void processDataFiles() throws IOException {
+		LOGGER.info("Starting process for ISBN_13");
+		processAndCreateZip(ISBN_DATASET_FILENAME, BarcodeType.ISBN_13, uiConfig.tmpIsbnZipFile());
+
+		LOGGER.info("Starting process for GTIN/EAN");
+		processAndCreateZip(GTIN_DATASET_FILENAME, BarcodeType.ISBN_13, uiConfig.tmpGtinZipFile(), true);
+	}
+
+	private void moveTmpFilesToFinalDestination() throws IOException {
+		moveFile(uiConfig.tmpIsbnZipFile(), uiConfig.isbnZipFile());
+		moveFile(uiConfig.tmpGtinZipFile(), uiConfig.gtinZipFile());
+	}
+
+	private void moveFile(File src, File dest) throws IOException {
+		if (dest.exists()) {
+			FileUtils.deleteQuietly(dest);
+		}
+		FileUtils.moveFile(src, dest);
+	}
+
 
 	/**
 	 * Processes the data and adds it to the zip output stream.
