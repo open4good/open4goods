@@ -62,13 +62,14 @@ public class OpenDataService {
 
 	private AtomicInteger concurrentDownloads = new AtomicInteger(0);
 
-
-
+	private static final String ISBN_DATASET_FILENAME = "open4goods-isbn-dataset.csv";
+	private static final String GTIN_DATASET_FILENAME = "open4goods-gtin-dataset.csv";
 
 	@Autowired
-	public OpenDataService(ProductRepository aggregatedDataRepository, UiConfig uiConfig) {
+	public OpenDataService(ProductRepository aggregatedDataRepository, UiConfig uiConfig){
 		this.aggregatedDataRepository = aggregatedDataRepository;
 		this.uiConfig = uiConfig;
+		generateOpendata();
 	}
 
 	/**
@@ -80,10 +81,10 @@ public class OpenDataService {
 	 */
 	public InputStream limitedRateStream() throws TechnicalException, FileNotFoundException {
 
-		// TODO : pageNumber conf
+		// TODO : in conf
 		RateLimiter rateLimiter = RateLimiter.create(DOWNLOAD_SPEED_KB * FileUtils.ONE_KB);
 
-		// TODO : pageNumber conf
+		// TODO : in conf
 		if (concurrentDownloads.get() >= CONCURRENT_DOWNLOADS) {
 			throw new TechnicalException("Too many requests ");
 		} else {
@@ -108,11 +109,11 @@ public class OpenDataService {
 	}
 
 	/**
-	 * Iterates over all aggregatedData pageSize generate the zipped opendata CSV file
+	 * Iterates over all aggregated data to generate the zipped opendata CSV file.
 	 *
-	 * TODO : Schedule pageNumber conf
+	 * TODO : Schedule in conf
 	 */
-	@Scheduled(initialDelay = 1000L *3600, fixedDelay = 1000L * 3600 * 24 * 7)
+	//@Scheduled(initialDelay = 1000L *3600, fixedDelay = 1000L * 3600 * 24 * 7)
 	public void generateOpendata() {
 
 		if (exportRunning.get()) {
@@ -133,11 +134,11 @@ public class OpenDataService {
 
 			// Process ISBN_13
 			LOGGER.info("Starting process for ISBN_13");
-			processAndAddToZip(zos, "open4goods-isbn-dataset.csv", BarcodeType.ISBN_13);
+			processAndAddToZip(zos, ISBN_DATASET_FILENAME, BarcodeType.ISBN_13);
 
 			// Process GTIN/EAN (excluding ISBN_13)
-			LOGGER.info("Starting process for GTIN/EAN excluding ISBN_13");
-			processAndAddToZip(zos, "open4goods-gtin-dataset.csv", BarcodeType.ISBN_13, true);
+			LOGGER.info("Starting process for GTIN/EAN");
+			processAndAddToZip(zos, GTIN_DATASET_FILENAME, BarcodeType.ISBN_13, true);
 
 			zos.close();
 			fos.close();
@@ -163,6 +164,11 @@ public class OpenDataService {
 		processAndAddToZip(zos, filename, barcodeType, false);
 	}
 
+	/**
+	 * Processes the data and adds it to the zip output stream.
+	 *
+	 * @param invertCondition whether to invert the condition for filtering the data
+	 */
 	private void processAndAddToZip(ZipOutputStream zos, String filename, BarcodeType barcodeType, boolean invertCondition) throws IOException {
 		ZipEntry entry = new ZipEntry(filename);
 		zos.putNextEntry(entry);
@@ -207,7 +213,6 @@ public class OpenDataService {
 		line[4] = String.valueOf(data.getLastChange());
 		//		"gs1_country"
 		line[5] = data.getGtinInfos().getCountry();
-
 		//		"upcType"
 		line[6] = data.getGtinInfos().getUpcType().toString();
 
