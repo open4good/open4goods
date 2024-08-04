@@ -125,8 +125,8 @@ public class OpenDataService {
 		}
 	}
 
-	private void processAndAddToZip(ZipOutputStream zos, String filename, BarcodeType barcodeType) throws IOException {
-		processAndAddToZip(zos, filename, barcodeType, false);
+	private void processAndCreateZip(String filename, BarcodeType barcodeType, File zipFile) throws IOException {
+		processAndCreateZip(filename, barcodeType, zipFile, false);
 	}
 
 	private void prepareDirectories() throws IOException {
@@ -155,28 +155,25 @@ public class OpenDataService {
 	}
 
 
-	/**
-	 * Processes the data and adds it to the zip output stream.
-	 *
-	 * @param invertCondition whether to invert the condition for filtering the data
-	 */
-	private void processAndAddToZip(ZipOutputStream zos, String filename, BarcodeType barcodeType, boolean invertCondition) throws IOException {
-		ZipEntry entry = new ZipEntry(filename);
-		zos.putNextEntry(entry);
-		CSVWriter writer = new CSVWriter(new OutputStreamWriter(zos));
-		writer.writeNext(header);
+	private void processAndCreateZip(String filename, BarcodeType barcodeType, File zipFile, boolean invertCondition) throws IOException {
+		try (FileOutputStream fos = new FileOutputStream(zipFile);
+			 ZipOutputStream zos = new ZipOutputStream(fos);
+			 CSVWriter writer = new CSVWriter(new OutputStreamWriter(zos))) {
 
-		AtomicLong count = new AtomicLong();
-		try {
-			aggregatedDataRepository.exportAll().filter(e ->
+			ZipEntry entry = new ZipEntry(filename);
+			zos.putNextEntry(entry);
+			writer.writeNext(header);
+
+			AtomicLong count = new AtomicLong();
+			aggregatedDataRepository.exportAll().limit(500).filter(e ->
 					invertCondition ? !e.getGtinInfos().getUpcType().equals(barcodeType) : e.getGtinInfos().getUpcType().equals(barcodeType)
 			).forEach(e -> {
 				count.incrementAndGet();
 				writer.writeNext(toEntry(e));
 			});
-			writer.flush();
-			zos.closeEntry();
 			LOGGER.info("{} rows exported in {}.", count.get(), filename);
+
+			zos.closeEntry();
 		} catch (Exception e) {
 			LOGGER.error("Error during processing of {}: {}", filename, e.getMessage());
 		}
