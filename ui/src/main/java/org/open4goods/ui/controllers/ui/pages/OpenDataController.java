@@ -2,6 +2,8 @@ package org.open4goods.ui.controllers.ui.pages;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Arrays;
+import java.util.List;
 
 import org.apache.commons.io.IOUtils;
 import org.open4goods.commons.exceptions.TechnicalException;
@@ -53,6 +55,15 @@ public class OpenDataController  implements SitemapExposedController{
 	public SitemapEntry getExposedUrls() {
 		return SitemapEntry.of(SitemapEntry.LANGUAGE_DEFAULT, DEFAULT_PATH, 0.3, ChangeFreq.YEARLY);
 	}
+
+	@Override
+	public List<SitemapEntry> getMultipleExposedUrls() {
+		return Arrays.asList(
+				SitemapEntry.of(SitemapEntry.LANGUAGE_DEFAULT, DEFAULT_PATH, 0.3, ChangeFreq.YEARLY),
+				SitemapEntry.of(SitemapEntry.LANGUAGE_DEFAULT, "/opendata/gtin-open-data.zip", 0.3, ChangeFreq.YEARLY),
+				SitemapEntry.of(SitemapEntry.LANGUAGE_DEFAULT, "/opendata/isbn-open-data.zip", 0.3, ChangeFreq.YEARLY)
+		);
+	}
 	
 	@GetMapping(value = {DEFAULT_PATH})	
 	public ModelAndView opendata(final HttpServletRequest request) {
@@ -62,6 +73,16 @@ public class OpenDataController  implements SitemapExposedController{
 		ret.addObject("fileSize", openDataService.fileSize());
 		ret.addObject("page","open data");
 		return ret;
+	}
+
+	@GetMapping(path = "/opendata/gtin-open-data.zip")
+	public void downloadGtinData(final HttpServletResponse response) throws IOException {
+
+	}
+
+	@GetMapping(path = "/opendata/isbn-open-data.zip")
+	public void downloadIsbnData(final HttpServletResponse response) throws IOException {
+
 	}
 
 	@GetMapping(path = "/opendata/gtin-open-data.zip")
