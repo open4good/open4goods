@@ -114,53 +114,30 @@ public class OpenDataService {
 	 */
 	@Scheduled(initialDelay = 1000L *3600, fixedDelay = 1000L * 3600 * 24 * 7)
 	public void generateOpendata() {
-
-		if (exportRunning.get()) {
+		if (exportRunning.getAndSet(true)) {
 			LOGGER.error("Opendata export is already running");
 			return;
 		}
 
-		exportRunning.set(true);
-
-		ZipOutputStream zos = null;
-		FileOutputStream fos = null;
-
 		try {
-			uiConfig.tmpOpenDataFile().getParentFile().mkdirs();
-
-			fos = new FileOutputStream(uiConfig.tmpOpenDataFile());
-			zos = new ZipOutputStream(fos);
-
-			// Process ISBN_13
-			LOGGER.info("Starting process for ISBN_13");
-			processAndAddToZip(zos, ISBN_DATASET_FILENAME, BarcodeType.ISBN_13);
-
-			// Process GTIN/EAN (excluding ISBN_13)
-			LOGGER.info("Starting process for GTIN/EAN");
-			processAndAddToZip(zos, GTIN_DATASET_FILENAME, BarcodeType.ISBN_13, true);
-
-			zos.close();
-			fos.close();
-
-			// Moving the tmp file
-			if (uiConfig.openDataFile().exists()) {
-				FileUtils.deleteQuietly(uiConfig.openDataFile());
-			}
-			FileUtils.moveFile(uiConfig.tmpOpenDataFile(), uiConfig.openDataFile());
-
+			prepareDirectories();
+			processDataFiles();
+			moveTmpFilesToFinalDestination();
 			LOGGER.info("Opendata CSV files generated and zipped successfully.");
-
 		} catch (Exception e) {
 			LOGGER.error("Error while generating opendata set", e);
 		} finally {
-			IOUtils.closeQuietly(zos);
-			IOUtils.closeQuietly(fos);
 			exportRunning.set(false);
 		}
 	}
 
 	private void processAndAddToZip(ZipOutputStream zos, String filename, BarcodeType barcodeType) throws IOException {
 		processAndAddToZip(zos, filename, barcodeType, false);
+	}
+
+	private void prepareDirectories() throws IOException {
+		uiConfig.tmpIsbnZipFile().getParentFile().mkdirs();
+		uiConfig.tmpGtinZipFile().getParentFile().mkdirs();
 	}
 
 	/**
