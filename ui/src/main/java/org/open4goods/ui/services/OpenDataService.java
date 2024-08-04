@@ -69,7 +69,6 @@ public class OpenDataService {
 	public OpenDataService(ProductRepository aggregatedDataRepository, UiConfig uiConfig){
 		this.aggregatedDataRepository = aggregatedDataRepository;
 		this.uiConfig = uiConfig;
-		generateOpendata();
 	}
 
 	/**
@@ -113,7 +112,7 @@ public class OpenDataService {
 	 *
 	 * TODO : Schedule in conf
 	 */
-	//@Scheduled(initialDelay = 1000L *3600, fixedDelay = 1000L * 3600 * 24 * 7)
+	@Scheduled(initialDelay = 1000L *3600, fixedDelay = 1000L * 3600 * 24 * 7)
 	public void generateOpendata() {
 
 		if (exportRunning.get()) {
