@@ -64,7 +64,6 @@ public class OpenDataService {
 	public OpenDataService(ProductRepository aggregatedDataRepository, UiConfig uiConfig){
 		this.aggregatedDataRepository = aggregatedDataRepository;
 		this.uiConfig = uiConfig;
-		generateOpendata();
 	}
 
 	/**

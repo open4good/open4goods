@@ -68,8 +68,8 @@ public class OpenDataController  implements SitemapExposedController{
 	public List<SitemapEntry> getMultipleExposedUrls() {
 		return Arrays.asList(
 				SitemapEntry.of(SitemapEntry.LANGUAGE_DEFAULT, DEFAULT_PATH, 0.3, ChangeFreq.YEARLY),
-				SitemapEntry.of(SitemapEntry.LANGUAGE_DEFAULT, "/opendata/gtin-open-data.zip", 0.3, ChangeFreq.YEARLY),
-				SitemapEntry.of(SitemapEntry.LANGUAGE_DEFAULT, "/opendata/isbn-open-data.zip", 0.3, ChangeFreq.YEARLY)
+				SitemapEntry.of(SitemapEntry.LANGUAGE_DEFAULT, "/opendata/gtin", 0.3, ChangeFreq.YEARLY),
+				SitemapEntry.of(SitemapEntry.LANGUAGE_DEFAULT, "/opendata/isbn", 0.3, ChangeFreq.YEARLY)
 		);
 	}
 
@@ -82,6 +82,24 @@ public class OpenDataController  implements SitemapExposedController{
 		ret.addObject("gtinLastUpdated", openDataService.gtinLastUpdate());
 		ret.addObject("gtinFileSize", openDataService.gtinFileSize());
 		ret.addObject("page", "open data");
+		return ret;
+	}
+
+	@GetMapping(value = {DEFAULT_PATH + "/gtin"})
+	public ModelAndView opendataGtin(final HttpServletRequest request) {
+		final ModelAndView ret = uiService.defaultModelAndView("opendata-gtin", request);
+		ret.addObject("lastUpdated", openDataService.gtinLastUpdate());
+		ret.addObject("fileSize", openDataService.gtinFileSize());
+		ret.addObject("page", "gtin data");
+		return ret;
+	}
+
+	@GetMapping(value = {DEFAULT_PATH + "/isbn"})
+	public ModelAndView opendataIsbn(final HttpServletRequest request) {
+		final ModelAndView ret = uiService.defaultModelAndView("opendata-isbn", request);
+		ret.addObject("lastUpdated", openDataService.isbnLastUpdate());
+		ret.addObject("fileSize", openDataService.isbnFileSize());
+		ret.addObject("page", "isbn data");
 		return ret;
 	}
 
