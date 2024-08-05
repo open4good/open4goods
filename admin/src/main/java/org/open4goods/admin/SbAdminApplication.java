@@ -7,10 +7,10 @@ import de.codecentric.boot.admin.server.config.EnableAdminServer;
 
 @EnableAdminServer
 @SpringBootApplication
-public class AdminApplication {
+public class SbAdminApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(AdminApplication.class, args);
+		SpringApplication.run(SbAdminApplication.class, args);
 	}
 
 }
