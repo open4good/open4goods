@@ -1,4 +1,4 @@
-package org.open4goods.admin;
+package org.open4goods.admin.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
