@@ -63,6 +63,7 @@ public class OpenDataService {
 	public OpenDataService(ProductRepository aggregatedDataRepository, UiConfig uiConfig){
 		this.aggregatedDataRepository = aggregatedDataRepository;
 		this.uiConfig = uiConfig;
+		generateOpendata();
 	}
 
 	/**
@@ -164,15 +165,17 @@ public class OpenDataService {
 			writer.writeNext(header);
 
 			AtomicLong count = new AtomicLong();
-			aggregatedDataRepository.exportAll().filter(e ->
+			aggregatedDataRepository.exportAll().limit(500).filter(e ->
 					invertCondition ? !e.getGtinInfos().getUpcType().equals(barcodeType) : e.getGtinInfos().getUpcType().equals(barcodeType)
 			).forEach(e -> {
 				count.incrementAndGet();
 				writer.writeNext(toEntry(e));
 			});
+			writer.flush();
+			zos.closeEntry(); // Ensure the entry is closed before ending the try block
+
 			LOGGER.info("{} rows exported in {}.", count.get(), filename);
 
-			zos.closeEntry();
 		} catch (Exception e) {
 			LOGGER.error("Error during processing of {}: {}", filename, e.getMessage());
 		}
