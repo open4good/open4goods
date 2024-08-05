@@ -69,6 +69,9 @@ import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.Ticker;
 
+import io.micrometer.core.aop.TimedAspect;
+import io.micrometer.core.instrument.MeterRegistry;
+
 @Configuration
 public class AppConfig {
 
@@ -366,4 +369,10 @@ public class AppConfig {
 		return Ticker.systemTicker();
 	}
 
+	
+	@Bean
+	public TimedAspect timedAspect(MeterRegistry registry) {
+	  return new TimedAspect(registry);
+	}
+	
 }
