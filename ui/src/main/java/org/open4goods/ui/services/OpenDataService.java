@@ -232,22 +232,24 @@ public class OpenDataService {
 		concurrentDownloads.decrementAndGet();
 	}
 
-	/**
-	 * Return the file size in human readable way
-	 * @return
-	 */
-	@Cacheable(key = "#root.method.name", cacheNames = CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME)
-	public String fileSize() {
-		return humanReadableByteCountBin(uiConfig.openDataFile().length());
+	@Cacheable(key = "#root.method.name + 'Isbn'", cacheNames = CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME)
+	public String isbnFileSize() {
+		return humanReadableByteCountBin(uiConfig.isbnZipFile().length());
 	}
 
-	/**
-	 *
-	 * @return the last update date
-	 */
-	@Cacheable(key = "#root.method.name", cacheNames = CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME)
-	public Date lastUpdate() {
-		return Date.from(Instant.ofEpochMilli(uiConfig.openDataFile().lastModified()));
+	@Cacheable(key = "#root.method.name + 'Gtin'", cacheNames = CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME)
+	public String gtinFileSize() {
+		return humanReadableByteCountBin(uiConfig.gtinZipFile().length());
+	}
+
+	@Cacheable(key = "#root.method.name + 'Isbn'", cacheNames = CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME)
+	public Date isbnLastUpdate() {
+		return Date.from(Instant.ofEpochMilli(uiConfig.isbnZipFile().lastModified()));
+	}
+
+	@Cacheable(key = "#root.method.name + 'Gtin'", cacheNames = CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME)
+	public Date gtinLastUpdate() {
+		return Date.from(Instant.ofEpochMilli(uiConfig.gtinZipFile().lastModified()));
 	}
 
 	/**
