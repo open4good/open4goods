@@ -20,7 +20,6 @@
 		<jacoco.version>0.8.12</jacoco.version>
 		<xwiki.version>11.10.2</xwiki.version>
 
-		<!-- To exclude springboot dependency management -->
 		<processDependencyManagement>false</processDependencyManagement>
 		<processPluginDependenciesInPluginManagement>true</processPluginDependenciesInPluginManagement>
 		<maven-compiler-plugin-version>3.13.0</maven-compiler-plugin-version>
@@ -30,6 +29,7 @@
 	</properties>
 
 	<modules>
+		<module>admin</module>
 		<module>commons</module>
 		<module>verticals</module>
 		<module>crawler</module>
