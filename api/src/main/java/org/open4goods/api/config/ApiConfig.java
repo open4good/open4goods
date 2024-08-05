@@ -83,6 +83,8 @@ import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.Ticker;
 
+import io.micrometer.core.aop.TimedAspect;
+import io.micrometer.core.instrument.MeterRegistry;
 //import io.micrometer.core.aop.TimedAspect;
 //import io.micrometer.core.instrument.MeterRegistry;
 import io.swagger.v3.oas.models.Components;
@@ -544,6 +546,12 @@ public class ApiConfig {
 		};
 	}
 
+	
+	@Bean
+	public TimedAspect timedAspect(MeterRegistry registry) {
+	  return new TimedAspect(registry);
+	}
+	
 
 
 }
