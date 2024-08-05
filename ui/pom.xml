@@ -1,91 +1,100 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-	<modelVersion>4.0.0</modelVersion>
-	<artifactId>ui</artifactId>
-	<name>ui</name>
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <artifactId>ui</artifactId>
+    <name>ui</name>
 
-	<parent>
-		<groupId>org.open4goods</groupId>
-		<artifactId>org.open4goods</artifactId>
-		<version>0.0.1-SNAPSHOT</version>
-	</parent>
+    <parent>
+        <groupId>org.open4goods</groupId>
+        <artifactId>org.open4goods</artifactId>
+        <version>0.0.1-SNAPSHOT</version>
+    </parent>
 
-	<properties>
-		<start-class>org.open4goods.ui.Ui</start-class>
-		<main.basedir>${basedir}/../..</main.basedir>
-	</properties>
+    <dependencies>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-actuator</artifactId>
+        </dependency>
 
-	<dependencies>
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-actuator</artifactId>
-		</dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-docker-compose</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-devtools</artifactId>
+            <optional>true</optional>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-security</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>de.codecentric</groupId>
+            <artifactId>spring-boot-admin-starter-client</artifactId>
+            <version>3.3.3</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-security</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.open4goods</groupId>
+            <artifactId>xwiki-spring-boot-starter</artifactId>
+            <version>0.0.1</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.opencsv</groupId>
+            <artifactId>opencsv</artifactId>
+            <version>5.9</version>
+        </dependency>
+        <dependency>
+            <groupId>com.google.apis</groupId>
+            <artifactId>google-api-services-indexing</artifactId>
+            <version>v3-rev20230927-2.0.0</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.rometools</groupId>
+            <artifactId>rome</artifactId>
+            <version>2.1.0</version>
+        </dependency>
+
+        <!-- verticals definitions -->
+        <dependency>
+            <groupId>org.open4goods</groupId>
+            <artifactId>verticals</artifactId>
+            <version>${global.version}</version>
+        </dependency>
+
+        <!-- Commons  -->
+        <dependency>
+            <groupId>org.open4goods</groupId>
+            <artifactId>commons</artifactId>
+            <version>${global.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.talanlabs</groupId>
+            <artifactId>avatar-generator</artifactId>
+            <version>1.1.0</version>
+        </dependency>
 
 
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-docker-compose</artifactId>
-		</dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-aspects</artifactId>
+        </dependency>
 
-
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-devtools</artifactId>
-			<optional>true</optional>
-		</dependency>
-
-
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-security</artifactId>
-		</dependency>
-
-		<dependency>
-			<groupId>org.open4goods</groupId>
-			<artifactId>xwiki-spring-boot-starter</artifactId>
-			<version>0.0.1</version>
-		</dependency>
-
-		<dependency>
-			<groupId>com.opencsv</groupId>
-			<artifactId>opencsv</artifactId>
-			<version>5.9</version>
-		</dependency>
-		<dependency>
-			<groupId>com.google.apis</groupId>
-			<artifactId>google-api-services-indexing</artifactId>
-			<version>v3-rev20230927-2.0.0</version>
-		</dependency>
-
-		<dependency>
-			<groupId>com.rometools</groupId>
-			<artifactId>rome</artifactId>
-			<version>2.1.0</version>
-		</dependency>
-
-		<!-- verticals definitions -->
-		<dependency>
-			<groupId>org.open4goods</groupId>
-			<artifactId>verticals</artifactId>
-			<version>${global.version}</version>
-		</dependency>
-
-		<!-- Commons  -->
-		<dependency>
-			<groupId>org.open4goods</groupId>
-			<artifactId>commons</artifactId>
-			<version>${global.version}</version>
-		</dependency>
-
-		<dependency>
-			<groupId>com.talanlabs</groupId>
-			<artifactId>avatar-generator</artifactId>
-			<version>1.1.0</version>
-		</dependency>
-
-		<!-- 
+        <!-- 
 
 		<dependency>
 			<groupId>com.talanlabs</groupId>
@@ -100,161 +109,160 @@
 		</dependency>
 -->
 
-		<dependency>
-			<groupId>jakarta.mail</groupId>
-			<artifactId>jakarta.mail-api</artifactId>
-			<scope>provided</scope>
-		</dependency>
+        <dependency>
+            <groupId>jakarta.mail</groupId>
+            <artifactId>jakarta.mail-api</artifactId>
+            <scope>provided</scope>
+        </dependency>
 
-		<dependency>
-			<groupId>org.eclipse.angus</groupId>
-			<artifactId>jakarta.mail</artifactId>
+        <dependency>
+            <groupId>org.eclipse.angus</groupId>
+            <artifactId>jakarta.mail</artifactId>
 
-		</dependency>
+        </dependency>
 
-		<dependency>
-			<groupId>com.talanlabs</groupId>
-			<artifactId>avatar-generator-8bit</artifactId>
-			<version>1.1.0</version>
-		</dependency>
+        <dependency>
+            <groupId>com.talanlabs</groupId>
+            <artifactId>avatar-generator-8bit</artifactId>
+            <version>1.1.0</version>
+        </dependency>
 
-		<!--
+        <!--
 		https://mvnrepository.com/artifact/com.github.dfabulich/sitemapgen4j -->
-		<dependency>
-			<groupId>cz.jiripinkas</groupId>
-			<artifactId>jsitemapgenerator</artifactId>
-			<version>4.5</version>
-		</dependency>
+        <dependency>
+            <groupId>cz.jiripinkas</groupId>
+            <artifactId>jsitemapgenerator</artifactId>
+            <version>4.5</version>
+        </dependency>
 
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-thymeleaf</artifactId>
-		</dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-thymeleaf</artifactId>
+        </dependency>
 
-		<!-- web -->
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-web</artifactId>
-			<exclusions>
-				<exclusion>
-					<groupId>org.springframework.boot</groupId>
-					<artifactId>spring-boot-starter-tomcat</artifactId>
-				</exclusion>
-			</exclusions>
-		</dependency>
+        <!-- web -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.springframework.boot</groupId>
+                    <artifactId>spring-boot-starter-tomcat</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
 
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-cache</artifactId>
-		</dependency>
+        <!-- servlet container -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-undertow</artifactId>
+            <!-- <scope>provided</scope> -->
+        </dependency>
 
-
-		<!-- servlet container -->
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-undertow</artifactId>
-			<!-- <scope>provided</scope> -->
-		</dependency>
-
-
-		<!-- Webjars-->
-		<dependency>
-			<groupId>org.webjars</groupId>
-			<artifactId>webjars-locator</artifactId>
-			<version>0.52</version>
-		</dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-cache</artifactId>
+        </dependency>
 
 
-		<dependency>
-			<groupId>org.webjars</groupId>
-			<artifactId>bootstrap</artifactId>
-			<version>5.3.3</version>
-		</dependency>
-		<dependency>
-			<groupId>org.webjars</groupId>
-			<artifactId>jquery</artifactId>
-			<version>3.7.1</version>
-		</dependency>
-
-		<dependency>
-			<groupId>org.webjars</groupId>
-			<artifactId>datatables</artifactId>
-			<version>2.0.7</version>
-		</dependency>
-
-		<dependency>
-			<groupId>org.webjars</groupId>
-			<artifactId>datatables-responsive</artifactId>
-			<version>2.2.7</version>
-		</dependency>
+        <!-- Webjars-->
+        <dependency>
+            <groupId>org.webjars</groupId>
+            <artifactId>webjars-locator</artifactId>
+            <version>0.52</version>
+        </dependency>
 
 
-		<dependency>
-			<groupId>org.webjars.npm</groupId>
-			<artifactId>mustache</artifactId>
-			<version>4.2.0</version>
-		</dependency>
+        <dependency>
+            <groupId>org.webjars</groupId>
+            <artifactId>bootstrap</artifactId>
+            <version>5.3.3</version>
+        </dependency>
+        <dependency>
+            <groupId>org.webjars</groupId>
+            <artifactId>jquery</artifactId>
+            <version>3.7.1</version>
+        </dependency>
 
-		<dependency>
-			<groupId>org.webjars</groupId>
-			<artifactId>chartjs</artifactId>
-			<version>4.1.2</version>
-		</dependency>
+        <dependency>
+            <groupId>org.webjars</groupId>
+            <artifactId>datatables</artifactId>
+            <version>2.0.7</version>
+        </dependency>
 
-
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-configuration-processor</artifactId>
-			<optional>true</optional>
-		</dependency>
-	</dependencies>
-
-	<build>
-		<plugins>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-jar-plugin</artifactId>
-				<version>3.4.2</version>
-				<configuration>
-					<excludes>
-						<!-- This is where the exclusion occurs -->
-						<exclude>**/application-devsec.yml</exclude>
-					</excludes>
-				</configuration>
-			</plugin>
-			<plugin>
-				<groupId>org.springframework.boot</groupId>
-				<artifactId>spring-boot-maven-plugin</artifactId>
-				<executions>
-					<execution>
-						<goals>
-							<goal>repackage</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
-
-			<plugin>
-				<groupId>org.springframework.boot</groupId>
-				<artifactId>spring-boot-maven-plugin</artifactId>
-				<version>${springboot.version}</version>
-				<executions>
-					<execution>
-						<goals>
-							<goal>repackage</goal>
-						</goals>
-					</execution>
-				</executions>
-
-				<configuration>
-					<layers>
-						<enabled>true</enabled>
-						<includeLayerTools>true</includeLayerTools>
-					</layers>
-				</configuration>
+        <dependency>
+            <groupId>org.webjars</groupId>
+            <artifactId>datatables-responsive</artifactId>
+            <version>2.2.7</version>
+        </dependency>
 
 
-			</plugin>
-		</plugins>
-	</build>
+        <dependency>
+            <groupId>org.webjars.npm</groupId>
+            <artifactId>mustache</artifactId>
+            <version>4.2.0</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.webjars</groupId>
+            <artifactId>chartjs</artifactId>
+            <version>4.1.2</version>
+        </dependency>
+
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-configuration-processor</artifactId>
+            <optional>true</optional>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>3.4.2</version>
+                <configuration>
+                    <excludes>
+                        <!-- This is where the exclusion occurs -->
+                        <exclude>**/application-devsec.yml</exclude>
+                    </excludes>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>repackage</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+                <version>${springboot.version}</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>repackage</goal>
+                        </goals>
+                    </execution>
+                </executions>
+
+                <configuration>
+                    <layers>
+                        <enabled>true</enabled>
+                        <includeLayerTools>true</includeLayerTools>
+                    </layers>
+                </configuration>
+
+
+            </plugin>
+        </plugins>
+    </build>
 </project>

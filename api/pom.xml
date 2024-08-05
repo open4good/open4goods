@@ -11,11 +11,6 @@
 		<version>0.0.1-SNAPSHOT</version>
 	</parent>
 
-	<properties>
-		<start-class>org.open4goods.api.Api</start-class>
-		<main.basedir>${basedir}/../..</main.basedir>
-	</properties>
-
 
 	<dependencies>
 
@@ -122,7 +117,10 @@
 		</dependency>
 
 		<!-- API DOC -->
-
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-aspects</artifactId>
+        </dependency>
 
 		<dependency>
 			<groupId>org.springdoc</groupId>
