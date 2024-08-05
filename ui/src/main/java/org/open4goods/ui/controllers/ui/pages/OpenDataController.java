@@ -1,12 +1,15 @@
 package org.open4goods.ui.controllers.ui.pages;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
 import java.util.List;
 
 import org.apache.commons.io.IOUtils;
-import org.open4goods.commons.exceptions.TechnicalException;
+import org.open4goods.exceptions.TechnicalException;
+import org.open4goods.ui.config.yml.UiConfig;
 import org.open4goods.ui.controllers.ui.UiService;
 import org.open4goods.ui.services.OpenDataService;
 import org.slf4j.Logger;
@@ -38,8 +41,13 @@ public class OpenDataController  implements SitemapExposedController{
 	// The siteConfig
 	private final OpenDataService openDataService;
 	private @Autowired UiService uiService;
-	public OpenDataController(OpenDataService openDataService) {
+	private final UiConfig uiConfig;
+
+
+	@Autowired
+	public OpenDataController(OpenDataService openDataService, UiConfig uiConfig) {
 		this.openDataService = openDataService;
+		this.uiConfig = uiConfig;
 	}
 
 	/**
@@ -64,39 +72,37 @@ public class OpenDataController  implements SitemapExposedController{
 				SitemapEntry.of(SitemapEntry.LANGUAGE_DEFAULT, "/opendata/isbn-open-data.zip", 0.3, ChangeFreq.YEARLY)
 		);
 	}
-	
-	@GetMapping(value = {DEFAULT_PATH})	
+
+	@GetMapping(value = {DEFAULT_PATH})
 	public ModelAndView opendata(final HttpServletRequest request) {
 		final ModelAndView ret = uiService.defaultModelAndView("opendata", request);
 		ret.addObject("count", openDataService.totalItems());
-		ret.addObject("lastUpdated", openDataService.lastUpdate());
-		ret.addObject("fileSize", openDataService.fileSize());
-		ret.addObject("page","open data");
+		ret.addObject("isbnLastUpdated", openDataService.isbnLastUpdate());
+		ret.addObject("isbnFileSize", openDataService.isbnFileSize());
+		ret.addObject("gtinLastUpdated", openDataService.gtinLastUpdate());
+		ret.addObject("gtinFileSize", openDataService.gtinFileSize());
+		ret.addObject("page", "open data");
 		return ret;
 	}
 
 	@GetMapping(path = "/opendata/gtin-open-data.zip")
 	public void downloadGtinData(final HttpServletResponse response) throws IOException {
-
+		downloadData(response, "gtin-open-data.zip", uiConfig.gtinZipFile());
 	}
 
 	@GetMapping(path = "/opendata/isbn-open-data.zip")
 	public void downloadIsbnData(final HttpServletResponse response) throws IOException {
-
+		downloadData(response, "isbn-open-data.zip", uiConfig.isbnZipFile());
 	}
 
-	@GetMapping(path = "/opendata/gtin-open-data.zip")
-	public void opensearch(final HttpServletResponse response) throws IOException {
-		try (InputStream str = openDataService.limitedRateStream()){
+	private void downloadData(final HttpServletResponse response, String fileName, File zipFile) throws IOException {
+		try (InputStream str = new FileInputStream(zipFile)) {
 			response.setHeader("Content-type", "application/octet-stream");
-			response.setHeader("Content-Disposition", "attachment; filename=\"gtin-open-data.zip\"");
+			response.setHeader("Content-Disposition", "attachment; filename=\"" + fileName + "\"");
 			IOUtils.copy(str, response.getOutputStream());
 		} catch (IOException e) {
-			LOGGER.error("opendata file download error or interruption : {}",e.getMessage());
+			LOGGER.error("opendata file download error or interruption : {}", e.getMessage());
 			openDataService.decrementDownloadCounter();
-		} catch (TechnicalException e) {
-			response.sendError(429, "Exceding the " + OpenDataService.CONCURRENT_DOWNLOADS + " concurrent downloads availlable");
-			LOGGER.error("opendata file download error : {}",e.getMessage());
 		}
 	}
 
