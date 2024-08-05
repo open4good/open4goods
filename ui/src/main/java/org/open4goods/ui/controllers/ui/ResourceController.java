@@ -1,29 +1,33 @@
 package org.open4goods.ui.controllers.ui;
 
-import java.io.*;
+import java.io.BufferedInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.net.URLConnection;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
-import org.open4goods.config.yml.ui.VerticalConfig;
 import org.open4goods.exceptions.InvalidParameterException;
 import org.open4goods.exceptions.TechnicalException;
 import org.open4goods.exceptions.ValidationException;
 import org.open4goods.model.data.Resource;
-import org.open4goods.services.*;
+import org.open4goods.services.BrandService;
+import org.open4goods.services.DataSourceConfigService;
+import org.open4goods.services.ImageGenerationService;
+import org.open4goods.services.ResourceService;
 import org.open4goods.ui.config.AppConfig;
 import org.open4goods.ui.config.yml.UiConfig;
 import org.open4goods.ui.services.GtinService;
-import org.open4goods.ui.services.ImageService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.server.ResponseStatusException;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -44,7 +48,6 @@ public class ResourceController {
 	private static final String HEADER_CACHE_CONTROL = "Cache-Control";
 
 	
-	private final ImageService imageService;
 	private final ImageGenerationService imageGenerationService;
 	private final UiConfig config;
 	private final DataSourceConfigService datasourceConfigService;
@@ -52,8 +55,7 @@ public class ResourceController {
 	private final ResourceService resourceService;
 	private final GtinService gtinService;
 
-	public ResourceController(ImageService imageService,  UiConfig config, DataSourceConfigService dsConfigService, ResourceService resourceService, BrandService brandService, ImageGenerationService imageGenerationService, GtinService gtinService) {
-		this.imageService = imageService;
+	public ResourceController( UiConfig config, DataSourceConfigService dsConfigService, ResourceService resourceService, BrandService brandService, ImageGenerationService imageGenerationService, GtinService gtinService) {
 		this.imageGenerationService = imageGenerationService;
 		this.config = config;
 		this.datasourceConfigService = dsConfigService;

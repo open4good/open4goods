@@ -36,7 +36,6 @@ import org.open4goods.ui.controllers.ui.UiService;
 import org.open4goods.ui.services.BlogService;
 import org.open4goods.ui.services.GoogleIndexationService;
 import org.open4goods.ui.services.GtinService;
-import org.open4goods.ui.services.ImageService;
 import org.open4goods.ui.services.OpenDataService;
 import org.open4goods.ui.services.SitemapGenerationService;
 import org.open4goods.ui.services.todo.TodoService;
@@ -151,12 +150,6 @@ public class AppConfig {
 		return new FeedbackService(config.getFeedbackConfig());
 	}
 
-	  
-	
-	@Bean
-	ImageService imageService(@Autowired ImageMagickService imageMagickService, @Autowired ResourceService resourceService) {
-		return new ImageService(imageMagickService, resourceService);
-	}
 
 	@Bean
 	@Autowired
