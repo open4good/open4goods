@@ -34,15 +34,35 @@ import com.opencsv.CSVWriter;
  *
  * @author Goulven.Furet
  *
+ * TODO : Methods comments
+ * 
+ * 
+ * TODO : Add the below attributes only for ISBN dataset 
+ * 
+ * CLASSIFICATION DECITRE 1	Loisirs et Jeux	 1
+CLASSIFICATION DECITRE 2	Jeux et activités	 1
+CLASSIFICATION DECITRE 3	Coloriage Gommettes Autocollants
+EDITEUR
+FORMAT
+
+NB DE PAGES
+SOUSCATEGORIE	Enfant-jeunesse	 1
+SOUSCATEGORIE2	Sport-et-loisirs
+ * 
+ * 
  */
 public class OpenDataService {
 
-	// Allowed download speed in kb
-	private static final int DOWNLOAD_SPEED_KB = 256;
+	private static final Logger LOGGER = LoggerFactory.getLogger(OpenDataService.class);
 
+	// Allowed download speed in kb
+	// TODO : In config (OpenDataConfig)
+	private static final int DOWNLOAD_SPEED_KB = 256;
 	public static final int CONCURRENT_DOWNLOADS = 4;
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(OpenDataService.class);
+	
+	private static final String ISBN_DATASET_FILENAME = "open4goods-isbn-dataset.csv";
+	private static final String GTIN_DATASET_FILENAME = "open4goods-gtin-dataset.csv";
 
 	// The headers
 	private static final String[] header = { "code", "brand", "model", "name", "last_updated", "gs1_country", "gtinType",
@@ -54,12 +74,9 @@ public class OpenDataService {
 	// The flag that indicates wether opendata export is running or not
 	private AtomicBoolean exportRunning = new AtomicBoolean(false);
 
-	private AtomicInteger concurrentDownloads = new AtomicInteger(0);
+	private AtomicInteger concurrentDownloadsCounter = new AtomicInteger(0);
 
-	private static final String ISBN_DATASET_FILENAME = "open4goods-isbn-dataset.csv";
-	private static final String GTIN_DATASET_FILENAME = "open4goods-gtin-dataset.csv";
 
-	@Autowired
 	public OpenDataService(ProductRepository aggregatedDataRepository, UiConfig uiConfig){
 		this.aggregatedDataRepository = aggregatedDataRepository;
 		this.uiConfig = uiConfig;
@@ -78,10 +95,10 @@ public class OpenDataService {
 		RateLimiter rateLimiter = RateLimiter.create(DOWNLOAD_SPEED_KB * FileUtils.ONE_KB);
 
 		// TODO : in conf
-		if (concurrentDownloads.get() >= CONCURRENT_DOWNLOADS) {
+		if (concurrentDownloadsCounter.get() >= CONCURRENT_DOWNLOADS) {
 			throw new TechnicalException("Too many requests ");
 		} else {
-			concurrentDownloads.incrementAndGet();
+			concurrentDownloadsCounter.incrementAndGet();
 		}
 
 		try {
@@ -91,12 +108,12 @@ public class OpenDataService {
 				@Override
 				public void close() throws IOException {
 					super.close();
-					concurrentDownloads.decrementAndGet();
+					concurrentDownloadsCounter.decrementAndGet();
 					LOGGER.info("Ending opendata dataset download");
 				}
 			};
 		} catch (IOException e) {
-			concurrentDownloads.decrementAndGet();
+			concurrentDownloadsCounter.decrementAndGet();
 			throw e;
 		}
 	}
@@ -106,7 +123,7 @@ public class OpenDataService {
 	 *
 	 * TODO : Schedule in conf
 	 */
-	@Scheduled(initialDelay = 1000L *3600, fixedDelay = 1000L * 3600 * 24 * 7)
+	@Scheduled(  initialDelay = 1000L *3600, fixedDelay = 1000L * 3600 * 24 * 7)
 	public void generateOpendata() {
 		if (exportRunning.getAndSet(true)) {
 			LOGGER.error("Opendata export is already running");
@@ -164,6 +181,7 @@ public class OpenDataService {
 			writer.writeNext(header);
 
 			AtomicLong count = new AtomicLong();
+			// TODO : Remove before MEP
 			aggregatedDataRepository.exportAll().limit(500).filter(e ->
 					invertCondition ? !e.getGtinInfos().getUpcType().equals(barcodeType) : e.getGtinInfos().getUpcType().equals(barcodeType)
 			).forEach(e -> {
@@ -171,6 +189,8 @@ public class OpenDataService {
 				writer.writeNext(toEntry(e));
 			});
 			writer.flush();
+			
+
 			zos.closeEntry(); // Ensure the entry is closed before ending the try block
 
 			LOGGER.info("{} rows exported in {}.", count.get(), filename);
@@ -231,7 +251,7 @@ public class OpenDataService {
 	 * (user stop the download)
 	 */
 	public void decrementDownloadCounter() {
-		concurrentDownloads.decrementAndGet();
+		concurrentDownloadsCounter.decrementAndGet();
 	}
 
 	@Cacheable(key = "#root.method.name + 'Isbn'", cacheNames = CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME)
