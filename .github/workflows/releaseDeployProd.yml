@@ -205,7 +205,7 @@ jobs:
         env:
             SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
             ARGS: "-rltgoDzvO --delete"
-            SOURCE: "/api/target/admin-0.0.1-SNAPSHOT.jar"
+            SOURCE: "/admin/target/admin-0.0.1-SNAPSHOT.jar"
             REMOTE_HOST: ${{ secrets.REMOTE_HOST }}
             REMOTE_USER: ${{ secrets.REMOTE_USER }}
             TARGET: "/opt/open4goods/bin/latest/sbadmin-latest.jar"     
