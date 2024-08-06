@@ -97,7 +97,21 @@ jobs:
                 
       - name: Build and test with Maven
         run: mvn --batch-mode --update-snapshots install
+
+      ############################################
+      # Deploy sbadmin JAR to qualification environment
+      ###########################################    
                 
+      - name: Deploy SBADMIN to qualification server
+        uses: easingthemes/ssh-deploy@main
+        env:
+            SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+            ARGS: "-rltgoDzvO --delete"
+            SOURCE: "/api/target/admin-0.0.1-SNAPSHOT.jar"
+            REMOTE_HOST: ${{ secrets.REMOTE_BETA_HOST }}
+            REMOTE_USER: ${{ secrets.REMOTE_BETA_USER }}
+            TARGET: "/opt/open4goods/bin/latest/sbadmin-latest.jar"  
+                                      
       ############################################
       # Deploy api JAR to qualification environment
       ###########################################    

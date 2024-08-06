@@ -113,17 +113,17 @@ public class AppConfig {
 	@Bean UiService uiService () {
 		return new UiService();
 	}
-	
-	
-	@Bean
-	@Autowired
-	public DevModeService devModeService (ProductRepository repository, SerialisationService serialisationService, VerticalsConfigService verticalsConfigService) {
+
+
+    @Bean
+    @Autowired
+    DevModeService devModeService(ProductRepository repository, SerialisationService serialisationService, VerticalsConfigService verticalsConfigService) {
 		return new DevModeService(config.getDevModeConfig(),repository, serialisationService, verticalsConfigService);
 	}
-	
-	
-	  @Bean
-	  public RedisTemplate<String, Product> redisTemplate(RedisConnectionFactory connectionFactory) {
+
+
+    @Bean
+    RedisTemplate<String, Product> redisTemplate(RedisConnectionFactory connectionFactory) {
 		  RedisTemplate<String, Product> template = new RedisTemplate<>();
 		    template.setConnectionFactory(connectionFactory);
 		    
@@ -135,16 +135,15 @@ public class AppConfig {
 		    // Add some specific configuration here. Key serializers, etc.
 		    return template;
 	  }
-	  
-	  
-	  
+
+
     @Bean
-	public BlogService blogService(@Autowired XwikiFacadeService xwikiReadService, @Autowired UiConfig config) {
+    BlogService blogService(@Autowired XwikiFacadeService xwikiReadService, @Autowired UiConfig config) {
 		return new BlogService(xwikiReadService, config.getBlogConfig(), config.getNamings().getBaseUrls());
 	}
 
-	@Bean
-	public ImageGenerationService imageGenerationService(@Autowired OpenAiImageModel imageModel, @Autowired UiConfig uiConfig) {
+    @Bean
+    ImageGenerationService imageGenerationService(@Autowired OpenAiImageModel imageModel, @Autowired UiConfig uiConfig) {
 		return new ImageGenerationService(imageModel, uiConfig.getImageGenerationConfig(), uiConfig.getGeneratedImagesFolder());
 	}
 	  
@@ -161,10 +160,9 @@ public class AppConfig {
 	}
 
 
-
-	/** Override the default RestTemplate with a custom one that has a longer timeout (For ImageGenerationService) **/
-	@Bean
-	public RestClientCustomizer restClientCustomizer() {
+    /** Override the default RestTemplate with a custom one that has a longer timeout (For ImageGenerationService) **/
+    @Bean
+    RestClientCustomizer restClientCustomizer() {
 		return restClientBuilder -> restClientBuilder
 				.requestFactory(ClientHttpRequestFactories.get(ClientHttpRequestFactorySettings.DEFAULTS
 						.withConnectTimeout(Duration.ofSeconds(60))
@@ -276,10 +274,10 @@ public class AppConfig {
 	@Bean RemoteFileCachingService remoteFileCachingService() {
 		return new RemoteFileCachingService(config.getRemoteCachingFolder());
 	}
-	
+
+    // TODO : should not be required at ui side
     @Bean
-	// TODO : should not be required at ui side
-    public GoogleTaxonomyService googleTaxonomyService(@Autowired RemoteFileCachingService remoteFileCachingService) {
+    GoogleTaxonomyService googleTaxonomyService(@Autowired RemoteFileCachingService remoteFileCachingService) {
 		GoogleTaxonomyService gts = new GoogleTaxonomyService(remoteFileCachingService);
 		
 		// TODO : From conf 
@@ -341,11 +339,15 @@ public class AppConfig {
 		return firewall;
 	}
 
+	@Bean
+	TimedAspect timedAspect(MeterRegistry registry) {
+		return new TimedAspect(registry);
+	}
 
 
 
 	//////////////////////////////////////////////
-	// The uidMap managers
+	// The cache managers
 	//////////////////////////////////////////////
 
 	@Bean
@@ -369,10 +371,6 @@ public class AppConfig {
 		return Ticker.systemTicker();
 	}
 
-	
-	@Bean
-	public TimedAspect timedAspect(MeterRegistry registry) {
-	  return new TimedAspect(registry);
-	}
+
 	
 }

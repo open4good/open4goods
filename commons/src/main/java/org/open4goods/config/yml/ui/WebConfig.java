@@ -1,11 +1,13 @@
 package org.open4goods.config.yml.ui;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class WebConfig {
 
 	public static final String PRODUCT_MONOPAGE_TEMPLATE = "pages/product";
 
 	public static final String PRODUCT_MULTIPAGE_TEMPLATE = "product-multipage";
-
 
 	/**
 	 * The google analytics ID, for page tracking
@@ -22,7 +24,6 @@ public class WebConfig {
 	 */
 	private Boolean templatesCaching = false;
 
-
 	/**
 	 * The size of a products search recordset
 	 */
@@ -37,6 +38,11 @@ public class WebConfig {
 	 */
 	private Boolean webAuthentication = true;
 
+	
+	/**
+	 * The list of hosts allowed for CORS
+	 */
+	private List<String> corsAllowedHosts = new ArrayList<>();
 
 
 	public String getGoogleAnalyticsId() {
@@ -87,7 +93,12 @@ public class WebConfig {
 		this.webAuthentication = webAuthentication;
 	}
 
+	public List<String> getCorsAllowedHosts() {
+		return corsAllowedHosts;
+	}
 
-
+	public void setCorsAllowedHosts(List<String> corsAllowedHosts) {
+		this.corsAllowedHosts = corsAllowedHosts;
+	}
 
 }
