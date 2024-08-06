@@ -18,6 +18,20 @@ logging:
       
 
 aggregationLogLevel: warn
+
+
+management:
+  health:
+    diskspace:
+      threshold: 10000MB  
+  endpoints:
+    web:
+      exposure:
+        include:
+          - "*"          
+  endpoint:
+    health:
+      show-details: always
    
 spring:
   docker:
@@ -52,23 +66,6 @@ langchain4j:
       log-requests: false
       log-responses: false
       
-
-management:
-  health:
-    diskspace:
-      threshold: 10000MB  
-         
-  endpoints:
-    web:
-      exposure:
-#        include:
-#        - "*"
-        exclude:
-        - "*"
-  endpoint:
-    
-    health:
-      show-details: always   
        
 attributeAggregationConfig:
   excludedAttributeNames:

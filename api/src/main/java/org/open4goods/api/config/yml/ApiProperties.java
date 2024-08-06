@@ -190,6 +190,11 @@ public class ApiProperties {
 	 */
 	private IcecatConfiguration icecatFeatureConfig = new IcecatConfiguration();
 	
+
+	/**
+	 * The list of hosts allowed for CORS
+	 */
+	private List<String> corsAllowedHosts = new ArrayList<>();
 	
 	public AmazonCompletionConfig getAmazonConfig() {
 		return amazonConfig;
@@ -574,6 +579,18 @@ public class ApiProperties {
 
 	public void setResourceCompletionConfig(ResourceCompletionConfig resourceCompletionConfig) {
 		this.resourceCompletionConfig = resourceCompletionConfig;
+	}
+
+
+
+	public List<String> getCorsAllowedHosts() {
+		return corsAllowedHosts;
+	}
+
+
+
+	public void setCorsAllowedHosts(List<String> corsAllowedHosts) {
+		this.corsAllowedHosts = corsAllowedHosts;
 	}
 
 

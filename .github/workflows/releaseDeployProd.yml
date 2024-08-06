@@ -195,6 +195,22 @@ jobs:
 #            ./ui/target/site/jacoco/jacoco.csv
 #            ./commons/target/site/jacoco/jacoco.csv
 #            ./crawler/target/site/jacoco/jacoco.csv
+
+      ############################################
+      # Deploy SB Admin to production server
+      ###########################################   
+          
+      - name: Deploy sbadmin to server
+        uses: easingthemes/ssh-deploy@main
+        env:
+            SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+            ARGS: "-rltgoDzvO --delete"
+            SOURCE: "/api/target/admin-0.0.1-SNAPSHOT.jar"
+            REMOTE_HOST: ${{ secrets.REMOTE_HOST }}
+            REMOTE_USER: ${{ secrets.REMOTE_USER }}
+            TARGET: "/opt/open4goods/bin/latest/sbadmin-latest.jar"     
+        
+
             
       ############################################
       # Deploy API to production server
