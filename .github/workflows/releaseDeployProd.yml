@@ -101,8 +101,8 @@ jobs:
       ###########################################   
                       
       - name: Build  Maven site
-        run: mvn --batch-mode clean install site site:stage
-                                    
+#        run: mvn --batch-mode clean install site site:stage
+        run: mvn --batch-mode clean install                                    
      ############################################
       # Create the release with changelog,
       # PR Oriented
@@ -264,7 +264,7 @@ jobs:
         run: cp -r target/staging/* src/main/site/maven/
                         
           
-      - name: Upload pen4goods custom site
+      - name: Upload open4goods custom site
         uses: actions/upload-pages-artifact@v3
         with:
           path: './src/main/site/'
