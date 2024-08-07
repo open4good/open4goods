@@ -335,6 +335,7 @@ public class ApiConfig {
 	private CaffeineCache buildExpiryCache(final String name, final Ticker ticker, final int minutesToExpire) {
 		return new CaffeineCache(name,
 				Caffeine.newBuilder()
+				.recordStats()
 				.expireAfterWrite(minutesToExpire, TimeUnit.MINUTES)
 				.ticker(ticker).build());
 	}
