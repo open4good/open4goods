@@ -2,6 +2,7 @@ package org.open4goods.ui.config;
 
 import java.util.Arrays;
 
+import org.open4goods.model.constants.RolesConstants;
 import org.open4goods.ui.config.yml.UiConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -30,7 +31,6 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
  */
 public class WebSecurityConfig {
 
-	private static final String ACTUATOR_ADMIN_ROLE = "XWIKIADMINGROUP";
 
 	private final AuthenticationProvider  authProvider;
 	
@@ -53,8 +53,8 @@ public class WebSecurityConfig {
 			.and().httpBasic(Customizer.withDefaults())
 			.authorizeRequests()
 			    // Actuator endpoints are protected
-				.requestMatchers("/actuator").hasRole(ACTUATOR_ADMIN_ROLE)
-		        .requestMatchers("/actuator/*").hasRole(ACTUATOR_ADMIN_ROLE)
+				.requestMatchers("/actuator").hasRole(RolesConstants.ACTUATOR_ADMIN_ROLE)
+		        .requestMatchers("/actuator/*").hasRole(RolesConstants.ACTUATOR_ADMIN_ROLE)
 		        //  login and logout are allowed
 				.and().formLogin().permitAll()
 				.and().logout().permitAll()

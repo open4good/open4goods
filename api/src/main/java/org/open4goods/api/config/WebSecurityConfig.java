@@ -43,7 +43,6 @@ import jakarta.servlet.http.HttpServletRequest;
 @EnableMethodSecurity(prePostEnabled = true)
 public class WebSecurityConfig {
 
-	private static final String ACTUATOR_ADMIN_ROLE = "XWIKIADMINGROUP";
 
 	private final ApiProperties apiProperties;
 
@@ -53,7 +52,6 @@ public class WebSecurityConfig {
 		this.apiProperties = apiProperties;
 		this.authProvider = authProvider;
 	}
-
 	
 	@Bean
 	public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -65,25 +63,24 @@ public class WebSecurityConfig {
 		.and().httpBasic(Customizer.withDefaults())
 		.authorizeRequests()
 		// Actuator endpoints are protected
-		.requestMatchers("/").hasRole(ACTUATOR_ADMIN_ROLE)
-		.requestMatchers("/actuator").hasRole(ACTUATOR_ADMIN_ROLE)
-		.requestMatchers("/actuator/*").hasRole(ACTUATOR_ADMIN_ROLE)
+		.requestMatchers("/actuator").hasRole(RolesConstants.ACTUATOR_ADMIN_ROLE)
+		.requestMatchers("/actuator/*").hasRole(RolesConstants.ACTUATOR_ADMIN_ROLE)
 		//  login and logout are allowed
 		.and().formLogin().permitAll()
 		.and().logout().permitAll()
 		// CSRF is disabled for actuator endpoints
 		.and().csrf(c -> c.ignoringRequestMatchers("/actuator/**").disable())
 		.addFilterBefore(new TokenAuthenticationFilter(), BasicAuthenticationFilter.class)
-		.sessionManagement()
-		.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-		.and()
 
 		.authorizeRequests()
-		.anyRequest().permitAll();
+		.anyRequest().authenticated();
 
 		return http.build();
 	}
 
+	/**
+	 * This filter is used to allow external crawlers authentication, through a specific set of keys 
+	 */
 	public class TokenAuthenticationFilter extends GenericFilterBean {
 
 		@Override
@@ -98,19 +95,16 @@ public class WebSecurityConfig {
 			}
 
 
-
-			// By default, we provide a USER role
-			final List<SimpleGrantedAuthority> authorities = new ArrayList<>();
-			authorities.add(new SimpleGrantedAuthority(RolesConstants.ROLE_USER));
-
 			if (null != accessToken) {
 
+				// By default, we provide a USER role
+				final List<SimpleGrantedAuthority> authorities = new ArrayList<>();
+				authorities.add(new SimpleGrantedAuthority(RolesConstants.ROLE_USER));
 
 				// Assignation of the ROLE_ADMIN
 				if (accessToken.equals(apiProperties.getAdminKey())) {
 					authorities.add(new SimpleGrantedAuthority(RolesConstants.ROLE_ADMIN));
 					authorities.add(new SimpleGrantedAuthority(RolesConstants.ROLE_CRAWLER));
-					authorities.add(new SimpleGrantedAuthority(RolesConstants.ROLE_UI_CAPSULE));
 				}
 
 				// Assignation of the ROLE_CRAWLER
@@ -122,13 +116,14 @@ public class WebSecurityConfig {
 				if (apiProperties.getTestKeys().contains(accessToken) ) {
 					authorities.add(new SimpleGrantedAuthority(RolesConstants.ROLE_TESTER));
 				}
+
+				// Populate SecurityContextHolder
+				final User user = new User("username", "password", true, true, true, true, authorities);
+				
+				final UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(user,null, user.getAuthorities());
+				SecurityContextHolder.getContext().setAuthentication(authentication);
 			}
 
-			// Populate SecurityContextHolder
-			final User user = new User("username", "password", true, true, true, true, authorities);
-
-			final UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(user,null, user.getAuthorities());
-			SecurityContextHolder.getContext().setAuthentication(authentication);
 
 			// Continue request handling
 			chain.doFilter(request, response);
