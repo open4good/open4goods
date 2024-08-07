@@ -3,9 +3,7 @@ server:
     enabled: true
     mime-types: text/html,text/xml,text/plain,text/css,text/javascript,application/javascript,application/json
     min-response-size: 1024
-  undertow:
-    
-    worker-threads: 1000
+
   http2:
     enabled: true
   forward-headers-strategy: NATIVE  
@@ -20,7 +18,13 @@ management:
         include:
           - "*"          
   endpoint:
-    health:
+    quartz:
+      enabled: true
+      show-values: always
+    caches:
+      enabled: true
+    health:      
+      enabled: true
       show-details: always
       
 spring:

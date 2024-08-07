@@ -30,7 +30,13 @@ management:
         include:
           - "*"          
   endpoint:
-    health:
+    quartz:
+      enabled: true
+      show-values: always
+    caches:
+      enabled: true
+    health:      
+      enabled: true
       show-details: always
    
 spring:
