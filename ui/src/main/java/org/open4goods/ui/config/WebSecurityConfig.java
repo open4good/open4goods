@@ -4,6 +4,7 @@ import java.util.Arrays;
 
 import org.open4goods.model.constants.RolesConstants;
 import org.open4goods.ui.config.yml.UiConfig;
+import org.open4goods.ui.controllers.webextention.WebExtensionController;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -84,13 +85,27 @@ public class WebSecurityConfig {
 	 */
 	@Bean
 	CorsConfigurationSource corsConfigurationSource() {
-	    CorsConfiguration configuration = new CorsConfiguration();
-	    configuration.setAllowedOrigins(config.getWebConfig().getCorsAllowedHosts());
-	    configuration.setAllowedMethods(Arrays.asList("*"));
-	    configuration.setAllowedHeaders(Arrays.asList("*"));
-	    configuration.setAllowCredentials(true);
-	    UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-	    source.registerCorsConfiguration("/**", configuration);
+		UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+		
+
+		// Specific CORS configuration for webextension endpoints
+		CorsConfiguration webExtConfig = new CorsConfiguration();
+		webExtConfig.setAllowedOriginPatterns(Arrays.asList("*")) ;
+		webExtConfig.setAllowedMethods(Arrays.asList("*"));
+		webExtConfig.setAllowedHeaders(Arrays.asList("*"));
+		webExtConfig.setAllowCredentials(true);
+		source.registerCorsConfiguration(WebExtensionController.WEBEXTENSION_ENDPOINT, webExtConfig);
+		source.registerCorsConfiguration(WebExtensionController.WEBEXTENSION_EXISTS_ENDPOINT, webExtConfig);
+
+		// Global cors configuration, with specific allowed hosts
+	    CorsConfiguration globalConfiguration = new CorsConfiguration();
+	    globalConfiguration.setAllowedOrigins(config.getWebConfig().getCorsAllowedHosts()) ;
+	    globalConfiguration.setAllowedMethods(Arrays.asList("*"));
+	    globalConfiguration.setAllowedHeaders(Arrays.asList("*"));
+	    globalConfiguration.setAllowCredentials(true);
+	    source.registerCorsConfiguration("/**", globalConfiguration);
+
+	    
 	    return source;
 	}
 
