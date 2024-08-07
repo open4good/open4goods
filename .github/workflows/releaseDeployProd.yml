@@ -102,8 +102,7 @@ jobs:
                       
       - name: Build  Maven site
 #      run: mvn --batch-mode clean install site site:stage
-        run: mvn --batch-mode clean install 
-        
+        run: mvn --batch-mode --update-snapshots clean install 
         
         
      ############################################
