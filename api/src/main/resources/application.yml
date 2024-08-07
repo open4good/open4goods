@@ -30,11 +30,6 @@ management:
         include:
           - "*"          
   endpoint:
-    quartz:
-      enabled: true
-      show-values: always
-    caches:
-      enabled: true
     health:      
       enabled: true
       show-details: always
