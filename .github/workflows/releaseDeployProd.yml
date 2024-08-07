@@ -70,8 +70,19 @@ jobs:
                 "snapshots": {
                   "enabled": true
                 }
+              },
+              {
+                "id": "oracleReleases",
+                "name": "oracleReleases",
+                "url": "https://download.oracle.com/maven",
+                "releases": {
+                  "enabled": true
+                },
+                "snapshots": {
+                  "enabled": false
+                }
               } 
-            ]  
+            ]
    
       - name: Build and test xwiki-springboot-starter
         working-directory: ./xwiki-spring-boot-starter        
