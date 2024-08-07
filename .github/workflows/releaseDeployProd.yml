@@ -101,7 +101,11 @@ jobs:
       ###########################################   
                       
       - name: Build  Maven site
-        run: mvn --batch-mode clean install site site:stage
+#      run: mvn --batch-mode clean install site site:stage
+        run: mvn --batch-mode clean install 
+        
+        
+        
      ############################################
       # Create the release with changelog,
       # PR Oriented
@@ -259,14 +263,14 @@ jobs:
       - name: Setup github Pages
         uses: actions/configure-pages@v5    
 
-      - name: Merge site
-        run: cp -r target/staging/* src/main/site/maven/
+#      - name: Merge site
+#        run: cp -r target/staging/* src/main/site/maven/
                         
           
-      - name: Upload open4goods custom site
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: './src/main/site/'
+#      - name: Upload open4goods custom site
+#        uses: actions/upload-pages-artifact@v3
+#        with:
+#          path: './src/main/site/'
 
       - name: Deploy to GitHub Pages
         id: deployment
