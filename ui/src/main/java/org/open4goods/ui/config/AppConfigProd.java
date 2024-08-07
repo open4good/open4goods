@@ -34,11 +34,6 @@ public class AppConfigProd {
 		return new WebMvcConfigurer() {
 
 			@Override
-			public void extendMessageConverters(final List<HttpMessageConverter<?>> converters) {
-				converters.add(new YamlHttpMessageConverter<>());
-			}
-
-			@Override
 			public void addInterceptors(final InterceptorRegistry registry) {
 				registry.addInterceptor(AppConfig.localeChangeInterceptor());
 				registry.addInterceptor(new GenericTemplateInterceptor());
