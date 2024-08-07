@@ -55,6 +55,12 @@ public class PriceAggregationService extends AbstractAggregationService {
 			return;
 		}
 
+		// Checking price is not 0, can happens
+		if (e.getPrice().getPrice() == 0.0) {
+			dedicatedLogger.info("Price is 0 for datafragment {}, skipping");
+			return;
+		}
+		
 		AggregatedPrice aggPrice = new AggregatedPrice(e);
 
 		///////////////////
