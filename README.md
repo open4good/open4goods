@@ -1,4 +1,3 @@
-
 # The project
 | [![Beta](https://github.com/open4good/open4goods/actions/workflows/testAndPublishBeta.yml/badge.svg?branch=main)](https://github.com/open4good/open4goods/actions/workflows/testAndPublishBeta.yml) | [![Production](https://github.com/open4good/open4goods/actions/workflows/releaseDeployProd.yml/badge.svg?branch=main)](https://github.com/open4good/open4goods/actions/workflows/releaseDeployProd.yml) |
 |--|--|
