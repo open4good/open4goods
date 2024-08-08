@@ -72,6 +72,14 @@ jobs:
                 }
               },
               {
+                  "id": "linkedin",
+                  "name": "linkedin",
+                  "url": "https://linkedin.jfrog.io/artifactory/open-source/",
+                  "snapshots": {
+                    "enabled": false
+                  }
+               },
+              {
                 "id": "oracleReleases",
                 "name": "oracleReleases",
                 "url": "https://download.oracle.com/maven",
