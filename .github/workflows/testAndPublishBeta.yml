@@ -1,19 +1,16 @@
-# This workflow will build, test and push the latest version on the beta environment.
-
 on: 
   push:
     branches:
       - 'main'
           
-name: 🔘 Beta - Build, Test and publish
+name: 🔘 Beta - Build, Test and Publish
 
 jobs:
-  deploy:
-    name: beta-test-build-publish
+  setup-java:
+    name: Set up Java Environment
     runs-on: self-hosted
 
     steps:
-
       ############################################
       # Install Java
       ###########################################      
@@ -24,14 +21,18 @@ jobs:
           java-version: '21'
           cache: 'maven'
 
+  install-dependencies:
+    name: Install Dependencies
+    runs-on: self-hosted
+    needs: setup-java
 
-#<TWEAK> : To localy install xwiki-springboot-starter until maven publication
+    steps:
       ############################################
-      # Setting up the xwiki repo (in a maven centraml publication compatible way)
+      # Setting up the xwiki repo (in a maven central publication compatible way)
       ###########################################   
       - uses: s4u/maven-settings-action@v3.0.0
         with:
-         repositories: |
+          repositories: |
             [
               {
                 "id": "xwiki-releases",
@@ -57,7 +58,6 @@ jobs:
                     "enabled": false
                   }
                 },
-           
               {
                 "id": "oracleReleases",
                 "name": "oracleReleases",
@@ -71,29 +71,24 @@ jobs:
               } 
             ]
 
-
       ############################################
       # Tweak until maven central publication
       ############################################
-
-
       - uses: actions/checkout@v4
         with:
           repository: 'open4good/xwiki-spring-boot-starter'
    
       - name: Build and test xwiki-springboot-starter
         working-directory: ./xwiki-spring-boot-starter        
-        run: mvn --batch-mode --update-snapshots install   
-   
-#</TWEAK> : To localy install xwiki-springboot-starter until maven publication   
-   
-   
-   
-   
-   
-    
-      - uses: actions/checkout@v4
+        run: mvn --batch-mode --update-snapshots install
 
+  build-test:
+    name: Build and Test
+    runs-on: self-hosted
+    needs: install-dependencies
+
+    steps:
+      - uses: actions/checkout@v4
 
       ############################################
       # TODO 2 Issue
@@ -102,8 +97,6 @@ jobs:
         uses: "alstr/todo-to-issue-action@v4"
         with:
           IDENTIFIERS: '[{"name": "ISSUE", "labels": ["codeTodo"]}]'
-            
-          
 
       ############################################
       # Install Maven dependency submission
@@ -114,56 +107,57 @@ jobs:
       ############################################
       # Maven build and testing
       ###########################################    
-                
       - name: Build and test with Maven
         run: mvn --batch-mode --update-snapshots install
 
+  deploy:
+    name: Deploy to Qualification Environment
+    runs-on: self-hosted
+    needs: build-test
+
+    steps:
       ############################################
       # Deploy sbadmin JAR to qualification environment
       ###########################################    
-                
       - name: Deploy SBADMIN to qualification server
         uses: easingthemes/ssh-deploy@main
         env:
-            SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
-            ARGS: "-rltgoDzvO --delete"
-            SOURCE: "/admin/target/admin-0.0.1-SNAPSHOT.jar"
-            REMOTE_HOST: ${{ secrets.REMOTE_BETA_HOST }}
-            REMOTE_USER: ${{ secrets.REMOTE_BETA_USER }}
-            TARGET: "/opt/open4goods/bin/latest/sbadmin-latest.jar"  
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+          ARGS: "-rltgoDzvO --delete"
+          SOURCE: "/admin/target/admin-0.0.1-SNAPSHOT.jar"
+          REMOTE_HOST: ${{ secrets.REMOTE_BETA_HOST }}
+          REMOTE_USER: ${{ secrets.REMOTE_BETA_USER }}
+          TARGET: "/opt/open4goods/bin/latest/sbadmin-latest.jar"  
                                       
       ############################################
       # Deploy api JAR to qualification environment
       ###########################################    
-              
       - name: Deploy API to qualification server
         uses: easingthemes/ssh-deploy@main
         env:
-            SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
-            ARGS: "-rltgoDzvO --delete"
-            SOURCE: "/api/target/api-0.0.1-SNAPSHOT.jar"
-            REMOTE_HOST: ${{ secrets.REMOTE_BETA_HOST }}
-            REMOTE_USER: ${{ secrets.REMOTE_BETA_USER }}
-            TARGET: "/opt/open4goods/bin/latest/api-latest.jar"     
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+          ARGS: "-rltgoDzvO --delete"
+          SOURCE: "/api/target/api-0.0.1-SNAPSHOT.jar"
+          REMOTE_HOST: ${{ secrets.REMOTE_BETA_HOST }}
+          REMOTE_USER: ${{ secrets.REMOTE_BETA_USER }}
+          TARGET: "/opt/open4goods/bin/latest/api-latest.jar"     
 
       ############################################
       # Deploy ui JAR to qualification environment
       ###########################################    
-            
       - name: Deploy UI to qualification server
         uses: easingthemes/ssh-deploy@main
         env:
-            SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
-            ARGS: "-rltgoDzvO --delete"
-            SOURCE: "/ui/target/ui-0.0.1-SNAPSHOT.jar"
-            REMOTE_HOST: ${{ secrets.REMOTE_BETA_HOST }}
-            REMOTE_USER: ${{ secrets.REMOTE_BETA_USER }}
-            TARGET: "/opt/open4goods/bin/latest/ui-latest.jar"   
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+          ARGS: "-rltgoDzvO --delete"
+          SOURCE: "/ui/target/ui-0.0.1-SNAPSHOT.jar"
+          REMOTE_HOST: ${{ secrets.REMOTE_BETA_HOST }}
+          REMOTE_USER: ${{ secrets.REMOTE_BETA_USER }}
+          TARGET: "/opt/open4goods/bin/latest/ui-latest.jar"
 
       ############################################
       # Restarting application
       ###########################################  
-      
       - name: Publish applications
         uses: appleboy/ssh-action@v1.0.3
         with:
@@ -171,4 +165,3 @@ jobs:
           username: ${{ secrets.REMOTE_BETA_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY}}
           script: sh /opt/open4goods/bin/publish-jars.sh
-                                                 
