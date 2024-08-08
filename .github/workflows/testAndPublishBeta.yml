@@ -1,17 +1,25 @@
+name: 🔘 Beta - Build, Test, and Publish
+
 on: 
   push:
     branches:
       - 'main'
-          
-name: 🔘 Beta - Build, Test, and Publish
+
+permissions:
+  contents: write
+  id-token: write
+
+concurrency:
+  group: "beta-deployment"
+  cancel-in-progress: false
 
 jobs:
-  deploy:
-    name: Beta Test, Build, and Publish
+  setup:
     runs-on: self-hosted
+    outputs:
+      maven-cache-key: ${{ steps.cache-maven.outputs.cache-hit }}
 
     steps:
-
       ############################################
       # Cache Maven Dependencies
       ###########################################
@@ -68,6 +76,10 @@ jobs:
               }
             ]
 
+  build:
+    runs-on: self-hosted
+    needs: setup
+    steps:
       ############################################
       # Checkout and Build xwiki-springboot-starter
       ###########################################
@@ -79,12 +91,18 @@ jobs:
       - name: Build and Test xwiki-springboot-starter
         working-directory: ./xwiki-spring-boot-starter        
         run: mvn --batch-mode --update-snapshots install
-      
+
       ############################################
       # Checkout the Main Repository
       ###########################################
-      - name: Checkout Repository
+      - name: Checkout Main Repository
         uses: actions/checkout@v4
+
+      ############################################
+      # Build and Test with Maven
+      ###########################################
+      - name: Build and Test with Maven
+        run: mvn --batch-mode --update-snapshots install
 
       ############################################
       # TODO 2 Issue
@@ -99,53 +117,72 @@ jobs:
       ###########################################      
       - name: Maven Dependency Submission
         uses: advanced-security/maven-dependency-submission-action@v4.1.1
-                  
+      
       ############################################
-      # Build and Test with Maven
-      ###########################################    
-      - name: Build and Test with Maven
-        run: mvn --batch-mode --update-snapshots install
+      # Save Build Artifacts
+      ###########################################
+      - name: Save Build Artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: maven-artifacts
+          path: |
+            ./api/target/api-0.0.1-SNAPSHOT.jar
+            ./ui/target/ui-0.0.1-SNAPSHOT.jar
+            ./target/staging/taglist/taglist.xml
+            ./admin/target/admin-0.0.1-SNAPSHOT.jar
+
+  deploy:
+    runs-on: self-hosted
+    needs: build
+    steps:
+      ############################################
+      # Download Build Artifacts
+      ###########################################
+      - name: Download Build Artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: maven-artifacts
 
       ############################################
       # Deploy JAR Files to Qualification Environment
-      ###########################################    
+      ###########################################
       - name: Deploy SBADMIN to Qualification Server
         uses: easingthemes/ssh-deploy@main
         env:
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
           ARGS: "-rltgoDzvO --delete"
-          SOURCE: "/admin/target/admin-0.0.1-SNAPSHOT.jar"
+          SOURCE: "./admin/target/admin-0.0.1-SNAPSHOT.jar"
           REMOTE_HOST: ${{ secrets.REMOTE_BETA_HOST }}
           REMOTE_USER: ${{ secrets.REMOTE_BETA_USER }}
-          TARGET: "/opt/open4goods/bin/latest/sbadmin-latest.jar"  
-                                      
+          TARGET: "/opt/open4goods/bin/latest/sbadmin-latest.jar"
+
       - name: Deploy API to Qualification Server
         uses: easingthemes/ssh-deploy@main
         env:
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
           ARGS: "-rltgoDzvO --delete"
-          SOURCE: "/api/target/api-0.0.1-SNAPSHOT.jar"
+          SOURCE: "./api/target/api-0.0.1-SNAPSHOT.jar"
           REMOTE_HOST: ${{ secrets.REMOTE_BETA_HOST }}
           REMOTE_USER: ${{ secrets.REMOTE_BETA_USER }}
-          TARGET: "/opt/open4goods/bin/latest/api-latest.jar"     
+          TARGET: "/opt/open4goods/bin/latest/api-latest.jar"
 
       - name: Deploy UI to Qualification Server
         uses: easingthemes/ssh-deploy@main
         env:
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
           ARGS: "-rltgoDzvO --delete"
-          SOURCE: "/ui/target/ui-0.0.1-SNAPSHOT.jar"
+          SOURCE: "./ui/target/ui-0.0.1-SNAPSHOT.jar"
           REMOTE_HOST: ${{ secrets.REMOTE_BETA_HOST }}
           REMOTE_USER: ${{ secrets.REMOTE_BETA_USER }}
-          TARGET: "/opt/open4goods/bin/latest/ui-latest.jar"   
+          TARGET: "/opt/open4goods/bin/latest/ui-latest.jar"
 
       ############################################
-      # Restarting Application
-      ###########################################  
-      - name: Publish Applications
+      # Restart Applications
+      ###########################################
+      - name: Restart Applications
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.REMOTE_BETA_HOST }}
           username: ${{ secrets.REMOTE_BETA_USER }}
-          key: ${{ secrets.SSH_PRIVATE_KEY}}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: sh /opt/open4goods/bin/publish-jars.sh
