@@ -3,9 +3,7 @@ package org.open4goods.api.services.store;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.open4goods.api.services.store.DataFragmentStoreService;
 import org.open4goods.model.data.DataFragment;
-import org.open4goods.model.product.Product;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 /**

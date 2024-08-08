@@ -9,7 +9,6 @@ import org.open4goods.exceptions.ResourceNotFoundException;
 import org.open4goods.model.constants.RolesConstants;
 import org.open4goods.model.data.AiDescription;
 import org.open4goods.model.product.Product;
-import org.open4goods.services.IcecatService;
 import org.open4goods.services.VerticalsConfigService;
 import org.open4goods.services.ai.AiService;
 import org.springframework.beans.factory.annotation.Autowired;

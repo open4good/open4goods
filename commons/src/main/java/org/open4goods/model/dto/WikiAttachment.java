@@ -1,8 +1,5 @@
 package org.open4goods.model.dto;
 
-import java.util.HashMap;
-import java.util.Map;
-
 /**
  * A xwiki attachment
  */

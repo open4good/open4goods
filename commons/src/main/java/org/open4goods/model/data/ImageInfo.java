@@ -1,7 +1,5 @@
 package org.open4goods.model.data;
 
-import java.math.BigInteger;
-
 public class ImageInfo {
 
 	private Integer height;

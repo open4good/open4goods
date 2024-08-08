@@ -1,8 +1,5 @@
 package org.open4goods.services.textgen;
 
-import javax.xml.parsers.SAXParser;
-import javax.xml.parsers.SAXParserFactory;
-
 import org.apache.commons.lang3.StringUtils;
 import org.open4goods.exceptions.InvalidParameterException;
 import org.open4goods.model.product.Product;

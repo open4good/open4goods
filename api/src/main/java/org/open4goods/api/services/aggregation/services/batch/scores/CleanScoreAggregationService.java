@@ -2,7 +2,6 @@ package org.open4goods.api.services.aggregation.services.batch.scores;
 
 import java.util.Collection;
 
-import org.open4goods.config.yml.ui.AttributesConfig;
 import org.open4goods.config.yml.ui.VerticalConfig;
 import org.open4goods.exceptions.AggregationSkipException;
 import org.open4goods.model.product.Product;

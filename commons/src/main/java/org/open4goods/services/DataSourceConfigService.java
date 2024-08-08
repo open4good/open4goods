@@ -12,7 +12,6 @@ import java.util.Map;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.open4goods.config.yml.datasource.DataSourceProperties;
-import org.open4goods.config.yml.datasource.FeedConfiguration;
 import org.open4goods.config.yml.datasource.HtmlDataSourceProperties;
 import org.open4goods.exceptions.InvalidParameterException;
 import org.open4goods.model.constants.CacheConstants;

@@ -1,8 +1,6 @@
 
 package org.open4goods.model.crawlers;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.UUID;
 
 import org.springframework.data.annotation.Id;

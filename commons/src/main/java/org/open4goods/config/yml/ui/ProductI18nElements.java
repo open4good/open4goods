@@ -1,14 +1,10 @@
 package org.open4goods.config.yml.ui;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.open4goods.config.yml.WikiPageConfig;
-import org.open4goods.config.yml.attributes.PromptConfig;
 import org.open4goods.config.yml.attributes.AiPromptsConfig;
-import org.open4goods.model.dto.WikiPage;
 
 import com.fasterxml.jackson.annotation.JsonMerge;
 

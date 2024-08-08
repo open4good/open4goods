@@ -26,7 +26,6 @@ import org.open4goods.model.data.Brand;
 import org.open4goods.model.data.BrandScore;
 import org.open4goods.store.repository.elastic.BrandScoresRepository;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.cache.annotation.Cacheable;
 
 import com.googlecode.concurrenttrees.radix.ConcurrentRadixTree;

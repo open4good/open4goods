@@ -15,10 +15,6 @@ import org.open4goods.helper.IdHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.dataformat.csv.CsvMapper;
-import com.fasterxml.jackson.dataformat.csv.CsvParser;
-
 /**
  * This service is in charge to google taxonomy id, from a product category
  * 

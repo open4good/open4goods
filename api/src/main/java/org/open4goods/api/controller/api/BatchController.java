@@ -8,7 +8,6 @@ import org.open4goods.api.services.AggregationFacadeService;
 import org.open4goods.api.services.BatchService;
 import org.open4goods.api.services.completion.GenAiCompletionService;
 import org.open4goods.api.services.completion.ResourceCompletionService;
-import org.open4goods.config.yml.ui.VerticalConfig;
 import org.open4goods.dao.ProductRepository;
 import org.open4goods.exceptions.AggregationSkipException;
 import org.open4goods.exceptions.InvalidParameterException;
@@ -22,7 +21,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 

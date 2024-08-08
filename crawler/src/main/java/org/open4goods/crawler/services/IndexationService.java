@@ -13,8 +13,6 @@ import org.slf4j.LoggerFactory;
 import com.mashape.unirest.http.Unirest;
 import com.mashape.unirest.http.exceptions.UnirestException;
 
-import jakarta.validation.constraints.NotBlank;
-
 public class IndexationService {
 
 	private final static Logger log = LoggerFactory.getLogger(IndexationService.class);

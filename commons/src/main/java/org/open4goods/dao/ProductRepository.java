@@ -34,7 +34,6 @@ import org.springframework.data.elasticsearch.core.SearchHits;
 import org.springframework.data.elasticsearch.core.mapping.IndexCoordinates;
 import org.springframework.data.elasticsearch.core.query.Criteria;
 import org.springframework.data.elasticsearch.core.query.CriteriaQuery;
-import org.springframework.data.elasticsearch.core.query.CriteriaQueryBuilder;
 import org.springframework.data.elasticsearch.core.query.Query;
 
 import co.elastic.clients.elasticsearch._types.aggregations.Aggregation;

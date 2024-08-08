@@ -29,14 +29,9 @@ import org.open4goods.model.constants.ReferentielKey;
 import org.open4goods.services.StandardiserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.data.annotation.Id;
-import org.springframework.data.elasticsearch.annotations.DateFormat;
-import org.springframework.data.elasticsearch.annotations.Field;
-import org.springframework.data.elasticsearch.annotations.FieldType;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.google.common.base.Objects;
-import com.google.common.collect.Sets;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;

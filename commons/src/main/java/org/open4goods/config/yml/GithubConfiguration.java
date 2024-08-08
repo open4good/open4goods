@@ -1,7 +1,5 @@
 package org.open4goods.config.yml;
 
-import java.net.URISyntaxException;
-
 /**
  * Configuration for an XWiki connexion
  * @author goulven

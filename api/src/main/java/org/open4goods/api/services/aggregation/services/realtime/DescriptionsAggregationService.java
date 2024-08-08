@@ -11,7 +11,6 @@ import org.open4goods.model.data.DataFragment;
 import org.open4goods.model.data.Description;
 import org.open4goods.model.product.Product;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 public class DescriptionsAggregationService extends AbstractAggregationService{
 
 	public DescriptionsAggregationService(Logger logger) {

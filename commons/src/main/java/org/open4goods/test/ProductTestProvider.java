@@ -2,7 +2,6 @@ package org.open4goods.test;
 
 import java.util.UUID;
 
-import org.open4goods.model.data.UnindexedKeyValTimestamp;
 import org.open4goods.model.product.Product;
 
 public class ProductTestProvider {

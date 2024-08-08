@@ -2,13 +2,11 @@ package org.open4goods.model.product;
 
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.open4goods.model.constants.ReferentielKey;
-import org.open4goods.model.dto.UiFeatureGroups;
 import org.springframework.data.elasticsearch.annotations.Field;
 import org.springframework.data.elasticsearch.annotations.FieldType;
 

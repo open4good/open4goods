@@ -1,6 +1,7 @@
 package org.open4goods.api.services.completion;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.List;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 // TODO : Merge with xml model ?
 public class IcecatData {

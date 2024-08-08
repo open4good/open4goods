@@ -3,9 +3,7 @@ package org.open4goods.api.controller.ui;
 
 
 import java.util.List;
-import java.util.Map;
 
-import org.open4goods.dao.ProductRepository;
 import org.open4goods.model.dto.ExpandedTaxonomy;
 import org.open4goods.services.VerticalsConfigService;
 import org.slf4j.Logger;
