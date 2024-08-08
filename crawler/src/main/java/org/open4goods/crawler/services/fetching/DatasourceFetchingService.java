@@ -1,5 +1,6 @@
 package org.open4goods.crawler.services.fetching;
 
+import java.io.IOException;
 import java.util.Map;
 
 import org.apache.commons.lang3.ArrayUtils;
@@ -38,8 +39,10 @@ public abstract class DatasourceFetchingService {
 	 * Start a Datasource fetching
 	 * @param provider
 	 * @throws TechnicalException 
+	 * @throws InterruptedException 
+	 * @throws IOException 
 	 */
-	public abstract void start(DataSourceProperties provide,String datasourceConfName) throws TechnicalException;
+	public abstract void start(DataSourceProperties provide,String datasourceConfName) throws TechnicalException, IOException, InterruptedException;
 
 	/**
 	 * Stop a Datasource fetching

@@ -52,11 +52,6 @@ public class UiConfig {
 	 */
 	private String resourceTemplateFolder;
 
-	
-	/**
-	 * Folder where verticals configurations are stored
-	 */
-	private String verticalsFolder=rootFolder+ File.separator+"config"+File.separator+"verticals"+File.separator;
 
 	/**
 	 * Folder where datasources definitions are stored
@@ -328,14 +323,7 @@ public class UiConfig {
 		this.generatedImagesFolder = generatedImagesFolder;
 	}
 
-	public String getVerticalsFolder() {
-		return verticalsFolder;
-	}
-
-	public void setVerticalsFolder(String verticalsFolder) {
-		this.verticalsFolder = verticalsFolder;
-	}
-
+	
 	public String getDatasourcesfolder() {
 		return datasourcesfolder;
 	}

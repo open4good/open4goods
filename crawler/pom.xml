@@ -37,13 +37,33 @@
 			<version>${global.version}</version>
 		</dependency>
 
+<!--
+    
 		<dependency>
 			<groupId>edu.uci.ics</groupId>
 			<artifactId>crawler4j</artifactId>
 			<version>4.4.0</version>
 		</dependency>
+-->
 
+        <dependency>
+            <groupId>de.malkusch.whois-server-list</groupId>
+            <artifactId>public-suffix-list</artifactId>
+            <version>2.2.0</version>
+        </dependency>
 
+        <dependency>
+            <groupId>com.linkedin.urls</groupId>
+            <artifactId>url-detector</artifactId>
+            <version>0.2.3-alpha</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.wiremock</groupId>
+            <artifactId>wiremock</artifactId>
+            <version>3.3.1</version>
+            <scope>test</scope>
+        </dependency>
 
 		<!-- Commons (model) -->
 
@@ -77,10 +97,8 @@
 			<optional>true</optional>
 		</dependency>
 
-		<dependency>
-			<groupId>org.seleniumhq.selenium</groupId>
-			<artifactId>selenium-java</artifactId>
-		</dependency>
+		
+		
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-text</artifactId>

@@ -142,11 +142,6 @@ public class CrawlProperties {
 	private Boolean respectNoFollow = true;
 
 
-	/**
-	 *   For really hard to crawl website. Heavy in perf !
-	 */
-
-	private Boolean useSelenium = false;
 
 	/**
 	 * The encoding to use for selenium fetched content
@@ -357,14 +352,6 @@ public class CrawlProperties {
 
 	public void setThreads(final Integer threads) {
 		this.threads = threads;
-	}
-
-	public Boolean getUseSelenium() {
-		return useSelenium;
-	}
-
-	public void setUseSelenium(Boolean useSelenium) {
-		this.useSelenium = useSelenium;
 	}
 
 	public String getSeleniumPageEncoding() {

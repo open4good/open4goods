@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.TimeUnit;
 
+import org.open4goods.api.config.yml.ApiProperties;
 import org.open4goods.config.yml.datasource.DataSourceProperties;
 import org.open4goods.model.constants.TimeConstants;
 import org.open4goods.model.constants.UrlConstants;
@@ -47,16 +48,20 @@ public class FetcherOrchestrationService {
 
 	private final  DataSourceConfigService datasourceConfigService;
 
+	private final ApiProperties apiProperties;
+
 	// The status of the registered crawlers, which auto expires the crawlers if not seen
 	private Cache<String, FetcherGlobalStats> crawlerStatuses = CacheBuilder.newBuilder()
 			.expireAfterWrite(TimeConstants.API_EXPIRED_UNSEEN_CRAWLERS_IN_SECONDS, TimeUnit.SECONDS)
 			.build( );
 
+
 	public FetcherOrchestrationService(final TaskScheduler threadPoolTaskScheduler,
-			final DataSourceConfigService datasourceConfigService) {
+			final DataSourceConfigService datasourceConfigService, ApiProperties apiProperties) {
 		super();
 		this.threadPoolTaskScheduler = threadPoolTaskScheduler;
 		this.datasourceConfigService = datasourceConfigService;
+		this.apiProperties = apiProperties;
 	}
 
 
@@ -183,7 +188,10 @@ public class FetcherOrchestrationService {
 
 		try {
 			final RequestEntity<DataSourceProperties> requestEntity = RequestEntity
-					.post(new URL(node.getNodeConfig().getNodeUrl() + UrlConstants.CRAWLER_API_STOP_FETCHING).toURI())
+					.post(new URL(node.getNodeConfig().getNodeUrl() 
+								+ UrlConstants.CRAWLER_API_STOP_FETCHING
+								+ "?" + UrlConstants.APIKEY_PARAMETER + "=" + apiProperties.getCrawlerKeys().getFirst()
+							).toURI())
 					.contentType(MediaType.APPLICATION_JSON)
 					.body(p);
 
@@ -215,7 +223,11 @@ public class FetcherOrchestrationService {
 
 		try {
 			final RequestEntity<DataSourceProperties> requestEntity = RequestEntity
-					.post(new URL(node.getNodeConfig().getNodeUrl() + UrlConstants.CRAWLER_API_REQUEST_FETCHING+"?datasourceConfName="+datasourceConfName).toURI())
+					.post(new URL(node.getNodeConfig().getNodeUrl() 
+									+ UrlConstants.CRAWLER_API_REQUEST_FETCHING+"?datasourceConfName="+datasourceConfName
+									// We use the first allowed key as credential
+									+ "&" + UrlConstants.APIKEY_PARAMETER + "=" + apiProperties.getCrawlerKeys().getFirst()
+									).toURI())
 
 					.contentType(MediaType.APPLICATION_JSON)
 					.body(p)
@@ -281,7 +293,11 @@ public class FetcherOrchestrationService {
 
 		try {
 			final RequestEntity<DataSourceProperties> requestEntity = RequestEntity
-					.post(new URL(electedNode.getNodeConfig().getNodeUrl() + UrlConstants.CRAWLER_API_DIRECT_URL_REQUEST_FETCHING  +"?"+UrlConstants.URL_PARAMETER + "=" + URLEncoder.encode( url, StandardCharsets.UTF_8)).toURI())
+					.post(new URL(electedNode.getNodeConfig().getNodeUrl() + UrlConstants.CRAWLER_API_DIRECT_URL_REQUEST_FETCHING  
+							+"?"+UrlConstants.URL_PARAMETER + "=" + URLEncoder.encode( url, StandardCharsets.UTF_8)
+							+ "&" + UrlConstants.APIKEY_PARAMETER + "=" + apiProperties.getCrawlerKeys().getFirst()
+							
+							).toURI())
 					.contentType(MediaType.APPLICATION_JSON)
 					.body(p);
 

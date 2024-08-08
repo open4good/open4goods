@@ -1,6 +1,10 @@
 package org.open4goods.crawler.services.fetching;
 
 import java.io.File;
+import java.io.IOException;
+import java.security.KeyManagementException;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -16,7 +20,6 @@ import org.open4goods.config.yml.datasource.CrawlProperties;
 import org.open4goods.config.yml.datasource.DataSourceProperties;
 import org.open4goods.config.yml.datasource.ExtractorConfig;
 import org.open4goods.config.yml.datasource.HtmlDataSourceProperties;
-import org.open4goods.crawler.SeleniumPageFetcher;
 import org.open4goods.crawler.config.yml.FetcherProperties;
 import org.open4goods.crawler.extractors.Extractor;
 import org.open4goods.crawler.model.CustomUrlProvider;
@@ -96,8 +99,10 @@ public class WebDatasourceFetchingService extends DatasourceFetchingService{
 	 * @param url
 	 * @return
 	 * @throws TechnicalException 
+	 * @throws InterruptedException 
+	 * @throws IOException 
 	 */
-	public DataFragment synchCrawl(final DataSourceProperties dsProperties,final String url) throws TechnicalException {
+	public DataFragment synchCrawl(final DataSourceProperties dsProperties,final String url) throws TechnicalException, IOException, InterruptedException {
 		final CrawlController realTimeController = createCrawlController("REALTIME-"+dsProperties.getName(), dsProperties.webDataSource().getCrawlConfig());
 		realTimeController.getConfig().setCleanupDelaySeconds(1);
 		realTimeController.getConfig().setThreadMonitoringDelaySeconds(1);
@@ -128,11 +133,21 @@ public class WebDatasourceFetchingService extends DatasourceFetchingService{
 
 
 		// Adding base url
-		controller.addSeed(provider.getWebDatasource().getBaseUrl());
+		try {
+			controller.addSeed(provider.getWebDatasource().getBaseUrl());
+		} catch (IOException | InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		// Adding optional initial url's
 		if (null != provider.getWebDatasource().getInitialUrls()) {
 			for (final String url : provider.getWebDatasource().getInitialUrls()) {
-				controller.addSeed(url);
+				try {
+					controller.addSeed(url);
+				} catch (IOException | InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 			}
 		}
 
@@ -143,7 +158,14 @@ public class WebDatasourceFetchingService extends DatasourceFetchingService{
 				CustomUrlProvider seedProvider = ((CustomUrlProvider)Class.forName(provider.getWebDatasource().getCustomUrlProviderClass()).newInstance());
 				autowireCapableBeanFactory.autowireBean(seedProvider);
 				Set<String> urls = seedProvider.getUrls();
-				urls.stream().forEach(e -> controller.addSeed(e));
+				urls.stream().forEach(e -> {
+					try {
+						controller.addSeed(e);
+					} catch (IOException | InterruptedException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
+				});
 //				controller.addSeed(datasourceConfName);
 				
 				
@@ -248,14 +270,12 @@ public class WebDatasourceFetchingService extends DatasourceFetchingService{
 		}
 
 		// Creating the controller
-		PageFetcher fetcher;
-		if (crawlProperties.getUseSelenium()) {
-			 
-			fetcher = new SeleniumPageFetcher(crawlConfig,crawlProperties,fetcherProperties);
-			
-		} else {
+		PageFetcher fetcher = null;
+		try {
 			fetcher = new PageFetcher(crawlConfig);
-			
+		} catch (KeyManagementException | NoSuchAlgorithmException | KeyStoreException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 			
 			

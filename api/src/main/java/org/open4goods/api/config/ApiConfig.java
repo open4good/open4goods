@@ -194,7 +194,7 @@ public class ApiConfig {
 	@Bean
 	@Autowired
 	VerticalsConfigService verticalConfigsService(ResourcePatternResolver resolver, SerialisationService serialisationService, GoogleTaxonomyService googleTaxonomyService, ProductRepository productRepository, ImageGenerationService imageGenService) throws IOException {
-		return new VerticalsConfigService(serialisationService,apiProperties.getVerticalsFolder(), googleTaxonomyService, productRepository, resolver,imageGenService);
+		return new VerticalsConfigService(serialisationService, googleTaxonomyService, productRepository, resolver,imageGenService);
 	}
 	
 	@Bean
@@ -518,8 +518,8 @@ public class ApiConfig {
 
 	@Bean
 	@Autowired
-	FetcherOrchestrationService fetcherOrchestrationService(TaskScheduler taskScheduler, DataSourceConfigService dataSourceConfigService) {
-		return new FetcherOrchestrationService(taskScheduler, dataSourceConfigService);
+	FetcherOrchestrationService fetcherOrchestrationService(TaskScheduler taskScheduler, DataSourceConfigService dataSourceConfigService, ApiProperties apiProperties) {
+		return new FetcherOrchestrationService(taskScheduler, dataSourceConfigService, apiProperties);
 	}
 
 	@Bean
