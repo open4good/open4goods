@@ -378,12 +378,8 @@ public class DataFragmentWebCrawler extends WebCrawler {
 		final HtmlParseData parseData = (HtmlParseData) page.getParseData();
 
 		// Getting the default locale for "default" price parsing
-		Locale locale;
-		if (!StringUtils.isEmpty(page.getLanguage())) {
-			locale = Locale.of(page.getLanguage());
-		} else {
-			locale = Locale.getDefault(Locale.Category.FORMAT);
-		}
+		Locale locale = Locale.forLanguageTag(datasourceProperties.getLanguage());
+		
 
 		for (final Extractor extractor : extractorzs) {
 			try {

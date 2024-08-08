@@ -83,11 +83,7 @@ public class Page {
      */
     protected String contentCharset;
 
-    /**
-     * Language of the Content.
-     */
-    private String language;
-
+  
     /**
      * Headers which were present in the response of the fetch request
      */
@@ -292,16 +288,6 @@ public class Page {
         this.contentCharset = contentCharset;
     }
 
-    /**
-     * @return Language
-     */
-    public String getLanguage() {
-        return language;
-    }
-
-    public void setLanguage(String language) {
-        this.language = language;
-    }
 
     public boolean isTruncated() {
         return truncated;

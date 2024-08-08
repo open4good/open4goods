@@ -128,8 +128,7 @@ public class DataSourceProperties {
 
 	@NotBlank
 	/**
-	 * The datasource language. It is a default value, it is in most case
-	 * autodetected
+	 * The datasource language. 
 	 */
 	private String language = "FR";
 
