@@ -46,7 +46,7 @@ jobs:
             ${{ runner.os }}-maven-
             
       ############################################
-      # Setting up the xwiki repo (in a maven central publication compatible way)
+      # Setting up the xwiki repo 
       ###########################################   
       - uses: s4u/maven-settings-action@v3.0.0
         with:
@@ -59,38 +59,13 @@ jobs:
                 "snapshots": {
                   "enabled": false
                 }
-              },
-              {
-                "id": "spring-snapshots",
-                "name": "spring-snapshots",
-                "url": "https://repo.spring.io/snapshot",
-                "snapshots": {
-                  "enabled": true
-                }
-              },
-              {
-                  "id": "linkedin",
-                  "name": "linkedin",
-                  "url": "https://linkedin.jfrog.io/artifactory/open-source/",
-                  "snapshots": {
-                    "enabled": false
-                  }
-                },
-              {
-                "id": "oracleReleases",
-                "name": "oracleReleases",
-                "url": "https://download.oracle.com/maven",
-                "releases": {
-                  "enabled": true
-                },
-                "snapshots": {
-                  "enabled": false
-                }
-              } 
+              }
+
             ]
 
       ############################################
       # Build and test xwiki-springboot-starter
+      # (Tweak, waiting for mven central publication)
       ###########################################   
       - name: Build and test xwiki-springboot-starter
         working-directory: ./xwiki-spring-boot-starter        
@@ -117,7 +92,51 @@ jobs:
           key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
           restore-keys: |
             ${{ runner.os }}-maven-
-            
+
+      ############################################
+      # Setting up the xwiki repo (in a maven central publication compatible way)
+      ###########################################   
+      - uses: s4u/maven-settings-action@v3.0.0
+        with:
+            repositories: |
+              [
+                {
+                  "id": "xwiki-releases",
+                  "name": "xwiki-releases",
+                  "url": "https://maven.xwiki.org/releases/",
+                  "snapshots": {
+                    "enabled": false
+                  }
+                },
+                {
+                  "id": "spring-snapshots",
+                  "name": "spring-snapshots",
+                  "url": "https://repo.spring.io/snapshot",
+                  "snapshots": {
+                    "enabled": true
+                  }
+                },
+                {
+                    "id": "linkedin",
+                    "name": "linkedin",
+                    "url": "https://linkedin.jfrog.io/artifactory/open-source/",
+                    "snapshots": {
+                      "enabled": false
+                    }
+                  },
+                {
+                  "id": "oracleReleases",
+                  "name": "oracleReleases",
+                  "url": "https://download.oracle.com/maven",
+                  "releases": {
+                    "enabled": true
+                  },
+                  "snapshots": {
+                    "enabled": false
+                  }
+                } 
+              ]
+                            
       ############################################
       # TODO 2 Issue
       ###########################################     
