@@ -77,22 +77,22 @@ public class BatchController {
 		return "done";
 	}
 	
-	@PutMapping(path="/batch/verticals/")
-	@Operation(summary="Create or update a vertical with a full yaml config. Can be long time processing")
-	@PreAuthorize("hasAuthority('"+RolesConstants.ROLE_ADMIN+"')")
-	public String fullUpdateFromConf( @RequestBody @NotBlank final String verticalConfig ) throws InvalidParameterException, JsonParseException, JsonMappingException, IOException, InterruptedException{
-		
-		// Adding the verticam to the vertical service
-		VerticalConfig v = serialisationService.fromYaml(verticalConfig, VerticalConfig.class);
-		verticalConfigService.addTmpConfig(v);
-		
-		// This is initial submission, batching the products to update catégories				
-		aggregationFacadeService. sanitizeVertical(v);
-		Thread.sleep(5000);
-		aggregationFacadeService. score(v);
-		
-		return "done";
-	}
+//	@PutMapping(path="/batch/verticals/")
+//	@Operation(summary="Create or update a vertical with a full yaml config. Can be long time processing")
+//	@PreAuthorize("hasAuthority('"+RolesConstants.ROLE_ADMIN+"')")
+//	public String fullUpdateFromConf( @RequestBody @NotBlank final String verticalConfig ) throws InvalidParameterException, JsonParseException, JsonMappingException, IOException, InterruptedException{
+//		
+//		// Adding the verticam to the vertical service
+//		VerticalConfig v = serialisationService.fromYaml(verticalConfig, VerticalConfig.class);
+//		verticalConfigService.addTmpConfig(v);
+//		
+//		// This is initial submission, batching the products to update catégories				
+//		aggregationFacadeService. sanitizeVertical(v);
+//		Thread.sleep(5000);
+//		aggregationFacadeService. score(v);
+//		
+//		return "done";
+//	}
 
 
 	@PostMapping(path="/full/verticals/")

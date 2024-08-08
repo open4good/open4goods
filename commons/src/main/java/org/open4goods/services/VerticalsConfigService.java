@@ -34,6 +34,7 @@ import com.fasterxml.jackson.databind.ObjectReader;
  * Configurations are provided from the classpath AND from a git specific
  * project (fresh local clone on app startup)
  * TODO : Should be in the verticals sub projetc
+ * TODO : Should not have a dep to gtaxonomy
  * @author goulven
  *
  */
@@ -58,7 +59,6 @@ public class VerticalsConfigService {
 
 	private Map<Integer,VerticalConfig> byTaxonomy = new HashMap<>();
 
-	private String verticalsFolder;
 
 	private ProductRepository productRepository;
 
@@ -72,10 +72,9 @@ public class VerticalsConfigService {
 	private final ExecutorService executorService = Executors.newFixedThreadPool(1);
 
 
-	public VerticalsConfigService(SerialisationService serialisationService, String verticalsFolder, GoogleTaxonomyService googleTaxonomyService, ProductRepository productRepository, ResourcePatternResolver resourceResolver, ImageGenerationService imageGenerationService) {
+	public VerticalsConfigService(SerialisationService serialisationService, GoogleTaxonomyService googleTaxonomyService, ProductRepository productRepository, ResourcePatternResolver resourceResolver, ImageGenerationService imageGenerationService) {
 		super();
 		this.serialisationService = serialisationService;
-		this.verticalsFolder = verticalsFolder;
 		this.googleTaxonomyService = googleTaxonomyService;
 		this.productRepository = productRepository;
 		this.resourceResolver = resourceResolver;
@@ -99,10 +98,6 @@ public class VerticalsConfigService {
 		// Load configurations from classpath
 		/////////////////////////////////////////
 
-		for (VerticalConfig uc : loadFromFolder()) {
-			logger.info("Adding config {} from frolder", uc.getId());
-			vConfs.put(uc.getId(), uc);
-		}
 
 		for (VerticalConfig uc : loadFromClasspath()) {
 			logger.info("Adding config {} from classpath", uc.getId());
@@ -165,33 +160,6 @@ public class VerticalsConfigService {
 	
 	
 	/**
-	 *
-	 * @return the available verticals configurations from classpath
-	 */
-	private List<VerticalConfig> loadFromFolder() {
-		List<VerticalConfig> ret = new ArrayList<>();
-
-		File verticalFolder = new File(verticalsFolder);
-		if (!verticalFolder.isDirectory()) {
-			logger.warn("Cannot load verticals from {} : not a valid directory", verticalsFolder);
-			return ret;
-		}
-		
-		for (File filename : verticalFolder.listFiles((dir, name) -> name.toLowerCase().endsWith(".yml"))) {
-			if (filename.getName().equals(DEFAULT_CONFIG_FILENAME)) {
-				continue;
-			}
-			try {
-				ret.add(getConfig(new FileInputStream(filename), getDefaultConfig()));
-			} catch (IOException e) {
-				logger.error("Cannot retrieve vertical config", e);
-			}
-		}
-
-		return ret;
-	}
-
-	/**
 	 * Instanciate a config with a previously defaulted one
 	 *
 	 * @param inputStream
@@ -207,20 +175,20 @@ public class VerticalsConfigService {
 		return ret;
 	}
 
-	/**	Add a config from api endpoint **/
-	public void addTmpConfig(VerticalConfig vc) {
-
-		try {
-			logger.warn("Adding a non versionned vertical config file. Have to do a PR on open4goods-config to persist it");
-			File dest = new File(verticalsFolder + File.separator + vc.getId() + ".yml");
-			serialisationService.getYamlMapper().writeValue(dest, vc);
-
-			// Reload configs
-			loadConfigs();
-		} catch (Exception e) {
-			logger.error("Cannot persist vertical config", e);
-		}
-    }
+//	/**	Add a config from api endpoint **/
+//	public void addTmpConfig(VerticalConfig vc) {
+//
+//		try {
+//			logger.warn("Adding a non versionned vertical config file. Have to do a PR on open4goods-config to persist it");
+//			File dest = new File(verticalsFolder + File.separator + vc.getId() + ".yml");
+//			serialisationService.getYamlMapper().writeValue(dest, vc);
+//
+//			// Reload configs
+//			loadConfigs();
+//		} catch (Exception e) {
+//			logger.error("Cannot persist vertical config", e);
+//		}
+//    }
 
 	/**
 	 * Instanciate a vertical config for a given category name

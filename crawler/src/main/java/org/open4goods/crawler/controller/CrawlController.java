@@ -1,6 +1,8 @@
 
 package org.open4goods.crawler.controller;
 
+import java.io.IOException;
+
 import org.open4goods.config.yml.datasource.DataSourceProperties;
 import org.open4goods.crawler.config.yml.FetcherProperties;
 import org.open4goods.crawler.services.FetchersService;
@@ -76,7 +78,7 @@ public class CrawlController {
 //	}
 
 	@PostMapping(path=UrlConstants.CRAWLER_API_DIRECT_URL_REQUEST_FETCHING)
-	public DataFragment fetchUrl(@RequestBody final DataSourceProperties p, @RequestParam final String url) throws TechnicalException {
+	public DataFragment fetchUrl(@RequestBody final DataSourceProperties p, @RequestParam final String url) throws TechnicalException, IOException, InterruptedException {
 		return fetchersService.getWebDatasourceFetchingService().synchCrawl(p, url);
 	}
 

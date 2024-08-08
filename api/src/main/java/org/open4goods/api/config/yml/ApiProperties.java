@@ -42,10 +42,6 @@ public class ApiProperties {
 	@NotBlank
 	private String rootFolder="/opt/open4goods/";
 
-	/**
-	 * Folder where verticals configurations are stored
-	 */
-	private String verticalsFolder=rootFolder+ File.separator+"config"+File.separator+"verticals"+File.separator;
 
 	/**
 	 * Folder where datasources definitions are stored
@@ -445,19 +441,6 @@ public class ApiProperties {
 	public void setElasticSearchPort(Integer elasticSearchPort) {
 		this.elasticSearchPort = elasticSearchPort;
 	}
-
-
-
-	public String getVerticalsFolder() {
-		return verticalsFolder;
-	}
-
-
-
-	public void setVerticalsFolder(String verticalsFolder) {
-		this.verticalsFolder = verticalsFolder;
-	}
-
 
 
 	public String getDatasourcesfolder() {
