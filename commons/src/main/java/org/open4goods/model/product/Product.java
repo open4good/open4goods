@@ -3,7 +3,6 @@ package org.open4goods.model.product;
 
 import java.text.DateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
@@ -48,8 +47,6 @@ import org.springframework.data.elasticsearch.annotations.Setting;
 import org.springframework.data.redis.core.RedisHash;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
 
 @Document(indexName = Product.DEFAULT_REPO, createIndex = true)
 @RedisHash(value=Product.DEFAULT_REPO, timeToLive = ProductRepository.VALID_UNTIL_DURATION)

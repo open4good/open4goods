@@ -9,7 +9,6 @@ import org.open4goods.config.yml.datasource.DataSourceProperties;
 import org.open4goods.crawler.services.IndexationService;
 import org.open4goods.model.constants.RolesConstants;
 import org.open4goods.model.constants.UrlConstants;
-import org.open4goods.model.data.DataFragment;
 import org.open4goods.services.DataSourceConfigService;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;

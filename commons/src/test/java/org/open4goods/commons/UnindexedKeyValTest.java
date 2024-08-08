@@ -6,7 +6,6 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.junit.jupiter.api.Test;
-import org.open4goods.model.BarcodeType;
 import org.open4goods.model.data.UnindexedKeyVal;
 
 public class UnindexedKeyValTest {

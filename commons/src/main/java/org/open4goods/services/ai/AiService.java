@@ -6,8 +6,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import org.apache.commons.lang3.StringUtils;
-import org.open4goods.config.yml.attributes.PromptConfig;
 import org.open4goods.config.yml.attributes.AiPromptsConfig;
+import org.open4goods.config.yml.attributes.PromptConfig;
 import org.open4goods.config.yml.ui.ProductI18nElements;
 import org.open4goods.config.yml.ui.VerticalConfig;
 import org.open4goods.model.data.AiDescription;

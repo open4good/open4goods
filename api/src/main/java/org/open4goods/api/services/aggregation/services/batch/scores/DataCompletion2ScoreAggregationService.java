@@ -3,7 +3,6 @@ package org.open4goods.api.services.aggregation.services.batch.scores;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
-import org.open4goods.config.yml.ui.AttributesConfig;
 import org.open4goods.config.yml.ui.VerticalConfig;
 import org.open4goods.exceptions.ValidationException;
 import org.open4goods.model.data.Score;

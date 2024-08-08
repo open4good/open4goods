@@ -1,9 +1,7 @@
 
 package org.open4goods.model.attribute;
 
-import java.util.HashSet;
 import java.util.Objects;
-import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
 import org.open4goods.exceptions.ValidationException;

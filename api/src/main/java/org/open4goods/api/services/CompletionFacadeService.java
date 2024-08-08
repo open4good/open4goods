@@ -2,7 +2,6 @@
 package org.open4goods.api.services;
 
 import java.io.IOException;
-import java.util.concurrent.TimeUnit;
 
 import org.open4goods.api.services.completion.AmazonCompletionService;
 import org.open4goods.api.services.completion.GenAiCompletionService;
@@ -11,8 +10,6 @@ import org.open4goods.api.services.completion.ResourceCompletionService;
 import org.open4goods.exceptions.InvalidParameterException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.stereotype.Service;
 
 /**
  * This service is in charge of building Product in realtime mode TODO :

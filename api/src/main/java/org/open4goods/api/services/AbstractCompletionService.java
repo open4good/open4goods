@@ -6,7 +6,6 @@ import org.open4goods.helper.GenericFileLogger;
 import org.open4goods.model.product.Product;
 import org.open4goods.services.VerticalsConfigService;
 import org.slf4j.Logger;
-import org.springframework.scheduling.annotation.Scheduled;
 
 import ch.qos.logback.classic.Level;
 
