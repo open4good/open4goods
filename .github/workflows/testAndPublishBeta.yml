@@ -28,6 +28,24 @@ jobs:
 
     steps:
       ############################################
+      # Check out the code
+      ###########################################   
+      - uses: actions/checkout@v4
+        with:
+          repository: 'open4good/xwiki-spring-boot-starter'
+
+      ############################################
+      # Cache Maven dependencies
+      ###########################################  
+      - name: Cache Maven dependencies
+        uses: actions/cache@v3
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-maven-
+            
+      ############################################
       # Setting up the xwiki repo (in a maven central publication compatible way)
       ###########################################   
       - uses: s4u/maven-settings-action@v3.0.0
@@ -72,12 +90,8 @@ jobs:
             ]
 
       ############################################
-      # Tweak until maven central publication
-      ############################################
-      - uses: actions/checkout@v4
-        with:
-          repository: 'open4good/xwiki-spring-boot-starter'
-   
+      # Build and test xwiki-springboot-starter
+      ###########################################   
       - name: Build and test xwiki-springboot-starter
         working-directory: ./xwiki-spring-boot-starter        
         run: mvn --batch-mode --update-snapshots install
@@ -88,8 +102,22 @@ jobs:
     needs: install-dependencies
 
     steps:
+      ############################################
+      # Check out the code
+      ###########################################   
       - uses: actions/checkout@v4
 
+      ############################################
+      # Cache Maven dependencies
+      ###########################################  
+      - name: Cache Maven dependencies
+        uses: actions/cache@v3
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-maven-
+            
       ############################################
       # TODO 2 Issue
       ###########################################     
@@ -116,6 +144,11 @@ jobs:
     needs: build-test
 
     steps:
+      ############################################
+      # Check out the code
+      ###########################################   
+      - uses: actions/checkout@v4
+
       ############################################
       # Deploy sbadmin JAR to qualification environment
       ###########################################    
