@@ -17,7 +17,6 @@
 
 package edu.uci.ics.crawler4j.parser;
 
-import org.apache.tika.language.LanguageIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -124,9 +123,9 @@ public class Parser {
                 page.setContentCharset(parsedData.getContentCharset());
             }
 
-            // Please note that identifying language takes less than 10 milliseconds
-            LanguageIdentifier languageIdentifier = new LanguageIdentifier(parsedData.getText());
-            page.setLanguage(languageIdentifier.getLanguage());
+//            // Please note that identifying language takes less than 10 milliseconds
+//            LanguageIdentifier languageIdentifier = new LanguageIdentifier(parsedData.getText());
+//            page.setLanguage(languageIdentifier.getLanguage());
 
             page.setParseData(parsedData);
 

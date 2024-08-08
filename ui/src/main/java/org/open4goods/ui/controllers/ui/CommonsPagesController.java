@@ -24,7 +24,6 @@ import com.mashape.unirest.http.exceptions.UnirestException;
 import io.micrometer.core.annotation.Timed;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import jakarta.ws.rs.Produces;
 
 @Controller
 /**
@@ -70,8 +69,7 @@ public class CommonsPagesController  {
 		return uiService.defaultModelAndView("opensearch", request).addObject("opensearch", config.getOpenSearchConfig());
 	}
 
-	@GetMapping(path= "/sitemap_index.xml", produces = MediaType.TEXT_PLAIN_VALUE)
-	@Produces(MediaType.APPLICATION_XML_VALUE)
+	@GetMapping(path= "/sitemap_index.xml", produces = MediaType.APPLICATION_XML_VALUE)
 	public void sitemapIndex(final HttpServletRequest request, HttpServletResponse response) throws IOException {
 		
 		String siteLanguage =  uiService.getSiteLanguage(request);
@@ -85,9 +83,8 @@ public class CommonsPagesController  {
 	}
 
 	
-	@GetMapping(path= "/sitemap/{sitemap}", produces = MediaType.TEXT_PLAIN_VALUE)
-	@Produces(MediaType.APPLICATION_XML_VALUE)
-	public void sitemapFile(@PathVariable(name = "sitemap") String sitemap, final HttpServletRequest request, HttpServletResponse response) throws IOException {
+	@GetMapping(path= "/sitemap/{sitemap}", produces = MediaType.APPLICATION_XML_VALUE)
+	public void sitemapFile(@PathVariable String sitemap, final HttpServletRequest request, HttpServletResponse response) throws IOException {
 
 		String siteLanguage =  uiService.getSiteLanguage(request);
 		

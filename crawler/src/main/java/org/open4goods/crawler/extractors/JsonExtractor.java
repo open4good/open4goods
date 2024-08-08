@@ -165,7 +165,7 @@ public class JsonExtractor extends Extractor {
 		////////////////////
 		try {
 			if (!StringUtils.isEmpty(c.getDescription())) {
-				p.addDescription(jsonEval(root, c.getDescription()), page.getLanguage());
+				p.addDescription(jsonEval(root, c.getDescription()), locale.getLanguage());
 			}
 
 		} catch (final Exception e) {
@@ -186,7 +186,7 @@ public class JsonExtractor extends Extractor {
 		try {
 			if (!StringUtils.isEmpty(c.getGtin13())) {
 				
-						p.addAttribute(ReferentielKey.GTIN.toString(), jsonEval(root, c.getGtin13()), page.getLanguage(),c.getIgnoreCariageReturns(),c.getAttributeSeparators());
+						p.addAttribute(ReferentielKey.GTIN.toString(), jsonEval(root, c.getGtin13()), locale.getLanguage(),c.getIgnoreCariageReturns(),c.getAttributeSeparators());
 			}
 
 		} catch (final Exception e) {
@@ -199,7 +199,7 @@ public class JsonExtractor extends Extractor {
 		try {
 			if (!StringUtils.isEmpty(c.getSubseller())) {
 				
-						p.addAttribute("SubSeller", jsonEval(root, c.getSubseller()), page.getLanguage(),c.getIgnoreCariageReturns(),c.getAttributeSeparators() );
+						p.addAttribute("SubSeller", jsonEval(root, c.getSubseller()), locale.getLanguage(),c.getIgnoreCariageReturns(),c.getAttributeSeparators() );
 			}
 
 		} catch (final Exception e) {
@@ -214,7 +214,7 @@ public class JsonExtractor extends Extractor {
 				final String brand = jsonEval(root, c.getBrand());
 
 					
-							p.addAttribute(ReferentielKey.BRAND.toString(), brand, page.getLanguage(),c.getIgnoreCariageReturns(),c.getAttributeSeparators());
+							p.addAttribute(ReferentielKey.BRAND.toString(), brand, locale.getLanguage(),c.getIgnoreCariageReturns(),c.getAttributeSeparators());
 				if (!StringUtils.isEmpty(brand)) {
 					//TODO(bug) : should set as referentiel from  all extractors, to avoid datafragmentcompletion to override "well set" referentiel attrs
 					p.addReferentielAttribute(ReferentielKey.BRAND.toString(),brand);
@@ -246,8 +246,8 @@ public class JsonExtractor extends Extractor {
 
 					final String[] terms = eRes.split(c.getBrandAndIdSeparator());
 
-					p.addAttribute(ReferentielKey.BRAND.toString(), terms[0], page.getLanguage(),true,null);
-					p.addAttribute(ReferentielKey.MODEL.toString(), terms[1], page.getLanguage(),true,null);
+					p.addAttribute(ReferentielKey.BRAND.toString(), terms[0], locale.getLanguage(),true,null);
+					p.addAttribute(ReferentielKey.MODEL.toString(), terms[1], locale.getLanguage(),true,null);
 				}
 			}
 
@@ -274,7 +274,7 @@ public class JsonExtractor extends Extractor {
 		try {
 			if (!StringUtils.isEmpty(c.getBrandUid())) {
 				
-						p.addAttribute(ReferentielKey.MODEL.toString(), jsonEval(root, c.getBrandUid()), page.getLanguage(),true,null);
+						p.addAttribute(ReferentielKey.MODEL.toString(), jsonEval(root, c.getBrandUid()), locale.getLanguage(),true,null);
 			}
 
 		} catch (final Exception e) {

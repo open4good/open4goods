@@ -9,8 +9,8 @@ import java.util.Collections;
 import java.util.List;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.ArrayUtils;
-import org.apache.tika.io.IOUtils;
 import org.open4goods.dao.ProductRepository;
 import org.open4goods.services.VerticalsConfigService;
 import org.slf4j.Logger;

@@ -2,6 +2,10 @@
 
 We use this "in place" project to easiest the patch management of the glorious -but old and unmaintained- crawler4j.
 
+Some modifications also : 
+* Removing page.language, and the associated Tika language detection  (better performance)
+
+
 
 # crawler4j
 [![Build Status](https://travis-ci.org/yasserg/crawler4j.svg?branch=master)](https://travis-ci.org/yasserg/crawler4j)
