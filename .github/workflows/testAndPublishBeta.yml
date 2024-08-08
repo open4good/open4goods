@@ -65,18 +65,7 @@ jobs:
                 "snapshots": {
                   "enabled": false
                 }
-              },
-              {
-                "id": "oracleReleases",
-                "name": "oracleReleases",
-                "url": "https://download.oracle.com/maven",
-                "releases": {
-                  "enabled": true
-                },
-                "snapshots": {
-                  "enabled": false
-                }
-              } 
+              }
             ]
 
       ############################################
