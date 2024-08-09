@@ -197,10 +197,10 @@ public class OpenDataService {
 			ZipEntry entry = new ZipEntry(filename);
 			zos.putNextEntry(entry);
 
-			// Sélection des en-têtes basés sur le type de fichier
-			if (!isGtinFile) {  // Fichier ISBN
+			// Headers selon type de fichier
+			if (!isGtinFile) {
 				writer.writeNext(isbnHeader);
-			} else {  // Fichier GTIN
+			} else {
 				writer.writeNext(gtinHeader);
 			}
 
@@ -279,11 +279,11 @@ public class OpenDataService {
 		// "Categories"
 		line[11] = StringUtils.join(data.getDatasourceCategories()," ; ");
 
-		// Modifier classe Product
-		if (isIsbn) {
-			line[13] = data.getAttributes().getReferentielAttributes().get("editeur");
-			line[14] = data.getAttributes().getReferentielAttributes().get("format");
-		}
+//		// Modifier classe Product
+//		if (isIsbn) {
+//			line[13] = data.getAttributes().getReferentielAttributes().get("editeur");
+//			line[14] = data.getAttributes().getReferentielAttributes().get("format");
+//		}
 
 		return line;
 	}
