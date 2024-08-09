@@ -189,7 +189,7 @@ public class OpenDataService {
 		FileUtils.moveFile(src, dest);
 	}
 
-	private void processAndCreateZip(String filename, BarcodeType barcodeType, File zipFile, boolean invertCondition) throws IOException {
+	private void processAndCreateZip(String filename, BarcodeType barcodeType, File zipFile, boolean isGtinFile) throws IOException {
 		try (FileOutputStream fos = new FileOutputStream(zipFile);
 			 ZipOutputStream zos = new ZipOutputStream(fos);
 			 CSVWriter writer = new CSVWriter(new OutputStreamWriter(zos))) {
@@ -197,22 +197,27 @@ public class OpenDataService {
 			ZipEntry entry = new ZipEntry(filename);
 			zos.putNextEntry(entry);
 
-			// Correct header if GTIN or ISBN
-			if (barcodeType == BarcodeType.ISBN_13) {
+			// Sélection des en-têtes basés sur le type de fichier
+			if (!isGtinFile) {  // Fichier ISBN
 				writer.writeNext(isbnHeader);
-			} else {
+			} else {  // Fichier GTIN
 				writer.writeNext(gtinHeader);
 			}
 
 			AtomicLong count = new AtomicLong();
-			aggregatedDataRepository.exportAll().limit(500).filter(e ->
-					invertCondition ? !e.getGtinInfos().getUpcType().equals(barcodeType) : e.getGtinInfos().getUpcType().equals(barcodeType)
-			).forEach(e -> {
+			aggregatedDataRepository.exportAll().limit(1000).filter(e -> {
+				if (isGtinFile) {
+					return e.getGtinInfos().getUpcType() != BarcodeType.ISBN_13;
+				} else {
+					return e.getGtinInfos().getUpcType() == BarcodeType.ISBN_13;
+				}
+			}).forEach(e -> {
 				count.incrementAndGet();
-				writer.writeNext(toEntry(e, barcodeType == BarcodeType.ISBN_13));
+				writer.writeNext(toEntry(e, !isGtinFile));
 			});
+
 			writer.flush();
-			zos.closeEntry(); // entry is closed before ending the try block
+			zos.closeEntry();
 
 			LOGGER.info("{} rows exported in {}.", count.get(), filename);
 
@@ -220,6 +225,7 @@ public class OpenDataService {
 			LOGGER.error("Error during processing of {}: {}", filename, e.getMessage());
 		}
 	}
+
 
 
 	/**
@@ -274,10 +280,10 @@ public class OpenDataService {
 		line[11] = StringUtils.join(data.getDatasourceCategories()," ; ");
 
 		// Modifier classe Product
-//		if (isIsbn) {
-//			line[13] = data.getEditeur();
-//			line[14] = data.getFormat();
-//		}
+		if (isIsbn) {
+			line[13] = data.getAttributes().getReferentielAttributes().get("editeur");
+			line[14] = data.getAttributes().getReferentielAttributes().get("format");
+		}
 
 		return line;
 	}
