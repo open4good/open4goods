@@ -83,7 +83,7 @@ public class RemoteFileCachingService {
 				resource = retrieve(conf);
 			}
 		} catch (final Exception e) {
-			logger.error("Resource {} cannot be retrieved",url,e );
+			logger.error("Resource {} cannot be retrieved : {}",url,e.getMessage() );
 		}
 
 		return resource;
