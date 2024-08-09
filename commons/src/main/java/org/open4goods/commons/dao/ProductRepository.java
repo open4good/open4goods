@@ -169,7 +169,21 @@ public class ProductRepository {
 				.map(SearchHit::getContent);
 	}
 
-
+	/**
+	 * Export all aggregated data, corresponding to the given Barcodes
+	 * 
+	 * @return
+	 */
+	public Stream<Product> exportAll(BarcodeType... barcodeTypes) {
+		
+		Criteria criteria = new Criteria("gtinInfos.upcType").in((Object[]) barcodeTypes);
+		CriteriaQuery query = new CriteriaQuery(criteria);
+		
+		return elasticsearchTemplate.searchForStream(query, Product.class, current_index).stream()
+				.map(SearchHit::getContent);
+	}
+	
+	
 	public Stream<Product> searchInValidPrices(String query, final String indexName, int from, int to) {
 
 		Criteria c = new Criteria().expression(query).and(getRecentPriceQuery());
@@ -582,6 +596,8 @@ public class ProductRepository {
 		CriteriaQuery query = new CriteriaQuery(getRecentPriceQuery());
 		return elasticsearchOperations.count(query, current_index);
 	}
+
+
 
     @Cacheable(cacheNames = CacheConstants.ONE_DAY_LOCAL_CACHE_NAME)
     public long countItemsByBarcodeType(BarcodeType... barcodeTypes) {
