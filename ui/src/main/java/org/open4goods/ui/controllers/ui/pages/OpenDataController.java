@@ -89,6 +89,7 @@ public class OpenDataController  implements SitemapExposedController{
 	public ModelAndView opendataGtin(final HttpServletRequest request) {
 		final ModelAndView ret = uiService.defaultModelAndView("opendata-gtin", request);
 		ret.addObject("lastUpdated", openDataService.gtinLastUpdate());
+		ret.addObject("countGTIN", openDataService.totalItemsGTIN());
 		ret.addObject("fileSize", openDataService.gtinFileSize());
 		ret.addObject("page", "gtin data");
 		return ret;
@@ -98,6 +99,7 @@ public class OpenDataController  implements SitemapExposedController{
 	public ModelAndView opendataIsbn(final HttpServletRequest request) {
 		final ModelAndView ret = uiService.defaultModelAndView("opendata-isbn", request);
 		ret.addObject("lastUpdated", openDataService.isbnLastUpdate());
+		ret.addObject("countISBN", openDataService.totalItemsISBN());
 		ret.addObject("fileSize", openDataService.isbnFileSize());
 		ret.addObject("page", "isbn data");
 		return ret;
