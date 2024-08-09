@@ -280,19 +280,24 @@ public class IcecatCompletionService extends AbstractCompletionService {
 		
 		// Adding PDFs
 		try {
-			
-			Resource r = new Resource(e.description.leafletPDFURL);
-			r.getHardTags().add(ResourceTag.LEAFLET);
-			df.addResource(r);
-			
+						
+			if (e.description != null && e.description.leafletPDFURL != null) {
+				Resource r = new Resource(e.description.leafletPDFURL);
+				r.getHardTags().add(ResourceTag.LEAFLET);
+				df.addResource(r);
+			}
 			
 		} catch (ValidationException e1) {
 			logger.error("Error while adding leaflet pdf {}", e.description.leafletPDFURL, e);
 		}
+		
+		
 		try {
-			Resource r = new Resource(e.description.manualPDFURL);
-			r.getHardTags().add(ResourceTag.MANUAL);
-			df.addResource(r);
+			if (e.description != null && e.description.manualPDFURL != null) {
+				Resource r = new Resource(e.description.manualPDFURL);
+				r.getHardTags().add(ResourceTag.MANUAL);
+				df.addResource(r);
+			}
 		} catch (ValidationException e1) {
 			logger.error("Error while adding manual pdf {}", e.description.leafletPDFURL, e);
 
