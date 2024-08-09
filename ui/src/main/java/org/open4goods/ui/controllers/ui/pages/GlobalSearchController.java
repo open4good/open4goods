@@ -4,13 +4,14 @@ import java.net.URLEncoder;
 import java.nio.charset.Charset;
 import java.util.Locale;
 
+import org.open4goods.helper.IpHelper;
 import org.open4goods.model.constants.CacheConstants;
-import org.open4goods.model.data.Resource;
+import org.open4goods.model.data.GlobalUserSearch;
 import org.open4goods.model.dto.VerticalSearchResponse;
-import org.open4goods.model.product.Product;
 import org.open4goods.services.SearchService;
 import org.open4goods.ui.config.yml.UiConfig;
 import org.open4goods.ui.controllers.ui.UiService;
+import org.open4goods.ui.repository.UserSearchRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Controller;
@@ -35,9 +36,12 @@ public class GlobalSearchController  implements SitemapExposedController{
 	private final SearchService searchService;
 	private final UiConfig config;
 	private @Autowired UiService uiService;
-	public GlobalSearchController(SearchService searchService, UiConfig config) {
+	private UserSearchRepository searchRepository;
+	
+	public GlobalSearchController(SearchService searchService, UiConfig config, UserSearchRepository searchRepository) {
 		this.searchService = searchService;
 		this.config = config;
+		this.searchRepository = searchRepository;
 	}
 
 	@Override
@@ -69,6 +73,12 @@ public class GlobalSearchController  implements SitemapExposedController{
 
 		model.addObject("results",results);
 		model.addObject("query", q);
+		
+		
+		// Saving the user search
+		// TODO(perf) : Bulk, parallelize		
+		GlobalUserSearch search = new GlobalUserSearch(IpHelper.getIp(request), request.getHeader("User-Agent"), q);
+		searchRepository.save(search);
 
 		return model;
 	}
