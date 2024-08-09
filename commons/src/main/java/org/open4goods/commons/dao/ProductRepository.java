@@ -12,6 +12,13 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.open4goods.config.yml.ui.VerticalConfig;
+import org.open4goods.exceptions.ResourceNotFoundException;
+import org.open4goods.model.BarcodeType;
+import org.open4goods.model.constants.CacheConstants;
+import org.open4goods.model.product.Product;
+import org.open4goods.store.repository.ProductIndexationWorker;
+import org.open4goods.store.repository.redis.RedisProductRepository;
 import org.open4goods.commons.config.yml.IndexationConfig;
 import org.open4goods.commons.config.yml.ui.VerticalConfig;
 import org.open4goods.commons.exceptions.ResourceNotFoundException;
@@ -63,10 +70,10 @@ public class ProductRepository {
 	
 	// The file queue implementation for Full products (no partial updates)
 	private BlockingQueue<Product> fullProductQueue;
-	
+
 	// The file queue implementation for Full products (no partial updates)
 	private BlockingQueue<ProductPartialUpdateHolder> partialProductQueue;
-	
+
 	
 	
 	/**
@@ -83,32 +90,32 @@ public class ProductRepository {
 	private @Autowired ElasticsearchOperations elasticsearchOperations;
 
 	private @Autowired SerialisationService serialisationService;
-	
+
 //	private @Autowired RedisProductRepository redisRepository;
 	
 //	private @Autowired RedisOperations<String, Product> redisRepo;
 
 	public ProductRepository() {
-		
-		
+
+
 	}
 
 //	private ExecutorService executor = Executors.newVirtualThreadPerTaskExecutor();
 
 	//TODO(p3,perf) : Virtual threads, but ko with visualVM profiling
 	public ProductRepository(IndexationConfig indexationConfig) {
-				
+
 		this.fullProductQueue = new LinkedBlockingQueue<>(indexationConfig.getProductsQueueMaxSize());
 		this.partialProductQueue = new LinkedBlockingQueue<>(indexationConfig.getPartialProductsQueueMaxSize());
 
 		for (int i = 0; i < indexationConfig.getProductWorkers(); i++) {
 			new Thread((new FullProductIndexationWorker(this, indexationConfig.getProductsbulkPageSize(), indexationConfig.getPauseDuration(),"full-products-worker-"+i))).start();
 		}
-		
+
 		for (int i = 0; i < indexationConfig.getPartialProductWorkers(); i++) {
 			new Thread((new PartialProductIndexationWorker(this, indexationConfig.getPartialProductsbulkPageSize(), indexationConfig.getPauseDuration(),"partial-products-worker-"+i))).start();
 		}
-		
+
 	}
 
 	/**
@@ -149,20 +156,20 @@ public class ProductRepository {
 	            .map(SearchHit::getContent);
 	}
 
-	
+
 
 	public Stream<Product> exportAll(String vertical) {
-		
+
 		Criteria c = new Criteria("vertical").is(vertical);
 
 		final NativeQuery initialQuery = new NativeQueryBuilder()
 				.withQuery(new CriteriaQuery(c)).build();
-		
+
 		return elasticsearchOperations.searchForStream(initialQuery, Product.class, current_index).stream()
 				.map(SearchHit::getContent);
 	}
 
-	
+
 	public Stream<Product> searchInValidPrices(String query, final String indexName, int from, int to) {
 
 		Criteria c = new Criteria().expression(query).and(getRecentPriceQuery());
@@ -267,24 +274,24 @@ public class ProductRepository {
 		return elasticsearchOperations.searchForStream(initialQuery, Product.class, current_index).stream().map(SearchHit::getContent);
 	}
 
-	
+
 	public Stream<Product> getAllHavingVertical() {
 		Criteria c = new Criteria("vertical").exists()
 				;
 
-		
+
 		NativeQueryBuilder initialQueryBuilder = new NativeQueryBuilder().withQuery(new CriteriaQuery(c));
-		
-		initialQueryBuilder =  initialQueryBuilder.withSort(Sort.by(org.springframework.data.domain.Sort.Order.desc("scores.ECOSCORE.value")));									
+
+		initialQueryBuilder =  initialQueryBuilder.withSort(Sort.by(org.springframework.data.domain.Sort.Order.desc("scores.ECOSCORE.value")));
 
 		NativeQuery initialQuery = initialQueryBuilder.build();
-		
+
 		return elasticsearchOperations.searchForStream(initialQuery, Product.class, current_index).stream().map(SearchHit::getContent);
-		
+
 	}
-	
-	
-	
+
+
+
 	/**
 	 * Export all aggregateddatas for a vertical, ordered by ecoscore descending
 	 * 
@@ -306,9 +313,9 @@ public class ProductRepository {
 
 	}
 
-	
-	
-	
+
+
+
 //	/**
 //	 * Index an Product
 //	 *
@@ -370,15 +377,15 @@ public class ProductRepository {
 	public void addToFullindexationQueue(Collection<Product> data) {
 
 		logger.info("Queuing {} products", data.size());
-		
+
 		data.forEach(e -> {
-			
+
 			try {
 				fullProductQueue.put(e) ;
 			} catch (Exception e1) {
 				logger.error("!!!! exception, cannot enqueue product {}",e);
 			}
-			
+
 		});
 	}
 
@@ -399,7 +406,7 @@ public class ProductRepository {
 	
 	public void store(Collection<Product> data) {
 	    logger.info("Indexing {} products", data.size());
-	    
+
 	    List<IndexQuery> indexQueries = data.stream()
 	        .map(p -> new IndexQueryBuilder()
 	            .withId(String.valueOf(p.getId()))
@@ -410,8 +417,8 @@ public class ProductRepository {
 	    elasticsearchOperations.bulkIndex(indexQueries, current_index);
 	}
 
-	
-	
+
+
 	public void forceIndex(Product data) {
 		logger.info("Indexing  product {}", data.gtin());
 
@@ -447,9 +454,9 @@ public class ProductRepository {
 //		try {
 //			result = redisRepository.findById(productId).orElseThrow(ResourceNotFoundException::new);
 //		} catch (ResourceNotFoundException e) {
-//			
+//
 //			result = null;
-//			
+//
 //		} catch (Exception e) {
 //			logger.error("Error getting product {} from redis", productId, e);
 //			result = null;
@@ -522,7 +529,7 @@ public class ProductRepository {
 //				ret.put(e.gtin(), e);
 //			}
 //		});
-//		
+//
 		// Getting the one we don't have in redis from elastic 		
 		Set<String> missingIds = ids.stream().filter(e -> !ret.containsKey(e)).map(e-> String.valueOf(e)) .collect(Collectors.toSet());
 		logger.info("redis hits : {}, missing : {}, queue size : {}",ret.size(), missingIds.size(),fullProductQueue.size());
@@ -575,6 +582,18 @@ public class ProductRepository {
 		CriteriaQuery query = new CriteriaQuery(getRecentPriceQuery());
 		return elasticsearchOperations.count(query, current_index);
 	}
+
+    @Cacheable(cacheNames = CacheConstants.ONE_DAY_LOCAL_CACHE_NAME)
+    public long countItemsByBarcodeType(BarcodeType... barcodeTypes) {
+        Criteria criteria = new Criteria("gtinInfos.upcType").in((Object[]) barcodeTypes);
+        CriteriaQuery query = new CriteriaQuery(criteria);
+        return elasticsearchTemplate.count(query, current_index);
+    }
+    @Cacheable(cacheNames = CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME)
+    public Long countMainIndexHavingPrice() {
+        CriteriaQuery query = new CriteriaQuery(getValidDateQuery());
+        return elasticsearchTemplate.count(query, current_index);
+    }
 
 	
 	@Cacheable(keyGenerator = CacheConstants.KEY_GENERATOR, cacheNames = CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME)
@@ -630,7 +649,7 @@ public class ProductRepository {
 	    // Perform the bulk update
 	    elasticsearchOperations.bulkUpdate(updateQueries, current_index);
 	}
-	
+
 //	/**
 //	 * Bulk update, using script
 //	 * @param partialItemsResults
@@ -658,7 +677,7 @@ public class ProductRepository {
 //	    // Perform the bulk update
 //	    elasticsearchOperations.bulkUpdate(updateQueries, current_index);
 //	}
-//	
+//
 
 
 	/**
@@ -667,7 +686,7 @@ public class ProductRepository {
 	 */
 	public Criteria getRecentPriceQuery() {
 		return getRecentProducts().and(new Criteria("offersCount").greaterThan(0));
-				
+
 	}
 
 	/**
@@ -677,7 +696,7 @@ public class ProductRepository {
 	public Criteria getRecentProducts() {
 		return new Criteria("lastChange").greaterThan(expirationClause());
 	}
-	
+
 	/**
 	 *
 	 * @return Criteria representing the valid dates
