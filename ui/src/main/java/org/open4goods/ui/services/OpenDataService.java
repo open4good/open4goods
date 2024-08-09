@@ -5,6 +5,7 @@ import java.text.CharacterIterator;
 import java.text.StringCharacterIterator;
 import java.time.Instant;
 import java.util.Date;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
@@ -14,21 +15,19 @@ import java.util.zip.ZipOutputStream;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
-<<<<<<< HEAD
 import org.open4goods.commons.dao.ProductRepository;
 import org.open4goods.commons.exceptions.TechnicalException;
 import org.open4goods.commons.helper.ThrottlingInputStream;
 import org.open4goods.commons.model.constants.CacheConstants;
 import org.open4goods.commons.model.product.Product;
-=======
 import org.open4goods.dao.ProductRepository;
 import org.open4goods.exceptions.TechnicalException;
 import org.open4goods.helper.ThrottlingInputStream;
 import org.open4goods.model.BarcodeType;
 import org.open4goods.model.constants.CacheConstants;
+import org.open4goods.model.product.AggregatedAttribute;
 import org.open4goods.model.product.Product;
 import org.open4goods.ui.config.OpenDataConfig;
->>>>>>> 562a43e0 (Frontend Tweaks + ISBN Headers)
 import org.open4goods.ui.config.yml.UiConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,48 +39,29 @@ import com.google.common.util.concurrent.RateLimiter;
 import com.opencsv.CSVWriter;
 
 /**
- * Service in charge of generating the CSV opendata file
- *
- * @author Goulven.Furet
- *
- * TODO : Methods comments
- * 
- * 
- * TODO : Add the below attributes only for ISBN dataset 
- * 
- * CLASSIFICATION DECITRE 1	Loisirs et Jeux	 1
-CLASSIFICATION DECITRE 2	Jeux et activités	 1
-CLASSIFICATION DECITRE 3	Coloriage Gommettes Autocollants
-EDITEUR
-FORMAT
-
-NB DE PAGES
-SOUSCATEGORIE	Enfant-jeunesse	 1
-SOUSCATEGORIE2	Sport-et-loisirs
- * 
- * 
+ * Service responsible for generating and managing the CSV opendata files.
+ * Handles the creation of GTIN and ISBN datasets, their compression into ZIP files,
+ * and the management of download limits and rates.
  */
 public class OpenDataService {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(OpenDataService.class);
 
-//	// Allowed download speed in kb
-//	// TODO : In config (OpenDataConfig)
-//	private static final int DOWNLOAD_SPEED_KB = 256;
-//	public static final int CONCURRENT_DOWNLOADS = 4;
-
-	
 	private static final String ISBN_DATASET_FILENAME = "open4goods-isbn-dataset.csv";
 	private static final String GTIN_DATASET_FILENAME = "open4goods-gtin-dataset.csv";
 
-	// GTIN headers
-	private static final String[] gtinHeader = { "code", "brand", "model", "name", "last_updated", "gs1_country", "gtinType",
-			"offers_count", "min_price", "min_price_compensation", "currency", "categories", "url" };
+	private static final String[] GTIN_HEADER = {
+			"code", "brand", "model", "name", "last_updated", "gs1_country", "gtinType",
+			"offers_count", "min_price", "min_price_compensation", "currency", "categories", "url"
+	};
 
-	// ISBN headers
-	private static final String[] isbnHeader = { "code", "brand", "model", "name", "last_updated", "gs1_country", "gtinType",
-			"offers_count", "min_price", "min_price_compensation", "currency", "categories", "url", "editeur", "format" };
-
+	private static final String[] ISBN_HEADER = {
+			"code", "brand", "model", "name", "last_updated", "gs1_country", "gtintype",
+			"offers_count", "min_price", "min_price_compensation", "currency", "categories", "url",
+			"editeur", "format", "nb de pages",
+			"classification decitre 1", "classification decitre 2", "classification decitre 3",
+			"souscategorie", "souscategorie2"
+	};
 
 	private ProductRepository aggregatedDataRepository;
 	private UiConfig uiConfig;
@@ -89,7 +69,6 @@ public class OpenDataService {
 
 	// The flag that indicates wether opendata export is running or not
 	private AtomicBoolean exportRunning = new AtomicBoolean(false);
-
 	private AtomicInteger concurrentDownloadsCounter = new AtomicInteger(0);
 
 
@@ -101,18 +80,13 @@ public class OpenDataService {
 	}
 
 	/**
-	 *
-	 * @return a limited stream pageSize the opendata set. Limited in bandwith, and
-	 *         limited in number of conccurent downloads Limited
-	 * @throws FileNotFoundException
-	 * @throws TechnicalException
+	 * Provides a limited bandwidth stream for downloading the opendata file.
+	 * Enforces a limit on the number of concurrent downloads.
 	 */
 	public InputStream limitedRateStream() throws TechnicalException, FileNotFoundException {
 
-		// TODO : in conf
 		RateLimiter rateLimiter = RateLimiter.create(openDataConfig.getDownloadSpeedKb() * FileUtils.ONE_KB);
 
-		// TODO : in conf
 		if (concurrentDownloadsCounter.get() >= openDataConfig.getConcurrentDownloads()) {
 			throw new TechnicalException("Too many requests ");
 		} else {
@@ -121,8 +95,7 @@ public class OpenDataService {
 
 		try {
 			LOGGER.info("Starting opendata dataset download");
-			return new ThrottlingInputStream(new BufferedInputStream(new FileInputStream(uiConfig.openDataFile())),
-					rateLimiter) {
+			return new ThrottlingInputStream(new BufferedInputStream(new FileInputStream(uiConfig.openDataFile())), rateLimiter) {
 				@Override
 				public void close() throws IOException {
 					super.close();
@@ -137,12 +110,13 @@ public class OpenDataService {
 	}
 
 	/**
-	 * Iterates over all aggregated data to generate the zipped opendata CSV file.
-	 *
+	 * Generates the opendata CSV files and compresses them into ZIP files.
+	 * This method is scheduled to run periodically.
 	 * TODO : Schedule in conf
 	 */
-	//@Scheduled(  initialDelay = 1000L *3600, fixedDelay = 1000L * 3600 * 24 * 7)
+	@Scheduled(initialDelay = 1000L * 3600, fixedDelay = 1000L * 3600 * 24 * 7)
 	public void generateOpendata() {
+
 		if (exportRunning.getAndSet(true)) {
 			LOGGER.error("Opendata export is already running");
 			return;
@@ -160,15 +134,17 @@ public class OpenDataService {
 		}
 	}
 
-	private void processAndCreateZip(String filename, BarcodeType barcodeType, File zipFile) throws IOException {
-		processAndCreateZip(filename, barcodeType, zipFile, false);
-	}
-
+	/**
+	 * Prepares the necessary directories for storing temporary files.
+	 */
 	private void prepareDirectories() throws IOException {
 		uiConfig.tmpIsbnZipFile().getParentFile().mkdirs();
 		uiConfig.tmpGtinZipFile().getParentFile().mkdirs();
 	}
 
+	/**
+	 * Processes and creates the ZIP files for the opendata.
+	 */
 	private void processDataFiles() throws IOException {
 		LOGGER.info("Starting process for ISBN_13");
 		processAndCreateZip(ISBN_DATASET_FILENAME, BarcodeType.ISBN_13, uiConfig.tmpIsbnZipFile());
@@ -177,11 +153,17 @@ public class OpenDataService {
 		processAndCreateZip(GTIN_DATASET_FILENAME, BarcodeType.ISBN_13, uiConfig.tmpGtinZipFile(), true);
 	}
 
+	/**
+	 * Moves the temporary files to their final destination.
+	 */
 	private void moveTmpFilesToFinalDestination() throws IOException {
 		moveFile(uiConfig.tmpIsbnZipFile(), uiConfig.isbnZipFile());
 		moveFile(uiConfig.tmpGtinZipFile(), uiConfig.gtinZipFile());
 	}
 
+	/**
+	 * Moves a file from the source to the destination.
+	 */
 	private void moveFile(File src, File dest) throws IOException {
 		if (dest.exists()) {
 			FileUtils.deleteQuietly(dest);
@@ -189,6 +171,19 @@ public class OpenDataService {
 		FileUtils.moveFile(src, dest);
 	}
 
+	private void processAndCreateZip(String filename, BarcodeType barcodeType, File zipFile) throws IOException {
+		processAndCreateZip(filename, barcodeType, zipFile, false);
+	}
+
+	/**
+	 * Processes the data and creates a ZIP file for the specified barcode type.
+	 *
+	 * @param filename    The name of the file to be created.
+	 * @param barcodeType The type of barcode being processed.
+	 * @param zipFile     The file object representing the ZIP file to be created.
+	 * @param isGtinFile  Indicates if the file is a GTIN file.
+	 * @throws IOException If there is an error during file creation or writing.
+	 */
 	private void processAndCreateZip(String filename, BarcodeType barcodeType, File zipFile, boolean isGtinFile) throws IOException {
 		try (FileOutputStream fos = new FileOutputStream(zipFile);
 			 ZipOutputStream zos = new ZipOutputStream(fos);
@@ -197,26 +192,23 @@ public class OpenDataService {
 			ZipEntry entry = new ZipEntry(filename);
 			zos.putNextEntry(entry);
 
-			
-			BarcodeType[] types = null;
-			
-			// Headers selon type de fichier
+			// Set the appropriate header and barcode types
+			BarcodeType[] types;
 			if (isGtinFile) {
-				writer.writeNext(gtinHeader);
-				types = new BarcodeType[] { BarcodeType.GTIN_8, BarcodeType.GTIN_12, BarcodeType.GTIN_13, BarcodeType.GTIN_14 };
+				writer.writeNext(GTIN_HEADER);
+				types = new BarcodeType[]{BarcodeType.GTIN_8, BarcodeType.GTIN_12, BarcodeType.GTIN_13, BarcodeType.GTIN_14};
 			} else {
-				writer.writeNext(isbnHeader);
-				types = new BarcodeType[] { BarcodeType.ISBN_13 };
+				writer.writeNext(ISBN_HEADER);
+				types = new BarcodeType[]{BarcodeType.ISBN_13};
 			}
 
 			AtomicLong count = new AtomicLong();
-			//TODO : Remind to remove limit
+
 			aggregatedDataRepository.exportAll(types)
-				.limit(1000)
-				.forEach(e -> {
-					count.incrementAndGet();
-					writer.writeNext(isGtinFile ?  toGtinEntry(e) : toIsbnEntry(e));
-			});
+					.forEach(e -> {
+						count.incrementAndGet();
+						writer.writeNext(isGtinFile ? toGtinEntry(e) : toIsbnEntry(e));
+					});
 
 			writer.flush();
 			zos.closeEntry();
@@ -231,142 +223,100 @@ public class OpenDataService {
 
 
 	/**
-	 * Convert an aggregateddata pageSize a csv row
-	 *
-	 * @param data
-	 * @return
+	 * Converts a Product object into a CSV row for GTIN.
 	 */
 	private String[] toGtinEntry(Product data) {
-		String[] line = new String[gtinHeader.length];
+		String[] line = new String[GTIN_HEADER.length];
 
-		//	"gtin"
-		line[0] = data.gtin();
-		//	"brand"
-		line[1] = data.brand();
-		//	"model"
-		line[2] = data.model();
-<<<<<<< HEAD
-		//		"shortest_name"
-		line[3] = data.shortestOfferName();
-		//		"last_updated"
-=======
-		//	"shortest_name"
-		line[3] = data.getNames().shortestOfferName();
-		//	"last_updated"
->>>>>>> 562a43e0 (Frontend Tweaks + ISBN Headers)
-		line[4] = String.valueOf(data.getLastChange());
-		//	"gs1_country"
-		line[5] = data.getGtinInfos().getCountry();
-		//	"upcType"
-		line[6] = data.getGtinInfos().getUpcType().toString();
-		//	"offers_count"
-		line[7] = String.valueOf(data.getOffersCount());
-		//	"min_price"
+		line[0] = data.gtin(); // "code"
+		line[1] = data.brand(); // "brand"
+		line[2] = data.model(); // "model"
+		line[3] = data.shortestOfferName(); // "name"
+		line[4] = String.valueOf(data.getLastChange()); // "last_updated"
+		line[5] = data.getGtinInfos().getCountry(); // "gs1_country"
+		line[6] = data.getGtinInfos().getUpcType().toString(); // "gtinType"
+		line[7] = String.valueOf(data.getOffersCount()); // "offers_count"
+
 		if (null != data.bestPrice()) {
-			line[8] = String.valueOf(data.bestPrice().getPrice());
-			// "compensation"
-			line[9] = String.valueOf(data.bestPrice().getCompensation());
-			// "currency"
-			line[10] = data.bestPrice().getCurrency().toString();
-			// "url"
-			line[12] = ""; //uiConfig.getBaseUrl(Locale.FRANCE) + data.getNames().getName();
+			line[8] = String.valueOf(data.bestPrice().getPrice()); // "min_price"
+			line[9] = String.valueOf(data.bestPrice().getCompensation()); // "min_price_compensation"
+			line[10] = data.bestPrice().getCurrency().toString(); // "currency"
+			line[12] = ""; // TODO: Construct the URL
 		}
-		// "Categories"
-		line[11] = StringUtils.join(data.getDatasourceCategories()," ; ");
 
-//		// Modifier classe Product
-//		if (isIsbn) {
-//			line[13] = data.getAttributes().getReferentielAttributes().get("editeur");
-//			line[14] = data.getAttributes().getReferentielAttributes().get("format");
-//		}
+		line[11] = StringUtils.join(data.getDatasourceCategories(), " ; "); // "categories"
 
 		return line;
 	}
 
-	
-	
 	/**
-	 * Convert an aggregateddata pageSize a csv row
-	 *
-	 * @param data
-	 * @return
+	 * Converts a Product object into a CSV row for ISBN.
 	 */
 	private String[] toIsbnEntry(Product data) {
-		String[] line = new String[isbnHeader.length];
+		String[] line = new String[ISBN_HEADER.length];
 
-		//	"gtin"
-		line[0] = data.gtin();
-		//	"brand"
-		line[1] = data.brand();
-		//	"model"
-		line[2] = data.model();
-		//	"shortest_name"
-		line[3] = data.getNames().shortestOfferName();
-		//	"last_updated"
-		line[4] = String.valueOf(data.getLastChange());
-		//	"gs1_country"
-		line[5] = data.getGtinInfos().getCountry();
-		//	"upcType"
-		line[6] = data.getGtinInfos().getUpcType().toString();
-		//	"offers_count"
-		line[7] = String.valueOf(data.getOffersCount());
-		//	"min_price"
+		line[0] = data.gtin(); // "code"
+		line[1] = data.brand(); // "brand"
+		line[2] = data.model(); // "model"
+		line[3] = data.shortestOfferName(); // "name"
+		line[4] = String.valueOf(data.getLastChange()); // "last_updated"
+		line[5] = data.getGtinInfos().getCountry(); // "gs1_country"
+		line[6] = data.getGtinInfos().getUpcType().toString(); // "gtintype"
+		line[7] = String.valueOf(data.getOffersCount()); // "offers_count"
+
 		if (null != data.bestPrice()) {
-			line[8] = String.valueOf(data.bestPrice().getPrice());
-			// "compensation"
-			line[9] = String.valueOf(data.bestPrice().getCompensation());
-			// "currency"
-			line[10] = data.bestPrice().getCurrency().toString();
-			// "url"
-			line[12] = ""; //uiConfig.getBaseUrl(Locale.FRANCE) + data.getNames().getName();
+			line[8] = String.valueOf(data.bestPrice().getPrice()); // "min_price"
+			line[9] = String.valueOf(data.bestPrice().getCompensation()); // "min_price_compensation"
+			line[10] = data.bestPrice().getCurrency().toString(); // "currency"
+			line[12] = ""; // TODO: Construct the URL
 		}
-		// "Categories"
-		line[11] = StringUtils.join(data.getDatasourceCategories()," ; ");
-		
-		
-		
-		String attrVal = getAttribute(data, "editeur");
 
-//		// Modifier classe Product
-//		if (isIsbn) {
-//			line[13] = data.getAttributes().getReferentielAttributes().get("editeur");
-//			line[14] = data.getAttributes().getReferentielAttributes().get("format");
-//		}
+		line[11] = StringUtils.join(data.getDatasourceCategories(), " ; "); // "categories"
+
+		line[13] = getAttribute(data, "EDITEUR");
+		line[14] = getAttribute(data, "FORMAT");
+		line[15] = getAttribute(data, "NB DE PAGES");
+		line[16] = getAttribute(data, "CLASSIFICATION DECITRE 1");
+		line[17] = getAttribute(data, "CLASSIFICATION DECITRE 2");
+		line[18] = getAttribute(data, "CLASSIFICATION DECITRE 3");
+		line[19] = getAttribute(data, "SOUSCATEGORIE");
+		line[20] = getAttribute(data, "SOUSCATEGORIE2");
 
 		return line;
 	}
 
 	/**
-	 * Try a direct access to aggregatedattributes, if fail iterate over unmapped ones
+	 * Retrieves a specific attribute from the product data.
 	 * TODO : Review when all attributes acessible by map
-	 * @param data
-	 * @param key
-	 * @return
 	 */
 	private String getAttribute(Product data, String key) {
-		
-		// Direct check against aggregatedAttributes
-		String value = data.getAttributes().getAggregatedAttributes().get(key).getValue();
-		
+
+		String value = null;
+
+		Map<String, AggregatedAttribute> aggregatedAttributes = data.getAttributes().getAggregatedAttributes();
+
+		if (aggregatedAttributes.containsKey(key)) {
+			AggregatedAttribute attribute = aggregatedAttributes.get(key);
+
+			if (attribute != null) {
+				value = attribute.getValue();
+			}
+		}
+
 		if (StringUtils.isEmpty(value)) {
 			// Checking in unmapped attributes
-			
 			value = data.getAttributes().getUnmapedAttributes().stream()
-									.filter(a -> a.getName().equalsIgnoreCase(key))
-									.findFirst()
-									.map(a -> a.getValue())
-									.orElse(null);
-			
+					.filter(a -> a.getName().equalsIgnoreCase(key))
+					.findFirst()
+					.map(AggregatedAttribute::getValue)
+					.orElse(null);
 		}
 
 		return value;
 	}
-	
-	
-	
+
 	/**
-	 * Used pageSize decrement the download counter, for instance when IOexception occurs
-	 * (user stop the download)
+	 * Decrements the download counter, for instance when an IOException occurs (e.g., user stops the download).
 	 */
 	public void decrementDownloadCounter() {
 		concurrentDownloadsCounter.decrementAndGet();
@@ -404,8 +354,9 @@ public class OpenDataService {
 	}
 
 	/**
+	 * Retrieves the total number of items in the main index.
 	 *
-	 * @return number of items
+	 * @return The total number of items.
 	 */
 	@Cacheable(key = "#root.method.name", cacheNames = CacheConstants.ONE_DAY_LOCAL_CACHE_NAME)
 	public long totalItems() {
@@ -413,9 +364,10 @@ public class OpenDataService {
 	}
 
 	/**
-	 * Convert a size in human readable form
-	 * @param bytes
-	 * @return
+	 * Converts a size in bytes to a human-readable format.
+	 *
+	 * @param bytes The size in bytes.
+	 * @return The size in a human-readable format (e.g., "1.2 MB").
 	 */
 	public static String humanReadableByteCountBin(long bytes) {
 		if (-1000 < bytes && bytes < 1000) {
@@ -428,6 +380,4 @@ public class OpenDataService {
 		}
 		return String.format("%.1f %cB", bytes / 1000.0, ci.current());
 	}
-
-
 }
