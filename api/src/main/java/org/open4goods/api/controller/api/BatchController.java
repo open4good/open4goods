@@ -106,7 +106,7 @@ public class BatchController {
 
 	
 	@PostMapping(path="/score/verticals/")
-	@Operation(summary="Create or update a vertical with a given config name. Can be long time processing")
+	@Operation(summary="Score the vertical")
 	public String scoreFromName( @RequestParam @NotBlank final String verticalConfig ) throws InvalidParameterException, JsonParseException, JsonMappingException, IOException, InterruptedException{
 		
 		aggregationFacadeService. score(verticalConfigService.getConfigById(verticalConfig));
