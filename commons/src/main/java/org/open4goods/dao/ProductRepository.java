@@ -14,6 +14,7 @@ import java.util.stream.Stream;
 
 import org.open4goods.config.yml.ui.VerticalConfig;
 import org.open4goods.exceptions.ResourceNotFoundException;
+import org.open4goods.model.BarcodeType;
 import org.open4goods.model.constants.CacheConstants;
 import org.open4goods.model.product.Product;
 import org.open4goods.store.repository.ProductIndexationWorker;
@@ -497,6 +498,12 @@ public class ProductRepository {
 		return elasticsearchTemplate.count(Query.findAll(), current_index);
 	}
 
+	@Cacheable(cacheNames = CacheConstants.ONE_DAY_LOCAL_CACHE_NAME)
+	public long countItemsByBarcodeType(BarcodeType... barcodeTypes) {
+		Criteria criteria = new Criteria("gtinInfos.upcType").in((Object[]) barcodeTypes);
+		CriteriaQuery query = new CriteriaQuery(criteria);
+		return elasticsearchTemplate.count(query, current_index);
+	}
 	@Cacheable(cacheNames = CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME)
 	public Long countMainIndexHavingPrice() {
 		CriteriaQuery query = new CriteriaQuery(getValidDateQuery());
