@@ -7,8 +7,6 @@ public class OpenDataConfig {
 
     private int downloadSpeedKb;
     private int concurrentDownloads;
-    private long initialDelay;
-    private long fixedDelay;
 
     public int getDownloadSpeedKb() {
         return downloadSpeedKb;
@@ -26,19 +24,5 @@ public class OpenDataConfig {
         this.concurrentDownloads = concurrentDownloads;
     }
 
-    public long getInitialDelay() {
-        return initialDelay;
-    }
-
-    public void setInitialDelay(long initialDelay) {
-        this.initialDelay = initialDelay;
-    }
-
-    public long getFixedDelay() {
-        return fixedDelay;
-    }
-
-    public void setFixedDelay(long fixedDelay) {
-        this.fixedDelay = fixedDelay;
-    }
+  
 }
