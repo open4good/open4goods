@@ -14,11 +14,21 @@ import java.util.zip.ZipOutputStream;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
+<<<<<<< HEAD
 import org.open4goods.commons.dao.ProductRepository;
 import org.open4goods.commons.exceptions.TechnicalException;
 import org.open4goods.commons.helper.ThrottlingInputStream;
 import org.open4goods.commons.model.constants.CacheConstants;
 import org.open4goods.commons.model.product.Product;
+=======
+import org.open4goods.dao.ProductRepository;
+import org.open4goods.exceptions.TechnicalException;
+import org.open4goods.helper.ThrottlingInputStream;
+import org.open4goods.model.BarcodeType;
+import org.open4goods.model.constants.CacheConstants;
+import org.open4goods.model.product.Product;
+import org.open4goods.ui.config.OpenDataConfig;
+>>>>>>> 562a43e0 (Frontend Tweaks + ISBN Headers)
 import org.open4goods.ui.config.yml.UiConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -55,21 +65,27 @@ public class OpenDataService {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(OpenDataService.class);
 
-	// Allowed download speed in kb
-	// TODO : In config (OpenDataConfig)
-	private static final int DOWNLOAD_SPEED_KB = 256;
-	public static final int CONCURRENT_DOWNLOADS = 4;
+//	// Allowed download speed in kb
+//	// TODO : In config (OpenDataConfig)
+//	private static final int DOWNLOAD_SPEED_KB = 256;
+//	public static final int CONCURRENT_DOWNLOADS = 4;
 
 	
 	private static final String ISBN_DATASET_FILENAME = "open4goods-isbn-dataset.csv";
 	private static final String GTIN_DATASET_FILENAME = "open4goods-gtin-dataset.csv";
 
-	// The headers
-	private static final String[] header = { "code", "brand", "model", "name", "last_updated", "gs1_country", "gtinType",
+	// GTIN headers
+	private static final String[] gtinHeader = { "code", "brand", "model", "name", "last_updated", "gs1_country", "gtinType",
 			"offers_count", "min_price", "min_price_compensation", "currency", "categories", "url" };
+
+	// ISBN headers
+	private static final String[] isbnHeader = { "code", "brand", "model", "name", "last_updated", "gs1_country", "gtinType",
+			"offers_count", "min_price", "min_price_compensation", "currency", "categories", "url", "editeur", "format" };
+
 
 	private ProductRepository aggregatedDataRepository;
 	private UiConfig uiConfig;
+	private final OpenDataConfig openDataConfig;
 
 	// The flag that indicates wether opendata export is running or not
 	private AtomicBoolean exportRunning = new AtomicBoolean(false);
@@ -77,9 +93,11 @@ public class OpenDataService {
 	private AtomicInteger concurrentDownloadsCounter = new AtomicInteger(0);
 
 
-	public OpenDataService(ProductRepository aggregatedDataRepository, UiConfig uiConfig){
+	public OpenDataService(ProductRepository aggregatedDataRepository, UiConfig uiConfig, OpenDataConfig openDataConfig){
 		this.aggregatedDataRepository = aggregatedDataRepository;
 		this.uiConfig = uiConfig;
+        this.openDataConfig = openDataConfig;
+        generateOpendata();
 	}
 
 	/**
@@ -92,10 +110,10 @@ public class OpenDataService {
 	public InputStream limitedRateStream() throws TechnicalException, FileNotFoundException {
 
 		// TODO : in conf
-		RateLimiter rateLimiter = RateLimiter.create(DOWNLOAD_SPEED_KB * FileUtils.ONE_KB);
+		RateLimiter rateLimiter = RateLimiter.create(openDataConfig.getDownloadSpeedKb() * FileUtils.ONE_KB);
 
 		// TODO : in conf
-		if (concurrentDownloadsCounter.get() >= CONCURRENT_DOWNLOADS) {
+		if (concurrentDownloadsCounter.get() >= openDataConfig.getConcurrentDownloads()) {
 			throw new TechnicalException("Too many requests ");
 		} else {
 			concurrentDownloadsCounter.incrementAndGet();
@@ -123,7 +141,7 @@ public class OpenDataService {
 	 *
 	 * TODO : Schedule in conf
 	 */
-	@Scheduled(  initialDelay = 1000L *3600, fixedDelay = 1000L * 3600 * 24 * 7)
+	//@Scheduled(  initialDelay = 1000L *3600, fixedDelay = 1000L * 3600 * 24 * 7)
 	public void generateOpendata() {
 		if (exportRunning.getAndSet(true)) {
 			LOGGER.error("Opendata export is already running");
@@ -178,20 +196,23 @@ public class OpenDataService {
 
 			ZipEntry entry = new ZipEntry(filename);
 			zos.putNextEntry(entry);
-			writer.writeNext(header);
+
+			// Correct header if GTIN or ISBN
+			if (barcodeType == BarcodeType.ISBN_13) {
+				writer.writeNext(isbnHeader);
+			} else {
+				writer.writeNext(gtinHeader);
+			}
 
 			AtomicLong count = new AtomicLong();
-			// TODO : Remove before MEP
 			aggregatedDataRepository.exportAll().limit(500).filter(e ->
 					invertCondition ? !e.getGtinInfos().getUpcType().equals(barcodeType) : e.getGtinInfos().getUpcType().equals(barcodeType)
 			).forEach(e -> {
 				count.incrementAndGet();
-				writer.writeNext(toEntry(e));
+				writer.writeNext(toEntry(e, barcodeType == BarcodeType.ISBN_13));
 			});
 			writer.flush();
-			
-
-			zos.closeEntry(); // Ensure the entry is closed before ending the try block
+			zos.closeEntry(); // entry is closed before ending the try block
 
 			LOGGER.info("{} rows exported in {}.", count.get(), filename);
 
@@ -200,35 +221,46 @@ public class OpenDataService {
 		}
 	}
 
+
 	/**
 	 * Convert an aggregateddata pageSize a csv row
 	 *
 	 * @param data
 	 * @return
 	 */
-	private String[] toEntry(Product data) {
+	private String[] toEntry(Product data, boolean isIsbn) {
+		String[] line;
 
-		String[] line = new String[header.length];
+		// Adapter la taille du tableau au nombre de headers
+		if (isIsbn) {
+			line = new String[isbnHeader.length];
+		} else {
+			line = new String[gtinHeader.length];
+		}
 
-		//		"gtin"
+		//	"gtin"
 		line[0] = data.gtin();
-		//		"brand"
+		//	"brand"
 		line[1] = data.brand();
-		//		"model"
+		//	"model"
 		line[2] = data.model();
+<<<<<<< HEAD
 		//		"shortest_name"
 		line[3] = data.shortestOfferName();
 		//		"last_updated"
+=======
+		//	"shortest_name"
+		line[3] = data.getNames().shortestOfferName();
+		//	"last_updated"
+>>>>>>> 562a43e0 (Frontend Tweaks + ISBN Headers)
 		line[4] = String.valueOf(data.getLastChange());
-		//		"gs1_country"
+		//	"gs1_country"
 		line[5] = data.getGtinInfos().getCountry();
-		//		"upcType"
+		//	"upcType"
 		line[6] = data.getGtinInfos().getUpcType().toString();
-
-
-		//		"offers_count"
+		//	"offers_count"
 		line[7] = String.valueOf(data.getOffersCount());
-		//		"min_price"
+		//	"min_price"
 		if (null != data.bestPrice()) {
 			line[8] = String.valueOf(data.bestPrice().getPrice());
 			// "compensation"
@@ -236,15 +268,20 @@ public class OpenDataService {
 			// "currency"
 			line[10] = data.bestPrice().getCurrency().toString();
 			// "url"
-			// TODO(gof) : i18n the url
 			line[12] = ""; //uiConfig.getBaseUrl(Locale.FRANCE) + data.getNames().getName();
 		}
-
-		// Categories
+		// "Categories"
 		line[11] = StringUtils.join(data.getDatasourceCategories()," ; ");
+
+		// Modifier classe Product
+//		if (isIsbn) {
+//			line[13] = data.getEditeur();
+//			line[14] = data.getFormat();
+//		}
 
 		return line;
 	}
+
 
 	/**
 	 * Used pageSize decrement the download counter, for instance when IOexception occurs
@@ -272,6 +309,17 @@ public class OpenDataService {
 	@Cacheable(key = "#root.method.name + 'Gtin'", cacheNames = CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME)
 	public Date gtinLastUpdate() {
 		return Date.from(Instant.ofEpochMilli(uiConfig.gtinZipFile().lastModified()));
+	}
+
+	@Cacheable(key = "#root.method.name + 'Isbn'", cacheNames = CacheConstants.ONE_DAY_LOCAL_CACHE_NAME)
+	public long totalItemsISBN() {
+		return aggregatedDataRepository.countItemsByBarcodeType(BarcodeType.ISBN_13);
+	}
+
+	@Cacheable(key = "#root.method.name + 'Gtin'", cacheNames = CacheConstants.ONE_DAY_LOCAL_CACHE_NAME)
+	public long totalItemsGTIN() {
+		return aggregatedDataRepository.countItemsByBarcodeType(
+				BarcodeType.GTIN_8, BarcodeType.GTIN_12, BarcodeType.GTIN_13, BarcodeType.GTIN_14);
 	}
 
 	/**
