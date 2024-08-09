@@ -302,7 +302,7 @@ public class CsvIndexationWorker implements Runnable {
 							continue;
 						}							
 
-						final DataFragment df = parseCsvLine(crawler, controler, dsProperties, line, dsConfName, logger);
+						final DataFragment df = parseCsvLine(crawler, controler, dsProperties, line, dsConfName, logger, url);
 
 						// Effectiv indexation
 						if (null != df) {
@@ -369,7 +369,7 @@ public class CsvIndexationWorker implements Runnable {
 
 	private DataFragment parseCsvLine(final DataFragmentWebCrawler crawler, final CrawlController controler,
 			final DataSourceProperties config, final Map<String, String> item, final String datasourceConfigName,
-			final Logger dedicatedLogger) throws ValidationException {
+			final Logger dedicatedLogger, String datasetUrl) throws ValidationException {
 
 		final CsvDataSourceProperties csvProperties = config.getCsvDatasource();
 
@@ -419,7 +419,7 @@ public class CsvIndexationWorker implements Runnable {
 
 			}
 		} catch (final Exception e2) {
-			dedicatedLogger.warn("Error while extracting url of {}", item);
+			dedicatedLogger.warn("Error while extracting url in dataset {} :  {}", datasetUrl, item);
 		}
 
 		if (!StringUtils.isEmpty(csvProperties.getAffiliatedUrl())) {
