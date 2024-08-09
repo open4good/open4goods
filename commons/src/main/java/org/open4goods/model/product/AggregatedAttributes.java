@@ -24,6 +24,7 @@ public class AggregatedAttributes  {
 
 	
 	//TODO: rename
+	// TODO : specifiy indexation rules
 	private Map<String,AggregatedAttribute> aggregatedAttributes = new HashMap<>();
 
 
