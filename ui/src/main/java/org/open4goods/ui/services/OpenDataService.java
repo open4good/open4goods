@@ -197,23 +197,25 @@ public class OpenDataService {
 			ZipEntry entry = new ZipEntry(filename);
 			zos.putNextEntry(entry);
 
+			
+			BarcodeType[] types = null;
+			
 			// Headers selon type de fichier
-			if (!isGtinFile) {
-				writer.writeNext(isbnHeader);
-			} else {
+			if (isGtinFile) {
 				writer.writeNext(gtinHeader);
+				types = new BarcodeType[] { BarcodeType.GTIN_8, BarcodeType.GTIN_12, BarcodeType.GTIN_13, BarcodeType.GTIN_14 };
+			} else {
+				writer.writeNext(isbnHeader);
+				types = new BarcodeType[] { BarcodeType.ISBN_13 };
 			}
 
 			AtomicLong count = new AtomicLong();
-			aggregatedDataRepository.exportAll().limit(1000).filter(e -> {
-				if (isGtinFile) {
-					return e.getGtinInfos().getUpcType() != BarcodeType.ISBN_13;
-				} else {
-					return e.getGtinInfos().getUpcType() == BarcodeType.ISBN_13;
-				}
-			}).forEach(e -> {
-				count.incrementAndGet();
-				writer.writeNext(toEntry(e, !isGtinFile));
+			//TODO : Remind to remove limit
+			aggregatedDataRepository.exportAll(types)
+				.limit(1000)
+				.forEach(e -> {
+					count.incrementAndGet();
+					writer.writeNext(isGtinFile ?  toGtinEntry(e) : toIsbnEntry(e));
 			});
 
 			writer.flush();
@@ -234,15 +236,8 @@ public class OpenDataService {
 	 * @param data
 	 * @return
 	 */
-	private String[] toEntry(Product data, boolean isIsbn) {
-		String[] line;
-
-		// Adapter la taille du tableau au nombre de headers
-		if (isIsbn) {
-			line = new String[isbnHeader.length];
-		} else {
-			line = new String[gtinHeader.length];
-		}
+	private String[] toGtinEntry(Product data) {
+		String[] line = new String[gtinHeader.length];
 
 		//	"gtin"
 		line[0] = data.gtin();
@@ -288,7 +283,87 @@ public class OpenDataService {
 		return line;
 	}
 
+	
+	
+	/**
+	 * Convert an aggregateddata pageSize a csv row
+	 *
+	 * @param data
+	 * @return
+	 */
+	private String[] toIsbnEntry(Product data) {
+		String[] line = new String[isbnHeader.length];
 
+		//	"gtin"
+		line[0] = data.gtin();
+		//	"brand"
+		line[1] = data.brand();
+		//	"model"
+		line[2] = data.model();
+		//	"shortest_name"
+		line[3] = data.getNames().shortestOfferName();
+		//	"last_updated"
+		line[4] = String.valueOf(data.getLastChange());
+		//	"gs1_country"
+		line[5] = data.getGtinInfos().getCountry();
+		//	"upcType"
+		line[6] = data.getGtinInfos().getUpcType().toString();
+		//	"offers_count"
+		line[7] = String.valueOf(data.getOffersCount());
+		//	"min_price"
+		if (null != data.bestPrice()) {
+			line[8] = String.valueOf(data.bestPrice().getPrice());
+			// "compensation"
+			line[9] = String.valueOf(data.bestPrice().getCompensation());
+			// "currency"
+			line[10] = data.bestPrice().getCurrency().toString();
+			// "url"
+			line[12] = ""; //uiConfig.getBaseUrl(Locale.FRANCE) + data.getNames().getName();
+		}
+		// "Categories"
+		line[11] = StringUtils.join(data.getDatasourceCategories()," ; ");
+		
+		
+		
+		String attrVal = getAttribute(data, "editeur");
+
+//		// Modifier classe Product
+//		if (isIsbn) {
+//			line[13] = data.getAttributes().getReferentielAttributes().get("editeur");
+//			line[14] = data.getAttributes().getReferentielAttributes().get("format");
+//		}
+
+		return line;
+	}
+
+	/**
+	 * Try a direct access to aggregatedattributes, if fail iterate over unmapped ones
+	 * TODO : Review when all attributes acessible by map
+	 * @param data
+	 * @param key
+	 * @return
+	 */
+	private String getAttribute(Product data, String key) {
+		
+		// Direct check against aggregatedAttributes
+		String value = data.getAttributes().getAggregatedAttributes().get(key).getValue();
+		
+		if (StringUtils.isEmpty(value)) {
+			// Checking in unmapped attributes
+			
+			value = data.getAttributes().getUnmapedAttributes().stream()
+									.filter(a -> a.getName().equalsIgnoreCase(key))
+									.findFirst()
+									.map(a -> a.getValue())
+									.orElse(null);
+			
+		}
+
+		return value;
+	}
+	
+	
+	
 	/**
 	 * Used pageSize decrement the download counter, for instance when IOexception occurs
 	 * (user stop the download)
