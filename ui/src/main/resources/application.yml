@@ -119,9 +119,15 @@ apiConfig:
   apiLicence: "May vary"
 
 
-tagListUrl: https://open4good.github.io/open4goods/maven/taglist/taglist.xml 
+tagListUrl: https://open4good.github.io/open4goods/maven/taglist/taglist.xml
 
-  
+openDataConfig:
+  downloadSpeedKb: 256
+  concurrentDownloads: 4
+  initialDelay: 3600000  # 1 heure
+  fixedDelay: 604800000  # 1 semaine
+
+
 feedbackConfig:      
   githubConfig:
     accessToken: GITHUB_ACCESS_TOKEN
