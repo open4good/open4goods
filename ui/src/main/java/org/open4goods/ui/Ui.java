@@ -9,6 +9,7 @@ import org.open4goods.store.repository.elastic.BrandScoresRepository;
 import org.open4goods.store.repository.elastic.ElasticProductRepository;
 import org.open4goods.store.repository.redis.RedisProductRepository;
 import org.open4goods.ui.repository.AffiliationTokenRepository;
+import org.open4goods.ui.repository.UserSearchRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,7 +31,7 @@ import jakarta.annotation.PreDestroy;
 @EnableScheduling
 @EnableCaching
 @Configuration
-@EnableElasticsearchRepositories(basePackageClasses = {AffiliationTokenRepository.class, ElasticProductRepository.class, BrandScoresRepository.class})
+@EnableElasticsearchRepositories(basePackageClasses = {AffiliationTokenRepository.class, UserSearchRepository.class, ElasticProductRepository.class, BrandScoresRepository.class})
 @EnableRedisRepositories(basePackageClasses = RedisProductRepository.class)
 public class Ui {
 
