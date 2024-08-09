@@ -51,8 +51,6 @@ public class AffiliatedController {
 		// No follow
 		response.addHeader("X-Robots-Tag", "noindex, nofollow");
 
-		// TODO : in a service
-		final String ip = IpHelper.getIp(request);
 		
 		String str = null;
 		try {
@@ -66,6 +64,8 @@ public class AffiliatedController {
 
 			// Setting ip and user agent
 			aff = serialisationService.fromJson(str, AffiliationToken.class);
+
+			final String ip = IpHelper.getIp(request);
 			aff.setIp(ip);
 			aff.setUa(request.getHeader("User-Agent"));
 			ValueWrapper existantVote = cache.get(ip);
