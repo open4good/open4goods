@@ -35,29 +35,17 @@ import jakarta.servlet.http.HttpServletResponse;
 public class OpenDataController  implements SitemapExposedController{
 
 	public static final String DEFAULT_PATH="/opendata";
-	
 	private static final Logger LOGGER = LoggerFactory.getLogger(OpenDataController.class);
 
-	// The siteConfig
 	private final OpenDataService openDataService;
 	private @Autowired UiService uiService;
 	private final UiConfig uiConfig;
-
 
 	@Autowired
 	public OpenDataController(OpenDataService openDataService, UiConfig uiConfig) {
 		this.openDataService = openDataService;
 		this.uiConfig = uiConfig;
 	}
-
-	/**
-	 * The Home page.
-	 *
-	 * @param request
-	 * @param response
-	 * @return
-	 * @throws UnirestException
-	 */
 
 	@Override
 	public SitemapEntry getExposedUrls() {
