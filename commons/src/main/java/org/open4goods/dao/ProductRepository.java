@@ -456,7 +456,7 @@ public class ProductRepository {
 		
 		// Getting the one we don't have in redis from elastic 		
 		Set<String> missingIds = ids.stream().filter(e -> !ret.containsKey(e)).collect(Collectors.toSet());
-		logger.warn("redis hits : {}, missing : {}, queue size : {}",ret.size(), missingIds.size(),queue.size());
+		logger.info("redis hits : {}, missing : {}, queue size : {}",ret.size(), missingIds.size(),queue.size());
 		
 		
 		if (missingIds.size() != 0) {

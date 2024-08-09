@@ -59,7 +59,7 @@ public class DataFragmentAggregationWorker implements Runnable {
 					// Aggregating
 					service.aggregateAndstore(buffer);
 					
-					logger.warn("{} has indexed {} DataFragments. {} Remaining in queue",workerName,  buffer.size(), service.getQueue().size());
+					logger.info("{} has indexed {} DataFragments. {} Remaining in queue",workerName,  buffer.size(), service.getQueue().size());
 
 				} else {
 					try {
