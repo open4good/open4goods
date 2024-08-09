@@ -438,7 +438,7 @@ public class ResourceCompletionService  extends AbstractCompletionService{
 				resource.setStatus(ResourceStatus.PROTOCOL_EXCEPTION);
 				resource.setEvicted(true);
 				return resource;
-			} catch (IOException e) {
+			} catch (Exception e) {
 				logger.error("Cannot download ({}) : {}", e.getMessage(), resource.getUrl());
 				resource.setStatus(ResourceStatus.IO_EXCEPTION);
 				resource.setEvicted(true);
