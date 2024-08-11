@@ -1,4 +1,4 @@
-name: Prod - Checking HTTP status codes
+name: ⏱ Prod - Checking HTTP status codes
 
 on:
   workflow_dispatch:
