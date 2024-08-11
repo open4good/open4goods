@@ -3,7 +3,7 @@ name: Prod - Checking HTTP status codes
 on:
   workflow_dispatch:
   schedule:
-    - cron: "*/10 * * * *"  # Runs every 10 minutes
+    - cron: "*/5 * * * *"  # Runs every 10 minutes
 
 jobs:
   check-status-codes:
@@ -18,5 +18,5 @@ jobs:
       - name: Check HTTP status codes of nudger.fr
         uses: lakuapik/gh-actions-http-status@v1
         with:
-          sites: '["https://api.nudger.fr", "https://wiki.nudger.fr/bin/login/XWiki/XWikiLogin"]'
-          expected: '[401]'
+          sites: '["https://api.nudger.fr", "https://wiki.nudger.fr/bin/login/XWiki/XWikiLogin", "https://beta.nudger.fr/"]'
+          expected: '[401, 401, 401]'
