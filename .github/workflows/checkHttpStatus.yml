@@ -1,0 +1,21 @@
+name: Workflow for checking HTTP status codes
+
+on:
+  schedule:
+    - cron: "*/10 * * * *"  # Runs every 10 minutes
+
+jobs:
+  check-status-codes:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check HTTP status codes of nudger.fr
+        uses: lakuapik/gh-actions-http-status@v1
+        with:
+          sites: '["https://nudger.fr"]'
+          expected: '[200]'
+
+      - name: Check HTTP status codes of nudger.fr
+        uses: lakuapik/gh-actions-http-status@v1
+        with:
+          sites: '["https://api.nudger.fr", "https://wiki.nudger.fr/bin/login/XWiki/XWikiLogin"]'
+          expected: '[401]'
