@@ -98,7 +98,11 @@ public class BlogService {
 						
 			String extract = fullPage.getProperties().get("extract");
 //			int hidden = Integer.valueOf(fullPage.getProperties().get("hidden"));
-//			String  publishDate = fullPage.getProperties().get("publishDate");
+			String  publishDate = fullPage.getProperties().get("publishDate");
+			// TODO :  DateTimeFormatter formatter = DateTimeFormatter.ofPattern("EEE MMM dd HH:mm:ss zzz yyyy");
+
+			
+			
 //			int published =   Integer.valueOf(fullPage.getProperties().get("published"));
 			String category =  fullPage.getProperties().get("category");
 			String title = fullPage.getProperties().get("title");
@@ -164,10 +168,10 @@ public class BlogService {
 				continue;
 			}
 			
-			String date = fullPage.getWikiPage().getCreated().getTime().toLocaleString();
+//			String date = fullPage.getWikiPage().getCreated().getTime().toLocaleString();
 			// TODO : Proper i18n, 
-			date = date.substring(0,date.indexOf(','));			
-			post.setCreated(date);
+//			date = date.substring(0,date.indexOf(','));			
+			post.setCreated(publishDate);
 			post.setCreatedMs(fullPage.getWikiPage().getCreated().getTimeInMillis());
 			post.setModified(fullPage.getWikiPage().getModified().toString());
 
