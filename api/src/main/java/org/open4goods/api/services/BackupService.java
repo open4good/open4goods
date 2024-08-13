@@ -16,6 +16,7 @@ import org.open4goods.services.SerialisationService;
 import org.open4goods.xwiki.services.XWikiReadService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.boot.actuate.health.HealthIndicator;
 import org.springframework.scheduling.annotation.Scheduled;
 
 import io.micrometer.core.annotation.Timed;
