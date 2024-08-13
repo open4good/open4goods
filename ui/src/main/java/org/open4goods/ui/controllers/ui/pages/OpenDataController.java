@@ -65,6 +65,8 @@ public class OpenDataController  implements SitemapExposedController{
 	public ModelAndView opendata(final HttpServletRequest request) {
 		final ModelAndView ret = uiService.defaultModelAndView("opendata", request);
 		ret.addObject("count", openDataService.totalItems());
+		ret.addObject("countGTIN", openDataService.totalItemsGTIN());
+		ret.addObject("countISBN", openDataService.totalItemsISBN());
 		ret.addObject("isbnLastUpdated", openDataService.isbnLastUpdate());
 		ret.addObject("isbnFileSize", openDataService.isbnFileSize());
 		ret.addObject("gtinLastUpdated", openDataService.gtinLastUpdate());
