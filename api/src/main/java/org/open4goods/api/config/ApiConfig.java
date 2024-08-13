@@ -7,6 +7,7 @@ import java.util.concurrent.TimeUnit;
 import org.apache.commons.lang3.ArrayUtils;
 import org.open4goods.api.config.yml.ApiProperties;
 import org.open4goods.api.services.AggregationFacadeService;
+import org.open4goods.api.services.BackupService;
 import org.open4goods.api.services.BatchService;
 import org.open4goods.api.services.CompletionFacadeService;
 import org.open4goods.api.services.FetcherOrchestrationService;
@@ -55,6 +56,7 @@ import org.open4goods.services.VerticalsConfigService;
 import org.open4goods.services.ai.AiService;
 import org.open4goods.services.textgen.BlablaService;
 import org.open4goods.store.repository.elastic.BrandScoresRepository;
+import org.open4goods.xwiki.services.XWikiReadService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springdoc.core.customizers.OpenApiCustomizer;
@@ -105,9 +107,9 @@ public class ApiConfig {
 		this.apiProperties = apiProperties;
 	}
 
-    
-	  @Bean
-	  public RedisTemplate<String, Product> redisTemplate(RedisConnectionFactory connectionFactory) {
+
+    @Bean
+    RedisTemplate<String, Product> redisTemplate(RedisConnectionFactory connectionFactory) {
 		  RedisTemplate<String, Product> template = new RedisTemplate<>();
 		    template.setConnectionFactory(connectionFactory);
 		    
@@ -127,7 +129,7 @@ public class ApiConfig {
 	@Bean
 	@Autowired
 	IcecatService icecatFeatureService( RemoteFileCachingService fileCachingService, BrandService brandService,  VerticalsConfigService verticalConfigService) throws SAXException {
-		// TODO : xmlMapper not injected because corruct the springdoc used one. Should use a @Primary derivation
+		// NOTE : xmlMapper not injected because corruct the springdoc used one. Could use a @Primary derivation
 		return new IcecatService(new XmlMapper(), apiProperties.getIcecatFeatureConfig(), fileCachingService, apiProperties.remoteCachingFolder(), brandService, verticalConfigService);
 	}
 	
@@ -177,9 +179,9 @@ public class ApiConfig {
 		return new BlablaService(evaluationService);
 	}
 
-	@Bean
-	@Autowired
-	public DevModeService devModeService (ProductRepository repository, SerialisationService serialisationService, VerticalsConfigService verticalsConfigService) {
+    @Bean
+    @Autowired
+    DevModeService devModeService(ProductRepository repository, SerialisationService serialisationService, VerticalsConfigService verticalsConfigService) {
 		return new DevModeService(apiProperties.getDevModeConfig(),repository, serialisationService, verticalsConfigService);
 	}
 	
@@ -196,9 +198,9 @@ public class ApiConfig {
 	VerticalsConfigService verticalConfigsService(ResourcePatternResolver resolver, SerialisationService serialisationService, GoogleTaxonomyService googleTaxonomyService, ProductRepository productRepository, ImageGenerationService imageGenService) throws IOException {
 		return new VerticalsConfigService(serialisationService, googleTaxonomyService, productRepository, resolver,imageGenService);
 	}
-	
-	@Bean
-	public ImageGenerationService imageGenerationService(@Autowired OpenAiImageModel imageModel) {
+
+    @Bean
+    ImageGenerationService imageGenerationService(@Autowired OpenAiImageModel imageModel) {
 		return new ImageGenerationService(imageModel, apiProperties.getImageGenerationConfig(), apiProperties.getGeneratedImagesFolder());
 	}
 	  
@@ -213,8 +215,8 @@ public class ApiConfig {
 		return new BrandService(properties.getBrandConfig(),  rfc, brandRepository, properties.logsFolder());
 	}
 
-	@Bean
-	public PromptConfig aiConfig() { return new PromptConfig(); }
+    @Bean
+    PromptConfig aiConfig() { return new PromptConfig(); }
 
 	@Bean
 	@Autowired  
@@ -223,8 +225,9 @@ public class ApiConfig {
 		
 		
 	}
+
     @Bean
-	public GoogleTaxonomyService googleTaxonomyService(@Autowired RemoteFileCachingService remoteFileCachingService) {
+    GoogleTaxonomyService googleTaxonomyService(@Autowired RemoteFileCachingService remoteFileCachingService) {
 		GoogleTaxonomyService gts = new GoogleTaxonomyService(remoteFileCachingService);
 		
 		// TODO : From conf 
@@ -547,11 +550,18 @@ public class ApiConfig {
 		};
 	}
 
-	
-	@Bean
-	public TimedAspect timedAspect(MeterRegistry registry) {
+
+    @Bean
+    TimedAspect timedAspect(MeterRegistry registry) {
 	  return new TimedAspect(registry);
 	}
+    
+    
+    @Bean
+    @Autowired
+    BackupService backupService(XWikiReadService xwikiService, ProductRepository productRepository, SerialisationService serialisationService) {
+    	return new BackupService(xwikiService, productRepository, apiProperties.getBackupConfig(), serialisationService);
+    }
 	
 
 
