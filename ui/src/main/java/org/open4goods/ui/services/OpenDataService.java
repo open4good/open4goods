@@ -12,6 +12,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
+import io.micrometer.core.annotation.Timed;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -27,6 +28,8 @@ import org.open4goods.ui.config.yml.UiConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.actuate.health.Health;
+import org.springframework.boot.actuate.health.HealthIndicator;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.scheduling.annotation.Scheduled;
 
@@ -38,7 +41,7 @@ import com.opencsv.CSVWriter;
  * Handles the creation of GTIN and ISBN datasets, their compression into ZIP files,
  * and the management of download limits and rates.
  */
-public class OpenDataService {
+public class OpenDataService implements HealthIndicator {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(OpenDataService.class);
 
@@ -71,6 +74,21 @@ public class OpenDataService {
 		this.aggregatedDataRepository = aggregatedDataRepository;
 		this.uiConfig = uiConfig;
         this.openDataConfig = openDataConfig;
+	}
+
+	/**
+	 * This method checks the health status of the OpenDataService.
+	 * It verifies if the required ZIP files (ISBN and GTIN) exist.
+	 */
+	@Override
+	public Health health() {
+		if (!uiConfig.isbnZipFile().exists()) {
+			return Health.down().withDetail("ISBN Zip File", "Le fichier ZIP ISBN est manquant.").build();
+		}
+		if (!uiConfig.gtinZipFile().exists()) {
+			return Health.down().withDetail("GTIN Zip File", "Le fichier ZIP GTIN est manquant.").build();
+		}
+		return Health.up().withDetail("OpenDataService", "Tous les fichiers ZIP sont présents.").build();
 	}
 
 	/**
@@ -109,6 +127,7 @@ public class OpenDataService {
 	 * TODO : Schedule in conf
 	 */
 	@Scheduled(initialDelay = 1000L * 3600, fixedDelay = 1000L * 3600 * 24 * 7)
+	@Timed(value = "OpenDataService.generateOpendata.time", description = "Time taken to generate the OpenData ZIP files", extraTags = {"service", "OpenDataService"})
 	public void generateOpendata() {
 
 		if (exportRunning.getAndSet(true)) {
