@@ -76,7 +76,6 @@ public class OpenDataService {
 		this.aggregatedDataRepository = aggregatedDataRepository;
 		this.uiConfig = uiConfig;
         this.openDataConfig = openDataConfig;
-        generateOpendata();
 	}
 
 	/**
@@ -241,7 +240,7 @@ public class OpenDataService {
 			line[8] = String.valueOf(data.bestPrice().getPrice()); // "min_price"
 			line[9] = String.valueOf(data.bestPrice().getCompensation()); // "min_price_compensation"
 			line[10] = data.bestPrice().getCurrency().toString(); // "currency"
-			line[12] = ""; // TODO: Construct the URL
+			line[12] = ""; // TODO: uiConfig.getBaseUrl(Locale.FRANCE) + data.getNames().getName();
 		}
 
 		line[11] = StringUtils.join(data.getDatasourceCategories(), " ; "); // "categories"
@@ -268,7 +267,7 @@ public class OpenDataService {
 			line[8] = String.valueOf(data.bestPrice().getPrice()); // "min_price"
 			line[9] = String.valueOf(data.bestPrice().getCompensation()); // "min_price_compensation"
 			line[10] = data.bestPrice().getCurrency().toString(); // "currency"
-			line[12] = ""; // TODO: Construct the URL
+			line[12] = ""; // TODO: uiConfig.getBaseUrl(Locale.FRANCE) + data.getNames().getName();
 		}
 
 		line[11] = StringUtils.join(data.getDatasourceCategories(), " ; "); // "categories"
@@ -287,7 +286,7 @@ public class OpenDataService {
 
 	/**
 	 * Retrieves a specific attribute from the product data.
-	 * TODO : Review when all attributes acessible by map
+	 * TODO : Review when all attributes accessible by map
 	 */
 	private String getAttribute(Product data, String key) {
 
