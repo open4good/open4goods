@@ -192,6 +192,13 @@ public class ApiProperties {
 	 */
 	private List<String> corsAllowedHosts = new ArrayList<>();
 	
+	
+	/**
+	 * Options for Wiki backup
+	 */
+	private BackupConfig backupConfig = new BackupConfig();
+	
+	
 	public AmazonCompletionConfig getAmazonConfig() {
 		return amazonConfig;
 	}
@@ -574,6 +581,18 @@ public class ApiProperties {
 
 	public void setCorsAllowedHosts(List<String> corsAllowedHosts) {
 		this.corsAllowedHosts = corsAllowedHosts;
+	}
+
+
+
+	public BackupConfig getBackupConfig() {
+		return backupConfig;
+	}
+
+
+
+	public void setBackupConfig(BackupConfig backupConfig) {
+		this.backupConfig = backupConfig;
 	}
 
 
