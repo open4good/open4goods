@@ -44,7 +44,12 @@ It can also apply if you want to monitor exceptions that will cause the service 
 
 Of course, you can combine stateful and stateless checks. For instance, you might need to check that a file is present and that an internal map has some minimal values. In this scenario, ensure that you raise the appropriate message on `Health.down()` to provide good visibility on what went wrong for the monitors.
 
+#### Monitoring multiple potential issues
 
+Quiet often, your `Health.down()` can be triggered by multiple cause. In order to maintain the full list of causes, you can use the `Health.withDetails(Map<String, String>)`.
+
+ - Be aware that `withDetails()` takes a Map as argument, so you MUST provide unique keys in order not to erase the previous details
+ -  A sample of this kind of implementation states in [`BackupService.health()`](https://github.com/open4good/open4goods/blob/main/api/src/main/java/org/open4goods/api/services/BackupService.java#L218)
 
 ### Performance Concern
 
