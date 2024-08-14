@@ -22,7 +22,7 @@
 
 <body>
  	<!--/* Navbar */-->
-	<th:block th:insert="~{inc/navbar/navbar-vertical.html}"></th:block>
+	<th:block th:insert="~{inc/navbar/navbar-home.html}"></th:block>
     <!--/* Loader */-->
     <th:block th:insert="~{inc/preloader.html}"></th:block>
 	
@@ -31,28 +31,7 @@
         <div class="section section-lg pt-5 pt-md-7 bg-gray-200">
             <div class="container container-semi-fluid">
 
-				<!--/* Hero */-->						
-				<div class="row mb-2">							
-					<div class="card shadow">
-						<div class=" align-items-center">
-							
-								<div class="d-flex flex-wrap align-items-center row">
-			                        <div class="col-lg-2 text-center">
-			                                <img class="mt-2" width="150" src="/assets/img/todo.jpg">
-			                        </div>
-			                        <span class="col-lg-10">
-			                                <h1 class="mt-2 text-center" text="code TODO's"></h1>
-			                                <div class="row p-2 mb-4"> 
-			                					<th:block th:with="path=${vertical} + '/welcome-header'">
-			                     					<th:block th:insert="~{inc/wiki.html}"></th:block>
-			                     				</th:block>
-			                				</div>		
-			                				
-			                        </span> 
-								</div>
-	                    </div>
-					</div>
-				</div>
+
 						
                 <div class="row ">
                 
