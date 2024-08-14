@@ -7,6 +7,12 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.UncheckedIOException;
 import java.nio.file.Files;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.TimeUnit;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
@@ -16,7 +22,9 @@ import org.open4goods.services.SerialisationService;
 import org.open4goods.xwiki.services.XWikiReadService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.boot.actuate.health.Health;
 import org.springframework.boot.actuate.health.HealthIndicator;
+import org.springframework.boot.actuate.health.Status;
 import org.springframework.scheduling.annotation.Scheduled;
 
 import io.micrometer.core.annotation.Timed;
@@ -28,11 +36,12 @@ import io.micrometer.core.annotation.Timed;
  *
  *
  */
-public class BackupService {
+public class BackupService implements HealthIndicator {
 
 	
 	private static final int MIN_XWIKI_BACKUP_SIZE_IN_BYTES = 1024 * 1024 * 10;
 	private static final long MIN_PRODUCT_BACKUP_SIZE_IN_BYTES = 1024 * 1024 * 100;
+	private static final int DATA_EXPORT_THREADS_COUNT = 6;
 
 	protected static final Logger logger = LoggerFactory.getLogger(BackupService.class);
 
@@ -71,56 +80,77 @@ public class BackupService {
 			}
 
 			// Creating tmp file
-			File tmp = File.createTempFile("product-backup", ".zip");
+			File tmp = File.createTempFile("products-backup", ".zip");
 
-			try (FileOutputStream fos = new FileOutputStream(tmp);
-			     ZipOutputStream zos = new ZipOutputStream(fos);
-			     BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(zos, "UTF-8"))) {
+			// BlockingQueue to store serialized JSON strings
+			BlockingQueue<String> queue = new LinkedBlockingQueue<>();
 
-			    // Create a new zip entry for the backup
-			    ZipEntry zipEntry = new ZipEntry("product-backup.json");
-			    zos.putNextEntry(zipEntry);
+			// ExecutorService for parallel serialization
+			ExecutorService serializationExecutor = Executors.newFixedThreadPool(DATA_EXPORT_THREADS_COUNT);
 
-			    // Stream JSON objects into the zip file
-			    productRepo.exportAll().forEach(data -> {
+			// Flag to signal completion of serialization
+			CountDownLatch latch = new CountDownLatch(1);
+
+			// Writer thread to write JSON strings to the zip file
+			Thread writerThread = new Thread(() -> {
+			    try (FileOutputStream fos = new FileOutputStream(tmp);
+			         ZipOutputStream zos = new ZipOutputStream(fos);
+			         BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(zos, "UTF-8"))) {
+
+			        // Create a new zip entry for the backup
+			        ZipEntry zipEntry = new ZipEntry("products.json");
+			        zos.putNextEntry(zipEntry);
+
+			        // Write JSON strings from the queue to the file
+			        while (latch.getCount() > 0 || !queue.isEmpty()) {
+			            String json = queue.poll(1, TimeUnit.SECONDS);
+			            if (json != null) {
+			                writer.write(json);
+			                writer.newLine();
+			            }
+			        }
+
+			        // Close the zip entry
+			        zos.closeEntry();
+			    } catch (IOException | InterruptedException e) {
+			        logger.error("Error writing JSON data to backup file", e);
+			        throw new UncheckedIOException(new IOException(e));
+			    }
+			});
+
+			// Start the writer thread
+			writerThread.start();
+
+			// Parallel serialization of products
+			productRepo.exportAll()
+			// TODO : Remove limit
+				.limit(100000)
+				.forEach(data -> {
+			    serializationExecutor.submit(() -> {
 			        String json = serialisationService.toJson(data);
 			        try {
-			            writer.write(json);
-			            writer.newLine(); // To separate JSON objects
-			        } catch (IOException e) {
-			            logger.error("Error writing JSON data to backup file", e);
-			            throw new UncheckedIOException(e);
+			            queue.put(json);
+			        } catch (InterruptedException e) {
+			            Thread.currentThread().interrupt();
+			            logger.error("Interrupted while adding JSON to queue", e);
 			        }
 			    });
+			});
 
-			    // Close the zip entry
-			    zos.closeEntry();
-			} catch (IOException e) {
-			    logger.error("Error during backup : {}", e.getMessage());
-			    throw new UncheckedIOException(e);
+			// Shut down serialization executor and signal the writer thread to finish
+			serializationExecutor.shutdown();
+			try {
+			    if (serializationExecutor.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS)) {
+			        latch.countDown(); // Signal that serialization is complete
+			        writerThread.join(); // Wait for writer thread to finish
+			    }
+			} catch (InterruptedException e) {
+			    Thread.currentThread().interrupt();
+			    throw e;
 			}
-			
-			
-			// Checking tmp file exists and not empty
-			if (!tmp.exists() || tmp.length() < MIN_PRODUCT_BACKUP_SIZE_IN_BYTES) {
-				throw new Exception("Empty tmp produt backup file");
-			}
-			
-			// Copy to target file
-			File dest = new File(backupConfig.getXwikiBackupFile());
-			// Deleting previous one
-			Files.delete(dest.toPath());
-			
-			// Moving tmp file to dest file 
-			Files.move(tmp.toPath(), dest.toPath());
-			
-			
-			
 		} catch (Exception e) {
-			logger.error("Error while backuping datas",e);
+			logger.error("Error while exporting datas",e);
 			this.dataBackupException = e.getMessage();
-		} finally {
-			this.dataBackupException = null;
 		}
 
 	    logger.info("Products data backup - complete");
@@ -170,8 +200,21 @@ public class BackupService {
 		logger.info("Xiki backup - finished");
 
 	}
-	
-	
-	
+
+
+
+
+		@Override
+	    public Health health() {
+	       
+			Health health1 = Health.status(Status.DOWN).build();
+			
+			Health health2 = Health.status(Status.DOWN).build();
+			
+			
+			return null; // TODO : Aggregate the health1 
+	    }
+
+
 
 }
