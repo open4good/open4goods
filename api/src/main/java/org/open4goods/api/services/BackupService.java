@@ -123,8 +123,6 @@ public class BackupService implements HealthIndicator {
 
 			// Parallel serialization of products
 			productRepo.exportAll()
-			// TODO : Remove limit
-				.limit(100000)
 				.forEach(data -> {
 			    serializationExecutor.submit(() -> {
 			        String json = serialisationService.toJson(data);
