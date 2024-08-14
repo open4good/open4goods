@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -210,14 +211,15 @@ public class CsvIndexationWorker implements Runnable {
 				if (config.getGzip()) {
 					// Awin are gziped
 					
-					File tmpFile = File.createTempFile("gzip", "awin");
+					File tmpFile = File.createTempFile("gzip", "gzip");
 
 					decompressGzipFile(destFile.getAbsolutePath(), tmpFile.getAbsolutePath());
 
-					// Switching and cleaning
-					String toDelete = destFile.getAbsolutePath();
+					// Deleting the zip
+					Files.delete(destFile.toPath());
+					
+					// Switching destFile
 					destFile = new File(tmpFile.getAbsolutePath());
-					new File(toDelete).delete();
 					
 				} else	if (config.getZiped()) {
 
@@ -328,14 +330,15 @@ public class CsvIndexationWorker implements Runnable {
 				mi.close();
 				
 				dedicatedLogger.info("Removing fetched CSV file at {}", destFile);
+				// Deleting only remote caches
 				if (url.startsWith("http")) {
-					FileUtils.deleteQuietly(destFile);
+					Files.delete(destFile.toPath());
 				}
 
 			} catch (final Exception e) {
-				dedicatedLogger.error("CSV fetching aborted : {}:{}",dsConfName ,url,e);
+				logger.error("CSV fetching aborted : {} : {}",dsConfName ,url,e);
+				dedicatedLogger.error("CSV fetching aborted : {} : {}",dsConfName ,url,e);
 				stats.setFail(true);
-				e.printStackTrace();
 			} 
 			dedicatedLogger.warn("Done : {} (imported:{}, errors:{}, not_validable:{}, excluded:{}) -  {} ", dsConfName,  okItems, errorItems, validationFailedItems, excludedItems, url);
 
