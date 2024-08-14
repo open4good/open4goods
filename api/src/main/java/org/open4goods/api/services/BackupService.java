@@ -7,6 +7,9 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.UncheckedIOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
@@ -38,12 +41,22 @@ import io.micrometer.core.annotation.Timed;
  */
 public class BackupService implements HealthIndicator {
 
+	// TODO : From conf
+	// TODO : Avoid parallel running
 	
-	private static final int MIN_XWIKI_BACKUP_SIZE_IN_BYTES = 1024 * 1024 * 10;
-	private static final long MIN_PRODUCT_BACKUP_SIZE_IN_BYTES = 1024 * 1024 * 100;
-	private static final int DATA_EXPORT_THREADS_COUNT = 6;
+	private static final int MIN_XWIKI_BACKUP_SIZE_IN_BYTES = 1024 * 1024 * 15;
+	private static final long MIN_PRODUCT_BACKUP_SIZE_IN_BYTES = 1024 * 1024 * 2000;
+	
+	private static final int DATA_EXPORT_THREADS_COUNT = 8;
 
 	protected static final Logger logger = LoggerFactory.getLogger(BackupService.class);
+	
+	// Cron period + 2h
+	private static final long MAX_WIKI_BACKUP_AGE =1000 * 3600 * 14;
+	// Cron period + 1d
+	private static final long MAX_PRODUCTS_BACKUP_AGE = 1000 * 3600 * 24 * 8;
+	
+	
 
 	private XWikiReadService xwikiService;
 	private ProductRepository productRepo;
@@ -67,7 +80,7 @@ public class BackupService implements HealthIndicator {
 	 * This method will periodicaly export all data in a zipped file
 	 */
 	// TODO : Schedule from conf
-	@Scheduled(initialDelay = 1000 * 3600 * 6 , fixedDelay = 1000 * 3600 * 48)
+	@Scheduled(initialDelay = 1000 * 3600 * 6 , fixedDelay = 1000 * 3600 * 24 * 7)
 	@Timed(value = "backup.products", description = "Backup of all products", extraTags = {"service"})
 	public void backupProducts() {
 	    logger.info("Products data backup - start");
@@ -201,16 +214,80 @@ public class BackupService implements HealthIndicator {
 
 
 
-
 		@Override
 	    public Health health() {
 	       
-			Health health1 = Health.status(Status.DOWN).build();
+			Map<String,String> messages = new HashMap<>();
 			
-			Health health2 = Health.status(Status.DOWN).build();
+			/////////////////////////////
+			// Xwiki file check
+			/////////////////////////////
 			
+			File wikiFile = new File(backupConfig.getXwikiBackupFile());
+			// Check exceptions during processing
+			if (null != wikiException) {
+				messages.put("Exception in xwiki export", wikiException);
+			}
+						
+			// Check exists
+			if (!Files.exists(Path.of(backupConfig.getXwikiBackupFile()))) {
+				messages.put("Xwiki backup file is missing", backupConfig.getXwikiBackupFile());
+			}
 			
-			return null; // TODO : Aggregate the health1 
+			// Check minimum size
+			if (wikiFile.length() < MIN_XWIKI_BACKUP_SIZE_IN_BYTES) {
+				messages.put("Xwiki backup file does not have the minimum required size", String.valueOf(wikiFile.length()));				
+			}
+			
+			// Check date is not to old
+			// NOTE : In the best world, MAX_WIKI_BACKUP_AGE would be derivated from the schedule rate
+			if (System.currentTimeMillis() - wikiFile.lastModified() < MAX_WIKI_BACKUP_AGE ) {
+				messages.put("Xwiki backup file is too old",  String.valueOf(wikiFile.lastModified()));	
+			}
+			
+			/////////////////////////////
+			// Products backup file check
+			/////////////////////////////
+			
+			File productFile = new File(backupConfig.getDataBackupFile());
+			
+			// Check exceptions during processing
+			if (null != dataBackupException) {
+				messages.put("Exception in product export" , dataBackupException);
+			}
+						
+			// Check exists
+			if (!Files.exists(Path.of(backupConfig.getDataBackupFile()))) {
+				messages.put("Product backup file is missing", backupConfig.getDataBackupFile());
+			}
+			
+			// Check minimum size
+			if (productFile.length() < MIN_PRODUCT_BACKUP_SIZE_IN_BYTES) {
+				messages.put("Product backup file does not have the minimum required size", String.valueOf(productFile.length()));				
+			}
+			
+			// Check date is not to old
+			// NOTE : In the best world, MAX_WIKI_PRODUCT_AGE would be derivated from the schedule rate
+			if (System.currentTimeMillis() - productFile.lastModified() < MAX_PRODUCTS_BACKUP_AGE ) {
+				messages.put("Product backup file is too old", String.valueOf(productFile.lastModified()));	
+			}
+			
+			// Building the healthcheck
+			
+			Health health = null;
+			
+			if (messages.size() == 0) {
+				// All is fine 
+				health = Health.status(Status.UP)
+								.withDetail(this.getClass().getSimpleName(),"Backups are OK")
+								.build();
+			} else {
+				health = Health.down()
+								.withDetails(messages)
+								.build();
+			}
+			
+			return health;  
 	    }
 
 
