@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Date;
@@ -28,6 +29,8 @@ import org.w3c.dom.NodeList;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import com.fasterxml.jackson.dataformat.csv.CsvMapper;
 import com.fasterxml.jackson.dataformat.csv.CsvSchema;
+
+import jakarta.annotation.PostConstruct;
 
 
 
@@ -170,11 +173,12 @@ public class TodoService {
 	}
 
 
-	@Scheduled(initialDelay = 0)
+	@PostConstruct
 	public void process() throws XPathExpressionException, IOException, Exception {		
 		File f =  File.createTempFile("todo", "todo");
 		FileUtils.copyURLToFile(new URL( this.tagListPath), f);
 		this.todos = loadTodos(f);		
+		Files.delete(f.toPath());
 	}
 
 	/**
