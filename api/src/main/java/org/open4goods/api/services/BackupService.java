@@ -8,18 +8,15 @@ import java.io.OutputStreamWriter;
 import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 import org.open4goods.api.config.yml.BackupConfig;
 import org.open4goods.dao.ProductRepository;
 import org.open4goods.services.SerialisationService;
@@ -93,80 +90,63 @@ public class BackupService implements HealthIndicator {
 			productExportRunning.set(true);
 		}
 
+		File tmp = null;
 		try {
 			// Creating parent folders if necessary
 			File parent = new File(backupConfig.getDataBackupFile()).getParentFile();
 			if (!parent.exists()) {
-				parent.mkdirs();
+			    parent.mkdirs();
 			}
 
 			// Creating tmp file
-			File tmp = File.createTempFile("products-backup", ".zip");
+			tmp = File.createTempFile("product-backup", ".zip");
 
-			// BlockingQueue to store serialized JSON strings
-			BlockingQueue<String> queue = new LinkedBlockingQueue<>();
+			try (FileOutputStream fos = new FileOutputStream(tmp);
+			     ZipOutputStream zos = new ZipOutputStream(fos);
+			     BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(zos, "UTF-8"))) {
 
-			// ExecutorService for parallel serialization
-			ExecutorService serializationExecutor = Executors.newFixedThreadPool(DATA_EXPORT_THREADS_COUNT);
+			    // Create a new zip entry for the backup
+			    ZipEntry zipEntry = new ZipEntry("product-backup.json");
+			    zos.putNextEntry(zipEntry);
 
-			// Flag to signal completion of serialization
-			CountDownLatch latch = new CountDownLatch(1);
+			    // Stream JSON objects into the zip file
+			    productRepo.exportAll().forEach(data -> {
+			        String json = serialisationService.toJson(data);
+			        try {
+			            writer.write(json);
+			            writer.newLine(); // To separate JSON objects
+			        } catch (IOException e) {
+			            logger.error("Error writing JSON data to backup file", e);
+			            throw new UncheckedIOException(e);
+			        }
+			    });
 
-			// Writer thread to write JSON strings to the zip file
-			Thread writerThread = new Thread(() -> {
-				try (FileOutputStream fos = new FileOutputStream(tmp); ZipOutputStream zos = new ZipOutputStream(fos); BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(zos, "UTF-8"))) {
-
-					// Create a new zip entry for the backup
-					ZipEntry zipEntry = new ZipEntry("products.json");
-					zos.putNextEntry(zipEntry);
-
-					// Write JSON strings from the queue to the file
-					while (latch.getCount() > 0 || !queue.isEmpty()) {
-						String json = queue.poll(1, TimeUnit.SECONDS);
-						if (json != null) {
-							writer.write(json);
-							writer.newLine();
-						}
-					}
-
-					// Close the zip entry
-					zos.closeEntry();
-				} catch (IOException | InterruptedException e) {
-					logger.error("Error writing JSON data to backup file", e);
-					throw new UncheckedIOException(new IOException(e));
-				}
-			});
-
-			// Start the writer thread
-			writerThread.start();
-
-			// Parallel serialization of products
-			productRepo.exportAll().forEach(data -> {
-				serializationExecutor.submit(() -> {
-					String json = serialisationService.toJson(data);
-					try {
-						queue.put(json);
-					} catch (InterruptedException e) {
-						Thread.currentThread().interrupt();
-						logger.error("Interrupted while adding JSON to queue", e);
-					}
-				});
-			});
-
-			// Shut down serialization executor and signal the writer thread to finish
-			serializationExecutor.shutdown();
-			try {
-				if (serializationExecutor.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS)) {
-					latch.countDown(); // Signal that serialization is complete
-					writerThread.join(); // Wait for writer thread to finish
-				}
-			} catch (InterruptedException e) {
-				Thread.currentThread().interrupt();
-				throw e;
+			    // Close the zip entry
+			    zos.closeEntry();
+			} catch (IOException e) {
+			    logger.error("Error during backup : {}", e.getMessage());
+			    throw new UncheckedIOException(e);
 			}
+			
+			
+			// Checking tmp file exists and not empty
+			if (!tmp.exists() || tmp.length() < MIN_PRODUCT_BACKUP_SIZE_IN_BYTES) {
+				throw new Exception("Empty tmp produt backup file");
+			}
+			
+			// Move to target file
+		    Files.move(tmp.toPath(), Path.of(backupConfig.getDataBackupFile()), StandardCopyOption.REPLACE_EXISTING);
+		    
+		    // Unsetting previous exception if any
+		    this.dataBackupException = null;
 		} catch (Exception e) {
-			logger.error("Error while exporting datas", e);
+			logger.error("Error while backuping datas",e);
 			this.dataBackupException = e.getMessage();
+		} finally {
+			// Deleting tmp file, if exists
+			if (null != tmp && tmp.exists()) {
+				FileUtils.deleteQuietly(tmp);
+			}
 		}
 
 		productExportRunning.set(false);
@@ -189,7 +169,7 @@ public class BackupService implements HealthIndicator {
 			wikiExportRunning.set(true);
 		}
 
-		logger.info("Xiki backup - start");
+		logger.info("Xwiki backup - start");
 		try {
 			// Creating parent folders if necessary
 			File parent = new File(backupConfig.getXwikiBackupFile()).getParentFile();
@@ -203,26 +183,22 @@ public class BackupService implements HealthIndicator {
 
 			// Checking tmp file exists and not empty
 			if (!tmp.exists() || tmp.length() < MIN_XWIKI_BACKUP_SIZE_IN_BYTES) {
-				throw new Exception("Empty tmp xwiki backup file");
+				throw new Exception("Empty or not large enough tmp xwiki backup file");
 			}
 
-			// Copy to target file
-			File dest = new File(backupConfig.getXwikiBackupFile());
-			// Deleting previous one
-			Files.delete(dest.toPath());
+			// Move to target file
+		    Files.move(tmp.toPath(), Path.of(backupConfig.getXwikiBackupFile()), StandardCopyOption.REPLACE_EXISTING);
 
-			// Moving tmp file to dest file
-			Files.move(tmp.toPath(), dest.toPath());
+		    this.wikiException = null;
 
 		} catch (Exception e) {
 			logger.error("Error while backuping Xwiki", e);
 			this.wikiException = e.getMessage();
 		} finally {
-			this.wikiException = null;
 		}
 
 		wikiExportRunning.set(false);
-		logger.info("Xiki backup - finished");
+		logger.info("Xwiki backup - finished");
 	}
 
 	/**
