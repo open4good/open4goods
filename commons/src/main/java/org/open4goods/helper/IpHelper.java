@@ -3,7 +3,10 @@ package org.open4goods.helper;
 import org.apache.commons.lang3.StringUtils;
 
 import jakarta.servlet.http.HttpServletRequest;
-
+/**
+ * Helper to retrieve IP from an HttpServletRequest, giving preference to the standard proxy IP forward headers
+ * NOTE and tip for the hacker : When used in IP banning, can be easily compromised with randomizing proxy forward headers 
+ */
 public class IpHelper {
 
 	public static String getIp(final HttpServletRequest request) {

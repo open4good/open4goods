@@ -8,6 +8,7 @@ import java.util.Locale;
 import java.util.Map;
 
 import org.open4goods.config.BrandsConfiguration;
+import org.open4goods.config.yml.BanCheckerConfig;
 import org.open4goods.config.yml.BlogConfiguration;
 import org.open4goods.config.yml.DevModeConfiguration;
 import org.open4goods.config.yml.FeedbackConfiguration;
@@ -129,6 +130,11 @@ public class UiConfig {
 	private WebConfig webConfig = new WebConfig();
 
 
+	/***
+	 * Config for IP and UA banChecking
+	 */
+	private BanCheckerConfig bancheckerConfig = new BanCheckerConfig();
+	
 	/**
 	 * The configuration for icecat features
      
@@ -492,6 +498,16 @@ public class UiConfig {
 
 	public void setGoogleApiJson(String googleApiJson) {
 		this.googleApiJson = googleApiJson;
+	}
+
+
+	public BanCheckerConfig getBancheckerConfig() {
+		return bancheckerConfig;
+	}
+
+
+	public void setBancheckerConfig(BanCheckerConfig bancheckerConfig) {
+		this.bancheckerConfig = bancheckerConfig;
 	}
 
 }
