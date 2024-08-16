@@ -88,7 +88,6 @@ public class CsvIndexationWorker implements Runnable {
 	private String logsFolder;
 
 
-	private boolean toConsole;
 
 	/**
 	 * Constructor
@@ -96,7 +95,7 @@ public class CsvIndexationWorker implements Runnable {
 	 * @param toConsole 
 	 * @param dequeuePageSize
 	 */
-	public CsvIndexationWorker(final CsvDatasourceFetchingService csvService, DataFragmentCompletionService completionService, IndexationService indexationService, WebDatasourceFetchingService webFetchingService, CsvIndexationRepository csvIndexationRepository,  final int pauseDuration, String logsFolder, boolean toConsole) {
+	public CsvIndexationWorker(final CsvDatasourceFetchingService csvService, DataFragmentCompletionService completionService, IndexationService indexationService, WebDatasourceFetchingService webFetchingService, CsvIndexationRepository csvIndexationRepository,  final int pauseDuration, String logsFolder) {
 		this.csvService = csvService;
 		this.pauseDuration = pauseDuration;
 		this.completionService = completionService;
@@ -104,8 +103,6 @@ public class CsvIndexationWorker implements Runnable {
 		this.webFetchingService = webFetchingService;
 		this.csvIndexationRepository = csvIndexationRepository;
 		this.logsFolder = logsFolder;
-		this.toConsole = toConsole;
-
 	}
 
 	@Override
@@ -182,6 +179,9 @@ public class CsvIndexationWorker implements Runnable {
 			int errorItems = 0;
 			int excludedItems = 0;
 			
+			
+			MappingIterator<Map<String, String>> mi = null;
+			File destFile = null;
 			try {
 
 				// configure the reader on what bean to read and how we want to write
@@ -190,7 +190,7 @@ public class CsvIndexationWorker implements Runnable {
 
 				// local file download, then estimate number of rows
 //					TODO(design,P2,0.5) : Allow CSV file forwarding on remote crawl (for now, CSV with classpath fetching only works on local node)
-				File destFile = File.createTempFile("csv", safeName+".csv");
+				 destFile = File.createTempFile("csv", safeName+".csv");
 				dedicatedLogger.info ("Downloading CSV for {} from {} to {}", safeName, url, destFile);
 
 				if (url.startsWith("http")) {
@@ -284,7 +284,7 @@ public class CsvIndexationWorker implements Runnable {
 				final long linesCount = 0L;			
 				legacyStat.setQueueLength(linesCount);
 				
-				final MappingIterator<Map<String, String>> mi = oReader.readValues(destFile);
+				mi = oReader.readValues(destFile);
 				
 				while (mi.hasNext()) {
 					Map<String, String> line = null;
@@ -326,20 +326,32 @@ public class CsvIndexationWorker implements Runnable {
 					}
 				}
 				
-				// closing iterator
-				mi.close();
 				
 				dedicatedLogger.info("Removing fetched CSV file at {}", destFile);
-				// Deleting only remote caches
-				if (url.startsWith("http")) {
-					Files.delete(destFile.toPath());
-				}
 
 			} catch (final Exception e) {
-				logger.error("CSV fetching aborted : {} : {}",dsConfName ,url,e);
+				logger.error("CSV FETCHING ABORTED : {} : {}",dsConfName ,url,e);
 				dedicatedLogger.error("CSV fetching aborted : {} : {}",dsConfName ,url,e);
 				stats.setFail(true);
-			} 
+			}  finally {
+				// closing iterator
+				try {
+					mi.close();
+				} catch (IOException e) {
+					logger.error("Error while closing iterator");
+				}
+
+				// Deleting only remote caches
+				if (url.startsWith("http")) {
+					try {
+						Files.delete(destFile.toPath());
+					} catch (IOException e) {
+						logger.error("Error while deleting tmp file");
+					}
+				}
+
+				
+			}
 			dedicatedLogger.warn("Done : {} (imported:{}, errors:{}, not_validable:{}, excluded:{}) -  {} ", dsConfName,  okItems, errorItems, validationFailedItems, excludedItems, url);
 
 			// Saving stats 
