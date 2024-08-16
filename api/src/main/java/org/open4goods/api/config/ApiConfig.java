@@ -556,13 +556,6 @@ public class ApiConfig {
 	  return new TimedAspect(registry);
 	}
     
-    
-    @Bean
-    @Autowired
-    BackupService backupService(XWikiReadService xwikiService, ProductRepository productRepository, SerialisationService serialisationService) {
-    	return new BackupService(xwikiService, productRepository, apiProperties.getBackupConfig(), serialisationService);
-    }
-	
-
+ 
 
 }
