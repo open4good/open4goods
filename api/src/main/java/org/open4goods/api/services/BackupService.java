@@ -1,26 +1,34 @@
 package org.open4goods.api.services;
 
+import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
 import org.apache.commons.io.FileUtils;
 import org.open4goods.api.config.yml.BackupConfig;
 import org.open4goods.dao.ProductRepository;
+import org.open4goods.model.product.Product;
 import org.open4goods.services.SerialisationService;
 import org.open4goods.xwiki.services.XWikiReadService;
 import org.slf4j.Logger;
@@ -39,6 +47,7 @@ import io.micrometer.core.annotation.Timed;
  *
  *
  */
+
 public class BackupService implements HealthIndicator {
 
 	protected static final Logger logger = LoggerFactory.getLogger(BackupService.class);
@@ -148,6 +157,50 @@ public class BackupService implements HealthIndicator {
         logger.info("Products data backup - complete");
     }
 
+	/**
+	 * Import product from the GZIP file
+	 * @throws Exception 
+	 */
+	public void importProducts() {
+	    logger.info("Product import : started");
+
+	    File importFile = new File(backupConfig.getImportProductPath());
+	    if (!importFile.exists()) {
+	        logger.error("Import file does not exists : {}", importFile.getAbsolutePath());
+	        return;
+	    }
+
+	    try (InputStream inputStream = new FileInputStream(importFile);
+	         GZIPInputStream gzipInputStream = new GZIPInputStream(inputStream);
+	         InputStreamReader inputStreamReader = new InputStreamReader(gzipInputStream);
+	         BufferedReader bufferedReader = new BufferedReader(inputStreamReader)) {
+
+	        List<Product> group = new ArrayList<>();
+	        
+	        bufferedReader.lines().forEach(line -> {
+	            try {
+					group.add(serialisationService.fromJson(line, Product.class));
+				} catch (IOException e) {
+					logger.error("Error occurs in data deserialisation", e);
+				}
+	            if (group.size() == 200) {
+	                productRepo.storeNoCache(group); // Index the current group
+	                group.clear(); // Clear the group for the next batch
+	            }
+	        });
+
+	        // Index the remaining lines if any
+	        if (!group.isEmpty()) {
+	            productRepo.storeNoCache(group);
+	        }
+
+	    } catch (Exception e) {
+	        logger.error("Error occurs in data file import", e);
+	    }
+	    logger.info("Product import : finished");
+	}
+	
+	
     private void serializeAndWriteProduct(Object product, BufferedWriter writer) {
         String json = serialisationService.toJson(product);
         synchronized (writer) {
@@ -277,6 +330,7 @@ public class BackupService implements HealthIndicator {
 		// Check date is not to old
 		// NOTE : In the best world, MAX_WIKI_PRODUCT_AGE would be derivated from the
 		// schedule rate
+		// TODO : Check
 		if (System.currentTimeMillis() - productFile.lastModified() < MAX_PRODUCTS_BACKUP_AGE) {
 			errorMessages.put("product_backup_too_old", String.valueOf(productFile.lastModified()));
 		}

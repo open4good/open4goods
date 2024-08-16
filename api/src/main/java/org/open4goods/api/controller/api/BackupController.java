@@ -40,5 +40,10 @@ public class BackupController {
 	public void productsExport() throws InvalidParameterException, IOException {
 		backupService.backupProducts();
 	}
-	
+
+	@PostMapping("/backup/products/import")
+	@Operation(summary = "Launch a product import")
+	public void productsImport() throws InvalidParameterException, IOException {
+		backupService.importProducts();
+	}
 }

@@ -341,6 +341,14 @@ public class ProductRepository {
 //		});
 	}
 	
+	public void storeNoCache(Collection<Product> data) {
+		logger.info("Indexing without caching {} products", data.size());
+
+		elasticsearchTemplate.save(data, current_index);
+
+	}
+	
+	
 	public void forceIndex(Product data) {
 		logger.info("Indexing  product {}", data.gtin());
 
