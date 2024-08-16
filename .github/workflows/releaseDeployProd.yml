@@ -230,7 +230,7 @@ jobs:
           host: ${{ secrets.REMOTE_HOST }}
           username: ${{ secrets.REMOTE_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
-          script: sh /opt/open4goods/bin/publish-jars.sh
+          script: sh /opt/open4goods/bin/publish-jars.sh prod
 
       ############################################
       # GitHub Pages Deployment

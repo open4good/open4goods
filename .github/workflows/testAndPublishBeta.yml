@@ -148,4 +148,4 @@ jobs:
           host: ${{ secrets.REMOTE_BETA_HOST }}
           username: ${{ secrets.REMOTE_BETA_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY}}
-          script: sh /opt/open4goods/bin/publish-jars.sh
+          script: sh /opt/open4goods/bin/publish-jars.sh beta
