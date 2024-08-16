@@ -6,6 +6,7 @@ import java.io.IOException;
 import org.open4goods.api.services.BackupService;
 import org.open4goods.exceptions.InvalidParameterException;
 import org.open4goods.model.constants.RolesConstants;
+import org.springframework.context.annotation.Profile;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -20,6 +21,7 @@ import io.swagger.v3.oas.annotations.Operation;
  */
 @RestController
 @PreAuthorize("hasAuthority('" + RolesConstants.ROLE_ADMIN + "')")
+@Profile("!beta")
 public class BackupController {
 
 	private final BackupService backupService;
