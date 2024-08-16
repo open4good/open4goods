@@ -57,8 +57,7 @@ public class WebSecurityConfig {
 
 		// For Cors config, see the below corsConfigurationSource()
 		.cors()
-		// Allowing directauth via http creds
-		.and().httpBasic(Customizer.withDefaults())
+		.and()
 		.authorizeRequests()
 		// Actuator endpoints are protected
 		.requestMatchers("/actuator").hasRole(RolesConstants.ACTUATOR_ADMIN_ROLE)
@@ -69,7 +68,8 @@ public class WebSecurityConfig {
 		// CSRF is disabled for actuator endpoints
 		.and().csrf(c -> c.ignoringRequestMatchers("/actuator/**").disable())
 		.addFilterBefore(new TokenAuthenticationFilter(), BasicAuthenticationFilter.class)
-
+		// Allowing directauth via http creds
+		.httpBasic(Customizer.withDefaults())
 		.authorizeRequests()
 		.anyRequest().authenticated();
 
