@@ -1,6 +1,7 @@
 package org.open4goods.admin.config;
 
 import java.util.Arrays;
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 import org.open4goods.xwiki.XWikiServiceConfiguration;
@@ -57,17 +58,19 @@ public class WebSecurityConfig {
         successHandler.setTargetUrlParameter("redirectTo");
         successHandler.setDefaultTargetUrl(this.adminServer.getContextPath() + "/");
 
-        http.authorizeHttpRequests(req -> req.requestMatchers(this.adminServer.getContextPath() + "/assets/**")
-                .permitAll()
-                .requestMatchers(this.adminServer.getContextPath() + "/login")
-                .permitAll()
-                .anyRequest()
-                .authenticated())
-            .formLogin(formLogin -> formLogin.loginPage(this.adminServer.getContextPath() + "/login")
-                .successHandler(successHandler))
-            .logout((logout) -> logout.logoutUrl(this.adminServer.getContextPath() + "/logout"))
-            .httpBasic(Customizer.withDefaults())
-            .csrf().disable();
+         http
+                 .authorizeHttpRequests(req ->
+                         req.requestMatchers(this.adminServer.getContextPath() + "/assets/**").permitAll()
+                                 .requestMatchers(this.adminServer.getContextPath() + "/login").permitAll()
+                                 .anyRequest().authenticated())
+                 .formLogin(formLogin -> formLogin.loginPage(this.adminServer.getContextPath() + "/login")
+                         .successHandler(successHandler))
+                 .logout((logout) -> logout.logoutUrl(this.adminServer.getContextPath() + "/logout"))
+                 .httpBasic(Customizer.withDefaults())
+                 .csrf(csrf -> csrf.disable())
+                 ;
+
+            
         return http.build();
 
 	}
