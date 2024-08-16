@@ -62,7 +62,10 @@ public class WebSecurityConfig {
                 .authorizeHttpRequests(requests -> requests
                         // Actuator endpoints are protected
                         .requestMatchers("/actuator").hasRole(RolesConstants.ACTUATOR_ADMIN_ROLE)
-                        .requestMatchers("/actuator/*").hasRole(RolesConstants.ACTUATOR_ADMIN_ROLE)).formLogin(login -> login.permitAll()).logout(logout -> logout.permitAll()).csrf(c -> c.ignoringRequestMatchers("/actuator/**").disable())
+                        .requestMatchers("/actuator/**").hasRole(RolesConstants.ACTUATOR_ADMIN_ROLE))
+				.formLogin(login -> login.permitAll().loginProcessingUrl("/login").defaultSuccessUrl("/",true))
+				.logout(logout -> logout.permitAll())
+                .csrf(c -> c.ignoringRequestMatchers("/actuator/**").disable())
                 .addFilterBefore(new TokenAuthenticationFilter(), BasicAuthenticationFilter.class)
                 // Allowing directauth via http creds
                 .httpBasic(Customizer.withDefaults())
