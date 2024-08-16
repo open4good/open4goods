@@ -7,6 +7,12 @@ public class BackupConfig {
 	
 	private String dataBackupFile;
 
+	/**
+	 * Location of the file used by import phase
+	 */
+	private String importProductPath;
+	
+	
 	public String getXwikiBackupFile() {
 		return xwikiBackupFile;
 	}
@@ -22,4 +28,14 @@ public class BackupConfig {
 	public void setDataBackupFile(String dataBackupFile) {
 		this.dataBackupFile = dataBackupFile;
 	}
+
+	public String getImportProductPath() {
+		return importProductPath;
+	}
+
+	public void setImportProductPath(String importProductPath) {
+		this.importProductPath = importProductPath;
+	}
+	
+	
 }
