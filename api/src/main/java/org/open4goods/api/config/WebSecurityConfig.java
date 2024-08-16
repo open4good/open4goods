@@ -6,6 +6,8 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.open4goods.api.config.yml.ApiProperties;
+
+import static org.springframework.security.config.Customizer.withDefaults;
 import org.open4goods.model.constants.RolesConstants;
 import org.open4goods.model.constants.UrlConstants;
 import org.springframework.context.annotation.Bean;
@@ -53,25 +55,19 @@ public class WebSecurityConfig {
 	
 	@Bean
 	public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-		http
+        http
 
-		// For Cors config, see the below corsConfigurationSource()
-		.cors()
-		.and()
-		.authorizeRequests()
-		// Actuator endpoints are protected
-		.requestMatchers("/actuator").hasRole(RolesConstants.ACTUATOR_ADMIN_ROLE)
-		.requestMatchers("/actuator/*").hasRole(RolesConstants.ACTUATOR_ADMIN_ROLE)
-		//  login and logout are allowed
-		.and().formLogin().permitAll()
-		.and().logout().permitAll()
-		// CSRF is disabled for actuator endpoints
-		.and().csrf(c -> c.ignoringRequestMatchers("/actuator/**").disable())
-		.addFilterBefore(new TokenAuthenticationFilter(), BasicAuthenticationFilter.class)
-		// Allowing directauth via http creds
-		.httpBasic(Customizer.withDefaults())
-		.authorizeRequests()
-		.anyRequest().authenticated();
+                // For Cors config, see the below corsConfigurationSource()
+                .cors(withDefaults())
+                .authorizeHttpRequests(requests -> requests
+                        // Actuator endpoints are protected
+                        .requestMatchers("/actuator").hasRole(RolesConstants.ACTUATOR_ADMIN_ROLE)
+                        .requestMatchers("/actuator/*").hasRole(RolesConstants.ACTUATOR_ADMIN_ROLE)).formLogin(login -> login.permitAll()).logout(logout -> logout.permitAll()).csrf(c -> c.ignoringRequestMatchers("/actuator/**").disable())
+                .addFilterBefore(new TokenAuthenticationFilter(), BasicAuthenticationFilter.class)
+                // Allowing directauth via http creds
+                .httpBasic(Customizer.withDefaults())
+                .authorizeHttpRequests(requests -> requests
+                        .anyRequest().authenticated());
 
 		return http.build();
 	}
