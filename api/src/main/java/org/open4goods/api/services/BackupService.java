@@ -207,7 +207,7 @@ public class BackupService implements HealthIndicator {
 	@Override
 	public Health health() {
 
-		Map<String, String> messages = new HashMap<>();
+		Map<String, String> errorMessages = new HashMap<>();
 
 		/////////////////////////////
 		// Xwiki file check
@@ -216,24 +216,24 @@ public class BackupService implements HealthIndicator {
 		File wikiFile = new File(backupConfig.getXwikiBackupFile());
 		// Check exceptions during processing
 		if (null != wikiException) {
-			messages.put("Exception in xwiki export", wikiException);
+			errorMessages.put("xwiki_export_exception", wikiException);
 		}
 
 		// Check exists
 		if (!Files.exists(Path.of(backupConfig.getXwikiBackupFile()))) {
-			messages.put("Xwiki backup file is missing", backupConfig.getXwikiBackupFile());
+			errorMessages.put("xwiki_backup_missing", backupConfig.getXwikiBackupFile());
 		}
 
 		// Check minimum size
 		if (wikiFile.length() < MIN_XWIKI_BACKUP_SIZE_IN_BYTES) {
-			messages.put("Xwiki backup file does not have the minimum required size", String.valueOf(wikiFile.length()));
+			errorMessages.put("xwiki_backup_min_size", String.valueOf(wikiFile.length()));
 		}
 
 		// Check date is not to old
 		// NOTE : In the best world, MAX_WIKI_BACKUP_AGE would be derivated from the
 		// schedule rate
 		if (System.currentTimeMillis() - wikiFile.lastModified() < MAX_WIKI_BACKUP_AGE) {
-			messages.put("Xwiki backup file is too old", String.valueOf(wikiFile.lastModified()));
+			errorMessages.put("xwiki_backup_too_old", String.valueOf(wikiFile.lastModified()));
 		}
 
 		/////////////////////////////
@@ -244,35 +244,35 @@ public class BackupService implements HealthIndicator {
 
 		// Check exceptions during processing
 		if (null != dataBackupException) {
-			messages.put("Exception in product export", dataBackupException);
+			errorMessages.put("product_export_exception", dataBackupException);
 		}
 
 		// Check exists
 		if (!Files.exists(Path.of(backupConfig.getDataBackupFile()))) {
-			messages.put("Product backup file is missing", backupConfig.getDataBackupFile());
+			errorMessages.put("product_backup_missing", backupConfig.getDataBackupFile());
 		}
 
 		// Check minimum size
 		if (productFile.length() < MIN_PRODUCT_BACKUP_SIZE_IN_BYTES) {
-			messages.put("Product backup file does not have the minimum required size", String.valueOf(productFile.length()));
+			errorMessages.put("product_backup_min_size", String.valueOf(productFile.length()));
 		}
 
 		// Check date is not to old
 		// NOTE : In the best world, MAX_WIKI_PRODUCT_AGE would be derivated from the
 		// schedule rate
 		if (System.currentTimeMillis() - productFile.lastModified() < MAX_PRODUCTS_BACKUP_AGE) {
-			messages.put("Product backup file is too old", String.valueOf(productFile.lastModified()));
+			errorMessages.put("product_backup_too_old", String.valueOf(productFile.lastModified()));
 		}
 
 		// Building the healthcheck
 
 		Health health = null;
 
-		if (messages.size() == 0) {
+		if (errorMessages.size() == 0) {
 			// All is fine
 			health = Health.status(Status.UP).withDetail(this.getClass().getSimpleName(), "Backups are OK").build();
 		} else {
-			health = Health.down().withDetails(messages).build();
+			health = Health.down().withDetails(errorMessages).build();
 		}
 
 		return health;
