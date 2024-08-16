@@ -11,19 +11,12 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 
 @Configuration
-@Profile({ "dev", "devsec" })
-public class ApiConfigDev {
+@Profile({ "beta" })
+public class ApiConfigBeta {
 
 	private ApiProperties apiProperties;
 
-	public ApiConfigDev(ApiProperties apiProperties) {
+	public ApiConfigBeta(ApiProperties apiProperties) {
 		this.apiProperties = apiProperties;
 	}
-
-//	@Bean
-//	@Autowired
-//	BackupService backupService(XWikiReadService xwikiService, ProductRepository productRepository, SerialisationService serialisationService) {
-//		return new BackupService(xwikiService, productRepository, apiProperties.getBackupConfig(), serialisationService);
-//	}
-
 }
