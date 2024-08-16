@@ -8,6 +8,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.open4goods.dao.ProductRepository;
 import org.open4goods.helper.DevModeService;
+import org.open4goods.interceptors.BanCheckerInterceptor;
 import org.open4goods.model.constants.CacheConstants;
 import org.open4goods.model.constants.Currency;
 import org.open4goods.model.data.Price;
@@ -33,6 +34,7 @@ import org.open4goods.services.ai.AiService;
 import org.open4goods.store.repository.elastic.BrandScoresRepository;
 import org.open4goods.ui.config.yml.UiConfig;
 import org.open4goods.ui.controllers.ui.UiService;
+import org.open4goods.ui.interceptors.GenericTemplateInterceptor;
 import org.open4goods.ui.services.BlogService;
 import org.open4goods.ui.services.GoogleIndexationService;
 import org.open4goods.ui.services.GtinService;
@@ -61,8 +63,12 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.web.firewall.HttpFirewall;
 import org.springframework.security.web.firewall.StrictHttpFirewall;
 import org.springframework.web.servlet.LocaleResolver;
+import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
+import org.springframework.web.servlet.config.annotation.PathMatchConfigurer;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import org.springframework.web.servlet.i18n.AcceptHeaderLocaleResolver;
 import org.springframework.web.servlet.i18n.LocaleChangeInterceptor;
+import org.springframework.web.util.UrlPathHelper;
 import org.xml.sax.SAXException;
 
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
@@ -375,5 +381,27 @@ public class AppConfig {
 	}
 
 
+	///////////////////////////////////
+	// Web MVC Config
+	///////////////////////////////////
+	@Bean
+	WebMvcConfigurer configurer() {
+		return new WebMvcConfigurer() {
+
+			@Override
+			public void addInterceptors(final InterceptorRegistry registry) {
+				registry.addInterceptor(new BanCheckerInterceptor(config.getBancheckerConfig()));
+				registry.addInterceptor(AppConfig.localeChangeInterceptor());
+				registry.addInterceptor(new GenericTemplateInterceptor());
+			}
+
+			@Override
+			public void configurePathMatch(PathMatchConfigurer configurer) {
+				UrlPathHelper urlPathHelper = new UrlPathHelper();
+				urlPathHelper.setUrlDecode(false);
+				configurer.setUrlPathHelper(urlPathHelper);
+			}
+		};
+	}
 	
 }

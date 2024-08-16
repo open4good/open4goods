@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.open4goods.dao.ProductRepository;
 import org.open4goods.helper.DevModeService;
+import org.open4goods.interceptors.BanCheckerInterceptor;
 import org.open4goods.services.SerialisationService;
 import org.open4goods.services.VerticalsConfigService;
 import org.open4goods.ui.config.yml.UiConfig;
@@ -48,74 +49,5 @@ public class AppConfigDev {
 	}
 	
 	
-	///////////////////////////////////
-	// Resources
-	///////////////////////////////////
-	@Bean
-	WebMvcConfigurer configurer() {
-		return new WebMvcConfigurer() {
-
-			@Override
-			public void addInterceptors(final InterceptorRegistry registry) {
-				registry.addInterceptor(AppConfig.localeChangeInterceptor());
-				registry.addInterceptor(new GenericTemplateInterceptor());
-			}
-
-			@Override
-			public void configurePathMatch(PathMatchConfigurer configurer) {
-				UrlPathHelper urlPathHelper = new UrlPathHelper();
-				urlPathHelper.setUrlDecode(false);
-				configurer.setUrlPathHelper(urlPathHelper);
-			}
-
-
-			/**
-			 * Define explicitly each static resources ( Also overrides classpath values with the ones pageNumber
-			 * filesystem
-			 */
-			@Override
-			public void addResourceHandlers(final ResourceHandlerRegistry registry) {
-
-//				registry.setOrder(Ordered.LOWEST_PRECEDENCE);
-				registry.addResourceHandler("/sitemap/**").addResourceLocations("file:" + config.siteMapFolder().getAbsolutePath() + File.separator);
-
-//				// NOTE : Register here files / folder to be allowed in devmode
-//				registerFallbackFolder(registry,"assets");
-//				registerFallbackFolder(registry,"css");
-//				registerFallbackFolder(registry,"icons");
-//				registerFallbackFolder(registry,"vendor");
-//				registerFile(registry,"tpl_table.html");
-			}
-		};
-	}
-
-	/**
-	 * Register a chained resolver (file first, then classpath) allowing local
-	 * templates edition, for a folder
-	 * 
-	 * @param registry
-	 * @param location
-	 */
-	public void registerFallbackFolder(ResourceHandlerRegistry registry, String location) {
-		registry.addResourceHandler("/" + location + "/**")
-				.addResourceLocations("file:" + config.getResourceTemplateFolder() + "static" + File.separator + location+ File.separator, "classpath:/static/" + location + "/")
-				.setCacheControl(CacheControl.noCache())
-				;
-	}
-
-	
-	/**
-	 * Register a chained resolver (file first, then classpath) allowing local
-	 * templates edition, for a folder
-	 * 
-	 * @param registry
-	 * @param location
-	 */
-	public void registerFile(ResourceHandlerRegistry registry, String location) {
-		registry.addResourceHandler("/" + location )
-				.addResourceLocations("file:" + config.getResourceTemplateFolder() + "static" + File.separator + location, "classpath:/static/" + location )
-				.setCacheControl(CacheControl.noCache())
-				;
-	}	
 
 }

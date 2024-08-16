@@ -3,6 +3,7 @@ package org.open4goods.ui.config;
 import java.io.File;
 import java.util.List;
 
+import org.open4goods.interceptors.BanCheckerInterceptor;
 import org.open4goods.ui.config.yml.UiConfig;
 import org.open4goods.ui.interceptors.GenericTemplateInterceptor;
 import org.springframework.context.annotation.Bean;
@@ -26,41 +27,6 @@ public class AppConfigProd {
 		this.config = config;
 	}
 
-	///////////////////////////////////
-	// Resources
-	///////////////////////////////////
-	@Bean
-	WebMvcConfigurer configurer() {
-		return new WebMvcConfigurer() {
-
-			@Override
-			public void addInterceptors(final InterceptorRegistry registry) {
-				registry.addInterceptor(AppConfig.localeChangeInterceptor());
-				registry.addInterceptor(new GenericTemplateInterceptor());
-			}
-
-			@Override
-			public void configurePathMatch(PathMatchConfigurer configurer) {
-				UrlPathHelper urlPathHelper = new UrlPathHelper();
-				urlPathHelper.setUrlDecode(false);
-				configurer.setUrlPathHelper(urlPathHelper);
-			}
-			
-			@Override
-			public void addResourceHandlers(final ResourceHandlerRegistry registry) {
-
-//				registry.setOrder(Ordered.LOWEST_PRECEDENCE);
-				registry.addResourceHandler("/sitemap/**").addResourceLocations("file:" + config.siteMapFolder().getAbsolutePath() + File.separator);
-
-//				// NOTE : Register here files / folder to be allowed in devmode
-//				registerFallbackFolder(registry,"assets");
-//				registerFallbackFolder(registry,"css");
-//				registerFallbackFolder(registry,"icons");
-//				registerFallbackFolder(registry,"vendor");
-//				registerFile(registry,"tpl_table.html");
-			}
-		};
-	}
 	
 
 }
