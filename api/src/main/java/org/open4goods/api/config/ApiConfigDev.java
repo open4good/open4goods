@@ -20,10 +20,10 @@ public class ApiConfigDev {
 		this.apiProperties = apiProperties;
 	}
 
-//	@Bean
-//	@Autowired
-//	BackupService backupService(XWikiReadService xwikiService, ProductRepository productRepository, SerialisationService serialisationService) {
-//		return new BackupService(xwikiService, productRepository, apiProperties.getBackupConfig(), serialisationService);
-//	}
+	@Bean
+	@Autowired
+	BackupService backupService(XWikiReadService xwikiService, ProductRepository productRepository, SerialisationService serialisationService) {
+		return new BackupService(xwikiService, productRepository, apiProperties.getBackupConfig(), serialisationService);
+	}
 
 }
