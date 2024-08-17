@@ -302,7 +302,7 @@ public class BackupService implements HealthIndicator {
 		// Check date is not to old
 		// NOTE : In the best world, MAX_WIKI_BACKUP_AGE would be derivated from the
 		// schedule rate
-		if (System.currentTimeMillis() - wikiFile.lastModified() < MAX_WIKI_BACKUP_AGE) {
+		if (System.currentTimeMillis() - wikiFile.lastModified() > MAX_WIKI_BACKUP_AGE) {
 			errorMessages.put("xwiki_backup_too_old", String.valueOf(wikiFile.lastModified()));
 		}
 
@@ -331,7 +331,7 @@ public class BackupService implements HealthIndicator {
 		// NOTE : In the best world, MAX_WIKI_PRODUCT_AGE would be derivated from the
 		// schedule rate
 		// TODO : Check
-		if (System.currentTimeMillis() - productFile.lastModified() < MAX_PRODUCTS_BACKUP_AGE) {
+		if (System.currentTimeMillis() - productFile.lastModified() > MAX_PRODUCTS_BACKUP_AGE) {
 			errorMessages.put("product_backup_too_old", String.valueOf(productFile.lastModified()));
 		}
 
