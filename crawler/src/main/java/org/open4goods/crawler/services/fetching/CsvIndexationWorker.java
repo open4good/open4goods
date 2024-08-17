@@ -550,10 +550,6 @@ public class CsvIndexationWorker implements Runnable {
 					description = description.replace(token, "");
 				}				
 			}
-			
-			if (!StringUtils.isEmpty(description)) {				
-				p.addDescription(description, config.getLanguage());
-			}			
 		}
 
 		try {

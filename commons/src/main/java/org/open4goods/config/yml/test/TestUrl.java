@@ -25,13 +25,8 @@ public class TestUrl {
 
 
 	private ResourcesExpectedResult resources;
-	private DescriptionsExpectedResult descriptions;
 	private Map<RatingType, RatingsExpectedResult> ratings;
 
-	private CommentsExpectedResult comments;
-	private ProsAndConsExpectedResult pros;
-	private ProsAndConsExpectedResult cons;
-	private QuestionsExpectedResult questions;
 	private SellerExpectedResult seller;
 
 
@@ -119,28 +114,11 @@ public class TestUrl {
 			price.test(data.getPrice(),ret, data.getInStock());
 		}
 
-		if (null != descriptions) {
-			descriptions.test(data.getDescriptions(),ret);
-		}
-
-
 		if (null != resources) {
 			resources.test(data.getResources(),ret);
 		}
 
-		if (null != pros) {
-			pros.test("pros",data.getPros(),ret);
-		}
-
-		if (null != cons) {
-			cons.test("cons",data.getCons(),ret);
-		}
-
-		if (null != comments)
-		{
-			comments.test(data.getComments(),ret);
-			//
-		}
+	
 
 		//		if (null != ratings) {
 		//			for (final Entry<RatingType, RatingsExpectedResult> ratingsEs : ratings.entrySet()) {
@@ -159,10 +137,6 @@ public class TestUrl {
 		//			}
 		//		}
 
-
-		if (null != questions) {
-			questions.test(data.getQuestions(),ret);
-		}
 
 
 		//
@@ -237,27 +211,6 @@ public class TestUrl {
 
 
 
-
-	public DescriptionsExpectedResult getDescriptions() {
-		return descriptions;
-	}
-
-
-
-
-	public void setDescriptions(final DescriptionsExpectedResult descriptions) {
-		this.descriptions = descriptions;
-	}
-
-
-
-
-
-
-
-
-
-
 	public String getCategory() {
 		return category;
 	}
@@ -314,48 +267,6 @@ public class TestUrl {
 
 
 
-	public ProsAndConsExpectedResult getPros() {
-		return pros;
-	}
-
-
-
-
-	public void setPros(final ProsAndConsExpectedResult pros) {
-		this.pros = pros;
-	}
-
-
-
-
-	public ProsAndConsExpectedResult getCons() {
-		return cons;
-	}
-
-
-
-
-	public void setCons(final ProsAndConsExpectedResult cons) {
-		this.cons = cons;
-	}
-
-
-
-
-	public QuestionsExpectedResult getQuestions() {
-		return questions;
-	}
-
-
-
-
-	public void setQuestions(final QuestionsExpectedResult questions) {
-		this.questions = questions;
-	}
-
-
-
-
 	public SellerExpectedResult getSeller() {
 		return seller;
 	}
@@ -366,22 +277,6 @@ public class TestUrl {
 	public void setSeller(final SellerExpectedResult seller) {
 		this.seller = seller;
 	}
-
-
-
-
-	public CommentsExpectedResult getComments() {
-		return comments;
-	}
-
-
-
-
-	public void setComments(final CommentsExpectedResult comments) {
-		this.comments = comments;
-	}
-
-
 
 
 	public String getUrl() {

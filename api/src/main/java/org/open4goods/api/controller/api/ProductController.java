@@ -7,7 +7,7 @@ import java.util.Map;
 import org.open4goods.dao.ProductRepository;
 import org.open4goods.exceptions.ResourceNotFoundException;
 import org.open4goods.model.constants.RolesConstants;
-import org.open4goods.model.data.AiDescription;
+import org.open4goods.model.data.AiDescriptions;
 import org.open4goods.model.product.Product;
 import org.open4goods.services.VerticalsConfigService;
 import org.open4goods.services.ai.AiService;
@@ -52,14 +52,14 @@ public class ProductController {
 	@PostMapping(path="/product/ai")
 	@Operation(summary="Generate the Ai assisted content")
 	@PreAuthorize("hasAuthority('"+RolesConstants.ROLE_ADMIN+"')")
-	public Map<String, AiDescription> genAi( @RequestParam @NotBlank final String gtin) throws ResourceNotFoundException {
+	public Map<String, AiDescriptions> genAi( @RequestParam @NotBlank final String gtin) throws ResourceNotFoundException {
 		
 		Product data = repository.getById(gtin);
 		
 		aiService.complete(data, configService.getConfigByIdOrDefault(data.getVertical()),true);		
 		repository.index(data);
 
-		return data.getAiDescriptions();
+		return data.getGenaiDescriptions();
 	}
 
 }

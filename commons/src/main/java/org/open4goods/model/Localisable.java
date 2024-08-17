@@ -10,13 +10,13 @@ import jakarta.servlet.http.HttpServletRequest;
 
 
 
-public class Localisable extends HashMap<String, String> {
+public class Localisable<K,V> extends HashMap<String, V> {
 
 	private static final Logger logger = LoggerFactory.getLogger(Localisable.class);
 
 	private static final long serialVersionUID = 7154423192084742663L;
 
-	public String i18n(final HttpServletRequest request) {
+	public V i18n(final HttpServletRequest request) {
 		final String language = request.getLocale().getLanguage();
 		if (null == language) {
 			return get("default");
@@ -24,7 +24,7 @@ public class Localisable extends HashMap<String, String> {
 		return getOrDefault(language, get("default"));
 	}
 
-	public String i18n(final String language) {
+	public V i18n(final String language) {
 		if (null == language) {
 			return i18n("default");
 		}

@@ -9,48 +9,37 @@ public class SiteNaming {
 
 
 	/**
-	 * The url for the search page
-	 */
-	private Localisable searchUrl = new Localisable();
-
-	/**
 	 * The site names, per languages. Use "default" for the international, non
 	 * language specific version
 	 */
-	private Localisable serverNames = new Localisable();
+	private Localisable<String,String> serverNames = new Localisable<>();
 
 	/**
 	 * The root url for each site, according to serverNames
 	 */
-	private Localisable baseUrls = new Localisable();
+	private Localisable<String,String> baseUrls = new Localisable<>();
 
 	public String getSiteName(final Locale l) {
 		return serverNames.getOrDefault(l.getLanguage(), serverNames.get("default"));
 	}
 
-	public Localisable getServerNames() {
+	public Localisable<String, String> getServerNames() {
 		return serverNames;
 	}
 
-	public void setServerNames(final Localisable base) {
-		serverNames = base;
+	public void setServerNames(Localisable<String, String> serverNames) {
+		this.serverNames = serverNames;
 	}
 
-	public Localisable getBaseUrls() {
+	public Localisable<String, String> getBaseUrls() {
 		return baseUrls;
 	}
 
-	public void setBaseUrls(final Localisable baseUrls) {
+	public void setBaseUrls(Localisable<String, String> baseUrls) {
 		this.baseUrls = baseUrls;
 	}
 
-	public Localisable getSearchUrl() {
-		return searchUrl;
-	}
-
-	public void setSearchUrl(final Localisable searchUrl) {
-		this.searchUrl = searchUrl;
-	}
+	
 
 	
 }

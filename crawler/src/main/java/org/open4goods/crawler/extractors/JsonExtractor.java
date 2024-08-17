@@ -161,18 +161,6 @@ public class JsonExtractor extends Extractor {
 		}
 
 		////////////////////
-		// Description
-		////////////////////
-		try {
-			if (!StringUtils.isEmpty(c.getDescription())) {
-				p.addDescription(jsonEval(root, c.getDescription()), locale.getLanguage());
-			}
-
-		} catch (final Exception e) {
-			dedicatedLogger.warn("Error while parsing description : {}  ; {}", e.getMessage(), url);
-		}
-
-		////////////////////
 		// Category
 		////////////////////
 		if (!StringUtils.isEmpty(c.getCategory())) {

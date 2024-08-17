@@ -203,9 +203,9 @@ public class SitemapGenerationService {
 		for (VerticalConfig vertical : verticalsConfigService.getConfigsWithoutDefault()) {
 			List<Product> datas = aggregatedDataRepository.exportVerticalWithValidDateOrderByEcoscore(vertical.getId(),false)
 			// Filtering on products having genAI content
-					.filter(e -> null != e.getAiDescriptions())
+					.filter(e -> null != e.getGenaiDescriptions())
 					// TODO : Not really filtered per language
-					.filter(e -> e.getAiDescriptions().size() > 1)
+					.filter(e -> e.getGenaiDescriptions().size() > 1)
 					
 			.toList();
 			

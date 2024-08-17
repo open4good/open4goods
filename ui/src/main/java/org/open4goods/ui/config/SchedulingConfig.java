@@ -19,8 +19,8 @@ public class SchedulingConfig implements SchedulingConfigurer {
 		taskRegistrar.setScheduler(taskExecutor());
 	}
 
-	@Bean(destroyMethod = "shutdown")
-	public Executor taskExecutor() {
+    @Bean(destroyMethod = "shutdown")
+    Executor taskExecutor() {
 		// TODO : Virtual threads not working
 //		return Executors.newScheduledThreadPool(5, Thread.ofVirtual().factory());
 		return Executors.newScheduledThreadPool(5);

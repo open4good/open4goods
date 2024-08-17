@@ -18,7 +18,6 @@ import org.apache.commons.lang3.math.NumberUtils;
 import org.open4goods.exceptions.ResourceNotFoundException;
 import org.open4goods.exceptions.ValidationException;
 import org.open4goods.helper.IdHelper;
-import org.open4goods.model.Localised;
 import org.open4goods.model.Standardisable;
 import org.open4goods.model.Validable;
 import org.open4goods.model.attribute.Attribute;
@@ -33,7 +32,6 @@ import org.slf4j.LoggerFactory;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.google.common.base.Objects;
 
-import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 
 /**
@@ -104,24 +102,12 @@ public class DataFragment implements Standardisable, Validable {
 	private Price price;
 
 	/**
-	 * The descriptions associated with this product
-	 */
-	private Set<Description> descriptions = new HashSet<>();
-
-	/**
 	 * Product data productTags
 	 */
 	private String category;
 
 	/** The different ratings **/
 	private Set<Rating> ratings = new HashSet<>();
-
-	/** The comments, by provider **/
-	private Set<Comment> comments = new HashSet<>();
-
-
-	/** The questions and answers, by provider **/
-	private Set<Question> questions = new HashSet<>();
 
 	/** The affiliated url, if any **/
 	private String affiliatedUrl;
@@ -134,12 +120,6 @@ public class DataFragment implements Standardisable, Validable {
 	/**
 	 * The pros
 	 */
-	private Set<ProsOrCons> pros = new HashSet<>();
-
-	/**
-	 * And the cons
-	 */
-	private Set<ProsOrCons> cons = new HashSet<>();
 
 
 	/**
@@ -237,9 +217,7 @@ public class DataFragment implements Standardisable, Validable {
 	@Override
 	public Set<Standardisable> standardisableChildren() {
 		final Set<Standardisable> ret = new HashSet<>();
-		if (null != comments) {
-			ret.addAll(comments);
-		}
+
 		if (null != ratings) {
 			ret.addAll(ratings);
 		}
@@ -283,55 +261,6 @@ public class DataFragment implements Standardisable, Validable {
 		if (null == lastIndexationDate) {
 			ret.add(ValidationMessage.newValidationMessage(url, "NO_DATE"));
 		}
-
-		if (null != descriptions) {
-			for (final Description d : descriptions) {
-				try {
-					d.validate();
-				} catch (final ValidationException e) {
-					ret.addAll(e.getResult());
-				}
-			}
-		}
-		if (null != questions) {
-			for (final Question d : questions) {
-				try {
-					d.validate();
-				} catch (final ValidationException e) {
-					ret.addAll(e.getResult());
-				}
-			}
-		}
-		if (null != pros) {
-			for (final ProsOrCons d : pros) {
-				try {
-					d.validate();
-				} catch (final ValidationException e) {
-					ret.addAll(e.getResult());
-				}
-			}
-		}
-
-		if (null != cons) {
-			for (final ProsOrCons d : cons) {
-				try {
-					d.validate();
-				} catch (final ValidationException e) {
-					ret.addAll(e.getResult());
-				}
-			}
-		}
-
-		if (null != comments) {
-			for (final Comment c : comments) {
-				try {
-					c.validate();
-				} catch (final ValidationException e) {
-					ret.addAll(e.getResult());
-				}
-			}
-		}
-
 
 		if (null != ratings) {
 			for (final Rating d : ratings) {
@@ -490,23 +419,6 @@ public class DataFragment implements Standardisable, Validable {
 	 *
 	 * @return
 	 */
-	public String longestDescription() {
-		String ret = null;
-
-		for (final Description n : descriptions) {
-			if (null == ret || n.getContent().getText().length() > ret.length()) {
-				ret = n.getContent().getText();
-			}
-		}
-		return ret == null ? "" : ret;
-	}
-
-
-	/**
-	 * Return the longest name for this offer
-	 *
-	 * @return
-	 */
 	public String longestName() {
 		String ret = null;
 
@@ -520,56 +432,6 @@ public class DataFragment implements Standardisable, Validable {
 	}
 
 
-	/**
-	 *
-	 * TODO  (P1, quality, 1) : Versionning does not work on attributes (maybe comments, and other "complex"). Failing on openfoodfacts, on the added/removedAttributes
-	 *
-	 * Add a versionned state. The version is the "previous" state
-	 * @param newItem
-	 */
-	public void addVersion(@Valid @NotNull final DataFragment newItem) {
-
-		////////////////////
-		// Unversionned data
-		////////////////////
-		names = newItem.getNames();
-		datasourceName = newItem.getDatasourceName();
-		datasourceConfigName = newItem.getDatasourceConfigName();
-		merchantName = newItem.getMerchantName();
-		category = newItem.getCategory();
-		referentielData = newItem.getReferentielData();
-		providerSupportType = newItem.getProviderSupportType();
-		affiliatedUrl = newItem.getAffiliatedUrl();
-		inStock = newItem.inStock;
-		quantityInStock = newItem.quantityInStock;
-		warranty = newItem.getWarranty();
-		shippingCost = newItem.shippingCost;
-		shippingTime = newItem.getShippingTime();
-
-		alternateIds.addAll(newItem.getAlternateIds());
-
-
-		// TODO(design, P2, 0.5) : Make update, with hashcode, equals...
-		ratings = newItem.getRatings();
-		descriptions = newItem.getDescriptions();
-		comments = newItem.getComments();
-		questions = newItem.getQuestions();
-		pros = newItem.getPros();
-		cons = newItem.getCons();
-		attributes = newItem.getAttributes();
-		referentielAttributes = newItem.getReferentielAttributes();
-		resources = newItem.getResources();
-		lastIndexationDate = newItem.getLastIndexationDate();
-
-		// Adding price history (only for ProductCondition.NEW items)
-		if (productState.equals(ProductCondition.NEW) &&  !Objects.equal(getPrice(), newItem.getPrice())) {
-			priceHistory.add(getPrice());
-			setPrice(newItem.getPrice());
-		}
-
-		productState = newItem.getProductState();
-
-	}
 
 
 	/**
@@ -593,15 +455,6 @@ public class DataFragment implements Standardisable, Validable {
 	// Attributes adding method
 	/////////////////////////////////////////////////////
 
-	public void addQuestion(final Question q) throws ValidationException {
-		q.validate();
-		questions.add(q);
-	}
-
-	public void addComment(final Comment comment) throws ValidationException {
-		comment.validate();
-		comments.add(comment);
-	}
 
 	//	public void addAttribute(final ReferentielKey refKey, final String value, final String language) {
 	//		return addAttribute(refKey.toString(), value, language, null);
@@ -811,19 +664,6 @@ public class DataFragment implements Standardisable, Validable {
 
 	}
 
-	public void addDescription(final String description, final String language) {
-
-		if (StringUtils.isEmpty(description)) {
-			return;
-		}
-
-		if (null == descriptions) {
-			descriptions = new HashSet<>();
-		}
-
-		descriptions.add(new Description(description, language));
-
-	}
 
 	/**
 	 * Attempts an auto detection
@@ -940,39 +780,6 @@ public class DataFragment implements Standardisable, Validable {
 			return;
 		}
 		names.add(name);
-	}
-
-	public void addCon(final String r, final String language, final String author) throws ValidationException {
-		final ProsOrCons p = new ProsOrCons();
-		p.setLabel(new Localised(r, language));
-		p.setAuthor(author);
-		p.validate();
-		cons.add(p);
-
-	}
-
-	public void addCon(final String r, final String language) throws ValidationException {
-		final ProsOrCons p = new ProsOrCons();
-		p.setLabel(new Localised(r, language));
-
-		p.validate();
-		cons.add(p);
-
-	}
-
-	public void addPro(final String r, final String language, final String author) throws ValidationException {
-		final ProsOrCons p = new ProsOrCons();
-		p.setLabel(new Localised(r, language));
-		p.setAuthor(author);
-		p.validate();
-		pros.add(p);
-	}
-
-	public void addPro(final String r, final String language) throws ValidationException {
-		final ProsOrCons p = new ProsOrCons();
-		p.setLabel(new Localised(r, language));
-		p.validate();
-		pros.add(p);
 	}
 
 	/**
@@ -1261,14 +1068,7 @@ public class DataFragment implements Standardisable, Validable {
 		merchantName = subSeller;
 	}
 
-	public Set<Description> getDescriptions() {
-		return descriptions;
-	}
-
-	public void setDescriptions(final Set<Description> descriptions) {
-		this.descriptions = descriptions;
-	}
-
+	
 
 
 
@@ -1290,41 +1090,12 @@ public class DataFragment implements Standardisable, Validable {
 		this.price = price;
 	}
 
-
-
-
-
-	public Set<ProsOrCons> getPros() {
-		return pros;
-	}
-
-	public void setPros(final Set<ProsOrCons> pros) {
-		this.pros = pros;
-	}
-
-	public Set<ProsOrCons> getCons() {
-		return cons;
-	}
-
-	public void setCons(final Set<ProsOrCons> cons) {
-		this.cons = cons;
-	}
-
 	public String getCategory() {
 		return category;
 	}
 
 	public void setCategory(final String productTags) {
 		category = productTags;
-	}
-
-
-	public Set<Question> getQuestions() {
-		return questions;
-	}
-
-	public void setComments(final Set<Comment> comments) {
-		this.comments = comments;
 	}
 
 	public Boolean getReferentielData() {
@@ -1342,15 +1113,6 @@ public class DataFragment implements Standardisable, Validable {
 	public void setRatings(final Set<Rating> ratings) {
 		this.ratings = ratings;
 	}
-
-	public Set<Comment> getComments() {
-		return comments;
-	}
-
-	public void setQuestions(final Set<Question> questions) {
-		this.questions = questions;
-	}
-
 
 
 

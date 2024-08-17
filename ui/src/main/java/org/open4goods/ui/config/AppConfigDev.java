@@ -36,10 +36,8 @@ public class AppConfigDev {
 	}
 
 
-
-	
-	@Bean
-	public MessageSource messageSource()
+    @Bean
+    MessageSource messageSource()
 	{       
 	    ReloadableResourceBundleMessageSource messageSource = new ReloadableResourceBundleMessageSource();
 	    messageSource.setBasenames( "file:" + config.resourceBundleFolder(), "classpath:/i18n/messages" );

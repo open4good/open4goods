@@ -96,6 +96,7 @@ i18n:
       # AI TEXTS CONFIGS
       ####################################################################################  
       aiConfigs:
+        override: false
 ##          rateLimitDelay: 3000
         rootPrompt: |
             Ta réponse devra être au format JSON. N'inclue aucune explication, fournis uniquement une réponse JSON conforme à la norme RFC8259. Supprime le balisage ```json de la sortie.
@@ -122,7 +123,6 @@ i18n:
            - key: "cons"
              prompt: |           
                 : Liste cinq inconvénients techniques du produit dans une seule ligne, séparés par des points-virgules, dans un style formel.
-             override: false
 
 
 

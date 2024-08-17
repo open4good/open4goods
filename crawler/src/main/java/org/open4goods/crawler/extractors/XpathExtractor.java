@@ -278,53 +278,7 @@ public class XpathExtractor extends Extractor {
 			}
 		}
 
-		String xpath = c.getPros();
-
-		if (!StringUtils.isEmpty(xpath)) {
-
-			final List<String> ress = evalMultipleAndLogs(document, xpath, url);
-			for (final String r : ress) {
-				try {
-					p.addPro(r, locale.getLanguage());
-				} catch (final ValidationException e) {
-					getDedicatedLogger().warn("Error while adding pro", e);
-				}
-			}
-		}
-		////////////////////
-		// Cons
-		////////////////////
-		xpath = c.getCons();
-
-		if (!StringUtils.isEmpty(xpath)) {
-
-			final List<String> ress = evalMultipleAndLogs(document, xpath, url);
-			for (final String r : ress) {
-				try {
-					p.addCon(r, locale.getLanguage());
-				} catch (final ValidationException e) {
-					getDedicatedLogger().warn("Error while adding con", e);
-				}
-			}
-		}
-
-		////////////////////
-		// Description
-		////////////////////
-
-		if (null != c.getDescription()) {
-			p.addDescription(evalAndLogs(document, c.getDescription(), url), locale.getLanguage());
-		}
-		if (!StringUtils.isEmpty(c.getGtin13())) {
-			
-					
-					String gtin = evalAndLogs(document, c.getGtin13(), url);
-					if (!StringUtils.isEmpty(gtin)) {
-						p.getReferentielAttributes().put(ReferentielKey.GTIN, gtin);
-					}
-			
-					
-		}
+	
 		////////////////////
 		// subSeller
 		////////////////////
