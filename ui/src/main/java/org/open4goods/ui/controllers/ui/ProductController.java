@@ -16,7 +16,7 @@ import org.open4goods.model.BarcodeType;
 import org.open4goods.model.Localised;
 import org.open4goods.model.constants.ProviderType;
 import org.open4goods.model.data.AffiliationToken;
-import org.open4goods.model.data.AiDescription;
+import org.open4goods.model.data.AiDescriptions;
 import org.open4goods.model.data.Description;
 import org.open4goods.model.data.Resource;
 import org.open4goods.model.dto.UiFeatureGroups;
@@ -232,22 +232,22 @@ public class ProductController  {
 		List<String> globalDescriptionParagraphs = null;
 		List<String> ecologicalDescriptionParagraphs = null;
 		
-		AiDescription ps = data.getAiDescriptions().get("pros");
+		AiDescriptions ps = data.getGenaiDescriptions().get("pros");
 		if (null != ps) {
 			pros = (Arrays.asList(ps.getContent().getText().split("\n|<br/>|;")));
 		}
 		
-		AiDescription cs = data.getAiDescriptions().get("cons");
+		AiDescriptions cs = data.getGenaiDescriptions().get("cons");
 		if (null != cs) {
 			cons = (Arrays.asList(cs.getContent().getText().split("\n|<br/>|;")));
 		}
 
-		AiDescription gd = data.getAiDescriptions().get("global-description");
+		AiDescriptions gd = data.getGenaiDescriptions().get("global-description");
 		if (gd != null) {
 			globalDescriptionParagraphs = Arrays.asList(gd.getContent().getText().split(";"));
 		}
 
-		AiDescription ed = data.getAiDescriptions().get("ecological-description");
+		AiDescriptions ed = data.getGenaiDescriptions().get("ecological-description");
 		if (ed != null) {
 			ecologicalDescriptionParagraphs = Arrays.asList(ed.getContent().getText().split(";"));
 		}
@@ -340,40 +340,6 @@ public class ProductController  {
 	}
 
 
-	/**
-	 * Update a product, from human edition 
-	 * @param productTitle
-	 * @param productDescription
-	 * @param id
-	 * @param request
-	 * @param response
-	 * @return
-	 * @throws IOException
-	 */
-	@PostMapping("/*-{id:\\d+}")
-	public ModelAndView updateProduct(@RequestParam String productTitle, @RequestParam String productDescription,  @PathVariable String id, final HttpServletRequest request, HttpServletResponse response) throws IOException {
-
-		// Retrieve the Product
-		Product data;
-		try {
-			data = productRepository.getById(id);
-		} catch (ResourceNotFoundException e) {
-			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Produit " + request.getServletPath() + " introuvable !");
-		}
-
-		Description description = new Description();
-		//TODO(i18n)
-		description.setContent(new Localised(productDescription, "fr"));
-		description.setProviderType(ProviderType.HUMAN_REDACTED);
-
-		data.setHumanDescription(description);
-
-		productRepository.index(data);
-
-		return buildProductView(id, null,request, response);
-
-	}
-	
 	
 	
 	/**

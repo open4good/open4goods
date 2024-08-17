@@ -138,9 +138,9 @@ public class GoogleIndexationService  {
 			try {
 				return productRepository.exportVerticalWithValidDateOrderByEcoscore(verticalId,false)
 				// Filtering on products having genAI content
-						.filter(e -> null != e.getAiDescriptions())
+						.filter(e -> null != e.getGenaiDescriptions())
 						// TODO : Not really filtered per language
-						.filter(e -> e.getAiDescriptions().size() > 1)
+						.filter(e -> e.getGenaiDescriptions().size() > 1)
 						// TODO : i18n
 						.map(e -> baseUrl+ e.url("fr"))
 						.toList();
@@ -177,9 +177,9 @@ public class GoogleIndexationService  {
 		LOGGER.info("Querying Google Indexation of all products since epoch {}", epoch);
 		List<String> urls = productRepository.exportAllVerticalizedProductsWithGenAiSinceEpoch(epoch)
 		// Filtering on products having genAI content
-				.filter(e -> null != e.getAiDescriptions())
+				.filter(e -> null != e.getGenaiDescriptions())
 				// TODO : Not really filtered per language
-				.filter(e -> e.getAiDescriptions().size() > 1)
+				.filter(e -> e.getGenaiDescriptions().size() > 1)
 				// TODO : I18n
 				.map(e -> e.url("fr"))
 				

@@ -1,27 +1,24 @@
 package org.open4goods.model.data;
 
-import org.open4goods.model.Localised;
 import org.springframework.data.elasticsearch.annotations.Field;
 import org.springframework.data.elasticsearch.annotations.FieldType;
 
-public class AiDescription extends Description {
+public class AiDescription {
 	
 	@Field(index = false, store = false, type = FieldType.Date)
 	private long ts;
+	
+	private String content;
 	
 	public AiDescription() {
 		super();
 
 	}
 
-	public AiDescription(Localised content) {
-		super(content);	
-		this.ts = System.currentTimeMillis();
-	}
+	public AiDescription(String content) {
 
-	public AiDescription(String description, String language) {
-		super(description, language);
-		this.ts = System.currentTimeMillis();		
+		this.ts = System.currentTimeMillis();
+		this.content = content;
 	}
 
 	public long getTs() {
@@ -31,6 +28,16 @@ public class AiDescription extends Description {
 	public void setTs(long ts) {
 		this.ts = ts;
 	}
+
+	public String getContent() {
+		return content;
+	}
+
+	public void setContent(String content) {
+		this.content = content;
+	}
+
+	
 
 
 }

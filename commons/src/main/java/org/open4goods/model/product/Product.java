@@ -24,14 +24,13 @@ import org.joda.time.format.PeriodFormatter;
 import org.open4goods.dao.ProductRepository;
 import org.open4goods.exceptions.ValidationException;
 import org.open4goods.model.EcoScoreRanking;
+import org.open4goods.model.Localisable;
 import org.open4goods.model.Standardisable;
 import org.open4goods.model.constants.Currency;
 import org.open4goods.model.constants.ProductCondition;
-import org.open4goods.model.constants.ProviderType;
 import org.open4goods.model.constants.ReferentielKey;
 import org.open4goods.model.constants.ResourceType;
-import org.open4goods.model.data.AiDescription;
-import org.open4goods.model.data.Description;
+import org.open4goods.model.data.AiDescriptions;
 import org.open4goods.model.data.Resource;
 import org.open4goods.model.data.Score;
 import org.open4goods.model.data.UnindexedKeyVal;
@@ -60,7 +59,7 @@ public class Product implements Standardisable {
 	public static final String DEFAULT_REPO = "products";
 
 	// TODO : Conf
-	// If true, the referentiel atrribute will be updated if a shortes version exists in alternativeModels
+	// If true, the referentiel atrribute will be updated if a shortest version exists in alternativeModels
 	private static final boolean FORCE = true;
 
 	/**
@@ -97,10 +96,7 @@ public class Product implements Standardisable {
 	@Field(index = true, store = false, type = FieldType.Boolean)
 	private boolean excluded = false;
 	
-	/** The list of other id's known for this product **/
-	// TODO : Rename to alternativ model names
-//	private Set<UnindexedKeyValTimestamp> alternativeIds = new HashSet<>();
-
+	/** The list of other model's known for this product **/
 	@Field(index = true, store = false, type = FieldType.Keyword)
 	private Set<String> alternativeModels = new HashSet<>();
 	
@@ -137,19 +133,9 @@ public class Product implements Standardisable {
 	private String coverImagePath;
 
 	
-	/** The descriptions **/
+	/** The ai generated texts, keyed by language**/
 	@Field(index = false, store = false, type = FieldType.Object)
-	private Set<Description> descriptions = new HashSet<>();
-
-	/** The ai generated texts**/
-	// TODO : Buggy for i18n
-	@Field(index = false, store = false, type = FieldType.Object)
-	private Map<String,AiDescription> aiDescriptions = new HashMap<>();
-
-	/** The human crafted description**/
-	// TODO : remove
-	@Field(index = false, store = false, type = FieldType.Object)
-	private Description humanDescription;
+	private Localisable<String,AiDescriptions> genaiDescriptions = new Localisable<>();
 
 	/**
 	 * Informations and resources related to the gtin
@@ -253,26 +239,6 @@ public class Product implements Standardisable {
 		return super.equals(obj);
 	}
 
-	/**
-	 * Get descriptions for a given language
-	 *
-	 * @param language
-	 * @return
-	 */
-	public Map<String, Set<Description>> descriptions(final String language) {
-		final Map<String, Set<Description>> ret = new HashMap<>();
-
-		for (final Description d : getDescriptions()) {
-			if (d.getContent().getLanguage().equals(language)) {
-				final String lang = d.getContent().getLanguage();
-				if (!ret.containsKey(lang)) {
-					ret.put(lang, new HashSet<>());
-				}
-				ret.get(lang).add(d);
-			}
-		}
-		return ret;
-	}
 
 	
 	public List<Score> realScores() {
@@ -427,19 +393,6 @@ public class Product implements Standardisable {
 		return resources.stream().filter(e-> e.getResourceType() != null &&  e.getResourceType().equals(ResourceType.VIDEO)).toList();
 	}
 	
-	/**
-	 *
-	 * @param language
-	 * @return the shortest description in a given language
-	 */
-	public String shortestDescription(String language) {
-		return descriptions.stream()
-				.filter(e -> e.getContent().getLanguage().equals(language))
-				.map(e -> e.getContent().getText())
-				.min (Comparator.comparingInt(String::length))
-				.orElse(null);
-	}
-
 	public AggregatedPrice bestPrice() {
 		return price == null ? null : price.getMinPrice();
 	}
@@ -502,19 +455,6 @@ public class Product implements Standardisable {
 	//		return ratings.stream().filter(e -> e.getTags().contains(ratingType.toString())).collect(Collectors.toSet());
 	//	}
 
-	public List<Description> reviewsDescriptions() {
-		return descriptions.stream().filter(d -> d.getProviderType() == ProviderType.CONTENT_PROVIDER)
-				.collect(Collectors.toList());
-	}
-
-	/**
-	 * Return the descriptions related to the product (filtering expansionsOf)
-	 *
-	 * @return
-	 */
-	public List<Description> productDescriptions() {
-		return new ArrayList<>(descriptions);
-	}
 
 	public String alternateIdsAsText() {
 		return StringUtils.join(alternativeModels, ", ");
@@ -636,46 +576,7 @@ public class Product implements Standardisable {
 		return datasourceCategories.stream().min (Comparator.comparingInt(String::length)).orElse(null);
 	}
 
-	/**
-	 *
-	 * @return all names and descriptions, excluding the longest offer name
-	 */
-	public List<String> namesAndDescriptionsWithoutShortestName() {
 
-		Set<String> ret = new HashSet<>();
-		ret.addAll(names.getOfferNames());
-		ret.addAll(descriptions.stream().map(e -> e.getContent().getText()).collect(Collectors.toSet()));
-		ret.remove(names.shortestOfferName());
-
-        List<String> list = new ArrayList<>(ret);
-
-		list.sort(Comparator.naturalOrder());
-
-		return list;
-	}
-
-
-	public String namesAndDescriptionsWithoutShortestNameWithCariage() {
-		return StringUtils.join(namesAndDescriptionsWithoutShortestName(),"\n");
-	}
-
-	/**
-	 *
-	 * @return all names and descriptions, excluding the longest offer name
-	 */
-	public List<String> namesAndDescriptionsWithoutLongestName() {
-
-		Set<String> ret = new HashSet<>();
-		ret.addAll(names.getOfferNames());
-		ret.addAll(descriptions.stream().map(e -> e.getContent().getText()).collect(Collectors.toSet()));
-		ret.remove(names.longestOfferName());
-
-        List<String> list = new ArrayList<>(ret);
-
-		list.sort(Comparator.naturalOrder());
-
-		return list;
-	}
 
 	//	/**
 	//	 *
@@ -692,27 +593,6 @@ public class Product implements Standardisable {
 	//		return builder.toString();
 	//	}
 
-
-	public List<String> tagCloudTokens() {
-		List<String> tokens = new ArrayList<>();
-		getNames().getOfferNames().stream().map(e -> e.split(" ")).forEach(e -> {
-			for (String token : e) {
-				if (token.length() > 1 && !StringUtils.isNumeric(token)) {
-					tokens.add(token);
-				}
-			}
-		});
-
-		getDescriptions().stream().map(e -> e.getContent().getText().split(" ")).forEach(e -> {
-			for (String token : e) {
-				if (token.length() > 1 && !StringUtils.isNumeric(token)) {
-					tokens.add(token);
-				}
-			}
-		});
-
-		return tokens;
-	}
 
 	
 	/**
@@ -953,28 +833,12 @@ public class Product implements Standardisable {
 		this.resources = resources;
 	}
 
-	public Set<Description> getDescriptions() {
-		return descriptions;
-	}
-
-	public void setDescriptions(Set<Description> descriptions) {
-		this.descriptions = descriptions;
-	}
-
-	public Description getHumanDescription() {
-		return humanDescription;
-	}
-
 	public EcoScoreRanking getRanking() {
 		return ranking;
 	}
 
 	public void setRanking(EcoScoreRanking ranking) {
 		this.ranking = ranking;
-	}
-
-	public void setHumanDescription(Description humanDescription) {
-		this.humanDescription = humanDescription;
 	}
 
 	public GtinInfo getGtinInfos() {
@@ -1020,12 +884,12 @@ public class Product implements Standardisable {
 		this.offersCount = offersCount;
 	}
 
-	public Map<String, AiDescription> getAiDescriptions() {
-		return aiDescriptions;
+	public Map<String, AiDescriptions> getGenaiDescriptions() {
+		return genaiDescriptions;
 	}
 
-	public void setAiDescriptions(Map<String, AiDescription> aiDescriptions) {
-		this.aiDescriptions = aiDescriptions;
+	public void setAiDescriptions(Map<String, AiDescriptions> aiDescriptions) {
+		this.genaiDescriptions = aiDescriptions;
 	}
 
 	public Integer getGoogleTaxonomyId() {

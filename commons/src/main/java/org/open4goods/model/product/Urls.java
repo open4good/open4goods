@@ -11,7 +11,7 @@ public class Urls {
 	 * i18n product urls. Use "default" for default international name
 	 */
 	@Field(index = true, store = false, type = FieldType.Object)
-	private Localisable urls = new Localisable();
+	private Localisable<String,String> urls = new Localisable<>();
 
 	/**
 	 * Shortcut method to get the given name for a locale

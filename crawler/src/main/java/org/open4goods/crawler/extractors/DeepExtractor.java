@@ -125,19 +125,7 @@ public class DeepExtractor extends Extractor {
 
 			//TODO(gof) : complete with other extractors
 			for (final Extractor e : extractors) {
-				if (e instanceof CommentsExtractor) {
-					if (deepData.getComments().size() >0) {
-						p.getComments().addAll(deepData.getComments());
-						more = true;
-					}
-
-				} else if (e instanceof QuestionsExtractor) {
-					if (deepData.getQuestions().size() >0) {
-						p.getQuestions().addAll(deepData.getQuestions());
-						more = true;
-					}
-
-				} else if (e instanceof TableAttributeExtractor) {
+				if (e instanceof TableAttributeExtractor) {
 					if (deepData.getAttributes().size() >0) {
 						p.getAttributes().addAll(deepData.getAttributes());
 						more = true;

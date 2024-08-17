@@ -14,7 +14,6 @@ import org.open4goods.api.services.aggregation.services.batch.scores.CleanScoreA
 import org.open4goods.api.services.aggregation.services.batch.scores.DataCompletion2ScoreAggregationService;
 import org.open4goods.api.services.aggregation.services.batch.scores.EcoScoreAggregationService;
 import org.open4goods.api.services.aggregation.services.realtime.AttributeRealtimeAggregationService;
-import org.open4goods.api.services.aggregation.services.realtime.DescriptionsAggregationService;
 import org.open4goods.api.services.aggregation.services.realtime.IdentityAggregationService;
 import org.open4goods.api.services.aggregation.services.realtime.MediaAggregationService;
 import org.open4goods.api.services.aggregation.services.realtime.NamesAggregationService;
@@ -256,7 +255,6 @@ public class AggregationFacadeService {
 		//		services.add(new CommentsAggregationService( config.getCommentsConfig()));
 		//		services.add(new ProsAndConsAggregationService(apiProperties.logsFolder()));
 		//		services.add(new QuestionsAggregationService(apiProperties.logsFolder()));
-		services.add(new DescriptionsAggregationService(logger));
 		services.add(new MediaAggregationService(logger));
 		
 		final StandardAggregator ret = new StandardAggregator(services, verticalConfigService);

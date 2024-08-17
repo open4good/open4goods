@@ -17,7 +17,7 @@ public class FeatureGroup {
 	 * Erased name if needed
 	 * @param categoryFeatureGroupId
 	 */
-	private Localisable name = new Localisable();
+	private Localisable<String,String> name = new Localisable<>();
 	
 	private List<Integer> featuresId = new ArrayList<>();
 	
@@ -36,17 +36,18 @@ public class FeatureGroup {
 	public void setIcecatCategoryFeatureGroupId(Integer icecatFeatureGroupId) {
 		this.icecatCategoryFeatureGroupId = icecatFeatureGroupId;
 	}
-	public Localisable getName() {
-		return name;
-	}
-	public void setName(Localisable name) {
-		this.name = name;
-	}
+
 	public List<Integer> getFeaturesId() {
 		return featuresId;
 	}
 	public void setFeaturesId(List<Integer> featuresId) {
 		this.featuresId = featuresId;
+	}
+	public Localisable<String, String> getName() {
+		return name;
+	}
+	public void setName(Localisable<String, String> name) {
+		this.name = name;
 	}
 
 	

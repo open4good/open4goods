@@ -33,8 +33,8 @@ public class TemplatesConfig {
 		this.config = config;
 	}
 
-	@Bean
-	public ClassLoaderTemplateResolver classpathTemplateResolver() {
+    @Bean
+    ClassLoaderTemplateResolver classpathTemplateResolver() {
 		ClassLoaderTemplateResolver templateResolver = new ClassLoaderTemplateResolver();
 		templateResolver.setPrefix("templates/");
 		templateResolver.setSuffix(".html");
@@ -47,8 +47,8 @@ public class TemplatesConfig {
 	}
 
 
-	@Bean
-	public FileTemplateResolver fileTemplateResolver() {
+    @Bean
+    FileTemplateResolver fileTemplateResolver() {
 		final FileTemplateResolver resolver = new FileTemplateResolver();
 
 		////////////////////////////////////////
@@ -65,9 +65,9 @@ public class TemplatesConfig {
 		return resolver;
 
 	}
-	
+
     @Bean
-    public SpringTemplateEngine templateEngine() {
+    SpringTemplateEngine templateEngine() {
         /* SpringTemplateEngine automatically applies SpringStandardDialect and
            enables Spring's own MessageSource message resolution mechanisms. */
         SpringTemplateEngine templateEngine = new SpringTemplateEngine();
@@ -83,7 +83,7 @@ public class TemplatesConfig {
     }
 
     @Bean
-    public ViewResolver viewResolver() {
+    ViewResolver viewResolver() {
         ThymeleafViewResolver viewResolver = new ThymeleafViewResolver();
         viewResolver.setTemplateEngine(this.templateEngine());
         viewResolver.setCharacterEncoding("UTF-8");

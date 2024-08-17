@@ -16,17 +16,6 @@ public class PromptConfig {
 
 	private String prompt;
 
-	/**
-	 * Rate limit delay in milliseconds.
-	 */
-	private int rateLimitDelay;
-	
-	
-	/**
-	 * If true, texts will be regenerated
-	 */
-	private boolean override = false;
-
 
 	public String getKey() {
 		return key;
@@ -48,20 +37,6 @@ public class PromptConfig {
 	}
 
 
-	public boolean isOverride() {
-		return override;
-	}
 
 
-	public void setOverride(boolean override) {
-		this.override = override;
-	}
-
-	public int getRateLimitDelay() {
-		return rateLimitDelay;
-	}
-
-	public void setRateLimitDelay(int rateLimitDelay) {
-		this.rateLimitDelay = rateLimitDelay;
-	}
 }
