@@ -203,9 +203,9 @@ public class SitemapGenerationService {
 		for (VerticalConfig vertical : verticalsConfigService.getConfigsWithoutDefault()) {
 			List<Product> datas = aggregatedDataRepository.exportVerticalWithValidDateOrderByEcoscore(vertical.getId(),false)
 			// Filtering on products having genAI content
-					.filter(e -> null != e.getGenaiDescriptions())
+					.filter(e -> null != e.getGenaiTexts())
 					// TODO : Not really filtered per language
-					.filter(e -> e.getGenaiDescriptions().size() > 1)
+					.filter(e -> e.getGenaiTexts().size() > 1)
 					
 			.toList();
 			
@@ -238,7 +238,7 @@ public class SitemapGenerationService {
 				
 		SitemapGenerator sitemap = SitemapGenerator.of(baseUrl);
 		
-		for (Entry<String, Localisable> entry : uiConfig.getWikiPagesMapping().entrySet()) {
+		for (Entry<String, Localisable<String,String>> entry : uiConfig.getWikiPagesMapping().entrySet()) {
 			FullPage page = null;
 			try {
 				page = xwikiService.getFullPage(entry.getKey());

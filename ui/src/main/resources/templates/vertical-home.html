@@ -192,16 +192,24 @@
    
    function description (data) {
    	
-   	if (data.aiDescriptions == null) {
+   	if (data.genaiTexts == null) {
    		return "";
    	}
    	
-   	if (data.aiDescriptions['ecological-description'] == null) {
-   		return "";
-   	}
+   	// TODO : I18n
+   	// TODO : Ugly, ugly....
+   	if (data.genaiTexts['default'] == null) {
+        return "";
+    }
    	
-   	if (data.aiDescriptions['ecological-description'] != null) {
-   		ret = data.aiDescriptions['ecological-description'].content.text;
+
+   	if (data.genaiTexts['default'].descriptions['ecological-description'] != null) {
+   		ret = data.genaiTexts['default'].descriptions['ecological-description'].content;
+   		
+   		if (ret == null) {
+   		   return "";
+   		}
+   		
    		if (ret.length > 200) {
    			return ret.slice(0, 200) + "...";
    		} else {

@@ -194,6 +194,11 @@ public class ApiProperties {
 	
 	
 	/**
+	 * Duration of the pause to apply beetween 2 subsequent GenAI generation
+	 */
+	private long genAiPauseDurationMs = 0L;
+	
+	/**
 	 * Options for Wiki backup
 	 */
 	private BackupConfig backupConfig = new BackupConfig();
@@ -593,6 +598,18 @@ public class ApiProperties {
 
 	public void setBackupConfig(BackupConfig backupConfig) {
 		this.backupConfig = backupConfig;
+	}
+
+
+
+	public long getGenAiPauseDurationMs() {
+		return genAiPauseDurationMs;
+	}
+
+
+
+	public void setGenAiPauseDurationMs(long genAiPauseDurationMs) {
+		this.genAiPauseDurationMs = genAiPauseDurationMs;
 	}
 
 

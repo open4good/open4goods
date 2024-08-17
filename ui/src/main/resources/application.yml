@@ -23,6 +23,13 @@ management:
       show-details: always
       
 spring:
+  ai:
+    openai:
+      chat:
+        options:
+          #TODO : Will change on next release
+          temperature: 0.2
+          response-format: { "type": "json_object" }  
   threads:
     virtual:
       enabled: true

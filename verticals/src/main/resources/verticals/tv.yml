@@ -97,7 +97,7 @@ i18n:
       ####################################################################################  
       aiConfigs:
         override: false
-##          rateLimitDelay: 3000
+        pauseDurationMs: 1000
         rootPrompt: |
             Ta réponse devra être au format JSON. N'inclue aucune explication, fournis uniquement une réponse JSON conforme à la norme RFC8259. Supprime le balisage ```json de la sortie.
           

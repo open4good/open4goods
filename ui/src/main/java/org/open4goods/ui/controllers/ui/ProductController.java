@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
-import java.util.AbstractMap.SimpleEntry;
 import java.util.Arrays;
 import java.util.List;
 
@@ -12,13 +11,9 @@ import org.apache.commons.lang3.StringUtils;
 import org.open4goods.config.yml.ui.VerticalConfig;
 import org.open4goods.dao.ProductRepository;
 import org.open4goods.exceptions.ResourceNotFoundException;
-import org.open4goods.model.BarcodeType;
-import org.open4goods.model.Localised;
-import org.open4goods.model.constants.ProviderType;
 import org.open4goods.model.data.AffiliationToken;
+import org.open4goods.model.data.AiDescription;
 import org.open4goods.model.data.AiDescriptions;
-import org.open4goods.model.data.Description;
-import org.open4goods.model.data.Resource;
 import org.open4goods.model.dto.UiFeatureGroups;
 import org.open4goods.model.product.AggregatedPrice;
 import org.open4goods.model.product.PriceTrend;
@@ -35,11 +30,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.ModelAndView;
 
@@ -70,7 +62,6 @@ public class ProductController  {
 
 	private @Autowired BrandService brandService;
 	private @Autowired UiService uiService;
-	private @Autowired BarcodeValidationService barcodeValidationService;
 
 	// TODO: Should not have a direct dependency to the icecat service,
 	// icecat stuff should be exposed through preloading vertical config 
@@ -232,24 +223,28 @@ public class ProductController  {
 		List<String> globalDescriptionParagraphs = null;
 		List<String> ecologicalDescriptionParagraphs = null;
 		
-		AiDescriptions ps = data.getGenaiDescriptions().get("pros");
-		if (null != ps) {
-			pros = (Arrays.asList(ps.getContent().getText().split("\n|<br/>|;")));
-		}
-		
-		AiDescriptions cs = data.getGenaiDescriptions().get("cons");
-		if (null != cs) {
-			cons = (Arrays.asList(cs.getContent().getText().split("\n|<br/>|;")));
-		}
-
-		AiDescriptions gd = data.getGenaiDescriptions().get("global-description");
-		if (gd != null) {
-			globalDescriptionParagraphs = Arrays.asList(gd.getContent().getText().split(";"));
-		}
-
-		AiDescriptions ed = data.getGenaiDescriptions().get("ecological-description");
-		if (ed != null) {
-			ecologicalDescriptionParagraphs = Arrays.asList(ed.getContent().getText().split(";"));
+		AiDescriptions aiDescriptions = data.getGenaiTexts().i18n(request);
+		if (null != aiDescriptions) {
+			
+			AiDescription ps = aiDescriptions.getDescriptions().get("pros");
+			if (null != ps) {
+				pros = (Arrays.asList(ps.getContent().split("\n|<br/>|;")));
+			}
+			
+			AiDescription cs = data.getGenaiTexts().i18n(request).getDescriptions().get("cons");
+			if (null != cs) {
+				cons = (Arrays.asList(cs.getContent().split("\n|<br/>|;")));
+			}
+	
+			AiDescription gd = data.getGenaiTexts().i18n(request).getDescriptions().get("global-description");
+			if (gd != null) {
+				globalDescriptionParagraphs = Arrays.asList(gd.getContent().split(";"));
+			}
+	
+			AiDescription ed = data.getGenaiTexts().i18n(request).getDescriptions().get("ecological-description");
+			if (ed != null) {
+				ecologicalDescriptionParagraphs = Arrays.asList(ed.getContent().split(";"));
+			}
 		}
 
 		mv.addObject("pros", pros);
@@ -262,10 +257,6 @@ public class ProductController  {
 		PriceTrend newTrends = PriceTrend.of(data.getPrice().getNewPricehistory());
 		
 		mv.addObject("newTrend", newTrends);
-		
-		
-		
-		
 		
 		
 		VerticalConfig verticalConfig = verticalConfigService.getVerticalForPath(vertical);

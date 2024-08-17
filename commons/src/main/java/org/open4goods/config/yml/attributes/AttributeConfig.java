@@ -40,7 +40,7 @@ public class AttributeConfig {
 	 */
 	private String faIcon = "fa-wrench";
 
-	private Localisable name ;
+	private Localisable<String,String> name ;
 
 	private AttributeType type = AttributeType.TEXT;
 

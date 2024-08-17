@@ -1,7 +1,6 @@
 package org.open4goods.admin.config;
 
 import java.util.Arrays;
-import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 import org.open4goods.xwiki.XWikiServiceConfiguration;

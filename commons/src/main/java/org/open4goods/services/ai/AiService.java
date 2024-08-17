@@ -12,45 +12,45 @@ import org.open4goods.config.yml.attributes.PromptConfig;
 import org.open4goods.config.yml.ui.ProductI18nElements;
 import org.open4goods.config.yml.ui.VerticalConfig;
 import org.open4goods.model.data.AiDescription;
+import org.open4goods.model.data.AiDescriptions;
 import org.open4goods.model.product.Product;
 import org.open4goods.services.EvaluationService;
+import org.open4goods.services.SerialisationService;
 import org.open4goods.services.VerticalsConfigService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ai.openai.OpenAiChatModel;
+import org.springframework.boot.actuate.health.Health;
+import org.springframework.boot.actuate.health.HealthIndicator;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JsonMappingException;
 
 import io.micrometer.core.annotation.Timed;
 
 /**
  * This service is in charge of generating texts through GenAI prompts
  */
-public class AiService {
+public class AiService implements HealthIndicator{
 
+	// TODO : From conf
 	private static final int MIN_REQUIRED_ATTRIBUTES = 15;
+	
+	
+	
 	private final Logger logger = LoggerFactory.getLogger(AiService.class);
 	private final OpenAiChatModel chatModel;
-	private final VerticalsConfigService verticalService;
 	private final EvaluationService spelEvaluationService;
-	private final ObjectMapper objectMapper;
+	private final SerialisationService serialisationService;
+	
+	// Tracked exception for healthcheck
+	private String exception;
 
-	public AiService(OpenAiChatModel chatModel, VerticalsConfigService verticalService, EvaluationService spelEvaluationService) {
+	public AiService(OpenAiChatModel chatModel,  EvaluationService spelEvaluationService, SerialisationService serialisationService) {
 		this.chatModel = chatModel;
-		this.verticalService = verticalService;
 		this.spelEvaluationService = spelEvaluationService;
-		this.objectMapper = new ObjectMapper();
-	}
-
-	/**
-	 * Generates a prompt response using the AI model.
-	 */
-	@Timed(value = "GenAiTextsGeneration", description = "Texts generation through generativ AI",  extraTags = {"service","ai"})
-	public String generatePromptResponse(String value) {
-		long startTime = System.currentTimeMillis();
-		String response = chatModel.call(value);
-		logger.info("GenAI request ({}ms) : \n ----------request :\n{} \n----------response\n{}", System.currentTimeMillis() - startTime, value, response);
-		return response;
+		this.serialisationService = serialisationService;
 	}
 
 	/**
@@ -71,47 +71,44 @@ public class AiService {
                 entry -> entry.getValue().getAiConfigs()
             ));
 		
-		// Launch the 
-		generateTextsForProduct(product, iaConfigsPerLanguage, force);
+        // Launch the genAiDescription
+		try {
+			generateTextsForProduct(product, iaConfigsPerLanguage, force);
+		} catch (Exception e) {
+			logger.error("Error while generating AI description for product {}", product,e);
+			this.exception = e.getMessage();
+		}
 	}
-
+	
 	/**
 	 * Generates AI text for the given product and configuration.
 	 *
 	 * @param product The product to generate descriptions for.
 	 * @param iaConfigsPerLanguage The internationalization configuration.
 	 * @param force Whether to force generation even if not necessary.
+	 * @throws IOException 
+	 * @throws JsonMappingException 
+	 * @throws JsonParseException 
 	 */
-	private void generateTextsForProduct(Product product, Map<String, AiPromptsConfig> iaConfigsPerLanguage, boolean force) {
-		try {
-			// Iterate over each language
+	private void generateTextsForProduct(Product product, Map<String, AiPromptsConfig> iaConfigsPerLanguage, boolean force) throws Exception {
+			// Iterate over each AiPromptsConfig, with language as a key
 			for (Entry<String, AiPromptsConfig> entry : iaConfigsPerLanguage.entrySet()) {
 				
 				// Check if we must proceed
 				if (shouldSkipDescriptionGeneration(product, entry.getKey(), entry.getValue() , force)) {
-					logger.info("Skipping because generated AI text is already present");
+					logger.info("Skipping because generated AI texts are already present for language {}",entry.getKey());
 					continue;
 				}
 				
-				
-				
-				Map<String, AiDescription> descriptions = createAiDescriptions(entry.getValue(), entry.getKey(), product);
+				// Operates the merged prompt generation
+				AiDescriptions descriptions = createAiDescriptions(entry.getValue(), entry.getKey(), product);
 
-				for (PromptConfig aiConfig : entry.getValue().getAiConfigs().getPrompts()) {
-
-					AiDescription description = descriptions.get(aiConfig.getKey());
-					if (description == null || StringUtils.isBlank(description.getContent().getText())) {
-						logger.error("Empty AI text for product {} with key {} and lang {} and prompt {}", product.getId(), aiConfig.getKey(), entry.getKey(), aiConfig.getPrompt());
-					} else {
-						storeGeneratedDescriptions(product, entry, descriptions);
-					}
-				}
+				// Store the generated prompts
+				product.getGenaiTexts().put(entry.getKey(), descriptions);
 			}
-		} catch (Exception e) {
-			logger.error("Error while generating AI descriptions for product {}: {}", product.getId(), e.getMessage());
-		}
-	}
 
+	}
+	
 	/**
 	 * Determines if the description generation should be skipped.
 	 */
@@ -122,26 +119,37 @@ public class AiService {
 			return false;
 		}
 		
-		if (!product.getGenaiDescriptions().containsKey(entry.getKey())) {
+		AiDescriptions aiDescriptions = product.getGenaiTexts().get(language);
+		if (null == aiDescriptions) {
 			// The product does not contains IA Content for the given language, we have to proceed
 			return false;
 		}
 		
-		if (!product.getGenaiDescriptions().get(entry.getKey()). )
+		if (!aiDescriptions.getDescriptions().keySet().containsAll(promptConfig.promptKeys())) {
+			// There are missing keys. in the stored products. Must regen the "whole" merged prompt
+			return false;
+		}
 		
-		return  && i18nConfig.keySet().contains(product.getAiDescriptions().get(entry.getKey()).getContent().getLanguage());
+		// No reason to proceed to generation
+		return  true;
 	}
+	
+
 
 	/**
-	 * Creates AI descriptions for a product.
+	 * Creates AI descriptions for a product, merging the specific prompts in a global prompt
 	 *
 	 * @param aiConfigs The AI configuration.
 	 * @param language The language of the descriptions.
 	 * @param product The product to generate the descriptions for.
 	 * @return The generated AI descriptions.
+	 * @throws IOException 
+	 * @throws JsonMappingException 
+	 * @throws JsonParseException 
 	 */
-	private Map<String, AiDescription> createAiDescriptions(AiPromptsConfig aiConfigs, String language, Product product) {
-		// 1 - Evaluate the root prompt
+	@SuppressWarnings("unchecked")
+	private AiDescriptions createAiDescriptions(AiPromptsConfig aiConfigs, String language, Product product) throws Exception {
+		// 1 - Evaluate the root prompt to inject variables
 		String evaluatedRootPrompt = spelEvaluationService.thymeleafEval(product, aiConfigs.getRootPrompt());
 
 		// 2 - Evaluate the other prompts
@@ -152,36 +160,54 @@ public class AiService {
 
 		// 3 - Generate the final prompt response
 		String aiResponse = generatePromptResponse(combinedPrompts.toString());
+		
 		logger.info("AI response for product {}: \n{}", product.getId(), aiResponse);
 
 		// 4 - Parse the JSON response
 		Map<String, String> responseMap;
-		try {
-			responseMap = objectMapper.readValue(aiResponse, Map.class);
-		} catch (IOException e) {
-			logger.error("Error parsing AI response for product {}: {}", product.getId(), e.getMessage());
-			return new HashMap<>();
-		}
-
+		
+		TypeReference<HashMap<String, String>> typeRef = new TypeReference<HashMap<String,String>>() {};
+		responseMap = serialisationService.fromJson(aiResponse, typeRef);
+		
 		// 5 - Create AiDescription objects
-		Map<String, AiDescription> descriptions = new HashMap<>();
+		AiDescriptions descriptions = new AiDescriptions();
 		for (String key : responseMap.keySet()) {
-			descriptions.put(key, new AiDescription( responseMap.get(key), language));
+			descriptions.getDescriptions().put(key, new AiDescription( responseMap.get(key)));
 		}
 
 		return descriptions;
 	}
 
+	
 	/**
-	 * Stores the generated AI descriptions in the product.
-	 *
-	 * @param product The product to store the descriptions in.
-	 * @param entry The entry containing the AI configuration.
-	 * @param descriptions The AI descriptions to store.
+	 * Generates a prompt response using the AI model.
+	 * @throws Exception 
 	 */
-	private void storeGeneratedDescriptions(Product product, Entry<String, ProductI18nElements> entry, Map<String, AiDescription> descriptions) {
-		for (String key : descriptions.keySet()) {
-			product.getGenaiDescriptions().put(key, descriptions.get(key));
+	@Timed(value = "GenAiTextsGeneration", description = " direct metric on the  API used  for generation",  extraTags = {"service","ai"})
+	public String generatePromptResponse(String value) throws Exception {
+		long startTime = System.currentTimeMillis();
+		String response = chatModel.call(value);
+		logger.info("GenAI request ({}ms) : \n ----------request :\n{} \n----------response\n{}", System.currentTimeMillis() - startTime, value, response);
+		
+		if (StringUtils.isEmpty(response)) {
+			logger.error("Empty response from API, generating for prompt : {}",value);
+			throw new Exception("Empty response returned from GENAI Api");
+		}
+		return response;
+	}
+
+	/**
+	 * Custom healthcheck, simply goes to DOWN if exception occurs in gen AI process
+	 */
+	@Override
+	public Health health() {
+		if (null == exception) {
+			return Health.up().build();
+		} else {
+			   return Health
+			            .down()
+			            .withDetail(this.getClass().getSimpleName()+"_exception" , exception)
+			            .build();
 		}
 	}
 }

@@ -55,11 +55,11 @@ public class BlogService {
 	private XwikiFacadeService xwikiFacadeService;
 	private Map<String, BlogPost> postsByUrl = new ConcurrentHashMap<>();
 	private List<BlogPost> posts = new ArrayList<>();
-	private Localisable baseUrl;
+	private Localisable<String,String> baseUrl;
 
 	
 	
-	public BlogService(XwikiFacadeService xwikiFacadeService,  BlogConfiguration config, Localisable localisable) {
+	public BlogService(XwikiFacadeService xwikiFacadeService,  BlogConfiguration config, Localisable<String,String> localisable) {
 		this.config = config;
 		this.xwikiFacadeService = xwikiFacadeService;
 		this.baseUrl = localisable;

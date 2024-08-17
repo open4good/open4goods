@@ -7,7 +7,6 @@ import java.util.concurrent.TimeUnit;
 import org.apache.commons.lang3.ArrayUtils;
 import org.open4goods.api.config.yml.ApiProperties;
 import org.open4goods.api.services.AggregationFacadeService;
-import org.open4goods.api.services.BackupService;
 import org.open4goods.api.services.BatchService;
 import org.open4goods.api.services.CompletionFacadeService;
 import org.open4goods.api.services.FetcherOrchestrationService;
@@ -56,7 +55,6 @@ import org.open4goods.services.VerticalsConfigService;
 import org.open4goods.services.ai.AiService;
 import org.open4goods.services.textgen.BlablaService;
 import org.open4goods.store.repository.elastic.BrandScoresRepository;
-import org.open4goods.xwiki.services.XWikiReadService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springdoc.core.customizers.OpenApiCustomizer;
@@ -135,14 +133,14 @@ public class ApiConfig {
 	
 	@Bean
 	@Autowired
-	GenAiCompletionService aiCompletionService(AiService aiService, ProductRepository productRepository, VerticalsConfigService verticalConfigService, PromptConfig aiConfig) {
-		return new GenAiCompletionService(aiService, productRepository, verticalConfigService, apiProperties, aiConfig);
+	GenAiCompletionService aiCompletionService(AiService aiService, ProductRepository productRepository, VerticalsConfigService verticalConfigService) {
+		return new GenAiCompletionService(aiService, productRepository, verticalConfigService, apiProperties);
 	}
 
 	@Bean
 	@Autowired
-	AiService aiService(OpenAiChatModel chatModel, final VerticalsConfigService verticalService, EvaluationService spelEvaluationService) {
-		return new AiService(chatModel, verticalService, spelEvaluationService);
+	AiService aiService(OpenAiChatModel chatModel, EvaluationService spelEvaluationService, SerialisationService serialisationService) {
+		return new AiService(chatModel , spelEvaluationService, serialisationService);
 	}
 	
 	@Bean

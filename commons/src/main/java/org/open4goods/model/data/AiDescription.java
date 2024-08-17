@@ -1,6 +1,10 @@
 package org.open4goods.model.data;
 
+
 import org.springframework.data.elasticsearch.annotations.Field;
+/**
+ * Representation of a generated AI Text
+ */
 import org.springframework.data.elasticsearch.annotations.FieldType;
 
 public class AiDescription {
@@ -8,15 +12,14 @@ public class AiDescription {
 	@Field(index = false, store = false, type = FieldType.Date)
 	private long ts;
 	
+	@Field(index = false, store = false, type = FieldType.Date)
 	private String content;
 	
 	public AiDescription() {
 		super();
-
 	}
 
 	public AiDescription(String content) {
-
 		this.ts = System.currentTimeMillis();
 		this.content = content;
 	}

@@ -135,7 +135,7 @@ public class Product implements Standardisable {
 	
 	/** The ai generated texts, keyed by language**/
 	@Field(index = false, store = false, type = FieldType.Object)
-	private Localisable<String,AiDescriptions> genaiDescriptions = new Localisable<>();
+	private Localisable<String,AiDescriptions> genaiTexts = new Localisable<>();
 
 	/**
 	 * Informations and resources related to the gtin
@@ -239,6 +239,22 @@ public class Product implements Standardisable {
 		return super.equals(obj);
 	}
 
+	/**
+	 *
+	 * @return all names and descriptions, excluding the longest offer name
+	 */
+	public List<String> namesAndDescriptionsWithoutShortestName() {
+
+		Set<String> ret = new HashSet<>();
+		ret.addAll(names.getOfferNames());
+		ret.remove(names.shortestOfferName());
+
+        List<String> list = new ArrayList<>(ret);
+
+		list.sort(Comparator.naturalOrder());
+
+		return list;
+	}
 
 	
 	public List<Score> realScores() {
@@ -884,12 +900,13 @@ public class Product implements Standardisable {
 		this.offersCount = offersCount;
 	}
 
-	public Map<String, AiDescriptions> getGenaiDescriptions() {
-		return genaiDescriptions;
+
+	public Localisable<String, AiDescriptions> getGenaiTexts() {
+		return genaiTexts;
 	}
 
-	public void setAiDescriptions(Map<String, AiDescriptions> aiDescriptions) {
-		this.genaiDescriptions = aiDescriptions;
+	public void setGenaiTexts(Localisable<String, AiDescriptions> genaiDescriptions) {
+		this.genaiTexts = genaiDescriptions;
 	}
 
 	public Integer getGoogleTaxonomyId() {

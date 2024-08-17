@@ -78,11 +78,11 @@ public class NamesAggregationService extends AbstractAggregationService {
 				// productMetaOpenGraphTitle
 				data.getNames().getProductMetaOpenGraphTitle().put(lang, blablaService.generateBlabla(tConf.getProductMetaOpenGraphTitle(), data));
 				// productMetaOpenGraphDescription
-				data.getNames().getproductMetaOpenGraphDescription().put(lang, blablaService.generateBlabla(tConf.getProductMetaOpenGraphDescription(), data));
+				data.getNames().getProductMetaOpenGraphDescription().put(lang, blablaService.generateBlabla(tConf.getProductMetaOpenGraphDescription(), data));
 				// productMetaTwitterTitle
-				data.getNames().getproductMetaTwitterTitle().put(lang, blablaService.generateBlabla(tConf.getProductMetaTwitterTitle(), data));
+				data.getNames().getProductMetaTwitterTitle().put(lang, blablaService.generateBlabla(tConf.getProductMetaTwitterTitle(), data));
 				// productMetaTwitterDescription
-				data.getNames().getproductMetaTwitterDescription().put(lang, blablaService.generateBlabla(tConf.getProductMetaTwitterDescription(), data));
+				data.getNames().getProductMetaTwitterDescription().put(lang, blablaService.generateBlabla(tConf.getProductMetaTwitterDescription(), data));
 
 			
 			
