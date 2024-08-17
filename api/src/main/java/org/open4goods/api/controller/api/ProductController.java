@@ -59,7 +59,7 @@ public class ProductController {
 		aiService.complete(data, configService.getConfigByIdOrDefault(data.getVertical()),true);		
 		repository.index(data);
 
-		return data.getGenaiDescriptions();
+		return data.getGenaiTexts();
 	}
 
 }

@@ -1,5 +1,6 @@
 package org.open4goods.model.data;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import org.open4goods.config.yml.attributes.PromptConfig;
@@ -12,7 +13,7 @@ public class AiDescriptions {
 	 * Descriptions, keyed by the identifying key (matching {@link PromptConfig.key}
 	 */
 	@Field(index = false, store = false, type = FieldType.Object)
-	private Map<String,AiDescription> descriptions;
+	private Map<String,AiDescription> descriptions = new HashMap<String, AiDescription>();
 	
 	
 	public AiDescriptions() {

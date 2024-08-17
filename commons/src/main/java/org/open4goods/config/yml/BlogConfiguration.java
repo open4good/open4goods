@@ -14,8 +14,8 @@ public class BlogConfiguration {
 	private String blogUrl = "blog/";
 	private String feedUrl = "blog/rss/";
 	
-	private Localisable feedTitle = new Localisable();
-	private Localisable feedDescription = new Localisable();
+	private Localisable<String,String> feedTitle = new Localisable<String,String>();
+	private Localisable<String,String> feedDescription = new Localisable<String,String>();
 	
 	
 	public String getFeedType() {
@@ -24,16 +24,18 @@ public class BlogConfiguration {
 	public void setFeedType(String feedType) {
 		this.feedType = feedType;
 	}
-	public Localisable getFeedTitle() {
+
+	
+	public Localisable<String, String> getFeedTitle() {
 		return feedTitle;
 	}
-	public void setFeedTitle(Localisable feedTitle) {
+	public void setFeedTitle(Localisable<String, String> feedTitle) {
 		this.feedTitle = feedTitle;
 	}
-	public Localisable getFeedDescription() {
+	public Localisable<String, String> getFeedDescription() {
 		return feedDescription;
 	}
-	public void setFeedDescription(Localisable feedDescription) {
+	public void setFeedDescription(Localisable<String, String> feedDescription) {
 		this.feedDescription = feedDescription;
 	}
 	public String getBlogUrl() {

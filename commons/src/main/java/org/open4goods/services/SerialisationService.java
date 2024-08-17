@@ -2,6 +2,8 @@ package org.open4goods.services;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 
 import org.open4goods.model.data.DataFragment;
@@ -12,6 +14,7 @@ import org.springframework.stereotype.Service;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -104,10 +107,10 @@ public class SerialisationService {
 			throws JsonParseException, JsonMappingException, IOException {
 		return jsonMapper.readValue(input, valueType);
 	}
-
-	public Set<DataFragment> fromJson(final String input, final CollectionType valueType) throws JsonParseException, JsonMappingException, IOException {
-		return jsonMapper.readValue(input, valueType);
+	public Map<String, String> fromJson(String value, TypeReference<HashMap<String, String>> typeRef) 		throws JsonParseException, JsonMappingException, IOException {
+		return jsonMapper.readValue(value, typeRef);
 	}
+
 
 
 
@@ -259,5 +262,6 @@ public class SerialisationService {
 		return new String( org.apache.commons.codec.binary.Base64.decodeBase64(zippedBase64Str));
 	}
 
+	
 
 }

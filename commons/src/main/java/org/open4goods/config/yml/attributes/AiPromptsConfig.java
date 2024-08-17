@@ -2,6 +2,8 @@ package org.open4goods.config.yml.attributes;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 public class AiPromptsConfig {
 
@@ -9,9 +11,25 @@ public class AiPromptsConfig {
 	 * If true, texts will be regenerated
 	 */
 	private boolean override = false;
+	
+	/**
+	 * The prompt injected before the other prompts
+	 */
 	private String rootPrompt;
+	
+	/**
+	 * List of specific prompts
+	 */
 	List<PromptConfig> prompts = new ArrayList<>();
 	
+	
+	/**
+	 * Shortcut to retrieve the prompts keys
+	 * @return
+	 */
+	public Set<String> promptKeys() {
+		return prompts.stream().map(e-> e.getKey()).collect(Collectors.toSet());
+	}
 	
 	public String getRootPrompt() {
 		return rootPrompt;
@@ -31,7 +49,6 @@ public class AiPromptsConfig {
 	public void setOverride(boolean override) {
 		this.override = override;
 	}
-	
-	
+
 	
 }

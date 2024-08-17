@@ -161,8 +161,8 @@ public class AppConfig {
 
 	@Bean
 	@Autowired
-	AiService aiService (OpenAiChatModel chatModel, VerticalsConfigService verticalService, EvaluationService spelEvaluationService) {
-		return new AiService(chatModel, verticalService, spelEvaluationService);
+	AiService aiService (OpenAiChatModel chatModel,  EvaluationService spelEvaluationService, SerialisationService serialisationService) {
+		return new AiService(chatModel, spelEvaluationService, serialisationService);
 	}
 
 

@@ -4,8 +4,9 @@ import org.open4goods.model.Localisable;
 
 import cz.jiripinkas.jsitemapgenerator.ChangeFreq;
 
-public class SitemapEntry extends Localisable{
+public class SitemapEntry extends Localisable<String,String>{
 	
+	private static final long serialVersionUID = 1L;
 	public static final String LANGUAGE_DEFAULT = "default";
 	public static final String LANGUAGE_FR = "fr";
 

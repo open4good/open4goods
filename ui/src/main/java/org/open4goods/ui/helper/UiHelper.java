@@ -32,9 +32,9 @@ public class UiHelper {
 		// Maybe not the best way to inject texts
 		texts.put("title", product.getNames().getH1Title().i18n(request));
 		texts.put("meta-description", product.getNames().getMetaDescription().i18n(request));
-		texts.put("twitter-description", product.getNames().getproductMetaTwitterDescription().i18n(request));
-		texts.put("twitter-title", product.getNames().getproductMetaTwitterTitle().i18n(request));
-		texts.put("opengraph-description", product.getNames().getproductMetaOpenGraphDescription().i18n(request));
+		texts.put("twitter-description", product.getNames().getProductMetaTwitterDescription().i18n(request));
+		texts.put("twitter-title", product.getNames().getProductMetaTwitterTitle().i18n(request));
+		texts.put("opengraph-description", product.getNames().getProductMetaOpenGraphDescription().i18n(request));
 		texts.put("opengraph-title", product.getNames().getProductMetaOpenGraphTitle().i18n(request));
 		
 	}

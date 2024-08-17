@@ -50,23 +50,18 @@ spring:
   threads:
     virtual:
       enabled: true
-
+  ai:
+    openai:
+      chat:
+        options:
+          #TODO : Will change on next release
+          temperature: 0.2
+          response-format: { "type": "json_object" }
 springdoc:
   swagger-ui:
     disable-swagger-default-url: true
 
-            
-# Configuration for the langchain chat model            
-langchain4j:
-  open-ai:
-    chat-model:
-      api-key: YOUR API KEY
-      model-name: gpt-4o
-      temperature: 0.0
-      timeout: PT60S
-      log-requests: false
-      log-responses: false
-      
+genAiPauseDurationMs: 100          
        
 attributeAggregationConfig:
   excludedAttributeNames:

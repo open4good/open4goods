@@ -27,13 +27,14 @@ public class Urls {
 		return urls.getOrDefault(l, urls.get("default"));
 	}
 
-	public Localisable getUrls() {
+	public Localisable<String, String> getUrls() {
 		return urls;
 	}
 
-	public void setUrls(Localisable urls) {
+	public void setUrls(Localisable<String, String> urls) {
 		this.urls = urls;
 	}
+
 
 
 
