@@ -14,6 +14,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -283,7 +284,12 @@ public class BackupService implements HealthIndicator {
 		// Xwiki file check
 		/////////////////////////////
 
+		
 		File wikiFile = new File(backupConfig.getXwikiBackupFile());
+		long wikiLastModified = wikiFile.lastModified();
+		long wikiFileSize = wikiFile.length();
+		
+		
 		// Check exceptions during processing
 		if (null != wikiException) {
 			errorMessages.put("xwiki_export_exception", wikiException);
@@ -295,15 +301,15 @@ public class BackupService implements HealthIndicator {
 		}
 
 		// Check minimum size
-		if (wikiFile.length() < MIN_XWIKI_BACKUP_SIZE_IN_BYTES) {
-			errorMessages.put("xwiki_backup_min_size", String.valueOf(wikiFile.length()));
+		if (wikiFileSize < MIN_XWIKI_BACKUP_SIZE_IN_BYTES) {
+			errorMessages.put("xwiki_backup_size_too_small", FileUtils.byteCountToDisplaySize(wikiFileSize) + " < " + FileUtils.byteCountToDisplaySize(MIN_XWIKI_BACKUP_SIZE_IN_BYTES));
 		}
 
 		// Check date is not to old
 		// NOTE : In the best world, MAX_WIKI_BACKUP_AGE would be derivated from the
 		// schedule rate
-		if (System.currentTimeMillis() - wikiFile.lastModified() > MAX_WIKI_BACKUP_AGE) {
-			errorMessages.put("xwiki_backup_too_old", String.valueOf(wikiFile.lastModified()));
+		if (System.currentTimeMillis() - wikiLastModified > MAX_WIKI_BACKUP_AGE) {
+			errorMessages.put("xwiki_backup_too_old", String.valueOf(wikiLastModified));
 		}
 
 		/////////////////////////////
@@ -311,7 +317,9 @@ public class BackupService implements HealthIndicator {
 		/////////////////////////////
 
 		File productFile = new File(backupConfig.getDataBackupFile());
-
+		long productLastModified = productFile.lastModified();
+		long productFileSize = productFile.length();
+		
 		// Check exceptions during processing
 		if (null != dataBackupException) {
 			errorMessages.put("product_export_exception", dataBackupException);
@@ -323,16 +331,16 @@ public class BackupService implements HealthIndicator {
 		}
 
 		// Check minimum size
-		if (productFile.length() < MIN_PRODUCT_BACKUP_SIZE_IN_BYTES) {
-			errorMessages.put("product_backup_min_size", String.valueOf(productFile.length()));
+		if (productFileSize < MIN_PRODUCT_BACKUP_SIZE_IN_BYTES) {
+			errorMessages.put("product_backup_size_too_small", FileUtils.byteCountToDisplaySize(productFileSize) + " < " + FileUtils.byteCountToDisplaySize(MIN_PRODUCT_BACKUP_SIZE_IN_BYTES));
 		}
 
 		// Check date is not to old
 		// NOTE : In the best world, MAX_WIKI_PRODUCT_AGE would be derivated from the
 		// schedule rate
 		// TODO : Check
-		if (System.currentTimeMillis() - productFile.lastModified() > MAX_PRODUCTS_BACKUP_AGE) {
-			errorMessages.put("product_backup_too_old", String.valueOf(productFile.lastModified()));
+		if (System.currentTimeMillis() - productLastModified > MAX_PRODUCTS_BACKUP_AGE) {
+			errorMessages.put("product_backup_too_old", new Date (productLastModified).toString());
 		}
 
 		// Building the healthcheck
@@ -341,7 +349,13 @@ public class BackupService implements HealthIndicator {
 
 		if (errorMessages.size() == 0) {
 			// All is fine
-			health = Health.status(Status.UP).withDetail(this.getClass().getSimpleName(), "Backups are OK").build();
+			health = Health.status(Status.UP)
+					.withDetail("product_backup_date", new Date (productLastModified).toString())
+					.withDetail("product_backup_size", FileUtils.byteCountToDisplaySize(productFileSize))
+					
+					.withDetail("xwiki_backup_date", new Date (wikiLastModified).toString())
+					.withDetail("xwiki_backup_size", FileUtils.byteCountToDisplaySize(wikiFileSize))
+					.build();
 		} else {
 			health = Health.down().withDetails(errorMessages).build();
 		}
