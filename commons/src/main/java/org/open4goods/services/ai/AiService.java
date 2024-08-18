@@ -21,6 +21,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ai.openai.OpenAiChatModel;
 import org.springframework.boot.actuate.health.Health;
+import org.springframework.boot.actuate.health.Health.Builder;
 import org.springframework.boot.actuate.health.HealthIndicator;
 
 import com.fasterxml.jackson.core.JsonParseException;
@@ -45,7 +46,7 @@ public class AiService implements HealthIndicator{
 	private final SerialisationService serialisationService;
 	
 	// Tracked exception for healthcheck
-	private String exception;
+	private Long exceptionCount = 0L;
 
 	public AiService(OpenAiChatModel chatModel,  EvaluationService spelEvaluationService, SerialisationService serialisationService) {
 		this.chatModel = chatModel;
@@ -76,7 +77,7 @@ public class AiService implements HealthIndicator{
 			generateTextsForProduct(product, iaConfigsPerLanguage, force);
 		} catch (Exception e) {
 			logger.error("Error while generating AI description for product {}", product,e);
-			this.exception = e.getMessage();
+			this.exceptionCount++;
 		}
 	}
 	
@@ -201,13 +202,18 @@ public class AiService implements HealthIndicator{
 	 */
 	@Override
 	public Health health() {
-		if (null == exception) {
-			return Health.up().build();
+		
+		Builder health;
+		
+		if (0L == exceptionCount) {
+			health =  Health.up();
 		} else {
-			   return Health
-			            .down()
-			            .withDetail(this.getClass().getSimpleName()+"_exception" , exception)
-			            .build();
+			health =  Health.down();
 		}
+		
+		  return health
+		            .withDetail("encountered_exceptions" , exceptionCount)
+		            .build();
+		  
 	}
 }
