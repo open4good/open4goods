@@ -120,8 +120,14 @@ public class ProductRepository {
 	 * @return
 	 */
 	public Stream<Product> exportAll() {
-		return elasticsearchTemplate.searchForStream(Query.findAll(), Product.class, current_index).stream()
-				.map(SearchHit::getContent);
+	    Query query = Query.findAll();
+	    // TODO : From conf, apply to other
+	    query.setPageable(PageRequest.of(0, 10000)); // Fetch larger batches
+	    return elasticsearchTemplate.searchForStream(query, Product.class, current_index)
+	    		.stream()
+	    		// TODO : Check CPU usage
+	    		.parallel()
+	            .map(SearchHit::getContent);
 	}
 
 	public Stream<Product> searchInValidPrices(String query, final String indexName, int from, int to) {
