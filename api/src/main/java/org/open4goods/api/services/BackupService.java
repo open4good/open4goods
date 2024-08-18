@@ -22,6 +22,9 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.LinkedBlockingDeque;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
@@ -51,6 +54,8 @@ import io.micrometer.core.annotation.Timed;
 
 public class BackupService implements HealthIndicator {
 
+	private static final int IMPORT_BULK_SIZE = 200;
+
 	protected static final Logger logger = LoggerFactory.getLogger(BackupService.class);
 
 	// TODO : Consts from conf
@@ -59,7 +64,7 @@ public class BackupService implements HealthIndicator {
 	
 	private static final long MIN_PRODUCT_BACKUP_SIZE_IN_BYTES = 1024 * 1024 * 200;
 
-	private static final int DATA_EXPORT_THREADS_COUNT = 8;
+	private static final int DATA_EXPORT_THREADS_COUNT = 6;
 
 	// Cron period + 2h
 	private static final long MAX_WIKI_BACKUP_AGE = 1000 * 3600 * 14;
@@ -78,9 +83,11 @@ public class BackupService implements HealthIndicator {
 	// Used to trigger Health.down() if exception occurs
 	private String wikiException;
 	private String dataBackupException;
-
 	
-	 
+	
+	private LinkedBlockingQueue<Product> blockingQueue = new LinkedBlockingQueue<Product>(1000);
+	
+
 	public BackupService(XWikiReadService xwikiService, ProductRepository productRepo, BackupConfig backupConfig, SerialisationService serialisationService) {
 		super();
 		this.xwikiService = xwikiService;
@@ -97,9 +104,7 @@ public class BackupService implements HealthIndicator {
 	@Timed(value = "backup.products", description = "Backup of all products", extraTags = { "service" })
 	   public void backupProducts() {
         logger.info("Products data backup - start");
-   	 	ExecutorService executorService = Executors.newFixedThreadPool(DATA_EXPORT_THREADS_COUNT);
 
-   	 
         // Checking not already running
         if (productExportRunning.get()) {
             logger.warn("Product export is already running. Skipped");
@@ -108,51 +113,45 @@ public class BackupService implements HealthIndicator {
             productExportRunning.set(true);
         }
 
-        File tmp = null;
         try {
-            // Creating parent folders if necessary
-            File parent = new File(backupConfig.getDataBackupFile()).getParentFile();
-            if (!parent.exists()) {
-                parent.mkdirs();
-            }
-
-            // Creating tmp file
-            tmp = File.createTempFile("product-backup", ".zip");
-
-            try (FileOutputStream fos = new FileOutputStream(tmp);
-                 GZIPOutputStream zos = new GZIPOutputStream(fos);
-                 BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(zos, "UTF-8"))) {
-
-                // Parallel processing of JSON serialization and compression
-                productRepo.exportAll()
-                    .map(product -> executorService.submit(() -> serializeAndWriteProduct(product, writer)))
-                    .forEach(this::waitForCompletion);
-
-            } catch (IOException e) {
-                logger.error("Error during backup : {}", e.getMessage());
-                throw new UncheckedIOException(e);
-            }
-
-            // Checking tmp file exists and is not empty
-            if (!tmp.exists() || tmp.length() < MIN_PRODUCT_BACKUP_SIZE_IN_BYTES) {
-                throw new Exception("Empty tmp product backup file");
-            }
-
-            // Move to target file
-            Files.move(tmp.toPath(), Path.of(backupConfig.getDataBackupFile()), StandardCopyOption.REPLACE_EXISTING);
-
-            // Unsetting previous exception if any
-            this.dataBackupException = null;
+	        ExecutorService executorService = Executors.newFixedThreadPool(DATA_EXPORT_THREADS_COUNT);
+	        
+	        // Starting files writing threads
+	        File backupFolder = new File(backupConfig.getDataBackupFolder());
+	        
+	        if (backupFolder != null && backupFolder.exists() && !backupFolder.isDirectory()) {
+	        	throw new Exception("is a file");
+	        } else  if (backupFolder != null && !backupFolder.exists()) {
+	            if (!backupFolder.mkdirs()) {
+	                throw new IOException("Failed to create parent directories: " + backupFolder.getAbsolutePath());
+	            }
+	        }
+	        
+	        backupFolder.mkdirs();
+	        
+	        // Starting the files writing threads
+	        for (int i = 0; i < DATA_EXPORT_THREADS_COUNT; i++) {
+	        	executorService.submit(new ProductBackupThread(backupFolder, blockingQueue, serialisationService, i));
+	        }
+	        
+	        // Exporting all datas to the blocking queue
+	        productRepo.exportAll()
+	        .forEach(e -> {
+	        	try {
+					blockingQueue.offer(e, 10, TimeUnit.HOURS);
+				} catch (InterruptedException e1) {
+		            logger.error("Error while backing up data", e);
+		            this.dataBackupException = e1.getMessage();
+				}
+	        });
+	        
+	        executorService.shutdown();
+        	
         } catch (Exception e) {
             logger.error("Error while backing up data", e);
             this.dataBackupException = e.getMessage();
         } finally {
-            // Deleting tmp file, if exists
-            if (tmp != null && tmp.exists()) {
-                FileUtils.deleteQuietly(tmp);
-            }
             productExportRunning.set(false);
-            executorService.shutdown();
         }
 
         logger.info("Products data backup - complete");
@@ -165,65 +164,46 @@ public class BackupService implements HealthIndicator {
 	public void importProducts() {
 	    logger.info("Product import : started");
 
-	    File importFile = new File(backupConfig.getImportProductPath());
-	    if (!importFile.exists()) {
-	        logger.error("Import file does not exists : {}", importFile.getAbsolutePath());
+	    File importFolder = new File(backupConfig.getImportProductPath());
+	    if (!importFolder.exists() || !importFolder.isDirectory()) {
+	        logger.error("Import file does not exists or is not a folder : {}", importFolder.getAbsolutePath());
 	        return;
 	    }
 
-	    try (InputStream inputStream = new FileInputStream(importFile);
-	         GZIPInputStream gzipInputStream = new GZIPInputStream(inputStream);
-	         InputStreamReader inputStreamReader = new InputStreamReader(gzipInputStream);
-	         BufferedReader bufferedReader = new BufferedReader(inputStreamReader)) {
-
-	        List<Product> group = new ArrayList<>();
-	        
-	        bufferedReader.lines().forEach(line -> {
-	            try {
-					group.add(serialisationService.fromJson(line, Product.class));
-				} catch (IOException e) {
-					logger.error("Error occurs in data deserialisation", e);
-				}
-	            if (group.size() == 200) {
-	                productRepo.storeNoCache(group); // Index the current group
-	                group.clear(); // Clear the group for the next batch
-	            }
-	        });
-
-	        // Index the remaining lines if any
-	        if (!group.isEmpty()) {
-	            productRepo.storeNoCache(group);
-	        }
-
-	    } catch (Exception e) {
-	        logger.error("Error occurs in data file import", e);
+	    for (File importFile : importFolder.listFiles()) {
+	    	logger.info("Importing file started : {}", importFile.getAbsolutePath());
+			try (InputStream inputStream = new FileInputStream(importFile);
+		         GZIPInputStream gzipInputStream = new GZIPInputStream(inputStream);
+		         InputStreamReader inputStreamReader = new InputStreamReader(gzipInputStream);
+		         BufferedReader bufferedReader = new BufferedReader(inputStreamReader)) {
+	
+		        List<Product> group = new ArrayList<>();
+		        
+		        bufferedReader.lines().forEach(line -> {
+		            try {
+						group.add(serialisationService.fromJson(line, Product.class));
+					} catch (IOException e) {
+						logger.error("Error occurs in data deserialisation", e);
+					}
+		            if (group.size() == IMPORT_BULK_SIZE) {
+		                productRepo.storeNoCache(group); // Index the current group
+		                group.clear(); // Clear the group for the next batch
+		            }
+		        });
+	
+		        // Index the remaining lines if any
+		        if (!group.isEmpty()) {
+		            productRepo.storeNoCache(group);
+		        }
+		    	logger.info("Importing file finished : {}", importFile.getAbsolutePath());
+		    } catch (Exception e) {
+		        logger.error("Error occurs in data file import", e);
+		    }
 	    }
 	    logger.info("Product import : finished");
 	}
 	
 	
-    private void serializeAndWriteProduct(Object product, BufferedWriter writer) {
-        String json = serialisationService.toJson(product);
-        synchronized (writer) {
-            try {
-                writer.write(json);
-                writer.newLine(); // To separate JSON objects
-            } catch (IOException e) {
-                logger.error("Error writing JSON data to backup file", e);
-                throw new UncheckedIOException(e);
-            }
-        }
-    }
-
-    private void waitForCompletion(Future<?> future) {
-        try {
-            future.get(); // Waits for the task to complete
-        } catch (InterruptedException | ExecutionException e) {
-            logger.error("Error during parallel processing", e);
-            throw new RuntimeException(e);
-        }
-    }
-
 	/**
 	 * This method will periodicaly backup the Xwiki content
 	 */
@@ -316,7 +296,7 @@ public class BackupService implements HealthIndicator {
 		// Products backup file check
 		/////////////////////////////
 
-		File productFile = new File(backupConfig.getDataBackupFile());
+		File productFile = new File(backupConfig.getDataBackupFolder());
 		long productLastModified = productFile.lastModified();
 		long productFileSize = productFile.length();
 		
@@ -326,8 +306,8 @@ public class BackupService implements HealthIndicator {
 		}
 
 		// Check exists
-		if (!Files.exists(Path.of(backupConfig.getDataBackupFile()))) {
-			errorMessages.put("product_backup_missing", backupConfig.getDataBackupFile());
+		if (!Files.exists(Path.of(backupConfig.getDataBackupFolder()))) {
+			errorMessages.put("product_backup_missing", backupConfig.getDataBackupFolder());
 		}
 
 		// Check minimum size

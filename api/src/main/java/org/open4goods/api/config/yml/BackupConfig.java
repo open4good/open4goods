@@ -1,15 +1,28 @@
 package org.open4goods.api.config.yml;
 
+import org.springframework.validation.annotation.Validated;
 
+import jakarta.validation.constraints.NotEmpty;
+
+@Validated
 public class BackupConfig {
 	
+	/**
+	 * Location of the file where xwiki backup must be stored
+	 */
+	@NotEmpty
 	private String xwikiBackupFile;
 	
-	private String dataBackupFile;
+	/**
+	 * Location of the folder where products backups files must be stored
+	 */
+	@NotEmpty
+	private String dataBackupFolder;
 
 	/**
 	 * Location of the file used by import phase
 	 */
+	@NotEmpty
 	private String importProductPath;
 	
 	
@@ -21,12 +34,12 @@ public class BackupConfig {
 		this.xwikiBackupFile = xwikiBackupFile;
 	}
 
-	public String getDataBackupFile() {
-		return dataBackupFile;
+	public String getDataBackupFolder() {
+		return dataBackupFolder;
 	}
 
-	public void setDataBackupFile(String dataBackupFile) {
-		this.dataBackupFile = dataBackupFile;
+	public void setDataBackupFolder(String dataBackupFile) {
+		this.dataBackupFolder = dataBackupFile;
 	}
 
 	public String getImportProductPath() {
