@@ -15,6 +15,7 @@ import org.open4goods.config.yml.ui.ImageGenerationConfig;
 import org.open4goods.crawler.config.yml.FetcherProperties;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
 import org.springframework.validation.annotation.Validated;
 
@@ -22,6 +23,7 @@ import ch.qos.logback.classic.Level;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
+@Configuration
 @ConfigurationProperties
 @Validated
 /**
