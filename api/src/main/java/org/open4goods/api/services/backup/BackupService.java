@@ -1,4 +1,4 @@
-package org.open4goods.api.services;
+package org.open4goods.api.services.backup;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -19,6 +19,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.zip.GZIPInputStream;
 
 import org.apache.commons.io.FileUtils;
@@ -50,8 +51,6 @@ public class BackupService implements HealthIndicator {
 	protected static final Logger logger = LoggerFactory.getLogger(BackupService.class);
 
 
-	private AtomicBoolean wikiExportRunning = new AtomicBoolean(false);
-	private AtomicBoolean productExportRunning = new AtomicBoolean(false);
 
 	private XWikiReadService xwikiService;
 	private ProductRepository productRepo;
@@ -62,10 +61,17 @@ public class BackupService implements HealthIndicator {
 	// Used to trigger Health.down() if exception occurs
 	private String wikiException;
 	private String dataBackupException;
-	
-	private LinkedBlockingQueue<Product> blockingQueue = new LinkedBlockingQueue<Product>(1000);
-	
 
+	// Count of last exported items
+	private AtomicLong expordedProductsCounter = new AtomicLong(0L);
+	private AtomicLong expectedBackupedProducts = new AtomicLong(0L);
+	
+	// Flags to avoid conccurent export running
+	private AtomicBoolean wikiExportRunning = new AtomicBoolean(false);
+	private AtomicBoolean productExportRunning = new AtomicBoolean(false);
+
+	
+	
 	public BackupService(XWikiReadService xwikiService, ProductRepository productRepo, BackupConfig backupConfig, SerialisationService serialisationService) {
 		super();
 		this.xwikiService = xwikiService;
@@ -91,6 +97,11 @@ public class BackupService implements HealthIndicator {
             productExportRunning.set(true);
         }
 
+        // The bloking queue, used to share the items to be backuped with threads
+        LinkedBlockingQueue<Product> blockingQueue = new LinkedBlockingQueue<Product>(1000);
+        // Reset the counter item flags
+        expordedProductsCounter.set(0L);
+        
         try {
 	        ExecutorService executorService = Executors.newFixedThreadPool(backupConfig.getProductsExportThreads());
 	        
@@ -113,10 +124,17 @@ public class BackupService implements HealthIndicator {
 	        	executorService.submit(new ProductBackupThread(backupFolder, blockingQueue, serialisationService, i));
 	        }
 	        
+	        
+	        // Setting the expected number of items (min, new items can be indexed during backup)
+	        expectedBackupedProducts.set(productRepo.countMainIndex());
+	        
 	        // Exporting all datas to the blocking queue
 	        productRepo.exportAll()
 	        .forEach(e -> {
 	        	try {
+	        		// Incrementing the counter
+	        		expordedProductsCounter.incrementAndGet();
+	        		
 					blockingQueue.offer(e, 10, TimeUnit.HOURS);
 				} catch (InterruptedException e1) {
 		            logger.error("Error while backing up data", e);
@@ -137,7 +155,8 @@ public class BackupService implements HealthIndicator {
     }
 
 	/**
-	 * Import product from the GZIP file
+	 * Import product from the GZIP files
+	 * NOTE : Could increase perf by having one import thread per file
 	 * @throws Exception 
 	 */
 	public void importProducts() {
@@ -260,7 +279,7 @@ public class BackupService implements HealthIndicator {
 		}
 
 		// Check minimum size
-		if (wikiFileSize < backupConfig.getMinXwikiBackupFileSizeInMb() * 1024 * 1024) {
+		if (wikiFileSize < backupConfig.getMinXwikiBackupFileSizeInMb() * 1024L * 1024L) {
 			errorMessages.put("xwiki_backup_size_too_small", FileUtils.byteCountToDisplaySize(wikiFileSize) + " < " + backupConfig.getMinXwikiBackupFileSizeInMb() + " Mb");
 		}
 
@@ -272,12 +291,20 @@ public class BackupService implements HealthIndicator {
 		}
 
 		/////////////////////////////
-		// Products backup file check
+		// Products backup files check
 		/////////////////////////////
 
 		File productFolder = new File(backupConfig.getDataBackupFolder());
 		long productLastModified = productFolder.lastModified();
 		long productFolderSize = FileUtils.sizeOfDirectoryAsBigInteger(productFolder).longValue();
+		
+		
+		// Check we have the expected number of items backuped (only if not running)
+		if (!productExportRunning.get()) {
+			if (expordedProductsCounter.longValue() < expordedProductsCounter.longValue()) {
+				errorMessages.put("product_exported_items_too_low",  expordedProductsCounter.longValue() + " < " + expordedProductsCounter.longValue());
+			}
+		}
 		
 		// Check exceptions during processing
 		if (null != dataBackupException) {
@@ -285,27 +312,40 @@ public class BackupService implements HealthIndicator {
 		}
 
 		// Check exists
+		// TODO
 		if (!Files.exists(Path.of(backupConfig.getDataBackupFolder()))) {
 			errorMessages.put("product_backup_missing", backupConfig.getDataBackupFolder());
 		}
 
 		// Check minimum size
-		if (productFolderSize < backupConfig.getMinProductsBackupFolderSizeInMb() * 1024 * 1024) {
+		if (productFolderSize <  backupConfig.getMinProductsBackupFolderSizeInMb() * 1024L * 1024L) {
 			errorMessages.put("product_backup_size_too_small", FileUtils.byteCountToDisplaySize(productFolderSize) + " < " +  backupConfig.getMinProductsBackupFolderSizeInMb() + " Mb");
 		}
 
 		// Check date is not to old
-		// NOTE : In the best world, MAX_WIKI_PRODUCT_AGE would be derivated from the
-		// schedule rate
+		// NOTE : In the best world, MAX_WIKI_PRODUCT_AGE would be derivated from the schedule rate
 
 		long oldestFileTs = Long.MAX_VALUE;
-		for (File f : productFolder.listFiles()) {
+		// TODO : Check count
+		File[] productBackupFiles = productFolder.listFiles();
+		
+		/*
+		 * Checking number of files is correct
+		 */
+		if (productBackupFiles.length != backupConfig.getProductsExportThreads()) {
+			errorMessages.put("product_backup_file_count", productBackupFiles.length + " <> " +  backupConfig.getProductsExportThreads());
+		}
+		
+		for (File f : productBackupFiles) {
 			if (f.lastModified() < oldestFileTs) {
 				oldestFileTs = f.lastModified();
 			}
 		}
-		
-		if (System.currentTimeMillis() - productLastModified > oldestFileTs) {
+	
+		/**
+		 * Checking product backup oldness
+		 */
+		if (System.currentTimeMillis() - oldestFileTs > backupConfig.getMaxProductsBackupAgeInHours() * 3600L * 1000L) {
 			errorMessages.put("product_backup_too_old", new Date (productLastModified).toString());
 		}
 
@@ -316,9 +356,12 @@ public class BackupService implements HealthIndicator {
 		if (errorMessages.size() == 0) {
 			// All is fine
 			health = Health.status(Status.UP)
+					.withDetail("product_export_running", productExportRunning.getClass())
 					.withDetail("product_backup_date", new Date (productLastModified).toString())
 					.withDetail("product_backup_size", FileUtils.byteCountToDisplaySize(productFolderSize))
+					.withDetail("product_exported_items",  expordedProductsCounter.longValue())
 					
+					.withDetail("xwiki_export_running", wikiExportRunning.getClass())
 					.withDetail("xwiki_backup_date", new Date (wikiLastModified).toString())
 					.withDetail("xwiki_backup_size", FileUtils.byteCountToDisplaySize(wikiFileSize))
 					.build();

@@ -3,7 +3,7 @@ package org.open4goods.api.controller.api;
 
 import java.io.IOException;
 
-import org.open4goods.api.services.BackupService;
+import org.open4goods.api.services.backup.BackupService;
 import org.open4goods.exceptions.InvalidParameterException;
 import org.open4goods.model.constants.RolesConstants;
 import org.springframework.context.annotation.Profile;
