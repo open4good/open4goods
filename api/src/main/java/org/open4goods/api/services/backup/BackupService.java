@@ -301,8 +301,8 @@ public class BackupService implements HealthIndicator {
 		
 		// Check we have the expected number of items backuped (only if not running)
 		if (!productExportRunning.get()) {
-			if (expordedProductsCounter.longValue() < expordedProductsCounter.longValue()) {
-				errorMessages.put("product_exported_items_too_low",  expordedProductsCounter.longValue() + " < " + expordedProductsCounter.longValue());
+			if (expordedProductsCounter.longValue() < expectedBackupedProducts.longValue()) {
+				errorMessages.put("product_exported_items_too_low",  expordedProductsCounter.longValue() + " < " + expectedBackupedProducts.longValue());
 			}
 		}
 		
