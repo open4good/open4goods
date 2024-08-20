@@ -61,22 +61,20 @@
 					         <img th:src="${member.imageUrl}" class="card-img-top rounded-top" th:alt="'Photo de ' + ${member.name}">
 					         <div class="card-body">
 					             <!-- Name -->
-					             <h3 class="h4 card-title mb-2" th:text="${member.name}"></h3>
+					             <h2 class="text-center h4 card-title mb-2" th:text="${member.name}"></h2>
 					             <!-- Title -->
-					             <span class="card-subtitle text-gray fw-normal"><strong th:text="${member.title}"></strong></span>
+					             <div class="text-center card-subtitle text-gray fw-normal"><strong th:text="${member.title}"></strong></div>
 					             
 					             <p class="card-text my-3">
 					              <th:block th:with="path='pages/team/'+${member.name}">
 					                  <th:block th:insert="~{inc/wiki.html}"></th:block>
 					              </th:block>
 					             </p>
-					             <ul class="list-unstyled d-flex mt-3 mb-0">
-					                 <li>
+					             <div class="text-center">
 					                     <a th:href="${member.linkedInUrl}" target="_blank" aria-label="linkedin social link" class="text-facebook me-3">
-					                         <span class="fab fa-linkedin"></span>
+					                         <span class="fab fa-2xl fa-linkedin"></span>
 					                     </a>
-					                 </li> 
-					             </ul>
+					             </div>
 					         </div>
 					     </div>
 					 </div>
@@ -122,13 +120,11 @@
 								</p>
 
 
-								<ul class="list-unstyled d-flex justify-content-center mt-3 mb-0">
-                                    <li>
-                                        <a th:href="${member.linkedInUrl}" target="_blank" aria-label="facebook social link" class="text-facebook me-3">
-                                            <span class="fab fa-linkedin"></span>
-                                        </a>
-                                    </li>                      
-                                </ul>
+                                <div class="text-center">
+                                         <a th:href="${member.linkedInUrl}" target="_blank" aria-label="linkedin social link" class="text-facebook me-3">
+                                             <span class="fab fa-2xl fa-linkedin"></span>
+                                         </a>
+                                 </div>
                             </div>
                         </div>
                     </div>
