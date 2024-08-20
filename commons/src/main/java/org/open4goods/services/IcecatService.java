@@ -524,7 +524,6 @@ public class IcecatService {
 					} else {
 						featureGroupById.put (cfgId, fg);
 					}
-					
 				}
 				
 

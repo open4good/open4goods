@@ -52,6 +52,7 @@ import org.open4goods.services.SearchService;
 import org.open4goods.services.SerialisationService;
 import org.open4goods.services.StandardiserService;
 import org.open4goods.services.VerticalsConfigService;
+import org.open4goods.services.VerticalsRepositoryService;
 import org.open4goods.services.ai.AiService;
 import org.open4goods.services.textgen.BlablaService;
 import org.open4goods.store.repository.elastic.BrandScoresRepository;
@@ -70,6 +71,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
 import org.springframework.core.io.support.ResourcePatternResolver;
+import org.springframework.data.elasticsearch.client.elc.ElasticsearchTemplate;
+import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
@@ -156,7 +159,11 @@ public class ApiConfig {
 		return new AmazonCompletionService(dataRepository, verticalConfigService, apiProperties, dataSourceConfigService, aggregationFacade);
 	}
 
-	
+	@Bean 
+	@Autowired
+	VerticalsRepositoryService verticalsRepositoryService (ElasticsearchTemplate elasticsearchRestTemplate, IcecatService icecatService, VerticalsConfigService verticalConfigService) {
+		return new VerticalsRepositoryService( elasticsearchRestTemplate, verticalConfigService, icecatService);
+	}
 	@Bean
 	@Autowired
 	BatchService batchService(AggregationFacadeService aggregationFacadeService,

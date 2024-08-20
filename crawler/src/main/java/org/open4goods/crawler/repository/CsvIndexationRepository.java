@@ -1,6 +1,6 @@
 package org.open4goods.crawler.repository;
 
-import org.open4goods.model.crawlers.FetchCsvStats;
+import org.open4goods.model.crawlers.CsvIndexationStat;
 import org.springframework.data.elasticsearch.repository.ElasticsearchRepository;
 
 /**
@@ -9,7 +9,7 @@ import org.springframework.data.elasticsearch.repository.ElasticsearchRepository
  *
  */
 
-public interface  CsvIndexationRepository extends ElasticsearchRepository<FetchCsvStats, String> {
+public interface  CsvIndexationRepository extends ElasticsearchRepository<CsvIndexationStat, String> {
 
 
 

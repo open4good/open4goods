@@ -27,7 +27,7 @@ import org.open4goods.crawler.repository.IndexationRepository;
 import org.open4goods.crawler.services.IndexationService;
 import org.open4goods.exceptions.TechnicalException;
 import org.open4goods.model.constants.TimeConstants;
-import org.open4goods.model.crawlers.FetchingJobStats;
+import org.open4goods.model.crawlers.WebIndexationStats;
 import org.open4goods.model.data.DataFragment;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -362,12 +362,12 @@ public class WebDatasourceFetchingService extends DatasourceFetchingService{
 	 * Return the stats
 	 */
 	@Override
-	public Map<String, FetchingJobStats> stats() {
+	public Map<String, WebIndexationStats> stats() {
 
-		final var ret = new HashMap<String,FetchingJobStats>();
+		final var ret = new HashMap<String,WebIndexationStats>();
 
 		for (final Entry<String, CrawlController> entry : getControllers().entrySet()) {
-			final FetchingJobStats c = new FetchingJobStats(entry.getKey(), 0L);
+			final WebIndexationStats c = new WebIndexationStats(entry.getKey(), 0L);
 			c.setFinished(entry.getValue().isFinished());
 			c.setShuttingDown(entry.getValue().isShuttingDown());
 			c.setStartDate(controllersDate.get(entry.getKey()));

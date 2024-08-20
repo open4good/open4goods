@@ -17,7 +17,7 @@ import org.open4goods.crawler.repository.CsvIndexationRepository;
 import org.open4goods.crawler.repository.IndexationRepository;
 import org.open4goods.crawler.services.DataFragmentCompletionService;
 import org.open4goods.crawler.services.IndexationService;
-import org.open4goods.model.crawlers.FetchingJobStats;
+import org.open4goods.model.crawlers.WebIndexationStats;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -50,7 +50,7 @@ public class CsvDatasourceFetchingService extends DatasourceFetchingService {
 	
 
 	// The running job status
-	private final Map<String, FetchingJobStats> running = new ConcurrentHashMap<>();
+	private final Map<String, WebIndexationStats> running = new ConcurrentHashMap<>();
 
 	private final FetcherProperties fetcherProperties;
 
@@ -118,9 +118,9 @@ public class CsvDatasourceFetchingService extends DatasourceFetchingService {
 	}
 
 	@Override
-	public Map<String, FetchingJobStats> stats() {
+	public Map<String, WebIndexationStats> stats() {
 		// Updating indexed counters
-		for (final FetchingJobStats js : running.values()) {
+		for (final WebIndexationStats js : running.values()) {
 			js.setNumberOfIndexedDatas(indexationService.getIndexed(js.getName()));
 		}
 		return running;
@@ -247,7 +247,7 @@ public class CsvDatasourceFetchingService extends DatasourceFetchingService {
 		return queue;
 	}
 
-	public Map<String, FetchingJobStats> getRunning() {
+	public Map<String, WebIndexationStats> getRunning() {
 		return running;
 	}
 	

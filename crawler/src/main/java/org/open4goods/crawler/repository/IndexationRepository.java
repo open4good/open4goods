@@ -1,6 +1,6 @@
 package org.open4goods.crawler.repository;
 
-import org.open4goods.model.crawlers.FetchingJobStats;
+import org.open4goods.model.crawlers.WebIndexationStats;
 import org.springframework.data.elasticsearch.repository.ElasticsearchRepository;
 
 /**
@@ -9,7 +9,7 @@ import org.springframework.data.elasticsearch.repository.ElasticsearchRepository
  *
  */
 
-public interface  IndexationRepository extends ElasticsearchRepository<FetchingJobStats, String> {
+public interface  IndexationRepository extends ElasticsearchRepository<WebIndexationStats, String> {
 
 
 

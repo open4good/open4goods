@@ -34,8 +34,8 @@ import org.open4goods.helper.ShippingTimeParser;
 import org.open4goods.model.constants.InStock;
 import org.open4goods.model.constants.ProductCondition;
 import org.open4goods.model.constants.ReferentielKey;
-import org.open4goods.model.crawlers.FetchCsvStats;
-import org.open4goods.model.crawlers.FetchingJobStats;
+import org.open4goods.model.crawlers.CsvIndexationStat;
+import org.open4goods.model.crawlers.WebIndexationStats;
 import org.open4goods.model.data.DataFragment;
 import org.open4goods.model.data.Price;
 import org.open4goods.model.data.Rating;
@@ -167,12 +167,12 @@ public class CsvIndexationWorker implements Runnable {
 		
 		Set<String> urls = config.getDatasourceUrls() ;	
 		
-		FetchingJobStats legacyStat = new FetchingJobStats(dsProperties.getDatasourceConfigName(), System.currentTimeMillis());
+		WebIndexationStats legacyStat = new WebIndexationStats(dsProperties.getDatasourceConfigName(), System.currentTimeMillis());
 		csvService.getRunning().put(dsProperties.getDatasourceConfigName(), legacyStat);
 		
 		for (final String url : urls) {
 			
-			FetchCsvStats stats = new FetchCsvStats(url, dsConfName);
+			CsvIndexationStat stats = new CsvIndexationStat(url, dsConfName);
 			
 			int okItems = 0;
 			int validationFailedItems = 0;
@@ -361,7 +361,7 @@ public class CsvIndexationWorker implements Runnable {
 		// Calling the finished to collect stats
 		
 		
-		FetchingJobStats sObject = csvService.stats().get(dsConfName);
+		WebIndexationStats sObject = csvService.stats().get(dsConfName);
 		if (null != sObject) {
 			csvService.finished(sObject, dsProperties);
 		}

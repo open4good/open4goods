@@ -16,13 +16,10 @@ public class TeamController  implements SitemapExposedController{
 	public static final String DEFAULT_PATH="/team";
 	public static final String FR_PATH="/equipe";
 	
-	
-	private @Autowired UiService uiService;
-	
-	final UiConfig uiConfig;
+	 @Autowired UiService uiService;
+	 @Autowired UiConfig uiConfig;
 
-	public TeamController(UiConfig uiConfig) {
-		this.uiConfig = uiConfig;
+	public TeamController() {
 	}
 
 	@Override
@@ -36,6 +33,11 @@ public class TeamController  implements SitemapExposedController{
 	public ModelAndView index(final HttpServletRequest request) {
 
 		ModelAndView model = uiService.defaultModelAndView("team", request);
+		
+		model.addObject("coreMembers", uiConfig.getTeamConfig().getCores());
+		model.addObject("contributors", uiConfig.getTeamConfig().getContributors());
+		
+		
 		return model;
 	}
 
