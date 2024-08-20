@@ -64,7 +64,8 @@ public class BlogService {
 		this.xwikiFacadeService = xwikiFacadeService;
 		this.baseUrl = localisable;
 	}
-		
+
+	// TODO : From conf
 	@Scheduled(initialDelay = 2000, fixedDelay = 1000 * 3600*2)
 	public void refreshPosts() {
 		updateBlogPosts();

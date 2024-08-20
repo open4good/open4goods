@@ -30,23 +30,20 @@
 <body>
     
 	<!--/* Navbar */-->
-	<th:block th:insert="~{inc/navbar/navbar-non-product.html}"></th:block>
+    <th:block th:with="page = 'notre équipe'" th:insert="~{inc/navbar/navbar-page.html}"></th:block>
     <!--/* Loader */-->
     <th:block th:insert="~{inc/preloader.html}"></th:block>
 	
     <main>	
-		
 
-
-
-        <!-- Hero -->
-        <section class="section-header bg-secondary pb-8 pb-md-11 mb-4 mb-lg-6 text-white">
+        <!-- Hero for Core Team -->
+        <section class="section-header bg-gray-200 pb-8 pb-md-11 mb-4 mb-lg-6 ">
             <div class="container">
                 <div class="row justify-content-center">
                     <div class="col-12 col-md-10 col-lg-8 text-center">
-                        <h1 class="display-2 text-white mb-3">Notre équipe</h1>
+                        <h1 class="display-2  mb-3">La core-team</h1>
                         <p class="lead">                        	                       
-                        	<th:block th:with="path='TEAM/header/'">
+                        	<th:block th:with="path='pages/team/hero-core-team/'">
                         		<th:block th:insert="~{inc/wiki.html}"></th:block>
                         	</th:block>
                         </p>
@@ -54,109 +51,97 @@
                 </div>
             </div>
         </section>
+        
+        
+        
+        <!-- Core team Members -->
         <section class="section section-lg pt-0">
             <div class="container mt-n8 mt-lg-n10 z-2">
                 <div class="row mt-7">
-                    <div class="col-12 col-md-6 col-lg-4 mb-7">
+					<div th:each="member, stat : ${coreMembers}" th:classappend="${stat.first ? 'col-md-6 col-lg-4' : 'col-md-6 col-lg-4'} " class="col-12 mb-5 mb-lg-0">
+					     <div class="card shadow border-gray-300">
+					         <img th:src="${member.imageUrl}" class="card-img-top rounded-top" th:alt="'Photo de ' + ${member.name}">
+					         <div class="card-body">
+					             <!-- Name -->
+					             <h3 class="h4 card-title mb-2" th:text="${member.name}"></h3>
+					             <!-- Title -->
+					             <span class="card-subtitle text-gray fw-normal" th:text="${member.title}"></span>
+					             
+					             <p class="card-text my-3">
+					              <th:block th:with="path='pages/team/'+${member.name}">
+					                  <th:block th:insert="~{inc/wiki.html}"></th:block>
+					              </th:block>
+					             </p>
+					             <ul class="list-unstyled d-flex mt-3 mb-0">
+					                 <li>
+					                     <a th:href="${member.linkedInUrl}" target="_blank" aria-label="linkedin social link" class="text-facebook me-3">
+					                         <span class="fab fa-linkedin"></span>
+					                     </a>
+					                 </li> 
+					             </ul>
+					         </div>
+					     </div>
+					 </div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Hero for contributors-->
+        <section class="section-header bg-gray-200 pb-8 pb-md-11 mb-4 mb-lg-6 ">
+            <div class="container">
+                <div class="row justify-content-center">
+                    <div class="col-12 col-md-10 col-lg-8 text-center">
+                        <h1 class="display-2  mb-3">Les contributeurs</h1>
+                        <p class="lead">                                                   
+                            <th:block th:with="path='pages/team/hero-contributors-team/'">
+                                <th:block th:insert="~{inc/wiki.html}"></th:block>
+                            </th:block>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Contributors list -->
+        <section class="section section-lg pt-0">
+            <div class="container mt-n8 mt-lg-n10 z-2">
+                <div class="row mt-7">
+                    
+              <div th:each="member, stat : ${contributors}" class="col-12 col-md-6 col-lg-4 mb-7">
                         <div class="card shadow border-gray-300 text-center">
                             <div class="profile-thumbnail mx-auto mt-n6">
-                                <img src="../../assets/img/team/goulven.jpeg" class="card-img-top rounded-circle border-0" alt="Jose Avatar">
+                                <img th:src="${member.imageUrl}" class="card-img-top rounded-circle border-0" th:alt="'Photo de ' + ${member.name}">
                             </div>
+                            
                             <div class="card-body">
-                                <h2 class="h4 card-title mb-2">Goulven Furet</h2>
-                                <span class="card-subtitle text-gray fw-normal">CEO / CTO</span>
+                                <h2 class="h4 card-title mb-2" th:text="${member.name}"></h2>
+                                <span class="card-subtitle text-gray fw-normal" th:text="${member.title}">CEO / CTO</span>
                                 <ul class="list-unstyled d-flex justify-content-center mt-3 mb-0">
                                     <li>
-                                        <a href="https://www.linkedin.com/in/goulven-furet-b448b582/" target="_blank" rel="nofollow" aria-label="facebook social link" class="text-facebook me-3">
+                                        <a th:src="${member.linkedInUrl}" target="_blank" aria-label="facebook social link" class="text-facebook me-3">
                                             <span class="fab fa-linkedin"></span>
                                         </a>
                                     </li>                      
                                 </ul>
-                                <p class="card-text my-2">
-		                        	<th:block th:with="path='TEAM/goulven/'">
-		                        		<th:block th:insert="~{inc/wiki.html}"></th:block>
-		                        	</th:block>                                
-                                </p>
                             </div>
                         </div>
                     </div>
-                    <div class="col-12 col-md-6 col-lg-4 mb-7">
-                        <div class="card shadow border-gray-300 text-center">
-                            <div class="profile-thumbnail mx-auto mt-n6">
-                                <img src="../../assets/img/team/berangere.jpeg" class="card-img-top rounded-circle border-0" alt="Neil Avatar">
-                            </div>
-                            <div class="card-body">
-                                <h2 class="h4 card-title mb-2">Bérangère Leven</h2>
-                                <span class="card-subtitle text-gray fw-normal">Business Manager & Communication</span>
-                                <ul class="list-unstyled d-flex justify-content-center mt-3 mb-0">
-                                    <li>
-                                        <a href="https://www.linkedin.com/in/b%C3%A9rang%C3%A8re-leven/" target="_blank" aria-label="facebook social link" rel="nofollow" class="text-facebook me-3">
-                                            <span class="fab fa-linkedin"></span>
-                                        </a>
-                                    </li>
-                                </ul>
-                                <p class="card-text my-2">
-		                        	<th:block th:with="path='TEAM/berangere/'">
-		                        		<th:block th:insert="~{inc/wiki.html}"></th:block>
-		                        	</th:block>                               
-		                         </p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-12 col-md-6 col-lg-4 mb-7">
-                        <div class="card shadow border-gray-300 text-center">
-                            <div class="profile-thumbnail mx-auto mt-n6">
-                                <img src="../../assets/img/team/thomas.jpeg" class="card-img-top rounded-circle border-0" alt="Bonnie Avatar">
-                            </div>
-                            <div class="card-body">
-                                <h2 class="h4 card-title mb-2">Thomas Vandewalle</h2>
-                                <span class="card-subtitle text-gray fw-normal">SEO & Contenus</span>
-                                <ul class="list-unstyled d-flex justify-content-center mt-3 mb-0">
-                                    <li>
-                                        <a href="https://www.linkedin.com/in/thomas-vandewalle-fr001/" target="_blank" aria-label="facebook social link" rel="nofollow" class="text-facebook me-3">
-                                            <span class="fab fa-linkedin"></span>
-                                        </a>
-                                    </li>                                    
-                                </ul>
-                                <p class="card-text my-2">
-		                        	<th:block th:with="path='TEAM/thomas/'">
-		                        		<th:block th:insert="~{inc/wiki.html}"></th:block>
-		                        	</th:block>  
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    
-                    
                 </div>
             </div>
         </section>
+        
+        <!-- Section : contact us -->
         <section class="section bg-gray-200">
             <div class="container z-2">
                 <div class="row justify-content-center">
                     <div class="col-md-10 text-center">
-                        <h2 class="h1">Interesé(e) par ce projet ?</h2>
-                        <p class="lead py-4 text-gray">Si vous souhaitez participer à l'aventure, de quelque manière que ce soit : </p>
+                        <h2 class="h1">Envie d'en discuter ?</h2>
+                        <p class="lead py-4 text-gray">Si vous souhaitez en savoir plus sur le projet, ou participer à l'aventure, de quelque manière que ce soit : </p>
                         <a href="/contact" class="btn btn-lg btn-secondary animate-up-2">Nous contacter</a>
                     </div>
                 </div>
             </div>  
         </section>
-
-
-
-
-
-
-
-
-
-
-
-
-
-      
 
     </main>
 

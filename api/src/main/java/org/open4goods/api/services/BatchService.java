@@ -44,6 +44,7 @@ public class BatchService {
 	}
 
 	@Scheduled(cron = "0 0 1,13 * * ?")
+	// TODO : From conf
 	public void batch() {
 
 		logger.info("Starting batch");

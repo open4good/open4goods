@@ -11,7 +11,7 @@ import org.springframework.data.elasticsearch.annotations.Field;
 import org.springframework.data.elasticsearch.annotations.FieldType;
 
 @Document(indexName = "indexations", createIndex = true)
-public class FetchingJobStats {
+public class WebIndexationStats {
 
 	@Id
 	@Field(index = true, store = false, type = FieldType.Keyword)
@@ -61,11 +61,11 @@ public class FetchingJobStats {
 		queueLength--;
 	}
 
-	public FetchingJobStats() {
+	public WebIndexationStats() {
 		super();
 	}
 
-	public FetchingJobStats(final String name, final long startDate) {
+	public WebIndexationStats(final String name, final long startDate) {
 		super();
 		this.id = UUID.randomUUID().toString();
 		this.name = name;

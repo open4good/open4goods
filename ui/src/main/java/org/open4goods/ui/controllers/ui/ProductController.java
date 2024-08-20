@@ -329,9 +329,6 @@ public class ProductController  {
 
 		return mv;
 	}
-
-
-	
 	
 	/**
 	 * Infer the affiliation token in an aggregated price

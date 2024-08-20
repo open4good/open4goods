@@ -8,7 +8,7 @@ import org.open4goods.config.yml.datasource.DataSourceProperties;
 import org.open4goods.crawler.repository.IndexationRepository;
 import org.open4goods.exceptions.TechnicalException;
 import org.open4goods.helper.GenericFileLogger;
-import org.open4goods.model.crawlers.FetchingJobStats;
+import org.open4goods.model.crawlers.WebIndexationStats;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -56,7 +56,7 @@ public abstract class DatasourceFetchingService {
 	 * @param provider
 	 */
 
-	public abstract  Map<String, FetchingJobStats> stats();
+	public abstract  Map<String, WebIndexationStats> stats();
 
 
 	/**
@@ -65,7 +65,7 @@ public abstract class DatasourceFetchingService {
 	 * @param string
 	 *
 	 */
-	public void finished(final FetchingJobStats fetchingJobStats, final DataSourceProperties dataSourceProperties) {
+	public void finished(final WebIndexationStats fetchingJobStats, final DataSourceProperties dataSourceProperties) {
 
 		// Logging the number of indexed and number
 		logger.info("Datasource fetching of {} is terminated",dataSourceProperties.getName());

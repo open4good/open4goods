@@ -42,7 +42,7 @@ public class EcoScoreAggregationService extends AbstractScoreAggregationService 
 			// Processing cardinality
 			incrementCardinality(ECOSCORE_SCORENAME,score);
 			
-			// Saving the actual score in the product, it will be relativized after (see super().done())
+			// Saving the actual score in the product, it will be relativized after this batch (see super().done())
 			Score s = new Score(ECOSCORE_SCORENAME, score);
 			data.getScores().put(s.getName(),s);
 		} catch (ValidationException e) {

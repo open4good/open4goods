@@ -9,23 +9,23 @@ import org.springframework.data.elasticsearch.annotations.Field;
 import org.springframework.data.elasticsearch.annotations.FieldType;
 
 @Document(indexName = "csv-indexations", createIndex = true)
-public class FetchCsvStats {
+public class CsvIndexationStat {
 
 	@Id
 	@Field(index = true, store = false, type = FieldType.Keyword)
 	private String id; 
 	
 	@Field(index = true, store = false, type = FieldType.Keyword)
-	private String datasource;
+	private String datasource="";
 	
 	@Field(index = true, store = false, type = FieldType.Keyword)
-	private String url;
+	private String url="";
 
 	@Field(index = true, store = false, type = FieldType.Date)
-	private long startDate;
+	private long startDate = 0;
 
 	@Field(index = true, store = false, type = FieldType.Long)
-	private long duration;
+	private long duration = 0;
 	
 	@Field(index = true, store = false, type = FieldType.Long)
 	private long lines = 0;
@@ -40,12 +40,12 @@ public class FetchCsvStats {
 	private long exceptions = 0;
 
 	@Field(index = true, store = false, type = FieldType.Boolean)
-	private Boolean fail;
+	private Boolean fail = false;
 	
-	public FetchCsvStats() {
+	public CsvIndexationStat() {
 	}	
 	
-	public FetchCsvStats(String url, String dsName) {
+	public CsvIndexationStat(String url, String dsName) {
 		this.startDate=System.currentTimeMillis();
 		this.datasource=dsName;
 		this.url = url;

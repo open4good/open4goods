@@ -27,14 +27,14 @@ spring:
     openai:
       chat:
         options:
-          #TODO : Will change on next release
           temperature: 0.2
+          #TODO : Will change on next release
           response-format: { "type": "json_object" }  
   threads:
     virtual:
       enabled: true
 
-      
+
       
   mail:
 #   host: 
@@ -49,7 +49,7 @@ spring:
   application:
     name: open4goods-ui
   thymeleaf:
-      cache: false
+      cache: true
   data:
     elasticsearch:
       repositories:
@@ -66,24 +66,38 @@ wikiPagesMapping:
   "[webpages:default:legal-notice:WebHome]":
     default: "mentions-legales"
     
+
+team-config:
+  cores:
+  - name: Goulven Furet
+    title: CEO / CTO
+    linkedInUrl: https://www.linkedin.com/in/goulven-furet-b448b582/ 
+    imageUrl: /assets/img/team/Goulven.jpeg
+  
+  - name: Bérangère Leven
+    title: Communication et pilotage
+    linkedInUrl: https://www.linkedin.com/in/b%C3%A9rang%C3%A8re-leven/
+    imageUrl: /assets/img/team/Berangere.jpeg
     
+  - name: Thomas Vandewalle
+    title: Stratégie SEO & contenus
+    linkedInUrl: https://www.linkedin.com/in/thomas-vandewalle-fr001/
+    imageUrl: /assets/img/team/Thomas.jpeg
+
+  - name: Louis-Marie Toudoire
+    title: Développeur Backend
+    linkedInUrl: https://www.linkedin.com/in/scezen/?originalSubdomain=fr
+    imageUrl: /assets/img/team/Louis-Marie.jpeg      
+          
+    
+    #  contributors:
+#  - name: Test
   
 apiConfig:
   apiTitle: "Open4goods API"
   apiDescription: "This API allows you to browse eco-nudger content"
   apiVersion: "0.1"
   apiLicence: "May vary"
-
-# Configuration for the langchain chat model            
-#langchain4j:
-#  open-ai:
-#    chat-model:
-#      api-key: YOUR API KEY
-#      model-name: gpt-4o
-#      temperature: 0.0
-#      timeout: PT60S
-#      log-requests: false
-#      log-responses: false
 
 
 tagListUrl: https://open4good.github.io/open4goods/maven/taglist/taglist.xml 

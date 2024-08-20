@@ -14,6 +14,7 @@ import java.util.stream.Collectors;
 
 import org.open4goods.config.yml.CommentsAggregationConfig;
 import org.open4goods.config.yml.attributes.AttributeConfig;
+import org.open4goods.helper.IdHelper;
 import org.open4goods.model.constants.CacheConstants;
 import org.open4goods.model.constants.UrlConstants;
 import org.open4goods.model.data.FeatureGroup;
@@ -124,6 +125,14 @@ public class VerticalConfig{
 	@JsonMerge
 	private Map<String, Double> ecoscoreConfig = new HashMap<>();
 
+	
+	@JsonMerge
+	/**
+	 * Configuration of the dedicated elastic index
+	 */
+	private VerticalIndexMappingConfig inexMappingConfig = new VerticalIndexMappingConfig();
+
+	
 	
 //	
 //	/**
@@ -368,6 +377,15 @@ public class VerticalConfig{
 		return l;
 	}
 
+	/**
+	 * Return the name of the product index for this capsule
+	 * @return
+	 */
+	@Cacheable(cacheNames=CacheConstants.FOREVER_LOCAL_CACHE_NAME)
+	public String indexName() {
+		return "vertical-" + IdHelper.azCharAndDigits(id, "-").toLowerCase();
+	}
+	
 	public String getSiteLocaleAsStringOrDefault(final HttpServletRequest request) {
 		return getLanguageByServerName(request.getServerName());
 	}
@@ -405,14 +423,7 @@ public class VerticalConfig{
 
 
 
-	/**
-	 * Return the name of the product index for this capsule
-	 * @return
-	 */
-	public String indexName() {
-		// TODO(security,0.25, P3)  Should require to only keep alphanumchars, then cache
-		return id;
-	}
+
 
 	/**
 	 * Return the name of the resource index for this capsule
@@ -673,8 +684,12 @@ public class VerticalConfig{
 		this.icecatTaxonomyId = icecatTaxonomyId;
 	}
 
+	public VerticalIndexMappingConfig getInexMappingConfig() {
+		return inexMappingConfig;
+	}
 
-
-
+	public void setInexMappingConfig(VerticalIndexMappingConfig inexMappingConfig) {
+		this.inexMappingConfig = inexMappingConfig;
+	}
 
 }

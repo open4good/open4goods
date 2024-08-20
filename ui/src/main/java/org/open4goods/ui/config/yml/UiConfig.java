@@ -24,6 +24,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.validation.annotation.Validated;
 
 import com.fasterxml.jackson.annotation.JsonMerge;
 
@@ -37,6 +38,7 @@ import com.fasterxml.jackson.annotation.JsonMerge;
  *
  */
 
+@Validated
 public class UiConfig {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(UiConfig.class);
@@ -141,6 +143,11 @@ public class UiConfig {
 	 */
 	private Map<String,Localisable<String,String>> wikiPagesMapping = new HashMap<>();
 	
+	
+	/**
+	 * Containing the project members, for restitution in /team
+	 */
+	private TeamConfig teamConfig = new TeamConfig();
 	
 
 	private BlogConfiguration blogConfig = new BlogConfiguration();
@@ -487,5 +494,17 @@ public class UiConfig {
 	public void setBancheckerConfig(BanCheckerConfig bancheckerConfig) {
 		this.bancheckerConfig = bancheckerConfig;
 	}
+
+
+	public TeamConfig getTeamConfig() {
+		return teamConfig;
+	}
+
+
+	public void setTeamConfig(TeamConfig teamConfig) {
+		this.teamConfig = teamConfig;
+	}
+	
+	
 
 }
