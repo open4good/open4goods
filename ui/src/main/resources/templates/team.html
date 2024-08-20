@@ -37,10 +37,10 @@
     <main>	
 
         <!-- Hero for Core Team -->
-        <section class="section-header bg-gray-200 pb-8 pb-md-11 mb-4 mb-lg-6 ">
+        <section class="section-header bg-green-transparent pb-8 pb-md-11 mb-4 mb-lg-6 ">
             <div class="container">
                 <div class="row justify-content-center">
-                    <div class="col-12 col-md-10 col-lg-8 text-center">
+                    <div class="col-12 col-md-10 col-lg-10 text-center">
                         <h1 class="display-2  mb-3">La core-team</h1>
                         <p class="lead">                        	                       
                         	<th:block th:with="path='pages/team/hero-core-team/'">
@@ -52,20 +52,18 @@
             </div>
         </section>
         
-        
-        
         <!-- Core team Members -->
         <section class="section section-lg pt-0">
             <div class="container mt-n8 mt-lg-n10 z-2">
-                <div class="row mt-7">
+                <div class="row mt-3">
 					<div th:each="member, stat : ${coreMembers}" th:classappend="${stat.first ? 'col-md-6 col-lg-4' : 'col-md-6 col-lg-4'} " class="col-12 mb-5 mb-lg-0">
-					     <div class="card shadow border-gray-300">
+					     <div class="mb-5 card shadow border-gray-300">
 					         <img th:src="${member.imageUrl}" class="card-img-top rounded-top" th:alt="'Photo de ' + ${member.name}">
 					         <div class="card-body">
 					             <!-- Name -->
 					             <h3 class="h4 card-title mb-2" th:text="${member.name}"></h3>
 					             <!-- Title -->
-					             <span class="card-subtitle text-gray fw-normal" th:text="${member.title}"></span>
+					             <span class="card-subtitle text-gray fw-normal"><strong th:text="${member.title}"></strong></span>
 					             
 					             <p class="card-text my-3">
 					              <th:block th:with="path='pages/team/'+${member.name}">
@@ -87,11 +85,11 @@
         </section>
         
         <!-- Hero for contributors-->
-        <section class="section-header bg-gray-200 pb-8 pb-md-11 mb-4 mb-lg-6 ">
+        <section class="section-header bg-green-transparent pb-8 pb-md-11 mb-lg-6 ">
             <div class="container">
                 <div class="row justify-content-center">
                     <div class="col-12 col-md-10 col-lg-8 text-center">
-                        <h1 class="display-2  mb-3">Les contributeurs</h1>
+                        <h1 class="display-2">Les contributeurs</h1>
                         <p class="lead">                                                   
                             <th:block th:with="path='pages/team/hero-contributors-team/'">
                                 <th:block th:insert="~{inc/wiki.html}"></th:block>
@@ -105,9 +103,9 @@
         <!-- Contributors list -->
         <section class="section section-lg pt-0">
             <div class="container mt-n8 mt-lg-n10 z-2">
-                <div class="row mt-7">
+                <div class="row">
                     
-              <div th:each="member, stat : ${contributors}" class="col-12 col-md-6 col-lg-4 mb-7">
+              <div th:each="member, stat : ${contributors}" class="col-12 col-md-6 col-lg-4 mt-5">
                         <div class="card shadow border-gray-300 text-center">
                             <div class="profile-thumbnail mx-auto mt-n6">
                                 <img th:src="${member.imageUrl}" class="card-img-top rounded-circle border-0" th:alt="'Photo de ' + ${member.name}">
@@ -115,10 +113,18 @@
                             
                             <div class="card-body">
                                 <h2 class="h4 card-title mb-2" th:text="${member.name}"></h2>
-                                <span class="card-subtitle text-gray fw-normal" th:text="${member.title}">CEO / CTO</span>
-                                <ul class="list-unstyled d-flex justify-content-center mt-3 mb-0">
+                                 <span class="card-subtitle text-gray fw-normal"><strong th:text="${member.title}"></strong></span>
+
+								<p class="card-text my-3">
+									<th:block th:with="path='pages/team/'+${member.name}">
+										<th:block th:insert="~{inc/wiki.html}"></th:block>
+									</th:block>
+								</p>
+
+
+								<ul class="list-unstyled d-flex justify-content-center mt-3 mb-0">
                                     <li>
-                                        <a th:src="${member.linkedInUrl}" target="_blank" aria-label="facebook social link" class="text-facebook me-3">
+                                        <a th:href="${member.linkedInUrl}" target="_blank" aria-label="facebook social link" class="text-facebook me-3">
                                             <span class="fab fa-linkedin"></span>
                                         </a>
                                     </li>                      
@@ -130,16 +136,58 @@
             </div>
         </section>
         
-        <!-- Section : contact us -->
-        <section class="section bg-gray-200">
-            <div class="container z-2">
-                <div class="row justify-content-center">
-                    <div class="col-md-10 text-center">
-                        <h2 class="h1">Envie d'en discuter ?</h2>
-                        <p class="lead py-4 text-gray">Si vous souhaitez en savoir plus sur le projet, ou participer à l'aventure, de quelque manière que ce soit : </p>
-                        <a href="/contact" class="btn btn-lg btn-secondary animate-up-2">Nous contacter</a>
-                    </div>
-                </div>
+        
+ 
+        
+        <!-- Section partenaires / contacts -->        
+
+        <section class="section bg-green-transparent">
+            <div class="container container-semi-fluid z-2">
+		
+		        <!-- Section : partenaires -->
+		       <div class ="row">
+		            <div class="col-12 col-lg-8">
+		                    <div class="card shadow px-4 py-1">
+		                        <div class="card-body text-center text-md-left">
+		                            <div class="row align-items-center">
+		                                <div class="col-md-6">
+		                                    <h1 class="mb-3">Nos partenaires !</h1>
+		                                    
+		                                    <p class="mb-4">
+                                               <th:block th:with="path='pages/team/partenaires/'">
+					                               <th:block th:insert="~{inc/wiki.html}"></th:block>
+					                           </th:block>
+		                                    </p>
+		                                    <a href="/partenaires" class="btn btn-outline-primary animate-up-2">
+		                                        En savoir plus
+		                                    </a>
+		                                </div>
+		                                <div class="col-12 col-md-6 mt-4 mt-md-0 text-md-right">
+		                                    <img src="/assets/img/illustrations/partners.png" alt="Partenaires du comparateur écologique Nudger">
+		                                </div>
+		                            </div>
+		                        </div>
+		                    </div>
+		            </div>
+		            
+		            
+                    <!-- Section : contact us -->
+		            <div class="col-12 col-lg-4 my-auto">
+		            
+		                <div class="row justify-content-center">
+		                    <div class="col-md-10 text-center ">
+		                        <h2 class="h1">Envie d'en discuter ?</h2>
+		                        <p class="lead py-4 text-gray">Si vous souhaitez en savoir plus sur le projet, n'hésitez pas ! </p>
+		                        <a href="/contact" class="btn btn-lg btn-secondary animate-up-2">Nous contacter</a>
+		                    </div>
+		                </div>          
+		            </div>
+		            
+            
+        
+        </div>
+
+                
             </div>  
         </section>
 

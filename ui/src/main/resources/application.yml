@@ -88,11 +88,30 @@ team-config:
     title: Développeur Backend
     linkedInUrl: https://www.linkedin.com/in/scezen/?originalSubdomain=fr
     imageUrl: /assets/img/team/Louis-Marie.jpeg      
-          
+
+  - name: Laurent Blondel
+    title: Développeur & intégrateur frontend
+    linkedInUrl: https://www.linkedin.com/in/laurent-blondel-33543532/
+    imageUrl: /assets/img/team/Laurent.jpeg            
     
-    #  contributors:
-#  - name: Test
-  
+  contributors:
+    - name: Thierry Ledan
+      title: Développements backend
+      linkedInUrl: https://www.linkedin.com/in/thierry-ledan-43650a183/
+      imageUrl: /assets/img/team/Thierry.jpeg
+
+    - name: Max Ziliani
+      title: Identité visuelle et artistique
+      linkedInUrl: https://www.linkedin.com/in/maxziliani/
+      imageUrl: /assets/img/team/Max.jpeg
+      
+    - name: Nicolas Bonamy
+      title: Dev backend & infra
+      linkedInUrl: https://www.linkedin.com/in/nicolas-bonamy-827b63a3/
+      imageUrl: /assets/img/team/Nicolas.jpeg
+        
+      
+      
 apiConfig:
   apiTitle: "Open4goods API"
   apiDescription: "This API allows you to browse eco-nudger content"
