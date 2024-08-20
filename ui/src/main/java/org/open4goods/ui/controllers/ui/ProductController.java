@@ -14,7 +14,7 @@ import org.open4goods.exceptions.ResourceNotFoundException;
 import org.open4goods.model.data.AffiliationToken;
 import org.open4goods.model.data.AiDescription;
 import org.open4goods.model.data.AiDescriptions;
-import org.open4goods.model.dto.UiFeatureGroups;
+import org.open4goods.model.dto.AttributesFeatureGroups;
 import org.open4goods.model.product.AggregatedPrice;
 import org.open4goods.model.product.PriceTrend;
 import org.open4goods.model.product.Product;
@@ -261,7 +261,7 @@ public class ProductController  {
 		
 		VerticalConfig verticalConfig = verticalConfigService.getVerticalForPath(vertical);
 		
-		List<UiFeatureGroups> features = icecatService.features(verticalConfig, mv.getModelMap().get("siteLanguage").toString(), data);
+		List<AttributesFeatureGroups> features = icecatService.features(verticalConfig, mv.getModelMap().get("siteLanguage").toString(), data);
 		mv.addObject("features",features);
 		
 		

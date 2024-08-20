@@ -10,7 +10,7 @@ import org.open4goods.model.product.AggregatedAttribute;
  * A convenient pojo holding feature groups and attributes,
  * for easy rendering on the templates sides
  */
-public class UiFeatureGroups {
+public class AttributesFeatureGroups {
 
 	private FeatureGroup featureGroup;
 	

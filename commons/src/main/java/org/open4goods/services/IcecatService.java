@@ -23,7 +23,7 @@ import org.open4goods.exceptions.TechnicalException;
 import org.open4goods.helper.IdHelper;
 import org.open4goods.model.data.Brand;
 import org.open4goods.model.data.FeatureGroup;
-import org.open4goods.model.dto.UiFeatureGroups;
+import org.open4goods.model.dto.AttributesFeatureGroups;
 import org.open4goods.model.icecat.IcecatCategory;
 import org.open4goods.model.icecat.IcecatCategoryFeatureGroup;
 import org.open4goods.model.icecat.IcecatFeature;
@@ -670,15 +670,15 @@ public class IcecatService {
 	 */
 	// TODO : perf, quiet expensive with the "iteration" model. Must be fixed by proper injection
 	// of icecat stuff to open4goods attribute model
-	public List<UiFeatureGroups> features(VerticalConfig vertical, String language, Product product) {
-		List<UiFeatureGroups> ret = new ArrayList<>();
+	public List<AttributesFeatureGroups> features(VerticalConfig vertical, String language, Product product) {
+		List<AttributesFeatureGroups> ret = new ArrayList<>();
 		
 		Integer icecatLanguage = getIceCatLangId(language);
 			
 		// Initial building
 		if (null != vertical) {
 			for (FeatureGroup fg : vertical.getFeatureGroups()) {
-				UiFeatureGroups ufg = new UiFeatureGroups();
+				AttributesFeatureGroups ufg = new AttributesFeatureGroups();
 				ufg.setFeatureGroup(fg);
 				ufg.setName(ufg.getFeatureGroup().getName().i18n(language));
 				for (Integer fId : fg.getFeaturesId()) {
@@ -687,6 +687,7 @@ public class IcecatService {
 						ufg.getAttributes().add(a);
 						// Updating attribute name
 						IcecatFeature f = featuresById.get(fId);
+						// TODO : Perf
 						IcecatName i18nName = f.getNames().getNames().stream().filter(e->e.getLangId() == icecatLanguage).findFirst().orElse(null);
 						if (null != i18nName) {
 							a.setName(i18nName.getTextValue());
@@ -720,6 +721,47 @@ public class IcecatService {
 		return ret;
 		
 	}
+	
+	
+	
+	/**
+	 * Loads the list of features, aggegated by UiFeatureGroup
+	 * @param vertical
+	 * @param language
+	 * @param product
+	 * @return
+	 */
+	// TODO : Caching
+	// of icecat stuff to open4goods attribute model
+	public Map<String, String> types(VerticalConfig vertical) {
+		Map<String,String> ret = new HashMap<>();
+		
+		// Initial building
+		if (null != vertical) {
+			for (FeatureGroup fg : vertical.getFeatureGroups()) {
+				FeatureGroup ufg = new FeatureGroup();
+
+				for (Integer fId : fg.getFeaturesId()) {
+						// Updating attribute name
+						IcecatFeature f = featuresById.get(fId);
+						
+						// TODO : Perf
+						IcecatName i18nName = f.getNames().getNames().stream().filter(e->e.getLangId() == 1).findFirst().orElse(null);
+						
+						if (null != i18nName) {
+							ret.put(i18nName.getTextValue(), f.getType());
+						} else {
+							LOGGER.error("Name not found for feature {} - {}",fId, f);
+						}
+				}
+				
+			}
+		}
+		
+		return ret;
+		
+	}
+	
 	
 	
 }
