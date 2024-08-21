@@ -137,7 +137,7 @@ public class BackupService implements HealthIndicator {
 	        		
 					blockingQueue.offer(e, 10, TimeUnit.HOURS);
 				} catch (InterruptedException e1) {
-		            logger.error("Error while backing up data", e);
+		            logger.error("Interruption error while backing up data", e1);
 		            this.dataBackupException = e1.getMessage();
 				}
 	        });
