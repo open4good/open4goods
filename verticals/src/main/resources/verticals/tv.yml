@@ -88,7 +88,7 @@ i18n:
      # A mapping beetween custom page names behind this vertical and wiki pages
      # Copy and paste the wiki wiew url, without the "bin/view" prefix
       wikiPages:
-        - wikiUrl: /verticals/tv/default/technologies-tv
+        - wikiUrl: /verticals/tv/technologies-tv/WebHome
           verticalUrl: "oled-qled-lcd-que-choisir"
           title: "OLED, QLED,LCD, ... Quelle technologie choisir ?"
           faIcon: "fa-star"
