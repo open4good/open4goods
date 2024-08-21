@@ -25,8 +25,6 @@
 	<meta name="twitter:image" th:content="${url} + 'assets/img/brand/light.svg'">
 	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" integrity="sha512-c42qTSw/wPZ3/5LBzD+Bw5f7bSF2oxou6wEb+I/lqeaKV5FDIfMvvRp772y4jcJLKuGUOpbJMdg/BTl50fJYAw==" crossorigin="anonymous" referrerpolicy="no-referrer" />	
 
-
-
 	<meta name="google-site-verification" content="I2wSyJnnRSjrLjadtNgFzHHmtSN8DPbjhPePTkQNhp4" />
 </head>
 
@@ -110,7 +108,7 @@
 						<img
 							class="profile-thumbnail small-thumbnail rounded mx-auto mt-4"
 							th:src="'/images/verticals/' + ${vertical.id} + '.png'"
-							alt="Christopher Portrait">
+							th:alt="${vertical.i18n(siteLanguage).verticalHomeTitle}">
 						<div class="card-body">
 							<h3 class="h5 card-title" th:text="${vertical.i18n(siteLanguage).verticalHomeTitle}"></h3>
 							<p class="card-text" th:text="${vertical.i18n(siteLanguage).truncatedHomeDescription(75)}"></p>
@@ -256,7 +254,7 @@
 
 		<section class="bg-green-transparent text-center py-4">
 			<h2> <span class="h1 mb-3">Les chiffres clés</span></h2>
-			<p class="lead mb-0">Nudger en quelques chiffres, c'est :</p>
+			<p class="lead mb-0">Nudger, c'est :</p>
 		</section>
 
 		<section class="container text-center py-4">
@@ -287,9 +285,9 @@
 				</div>
 		</section>
    
-		<section class="bg-green-transparent text-center py-4">
-			<h2> <span class="h1 mb-3">Notre philosophie : le bien commun</span></h3>
-			<p class="lead mb-0">Nous sommes engagés à faire de la consommation un acte réfléchi et moins impactant pour la planète :</p>
+		<section class="bg-green-transparent text-center py-4 mb-5">
+			<h2> <span class="h1 mb-3">Notre philosophie : le bien commun</span></h2>
+			<p class="lead mb-0">Nous sommes engagés à faire de la consommation un acte réfléchi et moins impactant pour la planète.</p>
 		</section>
 	   
 	   
@@ -299,18 +297,18 @@
 					<!-- Icon Boxes -->
 					<div class="card shadow">
 						<div class="row g-0 align-items-center">
-							<div class="col-md-4">
-								<img src="../../assets/img/pages/design.svg" alt="Web design illustration" class="card-img-top rounded-top">
+							<div class="col-md-4 p-4 d-none d-md-block">
+								<img src="/assets/img/illustrations/contribution.webp" alt="Contribution écologique" class="card-img-top rounded-top">
 							</div>
 							<div class="col-md-8">
 								<div class="card-body">
-									<h3 id=compensation class="h5 card-title mt-3">contribution environnementale</h3>
+									<h3 id=compensation class="h5 card-title mt-3">Contribution écologique</h3>
 									<p class="card-text">
 										<th:block th:with="path='WIDGETS/accueil-compensation-full/'">
 											<th:block th:insert="~{inc/wiki.html}"></th:block>
 										</th:block>                                           
 									</p>
-									<a href="/compensation-ecologique" class="btn btn-primary btn-sm">En savoir plus sur la compensation carbone</a>
+									<a href="/compensation-ecologique" class="btn btn-primary btn-sm">En savoir plus sur la contribution environnementale</a>
 								</div>
 							</div>
 						</div>
@@ -319,38 +317,39 @@
 				</div>
 			</div>
 
-			<div class="d-flex justify-content-end mt-3">
-				<div class="col-12 col-md-10">
-					<!-- Icon Boxes -->
-					<div class="card shadow">
-						<div class="row g-0 align-items-center">
-							<div class="col-md-8">
-								<div class="card-body">
-									<h3 id=modele-ouvert class="h5 card-title mt-3">Numérique responsable</h3>
-									<p class="card-text">
-										<th:block th:with="path='WIDGETS/accueil-data-responsable-full/'">
-											<th:block th:insert="~{inc/wiki.html}"></th:block>
-										</th:block>
-									</p>
-									<a href="/opendata" class="btn btn-primary btn-sm">En savoir plus sur l'utilisation de vos données</a>
-								</div>
-							</div>
-							<div class="col-md-4">
-								<img src="../../assets/img/pages/support.svg" alt="Web design illustration" class="card-img-top rounded-top">
-							</div>
-						</div>
-					</div>
-					<!-- End of Icon Boxes -->
-				</div>
-			</div>    
+            <div class="d-flex justify-content-end mt-3">
+                <div class="col-12 col-md-10">
+                    <!-- Icon Boxes -->
+                    <div class="card shadow">
+                        <div class="row g-0 align-items-center">
+                            <div class="col-md-8">
+                                <div class="card-body">
+                                    <h3 id=ecoscore class="h5 card-title mt-3">Évaluation environnementale</h3>
+                                    <p class="card-text">
+                                        <th:block th:with="path='WIDGETS/accueil-ecoscore-full/'">
+                                            <th:block th:insert="~{inc/wiki.html}"></th:block>
+                                        </th:block>   
+                                    </p>
+                                    <a href="/ecoscore" class="btn btn-primary btn-sm">En savoir plus sur l'évaluation écologique</a>
+                                </div>
+                            </div>
+                            <div class="col-md-4 p-4 d-none d-md-block">
+                                <img src="/assets/img/illustrations/evaluation-ecologique.webp" alt="Evaluationé cologique des produits" class="card-img-top rounded-top">
+                            </div>
+                        </div>
+                    </div>
+                    <!-- End of Icon Boxes -->
+                </div>
+            </div>  
+             
 			
 			<div class="d-flex justify-content-start mt-3">
 				<div class="col-12 col-md-10">
 					<!-- Icon Boxes -->
 					<div class="card shadow">
 						<div class="row g-0 align-items-center">
-							<div class="col-md-4">
-								<img src="../../assets/img/pages/technologies.svg" alt="Web design illustration" class="card-img-top rounded-top">
+							<div class="col-md-4 p-4 d-none d-md-block">
+								<img src="/assets/img/illustrations/comparaison-prix.webp" alt="Comparateur de prix" class="card-img-top rounded-top">
 							</div>
 							<div class="col-md-8">
 								<div class="card-body">
@@ -369,48 +368,59 @@
 				</div>
 			</div>
 
-			<div class="d-flex justify-content-end mt-3">
-				<div class="col-12 col-md-10">
-					<!-- Icon Boxes -->
-					<div class="card shadow">
-						<div class="row g-0 align-items-center">
-							<div class="col-md-8">
-								<div class="card-body">
-									<h3 id=ecoscore class="h5 card-title mt-3">Évaluation écologique</h3>
-									<p class="card-text">
-										<th:block th:with="path='WIDGETS/accueil-ecoscore-full/'">
-											<th:block th:insert="~{inc/wiki.html}"></th:block>
-										</th:block>   
-									</p>
-									<a href="/ecoscore" class="btn btn-primary btn-sm">En savoir plus sur l'évaluation environnementale</a>
-								</div>
-							</div>
-							<div class="col-md-4">
-								<img src="../../assets/img/pages/support.svg" alt="Web design illustration" class="card-img-top rounded-top">
-							</div>
-						</div>
-					</div>
-					<!-- End of Icon Boxes -->
-				</div>
-			</div>  
+
+
+
+
+            <div class="d-flex justify-content-end mt-3">
+                <div class="col-12 col-md-10">
+                    <!-- Icon Boxes -->
+                    <div class="card shadow">
+                        <div class="row g-0 align-items-center">
+                            <div class="col-md-8">
+                                <div class="card-body">
+                                    <h3 id=modele-ouvert class="h5 card-title mt-3">Numérique responsable</h3>
+                                    <p class="card-text">
+                                        <th:block th:with="path='WIDGETS/accueil-data-responsable-full/'">
+                                            <th:block th:insert="~{inc/wiki.html}"></th:block>
+                                        </th:block>
+                                    </p>
+                                    <a href="#" class="btn btn-primary btn-sm">En savoir plus sur l'utilisation de vos données</a>
+                                </div>
+                            </div>
+                            <div class="col-md-4 p-4 d-none d-md-block">
+                                <img src="/assets/img/illustrations/no_cookie.webp" alt="Pas de cookies" class=" card-img-top rounded-top">
+                            </div>
+                        </div>
+                    </div>
+                    <!-- End of Icon Boxes -->
+                </div>
+            </div>   
+
+
+
+
 
 			<div class="d-flex justify-content-start mt-3">
 				<div class="col-12 col-md-10">
 					<!-- Icon Boxes -->
 					<div class="card shadow">
 						<div class="row g-0 align-items-center">
-							<div class="col-md-4">
-								<img src="../../assets/img/pages/code.svg" alt="Web design illustration" class="card-img-top rounded-top">
+							<div class="col-md-4 d-none d-md-block">
+								<img src="/assets/img/illustrations/opensource-opendata.webp" alt="Open source / Open data" class="card-img-top rounded-top">
 							</div>
 							<div class="col-md-8">
 								<div class="card-body">
-									<h3 id=opendata class="h5 card-title mt-3">Open-source et Open-data</h3>
+									<h3 id=opendata class="h5 card-title mt-3">Comparateur Open-source et Open-data</h3>
 									<p class="card-text">
 										<th:block th:with="path='WIDGETS/accueil-modele-ouvert-full/'">
 											<th:block th:insert="~{inc/wiki.html}"></th:block>
 										</th:block>                                         
 									</p>
-									<a href="/opendata" class="btn btn-primary btn-sm">En savoir plus sur le modèle ouvert</a>
+									<a href="/opendata" class="btn btn-primary btn-sm">Bases open-data</a>
+                                    <a href="/opensource" class="btn btn-primary btn-sm">Code opensource</a>
+                                    
+									
 								</div>
 							</div>
 						</div>

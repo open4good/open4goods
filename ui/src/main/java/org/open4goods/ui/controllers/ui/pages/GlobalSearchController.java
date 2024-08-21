@@ -62,7 +62,7 @@ public class GlobalSearchController  implements SitemapExposedController{
 
 	@GetMapping({FR_PATH, DEFAULT_PATH})
 	@Cacheable(cacheNames = CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME)
-	public ModelAndView searchGet(final HttpServletRequest request, @RequestParam String q) {
+	public ModelAndView searchGet(final HttpServletRequest request, @RequestParam(required = false, defaultValue = "") String q) {
 
 			ModelAndView model = uiService.defaultModelAndView("search", request);
 
