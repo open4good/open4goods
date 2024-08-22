@@ -46,7 +46,7 @@ public class AiService implements HealthIndicator{
 	private final SerialisationService serialisationService;
 	
 	// Tracked exception for healthcheck
-	private Long exceptionCount = 0L;
+	private Long criticalExceptionsCounter = 0L;
 
 	public AiService(OpenAiChatModel chatModel,  EvaluationService spelEvaluationService, SerialisationService serialisationService) {
 		this.chatModel = chatModel;
@@ -77,7 +77,7 @@ public class AiService implements HealthIndicator{
 			generateTextsForProduct(product, iaConfigsPerLanguage, force);
 		} catch (Exception e) {
 			logger.error("Error while generating AI description for product {}", product,e);
-			this.exceptionCount++;
+			this.criticalExceptionsCounter++;
 		}
 	}
 	
@@ -198,22 +198,22 @@ public class AiService implements HealthIndicator{
 	}
 
 	/**
-	 * Custom healthcheck, simply goes to DOWN if exception occurs in gen AI process
+	 * Custom healthcheck, simply goes to DOWN if critical exception occurs
 	 */
 	@Override
 	public Health health() {
 		
 		Builder health;
 		
-		if (0L == exceptionCount) {
+		long eCount = criticalExceptionsCounter.longValue();
+		
+		if (0L == eCount ) {
 			health =  Health.up();
 		} else {
 			health =  Health.down();
 		}
-		
-		  return health
-		            .withDetail("encountered_exceptions" , exceptionCount)
-		            .build();
-		  
+
+		return health.withDetail("critical_exceptions", eCount).build();
 	}
+	
 }
