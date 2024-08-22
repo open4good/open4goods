@@ -46,7 +46,7 @@ public class BackupConfig {
 	 * Min size in MB the product backup folder should have (Will Raise an healthcheck.down() if this criteria is not met)
 	 */
 	
-	private int minProductsBackupFolderSizeInMb = 20000;
+	private int minProductsBackupFolderSizeInMb = 16000;
 
 
 	/**
