@@ -25,6 +25,7 @@ import org.slf4j.LoggerFactory;
  */
 public class ProductBackupThread implements Runnable {
 
+	// The minimum size a TMP file should have before being moved
     private static final int MINIMUM_TMP_FILE_SIZE = 1024 * 1024 * 100;
 
 	private static final Logger logger = LoggerFactory.getLogger(ProductBackupThread.class);
