@@ -106,11 +106,6 @@ public class VerticalConfig{
 	@JsonMerge
 	private ResourcesAggregationConfig resourcesConfig = new ResourcesAggregationConfig();
 
-	/** The config for compensation **/
-	@JsonMerge
-	private CompensationConfig compensation = new CompensationConfig();
-
-
 	/**
 	 * Configuration relativ to attributes aggregation
 	 */
@@ -493,14 +488,6 @@ public class VerticalConfig{
 		this.resourcesConfig = resourcesConfig;
 	}
 
-	public CompensationConfig getCompensation() {
-		return compensation;
-	}
-
-
-	public void setCompensation(CompensationConfig compensation) {
-		this.compensation = compensation;
-	}
 
 
 	public AttributesConfig getAttributesConfig() {
