@@ -25,7 +25,9 @@ import org.slf4j.LoggerFactory;
  */
 public class ProductBackupThread implements Runnable {
 
-    private static final Logger logger = LoggerFactory.getLogger(ProductBackupThread.class);
+    private static final int MINIMUM_TMP_FILE_SIZE = 1024 * 1024 * 100;
+
+	private static final Logger logger = LoggerFactory.getLogger(ProductBackupThread.class);
 
     private final File outputFolder;
     private final LinkedBlockingQueue<Product> queue;
@@ -101,7 +103,12 @@ public class ProductBackupThread implements Runnable {
     private void finalizeBackup()  {
         IOUtils.closeQuietly(writer);
 
-        if (tmpFile.exists()) {
+        if (!tmpFile.exists()) {
+            logger.error("Backup file does not exist: " + tmpFile.getAbsolutePath());
+        } else if (tmpFile.length() < MINIMUM_TMP_FILE_SIZE) {
+            logger.error("Backup file size is too low");
+            tmpFile.delete();
+        }  else {
             try {
             	Path dest = Path.of(outputFolder.toPath() +"/products-backup-"+fileNumber+".gz");
                 Files.move(tmpFile.toPath(), dest, StandardCopyOption.REPLACE_EXISTING);
@@ -110,9 +117,6 @@ public class ProductBackupThread implements Runnable {
                 logger.error("Failed to move backup file to final destination", e);
                 throw new UncheckedIOException(e);
             }
-        } else {
-            logger.error("Backup file does not exist: " + tmpFile.getAbsolutePath());
-            tmpFile.delete();          
         }
     }
 
