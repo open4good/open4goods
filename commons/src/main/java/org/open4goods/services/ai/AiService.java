@@ -148,7 +148,6 @@ public class AiService implements HealthIndicator{
 	 * @throws JsonMappingException 
 	 * @throws JsonParseException 
 	 */
-	@SuppressWarnings("unchecked")
 	private AiDescriptions createAiDescriptions(AiPromptsConfig aiConfigs, String language, Product product) throws Exception {
 		// 1 - Evaluate the root prompt to inject variables
 		String evaluatedRootPrompt = spelEvaluationService.thymeleafEval(product, aiConfigs.getRootPrompt());
@@ -167,8 +166,13 @@ public class AiService implements HealthIndicator{
 		// 4 - Parse the JSON response
 		Map<String, String> responseMap;
 		
-		TypeReference<HashMap<String, String>> typeRef = new TypeReference<HashMap<String,String>>() {};
-		responseMap = serialisationService.fromJson(aiResponse, typeRef);
+		try {
+			TypeReference<HashMap<String, String>> typeRef = new TypeReference<HashMap<String,String>>() {};
+			responseMap = serialisationService.fromJson(aiResponse, typeRef);
+		} catch (Exception e) {
+			logger.error("Error {} while serialisation of {} ",e.getMessage(), aiResponse);
+			throw e;
+		} 
 		
 		// 5 - Create AiDescription objects
 		AiDescriptions descriptions = new AiDescriptions();
