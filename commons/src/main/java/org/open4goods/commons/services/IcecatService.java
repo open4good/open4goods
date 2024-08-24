@@ -493,8 +493,8 @@ public class IcecatService {
 					// Setting up names
 					FeatureGroup fg = vertical.getOrCreateByIceCatCategoryFeatureGroup(ifg.getID());
 					
-					// TODO : perf
-					// TODO : real I18n
+					// TODO (p3, perf) : review
+					// TODO (p3,i18N) : real I18n
 					List<IcecatName> names = featureGroupsById.get(ifg.getID()).getNames();
 					
 					IcecatName defName = names.stream()
@@ -612,7 +612,7 @@ public class IcecatService {
 		File destFile = new File(remoteCachingFolder+File.separator+IdHelper.getHashedName(url));		
 		// Return the cached file if it exists
 		if (destFile.exists()) {
-			// TODO : Have a refresh policy
+			// TODO (p3, evolution): Have a refresh policy
 			LOGGER.info("File {} already cached", url);
 			return destFile;
 		}
@@ -731,8 +731,7 @@ public class IcecatService {
 	 * @param product
 	 * @return
 	 */
-	// TODO : Caching
-	// of icecat stuff to open4goods attribute model
+	// TODO  (P1, perf) : Caching of icecat stuff to open4goods attribute model
 	public Map<String, String> types(VerticalConfig vertical) {
 		Map<String,String> ret = new HashMap<>();
 		

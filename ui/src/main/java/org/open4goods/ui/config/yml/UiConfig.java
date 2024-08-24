@@ -99,7 +99,7 @@ public class UiConfig {
 	private String email;
 
 	/**
-	 * For the TODO service, the taglist.xml url to be scanned
+	 * For the T O D O service, the taglist.xml url to be scanned
 	 */
 	private String tagListUrl = "";
     /**

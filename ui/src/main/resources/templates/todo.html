@@ -26,25 +26,129 @@
     <!--/* Loader */-->
     <th:block th:insert="~{inc/preloader.html}"></th:block>
 	
-    <main>	
-  
-        <div class="section section-lg pt-5 pt-md-7 bg-gray-200">
-            <div class="container container-semi-fluid">
+    <main>
 
 
+
+		<section class="section hero section-md">
+			<div class="container">
+				<div class="row align-items-center justify-content-between">
+					<div class="col-12 col-md-3">
+						<img class="img-fluid"
+							src="/assets/img/todo.jpg"
+							alt="TODO's">
+					</div>
+					<div class="col-12 col-md-9 text-center text-md-left">
+						<h2 class="h1 mb-4 mt-4 mt-sm-0">Todo Driven Development!</h2>
+						<p class="lead">Un code parfait, ça n'existe pas ! Les TODO's permettent de consulter dans le code les points de progres, bugs potentiels, évolutions possibles. C'est un marqueur important côté technique.</p>
 						
-                <div class="row ">
-                
-                	<table id="todoTable" class="table display">
+						
+						
+						<div class="row">
+						  <div class="col-md-3">
+			                  <div class="card shadow p-4">
+		                            <!-- Header -->
+		                            <div class=" text-center">
+		                                <span class="d-block">
+		                                  <span class="display-3 text-primary fw-bold" th:text="${todos.size()}"></span>
+		                                  <br/>
+		                                  <span class="text-gray font-small">TODO's restants</span>
+		                                 </span>
+		                            </div>
+		                            <!-- End Header -->
+		                        </div>
+						  </div>
+						
+						
+						  
+                                <div class="col-md-9 ">
+                                    Utilisable dans tout code java :
+                                    <br/>
+	                                    <code>
+                                            // TODO : Faire un truc --> Ce todo sera simplement répertorié
+                                        </code>
+                                        <br>
+                                        <code>                                            
+                                            // TODO(P1,config) : Faire un bidule --> catégorie config, priorité 1  
+                                        </code>
+                                        <br/>
+                                        Souple, marche aussi : 
+                                        <br>
+                                        <code>                                            
+                                            // TODO(perf, 3) : Faire un machin --> catégorie perf, priortité 3  
+                                        </code>
+
+                                </div>
+                                
+                                
+						
+						</div>
+						
+						
+		
+					</div>
+				</div>
+			</div>
+		</section>
+		
+		
+		 
+        <section class="bg-green-transparent text-center py-4 mb-5">
+            <h2> <span class="h1 mb-3">Répartition</span></h2>
+        </section>
+        
+        
+        
+
+        <div>
+
+			<div class="container mt-2">
+				<div class="row">
+					<div class="col-12 col-md-6 col-lg-4 mb-5 mb-lg-0">
+						<canvas class="card" id="byComponentChart" width="300" height="300">
+			            </canvas>
+					</div>
+
+					<div class="col-12 col-md-6 col-lg-4 mb-5 mb-lg-0">
+						<canvas class="card" id="byCategoryChart" width="300" height="300">
+			            </canvas>
+					</div>
+
+					<div class="col-12 col-md-6 col-lg-4 mb-5 mb-lg-0">
+						<canvas class="card" id="byPriorityChart" width="300" height="300">
+			            </canvas>
+					</div>
+				</div>
+			</div>
+
+		</div>		
+		
+		
+		
+		
+		
+		 
+        <section class="bg-green-transparent text-center py-4 mt-5">
+            <h2> <span class="h1 mb-3">Explorer les TODO</span></h2>
+        </section>
+        
+		
+		
+		
+		
+		
+		
+		<div class="mt-2">
+            <div class="container-fluid">
+                <div class="card shadow p-2">
+                	<table id="todoTable" class="table table-striped">
 					    <thead>
 					        <tr>
 					            <th>Component</th>
-					            <th>Priorité</th>
+					            <th>Priority</th>
 					            <th>Categorie</th>
 					            <th>Description</th>
-					            <th>estimation</th>
 					            <th>class</th>
-					            <th>line</th>
 					            
 					            
 					        </tr>
@@ -55,9 +159,7 @@
 								<td th:text="${todo.priority}"></td>
 								<td th:text="${todo.category}"></td>
 								<td th:text="${todo.content}"></td>
-								<td th:text="${todo.estimation}"></td>
-								<td th:text="${todo.className}"></td>
-								<td th:text="${todo.lineNumber}"></td>	         
+								<td><a th:href="${todo.href()}" th:text="${todo.className}"></a></td>
 					        </tr>
 					    </tbody>
 					</table>
@@ -85,6 +187,8 @@
 
 <script type="text/javascript" language="javascript" src="/webjars/datatables/js/dataTables.min.js"></script>
 <script type="text/javascript" language="javascript" src="/webjars/datatables/js/dataTables.bootstrap5.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
 
 <script src="../../vendor/nouislider/distribute/nouislider.min.js"></script>
 
@@ -103,9 +207,101 @@
 
 <!-- Setting up variables -->
 <script th:inline="javascript">
+    /*<![CDATA[*/
+    
+        const byPriority = /*[[${byPriority}]]*/ {};
+        const byCategory = /*[[${getCategory}]]*/ {};
+        const byComponent = /*[[${byComponent}]]*/ {};  
+                        
+    /*]]>*/
+</script>
+
+<!-- Setting up variables -->
+<script th:inline="javascript">
+
+
+
+//Function to create a Chart.js chart from a map with configurable options
+//chartType can be : pie', 'bar', 'line', 'doughnut'
+function renderChart(mapData, chartId, chartType, chartLabel, chartTitle, additionalOptions) {
+ const labels = Object.keys(mapData);
+ const dataValues = Object.values(mapData);
+
+ const data = {
+     labels: labels,
+     datasets: [
+         {
+             label: chartLabel,
+             data: dataValues,
+             backgroundColor: [
+                 'rgba(255, 99, 132, 0.2)',
+                 'rgba(255, 159, 64, 0.2)',
+                 'rgba(255, 205, 86, 0.2)',
+                 'rgba(75, 192, 192, 0.2)',
+                 'rgba(54, 162, 235, 0.2)',
+                 'rgba(153, 102, 255, 0.2)',
+                 'rgba(201, 203, 207, 0.2)'
+             ],
+             borderColor: [
+                 'rgba(255, 99, 132, 1)',
+                 'rgba(255, 159, 64, 1)',
+                 'rgba(255, 205, 86, 1)',
+                 'rgba(75, 192, 192, 1)',
+                 'rgba(54, 162, 235, 1)',
+                 'rgba(153, 102, 255, 1)',
+                 'rgba(201, 203, 207, 1)'
+             ],
+             borderWidth: 1
+         }
+     ]
+ };
+
+ // Default options
+ const defaultOptions = {
+     responsive: true,
+     plugins: {
+         legend: {
+             position: 'top',
+         },
+         title: {
+             display: true,
+             text: chartTitle
+         }
+     }
+ };
+
+ // Merging additional options with default options
+ const options = $.extend(true, {}, defaultOptions, additionalOptions);
+
+ const ctx = document.getElementById(chartId).getContext('2d');
+ new Chart(ctx, {
+     type: chartType,
+     data: data,
+     options: options,
+ });
+}
+
+
+
 
 $(document).ready( function () {
-    $('#todoTable').DataTable();
+	$('#todoTable').DataTable({
+	    pageLength: 50
+	});
+    
+    // Init charts
+
+    // Call the function to render the chart with the injected map data
+    if (null != byCategory) renderChart(byCategory, 'byCategoryChart', "pie", "todos", "Répartition par priorités", {});
+
+    // Call the function to render the chart with the injected map data
+    if (null != byComponent) renderChart(byComponent, 'byComponentChart', "pie", "todos", "Répartition par composants", {});
+
+    // Call the function to render the chart with the injected map data
+    if (null != byPriority) renderChart(byPriority, 'byPriorityChart', "pie", "todos", "Répartition par priorités", {});
+    
+
+
 } );
 
 </script>
