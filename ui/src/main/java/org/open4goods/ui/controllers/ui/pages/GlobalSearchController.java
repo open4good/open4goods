@@ -4,11 +4,11 @@ import java.net.URLEncoder;
 import java.nio.charset.Charset;
 import java.util.Locale;
 
-import org.open4goods.helper.IpHelper;
-import org.open4goods.model.constants.CacheConstants;
-import org.open4goods.model.data.GlobalUserSearch;
-import org.open4goods.model.dto.VerticalSearchResponse;
-import org.open4goods.services.SearchService;
+import org.open4goods.commons.helper.IpHelper;
+import org.open4goods.commons.model.constants.CacheConstants;
+import org.open4goods.commons.model.data.GlobalUserSearch;
+import org.open4goods.commons.model.dto.VerticalSearchResponse;
+import org.open4goods.commons.services.SearchService;
 import org.open4goods.ui.config.yml.UiConfig;
 import org.open4goods.ui.controllers.ui.UiService;
 import org.open4goods.ui.repository.UserSearchRepository;

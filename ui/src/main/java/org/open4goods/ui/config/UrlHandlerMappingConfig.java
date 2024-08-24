@@ -4,12 +4,12 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.open4goods.config.yml.WikiPageConfig;
-import org.open4goods.config.yml.ui.ProductI18nElements;
-import org.open4goods.config.yml.ui.VerticalConfig;
-import org.open4goods.model.Localisable;
-import org.open4goods.services.SearchService;
-import org.open4goods.services.VerticalsConfigService;
+import org.open4goods.commons.config.yml.WikiPageConfig;
+import org.open4goods.commons.config.yml.ui.ProductI18nElements;
+import org.open4goods.commons.config.yml.ui.VerticalConfig;
+import org.open4goods.commons.model.Localisable;
+import org.open4goods.commons.services.SearchService;
+import org.open4goods.commons.services.VerticalsConfigService;
 import org.open4goods.ui.config.yml.UiConfig;
 import org.open4goods.ui.controllers.ui.UiService;
 import org.open4goods.ui.controllers.ui.VerticalController;

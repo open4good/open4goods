@@ -8,7 +8,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
-import org.open4goods.services.DataSourceConfigService;
+import org.open4goods.commons.services.DataSourceConfigService;
 import org.open4goods.ui.config.yml.UiConfig;
 import org.open4goods.xwiki.services.XWikiHtmlService;
 import org.slf4j.Logger;

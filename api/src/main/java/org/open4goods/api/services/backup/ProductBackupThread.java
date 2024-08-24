@@ -15,8 +15,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.zip.GZIPOutputStream;
 
 import org.apache.commons.io.IOUtils;
-import org.open4goods.model.product.Product;
-import org.open4goods.services.SerialisationService;
+import org.open4goods.commons.model.product.Product;
+import org.open4goods.commons.services.SerialisationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -1,9 +1,9 @@
 package org.open4goods.crawler.services;
 
-import org.open4goods.model.constants.TimeConstants;
-import org.open4goods.model.constants.UrlConstants;
-import org.open4goods.model.crawlers.ApiSynchConfig;
-import org.open4goods.model.crawlers.FetcherGlobalStats;
+import org.open4goods.commons.model.constants.TimeConstants;
+import org.open4goods.commons.model.constants.UrlConstants;
+import org.open4goods.commons.model.crawlers.ApiSynchConfig;
+import org.open4goods.commons.model.crawlers.FetcherGlobalStats;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.MediaType;

@@ -1,12 +1,12 @@
 package org.open4goods.ui.controllers.ui;
 
-import org.open4goods.config.yml.ui.VerticalConfig;
-import org.open4goods.model.dto.NumericRangeFilter;
-import org.open4goods.model.dto.VerticalSearchRequest;
-import org.open4goods.model.dto.VerticalSearchResponse;
-import org.open4goods.model.product.Product;
-import org.open4goods.services.SearchService;
-import org.open4goods.services.VerticalsConfigService;
+import org.open4goods.commons.config.yml.ui.VerticalConfig;
+import org.open4goods.commons.model.dto.NumericRangeFilter;
+import org.open4goods.commons.model.dto.VerticalSearchRequest;
+import org.open4goods.commons.model.dto.VerticalSearchResponse;
+import org.open4goods.commons.model.product.Product;
+import org.open4goods.commons.services.SearchService;
+import org.open4goods.commons.services.VerticalsConfigService;
 import org.open4goods.ui.controllers.dto.DataTableRequest;
 import org.open4goods.ui.controllers.dto.DataTableResults;
 import org.open4goods.ui.controllers.dto.PaginationCriteria;
@@ -26,7 +26,7 @@ import jakarta.servlet.http.HttpServletResponse;
 @RestController
 public class DataTableController {
 
-	private final org.open4goods.services.SearchService searchService;
+	private final org.open4goods.commons.services.SearchService searchService;
 	private @Autowired UiService uiService;
 	private final VerticalsConfigService verticalService;
 

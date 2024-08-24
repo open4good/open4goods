@@ -6,8 +6,8 @@ import static org.junit.jupiter.api.Assertions.fail;
 import java.util.Locale;
 
 import org.junit.jupiter.api.Test;
+import org.open4goods.commons.exceptions.ValidationException;
 import org.open4goods.crawler.extractors.Extractor;
-import org.open4goods.exceptions.ValidationException;
 
 public class DateParsingTest {
 

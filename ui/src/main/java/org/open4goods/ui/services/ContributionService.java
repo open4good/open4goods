@@ -9,9 +9,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.open4goods.model.constants.CacheConstants;
-import org.open4goods.model.data.ContributionVote;
-import org.open4goods.services.SerialisationService;
+import org.open4goods.commons.model.constants.CacheConstants;
+import org.open4goods.commons.model.data.ContributionVote;
+import org.open4goods.commons.services.SerialisationService;
 import org.open4goods.ui.config.yml.Reversement;
 import org.open4goods.ui.config.yml.ReversementConfig;
 import org.open4goods.ui.repository.ContributionVoteRepository;

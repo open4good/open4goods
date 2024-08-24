@@ -5,11 +5,11 @@ import java.util.Map.Entry;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.text.StringEscapeUtils;
-import org.open4goods.config.yml.datasource.DataSourceProperties;
-import org.open4goods.config.yml.datasource.ExtractorConfig;
+import org.open4goods.commons.config.yml.datasource.DataSourceProperties;
+import org.open4goods.commons.config.yml.datasource.ExtractorConfig;
+import org.open4goods.commons.model.constants.ReferentielKey;
+import org.open4goods.commons.model.data.DataFragment;
 import org.open4goods.crawler.services.fetching.DataFragmentWebCrawler;
-import org.open4goods.model.constants.ReferentielKey;
-import org.open4goods.model.data.DataFragment;
 import org.w3c.dom.Document;
 
 import edu.uci.ics.crawler4j.crawler.CrawlController;

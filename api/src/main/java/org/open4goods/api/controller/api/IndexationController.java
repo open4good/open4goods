@@ -2,11 +2,11 @@
 package org.open4goods.api.controller.api;
 
 import org.open4goods.api.services.store.DataFragmentStoreService;
-import org.open4goods.exceptions.ValidationException;
-import org.open4goods.model.constants.RolesConstants;
-import org.open4goods.model.constants.UrlConstants;
-import org.open4goods.model.data.DataFragment;
-import org.open4goods.model.dto.api.IndexationResponse;
+import org.open4goods.commons.exceptions.ValidationException;
+import org.open4goods.commons.model.constants.RolesConstants;
+import org.open4goods.commons.model.constants.UrlConstants;
+import org.open4goods.commons.model.data.DataFragment;
+import org.open4goods.commons.model.dto.api.IndexationResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.access.prepost.PreAuthorize;

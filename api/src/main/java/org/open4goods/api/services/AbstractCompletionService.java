@@ -1,10 +1,10 @@
 package org.open4goods.api.services;
 
-import org.open4goods.config.yml.ui.VerticalConfig;
-import org.open4goods.dao.ProductRepository;
-import org.open4goods.helper.GenericFileLogger;
-import org.open4goods.model.product.Product;
-import org.open4goods.services.VerticalsConfigService;
+import org.open4goods.commons.config.yml.ui.VerticalConfig;
+import org.open4goods.commons.dao.ProductRepository;
+import org.open4goods.commons.helper.GenericFileLogger;
+import org.open4goods.commons.model.product.Product;
+import org.open4goods.commons.services.VerticalsConfigService;
 import org.slf4j.Logger;
 
 import ch.qos.logback.classic.Level;

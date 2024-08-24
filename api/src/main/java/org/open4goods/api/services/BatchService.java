@@ -2,9 +2,9 @@ package org.open4goods.api.services;
 
 import java.util.concurrent.TimeUnit;
 
-import org.open4goods.model.constants.TimeConstants;
-import org.open4goods.model.crawlers.FetcherGlobalStats;
-import org.open4goods.services.VerticalsConfigService;
+import org.open4goods.commons.model.constants.TimeConstants;
+import org.open4goods.commons.model.crawlers.FetcherGlobalStats;
+import org.open4goods.commons.services.VerticalsConfigService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Scheduled;

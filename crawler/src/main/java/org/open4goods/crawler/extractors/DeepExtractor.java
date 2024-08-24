@@ -7,11 +7,11 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.open4goods.config.yml.datasource.DataSourceProperties;
-import org.open4goods.config.yml.datasource.ExtractorConfig;
-import org.open4goods.config.yml.datasource.HtmlDataSourceProperties;
+import org.open4goods.commons.config.yml.datasource.DataSourceProperties;
+import org.open4goods.commons.config.yml.datasource.ExtractorConfig;
+import org.open4goods.commons.config.yml.datasource.HtmlDataSourceProperties;
+import org.open4goods.commons.model.data.DataFragment;
 import org.open4goods.crawler.services.fetching.DataFragmentWebCrawler;
-import org.open4goods.model.data.DataFragment;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.util.MultiValueMap;

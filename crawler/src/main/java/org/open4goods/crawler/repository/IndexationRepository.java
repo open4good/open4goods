@@ -1,6 +1,6 @@
 package org.open4goods.crawler.repository;
 
-import org.open4goods.model.crawlers.WebIndexationStats;
+import org.open4goods.commons.model.crawlers.WebIndexationStats;
 import org.springframework.data.elasticsearch.repository.ElasticsearchRepository;
 
 /**

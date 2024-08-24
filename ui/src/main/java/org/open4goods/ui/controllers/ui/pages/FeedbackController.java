@@ -6,8 +6,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.open4goods.exceptions.InvalidParameterException;
-import org.open4goods.services.FeedbackService;
+import org.open4goods.commons.exceptions.InvalidParameterException;
+import org.open4goods.commons.services.FeedbackService;
 import org.open4goods.ui.config.yml.UiConfig;
 import org.open4goods.ui.controllers.ui.UiService;
 import org.slf4j.Logger;

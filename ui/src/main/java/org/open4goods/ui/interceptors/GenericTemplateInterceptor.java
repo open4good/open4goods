@@ -1,6 +1,6 @@
 package org.open4goods.ui.interceptors;
 
-import org.open4goods.model.dto.PageInterceptionResponse;
+import org.open4goods.commons.model.dto.PageInterceptionResponse;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.ModelAndView;
 

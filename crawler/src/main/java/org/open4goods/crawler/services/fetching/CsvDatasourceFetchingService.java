@@ -11,13 +11,13 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.stream.Collectors;
 
-import org.open4goods.config.yml.datasource.DataSourceProperties;
+import org.open4goods.commons.config.yml.datasource.DataSourceProperties;
+import org.open4goods.commons.model.crawlers.WebIndexationStats;
 import org.open4goods.crawler.config.yml.FetcherProperties;
 import org.open4goods.crawler.repository.CsvIndexationRepository;
 import org.open4goods.crawler.repository.IndexationRepository;
 import org.open4goods.crawler.services.DataFragmentCompletionService;
 import org.open4goods.crawler.services.IndexationService;
-import org.open4goods.model.crawlers.WebIndexationStats;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -12,10 +12,10 @@ import java.io.OutputStream;
 import org.apache.commons.io.IOUtils;
 import org.krysalis.barcode4j.impl.upcean.EAN13Bean;
 import org.krysalis.barcode4j.output.bitmap.BitmapCanvasProvider;
-import org.open4goods.exceptions.ValidationException;
-import org.open4goods.helper.IdHelper;
-import org.open4goods.model.data.Resource;
-import org.open4goods.services.ResourceService;
+import org.open4goods.commons.exceptions.ValidationException;
+import org.open4goods.commons.helper.IdHelper;
+import org.open4goods.commons.model.data.Resource;
+import org.open4goods.commons.services.ResourceService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -1,7 +1,7 @@
 package org.open4goods.ui.controllers.ui;
 
 import org.apache.commons.lang3.StringUtils;
-import org.open4goods.helper.IpHelper;
+import org.open4goods.commons.helper.IpHelper;
 import org.open4goods.ui.config.yml.UiConfig;
 import org.open4goods.ui.controllers.ui.pages.SitemapEntry;
 import org.open4goods.ui.controllers.ui.pages.SitemapExposedController;

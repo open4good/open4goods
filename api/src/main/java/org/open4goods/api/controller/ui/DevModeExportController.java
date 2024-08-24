@@ -2,7 +2,7 @@ package org.open4goods.api.controller.ui;
 
 import java.io.IOException;
 
-import org.open4goods.helper.DevModeService;
+import org.open4goods.commons.helper.DevModeService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;

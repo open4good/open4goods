@@ -2,14 +2,14 @@ package org.open4goods.api.services.aggregation.services.batch.scores;
 
 import java.util.Collection;
 
-import org.open4goods.config.yml.attributes.AttributeConfig;
-import org.open4goods.config.yml.ui.AttributesConfig;
-import org.open4goods.config.yml.ui.VerticalConfig;
-import org.open4goods.exceptions.ValidationException;
-import org.open4goods.model.attribute.AttributeType;
-import org.open4goods.model.data.Score;
-import org.open4goods.model.product.AggregatedAttribute;
-import org.open4goods.model.product.Product;
+import org.open4goods.commons.config.yml.attributes.AttributeConfig;
+import org.open4goods.commons.config.yml.ui.AttributesConfig;
+import org.open4goods.commons.config.yml.ui.VerticalConfig;
+import org.open4goods.commons.exceptions.ValidationException;
+import org.open4goods.commons.model.attribute.AttributeType;
+import org.open4goods.commons.model.data.Score;
+import org.open4goods.commons.model.product.AggregatedAttribute;
+import org.open4goods.commons.model.product.Product;
 import org.slf4j.Logger;
 
 public class Attribute2ScoreAggregationService extends AbstractScoreAggregationService {

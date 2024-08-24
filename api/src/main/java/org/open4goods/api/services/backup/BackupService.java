@@ -24,9 +24,9 @@ import java.util.zip.GZIPInputStream;
 
 import org.apache.commons.io.FileUtils;
 import org.open4goods.api.config.yml.BackupConfig;
-import org.open4goods.dao.ProductRepository;
-import org.open4goods.model.product.Product;
-import org.open4goods.services.SerialisationService;
+import org.open4goods.commons.dao.ProductRepository;
+import org.open4goods.commons.model.product.Product;
+import org.open4goods.commons.services.SerialisationService;
 import org.open4goods.xwiki.services.XWikiReadService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

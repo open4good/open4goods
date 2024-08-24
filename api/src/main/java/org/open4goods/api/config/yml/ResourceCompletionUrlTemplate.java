@@ -3,7 +3,7 @@ package org.open4goods.api.config.yml;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.open4goods.model.data.ResourceTag;
+import org.open4goods.commons.model.data.ResourceTag;
 
 public class ResourceCompletionUrlTemplate {
     private String url;

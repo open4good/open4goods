@@ -14,12 +14,12 @@ import java.util.Random;
 import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
-import org.open4goods.config.yml.datasource.DataSourceProperties;
-import org.open4goods.config.yml.datasource.FeedConfiguration;
+import org.open4goods.commons.config.yml.datasource.DataSourceProperties;
+import org.open4goods.commons.config.yml.datasource.FeedConfiguration;
+import org.open4goods.commons.helper.IdHelper;
+import org.open4goods.commons.services.DataSourceConfigService;
+import org.open4goods.commons.services.SerialisationService;
 import org.open4goods.crawler.services.fetching.CsvDatasourceFetchingService;
-import org.open4goods.helper.IdHelper;
-import org.open4goods.services.DataSourceConfigService;
-import org.open4goods.services.SerialisationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Scheduled;

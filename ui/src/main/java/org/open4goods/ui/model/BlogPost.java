@@ -3,7 +3,7 @@ package org.open4goods.ui.model;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.open4goods.model.dto.WikiAttachment;
+import org.open4goods.commons.model.dto.WikiAttachment;
 import org.open4goods.xwiki.model.FullPage;
 
 public class BlogPost {

@@ -6,11 +6,11 @@ import java.util.Locale;
 import javax.xml.xpath.XPathExpressionException;
 
 import org.apache.commons.lang3.StringUtils;
-import org.open4goods.config.yml.datasource.DataSourceProperties;
-import org.open4goods.config.yml.datasource.ExtractorConfig;
+import org.open4goods.commons.config.yml.datasource.DataSourceProperties;
+import org.open4goods.commons.config.yml.datasource.ExtractorConfig;
+import org.open4goods.commons.exceptions.ResourceNotFoundException;
+import org.open4goods.commons.model.data.DataFragment;
 import org.open4goods.crawler.services.fetching.DataFragmentWebCrawler;
-import org.open4goods.exceptions.ResourceNotFoundException;
-import org.open4goods.model.data.DataFragment;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;

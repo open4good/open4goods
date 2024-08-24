@@ -4,10 +4,10 @@ package org.open4goods.api;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import org.junit.jupiter.api.Test;
-import org.open4goods.model.constants.Currency;
-import org.open4goods.model.data.Price;
-import org.open4goods.model.data.Rating;
-import org.open4goods.services.StandardiserService;
+import org.open4goods.commons.model.constants.Currency;
+import org.open4goods.commons.model.data.Price;
+import org.open4goods.commons.model.data.Rating;
+import org.open4goods.commons.services.StandardiserService;
 
 public class RatingStandardisationTest {
 
