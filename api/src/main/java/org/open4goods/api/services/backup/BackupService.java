@@ -359,9 +359,9 @@ public class BackupService implements HealthIndicator {
 					.withDetail("product_export_running", productExportRunning.getClass())
 					.withDetail("product_backup_date", new Date (productLastModified).toString())
 					.withDetail("product_backup_size", FileUtils.byteCountToDisplaySize(productFolderSize))
-					.withDetail("product_exported_items",  expordedProductsCounter.longValue())
+					.withDetail("last_product_export_items_count",  expordedProductsCounter.longValue())
 					
-					.withDetail("xwiki_export_running", wikiExportRunning.getClass())
+					.withDetail("xwiki_export_running", wikiExportRunning.get())
 					.withDetail("xwiki_backup_date", new Date (wikiLastModified).toString())
 					.withDetail("xwiki_backup_size", FileUtils.byteCountToDisplaySize(wikiFileSize))
 					.build();
