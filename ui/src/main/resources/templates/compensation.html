@@ -98,7 +98,7 @@
                                 <span class="fas fa-user"></span>
                             </div>
                             <h3 class="h5">Organismes</h3>
-                            <span class="counter display-3 text-gray d-block" th:text="${config.getDistingReversementsOrganisation()}"></span>
+                            <span class="counter display-3 text-gray d-block" th:text="${config.reversementConfig.getDistingReversementsOrganisation()}"></span>
                         </div>
                         <!-- End of Box -->
                     </div>
@@ -120,7 +120,7 @@
                                 <span class="fas fa-euro-sign"></span>
                             </div>
                             <h3 class="h5">Montant reversé</h3>
-                            <span><span class="display-3 text-gray d-block" th:text="${config.getTotalReversements()}"></span>€</span>
+                            <span><span class="display-3 text-gray d-block" th:text="${config.reversementConfig.getTotalReversements()}"></span>€</span>
                         </div>
                         <!-- End of Box -->
                     </div>
@@ -129,41 +129,56 @@
 
         </section>
         
-        <section class="bg-green-transparent text-center py-4 mb-5">
-            <h2> <span class="h1 mb-3">Les contributions</span></h2>
-        </section>
-        
-              <!-- End of section -->
+        <!-- End of section -->
         <!-- Section -->
         <section class="section mt-5 section-lg pt-0">
            <div class="container">
 
+                <div class="row">
                 
-                <div class="card bg-white border-gray-300 ">
-	                            <div th:each="item : ${config.reversements}" class="border-bottom px-4 py-5">
-	                                <div class="row align-items-center text-center">
-	                                    <div class="col-12 col-md-3 pb-3 pb-md-0">
-	                                        <img th:src="${item.orgImg}" th:alt="${item.orgName}">
-	                                    </div>
-	                                    <div class="col-md-5 pb-2 pb-md-0">
-	                                        <h3 class="h5 mb-3"><span th:text="${item.amount}"></span> €</h3>
-	                                        <p class="mb-0" th:text="${item.orgName}"></p>
-	                                    </div>
-	                                    <div class="col-md-4 text-md-right"><span class="badge bg-primary" th:text="${item.date}" th:title="${item.comment}"></span></div>
-	                                </div>
-	                            </div>
-	            </div>
-	            
-	            <!--  Disclaimer-->  
-	            <div class="alert alert-danger alert-dismissible fade show mt-5" role="alert">
-	                    <span class="fas fa-bullhorn me-1"></span>
-	                    <strong>Que ça depuis 2021 ?!</strong> 
-	                    Vous êtes vigilants, et vous faîtes bien ! L'aventure Nudger était initialement un projet "geek" annexe, connu et testé sous le nom de comparatif-tv.fr. Il a permis de prouver le modèle financier et technique, mais a ensuite été mis en sommeil pendant plus de 2 ans... 
-	                    Mais tel le Phénix, Nudger revient en 2024 avec l'ambition de passer à l'échelle ! 
-	     
-	                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fermer"></button>
-	             </div>
+                    <div class="row">
+                        <div class="col-lg-6">
+                        
+                                 <div class="card bg-white border-gray-300 ">
+		                                <div th:each="item : ${config.reversementConfig.reversements}" class="border-bottom px-4 py-5">
+		                                    <div class="row align-items-center text-center">
+		                                        <div class="col-12 col-md-3 pb-3 pb-md-0">
+		                                            <img th:src="${item.orgImg}" th:alt="${item.orgName}">
+		                                        </div>
+		                                        <div class="col-md-5 pb-2 pb-md-0">
+		                                            <h3 class="h5 mb-3"><span th:text="${item.amount}"></span> €</h3>
+		                                            <p class="mb-0" th:text="${item.orgName}"></p>
+		                                        </div>
+		                                        <div class="col-md-4 text-md-right"><span class="badge bg-primary" th:text="${item.date}" th:title="${item.comment}"></span></div>
+		                                    </div>
+		                                </div>
+		                </div>
+		                
+		                <!--  Disclaimer-->  
+		                <div class="alert alert-danger alert-dismissible fade show mt-5" role="alert">
+		                        <span class="fas fa-bullhorn me-1"></span>
+		                        <strong>Que ça depuis 2021 ?!</strong> 
+		                        Vous êtes vigilants, et vous faîtes bien ! L'aventure Nudger était initialement un projet "geek" annexe, connu et testé sous le nom de comparatif-tv.fr. Il a permis de prouver le modèle financier et technique, mais a ensuite été mis en sommeil pendant plus de 2 ans... 
+		                        Mais tel le Phénix, Nudger revient en 2024 avec l'ambition de passer à l'échelle ! 
+		         
+		                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fermer"></button>
+		                 </div>
+                        
+                        </div>
+                        
+                        
+                    </div>
+                
+                </div>
+                
+    
             </div>
+            
+            
+            
+            
+            
+            
             
         </section>
         
@@ -233,26 +248,35 @@
                             
                             
                             
-                            <div class="my-4">
-                                <div class="d-flex">
-                                    <div class="me-3 me-md-4">
-                                        <div class="icon icon-shape icon-shape-secondary organic-radius">
-                                            <span class="fas fa-file-alt"></span>
-                                        </div>
-                                    </div>
-                                    <div>
-                                        <h3 class="h4">En toute transparence</h3>
-                                        <p>
-                                            Nous affichons le nombre et la répartition des votes, La mise à jour s'effectue toutes les heures. Et comme c'est <a href="#opensource">open-source</a>, vous regarder, vérifier ou contribuer au système de vote de Nudger.                                         
-                                        </p>
-                                    </div>
-                                </div>
-                            </div>
+                            
                         </div>  
                     </div>
 
 
 					<div class="col-12 col-md-6 col-lg-4 mb-5 mb-lg-0">
+					
+					
+					
+                            <div class="my-4">
+                                <div class="d-flex">
+               
+                                    <div>
+                                        <h3 class="h4">En toute transparence</h3>
+                                        <p>
+                                            Voici le nombre et la répartition des votes, la mise à jour s'effectue toutes les heures. Et comme c'est <a href="#opensource">open-source</a>, vous pouvez regarder, vérifier ou contribuer au système de vote de Nudger.                                         
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>					
+					
+					
+					
+					
+					
+					
+					
+					
+					
 						<div class="card shadow text-center">
 							<!-- Header -->
 							<div class="card-header bg-white p-3">
@@ -269,6 +293,18 @@
 							</div>
 							<!-- End Content -->
 						</div>
+						
+						
+						<canvas class="mt-4" id="voteChart"></canvas>    
+						
+						
+						
+						
+						
+						
+						
+						
+						
 					</div>
 
 
@@ -339,14 +375,6 @@
                     </div>				
             </div>
         </section>
-        
-        
-        
-        
-        
-      
-  
-        
     </main>
     
 
@@ -364,8 +392,7 @@
 <script src="../../vendor/jarallax/dist/jarallax.min.js"></script>
 <script src="../../vendor/smooth-scroll/dist/smooth-scroll.polyfills.min.js"></script>
 <script src="../../vendor/vivus/dist/vivus.min.js"></script>
-<script src="../../vendor/chartist/dist/chartist.min.js"></script>
-<script src="../../vendor/chartist-plugin-tooltips/dist/chartist-plugin-tooltip.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="../../vendor/@glidejs/glide/dist/glide.min.js"></script>
 <script src="../../vendor/countup.js/dist/countUp.umd.js"></script>
 <script src="../../vendor/vanillajs-datepicker/dist/js/datepicker.min.js"></script>
@@ -378,33 +405,75 @@
 <script src="../../assets/js/pixel.js"></script>
 <!-- custom sources -->
 <script src="../../assets/js/pixel-custom.js"></script>
+
+<!-- Setting up variables -->
+<script th:inline="javascript">
+    /*<![CDATA[*/
+    
+        const repartition = /*[[${repartition}]]*/ {};    
+                        
+    /*]]>*/
+</script>
+
 <script>
 $(document).ready(function() {
-	   
-	// Pie construction
-	// Gather data from inline HTML elements
-    const dataElements = document.querySelectorAll('.pie-data');
-    const series = [];
-    const labels = [];
 
-    dataElements.forEach(function(element) {
-        series.push(Number(element.getAttribute('data-value')));
-        labels.push(element.getAttribute('data-label'));
+    ///////////////////////////////////
+    // Vote chart
+    ///////////////////////////////////
+
+    // Extracting labels and data from the repartition map
+    const labels = Object.keys(repartition);
+    const dataValues = Object.values(repartition);
+
+    // Chart configuration
+    const data = {
+        labels: labels,
+        datasets: [
+            {
+                label: 'Dataset 1',
+                data: dataValues,
+                backgroundColor: [
+                    'rgba(255, 99, 132, 0.2)',
+                    'rgba(255, 159, 64, 0.2)',
+                    'rgba(255, 205, 86, 0.2)',
+                    'rgba(75, 192, 192, 0.2)',
+                    'rgba(54, 162, 235, 0.2)',
+                    'rgba(153, 102, 255, 0.2)',
+                    'rgba(201, 203, 207, 0.2)'
+                ],
+                borderColor: [
+                    'rgba(255, 99, 132, 1)',
+                    'rgba(255, 159, 64, 1)',
+                    'rgba(255, 205, 86, 1)',
+                    'rgba(75, 192, 192, 1)',
+                    'rgba(54, 162, 235, 1)',
+                    'rgba(153, 102, 255, 1)',
+                    'rgba(201, 203, 207, 1)'
+                ],
+                borderWidth: 1
+            }
+        ]
+    };
+
+    const ctx = document.getElementById('voteChart').getContext('2d');
+    var pieChart = new Chart(ctx, {
+        type: 'pie',
+        data: data,
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    position: 'top',
+                },
+                title: {
+                    display: true,
+                    text: 'Répartition des votes'
+                }
+            }
+        },
     });
 
-    // Create the pie chart using the gathered data
-    new Chartist.Pie('.ct-chart', {
-        series: series,
-        labels: labels
-    }, {
-        donut: true,
-        donutWidth: 60,
-        startAngle: 0,
-        total: series.reduce((a, b) => a + b, 0), // Calculate total from series
-        showLabel: true
-    });
-	
-	
 });
 </script>
 

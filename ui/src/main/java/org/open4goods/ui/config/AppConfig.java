@@ -57,6 +57,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.support.ResourcePatternResolver;
+import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
@@ -153,8 +154,8 @@ public class AppConfig {
     
     @Bean
     @Autowired
-    ContributionService contributionService (CacheManager cacheManager, SerialisationService serialisationService, ContributionVoteRepository repository, UiConfig uiConfig) {
-    	return new ContributionService(cacheManager, serialisationService, repository, uiConfig.getReversements());
+    ContributionService contributionService (CacheManager cacheManager, SerialisationService serialisationService, ContributionVoteRepository repository, UiConfig uiConfig, ElasticsearchOperations esOps) {
+    	return new ContributionService(cacheManager, serialisationService, repository, uiConfig.getReversementConfig(), esOps);
     }
     
     
