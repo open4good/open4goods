@@ -505,25 +505,23 @@ public class ProductRepository {
 	}
 
 
-	@Cacheable( cacheNames = CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME)
+	@Cacheable(keyGenerator = CacheConstants.KEY_GENERATOR, cacheNames = CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME)
 	public Long countMainIndex() {
 		return elasticsearchTemplate.count(Query.findAll(), current_index);
 	}
 
-	@Cacheable(cacheNames = CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME)
+	@Cacheable(keyGenerator = CacheConstants.KEY_GENERATOR, cacheNames = CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME)
 	public Long countMainIndexHavingPrice() {
 		CriteriaQuery query = new CriteriaQuery(getValidDateQuery());
 		return elasticsearchTemplate.count(query, current_index);
 	}
 
 	
-	@Cacheable(cacheNames = CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME)
+	@Cacheable(keyGenerator = CacheConstants.KEY_GENERATOR, cacheNames = CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME)
 	public Map<Integer, Long> byTaxonomy() {
 
 		// Setting the query
 		NativeQueryBuilder esQuery = new NativeQueryBuilder().withQuery(new CriteriaQuery( new Criteria("id").exists()));
-
-
 
 		// Adding standard aggregations
 		esQuery = esQuery

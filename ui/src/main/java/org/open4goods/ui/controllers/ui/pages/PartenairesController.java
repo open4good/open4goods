@@ -7,7 +7,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.open4goods.config.yml.datasource.DataSourceProperties;
-import org.open4goods.model.data.AffiliationToken;
+import org.open4goods.model.data.ContributionVote;
 import org.open4goods.services.DataSourceConfigService;
 import org.open4goods.services.SerialisationService;
 import org.open4goods.ui.config.yml.UiConfig;
@@ -60,7 +60,7 @@ public class PartenairesController  implements SitemapExposedController{
 	public void post() {
 		for (DataSourceProperties dsp : datasourceConfigService.datasourceConfigs().values()) {
 
-			AffiliationToken token = new AffiliationToken(dsp.getName(),dsp.getPortalUrl());
+			ContributionVote token = new ContributionVote(dsp.getName(),dsp.getPortalUrl());
 			String link;
 			try {
 				link = URLEncoder.encode(serialisationService.compressString(serialisationService.toJson(token)), Charset.defaultCharset());

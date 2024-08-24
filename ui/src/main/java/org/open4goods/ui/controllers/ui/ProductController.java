@@ -11,7 +11,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.open4goods.config.yml.ui.VerticalConfig;
 import org.open4goods.dao.ProductRepository;
 import org.open4goods.exceptions.ResourceNotFoundException;
-import org.open4goods.model.data.AffiliationToken;
+import org.open4goods.model.data.ContributionVote;
 import org.open4goods.model.data.AiDescription;
 import org.open4goods.model.data.AiDescriptions;
 import org.open4goods.model.dto.AttributesFeatureGroups;
@@ -340,7 +340,7 @@ public class ProductController  {
 	private void inferAffiliationToken(HttpServletRequest  request, Product data, AggregatedPrice price)  {
 
 		try {
-			AffiliationToken token = new AffiliationToken( price, data);
+			ContributionVote token = new ContributionVote( price, data);
 			
 			
 			String serToken = URLEncoder.encode(serialisationService.compressString(serialisationService.toJson(token)), Charset.defaultCharset());

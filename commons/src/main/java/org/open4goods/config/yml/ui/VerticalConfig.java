@@ -333,7 +333,7 @@ public class VerticalConfig{
 	 * @param key the key
 	 * @return the language by server name
 	 */
-	@Cacheable(cacheNames=CacheConstants.FOREVER_LOCAL_CACHE_NAME)
+	@Cacheable( keyGenerator = CacheConstants.KEY_GENERATOR,  cacheNames=CacheConstants.FOREVER_LOCAL_CACHE_NAME)
 	//TODO(perf) : check effectiv caching
 	public String getLanguageByServerName(final String key) {
 		HashMap<String,String> hashedSiteLocales = null;
@@ -358,8 +358,7 @@ public class VerticalConfig{
 	 * @param request
 	 * @return
 	 */
-	@Cacheable(cacheNames=CacheConstants.FOREVER_LOCAL_CACHE_NAME)
-	//TODO(perf) : check effectiv caching
+	//TODO(perf) : caching on request.getservername
 	public Locale getSiteLocaleOrDefault(final HttpServletRequest request) {
 		Locale l;
 		try {
@@ -373,10 +372,10 @@ public class VerticalConfig{
 	}
 
 	/**
-	 * Return the name of the product index for this capsule
+	 * Return the name of the product index for this vertical
 	 * @return
 	 */
-	@Cacheable(cacheNames=CacheConstants.FOREVER_LOCAL_CACHE_NAME)
+	// TODO : Local cache, better, store as attribute
 	public String indexName() {
 		return "vertical-" + IdHelper.azCharAndDigits(id, "-").toLowerCase();
 	}
