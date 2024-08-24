@@ -6,7 +6,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.junit.jupiter.api.Test;
-import org.open4goods.model.data.UnindexedKeyVal;
+import org.open4goods.commons.model.data.UnindexedKeyVal;
 
 public class UnindexedKeyValTest {
 

@@ -3,14 +3,14 @@ package org.open4goods.crawler.controller;
 
 import java.io.IOException;
 
-import org.open4goods.config.yml.datasource.DataSourceProperties;
+import org.open4goods.commons.config.yml.datasource.DataSourceProperties;
+import org.open4goods.commons.exceptions.TechnicalException;
+import org.open4goods.commons.model.constants.UrlConstants;
+import org.open4goods.commons.model.crawlers.FetcherGlobalStats;
+import org.open4goods.commons.model.data.DataFragment;
+import org.open4goods.commons.model.dto.FetchRequestResponse;
 import org.open4goods.crawler.config.yml.FetcherProperties;
 import org.open4goods.crawler.services.FetchersService;
-import org.open4goods.exceptions.TechnicalException;
-import org.open4goods.model.constants.UrlConstants;
-import org.open4goods.model.crawlers.FetcherGlobalStats;
-import org.open4goods.model.data.DataFragment;
-import org.open4goods.model.dto.FetchRequestResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.GetMapping;

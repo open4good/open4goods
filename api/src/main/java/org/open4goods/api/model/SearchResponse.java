@@ -3,8 +3,8 @@ package org.open4goods.api.model;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.open4goods.model.constants.ReferentielKey;
-import org.open4goods.model.data.DataFragment;
+import org.open4goods.commons.model.constants.ReferentielKey;
+import org.open4goods.commons.model.data.DataFragment;
 
 public class SearchResponse {
 

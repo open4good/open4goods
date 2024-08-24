@@ -4,10 +4,10 @@ package org.open4goods.crawler.config.yml;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.open4goods.config.yml.datasource.CrawlProperties;
-import org.open4goods.config.yml.datasource.FeedConfiguration;
-import org.open4goods.model.constants.UrlConstants;
-import org.open4goods.model.crawlers.ApiSynchConfig;
+import org.open4goods.commons.config.yml.datasource.CrawlProperties;
+import org.open4goods.commons.config.yml.datasource.FeedConfiguration;
+import org.open4goods.commons.model.constants.UrlConstants;
+import org.open4goods.commons.model.crawlers.ApiSynchConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.context.properties.ConfigurationProperties;

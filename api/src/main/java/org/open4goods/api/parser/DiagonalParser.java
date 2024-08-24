@@ -1,10 +1,10 @@
 package org.open4goods.api.parser;
 
 import org.apache.commons.lang3.math.NumberUtils;
-import org.open4goods.config.yml.attributes.AttributeConfig;
-import org.open4goods.config.yml.attributes.AttributeParser;
-import org.open4goods.exceptions.ParseException;
-import org.open4goods.model.attribute.Attribute;
+import org.open4goods.commons.config.yml.attributes.AttributeConfig;
+import org.open4goods.commons.config.yml.attributes.AttributeParser;
+import org.open4goods.commons.exceptions.ParseException;
+import org.open4goods.commons.model.attribute.Attribute;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

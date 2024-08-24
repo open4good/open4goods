@@ -3,7 +3,7 @@ package org.open4goods.ui.config;
 import java.io.File;
 import java.util.List;
 
-import org.open4goods.interceptors.BanCheckerInterceptor;
+import org.open4goods.commons.interceptors.BanCheckerInterceptor;
 import org.open4goods.ui.config.yml.UiConfig;
 import org.open4goods.ui.interceptors.GenericTemplateInterceptor;
 import org.springframework.context.annotation.Bean;

@@ -4,13 +4,13 @@ package org.open4goods.crawler.services;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.open4goods.config.yml.datasource.DataSourceProperties;
+import org.open4goods.commons.config.yml.datasource.DataSourceProperties;
+import org.open4goods.commons.exceptions.TechnicalException;
+import org.open4goods.commons.model.crawlers.FetcherGlobalStats;
+import org.open4goods.commons.model.crawlers.WebIndexationStats;
 import org.open4goods.crawler.config.yml.FetcherProperties;
 import org.open4goods.crawler.services.fetching.CsvDatasourceFetchingService;
 import org.open4goods.crawler.services.fetching.WebDatasourceFetchingService;
-import org.open4goods.exceptions.TechnicalException;
-import org.open4goods.model.crawlers.FetcherGlobalStats;
-import org.open4goods.model.crawlers.WebIndexationStats;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

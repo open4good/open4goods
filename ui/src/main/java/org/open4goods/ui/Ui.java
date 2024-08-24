@@ -3,11 +3,11 @@ package org.open4goods.ui;
 
 import java.io.IOException;
 
-import org.open4goods.dao.ProductRepository;
-import org.open4goods.services.SerialisationService;
-import org.open4goods.store.repository.elastic.BrandScoresRepository;
-import org.open4goods.store.repository.elastic.ElasticProductRepository;
-import org.open4goods.store.repository.redis.RedisProductRepository;
+import org.open4goods.commons.dao.ProductRepository;
+import org.open4goods.commons.services.SerialisationService;
+import org.open4goods.commons.store.repository.elastic.BrandScoresRepository;
+import org.open4goods.commons.store.repository.elastic.ElasticProductRepository;
+import org.open4goods.commons.store.repository.redis.RedisProductRepository;
 import org.open4goods.ui.repository.ContributionVoteRepository;
 import org.open4goods.ui.repository.UserSearchRepository;
 import org.slf4j.Logger;

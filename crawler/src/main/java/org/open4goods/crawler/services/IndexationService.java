@@ -3,10 +3,10 @@ package org.open4goods.crawler.services;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.open4goods.exceptions.ValidationException;
-import org.open4goods.model.constants.UrlConstants;
-import org.open4goods.model.data.DataFragment;
-import org.open4goods.model.dto.api.IndexationResponse;
+import org.open4goods.commons.exceptions.ValidationException;
+import org.open4goods.commons.model.constants.UrlConstants;
+import org.open4goods.commons.model.data.DataFragment;
+import org.open4goods.commons.model.dto.api.IndexationResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

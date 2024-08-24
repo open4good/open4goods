@@ -3,12 +3,12 @@ package org.open4goods.api;
 
 import java.io.IOException;
 
+import org.open4goods.commons.services.SerialisationService;
+import org.open4goods.commons.store.repository.elastic.BrandScoresRepository;
+import org.open4goods.commons.store.repository.elastic.ElasticProductRepository;
+import org.open4goods.commons.store.repository.redis.RedisProductRepository;
 import org.open4goods.crawler.controller.CrawlController;
 import org.open4goods.crawler.repository.IndexationRepository;
-import org.open4goods.services.SerialisationService;
-import org.open4goods.store.repository.elastic.BrandScoresRepository;
-import org.open4goods.store.repository.elastic.ElasticProductRepository;
-import org.open4goods.store.repository.redis.RedisProductRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

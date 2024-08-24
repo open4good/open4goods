@@ -2,9 +2,9 @@ package org.open4goods.api.services.aggregation.services.batch.scores;
 
 import java.util.Collection;
 
-import org.open4goods.config.yml.ui.VerticalConfig;
-import org.open4goods.exceptions.AggregationSkipException;
-import org.open4goods.model.product.Product;
+import org.open4goods.commons.config.yml.ui.VerticalConfig;
+import org.open4goods.commons.exceptions.AggregationSkipException;
+import org.open4goods.commons.model.product.Product;
 import org.slf4j.Logger;
 
 public class CleanScoreAggregationService extends AbstractScoreAggregationService {

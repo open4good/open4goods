@@ -11,14 +11,14 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.commons.lang3.StringUtils;
 import org.open4goods.api.services.AggregationFacadeService;
-import org.open4goods.dao.ProductRepository;
-import org.open4goods.exceptions.AggregationSkipException;
-import org.open4goods.exceptions.ValidationException;
-import org.open4goods.model.Standardisable;
-import org.open4goods.model.data.DataFragment;
-import org.open4goods.model.product.Product;
-import org.open4goods.services.StandardiserService;
-import org.open4goods.store.repository.ProductIndexationWorker;
+import org.open4goods.commons.dao.ProductRepository;
+import org.open4goods.commons.exceptions.AggregationSkipException;
+import org.open4goods.commons.exceptions.ValidationException;
+import org.open4goods.commons.model.Standardisable;
+import org.open4goods.commons.model.data.DataFragment;
+import org.open4goods.commons.model.product.Product;
+import org.open4goods.commons.services.StandardiserService;
+import org.open4goods.commons.store.repository.ProductIndexationWorker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

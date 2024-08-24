@@ -1,8 +1,8 @@
 package org.open4goods.ui.controllers.ui.pages;
 
-import org.open4goods.helper.IpHelper;
-import org.open4goods.services.MailService;
-import org.open4goods.services.RecaptchaService;
+import org.open4goods.commons.helper.IpHelper;
+import org.open4goods.commons.services.MailService;
+import org.open4goods.commons.services.RecaptchaService;
 import org.open4goods.ui.config.yml.UiConfig;
 import org.open4goods.ui.controllers.ui.UiService;
 import org.springframework.beans.factory.annotation.Autowired;

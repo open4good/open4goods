@@ -6,12 +6,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.lang3.ArrayUtils;
-import org.open4goods.config.BrandsConfiguration;
-import org.open4goods.config.yml.DevModeConfiguration;
-import org.open4goods.config.yml.GithubConfiguration;
-import org.open4goods.config.yml.IcecatConfiguration;
-import org.open4goods.config.yml.ui.DescriptionsAggregationConfig;
-import org.open4goods.config.yml.ui.ImageGenerationConfig;
+import org.open4goods.commons.config.BrandsConfiguration;
+import org.open4goods.commons.config.yml.DevModeConfiguration;
+import org.open4goods.commons.config.yml.GithubConfiguration;
+import org.open4goods.commons.config.yml.IcecatConfiguration;
+import org.open4goods.commons.config.yml.ui.DescriptionsAggregationConfig;
+import org.open4goods.commons.config.yml.ui.ImageGenerationConfig;
 import org.open4goods.crawler.config.yml.FetcherProperties;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.ConfigurationProperties;

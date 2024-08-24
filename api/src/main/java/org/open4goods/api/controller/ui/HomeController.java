@@ -4,8 +4,8 @@ package org.open4goods.api.controller.ui;
 
 import java.util.List;
 
-import org.open4goods.model.dto.ExpandedTaxonomy;
-import org.open4goods.services.VerticalsConfigService;
+import org.open4goods.commons.model.dto.ExpandedTaxonomy;
+import org.open4goods.commons.services.VerticalsConfigService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

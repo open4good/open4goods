@@ -8,7 +8,7 @@ import java.util.Set;
 import java.util.stream.Stream;
 
 import org.apache.commons.lang3.StringUtils;
-import org.open4goods.model.data.DataFragment;
+import org.open4goods.commons.model.data.DataFragment;
 
 public class RealtimeSearchResponse {
 

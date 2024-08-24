@@ -1,6 +1,6 @@
 package org.open4goods.ui.controllers.ui.pages;
 
-import org.open4goods.model.Localisable;
+import org.open4goods.commons.model.Localisable;
 
 import cz.jiripinkas.jsitemapgenerator.ChangeFreq;
 

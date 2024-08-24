@@ -4,12 +4,12 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.open4goods.config.yml.ui.VerticalConfig;
-import org.open4goods.model.dto.VerticalFilterTerm;
-import org.open4goods.model.dto.VerticalSearchRequest;
-import org.open4goods.model.dto.VerticalSearchResponse;
-import org.open4goods.services.SearchService;
-import org.open4goods.services.VerticalsConfigService;
+import org.open4goods.commons.config.yml.ui.VerticalConfig;
+import org.open4goods.commons.model.dto.VerticalFilterTerm;
+import org.open4goods.commons.model.dto.VerticalSearchRequest;
+import org.open4goods.commons.model.dto.VerticalSearchResponse;
+import org.open4goods.commons.services.SearchService;
+import org.open4goods.commons.services.VerticalsConfigService;
 import org.open4goods.ui.services.BlogService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

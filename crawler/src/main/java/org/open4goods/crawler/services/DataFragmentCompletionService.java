@@ -9,14 +9,14 @@ import java.util.NoSuchElementException;
 import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
-import org.open4goods.config.yml.datasource.DataSourceProperties;
-import org.open4goods.exceptions.InvalidParameterException;
-import org.open4goods.helper.IdHelper;
-import org.open4goods.model.attribute.Attribute;
-import org.open4goods.model.constants.ReferentielKey;
-import org.open4goods.model.data.DataFragment;
-import org.open4goods.model.data.ProviderSupportType;
-import org.open4goods.services.BrandService;
+import org.open4goods.commons.config.yml.datasource.DataSourceProperties;
+import org.open4goods.commons.exceptions.InvalidParameterException;
+import org.open4goods.commons.helper.IdHelper;
+import org.open4goods.commons.model.attribute.Attribute;
+import org.open4goods.commons.model.constants.ReferentielKey;
+import org.open4goods.commons.model.data.DataFragment;
+import org.open4goods.commons.model.data.ProviderSupportType;
+import org.open4goods.commons.services.BrandService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

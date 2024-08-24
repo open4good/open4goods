@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import org.apache.commons.io.IOUtils;
-import org.open4goods.exceptions.TechnicalException;
+import org.open4goods.commons.exceptions.TechnicalException;
 import org.open4goods.ui.controllers.ui.UiService;
 import org.open4goods.ui.services.OpenDataService;
 import org.slf4j.Logger;

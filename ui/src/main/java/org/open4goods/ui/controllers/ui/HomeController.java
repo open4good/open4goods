@@ -1,8 +1,8 @@
 package org.open4goods.ui.controllers.ui;
 
-import org.open4goods.dao.ProductRepository;
-import org.open4goods.services.DataSourceConfigService;
-import org.open4goods.services.VerticalsConfigService;
+import org.open4goods.commons.dao.ProductRepository;
+import org.open4goods.commons.services.DataSourceConfigService;
+import org.open4goods.commons.services.VerticalsConfigService;
 import org.open4goods.ui.services.OpenDataService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

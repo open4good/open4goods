@@ -6,14 +6,14 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.open4goods.api.services.aggregation.AbstractAggregationService;
-import org.open4goods.config.yml.ui.VerticalConfig;
-import org.open4goods.exceptions.AggregationSkipException;
-import org.open4goods.model.BarcodeType;
-import org.open4goods.model.constants.ReferentielKey;
-import org.open4goods.model.data.DataFragment;
-import org.open4goods.model.product.Product;
-import org.open4goods.services.BarcodeValidationService;
-import org.open4goods.services.Gs1PrefixService;
+import org.open4goods.commons.config.yml.ui.VerticalConfig;
+import org.open4goods.commons.exceptions.AggregationSkipException;
+import org.open4goods.commons.model.BarcodeType;
+import org.open4goods.commons.model.constants.ReferentielKey;
+import org.open4goods.commons.model.data.DataFragment;
+import org.open4goods.commons.model.product.Product;
+import org.open4goods.commons.services.BarcodeValidationService;
+import org.open4goods.commons.services.Gs1PrefixService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

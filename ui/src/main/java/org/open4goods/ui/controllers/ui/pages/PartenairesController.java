@@ -6,10 +6,10 @@ import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.open4goods.config.yml.datasource.DataSourceProperties;
-import org.open4goods.model.data.ContributionVote;
-import org.open4goods.services.DataSourceConfigService;
-import org.open4goods.services.SerialisationService;
+import org.open4goods.commons.config.yml.datasource.DataSourceProperties;
+import org.open4goods.commons.model.data.ContributionVote;
+import org.open4goods.commons.services.DataSourceConfigService;
+import org.open4goods.commons.services.SerialisationService;
 import org.open4goods.ui.config.yml.UiConfig;
 import org.open4goods.ui.controllers.ui.UiService;
 import org.slf4j.Logger;

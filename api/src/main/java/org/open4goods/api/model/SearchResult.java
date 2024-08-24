@@ -1,6 +1,6 @@
 package org.open4goods.api.model;
 
-import org.open4goods.model.data.Price;
+import org.open4goods.commons.model.data.Price;
 
 public class SearchResult {
 	private String brand;

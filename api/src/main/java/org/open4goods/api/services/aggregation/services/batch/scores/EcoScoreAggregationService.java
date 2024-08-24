@@ -7,10 +7,10 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
-import org.open4goods.config.yml.ui.VerticalConfig;
-import org.open4goods.exceptions.ValidationException;
-import org.open4goods.model.data.Score;
-import org.open4goods.model.product.Product;
+import org.open4goods.commons.config.yml.ui.VerticalConfig;
+import org.open4goods.commons.exceptions.ValidationException;
+import org.open4goods.commons.model.data.Score;
+import org.open4goods.commons.model.product.Product;
 import org.slf4j.Logger;
 
 /**

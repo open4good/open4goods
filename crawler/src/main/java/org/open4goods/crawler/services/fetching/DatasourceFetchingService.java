@@ -4,11 +4,11 @@ import java.io.IOException;
 import java.util.Map;
 
 import org.apache.commons.lang3.ArrayUtils;
-import org.open4goods.config.yml.datasource.DataSourceProperties;
+import org.open4goods.commons.config.yml.datasource.DataSourceProperties;
+import org.open4goods.commons.exceptions.TechnicalException;
+import org.open4goods.commons.helper.GenericFileLogger;
+import org.open4goods.commons.model.crawlers.WebIndexationStats;
 import org.open4goods.crawler.repository.IndexationRepository;
-import org.open4goods.exceptions.TechnicalException;
-import org.open4goods.helper.GenericFileLogger;
-import org.open4goods.model.crawlers.WebIndexationStats;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -2,8 +2,8 @@ package org.open4goods.api.config;
 
 import org.open4goods.api.config.yml.ApiProperties;
 import org.open4goods.api.services.backup.BackupService;
-import org.open4goods.dao.ProductRepository;
-import org.open4goods.services.SerialisationService;
+import org.open4goods.commons.dao.ProductRepository;
+import org.open4goods.commons.services.SerialisationService;
 import org.open4goods.xwiki.services.XWikiReadService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
