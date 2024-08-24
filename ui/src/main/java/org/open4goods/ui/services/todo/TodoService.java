@@ -2,6 +2,7 @@ package org.open4goods.ui.services.todo;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -13,216 +14,40 @@ import java.util.stream.Collectors;
 import javax.xml.xpath.XPathExpressionException;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.math.NumberUtils;
 import org.open4goods.commons.helper.DocumentHelper;
 import org.open4goods.commons.helper.XpathHelper;
+import org.open4goods.ui.model.Todo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.boot.actuate.health.Health;
+import org.springframework.boot.actuate.health.Health.Builder;
+import org.springframework.boot.actuate.health.HealthIndicator;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 
-import ch.qos.logback.core.util.StringUtil;
 import jakarta.annotation.PostConstruct;
 
 
 
 /**
- * This service is a bit "special", because it is only involved from a post-step tests (see gitlab-ci.yml).
- * It allows to parse the taglist.xml in order to aggregate TODO's in git
+ * A service quick and dirty, that allows parsing of T O D O's (maven taglist.xml)
  * @author goulven
  */
-public class TodoService {
+public class TodoService implements HealthIndicator{
 
 	private static final Logger logger = LoggerFactory.getLogger(TodoService.class);
 
 	private List<Todo> todos = new ArrayList<>();
 
-	public TodoService(String string) {
+	public TodoService(String tagList) {
 		super();
-		this.tagListPath = string;
+		this.tagListPath = tagList;
 	}
 
-	private String tagListPath;	// A TOUDOU markup, in the form TOUDO(P1,0.5,design) : make a new feature 
+	private String tagListPath;	// A TOUDOU markup, in the form TOUDO(P1,design) : make a new feature 
 	// the type, the priority, and the estimation can be swapped)
 	
-	public class Todo {
-		private String component = "";
-		private String priority = "";
-		private String category = "";
-		private String content = "";
-		private String className = "";
-		private String lineNumber = "";
-		
-		public Todo(String fileName, String lineNumber, String content, String component) {
-			this.className = fileName;
-			this.lineNumber = lineNumber;
-			this.component = component;
 
-			// Check the within parenthesis
-
-			
-			// Removing the potential ":" prefix 
-			content = content.trim();
-			if (content.startsWith(":")) {
-				content = content.substring(1).trim();
-			}
-			
-			int start = content.indexOf("(");
-			int to = content.indexOf(")");
-
-			// Checking if a valid (...), and ( first char
-			if (start == -1 || start != 0  || to == -1) {
-				this.content = content;
-			} else {
-				String[] frags = content.substring(start+1,to). split(",");
-				
-				if (frags.length != 2) {
-					this.content = content;
-				} else {
-					// Testing each part
-					for (int i = 0; i < frags.length; i++) {
-						String tmp = frags[i].trim();
-						
-						Integer priority = getPriorityFrom(tmp);
-						
-						if (null != priority) {
-							this.priority = String.valueOf(priority);
-						} else {
-							// Probably the category 
-							this.category = tmp;
-						}
-					}
-					
-					
-//			 		Setting the content
-					this.content = content.substring(to+1).trim();
-					if (this.content.startsWith(":")) {
-						this.content=this.content.substring(1).trim();
-					}
-				}
-			}
-
-		}
-
-
-		/**
-		 * Try to extract a priority (from 1, ... P2,) 
-		 * @param tmp
-		 * @return
-		 */
-		private Integer getPriorityFrom(String tmp) {
-			if (NumberUtils.isParsable(tmp)) {
-				return Integer.valueOf(tmp);
-			} else  {
-				switch (tmp.toLowerCase()) {
-				case "p1" : return 1;
-				case "p2" : return 2; 
-				case "p3" : return 3; 
-				case "p4" : return 4; 
-				case "p5" : return 5; 
-				}
-			}
-			return null;
-		}
-		
-
-		/**
-		 * Handy method that generates the Github link
-		 * @return
-		 */
-		public String href() {
-			
-			StringBuilder ret = new StringBuilder("https://github.com/open4good/open4goods/blob/main/");
-			ret.append(component);
-			ret.append("/src/main/java/");
-			ret.append(className.replace('.', '/'));
-			ret.append(".java#L");
-			ret.append(lineNumber);
-			return ret.toString();
-			
-		}
-
-		
-		/**
-		 * Stupid helper for helping restitution
-		 * @return
-		 */
-		public String getCategoryOrUndefined () {
-			return StringUtils.isEmpty(category) ? "undefined" : category;
-		}
-		
-		/**
-		 * Stupid helper for helping restitution
-		 * @return
-		 */
-		public String getPriorityOrUndefined () {
-			return StringUtils.isEmpty(priority) ? "undefined" : priority;
-		}
-		
-		/**
-		 * Stupid helper for helping restitution
-		 * @return
-		 */
-		public String getComponentOrUndefined () {
-			return StringUtils.isEmpty(component) ? "undefined" : component;
-		}
-		
-		
-		
-		
-		
-		
-		public String getPriority() {
-			return priority;
-		}
-
-		public void setPriority(String priority) {
-			this.priority = priority;
-		}
-
-		public String getCategory() {
-			return category;
-		}
-
-		public void setCategory(String category) {
-			this.category = category;
-		}
-
-		public String getClassName() {
-			return className;
-		}
-
-		public void setClassName(String className) {
-			this.className = className;
-		}
-
-		public String getContent() {
-			return content;
-		}
-
-		public void setContent(String content) {
-			this.content = content;
-		}
-
-		public String getLineNumber() {
-			return lineNumber;
-		}
-
-		public void setLineNumber(String lineNumber) {
-			this.lineNumber = lineNumber;
-		}
-
-		public String getComponent() {
-			return component;
-		}
-
-		public void setComponent(String component) {
-			this.component = component;
-		}
-
-
-	}
 
 
 	/**
@@ -232,11 +57,20 @@ public class TodoService {
 	 * @throws Exception
 	 */
 	@PostConstruct
-	public void process() throws XPathExpressionException, IOException, Exception {		
-		File f =  File.createTempFile("todo", "todo");
-		FileUtils.copyURLToFile(new URL( this.tagListPath), f);
-		this.todos = loadTodos(f);		
-		Files.delete(f.toPath());
+	public void process() {
+		File f = null;
+		try {
+			f =  File.createTempFile("todo", "todo");
+			FileUtils.copyURLToFile(new URL( this.tagListPath), f);
+			this.todos = loadTodos(f);		
+		} catch (Exception e) {
+			logger.error("Error while loading taglist file at {} ",tagListPath, e);
+			if (null != f) {
+				FileUtils.deleteQuietly(f);
+			}
+		} finally {
+			
+		}
 	}
 
 	/**
@@ -299,7 +133,7 @@ public class TodoService {
 
 	/**
 	 * 
-	 * @return the count of TODO items by component
+	 * @return the count of items by component
 	 */
 	public Map<String, Integer> byComponents() {
 		   return todos.stream()
@@ -311,7 +145,7 @@ public class TodoService {
 	
 	/**
 	 * 
-	 * @return the count of TODO items by priority
+	 * @return the count of items by priority
 	 */
 	public Map<String, Integer> byPriority() {
 		   return todos.stream()
@@ -323,7 +157,7 @@ public class TodoService {
 	
 	/**
 	 * 
-	 * @return the count of TODO items by component
+	 * @return the count of items by category
 	 */
 	public Map<String, Integer> byCategory() {
 		   return todos.stream()
@@ -343,5 +177,26 @@ public class TodoService {
 		this.todos = todos;
 	}
 
+	/**
+	 * Custom healthcheck, simply goes to DOWN if 0 T O DOs, that could never happens.
+	 */
+	@Override
+	public Health health() {
+		
+		Builder health;
+		
+		int eCount = todos.size();
+		
+		if (0 == eCount ) {
+			health =  Health.down();
+		} else {
+			health =  Health.up();
+		}
 
+		return health.withDetail("todos_count", eCount).build();
+	}
+
+
+	
+	
 }
