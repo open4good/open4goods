@@ -13,6 +13,7 @@ import java.util.stream.Collectors;
 import javax.xml.xpath.XPathExpressionException;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.open4goods.commons.helper.DocumentHelper;
 import org.open4goods.commons.helper.XpathHelper;
@@ -21,6 +22,7 @@ import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 
+import ch.qos.logback.core.util.StringUtil;
 import jakarta.annotation.PostConstruct;
 
 
@@ -141,6 +143,36 @@ public class TodoService {
 			
 		}
 
+		
+		/**
+		 * Stupid helper for helping restitution
+		 * @return
+		 */
+		public String getCategoryOrUndefined () {
+			return StringUtils.isEmpty(category) ? "undefined" : category;
+		}
+		
+		/**
+		 * Stupid helper for helping restitution
+		 * @return
+		 */
+		public String getPriorityOrUndefined () {
+			return StringUtils.isEmpty(priority) ? "undefined" : priority;
+		}
+		
+		/**
+		 * Stupid helper for helping restitution
+		 * @return
+		 */
+		public String getComponentOrUndefined () {
+			return StringUtils.isEmpty(component) ? "undefined" : component;
+		}
+		
+		
+		
+		
+		
+		
 		public String getPriority() {
 			return priority;
 		}
@@ -272,7 +304,7 @@ public class TodoService {
 	public Map<String, Integer> byComponents() {
 		   return todos.stream()
 	                .collect(Collectors.groupingBy(
-	                    Todo::getComponent, // Group by the component
+	                    Todo::getComponentOrUndefined, // Group by the component
 	                    Collectors.summingInt(e -> 1) // Count each item
 	                ));
 	}
@@ -284,7 +316,7 @@ public class TodoService {
 	public Map<String, Integer> byPriority() {
 		   return todos.stream()
 	                .collect(Collectors.groupingBy(
-	                    Todo::getPriority, // Group by the component
+	                    Todo::getPriorityOrUndefined, // Group by the component
 	                    Collectors.summingInt(e -> 1) // Count each item
 	                ));
 	}
@@ -295,8 +327,9 @@ public class TodoService {
 	 */
 	public Map<String, Integer> byCategory() {
 		   return todos.stream()
+				   	
 	                .collect(Collectors.groupingBy(
-	                    Todo::getCategory, // Group by the component
+	                    Todo::getCategoryOrUndefined, // Group by the component
 	                    Collectors.summingInt(e -> 1) // Count each item
 	                ));
 	}
