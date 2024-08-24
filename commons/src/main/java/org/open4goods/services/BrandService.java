@@ -254,7 +254,7 @@ public class BrandService {
 	 * @param string
 	 * @return
 	 */
-	@Cacheable(cacheNames = CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME)
+	@Cacheable(keyGenerator = CacheConstants.KEY_GENERATOR, cacheNames = CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME)
 	public Double getBrandScore(String brand, String datasourceName) {
 		Double score = null;
 		

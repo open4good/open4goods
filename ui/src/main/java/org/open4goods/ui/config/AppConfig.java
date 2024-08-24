@@ -35,7 +35,9 @@ import org.open4goods.store.repository.elastic.BrandScoresRepository;
 import org.open4goods.ui.config.yml.UiConfig;
 import org.open4goods.ui.controllers.ui.UiService;
 import org.open4goods.ui.interceptors.GenericTemplateInterceptor;
+import org.open4goods.ui.repository.ContributionVoteRepository;
 import org.open4goods.ui.services.BlogService;
+import org.open4goods.ui.services.ContributionService;
 import org.open4goods.ui.services.GoogleIndexationService;
 import org.open4goods.ui.services.GtinService;
 import org.open4goods.ui.services.OpenDataService;
@@ -148,6 +150,14 @@ public class AppConfig {
 		return new BlogService(xwikiReadService, config.getBlogConfig(), config.getNamings().getBaseUrls());
 	}
 
+    
+    @Bean
+    @Autowired
+    ContributionService contributionService (CacheManager cacheManager, SerialisationService serialisationService, ContributionVoteRepository repository, UiConfig uiConfig) {
+    	return new ContributionService(cacheManager, serialisationService, repository, uiConfig.getReversements());
+    }
+    
+    
     @Bean
     ImageGenerationService imageGenerationService(@Autowired OpenAiImageModel imageModel, @Autowired UiConfig uiConfig) {
 		return new ImageGenerationService(imageModel, uiConfig.getImageGenerationConfig(), uiConfig.getGeneratedImagesFolder());

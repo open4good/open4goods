@@ -10,11 +10,10 @@ import org.springframework.data.elasticsearch.annotations.Field;
 import org.springframework.data.elasticsearch.annotations.FieldType;
 
 @Document(indexName = "affiliation-links", createIndex = true)
-public class AffiliationToken {
+public class ContributionVote {
 
 	@Id
 	private String id;
-	
 	
 	@Field(type = FieldType.Date)
 	private long ts;
@@ -26,11 +25,9 @@ public class AffiliationToken {
 	private Double price;
 	
 	@Field(index = true, store = false, type = FieldType.Keyword)
-	private String cashback;
+	private String vote;
 	
-	
-	
-	@Field(index = true, store = false, type = FieldType.Keyword)
+	@Field(index = false, store = false, type = FieldType.Keyword)
 	private String datasourceName;
 	
 	@Field(index = false, store = false, type = FieldType.Ip)
@@ -43,13 +40,13 @@ public class AffiliationToken {
 	private String url;
 
 
-	public AffiliationToken() {
+	public ContributionVote() {
 		super();
 	}
 
 
 
-	public AffiliationToken(AggregatedPrice e, Product data) {
+	public ContributionVote(AggregatedPrice e, Product data) {
 		gtin= data.gtin();
 		price=e.getPrice();
 		datasourceName = e.getDatasourceName();
@@ -60,7 +57,7 @@ public class AffiliationToken {
 
 	
 	
-	public AffiliationToken(String datasourcename, String url) {
+	public ContributionVote(String datasourcename, String url) {
 
 		datasourceName = datasourcename;
 		this.url=url;
@@ -125,6 +122,18 @@ public class AffiliationToken {
 
 
 
+	public String getVote() {
+		return vote;
+	}
+
+
+
+	public void setVote(String cashback) {
+		this.vote = cashback;
+	}
+
+
+
 	public long getTs() {
 		return ts;
 	}
@@ -134,18 +143,5 @@ public class AffiliationToken {
 	public void setTs(long ts) {
 		this.ts = ts;
 	}
-
-
-
-	public String getCashback() {
-		return cashback;
-	}
-
-
-	public void setCashback(String cashback) {
-		this.cashback = cashback;
-	}
-
-
 
 }

@@ -196,7 +196,7 @@ public class VerticalsConfigService {
 	 * @return
 	 * @throws IOException
 	 */
-	@Cacheable(cacheNames = CacheConstants.FOREVER_LOCAL_CACHE_NAME)
+//	@Cacheable(key = "#root.methodName + ':' + #categories", cacheNames = CacheConstants.FOREVER_LOCAL_CACHE_NAME)
 	// ISSUE : Performance issue here, cache as a unique hash of categories
 	// TODO : Performance issue here, cache as a unique hash of categories
 	//labels:bug,perf
@@ -258,7 +258,7 @@ public class VerticalsConfigService {
 	 * @return
 	 * @throws IOException
 	 */
-	@Cacheable(cacheNames = CacheConstants.FOREVER_LOCAL_CACHE_NAME)
+	@Cacheable(keyGenerator = CacheConstants.KEY_GENERATOR,  cacheNames = CacheConstants.FOREVER_LOCAL_CACHE_NAME)
 	public VerticalConfig getDefaultConfig() {
 //		VerticalConfig ret = null;
 //		try {
@@ -306,7 +306,7 @@ public class VerticalsConfigService {
 	 * Return all expanded taxonomies, from the taxonomy service and from queryning on the store
 	 * @return
 	 */
-	@Cacheable(cacheNames = CacheConstants.ONE_DAY_LOCAL_CACHE_NAME)
+	@Cacheable(keyGenerator = CacheConstants.KEY_GENERATOR,  cacheNames = CacheConstants.ONE_DAY_LOCAL_CACHE_NAME)
 	public List<ExpandedTaxonomy> expandedTaxonomies() {
 		List<ExpandedTaxonomy> ret = new ArrayList<>();
 		productRepository.byTaxonomy().entrySet().forEach(t -> {

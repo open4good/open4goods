@@ -121,7 +121,7 @@ public class DataSourceConfigService {
 	 * @param datasourceName
 	 * @return
 	 */
-	@Cacheable(cacheNames=CacheConstants.FOREVER_LOCAL_CACHE_NAME)
+	@Cacheable(keyGenerator = CacheConstants.KEY_GENERATOR, cacheNames=CacheConstants.FOREVER_LOCAL_CACHE_NAME)
 	public DataSourceProperties getDatasourceConfig(final String datasourceName) {
 		return datasourceConfigs().get(datasourceName);
 
