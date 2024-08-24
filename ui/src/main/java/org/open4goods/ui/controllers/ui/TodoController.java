@@ -42,6 +42,9 @@ public class TodoController {
 	protected ModelAndView todo(HttpServletRequest request, HttpServletResponse response) throws Exception {
 		ModelAndView mv = uiService.defaultModelAndView("todo", request);
 		mv.addObject("todos", todoService.getTodos());
+		mv.addObject("byPriority", todoService.byPriority());
+		mv.addObject("byComponent", todoService.byComponents());
+		mv.addObject("byCategory", todoService.byCategory());
 		return mv;
 	}
 

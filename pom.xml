@@ -155,17 +155,6 @@
 			<artifactId>spring-boot-devtools</artifactId>
 			<optional>true</optional>
 		</dependency>
-
-		<!--
-		TODO : A discuter avec Nico
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-docker-compose</artifactId>
-			<optional>true</optional>
-		</dependency>
-		-->
-
-
 	</dependencies>
 
 
