@@ -9,8 +9,10 @@ import org.springframework.data.elasticsearch.annotations.Document;
 import org.springframework.data.elasticsearch.annotations.Field;
 import org.springframework.data.elasticsearch.annotations.FieldType;
 
-@Document(indexName = "affiliation-links", createIndex = true)
+
+@Document(indexName = ContributionVote.INDEX_NAME , createIndex = true)
 public class ContributionVote {
+	public static final String INDEX_NAME = "contribution-votes";
 
 	@Id
 	private String id;

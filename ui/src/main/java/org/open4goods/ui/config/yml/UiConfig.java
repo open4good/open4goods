@@ -191,26 +191,12 @@ public class UiConfig {
 	private BrandsConfiguration brandConfig = new BrandsConfiguration();
 	
 	/**
-	 * The list of reversments (cashback) to ecologgical organisations
+	 * Configuration for the reversements
 	 */
-	private List<Reversement> reversements = new ArrayList<>();
+	private ReversementConfig reversementConfig = new ReversementConfig();
 	
 	
-	/**
-	 * get the total amount of reversements
-	 * @return
-	 */
-	public Double getTotalReversements() {
-		return reversements.stream().mapToDouble(Reversement::getAmount).sum();
-	}
-	
-	/**
-	 * 	* get the total amount of reversements organisations
-	 * @return
-	 */
-	public int getDistingReversementsOrganisation() {
-		return reversements.stream().map(Reversement::getOrgName).distinct().toArray().length;
-	}
+
 	/**
 	 * Return the root url for a given sitelocale, with the "default" behavior
 	 *
@@ -402,13 +388,13 @@ public class UiConfig {
 	}
 
 
-	public List<Reversement> getReversements() {
-		return reversements;
+	public ReversementConfig getReversementConfig() {
+		return reversementConfig;
 	}
 
 
-	public void setReversements(List<Reversement> reversements) {
-		this.reversements = reversements;
+	public void setReversementConfig(ReversementConfig reversementConfig) {
+		this.reversementConfig = reversementConfig;
 	}
 
 

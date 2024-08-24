@@ -104,7 +104,10 @@ public class ContributionController implements SitemapExposedController{
 		ModelAndView ret = uiService.defaultModelAndView(("compensation"), request);
 		
 		ret.addObject("votes", contributionService.nudgesCountSinceLastReversement());
+		ret.addObject("repartition", contributionService.nudgesRepartitionSinceLastReversement());
+		
 		ret.addObject("page","compensation écologique");
+		
 		return ret;
 	}
 
