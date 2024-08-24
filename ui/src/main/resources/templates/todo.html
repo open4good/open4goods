@@ -210,7 +210,7 @@
     /*<![CDATA[*/
     
         const byPriority = /*[[${byPriority}]]*/ {};
-        const byCategory = /*[[${getCategory}]]*/ {};
+        const byCategory = /*[[${byCategory}]]*/ {};
         const byComponent = /*[[${byComponent}]]*/ {};  
                         
     /*]]>*/
@@ -292,13 +292,13 @@ $(document).ready( function () {
     // Init charts
 
     // Call the function to render the chart with the injected map data
-    if (null != byCategory) renderChart(byCategory, 'byCategoryChart', "pie", "todos", "Répartition par priorités", {});
+    if (null != byCategory) renderChart(byCategory, 'byCategoryChart', "bar", "todos", "Catégories", {});
 
     // Call the function to render the chart with the injected map data
-    if (null != byComponent) renderChart(byComponent, 'byComponentChart', "pie", "todos", "Répartition par composants", {});
+    if (null != byComponent) renderChart(byComponent, 'byComponentChart', "pie", "todos", "Composants", {});
 
     // Call the function to render the chart with the injected map data
-    if (null != byPriority) renderChart(byPriority, 'byPriorityChart', "pie", "todos", "Répartition par priorités", {});
+    if (null != byPriority) renderChart(byPriority, 'byPriorityChart', "pie", "todos", "Priorités", {});
     
 
 
