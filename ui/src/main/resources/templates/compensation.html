@@ -140,16 +140,16 @@
                         <div class="col-lg-6">
                         
                                  <div class="card bg-white border-gray-300 ">
-		                                <div th:each="item : ${config.reversementConfig.reversements}" class="border-bottom px-4 py-5">
-		                                    <div class="row align-items-center text-center">
+		                                <div th:each="reversement : ${config.reversementConfig.reversements}" class="border-bottom px-4 py-5">
+		                                    <div th:with="org = ${config.reversementConfig.contributedOrganisations.get(reversement.orgKey)}"  class="row align-items-center text-center">
 		                                        <div class="col-12 col-md-3 pb-3 pb-md-0">
-		                                            <img th:src="${item.orgImg}" th:alt="${item.orgName}">
+		                                            <img th:src="${org.img}" th:alt="${org.name}">
 		                                        </div>
 		                                        <div class="col-md-5 pb-2 pb-md-0">
-		                                            <h3 class="h5 mb-3"><span th:text="${item.amount}"></span> €</h3>
-		                                            <p class="mb-0" th:text="${item.orgName}"></p>
+		                                            <h3 class="h5 mb-3"><span th:text="${reversement.amount}"></span> €</h3>
+		                                            <p class="mb-0" th:text="${org.name}"></p>
 		                                        </div>
-		                                        <div class="col-md-4 text-md-right"><span class="badge bg-primary" th:text="${item.date}" th:title="${item.comment}"></span></div>
+		                                        <div class="col-md-4 text-md-right"><span class="badge bg-primary" th:text="${reversement.date}"></span></div>
 		                                    </div>
 		                                </div>
 		                </div>
@@ -284,18 +284,17 @@
 								<span class="d-block">
 								    <span class="display-1 text-dark fw-bold" th:text="${votes}"></span>
 								</span>
+								<p> Depuis le dernier reversement</p>
 							</div>
 							<!-- End Header -->
 							<!-- Content -->
 							<div class="card-body">
-								<p> Depuis le dernier reversement</p>
-								
+								<canvas class="mt-4" id="voteChart"></canvas>    							
 							</div>
 							<!-- End Content -->
 						</div>
 						
 						
-						<canvas class="mt-4" id="voteChart"></canvas>    
 						
 						
 						
@@ -320,36 +319,14 @@
 						        </div>
 						    </div>
 					</div>	    
-    
-    
-
-
-
-
-
-
-
                 </div>
             </div>
             
             
         
-        
-        
-        
-        
-        
-        
-        
         <section class="bg-green-transparent text-center py-4 mb-5">
             <h2> <span class="h1 mb-3">La contribution écologique en détail</span></h2>
         </section>
-        
-        
-        
-        
-        
-        
         
         
         

@@ -21,18 +21,10 @@ public class Reversement {
 	private LocalDate date;
 
 	@NotEmpty
-	private String orgName;
+	private String orgKey;
 	
-	@NotEmpty
-	private String orgImg;
-		
 	@Min(1)
 	private double amount;
-	
-	
-	private String comment;
-
-	
 
 	public LocalDate getDate() {
 		return date;
@@ -42,12 +34,12 @@ public class Reversement {
 		this.date = date;
 	}
 
-	public String getOrgName() {
-		return orgName;
+	public String getOrgKey() {
+		return orgKey;
 	}
 
-	public void setOrgName(String orgName) {
-		this.orgName = orgName;
+	public void setOrgKey(String orgName) {
+		this.orgKey = orgName;
 	}
 
 	
@@ -60,23 +52,6 @@ public class Reversement {
 		this.amount = amount;
 	}
 
-	public String getComment() {
-		return comment;
-	}
-
-	public void setComment(String comment) {
-		this.comment = comment;
-	}
-
-	public String getOrgImg() {
-		return orgImg;
-	}
-
-	public void setOrgImg(String orgImg) {
-		this.orgImg = orgImg;
-	}
-
-	
 	
 
 }

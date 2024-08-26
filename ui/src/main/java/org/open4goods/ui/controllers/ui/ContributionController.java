@@ -2,6 +2,7 @@ package org.open4goods.ui.controllers.ui;
 
 import org.apache.commons.lang3.StringUtils;
 import org.open4goods.commons.helper.IpHelper;
+import org.open4goods.ui.config.yml.ReversementConfig;
 import org.open4goods.ui.config.yml.UiConfig;
 import org.open4goods.ui.controllers.ui.pages.SitemapEntry;
 import org.open4goods.ui.controllers.ui.pages.SitemapExposedController;
@@ -26,6 +27,9 @@ import jakarta.servlet.http.HttpServletResponse;
 @Controller
 public class ContributionController implements SitemapExposedController{
 
+	private static final String DEFAULT_VOTE_OPTION = "nudger";
+
+
 	private static final Logger logger = LoggerFactory.getLogger(ContributionController.class);
 
 	
@@ -39,11 +43,13 @@ public class ContributionController implements SitemapExposedController{
 
 	private ContributionService contributionService;
 	private UiService uiService;
+	private ReversementConfig reversementConfig;
 	
-	public ContributionController(ContributionService contributionService, UiService uiService ) {
+	public ContributionController(ContributionService contributionService, UiService uiService, UiConfig uiConfig ) {
 		super();
 		this.contributionService = contributionService;
 		this.uiService = uiService;
+		this.reversementConfig = uiConfig.getReversementConfig();
 	}
 
 	/**
@@ -56,7 +62,7 @@ public class ContributionController implements SitemapExposedController{
 	 */
 	@PostMapping("/nudge")
 	public ModelAndView nudge(@RequestParam(required = true) final String token,
-									 @RequestParam(required = true,  name = "nudge") final String vote,
+									 @RequestParam(required = true,  name = "nudge") final String voteOption,
 									 final HttpServletRequest request, final HttpServletResponse response) {
 
 		// Setting the no follow header
@@ -69,6 +75,16 @@ public class ContributionController implements SitemapExposedController{
 		// Avoid possibility of "db spoofing"
 		if (ua.length() > MAX_UA_LENGTH) {
 			ua = ua.substring(0, MAX_UA_LENGTH);
+		}
+		
+		
+		// Checking no injection in the vote
+		String vote;
+		if (DEFAULT_VOTE_OPTION.equals(voteOption) || reversementConfig.getContributedOrganisations().containsKey(voteOption)) {
+			vote = voteOption;
+		} else {
+			vote = DEFAULT_VOTE_OPTION;
+			logger.warn("Unexpected vote option '{}' in Nudge for ip {}",voteOption, ip);
 		}
 		
 		// Operates the user contribution vote 

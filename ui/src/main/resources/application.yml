@@ -130,20 +130,25 @@ feedbackConfig:
      
 reversement-config:
   contributed-organisations:
-  - greenpeace
-  - goodplanet 
+    greenpeace: 
+      name: Green Peace
+      img: /assets/img/greenpeace_logo.png
+      url: https://www.greenpeace.fr/
+      description: Green Peace description
+    goodplanet:
+      name: Fondation Good Planet
+      img: /assets/img/goodplanet_logo.svg
+      url: https://www.goodplanet.org/fr/
+      description: Good Planet description
+           
   reversements:
   - date: 2021-11-01
     amount: 72
-    orgName: "Greenpeace"
-    orgImg: "/assets/img/greenpeace_logo.png"
-    comment: "Sur le prototype comparatif-tv.fr, avant une longue pause !"
+    orgKey: greenpeace
     
   - date: 2022-02-01
     amount: "71.5"
-    orgName: "Fondation Good Planet"
-    orgImg: "/assets/img/goodplanet_logo.svg"
-    comment: "Sur le prototype comparatif-tv.fr"
+    orgKey: goodplanet
 
 blogConfig:
    feedTitle:
