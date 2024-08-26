@@ -3,7 +3,9 @@ package org.open4goods.ui.config.yml;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.validation.annotation.Validated;
 @Validated
@@ -16,11 +18,11 @@ public class ReversementConfig {
 	private List<Reversement> reversements = new ArrayList<>();
 
 	/**
-	 * The list of availlable (and authorised) organisations that are part of the
+	 * The list of available (and authorised) organisations, by keys
 	 * TODO : I18n
 	 */
-	private List<String> contributedOrganisations = new ArrayList<>();
 
+	Map<String, ContributedOrganisation> contributedOrganisations = new HashMap<>();
 	
 	/**
 	 * get the total amount of reversements
@@ -35,7 +37,7 @@ public class ReversementConfig {
 	 * @return
 	 */
 	public int getDistingReversementsOrganisation() {
-		return reversements.stream().map(Reversement::getOrgName).distinct().toArray().length;
+		return reversements.stream().map(Reversement::getOrgKey).distinct().toArray().length;
 	}
 	
 	/**
@@ -66,12 +68,13 @@ public class ReversementConfig {
 		this.reversements = reversements;
 	}
 
-	public List<String> getContributedOrganisations() {
+	public Map<String, ContributedOrganisation> getContributedOrganisations() {
 		return contributedOrganisations;
 	}
 
-	public void setContributedOrganisations(List<String> contributedOrganisations) {
+	public void setContributedOrganisations(Map<String, ContributedOrganisation> contributedOrganisations) {
 		this.contributedOrganisations = contributedOrganisations;
 	}
 
+	
 }

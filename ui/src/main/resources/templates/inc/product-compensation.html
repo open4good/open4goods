@@ -17,9 +17,10 @@
 
 	<label class="my-1 me-2" for="inlineFormCustomSelectPref">Reversés au nom de votre achat</label>
 	<select name="nudge" width="100%" class="form-select mb-3" id="inlineFormCustomSelectPref" aria-label="Choisissez votre cause">
-		<option value="default" selected="selected">Laisser nudger choisir !</option>
-		<option value="greenpeace">greenpeace</option>
-		<option value="goodplanet">Fondation goodplanet</option>
+		<option value="nudger" selected="selected">Laisser nudger choisir !</option>
+		<th:block th:each="org : ${config.reversementConfig.contributedOrganisations}">
+    		<option th:value="${org.key}" th:text="${org.value.name}"></option>
+		</th:block>
 	</select>
 			
 	<a href="#markerPrices">
