@@ -37,14 +37,12 @@
     <th:block th:insert="~{inc/preloader.html}"></th:block>
 	
     <main>
-
-
         <!-- Hero -->
         <section class="section-header overflow-hidden pt-7 pt-lg-8 pb-7  bg-green-transparent">
             <div class="container">
                <div class="row justify-content-between align-items-center">
                         <h1 class="display-2 mb-4">La contribution écologique</h1>
-	                    <th:block th:with="path='WIDGETS/compensation-1/'">
+	                    <th:block th:with="path='pages/contribution/hero'">
 	                            <th:block th:insert="~{inc/wiki.html}"></th:block>
 	               		</th:block> 
                </div>
@@ -52,22 +50,24 @@
             <figure class="position-absolute bottom-0 left-0 w-100 d-none d-md-block mb-n2"><svg class="fill-white" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 3000 185.4"><path d="M3000,0v185.4H0V0c496.4,115.6,996.4,173.4,1500,173.4S2503.6,115.6,3000,0z"></path></svg></figure>
         </section>
 
-
-
         <!-- Section -->
         <section class="section section-md">
             <div class="container">
                 <div class="row d-flex flex-wrap align-items-center justify-content-around">
-	                <h2 class="h1 mb-5">Notre contribution volontaire</h2>
                     <div class="col-lg-5 mb-5">
                         <img class="organic-radius img-fluid" src="../../assets/img/illustrations/compensation-carbone.jpg" alt="Compensation carbone">
                     </div>
                     <div class="col-lg-7 ">
                         
                         <blockquote class="blockquote text-center">
-                           20 % des revenus de Nudger sont reversés en faveur de la planète. En plus, vous pouvez <a href="#vote">voter</a> à qui attribuer ces dons ! 
+	                        <th:block th:with="path='pages/contribution/baseline'">
+	                                <th:block th:insert="~{inc/wiki.html}"></th:block>
+	                        </th:block> 
+	                        
+                           
 		              	</blockquote>
-                        <th:block th:with="path='WIDGETS/compensation-2/'">
+                        
+                        <th:block th:with="path='pages/contribution/compensation-2/'">
                             <th:block th:insert="~{inc/wiki.html}"></th:block>
 	                   	</th:block> 
                     </div>
@@ -80,89 +80,247 @@
         
         
         <!-- Section -->        
-        <section class="bg-green-transparent text-center py-4 mb-2">
-            <h2> <span class="h1 mb-3">L'action de Nudger en chiffres</span></h2>
-            <p class="lead mb-0">C'est peu, mais ce n'est qu'un début !</p>
-        </section>
-        
-        
-        <section class=" container text-center">
-            <div class="row justify-content-center">
-                <h2 class="h1 mb-5 text-center"></h2>            
-                
-                <div class="row justify-content-center">
-                    <div class="col-12 col-md-6 col-lg-4 py-3">
-                        <!-- Box -->
-                        <div class="icon-box mb-4">
-                            <div class="icon icon-shape icon-shape-secondary me-2 me-md-0 mb-2">
-                                <span class="fas fa-user"></span>
-                            </div>
-                            <h3 class="h5">Organismes</h3>
-                            <span class="counter display-3 text-gray d-block" th:text="${config.reversementConfig.getDistingReversementsOrganisation()}"></span>
-                        </div>
-                        <!-- End of Box -->
-                    </div>
-                    <div class="col-12 col-md-6 col-lg-4 py-3">
-                        <!-- Box -->
-                        <div class="icon-box mb-4">
-                            <div class="icon icon-shape icon-shape-secondary me-2 me-md-0 mb-2">
-                                <span class="fas fa-money-check"></span>
-                            </div>
-                            <h3 class="h5">Versements effectués</h3>
-                            <span class="counter display-3 text-gray d-block">2</span>
-                        </div>
-                        <!-- End of Box -->
-                    </div>
-                    <div class="col-12 col-md-6 col-lg-4 py-3">
-                        <!--  Box -->
-                        <div class="icon-box mb-4">
-                            <div class="icon icon-shape icon-shape-secondary me-2 me-md-0 mb-2">
-                                <span class="fas fa-euro-sign"></span>
-                            </div>
-                            <h3 class="h5">Montant reversé</h3>
-                            <span><span class="display-3 text-gray d-block" th:text="${config.reversementConfig.getTotalReversements()}"></span>€</span>
-                        </div>
-                        <!-- End of Box -->
-                    </div>
-                </div>
-            </div>
 
+        
+        <section >
+        
+                <div class="bg-green-transparent text-center py-4 mb-2">
+	            <h2> <span class="h1 mb-3">L'action de Nudger en chiffres</span></h2>
+	            <p class="lead mb-0">Ce n'est qu'un début !</p>
+	        </div>
+        
+            <div class="container text-center">
+	        
+	            <div class="row justify-content-center">
+	                <h2 class="h1 mb-5 text-center"></h2>            
+	                
+	                <div class="row justify-content-center">
+	                    <div class="col-12 col-md-6 col-lg-4 py-3">
+	                        <!-- Box -->
+	                        <div class="icon-box mb-4">
+	                            <div class="icon icon-shape icon-shape-secondary me-2 me-md-0 mb-2">
+	                                <span class="fas fa-user"></span>
+	                            </div>
+	                            <h3 class="h5">Organismes</h3>
+	                            <span class="counter display-3 text-gray d-block" th:text="${config.reversementConfig.getDistingReversementsOrganisation()}"></span>
+	                        </div>
+	                        <!-- End of Box -->
+	                    </div>
+	                    <div class="col-12 col-md-6 col-lg-4 py-3">
+	                        <!-- Box -->
+	                        <div class="icon-box mb-4">
+	                            <div class="icon icon-shape icon-shape-secondary me-2 me-md-0 mb-2">
+	                                <span class="fas fa-money-check"></span>
+	                            </div>
+	                            <h3 class="h5">Versements effectués</h3>
+	                            <span class="counter display-3 text-gray d-block">2</span>
+	                        </div>
+	                        <!-- End of Box -->
+	                    </div>
+	                    <div class="col-12 col-md-6 col-lg-4 py-3">
+	                        <!--  Box -->
+	                        <div class="icon-box mb-4">
+	                            <div class="icon icon-shape icon-shape-secondary me-2 me-md-0 mb-2">
+	                                <span class="fas fa-euro-sign"></span>
+	                            </div>
+	                            <h3 class="h5">Montant reversé</h3>
+	                            <span><span class="display-3 text-gray d-block" th:text="${config.reversementConfig.getTotalReversements()}"></span>€</span>
+	                        </div>
+	                        <!-- End of Box -->
+	                    </div>
+	                </div>
+	            </div>
+            </div>
         </section>
         
         <!-- End of section -->
+        
+       <section>
+        
+            <div id="vote" class="bg-green-transparent text-center py-4 mb-5">
+                <h2> <span class="h1 mb-3">Vous décidez !</span></h2>
+            </div>
+            
+            
+            <div class="container">
+                    <div class="row justify-content-between align-items-center">
+                        <div class="col-12 col-lg-6">    
+                            <div class="d-flex flex-wrap justify-content-lg-start">
+                                <h2 class="h3 text-center text-lg-left mb-5">Système de vote de Nudger</h2>
+                                <div class="my-4">
+                                    <div class="d-flex">
+                                        <div class="me-3 me-md-4">
+                                            <div class="icon icon-shape icon-shape-secondary organic-radius">
+                                                <span class="fas fa-user-circle"></span>
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <h3 class="h4">Vous choisissez l'organisation</h3>
+                                            <p>
+                                                <th:block th:with="path='pages/contribution/vote-1'">
+					                                    <th:block th:insert="~{inc/wiki.html}"></th:block>
+					                            </th:block> 
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="my-4">
+                                    <div class="d-flex">
+                                        <div class="me-3 me-md-4">
+                                            <div class="icon icon-shape icon-shape-secondary organic-radius">
+                                                <span class="fas fa-shield-alt"></span>
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <h3 class="h4">Fonctionnement du vote</h3>
+                                            <p>
+                                                <th:block th:with="path='pages/contribution/vote-2'">
+                                                        <th:block th:insert="~{inc/wiki.html}"></th:block>
+                                                </th:block>                                                 
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="my-4">
+                                    <div class="d-flex">
+                                        <div class="me-3 me-md-4">
+                                            <div class="icon icon-shape icon-shape-secondary organic-radius">
+                                                <span class="fas fa-chart-pie"></span>
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <h3 class="h4">Répartition des revenus</h3>
+                                            <p>                                                                                                
+                                                <th:block th:with="path='pages/contribution/vote-3'">
+                                                        <th:block th:insert="~{inc/wiki.html}"></th:block>
+                                                </th:block>                                                                                              
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                
+                                
+                                
+                                
+                            </div>  
+                        </div>
+    
+    
+                        <div class="col-12 col-md-12 col-sm-12 col-lg-4 mb-5 mb-lg-0">
+                        
+                        
+                        
+                                <div class="my-4">
+                                    <div class="d-flex">
+                   
+                                        <div>
+                                            <h3 class="h4">En toute transparence</h3>
+                                            <p>
+                                                
+                                                <th:block th:with="path='pages/contribution/vote-4'">
+                                                        <th:block th:insert="~{inc/wiki.html}"></th:block>
+                                                </th:block>                                                                                          
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>                  
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                            <div class="card shadow text-center">
+                                <!-- Header -->
+                                <div class="card-header bg-white p-3">
+                                    <h3 class="text-primary mb-4">Votes</h3>
+                                    <span class="d-block">
+                                        <span class="display-1 text-dark fw-bold" th:text="${votes}"></span>
+                                    </span>
+                                    <p> Depuis le dernier reversement</p>
+                                </div>
+                                <!-- End Header -->
+                                <!-- Content -->
+                                <div class="card-body">
+                                    <canvas class="mt-4" id="voteChart"></canvas>
+                                    
+                                    <p th:unless="${duplicateVotes} == 0" class="mt-2"> <b><span th:text="${duplicateVotes}"></span></b> votes en double, non représentés sur le graphique</p>
+                                                                   
+                                </div>
+                                <!-- End Content -->
+                            </div>
+                            
+                        </div>
+    
+                    </div>
+                </div>
+                
+            </section>
+                
+            
         <!-- Section -->
-        <section class="section mt-5 section-lg pt-0">
-           <div class="container">
+        <section class="mt-3 pt-0">
+	        <div class="bg-green-transparent text-center py-4 mb-5">
+	            <h2> <span class="h1 mb-3">Détails des dons</span></h2>
+	        </div>
+
+           <div class="container container-semi-fluid">
 
                 <div class="row">
                 
                     <div class="row">
-                        <div class="col-lg-6">
+                        <div class="col-lg-6 px-5">
+
+                            <h3 class="h5 text-center">Choix des organisations</h3>
+							
+							<div th:each="org : ${config.reversementConfig.contributedOrganisations.values()}" class="card shadow p-4 mb-5">
+								<div class="row align-items-center">
+									<div class="col-4">
+										<a th:href="${org.url}"><img th:src="${org.img}" th:alt="${org.name}"></a>
+									</div>
+									<div class="col-8">
+										<p th:text="${org.description}"></p>
+										
+									</div>
+								</div>
+							</div>
+
+
+						</div>
                         
+                        
+                        <!-- Reversed amount  -->
+                         <div class="col-lg-6 px-5">
+                        
+                                 <h3 class="h5 text-center">Dons effectués</h3>
+                                                            
                                  <div class="card bg-white border-gray-300 ">
-		                                <div th:each="reversement : ${config.reversementConfig.reversements}" class="border-bottom px-4 py-5">
-		                                    <div th:with="org = ${config.reversementConfig.contributedOrganisations.get(reversement.orgKey)}"  class="row align-items-center text-center">
-		                                        <div class="col-12 col-md-3 pb-3 pb-md-0">
-		                                            <img th:src="${org.img}" th:alt="${org.name}">
-		                                        </div>
-		                                        <div class="col-md-5 pb-2 pb-md-0">
-		                                            <h3 class="h5 mb-3"><span th:text="${reversement.amount}"></span> €</h3>
-		                                            <p class="mb-0" th:text="${org.name}"></p>
-		                                        </div>
-		                                        <div class="col-md-4 text-md-right"><span class="badge bg-primary" th:text="${reversement.date}"></span></div>
-		                                    </div>
-		                                </div>
-		                </div>
-		                
-		                <!--  Disclaimer-->  
-		                <div class="alert alert-danger alert-dismissible fade show mt-5" role="alert">
-		                        <span class="fas fa-bullhorn me-1"></span>
-		                        <strong>Que ça depuis 2021 ?!</strong> 
-		                        Vous êtes vigilants, et vous faîtes bien ! L'aventure Nudger était initialement un projet "geek" annexe, connu et testé sous le nom de comparatif-tv.fr. Il a permis de prouver le modèle financier et technique, mais a ensuite été mis en sommeil pendant plus de 2 ans... 
-		                        Mais tel le Phénix, Nudger revient en 2024 avec l'ambition de passer à l'échelle ! 
-		         
-		                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fermer"></button>
-		                 </div>
+                                        <div th:each="reversement : ${config.reversementConfig.reversements}" class="border-bottom px-4 py-4">
+                                            <div th:with="org = ${config.reversementConfig.contributedOrganisations.get(reversement.orgKey)}"  class="row align-items-center text-center">
+                                                <div class="col-12 col-md-3 pb-3 pb-md-0">
+                                                    <img th:src="${org.img}" th:alt="${org.name}">
+                                                </div>
+                                                <div class="col-md-5 pb-2 pb-md-0">
+                                                    <span class="h5 mb-3"><span th:text="${reversement.amount}"></span> €</span>
+                                                </div>
+                                                <div class="col-md-4 text-md-right"><span class="badge bg-primary" th:text="${reversement.date}"></span></div>
+                                            </div>
+                                        </div>
+                                </div>
+                                
+                                <!--  Disclaimer-->  
+                                <div class="alert alert-danger alert-dismissible fade show mt-5" role="alert">
+                                        <strong>Que ça depuis 2021 ???</strong> 
+                                        Vous êtes vigilants, et vous faîtes bien ! L'aventure Nudger était initialement un projet "geek" annexe, connu et testé sous le nom de comparatif-tv.fr. Il a permis de prouver le modèle financier et technique, mais a ensuite été mis en sommeil pendant plus de 2 ans... 
+                                        Mais tel le Phénix, Nudger revient en 2024 avec l'ambition de passer à l'échelle ! 
+                         
+                                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fermer"></button>
+                                 </div>
                         
                         </div>
                         
@@ -182,175 +340,94 @@
             
         </section>
         
-        
-        <section id="vote" class="bg-green-transparent text-center py-4 mb-5">
-            <h2> <span class="h1 mb-3">Vous décidez !</span></h2>
-        </section>
+ 
         
         
-        <div class="container">
-                <div class="row justify-content-between align-items-center">
-                    <div class="col-12 col-lg-6">    
-                        <div class="d-flex flex-wrap justify-content-lg-start">
-                            <h2 class="h3 text-center text-lg-left mb-5">Système de vote de Nudger</h2>
-                            <div class="my-4">
-                                <div class="d-flex">
-                                    <div class="me-3 me-md-4">
-                                        <div class="icon icon-shape icon-shape-secondary organic-radius">
-                                            <span class="fas fa-shield-alt"></span>
-                                        </div>
+       <section >
+			        <div class="bg-green-transparent text-center py-4 mb-5 ">
+			            <h2> <span class="h1 mb-3">La contribution écologique en détail</span></h2>
+			        </div>
+        
+		            <div class="container container-semi-fluid">
+		                <div class="row d-flex flex-wrap align-items-center justify-content-around">
+		
+		                    <div class="col-">
+		                        <h2 class="h2 mb-3">Contribution écologique, compensation carbone. Quelles différences ?</h2>
+								<div>
+		                        <th:block th:with="path='pages/contribution/differences-carbone'">
+									<th:block th:insert="~{inc/wiki.html}"></th:block>
+								</th:block>   
+									</div>
+		                    </div>
+							
+							
+							
+							
+							<div class="col-">
+		                        <h2 class="h1 mb-5">Comment est calculé le montant reversé ?</h2>
+								<div>
+		                        <th:block th:with="path='pages/contribution/calcul'">
+									<th:block th:insert="~{inc/wiki.html}"></th:block>
+								</th:block>   
+									</div>
+		                    </div>			
+		                    
+		                    
+		                    
+		                    
+		                    
+		                     <div class="col-">
+                                <h2 class="h1 mb-5">20% des revenus, c'est quoi ? 20% des bénéfices ?</h2>
+                                <div>
+                                <th:block th:with="path='pages/contribution/compensation-revenus-benefices'">
+                                    <th:block th:insert="~{inc/wiki.html}"></th:block>
+                                </th:block>   
                                     </div>
-                                    <div>
-                                        <h3 class="h4">Vous choisissez l'organisation</h3>
-                                        <p>
-                                            Juste avant de Nudger votre produit, vous pouvez choisir à quel organisme les fonds seront reversés lors du prochain don. Pour les distraits ou les étourdis, pas d'inquietude ! Nudger reverse dans tous les cas 20% de ses revenus en contribution environnementale.                                            
-                                        </p>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="my-4">
-                                <div class="d-flex">
-                                    <div class="me-3 me-md-4">
-                                        <div class="icon icon-shape icon-shape-secondary organic-radius">
-                                            <span class="fas fa-user-circle"></span>
-                                        </div>
-                                    </div>
-                                    <div>
-                                        <h3 class="h4">Fonctionnement du vote</h3>
-                                        <p>
-                                            Vous votez en choisissant à qui vous souhaitez dédier votre Nudge depuis les fiches produits. Nous acceptons un vote par utilisateur et par heure, basé sur son adresse IP. Si plusieurs "nudges" sont effectués par un même utilisateur sur la même heure, seul le premier vote sera retenu.
-                                            Les votes sont captés sur "l'intention d'achat" alors que nous ne percevons nos revenus qui si l'utilisateur valide sa commande sur la plateforme marchande. 
-                                            Comme nous ne collectons pas les données vous concernant TODO lien, nous ne pouvons savoir si vous avez effectivement valider votre achat. Comme le dicton le dit si bien, c'est l'intention qui compte !  
-                                            
-                                        </p>
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <div class="my-4">
-                                <div class="d-flex">
-                                    <div class="me-3 me-md-4">
-                                        <div class="icon icon-shape icon-shape-secondary organic-radius">
-                                            <span class="fas fa-user-circle"></span>
-                                        </div>
-                                    </div>
-                                    <div>
-                                        <h3 class="h4">Répartition des revenus</h3>
-                                        <p>
-                                            
-                                            Rien de plus simple : les revenus sont reversés à la proportionnelle des intentions de votes. 
-                                            Les votes non attribués (dans le cas ou l'utilisateur ne choisit pas) seront attribués par Nudger à des actions de préservation écologiques qu'il juge pertinentes.                                             
-                                        </p>
-                                    </div>
-                                </div>
                             </div>
                             
                             
                             
-                            
-                            
-                        </div>  
-                    </div>
-
-
-					<div class="col-12 col-md-6 col-lg-4 mb-5 mb-lg-0">
-					
-					
-					
-                            <div class="my-4">
-                                <div class="d-flex">
-               
-                                    <div>
-                                        <h3 class="h4">En toute transparence</h3>
-                                        <p>
-                                            Voici le nombre et la répartition des votes, la mise à jour s'effectue toutes les heures. Et comme c'est <a href="#opensource">open-source</a>, vous pouvez regarder, vérifier ou contribuer au système de vote de Nudger.                                         
-                                        </p>
+                            <div class="col-">
+                                <h2 class="h1 mb-5">Comment est calculé le montant reversé ?</h2>
+                                <div>
+                                <th:block th:with="path='pages/contribution/compensation-4'">
+                                    <th:block th:insert="~{inc/wiki.html}"></th:block>
+                                </th:block>   
                                     </div>
-                                </div>
-                            </div>					
-					
-					
-					
-					
-					
-					
-					
-					
-					
-						<div class="card shadow text-center">
-							<!-- Header -->
-							<div class="card-header bg-white p-3">
-								<h3 class="text-primary mb-4">Votes</h3>
-								<span class="d-block">
-								    <span class="display-1 text-dark fw-bold" th:text="${votes}"></span>
-								</span>
-								<p> Depuis le dernier reversement</p>
-							</div>
-							<!-- End Header -->
-							<!-- Content -->
-							<div class="card-body">
-								<canvas class="mt-4" id="voteChart"></canvas>    							
-							</div>
-							<!-- End Content -->
-						</div>
-						
-						
-						
-						
-						
-						
-						
-						
-						
-						
-						
-					</div>
-
-
-
-					<div class="col-12 col-md-6 col-lg-4 mb-5 mb-lg-0">
-						<div class="row mt-4">
-						        <div class="col-12 text-center">
-						            <!-- Inline HTML elements to hold the data -->
-						            <span class="pie-data" data-value="20" data-label="Red"></span>
-						            <span class="pie-data" data-value="10" data-label="Green"></span>
-						            <span class="pie-data" data-value="30" data-label="Blue"></span>
-						            <span class="pie-data" data-value="40" data-label="Yellow"></span>
-						        </div>
-						    </div>
-					</div>	    
-                </div>
-            </div>
-            
-            
-        
-        <section class="bg-green-transparent text-center py-4 mb-5">
-            <h2> <span class="h1 mb-3">La contribution écologique en détail</span></h2>
-        </section>
-        
-        
-        
-		        <section class="section section-md">
-            <div class="container">
-                <div class="row d-flex flex-wrap align-items-center justify-content-around">
-
-                    <div class="col-">
-                        <h2 class="h1 mb-5">Quelle différence avec la compensation carbone ?</h2>
-						<div>
-                        <th:block th:with="path='compensation-3'">
-							<th:block th:insert="~{inc/wiki.html}"></th:block>
-						</th:block>   
-							</div>
-                    </div>
-					                    <div class="col-">
-                        <h2 class="h1 mb-5">À quelles associations ou organismes sont reversés les fonds de Nudger ?</h2>
-						<div>
-                        <th:block th:with="path='compensation-4'">
-							<th:block th:insert="~{inc/wiki.html}"></th:block>
-						</th:block>   
-							</div>
-                    </div>				
-            </div>
+                            </div>          
+                            
+                            
+                                                        
+                            <div class="col-">
+                                <h2 class="h1 mb-5">Comment vérifier que les dons sont réels ?</h2>
+                                <div>
+                                <th:block th:with="path='pages/contribution/check-dons'">
+                                    <th:block th:insert="~{inc/wiki.html}"></th:block>
+                                </th:block>   
+                                    </div>
+                            </div>          
+                            
+                            
+                            
+                            
+                            
+                            <div class="col-">
+                                <h2 class="h1 mb-5">Comment vérifier que cela fonctionne ?</h2>
+                                <div>
+                                <th:block th:with="path='pages/contribution/check-opensource'">
+                                    <th:block th:insert="~{inc/wiki.html}"></th:block>
+                                </th:block>   
+                                    </div>
+                            </div>          
+                            
+                            
+                            
+                            
+                            
+                            
+		                    	
+		               </div>
+		            </div>
         </section>
     </main>
     

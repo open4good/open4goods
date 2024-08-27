@@ -134,12 +134,12 @@ reversement-config:
       name: Green Peace
       img: /assets/img/greenpeace_logo.png
       url: https://www.greenpeace.fr/
-      description: Green Peace description
+      description: Greenpeace est une organisation non gouvernementale internationale fondée en 1971, dédiée à la protection de l'environnement et à la promotion de la paix. Elle est connue pour ses actions directes non violentes et ses campagnes de sensibilisation sur des enjeux cruciaux comme le changement climatique, la déforestation, la pollution des océans, et la protection de la biodiversité. Greenpeace milite pour une transition vers des énergies renouvelables, la réduction des déchets, et la préservation des écosystèmes menacés. L'organisation s'appuie sur la recherche scientifique, l'activisme, et le plaidoyer pour inciter les gouvernements et les entreprises à adopter des pratiques durables.
     goodplanet:
       name: Fondation Good Planet
       img: /assets/img/goodplanet_logo.svg
       url: https://www.goodplanet.org/fr/
-      description: Good Planet description
+      description: La Fondation GoodPlanet, créée par Yann Arthus-Bertrand en 2005, est une organisation dédiée à la promotion du développement durable et de la sensibilisation environnementale. Elle œuvre pour la protection de la biodiversité, la lutte contre le changement climatique, et la promotion d'une transition écologique et solidaire. La fondation mène des projets éducatifs, organise des événements, et soutient des initiatives locales et internationales. Elle propose également des solutions concrètes pour réduire l'empreinte écologique, tout en favorisant l'engagement citoyen et en cultivant une prise de conscience collective autour des enjeux environnementaux.
            
   reversements:
   - date: 2021-11-01

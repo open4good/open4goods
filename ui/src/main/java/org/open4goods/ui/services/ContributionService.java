@@ -42,9 +42,11 @@ import co.elastic.clients.elasticsearch._types.aggregations.StringTermsBucket;
  */
 public class ContributionService implements HealthIndicator {
 	
-	private static final String ALREADY_VOTED_CONST = "ALREADY_VOTED";
+	public static final String ALREADY_VOTED_CONST = "ALREADY_VOTED";
+	public static final String DEFAULT_VOTE = "nudger";
 
 	private static final Logger logger = LoggerFactory.getLogger(ContributionService.class);
+
 	
 	private SerialisationService serialisationService;
 	private ContributionVoteRepository repository;
