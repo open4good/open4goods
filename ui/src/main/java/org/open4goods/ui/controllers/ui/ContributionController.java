@@ -1,5 +1,8 @@
 package org.open4goods.ui.controllers.ui;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.apache.commons.lang3.StringUtils;
 import org.open4goods.commons.helper.IpHelper;
 import org.open4goods.ui.config.yml.ReversementConfig;
@@ -78,7 +81,7 @@ public class ContributionController implements SitemapExposedController{
 		}
 		
 		
-		// Checking no injection in the vote
+		// Checking vote is in the allowed list
 		String vote;
 		if (DEFAULT_VOTE_OPTION.equals(voteOption) || reversementConfig.getContributedOrganisations().containsKey(voteOption)) {
 			vote = voteOption;
@@ -119,8 +122,29 @@ public class ContributionController implements SitemapExposedController{
 	public ModelAndView compensation(final HttpServletRequest request) {
 		ModelAndView ret = uiService.defaultModelAndView(("compensation"), request);
 		
+		Map<String, Long> repartition =   new HashMap<String, Long>( contributionService.nudgesRepartitionSinceLastReversement());
+		
+		// Get number of duplicate votes
+		Long duplicateVotes = repartition.get(ContributionService.ALREADY_VOTED_CONST);
+		if (null == duplicateVotes) {
+			duplicateVotes = 0L;
+		}
+		
+		// Remove duplicate votes from the data (not to represent them in the chart)
+		repartition.remove(ContributionService.ALREADY_VOTED_CONST);
+		
+		
+		// Rename default votes to a clearest label
+		Long defaultVotes = repartition.get(ContributionService.DEFAULT_VOTE);
+		if (null != defaultVotes) {
+			repartition.remove(ContributionService.DEFAULT_VOTE);
+			repartition.put("Choix par défaut", defaultVotes);
+		}
+		
+		
 		ret.addObject("votes", contributionService.nudgesCountSinceLastReversement());
-		ret.addObject("repartition", contributionService.nudgesRepartitionSinceLastReversement());
+		ret.addObject("repartition", repartition);
+		ret.addObject("duplicateVotes", duplicateVotes);
 		
 		ret.addObject("page","compensation écologique");
 		
