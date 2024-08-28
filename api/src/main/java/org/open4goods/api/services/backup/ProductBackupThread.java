@@ -77,7 +77,8 @@ public class ProductBackupThread implements Runnable {
         logger.info("Starting product consuming for thread {}", fileNumber);
         while (true) {
             try {
-                Product product = queue.poll(5, TimeUnit.SECONDS);
+            	// We have big batches
+                Product product = queue.poll(5, TimeUnit.MINUTES);
                 
                 if (product == null) {
                 	logger.info("Handling done for this thread");
