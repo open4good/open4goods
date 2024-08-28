@@ -3,6 +3,7 @@ package org.open4goods.api;
 
 import java.io.IOException;
 
+import org.open4goods.commons.config.CacheKeyGenerator;
 import org.open4goods.commons.services.SerialisationService;
 import org.open4goods.commons.store.repository.elastic.BrandScoresRepository;
 import org.open4goods.commons.store.repository.elastic.ElasticProductRepository;
@@ -26,7 +27,7 @@ import jakarta.annotation.PostConstruct;
 
 
 
-@SpringBootApplication (scanBasePackageClasses = { Api.class, CrawlController.class})
+@SpringBootApplication (scanBasePackageClasses = { Api.class, CrawlController.class, CacheKeyGenerator.class})
 
 @EnableScheduling
 @EnableElasticsearchRepositories(basePackageClasses = {ElasticProductRepository.class, IndexationRepository.class, BrandScoresRepository.class})
