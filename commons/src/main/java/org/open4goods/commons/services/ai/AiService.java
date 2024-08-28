@@ -47,6 +47,7 @@ public class AiService implements HealthIndicator{
 	
 	// Tracked exception for healthcheck
 	private Long criticalExceptionsCounter = 0L;
+	private Long generatedProducts = 0L;
 
 	public AiService(OpenAiChatModel chatModel,  EvaluationService spelEvaluationService, SerialisationService serialisationService) {
 		this.chatModel = chatModel;
@@ -190,6 +191,7 @@ public class AiService implements HealthIndicator{
 	 */
 	@Timed(value = "GenAiTextsGeneration", description = " direct metric on the  API used  for generation",  extraTags = {"service","ai"})
 	public String generatePromptResponse(String value) throws Exception {
+		
 		long startTime = System.currentTimeMillis();
 		String response = chatModel.call(value);
 		logger.info("GenAI request ({}ms) : \n ----------request :\n{} \n----------response\n{}", System.currentTimeMillis() - startTime, value, response);
@@ -198,6 +200,7 @@ public class AiService implements HealthIndicator{
 			logger.error("Empty response from API, generating for prompt : {}",value);
 			throw new Exception("Empty response returned from GENAI Api");
 		}
+		generatedProducts++;
 		return response;
 	}
 
@@ -217,7 +220,11 @@ public class AiService implements HealthIndicator{
 			health =  Health.down();
 		}
 
-		return health.withDetail("critical_exceptions", eCount).build();
+		return health
+				.withDetail("critical_exceptions", eCount)
+				.withDetail("successfull_generations", generatedProducts.longValue())
+				
+				.build();
 	}
 	
 }
