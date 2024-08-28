@@ -120,7 +120,7 @@ public class ContributionController implements SitemapExposedController{
 	 */
 	@GetMapping(value = {DEFAULT_PATH, FR_PATH})
 	public ModelAndView compensation(final HttpServletRequest request) {
-		ModelAndView ret = uiService.defaultModelAndView(("compensation"), request);
+		ModelAndView ret = uiService.defaultModelAndView("contribution", request);
 		
 		Map<String, Long> repartition =   new HashMap<String, Long>( contributionService.nudgesRepartitionSinceLastReversement());
 		

@@ -91,11 +91,6 @@ public class DataSourceProperties {
 	
 	
 	/**
-	 * The percent of reversement for the provider
-	 */
-	private Double reversement = 3.0;
-
-	/**
 	 * Scheduling of this datasource Can be TimeConstants.CRON_DAY
 	 * |TimeConstants.CRON_WEEK | TimeConstants.CRON_MONTH or a spring cronexp
 	 *
@@ -516,14 +511,6 @@ public class DataSourceProperties {
 
 	public static void setDefaultReferentielAttributes(final Map<String, ReferentielKey> defaultReferentielAttributes) {
 		DataSourceProperties.defaultReferentielAttributes = defaultReferentielAttributes;
-	}
-
-	public Double getReversement() {
-		return reversement;
-	}
-
-	public void setReversement(Double reversement) {
-		this.reversement = reversement;
 	}
 
 	public String getLogo() {

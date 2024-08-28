@@ -37,10 +37,26 @@ import com.google.common.collect.Sets;
  *
  */
 public class PriceAggregationService extends AbstractAggregationService {
-
-	// TODO(conf, P3, 0.25) : from conf
-	private static final double REVERSEMENT = 0.2 * 0.8;
-
+	
+	/**
+	 * Allows to compute the incomes, it is the average percent reversed to Nudger by affiliation platforms
+	 */
+	private static Double averageAffiliationRatio = 0.05;
+	
+	/**
+	 * The ratio that allows to estimate benefits from revenue
+	 */
+	private static Double incomesToBenefitsRatio = 0.75;
+	
+	/**
+	 * The percent of benefits reversed
+	 */
+	private static Double percentBenefitsReversed = 0.1;
+	
+	
+	
+	
+	
 	private DataSourceConfigService datasourceConfigService;
 
 	public PriceAggregationService(final Logger logger, DataSourceConfigService datasourceConfigService) {
@@ -92,21 +108,11 @@ public class PriceAggregationService extends AbstractAggregationService {
 		final Set<AggregatedPrice> filtered = new HashSet<>(reducedPrices.values());
 
 		////////////////////////////
-		// Computing the compensation
+		// Set the contribution
 		////////////////////////////
-		// TODO : have to be clear, and to expose the code
 		for (AggregatedPrice price : filtered) {
 
-			double percent;
-			try {
-				percent = datasourceConfigService.getDatasourceConfig(price.getDatasourceName()).getReversement()
-						.doubleValue();
-			} catch (Exception e1) {
-				dedicatedLogger.info("Cannot get reversement for datasource {}", price.getDatasourceName());
-				percent = 2.0;
-			}
-
-			price.setCompensation(price.getPrice() * (percent / 100) * REVERSEMENT);
+			price.setCompensation(computeEstimatedContribution(price.getPrice()));
 
 		}
 
@@ -137,6 +143,15 @@ public class PriceAggregationService extends AbstractAggregationService {
 
 		// Setting if has an occasion offer
 
+	}
+
+	/**
+	 * Compute the estimated contribution for the given price
+	 * @param price
+	 * @return
+	 */
+	private Double computeEstimatedContribution(Double price) {
+		return price * averageAffiliationRatio * incomesToBenefitsRatio * percentBenefitsReversed;
 	}
 
 	/**
