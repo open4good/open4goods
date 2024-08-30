@@ -1,6 +1,5 @@
 package org.open4goods.ui.controllers.ui;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
@@ -8,7 +7,6 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
-import org.open4goods.commons.services.DataSourceConfigService;
 import org.open4goods.ui.config.yml.UiConfig;
 import org.open4goods.xwiki.services.XWikiHtmlService;
 import org.slf4j.Logger;
@@ -16,9 +14,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.core.env.Profiles;
-import org.springframework.core.io.Resource;
-import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
-import org.springframework.core.io.support.ResourcePatternResolver;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -39,14 +34,11 @@ public class UiService {
 
 		
 	// Used to load Datasource configurations from classpath
-	private static final ClassLoader cl = DataSourceConfigService.class.getClassLoader();
-	private static final ResourcePatternResolver resolver = new PathMatchingResourcePatternResolver(cl);
 	private  int maxImg;
 	
 	
 	private Map<String,String> languageByserverNames = new HashMap<>();
 	
-	// TODO :  in a service (hot, controllers are multiply instanciated)
 	@PostConstruct
 	public  void init() {
 		
@@ -55,17 +47,7 @@ public class UiService {
           languageByserverNames.put(e.getValue(),e.getKey());
         });
 		
-		
-		
-		try {
-			// TODO : from conf
-			Resource[] resources = resolver.getResources("classpath:/static/assets/img/loader/*");
-			
-			maxImg = resources.length;
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}	
+	
 	}
 	
 	
@@ -193,7 +175,7 @@ public class UiService {
 		if (config.getNamings().getServerNames().containsValue(serverName)) {
 			LOGGER.info("Server name {} found in configuration", serverName);
 		} else {
-			// TODO(p3,design) : Raise 403 ?
+			// TODO(p3,security) : Raise 403 ?
 			LOGGER.error("Server name {} not found in configuration", serverName);
 		}
 		
