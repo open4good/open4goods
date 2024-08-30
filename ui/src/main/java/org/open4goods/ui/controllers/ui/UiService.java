@@ -23,7 +23,7 @@ import org.springframework.web.servlet.ModelAndView;
 import jakarta.annotation.PostConstruct;
 import jakarta.servlet.http.HttpServletRequest;
 
-// TODO : MErge with uihelper
+// TODO(p2,design) : Merge with uihelper
 public class UiService {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(UiService.class);
@@ -78,7 +78,8 @@ public class UiService {
 		ret.addObject("userLocale", request.getLocale());
 		
 		ret.addObject("siteLanguage", getSiteLanguage(request));
-		ret.addObject("siteLocale", getSiteLocale(request));
+		Locale siteLocale = getSiteLocale(request);
+		ret.addObject("siteLocale", siteLocale);
 		
 		ret.addObject("config",config);
 
@@ -89,7 +90,7 @@ public class UiService {
 
 		ret.addObject("url",request.getRequestURL().toString() );
 
-		ret.addObject("baseUrl",config.getBaseUrl(request.getLocale()));
+		ret.addObject("baseUrl",config.getBaseUrl(siteLocale));
 
 
 		ret.addObject("loaderImg",loaderImage() );

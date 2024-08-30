@@ -14,7 +14,7 @@
 ######################################################################################################################################
 i18n:
   # Apply for the default site / language (english, on the .com website)
-  default:
+  fr:
       url: 
         prefix: ""
         attrs:
