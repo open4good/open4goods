@@ -163,6 +163,7 @@ public class AdminController {
 	@PreAuthorize("hasAuthority('"+RolesConstants.ROLE_XWIKI_ALL+"')")
 	public ModelAndView index(@PathVariable String verticalId, HttpServletRequest request) throws IOException {
 		
+		// TODO(p3,i18n) : Should be siteLocale
 		googleIndexationService.indexVertical(verticalId, config.getBaseUrl(request.getLocale()));
 		
 		ModelAndView mv = new ModelAndView("redirect:/");

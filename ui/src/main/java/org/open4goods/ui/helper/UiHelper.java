@@ -90,6 +90,7 @@ public class UiHelper {
 		 if (null == attr) {
 			 return key +" (!)";
 		 }
+		 // TODO : Should be site locale
 		return attr.i18n(request.getLocale().getLanguage());
 		
 		
