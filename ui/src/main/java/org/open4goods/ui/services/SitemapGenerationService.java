@@ -17,7 +17,6 @@ import org.open4goods.commons.config.yml.ui.VerticalConfig;
 import org.open4goods.commons.dao.ProductRepository;
 import org.open4goods.commons.helper.GenericFileLogger;
 import org.open4goods.commons.model.Localisable;
-import org.open4goods.commons.model.dto.WikiPage;
 import org.open4goods.commons.model.product.Product;
 import org.open4goods.commons.services.VerticalsConfigService;
 import org.open4goods.ui.config.yml.UiConfig;
@@ -276,7 +275,7 @@ public class SitemapGenerationService {
 				// TODO : Blog is immutable (not translated). At last have it in conf / constants
 				String url = baseUrl+"blog/"+  post.getUrl();
 				LOGGER.info("Adding blog entry to sitemap : {}",url);
-				sitemap = sitemap.addPage(getWebPage(url, ChangeFreq.MONTHLY, 0.8, Date.from(Instant.ofEpochMilli(post.getCreatedMs()))));
+				sitemap = sitemap.addPage(getWebPage(url, ChangeFreq.MONTHLY, 0.8, Date.from(Instant.ofEpochMilli(post.getCreated()))));
 		}
 		// Writing sitemap
 		try {
