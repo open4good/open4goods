@@ -3,10 +3,14 @@ package org.open4goods.ui.services;
 
 import java.net.URLEncoder;
 import java.nio.charset.Charset;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -15,11 +19,15 @@ import org.apache.commons.text.WordUtils;
 import org.open4goods.commons.config.yml.BlogConfiguration;
 import org.open4goods.commons.helper.IdHelper;
 import org.open4goods.commons.model.Localisable;
+import org.open4goods.ui.controllers.ui.pages.BlogController;
 import org.open4goods.ui.model.BlogPost;
 import org.open4goods.xwiki.model.FullPage;
 import org.open4goods.xwiki.services.XwikiFacadeService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.boot.actuate.health.Health;
+import org.springframework.boot.actuate.health.Health.Builder;
+import org.springframework.boot.actuate.health.HealthIndicator;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.xwiki.rest.model.jaxb.PageSummary;
 import org.xwiki.rest.model.jaxb.Pages;
@@ -35,38 +43,41 @@ import com.rometools.rome.feed.synd.SyndFeedImpl;
 import com.rometools.rome.io.FeedException;
 import com.rometools.rome.io.SyndFeedOutput;
 
+import jakarta.annotation.PostConstruct;
+
 /**
- * This service handles XWiki content bridges :
- * > Authentication, through the registered users/password on the wiki
- * > RBAC, through roles
- * > Content retrieving, through the REST API
- * TODO : Localisation
+ * This service handles blog functionalities, built over the Xwiki blog application
  * @author Goulven.Furet
  */
-public class BlogService {
+public class BlogService implements HealthIndicator{
 
 	private static final String XWIKI_BLOGPOST_START_MARKUP = "<div class=\"entry-content\">";
 	private static final String XWIKI_BLOGPOST_STOP_MARKUP = "<div class=\"entry-footer\">";
 	
 	private static final Logger logger = LoggerFactory.getLogger(BlogService.class);
 
-	
+			
 	private BlogConfiguration config;
 	private XwikiFacadeService xwikiFacadeService;
 	private Map<String, BlogPost> postsByUrl = new ConcurrentHashMap<>();
 	private List<BlogPost> posts = new ArrayList<>();
 	private Localisable<String,String> baseUrl;
 
+	private DateTimeFormatter blogDateformatter = DateTimeFormatter.ofPattern("EEE MMM dd HH:mm:ss zzz yyyy", Locale.ENGLISH);
 	
+	// States variables for healthcheck
+	int expectectedBlogPagesCount = 0;
+	int exceptionsCount = 0;
 	
-	public BlogService(XwikiFacadeService xwikiFacadeService,  BlogConfiguration config, Localisable<String,String> localisable) {
+	public BlogService(XwikiFacadeService xwikiFacadeService,  BlogConfiguration config, Localisable<String,String> baseUrls) {
 		this.config = config;
 		this.xwikiFacadeService = xwikiFacadeService;
-		this.baseUrl = localisable;
+		this.baseUrl = baseUrls;
 	}
 
-	// TODO : From conf
-	@Scheduled(initialDelay = 2000, fixedDelay = 1000 * 3600*2)
+	// TODO(p3, conf) : Schedule from conf
+	@Scheduled(fixedDelay = 1000 * 3600*2)
+	@PostConstruct
 	public void refreshPosts() {
 		updateBlogPosts();
 	}
@@ -82,54 +93,94 @@ public class BlogService {
 	}
 	
 	
-	// TODO : Cacheable, or better @scheduled
+	/**
+	 * Retrieves the blog posts from the Xwiki 
+	 */
 	public void updateBlogPosts() {
 		logger.info("Getting blog posts");
 		Pages pages = xwikiFacadeService.getPages("Blog");
+		
+		// Setting expected number of blog articles
+		expectectedBlogPagesCount = pages.getPageSummaries().size();
+		
 		List<BlogPost> posts = new ArrayList<>();
-		for (PageSummary page : pages.getPageSummaries()) {		
-			if (page.getFullName().endsWith(".WebHome")) {
-				continue;
-			}
-			FullPage fullPage = xwikiFacadeService.getFullPage(page.getSpace(), page.getName());
-			BlogPost post = new BlogPost();
-			post.setWikiPage(fullPage);
-			String image = fullPage.getProperties().get("image");
+		for (PageSummary page : pages.getPageSummaries()) {	
 			
-						
-			String extract = fullPage.getProperties().get("extract");
-//			int hidden = Integer.valueOf(fullPage.getProperties().get("hidden"));
-			String  publishDate = fullPage.getProperties().get("publishDate");
-			// TODO :  DateTimeFormatter formatter = DateTimeFormatter.ofPattern("EEE MMM dd HH:mm:ss zzz yyyy");
-
-			
-			
-//			int published =   Integer.valueOf(fullPage.getProperties().get("published"));
-			String category =  fullPage.getProperties().get("category");
-			String title = fullPage.getProperties().get("title");
-//			String content = fullPage.getProperties().get("content");
-			
-//			List<String> categories = Arrays.asList(category.replace("Blog.", "").split("|"));
-			
-			post.setUrl(getPostUrl(title));
-			posts.add(post);
-			// Maintain the inversed map
-			postsByUrl.put(post.getUrl(), post);
-						
-			post.setTitle(title);
-			post.setEditLink(xwikiFacadeService.getPathHelper().getEditpath(page.getId().replace("xwiki:", "").split("\\.")));
-			
-			if (!StringUtils.isEmpty(image)) {
-				String fullImage = getBlogImageUrl( URLEncoder.encode(page.getName(), Charset.defaultCharset()), URLEncoder.encode(image, Charset.defaultCharset()));
-				post.setImage(fullImage);				
-			}
-			
-			
-			// Substring(7) : Remove "XWiki." from author
-			post.setAuthor(WordUtils.capitalizeFully(fullPage.getWikiPage().getAuthor().substring(6)));			
 			try {
+				BlogPost post = new BlogPost();
+
+				// Reading the blog post
+				FullPage fullPage = xwikiFacadeService.getFullPage(page.getSpace(), page.getName());
+				post.setWikiPage(fullPage);
+
+				// To discard internal xwiki page, that is not a blog post
+				if (page.getFullName().endsWith(".WebHome")) {
+					expectectedBlogPagesCount--;
+					continue;
+				}
+
+				// Evict the xwiki blog default page
+				if ("Blog".equals(fullPage.getProperties().get("title"))) {
+					expectectedBlogPagesCount--;
+					continue;
+				}
+				
+				// Skipping if hidden
+				if (fullPage.getWikiPage().isHidden()) {
+					expectectedBlogPagesCount--;
+					continue;
+				}
+				
+				////////////////////////
+				// Setting blogpostInfos
+				////////////////////////
+
+
+				// The image
+				String image = fullPage.getProperties().get("image");						
+				if (!StringUtils.isEmpty(image)) {
+					String fullImage = getBlogImageUrl( URLEncoder.encode(page.getName(), Charset.defaultCharset()), URLEncoder.encode(image, Charset.defaultCharset()));
+					post.setImage(fullImage);				
+				}
+				
+				// Set the Author
+				// Substring(6) : Remove "XWiki." from author
+				post.setAuthor(WordUtils.capitalizeFully(fullPage.getWikiPage().getAuthor().substring(6)));		
+				
+				
+				// post summary
+				String extract = fullPage.getProperties().get("extract");
 				post.setSummary(extract);
 				
+				// Setting the post category
+				String category =  fullPage.getProperties().get("category");
+				if (null != category) {
+					post.setCategory(Arrays.asList(category.replace("Blog.","").split("\\|")));				
+				}
+				
+				// Get blog publish date as an epoch
+				String  publishDate = fullPage.getProperties().get("publishDate");
+				ZonedDateTime zonedDateTime = ZonedDateTime.parse(publishDate, blogDateformatter);
+				long publishedDateMs = zonedDateTime.toInstant().toEpochMilli();
+				post.setCreated( new Date(publishedDateMs));
+				
+				
+				
+				// Get last modification as epoch 
+				post.setModified(new Date(fullPage.getWikiPage().getModified().getTimeInMillis()));
+				
+				// Setting the post title
+				String title = fullPage.getProperties().get("title");
+				post.setTitle(title);
+
+				// Derivating the open4goods blog url from the post title
+				post.setUrl(getPostUrl(title));
+
+				// Setting the edit link
+				post.setEditLink(xwikiFacadeService.getPathHelper().getEditpath(page.getId().replace("xwiki:", "").split("\\.")));
+
+				
+				// Setting the post content, from xwiki content html markup parsing
 				
 				String html = fullPage.getHtmlContent();
 				// Remove the leading xwiki edit markup pages
@@ -143,67 +194,43 @@ public class BlogService {
 					html = html.substring(0,pos);
 				}
 				
-				
-				//TODO : Markup should be mutualized with BlogController / downloadAttachment mapping
-				html = html.replace("\"/bin/download/Blog","\"/blog");
-				
+				// Replace blog attachments links with proxied equivalent nudger links
+				html = html.replace("\"/bin/download/Blog","\"" + BlogController.DEFAULT_PATH);
 				
 				post.setBody(html);
-							
-				// Remove the trailing markup
-				
-				
-				
-			} catch (Exception e) {
-				logger.error("Error while rendering XWiki content", e);
-			}
-			
-			post.setHidden(fullPage.getWikiPage().isHidden());
-			// Skipping if hidden
-			if (post.getHidden()) {
-				continue;
-			}
-			
-			// TODO : Evict a ghost page
-			if (post.getTitle().equals("Blog")) {
-				continue;
-			}
-			
-//			String date = fullPage.getWikiPage().getCreated().getTime().toLocaleString();
-			// TODO : Proper i18n, 
-//			date = date.substring(0,date.indexOf(','));			
-			post.setCreated(publishDate);
-			post.setCreatedMs(fullPage.getWikiPage().getCreated().getTimeInMillis());
-			post.setModified(fullPage.getWikiPage().getModified().toString());
+					
 
-			// TODO : Handle attachment
-//			post.setAttachments(fullPage.getAttachments());
-			
-			if (null != category) {
-				post.setCategory(Arrays.asList(category.replace("Blog.","").split("\\|")));				
-			}
-			// TODO : handle image
-//			post.setImage(getProxyUrl(fullPage.getSpace(), fullPage.getName(), fullPage.getProps().get("image")));
-						
-			// If we have no summary, truncate the first 100 chars
-			// TODO : Truncation from config
-			if (null != post.getBody() &&  null == post.getSummary() && post.getBody().length() > 100) {
-				post.setSummary(post.getBody().substring(0, 100)+" ...");
+				
+				// If we have no summary, truncate the first chars from the full post
+				// TODO(p3,conf) : Truncation from config
+				if (null != post.getBody() &&  null == post.getSummary() && post.getBody().length() > 100) {
+					post.setSummary(post.getBody().substring(0, 100)+" ...");
+				}
+				
+				
+				// Save the post in instance variable
+				posts.add(post);
+			} catch (Exception e) {
+				logger.error("Error while setting blog post from XWiki content", e);
+				exceptionsCount++;
+
 			}
 			
 		}
+
+		// Replacing existing posts by order sorted ones
 		this.posts.clear();
-		Collections.sort(posts, (o1, o2) -> Long.compare(o2.getCreatedMs(), o1.getCreatedMs()));
+		Collections.sort(posts, (o1, o2) -> o2.getCreated().compareTo(o1.getCreated()));
 		this.posts.addAll(posts);
 		
-	}
-
-	private String getBlogImageUrl( String name, String image) {
-		return "/blog/"+name+"/"+image;
-	}
-
-	private String getPostUrl(String title) {
-		return StringUtils.strip(IdHelper.azCharAndDigits(StringUtils.normalizeSpace(title).toLowerCase(),"-"),"-");
+		// Update the inversed map
+		postsByUrl.clear();
+		posts.stream().forEach(post -> {
+			postsByUrl.put(post.getUrl(), post);
+			
+		});
+		
+		
 	}
 
 
@@ -227,7 +254,7 @@ public class BlogService {
 //		feed.setAuthors(null)
 //		feed.setCategories(null)
 				
-		// TODO : i18n filtering
+		// TODO(p3,i18) : i18n filtering
 		feed.setEntries(new ArrayList<>());
 		for (BlogPost post : postsByUrl.values()) {
 			SyndEntry entry = new SyndEntryImpl();
@@ -253,6 +280,57 @@ public class BlogService {
 		SyndFeedOutput syndFeedOutput = new SyndFeedOutput();
 		return syndFeedOutput.outputString(feed,true);
 	}
+	
+	/**
+	 * Rename the image in order to be proxified by xwiki component
+	 * @see BlogController.attachment
+	 * @param name
+	 * @param image
+	 * @return
+	 */
+	private String getBlogImageUrl( String name, String image) {
+		return BlogController.DEFAULT_PATH+ "/"+name+"/"+image;
+	}
+
+	/**
+	 * Return a proper name for a post URL
+	 * @param title
+	 * @return
+	 */
+	private String getPostUrl(String title) {
+		return StringUtils.strip(IdHelper.azCharAndDigits(StringUtils.normalizeSpace(title).toLowerCase(),"-"),"-");
+	}
+
+
+	/**
+	 * Custom healthcheck, 
+	 */
+	@Override
+	public Health health() {
+		
+		Builder health = Health.up()
+				.withDetail("posts_count", posts.size())
+				.withDetail("exceptions_count", exceptionsCount)
+				;
+		
+		if (posts.size()==0) {
+			health = health.down();
+		}
+
+		if (exceptionsCount>0) {
+			health = health.down();
+		}
+
+		if (expectectedBlogPagesCount != posts.size()) {
+			health = health.down().withDetail("invalid_expected_posts_count", "Was expecting " + expectectedBlogPagesCount + " get " + posts.size());
+		}
+		
+		return health.build();
+	}
+	
+	///////////////////////////////
+	// Getters and setters
+	//////////////////////////////
 
 	public Map<String, BlogPost> getPostsByUrl() {
 		return postsByUrl;

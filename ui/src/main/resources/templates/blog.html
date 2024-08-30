@@ -43,7 +43,7 @@
                     <div class="col-12 col-md-8 text-center">
                     
                         <h1 class="display-2 mb-4"><span><a href="/blog/rss"> <img style="height: 100px" src="/icons/rss.png"></a> </span>Le blog Nudger</h1>
-                        <p class="lead">Billets d'humeurs, Le carnet de route, pour vous tenir informer des avancées du projet </p>
+                        <p class="lead">Nos actualités et nos billets</p>
                     </div>
                 </div>
             </div>
@@ -63,10 +63,10 @@
                                 </a>
                                 <p th:text="${post.summary}"></p>
                                 <div class="d-flex align-items-center mt-3">
-                                    <img class="avatar avatar-sm rounded-circle" th:src="'/assets/img/team/'+${post.author}+'.jpg'" th:alt="${post.author}"> 
+                                    <img class="avatar avatar-sm rounded-circle" th:src="'/assets/img/team/'+${post.author}+'.jpeg'" th:alt="${post.author}"> 
                                     <h3 class="h6 small ms-2 mb-0" th:text="${post.author}"></h3>
                                     <span class="h6 text-muted small fw-normal mb-0 ms-auto">
-                                        <time th:datetime="${post.created}" th:text="${post.created}"></time>
+                                        <time th:datetime="${post.created}" th:text="${#dates.format(post.created, 'dd MMMM yyyy')}"></time>
                                     </span>
                                 </div>
                             </div>
@@ -84,9 +84,12 @@
 	                            <div class="card-body p-0 pt-4">
 	                                <a th:href="'/blog/'+${post.url}" class="h4" th:value="${post.title}"></a>
 	                                <p class="mb-0" th:text="${post.summary}"></p>
-	                                <div class="d-flex align-items-center my-3">
-	                                    <img class="avatar avatar-sm rounded-circle" th:src="'/assets/img/team/'+${post.author}+'.jpg'" th:alt="${post.author}"> 
+	                                <div class="d-flex align-items-center mt-3">
+	                                    <img class="avatar avatar-sm rounded-circle" th:src="'/assets/img/team/'+${post.author}+'.jpeg'" th:alt="${post.author}"> 
 	                                    <h3 class="h6 small ms-2 mb-0" th:text="${post.author}"></h3>
+	                                    <span class="h6 text-muted small fw-normal mb-0 ms-auto">
+	                                        <time th:datetime="${post.created}" th:text="${#dates.format(post.created, 'dd MMMM yyyy')}"></time>
+	                                    </span>
 	                                </div>
 	                            </div>
 	                        </div>

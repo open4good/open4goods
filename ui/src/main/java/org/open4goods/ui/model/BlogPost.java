@@ -1,11 +1,14 @@
 package org.open4goods.ui.model;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
-import org.open4goods.commons.model.dto.WikiAttachment;
 import org.open4goods.xwiki.model.FullPage;
 
+/**
+ * Representation of a xwiki blog post entry
+ */
 public class BlogPost {
 	
 	private String url;
@@ -15,21 +18,17 @@ public class BlogPost {
 	private String editLink;
 	
 	private String body;
-	private String created;
-	private Long createdMs;
+	private Date created;
 	
-	private String modified;
-	
-	// For conveniency
-	private FullPage wikiPage;
+	private Date modified;
 	
 	private List<String> category = new ArrayList<>();
+	
 	private Boolean hidden;
 	
 	private String image;
 	
-	// Some more attachments, drom wiki page, should not be usefull
-	private List<WikiAttachment> attachments = new ArrayList<>();
+	private FullPage wikiPage;
 	
 	public String getTitle() {
 		return title;
@@ -56,18 +55,6 @@ public class BlogPost {
 		this.body = body;
 	}
 
-	
-	public void setCreated(String created) {
-		this.created = created;
-	}
-	public List<WikiAttachment> getAttachments() {
-		return attachments;
-	}
-	public void setAttachments(List<WikiAttachment> attachments) {
-		this.attachments = attachments;
-	}
-
-	
 	public List<String> getCategory() {
 		return category;
 	}
@@ -92,26 +79,23 @@ public class BlogPost {
 	public void setUrl(String url) {
 		this.url = url;
 	}
-	public String getModified() {
-		return modified;
-	}
-	public void setModified(String modified) {
-		this.modified = modified;
-	}
-	public String getCreated() {
-		return created;
-	}
-	public Long getCreatedMs() {
-		return createdMs;
-	}
-	public void setCreatedMs(Long createdMs) {
-		this.createdMs = createdMs;
-	}
 	public String getEditLink() {
 		return editLink;
 	}
 	public void setEditLink(String editLink) {
 		this.editLink = editLink;
+	}
+	public Date getCreated() {
+		return created;
+	}
+	public void setCreated(Date created) {
+		this.created = created;
+	}
+	public Date getModified() {
+		return modified;
+	}
+	public void setModified(Date modified) {
+		this.modified = modified;
 	}
 	public FullPage getWikiPage() {
 		return wikiPage;
@@ -120,7 +104,7 @@ public class BlogPost {
 		this.wikiPage = wikiPage;
 	}
 
-
+	
 	
 	
 }
