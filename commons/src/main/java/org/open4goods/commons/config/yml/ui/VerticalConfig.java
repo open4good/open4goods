@@ -301,7 +301,7 @@ public class VerticalConfig{
 	 * @return
 	 */
 	public String getBaseUrl(final Locale siteLocale) {
-		return i18n.getOrDefault(siteLocale, i18n.get("default")).getVerticalHomeUrl();
+		return i18n.getOrDefault(siteLocale.getLanguage(), i18n.get("default")).getVerticalHomeUrl();
 	}
 
 
