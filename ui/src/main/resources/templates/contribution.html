@@ -42,7 +42,7 @@
             <div class="container">
                <div class="row justify-content-between align-items-center">
                         <h1 class="display-2 mb-4">La contribution écologique</h1>
-	                    <th:block th:with="path='pages/contribution/hero'">
+	                    <th:block th:with="path='pages/contribution/hero/'">
 	                            <th:block th:insert="~{inc/wiki.html}"></th:block>
 	               		</th:block> 
                </div>
@@ -60,7 +60,7 @@
                     <div class="col-lg-7 ">
                         
                         <blockquote class="blockquote text-center">
-	                        <th:block th:with="path='pages/contribution/baseline'">
+	                        <th:block th:with="path='pages/contribution/baseline',plaintext=true">
 	                                <th:block th:insert="~{inc/wiki.html}"></th:block>
 	                        </th:block> 
 	                        
@@ -351,10 +351,10 @@
 		            <div class="container container-semi-fluid">
 		                <div class="row d-flex flex-wrap align-items-center justify-content-around">
 		
-		                    <div class="col-">
+		                    <div>
 		                        <h2 class="h2 mb-3">Contribution écologique, compensation carbone. Quelles différences ?</h2>
 								<div>
-		                        <th:block th:with="path='pages/contribution/differences-carbone'">
+		                        <th:block th:with="path='pages/contribution/differences-carbone/'">
 									<th:block th:insert="~{inc/wiki.html}"></th:block>
 								</th:block>   
 									</div>
@@ -363,69 +363,28 @@
 							
 							
 							
-							<div class="col-">
-		                        <h2 class="h1 mb-5">Comment est calculé le montant reversé ?</h2>
+							<div>
+		                        <h2 class="h2 mb-3">Comment est calculé le montant reversé ?</h2>
 								<div>
-		                        <th:block th:with="path='pages/contribution/calcul'">
+		                        <th:block th:with="path='pages/contribution/calcul/'">
 									<th:block th:insert="~{inc/wiki.html}"></th:block>
 								</th:block>   
 									</div>
 		                    </div>			
 		                    
 		                    
-		                    
-		                    
-		                    
-		                     <div class="col-">
-                                <h2 class="h1 mb-5">20% des revenus, c'est quoi ? 20% des bénéfices ?</h2>
+                
+                            
+                            
+                            <div>
+                                <h2 class="h2 mb-3">Puis je vérifier ?</h2>
                                 <div>
-                                <th:block th:with="path='pages/contribution/compensation-revenus-benefices'">
+                                <th:block th:with="path='pages/contribution/check-opensource',plaintext=true">
                                     <th:block th:insert="~{inc/wiki.html}"></th:block>
                                 </th:block>   
-                                    </div>
-                            </div>
-                            
-                            
-                            
-                            <div class="col-">
-                                <h2 class="h1 mb-5">Comment est calculé le montant reversé ?</h2>
-                                <div>
-                                <th:block th:with="path='pages/contribution/compensation-4'">
-                                    <th:block th:insert="~{inc/wiki.html}"></th:block>
-                                </th:block>   
-                                    </div>
+                                </div>
                             </div>          
                             
-                            
-                                                        
-                            <div class="col-">
-                                <h2 class="h1 mb-5">Comment vérifier que les dons sont réels ?</h2>
-                                <div>
-                                <th:block th:with="path='pages/contribution/check-dons'">
-                                    <th:block th:insert="~{inc/wiki.html}"></th:block>
-                                </th:block>   
-                                    </div>
-                            </div>          
-                            
-                            
-                            
-                            
-                            
-                            <div class="col-">
-                                <h2 class="h1 mb-5">Comment vérifier que cela fonctionne ?</h2>
-                                <div>
-                                <th:block th:with="path='pages/contribution/check-opensource'">
-                                    <th:block th:insert="~{inc/wiki.html}"></th:block>
-                                </th:block>   
-                                    </div>
-                            </div>          
-                            
-                            
-                            
-                            
-                            
-                            
-		                    	
 		               </div>
 		            </div>
         </section>
