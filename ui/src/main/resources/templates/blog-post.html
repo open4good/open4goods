@@ -32,7 +32,7 @@
                         <div class="mb-4">
                         <h1 class="display-3 mb-4 px-lg-5" th:text="${post.title}"></h1>
                         <th:block th:each="item,stat : ${post.category}">
-                            <a th:href="'/blog?tag='+${item}" class="badge bg-success text-uppercase me-2 px-3" th:text="${item}"></a>                        
+                            <a th:href="'/blog/tag/'+${item}" class="badge bg-success text-uppercase me-2 px-3" th:text="${item}"></a>                        
                         </th:block>
                         </div>
                         <div class="post-meta">     

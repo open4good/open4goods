@@ -35,13 +35,11 @@ public class BlogController  implements SitemapExposedController{
 	private final XwikiFacadeService xwikiFacadeService;
 	private BlogService blogService;
 	private UiService uiService;
-	private UiConfig uiConfig;
 	
-	public BlogController( BlogService blogService, XwikiFacadeService xwikiFacadeService, UiService uiService, UiConfig uiConfig) {
+	public BlogController( BlogService blogService, XwikiFacadeService xwikiFacadeService, UiService uiService) {
 		this.blogService = blogService;
 		this.xwikiFacadeService = xwikiFacadeService;
 		this.uiService = uiService;
-		this.uiConfig = uiConfig;
 	}
 
 	@Override
@@ -56,7 +54,25 @@ public class BlogController  implements SitemapExposedController{
 	 * @return
 	 */
 	@GetMapping(DEFAULT_PATH)
-	public ModelAndView blogIndex(final HttpServletRequest request, @RequestParam(required = false) String tag) {
+	public ModelAndView blogIndex(final HttpServletRequest request) {
+		ModelAndView model = uiService.defaultModelAndView("blog", request);
+		model.addObject("url",  "/");
+		List<BlogPost> posts = blogService.getPosts();
+		
+		model.addObject("posts", posts);
+		model.addObject("tags",blogService.getTags());
+		return model;
+	}
+
+
+	/**
+	 * Blog entry page
+	 * @param request
+	 * @param tag
+	 * @return
+	 */
+	@GetMapping(DEFAULT_PATH +  "/tag/{tag}")
+	public ModelAndView blogIndexByCat(final HttpServletRequest request, @PathVariable String tag) {
 		ModelAndView model = uiService.defaultModelAndView("blog", request);
 		model.addObject("url",  "/");
 		List<BlogPost> posts = blogService.getPosts();
@@ -66,13 +82,15 @@ public class BlogController  implements SitemapExposedController{
 			posts = posts.stream().filter(e->e.getCategory().contains(tag)).toList();
 		}
 		
-		
-		model.addObject("posts", posts);		
+		model.addObject("posts", posts);	
+		model.addObject("tags",blogService.getTags());
+		model.addObject("currentTag", tag);
 		return model;
 	}
 
-
-
+	
+	
+	
 	
 	/**
 	 * Blog post page
@@ -90,7 +108,7 @@ public class BlogController  implements SitemapExposedController{
 			LOGGER.info("Blog post not found : {}", post);
 			throw new ResponseStatusException( HttpStatus.NOT_FOUND, "Unable to find blog post");
 		} else {
-			model.addObject("post", blogPost);		
+			model.addObject("post", blogPost);	
 			return model;			
 		}
 	}

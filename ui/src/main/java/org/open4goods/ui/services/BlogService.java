@@ -40,6 +40,7 @@ import com.rometools.rome.feed.synd.SyndEntry;
 import com.rometools.rome.feed.synd.SyndEntryImpl;
 import com.rometools.rome.feed.synd.SyndFeed;
 import com.rometools.rome.feed.synd.SyndFeedImpl;
+import com.rometools.rome.feed.synd.SyndImageImpl;
 import com.rometools.rome.io.FeedException;
 import com.rometools.rome.io.SyndFeedOutput;
 
@@ -59,8 +60,18 @@ public class BlogService implements HealthIndicator{
 			
 	private BlogConfiguration config;
 	private XwikiFacadeService xwikiFacadeService;
-	private Map<String, BlogPost> postsByUrl = new ConcurrentHashMap<>();
+	// List of blog posts
 	private List<BlogPost> posts = new ArrayList<>();
+	
+	// List of posts by url
+	private Map<String, BlogPost> postsByUrl = new ConcurrentHashMap<>();
+
+	// List of tags, with count of posts
+	private Map<String, Integer> tags = new ConcurrentHashMap<>();
+
+		
+	
+	
 	private Localisable<String,String> baseUrl;
 
 	private DateTimeFormatter blogDateformatter = DateTimeFormatter.ofPattern("EEE MMM dd HH:mm:ss zzz yyyy", Locale.ENGLISH);
@@ -174,7 +185,7 @@ public class BlogService implements HealthIndicator{
 				post.setTitle(title);
 
 				// Derivating the open4goods blog url from the post title
-				post.setUrl(getPostUrl(title));
+				post.setUrl(IdHelper.normalizeFileName(title));
 
 				// Setting the edit link
 				post.setEditLink(xwikiFacadeService.getPathHelper().getEditpath(page.getId().replace("xwiki:", "").split("\\.")));
@@ -230,7 +241,14 @@ public class BlogService implements HealthIndicator{
 			
 		});
 		
-		
+		// Update the tags map to get count of posts by tags
+		tags.clear();
+		posts.stream().forEach(p -> {
+		    List<String> categories = p.getCategory();
+		    for (String tag : categories) {
+		        tags.compute(tag, (key, count) -> (count == null) ? 1 : count + 1);
+		    }
+		});
 	}
 
 
@@ -248,25 +266,26 @@ public class BlogService implements HealthIndicator{
 		feed.setTitle(config.getFeedTitle().i18n(lang));
 		feed.setDescription(config.getFeedDescription().i18n(lang));
 		
-		feed.setLink(baseUrl.i18n(lang) +config.getFeedUrl());
+		feed.setLink(baseUrl.i18n(lang));
 		
-//		feed.setCopyright(lang)
-//		feed.setAuthors(null)
-//		feed.setCategories(null)
-				
 		// TODO(p3,i18) : i18n filtering
 		feed.setEntries(new ArrayList<>());
 		for (BlogPost post : postsByUrl.values()) {
 			SyndEntry entry = new SyndEntryImpl();
 			entry.setTitle(post.getTitle());
 			entry.setLink(baseUrl.i18n(lang) + config.getBlogUrl() + post.getUrl());
+			
+			
+			SyndContent content = new SyndContentImpl();
+			
+			content.setType("text/html");
+			content.setValue(post.getSummary());
 
-			SyndContent description = new SyndContentImpl();
-			description.setType("text/html");
-			description.setValue(post.getSummary());
-
-			entry.setDescription(description);
-
+			entry.setDescription(content);
+			entry.setPublishedDate(post.getCreated());
+			entry.setUpdatedDate(post.getModified());
+			entry.setAuthor(post.getAuthor());
+			
 			List<SyndCategory> categories = new ArrayList<>();
 			for (String cat : post.getCategory()) {
 				SyndCategory category = new SyndCategoryImpl();
@@ -291,16 +310,6 @@ public class BlogService implements HealthIndicator{
 	private String getBlogImageUrl( String name, String image) {
 		return BlogController.DEFAULT_PATH+ "/"+name+"/"+image;
 	}
-
-	/**
-	 * Return a proper name for a post URL
-	 * @param title
-	 * @return
-	 */
-	private String getPostUrl(String title) {
-		return StringUtils.strip(IdHelper.azCharAndDigits(StringUtils.normalizeSpace(title).toLowerCase(),"-"),"-");
-	}
-
 
 	/**
 	 * Custom healthcheck, 
@@ -346,6 +355,14 @@ public class BlogService implements HealthIndicator{
 
 	public void setPosts(List<BlogPost> posts) {
 		this.posts = posts;
+	}
+
+	public Map<String, Integer> getTags() {
+		return tags;
+	}
+
+	public void setTags(Map<String, Integer> tags) {
+		this.tags = tags;
 	}
 
 
