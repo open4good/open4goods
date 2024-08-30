@@ -56,9 +56,9 @@ spring:
         enabled: true
       
 wikiPagesMapping:
-  "[webpages:default:legal-notice:WebHome]":
+  "[webpages/default/legal-notice/WebHome]":
     fr: "mentions-legales"
-  "[webpages:opensource-contribution:WebHome]":
+  "[webpages/opensource-contribution/WebHome]":
       fr: "opensource/contribution-ecologique"    
 
 team-config:
