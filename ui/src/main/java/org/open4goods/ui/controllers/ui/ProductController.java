@@ -120,7 +120,7 @@ public class ProductController  {
 		Product product = (Product) ret.getModel().get("product");
 		
 		if (null != product && !StringUtils.isEmpty(product.getVertical())) {
-			String vPath = verticalConfigService.getConfigById(product.getVertical()).getBaseUrl(request.getLocale()); 
+			String vPath = verticalConfigService.getConfigById(product.getVertical()).getBaseUrl(uiService.getSiteLocale(request)); 
 			ModelAndView mv = new ModelAndView("redirect:/"  + vPath+ "/"+url);
 			mv.setStatus(HttpStatus.MOVED_PERMANENTLY);				
 			return mv;			
