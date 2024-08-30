@@ -99,7 +99,7 @@ public class ContributionService implements HealthIndicator {
 				aff.setVote(ALREADY_VOTED_CONST);
 			}
 			
-			// TODO(P2,perf,0.5) : async index
+			// TODO(P2,perf) : async index
 			repository.save(aff);
 			
 			// Return the decoded affiliationtoken
@@ -153,7 +153,7 @@ public class ContributionService implements HealthIndicator {
 		SearchHits<ContributionVote> results = elasticSearchOperations.search(esQuery.build(), ContributionVote.class, IndexCoordinates.of(ContributionVote.INDEX_NAME));
 
 		// Handling aggregations results if relevant
-		//TODO(gof) : this cast should be avoided
+		//NOTE(gof) : this cast should be avoided
 		ElasticsearchAggregations aggregations = (ElasticsearchAggregations)results.getAggregations();
 
 
