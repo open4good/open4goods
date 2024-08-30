@@ -278,6 +278,7 @@ public class IcecatCompletionService extends AbstractCompletionService {
 		df.addProductTag(e.category.name.value);
 		
 		
+		
 		// Adding PDFs
 		try {
 						

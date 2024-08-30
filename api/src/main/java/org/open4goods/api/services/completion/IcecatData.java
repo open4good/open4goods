@@ -123,7 +123,10 @@ public class IcecatData {
         public String productFamily;
         @JsonProperty("zoom_panel_out")
         public String zoomPanelOut;
+        @JsonProperty("repairability_index")
+        public String repairabilityIndex;
 
+        
         // Getters and Setters
     }
 
