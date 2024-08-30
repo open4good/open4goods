@@ -275,7 +275,7 @@ public class SitemapGenerationService {
 				// TODO : Blog is immutable (not translated). At last have it in conf / constants
 				String url = baseUrl+"blog/"+  post.getUrl();
 				LOGGER.info("Adding blog entry to sitemap : {}",url);
-				sitemap = sitemap.addPage(getWebPage(url, ChangeFreq.MONTHLY, 0.8, Date.from(Instant.ofEpochMilli(post.getCreated()))));
+				sitemap = sitemap.addPage(getWebPage(url, ChangeFreq.MONTHLY, 0.8, post.getCreated()));
 		}
 		// Writing sitemap
 		try {

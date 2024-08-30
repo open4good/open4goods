@@ -1,15 +1,12 @@
 package org.open4goods.ui.controllers.ui;
 
-import java.io.IOException;
 import java.util.Locale;
 
 import org.open4goods.xwiki.model.FullPage;
-import org.open4goods.xwiki.services.XWikiHtmlService;
 import org.open4goods.xwiki.services.XwikiFacadeService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.AbstractController;
 
@@ -20,11 +17,11 @@ import jakarta.servlet.http.HttpServletResponse;
 
 /**
  * This controller pages pageSize Xwiki content
- * @author gof
- * TODO : Could put in the xwiki-starter
+ * 
+ * @author gof TODO : Could put in the xwiki-starter
  *
  */
-public class XwikiController extends AbstractController  {
+public class XwikiController extends AbstractController {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(XwikiController.class);
 
@@ -34,87 +31,52 @@ public class XwikiController extends AbstractController  {
 	private static final String WEBPAGE_CLASS_HTML = "html";
 	private static final String WEBPAGE_CLASS_WIDTH = "width";
 
-	private  XwikiFacadeService xwikiService;
-	private  UiService uiService;
-	
+	private XwikiFacadeService xwikiService;
+	private UiService uiService;
 
-	private String frags;	
+	private String frags;
 
-	public XwikiController(	 ) {
+	public XwikiController() {
 		super();
 	}
 
-	public XwikiController(	 XwikiFacadeService xwikiService, 	UiService uiService,  String wikiPage) {
+	public XwikiController(XwikiFacadeService xwikiService, UiService uiService, String wikiPage) {
 		super();
-//		this.config = config;
 		this.xwikiService = xwikiService;
 		this.uiService = uiService;
-		this.frags =  wikiPage;
+		this.frags = wikiPage;
 	}
-	
+
 	@Override
 	protected ModelAndView handleRequestInternal(HttpServletRequest request, HttpServletResponse response) throws Exception {
-	    FullPage fullPage = xwikiService.getFullPage(frags);
+		FullPage fullPage = xwikiService.getFullPage(frags);
 
-	    ModelAndView mv = uiService.defaultModelAndView("xwiki-"+ fullPage.getProp("layout"), request);
+		ModelAndView mv = uiService.defaultModelAndView("xwiki-" + fullPage.getProp("layout"), request);
 
-	    mv.addObject(WEBPAGE_CLASS_META_TITLE,fullPage.getProp(WEBPAGE_CLASS_META_TITLE));
-		mv.addObject(WEBPAGE_CLASS_META_DESCRIPTION,fullPage.getProp(WEBPAGE_CLASS_META_DESCRIPTION));
-		mv.addObject(WEBPAGE_CLASS_PAGE_TITLE,fullPage.getProp(WEBPAGE_CLASS_PAGE_TITLE));
-		mv.addObject(WEBPAGE_CLASS_HTML,getHtml(fullPage));
-		mv.addObject(WEBPAGE_CLASS_WIDTH,fullPage.getProp(WEBPAGE_CLASS_WIDTH));
+		mv.addObject(WEBPAGE_CLASS_META_TITLE, fullPage.getProp(WEBPAGE_CLASS_META_TITLE));
+		mv.addObject(WEBPAGE_CLASS_META_DESCRIPTION, fullPage.getProp(WEBPAGE_CLASS_META_DESCRIPTION));
+		mv.addObject(WEBPAGE_CLASS_PAGE_TITLE, fullPage.getProp(WEBPAGE_CLASS_PAGE_TITLE));
+		mv.addObject(WEBPAGE_CLASS_HTML, getHtml(fullPage));
+		mv.addObject(WEBPAGE_CLASS_WIDTH, fullPage.getProp(WEBPAGE_CLASS_WIDTH));
 
-		// TODO : ugly, see in natively in Xwiki
-		mv.addObject("editLink",xwikiService.getPathHelper().getEditpath(frags.replace('.', '/')));
+		mv.addObject("editLink", xwikiService.getPathHelper().getEditpath(frags.replace('.', '/')));
 		mv.addObject("userLocale", request.getLocale());
-		// TODO(i18n,p3, 0,25)
+		// TODO(i18n,p3) : localisation
 		mv.addObject("siteLanguage", "fr");
 		final Locale sl = Locale.FRANCE;
-		mv.addObject("siteLocale", sl);				
-	    return mv;
+		mv.addObject("siteLocale", sl);
+		return mv;
 	}
-	
+
 	/**
-	 * TODO : So dirty, so fragile.... In a hurry of xwiki jakarta migration for client side rendering
+	 * Get the XWIKI corresponding html for a wiki page
 	 * 
 	 * @param fullPage
 	 * @return
 	 */
-	private String getHtml(FullPage fullPage) {	
+	private String getHtml(FullPage fullPage) {
 		String ret = xwikiService.getxWikiHtmlService().getHtmlClassWebPage(fullPage.getWikiPage().getId());
 		return ret;
 	}
 
-	//////////////////////////////////////////////////////////////
-	// Mappings
-	//////////////////////////////////////////////////////////////
-
-
-//	/**
-//	 * Endpoint pageSize flush the wiki
-//	 * @param request
-//	 * @return
-//	 */
-//	@GetMapping("/flushCache")
-//	@PreAuthorize("hasAuthority('"+RolesConstants.ROLE_XWIKI_ALL+"')")
-//	//TODO (gof) : put back 
-//	public ModelAndView flushCache(final HttpServletRequest request, @RequestParam(name = "r", required = false) String redircectUrl) {
-//		xwikiService.invalidateAll();
-//		ModelAndView mv = uiService.defaultModelAndView(("xwiki-layout1"), request);
-//
-//		WikiResult res = new WikiResult();
-//		res.setHtml("All xwiki caches are invalidated");
-//		res.setPageTitle("SUCCESS, CACHE FLUSHED");
-//		mv.addObject("content", res);
-//		
-//		if (null != redircectUrl) {
-//			mv = new ModelAndView("redirect:"+ redircectUrl);
-//			mv.setStatus(HttpStatus.MOVED_TEMPORARILY);				
-//		}
-//		return mv;
-//
-//	}
-//
-
-	}
-
+}

@@ -95,15 +95,8 @@ public class UiService {
 
 		ret.addObject("userLocale", request.getLocale());
 		
-		
-		
-		// TODO(i18n,p3, 0,25)
 		ret.addObject("siteLanguage", getSiteLanguage(request));
-		final Locale sl = Locale.FRANCE;
 		ret.addObject("siteLocale", getSiteLocale(request));
-
-		
-		
 		
 		ret.addObject("config",config);
 
@@ -137,7 +130,7 @@ public class UiService {
 			Set<String> roles = authentication.getAuthorities().stream().map(GrantedAuthority::getAuthority).collect(Collectors.toSet());
 			ret.addObject("roles",roles) ;
 
-			// TODO : role editor as const
+			// TODO(p3,conf) : role editor as const
 			if (roles.contains("SITEEDITOR")) {
 				ret.addObject("editor","true") ;
 
@@ -196,12 +189,11 @@ public class UiService {
 	 */
 	public String getSiteLanguage(HttpServletRequest request) {
 		String serverName = request.getServerName();
-		// TODO : Check with nginx
 		
 		if (config.getNamings().getServerNames().containsValue(serverName)) {
 			LOGGER.info("Server name {} found in configuration", serverName);
 		} else {
-			// TODO : Raise 403 ?
+			// TODO(p3,design) : Raise 403 ?
 			LOGGER.error("Server name {} not found in configuration", serverName);
 		}
 		

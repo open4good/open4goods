@@ -35,8 +35,15 @@
                             <a th:href="'/blog?tag='+${item}" class="badge bg-success text-uppercase me-2 px-3" th:text="${item}"></a>                        
                         </th:block>
                         </div>
-                        <div class="post-meta">                         	
-                           le <span class="post-date me-3" th:text="${post.created}"></span>, par <span class="fw-bold me-3" th:text="${post.author}"></span>
+                        <div class="post-meta">     
+                                <div class="row">
+                                    <span class="h6 text-muted small fw-normal mb-0 ms-auto">
+                                        <time class="h6 small mb-0" th:datetime="${post.created}" th:text="${#dates.format(post.created, 'EEEE dd MMMM yyyy')}"></time>
+                                        <span> par</span>
+	                                    <span class="h6 small mb-0" th:text="${post.author}"></span>
+                                    </span>
+                                </div>          	
+                          
                         </div>
                         
                     </div>
