@@ -9,6 +9,16 @@
   }
 */
 
+
+
+.blockquote a {
+  text-decoration: underline;
+}
+
+.wikiexternallink a{
+	text-decoration: underline;
+}
+
 /***********************************************
 CUSTOM
 **************************************************/
