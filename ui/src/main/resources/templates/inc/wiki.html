@@ -1,4 +1,4 @@
-<th:block th:with="res = ${wiki.htmlWithProxifiedResource(path)}">
+<th:block th:with="res = ${wiki.htmlWithProxifiedResource(path,plaintext)}">
 	<th:block th:utext="${res}"></th:block>	
 
 	<div th:if="${editor}">
