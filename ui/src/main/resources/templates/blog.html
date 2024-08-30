@@ -38,14 +38,31 @@
  
         <!-- Hero -->
         <section class="section-header bg-primary text-white pb-10 pb-sm-8 pb-lg-11">
-            <div class="container">
+            <div class="container text-center">
                 <div class="row justify-content-center">
                     <div class="col-12 col-md-8 text-center">
-                    
                         <h1 class="display-2 mb-4"><span><a href="/blog/rss"> <img style="height: 100px" src="/icons/rss.png"></a> </span>Le blog Nudger</h1>
                         <p class="lead">Nos actualités et nos billets</p>
                     </div>
                 </div>
+
+                <a href="/blog" type="button" class="btn btn-lg" th:classappend="${currentTag == null} ? 'btn-info' : 'btn-primary'">
+                       <span>Tous</span>
+                       <span class="badge bg-pill bg-success" th:text="${posts.size()}"></span>
+                </a>
+                                
+                <th:block th:each="tag : ${tags}">
+	                <a th:href="'/blog/tag/'+${tag.key}" type="button" class="btn btn-lg" th:classappend="${tag.key.equals(currentTag)} ? 'btn-info' : 'btn-primary'">
+	                   <span th:text="${tag.key}"></span>
+	                   <span class="badge bg-pill bg-success" th:text="${tag.value}"></span>
+	                </a>
+                </th:block>
+                
+                
+                
+                
+                
+                
             </div>
         </section>
         <section class="section section-lg line-bottom-light">

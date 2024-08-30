@@ -10,7 +10,7 @@ import org.open4goods.commons.model.Localisable;
 public class BlogConfiguration {
 	
 	
-	private String feedType = "rss_1.0";
+	private String feedType = "rss_2.0";
 	private String blogUrl = "blog/";
 	private String feedUrl = "blog/rss/";
 	
