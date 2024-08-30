@@ -27,7 +27,7 @@ spring:
     openai:
       chat:
         options:
-          temperature: 0.7
+          temperature: 1.0
           #TODO : Will change on next release
           response-format: { "type": "json_object" }  
   threads:
@@ -156,7 +156,7 @@ blogConfig:
 imageGenerationConfig:
   prompt: |
     Create a simple icon of a {VERTICAL} that strictly adheres to the following guidelines:
-    - The background color must be fully (#FFFFFF).
+    - The background color must be plain white(#FFFFFF).
     - The white background does not contains any gradient or texture.
     - The icon should be flat, in a modern, minimalist style.
     - The lines must be clean and simple.

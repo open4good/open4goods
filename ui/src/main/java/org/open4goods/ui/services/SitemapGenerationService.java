@@ -67,7 +67,6 @@ public class SitemapGenerationService {
 	//  To allow last mod date and check existence
 	private final XwikiFacadeService xwikiService;
 	
-	private ApplicationContext context;
 
 	private Map<String, SitemapExposedController> annotatedControllers;
 	
@@ -84,7 +83,7 @@ public class SitemapGenerationService {
 	/**
 	 * IBuild the sitemap
 	 *
-	 * TODO : Schedule from conf
+	 * TODO(p3,conf) : Schedule from conf
 	 */
 	@Scheduled(initialDelay = 1000L * 3600, fixedDelay = 1000L * 3600 * 24 * 7)
 	public void generate() {
@@ -202,9 +201,8 @@ public class SitemapGenerationService {
 		for (VerticalConfig vertical : verticalsConfigService.getConfigsWithoutDefault()) {
 			List<Product> datas = aggregatedDataRepository.exportVerticalWithValidDateOrderByEcoscore(vertical.getId(),false)
 			// Filtering on products having genAI content
-					.filter(e -> null != e.getGenaiTexts())
-					// TODO : Not really filtered per language
-					.filter(e -> e.getGenaiTexts().size() > 1)
+					.filter(e -> null != e.getGenaiTexts() && null != e.getGenaiTexts().get(language))
+					.filter(e -> e.getGenaiTexts().get(language).getDescriptions().size() > 1)
 					
 			.toList();
 			
@@ -272,7 +270,7 @@ public class SitemapGenerationService {
 	private void addBlogPost(List<BlogPost> posts, String baseUrl, String language) {
 		SitemapGenerator sitemap = SitemapGenerator.of(baseUrl);
 		for (BlogPost post : posts) {
-				// TODO : Blog is immutable (not translated). At last have it in conf / constants
+				// NOTE : Blog is immutable (not translated). 
 				String url = baseUrl+"blog/"+  post.getUrl();
 				LOGGER.info("Adding blog entry to sitemap : {}",url);
 				sitemap = sitemap.addPage(getWebPage(url, ChangeFreq.MONTHLY, 0.8, post.getCreated()));
