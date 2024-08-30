@@ -55,7 +55,7 @@ spring:
       chat:
         options:
           #TODO : Will change on next release
-          temperature: 0.2
+          temperature: 0.7
           response-format: { "type": "json_object" }
 springdoc:
   swagger-ui:
