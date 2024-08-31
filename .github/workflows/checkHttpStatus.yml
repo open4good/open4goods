@@ -1,0 +1,37 @@
+name: ⏱ Prod - Checking HTTP status codes
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "*/10 * * * *"  # Runs every 10 minutes
+
+jobs:
+  check-status-codes:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check HTTP status codes of nudger.fr
+        uses: lakuapik/gh-actions-http-status@v1
+        with:
+          sites: '["https://nudger.fr", 
+                    "https://api.nudger.fr", 
+                    "https://wiki.nudger.fr/bin/login/XWiki/XWikiLogin", 
+                    "https://beta.nudger.fr/", 
+                    "https://kibana.nudger.fr/login", 
+                    "https://sb-admin.nudger.fr/",
+                    "https://nudger.fr/televiseurs/oled-qled-lcd-que-choisir", 
+                    "https://nudger.fr/mentions-legales",
+                    "https://nudger.fr/blog/ouverture-du-prototype",
+                    "https://nudger.fr/sitemap_index.xml"
+                  ]' 
+          expected: '[200, 
+                      401,
+                      401,
+                      401,
+                      200,
+                      401,
+                      200,
+                      200,
+                      200,
+                      200
+                    ]'
+                    
