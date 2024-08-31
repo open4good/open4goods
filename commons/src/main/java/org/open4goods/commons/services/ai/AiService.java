@@ -48,7 +48,9 @@ public class AiService implements HealthIndicator{
 	// Tracked exception for healthcheck
 	private Long criticalExceptionsCounter = 0L;
 	private Long generatedProducts = 0L;
+	private Long skippedGenerations = 0L;
 
+	
 	public AiService(OpenAiChatModel chatModel,  EvaluationService spelEvaluationService, SerialisationService serialisationService) {
 		this.chatModel = chatModel;
 		this.spelEvaluationService = spelEvaluationService;
@@ -99,6 +101,7 @@ public class AiService implements HealthIndicator{
 				// Check if we must proceed
 				if (shouldSkipDescriptionGeneration(product, entry.getKey(), entry.getValue() , force)) {
 					logger.info("Skipping because generated AI texts are already present for language {}",entry.getKey());
+					skippedGenerations++;
 					continue;
 				}
 				
@@ -223,7 +226,7 @@ public class AiService implements HealthIndicator{
 		return health
 				.withDetail("critical_exceptions", eCount)
 				.withDetail("successfull_generations", generatedProducts.longValue())
-				
+				.withDetail("skipped_generations_already_exists", skippedGenerations.longValue())
 				.build();
 	}
 	
