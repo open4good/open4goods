@@ -356,7 +356,7 @@ public class BackupService implements HealthIndicator {
 		if (errorMessages.size() == 0) {
 			// All is fine
 			health = Health.status(Status.UP)
-					.withDetail("product_export_running", productExportRunning.getClass())
+					.withDetail("product_export_running", productExportRunning.get())
 					.withDetail("product_backup_date", new Date (productLastModified).toString())
 					.withDetail("product_backup_size", FileUtils.byteCountToDisplaySize(productFolderSize))
 					.withDetail("last_product_export_items_count",  expordedProductsCounter.longValue())
