@@ -38,28 +38,27 @@
     <main>	
 
 		<section id="section1"
-			class="section-header overflow-hidden bg-white vh-100 d-flex align-items-center navigation">
+			class="section-header overflow-hidden bg-white vh-100 d-flex  navigation">
 			<div class="container">
 				<div class="row">
-					<div style="    margin-top: -350px;" class="col-12 text-center">
+					<div  class="col-12 text-center">
 						<span class="h1 fw-bolder display-2">
 							Bienvenue sur <img height="75"
 								src="https://nudger.fr/assets/img/nudger-logo-small.png"
 								alt="Nudger.fr">
 						</span>
 						<h2 class="h2 text-green-bg-transparent d-inline-flex px-3 mt-5 mb-5">Réconcilier écologie et pouvoir d'achat !</h2>
-						<p class="lead fw-normal text-muted mb-5"> 
+						<div class="container lead fw-normal text-muted mb-7"> 
 						<th:block th:with="path='WIDGETS/accueil-jumbotron/'">
 									<th:block th:insert="~{inc/wiki.html}"></th:block>
 								</th:block>
 						
-						</p>
+						</div>
 						<!-- Button Modal -->
-						<form method="get" id="searchForm" action="/recherche">
+						<form class="" method="get" id="searchForm" action="/recherche">
 							<div class="d-flex align-items-center row mt-lg-2">
 								<div class="col-12 mb-3 mb-md-0 col-md-6 col-lg-4">
-									<label for="searchInput" class="bg-green px-3 py-2 mb-0">Pour
-										Nudger, tapez ici le produit recherché</label>
+									<label for="searchInput" class="bg-green px-3 py-2 mb-0">Commencez à nudger ici</label>
 								</div>
 								<div class="col-12 col-md-6 col-lg-8">
 									<div class="input-group">
@@ -135,8 +134,8 @@
 
 
 		<section class="bg-green-transparent text-center py-4">
-			<h2> <span class="h1 mb-3">Consommons peu, consommons bien</span></h2>
-			<p class="lead mb-0">Un coup de main éthique et ouvert pour amoindrir l'impact de votre shopping en ligne.</p>
+			<h2> <span class="h1 mb-3">Consommer moins, consommer mieux !</span></h2>
+			<p class="lead mb-0">Nudger, le coup de pouce qui vous aide à amoindrir l'impact de votre shopping en ligne.</p>
 		</section>
        
 
@@ -156,7 +155,7 @@
 						<div class="col-12 col-md-6 col-lg-6 mb-3">
 							<div class="card bg-white border-gray-300 text-gray p-4 h-100">
 								<div class="card-header bg-white border-0 pb-0">
-									<h3 class="h4 m-0">Écoscore électronique</h3>
+									<h3 class="h4 m-0">Écoscore</h3>
 								</div>
 								<div class="card-body">
 									<p>
@@ -261,7 +260,7 @@
 							<span class="fas fa-box-open"></span>
 						</div>
 						<span class="counter display-3 text-secondary d-block" th:data-value="${config.reversementConfig.getTotalReversements()}" ></span>
-						<span class="lead">Montant du coup de pouce à date de Nudger pour la planète</span>
+						<span class="lead">Montant en euros du coup de pouce à date de Nudger pour la planète</span>
 					</div>
 
 					<div class="col-12 col-md-6 col-lg-4 py-3">
@@ -269,7 +268,7 @@
 							<span class="fas fa-box-open"></span>
 						</div>
 						<span class="counter display-3 text-secondary d-block" th:data-value="${totalItems}" >15M+ Offres commerciales</span>
-						<span class="lead">Un des comparateurs français les plus fournis</span>
+						<span class="lead">Un des comparateurs français les plus fournis en références de produits</span>
 					</div>
 
 					<div class="col-12 col-md-6 col-lg-4 py-3">
@@ -277,7 +276,7 @@
 							<span class="fas fa-box-open"></span>
 						</div>
 						<span class="counter display-3 text-secondary d-block" th:data-value="'53'" th:text="'53'"></span>
-						<span class="lead"><a href="/partenaires"> Nombre de partenaires</a> de notre démarche. Toutes les plus grandes enseignes !</span>
+						<span class="lead"><a href="/partenaires"> Nombre de partenaires</a> de Nudger, dont les plus grandes enseignes !</span>
 					</div>
 				</div>
 		</section>
@@ -408,7 +407,7 @@
 							</div>
 							<div class="col-md-8">
 								<div class="card-body">
-									<h3 id=opendata class="h5 card-title mt-3">Comparateur Open-source et Open-data</h3>
+									<h3 id=opendata class="h5 card-title mt-3">Comparateur ouvert</h3>
 									<p class="card-text">
 										<th:block th:with="path='WIDGETS/accueil-modele-ouvert-full/'">
 											<th:block th:insert="~{inc/wiki.html}"></th:block>

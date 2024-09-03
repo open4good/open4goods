@@ -3,7 +3,6 @@ package org.open4goods.ui.controllers.ui;
 import org.open4goods.commons.dao.ProductRepository;
 import org.open4goods.commons.services.DataSourceConfigService;
 import org.open4goods.commons.services.VerticalsConfigService;
-import org.open4goods.ui.services.OpenDataService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,7 +21,6 @@ public class HomeController  {
 	private final DataSourceConfigService datasourceConfigService;
 	private @Autowired UiService uiService;
 	private final VerticalsConfigService verticalConfigService;
-	private OpenDataService openDataService;
 
 	public HomeController(ProductRepository aggregatedDataRepository, DataSourceConfigService datasourceConfigService, VerticalsConfigService verticalConfigService) {
 		this.aggregatedDataRepository = aggregatedDataRepository;
@@ -34,10 +32,9 @@ public class HomeController  {
 	@GetMapping("/")
 	public ModelAndView index(final HttpServletRequest request) {
 
-		// TODO : Remove this test page
 		ModelAndView model = uiService.defaultModelAndView("index", request);
 
-		model.addObject("totalItems", aggregatedDataRepository.countMainIndex());
+		model.addObject("totalItems", aggregatedDataRepository.countMainIndexHavingPrice());
 
 		// TODO(gof) : deduplicate (darty.com / darty.com-CSV)
 		model.addObject("partners",  datasourceConfigService.datasourceConfigs().size());
