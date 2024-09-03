@@ -47,7 +47,7 @@ import org.open4goods.commons.services.ai.AiService;
 import org.open4goods.commons.services.textgen.BlablaService;
 import org.open4goods.commons.store.repository.elastic.BrandScoresRepository;
 import org.open4goods.crawler.config.yml.FetcherProperties;
-import org.open4goods.crawler.repository.CsvIndexationRepository;
+import org.open4goods.crawler.repository.IndexationRepository;
 import org.open4goods.crawler.repository.IndexationRepository;
 import org.open4goods.crawler.services.ApiSynchService;
 import org.open4goods.crawler.services.DataFragmentCompletionService;
@@ -470,7 +470,7 @@ public class ApiConfig {
 			@Autowired final IndexationService indexationService, @Autowired final ApiProperties apiProperties,
 			@Autowired final WebDatasourceFetchingService webDatasourceFetchingService,
 			@Autowired final IndexationRepository indexationRepository,
-			  @Autowired CsvIndexationRepository csvIndexationRepo
+			  @Autowired IndexationRepository csvIndexationRepo
 			
 			
 			) {

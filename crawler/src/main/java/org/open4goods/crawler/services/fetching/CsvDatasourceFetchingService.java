@@ -4,17 +4,16 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.open4goods.commons.config.yml.datasource.DataSourceProperties;
-import org.open4goods.commons.model.crawlers.WebIndexationStats;
+import org.open4goods.commons.model.crawlers.IndexationJobStat;
 import org.open4goods.crawler.config.yml.FetcherProperties;
-import org.open4goods.crawler.repository.CsvIndexationRepository;
 import org.open4goods.crawler.repository.IndexationRepository;
 import org.open4goods.crawler.services.DataFragmentCompletionService;
 import org.open4goods.crawler.services.IndexationService;
@@ -26,10 +25,9 @@ import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 import jakarta.annotation.PreDestroy;
 
 /**
- * Service that handles the csv datasources fetching TODO(gof) : implement
- * productState
+ * Service that handles the csv datasources fetching 
  * 
- * @author goulven TODO(gof) by datasource dedicated logging
+ * @author goulven 
  */
 
 public class CsvDatasourceFetchingService extends DatasourceFetchingService {
@@ -50,11 +48,11 @@ public class CsvDatasourceFetchingService extends DatasourceFetchingService {
 	
 
 	// The running job status
-	private final Map<String, WebIndexationStats> running = new ConcurrentHashMap<>();
+	private final Map<String, CsvIndexationWorker> runningJobs = new ConcurrentHashMap<>();
 
 	private final FetcherProperties fetcherProperties;
 
-	private CsvIndexationRepository csvIndexationRepository;
+	private IndexationRepository csvIndexationRepository;
 
 	private BlockingQueue<DataSourceProperties> queue = null;
 
@@ -70,7 +68,7 @@ public class CsvDatasourceFetchingService extends DatasourceFetchingService {
 	 * @param fetcherProperties
 	 * @param webFetchingService
 	 */
-	public CsvDatasourceFetchingService(final CsvIndexationRepository csvIndexationRepository,   final DataFragmentCompletionService completionService,
+	public CsvDatasourceFetchingService(final IndexationRepository csvIndexationRepository,   final DataFragmentCompletionService completionService,
 			final IndexationService indexationService, final FetcherProperties fetcherProperties,
 			final WebDatasourceFetchingService webFetchingService, IndexationRepository indexationRepository,
 			DatasourceFetchingService fetchingService, final String logsFolder, boolean toConsole
@@ -83,17 +81,14 @@ public class CsvDatasourceFetchingService extends DatasourceFetchingService {
 		this.fetchingService = fetchingService;
 		// The CSV executor can have at most the fetcher max indexation tasks threads
 		
-		// TODO : Limit from conf
-		
 		this.queue = new LinkedBlockingQueue<>(fetcherProperties.getConcurrentFetcherTask());
 //		executor = Executors.newFixedThreadPool(fetcherProperties.getConcurrentFetcherTask(), Thread.ofVirtual().factory());
 //		executor = Executors.newFixedThreadPool(fetcherProperties.getConcurrentFetcherTask());
 		this.csvIndexationRepository = csvIndexationRepository;
 		
 		for (int i = 0; i < fetcherProperties.getConcurrentFetcherTask(); i++) {			
-			// TODO : gof : wait 4secs from conf
+			// TODO(conf,p3) : wait (4000) from config
 			Thread.startVirtualThread(new CsvIndexationWorker(this,completionService,indexationService, webFetchingService, csvIndexationRepository,  4000,logsFolder));
-		
 		}
 	}
 
@@ -114,117 +109,129 @@ public class CsvDatasourceFetchingService extends DatasourceFetchingService {
 	@Override
 	public void stop(final String providerName) {
 		indexationService.clearIndexedCounter(providerName);
-		running.get(providerName).setShuttingDown(true);
+		runningJobs.get(providerName).stop();
 	}
 
 	@Override
-	public Map<String, WebIndexationStats> stats() {
-		// Updating indexed counters
-		for (final WebIndexationStats js : running.values()) {
-			js.setNumberOfIndexedDatas(indexationService.getIndexed(js.getName()));
-		}
-		return running;
+	public Map<String, IndexationJobStat> stats() {
+		return runningJobs.entrySet().stream()
+				.collect(Collectors.toMap(e-> e.getKey(), e -> e.getValue().stats()));
 	}
 
 
 	/**
 	 * CSV Schema autodetection
-	 * @param f
-	 * @return
-	 * @throws IOException 
+	 * @param file the CSV file
+	 * @return the detected CsvSchema
+	 * @throws IOException if an I/O error occurs
 	 */
-	public CsvSchema detectSchema (File f) throws IOException {
-		
-		logger.info("Autodetecting CSV schema for file {}",f.getAbsolutePath());
-		// TODO : Numer of lines from conf
-		 List<String> lines = Files.lines(f.toPath()).limit(1000).collect(Collectors.toList());
-	
+	public CsvSchema detectSchema(File file) throws IOException {
+	    logger.info("Autodetecting CSV schema for file {}", file.getAbsolutePath());
+	    
+	    // TODO: Get number of lines to read from config (limit 10000 in this case)
+	    final int MAX_LINES_TO_READ = 10000;
 
-		 // The potential columns separators
-		 Map<String,Long> columnsSeparatorsCandidates = new HashMap<>();
-		 // TODO from conf
-		 columnsSeparatorsCandidates.put(";", 0L);
-		 columnsSeparatorsCandidates.put(",", 0L);
-		 columnsSeparatorsCandidates.put("|", 0L);
-		 columnsSeparatorsCandidates.put("\t", 0L);
-		 
+	    // Potential column separators, quote characters, and escape characters from config (can be externalized)
+	    Map<String, Long> columnSeparatorsCandidates = new HashMap<>();
+	    columnSeparatorsCandidates.put(";", 0L);
+	    columnSeparatorsCandidates.put(",", 0L);
+	    columnSeparatorsCandidates.put("|", 0L);
+	    columnSeparatorsCandidates.put("\t", 0L);
 
-		 Map<String,Long> quoteCharsCandidates = new HashMap<>();
-		 // TODO from conf
-		 quoteCharsCandidates.put("\"", 0L);
-		 quoteCharsCandidates.put("'", 0L);
-		 quoteCharsCandidates.put("`", 0L);
-		 
-		 
-		 Map<String,Long> escapeCharsCandidates = new HashMap<>();
-		 // TODO from conf		 
-		 escapeCharsCandidates.put("\\", 0L);
-		 
-		 
-		 // Counting the number of lines containing the separator
-		for (String line : lines) {
-			for (String separator : columnsSeparatorsCandidates.keySet()) {
-				if (line.contains(separator)) {
-					columnsSeparatorsCandidates.put(separator, columnsSeparatorsCandidates.get(separator) + 1);
-				}
-			}
+	    Map<String, Long> quoteCharsCandidates = new HashMap<>();
+	    quoteCharsCandidates.put("\"", 0L);
+	    quoteCharsCandidates.put("'", 0L);
+	    quoteCharsCandidates.put("`", 0L);
 
-			for (String quote : quoteCharsCandidates.keySet()) {
-				if (line.contains(quote)) {
-					quoteCharsCandidates.put(quote, quoteCharsCandidates.get(quote) + 1);
-				}
-			}
+	    Map<String, Long> escapeCharsCandidates = new HashMap<>();
+	    escapeCharsCandidates.put("\\", 0L);
 
-			for (String escape : escapeCharsCandidates.keySet()) {
-				if (line.contains(escape)) {
-					escapeCharsCandidates.put(escape, escapeCharsCandidates.get(escape) + 1);
-				}
-			}
-		}
-		
-		
-		// Electing the most frequent separator
-		
-		String columnSeparator = columnsSeparatorsCandidates.entrySet().stream().max((e1,e2) -> e1.getValue().compareTo(e2.getValue())).get().getKey();
-		String quoteChar = quoteCharsCandidates.entrySet().stream().max((e1,e2) -> e1.getValue().compareTo(e2.getValue())).get().getKey();
-		String escapeChar = null ; // escapeCharsCandidates.entrySet().stream().max((e1,e2) -> e1.getValue().compareTo(e2.getValue())).get().getKey();
-		
-		
-		// Evicting to unset the use of separator if not a minimum of occurences
-		
-		if (columnsSeparatorsCandidates.get(columnSeparator) < 10) {
-			columnSeparator = null;
-		}
-		
-		if (quoteCharsCandidates.get(quoteChar) < 10) {
-			quoteChar = null;
-		}
-		
-		
-		// Special handling escape char if no quote separator
-		if (quoteChar == null && null != escapeChar) {
-			escapeChar = null;
-			// TODO : test
-		}
-		
-		CsvSchema.Builder builder = CsvSchema.builder();
-		
-		if (columnSeparator != null) {
-			builder.setColumnSeparator(columnSeparator.charAt(0));
-		}
-	
-		if (quoteChar != null) {
-			builder.setQuoteChar(quoteChar.charAt(0));
-		}
-		
-		
-		logger.warn("Autodetected CSV schema for file {} : separator {}, quote {}, escape {}",f.getAbsolutePath(),columnSeparator,quoteChar,escapeChar);
-		// All catalogs use header
-		builder.setUseHeader(true);
-		
-		return builder.build();
+	    // Process the file, line by line (within limit)
+	    try (Stream<String> lines = Files.lines(file.toPath())) {
+	        lines.limit(MAX_LINES_TO_READ).forEach(line -> {
+	            // Count occurrences of separators
+	            for (String separator : columnSeparatorsCandidates.keySet()) {
+	                if (line.contains(separator)) {
+	                    columnSeparatorsCandidates.put(separator, columnSeparatorsCandidates.get(separator) + 1);
+	                }
+	            }
+
+	            // Count occurrences of quote characters
+	            for (String quote : quoteCharsCandidates.keySet()) {
+	                if (line.contains(quote)) {
+	                    quoteCharsCandidates.put(quote, quoteCharsCandidates.get(quote) + 1);
+	                }
+	            }
+
+	            // Count occurrences of escape characters
+	            for (String escape : escapeCharsCandidates.keySet()) {
+	                if (line.contains(escape)) {
+	                    escapeCharsCandidates.put(escape, escapeCharsCandidates.get(escape) + 1);
+	                }
+	            }
+	        });
+	    }
+
+	    // Find the most frequent column separator
+	    String columnSeparator = columnSeparatorsCandidates.entrySet().stream()
+	        .max(Map.Entry.comparingByValue())
+	        .map(Map.Entry::getKey)
+	        .orElse(null);
+
+	    // Find the most frequent quote character
+	    String quoteChar = quoteCharsCandidates.entrySet().stream()
+	        .max(Map.Entry.comparingByValue())
+	        .map(Map.Entry::getKey)
+	        .orElse(null);
+
+	    // Find the most frequent escape character (if needed)
+	    String escapeChar = escapeCharsCandidates.entrySet().stream()
+	        .max(Map.Entry.comparingByValue())
+	        .map(Map.Entry::getKey)
+	        .orElse(null);
+
+	    // Set a minimum threshold for detected separator and quote character (e.g., 10 occurrences)
+	    final long MIN_OCCURRENCES = 10;
+
+	    if (columnSeparator != null && columnSeparatorsCandidates.get(columnSeparator) < MIN_OCCURRENCES) {
+	        columnSeparator = null;
+	    }
+
+	    if (quoteChar != null && quoteCharsCandidates.get(quoteChar) < MIN_OCCURRENCES) {
+	        quoteChar = null;
+	    }
+
+	    // If no quote character is found, we may not need an escape character
+	    if (quoteChar == null) {
+	        escapeChar = null;
+	    }
+
+	    // Build the CSV schema
+	    CsvSchema.Builder builder = CsvSchema.builder();
+
+	    if (columnSeparator != null) {
+	        builder.setColumnSeparator(columnSeparator.charAt(0));
+	    }
+
+	    if (quoteChar != null) {
+	        builder.setQuoteChar(quoteChar.charAt(0));
+	    }
+
+	    if (escapeChar != null && escapeCharsCandidates.get(escapeChar) > 0) {
+	        builder.setEscapeChar(escapeChar.charAt(0));
+	    }
+	    
+	    // Optionally handle escape character if needed (currently null)
+	    // builder.setEscapeChar(...);
+
+	    // Use header if available
+	    builder.setUseHeader(true);
+
+	    logger.info("Autodetected CSV schema for file {}: separator='{}', quote='{}', escape='{}'", file.getAbsolutePath(), columnSeparator, quoteChar, escapeChar);
+
+	    return builder.build();
 	}
-	
+
 	
 	
 	
@@ -234,23 +241,15 @@ public class CsvDatasourceFetchingService extends DatasourceFetchingService {
 	 */
 	@PreDestroy
 	private void destroy() {
-		for (final String provider : running.keySet()) {
+		for (final String provider : runningJobs.keySet()) {
 			stop(provider);
 		}
-//		executor.shutdown();
 	}
 
-
-	
 	
 	public BlockingQueue<DataSourceProperties> getQueue() {
 		return queue;
 	}
-
-	public Map<String, WebIndexationStats> getRunning() {
-		return running;
-	}
-	
 	
 	
 }

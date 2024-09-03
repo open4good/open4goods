@@ -8,8 +8,8 @@ import org.springframework.data.elasticsearch.annotations.Document;
 import org.springframework.data.elasticsearch.annotations.Field;
 import org.springframework.data.elasticsearch.annotations.FieldType;
 
-@Document(indexName = "csv-indexations", createIndex = true)
-public class CsvIndexationStat {
+@Document(indexName = "datas-indexations", createIndex = true)
+public class IndexationJobStat {
 
 	@Id
 	@Field(index = true, store = false, type = FieldType.Keyword)
@@ -42,10 +42,10 @@ public class CsvIndexationStat {
 	@Field(index = true, store = false, type = FieldType.Boolean)
 	private Boolean fail = false;
 	
-	public CsvIndexationStat() {
+	public IndexationJobStat() {
 	}	
 	
-	public CsvIndexationStat(String url, String dsName) {
+	public IndexationJobStat(String url, String dsName) {
 		this.startDate=System.currentTimeMillis();
 		this.datasource=dsName;
 		this.url = url;
