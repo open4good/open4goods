@@ -249,7 +249,7 @@
                                 <div class="card-body">
                                     <canvas class="mt-4" id="voteChart"></canvas>
                                     
-                                    <p th:unless="${duplicateVotes} == 0" class="mt-2"> <b><span th:text="${duplicateVotes}"></span></b> votes en double, non représentés sur le graphique</p>
+                                    <p th:unless="${duplicateVotes} == 0" class="mt-2"> <b><span th:text="${duplicateVotes}"></span></b> votes en double, exclus des données ci-dessus</p>
                                                                    
                                 </div>
                                 <!-- End Content -->

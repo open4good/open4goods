@@ -142,7 +142,7 @@ public class ContributionController implements SitemapExposedController{
 		}
 		
 		
-		ret.addObject("votes", contributionService.nudgesCountSinceLastReversement());
+		ret.addObject("votes", contributionService.nudgesCountSinceLastReversement() - duplicateVotes);
 		ret.addObject("repartition", repartition);
 		ret.addObject("duplicateVotes", duplicateVotes);
 		
