@@ -66,6 +66,10 @@ public class IdHelper {
 		return ret;
 	}
 	
+	public static String sanitizeAndNormalize(final String input) {
+		return StringUtils.normalizeSpace(StringEscapeUtils.unescapeHtml4(input));
+	}
+
 	// ISSUE : A test bug 
 	//labels:bug
 	

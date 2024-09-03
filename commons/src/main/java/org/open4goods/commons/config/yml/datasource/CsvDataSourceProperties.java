@@ -49,10 +49,7 @@ public class CsvDataSourceProperties {
 	 */
 	private String csvEncoding="UTF8";
 
-	/**
-	 * If defined, only columns (keys) having one of the values will be handled
-	 */
-	private Map<String, Set<String>> columnsFilter = new HashMap<>();
+	
 
 	/**
 	 * The URL's where CSV(s) can be retrieved
@@ -60,8 +57,7 @@ public class CsvDataSourceProperties {
 	protected Set<String> datasourceUrls = new HashSet<>();
 
 	/**
-	 * If true, means the data is in ZIP format TODO(feature) : auto detect
-	 * downloaded format
+	 * If true, means the data is in ZIP format 
 	 */
 	private Boolean ziped = false;
 
@@ -130,10 +126,6 @@ public class CsvDataSourceProperties {
 	 */
 	protected Map<ReferentielKey, Set<String>> referentiel = new HashMap<>();
 
-	/**
-	 * A mapping of CSV cells (by colname) / attribute
-	 */
-	protected Map<String, String> attributes = new HashMap<>();
 
 	/**
 	 * for attributes parsing, wether to ignore (or not) cariage returns in
@@ -405,13 +397,6 @@ public class CsvDataSourceProperties {
 		this.affiliatedUrl = affiliatedUrl;
 	}
 
-	public Map<String, Set<String>> getColumnsFilter() {
-		return columnsFilter;
-	}
-
-	public void setColumnsFilter(final Map<String, Set<String>> columnsFilter) {
-		this.columnsFilter = columnsFilter;
-	}
 
 	public String getTestHeaders() {
 		return testHeaders;
@@ -429,13 +414,6 @@ public class CsvDataSourceProperties {
 		this.testDatas = testDatas;
 	}
 
-	public Map<String, String> getAttributes() {
-		return attributes;
-	}
-
-	public void setAttributes(final Map<String, String> attributes) {
-		this.attributes = attributes;
-	}
 
 	public Boolean getAttributesIgnoreCariageReturns() {
 		return attributesIgnoreCariageReturns;

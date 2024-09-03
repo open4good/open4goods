@@ -550,8 +550,8 @@ public class DataFragment implements Standardisable, Validable {
 
 		// Attributye name normalisation
 		String sanitizedName =name;
-		sanitizedName= StringUtils.normalizeSpace(sanitizedName).toUpperCase();
-		// TODO(gof) : From conf, could have the =, ..
+		sanitizedName= sanitizedName.trim().toUpperCase();
+		// TODO(p2,conf) : From conf, could have the =, ..
 		if (sanitizedName.endsWith(":")) {
 			sanitizedName = sanitizedName.substring(0, sanitizedName.length() -1).trim();
 		}

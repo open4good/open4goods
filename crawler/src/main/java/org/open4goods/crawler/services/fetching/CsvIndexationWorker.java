@@ -117,7 +117,6 @@ public class CsvIndexationWorker implements Runnable {
 	@Override
 	public void run() {
 
-		// TODO : exit thread condition
 		while (!stop) {	
 			try {
 				if (!csvService.getQueue().isEmpty()) {
@@ -129,8 +128,6 @@ public class CsvIndexationWorker implements Runnable {
 					fetch(ds);
 					logger.info("indexed {}",ds.getDatasourceConfigName());					
 					
-//					logger.info("{} has indexed {} DataFragments. {} Remaining in queue",workerName,  buffer.size(), service.getQueue().size());
-
 				} else {
 					try {
 						logger.debug("No DataFragments to dequeue. Will sleep {}ms",pauseDuration);
@@ -357,28 +354,6 @@ public class CsvIndexationWorker implements Runnable {
 		
 		
 		
-		/////////////////////////////////////
-		// Applying filtering rules
-		//////////////////////////////////////
-		if (csvProperties.getColumnsFilter().size() > 0) {
-			boolean handle = false;
-			for (final Entry<String, Set<String>> entry : csvProperties.getColumnsFilter().entrySet()) {
-				final String val = item.get(entry.getKey());
-				if (entry.getValue().contains(val)) {
-					handle = true;
-					break;
-				}
-			}
-			if (!handle) {
-				throw new ValidationException("Item " + item + " will be filtered according to filtering rules");
-			}
-		}
-
-		/////////////////////////////////////
-		// Applying replacements rules
-		//////////////////////////////////////
-		
-		
 		
 		
 		/////////////////////////////////
@@ -475,18 +450,6 @@ public class CsvIndexationWorker implements Runnable {
 				
 			}
 		}
-
-		// Attributes
-		for (final Entry<String, String> desc : csvProperties.getAttributes().entrySet()) {
-			p.addAttribute(desc.getValue(), getFromCsvRow(item, desc.getKey()),
-							config.getLanguage(), csvProperties.getAttributesIgnoreCariageReturns(),
-							csvProperties.getAttributesSplitSeparators());
-		}
-
-		// Rating
-		
-		
-		
 
 		if (null != csvProperties.getRating()) {
 			try {
@@ -629,6 +592,7 @@ public class CsvIndexationWorker implements Runnable {
 		}
 		
 
+		// TODO : Complete to get commons
 		for (final Entry<ReferentielKey, Set<String>> refs : csvProperties.getReferentiel().entrySet()) {
 			for (String csvKey : refs.getValue()) {
 				
@@ -654,9 +618,8 @@ public class CsvIndexationWorker implements Runnable {
 
 		// We import all columns as attributes
 		if (csvProperties.getImportAllAttributes()) {
-
 			for (Entry<String, String> entry : item.entrySet()) {
-				p.addAttribute(sanitize(entry.getKey()), sanitize(entry.getValue()), config.getLanguage(), true,
+				p.addAttribute(entry.getKey(), entry.getValue(), config.getLanguage(), true,
 						Sets.newHashSet());
 			}
 
@@ -670,7 +633,7 @@ public class CsvIndexationWorker implements Runnable {
 			if (!StringUtils.isEmpty(p.getUrl())) {
 				// Completing the datafragment with the configured url
 				DataFragment fragment = crawler.visitNow(controler, p.getUrl(), p);
-				
+				//					TODO(p3,not working) Complete if need direct indexation from CSV
 				
 				
 				p.setDatasourceConfigName(datasourceConfigName);
@@ -787,7 +750,7 @@ public class CsvIndexationWorker implements Runnable {
 			if (frags.length != 2) {
 				dedicatedLogger.info("Was expecting two fragments, got {} : {} at {}", frags.length, line, config.getName());
 			} else {
-				String key = sanitize(frags[0]);
+				String key = frags[0];
 				if (null != config.getCsvDatasource().getAttributesKeyKeepAfter()) {
 
 					int pos = key.indexOf(config.getCsvDatasource().getAttributesKeyKeepAfter());
@@ -797,7 +760,7 @@ public class CsvIndexationWorker implements Runnable {
 				}
 
 				// Splitters from conf
-				pd.addAttribute(key, sanitize(frags[1]), config.getLanguage(), true, Sets.newHashSet());
+				pd.addAttribute(key, frags[1], config.getLanguage(), true, Sets.newHashSet());
 			}
 		}
 
@@ -814,7 +777,10 @@ public class CsvIndexationWorker implements Runnable {
 
 		final String val = item.get(colName);
 		if (null != val) {
-			return sanitize(val);
+			// TODO(conf,p3) : strong choice to not santize, CPU wins, but some specific datasources could need it
+//			return sanitizeAndNormalize.sanitizeAndNormalize(val);
+			return val;
+
 		} else {
 			return null;
 		}
@@ -832,10 +798,6 @@ public class CsvIndexationWorker implements Runnable {
 		return ret;
 	}
 
-	// TODO(design,0.25,P3) : Externalize / mutualize at addAttribute level
-	public static String sanitize(final String input) {
-		return StringUtils.normalizeSpace(StringEscapeUtils.unescapeHtml4(input));
-	}
 
 	/**
 	 * Say this thread to stop
