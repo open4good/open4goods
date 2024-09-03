@@ -9,7 +9,7 @@ public class FetcherGlobalStats {
 
 
 	/** The stats by crawler **/
-	private Map<String, WebIndexationStats> crawlerStats;
+	private Map<String, IndexationJobStat> crawlerStats;
 
 	private long queueLength;
 
@@ -27,14 +27,14 @@ public class FetcherGlobalStats {
 		if (null == crawlerStats) {
 			return false;
 		}
-		return crawlerStats.values().stream().anyMatch(e -> e.getName().equals(datasource));
+		return crawlerStats.values().stream().anyMatch(e -> e.getDatasource().equals(datasource));
 	}
 
-	public Map<String, WebIndexationStats> getCrawlerStats() {
+	public Map<String, IndexationJobStat> getCrawlerStats() {
 		return crawlerStats;
 	}
 
-	public void setCrawlerStats(final Map<String, WebIndexationStats> crawlerStats) {
+	public void setCrawlerStats(final Map<String, IndexationJobStat> crawlerStats) {
 		this.crawlerStats = crawlerStats;
 	}
 

@@ -4,7 +4,7 @@ import org.apache.commons.lang3.ArrayUtils;
 import org.open4goods.commons.services.EvaluationService;
 import org.open4goods.commons.services.SerialisationService;
 import org.open4goods.crawler.config.yml.FetcherProperties;
-import org.open4goods.crawler.repository.CsvIndexationRepository;
+import org.open4goods.crawler.repository.IndexationRepository;
 import org.open4goods.crawler.repository.IndexationRepository;
 import org.open4goods.crawler.services.ApiSynchService;
 import org.open4goods.crawler.services.DataFragmentCompletionService;
@@ -72,7 +72,7 @@ public class CrawlerConfig {
             @Autowired final IndexationService indexationService,
             @Autowired IndexationRepository indexationRepository,
 //            @Autowired AwinCatalogService awinCatalogService,
-            @Autowired CsvIndexationRepository csvIndexationRepo
+            @Autowired IndexationRepository csvIndexationRepo
 
             ) {
     	
