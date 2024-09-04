@@ -156,9 +156,9 @@ public class ProductRepository {
 		
 		
 		Criteria c = getValidDateQuery()
-				// TODO : Warning : check nehaviour
 				.and( new Criteria("vertical").is(vertical.getId()))
-//				.or(new Criteria("datasourceCategories").in(vertical.getMatchingCategories())
+
+				//				.or(new Criteria("datasourceCategories").in(vertical.getMatchingCategories())
 				;
 		
 		if (!withExcluded) {
