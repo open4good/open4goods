@@ -33,14 +33,14 @@ import jakarta.validation.constraints.NotBlank;
 
 
 /**
- * This service is in charge of fetcher jobs orchestration.
+ * This service is in charge of scrapperjobs orchestration.
  * @author Goulven.Furet
  *
  *
  */
-public class FetcherOrchestrationService {
+public class ScrapperOrchestrationService {
 
-	protected static final Logger logger = LoggerFactory.getLogger(FetcherOrchestrationService.class);
+	protected static final Logger logger = LoggerFactory.getLogger(ScrapperOrchestrationService.class);
 
 	private final  TaskScheduler  threadPoolTaskScheduler;
 
@@ -54,7 +54,7 @@ public class FetcherOrchestrationService {
 			.build( );
 
 
-	public FetcherOrchestrationService(final TaskScheduler threadPoolTaskScheduler,
+	public ScrapperOrchestrationService(final TaskScheduler threadPoolTaskScheduler,
 			final DataSourceConfigService datasourceConfigService, ApiProperties apiProperties) {
 		super();
 		this.threadPoolTaskScheduler = threadPoolTaskScheduler;
@@ -68,37 +68,27 @@ public class FetcherOrchestrationService {
 	 */
 	@PostConstruct
 	public void schedule() {
-		logger.info("Initialising direct datasources scheduling");
+		logger.info("Initialising web datasource crawlingscheduling");
 
 		final Map<String,DataSourceProperties> providerConfigs = datasourceConfigService.datasourceConfigs();
 		for (final Entry<String, DataSourceProperties> pConf : providerConfigs.entrySet()) {
 
-			final String realCron = pConf.getValue().cron();
-
-			final CronTrigger t = new CronTrigger(realCron);
-
-			threadPoolTaskScheduler.schedule(() -> {
-				logger.warn("triggerRemoteCrawling crawl of {}", pConf.getKey());
-				triggerRemoteCrawling(pConf.getValue(), pConf.getKey());
-			}, t);
-		}
-	}
+			if (null != pConf.getValue().webDataSource()) {
+				final String realCron = pConf.getValue().cron();
+				final CronTrigger t = new CronTrigger(realCron);
 	
-	
-	/**
-	 * Force a crawling of csv datasources at night
-	 */
-	public void triggerAllCsvFetcher() {		
-		logger.warn("Lauching batch night indexation");
-		for (final Entry<String, DataSourceProperties> ds : datasourceConfigService.datasourceConfigs().entrySet()) {
-			if (null != ds.getValue().getCsvDatasource()) {
-				logger.warn("Lauching night indexation of {}", ds.getKey());
-				triggerRemoteCrawling(ds.getKey());
+				threadPoolTaskScheduler.schedule(() -> {
+					logger.warn("triggerRemoteCrawling crawl of {}", pConf.getKey());
+					triggerRemoteCrawling(pConf.getValue(), pConf.getKey());
+				}, t);
+
+			} else {
+				logger.info("{} excluded because CSV datasource type",pConf.getKey());
 			}
 		}
 	}
 	
-
+	
 	/**
 	 * Update the internally maintained map of crawlers with the one given in parameter
 	 * @param clientStats

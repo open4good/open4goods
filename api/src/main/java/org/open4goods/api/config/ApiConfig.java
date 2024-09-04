@@ -9,7 +9,7 @@ import org.open4goods.api.config.yml.ApiProperties;
 import org.open4goods.api.services.AggregationFacadeService;
 import org.open4goods.api.services.BatchService;
 import org.open4goods.api.services.CompletionFacadeService;
-import org.open4goods.api.services.FetcherOrchestrationService;
+import org.open4goods.api.services.ScrapperOrchestrationService;
 import org.open4goods.api.services.completion.AmazonCompletionService;
 import org.open4goods.api.services.completion.GenAiCompletionService;
 import org.open4goods.api.services.completion.IcecatCompletionService;
@@ -526,8 +526,8 @@ public class ApiConfig {
 
 	@Bean
 	@Autowired
-	FetcherOrchestrationService fetcherOrchestrationService(TaskScheduler taskScheduler, DataSourceConfigService dataSourceConfigService, ApiProperties apiProperties) {
-		return new FetcherOrchestrationService(taskScheduler, dataSourceConfigService, apiProperties);
+	ScrapperOrchestrationService fetcherOrchestrationService(TaskScheduler taskScheduler, DataSourceConfigService dataSourceConfigService, ApiProperties apiProperties) {
+		return new ScrapperOrchestrationService(taskScheduler, dataSourceConfigService, apiProperties);
 	}
 
 	@Bean
@@ -544,7 +544,7 @@ public class ApiConfig {
 	 * @return
 	 */
 	@Autowired
-	ApiSynchService apiSynchService(final ApiProperties apiProperties, FetchersService crawlersInterface, FetcherOrchestrationService fetcherOrchestrationService) {
+	ApiSynchService apiSynchService(final ApiProperties apiProperties, FetchersService crawlersInterface, ScrapperOrchestrationService fetcherOrchestrationService) {
 		return new ApiSynchService(apiProperties.getFetcherProperties().getApiSynchConfig(), crawlersInterface, null,
 				null) {
 			@Override

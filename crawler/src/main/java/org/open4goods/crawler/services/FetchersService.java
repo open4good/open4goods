@@ -102,7 +102,7 @@ public class FetchersService{
 		// Computing the global stats from each crawlers one
 		for (final IndexationJobStat s : ret. values()) {
 			totIndexed += s.getIndexed();
-			totProcessed += s.getLines();
+			totProcessed += s.getProcessed();
 		}
 
 		final FetcherGlobalStats gs = new FetcherGlobalStats();

@@ -28,7 +28,7 @@ public class IndexationJobStat {
 	private long duration = 0;
 	
 	@Field(index = true, store = false, type = FieldType.Long)
-	private long lines = 0;
+	private long processed = 0;
 	
 	@Field(index = true, store = false, type = FieldType.Long)
 	private long indexed = 0;
@@ -59,7 +59,7 @@ public class IndexationJobStat {
 	}
 
 	public void incrementLines() {
-		lines++;		
+		processed++;		
 	}
 
 	public void incrementErrors() {
@@ -114,12 +114,12 @@ public class IndexationJobStat {
 		this.startDate = startDate;
 	}
 
-	public long getLines() {
-		return lines;
+	public long getProcessed() {
+		return processed;
 	}
 
-	public void setLines(long lines) {
-		this.lines = lines;
+	public void setProcessed(long lines) {
+		this.processed = lines;
 	}
 
 	public long getIndexed() {
