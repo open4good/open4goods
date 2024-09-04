@@ -42,7 +42,7 @@ import jakarta.validation.constraints.NotBlank;
  */
 @RestController
 
-public class ScrapperOrchestrationController {
+public class ScraperOrchestrationController {
 
 
 	private final SerialisationService serialisationService;
@@ -53,7 +53,7 @@ public class ScrapperOrchestrationController {
 
 	private final DataFragmentStoreService dataFragmentStoreService;
 	
-	public ScrapperOrchestrationController(SerialisationService serialisationService, ScrapperOrchestrationService fetcherOrchestrationService, DataSourceConfigService datasourceConfigService, DataFragmentStoreService dataFragmentStoreService) {
+	public ScraperOrchestrationController(SerialisationService serialisationService, ScrapperOrchestrationService fetcherOrchestrationService, DataSourceConfigService datasourceConfigService, DataFragmentStoreService dataFragmentStoreService) {
 		this.serialisationService = serialisationService;
 		this.fetcherOrchestrationService = fetcherOrchestrationService;
 		this.dataFragmentStoreService = dataFragmentStoreService;

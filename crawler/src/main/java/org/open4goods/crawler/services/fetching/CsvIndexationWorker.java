@@ -176,8 +176,11 @@ public class CsvIndexationWorker implements Runnable {
 		// Initialize the "exposed" stats object
 		
 		if (urls.size() == 0) {
-			// TODO : Healthcheck
+			// Triggering healthcheck down in the CsvService
+			csvService.incrementFeedNoUrls();
 			logger.error("No url's defined for datasource {}",dsProperties.getDatasourceConfigName());
+			dedicatedLogger.error("No url's defined for datasource {}",dsProperties.getDatasourceConfigName());
+			
 		}
 		
 		for (String url : urls) {
@@ -239,7 +242,8 @@ public class CsvIndexationWorker implements Runnable {
 				dedicatedLogger.info("Removing fetched CSV file at {}", destFile);
 
 			} catch (Exception e) {
-				// TODO : A dedicated logger
+				// Triggering healthcheck down in the CsvService
+				csvService.brokenCsv();
 				logger.error("Critical exception while parsing CSV file: {} : {}", dsConfName, url, e);
 				dedicatedLogger.error("Critical exception while parsing CSV file:  : {} : {}", dsConfName, url, e);
 				stats.setFail(true);
@@ -762,8 +766,7 @@ public class CsvIndexationWorker implements Runnable {
 
 		final String val = item.get(colName);
 		if (null != val) {
-			// TODO(conf,p3) : strong choice to not santize, CPU wins, but some specific
-			// datasources could need it
+			// TODO(conf,p3) : strong choice to not sanitize, CPU wins, but some specific datasources could need it
 //			return sanitizeAndNormalize.sanitizeAndNormalize(val);
 			return val;
 

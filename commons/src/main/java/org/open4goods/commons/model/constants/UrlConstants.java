@@ -30,8 +30,8 @@ public class UrlConstants {
 	public static final String MASTER_API_CRAWLER_SYNCH_FETCH_WITH_CONFIG = "/testwithconfig/";
 
 	// API Endpoints that allow crawler status updates
-	public static final String MASTER_API_CRAWLERS= "/fetchers";
-	public static final String MASTER_API_CRAWLER_UPDATE_PREFIX = "/fetcher/";
+	public static final String MASTER_API_CRAWLERS= "/webscrapers";
+	public static final String MASTER_API_CRAWLER_UPDATE_PREFIX = "/webscraper/";
 	public static final String MASTER_API_CRAWLER_UPDATE = MASTER_API_CRAWLER_UPDATE_PREFIX + "%s";
 
 	// API Endpoints for datasource informations

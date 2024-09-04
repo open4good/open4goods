@@ -89,18 +89,8 @@ public class CrawlController {
 		return fetchersService.getWebDatasourceFetchingService().synchCrawl(p, url);
 	}
 
-//	@PostMapping(path=UrlConstants.CRAWLER_API_DIRECT_CSV_REQUEST_FETCHING)
-//	public DataFragment fetchCsv(@RequestBody final DataSourceProperties p, @RequestParam final String csvLine,@RequestParam final String csvHeaders) {
-//		try {
-//			return this.fetchersService.getCsvDatasourceFetchingService().synchFetch(p, csvHeaders, csvLine);
-//		} catch (IOException | ValidationException e) {
-//			logger.error("Error while drect csv line fecthing",e);
-//			return null;
-//		}
-//	}
 
-
-	@GetMapping("/stats/fetchersService")
+	@GetMapping("/stats/webscrapers")
 	public FetcherGlobalStats stats() {
 		return fetchersService.stats();
 	}
