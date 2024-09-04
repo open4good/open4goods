@@ -2,6 +2,7 @@ package org.open4goods.crawler.config;
 
 import org.apache.commons.lang3.ArrayUtils;
 import org.open4goods.commons.services.EvaluationService;
+import org.open4goods.commons.services.RemoteFileCachingService;
 import org.open4goods.commons.services.SerialisationService;
 import org.open4goods.crawler.config.yml.FetcherProperties;
 import org.open4goods.crawler.repository.IndexationRepository;
@@ -72,16 +73,17 @@ public class CrawlerConfig {
             @Autowired final IndexationService indexationService,
             @Autowired IndexationRepository indexationRepository,
 //            @Autowired AwinCatalogService awinCatalogService,
-            @Autowired IndexationRepository csvIndexationRepo
+            @Autowired IndexationRepository csvIndexationRepo,
+            @Autowired RemoteFileCachingService remoteFileCachingService
 
             ) {
     	
 		// Logging to console according to dev profile and conf
+    	// TODO(p2,design) : This tweaky "toConsole" should be removed everywhere
 		boolean toConsole = ArrayUtils.contains(env.getActiveProfiles(), "dev") || ArrayUtils.contains(env.getActiveProfiles(), "devsec");
-		// TODO : Not nice, mutualize
 
 
-        return new CsvDatasourceFetchingService(csvIndexationRepo, completionService, indexationService, fetcherProperties, webDatasourceFetchingService, indexationRepository,webDatasourceFetchingService, fetcherProperties.getLogsDir(),  toConsole);
+        return new CsvDatasourceFetchingService(csvIndexationRepo, completionService, indexationService, fetcherProperties, webDatasourceFetchingService, indexationRepository,webDatasourceFetchingService, remoteFileCachingService, fetcherProperties.getLogsDir(),  toConsole);
 	}
 
     @Bean

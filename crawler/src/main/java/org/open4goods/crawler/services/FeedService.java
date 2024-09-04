@@ -34,7 +34,7 @@ import com.fasterxml.jackson.dataformat.csv.CsvParser;
 import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 
 /**
- * TODO : Optimize by checking last updated dates sometimes provided by the platforms
+ * TODO(p2, design) : Optimize CSV retrieval by checking last updated dates sometimes provided by the platforms
  */
 public class FeedService {
 		
@@ -58,7 +58,6 @@ public class FeedService {
 	/**
 	 * Fetch the feeds
 	 * TODO : Make it from conf, not to retrive datasources at the same time than beta.nudger.fr
-	 * ISSUE : MAke it from conf, not to retrieve datasources at the exact same time than beta.nudger.fr
 	 */
 	@Scheduled(cron = "0 0 20,8 * * ?")
 	public void fetchFeeds() {
@@ -66,7 +65,7 @@ public class FeedService {
 		// 1 - Loads the whole feeds as a list of DataSourceProperties, eventually hot defaulted
 		
 		Set<DataSourceProperties> ds = getFeedsUrl();
-		List<DataSourceProperties> dsl =new ArrayList<DataSourceProperties>(ds);
+		List<DataSourceProperties> dsl = new ArrayList<DataSourceProperties>(ds);
 
 
 		long seed = System.nanoTime();

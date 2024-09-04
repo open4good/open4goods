@@ -470,7 +470,8 @@ public class ApiConfig {
 			@Autowired final IndexationService indexationService, @Autowired final ApiProperties apiProperties,
 			@Autowired final WebDatasourceFetchingService webDatasourceFetchingService,
 			@Autowired final IndexationRepository indexationRepository,
-			  @Autowired IndexationRepository csvIndexationRepo
+			@Autowired IndexationRepository csvIndexationRepo,
+			@Autowired RemoteFileCachingService remoteFileCachingService
 			
 			
 			) {
@@ -480,7 +481,7 @@ public class ApiConfig {
 
 
         return new CsvDatasourceFetchingService(csvIndexationRepo, completionService, indexationService,
-				apiProperties.getFetcherProperties(), webDatasourceFetchingService,indexationRepository, webDatasourceFetchingService, apiProperties.logsFolder(), toConsole);
+				apiProperties.getFetcherProperties(), webDatasourceFetchingService,indexationRepository, webDatasourceFetchingService, remoteFileCachingService, apiProperties.logsFolder(), toConsole);
 	}
 
 	@Bean

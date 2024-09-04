@@ -68,18 +68,26 @@ public class IdHelper {
 		return StringUtils.normalizeSpace(StringEscapeUtils.unescapeHtml4(input));
 	}
 
-	// ISSUE : A test bug 
-	//labels:bug
-	
+	/**
+	 * Normalize 
+	 * @param string
+	 * @return
+	 */
+	public static String normalizeAttributeName(String string) {
+		if (string == null) {
+			return null;
+		} else {
+			return StringUtils.stripAccents(string).trim().toUpperCase();
+		}
+	}
 
 	/**
 	 * Extract brandUid from product name
 	 *
-     // TODO : Rename to extractModelName
 	 * @return
 	 * @throws InvalidParameterException
 	 */
-	public static String extractBrandUidsFromNames(final DataFragment dataFragment) throws InvalidParameterException {
+	public static String extractModelFromNames(final DataFragment dataFragment) throws InvalidParameterException {
 		final Set<String> brandUids = new HashSet<>();
 		for (final String name : dataFragment.getNames()) {
 			// TODO(conf,P2,0.25) : Use filter parameters from conf (see cm)
@@ -238,6 +246,8 @@ public class IdHelper {
 		ret = StringUtils.removeEnd(ret, "-");
 		return ret;
 	}
+
+
 
 
 }

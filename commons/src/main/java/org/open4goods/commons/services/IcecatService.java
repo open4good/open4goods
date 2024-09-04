@@ -148,7 +148,7 @@ public class IcecatService {
 				// Loading the by name map
 				feature.getNames().getNames(). forEach(name -> {
                   
-					String val = normalize(name.getTextValue());
+					String val = IdHelper.normalizeAttributeName(name.getTextValue());
 					Set<Integer> fIds = featuresByNames.get(val);
                     if (fIds == null) {
                         fIds = new HashSet<>();
@@ -581,25 +581,19 @@ public class IcecatService {
 	 * @return
 	 */
 	public Set<Integer> resolveFeatureName (String featureName) {		
-		String f = normalize(featureName);
+		String f = IdHelper.normalizeAttributeName(featureName);
 		return featuresByNames.get(f);		
 	}
 
 
 
-	private String normalize(String featureName) {
-		if (StringUtils.isEmpty(featureName)) {
-			return featureName;
-		}
-		return StringUtils.normalizeSpace(StringUtils.stripAccents(featureName)).toLowerCase();
-	}
 	
 	
 	
 
 	/**
 	 * Donload feature file, unzip it and maintain the cached version
-	 * TODO : Should defer the "cahce" url <> file in the remotefilecachingservice
+	 * TODO(design,p3) : Should defer in the remotefilecachingservice
 	 * @param url
 	 * @param user
 	 * @param password

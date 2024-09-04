@@ -14,6 +14,7 @@ import java.util.stream.Stream;
 
 import org.open4goods.commons.config.yml.datasource.DataSourceProperties;
 import org.open4goods.commons.model.crawlers.IndexationJobStat;
+import org.open4goods.commons.services.RemoteFileCachingService;
 import org.open4goods.crawler.config.yml.FetcherProperties;
 import org.open4goods.crawler.repository.IndexationRepository;
 import org.open4goods.crawler.services.DataFragmentCompletionService;
@@ -21,8 +22,8 @@ import org.open4goods.crawler.services.IndexationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.actuate.health.Health;
-import org.springframework.boot.actuate.health.HealthIndicator;
 import org.springframework.boot.actuate.health.Health.Builder;
+import org.springframework.boot.actuate.health.HealthIndicator;
 
 import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 
@@ -49,7 +50,8 @@ public class CsvDatasourceFetchingService extends DatasourceFetchingService impl
 	// The running job status
 	private final Map<String, CsvIndexationWorker> runningJobs = new ConcurrentHashMap<>();
 
-
+	private RemoteFileCachingService remoteFileCachingService;
+	
 
 	private AtomicLong feedNoUrls = new AtomicLong(0L);
 	private AtomicLong brokenCsvFiles = new AtomicLong(0L);
@@ -64,10 +66,11 @@ public class CsvDatasourceFetchingService extends DatasourceFetchingService impl
 	public CsvDatasourceFetchingService(final IndexationRepository csvIndexationRepository,   final DataFragmentCompletionService completionService,
 			final IndexationService indexationService, final FetcherProperties fetcherProperties,
 			final WebDatasourceFetchingService webFetchingService, IndexationRepository indexationRepository,
-			DatasourceFetchingService fetchingService, final String logsFolder, boolean toConsole
+			DatasourceFetchingService fetchingService, RemoteFileCachingService remoteFileCachingService, final String logsFolder, boolean toConsole
 			) {
 		super(logsFolder, toConsole,indexationRepository);
 		this.indexationService = indexationService;
+		this.remoteFileCachingService = remoteFileCachingService;
 		// The CSV executor can have at most the fetcher max indexation tasks threads
 		
 //		executor = Executors.newFixedThreadPool(fetcherProperties.getConcurrentFetcherTask(), Thread.ofVirtual().factory());
@@ -75,7 +78,7 @@ public class CsvDatasourceFetchingService extends DatasourceFetchingService impl
 		
 		for (int i = 0; i < fetcherProperties.getConcurrentFetcherTask(); i++) {			
 			// TODO(conf,p3) : wait (4000) from config
-			Thread.startVirtualThread(new CsvIndexationWorker(this,completionService,indexationService, webFetchingService, csvIndexationRepository,  4000,logsFolder));
+			Thread.startVirtualThread(new CsvIndexationWorker(this,completionService,indexationService, webFetchingService, csvIndexationRepository,  4000,logsFolder, remoteFileCachingService));
 		}
 	}
 
@@ -86,6 +89,7 @@ public class CsvDatasourceFetchingService extends DatasourceFetchingService impl
 	public void start(final DataSourceProperties pConfig, final String datasourceConfName) {
 	
 		try {
+				
 			queue.put(pConfig);
 		} catch (InterruptedException e) {
 			logger.error("Error while putting csv fetching job in queue",e);
