@@ -41,7 +41,14 @@ public class CrawlController {
 
 		final FetchRequestResponse ret = new FetchRequestResponse(true);
 
-		if (fetchersService.stats().getCrawlerStats().containsKey(datasourceConfName)) {
+		
+		if (null != p.getCsvDatasource() ) {
+			logger.warn("{} will be ignored, CSV Jobs must be triggered through feedservice",datasourceConfName);
+			ret.setCrawlAccepted(false);
+			ret.setMessage("This job is a CSV job, use feedService");
+			return ret;
+			
+		}else if (fetchersService.stats().getCrawlerStats().containsKey(datasourceConfName)) {
 			logger.warn("Will skip crawl of {}, this job is already running",datasourceConfName);
 			ret.setCrawlAccepted(false);
 			ret.setMessage("This fetching is already running");
@@ -60,40 +67,30 @@ public class CrawlController {
 		return ret;
 	}
 
-//	@PostMapping(path=UrlConstants.CRAWLER_API_STOP_FETCHING)
-//	public FetchRequestResponse stop(@RequestBody final DataSourceProperties p) {
-//
-//		final FetchRequestResponse ret = new FetchRequestResponse(true);
-//
-//		if (!this.fetchersService.stats().getCrawlerStats().containsKey(p.getName())) {
-//			logger.warn("Cannot stop {}, this job does not exists",p.getName());
-//			ret.setCrawlAccepted(false);
-//			ret.setMessage("This fetching job does not exists");
-//			return ret;
-//		}
-//
-//		logger.info("Stopping crawl of {})",p.getName());
-//		this.fetchersService.stop(p);
-//		return ret;
-//	}
+	@PostMapping(path=UrlConstants.CRAWLER_API_STOP_FETCHING)
+	public FetchRequestResponse stop(@RequestBody final DataSourceProperties p) {
+
+		final FetchRequestResponse ret = new FetchRequestResponse(true);
+
+		if (!this.fetchersService.stats().getCrawlerStats().containsKey(p.getName())) {
+			logger.warn("Cannot stop {}, this job does not exists",p.getName());
+			ret.setCrawlAccepted(false);
+			ret.setMessage("This fetching job does not exists");
+			return ret;
+		}
+
+		logger.info("Stopping crawl of {})",p.getName());
+		this.fetchersService.stop(p, p.getDatasourceConfigName());
+		return ret;
+	}
 
 	@PostMapping(path=UrlConstants.CRAWLER_API_DIRECT_URL_REQUEST_FETCHING)
 	public DataFragment fetchUrl(@RequestBody final DataSourceProperties p, @RequestParam final String url) throws TechnicalException, IOException, InterruptedException {
 		return fetchersService.getWebDatasourceFetchingService().synchCrawl(p, url);
 	}
 
-//	@PostMapping(path=UrlConstants.CRAWLER_API_DIRECT_CSV_REQUEST_FETCHING)
-//	public DataFragment fetchCsv(@RequestBody final DataSourceProperties p, @RequestParam final String csvLine,@RequestParam final String csvHeaders) {
-//		try {
-//			return this.fetchersService.getCsvDatasourceFetchingService().synchFetch(p, csvHeaders, csvLine);
-//		} catch (IOException | ValidationException e) {
-//			logger.error("Error while drect csv line fecthing",e);
-//			return null;
-//		}
-//	}
 
-
-	@GetMapping("/stats/fetchersService")
+	@GetMapping("/stats/webscrapers")
 	public FetcherGlobalStats stats() {
 		return fetchersService.stats();
 	}

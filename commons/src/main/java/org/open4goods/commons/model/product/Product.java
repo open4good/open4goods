@@ -58,9 +58,9 @@ public class Product implements Standardisable {
 
 	public static final String DEFAULT_REPO = "products";
 
-	// TODO : Conf
-	// If true, the referentiel atrribute will be updated if a shortest version exists in alternativeModels
-	private static final boolean FORCE = true;
+	// Should not be used 
+	// If true, the referentiel attribute will be updated if a shortest version exists in alternativeModels
+	private static final boolean FORCE = false;
 
 	/**
 	 * The ID is the gtin

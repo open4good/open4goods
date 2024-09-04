@@ -23,8 +23,6 @@ import org.slf4j.LoggerFactory;
  */
 public class IdHelper {
 
-	private static final int MAX_CATEGORIES = 2;
-
 	private static final Logger LOGGER = LoggerFactory.getLogger(IdHelper.class);
 
 	private static final Pattern brandUid = Pattern.compile("\\w*\\-?(\\d[A-Za-z])+|([A-Za-z]\\d)+\\-?\\w*");
@@ -33,7 +31,7 @@ public class IdHelper {
 	 * The key used for simple encryptions. Mabe a need one day to handle it from
 	 * conf
 	 */
-	private static final String KEY = "that'sawonderfulkeyno??";
+	private static final String XOR_KEY = "that'sawonderfulkeyno??";
 
 
 	/**
@@ -66,11 +64,13 @@ public class IdHelper {
 		return ret;
 	}
 	
+	public static String sanitizeAndNormalize(final String input) {
+		return StringUtils.normalizeSpace(StringEscapeUtils.unescapeHtml4(input));
+	}
+
 	// ISSUE : A test bug 
 	//labels:bug
 	
-
-	// TODO : test
 
 	/**
 	 * Extract brandUid from product name
@@ -219,7 +219,7 @@ public class IdHelper {
 
 	private static byte[] xor(final byte[] input) {
 		final byte[] output = new byte[input.length];
-		final byte[] secret = KEY.getBytes();
+		final byte[] secret = XOR_KEY.getBytes();
 		int spos = 0;
 		for (int pos = 0; pos < input.length; ++pos) {
 			output[pos] = (byte) (input[pos] ^ secret[spos]);

@@ -7,7 +7,8 @@ import java.util.Map;
 import org.open4goods.commons.config.yml.datasource.DataSourceProperties;
 import org.open4goods.commons.exceptions.TechnicalException;
 import org.open4goods.commons.model.crawlers.FetcherGlobalStats;
-import org.open4goods.commons.model.crawlers.WebIndexationStats;
+import org.open4goods.commons.model.crawlers.IndexationJobStat;
+import org.open4goods.commons.model.crawlers.IndexationJobStat;
 import org.open4goods.crawler.config.yml.FetcherProperties;
 import org.open4goods.crawler.services.fetching.CsvDatasourceFetchingService;
 import org.open4goods.crawler.services.fetching.WebDatasourceFetchingService;
@@ -91,7 +92,7 @@ public class FetchersService{
 	 */
 	public FetcherGlobalStats stats() {
 
-		final Map<String, WebIndexationStats> ret = new HashMap<>();
+		final Map<String, IndexationJobStat> ret = new HashMap<>();
 
 		ret.putAll( webDatasourceFetchingService.stats());
 		ret.putAll( csvDatasourceFetchingService.stats());
@@ -99,10 +100,9 @@ public class FetchersService{
 
 		long totQueue = 0L, totProcessed = 0L, totIndexed = 0L;
 		// Computing the global stats from each crawlers one
-		for (final WebIndexationStats s : ret. values()) {
-			totQueue += s.getQueueLength();
-			totProcessed += s.getNumberOfProcessedDatas();
-			totIndexed += s.getNumberOfIndexedDatas();
+		for (final IndexationJobStat s : ret. values()) {
+			totIndexed += s.getIndexed();
+			totProcessed += s.getProcessed();
 		}
 
 		final FetcherGlobalStats gs = new FetcherGlobalStats();
