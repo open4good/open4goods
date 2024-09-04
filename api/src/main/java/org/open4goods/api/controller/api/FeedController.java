@@ -2,7 +2,7 @@ package org.open4goods.api.controller.api;
 
 import java.util.Set;
 
-import org.open4goods.api.services.FetcherOrchestrationService;
+import org.open4goods.api.services.ScrapperOrchestrationService;
 import org.open4goods.api.services.store.DataFragmentStoreService;
 import org.open4goods.commons.config.yml.datasource.DataSourceProperties;
 import org.open4goods.commons.model.constants.RolesConstants;
@@ -32,7 +32,7 @@ public class FeedController {
 
 	private final SerialisationService serialisationService;
 
-	private final FetcherOrchestrationService fetcherOrchestrationService;
+	private final ScrapperOrchestrationService fetcherOrchestrationService;
 
 	private final DataSourceConfigService datasourceConfigService;
 
@@ -42,7 +42,7 @@ public class FeedController {
 	
 	private final FeedService feedService;
 	
-	public FeedController(SerialisationService serialisationService, FetcherOrchestrationService fetcherOrchestrationService, DataSourceConfigService datasourceConfigService, DataFragmentStoreService dataFragmentStoreService, FeedService feedService, CsvDatasourceFetchingService  csvDatasourceFetchingService) {
+	public FeedController(SerialisationService serialisationService, ScrapperOrchestrationService fetcherOrchestrationService, DataSourceConfigService datasourceConfigService, DataFragmentStoreService dataFragmentStoreService, FeedService feedService, CsvDatasourceFetchingService  csvDatasourceFetchingService) {
 		this.serialisationService = serialisationService;
 		this.fetcherOrchestrationService = fetcherOrchestrationService;
 		this.dataFragmentStoreService = dataFragmentStoreService;

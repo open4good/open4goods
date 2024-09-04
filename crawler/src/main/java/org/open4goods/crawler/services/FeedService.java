@@ -35,7 +35,6 @@ import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 
 /**
  * TODO : Optimize by checking last updated dates sometimes provided by the platforms
- * TODO : Should merge with CsvDatasourceFetchingService
  */
 public class FeedService {
 		

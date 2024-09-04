@@ -370,7 +370,7 @@ public class WebDatasourceFetchingService extends DatasourceFetchingService{
 			final IndexationJobStat c = new IndexationJobStat(entry.getKey(), entry.getKey());
 			c.setStartDate(controllersDate.get(entry.getKey()));
 			if (null != entry.getValue().getFrontier() && !entry.getValue().isFinished()) {
-				c.setLines(entry.getValue().getFrontier().getNumberOfProcessedPages());
+				c.setProcessed(entry.getValue().getFrontier().getNumberOfProcessedPages());
 			}
 			c.setIndexed(indexationService.getIndexed(entry.getKey()));
 			ret.put(entry.getKey(), c);

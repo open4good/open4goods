@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.open4goods.api.services.FetcherOrchestrationService;
+import org.open4goods.api.services.ScrapperOrchestrationService;
 import org.open4goods.api.services.store.DataFragmentStoreService;
 import org.open4goods.commons.config.yml.datasource.DataSourceProperties;
 import org.open4goods.commons.exceptions.InvalidParameterException;
@@ -42,18 +42,18 @@ import jakarta.validation.constraints.NotBlank;
  */
 @RestController
 
-public class CrawlerOrchestrationController {
+public class ScrapperOrchestrationController {
 
 
 	private final SerialisationService serialisationService;
 
-	private final FetcherOrchestrationService fetcherOrchestrationService;
+	private final ScrapperOrchestrationService fetcherOrchestrationService;
 
 	private final DataSourceConfigService datasourceConfigService;
 
 	private final DataFragmentStoreService dataFragmentStoreService;
 	
-	public CrawlerOrchestrationController(SerialisationService serialisationService, FetcherOrchestrationService fetcherOrchestrationService, DataSourceConfigService datasourceConfigService, DataFragmentStoreService dataFragmentStoreService) {
+	public ScrapperOrchestrationController(SerialisationService serialisationService, ScrapperOrchestrationService fetcherOrchestrationService, DataSourceConfigService datasourceConfigService, DataFragmentStoreService dataFragmentStoreService) {
 		this.serialisationService = serialisationService;
 		this.fetcherOrchestrationService = fetcherOrchestrationService;
 		this.dataFragmentStoreService = dataFragmentStoreService;
@@ -63,35 +63,8 @@ public class CrawlerOrchestrationController {
 
 	
 	
-	@PostMapping(path=UrlConstants.MASTER_API_CRAWLERS  + UrlConstants.MASTER_API_CRAWLER_TRIGGER_SUFFIX+"/csv/all")
-	@Operation(summary="Run a all CSV datasources retrieving against best availlables node")
-	@PreAuthorize("hasAuthority('"+RolesConstants.ROLE_ADMIN+"')")
-	public List<FetchRequestResponse> triggerAllCsvFetcher() {
-		List<FetchRequestResponse> ret = new ArrayList<>();
-		for (final Entry<String, DataSourceProperties> ds : datasourceConfigService.datasourceConfigs().entrySet()) {
-			if (null != ds.getValue().getCsvDatasource()) {
-				ret.add(fetcherOrchestrationService.triggerRemoteCrawling(ds.getKey()));
-			}
-		}
-		return ret;
-	}
 	
-	
-	@PutMapping(path=UrlConstants.MASTER_API_CRAWLER_UPDATE_PREFIX+"{crawlerNodeName}",consumes=MediaType.APPLICATION_JSON_VALUE,produces=MediaType.APPLICATION_JSON_VALUE)
-	@Operation(summary="Update the presence and status of a Fetcher")
-	@PreAuthorize("hasAuthority('"+RolesConstants.ROLE_CRAWLER+"')")
-	@Hidden
-	public void updateFetcherStatus( @PathVariable @NotBlank final String crawlerNodeName, @RequestBody @NotBlank final FetcherGlobalStats globalStats) {
-		fetcherOrchestrationService.updateClientStatus(globalStats);
-	}
 
-	@PostMapping(path=UrlConstants.MASTER_API_CRAWLER_UPDATE_PREFIX+"{crawlerNodeName}"+"/"+"{datasourceName}"  + UrlConstants.MASTER_API_CRAWLER_TRIGGER_SUFFIX)
-	@Operation(summary="Run a datasource retrieving against a specific node")
-	@PreAuthorize("hasAuthority('"+RolesConstants.ROLE_ADMIN+"')")
-	@Hidden
-	public FetchRequestResponse triggerFetcher( @PathVariable @NotBlank final String crawlerNodeName, @PathVariable @NotBlank final String datasourceName) {
-		return fetcherOrchestrationService.triggerRemoteCrawling(crawlerNodeName, datasourceName);
-	}
 
 	@GetMapping(path=UrlConstants.MASTER_API_CRAWLERS)
 	@Operation(summary="List all availlable fetchers and their stats")
@@ -182,5 +155,21 @@ public class CrawlerOrchestrationController {
 		fetcherOrchestrationService.stop(dsp, dsp);
 	}
 
+	
+	@PutMapping(path=UrlConstants.MASTER_API_CRAWLER_UPDATE_PREFIX+"{crawlerNodeName}",consumes=MediaType.APPLICATION_JSON_VALUE,produces=MediaType.APPLICATION_JSON_VALUE)
+	@Operation(summary="Update the presence and status of a Fetcher")
+	@PreAuthorize("hasAuthority('"+RolesConstants.ROLE_CRAWLER+"')")
+	@Hidden
+	public void updateFetcherStatus( @PathVariable @NotBlank final String crawlerNodeName, @RequestBody @NotBlank final FetcherGlobalStats globalStats) {
+		fetcherOrchestrationService.updateClientStatus(globalStats);
+	}
+
+	@PostMapping(path=UrlConstants.MASTER_API_CRAWLER_UPDATE_PREFIX+"{crawlerNodeName}"+"/"+"{datasourceName}"  + UrlConstants.MASTER_API_CRAWLER_TRIGGER_SUFFIX)
+	@Operation(summary="Run a datasource retrieving against a specific node")
+	@PreAuthorize("hasAuthority('"+RolesConstants.ROLE_ADMIN+"')")
+	@Hidden
+	public FetchRequestResponse triggerFetcher( @PathVariable @NotBlank final String crawlerNodeName, @PathVariable @NotBlank final String datasourceName) {
+		return fetcherOrchestrationService.triggerRemoteCrawling(crawlerNodeName, datasourceName);
+	}
 
 }
