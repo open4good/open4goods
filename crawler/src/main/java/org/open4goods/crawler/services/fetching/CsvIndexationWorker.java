@@ -229,8 +229,9 @@ public class CsvIndexationWorker implements Runnable {
 	            dedicatedLogger.info("Removing fetched CSV file at {}", destFile);
 
 	        } catch (Exception e) {
-	            logger.error("Crtical exception while parsing CSV file: {} : {}", dsConfName, url, e);
-	            dedicatedLogger.error("Crtical exception while parsing CSV file:  : {} : {}", dsConfName, url, e);
+	        	// TODO : A dedicated logger
+	            logger.error("Critical exception while parsing CSV file: {} : {}", dsConfName, url, e);
+	            dedicatedLogger.error("Critical exception while parsing CSV file:  : {} : {}", dsConfName, url, e);
 	            stats.setFail(true);
 	        } finally {
 	            closeIterator(mi, dedicatedLogger);
@@ -442,7 +443,7 @@ public class CsvIndexationWorker implements Runnable {
 		if (csvProperties.getImportAllAttributes()) {			
 			for (Entry<String, String> kv : item.entrySet()) {
 				String key = kv.getKey();
-				String val = kv.getValue();
+				String val = IdHelper.sanitizeAndNormalize(kv.getValue());
 							
 				if (!StringUtils.isEmpty(val)) {				
 						p.addAttribute(key,val,config.getLanguage(), csvProperties.getAttributesIgnoreCariageReturns(),csvProperties.getAttributesSplitSeparators());
