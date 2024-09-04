@@ -55,8 +55,8 @@ public class ProductRepository {
 
 	
 	// The file queue implementation
-	// TODO : Limit from conf
-	private BlockingQueue<Product> queue = new LinkedBlockingQueue<>(15000);
+	// TODO(p3,conf) : Limit from conf
+	private BlockingQueue<Product> queue = new LinkedBlockingQueue<>(150000);
 	
 	
 	/**

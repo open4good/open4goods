@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -19,6 +20,9 @@ import org.open4goods.crawler.services.DataFragmentCompletionService;
 import org.open4goods.crawler.services.IndexationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.boot.actuate.health.Health;
+import org.springframework.boot.actuate.health.HealthIndicator;
+import org.springframework.boot.actuate.health.Health.Builder;
 
 import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 
@@ -30,36 +34,25 @@ import jakarta.annotation.PreDestroy;
  * @author goulven 
  */
 
-public class CsvDatasourceFetchingService extends DatasourceFetchingService {
+public class CsvDatasourceFetchingService extends DatasourceFetchingService implements HealthIndicator{
 
 	
 	private static final Logger logger = LoggerFactory.getLogger(CsvDatasourceFetchingService.class);
 
 
+	private static final Integer JOBS_QUEUE_CAPACITY = 1000;
+	private BlockingQueue<DataSourceProperties> queue = new LinkedBlockingQueue<>(JOBS_QUEUE_CAPACITY);
+
+
 	private final IndexationService indexationService;
 	
-
-	private final DataFragmentCompletionService completionService;
-
-	private final WebDatasourceFetchingService webFetchingService;
-
-	private final DatasourceFetchingService fetchingService;
-	
-	
-
 	// The running job status
 	private final Map<String, CsvIndexationWorker> runningJobs = new ConcurrentHashMap<>();
 
-	private final FetcherProperties fetcherProperties;
 
-	private IndexationRepository csvIndexationRepository;
 
-	private BlockingQueue<DataSourceProperties> queue = null;
-
-	// The chars used in CSV after libreoffice sanitisation
-//	private static final char SANITISED_COLUMN_SEPARATOR = ';';
-//	private static final char SANITIZED_ESCAPE_CHAR = '"';
-//	private static final char SANITIZED_QUOTE_CHAR = '"';
+	private AtomicLong feedNoUrls = new AtomicLong(0L);
+	private AtomicLong brokenCsvFiles = new AtomicLong(0L);
 	
 	/**
 	 * Constructor
@@ -75,16 +68,10 @@ public class CsvDatasourceFetchingService extends DatasourceFetchingService {
 			) {
 		super(logsFolder, toConsole,indexationRepository);
 		this.indexationService = indexationService;
-		this.webFetchingService = webFetchingService;
-		this.completionService = completionService;
-		this.fetcherProperties = fetcherProperties;
-		this.fetchingService = fetchingService;
 		// The CSV executor can have at most the fetcher max indexation tasks threads
 		
-		this.queue = new LinkedBlockingQueue<>(fetcherProperties.getConcurrentFetcherTask());
 //		executor = Executors.newFixedThreadPool(fetcherProperties.getConcurrentFetcherTask(), Thread.ofVirtual().factory());
 //		executor = Executors.newFixedThreadPool(fetcherProperties.getConcurrentFetcherTask());
-		this.csvIndexationRepository = csvIndexationRepository;
 		
 		for (int i = 0; i < fetcherProperties.getConcurrentFetcherTask(); i++) {			
 			// TODO(conf,p3) : wait (4000) from config
@@ -249,6 +236,40 @@ public class CsvDatasourceFetchingService extends DatasourceFetchingService {
 	
 	public BlockingQueue<DataSourceProperties> getQueue() {
 		return queue;
+	}
+
+	
+	// To provide Data to the health check
+	public synchronized void incrementFeedNoUrls() {
+		feedNoUrls.incrementAndGet();
+		
+	}
+
+	public synchronized void brokenCsv() {
+		brokenCsvFiles.incrementAndGet();
+	}
+
+	/**
+	 * Custom healthcheck, simply goes to DOWN if critical exception occurs
+	 */
+	@Override
+	public Health health() {
+		
+		Builder health = Health.up();
+		
+		
+		if (feedNoUrls.get() > 0L) {
+			health =  Health.down();
+		} 
+		
+		if (brokenCsvFiles.get() > 0L) {
+			health =  Health.down();
+		} 
+		
+		return health
+				.withDetail("feed_without_urls", feedNoUrls.get() )
+				.withDetail("invalid_csv_files", brokenCsvFiles.get())
+				.build();
 	}
 	
 	
