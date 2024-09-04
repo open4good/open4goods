@@ -207,7 +207,7 @@ public class DataFragmentCompletionService {
 
 			String bId = null;
 			try {
-				bId = IdHelper.extractBrandUidsFromNames(dataFragment);
+				bId = IdHelper.extractModelFromNames(dataFragment);
 			} catch (final InvalidParameterException e) {
 				LOGGER.info(e.getMessage());
 			}

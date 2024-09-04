@@ -1,10 +1,7 @@
 package org.open4goods.crawler.services.fetching;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.net.URL;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -14,12 +11,9 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-import java.util.UUID;
-import java.util.zip.GZIPInputStream;
+import java.util.stream.Collectors;
 
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.text.StringEscapeUtils;
 import org.open4goods.commons.config.yml.datasource.CsvDataSourceProperties;
 import org.open4goods.commons.config.yml.datasource.DataSourceProperties;
 import org.open4goods.commons.config.yml.datasource.HtmlDataSourceProperties;
@@ -33,16 +27,15 @@ import org.open4goods.commons.model.constants.InStock;
 import org.open4goods.commons.model.constants.ProductCondition;
 import org.open4goods.commons.model.constants.ReferentielKey;
 import org.open4goods.commons.model.crawlers.IndexationJobStat;
-import org.open4goods.commons.model.crawlers.IndexationJobStat;
 import org.open4goods.commons.model.data.DataFragment;
 import org.open4goods.commons.model.data.Price;
 import org.open4goods.commons.model.data.Rating;
+import org.open4goods.commons.services.RemoteFileCachingService;
 import org.open4goods.crawler.repository.IndexationRepository;
 import org.open4goods.crawler.services.DataFragmentCompletionService;
 import org.open4goods.crawler.services.IndexationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.core.io.ClassPathResource;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -50,13 +43,10 @@ import com.fasterxml.jackson.databind.MappingIterator;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectReader;
 import com.fasterxml.jackson.dataformat.csv.CsvMapper;
-import com.fasterxml.jackson.dataformat.csv.CsvParser;
 import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 import com.google.common.collect.Sets;
 
 import edu.uci.ics.crawler4j.crawler.CrawlController;
-import net.lingala.zip4j.ZipFile;
-import net.lingala.zip4j.exception.ZipException;
 
 /**
  * Worker thread that asynchronously dequeue the DataFragments from the file
@@ -85,6 +75,8 @@ public class CsvIndexationWorker implements Runnable {
 	private final DataFragmentCompletionService completionService;
 
 	private final IndexationRepository csvIndexationRepository;
+	
+	private final RemoteFileCachingService remoteFileCachingService;
 
 	/**
 	 * The duration of the worker thread pause when nothing to get from the queue
@@ -110,8 +102,8 @@ public class CsvIndexationWorker implements Runnable {
 	 * @param toConsole
 	 * @param dequeuePageSize
 	 */
-	public CsvIndexationWorker(final CsvDatasourceFetchingService csvService, DataFragmentCompletionService completionService, IndexationService indexationService, WebDatasourceFetchingService webFetchingService, IndexationRepository csvIndexationRepository, final int pauseDuration,
-			String logsFolder) {
+	public CsvIndexationWorker(final CsvDatasourceFetchingService csvService, DataFragmentCompletionService completionService, IndexationService indexationService, WebDatasourceFetchingService webFetchingService, IndexationRepository csvIndexationRepository, final int pauseDuration, 
+			String logsFolder, RemoteFileCachingService remoteFileCachingService) {
 		this.csvService = csvService;
 		this.pauseDuration = pauseDuration;
 		this.completionService = completionService;
@@ -119,16 +111,17 @@ public class CsvIndexationWorker implements Runnable {
 		this.webFetchingService = webFetchingService;
 		this.csvIndexationRepository = csvIndexationRepository;
 		this.logsFolder = logsFolder;
+		this.remoteFileCachingService = remoteFileCachingService;
 	}
 
 	@Override
 	public void run() {
-
 		while (!stop) {
 			try {
 				if (!csvService.getQueue().isEmpty()) {
 					// There is data to consume and queue consummation is enabled
-
+					// TODO : Random sleep to avoid all starting at the same time and 400 errors
+					
 					DataSourceProperties ds = csvService.getQueue().take();
 
 					logger.info("will index {}", ds.getDatasourceConfigName());
@@ -195,12 +188,12 @@ public class CsvIndexationWorker implements Runnable {
 			MappingIterator<Map<String, String>> mi = null;
 			File destFile = null;
 			try {
-				destFile = downloadCsvFile(url, safeName, dedicatedLogger);
+				destFile = remoteFileCachingService.downloadToTmpFile(url, safeName);
 
 				if (config.getGzip()) {
-					destFile = decompressGzip(destFile, dedicatedLogger);
+					destFile = remoteFileCachingService.decompressGzipAndDeleteSource(destFile);
 				} else if (config.getZiped()) {
-					destFile = unzipFile(destFile, dedicatedLogger);
+					destFile = remoteFileCachingService.unzipFileAndDeleteSource(destFile);
 				}
 
 				CsvSchema schema = configureCsvSchema(config, destFile, dedicatedLogger);
@@ -218,6 +211,12 @@ public class CsvIndexationWorker implements Runnable {
 							throw new ValidationException("Null line encountered");
 						}
 
+						// Normalisation 
+						 line = line.entrySet().stream()
+							    .collect(Collectors.toMap(
+							        e -> (String) IdHelper.normalizeAttributeName(e.getKey().toString()), // Ensure key is String
+							        e -> (String) IdHelper.sanitizeAndNormalize(e.getValue().toString())  // Ensure value is String
+							    ));
 						DataFragment df = parseCsvLine(crawler, controller, dsProperties, line, dsConfName, logger, url);
 
 						// Store the feedUrl as an attribute (for debug)
@@ -261,62 +260,35 @@ public class CsvIndexationWorker implements Runnable {
 		finalizeCrawl(controller, crawler, dsConfName, dsProperties, dedicatedLogger);
 	}
 
-	private File downloadCsvFile(String url, String safeName, Logger dedicatedLogger) throws IOException {
-		File destFile;
-		destFile = File.createTempFile("csv", safeName + ".csv");
-		dedicatedLogger.info("Downloading CSV for {} from {} to {}", safeName, url, destFile);
+	
 
-		if (url.startsWith("http")) {
-			FileUtils.copyURLToFile(new URL(url), destFile);
-		} else if (url.startsWith(CLASSPATH_PREFIX)) {
-			ClassPathResource res = new ClassPathResource(url.substring(CLASSPATH_PREFIX.length()));
-			FileUtils.copyInputStreamToFile(res.getInputStream(), destFile);
-		} else {
-			destFile = new File(url);
-		}
-		return destFile;
-	}
-
-	private File decompressGzip(File destFile, Logger dedicatedLogger) throws IOException {
-		File tmpFile = File.createTempFile("gzip", "gzip");
-		decompressGzipFile(destFile.getAbsolutePath(), tmpFile.getAbsolutePath());
-		Files.delete(destFile.toPath());
-		return new File(tmpFile.getAbsolutePath());
-	}
-
-	private File unzipFile(File destFile, Logger dedicatedLogger) throws IOException {
-		String targetFolder = destFile.getParent() + File.separator + "unzipped";
-		dedicatedLogger.info("Unzipping CSV data from {} to {}", destFile.getAbsolutePath(), targetFolder);
-		new File(targetFolder).mkdirs();
-
-		try (ZipFile zipFile = new ZipFile(destFile)) {
-			zipFile.extractAll(targetFolder);
-		} catch (ZipException e) {
-			dedicatedLogger.error("Error extracting CSV data", e);
-			throw e;
-		}
-
-		FileUtils.deleteQuietly(destFile);
-		File zipedDestFolder = new File(targetFolder);
-
-		if (zipedDestFolder.list().length > 1) {
-			dedicatedLogger.error("Multiple files in {}, cannot operate", destFile.getAbsolutePath());
-			throw new IOException("Multiple files in zip archive");
-		}
-
-		return zipedDestFolder.listFiles()[0];
-	}
-
+	/**
+	 * Configure the schema for the specified file, and overrides with DatasourceConfig props if any
+	 * @param config
+	 * @param destFile
+	 * @param dedicatedLogger
+	 * @return
+	 * @throws IOException
+	 */
 	private CsvSchema configureCsvSchema(CsvDataSourceProperties config, File destFile, Logger dedicatedLogger) throws IOException {
 		dedicatedLogger.info("Detecting schema for {}", destFile.getAbsolutePath());
 		CsvSchema schema = csvService.detectSchema(destFile);
 
+		// Overriding with datasource specific config if defined
 		if (config.getCsvQuoteChar() != null) {
 			schema = schema.withQuoteChar(config.getCsvQuoteChar().charValue());
 		}
 		if (config.getCsvEscapeChar() != null) {
-			schema = schema.withEscapeChar(config.getCsvEscapeChar());
+			schema = schema.withEscapeChar(config.getCsvEscapeChar().charValue());
 		}
+		
+		if (config.getCsvSeparator() != null) {
+			schema = schema.withColumnSeparator(config.getCsvSeparator().charValue());
+		}
+		
+		
+		
+		
 		return schema;
 	}
 
@@ -444,7 +416,7 @@ public class CsvIndexationWorker implements Runnable {
 		if (csvProperties.getImportAllAttributes()) {
 			for (Entry<String, String> kv : item.entrySet()) {
 				String key = kv.getKey();
-				String val = IdHelper.sanitizeAndNormalize(kv.getValue());
+				String val =(kv.getValue());
 
 				if (!StringUtils.isEmpty(val)) {
 					p.addAttribute(key, val, config.getLanguage(), csvProperties.getAttributesIgnoreCariageReturns(), csvProperties.getAttributesSplitSeparators());
@@ -651,79 +623,8 @@ public class CsvIndexationWorker implements Runnable {
 
 	}
 
-//
-//	/**
-//	 * Sanitisation using libreoffice
-//	 * @param destFile
-//	 * @param config
-//	 * @param dedicatedLogger 
-//	 * @return
-//	 */
-//	private File libreOfficeSanitisation(File destFile, CsvDataSourceProperties config, Logger dedicatedLogger) {
-//
-//		// libreoffice --headless --convert-to csv:"Text - txt - csv (StarCalc)":59,34,76,,,,true /home/goulven/Bureau/products_405199502.csv --outdir /tmp/libreofficeCSV --infilter=CSV:59,34,UTF8
-//		
-//		String outDir = System.getProperty("java.io.tmpdir")+ File.separator+"libreofficeCSV";
-//		String fileName = destFile.getName();
-//		
-////		int fieldSeparator=59;
-////		int textSeparator=34;
-//
-//		int fieldSeparator=config.getCsvSeparator();
-//		int textSeparator=config.getCsvQuoteChar() == null ? 0 : config.getCsvQuoteChar();
-//		
-//		//NOTE :  76 represents utf8 encoding
-//		ProcessBuilder builder = new ProcessBuilder("libreoffice", "--headless", "--convert-to", "csv:Text - txt - csv (StarCalc):"+(int)SANITISED_COLUMN_SEPARATOR+","+(int)SANITIZED_QUOTE_CHAR+",76,,,,true", destFile.getAbsolutePath(), "--outdir", outDir, "--infilter=CSV:"+fieldSeparator+","+textSeparator+","+config.getCsvEncoding());
-//
-//		try {
-//			Process process = builder.start();
-//			process.waitFor();
-//
-//			logger.info("Libreoffice conversion result : {}", IOUtils.toString(process.getInputStream(),Charset.defaultCharset()));
-//			
-//			String error = IOUtils.toString(process.getErrorStream(),Charset.defaultCharset());
-//			
-//			IOUtils.closeQuietly(process.getErrorStream());
-//			IOUtils.closeQuietly(process.getInputStream());
-//			 
-//			 
-//			if (!StringUtils.isEmpty(error)) {
-//				dedicatedLogger.error("Error returned by libreoffice converter. Sanitisation will be skipped : {}",error);
-//				logger.error("Error returned by libreoffice converter. Sanitisation will be skipped : {}",error);
-//			}
-//			else {				
-//				destFile.delete();
-//				return new File(outDir+File.separator+fileName);
-//			}
-//		
-//		} catch (IOException | InterruptedException e) {
-//			logger.error("Error with libreoffice transformation",e);
-//		}
-//		return destFile;
-//
-//	
-//	
-//	}
 
-	// TODO : Mutualize with RemoteFileCachingService
-	public void decompressGzipFile(String gzipFile, String newFile) {
-		try {
-			FileInputStream fis = new FileInputStream(gzipFile);
-			GZIPInputStream gis = new GZIPInputStream(fis);
-			FileOutputStream fos = new FileOutputStream(newFile);
-			byte[] buffer = new byte[1024];
-			int len;
-			while ((len = gis.read(buffer)) != -1) {
-				fos.write(buffer, 0, len);
-			}
-			// close resources
-			fos.close();
-			gis.close();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
 
-	}
 
 	private void handleAttributes(final DataFragment pd, final DataSourceProperties config, final String attrRaw, Logger dedicatedLogger) {
 
@@ -766,8 +667,6 @@ public class CsvIndexationWorker implements Runnable {
 
 		final String val = item.get(colName);
 		if (null != val) {
-			// TODO(conf,p3) : strong choice to not sanitize, CPU wins, but some specific datasources could need it
-//			return sanitizeAndNormalize.sanitizeAndNormalize(val);
 			return val;
 
 		} else {

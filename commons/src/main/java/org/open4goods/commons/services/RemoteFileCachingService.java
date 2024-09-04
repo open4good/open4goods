@@ -4,6 +4,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URL;
+import java.nio.file.Files;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
@@ -17,6 +18,7 @@ import org.open4goods.commons.helper.IdHelper;
 import org.open4goods.commons.model.CacheResourceConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.ClientHttpRequest;
@@ -34,7 +36,7 @@ import net.lingala.zip4j.exception.ZipException;
  * @author goulven
  *
 
- * TODO(0.25,P3,test) : unit tests
+ * TODO(P3,test) : unit tests
  */
 public class RemoteFileCachingService {
 
@@ -43,9 +45,11 @@ public class RemoteFileCachingService {
 
 	private static final Logger logger = LoggerFactory.getLogger(RemoteFileCachingService.class);
 
+	private static final int BUFFER_SIZE = 2048;
+
 	private final String resourceFolder;
 	
-	// TODO : Inject
+	// TODO(p3,design) : Inject
 	private RestTemplate restTemplate = new RestTemplate();
 
 
@@ -120,25 +124,107 @@ public class RemoteFileCachingService {
 
 	
 	
-	// TODO : Mutualize with CsvIndexationWorker
-    public  void decompressGzipFile(File gzipFile, File newFile) {
-        try {
-            FileInputStream fis = new FileInputStream(gzipFile);
-            GZIPInputStream gis = new GZIPInputStream(fis);
-            FileOutputStream fos = new FileOutputStream(newFile);
-            byte[] buffer = new byte[1024];
+	 /**
+     * Decompresses a GZIP file to the specified output file.
+     * Utilizes a buffer for efficient reading and writing.
+     *
+     * @param gzipFile The GZIP file to decompress.
+     * @param newFile  The file to write the decompressed data to.
+     */
+    public void decompressGzipFile(File gzipFile, File newFile) {
+        // Using try-with-resources to ensure streams are closed automatically
+        try (FileInputStream fis = new FileInputStream(gzipFile);
+             GZIPInputStream gis = new GZIPInputStream(fis);
+             FileOutputStream fos = new FileOutputStream(newFile)) {
+
+            byte[] buffer = new byte[BUFFER_SIZE];
             int len;
-            while((len = gis.read(buffer)) != -1){
+            // Read from GZIPInputStream and write to FileOutputStream
+            while ((len = gis.read(buffer)) != -1) {
                 fos.write(buffer, 0, len);
             }
-            //close resources
-            fos.close();
-            gis.close();
+
+            logger.info("Successfully decompressed {} to {}", gzipFile.getAbsolutePath(), newFile.getAbsolutePath());
+
         } catch (IOException e) {
-            e.printStackTrace();
+            // Log the error with specific details about the input/output files
+            logger.error("Error occurred while decompressing GZIP file '{}' to '{}'.", 
+                         gzipFile.getAbsolutePath(), newFile.getAbsolutePath(), e);
         }
-        
     }
+
+    /**
+     * Downloads a file from the given URL to a temporary file with a specified safe name.
+     *
+     * @param url      The URL of the file to download.
+     * @param safeName A safe name to use as part of the temporary file name.
+     * @return The temporary file where the content has been downloaded.
+     * @throws IOException If an I/O error occurs during file download or creation.
+     */
+    public File downloadToTmpFile(String url, String safeName) throws IOException {
+        // Create a temporary file with a normalized safe name
+        File destFile = File.createTempFile("csv", IdHelper.normalizeFileName(safeName) + ".csv");
+
+        logger.info("Downloading CSV for '{}' from '{}' to '{}'", safeName, url, destFile.getAbsolutePath());
+
+        try {
+            // Handle HTTP/HTTPS URLs
+            if (url.startsWith("http")) {
+                FileUtils.copyURLToFile(new URL(url), destFile);
+            }
+            // Handle classpath resources if necessary (currently commented out)
+            // else if (url.startsWith(CLASSPATH_PREFIX)) {
+            //     ClassPathResource res = new ClassPathResource(url.substring(CLASSPATH_PREFIX.length()));
+            //     FileUtils.copyInputStreamToFile(res.getInputStream(), destFile);
+            // }
+            // Handle local file paths
+            else {
+                destFile = new File(url);
+            }
+
+            logger.info("File successfully downloaded to '{}'", destFile.getAbsolutePath());
+        } catch (IOException e) {
+            // Log the error and rethrow the exception for the caller to handle
+            logger.error("Failed to download file from '{}' to '{}'", url, destFile.getAbsolutePath(), e);
+            throw e;
+        }
+
+        return destFile;
+    }
+    
+    
+    
+
+	public File decompressGzipAndDeleteSource(File destFile) throws IOException {
+		File tmpFile = File.createTempFile("gzip", "gzip");
+		decompressGzipFile(destFile, tmpFile);
+		Files.delete(destFile.toPath());
+		return new File(tmpFile.getAbsolutePath());
+	}
+
+	public File unzipFileAndDeleteSource(File sourceFile) throws IOException {
+		String targetFolder = sourceFile.getParent() + File.separator + "unzipped";
+		logger.info("Unzipping CSV data from {} to {}", sourceFile.getAbsolutePath(), targetFolder);
+		new File(targetFolder).mkdirs();
+
+		try (ZipFile zipFile = new ZipFile(sourceFile)) {
+			zipFile.extractAll(targetFolder);
+		} catch (ZipException e) {
+			logger.error("Error extracting CSV data", e);
+			throw e;
+		}
+
+		FileUtils.deleteQuietly(sourceFile);
+		File zipedDestFolder = new File(targetFolder);
+
+		if (zipedDestFolder.list().length > 1) {
+			logger.error("Multiple files in {}, cannot operate", sourceFile.getAbsolutePath());
+			throw new IOException("Multiple files in zip archive");
+		}
+
+		return zipedDestFolder.listFiles()[0];
+	}
+
     
     
     

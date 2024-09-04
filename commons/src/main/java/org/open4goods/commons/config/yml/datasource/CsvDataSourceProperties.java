@@ -13,7 +13,6 @@ import org.open4goods.commons.model.constants.ReferentielKey;
 import org.springframework.validation.annotation.Validated;
 
 @Validated
-//TODO(design) : should / could rename config elems
 public class CsvDataSourceProperties {
 
 	/**
@@ -31,7 +30,7 @@ public class CsvDataSourceProperties {
 	/**
 	 * csvSeparator
 	 */
-	private char csvSeparator;
+	private Character csvSeparator;
 
 	/**
 	 * csvQuoteChar
@@ -230,13 +229,20 @@ public class CsvDataSourceProperties {
 		}
 	}
 
-	public char getCsvSeparator() {
+
+
+
+	public Character getCsvSeparator() {
 		return csvSeparator;
 	}
 
-	public void setCsvSeparator(final char csvSeparator) {
+
+
+
+	public void setCsvSeparator(Character csvSeparator) {
 		this.csvSeparator = csvSeparator;
 	}
+
 
 
 
