@@ -9,7 +9,7 @@ import org.open4goods.api.config.yml.ApiProperties;
 import org.open4goods.api.services.AggregationFacadeService;
 import org.open4goods.api.services.BatchService;
 import org.open4goods.api.services.CompletionFacadeService;
-import org.open4goods.api.services.FetcherOrchestrationService;
+import org.open4goods.api.services.ScrapperOrchestrationService;
 import org.open4goods.api.services.completion.AmazonCompletionService;
 import org.open4goods.api.services.completion.GenAiCompletionService;
 import org.open4goods.api.services.completion.IcecatCompletionService;
@@ -47,7 +47,7 @@ import org.open4goods.commons.services.ai.AiService;
 import org.open4goods.commons.services.textgen.BlablaService;
 import org.open4goods.commons.store.repository.elastic.BrandScoresRepository;
 import org.open4goods.crawler.config.yml.FetcherProperties;
-import org.open4goods.crawler.repository.CsvIndexationRepository;
+import org.open4goods.crawler.repository.IndexationRepository;
 import org.open4goods.crawler.repository.IndexationRepository;
 import org.open4goods.crawler.services.ApiSynchService;
 import org.open4goods.crawler.services.DataFragmentCompletionService;
@@ -470,7 +470,7 @@ public class ApiConfig {
 			@Autowired final IndexationService indexationService, @Autowired final ApiProperties apiProperties,
 			@Autowired final WebDatasourceFetchingService webDatasourceFetchingService,
 			@Autowired final IndexationRepository indexationRepository,
-			  @Autowired CsvIndexationRepository csvIndexationRepo
+			  @Autowired IndexationRepository csvIndexationRepo
 			
 			
 			) {
@@ -526,8 +526,8 @@ public class ApiConfig {
 
 	@Bean
 	@Autowired
-	FetcherOrchestrationService fetcherOrchestrationService(TaskScheduler taskScheduler, DataSourceConfigService dataSourceConfigService, ApiProperties apiProperties) {
-		return new FetcherOrchestrationService(taskScheduler, dataSourceConfigService, apiProperties);
+	ScrapperOrchestrationService fetcherOrchestrationService(TaskScheduler taskScheduler, DataSourceConfigService dataSourceConfigService, ApiProperties apiProperties) {
+		return new ScrapperOrchestrationService(taskScheduler, dataSourceConfigService, apiProperties);
 	}
 
 	@Bean
@@ -544,7 +544,7 @@ public class ApiConfig {
 	 * @return
 	 */
 	@Autowired
-	ApiSynchService apiSynchService(final ApiProperties apiProperties, FetchersService crawlersInterface, FetcherOrchestrationService fetcherOrchestrationService) {
+	ApiSynchService apiSynchService(final ApiProperties apiProperties, FetchersService crawlersInterface, ScrapperOrchestrationService fetcherOrchestrationService) {
 		return new ApiSynchService(apiProperties.getFetcherProperties().getApiSynchConfig(), crawlersInterface, null,
 				null) {
 			@Override

@@ -55,8 +55,8 @@ public class ProductRepository {
 
 	
 	// The file queue implementation
-	// TODO : Limit from conf
-	private BlockingQueue<Product> queue = new LinkedBlockingQueue<>(15000);
+	// TODO(p3,conf) : Limit from conf
+	private BlockingQueue<Product> queue = new LinkedBlockingQueue<>(150000);
 	
 	
 	/**
@@ -156,9 +156,9 @@ public class ProductRepository {
 		
 		
 		Criteria c = getValidDateQuery()
-				// TODO : Warning : check nehaviour
 				.and( new Criteria("vertical").is(vertical.getId()))
-//				.or(new Criteria("datasourceCategories").in(vertical.getMatchingCategories())
+
+				//				.or(new Criteria("datasourceCategories").in(vertical.getMatchingCategories())
 				;
 		
 		if (!withExcluded) {

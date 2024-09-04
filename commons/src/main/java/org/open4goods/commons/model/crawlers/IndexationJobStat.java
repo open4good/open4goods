@@ -8,8 +8,8 @@ import org.springframework.data.elasticsearch.annotations.Document;
 import org.springframework.data.elasticsearch.annotations.Field;
 import org.springframework.data.elasticsearch.annotations.FieldType;
 
-@Document(indexName = "csv-indexations", createIndex = true)
-public class CsvIndexationStat {
+@Document(indexName = "datas-indexations", createIndex = true)
+public class IndexationJobStat {
 
 	@Id
 	@Field(index = true, store = false, type = FieldType.Keyword)
@@ -28,7 +28,7 @@ public class CsvIndexationStat {
 	private long duration = 0;
 	
 	@Field(index = true, store = false, type = FieldType.Long)
-	private long lines = 0;
+	private long processed = 0;
 	
 	@Field(index = true, store = false, type = FieldType.Long)
 	private long indexed = 0;
@@ -42,10 +42,10 @@ public class CsvIndexationStat {
 	@Field(index = true, store = false, type = FieldType.Boolean)
 	private Boolean fail = false;
 	
-	public CsvIndexationStat() {
+	public IndexationJobStat() {
 	}	
 	
-	public CsvIndexationStat(String url, String dsName) {
+	public IndexationJobStat(String url, String dsName) {
 		this.startDate=System.currentTimeMillis();
 		this.datasource=dsName;
 		this.url = url;
@@ -59,7 +59,7 @@ public class CsvIndexationStat {
 	}
 
 	public void incrementLines() {
-		lines++;		
+		processed++;		
 	}
 
 	public void incrementErrors() {
@@ -114,12 +114,12 @@ public class CsvIndexationStat {
 		this.startDate = startDate;
 	}
 
-	public long getLines() {
-		return lines;
+	public long getProcessed() {
+		return processed;
 	}
 
-	public void setLines(long lines) {
-		this.lines = lines;
+	public void setProcessed(long lines) {
+		this.processed = lines;
 	}
 
 	public long getIndexed() {

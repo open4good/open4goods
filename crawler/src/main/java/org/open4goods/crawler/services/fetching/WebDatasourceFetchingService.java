@@ -22,7 +22,7 @@ import org.open4goods.commons.config.yml.datasource.ExtractorConfig;
 import org.open4goods.commons.config.yml.datasource.HtmlDataSourceProperties;
 import org.open4goods.commons.exceptions.TechnicalException;
 import org.open4goods.commons.model.constants.TimeConstants;
-import org.open4goods.commons.model.crawlers.WebIndexationStats;
+import org.open4goods.commons.model.crawlers.IndexationJobStat;
 import org.open4goods.commons.model.data.DataFragment;
 import org.open4goods.crawler.config.yml.FetcherProperties;
 import org.open4goods.crawler.extractors.Extractor;
@@ -362,20 +362,17 @@ public class WebDatasourceFetchingService extends DatasourceFetchingService{
 	 * Return the stats
 	 */
 	@Override
-	public Map<String, WebIndexationStats> stats() {
+	public Map<String, IndexationJobStat> stats() {
 
-		final var ret = new HashMap<String,WebIndexationStats>();
+		final var ret = new HashMap<String,IndexationJobStat>();
 
 		for (final Entry<String, CrawlController> entry : getControllers().entrySet()) {
-			final WebIndexationStats c = new WebIndexationStats(entry.getKey(), 0L);
-			c.setFinished(entry.getValue().isFinished());
-			c.setShuttingDown(entry.getValue().isShuttingDown());
+			final IndexationJobStat c = new IndexationJobStat(entry.getKey(), entry.getKey());
 			c.setStartDate(controllersDate.get(entry.getKey()));
 			if (null != entry.getValue().getFrontier() && !entry.getValue().isFinished()) {
-				c.setQueueLength(entry.getValue().getFrontier().getQueueLength());
-				c.setNumberOfProcessedDatas(entry.getValue().getFrontier().getNumberOfProcessedPages());
+				c.setProcessed(entry.getValue().getFrontier().getNumberOfProcessedPages());
 			}
-			c.setNumberOfIndexedDatas(indexationService.getIndexed(entry.getKey()));
+			c.setIndexed(indexationService.getIndexed(entry.getKey()));
 			ret.put(entry.getKey(), c);
 		}
 		return ret;
