@@ -10,7 +10,7 @@ import ch.qos.logback.classic.Level;
 public class ShippingCostParser {
 
 	// TODO : Path from conf
-	private static final Logger logger = GenericFileLogger.initLogger("product-shipping-cost-parser", Level.INFO, "/opt/open4goods/logs/", false);
+	private static final Logger logger = GenericFileLogger.initLogger("product-shipping-cost-parser", Level.INFO, "/opt/open4goods/logs/");
 
 	public static Double parse(final String val) throws InvalidParameterException {
 

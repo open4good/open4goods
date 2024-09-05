@@ -11,7 +11,7 @@ import ch.qos.logback.classic.Level;
 //TODO(feature) : Shipping time could be greatly improved (jours ouvrés, inneficient parsing ..., log unresolved and so on for ShippingCostParser, ...)
 public class ShippingTimeParser {
 
-	private static final Logger logger = GenericFileLogger.initLogger("product-shipping-time-parser", Level.INFO, "/opt/open4goods/logs/", false);
+	private static final Logger logger = GenericFileLogger.initLogger("product-shipping-time-parser", Level.INFO, "/opt/open4goods/logs/");
 	/**
 	 * Parse a shipping time
 	 * @param val

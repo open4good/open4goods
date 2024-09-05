@@ -10,7 +10,7 @@ import ch.qos.logback.classic.Level;
 public class ProductConditionParser {
 
 	// TODO : Path from conf
-	private static final Logger logger = GenericFileLogger.initLogger("product-condition-parser", Level.INFO, "/opt/open4goods/logs/", false);
+	private static final Logger logger = GenericFileLogger.initLogger("product-condition-parser", Level.INFO, "/opt/open4goods/logs/");
 	public static ProductCondition parse(String val) throws InvalidParameterException {
 
 		if (StringUtils.isEmpty(val)) {

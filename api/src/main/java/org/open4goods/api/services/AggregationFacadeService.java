@@ -240,7 +240,7 @@ public class AggregationFacadeService {
 	 */
 	public StandardAggregator getStandardAggregator(String name) {		
 		
-		Logger logger = GenericFileLogger.initLogger(name, apiProperties.aggLogLevel(), apiProperties.logsFolder()+"/aggregation", apiProperties.isDevMode());
+		Logger logger = GenericFileLogger.initLogger(name, apiProperties.aggLogLevel(), apiProperties.logsFolder()+"/aggregation");
 
 		final List<AbstractAggregationService> services = new ArrayList<>();
 		
@@ -272,7 +272,7 @@ public class AggregationFacadeService {
 	public ScoringBatchedAggregator getScoringAggregator() {
 		final List<AbstractAggregationService> services = new ArrayList<>();
 	
-		Logger logger = GenericFileLogger.initLogger("score", apiProperties.aggLogLevel(), apiProperties.logsFolder()+"/aggregation", apiProperties.isDevMode());
+		Logger logger = GenericFileLogger.initLogger("score", apiProperties.aggLogLevel(), apiProperties.logsFolder()+"/aggregation");
 		
 		services.add(new CleanScoreAggregationService(logger));
 		services.add(new Attribute2ScoreAggregationService(logger));

@@ -22,8 +22,7 @@ public abstract class AbstractCompletionService {
 		super();
 		this.dataRepository = dataRepository;
 		this.verticalConfigService = verticalConfigService;
-		// TODO : handle the toConsole
-		logger  = GenericFileLogger.initLogger("completion-"+getClass().getSimpleName().toLowerCase(), logLevel, logFolder, true);
+		logger  = GenericFileLogger.initLogger("completion-"+getClass().getSimpleName().toLowerCase(), logLevel, logFolder);
 	}
 
 	/**

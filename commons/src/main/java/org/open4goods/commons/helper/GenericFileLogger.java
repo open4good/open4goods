@@ -11,7 +11,6 @@ import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.encoder.PatternLayoutEncoder;
 import ch.qos.logback.classic.spi.ILoggingEvent;
-import ch.qos.logback.core.ConsoleAppender;
 import ch.qos.logback.core.rolling.FixedWindowRollingPolicy;
 import ch.qos.logback.core.rolling.RollingFileAppender;
 import ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy;
@@ -37,8 +36,8 @@ public class GenericFileLogger {
 	 * @param provider
 	 * @return
 	 */
-	public static org.slf4j.Logger initLogger(final String provider, final Level level, final String path,
-			final boolean toConsole) {
+	public static org.slf4j.Logger initLogger(final String provider, final Level level, final String path
+			) {
 
 		Logger logbackLogger = loggers.get(provider);
 		if (null == logbackLogger) {
@@ -48,24 +47,24 @@ public class GenericFileLogger {
 			encoder.setPattern(PATTERN);
 
 			encoder.start();
-			if (toConsole) {
-				final ConsoleAppender ca = new ConsoleAppender<>();
-				ca.setEncoder(encoder);
-
-				ca.setContext(loggerContext);
-				ca.setName(provider);
-
-				ca.start();
-
-				// attach the rolling file appender to the logger of your choice
-				logbackLogger = loggerContext.getLogger("GENERIC_LOGGER." + provider);
-				logbackLogger.addAppender(ca);
-				logbackLogger.setLevel(level);
-				logbackLogger.setAdditive(true);
-				// Adding it in the uidMap
-
-				loggers.put(provider, logbackLogger);
-			} else {
+//			if (toConsole) {
+//				final ConsoleAppender ca = new ConsoleAppender<>();
+//				ca.setEncoder(encoder);
+//
+//				ca.setContext(loggerContext);
+//				ca.setName(provider);
+//
+//				ca.start();
+//
+//				// attach the rolling file appender to the logger of your choice
+//				logbackLogger = loggerContext.getLogger("GENERIC_LOGGER." + provider);
+//				logbackLogger.addAppender(ca);
+//				logbackLogger.setLevel(level);
+//				logbackLogger.setAdditive(true);
+//				// Adding it in the uidMap
+//
+//				loggers.put(provider, logbackLogger);
+//			} else {
 
 				//				// Creating dirs if it does not exists
 				new File(path).mkdirs();
@@ -108,7 +107,7 @@ public class GenericFileLogger {
 				// Adding it in the uidMap
 				loggers.put(provider, logbackLogger);
 				filePaths.put(logbackLogger, file);
-			}
+//			}
 		}
 		return logbackLogger;
 

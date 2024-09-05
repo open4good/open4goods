@@ -66,8 +66,8 @@ public class SearchService {
 
 	public SearchService(ProductRepository aggregatedDataRepository, String logsFolder) {
 		this.aggregatedDataRepository = aggregatedDataRepository;
-		globalstatsLogger  = GenericFileLogger.initLogger("stats-search-global", Level.INFO, logsFolder, false);
-		verticalstatsLogger  = GenericFileLogger.initLogger("stats-search-vertical", Level.INFO, logsFolder, false);
+		globalstatsLogger  = GenericFileLogger.initLogger("stats-search-global", Level.INFO, logsFolder);
+		verticalstatsLogger  = GenericFileLogger.initLogger("stats-search-vertical", Level.INFO, logsFolder);
 	}
 
 	/**

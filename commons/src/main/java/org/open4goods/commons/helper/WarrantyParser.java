@@ -11,7 +11,7 @@ import ch.qos.logback.classic.Level;
 
 public class WarrantyParser {
 
-	private static final Logger logger = GenericFileLogger.initLogger("product-warranty-parser", Level.INFO, "/opt/open4goods/logs/", false);
+	private static final Logger logger = GenericFileLogger.initLogger("product-warranty-parser", Level.INFO, "/opt/open4goods/logs/");
 	public static Integer parse(final String val) throws InvalidParameterException {
 
 		if (StringUtils.isEmpty(val)) {

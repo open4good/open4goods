@@ -120,8 +120,7 @@ public class CsvIndexationWorker implements Runnable {
 			try {
 				if (!csvService.getQueue().isEmpty()) {
 					// There is data to consume and queue consummation is enabled
-					// TODO : Random sleep to avoid all starting at the same time and 400 errors
-					
+
 					DataSourceProperties ds = csvService.getQueue().take();
 
 					logger.info("will index {}", ds.getDatasourceConfigName());

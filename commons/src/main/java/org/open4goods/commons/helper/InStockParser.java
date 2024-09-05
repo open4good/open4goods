@@ -15,7 +15,7 @@ import ch.qos.logback.classic.Level;
 public class InStockParser {
 
 	// TODO : Path from conf
-	private static final Logger logger = GenericFileLogger.initLogger("product-stock-parser", Level.INFO, "/opt/open4goods/logs/", false);
+	private static final Logger logger = GenericFileLogger.initLogger("product-stock-parser", Level.INFO, "/opt/open4goods/logs/");
 
 	
 	public static InStock parse(String val) throws InvalidParameterException {
