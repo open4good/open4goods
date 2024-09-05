@@ -323,11 +323,11 @@ public class FeedService {
 				
 		if (null == existing) {
 			// If not, set the CSV fetcher associated with the catalog provider
-			logger.error("NO DATASOURCE found for feed key {}, using the default one", feedKey);
+			logger.info("NO DATASOURCE found for feed key {}, using the default one", feedKey);
 			ds.setCsvDatasource(feedConfig.getDefaultCsvProperties());
 			ds.setDatasourceConfigName(feedKey);
 		} else {
-			logger.error("DATASOURCE found for feed key {}", feedKey);
+			logger.info("DATASOURCE found for feed key {}", feedKey);
 			ds = existing;
 		}
 		

@@ -26,6 +26,7 @@ import org.springframework.boot.actuate.health.Health.Builder;
 import org.springframework.boot.actuate.health.HealthIndicator;
 
 import com.fasterxml.jackson.dataformat.csv.CsvSchema;
+import com.mchange.lang.StringUtils;
 
 import jakarta.annotation.PreDestroy;
 
@@ -120,6 +121,7 @@ public class CsvDatasourceFetchingService extends DatasourceFetchingService impl
 	    logger.info("Autodetecting CSV schema for file {}", file.getAbsolutePath());
 	    
 	    // TODO: Get number of lines to read from config (limit 10000 in this case)
+	    // NOTE : When having headers, this is enough !
 	    final int MAX_LINES_TO_READ = 10000;
 
 	    // Potential column separators, quote characters, and escape characters from config (can be externalized)
@@ -140,17 +142,17 @@ public class CsvDatasourceFetchingService extends DatasourceFetchingService impl
 	    // Process the file, line by line (within limit)
 	    try (Stream<String> lines = Files.lines(file.toPath())) {
 	        lines.limit(MAX_LINES_TO_READ).forEach(line -> {
-	            // Count occurrences of separators
+
+	        	
+	        	// Count occurrences of separators
 	            for (String separator : columnSeparatorsCandidates.keySet()) {
-	                if (line.contains(separator)) {
-	                    columnSeparatorsCandidates.put(separator, columnSeparatorsCandidates.get(separator) + 1);
-	                }
+	                    columnSeparatorsCandidates.put(separator, columnSeparatorsCandidates.get(separator) + org.apache.commons.lang3.StringUtils.countMatches(line, separator) );
 	            }
 
 	            // Count occurrences of quote characters
 	            for (String quote : quoteCharsCandidates.keySet()) {
 	                if (line.contains(quote)) {
-	                    quoteCharsCandidates.put(quote, quoteCharsCandidates.get(quote) + 1);
+	                    quoteCharsCandidates.put(quote, quoteCharsCandidates.get(quote) +  org.apache.commons.lang3.StringUtils.countMatches(line, quote));
 	                }
 	            }
 
