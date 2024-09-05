@@ -208,13 +208,13 @@ public class CsvDatasourceFetchingService extends DatasourceFetchingService impl
 	        builder.setQuoteChar(quoteChar.charAt(0));
 	    }
 
-	    if (escapeChar != null && escapeCharsCandidates.get(escapeChar) > 0) {
-	        builder.setEscapeChar(escapeChar.charAt(0));
-	    }
-	    
-	    // Optionally handle escape character if needed (currently null)
-	    // builder.setEscapeChar(...);
 
+	    // TODO(design,p2) : not handling escape chars dynamically : detected \ seems not to be really escapechars...  
+//	    if (escapeChar != null && escapeCharsCandidates.get(escapeChar) > 0) {
+//	        builder.setEscapeChar(escapeChar.charAt(0));
+//	    }
+//	    
+	    
 	    // Use header if available
 	    builder.setUseHeader(true);
 
