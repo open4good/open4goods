@@ -183,9 +183,9 @@ public class RemoteFileCachingService {
             }
 
             logger.info("File successfully downloaded to '{}'", destFile.getAbsolutePath());
-        } catch (IOException e) {
-            // Log the error and rethrow the exception for the caller to handle
-            logger.error("Failed to download file from '{}' to '{}'", url, destFile.getAbsolutePath(), e);
+        } catch (Exception e) {
+        	// Delete the tmp file
+        	FileUtils.deleteQuietly(destFile);
             throw e;
         }
 
