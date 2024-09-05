@@ -226,7 +226,7 @@ public class AiService implements HealthIndicator{
 		return health
 				.withDetail("critical_exceptions", eCount)
 				.withDetail("successfull_generations", generatedProducts.longValue())
-				.withDetail("skipped_generations_already_exists", skippedGenerations.longValue())
+				.withDetail("skipped_generations", skippedGenerations.longValue())
 				.build();
 	}
 	
