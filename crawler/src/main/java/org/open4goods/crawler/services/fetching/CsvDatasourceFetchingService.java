@@ -134,8 +134,8 @@ public class CsvDatasourceFetchingService extends DatasourceFetchingService impl
 	    quoteCharsCandidates.put("'", 0L);
 	    quoteCharsCandidates.put("`", 0L);
 
-	    Map<String, Long> escapeCharsCandidates = new HashMap<>();
-	    escapeCharsCandidates.put("\\", 0L);
+//	    Map<String, Long> escapeCharsCandidates = new HashMap<>();
+//	    escapeCharsCandidates.put("\\", 0L);
 
 	    // Process the file, line by line (within limit)
 	    try (Stream<String> lines = Files.lines(file.toPath())) {
@@ -154,12 +154,12 @@ public class CsvDatasourceFetchingService extends DatasourceFetchingService impl
 	                }
 	            }
 
-	            // Count occurrences of escape characters
-	            for (String escape : escapeCharsCandidates.keySet()) {
-	                if (line.contains(escape)) {
-	                    escapeCharsCandidates.put(escape, escapeCharsCandidates.get(escape) + 1);
-	                }
-	            }
+//	            // Count occurrences of escape characters
+//	            for (String escape : escapeCharsCandidates.keySet()) {
+//	                if (line.contains(escape)) {
+//	                    escapeCharsCandidates.put(escape, escapeCharsCandidates.get(escape) + 1);
+//	                }
+//	            }
 	        });
 	    }
 
@@ -175,11 +175,11 @@ public class CsvDatasourceFetchingService extends DatasourceFetchingService impl
 	        .map(Map.Entry::getKey)
 	        .orElse(null);
 
-	    // Find the most frequent escape character (if needed)
-	    String escapeChar = escapeCharsCandidates.entrySet().stream()
-	        .max(Map.Entry.comparingByValue())
-	        .map(Map.Entry::getKey)
-	        .orElse(null);
+//	    // Find the most frequent escape character (if needed)
+//	    String escapeChar = escapeCharsCandidates.entrySet().stream()
+//	        .max(Map.Entry.comparingByValue())
+//	        .map(Map.Entry::getKey)
+//	        .orElse(null);
 
 	    // Set a minimum threshold for detected separator and quote character (e.g., 10 occurrences)
 	    final long MIN_OCCURRENCES = 10;
@@ -192,10 +192,6 @@ public class CsvDatasourceFetchingService extends DatasourceFetchingService impl
 	        quoteChar = null;
 	    }
 
-	    // If no quote character is found, we may not need an escape character
-	    if (quoteChar == null) {
-	        escapeChar = null;
-	    }
 
 	    // Build the CSV schema
 	    CsvSchema.Builder builder = CsvSchema.builder();
@@ -218,7 +214,7 @@ public class CsvDatasourceFetchingService extends DatasourceFetchingService impl
 	    // Use header if available
 	    builder.setUseHeader(true);
 
-	    logger.info("Autodetected CSV schema for file {}: separator='{}', quote='{}', escape='{}'", file.getAbsolutePath(), columnSeparator, quoteChar, escapeChar);
+	    logger.info("Autodetected CSV schema for file {}: separator='{}', quote='{}'", file.getAbsolutePath(), columnSeparator, quoteChar);
 
 	    return builder.build();
 	}
