@@ -288,7 +288,7 @@ public class AggregationFacadeService {
 
 	/**
 	 * The aggregator used for sanitisation. The same than in realtime, only the productMEthod, 
-	 * allowing a nice mutualisation netween rt and batch handlings if aggregationservice are well designed
+	 * allowing a nice mutualisation between rt and batch handlings if aggregationservice are well designed
 	 * @param config
 	 * @return
 	 */
