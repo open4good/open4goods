@@ -214,7 +214,7 @@ public class CsvIndexationWorker implements Runnable {
 							        e -> (String) IdHelper.normalizeAttributeName(e.getKey().toString()), // Ensure key is String
 							        e -> (String) IdHelper.sanitizeAndNormalize(e.getValue().toString())  // Ensure value is String
 							    ));
-						DataFragment df = parseCsvLine(crawler, controller, dsProperties, line, dsConfName, logger, url);
+						DataFragment df = parseCsvLine(crawler, controller, dsProperties, line, dsConfName, dedicatedLogger, url);
 
 						// Store the feedUrl as an attribute (for debug)
 						// TODO(p3,conf) : from conf
