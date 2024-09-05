@@ -198,10 +198,14 @@ public class CsvIndexationWorker implements Runnable {
 
 				mi = oReader.readValues(destFile);
 
-				while (mi.hasNext()) {
+				boolean hasNext = true;
+				while (hasNext) {
+					stats.incrementLines();
 					Map<String, String> line = null;
 					try {
-						stats.incrementLines();
+						
+						// NOTE : can raise exception if further line is invalid
+						hasNext = mi.hasNext();
 
 						line = mi.next();
 						if (line == null) {
