@@ -187,12 +187,13 @@ public class CsvIndexationWorker implements Runnable {
 			try {
 				try {
 					destFile = remoteFileCachingService.downloadToTmpFile(url, safeName);
-					if (!destFile.exists() || destFile.length() == 0) {
+					if (destFile ==null || !destFile.exists() || destFile.length() == 0) {
 						dedicatedLogger.error("Non existing or empty downloaded file : {}",url);
 						continue;
 					}
 				} catch (Exception e) {
 					dedicatedLogger.error("Exception while downloading feed  {}",url, e);
+					continue;
 				}
 
 				if (config.getGzip()) {
@@ -206,15 +207,17 @@ public class CsvIndexationWorker implements Runnable {
 
 				mi = oReader.readValues(destFile);
 
-				boolean hasNext = true;
-				while (hasNext) {
+				while (true) {
 					stats.incrementLines();
 					Map<String, String> line = null;
 					try {
 						
 						// NOTE : can raise exception if further line is invalid
-						hasNext = mi.hasNext();
-
+						boolean hasNext = mi.hasNext();
+						if (!hasNext) {
+							break;
+						}
+						
 						line = mi.next();
 						if (line == null) {
 							throw new ValidationException("Null line encountered");
@@ -223,8 +226,8 @@ public class CsvIndexationWorker implements Runnable {
 						// Normalisation 
 						 line = line.entrySet().stream()
 							    .collect(Collectors.toMap(
-							        e -> (String) IdHelper.normalizeAttributeName(e.getKey().toString()), // Ensure key is String
-							        e -> (String) IdHelper.sanitizeAndNormalize(e.getValue().toString())  // Ensure value is String
+							        e -> e.getKey(), 
+							        e -> (String) IdHelper.sanitizeAndNormalize(e.getValue().toString())  
 							    ));
 						DataFragment df = parseCsvLine(crawler, controller, dsProperties, line, dsConfName, dedicatedLogger, url);
 
@@ -356,10 +359,9 @@ public class CsvIndexationWorker implements Runnable {
 				p.setUrl(u);
 			} else {
 				p.setUrl(getFromCsvRow(item, csvProperties.getUrl()));
-
 			}
 		} catch (final Exception e2) {
-			dedicatedLogger.warn("Error while extracting url in dataset {} :  {}", datasetUrl, item);
+			dedicatedLogger.info("Error while extracting url in dataset {} :  {}", datasetUrl, item);
 		}
 
 		if (!StringUtils.isEmpty(csvProperties.getAffiliatedUrl())) {
@@ -430,7 +432,6 @@ public class CsvIndexationWorker implements Runnable {
 				if (!StringUtils.isEmpty(val)) {
 					p.addAttribute(key, val, config.getLanguage(), csvProperties.getAttributesIgnoreCariageReturns(), csvProperties.getAttributesSplitSeparators());
 				}
-
 			}
 		}
 

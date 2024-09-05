@@ -548,8 +548,7 @@ public class DataFragment implements Standardisable, Validable {
 		final Attribute attr = new Attribute();
 
 		// Attributye name normalisation
-		String sanitizedName =name;
-		sanitizedName= sanitizedName.trim().toUpperCase();
+		String sanitizedName = IdHelper.normalizeAttributeName(name);
 		// TODO(p2,conf) : From conf, could have the =, ..
 		if (sanitizedName.endsWith(":")) {
 			sanitizedName = sanitizedName.substring(0, sanitizedName.length() -1).trim();
