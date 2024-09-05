@@ -15,6 +15,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -30,27 +31,14 @@ import jakarta.validation.constraints.NotBlank;
 public class FeedController {
 
 
-	private final SerialisationService serialisationService;
-
-	private final ScrapperOrchestrationService fetcherOrchestrationService;
-
-	private final DataSourceConfigService datasourceConfigService;
-
-	private final DataFragmentStoreService dataFragmentStoreService;
-
 	private final CsvDatasourceFetchingService  csvDatasourceFetchingService;
 	
 	private final FeedService feedService;
 	
-	public FeedController(SerialisationService serialisationService, ScrapperOrchestrationService fetcherOrchestrationService, DataSourceConfigService datasourceConfigService, DataFragmentStoreService dataFragmentStoreService, FeedService feedService, CsvDatasourceFetchingService  csvDatasourceFetchingService) {
-		this.serialisationService = serialisationService;
-		this.fetcherOrchestrationService = fetcherOrchestrationService;
-		this.dataFragmentStoreService = dataFragmentStoreService;
-		this.datasourceConfigService = datasourceConfigService;
+	public FeedController( FeedService feedService, CsvDatasourceFetchingService  csvDatasourceFetchingService) {
 		this.feedService = feedService;
 		this.csvDatasourceFetchingService = csvDatasourceFetchingService;
 	}
-
 	
 	@PatchMapping(path = "/feeds")
 	@Operation(summary="Manualy run the indexation of all feeds")
@@ -78,14 +66,14 @@ public class FeedController {
 	@PatchMapping(path = "/feedsByKey")
 	@Operation(summary="List all feeds from catalogs corresponding the given field key")
 	@PreAuthorize("hasAuthority('"+RolesConstants.ROLE_ADMIN+"')")
-	public void feedByKey(@RequestBody @NotBlank final String feedKey) {
+	public void feedByKey(@RequestParam @NotBlank final String feedKey) {
 		feedService.fetchFeedsByKey(feedKey);
 	}
 	
 	@PatchMapping(path = "/feedsByUrl")
 	@Operation(summary="List all feeds from catalogs corresponding the given url")
 	@PreAuthorize("hasAuthority('"+RolesConstants.ROLE_ADMIN+"')")
-	public void feedByUrl(@RequestBody @NotBlank final String url) {
+	public void feedByUrl(@RequestParam @NotBlank final String url) {
 		feedService.fetchFeedsByUrl(url);
 	}
 	
