@@ -166,8 +166,6 @@ public class CsvIndexationWorker implements Runnable {
 		final CsvDataSourceProperties config = dsProperties.getCsvDatasource();
 		Set<String> urls = config.getDatasourceUrls();
 
-		// Initialize the "exposed" stats object
-		
 		if (urls.size() == 0) {
 			// Triggering healthcheck down in the CsvService
 			csvService.incrementFeedNoUrls();
