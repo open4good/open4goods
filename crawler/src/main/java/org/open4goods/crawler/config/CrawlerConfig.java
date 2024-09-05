@@ -56,12 +56,7 @@ public class CrawlerConfig {
     WebDatasourceFetchingService webDatasourceFetchingService(@Autowired final FetcherProperties fetcherProperties,
                                                                       @Autowired final IndexationService indexationService,  @Autowired final IndexationRepository indexationRepository) {
     	
-		// Logging to console according to dev profile and conf
-		boolean toConsole = ArrayUtils.contains(env.getActiveProfiles(), "dev") || ArrayUtils.contains(env.getActiveProfiles(), "devsec");
-		// TODO : Not nice, mutualize
-
-
-        return new WebDatasourceFetchingService(indexationService, fetcherProperties, indexationRepository, fetcherProperties.getLogsDir(), toConsole);
+        return new WebDatasourceFetchingService(indexationService, fetcherProperties, indexationRepository, fetcherProperties.getLogsDir());
 	}
 
  
@@ -78,12 +73,8 @@ public class CrawlerConfig {
 
             ) {
     	
-		// Logging to console according to dev profile and conf
-    	// TODO(p2,design) : This tweaky "toConsole" should be removed everywhere
-		boolean toConsole = ArrayUtils.contains(env.getActiveProfiles(), "dev") || ArrayUtils.contains(env.getActiveProfiles(), "devsec");
 
-
-        return new CsvDatasourceFetchingService(csvIndexationRepo, completionService, indexationService, fetcherProperties, webDatasourceFetchingService, indexationRepository,webDatasourceFetchingService, remoteFileCachingService, fetcherProperties.getLogsDir(),  toConsole);
+        return new CsvDatasourceFetchingService(csvIndexationRepo, completionService, indexationService, fetcherProperties, webDatasourceFetchingService, indexationRepository,webDatasourceFetchingService, remoteFileCachingService, fetcherProperties.getLogsDir());
 	}
 
     @Bean

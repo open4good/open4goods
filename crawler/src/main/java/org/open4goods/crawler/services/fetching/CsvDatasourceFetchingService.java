@@ -66,9 +66,9 @@ public class CsvDatasourceFetchingService extends DatasourceFetchingService impl
 	public CsvDatasourceFetchingService(final IndexationRepository csvIndexationRepository,   final DataFragmentCompletionService completionService,
 			final IndexationService indexationService, final FetcherProperties fetcherProperties,
 			final WebDatasourceFetchingService webFetchingService, IndexationRepository indexationRepository,
-			DatasourceFetchingService fetchingService, RemoteFileCachingService remoteFileCachingService, final String logsFolder, boolean toConsole
+			DatasourceFetchingService fetchingService, RemoteFileCachingService remoteFileCachingService, final String logsFolder
 			) {
-		super(logsFolder, toConsole,indexationRepository);
+		super(logsFolder, indexationRepository);
 		this.indexationService = indexationService;
 		this.remoteFileCachingService = remoteFileCachingService;
 		// The CSV executor can have at most the fetcher max indexation tasks threads

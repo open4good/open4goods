@@ -72,8 +72,8 @@ public class WebDatasourceFetchingService extends DatasourceFetchingService{
 	private  AutowireCapableBeanFactory autowireCapableBeanFactory;
 	
 
-	public WebDatasourceFetchingService(final IndexationService indexationService, final FetcherProperties fetcherProperties, IndexationRepository repository, final String logsFolder, boolean toConsole) {
-		super(logsFolder, toConsole,repository);
+	public WebDatasourceFetchingService(final IndexationService indexationService, final FetcherProperties fetcherProperties, IndexationRepository repository, final String logsFolder) {
+		super(logsFolder,repository);
 		this.fetcherProperties = fetcherProperties;
 		this.indexationService = indexationService;
 	

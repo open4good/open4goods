@@ -132,7 +132,7 @@ public class JsonExtractor extends Extractor {
 				p.setInStock(InStockParser.parse(jsonEval(root, c.getInStock())));
 			}
 		} catch (final Exception e) {
-			parserLogger.info("Error while parsing inStock : {}  ; {}", e.getMessage(), url);
+			dedicatedLogger.info("Error while parsing inStock : {}  ; {}", e.getMessage(), url);
 		}
 
 		////////////////////
@@ -143,7 +143,7 @@ public class JsonExtractor extends Extractor {
 				p.setWarranty(WarrantyParser.parse(jsonEval(root, c.getWarranty())));
 			}
 		} catch (final Exception e) {
-			parserLogger.info("Error while parsing warranty : {}  ; {}", e.getMessage(), url);
+			dedicatedLogger.info("Error while parsing warranty : {}  ; {}", e.getMessage(), url);
 		}
 
 

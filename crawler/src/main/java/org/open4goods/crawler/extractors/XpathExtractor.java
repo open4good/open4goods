@@ -120,7 +120,7 @@ public class XpathExtractor extends Extractor {
 				p.setWarranty(WarrantyParser.parse(evalAndLogs(document, c.getWarranty(), url)));
 			}
 		} catch (final Exception e) {
-			parserLogger.warn("Error while parsing Warranty : {}  ; {}", e.getMessage(), url);
+			getDedicatedLogger().warn("Error while parsing Warranty : {}  ; {}", e.getMessage(), url);
 		}
 
 		////////////////////
@@ -131,7 +131,7 @@ public class XpathExtractor extends Extractor {
 				p.setShippingCost(ShippingCostParser.parse(evalAndLogs(document, c.getShippingCost(), url)));
 			}
 		} catch (final Exception e) {
-			parserLogger.warn("{}  ; {}", e.getMessage(), url);
+			getDedicatedLogger().warn("{}  ; {}", e.getMessage(), url);
 		}
 
 
@@ -144,7 +144,7 @@ public class XpathExtractor extends Extractor {
 				p.setShippingTime(ShippingTimeParser.parse(evalAndLogs(document, c.getShippingTime(), url)));
 			}
 		} catch (final Exception e) {
-			parserLogger.warn("Error while parsing ShippingTime : {}  ; {}", e.getMessage(), url);
+			getDedicatedLogger().warn("Error while parsing ShippingTime : {}  ; {}", e.getMessage(), url);
 		}
 
 
@@ -158,7 +158,7 @@ public class XpathExtractor extends Extractor {
 				p.setProductState(ProductConditionParser.parse(evalAndLogs(document, c.getProductState(), url)));
 			}
 		} catch (final Exception e) {
-			parserLogger.warn("Error while parsing ProductCondition : {}  ; {}", e.getMessage(), url);
+			getDedicatedLogger().warn("Error while parsing ProductCondition : {}  ; {}", e.getMessage(), url);
 		}
 
 
@@ -172,7 +172,7 @@ public class XpathExtractor extends Extractor {
 				p.setInStock(InStockParser.parse(evalAndLogs(document, c.getInStock(), url)));
 			}
 		} catch (final Exception e) {
-			parserLogger.info("Error while parsing inStock : {}  ; {}", e.getMessage(), url);
+			getDedicatedLogger().info("Error while parsing inStock : {}  ; {}", e.getMessage(), url);
 		}
 
 

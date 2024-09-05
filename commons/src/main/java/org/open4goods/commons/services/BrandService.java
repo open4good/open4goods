@@ -61,7 +61,7 @@ public class BrandService {
 		this.brandsConfig = config;
 		this.remoteFileCachingService = remoteFileCachingService;
 		this.brandRepository = brandRepository;
-		this.logger = 	GenericFileLogger.initLogger("brand-service", Level.INFO, logsFolder, false);
+		this.logger = 	GenericFileLogger.initLogger("brand-service", Level.INFO, logsFolder);
 		// Updating maps
 		for (Brand b : brandsConfig.getBrands()) {
 			saveBrand(b);

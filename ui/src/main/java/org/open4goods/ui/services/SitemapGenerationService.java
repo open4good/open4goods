@@ -74,7 +74,7 @@ public class SitemapGenerationService {
 		this.aggregatedDataRepository = aggregatedDataRepository;
 		this.verticalsConfigService = verticalConfigService;
 		this.blogService = blogService;
-		this.statsLogger = GenericFileLogger.initLogger("stats-sitemap", Level.INFO, uiConfig.logsFolder(), false);
+		this.statsLogger = GenericFileLogger.initLogger("stats-sitemap", Level.INFO, uiConfig.logsFolder());
 		this.xwikiService = xwikiService;
 		this.uiConfig = uiConfig;
 		this.annotatedControllers =  context.getBeansOfType(SitemapExposedController.class);

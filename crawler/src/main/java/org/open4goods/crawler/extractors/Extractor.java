@@ -52,9 +52,6 @@ import edu.uci.ics.crawler4j.parser.HtmlParseData;
 //TODO(design) : ugly class, do multiple things (xpath / sanitisation, ...)
 public abstract class Extractor {
 
-	//TODO(conf) : logs folder from conf
-	protected static Logger parserLogger = GenericFileLogger.initLogger("string-parsers", Level.WARN, "./capsule-data/logs/", false);
-
 
 	private ExtractorConfig extractorConfig;
 

@@ -476,25 +476,15 @@ public class ApiConfig {
 			
 			) {
 		
-		boolean toConsole = ArrayUtils.contains(env.getActiveProfiles(), "dev") || ArrayUtils.contains(env.getActiveProfiles(), "devsec");
-		// TODO : Not nice, mutualize
-
-
-        return new CsvDatasourceFetchingService(csvIndexationRepo, completionService, indexationService,
-				apiProperties.getFetcherProperties(), webDatasourceFetchingService,indexationRepository, webDatasourceFetchingService, remoteFileCachingService, apiProperties.logsFolder(), toConsole);
+	        return new CsvDatasourceFetchingService(csvIndexationRepo, completionService, indexationService,
+				apiProperties.getFetcherProperties(), webDatasourceFetchingService,indexationRepository, webDatasourceFetchingService, remoteFileCachingService, apiProperties.logsFolder());
 	}
 
 	@Bean
 	WebDatasourceFetchingService webDatasourceFetchingService(@Autowired final IndexationRepository indexationRepository,
 			@Autowired final IndexationService indexationService, @Autowired final ApiProperties apiProperties) {
 
-		// Logging to console according to dev profile and conf
-		boolean toConsole = ArrayUtils.contains(env.getActiveProfiles(), "dev") || ArrayUtils.contains(env.getActiveProfiles(), "devsec");
-		// TODO : Not nice, mutualize
-
-
-        return new WebDatasourceFetchingService(indexationService, apiProperties.getFetcherProperties(),indexationRepository,
-				apiProperties.logsFolder(), toConsole);
+	    return new WebDatasourceFetchingService(indexationService, apiProperties.getFetcherProperties(),indexationRepository, apiProperties.logsFolder());
 	}
 
 
