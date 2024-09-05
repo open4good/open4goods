@@ -16,7 +16,6 @@ import org.open4goods.commons.model.data.AiDescriptions;
 import org.open4goods.commons.model.product.Product;
 import org.open4goods.commons.services.EvaluationService;
 import org.open4goods.commons.services.SerialisationService;
-import org.open4goods.commons.services.VerticalsConfigService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ai.openai.OpenAiChatModel;

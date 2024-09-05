@@ -142,7 +142,7 @@ public class CsvIndexationWorker implements Runnable {
 
 	public void fetch(DataSourceProperties dsProperties) {
 		String safeName = IdHelper.azCharAndDigitsPointsDash(dsProperties.getName()).toLowerCase();
-		Logger dedicatedLogger = csvService.createDatasourceLogger(safeName, dsProperties, logsFolder + "/crawler/");
+		Logger dedicatedLogger = csvService.createDatasourceLogger(safeName, dsProperties, logsFolder + "/feeds/");
 
 		dedicatedLogger.info("STARTING CRAWL OF {}", dsProperties);
 
@@ -185,7 +185,15 @@ public class CsvIndexationWorker implements Runnable {
 			MappingIterator<Map<String, String>> mi = null;
 			File destFile = null;
 			try {
-				destFile = remoteFileCachingService.downloadToTmpFile(url, safeName);
+				try {
+					destFile = remoteFileCachingService.downloadToTmpFile(url, safeName);
+					if (!destFile.exists() || destFile.length() == 0) {
+						dedicatedLogger.error("Non existing or empty downloaded file : {}",url);
+						continue;
+					}
+				} catch (Exception e) {
+					dedicatedLogger.error("Exception while downloading feed  {}",url, e);
+				}
 
 				if (config.getGzip()) {
 					destFile = remoteFileCachingService.decompressGzipAndDeleteSource(destFile);
@@ -598,7 +606,6 @@ public class CsvIndexationWorker implements Runnable {
 		}
 
 		// Completing with the web data if defined
-		// TODO : && !StringUtils.isEmpty(p.gtin()
 		if (null != crawler) {
 			dedicatedLogger.info("Completing CSV data fragment {} with web data at url {}", p, p.getUrl());
 
