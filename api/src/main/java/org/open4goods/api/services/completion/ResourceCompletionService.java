@@ -51,9 +51,12 @@ import dev.brachtendorf.jimagehash.hashAlgorithms.PerceptiveHash;
 public class ResourceCompletionService  extends AbstractCompletionService{
 
 
-	// TODO : From yaml
-	// TODO : Set to false before prod
-	private static boolean forceEraseFileName = true;
+	// TODO(p3, conf) : From yaml
+	/**
+	 * If true, will regenerate each time new file name for resources. To be used with caution in production, cause it will triggers 301 !
+	 */
+	private static boolean forceEraseFileName = false;
+	
 	private static final double SIMILARITY_SCORE = 0.20;
 	private static final int PERCEPTIV_HASH_SIZE = 32;
 
