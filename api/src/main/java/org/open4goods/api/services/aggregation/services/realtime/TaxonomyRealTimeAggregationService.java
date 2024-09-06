@@ -56,7 +56,6 @@ public class TaxonomyRealTimeAggregationService extends AbstractAggregationServi
 			if (null != taxonomy) {			
 				data.setGoogleTaxonomyId(taxonomy);
 				dedicatedLogger.info("Detected taxonomy {} for categories : {}", taxonomy, data.getDatasourceCategories());
-				
 			} else {
 				dedicatedLogger.info("No taxonomy found for categories : {}", data.getDatasourceCategories());
 			}
@@ -75,7 +74,10 @@ public class TaxonomyRealTimeAggregationService extends AbstractAggregationServi
 				dedicatedLogger.warn("Will erase existing vertical {} with {} for product {}, because of category {}", data.getVertical(), vertical.getId(), data.bestName());
 			}
 			data.setVertical(vertical.getId());
-
+		} else {
+			// Unsetting the vertical
+			// TODO(p1,design) : Should erase ai descriptions and generated names / urls : a telivision that unmaches continue to have "television" generated stuff 
+			data.setVertical(null);
 		}
 		
 		// Setting no vertical if no category
