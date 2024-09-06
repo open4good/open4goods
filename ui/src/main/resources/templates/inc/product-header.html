@@ -3,7 +3,7 @@
 		   <th:block th:insert="~{inc/product-images.html}">	
 	</aside>
 	
-	<div th:if="${product.ecoscore}" class="col-lg-4">
+	<div th:if="${product.ecoscore != null  && null != verticalConfig}" class="col-lg-4">
 		<!--/* Best price */-->				
 		<!--th:block th:insert="~{inc/product-price.html}"></th:block-->
 
