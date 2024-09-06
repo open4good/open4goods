@@ -85,8 +85,9 @@ public class BatchService {
 		}
 		
 		try {
-			//  amazon complete
-			completionFacadeService.amazonCompletionAll();
+			// amazon complete
+			// TODO(p1, feature) : enable amazon price completion
+			//completionFacadeService.amazonCompletionAll();
 		} catch (Exception e) {
 			logger.error("Error in batch : amazon completion fail", e);
 		}
