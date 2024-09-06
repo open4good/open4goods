@@ -315,6 +315,7 @@ public class CsvIndexationWorker implements Runnable {
 	}
 
 	private void deleteTemporaryFile(String url, File destFile, Logger logger) {
+		// We delete only downloaded files, to preserve the local files (used for debug)
 		if (url.startsWith("http") && destFile != null && destFile.exists()) {
 			try {
 				Files.delete(destFile.toPath());
