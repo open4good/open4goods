@@ -67,7 +67,6 @@ public class TaxonomyRealTimeAggregationService extends AbstractAggregationServi
 		////////////////////////////
 		// Setting vertical from category
 		////////////////////////////
-		data.setVertical(null);
 		VerticalConfig vertical = verticalService.getVerticalForCategories(data.getDatasourceCategories());
 		if (null != vertical) {
 			if ( null != data.getVertical() && !vertical.getId().equals(data.getVertical())) {
@@ -80,11 +79,11 @@ public class TaxonomyRealTimeAggregationService extends AbstractAggregationServi
 			data.setVertical(null);
 		}
 		
-		// Setting no vertical if no category
-		if (data.getDatasourceCategories().size() == 0) {
-			dedicatedLogger.info("No category in {}, removing vertical", data);
-			data.setVertical(null);
-		}
+//		// Setting no vertical if no category
+//		if (data.getDatasourceCategories().size() == 0) {
+//			dedicatedLogger.info("No category in {}, removing vertical", data);
+//			data.setVertical(null);
+//		}
 		
 		
 		// TODO : Disabling google taxonomy for now

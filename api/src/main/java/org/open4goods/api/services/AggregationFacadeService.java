@@ -186,7 +186,7 @@ public class AggregationFacadeService {
 
 			// TODO : Performance, could parallelize
 			// Note : a strong choice to rely on categories, to replay aggregation process from unmapped / unverticalized items
-			dataRepository.getProductsMatchingCategories(vertical) .forEach(p -> {
+			dataRepository.getProductsMatchingCategoriesOrVerticalId(vertical) .forEach(p -> {
                 try {
 					batchAgg.onProduct(p);
 					dataRepository.index(p);

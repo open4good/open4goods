@@ -68,9 +68,13 @@ public class NamesAggregationService extends AbstractAggregationService {
 				ProductI18nElements tConf = e.getValue();
 				
 				// Computing url
-				String urlSuffix = StringUtils.stripAccents(computePrefixedText(data, tConf.getUrl(), "-"));
-				urlSuffix = StringUtils.normalizeSpace(urlSuffix).replace(' ', '-');
-				data.getNames().getUrl().put(lang, data.gtin() + "-" + urlSuffix);
+				// TODO(conf,p2) : Should allow override from conf
+				if (null == data.getNames().getUrl().get(lang)) {
+					String urlSuffix = StringUtils.stripAccents(computePrefixedText(data, tConf.getUrl(), "-"));
+					urlSuffix = StringUtils.normalizeSpace(urlSuffix).replace(' ', '-');
+					data.getNames().getUrl().put(lang, data.gtin() + "-" + urlSuffix);
+				}
+				
 				// h1Title			
 				data.getNames().getH1Title().put(lang, computePrefixedText(data, tConf.getH1Title(), " "));
 				// metaDescription
