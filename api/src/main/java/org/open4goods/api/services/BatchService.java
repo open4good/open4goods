@@ -47,6 +47,15 @@ public class BatchService {
 	// TODO : From conf
 	public void batch() {
 
+		
+		// TODO (p1, design) : Here the sanitisation pass, that must applies on all matching categories and verticals with already defined ID
+		// at least to unset the no more matching categories
+		// BUT have to work on it on 2 passes which applies on 2 distinct datasets, this one as first with full hot memory on the "
+		//This is initial submission, batching the products to update catégories				
+		aggregationFacadeService.sanitizeAllVerticals();		
+				
+				
+				
 		logger.info("Starting batch");
 
 		try {

@@ -99,7 +99,7 @@ public class ProductRepository {
 	 * @param v
 	 * @return
 	 */
-	public Stream<Product> getProductsMatchingCategories(VerticalConfig v) {
+	public Stream<Product> getProductsMatchingCategoriesOrVerticalId(VerticalConfig v) {
 		Criteria c = new Criteria("datasourceCategories").in(v.getMatchingCategories())
 		// TODO : Add exclusion
 //				.and(new Criteria("datasourceCategories").notIn(v.getMatchingCategories()))
