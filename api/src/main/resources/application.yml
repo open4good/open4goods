@@ -54,9 +54,10 @@ spring:
     openai:
       chat:
         options:
-          #TODO : Will change on next release
-          temperature: 1.0
-          response-format: { "type": "json_object" }
+#          #TODO : Will change on next release
+#          temperature: 1.0
+#          response-format: { "type": "json_object" }
+
 springdoc:
   swagger-ui:
     disable-swagger-default-url: true

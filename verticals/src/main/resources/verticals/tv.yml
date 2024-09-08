@@ -109,9 +109,9 @@ i18n:
             Caractéristiques : 
             [(${p.caracteristics()})]
           
-            Génère un fichier JSON clé-valeur pour l'objet concerné répondant uniquement aux prompts suivants :      
+#            Génère un fichier JSON clé-valeur pour l'objet concerné répondant uniquement aux prompts suivants :
 
-        prompts: 
+        prompts:
            - key: "global-description"
              prompt: |           
                 : en tant qu'expert technique, rédige une description de l'objet en mettant en avant ses principales caractéristiques techniques. Le texte doit comporter entre 180 et 200 mots et être composé de deux paragraphes distincts, séparés par un point-virgule. Veille à ce que chaque paragraphe soit équilibré en termes de longueur.
