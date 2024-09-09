@@ -27,9 +27,13 @@ spring:
     openai:
       chat:
         options:
+          model: gpt-4o-mini
           temperature: 1.0
           #TODO : Will change on next release
-          response-format: { "type": "json_object" }  
+          response-format:
+            type : JSON_SCHEMA
+            schema: {"type": "object", "properties": { "global-description": { "type": "string" }, "ecological-description": { "type": "string" }, "pros": { "type": "string" }, "cons": { "type": "string" }}, "required": ["global-description", "ecological-description", "pros", "cons"], "additionalProperties": false}
+
   threads:
     virtual:
       enabled: true
