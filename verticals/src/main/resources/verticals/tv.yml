@@ -58,7 +58,7 @@ i18n:
       ##################################
       # The product h1 title. Constructed on the same basis than "url", but without the concatened hyphens
       h1Title:  
-        prefix: "|| TV | Télévision | Téléviseur | Televiseur ||"
+        prefix: "|| TV | Télévision | Téléviseur ||"
         attrs:
           - TV_TYPE
           - BRAND
@@ -80,7 +80,7 @@ i18n:
       verticalHomeUrl: "televiseurs"
       # Text displaid as title for the vertical
       # TODO : Make verticalHomeTitle/ verticalHomeDescription templatable
-      verticalHomeTitle: "Televiseurs"
+      verticalHomeTitle: "Téléviseurs"
       # Text displaid as title for the vertical
       verticalHomeDescription: "Bienvenue dans notre rubrique téléviseurs. Devenus des objets quasi-nécessaires, nos TV's ne sont malheureusement pas neutres pour l'environnement 🌏 ! Heureusement, Nudger est là pour vous informer et vous aider à choisir la TV la plus écologique et la plus adaptée à votre besoin."  
       # The image used as a logo
