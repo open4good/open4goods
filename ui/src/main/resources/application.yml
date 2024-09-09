@@ -29,10 +29,10 @@ spring:
         options:
           model: gpt-4o-mini
           temperature: 1.0
-          #TODO : Will change on next release
           response-format:
-            type : JSON_SCHEMA
-            schema: {"type": "object", "properties": { "global-description": { "type": "string" }, "ecological-description": { "type": "string" }, "pros": { "type": "string" }, "cons": { "type": "string" }}, "required": ["global-description", "ecological-description", "pros", "cons"], "additionalProperties": false}
+            type: JSON_SCHEMA
+            strict: true
+            schema: "{\"type\":\"object\",\"properties\":{},\"additionalProperties\":{\"type\":\"string\"},\"required\":[]}"
 
   threads:
     virtual:

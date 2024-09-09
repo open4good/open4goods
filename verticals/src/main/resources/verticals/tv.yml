@@ -102,23 +102,20 @@ i18n:
         pauseDurationMs: 1000
         rootPrompt: |
             analyse technique, fonctionnelle et écologique d'un téléviseur.
-          
-            Marque : [(${p.brand()})]
-            Modèle : [(${p.model()})]
              
             Caractéristiques : 
             [(${p.caracteristics()})]
           
-#            Génère un fichier JSON clé-valeur pour l'objet concerné répondant uniquement aux prompts suivants :
+            Génère un fichier JSON avec les clés suivantes :
 
         prompts:
            - key: "global-description"
              prompt: |           
-                : en tant qu'expert technique, rédige une description de l'objet en mettant en avant ses principales caractéristiques techniques. Le texte doit comporter entre 180 et 200 mots et être composé de deux paragraphes distincts, séparés par un point-virgule. Veille à ce que chaque paragraphe soit équilibré en termes de longueur.
+                : en tant qu'expert technique, rédige une description de l'objet en mettant en avant ses principales caractéristiques techniques. Le texte doit impérativement comporter entre 180 et 200 mots et être composé de deux paragraphes distincts, séparés chacuns par un point-virgule. Veille à ce que chaque paragraphe soit équilibré en termes de longueur.
    
            - key: "ecological-description"
              prompt: |           
-                : en tant qu'expert en impacts environnementaux, rédige une analyse de l'impact écologique de l'objet. Le texte doit comporter entre 180 et 200 mots et être composé de deux paragraphes distincts, séparés par un point-virgule. Veille à ce que chaque paragraphe soit équilibré en termes de longueur.
+                : en tant qu'expert en impacts environnementaux, rédige une analyse de l'impact écologique de l'objet. Le texte doit impérativement comporter entre 180 et 200 mots et être composé de deux paragraphes distincts, séparés chacuns par un point-virgule. Veille à ce que chaque paragraphe soit équilibré en termes de longueur.
    
            - key: "pros"
              prompt: |           
