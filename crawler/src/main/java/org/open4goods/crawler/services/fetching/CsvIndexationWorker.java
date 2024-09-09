@@ -286,10 +286,14 @@ public class CsvIndexationWorker implements Runnable {
 		dedicatedLogger.info("Detecting schema for {}", destFile.getAbsolutePath());
 		CsvSchema schema = csvService.detectSchema(destFile);
 
+		// Specific logging in dedicated logger
+		dedicatedLogger.warn("Auto detected schema is quoteChar:{} separatorChar:{} escapeChar:{}",  schema.getQuoteChar() == -1 ? "none" : Character.toString(schema.getQuoteChar()), schema.getColumnSeparator() == -1 ? "none" : Character.toString(schema.getColumnSeparator()), schema.getEscapeChar() == -1 ? "none" : Character.toString(schema.getEscapeChar())  );
+		
 		// Overriding with datasource specific config if defined
 		if (config.getCsvQuoteChar() != null) {
 			schema = schema.withQuoteChar(config.getCsvQuoteChar().charValue());
 		}
+		
 		if (config.getCsvEscapeChar() != null) {
 			schema = schema.withEscapeChar(config.getCsvEscapeChar().charValue());
 		}
@@ -297,9 +301,7 @@ public class CsvIndexationWorker implements Runnable {
 		if (config.getCsvSeparator() != null) {
 			schema = schema.withColumnSeparator(config.getCsvSeparator().charValue());
 		}
-		
-		
-		
+				
 		
 		return schema;
 	}
