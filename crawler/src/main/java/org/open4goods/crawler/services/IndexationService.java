@@ -46,6 +46,8 @@ public class IndexationService {
 
 
 	protected void indexInternal(final DataFragment data) throws ValidationException {
+		
+		log.error("REMORTE INDEXATION DISABLED FOR NOW ! SHOULD NOT GET IN THIS CODE");
 		try {
 			Unirest.post(indexationEndpoint).header("accept", "application/json")
 					.header("Content-Type", "application/json").header(UrlConstants.APIKEY_PARAMETER, apiKey).body(data)
