@@ -3,7 +3,6 @@ package org.open4goods.crawler.services.fetching;
 import java.io.IOException;
 import java.util.Map;
 
-import org.apache.commons.lang3.ArrayUtils;
 import org.open4goods.commons.config.yml.datasource.DataSourceProperties;
 import org.open4goods.commons.exceptions.TechnicalException;
 import org.open4goods.commons.helper.GenericFileLogger;
@@ -92,10 +91,6 @@ public abstract class DatasourceFetchingService {
 			logger.warn("Specific logging for {} is not or badly defined. Turned warn", datasourceConfigName);
 			level = Level.toLevel(datasourceConfig.getDedicatedLogLevel(), Level.WARN);
 		}
-
-		// Logging to console according to dev profile and conf
-		boolean toConsole = ArrayUtils.contains(env.getActiveProfiles(), "dev") || ArrayUtils.contains(env.getActiveProfiles(), "devsec");
-		// TODO : Not nice, mutualize
 
         final Logger dedicatedLogger = GenericFileLogger.initLogger(datasourceConfigName, level, logDir);
 		return dedicatedLogger;

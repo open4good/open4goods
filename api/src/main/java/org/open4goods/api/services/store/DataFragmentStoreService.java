@@ -162,9 +162,9 @@ public class DataFragmentStoreService {
 	 */
 	void enqueue(final DataFragment df) {
 		try {
-			queue.offer(df,10, TimeUnit.SECONDS);
-		} catch (InterruptedException e) {
-			logger.error("Expiration error while waiting to add in the queue, ",e);			
+			queue.put(df);
+		} catch (Exception e) {
+			logger.error("Exception while adding in the queue, ",e);			
 		}	
 	}
 

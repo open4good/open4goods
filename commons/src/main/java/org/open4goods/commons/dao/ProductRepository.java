@@ -282,9 +282,8 @@ public class ProductRepository {
 		logger.info("Queuing single product : {}", p.gtin());
 
 		try {
-			//TODO : timeout from conf
-			queue.offer(p, 300, TimeUnit.SECONDS);
-		} catch (InterruptedException e) {
+			queue.put(p);
+		} catch (Exception e) {
 			logger.error("Cannot enqueue product {}",p,e);			
 		}
 
@@ -321,10 +320,8 @@ public class ProductRepository {
 		data.forEach(e -> {
 			
 			try {
-				if (!queue.offer(e, 300, TimeUnit.SECONDS)) {
-					logger.error("!!!! Cannot enqueue product {}",e);
-				}
-			} catch (InterruptedException e1) {
+				queue.put(e) ;
+			} catch (Exception e1) {
 				logger.error("!!!! exception, cannot enqueue product {}",e);
 			}
 			
