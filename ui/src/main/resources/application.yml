@@ -11,7 +11,7 @@ server:
 management:
   health:
     diskspace:
-      threshold: 10000MB  
+      threshold: 100GB  
   endpoints:
     web:
       exposure:
