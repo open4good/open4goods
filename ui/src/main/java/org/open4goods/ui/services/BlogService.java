@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.text.WordUtils;
@@ -40,7 +41,6 @@ import com.rometools.rome.feed.synd.SyndEntry;
 import com.rometools.rome.feed.synd.SyndEntryImpl;
 import com.rometools.rome.feed.synd.SyndFeed;
 import com.rometools.rome.feed.synd.SyndFeedImpl;
-import com.rometools.rome.feed.synd.SyndImageImpl;
 import com.rometools.rome.io.FeedException;
 import com.rometools.rome.io.SyndFeedOutput;
 
@@ -79,6 +79,7 @@ public class BlogService implements HealthIndicator{
 	// States variables for healthcheck
 	int expectectedBlogPagesCount = 0;
 	int exceptionsCount = 0;
+	private AtomicBoolean loading = new AtomicBoolean(false);
 	
 	public BlogService(XwikiFacadeService xwikiFacadeService,  BlogConfiguration config, Localisable<String,String> baseUrls) {
 		this.config = config;
@@ -109,6 +110,14 @@ public class BlogService implements HealthIndicator{
 	 */
 	public void updateBlogPosts() {
 		logger.info("Getting blog posts");
+		
+		if (loading.get()) {
+			logger.warn("Blog posts update is already running");
+			return;
+		}
+		// Setting activ loading
+		loading.set(true);
+		
 		Pages pages = xwikiFacadeService.getPages("Blog");
 		
 		// Setting expected number of blog articles
@@ -249,6 +258,9 @@ public class BlogService implements HealthIndicator{
 		        tags.compute(tag, (key, count) -> (count == null) ? 1 : count + 1);
 		    }
 		});
+		
+		// Disabling loading state
+		loading.set(false);
 	}
 
 
@@ -316,6 +328,13 @@ public class BlogService implements HealthIndicator{
 	 */
 	@Override
 	public Health health() {
+		
+		if (loading.get()) {
+			Builder health = Health.up()
+					.withDetail("loading", true)
+					;
+			return health.build();
+		}
 		
 		Builder health = Health.up()
 				.withDetail("posts_count", posts.size())
