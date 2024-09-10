@@ -367,7 +367,7 @@ public class WebDatasourceFetchingService extends DatasourceFetchingService{
 		final var ret = new HashMap<String,IndexationJobStat>();
 
 		for (final Entry<String, CrawlController> entry : getControllers().entrySet()) {
-			final IndexationJobStat c = new IndexationJobStat(entry.getKey(), entry.getKey());
+			final IndexationJobStat c = new IndexationJobStat(entry.getKey(), entry.getKey(), IndexationJobStat.TYPE_WEB);
 			c.setStartDate(controllersDate.get(entry.getKey()));
 			if (null != entry.getValue().getFrontier() && !entry.getValue().isFinished()) {
 				c.setProcessed(entry.getValue().getFrontier().getNumberOfProcessedPages());
