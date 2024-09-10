@@ -547,8 +547,8 @@ public class DataFragment implements Standardisable, Validable {
 
 		// Evicting too big values
 		// TODO(p3,conf) : From config
-		if (value.length() > 8000) {
-			logger.warn("Evicting a too big value for attribute {}", name);
+		if (value.length() > 10000) {
+			logger.warn("Evicting a too big value for attribute {}:{}", name,value);
 			return;
 		}
 		
