@@ -190,6 +190,9 @@ public class PriceAggregationService extends AbstractAggregationService {
 		}
 		
 		
+		// Cleaning 0 values
+		history.removeIf(e -> e.getPrice() == 0.0);
+		
 		// Setting
 		switch (state) {
 		case NEW:
