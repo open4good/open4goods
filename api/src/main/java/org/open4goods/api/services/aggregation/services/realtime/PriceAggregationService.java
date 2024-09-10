@@ -20,7 +20,6 @@ import org.open4goods.commons.model.product.AggregatedPrice;
 import org.open4goods.commons.model.product.AggregatedPrices;
 import org.open4goods.commons.model.product.PriceHistory;
 import org.open4goods.commons.model.product.Product;
-import org.open4goods.commons.services.DataSourceConfigService;
 import org.slf4j.Logger;
 
 import com.google.common.collect.Sets;
@@ -30,8 +29,6 @@ import com.google.common.collect.Sets;
  * stock
  *
  *
- * TODO : Could cut the price history after a number / delay of history for
- * elastic size purpose
  *
  * @author goulven
  *
@@ -53,98 +50,97 @@ public class PriceAggregationService extends AbstractAggregationService {
 	 */
 	private static Double percentBenefitsReversed = 0.1;
 	
-	
-	
-	
-	
-	private DataSourceConfigService datasourceConfigService;
 
-	public PriceAggregationService(final Logger logger, DataSourceConfigService datasourceConfigService) {
+	public PriceAggregationService(final Logger logger) {
 		super(logger);
-		this.datasourceConfigService = datasourceConfigService;
 	}
 
 	@Override
-	public void onDataFragment(final DataFragment e, final Product aggregatedData,VerticalConfig vConf) throws AggregationSkipException {
+	public void onDataFragment(final DataFragment fragment, final Product aggregatedData,VerticalConfig vConf) throws AggregationSkipException {
 
-		if (!e.hasPrice() || !e.affiliated()) {
-			return;
-		}
-
-		// Checking price is not 0, can happens
-		if (e.getPrice().getPrice() == 0.0) {
-			dedicatedLogger.info("Price is 0 for datafragment {}, skipping");
-			return;
+		if (!fragment.hasPrice() || !fragment.affiliated()) {
+			dedicatedLogger.info("No price for data fragment {}, skipping", fragment );
+		} else if (fragment.getPrice().getPrice() == 0.0) {
+			// Checking price is not 0, can happens
+			dedicatedLogger.info("Price is 0 for datafragment {}, skipping", fragment);
+		} else {		
+			// Adding the price in the price list, we fill filter and remove outdated in the onProduct() méthod
+			AggregatedPrice aggPrice = new AggregatedPrice(fragment);
+			aggregatedData.getPrice().getOffers().add(aggPrice);			
 		}
 		
-		AggregatedPrice aggPrice = new AggregatedPrice(e);
+		// Calling the stateless handling
+		onProduct(aggregatedData, vConf);
+	}
+
+	
+	@Override
+	public void onProduct(Product data, VerticalConfig vConf) throws AggregationSkipException {
 
 		///////////////////
-		// Filtering : keeping lowest prices per provider and offer names
+		// Filtering : 
 		//////////////////
-
+		
 		// Key is providerName + name
 		final Map<String, AggregatedPrice> reducedPrices = new HashMap<>();
 
 		// Adding current price in the list of all prices
-		aggregatedData.getPrice().getOffers().add(aggPrice);
 
-		for (final AggregatedPrice df : aggregatedData.getPrice().getOffers()) {
+		for (final AggregatedPrice df : data.getPrice().getOffers()) {
 
-			// TODO : compute price history
+			// Filtering : removing outdated prices
 			if (System.currentTimeMillis() - ProductRepository.VALID_UNTIL_DURATION > df.getTimeStamp()) {
-				dedicatedLogger.info("price too old for CSV datafragment {}, removing it", df);
+				dedicatedLogger.info("price too old for datafragment {}, removing it", df);
 
 			} else {
 
 				final String key = pricMerchanteKey(df);
-
+				// Filtering : keeping lowest prices per provider and offer names	
 				if (null == reducedPrices.get(key) || reducedPrices.get(key).getPrice() > df.getPrice()) {
 					reducedPrices.put(key, df);
 				}
 			}
 		}
 
-		final Set<AggregatedPrice> filtered = new HashSet<>(reducedPrices.values());
+		final Set<AggregatedPrice> prices = new HashSet<>(reducedPrices.values());
 
 		////////////////////////////
-		// Set the contribution
+		// Set the contribution amount 
 		////////////////////////////
-		for (AggregatedPrice price : filtered) {
-
+		for (AggregatedPrice price : prices) {
 			price.setCompensation(computeEstimatedContribution(price.getPrice()));
-
 		}
 
-		AggregatedPrices aggPrices = aggregatedData.getPrice();
+		AggregatedPrices aggPrices = data.getPrice();
 
 		/////////////////////////
 		// Prices computation
 		////////////////////////
 
 		// Compute current prices
-		computeMinPrice(filtered, aggPrices);
+		computeMinPrice(prices, aggPrices);
 
 		// set Number of offers
-		aggregatedData.setOffersCount(reducedPrices.size());
+		data.setOffersCount(prices.size());
 		
 		// Reseting prices (reducing)
-		aggregatedData.getPrice().setOffers(Sets.newHashSet(reducedPrices.values()));
+		data.getPrice().setOffers(Sets.newHashSet(prices));
 
 		// Computing / incrementing history
-		computePriceHistory(aggPrices, ProductCondition.OCCASION);
+		computePriceHistory(aggPrices, ProductCondition.OCCASION);		
 		computePriceHistory(aggPrices, ProductCondition.NEW);
 
 		// Setting the product state summary
+		aggPrices.getConditions().clear();
 		aggPrices.getOffers().forEach(i -> aggPrices.getConditions().add(i.getProductState()));
 
 		// Setting the result
-		aggregatedData.setPrice(aggPrices);
+		data.setPrice(aggPrices);
 
 		// Setting if has an occasion offer
-
 	}
 
+	
 	/**
 	 * Compute the estimated contribution for the given price
 	 * @param price
@@ -183,12 +179,12 @@ public class PriceAggregationService extends AbstractAggregationService {
 			} else if (minPrice.getPrice() > lastPrice.getPrice().doubleValue()) {
 				// Price has increased
 				prices.setTrend(1);
-				// TODO : Cut here to a fixed history
+				// NOTE : Should one day cut here if too long
 				history.add(new PriceHistory(minPrice));
 			} else {
 				// Price has decreased
 				prices.setTrend(-1);
-				// TODO : Cut here to a fixed history
+				// NOTE : Should one day cut here if too long
 				history.add(new PriceHistory(minPrice));
 			}
 		}
@@ -225,6 +221,8 @@ public class PriceAggregationService extends AbstractAggregationService {
 	 */
 	private void computeMinPrice(final Collection<AggregatedPrice> filtered, final AggregatedPrices p) {
 
+		// Resetting the min price
+		p.setMinPrice(null);
 		// Min / max
 		for (final AggregatedPrice o : filtered) {
 
@@ -241,10 +239,6 @@ public class PriceAggregationService extends AbstractAggregationService {
 	}
 
 
-	@Override
-	public void onProduct(Product data, VerticalConfig vConf) throws AggregationSkipException {
-		
-	}
-
+	
 
 }

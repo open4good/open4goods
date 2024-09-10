@@ -251,7 +251,7 @@ public class AggregationFacadeService {
 		//		services.add(new CategoryService( taxonomyService));
 		//		services.add(new UrlsAggregationService(evaluationService, 
 		//				config.getNamings().getProductUrlTemplates()));
-		services.add(new PriceAggregationService( logger, dataSourceConfigService));
+		services.add(new PriceAggregationService( logger));
 		//		services.add(new CommentsAggregationService( config.getCommentsConfig()));
 		//		services.add(new ProsAndConsAggregationService(apiProperties.logsFolder()));
 		//		services.add(new QuestionsAggregationService(apiProperties.logsFolder()));
