@@ -55,9 +55,11 @@ spring:
       chat:
         options:
           model: gpt-4o-mini
-          #TODO : Will change on next release
           temperature: 1.0
-          response-format: { "type": "json_object" }
+          response-format:
+            type: JSON_SCHEMA
+            strict: true
+            schema: "{\"type\":\"object\",\"properties\":{},\"additionalProperties\":{\"type\":\"string\"},\"required\":[]}"
 springdoc:
   swagger-ui:
     disable-swagger-default-url: true
