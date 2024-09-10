@@ -175,7 +175,7 @@ public class CsvIndexationWorker implements Runnable {
 		
 		for (String url : urls) {
 			// Updating status with actual feed
-			stats = new IndexationJobStat(dsProperties.getDatasourceConfigName(), url);
+			stats = new IndexationJobStat(dsProperties.getDatasourceConfigName(), url, IndexationJobStat.TYPE_CSV);
 
 			int okItems = 0;
 			int validationFailedItems = 0;
@@ -238,6 +238,14 @@ public class CsvIndexationWorker implements Runnable {
 						indexationService.index(df, dsConfName);
 						stats.incrementIndexed();
 						okItems++;
+						
+						
+						if (df.getPrice() == null) {
+							logger.warn("No price for : {}",line);
+						} else {
+							logger.warn("Price found");
+						}
+						
 
 					} catch (ValidationException e) {
 						stats.incrementValidationFail();
@@ -286,10 +294,14 @@ public class CsvIndexationWorker implements Runnable {
 		dedicatedLogger.info("Detecting schema for {}", destFile.getAbsolutePath());
 		CsvSchema schema = csvService.detectSchema(destFile);
 
+		// Specific logging in dedicated logger
+		dedicatedLogger.warn("Auto detected schema is quoteChar:{} separatorChar:{} escapeChar:{}",  schema.getQuoteChar() == -1 ? "none" : Character.toString(schema.getQuoteChar()), schema.getColumnSeparator() == -1 ? "none" : Character.toString(schema.getColumnSeparator()), schema.getEscapeChar() == -1 ? "none" : Character.toString(schema.getEscapeChar())  );
+		
 		// Overriding with datasource specific config if defined
 		if (config.getCsvQuoteChar() != null) {
 			schema = schema.withQuoteChar(config.getCsvQuoteChar().charValue());
 		}
+		
 		if (config.getCsvEscapeChar() != null) {
 			schema = schema.withEscapeChar(config.getCsvEscapeChar().charValue());
 		}
@@ -297,9 +309,7 @@ public class CsvIndexationWorker implements Runnable {
 		if (config.getCsvSeparator() != null) {
 			schema = schema.withColumnSeparator(config.getCsvSeparator().charValue());
 		}
-		
-		
-		
+				
 		
 		return schema;
 	}

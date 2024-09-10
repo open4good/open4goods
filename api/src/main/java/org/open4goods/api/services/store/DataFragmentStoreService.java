@@ -162,9 +162,9 @@ public class DataFragmentStoreService {
 	 */
 	void enqueue(final DataFragment df) {
 		try {
-			queue.offer(df,10, TimeUnit.SECONDS);
-		} catch (InterruptedException e) {
-			logger.error("Expiration error while waiting to add in the queue, ",e);			
+			queue.put(df);
+		} catch (Exception e) {
+			logger.error("Exception while adding in the queue, ",e);			
 		}	
 	}
 
@@ -180,7 +180,8 @@ public class DataFragmentStoreService {
 
 					buffer.stream()
 					.map(DataFragment::gtin)
-					.filter(StringUtils::isNotBlank).toList());
+					.filter(StringUtils::isNotBlank)
+					.toList());
 
 
 			// Aggregating to product datas
@@ -194,8 +195,8 @@ public class DataFragmentStoreService {
 					data.setCreationDate(System.currentTimeMillis());
 				}
 
+				// PRoceeding to aggregation pipeline
 				try {
-					// TODO : Not the good point. Service ?
 					results.add(generationService.updateOne(df,data));
 				} catch (AggregationSkipException e1) {
 					logger.warn("Aggregation skipped for {} : {}",df,e1.getMessage());
@@ -207,7 +208,7 @@ public class DataFragmentStoreService {
 			aggregatedDataRepository.index(results);
 
 
-			logger.info("Indexed {} DataFragments. Queue size is {}",  buffer.size(),queue.size());
+			logger.warn("Indexed {} DataFragments. Queue size is {}",  buffer.size(),queue.size());
 
 		} catch (final Exception e) {
 			logger.error("Error while dequeing DataFragments",e);

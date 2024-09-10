@@ -11,7 +11,7 @@ server:
 management:
   health:
     diskspace:
-      threshold: 10000MB  
+      threshold: 100GB  
   endpoints:
     web:
       exposure:
@@ -33,7 +33,6 @@ spring:
             type: JSON_SCHEMA
             strict: true
             schema: "{\"type\":\"object\",\"properties\":{},\"additionalProperties\":{\"type\":\"string\"},\"required\":[]}"
-
   threads:
     virtual:
       enabled: true
@@ -92,21 +91,22 @@ team-config:
     linkedInUrl: https://www.linkedin.com/in/laurent-blondel-33543532/
     imageUrl: /assets/img/team/Laurent.jpeg            
     
-  contributors:
-    - name: Thierry Ledan
-      title: Développements backend
-      linkedInUrl: https://www.linkedin.com/in/thierry-ledan-43650a183/
-      imageUrl: /assets/img/team/Thierry.jpeg
+  - name: Max Ziliani
+    title: Identité visuelle et artistique
+    linkedInUrl: https://www.linkedin.com/in/maxziliani/
+    imageUrl: /assets/img/team/Max.jpeg
 
-    - name: Max Ziliani
-      title: Identité visuelle et artistique
-      linkedInUrl: https://www.linkedin.com/in/maxziliani/
-      imageUrl: /assets/img/team/Max.jpeg
-      
-    - name: Nicolas Bonamy
-      title: Dev backend & infra
-      linkedInUrl: https://www.linkedin.com/in/nicolas-bonamy-827b63a3/
-      imageUrl: /assets/img/team/Nicolas.jpeg
+  contributors:
+  - name: Thierry Ledan
+    title: Développements backend
+    linkedInUrl: https://www.linkedin.com/in/thierry-ledan-43650a183/
+    imageUrl: /assets/img/team/Thierry.jpeg
+
+    
+  - name: Nicolas Bonamy
+    title: Dev backend & infra
+    linkedInUrl: https://www.linkedin.com/in/nicolas-bonamy-827b63a3/
+    imageUrl: /assets/img/team/Nicolas.jpeg
         
       
       

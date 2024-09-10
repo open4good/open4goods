@@ -66,6 +66,8 @@ public class IdentityAggregationService extends AbstractAggregationService {
 		// The last update
 		if ( output.getLastChange() < input.getLastIndexationDate()) {
 			output.setLastChange(input.getLastIndexationDate());
+		} else {
+			dedicatedLogger.error("Data Fragment has an update date in the futur ! : {}",input);
 		}
 
 		/////////////////////////////

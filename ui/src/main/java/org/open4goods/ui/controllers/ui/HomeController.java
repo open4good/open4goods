@@ -34,7 +34,7 @@ public class HomeController  {
 
 		ModelAndView model = uiService.defaultModelAndView("index", request);
 
-		model.addObject("totalItems", aggregatedDataRepository.countMainIndexHavingPrice());
+		model.addObject("totalItems", aggregatedDataRepository.countMainIndexHavingRecentUpdate());
 
 		// TODO(gof) : deduplicate (darty.com / darty.com-CSV)
 		model.addObject("partners",  datasourceConfigService.datasourceConfigs().size());
