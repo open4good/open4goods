@@ -582,7 +582,9 @@ public class Product implements Standardisable {
 
 	
 	public String compensation () {
-		return String.format("%.2f", bestPrice().getCompensation());
+				
+		Double c = bestPrice() == null ? 0.0 :  bestPrice().getCompensation();		
+		return String.format("%.2f", c);
 	}
 	/**
 	 *
