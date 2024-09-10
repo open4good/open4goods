@@ -11,6 +11,9 @@ import org.springframework.data.elasticsearch.annotations.FieldType;
 @Document(indexName = "datas-indexations", createIndex = true)
 public class IndexationJobStat {
 
+	public static final String TYPE_CSV = "feed";
+	public static final String TYPE_WEB = "web";
+	
 	@Id
 	@Field(index = true, store = false, type = FieldType.Keyword)
 	private String id; 
@@ -41,16 +44,20 @@ public class IndexationJobStat {
 
 	@Field(index = true, store = false, type = FieldType.Boolean)
 	private Boolean fail = false;
+
+	@Field(index = true, store = false, type = FieldType.Keyword)
+	private String type;
 	
 	public IndexationJobStat() {
 	}	
 	
-	public IndexationJobStat(String url, String dsName) {
+	public IndexationJobStat(String url, String dsName, String type) {
 		this.startDate=System.currentTimeMillis();
 		this.datasource=dsName;
 		this.url = url;
 		this.fail = false;
 		this.id=UUID.randomUUID().toString();
+		this.type=type;
 	}
 
 	

@@ -175,7 +175,7 @@ public class CsvIndexationWorker implements Runnable {
 		
 		for (String url : urls) {
 			// Updating status with actual feed
-			stats = new IndexationJobStat(dsProperties.getDatasourceConfigName(), url);
+			stats = new IndexationJobStat(dsProperties.getDatasourceConfigName(), url, IndexationJobStat.TYPE_CSV);
 
 			int okItems = 0;
 			int validationFailedItems = 0;
@@ -238,6 +238,14 @@ public class CsvIndexationWorker implements Runnable {
 						indexationService.index(df, dsConfName);
 						stats.incrementIndexed();
 						okItems++;
+						
+						
+						if (df.getPrice() == null) {
+							logger.warn("No price for : {}",line);
+						} else {
+							logger.warn("Price found");
+						}
+						
 
 					} catch (ValidationException e) {
 						stats.incrementValidationFail();

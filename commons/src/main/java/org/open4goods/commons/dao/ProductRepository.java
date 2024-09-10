@@ -63,7 +63,7 @@ public class ProductRepository {
 	 * !!!MAJOR CONST !!! Duration in ms where a price is considered to be valid. Only data with a
 	 * price greater than this one will be returned to the user. Also defines the caching TTL of redis
 	 **/
-	// TODO(gof) : from conf
+	// TODO(p1, conf) : Major constant, from conf
 	public final static long VALID_UNTIL_DURATION = 1000 * 3600 * 24 * 2;
 
 	private static final int MAX_TITLE_ITEMS_TO_FETCH = 5;
@@ -132,7 +132,7 @@ public class ProductRepository {
 
 	public Stream<Product> searchInValidPrices(String query, final String indexName, int from, int to) {
 
-		Criteria c = new Criteria().expression(query).and(getValidDateQuery());
+		Criteria c = new Criteria().expression(query).and(getRecentPriceQuery());
 
 		final NativeQuery initialQuery = new NativeQueryBuilder().withQuery(new CriteriaQuery(c))
 				.withPageable(PageRequest.of(from, to)).build();
@@ -155,7 +155,7 @@ public class ProductRepository {
 		
 		
 		
-		Criteria c = getValidDateQuery()
+		Criteria c = getRecentPriceQuery()
 				.and( new Criteria("vertical").is(vertical.getId()))
 
 				//				.or(new Criteria("datasourceCategories").in(vertical.getMatchingCategories())
@@ -215,7 +215,7 @@ public class ProductRepository {
 	public Stream<Product> exportVerticalWithValidDateOrderByEcoscore(String vertical, Integer max, boolean withExcluded) {
 
 		Criteria c = new Criteria("vertical").is(vertical)
-				.and(getValidDateQuery())
+				.and(getRecentPriceQuery())
 				;
 
 		if (!withExcluded) {
@@ -508,8 +508,14 @@ public class ProductRepository {
 	}
 
 	@Cacheable(keyGenerator = CacheConstants.KEY_GENERATOR, cacheNames = CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME)
-	public Long countMainIndexHavingPrice() {
-		CriteriaQuery query = new CriteriaQuery(getValidDateQuery());
+	public Long countMainIndexHavingRecentPrices() {
+		CriteriaQuery query = new CriteriaQuery(getRecentPriceQuery());
+		return elasticsearchTemplate.count(query, current_index);
+	}
+
+	@Cacheable(keyGenerator = CacheConstants.KEY_GENERATOR, cacheNames = CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME)
+	public Long countMainIndexHavingRecentUpdate() {
+		CriteriaQuery query = new CriteriaQuery(getRecentPriceQuery());
 		return elasticsearchTemplate.count(query, current_index);
 	}
 
@@ -552,18 +558,27 @@ public class ProductRepository {
 	
 	/**
 	 *
-	 * @return Criteria representing the valid dates
+	 * @return Criteria representing recent prices
 	 */
-	public Criteria getValidDateQuery() {
-		return new Criteria("price.minPrice.timeStamp").greaterThan(expirationClause());
+	public Criteria getRecentPriceQuery() {
+		return new Criteria("price.offers.timeStamp").greaterThan(expirationClause());
+				
 	}
 
+	/**
+	 *
+	 * @return Criteria representing recent updated products
+	 */
+	public Criteria getRecentProducts() {
+		return new Criteria("lastChange").greaterThan(expirationClause());
+	}
+	
 	/**
 	 *
 	 * @return Criteria representing the valid dates
 	 */
 	public Criteria getSinceDateQuery(Long epoch) {
-		return new Criteria("price.minPrice.timeStamp").greaterThan(epoch);
+		return new Criteria("lastChange").greaterThan(epoch);
 	}
 
 	/**
