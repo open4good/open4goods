@@ -51,34 +51,33 @@ import dev.brachtendorf.jimagehash.hashAlgorithms.PerceptiveHash;
 public class ResourceCompletionService  extends AbstractCompletionService{
 
 
-	// TODO(p3, conf) : From yaml
+	private static final String NO_IMAGE_PATH = "/icons/no-image.png";
+
 	/**
 	 * If true, will regenerate each time new file name for resources. To be used with caution in production, cause it will triggers 301 !
 	 */
+	// TODO(p3, conf) : From yaml
 	private static boolean forceEraseFileName = false;
 	
 	private static final double SIMILARITY_SCORE = 0.20;
 	private static final int PERCEPTIV_HASH_SIZE = 32;
 
-	// TODO : Dedicated logger
 	protected static final Logger logger = LoggerFactory.getLogger(ResourceCompletionService.class);
 
 	private final ApiProperties apiProperties;
 	private final ImageMagickService imageService;	
 	private final ResourceService resourceService;
 
-	// TODO : move to Tika V2
 	private static final Tika tika = new Tika();
 	private static final TikaConfig config = TikaConfig.getDefaultConfig();
 
-	// TODO : Warning : Probably not thread safe
+	// TODO(p2,safety) : Warning : Probably not thread safe
 	private static final HashingAlgorithm hasher = new PerceptiveHash(PERCEPTIV_HASH_SIZE);
 
-	// private final ElasticsearchRestTemplate esTemplate;
 
 	public ResourceCompletionService(ImageMagickService imageService, VerticalsConfigService verticalConfigService, ResourceService resourceService, ProductRepository dataRepository, ApiProperties apiProperties) {
 		
-		// TODO : Should set a specific log level here (not "agg(regation)" one)
+		// TODO(p3,conf) : Should set a specific log level here (not "agg(regation)" one)
 		super(dataRepository, verticalConfigService, apiProperties.logsFolder(), apiProperties.aggLogLevel());		
 
 		this.apiProperties = apiProperties;
@@ -139,8 +138,7 @@ public class ResourceCompletionService  extends AbstractCompletionService{
 			if (forceEraseFileName || StringUtils.isEmpty(r.getFileName())) {
 				String name;
 				
-				// TODO : OfferNAme size from conf
-				List<String> offerNames = data.getNames().getOfferNames().stream().filter(e->e.length() < 60).toList();
+				List<String> offerNames = data.getNames().getOfferNames().stream().toList();
 				
 				// No offer names, we generate a title by our own
 				if (offerNames.size() ==  0) {
@@ -264,7 +262,6 @@ public class ResourceCompletionService  extends AbstractCompletionService{
 		
 		
 		// Extracting the cover image first
-		// TODO : cover as const
 		Resource cover = resultingImages.stream()
 					.filter(e->e.getHardTags().contains(ResourceTag.PRIMARY))
 					.max((o1,o2) -> o1.getImageInfo().pixels().compareTo(o2.getImageInfo().pixels()))
@@ -277,34 +274,32 @@ public class ResourceCompletionService  extends AbstractCompletionService{
 		
 		if (null == cover) {
 			logger.warn("No cover image found for product : {}", data.gtin());
-			// TODO : from const
-			data.setCoverImagePath("/icons/no-image.png");
+			data.setCoverImagePath(NO_IMAGE_PATH);
 		} else {
 			data.setCoverImagePath(cover.path());			
 		}
 		
 		// Deleting useless files and unsetting attributes to preserve space
-		for (Resource r : data.getResources()) {
-			if (r.isEvicted()) {
-				// If an evicted resource, systematicaly delete file.
-				File evicted = resourceService.getCacheFile(r);
-				logger.info("Deleting evicted resource :{} -> {}",r, evicted);
-				// TODO : uncomment to effectivly rm files				
-				//				if (!evicted.delete()) {
-				//					logger.error("Could not delete evicted resource : {}",resourceService.getCacheFile(r));
-				//				}							
-				//				data.getResources().remove(r);
-			}
-			
-		}
+//				// NOTE : uncomment to effectivly rm files. But we should not : effectiv removing we make resources classified and downloaded again...			
+//		for (Resource r : data.getResources()) {
+//			if (r.isEvicted()) {
+//				// If an evicted resource, systematicaly delete file.
+//				File evicted = resourceService.getCacheFile(r);
+////				logger.info("Deleting evicted resource :{} -> {}",r, evicted);
+//				//				if (!evicted.delete()) {
+//				//					logger.error("Could not delete evicted resource : {}",resourceService.getCacheFile(r));
+//				//				}							
+//				//				data.getResources().remove(r);
+//			}
+//			
+//		}
 	}
 
 	private Resource processUrlTemplate(ResourceCompletionUrlTemplate ut, String gtin) {
-		
 		Resource r = new Resource();
 		r.getHardTags().addAll(ut.getHardTags());
 		
-		// TODO : add resource language
+		// TODO(p3,i18n) : add resource language
 		r.setUrl(ut.getUrl().replace("{GTIN}", gtin));
 		
 		return r;
@@ -317,8 +312,6 @@ public class ResourceCompletionService  extends AbstractCompletionService{
 	 * @return
 	 */
 	private ArrayList<List<Resource>> classify(List<Resource> list) {
-		// TODO Auto-generated method stub
-
 		logger.info("Starting image perceptive clusterisation");
 
 		Map<Resource, Set<Resource>> cluster = new HashMap<>();
@@ -337,7 +330,6 @@ public class ResourceCompletionService  extends AbstractCompletionService{
 
 				double similarityScore = hash0.normalizedHammingDistanceFast(hash1);
 				logger.info("image similarityScore : {} ", similarityScore);
-				// TODO : From conf
 				if (similarityScore < SIMILARITY_SCORE) {
 					// Considered a duplicate in this particular case
 					cluster.get(r1).add(r2);
@@ -362,23 +354,11 @@ public class ResourceCompletionService  extends AbstractCompletionService{
 			Collections.sort(tmpList, (o1, o2) -> o2.getImageInfo().pixels().compareTo(o1.getImageInfo().pixels()));
 			sortedCluster.add(tmpList);			
 			
-			// We priorize on amazon primary image
-			// TODO : Share const
-//			boolean primary =  resourceGroups.stream().map(e->e.getTags()).anyMatch(e -> e.contains("cover"));
-//			if (primary) {
-//				forcedFirst = tmpList;
-//			}
 		}
 				
 		// Sorting bucketsby number of occurences
 		Collections.sort(sortedCluster, (o1, o2) -> Integer.compare(o2.size(), o1.size()));
 
-//		if (null != forcedFirst) {
-//			sortedCluster.remove(forcedFirst);
-//			sortedCluster.addFirst(forcedFirst);
-//		}
-		// But 
-		
 		
 		// Adding the group number		
 		for (int i = 0; i < sortedCluster.size(); i++) {			
@@ -423,7 +403,6 @@ public class ResourceCompletionService  extends AbstractCompletionService{
 		File target = resourceService.getCacheFile(resource);
 
 		// Downloading the file if not cached
-		// TODO : A specific config property to force re-download
 		if (target.exists()) { 
 			logger.info("resource in file cache: {}", target);
 		} else {
@@ -432,7 +411,7 @@ public class ResourceCompletionService  extends AbstractCompletionService{
 
 			try {
 				Request.Get(resource.getUrl())
-						// TODO from conf
+						// TODO(p2,conf) from conf
 						.userAgent("Mozilla/5.0 (Windows NT 5.1; rv:5.0.1) Gecko/20100101 Firefox/5.0.1")
 						.connectTimeout(1000).socketTimeout(1000).execute().saveContent(target);
 				
@@ -524,8 +503,7 @@ public class ResourceCompletionService  extends AbstractCompletionService{
 	}
 
 	private void processPdf(final Resource indexed, final File target) {
-		// TODO(1,p3,feature) : Generate default PNG version, generate thumnails from
-		// config, html version, so on...
+		// TODO(p3,feature) : Generate default PNG version, generate thumnails from PDF
 		// handle metadatas
 		indexed.setResourceType(ResourceType.PDF);
 		
