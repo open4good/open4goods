@@ -27,6 +27,7 @@ spring:
     openai:
       chat:
         options:
+          model: gpt-4o-mini          
           temperature: 1.0
           #TODO : Will change on next release
           response-format: { "type": "json_object" }  
