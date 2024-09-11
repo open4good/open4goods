@@ -20,6 +20,7 @@ import org.open4goods.commons.exceptions.AggregationSkipException;
 import org.open4goods.commons.exceptions.ParseException;
 import org.open4goods.commons.exceptions.ResourceNotFoundException;
 import org.open4goods.commons.exceptions.ValidationException;
+import org.open4goods.commons.helper.IdHelper;
 import org.open4goods.commons.helper.ResourceHelper;
 import org.open4goods.commons.model.attribute.Attribute;
 import org.open4goods.commons.model.constants.ReferentielKey;
@@ -55,6 +56,20 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 	@Override
 	public void onProduct(Product data, VerticalConfig vConf) throws AggregationSkipException {
 
+		
+		//////////////////////////////////////////
+		// Cleaning attributes names (normalisation)		
+		// TODO(p3, optimisation) : Could remove once full sanitisation batch, all new attribute names are clean
+		//////////////////////////////////////////
+		Set<AggregatedAttribute> attrs = new HashSet<AggregatedAttribute>();
+		data.getAttributes().getUnmapedAttributes().stream().forEach(a -> {
+			// Dedup is ensured with the set and hashcode / equals override
+			a.setName(IdHelper.normalizeAttributeName(a.getName()));
+			attrs.add(a);
+		});
+		data.getAttributes().setUnmapedAttributes(attrs);
+		
+		
 		//////////////////////////////////////////////////////////////////////////		
 		// Checking if all mandatory attributes are present for this product
 		//////////////////////////////////////////////////////////////////////////
