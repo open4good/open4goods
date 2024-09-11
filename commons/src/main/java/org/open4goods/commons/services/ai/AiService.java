@@ -1,13 +1,11 @@
 package org.open4goods.commons.services.ai;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.apache.commons.lang3.StringUtils;
 import org.open4goods.commons.config.yml.attributes.AiPromptsConfig;
 import org.open4goods.commons.config.yml.attributes.PromptConfig;
 import org.open4goods.commons.config.yml.ui.ProductI18nElements;
@@ -27,7 +25,6 @@ import org.springframework.boot.actuate.health.HealthIndicator;
 import org.springframework.core.ParameterizedTypeReference;
 
 import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonMappingException;
 
 import io.micrometer.core.annotation.Timed;
@@ -173,8 +170,16 @@ public class AiService implements HealthIndicator{
 			}
 		}
 
+		
+		
 		// 3 - Generate the final prompt response
-		Map<String, String> aiResponse = generatePromptResponse(combinedPrompts.toString());
+		String str = combinedPrompts.toString();
+		
+		// Removing chars that can make the prompt parsing fail 
+		str = str.replaceAll("\\{|\\}", "_");
+		
+		
+		Map<String, String> aiResponse = generatePromptResponse(str);
 		
 		logger.info("Gen AI response for product {}: \n{}", product.getId(), aiResponse);
 
@@ -182,8 +187,16 @@ public class AiService implements HealthIndicator{
 		
 		// 5 - Create AiDescription objects
 		AiDescriptions descriptions = new AiDescriptions();
+		
+		
+		Set<String> allowedKeys = aiConfigs.getPrompts().stream().map(e -> e.getKey()).collect(Collectors.toSet());
 		for (String key : aiResponse.keySet()) {
-			descriptions.getDescriptions().put(key, new AiDescription( aiResponse.get(key)));
+			
+			if (allowedKeys.contains(key)) {
+				descriptions.getDescriptions().put(key, new AiDescription( aiResponse.get(key)));				
+			} else {
+				logger.error("Unexpected key returned by AI : {}:{}",key,aiResponse.get(key));
+			}
 		}
 
 		return descriptions;
