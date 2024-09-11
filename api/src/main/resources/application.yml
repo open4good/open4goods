@@ -57,9 +57,8 @@ spring:
           model: gpt-4o-mini
           temperature: 1.0
           response-format:
-            type: JSON_SCHEMA
-            strict: true
-            schema: "{\"type\":\"object\",\"properties\":{},\"additionalProperties\":{\"type\":\"string\"},\"required\":[]}"
+            type: JSON_OBJECT
+
 springdoc:
   swagger-ui:
     disable-swagger-default-url: true
