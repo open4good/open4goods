@@ -6,8 +6,9 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.elasticsearch.annotations.Document;
 import org.springframework.data.elasticsearch.annotations.Field;
 import org.springframework.data.elasticsearch.annotations.FieldType;
+import org.springframework.data.elasticsearch.annotations.WriteTypeHint;
 
-@Document(indexName = "user-searches", createIndex = true)
+@Document(indexName = "user-searches", createIndex = true, writeTypeHint = WriteTypeHint.FALSE)
 public class GlobalUserSearch {
 
 	@Id

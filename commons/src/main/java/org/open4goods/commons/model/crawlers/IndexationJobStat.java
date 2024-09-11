@@ -7,8 +7,9 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.elasticsearch.annotations.Document;
 import org.springframework.data.elasticsearch.annotations.Field;
 import org.springframework.data.elasticsearch.annotations.FieldType;
+import org.springframework.data.elasticsearch.annotations.WriteTypeHint;
 
-@Document(indexName = "datas-indexations", createIndex = true)
+@Document(indexName = "datas-indexations", createIndex = true, writeTypeHint = WriteTypeHint.FALSE)
 public class IndexationJobStat {
 
 	public static final String TYPE_CSV = "feed";

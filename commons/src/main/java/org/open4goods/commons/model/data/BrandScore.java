@@ -11,8 +11,9 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.elasticsearch.annotations.Document;
 import org.springframework.data.elasticsearch.annotations.Field;
 import org.springframework.data.elasticsearch.annotations.FieldType;
+import org.springframework.data.elasticsearch.annotations.WriteTypeHint;
 
-@Document(indexName = "brand-scores", createIndex = true)
+@Document(indexName = "brand-scores", createIndex = true, writeTypeHint = WriteTypeHint.FALSE)
 public class BrandScore {
 
 	private static final Logger logger = LoggerFactory.getLogger(BrandScore.class);

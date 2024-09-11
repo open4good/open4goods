@@ -1,5 +1,6 @@
 package org.open4goods.commons.model;
 // TODO : Some fields should be computed / rendered (eg. id's), not stored but so handy....
+// TODO : Add fields
 public class EcoScoreRanking {
 	
 	// The position in the whole vertical
