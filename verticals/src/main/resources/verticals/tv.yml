@@ -102,9 +102,6 @@ i18n:
         pauseDurationMs: 1000
         rootPrompt: |
             analyse technique, fonctionnelle et écologique d'un téléviseur.
-          
-            Marque : [(${p.brand()})]
-            Modèle : [(${p.model()})]
              
             Caractéristiques : 
             [(${p.caracteristics()})]
