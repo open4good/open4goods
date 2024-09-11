@@ -2,6 +2,7 @@ package org.open4goods.commons.services.ai;
 
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
@@ -18,10 +19,12 @@ import org.open4goods.commons.services.EvaluationService;
 import org.open4goods.commons.services.SerialisationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.openai.OpenAiChatModel;
 import org.springframework.boot.actuate.health.Health;
 import org.springframework.boot.actuate.health.Health.Builder;
 import org.springframework.boot.actuate.health.HealthIndicator;
+import org.springframework.core.ParameterizedTypeReference;
 
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -34,7 +37,7 @@ import io.micrometer.core.annotation.Timed;
  */
 public class AiService implements HealthIndicator{
 
-	// TODO : From conf
+	// TODO(p2,conf) : From conf
 	private static final int MIN_REQUIRED_ATTRIBUTES = 15;
 	
 	
@@ -49,6 +52,7 @@ public class AiService implements HealthIndicator{
 	private Long generatedProducts = 0L;
 	private Long skippedGenerations = 0L;
 
+	
 	
 	public AiService(OpenAiChatModel chatModel,  EvaluationService spelEvaluationService, SerialisationService serialisationService) {
 		this.chatModel = chatModel;
@@ -105,7 +109,7 @@ public class AiService implements HealthIndicator{
 				}
 				
 				// Operates the merged prompt generation
-				AiDescriptions descriptions = createAiDescriptions(entry.getValue(), entry.getKey(), product);
+				AiDescriptions descriptions = createAiDescriptions(entry.getValue(), entry.getKey(), product,force);
 
 				// Store the generated prompts
 				product.getGenaiTexts().put(entry.getKey(), descriptions);
@@ -151,36 +155,35 @@ public class AiService implements HealthIndicator{
 	 * @throws JsonMappingException 
 	 * @throws JsonParseException 
 	 */
-	private AiDescriptions createAiDescriptions(AiPromptsConfig aiConfigs, String language, Product product) throws Exception {
+	private AiDescriptions createAiDescriptions(AiPromptsConfig aiConfigs, String language, Product product, boolean force) throws Exception {
 		// 1 - Evaluate the root prompt to inject variables
 		String evaluatedRootPrompt = spelEvaluationService.thymeleafEval(product, aiConfigs.getRootPrompt());
 
 		// 2 - Evaluate the other prompts
 		StringBuilder combinedPrompts = new StringBuilder(evaluatedRootPrompt);
 		for (PromptConfig promptConfig : aiConfigs.getPrompts()) {
-			combinedPrompts.append("\n").append(promptConfig.getKey()).append(promptConfig.getPrompt());
+			
+			// We do not add the prompt if we already have a generation on it, unless force == true 
+			
+			if (force || !product.getGenaiTexts().containsKey(language) || !product.getGenaiTexts().get(language).getDescriptions().containsKey(promptConfig.getKey())) {			
+				logger.info("Adding partial prompt {}", promptConfig.getKey());
+				combinedPrompts.append("\n").append(promptConfig.getKey()).append(promptConfig.getPrompt());
+			} else {
+				logger.info("Skipping partial prompt {}", promptConfig.getKey());
+			}
 		}
 
 		// 3 - Generate the final prompt response
-		String aiResponse = generatePromptResponse(combinedPrompts.toString());
+		Map<String, String> aiResponse = generatePromptResponse(combinedPrompts.toString());
 		
-		logger.info("AI response for product {}: \n{}", product.getId(), aiResponse);
+		logger.info("Gen AI response for product {}: \n{}", product.getId(), aiResponse);
 
-		// 4 - Parse the JSON response
-		Map<String, String> responseMap;
-		
-		try {
-			TypeReference<HashMap<String, String>> typeRef = new TypeReference<HashMap<String,String>>() {};
-			responseMap = serialisationService.fromJson(aiResponse, typeRef);
-		} catch (Exception e) {
-			logger.error("Error {} while serialisation of {} ",e.getMessage(), aiResponse);
-			throw e;
-		} 
+	
 		
 		// 5 - Create AiDescription objects
 		AiDescriptions descriptions = new AiDescriptions();
-		for (String key : responseMap.keySet()) {
-			descriptions.getDescriptions().put(key, new AiDescription( responseMap.get(key)));
+		for (String key : aiResponse.keySet()) {
+			descriptions.getDescriptions().put(key, new AiDescription( aiResponse.get(key)));
 		}
 
 		return descriptions;
@@ -192,18 +195,25 @@ public class AiService implements HealthIndicator{
 	 * @throws Exception 
 	 */
 	@Timed(value = "GenAiTextsGeneration", description = " direct metric on the  API used  for generation",  extraTags = {"service","ai"})
-	public String generatePromptResponse(String value) throws Exception {
+	public Map<String, String> generatePromptResponse(String value) throws Exception {
 		
 		long startTime = System.currentTimeMillis();
-		String response = chatModel.call(value);
-		logger.info("GenAI request ({}ms) : \n ----------request :\n{} \n----------response\n{}", System.currentTimeMillis() - startTime, value, response);
 		
-		if (StringUtils.isEmpty(response)) {
+		
+		Map<String,String> ret = ChatClient.create(chatModel).prompt()
+									.user(value)
+									.call()
+									.entity(new ParameterizedTypeReference<Map<String, String>>() {});
+		
+		
+		logger.info("GenAI request ({}ms) : \n ----------request :\n{} \n----------response\n{}", System.currentTimeMillis() - startTime, value, ret);
+		
+		if (ret == null || ret.size() == 0) {
 			logger.error("Empty response from API, generating for prompt : {}",value);
 			throw new Exception("Empty response returned from GENAI Api");
 		}
 		generatedProducts++;
-		return response;
+		return ret;
 	}
 
 	/**

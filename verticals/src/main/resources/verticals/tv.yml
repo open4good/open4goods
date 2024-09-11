@@ -109,7 +109,7 @@ i18n:
             Caractéristiques : 
             [(${p.caracteristics()})]
           
-            Génère un fichier JSON clé-valeur pour l'objet concerné répondant uniquement aux prompts suivants :      
+            Génère un fichier JSON clé-valeur pour l'objet concerné répondant uniquement et strictement aux prompts suivants :      
 
         prompts: 
            - key: "global-description"
