@@ -56,12 +56,14 @@ services:
     image: mongo:6.0.5
     container_name: mongo
     environment:
-        - MONGO_INITDB_ROOT_USERNAME=root
-        - MONGO_INITDB_ROOT_PASSWORD=rootpassword
-        - MONGO_INITDB_DATABASE=mydatabase
+        - MONGO_INITDB_ROOT_USERNAME=nudger
+        - MONGO_INITDB_ROOT_PASSWORD=nudger
+        - MONGO_INITDB_DATABASE=products
     volumes:
-      - mongo-data:/data/db
-      - mongo-config:/data/configdb
+      - /opt/open4goods/mongo/db:/data/db
+      - /opt/open4goods/mongo/configdb:/data/configdb
+#      - mongo-data:/data/db
+#      - mongo-config:/data/configdb
       - ./mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro      
     ports:
       - "27017:27017"

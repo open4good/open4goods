@@ -15,18 +15,19 @@ public class ExternalIds {
 	 */
 	private String icecat;
 	
-	
-	
 	/**
-	 * Known mpn's
+	 * Known mpn's (Manufacturer Parts Number) 
 	 */
 	private Set<String> mpn = new HashSet<>();
 	
 	/**
-	 * Known sku's
+	 * Known sku's (Stock Keeping Units)
 	 */
 	private Set<String> sku = new HashSet<>();
 
+	
+	
+	
 	public String getAsin() {
 		return asin;
 	}

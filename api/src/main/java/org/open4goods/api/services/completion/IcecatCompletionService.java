@@ -84,7 +84,7 @@ public class IcecatCompletionService extends AbstractCompletionService {
 		logger.info("Icecat completion for {}", data.getId());
 		Set<DataFragment> fragments = new HashSet<>();
 		
-		String icecatId = data.getExternalId().getIcecat();
+		String icecatId = data.getExternalIds().getIcecat();
 		if (StringUtils.isEmpty(icecatId)) {			
 			fragments.addAll(completeSearch(vertical, data));
 		} else {
@@ -127,7 +127,7 @@ public class IcecatCompletionService extends AbstractCompletionService {
 			String content = IOUtils.toString(new URL(url));
 			IceDataItem iceItem = objectMapper.readValue(content, IcecatData.class).data;
 			
-			data.getExternalId().setIcecat(String.valueOf(iceItem.generalInfo.icecatId));
+			data.getExternalIds().setIcecat(String.valueOf(iceItem.generalInfo.icecatId));
 			
 			ret.add(convert(iceItem, data));
 
