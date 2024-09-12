@@ -239,14 +239,6 @@ public class CsvIndexationWorker implements Runnable {
 						stats.incrementIndexed();
 						okItems++;
 						
-						
-						if (df.getPrice() == null) {
-							logger.warn("No price for : {}",line);
-						} else {
-							logger.warn("Price found");
-						}
-						
-
 					} catch (ValidationException e) {
 						stats.incrementValidationFail();
 						validationFailedItems++;
