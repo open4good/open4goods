@@ -2,6 +2,7 @@ package org.open4goods.commons.dao;
 
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -15,8 +16,10 @@ import java.util.stream.Stream;
 import org.open4goods.commons.config.yml.ui.VerticalConfig;
 import org.open4goods.commons.exceptions.ResourceNotFoundException;
 import org.open4goods.commons.model.constants.CacheConstants;
+import org.open4goods.commons.model.product.MongoProduct;
 import org.open4goods.commons.model.product.Product;
 import org.open4goods.commons.store.repository.ProductIndexationWorker;
+import org.open4goods.commons.store.repository.mongo.MongoProductRepository;
 import org.open4goods.commons.store.repository.redis.RedisProductRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -73,6 +76,9 @@ public class ProductRepository {
 	private @Autowired ElasticsearchOperations elasticsearchTemplate;
 
 	private @Autowired RedisProductRepository redisRepository;
+	
+	private @Autowired MongoProductRepository mongoProductRepository;
+	
 	
 //	private @Autowired RedisOperations<String, Product> redisRepo;
 
@@ -342,12 +348,22 @@ public class ProductRepository {
 			redisRepository.saveAll(data);
 //			redisRepo.opsForValue().multiSet(data.stream().collect(Collectors.toMap(Product::gtin, Function.identity())));
 //		});
+			
+			
+		// TODO : Translation in mongo products
+		List<MongoProduct> mProducts = data.stream().map(d -> new MongoProduct(d)).toList();
+		mongoProductRepository.saveAll(mProducts);	
+			
 	}
 	
 	public void storeNoCache(Collection<Product> data) {
 		logger.info("Indexing without caching {} products", data.size());
 
 		elasticsearchTemplate.save(data, current_index);
+		
+		// TODO : Translation in mongo products
+		List<MongoProduct> mProducts = data.stream().map(d -> new MongoProduct(d)).toList();
+		mongoProductRepository.saveAll(mProducts);	
 
 	}
 	
@@ -363,6 +379,8 @@ public class ProductRepository {
 //			redisRepo.opsForValue().set(data.gtin(), data);
 			redisRepository.save(data);
 //		});
+			
+			mongoProductRepository.save(new MongoProduct(data));
 	}
 	
 	

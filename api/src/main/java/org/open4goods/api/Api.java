@@ -7,6 +7,7 @@ import org.open4goods.commons.config.CacheKeyGenerator;
 import org.open4goods.commons.services.SerialisationService;
 import org.open4goods.commons.store.repository.elastic.BrandScoresRepository;
 import org.open4goods.commons.store.repository.elastic.ElasticProductRepository;
+import org.open4goods.commons.store.repository.mongo.MongoProductRepository;
 import org.open4goods.commons.store.repository.redis.RedisProductRepository;
 import org.open4goods.crawler.controller.CrawlController;
 import org.open4goods.crawler.repository.IndexationRepository;
@@ -17,6 +18,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.data.elasticsearch.repository.config.EnableElasticsearchRepositories;
+import org.springframework.data.mongodb.repository.config.EnableMongoRepositories;
 import org.springframework.data.redis.repository.configuration.EnableRedisRepositories;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
@@ -31,6 +33,7 @@ import jakarta.annotation.PostConstruct;
 
 @EnableScheduling
 @EnableElasticsearchRepositories(basePackageClasses = {ElasticProductRepository.class, IndexationRepository.class, BrandScoresRepository.class})
+@EnableMongoRepositories(basePackageClasses = {MongoProductRepository.class})
 @EnableRedisRepositories(basePackageClasses = RedisProductRepository.class)
 @EnableCaching
 

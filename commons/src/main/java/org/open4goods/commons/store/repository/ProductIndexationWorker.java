@@ -75,6 +75,10 @@ public class ProductIndexationWorker implements Runnable {
 					
 					service.store(buffer.values());
 					
+					
+					
+					
+					
 					logger.info("{} has indexed {} DataFragments. {} Remaining in queue",workerName,  buffer.size(), service.getQueue().size());
 
 				} else {
