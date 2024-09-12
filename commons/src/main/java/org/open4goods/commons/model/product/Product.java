@@ -74,7 +74,7 @@ public class Product implements Standardisable {
 	/**
 	 * The list of external id's for this product
 	 */
-	private ExternalIds externalId = new ExternalIds();
+	private ExternalIds externalIds = new ExternalIds();
 		
 	/**
 	 * The date this item has been created
@@ -929,12 +929,12 @@ public class Product implements Standardisable {
 	}
 
 
-	public ExternalIds getExternalId() {
-		return externalId;
+	public ExternalIds getExternalIds() {
+		return externalIds;
 	}
 
-	public void setExternalId(ExternalIds externalId) {
-		this.externalId = externalId;
+	public void setExternalIds(ExternalIds externalId) {
+		this.externalIds = externalId;
 	}
 
 	public String getCoverImagePath() {

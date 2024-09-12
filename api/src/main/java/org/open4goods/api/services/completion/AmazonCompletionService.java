@@ -135,14 +135,14 @@ public class AmazonCompletionService extends AbstractCompletionService {
 		logger.info("Amazon completion for {}", data.getId());
 		Set<DataFragment> fragments = new HashSet<>();
 		
-		String asin = data.getExternalId().getAsin();
+		String asin = data.getExternalIds().getAsin();
 		if (StringUtils.isEmpty(asin)) {
 			// First time API Call, we operate through the search method
 			logger.info("Initial amazon call (get) for {}", data.gtin());
 			fragments.addAll(completeSearch(vertical, data));
 		} else {
 				if (asin.equals(NOT_FOUND_ASIN_MARKUP)) {
-					data.getExternalId().setAsin(null);
+					data.getExternalIds().setAsin(null);
 				} else {
 					// If we already have the ASIN, we operate a direct get request
 					logger.info("Further amazon call (get) for {}", data.gtin());
@@ -177,7 +177,7 @@ public class AmazonCompletionService extends AbstractCompletionService {
 	private Set<DataFragment> completeGet(VerticalConfig vertical, Product data) {
 		Set<DataFragment> ret = new HashSet<>();
 		GetItemsRequest getItemsRequest = new GetItemsRequest().itemIdType(ItemIdType.ASIN)
-				.itemIds(List.of(data.getExternalId().getAsin())).partnerTag(amazonConfig.getPartnerTag())
+				.itemIds(List.of(data.getExternalIds().getAsin())).partnerTag(amazonConfig.getPartnerTag())
 				.partnerType(PartnerType.ASSOCIATES).resources(getItemsResources);
 		try {
 			// Sending the request
@@ -233,7 +233,7 @@ public class AmazonCompletionService extends AbstractCompletionService {
 
 			if (null == response.getSearchResult() || response.getSearchResult().getItems().size() == 0) {
 				logger.warn("No amazon product for {}", data.gtin());
-				data.getExternalId().setAsin(NOT_FOUND_ASIN_MARKUP);
+				data.getExternalIds().setAsin(NOT_FOUND_ASIN_MARKUP);
 				return ret;
 			} else if (response.getSearchResult().getItems().size() > 1) {
 				logger.warn("Multiple amazon product for {}", data.gtin());
@@ -259,7 +259,7 @@ public class AmazonCompletionService extends AbstractCompletionService {
 		// Setting the ASIN (directly in product)
 		String asin = item.getASIN();
 		if (!StringUtils.isEmpty(asin)) {
-			data.getExternalId().setAsin(asin);
+			data.getExternalIds().setAsin(asin);
 		} else {
 			logger.warn("Empty ASIN returned for {}", data.gtin());
 		}
