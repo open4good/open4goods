@@ -4,16 +4,16 @@
 <head>
     <th:block th:insert="~{inc/header-meta.html}"></th:block>
     <title>Base de données ISBN en libre accès | Nudger</title>
-    <meta name="description" content="Accédez à notre base de données ISBN gratuitement et librement">
+    <meta name="description" content="Accédez à notre base de données ISBN gratuitement et librement. Découvrez l'importance des ISBN pour l'industrie du livre et de l'édition.">
     <meta property="og:type" content="website">
     <meta property="og:url" th:content="${url}">
     <meta property="og:title" content="Base de données ISBN en libre accès">
-    <meta property="og:description" content="Accédez à notre base de données ISBN gratuitement et librement">
+    <meta property="og:description" content="Accédez à notre base de données ISBN gratuitement et librement. Découvrez l'importance des ISBN pour l'industrie du livre et de l'édition.">
     <meta property="og:image" th:content="${baseUrl} + 'assets/img/brand/light.svg'">
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:url" th:content="${url}">
     <meta name="twitter:title" content="Base de données ISBN en libre accès">
-    <meta name="twitter:description" content="Accédez à notre base de données ISBN gratuitement et librement">
+    <meta name="twitter:description" content="Accédez à notre base de données ISBN gratuitement et librement. Découvrez l'importance des ISBN pour l'industrie du livre et de l'édition.">
     <meta name="twitter:image" th:content="${baseUrl} + 'assets/img/brand/light.svg'">
 </head>
 
@@ -40,9 +40,18 @@
                                 <img height="200" src="/assets/img/opendata.jpg" alt="code barre en opendata">
                             </div>
                             <div class="col-lg-9 my-auto">
-                                <p class="lead"><strong>Libérez les données !</strong> Accédez à notre base de données ISBN. Ces données sont mises à jour <b>une fois par semaine</b> et proviennent de notre agrégation de contenu autour des catalogues d'affiliation.</p>
+                                <p class="lead"><strong>Accédez à notre base de données ISBN.</strong> Ces données sont mises à jour <b>une fois par semaine</b> et proviennent de notre agrégation de contenu autour des catalogues d'affiliation.</p>
                             </div>
                         </div>
+                        <h2 class="h3 mt-3">Qu'est-ce qu'un ISBN ?</h2>
+                        <p>
+                            L'<strong>ISBN (International Standard Book Number)</strong> est un identifiant unique pour les livres et autres publications. Il est essentiel dans le monde de l'édition pour identifier, gérer, et suivre les publications à travers les librairies, éditeurs et distributeurs.
+                        </p>
+                        <ul class="list-unstyled">
+                            <li><i class="fas fa-book"></i>&nbsp;&nbsp;&nbsp;Utilisé mondialement dans l'édition</li>
+                            <li><i class="fas fa-tags"></i>&nbsp;&nbsp;&nbsp;Identification unique pour les publications</li>
+                            <li><i class="fas fa-truck"></i>&nbsp;&nbsp;Facilite la distribution et la gestion des stocks</li>
+                        </ul>
                         <h2 class="h3 mt-3">Conditions d'utilisation</h2>
                         <ul class="text-secondary">
                             <li class="pb-2">Ces données sont délivrées sous <a href="/assets/ETALAB-Licence-Ouverte-v2.0.pdf" target="_blank">licence ouverte</a>, et sont donc librement utilisables, sans restrictions d'usages.</li>
@@ -56,15 +65,15 @@
                                         <table class="table table-hover">
                                             <tbody>
                                             <tr>
-                                                <th scope="row">mise à jour</th>
-                                                <td scope="row" th:text="${#dates.format(lastUpdated, 'dd-MMM-yyyy, HH:mm')}"></td>
+                                                <th scope="row">Mise à jour</th>
+                                                <td scope="row" th:text="${#dates.format(lastUpdated, 'dd MMM yyyy, HH:mm')}"></td>
                                             </tr>
                                             <tr>
                                                 <th scope="row"><b>Taille du fichier</b></th>
                                                 <td scope="row" th:text="${fileSize}"></td>
                                             </tr>
                                             <tr>
-                                                <th scope="row"><b>Nombre de produits</b></th>
+                                                <th scope="row"><b>Nombre de publications</b></th>
                                                 <td scope="row" th:text="${#numbers.formatDecimal(countISBN, 0, 'COMMA', 0, 'POINT')}"></td>
                                             </tr>
                                             </tbody>
@@ -106,48 +115,40 @@
                             <table class="table table-hover">
                                 <tbody>
                                 <tr>
-                                    <th scope="row"><b>barcode</b></th>
-                                    <td scope="row">Le code barre du produit, qui est un ISBN</td>
+                                    <th scope="row"><b>isbn</b></th>
+                                    <td scope="row">Le code ISBN de la publication</td>
                                 </tr>
                                 <tr>
-                                    <th scope="row"><b>brand</b></th>
-                                    <td>Marque de l'éditeur</td>
+                                    <th scope="row"><b>author</b></th>
+                                    <td>Auteur de la publication</td>
                                 </tr>
                                 <tr>
-                                    <th scope="row"><b>model</b></th>
-                                    <td scope="row">Référence de l'ouvrage</td>
+                                    <th scope="row"><b>title</b></th>
+                                    <td scope="row">Titre de la publication</td>
+                                </tr>
+                                <tr>
+                                    <th scope="row"><b>publisher</b></th>
+                                    <td scope="row">Éditeur de la publication</td>
                                 </tr>
                                 <tr>
                                     <th scope="row"><b>last_updated</b></th>
-                                    <td scope="row">Dernière mise à jour de ce produit, au format epoch en millisecondes</td>
-                                </tr>
-                                <tr>
-                                    <th scope="row"><b>gs1_country</b></th>
-                                    <td scope="row">Pays de l'organisme GS1 qui a délivré le code barre pour ce produit</td>
-                                </tr>
-                                <tr>
-                                    <th scope="row"><b>gtinType</b></th>
-                                    <td scope="row">Type du code barre. Pour ISBN, cela sera toujours ISBN_13</td>
-                                </tr>
-                                <tr>
-                                    <th scope="row"><b>offers_count</b></th>
-                                    <td scope="row">Nombre d'offres commerciales pour ce produit</td>
-                                </tr>
-                                <tr>
-                                    <th scope="row"><b>min_price</b></th>
-                                    <td scope="row">Prix le plus faible pour ce produit</td>
-                                </tr>
-                                <tr>
-                                    <th scope="row"><b>min_price_compensation</b></th>
-                                    <td scope="row">Compensation carbone reversée, correspondant au prix le plus faible pour ce produit</td>
-                                </tr>
-                                <tr>
-                                    <th scope="row"><b>currency</b></th>
-                                    <td scope="row">Devise du prix le plus faible et de la compensation carbone associée</td>
+                                    <td scope="row">Dernière mise à jour de cette publication, au format epoch en millisecondes</td>
                                 </tr>
                                 <tr>
                                     <th scope="row"><b>categories</b></th>
-                                    <td scope="row">Catégories dans lesquelles ce produit a été rencontré</td>
+                                    <td scope="row">Catégories dans lesquelles cette publication a été rencontrée</td>
+                                </tr>
+                                <tr>
+                                    <th scope="row"><b>offers_count</b></th>
+                                    <td scope="row">Nombre d'offres commerciales pour cette publication</td>
+                                </tr>
+                                <tr>
+                                    <th scope="row"><b>min_price</b></th>
+                                    <td scope="row">Prix le plus faible pour cette publication</td>
+                                </tr>
+                                <tr>
+                                    <th scope="row"><b>currency</b></th>
+                                    <td scope="row">Devise du prix le plus faible</td>
                                 </tr>
                                 <tr>
                                     <th scope="row"><b>url</b></th>
