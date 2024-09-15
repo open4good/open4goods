@@ -73,6 +73,7 @@ import org.springframework.core.env.Environment;
 import org.springframework.core.io.support.ResourcePatternResolver;
 import org.springframework.data.elasticsearch.client.elc.ElasticsearchTemplate;
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
+import org.springframework.data.mongodb.core.convert.MappingMongoConverter;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
@@ -108,7 +109,12 @@ public class ApiConfig {
 		this.apiProperties = apiProperties;
 	}
 
-
+	@Autowired
+	void setMapKeyDotReplacement(MappingMongoConverter mappingMongoConverter) {
+	    mappingMongoConverter.setMapKeyDotReplacement("~~");
+	}
+	
+	
     @Bean
     RedisTemplate<String, Product> redisTemplate(RedisConnectionFactory connectionFactory) {
 		  RedisTemplate<String, Product> template = new RedisTemplate<>();

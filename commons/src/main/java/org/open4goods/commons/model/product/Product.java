@@ -57,6 +57,7 @@ public class Product implements Standardisable {
 
 	private final static Logger logger = LoggerFactory.getLogger(Product.class);
 
+	// TODO : Put back 
 	public static final String DEFAULT_REPO = "products";
 
 	// Should not be used 

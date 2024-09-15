@@ -32,8 +32,6 @@ import org.open4goods.commons.model.constants.ResourceType;
 import org.open4goods.commons.model.data.AiDescriptions;
 import org.open4goods.commons.model.data.Resource;
 import org.open4goods.commons.model.data.Score;
-import org.open4goods.commons.model.data.UnindexedKeyVal;
-import org.open4goods.commons.model.data.UnindexedKeyValTimestamp;
 import org.open4goods.commons.services.StandardiserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,14 +39,12 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.elasticsearch.annotations.Field;
 import org.springframework.data.elasticsearch.annotations.FieldType;
 
+/**
+ * Representation of a product
+ */
 public class MongoProduct implements Standardisable {
 
 	private final static Logger logger = LoggerFactory.getLogger(MongoProduct.class);
-
-	// Should not be used
-	// If true, the referentiel attribute will be updated if a shortest version
-	// exists in alternativeModels
-	private static final boolean FORCE = false;
 
 	/**
 	 * The ID is the gtin
@@ -56,6 +52,17 @@ public class MongoProduct implements Standardisable {
 	@Id
 	private long id;
 
+	/**
+	 * The model name, set the first time a model name is encounterd. All variations are 
+	 * availlable in the modelNames attribute
+	 */
+	private String model;
+
+	/**
+	 * The model name, set the first time a brand name is encounterd. All variations are 
+	 * availlable in the modelNames attribute
+	 */
+	private String brand;
 	/**
 	 * The list of external id's for this product
 	 */
@@ -83,31 +90,40 @@ public class MongoProduct implements Standardisable {
 	 **/
 	private boolean excluded = false;
 
-	/** The list of other model's known for this product **/
-	@Field(index = true, store = false, type = FieldType.Keyword)
-	private Set<String> alternativeModels = new HashSet<>();
+	/** The list of all model's names , associated with datasources raising the product**/
+	private Map<String,Set<String>> modelNames = new HashMap<>();
 
-	/** The list of brands known for this product **/
-	@Field(index = false, store = false, type = FieldType.Object)
-	private Set<UnindexedKeyValTimestamp> alternativeBrands = new HashSet<>();
+	/** The list of all brands known for this product, by datasourcename **/
+	private Map<String,Set<String>> brandNames = new HashMap<>();
 
+	/**
+	 * Datasources that participates to this product informations
+	 */
+	private Set<String> datasourceNames = new HashSet<>();
+
+	/**
+	 * Informations and resources related to the gtin
+	 */
+	private MongoGtinInfo gtinInfos = new MongoGtinInfo();
+	
+
+	/**
+	 * The categories, by datasources
+	 */
+	private Map<String,String> mappedCategories = new HashMap<>();
+	
+	
+	
 	/** Namings informations for this product **/
-	// TODO : Should be computed
 	@Field(index = true, store = false, type = FieldType.Object)
+	// TODO(p1,design) : Refactor to a localisable at this level, check impact on already generated names, check url's can not be erased
 	private ProductTexts names = new ProductTexts();
-
-	// @Field(index = false, store = false, type = FieldType.Object)
-	// /** The comments, aggregated and nlp processed **/
-	// private AggregatedComments comments = new AggregatedComments();
 
 	@Field(index = false, store = false, type = FieldType.Object)
 	private AggregatedAttributes attributes = new AggregatedAttributes();
 
 	@Field(index = false, store = false, type = FieldType.Object)
 	private AggregatedPrices price = new AggregatedPrices();
-
-	@Field(index = false, store = false, type = FieldType.Keyword)
-	private Set<String> datasourceNames = new HashSet<>();
 
 	/**
 	 * The media resources for this data
@@ -122,10 +138,6 @@ public class MongoProduct implements Standardisable {
 	@Field(index = false, store = false, type = FieldType.Object)
 	private Localisable<String, AiDescriptions> genaiTexts = new Localisable<>();
 
-	/**
-	 * Informations and resources related to the gtin
-	 */
-	private MongoGtinInfo gtinInfos = new MongoGtinInfo();
 
 	/**
 	 * The google taxonomy id
@@ -133,37 +145,12 @@ public class MongoProduct implements Standardisable {
 	@Field(index = true, store = false, type = FieldType.Integer)
 	private Integer googleTaxonomyId;
 
-	/**
-	 * The set of participating "productCategories", on datasources that build this
-	 * aggregatedData
-	 */
-	@Field(index = true, store = false, type = FieldType.Keyword)
-	private Set<String> datasourceCategories = new HashSet<>();
-
-	@Field(index = false, store = false, type = FieldType.Object)
-	private Set<UnindexedKeyVal> mappedCategories = new HashSet<>();
 
 	@Field(index = true, store = false, type = FieldType.Object)
 	private Map<String, Score> scores = new HashMap<>();
 
 	@Field(index = false, store = false, type = FieldType.Object)
 	private EcoScoreRanking ranking = new EcoScoreRanking();
-
-	//
-	// /**
-	// * All the ratings
-	// */
-	// @Field(index = false, store = false, type = FieldType.Object)
-	// private Set<SourcedRating> ratings = new HashSet<>();
-
-	// @Field(index = false, store = false, type = FieldType.Object)
-	// private Set<Question> questions = new HashSet<>();
-	//
-	// @Field(index = false, store = false, type = FieldType.Object)
-	// private Set<ProsOrCons> pros = new HashSet<>();
-	//
-	// @Field(index = false, store = false, type = FieldType.Object)
-	// private Set<ProsOrCons> cons = new HashSet<>();
 
 	//////////////////// :
 	// Stored (and computed) to help elastic querying / sorting
@@ -199,8 +186,33 @@ public class MongoProduct implements Standardisable {
 		this.lastChange = other.getLastChange();
 		this.vertical = other.getVertical();
 		this.excluded = other.isExcluded();
-		this.alternativeModels = other.getAlternativeModels(); // Directly using getter
-		this.alternativeBrands = other.getAlternativeBrands(); // Using getter directly
+		
+		// Skipping because we don't know the the datasource providers in 
+		//this.alternativeModels = other.getAlternativeModels(); 
+		if (!StringUtils.isEmpty(other.model())) {
+			this.model = StringUtils.normalizeSpace(other.model()).toUpperCase();;
+		}
+
+		if (!StringUtils.isEmpty(other.brand())) {
+			this.brand =  StringUtils.stripAccents(StringUtils.normalizeSpace(other.brand()).toUpperCase());
+		}
+		
+		
+		other.getAlternativeBrands().stream().forEach(d -> {
+			addBrand(d.getValue(), d.getKey());
+		});
+
+		
+		// Categories datasource
+		other.getMappedCategories().stream().forEach(cat -> {
+			this.mappedCategories.put(cat.getKey(), cat.getValue());
+		});
+		
+		
+		
+		
+		
+		
 		this.names = other.getNames(); // Using getter from ProductTexts
 		this.attributes = other.getAttributes(); // Using getter from AggregatedAttributes
 		this.price = other.getPrice(); // Using getter from AggregatedPrices
@@ -209,8 +221,6 @@ public class MongoProduct implements Standardisable {
 		this.coverImagePath = other.getCoverImagePath();
 		this.genaiTexts = other.getGenaiTexts(); // Using getter from Localisable
 		this.googleTaxonomyId = other.getGoogleTaxonomyId();
-		this.datasourceCategories = other.getDatasourceCategories(); // Directly using getter
-		this.mappedCategories = other.getMappedCategories(); // Directly using getter
 		this.scores = other.getScores(); // Directly using getter
 		this.ranking = other.getRanking(); // Using getter from EcoScoreRanking
 		this.offersCount = other.getOffersCount();
@@ -421,7 +431,7 @@ public class MongoProduct implements Standardisable {
 	 * @return true if this AggrgatedData has alternateIds
 	 */
 	public Boolean hasAlternateIds() {
-		return alternativeModels.size() > 0;
+		return modelNames.size() > 0;
 	}
 
 	public boolean hasOccasions() {
@@ -440,7 +450,7 @@ public class MongoProduct implements Standardisable {
 	// }
 
 	public String alternateIdsAsText() {
-		return StringUtils.join(alternativeModels, ", ");
+		return StringUtils.join(modelNames, ", ");
 	}
 
 	/**
@@ -465,18 +475,15 @@ public class MongoProduct implements Standardisable {
 		}
 	}
 
-	/**
-	 *
-	 * @return the brandUid, if availlable from referentiel attributes
-	 */
-	public String model() {
-		return attributes.getReferentielAttributes().get(ReferentielKey.MODEL);
-	}
 
+	/**
+	 * 
+	 * @return a random model name, from the availlable ones
+	 */
 	public String randomModel() {
 		List<String> names = new ArrayList<>();
-		names.add(model());
-		alternativeModels.forEach(e -> names.add(e));
+		names.add(model);
+		modelNames.keySet().forEach(e -> names.add(e));
 		Random rand = new Random();
 		return names.get(rand.nextInt(names.size()));
 
@@ -494,7 +501,7 @@ public class MongoProduct implements Standardisable {
 	 */
 	public String bestName() {
 		String ret;
-		if (null == brand() || null == model()) {
+		if (null == brand() || null == model) {
 			ret = names.shortestOfferName();
 		} else {
 			ret = brandAndModel();
@@ -505,24 +512,6 @@ public class MongoProduct implements Standardisable {
 		}
 
 		return ret;
-	}
-
-	/**
-	 *
-	 * @return All categories in an IHM purpose, without the shortest one
-	 */
-	public List<String> datasourceCategoriesWithoutShortest() {
-
-		Set<String> ret = new HashSet<>(datasourceCategories.stream().toList());
-
-		ret.remove(shortestCategory());
-
-		List<String> list = new ArrayList<>(ret);
-
-		list.sort(Comparator.comparingInt(String::length));
-
-		return list;
-
 	}
 
 	public String ecoscoreAsString() {
@@ -540,7 +529,7 @@ public class MongoProduct implements Standardisable {
 			ret += brand() + "-";
 		}
 
-		ret += model();
+		ret += model;
 
 		return ret;
 	}
@@ -551,28 +540,6 @@ public class MongoProduct implements Standardisable {
 		return String.format("%.2f", c);
 	}
 
-	/**
-	 *
-	 * @return The shortest category for this product
-	 */
-	public String shortestCategory() {
-		return datasourceCategories.stream().min(Comparator.comparingInt(String::length)).orElse(null);
-	}
-
-	// /**
-	// *
-	// * @return the id
-	// */
-	// public String id() {
-	// StringBuilder builder = new StringBuilder();
-	//
-	// if (null == brand() || null == model()) {
-	// builder.append(gtin());
-	// } else {
-	// builder.append(brand()).append("-").append(model());
-	// }
-	// return builder.toString();
-	// }
 
 	/**
 	 * TODO : merge with the one on price()
@@ -676,52 +643,73 @@ public class MongoProduct implements Standardisable {
 	}
 
 	/**
-	 * Add the model referentiel attribute, applying some spliting mechanism and
+	 * Add the model name referentiel attribute :
+	 * > applying some spliting mechanism to extract shortest model name when possible
+	 * > Set the "official" model name if first time encountered
+	 * > Add to the sourced modelNames
 	 * cleaning pass
 	 * 
-	 * @param value
+	 * @param modelName
 	 */
-	public void addModel(String value) {
+	public void addModelName(String modelName, String datasourceName) {
 
-		String model = StringUtils.normalizeSpace(value).toUpperCase();
+		String nModel = StringUtils.normalizeSpace(modelName).toUpperCase();
 
-		// TODO : Eviction size from conf
-		if (StringUtils.isEmpty(value) || value.length() < 3) {
+		// TODO(p3,conf) : Model size eviction threshold from conf
+		if (StringUtils.isEmpty(modelName) || modelName.length() < 3) {
 			return;
 		}
 		// Splitting on conventionnal suffixes (/ - .)
-		// TODO : Const / conf
-		String[] frags = model.split("/|\\|.|-");
+		// TODO(p3,conf) : Const / conf
+		String[] frags = nModel.split("/|\\|.|-");
 
-		alternativeModels.add(value);
+		modelNames.computeIfAbsent(nModel, k -> new HashSet<>()).add(datasourceName);
+		
 		if (frags.length > 1) {
 			logger.info("Found an alternative model : " + frags[0]);
-			alternativeModels.add(frags[0]);
+			modelNames.computeIfAbsent(frags[0], k -> new HashSet<>()).add(datasourceName);
 		}
 
 		// Case ref attribute is already set, we keep as it and we remove the elected
 		// one from alternativeModels
-		String existing = model();
-
-		if (StringUtils.isEmpty(existing) || FORCE) {
+		// NOTE : Due to the design (this method being called on each new model name), this election mechanism will only applies to extracted variants
+		if (StringUtils.isEmpty(model) ) {
 			String shortest = shortestModel();
 			if (null != shortest) {
+				this.model = shortest;
 				attributes.getReferentielAttributes().put(ReferentielKey.MODEL, shortest);
-				alternativeModels.remove(shortest);
 			}
-		} else {
-			alternativeModels.remove(existing);
-		}
+		} 
 	}
 
+	
+	/**
+	 * Add the brand : 
+	 * > Set the "official" brand name if first time encountered
+	 * > Add to the sourced brandNames
+	 * cleaning pass
+	 * 
+	 * @param brandName
+	 */
+	public void addBrand(String brandName, String datasourceName) {
+
+		String nBrand = StringUtils.stripAccents(StringUtils.normalizeSpace(brandName).toUpperCase());
+
+		brandNames.computeIfAbsent(nBrand, k -> new HashSet<>()).add(datasourceName);
+
+		// Setting the brand if first time encountered
+		if (StringUtils.isEmpty(brand) ) {
+			this.brand = nBrand;
+		} 
+	}
 	/**
 	 * 
 	 * @return the shortest model name
 	 */
 	public String shortestModel() {
 		Set<String> names = new HashSet<>();
-		names.add(model());
-		names.addAll(alternativeModels);
+		names.add(model);
+		names.addAll(modelNames.keySet());
 		if (names.size() == 0) {
 			return null;
 		} else {
@@ -733,9 +721,7 @@ public class MongoProduct implements Standardisable {
 	// Getters / Setters
 	//////////////////////////////////////////
 
-	public Set<UnindexedKeyValTimestamp> getAlternativeBrands() {
-		return alternativeBrands;
-	}
+
 
 	public long getId() {
 		return id;
@@ -745,9 +731,7 @@ public class MongoProduct implements Standardisable {
 		this.id = id;
 	}
 
-	public void setAlternativeBrands(Set<UnindexedKeyValTimestamp> alternativeBrands) {
-		this.alternativeBrands = alternativeBrands;
-	}
+
 
 	public String getVertical() {
 		return vertical;
@@ -821,21 +805,6 @@ public class MongoProduct implements Standardisable {
 		this.gtinInfos = gtinInfos;
 	}
 
-	public Set<String> getDatasourceCategories() {
-		return datasourceCategories;
-	}
-
-	public void setDatasourceCategories(Set<String> datasourceCategories) {
-		this.datasourceCategories = datasourceCategories;
-	}
-
-	public Set<UnindexedKeyVal> getMappedCategories() {
-		return mappedCategories;
-	}
-
-	public void setMappedCategories(Set<UnindexedKeyVal> mappedCategories) {
-		this.mappedCategories = mappedCategories;
-	}
 
 	public Map<String, Score> getScores() {
 		return scores;
@@ -847,6 +816,14 @@ public class MongoProduct implements Standardisable {
 
 	public Integer getOffersCount() {
 		return offersCount;
+	}
+
+	public Map<String, String> getMappedCategories() {
+		return mappedCategories;
+	}
+
+	public void setMappedCategories(Map<String, String> mappedCategories) {
+		this.mappedCategories = mappedCategories;
 	}
 
 	public void setOffersCount(Integer offersCount) {
@@ -893,12 +870,40 @@ public class MongoProduct implements Standardisable {
 		this.coverImagePath = coverImagePath;
 	}
 
-	public Set<String> getAlternativeModels() {
-		return alternativeModels;
+
+
+	public String getModel() {
+		return model;
 	}
 
-	public void setAlternativeModels(Set<String> alternativeModels) {
-		this.alternativeModels = alternativeModels;
+	public void setModel(String model) {
+		this.model = model;
+	}
+
+	public Map<String, Set<String>> getModelNames() {
+		return modelNames;
+	}
+
+	public void setModelNames(Map<String, Set<String>> modelNames) {
+		this.modelNames = modelNames;
+	}
+
+
+
+	public String getBrand() {
+		return brand;
+	}
+
+	public void setBrand(String brand) {
+		this.brand = brand;
+	}
+
+	public Map<String, Set<String>> getBrandNames() {
+		return brandNames;
+	}
+
+	public void setBrandNames(Map<String, Set<String>> brandNames) {
+		this.brandNames = brandNames;
 	}
 
 	public boolean isExcluded() {

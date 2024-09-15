@@ -18,6 +18,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 
+import jakarta.annotation.PostConstruct;
 import jakarta.servlet.http.HttpServletResponse;
 
 /**
@@ -39,13 +40,13 @@ public class DevModeService {
 		this.productLoadEndpoint = devModeConfiguration;
 		this.verticalConfigService = verticalsConfigService;
 
-		checkAndIngest();
 
 	}
 
 	/**
 	 * Check if the database needs data ingestion and do it if needed
 	 */
+	@PostConstruct
 	public void checkAndIngest() {
 		LOGGER.info("DevMode : Checking if products is needed");
 		if (needsUpdate()) {
@@ -62,9 +63,13 @@ public class DevModeService {
 	 * @return
 	 */
 	public boolean needsUpdate() {
-		boolean ret = repository.countMainIndexHavingRecentPrices() == 0;
-		LOGGER.info("DevMode : Products needs update : "+ret);
-		return ret;
+		
+		// TODO(p1, feature) : fix this service : Auto creation index does not works (means empty index, fail on startup) and remote credentials seems ko
+//		
+//		boolean ret = repository.countMainIndexHavingRecentPrices() == 0;
+//		LOGGER.info("DevMode : Products needs update : "+ret);
+//		return ret;
+		return false;
 	}
 	
 	/**

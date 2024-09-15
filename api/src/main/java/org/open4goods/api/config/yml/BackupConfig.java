@@ -32,6 +32,11 @@ public class BackupConfig {
 	private  int importBulkSize = 200;
 
 	/**
+	 * Number of concurent threads running import (1 thread per file, so should be less or equals than productsExportThreads)
+	 */
+	private int productImportThreads = 4;
+	
+	/**
 	 * Number of threads (and of files) to operate export with
 	 */
 	private int productsExportThreads = 4;
@@ -133,6 +138,14 @@ public class BackupConfig {
 
 	public void setMaxProductsBackupAgeInHours(long maxProductsBackupAgeInHours) {
 		this.maxProductsBackupAgeInHours = maxProductsBackupAgeInHours;
+	}
+
+	public int getProductImportThreads() {
+		return productImportThreads;
+	}
+
+	public void setProductImportThreads(int productImportThreads) {
+		this.productImportThreads = productImportThreads;
 	}
 	
 	

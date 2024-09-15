@@ -168,7 +168,7 @@ public class PriceAggregationService extends AbstractAggregationService {
 
 		if (history.size() == 0) {
 			// First price
-			prices.setTrend(0);
+			prices. setTrend(0);
 			history.add(new PriceHistory(minPrice));
 
 		} else {
