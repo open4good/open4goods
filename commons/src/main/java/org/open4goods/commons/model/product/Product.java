@@ -46,13 +46,11 @@ import org.springframework.data.elasticsearch.annotations.Setting;
 import org.springframework.data.elasticsearch.annotations.WriteTypeHint;
 import org.springframework.data.redis.core.RedisHash;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 @Document(indexName = Product.DEFAULT_REPO, createIndex = true, writeTypeHint = WriteTypeHint.FALSE)
 @RedisHash(value=Product.DEFAULT_REPO, timeToLive = ProductRepository.VALID_UNTIL_DURATION)
 @Setting( settingPath = "/elastic-settings.json")
-// TODO : Disabling to see/test  if a clean jackson serial
-@JsonIgnoreProperties(ignoreUnknown = true)
 public class Product implements Standardisable {
 
 	private final static Logger logger = LoggerFactory.getLogger(Product.class);
@@ -61,25 +59,24 @@ public class Product implements Standardisable {
 
 	// Should not be used 
 	// If true, the referentiel attribute will be updated if a shortest version exists in alternativeModels
-	private static final boolean FORCE = false;
+	private static final boolean FORCE_OVERRIDE_MODEL_NAME_WITH_SHORTEST = false;
 
 	/**
 	 * The ID is the gtin
 	 */
 	@Id
-	@Field(index = true, store = false, type = FieldType.Keyword)
-	private String id;
+	private long id;
 
-	
 	/**
 	 * The list of external id's for this product
 	 */
+	@Field(enabled = false, index = false, store = false, type = FieldType.Object)
 	private ExternalIds externalIds = new ExternalIds();
 		
 	/**
 	 * The date this item has been created
 	 */
-	@Field(type = FieldType.Date)
+	@Field( index = false, store = false, type = FieldType.Date)
 	private long creationDate;
 	
 	/**
@@ -98,27 +95,29 @@ public class Product implements Standardisable {
 	private boolean excluded = false;
 	
 	/** The list of other model's known for this product **/
-	@Field(index = true, store = false, type = FieldType.Keyword)
+	@Field( index = false, store = false, type = FieldType.Keyword)
 	private Set<String> alternativeModels = new HashSet<>();
 	
 	
 	/** The list of other id's known for this product **/
-	@Field(index = false, store = false, type = FieldType.Object)
+	@Field(enabled = false, index = false, store = false, type = FieldType.Object)
+	// TODO : Remove unindexed
 	private Set<UnindexedKeyValTimestamp> alternativeBrands = new HashSet<>();
 		
 	/** Namings informations for this product **/
 	// TODO : Should be computed
-	@Field(index = true, store = false, type = FieldType.Object)
+	// TODO : move the offernames inside
+	@Field(enabled= false, index = true, store = false, type = FieldType.Object)
 	private ProductTexts names = new ProductTexts();
 
 	//	@Field(index = false, store = false, type = FieldType.Object)
 	//	/** The comments, aggregated and nlp processed **/
 	//	private AggregatedComments comments = new AggregatedComments();
 
-	@Field(index = false, store = false, type = FieldType.Object)
+	@Field(enabled = false, index = false, store = false, type = FieldType.Object)
 	private AggregatedAttributes attributes = new AggregatedAttributes();
 
-	@Field(index = false, store = false, type = FieldType.Object)
+	@Field(enabled = false, index = false, store = false, type = FieldType.Object)
 	private AggregatedPrices price = new AggregatedPrices();
 
 	@Field(index = false, store = false, type = FieldType.Keyword)
@@ -127,7 +126,7 @@ public class Product implements Standardisable {
 	/**
 	 * The media resources for this data
 	 */
-	@Field(index = false, store = false, type = FieldType.Object)
+	@Field(enabled = false, index = false, store = false, type = FieldType.Object)
 	private Set<Resource> resources = new HashSet<>();
 	
 	@Field(index = false, store = false, type = FieldType.Keyword)
@@ -135,19 +134,19 @@ public class Product implements Standardisable {
 
 	
 	/** The ai generated texts, keyed by language**/
-	@Field(index = false, store = false, type = FieldType.Object)
+	@Field(enabled = false, index = false, store = false, type = FieldType.Object)
 	private Localisable<String,AiDescriptions> genaiTexts = new Localisable<>();
 
 	/**
 	 * Informations and resources related to the gtin
 	 */
-	@Field(index = false, store = false, type = FieldType.Object)
+	@Field(enabled = false,index = false, store = false, type = FieldType.Object)
 	private GtinInfo gtinInfos = new GtinInfo();
 
 	/**
 	 * The google taxonomy id
 	 */
-	@Field(index = true, store = false, type = FieldType.Integer)
+	@Field(index = false, store = false, type = FieldType.Integer)
 	private Integer googleTaxonomyId;
 	
 	/**
@@ -157,35 +156,17 @@ public class Product implements Standardisable {
 	@Field(index = true, store = false, type = FieldType.Keyword)
 	private Set<String> datasourceCategories = new HashSet<>();
 
-	@Field(index = false, store = false, type = FieldType.Object)
+	// TODO : Remove unindexed
+	@Field(enabled = false, index = false, store = false, type = FieldType.Object)
 	private Set<UnindexedKeyVal> mappedCategories = new HashSet<>();
 	
-	@Field(index = true, store = false, type = FieldType.Object)
+	@Field(enabled = false, index = true, store = false, type = FieldType.Object)
 	private Map<String, Score> scores = new HashMap<>();
 	
-	@Field(index = false, store = false, type = FieldType.Object)
+	@Field(enabled = false, index = false, store = false, type = FieldType.Object)
 	private EcoScoreRanking ranking = new EcoScoreRanking();
 	
 	
-	
-	
-	// 
-	//	/**
-	//	 * All the ratings
-	//	 */
-	//	@Field(index = false, store = false, type = FieldType.Object)
-	//	private Set<SourcedRating> ratings = new HashSet<>();
-
-	//	@Field(index = false, store = false, type = FieldType.Object)
-	//	private Set<Question> questions = new HashSet<>();
-	//
-	//	@Field(index = false, store = false, type = FieldType.Object)
-	//	private Set<ProsOrCons> pros = new HashSet<>();
-	//
-	//	@Field(index = false, store = false, type = FieldType.Object)
-	//	private Set<ProsOrCons> cons = new HashSet<>();
-
-
 	//////////////////// :
 	// Stored (and computed) to help elastic querying / sorting
 	////////////////////
@@ -204,7 +185,7 @@ public class Product implements Standardisable {
 		super();
 	}
 
-	public Product(final String id) {
+	public Product(final long id) {
 		super();
 		this.id = id;
 
@@ -234,7 +215,7 @@ public class Product implements Standardisable {
 	public boolean equals(final Object obj) {
 
 		if (obj instanceof Product) {
-			return id.equals(((Product) obj).getId());
+			return id == ((Product) obj).getId();
 		}
 
 		return super.equals(obj);
@@ -278,14 +259,6 @@ public class Product implements Standardisable {
 		return scores.get("ECOSCORE");
 	}
 	
-	
-
-	public String ecological() {
-		
-		
-		return id;
-	}
-		
 		
 	public String caracteristics() {
 		
@@ -491,8 +464,9 @@ public class Product implements Standardisable {
 	 * @return the gtin, if availlable from referentiel attributes
 	 */
 	public String gtin() {
+		// TODO(p2,design) : Use gtin info to format to the according gtin type
 		try {
-			return id;
+			return id+"";
 		} catch (final Exception e) {
 			return null;
 		}
@@ -746,7 +720,7 @@ public class Product implements Standardisable {
 		// Case ref attribute is already set, we keep as it and we remove the elected one from alternativeModels
 		String existing = model();
 		
-		if ( StringUtils.isEmpty(existing) || FORCE) {
+		if ( StringUtils.isEmpty(existing) || FORCE_OVERRIDE_MODEL_NAME_WITH_SHORTEST) {
 			String shortest = shortestModel();
 			if (null != shortest) {
 				attributes.getReferentielAttributes().put(ReferentielKey.MODEL, shortest);
@@ -777,17 +751,6 @@ public class Product implements Standardisable {
 	//////////////////////////////////////////
 
 	
-	
-	public String getId() {
-		return id;
-	}
-
-	public void setId(String id) {
-		this.id = id;
-	}
-
-
-
 	public Set<UnindexedKeyValTimestamp> getAlternativeBrands() {
 		return alternativeBrands;
 	}
@@ -960,6 +923,15 @@ public class Product implements Standardisable {
 	public void setExcluded(boolean excluded) {
 		this.excluded = excluded;
 	}
+
+	public long getId() {
+		return id;
+	}
+
+	public void setId(long id) {
+		this.id = id;
+	}
+
 
 
 

@@ -47,7 +47,7 @@ public class IdentityAggregationService extends AbstractAggregationService {
 		/////////////////////////////
 		
 		if (null == output.gtin()) {
-			output.setId(input.gtin());
+			output.setId(Long.valueOf(input.gtin()));
 		} else {
 			if (!output.gtin().equals(input.gtin())) {
 				dedicatedLogger.error("GTIN Mismatch : product {], dataFragment {}", output.gtin(), input.gtin());
@@ -96,7 +96,7 @@ public class IdentityAggregationService extends AbstractAggregationService {
 
 		// Replacing the barcode, due to sanitisation
 		output.getAttributes().getReferentielAttributes().put(ReferentielKey.GTIN,valResult.getValue());
-		output.setId(valResult.getValue());
+		output.setId(Long.valueOf(valResult.getValue()));
 
 
 		/////////////////////////////

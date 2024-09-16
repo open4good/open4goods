@@ -181,7 +181,7 @@ public class BackupService implements HealthIndicator {
 						List<Product> group = new ArrayList<>();
 						bufferedReader.lines().forEach(line -> {
 						    try {
-						        group.add(serialisationService.fromJson(line, Product.class));
+						        group.add(translateImport(serialisationService.fromJson(line, Product.class)));
 						        counter.incrementAndGet();
 						        if (counter.get() % 1000 == 0) {
 						            logger.warn("Imported items so : {}", counter.get());
@@ -218,7 +218,17 @@ public class BackupService implements HealthIndicator {
 	    logger.info("Product import : finished");
 	}
 	
-	
+	/**
+	 * This method is used to convert data in migration scenario
+	 * @param original
+	 * @return
+	 */
+	private Product translateImport(Product original) {
+		
+		
+		return original;
+	}
+
 	/**
 	 * This method will periodicaly backup the Xwiki content
 	 */

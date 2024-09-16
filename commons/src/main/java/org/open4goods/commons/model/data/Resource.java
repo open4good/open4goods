@@ -13,9 +13,6 @@ import org.open4goods.commons.model.Validable;
 import org.open4goods.commons.model.constants.ResourceType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.data.elasticsearch.annotations.DateFormat;
-import org.springframework.data.elasticsearch.annotations.Field;
-import org.springframework.data.elasticsearch.annotations.FieldType;
 
 /**
  * Resources represents documents, images, binaries , etc.. associated with a
@@ -30,54 +27,39 @@ public class Resource implements Validable {
 
 	private static final Logger logger = LoggerFactory.getLogger(Resource.class);
 
-	@Field(index = false, store = false, type = FieldType.Keyword)
 	private String url;
 
-	@Field(index = false, store = false, type = FieldType.Keyword)
 	private String mimeType;
 
-	@Field(index = false, store = false, type = FieldType.Date, format = DateFormat.epoch_millis)
 	private Long timeStamp;
 
-	@Field(index = false, store = false, type = FieldType.Keyword)
 	private String cacheKey;
 
-	@Field(index = false, store = false, type = FieldType.Boolean)
 	// If true, this media has been tested and is not retained
 	private boolean evicted = false;
 
-	@Field(index = false, store = false, type = FieldType.Boolean)
 	// If true, this media has been downloaded and analysed
 	private boolean processed = false;
 
-	@Field(index = false, store = false, type = FieldType.Keyword)
 	// A complementary status, on eviction cause, or whatever
 	private ResourceStatus status;
 
-	@Field(index = false, store = false, type = FieldType.Keyword)
 	private Long fileSize;
 
-	@Field(index = false, store = false, type = FieldType.Keyword)
 	private String fileName;
 
-	@Field(index = false, store = false, type = FieldType.Keyword)
 	private String extension;
 
-	@Field(index = false, store = false, type = FieldType.Keyword)
 	private String md5;
 
-	@Field(index = false, store = false, type = FieldType.Keyword)
 	private ResourceType resourceType;
 
-	@Field(index = false, store = false, type = FieldType.Object)
 	private ImageInfo imageInfo;
 
-	@Field(index = false, store = false, type = FieldType.Integer)
 	// The group (similarity based and popularity ranked) this resource belongs to
 	// TODO : Move into imageinfo
 	private Integer group;
 
-	@Field(index = false, store = false, type = FieldType.Keyword)
 	// The group (similarity based and popularity ranked) this resource belongs to
 	private String datasourceName;
 
@@ -86,10 +68,8 @@ public class Resource implements Validable {
 	/**
 	 * From ResourceTagDictionary
 	 */
-	@Field(index = false, store = false, type = FieldType.Keyword)
 	private Set<String> tags = new HashSet<>();
 
-	@Field(index = false, store = false, type = FieldType.Keyword)
 	private Set<ResourceTag> hardTags = new HashSet<>();
 	
 	public Resource() {

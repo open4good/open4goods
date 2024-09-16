@@ -16,7 +16,6 @@ public class ExternalIds {
 	private String icecat;
 	
 	
-	
 	/**
 	 * Known mpn's
 	 */

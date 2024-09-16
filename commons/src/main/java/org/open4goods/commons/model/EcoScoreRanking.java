@@ -8,9 +8,9 @@ public class EcoScoreRanking {
 	// Number of items in ther vertical when the position was computed
 	private long globalCount;
 	// The best item id in the whole vertical
-	private String globalBest;
+	private Long globalBest;
 	// The better item id in the whole vertical (item just after)
-	private String globalBetter;
+	private Long globalBetter;
 		
 	
 	
@@ -50,16 +50,19 @@ public class EcoScoreRanking {
 	public void setSpecializedCount(long specializedCount) {
 		this.specializedCount = specializedCount;
 	}
-	public String getGlobalBest() {
+	
+	
+	public Long getGlobalBest() {
 		return globalBest;
 	}
-	public void setGlobalBest(String globalBest) {
+	public void setGlobalBest(Long globalBest) {
 		this.globalBest = globalBest;
 	}
-	public String getGlobalBetter() {
+	public Long getGlobalBetter() {
 		return globalBetter;
 	}
-	public void setGlobalBetter(String globalBetter) {
+	
+	public void setGlobalBetter(Long globalBetter) {
 		this.globalBetter = globalBetter;
 	}
 	public String getSpecializedBest() {

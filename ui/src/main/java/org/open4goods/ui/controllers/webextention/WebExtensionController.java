@@ -76,7 +76,7 @@ public class WebExtensionController {
 			} else {
 				Product data = null;
 				try {
-					data = productRepository.getById(bCode.getValue());
+					data = productRepository.getById(Long.valueOf(bCode.getValue()));
 				} catch (ResourceNotFoundException e) {
 					mv.addObject("exists", false);
 				}
@@ -130,7 +130,7 @@ public class WebExtensionController {
 			} else {
 				Product data;
 				try {
-					data = productRepository.getById(bCode.getValue());
+					data = productRepository.getById(Long.valueOf(bCode.getValue()));
 				} catch (ResourceNotFoundException e) {
 					mv.setViewName("webextension/product-notfound");
 					throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No product found ");
