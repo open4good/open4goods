@@ -74,8 +74,7 @@ public class MongoProduct implements Standardisable {
 	private long creationDate;
 
 	/**
-	 * The last date this product has changed (new data, price change, new comment,
-	 * * so on...)
+	 * The last date this product has changed (new data, price change, new comment, so on...)
 	 */
 	private long lastChange;
 
@@ -152,7 +151,8 @@ public class MongoProduct implements Standardisable {
 	/** Namings informations for this product **/
 	@Field(index = true, store = false, type = FieldType.Object)
 	// TODO(p1,design) : Refactor to a localisable at this level, check impact on already generated names, check url's can not be erased
-	private ProductTexts names = new ProductTexts();
+	// TODO : Rename
+	private Localisable<String, ProductTexts> names = new Localisable<String, ProductTexts>();
 
 	
 	// /**
@@ -209,7 +209,8 @@ public class MongoProduct implements Standardisable {
 		
 		
 		
-		this.names = other.getNames(); // Using getter from ProductTexts
+//		this.names = other.getNames(); // Using getter from ProductTexts
+		
 		this.attributes = other.getAttributes(); // Using getter from AggregatedAttributes
 		this.price = other.getPrice(); // Using getter from AggregatedPrices
 		this.datasourceNames = other.getDatasourceNames(); // Directly using getter
@@ -252,22 +253,22 @@ public class MongoProduct implements Standardisable {
 		return super.equals(obj);
 	}
 
-	/**
-	 *
-	 * @return all names and descriptions, excluding the longest offer name
-	 */
-	public List<String> namesAndDescriptionsWithoutShortestName() {
-
-		Set<String> ret = new HashSet<>();
-		ret.addAll(names.getOfferNames());
-		ret.remove(names.shortestOfferName());
-
-		List<String> list = new ArrayList<>(ret);
-
-		list.sort(Comparator.naturalOrder());
-
-		return list;
-	}
+//	/**
+//	 *
+//	 * @return all names and descriptions, excluding the longest offer name
+//	 */
+//	public List<String> namesAndDescriptionsWithoutShortestName() {
+//
+//		Set<String> ret = new HashSet<>();
+//		ret.addAll(names.getOfferNames());
+//		ret.remove(names.shortestOfferName());
+//
+//		List<String> list = new ArrayList<>(ret);
+//
+//		list.sort(Comparator.naturalOrder());
+//
+//		return list;
+//	}
 
 	public List<Score> realScores() {
 		List<Score> ret = scores.values().stream().filter(e -> !e.getVirtual())
@@ -492,23 +493,23 @@ public class MongoProduct implements Standardisable {
 	// return id();
 	// }
 	//
-	/**
-	 * Returns the best human readable name
-	 */
-	public String bestName() {
-		String ret;
-		if (null == brand() || null == model) {
-			ret = names.shortestOfferName();
-		} else {
-			ret = brandAndModel();
-		}
-
-		if (null == ret) {
-			ret = gtin();
-		}
-
-		return ret;
-	}
+//	/**
+//	 * Returns the best human readable name
+//	 */
+//	public String bestName() {
+//		String ret;
+//		if (null == brand() || null == model) {
+//			ret = names.shortestOfferName();
+//		} else {
+//			ret = brandAndModel();
+//		}
+//
+//		if (null == ret) {
+//			ret = gtin();
+//		}
+//
+//		return ret;
+//	}
 
 	public String ecoscoreAsString() {
 		Score s = ecoscore();
@@ -635,7 +636,7 @@ public class MongoProduct implements Standardisable {
 	}
 
 	public String url(String language) {
-		return names.getUrl().getOrDefault(language, names.getUrl().get("default"));
+		return names.getOrDefault(language, names.get("default")).getUrl();
 	}
 
 	/**
@@ -753,11 +754,13 @@ public class MongoProduct implements Standardisable {
 		this.lastChange = lastChange;
 	}
 
-	public ProductTexts getNames() {
+	
+	
+	public Localisable<String, ProductTexts> getNames() {
 		return names;
 	}
 
-	public void setNames(ProductTexts names) {
+	public void setNames(Localisable<String, ProductTexts> names) {
 		this.names = names;
 	}
 

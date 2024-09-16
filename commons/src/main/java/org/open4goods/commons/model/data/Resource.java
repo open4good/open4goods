@@ -94,6 +94,7 @@ public class Resource implements Validable {
 		super();
 	}
 
+	//TODO(p1, i18n) : Add language
 	public Resource(String url) throws ValidationException {
 		super();
 

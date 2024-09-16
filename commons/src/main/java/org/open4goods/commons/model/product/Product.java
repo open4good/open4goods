@@ -241,22 +241,6 @@ public class Product implements Standardisable {
 		return super.equals(obj);
 	}
 
-	/**
-	 *
-	 * @return all names and descriptions, excluding the longest offer name
-	 */
-	public List<String> namesAndDescriptionsWithoutShortestName() {
-
-		Set<String> ret = new HashSet<>();
-		ret.addAll(names.getOfferNames());
-		ret.remove(names.shortestOfferName());
-
-        List<String> list = new ArrayList<>(ret);
-
-		list.sort(Comparator.naturalOrder());
-
-		return list;
-	}
 
 	
 	public List<Score> realScores() {
@@ -518,31 +502,7 @@ public class Product implements Standardisable {
 	}
 	
 	
-	
-	//	/**
-	//	 * Returns the name (brand - model)
-	//	 */
-	//	public String name() {
-	//		return id();
-	//	}
-	//
-	/**
-	 * Returns the best human readable name
-	 */
-	public String bestName() {
-		String ret;
-		if (null == brand() || null == model()) {
-			ret = names.shortestOfferName();
-		} else {
-			ret =  brandAndModel();
-		}
-		
-		if (null == ret) {
-			ret = gtin();
-		}
 
-		return ret;
-	}
 
 	/**
 	 *
@@ -717,9 +677,9 @@ public class Product implements Standardisable {
 		
 	}
 	
-	
+	// TODO : remove when migration complete
 	public String url (String language) {
-		return names.getUrl().getOrDefault(language, names.getUrl().get("default"));
+		return "";
 	}
 	
 	/**
@@ -969,6 +929,10 @@ public class Product implements Standardisable {
 	}
 
 
+	// TODO : Remove once migration done
+	public String bestName() {
+		return "";
+	}
 
 
 
