@@ -1,6 +1,6 @@
 {
   "index": {
-  	"refresh_interval": "30s"
+  	"refresh_interval": "60s"
   },
   "analysis": {
     "analyzer": {
