@@ -2,7 +2,7 @@ package org.open4goods.commons.services.textgen;
 
 import org.apache.commons.lang3.StringUtils;
 import org.open4goods.commons.exceptions.InvalidParameterException;
-import org.open4goods.commons.model.product.Product;
+import org.open4goods.commons.model.product.LegacyProduct;
 import org.open4goods.commons.services.EvaluationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,7 +42,7 @@ public class BlablaService {
 	 * @param data
 	 * @return
 	 */
-	public String generateBlabla(String input, final Product data) throws InvalidParameterException {
+	public String generateBlabla(String input, final LegacyProduct data) throws InvalidParameterException {
 
 		//////////////////////////////////
 		// Aleas computation;

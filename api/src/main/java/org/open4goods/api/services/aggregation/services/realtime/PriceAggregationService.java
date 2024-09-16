@@ -19,7 +19,7 @@ import org.open4goods.commons.model.data.DataFragment;
 import org.open4goods.commons.model.product.AggregatedPrice;
 import org.open4goods.commons.model.product.AggregatedPrices;
 import org.open4goods.commons.model.product.PriceHistory;
-import org.open4goods.commons.model.product.Product;
+import org.open4goods.commons.model.product.LegacyProduct;
 import org.slf4j.Logger;
 
 import com.google.common.collect.Sets;
@@ -56,7 +56,7 @@ public class PriceAggregationService extends AbstractAggregationService {
 	}
 
 	@Override
-	public void onDataFragment(final DataFragment fragment, final Product aggregatedData,VerticalConfig vConf) throws AggregationSkipException {
+	public void onDataFragment(final DataFragment fragment, final LegacyProduct aggregatedData,VerticalConfig vConf) throws AggregationSkipException {
 
 		if (!fragment.hasPrice() || !fragment.affiliated()) {
 			dedicatedLogger.info("No price for data fragment {}, skipping", fragment );
@@ -75,7 +75,7 @@ public class PriceAggregationService extends AbstractAggregationService {
 
 	
 	@Override
-	public void onProduct(Product data, VerticalConfig vConf) throws AggregationSkipException {
+	public void onProduct(LegacyProduct data, VerticalConfig vConf) throws AggregationSkipException {
 
 		///////////////////
 		// Filtering : 

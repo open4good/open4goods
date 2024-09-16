@@ -6,7 +6,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.open4goods.commons.config.yml.ui.VerticalConfig;
 import org.open4goods.commons.exceptions.ValidationException;
 import org.open4goods.commons.model.data.Score;
-import org.open4goods.commons.model.product.Product;
+import org.open4goods.commons.model.product.LegacyProduct;
 import org.slf4j.Logger;
 
 /**
@@ -26,7 +26,7 @@ public class DataCompletion2ScoreAggregationService extends AbstractScoreAggrega
 
 
 	@Override
-	public void onProduct(Product data, VerticalConfig vConf) {
+	public void onProduct(LegacyProduct data, VerticalConfig vConf) {
 		if (StringUtils.isEmpty(data.brand())) {
 			return;
 		}

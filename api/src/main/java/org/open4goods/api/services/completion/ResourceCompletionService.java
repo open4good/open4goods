@@ -32,7 +32,7 @@ import org.open4goods.commons.model.data.ImageInfo;
 import org.open4goods.commons.model.data.Resource;
 import org.open4goods.commons.model.data.ResourceStatus;
 import org.open4goods.commons.model.data.ResourceTag;
-import org.open4goods.commons.model.product.Product;
+import org.open4goods.commons.model.product.LegacyProduct;
 import org.open4goods.commons.services.ImageMagickService;
 import org.open4goods.commons.services.ResourceService;
 import org.open4goods.commons.services.VerticalsConfigService;
@@ -100,7 +100,7 @@ public class ResourceCompletionService  extends AbstractCompletionService{
 	 */
 	
 	@Override
-	public void processProduct(VerticalConfig vertical, Product data ) {
+	public void processProduct(VerticalConfig vertical, LegacyProduct data ) {
 
 		////////////////////
 		// Update all new items

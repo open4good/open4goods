@@ -11,7 +11,7 @@ import org.open4goods.commons.exceptions.AggregationSkipException;
 import org.open4goods.commons.model.BarcodeType;
 import org.open4goods.commons.model.constants.ReferentielKey;
 import org.open4goods.commons.model.data.DataFragment;
-import org.open4goods.commons.model.product.Product;
+import org.open4goods.commons.model.product.LegacyProduct;
 import org.open4goods.commons.services.BarcodeValidationService;
 import org.open4goods.commons.services.Gs1PrefixService;
 import org.slf4j.Logger;
@@ -40,7 +40,7 @@ public class IdentityAggregationService extends AbstractAggregationService {
 	}
 
 	@Override
-	public void onDataFragment(final DataFragment input, final Product output, VerticalConfig vConf) throws AggregationSkipException {
+	public void onDataFragment(final DataFragment input, final LegacyProduct output, VerticalConfig vConf) throws AggregationSkipException {
 
 		/////////////////////////////
 		// Validating barcodes
@@ -80,7 +80,7 @@ public class IdentityAggregationService extends AbstractAggregationService {
 	}
 
 	@Override
-	public void onProduct(Product output, VerticalConfig vConf) throws AggregationSkipException {
+	public void onProduct(LegacyProduct output, VerticalConfig vConf) throws AggregationSkipException {
 
 		if (StringUtils.isEmpty(output.gtin())) {
 			dedicatedLogger.warn("Skipping product aggregation, empty barcode");

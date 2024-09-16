@@ -7,7 +7,7 @@ import java.util.Collection;
 import org.open4goods.commons.config.yml.ui.VerticalConfig;
 import org.open4goods.commons.exceptions.AggregationSkipException;
 import org.open4goods.commons.model.data.DataFragment;
-import org.open4goods.commons.model.product.Product;
+import org.open4goods.commons.model.product.LegacyProduct;
 import org.slf4j.Logger;
 
 
@@ -30,7 +30,7 @@ public abstract class AbstractAggregationService  implements Closeable {
 	 * Called on each participant DataFragment, in realtime mode
 	 * @param data
 	 */
-	public void onDataFragment (final DataFragment input, final Product output, VerticalConfig vConf) throws AggregationSkipException {
+	public void onDataFragment (final DataFragment input, final LegacyProduct output, VerticalConfig vConf) throws AggregationSkipException {
 		
 	}
 
@@ -41,7 +41,7 @@ public abstract class AbstractAggregationService  implements Closeable {
 	 * @param output
 	 * @throws AggregationSkipException
 	 */
-	public abstract void onProduct(Product data, VerticalConfig vConf) throws AggregationSkipException;
+	public abstract void onProduct(LegacyProduct data, VerticalConfig vConf) throws AggregationSkipException;
 	
 
 
@@ -49,7 +49,7 @@ public abstract class AbstractAggregationService  implements Closeable {
 	 * Called before data aggregation in batch mode
 	 * @param datas 
 	 */
-	public void init(Collection<Product> datas) {
+	public void init(Collection<LegacyProduct> datas) {
 
 	}
 
@@ -57,7 +57,7 @@ public abstract class AbstractAggregationService  implements Closeable {
 	 * Called after data aggregation in batchmode
 	 * @param datas 
 	 */
-	public void done(Collection<Product> datas) {
+	public void done(Collection<LegacyProduct> datas) {
 		
 	}
 	

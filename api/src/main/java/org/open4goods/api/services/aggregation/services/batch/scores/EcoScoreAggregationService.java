@@ -10,7 +10,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.open4goods.commons.config.yml.ui.VerticalConfig;
 import org.open4goods.commons.exceptions.ValidationException;
 import org.open4goods.commons.model.data.Score;
-import org.open4goods.commons.model.product.Product;
+import org.open4goods.commons.model.product.LegacyProduct;
 import org.slf4j.Logger;
 
 /**
@@ -29,7 +29,7 @@ public class EcoScoreAggregationService extends AbstractScoreAggregationService 
 
 
 	@Override
-	public void onProduct(Product data, VerticalConfig vConf) {
+	public void onProduct(LegacyProduct data, VerticalConfig vConf) {
 		if (StringUtils.isEmpty(data.brand())) {
 			return;
 		}
@@ -74,20 +74,20 @@ public class EcoScoreAggregationService extends AbstractScoreAggregationService 
 
 
 	@Override
-	public void done(Collection<Product> datas) {
+	public void done(Collection<LegacyProduct> datas) {
 		super.done(datas);
 		
 		///////////////////////
 		// EcoScore ranking and "best alternativ" reach
 		///////////////////////
-		List<Product> sorted = new ArrayList<>();
+		List<LegacyProduct> sorted = new ArrayList<>();
 		sorted.addAll(datas);
 
 		Collections.sort(sorted, (o1, o2) -> Double.compare(o1.ecoscore().getRelativ().getValue() , o2.ecoscore().getRelativ().getValue()));
 		
 		int count = sorted.size();
 		for (int i = 0; i < count; i++) {
-			Product p = sorted.get(i);
+			LegacyProduct p = sorted.get(i);
 			p.getRanking().setGlobalCount(count);
 			p.getRanking().setGlobalPosition(count - i);
 			p.getRanking().setGlobalBest(sorted.getLast().getIdLong());

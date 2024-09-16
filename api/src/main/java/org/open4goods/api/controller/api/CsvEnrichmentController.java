@@ -17,7 +17,7 @@ import org.open4goods.commons.exceptions.ResourceNotFoundException;
 import org.open4goods.commons.model.BarcodeType;
 import org.open4goods.commons.model.constants.ProductCondition;
 import org.open4goods.commons.model.constants.RolesConstants;
-import org.open4goods.commons.model.product.Product;
+import org.open4goods.commons.model.product.LegacyProduct;
 import org.open4goods.commons.services.BarcodeValidationService;
 import org.open4goods.commons.services.SerialisationService;
 import org.slf4j.Logger;
@@ -196,7 +196,7 @@ public class CsvEnrichmentController {
 				String title = line.get(titleField);
 
 
-				Product p = null;
+				LegacyProduct p = null;
 				
 				// Sanitisation and GTIN information
 				if (StringUtils.isEmpty(gtin)) {
@@ -208,7 +208,7 @@ public class CsvEnrichmentController {
 						// GTIN resolution
 						logger.info("Product resolution from title : " + title);
 						
-						List<Product> products = repository.getByTitle(title);
+						List<LegacyProduct> products = repository.getByTitle(title);
 						if (products.size() == 0) {
 							enriched.put(O4G_MSG, "NO_TITLE_MATCH");	
 						} else if (products.size() > 1) {
@@ -273,7 +273,7 @@ public class CsvEnrichmentController {
 	 * @param enriched
 	 * @param facets
 	 */
-	private void enrich(Product p, Map<String, Object> enriched, List<EnrichmentFacet> facets) {
+	private void enrich(LegacyProduct p, Map<String, Object> enriched, List<EnrichmentFacet> facets) {
 
 		for (EnrichmentFacet facet : facets) {
 

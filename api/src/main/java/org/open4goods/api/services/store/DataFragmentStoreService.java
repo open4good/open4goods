@@ -16,7 +16,7 @@ import org.open4goods.commons.exceptions.AggregationSkipException;
 import org.open4goods.commons.exceptions.ValidationException;
 import org.open4goods.commons.model.Standardisable;
 import org.open4goods.commons.model.data.DataFragment;
-import org.open4goods.commons.model.product.Product;
+import org.open4goods.commons.model.product.LegacyProduct;
 import org.open4goods.commons.services.StandardiserService;
 import org.open4goods.commons.store.repository.ProductIndexationWorker;
 import org.slf4j.Logger;
@@ -176,7 +176,7 @@ public class DataFragmentStoreService {
 		
 		try {
 			// Retrieving datafragments
-			Map<String, Product> aggDatas = aggregatedDataRepository.multiGetById(
+			Map<String, LegacyProduct> aggDatas = aggregatedDataRepository.multiGetById(
 
 					buffer.stream()
 					.map(DataFragment::gtin)
@@ -185,13 +185,13 @@ public class DataFragmentStoreService {
 
 
 			// Aggregating to product datas
-			Set<Product> results = new HashSet<Product>();
+			Set<LegacyProduct> results = new HashSet<LegacyProduct>();
 
 			for (DataFragment df : buffer) {
-				Product data = aggDatas.get(df.gtin());
+				LegacyProduct data = aggDatas.get(df.gtin());
 				if (null == data) {
 					// This is a first product
-					data = new Product();
+					data = new LegacyProduct();
 					data.setCreationDate(System.currentTimeMillis());
 				}
 

@@ -6,7 +6,7 @@ import org.open4goods.api.services.aggregation.AbstractAggregationService;
 import org.open4goods.commons.config.yml.ui.VerticalConfig;
 import org.open4goods.commons.exceptions.AggregationSkipException;
 import org.open4goods.commons.model.data.DataFragment;
-import org.open4goods.commons.model.product.Product;
+import org.open4goods.commons.model.product.LegacyProduct;
 import org.open4goods.commons.services.VerticalsConfigService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,7 +35,7 @@ public class StandardAggregator extends AbstractAggregator {
 	 * @return
 	 * @throws AggregationSkipException
 	 */
-	public Product onDatafragment(final DataFragment fragment, final Product data ) throws AggregationSkipException {
+	public LegacyProduct onDatafragment(final DataFragment fragment, final LegacyProduct data ) throws AggregationSkipException {
 
 		logger.debug("Incrementing Product with {} DataFragment and using {} services",fragment,services.size());
 
@@ -61,7 +61,7 @@ public class StandardAggregator extends AbstractAggregator {
 	 * @return
 	 * @throws AggregationSkipException
 	 */
-	public Product onProduct(final Product data ) throws AggregationSkipException {
+	public LegacyProduct onProduct(final LegacyProduct data ) throws AggregationSkipException {
 
 		logger.debug("Updating product using {} services",services.size());
 

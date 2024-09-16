@@ -19,7 +19,7 @@ import org.open4goods.commons.model.dto.NumericRangeFilter;
 import org.open4goods.commons.model.dto.VerticalFilterTerm;
 import org.open4goods.commons.model.dto.VerticalSearchRequest;
 import org.open4goods.commons.model.dto.VerticalSearchResponse;
-import org.open4goods.commons.model.product.Product;
+import org.open4goods.commons.model.product.LegacyProduct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cache.annotation.Cacheable;
@@ -119,7 +119,7 @@ public class SearchService {
 				.withPageable(PageRequest.of(from, to))
 				.withSort(Sort.by(org.springframework.data.domain.Sort.Order.desc("offersCount")));
 
-		SearchHits<Product> results = aggregatedDataRepository.search(esQuery.build(),ProductRepository.MAIN_INDEX_NAME);
+		SearchHits<LegacyProduct> results = aggregatedDataRepository.search(esQuery.build(),ProductRepository.MAIN_INDEX_NAME);
 		VerticalSearchResponse vsr = new VerticalSearchResponse();
 
 		//		// Setting the response
@@ -253,7 +253,7 @@ public class SearchService {
 		
 		}
 				
-		SearchHits<Product> results = aggregatedDataRepository.search(esQuery.build(),ProductRepository.MAIN_INDEX_NAME);
+		SearchHits<LegacyProduct> results = aggregatedDataRepository.search(esQuery.build(),ProductRepository.MAIN_INDEX_NAME);
 
 
 		// Handling aggregations results if relevant

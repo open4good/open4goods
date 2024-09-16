@@ -10,7 +10,7 @@ import java.util.stream.Stream;
 
 import org.open4goods.commons.config.yml.DevModeConfiguration;
 import org.open4goods.commons.dao.ProductRepository;
-import org.open4goods.commons.model.product.Product;
+import org.open4goods.commons.model.product.LegacyProduct;
 import org.open4goods.commons.services.SerialisationService;
 import org.open4goods.commons.services.VerticalsConfigService;
 import org.slf4j.Logger;
@@ -84,7 +84,7 @@ public class DevModeService {
 				Stream<String> stream = reader.lines()) {
 			stream.forEach(e -> {
 				try {
-					Product p = serialisationService.fromJson(e, Product.class);
+					LegacyProduct p = serialisationService.fromJson(e, LegacyProduct.class);
 					p.getPrice().getMinPrice().setTimeStamp(System.currentTimeMillis());
 					LOGGER.info("DevMode : Indexing product : "+p.getId());
 					repository.forceIndex(p);

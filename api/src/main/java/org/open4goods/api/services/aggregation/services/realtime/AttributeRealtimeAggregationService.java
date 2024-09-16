@@ -30,7 +30,7 @@ import org.open4goods.commons.model.data.Resource;
 import org.open4goods.commons.model.data.UnindexedKeyValTimestamp;
 import org.open4goods.commons.model.product.AggregatedAttribute;
 import org.open4goods.commons.model.product.AggregatedFeature;
-import org.open4goods.commons.model.product.Product;
+import org.open4goods.commons.model.product.LegacyProduct;
 import org.open4goods.commons.services.BrandService;
 import org.open4goods.commons.services.IcecatService;
 import org.open4goods.commons.services.VerticalsConfigService;
@@ -54,7 +54,7 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 
 
 	@Override
-	public void onProduct(Product data, VerticalConfig vConf) throws AggregationSkipException {
+	public void onProduct(LegacyProduct data, VerticalConfig vConf) throws AggregationSkipException {
 
 		
 		//////////////////////////////////////////
@@ -105,7 +105,7 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 	 * @param match2
 	 */
 	@Override
-	public void onDataFragment(final DataFragment dataFragment, final Product product, VerticalConfig vConf) throws AggregationSkipException {
+	public void onDataFragment(final DataFragment dataFragment, final LegacyProduct product, VerticalConfig vConf) throws AggregationSkipException {
 
 		if (dataFragment.getAttributes().size() == 0) {
 			return;
@@ -344,7 +344,7 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 	 * @param aa
 	 * @param output
 	 */
-	private void handleReferentielAttributes(DataFragment fragement, Product output) {
+	private void handleReferentielAttributes(DataFragment fragement, LegacyProduct output) {
 
 		
 		for (Entry<ReferentielKey, String> attr : fragement.getReferentielAttributes().entrySet()) {

@@ -28,7 +28,7 @@ import org.open4goods.commons.model.constants.ReferentielKey;
 import org.open4goods.commons.model.data.DataFragment;
 import org.open4goods.commons.model.data.Resource;
 import org.open4goods.commons.model.data.ResourceTag;
-import org.open4goods.commons.model.product.Product;
+import org.open4goods.commons.model.product.LegacyProduct;
 import org.open4goods.commons.services.DataSourceConfigService;
 import org.open4goods.commons.services.VerticalsConfigService;
 import org.slf4j.Logger;
@@ -80,7 +80,7 @@ public class IcecatCompletionService extends AbstractCompletionService {
 	 * > if second call, then make a get.
 	 * > If ASIN was not previously found, then mark as stand by
 	 */
-	public void processProduct(VerticalConfig vertical, Product data) {
+	public void processProduct(VerticalConfig vertical, LegacyProduct data) {
 		logger.info("Icecat completion for {}", data.getId());
 		Set<DataFragment> fragments = new HashSet<>();
 		
@@ -116,7 +116,7 @@ public class IcecatCompletionService extends AbstractCompletionService {
 	 * @param vertical
 	 * @param data
 	 */
-	private Set<DataFragment> completeSearch(VerticalConfig vertical, Product data) {
+	private Set<DataFragment> completeSearch(VerticalConfig vertical, LegacyProduct data) {
 		Set<DataFragment> ret = new HashSet<>();
 		
 		// TODO : Should manage a thread pool if operating on all catalog
@@ -158,7 +158,7 @@ public class IcecatCompletionService extends AbstractCompletionService {
 	 * @param data
 	 * @return
 	 */
-	private DataFragment convert(IceDataItem iceItem, Product data) {
+	private DataFragment convert(IceDataItem iceItem, LegacyProduct data) {
 		DataFragment df = initDataFragment(data);
 		
 		completeGeneralInfos(iceItem.generalInfo, df);
@@ -316,7 +316,7 @@ public class IcecatCompletionService extends AbstractCompletionService {
 	 * @param data
 	 * @return
 	 */
-	private DataFragment initDataFragment( Product data) {
+	private DataFragment initDataFragment( LegacyProduct data) {
 		DataFragment df = new DataFragment();
 		// TODO : Constants
 		df.setDatasourceName("icecat.biz");

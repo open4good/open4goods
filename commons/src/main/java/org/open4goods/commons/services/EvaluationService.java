@@ -3,7 +3,7 @@ package org.open4goods.commons.services;
 import java.util.Map.Entry;
 
 import org.open4goods.commons.model.constants.ReferentielKey;
-import org.open4goods.commons.model.product.Product;
+import org.open4goods.commons.model.product.LegacyProduct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.expression.EvaluationException;
@@ -56,7 +56,7 @@ public class EvaluationService {
 	 * @param spel
 	 * @return
 	 */
-	public Boolean spelEval(final Product p, final String spel) {
+	public Boolean spelEval(final LegacyProduct p, final String spel) {
 		final Expression expression = expressionParser.parseExpression(spel);
 		try {
 			return expression.getValue(p, Boolean.class);
@@ -73,7 +73,7 @@ public class EvaluationService {
 	 * @param spel
 	 * @return
 	 */
-	public String spelCompute(final Product p, final String spel) {
+	public String spelCompute(final LegacyProduct p, final String spel) {
 		final Expression expression = expressionParser.parseExpression(spel);
 		try {
 			return expression.getValue(p, String.class);
@@ -91,7 +91,7 @@ public class EvaluationService {
 	 * @param template
 	 * @return
 	 */
-		public String thymeleafEval(final Product p, final String template) {
+		public String thymeleafEval(final LegacyProduct p, final String template) {
 			/**
 			 * Generate a name from the thymleaf template weared in conf
 			 *

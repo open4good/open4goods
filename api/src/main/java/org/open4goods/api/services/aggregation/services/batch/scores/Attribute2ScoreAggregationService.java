@@ -9,7 +9,7 @@ import org.open4goods.commons.exceptions.ValidationException;
 import org.open4goods.commons.model.attribute.AttributeType;
 import org.open4goods.commons.model.data.Score;
 import org.open4goods.commons.model.product.AggregatedAttribute;
-import org.open4goods.commons.model.product.Product;
+import org.open4goods.commons.model.product.LegacyProduct;
 import org.slf4j.Logger;
 
 public class Attribute2ScoreAggregationService extends AbstractScoreAggregationService {
@@ -22,7 +22,7 @@ public class Attribute2ScoreAggregationService extends AbstractScoreAggregationS
 	
 	
 	@Override
-	public void onProduct(Product data, VerticalConfig vConf) {
+	public void onProduct(LegacyProduct data, VerticalConfig vConf) {
 
 		
 		Collection<AggregatedAttribute> aggattrs =    data.getAttributes().getAggregatedAttributes().values()  ;

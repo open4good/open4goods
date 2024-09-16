@@ -1,6 +1,6 @@
 package org.open4goods.commons.store.repository.redis;
 
-import org.open4goods.commons.model.product.Product;
+import org.open4goods.commons.model.product.LegacyProduct;
 import org.springframework.data.repository.CrudRepository;
 
 /**
@@ -9,7 +9,7 @@ import org.springframework.data.repository.CrudRepository;
  *
  */
 
-public interface  RedisProductRepository extends CrudRepository<Product, String> {
+public interface  RedisProductRepository extends CrudRepository<LegacyProduct, String> {
 
 
 

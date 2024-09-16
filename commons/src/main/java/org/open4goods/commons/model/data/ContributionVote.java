@@ -3,7 +3,7 @@ package org.open4goods.commons.model.data;
 import java.util.UUID;
 
 import org.open4goods.commons.model.product.AggregatedPrice;
-import org.open4goods.commons.model.product.Product;
+import org.open4goods.commons.model.product.LegacyProduct;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.elasticsearch.annotations.Document;
 import org.springframework.data.elasticsearch.annotations.Field;
@@ -48,7 +48,7 @@ public class ContributionVote {
 
 
 
-	public ContributionVote(AggregatedPrice e, Product data) {
+	public ContributionVote(AggregatedPrice e, LegacyProduct data) {
 		gtin= data.gtin();
 		price=e.getPrice();
 		datasourceName = e.getDatasourceName();

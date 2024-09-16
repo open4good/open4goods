@@ -7,7 +7,7 @@ import java.util.Map;
 
 import org.open4goods.commons.config.yml.attributes.AttributeConfig;
 import org.open4goods.commons.config.yml.ui.VerticalConfig;
-import org.open4goods.commons.model.product.Product;
+import org.open4goods.commons.model.product.LegacyProduct;
 
 /**
  * Results of a search inside a specific vertical
@@ -21,7 +21,7 @@ public class VerticalSearchResponse {
 
 	private VerticalSearchRequest request;
 
-	private List<Product> data;
+	private List<LegacyProduct> data;
 
 
 	private Integer maxOffers;
@@ -74,18 +74,18 @@ public class VerticalSearchResponse {
 	public VerticalSearchResponse() {
 	}
 
-	public List<Product> limitedDatas(Integer to) {
+	public List<LegacyProduct> limitedDatas(Integer to) {
 		if (to > data.size()) {
 			return data;
 		}
 		return data.subList(0, to);
 	}
 	
-	public List<Product> getData() {
+	public List<LegacyProduct> getData() {
 		return data;
 	}
 
-	public void setData(List<Product> results) {
+	public void setData(List<LegacyProduct> results) {
 		data = results;
 	}
 

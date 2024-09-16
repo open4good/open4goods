@@ -1,6 +1,6 @@
 package org.open4goods.commons.store.repository.elastic;
 
-import org.open4goods.commons.model.product.Product;
+import org.open4goods.commons.model.product.LegacyProduct;
 import org.springframework.data.elasticsearch.repository.ElasticsearchRepository;
 
 /**
@@ -9,7 +9,7 @@ import org.springframework.data.elasticsearch.repository.ElasticsearchRepository
  *
  */
 
-public interface  ElasticProductRepository extends ElasticsearchRepository<Product, String> {
+public interface  ElasticProductRepository extends ElasticsearchRepository<LegacyProduct, String> {
 
 
 

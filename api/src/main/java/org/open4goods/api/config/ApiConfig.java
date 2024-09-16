@@ -26,7 +26,7 @@ import org.open4goods.commons.model.constants.TimeConstants;
 import org.open4goods.commons.model.constants.UrlConstants;
 import org.open4goods.commons.model.data.DataFragment;
 import org.open4goods.commons.model.data.Price;
-import org.open4goods.commons.model.product.Product;
+import org.open4goods.commons.model.product.LegacyProduct;
 import org.open4goods.commons.services.BarcodeValidationService;
 import org.open4goods.commons.services.BrandService;
 import org.open4goods.commons.services.DataSourceConfigService;
@@ -116,8 +116,8 @@ public class ApiConfig {
 	
 	
     @Bean
-    RedisTemplate<String, Product> redisTemplate(RedisConnectionFactory connectionFactory) {
-		  RedisTemplate<String, Product> template = new RedisTemplate<>();
+    RedisTemplate<String, LegacyProduct> redisTemplate(RedisConnectionFactory connectionFactory) {
+		  RedisTemplate<String, LegacyProduct> template = new RedisTemplate<>();
 		    template.setConnectionFactory(connectionFactory);
 		    
 		    // Configure serialization

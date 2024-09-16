@@ -8,7 +8,7 @@ import org.open4goods.api.services.aggregation.AbstractAggregationService;
 import org.open4goods.commons.exceptions.ValidationException;
 import org.open4goods.commons.model.attribute.Cardinality;
 import org.open4goods.commons.model.data.Score;
-import org.open4goods.commons.model.product.Product;
+import org.open4goods.commons.model.product.LegacyProduct;
 import org.open4goods.commons.services.StandardiserService;
 import org.slf4j.Logger;
 
@@ -24,14 +24,14 @@ public abstract class AbstractScoreAggregationService extends  AbstractAggregati
 
 
 	@Override
-	public void init(Collection<Product> datas) {
+	public void init(Collection<LegacyProduct> datas) {
 		super.init(datas);
 		batchDatas.clear();
 	}
 
 	
 	@Override
-	public void done(Collection<Product> datas) {
+	public void done(Collection<LegacyProduct> datas) {
 		super.done(datas);
 
 
@@ -42,7 +42,7 @@ public abstract class AbstractScoreAggregationService extends  AbstractAggregati
 		// Virtual scores computing
 		// Operated on absolute values
 		//////////////////////////
-		for (Product p : datas) {
+		for (LegacyProduct p : datas) {
 			for (String scoreName : batchDatas.keySet()) {
 				Score s = p.getScores().get(scoreName);
 				Cardinality source = batchDatas.get(scoreName);
@@ -71,7 +71,7 @@ public abstract class AbstractScoreAggregationService extends  AbstractAggregati
 		// Scores relativisation 
 		// Create a relativized cardinality in each product
 		////////////////////////
-		for (Product p : datas) {			
+		for (LegacyProduct p : datas) {			
 			for (String scoreName : batchDatas.keySet()) {
 				Score s = p.getScores().get(scoreName);
 				if (null != s) {

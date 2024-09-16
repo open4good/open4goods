@@ -25,7 +25,7 @@ import java.util.zip.GZIPInputStream;
 import org.apache.commons.io.FileUtils;
 import org.open4goods.api.config.yml.BackupConfig;
 import org.open4goods.commons.dao.ProductRepository;
-import org.open4goods.commons.model.product.Product;
+import org.open4goods.commons.model.product.LegacyProduct;
 import org.open4goods.commons.services.SerialisationService;
 import org.open4goods.xwiki.services.XWikiReadService;
 import org.slf4j.Logger;
@@ -98,7 +98,7 @@ public class BackupService implements HealthIndicator {
         }
 
         // The bloking queue, used to share the items to be backuped with threads
-        LinkedBlockingQueue<Product> blockingQueue = new LinkedBlockingQueue<Product>(1000);
+        LinkedBlockingQueue<LegacyProduct> blockingQueue = new LinkedBlockingQueue<LegacyProduct>(1000);
         // Reset the counter item flags
         expordedProductsCounter.set(0L);
         
@@ -179,10 +179,10 @@ public class BackupService implements HealthIndicator {
 	                 InputStreamReader inputStreamReader = new InputStreamReader(gzipInputStream);
 	                 BufferedReader bufferedReader = new BufferedReader(inputStreamReader)) {
 
-						List<Product> group = new ArrayList<>();
+						List<LegacyProduct> group = new ArrayList<>();
 						bufferedReader.lines().forEach(line -> {
 						    try {
-						        group.add(serialisationService.fromJson(line, Product.class));
+						        group.add(serialisationService.fromJson(line, LegacyProduct.class));
 						        counter.incrementAndGet();
 						        if (counter.get() % 1000 == 0) {
 						            logger.warn("Imported items so : {}", counter.get());

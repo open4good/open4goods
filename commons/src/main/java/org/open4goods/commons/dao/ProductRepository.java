@@ -17,7 +17,7 @@ import org.open4goods.commons.config.yml.ui.VerticalConfig;
 import org.open4goods.commons.exceptions.ResourceNotFoundException;
 import org.open4goods.commons.model.constants.CacheConstants;
 import org.open4goods.commons.model.product.MongoProduct;
-import org.open4goods.commons.model.product.Product;
+import org.open4goods.commons.model.product.LegacyProduct;
 import org.open4goods.commons.store.repository.ProductIndexationWorker;
 import org.open4goods.commons.store.repository.mongo.MongoProductRepository;
 import org.open4goods.commons.store.repository.redis.RedisProductRepository;
@@ -54,12 +54,12 @@ public class ProductRepository {
 
 	private static final Logger logger = LoggerFactory.getLogger(ProductRepository.class);
 
-	public static final String MAIN_INDEX_NAME = Product.DEFAULT_REPO;
+	public static final String MAIN_INDEX_NAME = LegacyProduct.DEFAULT_REPO;
 
 	
 	// The file queue implementation
 	// TODO(p3,conf) : Limit from conf
-	private BlockingQueue<Product> queue = new LinkedBlockingQueue<>(150000);
+	private BlockingQueue<LegacyProduct> queue = new LinkedBlockingQueue<>(150000);
 	
 	
 	/**
@@ -105,7 +105,7 @@ public class ProductRepository {
 	 * @param v
 	 * @return
 	 */
-	public Stream<Product> getProductsMatchingCategoriesOrVerticalId(VerticalConfig v) {
+	public Stream<LegacyProduct> getProductsMatchingCategoriesOrVerticalId(VerticalConfig v) {
 		Criteria c = new Criteria("datasourceCategories").in(v.getMatchingCategories())
 		// TODO : Add exclusion
 //				.and(new Criteria("datasourceCategories").notIn(v.getMatchingCategories()))
@@ -115,7 +115,7 @@ public class ProductRepository {
 		
 		final NativeQuery initialQuery = new NativeQueryBuilder().withQuery(new CriteriaQuery(c)).build();
 
-		return elasticsearchTemplate.searchForStream(initialQuery, Product.class, current_index).stream()
+		return elasticsearchTemplate.searchForStream(initialQuery, LegacyProduct.class, current_index).stream()
 				.map(SearchHit::getContent);
 
 	}
@@ -125,25 +125,25 @@ public class ProductRepository {
 	 * 
 	 * @return
 	 */
-	public Stream<Product> exportAll() {
+	public Stream<LegacyProduct> exportAll() {
 	    Query query = Query.findAll();
 	    // TODO : From conf, apply to other
 	    query.setPageable(PageRequest.of(0, 10000)); // Fetch larger batches
-	    return elasticsearchTemplate.searchForStream(query, Product.class, current_index)
+	    return elasticsearchTemplate.searchForStream(query, LegacyProduct.class, current_index)
 	    		.stream()
 	    		// TODO : Check CPU usage
 	    		.parallel()
 	            .map(SearchHit::getContent);
 	}
 
-	public Stream<Product> searchInValidPrices(String query, final String indexName, int from, int to) {
+	public Stream<LegacyProduct> searchInValidPrices(String query, final String indexName, int from, int to) {
 
 		Criteria c = new Criteria().expression(query).and(getRecentPriceQuery());
 
 		final NativeQuery initialQuery = new NativeQueryBuilder().withQuery(new CriteriaQuery(c))
 				.withPageable(PageRequest.of(from, to)).build();
 
-		return elasticsearchTemplate.search(initialQuery, Product.class, current_index).stream()
+		return elasticsearchTemplate.search(initialQuery, LegacyProduct.class, current_index).stream()
 				.map(SearchHit::getContent);
 
 	}
@@ -156,7 +156,7 @@ public class ProductRepository {
 	 * @param indexName
 	 * @return
 	 */
-	public Stream<Product> exportVerticalWithValidDate(VerticalConfig vertical, boolean withExcluded) {
+	public Stream<LegacyProduct> exportVerticalWithValidDate(VerticalConfig vertical, boolean withExcluded) {
 
 		
 		
@@ -173,7 +173,7 @@ public class ProductRepository {
 		
 		final NativeQuery initialQuery = new NativeQueryBuilder()
 				.withQuery(new CriteriaQuery(c)).build();
-		return elasticsearchTemplate.searchForStream(initialQuery, Product.class, current_index).stream()
+		return elasticsearchTemplate.searchForStream(initialQuery, LegacyProduct.class, current_index).stream()
 				.map(SearchHit::getContent);
 	}
 
@@ -188,7 +188,7 @@ public class ProductRepository {
 	 * @param indexName
 	 * @return
 	 */
-	public Stream<Product> exportAllVerticalizedProductsWithGenAiSinceEpoch(Long epoch) {
+	public Stream<LegacyProduct> exportAllVerticalizedProductsWithGenAiSinceEpoch(Long epoch) {
 
 		Criteria c = new Criteria("vertical").exists()
 				.and(getSinceDateQuery(epoch))
@@ -200,7 +200,7 @@ public class ProductRepository {
 
 		NativeQuery initialQuery = initialQueryBuilder.build();
 		
-		return elasticsearchTemplate.searchForStream(initialQuery, Product.class, current_index).stream().map(SearchHit::getContent);
+		return elasticsearchTemplate.searchForStream(initialQuery, LegacyProduct.class, current_index).stream().map(SearchHit::getContent);
 	}
 	
 	
@@ -218,7 +218,7 @@ public class ProductRepository {
 	 * @param indexName
 	 * @return
 	 */
-	public Stream<Product> exportVerticalWithValidDateOrderByEcoscore(String vertical, Integer max, boolean withExcluded) {
+	public Stream<LegacyProduct> exportVerticalWithValidDateOrderByEcoscore(String vertical, Integer max, boolean withExcluded) {
 
 		Criteria c = new Criteria("vertical").is(vertical)
 				.and(getRecentPriceQuery())
@@ -237,7 +237,7 @@ public class ProductRepository {
 
 		NativeQuery initialQuery = initialQueryBuilder.build();
 		
-		return elasticsearchTemplate.searchForStream(initialQuery, Product.class, current_index).stream().map(SearchHit::getContent);
+		return elasticsearchTemplate.searchForStream(initialQuery, LegacyProduct.class, current_index).stream().map(SearchHit::getContent);
 	}
 
 	/**
@@ -250,14 +250,14 @@ public class ProductRepository {
 	 * @return
 	 */
 
-	public Stream<Product> exportVerticalWithValidDateOrderByEcoscore(String vertical, boolean withExcluded) {
+	public Stream<LegacyProduct> exportVerticalWithValidDateOrderByEcoscore(String vertical, boolean withExcluded) {
 		return exportVerticalWithValidDateOrderByEcoscore(vertical, null, withExcluded);
 	}
 
 	
 	
-	public SearchHits<Product> search(Query query, final String indexName) {
-		return elasticsearchTemplate.search(query, Product.class, IndexCoordinates.of(indexName));
+	public SearchHits<LegacyProduct> search(Query query, final String indexName) {
+		return elasticsearchTemplate.search(query, LegacyProduct.class, IndexCoordinates.of(indexName));
 
 	}
 
@@ -283,7 +283,7 @@ public class ProductRepository {
 	 *
 	 * @param p
 	 */
-	public void index(final Product p) {
+	public void index(final LegacyProduct p) {
 
 		logger.info("Queuing single product : {}", p.gtin());
 
@@ -319,7 +319,7 @@ public class ProductRepository {
 	 *
 	 * @param p
 	 */
-	public void index(Collection<Product> data) {
+	public void index(Collection<LegacyProduct> data) {
 
 		logger.info("Queuing {} products", data.size());
 		
@@ -337,7 +337,7 @@ public class ProductRepository {
 	}
 
 	
-	public void store(Collection<Product> data) {
+	public void store(Collection<LegacyProduct> data) {
 		logger.info("Indexing {} products", data.size());
 
 //		executor.submit(() -> {
@@ -356,7 +356,7 @@ public class ProductRepository {
 			
 	}
 	
-	public void storeNoCache(Collection<Product> data) {
+	public void storeNoCache(Collection<LegacyProduct> data) {
 		logger.info("Indexing without caching {} products", data.size());
 
 		elasticsearchTemplate.save(data, current_index);
@@ -368,7 +368,7 @@ public class ProductRepository {
 	}
 	
 	
-	public void forceIndex(Product data) {
+	public void forceIndex(LegacyProduct data) {
 		logger.info("Indexing  product {}", data.gtin());
 
 //		executor.submit(() -> {
@@ -394,7 +394,7 @@ public class ProductRepository {
 	 * @throws ResourceNotFoundException
 	 */
 //	@Cacheable(cacheNames = CacheConstants.ONE_MINUTE_LOCAL_CACHE_NAME)
-	public Product getById(final String productId) throws ResourceNotFoundException {
+	public LegacyProduct getById(final String productId) throws ResourceNotFoundException {
 
 		logger.info("Getting product  {}", productId);
 		// Getting from redis
@@ -402,7 +402,7 @@ public class ProductRepository {
 		
 		
 //		Product result = redisRepo.opsForValue().get(productId);
-		Product result;
+		LegacyProduct result;
 		try {
 			result = redisRepository.findById(productId).orElseThrow(ResourceNotFoundException::new);
 		} catch (ResourceNotFoundException e) {
@@ -417,7 +417,7 @@ public class ProductRepository {
 		if (null == result) {
 			// Fail, getting from elastic
 			logger.info("Cache miss, getting product {} from elastic", productId);
-			result = elasticsearchTemplate.get(productId, Product.class);
+			result = elasticsearchTemplate.get(productId, LegacyProduct.class);
 
 			if (null == result) {
 				throw new ResourceNotFoundException("Product '" + productId + "' does not exists");
@@ -439,7 +439,7 @@ public class ProductRepository {
 	 * @param title
 	 * @return
 	 */
-	public List<Product> getByTitle(String title) {
+	public List<LegacyProduct> getByTitle(String title) {
 		// Setting the query
 		
 		return getByTitle(title, MAX_TITLE_ITEMS_TO_FETCH);
@@ -451,12 +451,12 @@ public class ProductRepository {
 	 * @param title
 	 * @return
 	 */
-	public List<Product> getByTitle(String title, int maxItems) {
+	public List<LegacyProduct> getByTitle(String title, int maxItems) {
 		// Setting the query
 		
 		List<String> words = List.of(title.split(" "));		
 		NativeQueryBuilder esQuery = new NativeQueryBuilder().withQuery(new CriteriaQuery(new Criteria("names.offerNames").matchesAll(words) ));
-		SearchHits<Product> results = search(esQuery.withPageable(PageRequest.of(0, maxItems)).build(),ProductRepository.MAIN_INDEX_NAME);
+		SearchHits<LegacyProduct> results = search(esQuery.withPageable(PageRequest.of(0, maxItems)).build(),ProductRepository.MAIN_INDEX_NAME);
 		return results.stream().map(SearchHit::getContent).collect(Collectors.toList());
 		
 	}
@@ -467,16 +467,16 @@ public class ProductRepository {
 	 * @return
 	 * @throws ResourceNotFoundException
 	 */
-	public Map<String, Product> multiGetById( final Collection<String> ids)
+	public Map<String, LegacyProduct> multiGetById( final Collection<String> ids)
 			throws ResourceNotFoundException {
 
 		logger.info("Getting {} products from default index",ids.size());
-		Map<String, Product> ret = new HashMap<String, Product>();
+		Map<String, LegacyProduct> ret = new HashMap<String, LegacyProduct>();
 		
 		
 		// Getting from redis
 //		Iterable<Product> redisResults = redisRepo.opsForValue().multiGet(ids);
-		Iterable<Product> redisResults = redisRepository.findAllById(ids);
+		Iterable<LegacyProduct> redisResults = redisRepository.findAllById(ids);
 		redisResults.forEach(e -> {
 			if (null != e) {
 				ret.put(e.gtin(), e);
@@ -493,14 +493,14 @@ public class ProductRepository {
 			
 			NativeQuery query = new NativeQueryBuilder().withIds(missingIds).build();
 	
-			elasticsearchTemplate.multiGet(query, Product.class,current_index )
+			elasticsearchTemplate.multiGet(query, LegacyProduct.class,current_index )
 			.stream().map(MultiGetItem::getItem)
 			.filter(Objects::nonNull)
 			.forEach(e -> ret.put(e.gtin(), e));
 	
 			
 			// Filtrer et collecter les produits à partir d'une liste en utilisant leur GTIN comme clé dans une map
-			Set<Product> redisItems = ret.values().stream()
+			Set<LegacyProduct> redisItems = ret.values().stream()
 			    // Filtrer les éléments non nuls
 			    .filter(Objects::nonNull)
 			    // Filtrer les éléments dont le GTIN est présent dans la liste des IDs manquants
@@ -549,7 +549,7 @@ public class ProductRepository {
 				.withAggregation("taxonomy", 	Aggregation.of(a -> a.terms(ta -> ta.field("googleTaxonomyId").size(50000))  ))
 				;
 	
-		SearchHits<Product> results = search(esQuery.build(),ProductRepository.MAIN_INDEX_NAME);
+		SearchHits<LegacyProduct> results = search(esQuery.build(),ProductRepository.MAIN_INDEX_NAME);
 
 
 		// Handling aggregations results if relevant
@@ -610,14 +610,14 @@ public class ProductRepository {
 	/**
 	 * save the product in redis * @param result
 	 */
-	private void saveToRedis(Product result) {
+	private void saveToRedis(LegacyProduct result) {
 //		executor.submit(() -> {
 //			redisRepo.opsForValue().set(result.gtin(), result);
 			redisRepository.save(result);
 //		});
 	}
 
-	public BlockingQueue<Product> getQueue() {
+	public BlockingQueue<LegacyProduct> getQueue() {
 		return queue;
 	}
 

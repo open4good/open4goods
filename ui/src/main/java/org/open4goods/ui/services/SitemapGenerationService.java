@@ -17,7 +17,7 @@ import org.open4goods.commons.config.yml.ui.VerticalConfig;
 import org.open4goods.commons.dao.ProductRepository;
 import org.open4goods.commons.helper.GenericFileLogger;
 import org.open4goods.commons.model.Localisable;
-import org.open4goods.commons.model.product.Product;
+import org.open4goods.commons.model.product.LegacyProduct;
 import org.open4goods.commons.services.VerticalsConfigService;
 import org.open4goods.ui.config.yml.UiConfig;
 import org.open4goods.ui.controllers.ui.pages.SitemapEntry;
@@ -199,14 +199,14 @@ public class SitemapGenerationService {
 		SitemapGenerator sitemap = SitemapGenerator.of(baseUrl);
 		
 		for (VerticalConfig vertical : verticalsConfigService.getConfigsWithoutDefault()) {
-			List<Product> datas = aggregatedDataRepository.exportVerticalWithValidDateOrderByEcoscore(vertical.getId(),false)
+			List<LegacyProduct> datas = aggregatedDataRepository.exportVerticalWithValidDateOrderByEcoscore(vertical.getId(),false)
 			// Filtering on products having genAI content
 					.filter(e -> null != e.getGenaiTexts() && null != e.getGenaiTexts().get(language))
 					.filter(e -> e.getGenaiTexts().get(language).getDescriptions().size() > 1)
 					
 			.toList();
 			
-			for (Product data : datas) {
+			for (LegacyProduct data : datas) {
 				String url = vertical.getBaseUrl(language) + "/" + data.url(language);
 				LOGGER.info("Adding product page to sitemap : {}",url);
 				sitemap = sitemap.addPage(getWebPage(url, ChangeFreq.DAILY, 1.0, Date.from(Instant.ofEpochMilli(data.getLastChange()))));			

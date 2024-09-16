@@ -9,7 +9,7 @@ import org.open4goods.commons.config.yml.ui.VerticalConfig;
 import org.open4goods.commons.dao.ProductRepository;
 import org.open4goods.commons.exceptions.ResourceNotFoundException;
 import org.open4goods.commons.model.BarcodeType;
-import org.open4goods.commons.model.product.Product;
+import org.open4goods.commons.model.product.LegacyProduct;
 import org.open4goods.commons.services.BarcodeValidationService;
 import org.open4goods.commons.services.VerticalsConfigService;
 import org.open4goods.ui.controllers.ui.UiService;
@@ -74,7 +74,7 @@ public class WebExtensionController {
 			if (bCode.getKey().equals(BarcodeType.UNKNOWN)) {
 				mv.addObject("exists", false);
 			} else {
-				Product data = null;
+				LegacyProduct data = null;
 				try {
 					data = productRepository.getById(bCode.getValue());
 				} catch (ResourceNotFoundException e) {
@@ -90,7 +90,7 @@ public class WebExtensionController {
 		} else {
 			// Lookup by title
 
-			List<Product> data = productRepository.getByTitle(title);
+			List<LegacyProduct> data = productRepository.getByTitle(title);
 			if (data.size() == 0) {
 				mv.addObject("exists", false);
 			} else {
@@ -128,7 +128,7 @@ public class WebExtensionController {
 				mv.setViewName("/webextension/product-notfound");
 //				throw new ResponseStatusException(HttpStatus.BAD_REQUEST,	"Invalid GTIN Format");
 			} else {
-				Product data;
+				LegacyProduct data;
 				try {
 					data = productRepository.getById(bCode.getValue());
 				} catch (ResourceNotFoundException e) {
@@ -146,7 +146,7 @@ public class WebExtensionController {
 		} else {
 			// Lookup by title
 
-			List<Product> data = productRepository.getByTitle(title);
+			List<LegacyProduct> data = productRepository.getByTitle(title);
 			if (data.size() == 0) {
 				mv.setViewName("webextension/product-notfound");
 				throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No product found ");
@@ -158,7 +158,7 @@ public class WebExtensionController {
 			}
 		}
 
-		Product p = (Product) mv.getModel().get("product");
+		LegacyProduct p = (LegacyProduct) mv.getModel().get("product");
 
 		if (null != p) {
 			VerticalConfig verticalConfig = verticalConfigService.getConfigByIdOrDefault(p.getVertical());

@@ -48,14 +48,14 @@ import org.springframework.data.redis.core.RedisHash;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
-@Document(indexName = Product.DEFAULT_REPO, createIndex = true, writeTypeHint = WriteTypeHint.FALSE)
-@RedisHash(value=Product.DEFAULT_REPO, timeToLive = ProductRepository.VALID_UNTIL_DURATION)
+@Document(indexName = LegacyProduct.DEFAULT_REPO, createIndex = true, writeTypeHint = WriteTypeHint.FALSE)
+@RedisHash(value=LegacyProduct.DEFAULT_REPO, timeToLive = ProductRepository.VALID_UNTIL_DURATION)
 @Setting( settingPath = "/elastic-settings.json")
 // TODO : Disabling to see/test  if a clean jackson serial
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class Product implements Standardisable {
+public class LegacyProduct implements Standardisable {
 
-	private final static Logger logger = LoggerFactory.getLogger(Product.class);
+	private final static Logger logger = LoggerFactory.getLogger(LegacyProduct.class);
 
 	// TODO : Put back 
 	public static final String DEFAULT_REPO = "products";
@@ -201,11 +201,11 @@ public class Product implements Standardisable {
 	//	@Field(index = false, store = false, type = FieldType.Object)
 	//	private AggregationResult aggregationResult = new AggregationResult();
 
-	public Product() {
+	public LegacyProduct() {
 		super();
 	}
 
-	public Product(final String id) {
+	public LegacyProduct(final String id) {
 		super();
 		this.id = id;
 
@@ -234,8 +234,8 @@ public class Product implements Standardisable {
 	@Override
 	public boolean equals(final Object obj) {
 
-		if (obj instanceof Product) {
-			return id.equals(((Product) obj).getId());
+		if (obj instanceof LegacyProduct) {
+			return id.equals(((LegacyProduct) obj).getId());
 		}
 
 		return super.equals(obj);

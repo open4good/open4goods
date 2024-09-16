@@ -24,7 +24,7 @@ import org.open4goods.commons.dao.ProductRepository;
 import org.open4goods.commons.exceptions.AggregationSkipException;
 import org.open4goods.commons.helper.GenericFileLogger;
 import org.open4goods.commons.model.data.DataFragment;
-import org.open4goods.commons.model.product.Product;
+import org.open4goods.commons.model.product.LegacyProduct;
 import org.open4goods.commons.services.BarcodeValidationService;
 import org.open4goods.commons.services.BrandService;
 import org.open4goods.commons.services.DataSourceConfigService;
@@ -130,7 +130,7 @@ public class AggregationFacadeService {
 
 		ScoringBatchedAggregator batchAgg = getScoringAggregator();
 
-		List<Product> productBag = dataRepository.exportVerticalWithValidDate (vertical, false).toList();
+		List<LegacyProduct> productBag = dataRepository.exportVerticalWithValidDate (vertical, false).toList();
 		// Batched (scoring) aggregation
 		try {
 			batchAgg.score(productBag, verticalConfigService.getConfigByIdOrDefault(vertical.getId()));
@@ -203,7 +203,7 @@ public class AggregationFacadeService {
 	 * @param product
 	 * @throws AggregationSkipException 
 	 */
-	public void sanitizeOne(Product product) throws AggregationSkipException {
+	public void sanitizeOne(LegacyProduct product) throws AggregationSkipException {
 		logger.info("started : Sanitisation batching for {}",product);
 		StandardAggregator batchAgg = getFullSanitisationAggregator();
 
@@ -220,7 +220,7 @@ public class AggregationFacadeService {
 	 * @return
 	 * @throws AggregationSkipException
 	 */
-	public Product updateOne(DataFragment df, Product data) throws AggregationSkipException {
+	public LegacyProduct updateOne(DataFragment df, LegacyProduct data) throws AggregationSkipException {
 		return realtimeAggregator.onDatafragment(df, data);
 	}
 

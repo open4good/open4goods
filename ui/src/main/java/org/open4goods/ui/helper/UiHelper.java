@@ -6,7 +6,7 @@ import java.util.Map;
 
 import org.open4goods.commons.config.yml.attributes.AttributeConfig;
 import org.open4goods.commons.config.yml.ui.VerticalConfig;
-import org.open4goods.commons.model.product.Product;
+import org.open4goods.commons.model.product.LegacyProduct;
 
 import jakarta.servlet.http.HttpServletRequest;
 
@@ -18,12 +18,12 @@ public class UiHelper {
 	private VerticalConfig verticalConfig;
 
 	private Map<String,String> texts = new HashMap<>();
-	private Product product;
+	private LegacyProduct product;
 	
 	public static final DecimalFormat numberFormater = new DecimalFormat("0.#");
 
 	
-	public UiHelper(HttpServletRequest request, VerticalConfig verticalConfig, Product product) {
+	public UiHelper(HttpServletRequest request, VerticalConfig verticalConfig, LegacyProduct product) {
 		super();
 		this.request = request;
 		this.verticalConfig = verticalConfig;

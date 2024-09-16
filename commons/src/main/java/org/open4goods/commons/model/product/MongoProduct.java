@@ -169,7 +169,7 @@ public class MongoProduct implements Standardisable {
 	 * TODO(p2,dsign) : Here the hard mapping to convert our elastic items to"blobed" mongodb version 
 	 * @param other
 	 */
-	public MongoProduct(final Product other) {
+	public MongoProduct(final LegacyProduct other) {
 		super();
 		
 		// Converting gtin and info

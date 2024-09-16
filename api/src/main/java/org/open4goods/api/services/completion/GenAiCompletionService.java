@@ -5,7 +5,7 @@ import org.open4goods.api.services.AbstractCompletionService;
 import org.open4goods.commons.config.yml.attributes.AiPromptsConfig;
 import org.open4goods.commons.config.yml.ui.VerticalConfig;
 import org.open4goods.commons.dao.ProductRepository;
-import org.open4goods.commons.model.product.Product;
+import org.open4goods.commons.model.product.LegacyProduct;
 import org.open4goods.commons.services.VerticalsConfigService;
 import org.open4goods.commons.services.ai.AiService;
 import org.slf4j.Logger;
@@ -27,7 +27,7 @@ public class GenAiCompletionService  extends AbstractCompletionService{
 		this.apiProperties = apiProperties;
 	}
 
-	public void processProduct(VerticalConfig vertical, Product data) {
+	public void processProduct(VerticalConfig vertical, LegacyProduct data) {
 		logger.info("AI text completion for {}", data.getId());
 		
 		// Operating genai completion

@@ -4,7 +4,7 @@ import org.open4goods.commons.config.yml.ui.VerticalConfig;
 import org.open4goods.commons.model.dto.NumericRangeFilter;
 import org.open4goods.commons.model.dto.VerticalSearchRequest;
 import org.open4goods.commons.model.dto.VerticalSearchResponse;
-import org.open4goods.commons.model.product.Product;
+import org.open4goods.commons.model.product.LegacyProduct;
 import org.open4goods.commons.services.SearchService;
 import org.open4goods.commons.services.VerticalsConfigService;
 import org.open4goods.ui.controllers.dto.DataTableRequest;
@@ -37,10 +37,10 @@ public class DataTableController {
 
 
 	@RequestMapping(value="/{vertical:[a-z-]+}/paginated", method=RequestMethod.GET)
-	public DataTableResults<Product> listUsersPaginated(@PathVariable(name = "vertical") String vertical, HttpServletRequest request, HttpServletResponse response) {
+	public DataTableResults<LegacyProduct> listUsersPaginated(@PathVariable(name = "vertical") String vertical, HttpServletRequest request, HttpServletResponse response) {
 
 
-		DataTableRequest<Product> dataTableInRQ = new DataTableRequest<Product>(request);
+		DataTableRequest<LegacyProduct> dataTableInRQ = new DataTableRequest<LegacyProduct>(request);
 		PaginationCriteria pagination = dataTableInRQ.getPaginationRequest();
 
 		VerticalConfig vConfig = verticalService.getVerticalForPath(vertical);
@@ -93,7 +93,7 @@ public class DataTableController {
 
 		VerticalSearchResponse vResults = searchService.verticalSearch(vConfig, vRequest);
 
-		DataTableResults<Product> dataTableResult = new DataTableResults<Product>();
+		DataTableResults<LegacyProduct> dataTableResult = new DataTableResults<LegacyProduct>();
 		dataTableResult.setDraw(dataTableInRQ.getDraw());
 		dataTableResult.setData(vResults.getData());
 

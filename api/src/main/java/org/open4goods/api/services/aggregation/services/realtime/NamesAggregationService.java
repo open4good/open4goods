@@ -15,7 +15,7 @@ import org.open4goods.commons.helper.IdHelper;
 import org.open4goods.commons.model.constants.ReferentielKey;
 import org.open4goods.commons.model.data.DataFragment;
 import org.open4goods.commons.model.product.AggregatedAttribute;
-import org.open4goods.commons.model.product.Product;
+import org.open4goods.commons.model.product.LegacyProduct;
 import org.open4goods.commons.services.EvaluationService;
 import org.open4goods.commons.services.VerticalsConfigService;
 import org.open4goods.commons.services.textgen.BlablaService;
@@ -41,7 +41,7 @@ public class NamesAggregationService extends AbstractAggregationService {
 	}
 
 	@Override
-	public void onDataFragment(final DataFragment df, Product output, VerticalConfig vConf) throws AggregationSkipException {
+	public void onDataFragment(final DataFragment df, LegacyProduct output, VerticalConfig vConf) throws AggregationSkipException {
 
 		// Adding raw offer names
 		// TODO : names are not localized
@@ -53,7 +53,7 @@ public class NamesAggregationService extends AbstractAggregationService {
 	}
 
 	@Override
-	public void onProduct(Product data, VerticalConfig vConf) throws AggregationSkipException {
+	public void onProduct(LegacyProduct data, VerticalConfig vConf) throws AggregationSkipException {
 
 		logger.info("Name generation for product {}", data.getId());
 
@@ -123,7 +123,7 @@ public class NamesAggregationService extends AbstractAggregationService {
 	 * @return
 	 * @throws InvalidParameterException 
 	 */
-	private String computePrefixedText(Product data, PrefixedAttrText textsConfigUrl, String separator) throws InvalidParameterException {
+	private String computePrefixedText(LegacyProduct data, PrefixedAttrText textsConfigUrl, String separator) throws InvalidParameterException {
 		
 		StringBuilder sb = new StringBuilder();
 		

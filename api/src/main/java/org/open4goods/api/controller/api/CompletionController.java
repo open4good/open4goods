@@ -11,7 +11,7 @@ import org.open4goods.commons.dao.ProductRepository;
 import org.open4goods.commons.exceptions.InvalidParameterException;
 import org.open4goods.commons.exceptions.ResourceNotFoundException;
 import org.open4goods.commons.model.constants.RolesConstants;
-import org.open4goods.commons.model.product.Product;
+import org.open4goods.commons.model.product.LegacyProduct;
 import org.open4goods.commons.services.VerticalsConfigService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -78,7 +78,7 @@ public class CompletionController {
 	@GetMapping("/completion/resources/gtin/")
 	@Operation(summary = "Launch resource completion on the specified vertical")
 	public void resourceCompletionProduct(@RequestParam @NotBlank final String gtin) {
-		Product data;
+		LegacyProduct data;
 		try {
 			data = repository.getById(gtin);
 		} catch (ResourceNotFoundException e) {
@@ -108,7 +108,7 @@ public class CompletionController {
 	@GetMapping("/completion/genai/gtin/")
 	@Operation(summary = "Launch genai completion on the specified vertical")
 	public void genaiCompletionProduct(@RequestParam @NotBlank final String gtin) {
-		Product data;
+		LegacyProduct data;
 		try {
 			data = repository.getById(gtin);
 		} catch (ResourceNotFoundException e) {
@@ -138,7 +138,7 @@ public class CompletionController {
 	@GetMapping("/completion/amazon/gtin/")
 	@Operation(summary = "Launch amazon completion on the specified vertical")
 	public void amazonCompletionProduct(@RequestParam @NotBlank final String gtin) {
-		Product data;
+		LegacyProduct data;
 		try {
 			data = repository.getById(gtin);
 		} catch (ResourceNotFoundException e) {
@@ -172,7 +172,7 @@ public class CompletionController {
 	@GetMapping("/completion/icecat/gtin/")
 	@Operation(summary = "Launch icecat completion on the specified vertical")
 	public void icecatCompletionProduct(@RequestParam @NotBlank final String gtin) {
-		Product data;
+		LegacyProduct data;
 		try {
 			data = repository.getById(gtin);
 		} catch (ResourceNotFoundException e) {

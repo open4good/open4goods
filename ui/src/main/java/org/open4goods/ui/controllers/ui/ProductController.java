@@ -17,7 +17,7 @@ import org.open4goods.commons.model.data.ContributionVote;
 import org.open4goods.commons.model.dto.AttributesFeatureGroups;
 import org.open4goods.commons.model.product.AggregatedPrice;
 import org.open4goods.commons.model.product.PriceTrend;
-import org.open4goods.commons.model.product.Product;
+import org.open4goods.commons.model.product.LegacyProduct;
 import org.open4goods.commons.services.BarcodeValidationService;
 import org.open4goods.commons.services.BrandService;
 import org.open4goods.commons.services.IcecatService;
@@ -117,7 +117,7 @@ public class ProductController  {
 		String url = uiHelper.url();
 	
 		// Testing if on a vertical, redirect if so
-		Product product = (Product) ret.getModel().get("product");
+		LegacyProduct product = (LegacyProduct) ret.getModel().get("product");
 		
 		if (null != product && !StringUtils.isEmpty(product.getVertical())) {
 			String vPath = verticalConfigService.getConfigById(product.getVertical()).getBaseUrl(uiService.getSiteLocale(request)); 
@@ -146,7 +146,7 @@ public class ProductController  {
 		
 		
 		// Retrieve the Product
-		Product data;
+		LegacyProduct data;
 		try {
 			data = productRepository.getById(id);
 
@@ -181,7 +181,7 @@ public class ProductController  {
 			String globalBetter = data.getRanking().getGlobalBetter();
 			
 			if (null != globalBestId) {
-				Product best = null;
+				LegacyProduct best = null;
 				try {
 					best = productRepository.getById(globalBestId);
 				} catch (ResourceNotFoundException e) {
@@ -192,7 +192,7 @@ public class ProductController  {
 			}
 			
 			if (null != globalBetter) {
-				Product better = null;
+				LegacyProduct better = null;
 				try {
 					better = productRepository.getById(globalBetter);
 				} catch (ResourceNotFoundException e) {
@@ -337,7 +337,7 @@ public class ProductController  {
 	 * @param price
 	 * @throws IOException
 	 */
-	private void inferAffiliationToken(HttpServletRequest  request, Product data, AggregatedPrice price)  {
+	private void inferAffiliationToken(HttpServletRequest  request, LegacyProduct data, AggregatedPrice price)  {
 
 		try {
 			ContributionVote token = new ContributionVote( price, data);

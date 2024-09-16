@@ -8,7 +8,7 @@ import org.open4goods.commons.dao.ProductRepository;
 import org.open4goods.commons.exceptions.ResourceNotFoundException;
 import org.open4goods.commons.model.constants.RolesConstants;
 import org.open4goods.commons.model.data.AiDescriptions;
-import org.open4goods.commons.model.product.Product;
+import org.open4goods.commons.model.product.LegacyProduct;
 import org.open4goods.commons.services.VerticalsConfigService;
 import org.open4goods.commons.services.ai.AiService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,7 +44,7 @@ public class ProductController {
 	@GetMapping(path="/product/")
 	@Operation(summary="Get a product from it's GTIN")
 	@PreAuthorize("hasAuthority('"+RolesConstants.ROLE_ADMIN+"')")
-	public Product get( @RequestParam @NotBlank final String gtin) throws ResourceNotFoundException {
+	public LegacyProduct get( @RequestParam @NotBlank final String gtin) throws ResourceNotFoundException {
 		return repository.getById(gtin);
 		
 	}
@@ -54,7 +54,7 @@ public class ProductController {
 	@PreAuthorize("hasAuthority('"+RolesConstants.ROLE_ADMIN+"')")
 	public Map<String, AiDescriptions> genAi( @RequestParam @NotBlank final String gtin) throws ResourceNotFoundException {
 		
-		Product data = repository.getById(gtin);
+		LegacyProduct data = repository.getById(gtin);
 		
 		aiService.complete(data, configService.getConfigByIdOrDefault(data.getVertical()),true);		
 		repository.index(data);

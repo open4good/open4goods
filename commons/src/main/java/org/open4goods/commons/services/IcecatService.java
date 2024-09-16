@@ -33,7 +33,7 @@ import org.open4goods.commons.model.icecat.IcecatModel;
 import org.open4goods.commons.model.icecat.IcecatName;
 import org.open4goods.commons.model.icecat.IcecatSupplier;
 import org.open4goods.commons.model.product.AggregatedAttribute;
-import org.open4goods.commons.model.product.Product;
+import org.open4goods.commons.model.product.LegacyProduct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xml.sax.InputSource;
@@ -664,7 +664,7 @@ public class IcecatService {
 	 */
 	// TODO : perf, quiet expensive with the "iteration" model. Must be fixed by proper injection
 	// of icecat stuff to open4goods attribute model
-	public List<AttributesFeatureGroups> features(VerticalConfig vertical, String language, Product product) {
+	public List<AttributesFeatureGroups> features(VerticalConfig vertical, String language, LegacyProduct product) {
 		List<AttributesFeatureGroups> ret = new ArrayList<>();
 		
 		Integer icecatLanguage = getIceCatLangId(language);

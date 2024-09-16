@@ -24,7 +24,7 @@ import org.open4goods.commons.dao.ProductRepository;
 import org.open4goods.commons.exceptions.TechnicalException;
 import org.open4goods.commons.helper.ThrottlingInputStream;
 import org.open4goods.commons.model.constants.CacheConstants;
-import org.open4goods.commons.model.product.Product;
+import org.open4goods.commons.model.product.LegacyProduct;
 import org.open4goods.ui.config.yml.UiConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -174,7 +174,7 @@ public class OpenDataService {
 	 * @param data
 	 * @return
 	 */
-	private String[] toEntry(Product data) {
+	private String[] toEntry(LegacyProduct data) {
 
 		String[] line = new String[header.length];
 

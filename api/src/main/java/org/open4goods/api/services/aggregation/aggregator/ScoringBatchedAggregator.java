@@ -7,7 +7,7 @@ import java.util.Set;
 import org.open4goods.api.services.aggregation.AbstractAggregationService;
 import org.open4goods.commons.config.yml.ui.VerticalConfig;
 import org.open4goods.commons.exceptions.AggregationSkipException;
-import org.open4goods.commons.model.product.Product;
+import org.open4goods.commons.model.product.LegacyProduct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,7 +28,7 @@ public class ScoringBatchedAggregator extends AbstractAggregator {
 	}
 
 
-	public void close(Set<Product> datas) {
+	public void close(Set<LegacyProduct> datas) {
 		super.close();
 
 
@@ -43,10 +43,10 @@ public class ScoringBatchedAggregator extends AbstractAggregator {
 	 * @return
 	 * @throws AggregationSkipException
 	 */
-	public Product score(final Collection<Product> datas, VerticalConfig vConf) throws AggregationSkipException{
+	public LegacyProduct score(final Collection<LegacyProduct> datas, VerticalConfig vConf) throws AggregationSkipException{
 
 
-		Product ret = null;
+		LegacyProduct ret = null;
 		// Call transformation building registered service
 		for (final AbstractAggregationService service: services) {
 			
@@ -59,7 +59,7 @@ public class ScoringBatchedAggregator extends AbstractAggregator {
 			logger.warn("Processing {} products using {} service",datas.size() ,service.getClass().getSimpleName());
 
 			// Processing Products
-			for (Product p : datas) {
+			for (LegacyProduct p : datas) {
 				service.onProduct(p,vConf);				
 			}
 

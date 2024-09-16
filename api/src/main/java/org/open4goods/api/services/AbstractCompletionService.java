@@ -3,7 +3,7 @@ package org.open4goods.api.services;
 import org.open4goods.commons.config.yml.ui.VerticalConfig;
 import org.open4goods.commons.dao.ProductRepository;
 import org.open4goods.commons.helper.GenericFileLogger;
-import org.open4goods.commons.model.product.Product;
+import org.open4goods.commons.model.product.LegacyProduct;
 import org.open4goods.commons.services.VerticalsConfigService;
 import org.slf4j.Logger;
 
@@ -57,7 +57,7 @@ public abstract class AbstractCompletionService {
 		});
 	}
 
-	public void completeProduct(VerticalConfig vertical, Product data) {
+	public void completeProduct(VerticalConfig vertical, LegacyProduct data) {
 		processProduct(vertical, data);
 		dataRepository.forceIndex(data);
 		
@@ -75,7 +75,7 @@ public abstract class AbstractCompletionService {
 	 * @param vertical
 	 * @param data
 	 */
-	public abstract void processProduct(VerticalConfig vertical, Product data);
+	public abstract void processProduct(VerticalConfig vertical, LegacyProduct data);
 
 	
 	

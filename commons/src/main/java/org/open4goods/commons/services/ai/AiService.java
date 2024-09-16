@@ -12,7 +12,7 @@ import org.open4goods.commons.config.yml.ui.ProductI18nElements;
 import org.open4goods.commons.config.yml.ui.VerticalConfig;
 import org.open4goods.commons.model.data.AiDescription;
 import org.open4goods.commons.model.data.AiDescriptions;
-import org.open4goods.commons.model.product.Product;
+import org.open4goods.commons.model.product.LegacyProduct;
 import org.open4goods.commons.services.EvaluationService;
 import org.open4goods.commons.services.SerialisationService;
 import org.slf4j.Logger;
@@ -60,7 +60,7 @@ public class AiService implements HealthIndicator{
 	/**
 	 * Completes AI descriptions for a product based on the provided vertical configuration, containing the prompts
 	 */
-	public void complete(Product product, VerticalConfig verticalConfig, boolean force) {
+	public void complete(LegacyProduct product, VerticalConfig verticalConfig, boolean force) {
 		// Discard if we do not have a minimum set of attributes, but applies if is in forced mode
 		if (!force && product.getAttributes().count() < MIN_REQUIRED_ATTRIBUTES) {
 			return;
@@ -94,7 +94,7 @@ public class AiService implements HealthIndicator{
 	 * @throws JsonMappingException 
 	 * @throws JsonParseException 
 	 */
-	private void generateTextsForProduct(Product product, Map<String, AiPromptsConfig> iaConfigsPerLanguage, boolean force) throws Exception {
+	private void generateTextsForProduct(LegacyProduct product, Map<String, AiPromptsConfig> iaConfigsPerLanguage, boolean force) throws Exception {
 			// Iterate over each AiPromptsConfig, with language as a key
 			for (Entry<String, AiPromptsConfig> entry : iaConfigsPerLanguage.entrySet()) {
 				
@@ -117,7 +117,7 @@ public class AiService implements HealthIndicator{
 	/**
 	 * Determines if the description generation should be skipped.
 	 */
-	private boolean shouldSkipDescriptionGeneration(Product product, String language, AiPromptsConfig promptConfig, boolean force) {
+	private boolean shouldSkipDescriptionGeneration(LegacyProduct product, String language, AiPromptsConfig promptConfig, boolean force) {
 		
 		if (force || promptConfig.isOverride()) {
 			// It is either forced programaticaly, or forced from conf. Do not skip generation
@@ -152,7 +152,7 @@ public class AiService implements HealthIndicator{
 	 * @throws JsonMappingException 
 	 * @throws JsonParseException 
 	 */
-	private AiDescriptions createAiDescriptions(AiPromptsConfig aiConfigs, String language, Product product, boolean force) throws Exception {
+	private AiDescriptions createAiDescriptions(AiPromptsConfig aiConfigs, String language, LegacyProduct product, boolean force) throws Exception {
 		// 1 - Evaluate the root prompt to inject variables
 		String evaluatedRootPrompt = spelEvaluationService.thymeleafEval(product, aiConfigs.getRootPrompt());
 

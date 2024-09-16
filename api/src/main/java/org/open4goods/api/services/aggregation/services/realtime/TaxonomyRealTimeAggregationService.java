@@ -9,7 +9,7 @@ import org.open4goods.commons.config.yml.ui.VerticalConfig;
 import org.open4goods.commons.exceptions.AggregationSkipException;
 import org.open4goods.commons.model.data.DataFragment;
 import org.open4goods.commons.model.data.UnindexedKeyVal;
-import org.open4goods.commons.model.product.Product;
+import org.open4goods.commons.model.product.LegacyProduct;
 import org.open4goods.commons.services.GoogleTaxonomyService;
 import org.open4goods.commons.services.VerticalsConfigService;
 import org.slf4j.Logger;
@@ -32,7 +32,7 @@ public class TaxonomyRealTimeAggregationService extends AbstractAggregationServi
 	}
 
 	@Override
-	public void onDataFragment(final DataFragment input, final Product output, VerticalConfig vConf) throws AggregationSkipException {
+	public void onDataFragment(final DataFragment input, final LegacyProduct output, VerticalConfig vConf) throws AggregationSkipException {
 
 		
 		String category = input.getCategory();
@@ -45,7 +45,7 @@ public class TaxonomyRealTimeAggregationService extends AbstractAggregationServi
 	}
 
 	@Override
-	public void onProduct(Product data, VerticalConfig vConf) throws AggregationSkipException {
+	public void onProduct(LegacyProduct data, VerticalConfig vConf) throws AggregationSkipException {
 		
 		////////////////////////////
 		// Setting google taxonomy
@@ -110,7 +110,7 @@ public class TaxonomyRealTimeAggregationService extends AbstractAggregationServi
 	 * @param input
 	 * @return 
 	 */
-	private Integer googleTaxonomy(final Product input) {
+	private Integer googleTaxonomy(final LegacyProduct input) {
 		Integer taxonomyId = null;
 		
 		List<Integer> taxons =new ArrayList<>();

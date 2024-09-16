@@ -25,7 +25,7 @@ import org.open4goods.commons.model.data.DataFragment;
 import org.open4goods.commons.model.data.Price;
 import org.open4goods.commons.model.data.Resource;
 import org.open4goods.commons.model.data.ResourceTag;
-import org.open4goods.commons.model.product.Product;
+import org.open4goods.commons.model.product.LegacyProduct;
 import org.open4goods.commons.services.DataSourceConfigService;
 import org.open4goods.commons.services.VerticalsConfigService;
 import org.slf4j.Logger;
@@ -131,7 +131,7 @@ public class AmazonCompletionService extends AbstractCompletionService {
 	 * > if second call, then make a get.
 	 * > If ASIN was not previously found, then mark as stand by
 	 */
-	public void processProduct(VerticalConfig vertical, Product data) {
+	public void processProduct(VerticalConfig vertical, LegacyProduct data) {
 		logger.info("Amazon completion for {}", data.getId());
 		Set<DataFragment> fragments = new HashSet<>();
 		
@@ -174,7 +174,7 @@ public class AmazonCompletionService extends AbstractCompletionService {
 	 * @param vertical
 	 * @param data
 	 */
-	private Set<DataFragment> completeGet(VerticalConfig vertical, Product data) {
+	private Set<DataFragment> completeGet(VerticalConfig vertical, LegacyProduct data) {
 		Set<DataFragment> ret = new HashSet<>();
 		GetItemsRequest getItemsRequest = new GetItemsRequest().itemIdType(ItemIdType.ASIN)
 				.itemIds(List.of(data.getExternalIds().getAsin())).partnerTag(amazonConfig.getPartnerTag())
@@ -213,7 +213,7 @@ public class AmazonCompletionService extends AbstractCompletionService {
 	 * @param vertical
 	 * @param data
 	 */
-	private Set<DataFragment> completeSearch(VerticalConfig vertical, Product data) {
+	private Set<DataFragment> completeSearch(VerticalConfig vertical, LegacyProduct data) {
 		Set<DataFragment> ret = new HashSet<>();
 
 		SearchItemsRequest searchItemsRequest = new SearchItemsRequest().keywords(data.gtin())
@@ -251,7 +251,7 @@ public class AmazonCompletionService extends AbstractCompletionService {
 		return ret;
 	}
 
-	private Set<DataFragment> processAmazonItem(Item item, VerticalConfig vertical, Product data) {
+	private Set<DataFragment> processAmazonItem(Item item, VerticalConfig vertical, LegacyProduct data) {
 
 		logger.info("Setting amazon data for {}:{}", vertical.getId(), data.gtin());
 		Set<DataFragment>  ret = new HashSet<>();
@@ -499,7 +499,7 @@ public class AmazonCompletionService extends AbstractCompletionService {
 	 * @param url
 	 * @return
 	 */
-	private DataFragment mapOfferToDataFragment(OfferListing o, String url, Product data) {
+	private DataFragment mapOfferToDataFragment(OfferListing o, String url, LegacyProduct data) {
 
 		DataFragment df = initDataFragment(url, url, data);
 		
@@ -533,7 +533,7 @@ public class AmazonCompletionService extends AbstractCompletionService {
 	 * @param data
 	 * @return
 	 */
-	private DataFragment initDataFragment(String datasourceName, String url, Product data) {
+	private DataFragment initDataFragment(String datasourceName, String url, LegacyProduct data) {
 		DataFragment df = new DataFragment();
 		df.setDatasourceName(amazonDatasource.getName());
 		df.setDatasourceConfigName(amazonDatasource.getDatasourceConfigName());

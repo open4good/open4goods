@@ -6,7 +6,7 @@ import org.open4goods.commons.config.yml.ui.VerticalConfig;
 import org.open4goods.commons.dao.ProductRepository;
 import org.open4goods.commons.exceptions.ResourceNotFoundException;
 import org.open4goods.commons.model.constants.RolesConstants;
-import org.open4goods.commons.model.product.Product;
+import org.open4goods.commons.model.product.LegacyProduct;
 import org.open4goods.commons.services.ImageGenerationService;
 import org.open4goods.commons.services.VerticalsConfigService;
 import org.open4goods.commons.services.ai.AiService;
@@ -104,7 +104,7 @@ public class AdminController {
 			@RequestParam(name = "r", required = false) String redircectUrl,
 			@RequestParam(name = "gtin", required = false) String gtin) throws ResourceNotFoundException {
 
-		Product data = repository.getById(gtin);
+		LegacyProduct data = repository.getById(gtin);
 
 		// We always force when human triggered
 		aiService.complete(data, verticalsConfigService.getConfigByIdOrDefault(data.getVertical()),true);

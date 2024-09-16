@@ -4,7 +4,7 @@ import java.util.Collection;
 
 import org.open4goods.commons.config.yml.ui.VerticalConfig;
 import org.open4goods.commons.exceptions.AggregationSkipException;
-import org.open4goods.commons.model.product.Product;
+import org.open4goods.commons.model.product.LegacyProduct;
 import org.slf4j.Logger;
 
 public class CleanScoreAggregationService extends AbstractScoreAggregationService {
@@ -16,10 +16,10 @@ public class CleanScoreAggregationService extends AbstractScoreAggregationServic
 
 
 	@Override
-	public void init(Collection<Product> datas) {
+	public void init(Collection<LegacyProduct> datas) {
 		super.init(datas);
 		
-		for (Product d : datas) {
+		for (LegacyProduct d : datas) {
 			d.getScores().clear();
 		}
 	}
@@ -27,7 +27,7 @@ public class CleanScoreAggregationService extends AbstractScoreAggregationServic
 
 
 	@Override
-	public void onProduct(Product data, VerticalConfig vConf) throws AggregationSkipException {
+	public void onProduct(LegacyProduct data, VerticalConfig vConf) throws AggregationSkipException {
 		
 	}
 	

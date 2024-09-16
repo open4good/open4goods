@@ -15,7 +15,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.zip.GZIPOutputStream;
 
 import org.apache.commons.io.IOUtils;
-import org.open4goods.commons.model.product.Product;
+import org.open4goods.commons.model.product.LegacyProduct;
 import org.open4goods.commons.services.SerialisationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,14 +31,14 @@ public class ProductBackupThread implements Runnable {
 	private static final Logger logger = LoggerFactory.getLogger(ProductBackupThread.class);
 
     private final File outputFolder;
-    private final LinkedBlockingQueue<Product> queue;
+    private final LinkedBlockingQueue<LegacyProduct> queue;
     private final SerialisationService serialisationService;
     private final int fileNumber;
     
     private BufferedWriter writer;
     private File tmpFile;
 
-    public ProductBackupThread(File outputFolder, LinkedBlockingQueue<Product> queue, SerialisationService serialisationService, int fileNumber) throws Exception {
+    public ProductBackupThread(File outputFolder, LinkedBlockingQueue<LegacyProduct> queue, SerialisationService serialisationService, int fileNumber) throws Exception {
         this.outputFolder = outputFolder;
         this.queue = queue;
         this.serialisationService = serialisationService;
@@ -78,7 +78,7 @@ public class ProductBackupThread implements Runnable {
         while (true) {
             try {
             	// We have big batches
-                Product product = queue.poll(5, TimeUnit.MINUTES);
+                LegacyProduct product = queue.poll(5, TimeUnit.MINUTES);
                 
                 if (product == null) {
                 	logger.info("Handling done for this thread");
