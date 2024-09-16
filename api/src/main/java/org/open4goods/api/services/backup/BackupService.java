@@ -17,7 +17,6 @@ import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.zip.GZIPInputStream;
@@ -164,40 +163,58 @@ public class BackupService implements HealthIndicator {
 
 	    File importFolder = new File(backupConfig.getImportProductPath());
 	    if (!importFolder.exists() || !importFolder.isDirectory()) {
-	        logger.error("Import file does not exists or is not a folder : {}", importFolder.getAbsolutePath());
+	        logger.error("Import file does not exist or is not a folder : {}", importFolder.getAbsolutePath());
 	        return;
 	    }
 
+	    AtomicLong counter = new AtomicLong(0);
+	    ExecutorService executorService = Executors.newFixedThreadPool(backupConfig.getProductImportThreads());
+
 	    for (File importFile : importFolder.listFiles()) {
-	    	logger.info("Importing file started : {}", importFile.getAbsolutePath());
-			try (InputStream inputStream = new FileInputStream(importFile);
-		         GZIPInputStream gzipInputStream = new GZIPInputStream(inputStream);
-		         InputStreamReader inputStreamReader = new InputStreamReader(gzipInputStream);
-		         BufferedReader bufferedReader = new BufferedReader(inputStreamReader)) {
-	
-		        List<Product> group = new ArrayList<>();
-		        
-		        bufferedReader.lines().forEach(line -> {
-		            try {
-						group.add(serialisationService.fromJson(line, Product.class));
-					} catch (IOException e) {
-						logger.error("Error occurs in data deserialisation", e);
+	        executorService.submit(() -> {
+	            logger.info("Importing file started : {}", importFile.getAbsolutePath());
+	            try (InputStream inputStream = new FileInputStream(importFile);
+	                 GZIPInputStream gzipInputStream = new GZIPInputStream(inputStream);
+	                 InputStreamReader inputStreamReader = new InputStreamReader(gzipInputStream);
+	                 BufferedReader bufferedReader = new BufferedReader(inputStreamReader)) {
+
+						List<Product> group = new ArrayList<>();
+						bufferedReader.lines().forEach(line -> {
+						    try {
+						        group.add(serialisationService.fromJson(line, Product.class));
+						        counter.incrementAndGet();
+						        if (counter.get() % 1000 == 0) {
+						            logger.warn("Imported items so : {}", counter.get());
+						        }
+						        if (group.size() == backupConfig.getImportBulkSize()) {
+						        	productRepo.storeNoCache(group); // Index the current group
+						        	group.clear(); // Clear the group for the next batch
+						        }
+						    } catch (Exception e) {
+						        logger.error("Error occurs in data import", e);
+						    }
+
+						});
+
+						if (!group.isEmpty()) {
+						    productRepo.storeNoCache(group);
+						}
+						logger.info("Importing file finished : {}", importFile.getAbsolutePath());
+					} catch (Exception e) {
+						logger.error("Error occurs in data file processing", e);
 					}
-		            if (group.size() == backupConfig.getImportBulkSize()) {
-		                productRepo.storeNoCache(group); // Index the current group
-		                group.clear(); // Clear the group for the next batch
-		            }
-		        });
-	
-		        // Index the remaining lines if any
-		        if (!group.isEmpty()) {
-		            productRepo.storeNoCache(group);
-		        }
-		    	logger.info("Importing file finished : {}", importFile.getAbsolutePath());
-		    } catch (Exception e) {
-		        logger.error("Error occurs in data file import", e);
-		    }
+	        });
 	    }
+
+	    executorService.shutdown();
+	    while (!executorService.isTerminated()) {
+	        try {
+				Thread.sleep(1000);
+			} catch (InterruptedException e) {
+				logger.error("Error while sleeping",e);
+			}
+	    }
+
 	    logger.info("Product import : finished");
 	}
 	
