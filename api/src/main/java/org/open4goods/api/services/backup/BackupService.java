@@ -179,31 +179,31 @@ public class BackupService implements HealthIndicator {
 	                 InputStreamReader inputStreamReader = new InputStreamReader(gzipInputStream);
 	                 BufferedReader bufferedReader = new BufferedReader(inputStreamReader)) {
 
-	                List<Product> group = new ArrayList<>();
-	                bufferedReader.lines().forEach(line -> {
-	                    try {
-	                        group.add(serialisationService.fromJson(line, Product.class));
-	                        counter.incrementAndGet();
-	                        if (counter.get() % 1000 == 0) {
-	                            logger.warn("Imported items so : {}", counter.get());
-	                        }
-	                    } catch (IOException e) {
-	                        logger.error("Error occurs in data deserialization", e);
-	                    }
+						List<Product> group = new ArrayList<>();
+						bufferedReader.lines().forEach(line -> {
+						    try {
+						        group.add(serialisationService.fromJson(line, Product.class));
+						        counter.incrementAndGet();
+						        if (counter.get() % 1000 == 0) {
+						            logger.warn("Imported items so : {}", counter.get());
+						        }
+						        if (group.size() == backupConfig.getImportBulkSize()) {
+						        	productRepo.storeNoCache(group); // Index the current group
+						        	group.clear(); // Clear the group for the next batch
+						        }
+						    } catch (Exception e) {
+						        logger.error("Error occurs in data import", e);
+						    }
 
-	                    if (group.size() == backupConfig.getImportBulkSize()) {
-	                        productRepo.storeNoCache(group); // Index the current group
-	                        group.clear(); // Clear the group for the next batch
-	                    }
-	                });
+						});
 
-	                if (!group.isEmpty()) {
-	                    productRepo.storeNoCache(group);
-	                }
-	                logger.info("Importing file finished : {}", importFile.getAbsolutePath());
-	            } catch (Exception e) {
-	                logger.error("Error occurs in data file import", e);
-	            }
+						if (!group.isEmpty()) {
+						    productRepo.storeNoCache(group);
+						}
+						logger.info("Importing file finished : {}", importFile.getAbsolutePath());
+					} catch (Exception e) {
+						logger.error("Error occurs in data file processing", e);
+					}
 	        });
 	    }
 

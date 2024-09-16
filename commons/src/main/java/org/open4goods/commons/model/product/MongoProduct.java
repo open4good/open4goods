@@ -112,53 +112,49 @@ public class MongoProduct implements Standardisable {
 	 */
 	private Map<String,String> mappedCategories = new HashMap<>();
 	
+	private AggregatedPrices price = new AggregatedPrices();
 	
+	
+	/**
+	 * The google taxonomy id
+	 */
+	private Integer googleTaxonomyId;
+	
+	/** number of commercial offers **/
+	private Integer offersCount = 0;
+
+
+	/**
+	 * The media resources for this data
+	 */
+	private Set<Resource> resources = new HashSet<>();
+	
+	/** The image used as cover **/
+	private String coverImagePath;
+
+	/** The ai generated texts, keyed by language **/
+	private Localisable<String, AiDescriptions> genaiTexts = new Localisable<>();
+
+	/**
+	 * The scores computed for this product
+	 */
+	private Map<String, Score> scores = new HashMap<>();
+
+	/**
+	 * The ranking (position of the product in its category)
+	 */
+	private EcoScoreRanking ranking = new EcoScoreRanking();
+
+
+	@Field(index = false, store = false, type = FieldType.Object)
+	private AggregatedAttributes attributes = new AggregatedAttributes();
 	
 	/** Namings informations for this product **/
 	@Field(index = true, store = false, type = FieldType.Object)
 	// TODO(p1,design) : Refactor to a localisable at this level, check impact on already generated names, check url's can not be erased
 	private ProductTexts names = new ProductTexts();
 
-	@Field(index = false, store = false, type = FieldType.Object)
-	private AggregatedAttributes attributes = new AggregatedAttributes();
-
-	@Field(index = false, store = false, type = FieldType.Object)
-	private AggregatedPrices price = new AggregatedPrices();
-
-	/**
-	 * The media resources for this data
-	 */
-	@Field(index = false, store = false, type = FieldType.Object)
-	private Set<Resource> resources = new HashSet<>();
-
-	@Field(index = false, store = false, type = FieldType.Keyword)
-	private String coverImagePath;
-
-	/** The ai generated texts, keyed by language **/
-	@Field(index = false, store = false, type = FieldType.Object)
-	private Localisable<String, AiDescriptions> genaiTexts = new Localisable<>();
-
-
-	/**
-	 * The google taxonomy id
-	 */
-	@Field(index = true, store = false, type = FieldType.Integer)
-	private Integer googleTaxonomyId;
-
-
-	@Field(index = true, store = false, type = FieldType.Object)
-	private Map<String, Score> scores = new HashMap<>();
-
-	@Field(index = false, store = false, type = FieldType.Object)
-	private EcoScoreRanking ranking = new EcoScoreRanking();
-
-	//////////////////// :
-	// Stored (and computed) to help elastic querying / sorting
-	////////////////////
-	/** number of commercial offers **/
-	@Field(index = true, store = false, type = FieldType.Integer)
-	private Integer offersCount = 0;
-
+	
 	// /**
 	// * Informations about participant datas and aggegation process
 	// */

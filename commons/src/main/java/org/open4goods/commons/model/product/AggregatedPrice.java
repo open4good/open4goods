@@ -13,7 +13,7 @@ import org.springframework.data.elasticsearch.annotations.FieldType;
 
 public class AggregatedPrice extends Price {
 	
-	//TODO : shared, ugly
+	//TODO(p3,design) : shared, ugly
 	public static final DecimalFormat numberFormater = new DecimalFormat("0.#");
 	
 	@Field(index = false, store = false, type = FieldType.Keyword)
@@ -24,13 +24,13 @@ public class AggregatedPrice extends Price {
 	@Field(index = false, store = false, type = FieldType.Keyword)
 	private String url;
 	@Field(index = false, store = false, type = FieldType.Double)
-	// TODO : Compute, do not store
 	private Double compensation;
+	
 	/**
 	 * The state of the product (new, occasion, ...)
 	 */
 	@Field(index = true, store = false, type = FieldType.Keyword)
-	//TODO : Rename to productCondition
+	//TODO(p3,elegance) : Rename to productCondition, but not easy on existing data
 	private ProductCondition productState;
 
 	/**
@@ -155,8 +155,5 @@ public class AggregatedPrice extends Price {
 	public void setCompensation(Double compensation) {
 		this.compensation = compensation;
 	}
-
-
-
 
 }

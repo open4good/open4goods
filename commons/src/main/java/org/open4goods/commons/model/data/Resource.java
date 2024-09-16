@@ -74,11 +74,9 @@ public class Resource implements Validable {
 
 	@Field(index = false, store = false, type = FieldType.Integer)
 	// The group (similarity based and popularity ranked) this resource belongs to
-	// TODO : Move into imageinfo
 	private Integer group;
 
 	@Field(index = false, store = false, type = FieldType.Keyword)
-	// The group (similarity based and popularity ranked) this resource belongs to
 	private String datasourceName;
 
 

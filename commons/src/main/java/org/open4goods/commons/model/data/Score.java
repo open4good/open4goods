@@ -25,7 +25,7 @@ public class Score  implements Validable {
 	
 	@Field(index = true, store = false, type = FieldType.Boolean)
 	// Is equals to relativ.value
-	// TODO : Remove field ?
+	// TODO(p3,design) : Remove field ?
 	private Double value;
 
 	@Field(index = true, store = false, type = FieldType.Object)

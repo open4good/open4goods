@@ -168,22 +168,22 @@ public class PriceAggregationService extends AbstractAggregationService {
 
 		if (history.size() == 0) {
 			// First price
-			prices. setTrend(0);
+			prices.getTrends().put(state, 0);
 			history.add(new PriceHistory(minPrice));
 
 		} else {
 			PriceHistory lastPrice = history.get(history.size() - 1);
 			if (minPrice.getPrice() == lastPrice.getPrice().doubleValue()) {
-				prices.setTrend(0);
+				prices.getTrends().put(state,0);
 				lastPrice.setTimestamp(System.currentTimeMillis());
 			} else if (minPrice.getPrice() > lastPrice.getPrice().doubleValue()) {
 				// Price has increased
-				prices.setTrend(1);
+				prices.getTrends().put(state,1);
 				// NOTE : Should one day cut here if too long
 				history.add(new PriceHistory(minPrice));
 			} else {
 				// Price has decreased
-				prices.setTrend(-1);
+				prices.getTrends().put(state,-1);
 				// NOTE : Should one day cut here if too long
 				history.add(new PriceHistory(minPrice));
 			}

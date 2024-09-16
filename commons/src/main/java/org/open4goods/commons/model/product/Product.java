@@ -962,6 +962,12 @@ public class Product implements Standardisable {
 		this.excluded = excluded;
 	}
 
+	
+	// TODO(p1, design) : Remove once migration complete
+	public long getIdLong() {
+		return Long.valueOf(id);
+	}
+
 
 
 

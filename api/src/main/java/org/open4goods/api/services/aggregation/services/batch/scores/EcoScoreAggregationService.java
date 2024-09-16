@@ -90,10 +90,10 @@ public class EcoScoreAggregationService extends AbstractScoreAggregationService 
 			Product p = sorted.get(i);
 			p.getRanking().setGlobalCount(count);
 			p.getRanking().setGlobalPosition(count - i);
-			p.getRanking().setGlobalBest(sorted.getLast().getId());
+			p.getRanking().setGlobalBest(sorted.getLast().getIdLong());
 			
 			if (i < count - 1) {
-				p.getRanking().setGlobalBetter(sorted.get(i+1).getId());
+				p.getRanking().setGlobalBetter(sorted.get(i+1).getIdLong());
 			}
 
 		}

@@ -59,8 +59,7 @@ public class FeedService {
 	 * Fetch the feeds
 	 * TODO : Make it from conf, not to retrive datasources at the same time than beta.nudger.fr
 	 */
-//	TODO(p1, feature) : put back
-//	@Scheduled(cron = "0 0 20,8 * * ?")
+	@Scheduled(cron = "0 0 20,8 * * ?")
 	public void fetchFeeds() {
 		logger.info("Fetching CSV affiliation feeds");
 		// 1 - Loads the whole feeds as a list of DataSourceProperties, eventually hot defaulted
