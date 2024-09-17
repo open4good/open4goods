@@ -191,6 +191,7 @@ public class DataFragmentStoreService {
 				if (null == data) {
 					// This is a first product
 					data = new Product();
+					data.setId(Long.valueOf(df.gtin()));
 					data.setCreationDate(System.currentTimeMillis());
 				}
 
@@ -212,10 +213,6 @@ public class DataFragmentStoreService {
 		} catch (final Exception e) {
 			logger.error("Error while dequeing DataFragments",e);
 		}
-
-		// Clearing queue
-		queue.clear();
-
 	}
 
 
