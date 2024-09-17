@@ -72,7 +72,7 @@ public class NamesAggregationService extends AbstractAggregationService {
 				if (null == data.getNames().getUrl().get(lang)) {
 					String urlSuffix = StringUtils.stripAccents(computePrefixedText(data, tConf.getUrl(), "-"));
 					urlSuffix = StringUtils.normalizeSpace(urlSuffix).replace(' ', '-');
-					data.getNames().getUrl().put(lang, data.gtin() + "-" + urlSuffix);
+					data.getNames().getUrl().put(lang, data.getId() + "-" + urlSuffix);
 				}
 				
 				// h1Title			

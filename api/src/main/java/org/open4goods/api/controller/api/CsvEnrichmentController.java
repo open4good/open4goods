@@ -212,7 +212,7 @@ public class CsvEnrichmentController {
 						if (products.size() == 0) {
 							enriched.put(O4G_MSG, "NO_TITLE_MATCH");	
 						} else if (products.size() > 1) {
-							enriched.put(O4G_MSG, "MULTIPLE_TITLE_MATCH : "+ StringUtils.join( products.stream().map(e->e.gtin()).toArray() , ", "));
+							enriched.put(O4G_MSG, "MULTIPLE_TITLE_MATCH : "+ StringUtils.join( products.stream().map(e->e.getId()).toArray() , ", "));
 						} else {
 							p = products.get(0);
 						}

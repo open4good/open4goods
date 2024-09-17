@@ -46,11 +46,11 @@ public class IdentityAggregationService extends AbstractAggregationService {
 		// Validating barcodes
 		/////////////////////////////
 		
-		if (null == output.gtin()) {
+		if (null == output.getId()) {
 			output.setId(Long.valueOf(input.gtin()));
 		} else {
-			if (!output.gtin().equals(input.gtin())) {
-				dedicatedLogger.error("GTIN Mismatch : product {], dataFragment {}", output.gtin(), input.gtin());
+			if (!output.getId().equals(Long.valueOf(input.gtin()))) {
+				dedicatedLogger.error("GTIN Mismatch : product {], dataFragment {}", output.getId(), input.gtin());
 			}
 		}
 		
@@ -82,7 +82,7 @@ public class IdentityAggregationService extends AbstractAggregationService {
 	@Override
 	public void onProduct(Product output, VerticalConfig vConf) throws AggregationSkipException {
 
-		if (StringUtils.isEmpty(output.gtin())) {
+		if (null == output.getId()) {
 			dedicatedLogger.warn("Skipping product aggregation, empty barcode");
 			throw new AggregationSkipException("Cannot proceed, empty barcode");
 		} 

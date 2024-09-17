@@ -6,10 +6,8 @@ import org.springframework.data.elasticsearch.annotations.FieldType;
 
 public class PriceHistory {
 
-	@Field(index = false, store = false, type=FieldType.Date, format = DateFormat.epoch_millis)
 	private Long timestamp;
 
-	@Field(index = false, store = false, type = FieldType.Double)
 	private Double price;
 
 

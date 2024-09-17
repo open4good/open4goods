@@ -49,7 +49,7 @@ public class ContributionVote {
 
 
 	public ContributionVote(AggregatedPrice e, Product data) {
-		gtin= data.gtin();
+		gtin= String.valueOf(data.getId());
 		price=e.getPrice();
 		datasourceName = e.getDatasourceName();
 		url=e.getUrl();

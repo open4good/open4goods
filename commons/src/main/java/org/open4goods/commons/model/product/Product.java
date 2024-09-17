@@ -40,6 +40,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.elasticsearch.annotations.Document;
+import org.springframework.data.elasticsearch.annotations.Dynamic;
 import org.springframework.data.elasticsearch.annotations.Field;
 import org.springframework.data.elasticsearch.annotations.FieldType;
 import org.springframework.data.elasticsearch.annotations.Setting;
@@ -48,7 +49,7 @@ import org.springframework.data.redis.core.RedisHash;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-@Document(indexName = Product.DEFAULT_REPO, createIndex = true, writeTypeHint = WriteTypeHint.FALSE)
+@Document(indexName = Product.DEFAULT_REPO, createIndex = true, writeTypeHint = WriteTypeHint.FALSE, dynamic = Dynamic.FALSE)
 @RedisHash(value=Product.DEFAULT_REPO, timeToLive = ProductRepository.VALID_UNTIL_DURATION)
 @Setting( settingPath = "/elastic-settings.json")
 public class Product implements Standardisable {
@@ -466,7 +467,7 @@ public class Product implements Standardisable {
 	public String gtin() {
 		// TODO(p2,design) : Use gtin info to format to the according gtin type
 		try {
-			return id+"";
+			return String.valueOf(id);
 		} catch (final Exception e) {
 			return null;
 		}
@@ -924,11 +925,11 @@ public class Product implements Standardisable {
 		this.excluded = excluded;
 	}
 
-	public long getId() {
+	public Long getId() {
 		return id;
 	}
 
-	public void setId(long id) {
+	public void setId(Long id) {
 		this.id = id;
 	}
 

@@ -279,7 +279,7 @@ public class ProductRepository {
 	 */
 	public void index(final Product p) {
 
-		logger.info("Queuing single product : {}", p.gtin());
+		logger.info("Queuing single product : {}", p.getId());
 
 		try {
 			queue.put(p);
@@ -353,7 +353,7 @@ public class ProductRepository {
 	
 	
 	public void forceIndex(Product data) {
-		logger.info("Indexing  product {}", data.gtin());
+		logger.info("Indexing  product {}", data.getId());
 
 //		executor.submit(() -> {
 			elasticsearchTemplate.save(data, current_index);
@@ -451,11 +451,11 @@ public class ProductRepository {
 	 * @return
 	 * @throws ResourceNotFoundException
 	 */
-	public Map<String, Product> multiGetById( final Collection<Long> ids)
+	public Map<Long, Product> multiGetById( final Collection<Long> ids)
 			throws ResourceNotFoundException {
 
 		logger.info("Getting {} products from default index",ids.size());
-		Map<String, Product> ret = new HashMap<String, Product>();
+		Map<Long, Product> ret = new HashMap<Long, Product>();
 		
 		
 		// Getting from redis
@@ -463,7 +463,7 @@ public class ProductRepository {
 		Iterable<Product> redisResults = redisRepository.findAllById(ids);
 		redisResults.forEach(e -> {
 			if (null != e) {
-				ret.put(e.gtin(), e);
+				ret.put(e.getId(), e);
 			}
 		});
 		
@@ -480,7 +480,7 @@ public class ProductRepository {
 			elasticsearchTemplate.multiGet(query, Product.class,current_index )
 			.stream().map(MultiGetItem::getItem)
 			.filter(Objects::nonNull)
-			.forEach(e -> ret.put(e.gtin(), e));
+			.forEach(e -> ret.put(e.getId(), e));
 	
 			
 			// Filtrer et collecter les produits à partir d'une liste en utilisant leur GTIN comme clé dans une map
@@ -488,7 +488,7 @@ public class ProductRepository {
 			    // Filtrer les éléments non nuls
 			    .filter(Objects::nonNull)
 			    // Filtrer les éléments dont le GTIN est présent dans la liste des IDs manquants
-			    .filter(e -> missingIds.contains(e.gtin()))
+			    .filter(e -> missingIds.contains(e.getId()))
 			    // Collecter les produits dans une map avec le GTIN comme clé
 			    .collect(Collectors.toSet());
 			

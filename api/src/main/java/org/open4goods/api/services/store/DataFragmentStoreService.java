@@ -176,7 +176,7 @@ public class DataFragmentStoreService {
 		
 		try {
 			// Retrieving datafragments
-			Map<String, Product> aggDatas = aggregatedDataRepository.multiGetById(
+			Map<Long, Product> aggDatas = aggregatedDataRepository.multiGetById(
 
 					buffer.stream()
 					.map( e -> Long.valueOf(e.gtin()))
@@ -187,7 +187,7 @@ public class DataFragmentStoreService {
 			Set<Product> results = new HashSet<Product>();
 
 			for (DataFragment df : buffer) {
-				Product data = aggDatas.get(df.gtin());
+				Product data = aggDatas.get(Long.valueOf(df.gtin()));
 				if (null == data) {
 					// This is a first product
 					data = new Product();

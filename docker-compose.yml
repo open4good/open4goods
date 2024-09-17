@@ -12,8 +12,9 @@ services:
       - cluster.name=es-docker-cluster
       - cluster.initial_master_nodes=elastic
       - bootstrap.memory_lock=true
-      - "ES_JAVA_OPTS=-Xms256m -Xmx256m"
+      - "ES_JAVA_OPTS=-Xms10g -Xmx10g"
       - xpack.security.enabled=false
+      - logger.level=WARN
       
     ulimits:
       memlock:
@@ -24,8 +25,8 @@ services:
         soft: 65536
         hard: 65536
 
-#    volumes:
-#      - /tmp/elastic-data:/usr/share/elasticsearch/data
+    volumes:
+      - /opt/open4goods/elastic-data:/usr/share/elasticsearch/data
 
     ports:
       - "9200:9200"

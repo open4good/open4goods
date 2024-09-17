@@ -73,7 +73,7 @@ public class BlablaService {
 		logger.info("generating thymeleaf version {}:{} >> {}", seqGen.getSequenceCount(), seqGen.hashCode(), xmlBlabla);
 		
 		if (null == xmlBlabla) {
-			logger.error("Empty blabla (invalid expressions in template ?) generated for {} : {} > {}",data.gtin(), input, xmlBlabla);
+			logger.error("Empty blabla (invalid expressions in template ?) generated for {} : {} > {}",data.getId(), input, xmlBlabla);
 			return "";
 		}
 		return StringUtils.normalizeSpace(xmlBlabla);

@@ -14,8 +14,6 @@ import org.open4goods.commons.model.attribute.Attribute;
 import org.open4goods.commons.model.attribute.AttributeType;
 import org.open4goods.commons.model.data.UnindexedKeyVal;
 import org.open4goods.commons.model.data.UnindexedKeyValTimestamp;
-import org.springframework.data.elasticsearch.annotations.Field;
-import org.springframework.data.elasticsearch.annotations.FieldType;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
@@ -25,32 +23,27 @@ public class AggregatedAttribute implements IAttribute {
 	/**
 	 * The name of this aggregated attribute
 	 */
-	@Field(index = true, store = false, type = FieldType.Keyword)
 	private String name;
 
 	/**
 	 * The value of this aggregated attribute
 	 */
-	@Field(index = true, store = false, type = FieldType.Keyword)
 	private String value;
 
 	/**
 	 * The numeric value (if any) of this aggregated attribute
 	 */
-	@Field(index = true, store = false, type = FieldType.Double)
 	private Double numericValue;
 
 	/**
 	 * The collections of conflicts for this attribute
 	 */
-	@Field(index = false, store = false, type = FieldType.Object)
 	private Set<UnindexedKeyValTimestamp> sources = new HashSet<>();
 
 	
 	/**
 	 * The attribute raw rawValue
 	 */
-	@Field(index = false, store = false, type = FieldType.Keyword)
 	private Set<Integer> icecatTaxonomyIds = new HashSet<>();
 	
 	
@@ -115,7 +108,6 @@ public class AggregatedAttribute implements IAttribute {
 		return ret;
 	}
 
-	// TODO : Simple, but does not allow to handle conflicts, and so on
 	@Override
 	public int hashCode() {
 		return name.hashCode();

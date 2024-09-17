@@ -135,13 +135,13 @@ public class IcecatCompletionService extends AbstractCompletionService {
 		} catch (UnrecognizedPropertyException e) {
 			logger.error("Unknown property at {} : {}",url,e.getOriginalMessage());
 		}  catch (FileNotFoundException e) {
-			logger.info("Gtin {} is not found",data.gtin());
+			logger.info("Gtin {} is not found",data.getId());
 		} catch (IOException e) {
 			// TODO : Not nice, use real httpclient
 			if (e.getMessage().contains("response code: 400 ")) {
-				logger.info("Gtin {} does not exists in Icecat",data.gtin());
+				logger.info("Gtin {} does not exists in Icecat",data.getId());
 			} else if (e.getMessage().contains("response code: 403 ")) {
-				logger.info("Gtin {} is restricted to upgraded plan in Icecat",data.gtin());
+				logger.info("Gtin {} is restricted to upgraded plan in Icecat",data.getId());
 			} else {
 				logger.error("Unexpected error in icecat parsing",e);
 			}

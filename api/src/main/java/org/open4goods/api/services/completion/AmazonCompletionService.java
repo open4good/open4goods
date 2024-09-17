@@ -138,14 +138,14 @@ public class AmazonCompletionService extends AbstractCompletionService {
 		String asin = data.getExternalIds().getAsin();
 		if (StringUtils.isEmpty(asin)) {
 			// First time API Call, we operate through the search method
-			logger.info("Initial amazon call (get) for {}", data.gtin());
+			logger.info("Initial amazon call (get) for {}", data.getId());
 			fragments.addAll(completeSearch(vertical, data));
 		} else {
 				if (asin.equals(NOT_FOUND_ASIN_MARKUP)) {
 					data.getExternalIds().setAsin(null);
 				} else {
 					// If we already have the ASIN, we operate a direct get request
-					logger.info("Further amazon call (get) for {}", data.gtin());
+					logger.info("Further amazon call (get) for {}", data.getId());
 					// TODO : Do not proceed, have a delay threshold
 					fragments.addAll(completeGet(vertical, data));
 				}
@@ -191,9 +191,9 @@ public class AmazonCompletionService extends AbstractCompletionService {
 			}
 
 			if (response.getItemsResult().getItems().size() == 0) {
-				logger.warn("No amazon product for {}", data.gtin());
+				logger.warn("No amazon product for {}", data.getId());
 			} else if (response.getItemsResult().getItems().size() == 0) {
-				logger.warn("Multiple amazon product for {}", data.gtin());
+				logger.warn("Multiple amazon product for {}", data.getId());
 			}
 
 			for (Item item : response.getItemsResult().getItems()) {
@@ -232,11 +232,11 @@ public class AmazonCompletionService extends AbstractCompletionService {
 			}
 
 			if (null == response.getSearchResult() || response.getSearchResult().getItems().size() == 0) {
-				logger.warn("No amazon product for {}", data.gtin());
+				logger.warn("No amazon product for {}", data.getId());
 				data.getExternalIds().setAsin(NOT_FOUND_ASIN_MARKUP);
 				return ret;
 			} else if (response.getSearchResult().getItems().size() > 1) {
-				logger.warn("Multiple amazon product for {}", data.gtin());
+				logger.warn("Multiple amazon product for {}", data.getId());
 			}
 
 			for (Item item : response.getSearchResult().getItems()) {
@@ -253,7 +253,7 @@ public class AmazonCompletionService extends AbstractCompletionService {
 
 	private Set<DataFragment> processAmazonItem(Item item, VerticalConfig vertical, Product data) {
 
-		logger.info("Setting amazon data for {}:{}", vertical.getId(), data.gtin());
+		logger.info("Setting amazon data for {}:{}", vertical.getId(), data.getId());
 		Set<DataFragment>  ret = new HashSet<>();
 		
 		// Setting the ASIN (directly in product)
@@ -261,7 +261,7 @@ public class AmazonCompletionService extends AbstractCompletionService {
 		if (!StringUtils.isEmpty(asin)) {
 			data.getExternalIds().setAsin(asin);
 		} else {
-			logger.warn("Empty ASIN returned for {}", data.gtin());
+			logger.warn("Empty ASIN returned for {}", data.getId());
 		}
 
 		// Handling images (directly in product)
@@ -270,7 +270,7 @@ public class AmazonCompletionService extends AbstractCompletionService {
 			if (null != images.getPrimary()) {
 
 				try {
-					logger.info("Adding primary image for {} : {}", data.gtin(), images.getPrimary().getLarge());
+					logger.info("Adding primary image for {} : {}", data.getId(), images.getPrimary().getLarge());
 					Resource r = new Resource(images.getPrimary(). getLarge().getURL());
 					r.getHardTags().add(ResourceTag.AMAZON_PRIMARY_TAG);
 					r.getHardTags().add(ResourceTag.PRIMARY);
@@ -283,7 +283,7 @@ public class AmazonCompletionService extends AbstractCompletionService {
 
 			if (null != images.getVariants()) {
 				images.getVariants().forEach(e -> {
-					logger.info("Adding variant image for {} : {}", data.gtin(), e.getLarge().getURL());
+					logger.info("Adding variant image for {} : {}", data.getId(), e.getLarge().getURL());
 					try {
 						Resource r = new Resource(e.getLarge().getURL());
 						r.getHardTags().add(ResourceTag.AMAZON_VARIANT_TAG);
@@ -302,7 +302,7 @@ public class AmazonCompletionService extends AbstractCompletionService {
 		String detailPageUrl = item.getDetailPageURL();
 		Offers offers = item.getOffers();
 		if (null != offers) {
-			logger.info("Adding prices for {}", data.gtin());
+			logger.info("Adding prices for {}", data.getId());
 			OfferListing minNewPrice = null;
 			OfferListing minOccasionPrice = null;
 
@@ -459,7 +459,7 @@ public class AmazonCompletionService extends AbstractCompletionService {
 			variationAttributes.forEach(e -> {
 				String varName = e.getName();
 				String varValue = e.getValue();
-				logger.info("Found a variation attribute for {} : {}, {}", data.gtin(), varName, varValue);
+				logger.info("Found a variation attribute for {} : {}, {}", data.getId(), varName, varValue);
 			});
 		}
 
@@ -485,7 +485,7 @@ public class AmazonCompletionService extends AbstractCompletionService {
 
 		// RentalOffers rentalOffers = item.getRentalOffers();
 
-		logger.warn("Amazon completion done for {}", data.gtin());
+		logger.warn("Amazon completion done for {}", data.getId());
 		return ret;
 
 	}

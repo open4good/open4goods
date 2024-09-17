@@ -9,29 +9,22 @@ import java.util.stream.Collectors;
 import org.open4goods.commons.model.constants.ReferentielKey;
 import org.springframework.data.elasticsearch.annotations.Field;
 import org.springframework.data.elasticsearch.annotations.FieldType;
-
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-@JsonIgnoreProperties(ignoreUnknown = true)
+//@JsonIgnoreProperties(ignoreUnknown = true)
 public class AggregatedAttributes  {
 
 	/**
 	 * The referentiel attributes
 	 */
-	@Field(index = true, store = false, type = FieldType.Object)
 	private Map<ReferentielKey, String> referentielAttributes = new HashMap<>();
 
-	@Field(index = true, store = false, type = FieldType.Object)
-
-	
-	//TODO: rename
+	//TODO(p3,naming) : rename
+	@Field(enabled = false, index = false, store = false, type = FieldType.Object)
 	private Map<String,AggregatedAttribute> aggregatedAttributes = new HashMap<>();
 
-
-	@Field(index = false, store = false,type = FieldType.Object)
+	@Field(enabled = false, index = false, store = false, type = FieldType.Object)
 	private Set<AggregatedAttribute> unmapedAttributes = new HashSet<>();
 
-
-	@Field(index = false, store = false, type = FieldType.Object)
+	@Field(enabled = false, index = false, store = false, type = FieldType.Object)
 	private Set<AggregatedFeature> features = new HashSet<>();
 
 	@Override

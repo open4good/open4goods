@@ -18,19 +18,16 @@ import org.springframework.data.elasticsearch.annotations.FieldType;
 
 public class AggregatedPrices implements Standardisable {
 
-	@Field(index = false, store = false, type = FieldType.Object)
 	private Set<AggregatedPrice> offers = new HashSet<>();
 
 	@Field(index = false, store = false, type = FieldType.Object)
 	private AggregatedPrice minPrice;
 
-	@Field(index = false, store = false, type = FieldType.Object)
 	private List<PriceHistory> newPricehistory = new ArrayList<>();
 
-	@Field(index = false, store = false, type = FieldType.Object)
 	private List<PriceHistory> occasionPricehistory = new ArrayList<>();
 		
-	@Field(index = false, store = false, type = FieldType.Integer)
+	// TODO : trend
 	// Price evolution trend :
 	// 0 -> equals
 	// 1 -> Increasing

@@ -59,17 +59,17 @@ public class ProductIndexationWorker implements Runnable {
 				if (itemsToTake > 0) {
 					// There is data to consume and queue consummation is enabled
 					// A map to deduplicate --> MEANS WE CAN SOMETIMES LOOSE DATAFRAMENTS IF 2 ENTRIES ARE IN THE SAME BAG (no because we put back in queue)
-					final Map<String,Product> buffer = new HashMap<>();	
+					final Map<Long,Product> buffer = new HashMap<>();	
 										
 					// Dequeuing
 					for (int i = 0; i < itemsToTake; i++) {
 						Product item = service.getQueue().take();
 						
-						if (buffer.containsKey(item.gtin())) {
-							logger.info("Putting back in queue : {}", item.gtin() );
+						if (buffer.containsKey(item.getId())) {
+							logger.info("Putting back in queue : {}", item.getId() );
 							service.getQueue().add(item);
 						} else {
-							buffer.put(item.gtin(),item);							
+							buffer.put(item.getId(),item);							
 						}
 					}
 					

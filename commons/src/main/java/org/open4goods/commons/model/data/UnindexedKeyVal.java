@@ -6,13 +6,8 @@ import org.springframework.data.elasticsearch.annotations.FieldType;
 public class UnindexedKeyVal {
 
 	
-	@Field(index = false, store = false, type = FieldType.Keyword)
 	private String key;
-	@Field(index = false, store = false, type = FieldType.Keyword)
 	private String value;
-	
-	
-	
 	
 	public UnindexedKeyVal() {
 		super();

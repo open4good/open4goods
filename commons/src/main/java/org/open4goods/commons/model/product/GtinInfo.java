@@ -7,16 +7,12 @@ import org.springframework.data.elasticsearch.annotations.FieldType;
 public class GtinInfo {
 
 
-	@Field(index = false, store = false, type = FieldType.Keyword)
 	private BarcodeType upcType;
 
 	/**
 	 * Manufacturer country, from the gtin
 	 */
-	@Field(index = true, store = false, type = FieldType.Keyword)
 	private String country;
-
-
 
 	public String getCountry() {
 		return country;

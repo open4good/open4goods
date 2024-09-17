@@ -12,9 +12,6 @@ public class EcoScoreRanking {
 	// The better item id in the whole vertical (item just after)
 	private Long globalBetter;
 		
-	
-	
-	
 	// The position in the specialisation (eg : big TV)
 	private long specializedPosition;
 	// Number of items in ther vertical when the position was computed

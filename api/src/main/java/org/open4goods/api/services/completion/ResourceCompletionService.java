@@ -185,7 +185,7 @@ public class ResourceCompletionService  extends AbstractCompletionService{
 					r.setFileName(name);
 				} else {
 					// At last, we put by default the gtin
-					r.setFileName(data.gtin());
+					r.setFileName(String.valueOf(data.getId()));
 				}
 			}
 		});
@@ -245,7 +245,7 @@ public class ResourceCompletionService  extends AbstractCompletionService{
 		/////////////////////////////////////////
 		ArrayList<List<Resource>> classified = classify(images.stream().filter(e -> !e.isEvicted()).toList());
 		
-		logger.info("{} - {} resources links, {} processed, {} retained and classified in {} bucket", data.gtin(), data.getResources().size(), resources.size(), images.size(), classified.size());
+		logger.info("{} - {} resources links, {} processed, {} retained and classified in {} bucket", data.getId(), data.getResources().size(), resources.size(), images.size(), classified.size());
 		
 		
 		List<Resource> resultingImages = new ArrayList<>();
@@ -255,7 +255,7 @@ public class ResourceCompletionService  extends AbstractCompletionService{
 			resultingImages.add(dups.getFirst());			
 		}
 
-		logger.info("{}/{} images selected for product {} : \n  {}",resultingImages.size(),images.size(), data.gtin(), StringUtils.join(resultingImages,"\n  ") );
+		logger.info("{}/{} images selected for product {} : \n  {}",resultingImages.size(),images.size(), data.getId(), StringUtils.join(resultingImages,"\n  ") );
 		
 		// TODO : Delete all evicted items after a given time
 		
@@ -273,7 +273,7 @@ public class ResourceCompletionService  extends AbstractCompletionService{
 		
 		
 		if (null == cover) {
-			logger.warn("No cover image found for product : {}", data.gtin());
+			logger.warn("No cover image found for product : {}", data.getId());
 			data.setCoverImagePath(NO_IMAGE_PATH);
 		} else {
 			data.setCoverImagePath(cover.path());			
