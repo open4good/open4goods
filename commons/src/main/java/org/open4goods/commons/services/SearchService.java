@@ -97,7 +97,7 @@ public class SearchService {
 			// TODO(security) : sanitize, web imput !!
 			c = 	new Criteria("names.offerNames").matchesAll(Arrays.asList(query.split(" ")))
 					.and("offersCount").greaterThanEqual(1)
-					.and(aggregatedDataRepository.getRecentPriceQuery())
+					.and(aggregatedDataRepository.getRecentProductsWithPriceQuery())
 					;
 
 			// TODO : could add
@@ -147,7 +147,7 @@ public class SearchService {
 		List<AttributeConfig> customAttrFilters = vertical.verticalFilters().stream().filter(Objects::nonNull).toList();
 
 		Criteria criterias = new Criteria("vertical").is(vertical.getId())
-				.and(aggregatedDataRepository.getRecentPriceQuery())
+				.and(aggregatedDataRepository.getRecentProductsWithPriceQuery())
 				.and(new Criteria("excluded"). is(request.isExcluded()))
 				;
 

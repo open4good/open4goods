@@ -49,20 +49,6 @@ public class HomeController {
 	}
 
 	
-	@GetMapping(path = "/taxonomies")
-	//	@ResponseBody
-	public ModelAndView  taxonomies() {
-
-		List<ExpandedTaxonomy> taxonomies = verticalsConfigService.expandedTaxonomies();
-		
-		
-		ModelAndView mv = new ModelAndView("taxonomy.html");
-		
-		mv.addObject("taxonomies",taxonomies);
-		
-		return mv;
-
-	}
 	
 	
 

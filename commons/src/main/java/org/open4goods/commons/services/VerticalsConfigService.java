@@ -302,24 +302,7 @@ public class VerticalsConfigService {
 		return configs.values().stream().filter(e ->googleCategoryId.equals(e.getGoogleTaxonomyId())).findFirst().orElse(null);
 	}
 	
-	/**
-	 * Return all expanded taxonomies, from the taxonomy service and from queryning on the store
-	 * @return
-	 */
-	@Cacheable(keyGenerator = CacheConstants.KEY_GENERATOR,  cacheNames = CacheConstants.ONE_DAY_LOCAL_CACHE_NAME)
-	public List<ExpandedTaxonomy> expandedTaxonomies() {
-		List<ExpandedTaxonomy> ret = new ArrayList<>();
-		productRepository.byTaxonomy().entrySet().forEach(t -> {
-            ExpandedTaxonomy et = new ExpandedTaxonomy();
-            et.setTaxonomyId(t.getKey());
-            et.setTaxonomyName(googleTaxonomyService.getTaxonomyName(t.getKey())+"");
-            et.setTotal(t.getValue());
-            et.setAssociatedVertical(getVerticalForTaxonomy(t.getKey()));
-            ret.add(et);
-        });
-		
-		return ret;
-	}
+
 	
 	/**
 	 * Return a vertical config for a given taxonomy id

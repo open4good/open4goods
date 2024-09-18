@@ -132,7 +132,7 @@ public class ProductRepository {
 
 	public Stream<Product> searchInValidPrices(String query, final String indexName, int from, int to) {
 
-		Criteria c = new Criteria().expression(query).and(getRecentPriceQuery());
+		Criteria c = new Criteria().expression(query).and(getRecentProductsWithPriceQuery());
 
 		final NativeQuery initialQuery = new NativeQueryBuilder().withQuery(new CriteriaQuery(c))
 				.withPageable(PageRequest.of(from, to)).build();
@@ -155,7 +155,7 @@ public class ProductRepository {
 		
 		
 		
-		Criteria c = getRecentPriceQuery()
+		Criteria c = getRecentProductsWithPriceQuery()
 				.and( new Criteria("vertical").is(vertical.getId()))
 
 				//				.or(new Criteria("datasourceCategories").in(vertical.getMatchingCategories())
@@ -215,7 +215,7 @@ public class ProductRepository {
 	public Stream<Product> exportVerticalWithValidDateOrderByEcoscore(String vertical, Integer max, boolean withExcluded) {
 
 		Criteria c = new Criteria("vertical").is(vertical)
-				.and(getRecentPriceQuery())
+				.and(getRecentProductsWithPriceQuery())
 				;
 
 		if (!withExcluded) {
@@ -511,50 +511,17 @@ public class ProductRepository {
 
 	@Cacheable(keyGenerator = CacheConstants.KEY_GENERATOR, cacheNames = CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME)
 	public Long countMainIndexHavingRecentPrices() {
-		CriteriaQuery query = new CriteriaQuery(getRecentPriceQuery());
+		CriteriaQuery query = new CriteriaQuery(getRecentProductsWithPriceQuery());
 		return elasticsearchTemplate.count(query, current_index);
 	}
 
 	@Cacheable(keyGenerator = CacheConstants.KEY_GENERATOR, cacheNames = CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME)
 	public Long countMainIndexHavingRecentUpdate() {
-		CriteriaQuery query = new CriteriaQuery(getRecentPriceQuery());
+		CriteriaQuery query = new CriteriaQuery(getRecentProductsWithPriceQuery());
 		return elasticsearchTemplate.count(query, current_index);
 	}
 
 	
-	@Cacheable(keyGenerator = CacheConstants.KEY_GENERATOR, cacheNames = CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME)
-	public Map<Integer, Long> byTaxonomy() {
-
-		// Setting the query
-		NativeQueryBuilder esQuery = new NativeQueryBuilder().withQuery(new CriteriaQuery( new Criteria("id").exists()));
-
-		// Adding standard aggregations
-		esQuery = esQuery
-				.withAggregation("taxonomy", 	Aggregation.of(a -> a.terms(ta -> ta.field("googleTaxonomyId").size(50000))  ))
-				;
-	
-		SearchHits<Product> results = search(esQuery.build(),ProductRepository.MAIN_INDEX_NAME);
-
-
-		// Handling aggregations results if relevant
-		//TODO(gof) : this cast should be avoided
-		ElasticsearchAggregations aggregations = (ElasticsearchAggregations)results.getAggregations();
-
-
-		///////
-		// Numeric aggregations
-		///////
-		LongTermsAggregate taxonomy = aggregations.get("taxonomy").aggregation().getAggregate().lterms();
-
-		Map<Integer, Long> ret = new HashMap<>();
-		for (LongTermsBucket b : taxonomy.buckets().array()) {
-			ret.put(new Long(b.key()).intValue(), b.docCount());
-		}
- 		
-		
-		return ret;
-		
-	}
 	
 	
 	
@@ -562,8 +529,8 @@ public class ProductRepository {
 	 *
 	 * @return Criteria representing recent prices
 	 */
-	public Criteria getRecentPriceQuery() {
-		return new Criteria("price.offers.timeStamp").greaterThan(expirationClause());
+	public Criteria getRecentProductsWithPriceQuery() {
+		return getRecentProducts().and(new Criteria("offersCount").greaterThan(0));
 				
 	}
 
