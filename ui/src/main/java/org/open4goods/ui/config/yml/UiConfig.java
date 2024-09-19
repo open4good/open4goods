@@ -194,8 +194,11 @@ public class UiConfig {
 	 * Configuration for the reversements
 	 */
 	private ReversementConfig reversementConfig = new ReversementConfig();
-	
-	
+
+	/**
+	 * Amazon affiliate link
+	 */
+	private String amazonSearchLink = "https://www.amazon.fr/s?k={search_terms}&tag=nudger-21";
 
 	/**
 	 * Return the root url for a given sitelocale, with the "default" behavior
@@ -490,7 +493,13 @@ public class UiConfig {
 	public void setTeamConfig(TeamConfig teamConfig) {
 		this.teamConfig = teamConfig;
 	}
-	
-	
+
+	public String getAmazonSearchLink() {
+		return amazonSearchLink;
+	}
+
+	public void setAmazonSearchLink(String amazonSearchLink) {
+		this.amazonSearchLink = amazonSearchLink;
+	}
 
 }
