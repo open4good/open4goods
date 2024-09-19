@@ -67,27 +67,46 @@
 
         </section>
 
-
-        
-                
-       
-       <!--/* Verticals results */-->
-        <section class="section section-md bg-white">        
-         	<div class="container container-semi-fluid">
+        <!--/* Résultats de la recherche */-->
+        <section class="section section-md bg-white">
+            <div class="container container-semi-fluid">
                 <div class="row justify-content-center">
-        
-			        <div th:each="item: ${results.data}" class="col-12 col-md-12 mb-3">			        	
-			        	<th:block th:with="item = ${item}">
-				        	<th:block th:insert="~{inc/search-card.html}"></th:block>        
-			        	</th:block>   
-			        </div>
-	        	</div>
-	        </div>
-        </section>
-       
-       
-     
-      
+                    <th:block th:if="${not #lists.isEmpty(results.data)}">
+                        <div th:each="item: ${results.data}" class="col-12 col-md-12 mb-3">
+                            <th:block th:with="item = ${item}">
+                                <th:block th:insert="~{inc/search-card.html}"></th:block>
+                            </th:block>
+                        </div>
+                    </th:block>
+                    <!-- Panneau Amazon si pas de résultats -->
+                    <th:block th:if="${#lists.isEmpty(results.data)}">
+                        <section class="section section-lg pt-0">
+                            <div class="container">
+                                <div class="card shadow mb-6">
+                                    <div class="card-body px-5 py-5">
+                                        <div class="row align-items-center">
+                                            <div class="col-12 col-md-6">
+                                                <h2 class="mb-3">Oups... Aucun résultat trouvé</h2>
+                                                <p class="mb-0">Ne vous inquiétez pas, nous pouvons toujours chercher sur Amazon. La contribution écologique s'applique toujours en faisant vos achats via ce lien.</p>
+                                            </div>
+                                            <div class="col-12 col-md-6 text-md-right">
+                                                <a th:href="${amazonLink}" class="btn btn-primary mt-4 mt-md-0">
+                                <span class="me-1">
+                                    <span class="fas fa-shopping-cart"></span>
+                                </span>
+                                                    Recherche Amazon
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+                    </th:block>
+
+
+
+
 
     </main>
 
