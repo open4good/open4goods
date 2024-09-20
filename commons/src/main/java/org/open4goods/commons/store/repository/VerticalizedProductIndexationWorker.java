@@ -1,10 +1,12 @@
 package org.open4goods.commons.store.repository;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.open4goods.commons.dao.ProductRepository;
 import org.open4goods.commons.model.product.Product;
+import org.open4goods.commons.model.product.VerticalizedProduct;
+import org.open4goods.commons.services.VerticalsRepositoryService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 /**
@@ -12,13 +14,13 @@ import org.slf4j.LoggerFactory;
  * @author goulven
  *
  */
-public class ProductIndexationWorker implements Runnable {
+public class VerticalizedProductIndexationWorker implements Runnable {
 
 
-	private static final Logger logger = LoggerFactory.getLogger(ProductIndexationWorker.class);
+	private static final Logger logger = LoggerFactory.getLogger(VerticalizedProductIndexationWorker.class);
 
-	/** The service used to "atomically" fetch and store / update DataFragments **/
-	private final ProductRepository service;
+
+	private VerticalsRepositoryService verticalRepoService;
 
 	/** Size of pages that will be bulked to the DataFragmentStore**/
 	private final int dequeuePageSize;
@@ -31,16 +33,17 @@ public class ProductIndexationWorker implements Runnable {
 	 */
 	private final String workerName;
 
+
 	/**
 	 * Constructor
 	 * @param owningService
 	 * @param dequeuePageSize
 	 */
-	public ProductIndexationWorker(final ProductRepository owningService, final int dequeuePageSize, final int pauseDuration, String workerName) {
-		service = owningService;
+	public VerticalizedProductIndexationWorker(final VerticalsRepositoryService verticalRepoService, final int dequeuePageSize, final int pauseDuration, String workerName) {
 		this.dequeuePageSize = dequeuePageSize;
 		this.pauseDuration = pauseDuration;
 		this.workerName = workerName;
+		this.verticalRepoService = verticalRepoService;
 	}
 
 	@Override
@@ -51,7 +54,7 @@ public class ProductIndexationWorker implements Runnable {
 			try {
 				
 				// Computing if items presents, and how many to take
-				int itemsToTake = service.getProductQueue().size();
+				int itemsToTake = verticalRepoService.getVerticalizedProductQueue().size();
 				if (itemsToTake > dequeuePageSize) {
 					itemsToTake = dequeuePageSize;
 				}
@@ -59,23 +62,19 @@ public class ProductIndexationWorker implements Runnable {
 				if (itemsToTake > 0) {
 					// There is data to consume and queue consummation is enabled
 					// A map to deduplicate --> MEANS WE CAN SOMETIMES LOOSE DATAFRAMENTS IF 2 ENTRIES ARE IN THE SAME BAG (no because we put back in queue)
-					final Map<Long,Product> buffer = new HashMap<>();	
+					final Set<VerticalizedProduct> buffer = new HashSet<>();	
 										
 					// Dequeuing
 					for (int i = 0; i < itemsToTake; i++) {
-						Product item = service.getProductQueue().take();
+						VerticalizedProduct item = verticalRepoService.getVerticalizedProductQueue().take();
 						
-						if (buffer.containsKey(item.getId())) {
-							logger.info("Putting back in queue : {}", item.getId() );
-							service.getProductQueue().add(item);
-						} else {
-							buffer.put(item.getId(),item);							
-						}
+						buffer.add(item);
+						
 					}
 					
-					service.store(buffer.values());
+					verticalRepoService.index(buffer);
 					
-					logger.info("{} has indexed {} DataFragments. {} Remaining in queue",workerName,  buffer.size(), service.getProductQueue().size());
+					logger.info("{} has put in queue {} verticalized products. {} Remaining in queue",workerName,  buffer.size(), verticalRepoService.getVerticalizedProductQueue().size());
 
 				} else {
 					try {

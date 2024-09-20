@@ -200,8 +200,8 @@ public class ApiConfig {
 
 	@Bean
 	@Autowired
-	VerticalsConfigService verticalConfigsService(ResourcePatternResolver resolver, SerialisationService serialisationService, GoogleTaxonomyService googleTaxonomyService, ProductRepository productRepository, ImageGenerationService imageGenService) throws IOException {
-		return new VerticalsConfigService(serialisationService, googleTaxonomyService, productRepository, resolver,imageGenService);
+	VerticalsConfigService verticalConfigsService(ResourcePatternResolver resolver, SerialisationService serialisationService, GoogleTaxonomyService googleTaxonomyService,  ImageGenerationService imageGenService) throws IOException {
+		return new VerticalsConfigService(serialisationService, googleTaxonomyService,  resolver,imageGenService);
 	}
 
     @Bean

@@ -44,7 +44,7 @@ public class NamesAggregationService extends AbstractAggregationService {
 	public void onDataFragment(final DataFragment df, Product output, VerticalConfig vConf) throws AggregationSkipException {
 
 		// Adding raw offer names
-		// TODO : names are not localized
+		// TODO(p3,i18n)  : names are not localized
 		output.getNames().getOfferNames()
 				.addAll(df.getNames().stream().map(this::normalizeName).collect(Collectors.toSet()));
 
@@ -149,7 +149,7 @@ public class NamesAggregationService extends AbstractAggregationService {
 				sb.append(separator).append(IdHelper.azCharAndDigits(refVal).toLowerCase());
 			} else {
 				// Checking in aggregated attrs
-				AggregatedAttribute attrValue = data.getAttributes().getAggregatedAttributes().get(attr);
+				AggregatedAttribute attrValue = data.getAttributes().getAttributes().get(attr);
 				if (null != attrValue) {
 					sb.append(separator).append(attrValue.getValue().toLowerCase());
 				} 

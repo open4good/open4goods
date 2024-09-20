@@ -8,7 +8,6 @@ import org.open4goods.api.services.aggregation.AbstractAggregationService;
 import org.open4goods.commons.config.yml.ui.VerticalConfig;
 import org.open4goods.commons.exceptions.AggregationSkipException;
 import org.open4goods.commons.model.data.DataFragment;
-import org.open4goods.commons.model.data.UnindexedKeyVal;
 import org.open4goods.commons.model.product.Product;
 import org.open4goods.commons.services.GoogleTaxonomyService;
 import org.open4goods.commons.services.VerticalsConfigService;
@@ -37,8 +36,8 @@ public class TaxonomyRealTimeAggregationService extends AbstractAggregationServi
 		
 		String category = input.getCategory();
 		if (!StringUtils.isEmpty(category)) {
-			output.getDatasourceCategories().add(category);
-			output.getMappedCategories().add(new UnindexedKeyVal(input.getDatasourceConfigName(), category));
+			output.getCategories().add(category);
+			output.getDsCategories().put(input.getDatasourceConfigName(), category);
 		}
 		
 		onProduct(output, vConf);
@@ -51,13 +50,13 @@ public class TaxonomyRealTimeAggregationService extends AbstractAggregationServi
 		// Setting google taxonomy
 		////////////////////////////
 		data.setGoogleTaxonomyId(null);
-		if (data.getDatasourceCategories().size() != 0) {
+		if (data.getCategories().size() != 0) {
 			Integer taxonomy =   googleTaxonomy(data);
 			if (null != taxonomy) {			
 				data.setGoogleTaxonomyId(taxonomy);
-				dedicatedLogger.info("Detected taxonomy {} for categories : {}", taxonomy, data.getDatasourceCategories());
+				dedicatedLogger.info("Detected taxonomy {} for categories : {}", taxonomy, data.getCategories());
 			} else {
-				dedicatedLogger.info("No taxonomy found for categories : {}", data.getDatasourceCategories());
+				dedicatedLogger.info("No taxonomy found for categories : {}", data.getCategories());
 			}
 		}
 
@@ -67,7 +66,7 @@ public class TaxonomyRealTimeAggregationService extends AbstractAggregationServi
 		////////////////////////////
 		// Setting vertical from category
 		////////////////////////////
-		VerticalConfig vertical = verticalService.getVerticalForCategories(data.getDatasourceCategories());
+		VerticalConfig vertical = verticalService.getVerticalForCategories(data.getCategories());
 		if (null != vertical) {
 			if ( null != data.getVertical() && !vertical.getId().equals(data.getVertical())) {
 				dedicatedLogger.warn("Will erase existing vertical {} with {} for product {}, because of category {}", data.getVertical(), vertical.getId(), data.bestName());
@@ -115,7 +114,7 @@ public class TaxonomyRealTimeAggregationService extends AbstractAggregationServi
 		
 		List<Integer> taxons =new ArrayList<>();
 
-		input.getAttributes().getUnmapedAttributes().forEach(a -> {
+		input.getAttributes().getUnmatchedAttributes().forEach(a -> {
 			String i = a.getName();
 			
 			if (i.contains("CATEGORY")) {

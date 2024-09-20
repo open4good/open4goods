@@ -52,7 +52,7 @@ public class AggregatedPrice extends Price {
 		setCurrency(df.getPrice().getCurrency());
 		setPrice(df.getPrice().getPrice());
 		setTimeStamp(df.getLastIndexationDate());
-		setProductState(df.getProductState());
+		setProductState(df.getProductCondition());
 	}
 
 	/**

@@ -154,8 +154,7 @@ public class BackupService implements HealthIndicator {
     }
 
 	/**
-	 * Import product from the GZIP files
-	 * NOTE : Could increase perf by having one import thread per file
+	 * Import product from the GZIP files, multi threaded
 	 * @throws Exception 
 	 */
 	public void importProducts() {

@@ -321,8 +321,8 @@ public class AppConfig {
     
 	@Bean
 	@Autowired
-	VerticalsConfigService verticalConfigsService(ResourcePatternResolver resourceResolver, SerialisationService serialisationService,  GoogleTaxonomyService googleTaxonomyService, ProductRepository productRepository, ImageGenerationService imageGenerationService) throws IOException {
-		return new VerticalsConfigService( serialisationService, googleTaxonomyService, productRepository, resourceResolver, imageGenerationService);
+	VerticalsConfigService verticalConfigsService(ResourcePatternResolver resourceResolver, SerialisationService serialisationService,  GoogleTaxonomyService googleTaxonomyService, ImageGenerationService imageGenerationService) throws IOException {
+		return new VerticalsConfigService( serialisationService, googleTaxonomyService, resourceResolver, imageGenerationService);
 	}
 
 	////////////////////////////////////

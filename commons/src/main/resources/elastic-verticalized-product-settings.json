@@ -1,0 +1,22 @@
+{
+  "index": {
+  	"refresh_interval": "60s",
+  	"number_of_shards": "1",
+  	"codec": "best_compression"
+  },
+  "analysis": {
+    "analyzer": {
+      "french": {
+        "type": "custom",
+        "tokenizer": "standard",
+        "char_filter": [
+          "html_strip"
+        ],
+        "filter": [
+          "lowercase",
+          "asciifolding"
+        ]
+      }
+    }
+  }
+}

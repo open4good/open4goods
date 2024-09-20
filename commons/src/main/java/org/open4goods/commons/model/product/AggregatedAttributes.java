@@ -18,25 +18,28 @@ public class AggregatedAttributes  {
 	private Map<ReferentielKey, String> referentielAttributes = new HashMap<>();
 
 	//TODO(p3,naming) : rename
-	@Field(enabled = false, index = false, store = false, type = FieldType.Object)
-	private Map<String,AggregatedAttribute> aggregatedAttributes = new HashMap<>();
+	@Field(enabled = false,  store = false, type = FieldType.Object)
+	/**
+	 * The key is the english name, such as classified by icecat
+	 */
+	private Map<String,AggregatedAttribute> attributes = new HashMap<>();
 
-	@Field(enabled = false, index = false, store = false, type = FieldType.Object)
-	private Set<AggregatedAttribute> unmapedAttributes = new HashSet<>();
+	@Field(enabled = false, store = false, type = FieldType.Object)
+	private Set<AggregatedAttribute> unmatchedAttributes = new HashSet<>();
 
-	@Field(enabled = false, index = false, store = false, type = FieldType.Object)
+	@Field(enabled = false,  store = false, type = FieldType.Object)
 	private Set<AggregatedFeature> features = new HashSet<>();
 
 	@Override
 	public String toString() {
-		return "ref:"+referentielAttributes.size()+ " , agg:"+aggregatedAttributes.size() +" , unmaped:"+unmapedAttributes.size() +" , features:"+features.size();
+		return "ref:"+referentielAttributes.size()+ " , agg:"+attributes.size() +" , unmaped:"+unmatchedAttributes.size() +" , features:"+features.size();
 	}
 	
 	
 
 	public int count() {
 		
-		return referentielAttributes.size() + aggregatedAttributes.size() + unmapedAttributes.size() + features.size();
+		return referentielAttributes.size() + attributes.size() + unmatchedAttributes.size() + features.size();
 	}
 	
 
@@ -46,7 +49,7 @@ public class AggregatedAttributes  {
 			return null;
 		}
 		
-		AggregatedAttribute ret = unmapedAttributes.stream().filter(a -> a.getIcecatTaxonomyIds().contains(featureId)).findFirst()
+		AggregatedAttribute ret = unmatchedAttributes.stream().filter(a -> a.getIcecatTaxonomyIds().contains(featureId)).findFirst()
 				.orElse(null);
 				return ret;
 	}
@@ -70,11 +73,11 @@ public class AggregatedAttributes  {
 
 
 
-	public Map<String, AggregatedAttribute> getAggregatedAttributes() {
-		return aggregatedAttributes;
+	public Map<String, AggregatedAttribute> getAttributes() {
+		return attributes;
 	}
-	public void setAggregatedAttributes(Map<String, AggregatedAttribute> aggregatedAttributes) {
-		this.aggregatedAttributes = aggregatedAttributes;
+	public void setAttributes(Map<String, AggregatedAttribute> aggregatedAttributes) {
+		this.attributes = aggregatedAttributes;
 	}
 	public Set<AggregatedFeature> getFeatures() {
 		return features;
@@ -84,12 +87,12 @@ public class AggregatedAttributes  {
 		this.features = features;
 	}
 
-	public Set<AggregatedAttribute> getUnmapedAttributes() {
-		return unmapedAttributes;
+	public Set<AggregatedAttribute> getUnmatchedAttributes() {
+		return unmatchedAttributes;
 	}
 
-	public void setUnmapedAttributes(Set<AggregatedAttribute> unmapedAttributes) {
-		this.unmapedAttributes = unmapedAttributes;
+	public void setUnmatchedAttributes(Set<AggregatedAttribute> unmapedAttributes) {
+		this.unmatchedAttributes = unmapedAttributes;
 	}
 
 	public Map<ReferentielKey, String> getReferentielAttributes() {

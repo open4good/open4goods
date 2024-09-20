@@ -233,7 +233,7 @@ public class IcecatService {
 					if (null == brand) {
 						// The icecat brand has not been defined by YAML config, we add it
 						brand = new Brand();
-						brand.setName(supplier.getName());
+						brand.setName(IdHelper.brandName(supplier.getName()));
 						brand.setLogo(supplier.getLogoHighPic());
 //						brand.setAka(supplier.getNames().stream().colect(Collectors.toSet()));
 					} else {

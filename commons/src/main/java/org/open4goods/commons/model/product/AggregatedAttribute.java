@@ -3,21 +3,13 @@ package org.open4goods.commons.model.product;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
-import org.open4goods.commons.config.yml.attributes.AttributeConfig;
 import org.open4goods.commons.model.attribute.Attribute;
-import org.open4goods.commons.model.attribute.AttributeType;
-import org.open4goods.commons.model.data.UnindexedKeyVal;
-import org.open4goods.commons.model.data.UnindexedKeyValTimestamp;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-
-@JsonIgnoreProperties(ignoreUnknown = true)
 public class AggregatedAttribute implements IAttribute {
 
 	/**
@@ -36,13 +28,13 @@ public class AggregatedAttribute implements IAttribute {
 	private Double numericValue;
 
 	/**
-	 * The collections of conflicts for this attribute
+	 * The whole values, associated with datasources
 	 */
-	private Set<UnindexedKeyValTimestamp> sources = new HashSet<>();
+	private Map<String, Set<String>> sources = new HashMap<>();
 
 	
 	/**
-	 * The attribute raw rawValue
+	 * The icecat matched taxonomies, by it's name
 	 */
 	private Set<Integer> icecatTaxonomyIds = new HashSet<>();
 	
@@ -62,7 +54,7 @@ public class AggregatedAttribute implements IAttribute {
 	 * @return
 	 */
 	public long distinctValues() {
-		return sources.stream().map(UnindexedKeyVal::getValue).distinct().count();
+		return sources.keySet().size();
 	}
 
 	/**
@@ -71,7 +63,8 @@ public class AggregatedAttribute implements IAttribute {
 	 * @return
 	 */
 	public String providersToString() {
-		return StringUtils.join(sources.stream().map(UnindexedKeyVal::getKey).toArray(), ", ");
+		   return StringUtils.join(
+		            sources.values().stream().flatMap(Set::stream).collect(Collectors.toSet()),", ");
 	}
 
 	/**
@@ -80,8 +73,15 @@ public class AggregatedAttribute implements IAttribute {
 	 * @return
 	 */
 	public String sourcesToString() {
-		return StringUtils.join(sources.stream().map(e -> e.getKey() + ":" + e.getValue()).toArray(), ", ");
 
+        StringBuilder result = new StringBuilder();
+
+        for (Map.Entry<String, Set<String>> entry : sources.entrySet()) {
+            String joinedValues = StringUtils.join(entry.getValue(), ", ");
+            result.append(entry.getKey()).append(": ").append(joinedValues).append("\n");
+        }
+        
+        return result.toString();
 	}
 
 	public boolean hasConflicts() {
@@ -127,66 +127,38 @@ public class AggregatedAttribute implements IAttribute {
 	 * 
 	 * @param parsed Should handle language ?
 	 */
-	public void addAttribute(Attribute attr, AttributeConfig attrConfig, UnindexedKeyValTimestamp sourcedValue)
+	public void addAttribute(Attribute attr, String datasourceName, String value)
 			throws NumberFormatException {
 
 		// Guard
 		if (this.name != null && !name.equals(this.name)) {
-			// TODO
 			System.out.println("ERROR : Name mismatch in add attribute");
 		}
 
 		this.name = attr.getName();
-		sources.add(sourcedValue);
+		
+		if (!sources.containsKey(value)) {
+			sources.put(value, new HashSet<String>());
+		} 
+		sources.get(value).add(datasourceName);
 
 		value = bestValue();
 
-		if (attrConfig.getType().equals(AttributeType.NUMERIC)) {
+		try {
 			numericValue = numericOrNull(value);
+		} catch (NumberFormatException e) {
+
 		}
 	}
-
-	public void addAttribute(Attribute attr, UnindexedKeyValTimestamp sourcedValue) {
-		// Guard
-		if (this.name != null && !name.equals(this.name)) {
-			// TODO
-			System.out.println("ERROR : Name mismatch in add attribute");
-		}
-
-		this.name = attr.getName();
-		sources.add(sourcedValue);
-
-		value = bestValue();
-
-	}
-
+	
 	/**
 	 * 
 	 * @return the best value
 	 */
 	public String bestValue() {
-
-		// Count values by unique keys... NOTE : Should have a java8+ nice solution here
-		// !
-		Map<String, Integer> valueCounter = new HashMap<>();
-
-		for (UnindexedKeyValTimestamp source : sources) {
-
-			valueCounter.merge(source.getValue(), 1, Integer::sum);
-		}
-
-		// sort this map by values
-
-		Map<String, Integer> result = valueCounter.entrySet().stream()
-				.sorted(Map.Entry.comparingByValue(Comparator.reverseOrder()))
-
-				.collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (oldValue, newValue) -> oldValue,
-						LinkedHashMap::new));
-
-		// Take the first one : will be the "most recommanded" if discriminant number of
-		// datasources, a random value otherwise
-
-		return result.entrySet().stream().findFirst().get().getKey();
+		return sources.entrySet().stream().max(Comparator.comparingInt(entry -> entry.getValue().size())) 
+				.map(Map.Entry::getKey) 
+				.orElse(null); 
 	}
 
 	/**
@@ -195,7 +167,7 @@ public class AggregatedAttribute implements IAttribute {
 	 * @return
 	 */
 	public long ponderedvalues() {
-		return sources.stream().map(UnindexedKeyVal::getValue).distinct().count();
+		return sources.size();
 	}
 
 	@Override
@@ -242,18 +214,19 @@ public class AggregatedAttribute implements IAttribute {
 //		this.type = type;
 //	}
 
-	public Set<UnindexedKeyValTimestamp> getSources() {
-		return sources;
-	}
-
-	public void setSources(Set<UnindexedKeyValTimestamp> sources) {
-		this.sources = sources;
-	}
 
 	@Override
 	public String getLanguage() {
 		// TODO : i18n
 		return null;
+	}
+
+	public Map<String, Set<String>> getSources() {
+		return sources;
+	}
+
+	public void setSources(Map<String, Set<String>> sources) {
+		this.sources = sources;
 	}
 
 	public Double getNumericValue() {

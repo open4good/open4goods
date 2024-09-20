@@ -10,9 +10,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Random;
 import java.util.Set;
+import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
@@ -21,7 +21,6 @@ import org.joda.time.Period;
 import org.joda.time.PeriodType;
 import org.joda.time.format.PeriodFormat;
 import org.joda.time.format.PeriodFormatter;
-import org.open4goods.commons.dao.ProductRepository;
 import org.open4goods.commons.exceptions.ValidationException;
 import org.open4goods.commons.helper.IdHelper;
 import org.open4goods.commons.model.EcoScoreRanking;
@@ -44,25 +43,14 @@ import org.springframework.data.elasticsearch.annotations.Field;
 import org.springframework.data.elasticsearch.annotations.FieldType;
 import org.springframework.data.elasticsearch.annotations.Setting;
 import org.springframework.data.elasticsearch.annotations.WriteTypeHint;
-import org.springframework.data.redis.core.RedisHash;
+/**
+ * This object modelize a repository mapping for a verticalized product. 
+ */
+@Document(indexName = "noop", createIndex = true, writeTypeHint = WriteTypeHint.FALSE, dynamic = Dynamic.FALSE)
+@Setting(settingPath = "/elastic-verticalized-product-settings.json")
+public class VerticalizedProduct {
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-
-@Document(indexName = Product.DEFAULT_REPO, createIndex = true, writeTypeHint = WriteTypeHint.FALSE, dynamic = Dynamic.FALSE)
-@RedisHash(value = Product.DEFAULT_REPO, timeToLive = ProductRepository.VALID_UNTIL_DURATION)
-@Setting(settingPath = "/elastic-product-settings.json")
-//TODO : Disabling to see/test  if a clean jackson serial
-//@JsonIgnoreProperties(ignoreUnknown = true)
-public class Product implements Standardisable {
-
-	private final static Logger logger = LoggerFactory.getLogger(Product.class);
-
-	public static final String DEFAULT_REPO = "products";
-
-	// Should not be used
-	// If true, the referentiel attribute will be updated if a shortest version
-	// exists in alternativeModels
-	private static final boolean FORCE_OVERRIDE_MODEL_NAME_WITH_SHORTEST = false;
+	private final static Logger logger = LoggerFactory.getLogger(VerticalizedProduct.class);
 
 	/**
 	 * The ID is the gtin
@@ -186,30 +174,7 @@ public class Product implements Standardisable {
 	// @Field(index = false, store = false, type = FieldType.Object)
 	// private AggregationResult aggregationResult = new AggregationResult();
 
-	public Product() {
-		super();
-	}
 
-	public Product(final long id) {
-		super();
-		this.id = id;
-
-	}
-
-	@Override
-	public Set<Standardisable> standardisableChildren() {
-		final Set<Standardisable> ret = new HashSet<>(price.standardisableChildren());
-		return ret;
-	}
-
-	@Override
-	public void standardize(final StandardiserService standardiser, final Currency currency) {
-
-		for (final Standardisable s : standardisableChildren()) {
-			s.standardize(standardiser, currency);
-		}
-
-	}
 
 	@Override
 	public String toString() {
@@ -655,48 +620,7 @@ public class Product implements Standardisable {
 		return names.getUrl().getOrDefault(language, names.getUrl().get("default"));
 	}
 
-	/**
-	 * Add the model referentiel attribute, applying some spliting mechanism and
-	 * cleaning pass
-	 * 
-	 * @param value
-	 */
-	public void addModel(String value) {
-
-		if (StringUtils.isEmpty(value)) {
-			return;
-		}
-
-		String model = StringUtils.normalizeSpace(value).toUpperCase();
-
-		// TODO : Eviction size from conf
-		if (StringUtils.isEmpty(value) || value.length() < 3) {
-			return;
-		}
-		// Splitting on conventionnal suffixes (/ - .)
-		// TODO : Const / conf
-		String[] frags = model.split("/|\\|.|-");
-
-		altModels.add(value);
-		if (frags.length > 1) {
-			logger.info("Found an alternative model : " + frags[0]);
-			altModels.add(frags[0]);
-		}
-
-		// Case ref attribute is already set, we keep as it and we remove the elected
-		// one from alternativeModels
-		String existing = model();
-
-		if (StringUtils.isEmpty(existing) || FORCE_OVERRIDE_MODEL_NAME_WITH_SHORTEST) {
-			String shortest = shortestModel();
-			if (null != shortest) {
-				attributes.getReferentielAttributes().put(ReferentielKey.MODEL, shortest);
-				altModels.remove(shortest);
-			}
-		} else {
-			altModels.remove(existing);
-		}
-	}
+	
 
 	/**
 	 * 

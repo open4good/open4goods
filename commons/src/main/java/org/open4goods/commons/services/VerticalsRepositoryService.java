@@ -2,11 +2,17 @@ package org.open4goods.commons.services;
 
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.List;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.stream.Collectors;
 
 import org.open4goods.commons.config.yml.ui.VerticalConfig;
-import org.open4goods.commons.model.data.FeatureGroup;
+import org.open4goods.commons.model.product.Product;
+import org.open4goods.commons.model.product.VerticalizedProduct;
+import org.open4goods.commons.store.repository.VerticalizedProductIndexationWorker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.elasticsearch.client.elc.ElasticsearchTemplate;
@@ -15,11 +21,7 @@ import org.springframework.data.elasticsearch.core.document.Document;
 import org.springframework.data.elasticsearch.core.mapping.IndexCoordinates;
 import org.springframework.stereotype.Service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 
 /**
  * Service responsible for dynamic creation of specific vertical indexes. This
@@ -45,6 +47,13 @@ public class VerticalsRepositoryService {
 	// Used for verticals configuration options
 	private VerticalsConfigService verticalsConfigService;
 
+	// The file queue implementation that buffers the VerticalisedProduct to be stored
+	// TODO(p3,conf) : Limit from conf
+	private BlockingQueue<VerticalizedProduct> verticalizedProductQueue = new LinkedBlockingQueue<>(500);
+	
+	
+	
+	
 	/**
 	 * Constructor for VerticalsRepositoryService.
 	 *
@@ -59,23 +68,31 @@ public class VerticalsRepositoryService {
 		
 		// Indexes initialization
 		initIndexes();
+		
+		
+		// TODO(p2,conf) : from conf
+		int vDequeueSize = 100;
+		int vWorkers = 1;
+		int vPauseDuration = 5000;
+		// Starting batch indexation threads for verticalisedProducts
+		// TODO : From conf
+		for (int i = 0; i < vWorkers; i++) {			
+			Thread.startVirtualThread((new VerticalizedProductIndexationWorker(this, vDequeueSize, vPauseDuration,"verticalized-dequeue-worker-"+i)));
+		}
 	}
 
 	public void initIndexes() {
 		for (VerticalConfig vConf : verticalsConfigService.getConfigsWithoutDefault()) {
 			try {
 				createIndex(vConf);
-			} catch (IOException e) {
-				// TODO Auto-generated catch blockvConf
-				e.printStackTrace();
+			} catch (Exception e) {
+				logger.error("Error while creating index",e);
 			}
 		}
 	}
 
 	public void createIndex(VerticalConfig vConfig) throws IOException {
 
-		
-		Map<String, String> features = icecatService.types(vConfig);
 		
 		// TODO : Clean the name
 		String indexName = vConfig.indexName();
@@ -91,137 +108,100 @@ public class VerticalsRepositoryService {
 
 			logger.info("Index does not exists, will be created : {} ", indexName);
 			
-			// Create the JSON structure programmatically
-			ObjectNode rootNode = mapper.createObjectNode();
-
-			// Add the analysers configuration
-			configureAnalyser(rootNode);
-
-			///////////////////////////////////////
-			// Add the mapping properties
-			///////////////////////////////////////
-			ObjectNode propertiesNode = mapper.createObjectNode();
-
-			// Add the generic fields
-
-			// TODO : Type and names as const
-			addFieldMapping(propertiesNode, "offersCount", "integer", false);
+		
+			Map<String, Object> settings = indexOperations.createSettings(VerticalizedProduct.class);
+			Document mapping = indexOperations.createMapping(VerticalizedProduct.class);
 			
-			// TODO : Fix analyser
-//			addFieldMapping(propertiesNode, "name", "text", "insensitiv", true, false);
-			addFieldMapping(propertiesNode, "name", "text" , true);
-
-			rootNode.set("properties", propertiesNode);
-
-			// Convert ObjectNode to JSON string
-			String jsonString = mapper.writeValueAsString(rootNode);
-
-			String mappingJson = jsonString; // Pass json string here
-			Document mapping = Document.parse(mappingJson);
-
-			// Configure settings for the index (can be customized)
-			Map<String, Object> settings = new HashMap<>();
-			settings.put("index.number_of_shards", 1);
-			settings.put("index.number_of_replicas", 1);
-
 			indexOperations.create(settings, mapping);
-			indexOperations.refresh(); // (Optional) refreshes the doc count
+			
 		}
 	}
+	
+	
+	public  VerticalizedProduct toVerticalizedProduct(Product source) {
+		
+		VerticalConfig v = verticalsConfigService.getConfigById(source.getVertical());
+		
+		VerticalizedProduct target = new VerticalizedProduct();
+		
+        // Copying individual attributes via getters and setters
+        target.setId(source.getId());
+        target.setExternalIds(source.getExternalIds());
+        target.setCreationDate(source.getCreationDate());
+        target.setLastChange(source.getLastChange());
+        target.setVertical(source.getVertical());
+        target.setExcluded(source.isExcluded());
+        target.setAltModels(new HashSet<>(source.getAltModels()));
+        target.setAltBrands(new HashMap<>(source.getAltBrands()));
+        target.setNames(source.getNames());
+        target.setAttributes(source.getAttributes());
+        target.setPrice(source.getPrice());
+        target.setDatasourceNames(new HashSet<>(source.getDatasourceNames()));
+        target.setResources(new HashSet<>(source.getResources()));
+        target.setCoverImagePath(source.getCoverImagePath());
+        target.setGenaiTexts(source.getGenaiTexts());
+        target.setGtinInfos(source.getGtinInfos());
+        target.setGoogleTaxonomyId(source.getGoogleTaxonomyId());
+        target.setCategories(new HashSet<>(source.getCategories()));
+        target.setDsCategories(new HashMap<>(source.getDsCategories()));
+        target.setScores(new HashMap<>(source.getScores()));
+        target.setRanking(source.getRanking());
+        target.setOffersCount(source.getOffersCount());
 
+        return target;
+	
+	}
+
+	
 	/**
-	 * Add a field to the mapping properties
-	 * 
-	 * @param propertiesNode
-	 * @param name
-	 * @param type
-	 * @param analyser
-	 * @param index
-	 * @param store
+	 * Index the products in the associated vertical
+	 * @param buffer
 	 */
-	private void addFieldMapping(ObjectNode propertiesNode, String name, String type, String analyser, Boolean index, Boolean store) {
-		ObjectNode field1Node = new ObjectMapper().createObjectNode();
-		field1Node.put("type", type);
+	public void index(Set<VerticalizedProduct> buffer) {
+		
+		// Splitting into the different categories
+		Map<String, Set<VerticalizedProduct>> bag = buffer.stream()
+				.filter(e-> null!=e.getVertical())
+		        .collect(Collectors.groupingBy(
+		                VerticalizedProduct::getVertical,  
+		                Collectors.toSet()                 
+		        ));
 
-		// Optional: Set the analyzer if provided
-		if (analyser != null && !analyser.isEmpty()) {
-			field1Node.put("analyzer", analyser);
+		// Indexing into given index
+		
+		bag.entrySet().forEach(e -> {
+			VerticalConfig vc = verticalsConfigService.getConfigById(e.getKey());
+			
+			//TODO (perf,p3) : cache the index coordinates
+			elasticsearchRestTemplate.
+			save(e.getValue(), IndexCoordinates.of(vc.indexName()));
+			
+		});		
+	}
+
+	
+	public void queueForVerticalisation(Product p) {
+		
+		if (null != p.getVertical()) {
+			try {
+				verticalizedProductQueue.put(toVerticalizedProduct(p));
+			} catch (InterruptedException e) {
+				logger.error("Interrupted while adding serialized to queue");
+			}
 		}
-
-		// Optional: Set the index option if provided
-		if (index != null) {
-			field1Node.put("index", index);
-		}
-
-		// Optional: Set the store option if provided
-		if (store != null) {
-			field1Node.put("store", store);
-		}
-
-		// Add this field's mapping to the properties node
-		propertiesNode.set(name, field1Node);
+		
+	}
+	
+	
+	
+	public BlockingQueue<VerticalizedProduct> getVerticalizedProductQueue() {
+		return verticalizedProductQueue;
 	}
 
-	/**
-	 * Add a field to the mapping properties
-	 * 
-	 * @param propertiesNode
-	 * @param name
-	 * @param type
-	 * @param analyser
-	 * @param index
-	 */
-	private void addFieldMapping(ObjectNode propertiesNode, String name, String type, String analyser, Boolean index) {
-		addFieldMapping(propertiesNode, name, type, analyser, index, false);
+	public void setVerticalizedProductQueue(BlockingQueue<VerticalizedProduct> verticalizedProductQueue) {
+		this.verticalizedProductQueue = verticalizedProductQueue;
 	}
 
-	/**
-	 * Add a field to the mapping properties
-	 * 
-	 * @param propertiesNode
-	 * @param name
-	 * @param type
-	 * @param index
-	 */
-	private void addFieldMapping(ObjectNode propertiesNode, String name, String type, Boolean index) {
-		addFieldMapping(propertiesNode, name, type, null, index, false);
-	}
 
-	/**
-	 * Create the analyser part
-	 * 
-	 * @param rootNode
-	 * @throws JsonProcessingException 
-	 * @throws JsonMappingException 
-	 */
-	private void configureAnalyser(ObjectNode rootNode) throws JsonMappingException, JsonProcessingException {
-		String analyserJson = """
-{
-  "index": {
-  	"refresh_interval": "30s"
-  },
-  "analysis": {
-    "analyzer": {
-      "french": {
-        "type": "custom",
-        "tokenizer": "standard",
-        "char_filter": [
-          "html_strip"
-        ],
-        "filter": [
-          "lowercase",
-          "asciifolding"
-        ]
-      }
-    }
-  }
-}
-				""";
-
-			JsonNode analysisNode = mapper.readTree(analyserJson);
-
-			// TODO : Set analyser at the correct location
-			//			rootNode.set("analysis", analysisNode.get("analysis"));
-
-	}
+	
 }

@@ -62,13 +62,7 @@ public class DataFragment implements Standardisable, Validable {
 	private Long lastIndexationDate;
 
 	// If true, is a brand related score, will be discarded before indexation
-	private boolean brandFragment = false;
-	
-	
-	@NotNull
-	// TODO : Should remove, creation is computed at Product level
-	private Long creationDate;
-
+	private boolean brandFragment = false;		
 
 	@NotNull
 	/**
@@ -124,10 +118,8 @@ public class DataFragment implements Standardisable, Validable {
 
 	/**
 	 * The list of alternate ids for this product
-	 * It his built (or completed) at the ui level, when
-	 * got matching with longest ids
 	 */
-	private Set<UnindexedKeyValTimestamp> alternateIds = new HashSet<>();
+	private Set<String> alternateIds = new HashSet<>();
 
 	/**
 	 * The unmapped / uncategorized attributes
@@ -169,12 +161,8 @@ public class DataFragment implements Standardisable, Validable {
 	/**
 	 * The state of the product (new, occasion, ...)
 	 */
-	private ProductCondition productState;
+	private ProductCondition productCondition;
 
-	/**
-	 * The price history
-	 */
-	private List<Price> priceHistory = new ArrayList<>();
 
 	@Override
 	public boolean equals(final Object obj) {
@@ -285,7 +273,7 @@ public class DataFragment implements Standardisable, Validable {
 			try {
 
 				// When price is set, we enforce the need of inStock, product state, ...
-				if (null == productState) {
+				if (null == productCondition) {
 					ret.add(ValidationMessage.newValidationMessage(url,"NO_PRODUCT_STATE"));
 				}
 
@@ -497,7 +485,7 @@ public class DataFragment implements Standardisable, Validable {
 			final String cleaned = IdHelper.getHashedName(val);
 			getReferentielAttributes().put(ReferentielKey.MODEL,cleaned);
 			if (!cleaned.equals(val)) {
-				alternateIds.add(new UnindexedKeyValTimestamp(ReferentielKey.MODEL.toString(),val));
+				alternateIds.add(val);
 			}
 			//			} catch (final InvalidParameterException e) {
 			//				logger.warn("{} : cannot add brand for {}",e.getMessage(), this);
@@ -977,7 +965,7 @@ public class DataFragment implements Standardisable, Validable {
 
 
 
-	public String brandUid() {
+	public String model() {
 		return referentielAttributes.get(ReferentielKey.MODEL);
 	}
 
@@ -1120,12 +1108,11 @@ public class DataFragment implements Standardisable, Validable {
 	}
 
 
-
-	public Set<UnindexedKeyValTimestamp> getAlternateIds() {
+	public Set<String> getAlternateIds() {
 		return alternateIds;
 	}
 
-	public void setAlternateIds(Set<UnindexedKeyValTimestamp> alternateIds) {
+	public void setAlternateIds(Set<String> alternateIds) {
 		this.alternateIds = alternateIds;
 	}
 
@@ -1188,12 +1175,12 @@ public class DataFragment implements Standardisable, Validable {
 		this.shippingCost = shippingCost;
 	}
 
-	public ProductCondition getProductState() {
-		return productState;
+	public ProductCondition getProductCondition() {
+		return productCondition;
 	}
 
-	public void setProductState(final ProductCondition productState) {
-		this.productState = productState;
+	public void setProductCondition(final ProductCondition productState) {
+		this.productCondition = productState;
 	}
 
 
@@ -1213,14 +1200,6 @@ public class DataFragment implements Standardisable, Validable {
 		this.datasourceConfigName = datasourceConfigName;
 	}
 
-
-	public Long getCreationDate() {
-		return creationDate;
-	}
-
-	public void setCreationDate(Long creationDate) {
-		this.creationDate = creationDate;
-	}
 
 	public boolean isBrandFragment() {
 		return brandFragment;

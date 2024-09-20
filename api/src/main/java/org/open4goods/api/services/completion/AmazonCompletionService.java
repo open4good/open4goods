@@ -506,9 +506,9 @@ public class AmazonCompletionService extends AbstractCompletionService {
 		Price p = new Price();
 		p.setTimeStamp(System.currentTimeMillis());
 		if (o.getCondition().getValue().equals(AMAZON_PRODUCTSTATE_OCCASION)) {
-			df.setProductState(ProductCondition.OCCASION);
+			df.setProductCondition(ProductCondition.OCCASION);
 		} else if (o.getCondition().getValue().equals(AMAZON_PRODUCTSTATE_NEW)) {
-			df.setProductState(ProductCondition.NEW);
+			df.setProductCondition(ProductCondition.NEW);
 		} else {
 			logger.warn("Unknow amazon product condition : {}", o.getCondition().getLabel());
 		}
@@ -540,7 +540,6 @@ public class AmazonCompletionService extends AbstractCompletionService {
 		df.setAffiliatedUrl(url);
 		df.setUrl(url);
 		df.setLastIndexationDate(System.currentTimeMillis());
-		df.setCreationDate(System.currentTimeMillis());
 		df.addReferentielAttribute(ReferentielKey.GTIN, String.valueOf(data.getId()) );
 		return df;
 	}

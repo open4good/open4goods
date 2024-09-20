@@ -375,7 +375,7 @@ public class VerticalConfig{
 	 * Return the name of the product index for this vertical
 	 * @return
 	 */
-	// TODO : Local cache, better, store as attribute
+	// TODO(p1,perf) : Local cache, better, store as attribute
 	public String indexName() {
 		return "vertical-" + IdHelper.azCharAndDigits(id, "-").toLowerCase();
 	}

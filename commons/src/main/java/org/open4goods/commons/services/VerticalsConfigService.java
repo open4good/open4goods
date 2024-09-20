@@ -58,7 +58,6 @@ public class VerticalsConfigService {
 	private Map<Integer,VerticalConfig> byTaxonomy = new HashMap<>();
 
 
-	private ProductRepository productRepository;
 
 	private GoogleTaxonomyService googleTaxonomyService;
 
@@ -70,11 +69,10 @@ public class VerticalsConfigService {
 	private final ExecutorService executorService = Executors.newFixedThreadPool(1);
 
 
-	public VerticalsConfigService(SerialisationService serialisationService, GoogleTaxonomyService googleTaxonomyService, ProductRepository productRepository, ResourcePatternResolver resourceResolver, ImageGenerationService imageGenerationService) {
+	public VerticalsConfigService(SerialisationService serialisationService, GoogleTaxonomyService googleTaxonomyService,  ResourcePatternResolver resourceResolver, ImageGenerationService imageGenerationService) {
 		super();
 		this.serialisationService = serialisationService;
 		this.googleTaxonomyService = googleTaxonomyService;
-		this.productRepository = productRepository;
 		this.resourceResolver = resourceResolver;
 		this.imageGenerationService = imageGenerationService;
 
@@ -233,15 +231,7 @@ public class VerticalsConfigService {
 	public VerticalConfig getVerticalForPath(String path) {
 		return byUrl.get(path);
 	}
-
-	
-	public String getLanguageForPath(String vertical) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	
-	
+		
 	/**
 	 * Return the path for a vertical language, if any
 	 * @param config 
@@ -260,19 +250,7 @@ public class VerticalsConfigService {
 	 */
 	@Cacheable(keyGenerator = CacheConstants.KEY_GENERATOR,  cacheNames = CacheConstants.FOREVER_LOCAL_CACHE_NAME)
 	public VerticalConfig getDefaultConfig() {
-//		VerticalConfig ret = null;
-//		try {
-//			FileInputStream f = new FileInputStream(verticalsFolder + File.separator + DEFAULT_CONFIG_FILENAME);
-//			ret = serialisationService.fromYaml(f, VerticalConfig.class);
-//			f.close();
-//		} catch (Exception e) {
-//			logger.error("Error getting default config", e);
-//		}
-//		return ret;
-		
-		
-		
-		List<VerticalConfig> ret = new ArrayList<>();
+
 		try {
 			Resource r = resourceResolver.getResource(CLASSPATH_VERTICALS_DEFAULT);
 			return serialisationService.fromYaml(r.getInputStream(), VerticalConfig.class);
@@ -286,7 +264,7 @@ public class VerticalsConfigService {
 	/**
 	 * Return a config by it's icecat categoryId
 	 * @param icecatCategoryId
-	 * TODO : PErf : Maintain a map for key/val access
+	 * TODO(p2,perf) : cache / Maintain a map for key/val access
 	 * @return
 	 */
 	public VerticalConfig getByIcecatCategoryId(Integer icecatCategoryId) {
@@ -296,6 +274,7 @@ public class VerticalsConfigService {
 	/**
 	 * Return a config by it's google taxonomy id
 	 * @param icecatCategoryId
+	 * TODO(p2,perf) : cache / Maintain a map for key/val access
 	 * @return
 	 */
 	public VerticalConfig getByGoogleTaxonomy(Integer googleCategoryId) {

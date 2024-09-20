@@ -20,7 +20,6 @@ public class AggregatedPrices implements Standardisable {
 
 	private Set<AggregatedPrice> offers = new HashSet<>();
 
-	@Field(index = false, store = false, type = FieldType.Object)
 	private AggregatedPrice minPrice;
 
 	private List<PriceHistory> newPricehistory = new ArrayList<>();

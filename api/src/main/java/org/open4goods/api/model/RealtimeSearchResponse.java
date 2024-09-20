@@ -46,7 +46,7 @@ public class RealtimeSearchResponse {
 
 	public String model(Set<DataFragment> dfs) {
 		//		return StringUtils.join(dfs.stream().map(e -> e.brandUid()).collect(Collectors.toSet()));
-		return (dfs.stream().filter(e -> e!= null && null != e.brandUid()) .map(DataFragment::brandUid).findAny().orElse("NO-MODEL"));
+		return (dfs.stream().filter(e -> e!= null && null != e.model()) .map(DataFragment::model).findAny().orElse("NO-MODEL"));
 	}
 
 

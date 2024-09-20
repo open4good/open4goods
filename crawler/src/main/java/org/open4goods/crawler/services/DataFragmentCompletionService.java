@@ -63,14 +63,7 @@ public class DataFragmentCompletionService {
 		// If has a price, ensure price has the date
 		if (null != o.getPrice() && null == o.getPrice().getTimeStamp()) {
 			o.getPrice().setTimeStamp(currentTimeMillis);
-		}
-		
-		
-		// Setting the creation date
-		o.setCreationDate(currentTimeMillis);
-		
-//		// Setting the data type
-//		o.setProviderType(datasourceProperties.getType());
+		}	
 
 		// Sets the datasourceConfigType
 		if (null != datasourceProperties.getCsvDatasource()) {
@@ -111,8 +104,8 @@ public class DataFragmentCompletionService {
 
 		// Default product state if defined
 		if (null != datasourceProperties.getDefaultItemCondition()) {
-			if (null == o.getProductState()) {
-				o.setProductState(datasourceProperties.getDefaultItemCondition());
+			if (null == o.getProductCondition()) {
+				o.setProductCondition(datasourceProperties.getDefaultItemCondition());
 			}
 		}
 		

@@ -10,6 +10,7 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.text.CaseUtils;
 import org.apache.commons.text.StringEscapeUtils;
 import org.open4goods.commons.exceptions.InvalidParameterException;
 import org.open4goods.commons.model.data.DataFragment;
@@ -245,6 +246,10 @@ public class IdHelper {
 		ret = StringUtils.removeStart(ret, '-');
 		ret = StringUtils.removeEnd(ret, "-");
 		return ret;
+	}
+
+	public static String brandName(String name) {
+		return (StringUtils.normalizeSpace(StringUtils.stripAccents(name))).toUpperCase();
 	}
 
 

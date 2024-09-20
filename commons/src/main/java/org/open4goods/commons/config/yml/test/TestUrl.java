@@ -65,11 +65,11 @@ public class TestUrl {
 
 		// product state
 		if (null != productState) {
-			if (null == data.getProductState()) {
+			if (null == data.getProductCondition()) {
 				ret.addMessage("Was expecting a productState");
 			} else
-				if (productState != data.getProductState()) {
-					ret.addMessage("Was expecting productState " + productState + ", we have : " + data.getProductState());
+				if (productState != data.getProductCondition()) {
+					ret.addMessage("Was expecting productState " + productState + ", we have : " + data.getProductCondition());
 				}
 		}
 

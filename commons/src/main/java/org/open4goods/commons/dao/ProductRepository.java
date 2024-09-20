@@ -8,7 +8,6 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -16,7 +15,10 @@ import org.open4goods.commons.config.yml.ui.VerticalConfig;
 import org.open4goods.commons.exceptions.ResourceNotFoundException;
 import org.open4goods.commons.model.constants.CacheConstants;
 import org.open4goods.commons.model.product.Product;
+import org.open4goods.commons.model.product.VerticalizedProduct;
+import org.open4goods.commons.services.VerticalsRepositoryService;
 import org.open4goods.commons.store.repository.ProductIndexationWorker;
+import org.open4goods.commons.store.repository.VerticalizedProductIndexationWorker;
 import org.open4goods.commons.store.repository.redis.RedisProductRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,7 +26,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
-import org.springframework.data.elasticsearch.client.elc.ElasticsearchAggregations;
 import org.springframework.data.elasticsearch.client.elc.NativeQuery;
 import org.springframework.data.elasticsearch.client.elc.NativeQueryBuilder;
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
@@ -35,10 +36,6 @@ import org.springframework.data.elasticsearch.core.mapping.IndexCoordinates;
 import org.springframework.data.elasticsearch.core.query.Criteria;
 import org.springframework.data.elasticsearch.core.query.CriteriaQuery;
 import org.springframework.data.elasticsearch.core.query.Query;
-
-import co.elastic.clients.elasticsearch._types.aggregations.Aggregation;
-import co.elastic.clients.elasticsearch._types.aggregations.LongTermsAggregate;
-import co.elastic.clients.elasticsearch._types.aggregations.LongTermsBucket;
 
 /**
  * The Elastic Data Access Object for products TODO : Could maintain the elastic
@@ -54,11 +51,10 @@ public class ProductRepository {
 	public static final String MAIN_INDEX_NAME = Product.DEFAULT_REPO;
 
 	
-	// The file queue implementation
+	// The file queue implementation that buffers the Product to be stored
 	// TODO(p3,conf) : Limit from conf
-	private BlockingQueue<Product> queue = new LinkedBlockingQueue<>(150000);
-	
-	
+	private BlockingQueue<Product> productQueue = new LinkedBlockingQueue<>(150000);
+
 	/**
 	 * !!!MAJOR CONST !!! Duration in ms where a price is considered to be valid. Only data with a
 	 * price greater than this one will be returned to the user. Also defines the caching TTL of redis
@@ -73,21 +69,29 @@ public class ProductRepository {
 	private @Autowired ElasticsearchOperations elasticsearchTemplate;
 
 	private @Autowired RedisProductRepository redisRepository;
+//	
+	private @Autowired VerticalsRepositoryService verticalRepository;
 	
-//	private @Autowired RedisOperations<String, Product> redisRepo;
 
 	public ProductRepository() {
 		
-		// TODO : from conf
-		int dequeueSize = 20;
-		int workers = 3;
+		// TODO(p2,conf) : from conf
+		int dequeueSize = 200;
+		int workers = 4;
 		int pauseDuration = 5000;
 		
 		logger.info("Starting file queue consumer thread, with bulk page size of {} items", dequeueSize );
-				
+		
+		// Starting batched indexation for Products
 		for (int i = 0; i < workers; i++) {			
-			Thread.startVirtualThread((new ProductIndexationWorker(this, dequeueSize, pauseDuration,"dequeue-worker-"+i)));
+			Thread.startVirtualThread((new ProductIndexationWorker(this, dequeueSize, pauseDuration,"produt-dequeue-worker-"+i)));
 		}
+		
+		
+
+		
+
+		
 	}
 
 //	private ExecutorService executor = Executors.newVirtualThreadPerTaskExecutor();
@@ -104,8 +108,6 @@ public class ProductRepository {
 		// TODO : Add exclusion
 //				.and(new Criteria("datasourceCategories").notIn(v.getMatchingCategories()))
 				.or(new Criteria("vertical").is(v.getId()));
-// TODO : Add or get by taxonomyId
-		
 		
 		final NativeQuery initialQuery = new NativeQueryBuilder().withQuery(new CriteriaQuery(c)).build();
 
@@ -152,9 +154,6 @@ public class ProductRepository {
 	 */
 	public Stream<Product> exportVerticalWithValidDate(VerticalConfig vertical, boolean withExcluded) {
 
-		
-		
-		
 		Criteria c = getRecentProductsWithPriceQuery()
 				.and( new Criteria("vertical").is(vertical.getId()))
 
@@ -282,7 +281,8 @@ public class ProductRepository {
 		logger.info("Queuing single product : {}", p.getId());
 
 		try {
-			queue.put(p);
+			productQueue.put(p);
+			verticalRepository.queueForVerticalisation(p);
 		} catch (Exception e) {
 			logger.error("Cannot enqueue product {}",p,e);			
 		}
@@ -320,7 +320,8 @@ public class ProductRepository {
 		data.forEach(e -> {
 			
 			try {
-				queue.put(e) ;
+				productQueue.put(e) ;
+				verticalRepository.queueForVerticalisation(e);
 			} catch (Exception e1) {
 				logger.error("!!!! exception, cannot enqueue product {}",e);
 			}
@@ -334,6 +335,9 @@ public class ProductRepository {
 	public void store(Collection<Product> data) {
 		logger.info("Indexing {} products", data.size());
 
+		
+		
+		
 //		executor.submit(() -> {
 			elasticsearchTemplate.save(data, current_index);
 //		});
@@ -347,6 +351,10 @@ public class ProductRepository {
 	public void storeNoCache(Collection<Product> data) {
 		logger.info("Indexing without caching {} products", data.size());
 
+		data.forEach(e-> {
+			verticalRepository.queueForVerticalisation(e);
+		});
+
 		elasticsearchTemplate.save(data, current_index);
 
 	}
@@ -357,6 +365,7 @@ public class ProductRepository {
 
 //		executor.submit(() -> {
 			elasticsearchTemplate.save(data, current_index);
+			verticalRepository.queueForVerticalisation(data);
 //		});
 
 //		executor.submit(() -> {
@@ -469,7 +478,7 @@ public class ProductRepository {
 		
 		// Getting the one we don't have in redis from elastic 		
 		Set<String> missingIds = ids.stream().filter(e -> !ret.containsKey(e)).map(e-> String.valueOf(e)) .collect(Collectors.toSet());
-		logger.info("redis hits : {}, missing : {}, queue size : {}",ret.size(), missingIds.size(),queue.size());
+		logger.info("redis hits : {}, missing : {}, queue size : {}",ret.size(), missingIds.size(),productQueue.size());
 		
 		
 		if (missingIds.size() != 0) {
@@ -568,9 +577,8 @@ public class ProductRepository {
 //		});
 	}
 
-	public BlockingQueue<Product> getQueue() {
-		return queue;
+	public BlockingQueue<Product> getProductQueue() {
+		return productQueue;
 	}
-
 
 }

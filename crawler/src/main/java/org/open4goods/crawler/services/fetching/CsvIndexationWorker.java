@@ -560,14 +560,14 @@ public class CsvIndexationWorker implements Runnable {
 		}
 
 		// ProductCondition
-		p.setProductState(config.getDefaultItemCondition());
+		p.setProductCondition(config.getDefaultItemCondition());
 		if (null != csvProperties.getProductState()) {
 			for (String productState : csvProperties.getProductState()) {
 
 				try {
 					ProductCondition state = ProductConditionParser.parse(getFromCsvRow(item, productState));
 					if (null != state) {
-						p.setProductState(state);
+						p.setProductCondition(state);
 						break;
 					}
 				} catch (final Exception e1) {

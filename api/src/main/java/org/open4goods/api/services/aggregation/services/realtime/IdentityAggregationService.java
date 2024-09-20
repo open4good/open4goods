@@ -2,6 +2,7 @@
 package org.open4goods.api.services.aggregation.services.realtime;
 
 import java.util.AbstractMap.SimpleEntry;
+import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
@@ -10,6 +11,7 @@ import org.open4goods.commons.config.yml.ui.VerticalConfig;
 import org.open4goods.commons.exceptions.AggregationSkipException;
 import org.open4goods.commons.model.BarcodeType;
 import org.open4goods.commons.model.constants.ReferentielKey;
+import org.open4goods.commons.model.data.Brand;
 import org.open4goods.commons.model.data.DataFragment;
 import org.open4goods.commons.model.product.Product;
 import org.open4goods.commons.services.BarcodeValidationService;
@@ -54,11 +56,21 @@ public class IdentityAggregationService extends AbstractAggregationService {
 			}
 		}
 		
+		
+		handleReferentielAttributes(input, output);
+		
 		/////////////////////////////
 		// Adding alternate models's
 		/////////////////////////////		
-		output.getAlternativeModels().addAll(input.getAlternateIds().stream().map(e-> e.getValue()).collect(Collectors.toSet()) );
-
+		input.getAlternateIds().stream().forEach(e -> {
+			output.addModel(e);
+			
+		});
+		
+		
+		
+		
+		
 		/////////////////////////////
 		// Setting the dates
 		/////////////////////////////
@@ -115,4 +127,17 @@ public class IdentityAggregationService extends AbstractAggregationService {
 		
 	}
 
+	
+	/**
+	 * Aggregate ReferentielAttributes
+	 * @param refAttrs
+	 * @param aa
+	 * @param output
+	 */
+	private void handleReferentielAttributes(DataFragment fragment, Product output) {
+		output.addBrand(fragment.getDatasourceName(), fragment.brand());
+		output.addModel(fragment.model());
+	}
+	
+	
 }

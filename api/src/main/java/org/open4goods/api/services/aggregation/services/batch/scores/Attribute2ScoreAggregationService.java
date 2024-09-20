@@ -25,7 +25,7 @@ public class Attribute2ScoreAggregationService extends AbstractScoreAggregationS
 	public void onProduct(Product data, VerticalConfig vConf) {
 
 		
-		Collection<AggregatedAttribute> aggattrs =    data.getAttributes().getAggregatedAttributes().values()  ;
+		Collection<AggregatedAttribute> aggattrs =    data.getAttributes().getAttributes().values()  ;
 		for (AggregatedAttribute aga : aggattrs) {
 			// Scoring from attribute
 			try {

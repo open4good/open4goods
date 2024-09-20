@@ -210,7 +210,7 @@ public class OpenDataService {
 		}
 
 		// Categories
-		line[11] = StringUtils.join(data.getDatasourceCategories()," ; ");
+		line[11] = StringUtils.join(data.getCategories()," ; ");
 
 		return line;
 	}
