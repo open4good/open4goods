@@ -75,9 +75,11 @@ public class GlobalSearchController  implements SitemapExposedController{
 		model.addObject("results",results);
 		model.addObject("query", q);
 
-		String amazonSearchLinkTemplate = config.getAmazonSearchLink();
+		String amazonSearchLinkTemplate = config.getAmazonConfig().getAmazonSearchLink();
 		String encodedQuery = URLEncoder.encode(q, StandardCharsets.UTF_8);
-		String amazonLink = amazonSearchLinkTemplate.replace("{search_terms}", encodedQuery);
+		String amazonLink = amazonSearchLinkTemplate
+				.replace("{search_terms}", encodedQuery)
+				.replace("{affiliate_tag}", config.getAmazonConfig().getAffiliateTag());
 
 		model.addObject("amazonLink", amazonLink);
 		

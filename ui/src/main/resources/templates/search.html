@@ -3,115 +3,126 @@
 
 <head>
 
-	<!--/* Metas and CSS */-->
-	<th:block th:insert="~{inc/header-meta.html}"></th:block>
-    
-	<!-- Primary Meta Tags -->
-	<title th:text="#{search.title}"></title>
-	<meta name="title" th:content="#{search.meta.title}">
-	<meta name="description" th:content="#{search.meta.description}">
-		
-	<!-- Open Graph / Facebook -->
-	<meta property="og:type" content="website">
-	<meta property="og:url" th:content="${url}">
-	<meta property="og:title" th:content="#{search.title}">
-	<meta property="og:description" th:content="#{search.meta.description}">
-	<meta property="og:image"  th:content="${baseUrl} + '/assets/img/brand/light.svg'">
-	
-	<!-- Twitter -->
-	<meta name="twitter:card" content="summary_large_image">
-	<meta name="twitter:url" th:content="${url}">
-	<meta name="twitter:title" th:content="#{search.title}">
-	<meta name="twitter:description" th:content="#{search.meta.description}">
-	<meta name="twitter:image" th:content="${baseUrl} + 'assets/img/brand/light.svg'">	
-	
+    <!--/* Metas and CSS */-->
+    <th:block th:insert="~{inc/header-meta.html}"></th:block>
+
+    <!-- Primary Meta Tags -->
+    <title th:text="#{search.title}"></title>
+    <meta name="title" th:content="#{search.meta.title}">
+    <meta name="description" th:content="#{search.meta.description}">
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" th:content="${url}">
+    <meta property="og:title" th:content="#{search.title}">
+    <meta property="og:description" th:content="#{search.meta.description}">
+    <meta property="og:image" th:content="${baseUrl} + '/assets/img/brand/light.svg'">
+
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:url" th:content="${url}">
+    <meta name="twitter:title" th:content="#{search.title}">
+    <meta name="twitter:description" th:content="#{search.meta.description}">
+    <meta name="twitter:image" th:content="${baseUrl} + 'assets/img/brand/light.svg'">
+
 </head>
 
 <body>
-    
-	<!--/* Navbar */-->
-	<th:block th:with="page = 'search'" th:insert="~{inc/navbar/navbar-page.html}"></th:block>
 
-    <!--/* Loader */-->
-    <th:block th:insert="~{inc/preloader.html}"></th:block>
-	
-    <main>	
-		
+<!--/* Navbar */-->
+<th:block th:with="page = 'search'" th:insert="~{inc/navbar/navbar-page.html}"></th:block>
+
+<!--/* Loader */-->
+<th:block th:insert="~{inc/preloader.html}"></th:block>
+
+<main>
 
 
-       <!--/* Search panel */-->
-        <section class="section bg-primary text-white ">
-            <div class="container">
-                <div class="row justify-content-center">
-                    <div class="col-12 col-md-10 text-center">
-                        <h1 class="mb-3">Rechercher dans les produits</h1>
-                        <p class="lead px-lg-5 mb-5">Vous êtes dans la recherche globale, une recherche détaillée est disponible dans chaque catégorie de produits.</p>
-                        <form id="searchForm" method="get">
-                            <div class="form-group bg-white shadow-soft rounded-pill mb-4 px-3 py-2">
-                                <div class="row align-items-center">
-                                    <div class="col">
-                                        <div class="input-group input-group-merge shadow-none">
-                                            <div class="input-group-text bg-transparent border-0"><span class="fas fa-search"></span></div>
-                                            <input id="searchInput" name="q" th:value="${query}" type="text" class="form-control border-0 form-control-flush shadow-none pb-2" placeholder="Rechercher un produit" required>
-                                        </div>
-                                    </div>
-                                    <div class="col-auto">
-                                        <button type="submit" class="btn btn-block btn-primary rounded-pill">Chercher</button>
+    <!--/* Search panel */-->
+    <section class="section bg-primary text-white ">
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-12 col-md-10 text-center">
+                    <h1 class="mb-3">Rechercher dans les produits</h1>
+                    <p class="lead px-lg-5 mb-5">Vous êtes dans la recherche globale, une recherche détaillée est
+                        disponible dans chaque catégorie de produits.</p>
+                    <form id="searchForm" method="get">
+                        <div class="form-group bg-white shadow-soft rounded-pill mb-4 px-3 py-2">
+                            <div class="row align-items-center">
+                                <div class="col">
+                                    <div class="input-group input-group-merge shadow-none">
+                                        <div class="input-group-text bg-transparent border-0"><span
+                                                class="fas fa-search"></span></div>
+                                        <input id="searchInput" name="q" th:value="${query}" type="text"
+                                               class="form-control border-0 form-control-flush shadow-none pb-2"
+                                               placeholder="Rechercher un produit" required>
                                     </div>
                                 </div>
+                                <div class="col-auto">
+                                    <button type="submit" class="btn btn-block btn-primary rounded-pill">Chercher
+                                    </button>
+                                </div>
                             </div>
-                        </form>
-                    </div>
+                        </div>
+                    </form>
                 </div>
             </div>
+        </div>
 
-        </section>
+    </section>
 
-        <!--/* Résultats de la recherche */-->
-        <section class="section section-md bg-white">
-            <div class="container container-semi-fluid">
-                <div class="row justify-content-center">
-                    <th:block th:if="${not #lists.isEmpty(results.data)}">
-                        <div th:each="item: ${results.data}" class="col-12 col-md-12 mb-3">
-                            <th:block th:with="item = ${item}">
-                                <th:block th:insert="~{inc/search-card.html}"></th:block>
-                            </th:block>
-                        </div>
-                    </th:block>
-                    <!-- Panneau Amazon si pas de résultats -->
-                    <th:block th:if="${#lists.isEmpty(results.data)}">
-                        <section class="section section-lg pt-0">
-                            <div class="container">
-                                <div class="card shadow mb-6">
-                                    <div class="card-body px-5 py-5">
-                                        <div class="row align-items-center">
-                                            <div class="col-12 col-md-6">
-                                                <h2 class="mb-3">Oups... Aucun résultat trouvé</h2>
-                                                <p class="mb-0">Ne vous inquiétez pas, nous pouvons toujours chercher sur Amazon. La contribution écologique s'applique toujours en faisant vos achats via ce lien.</p>
-                                            </div>
-                                            <div class="col-12 col-md-6 text-md-right">
-                                                <a th:href="${amazonLink}" class="btn btn-primary mt-4 mt-md-0">
-                                <span class="me-1">
-                                    <span class="fas fa-shopping-cart"></span>
-                                </span>
-                                                    Recherche Amazon
-                                                </a>
-                                            </div>
+    <!--/* Résultats de la recherche */-->
+    <section class="section section-md bg-white">
+        <div class="container container-semi-fluid">
+            <div class="row justify-content-center">
+
+                <!-- Si des résultats sont trouvés -->
+                <th:block th:if="${not #lists.isEmpty(results.data)}">
+                    <div th:each="item: ${results.data}" class="col-12 col-md-12 mb-3">
+                        <th:block th:with="item = ${item}">
+                            <th:block th:insert="~{inc/search-card.html}"></th:block>
+                        </th:block>
+                    </div>
+                </th:block>
+
+                <!-- Panneau Amazon si pas de résultats -->
+                <th:block th:if="${#lists.isEmpty(results.data)}">
+                    <section class="section section-lg pt-0">
+                        <div class="container">
+                            <div class="card shadow mb-6">
+                                <div class="card-body px-5 py-5">
+                                    <div class="row align-items-center">
+                                        <div class="col-12 col-md-6">
+                                            <h2 class="mb-3">Oups... Aucun résultat trouvé</h2>
+                                            <p class="mb-0">
+                                                Ne vous inquiétez pas, nous pouvons toujours chercher sur Amazon.
+                                                La contribution écologique s'applique toujours en faisant vos achats via ce lien.
+                                            </p>
+                                        </div>
+                                        <div class="col-12 col-md-6 text-md-right">
+                                            <a th:href="${amazonLink}" class="btn btn-primary mt-4 mt-md-0">
+                                            <span class="me-1">
+                                                <span class="fas fa-shopping-cart"></span>
+                                            </span>
+                                                Rechercher "<span th:text="${query}"></span>" sur Amazon
+                                            </a>
                                         </div>
                                     </div>
                                 </div>
                             </div>
-                        </section>
-                    </th:block>
+                        </div>
+                    </section>
+                </th:block>
+
+            </div>
+        </div>
+    </section>
 
 
+</main>
 
-
-
-    </main>
-
-	<!--/* Footer */-->
-	<th:block th:insert="~{inc/footer.html}"></th:block>	
+<!--/* Footer */-->
+<th:block th:insert="~{inc/footer.html}"></th:block>
 
 <!-- Core -->
 <script src="../../vendor/@popperjs/core/dist/umd/popper.min.js"></script>
@@ -128,12 +139,12 @@
 <!-- custom sources -->
 <script src="../../assets/js/pixel-custom.js"></script>
 <script>
-$(document).ready(function() {
-	// search feature
-    $('#searchInput').on("change",function (e) {
-    	$('#searchForm').attr("action","/recherche/"+($('#searchInput').val()));
+    $(document).ready(function () {
+        // search feature
+        $('#searchInput').on("change", function (e) {
+            $('#searchForm').attr("action", "/recherche/" + ($('#searchInput').val()));
+        });
     });
-} );
 </script>
 </body>
 
