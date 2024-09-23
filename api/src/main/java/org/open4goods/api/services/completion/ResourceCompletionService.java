@@ -74,7 +74,6 @@ public class ResourceCompletionService  extends AbstractCompletionService{
 	// TODO(p2,safety) : Warning : Probably not thread safe
 	private static final HashingAlgorithm hasher = new PerceptiveHash(PERCEPTIV_HASH_SIZE);
 
-
 	public ResourceCompletionService(ImageMagickService imageService, VerticalsConfigService verticalConfigService, ResourceService resourceService, ProductRepository dataRepository, ApiProperties apiProperties) {
 		
 		// TODO(p3,conf) : Should set a specific log level here (not "agg(regation)" one)
@@ -110,20 +109,16 @@ public class ResourceCompletionService  extends AbstractCompletionService{
 		// Adding computed url's from availlable url's templates
 		
 		apiProperties.getResourceCompletionConfig().getUrlTemplates().forEach(e -> {
-			try {
-				data.addResource  (processUrlTemplate(e, String.valueOf(data.gtin())));
-			} catch (ValidationException e1) {
-				logger.error("Error while adding resource {}", e.getUrl(), e1);
-			}
+			data.getResources().add(processUrlTemplate(e, String.valueOf(data.gtin())));
 		});
 		
 		// Deleting existing groups
-		data.getResources().values().forEach(e -> {
+		data.getResources().forEach(e -> {
 			e.setGroup(null);
 			
 		});
 		
-		List<Resource> resources = data.getResources().values().stream()
+		List<Resource> resources = data.getResources().stream()
 				// Exclude already processed
 				.filter( e ->  vertical.getResourcesConfig().getOverrideResources() || !e.isProcessed() )
 				// Exclude already the previously detected invalids
@@ -132,10 +127,8 @@ public class ResourceCompletionService  extends AbstractCompletionService{
 				.map(e -> fetchResource(e, vertical)).toList();
 
 		// Updating
-		data.getResources().clear();
-		resources.forEach(e -> {
-			data.getResources().put(e.getUrl(),e);
-		});
+		data.getResources().removeAll(resources);
+		data.getResources().addAll(resources);
 		
 		
 		// Setting the file names if new
@@ -202,7 +195,7 @@ public class ResourceCompletionService  extends AbstractCompletionService{
 		
 		Set<String> md5s = new HashSet<>();
 		
-		List<Resource> images = data.getResources().values().stream()
+		List<Resource> images = data.getResources().stream()
 				.filter(e -> !e.isEvicted())
 				// Filtering on images
 				.filter(e -> e.getResourceType() == ResourceType.IMAGE)
@@ -243,11 +236,8 @@ public class ResourceCompletionService  extends AbstractCompletionService{
 
 
 		// Updating
-		// Updating
-		data.getResources().clear();
-		resources.forEach(e -> {
-			data.getResources().put(e.getUrl(),e);
-		});
+		data.getResources().removeAll(images);
+		data.getResources().addAll(images);
 		
 		/////////////////////////////////////////
 		// Images similarity clusterization
@@ -255,7 +245,6 @@ public class ResourceCompletionService  extends AbstractCompletionService{
 		ArrayList<List<Resource>> classified = classify(images.stream().filter(e -> !e.isEvicted()).toList());
 		
 		logger.info("{} - {} resources links, {} processed, {} retained and classified in {} bucket", data.getId(), data.getResources().size(), resources.size(), images.size(), classified.size());
-		
 		
 		List<Resource> resultingImages = new ArrayList<>();
 		

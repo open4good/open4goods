@@ -35,10 +35,7 @@ public class AggregatedAttributes  {
 		return "ref:"+referentielAttributes.size()+ " , agg:"+attributes.size() +" , unmaped:"+unmatchedAttributes.size() +" , features:"+features.size();
 	}
 	
-	
-
 	public int count() {
-		
 		return referentielAttributes.size() + attributes.size() + unmatchedAttributes.size() + features.size();
 	}
 	
@@ -57,20 +54,14 @@ public class AggregatedAttributes  {
 	public void addReferentielAttribute(ReferentielKey key, String value) {
 		referentielAttributes.put(key, value);
 	}
-
-
 		
 	public Map<String, String> referentielAttributesAsStringKeys() {
-		// TODO Auto-generated method stub
 		return referentielAttributes.entrySet().stream().collect(Collectors.toMap(
 					e -> e.getKey().toString(),
 				Map.Entry::getValue
 					
 				));
 	}
-	
-	
-
 
 
 	public Map<String, AggregatedAttribute> getAttributes() {

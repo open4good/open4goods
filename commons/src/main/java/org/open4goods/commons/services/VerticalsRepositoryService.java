@@ -122,9 +122,19 @@ public class VerticalsRepositoryService {
 		
 		VerticalConfig v = verticalsConfigService.getConfigById(source.getVertical());
 		
+		
+		
+		
+		
 		VerticalizedProduct target = new VerticalizedProduct();
 		
-        // Copying individual attributes via getters and setters
+		
+		// Translating and filtering on attributes
+		target.setAttributes(source.getAttributes());
+
+		
+		
+		// Copying individual attributes via getters and setters
         target.setId(source.getId());
         target.setExternalIds(source.getExternalIds());
         target.setCreationDate(source.getCreationDate());
@@ -134,10 +144,9 @@ public class VerticalsRepositoryService {
         target.setAltModels(new HashSet<>(source.getAltModels()));
         target.setAltBrands(new HashMap<>(source.getAltBrands()));
         target.setNames(source.getNames());
-        target.setAttributes(source.getAttributes());
         target.setPrice(source.getPrice());
         target.setDatasourceNames(new HashSet<>(source.getDatasourceNames()));
-        target.setResources(new HashSet<>(source.getResources().values()));
+        target.setResources(new HashSet<>(source.getResources()));
         target.setCoverImagePath(source.getCoverImagePath());
         target.setGenaiTexts(source.getGenaiTexts());
         target.setGtinInfos(source.getGtinInfos());
@@ -171,12 +180,13 @@ public class VerticalsRepositoryService {
 		
 		bag.entrySet().forEach(e -> {
 			VerticalConfig vc = verticalsConfigService.getConfigById(e.getKey());
-			if (vc != null) {
+			
+			if (null == vc) {
+				logger.warn("Vertical config not found for {}", e.getKey());
+			} else {
 				//TODO (perf,p3) : cache the index coordinates
 				elasticsearchRestTemplate.
-				save(e.getValue(), IndexCoordinates.of(vc.indexName()));
-			} else {
-				logger.warn("Skipping not found vertical category for {}", e.getKey());
+				save(e.getValue(), IndexCoordinates.of(vc.indexName()));				
 			}
 			
 		});		

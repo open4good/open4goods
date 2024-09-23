@@ -160,7 +160,7 @@ public class NamesAggregationService extends AbstractAggregationService {
 	}
 
 	private String normalizeName(String name) {
-		return name.trim();
+		return name.trim().toLowerCase();
 	}
 
 	

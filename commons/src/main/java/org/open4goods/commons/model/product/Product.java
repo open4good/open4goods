@@ -46,17 +46,14 @@ import org.springframework.data.elasticsearch.annotations.Setting;
 import org.springframework.data.elasticsearch.annotations.WriteTypeHint;
 import org.springframework.data.redis.core.RedisHash;
 
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @Document(indexName = Product.DEFAULT_REPO, createIndex = true, writeTypeHint = WriteTypeHint.FALSE, dynamic = Dynamic.FALSE)
 @RedisHash(value = Product.DEFAULT_REPO, timeToLive = ProductRepository.VALID_UNTIL_DURATION)
 @Setting(settingPath = "/elastic-product-settings.json")
+//TODO : Disabling to see/test  if a clean jackson serial
 //@JsonIgnoreProperties(ignoreUnknown = true)
 public class Product implements Standardisable {
-
-	private static final String MODEL_NAME_SPLITTERS = "/|\\|.|-";
-
-	public static final String ECOSCORE_NAME = "ECOSCORE";
 
 	private final static Logger logger = LoggerFactory.getLogger(Product.class);
 
@@ -114,7 +111,8 @@ public class Product implements Standardisable {
 	private Map<String, Set<String>> altBrands = new HashMap<>();
 
 	/** Namings informations for this product **/
-	// NOTE : Could be a better name, but legacy....
+	// TODO : move the offernames inside
+	// TODO : Could be a better name
 	@Field(enabled = false, store = false, type = FieldType.Object)
 	private ProductTexts names = new ProductTexts();
 
@@ -135,8 +133,7 @@ public class Product implements Standardisable {
 	 * The media resources for this data
 	 */
 	@Field(enabled = false, store = false, type = FieldType.Object)
-	@JsonDeserialize(using = MigrationDeserializer.class)
-	private Map<String, Resource> resources = new HashMap<>();
+	private Set<Resource> resources = new HashSet<>();
 
 	@Field(index = false, store = false, type = FieldType.Keyword)
 	private String coverImagePath;
@@ -248,7 +245,8 @@ public class Product implements Standardisable {
 
 	public List<Score> realScores() {
 		List<Score> ret = scores.values().stream().filter(e -> !e.getVirtual())
-				.filter(e -> !e.getName().equals(ECOSCORE_NAME)).sorted((o1, o2) -> o2.getRelativ().getValue().compareTo(o1.getRelativ().getValue())).toList();
+				// TODO : Const
+				.filter(e -> !e.getName().equals("ECOSCORE")).sorted((o1, o2) -> o2.getRelativ().getValue().compareTo(o1.getRelativ().getValue())).toList();
 
 		return ret;
 	}
@@ -258,7 +256,8 @@ public class Product implements Standardisable {
 	 * @return the ecoscore or null
 	 */
 	public Score ecoscore() {
-		return scores.get(ECOSCORE_NAME);
+		// TODO : const
+		return scores.get("ECOSCORE");
 	}
 
 	public String caracteristics() {
@@ -296,7 +295,7 @@ public class Product implements Standardisable {
 	}
 
 	public List<Resource> pdfs() {
-		return resources.values().stream().filter(e -> e.getResourceType() != null && e.getResourceType().equals(ResourceType.PDF)).toList();
+		return resources.stream().filter(e -> e.getResourceType() != null && e.getResourceType().equals(ResourceType.PDF)).toList();
 	}
 
 	public String externalCover() {
@@ -313,12 +312,14 @@ public class Product implements Standardisable {
 	}
 
 	public List<Resource> unprocessedimages() {
-		return resources.values().stream().filter(e -> e.getUrl().endsWith(".jpg") || e.getUrl().endsWith(".png") || e.getUrl().endsWith(".jpeg")).toList();
+		// TODO Auto-generated method stub
+		return resources.stream().filter(e -> e.getUrl() != null).filter(e -> e.getUrl().endsWith(".jpg") || e.getUrl().endsWith(".png") || e.getUrl().endsWith(".jpeg")).toList();
 	}
 
+	// TODO : Should be outsided / cached
 	public List<Resource> images() {
 		// Filter resources of type IMAGE
-		List<Resource> images = resources.values().stream().filter(e -> e.getResourceType() != null && e.getResourceType().equals(ResourceType.IMAGE)).toList();
+		List<Resource> images = resources.stream().filter(e -> e.getResourceType() != null && e.getResourceType().equals(ResourceType.IMAGE)).toList();
 
 		//////////////////////////////////
 		// Applying filtering / ordering
@@ -337,6 +338,7 @@ public class Product implements Standardisable {
 		// Then, add the other images by groups
 		otherGroupsId.forEach(otherGroupId -> ret.add(bestByGroup(images, otherGroupId)));
 
+		// TODO : perf : null check Could be avoided
 		return ret.stream().filter(e -> null != e).toList();
 	}
 
@@ -355,12 +357,44 @@ public class Product implements Standardisable {
 	}
 
 	public List<Resource> videos() {
-		return resources.values().stream().filter(e -> e.getResourceType() != null && e.getResourceType().equals(ResourceType.VIDEO)).toList();
+		return resources.stream().filter(e -> e.getResourceType() != null && e.getResourceType().equals(ResourceType.VIDEO)).toList();
 	}
 
 	public AggregatedPrice bestPrice() {
 		return price == null ? null : price.getMinPrice();
 	}
+
+	// /**
+	// * Return ratings having specific tags
+	// *
+	// * @param tag
+	// * @return
+	// */
+	// public Set<SourcedRating> ratingsByTag(final String tag) {
+	//
+	// if (null == tag || null == ratings) {
+	// return null;
+	// }
+	//
+	// return ratings.stream().filter(e ->
+	// e.getTags().contains(tag)).collect(Collectors.toSet());
+	// }
+
+	// /**
+	// * Return a rating having specific tags
+	// *
+	// * @param tag
+	// * @return
+	// */
+	// public SourcedRating ratingByTag(final String tag) {
+	//
+	// if (null == tag || null == ratings) {
+	// return null;
+	// }
+	//
+	// return ratings.stream().filter(e ->
+	// e.getTags().contains(tag)).findAny().orElse(null);
+	// }
 
 	/**
 	 *
@@ -374,6 +408,17 @@ public class Product implements Standardisable {
 		return price.getConditions().contains(ProductCondition.OCCASION);
 	}
 
+	// /**
+	// * Return all the specific ratings
+	// *
+	// * @return
+	// * @throws ResourceNotFoundException
+	// */
+	// public Set<Rating> ratings(final RatingType ratingType) {
+	// return ratings.stream().filter(e ->
+	// e.getTags().contains(ratingType.toString())).collect(Collectors.toSet());
+	// }
+
 	public String alternateIdsAsText() {
 		return StringUtils.join(altModels, ", ");
 	}
@@ -384,6 +429,7 @@ public class Product implements Standardisable {
 	 */
 	public String brand() {
 		return attributes.getReferentielAttributes().get(ReferentielKey.BRAND);
+
 	}
 
 	/**
@@ -493,8 +539,23 @@ public class Product implements Standardisable {
 		return categories.stream().min(Comparator.comparingInt(String::length)).orElse(null);
 	}
 
+	// /**
+	// *
+	// * @return the id
+	// */
+	// public String id() {
+	// StringBuilder builder = new StringBuilder();
+	//
+	// if (null == brand() || null == model()) {
+	// builder.append(gtin());
+	// } else {
+	// builder.append(brand()).append("-").append(model());
+	// }
+	// return builder.toString();
+	// }
 
 	/**
+	 * TODO : merge with the one on price()
 	 * 
 	 * @return a localised formated duration of when the product was last indexed
 	 */
@@ -531,6 +592,35 @@ public class Product implements Standardisable {
 		return date;
 	}
 
+//	/**
+//	 * Initialize a dummy DataFragment from this product, (used to "touch" products to replay batch scenarios with realtimeAggregationService)
+//	 * @return
+//	 */
+//	public DataFragment getFragment() {
+//		DataFragment ret = new DataFragment();
+//		ret.setLastIndexationDate(lastChange);
+//		ret.setCreationDate(creationDate);
+//		ret.setReferentielAttributes(attributes.getReferentielAttributes());
+//		
+//		return ret;
+//		
+//	}
+
+	/**
+	 * Add an image to this product
+	 * 
+	 * @param url
+	 */
+//	public void addImage(String url, String tag) {
+//		if (!StringUtils.isEmpty(url)) {
+//			Resource r = new Resource(url);
+//			r.addTag(tag);
+// TODO : Check incidence			
+//			resources.remove(r);
+
+//			resources.add(r);			
+//		}
+//	}
 
 	public void addResource(final Resource resource) throws ValidationException {
 
@@ -543,11 +633,11 @@ public class Product implements Standardisable {
 		// Smart update, time consuming but necessary.
 		// TODO : Involve on a map on the new model
 
-		Resource existing = resources.get(resource.getUrl());
+		Resource existing = resources.stream().filter(e -> e.equals(resource)).findFirst().orElse(null);
 
 		if (null == existing) {
 			logger.info("Adding new resource : {}", resource);
-			resources.put(resource.getUrl(),resource);
+			resources.add(resource);
 		} else {
 			logger.info("Updating existing resource : {}", resource);
 			// Smart update
@@ -555,7 +645,8 @@ public class Product implements Standardisable {
 			existing.setHardTags(resource.getHardTags());
 			existing.setDatasourceName(resource.getDatasourceName());
 
-			resources.put(resource.getUrl(),resource);
+			resources.remove(resource);
+			resources.add(existing);
 		}
 
 	}
@@ -578,12 +669,13 @@ public class Product implements Standardisable {
 
 		String model = StringUtils.normalizeSpace(value).toUpperCase();
 
-		// TODO(p3,conf) : Eviction size from conf
+		// TODO : Eviction size from conf
 		if (StringUtils.isEmpty(value) || value.length() < 3) {
 			return;
 		}
 		// Splitting on conventionnal suffixes (/ - .)
-		String[] frags = model.split(MODEL_NAME_SPLITTERS);
+		// TODO : Const / conf
+		String[] frags = model.split("/|\\|.|-");
 
 		altModels.add(value);
 		if (frags.length > 1) {
@@ -693,12 +785,11 @@ public class Product implements Standardisable {
 		this.price = price;
 	}
 
-
-	public Map<String, Resource> getResources() {
+	public Set<Resource> getResources() {
 		return resources;
 	}
 
-	public void setResources(Map<String, Resource> resources) {
+	public void setResources(Set<Resource> resources) {
 		this.resources = resources;
 	}
 

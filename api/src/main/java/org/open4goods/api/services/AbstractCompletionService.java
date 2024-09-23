@@ -51,7 +51,7 @@ public abstract class AbstractCompletionService {
 	 */
 	public void complete(VerticalConfig vertical, Integer limit, boolean withExcluded)  {
 		logger.info("Generating AI texts for {} products {}",limit == null ? "all" : limit, vertical.getId());
-		dataRepository.exportVerticalWithValidDateOrderByEcoscore(vertical.getId(), limit,withExcluded).forEach(data -> {
+		dataRepository.exportVerticalWithValidDate(vertical.getId(), limit,withExcluded).forEach(data -> {
 			completeProduct(vertical, data);
 			
 		});

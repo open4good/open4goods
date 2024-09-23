@@ -136,7 +136,7 @@ public class GoogleIndexationService  {
     private List<String> getVerticalUrls( String verticalId, String baseUrl) {	
 		
 			try {
-				return productRepository.exportVerticalWithValidDateOrderByEcoscore(verticalId,false)
+				return productRepository.exportVerticalWithValidDate(verticalId,false)
 				// Filtering on products having genAI content
 						.filter(e -> null != e.getGenaiTexts())
 						// TODO : Not really filtered per language

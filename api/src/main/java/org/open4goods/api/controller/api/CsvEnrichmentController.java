@@ -344,7 +344,7 @@ public class CsvEnrichmentController {
 					break;
 					
 				case EnrichmentFacet.IMAGES:
-					enriched.put(key, serialisationService.toJson(p.getResources().values().stream().map(r -> r.getUrl() ).toList()) );
+					enriched.put(key, serialisationService.toJson(p.getResources().stream().map(r -> r.getUrl() ).toList()) );
 					break;
 
 				case EnrichmentFacet.CATEGORIES:

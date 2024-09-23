@@ -10,9 +10,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Random;
 import java.util.Set;
+import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
@@ -21,8 +21,12 @@ import org.joda.time.Period;
 import org.joda.time.PeriodType;
 import org.joda.time.format.PeriodFormat;
 import org.joda.time.format.PeriodFormatter;
+import org.open4goods.commons.exceptions.ValidationException;
+import org.open4goods.commons.helper.IdHelper;
 import org.open4goods.commons.model.EcoScoreRanking;
 import org.open4goods.commons.model.Localisable;
+import org.open4goods.commons.model.Standardisable;
+import org.open4goods.commons.model.constants.Currency;
 import org.open4goods.commons.model.constants.ProductCondition;
 import org.open4goods.commons.model.constants.ReferentielKey;
 import org.open4goods.commons.model.constants.ResourceType;
@@ -164,6 +168,13 @@ public class VerticalizedProduct {
 	@Field(index = true, store = false, type = FieldType.Integer)
 	private Integer offersCount = 0;
 
+	// /**
+	// * Informations about participant datas and aggegation process
+	// */
+	// @Field(index = false, store = false, type = FieldType.Object)
+	// private AggregationResult aggregationResult = new AggregationResult();
+
+
 
 	@Override
 	public String toString() {
@@ -199,7 +210,9 @@ public class VerticalizedProduct {
 
 	public List<Score> realScores() {
 		List<Score> ret = scores.values().stream().filter(e -> !e.getVirtual())
-				.filter(e -> !e.getName().equals(Product.ECOSCORE_NAME)).sorted((o1, o2) -> o2.getRelativ().getValue().compareTo(o1.getRelativ().getValue())).toList();
+				// TODO : Const
+				.filter(e -> !e.getName().equals("ECOSCORE")).sorted((o1, o2) -> o2.getRelativ().getValue().compareTo(o1.getRelativ().getValue())).toList();
+
 		return ret;
 	}
 
@@ -208,7 +221,8 @@ public class VerticalizedProduct {
 	 * @return the ecoscore or null
 	 */
 	public Score ecoscore() {
-		return scores.get(Product.ECOSCORE_NAME);
+		// TODO : const
+		return scores.get("ECOSCORE");
 	}
 
 	public String caracteristics() {
@@ -263,9 +277,11 @@ public class VerticalizedProduct {
 	}
 
 	public List<Resource> unprocessedimages() {
+		// TODO Auto-generated method stub
 		return resources.stream().filter(e -> e.getUrl() != null).filter(e -> e.getUrl().endsWith(".jpg") || e.getUrl().endsWith(".png") || e.getUrl().endsWith(".jpeg")).toList();
 	}
 
+	// TODO : Should be outsided / cached
 	public List<Resource> images() {
 		// Filter resources of type IMAGE
 		List<Resource> images = resources.stream().filter(e -> e.getResourceType() != null && e.getResourceType().equals(ResourceType.IMAGE)).toList();
@@ -287,6 +303,7 @@ public class VerticalizedProduct {
 		// Then, add the other images by groups
 		otherGroupsId.forEach(otherGroupId -> ret.add(bestByGroup(images, otherGroupId)));
 
+		// TODO : perf : null check Could be avoided
 		return ret.stream().filter(e -> null != e).toList();
 	}
 
@@ -311,6 +328,38 @@ public class VerticalizedProduct {
 	public AggregatedPrice bestPrice() {
 		return price == null ? null : price.getMinPrice();
 	}
+
+	// /**
+	// * Return ratings having specific tags
+	// *
+	// * @param tag
+	// * @return
+	// */
+	// public Set<SourcedRating> ratingsByTag(final String tag) {
+	//
+	// if (null == tag || null == ratings) {
+	// return null;
+	// }
+	//
+	// return ratings.stream().filter(e ->
+	// e.getTags().contains(tag)).collect(Collectors.toSet());
+	// }
+
+	// /**
+	// * Return a rating having specific tags
+	// *
+	// * @param tag
+	// * @return
+	// */
+	// public SourcedRating ratingByTag(final String tag) {
+	//
+	// if (null == tag || null == ratings) {
+	// return null;
+	// }
+	//
+	// return ratings.stream().filter(e ->
+	// e.getTags().contains(tag)).findAny().orElse(null);
+	// }
 
 	/**
 	 *
@@ -455,8 +504,23 @@ public class VerticalizedProduct {
 		return categories.stream().min(Comparator.comparingInt(String::length)).orElse(null);
 	}
 
+	// /**
+	// *
+	// * @return the id
+	// */
+	// public String id() {
+	// StringBuilder builder = new StringBuilder();
+	//
+	// if (null == brand() || null == model()) {
+	// builder.append(gtin());
+	// } else {
+	// builder.append(brand()).append("-").append(model());
+	// }
+	// return builder.toString();
+	// }
+
 	/**
-	 * TODO(p3,design) : merge with the one on Product
+	 * TODO : merge with the one on price()
 	 * 
 	 * @return a localised formated duration of when the product was last indexed
 	 */
@@ -493,10 +557,40 @@ public class VerticalizedProduct {
 		return date;
 	}
 
+	public void addResource(final Resource resource) throws ValidationException {
+
+		if (null == resource) {
+			return;
+		}
+
+		resource.validate();
+
+		// Smart update, time consuming but necessary.
+		// TODO : Involve on a map on the new model
+
+		Resource existing = resources.stream().filter(e -> e.equals(resource)).findFirst().orElse(null);
+
+		if (null == existing) {
+			logger.info("Adding new resource : {}", resource);
+			resources.add(resource);
+		} else {
+			logger.info("Updating existing resource : {}", resource);
+			// Smart update
+			existing.setTags(resource.getTags());
+			existing.setHardTags(resource.getHardTags());
+			existing.setDatasourceName(resource.getDatasourceName());
+
+			resources.remove(resource);
+			resources.add(existing);
+		}
+
+	}
 
 	public String url(String language) {
 		return names.getUrl().getOrDefault(language, names.getUrl().get("default"));
 	}
+
+	
 
 	/**
 	 * 
@@ -513,7 +607,26 @@ public class VerticalizedProduct {
 		}
 	}
 
-	
+	/**
+	 * 
+	 * @param datasourceName
+	 * @param brand
+	 */
+	public void addBrand(String datasourceName, String brand) {
+
+		if (StringUtils.isEmpty(brand)) {
+			return;
+		}
+		String name = IdHelper.brandName(brand);
+
+		if (null == brand()) {
+			getAttributes().addReferentielAttribute(ReferentielKey.BRAND, name);
+		}
+
+		altBrands.computeIfAbsent(name, k -> new HashSet<>()).add(datasourceName);
+
+	}
+
 	//////////////////////////////////////////
 	// Getters / Setters
 	//////////////////////////////////////////

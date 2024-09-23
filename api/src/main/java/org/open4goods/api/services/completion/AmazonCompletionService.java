@@ -275,7 +275,7 @@ public class AmazonCompletionService extends AbstractCompletionService {
 					r.getHardTags().add(ResourceTag.AMAZON_PRIMARY_TAG);
 					r.getHardTags().add(ResourceTag.PRIMARY);
 					r.setDatasourceName(amazonDatasource.getName());
-					data.addResource(r);
+					data.getResources().add(r);
 				} catch (ValidationException e) {
 					logger.error("Error while adding primary image", e);
 				}
@@ -288,7 +288,7 @@ public class AmazonCompletionService extends AbstractCompletionService {
 						Resource r = new Resource(e.getLarge().getURL());
 						r.getHardTags().add(ResourceTag.AMAZON_VARIANT_TAG);
 						r.setDatasourceName(amazonDatasource.getName());
-						data.addResource(r);
+						data.getResources().add(r);
 					} catch (ValidationException e1) {
 						logger.error("Error while adding variant image", e1);
 					}

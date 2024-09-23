@@ -26,8 +26,35 @@ public class ProductTexts {
 	
 	
 	@Field(index = true, store = false, type = FieldType.Text, analyzer = "french")
+	//	@Field(index = true, store = false, type = FieldType.Text)
 	private Set<String> offerNames = new HashSet<>();
 
+
+	
+//	
+//	
+//	/**
+//	 * 	Adds a keyed name for a language
+//	 * @param lang
+//	 * @param key
+//	 * @param value
+//	 */
+//	public void addOther(String lang, String key, String value) {
+//	
+//		if (!others.containsKey(lang)) {
+//			others.put(lang, new  Localisable());
+//		}
+//		
+//		others.get(lang).put(key, value);
+//	}
+//	
+//	
+//	
+
+	
+	
+	
+	
 	
 	public String longestOfferName() {
 		return offerNames.stream().max (Comparator.comparingInt(String::length)).get();
