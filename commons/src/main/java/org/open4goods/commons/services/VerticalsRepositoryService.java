@@ -137,7 +137,7 @@ public class VerticalsRepositoryService {
         target.setAttributes(source.getAttributes());
         target.setPrice(source.getPrice());
         target.setDatasourceNames(new HashSet<>(source.getDatasourceNames()));
-        target.setResources(new HashSet<>(source.getResources()));
+        target.setResources(new HashSet<>(source.getResources().values()));
         target.setCoverImagePath(source.getCoverImagePath());
         target.setGenaiTexts(source.getGenaiTexts());
         target.setGtinInfos(source.getGtinInfos());
@@ -171,10 +171,13 @@ public class VerticalsRepositoryService {
 		
 		bag.entrySet().forEach(e -> {
 			VerticalConfig vc = verticalsConfigService.getConfigById(e.getKey());
-			
-			//TODO (perf,p3) : cache the index coordinates
-			elasticsearchRestTemplate.
-			save(e.getValue(), IndexCoordinates.of(vc.indexName()));
+			if (vc != null) {
+				//TODO (perf,p3) : cache the index coordinates
+				elasticsearchRestTemplate.
+				save(e.getValue(), IndexCoordinates.of(vc.indexName()));
+			} else {
+				logger.warn("Skipping not found vertical category for {}", e.getKey());
+			}
 			
 		});		
 	}

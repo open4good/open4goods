@@ -1,12 +1,11 @@
 package org.open4goods.api.services.aggregation.services.realtime;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
 
 import org.open4goods.api.services.aggregation.AbstractAggregationService;
 import org.open4goods.commons.config.yml.ui.VerticalConfig;
 import org.open4goods.commons.exceptions.AggregationSkipException;
+import org.open4goods.commons.exceptions.ValidationException;
 import org.open4goods.commons.helper.IdHelper;
 import org.open4goods.commons.model.data.DataFragment;
 import org.open4goods.commons.model.data.Resource;
@@ -44,33 +43,18 @@ public class MediaAggregationService extends AbstractAggregationService{
 	public void onDataFragment(final DataFragment input, final Product output, VerticalConfig vConf) throws AggregationSkipException {
 
 		
-		
-		Map<String,Resource> olds = new HashMap<>();
-		output.getResources().forEach(r -> {
-			olds.put(r.getUrl(), r);
-		});
-		
-		
-		
 		for (final Resource r : input.getResources()) {
 
 			// Adding standard tags
 			r.setDatasourceName(input.getDatasourceName());
-			
 			r.setCacheKey(IdHelper .generateResourceId(r.getUrl()));
 
-			
-			
-			// a special case here. to update tags. 
-			
-			Resource old = olds.get(r.getUrl());
-			
-			if (null != old) {
-				old.setTags(r.getTags());
-				old.setHardTags(r.getHardTags());
-			} else {
-				output.getResources().add(r);				
+			try {
+				output.addResource(r);
+			} catch (ValidationException e) {
+				logger.warn("Validation exception while adding resource {}", r, e );
 			}
+			
 		}
 	}
 

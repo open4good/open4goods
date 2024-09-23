@@ -15,10 +15,9 @@ import org.open4goods.commons.config.yml.ui.VerticalConfig;
 import org.open4goods.commons.exceptions.ResourceNotFoundException;
 import org.open4goods.commons.model.constants.CacheConstants;
 import org.open4goods.commons.model.product.Product;
-import org.open4goods.commons.model.product.VerticalizedProduct;
+import org.open4goods.commons.services.SerialisationService;
 import org.open4goods.commons.services.VerticalsRepositoryService;
 import org.open4goods.commons.store.repository.ProductIndexationWorker;
-import org.open4goods.commons.store.repository.VerticalizedProductIndexationWorker;
 import org.open4goods.commons.store.repository.redis.RedisProductRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,6 +25,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.elasticsearch.BulkFailureException;
+import org.springframework.data.elasticsearch.BulkFailureException.FailureDetails;
 import org.springframework.data.elasticsearch.client.elc.NativeQuery;
 import org.springframework.data.elasticsearch.client.elc.NativeQueryBuilder;
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
@@ -72,6 +73,7 @@ public class ProductRepository {
 //	
 	private @Autowired VerticalsRepositoryService verticalRepository;
 	
+	private @Autowired SerialisationService serialisationService;
 
 	public ProductRepository() {
 		
@@ -86,12 +88,6 @@ public class ProductRepository {
 		for (int i = 0; i < workers; i++) {			
 			Thread.startVirtualThread((new ProductIndexationWorker(this, dequeueSize, pauseDuration,"produt-dequeue-worker-"+i)));
 		}
-		
-		
-
-		
-
-		
 	}
 
 //	private ExecutorService executor = Executors.newVirtualThreadPerTaskExecutor();
@@ -355,8 +351,23 @@ public class ProductRepository {
 			verticalRepository.queueForVerticalisation(e);
 		});
 
-		elasticsearchTemplate.save(data, current_index);
+		try {
+			elasticsearchTemplate.save(data, current_index);
+		} catch (BulkFailureException e) {
+			Map<String, FailureDetails> failedDocuments = ((BulkFailureException)e).getFailedDocuments();
 
+			failedDocuments.forEach((docId, failureDetails) -> {
+				logger.error("Document with ID " + docId + " failed. Error: " + failureDetails.errorMessage());
+
+				String dump =  serialisationService.toJson( data.stream().filter(p-> p.getId().longValue() == Long.valueOf(docId).longValue()).findFirst().orElse(null));
+				
+				logger.error("Object dump : \n\n {}", dump);
+				
+				
+			});
+		} catch (Exception e1) {
+			logger.error("Error while saving products in main repository", e1);
+		}
 	}
 	
 	
@@ -375,7 +386,6 @@ public class ProductRepository {
 	}
 	
 	
-	
 	/**
 	 * Return an aggregated data by it's ID
 	 * 
@@ -389,8 +399,6 @@ public class ProductRepository {
 
 		logger.info("Getting product  {}", productId);
 		// Getting from redis
-		
-		
 		
 //		Product result = redisRepo.opsForValue().get(productId);
 		Product result;

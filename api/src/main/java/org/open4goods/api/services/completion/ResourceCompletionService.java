@@ -110,16 +110,20 @@ public class ResourceCompletionService  extends AbstractCompletionService{
 		// Adding computed url's from availlable url's templates
 		
 		apiProperties.getResourceCompletionConfig().getUrlTemplates().forEach(e -> {
-			data.getResources().add(processUrlTemplate(e, String.valueOf(data.gtin())));
+			try {
+				data.addResource  (processUrlTemplate(e, String.valueOf(data.gtin())));
+			} catch (ValidationException e1) {
+				logger.error("Error while adding resource {}", e.getUrl(), e1);
+			}
 		});
 		
 		// Deleting existing groups
-		data.getResources().forEach(e -> {
+		data.getResources().values().forEach(e -> {
 			e.setGroup(null);
 			
 		});
 		
-		List<Resource> resources = data.getResources().stream()
+		List<Resource> resources = data.getResources().values().stream()
 				// Exclude already processed
 				.filter( e ->  vertical.getResourcesConfig().getOverrideResources() || !e.isProcessed() )
 				// Exclude already the previously detected invalids
@@ -128,8 +132,10 @@ public class ResourceCompletionService  extends AbstractCompletionService{
 				.map(e -> fetchResource(e, vertical)).toList();
 
 		// Updating
-		data.getResources().removeAll(resources);
-		data.getResources().addAll(resources);
+		data.getResources().clear();
+		resources.forEach(e -> {
+			data.getResources().put(e.getUrl(),e);
+		});
 		
 		
 		// Setting the file names if new
@@ -196,7 +202,7 @@ public class ResourceCompletionService  extends AbstractCompletionService{
 		
 		Set<String> md5s = new HashSet<>();
 		
-		List<Resource> images = data.getResources().stream()
+		List<Resource> images = data.getResources().values().stream()
 				.filter(e -> !e.isEvicted())
 				// Filtering on images
 				.filter(e -> e.getResourceType() == ResourceType.IMAGE)
@@ -237,8 +243,11 @@ public class ResourceCompletionService  extends AbstractCompletionService{
 
 
 		// Updating
-		data.getResources().removeAll(images);
-		data.getResources().addAll(images);
+		// Updating
+		data.getResources().clear();
+		resources.forEach(e -> {
+			data.getResources().put(e.getUrl(),e);
+		});
 		
 		/////////////////////////////////////////
 		// Images similarity clusterization
