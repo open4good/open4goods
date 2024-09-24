@@ -207,8 +207,6 @@ public class VerticalsRepositoryService {
 						aggAttr.setValue(attr.bestValue());
 						aggAttr.setName(icecatName);
 						attrs.getAttributes().put(icecatName, aggAttr);
-						
-						
 					} else {
 						logger.info("Id {} is not part of icecat features id in vertical {}", id, v);
 					}
