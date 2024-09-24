@@ -90,7 +90,7 @@ jobs:
       # TODO 2 Issue
       ###########################################     
       - name: "TODO2Issue"
-        uses: "alstr/todo-to-issue-action@v4"
+        uses: "alstr/todo-to-issue-action@v5"
         with:
           IDENTIFIERS: '[{"name": "ISSUE", "labels": ["codeTodo"]}]'
             
