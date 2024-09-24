@@ -18,7 +18,6 @@ public class AggregatedAttributes  {
 	private Map<ReferentielKey, String> referentielAttributes = new HashMap<>();
 
 	//TODO(p3,naming) : rename
-	@Field(enabled = false,  store = false, type = FieldType.Object)
 	/**
 	 * The key is the english name, such as classified by icecat
 	 */

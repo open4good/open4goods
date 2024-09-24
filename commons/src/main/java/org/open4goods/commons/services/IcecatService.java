@@ -350,10 +350,6 @@ public class IcecatService {
 			return;
 		}
 		
-		
-		
-		
-		
 		LOGGER.info("Getting file from {}", iceCatConfig.getCategoryFeatureListFileUri());
 		
 		// Tweak, we cache directly the minified version (7Mb vs 7Gb ;) 
@@ -628,7 +624,7 @@ public class IcecatService {
 	
 	
 	// TODO : Perf, caching
-	public String getFeatureName(Long featureID, String language) {
+	public String getFeatureName(Integer featureID, String language) {
 		
 		IcecatFeature feature = featuresById.get(featureID);
 		Integer icecatLanguage = getIceCatLangId(language);
@@ -637,7 +633,7 @@ public class IcecatService {
 			List<IcecatName> names = feature.getNames().getNames();
 			for (IcecatName name : names) {
 				if (name.getLangId() == icecatLanguage.intValue()) {
-					return name.getValue();
+					return name.getValue() == null ? name.getTextValue() : name.getValue();
 				}
 			}			
 		}
@@ -716,7 +712,21 @@ public class IcecatService {
 		
 	}
 	
-	
+	public Set<Integer> featuresId(VerticalConfig vertical) {
+		Set<Integer> ret = new HashSet<>();
+		// Initial building
+		if (null != vertical) {
+			for (FeatureGroup fg : vertical.getFeatureGroups()) {
+				for (Integer fId : fg.getFeaturesId()) {
+					ret.add(fId);
+				}
+				
+			}
+		}
+		
+		return ret;
+		
+	}
 	
 	/**
 	 * Loads the list of features, aggegated by UiFeatureGroup

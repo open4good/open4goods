@@ -1,8 +1,10 @@
 package org.open4goods.commons.services;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.BlockingQueue;
@@ -10,6 +12,8 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.stream.Collectors;
 
 import org.open4goods.commons.config.yml.ui.VerticalConfig;
+import org.open4goods.commons.model.product.AggregatedAttribute;
+import org.open4goods.commons.model.product.AggregatedAttributes;
 import org.open4goods.commons.model.product.Product;
 import org.open4goods.commons.model.product.VerticalizedProduct;
 import org.open4goods.commons.store.repository.VerticalizedProductIndexationWorker;
@@ -130,7 +134,7 @@ public class VerticalsRepositoryService {
 		
 		
 		// Translating and filtering on attributes
-		target.setAttributes(source.getAttributes());
+		target.setAttributes(mapAttributes(source.getAttributes(),v));
 
 		
 		
@@ -161,7 +165,64 @@ public class VerticalsRepositoryService {
 	
 	}
 
-	
+	/**
+	 * Leverage the attributesn by : 
+	 * >> Filtering on the attribute having icecat taxonomy for the given vertical
+	 * >> Mapping with the corresponding english name for the given attribute
+	 * >>  
+	 * 
+	 * @param attributes
+	 * @param v
+	 * @return
+	 */
+	private AggregatedAttributes mapAttributes(AggregatedAttributes attributes, VerticalConfig v) {
+		
+		AggregatedAttributes attrs = new AggregatedAttributes();
+		attrs.setReferentielAttributes(attributes.getReferentielAttributes());
+		
+		if (null != v) {
+			
+			Set<Integer> icecatIds = icecatService.featuresId(v);
+			
+			// Filtering attributes having icecat taxonomies matching the category 
+			
+			for (AggregatedAttribute attr : attributes.getUnmatchedAttributes()) {
+				
+				if (attr.getIcecatTaxonomyIds().size() == 0) {
+					continue;
+				}
+				
+				Set<Integer> verticalMatchinIds = new HashSet<Integer>(attr.getIcecatTaxonomyIds());
+				verticalMatchinIds.retainAll(icecatIds);
+				
+				if (verticalMatchinIds.size() == 0) {
+					logger.info("No features for id for icecat category");
+				} else if (verticalMatchinIds.size() == 1) {
+					logger.info("Unique icecat id has been identified");
+					Integer id = verticalMatchinIds.stream().findFirst().orElse(null);
+					if (icecatIds.contains(id)) {
+						String icecatName = icecatService.getFeatureName(id, "en").trim();
+						logger.warn("Found a matching icecat id ({}) in vertical {}. Translated name is : {}", id,attr.getName(), icecatName);
+						AggregatedAttribute aggAttr = new AggregatedAttribute();
+						aggAttr.setValue(attr.bestValue());
+						aggAttr.setName(icecatName);
+						attrs.getAttributes().put(icecatName, aggAttr);
+						
+						
+					} else {
+						logger.info("Id {} is not part of icecat features id in vertical {}", id, v);
+					}
+				} else {
+					Set<String> attrNames = verticalMatchinIds.stream().map(e-> e + ":"+icecatService.getFeatureName(e, "en")).collect(Collectors.toSet());
+					logger.warn("Conflict ! attr {} can be resolved to {}", attr.getName()+":"+attr.bestValue(), attrNames);
+				}
+				
+			}
+		}
+		
+		return attrs;
+	}
+
 	/**
 	 * Index the products in the associated vertical
 	 * @param buffer
