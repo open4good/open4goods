@@ -91,6 +91,19 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 				a.setNumericValue(null);
 			}
 		});
+		
+		// Post computing attr value from best value. Should not occcurs, but due to RDO, sometimes attribute value is not computed
+		data.getAttributes().getAttributes().entrySet().stream().forEach(a -> {
+			if (null == a.getValue().getValue()) {
+				a.getValue().setValue(a.getValue().bestValue());
+			}
+			
+			
+		});
+		
+		
+		
+		
 	}
 
 	

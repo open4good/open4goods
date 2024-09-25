@@ -197,12 +197,13 @@ public class VerticalsRepositoryService {
 				
 				if (verticalMatchinIds.size() == 0) {
 					logger.info("No features for id for icecat category");
+					attrs.getUnmatchedAttributes().add(attr);
 				} else if (verticalMatchinIds.size() == 1) {
 					logger.info("Unique icecat id has been identified");
 					Integer id = verticalMatchinIds.stream().findFirst().orElse(null);
 					if (icecatIds.contains(id)) {
-						String icecatName = icecatService.getFeatureName(id, "en").trim();
-						logger.warn("Found a matching icecat id ({}) in vertical {}. Translated name is : {}", id,attr.getName(), icecatName);
+						String icecatName = icecatService.getFeatureName(id, "en").toLowerCase();
+						logger.info("Found a matching icecat id ({}) in vertical {}. Translated name is : {}", id,attr.getName(), icecatName);
 						AggregatedAttribute aggAttr = new AggregatedAttribute();
 						aggAttr.setValue(attr.bestValue());
 						aggAttr.setName(icecatName);

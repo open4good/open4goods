@@ -41,12 +41,13 @@ import org.springframework.data.elasticsearch.annotations.Document;
 import org.springframework.data.elasticsearch.annotations.Dynamic;
 import org.springframework.data.elasticsearch.annotations.Field;
 import org.springframework.data.elasticsearch.annotations.FieldType;
+import org.springframework.data.elasticsearch.annotations.Mapping;
 import org.springframework.data.elasticsearch.annotations.Setting;
 import org.springframework.data.elasticsearch.annotations.WriteTypeHint;
 /**
  * This object modelize a repository mapping for a verticalized product. 
  */
-@Document(indexName = "noop", createIndex = true, writeTypeHint = WriteTypeHint.FALSE, dynamic = Dynamic.FALSE)
+@Document(indexName = "noop", createIndex = true, writeTypeHint = WriteTypeHint.FALSE)
 @Setting(settingPath = "/elastic-verticalized-product-settings.json")
 public class VerticalizedProduct {
 
@@ -108,7 +109,7 @@ public class VerticalizedProduct {
 	// /** The comments, aggregated and nlp processed **/
 	// private AggregatedComments comments = new AggregatedComments();
 
-	@Field(enabled = false, store = false, type = FieldType.Object)
+	@Field(enabled = true, store = false, type = FieldType.Object)
 	private AggregatedAttributes attributes = new AggregatedAttributes();
 
 	@Field(enabled = false, store = false, type = FieldType.Object)

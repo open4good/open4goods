@@ -9,33 +9,40 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.open4goods.commons.model.attribute.Attribute;
+import org.springframework.data.elasticsearch.annotations.Field;
+import org.springframework.data.elasticsearch.annotations.FieldType;
 
 public class AggregatedAttribute implements IAttribute {
 
 	/**
 	 * The name of this aggregated attribute
 	 */
+	@Field(type = FieldType.Keyword, index = false, store = false)
 	private String name;
 
 	/**
 	 * The value of this aggregated attribute
 	 */
+	@Field(type = FieldType.Keyword, index = true, store = false)
 	private String value;
 
 	/**
 	 * The numeric value (if any) of this aggregated attribute
 	 */
+	@Field(type = FieldType.Double)
 	private Double numericValue;
 
 	/**
 	 * The whole values, associated with datasources
 	 */
+	@Field(enabled = false, store = false, type = FieldType.Object)
 	private Map<String, Set<String>> sources = new HashMap<>();
 
 	
 	/**
 	 * The icecat matched taxonomies, by it's name
 	 */
+	@Field(index = false,  type = FieldType.Integer)
 	private Set<Integer> icecatTaxonomyIds = new HashSet<>();
 	
 	
@@ -142,7 +149,7 @@ public class AggregatedAttribute implements IAttribute {
 		} 
 		sources.get(value).add(datasourceName);
 
-		value = bestValue();
+		this.value = bestValue();
 
 		try {
 			numericValue = numericOrNull(value);

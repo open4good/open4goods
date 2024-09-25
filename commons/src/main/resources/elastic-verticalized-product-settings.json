@@ -4,6 +4,11 @@
   	"number_of_shards": "1",
   	"codec": "best_compression"
   },
+  "mapping": {
+      "total_fields": {
+        "limit": 3000
+      }
+  },  
   "analysis": {
     "analyzer": {
       "french": {

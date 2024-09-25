@@ -1,8 +1,11 @@
 package org.open4goods.commons.model.product;
 
+import org.springframework.data.elasticsearch.annotations.Field;
+
 public class AggregatedFeature {
 
 	
+	@Field
 	private String name;
 
 	@Override

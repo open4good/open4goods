@@ -15,12 +15,14 @@ public class AggregatedAttributes  {
 	/**
 	 * The referentiel attributes
 	 */
+	@Field
 	private Map<ReferentielKey, String> referentielAttributes = new HashMap<>();
 
 	//TODO(p3,naming) : rename
 	/**
 	 * The key is the english name, such as classified by icecat
 	 */
+	@Field( store = false, type = FieldType.Object)
 	private Map<String,AggregatedAttribute> attributes = new HashMap<>();
 
 	@Field(enabled = false, store = false, type = FieldType.Object)
@@ -92,13 +94,5 @@ public class AggregatedAttributes  {
 	public void setReferentielAttributes(Map<ReferentielKey, String> referentielAttributes) {
 		this.referentielAttributes = referentielAttributes;
 	}
-
-
-
-
-
-
-
-
 
 }
