@@ -10,25 +10,18 @@ import org.springframework.data.elasticsearch.annotations.FieldType;
 
 public class ProductTexts {
 
-	@Field(enabled = false, type = FieldType.Object)
 	private Localisable<String,String> url = new Localisable<>();
 
-	@Field(enabled = false, type = FieldType.Object)
 	private Localisable<String,String> h1Title = new Localisable<>();
 	
-	@Field(enabled = false, type = FieldType.Object)
 	private Localisable<String,String> metaDescription = new Localisable<>();
 	
-	@Field(enabled = false, type = FieldType.Object)
 	private Localisable<String,String> productMetaOpenGraphTitle = new Localisable<>();
 	
-	@Field(enabled = false, type = FieldType.Object)
 	private Localisable<String,String> productMetaOpenGraphDescription = new Localisable<>();
 	
-	@Field(enabled = false, type = FieldType.Object)
 	private Localisable<String,String> productMetaTwitterTitle = new Localisable<>();
 	
-	@Field(enabled = false, type = FieldType.Object)
 	private Localisable<String,String> productMetaTwitterDescription = new Localisable<>();
 	
 	

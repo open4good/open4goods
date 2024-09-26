@@ -4,50 +4,87 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import org.open4goods.commons.config.yml.ui.ProductI18nElements;
 import org.open4goods.commons.model.constants.ReferentielKey;
 import org.springframework.data.elasticsearch.annotations.Field;
 import org.springframework.data.elasticsearch.annotations.FieldType;
 //@JsonIgnoreProperties(ignoreUnknown = true)
 public class AggregatedAttributes  {
 
+	
+	transient Map<String,AggregatedAttribute> map;
+	
 	/**
 	 * The referentiel attributes
 	 */
-	@Field
+	@Field(enabled = false, store = false, type = FieldType.Object)
 	private Map<ReferentielKey, String> referentielAttributes = new HashMap<>();
 
 	//TODO(p3,naming) : rename
 	/**
 	 * The key is the english name, such as classified by icecat
 	 */
-	@Field( store = false, type = FieldType.Object)
-	private Map<String,AggregatedAttribute> attributes = new HashMap<>();
+	
+//	@Field( store = false, type = FieldType.Object)
+//	private Map<String,AggregatedAttribute> attributes = new HashMap<>();
+//
+//	@Field(enabled = false, store = false, type = FieldType.Object)
+//	private Set<AggregatedAttribute> unmatchedAttributes = new HashSet<>();
 
-	@Field(enabled = false, store = false, type = FieldType.Object)
-	private Set<AggregatedAttribute> unmatchedAttributes = new HashSet<>();
-
-	@Field(enabled = false,  store = false, type = FieldType.Object)
-	private Set<AggregatedFeature> features = new HashSet<>();
-
+	@Field(type = FieldType.Nested)
+	private Set<AggregatedAttribute> attrs = new HashSet<>();
+	
 	@Override
 	public String toString() {
-		return "ref:"+referentielAttributes.size()+ " , agg:"+attributes.size() +" , unmaped:"+unmatchedAttributes.size() +" , features:"+features.size();
+		return "ref:"+referentielAttributes.size()+ " , agg:"+attrs.size();
 	}
 	
-	public int count() {
-		return referentielAttributes.size() + attributes.size() + unmatchedAttributes.size() + features.size();
+	
+
+	/**
+	 * 
+	 * @return
+	 */
+	public long countMatched() {
+		
+		return attrs.stream().filter(e->e.getIcecatTaxonomyIds().size() >0).count();
 	}
 	
 
+
+	/**
+	 * 
+	 * @return a map version of attributes, with attribute name as key. The map is internally cached for optimisation
+	 */
+	public Map<String, AggregatedAttribute> toMap() {
+		if (null == map) {
+			map = attrs.stream().collect(Collectors.toMap(AggregatedAttribute::getName, Function.identity()));
+		}
+		return map;
+	}
+
+	
+	/**
+	 * Special trick on the setter : We invalidate the local cache
+	 * @param attrs
+	 */
+	public void setAttrs(Set<AggregatedAttribute> attrs) {
+		this.map = null;
+		this.attrs = attrs;
+	}
+
+	
+	
 	// TODO : performance
 	public AggregatedAttribute attributeByFeatureId(Integer featureId) {
 		if (null == featureId) {
 			return null;
 		}
 		
-		AggregatedAttribute ret = unmatchedAttributes.stream().filter(a -> a.getIcecatTaxonomyIds().contains(featureId)).findFirst()
+		AggregatedAttribute ret = attrs.stream().filter(a -> a.getIcecatTaxonomyIds().contains(featureId)).findFirst()
 				.orElse(null);
 				return ret;
 	}
@@ -64,28 +101,22 @@ public class AggregatedAttributes  {
 				));
 	}
 
-
-	public Map<String, AggregatedAttribute> getAttributes() {
-		return attributes;
-	}
-	public void setAttributes(Map<String, AggregatedAttribute> aggregatedAttributes) {
-		this.attributes = aggregatedAttributes;
-	}
-	public Set<AggregatedFeature> getFeatures() {
-		return features;
-	}
-
-	public void setFeatures(Set<AggregatedFeature> features) {
-		this.features = features;
-	}
-
-	public Set<AggregatedAttribute> getUnmatchedAttributes() {
-		return unmatchedAttributes;
-	}
-
-	public void setUnmatchedAttributes(Set<AggregatedAttribute> unmapedAttributes) {
-		this.unmatchedAttributes = unmapedAttributes;
-	}
+//
+//	public Map<String, AggregatedAttribute> getAttributes() {
+//		return attributes;
+//	}
+//	public void setAttributes(Map<String, AggregatedAttribute> aggregatedAttributes) {
+//		this.attributes = aggregatedAttributes;
+//	}
+//
+//
+//	public Set<AggregatedAttribute> getUnmatchedAttributes() {
+//		return unmatchedAttributes;
+//	}
+//
+//	public void setUnmatchedAttributes(Set<AggregatedAttribute> unmapedAttributes) {
+//		this.unmatchedAttributes = unmapedAttributes;
+//	}
 
 	public Map<ReferentielKey, String> getReferentielAttributes() {
 		return referentielAttributes;
@@ -94,5 +125,16 @@ public class AggregatedAttributes  {
 	public void setReferentielAttributes(Map<ReferentielKey, String> referentielAttributes) {
 		this.referentielAttributes = referentielAttributes;
 	}
+
+	public Set<AggregatedAttribute> getAttrs() {
+		return attrs;
+	}
+
+
+
+
+
+
+	
 
 }

@@ -13,10 +13,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.stream.Collectors;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.open4goods.commons.config.yml.IcecatConfiguration;
 import org.open4goods.commons.config.yml.ui.VerticalConfig;
 import org.open4goods.commons.exceptions.TechnicalException;
@@ -763,6 +763,42 @@ public class IcecatService {
 		
 		return ret;
 		
+	}
+
+
+	/**
+	 * Resolve the icecat features id, and apply the english name if an unconflicted match is found.
+	 * The resolution is operated on the vertical matching features id if set, on all features id if not set 
+	 * @param name
+	 * @return
+	 */
+	public String getOriginalEnglishName(String name, VerticalConfig vc) {
+		
+		Set<Integer> featuresId = resolveFeatureName(name);
+		
+		if (featuresId == null) {
+			LOGGER.warn("No icecat name found for {}",name);
+			return name;
+		}
+		
+		if (vc != null) {
+			featuresId.retainAll(featuresId(vc));
+			if (featuresId.size() == 0) {
+				LOGGER.warn("No icecat featureID for {}, after filtering on id's for vertical {}",name, vc);
+				return name;
+			}
+		}
+	
+	 if (featuresId.size() ==1) {
+			String ret = getFeatureName(featuresId.stream().findFirst().orElse(null), "en");
+			LOGGER.info("Resolved feature name : {}->{}",name, ret);
+			return ret;
+			
+		} else {
+			Set<String> attrNames = featuresId.stream().map(e-> e + ":"+getFeatureName(e, "en")).collect(Collectors.toSet());
+			LOGGER.warn("Conflict ! attr {} can be resolved to {}", name, attrNames);
+			return name;
+		}		
 	}
 	
 	

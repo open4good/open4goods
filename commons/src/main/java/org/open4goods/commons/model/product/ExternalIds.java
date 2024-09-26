@@ -10,26 +10,22 @@ public class ExternalIds {
 	/**
 	 * The amazon identifier
 	 */
-	@Field
 	private String asin;
 	
 	/**
 	 * The icecat identifier
 	 */
-	@Field
 	private String icecat;
 	
 	
 	/**
 	 * Known mpn's
 	 */
-	@Field
 	private Set<String> mpn = new HashSet<>();
 	
 	/**
 	 * Known sku's
 	 */
-	@Field
 	private Set<String> sku = new HashSet<>();
 
 	public String getAsin() {

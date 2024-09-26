@@ -15,10 +15,7 @@ import org.open4goods.commons.config.yml.ui.VerticalConfig;
 import org.open4goods.commons.exceptions.ResourceNotFoundException;
 import org.open4goods.commons.model.constants.CacheConstants;
 import org.open4goods.commons.model.product.Product;
-import org.open4goods.commons.model.product.VerticalizedProduct;
-import org.open4goods.commons.services.VerticalsRepositoryService;
 import org.open4goods.commons.store.repository.ProductIndexationWorker;
-import org.open4goods.commons.store.repository.VerticalizedProductIndexationWorker;
 import org.open4goods.commons.store.repository.redis.RedisProductRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -70,7 +67,6 @@ public class ProductRepository {
 
 	private @Autowired RedisProductRepository redisRepository;
 //	
-	private @Autowired VerticalsRepositoryService verticalRepository;
 	
 
 	public ProductRepository() {
@@ -282,7 +278,6 @@ public class ProductRepository {
 
 		try {
 			productQueue.put(p);
-			verticalRepository.queueForVerticalisation(p);
 		} catch (Exception e) {
 			logger.error("Cannot enqueue product {}",p,e);			
 		}
@@ -321,7 +316,6 @@ public class ProductRepository {
 			
 			try {
 				productQueue.put(e) ;
-				verticalRepository.queueForVerticalisation(e);
 			} catch (Exception e1) {
 				logger.error("!!!! exception, cannot enqueue product {}",e);
 			}
@@ -351,10 +345,6 @@ public class ProductRepository {
 	public void storeNoCache(Collection<Product> data) {
 		logger.info("Indexing without caching {} products", data.size());
 
-		data.forEach(e-> {
-			verticalRepository.queueForVerticalisation(e);
-		});
-
 		elasticsearchTemplate.save(data, current_index);
 
 	}
@@ -365,7 +355,6 @@ public class ProductRepository {
 
 //		executor.submit(() -> {
 			elasticsearchTemplate.save(data, current_index);
-			verticalRepository.queueForVerticalisation(data);
 //		});
 
 //		executor.submit(() -> {

@@ -149,7 +149,7 @@ public class NamesAggregationService extends AbstractAggregationService {
 				sb.append(separator).append(IdHelper.azCharAndDigits(refVal).toLowerCase());
 			} else {
 				// Checking in aggregated attrs
-				AggregatedAttribute attrValue = data.getAttributes().getAttributes().get(attr);
+				AggregatedAttribute attrValue = data.getAttributes().toMap().get(attr);
 				if (null != attrValue) {
 					sb.append(separator).append(attrValue.getValue().toLowerCase());
 				} 

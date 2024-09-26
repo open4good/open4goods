@@ -51,6 +51,8 @@ import org.springframework.data.redis.core.RedisHash;
 @Setting(settingPath = "/elastic-product-settings.json")
 public class Product implements Standardisable {
 
+	private static final String ECOSCORE_NAME = "ECOSCORE";
+
 	private final static Logger logger = LoggerFactory.getLogger(Product.class);
 
 	public static final String DEFAULT_REPO = "products";
@@ -75,14 +77,14 @@ public class Product implements Standardisable {
 	/**
 	 * The date this item has been created
 	 */
-	@Field(index = false, store = false, type = FieldType.Date)
+	@Field(index = true, store = false, type = FieldType.Date)
 	private long creationDate;
 
 	/**
 	 * The last date this product has changed (new data, price change, new comment,
 	 * * so on...)
 	 */
-	@Field(type = FieldType.Date)
+	@Field(index = true, store = false, type = FieldType.Date)
 	private long lastChange;
 
 	/** The associated vertical, if any **/
@@ -107,16 +109,12 @@ public class Product implements Standardisable {
 	private Map<String, Set<String>> altBrands = new HashMap<>();
 
 	/** Namings informations for this product **/
-	// TODO : move the offernames inside
-	// TODO : Could be a better name
+	// NOTE : Could be a better name
 	@Field(enabled = false, store = false, type = FieldType.Object)
 	private ProductTexts names = new ProductTexts();
 
-	// @Field(index = false, store = false, type = FieldType.Object)
-	// /** The comments, aggregated and nlp processed **/
-	// private AggregatedComments comments = new AggregatedComments();
 
-	@Field(enabled = false, store = false, type = FieldType.Object)
+	@Field(enabled = true, store = false, index=false, type = FieldType.Object)
 	private AggregatedAttributes attributes = new AggregatedAttributes();
 
 	@Field(enabled = false, store = false, type = FieldType.Object)
@@ -175,12 +173,6 @@ public class Product implements Standardisable {
 	/** number of commercial offers **/
 	@Field(index = true, store = false, type = FieldType.Integer)
 	private Integer offersCount = 0;
-
-	// /**
-	// * Informations about participant datas and aggegation process
-	// */
-	// @Field(index = false, store = false, type = FieldType.Object)
-	// private AggregationResult aggregationResult = new AggregationResult();
 
 	public Product() {
 		super();
@@ -241,8 +233,7 @@ public class Product implements Standardisable {
 
 	public List<Score> realScores() {
 		List<Score> ret = scores.values().stream().filter(e -> !e.getVirtual())
-				// TODO : Const
-				.filter(e -> !e.getName().equals("ECOSCORE")).sorted((o1, o2) -> o2.getRelativ().getValue().compareTo(o1.getRelativ().getValue())).toList();
+				.filter(e -> !e.getName().equals(ECOSCORE_NAME)).sorted((o1, o2) -> o2.getRelativ().getValue().compareTo(o1.getRelativ().getValue())).toList();
 
 		return ret;
 	}
@@ -252,8 +243,7 @@ public class Product implements Standardisable {
 	 * @return the ecoscore or null
 	 */
 	public Score ecoscore() {
-		// TODO : const
-		return scores.get("ECOSCORE");
+		return scores.get(ECOSCORE_NAME);
 	}
 
 	public String caracteristics() {
@@ -264,7 +254,7 @@ public class Product implements Standardisable {
 			sb.append(" - ").append(attr.getKey().toString()).append(" : ").append(attr.getValue()).append("\n");
 		}
 
-		for (AggregatedAttribute attr : attributes.getUnmatchedAttributes()) {
+		for (AggregatedAttribute attr : attributes.getAttrs()) {
 
 			if (attr.getIcecatTaxonomyIds().size() > 0) {
 				sb.append(" - ").append(attr.getName().toString()).append(" : ").append(attr.getValue()).append("\n");
@@ -308,11 +298,9 @@ public class Product implements Standardisable {
 	}
 
 	public List<Resource> unprocessedimages() {
-		// TODO Auto-generated method stub
 		return resources.stream().filter(e -> e.getUrl() != null).filter(e -> e.getUrl().endsWith(".jpg") || e.getUrl().endsWith(".png") || e.getUrl().endsWith(".jpeg")).toList();
 	}
 
-	// TODO : Should be outsided / cached
 	public List<Resource> images() {
 		// Filter resources of type IMAGE
 		List<Resource> images = resources.stream().filter(e -> e.getResourceType() != null && e.getResourceType().equals(ResourceType.IMAGE)).toList();
@@ -334,7 +322,6 @@ public class Product implements Standardisable {
 		// Then, add the other images by groups
 		otherGroupsId.forEach(otherGroupId -> ret.add(bestByGroup(images, otherGroupId)));
 
-		// TODO : perf : null check Could be avoided
 		return ret.stream().filter(e -> null != e).toList();
 	}
 
@@ -360,37 +347,6 @@ public class Product implements Standardisable {
 		return price == null ? null : price.getMinPrice();
 	}
 
-	// /**
-	// * Return ratings having specific tags
-	// *
-	// * @param tag
-	// * @return
-	// */
-	// public Set<SourcedRating> ratingsByTag(final String tag) {
-	//
-	// if (null == tag || null == ratings) {
-	// return null;
-	// }
-	//
-	// return ratings.stream().filter(e ->
-	// e.getTags().contains(tag)).collect(Collectors.toSet());
-	// }
-
-	// /**
-	// * Return a rating having specific tags
-	// *
-	// * @param tag
-	// * @return
-	// */
-	// public SourcedRating ratingByTag(final String tag) {
-	//
-	// if (null == tag || null == ratings) {
-	// return null;
-	// }
-	//
-	// return ratings.stream().filter(e ->
-	// e.getTags().contains(tag)).findAny().orElse(null);
-	// }
 
 	/**
 	 *
@@ -551,7 +507,7 @@ public class Product implements Standardisable {
 	// }
 
 	/**
-	 * TODO : merge with the one on price()
+	 * TODO(p3,design) : merge with the one on price()
 	 * 
 	 * @return a localised formated duration of when the product was last indexed
 	 */
@@ -588,35 +544,6 @@ public class Product implements Standardisable {
 		return date;
 	}
 
-//	/**
-//	 * Initialize a dummy DataFragment from this product, (used to "touch" products to replay batch scenarios with realtimeAggregationService)
-//	 * @return
-//	 */
-//	public DataFragment getFragment() {
-//		DataFragment ret = new DataFragment();
-//		ret.setLastIndexationDate(lastChange);
-//		ret.setCreationDate(creationDate);
-//		ret.setReferentielAttributes(attributes.getReferentielAttributes());
-//		
-//		return ret;
-//		
-//	}
-
-	/**
-	 * Add an image to this product
-	 * 
-	 * @param url
-	 */
-//	public void addImage(String url, String tag) {
-//		if (!StringUtils.isEmpty(url)) {
-//			Resource r = new Resource(url);
-//			r.addTag(tag);
-// TODO : Check incidence			
-//			resources.remove(r);
-
-//			resources.add(r);			
-//		}
-//	}
 
 	public void addResource(final Resource resource) throws ValidationException {
 
@@ -665,12 +592,12 @@ public class Product implements Standardisable {
 
 		String model = StringUtils.normalizeSpace(value).toUpperCase();
 
-		// TODO : Eviction size from conf
+		// TODO(conf,p3) : Eviction size from conf
 		if (StringUtils.isEmpty(value) || value.length() < 3) {
 			return;
 		}
 		// Splitting on conventionnal suffixes (/ - .)
-		// TODO : Const / conf
+		// TODO(conf,p3) : Const / conf
 		String[] frags = model.split("/|\\|.|-");
 
 		altModels.add(value);
@@ -872,6 +799,7 @@ public class Product implements Standardisable {
 	public void setDatasourceNames(Set<String> datasourceNames) {
 		this.datasourceNames = datasourceNames;
 	}
+
 
 	public ExternalIds getExternalIds() {
 		return externalIds;

@@ -302,14 +302,14 @@ public class CsvEnrichmentController {
 
 				case EnrichmentFacet.RAW_ATTRIBUTES:
 					// TODO : I18n
-					Map<String, String> raw = p.getAttributes().getUnmatchedAttributes().stream().collect(HashMap::new, (m, a) -> m.put(a.getName(), a.getValue()), HashMap::putAll);
+					Map<String, String> raw = p.getAttributes().getAttrs().stream().collect(HashMap::new, (m, a) -> m.put(a.getName(), a.getValue()), HashMap::putAll);
 					enriched.put(key, serialisationService.toJson(raw));
 					break;
 					
 				case EnrichmentFacet.CLASSIFIED_ATTRIBUTES:
 //					// TODO : I18n
-					Map<String, String> attrs = p.getAttributes().getAttributes().entrySet().stream()
-							.collect(HashMap::new, (m, a) -> m.put(a.getKey(), a.getValue().getValue()), HashMap::putAll);
+					Map<String, String> attrs = p.getAttributes().getAttrs().stream()
+							.collect(HashMap::new, (m, a) -> m.put(a.getName(), a.getValue()), HashMap::putAll);
 					enriched.put(key, serialisationService.toJson(attrs));
 					break;
 

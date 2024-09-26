@@ -42,7 +42,7 @@ public class AggregatedAttribute implements IAttribute {
 	/**
 	 * The icecat matched taxonomies, by it's name
 	 */
-	@Field(index = false,  type = FieldType.Integer)
+	@Field(index = false,  store = false, type = FieldType.Integer)
 	private Set<Integer> icecatTaxonomyIds = new HashSet<>();
 	
 	

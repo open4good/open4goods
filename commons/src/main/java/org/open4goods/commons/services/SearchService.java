@@ -144,7 +144,7 @@ public class SearchService {
 
 		VerticalSearchResponse vsr = new VerticalSearchResponse();
 
-		List<AttributeConfig> customAttrFilters = vertical.verticalFilters().stream().filter(Objects::nonNull).toList();
+//		List<AttributeConfig> customAttrFilters = vertical.verticalFilters().stream().filter(Objects::nonNull).toList();
 
 		Criteria criterias = new Criteria("vertical").is(vertical.getId())
 				.and(aggregatedDataRepository.getRecentProductsWithPriceQuery())
@@ -231,16 +231,16 @@ public class SearchService {
 			} else if (request.getSortOrder().equalsIgnoreCase("ASC") ){
 				esQuery = esQuery.withSort(Sort.by(request.getSortField()).ascending() );
 			} else {
-				throw new RuntimeException("implement");
+				throw new RuntimeException("TODO : implement");
 			}
 		}
 
-		// Adding custom attributes terms filters aggregations
-		for (AttributeConfig attrConfig : customAttrFilters) {
-			esQuery = esQuery
-					// TODO : size from conf
-					.withAggregation(attrConfig.getKey(), 	Aggregation.of(a -> a.terms(ta -> ta.field("attributes.aggregatedAttributes."+attrConfig.getKey()+".value.keyword").missing(OTHER_BUCKET).size(100)  ))	);
-		}
+//		// Adding custom attributes terms filters aggregations
+//		for (AttributeConfig attrConfig : customAttrFilters) {
+//			esQuery = esQuery
+//					// TODO : size from conf
+//					.withAggregation(attrConfig.getKey(), 	Aggregation.of(a -> a.terms(ta -> ta.field("attributes.aggregatedAttributes."+attrConfig.getKey()+".value.keyword").missing(OTHER_BUCKET).size(100)  ))	);
+//		}
 		
 		
 		
@@ -341,30 +341,30 @@ public class SearchService {
 		//////////////
 
 
-		//		// Handling custom filters aggregations
-		for (AttributeConfig attrConfig : customAttrFilters) {
-			StringTermsAggregate agg  =  aggregations.get(attrConfig.getKey()).aggregation().getAggregate().sterms() ;
-			vsr.getCustomFilters().put(attrConfig, new ArrayList<>());
-			for (StringTermsBucket bucket : agg.buckets().array()) {
-
-				if (!bucket.key().stringValue().equals(OTHER_BUCKET)) {
-					vsr.getCustomFilters().get(attrConfig).add (new VerticalFilterTerm(bucket.key().stringValue(), bucket.docCount()));
-				}
-			}
-
-			if (attrConfig.getAttributeValuesOrdering().equals(org.open4goods.commons.config.yml.attributes.Order.COUNT ) ) {
-				vsr.getCustomFilters().get(attrConfig).sort((o1, o2) -> o2.getCount().compareTo(o1.getCount()));
-			}
-			else {
-				vsr.getCustomFilters().get(attrConfig).sort(Comparator.comparing(VerticalFilterTerm::getText));
-			}
-
-			// TODO : add missing
-			//			// Adding others
-			//			if (null != agg.getBucketByKey(OTHER_BUCKET)) {
-			//				vsr.getCustomFilters().get(attrConfig).add ( new VerticalFilterTerm(OTHER_BUCKET,agg.getBucketByKey(OTHER_BUCKET).getDocCount()));
-			//			}
-		}
+//		//		// Handling custom filters aggregations
+//		for (AttributeConfig attrConfig : customAttrFilters) {
+//			StringTermsAggregate agg  =  aggregations.get(attrConfig.getKey()).aggregation().getAggregate().sterms() ;
+//			vsr.getCustomFilters().put(attrConfig, new ArrayList<>());
+//			for (StringTermsBucket bucket : agg.buckets().array()) {
+//
+//				if (!bucket.key().stringValue().equals(OTHER_BUCKET)) {
+//					vsr.getCustomFilters().get(attrConfig).add (new VerticalFilterTerm(bucket.key().stringValue(), bucket.docCount()));
+//				}
+//			}
+//
+//			if (attrConfig.getAttributeValuesOrdering().equals(org.open4goods.commons.config.yml.attributes.Order.COUNT ) ) {
+//				vsr.getCustomFilters().get(attrConfig).sort((o1, o2) -> o2.getCount().compareTo(o1.getCount()));
+//			}
+//			else {
+//				vsr.getCustomFilters().get(attrConfig).sort(Comparator.comparing(VerticalFilterTerm::getText));
+//			}
+//
+//			// TODO : add missing
+//			//			// Adding others
+//			//			if (null != agg.getBucketByKey(OTHER_BUCKET)) {
+//			//				vsr.getCustomFilters().get(attrConfig).add ( new VerticalFilterTerm(OTHER_BUCKET,agg.getBucketByKey(OTHER_BUCKET).getDocCount()));
+//			//			}
+//		}
 
 		//		// Setting the response
 		vsr.setTotalResults(results.getTotalHits());

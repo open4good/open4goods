@@ -50,15 +50,15 @@ public class TaxonomyRealTimeAggregationService extends AbstractAggregationServi
 		// Setting google taxonomy
 		////////////////////////////
 		data.setGoogleTaxonomyId(null);
-		if (data.getCategories().size() != 0) {
-			Integer taxonomy =   googleTaxonomy(data);
-			if (null != taxonomy) {			
-				data.setGoogleTaxonomyId(taxonomy);
-				dedicatedLogger.info("Detected taxonomy {} for categories : {}", taxonomy, data.getCategories());
-			} else {
-				dedicatedLogger.info("No taxonomy found for categories : {}", data.getCategories());
-			}
-		}
+//		if (data.getCategories().size() != 0) {
+//			Integer taxonomy =   googleTaxonomy(data);
+//			if (null != taxonomy) {			
+//				data.setGoogleTaxonomyId(taxonomy);
+//				dedicatedLogger.info("Detected taxonomy {} for categories : {}", taxonomy, data.getCategories());
+//			} else {
+//				dedicatedLogger.info("No taxonomy found for categories : {}", data.getCategories());
+//			}
+//		}
 
 		
 		
@@ -104,38 +104,38 @@ public class TaxonomyRealTimeAggregationService extends AbstractAggregationServi
 	}
 	
 	
-	/**
-	 * Try to detect the google taxonomy id
-	 * @param input
-	 * @return 
-	 */
-	private Integer googleTaxonomy(final Product input) {
-		Integer taxonomyId = null;
-		
-		List<Integer> taxons =new ArrayList<>();
-
-		input.getAttributes().getUnmatchedAttributes().forEach(a -> {
-			String i = a.getName();
-			
-			if (i.contains("CATEGORY")) {
-				Integer t = taxonomyService.resolve(a.getValue());
-				if (null != t) {
-					taxons.add(t);					
-				}
-			}			
-		});
-		
-		if (taxons.size() == 1) {
-			taxonomyId = taxons.stream().findAny().orElse(null);
-		} else if (taxons.size() > 1) {
-			// TODO : The language (should not be needed), will bug when other languages
-			taxonomyId = taxonomyService.selectDeepest("fr", taxons);
-		}
-		
-		return taxonomyId;
-	}
-
-	
+//	/**
+//	 * Try to detect the google taxonomy id
+//	 * @param input
+//	 * @return 
+//	 */
+//	private Integer googleTaxonomy(final Product input) {
+//		Integer taxonomyId = null;
+//		
+//		List<Integer> taxons =new ArrayList<>();
+//
+//		input.getAttributes().getUnmatchedAttributes().forEach(a -> {
+//			String i = a.getName();
+//			
+//			if (i.contains("CATEGORY")) {
+//				Integer t = taxonomyService.resolve(a.getValue());
+//				if (null != t) {
+//					taxons.add(t);					
+//				}
+//			}			
+//		});
+//		
+//		if (taxons.size() == 1) {
+//			taxonomyId = taxons.stream().findAny().orElse(null);
+//		} else if (taxons.size() > 1) {
+//			// TODO : The language (should not be needed), will bug when other languages
+//			taxonomyId = taxonomyService.selectDeepest("fr", taxons);
+//		}
+//		
+//		return taxonomyId;
+//	}
+//
+//	
 
 
 }

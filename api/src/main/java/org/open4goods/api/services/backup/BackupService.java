@@ -12,6 +12,7 @@ import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
@@ -24,6 +25,7 @@ import java.util.zip.GZIPInputStream;
 import org.apache.commons.io.FileUtils;
 import org.open4goods.api.config.yml.BackupConfig;
 import org.open4goods.commons.dao.ProductRepository;
+import org.open4goods.commons.model.product.AggregatedAttribute;
 import org.open4goods.commons.model.product.Product;
 import org.open4goods.commons.services.SerialisationService;
 import org.open4goods.xwiki.services.XWikiReadService;
@@ -218,13 +220,22 @@ public class BackupService implements HealthIndicator {
 	}
 	
 	/**
+	 * TODO(p1,gof) : remove once migration done
 	 * This method is used to convert data in migration scenario
 	 * @param original
 	 * @return
 	 */
 	private Product translateImport(Product original) {
 		
+//		original.getAttributes().getAttrs().addAll(original.getAttributes().getUnmatchedAttributes());
+//		original.getAttributes().getAttrs().addAll(original.getAttributes().getAttributes().values());
+//		
+//		original.getAttributes().setAttributes(new HashMap<String, AggregatedAttribute>());
+//		original.getAttributes().setUnmatchedAttributes(new HashSet<AggregatedAttribute>());
 		
+		original.getAttributes().getAttrs().stream().forEach(e -> {
+			e.setValue(e.bestValue());
+		});
 		return original;
 	}
 

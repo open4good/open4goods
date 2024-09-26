@@ -1,11 +1,8 @@
 package org.open4goods.api.services.aggregation.services.realtime;
 
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -25,7 +22,6 @@ import org.open4goods.commons.model.attribute.Attribute;
 import org.open4goods.commons.model.data.DataFragment;
 import org.open4goods.commons.model.data.Resource;
 import org.open4goods.commons.model.product.AggregatedAttribute;
-import org.open4goods.commons.model.product.AggregatedFeature;
 import org.open4goods.commons.model.product.Product;
 import org.open4goods.commons.services.BrandService;
 import org.open4goods.commons.services.IcecatService;
@@ -55,35 +51,39 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 		
 		//////////////////////////////////////////
 		// Cleaning attributes names (normalisation)		
-		// TODO(p3, optimisation) : Could remove once full sanitisation batch, all new attribute names are clean
 		//////////////////////////////////////////
 		Set<AggregatedAttribute> attrs = new HashSet<AggregatedAttribute>();
-		data.getAttributes().getUnmatchedAttributes().stream().forEach(a -> {
+		data.getAttributes().getAttrs().stream().forEach(a -> {
+			
+			// TODO(p3, optimisation) : Could remove once full sanitisation batch, all new attribute names are clean through the addAttribute method
+			String name = IdHelper.normalizeAttributeName(a.getName());
+
+			name=featureService.getOriginalEnglishName(name,vConf);
+			
 			// Dedup is ensured with the set and hashcode / equals override
-			a.setName(IdHelper.normalizeAttributeName(a.getName()));
+			a.setName(name);
 			attrs.add(a);
 		});
-		data.getAttributes().setUnmatchedAttributes(attrs);
+		data.getAttributes().setAttrs(attrs);
 		
 		
 		//////////////////////////////////////////////////////////////////////////		
 		// Checking if all mandatory attributes are present for this product
 		//////////////////////////////////////////////////////////////////////////
-		if (!data.getAttributes().getAttributes().keySet().containsAll(vConf.getAttributesConfig().getMandatory())) {
+		if (!data.getAttributes().toMap().keySet().containsAll(vConf.getAttributesConfig().getMandatory())) {
 			// Missing attributes.
 			
 			Set<String> missing = vConf.getAttributesConfig().getMandatory();
-			missing.removeAll(data.getAttributes().getAttributes().keySet());
+			missing.removeAll(data.getAttributes().toMap().keySet());
 			
 			dedicatedLogger.warn("{} excluded from {}. Missing mandatory attributes : {}",  data.getId(), vConf.getId(), missing);
 			data.setExcluded(true);
 		} else {
 			data.setExcluded(false);			
 		}
-
 		
 		// Attributing taxomy to attributes
-		data.getAttributes().getUnmatchedAttributes().forEach(a -> {
+		data.getAttributes().getAttrs().forEach(a -> {
 			Set<Integer> icecatTaxonomyIds = featureService.resolveFeatureName(a.getName());
 			if (null != icecatTaxonomyIds) {
 				dedicatedLogger.info("Found icecat taxonomy for {} : {}", a.getName(), icecatTaxonomyIds);
@@ -91,17 +91,6 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 				a.setNumericValue(null);
 			}
 		});
-		
-		// Post computing attr value from best value. Should not occcurs, but due to RDO, sometimes attribute value is not computed
-		data.getAttributes().getAttributes().entrySet().stream().forEach(a -> {
-			if (null == a.getValue().getValue()) {
-				a.getValue().setValue(a.getValue().bestValue());
-			}
-			
-			
-		});
-		
-		
 		
 		
 	}
@@ -141,81 +130,71 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 			//all.addAll(product.getAttributes().getUnmapedAttributes().stream().map(e -> new Attribute(e.getName(),e.getValue(),e.getLanguage())).toList());
 			
 			
-			for (Attribute attr :  all) {
-				
-				// Checking if a potential AggregatedAttribute
-				Attribute translated = attributesConfig.translateAttribute(attr,  dataFragment.getDatasourceName());
-				
-				// We have a "raw" attribute that matches a aggregationconfig								
-				
-				if (ResourceHelper.isImage(attr.getValue())) {
-					Resource r = new Resource(attr.getValue());
-					r.getTags().add(attr.getName());
-					product.addResource(r);
-					toRemoveFromUnmatched.add(attr.getName());
-					continue;
-				}
-				
-				if (null != translated) {
-					
-					try {
-						AttributeConfig attrConfig = attributesConfig.getConfigFor(translated);
-						
-						// Applying parsing rule
-						translated = parseAttributeValue(translated, attrConfig);
-						
-						if (translated.getRawValue() == null) {
-							continue;
-						}
-
-						AggregatedAttribute agg = product.getAttributes().getAttributes().get(attr.getName());
-						
-						
-						if (null == agg) {
-							// A first time match
-							agg = new AggregatedAttribute();
-							agg.setName(attr.getName());
-						} 
-							
-						
-						
-						toRemoveFromUnmatched.add(translated.getName());
-					
-						
-						
-						agg.addAttribute(translated, dataFragment.getDatasourceName(), translated.getValue());
-						
-						// Replacing new AggAttribute in product
-						product.getAttributes().getAttributes().put(agg.getName(), agg);
-					} catch (Exception e) {
-
-						dedicatedLogger.error("Attribute parsing fail for matched attribute {}", translated);
-					}				
-				}
-			}
+			
+			
+			// TODO(p1,design) : Review, we disable the nativ attribute translation in favor of icecat full taxonomies 
+			
+//			for (Attribute attr :  all) {
+//				
+//				// Checking if a potential AggregatedAttribute
+//				Attribute translated = attributesConfig.translateAttribute(attr,  dataFragment.getDatasourceName());
+//				
+//				// We have a "raw" attribute that matches an aggregationconfig								
+//				
+//				if (ResourceHelper.isImage(attr.getValue())) {
+//					Resource r = new Resource(attr.getValue());
+//					r.getTags().add(attr.getName());
+//					product.addResource(r);
+//					toRemoveFromUnmatched.add(attr.getName());
+//					continue;
+//				}
+//				
+//				if (null != translated) {
+//					
+//					try {
+//						AttributeConfig attrConfig = attributesConfig.getConfigFor(translated);
+//						
+//						// Applying parsing rule
+//						translated = parseAttributeValue(translated, attrConfig);
+//						
+//						if (translated.getRawValue() == null) {
+//							continue;
+//						}
+//
+//						AggregatedAttribute agg = product.getAttributes().getAttributes().get(attr.getName());
+//						
+//						
+//						if (null == agg) {
+//							// A first time match
+//							agg = new AggregatedAttribute();
+//							agg.setName(attr.getName());
+//						} 
+//							
+//						
+//						
+//						toRemoveFromUnmatched.add(translated.getName());
+//					
+//						
+//						
+//						agg.addAttribute(translated, dataFragment.getDatasourceName(), translated.getValue());
+//						
+//						// Replacing new AggAttribute in product
+//						product.getAttributes().getAttributes().put(agg.getName(), agg);
+//					} catch (Exception e) {
+//
+//						dedicatedLogger.error("Attribute parsing fail for matched attribute {}", translated);
+//					}				
+//				}
+//			}
 
 			
 			// Checking model name from product words
 //			completeModelNames(product, dataFragment.getReferentielAttributes().get(ReferentielKey.MODEL));
 			
-			/////////////////////////////////////////
-			// EXTRACTING FEATURES 
-			/////////////////////////////////////////
-			
-			List<Attribute> matchedFeatures = dataFragment.getAttributes().stream()
-					.filter(e -> isFeatureAttribute(e, attributesConfig))
-					.collect(Collectors.toList());
-
-			toRemoveFromUnmatched.addAll(matchedFeatures.stream().map(Attribute::getName).collect(Collectors.toSet()));
-			
-
-			Collection<AggregatedFeature> af = aggregateFeatures(matchedFeatures);
-			product.getAttributes().getFeatures().addAll(af);
-			
-
+		
 			
 			//////////////////////////
-			// Aggregating unmatched attributes
+			// Aggregating attributes
 			///////////////////////////
 			
 			for (Attribute attr : dataFragment.getAttributes()) {
@@ -224,29 +203,33 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 //					continue;
 //				}
 				
-				// TODO : remove from a config list
+				// Getting the original attr name if possible
+				String translatedName = featureService.getOriginalEnglishName(attr.getName(), vConf);
 				
-				AggregatedAttribute agg = product.getAttributes().getUnmatchedAttributes().stream().filter(e->e.getName().equals(attr.getName())).findAny().orElse(null);
+				// Getting existing attribute if any
+				
+				AggregatedAttribute agg = product.getAttributes().getAttrs().stream().filter(e->e.getName().equals(translatedName)).findAny().orElse(null);
 				
 				if (null == agg) {
 					// A first time match
 					agg = new AggregatedAttribute();
-					agg.setName(attr.getName());
+					agg.setName(translatedName);
 				} 
+				
 				agg.addAttribute(attr, dataFragment.getDatasourceName(), attr.getValue());
 				
-				product.getAttributes().getUnmatchedAttributes().add(agg);			
+				product.getAttributes().getAttrs().add(agg);			
 			}
 
 			
-			// Removing 
-			product.getAttributes().setUnmatchedAttributes(product.getAttributes().getUnmatchedAttributes().stream()
-					// TODO : Should be from path
-					// TODO : apply from sanitisation
-					.filter(e -> !e.getName().contains("CATEGORY")) 
-//					.filter(e -> !toRemoveFromUnmatched.contains(e.getName())) 
-					.collect(Collectors.toSet()));
-			
+//			// Removing 
+//			product.getAttributes().setUnmatchedAttributes(product.getAttributes().getUnmatchedAttributes().stream()
+//					// TODO : Should be from path
+//					// TODO : apply from sanitisation
+//					.filter(e -> !e.getName().contains("CATEGORY")) 
+////					.filter(e -> !toRemoveFromUnmatched.contains(e.getName())) 
+//					.collect(Collectors.toSet()));
+//			
 			
 			
 			// TODO : Removing matchlist again to handle remove of old attributes in case of configuration change
@@ -309,38 +292,6 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 
 
 
-
-	/**
-	 *
-	 * @param matchedFeatures
-	 * @param unmatchedFeatures
-	 * @return
-	 */
-	private Collection<AggregatedFeature> aggregateFeatures(List<Attribute> matchedFeatures) {
-
-		Map<String,AggregatedFeature> ret = new HashMap<String, AggregatedFeature>();
-
-		// Adding matched attributes features
-		for (Attribute a : matchedFeatures) {
-			if (! ret.containsKey(a.getName())) {
-				ret.put(a.getName(), new AggregatedFeature(a.getName()));
-			}
-			//			ret.get(a.getName()).getDatasources().add(a.getDatasourceName());
-		}
-
-		
-
-		return ret.values();
-	}
-
-	/**
-	 * Returns if an attribute is a feature, by comparing "yes" values from config
-	 * @param e
-	 * @return
-	 */
-	private boolean isFeatureAttribute(Attribute e, AttributesConfig attributesConfig) {
-		return e.getRawValue() == null ? false :  attributesConfig.getFeaturedValues().contains(e.getRawValue().trim().toUpperCase());
-	}
 
 	
 

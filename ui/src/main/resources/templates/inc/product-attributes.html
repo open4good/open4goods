@@ -1,6 +1,6 @@
-<div class="table-responsive table-caracteristics-fs mt-4" th:if="${product.attributes.aggregatedAttributes.size()} > 0">
+<div class="table-responsive table-caracteristics-fs mt-4" th:if="${product.attributes.attrs.size()} > 0">
 	<table class="table">
-		<th:block th:each="attribute : ${product.attributes.aggregatedAttributes.values()}">
+		<th:block th:each="attribute : ${product.attributes.attrs}">
 			<tr>
 				<td class="align-middle" th:text="${helper.attributeName(attribute.name)}"></td>
 				
