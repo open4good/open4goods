@@ -130,6 +130,20 @@ public class ProductRepository {
 	            .map(SearchHit::getContent);
 	}
 
+	
+
+	public Stream<Product> exportAll(String vertical) {
+		
+		Criteria c = new Criteria("vertical").is(vertical);
+
+		final NativeQuery initialQuery = new NativeQueryBuilder()
+				.withQuery(new CriteriaQuery(c)).build();
+		
+		return elasticsearchTemplate.searchForStream(initialQuery, Product.class, current_index).stream()
+				.map(SearchHit::getContent);
+	}
+
+	
 	public Stream<Product> searchInValidPrices(String query, final String indexName, int from, int to) {
 
 		Criteria c = new Criteria().expression(query).and(getRecentPriceQuery());

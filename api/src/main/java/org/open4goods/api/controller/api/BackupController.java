@@ -9,6 +9,7 @@ import org.open4goods.commons.model.constants.RolesConstants;
 import org.springframework.context.annotation.Profile;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -43,9 +44,19 @@ public class BackupController {
 		backupService.backupProducts();
 	}
 
+	@PostMapping("/backup/products/export/vertical")
+	@Operation(summary = "Launch a product backup, for specified vertical")
+	public void productsExport(@RequestParam String vertical) throws InvalidParameterException, IOException {
+		backupService.exportVertical(vertical);
+	}
+	
+		
+	
 	@PostMapping("/backup/products/import")
 	@Operation(summary = "Launch a product import")
 	public void productsImport() throws InvalidParameterException, IOException {
 		backupService.importProducts();
 	}
+	
+	
 }
