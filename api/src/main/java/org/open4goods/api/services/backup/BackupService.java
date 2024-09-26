@@ -1,11 +1,15 @@
 package org.open4goods.api.services.backup;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
@@ -19,9 +23,12 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.stream.Stream;
 import java.util.zip.GZIPInputStream;
+import java.util.zip.GZIPOutputStream;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 import org.open4goods.api.config.yml.BackupConfig;
 import org.open4goods.commons.dao.ProductRepository;
 import org.open4goods.commons.model.product.Product;
@@ -153,6 +160,57 @@ public class BackupService implements HealthIndicator {
         logger.info("Products data backup - complete");
     }
 
+	
+	public void exportVertical(String vertical) {
+	    logger.info("Exporting vertical {}", vertical);
+
+	    try {
+	        // Starting files writing threads
+	        File backupFolder = new File(backupConfig.getDataBackupFolder());
+
+	        if (backupFolder != null && backupFolder.exists() && !backupFolder.isDirectory()) {
+	            throw new Exception("is a file");
+	        } else if (backupFolder != null && !backupFolder.exists()) {
+	            if (!backupFolder.mkdirs()) {
+	                throw new IOException("Failed to create parent directories: " + backupFolder.getAbsolutePath());
+	            }
+	        }
+
+	        // Creating the folders if needed
+	        backupFolder.mkdirs();
+
+	        File destFile = new File(backupFolder.getAbsolutePath() + "/" + vertical + ".gz");
+
+	        // Try-with-resources to ensure streams are closed
+	        try (FileOutputStream fos = new FileOutputStream(destFile);
+	             GZIPOutputStream gzipOutputStream = new GZIPOutputStream(fos);
+	             BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(gzipOutputStream, StandardCharsets.UTF_8))) {
+
+	            Stream<Product> str = productRepo.exportAll(vertical);
+
+	            str.forEach(p -> {
+	                String json = serialisationService.toJson(p);
+	                try {
+	                    writer.write(json);
+	                    writer.newLine(); // Ensure each JSON object is on a new line
+	                } catch (IOException e) {
+	                    logger.error("Serialization exception", e);
+	                }
+	            });
+
+	        } catch (Exception e) {
+	            logger.error("Error while backing up data", e);
+	        }
+
+	    } catch (Exception e) {
+	        logger.error("Error while preparing for export", e);
+	    }
+
+	    logger.info("Vertical export complete : {}", vertical);
+	}
+
+	
+	
 	/**
 	 * Import product from the GZIP files
 	 * NOTE : Could increase perf by having one import thread per file
