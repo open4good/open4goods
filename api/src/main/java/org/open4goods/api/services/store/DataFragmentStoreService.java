@@ -212,11 +212,7 @@ public class DataFragmentStoreService {
 
 		} catch (final Exception e) {
 			logger.error("Error while dequeing DataFragments",e);
-		}
-
-		// Clearing queue
-		queue.clear();
-
+		}	
 	}
 
 
