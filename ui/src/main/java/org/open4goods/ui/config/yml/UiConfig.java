@@ -194,8 +194,11 @@ public class UiConfig {
 	 * Configuration for the reversements
 	 */
 	private ReversementConfig reversementConfig = new ReversementConfig();
-	
-	
+
+	/**
+	 * Configuration for Amazon Links & Tags
+	 */
+	private AmazonConfig amazonConfig = new AmazonConfig();
 
 	/**
 	 * Return the root url for a given sitelocale, with the "default" behavior
@@ -490,7 +493,8 @@ public class UiConfig {
 	public void setTeamConfig(TeamConfig teamConfig) {
 		this.teamConfig = teamConfig;
 	}
-	
-	
 
+	public AmazonConfig getAmazonConfig() { return amazonConfig; }
+
+	public void setAmazonConfig(AmazonConfig amazon) { this.amazonConfig = amazon; }
 }
