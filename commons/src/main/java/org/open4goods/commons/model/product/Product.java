@@ -46,9 +46,12 @@ import org.springframework.data.elasticsearch.annotations.Setting;
 import org.springframework.data.elasticsearch.annotations.WriteTypeHint;
 import org.springframework.data.redis.core.RedisHash;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 @Document(indexName = Product.DEFAULT_REPO, createIndex = true, writeTypeHint = WriteTypeHint.FALSE, dynamic = Dynamic.FALSE)
 @RedisHash(value = Product.DEFAULT_REPO, timeToLive = ProductRepository.VALID_UNTIL_DURATION)
 @Setting(settingPath = "/elastic-product-settings.json")
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class Product implements Standardisable {
 
 	private static final String ECOSCORE_NAME = "ECOSCORE";
@@ -108,6 +111,9 @@ public class Product implements Standardisable {
 	@Field(enabled = false, store = false, type = FieldType.Object)
 	private Map<String, Set<String>> altBrands = new HashMap<>();
 
+
+	
+	
 	/** Namings informations for this product **/
 	// NOTE : Could be a better name
 	@Field(enabled = false, store = false, type = FieldType.Object)
@@ -153,7 +159,7 @@ public class Product implements Standardisable {
 	 * aggregatedData
 	 */
 	@Field(index = true, store = false, type = FieldType.Keyword)
-	private Set<String> categories = new HashSet<>();
+	private Set<String> datasourceCategories = new HashSet<>();
 
 	/**
 	 * The encountered categories, by datasources
@@ -445,7 +451,7 @@ public class Product implements Standardisable {
 	 */
 	public List<String> datasourceCategoriesWithoutShortest() {
 
-		Set<String> ret = new HashSet<>(categories.stream().toList());
+		Set<String> ret = new HashSet<>(datasourceCategories.stream().toList());
 
 		ret.remove(shortestCategory());
 
@@ -488,7 +494,7 @@ public class Product implements Standardisable {
 	 * @return The shortest category for this product
 	 */
 	public String shortestCategory() {
-		return categories.stream().min(Comparator.comparingInt(String::length)).orElse(null);
+		return datasourceCategories.stream().min(Comparator.comparingInt(String::length)).orElse(null);
 	}
 
 	// /**
@@ -740,12 +746,12 @@ public class Product implements Standardisable {
 		this.altBrands = alternativeBrands;
 	}
 
-	public Set<String> getCategories() {
-		return categories;
+	public Set<String> getDatasourceCategories() {
+		return datasourceCategories;
 	}
 
-	public void setCategories(Set<String> categories) {
-		this.categories = categories;
+	public void setDatasourceCategories(Set<String> categories) {
+		this.datasourceCategories = categories;
 	}
 
 	public Map<String, String> getDsCategories() {

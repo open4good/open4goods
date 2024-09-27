@@ -36,7 +36,7 @@ public class TaxonomyRealTimeAggregationService extends AbstractAggregationServi
 		
 		String category = input.getCategory();
 		if (!StringUtils.isEmpty(category)) {
-			output.getCategories().add(category);
+			output.getDatasourceCategories().add(category);
 			output.getDsCategories().put(input.getDatasourceConfigName(), category);
 		}
 		
@@ -66,7 +66,7 @@ public class TaxonomyRealTimeAggregationService extends AbstractAggregationServi
 		////////////////////////////
 		// Setting vertical from category
 		////////////////////////////
-		VerticalConfig vertical = verticalService.getVerticalForCategories(data.getCategories());
+		VerticalConfig vertical = verticalService.getVerticalForCategories(data.getDatasourceCategories());
 		if (null != vertical) {
 			if ( null != data.getVertical() && !vertical.getId().equals(data.getVertical())) {
 				dedicatedLogger.warn("Will erase existing vertical {} with {} for product {}, because of category {}", data.getVertical(), vertical.getId(), data.bestName());

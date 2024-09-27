@@ -15,6 +15,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -227,15 +228,43 @@ public class BackupService implements HealthIndicator {
 	 */
 	private Product translateImport(Product original) {
 		
-//		original.getAttributes().getAttrs().addAll(original.getAttributes().getUnmatchedAttributes());
-//		original.getAttributes().getAttrs().addAll(original.getAttributes().getAttributes().values());
+		original.getAttributes().getAttrs().addAll(original.getAttributes().getUnmapedAttributes());
+		original.getAttributes().getAttrs().addAll(original.getAttributes().getAggregatedAttributes().values());
 //		
-//		original.getAttributes().setAttributes(new HashMap<String, AggregatedAttribute>());
-//		original.getAttributes().setUnmatchedAttributes(new HashSet<AggregatedAttribute>());
+		original.getAttributes().setAggregatedAttributes(new HashMap<String, AggregatedAttribute>());
+		original.getAttributes().setUnmapedAttributes(new HashSet<AggregatedAttribute>());
+		
+		Set<AggregatedAttribute> toRemove = new HashSet<>();
 		
 		original.getAttributes().getAttrs().stream().forEach(e -> {
+			
+			// Mapping the source
+			e.getSources().forEach(s -> {
+				
+				if (null != s.getValue()) {
+					if (!e.getSource().containsKey(s.getValue())) {
+						e.getSource().put(s.getValue(), new HashSet<String>());
+					} 
+					e.getSource().get(s.getValue()).add(s.getKey());
+				} else {
+					logger.warn("Null detected");
+				}
+			});
+
 			e.setValue(e.bestValue());
+			if (e.getValue() == null) {
+				toRemove.add(e);
+			}
+			
+			e.getSources().clear();
 		});
+		
+		
+		original.getAttributes().getAttrs().removeAll(toRemove);
+		
+		// Forcing as a fresh product
+		original.setLastChange(System.currentTimeMillis());
+		
 		return original;
 	}
 

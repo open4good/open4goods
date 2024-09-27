@@ -7,6 +7,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -779,9 +780,12 @@ public class IcecatService {
 		if (featuresId == null) {
 			LOGGER.warn("No icecat name found for {}",name);
 			return name;
-		}
+		} 
 		
-		if (vc != null) {
+		if (vc != null && vc.getId() != null) {
+			
+			// Cloning, to not modify the original map
+			featuresId = new HashSet<Integer>(featuresId);
 			featuresId.retainAll(featuresId(vc));
 			if (featuresId.size() == 0) {
 				LOGGER.warn("No icecat featureID for {}, after filtering on id's for vertical {}",name, vc);
@@ -791,7 +795,7 @@ public class IcecatService {
 	
 	 if (featuresId.size() ==1) {
 			String ret = getFeatureName(featuresId.stream().findFirst().orElse(null), "en");
-			LOGGER.info("Resolved feature name : {}->{}",name, ret);
+			LOGGER.error("Resolved feature name : {}->{}",name, ret);
 			return ret;
 			
 		} else {

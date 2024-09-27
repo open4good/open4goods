@@ -9,9 +9,14 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.open4goods.commons.model.attribute.Attribute;
+import org.open4goods.commons.model.data.UnindexedKeyValTimestamp;
 import org.springframework.data.elasticsearch.annotations.Field;
 import org.springframework.data.elasticsearch.annotations.FieldType;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+//TODO(p1,design) : remove once migration ok
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class AggregatedAttribute implements IAttribute {
 
 	/**
@@ -36,8 +41,13 @@ public class AggregatedAttribute implements IAttribute {
 	 * The whole values, associated with datasources
 	 */
 	@Field(enabled = false, store = false, type = FieldType.Object)
-	private Map<String, Set<String>> sources = new HashMap<>();
+    @JsonDeserialize(contentAs = Void.class)  // This will skip deserialization of the field
+	private Map<String, Set<String>> source = new HashMap<>();
 
+	// TODO(design, p1) : remove once migration ok 
+	@Field(index = false, store = false, type = FieldType.Object)
+	private Set<UnindexedKeyValTimestamp> sources = new HashSet<>();
+	
 	
 	/**
 	 * The icecat matched taxonomies, by it's name
@@ -52,7 +62,7 @@ public class AggregatedAttribute implements IAttribute {
 	 * @return
 	 */
 	public int sourcesCount() {
-		return sources.size();
+		return source.size();
 	}
 
 	/**
@@ -61,7 +71,7 @@ public class AggregatedAttribute implements IAttribute {
 	 * @return
 	 */
 	public long distinctValues() {
-		return sources.keySet().size();
+		return source.keySet().size();
 	}
 
 	/**
@@ -71,7 +81,7 @@ public class AggregatedAttribute implements IAttribute {
 	 */
 	public String providersToString() {
 		   return StringUtils.join(
-		            sources.values().stream().flatMap(Set::stream).collect(Collectors.toSet()),", ");
+		            source.values().stream().flatMap(Set::stream).collect(Collectors.toSet()),", ");
 	}
 
 	/**
@@ -83,7 +93,7 @@ public class AggregatedAttribute implements IAttribute {
 
         StringBuilder result = new StringBuilder();
 
-        for (Map.Entry<String, Set<String>> entry : sources.entrySet()) {
+        for (Map.Entry<String, Set<String>> entry : source.entrySet()) {
             String joinedValues = StringUtils.join(entry.getValue(), ", ");
             result.append(entry.getKey()).append(": ").append(joinedValues).append("\n");
         }
@@ -144,10 +154,10 @@ public class AggregatedAttribute implements IAttribute {
 
 		this.name = attr.getName();
 		
-		if (!sources.containsKey(value)) {
-			sources.put(value, new HashSet<String>());
+		if (!source.containsKey(value)) {
+			source.put(value, new HashSet<String>());
 		} 
-		sources.get(value).add(datasourceName);
+		source.get(value).add(datasourceName);
 
 		this.value = bestValue();
 
@@ -163,7 +173,7 @@ public class AggregatedAttribute implements IAttribute {
 	 * @return the best value
 	 */
 	public String bestValue() {
-		return sources.entrySet().stream().max(Comparator.comparingInt(entry -> entry.getValue().size())) 
+		return source.entrySet().stream().max(Comparator.comparingInt(entry -> entry.getValue().size())) 
 				.map(Map.Entry::getKey) 
 				.orElse(null); 
 	}
@@ -174,12 +184,12 @@ public class AggregatedAttribute implements IAttribute {
 	 * @return
 	 */
 	public long ponderedvalues() {
-		return sources.size();
+		return source.size();
 	}
 
 	@Override
 	public String toString() {
-		return name + " : " + value + " -> " + sources.size() + " source(s), " + ponderedvalues() + " conflict(s)";
+		return name + " : " + value + " -> " + source.size() + " source(s), " + ponderedvalues() + " conflict(s)";
 	}
 
 	public Double numericOrNull(String rawValue) throws NumberFormatException {
@@ -228,12 +238,12 @@ public class AggregatedAttribute implements IAttribute {
 		return null;
 	}
 
-	public Map<String, Set<String>> getSources() {
-		return sources;
+	public Map<String, Set<String>> getSource() {
+		return source;
 	}
 
-	public void setSources(Map<String, Set<String>> sources) {
-		this.sources = sources;
+	public void setSource(Map<String, Set<String>> sources) {
+		this.source = sources;
 	}
 
 	public Double getNumericValue() {
@@ -250,6 +260,14 @@ public class AggregatedAttribute implements IAttribute {
 
 	public void setIcecatTaxonomyIds(Set<Integer> icecatTaxonomyIds) {
 		this.icecatTaxonomyIds = icecatTaxonomyIds;
+	}
+
+	public Set<UnindexedKeyValTimestamp> getSources() {
+		return sources;
+	}
+
+	public void setSources(Set<UnindexedKeyValTimestamp> sources) {
+		this.sources = sources;
 	}
 	
 	

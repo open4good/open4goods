@@ -348,7 +348,7 @@ public class CsvEnrichmentController {
 					break;
 
 				case EnrichmentFacet.CATEGORIES:
-					enriched.put(key, serialisationService.toJson(p.getCategories()) );
+					enriched.put(key, serialisationService.toJson(p.getDatasourceCategories()) );
 					break;
 					
 				default:

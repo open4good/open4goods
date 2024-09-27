@@ -7,11 +7,14 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import org.open4goods.commons.config.yml.ui.ProductI18nElements;
 import org.open4goods.commons.model.constants.ReferentielKey;
 import org.springframework.data.elasticsearch.annotations.Field;
 import org.springframework.data.elasticsearch.annotations.FieldType;
-//@JsonIgnoreProperties(ignoreUnknown = true)
+
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+//TODO(p1,design) : remove once migration ok
+@JsonIgnoreProperties(ignoreUnknown = true)
+
 public class AggregatedAttributes  {
 
 	
@@ -27,12 +30,15 @@ public class AggregatedAttributes  {
 	/**
 	 * The key is the english name, such as classified by icecat
 	 */
+
 	
-//	@Field( store = false, type = FieldType.Object)
-//	private Map<String,AggregatedAttribute> attributes = new HashMap<>();
-//
-//	@Field(enabled = false, store = false, type = FieldType.Object)
-//	private Set<AggregatedAttribute> unmatchedAttributes = new HashSet<>();
+	// TODO(p1, design) : remove once migration ok
+	@Field( store = false, type = FieldType.Object)
+	private Map<String,AggregatedAttribute> aggregatedAttributes = new HashMap<>();
+
+	// TODO(p1, design) : remove once migration ok
+	@Field(enabled = false, store = false, type = FieldType.Object)
+	private Set<AggregatedAttribute> unmapedAttributes = new HashSet<>();
 
 	@Field(type = FieldType.Nested)
 	private Set<AggregatedAttribute> attrs = new HashSet<>();
@@ -101,22 +107,22 @@ public class AggregatedAttributes  {
 				));
 	}
 
-//
-//	public Map<String, AggregatedAttribute> getAttributes() {
-//		return attributes;
-//	}
-//	public void setAttributes(Map<String, AggregatedAttribute> aggregatedAttributes) {
-//		this.attributes = aggregatedAttributes;
-//	}
-//
-//
-//	public Set<AggregatedAttribute> getUnmatchedAttributes() {
-//		return unmatchedAttributes;
-//	}
-//
-//	public void setUnmatchedAttributes(Set<AggregatedAttribute> unmapedAttributes) {
-//		this.unmatchedAttributes = unmapedAttributes;
-//	}
+
+	public Map<String, AggregatedAttribute> getAggregatedAttributes() {
+		return aggregatedAttributes;
+	}
+	public void setAggregatedAttributes(Map<String, AggregatedAttribute> aggregatedAttributes) {
+		this.aggregatedAttributes = aggregatedAttributes;
+	}
+
+
+	public Set<AggregatedAttribute> getUnmapedAttributes() {
+		return unmapedAttributes;
+	}
+
+	public void setUnmapedAttributes(Set<AggregatedAttribute> unmapedAttributes) {
+		this.unmapedAttributes = unmapedAttributes;
+	}
 
 	public Map<ReferentielKey, String> getReferentielAttributes() {
 		return referentielAttributes;
