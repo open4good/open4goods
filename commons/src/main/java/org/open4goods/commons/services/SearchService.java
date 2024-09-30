@@ -211,7 +211,7 @@ public class SearchService {
 				.withAggregation("conditions", 	Aggregation.of(a -> a.terms(ta -> ta.field("price.conditions").missing(OTHER_BUCKET).size(3)  ))	)
 				//
 				//				// TODO : size from conf
-				.withAggregation("brands", 	Aggregation.of(a -> a.terms(ta -> ta.field("attributes.referentielAttributes.BRAND.keyword").missing(OTHER_BUCKET).size(100)  ))	)
+				.withAggregation("brands", 	Aggregation.of(a -> a.terms(ta -> ta.field("attributes.referentielAttributes.BRAND").missing(OTHER_BUCKET).size(100)  ))	)
 				//
 				//				// TODO : size from conf
 				.withAggregation("country", 	Aggregation.of(a -> a.terms(ta -> ta.field("gtinInfos.country").missing(OTHER_BUCKET).size(100)  ))	)
@@ -238,7 +238,7 @@ public class SearchService {
 		for (AttributeConfig attrConfig : customAttrFilters) {
 			esQuery = esQuery
 					// TODO : size from conf
-					.withAggregation(attrConfig.getKey(), 	Aggregation.of(a -> a.terms(ta -> ta.field("attributes.aggregatedAttributes."+attrConfig.getKey()+".value.keyword").missing(OTHER_BUCKET).size(100)  ))	);
+					.withAggregation(attrConfig.getKey(), 	Aggregation.of(a -> a.terms(ta -> ta.field("attributes.aggregatedAttributes."+attrConfig.getKey()+".value").missing(OTHER_BUCKET).size(100)  ))	);
 		}
 		
 		
