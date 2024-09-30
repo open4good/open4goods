@@ -92,8 +92,21 @@
             "enabled": false
           },
           "referentielAttributes": {
-            "type": "object",
-            "enabled": false
+            "properties": {
+              "BRAND": {
+                "type": "keyword",
+                "ignore_above": 256
+              },
+              "GTIN": {
+                "type": "long",
+                "index": false
+              },
+              "MODEL": {
+                "type": "keyword",
+                "ignore_above": 256,
+                "index": false
+                }
+              }
           },
           "unmapedAttributes": {
             "type": "object",
@@ -130,10 +143,6 @@
       "googleTaxonomyId": {
         "type": "integer",
         "index": false
-      },
-      "gtinInfos": {
-        "type": "object",
-        "enabled": false
       },
       "lastChange": {
         "type": "date",
@@ -244,6 +253,17 @@
       "offerNames": {
         "type": "text",
         "analyzer": "french"
-      }
+      },
+      "gtinInfos": {
+        "properties": {
+          "country": {
+            "type": "keyword"
+          },
+          "upcType": {
+            "type": "keyword",
+            "index": false
+          }
+        }
+      }      
     }
 }
