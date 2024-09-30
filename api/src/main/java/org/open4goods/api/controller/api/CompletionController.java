@@ -77,7 +77,7 @@ public class CompletionController {
 
 	@GetMapping("/completion/resources/gtin/")
 	@Operation(summary = "Launch resource completion on the specified vertical")
-	public void resourceCompletionProduct(@RequestParam @NotBlank final String gtin) {
+	public void resourceCompletionProduct(@RequestParam @NotBlank final Long gtin) {
 		Product data;
 		try {
 			data = repository.getById(gtin);
@@ -107,7 +107,7 @@ public class CompletionController {
 
 	@GetMapping("/completion/genai/gtin/")
 	@Operation(summary = "Launch genai completion on the specified vertical")
-	public void genaiCompletionProduct(@RequestParam @NotBlank final String gtin) {
+	public void genaiCompletionProduct(@RequestParam @NotBlank final Long gtin) {
 		Product data;
 		try {
 			data = repository.getById(gtin);
@@ -137,7 +137,7 @@ public class CompletionController {
 
 	@GetMapping("/completion/amazon/gtin/")
 	@Operation(summary = "Launch amazon completion on the specified vertical")
-	public void amazonCompletionProduct(@RequestParam @NotBlank final String gtin) {
+	public void amazonCompletionProduct(@RequestParam @NotBlank final Long gtin) {
 		Product data;
 		try {
 			data = repository.getById(gtin);
@@ -171,7 +171,7 @@ public class CompletionController {
 
 	@GetMapping("/completion/icecat/gtin/")
 	@Operation(summary = "Launch icecat completion on the specified vertical")
-	public void icecatCompletionProduct(@RequestParam @NotBlank final String gtin) {
+	public void icecatCompletionProduct(@RequestParam @NotBlank final Long gtin) {
 		Product data;
 		try {
 			data = repository.getById(gtin);

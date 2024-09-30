@@ -1,12 +1,9 @@
 package org.open4goods.commons.model.data;
 
-import org.springframework.data.elasticsearch.annotations.Field;
-import org.springframework.data.elasticsearch.annotations.FieldType;
-
+// TODO(design, p2) : This is a legacy due to elastic misconception, should be replaced my maps / sets
 public class UnindexedKeyValTimestamp extends UnindexedKeyVal{
 
 	
-	@Field(index = false, store = false, type = FieldType.Date)
 	private long ts;
 	
 	

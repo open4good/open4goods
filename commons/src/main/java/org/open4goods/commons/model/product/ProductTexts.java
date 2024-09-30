@@ -1,12 +1,9 @@
 package org.open4goods.commons.model.product;
 
-import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Set;
 
 import org.open4goods.commons.model.Localisable;
-import org.springframework.data.elasticsearch.annotations.Field;
-import org.springframework.data.elasticsearch.annotations.FieldType;
 
 public class ProductTexts {
 
@@ -25,8 +22,9 @@ public class ProductTexts {
 	private Localisable<String,String> productMetaTwitterDescription = new Localisable<>();
 	
 	
-	@Field(index = true, store = false, type = FieldType.Text, analyzer = "french")
+//	@Field(index = true, store = false, type = FieldType.Text, analyzer = "french")
 	//	@Field(index = true, store = false, type = FieldType.Text)
+	//TODO(p1, design) : remove when migration done
 	private Set<String> offerNames = new HashSet<>();
 
 
@@ -51,18 +49,6 @@ public class ProductTexts {
 //	
 //	
 
-	
-	
-	
-	
-	
-	public String longestOfferName() {
-		return offerNames.stream().max (Comparator.comparingInt(String::length)).get();
-	}
-
-	public String shortestOfferName() {
-		return offerNames.stream().min (Comparator.comparingInt(String::length)).orElse(null);
-	}
 
 	public Set<String> getOfferNames() {
 		return offerNames;

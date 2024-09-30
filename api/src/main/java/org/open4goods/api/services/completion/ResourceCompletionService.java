@@ -138,7 +138,7 @@ public class ResourceCompletionService  extends AbstractCompletionService{
 			if (forceEraseFileName || StringUtils.isEmpty(r.getFileName())) {
 				String name;
 				
-				List<String> offerNames = data.getNames().getOfferNames().stream().toList();
+				List<String> offerNames = data.getOfferNames().stream().toList();
 				
 				// No offer names, we generate a title by our own
 				if (offerNames.size() ==  0) {
