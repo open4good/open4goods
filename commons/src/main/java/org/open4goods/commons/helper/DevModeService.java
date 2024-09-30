@@ -62,9 +62,13 @@ public class DevModeService {
 	 * @return
 	 */
 	public boolean needsUpdate() {
-		boolean ret = repository.countMainIndexHavingRecentPrices() == 0;
-		LOGGER.info("DevMode : Products needs update : "+ret);
-		return ret;
+		// TODO(p1, design) : fix (no index auto creation)
+		
+		return false;
+//		
+//		boolean ret = repository.countMainIndexHavingRecentPrices() == 0;
+//		LOGGER.info("DevMode : Products needs update : "+ret);
+//		return ret;
 	}
 	
 	/**

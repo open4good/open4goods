@@ -179,8 +179,7 @@ public class DataFragmentStoreService {
 			Map<String, Product> aggDatas = aggregatedDataRepository.multiGetById(
 
 					buffer.stream()
-					.map(DataFragment::gtin)
-					.filter(StringUtils::isNotBlank)
+					.map(e -> Long.valueOf(e.gtin()))
 					.toList());
 
 

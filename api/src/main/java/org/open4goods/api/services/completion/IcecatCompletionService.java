@@ -323,7 +323,7 @@ public class IcecatCompletionService extends AbstractCompletionService {
 		df.setDatasourceConfigName("icecat.biz.yml");
 		df.setLastIndexationDate(System.currentTimeMillis());
 		df.setCreationDate(System.currentTimeMillis());
-		df.addReferentielAttribute(ReferentielKey.GTIN, data.getId() );
+		df.addReferentielAttribute(ReferentielKey.GTIN, String.valueOf(data.getId()));
 		return df;
 	}
 	

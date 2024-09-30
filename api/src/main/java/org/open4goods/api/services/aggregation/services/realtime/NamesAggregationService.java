@@ -45,7 +45,7 @@ public class NamesAggregationService extends AbstractAggregationService {
 
 		// Adding raw offer names
 		// TODO : names are not localized
-		output.getNames().getOfferNames()
+		output.getOfferNames()
 				.addAll(df.getNames().stream().map(this::normalizeName).collect(Collectors.toSet()));
 
 		onProduct(output,vConf);

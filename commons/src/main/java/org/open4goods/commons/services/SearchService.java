@@ -91,12 +91,11 @@ public class SearchService {
 		Criteria c = null;
 		if (StringUtils.isNumeric(query)) {
 			// Showing even if no offers when by GTIN
-			c = new Criteria("attributes.referentielAttributes.GTIN.keyword").is(initialQuery);
+			c = new Criteria("id").is(initialQuery);
 		}
 		else {
-			// TODO(security) : sanitize, web imput !!
-			c = 	new Criteria("names.offerNames").matchesAll(Arrays.asList(query.split(" ")))
-					.and("offersCount").greaterThanEqual(1)
+			// TODO(p1,security) : sanitize, web imput !!
+			c = 	new Criteria("offerNames").matchesAll(Arrays.asList(query.split(" ")))
 					.and(aggregatedDataRepository.getRecentPriceQuery())
 					;
 

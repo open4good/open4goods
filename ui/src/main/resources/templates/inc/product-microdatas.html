@@ -1,9 +1,9 @@
  <div itemtype="https://schema.org/Product">
      <meta th:if="${product.model()}" itemprop="mpn" th:content="${product.model()}" />
-     <meta itemprop="name" th:content="${product.names.shortestOfferName()}" />
+     <meta itemprop="name" th:content="${product.shortestOfferName()}" />
      <link itemprop="image" th:href="'/'+${helper.texts.url}+'/image.png'" />
      <meta th:if="${product.shortestDescription(siteLanguage)}" itemprop="description" th:content="${product.shortestDescription(siteLanguage)}" />
-     <meta th:unless="${product.shortestDescription(siteLanguage)}" itemprop="description" th:content="${product.names.longestOfferName()}" />
+     <meta th:unless="${product.shortestDescription(siteLanguage)}" itemprop="description" th:content="${product.longestOfferName()}" />
      
      <div th:if="${product.bestPrice()}" itemprop="offers" itemtype="https://schema.org/Offer" itemscope>
        <link itemprop="url" th:href="${url}" />
