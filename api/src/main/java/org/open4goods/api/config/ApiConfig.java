@@ -25,7 +25,6 @@ import org.open4goods.commons.model.constants.TimeConstants;
 import org.open4goods.commons.model.constants.UrlConstants;
 import org.open4goods.commons.model.data.DataFragment;
 import org.open4goods.commons.model.data.Price;
-import org.open4goods.commons.model.product.Product;
 import org.open4goods.commons.services.BarcodeValidationService;
 import org.open4goods.commons.services.BrandService;
 import org.open4goods.commons.services.DataSourceConfigService;
@@ -68,10 +67,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
 import org.springframework.core.io.support.ResourcePatternResolver;
-import org.springframework.data.redis.connection.RedisConnectionFactory;
-import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
-import org.springframework.data.redis.serializer.StringRedisSerializer;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
@@ -104,18 +99,18 @@ public class ApiConfig {
 	}
 
 
-    @Bean
-    RedisTemplate<String, Product> redisTemplate(RedisConnectionFactory connectionFactory) {
-		  RedisTemplate<String, Product> template = new RedisTemplate<>();
-		    template.setConnectionFactory(connectionFactory);
-		    
-		    // Configure serialization
-		    template.setKeySerializer(new StringRedisSerializer());
-		    template.setValueSerializer(new GenericJackson2JsonRedisSerializer());
-
-		    return template;
-	  }
-	 
+//    @Bean
+//    RedisTemplate<String, Product> redisTemplate(RedisConnectionFactory connectionFactory) {
+//		  RedisTemplate<String, Product> template = new RedisTemplate<>();
+//		    template.setConnectionFactory(connectionFactory);
+//		    
+//		    // Configure serialization
+//		    template.setKeySerializer(new StringRedisSerializer());
+//		    template.setValueSerializer(new GenericJackson2JsonRedisSerializer());
+//
+//		    return template;
+//	  }
+//	 
 	@Bean
 	SerialisationService serialisationService() {
 		return new SerialisationService();

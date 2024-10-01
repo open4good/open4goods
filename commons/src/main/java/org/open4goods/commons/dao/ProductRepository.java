@@ -8,7 +8,6 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -17,7 +16,6 @@ import org.open4goods.commons.exceptions.ResourceNotFoundException;
 import org.open4goods.commons.model.constants.CacheConstants;
 import org.open4goods.commons.model.product.Product;
 import org.open4goods.commons.store.repository.ProductIndexationWorker;
-import org.open4goods.commons.store.repository.redis.RedisProductRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -72,7 +70,7 @@ public class ProductRepository {
 
 	private @Autowired ElasticsearchOperations elasticsearchTemplate;
 
-	private @Autowired RedisProductRepository redisRepository;
+//	private @Autowired RedisProductRepository redisRepository;
 	
 //	private @Autowired RedisOperations<String, Product> redisRepo;
 
@@ -353,8 +351,7 @@ public class ProductRepository {
 //		});
 
 //		executor.submit(() -> {
-			redisRepository.saveAll(data);
-//			redisRepo.opsForValue().multiSet(data.stream().collect(Collectors.toMap(Product::gtin, Function.identity())));
+//			redisRepository.saveAll(data);
 //		});
 	}
 	
@@ -374,8 +371,7 @@ public class ProductRepository {
 //		});
 
 //		executor.submit(() -> {
-//			redisRepo.opsForValue().set(data.gtin(), data);
-			redisRepository.save(data);
+//			redisRepository.save(data);
 //		});
 	}
 	
@@ -398,17 +394,17 @@ public class ProductRepository {
 		
 		
 //		Product result = redisRepo.opsForValue().get(productId);
-		Product result;
-		try {
-			result = redisRepository.findById(productId).orElseThrow(ResourceNotFoundException::new);
-		} catch (ResourceNotFoundException e) {
-			
-			result = null;
-			
-		} catch (Exception e) {
-			logger.error("Error getting product {} from redis", productId, e);
-			result = null;
-		}
+		Product result = null;
+//		try {
+//			result = redisRepository.findById(productId).orElseThrow(ResourceNotFoundException::new);
+//		} catch (ResourceNotFoundException e) {
+//			
+//			result = null;
+//			
+//		} catch (Exception e) {
+//			logger.error("Error getting product {} from redis", productId, e);
+//			result = null;
+//		}
 
 		if (null == result) {
 			// Fail, getting from elastic
@@ -471,14 +467,13 @@ public class ProductRepository {
 		
 		
 		// Getting from redis
-//		Iterable<Product> redisResults = redisRepo.opsForValue().multiGet(ids);
-		Iterable<Product> redisResults = redisRepository.findAllById(ids);
-		redisResults.forEach(e -> {
-			if (null != e) {
-				ret.put(e.gtin(), e);
-			}
-		});
-		
+//		Iterable<Product> redisResults = redisRepository.findAllById(ids);
+//		redisResults.forEach(e -> {
+//			if (null != e) {
+//				ret.put(e.gtin(), e);
+//			}
+//		});
+//		
 		// Getting the one we don't have in redis from elastic 		
 		Set<String> missingIds = ids.stream().filter(e -> !ret.containsKey(e)).map(e-> String.valueOf(e)) .collect(Collectors.toSet());
 		logger.info("redis hits : {}, missing : {}, queue size : {}",ret.size(), missingIds.size(),queue.size());
@@ -507,8 +502,7 @@ public class ProductRepository {
 			logger.info("Saving {} products in redis",redisItems.size());
 //			executor.submit(() -> {
 				
-			redisRepository.saveAll(redisItems);
-//				redisRepo.opsForValue().multiSet();
+//			redisRepository.saveAll(redisItems);
 //			});
 		}
 		
@@ -608,8 +602,7 @@ public class ProductRepository {
 	 */
 	private void saveToRedis(Product result) {
 //		executor.submit(() -> {
-//			redisRepo.opsForValue().set(result.gtin(), result);
-			redisRepository.save(result);
+//			redisRepository.save(result);
 //		});
 	}
 
