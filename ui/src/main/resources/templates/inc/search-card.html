@@ -1,7 +1,7 @@
 <div th:with="purl = ${item.names.url.get(siteLocale)}" class="card shadow p-2 animate-up-3">
                <div class="row align-items-center">
                    <aside class="col-md-2">
-                       <img height="150" th:src="${item.externalCover()}" th:alt="${item.names.longestOfferName()}">
+                       <img height="150" th:src="${item.externalCover()}" th:alt="${item.longestOfferName()}">
                    </aside>
                  <div class="col-md-7">
                      <div class="info-main">

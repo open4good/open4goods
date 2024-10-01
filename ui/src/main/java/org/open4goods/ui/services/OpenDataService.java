@@ -185,7 +185,7 @@ public class OpenDataService {
 		//		"model"
 		line[2] = data.model();
 		//		"shortest_name"
-		line[3] = data.getNames().shortestOfferName();
+		line[3] = data.shortestOfferName();
 		//		"last_updated"
 		line[4] = String.valueOf(data.getLastChange());
 		//		"gs1_country"

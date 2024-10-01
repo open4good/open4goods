@@ -231,7 +231,7 @@ public class CsvEnrichmentController {
 
 
 					try {
-						p = repository.getById(gtin);
+						p = repository.getById(Long.valueOf(gtin));
 					} catch (ResourceNotFoundException e) {
 						logger.info("Product not found in database : " + gtin);
 						enriched.put(O4G_MSG, "NOT_FOUND_IN_DATABASE");

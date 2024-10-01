@@ -79,7 +79,7 @@ public class ProductController  {
 
 
 	@GetMapping("/{vertical}/{id:\\d+}-*")
-	public ModelAndView productInVertical(@PathVariable String vertical, @PathVariable String id, final HttpServletRequest request, HttpServletResponse response) throws IOException {
+	public ModelAndView productInVertical(@PathVariable String vertical, @PathVariable Long id, final HttpServletRequest request, HttpServletResponse response) throws IOException {
 
 
 		VerticalConfig language = verticalConfigService.getVerticalForPath(vertical);
@@ -105,7 +105,7 @@ public class ProductController  {
 	 */
 	
 	@GetMapping("/{id:\\d+}*")
-	public ModelAndView product(@PathVariable String id, final HttpServletRequest request, HttpServletResponse response) throws IOException {
+	public ModelAndView product(@PathVariable Long id, final HttpServletRequest request, HttpServletResponse response) throws IOException {
 
 		ModelAndView ret = buildProductView(id, null, request, response);;
 		
@@ -138,7 +138,7 @@ public class ProductController  {
 	 * @param response
 	 * @return
 	 */
-	private ModelAndView buildProductView(String id, String vertical, final HttpServletRequest request,
+	private ModelAndView buildProductView(Long id, String vertical, final HttpServletRequest request,
 			HttpServletResponse response) {
 		
 		// Getting the product name
@@ -177,8 +177,8 @@ public class ProductController  {
 		// Fetching better and best objects
 		if (null != data.ecoscore()) {
 			
-			String globalBestId = data.getRanking().getGlobalBest();
-			String globalBetter = data.getRanking().getGlobalBetter();
+			Long globalBestId = data.getRanking().getGlobalBest();
+			Long globalBetter = data.getRanking().getGlobalBetter();
 			
 			if (null != globalBestId) {
 				Product best = null;

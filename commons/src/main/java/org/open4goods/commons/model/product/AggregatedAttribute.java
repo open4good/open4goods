@@ -19,19 +19,16 @@ import org.springframework.data.elasticsearch.annotations.FieldType;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
-@JsonIgnoreProperties(ignoreUnknown = true)
 public class AggregatedAttribute implements IAttribute {
 
 	/**
 	 * The name of this aggregated attribute
 	 */
-	@Field(index = true, store = false, type = FieldType.Keyword)
 	private String name;
 
 	/**
 	 * The value of this aggregated attribute
 	 */
-	@Field(index = true, store = false, type = FieldType.Keyword)
 	private String value;
 
 	/**
@@ -43,7 +40,7 @@ public class AggregatedAttribute implements IAttribute {
 	/**
 	 * The collections of conflicts for this attribute
 	 */
-	@Field(index = false, store = false, type = FieldType.Object)
+	@Field( index = false, store = false, enabled = false, type = FieldType.Object)
 	private Set<UnindexedKeyValTimestamp> sources = new HashSet<>();
 
 	

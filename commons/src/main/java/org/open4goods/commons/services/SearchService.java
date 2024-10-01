@@ -91,12 +91,11 @@ public class SearchService {
 		Criteria c = null;
 		if (StringUtils.isNumeric(query)) {
 			// Showing even if no offers when by GTIN
-			c = new Criteria("attributes.referentielAttributes.GTIN.keyword").is(initialQuery);
+			c = new Criteria("id").is(initialQuery);
 		}
 		else {
-			// TODO(security) : sanitize, web imput !!
-			c = 	new Criteria("names.offerNames").matchesAll(Arrays.asList(query.split(" ")))
-					.and("offersCount").greaterThanEqual(1)
+			// TODO(p1,security) : sanitize, web imput !!
+			c = 	new Criteria("offerNames").matchesAll(Arrays.asList(query.split(" ")))
 					.and(aggregatedDataRepository.getRecentPriceQuery())
 					;
 
@@ -212,7 +211,7 @@ public class SearchService {
 				.withAggregation("conditions", 	Aggregation.of(a -> a.terms(ta -> ta.field("price.conditions").missing(OTHER_BUCKET).size(3)  ))	)
 				//
 				//				// TODO : size from conf
-				.withAggregation("brands", 	Aggregation.of(a -> a.terms(ta -> ta.field("attributes.referentielAttributes.BRAND.keyword").missing(OTHER_BUCKET).size(100)  ))	)
+				.withAggregation("brands", 	Aggregation.of(a -> a.terms(ta -> ta.field("attributes.referentielAttributes.BRAND").missing(OTHER_BUCKET).size(100)  ))	)
 				//
 				//				// TODO : size from conf
 				.withAggregation("country", 	Aggregation.of(a -> a.terms(ta -> ta.field("gtinInfos.country").missing(OTHER_BUCKET).size(100)  ))	)
@@ -239,7 +238,7 @@ public class SearchService {
 		for (AttributeConfig attrConfig : customAttrFilters) {
 			esQuery = esQuery
 					// TODO : size from conf
-					.withAggregation(attrConfig.getKey(), 	Aggregation.of(a -> a.terms(ta -> ta.field("attributes.aggregatedAttributes."+attrConfig.getKey()+".value.keyword").missing(OTHER_BUCKET).size(100)  ))	);
+					.withAggregation(attrConfig.getKey(), 	Aggregation.of(a -> a.terms(ta -> ta.field("attributes.aggregatedAttributes."+attrConfig.getKey()+".value").missing(OTHER_BUCKET).size(100)  ))	);
 		}
 		
 		

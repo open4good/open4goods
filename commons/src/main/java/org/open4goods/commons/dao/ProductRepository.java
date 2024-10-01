@@ -390,7 +390,7 @@ public class ProductRepository {
 	 * @throws ResourceNotFoundException
 	 */
 //	@Cacheable(cacheNames = CacheConstants.ONE_MINUTE_LOCAL_CACHE_NAME)
-	public Product getById(final String productId) throws ResourceNotFoundException {
+	public Product getById(final Long productId) throws ResourceNotFoundException {
 
 		logger.info("Getting product  {}", productId);
 		// Getting from redis
@@ -413,7 +413,7 @@ public class ProductRepository {
 		if (null == result) {
 			// Fail, getting from elastic
 			logger.info("Cache miss, getting product {} from elastic", productId);
-			result = elasticsearchTemplate.get(productId, Product.class);
+			result = elasticsearchTemplate.get(String.valueOf(productId), Product.class);
 
 			if (null == result) {
 				throw new ResourceNotFoundException("Product '" + productId + "' does not exists");
@@ -451,7 +451,7 @@ public class ProductRepository {
 		// Setting the query
 		
 		List<String> words = List.of(title.split(" "));		
-		NativeQueryBuilder esQuery = new NativeQueryBuilder().withQuery(new CriteriaQuery(new Criteria("names.offerNames").matchesAll(words) ));
+		NativeQueryBuilder esQuery = new NativeQueryBuilder().withQuery(new CriteriaQuery(new Criteria("offerNames").matchesAll(words) ));
 		SearchHits<Product> results = search(esQuery.withPageable(PageRequest.of(0, maxItems)).build(),ProductRepository.MAIN_INDEX_NAME);
 		return results.stream().map(SearchHit::getContent).collect(Collectors.toList());
 		
@@ -463,7 +463,7 @@ public class ProductRepository {
 	 * @return
 	 * @throws ResourceNotFoundException
 	 */
-	public Map<String, Product> multiGetById( final Collection<String> ids)
+	public Map<String, Product> multiGetById( final Collection<Long> ids)
 			throws ResourceNotFoundException {
 
 		logger.info("Getting {} products from default index",ids.size());
@@ -480,7 +480,7 @@ public class ProductRepository {
 		});
 		
 		// Getting the one we don't have in redis from elastic 		
-		Set<String> missingIds = ids.stream().filter(e -> !ret.containsKey(e)).collect(Collectors.toSet());
+		Set<String> missingIds = ids.stream().filter(e -> !ret.containsKey(e)).map(e-> String.valueOf(e)) .collect(Collectors.toSet());
 		logger.info("redis hits : {}, missing : {}, queue size : {}",ret.size(), missingIds.size(),queue.size());
 		
 		
@@ -575,7 +575,7 @@ public class ProductRepository {
 	 * @return Criteria representing recent prices
 	 */
 	public Criteria getRecentPriceQuery() {
-		return new Criteria("price.offers.timeStamp").greaterThan(expirationClause());
+		return getRecentProducts().and(new Criteria("offersCount").greaterThan(0));
 				
 	}
 

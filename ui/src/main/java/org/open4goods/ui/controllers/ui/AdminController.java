@@ -102,7 +102,7 @@ public class AdminController {
 	@PreAuthorize("hasAuthority('" + RolesConstants.ROLE_XWIKI_ALL + "')")
 	public ModelAndView aiAssist(final HttpServletRequest request,
 			@RequestParam(name = "r", required = false) String redircectUrl,
-			@RequestParam(name = "gtin", required = false) String gtin) throws ResourceNotFoundException {
+			@RequestParam(name = "gtin", required = false) Long gtin) throws ResourceNotFoundException {
 
 		Product data = repository.getById(gtin);
 
