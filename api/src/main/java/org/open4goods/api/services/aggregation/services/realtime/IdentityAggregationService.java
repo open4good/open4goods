@@ -46,7 +46,7 @@ public class IdentityAggregationService extends AbstractAggregationService {
 		// Validating barcodes
 		/////////////////////////////
 		
-		if (null == output.gtin()) {
+		if (null == output.getId()) {
 			output.setId(Long.valueOf(input.gtin()));
 		} else {
 			if (!output.gtin().equals(input.gtin())) {

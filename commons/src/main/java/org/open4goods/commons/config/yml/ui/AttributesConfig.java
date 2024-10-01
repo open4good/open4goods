@@ -140,16 +140,16 @@ public class AttributesConfig {
 
 		// Sanitization
 		//TODO : from conf
-		translated = translated.replace("(+ D'INFOS)", "");
+//		translated = translated.replace("(+ D'INFOS)", "");
 
-		if (translated.endsWith(":")) {
-			translated = translated.substring(0, translated.length() - 1).trim();
-		}
-
-		final int pos = translated.indexOf('|');
-		if (pos != -1) {
-			translated = translated.substring(pos + 1).trim();
-		}
+//		if (translated.endsWith(":")) {
+//			translated = translated.substring(0, translated.length() - 1).trim();
+//		}
+//
+//		final int pos = translated.indexOf('|');
+//		if (pos != -1) {
+//			translated = translated.substring(pos + 1).trim();
+//		}
 
 		// Not nice, but due to current design, in order to handle attr name on unmatched attrs
 		a.setName(translated);
