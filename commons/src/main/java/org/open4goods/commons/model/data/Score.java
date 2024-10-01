@@ -17,23 +17,17 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 public class Score  implements Validable {
 	private static final Logger LOGGER = LoggerFactory.getLogger(Score.class);
 
-	@Field(index = false, store = false, type = FieldType.Keyword)
 	private String name;;
 
-	@Field(index = true, store = false, type = FieldType.Boolean)
 	private Boolean virtual = false;
 	
-	@Field(index = true, store = false, type = FieldType.Boolean)
 	// Is equals to relativ.value
 	// TODO : Remove field ?
 	private Double value;
 
-	@Field(index = true, store = false, type = FieldType.Object)
 	/** The source cardinalities, absolute mode.**/
 	private Cardinality absolute;
 	
-	
-	@Field(index = true, store = false, type = FieldType.Object)
 	/** The relativised cardinalities, relativ mode.**/
 	private Cardinality relativ;
 	

@@ -541,7 +541,7 @@ public class AmazonCompletionService extends AbstractCompletionService {
 		df.setUrl(url);
 		df.setLastIndexationDate(System.currentTimeMillis());
 		df.setCreationDate(System.currentTimeMillis());
-		df.addReferentielAttribute(ReferentielKey.GTIN, data.getId() );
+		df.addReferentielAttribute(ReferentielKey.GTIN, String.valueOf(data.getId()) );
 		return df;
 	}
 	

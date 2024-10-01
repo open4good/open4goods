@@ -44,7 +44,7 @@ public class ProductController {
 	@GetMapping(path="/product/")
 	@Operation(summary="Get a product from it's GTIN")
 	@PreAuthorize("hasAuthority('"+RolesConstants.ROLE_ADMIN+"')")
-	public Product get( @RequestParam @NotBlank final String gtin) throws ResourceNotFoundException {
+	public Product get( @RequestParam @NotBlank final Long gtin) throws ResourceNotFoundException {
 		return repository.getById(gtin);
 		
 	}
@@ -52,7 +52,7 @@ public class ProductController {
 	@PostMapping(path="/product/ai")
 	@Operation(summary="Generate the Ai assisted content")
 	@PreAuthorize("hasAuthority('"+RolesConstants.ROLE_ADMIN+"')")
-	public Map<String, AiDescriptions> genAi( @RequestParam @NotBlank final String gtin) throws ResourceNotFoundException {
+	public Map<String, AiDescriptions> genAi( @RequestParam @NotBlank final Long gtin) throws ResourceNotFoundException {
 		
 		Product data = repository.getById(gtin);
 		

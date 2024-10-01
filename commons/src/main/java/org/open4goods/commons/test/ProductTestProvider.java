@@ -16,7 +16,7 @@ public class ProductTestProvider {
 
 	public static  ProductTestBuilder defaulted() {
 		final Product p = new Product();
-		p.setId(UUID.randomUUID().toString());
+		p.setId(UUID.randomUUID().timestamp());
 
 //		p.getAlternativeIds().add(new UnindexedKeyValTimestamp("provider 1", "alternateId1")); 
 //		p.getAlternativeIds().add(new UnindexedKeyValTimestamp("provider 2", "alternateId2"));

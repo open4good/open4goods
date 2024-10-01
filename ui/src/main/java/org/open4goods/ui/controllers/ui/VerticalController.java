@@ -62,7 +62,7 @@ public class VerticalController  extends AbstractController {
 		// TODO : strategy of injection of products for nativ SEO
 
 		VerticalSearchRequest vRequest = new VerticalSearchRequest();
-		vRequest.setSortField("scores.ECOSCORE.relativ.value");
+		vRequest.setSortField("scores.ECOSCORE.value");
 		vRequest.setSortOrder("desc");
 		
 		VerticalSearchResponse products = searchService.verticalSearch(config,vRequest);

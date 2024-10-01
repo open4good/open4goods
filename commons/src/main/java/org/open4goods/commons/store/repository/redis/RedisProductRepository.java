@@ -9,7 +9,7 @@ import org.springframework.data.repository.CrudRepository;
  *
  */
 
-public interface  RedisProductRepository extends CrudRepository<Product, String> {
+public interface  RedisProductRepository extends CrudRepository<Product, Long> {
 
 
 

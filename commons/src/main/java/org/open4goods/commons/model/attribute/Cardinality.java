@@ -18,37 +18,31 @@ public class Cardinality {
 	protected static final Logger logger = LoggerFactory.getLogger(Cardinality.class);
 
 	
-	@Field(index = true, store = false, type = FieldType.Double)
 	private Double value;
 	
 	/**
 	 * The minimum encountered
 	 */
-	@Field(index = true, store = false, type = FieldType.Double)
 	private Double min = null;
 
 	/**
 	 * The maximum encountered
 	 */
-	@Field(index = true, store = false, type = FieldType.Double)		
 	private Double max = null;
 
 	/**
 	 * The average value
 	 */
-	@Field(index = true, store = false, type = FieldType.Double)	
 	private Double avg = null;
 
 	/**
 	 * The number of elements for computing this cardinality
 	 */
-	@Field(index = true, store = false, type = FieldType.Double)	
 	private Integer count = 0;
 
 	/**
 	 * The sum
 	 */
-	@Field(index = true, store = false, type = FieldType.Double)		
 	private Double sum = 0.0;
 
 

@@ -54,7 +54,7 @@ public class BlablaService {
 		String xmlBlabla = input;
 		
 		Long hash = Long.valueOf(xmlBlabla.hashCode())
-				+ ((null == data || null == data.getId()) ? 0L : Long.valueOf(data.getId().hashCode()));
+				+ ((null == data) ? 0L : data.getId());
 		final BlaBlaSecGenerator seqGen = new BlaBlaSecGenerator(hash.hashCode());
 
 		logger.debug("generating blabla {}:{} >> {}", seqGen.getSequenceCount(), seqGen.hashCode(), xmlBlabla);
