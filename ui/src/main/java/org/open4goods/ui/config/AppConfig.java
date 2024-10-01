@@ -12,7 +12,6 @@ import org.open4goods.commons.interceptors.BanCheckerInterceptor;
 import org.open4goods.commons.model.constants.CacheConstants;
 import org.open4goods.commons.model.constants.Currency;
 import org.open4goods.commons.model.data.Price;
-import org.open4goods.commons.model.product.Product;
 import org.open4goods.commons.services.BarcodeValidationService;
 import org.open4goods.commons.services.BrandService;
 import org.open4goods.commons.services.DataSourceConfigService;
@@ -58,10 +57,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.support.ResourcePatternResolver;
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
-import org.springframework.data.redis.connection.RedisConnectionFactory;
-import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
-import org.springframework.data.redis.serializer.StringRedisSerializer;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.web.firewall.HttpFirewall;
 import org.springframework.security.web.firewall.StrictHttpFirewall;
@@ -131,19 +126,19 @@ public class AppConfig {
 	}
 
 
-    @Bean
-    RedisTemplate<String, Product> redisTemplate(RedisConnectionFactory connectionFactory) {
-		  RedisTemplate<String, Product> template = new RedisTemplate<>();
-		    template.setConnectionFactory(connectionFactory);
-		    
-		    // Configure serialization
-		    template.setKeySerializer(new StringRedisSerializer());
-		    template.setValueSerializer(new GenericJackson2JsonRedisSerializer());
-
-		    
-		    // Add some specific configuration here. Key serializers, etc.
-		    return template;
-	  }
+//    @Bean
+//    RedisTemplate<String, Product> redisTemplate(RedisConnectionFactory connectionFactory) {
+//		  RedisTemplate<String, Product> template = new RedisTemplate<>();
+//		    template.setConnectionFactory(connectionFactory);
+//		    
+//		    // Configure serialization
+//		    template.setKeySerializer(new StringRedisSerializer());
+//		    template.setValueSerializer(new GenericJackson2JsonRedisSerializer());
+//
+//		    
+//		    // Add some specific configuration here. Key serializers, etc.
+//		    return template;
+//	  }
 
 
     @Bean
