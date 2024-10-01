@@ -69,6 +69,9 @@ public class VerticalsConfigService {
 	//
 	private final ExecutorService executorService = Executors.newFixedThreadPool(1);
 
+	// The default config
+	private VerticalConfig defaultConfig;
+
 
 	public VerticalsConfigService(SerialisationService serialisationService, GoogleTaxonomyService googleTaxonomyService, ProductRepository productRepository, ResourcePatternResolver resourceResolver, ImageGenerationService imageGenerationService) {
 		super();
@@ -92,10 +95,17 @@ public class VerticalsConfigService {
 
 		Map<String, VerticalConfig> vConfs = new ConcurrentHashMap<>(100);
 
+		// Setting the default config
+		try {
+			Resource r = resourceResolver.getResource(CLASSPATH_VERTICALS_DEFAULT);
+			defaultConfig =  serialisationService.fromYaml(r.getInputStream(), VerticalConfig.class);
+		} catch (IOException e) {
+			logger.error("Cannot load  default config from {}", CLASSPATH_VERTICALS_DEFAULT, e);
+		}
+		
 		/////////////////////////////////////////
 		// Load configurations from classpath
 		/////////////////////////////////////////
-
 
 		for (VerticalConfig uc : loadFromClasspath()) {
 			logger.info("Adding config {} from classpath", uc.getId());
@@ -258,28 +268,10 @@ public class VerticalsConfigService {
 	 * @return
 	 * @throws IOException
 	 */
-	@Cacheable(keyGenerator = CacheConstants.KEY_GENERATOR,  cacheNames = CacheConstants.FOREVER_LOCAL_CACHE_NAME)
 	public VerticalConfig getDefaultConfig() {
-//		VerticalConfig ret = null;
-//		try {
-//			FileInputStream f = new FileInputStream(verticalsFolder + File.separator + DEFAULT_CONFIG_FILENAME);
-//			ret = serialisationService.fromYaml(f, VerticalConfig.class);
-//			f.close();
-//		} catch (Exception e) {
-//			logger.error("Error getting default config", e);
-//		}
-//		return ret;
-		
-		
-		
-		List<VerticalConfig> ret = new ArrayList<>();
-		try {
-			Resource r = resourceResolver.getResource(CLASSPATH_VERTICALS_DEFAULT);
-			return serialisationService.fromYaml(r.getInputStream(), VerticalConfig.class);
-		} catch (IOException e) {
-			logger.error("Cannot load  verticals from {} : {}", CLASSPATH_VERTICALS, e.getMessage());
-			return null;
-		}
+
+		return defaultConfig;
+	
 	}
 
 
