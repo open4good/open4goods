@@ -22,6 +22,10 @@ management:
       enabled: true
       show-details: always
       
+amazonConfig:
+  affiliate-tag: nudger-21
+  amazon-search-link: "https://www.amazon.fr/s?k={search_terms}&tag={affiliate_tag}"
+
 spring:
   ai:
     openai:
@@ -35,9 +39,6 @@ spring:
     virtual:
       enabled: true
 
-amazonConfig:
-  affiliate-tag: nudger-21
-  amazon-search-link: "https://www.amazon.fr/s?k={search_terms}&tag={affiliate_tag}"
       
   mail:
 #   host: 
