@@ -285,7 +285,7 @@ public class BackupService implements HealthIndicator {
 
 		p.getOfferNames().addAll(p.getNames().getOfferNames());
 		p.getNames().getOfferNames().clear();
-		p.setLastChange(System.currentTimeMillis());
+//		p.setLastChange(System.currentTimeMillis());
 		return p;
 	}
 
