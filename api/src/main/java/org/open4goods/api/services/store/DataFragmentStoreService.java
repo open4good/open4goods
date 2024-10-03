@@ -10,6 +10,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.commons.lang3.StringUtils;
+import org.open4goods.api.config.yml.ApiProperties;
+import org.open4goods.api.config.yml.IndexationConfig;
 import org.open4goods.api.services.AggregationFacadeService;
 import org.open4goods.commons.dao.ProductRepository;
 import org.open4goods.commons.exceptions.AggregationSkipException;
@@ -32,7 +34,6 @@ import jakarta.annotation.PreDestroy;
  *
  * It also provides mechanism to stop indexation (and keep data in the persisted
  * file), and to perform "direct" updates without giving up to the file buffer
- * TODO : Could also have a thread pool here to increase performances
  * @author Goulven.Furet
  *
  */
@@ -52,8 +53,7 @@ public class DataFragmentStoreService {
 	private final AtomicBoolean serviceShutdown = new AtomicBoolean(false);
 
 	// The queue implementation
-	// TODO : Limit from conf
-	private BlockingQueue<DataFragment> queue = new LinkedBlockingQueue<>(15000);
+	private BlockingQueue<DataFragment> queue;
 
 	private ProductRepository aggregatedDataRepository;
 
@@ -62,24 +62,21 @@ public class DataFragmentStoreService {
 
 	/**
 	 *
+	 * @param indexationConfig 
 	 * @param queueFolder The folder where indexation queued datas will be stored
 	 */
-	public DataFragmentStoreService(StandardiserService standardiserService, AggregationFacadeService generationService, ProductRepository aggregatedDataRepository) {
+	public DataFragmentStoreService(StandardiserService standardiserService, AggregationFacadeService generationService, ProductRepository aggregatedDataRepository, IndexationConfig indexationConfig) {
 
 
 		this.standardiserService = standardiserService;
 		this.aggregatedDataRepository = aggregatedDataRepository;
 		this.generationService=generationService;
 
-		// TODO : from conf
-		int dequeueSize = 150;
-		int workers = 2;
-		int pauseDuration = 4000;
-//		
-		logger.info("Starting file queue consumer thread, with bulk page size of {} items", dequeueSize );
-//				
-		for (int i = 0; i < workers; i++) {					
-			Thread.startVirtualThread(new DataFragmentAggregationWorker(this, dequeueSize, pauseDuration,"dequeue-worker-"+i));
+		this.queue =  new LinkedBlockingQueue<>(indexationConfig.getQueueMaxSize());
+		
+		for (int i = 0; i < indexationConfig.getWorkers(); i++) {					
+			logger.info("Starting file queue consumer thread {}, with bulk page size of {} items",i, indexationConfig.getBulkPageSize() );
+			Thread.startVirtualThread(new DataFragmentAggregationWorker(this, indexationConfig.getBulkPageSize(), indexationConfig.getPauseDuration(),"dequeue-worker-"+i));
 		}
 		
 		
