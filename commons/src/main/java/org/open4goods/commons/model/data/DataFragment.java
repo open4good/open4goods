@@ -656,7 +656,7 @@ public class DataFragment implements Standardisable, Validable {
 
 	public void addProductTags(final List<String> tags) {
 
-		addProductTag(StringUtils.join(tags, ">").toUpperCase().trim());
+		addProductTag(StringUtils.join(tags, " | ").toUpperCase().trim());
 	}
 
 	public void addProductTag(final String category) {

@@ -105,10 +105,6 @@ public class CsvDataSourceProperties {
 	 */
 	private Boolean trimUrlParameters = false;
 
-	/**
-	 * Column name indicating the productCategory
-	 */
-	protected List<String> productTags = new ArrayList<>();
 
 	/**
 	 * If true, all columns of this datasource will ba added as attributes
@@ -286,15 +282,6 @@ public class CsvDataSourceProperties {
 	public void setTrimUrlParameters(final Boolean trimUrlParameters) {
 		this.trimUrlParameters = trimUrlParameters;
 	}
-
-	public List<String> getProductTags() {
-		return productTags;
-	}
-
-	public void setProductTags(List<String> productTags) {
-		this.productTags = productTags;
-	}
-
 
 
 	public Set<String> getPrice() {
