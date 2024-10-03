@@ -12,6 +12,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Random;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.commons.lang3.StringUtils;
 import org.open4goods.commons.config.yml.datasource.DataSourceProperties;
@@ -46,7 +47,6 @@ public class FeedService {
 	private DataSourceConfigService datasourceConfigService;
 	private Map<String, FeedConfiguration>  feedConfigs;
 
-	
 	public FeedService(SerialisationService serialisationService, DataSourceConfigService datasourceConfigService, CsvDatasourceFetchingService fetchingService, Map<String, FeedConfiguration> feedConfigs) {
 		super();
 		this.feedConfigs = feedConfigs;
@@ -61,6 +61,12 @@ public class FeedService {
 	 */
 	@Scheduled(cron = "0 0 20,8 * * ?")
 	public void fetchFeeds() {
+		
+		if (fetchingService.getQueue().size() > 0) {
+			logger.warn("Fetching feeds skipped, it is already running");
+			return;
+		}
+		
 		logger.info("Fetching CSV affiliation feeds");
 		// 1 - Loads the whole feeds as a list of DataSourceProperties, eventually hot defaulted
 		
