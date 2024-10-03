@@ -6,6 +6,7 @@ import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -418,7 +419,7 @@ public class CsvIndexationWorker implements Runnable {
 		}
 
 		p.addName(getFromCsvRow(item, csvProperties.getName()));
-		p.addProductTags(getCategoryFromCsvRows(item, csvProperties.getProductTags()));
+		p.addProductTags(getCategoryFromCsvRows(item));
 
 		if (!StringUtils.isEmpty(csvProperties.getAttrs())) {
 			handleAttributes(p, config, getFromCsvRow(item, csvProperties.getAttrs()), dedicatedLogger);
@@ -677,24 +678,21 @@ public class CsvIndexationWorker implements Runnable {
 	 */
 	private String getFromCsvRow(final Map<String, String> item, final String colName) {
 
-		final String val = item.get(colName);
-		if (null != val) {
-			return val;
-
-		} else {
-			return null;
-		}
+		return item.get(colName);
+		
 	}
 
-	private List<String> getCategoryFromCsvRows(Map<String, String> item, List<String> colNames) {
-		List<String> ret = new ArrayList<>();
+	private List<String> getCategoryFromCsvRows(Map<String, String> item) {
+		Set<String> catsColumns = new HashSet<String>(item.keySet());
+		
+		List<String> ret = catsColumns.stream()
+							.filter(e -> e.toLowerCase().contains("categor"))
+							.sorted()
+							.map(e -> item.get(e) )
+							.filter(e -> !StringUtils.isEmpty(e))
+							.toList();
 
-		for (String colName : colNames) {
-			String val = getFromCsvRow(item, colName);
-			if (!StringUtils.isEmpty(val)) {
-				ret.add(val);
-			}
-		}
+
 		return ret;
 	}
 
