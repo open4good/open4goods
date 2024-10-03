@@ -37,8 +37,9 @@ public class TaxonomyRealTimeAggregationService extends AbstractAggregationServi
 		
 		String category = input.getCategory();
 		if (!StringUtils.isEmpty(category)) {
-			output.getDatasourceCategories().add(category);
-			output.getMappedCategories().add(new UnindexedKeyVal(input.getDatasourceConfigName(), category));
+			UnindexedKeyVal ui = new UnindexedKeyVal(input.getDatasourceConfigName(), category);
+			output.getMappedCategories().remove(ui);			
+			output.getMappedCategories().add(ui);			
 		}
 		
 		onProduct(output, vConf);
@@ -47,19 +48,28 @@ public class TaxonomyRealTimeAggregationService extends AbstractAggregationServi
 	@Override
 	public void onProduct(Product data, VerticalConfig vConf) throws AggregationSkipException {
 		
+		
+		////////////////////////////
+		// Updating the categories
+		////////////////////////////
+		data.getDatasourceCategories().clear();
+		data.getMappedCategories().forEach(e -> {
+			data.getDatasourceCategories().add(e.getValue());
+		});
+		
 		////////////////////////////
 		// Setting google taxonomy
 		////////////////////////////
 		data.setGoogleTaxonomyId(null);
-		if (data.getDatasourceCategories().size() != 0) {
-			Integer taxonomy =   googleTaxonomy(data);
-			if (null != taxonomy) {			
-				data.setGoogleTaxonomyId(taxonomy);
-				dedicatedLogger.info("Detected taxonomy {} for categories : {}", taxonomy, data.getDatasourceCategories());
-			} else {
-				dedicatedLogger.info("No taxonomy found for categories : {}", data.getDatasourceCategories());
-			}
-		}
+//		if (data.getDatasourceCategories().size() != 0) {
+//			Integer taxonomy =   googleTaxonomy(data);
+//			if (null != taxonomy) {			
+//				data.setGoogleTaxonomyId(taxonomy);
+//				dedicatedLogger.info("Detected taxonomy {} for categories : {}", taxonomy, data.getDatasourceCategories());
+//			} else {
+//				dedicatedLogger.info("No taxonomy found for categories : {}", data.getDatasourceCategories());
+//			}
+//		}
 
 		
 		
