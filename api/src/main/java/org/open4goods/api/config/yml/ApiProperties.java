@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.lang3.ArrayUtils;
+import org.open4goods.api.controller.api.IndexationController;
 import org.open4goods.commons.config.BrandsConfiguration;
 import org.open4goods.commons.config.yml.DevModeConfiguration;
 import org.open4goods.commons.config.yml.GithubConfiguration;
@@ -191,6 +192,12 @@ public class ApiProperties {
 	 * The list of hosts allowed for CORS
 	 */
 	private List<String> corsAllowedHosts = new ArrayList<>();
+	
+	
+	/**
+	 * Configuration for indexation (number of threads, batch size, ...)
+	 */
+	private IndexationConfig indexationConfig = new IndexationConfig();
 	
 	
 	/**
@@ -610,6 +617,18 @@ public class ApiProperties {
 
 	public void setGenAiPauseDurationMs(long genAiPauseDurationMs) {
 		this.genAiPauseDurationMs = genAiPauseDurationMs;
+	}
+
+
+
+	public IndexationConfig getIndexationConfig() {
+		return indexationConfig;
+	}
+
+
+
+	public void setIndexationConfig(IndexationConfig indexationConfig) {
+		this.indexationConfig = indexationConfig;
 	}
 
 
