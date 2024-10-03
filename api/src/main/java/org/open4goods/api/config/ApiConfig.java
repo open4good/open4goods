@@ -303,7 +303,7 @@ public class ApiConfig {
 //	
 	@Bean TaskScheduler threadPoolTaskScheduler() {
 		final ThreadPoolTaskScheduler threadPoolTaskScheduler = new ThreadPoolTaskScheduler();
-		threadPoolTaskScheduler.setPoolSize(2);
+		threadPoolTaskScheduler.setPoolSize(5);
 		threadPoolTaskScheduler.setThreadNamePrefix("ThreadPoolTaskScheduler");
 		return threadPoolTaskScheduler;
 	}
