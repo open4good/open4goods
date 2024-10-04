@@ -1,18 +1,17 @@
 package org.open4goods.api.services.store;
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.commons.lang3.StringUtils;
-import org.open4goods.api.config.yml.ApiProperties;
-import org.open4goods.api.config.yml.IndexationConfig;
 import org.open4goods.api.services.AggregationFacadeService;
+import org.open4goods.commons.config.yml.IndexationConfig;
 import org.open4goods.commons.dao.ProductRepository;
 import org.open4goods.commons.exceptions.AggregationSkipException;
 import org.open4goods.commons.exceptions.ValidationException;
@@ -23,6 +22,8 @@ import org.open4goods.commons.services.StandardiserService;
 import org.open4goods.commons.store.repository.ProductIndexationWorker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
+import org.springframework.data.elasticsearch.core.query.UpdateQuery;
 
 import jakarta.annotation.PreDestroy;
 
@@ -72,9 +73,9 @@ public class DataFragmentStoreService {
 		this.aggregatedDataRepository = aggregatedDataRepository;
 		this.generationService=generationService;
 
-		this.queue =  new LinkedBlockingQueue<>(indexationConfig.getQueueMaxSize());
+		this.queue =  new LinkedBlockingQueue<>(indexationConfig.getDatafragmentQueueMaxSize());
 		
-		for (int i = 0; i < indexationConfig.getWorkers(); i++) {					
+		for (int i = 0; i < indexationConfig.getDataFragmentworkers(); i++) {					
 			logger.info("Starting file queue consumer thread {}, with bulk page size of {} items",i, indexationConfig.getBulkPageSize() );
 			//TODO(p3,perf) : Virtual threads, but ko with visualVM profiling
 			new Thread(new DataFragmentAggregationWorker(this, indexationConfig.getBulkPageSize(), indexationConfig.getPauseDuration(),"dequeue-worker-"+i)).start();;
@@ -211,8 +212,6 @@ public class DataFragmentStoreService {
 			logger.error("Error while dequeing DataFragments",e);
 		}	
 	}
-
-
 
 
 	public AtomicBoolean getServiceShutdown() {

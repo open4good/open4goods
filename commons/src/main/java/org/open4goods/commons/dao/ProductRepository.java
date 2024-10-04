@@ -11,6 +11,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.open4goods.commons.config.yml.IndexationConfig;
 import org.open4goods.commons.config.yml.ui.VerticalConfig;
 import org.open4goods.commons.exceptions.ResourceNotFoundException;
 import org.open4goods.commons.model.constants.CacheConstants;
@@ -78,20 +79,20 @@ public class ProductRepository {
 
 	public ProductRepository() {
 		
-		// TODO : from conf
-		int dequeueSize = 20;
-		int workers = 3;
-		int pauseDuration = 5000;
 		
-		logger.info("Starting file queue consumer thread, with bulk page size of {} items", dequeueSize );
-				
-		for (int i = 0; i < workers; i++) {
-			//TODO(p3,perf) : Virtual threads, but ko with visualVM profiling
-			new Thread((new ProductIndexationWorker(this, dequeueSize, pauseDuration,"dequeue-worker-"+i))).start();
-		}
 	}
 
 //	private ExecutorService executor = Executors.newVirtualThreadPerTaskExecutor();
+
+	public ProductRepository(IndexationConfig indexationConfig) {
+				logger.info("Starting file queue consumer thread, with bulk page size of {} items", indexationConfig.getBulkPageSize() );
+						
+				for (int i = 0; i < indexationConfig.getProductWorkers(); i++) {
+					//TODO(p3,perf) : Virtual threads, but ko with visualVM profiling
+					new Thread((new ProductIndexationWorker(this, indexationConfig.getBulkPageSize(), indexationConfig.getPauseDuration(),"dequeue-worker-"+i))).start();
+				}
+	
+	}
 
 	/**
 	 * Return all products matching the vertical in the config or already having a
@@ -606,6 +607,38 @@ public class ProductRepository {
 		return null;
 	}
 
+	
+	public void updateLastChange(String documentId, long lastChange) {
+	    Map<String, Object> fieldsToUpdate = new HashMap<>();
+	    fieldsToUpdate.put("lastChange", lastChange);
+
+	    UpdateQuery updateQuery = UpdateQuery.builder(documentId)
+	        .withDocument(Document.from(fieldsToUpdate))
+	        .withIndex(current_index.getIndexName())
+	        .build();
+
+	    elasticsearchTemplate.update(updateQuery, current_index);
+	}
+	
+
+	public void updateProductFields(String documentId, Map<String, Object> fieldsToUpdate) {
+	    // Script to iterate over the map and update the fields in the _source
+	    String script = "for (entry in params.fieldsToUpdate.entrySet()) { ctx._source[entry.getKey()] = entry.getValue(); }";
+
+	    // Pass the updated fields as parameters
+	    Map<String, Object> params = new HashMap<>();
+	    params.put("fieldsToUpdate", fieldsToUpdate);
+
+	    // Create an UpdateQuery with the script and parameters
+	    UpdateQuery updateQuery = UpdateQuery.builder(documentId)
+	        .withScript(script)
+	        .withParams(params)
+	        .withIndex(Product.DEFAULT_REPO)
+	        .build();
+
+	    // Execute the update using ElasticsearchOperations
+	    elasticsearchTemplate.update(updateQuery, IndexCoordinates.of( Product.DEFAULT_REPO));
+	}
 	/**
 	 *
 	 * @return Criteria representing recent prices

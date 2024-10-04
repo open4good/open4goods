@@ -11,6 +11,7 @@ import org.open4goods.commons.config.BrandsConfiguration;
 import org.open4goods.commons.config.yml.DevModeConfiguration;
 import org.open4goods.commons.config.yml.GithubConfiguration;
 import org.open4goods.commons.config.yml.IcecatConfiguration;
+import org.open4goods.commons.config.yml.IndexationConfig;
 import org.open4goods.commons.config.yml.ui.DescriptionsAggregationConfig;
 import org.open4goods.commons.config.yml.ui.ImageGenerationConfig;
 import org.open4goods.crawler.config.yml.FetcherProperties;

@@ -398,7 +398,7 @@ public class ApiConfig {
 
 	@Bean
 	ProductRepository aggregatedDatasRepository(@Autowired final ApiProperties config) {
-		return new ProductRepository();
+		return new ProductRepository(config.getIndexationConfig());
 	}
 
 
