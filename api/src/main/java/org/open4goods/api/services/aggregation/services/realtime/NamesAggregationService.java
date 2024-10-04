@@ -41,7 +41,7 @@ public class NamesAggregationService extends AbstractAggregationService {
 	}
 
 	@Override
-	public void onDataFragment(final DataFragment df, Product output, VerticalConfig vConf) throws AggregationSkipException {
+	public  Map<String, Object> onDataFragment(final DataFragment df, Product output, VerticalConfig vConf) throws AggregationSkipException {
 
 		// Adding raw offer names
 		// TODO : names are not localized
@@ -49,11 +49,12 @@ public class NamesAggregationService extends AbstractAggregationService {
 				.addAll(df.getNames().stream().map(this::normalizeName).collect(Collectors.toSet()));
 
 		onProduct(output,vConf);
+		return null;
 
 	}
 
 	@Override
-	public void onProduct(Product data, VerticalConfig vConf) throws AggregationSkipException {
+	public Map<String, Object> onProduct(Product data, VerticalConfig vConf) throws AggregationSkipException {
 
 		logger.info("Name generation for product {}", data.getId());
 
@@ -95,6 +96,7 @@ public class NamesAggregationService extends AbstractAggregationService {
 			}
 
 		}
+		return null;
 
 		
 //		if (null != vConf) {

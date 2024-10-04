@@ -1,6 +1,7 @@
 package org.open4goods.api.services.aggregation.services.batch.scores;
 
 import java.util.Collection;
+import java.util.Map;
 
 import org.open4goods.commons.config.yml.ui.VerticalConfig;
 import org.open4goods.commons.exceptions.AggregationSkipException;
@@ -27,7 +28,8 @@ public class CleanScoreAggregationService extends AbstractScoreAggregationServic
 
 
 	@Override
-	public void onProduct(Product data, VerticalConfig vConf) throws AggregationSkipException {
+	public Map<String, Object> onProduct(Product data, VerticalConfig vConf) throws AggregationSkipException {
+		return null;
 		
 	}
 	

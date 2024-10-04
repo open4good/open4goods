@@ -44,7 +44,7 @@ import org.springframework.data.elasticsearch.annotations.Mapping;
 import org.springframework.data.elasticsearch.annotations.Setting;
 import org.springframework.data.elasticsearch.annotations.WriteTypeHint;
 
-@Document(indexName = Product.DEFAULT_REPO, createIndex = true, writeTypeHint = WriteTypeHint.FALSE, dynamic = Dynamic.FALSE)
+@Document(indexName = Product.DEFAULT_REPO, alwaysWriteMapping = true, createIndex = true, writeTypeHint = WriteTypeHint.FALSE, dynamic = Dynamic.FALSE)
 //@RedisHash(value=Product.DEFAULT_REPO, timeToLive = ProductRepository.VALID_UNTIL_DURATION)
 @Setting( settingPath = "/product-settings.json")
 @Mapping(mappingPath = "/product-mappings.json")
@@ -139,7 +139,13 @@ public class Product implements Standardisable {
 	 */
 	private Set<String> datasourceCategories = new HashSet<>();
 
+	// TODO(p1, design) : Remove on next import / export, update backupservice.translate
 	private Set<UnindexedKeyVal> mappedCategories = new HashSet<>();
+	
+	/**
+	 * The product category path by datasources
+	 */
+	private Map<String,String> categoriesByDatasources = new HashMap<String, String>();
 	
 	private Map<String, Score> scores = new HashMap<>();
 	
@@ -843,13 +849,13 @@ public class Product implements Standardisable {
 	
 
 
-	public Set<UnindexedKeyVal> getMappedCategories() {
-		return mappedCategories;
-	}
-
-	public void setMappedCategories(Set<UnindexedKeyVal> mappedCategories) {
-		this.mappedCategories = mappedCategories;
-	}
+//	public Set<UnindexedKeyVal> getMappedCategories() {
+//		return mappedCategories;
+//	}
+//
+//	public void setMappedCategories(Set<UnindexedKeyVal> mappedCategories) {
+//		this.mappedCategories = mappedCategories;
+//	}
 
 	public Map<String, Score> getScores() {
 		return scores;
@@ -931,6 +937,22 @@ public class Product implements Standardisable {
 
 	public void setOfferNames(Set<String> offerNames) {
 		this.offerNames = offerNames;
+	}
+
+	public Map<String, String> getCategoriesByDatasources() {
+		return categoriesByDatasources;
+	}
+
+	public void setCategoriesByDatasources(Map<String, String> categoriesByDatasources) {
+		this.categoriesByDatasources = categoriesByDatasources;
+	}
+
+	public Set<UnindexedKeyVal> getMappedCategories() {
+		return mappedCategories;
+	}
+
+	public void setMappedCategories(Set<UnindexedKeyVal> mappedCategories) {
+		this.mappedCategories = mappedCategories;
 	}
 
 

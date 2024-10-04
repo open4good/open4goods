@@ -1,5 +1,7 @@
 package org.open4goods.api.services.aggregation.services.batch.scores;
 
+import java.util.Map;
+
 import org.apache.commons.lang3.StringUtils;
 import org.open4goods.commons.config.yml.ui.VerticalConfig;
 import org.open4goods.commons.exceptions.ValidationException;
@@ -34,14 +36,14 @@ public class Brand2ScoreAggregationService extends AbstractScoreAggregationServi
 	
 
 	@Override
-	public void onProduct(Product data, VerticalConfig vConf) {
+	public Map<String, Object> onProduct(Product data, VerticalConfig vConf) {
 
 		// Enforce score removing
 		data.getScores().remove(BRAND_SUSTAINABILITY_SCORENAME);
 		
 		
 		if (StringUtils.isEmpty(data.brand())) {
-			return;
+			return null;
 		}
 		
 		try {
@@ -53,7 +55,7 @@ public class Brand2ScoreAggregationService extends AbstractScoreAggregationServi
 			Double score = brandService.getBrandScore(company,"sustainalytics.com");
 			if (null == score) {
 				dedicatedLogger.error("No score found for brand {}",data.brand());
-				return;
+				return null;
 			}
 			
 			// Processing cardinality
@@ -63,7 +65,8 @@ public class Brand2ScoreAggregationService extends AbstractScoreAggregationServi
 			data.getScores().put(s.getName(),s);
 		} catch (ValidationException e) {
 			dedicatedLogger.warn("Brand to score fail for {}",data,e);
-		}								
+		}
+		return null;								
 		
 		
 	}
