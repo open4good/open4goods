@@ -2,6 +2,8 @@
 package org.open4goods.api.services.aggregation.services.realtime;
 
 import java.util.AbstractMap.SimpleEntry;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
@@ -40,7 +42,7 @@ public class IdentityAggregationService extends AbstractAggregationService {
 	}
 
 	@Override
-	public void onDataFragment(final DataFragment input, final Product output, VerticalConfig vConf) throws AggregationSkipException {
+	public  Map<String, Object> onDataFragment(final DataFragment input, final Product output, VerticalConfig vConf) throws AggregationSkipException {
 
 		/////////////////////////////
 		// Validating barcodes
@@ -77,10 +79,11 @@ public class IdentityAggregationService extends AbstractAggregationService {
 
 		
 		onProduct(output, vConf);
+		return null;
 	}
 
 	@Override
-	public void onProduct(Product output, VerticalConfig vConf) throws AggregationSkipException {
+	public HashMap<String, Object> onProduct(Product output, VerticalConfig vConf) throws AggregationSkipException {
 
 		if (StringUtils.isEmpty(output.gtin())) {
 			dedicatedLogger.warn("Skipping product aggregation, empty barcode");
@@ -112,6 +115,7 @@ public class IdentityAggregationService extends AbstractAggregationService {
 
 		// Setting barcode type
 		output.getGtinInfos().setUpcType(valResult.getKey());
+		return null;
 		
 	}
 

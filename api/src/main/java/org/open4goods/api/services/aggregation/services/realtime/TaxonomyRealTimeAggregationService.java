@@ -1,7 +1,9 @@
 package org.open4goods.api.services.aggregation.services.realtime;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 import org.open4goods.api.services.aggregation.AbstractAggregationService;
@@ -32,29 +34,30 @@ public class TaxonomyRealTimeAggregationService extends AbstractAggregationServi
 	}
 
 	@Override
-	public void onDataFragment(final DataFragment input, final Product output, VerticalConfig vConf) throws AggregationSkipException {
+	public  Map<String, Object> onDataFragment(final DataFragment input, final Product output, VerticalConfig vConf) throws AggregationSkipException {
 
 		
 		String category = input.getCategory();
 		if (!StringUtils.isEmpty(category)) {
-			UnindexedKeyVal ui = new UnindexedKeyVal(input.getDatasourceConfigName(), category);
-			output.getMappedCategories().remove(ui);			
-			output.getMappedCategories().add(ui);			
+			
+			// TODO : If return null
+			output.getCategoriesByDatasources().put(input.getDatasourceConfigName(), category);
 		}
 		
 		onProduct(output, vConf);
+		
+		return new HashMap<String, Object>();
 	}
 
 	@Override
-	public void onProduct(Product data, VerticalConfig vConf) throws AggregationSkipException {
+	public HashMap<String, Object> onProduct(Product data, VerticalConfig vConf) throws AggregationSkipException {
 		
 		
 		////////////////////////////
 		// Updating the categories
 		////////////////////////////
-		data.getDatasourceCategories().clear();
-		data.getMappedCategories().forEach(e -> {
-			data.getDatasourceCategories().add(e.getValue());
+		data.getCategoriesByDatasources().values() .forEach(e -> {
+			data.getDatasourceCategories().add(e);
 		});
 		
 		////////////////////////////
@@ -111,7 +114,10 @@ public class TaxonomyRealTimeAggregationService extends AbstractAggregationServi
 //					dedicatedLogger.info("No taxonomy found for categories : {}", data.getDatasourceCategories());
 //				}
 //			}
-//		}		
+//		}
+		
+		return new HashMap<String, Object>();
+		
 	}
 	
 	

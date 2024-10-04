@@ -54,7 +54,7 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 
 
 	@Override
-	public void onProduct(Product data, VerticalConfig vConf) throws AggregationSkipException {
+	public HashMap<String, Object> onProduct(Product data, VerticalConfig vConf) throws AggregationSkipException {
 
 		
 		//////////////////////////////////////////
@@ -94,6 +94,7 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 				a.setIcecatTaxonomyIds(icecatTaxonomyIds );
 			}
 		});
+		return null;
 	}
 
 	
@@ -105,10 +106,10 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 	 * @param match2
 	 */
 	@Override
-	public void onDataFragment(final DataFragment dataFragment, final Product product, VerticalConfig vConf) throws AggregationSkipException {
+	public  Map<String, Object> onDataFragment(final DataFragment dataFragment, final Product product, VerticalConfig vConf) throws AggregationSkipException {
 
 		if (dataFragment.getAttributes().size() == 0) {
-			return;
+			return null;
 		}
 		
 		try {
@@ -255,6 +256,7 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 		
 		
 		onProduct(product, vConf);
+		return null;
 	}
 
 

@@ -3,6 +3,8 @@ package org.open4goods.api.services.aggregation;
 import java.io.Closeable;
 import java.io.IOException;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.open4goods.commons.config.yml.ui.VerticalConfig;
 import org.open4goods.commons.exceptions.AggregationSkipException;
@@ -27,11 +29,12 @@ public abstract class AbstractAggregationService  implements Closeable {
 
 
 	/**
-	 * Called on each participant DataFragment, in realtime mode
+	 * Called on each participant DataFragment, in realtime mode. Returned maps is the updated datas, for partial updates
 	 * @param data
 	 */
-	public void onDataFragment (final DataFragment input, final Product output, VerticalConfig vConf) throws AggregationSkipException {
+	public  Map<String, Object> onDataFragment (final DataFragment input, final Product output, VerticalConfig vConf) throws AggregationSkipException {
 		
+		return new HashMap<String, Object>();
 	}
 
 	
@@ -41,7 +44,7 @@ public abstract class AbstractAggregationService  implements Closeable {
 	 * @param output
 	 * @throws AggregationSkipException
 	 */
-	public abstract void onProduct(Product data, VerticalConfig vConf) throws AggregationSkipException;
+	public abstract Map<String, Object>  onProduct(Product data, VerticalConfig vConf) throws AggregationSkipException;
 	
 
 

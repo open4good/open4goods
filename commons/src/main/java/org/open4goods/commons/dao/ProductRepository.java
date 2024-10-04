@@ -29,10 +29,12 @@ import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
 import org.springframework.data.elasticsearch.core.MultiGetItem;
 import org.springframework.data.elasticsearch.core.SearchHit;
 import org.springframework.data.elasticsearch.core.SearchHits;
+import org.springframework.data.elasticsearch.core.document.Document;
 import org.springframework.data.elasticsearch.core.mapping.IndexCoordinates;
 import org.springframework.data.elasticsearch.core.query.Criteria;
 import org.springframework.data.elasticsearch.core.query.CriteriaQuery;
 import org.springframework.data.elasticsearch.core.query.Query;
+import org.springframework.data.elasticsearch.core.query.UpdateQuery;
 
 import co.elastic.clients.elasticsearch._types.aggregations.Aggregation;
 import co.elastic.clients.elasticsearch._types.aggregations.LongTermsAggregate;
@@ -83,8 +85,9 @@ public class ProductRepository {
 		
 		logger.info("Starting file queue consumer thread, with bulk page size of {} items", dequeueSize );
 				
-		for (int i = 0; i < workers; i++) {			
-			Thread.startVirtualThread((new ProductIndexationWorker(this, dequeueSize, pauseDuration,"dequeue-worker-"+i)));
+		for (int i = 0; i < workers; i++) {
+			//TODO(p3,perf) : Virtual threads, but ko with visualVM profiling
+			new Thread((new ProductIndexationWorker(this, dequeueSize, pauseDuration,"dequeue-worker-"+i))).start();
 		}
 	}
 
@@ -562,8 +565,47 @@ public class ProductRepository {
 		
 	}
 	
+	public void updatePartialFields(String id, Map<String, Object> fieldsToUpdate) {
+	    // Define the update query with the partial fields
+	    Map<String, Object> scriptParams = new HashMap<>(fieldsToUpdate);
+	    
+	    UpdateQuery updateQuery = UpdateQuery.builder(id)
+	        .withDocument(Document.from(scriptParams))
+	        .withIndex(current_index.getIndexName())
+	        .build();
+
+	    // Perform the update using ElasticsearchOperations
+	    elasticsearchTemplate.update(updateQuery, IndexCoordinates.of(MAIN_INDEX_NAME));
+	}
 	
 	
+	// TODO : review
+	public void bulkUpdatePartialFields(List<Product> productsToUpdate) {
+		
+
+		
+		
+		
+	    List<UpdateQuery> updateQueries = productsToUpdate.stream()
+	        .map(product -> {
+	            Map<String, Object> fieldsToUpdate = extractFieldsToUpdate(product);
+	            return UpdateQuery.builder(product.gtin())
+	                .withDocument(Document.from(fieldsToUpdate))
+	                .withIndex(current_index.getIndexName())
+	                .build();
+	        })
+	        .collect(Collectors.toList());
+
+	    // Perform the bulk update
+	    elasticsearchTemplate.bulkUpdate(updateQueries, current_index);
+	}
+	
+	
+	private Map<String, Object> extractFieldsToUpdate(Product product) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 	/**
 	 *
 	 * @return Criteria representing recent prices

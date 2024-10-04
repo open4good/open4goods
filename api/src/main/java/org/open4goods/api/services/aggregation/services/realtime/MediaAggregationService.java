@@ -41,7 +41,7 @@ public class MediaAggregationService extends AbstractAggregationService{
 	}
 
 	@Override
-	public void onDataFragment(final DataFragment input, final Product output, VerticalConfig vConf) throws AggregationSkipException {
+	public  Map<String, Object> onDataFragment(final DataFragment input, final Product output, VerticalConfig vConf) throws AggregationSkipException {
 
 		
 		
@@ -72,6 +72,7 @@ public class MediaAggregationService extends AbstractAggregationService{
 				output.getResources().add(r);				
 			}
 		}
+		return null;
 	}
 
 
@@ -81,7 +82,8 @@ public class MediaAggregationService extends AbstractAggregationService{
 	}
 
 	@Override
-	public void onProduct(Product data, VerticalConfig vConf) throws AggregationSkipException {
+	public Map<String, Object> onProduct(Product data, VerticalConfig vConf) throws AggregationSkipException {
+		return null;
 	}
 
 

@@ -1,8 +1,5 @@
 package org.open4goods.commons.model.product;
 
-import java.util.HashSet;
-import java.util.Set;
-
 import org.open4goods.commons.model.Localisable;
 
 public class ProductTexts {
@@ -24,12 +21,8 @@ public class ProductTexts {
 	
 //	@Field(index = true, store = false, type = FieldType.Text, analyzer = "french")
 	//	@Field(index = true, store = false, type = FieldType.Text)
-	//TODO(p1, design) : remove when migration done
-	private Set<String> offerNames = new HashSet<>();
 
-
-	
-//	
+	//	
 //	
 //	/**
 //	 * 	Adds a keyed name for a language
@@ -48,15 +41,6 @@ public class ProductTexts {
 //	
 //	
 //	
-
-
-	public Set<String> getOfferNames() {
-		return offerNames;
-	}
-
-	public void setOfferNames(final Set<String> offerNames) {
-		this.offerNames = offerNames;
-	}
 
 	public Localisable<String, String> getUrl() {
 		return url;

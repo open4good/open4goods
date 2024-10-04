@@ -76,7 +76,8 @@ public class DataFragmentStoreService {
 		
 		for (int i = 0; i < indexationConfig.getWorkers(); i++) {					
 			logger.info("Starting file queue consumer thread {}, with bulk page size of {} items",i, indexationConfig.getBulkPageSize() );
-			Thread.startVirtualThread(new DataFragmentAggregationWorker(this, indexationConfig.getBulkPageSize(), indexationConfig.getPauseDuration(),"dequeue-worker-"+i));
+			//TODO(p3,perf) : Virtual threads, but ko with visualVM profiling
+			new Thread(new DataFragmentAggregationWorker(this, indexationConfig.getBulkPageSize(), indexationConfig.getPauseDuration(),"dequeue-worker-"+i)).start();;
 		}
 		
 		

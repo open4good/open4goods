@@ -140,6 +140,10 @@
         "type": "object",
         "enabled": false
       },
+      "categoriesByDatasources": {
+        "type": "object",
+        "enabled": false
+      },
       "googleTaxonomyId": {
         "type": "integer",
         "index": false

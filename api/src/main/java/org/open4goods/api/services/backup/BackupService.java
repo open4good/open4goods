@@ -283,9 +283,11 @@ public class BackupService implements HealthIndicator {
 	 */
 	private Product translate(Product p) {
 
-		p.getOfferNames().addAll(p.getNames().getOfferNames());
-		p.getNames().getOfferNames().clear();
-//		p.setLastChange(System.currentTimeMillis());
+		// Setting datasources to new Map format
+		p.getMappedCategories().forEach(e -> {
+			p.getCategoriesByDatasources().put(e.getKey(), e.getValue());
+		});
+		
 		return p;
 	}
 

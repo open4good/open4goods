@@ -56,7 +56,7 @@ public class PriceAggregationService extends AbstractAggregationService {
 	}
 
 	@Override
-	public void onDataFragment(final DataFragment fragment, final Product aggregatedData,VerticalConfig vConf) throws AggregationSkipException {
+	public  Map<String, Object> onDataFragment(final DataFragment fragment, final Product aggregatedData,VerticalConfig vConf) throws AggregationSkipException {
 
 		if (!fragment.hasPrice() || !fragment.affiliated()) {
 			dedicatedLogger.info("No price for data fragment {}, skipping", fragment );
@@ -71,11 +71,12 @@ public class PriceAggregationService extends AbstractAggregationService {
 		
 		// Calling the stateless handling
 		onProduct(aggregatedData, vConf);
+		return null;
 	}
 
 	
 	@Override
-	public void onProduct(Product data, VerticalConfig vConf) throws AggregationSkipException {
+	public Map<String, Object> onProduct(Product data, VerticalConfig vConf) throws AggregationSkipException {
 
 		///////////////////
 		// Filtering : 
@@ -136,6 +137,7 @@ public class PriceAggregationService extends AbstractAggregationService {
 
 		// Setting the result
 		data.setPrice(aggPrices);
+		return null;
 
 		// Setting if has an occasion offer
 	}

@@ -1,6 +1,7 @@
 package org.open4goods.api.services.aggregation.services.batch.scores;
 
 import java.util.Collection;
+import java.util.Map;
 
 import org.open4goods.commons.config.yml.attributes.AttributeConfig;
 import org.open4goods.commons.config.yml.ui.AttributesConfig;
@@ -22,7 +23,7 @@ public class Attribute2ScoreAggregationService extends AbstractScoreAggregationS
 	
 	
 	@Override
-	public void onProduct(Product data, VerticalConfig vConf) {
+	public Map<String, Object> onProduct(Product data, VerticalConfig vConf) {
 
 		
 		Collection<AggregatedAttribute> aggattrs =    data.getAttributes().getAggregatedAttributes().values()  ;
@@ -56,6 +57,7 @@ public class Attribute2ScoreAggregationService extends AbstractScoreAggregationS
 				dedicatedLogger.error("Error while processing attribute {}",aga);
 			}
 		}
+		return null;
 	}
 
 

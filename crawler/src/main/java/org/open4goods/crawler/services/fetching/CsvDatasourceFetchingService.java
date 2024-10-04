@@ -79,7 +79,7 @@ public class CsvDatasourceFetchingService extends DatasourceFetchingService impl
 		
 		for (int i = 0; i < fetcherProperties.getConcurrentFetcherTask(); i++) {			
 			// TODO(conf,p3) : wait (4000) from config
-			Thread.startVirtualThread(new CsvIndexationWorker(this,completionService,indexationService, webFetchingService, csvIndexationRepository,  4000,logsFolder, remoteFileCachingService));
+			new Thread(new CsvIndexationWorker(this,completionService,indexationService, webFetchingService, csvIndexationRepository,  4000,logsFolder, remoteFileCachingService)).start();
 		}
 	}
 
