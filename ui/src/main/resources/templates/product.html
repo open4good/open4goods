@@ -16,6 +16,9 @@
 	<meta property="og:description" th:content="${helper.texts.get('opengraph-description')}">
 	<meta property="og:image" th:content="${baseUrl} + '/images/'+${product.gtin()}+'-cover.png'">
 	
+	<!-- No indexing if not a verticalized page -->/ 
+	<meta th:unless="${product.vertical}" name="robots" content="noindex">
+	 
 	<!-- Twitter -->
 	<meta name="twitter:card" content="summary_large_image">
 	<meta name="twitter:url" th:content="${url}">
@@ -74,7 +77,7 @@ table.dataTable tbody tr.selected {
         <div  class="section section-lg pt-5">
             <div class="container-fluid">
 	
-								<h1 th:unless="${product.vertical}"class="h1 title text-uppercase text-center"
+								<h1 th:unless="${product.vertical}" class="h1 title text-uppercase text-center"
 									th:text="${product.bestName()}"></h1>
 
  								<h1 th:if="${product.vertical}" class="h1 title text-uppercase text-center"
