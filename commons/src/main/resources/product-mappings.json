@@ -152,10 +152,6 @@
         "type": "date",
         "format": "date_optional_time||epoch_millis"
       },
-      "mappedCategories": {
-        "type": "object",
-        "enabled": false
-      },
       "names": {
         "type": "object",
         "enabled": false
