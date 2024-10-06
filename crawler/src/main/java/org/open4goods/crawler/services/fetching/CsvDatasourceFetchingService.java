@@ -101,7 +101,6 @@ public class CsvDatasourceFetchingService extends DatasourceFetchingService impl
 	@Override
 	public void stop(final String providerName) {
 		indexationService.clearIndexedCounter(providerName);
-		runningJobs.get(providerName).stop();
 	}
 
 	@Override

@@ -115,11 +115,6 @@ public class ApiProperties {
 	private Integer dataFragmentsDequeueSize = 200;
 
 	/**
-	 * The datafragments dequeue worker size
-	 */
-	private Integer dataFragmentsDequeueWorkers = 4;
-
-	/**
 	 * The datafragments worker dequeue poll period, in ms
 	 */
 	private Integer dataFragmentsDequeuePeriodMs = 2000;
@@ -399,20 +394,6 @@ public class ApiProperties {
 
 	public void setRootFolder(final String rootFolder) {
 		this.rootFolder = rootFolder;
-	}
-
-
-
-
-
-	public Integer getDataFragmentsDequeueWorkers() {
-		return dataFragmentsDequeueWorkers;
-	}
-
-
-
-	public void setDataFragmentsDequeueWorkers(Integer dataFragmentsDequeueWorker) {
-		dataFragmentsDequeueWorkers = dataFragmentsDequeueWorker;
 	}
 
 
