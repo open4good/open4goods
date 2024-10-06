@@ -89,7 +89,7 @@ public class CsvIndexationWorker implements Runnable {
 	/**
 	 * State flag
 	 */
-	private volatile boolean stop;
+//	private volatile boolean stop;
 
 	/**
 	 * The externaly maintained stats
@@ -117,7 +117,7 @@ public class CsvIndexationWorker implements Runnable {
 
 	@Override
 	public void run() {
-		while (!stop) {
+		while (true) {
 			try {
 				if (!csvService.getQueue().isEmpty()) {
 					// There is data to consume and queue consummation is enabled
@@ -694,13 +694,6 @@ public class CsvIndexationWorker implements Runnable {
 
 
 		return ret;
-	}
-
-	/**
-	 * Say this thread to stop
-	 */
-	public void stop() {
-		this.stop = true;
 	}
 
 	public synchronized IndexationJobStat stats() {
