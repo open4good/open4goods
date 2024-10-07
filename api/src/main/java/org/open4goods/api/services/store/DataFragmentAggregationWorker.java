@@ -45,7 +45,6 @@ public class DataFragmentAggregationWorker implements Runnable {
 	@Override
 	public void run() {
 
-		// TODO : exit thread condition
 		while (true) {
 			try {
 				if (!service.getQueue().isEmpty()) {

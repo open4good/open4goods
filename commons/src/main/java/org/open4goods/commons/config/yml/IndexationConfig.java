@@ -5,28 +5,33 @@ public class IndexationConfig {
 	/**
 	 * Max size of the blocking queue for products
 	 */
-	int productsQueueMaxSize = 15000;
+	int productsQueueMaxSize = 10000;
 
 	/**
 	 * Max size of the blocking queue for products
 	 */
-	int datafragmentQueueMaxSize = 50000;
+	int datafragmentQueueMaxSize = 10000;
+	
+	/**
+	 * Bulk size  (applied for update of datafragments, means on fetching and on insertion in elastic cluster)
+	 */
+	
+	int dataFragmentbulkPageSize = 200;
+
+	int productsbulkPageSize = 200;
 
 	
 	
-	
 	/**
-	 * Bulk size  (applied for update, means on fetching and on insertion in elastic cluster)
-	 */
-	
-	int bulkPageSize = 200;
-	
-	/**
-	 * Number ofconccurent workers
+	 * Number ofconccurent workers for product (only save in es)
 	 */
 	int productWorkers = 2;
 	
-	int dataFragmentworkers = 3;
+
+	/**
+	 * Number of concurent workers for datafragments aggregation (means retrieve from cluster, update and save bck)
+	 */
+	int dataFragmentworkers = 2;
 	
 	
 	/**
@@ -35,11 +40,11 @@ public class IndexationConfig {
 	int pauseDuration = 4000;
 	
 	
-	public int getBulkPageSize() {
-		return bulkPageSize;
+	public int getDataFragmentBulkPageSize() {
+		return dataFragmentbulkPageSize;
 	}
-	public void setBulkPageSize(int dequeueSize) {
-		this.bulkPageSize = dequeueSize;
+	public void setDataFragmentBulkPageSize(int dequeueSize) {
+		this.dataFragmentbulkPageSize = dequeueSize;
 	}
 	public int getProductWorkers() {
 		return productWorkers;
@@ -70,6 +75,15 @@ public class IndexationConfig {
 	}
 	public void setDatafragmentQueueMaxSize(int datafragmentQueueMaxSize) {
 		this.datafragmentQueueMaxSize = datafragmentQueueMaxSize;
+	}
+	public int getProductsbulkPageSize() {
+		return productsbulkPageSize;
+	}
+	public void setProductsbulkPageSize(int productsbulkPageSize) {
+		this.productsbulkPageSize = productsbulkPageSize;
+	}
+	public int getDataFragmentbulkPageSize() {
+		return dataFragmentbulkPageSize;
 	}
 	
 
