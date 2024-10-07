@@ -85,13 +85,12 @@ public class ProductRepository {
 //	private ExecutorService executor = Executors.newVirtualThreadPerTaskExecutor();
 
 	public ProductRepository(IndexationConfig indexationConfig) {
-				logger.info("Starting file queue consumer thread, with bulk page size of {} items", indexationConfig.getBulkPageSize() );
-						
-				for (int i = 0; i < indexationConfig.getProductWorkers(); i++) {
-					//TODO(p3,perf) : Virtual threads, but ko with visualVM profiling
-					new Thread((new ProductIndexationWorker(this, indexationConfig.getBulkPageSize(), indexationConfig.getPauseDuration(),"dequeue-worker-"+i))).start();
-				}
-	
+		logger.info("Starting file queue consumer thread, with bulk page size of {} items", indexationConfig.getProductsbulkPageSize() );
+				
+		for (int i = 0; i < indexationConfig.getProductWorkers(); i++) {
+			//TODO(p3,perf) : Virtual threads, but ko with visualVM profiling
+			new Thread((new ProductIndexationWorker(this, indexationConfig.getProductsbulkPageSize(), indexationConfig.getPauseDuration(),"products-worker-"+i))).start();
+		}
 	}
 
 	/**
