@@ -56,9 +56,7 @@ public class ProductRepository {
 
 	
 	// The file queue implementation
-	// TODO(p3,conf) : Limit from conf
-	private BlockingQueue<Product> queue = new LinkedBlockingQueue<>(150000);
-	
+	private BlockingQueue<Product> queue;
 	
 	/**
 	 * !!!MAJOR CONST !!! Duration in ms where a price is considered to be valid. Only data with a
@@ -87,6 +85,7 @@ public class ProductRepository {
 	public ProductRepository(IndexationConfig indexationConfig) {
 		logger.info("Starting file queue consumer thread, with bulk page size of {} items", indexationConfig.getProductsbulkPageSize() );
 				
+		this.queue = new LinkedBlockingQueue<>(indexationConfig.getProductsQueueMaxSize());
 		for (int i = 0; i < indexationConfig.getProductWorkers(); i++) {
 			//TODO(p3,perf) : Virtual threads, but ko with visualVM profiling
 			new Thread((new ProductIndexationWorker(this, indexationConfig.getProductsbulkPageSize(), indexationConfig.getPauseDuration(),"products-worker-"+i))).start();
