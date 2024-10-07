@@ -540,40 +540,40 @@ public class DataFragment implements Standardisable, Validable {
 	 * @return
 	 */
 	public void addAttribute(final String name, final String value, final String language, final Boolean ignoreCariageReturns,final Set<String> multivalueSeparators ) {
-//		if (null == value || value.isBlank()) {
-//			logger.debug("Cannot add null or empty values for attribute " + name);
-//			return ;
-//		}
-//
-//		// Evicting too big values
-//		// TODO(p3,conf) : From config
-//		if (value.length() > 10000) {
-//			logger.warn("Evicting a too big value for attribute {}:{}", name,value);
-//			return;
-//		}
-//		
-//		final Attribute attr = new Attribute();
-//
-//		// Attributye name normalisation
-//		String sanitizedName = IdHelper.normalizeAttributeName(name);
-//		// TODO(p2,conf) : From conf, could have the =, ..
-//		if (sanitizedName.endsWith(":")) {
-//			sanitizedName = sanitizedName.substring(0, sanitizedName.length() -1).trim();
-//		}
-//
-//		attr.setName(sanitizedName);
-//
-//		if (ignoreCariageReturns.booleanValue()) {
-//			attr.setRawValue(value.trim().replaceAll("[\\r\\n]+", " "));
-//		} else {
-//			attr.setRawValue(value);
-//		}
-//
-//		attr.setLanguage(language);
-//
-//
-//
-//		addAttribute(attr, multivalueSeparators);
+		if (null == value || value.isBlank()) {
+			logger.debug("Cannot add null or empty values for attribute " + name);
+			return ;
+		}
+
+		// Evicting too big values
+		// TODO(p3,conf) : From config
+		if (value.length() > 10000) {
+			logger.warn("Evicting a too big value for attribute {}:{}", name,value);
+			return;
+		}
+		
+		final Attribute attr = new Attribute();
+
+		// Attributye name normalisation
+		String sanitizedName = IdHelper.normalizeAttributeName(name);
+		// TODO(p2,conf) : From conf, could have the =, ..
+		if (sanitizedName.endsWith(":")) {
+			sanitizedName = sanitizedName.substring(0, sanitizedName.length() -1).trim();
+		}
+
+		attr.setName(sanitizedName);
+
+		if (ignoreCariageReturns.booleanValue()) {
+			attr.setRawValue(value.trim().replaceAll("[\\r\\n]+", " "));
+		} else {
+			attr.setRawValue(value);
+		}
+
+		attr.setLanguage(language);
+
+
+
+		addAttribute(attr, multivalueSeparators);
 	}
 
 	/**
