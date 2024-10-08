@@ -12,10 +12,10 @@ import org.slf4j.LoggerFactory;
  * @author goulven
  *
  */
-public class ProductIndexationWorker implements Runnable {
+public class FullProductIndexationWorker implements Runnable {
 
 
-	private static final Logger logger = LoggerFactory.getLogger(ProductIndexationWorker.class);
+	private static final Logger logger = LoggerFactory.getLogger(FullProductIndexationWorker.class);
 
 	/** The service used to "atomically" fetch and store / update DataFragments **/
 	private final ProductRepository service;
@@ -36,7 +36,7 @@ public class ProductIndexationWorker implements Runnable {
 	 * @param owningService
 	 * @param dequeuePageSize
 	 */
-	public ProductIndexationWorker(final ProductRepository owningService, final int dequeuePageSize, final int pauseDuration, String workerName) {
+	public FullProductIndexationWorker(final ProductRepository owningService, final int dequeuePageSize, final int pauseDuration, String workerName) {
 		service = owningService;
 		this.dequeuePageSize = dequeuePageSize;
 		this.pauseDuration = pauseDuration;
@@ -51,7 +51,7 @@ public class ProductIndexationWorker implements Runnable {
 			try {
 				
 				// Computing if items presents, and how many to take
-				int itemsToTake = service.getQueue().size();
+				int itemsToTake = service.getFullProductQueue().size();
 				if (itemsToTake > dequeuePageSize) {
 					itemsToTake = dequeuePageSize;
 				}
@@ -63,11 +63,11 @@ public class ProductIndexationWorker implements Runnable {
 										
 					// Dequeuing
 					for (int i = 0; i < itemsToTake; i++) {
-						Product item = service.getQueue().take();
+						Product item = service.getFullProductQueue().take();
 						
 						if (buffer.containsKey(item.gtin())) {
 							logger.info("Putting back in queue : {}", item.gtin() );
-							service.getQueue().put(item);
+							service.getFullProductQueue().put(item);
 						} else {
 							buffer.put(item.gtin(),item);							
 						}
@@ -75,7 +75,7 @@ public class ProductIndexationWorker implements Runnable {
 					
 					service.store(buffer.values());
 					
-					logger.warn ("{} has indexed {} products. {} Remaining in queue",workerName,  buffer.size(), service.getQueue().size());
+					logger.warn ("{} has indexed {} products. {} Remaining in queue",workerName,  buffer.size(), service.getFullProductQueue().size());
 
 				} else {
 					try {

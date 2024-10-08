@@ -170,6 +170,9 @@ public class SerialisationService {
 		return toJson(o).getBytes();
 	}
 
+	public ObjectMapper jsonMapper() {
+		return jsonMapper;
+	}
 
 
 	//	/**

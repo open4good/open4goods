@@ -353,7 +353,9 @@ public class CsvIndexationWorker implements Runnable {
 		//////////////////////////////////
 
 		final DataFragment p = new DataFragment();
-
+		p.setFragmentHashCode(item.hashCode());
+		
+		
 		// Url extraction from param
 		try {
 			if (!StringUtils.isEmpty(csvProperties.getExtractUrlFromParam())) {

@@ -72,10 +72,7 @@ public class IdentityAggregationService extends AbstractAggregationService {
 			dedicatedLogger.error("Data Fragment has an update date in the futur ! : {}",input);
 		}
 
-		/////////////////////////////
-		// Updating the datasources
-		/////////////////////////////
-		output.getDatasourceNames().add(input.getDatasourceName());
+	
 
 		
 		onProduct(output, vConf);

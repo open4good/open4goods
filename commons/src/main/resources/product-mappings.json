@@ -68,6 +68,10 @@
         "type": "keyword",
         "index": false
       },
+      "datasourceCodes": {
+        "type": "object",
+        "enabled": false
+      },
       "attributes": {
         "properties": {
           "aggregatedAttributes": {
@@ -171,10 +175,6 @@
                 "index": false
               },
               "currency": {
-                "type": "keyword",
-                "index": false
-              },
-              "datasourceName": {
                 "type": "keyword",
                 "index": false
               },

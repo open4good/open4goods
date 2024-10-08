@@ -1,7 +1,6 @@
 package org.open4goods.api.services.store;
 
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -11,6 +10,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.commons.lang3.StringUtils;
 import org.open4goods.api.services.AggregationFacadeService;
+import org.open4goods.api.services.aggregation.services.realtime.PriceAggregationService;
 import org.open4goods.commons.config.yml.IndexationConfig;
 import org.open4goods.commons.dao.ProductRepository;
 import org.open4goods.commons.exceptions.AggregationSkipException;
@@ -18,19 +18,18 @@ import org.open4goods.commons.exceptions.ValidationException;
 import org.open4goods.commons.model.Standardisable;
 import org.open4goods.commons.model.data.DataFragment;
 import org.open4goods.commons.model.product.Product;
+import org.open4goods.commons.model.product.ProductPartialUpdateHolder;
 import org.open4goods.commons.services.StandardiserService;
-import org.open4goods.commons.store.repository.ProductIndexationWorker;
+import org.open4goods.commons.store.repository.FullProductIndexationWorker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
-import org.springframework.data.elasticsearch.core.query.UpdateQuery;
 
 import jakarta.annotation.PreDestroy;
 
 /**
  * This service is in charge of DataFragments update and persistence. All
  * indexation request are queued in a file. This queue is asynchronously read by
- * {@link ProductIndexationWorker} in order to "bulk" and delay the
+ * {@link FullProductIndexationWorker} in order to "bulk" and delay the
  * DataFragments update operations through {@link DataFragmentRepository} .<br/>
  *
  * It also provides mechanism to stop indexation (and keep data in the persisted
@@ -60,9 +59,11 @@ public class DataFragmentStoreService {
 
 	private AggregationFacadeService generationService;
 
+	PriceAggregationService priceService = new PriceAggregationService(logger);
+
 
 	/**
-	 *
+	 * 
 	 * @param indexationConfig 
 	 * @param queueFolder The folder where indexation queued datas will be stored
 	 */
@@ -72,7 +73,7 @@ public class DataFragmentStoreService {
 		this.standardiserService = standardiserService;
 		this.aggregatedDataRepository = aggregatedDataRepository;
 		this.generationService=generationService;
-
+		
 		this.queue =  new LinkedBlockingQueue<>(indexationConfig.getDatafragmentQueueMaxSize());
 		
 		for (int i = 0; i < indexationConfig.getDataFragmentworkers(); i++) {					
@@ -80,9 +81,6 @@ public class DataFragmentStoreService {
 			//TODO(p3,perf) : Virtual threads, but ko with visualVM profiling
 			new Thread(new DataFragmentAggregationWorker(this, indexationConfig.getDataFragmentBulkPageSize(), indexationConfig.getPauseDuration(),"aggreg-worker-"+i)).start();;
 		}
-		
-		
-
 	}
 
 	
@@ -182,9 +180,12 @@ public class DataFragmentStoreService {
 					.toList());
 
 
-			// Aggregating to product datas
-			Set<Product> results = new HashSet<Product>();
-
+			// Storing for partial updates
+			Set<Product> fullItemsResults = new HashSet<Product>();
+			// Storing for full updates
+			Set<ProductPartialUpdateHolder> partialItemsResults = new HashSet<ProductPartialUpdateHolder>();
+			
+			
 			for (DataFragment df : buffer) {
 				Product data = aggDatas.get(df.gtin());
 				if (null == data) {
@@ -193,21 +194,57 @@ public class DataFragmentStoreService {
 					data.setCreationDate(System.currentTimeMillis());
 				}
 
-				// PRoceeding to aggregation pipeline
-				try {
-					results.add(generationService.updateOne(df,data));
-				} catch (AggregationSkipException e1) {
-					logger.warn("Aggregation skipped for {} : {}",df,e1.getMessage());
+				/////////////////////////////
+				// Updating the datasources
+				/////////////////////////////
+				
+				// Fastening, by checking if exaclty same datafragment than previously
+				Integer hash = data.getDatasourceCodes().get(df.getDatasourceName());				
+				if (null != hash && hash.equals(df.getFragmentHashCode())) {
+					// We can proceed to partial update, we just update lasttimechange and prices
+					logger.info("Proceeding to partial update for {}",data.getId());
+					// Updating price
+					priceService.onDataFragment(df, data, null);
+					// Updating lastChange
+					data.setLastChange(System.currentTimeMillis());
+					
+					ProductPartialUpdateHolder partial = new ProductPartialUpdateHolder(data.getId());
+					partial.addChange("lastChange", data.getLastChange());
+					partial.addChange("price", data.getPrice());
+					
+					partialItemsResults.add(partial);
+					
+				} else {
+					// Item has changed, we proceed to full update
+					logger.info("Proceeding to full update for {}",data.getId());
+					data.getDatasourceCodes().put(df.getDatasourceName(), df.getFragmentHashCode());
+					
+					
+					// Proceeding to aggregation pipeline
+					try {
+						Product newP = generationService.updateOne(df,data);
+						
+						fullItemsResults.add(newP);
+					} catch (AggregationSkipException e1) {
+						logger.warn("Aggregation skipped for {} : {}",df,e1.getMessage());
+					}
 				}
-
 			}
 
 			// Saving the result
-			aggregatedDataRepository.index(results);
-
-
-			logger.warn("Indexed {} DataFragments. Queue size is {}",  buffer.size(),queue.size());
-
+			
+			if (fullItemsResults.size() > 0) {
+				aggregatedDataRepository.index(fullItemsResults);
+				logger.warn("Added {} products in queue (size is now {})",  fullItemsResults.size(),queue.size());
+			}
+			
+			
+			if (partialItemsResults.size() > 0) {
+				// TODO(p1,perf) : Should use a thread pool
+				aggregatedDataRepository.indexPartial(partialItemsResults);
+				logger.warn("Added {} partial products in queue (size is now {})", partialItemsResults.size(), queue.size());
+			}
+			
 		} catch (final Exception e) {
 			logger.error("Error while dequeing DataFragments",e);
 		}	

@@ -71,9 +71,6 @@ public class TaxonomyRealTimeAggregationService extends AbstractAggregationServi
 //				dedicatedLogger.info("No taxonomy found for categories : {}", data.getDatasourceCategories());
 //			}
 //		}
-
-		
-		
 		
 		////////////////////////////
 		// Setting vertical from category
