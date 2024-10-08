@@ -1,5 +1,6 @@
 package org.open4goods.commons.dao;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -37,6 +38,8 @@ import org.springframework.data.elasticsearch.core.document.Document;
 import org.springframework.data.elasticsearch.core.mapping.IndexCoordinates;
 import org.springframework.data.elasticsearch.core.query.Criteria;
 import org.springframework.data.elasticsearch.core.query.CriteriaQuery;
+import org.springframework.data.elasticsearch.core.query.IndexQuery;
+import org.springframework.data.elasticsearch.core.query.IndexQueryBuilder;
 import org.springframework.data.elasticsearch.core.query.Query;
 import org.springframework.data.elasticsearch.core.query.UpdateQuery;
 
@@ -77,7 +80,7 @@ public class ProductRepository {
 
 	public IndexCoordinates current_index = IndexCoordinates.of(MAIN_INDEX_NAME);
 
-	private @Autowired ElasticsearchOperations elasticsearchTemplate;
+	private @Autowired ElasticsearchOperations elasticsearchOperations;
 
 	private @Autowired SerialisationService serialisationService;
 	
@@ -125,7 +128,7 @@ public class ProductRepository {
 		
 		final NativeQuery initialQuery = new NativeQueryBuilder().withQuery(new CriteriaQuery(c)).build();
 
-		return elasticsearchTemplate.searchForStream(initialQuery, Product.class, current_index).stream()
+		return elasticsearchOperations.searchForStream(initialQuery, Product.class, current_index).stream()
 				.map(SearchHit::getContent);
 
 	}
@@ -139,7 +142,7 @@ public class ProductRepository {
 	    Query query = Query.findAll();
 	    // TODO : From conf, apply to other
 	    query.setPageable(PageRequest.of(0, 10000)); // Fetch larger batches
-	    return elasticsearchTemplate.searchForStream(query, Product.class, current_index)
+	    return elasticsearchOperations.searchForStream(query, Product.class, current_index)
 	    		.stream()
 	    		// TODO : Check CPU usage
 	    		.parallel()
@@ -155,7 +158,7 @@ public class ProductRepository {
 		final NativeQuery initialQuery = new NativeQueryBuilder()
 				.withQuery(new CriteriaQuery(c)).build();
 		
-		return elasticsearchTemplate.searchForStream(initialQuery, Product.class, current_index).stream()
+		return elasticsearchOperations.searchForStream(initialQuery, Product.class, current_index).stream()
 				.map(SearchHit::getContent);
 	}
 
@@ -167,7 +170,7 @@ public class ProductRepository {
 		final NativeQuery initialQuery = new NativeQueryBuilder().withQuery(new CriteriaQuery(c))
 				.withPageable(PageRequest.of(from, to)).build();
 
-		return elasticsearchTemplate.search(initialQuery, Product.class, current_index).stream()
+		return elasticsearchOperations.search(initialQuery, Product.class, current_index).stream()
 				.map(SearchHit::getContent);
 
 	}
@@ -197,7 +200,7 @@ public class ProductRepository {
 		
 		final NativeQuery initialQuery = new NativeQueryBuilder()
 				.withQuery(new CriteriaQuery(c)).build();
-		return elasticsearchTemplate.searchForStream(initialQuery, Product.class, current_index).stream()
+		return elasticsearchOperations.searchForStream(initialQuery, Product.class, current_index).stream()
 				.map(SearchHit::getContent);
 	}
 
@@ -224,7 +227,7 @@ public class ProductRepository {
 
 		NativeQuery initialQuery = initialQueryBuilder.build();
 		
-		return elasticsearchTemplate.searchForStream(initialQuery, Product.class, current_index).stream().map(SearchHit::getContent);
+		return elasticsearchOperations.searchForStream(initialQuery, Product.class, current_index).stream().map(SearchHit::getContent);
 	}
 	
 	
@@ -261,7 +264,7 @@ public class ProductRepository {
 
 		NativeQuery initialQuery = initialQueryBuilder.build();
 		
-		return elasticsearchTemplate.searchForStream(initialQuery, Product.class, current_index).stream().map(SearchHit::getContent);
+		return elasticsearchOperations.searchForStream(initialQuery, Product.class, current_index).stream().map(SearchHit::getContent);
 	}
 
 	
@@ -276,7 +279,7 @@ public class ProductRepository {
 
 		NativeQuery initialQuery = initialQueryBuilder.build();
 		
-		return elasticsearchTemplate.searchForStream(initialQuery, Product.class, current_index).stream().map(SearchHit::getContent);
+		return elasticsearchOperations.searchForStream(initialQuery, Product.class, current_index).stream().map(SearchHit::getContent);
 		
 	}
 	
@@ -299,7 +302,7 @@ public class ProductRepository {
 	
 	
 	public SearchHits<Product> search(Query query, final String indexName) {
-		return elasticsearchTemplate.search(query, Product.class, IndexCoordinates.of(indexName));
+		return elasticsearchOperations.search(query, Product.class, IndexCoordinates.of(indexName));
 
 	}
 
@@ -364,7 +367,7 @@ public class ProductRepository {
 	 *
 	 * @param p
 	 */
-	public void index(Collection<Product> data) {
+	public void addToFullindexationQueue(Collection<Product> data) {
 
 		logger.info("Queuing {} products", data.size());
 		
@@ -379,7 +382,7 @@ public class ProductRepository {
 		});
 	}
 
-	public void indexPartial(Collection<ProductPartialUpdateHolder> data) {
+	public void addToPartialIndexationQueue(Collection<ProductPartialUpdateHolder> data) {
 
 		logger.info("Queuing {} products", data.size());
 		
@@ -396,29 +399,24 @@ public class ProductRepository {
 	
 	public void store(Collection<Product> data) {
 		logger.info("Indexing {} products", data.size());
-
-//		executor.submit(() -> {
-			elasticsearchTemplate.save(data, current_index);
-//		});
-
-//		executor.submit(() -> {
-//			redisRepository.saveAll(data);
-//		});
+			List<IndexQuery> indexQueries = new ArrayList<>();
+	        for (Product p : data) {
+	            IndexQuery query = new IndexQueryBuilder()
+	                    .withId(String.valueOf(p.getId()))
+	                    .withObject(p)
+	                    .build();
+	            indexQueries.add(query);
+	        }
+	    elasticsearchOperations.bulkIndex(indexQueries,current_index);
 	}
-	
-	public void storeNoCache(Collection<Product> data) {
-		logger.info("Indexing without caching {} products", data.size());
 
-		elasticsearchTemplate.save(data, current_index);
-
-	}
 	
 	
 	public void forceIndex(Product data) {
 		logger.info("Indexing  product {}", data.gtin());
 
 //		executor.submit(() -> {
-			elasticsearchTemplate.save(data, current_index);
+			elasticsearchOperations.save(data, current_index);
 //		});
 
 //		executor.submit(() -> {
@@ -460,7 +458,7 @@ public class ProductRepository {
 		if (null == result) {
 			// Fail, getting from elastic
 			logger.info("Cache miss, getting product {} from elastic", productId);
-			result = elasticsearchTemplate.get(String.valueOf(productId), Product.class);
+			result = elasticsearchOperations.get(String.valueOf(productId), Product.class);
 
 			if (null == result) {
 				throw new ResourceNotFoundException("Product '" + productId + "' does not exists");
@@ -535,7 +533,7 @@ public class ProductRepository {
 			
 			NativeQuery query = new NativeQueryBuilder().withIds(missingIds).build();
 	
-			elasticsearchTemplate.multiGet(query, Product.class,current_index )
+			elasticsearchOperations.multiGet(query, Product.class,current_index )
 			.stream().map(MultiGetItem::getItem)
 			.filter(Objects::nonNull)
 			.forEach(e -> ret.put(e.gtin(), e));
@@ -563,19 +561,19 @@ public class ProductRepository {
 
 	@Cacheable(keyGenerator = CacheConstants.KEY_GENERATOR, cacheNames = CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME)
 	public Long countMainIndex() {
-		return elasticsearchTemplate.count(Query.findAll(), current_index);
+		return elasticsearchOperations.count(Query.findAll(), current_index);
 	}
 
 	@Cacheable(keyGenerator = CacheConstants.KEY_GENERATOR, cacheNames = CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME)
 	public Long countMainIndexHavingRecentPrices() {
 		CriteriaQuery query = new CriteriaQuery(getRecentPriceQuery());
-		return elasticsearchTemplate.count(query, current_index);
+		return elasticsearchOperations.count(query, current_index);
 	}
 
 	@Cacheable(keyGenerator = CacheConstants.KEY_GENERATOR, cacheNames = CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME)
 	public Long countMainIndexHavingRecentUpdate() {
 		CriteriaQuery query = new CriteriaQuery(getRecentPriceQuery());
-		return elasticsearchTemplate.count(query, current_index);
+		return elasticsearchOperations.count(query, current_index);
 	}
 
 	
@@ -630,37 +628,37 @@ public class ProductRepository {
 	        .collect(Collectors.toList());
 
 	    // Perform the bulk update
-	    elasticsearchTemplate.bulkUpdate(updateQueries, current_index);
+	    elasticsearchOperations.bulkUpdate(updateQueries, current_index);
 	}
 	
-	/**
-	 * Bulk update, using script
-	 * @param partialItemsResults
-	 */
-	public void bulkUpdateScript(Set<ProductPartialUpdateHolder> partialItemsResults) {
-	    // Prepare a list to hold the update queries
-	    List<UpdateQuery> updateQueries = partialItemsResults.stream()
-	        .map(product -> {
-	            // Script to iterate over the map and update the fields in _source
-	            String script = "for (entry in params.fieldsToUpdate.entrySet()) { ctx._source[entry.getKey()] = entry.getValue(); }";
-
-	            // Pass the updated fields as parameters
-	            Map<String, Object> params = new HashMap<>();
-	            params.put("fieldsToUpdate", product.getChanges());
-
-	            // Create and return the UpdateQuery with the script and parameters
-	            return UpdateQuery.builder(String.valueOf(product.getProductId()))
-	                .withScript(script)
-	                .withParams(params)
-	                .withIndex(current_index.getIndexName())  // Use the current index
-	                .build();
-	        })
-	        .collect(Collectors.toList());
-
-	    // Perform the bulk update
-	    elasticsearchTemplate.bulkUpdate(updateQueries, current_index);
-	}
-	
+//	/**
+//	 * Bulk update, using script
+//	 * @param partialItemsResults
+//	 */
+//	public void bulkUpdateScript(Set<ProductPartialUpdateHolder> partialItemsResults) {
+//	    // Prepare a list to hold the update queries
+//	    List<UpdateQuery> updateQueries = partialItemsResults.stream()
+//	        .map(product -> {
+//	            // Script to iterate over the map and update the fields in _source
+//	            String script = "for (entry in params.fieldsToUpdate.entrySet()) { ctx._source[entry.getKey()] = entry.getValue(); }";
+//
+//	            // Pass the updated fields as parameters
+//	            Map<String, Object> params = new HashMap<>();
+//	            params.put("fieldsToUpdate", product.getChanges());
+//
+//	            // Create and return the UpdateQuery with the script and parameters
+//	            return UpdateQuery.builder(String.valueOf(product.getProductId()))
+//	                .withScript(script)
+//	                .withParams(params)
+//	                .withIndex(current_index.getIndexName())  // Use the current index
+//	                .build();
+//	        })
+//	        .collect(Collectors.toList());
+//
+//	    // Perform the bulk update
+//	    elasticsearchOperations.bulkUpdate(updateQueries, current_index);
+//	}
+//	
 
 
 	/**

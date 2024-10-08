@@ -244,7 +244,7 @@ public class BackupService implements HealthIndicator {
 						            logger.warn("Imported items so : {}", counter.get());
 						        }
 						        if (group.size() == backupConfig.getImportBulkSize()) {
-						        	productRepo.storeNoCache(group); // Index the current group
+						        	productRepo.store(group); // Index the current group
 						        	group.clear(); // Clear the group for the next batch
 						        }
 						    } catch (Exception e) {
@@ -254,7 +254,7 @@ public class BackupService implements HealthIndicator {
 						});
 
 						if (!group.isEmpty()) {
-						    productRepo.storeNoCache(group);
+						    productRepo.store(group);
 						}
 						logger.info("Importing file finished : {}", importFile.getAbsolutePath());
 					} catch (Exception e) {

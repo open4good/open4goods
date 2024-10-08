@@ -138,7 +138,7 @@ public class AggregationFacadeService {
 			logger.error("Skipping product during batched scoring : ",e);
 		}
 		logger.info("Score batching : indexing {} products", productBag.size());
-		dataRepository.index(productBag);
+		dataRepository.addToFullindexationQueue(productBag);
 
 	}
 	
