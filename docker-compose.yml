@@ -37,17 +37,17 @@ services:
 # Redis
 ###################################################################
        
-  redis:
-    image: bitnami/redis:7.4.0
-    container_name: redis
-    command: ["redis-server", "--stop-writes-on-bgsave-error","no","--protected-mode","no", "--appendonly", "no", "--maxmemory", "20mb", "--maxmemory-policy", "allkeys-lru"]
-    ports:
-      - 6379:6379        
-    environment:
-      - ALLOW_EMPTY_PASSWORD=yes
- 
-    networks:
-      - o4g-network
+#  redis:
+#    image: bitnami/redis:7.4.0
+#    container_name: redis
+#    command: ["redis-server", "--stop-writes-on-bgsave-error","no","--protected-mode","no", "--appendonly", "no", "--maxmemory", "20mb", "--maxmemory-policy", "allkeys-lru"]
+#    ports:
+#      - 6379:6379        
+#    environment:
+#      - ALLOW_EMPTY_PASSWORD=yes
+# 
+#    networks:
+#      - o4g-network
       
       
 
