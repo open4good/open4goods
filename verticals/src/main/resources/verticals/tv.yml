@@ -51,6 +51,9 @@ matchingCategories:
 # The categories that disengage a mapping in this vertical  
 unmatchingCategories:
 - "HIFI>APPAREILS-PHOTO"
+- "TV - VIDEO - SON | TV - VIDEO - SON > ACCESSOIRES TV - VIDEO - SON > FIXATION TV - SUPPORT TV - SUPPORT MURAL POUR TV | ACCESSOIRES TV - VIDEO - SON | FIXATION TV - SUPPORT TV - SUPPORT MURAL POUR TV"
+- "ACCESSOIRES DE TV"
+- "TV, VIDEO, HOME CINEMA | TV, VIDEO, HOME CINEMA>TELEVISEUR>SUPPORT MURAL POUR ECRAN PLAT | TELEVISEUR | TV, VIDEO, HOME CINEMA"
 
 #####################################################################################################################################
 # I18N CONFIGURATION
