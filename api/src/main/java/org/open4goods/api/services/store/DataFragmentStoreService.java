@@ -79,7 +79,7 @@ public class DataFragmentStoreService {
 		for (int i = 0; i < indexationConfig.getDataFragmentworkers(); i++) {					
 			logger.info("Starting file queue consumer thread {}, with bulk page size of {} items",i, indexationConfig.getDataFragmentBulkPageSize() );
 			//TODO(p3,perf) : Virtual threads, but ko with visualVM profiling
-			new Thread(new DataFragmentAggregationWorker(this, indexationConfig.getDataFragmentBulkPageSize(), indexationConfig.getPauseDuration(),"aggreg-worker-"+i)).start();;
+			new Thread(new DataFragmentAggregationWorker(this, indexationConfig.getDataFragmentBulkPageSize(), indexationConfig.getPauseDuration(),"datafragment-worker-"+i)).start();;
 		}
 	}
 
@@ -234,15 +234,15 @@ public class DataFragmentStoreService {
 			// Saving the result
 			
 			if (fullItemsResults.size() > 0) {
-				aggregatedDataRepository.index(fullItemsResults);
-				logger.warn("Added {} products in queue (size is now {})",  fullItemsResults.size(),queue.size());
+				aggregatedDataRepository.addToFullindexationQueue(fullItemsResults);
+				logger.warn("Submitted {} full products for indexation (datafragment queue size is now {})",  fullItemsResults.size(),queue.size());
 			}
 			
 			
 			if (partialItemsResults.size() > 0) {
 				// TODO(p1,perf) : Should use a thread pool
-				aggregatedDataRepository.indexPartial(partialItemsResults);
-				logger.warn("Added {} partial products in queue (size is now {})", partialItemsResults.size(), queue.size());
+				aggregatedDataRepository.addToPartialIndexationQueue(partialItemsResults);
+				logger.warn("Submitted {} partial products for indexation (datafragment queue size is now {})", partialItemsResults.size(), queue.size());
 			}
 			
 		} catch (final Exception e) {
