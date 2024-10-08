@@ -28,7 +28,6 @@ import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
 import org.open4goods.api.config.yml.BackupConfig;
 import org.open4goods.commons.dao.ProductRepository;
 import org.open4goods.commons.model.product.Product;
@@ -284,9 +283,9 @@ public class BackupService implements HealthIndicator {
 	private Product translate(Product p) {
 
 		// Setting datasources to new Map format
-		p.getMappedCategories().forEach(e -> {
-			p.getCategoriesByDatasources().put(e.getKey(), e.getValue());
-		});
+//		p.getMappedCategories().forEach(e -> {
+//			p.getCategoriesByDatasources().put(e.getKey(), e.getValue());
+//		});
 		
 		return p;
 	}

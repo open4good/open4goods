@@ -140,7 +140,7 @@ public class Product implements Standardisable {
 	private Set<String> datasourceCategories = new HashSet<>();
 
 	// TODO(p1, design) : Remove on next import / export, update backupservice.translate
-	private Set<UnindexedKeyVal> mappedCategories = new HashSet<>();
+//	private Set<UnindexedKeyVal> mappedCategories = new HashSet<>();
 	
 	/**
 	 * The product category path by datasources
@@ -947,13 +947,13 @@ public class Product implements Standardisable {
 		this.categoriesByDatasources = categoriesByDatasources;
 	}
 
-	public Set<UnindexedKeyVal> getMappedCategories() {
-		return mappedCategories;
-	}
-
-	public void setMappedCategories(Set<UnindexedKeyVal> mappedCategories) {
-		this.mappedCategories = mappedCategories;
-	}
+//	public Set<UnindexedKeyVal> getMappedCategories() {
+//		return mappedCategories;
+//	}
+//
+//	public void setMappedCategories(Set<UnindexedKeyVal> mappedCategories) {
+//		this.mappedCategories = mappedCategories;
+//	}
 
 
 
