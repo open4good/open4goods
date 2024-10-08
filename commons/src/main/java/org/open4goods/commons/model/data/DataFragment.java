@@ -89,6 +89,7 @@ public class DataFragment implements Standardisable, Validable {
 	private ProviderSupportType providerSupportType;
 
 
+	private Integer fragmentHashCode;
 
 	/**
 	 * The real merchant (website, or any) providing the offer, sometimes
@@ -1228,6 +1229,14 @@ public class DataFragment implements Standardisable, Validable {
 
 	public void setBrandFragment(boolean brandFragment) {
 		this.brandFragment = brandFragment;
+	}
+
+	public Integer getFragmentHashCode() {
+		return fragmentHashCode;
+	}
+
+	public void setFragmentHashCode(Integer fragmentHashCode) {
+		this.fragmentHashCode = fragmentHashCode;
 	}
 
 

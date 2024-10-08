@@ -110,7 +110,13 @@ public class Product implements Standardisable {
 
 	private AggregatedPrices price = new AggregatedPrices();
 
-	private Set<String> datasourceNames = new HashSet<>();
+	// TODO(p1,design) : remove once migration ok
+//	private Set<String> datasourceNames = new HashSet<>();
+	
+	/**
+	 * The datasources participating to this product, with a hashcode used for fastening data processing (by skipping already processed items)
+	 */
+	private Map<String,Integer> datasourceCodes = new HashMap<>();
 	
 	/**
 	 * The media resources for this data
@@ -890,13 +896,13 @@ public class Product implements Standardisable {
 		this.googleTaxonomyId = googleTaxonomyId;
 	}
 
-	public Set<String> getDatasourceNames() {
-		return datasourceNames;
-	}
-
-	public void setDatasourceNames(Set<String> datasourceNames) {
-		this.datasourceNames = datasourceNames;
-	}
+//	public Set<String> getDatasourceNames() {
+//		return datasourceNames;
+//	}
+//
+//	public void setDatasourceNames(Set<String> datasourceNames) {
+//		this.datasourceNames = datasourceNames;
+//	}
 
 
 	public ExternalIds getExternalIds() {
@@ -945,6 +951,14 @@ public class Product implements Standardisable {
 
 	public void setCategoriesByDatasources(Map<String, String> categoriesByDatasources) {
 		this.categoriesByDatasources = categoriesByDatasources;
+	}
+
+	public Map<String, Integer> getDatasourceCodes() {
+		return datasourceCodes;
+	}
+
+	public void setDatasourceCodes(Map<String, Integer> datasources) {
+		this.datasourceCodes = datasources;
 	}
 
 //	public Set<UnindexedKeyVal> getMappedCategories() {

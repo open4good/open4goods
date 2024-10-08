@@ -16,7 +16,10 @@ import org.open4goods.commons.config.yml.ui.VerticalConfig;
 import org.open4goods.commons.exceptions.ResourceNotFoundException;
 import org.open4goods.commons.model.constants.CacheConstants;
 import org.open4goods.commons.model.product.Product;
-import org.open4goods.commons.store.repository.ProductIndexationWorker;
+import org.open4goods.commons.model.product.ProductPartialUpdateHolder;
+import org.open4goods.commons.services.SerialisationService;
+import org.open4goods.commons.store.repository.FullProductIndexationWorker;
+import org.open4goods.commons.store.repository.PartialProductIndexationWorker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -55,8 +58,13 @@ public class ProductRepository {
 	public static final String MAIN_INDEX_NAME = Product.DEFAULT_REPO;
 
 	
-	// The file queue implementation
-	private BlockingQueue<Product> queue;
+	// The file queue implementation for Full products (no partial updates)
+	private BlockingQueue<Product> fullProductQueue;
+	
+	// The file queue implementation for Full products (no partial updates)
+	private BlockingQueue<ProductPartialUpdateHolder> partialProductQueue;
+	
+	
 	
 	/**
 	 * !!!MAJOR CONST !!! Duration in ms where a price is considered to be valid. Only data with a
@@ -71,6 +79,8 @@ public class ProductRepository {
 
 	private @Autowired ElasticsearchOperations elasticsearchTemplate;
 
+	private @Autowired SerialisationService serialisationService;
+	
 //	private @Autowired RedisProductRepository redisRepository;
 	
 //	private @Autowired RedisOperations<String, Product> redisRepo;
@@ -82,14 +92,20 @@ public class ProductRepository {
 
 //	private ExecutorService executor = Executors.newVirtualThreadPerTaskExecutor();
 
+	//TODO(p3,perf) : Virtual threads, but ko with visualVM profiling
 	public ProductRepository(IndexationConfig indexationConfig) {
-		logger.info("Starting file queue consumer thread, with bulk page size of {} items", indexationConfig.getProductsbulkPageSize() );
 				
-		this.queue = new LinkedBlockingQueue<>(indexationConfig.getProductsQueueMaxSize());
+		this.fullProductQueue = new LinkedBlockingQueue<>(indexationConfig.getProductsQueueMaxSize());
+		this.partialProductQueue = new LinkedBlockingQueue<>(indexationConfig.getPartialProductsQueueMaxSize());
+
 		for (int i = 0; i < indexationConfig.getProductWorkers(); i++) {
-			//TODO(p3,perf) : Virtual threads, but ko with visualVM profiling
-			new Thread((new ProductIndexationWorker(this, indexationConfig.getProductsbulkPageSize(), indexationConfig.getPauseDuration(),"products-worker-"+i))).start();
+			new Thread((new FullProductIndexationWorker(this, indexationConfig.getProductsbulkPageSize(), indexationConfig.getPauseDuration(),"full-products-worker-"+i))).start();
 		}
+		
+		for (int i = 0; i < indexationConfig.getPartialProductWorkers(); i++) {
+			new Thread((new PartialProductIndexationWorker(this, indexationConfig.getPartialProductsbulkPageSize(), indexationConfig.getPauseDuration(),"partial-products-worker-"+i))).start();
+		}
+		
 	}
 
 	/**
@@ -317,7 +333,7 @@ public class ProductRepository {
 		logger.info("Queuing single product : {}", p.gtin());
 
 		try {
-			queue.put(p);
+			fullProductQueue.put(p);
 		} catch (Exception e) {
 			logger.error("Cannot enqueue product {}",p,e);			
 		}
@@ -355,16 +371,28 @@ public class ProductRepository {
 		data.forEach(e -> {
 			
 			try {
-				queue.put(e) ;
+				fullProductQueue.put(e) ;
 			} catch (Exception e1) {
 				logger.error("!!!! exception, cannot enqueue product {}",e);
 			}
 			
 		});
-		
-
 	}
 
+	public void indexPartial(Collection<ProductPartialUpdateHolder> data) {
+
+		logger.info("Queuing {} products", data.size());
+		
+		data.forEach(e -> {
+			
+			try {
+				partialProductQueue.put(e) ;
+			} catch (Exception e1) {
+				logger.error("!!!! exception, cannot enqueue product {}",e);
+			}
+			
+		});
+	}
 	
 	public void store(Collection<Product> data) {
 		logger.info("Indexing {} products", data.size());
@@ -499,7 +527,7 @@ public class ProductRepository {
 //		
 		// Getting the one we don't have in redis from elastic 		
 		Set<String> missingIds = ids.stream().filter(e -> !ret.containsKey(e)).map(e-> String.valueOf(e)) .collect(Collectors.toSet());
-		logger.info("redis hits : {}, missing : {}, queue size : {}",ret.size(), missingIds.size(),queue.size());
+		logger.info("redis hits : {}, missing : {}, queue size : {}",ret.size(), missingIds.size(),fullProductQueue.size());
 		
 		
 		if (missingIds.size() != 0) {
@@ -585,31 +613,16 @@ public class ProductRepository {
 		
 	}
 	
-	public void updatePartialFields(String id, Map<String, Object> fieldsToUpdate) {
-	    // Define the update query with the partial fields
-	    Map<String, Object> scriptParams = new HashMap<>(fieldsToUpdate);
-	    
-	    UpdateQuery updateQuery = UpdateQuery.builder(id)
-	        .withDocument(Document.from(scriptParams))
-	        .withIndex(current_index.getIndexName())
-	        .build();
-
-	    // Perform the update using ElasticsearchOperations
-	    elasticsearchTemplate.update(updateQuery, IndexCoordinates.of(MAIN_INDEX_NAME));
-	}
 	
-	
-	// TODO : review
-	public void bulkUpdatePartialFields(List<Product> productsToUpdate) {
-		
-
-		
-		
-		
-	    List<UpdateQuery> updateQueries = productsToUpdate.stream()
+	/**
+	 * Bulk update, using Document
+	 * @param partialItemsResults
+	 */
+	public void bulkUpdateDocument(Collection<ProductPartialUpdateHolder> partialItemsResults) {
+	    List<UpdateQuery> updateQueries = partialItemsResults.stream()
 	        .map(product -> {
-	            Map<String, Object> fieldsToUpdate = extractFieldsToUpdate(product);
-	            return UpdateQuery.builder(product.gtin())
+	            Map<String, Object> fieldsToUpdate = product.getChanges();
+	            return UpdateQuery.builder(String.valueOf(product.getProductId()))
 	                .withDocument(Document.from(fieldsToUpdate))
 	                .withIndex(current_index.getIndexName())
 	                .build();
@@ -620,44 +633,36 @@ public class ProductRepository {
 	    elasticsearchTemplate.bulkUpdate(updateQueries, current_index);
 	}
 	
-	
-	private Map<String, Object> extractFieldsToUpdate(Product product) {
-		// TODO Auto-generated method stub
-		return null;
+	/**
+	 * Bulk update, using script
+	 * @param partialItemsResults
+	 */
+	public void bulkUpdateScript(Set<ProductPartialUpdateHolder> partialItemsResults) {
+	    // Prepare a list to hold the update queries
+	    List<UpdateQuery> updateQueries = partialItemsResults.stream()
+	        .map(product -> {
+	            // Script to iterate over the map and update the fields in _source
+	            String script = "for (entry in params.fieldsToUpdate.entrySet()) { ctx._source[entry.getKey()] = entry.getValue(); }";
+
+	            // Pass the updated fields as parameters
+	            Map<String, Object> params = new HashMap<>();
+	            params.put("fieldsToUpdate", product.getChanges());
+
+	            // Create and return the UpdateQuery with the script and parameters
+	            return UpdateQuery.builder(String.valueOf(product.getProductId()))
+	                .withScript(script)
+	                .withParams(params)
+	                .withIndex(current_index.getIndexName())  // Use the current index
+	                .build();
+	        })
+	        .collect(Collectors.toList());
+
+	    // Perform the bulk update
+	    elasticsearchTemplate.bulkUpdate(updateQueries, current_index);
 	}
-
-	
-	public void updateLastChange(String documentId, long lastChange) {
-	    Map<String, Object> fieldsToUpdate = new HashMap<>();
-	    fieldsToUpdate.put("lastChange", lastChange);
-
-	    UpdateQuery updateQuery = UpdateQuery.builder(documentId)
-	        .withDocument(Document.from(fieldsToUpdate))
-	        .withIndex(current_index.getIndexName())
-	        .build();
-
-	    elasticsearchTemplate.update(updateQuery, current_index);
-	}
 	
 
-	public void updateProductFields(String documentId, Map<String, Object> fieldsToUpdate) {
-	    // Script to iterate over the map and update the fields in the _source
-	    String script = "for (entry in params.fieldsToUpdate.entrySet()) { ctx._source[entry.getKey()] = entry.getValue(); }";
 
-	    // Pass the updated fields as parameters
-	    Map<String, Object> params = new HashMap<>();
-	    params.put("fieldsToUpdate", fieldsToUpdate);
-
-	    // Create an UpdateQuery with the script and parameters
-	    UpdateQuery updateQuery = UpdateQuery.builder(documentId)
-	        .withScript(script)
-	        .withParams(params)
-	        .withIndex(Product.DEFAULT_REPO)
-	        .build();
-
-	    // Execute the update using ElasticsearchOperations
-	    elasticsearchTemplate.update(updateQuery, IndexCoordinates.of( Product.DEFAULT_REPO));
-	}
 	/**
 	 *
 	 * @return Criteria representing recent prices
@@ -700,8 +705,12 @@ public class ProductRepository {
 //		});
 	}
 
-	public BlockingQueue<Product> getQueue() {
-		return queue;
+	public BlockingQueue<Product> getFullProductQueue() {
+		return fullProductQueue;
+	}
+
+	public BlockingQueue<ProductPartialUpdateHolder> getPartialProductQueue() {
+		return partialProductQueue;
 	}
 
 
