@@ -152,8 +152,8 @@ public class ApiConfig {
 	@Bean
 	@Autowired
 	BatchService batchService(AggregationFacadeService aggregationFacadeService,
-			CompletionFacadeService completionFacadeService, VerticalsConfigService verticalsConfigService) {
-		return new BatchService(aggregationFacadeService, completionFacadeService, verticalsConfigService);
+			CompletionFacadeService completionFacadeService, VerticalsConfigService verticalsConfigService, ProductRepository productRepository) {
+		return new BatchService(aggregationFacadeService, completionFacadeService, verticalsConfigService, productRepository);
 	}
 	
 	

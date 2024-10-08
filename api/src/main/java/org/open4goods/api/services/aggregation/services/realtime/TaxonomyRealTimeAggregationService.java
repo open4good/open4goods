@@ -10,7 +10,6 @@ import org.open4goods.api.services.aggregation.AbstractAggregationService;
 import org.open4goods.commons.config.yml.ui.VerticalConfig;
 import org.open4goods.commons.exceptions.AggregationSkipException;
 import org.open4goods.commons.model.data.DataFragment;
-import org.open4goods.commons.model.data.UnindexedKeyVal;
 import org.open4goods.commons.model.product.Product;
 import org.open4goods.commons.services.GoogleTaxonomyService;
 import org.open4goods.commons.services.VerticalsConfigService;
@@ -56,9 +55,8 @@ public class TaxonomyRealTimeAggregationService extends AbstractAggregationServi
 		////////////////////////////
 		// Updating the categories
 		////////////////////////////
-		data.getCategoriesByDatasources().values() .forEach(e -> {
-			data.getDatasourceCategories().add(e);
-		});
+		data.getDatasourceCategories().clear();
+		data.getDatasourceCategories().addAll(data.getCategoriesByDatasources().values());
 		
 		////////////////////////////
 		// Setting google taxonomy

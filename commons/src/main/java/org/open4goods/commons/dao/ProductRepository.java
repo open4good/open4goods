@@ -248,6 +248,24 @@ public class ProductRepository {
 		return elasticsearchTemplate.searchForStream(initialQuery, Product.class, current_index).stream().map(SearchHit::getContent);
 	}
 
+	
+	public Stream<Product> getAllHavingVertical() {
+		Criteria c = new Criteria("vertical").exists()
+				;
+
+		
+		NativeQueryBuilder initialQueryBuilder = new NativeQueryBuilder().withQuery(new CriteriaQuery(c));
+		
+		initialQueryBuilder =  initialQueryBuilder.withSort(Sort.by(org.springframework.data.domain.Sort.Order.desc("scores.ECOSCORE.value")));									
+
+		NativeQuery initialQuery = initialQueryBuilder.build();
+		
+		return elasticsearchTemplate.searchForStream(initialQuery, Product.class, current_index).stream().map(SearchHit::getContent);
+		
+	}
+	
+	
+	
 	/**
 	 * Export all aggregateddatas for a vertical, ordered by ecoscore descending
 	 * 
@@ -269,6 +287,9 @@ public class ProductRepository {
 
 	}
 
+	
+	
+	
 //	/**
 //	 * Index an Product
 //	 *
@@ -682,6 +703,8 @@ public class ProductRepository {
 	public BlockingQueue<Product> getQueue() {
 		return queue;
 	}
+
+
 
 
 }
