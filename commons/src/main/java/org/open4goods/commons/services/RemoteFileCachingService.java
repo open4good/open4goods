@@ -171,7 +171,10 @@ public class RemoteFileCachingService {
             // Handle HTTP/HTTPS URLs
             if (url.startsWith("http")) {
             	//TODO(p3,conf) : timeouts from config
+            	logger.error("STARTING DOWNLOAD OF {}",url);
                 FileUtils.copyURLToFile(new URL(url), destFile, 30000, 30000);
+                logger.error("ENDED DOWNLOAD OF {}",url);
+                
             }
             // Handle classpath resources if necessary (currently commented out)
             // else if (url.startsWith(CLASSPATH_PREFIX)) {
