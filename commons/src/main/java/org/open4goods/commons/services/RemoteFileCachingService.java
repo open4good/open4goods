@@ -170,7 +170,8 @@ public class RemoteFileCachingService {
         try {
             // Handle HTTP/HTTPS URLs
             if (url.startsWith("http")) {
-                FileUtils.copyURLToFile(new URL(url), destFile);
+            	//TODO(p3,conf) : timeouts from config
+                FileUtils.copyURLToFile(new URL(url), destFile, 30000, 30000);
             }
             // Handle classpath resources if necessary (currently commented out)
             // else if (url.startsWith(CLASSPATH_PREFIX)) {
@@ -281,7 +282,8 @@ public class RemoteFileCachingService {
 
 		try {
 			logger.info("Downloading resource  from {} to {}", url, tmpFile);
-			FileUtils.copyURLToFile(new URL(url), tmpFile);
+        	//TODO(p3,conf) : timeouts from config
+            FileUtils.copyURLToFile(new URL(url), tmpFile, 30000, 30000);
 			return tmpFile;
 		} catch (Exception e) {
 			throw new TechnicalException("Cannot download resource " + url  + " : " + e.getMessage());
