@@ -5,17 +5,17 @@ public class IndexationConfig {
 	/**
 	 * Max size of the blocking queue for products
 	 */
-	int productsQueueMaxSize = 10000;
+	int productsQueueMaxSize = 5000;
 	
 	/**
 	 * Max size of the blocking queue for partial products
 	 */
-	int partialProductsQueueMaxSize = 10000;
+	int partialProductsQueueMaxSize = 5000;
 
 	/**
 	 * Max size of the blocking queue for products
 	 */
-	int datafragmentQueueMaxSize = 10000;
+	int datafragmentQueueMaxSize = 20000;
 	
 	/**
 	 * Bulk size  (applied for update of datafragments, means on fetching and processing in elastic cluster)
