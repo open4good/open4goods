@@ -4,68 +4,65 @@
 <head>
 	<!--/* Metas and CSS */-->
 	<th:block th:insert="~{inc/header-meta.html}"></th:block>
-    
+
 	<!-- Primary Meta Tags -->
 	<title th:text="${helper.getMetaTitle()}"></title>
-    <meta name="description"  th:content="${helper.texts.get('meta-description')}">              
-	
+	<meta name="description"  th:content="${helper.texts.get('meta-description')}">
+
 	<!-- Open Graph / Facebook -->
 	<meta property="og:type" content="website">
 	<meta property="og:url" th:content="${url}">
 	<meta property="og:title" th:content="${helper.texts.get('opengraph-title')}">
 	<meta property="og:description" th:content="${helper.texts.get('opengraph-description')}">
 	<meta property="og:image" th:content="${baseUrl} + '/images/'+${product.gtin()}+'-cover.png'">
-	
-	<!-- No indexing if not a verticalized page -->/ 
-	<meta th:unless="${product.vertical}" name="robots" content="noindex">
-	 
+
 	<!-- Twitter -->
 	<meta name="twitter:card" content="summary_large_image">
 	<meta name="twitter:url" th:content="${url}">
 	<meta name="twitter:title" th:content="${helper.texts.get('twitter-title')}">
 	<meta name="twitter:description" th:content="${helper.texts.get('twitter-description')}">
 	<meta name="twitter:image" th:content="${baseUrl} + '/images/'+${product.gtin()}+'-cover.png'">
-	
+
 	<!-- CSS -->
 	<link rel="stylesheet" type="text/css" href="/webjars/datatables/css/dataTables.bootstrap5.min.css">
 	<link rel="stylesheet" type="text/css" href="/webjars/datatables-responsive/css/responsive.dataTables.min.css">
-	
+
 	<link th:if="${user}" rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/11.10.0/styles/default.min.css">
-	
-	
+
+
 	<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/select/1.7.0/css/select.dataTables.min.css">
 	<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/buttons/2.4.2/css/buttons.dataTables.min.css">
-	<link href="/vendor/lightgallery/dist/css/lightgallery-bundle.min.css" rel="stylesheet">	
-<style>
+	<link href="/vendor/lightgallery/dist/css/lightgallery-bundle.min.css" rel="stylesheet">
+	<style>
 
-.carousel-control-prev-icon::before {
-    content: '\f060';
-    font-family: "Font Awesome 5 Free";
-    font-size: 5rem;
-    color: gray;
-    font-weight: 900;
-}
+		.carousel-control-prev-icon::before {
+			content: '\f060';
+			font-family: "Font Awesome 5 Free";
+			font-size: 5rem;
+			color: gray;
+			font-weight: 900;
+		}
 
-.carousel-control-next-icon:before {
-    font-family: "Font Awesome 5 Free";
-    content: "\f061";
-    font-size: 5rem;
-    color: gray;
-    font-weight: 900;
-  
-}
+		.carousel-control-next-icon:before {
+			font-family: "Font Awesome 5 Free";
+			content: "\f061";
+			font-size: 5rem;
+			color: gray;
+			font-weight: 900;
 
-
-table.dataTable tbody tr.selected {
-    font-size: 1.5em;
-}
+		}
 
 
-</style>
+		table.dataTable tbody tr.selected {
+			font-size: 1.5em;
+		}
+
+
+	</style>
 </head>
 
 <body>
-    
+
 
 <!--/* Navbar */-->
 <th:block th:insert="~{inc/navbar/navbar-product.html}"></th:block>
@@ -74,167 +71,167 @@ table.dataTable tbody tr.selected {
 
 <main th:with="images = ${product.images()}" class="bg-gray-200">
 
-        <div  class="section section-lg pt-5">
-            <div class="container-fluid">
-	
-								<h1 th:unless="${product.vertical}" class="h1 title text-uppercase text-center"
-									th:text="${product.bestName()}"></h1>
+	<div  class="section section-lg pt-5">
+		<div class="container-fluid">
 
- 								<h1 th:if="${product.vertical}" class="h1 title text-uppercase text-center"
-									th:text="${helper.texts.title}"></h1>
+			<h1 th:unless="${product.vertical}"class="h1 title text-uppercase text-center"
+				th:text="${product.bestName()}"></h1>
 
-
+			<h1 th:if="${product.vertical}" class="h1 title text-uppercase text-center"
+				th:text="${helper.texts.title}"></h1>
 
 
-								<div class="card shadow p-4">
-									<!--/* Header */-->
-									<th:block th:insert="~{inc/product-header.html}"></th:block>
+
+
+			<div class="card shadow p-4">
+				<!--/* Header */-->
+				<th:block th:insert="~{inc/product-header.html}"></th:block>
+			</div>
+
+
+			<!--/* Presentation */-->
+			<th:block th:insert="~{inc/product-presentation.html}"></th:block>
+
+			<!--/* Descriptions */-->
+			<th:block th:insert="~{inc/product-ecological.html}"></th:block>
+
+			<!--/* Product prices  */-->
+			<th:block th:insert="~{inc/product-price.html}"></th:block>
+
+
+			<!--/* Product prices  */-->
+			<th:block th:insert="~{inc/product-attributes-details.html}"></th:block>
+
+
+
+
+			<div class="row mt-3">
+
+
+
+
+
+
+
+
+
+				<div class=" col-lg-12">
+
+
+					<!--  Authenticated section -->
+					<th:block th:if="${user}">
+
+
+
+						<!--/* Categories */-->
+						<th:block th:insert="~{inc/product-categories.html}"></th:block>
+
+
+
+						<!--Un matched Attribute table  -->
+						<div class="col-lg-4">
+
+							<!--/* Attributes */-->
+							<th:block th:insert="~{inc/product-unmatched-attributes.html}"></th:block>
+						</div>
+
+
+						<div class="card shadow mb-3 my-3">
+							<div class="card-header">
+								<h2 class="h5">Mode développement</h2>
+							</div>
+							<p>Cette section n'apparait qu'a là nudger team</p>
+
+
+
+
+
+
+
+							<div class="card-body">
+
+
+								<h1 th:text="'taxonomy : ' + ${product.googleTaxonomyId}"></h1>
+
+								<!--/* Resources */-->
+								<th:block th:insert="~{inc/product-resources.html}"></th:block>
+
+								<!--/* Mapped categories */-->
+								<div class="card shadow my-3">
+									<div class="card-header">
+										<h2 class="h5">Mapped Catégories</h2>
+									</div>
+									<div class="card-body">
+										<th:block
+												th:each="item, stat : ${product.mappedCategories}">
+											<div class="alert alert-primary" role="alert">
+												<span th:text="${item.key + ' : ' + item.value}"></span>
+											</div>
+										</th:block>
+									</div>
 								</div>
 
 
-								<!--/* Presentation */-->
-								<th:block th:insert="~{inc/product-presentation.html}"></th:block>
-
-								<!--/* Descriptions */-->
-								<th:block th:insert="~{inc/product-ecological.html}"></th:block>
-
-								<!--/* Product prices  */-->
-								<th:block th:insert="~{inc/product-price.html}"></th:block>
-
-
-								<!--/* Product prices  */-->
-								<th:block th:insert="~{inc/product-attributes-details.html}"></th:block>
+							</div>
+						</div>
 
 
 
 
-								<div class="row mt-3">
-						
+						<!--  The Raw JSON -->
 
 
-
-
-
-
-
-
-									<div class=" col-lg-12">
-
-
-										<!--  Authenticated section -->
-										<th:block th:if="${user}">
-
-
-
-											<!--/* Categories */-->
-											<th:block th:insert="~{inc/product-categories.html}"></th:block>
-
-
-
-            <!--Un matched Attribute table  -->
-            <div class="col-lg-4">
-
-                <!--/* Attributes */-->
-                <th:block th:insert="~{inc/product-unmatched-attributes.html}"></th:block>
-            </div>
-            
-
-											<div class="card shadow mb-3 my-3">
-												<div class="card-header">
-													<h2 class="h5">Mode développement</h2>
-												</div>
-												<p>Cette section n'apparait qu'a là nudger team</p>
-
-
-
-
-
-
-
-												<div class="card-body">
-
-
-													<h1 th:text="'taxonomy : ' + ${product.googleTaxonomyId}"></h1>
-
-													<!--/* Resources */-->
-													<th:block th:insert="~{inc/product-resources.html}"></th:block>
-
-													<!--/* Mapped categories */-->
-													<div class="card shadow my-3">
-														<div class="card-header">
-															<h2 class="h5">Mapped Catégories</h2>
-														</div>
-														<div class="card-body">
-															<th:block
-																th:each="item, stat : ${product.categoriesByDatasources}">
-																<div class="alert alert-primary" role="alert">
-																	<span th:text="${item.key + ' : ' + item.value}"></span>
-																</div>
-															</th:block>
-														</div>
-													</div>
-
-
-												</div>
-											</div>
-
-
-
-
-											<!--  The Raw JSON -->
-
-
-											<!--/* Mapped categories */-->
-											<div class="card shadow my-3">
-												<div class="card-header">
-													<h2 class="h5">JSON</h2>
-												</div>
-												<div class="card-body">
+						<!--/* Mapped categories */-->
+						<div class="card shadow my-3">
+							<div class="card-header">
+								<h2 class="h5">JSON</h2>
+							</div>
+							<div class="card-body">
 
 													<pre style="height: 500px">
 														<code id="json-output" class="json"></code>
 													</pre>
-													<script
-														src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.10.0/highlight.min.js"></script>
+								<script
+										src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.10.0/highlight.min.js"></script>
 
 
-													<script th:inline="javascript">
-												/*<![CDATA[*/
-												
-												    const jsonObject = /*[[${raw}]]*/ '';
-												        	    
-												/*]]>*/
-												
-												
-										        // Stringify and format the JSON object
-										        const jsonString = JSON.stringify(jsonObject, null, 2);
-										
-										        // Insert formatted JSON into the <code> element
-										        document.getElementById('json-output').textContent = jsonObject;
-										
-										        // Highlight the JSON
-										        hljs.highlightAll();
-										        
-											</script>
+								<script th:inline="javascript">
+									/*<![CDATA[*/
 
-												</div>
-											</div>
+									const jsonObject = /*[[${raw}]]*/ '';
 
-										</th:block>
-
-									</div>
+									/*]]>*/
 
 
-								</div>
-					</div>
-		</div>  
+									// Stringify and format the JSON object
+									const jsonString = JSON.stringify(jsonObject, null, 2);
+
+									// Insert formatted JSON into the <code> element
+									document.getElementById('json-output').textContent = jsonObject;
+
+									// Highlight the JSON
+									hljs.highlightAll();
+
+								</script>
+
+							</div>
+						</div>
+
+					</th:block>
+
+				</div>
+
+
+			</div>
+		</div>
+	</div>
 </main>
 
-<!--/* Product footer */-->				
+<!--/* Product footer */-->
 <th:block th:insert="~{inc/footer.html}"></th:block>
-    
 
-    <!-- Core -->
+
+<!-- Core -->
 <script src="../../vendor/@popperjs/core/dist/umd/popper.min.js"></script>
 <script src="/webjars/bootstrap/js/bootstrap.min.js"></script>
 
@@ -245,7 +242,7 @@ table.dataTable tbody tr.selected {
 <script src="../../vendor/vivus/dist/vivus.min.js"></script>
 
 
-<!-- 
+<!--
 <script src="../../vendor/headroom.js/dist/headroom.min.js"></script>
 
 
@@ -258,7 +255,7 @@ table.dataTable tbody tr.selected {
 <script src="../../vendor/vanillajs-datepicker/dist/js/datepicker.min.js"></script>
 <script async defer src="https://buttons.github.io/buttons.js"></script>
 <script src="../../vendor/@glidejs/glide/dist/glide.min.js"></script>
- --> 
+ -->
 
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -279,224 +276,321 @@ table.dataTable tbody tr.selected {
 
 <script th:inline="javascript">
 
-var reversment;
-function initTable (tableId) {
-	
+	var reversment;
+	function initTable (tableId) {
 
-	tableNew = $(tableId).DataTable({
-			searching: false, 
-			paging: false,
-			info: false,
-			select: 'single',
-		    "order": [ [ 1, 'asc' ]]
-	}			
-	);	
-	
-	
-	
-	tableNew.on('click', 'tbody tr', (e) => {
-	    let classList = e.currentTarget.classList;
-	 	
-	    token = $(e.currentTarget).attr('data-token');
-	    compensation = $(e.currentTarget).attr('data-compensation');
-	    
-	    $("#token").val(token);
 
-	    var countUpUpdateoptions = {
+		tableNew = $(tableId).DataTable({
+					searching: false,
+					paging: false,
+					info: false,
+					select: 'single',
+					"order": [ [ 1, 'asc' ]]
+				}
+		);
+
+
+
+		tableNew.on('click', 'tbody tr', (e) => {
+			let classList = e.currentTarget.classList;
+
+			token = $(e.currentTarget).attr('data-token');
+			compensation = $(e.currentTarget).attr('data-compensation');
+
+			$("#token").val(token);
+
+			var countUpUpdateoptions = {
 //	    		   startVal: $("#countup-reversment").attr("data-max"),
-	    		   duration: 1,
-	    		   useEasing : false,
-	    		   useGrouping : false,
-	    		   separator : ',',
-	    		   decimal : '.',
-	    		   decimalPlaces: 2,
-	    		   prefix : '',
-	    		   suffix : ''
-	    		 };
-	    
-	  
-	    $("#countup-reversment").attr("data-max", compensation);
-	    reversment.update(compensation);
-
-	    	tableNew.rows('.selected').nodes().each((row) => row.classList.remove('selected'));
-	        classList.add('selected');
-	    
-	});
-}
+				duration: 1,
+				useEasing : false,
+				useGrouping : false,
+				separator : ',',
+				decimal : '.',
+				decimalPlaces: 2,
+				prefix : '',
+				suffix : ''
+			};
 
 
-$(document).ready(function() {
+			$("#countup-reversment").attr("data-max", compensation);
+			reversment.update(compensation);
 
-	/////////////////////////////////	
-	// CountUp
-	/////////////////////////////////
-	 var countUpoptions = {
-	   duration: 3,
-	   useEasing : false,
-	   useGrouping : false,
-	   separator : ',',
-	   decimal : '.',
-	   decimalPlaces: 2,
-	   prefix : '',
-	   suffix : ''
-	 };
+			tableNew.rows('.selected').nodes().each((row) => row.classList.remove('selected'));
+			classList.add('selected');
 
-
-	  reversment = new countUp.CountUp("countup-reversment", $("#countup-reversment").attr("data-max"), countUpoptions);
-	 setTimeout(reversment.start(), 5000);
-		
-	/////////////////////////////////
-	// Getting price histories
-	/////////////////////////////////
-    const newPriceHistory = [[${product.price.newPricehistory}]].map(({
-    	  timestamp: x,
-    	  ...rest
-    	}) => ({
-    	  x,
-    	  ...rest
-    	})).map(({
-    	  price: y,
-    	  ...rest
-    	}) => ({
-    	  y,
-    	  ...rest
-    	}));
-
-    const occasionPriceHistory = [[${product.price.occasionPricehistory}]].map(({
-    	  timestamp: x,
-    	  ...rest
-    	}) => ({
-    	  x,
-    	  ...rest
-    	})).map(({
-    	  price: y,
-    	  ...rest
-    	}) => ({
-    	  y,
-    	  ...rest
-    	}));
-	
-	
-	/////////////////////////////////
-	// Price datatables
-	/////////////////////////////////
-		
-	
-	initTable('#offres');
-	
-
-	/////////////////////////////////
-	// Attributes datatables
-	/////////////////////////////////	
-	
-	if ($("#allAttributes").length) {
-		$('#allAttributes').DataTable({
-				responsive: true		
 		});
 	}
 
-	/////////////////////////////////
-	// Images table
-	/////////////////////////////////	
-	
-	if ($("#imagesTable").length) {
-		$('#imagesTable').DataTable({
-				responsive: true		
+
+	$(document).ready(function() {
+
+		/////////////////////////////////
+		// CountUp
+		/////////////////////////////////
+		var countUpoptions = {
+			duration: 3,
+			useEasing : false,
+			useGrouping : false,
+			separator : ',',
+			decimal : '.',
+			decimalPlaces: 2,
+			prefix : '',
+			suffix : ''
+		};
+
+
+		reversment = new countUp.CountUp("countup-reversment", $("#countup-reversment").attr("data-max"), countUpoptions);
+		setTimeout(reversment.start(), 5000);
+
+		/////////////////////////////////
+		// Getting price histories
+		/////////////////////////////////
+
+		const newPriceHistory = [[${product.price.newPricehistory}]].map(({ timestamp: x, price: y }) => ({ x, y }));
+		const occasionPriceHistory = [[${product.price.occasionPricehistory}]].map(({ timestamp: x, price: y }) => ({ x, y }));
+
+		function filterDataByDate(data, startDate) {
+			return data.filter(item => new Date(item.x) >= startDate);
+		}
+
+		const today = new Date();
+
+		const dateRanges = {
+			'15days': new Date(today.getTime() - (15 * 24 * 60 * 60 * 1000)),
+			'3months': new Date(today.getFullYear(), today.getMonth() - 3, today.getDate()),
+			'6months': new Date(today.getFullYear(), today.getMonth() - 6, today.getDate()),
+			'max': null //  (toutes les données)
+		};
+
+		const date15DaysAgo = new Date(today);
+		date15DaysAgo.setDate(today.getDate() - 15);
+
+		const date3MonthsAgo = new Date(today);
+		date3MonthsAgo.setMonth(today.getMonth() - 3);
+
+		const date6MonthsAgo = new Date(today);
+		date6MonthsAgo.setMonth(today.getMonth() - 6);
+
+		function getFilteredData(data, period) {
+			if (dateRanges[period]) {
+				return filterDataByDate(data, dateRanges[period]);
+			} else {
+				return data; // Retourne toutes les données pour 'max'
+			}
+		}
+
+
+		/////////////////////////////////
+		// Price datatables
+		/////////////////////////////////
+
+
+		initTable('#offres');
+
+
+		/////////////////////////////////
+		// Attributes datatables
+		/////////////////////////////////
+
+		if ($("#allAttributes").length) {
+			$('#allAttributes').DataTable({
+				responsive: true
+			});
+		}
+
+		/////////////////////////////////
+		// Images table
+		/////////////////////////////////
+
+		if ($("#imagesTable").length) {
+			$('#imagesTable').DataTable({
+				responsive: true
+			});
+		}
+
+
+
+
+		/////////////////////////////////
+		// Enable tooltips
+		/////////////////////////////////
+		$('[data-bs-toggle="tooltip"]').tooltip();
+
+		const newPriceCtx = document.getElementById('newPriceChart').getContext('2d');
+		const newPriceChart = new Chart(newPriceCtx, {
+			type: 'line',
+			data: {
+				datasets: [{
+					label: 'Prix Neuf',
+					fill: true,
+					data: getFilteredData(newPriceHistory, '15days'), // Affiche les 15 derniers jours par défaut
+					backgroundColor: '#4cb1ff',
+					borderColor: '#41a3ef',
+					borderWidth: 2,
+					tension: 0,
+					pointRadius: 0,         // Masque les points par défaut
+					pointHoverRadius: 6,    // Affiche le point au survol
+					pointHitRadius: 10,
+				}]
+			},
+			options: {
+				interaction: {
+					mode: 'nearest',
+					intersect: false
+				},
+				scales: {
+					x: {
+						type: 'time',
+						time: {
+							unit: 'day',
+							displayFormats: {
+								day: 'dd/MM/yyyy'
+							},
+							tooltipFormat: 'dd/MM/yyyy'
+						},
+						title: {
+							display: true,
+							text: 'Date'
+						}
+					},
+					y: {
+						title: {
+							display: true,
+							text: 'Prix (€)'
+						}
+					}
+				}
+			}
 		});
-	}
 
-	
+		const usedPriceCtx = document.getElementById('usedPriceChart').getContext('2d');
+		const usedPriceChart = new Chart(usedPriceCtx, {
+			type: 'line',
+			data: {
+				datasets: [{
+					label: 'Prix d\'Occasion',
+					fill: true,
+					data: getFilteredData(occasionPriceHistory, '15days'), // Affiche les 15 derniers jours par défaut
+					backgroundColor: '#ff6384',
+					borderColor: '#fa486e',
+					borderWidth: 2,
+					tension: 0,
+					pointRadius: 0,
+					pointHoverRadius: 6,
+					pointHitRadius: 10,
+				}]
+			},
+			options: {
+				interaction: {
+					mode: 'nearest',
+					intersect: false
+				},
+				scales: {
+					x: {
+						type: 'time',
+						time: {
+							unit: 'day',
+							displayFormats: {
+								day: 'dd/MM/yyyy'
+							},
+							tooltipFormat: 'dd/MM/yyyy'
+						},
+						title: {
+							display: true,
+							text: 'Date'
+						}
+					},
+					y: {
+						title: {
+							display: true,
+							text: 'Prix (€)'
+						}
+					}
+				}
+			}
+		});
 
-	
-	/////////////////////////////////
-	// Enable tooltips
-	/////////////////////////////////	
-  	$('[data-bs-toggle="tooltip"]').tooltip();
+		document.getElementById('btn-new-15days').addEventListener('click', function() {
+			updateChart(newPriceChart, newPriceHistory, '15days');
+			setActiveButton(this, 'new');
+		});
+
+		document.getElementById('btn-new-3months').addEventListener('click', function() {
+			updateChart(newPriceChart, newPriceHistory, '3months');
+			setActiveButton(this, 'new');
+		});
+
+		document.getElementById('btn-new-6months').addEventListener('click', function() {
+			updateChart(newPriceChart, newPriceHistory, '6months');
+			setActiveButton(this, 'new');
+		});
+
+		document.getElementById('btn-new-max').addEventListener('click', function() {
+			updateChart(newPriceChart, newPriceHistory, 'max');
+			setActiveButton(this, 'new');
+		});
+
+		document.getElementById('btn-used-15days').addEventListener('click', function() {
+			updateChart(usedPriceChart, occasionPriceHistory, '15days');
+			setActiveButton(this, 'used');
+		});
+
+		document.getElementById('btn-used-3months').addEventListener('click', function() {
+			updateChart(usedPriceChart, occasionPriceHistory, '3months');
+			setActiveButton(this, 'used');
+		});
+
+		document.getElementById('btn-used-6months').addEventListener('click', function() {
+			updateChart(usedPriceChart, occasionPriceHistory, '6months');
+			setActiveButton(this, 'used');
+		});
+
+		document.getElementById('btn-used-max').addEventListener('click', function() {
+			updateChart(usedPriceChart, occasionPriceHistory, 'max');
+			setActiveButton(this, 'used');
+		});
+
+		function updateChart(chart, data, period) {
+			chart.data.datasets[0].data = getFilteredData(data, period);
+			chart.update();
+		}
+
+		function setActiveButton(activeButton, chartType) {
+			const buttonGroupSelector = chartType === 'new' ? '.btn-group .btn[id^="btn-new"]' : '.btn-group .btn[id^="btn-used"]';
+			const buttons = document.querySelectorAll(buttonGroupSelector);
+			buttons.forEach(button => {
+				button.classList.remove('btn-primary');
+				button.classList.add('btn-secondary');
+			});
+			activeButton.classList.remove('btn-secondary');
+			activeButton.classList.add('btn-primary');
+		}
+
+
+		// Image gallery
+
+		// Get the carousel element by its ID
+		let carouselEl = document.getElementById('bootstrap-gallery-carousel');
+
+		// Create a new Bootstrap 5 Carousel instance with specified options
+		const carousel = new bootstrap.Carousel(carouselEl, {
+			interval: 10000,
+			wrap: false,
+
+		});
+
+		// Add an event listener for the 'slide.bs.carousel' event, fires immediately when the slide instance method is invoked.
+		carouselEl.addEventListener('slide.bs.carousel', (event) => {
+			const container = document.querySelector('.carousel-inner');
+			window.lightGallery(container, {
+				plugins: [lgThumbnail],
+				selector: '.lg-item',
+			});
+		});
 
 
 
-	/////////////////////////////////
-	// Price chart
-	/////////////////////////////////
-const ctx = document.getElementById('priceChart');
-var priceChart = new Chart(ctx, {
-	  type: 'line',
-	  data: {
-	    datasets: [{
-	      label: 'Prix neuf',
-	      data: newPriceHistory,               
-	      backgroundColor: 'transparent',
-	      borderColor: 'blue',
-	      borderWidth: 2,
-	      tension: 0
-	    },{
-		      label: 'Prix d\'occasion',
-		      data: occasionPriceHistory,               
-		      backgroundColor: 'transparent',
-		      borderColor: 'red',
-		      borderWidth: 2,
-		      tension: 0.5
-		    }
-	    
-	    
-	    
-	    ]
-	  },
-	  
-	  
-	  
-	  options: {
-	    normalized: false,
-	    scales: {
-	      x: {
-	        type: 'time',
-	        time: {
-	          unit: 'day',
-	          displayFormats: {
-	        	  quarter: 'MMM YYYY'
-	          },
-	          tooltipFormat: 'dd T'
-	        },
-	        title: {
-	          display: true,
-	          text: 'Date'
-	        }
-	      },
-	      y: {
-	        title: {
-	          display: true,
-	          text: 'Prix'
-	        }
-	      }
-	    }
-	  }
-	});
-
-
-// Image gallery
-
-// Get the carousel element by its ID
-let carouselEl = document.getElementById('bootstrap-gallery-carousel');
-
-// Create a new Bootstrap 5 Carousel instance with specified options
-const carousel = new bootstrap.Carousel(carouselEl, {
-    interval: 10000,
-    wrap: false,
-    
-});
-
-// Add an event listener for the 'slide.bs.carousel' event, fires immediately when the slide instance method is invoked.
-carouselEl.addEventListener('slide.bs.carousel', (event) => {
-    const container = document.querySelector('.carousel-inner');
-    window.lightGallery(container, {
-        plugins: [lgThumbnail],
-        selector: '.lg-item',
-    });
-});
-
-
-
-} );
+	} );
 </script>
 
 </body>
