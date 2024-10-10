@@ -182,6 +182,10 @@
                 "type": "keyword",
                 "index": false
               },
+              "datasourceName": {
+                "type": "keyword",
+                "index": false
+              },              
               "price": {
                 "type": "double"
               },
