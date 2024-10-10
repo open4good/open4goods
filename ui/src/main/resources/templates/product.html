@@ -2,39 +2,40 @@
 <html th:lang="${siteLocale.language}">
 
 <head>
-	<!--/* Metas and CSS */-->
+	<!-- Importing meta tags and CSS files -->
 	<th:block th:insert="~{inc/header-meta.html}"></th:block>
 
 	<!-- Primary Meta Tags -->
 	<title th:text="${helper.getMetaTitle()}"></title>
-	<meta name="description"  th:content="${helper.texts.get('meta-description')}">
+	<meta name="description" th:content="${helper.texts.get('meta-description')}">
 
-	<!-- Open Graph / Facebook -->
+	<!-- Open Graph / Facebook Meta Tags -->
 	<meta property="og:type" content="website">
 	<meta property="og:url" th:content="${url}">
 	<meta property="og:title" th:content="${helper.texts.get('opengraph-title')}">
 	<meta property="og:description" th:content="${helper.texts.get('opengraph-description')}">
 	<meta property="og:image" th:content="${baseUrl} + '/images/'+${product.gtin()}+'-cover.png'">
 
-	<!-- Twitter -->
+	<!-- Twitter Meta Tags -->
 	<meta name="twitter:card" content="summary_large_image">
 	<meta name="twitter:url" th:content="${url}">
 	<meta name="twitter:title" th:content="${helper.texts.get('twitter-title')}">
 	<meta name="twitter:description" th:content="${helper.texts.get('twitter-description')}">
 	<meta name="twitter:image" th:content="${baseUrl} + '/images/'+${product.gtin()}+'-cover.png'">
 
-	<!-- CSS -->
+	<!-- CSS Stylesheets -->
 	<link rel="stylesheet" type="text/css" href="/webjars/datatables/css/dataTables.bootstrap5.min.css">
 	<link rel="stylesheet" type="text/css" href="/webjars/datatables-responsive/css/responsive.dataTables.min.css">
 
+	<!-- Conditional CSS for highlight.js if user is authenticated -->
 	<link th:if="${user}" rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/11.10.0/styles/default.min.css">
-
 
 	<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/select/1.7.0/css/select.dataTables.min.css">
 	<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/buttons/2.4.2/css/buttons.dataTables.min.css">
 	<link href="/vendor/lightgallery/dist/css/lightgallery-bundle.min.css" rel="stylesheet">
-	<style>
 
+	<style>
+		/* Customizing carousel control icons */
 		.carousel-control-prev-icon::before {
 			content: '\f060';
 			font-family: "Font Awesome 5 Free";
@@ -49,159 +50,105 @@
 			font-size: 5rem;
 			color: gray;
 			font-weight: 900;
-
 		}
 
-
+		/* Style for selected row in DataTables */
 		table.dataTable tbody tr.selected {
 			font-size: 1.5em;
 		}
-
-
 	</style>
 </head>
 
 <body>
 
-
-<!--/* Navbar */-->
+<!-- Navigation bar -->
 <th:block th:insert="~{inc/navbar/navbar-product.html}"></th:block>
-<!--/* Loader */-->
+<!-- Preloader -->
 <th:block th:insert="~{inc/preloader.html}"></th:block>
 
 <main th:with="images = ${product.images()}" class="bg-gray-200">
-
-	<div  class="section section-lg pt-5">
+	<div class="section section-lg pt-5">
 		<div class="container-fluid">
 
-			<h1 th:unless="${product.vertical}"class="h1 title text-uppercase text-center"
-				th:text="${product.bestName()}"></h1>
-
-			<h1 th:if="${product.vertical}" class="h1 title text-uppercase text-center"
-				th:text="${helper.texts.title}"></h1>
-
-
-
+			<!-- Displaying the product title -->
+			<h1 th:unless="${product.vertical}" class="h1 title text-uppercase text-center" th:text="${product.bestName()}"></h1>
+			<h1 th:if="${product.vertical}" class="h1 title text-uppercase text-center" th:text="${helper.texts.title}"></h1>
 
 			<div class="card shadow p-4">
-				<!--/* Header */-->
+				<!-- Product header -->
 				<th:block th:insert="~{inc/product-header.html}"></th:block>
 			</div>
 
-
-			<!--/* Presentation */-->
+			<!-- Product presentation -->
 			<th:block th:insert="~{inc/product-presentation.html}"></th:block>
 
-			<!--/* Descriptions */-->
+			<!-- Ecological descriptions -->
 			<th:block th:insert="~{inc/product-ecological.html}"></th:block>
 
-			<!--/* Product prices  */-->
+			<!-- Product prices -->
 			<th:block th:insert="~{inc/product-price.html}"></th:block>
 
-
-			<!--/* Product prices  */-->
+			<!-- Product attribute details -->
 			<th:block th:insert="~{inc/product-attributes-details.html}"></th:block>
 
-
-
-
 			<div class="row mt-3">
+				<div class="col-lg-12">
 
-
-
-
-
-
-
-
-
-				<div class=" col-lg-12">
-
-
-					<!--  Authenticated section -->
+					<!-- Section for authenticated users only -->
 					<th:block th:if="${user}">
 
-
-
-						<!--/* Categories */-->
+						<!-- Product categories -->
 						<th:block th:insert="~{inc/product-categories.html}"></th:block>
 
-
-
-						<!--Un matched Attribute table  -->
+						<!-- Table of unmatched attributes -->
 						<div class="col-lg-4">
-
-							<!--/* Attributes */-->
 							<th:block th:insert="~{inc/product-unmatched-attributes.html}"></th:block>
 						</div>
 
-
+						<!-- Development mode: additional information -->
 						<div class="card shadow mb-3 my-3">
 							<div class="card-header">
-								<h2 class="h5">Mode développement</h2>
+								<h2 class="h5">Development Mode</h2>
 							</div>
-							<p>Cette section n'apparait qu'a là nudger team</p>
-
-
-
-
-
-
-
+							<p>This section is visible only to the nudger team.</p>
 							<div class="card-body">
-
-
+								<!-- Displaying product taxonomy -->
 								<h1 th:text="'taxonomy : ' + ${product.googleTaxonomyId}"></h1>
 
-								<!--/* Resources */-->
+								<!-- Resources related to the product -->
 								<th:block th:insert="~{inc/product-resources.html}"></th:block>
 
-								<!--/* Mapped categories */-->
+								<!-- Mapped categories of the product -->
 								<div class="card shadow my-3">
 									<div class="card-header">
-										<h2 class="h5">Mapped Catégories</h2>
+										<h2 class="h5">Mapped Categories</h2>
 									</div>
 									<div class="card-body">
-										<th:block
-												th:each="item, stat : ${product.mappedCategories}">
+										<th:block th:each="item, stat : ${product.mappedCategories}">
 											<div class="alert alert-primary" role="alert">
 												<span th:text="${item.key + ' : ' + item.value}"></span>
 											</div>
 										</th:block>
 									</div>
 								</div>
-
-
 							</div>
 						</div>
 
-
-
-
-						<!--  The Raw JSON -->
-
-
-						<!--/* Mapped categories */-->
+						<!-- Displaying raw JSON data -->
 						<div class="card shadow my-3">
 							<div class="card-header">
 								<h2 class="h5">JSON</h2>
 							</div>
 							<div class="card-body">
-
-													<pre style="height: 500px">
-														<code id="json-output" class="json"></code>
-													</pre>
-								<script
-										src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.10.0/highlight.min.js"></script>
-
-
+                                    <pre style="height: 500px">
+                                        <code id="json-output" class="json"></code>
+                                    </pre>
+								<!-- Script for formatting and syntax highlighting the JSON -->
+								<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.10.0/highlight.min.js"></script>
 								<script th:inline="javascript">
 									/*<![CDATA[*/
-
 									const jsonObject = /*[[${raw}]]*/ '';
-
 									/*]]>*/
-
 
 									// Stringify and format the JSON object
 									const jsonString = JSON.stringify(jsonObject, null, 2);
@@ -209,227 +156,207 @@
 									// Insert formatted JSON into the <code> element
 									document.getElementById('json-output').textContent = jsonObject;
 
-									// Highlight the JSON
+									// Apply syntax highlighting
 									hljs.highlightAll();
-
 								</script>
-
 							</div>
 						</div>
 
 					</th:block>
-
 				</div>
-
-
 			</div>
 		</div>
 	</div>
 </main>
 
-<!--/* Product footer */-->
+<!-- Product footer -->
 <th:block th:insert="~{inc/footer.html}"></th:block>
 
-
-<!-- Core -->
+<!-- Core Scripts -->
 <script src="../../vendor/@popperjs/core/dist/umd/popper.min.js"></script>
 <script src="/webjars/bootstrap/js/bootstrap.min.js"></script>
-
-
 
 <!-- Vendor JS -->
 <script src="../../vendor/smooth-scroll/dist/smooth-scroll.polyfills.min.js"></script>
 <script src="../../vendor/vivus/dist/vivus.min.js"></script>
 
-
+<!-- Optional Scripts (commented out as they are not used) -->
 <!--
 <script src="../../vendor/headroom.js/dist/headroom.min.js"></script>
-
-
 <script src="../../vendor/onscreen/dist/on-screen.umd.min.js"></script>
 <script src="../../vendor/nouislider/distribute/nouislider.min.js"></script>
 <script src="../../vendor/jarallax/dist/jarallax.min.js"></script>
 <script src="../../vendor/chartist/dist/chartist.min.js"></script>
 <script src="../../vendor/chartist-plugin-tooltips/dist/chartist-plugin-tooltip.min.js"></script>
-
 <script src="../../vendor/vanillajs-datepicker/dist/js/datepicker.min.js"></script>
 <script async defer src="https://buttons.github.io/buttons.js"></script>
 <script src="../../vendor/@glidejs/glide/dist/glide.min.js"></script>
- -->
+-->
 
-
+<!-- Chart.js and date adapter -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
+
+<!-- jQuery and DataTables -->
 <script src="/webjars/jquery/jquery.min.js"></script>
 <script type="text/javascript" language="javascript" src="/webjars/datatables/js/dataTables.min.js"></script>
 <script type="text/javascript" language="javascript" src="/webjars/datatables/js/dataTables.bootstrap5.min.js"></script>
 
+<!-- Animated Counter -->
 <script src="../../vendor/countup.js/dist/countUp.umd.js"></script>
-<!-- pixel JS -->
+
+<!-- Custom Scripts -->
 <script src="../../assets/js/pixel.js"></script>
-<!-- custom sources -->
 <script src="../../assets/js/pixel-custom.js"></script>
 
+<!-- LightGallery for image gallery -->
 <script src="/vendor/lightgallery/dist/lightgallery.min.js"></script>
 <script src="/vendor/lightgallery/dist/plugins/thumbnail/lg-thumbnail.min.js"></script>
 
-
 <script th:inline="javascript">
-
+	// Global variable for the counter
 	var reversment;
-	function initTable (tableId) {
 
-
+	// Function to initialize DataTable
+	function initTable(tableId) {
+		// Initialize DataTable with specified options
 		tableNew = $(tableId).DataTable({
-					searching: false,
-					paging: false,
-					info: false,
-					select: 'single',
-					"order": [ [ 1, 'asc' ]]
-				}
-		);
+			searching: false,
+			paging: false,
+			info: false,
+			select: 'single',
+			"order": [[1, 'asc']]
+		});
 
-
-
+		// Event handler for row click in the table
 		tableNew.on('click', 'tbody tr', (e) => {
 			let classList = e.currentTarget.classList;
 
+			// Retrieve data attributes from the clicked row
 			token = $(e.currentTarget).attr('data-token');
 			compensation = $(e.currentTarget).attr('data-compensation');
 
+			// Update the token (e.g., in a hidden input field)
 			$("#token").val(token);
 
 			var countUpUpdateoptions = {
-//	    		   startVal: $("#countup-reversment").attr("data-max"),
 				duration: 1,
-				useEasing : false,
-				useGrouping : false,
-				separator : ',',
-				decimal : '.',
+				useEasing: false,
+				useGrouping: false,
+				separator: ',',
+				decimal: '.',
 				decimalPlaces: 2,
-				prefix : '',
-				suffix : ''
+				prefix: '',
+				suffix: ''
 			};
 
-
+			// Update the counter with the new compensation value
 			$("#countup-reversment").attr("data-max", compensation);
 			reversment.update(compensation);
 
+			// Manage the 'selected' class for the active row
 			tableNew.rows('.selected').nodes().each((row) => row.classList.remove('selected'));
 			classList.add('selected');
-
 		});
 	}
 
+	$(document).ready(function () {
 
-	$(document).ready(function() {
-
-		/////////////////////////////////
-		// CountUp
-		/////////////////////////////////
+		///////////////////////////////////
+		// Initialization of CountUp counter
+		///////////////////////////////////
 		var countUpoptions = {
 			duration: 3,
-			useEasing : false,
-			useGrouping : false,
-			separator : ',',
-			decimal : '.',
+			useEasing: false,
+			useGrouping: false,
+			separator: ',',
+			decimal: '.',
 			decimalPlaces: 2,
-			prefix : '',
-			suffix : ''
+			prefix: '',
+			suffix: ''
 		};
 
-
+		// Initialize the counter for the element with ID 'countup-reversment'
 		reversment = new countUp.CountUp("countup-reversment", $("#countup-reversment").attr("data-max"), countUpoptions);
 		setTimeout(reversment.start(), 5000);
 
-		/////////////////////////////////
-		// Getting price histories
-		/////////////////////////////////
+		///////////////////////////////////
+		// Fetching price histories
+		///////////////////////////////////
 
+		// Fetch and format new and used price data
 		const newPriceHistory = [[${product.price.newPricehistory}]].map(({ timestamp: x, price: y }) => ({ x, y }));
 		const occasionPriceHistory = [[${product.price.occasionPricehistory}]].map(({ timestamp: x, price: y }) => ({ x, y }));
 
+		// Function to filter data based on date
 		function filterDataByDate(data, startDate) {
 			return data.filter(item => new Date(item.x) >= startDate);
 		}
 
 		const today = new Date();
 
+		// Define date ranges for filtering
 		const dateRanges = {
 			'15days': new Date(today.getTime() - (15 * 24 * 60 * 60 * 1000)),
 			'3months': new Date(today.getFullYear(), today.getMonth() - 3, today.getDate()),
 			'6months': new Date(today.getFullYear(), today.getMonth() - 6, today.getDate()),
-			'max': null //  (toutes les données)
+			'max': null // All data
 		};
 
-		const date15DaysAgo = new Date(today);
-		date15DaysAgo.setDate(today.getDate() - 15);
-
-		const date3MonthsAgo = new Date(today);
-		date3MonthsAgo.setMonth(today.getMonth() - 3);
-
-		const date6MonthsAgo = new Date(today);
-		date6MonthsAgo.setMonth(today.getMonth() - 6);
-
+		// Function to get filtered data based on the period
 		function getFilteredData(data, period) {
 			if (dateRanges[period]) {
 				return filterDataByDate(data, dateRanges[period]);
 			} else {
-				return data; // Retourne toutes les données pour 'max'
+				return data; // Return all data for 'max'
 			}
 		}
 
+		///////////////////////////////////
+		// Initialization of DataTables
+		///////////////////////////////////
 
-		/////////////////////////////////
-		// Price datatables
-		/////////////////////////////////
-
-
+		// Initialize the offers table
 		initTable('#offres');
 
-
-		/////////////////////////////////
-		// Attributes datatables
-		/////////////////////////////////
-
+		// Initialize the attributes table if it exists
 		if ($("#allAttributes").length) {
 			$('#allAttributes').DataTable({
 				responsive: true
 			});
 		}
 
-		/////////////////////////////////
-		// Images table
-		/////////////////////////////////
-
+		// Initialize the images table if it exists
 		if ($("#imagesTable").length) {
 			$('#imagesTable').DataTable({
 				responsive: true
 			});
 		}
 
-
-
-
-		/////////////////////////////////
-		// Enable tooltips
-		/////////////////////////////////
+		///////////////////////////////////
+		// Enable Bootstrap tooltips
+		///////////////////////////////////
 		$('[data-bs-toggle="tooltip"]').tooltip();
 
+		///////////////////////////////////
+		// Initialization of price charts
+		///////////////////////////////////
+
+		// Initialize the chart for new prices
 		const newPriceCtx = document.getElementById('newPriceChart').getContext('2d');
 		const newPriceChart = new Chart(newPriceCtx, {
 			type: 'line',
 			data: {
 				datasets: [{
-					label: 'Prix Neuf',
+					label: 'New Price',
 					fill: true,
-					data: getFilteredData(newPriceHistory, '15days'), // Affiche les 15 derniers jours par défaut
+					data: getFilteredData(newPriceHistory, '15days'), // Default display of the last 15 days
 					backgroundColor: '#4cb1ff',
 					borderColor: '#41a3ef',
 					borderWidth: 2,
 					tension: 0,
-					pointRadius: 0,         // Masque les points par défaut
-					pointHoverRadius: 6,    // Affiche le point au survol
+					pointRadius: 0,         // Hide points by default
+					pointHoverRadius: 6,    // Show point on hover
 					pointHitRadius: 10,
 				}]
 			},
@@ -456,21 +383,22 @@
 					y: {
 						title: {
 							display: true,
-							text: 'Prix (€)'
+							text: 'Price (€)'
 						}
 					}
 				}
 			}
 		});
 
+		// Initialize the chart for used prices
 		const usedPriceCtx = document.getElementById('usedPriceChart').getContext('2d');
 		const usedPriceChart = new Chart(usedPriceCtx, {
 			type: 'line',
 			data: {
 				datasets: [{
-					label: 'Prix d\'Occasion',
+					label: 'Used Price',
 					fill: true,
-					data: getFilteredData(occasionPriceHistory, '15days'), // Affiche les 15 derniers jours par défaut
+					data: getFilteredData(occasionPriceHistory, '15days'), // Default display of the last 15 days
 					backgroundColor: '#ff6384',
 					borderColor: '#fa486e',
 					borderWidth: 2,
@@ -503,58 +431,62 @@
 					y: {
 						title: {
 							display: true,
-							text: 'Prix (€)'
+							text: 'Price (€)'
 						}
 					}
 				}
 			}
 		});
 
-		document.getElementById('btn-new-15days').addEventListener('click', function() {
+		// Event handlers for "new" price chart buttons
+		document.getElementById('btn-new-15days').addEventListener('click', function () {
 			updateChart(newPriceChart, newPriceHistory, '15days');
 			setActiveButton(this, 'new');
 		});
 
-		document.getElementById('btn-new-3months').addEventListener('click', function() {
+		document.getElementById('btn-new-3months').addEventListener('click', function () {
 			updateChart(newPriceChart, newPriceHistory, '3months');
 			setActiveButton(this, 'new');
 		});
 
-		document.getElementById('btn-new-6months').addEventListener('click', function() {
+		document.getElementById('btn-new-6months').addEventListener('click', function () {
 			updateChart(newPriceChart, newPriceHistory, '6months');
 			setActiveButton(this, 'new');
 		});
 
-		document.getElementById('btn-new-max').addEventListener('click', function() {
+		document.getElementById('btn-new-max').addEventListener('click', function () {
 			updateChart(newPriceChart, newPriceHistory, 'max');
 			setActiveButton(this, 'new');
 		});
 
-		document.getElementById('btn-used-15days').addEventListener('click', function() {
+		// Event handlers for "used" price chart buttons
+		document.getElementById('btn-used-15days').addEventListener('click', function () {
 			updateChart(usedPriceChart, occasionPriceHistory, '15days');
 			setActiveButton(this, 'used');
 		});
 
-		document.getElementById('btn-used-3months').addEventListener('click', function() {
+		document.getElementById('btn-used-3months').addEventListener('click', function () {
 			updateChart(usedPriceChart, occasionPriceHistory, '3months');
 			setActiveButton(this, 'used');
 		});
 
-		document.getElementById('btn-used-6months').addEventListener('click', function() {
+		document.getElementById('btn-used-6months').addEventListener('click', function () {
 			updateChart(usedPriceChart, occasionPriceHistory, '6months');
 			setActiveButton(this, 'used');
 		});
 
-		document.getElementById('btn-used-max').addEventListener('click', function() {
+		document.getElementById('btn-used-max').addEventListener('click', function () {
 			updateChart(usedPriceChart, occasionPriceHistory, 'max');
 			setActiveButton(this, 'used');
 		});
 
+		// Function to update the chart with filtered data
 		function updateChart(chart, data, period) {
 			chart.data.datasets[0].data = getFilteredData(data, period);
 			chart.update();
 		}
 
+		// Function to visually set the active button
 		function setActiveButton(activeButton, chartType) {
 			const buttonGroupSelector = chartType === 'new' ? '.btn-group .btn[id^="btn-new"]' : '.btn-group .btn[id^="btn-used"]';
 			const buttons = document.querySelectorAll(buttonGroupSelector);
@@ -566,20 +498,20 @@
 			activeButton.classList.add('btn-primary');
 		}
 
+		///////////////////////////////////
+		// Initialization of image gallery
+		///////////////////////////////////
 
-		// Image gallery
-
-		// Get the carousel element by its ID
+		// Retrieve the carousel element
 		let carouselEl = document.getElementById('bootstrap-gallery-carousel');
 
-		// Create a new Bootstrap 5 Carousel instance with specified options
+		// Create a Bootstrap Carousel instance with specified options
 		const carousel = new bootstrap.Carousel(carouselEl, {
 			interval: 10000,
 			wrap: false,
-
 		});
 
-		// Add an event listener for the 'slide.bs.carousel' event, fires immediately when the slide instance method is invoked.
+		// Add event listener for 'slide.bs.carousel' event
 		carouselEl.addEventListener('slide.bs.carousel', (event) => {
 			const container = document.querySelector('.carousel-inner');
 			window.lightGallery(container, {
@@ -587,10 +519,7 @@
 				selector: '.lg-item',
 			});
 		});
-
-
-
-	} );
+	});
 </script>
 
 </body>
