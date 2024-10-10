@@ -1,10 +1,9 @@
 package org.open4goods.commons.store.repository;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.open4goods.commons.dao.ProductRepository;
-import org.open4goods.commons.model.product.Product;
 import org.open4goods.commons.model.product.ProductPartialUpdateHolder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -60,21 +59,15 @@ public class PartialProductIndexationWorker implements Runnable {
 				if (itemsToTake > 0) {
 					// There is data to consume and queue consummation is enabled
 					// A map to deduplicate --> MEANS WE CAN SOMETIMES LOOSE DATAFRAMENTS IF 2 ENTRIES ARE IN THE SAME BAG (no because we put back in queue)
-					final Map<Long,ProductPartialUpdateHolder> buffer = new HashMap<>();	
+					final Set<ProductPartialUpdateHolder> buffer = new HashSet<>();	
 										
 					// Dequeuing
 					for (int i = 0; i < itemsToTake; i++) {
 						ProductPartialUpdateHolder item = service.getPartialProductQueue().take();
-						
-						if (buffer.containsKey(item.getProductId())) {
-							logger.info("Putting back in queue : {}", item.getProductId() );
-							service.getPartialProductQueue().put(item);
-						} else {
-							buffer.put(item.getProductId(),item);							
-						}
+						buffer.add(item);						
 					}
 					
-					service.bulkUpdateDocument(buffer.values());
+					service.bulkUpdateDocument(buffer);
 					
 					logger.warn ("{} has indexed {} products. {} Remaining in queue",workerName,  buffer.size(), service.getPartialProductQueue().size());
 
