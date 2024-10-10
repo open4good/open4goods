@@ -398,16 +398,16 @@ public class ProductRepository {
 	}
 	
 	public void store(Collection<Product> data) {
-		logger.info("Indexing {} products", data.size());
-			List<IndexQuery> indexQueries = new ArrayList<>();
-	        for (Product p : data) {
-	            IndexQuery query = new IndexQueryBuilder()
-	                    .withId(String.valueOf(p.getId()))
-	                    .withObject(p)
-	                    .build();
-	            indexQueries.add(query);
-	        }
-	    elasticsearchOperations.bulkIndex(indexQueries,current_index);
+	    logger.info("Indexing {} products", data.size());
+	    
+	    List<IndexQuery> indexQueries = data.stream()
+	        .map(p -> new IndexQueryBuilder()
+	            .withId(String.valueOf(p.getId()))
+	            .withObject(p)
+	            .build())
+	        .collect(Collectors.toList());
+
+	    elasticsearchOperations.bulkIndex(indexQueries, current_index);
 	}
 
 	
