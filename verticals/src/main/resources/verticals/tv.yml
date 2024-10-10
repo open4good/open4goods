@@ -120,7 +120,7 @@ i18n:
         override: false
         pauseDurationMs: 1000
         rootPrompt: |
-            analyse technique, fonctionnelle et écologique d'un téléviseur.
+            analyse technique, fonctionnelle et écologique d'un téléviseur, textes en français uniquement.
              
             Caractéristiques : 
             [(${p.caracteristics()})]
