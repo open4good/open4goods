@@ -210,6 +210,7 @@ public class DataFragmentStoreService {
 					ProductPartialUpdateHolder partial = new ProductPartialUpdateHolder(data.getId());
 					partial.addChange("lastChange", data.getLastChange());
 					partial.addChange("price", data.getPrice());
+					partial.addChange("offersCount", data.getOffersCount());
 					
 					partialItemsResults.add(partial);
 					
