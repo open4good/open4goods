@@ -8,28 +8,21 @@ import org.open4goods.commons.model.constants.ProductCondition;
 import org.open4goods.commons.model.data.DataFragment;
 import org.open4goods.commons.model.data.Price;
 import org.springframework.data.annotation.Transient;
-import org.springframework.data.elasticsearch.annotations.Field;
-import org.springframework.data.elasticsearch.annotations.FieldType;
 
 public class AggregatedPrice extends Price {
 	
 	//TODO : shared, ugly
 	public static final DecimalFormat numberFormater = new DecimalFormat("0.#");
 	
-	@Field(index = false, store = false, type = FieldType.Keyword)
 	private String datasourceName;
 	
-	@Field(index = false, store = false, type = FieldType.Keyword)
 	private String offerName;
-	@Field(index = false, store = false, type = FieldType.Keyword)
 	private String url;
-	@Field(index = false, store = false, type = FieldType.Double)
 	// TODO : Compute, do not store
 	private Double compensation;
 	/**
 	 * The state of the product (new, occasion, ...)
 	 */
-	@Field(index = true, store = false, type = FieldType.Keyword)
 	//TODO : Rename to productCondition
 	private ProductCondition productState;
 
@@ -37,7 +30,6 @@ public class AggregatedPrice extends Price {
 	 * The encoded form of the affiliation token
 	 */
 	@Transient
-	@Field(index = false, store = false, type = FieldType.Keyword)
 	private String affiliationToken;
 
 	/**
