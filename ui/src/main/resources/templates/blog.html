@@ -99,7 +99,7 @@
 	                                <img th:src="${post.image}" class="card-img-top rounded" th:alt="${post.title}">
 	                            </a>
 	                            <div class="card-body p-0 pt-4">
-	                                <a th:href="'/blog/'+${post.url}" class="h4" th:value="${post.title}"></a>
+	                                <a th:href="'/blog/'+${post.url}" class="h4" th:text="${post.title}"></a>
 	                                <p class="mb-0" th:text="${post.summary}"></p>
 	                                <div class="d-flex align-items-center mt-3">
 	                                    <img class="avatar avatar-sm rounded-circle" th:src="'/assets/img/team/'+${post.author}+'.jpeg'" th:alt="${post.author}"> 
