@@ -1,6 +1,6 @@
 {
   "index": {
-  	"refresh_interval": "60s",
+  	"refresh_interval": "80s",
   	"number_of_shards": "5"
   },
   "analysis": {
