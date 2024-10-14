@@ -7,9 +7,6 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.open4goods.commons.model.constants.ReferentielKey;
-import org.springframework.data.elasticsearch.annotations.Dynamic;
-import org.springframework.data.elasticsearch.annotations.Field;
-import org.springframework.data.elasticsearch.annotations.FieldType;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -58,10 +55,7 @@ public class AggregatedAttributes  {
 		referentielAttributes.put(key, value);
 	}
 
-
-		
 	public Map<String, String> referentielAttributesAsStringKeys() {
-		// TODO Auto-generated method stub
 		return referentielAttributes.entrySet().stream().collect(Collectors.toMap(
 					e -> e.getKey().toString(),
 				Map.Entry::getValue
@@ -102,13 +96,4 @@ public class AggregatedAttributes  {
 	public void setReferentielAttributes(Map<ReferentielKey, String> referentielAttributes) {
 		this.referentielAttributes = referentielAttributes;
 	}
-
-
-
-
-
-
-
-
-
 }

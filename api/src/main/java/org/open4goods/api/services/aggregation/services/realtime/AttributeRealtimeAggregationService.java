@@ -53,17 +53,23 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 	@Override
 	public HashMap<String, Object> onProduct(Product data, VerticalConfig vConf) throws AggregationSkipException {
 
-		//////////////////////////////////////////
-		// Cleaning attributes names (normalisation)
-		// TODO(p3, optimisation) : Could remove once full sanitisation batch, all new
-		////////////////////////////////////////// attribute names are clean
-		//////////////////////////////////////////
+		
 		Set<AggregatedAttribute> attrs = new HashSet<AggregatedAttribute>();
-		data.getAttributes().getUnmapedAttributes().stream().forEach(a -> {
-			// Dedup is ensured with the set and hashcode / equals override
-			a.setName(IdHelper.normalizeAttributeName(a.getName()));
-			attrs.add(a);
+		//////////////////////////////////////////
+		//		  Cleaning attributes that must be discarded 
+		//////////////////////////////////////////
+		data.getAttributes().getUnmapedAttributes().forEach(a -> {			
+			if (vConf.getAttributesConfig().getExclusions().contains(a.getName())) {
+				dedicatedLogger.info("Removing attribute {} from {}",a, data.getId());
+			} else {
+				// Dedup is ensured with the set and hashcode / equals override
+				// TODO(p3, optimisation) : Could remove once full sanitisation batch, all new
+				a.setName(IdHelper.normalizeAttributeName(a.getName()));
+				attrs.add(a);
+			}			
 		});
+		
+		
 		data.getAttributes().setUnmapedAttributes(attrs);
 
 		//////////////////////////////////////////////////////////////////////////
@@ -132,7 +138,7 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 				// Checking if a potential AggregatedAttribute
 				Attribute translated = attributesConfig.translateAttribute(attr, dataFragment.getDatasourceName());
 
-				// We have a "raw" attribute that matches a aggragationconfig
+				// We have a "raw" attribute that matches an aggregationconfig
 
 				if (ResourceHelper.isImage(attr.getValue())) {
 					Resource r = new Resource(attr.getValue());

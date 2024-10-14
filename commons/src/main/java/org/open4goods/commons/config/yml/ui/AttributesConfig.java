@@ -49,7 +49,7 @@ public class AttributesConfig {
 
 
 	/**
-	 * If set, the list of attributes names to be excluded from "unmapped attributes"
+	 * If set, the list of attributes names to be excluded from attributes. Will not be aggregated in the product data
 	 */
 	@JsonMerge
 	private Set<String> exclusions = new HashSet<>();
