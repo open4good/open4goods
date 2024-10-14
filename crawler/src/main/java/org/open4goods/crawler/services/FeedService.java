@@ -59,7 +59,7 @@ public class FeedService {
 	 * Fetch the feeds
 	 * TODO : Make it from conf, not to retrive datasources at the same time than beta.nudger.fr
 	 */
-	@Scheduled(cron = "0 0 22 * * ?")
+	@Scheduled(cron = "0 0 21 * * ?")
 	public void fetchFeeds() {
 		
 		if (fetchingService.getQueue().size() > 0) {
