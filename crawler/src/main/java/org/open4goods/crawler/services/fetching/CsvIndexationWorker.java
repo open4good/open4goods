@@ -2,15 +2,15 @@ package org.open4goods.crawler.services.fetching;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -342,302 +342,556 @@ public class CsvIndexationWorker implements Runnable {
 		dedicatedLogger.info("End CSV direct fetching for {}", dsConfName);
 	}
 
-	private DataFragment parseCsvLine(final DataFragmentWebCrawler crawler, final CrawlController controler, final DataSourceProperties config, final Map<String, String> item, final String datasourceConfigName, final Logger dedicatedLogger, String datasetUrl) throws ValidationException {
 
-		final CsvDataSourceProperties csvProperties = config.getCsvDatasource();
-
-		dedicatedLogger.info("Parsing line : {}", item);
-
-		/////////////////////////////////
-		// DataFragments mapping
-		//////////////////////////////////
-
-		final DataFragment p = new DataFragment();
-		p.setFragmentHashCode(item.hashCode());
-		
-		
-		// Url extraction from param
-		try {
-			if (!StringUtils.isEmpty(csvProperties.getExtractUrlFromParam())) {
-				String u = getFromCsvRow(item, csvProperties.getUrl());
-				final UriComponents parsedUrl = UriComponentsBuilder.fromUriString(u).build();
-				u = URLDecoder.decode(parsedUrl.getQueryParams().getFirst(csvProperties.getExtractUrlFromParam()), StandardCharsets.UTF_8);
-				p.setUrl(u);
-			} else {
-				p.setUrl(getFromCsvRow(item, csvProperties.getUrl()));
-			}
-		} catch (final Exception e2) {
-			dedicatedLogger.info("Error while extracting url in dataset {} :  {}", datasetUrl, item);
-		}
-
-		if (!StringUtils.isEmpty(csvProperties.getAffiliatedUrl())) {
-			String u = getFromCsvRow(item, csvProperties.getAffiliatedUrl());
-			if (null == u) {
-				dedicatedLogger.info("Null affiliated url in {}", item);
-			} else {
-				if (null != csvProperties.getAffiliatedUrlReplacementTokens()) {
-					for (Entry<String, String> a : csvProperties.getAffiliatedUrlReplacementTokens().entrySet()) {
-						u = u.replace(a.getKey(), a.getValue());
-					}
-				}
-				p.setAffiliatedUrl(u);
-			}
-		}
-
-		if (csvProperties.getTrimUrlParameters()) {
-
-			final int pos = p.getUrl().indexOf('?');
-			if (-1 != pos) {
-				p.setUrl(p.getUrl().substring(0, pos));
-			}
-		}
-
-		if (null != csvProperties.getPrice()) {
-
-			for (String pc : csvProperties.getPrice()) {
-				try {
-
-					final Price price = new Price();
-					String val = getFromCsvRow(item, pc);
-
-					if (StringUtils.isEmpty(val)) {
-						continue;
-					}
-
-					price.setPriceValue(val, Locale.forLanguageTag(config.getLanguage().toUpperCase()));
-					price.setCurrency(csvProperties.getCurrency());
-
-					p.setPrice(price);
-					break;
-				} catch (final Exception e) {
-					dedicatedLogger.info("Error setting price, trying setPriceAndCurrency : {}", p.getUrl());
-					try {
-						p.setPriceAndCurrency(getFromCsvRow(item, pc), Locale.forLanguageTag(config.getLanguage().toUpperCase()));
-					} catch (final Exception e1) {
-						dedicatedLogger.warn("Error setting fallback price with setPriceAndCurrency(): {}", p.getUrl());
-					}
-				}
-			}
-		}
-
-		p.addName(getFromCsvRow(item, csvProperties.getName()));
-		p.addProductTags(getCategoryFromCsvRows(item));
-
-		if (!StringUtils.isEmpty(csvProperties.getAttrs())) {
-			handleAttributes(p, config, getFromCsvRow(item, csvProperties.getAttrs()), dedicatedLogger);
-		}
-
-		/////////////////////////////////////
-		// Adding all columns as attributes
-		/////////////////////////////////////
-		if (csvProperties.getImportAllAttributes()) {
-			for (Entry<String, String> kv : item.entrySet()) {
-				String key = kv.getKey();
-				String val =(kv.getValue());
-
-				if (!StringUtils.isEmpty(val)) {
-					p.addAttribute(key, val, config.getLanguage(), csvProperties.getAttributesIgnoreCariageReturns(), csvProperties.getAttributesSplitSeparators());
-				}
-			}
-		}
-
-		if (null != csvProperties.getRating()) {
-			try {
-				final Rating r = new Rating();
-//				r.setProviderName(config.getName());
-//				r.setTimeStamp(System.currentTimeMillis());
-				r.setMin(csvProperties.getRating().getMinValue());
-				r.setMax(csvProperties.getRating().getMaxValue());
-				r.addTag(csvProperties.getRating().getType());
-				r.setValue(Double.valueOf(getFromCsvRow(item, csvProperties.getRating().getValue())));
-//				r.setUrl(p.getUrl());
-				p.addRating(r);
-			} catch (final Exception e) {
-				dedicatedLogger.warn("Error while adding rating for {} : {}", item, e.getMessage());
-			}
-		}
-
-		for (final String desc : csvProperties.getDescription()) {
-
-			String description = getFromCsvRow(item, desc);
-
-			if (!StringUtils.isEmpty(description) && null != config.getDescriptionRemoveToken()) {
-
-				for (String token : config.getDescriptionRemoveToken()) {
-					description = description.replace(token, "");
-				}
-			}
-		}
-
-		try {
-			for (final String imgCell : csvProperties.getImage()) {
-				String r = getFromCsvRow(item, imgCell);
-				if (!StringUtils.isEmpty(r)) {
-
-					// Checking for image tokens exclusions
-					if (null != csvProperties.getImageTokenExclusions()) {
-						boolean skip = false;
-						for (String re : csvProperties.getImageTokenExclusions()) {
-							if (r.contains(re)) {
-								skip = true;
-								break;
-							}
-						}
-						if (skip) {
-							continue;
-						}
-					}
-
-					p.addResource(r);
-
-				}
-			}
-		} catch (final ValidationException e1) {
-			dedicatedLogger.warn("Problem while adding resource for {}", item);
-		}
-
-		// Assuming that by default, for referentiels they are in stock
-		p.setInStock(InStock.INSTOCK);
-		if (null != csvProperties.getInStock()) {
-			for (String inStock : csvProperties.getInStock()) {
-				// Instock
-				try {
-					String val = getFromCsvRow(item, inStock);
-					InStock stock = InStockParser.parse(val);
-					if (null != stock) {
-						p.setInStock(stock);
-						break;
-					}
-				} catch (final Exception e1) {
-					dedicatedLogger.info("Cannot parse InStock : {} ", e1.getMessage());
-				}
-			}
-		}
-
-		// Shipping time
-		if (!StringUtils.isEmpty(csvProperties.getShippingTime())) {
-			final String strW = getFromCsvRow(item, csvProperties.getShippingTime());
-			try {
-				p.setShippingTime(ShippingTimeParser.parse(strW));
-			} catch (final Exception e1) {
-				dedicatedLogger.info("Cannot parse shippingTime : {} ", e1.getMessage());
-			}
-		}
-
-		// Instock quantity
-		if (!StringUtils.isEmpty(csvProperties.getQuantityInStock())) {
-			final String strW = getFromCsvRow(item, csvProperties.getQuantityInStock());
-			if (StringUtils.isEmpty(strW)) {
-				dedicatedLogger.info("No  ShippingCost in csv column {}", csvProperties.getQuantityInStock());
-			} else {
-				try {
-					p.setQuantityInStock(Integer.valueOf(strW));
-				} catch (final Exception e1) {
-					dedicatedLogger.info("Cannot parse QuantityInStock : {} ", e1.getMessage());
-				}
-			}
-		}
-
-		// Shipping price
-		if (!StringUtils.isEmpty(csvProperties.getShippingCost())) {
-			final String strW = getFromCsvRow(item, csvProperties.getShippingCost());
-			try {
-				p.setShippingCost(ShippingCostParser.parse(strW));
-			} catch (final Exception e1) {
-				dedicatedLogger.info("Cannot parse ShippingCost : {} ", e1.getMessage());
-			}
-		}
-
-		// Warranty
-		if (!StringUtils.isEmpty(csvProperties.getWarranty())) {
-			try {
-				final String strW = getFromCsvRow(item, csvProperties.getWarranty());
-				if (StringUtils.isEmpty(strW)) {
-					dedicatedLogger.warn("No  warranty in csv column {}", csvProperties.getWarranty());
-				} else {
-					p.setWarranty(Integer.valueOf(strW));
-				}
-			} catch (final Exception e1) {
-				dedicatedLogger.info("Cannot parse Warranty : {} ", e1.getMessage());
-			}
-		}
-
-		// ProductCondition
-		p.setProductState(config.getDefaultItemCondition());
-		if (null != csvProperties.getProductState()) {
-			for (String productState : csvProperties.getProductState()) {
-
-				try {
-					ProductCondition state = ProductConditionParser.parse(getFromCsvRow(item, productState));
-					if (null != state) {
-						p.setProductState(state);
-						break;
-					}
-				} catch (final Exception e1) {
-					dedicatedLogger.info("Cannot parse product state : {} ", e1.getMessage());
-				}
-			}
-		}
-
-		// TODO : Complete to get commons
-		for (final Entry<ReferentielKey, Set<String>> refs : csvProperties.getReferentiel().entrySet()) {
-			for (String csvKey : refs.getValue()) {
-
-				final String val = getFromCsvRow(item, csvKey);
-				if (StringUtils.isEmpty(val)) {
-					dedicatedLogger.debug("No data for {} in {}", csvKey, item);
-				} else {
-					p.addReferentielAttribute(refs.getKey(), val);
-					break;
-				}
-			}
-
-			if (null == p.getReferentielAttributes().get(refs.getKey())) {
-				dedicatedLogger.info("No referentiel attribute found for {} in {}", refs.getKey(), item);
-			}
-		}
-
-		// If an affiliated url and no url, use affiliatedUrl
-		// NOTE : Enforcement, to be sure than in all the processing and restitution
-		// process we have a "by default" affiliatedUrl use
-		if (!StringUtils.isEmpty(p.getAffiliatedUrl())) {
-			p.setUrl(p.getAffiliatedUrl());
-		}
-
-		// We import all columns as attributes
-		if (csvProperties.getImportAllAttributes()) {
-			for (Entry<String, String> entry : item.entrySet()) {
-				p.addAttribute(entry.getKey(), entry.getValue(), config.getLanguage(), true, Sets.newHashSet());
-			}
-
-		}
-
-		// Completing with the web data if defined
-		if (null != crawler) {
-			dedicatedLogger.info("Completing CSV data fragment {} with web data at url {}", p, p.getUrl());
-
-			if (!StringUtils.isEmpty(p.getUrl())) {
-				// Completing the datafragment with the configured url
-				DataFragment fragment = crawler.visitNow(controler, p.getUrl(), p);
-				// TODO(p3,not working) Complete if need direct indexation from CSV
-
-				p.setDatasourceConfigName(datasourceConfigName);
-
-			} else {
-				dedicatedLogger.warn("No url to crawl extracted from datafragment {}, will index without web crawling completion", p);
-			}
-		} else {
-			// NOTE : completion service is made by completionCrawler
-			////// "Standard" completion of the data fragment
-			completionService.complete(p, datasourceConfigName, config, dedicatedLogger);
-		}
-
-		p.validate(config.getValidationFields());
-
-		return p;
-
+	
+	
+	
+	
+	
+	
+	/**
+	 * Parses a CSV line into a DataFragment object.
+	 *
+	 * @param crawler DataFragmentWebCrawler for web data completion
+	 * @param controller CrawlController for controlling crawling operations
+	 * @param config DataSourceProperties for configuration settings
+	 * @param item Map representing a CSV line
+	 * @param datasourceConfigName Name of the data source configuration
+	 * @param dedicatedLogger Logger for logging information
+	 * @param datasetUrl URL of the dataset being parsed
+	 * @return DataFragment object containing parsed data
+	 * @throws ValidationException if validation fails
+	 */
+	private DataFragment parseCsvLine(final DataFragmentWebCrawler crawler, final CrawlController controller, final DataSourceProperties config, final Map<String, String> item, final String datasourceConfigName, final Logger dedicatedLogger, String datasetUrl) throws ValidationException {
+	    dedicatedLogger.info("Parsing line : {}", item);
+	    
+	    DataFragment dataFragment = new DataFragment();
+	    dataFragment.setFragmentHashCode(item.hashCode());
+	    
+	    setUrl(dataFragment, item, config, dedicatedLogger, datasetUrl);
+	    setAffiliatedUrl(dataFragment, item, config, dedicatedLogger);
+	    trimUrlParameters(dataFragment, config);
+	    setPrice(dataFragment, item, config, dedicatedLogger);
+	    setNameAndTags(dataFragment, item, config);
+	    setAttributes(dataFragment, item, config, dedicatedLogger);
+	    setRating(dataFragment, item, config, dedicatedLogger);
+	    setDescription(dataFragment, item, config);
+	    addResources(dataFragment, item, config, dedicatedLogger);
+	    setInStock(dataFragment, item, config, dedicatedLogger);
+	    setShippingDetails(dataFragment, item, config, dedicatedLogger);
+	    setProductState(dataFragment, item, config, dedicatedLogger);
+	    addReferentielAttributes(dataFragment, item, config, dedicatedLogger);
+	    enforceAffiliatedUrl(dataFragment);
+	    
+	    importAllAttributes(dataFragment, item, config);
+	    completeWithWebData(dataFragment, crawler, controller, datasourceConfigName, config, dedicatedLogger);
+	    dataFragment.validate(config.getValidationFields());
+	    
+	    return dataFragment;
 	}
 
+	/**
+	 * Sets the URL of the DataFragment.
+	 *
+	 * @param dataFragment DataFragment to set the URL
+	 * @param item Map representing a CSV line
+	 * @param config DataSourceProperties for configuration settings
+	 * @param logger Logger for logging information
+	 * @param datasetUrl URL of the dataset being parsed
+	 */
+	private void setUrl(DataFragment dataFragment, Map<String, String> item, DataSourceProperties config, Logger logger, String datasetUrl) {
+	    try {
+	        CsvDataSourceProperties csvProperties = config.getCsvDatasource();
+	        String url = !StringUtils.isEmpty(csvProperties.getExtractUrlFromParam()) ? extractUrlFromParam(item, csvProperties) : getFromCsvRow(item, csvProperties.getUrl());
+	        dataFragment.setUrl(url);
+	        // revove from the source to prevent further integration
+	        removeFromSource(item, csvProperties.getUrl());
+	        
+	    } catch (Exception e) {
+	        logger.info("Error while extracting url in dataset {} :  {}", datasetUrl, item);
+	    }
+	}
+
+
+	/**
+	 * Extracts URL from a specific parameter in the CSV row.
+	 *
+	 * @param item Map representing a CSV line
+	 * @param csvProperties CsvDataSourceProperties for configuration settings
+	 * @return Extracted URL string
+	 * @throws UnsupportedEncodingException if URL decoding fails
+	 */
+	private String extractUrlFromParam(Map<String, String> item, CsvDataSourceProperties csvProperties) {
+	    String url = getFromCsvRow(item, csvProperties.getUrl());
+	    UriComponents parsedUrl = UriComponentsBuilder.fromUriString(url).build();
+	    return URLDecoder.decode(parsedUrl.getQueryParams().getFirst(csvProperties.getExtractUrlFromParam()), StandardCharsets.UTF_8);
+	}
+
+	/**
+	 * Sets the affiliated URL of the DataFragment.
+	 *
+	 * @param dataFragment DataFragment to set the affiliated URL
+	 * @param item Map representing a CSV line
+	 * @param config DataSourceProperties for configuration settings
+	 * @param logger Logger for logging information
+	 */
+	private void setAffiliatedUrl(DataFragment dataFragment, Map<String, String> item, DataSourceProperties config, Logger logger) {
+	    CsvDataSourceProperties csvProperties = config.getCsvDatasource();
+	    if (!StringUtils.isEmpty(csvProperties.getAffiliatedUrl())) {
+	        String url = getFromCsvRow(item, csvProperties.getAffiliatedUrl());
+	        if (url != null && csvProperties.getAffiliatedUrlReplacementTokens() != null) {
+	            for (Map.Entry<String, String> token : csvProperties.getAffiliatedUrlReplacementTokens().entrySet()) {
+	                url = url.replace(token.getKey(), token.getValue());
+	            }
+	        }
+	        dataFragment.setAffiliatedUrl(url);
+	    }
+	}
+
+	/**
+	 * Trims URL parameters from the DataFragment's URL.
+	 *
+	 * @param dataFragment DataFragment to trim the URL
+	 * @param config DataSourceProperties for configuration settings
+	 */
+	private void trimUrlParameters(DataFragment dataFragment, DataSourceProperties config) {
+	    CsvDataSourceProperties csvProperties = config.getCsvDatasource();
+	    if (csvProperties.getTrimUrlParameters()) {
+	        int pos = dataFragment.getUrl().indexOf('?');
+	        if (pos != -1) {
+	            dataFragment.setUrl(dataFragment.getUrl().substring(0, pos));
+	        }
+	    }
+	}
+
+	/**
+	 * Sets the price of the DataFragment.
+	 *
+	 * @param dataFragment DataFragment to set the price
+	 * @param item Map representing a CSV line
+	 * @param config DataSourceProperties for configuration settings
+	 * @param logger Logger for logging information
+	 */
+	private void setPrice(DataFragment dataFragment, Map<String, String> item, DataSourceProperties config, Logger logger) {
+	    CsvDataSourceProperties csvProperties = config.getCsvDatasource();
+	    if (csvProperties.getPrice() != null) {
+	        for (String priceColumn : csvProperties.getPrice()) {
+	            try {
+	                Price price = new Price();
+	                String value = getFromCsvRow(item, priceColumn);
+	                if (!StringUtils.isEmpty(value)) {
+	                    price.setPriceValue(value, Locale.forLanguageTag(config.getLanguage().toUpperCase()));
+	                    price.setCurrency(csvProperties.getCurrency());
+	                    dataFragment.setPrice(price);
+	                    break;
+	                }
+	            } catch (Exception e) {
+	                handlePriceFallback(dataFragment, item, priceColumn, config, logger);
+	            }
+	            
+                // Delete from source
+                removeFromSource(item, priceColumn);
+	            
+	        }
+	    }
+	}
+
+	/**
+	 * Handles fallback mechanism for setting the price if the initial attempt fails.
+	 *
+	 * @param dataFragment DataFragment to set the price
+	 * @param item Map representing a CSV line
+	 * @param priceColumn Column name containing the price
+	 * @param config DataSourceProperties for configuration settings
+	 * @param logger Logger for logging information
+	 */
+	private void handlePriceFallback(DataFragment dataFragment, Map<String, String> item, String priceColumn, DataSourceProperties config, Logger logger) {
+	    try {
+	        dataFragment.setPriceAndCurrency(getFromCsvRow(item, priceColumn), Locale.forLanguageTag(config.getLanguage().toUpperCase()));
+	    } catch (Exception e) {
+	        logger.warn("Error setting fallback price with setPriceAndCurrency(): {}", dataFragment.getUrl());
+	    }
+	}
+
+	/**
+	 * Sets the name and tags of the DataFragment.
+	 *
+	 * @param dataFragment DataFragment to set the name and tags
+	 * @param item Map representing a CSV line
+	 * @param config DataSourceProperties for configuration settings
+	 */
+	private void setNameAndTags(DataFragment dataFragment, Map<String, String> item, DataSourceProperties config) {
+	    CsvDataSourceProperties csvProperties = config.getCsvDatasource();
+	    dataFragment.addName(getFromCsvRow(item, csvProperties.getName()));
+	    
+        // Delete from source
+        removeFromSource(item, csvProperties.getName());
+        
+	    dataFragment.addProductTags(getCategoryFromCsvRows(item));
+	}
+
+	/**
+	 * Sets the attributes of the DataFragment.
+	 *
+	 * @param dataFragment DataFragment to set the attributes
+	 * @param item Map representing a CSV line
+	 * @param config DataSourceProperties for configuration settings
+	 * @param logger Logger for logging information
+	 */
+	private void setAttributes(DataFragment dataFragment, Map<String, String> item, DataSourceProperties config, Logger logger) {
+	    CsvDataSourceProperties csvProperties = config.getCsvDatasource();
+	    if (!StringUtils.isEmpty(csvProperties.getAttrs())) {
+	        handleAttributes(dataFragment, config, getFromCsvRow(item, csvProperties.getAttrs()), logger);
+            // Delete from source
+            removeFromSource(item, csvProperties.getAttrs());
+	    }
+	}
+
+	/**
+	 * Sets the rating of the DataFragment.
+	 *
+	 * @param dataFragment DataFragment to set the rating
+	 * @param item Map representing a CSV line
+	 * @param config DataSourceProperties for configuration settings
+	 * @param logger Logger for logging information
+	 */
+	private void setRating(DataFragment dataFragment, Map<String, String> item, DataSourceProperties config, Logger logger) {
+	    CsvDataSourceProperties csvProperties = config.getCsvDatasource();
+	    if (csvProperties.getRating() != null) {
+	        try {
+	            Rating rating = new Rating();
+	            rating.setMin(csvProperties.getRating().getMinValue());
+	            rating.setMax(csvProperties.getRating().getMaxValue());
+	            rating.addTag(csvProperties.getRating().getType());
+	            rating.setValue(Double.valueOf(getFromCsvRow(item, csvProperties.getRating().getValue())));
+	            dataFragment.addRating(rating);
+	        } catch (Exception e) {
+	            logger.warn("Error while adding rating for {} : {}", item, e.getMessage());
+	        }
+	    }
+	}
+
+	/**
+	 * Sets the description of the DataFragment.
+	 *
+	 * @param dataFragment DataFragment to set the description
+	 * @param item Map representing a CSV line
+	 * @param config DataSourceProperties for configuration settings
+	 */
+	private void setDescription(DataFragment dataFragment, Map<String, String> item, DataSourceProperties config) {
+	    CsvDataSourceProperties csvProperties = config.getCsvDatasource();
+	    for (String descColumn : csvProperties.getDescription()) {
+	        String description = getFromCsvRow(item, descColumn);
+	        if (!StringUtils.isEmpty(description) && config.getDescriptionRemoveToken() != null) {
+	            for (String token : config.getDescriptionRemoveToken()) {
+	                description = description.replace(token, "");
+	            }
+	        }
+	        
+            // Delete from source
+            removeFromSource(item, descColumn);
+	    }
+	}
+
+	/**
+	 * Adds resources (e.g., images) to the DataFragment.
+	 *
+	 * @param dataFragment DataFragment to add resources
+	 * @param item Map representing a CSV line
+	 * @param config DataSourceProperties for configuration settings
+	 * @param logger Logger for logging information
+	 */
+	private void addResources(DataFragment dataFragment, Map<String, String> item, DataSourceProperties config, Logger logger) {
+	    try {
+	        CsvDataSourceProperties csvProperties = config.getCsvDatasource();
+	        for (String imgCell : csvProperties.getImage()) {
+	            String resource = getFromCsvRow(item, imgCell);
+	            if (!StringUtils.isEmpty(resource) && shouldIncludeResource(resource, csvProperties)) {
+	                dataFragment.addResource(resource);
+	            }
+	            
+	            // Delete from source
+                removeFromSource(item, imgCell);
+                
+	        }
+	    } catch (ValidationException e) {
+	        logger.warn("Problem while adding resource for {}", item);
+	    }
+	}
+
+	/**
+	 * Determines if a resource should be included based on exclusions.
+	 *
+	 * @param resource Resource string to check
+	 * @param csvProperties CsvDataSourceProperties for configuration settings
+	 * @return True if the resource should be included, false otherwise
+	 */
+	private boolean shouldIncludeResource(String resource, CsvDataSourceProperties csvProperties) {
+	    if (csvProperties.getImageTokenExclusions() != null) {
+	        for (String exclusion : csvProperties.getImageTokenExclusions()) {
+	            if (resource.contains(exclusion)) {
+	                return false;
+	            }
+	        }
+	    }
+	    return true;
+	}
+
+	/**
+	 * Sets the stock availability of the DataFragment.
+	 *
+	 * @param dataFragment DataFragment to set stock availability
+	 * @param item Map representing a CSV line
+	 * @param config DataSourceProperties for configuration settings
+	 * @param logger Logger for logging information
+	 */
+	private void setInStock(DataFragment dataFragment, Map<String, String> item, DataSourceProperties config, Logger logger) {
+	    CsvDataSourceProperties csvProperties = config.getCsvDatasource();
+	    dataFragment.setInStock(InStock.INSTOCK);
+	    if (csvProperties.getInStock() != null) {
+	        for (String inStockColumn : csvProperties.getInStock()) {
+	            try {
+					String value = getFromCsvRow(item, inStockColumn);
+					if (!StringUtils.isEmpty(value)) {
+
+						InStock inStock = InStockParser.parse(value);
+						if (inStock != null) {
+							dataFragment.setInStock(inStock);
+							continue;
+						}
+
+	                }
+					
+		            // Delete from source
+	                removeFromSource(item, inStockColumn);
+	                
+	            } catch (Exception e) {
+	                logger.info("Cannot parse InStock : {}", e.getMessage());
+	            }
+	        }
+	    }
+	}
+
+	/**
+	 * Sets the shipping details of the DataFragment.
+	 *
+	 * @param dataFragment DataFragment to set shipping details
+	 * @param item Map representing a CSV line
+	 * @param config DataSourceProperties for configuration settings
+	 * @param logger Logger for logging information
+	 */
+	private void setShippingDetails(DataFragment dataFragment, Map<String, String> item, DataSourceProperties config, Logger logger) {
+	    CsvDataSourceProperties csvProperties = config.getCsvDatasource();
+	    setShippingTime(dataFragment, item, csvProperties, logger);
+	    setShippingCost(dataFragment, item, csvProperties, logger);
+	    setQuantityInStock(dataFragment, item, csvProperties, logger);
+	    setWarranty(dataFragment, item, csvProperties, logger);
+	}
+
+	/**
+	 * Sets the shipping time of the DataFragment.
+	 *
+	 * @param dataFragment DataFragment to set shipping time
+	 * @param item Map representing a CSV line
+	 * @param csvProperties CsvDataSourceProperties for configuration settings
+	 * @param logger Logger for logging information
+	 */
+	private void setShippingTime(DataFragment dataFragment, Map<String, String> item, CsvDataSourceProperties csvProperties, Logger logger) {
+	    if (!StringUtils.isEmpty(csvProperties.getShippingTime())) {
+	        String shippingTimeStr = getFromCsvRow(item, csvProperties.getShippingTime());
+	        try {
+	            dataFragment.setShippingTime(ShippingTimeParser.parse(shippingTimeStr));
+	            // Delete from source
+                removeFromSource(item, csvProperties.getShippingTime());
+	        } catch (Exception e) {
+	            logger.info("Cannot parse shippingTime : {}", e.getMessage());
+	        }
+	    }
+	}
+
+	/**
+	 * Sets the quantity in stock of the DataFragment.
+	 *
+	 * @param dataFragment DataFragment to set quantity in stock
+	 * @param item Map representing a CSV line
+	 * @param csvProperties CsvDataSourceProperties for configuration settings
+	 * @param logger Logger for logging information
+	 */
+	private void setQuantityInStock(DataFragment dataFragment, Map<String, String> item, CsvDataSourceProperties csvProperties, Logger logger) {
+	    if (!StringUtils.isEmpty(csvProperties.getQuantityInStock())) {
+	        String quantityStr = getFromCsvRow(item, csvProperties.getQuantityInStock());
+	        if (null != quantityStr) {
+		        try {
+		            dataFragment.setQuantityInStock(Integer.valueOf(quantityStr));
+		            // Delete from source
+	                removeFromSource(item, csvProperties.getQuantityInStock());
+		        } catch (Exception e) {
+		            logger.info("Cannot parse QuantityInStock : {}", e.getMessage());
+		        }
+	        }
+	    }
+	}
+
+	/**
+	 * Sets the shipping cost of the DataFragment.
+	 *
+	 * @param dataFragment DataFragment to set shipping cost
+	 * @param item Map representing a CSV line
+	 * @param csvProperties CsvDataSourceProperties for configuration settings
+	 * @param logger Logger for logging information
+	 */
+	private void setShippingCost(DataFragment dataFragment, Map<String, String> item, CsvDataSourceProperties csvProperties, Logger logger) {
+	    if (!StringUtils.isEmpty(csvProperties.getShippingCost())) {
+	        String costStr = getFromCsvRow(item, csvProperties.getShippingCost());
+	        try {
+	            dataFragment.setShippingCost(ShippingCostParser.parse(costStr));
+	         // Delete from source
+                removeFromSource(item, csvProperties.getShippingCost());
+	        } catch (Exception e) {
+	            logger.info("Cannot parse ShippingCost : {}", e.getMessage());
+	        }
+	    }
+	}
+
+	/**
+	 * Sets the warranty of the DataFragment.
+	 *
+	 * @param dataFragment DataFragment to set warranty
+	 * @param item Map representing a CSV line
+	 * @param csvProperties CsvDataSourceProperties for configuration settings
+	 * @param logger Logger for logging information
+	 */
+	private void setWarranty(DataFragment dataFragment, Map<String, String> item, CsvDataSourceProperties csvProperties, Logger logger) {
+	    if (!StringUtils.isEmpty(csvProperties.getWarranty())) {
+	        String warrantyStr = getFromCsvRow(item, csvProperties.getWarranty());
+	        try {
+	            dataFragment.setWarranty(Integer.valueOf(warrantyStr));
+                // Delete from source
+                removeFromSource(item, csvProperties.getWarranty());
+	        } catch (Exception e) {
+	            logger.info("Cannot parse Warranty : {}", e.getMessage());
+	        }
+	    }
+	}
+
+	/**
+	 * Sets the product state of the DataFragment.
+	 *
+	 * @param dataFragment DataFragment to set product state
+	 * @param item Map representing a CSV line
+	 * @param config DataSourceProperties for configuration settings
+	 * @param logger Logger for logging information
+	 */
+	private void setProductState(DataFragment dataFragment, Map<String, String> item, DataSourceProperties config, Logger logger) {
+	    CsvDataSourceProperties csvProperties = config.getCsvDatasource();
+	    dataFragment.setProductState(config.getDefaultItemCondition());
+	    if (csvProperties.getProductState() != null) {
+	        for (String productStateColumn : csvProperties.getProductState()) {
+	            try {
+	                ProductCondition productState = ProductConditionParser.parse(getFromCsvRow(item, productStateColumn));
+	                if (productState != null) {
+	                    dataFragment.setProductState(productState);
+		                // Delete from source
+	                    removeFromSource(item, productStateColumn);
+	                    continue;
+	                }
+	            } catch (Exception e) {
+	                logger.info("Cannot parse product state : {}", e.getMessage());
+	            }
+	        }
+	    }
+	}
+
+	/**
+	 * Adds referentiel attributes to the DataFragment.
+	 *
+	 * @param dataFragment DataFragment to add referentiel attributes
+	 * @param item Map representing a CSV line
+	 * @param config DataSourceProperties for configuration settings
+	 * @param logger Logger for logging information
+	 */
+	private void addReferentielAttributes(DataFragment dataFragment, Map<String, String> item, DataSourceProperties config, Logger logger) {
+	    CsvDataSourceProperties csvProperties = config.getCsvDatasource();
+	    for (Map.Entry<ReferentielKey, Set<String>> entry : csvProperties.getReferentiel().entrySet()) {
+	        for (String key : entry.getValue()) {
+	            String value = getFromCsvRow(item, key);	            
+	            if (!StringUtils.isEmpty(value)) {
+	                dataFragment.addReferentielAttribute(entry.getKey(), value);
+	                // Delete from source
+	                removeFromSource(item, key);
+	                continue;
+	            }
+	        }
+	    }
+	}
+
+	/**
+	 * Enforces the use of the affiliated URL if it is set.
+	 *
+	 * @param dataFragment DataFragment to enforce affiliated URL
+	 */
+	private void enforceAffiliatedUrl(DataFragment dataFragment) {
+	    if (!StringUtils.isEmpty(dataFragment.getAffiliatedUrl())) {
+	        dataFragment.setUrl(dataFragment.getAffiliatedUrl());
+	    }
+	}
+
+	/**
+	 * Imports all attributes from the CSV row into the DataFragment.
+	 *
+	 * @param dataFragment DataFragment to import attributes
+	 * @param item Map representing a CSV line
+	 * @param config DataSourceProperties for configuration settings
+	 */
+	private void importAllAttributes(DataFragment dataFragment, Map<String, String> item, DataSourceProperties config) {
+	    CsvDataSourceProperties csvProperties = config.getCsvDatasource();
+	    if (csvProperties.getImportAllAttributes()) {
+	        for (Map.Entry<String, String> entry : item.entrySet()) {
+	            dataFragment.addAttribute(entry.getKey(), entry.getValue(), config.getLanguage(), true, Collections.emptySet());
+	        }
+	    }
+	}
+
+	/**
+	 * Completes the DataFragment with web data if the crawler is defined.
+	 *
+	 * @param dataFragment DataFragment to complete with web data
+	 * @param crawler DataFragmentWebCrawler for web data completion
+	 * @param controller CrawlController for controlling crawling operations
+	 * @param datasourceConfigName Name of the data source configuration
+	 * @param config DataSourceProperties for configuration settings
+	 * @param logger Logger for logging information
+	 */
+	private void completeWithWebData(DataFragment dataFragment, DataFragmentWebCrawler crawler, CrawlController controller, String datasourceConfigName, DataSourceProperties config, Logger logger) {
+	    if (crawler != null && !StringUtils.isEmpty(dataFragment.getUrl())) {
+	        logger.info("Completing CSV data fragment {} with web data at url {}", dataFragment, dataFragment.getUrl());
+	        crawler.visitNow(controller, dataFragment.getUrl(), dataFragment);
+	    } else {
+	        completionService.complete(dataFragment, datasourceConfigName, config, logger);
+	    }
+	}
+	
+	
+
+	/**
+	 * Remove an attribute from the source jackson csv map,
+	 * @param item
+	 * @param url
+	 */
+	private void removeFromSource(Map<String, String> item, String key) {
+		if (item.containsKey(key)) {
+			item.remove(key);
+		}
+		
+	}
+	
+	
+	
+	
+	
+	
+	
+	
 
 
 
@@ -687,15 +941,22 @@ public class CsvIndexationWorker implements Runnable {
 	private List<String> getCategoryFromCsvRows(Map<String, String> item) {
 		Set<String> catsColumns = new HashSet<String>(item.keySet());
 		
-		List<String> ret = catsColumns.stream()
+		List<String> catCols = catsColumns.stream()
 							.filter(e -> e.toLowerCase().contains("categor"))
-							.sorted()
+							.toList();
+		
+		List<String> catValues = catCols.stream().sorted()
 							.map(e -> item.get(e) )
 							.filter(e -> !StringUtils.isEmpty(e))
 							.toList();
 
-
-		return ret;
+		catCols.forEach(e -> {
+            // Delete from source
+            removeFromSource(item, e);
+		});
+		
+		
+		return catValues;
 	}
 
 	public synchronized IndexationJobStat stats() {

@@ -63,7 +63,7 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 				dedicatedLogger.info("Removing attribute {} from {}",a, data.getId());
 			} else {
 				// Dedup is ensured with the set and hashcode / equals override
-				// TODO(p3, optimisation) : Could remove once full sanitisation batch, all new
+				// TODO(p1, optimisation) : Could remove once full sanitisation batch, all new
 				a.setName(IdHelper.normalizeAttributeName(a.getName()));
 				attrs.add(a);
 			}			
