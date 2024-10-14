@@ -29,7 +29,9 @@ import java.util.zip.GZIPOutputStream;
 
 import org.apache.commons.io.FileUtils;
 import org.open4goods.api.config.yml.BackupConfig;
+import org.open4goods.api.services.AggregationFacadeService;
 import org.open4goods.commons.dao.ProductRepository;
+import org.open4goods.commons.exceptions.AggregationSkipException;
 import org.open4goods.commons.model.product.Product;
 import org.open4goods.commons.services.SerialisationService;
 import org.open4goods.xwiki.services.XWikiReadService;
@@ -61,6 +63,8 @@ public class BackupService implements HealthIndicator {
 	private ProductRepository productRepo;
 	private SerialisationService serialisationService;
 
+	private AggregationFacadeService aggregationService;
+	
 	private BackupConfig backupConfig;
 
 	// Used to trigger Health.down() if exception occurs
@@ -77,12 +81,15 @@ public class BackupService implements HealthIndicator {
 
 	
 	
-	public BackupService(XWikiReadService xwikiService, ProductRepository productRepo, BackupConfig backupConfig, SerialisationService serialisationService) {
+	
+	
+	public BackupService(XWikiReadService xwikiService, ProductRepository productRepo, BackupConfig backupConfig, SerialisationService serialisationService, AggregationFacadeService aggregationService) {
 		super();
 		this.xwikiService = xwikiService;
 		this.productRepo = productRepo;
 		this.backupConfig = backupConfig;
 		this.serialisationService = serialisationService;
+		this.aggregationService = aggregationService;
 	}
 
 	/**
@@ -282,6 +289,14 @@ public class BackupService implements HealthIndicator {
 	 */
 	private Product translate(Product p) {
 
+		
+		try {
+			aggregationService.sanitizeOne(p);
+		} catch (AggregationSkipException e) {
+			logger.error("Error in import, with product sanitisation",e);
+		}
+		
+		
 		// Setting datasources to new Map format
 //		p.getMappedCategories().forEach(e -> {
 //			p.getCategoriesByDatasources().put(e.getKey(), e.getValue());
@@ -293,7 +308,7 @@ public class BackupService implements HealthIndicator {
 	/**
 	 * This method will periodicaly backup the Xwiki content
 	 */
-	// TODO : Schedule from conf
+	// TODO(p3,conf) : Schedule from conf
 	@Scheduled(initialDelay = 1000 * 3600, fixedDelay = 1000 * 3600 * 12)
 	@Timed(value = "backup.wiki", description = "Backup of all the xwiki content", extraTags = { "service" })
 	public void backupXwiki() {
