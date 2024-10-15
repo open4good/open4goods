@@ -36,6 +36,8 @@ import org.open4goods.commons.services.IcecatService;
 import org.open4goods.commons.services.VerticalsConfigService;
 import org.slf4j.Logger;
 
+import groovyjarjarantlr4.runtime.DFA;
+
 public class AttributeRealtimeAggregationService extends AbstractAggregationService {
 
 	private final BrandService brandService;
@@ -117,9 +119,12 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 
 			AttributesConfig attributesConfig = vConf.getAttributesConfig();
 
-			// Adding the list of "to be removed" attributes
-			Set<String> toRemoveFromUnmatched = new HashSet<>(attributesConfig.getExclusions());
 
+			// Remove unwanted attributes
+			if (dataFragment.getAttributes().removeIf(e -> attributesConfig.getExclusions().contains(e.getName()))) {
+				dedicatedLogger.info("Attributes have been removed for {}", product.gtin());
+			}
+			
 			/////////////////////////////////////////
 			// Converting to AggregatedAttributes for matches from config
 			/////////////////////////////////////////
@@ -139,14 +144,14 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 				Attribute translated = attributesConfig.translateAttribute(attr, dataFragment.getDatasourceName());
 
 				// We have a "raw" attribute that matches an aggregationconfig
-
-				if (ResourceHelper.isImage(attr.getValue())) {
-					Resource r = new Resource(attr.getValue());
-					r.getTags().add(attr.getName());
-					product.addResource(r);
-					toRemoveFromUnmatched.add(attr.getName());
-					continue;
-				}
+				// TODO : At the datafragment level
+//				if (ResourceHelper.isResource(attr.getValue())) {
+//					Resource r = new Resource(attr.getValue());
+//					r.getTags().add(attr.getName());
+//					product.addResource(r);
+//					toRemoveFromUnmatched.add(attr.getName());
+//					continue;
+//				}
 
 				if (null != translated) {
 
@@ -168,9 +173,9 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 							agg.setName(attr.getName());
 						}
 
-						toRemoveFromUnmatched.add(translated.getName());
+//						toRemoveFromUnmatched.add(translated.getName());
 
-						agg.addAttribute(translated, attrConfig, new UnindexedKeyValTimestamp(dataFragment.getDatasourceName(), translated.getValue()));
+						agg.addSourceAttribute(translated, attrConfig, new UnindexedKeyValTimestamp(dataFragment.getDatasourceName(), translated.getValue()));
 
 						// Replacing new AggAttribute in product
 						product.getAttributes().getAggregatedAttributes().put(agg.getName(), agg);
@@ -196,7 +201,7 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 
 			List<Attribute> matchedFeatures = dataFragment.getAttributes().stream().filter(e -> isFeatureAttribute(e, attributesConfig)).collect(Collectors.toList());
 
-			toRemoveFromUnmatched.addAll(matchedFeatures.stream().map(Attribute::getName).collect(Collectors.toSet()));
+//			toRemoveFromUnmatched.addAll(matchedFeatures.stream().map(Attribute::getName).collect(Collectors.toSet()));
 
 			Collection<AggregatedFeature> af = aggregateFeatures(matchedFeatures);
 			product.getAttributes().getFeatures().addAll(af);

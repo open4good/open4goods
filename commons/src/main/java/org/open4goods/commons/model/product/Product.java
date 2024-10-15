@@ -108,6 +108,11 @@ public class Product implements Standardisable {
 
 	private AggregatedAttributes attributes = new AggregatedAttributes();
 
+	
+	private AggregatedAttributes attrs = new AggregatedAttributes();
+	
+	
+
 	private AggregatedPrices price = new AggregatedPrices();
 
 	// TODO(p1,design) : remove once migration ok

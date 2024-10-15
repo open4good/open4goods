@@ -804,6 +804,27 @@ public class IcecatService {
 			return name;
 		}		
 	}
+
+
+	public Map<Integer, IcecatFeature> getFeaturesById() {
+		return featuresById;
+	}
+
+
+	public void setFeaturesById(Map<Integer, IcecatFeature> featuresById) {
+		this.featuresById = featuresById;
+	}
+
+
+	public Map<Integer, IcecatCategory> getCategoriesById() {
+		return categoriesById;
+	}
+
+
+	public void setCategoriesById(Map<Integer, IcecatCategory> categoriesById) {
+		this.categoriesById = categoriesById;
+	}
+	
 	
 	
 	
