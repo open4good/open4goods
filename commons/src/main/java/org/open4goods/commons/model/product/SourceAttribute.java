@@ -19,7 +19,7 @@ import org.springframework.data.elasticsearch.annotations.FieldType;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
-public class AggregatedAttribute implements IAttribute {
+public class SourceAttribute implements IAttribute {
 
 	/**
 	 * The name of this aggregated attribute
@@ -121,8 +121,8 @@ public class AggregatedAttribute implements IAttribute {
 	@Override
 	public boolean equals(Object obj) {
 
-		if (obj instanceof AggregatedAttribute) {
-			return name.equals(((AggregatedAttribute) obj).name);
+		if (obj instanceof SourceAttribute) {
+			return name.equals(((SourceAttribute) obj).name);
 		}
 		return false;
 	}

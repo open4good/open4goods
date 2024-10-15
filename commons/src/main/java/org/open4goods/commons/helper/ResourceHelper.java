@@ -12,8 +12,9 @@ public class ResourceHelper {
 	 * @param value
 	 * @return
 	 */
-	 public static boolean isImage(String value) {
+	 public static boolean isResource(String value) {
 		  String val = value.toLowerCase().trim();
-		  return val.endsWith(".jpg") || val.endsWith(".png") || val.endsWith(".jpeg")  || val.endsWith(".wlp") || val.endsWith(".gif") || val.endsWith(".bmp") || val.endsWith(".tiff") || val.endsWith(".ico");
+		  return val.endsWith(".jpg") || val.endsWith(".png") || val.endsWith(".jpeg")  || val.endsWith(".wlp") || val.endsWith(".gif") || val.endsWith(".bmp") || val.endsWith(".tiff") || val.endsWith(".ico")
+				  || val.endsWith(".pdf");
 		 }
 }
