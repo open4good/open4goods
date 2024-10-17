@@ -8,7 +8,6 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.apache.commons.io.IOUtils;
-import org.open4goods.exceptions.TechnicalException;
 import org.open4goods.ui.config.yml.UiConfig;
 import org.open4goods.ui.controllers.ui.UiService;
 import org.open4goods.ui.services.OpenDataService;
@@ -18,8 +17,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.servlet.ModelAndView;
-
-import com.mashape.unirest.http.exceptions.UnirestException;
 
 import cz.jiripinkas.jsitemapgenerator.ChangeFreq;
 import jakarta.servlet.http.HttpServletRequest;

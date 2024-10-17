@@ -14,25 +14,18 @@ import java.util.zip.ZipOutputStream;
 
 import io.micrometer.core.annotation.Timed;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.open4goods.commons.dao.ProductRepository;
 import org.open4goods.commons.exceptions.TechnicalException;
 import org.open4goods.commons.helper.ThrottlingInputStream;
 import org.open4goods.commons.model.constants.CacheConstants;
+import org.open4goods.commons.model.product.AggregatedAttribute;
 import org.open4goods.commons.model.product.Product;
-import org.open4goods.dao.ProductRepository;
-import org.open4goods.exceptions.TechnicalException;
-import org.open4goods.helper.ThrottlingInputStream;
 import org.open4goods.model.BarcodeType;
-import org.open4goods.model.constants.CacheConstants;
-import org.open4goods.model.product.AggregatedAttribute;
-import org.open4goods.model.product.Product;
 import org.open4goods.ui.config.OpenDataConfig;
 import org.open4goods.ui.config.yml.UiConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.actuate.health.Health;
 import org.springframework.boot.actuate.health.HealthIndicator;
 import org.springframework.cache.annotation.Cacheable;
@@ -78,7 +71,7 @@ public class OpenDataService implements HealthIndicator {
 	public OpenDataService(ProductRepository aggregatedDataRepository, UiConfig uiConfig, OpenDataConfig openDataConfig){
 		this.aggregatedDataRepository = aggregatedDataRepository;
 		this.uiConfig = uiConfig;
-        this.openDataConfig = openDataConfig;
+		this.openDataConfig = openDataConfig;
 	}
 
 	/**
@@ -131,7 +124,7 @@ public class OpenDataService implements HealthIndicator {
 	 * This method is scheduled to run periodically.
 	 * TODO : Schedule in conf
 	 */
-	@Scheduled(initialDelay = 1000L * 3600, fixedDelay = 1000L * 3600 * 24 * 7)
+	//@Scheduled(initialDelay = 1000L * 3600, fixedDelay = 1000L * 3600 * 24 * 7)
 	@Timed(value = "OpenDataService.generateOpendata.time", description = "Time taken to generate the OpenData ZIP files", extraTags = {"service", "OpenDataService"})
 	public void generateOpendata() {
 
@@ -140,15 +133,7 @@ public class OpenDataService implements HealthIndicator {
 			return;
 		}
 
-		exportRunning.set(true);
-			return;
-		}
-
-		ZipOutputStream zos = null;
-		FileOutputStream fos = null;
-
 		try {
-			uiConfig.tmpOpenDataFile().getParentFile().mkdirs();
 			prepareDirectories();
 			processDataFiles();
 			moveTmpFilesToFinalDestination();
@@ -167,27 +152,6 @@ public class OpenDataService implements HealthIndicator {
 		uiConfig.tmpIsbnZipFile().getParentFile().mkdirs();
 		uiConfig.tmpGtinZipFile().getParentFile().mkdirs();
 	}
-
-	private void processDataFiles() throws IOException {
-		LOGGER.info("Starting process for ISBN_13");
-		processAndCreateZip(ISBN_DATASET_FILENAME, BarcodeType.ISBN_13, uiConfig.tmpIsbnZipFile());
-
-		LOGGER.info("Starting process for GTIN/EAN");
-		processAndCreateZip(GTIN_DATASET_FILENAME, BarcodeType.ISBN_13, uiConfig.tmpGtinZipFile(), true);
-	}
-
-	private void moveTmpFilesToFinalDestination() throws IOException {
-		moveFile(uiConfig.tmpIsbnZipFile(), uiConfig.isbnZipFile());
-		moveFile(uiConfig.tmpGtinZipFile(), uiConfig.gtinZipFile());
-	}
-
-	private void moveFile(File src, File dest) throws IOException {
-		if (dest.exists()) {
-			FileUtils.deleteQuietly(dest);
-		}
-		FileUtils.moveFile(src, dest);
-	}
-
 
 	/**
 	 * Processes and creates the ZIP files for the opendata.
@@ -218,8 +182,6 @@ public class OpenDataService implements HealthIndicator {
 		FileUtils.moveFile(src, dest);
 	}
 
-			fos = new FileOutputStream(uiConfig.tmpOpenDataFile());
-			zos = new ZipOutputStream(fos);
 	private void processAndCreateZip(String filename, BarcodeType barcodeType, File zipFile) throws IOException {
 		processAndCreateZip(filename, barcodeType, zipFile, false);
 	}
@@ -251,17 +213,8 @@ public class OpenDataService implements HealthIndicator {
 				types = new BarcodeType[]{BarcodeType.ISBN_13};
 			}
 
-			// Process ISBN_13
-			LOGGER.info("Starting process for ISBN_13");
-			processAndAddToZip(zos, "open4goods-isbn-dataset.csv", BarcodeType.ISBN_13);
-
-			// Process GTIN/EAN (excluding ISBN_13)
-			LOGGER.info("Starting process for GTIN/EAN excluding ISBN_13");
-			processAndAddToZip(zos, "open4goods-gtin-dataset.csv", BarcodeType.ISBN_13, true);
 			AtomicLong count = new AtomicLong();
 
-			zos.close();
-			fos.close();
 			aggregatedDataRepository.exportAll(types)
 					.forEach(e -> {
 						count.incrementAndGet();
@@ -271,46 +224,8 @@ public class OpenDataService implements HealthIndicator {
 			writer.flush();
 			zos.closeEntry();
 
-			// Moving the tmp file
-			if (uiConfig.openDataFile().exists()) {
-				FileUtils.deleteQuietly(uiConfig.openDataFile());
-			}
-			FileUtils.moveFile(uiConfig.tmpOpenDataFile(), uiConfig.openDataFile());
-
-			LOGGER.info("Opendata CSV files generated and zipped successfully.");
 			LOGGER.info("{} rows exported in {}.", count.get(), filename);
 
-		} catch (Exception e) {
-			LOGGER.error("Error while generating opendata set", e);
-		} finally {
-			IOUtils.closeQuietly(zos);
-			IOUtils.closeQuietly(fos);
-			exportRunning.set(false);
-			LOGGER.error("Error during processing of {}: {}", filename, e.getMessage());
-		}
-	}
-
-	private void processAndAddToZip(ZipOutputStream zos, String filename, BarcodeType barcodeType) throws IOException {
-		processAndAddToZip(zos, filename, barcodeType, false);
-	}
-
-	private void processAndAddToZip(ZipOutputStream zos, String filename, BarcodeType barcodeType, boolean invertCondition) throws IOException {
-		ZipEntry entry = new ZipEntry(filename);
-		zos.putNextEntry(entry);
-		CSVWriter writer = new CSVWriter(new OutputStreamWriter(zos));
-		writer.writeNext(header);
-
-		AtomicLong count = new AtomicLong();
-		try {
-			aggregatedDataRepository.exportAll().filter(e ->
-					invertCondition ? !e.getGtinInfos().getUpcType().equals(barcodeType) : e.getGtinInfos().getUpcType().equals(barcodeType)
-			).forEach(e -> {
-				count.incrementAndGet();
-				writer.writeNext(toEntry(e));
-			});
-			writer.flush();
-			zos.closeEntry();
-			LOGGER.info("{} rows exported in {}.", count.get(), filename);
 		} catch (Exception e) {
 			LOGGER.error("Error during processing of {}: {}", filename, e.getMessage());
 		}
