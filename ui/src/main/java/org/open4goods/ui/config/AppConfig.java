@@ -195,9 +195,7 @@ public class AppConfig {
 
 
 	@Bean
-	OpenDataService openDataService(@Autowired ProductRepository aggregatedDataRepository,
-									@Autowired UiConfig props,
-									@Autowired OpenDataConfig openDataConfig) {
+	OpenDataService openDataService(@Autowired ProductRepository aggregatedDataRepository, @Autowired UiConfig props, @Autowired OpenDataConfig openDataConfig) {
 		return new OpenDataService(aggregatedDataRepository, props, openDataConfig);
 	}
 
