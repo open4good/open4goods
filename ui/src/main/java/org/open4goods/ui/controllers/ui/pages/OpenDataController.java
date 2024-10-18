@@ -8,12 +8,14 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.apache.commons.io.IOUtils;
+import org.open4goods.commons.model.constants.RolesConstants;
 import org.open4goods.ui.config.yml.UiConfig;
 import org.open4goods.ui.controllers.ui.UiService;
 import org.open4goods.ui.services.OpenDataService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.servlet.ModelAndView;
@@ -111,6 +113,13 @@ public class OpenDataController  implements SitemapExposedController{
 			LOGGER.error("opendata file download error or interruption : {}", e.getMessage());
 			openDataService.decrementDownloadCounter();
 		}
+	}
+	
+	
+	@GetMapping(path = "/opendata/generate")
+	@PreAuthorize("hasAuthority('"+RolesConstants.ROLE_ADMIN+"')")
+	public void generate(final HttpServletResponse response) throws IOException {
+		openDataService.generateOpendata();
 	}
 
 }

@@ -3,17 +3,17 @@
 
 <head>
     <th:block th:insert="~{inc/header-meta.html}"></th:block>
-    <title>Base de données GTIN en libre accès | Nudger</title>
-    <meta name="description" content="Accédez à notre base de données GTIN gratuitement et librement. Découvrez l'importance des GTIN pour le commerce et l'industrie.">
+    <title>Base de données open data de codes barres en libre accès | Nudger</title>
+    <meta name="description" content="Accédez à notre base de données GTIN, EAN, UPC gratuitement et librement">
     <meta property="og:type" content="website">
     <meta property="og:url" th:content="${url}">
     <meta property="og:title" content="Base de données GTIN en libre accès">
-    <meta property="og:description" content="Accédez à notre base de données GTIN gratuitement et librement. Découvrez l'importance des GTIN pour le commerce et l'industrie.">
+    <meta property="og:description" content="Accédez à notre base de données GTIN ouverte, gratuitement et librement.">
     <meta property="og:image" th:content="${baseUrl} + 'assets/img/brand/light.svg'">
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:url" th:content="${url}">
     <meta name="twitter:title" content="Base de données GTIN en libre accès">
-    <meta name="twitter:description" content="Accédez à notre base de données GTIN gratuitement et librement. Découvrez l'importance des GTIN pour le commerce et l'industrie.">
+    <meta name="twitter:description" content="Accédez à notre base de données GTIN ouverte, gratuitement et librement.">
     <meta name="twitter:image" th:content="${baseUrl} + 'assets/img/brand/light.svg'">
 </head>
 
@@ -22,10 +22,10 @@
 <th:block th:insert="~{inc/preloader.html}"></th:block>
 <main>
     <section class="section-header bg-primary text-white pb-9 pb-lg-12 mb-4 mb-lg-6">
-        <div class="container">
+        <div class="container-fluid">
             <div class="row justify-content-center">
                 <div class="col-12 col-md-8 text-center">
-                    <h1 class="display-2 mb-3">Open Data : Base de données GTIN en libre accès</h1>
+                    <h1 class="display-2 mb-3">Open Data : base de données de codes barres</h1>
                 </div>
             </div>
         </div>
@@ -37,13 +37,13 @@
                     <div class="card shadow border-gray-300 p-2 p-lg-5">
                         <div class="row">
                             <div class="col-lg-3 text-center">
-                                <img height="200" src="/assets/img/opendata.jpg" alt="code barre en opendata">
+                                <img height="200" src="/assets/img/gtin.webp" alt="code barre GTIN en opendata">
                             </div>
                             <div class="col-lg-9 my-auto">
                                 <p class="lead"><strong>Accédez à notre base de données GTIN.</strong> Ces données sont mises à jour <b>une fois par semaine</b> et proviennent de notre agrégation de contenu autour des catalogues d'affiliation.</p>
                             </div>
                         </div>
-                        <h2 class="h3 mt-3">Qu'est-ce qu'un GTIN ?</h2>
+                        <h2 class="h3 mt-3">GTIN ?</h2>
                         <p>
                             Le <strong>GTIN (Global Trade Item Number)</strong> est un identifiant unique utilisé mondialement pour identifier les produits et services. Il est crucial pour le commerce international et facilite la gestion des stocks, la logistique, et les transactions commerciales.
                         </p>
@@ -105,8 +105,8 @@
                             <table class="table table-hover">
                                 <tbody>
                                 <tr>
-                                    <th scope="row"><b>barcode</b></th>
-                                    <td scope="row">Le code barre GTIN du produit</td>
+                                    <th scope="row"><b>gtin</b></th>
+                                    <td scope="row">Le code barre GTIN (EAN ou UPC) du produit</td>
                                 </tr>
                                 <tr>
                                     <th scope="row"><b>brand</b></th>
@@ -116,6 +116,14 @@
                                     <th scope="row"><b>model</b></th>
                                     <td scope="row">Référence constructeur du produit</td>
                                 </tr>
+
+                                <tr>
+                                    <th scope="row"><b>name</b></th>
+                                    <td scope="row">Nom du produit</td>
+                                </tr>
+
+                                
+                                
                                 <tr>
                                     <th scope="row"><b>last_updated</b></th>
                                     <td scope="row">Dernière mise à jour de ce produit, au format epoch en millisecondes</td>
@@ -150,12 +158,169 @@
                                 </tr>
                                 <tr>
                                     <th scope="row"><b>url</b></th>
-                                    <td scope="row">URL de la fiche produit, uniquement si des offres commerciales sont disponibles</td>
+                                    <td scope="row">URL de la fiche produit</td>
                                 </tr>
                                 </tbody>
                             </table>
                         </div>
-                    </div>
+
+
+						<div class="row justify-content-center mt-4">
+							<div class="col-12 col-lg-12">
+								<div class="accordion" id="accordionExample1">
+
+									<div class="accordion-item">
+										<h2 class="accordion-header" id="headingOne">
+											<button class="accordion-button" type="button"
+												data-bs-toggle="collapse" data-bs-target="#collapseOne"
+												aria-expanded="true" aria-controls="collapseOne">
+												<b>Qu'est-ce qu'un GTIN ?</b></button>
+										</h2>
+										<div id="collapseOne"
+											class="accordion-collapse collapse show"
+											aria-labelledby="headingOne"
+											data-bs-parent="#accordionExample1">
+											<div class="accordion-body">
+												<strong>Le GTIN (Global Trade Item Number)</strong> est un
+												identifiant unique utilisé pour identifier des produits à
+												l'échelle mondiale. Il se présente sous plusieurs formats
+												(GTIN-12, GTIN-13, GTIN-14), chaque format étant adapté à
+												différents types de produits ou à des régions spécifiques.
+												Par exemple, le GTIN-13 est couramment utilisé en Europe,
+												tandis que le GTIN-12 est plus fréquent en Amérique du
+												Nord. Chaque GTIN garantit qu’un produit peut être suivi,
+												identifié et catalogué dans n'importe quelle partie du
+												monde, assurant ainsi une gestion efficace des stocks et
+												des ventes.
+											</div>
+										</div>
+									</div>
+
+									<div class="accordion-item">
+										<h2 class="accordion-header" id="headingTwo">
+											<button class="accordion-button collapsed" type="button"
+												data-bs-toggle="collapse" data-bs-target="#collapseTwo"
+												aria-expanded="false" aria-controls="collapseTwo"><b>
+												Quelle est la différence entre GTIN et EAN ?</b></button>
+										</h2>
+										<div id="collapseTwo" class="accordion-collapse collapse"
+											aria-labelledby="headingTwo"
+											data-bs-parent="#accordionExample1">
+											<div class="accordion-body">
+												<strong>L’EAN (European Article Number)</strong> était
+												autrefois l'identifiant standard utilisé en Europe pour
+												marquer les produits. Aujourd'hui, le terme GTIN a
+												remplacé l’EAN afin de standardiser les codes de produit à
+												l'échelle mondiale. L'EAN-13 est désormais un GTIN-13. En
+												pratique, la transition de l'EAN au GTIN est surtout une
+												question de nomenclature, et la structure du code reste la
+												même. Le GTIN englobe également d'autres identifiants
+												comme le UPC (Universal Product Code) utilisé en Amérique
+												du Nord.
+											</div>
+										</div>
+									</div>
+
+									<div class="accordion-item">
+										<h2 class="accordion-header" id="headingThree">
+											<button class="accordion-button collapsed" type="button"
+												data-bs-toggle="collapse" data-bs-target="#collapseThree"
+												aria-expanded="false" aria-controls="collapseThree"><b>
+												Quels sont les différents formats de GTIN ?</b></button>
+										</h2>
+										<div id="collapseThree" class="accordion-collapse collapse"
+											aria-labelledby="headingThree"
+											data-bs-parent="#accordionExample1">
+											<div class="accordion-body">
+												<strong>Les principaux formats de GTIN</strong> sont :
+												GTIN-12 (couramment utilisé aux États-Unis et au Canada
+												sous le nom de UPC), GTIN-13 (le plus courant en Europe),
+												et GTIN-14 (pour les unités logistiques). Ces différents
+												formats permettent de répondre aux besoins spécifiques de
+												chaque région et chaque chaîne d'approvisionnement. Le
+												format GTIN-14 est généralement utilisé pour
+												l'identification d’unités logistiques plus grandes, comme
+												des cartons ou des palettes, plutôt que pour des articles
+												à l’unité.
+											</div>
+										</div>
+									</div>
+
+									<div class="accordion-item">
+										<h2 class="accordion-header" id="headingFour">
+											<button class="accordion-button collapsed" type="button"
+												data-bs-toggle="collapse" data-bs-target="#collapseFour"
+												aria-expanded="false" aria-controls="collapseFour">
+												<b>Quelle est la différence entre GTIN et UPC ?</b></button>
+										</h2>
+										<div id="collapseFour" class="accordion-collapse collapse"
+											aria-labelledby="headingFour"
+											data-bs-parent="#accordionExample1">
+											<div class="accordion-body">
+												<strong>L'UPC (Universal Product Code)</strong> est une
+												forme de GTIN-12, utilisé principalement en Amérique du
+												Nord. La différence entre GTIN et UPC réside surtout dans
+												leur utilisation régionale : le GTIN est un terme plus
+												global, tandis que l’UPC se réfère à un code spécifique
+												utilisé dans un contexte nord-américain. Toutefois, les
+												deux systèmes sont interopérables, et dans le cadre de la
+												norme GTIN, l’UPC est reconnu comme une sous-catégorie.
+											</div>
+										</div>
+									</div>
+
+									<div class="accordion-item">
+										<h2 class="accordion-header" id="headingFive">
+											<button class="accordion-button collapsed" type="button"
+												data-bs-toggle="collapse" data-bs-target="#collapseFive"
+												aria-expanded="false" aria-controls="collapseFive"><b>
+												Qu'est-ce que le format EAN-13 ?</b></button>
+										</h2>
+										<div id="collapseFive" class="accordion-collapse collapse"
+											aria-labelledby="headingFive"
+											data-bs-parent="#accordionExample1">
+											<div class="accordion-body">
+												<strong>L’EAN-13</strong> est un code-barres constitué de
+												13 chiffres qui identifie les produits au niveau
+												international, principalement en Europe. L'EAN-13 est
+												aussi appelé GTIN-13 et est largement utilisé dans les
+												points de vente pour scanner et suivre les articles. Il
+												inclut un préfixe de pays, un code d’entreprise, un code
+												produit et une clé de contrôle qui garantit l'exactitude
+												du code.
+											</div>
+										</div>
+									</div>
+
+									<div class="accordion-item">
+										<h2 class="accordion-header" id="headingSix">
+											<button class="accordion-button collapsed" type="button"
+												data-bs-toggle="collapse" data-bs-target="#collapseSix"
+												aria-expanded="false" aria-controls="collapseSix"><b>
+												Comment le GTIN est-il utilisé dans la logistique ?</b></button>
+										</h2>
+										<div id="collapseSix" class="accordion-collapse collapse"
+											aria-labelledby="headingSix"
+											data-bs-parent="#accordionExample1">
+											<div class="accordion-body">
+												<strong>Le GTIN dans la logistique</strong> joue un rôle
+												essentiel pour identifier les produits à travers les
+												chaînes d'approvisionnement. Par exemple, le format
+												GTIN-14 permet d'identifier des unités d'expédition comme
+												des cartons ou des palettes, et facilite ainsi la gestion
+												des stocks et des expéditions. L’utilisation des
+												codes-barres GTIN dans la logistique permet une
+												traçabilité précise des produits tout au long de leur
+												cycle de vie, du fabricant au distributeur.
+											</div>
+										</div>
+									</div>
+
+								</div>
+							</div>
+						</div>
+
+						</div>
                 </div>
             </div>
         </div>

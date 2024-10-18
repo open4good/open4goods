@@ -1,26 +1,33 @@
 package org.open4goods.ui.services;
 
-import java.io.*;
+import java.io.BufferedInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStreamWriter;
 import java.text.CharacterIterator;
 import java.text.StringCharacterIterator;
 import java.time.Instant;
 import java.util.Date;
-import java.util.Map;
+import java.util.Locale;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
-import io.micrometer.core.annotation.Timed;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.open4goods.commons.dao.ProductRepository;
 import org.open4goods.commons.exceptions.TechnicalException;
 import org.open4goods.commons.helper.ThrottlingInputStream;
 import org.open4goods.commons.model.constants.CacheConstants;
-import org.open4goods.commons.model.product.AggregatedAttribute;
+import org.open4goods.commons.model.product.IndexedAttribute;
 import org.open4goods.commons.model.product.Product;
+import org.open4goods.commons.model.product.ProductAttribute;
 import org.open4goods.model.BarcodeType;
 import org.open4goods.ui.config.OpenDataConfig;
 import org.open4goods.ui.config.yml.UiConfig;
@@ -33,6 +40,8 @@ import org.springframework.scheduling.annotation.Scheduled;
 
 import com.google.common.util.concurrent.RateLimiter;
 import com.opencsv.CSVWriter;
+
+import io.micrometer.core.annotation.Timed;
 
 /**
  * Service responsible for generating and managing the CSV opendata files.
@@ -47,16 +56,38 @@ public class OpenDataService implements HealthIndicator {
 	private static final String GTIN_DATASET_FILENAME = "open4goods-gtin-dataset.csv";
 
 	private static final String[] GTIN_HEADER = {
-			"code", "brand", "model", "name", "last_updated", "gs1_country", "gtinType",
-			"offers_count", "min_price", "min_price_compensation", "currency", "categories", "url"
+			"gtin", 
+			"brand",
+			"model",
+			"name",
+			"last_updated",
+			"gs1_country",
+			"gtinType",
+			"offers_count",
+			"min_price",
+			"min_price_compensation",
+			"currency",
+			"categories",
+			"url"
 	};
 
 	private static final String[] ISBN_HEADER = {
-			"code", "brand", "model", "name", "last_updated", "gs1_country", "gtintype",
-			"offers_count", "min_price", "min_price_compensation", "currency", "categories", "url",
-			"editeur", "format", "nb de pages",
-			"classification decitre 1", "classification decitre 2", "classification decitre 3",
-			"souscategorie", "souscategorie2"
+			"isbn",
+			"title",
+			"last_updated",
+			"offers_count",
+			"min_price",
+			"min_price_compensation",
+			"currency",
+			"url",
+			"editeur",
+			"format",
+			"nb_page",
+			"classification_decitre_1",
+			"classification_decitre_2",
+			"classification_decitre_3",
+			"souscategorie", 
+			"souscategorie2"
 	};
 
 	private ProductRepository aggregatedDataRepository;
@@ -122,7 +153,7 @@ public class OpenDataService implements HealthIndicator {
 	/**
 	 * Generates the opendata CSV files and compresses them into ZIP files.
 	 * This method is scheduled to run periodically.
-	 * TODO : Schedule in conf
+	 * TODO(p3,conf) : Schedule in conf
 	 */
 	@Scheduled(initialDelay = 1000L * 3600, fixedDelay = 1000L * 3600 * 24 * 7)
 	@Timed(value = "OpenDataService.generateOpendata.time", description = "Time taken to generate the OpenData ZIP files", extraTags = {"service", "OpenDataService"})
@@ -243,6 +274,8 @@ public class OpenDataService implements HealthIndicator {
 		line[1] = data.brand(); // "brand"
 		line[2] = data.model(); // "model"
 		line[3] = data.shortestOfferName(); // "name"
+		
+		
 		line[4] = String.valueOf(data.getLastChange()); // "last_updated"
 		line[5] = data.getGtinInfos().getCountry(); // "gs1_country"
 		line[6] = data.getGtinInfos().getUpcType().toString(); // "gtinType"
@@ -252,10 +285,17 @@ public class OpenDataService implements HealthIndicator {
 			line[8] = String.valueOf(data.bestPrice().getPrice()); // "min_price"
 			line[9] = String.valueOf(data.bestPrice().getCompensation()); // "min_price_compensation"
 			line[10] = data.bestPrice().getCurrency().toString(); // "currency"
-			line[12] = ""; // TODO: uiConfig.getBaseUrl(Locale.FRANCE) + data.getNames().getName();
+		}
+		line[11] = StringUtils.join(data.getDatasourceCategories(), " ; "); // "categories"
+
+		try {
+			// TODO(p3, i18N) : internationalize
+			line[12] = uiConfig.getBaseUrl(Locale.FRANCE) + data.getNames().getUrl().get("fr");
+		} catch (Exception e) {
+			LOGGER.error("Errro while extracting URL for ISBN {}",data.getId());
+
 		}
 
-		line[11] = StringUtils.join(data.getDatasourceCategories(), " ; "); // "categories"
 
 		return line;
 	}
@@ -266,33 +306,52 @@ public class OpenDataService implements HealthIndicator {
 	private String[] toIsbnEntry(Product data) {
 		String[] line = new String[ISBN_HEADER.length];
 
+		
+//		"isbn",
+//		"title",
+//		"last_updated",
+//		"offers_count",
+//		"min_price",
+//		"min_price_compensation",
+//		"currency",
+//		"url",
+//		"editeur",
+//		"format",
+//		"nb_page",
+//		"classification_decitre_1",
+//		"classification_decitre_2",
+//		"classification_decitre_3",
+//		"souscategorie", 
+//		"souscategorie2"
+//		
+//		
 		line[0] = data.gtin(); // "code"
-		line[1] = data.brand(); // "brand"
-		line[2] = data.model(); // "model"
-		line[3] = data.shortestOfferName(); // "name"
-		line[4] = String.valueOf(data.getLastChange()); // "last_updated"
-		line[5] = data.getGtinInfos().getCountry(); // "gs1_country"
-		line[6] = data.getGtinInfos().getUpcType().toString(); // "gtintype"
-		line[7] = String.valueOf(data.getOffersCount()); // "offers_count"
+		line[1] = data.shortestOfferName(); // "name"
+		line[2] = String.valueOf(data.getLastChange()); // "last_updated"
+		line[3] = String.valueOf(data.getOffersCount()); // "offers_count"
 
 		if (null != data.bestPrice()) {
-			line[8] = String.valueOf(data.bestPrice().getPrice()); // "min_price"
-			line[9] = String.valueOf(data.bestPrice().getCompensation()); // "min_price_compensation"
-			line[10] = data.bestPrice().getCurrency().toString(); // "currency"
-			line[12] = ""; // TODO: uiConfig.getBaseUrl(Locale.FRANCE) + data.getNames().getName();
+			line[4] = String.valueOf(data.bestPrice().getPrice()); // "min_price"
+			line[5] = String.valueOf(data.bestPrice().getCompensation()); // "min_price_compensation"
+			line[6] = data.bestPrice().getCurrency().toString(); // "currency"
+			try {
+				// TODO(p3, i18N) : internationalize
+				line[7] = uiConfig.getBaseUrl(Locale.FRANCE) + data.getNames().getUrl().get("fr");
+			} catch (Exception e) {
+				LOGGER.error("Errro while extracting URL for ISBN {}",data.getId());
+			}
 		}
 
-		line[11] = StringUtils.join(data.getDatasourceCategories(), " ; "); // "categories"
-
-		//TODO : Asconsts
-		line[13] = getAttribute(data, "EDITEUR");
-		line[14] = getAttribute(data, "FORMAT");
-		line[15] = getAttribute(data, "NB DE PAGES");
-		line[16] = getAttribute(data, "CLASSIFICATION DECITRE 1");
-		line[17] = getAttribute(data, "CLASSIFICATION DECITRE 2");
-		line[18] = getAttribute(data, "CLASSIFICATION DECITRE 3");
-		line[19] = getAttribute(data, "SOUSCATEGORIE");
-		line[20] = getAttribute(data, "SOUSCATEGORIE2");
+		//TODO(p2, design) : We are looking for unormalized attributes. We should consider querying multiple  attributes in a failover mode
+		// TODO(p3,conf) : Should be in config files
+		line[8] = getAttribute(data, "EDITEUR");
+		line[9] = getAttribute(data, "FORMAT");
+		line[10] = getAttribute(data, "NB DE PAGES");
+		line[11] = getAttribute(data, "CLASSIFICATION DECITRE 1");
+		line[12] = getAttribute(data, "CLASSIFICATION DECITRE 2");
+		line[13] = getAttribute(data, "CLASSIFICATION DECITRE 3");
+		line[14] = getAttribute(data, "SOUSCATEGORIE");
+		line[15] = getAttribute(data, "SOUSCATEGORIE2");
 
 		return line;
 	}
@@ -305,24 +364,19 @@ public class OpenDataService implements HealthIndicator {
 
 		String value = null;
 
-		Map<String, AggregatedAttribute> aggregatedAttributes = data.getAttributes().getAggregatedAttributes();
-
-		if (aggregatedAttributes.containsKey(key)) {
-			AggregatedAttribute attribute = aggregatedAttributes.get(key);
-
-			if (attribute != null) {
-				value = attribute.getValue();
+		IndexedAttribute indexedAttr = data.getAttributes().getIndexed().get(key);
+		
+		
+		if (null != indexedAttr) {
+			value = indexedAttr.getValue();
+		} else {
+			ProductAttribute pAttr = data.getAttributes().getAll().get(key);
+			if (null != pAttr) {
+				value = pAttr.getValue();
 			}
 		}
-
-		if (StringUtils.isEmpty(value)) {
-			// Checking in unmapped attributes
-			value = data.getAttributes().getUnmapedAttributes().stream()
-					.filter(a -> a.getName().equalsIgnoreCase(key))
-					.findFirst()
-					.map(AggregatedAttribute::getValue)
-					.orElse(null);
-		}
+		
+		
 
 		return value;
 	}
