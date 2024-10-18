@@ -192,11 +192,11 @@ public class AppConfig {
 		// TODO : xmlMapper not injected because corruct the springdoc used one. Should use a @Primary derivation
 		return new IcecatService(new XmlMapper(), properties.getIcecatFeatureConfig(), fileCachingService, properties.getRemoteCachingFolder(), brandService, verticalConfigService);
 	}
-	
-	
+
+
 	@Bean
-	OpenDataService openDataService(@Autowired ProductRepository aggregatedDataRepository, @Autowired UiConfig props) {
-		return new OpenDataService(aggregatedDataRepository, props);
+	OpenDataService openDataService(@Autowired ProductRepository aggregatedDataRepository, @Autowired UiConfig props, @Autowired OpenDataConfig openDataConfig) {
+		return new OpenDataService(aggregatedDataRepository, props, openDataConfig);
 	}
 
 

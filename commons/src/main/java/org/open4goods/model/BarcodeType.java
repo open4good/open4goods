@@ -1,4 +1,4 @@
-package org.open4goods.commons.model;
+package org.open4goods.model;
 
 public enum BarcodeType {
 	ISBN_13,

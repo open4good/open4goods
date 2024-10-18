@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html th:lang="${siteLocale.language}">
+
+<head>
+    <th:block th:insert="~{inc/header-meta.html}"></th:block>
+    <title>Base de données ISBN en libre accès | Nudger</title>
+    <meta name="description" content="Accédez à notre base de données ISBN gratuitement et librement. Découvrez l'importance des ISBN pour l'industrie du livre et de l'édition.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" th:content="${url}">
+    <meta property="og:title" content="Base de données ISBN en libre accès">
+    <meta property="og:description" content="Accédez à notre base de données ISBN gratuitement et librement. Découvrez l'importance des ISBN pour l'industrie du livre et de l'édition.">
+    <meta property="og:image" th:content="${baseUrl} + 'assets/img/brand/light.svg'">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:url" th:content="${url}">
+    <meta name="twitter:title" content="Base de données ISBN en libre accès">
+    <meta name="twitter:description" content="Accédez à notre base de données ISBN gratuitement et librement. Découvrez l'importance des ISBN pour l'industrie du livre et de l'édition.">
+    <meta name="twitter:image" th:content="${baseUrl} + 'assets/img/brand/light.svg'">
+</head>
+
+<body>
+<th:block th:with="page = 'opendata'" th:insert="~{inc/navbar/navbar-page.html}"></th:block>
+<th:block th:insert="~{inc/preloader.html}"></th:block>
+<main>
+    <section class="section-header bg-primary text-white pb-9 pb-lg-12 mb-4 mb-lg-6">
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-12 col-md-8 text-center">
+                    <h1 class="display-2 mb-3">Open Data : Base de données ISBN en libre accès</h1>
+                </div>
+            </div>
+        </div>
+    </section>
+    <section class="section section-lg pt-0">
+        <div class="container mt-n8 mt-lg-n12 z-2">
+            <div class="row justify-content-center">
+                <div class="col">
+                    <div class="card shadow border-gray-300 p-2 p-lg-5">
+                        <div class="row">
+                            <div class="col-lg-3 text-center">
+                                <img height="200" src="/assets/img/opendata.jpg" alt="code barre en opendata">
+                            </div>
+                            <div class="col-lg-9 my-auto">
+                                <p class="lead"><strong>Accédez à notre base de données ISBN.</strong> Ces données sont mises à jour <b>une fois par semaine</b> et proviennent de notre agrégation de contenu autour des catalogues d'affiliation.</p>
+                            </div>
+                        </div>
+                        <h2 class="h3 mt-3">Qu'est-ce qu'un ISBN ?</h2>
+                        <p>
+                            L'<strong>ISBN (International Standard Book Number)</strong> est un identifiant unique pour les livres et autres publications. Il est essentiel dans le monde de l'édition pour identifier, gérer, et suivre les publications à travers les librairies, éditeurs et distributeurs.
+                        </p>
+                        <ul class="list-unstyled">
+                            <li><i class="fas fa-book"></i>&nbsp;&nbsp;&nbsp;Utilisé mondialement dans l'édition</li>
+                            <li><i class="fas fa-tags"></i>&nbsp;&nbsp;&nbsp;Identification unique pour les publications</li>
+                            <li><i class="fas fa-truck"></i>&nbsp;&nbsp;Facilite la distribution et la gestion des stocks</li>
+                        </ul>
+                        <h2 class="h3 mt-3">Conditions d'utilisation</h2>
+                        <ul class="text-secondary">
+                            <li class="pb-2">Ces données sont délivrées sous <a href="/assets/ETALAB-Licence-Ouverte-v2.0.pdf" target="_blank">licence ouverte</a>, et sont donc librement utilisables, sans restrictions d'usages.</li>
+                            <li class="pb-2">Vous devez indiquer la provenance des données, en mentionnant la page produit quand disponible, ou en ajoutant un lien vers la page d'accueil de <a href="https://nudger.fr">nudger.fr</a>.</li>
+                        </ul>
+                        <div class="card shadow px-4 py-1 mb-3">
+                            <div class="card-body text-center text-md-left">
+                                <div class="row align-items-center">
+                                    <div class="col-md-6">
+                                        <h2 class="mb-3">Obtenir les données</h2>
+                                        <table class="table table-hover">
+                                            <tbody>
+                                            <tr>
+                                                <th scope="row">Mise à jour</th>
+                                                <td scope="row" th:text="${#dates.format(lastUpdated, 'dd MMM yyyy, HH:mm')}"></td>
+                                            </tr>
+                                            <tr>
+                                                <th scope="row"><b>Taille du fichier</b></th>
+                                                <td scope="row" th:text="${fileSize}"></td>
+                                            </tr>
+                                            <tr>
+                                                <th scope="row"><b>Nombre de publications</b></th>
+                                                <td scope="row" th:text="${#numbers.formatDecimal(countISBN, 0, 'COMMA', 0, 'POINT')}"></td>
+                                            </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                    <div class="col-12 col-md-6 mt-4 mt-md-0 text-center">
+                                        <a download href="/opendata/isbn-open-data.zip" style="width:95%" class="btn btn-primary">
+                                                <span class="me-1">
+                                                    <span class="fas fa-download"></span>
+                                                </span>
+                                            Télécharger
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <h2 class="h3">Format des données</h2>
+                        <div class="alert alert-info" role="alert">
+                            Les données sont au format <b>CSV</b>, compressées au format <b>zip</b>.
+                            <ul>
+                                <li>Séparateur de champs : <b>,</b> </li>
+                                <li>Séparateur de texte : <b>"</b> </li>
+                            </ul>
+                        </div>
+                        <div class="mb-5">
+                            <div class="mb-4">
+                                <span class="h5">Colonnes</span>
+                            </div>
+                            <table class="table table-hover">
+                                <tbody>
+                                <tr>
+                                    <th scope="row"><b>isbn</b></th>
+                                    <td scope="row">Le code ISBN de la publication</td>
+                                </tr>
+                                <tr>
+                                    <th scope="row"><b>author</b></th>
+                                    <td>Auteur de la publication</td>
+                                </tr>
+                                <tr>
+                                    <th scope="row"><b>title</b></th>
+                                    <td scope="row">Titre de la publication</td>
+                                </tr>
+                                <tr>
+                                    <th scope="row"><b>publisher</b></th>
+                                    <td scope="row">Éditeur de la publication</td>
+                                </tr>
+                                <tr>
+                                    <th scope="row"><b>last_updated</b></th>
+                                    <td scope="row">Dernière mise à jour de cette publication, au format epoch en millisecondes</td>
+                                </tr>
+                                <tr>
+                                    <th scope="row"><b>categories</b></th>
+                                    <td scope="row">Catégories dans lesquelles cette publication a été rencontrée</td>
+                                </tr>
+                                <tr>
+                                    <th scope="row"><b>offers_count</b></th>
+                                    <td scope="row">Nombre d'offres commerciales pour cette publication</td>
+                                </tr>
+                                <tr>
+                                    <th scope="row"><b>min_price</b></th>
+                                    <td scope="row">Prix le plus faible pour cette publication</td>
+                                </tr>
+                                <tr>
+                                    <th scope="row"><b>currency</b></th>
+                                    <td scope="row">Devise du prix le plus faible</td>
+                                </tr>
+                                <tr>
+                                    <th scope="row"><b>url</b></th>
+                                    <td scope="row">URL de la fiche produit, uniquement si des offres commerciales sont disponibles</td>
+                                </tr>
+                                <tr>
+                                    <th scope="row"><b>editeur</b></th>
+                                    <td scope="row">Éditeur de la publication</td>
+                                </tr>
+                                <tr>
+                                    <th scope="row"><b>format</b></th>
+                                    <td scope="row">Format de la publication (ex. broché, numérique)</td>
+                                </tr>
+                                <tr>
+                                    <th scope="row"><b>nb de pages</b></th>
+                                    <td scope="row">Nombre de pages de la publication</td>
+                                </tr>
+                                <tr>
+                                    <th scope="row"><b>classification decitre 1</b></th>
+                                    <td scope="row">Classification principale de Decitre pour cette publication</td>
+                                </tr>
+                                <tr>
+                                    <th scope="row"><b>classification decitre 2</b></th>
+                                    <td scope="row">Deuxième niveau de classification de Decitre</td>
+                                </tr>
+                                <tr>
+                                    <th scope="row"><b>classification decitre 3</b></th>
+                                    <td scope="row">Troisième niveau de classification de Decitre</td>
+                                </tr>
+                                <tr>
+                                    <th scope="row"><b>souscategorie</b></th>
+                                    <td scope="row">Sous-catégorie principale pour cette publication</td>
+                                </tr>
+                                <tr>
+                                    <th scope="row"><b>souscategorie2</b></th>
+                                    <td scope="row">Deuxième sous-catégorie pour cette publication</td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</main>
+<th:block th:insert="~{inc/footer.html}"></th:block>
+<script src="../../vendor/@popperjs/core/dist/umd/popper.min.js"></script>
+<script src="/webjars/bootstrap/js/bootstrap.min.js"></script>
+<script src="../../vendor/headroom.js/dist/headroom.min.js"></script>
+<script src="../../vendor/smooth-scroll/dist/smooth-scroll.polyfills.min.js"></script>
+<script src="../../vendor/vivus/dist/vivus.min.js"></script>
+<script src="/webjars/jquery/jquery.min.js"></script>
+<script src="../../assets/js/pixel.js"></script>
+<script src="../../assets/js/pixel-custom.js"></script>
+<script>
+    $(document).ready(function() {
+        $('#searchInput').on("change", function(e) {
+            $('#searchForm').attr("action", "/recherche/" + encodeURIComponent($('#searchInput').val()));
+        });
+    });
+</script>
+</body>
+
+</html>

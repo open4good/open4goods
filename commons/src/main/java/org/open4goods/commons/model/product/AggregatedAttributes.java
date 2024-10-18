@@ -18,7 +18,7 @@ public class AggregatedAttributes  {
 	private Map<ReferentielKey, String> referentielAttributes = new HashMap<>();
 
 	//TODO: rename
-	
+
 	private Map<String,AggregatedAttribute> aggregatedAttributes = new HashMap<>();
 
 
@@ -96,4 +96,13 @@ public class AggregatedAttributes  {
 	public void setReferentielAttributes(Map<ReferentielKey, String> referentielAttributes) {
 		this.referentielAttributes = referentielAttributes;
 	}
+
+
+
+
+
+
+
+
+
 }
