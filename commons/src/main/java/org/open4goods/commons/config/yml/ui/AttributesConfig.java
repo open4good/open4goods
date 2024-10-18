@@ -11,6 +11,8 @@ import java.util.Set;
 import org.open4goods.commons.config.yml.attributes.AttributeConfig;
 import org.open4goods.commons.model.attribute.Attribute;
 import org.open4goods.commons.model.product.IAttribute;
+import org.open4goods.commons.model.product.IndexedAttribute;
+import org.open4goods.commons.model.product.ProductAttribute;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonMerge;
@@ -131,12 +133,12 @@ public class AttributesConfig {
 
 	
 	
-	public Attribute translateAttribute(final Attribute a, final String provider) {
+	public String isToBeIndexedAttribute(final ProductAttribute attr, final String provider) {
 
-		Map<String, String> p = synonyms().get(provider);
+		Map<String, String> p = provider == null ? null : synonyms().get(provider);
 
 		// TODO(conf) : This rules should be weared at the config level.
-		String translated = a.getName();
+		String translated = attr.getName();
 
 		// Sanitization
 		//TODO : from conf
@@ -152,15 +154,14 @@ public class AttributesConfig {
 //		}
 
 		// Not nice, but due to current design, in order to handle attr name on unmatched attrs
-		a.setName(translated);
+		attr.setName(translated);
 
 
 		if (null != p) {
 			// Trying on the specific provider name
 			final String r = p.get(translated);
 			if (r != null) {
-				a.setName(r);
-				return a;
+				return r;
 			}
 		}
 
@@ -170,8 +171,7 @@ public class AttributesConfig {
 		if (null != p) {
 			final String r = p.get(translated);
 			if (r != null) {
-				a.setName(r);
-				return a;
+				return r;
 			}
 		}
 		return null;
@@ -191,16 +191,11 @@ public class AttributesConfig {
 	/**
 	 * Return the attributeConfig for an attribute, if any
 	 *
-	 * @param value
+	 * @param indexedName
 	 * @return
 	 */
-	public AttributeConfig getConfigFor(final IAttribute value) {
-
-		if (null == value) {
-			return null;
-		}
-
-		return getAttributeConfigByKey(value.getName());
+	public AttributeConfig getConfigFor(final String indexedName) {
+		return getAttributeConfigByKey(indexedName);
 	}
 
 	private void singletonHashAttrs() {

@@ -107,12 +107,7 @@ public class Product implements Standardisable {
 	//	private AggregatedComments comments = new AggregatedComments();
 
 	private AggregatedAttributes attributes = new AggregatedAttributes();
-
 	
-	private AggregatedAttributes attrs = new AggregatedAttributes();
-	
-	
-
 	private AggregatedPrices price = new AggregatedPrices();
 
 	// TODO(p1,design) : remove once migration ok
@@ -274,9 +269,7 @@ public class Product implements Standardisable {
 			sb.append(" - ").append(attr.getKey().toString()).append(" : ").append(attr.getValue()).append("\n");
 		}
 		
-
-		for (AggregatedAttribute attr : attributes.getUnmapedAttributes()) {
-			
+		for (ProductAttribute attr : attributes.getAll().values()) {
 			if (attr.getIcecatTaxonomyIds().size() > 0) {
 				sb.append(" - ").append(attr.getName().toString()).append(" : ").append(attr.getValue()).append("\n");
 			}
@@ -324,14 +317,13 @@ public class Product implements Standardisable {
 	
 	
 	public List<Resource> unprocessedimages() {
-		// TODO Auto-generated method stub
 		return resources.stream()
 				.filter(e-> e.getUrl() != null)
 				.filter(e -> e.getUrl().endsWith(".jpg") || e.getUrl().endsWith(".png") || e.getUrl().endsWith(".jpeg"))
 				.toList();
 	}
 	
-	// TODO : Should be outsided / cached
+	// TODO'p2,perf) : Should be cached
 	public List<Resource> images() {
 	    // Filter resources of type IMAGE
 	    List<Resource> images = resources.stream()
@@ -478,6 +470,9 @@ public class Product implements Standardisable {
 		}
 	}
 
+	
+	
+	
 	/**
 	 *
 	 * @return the brandUid, if availlable from referentiel attributes
@@ -966,13 +961,7 @@ public class Product implements Standardisable {
 		this.datasourceCodes = datasources;
 	}
 
-//	public Set<UnindexedKeyVal> getMappedCategories() {
-//		return mappedCategories;
-//	}
-//
-//	public void setMappedCategories(Set<UnindexedKeyVal> mappedCategories) {
-//		this.mappedCategories = mappedCategories;
-//	}
+
 
 
 

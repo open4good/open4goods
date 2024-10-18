@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.open4goods.commons.model.data.FeatureGroup;
-import org.open4goods.commons.model.product.AggregatedAttribute;
+import org.open4goods.commons.model.product.ProductAttribute;
 
 /**
  * A convenient pojo holding feature groups and attributes,
@@ -17,7 +17,7 @@ public class AttributesFeatureGroups {
 	// Shortcut to the localized name
 	private String name;
 	
-	private List<AggregatedAttribute> attributes = new ArrayList<>();
+	private List<ProductAttribute> attributes = new ArrayList<>();
 
 	public FeatureGroup getFeatureGroup() {
 		return featureGroup;
@@ -27,11 +27,11 @@ public class AttributesFeatureGroups {
 		this.featureGroup = featureGroup;
 	}
 
-	public List<AggregatedAttribute> getAttributes() {
+	public List<ProductAttribute> getAttributes() {
 		return attributes;
 	}
 
-	public void setAttributes(List<AggregatedAttribute> attributes) {
+	public void setAttributes(List<ProductAttribute> attributes) {
 		this.attributes = attributes;
 	}
 

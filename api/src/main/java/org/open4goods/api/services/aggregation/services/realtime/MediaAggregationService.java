@@ -82,8 +82,7 @@ public class MediaAggregationService extends AbstractAggregationService{
 	}
 
 	@Override
-	public Map<String, Object> onProduct(Product data, VerticalConfig vConf) throws AggregationSkipException {
-		return null;
+	public void onProduct(Product data, VerticalConfig vConf) throws AggregationSkipException {
 	}
 
 

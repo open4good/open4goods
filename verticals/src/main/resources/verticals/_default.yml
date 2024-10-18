@@ -98,9 +98,28 @@ attributesConfig:
 
   # Those attributes will be removed from unmatchedAttributes if found
   exclusions:
+    - "SOUSCATEGORIE"
+    - "PRICE_NEW"
+    - "DELIVERY_COST"
+    - "MERCHANT_CATEGORY"
+    - "DELIVERY_TIME"
+    - "MERCHANT_PRODUCT_THIRD_CATEGORY"
+    - "PRODUCT_MODEL"
+    - "ADVERT_RAKUPON_AMOUNT"
+    - "PRICE_WITH_RAKUPON"
+    - "FRAISDEPORT"
+    - "MERCHANT_PRODUCT_SECOND_CATEGORY"
+    - "ADVERT_RAKUPON_CONDITION"    
     - "CNET INLINE CONTENT"
+    - "ADVERT_RAKUPON_NAME"
+    - "AW_THUMB_URL"
+    - "PRODUCT_TYPE"
+    - "MERCHANT_PRODUCT_CATEGORY_PATH"
     - "CRAWLER"
+    - "URLFICHEPRODUIT"
+    - "IDPRODUIT"
 #    - "EAN GGSHOPPING"
+    - "AW_IMAGE_URL"
     - "SEARCH KEYWORDS"
     - "ALTERNATE_IMAGE"
     - "AVERAGE_RATING"
@@ -177,11 +196,7 @@ attributesConfig:
   # Disponibilité des pièces détachées
   ##################################
   - key: "PARTS_AVAILLABILITY"
-    
-  
-  faIcon: "fa-bolt"
-    
-    
+    faIcon: "fa-bolt"
     name:
       default: "Parts availlability"
       fr: "Disponibilité des pièces détachées"
@@ -412,31 +427,6 @@ attributesConfig:
 #      - "ANS"
       
 
-
-    ##################################
-     # DECIBELS_MAX
-     ##################################
-  - key: "DECIBELS_MAX"
-    faIcon: "up-right-and-down-left-from-center"
-    name:
-      default: "Niveau sonore (Db)"
-      fr: "Niveau sonore (Db)"
-    type: "NUMERIC"
-    
-    asRating: true
-    
-    synonyms:
-      all:      
-      - "NIVEAU SONORE MAXIMUM"
-   
-    parser:
-      normalize: true
-      trim: true
-      lowerCase: true
-      upperCase: false
-      removeParenthesis: false
-      deleteTokens: 
-        - "db"
 
 
 

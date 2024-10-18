@@ -14,7 +14,7 @@ import org.open4goods.commons.exceptions.InvalidParameterException;
 import org.open4goods.commons.helper.IdHelper;
 import org.open4goods.commons.model.constants.ReferentielKey;
 import org.open4goods.commons.model.data.DataFragment;
-import org.open4goods.commons.model.product.AggregatedAttribute;
+import org.open4goods.commons.model.product.ProductAttribute;
 import org.open4goods.commons.model.product.Product;
 import org.open4goods.commons.services.EvaluationService;
 import org.open4goods.commons.services.VerticalsConfigService;
@@ -54,7 +54,7 @@ public class NamesAggregationService extends AbstractAggregationService {
 	}
 
 	@Override
-	public Map<String, Object> onProduct(Product data, VerticalConfig vConf) throws AggregationSkipException {
+	public void onProduct(Product data, VerticalConfig vConf) throws AggregationSkipException {
 
 		logger.info("Name generation for product {}", data.getId());
 
@@ -96,7 +96,6 @@ public class NamesAggregationService extends AbstractAggregationService {
 			}
 
 		}
-		return null;
 
 		
 //		if (null != vConf) {
@@ -142,20 +141,11 @@ public class NamesAggregationService extends AbstractAggregationService {
 		// Adding the mentioned attrs if existing		
 		for (String attr : textsConfigUrl.getAttrs()) {
 			// Checking in referentiel attrs
-			String refVal = null;
-			if (ReferentielKey.isValid(attr)) {
-				refVal = data.getAttributes().getReferentielAttributes().get(ReferentielKey.valueOf(attr));
-			}
+			String refVal = data.getAttributes().val(attr);
 			
 			if (null != refVal) {
 				sb.append(separator).append(IdHelper.azCharAndDigits(refVal).toLowerCase());
-			} else {
-				// Checking in aggregated attrs
-				AggregatedAttribute attrValue = data.getAttributes().getAggregatedAttributes().get(attr);
-				if (null != attrValue) {
-					sb.append(separator).append(attrValue.getValue().toLowerCase());
-				} 
-			}
+			} 
 		}
 		
 		return sb.toString();

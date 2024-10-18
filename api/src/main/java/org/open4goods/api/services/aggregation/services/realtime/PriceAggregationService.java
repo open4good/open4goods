@@ -76,7 +76,7 @@ public class PriceAggregationService extends AbstractAggregationService {
 
 	
 	@Override
-	public Map<String, Object> onProduct(Product data, VerticalConfig vConf) throws AggregationSkipException {
+	public void onProduct(Product data, VerticalConfig vConf) throws AggregationSkipException {
 
 		///////////////////
 		// Filtering : 
@@ -137,7 +137,6 @@ public class PriceAggregationService extends AbstractAggregationService {
 
 		// Setting the result
 		data.setPrice(aggPrices);
-		return null;
 
 		// Setting if has an occasion offer
 	}

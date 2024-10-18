@@ -30,8 +30,8 @@
                             <p th:text="${p.offersCount}"></p>
                             
                             <th:block th:each="filter : ${products.customFilters}">
-                                <p th:if="${p.attributes.aggregatedAttributes.get(filter.key.key)}" th:text="${p.attributes.aggregatedAttributes.get(filter.key.key).value }"></p>            
-                                <p th:unless="${p.attributes.aggregatedAttributes.get(filter.key.key)}"></p>            
+                                <p th:if="${p.attributes.indexed.get(filter.key.key)}" th:text="${p.attributes.indexed.get(filter.key.key).value }"></p>            
+                                <p th:unless="${p.attributes.indexed.get(filter.key.key)}"></p>            
                             </th:block>
 
                        

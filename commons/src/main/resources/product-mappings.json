@@ -53,7 +53,41 @@
             "ignore_above": 256
           }
         }
+      },
+    {
+      "name_as_keyword_in_indexedAttributes": {
+        "path_match": "attributes.indexed.*.name",
+        "mapping": {
+          "type": "keyword",
+          "ignore_above": 256
+        }
       }
+    },
+    {
+      "value_as_keyword_in_indexedAttributes": {
+        "path_match": "attributes.indexed.*.value",
+        "mapping": {
+          "type": "keyword",
+          "ignore_above": 256
+        }
+      }
+    },
+    {
+      "numericValue_as_double_in_indexedAttributes": {
+        "path_match": "attributes.indexed.*.numericValue",
+        "mapping": {
+          "type": "double"
+        }
+      }
+    },
+    {
+      "boolValue_as_boolean_in_indexedAttributes": {
+        "path_match": "attributes.indexed.*.boolValue",
+        "mapping": {
+          "type": "boolean"
+        }
+      }
+    }
     ],
     "properties": {
      "id": {
@@ -81,19 +115,30 @@
                 "type": "keyword",
                 "ignore_above": 256
               },
+              "source": {
+                "type": "object",
+                "enabled": false
+              },
+              
               "sources": {
                 "type": "object",
                 "enabled": false
               },
+              
               "value": {
                 "type": "keyword",
                 "ignore_above": 256
               }
             }
           },
-          "features": {
-            "type": "object",
-            "enabled": false
+          "indexed": {
+            "dynamic": "true",
+            "properties": {
+              "name": {
+                "type": "keyword",
+                "ignore_above": 256
+              }
+            }
           },
           "referentielAttributes": {
             "properties": {
@@ -115,7 +160,16 @@
           "unmapedAttributes": {
             "type": "object",
             "enabled": false
+          },
+          "all": {
+            "type": "object",
+            "enabled": false
+          },
+          "features": {
+            "type": "object",
+            "enabled": false
           }
+          
         }
       },
       "coverImagePath": {

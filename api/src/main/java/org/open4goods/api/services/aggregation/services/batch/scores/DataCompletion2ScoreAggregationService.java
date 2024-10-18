@@ -26,9 +26,9 @@ public class DataCompletion2ScoreAggregationService extends AbstractScoreAggrega
 
 
 	@Override
-	public Map<String, Object> onProduct(Product data, VerticalConfig vConf) {
+	public void onProduct(Product data, VerticalConfig vConf) {
 		if (StringUtils.isEmpty(data.brand())) {
-			return null;
+			return;
 		}
 		
 		try {
@@ -42,7 +42,6 @@ public class DataCompletion2ScoreAggregationService extends AbstractScoreAggrega
 		} catch (ValidationException e) {
 			dedicatedLogger.warn("DataQuality to score fail for {}",data,e);
 		}
-		return null;								
 		
 		
 	}

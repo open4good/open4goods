@@ -5,6 +5,6 @@ import org.open4goods.commons.model.attribute.Attribute;
 
 public abstract class AttributeParser {
 
-	public abstract String parse(String attrVal, Attribute attribute, AttributeConfig attributeConfig) throws ParseException;
+	public abstract String parse(String attrVal, AttributeConfig attributeConfig) throws ParseException;
 
 }

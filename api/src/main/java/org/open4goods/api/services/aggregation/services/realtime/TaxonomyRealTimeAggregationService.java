@@ -49,7 +49,7 @@ public class TaxonomyRealTimeAggregationService extends AbstractAggregationServi
 	}
 
 	@Override
-	public HashMap<String, Object> onProduct(Product data, VerticalConfig vConf) throws AggregationSkipException {
+	public void onProduct(Product data, VerticalConfig vConf) throws AggregationSkipException {
 		
 		
 		////////////////////////////
@@ -111,8 +111,6 @@ public class TaxonomyRealTimeAggregationService extends AbstractAggregationServi
 //			}
 //		}
 		
-		return new HashMap<String, Object>();
-		
 	}
 	
 	
@@ -126,7 +124,7 @@ public class TaxonomyRealTimeAggregationService extends AbstractAggregationServi
 		
 		List<Integer> taxons =new ArrayList<>();
 
-		input.getAttributes().getUnmapedAttributes().forEach(a -> {
+		input.getAttributes().getAll().values().forEach(a -> {
 			String i = a.getName();
 			
 			if (i.contains("CATEGORY")) {

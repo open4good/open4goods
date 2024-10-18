@@ -80,7 +80,7 @@ public class IdentityAggregationService extends AbstractAggregationService {
 	}
 
 	@Override
-	public HashMap<String, Object> onProduct(Product output, VerticalConfig vConf) throws AggregationSkipException {
+	public void onProduct(Product output, VerticalConfig vConf) throws AggregationSkipException {
 
 		if (StringUtils.isEmpty(output.gtin())) {
 			dedicatedLogger.warn("Skipping product aggregation, empty barcode");
@@ -112,7 +112,6 @@ public class IdentityAggregationService extends AbstractAggregationService {
 
 		// Setting barcode type
 		output.getGtinInfos().setUpcType(valResult.getKey());
-		return null;
 		
 	}
 

@@ -7,9 +7,9 @@
 
 		<div class="row">
 			<!--  Features -->
-			<div class="col-lg-3">
+			<div th:with="features = ${product.attributes.features()}" class="col-lg-3">
 				<div class="mt-3"
-					th:if="${product.attributes.features.size > 0}"
+					th:if="${features.size > 0}"
 					th:insert="~{inc/product-features.html}">
 				</div>
 			</div>
