@@ -1,4 +1,4 @@
-<div class="table-responsive table-caracteristics-fs" th:if="${product.attributes.aggregatedAttributes.size()} > 0">
+<div class="table-responsive table-caracteristics-fs" th:if="${product.attributes.indexed.size()} > 0">
 	<table class="table">
 		<tr th:if="${product.brand()}">
 			<td class="align-middle">Marque</td>
@@ -67,7 +67,7 @@
 							
 				<td class="align-middle">
 					<span class="fa-solid fa-circle-info me-2"></span>
-					<a target="_blank" th:href="${item.path()}"> Fichier PDF (<span th:text="${item.humanReadableSize()}"></span>)</a>
+					<a target="_blank" rel="nofollow noindex" th:href="${item.path()}"> Fichier PDF (<span th:text="${item.humanReadableSize()}"></span>)</a>
 				</td>
 				
 			
