@@ -234,16 +234,16 @@ public class DataFragmentStoreService {
 			// Saving the result
 			
 			if (fullItemsResults.size() > 0) {
-				logger.warn("Will submit {} full products for indexation (datafragment queue size is now {})",  fullItemsResults.size(),queue.size());
+				logger.info("Will submit {} full products for indexation (datafragment queue size is now {})",  fullItemsResults.size(),queue.size());
 				aggregatedDataRepository.addToFullindexationQueue(fullItemsResults);
-				logger.warn("Submitted {} full products for indexation (datafragment queue size is now {})",  fullItemsResults.size(),queue.size());
+				logger.info("Submitted {} full products for indexation (datafragment queue size is now {})",  fullItemsResults.size(),queue.size());
 			}
 			
 			
 			if (partialItemsResults.size() > 0) {
-				logger.warn("Will submit {} partial products for indexation (datafragment queue size is now {})", partialItemsResults.size(), queue.size());
+				logger.info("Will submit {} partial products for indexation (datafragment queue size is now {})", partialItemsResults.size(), queue.size());
 				aggregatedDataRepository.addToPartialIndexationQueue(partialItemsResults);
-				logger.warn("Submitted {} partial products for indexation (datafragment queue size is now {})", partialItemsResults.size(), queue.size());
+				logger.info("Submitted {} partial products for indexation (datafragment queue size is now {})", partialItemsResults.size(), queue.size());
 			}
 			
 		} catch (final Exception e) {
