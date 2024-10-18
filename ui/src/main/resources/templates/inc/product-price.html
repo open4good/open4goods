@@ -60,28 +60,28 @@
 			<div class="col-md-8 mt-5 mt-md-0">
 				<div class="row">
 					<!-- Graphique Prix Neuf -->
-					<div class="col-md-6">
+					<div class="col-md-6" th:if="${product.price.newPricehistory != null and !#lists.isEmpty(product.price.newPricehistory)}">
 						<h3>Prix Neuf</h3>
 						<canvas class="mt-4" id="newPriceChart"></canvas>
 						<div class="text-center">
 							<div class="btn-group my-3" role="group" aria-label="Sélection de la période">
-								<button type="button" class="btn btn-primary" id="btn-new-15days">15 jours</button>
-								<button type="button" class="btn btn-secondary" id="btn-new-3months">3 mois</button>
-								<button type="button" class="btn btn-secondary" id="btn-new-6months">6 mois</button>
-								<button type="button" class="btn btn-secondary" id="btn-new-max">Max</button>
+								<button type="button" class="btn btn-secondary period-btn" id="btn-new-15days">15 jours</button>
+								<button type="button" class="btn btn-primary active-period-btn period-btn" id="btn-new-3months">3 mois</button>
+								<button type="button" class="btn btn-secondary period-btn" id="btn-new-6months">6 mois</button>
+								<button type="button" class="btn btn-secondary period-btn" id="btn-new-max">Max</button>
 							</div>
 						</div>
 					</div>
 					<!-- Graphique Prix d'Occasion -->
-					<div class="col-md-6">
+					<div class="col-md-6" th:if="${product.price.occasionPricehistory != null and !#lists.isEmpty(product.price.occasionPricehistory)}">
 						<h3>Prix d'Occasion</h3>
 						<canvas class="mt-4" id="usedPriceChart"></canvas>
 						<div class="text-center">
 							<div class="btn-group my-3" role="group" aria-label="Sélection de la période">
-								<button type="button" class="btn btn-primary" id="btn-used-15days">15 jours</button>
-								<button type="button" class="btn btn-secondary" id="btn-used-3months">3 mois</button>
-								<button type="button" class="btn btn-secondary" id="btn-used-6months">6 mois</button>
-								<button type="button" class="btn btn-secondary" id="btn-used-max">Max</button>
+								<button type="button" class="btn btn-secondary period-btn" id="btn-used-15days">15 jours</button>
+								<button type="button" class="btn btn-primary active-period-btn period-btn" id="btn-used-3months">3 mois</button>
+								<button type="button" class="btn btn-secondary period-btn" id="btn-used-6months">6 mois</button>
+								<button type="button" class="btn btn-secondary period-btn" id="btn-used-max">Max</button>
 							</div>
 						</div>
 					</div>

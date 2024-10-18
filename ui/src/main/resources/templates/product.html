@@ -56,72 +56,87 @@
 		table.dataTable tbody tr.selected {
 			font-size: 1.5em;
 		}
+
+		.active-period-btn {
+			background-color: #166d12 !important;
+			color: white !important;
+			border: 2px solid #1c8418 !important;
+		}
+
+		.btn:focus {
+			outline: none !important;
+			box-shadow: none !important;
+		}
+
+		.btn {
+			transition: none !important;
+		}
 	</style>
 </head>
 
 <body>
 
-<!-- Navigation bar -->
+<!-- Barre de navigation -->
 <th:block th:insert="~{inc/navbar/navbar-product.html}"></th:block>
-<!-- Preloader -->
+<!-- Préchargeur -->
 <th:block th:insert="~{inc/preloader.html}"></th:block>
 
 <main th:with="images = ${product.images()}" class="bg-gray-200">
 	<div class="section section-lg pt-5">
 		<div class="container-fluid">
 
-			<!-- Displaying the product title -->
+			<!-- Affichage du titre du produit -->
 			<h1 th:unless="${product.vertical}" class="h1 title text-uppercase text-center" th:text="${product.bestName()}"></h1>
 			<h1 th:if="${product.vertical}" class="h1 title text-uppercase text-center" th:text="${helper.texts.title}"></h1>
 
 			<div class="card shadow p-4">
-				<!-- Product header -->
+				<!-- En-tête du produit -->
 				<th:block th:insert="~{inc/product-header.html}"></th:block>
 			</div>
 
-			<!-- Product presentation -->
+			<!-- Présentation du produit -->
 			<th:block th:insert="~{inc/product-presentation.html}"></th:block>
 
-			<!-- Ecological descriptions -->
+			<!-- Descriptions écologiques -->
 			<th:block th:insert="~{inc/product-ecological.html}"></th:block>
 
-			<!-- Product prices -->
+			<!-- Prix du produit -->
 			<th:block th:insert="~{inc/product-price.html}"></th:block>
 
-			<!-- Product attribute details -->
+			<!-- Détails des attributs du produit -->
 			<th:block th:insert="~{inc/product-attributes-details.html}"></th:block>
 
 			<div class="row mt-3">
 				<div class="col-lg-12">
 
-					<!-- Section for authenticated users only -->
+					<!-- Section réservée aux utilisateurs authentifiés -->
 					<th:block th:if="${user}">
 
-						<!-- Product categories -->
+						<!-- Catégories du produit -->
 						<th:block th:insert="~{inc/product-categories.html}"></th:block>
 
-						<!-- Table of unmatched attributes -->
+						<!-- Tableau des attributs non appariés -->
 						<div class="col-lg-4">
 							<th:block th:insert="~{inc/product-unmatched-attributes.html}"></th:block>
 						</div>
 
-						<!-- Development mode: additional information -->
+						<!-- Mode développement : informations supplémentaires -->
 						<div class="card shadow mb-3 my-3">
 							<div class="card-header">
-								<h2 class="h5">Development Mode</h2>
+								<h2 class="h5">Mode Développement</h2>
 							</div>
-							<p>This section is visible only to the nudger team.</p>
+							<p>Cette section est visible uniquement par l'équipe Nudger.</p>
 							<div class="card-body">
-								<!-- Displaying product taxonomy -->
+								<!-- Affichage de la taxonomie du produit -->
 								<h1 th:text="'taxonomy : ' + ${product.googleTaxonomyId}"></h1>
 
-								<!-- Resources related to the product -->
+								<!-- Ressources liées au produit -->
 								<th:block th:insert="~{inc/product-resources.html}"></th:block>
 
-								<!-- Mapped categories of the product -->
+								<!-- Catégories mappées du produit -->
 								<div class="card shadow my-3">
 									<div class="card-header">
-										<h2 class="h5">Mapped Categories</h2>
+										<h2 class="h5">Catégories Mappées</h2>
 									</div>
 									<div class="card-body">
 										<th:block th:each="item, stat : ${product.mappedCategories}">
@@ -134,7 +149,7 @@
 							</div>
 						</div>
 
-						<!-- Displaying raw JSON data -->
+						<!-- Affichage des données JSON brutes -->
 						<div class="card shadow my-3">
 							<div class="card-header">
 								<h2 class="h5">JSON</h2>
@@ -143,20 +158,20 @@
                                     <pre style="height: 500px">
                                         <code id="json-output" class="json"></code>
                                     </pre>
-								<!-- Script for formatting and syntax highlighting the JSON -->
+								<!-- Script pour formater et mettre en évidence le JSON -->
 								<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.10.0/highlight.min.js"></script>
 								<script th:inline="javascript">
 									/*<![CDATA[*/
 									const jsonObject = /*[[${raw}]]*/ '';
 									/*]]>*/
 
-									// Stringify and format the JSON object
+									// Stringify et formatage de l'objet JSON
 									const jsonString = JSON.stringify(jsonObject, null, 2);
 
-									// Insert formatted JSON into the <code> element
+									// Insérer le JSON formaté dans l'élément <code>
 									document.getElementById('json-output').textContent = jsonObject;
 
-									// Apply syntax highlighting
+									// Appliquer la mise en évidence syntaxique
 									hljs.highlightAll();
 								</script>
 							</div>
@@ -169,74 +184,62 @@
 	</div>
 </main>
 
-<!-- Product footer -->
+<!-- Pied de page du produit -->
 <th:block th:insert="~{inc/footer.html}"></th:block>
 
-<!-- Core Scripts -->
+<!-- Scripts principaux -->
 <script src="../../vendor/@popperjs/core/dist/umd/popper.min.js"></script>
 <script src="/webjars/bootstrap/js/bootstrap.min.js"></script>
 
-<!-- Vendor JS -->
+<!-- Scripts des fournisseurs -->
 <script src="../../vendor/smooth-scroll/dist/smooth-scroll.polyfills.min.js"></script>
 <script src="../../vendor/vivus/dist/vivus.min.js"></script>
 
-<!-- Optional Scripts (commented out as they are not used) -->
-<!--
-<script src="../../vendor/headroom.js/dist/headroom.min.js"></script>
-<script src="../../vendor/onscreen/dist/on-screen.umd.min.js"></script>
-<script src="../../vendor/nouislider/distribute/nouislider.min.js"></script>
-<script src="../../vendor/jarallax/dist/jarallax.min.js"></script>
-<script src="../../vendor/chartist/dist/chartist.min.js"></script>
-<script src="../../vendor/chartist-plugin-tooltips/dist/chartist-plugin-tooltip.min.js"></script>
-<script src="../../vendor/vanillajs-datepicker/dist/js/datepicker.min.js"></script>
-<script async defer src="https://buttons.github.io/buttons.js"></script>
-<script src="../../vendor/@glidejs/glide/dist/glide.min.js"></script>
--->
-
-<!-- Chart.js and date adapter -->
+<!-- Chart.js et adaptateur de date -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
 
-<!-- jQuery and DataTables -->
+<!-- jQuery et DataTables -->
 <script src="/webjars/jquery/jquery.min.js"></script>
 <script type="text/javascript" language="javascript" src="/webjars/datatables/js/dataTables.min.js"></script>
 <script type="text/javascript" language="javascript" src="/webjars/datatables/js/dataTables.bootstrap5.min.js"></script>
 
-<!-- Animated Counter -->
+<!-- Compteur animé -->
 <script src="../../vendor/countup.js/dist/countUp.umd.js"></script>
 
-<!-- Custom Scripts -->
+<!-- Scripts personnalisés -->
 <script src="../../assets/js/pixel.js"></script>
 <script src="../../assets/js/pixel-custom.js"></script>
 
-<!-- LightGallery for image gallery -->
+<!-- LightGallery pour la galerie d'images -->
 <script src="/vendor/lightgallery/dist/lightgallery.min.js"></script>
 <script src="/vendor/lightgallery/dist/plugins/thumbnail/lg-thumbnail.min.js"></script>
 
 <script th:inline="javascript">
-	// Global variable for the counter
+	/*<![CDATA[*/
+	// Variable globale pour le compteur
 	var reversment;
 
-	// Function to initialize DataTable
+	// Fonction pour initialiser DataTable
 	function initTable(tableId) {
-		// Initialize DataTable with specified options
+		// Initialiser DataTable avec les options spécifiées
 		tableNew = $(tableId).DataTable({
 			searching: false,
 			paging: false,
 			info: false,
 			select: 'single',
-			"order": [[1, 'asc']]
+			"order": [ [1, 'asc'] ]
 		});
 
-		// Event handler for row click in the table
+		// Gestionnaire d'événements pour le clic sur une ligne du tableau
 		tableNew.on('click', 'tbody tr', (e) => {
 			let classList = e.currentTarget.classList;
 
-			// Retrieve data attributes from the clicked row
+			// Récupérer les attributs de données de la ligne cliquée
 			token = $(e.currentTarget).attr('data-token');
 			compensation = $(e.currentTarget).attr('data-compensation');
 
-			// Update the token (e.g., in a hidden input field)
+			// Mettre à jour le token (par exemple, dans un champ caché)
 			$("#token").val(token);
 
 			var countUpUpdateoptions = {
@@ -250,20 +253,52 @@
 				suffix: ''
 			};
 
-			// Update the counter with the new compensation value
+			// Mettre à jour le compteur avec la nouvelle valeur de compensation
 			$("#countup-reversment").attr("data-max", compensation);
 			reversment.update(compensation);
 
-			// Manage the 'selected' class for the active row
+			// Gérer la classe 'selected' pour la ligne active
 			tableNew.rows('.selected').nodes().each((row) => row.classList.remove('selected'));
 			classList.add('selected');
 		});
 	}
 
+	// Récupération et formatage des données de prix
+	const newPriceHistoryData = /*[[${product.price.newPricehistory}]]*/ [];
+	const occasionPriceHistoryData = /*[[${product.price.occasionPricehistory}]]*/ [];
+
+	// Mappage des données uniquement si elles ne sont pas vides
+	const newPriceHistory = newPriceHistoryData.length > 0 ? newPriceHistoryData.map(({ timestamp: x, price: y }) => ({ x, y })) : [];
+	const occasionPriceHistory = occasionPriceHistoryData.length > 0 ? occasionPriceHistoryData.map(({ timestamp: x, price: y }) => ({ x, y })) : [];
+
+	// Fonction pour filtrer les données en fonction de la date
+	function filterDataByDate(data, startDate) {
+		return data.filter(item => new Date(item.x) >= startDate);
+	}
+
+	const today = new Date();
+
+	// Définir les plages de dates pour le filtrage
+	const dateRanges = {
+		'15days': new Date(today.getTime() - (15 * 24 * 60 * 60 * 1000)),
+		'3months': new Date(today.getFullYear(), today.getMonth() - 3, today.getDate()),
+		'6months': new Date(today.getFullYear(), today.getMonth() - 6, today.getDate()),
+		'max': null // Toutes les données
+	};
+
+	// Fonction pour obtenir les données filtrées en fonction de la période
+	function getFilteredData(data, period) {
+		if (dateRanges[period]) {
+			return filterDataByDate(data, dateRanges[period]);
+		} else {
+			return data; // Retourne toutes les données pour 'max'
+		}
+	}
+
 	$(document).ready(function () {
 
 		///////////////////////////////////
-		// Initialization of CountUp counter
+		// Initialisation du compteur CountUp
 		///////////////////////////////////
 		var countUpoptions = {
 			duration: 3,
@@ -276,57 +311,25 @@
 			suffix: ''
 		};
 
-		// Initialize the counter for the element with ID 'countup-reversment'
+		// Initialiser le compteur pour l'élément avec l'ID 'countup-reversment'
 		reversment = new countUp.CountUp("countup-reversment", $("#countup-reversment").attr("data-max"), countUpoptions);
 		setTimeout(reversment.start(), 5000);
 
 		///////////////////////////////////
-		// Fetching price histories
+		// Initialisation de DataTables
 		///////////////////////////////////
 
-		// Fetch and format new and used price data
-		const newPriceHistory = [[${product.price.newPricehistory}]].map(({ timestamp: x, price: y }) => ({ x, y }));
-		const occasionPriceHistory = [[${product.price.occasionPricehistory}]].map(({ timestamp: x, price: y }) => ({ x, y }));
-
-		// Function to filter data based on date
-		function filterDataByDate(data, startDate) {
-			return data.filter(item => new Date(item.x) >= startDate);
-		}
-
-		const today = new Date();
-
-		// Define date ranges for filtering
-		const dateRanges = {
-			'15days': new Date(today.getTime() - (15 * 24 * 60 * 60 * 1000)),
-			'3months': new Date(today.getFullYear(), today.getMonth() - 3, today.getDate()),
-			'6months': new Date(today.getFullYear(), today.getMonth() - 6, today.getDate()),
-			'max': null // All data
-		};
-
-		// Function to get filtered data based on the period
-		function getFilteredData(data, period) {
-			if (dateRanges[period]) {
-				return filterDataByDate(data, dateRanges[period]);
-			} else {
-				return data; // Return all data for 'max'
-			}
-		}
-
-		///////////////////////////////////
-		// Initialization of DataTables
-		///////////////////////////////////
-
-		// Initialize the offers table
+		// Initialiser le tableau des offres
 		initTable('#offres');
 
-		// Initialize the attributes table if it exists
+		// Initialiser le tableau des attributs s'il existe
 		if ($("#allAttributes").length) {
 			$('#allAttributes').DataTable({
 				responsive: true
 			});
 		}
 
-		// Initialize the images table if it exists
+		// Initialiser le tableau des images s'il existe
 		if ($("#imagesTable").length) {
 			$('#imagesTable').DataTable({
 				responsive: true
@@ -334,184 +337,194 @@
 		}
 
 		///////////////////////////////////
-		// Enable Bootstrap tooltips
+		// Activer les tooltips Bootstrap
 		///////////////////////////////////
 		$('[data-bs-toggle="tooltip"]').tooltip();
 
 		///////////////////////////////////
-		// Initialization of price charts
+		// Initialisation des graphiques de prix
 		///////////////////////////////////
 
-		// Initialize the chart for new prices
-		const newPriceCtx = document.getElementById('newPriceChart').getContext('2d');
-		const newPriceChart = new Chart(newPriceCtx, {
-			type: 'line',
-			data: {
-				datasets: [{
-					label: 'New Price',
-					fill: true,
-					data: getFilteredData(newPriceHistory, '15days'), // Default display of the last 15 days
-					backgroundColor: '#4cb1ff',
-					borderColor: '#41a3ef',
-					borderWidth: 2,
-					tension: 0,
-					pointRadius: 0,         // Hide points by default
-					pointHoverRadius: 6,    // Show point on hover
-					pointHitRadius: 10,
-				}]
-			},
-			options: {
-				interaction: {
-					mode: 'nearest',
-					intersect: false
+		// Initialiser le graphique des prix neufs seulement s'il y a des données
+		if (newPriceHistory.length > 0) {
+			const newPriceCtx = document.getElementById('newPriceChart').getContext('2d');
+			const newPriceChart = new Chart(newPriceCtx, {
+				type: 'line',
+				data: {
+					datasets: [{
+						label: 'Prix Neuf',
+						fill: true,
+						data: getFilteredData(newPriceHistory, '3months'),
+						backgroundColor: '#4cb1ff',
+						borderColor: '#41a3ef',
+						borderWidth: 2,
+						tension: 0,
+						pointRadius: 0,
+						pointHoverRadius: 6,
+						pointHitRadius: 10,
+					}]
 				},
-				scales: {
-					x: {
-						type: 'time',
-						time: {
-							unit: 'day',
-							displayFormats: {
-								day: 'dd/MM/yyyy'
-							},
-							tooltipFormat: 'dd/MM/yyyy'
-						},
-						title: {
-							display: true,
-							text: 'Date'
-						}
+				options: {
+					interaction: {
+						mode: 'nearest',
+						intersect: false
 					},
-					y: {
-						title: {
-							display: true,
-							text: 'Price (€)'
+					scales: {
+						x: {
+							type: 'time',
+							time: {
+								unit: 'day',
+								displayFormats: {
+									day: 'dd/MM/yyyy'
+								},
+								tooltipFormat: 'dd/MM/yyyy'
+							},
+							title: {
+								display: true,
+								text: 'Date'
+							}
+						},
+						y: {
+							title: {
+								display: true,
+								text: 'Prix (€)'
+							}
 						}
 					}
 				}
-			}
-		});
+			});
 
-		// Initialize the chart for used prices
-		const usedPriceCtx = document.getElementById('usedPriceChart').getContext('2d');
-		const usedPriceChart = new Chart(usedPriceCtx, {
-			type: 'line',
-			data: {
-				datasets: [{
-					label: 'Used Price',
-					fill: true,
-					data: getFilteredData(occasionPriceHistory, '15days'), // Default display of the last 15 days
-					backgroundColor: '#ff6384',
-					borderColor: '#fa486e',
-					borderWidth: 2,
-					tension: 0,
-					pointRadius: 0,
-					pointHoverRadius: 6,
-					pointHitRadius: 10,
-				}]
-			},
-			options: {
-				interaction: {
-					mode: 'nearest',
-					intersect: false
+			// Gestionnaires d'événements pour les boutons du graphique "Prix Neuf"
+			document.getElementById('btn-new-15days').addEventListener('click', function () {
+				updateChart(newPriceChart, newPriceHistory, '15days');
+				setActiveButton(this, 'new');
+			});
+
+			document.getElementById('btn-new-3months').addEventListener('click', function () {
+				updateChart(newPriceChart, newPriceHistory, '3months');
+				setActiveButton(this, 'new');
+			});
+
+			document.getElementById('btn-new-6months').addEventListener('click', function () {
+				updateChart(newPriceChart, newPriceHistory, '6months');
+				setActiveButton(this, 'new');
+			});
+
+			document.getElementById('btn-new-max').addEventListener('click', function () {
+				updateChart(newPriceChart, newPriceHistory, 'max');
+				setActiveButton(this, 'new');
+			});
+
+			// Définir le bouton '3 mois' comme actif par défaut
+			setActiveButton(document.getElementById('btn-new-3months'), 'new');
+		}
+
+		// Initialiser le graphique des prix d'occasion seulement s'il y a des données
+		if (occasionPriceHistory.length > 0) {
+			const usedPriceCtx = document.getElementById('usedPriceChart').getContext('2d');
+			const usedPriceChart = new Chart(usedPriceCtx, {
+				type: 'line',
+				data: {
+					datasets: [{
+						label: 'Prix d\'Occasion',
+						fill: true,
+						data: getFilteredData(occasionPriceHistory, '3months'),
+						backgroundColor: '#ff6384',
+						borderColor: '#fa486e',
+						borderWidth: 2,
+						tension: 0,
+						pointRadius: 0,
+						pointHoverRadius: 6,
+						pointHitRadius: 10,
+					}]
 				},
-				scales: {
-					x: {
-						type: 'time',
-						time: {
-							unit: 'day',
-							displayFormats: {
-								day: 'dd/MM/yyyy'
-							},
-							tooltipFormat: 'dd/MM/yyyy'
-						},
-						title: {
-							display: true,
-							text: 'Date'
-						}
+				options: {
+					interaction: {
+						mode: 'nearest',
+						intersect: false
 					},
-					y: {
-						title: {
-							display: true,
-							text: 'Price (€)'
+					scales: {
+						x: {
+							type: 'time',
+							time: {
+								unit: 'day',
+								displayFormats: {
+									day: 'dd/MM/yyyy'
+								},
+								tooltipFormat: 'dd/MM/yyyy'
+							},
+							title: {
+								display: true,
+								text: 'Date'
+							}
+						},
+						y: {
+							title: {
+								display: true,
+								text: 'Prix (€)'
+							}
 						}
 					}
 				}
-			}
-		});
+			});
 
-		// Event handlers for "new" price chart buttons
-		document.getElementById('btn-new-15days').addEventListener('click', function () {
-			updateChart(newPriceChart, newPriceHistory, '15days');
-			setActiveButton(this, 'new');
-		});
+			// Gestionnaires d'événements pour les boutons du graphique "Prix d'Occasion"
+			document.getElementById('btn-used-15days').addEventListener('click', function () {
+				updateChart(usedPriceChart, occasionPriceHistory, '15days');
+				setActiveButton(this, 'used');
+			});
 
-		document.getElementById('btn-new-3months').addEventListener('click', function () {
-			updateChart(newPriceChart, newPriceHistory, '3months');
-			setActiveButton(this, 'new');
-		});
+			document.getElementById('btn-used-3months').addEventListener('click', function () {
+				updateChart(usedPriceChart, occasionPriceHistory, '3months');
+				setActiveButton(this, 'used');
+			});
 
-		document.getElementById('btn-new-6months').addEventListener('click', function () {
-			updateChart(newPriceChart, newPriceHistory, '6months');
-			setActiveButton(this, 'new');
-		});
+			document.getElementById('btn-used-6months').addEventListener('click', function () {
+				updateChart(usedPriceChart, occasionPriceHistory, '6months');
+				setActiveButton(this, 'used');
+			});
 
-		document.getElementById('btn-new-max').addEventListener('click', function () {
-			updateChart(newPriceChart, newPriceHistory, 'max');
-			setActiveButton(this, 'new');
-		});
+			document.getElementById('btn-used-max').addEventListener('click', function () {
+				updateChart(usedPriceChart, occasionPriceHistory, 'max');
+				setActiveButton(this, 'used');
+			});
 
-		// Event handlers for "used" price chart buttons
-		document.getElementById('btn-used-15days').addEventListener('click', function () {
-			updateChart(usedPriceChart, occasionPriceHistory, '15days');
-			setActiveButton(this, 'used');
-		});
+			// Définir le bouton '3 mois' comme actif par défaut
+			setActiveButton(document.getElementById('btn-used-3months'), 'used');
+		}
 
-		document.getElementById('btn-used-3months').addEventListener('click', function () {
-			updateChart(usedPriceChart, occasionPriceHistory, '3months');
-			setActiveButton(this, 'used');
-		});
-
-		document.getElementById('btn-used-6months').addEventListener('click', function () {
-			updateChart(usedPriceChart, occasionPriceHistory, '6months');
-			setActiveButton(this, 'used');
-		});
-
-		document.getElementById('btn-used-max').addEventListener('click', function () {
-			updateChart(usedPriceChart, occasionPriceHistory, 'max');
-			setActiveButton(this, 'used');
-		});
-
-		// Function to update the chart with filtered data
+		// Fonction pour mettre à jour le graphique avec les données filtrées
 		function updateChart(chart, data, period) {
 			chart.data.datasets[0].data = getFilteredData(data, period);
 			chart.update();
 		}
 
-		// Function to visually set the active button
+		// Fonction pour définir visuellement le bouton actif
 		function setActiveButton(activeButton, chartType) {
 			const buttonGroupSelector = chartType === 'new' ? '.btn-group .btn[id^="btn-new"]' : '.btn-group .btn[id^="btn-used"]';
 			const buttons = document.querySelectorAll(buttonGroupSelector);
 			buttons.forEach(button => {
-				button.classList.remove('btn-primary');
+				button.classList.remove('btn-primary', 'active-period-btn');
 				button.classList.add('btn-secondary');
 			});
 			activeButton.classList.remove('btn-secondary');
-			activeButton.classList.add('btn-primary');
+			activeButton.classList.add('btn-primary', 'active-period-btn');
 		}
 
 		///////////////////////////////////
-		// Initialization of image gallery
+		// Initialisation de la galerie d'images
 		///////////////////////////////////
 
-		// Retrieve the carousel element
+		// Récupérer l'élément du carousel
 		let carouselEl = document.getElementById('bootstrap-gallery-carousel');
 
-		// Create a Bootstrap Carousel instance with specified options
+		// Créer une instance de Bootstrap Carousel avec les options spécifiées
 		const carousel = new bootstrap.Carousel(carouselEl, {
 			interval: 10000,
 			wrap: false,
 		});
 
-		// Add event listener for 'slide.bs.carousel' event
+		// Ajouter un écouteur d'événements pour 'slide.bs.carousel'
 		carouselEl.addEventListener('slide.bs.carousel', (event) => {
 			const container = document.querySelector('.carousel-inner');
 			window.lightGallery(container, {
@@ -520,6 +533,7 @@
 			});
 		});
 	});
+	/*]]>*/
 </script>
 
 </body>
