@@ -124,7 +124,7 @@ public class OpenDataService implements HealthIndicator {
 	 * This method is scheduled to run periodically.
 	 * TODO : Schedule in conf
 	 */
-	//@Scheduled(initialDelay = 1000L * 3600, fixedDelay = 1000L * 3600 * 24 * 7)
+	@Scheduled(initialDelay = 1000L * 3600, fixedDelay = 1000L * 3600 * 24 * 7)
 	@Timed(value = "OpenDataService.generateOpendata.time", description = "Time taken to generate the OpenData ZIP files", extraTags = {"service", "OpenDataService"})
 	public void generateOpendata() {
 
@@ -152,27 +152,6 @@ public class OpenDataService implements HealthIndicator {
 		uiConfig.tmpIsbnZipFile().getParentFile().mkdirs();
 		uiConfig.tmpGtinZipFile().getParentFile().mkdirs();
 	}
-
-	private void processDataFiles() throws IOException {
-		LOGGER.info("Starting process for ISBN_13");
-		processAndCreateZip(ISBN_DATASET_FILENAME, BarcodeType.ISBN_13, uiConfig.tmpIsbnZipFile());
-
-		LOGGER.info("Starting process for GTIN/EAN");
-		processAndCreateZip(GTIN_DATASET_FILENAME, BarcodeType.ISBN_13, uiConfig.tmpGtinZipFile(), true);
-	}
-
-	private void moveTmpFilesToFinalDestination() throws IOException {
-		moveFile(uiConfig.tmpIsbnZipFile(), uiConfig.isbnZipFile());
-		moveFile(uiConfig.tmpGtinZipFile(), uiConfig.gtinZipFile());
-	}
-
-	private void moveFile(File src, File dest) throws IOException {
-		if (dest.exists()) {
-			FileUtils.deleteQuietly(dest);
-		}
-		FileUtils.moveFile(src, dest);
-	}
-
 
 	/**
 	 * Processes and creates the ZIP files for the opendata.
