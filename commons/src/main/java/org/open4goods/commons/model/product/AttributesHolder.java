@@ -15,54 +15,54 @@ public class AttributesHolder  {
 	/**
 	 * The referentiel attributes
 	 */
-	private Map<ReferentielKey, String> referentielAttributes = new HashMap<>();
+	private Map<ReferentielKey, String> referentiel = new HashMap<>();
 
 	//TODO: rename
 	
 	/**
 	 * Those attributes are defined from configuration, and indexed in elasticsearch 
 	 */
-	private Map<String,AggregatedAttribute> indexedAttributes = new HashMap<>();
+	private Map<String,ProductAttribute> indexed = new HashMap<>();
 
 
 	/**
 	 * Those attributes are not indexed 
 	 */
-	private Map<String, AggregatedAttribute> all = new HashMap<>();
+	private Map<String, ProductAttribute> all = new HashMap<>();
 
 
 	private Set<AggregatedFeature> features = new HashSet<>();
 
 	@Override
 	public String toString() {
-		return "ref:"+referentielAttributes.size()+ " , agg:"+indexedAttributes.size() +" , unmaped:"+all.size() +" , features:"+features.size();
+		return "ref:"+referentiel.size()+ " , agg:"+indexed.size() +" , unmaped:"+all.size() +" , features:"+features.size();
 	}
 	
 	
 
 	public int count() {
 		
-		return referentielAttributes.size() + indexedAttributes.size() + all.size() + features.size();
+		return referentiel.size() + indexed.size() + all.size() + features.size();
 	}
 	
 
 	// TODO : performance
-	public AggregatedAttribute attributeByFeatureId(Integer featureId) {
+	public ProductAttribute attributeByFeatureId(Integer featureId) {
 		if (null == featureId) {
 			return null;
 		}
 		
-		AggregatedAttribute ret = all.values().stream().filter(a -> a.getIcecatTaxonomyIds().contains(featureId)).findFirst()
+		ProductAttribute ret = all.values().stream().filter(a -> a.getIcecatTaxonomyIds().contains(featureId)).findFirst()
 				.orElse(null);
 				return ret;
 	}
 	
 	public void addReferentielAttribute(ReferentielKey key, String value) {
-		referentielAttributes.put(key, value);
+		referentiel.put(key, value);
 	}
 
 	public Map<String, String> referentielAttributesAsStringKeys() {
-		return referentielAttributes.entrySet().stream().collect(Collectors.toMap(
+		return referentiel.entrySet().stream().collect(Collectors.toMap(
 					e -> e.getKey().toString(),
 				Map.Entry::getValue
 					
@@ -73,11 +73,11 @@ public class AttributesHolder  {
 
 
 
-	public Map<String, AggregatedAttribute> getIndexedAttributes() {
-		return indexedAttributes;
+	public Map<String, ProductAttribute> getIndexed() {
+		return indexed;
 	}
-	public void setIndexedAttributes(Map<String, AggregatedAttribute> aggregatedAttributes) {
-		this.indexedAttributes = aggregatedAttributes;
+	public void setIndexed(Map<String, ProductAttribute> aggregatedAttributes) {
+		this.indexed = aggregatedAttributes;
 	}
 	public Set<AggregatedFeature> getFeatures() {
 		return features;
@@ -89,23 +89,23 @@ public class AttributesHolder  {
 
 	
 
-	public Map<String, AggregatedAttribute> getAll() {
+	public Map<String, ProductAttribute> getAll() {
 		return all;
 	}
 
 
 
-	public void setAll(Map<String, AggregatedAttribute> allAttributes) {
+	public void setAll(Map<String, ProductAttribute> allAttributes) {
 		this.all = allAttributes;
 	}
 
 
 
-	public Map<ReferentielKey, String> getReferentielAttributes() {
-		return referentielAttributes;
+	public Map<ReferentielKey, String> getReferentiel() {
+		return referentiel;
 	}
 
-	public void setReferentielAttributes(Map<ReferentielKey, String> referentielAttributes) {
-		this.referentielAttributes = referentielAttributes;
+	public void setReferentiel(Map<ReferentielKey, String> referentielAttributes) {
+		this.referentiel = referentielAttributes;
 	}
 }

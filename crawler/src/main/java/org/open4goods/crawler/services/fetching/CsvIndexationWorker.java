@@ -11,6 +11,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -22,6 +23,7 @@ import org.open4goods.commons.exceptions.ValidationException;
 import org.open4goods.commons.helper.IdHelper;
 import org.open4goods.commons.helper.InStockParser;
 import org.open4goods.commons.helper.ProductConditionParser;
+import org.open4goods.commons.helper.ResourceHelper;
 import org.open4goods.commons.helper.ShippingCostParser;
 import org.open4goods.commons.helper.ShippingTimeParser;
 import org.open4goods.commons.model.constants.InStock;
@@ -31,6 +33,7 @@ import org.open4goods.commons.model.crawlers.IndexationJobStat;
 import org.open4goods.commons.model.data.DataFragment;
 import org.open4goods.commons.model.data.Price;
 import org.open4goods.commons.model.data.Rating;
+import org.open4goods.commons.model.data.Resource;
 import org.open4goods.commons.services.RemoteFileCachingService;
 import org.open4goods.crawler.repository.IndexationRepository;
 import org.open4goods.crawler.services.DataFragmentCompletionService;
@@ -614,6 +617,18 @@ public class CsvIndexationWorker implements Runnable {
                 removeFromSource(item, imgCell);
                 
 	        }
+	        
+	        // Adding all resources patterns
+	        for (Entry<String, String> attr : item.entrySet()) {
+	        	
+				if (ResourceHelper.isResource(attr.getValue())) {
+					Resource r = new Resource(attr.getValue());
+					// TODO (p2, feature) : handle COVERS
+					dataFragment.addResource(r);
+					removeFromSource(item, attr.getKey());
+				}
+	        }
+	        
 	    } catch (ValidationException e) {
 	        logger.warn("Problem while adding resource for {}", item);
 	    }

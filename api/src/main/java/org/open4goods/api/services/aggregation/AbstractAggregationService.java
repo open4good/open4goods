@@ -44,7 +44,7 @@ public abstract class AbstractAggregationService  implements Closeable {
 	 * @param output
 	 * @throws AggregationSkipException
 	 */
-	public abstract Map<String, Object>  onProduct(Product data, VerticalConfig vConf) throws AggregationSkipException;
+	public abstract void  onProduct(Product data, VerticalConfig vConf) throws AggregationSkipException;
 	
 
 

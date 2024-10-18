@@ -29,9 +29,9 @@ public class EcoScoreAggregationService extends AbstractScoreAggregationService 
 
 
 	@Override
-	public Map<String, Object> onProduct(Product data, VerticalConfig vConf) {
+	public void onProduct(Product data, VerticalConfig vConf) {
 		if (StringUtils.isEmpty(data.brand())) {
-			return null;
+			return;
 		}
 		
 		try {
@@ -48,8 +48,6 @@ public class EcoScoreAggregationService extends AbstractScoreAggregationService 
 		} catch (ValidationException e) {
 			dedicatedLogger.warn("Brand to score fail for {} : {}",data,e.getMessage());
 		}
-		return null;								
-		
 	}
 
 

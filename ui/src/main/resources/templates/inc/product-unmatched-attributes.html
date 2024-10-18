@@ -1,4 +1,4 @@
-<section class="card shadow p-4" th:if="${product.attributes.unmapedAttributes.size()} > 0">
+<section class="card shadow p-4" th:if="${product.attributes.all.size()} > 0">
 <div class="card-header"><h3 class="h5">Toutes les caracteristiques</h3></div>
 
 	<div class="table-responsive table-caracteristics-fs">
@@ -11,7 +11,7 @@
 				<th>Sources</th>
 			</thead>
 
-			<th:block th:each="attribute : ${product.attributes.unmapedAttributes}">
+			<th:block th:each="attribute : ${product.attributes.all.values()}">
 				<th:block t:if="${attribute.icecatTaxonomyIds.size() == 0">
 					<tr th:class="${attribute.bgRow()}">
 						<td th:if="${user}" class="align-middle"><span th:text="${attribute.icecatTaxonomyIds}"></span></td>					

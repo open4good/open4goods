@@ -260,7 +260,7 @@
            ];
 
 	 	for ( i = 0; i <  additionalAttributes.length; i++) {						
-			columns[i+5] = JSON.parse('{ "data": "attributes.aggregatedAttributes.'+additionalAttributes[i]['key']+'.value", "name" : "'+additionalAttributes[i]['name'][siteLanguage]+'", "title" : "'+additionalAttributes[i]['name'][siteLanguage]+'"  }');
+			columns[i+5] = JSON.parse('{ "data": "attributes.indexed.'+additionalAttributes[i]['key']+'.value", "name" : "'+additionalAttributes[i]['name'][siteLanguage]+'", "title" : "'+additionalAttributes[i]['name'][siteLanguage]+'"  }');
 			columns[i+5].render = dummyRender;
 	 	}
 	 

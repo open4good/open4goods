@@ -9,7 +9,8 @@ import org.open4goods.commons.config.yml.ui.VerticalConfig;
 import org.open4goods.commons.exceptions.ValidationException;
 import org.open4goods.commons.model.attribute.AttributeType;
 import org.open4goods.commons.model.data.Score;
-import org.open4goods.commons.model.product.AggregatedAttribute;
+import org.open4goods.commons.model.product.ProductAttribute;
+import org.open4goods.commons.model.product.IndexedAttribute;
 import org.open4goods.commons.model.product.Product;
 import org.slf4j.Logger;
 
@@ -23,11 +24,11 @@ public class Attribute2ScoreAggregationService extends AbstractScoreAggregationS
 	
 	
 	@Override
-	public Map<String, Object> onProduct(Product data, VerticalConfig vConf) {
+	public void onProduct(Product data, VerticalConfig vConf) {
 
 		
-		Collection<AggregatedAttribute> aggattrs =    data.getAttributes().getAggregatedAttributes().values()  ;
-		for (AggregatedAttribute aga : aggattrs) {
+		Collection<IndexedAttribute> aggattrs =    data.getAttributes().getIndexed().values()  ;
+		for (IndexedAttribute aga : aggattrs) {
 			// Scoring from attribute
 			try {
 				
@@ -57,7 +58,6 @@ public class Attribute2ScoreAggregationService extends AbstractScoreAggregationS
 				dedicatedLogger.error("Error while processing attribute {}",aga);
 			}
 		}
-		return null;
 	}
 
 
@@ -65,10 +65,10 @@ public class Attribute2ScoreAggregationService extends AbstractScoreAggregationS
 	/**
 	 * Generate the score (min, max, value) from an aggregatedattribute
 	 * @param attributeKey
-	 * @param a
+	 * @param aga
 	 * @return
 	 */
-	public Double generateScoresFromAttribute(String attributeKey , AggregatedAttribute a, AttributesConfig attributesConfig) throws ValidationException{
+	public Double generateScoresFromAttribute(String attributeKey , IndexedAttribute aga, AttributesConfig attributesConfig) throws ValidationException{
 
 		AttributeConfig ac = attributesConfig.getAttributeConfigByKey(attributeKey);
 		// transformation required
@@ -79,19 +79,19 @@ public class Attribute2ScoreAggregationService extends AbstractScoreAggregationS
 		
 		if (ac.getType().equals(AttributeType.NUMERIC)) {
 			try {
-				return Double.valueOf(a.getValue().replace(",", "."));
+				return Double.valueOf(aga.getValue().replace(",", "."));
 			} catch (Exception e) {
-				throw new ValidationException("Cannot convert to numeric" +a);
+				throw new ValidationException("Cannot convert to numeric" +aga);
 			}
 			
 		} else if (ac.getNumericMapping().size() > 0) {
-				Double mapping = ac.getNumericMapping().get(a.getValue());
+				Double mapping = ac.getNumericMapping().get(aga.getValue());
 				if (null == mapping || mapping.isInfinite() || mapping.isNaN()) {
-					throw new ValidationException("Attribute to rating conversion failed "+a);
+					throw new ValidationException("Attribute to rating conversion failed "+aga);
 				}
 				return mapping;
 		} else {
-			throw new ValidationException("Was asking to  translate {} into rating, but no numericMapping definition nor numeric attribute found : " + a);
+			throw new ValidationException("Was asking to  translate {} into rating, but no numericMapping definition nor numeric attribute found : " + aga);
 		}
 
 	}

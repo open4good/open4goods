@@ -33,6 +33,7 @@ import org.open4goods.api.services.AggregationFacadeService;
 import org.open4goods.commons.dao.ProductRepository;
 import org.open4goods.commons.exceptions.AggregationSkipException;
 import org.open4goods.commons.model.product.Product;
+import org.open4goods.commons.model.product.SourcedAttribute;
 import org.open4goods.commons.services.SerialisationService;
 import org.open4goods.xwiki.services.XWikiReadService;
 import org.slf4j.Logger;
@@ -290,8 +291,32 @@ public class BackupService implements HealthIndicator {
 	private Product translate(Product p) {
 
 		
+		// Forcing fresh
+		// TODO : remove
+		p.setLastChange(System.currentTimeMillis());
+				
+		// Attributes migration
+		// Purging aggregated
+		p.getAttributes().getAggregatedAttributes().clear();
+		
+		p.getAttributes().getUnmapedAttributes().forEach(e-> {
+			p.getAttributes().getAll().put(e.getName(), e);
+			
+			e.getSources().forEach(s -> {
+				SourcedAttribute sa = new SourcedAttribute();
+				sa.setDataSourcename(s.getKey());
+				sa.setValue(s.getValue());
+				e.addSourceAttribute(sa);
+				
+			});
+			e.getSources().clear();
+			
+		});
+		
+		p.getAttributes().getUnmapedAttributes().clear();
+
 		try {
-			aggregationService.sanitizeOne(p);
+			aggregationService.sanitize(p);
 		} catch (AggregationSkipException e) {
 			logger.error("Error in import, with product sanitisation",e);
 		}
