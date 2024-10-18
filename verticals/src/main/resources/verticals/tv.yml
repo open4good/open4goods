@@ -228,8 +228,10 @@ attributesConfig:
    
        asRating: false
        synonyms:
-         rakuten.com:      
-         - "DIAGONALE"
+         all:
+           - "DIAGONALE_POUCES" 
+#         rakuten.com:      
+#           - "DIAGONALE"
    
        parser:
          normalize: true
