@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html th:lang="${siteLocale.language}">
+
+<head>
+    <th:block th:insert="~{inc/header-meta.html}"></th:block>
+    <title>Base de données GTIN en libre accès | Nudger</title>
+    <meta name="description" content="Accédez à notre base de données GTIN gratuitement et librement. Découvrez l'importance des GTIN pour le commerce et l'industrie.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" th:content="${url}">
+    <meta property="og:title" content="Base de données GTIN en libre accès">
+    <meta property="og:description" content="Accédez à notre base de données GTIN gratuitement et librement. Découvrez l'importance des GTIN pour le commerce et l'industrie.">
+    <meta property="og:image" th:content="${baseUrl} + 'assets/img/brand/light.svg'">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:url" th:content="${url}">
+    <meta name="twitter:title" content="Base de données GTIN en libre accès">
+    <meta name="twitter:description" content="Accédez à notre base de données GTIN gratuitement et librement. Découvrez l'importance des GTIN pour le commerce et l'industrie.">
+    <meta name="twitter:image" th:content="${baseUrl} + 'assets/img/brand/light.svg'">
+</head>
+
+<body>
+<th:block th:with="page = 'opendata'" th:insert="~{inc/navbar/navbar-page.html}"></th:block>
+<th:block th:insert="~{inc/preloader.html}"></th:block>
+<main>
+    <section class="section-header bg-primary text-white pb-9 pb-lg-12 mb-4 mb-lg-6">
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-12 col-md-8 text-center">
+                    <h1 class="display-2 mb-3">Open Data : Base de données GTIN en libre accès</h1>
+                </div>
+            </div>
+        </div>
+    </section>
+    <section class="section section-lg pt-0">
+        <div class="container mt-n8 mt-lg-n12 z-2">
+            <div class="row justify-content-center">
+                <div class="col">
+                    <div class="card shadow border-gray-300 p-2 p-lg-5">
+                        <div class="row">
+                            <div class="col-lg-3 text-center">
+                                <img height="200" src="/assets/img/opendata.jpg" alt="code barre en opendata">
+                            </div>
+                            <div class="col-lg-9 my-auto">
+                                <p class="lead"><strong>Accédez à notre base de données GTIN.</strong> Ces données sont mises à jour <b>une fois par semaine</b> et proviennent de notre agrégation de contenu autour des catalogues d'affiliation.</p>
+                            </div>
+                        </div>
+                        <h2 class="h3 mt-3">Qu'est-ce qu'un GTIN ?</h2>
+                        <p>
+                            Le <strong>GTIN (Global Trade Item Number)</strong> est un identifiant unique utilisé mondialement pour identifier les produits et services. Il est crucial pour le commerce international et facilite la gestion des stocks, la logistique, et les transactions commerciales.
+                        </p>
+                        <ul class="list-unstyled">
+                            <li><i class="fas fa-globe"></i>&nbsp;&nbsp;&nbsp;Utilisé internationalement</li>
+                            <li><i class="fas fa-boxes"></i>&nbsp;&nbsp;&nbsp;Facilite la gestion des stocks</li>
+                            <li><i class="fas fa-truck"></i>&nbsp;&nbsp;Optimise la logistique</li>
+                        </ul>
+                        <h2 class="h3 mt-3">Conditions d'utilisation</h2>
+                        <ul class="text-secondary">
+                            <li class="pb-2">Ces données sont délivrées sous <a href="/assets/ETALAB-Licence-Ouverte-v2.0.pdf" target="_blank">licence ouverte</a>, et sont donc librement utilisables, sans restrictions d'usages.</li>
+                            <li class="pb-2">Vous devez indiquer la provenance des données, en mentionnant la page produit quand disponible, ou en ajoutant un lien vers la page d'accueil de <a href="https://nudger.fr">nudger.fr</a>.</li>
+                        </ul>
+                        <div class="card shadow px-4 py-1 mb-3">
+                            <div class="card-body text-center text-md-left">
+                                <div class="row align-items-center">
+                                    <div class="col-md-6">
+                                        <h2 class="mb-3">Obtenir les données</h2>
+                                        <table class="table table-hover">
+                                            <tbody>
+                                            <tr>
+                                                <th scope="row">Mise à jour</th>
+                                                <td scope="row" th:text="${#dates.format(lastUpdated, 'dd MMM yyyy, HH:mm')}"></td>
+                                            </tr>
+                                            <tr>
+                                                <th scope="row"><b>Taille du fichier</b></th>
+                                                <td scope="row" th:text="${fileSize}"></td>
+                                            </tr>
+                                            <tr>
+                                                <th scope="row"><b>Nombre de produits</b></th>
+                                                <td scope="row" th:text="${#numbers.formatDecimal(countGTIN, 0, 'COMMA', 0, 'POINT')}"></td>
+                                            </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                    <div class="col-12 col-md-6 mt-4 mt-md-0 text-center">
+                                        <a download href="/opendata/gtin-open-data.zip" style="width:95%" class="btn btn-primary">
+                                                <span class="me-1">
+                                                    <span class="fas fa-download"></span>
+                                                </span>
+                                            Télécharger
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <h2 class="h3">Format des données</h2>
+                        <div class="alert alert-info" role="alert">
+                            Les données sont au format <b>CSV</b>, compressées au format <b>zip</b>.
+                            <ul>
+                                <li>Séparateur de champs : <b>,</b> </li>
+                                <li>Séparateur de texte : <b>"</b> </li>
+                            </ul>
+                        </div>
+                        <div class="mb-5">
+                            <div class="mb-4">
+                                <span class="h5">Colonnes</span>
+                            </div>
+                            <table class="table table-hover">
+                                <tbody>
+                                <tr>
+                                    <th scope="row"><b>barcode</b></th>
+                                    <td scope="row">Le code barre GTIN du produit</td>
+                                </tr>
+                                <tr>
+                                    <th scope="row"><b>brand</b></th>
+                                    <td>Marque du produit</td>
+                                </tr>
+                                <tr>
+                                    <th scope="row"><b>model</b></th>
+                                    <td scope="row">Référence constructeur du produit</td>
+                                </tr>
+                                <tr>
+                                    <th scope="row"><b>last_updated</b></th>
+                                    <td scope="row">Dernière mise à jour de ce produit, au format epoch en millisecondes</td>
+                                </tr>
+                                <tr>
+                                    <th scope="row"><b>gs1_country</b></th>
+                                    <td scope="row">Pays de l'organisme GS1 qui a délivré le code barre pour ce produit</td>
+                                </tr>
+                                <tr>
+                                    <th scope="row"><b>gtinType</b></th>
+                                    <td scope="row">Type du code barre. Peut être GTIN_13, GTIN_8, GTIN_12, GTIN_14</td>
+                                </tr>
+                                <tr>
+                                    <th scope="row"><b>offers_count</b></th>
+                                    <td scope="row">Nombre d'offres commerciales pour ce produit</td>
+                                </tr>
+                                <tr>
+                                    <th scope="row"><b>min_price</b></th>
+                                    <td scope="row">Prix le plus faible pour ce produit</td>
+                                </tr>
+                                <tr>
+                                    <th scope="row"><b>min_price_compensation</b></th>
+                                    <td scope="row">Compensation carbone reversée, correspondant au prix le plus faible pour ce produit</td>
+                                </tr>
+                                <tr>
+                                    <th scope="row"><b>currency</b></th>
+                                    <td scope="row">Devise du prix le plus faible et de la compensation carbone associée</td>
+                                </tr>
+                                <tr>
+                                    <th scope="row"><b>categories</b></th>
+                                    <td scope="row">Catégories dans lesquelles ce produit a été rencontré</td>
+                                </tr>
+                                <tr>
+                                    <th scope="row"><b>url</b></th>
+                                    <td scope="row">URL de la fiche produit, uniquement si des offres commerciales sont disponibles</td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</main>
+<th:block th:insert="~{inc/footer.html}"></th:block>
+<script src="../../vendor/@popperjs/core/dist/umd/popper.min.js"></script>
+<script src="/webjars/bootstrap/js/bootstrap.min.js"></script>
+<script src="../../vendor/headroom.js/dist/headroom.min.js"></script>
+<script src="../../vendor/smooth-scroll/dist/smooth-scroll.polyfills.min.js"></script>
+<script src="../../vendor/vivus/dist/vivus.min.js"></script>
+<script src="/webjars/jquery/jquery.min.js"></script>
+<script src="../../assets/js/pixel.js"></script>
+<script src="../../assets/js/pixel-custom.js"></script>
+<script>
+    $(document).ready(function() {
+        $('#searchInput').on("change", function(e) {
+            $('#searchForm').attr("action", "/recherche/" + encodeURIComponent($('#searchInput').val()));
+        });
+    });
+</script>
+</body>
+
+</html>

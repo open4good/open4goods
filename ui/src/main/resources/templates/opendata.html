@@ -7,7 +7,7 @@
 	<th:block th:insert="~{inc/header-meta.html}"></th:block>
     
 	<!-- Primary Meta Tags -->
-	<title>Base de données ISBN en libre accès | Nudger</title>
+	<title>Base de données GTIN, EAN et ISBN en libre accès | Nudger</title>
 	<meta name="description" content="Nudger vous donne la possibilité d'accéder à une grande base de données ISBN gratuitement et librement">
 		
 	<!-- Open Graph / Facebook -->
@@ -46,161 +46,98 @@
                 </div>
             </div>
         </section>
-        
-        
-        <section class="section section-lg pt-0">
-            <div class="container mt-n8 mt-lg-n12 z-2">
-                <div class="row justify-content-center">
-                    <div class="col">
-                        <div class="card shadow border-gray-300 p-2 p-lg-5">
-                            
-                            <div class="row">
-	                            <div class="col-lg-3 text-center">
-	                            	<img height="200" src="/assets/img/opendata.jpg" alt="code barre en opendata">
-	                            </div>
-	                            <div class="col-lg-9 my-auto">
-	                            	<p class="lead"><strong>Liberez, la donnée !</strong> Nous mettons à disposition une extraction complète de notre base de données, celle-ci est notament utile pour le grand nombre d'articles identifiés par leurs codes barres (gtin / ean13 / UPC / ISBN). Ces données sont mises à jour <b>une fois par semaine</b>, et proviennent de l'aggrégation de contenu que nous réalisons autour des catalogues d'affiliations.</p>
-	                            </div>
-                            </div>
-                                                     
-                            <h2 class="h3 mt-3">Conditions d'utilisation</h2>
+
+
+		<section class="section section-lg pt-0">
+			<div class="container mt-n8 mt-lg-n12 z-2">
+				<div class="row justify-content-center">
+					<div class="col">
+						<div class="card shadow border-gray-300 p-4">
+							<div class="row">
+								<div class="col-lg-3 text-center">
+									<img height="200" src="/assets/img/opendata.jpg" alt="code barre en opendata">
+								</div>
+								<div class="col-lg-9 my-auto">
+									<p class="lead"><strong>Libérez la donnée !</strong> Nous mettons à disposition une extraction complète de notre base de données, celle-ci est notamment utile pour le grand nombre d'articles identifiés par leurs codes barres (GTIN / EAN13 / UPC / ISBN). Ces données sont mises à jour <b>une fois par semaine</b>, et proviennent de l'agrégation de contenu que nous réalisons autour des catalogues d'affiliations.</p>
+								</div>
+							</div>
+
+							<h2 class="h3 mt-4">Conditions d'utilisation</h2>
 							<ul class="text-secondary">
 								<li class="pb-2">Ces données sont délivrées sous <a href="/assets/ETALAB-Licence-Ouverte-v2.0.pdf" target="_blank">licence ouverte</a>, et sont donc librement utilisables, sans restrictions d'usages.</li>
 								<li class="pb-2">Vous devez par contre <b>indiquer la provenance de ces données</b>, en mentionnant la page produit quand elle est disponible, ou avec un lien vers la page d'accueil de <a href="https://nudger.fr">nudger.fr</a> quand la page produit n'est pas disponible.</li>
-                            </ul>
+							</ul>
 
-							<div class="card shadow px-4 py-1 mb-3">
-								<div class="card-body text-center text-md-left">
-									<div class="row align-items-center">
-										<div class="col-md-6">
-											<h2 class="mb-3">Obtenir les données</h2>
-											
-												<table class="table table-hover">
-													<tbody>
-													<tr>
-														<th scope="row">mise à jour</th>
-														<td scope="row" th:text="${#dates.format(lastUpdated, 'dd-MMM-yyyy, HH:mm')}"></td>
-													</tr>
-													
-													<tr>
-														<th scope="row"><b>Taille du fichier</b></th>
-														<td scope="row" th:text="${fileSize}"></td>
-													</tr>
-													<tr>
-														<th scope="row"><b>Nombre de produits</b></th>
-														<td scope="row" th:text="${#numbers.formatDecimal(count, 0, 'COMMA', 0, 'POINT')}"></td>
-													</tr>
-													</tbody>
-												</table>
-										
+							<div class="card shadow px-4 py-4">
+								<div class="card-body">
+									<div class="row text-center">
+										<div class="col-md-4">
+											<h3 class="h5">&nbsp;</h3>
+											<table class="table table-borderless">
+												<tbody>
+												<tr>
+													<th scope="row">Mise à jour</th>
+												</tr>
+												<tr>
+													<th scope="row">Taille du fichier</th>
+												</tr>
+												<tr>
+													<th scope="row">Nombre de produits</th>
+												</tr>
+												</tbody>
+											</table>
 										</div>
-										<div class="col-12 col-md-6 mt-4 mt-md-0 text-center">
-											
-											<a download href="/opendata/gtin-open-data.zip" style="width:95%"  class="btn btn-primary">
-												<span class="me-1">
-													<span class="fas fa-download"></span>
-												</span>
-												Télécharger
+
+										<div class="col-md-4">
+											<h3 class="h5">Dataset GTIN</h3>
+											<table class="table table-hover">
+												<tbody>
+												<tr>
+													<td th:text="${#dates.format(gtinLastUpdated, 'dd MMM yyyy, HH:mm')}"></td>
+												</tr>
+												<tr>
+													<td th:text="${gtinFileSize}"></td>
+												</tr>
+												<tr>
+													<td th:text="${#numbers.formatDecimal(countGTIN, 0, 'COMMA', 0, 'POINT')}"></td>
+												</tr>
+												</tbody>
+											</table>
+											<a href="/opendata/gtin" class="btn btn-primary mt-3">
+												Voir les détails et télécharger
+											</a>
+										</div>
+
+										<div class="col-md-4">
+											<h3 class="h5">Dataset ISBN</h3>
+											<table class="table table-hover">
+												<tbody>
+												<tr>
+													<td th:text="${#dates.format(isbnLastUpdated, 'dd MMM yyyy, HH:mm')}"></td>
+												</tr>
+												<tr>
+													<td th:text="${isbnFileSize}"></td>
+												</tr>
+												<tr>
+													<td th:text="${#numbers.formatDecimal(countISBN, 0, 'COMMA', 0, 'POINT')}"></td>
+												</tr>
+												</tbody>
+											</table>
+											<a href="/opendata/isbn" class="btn btn-primary mt-3">
+												Voir les détails et télécharger
 											</a>
 										</div>
 									</div>
 								</div>
-							</div>     
-							
-                            <div class="alert alert-warning p-4" role="alert">
-	                            <div class="media">
-	                                <div class="media-body">
-	                                <strong>Important :</strong> La mise à disposition de notre jeu de données monopolise beaucoup de bande passante. Afin de ne pas pénaliser la qualité de service pour le reste du site, nous limitons les téléchargements, en quantité et en débit.
-	                                si vous avez des besoins spécifiques, n'hésitez pas à <a href="/contact">nous contacter</a>. <br/><br/> Un jeu de données moins à jour (novembre 2021), mais sans restriction de débit est également disponible :
-	                                <ul>
-	                                	<li><a target="_blank" rel="nofollow" href ="https://files.opendatarchives.fr/data.cquest.org/open4goods/">opendata archives, thanks @cquest</a></li>
-	                                </ul>
-	                                </div>
-	                            </div>
-                            </div>
-                            
-                            <h2 class="h3">Format des données</h2>
-                            <div class="alert alert-info" role="alert">
-								Les données sont au format <b>CSV</b>, compressées au format <b>zip</b>.
-								<ul>
-									<li>Séparateur de champs : <b>,</b> </li>
-									<li>Séparateur de texte : <b>"</b> </li>
-								</ul>
-							</div>
-			
-															
-							<div class="mb-5">
-								<div class="mb-4">
-									<span class="h5">Colonnes</span>
-								</div>
-								<table class="table table-hover">
-									<tbody>
-									<tr>
-										<th scope="row"><b>barcode</b></th>
-										<td scope="row">Le code barre du produit, qui peut être un GTIN, EAN13 ou ISBN</td>
-									</tr>
-									
-									<tr>
-										<th scope="row"><b>brand</b></th>
-										<td>Marque du produit</td>
-									</tr>
-									<tr>
-										<th scope="row"><b>model</b></th>
-										<td scope="row">Réference constructeur du produit</td>
-									</tr>
-									<tr>
-										<th scope="row"><b>last_updated</b></th>
-										<td scope="row">Dernière mise à jour de ce produit, au format epoch en millisecondes</td>
-									</tr>
-									<tr>
-										<th scope="row"><b>gs1_country</b></th>
-										<td scope="row">Pays de l'organisme GS1 qui a délivré le code barre pour ce produit (hors ISBN)</td>
-									</tr>
-									<tr>
-										<th scope="row"><b>gtinType</b></th>
-										<td scope="row">Type du code barre. Peut être ISBN_13, GTIN_13, GTIN_8, GTIN_12</td>
-									</tr>																											
-									<tr>
-										<th scope="row"><b>offers_count</b></th>
-										<td scope="row">Nombre d'offres commerciales pour ce produit</td>
-									</tr>
-									<tr>
-										<th scope="row"><b>min_price</b></th>
-										<td scope="row">Prix le plus faible pour ce produit</td>
-									</tr>
-									<tr>
-										<th scope="row"><b>min_price_compensation</b></th>
-										<td scope="row">Compensation carbone reversée, correspondant au prix le plus faible pour ce produit</td>
-									</tr>									
-									<tr>
-										<th scope="row"><b>currency</b></th>
-										<td scope="row">Devise du prix le plus faible et de la compensation carbone associée </td>
-									</tr>									
-									<tr>
-										<th scope="row"><b>categories</b></th>
-										<td scope="row">Catégories dans lesquelles ce produit a été rencontré</td>
-									</tr>
-									<tr>
-										<th scope="row"><b>url</b></th>
-										<td scope="row">URL de la fiche produit, uniquement si des offres commerciales sont disponibles</td>
-									</tr>	
-																		
-								</tbody></table>
 							</div>
 
-                       
-                            
-                           
-							
-                   
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-       
-       
-    </main>
+						</div>
+					</div>
+				</div>
+			</div>
+		</section>
+
+	</main>
 
 	<!--/* Footer */-->
 	<th:block th:insert="~{inc/footer.html}"></th:block>	
