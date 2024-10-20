@@ -258,10 +258,11 @@ public class CsvIndexationWorker implements Runnable {
 
 			} catch (Exception e) {
 				// Triggering healthcheck down in the CsvService
-				csvService.brokenCsv();
+				csvService.brokenCsv(url);
 				logger.error("Critical exception while parsing CSV file: {} : {}", dsConfName, url, e);
 				dedicatedLogger.error("Critical exception while parsing CSV file:  : {} : {}", dsConfName, url, e);
 				stats.setFail(true);
+				
 			} finally {
 				// Saving the feed state specifically
 				stats.terminate();

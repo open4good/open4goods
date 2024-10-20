@@ -3,8 +3,11 @@ package org.open4goods.crawler.services.fetching;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -12,6 +15,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.apache.commons.lang3.StringUtils;
 import org.open4goods.commons.config.yml.datasource.DataSourceProperties;
 import org.open4goods.commons.model.crawlers.IndexationJobStat;
 import org.open4goods.commons.services.RemoteFileCachingService;
@@ -26,7 +30,6 @@ import org.springframework.boot.actuate.health.Health.Builder;
 import org.springframework.boot.actuate.health.HealthIndicator;
 
 import com.fasterxml.jackson.dataformat.csv.CsvSchema;
-import com.mchange.lang.StringUtils;
 
 import jakarta.annotation.PreDestroy;
 
@@ -55,7 +58,7 @@ public class CsvDatasourceFetchingService extends DatasourceFetchingService impl
 	
 
 	private AtomicLong feedNoUrls = new AtomicLong(0L);
-	private AtomicLong brokenCsvFiles = new AtomicLong(0L);
+	private Set<String> brokenCsvFiles = Collections.synchronizedSet(new HashSet<String>());
 	
 	/**
 	 * Constructor
@@ -246,8 +249,8 @@ public class CsvDatasourceFetchingService extends DatasourceFetchingService impl
 		
 	}
 
-	public synchronized void brokenCsv() {
-		brokenCsvFiles.incrementAndGet();
+	public synchronized void brokenCsv(String url) {
+		brokenCsvFiles.add(url);
 	}
 
 	/**
@@ -263,13 +266,13 @@ public class CsvDatasourceFetchingService extends DatasourceFetchingService impl
 			health =  Health.down();
 		} 
 		
-		if (brokenCsvFiles.get() > 0L) {
+		if (brokenCsvFiles.size() > 0L) {
 			health =  Health.down();
 		} 
 		
 		return health
 				.withDetail("feed_without_urls", feedNoUrls.get() )
-				.withDetail("invalid_csv_files", brokenCsvFiles.get())
+				.withDetail("invalid_csv_files", StringUtils.join(brokenCsvFiles ,"\n"))
 				.build();
 	}
 	
