@@ -23,7 +23,7 @@ public class NumericRangeFilter {
 	@Override
 	public String toString() {
 	
-		return key+ " : " + minValue +"<>" + maxValue;
+		return key+ " : " + minValue +"<>" + maxValue+", allowEmptyValues:"+allowEmptyValues;
 	}
 	
 	@Override
