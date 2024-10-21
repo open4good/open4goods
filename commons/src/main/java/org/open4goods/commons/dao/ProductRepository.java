@@ -83,6 +83,10 @@ public class ProductRepository {
 
 	private @Autowired ElasticsearchOperations elasticsearchOperations;
 
+	public ElasticsearchOperations getElasticsearchOperations() {
+		return elasticsearchOperations;
+	}
+
 	private @Autowired SerialisationService serialisationService;
 
 //	private @Autowired RedisProductRepository redisRepository;
@@ -613,7 +617,7 @@ public class ProductRepository {
 
 
 		// Handling aggregations results if relevant
-		//TODO(gof) : this cast should be avoided
+		//TODO(p3,safety) : this cast should be avoided
 		ElasticsearchAggregations aggregations = (ElasticsearchAggregations)results.getAggregations();
 
 

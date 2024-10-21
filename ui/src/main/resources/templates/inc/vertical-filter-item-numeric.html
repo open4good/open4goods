@@ -21,9 +21,21 @@
 						<div class="col-6 text-right">
 							<span class="range-slider-value value-high" th:attr="data-range-value-high=${max}"></span>
 						</div>
+
+				
 				</div>
 				<!--/* End of range slider values */-->				
 			</div>
-		  </div>
+            
+        
+	        <div th:if="${showIncludeUndefinedButton}" class="mt-5 form-check form-switch">
+	            <input class="form-check-input"  th:checked="${includeUndefined}" type="checkbox" th:id="'include-undefined-'+${id}">
+	            <label class="form-check-label" th:for="'include-undefined-'+${id}" th:text="${includeUndefinedLabel}"></label>
+	        </div>
+            
+            <input style="display:none" th:unless="${showIncludeUndefinedButton}" th:checked="${includeUndefined}" type="checkbox" th:id="'include-undefined-'+${id}">
+
+		</div>
+
 		</div>
 </div>

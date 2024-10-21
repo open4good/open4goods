@@ -15,14 +15,6 @@ import org.open4goods.commons.model.constants.ProductCondition;
 
 public class VerticalSearchRequest {
 
-    Integer minPrice;
-    Integer maxPrice;
-
-    Integer minOffers;
-    Integer maxOffers;
-
-    ProductCondition condition;
-
     Integer pageNumber;
     Integer pageSize;
 
@@ -44,45 +36,6 @@ public class VerticalSearchRequest {
         termsFilter.get(attribute).add(term);
     }
 
-    public Integer getMinPrice() {
-        return minPrice;
-    }
-
-    public void setMinPrice(Integer minPrice) {
-        this.minPrice = minPrice;
-    }
-
-    public Integer getMaxPrice() {
-        return maxPrice;
-    }
-
-    public void setMaxPrice(Integer maxPrice) {
-        this.maxPrice = maxPrice;
-    }
-
-    public Integer getMinOffers() {
-        return minOffers;
-    }
-
-    public void setMinOffers(Integer minOffers) {
-        this.minOffers = minOffers;
-    }
-
-    public Integer getMaxOffers() {
-        return maxOffers;
-    }
-
-    public void setMaxOffers(Integer maxOffers) {
-        this.maxOffers = maxOffers;
-    }
-
-    public ProductCondition getCondition() {
-        return condition;
-    }
-
-    public void setCondition(ProductCondition condition) {
-        this.condition = condition;
-    }
 
     public Integer getPageNumber() {
         return pageNumber;
@@ -157,11 +110,6 @@ public class VerticalSearchRequest {
 
         return new EqualsBuilder()
             .append(excluded, that.excluded)
-            .append(minPrice, that.minPrice)
-            .append(maxPrice, that.maxPrice)
-            .append(minOffers, that.minOffers)
-            .append(maxOffers, that.maxOffers)
-            .append(condition, that.condition)
             .append(pageNumber, that.pageNumber)
             .append(pageSize, that.pageSize)
             .append(countries, that.countries)
@@ -175,11 +123,6 @@ public class VerticalSearchRequest {
     @Override
     public int hashCode() {
         return new HashCodeBuilder(17, 37)
-            .append(minPrice)
-            .append(maxPrice)
-            .append(minOffers)
-            .append(maxOffers)
-            .append(condition)
             .append(pageNumber)
             .append(pageSize)
             .append(countries)
@@ -194,11 +137,6 @@ public class VerticalSearchRequest {
     @Override
     public String toString() {
         return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
-            .append("minPrice", minPrice)
-            .append("maxPrice", maxPrice)
-            .append("minOffers", minOffers)
-            .append("maxOffers", maxOffers)
-            .append("condition", condition)
             .append("pageNumber", pageNumber)
             .append("pageSize", pageSize)
             .append("countries", countries)

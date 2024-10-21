@@ -32,7 +32,6 @@ import org.open4goods.commons.model.constants.ResourceType;
 import org.open4goods.commons.model.data.AiDescriptions;
 import org.open4goods.commons.model.data.Resource;
 import org.open4goods.commons.model.data.Score;
-import org.open4goods.commons.model.data.UnindexedKeyVal;
 import org.open4goods.commons.model.data.UnindexedKeyValTimestamp;
 import org.open4goods.commons.services.StandardiserService;
 import org.slf4j.Logger;

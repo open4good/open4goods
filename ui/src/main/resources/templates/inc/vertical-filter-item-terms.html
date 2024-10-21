@@ -23,7 +23,7 @@
 								
 								<th:block th:unless="${termsLineWidget}">
 									<div class="form-check mb-1">
-										<input class="form-check-input" type="checkbox" th:id="${id}+'-'+${term.id}">
+										<input class="form-check-input changeableBox" type="checkbox" th:id="${id}+'-'+${term.id}">
 										<label th:text="${term.text}" class="form-check-label" th:for="${id}+'-'+${term.id}"></label>
 										<span th:text="${term.count}" th:id="'badge'+'-'+${id}+'-'+${term.id}" class="badge bg-gray badge-pill float-end"></span>
 									</div>
@@ -46,7 +46,7 @@
 												
 												<th:block th:unless="${termsLineWidget}">
 													<div class="form-check mb-1">
-														<input class="form-check-input" type="checkbox" th:id="${id}+'-'+${term.id}">
+														<input class="form-check-input changeableBox" type="checkbox" th:id="${id}+'-'+${term.id}">
 														<label th:text="${term.text}" class="form-check-label" th:for="${id}+'-'+${term.id}"></label>
 														<span th:text="${term.count}" th:id="'badge'+'-'+${id}+'-'+${term.id}" class="badge bg-gray badge-pill float-end"></span>
 													</div>
