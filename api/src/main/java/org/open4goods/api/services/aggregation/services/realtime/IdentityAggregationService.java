@@ -108,6 +108,8 @@ public class IdentityAggregationService extends AbstractAggregationService {
 			String country = gs1Service.detectCountry(output.gtin());
 			//		logger.info("Country for {} is {}", output.gtin(), country);
 			output.getGtinInfos().setCountry(country);
+		} else {
+			dedicatedLogger.warn("An unknown GTIN type, cannot complete with country and type : {}",output.getId());
 		}
 
 		// Setting barcode type

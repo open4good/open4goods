@@ -5,17 +5,19 @@ public class NumericRangeFilter {
 	private String key;
 	private Double minValue;
 	private Double maxValue;
+	private boolean allowEmptyValues = true;
 
 
 
 	public NumericRangeFilter() {
 		super();
 	}
-	public NumericRangeFilter(String attribute, Double minValue, Double maxValue) {
+	public NumericRangeFilter(String attribute, Double minValue, Double maxValue, Boolean includeUndefined) {
 		super();
 		this.key = attribute;
 		this.minValue = minValue;
 		this.maxValue = maxValue;
+		this.allowEmptyValues = includeUndefined.booleanValue();
 	}
 	
 	@Override
@@ -56,7 +58,14 @@ public class NumericRangeFilter {
 	public void setMaxValue(Double maxValue) {
 		this.maxValue = maxValue;
 	}
+	public boolean isAllowEmptyValues() {
+		return allowEmptyValues;
+	}
+	public void setAllowEmptyValues(boolean allowEmptyValues) {
+		this.allowEmptyValues = allowEmptyValues;
+	}
 
+	
 
 
 }

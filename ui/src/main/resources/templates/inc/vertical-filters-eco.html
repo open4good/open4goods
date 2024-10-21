@@ -14,7 +14,11 @@
 					   icon='fa-cart-plus',                   
 					   label='Notre ecoscore est composé de multiples critères, il vous permet en un clic de filtrer les produits les plus écologiques !',
 	                   min=0,
-	                   max=5">
+	                   max=5,   
+                       includeUndefined=true,
+                       showIncludeUndefinedButton=true,
+                       includeUndefinedLabel='Afficher les non évalués'
+                       ">
 
 		<th:block th:insert="~{inc/vertical-filter-item-numeric.html}"></th:block>
 	</th:block>	

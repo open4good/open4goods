@@ -18,7 +18,6 @@ public class AggregatedPrice extends Price {
 	
 	private String offerName;
 	private String url;
-	// TODO : Compute, do not store
 	private Double compensation;
 	/**
 	 * The state of the product (new, occasion, ...)

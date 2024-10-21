@@ -180,8 +180,6 @@
 	    const verticalPath = /*[[${verticalPath}]]*/'';
 	    const additionalAttributes = /*[[${filters}]]*/'';
 	    const tpl = /*[[${tpl}]]*/'';
-	    
-	    
 	    	    	    
 	/*]]>*/
 </script>
@@ -234,9 +232,8 @@
 					data : data,
 					vertical: vertical,
   					productUrl : baseUrl+verticalPath+'/'+data.names.url['default'],
-  					ecoscore: Math.round((data.scores.ECOSCORE.value + Number.EPSILON) * 100) / 100 ,
-  					compensation: Math.round((data.price.minPrice.compensation + Number.EPSILON) * 100) / 100 ,
-  					
+  				    ecoscore: data.scores?.ECOSCORE?.value != null ? Math.round((data.scores.ECOSCORE.value + Number.EPSILON) * 100) / 100 : null,
+  					compensation: data.price?.minPrice?.compensation != null ? Math.round((data.price.minPrice.compensation + Number.EPSILON) * 100) / 100 : null,  					
   					
 // TODO : Default as a hack until full i18n is implemented
   					desc:   description(data),
@@ -285,14 +282,14 @@
 	            	// Adding slider rangers attributes
 	            	var sliderParameters = new Array();
 	            	$('.input-slider-range-container').each (function (e) {
-	            		sliderParameters.push( $(this).attr("id") + ":" + $(this).attr('data-range-value-min') + " : " + $(this).attr('data-range-value-max'));	            		
+	            		sliderParameters.push( $(this).attr("id") + ":" + $(this).attr('data-range-value-min') + ":" + $(this).attr('data-range-value-max')+":"+$('[id="include-undefined-'+$(this).attr("id") + '"]').is(':checked'));	            		
 		            	} 
 	            	);	            	
 	            	data.sliders=sliderParameters;
 	            	
 	            	// Adding checkboxes attributes
 	            	var checkboxesParameters = new Array();
-	            	$('input:checked').each (function (e) {	            	
+	            	$('changeableBox').each (function (e) {	            	
 	            		checkboxesParameters.push( $(this).attr("id"));	            				            	
 	            		} 
 	            	);	

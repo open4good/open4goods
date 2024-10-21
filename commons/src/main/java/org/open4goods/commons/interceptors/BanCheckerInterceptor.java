@@ -27,7 +27,7 @@ public class BanCheckerInterceptor implements HandlerInterceptor {
 	
 		// Retrieving IP
 		String ip = IpHelper.getIp(request);
-		logger.info("Check banlist for {}",ip);
+		logger.debug("Check banlist for {}",ip);
 		
 		// Checkinf if IP is in the banlist
 		if (bancheckerConfig.getIps().contains(ip)) {

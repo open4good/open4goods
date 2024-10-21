@@ -41,7 +41,7 @@ import co.elastic.clients.elasticsearch._types.aggregations.StringTermsAggregate
 import co.elastic.clients.elasticsearch._types.aggregations.StringTermsBucket;
 
 /**
- * Service in charge of the search in AggregatedDatas and in DataFragments
+ * Service in charge of the search in Products
  *
  *
  * @author Goulven.Furet
@@ -49,36 +49,29 @@ import co.elastic.clients.elasticsearch._types.aggregations.StringTermsBucket;
  */
 public class SearchService {
 
+	private static final int AGGREGATION_BUCKET_SIZE = 100;
+
 	private static final Logger LOGGER = LoggerFactory.getLogger(SearchService.class);
-
-
 
 	public static final String OTHER_BUCKET = "ES-UNKNOWN";
 
-
 	private ProductRepository aggregatedDataRepository;
 
-
 	// Dedicated loggers, to get some stats
-	private Logger verticalstatsLogger;
 	private Logger globalstatsLogger;
-
 
 	public SearchService(ProductRepository aggregatedDataRepository, String logsFolder) {
 		this.aggregatedDataRepository = aggregatedDataRepository;
 		globalstatsLogger  = GenericFileLogger.initLogger("stats-search-global", Level.INFO, logsFolder);
-		verticalstatsLogger  = GenericFileLogger.initLogger("stats-search-vertical", Level.INFO, logsFolder);
 	}
 
 	/**
-	 * Operates a search on each vertical, and on datafragments if no results in verticals
-	 * TODO(P1,security,0.75) : enable results limitation
+	 * Operates a global search
 	 * @param pageNumber
 	 * @param pageSize
 	 * @param query
 	 * @return
 	 */
-	// TODO(perf : cache)
 	@Cacheable(keyGenerator = CacheConstants.KEY_GENERATOR, cacheNames = CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME)
 	public VerticalSearchResponse globalSearch(String initialQuery, Integer fromPrice, Integer toPrice, Set<String> categories, ProductCondition condition, int from, int to, int minOffers, boolean sort) {
 
@@ -94,12 +87,12 @@ public class SearchService {
 			c = new Criteria("id").is(initialQuery);
 		}
 		else {
-			// TODO(p1,security) : sanitize, web imput !!
+			// TODO(p1,security) : sanitize, web input !!
 			c = 	new Criteria("offerNames").matchesAll(Arrays.asList(query.split(" ")))
 					.and(aggregatedDataRepository.getRecentPriceQuery())
 					;
 
-			// TODO : could add
+			// NOTE : could add
 			//			price
 			//			vertical
 			//			offerscount
@@ -132,6 +125,8 @@ public class SearchService {
 
 
 
+	
+	
 	/**
 	 * Advanced search in a vertical
 	 * @param vertical
@@ -147,46 +142,33 @@ public class SearchService {
 
 		Criteria criterias = new Criteria("vertical").is(vertical.getId())
 				.and(aggregatedDataRepository.getRecentPriceQuery())
-				.and(new Criteria("excluded"). is(request.isExcluded()))
 				;
 
-//		// min price
-		if (null != request.getMinPrice()) {
-			criterias.and(new Criteria("price.minPrice.price").greaterThanEqual(Math.floor(request.getMinPrice())));
-		}
 
-		// max price
-		if (null != request.getMaxPrice()) {
-			criterias.and(new Criteria("price.minPrice.price").lessThanEqual(Math.ceil(request.getMaxPrice())));
-		}
-
-
-		// Adding custom numeric filters		
+		// Adding custom numeric filters
 		for (NumericRangeFilter filter : request.getNumericFilters()) {
-			criterias.and(new Criteria(filter.getKey()).lessThanEqual(filter.getMaxValue()) );
-			criterias.and(new Criteria(filter.getKey()).greaterThanEqual(filter.getMinValue()));
+
+		    if (!filter.isAllowEmptyValues()) {
+		        // Strict "and" filtering for the range
+		        Criteria rangeCriteria = new Criteria(filter.getKey())
+		            .greaterThanEqual(filter.getMinValue())
+		            .lessThanEqual(filter.getMaxValue());
+
+		        criterias.and(rangeCriteria);
+		    } else {
+		        // Allow items where the field is not present OR within the range
+		    	criterias.subCriteria(new Criteria().or(filter.getKey()).exists().not()
+		    			.or(filter.getKey())
+			            .greaterThanEqual(filter.getMinValue())
+			            .lessThanEqual(filter.getMaxValue()));
+		    }
 		}
+
 
 		// Adding custom checkbox filters
 		for (Entry<String, Set<String>> filter : request.getTermsFilter().entrySet()) {
 			criterias.and(new Criteria(filter.getKey()).in(filter.getValue()) );
 		}
-
-		// condition
-		if (null != request.getCondition()) {
-			criterias.and(new Criteria("price.conditions").in(request.getCondition().toString()) );
-		}
-
-		// min offersCount
-		if (null != request.getMinOffers()) {
-			criterias.and(new Criteria("offersCount").greaterThanEqual(request.getMinOffers()));
-		}
-
-		// max offersCount
-		if (null != request.getMaxOffers()) {
-			criterias.and(new Criteria("offersCount").lessThanEqual(request.getMaxOffers()));
-		}
-//
 
 		// Setting the query
 		NativeQueryBuilder esQuery = new NativeQueryBuilder().withQuery(new CriteriaQuery(criterias));
@@ -195,7 +177,7 @@ public class SearchService {
 		if (null != request.getPageNumber() && null != request.getPageSize()) {
 			esQuery = esQuery .withPageable(PageRequest.of(request.getPageNumber(), request.getPageSize()));
 		} else {
-			//TODO(gof) : pageNumber conf
+			//TODO(p3,conf) : default pageNumber from conf
 			esQuery = esQuery .withPageable(PageRequest.of(0, 100));
 		}
 
@@ -204,18 +186,11 @@ public class SearchService {
 		esQuery = esQuery
 				.withAggregation("min_price", 	Aggregation.of(a -> a.min(ta -> ta.field("price.minPrice.price"))))
 				.withAggregation("max_price", 	Aggregation.of(a -> a.max(ta -> ta.field("price.minPrice.price"))))
-
 				.withAggregation("min_offers", 	Aggregation.of(a -> a.min(ta -> ta.field("offersCount"))))
 				.withAggregation("max_offers", 	Aggregation.of(a -> a.max(ta -> ta.field("offersCount"))))
-				//
 				.withAggregation("conditions", 	Aggregation.of(a -> a.terms(ta -> ta.field("price.conditions").missing(OTHER_BUCKET).size(3)  ))	)
-				//
-				//				// TODO : size from conf
-				.withAggregation("brands", 	Aggregation.of(a -> a.terms(ta -> ta.field("attributes.referentielAttributes.BRAND").missing(OTHER_BUCKET).size(100)  ))	)
-				//
-				//				// TODO : size from conf
-				.withAggregation("country", 	Aggregation.of(a -> a.terms(ta -> ta.field("gtinInfos.country").missing(OTHER_BUCKET).size(100)  ))	)
-				//
+				.withAggregation("brands", 	Aggregation.of(a -> a.terms(ta -> ta.field("attributes.referentielAttributes.BRAND").missing(OTHER_BUCKET).size(AGGREGATION_BUCKET_SIZE)  ))	)
+				.withAggregation("country", 	Aggregation.of(a -> a.terms(ta -> ta.field("gtinInfos.country").missing(OTHER_BUCKET).size(AGGREGATION_BUCKET_SIZE)  ))	)
 				;
 		////
 		// Sort order
@@ -224,11 +199,10 @@ public class SearchService {
 		if (null == request.getSortField()) {
 			esQuery = esQuery.withSort(Sort.by("offersCount").descending());
 		} else {
-			// TODO : check value, remove ignorecase
 			if (request.getSortOrder().equalsIgnoreCase("DESC") ) {
-				esQuery = esQuery.withSort(Sort.by(request.getSortField()).descending() );
+				esQuery = esQuery.withSort(Sort.by(Sort.Order.desc(request.getSortField()).nullsLast()));
 			} else if (request.getSortOrder().equalsIgnoreCase("ASC") ){
-				esQuery = esQuery.withSort(Sort.by(request.getSortField()).ascending() );
+				esQuery = esQuery.withSort(Sort.by(Sort.Order.asc(request.getSortField()).nullsLast()) );
 			} else {
 				throw new RuntimeException("implement");
 			}
@@ -237,16 +211,12 @@ public class SearchService {
 		// Adding custom attributes terms filters aggregations
 		for (AttributeConfig attrConfig : customAttrFilters) {
 			esQuery = esQuery
-					// TODO : size from conf
-					.withAggregation(attrConfig.getKey(), 	Aggregation.of(a -> a.terms(ta -> ta.field("attributes.aggregatedAttributes."+attrConfig.getKey()+".value").missing(OTHER_BUCKET).size(100)  ))	);
+					.withAggregation(attrConfig.getKey(), 	Aggregation.of(a -> a.terms(ta -> ta.field("attributes.indexed."+attrConfig.getKey()+".value").missing(OTHER_BUCKET).size(AGGREGATION_BUCKET_SIZE)  ))	);
 		}
-		
-		
 		
 		// Adding custom range aggregations
 		for (NumericRangeFilter filter: request.getNumericFilters()) {
 			esQuery = esQuery
-					// TODO : size from conf
 			.withAggregation("min"+filter.getKey(),  	Aggregation.of(a -> a.min(ta -> ta.field(filter.getKey()))))
 			.withAggregation("max"+filter.getKey(), 	Aggregation.of(a -> a.max(ta -> ta.field(filter.getKey()))))		;		
 		
@@ -256,7 +226,7 @@ public class SearchService {
 
 
 		// Handling aggregations results if relevant
-		//TODO(gof) : this cast should be avoided
+		//NOTE(gof) : this cast is not nice...
 		ElasticsearchAggregations aggregations = (ElasticsearchAggregations)results.getAggregations();
 
 
@@ -284,9 +254,7 @@ public class SearchService {
 			NumericRangeFilter nrf = new NumericRangeFilter();
 			nrf.setMaxValue(min.value());
 			nrf.setMinValue(max.value());
-			
 		}
-		
 		
 		///////
 		// Item condition
@@ -298,12 +266,6 @@ public class SearchService {
 		}
 		vsr.getConditions().sort((o1, o2) -> o2.getCount().compareTo(o1.getCount()));
 
-		//TODO : Add other
-		//		// Adding others
-		//		if (null != productSate.getBucketByKey(OTHER_BUCKET)) {
-		//			vsr.getConditions().add ( new VerticalFilterTerm(OTHER_BUCKET,productSate.getBucketByKey(OTHER_BUCKET).getDocCount()));
-		//		}
-		//
 
 		///////
 		// Brands
@@ -314,11 +276,6 @@ public class SearchService {
 			vsr.getBrands().add (new VerticalFilterTerm(b.key().stringValue(), b.docCount()));
 		}
 		vsr.getBrands().sort((o1, o2) -> o2.getCount().compareTo(o1.getCount()));
-		//		TODO : Add other
-		//		// Adding others
-		//		if (null != brands.getBucketByKey(OTHER_BUCKET)) {
-		//			vsr.getBrands().add ( new VerticalFilterTerm(OTHER_BUCKET,brands.getBucketByKey(OTHER_BUCKET).getDocCount()));
-		//		}
 
 		///////
 		// Brands
@@ -329,10 +286,6 @@ public class SearchService {
 			vsr.getCountries().add (new VerticalFilterTerm(bucket.key().stringValue(), bucket.docCount()));
 		}
 		vsr.getCountries().sort((o1, o2) -> o2.getCount().compareTo(o1.getCount()));
-		//TODO: add missing
-		//		if (null != countries.buckets().keyed().get(OTHER_BUCKET)) {
-		////			vsr.getCountries().add ( new VerticalFilterTerm(OTHER_BUCKET,countries. buckets().keyed().get(OTHER_BUCKET).docCount()));
-		////		}
 
 
 		//////////////
@@ -358,11 +311,6 @@ public class SearchService {
 				vsr.getCustomFilters().get(attrConfig).sort(Comparator.comparing(VerticalFilterTerm::getText));
 			}
 
-			// TODO : add missing
-			//			// Adding others
-			//			if (null != agg.getBucketByKey(OTHER_BUCKET)) {
-			//				vsr.getCustomFilters().get(attrConfig).add ( new VerticalFilterTerm(OTHER_BUCKET,agg.getBucketByKey(OTHER_BUCKET).getDocCount()));
-			//			}
 		}
 
 		//		// Setting the response
@@ -372,35 +320,12 @@ public class SearchService {
 		vsr.setVerticalConfig(vertical);
 		vsr.setRequest(request);
 		String queryString = StringUtils.join(criterias.getCriteriaChain(), "\n-> ");
-		verticalstatsLogger.info("Searching in vertical {} : {} results for query \n-> {}", vertical.getId(), vsr.getTotalResults(), queryString);
+		LOGGER.info("Searching in vertical {} : {} results for query \n-> {}", vertical.getId(), vsr.getTotalResults(), queryString);
 //		verticalstatsLogger.info("Searching in vertical {} : {}",vertical.getId(), request.toString());
 
 		return vsr;
 	}
 
-
-	//	/**
-	//	 *
-	//	 * @param categorie
-	//	 * @return all Product for a categorie
-	//	 */
-	//	public VerticalSearchResponse categorieSearch(String categorie) {
-	//		String translatedVerticalQuery="datasourceCategories:\""+categorie+"\"";
-	//
-	//
-	//
-	//		VerticalSearchResponse vsr = new VerticalSearchResponse();
-	//
-	//		//TODO : Handle attributes and limits
-	////		 CategoryStatResults statsResult = aggregatedDataRepository.stats(translatedVerticalQuery);
-	//
-	//
-	//		// TODO(gof) : Page pageNumber conf
-	//		vsr.setData(aggregatedDataRepository.searchValidPrices(translatedVerticalQuery,ALL_VERTICAL_NAME,0,1000) .collect(Collectors.toList()));
-	//
-	//		return vsr;
-	//	}
-	//
 	public String sanitize(String q) {
 		return StringUtils.normalizeSpace(q.replace("(", " ")
 				.replace(")", " ")
