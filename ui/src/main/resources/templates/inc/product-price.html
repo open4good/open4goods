@@ -61,7 +61,6 @@
 				<div class="row">
 					<!-- Graphique Prix Neuf -->
 					<div class="col-md-6" th:if="${product.price.newPricehistory != null and !#lists.isEmpty(product.price.newPricehistory)}">
-						<h3>Prix Neuf</h3>
 						<canvas class="mt-4" id="newPriceChart"></canvas>
 						<div class="text-center">
 							<div class="btn-group my-3" role="group" aria-label="Sélection de la période">
@@ -74,7 +73,6 @@
 					</div>
 					<!-- Graphique Prix d'Occasion -->
 					<div class="col-md-6" th:if="${product.price.occasionPricehistory != null and !#lists.isEmpty(product.price.occasionPricehistory)}">
-						<h3>Prix d'Occasion</h3>
 						<canvas class="mt-4" id="usedPriceChart"></canvas>
 						<div class="text-center">
 							<div class="btn-group my-3" role="group" aria-label="Sélection de la période">
