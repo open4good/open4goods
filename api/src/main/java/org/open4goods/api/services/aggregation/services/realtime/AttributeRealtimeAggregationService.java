@@ -323,7 +323,7 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 	private void handleReferentielAttributes(DataFragment fragment, Product output) {
 		for (Entry<ReferentielKey, String> attr : fragment.getReferentielAttributes().entrySet()) {
 			ReferentielKey key = attr.getKey();
-			String value = attr.getValue();
+			String value = attr.getValue().toUpperCase();
 
 			if (StringUtils.isEmpty(value)) {
 				continue;
@@ -340,9 +340,8 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 					dedicatedLogger.info("Adding different {} name as alternate id. Existing is {}, would have erased with {}", key, existing, value);
 					output.addModel(value);
 					break;
-				case BRAND:
-					output.getAlternativeBrands().add(new UnindexedKeyValTimestamp(fragment.getDatasourceName(), value));
-					output.getAlternativeBrands().removeIf(b -> b.getValue().equals(output.brand()));
+				case BRAND:				
+					output.getAkaBrands().put(fragment.getDatasourceName(), value);
 					break;
 				case GTIN:
 					if (value != null && !existing.equals(value)) {

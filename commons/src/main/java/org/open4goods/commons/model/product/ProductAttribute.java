@@ -31,7 +31,8 @@ public class ProductAttribute extends SourcableAttribute implements IAttribute {
 
 	/**
 	 * The collections of conflicts for this attribute
-	 */
+	 * 	 */
+	// TODO(p1, design) : remove after migration
 	private Set<UnindexedKeyValTimestamp> sources = new HashSet<>();
 
 

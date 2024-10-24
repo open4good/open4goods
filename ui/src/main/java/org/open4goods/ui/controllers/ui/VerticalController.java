@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.open4goods.commons.config.yml.ui.VerticalConfig;
+import org.open4goods.commons.model.dto.NumericRangeFilter;
 import org.open4goods.commons.model.dto.VerticalFilterTerm;
 import org.open4goods.commons.model.dto.VerticalSearchRequest;
 import org.open4goods.commons.model.dto.VerticalSearchResponse;
@@ -64,6 +65,9 @@ public class VerticalController  extends AbstractController {
 		VerticalSearchRequest vRequest = new VerticalSearchRequest();
 		vRequest.setSortField("scores.ECOSCORE.value");
 		vRequest.setSortOrder("desc");
+		vRequest.getNumericFilters().add(new NumericRangeFilter("offersCount", 1.0, 10000.0, false));
+		vRequest.getNumericFilters().add(new NumericRangeFilter("price.minPrice.price", 0.0001, 500000.0, false));
+		
 		
 		VerticalSearchResponse products = searchService.verticalSearch(config,vRequest);
 		

@@ -49,6 +49,7 @@ public class IdentityAggregationService extends AbstractAggregationService {
 		/////////////////////////////
 		
 		if (null == output.getId()) {
+			// TODO(p2, features) : Should store the GTIN type when encountered in gtin infos, and then render with appropriate leading 0
 			output.setId(Long.valueOf(input.gtin()));
 		} else {
 			if (!output.gtin().equals(input.gtin())) {
@@ -59,7 +60,7 @@ public class IdentityAggregationService extends AbstractAggregationService {
 		/////////////////////////////
 		// Adding alternate models's
 		/////////////////////////////		
-		output.getAlternativeModels().addAll(input.getAlternateIds().stream().map(e-> e.getValue()).collect(Collectors.toSet()) );
+		output.getAkaModels().addAll(input.getAlternateIds().stream().map(e-> e.getValue()).collect(Collectors.toSet()) );
 
 		/////////////////////////////
 		// Setting the dates

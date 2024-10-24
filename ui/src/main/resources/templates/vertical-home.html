@@ -232,7 +232,7 @@
 					data : data,
 					vertical: vertical,
   					productUrl : baseUrl+verticalPath+'/'+data.names.url['default'],
-  				    ecoscore: data.scores?.ECOSCORE?.value != null ? Math.round((data.scores.ECOSCORE.value + Number.EPSILON) * 100) / 100 : null,
+  				    ecoscore: data.scores?.ECOSCORE?.value != null ? Math.round((data.scores.ECOSCORE.value + Number.EPSILON) * 100) / 100 : "",
   					compensation: data.price?.minPrice?.compensation != null ? Math.round((data.price.minPrice.compensation + Number.EPSILON) * 100) / 100 : null,  					
   					
 // TODO : Default as a hack until full i18n is implemented
@@ -251,7 +251,7 @@
                return  "" ;
            }
        },
-       { "data": "scores.ECOSCORE.value", "name" : "Ecoscore", "title" : "Ecoscore"  },
+       { "data": "scores.ECOSCORE.value", "name" : "Ecoscore", "title" : "Ecoscore", defaultContent:""  },
        { "data": "price.minPrice.price", "name" : "Prix", "title" : "Prix"  },
        { "data": "offersCount", "name" : "Concurrence", "title" : "Concurrence"  }
            ];

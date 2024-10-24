@@ -292,8 +292,7 @@ public class BackupService implements HealthIndicator {
 
 		
 		// Forcing fresh
-		// TODO : remove
-		p.setLastChange(System.currentTimeMillis());
+//		p.setLastChange(System.currentTimeMillis());
 				
 		// Attributes migration
 		// Purging aggregated
@@ -314,6 +313,28 @@ public class BackupService implements HealthIndicator {
 		});
 		
 		p.getAttributes().getUnmapedAttributes().clear();
+		
+		
+		
+		// Brands
+		
+		p.getAlternativeBrands().forEach(b -> {
+			
+			if (!b.getKey().equalsIgnoreCase(b.getValue())) {
+				p.getAkaBrands().put(b.getKey(), b.getValue().toUpperCase());				
+			}
+		});
+		
+		
+		// Models
+		p.setAkaModels(p.getAlternativeModels());
+		
+		
+		
+		p.getAttributes().setAggregatedAttributes(null);
+		p.getAttributes().setUnmapedAttributes(null);
+		p.setAlternativeBrands(null);
+		p.setAlternativeModels(null);
 
 		try {
 			aggregationService.sanitize(p);
