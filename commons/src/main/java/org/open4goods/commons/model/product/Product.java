@@ -215,6 +215,14 @@ public class Product implements Standardisable {
 	}
 
 	
+	/**
+	 * Return a set containing AKA brands if not matching the set brand 
+	 * @return
+	 */
+	public Set<String> akaBrands () {
+		return akaBrands.values().stream().filter(e-> !e.equals(brand())).collect(Collectors.toSet());
+		
+	}
 	
 	public String longestOfferName() {
 		return offerNames.stream().max (Comparator.comparingInt(String::length)).get();
