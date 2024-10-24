@@ -57,7 +57,7 @@ public class DataTableController {
 		String[] checkboxes = request.getParameterValues("checkboxes[]");
 		if (null != checkboxes) {
 			for (String checkbox : checkboxes) {
-				String[] attr = checkbox.split("-");
+				String[] attr = checkbox.split(":");
 
 				// TODO : should have consts shared with javascript (vertical-home)
                 switch (attr[0]) {

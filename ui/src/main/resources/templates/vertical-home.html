@@ -289,8 +289,9 @@
 	            	
 	            	// Adding checkboxes attributes
 	            	var checkboxesParameters = new Array();
-	            	$('changeableBox').each (function (e) {	            	
-	            		checkboxesParameters.push( $(this).attr("id"));	            				            	
+	            	$('input.changeableBox:checked').each (function (e) {
+	            		    val = $(this).attr("data-id")+":"+$(this).attr("data-value");
+	            		  	checkboxesParameters.push( val);	            				            	
 	            		} 
 	            	);	
 	            	data.checkboxes=checkboxesParameters;

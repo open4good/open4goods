@@ -38,7 +38,7 @@
 	<th:block th:each="filter : ${products.customFilters}">
 	
 		<th:block th:with="title=${filter.key.name.get(siteLanguage)},
-		               id=${filter.key.key},
+		               id='attributes.indexed.'+${filter.key.key}+'.value',
 					   icon=${filter.key.faIcon},		                   
 					   visibleSection=10,
 					   terms=${filter.value}">
