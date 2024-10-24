@@ -8,9 +8,9 @@
 			</td>
 		</tr>
 
-		<th:block th:each="item, stat : ${product.akaBrands}">
+		<th:block th:each="item, stat : ${product.akaBrands()}">
 			<tr th:if="${stat.first}">
-				<td class="align-middle" th:rowspan="${product.akaBrands.size()}">Aussi référencé comme</td>
+				<td class="align-middle" th:rowspan="${product.akaBrands().size()}">Aussi référencé comme</td>
 				<td class="align-middle" th:text="${item}"></td>
 			</tr>
 			<tr th:unless="${stat.first}">
