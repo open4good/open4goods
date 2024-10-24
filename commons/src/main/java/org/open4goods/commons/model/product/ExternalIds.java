@@ -15,8 +15,6 @@ public class ExternalIds {
 	 */
 	private String icecat;
 	
-	
-	
 	/**
 	 * Known mpn's
 	 */
@@ -26,6 +24,11 @@ public class ExternalIds {
 	 * Known sku's
 	 */
 	private Set<String> sku = new HashSet<>();
+	
+	
+	
+	
+	
 
 	public String getAsin() {
 		return asin;

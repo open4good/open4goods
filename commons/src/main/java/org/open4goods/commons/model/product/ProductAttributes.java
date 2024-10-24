@@ -11,20 +11,21 @@ import org.springframework.data.annotation.Transient;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class AggregatedAttributes  {
+public class ProductAttributes  {
 
 	/**
 	 * The referentiel attributes
 	 */
 	private Map<ReferentielKey, String> referentielAttributes = new HashMap<>();
 
-	//TODO(p2,design): remove when migration done	
+	//TODO(p1,design): remove when migration done	
 	private Map<String,ProductAttribute> aggregatedAttributes = new HashMap<>();
 	
 	private Map<String,IndexedAttribute> indexed = new HashMap<>();
 
 	
-	//TODO(p2,design): rename	
+	//TODO(p1,design): remove when migration done	
+
 	private Set<ProductAttribute> unmapedAttributes = new HashSet<>();
 	
 	
@@ -34,14 +35,10 @@ public class AggregatedAttributes  {
 	// Instance life cache for fastenning features
 	private Set<ProductAttribute> featuresCache;
 
-
-	// TODO(gof) : remove
-//	private Set<AggregatedFeature> features = new HashSet<>();
-	
 	
 	
 	/**
-	 * Best effort method to return the string val ofan attribute, looking up, by priority in :
+	 * Best effort method to return the string val of an attribute, looking up, by priority in :
 	 * > ReferentielAttributes
 	 * > IndexedAttributes
 	 * > All 
@@ -84,7 +81,6 @@ public class AggregatedAttributes  {
 		return referentielAttributes.size() + indexed.size() + all.size();
 	}
 	
-	//TODO(p1, perf) : maintain a localcache
 	public Set<ProductAttribute> features() {
 		
 		if (this.featuresCache == null) {
@@ -95,7 +91,7 @@ public class AggregatedAttributes  {
 	
 	
 
-	// TODO : performance
+	// TODO(p3,perf) : performance
 	public ProductAttribute attributeByFeatureId(Integer featureId) {
 		if (null == featureId) {
 			return null;
@@ -175,9 +171,9 @@ public class AggregatedAttributes  {
 		return unmapedAttributes;
 	}
 //
-//	public void setUnmapedAttributes(Set<ProductAttribute> unmapedAttributes) {
-//		this.unmapedAttributes = unmapedAttributes;
-//	}
+	public void setUnmapedAttributes(Set<ProductAttribute> unmapedAttributes) {
+		this.unmapedAttributes = unmapedAttributes;
+	}
 //	
 	
 	
