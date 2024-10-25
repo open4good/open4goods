@@ -22,8 +22,17 @@
 <link rel="stylesheet" href="../../vendor/@glidejs/glide/dist/css/glide.theme.min.css">
 -->
 
-<link type="text/css" href="../../css/pixel.css" rel="stylesheet">
-<link type="text/css" href="../../css/custom.css" rel="stylesheet">
+<th:block th:unless="${dev}">
+	<link type="text/css" href="../../css/pixel.css" rel="stylesheet">
+	<link type="text/css" href="../../css/custom.css" rel="stylesheet">
+</th:block>
+
+
+<th:block th:if="${dev}">
+    <link type="text/css" href="../../css/dev/pixel.css" rel="stylesheet">
+    <link type="text/css" href="../../css/dev/custom.css" rel="stylesheet">
+</th:block>
+
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=League+Spartan:wght@500&display=swap" rel="stylesheet">

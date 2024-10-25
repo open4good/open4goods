@@ -12,3 +12,7 @@
 /.cached/
 /logs/*
 /logs/
+/node_modules/
+/.temp/
+/dist/
+/node/
