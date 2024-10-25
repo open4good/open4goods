@@ -311,6 +311,19 @@
 							<directory>data</directory>
 							<followSymlinks>false</followSymlinks>
 						</fileset>
+                        <fileset>
+                            <directory>dist</directory>
+                            <followSymlinks>false</followSymlinks>
+                        </fileset>
+                        <fileset>
+                            <directory>node_modules</directory>
+                            <followSymlinks>false</followSymlinks>
+                        </fileset>
+                        <fileset>
+                            <directory>node_modules</directory>
+                            <followSymlinks>false</followSymlinks>
+                        </fileset>
+                        
 						<fileset>
 							<directory>src/test/resources/last</directory>
 							<followSymlinks>false</followSymlinks>
