@@ -47,10 +47,13 @@ public class IndexedAttribute extends SourcableAttribute{
 
 
 	public static Boolean getBool(String cleanedValue) {
-		String num;
+		String tmp = cleanedValue;
 		// Trying to specialize as boolean
-		num = cleanedValue.toLowerCase();
-		switch (num) {
+		if (null != tmp) {
+			tmp = cleanedValue.toLowerCase();
+		};
+		
+		switch (tmp) {
 		case "true":
 		case "yes":
 		case "oui":
