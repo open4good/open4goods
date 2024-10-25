@@ -20,7 +20,6 @@ import org.open4goods.commons.exceptions.ValidationException;
 import org.open4goods.commons.model.attribute.Attribute;
 import org.open4goods.commons.model.constants.ReferentielKey;
 import org.open4goods.commons.model.data.DataFragment;
-import org.open4goods.commons.model.data.UnindexedKeyValTimestamp;
 import org.open4goods.commons.model.product.AggregatedFeature;
 import org.open4goods.commons.model.product.IndexedAttribute;
 import org.open4goods.commons.model.product.Product;
