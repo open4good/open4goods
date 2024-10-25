@@ -128,7 +128,7 @@ public class DataFragment implements Standardisable, Validable {
 	 * It his built (or completed) at the ui level, when
 	 * got matching with longest ids
 	 */
-	private Set<UnindexedKeyValTimestamp> alternateIds = new HashSet<>();
+	private Set<String> alternateIds = new HashSet<>();
 
 	/**
 	 * The unmapped / uncategorized attributes
@@ -498,7 +498,7 @@ public class DataFragment implements Standardisable, Validable {
 			final String cleaned = IdHelper.getHashedName(val);
 			getReferentielAttributes().put(ReferentielKey.MODEL,cleaned);
 			if (!cleaned.equals(val)) {
-				alternateIds.add(new UnindexedKeyValTimestamp(ReferentielKey.MODEL.toString(),val));
+				alternateIds.add(val.toUpperCase());
 			}
 			//			} catch (final InvalidParameterException e) {
 			//				logger.warn("{} : cannot add brand for {}",e.getMessage(), this);
@@ -1122,13 +1122,6 @@ public class DataFragment implements Standardisable, Validable {
 
 
 
-	public Set<UnindexedKeyValTimestamp> getAlternateIds() {
-		return alternateIds;
-	}
-
-	public void setAlternateIds(Set<UnindexedKeyValTimestamp> alternateIds) {
-		this.alternateIds = alternateIds;
-	}
 
 	public InStock getInStock() {
 		return inStock;
@@ -1237,6 +1230,14 @@ public class DataFragment implements Standardisable, Validable {
 
 	public void setFragmentHashCode(Integer fragmentHashCode) {
 		this.fragmentHashCode = fragmentHashCode;
+	}
+
+	public Set<String> getAlternateIds() {
+		return alternateIds;
+	}
+
+	public void setAlternateIds(Set<String> alternateIds) {
+		this.alternateIds = alternateIds;
 	}
 
 

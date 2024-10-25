@@ -60,7 +60,7 @@ public class IdentityAggregationService extends AbstractAggregationService {
 		/////////////////////////////
 		// Adding alternate models's
 		/////////////////////////////		
-		output.getAkaModels().addAll(input.getAlternateIds().stream().map(e-> e.getValue()).collect(Collectors.toSet()) );
+		output.getAkaModels().addAll(input.getAlternateIds());
 
 		/////////////////////////////
 		// Setting the dates
