@@ -32,6 +32,7 @@ import org.open4goods.commons.model.constants.ResourceType;
 import org.open4goods.commons.model.data.AiDescriptions;
 import org.open4goods.commons.model.data.Resource;
 import org.open4goods.commons.model.data.Score;
+import org.open4goods.commons.model.data.UnindexedKeyValTimestamp;
 import org.open4goods.commons.services.StandardiserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -54,7 +55,7 @@ public class Product implements Standardisable {
 	/**
 	 * Name of the elastic index
 	 */
-	public static final String DEFAULT_REPO = "products-2";
+	public static final String DEFAULT_REPO = "products";
 	
 	/**
 	 * Name of the ecoscore
@@ -95,10 +96,17 @@ public class Product implements Standardisable {
 	private boolean excluded = false;
 	
 	/** The list of other model's known for this product **/
+	// TODO(p1) : remove once migration
+	private Set<String> alternativeModels = new HashSet<>();
+	
+	/** The list of other model's known for this product **/
 	private Set<String> akaModels = new HashSet<>();
 	
 	
 	/** The list of other id's known for this product **/
+	// TODO(p1, design) : Remove once migration
+	private Set<UnindexedKeyValTimestamp> alternativeBrands = new HashSet<>();
+	
 	private Map<String,String> akaBrands = new HashMap<String, String>(); 
 	
 		
@@ -528,7 +536,7 @@ public class Product implements Standardisable {
 
 	
 	/**
-	 * TODO(design,p3) : merge with the one on price()
+	 * TODO : merge with the one on price()
 	 * @return a localised formated duration of when the product was last indexed
 	 */
 	public String ago(Locale locale) {
@@ -658,6 +666,15 @@ public class Product implements Standardisable {
 	//////////////////////////////////////////
 
 	
+	
+
+
+	public Set<UnindexedKeyValTimestamp> getAlternativeBrands() {
+		return alternativeBrands;
+	}
+	public void setAlternativeBrands(Set<UnindexedKeyValTimestamp> alternativeBrands) {
+		this.alternativeBrands = alternativeBrands;
+	}
 
 
 	public Long getId() {
@@ -799,6 +816,14 @@ public class Product implements Standardisable {
 
 	public void setCoverImagePath(String coverImagePath) {
 		this.coverImagePath = coverImagePath;
+	}
+
+	public Set<String> getAlternativeModels() {
+		return alternativeModels;
+	}
+
+	public void setAlternativeModels(Set<String> alternativeModels) {
+		this.alternativeModels = alternativeModels;
 	}
 
 	public boolean isExcluded() {
