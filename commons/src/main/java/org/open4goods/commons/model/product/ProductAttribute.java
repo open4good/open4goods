@@ -1,7 +1,15 @@
 package org.open4goods.commons.model.product;
 
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
+
+import org.apache.commons.lang3.StringUtils;
+import org.open4goods.commons.model.data.UnindexedKeyValTimestamp;
 
 public class ProductAttribute extends SourcableAttribute implements IAttribute {
 
@@ -14,6 +22,20 @@ public class ProductAttribute extends SourcableAttribute implements IAttribute {
 	 * The value of this aggregated attribute
 	 */
 	private String value;
+
+	/**
+	 * The numeric value (if any) of this aggregated attribute
+	 */
+	// TODO(p1, design) : remove after migration
+	private Double numericValue;
+
+	/**
+	 * The collections of conflicts for this attribute
+	 * 	 */
+	// TODO(p1, design) : remove after migration
+	private Set<UnindexedKeyValTimestamp> sources = new HashSet<>();
+
+
 	
 	/**
 	 * The attribute raw rawValue
@@ -94,10 +116,35 @@ public class ProductAttribute extends SourcableAttribute implements IAttribute {
 		this.value = value;
 	}
 
+//	public AttributeType getType() {
+//		return type;
+//	}
+//
+//
+//	public void setType(AttributeType type) {
+//		this.type = type;
+//	}
+
+//	public Set<UnindexedKeyValTimestamp> getSources() {
+//		return sources;
+//	}
+//
+//	public void setSources(Set<UnindexedKeyValTimestamp> sources) {
+//		this.sources = sources;
+//	}
+
 	@Override
 	public String getLanguage() {
 		// TODO : i18n
 		return null;
+	}
+
+	public Double getNumericValue() {
+		return numericValue;
+	}
+
+	public void setNumericValue(Double numericValue) {
+		this.numericValue = numericValue;
 	}
 
 	public Set<Integer> getIcecatTaxonomyIds() {
@@ -108,6 +155,13 @@ public class ProductAttribute extends SourcableAttribute implements IAttribute {
 		this.icecatTaxonomyIds = icecatTaxonomyIds;
 	}
 
+	public Set<UnindexedKeyValTimestamp> getSources() {
+		return sources;
+	}
+
+	public void setSources(Set<UnindexedKeyValTimestamp> sources) {
+		this.sources = sources;
+	}
 
 	public Set<SourcedAttribute> getSource() {
 		return source;

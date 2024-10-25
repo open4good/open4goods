@@ -298,6 +298,45 @@ public class BackupService implements HealthIndicator {
 				
 		// Attributes migration
 		// Purging aggregated
+		p.getAttributes().getAggregatedAttributes().clear();
+		
+		p.getAttributes().getUnmapedAttributes().forEach(e-> {
+			p.getAttributes().getAll().put(e.getName(), e);
+			
+			e.getSources().forEach(s -> {
+				SourcedAttribute sa = new SourcedAttribute();
+				sa.setDataSourcename(s.getKey());
+				sa.setValue(s.getValue());
+				e.addSourceAttribute(sa);
+				
+			});
+			e.getSources().clear();
+			
+		});
+		
+		p.getAttributes().getUnmapedAttributes().clear();
+		
+		
+		
+		// Brands
+		
+		p.getAlternativeBrands().forEach(b -> {
+			
+			if (!b.getKey().equalsIgnoreCase(b.getValue())) {
+				p.getAkaBrands().put(b.getKey(), b.getValue().toUpperCase());				
+			}
+		});
+		
+		
+		// Models
+		p.setAkaModels(p.getAlternativeModels());
+		
+		
+		
+		p.getAttributes().setAggregatedAttributes(null);
+		p.getAttributes().setUnmapedAttributes(null);
+		p.setAlternativeBrands(null);
+		p.setAlternativeModels(null);
 
 		try {
 			aggregationService.sanitize(p);
