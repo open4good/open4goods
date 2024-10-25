@@ -620,15 +620,20 @@ public class CsvIndexationWorker implements Runnable {
 	        }
 	        
 	        // Adding all resources patterns
+	        Set<String> toRemove = new HashSet<String>();
 	        for (Entry<String, String> attr : item.entrySet()) {
 	        	
 				if (ResourceHelper.isResource(attr.getValue())) {
 					Resource r = new Resource(attr.getValue());
 					// TODO (p2, feature) : handle COVERS
 					dataFragment.addResource(r);
-					removeFromSource(item, attr.getKey());
+					toRemove.add( attr.getKey());
 				}
 	        }
+	        toRemove.forEach(e -> {
+	        	removeFromSource(item,e);
+	        	
+	        });
 	        
 	    } catch (ValidationException e) {
 	        logger.warn("Problem while adding resource for {}", item);
