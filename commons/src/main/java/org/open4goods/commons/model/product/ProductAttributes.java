@@ -18,16 +18,8 @@ public class ProductAttributes  {
 	 */
 	private Map<ReferentielKey, String> referentielAttributes = new HashMap<>();
 
-	//TODO(p1,design): remove when migration done	
-	private Map<String,ProductAttribute> aggregatedAttributes = new HashMap<>();
-	
 	private Map<String,IndexedAttribute> indexed = new HashMap<>();
 
-	
-	//TODO(p1,design): remove when migration done	
-
-	private Set<ProductAttribute> unmapedAttributes = new HashSet<>();
-	
 	
 	private Map<String, ProductAttribute> all = new HashMap<>();
 
@@ -74,7 +66,6 @@ public class ProductAttributes  {
 		return "ref:"+referentielAttributes.size()+ " , indexed:"+indexed.size() +" , all:"+all.size();
 	}
 	
-	
 
 	public int count() {
 		
@@ -114,16 +105,6 @@ public class ProductAttributes  {
 				));
 	}
 	
-	
-	
-
-//	public Set<AggregatedFeature> getFeatures() {
-//		return features;
-//	}
-//
-//	public void setFeatures(Set<AggregatedFeature> features) {
-//		this.features = features;
-//	}
 
 
 
@@ -158,27 +139,5 @@ public class ProductAttributes  {
 	public void setAll(Map<String, ProductAttribute> all) {
 		this.all = all;
 	}
-
-	public Map<String, ProductAttribute> getAggregatedAttributes() {
-		return aggregatedAttributes;
-	}
-
-	public void setAggregatedAttributes(Map<String, ProductAttribute> aggregatedAttributes) {
-		this.aggregatedAttributes = aggregatedAttributes;
-	}
-
-	public Set<ProductAttribute> getUnmapedAttributes() {
-		return unmapedAttributes;
-	}
-//
-//	public void setUnmapedAttributes(Set<ProductAttribute> unmapedAttributes) {
-//		this.unmapedAttributes = unmapedAttributes;
-//	}
-//	
-
-	public void setUnmapedAttributes(Set<ProductAttribute> unmapedAttributes) {
-		this.unmapedAttributes = unmapedAttributes;
-	}
-	
 	
 }
