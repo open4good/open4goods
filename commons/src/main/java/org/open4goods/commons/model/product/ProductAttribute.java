@@ -1,15 +1,7 @@
 package org.open4goods.commons.model.product;
 
-import java.util.Comparator;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
-
-import org.apache.commons.lang3.StringUtils;
-import org.open4goods.commons.model.data.UnindexedKeyValTimestamp;
 
 public class ProductAttribute extends SourcableAttribute implements IAttribute {
 
@@ -28,13 +20,6 @@ public class ProductAttribute extends SourcableAttribute implements IAttribute {
 	 */
 	// TODO(p1, design) : remove after migration
 	private Double numericValue;
-
-	/**
-	 * The collections of conflicts for this attribute
-	 * 	 */
-	// TODO(p1, design) : remove after migration
-	private Set<UnindexedKeyValTimestamp> sources = new HashSet<>();
-
 
 	
 	/**
@@ -153,14 +138,6 @@ public class ProductAttribute extends SourcableAttribute implements IAttribute {
 
 	public void setIcecatTaxonomyIds(Set<Integer> icecatTaxonomyIds) {
 		this.icecatTaxonomyIds = icecatTaxonomyIds;
-	}
-
-	public Set<UnindexedKeyValTimestamp> getSources() {
-		return sources;
-	}
-
-	public void setSources(Set<UnindexedKeyValTimestamp> sources) {
-		this.sources = sources;
 	}
 
 	public Set<SourcedAttribute> getSource() {
