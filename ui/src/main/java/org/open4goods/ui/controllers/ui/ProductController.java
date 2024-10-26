@@ -180,7 +180,7 @@ public class ProductController  {
 			Long globalBestId = data.getRanking().getGlobalBest();
 			Long globalBetter = data.getRanking().getGlobalBetter();
 			
-			if (null != globalBestId) {
+			if (null != globalBestId && globalBestId.longValue() !=0) {
 				Product best = null;
 				try {
 					best = productRepository.getById(globalBestId);
@@ -191,7 +191,7 @@ public class ProductController  {
 				mv.addObject("best", best);
 			}
 			
-			if (null != globalBetter) {
+			if (null != globalBetter && globalBetter.longValue() != 0) {
 				Product better = null;
 				try {
 					better = productRepository.getById(globalBetter);
