@@ -148,7 +148,7 @@ public class CsvIndexationWorker implements Runnable {
 		String safeName = IdHelper.azCharAndDigitsPointsDash(dsProperties.getName()).toLowerCase();
 		Logger dedicatedLogger = csvService.createDatasourceLogger(safeName, dsProperties, logsFolder + "/feeds/");
 
-		dedicatedLogger.info("STARTING CRAWL OF {}", dsProperties);
+		dedicatedLogger.warn("STARTING CRAWL OF {} - {}", dsProperties.getFeedKey(), dsProperties);
 
 		final HtmlDataSourceProperties crawlConfig = dsProperties.getCsvDatasource().getWebDatasource();
 		DataFragmentWebCrawler crawler = null;
@@ -498,7 +498,7 @@ public class CsvIndexationWorker implements Runnable {
 	            
 	        }
 	    }
-	    if (null == dataFragment.getPrice().getPrice()) {
+	    if (null == dataFragment.getPrice() || null == dataFragment.getPrice().getPrice()) {
 	    	logger.warn("No price extracted for {}",item);
 	    }
 	    
