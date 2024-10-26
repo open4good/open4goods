@@ -753,21 +753,23 @@ public class DataFragment implements Standardisable, Validable {
 		// Smart update, time consuming but necessary.
 		// TODO : Involve on a map on the new model
 		
-		Resource existing = resources.stream().filter(e -> e.equals(resource)).findFirst().orElse(null);
-		
-		if (null == existing) {
-			logger.info("Adding new resource : {}",resource);
-			resources.add(resource);
-		} else {
-			logger.info("Updating existing resource : {}",resource);
-			// Smart update
-			existing.setTags(resource.getTags());
-			existing.setHardTags(resource.getHardTags());
-			existing.setDatasourceName(resource.getDatasourceName());
-			
 			resources.remove(resource);
-			resources.add(existing);
-		}
+			resources.add(resource);
+		
+//		
+//		Resource existing = resources.stream().filter(e -> e.getUrl().equals(resource.getUrl()) ).findFirst().orElse(null);
+//		
+//		if (null == existing) {
+//			logger.info("Adding new resource : {}",resource);
+//			resources.add(resource);
+//		} else {
+//			logger.info("Updating existing resource : {}",resource);
+//			// Smart update
+//			existing.setTags(resource.getTags());
+//			existing.setHardTags(resource.getHardTags());
+//			existing.setDatasourceName(resource.getDatasourceName());
+//			
+//		}
 		
 	}
 
