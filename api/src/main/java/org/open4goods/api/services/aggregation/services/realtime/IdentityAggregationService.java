@@ -67,10 +67,10 @@ public class IdentityAggregationService extends AbstractAggregationService {
 		/////////////////////////////
 		
 		// The last update
-		if ( output.getLastChange() < input.getLastIndexationDate()) {
+		if ( output.getLastChange() <= input.getLastIndexationDate()) {
 			output.setLastChange(input.getLastIndexationDate());
 		} else {
-			dedicatedLogger.error("Data Fragment has an update date in the futur ! : {}",input);
+			dedicatedLogger.warn("Data Fragment has an update date in the futur. Probable erasure due to same gtin in different datasources in the same bulk ! : {}",input);
 		}
 
 	
