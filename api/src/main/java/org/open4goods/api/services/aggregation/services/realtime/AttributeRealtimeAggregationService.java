@@ -347,8 +347,8 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 						try {
 							long existingGtin = Long.parseLong(existing);
 							long newGtin = Long.parseLong(value);
-							if (existingGtin == newGtin) {
-								dedicatedLogger.error("Overriding GTIN from {} to {}", existing, value);
+							if (existingGtin != newGtin) {
+								dedicatedLogger.error("Overriding GTIN from {} to {}", existing, newGtin);
 								output.getAttributes().getReferentielAttributes().put(ReferentielKey.GTIN, value);
 							} else {
 								dedicatedLogger.error("Cannot override GTIN from {} to {}", existing, value);
