@@ -155,7 +155,7 @@ public class OpenDataService implements HealthIndicator {
 	 * This method is scheduled to run periodically.
 	 * TODO(p3,conf) : Schedule in conf
 	 */
-	@Scheduled(initialDelay = 1000L * 3600, fixedDelay = 1000L * 3600 * 24 * 7)
+	@Scheduled(initialDelay = 1000L * 3600 * 8, fixedDelay = 1000L * 3600 * 24 * 7)
 	@Timed(value = "OpenDataService.generateOpendata.time", description = "Time taken to generate the OpenData ZIP files", extraTags = {"service", "OpenDataService"})
 	public void generateOpendata() {
 
