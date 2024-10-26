@@ -51,6 +51,8 @@ public class IndexedAttribute extends SourcableAttribute{
 		// Trying to specialize as boolean
 		if (null != tmp) {
 			tmp = cleanedValue.toLowerCase();
+		} else {
+			return null;
 		};
 		
 		switch (tmp) {
