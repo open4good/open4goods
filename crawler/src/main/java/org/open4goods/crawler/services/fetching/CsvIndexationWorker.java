@@ -487,17 +487,22 @@ public class CsvIndexationWorker implements Runnable {
 	                    price.setPriceValue(value, Locale.forLanguageTag(config.getLanguage().toUpperCase()));
 	                    price.setCurrency(csvProperties.getCurrency());
 	                    dataFragment.setPrice(price);
+	                    // Delete from source
+	                    removeFromSource(item, priceColumn);
 	                    break;
 	                }
 	            } catch (Exception e) {
 	                handlePriceFallback(dataFragment, item, priceColumn, config, logger);
 	            }
 	            
-                // Delete from source
-                removeFromSource(item, priceColumn);
 	            
 	        }
 	    }
+	    if (null == dataFragment.getPrice().getPrice()) {
+	    	logger.warn("No price extracted for {}",item);
+	    }
+	    
+	    
 	}
 
 	/**
@@ -854,6 +859,10 @@ public class CsvIndexationWorker implements Runnable {
 	private void enforceAffiliatedUrl(DataFragment dataFragment) {
 	    if (!StringUtils.isEmpty(dataFragment.getAffiliatedUrl())) {
 	        dataFragment.setUrl(dataFragment.getAffiliatedUrl());
+	    }
+	    
+	    if (StringUtils.isEmpty(dataFragment.getAffiliatedUrl())) {
+	    	dataFragment.setAffiliatedUrl(dataFragment.getUrl());
 	    }
 	}
 
