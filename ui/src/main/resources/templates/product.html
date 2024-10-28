@@ -61,9 +61,9 @@
 		}
 
 		.active-period-btn {
-			background-color: #166d12 !important;
+			background-color: #253154 !important;
 			color: white !important;
-			border: 2px solid #1c8418 !important;
+			border: 2px solid #28365d !important;
 		}
 
 		.btn:focus {
@@ -88,7 +88,7 @@
 
         <div  class="section section-lg pt-5">
             <div class="container-fluid">
-	
+
 								<h1 th:unless="${product.vertical}" class="h1 title text-uppercase text-center"
 									th:text="${product.bestName()}"></h1>
 
@@ -121,7 +121,7 @@
 
 
 								<div class="row mt-3">
-						
+
 
 
 
@@ -147,7 +147,7 @@
 
                 <!--/* Attributes */-->
                 <th:block th:insert="~{inc/product-unmatched-attributes.html}"></th:block>
-            
+
 
 											<div class="card shadow mb-3 my-3">
 												<div class="card-header">
@@ -210,21 +210,21 @@
 
 													<script th:inline="javascript">
 												/*<![CDATA[*/
-												
+
 												    const jsonObject = /*[[${raw}]]*/ '';
-												        	    
+
 												/*]]>*/
-												
-												
+
+
 										        // Stringify and format the JSON object
 										        const jsonString = JSON.stringify(jsonObject, null, 2);
-										
+
 										        // Insert formatted JSON into the <code> element
 										        document.getElementById('json-output').textContent = jsonObject;
-										
+
 										        // Highlight the JSON
 										        hljs.highlightAll();
-										        
+
 											</script>
 
 												</div>
@@ -237,12 +237,12 @@
 
 								</div>
 					</div>
-		</div>  
+		</div>
 </main>
 
-<!--/* Product footer */-->				
+<!--/* Product footer */-->
 <th:block th:insert="~{inc/footer.html}"></th:block>
-    
+
 
     <!-- Core -->
 <script src="../../vendor/@popperjs/core/dist/umd/popper.min.js"></script>
@@ -255,7 +255,7 @@
 <script src="../../vendor/vivus/dist/vivus.min.js"></script>
 
 
-<!-- 
+<!--
 <script src="../../vendor/headroom.js/dist/headroom.min.js"></script>
 
 
@@ -268,7 +268,7 @@
 <script src="../../vendor/vanillajs-datepicker/dist/js/datepicker.min.js"></script>
 <script async defer src="https://buttons.github.io/buttons.js"></script>
 <script src="../../vendor/@glidejs/glide/dist/glide.min.js"></script>
- --> 
+ -->
 
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -418,6 +418,11 @@
 
 		// Initialiser le graphique des prix neufs seulement s'il y a des données
 		if (newPriceHistory.length > 0) {
+			let defaultPeriod = '3months';
+			if (!hasDataInPeriod(newPriceHistory, defaultPeriod)) {
+				defaultPeriod = 'max';
+			}
+
 			const newPriceCtx = document.getElementById('newPriceChart').getContext('2d');
 			const newPriceChart = new Chart(newPriceCtx, {
 				type: 'line',
@@ -425,7 +430,7 @@
 					datasets: [{
 						label: 'Prix Neuf',
 						fill: true,
-						data: getFilteredData(newPriceHistory, '3months'),
+						data: getFilteredData(newPriceHistory, defaultPeriod),
 						backgroundColor: '#4cb1ff',
 						borderColor: '#41a3ef',
 						borderWidth: 2,
@@ -465,6 +470,18 @@
 				}
 			});
 
+			// Définir le bouton actif
+			setActiveButton(document.getElementById('btn-new-' + defaultPeriod), 'new');
+
+			// Désactiver les boutons sans données
+			['15days', '3months', '6months'].forEach(period => {
+				if (!hasDataInPeriod(newPriceHistory, period)) {
+					const button = document.getElementById('btn-new-' + period);
+					button.disabled = true;
+					button.classList.add('disabled');
+				}
+			});
+
 			// Gestionnaires d'événements pour les boutons du graphique "Prix Neuf"
 			document.getElementById('btn-new-15days').addEventListener('click', function () {
 				updateChart(newPriceChart, newPriceHistory, '15days');
@@ -485,13 +502,15 @@
 				updateChart(newPriceChart, newPriceHistory, 'max');
 				setActiveButton(this, 'new');
 			});
-
-			// Définir le bouton '3 mois' comme actif par défaut
-			setActiveButton(document.getElementById('btn-new-3months'), 'new');
 		}
 
 		// Initialiser le graphique des prix d'occasion seulement s'il y a des données
 		if (occasionPriceHistory.length > 0) {
+			let defaultPeriod = '3months';
+			if (!hasDataInPeriod(occasionPriceHistory, defaultPeriod)) {
+				defaultPeriod = 'max';
+			}
+
 			const usedPriceCtx = document.getElementById('usedPriceChart').getContext('2d');
 			const usedPriceChart = new Chart(usedPriceCtx, {
 				type: 'line',
@@ -499,7 +518,7 @@
 					datasets: [{
 						label: 'Prix d\'Occasion',
 						fill: true,
-						data: getFilteredData(occasionPriceHistory, '3months'),
+						data: getFilteredData(occasionPriceHistory, defaultPeriod),
 						backgroundColor: '#ff6384',
 						borderColor: '#fa486e',
 						borderWidth: 2,
@@ -539,6 +558,18 @@
 				}
 			});
 
+			// Définir le bouton actif
+			setActiveButton(document.getElementById('btn-used-' + defaultPeriod), 'used');
+
+			// Désactiver les boutons sans données
+			['15days', '3months', '6months'].forEach(period => {
+				if (!hasDataInPeriod(occasionPriceHistory, period)) {
+					const button = document.getElementById('btn-used-' + period);
+					button.disabled = true;
+					button.classList.add('disabled');
+				}
+			});
+
 			// Gestionnaires d'événements pour les boutons du graphique "Prix d'Occasion"
 			document.getElementById('btn-used-15days').addEventListener('click', function () {
 				updateChart(usedPriceChart, occasionPriceHistory, '15days');
@@ -559,15 +590,17 @@
 				updateChart(usedPriceChart, occasionPriceHistory, 'max');
 				setActiveButton(this, 'used');
 			});
-
-			// Définir le bouton '3 mois' comme actif par défaut
-			setActiveButton(document.getElementById('btn-used-3months'), 'used');
 		}
 
 		// Fonction pour mettre à jour le graphique avec les données filtrées
 		function updateChart(chart, data, period) {
 			chart.data.datasets[0].data = getFilteredData(data, period);
 			chart.update();
+		}
+
+		// Fonction pour vérifier la présence de données dans une période donnée
+		function hasDataInPeriod(data, period) {
+			return getFilteredData(data, period).length > 0;
 		}
 
 		// Fonction pour définir visuellement le bouton actif
