@@ -47,7 +47,6 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 	@Override
 	public void onProduct(Product data, VerticalConfig vConf) throws AggregationSkipException {
 
-		Set<ProductAttribute> attrs = new HashSet<ProductAttribute>();
 		//////////////////////////////////////////
 		// Cleaning attributes that must be discarded
 		//////////////////////////////////////////
@@ -58,6 +57,10 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 			data.getAttributes().getAll().remove(e);
 		});
 
+		// TODO(p3,design) : Some kind of legacy bug, some attributes have to many sources. Hope this is a done bug..
+		data.getAttributes().getAll().keySet().removeIf(e-> data.getAttributes().getAll().get(e).sourcesCount() > 10);
+		
+		
 		//////////////////////////////////////////////////////////////////////////
 		// Checking if all mandatory attributes are present for this product
 		//////////////////////////////////////////////////////////////////////////
