@@ -12,9 +12,9 @@
 
 		<div class="card shadow border-gray-300 text-center">
 			<div class="row align-items-center">
-				<!-- Première colonne : Messages -->
+				<!-- First column: Messages -->
 				<div th:attr="class='col-md-' + (${hasNewPriceHistory or hasOccasionPriceHistory} ? 4 : 12)">
-					<!-- Contenu des messages -->
+					<!-- Content of messages -->
 					<th:block>
 						<!-- Messages -->
 						<div class="m-4">
@@ -43,10 +43,10 @@
 									</div>
 
 									<div th:unless="${newTrend.historicalLowestPrice != 0}" class="col-12 col-md-4 mt-4 mt-md-0 text-md-right">
-										<span class="d-block my-3">
-											<span class="h3 fw-bold" th:text="${#numbers.formatDecimal(newTrend.historicalVariation == null ? 0 : newTrend.historicalVariation, 0, 1)}"></span>
-											<span class="align-baseline font-medium">€</span>
-										</span>
+                                        <span class="d-block my-3">
+                                            <span class="h3 fw-bold" th:text="${#numbers.formatDecimal(newTrend.historicalVariation == null ? 0 : newTrend.historicalVariation, 0, 1)}"></span>
+                                            <span class="align-baseline font-medium">€</span>
+                                        </span>
 									</div>
 								</div>
 							</div>
@@ -55,18 +55,18 @@
 
 					<div class="card-shadow m-4">
 						<a href="#markerEcoscore" class="text-center btn btn-primary w-100">
-        <span class="me-1">
-            <span class="fas fa-euro"></span>
-        </span>
+                            <span class="me-1">
+                                <span class="fas fa-euro"></span>
+                            </span>
 							Meilleur prix
 						</a>
 					</div>
 				</div>
 
-				<!-- Seconde colonne : Graphiques -->
+				<!-- Second column: Charts -->
 				<div class="col-md-8 mt-5 mt-md-0" th:if="${hasNewPriceHistory or hasOccasionPriceHistory}">
 					<div class="row">
-						<!-- Graphique Prix Neuf -->
+						<!-- New Price Chart -->
 						<div th:if="${hasNewPriceHistory}" th:attr="class='col-md-' + ${colSize}">
 							<canvas class="mt-4" id="newPriceChart"></canvas>
 							<div class="text-center">
@@ -78,7 +78,7 @@
 								</div>
 							</div>
 						</div>
-						<!-- Graphique Prix d'Occasion -->
+						<!-- Used Price Chart -->
 						<div th:if="${hasOccasionPriceHistory}" th:attr="class='col-md-' + ${colSize}">
 							<canvas class="mt-4" id="usedPriceChart"></canvas>
 							<div class="text-center">
