@@ -28,23 +28,24 @@ public class Attribute implements Validable,IAttribute {
 	/**
 	 * The attribute name
 	 */
-	@Field(index = true, store = false, type = FieldType.Text)
 	private String name;
 
 	
 	/**
 	 * The attribute language, if pertinent
 	 */
-	@Field(index = true, store = false, type = FieldType.Keyword)
 	private String language;
 
 	/**
 	 * The attribute raw rawValue
 	 */
-	@Field(index = false, store = false, type = FieldType.Keyword)
 	private String rawValue;
 
 
+	/***
+	 * The optionl icecat feature id 
+	 */
+	private Integer icecatFeatureId;
 	
 	public Attribute() {
 
@@ -301,6 +302,18 @@ public class Attribute implements Validable,IAttribute {
 	@Override
 	public String getValue() {
 		return rawValue;
+	}
+
+	public Integer getIcecatFeatureId() {
+		return icecatFeatureId;
+	}
+
+	public void setIcecatFeatureId(Integer icecatFeatureId) {
+		this.icecatFeatureId = icecatFeatureId;
+	}
+
+	public static Logger getLogger() {
+		return logger;
 	}
 
 

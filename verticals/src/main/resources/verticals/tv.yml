@@ -22,19 +22,40 @@ icecatTaxonomyId: 1584
 ##############################################################################
 # Will associate to this vertical if one of the following categorie is present for the product  
 matchingCategories:
-- "HIFI>TELEVISION"
-#Buggy with fnac
-#- "APPAREILS ELECTRONIQUES > VIDEO > TELEVISEURS"
-- "TV, VIDEO, HOME CINEMA>TELEVISEUR>TV LED"
-- "TV - VIDEO - SON > TELEVISEUR > TELEVISEUR LED"
-- "TV & VIDEO & HOME CINEMA > TELEVISEUR > TV LED/LCD"
-- "TV, VIDEO, HOME CINEMA / TELEVISEUR / TV LED"
-- "TV"
-- "HIGH-TECH > TELEVISION, HI-FI > TELEVISION"
+#    - TV
+#    - HIFI | TELEVISION
+#    - TV & VIDEO & HOME CINEMA TELEVISEUR | APPAREILS ELECTRONIQUES > VIDEO > TELEVISEURS
+    - TV - VIDEO - SON | TV - VIDEO - SON > TELEVISEUR > TELEVISEUR LED | TELEVISEUR | TELEVISEUR LED
+#    - TV, VIDEO, HOME CINEMA / TELEVISEUR / TV LED | TV, VIDEO, HOME CINEMA>TELEVISEUR>TV LED | TELEVISEUR | TV LED
+    - TV - VIDEO - SON > TELEVISEUR > TELEVISEUR LED
+    - TV, VIDEO, HOME CINEMA / TELEVISEUR / TV LED
+#    - TV & VIDEO & HOME CINEMA | TV & VIDEO & HOME CINEMA > TELEVISEUR > TV LED/LCD | TELEVISEUR | TV LED/LCD
+    - HIGH-TECH >  TELEVISION, HI-FI >  TELEVISION
+#    - TV, VIDEO, HOME CINEMA | TELEVISEUR
+    - TV & VIDEO & HOME CINEMA > TELEVISEUR > TV LED/LCD
+    - TV, VIDEO, HOME CINEMA | TV, VIDEO, HOME CINEMA>TELEVISEUR>TV LED | TELEVISEUR | TV, VIDEO, HOME CINEMA
+    - TV, VIDEO, HOME CINEMA>TELEVISEUR>TV LED
+    - TV, VIDEO, HOME CINEMA / TELEVISEUR / TV OLED | TV, VIDEO, HOME CINEMA>TELEVISEUR>TV OLED | TELEVISEUR | TV OLED
+    - TV - VIDEO - SON > TELEVISEUR > TELEVISEUR LCD
+    - TV & VIDEO & HOME CINEMA | TV & VIDEO & HOME CINEMA > TELEVISEUR > OLED TV | TELEVISEUR | OLED TV
+    - TV, VIDEO, HOME CINEMA / TELEVISEUR / TV OLED
+    - 9 | TELEVISIONS | TV & MONITEUR > TV
+    - TV - VIDEO - SON | TV - VIDEO - SON > TELEVISEUR > TELEVISEUR LCD | TELEVISEUR | TELEVISEUR LCD
+    - TV, VIDEO, HOME CINEMA | TV, VIDEO, HOME CINEMA>TELEVISEUR>TV OLED | TELEVISEUR | TV, VIDEO, HOME CINEMA
+    - HIGH TECH | HIGH-TECH > TV - CINEMA > TELEVISEURS - TELEVISIONS - TV > TV HISENSE | TV - CINEMA | TELEVISEURS - TELEVISIONS - TV
+    - HIGH-TECH | HIGH-TECH>TV - CINEMA>TELEVISEURS - TELEVISIONS - TV>TV HISENSE | TV - CINEMA | TELEVISEURS - TELEVISIONS - TV
+    - HIGH TECH | HIGH-TECH > MARQUES HIGH-TECH > SAMSUNG HIGH-TECH > SAMSUNG TV & AUDIO > SMART TV | MARQUES HIGH-TECH | SAMSUNG HIGH-TECH
+    - HIGH TECH | HIGH-TECH > TV - CINEMA > TELEVISEURS - TELEVISIONS - TV > TV LG | TV - CINEMA | TELEVISEURS - TELEVISIONS - TV
+    - HIGH-TECH | HIGH-TECH>MARQUES HIGH-TECH>SAMSUNG HIGH-TECH>SAMSUNG TV & AUDIO>SMART TV | MARQUES HIGH-TECH | SAMSUNG HIGH-TECH
+    - HIGH-TECH | HIGH-TECH>TV - CINEMA>TELEVISEURS - TELEVISIONS - TV>TV LG | TV - CINEMA | TELEVISEURS - TELEVISIONS - TV
+
 
 # The categories that disengage a mapping in this vertical  
 unmatchingCategories:
 - "HIFI>APPAREILS-PHOTO"
+- "TV - VIDEO - SON | TV - VIDEO - SON > ACCESSOIRES TV - VIDEO - SON > FIXATION TV - SUPPORT TV - SUPPORT MURAL POUR TV | ACCESSOIRES TV - VIDEO - SON | FIXATION TV - SUPPORT TV - SUPPORT MURAL POUR TV"
+- "ACCESSOIRES DE TV"
+- "TV, VIDEO, HOME CINEMA | TV, VIDEO, HOME CINEMA>TELEVISEUR>SUPPORT MURAL POUR ECRAN PLAT | TELEVISEUR | TV, VIDEO, HOME CINEMA"
 
 #####################################################################################################################################
 # I18N CONFIGURATION
@@ -101,7 +122,7 @@ i18n:
         override: false
         pauseDurationMs: 1000
         rootPrompt: |
-            analyse technique, fonctionnelle et écologique d'un téléviseur.
+            analyse technique, fonctionnelle et écologique d'un téléviseur, textes en français uniquement.
              
             Caractéristiques : 
             [(${p.caracteristics()})]
@@ -207,8 +228,10 @@ attributesConfig:
    
        asRating: false
        synonyms:
-         rakuten.com:      
-         - "DIAGONALE"
+         all:
+           - "DIAGONALE_POUCES" 
+#         rakuten.com:      
+#           - "DIAGONALE"
    
        parser:
          normalize: true
@@ -233,8 +256,8 @@ attributesConfig:
        asSearchFilter: false       
        synonyms:
          all:      
-         - "TYPE DE PRODUIT"
-         - "TV_DEFINITION"
+         - "TYPssE DE PRODUIT"
+         - "TssV_DEFINITION"
        mappings:
          "TV OLED" : "OLED"
          "TV QLED" : "QLED"

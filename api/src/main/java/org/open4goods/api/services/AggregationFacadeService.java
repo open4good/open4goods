@@ -138,7 +138,7 @@ public class AggregationFacadeService {
 			logger.error("Skipping product during batched scoring : ",e);
 		}
 		logger.info("Score batching : indexing {} products", productBag.size());
-		dataRepository.index(productBag);
+		dataRepository.addToFullindexationQueue(productBag);
 
 	}
 	
@@ -199,16 +199,27 @@ public class AggregationFacadeService {
 	
 	
 	/**
+	 * Launch the sanitisation of one product and save
+	 * @param product
+	 * @throws AggregationSkipException 
+	 */
+	// TODO(p3,design) : not a good design
+	public void sanitizeAndSave(Product product) throws AggregationSkipException {
+		sanitize(product);
+	    dataRepository.forceIndex(product);
+		logger.info("done : Sanitisation batching for {}", product);		
+	}
+	
+	/**
 	 * Launch the sanitisation of one product
 	 * @param product
 	 * @throws AggregationSkipException 
 	 */
-	public void sanitizeOne(Product product) throws AggregationSkipException {
+	public void sanitize(Product product) throws AggregationSkipException {
 		logger.info("started : Sanitisation batching for {}",product);
 		StandardAggregator batchAgg = getFullSanitisationAggregator();
 
 	    batchAgg.onProduct(product);
-	    dataRepository.forceIndex(product);
 		logger.info("done : Sanitisation batching for {}", product);		
 	}
 	

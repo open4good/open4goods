@@ -32,8 +32,6 @@ import org.open4goods.commons.model.constants.ResourceType;
 import org.open4goods.commons.model.data.AiDescriptions;
 import org.open4goods.commons.model.data.Resource;
 import org.open4goods.commons.model.data.Score;
-import org.open4goods.commons.model.data.UnindexedKeyVal;
-import org.open4goods.commons.model.data.UnindexedKeyValTimestamp;
 import org.open4goods.commons.services.StandardiserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,19 +43,26 @@ import org.springframework.data.elasticsearch.annotations.Setting;
 import org.springframework.data.elasticsearch.annotations.WriteTypeHint;
 
 @Document(indexName = Product.DEFAULT_REPO, alwaysWriteMapping = true, createIndex = true, writeTypeHint = WriteTypeHint.FALSE, dynamic = Dynamic.FALSE)
-//@RedisHash(value=Product.DEFAULT_REPO, timeToLive = ProductRepository.VALID_UNTIL_DURATION)
 @Setting( settingPath = "/product-settings.json")
 @Mapping(mappingPath = "/product-mappings.json")
-// TODO : Disabling to see/test  if a clean jackson serial
-//@JsonIgnoreProperties(ignoreUnknown = true)
 public class Product implements Standardisable {
+
+
 
 	private final static Logger logger = LoggerFactory.getLogger(Product.class);
 
+	/**
+	 * Name of the elastic index
+	 */
 	public static final String DEFAULT_REPO = "products";
+	
+	/**
+	 * Name of the ecoscore
+	 */
+	private static final String ECOSCORE_NAME = "ECOSCORE";
 
 	// Should not be used 
-	// If true, the referentiel attribute will be updated if a shortest version exists in alternativeModels
+	// If true, the referentiel attribute will be updated if a shortest version exists in akaModels
 	private static final boolean FORCE = false;
 
 	/**
@@ -90,27 +95,26 @@ public class Product implements Standardisable {
 	private boolean excluded = false;
 	
 	/** The list of other model's known for this product **/
-	private Set<String> alternativeModels = new HashSet<>();
+	private Set<String> akaModels = new HashSet<>();
 	
 	
 	/** The list of other id's known for this product **/
-	private Set<UnindexedKeyValTimestamp> alternativeBrands = new HashSet<>();
+	private Map<String,String> akaBrands = new HashMap<String, String>(); 
+	
 		
 	/** Namings informations for this product **/
 	private ProductTexts names = new ProductTexts();
 
 	private Set<String> offerNames = new HashSet<>();
 
+	private ProductAttributes attributes = new ProductAttributes();
 	
-	//	@Field(index = false, store = false, type = FieldType.Object)
-	//	/** The comments, aggregated and nlp processed **/
-	//	private AggregatedComments comments = new AggregatedComments();
-
-	private AggregatedAttributes attributes = new AggregatedAttributes();
-
 	private AggregatedPrices price = new AggregatedPrices();
 
-	private Set<String> datasourceNames = new HashSet<>();
+	/**
+	 * The datasources participating to this product, with a hashcode used for fastening data processing (by skipping already processed items)
+	 */
+	private Map<String,Integer> datasourceCodes = new HashMap<>();
 	
 	/**
 	 * The media resources for this data
@@ -139,9 +143,6 @@ public class Product implements Standardisable {
 	 */
 	private Set<String> datasourceCategories = new HashSet<>();
 
-	// TODO(p1, design) : Remove on next import / export, update backupservice.translate
-	private Set<UnindexedKeyVal> mappedCategories = new HashSet<>();
-	
 	/**
 	 * The product category path by datasources
 	 */
@@ -206,6 +207,14 @@ public class Product implements Standardisable {
 	}
 
 	
+	/**
+	 * Return a set containing AKA brands if not matching the set brand 
+	 * @return
+	 */
+	public Set<String> akaBrands () {
+		return akaBrands.values().stream().filter(e-> !e.equals(brand())).collect(Collectors.toSet());
+		
+	}
 	
 	public String longestOfferName() {
 		return offerNames.stream().max (Comparator.comparingInt(String::length)).get();
@@ -237,8 +246,7 @@ public class Product implements Standardisable {
 	public List<Score> realScores() {
 		List<Score> ret = scores.values().stream()
 				.filter(e -> !e.getVirtual())
-				// TODO : Const
-				.filter(e -> !e.getName().equals("ECOSCORE"))
+				.filter(e -> !e.getName().equals(ECOSCORE_NAME))
 				.sorted( (o1, o2) -> o2.getRelativ().getValue().compareTo(o1.getRelativ().getValue()))
 				.toList();
 		
@@ -250,8 +258,7 @@ public class Product implements Standardisable {
 	 * @return the ecoscore or null
 	 */
 	public Score ecoscore() {
-		// TODO : const
-		return scores.get("ECOSCORE");
+		return scores.get(ECOSCORE_NAME);
 	}
 	
 		
@@ -263,9 +270,7 @@ public class Product implements Standardisable {
 			sb.append(" - ").append(attr.getKey().toString()).append(" : ").append(attr.getValue()).append("\n");
 		}
 		
-
-		for (AggregatedAttribute attr : attributes.getUnmapedAttributes()) {
-			
+		for (ProductAttribute attr : attributes.getAll().values()) {
 			if (attr.getIcecatTaxonomyIds().size() > 0) {
 				sb.append(" - ").append(attr.getName().toString()).append(" : ").append(attr.getValue()).append("\n");
 			}
@@ -313,14 +318,13 @@ public class Product implements Standardisable {
 	
 	
 	public List<Resource> unprocessedimages() {
-		// TODO Auto-generated method stub
 		return resources.stream()
 				.filter(e-> e.getUrl() != null)
 				.filter(e -> e.getUrl().endsWith(".jpg") || e.getUrl().endsWith(".png") || e.getUrl().endsWith(".jpeg"))
 				.toList();
 	}
 	
-	// TODO : Should be outsided / cached
+	// TODO(p2,perf) : Should be cached
 	public List<Resource> images() {
 	    // Filter resources of type IMAGE
 	    List<Resource> images = resources.stream()
@@ -351,7 +355,7 @@ public class Product implements Standardisable {
 	    // Then, add the other images by groups
 	    otherGroupsId.forEach(otherGroupId -> ret.add(bestByGroup(images, otherGroupId)));
 	    
-	    // TODO : perf : null check Could be avoided
+	    // TODO(p3,perf) : perf : null check could be avoided
 	    return ret.stream().filter(e-> null != e).toList();
 	}
 
@@ -382,42 +386,12 @@ public class Product implements Standardisable {
 		return price == null ? null : price.getMinPrice();
 	}
 
-	//	/**
-	//	 * Return ratings having specific tags
-	//	 *
-	//	 * @param tag
-	//	 * @return
-	//	 */
-	//	public Set<SourcedRating> ratingsByTag(final String tag) {
-	//
-	//		if (null == tag || null == ratings) {
-	//			return null;
-	//		}
-	//
-	//		return ratings.stream().filter(e -> e.getTags().contains(tag)).collect(Collectors.toSet());
-	//	}
-
-	//	/**
-	//	 * Return a rating having specific tags
-	//	 *
-	//	 * @param tag
-	//	 * @return
-	//	 */
-	//	public SourcedRating ratingByTag(final String tag) {
-	//
-	//		if (null == tag || null == ratings) {
-	//			return null;
-	//		}
-	//
-	//		return ratings.stream().filter(e -> e.getTags().contains(tag)).findAny().orElse(null);
-	//	}
-
 	/**
 	 *
 	 * @return true if this AggrgatedData has alternateIds
 	 */
 	public Boolean hasAlternateIds() {
-		return alternativeModels.size() > 0;
+		return akaModels.size() > 0;
 	}
 
 	
@@ -425,24 +399,9 @@ public class Product implements Standardisable {
 		return price.getConditions().contains(ProductCondition.OCCASION);
 	}
 	
-	
-	
-	
-	
-	
-	//	/**
-	//	 * Return all the specific ratings
-	//	 *
-	//	 * @return
-	//	 * @throws ResourceNotFoundException
-	//	 */
-	//	public Set<Rating> ratings(final RatingType ratingType) {
-	//		return ratings.stream().filter(e -> e.getTags().contains(ratingType.toString())).collect(Collectors.toSet());
-	//	}
-
 
 	public String alternateIdsAsText() {
-		return StringUtils.join(alternativeModels, ", ");
+		return StringUtils.join(akaModels, ", ");
 	}
 
 	/**
@@ -459,14 +418,17 @@ public class Product implements Standardisable {
 	 * @return the gtin
 	 */
 	public String gtin() {
-		// TODO(p2, features) : Should store the GTIN type when encountered in gtin infos, and then render with appropriate leading 0
 		try {
+			// TODO(p2, features) : Should render with appropriate leading 0
 			return String.valueOf(id);
 		} catch (final Exception e) {
 			return null;
 		}
 	}
 
+	
+	
+	
 	/**
 	 *
 	 * @return the brandUid, if availlable from referentiel attributes
@@ -479,7 +441,7 @@ public class Product implements Standardisable {
 	public String randomModel() {	
 		List<String> names =  new ArrayList<>();
 		names.add(model());				
-		alternativeModels.forEach(e -> names.add(e));
+		akaModels.forEach(e -> names.add(e));
 		Random rand = new Random();
 		return names.get(rand.nextInt(names.size()));
 		
@@ -564,24 +526,6 @@ public class Product implements Standardisable {
 		return datasourceCategories.stream().min (Comparator.comparingInt(String::length)).orElse(null);
 	}
 
-
-
-	//	/**
-	//	 *
-	//	 * @return the id
-	//	 */
-	//	public String id() {
-	//		StringBuilder builder = new StringBuilder();
-	//
-	//		if (null == brand() || null == model()) {
-	//			builder.append(gtin());
-	//		} else {
-	//			builder.append(brand()).append("-").append(model());
-	//		}
-	//		return builder.toString();
-	//	}
-
-
 	
 	/**
 	 * TODO : merge with the one on price()
@@ -621,39 +565,8 @@ public class Product implements Standardisable {
 		String date = dateFormat.format(new Date(creationDate));
 		return date;
 	}
-	
-	
-	
-//	/**
-//	 * Initialize a dummy DataFragment from this product, (used to "touch" products to replay batch scenarios with realtimeAggregationService)
-//	 * @return
-//	 */
-//	public DataFragment getFragment() {
-//		DataFragment ret = new DataFragment();
-//		ret.setLastIndexationDate(lastChange);
-//		ret.setCreationDate(creationDate);
-//		ret.setReferentielAttributes(attributes.getReferentielAttributes());
-//		
-//		return ret;
-//		
-//	}
 
 
-	/**
-	 * Add an image to this product
-	 * @param url
-	 */
-//	public void addImage(String url, String tag) {
-//		if (!StringUtils.isEmpty(url)) {
-//			Resource r = new Resource(url);
-//			r.addTag(tag);
-// TODO : Check incidence			
-//			resources.remove(r);
-	
-	
-//			resources.add(r);			
-//		}
-//	}
 	
 	public void addResource(final Resource resource) throws ValidationException {
 
@@ -665,7 +578,6 @@ public class Product implements Standardisable {
 		resource.validate();
 
 		// Smart update, time consuming but necessary.
-		// TODO : Involve on a map on the new model
 		
 		Resource existing = resources.stream().filter(e -> e.equals(resource)).findFirst().orElse(null);
 		
@@ -698,18 +610,18 @@ public class Product implements Standardisable {
 		
 		String model = StringUtils.normalizeSpace(value).toUpperCase();
 		
-		// TODO : Eviction size from conf
+		// TODO(conf,p2) : Eviction size from conf
 		if (StringUtils.isEmpty(value) || value.length() < 3) {
 			return;
 		}
 		// Splitting on conventionnal suffixes (/ - .)
-		// TODO : Const / conf
+		// TODO(conf,p2) : splitters from Const / conf
 		String[]frags = model.split("/|\\|.|-");
 
-		alternativeModels.add(value);
+		akaModels.add(value);
 		if (frags.length > 1) {
 			logger.info("Found an alternative model : " + frags[0]);
-			alternativeModels.add(frags[0]);
+			akaModels.add(frags[0]);
 		}
 
 		// Case ref attribute is already set, we keep as it and we remove the elected one from alternativeModels
@@ -719,10 +631,10 @@ public class Product implements Standardisable {
 			String shortest = shortestModel();
 			if (null != shortest) {
 				attributes.getReferentielAttributes().put(ReferentielKey.MODEL, shortest);
-				alternativeModels.remove(shortest);
+				akaModels.remove(shortest);
 			}
 		} else {
-			alternativeModels.remove(existing);
+			akaModels.remove(existing);
 		}		
 	}
 
@@ -733,7 +645,7 @@ public class Product implements Standardisable {
 	public String shortestModel() {		
 		Set<String> names = new HashSet<>();
 		names.add(model());
-		names.addAll(alternativeModels);
+		names.addAll(akaModels);
 		if (names.size() == 0) {
 			return null;
 		} else {
@@ -748,12 +660,6 @@ public class Product implements Standardisable {
 	
 	
 
-
-	public Set<UnindexedKeyValTimestamp> getAlternativeBrands() {
-		return alternativeBrands;
-	}
-
-
 	public Long getId() {
 		return id;
 	}
@@ -762,9 +668,6 @@ public class Product implements Standardisable {
 		this.id = id;
 	}
 
-	public void setAlternativeBrands(Set<UnindexedKeyValTimestamp> alternativeBrands) {
-		this.alternativeBrands = alternativeBrands;
-	}
 
 	public String getVertical() {
 		return vertical;
@@ -798,11 +701,11 @@ public class Product implements Standardisable {
 		this.names = names;
 	}
 
-	public AggregatedAttributes getAttributes() {
+	public ProductAttributes getAttributes() {
 		return attributes;
 	}
 
-	public void setAttributes(AggregatedAttributes attributes) {
+	public void setAttributes(ProductAttributes attributes) {
 		this.attributes = attributes;
 	}
 
@@ -846,16 +749,7 @@ public class Product implements Standardisable {
 		this.datasourceCategories = datasourceCategories;
 	}
 
-	
 
-
-//	public Set<UnindexedKeyVal> getMappedCategories() {
-//		return mappedCategories;
-//	}
-//
-//	public void setMappedCategories(Set<UnindexedKeyVal> mappedCategories) {
-//		this.mappedCategories = mappedCategories;
-//	}
 
 	public Map<String, Score> getScores() {
 		return scores;
@@ -890,14 +784,6 @@ public class Product implements Standardisable {
 		this.googleTaxonomyId = googleTaxonomyId;
 	}
 
-	public Set<String> getDatasourceNames() {
-		return datasourceNames;
-	}
-
-	public void setDatasourceNames(Set<String> datasourceNames) {
-		this.datasourceNames = datasourceNames;
-	}
-
 
 	public ExternalIds getExternalIds() {
 		return externalIds;
@@ -913,14 +799,6 @@ public class Product implements Standardisable {
 
 	public void setCoverImagePath(String coverImagePath) {
 		this.coverImagePath = coverImagePath;
-	}
-
-	public Set<String> getAlternativeModels() {
-		return alternativeModels;
-	}
-
-	public void setAlternativeModels(Set<String> alternativeModels) {
-		this.alternativeModels = alternativeModels;
 	}
 
 	public boolean isExcluded() {
@@ -947,13 +825,31 @@ public class Product implements Standardisable {
 		this.categoriesByDatasources = categoriesByDatasources;
 	}
 
-	public Set<UnindexedKeyVal> getMappedCategories() {
-		return mappedCategories;
+	public Map<String, Integer> getDatasourceCodes() {
+		return datasourceCodes;
 	}
 
-	public void setMappedCategories(Set<UnindexedKeyVal> mappedCategories) {
-		this.mappedCategories = mappedCategories;
+	public void setDatasourceCodes(Map<String, Integer> datasources) {
+		this.datasourceCodes = datasources;
 	}
+
+	public Map<String, String> getAkaBrands() {
+		return akaBrands;
+	}
+
+	public void setAkaBrands(Map<String, String> akaBrands) {
+		this.akaBrands = akaBrands;
+	}
+
+	public Set<String> getAkaModels() {
+		return akaModels;
+	}
+
+	public void setAkaModels(Set<String> akaModels) {
+		this.akaModels = akaModels;
+	}
+
+
 
 
 

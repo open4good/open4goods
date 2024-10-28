@@ -152,8 +152,8 @@ public class ApiConfig {
 	@Bean
 	@Autowired
 	BatchService batchService(AggregationFacadeService aggregationFacadeService,
-			CompletionFacadeService completionFacadeService, VerticalsConfigService verticalsConfigService) {
-		return new BatchService(aggregationFacadeService, completionFacadeService, verticalsConfigService);
+			CompletionFacadeService completionFacadeService, VerticalsConfigService verticalsConfigService, ProductRepository productRepository) {
+		return new BatchService(aggregationFacadeService, completionFacadeService, verticalsConfigService, productRepository);
 	}
 	
 	
@@ -383,7 +383,7 @@ public class ApiConfig {
 
 
 	@Bean DataFragmentStoreService dataFragmentStoreService(
-			@Autowired final ApiProperties config, @Autowired final SerialisationService serialisationService, @Autowired StandardiserService standardiserService, @Autowired AggregationFacadeService generationService, @Autowired ProductRepository aggregatedDataRepository) {
+			@Autowired final ApiProperties config, @Autowired StandardiserService standardiserService, @Autowired AggregationFacadeService generationService, @Autowired ProductRepository aggregatedDataRepository) {
 		return new DataFragmentStoreService(standardiserService, generationService, aggregatedDataRepository, config.getIndexationConfig());
 	}
 

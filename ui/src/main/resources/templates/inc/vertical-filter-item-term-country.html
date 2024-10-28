@@ -1,5 +1,5 @@
 <div class="form-check mb-1">
-		<input class="form-check-input" type="checkbox" th:id="${id}+'-'+${term.id}">
+		<input class="form-check-input changeableBox" type="checkbox" th:id="${id}+':'+${term.id}">
 		<img width=30 th:title="${countryNames.get(term.text)}" th:src="'/assets/img/flags/'+${term.text.toLowerCase()}+'.png'">
 		<label th:text="${countryNames.get(term.text)}" class="form-check-label" th:for="${id}+'-'+${term.id}"></label>
 		<span th:text="${term.count}" th:id="'badge'+'-'+${id}+'-'+${term.id}" class="badge bg-gray badge-pill float-end"></span>

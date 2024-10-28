@@ -1,5 +1,6 @@
 package org.open4goods.commons.dao;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -11,12 +12,16 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.open4goods.model.BarcodeType;
 import org.open4goods.commons.config.yml.IndexationConfig;
 import org.open4goods.commons.config.yml.ui.VerticalConfig;
 import org.open4goods.commons.exceptions.ResourceNotFoundException;
 import org.open4goods.commons.model.constants.CacheConstants;
 import org.open4goods.commons.model.product.Product;
-import org.open4goods.commons.store.repository.ProductIndexationWorker;
+import org.open4goods.commons.model.product.ProductPartialUpdateHolder;
+import org.open4goods.commons.services.SerialisationService;
+import org.open4goods.commons.store.repository.FullProductIndexationWorker;
+import org.open4goods.commons.store.repository.PartialProductIndexationWorker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,6 +39,8 @@ import org.springframework.data.elasticsearch.core.document.Document;
 import org.springframework.data.elasticsearch.core.mapping.IndexCoordinates;
 import org.springframework.data.elasticsearch.core.query.Criteria;
 import org.springframework.data.elasticsearch.core.query.CriteriaQuery;
+import org.springframework.data.elasticsearch.core.query.IndexQuery;
+import org.springframework.data.elasticsearch.core.query.IndexQueryBuilder;
 import org.springframework.data.elasticsearch.core.query.Query;
 import org.springframework.data.elasticsearch.core.query.UpdateQuery;
 
@@ -55,8 +62,13 @@ public class ProductRepository {
 	public static final String MAIN_INDEX_NAME = Product.DEFAULT_REPO;
 
 	
-	// The file queue implementation
-	private BlockingQueue<Product> queue;
+	// The file queue implementation for Full products (no partial updates)
+	private BlockingQueue<Product> fullProductQueue;
+
+	// The file queue implementation for Full products (no partial updates)
+	private BlockingQueue<ProductPartialUpdateHolder> partialProductQueue;
+
+	
 	
 	/**
 	 * !!!MAJOR CONST !!! Duration in ms where a price is considered to be valid. Only data with a
@@ -69,27 +81,39 @@ public class ProductRepository {
 
 	public IndexCoordinates current_index = IndexCoordinates.of(MAIN_INDEX_NAME);
 
-	private @Autowired ElasticsearchOperations elasticsearchTemplate;
+	private @Autowired ElasticsearchOperations elasticsearchOperations;
+
+	public ElasticsearchOperations getElasticsearchOperations() {
+		return elasticsearchOperations;
+	}
+
+	private @Autowired SerialisationService serialisationService;
 
 //	private @Autowired RedisProductRepository redisRepository;
 	
 //	private @Autowired RedisOperations<String, Product> redisRepo;
 
 	public ProductRepository() {
-		
-		
+
+
 	}
 
 //	private ExecutorService executor = Executors.newVirtualThreadPerTaskExecutor();
 
+	//TODO(p3,perf) : Virtual threads, but ko with visualVM profiling
 	public ProductRepository(IndexationConfig indexationConfig) {
-		logger.info("Starting file queue consumer thread, with bulk page size of {} items", indexationConfig.getProductsbulkPageSize() );
-				
-		this.queue = new LinkedBlockingQueue<>(indexationConfig.getProductsQueueMaxSize());
+
+		this.fullProductQueue = new LinkedBlockingQueue<>(indexationConfig.getProductsQueueMaxSize());
+		this.partialProductQueue = new LinkedBlockingQueue<>(indexationConfig.getPartialProductsQueueMaxSize());
+
 		for (int i = 0; i < indexationConfig.getProductWorkers(); i++) {
-			//TODO(p3,perf) : Virtual threads, but ko with visualVM profiling
-			new Thread((new ProductIndexationWorker(this, indexationConfig.getProductsbulkPageSize(), indexationConfig.getPauseDuration(),"products-worker-"+i))).start();
+			new Thread((new FullProductIndexationWorker(this, indexationConfig.getProductsbulkPageSize(), indexationConfig.getPauseDuration(),"full-products-worker-"+i))).start();
 		}
+
+		for (int i = 0; i < indexationConfig.getPartialProductWorkers(); i++) {
+			new Thread((new PartialProductIndexationWorker(this, indexationConfig.getPartialProductsbulkPageSize(), indexationConfig.getPauseDuration(),"partial-products-worker-"+i))).start();
+		}
+
 	}
 
 	/**
@@ -109,7 +133,7 @@ public class ProductRepository {
 		
 		final NativeQuery initialQuery = new NativeQueryBuilder().withQuery(new CriteriaQuery(c)).build();
 
-		return elasticsearchTemplate.searchForStream(initialQuery, Product.class, current_index).stream()
+		return elasticsearchOperations.searchForStream(initialQuery, Product.class, current_index).stream()
 				.map(SearchHit::getContent);
 
 	}
@@ -123,26 +147,40 @@ public class ProductRepository {
 	    Query query = Query.findAll();
 	    // TODO : From conf, apply to other
 	    query.setPageable(PageRequest.of(0, 10000)); // Fetch larger batches
-	    return elasticsearchTemplate.searchForStream(query, Product.class, current_index)
+	    return elasticsearchOperations.searchForStream(query, Product.class, current_index)
 	    		.stream()
 	    		// TODO : Check CPU usage
 	    		.parallel()
 	            .map(SearchHit::getContent);
 	}
 
-	
+
 
 	public Stream<Product> exportAll(String vertical) {
-		
+
 		Criteria c = new Criteria("vertical").is(vertical);
 
 		final NativeQuery initialQuery = new NativeQueryBuilder()
 				.withQuery(new CriteriaQuery(c)).build();
-		
-		return elasticsearchTemplate.searchForStream(initialQuery, Product.class, current_index).stream()
+
+		return elasticsearchOperations.searchForStream(initialQuery, Product.class, current_index).stream()
 				.map(SearchHit::getContent);
 	}
 
+	/**
+	 * Export all aggregated data, corresponding to the given Barcodes
+	 * 
+	 * @return
+	 */
+	public Stream<Product> exportAll(BarcodeType... barcodeTypes) {
+		
+		Criteria criteria = new Criteria("gtinInfos.upcType").in((Object[]) barcodeTypes);
+		CriteriaQuery query = new CriteriaQuery(criteria);
+		
+		return elasticsearchOperations.searchForStream(query, Product.class, current_index).stream()
+				.map(SearchHit::getContent);
+	}
+	
 	
 	public Stream<Product> searchInValidPrices(String query, final String indexName, int from, int to) {
 
@@ -151,7 +189,7 @@ public class ProductRepository {
 		final NativeQuery initialQuery = new NativeQueryBuilder().withQuery(new CriteriaQuery(c))
 				.withPageable(PageRequest.of(from, to)).build();
 
-		return elasticsearchTemplate.search(initialQuery, Product.class, current_index).stream()
+		return elasticsearchOperations.search(initialQuery, Product.class, current_index).stream()
 				.map(SearchHit::getContent);
 
 	}
@@ -181,7 +219,7 @@ public class ProductRepository {
 		
 		final NativeQuery initialQuery = new NativeQueryBuilder()
 				.withQuery(new CriteriaQuery(c)).build();
-		return elasticsearchTemplate.searchForStream(initialQuery, Product.class, current_index).stream()
+		return elasticsearchOperations.searchForStream(initialQuery, Product.class, current_index).stream()
 				.map(SearchHit::getContent);
 	}
 
@@ -208,7 +246,7 @@ public class ProductRepository {
 
 		NativeQuery initialQuery = initialQueryBuilder.build();
 		
-		return elasticsearchTemplate.searchForStream(initialQuery, Product.class, current_index).stream().map(SearchHit::getContent);
+		return elasticsearchOperations.searchForStream(initialQuery, Product.class, current_index).stream().map(SearchHit::getContent);
 	}
 	
 	
@@ -245,8 +283,26 @@ public class ProductRepository {
 
 		NativeQuery initialQuery = initialQueryBuilder.build();
 		
-		return elasticsearchTemplate.searchForStream(initialQuery, Product.class, current_index).stream().map(SearchHit::getContent);
+		return elasticsearchOperations.searchForStream(initialQuery, Product.class, current_index).stream().map(SearchHit::getContent);
 	}
+
+
+	public Stream<Product> getAllHavingVertical() {
+		Criteria c = new Criteria("vertical").exists()
+				;
+
+
+		NativeQueryBuilder initialQueryBuilder = new NativeQueryBuilder().withQuery(new CriteriaQuery(c));
+
+		initialQueryBuilder =  initialQueryBuilder.withSort(Sort.by(org.springframework.data.domain.Sort.Order.desc("scores.ECOSCORE.value")));
+
+		NativeQuery initialQuery = initialQueryBuilder.build();
+
+		return elasticsearchOperations.searchForStream(initialQuery, Product.class, current_index).stream().map(SearchHit::getContent);
+
+	}
+
+
 
 	/**
 	 * Export all aggregateddatas for a vertical, ordered by ecoscore descending
@@ -265,9 +321,12 @@ public class ProductRepository {
 	
 	
 	public SearchHits<Product> search(Query query, final String indexName) {
-		return elasticsearchTemplate.search(query, Product.class, IndexCoordinates.of(indexName));
+		return elasticsearchOperations.search(query, Product.class, IndexCoordinates.of(indexName));
 
 	}
+
+
+
 
 //	/**
 //	 * Index an Product
@@ -296,7 +355,7 @@ public class ProductRepository {
 		logger.info("Queuing single product : {}", p.gtin());
 
 		try {
-			queue.put(p);
+			fullProductQueue.put(p);
 		} catch (Exception e) {
 			logger.error("Cannot enqueue product {}",p,e);			
 		}
@@ -327,49 +386,56 @@ public class ProductRepository {
 	 *
 	 * @param p
 	 */
-	public void index(Collection<Product> data) {
+	public void addToFullindexationQueue(Collection<Product> data) {
+
+		logger.info("Queuing {} products", data.size());
+
+		data.forEach(e -> {
+
+			try {
+				fullProductQueue.put(e) ;
+			} catch (Exception e1) {
+				logger.error("!!!! exception, cannot enqueue product {}",e);
+			}
+
+		});
+	}
+
+	public void addToPartialIndexationQueue(Collection<ProductPartialUpdateHolder> data) {
 
 		logger.info("Queuing {} products", data.size());
 		
 		data.forEach(e -> {
 			
 			try {
-				queue.put(e) ;
+				partialProductQueue.put(e) ;
 			} catch (Exception e1) {
 				logger.error("!!!! exception, cannot enqueue product {}",e);
 			}
 			
 		});
-		
-
 	}
-
 	
 	public void store(Collection<Product> data) {
-		logger.info("Indexing {} products", data.size());
+	    logger.info("Indexing {} products", data.size());
 
-//		executor.submit(() -> {
-			elasticsearchTemplate.save(data, current_index);
-//		});
+	    List<IndexQuery> indexQueries = data.stream()
+	        .map(p -> new IndexQueryBuilder()
+	            .withId(String.valueOf(p.getId()))
+	            .withObject(p)
+	            .build())
+	        .collect(Collectors.toList());
 
-//		executor.submit(() -> {
-//			redisRepository.saveAll(data);
-//		});
+	    elasticsearchOperations.bulkIndex(indexQueries, current_index);
 	}
-	
-	public void storeNoCache(Collection<Product> data) {
-		logger.info("Indexing without caching {} products", data.size());
 
-		elasticsearchTemplate.save(data, current_index);
 
-	}
-	
-	
+
 	public void forceIndex(Product data) {
 		logger.info("Indexing  product {}", data.gtin());
 
 //		executor.submit(() -> {
-			elasticsearchTemplate.save(data, current_index);
+			elasticsearchOperations.save(data, current_index);
 //		});
 
 //		executor.submit(() -> {
@@ -400,9 +466,9 @@ public class ProductRepository {
 //		try {
 //			result = redisRepository.findById(productId).orElseThrow(ResourceNotFoundException::new);
 //		} catch (ResourceNotFoundException e) {
-//			
+//
 //			result = null;
-//			
+//
 //		} catch (Exception e) {
 //			logger.error("Error getting product {} from redis", productId, e);
 //			result = null;
@@ -411,7 +477,7 @@ public class ProductRepository {
 		if (null == result) {
 			// Fail, getting from elastic
 			logger.info("Cache miss, getting product {} from elastic", productId);
-			result = elasticsearchTemplate.get(String.valueOf(productId), Product.class);
+			result = elasticsearchOperations.get(String.valueOf(productId), Product.class);
 
 			if (null == result) {
 				throw new ResourceNotFoundException("Product '" + productId + "' does not exists");
@@ -475,10 +541,10 @@ public class ProductRepository {
 //				ret.put(e.gtin(), e);
 //			}
 //		});
-//		
+//
 		// Getting the one we don't have in redis from elastic 		
 		Set<String> missingIds = ids.stream().filter(e -> !ret.containsKey(e)).map(e-> String.valueOf(e)) .collect(Collectors.toSet());
-		logger.info("redis hits : {}, missing : {}, queue size : {}",ret.size(), missingIds.size(),queue.size());
+		logger.info("redis hits : {}, missing : {}, queue size : {}",ret.size(), missingIds.size(),fullProductQueue.size());
 		
 		
 		if (missingIds.size() != 0) {
@@ -486,7 +552,7 @@ public class ProductRepository {
 			
 			NativeQuery query = new NativeQueryBuilder().withIds(missingIds).build();
 	
-			elasticsearchTemplate.multiGet(query, Product.class,current_index )
+			elasticsearchOperations.multiGet(query, Product.class,current_index )
 			.stream().map(MultiGetItem::getItem)
 			.filter(Objects::nonNull)
 			.forEach(e -> ret.put(e.gtin(), e));
@@ -514,21 +580,27 @@ public class ProductRepository {
 
 	@Cacheable(keyGenerator = CacheConstants.KEY_GENERATOR, cacheNames = CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME)
 	public Long countMainIndex() {
-		return elasticsearchTemplate.count(Query.findAll(), current_index);
+		return elasticsearchOperations.count(Query.findAll(), current_index);
 	}
 
 	@Cacheable(keyGenerator = CacheConstants.KEY_GENERATOR, cacheNames = CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME)
 	public Long countMainIndexHavingRecentPrices() {
 		CriteriaQuery query = new CriteriaQuery(getRecentPriceQuery());
-		return elasticsearchTemplate.count(query, current_index);
+		return elasticsearchOperations.count(query, current_index);
 	}
 
 	@Cacheable(keyGenerator = CacheConstants.KEY_GENERATOR, cacheNames = CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME)
 	public Long countMainIndexHavingRecentUpdate() {
 		CriteriaQuery query = new CriteriaQuery(getRecentPriceQuery());
-		return elasticsearchTemplate.count(query, current_index);
+		return elasticsearchOperations.count(query, current_index);
 	}
 
+    @Cacheable(cacheNames = CacheConstants.ONE_DAY_LOCAL_CACHE_NAME)
+    public long countItemsByBarcodeType(BarcodeType... barcodeTypes) {
+        Criteria criteria = new Criteria("gtinInfos.upcType").in((Object[]) barcodeTypes);
+        CriteriaQuery query = new CriteriaQuery(criteria);
+        return elasticsearchOperations.count(query, current_index);
+    }
 	
 	@Cacheable(keyGenerator = CacheConstants.KEY_GENERATOR, cacheNames = CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME)
 	public Map<Integer, Long> byTaxonomy() {
@@ -545,7 +617,7 @@ public class ProductRepository {
 
 
 		// Handling aggregations results if relevant
-		//TODO(gof) : this cast should be avoided
+		//TODO(p3,safety) : this cast should be avoided
 		ElasticsearchAggregations aggregations = (ElasticsearchAggregations)results.getAggregations();
 
 
@@ -564,31 +636,16 @@ public class ProductRepository {
 		
 	}
 	
-	public void updatePartialFields(String id, Map<String, Object> fieldsToUpdate) {
-	    // Define the update query with the partial fields
-	    Map<String, Object> scriptParams = new HashMap<>(fieldsToUpdate);
-	    
-	    UpdateQuery updateQuery = UpdateQuery.builder(id)
-	        .withDocument(Document.from(scriptParams))
-	        .withIndex(current_index.getIndexName())
-	        .build();
-
-	    // Perform the update using ElasticsearchOperations
-	    elasticsearchTemplate.update(updateQuery, IndexCoordinates.of(MAIN_INDEX_NAME));
-	}
 	
-	
-	// TODO : review
-	public void bulkUpdatePartialFields(List<Product> productsToUpdate) {
-		
-
-		
-		
-		
-	    List<UpdateQuery> updateQueries = productsToUpdate.stream()
+	/**
+	 * Bulk update, using Document
+	 * @param partialItemsResults
+	 */
+	public void bulkUpdateDocument(Collection<ProductPartialUpdateHolder> partialItemsResults) {
+	    List<UpdateQuery> updateQueries = partialItemsResults.stream()
 	        .map(product -> {
-	            Map<String, Object> fieldsToUpdate = extractFieldsToUpdate(product);
-	            return UpdateQuery.builder(product.gtin())
+	            Map<String, Object> fieldsToUpdate = product.getChanges();
+	            return UpdateQuery.builder(String.valueOf(product.getProductId()))
 	                .withDocument(Document.from(fieldsToUpdate))
 	                .withIndex(current_index.getIndexName())
 	                .build();
@@ -596,54 +653,46 @@ public class ProductRepository {
 	        .collect(Collectors.toList());
 
 	    // Perform the bulk update
-	    elasticsearchTemplate.bulkUpdate(updateQueries, current_index);
-	}
-	
-	
-	private Map<String, Object> extractFieldsToUpdate(Product product) {
-		// TODO Auto-generated method stub
-		return null;
+	    elasticsearchOperations.bulkUpdate(updateQueries, current_index);
 	}
 
-	
-	public void updateLastChange(String documentId, long lastChange) {
-	    Map<String, Object> fieldsToUpdate = new HashMap<>();
-	    fieldsToUpdate.put("lastChange", lastChange);
+//	/**
+//	 * Bulk update, using script
+//	 * @param partialItemsResults
+//	 */
+//	public void bulkUpdateScript(Set<ProductPartialUpdateHolder> partialItemsResults) {
+//	    // Prepare a list to hold the update queries
+//	    List<UpdateQuery> updateQueries = partialItemsResults.stream()
+//	        .map(product -> {
+//	            // Script to iterate over the map and update the fields in _source
+//	            String script = "for (entry in params.fieldsToUpdate.entrySet()) { ctx._source[entry.getKey()] = entry.getValue(); }";
+//
+//	            // Pass the updated fields as parameters
+//	            Map<String, Object> params = new HashMap<>();
+//	            params.put("fieldsToUpdate", product.getChanges());
+//
+//	            // Create and return the UpdateQuery with the script and parameters
+//	            return UpdateQuery.builder(String.valueOf(product.getProductId()))
+//	                .withScript(script)
+//	                .withParams(params)
+//	                .withIndex(current_index.getIndexName())  // Use the current index
+//	                .build();
+//	        })
+//	        .collect(Collectors.toList());
+//
+//	    // Perform the bulk update
+//	    elasticsearchOperations.bulkUpdate(updateQueries, current_index);
+//	}
+//
 
-	    UpdateQuery updateQuery = UpdateQuery.builder(documentId)
-	        .withDocument(Document.from(fieldsToUpdate))
-	        .withIndex(current_index.getIndexName())
-	        .build();
 
-	    elasticsearchTemplate.update(updateQuery, current_index);
-	}
-	
-
-	public void updateProductFields(String documentId, Map<String, Object> fieldsToUpdate) {
-	    // Script to iterate over the map and update the fields in the _source
-	    String script = "for (entry in params.fieldsToUpdate.entrySet()) { ctx._source[entry.getKey()] = entry.getValue(); }";
-
-	    // Pass the updated fields as parameters
-	    Map<String, Object> params = new HashMap<>();
-	    params.put("fieldsToUpdate", fieldsToUpdate);
-
-	    // Create an UpdateQuery with the script and parameters
-	    UpdateQuery updateQuery = UpdateQuery.builder(documentId)
-	        .withScript(script)
-	        .withParams(params)
-	        .withIndex(Product.DEFAULT_REPO)
-	        .build();
-
-	    // Execute the update using ElasticsearchOperations
-	    elasticsearchTemplate.update(updateQuery, IndexCoordinates.of( Product.DEFAULT_REPO));
-	}
 	/**
 	 *
 	 * @return Criteria representing recent prices
 	 */
 	public Criteria getRecentPriceQuery() {
 		return getRecentProducts().and(new Criteria("offersCount").greaterThan(0));
-				
+
 	}
 
 	/**
@@ -653,7 +702,7 @@ public class ProductRepository {
 	public Criteria getRecentProducts() {
 		return new Criteria("lastChange").greaterThan(expirationClause());
 	}
-	
+
 	/**
 	 *
 	 * @return Criteria representing the valid dates
@@ -679,9 +728,15 @@ public class ProductRepository {
 //		});
 	}
 
-	public BlockingQueue<Product> getQueue() {
-		return queue;
+	public BlockingQueue<Product> getFullProductQueue() {
+		return fullProductQueue;
 	}
+
+	public BlockingQueue<ProductPartialUpdateHolder> getPartialProductQueue() {
+		return partialProductQueue;
+	}
+
+
 
 
 }

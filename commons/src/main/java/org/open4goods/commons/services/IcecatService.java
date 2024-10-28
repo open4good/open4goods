@@ -33,7 +33,7 @@ import org.open4goods.commons.model.icecat.IcecatLanguageHandler;
 import org.open4goods.commons.model.icecat.IcecatModel;
 import org.open4goods.commons.model.icecat.IcecatName;
 import org.open4goods.commons.model.icecat.IcecatSupplier;
-import org.open4goods.commons.model.product.AggregatedAttribute;
+import org.open4goods.commons.model.product.ProductAttribute;
 import org.open4goods.commons.model.product.Product;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -673,7 +673,7 @@ public class IcecatService {
 				ufg.setFeatureGroup(fg);
 				ufg.setName(ufg.getFeatureGroup().getName().i18n(language));
 				for (Integer fId : fg.getFeaturesId()) {
-					AggregatedAttribute a = product.getAttributes().attributeByFeatureId(fId);
+					ProductAttribute a = product.getAttributes().attributeByFeatureId(fId);
 					if (null != a) {
 						ufg.getAttributes().add(a);
 						// Updating attribute name
@@ -804,6 +804,27 @@ public class IcecatService {
 			return name;
 		}		
 	}
+
+
+	public Map<Integer, IcecatFeature> getFeaturesById() {
+		return featuresById;
+	}
+
+
+	public void setFeaturesById(Map<Integer, IcecatFeature> featuresById) {
+		this.featuresById = featuresById;
+	}
+
+
+	public Map<Integer, IcecatCategory> getCategoriesById() {
+		return categoriesById;
+	}
+
+
+	public void setCategoriesById(Map<Integer, IcecatCategory> categoriesById) {
+		this.categoriesById = categoriesById;
+	}
+	
 	
 	
 	

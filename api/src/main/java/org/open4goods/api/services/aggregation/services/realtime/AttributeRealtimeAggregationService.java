@@ -1,6 +1,5 @@
 package org.open4goods.api.services.aggregation.services.realtime;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -8,7 +7,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.open4goods.api.services.aggregation.AbstractAggregationService;
@@ -17,20 +15,16 @@ import org.open4goods.commons.config.yml.attributes.AttributeParser;
 import org.open4goods.commons.config.yml.ui.AttributesConfig;
 import org.open4goods.commons.config.yml.ui.VerticalConfig;
 import org.open4goods.commons.exceptions.AggregationSkipException;
-import org.open4goods.commons.exceptions.ParseException;
 import org.open4goods.commons.exceptions.ResourceNotFoundException;
 import org.open4goods.commons.exceptions.ValidationException;
-import org.open4goods.commons.helper.IdHelper;
-import org.open4goods.commons.helper.ResourceHelper;
 import org.open4goods.commons.model.attribute.Attribute;
 import org.open4goods.commons.model.constants.ReferentielKey;
-import org.open4goods.commons.model.data.Brand;
 import org.open4goods.commons.model.data.DataFragment;
-import org.open4goods.commons.model.data.Resource;
-import org.open4goods.commons.model.data.UnindexedKeyValTimestamp;
-import org.open4goods.commons.model.product.AggregatedAttribute;
 import org.open4goods.commons.model.product.AggregatedFeature;
+import org.open4goods.commons.model.product.IndexedAttribute;
 import org.open4goods.commons.model.product.Product;
+import org.open4goods.commons.model.product.ProductAttribute;
+import org.open4goods.commons.model.product.SourcedAttribute;
 import org.open4goods.commons.services.BrandService;
 import org.open4goods.commons.services.IcecatService;
 import org.open4goods.commons.services.VerticalsConfigService;
@@ -51,50 +45,101 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 	}
 
 	@Override
-	public HashMap<String, Object> onProduct(Product data, VerticalConfig vConf) throws AggregationSkipException {
+	public void onProduct(Product data, VerticalConfig vConf) throws AggregationSkipException {
 
+		Set<ProductAttribute> attrs = new HashSet<ProductAttribute>();
 		//////////////////////////////////////////
-		// Cleaning attributes names (normalisation)
-		// TODO(p3, optimisation) : Could remove once full sanitisation batch, all new
-		////////////////////////////////////////// attribute names are clean
+		// Cleaning attributes that must be discarded
 		//////////////////////////////////////////
-		Set<AggregatedAttribute> attrs = new HashSet<AggregatedAttribute>();
-		data.getAttributes().getUnmapedAttributes().stream().forEach(a -> {
-			// Dedup is ensured with the set and hashcode / equals override
-			a.setName(IdHelper.normalizeAttributeName(a.getName()));
-			attrs.add(a);
+
+		// Remove excluded attributes
+		// TODO / Usefull for batch mode, could remove once initial sanitization
+		vConf.getAttributesConfig().getExclusions().forEach(e -> {
+			data.getAttributes().getAll().remove(e);
 		});
-		data.getAttributes().setUnmapedAttributes(attrs);
 
 		//////////////////////////////////////////////////////////////////////////
 		// Checking if all mandatory attributes are present for this product
 		//////////////////////////////////////////////////////////////////////////
-		if (!data.getAttributes().getAggregatedAttributes().keySet().containsAll(vConf.getAttributesConfig().getMandatory())) {
-			// Missing attributes.
-
-			Set<String> missing = vConf.getAttributesConfig().getMandatory();
-			missing.removeAll(data.getAttributes().getAggregatedAttributes().keySet());
-
-			dedicatedLogger.warn("{} excluded from {}. Missing mandatory attributes : {}", data.getId(), vConf.getId(), missing);
-			data.setExcluded(true);
-		} else {
-			data.setExcluded(false);
-		}
+//		if (!data.getAttributes().getAggregatedAttributes().keySet().containsAll(vConf.getAttributesConfig().getMandatory())) {
+//			// Missing attributes.
+//
+//			Set<String> missing = vConf.getAttributesConfig().getMandatory();
+//			missing.removeAll(data.getAttributes().getAggregatedAttributes().keySet());
+//
+//			dedicatedLogger.warn("{} excluded from {}. Missing mandatory attributes : {}", data.getId(), vConf.getId(), missing);
+//			data.setExcluded(true);
+//		} else {
+//			data.setExcluded(false);
+//		}
 
 		// Attributing taxomy to attributes
-		data.getAttributes().getUnmapedAttributes().forEach(a -> {
+		data.getAttributes().getAll().values().forEach(a -> {
 			Set<Integer> icecatTaxonomyIds = featureService.resolveFeatureName(a.getName());
 			if (null != icecatTaxonomyIds) {
 				dedicatedLogger.info("Found icecat taxonomy for {} : {}", a.getName(), icecatTaxonomyIds);
 				a.setIcecatTaxonomyIds(icecatTaxonomyIds);
 			}
 		});
-		return null;
+
+		///////////////////////////////////////////////////
+		// Extracting indexed attributes
+		//////////////////////////////////////////////////
+		AttributesConfig attributesConfig = vConf.getAttributesConfig();
+		
+		
+		Map<String,IndexedAttribute> indexed = new HashMap<String, IndexedAttribute>();
+		
+		
+		for (ProductAttribute attr : data.getAttributes().getAll().values()) {
+
+			// Checking if a potential AggregatedAttribute
+			// TODO(P1) : Detect and parse from the icecat taxonomy
+			String indexedName = attributesConfig.isToBeIndexedAttribute(attr, null);
+
+			// We have a "raw" attribute that matches an aggregationconfig
+			if (null != indexedName) {
+
+				try {
+					AttributeConfig attrConfig = attributesConfig.getConfigFor(indexedName);
+
+					// Applying parsing rule
+					String cleanedValue =  parseAttributeValue(attr.getValue(), attrConfig);
+
+					if (StringUtils.isEmpty(cleanedValue)) {
+						dedicatedLogger.error("Empty indexed attribute value {}:{}",indexedName,attr.getValue());
+						continue;
+					}
+					
+					IndexedAttribute indexedAttr = indexed.get(indexedName);
+					if (null != indexedAttr) {
+						dedicatedLogger.info("Duplicate attribute candidate for indexation, for GTIN : {} and attrs {}",data.getId(), indexedName);
+						if (!cleanedValue.equals(indexedAttr.getValue() )) {
+							// TODO(p3,design) : Means we have multiple attributes matching for indexedbuilding. Have a merge strategy
+							dedicatedLogger.error("Value mismatch for attribute {} : {}<>{}",attr.getName(),cleanedValue, indexedAttr.getValue());
+						} 						
+					} else {
+						 indexedAttr = new IndexedAttribute(indexedName, cleanedValue);
+					}
+					
+					indexedAttr.getSource().addAll(attr.getSource());					
+					indexed.put(indexedName, indexedAttr);
+					
+				} catch (Exception e) {
+					dedicatedLogger.error("Attribute parsing fail for matched attribute {}", indexedName);
+				}
+			}
+		}
+		
+		
+		// Replacing all previously indexed
+		data.getAttributes().setIndexed(indexed);
+		
 	}
 
 	/**
-	 * Associate and match a set of nativ attributes from a datafragment into a
-	 * product
+	 * On data fragment agg leveln we increment the "all" field, with sourced values
+	 * for new or existing attributes. product
 	 *
 	 * @param dataFragment
 	 * @param p
@@ -109,71 +154,34 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 
 		try {
 
-			AttributesConfig attributesConfig = vConf.getAttributesConfig();
+//			AttributesConfig attributesConfig = vConf.getAttributesConfig();
 
-			// Adding the list of "to be removed" attributes
-			Set<String> toRemoveFromUnmatched = new HashSet<>(attributesConfig.getExclusions());
+//			// Remove excluded attributes
+//			if (dataFragment.getAttributes().removeIf(e -> attributesConfig.getExclusions().contains(e.getName()))) {
+//				dedicatedLogger.info("Attributes have been removed for {}", product.gtin());
+//			}
 
 			/////////////////////////////////////////
-			// Converting to AggregatedAttributes for matches from config
+			// Incrementing "all" attributes
 			/////////////////////////////////////////
+			for (Attribute attr : dataFragment.getAttributes()) {
 
-			List<Attribute> all = new ArrayList<>();
-			// Handling attributes in datafragment
-			all.addAll(dataFragment.getAttributes());
-			// Add unmatched attributes from the product (case configuration change)
+				ProductAttribute agg = product.getAttributes().getAll().get(attr.getName());
 
-			// TODO : BIG BUG : Override the providername. Must be only in batch mode
-			// all.addAll(product.getAttributes().getUnmapedAttributes().stream().map(e ->
-			// new Attribute(e.getName(),e.getValue(),e.getLanguage())).toList());
-
-			for (Attribute attr : all) {
-
-				// Checking if a potential AggregatedAttribute
-				Attribute translated = attributesConfig.translateAttribute(attr, dataFragment.getDatasourceName());
-
-				// We have a "raw" attribute that matches a aggragationconfig
-
-				if (ResourceHelper.isImage(attr.getValue())) {
-					Resource r = new Resource(attr.getValue());
-					r.getTags().add(attr.getName());
-					product.addResource(r);
-					toRemoveFromUnmatched.add(attr.getName());
-					continue;
+				if (null == agg) {
+					// A first time match
+					agg = new ProductAttribute();
+					agg.setName(attr.getName());
 				}
 
-				if (null != translated) {
+				// TODO(p1, gof) : update the add
+				agg.addSourceAttribute(new SourcedAttribute(attr, dataFragment.getDatasourceName()));
 
-					try {
-						AttributeConfig attrConfig = attributesConfig.getConfigFor(translated);
+				// Replacing new AggAttribute in product
+				product.getAttributes().getAll().put(agg.getName(), agg);
 
-						// Applying parsing rule
-						translated = parseAttributeValue(translated, attrConfig);
-
-						if (translated.getRawValue() == null) {
-							continue;
-						}
-
-						AggregatedAttribute agg = product.getAttributes().getAggregatedAttributes().get(attr.getName());
-
-						if (null == agg) {
-							// A first time match
-							agg = new AggregatedAttribute();
-							agg.setName(attr.getName());
-						}
-
-						toRemoveFromUnmatched.add(translated.getName());
-
-						agg.addAttribute(translated, attrConfig, new UnindexedKeyValTimestamp(dataFragment.getDatasourceName(), translated.getValue()));
-
-						// Replacing new AggAttribute in product
-						product.getAttributes().getAggregatedAttributes().put(agg.getName(), agg);
-					} catch (Exception e) {
-
-						dedicatedLogger.error("Attribute parsing fail for matched attribute {}", translated);
-					}
-				}
 			}
+
 
 			// Checking model name from product words
 //			completeModelNames(product, dataFragment.getReferentielAttributes().get(ReferentielKey.MODEL));
@@ -184,40 +192,29 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 			handleReferentielAttributes(dataFragment, product);
 			// TODO : Add BRAND / MODEL from matches from attributes
 
-			/////////////////////////////////////////
-			// EXTRACTING FEATURES
-			/////////////////////////////////////////
-
-			List<Attribute> matchedFeatures = dataFragment.getAttributes().stream().filter(e -> isFeatureAttribute(e, attributesConfig)).collect(Collectors.toList());
-
-			toRemoveFromUnmatched.addAll(matchedFeatures.stream().map(Attribute::getName).collect(Collectors.toSet()));
-
-			Collection<AggregatedFeature> af = aggregateFeatures(matchedFeatures);
-			product.getAttributes().getFeatures().addAll(af);
-
 			//////////////////////////
 			// Aggregating unmatched attributes
 			///////////////////////////
 
-			for (Attribute attr : dataFragment.getAttributes()) {
-				// Checking if to be removed
-//				if (toRemoveFromUnmatched.contains(attr.getName())) {
-//					continue;
+//			for (Attribute attr : dataFragment.getAttributes()) {
+//				// Checking if to be removed
+////				if (toRemoveFromUnmatched.contains(attr.getName())) {
+////					continue;
+////				}
+//
+//				// TODO : remove from a config list
+//
+//				ProductAttribute agg = product.getAttributes().getUnmapedAttributes().stream().filter(e -> e.getName().equals(attr.getName())).findAny().orElse(null);
+//
+//				if (null == agg) {
+//					// A first time match
+//					agg = new ProductAttribute();
+//					agg.setName(attr.getName());
 //				}
-
-				// TODO : remove from a config list
-
-				AggregatedAttribute agg = product.getAttributes().getUnmapedAttributes().stream().filter(e -> e.getName().equals(attr.getName())).findAny().orElse(null);
-
-				if (null == agg) {
-					// A first time match
-					agg = new AggregatedAttribute();
-					agg.setName(attr.getName());
-				}
-				agg.addAttribute(attr, new UnindexedKeyValTimestamp(dataFragment.getDatasourceName(), attr.getValue()));
-
-				product.getAttributes().getUnmapedAttributes().add(agg);
-			}
+//				agg.addAttribute(attr, new UnindexedKeyValTimestamp(dataFragment.getDatasourceName(), attr.getValue()));
+//
+//				product.getAttributes().getUnmapedAttributes().add(agg);
+//			}
 
 			// Removing
 //			product.getAttributes().setUnmapedAttributes(product.getAttributes().getUnmapedAttributes().stream()
@@ -314,19 +311,18 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 	}
 
 	/**
-	 * Aggregate ReferentielAttributes
-	 * 
-	 * @param refAttrs
-	 * @param aa
-	 * @param output
+	 * Handles referential attributes of a data fragment and updates the product
+	 * output accordingly. This method updates or adds referential attributes, while
+	 * also handling conflicts and logging them.
+	 *
+	 * @param fragment The data fragment containing referential attributes.
+	 * @param output   The product output to which referential attributes are to be
+	 *                 added or updated.
 	 */
-	private void handleReferentielAttributes(DataFragment fragement, Product output) {
-
-		for (Entry<ReferentielKey, String> attr : fragement.getReferentielAttributes().entrySet()) {
-
+	private void handleReferentielAttributes(DataFragment fragment, Product output) {
+		for (Entry<ReferentielKey, String> attr : fragment.getReferentielAttributes().entrySet()) {
 			ReferentielKey key = attr.getKey();
-
-			String value = attr.getValue();
+			String value = attr.getValue().toUpperCase();
 
 			if (StringUtils.isEmpty(value)) {
 				continue;
@@ -337,35 +333,38 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 			if (StringUtils.isEmpty(existing)) {
 				output.getAttributes().addReferentielAttribute(key, value);
 			} else if (!existing.equals(value)) {
-				// TODO(0.5,p2,feature) : handle conflicts and "best value" election on
-				// referentiel attributes
-				if (key.equals(ReferentielKey.MODEL)) {
+				// We have a variation !
+				switch (key) {
+				case MODEL:
 					dedicatedLogger.info("Adding different {} name as alternate id. Existing is {}, would have erased with {}", key, existing, value);
 					output.addModel(value);
-
-				} else if (key.equals(ReferentielKey.BRAND)) {
-
-					output.getAlternativeBrands().add(new UnindexedKeyValTimestamp(fragement.getDatasourceName(), value));
-					output.getAlternativeBrands().removeIf(b -> b.getValue().equals(output.brand()));
-
-				}
-			} else if (key.equals(ReferentielKey.GTIN)) {
-				if (null != value && !existing.equals(value)) {
-					// If the same gtin but in a different UPC form
-					if (Long.valueOf(value).longValue() == Long.valueOf(existing).longValue()) {
-						dedicatedLogger.error("Overiding GTIN from {} to {} ", existing, value);
-						output.getAttributes().getReferentielAttributes().put(ReferentielKey.GTIN, value);
-					} else {
-						dedicatedLogger.error("Cannot overide GTIN from {} to {} ", existing, value);
+					break;
+				case BRAND:				
+					output.getAkaBrands().put(fragment.getDatasourceName(), value);
+					break;
+				case GTIN:
+					if (value != null && !existing.equals(value)) {
+						try {
+							long existingGtin = Long.parseLong(existing);
+							long newGtin = Long.parseLong(value);
+							if (existingGtin != newGtin) {
+								dedicatedLogger.error("Overriding GTIN from {} to {}", existing, newGtin);
+								output.getAttributes().getReferentielAttributes().put(ReferentielKey.GTIN, value);
+							} else {
+								dedicatedLogger.error("Cannot override GTIN from {} to {}", existing, value);
+							}
+						} catch (NumberFormatException e) {
+							dedicatedLogger.error("Invalid GTIN format: existing = {}, new = {}", existing, value, e);
+						}
 					}
+					break;
+				default:
+					dedicatedLogger.warn("Skipping referential attribute erasure for {}. Existing is {}, would have erased with {}", key, existing, value);
+					break;
 				}
-			} else {
-				dedicatedLogger.warn("Skipping referentiel attribute erasure for {}. Existing is {}, would have erased with {}", key, existing, value);
 			}
 		}
 	}
-
-	
 
 	/**
 	 * Type attribute and apply parsing rules. Return null if the Attribute fail to
@@ -376,18 +375,19 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 	 * @return
 	 * @throws ValidationException
 	 */
-	public Attribute parseAttributeValue(final Attribute attr, final AttributeConfig conf) throws ValidationException {
+	public String parseAttributeValue(final String source, final AttributeConfig conf) throws ValidationException {
 
+		String string = source;
 		///////////////////
 		// To upperCase / lowerCase
 		///////////////////
 
 		if (conf.getParser().getLowerCase()) {
-			attr.lowerCase();
+			string = string.toLowerCase();
 		}
 
 		if (conf.getParser().getUpperCase()) {
-			attr.upperCase();
+			string = string.toUpperCase();
 		}
 
 		//////////////////////////////
@@ -396,7 +396,7 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 
 		if (null != conf.getParser().getDeleteTokens()) {
 			for (final String token : conf.getParser().getDeleteTokens()) {
-				attr.replaceToken(token, "");
+				string = string.replace(token, "");
 			}
 		}
 
@@ -404,21 +404,21 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 		// removing parenthesis tokens
 		///////////////////
 		if (conf.getParser().isRemoveParenthesis()) {
-			attr.replaceToken("\\(.*\\)", "");
+			string = string.replace("\\(.*\\)", "");
 		}
 
 		///////////////////
 		// Normalisation
 		///////////////////
 		if (conf.getParser().getNormalize()) {
-			attr.normalize();
+			string = StringUtils.normalizeSpace(source);
 		}
 
 		///////////////////
 		// Trimming
 		///////////////////
 		if (conf.getParser().getTrim()) {
-			attr.trim();
+			string = source.trim();
 		}
 
 		///////////////////
@@ -428,17 +428,17 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 		if (null != conf.getParser().getTokenMatch()) {
 			boolean found = false;
 
-			final String val = attr.getRawValue();
+			final String val = string;
 			for (final String match : conf.getParser().getTokenMatch()) {
 				if (val.contains(match)) {
-					attr.setRawValue(match);
+					string = match;
 					found = true;
 					break;
 				}
 			}
 
 			if (!found) {
-				throw new ValidationException("Token " + attr.stringValue() + " does not match  attribute " + attr.getName() + " specifiction");
+				throw new ValidationException("Token " + string + " does not match  any fixed attribute ");
 			}
 
 		}
@@ -447,17 +447,16 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 		// FIXED TEXT MAPPING
 		/////////////////////////////////
 		if (!conf.getMappings().isEmpty()) {
-			String replacement = conf.getMappings().get(attr.getRawValue());
-			attr.setRawValue(replacement);
+			string = conf.getMappings().get(string);
 		}
 
 		/////////////////////////////////
 		// Checking preliminary result
-		/////////////////////////////////
-
-		if (null == attr.getRawValue()) {
-			throw new ValidationException("Null rawValue in attribute " + attr);
-		}
+//		/////////////////////////////////
+//
+//		if (null == string) {
+//			throw new ValidationException("Null rawValue in attribute " + string);
+//		}
 
 		////////////////////////////////////
 		// Applying specific parser instance
@@ -466,21 +465,17 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 		if (!StringUtils.isEmpty(conf.getParser().getClazz())) {
 			try {
 				final AttributeParser parser = conf.getParserInstance();
-				final String parserRes = parser.parse(attr.getRawValue(), attr, conf);
-				attr.setRawValue(parserRes);
+				string  = parser.parse(string, conf);
 			} catch (final ResourceNotFoundException e) {
 				dedicatedLogger.warn("Error while applying specific parser for {}", conf.getParser().getClazz(), e);
 				throw new ValidationException(e.getMessage());
-			} catch (final ParseException e) {
-				dedicatedLogger.warn("Cannot parse {} with {} : {}", attr, conf.getParser().getClazz(), e.getMessage());
-				throw new ValidationException(e.getMessage());
 			} catch (final Exception e) {
-				dedicatedLogger.error("Unexpected exception while parsing {} with {}", attr, conf.getParser().getClazz(), e);
+				dedicatedLogger.error("Unexpected exception while parsing {} with {}", string, conf.getParser().getClazz(), e);
 				throw new ValidationException(e.getMessage());
 			}
 		}
 
-		return attr;
+		return string;
 
 	}
 

@@ -10,7 +10,6 @@ import org.open4goods.api.services.aggregation.AbstractAggregationService;
 import org.open4goods.commons.config.yml.ui.VerticalConfig;
 import org.open4goods.commons.exceptions.AggregationSkipException;
 import org.open4goods.commons.model.data.DataFragment;
-import org.open4goods.commons.model.data.UnindexedKeyVal;
 import org.open4goods.commons.model.product.Product;
 import org.open4goods.commons.services.GoogleTaxonomyService;
 import org.open4goods.commons.services.VerticalsConfigService;
@@ -50,15 +49,14 @@ public class TaxonomyRealTimeAggregationService extends AbstractAggregationServi
 	}
 
 	@Override
-	public HashMap<String, Object> onProduct(Product data, VerticalConfig vConf) throws AggregationSkipException {
+	public void onProduct(Product data, VerticalConfig vConf) throws AggregationSkipException {
 		
 		
 		////////////////////////////
 		// Updating the categories
 		////////////////////////////
-		data.getCategoriesByDatasources().values() .forEach(e -> {
-			data.getDatasourceCategories().add(e);
-		});
+		data.getDatasourceCategories().clear();
+		data.getDatasourceCategories().addAll(data.getCategoriesByDatasources().values());
 		
 		////////////////////////////
 		// Setting google taxonomy
@@ -73,9 +71,6 @@ public class TaxonomyRealTimeAggregationService extends AbstractAggregationServi
 //				dedicatedLogger.info("No taxonomy found for categories : {}", data.getDatasourceCategories());
 //			}
 //		}
-
-		
-		
 		
 		////////////////////////////
 		// Setting vertical from category
@@ -116,8 +111,6 @@ public class TaxonomyRealTimeAggregationService extends AbstractAggregationServi
 //			}
 //		}
 		
-		return new HashMap<String, Object>();
-		
 	}
 	
 	
@@ -131,7 +124,7 @@ public class TaxonomyRealTimeAggregationService extends AbstractAggregationServi
 		
 		List<Integer> taxons =new ArrayList<>();
 
-		input.getAttributes().getUnmapedAttributes().forEach(a -> {
+		input.getAttributes().getAll().values().forEach(a -> {
 			String i = a.getName();
 			
 			if (i.contains("CATEGORY")) {

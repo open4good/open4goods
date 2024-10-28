@@ -36,14 +36,14 @@ public class Brand2ScoreAggregationService extends AbstractScoreAggregationServi
 	
 
 	@Override
-	public Map<String, Object> onProduct(Product data, VerticalConfig vConf) {
+	public void onProduct(Product data, VerticalConfig vConf) {
 
 		// Enforce score removing
 		data.getScores().remove(BRAND_SUSTAINABILITY_SCORENAME);
 		
 		
 		if (StringUtils.isEmpty(data.brand())) {
-			return null;
+			return;
 		}
 		
 		try {
@@ -55,7 +55,7 @@ public class Brand2ScoreAggregationService extends AbstractScoreAggregationServi
 			Double score = brandService.getBrandScore(company,"sustainalytics.com");
 			if (null == score) {
 				dedicatedLogger.error("No score found for brand {}",data.brand());
-				return null;
+				return;
 			}
 			
 			// Processing cardinality
@@ -66,8 +66,6 @@ public class Brand2ScoreAggregationService extends AbstractScoreAggregationServi
 		} catch (ValidationException e) {
 			dedicatedLogger.warn("Brand to score fail for {}",data,e);
 		}
-		return null;								
-		
 		
 	}
 }

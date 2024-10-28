@@ -18,7 +18,11 @@ public class BarcodeTest {
 		// Testing ean13
 		assertEquals(BarcodeType.GTIN_13, service.sanitize("8436542858045").getKey());
 		assertEquals(BarcodeType.GTIN_13, service.sanitize("3462117246967").getKey());
+		
+		assertEquals(BarcodeType.ISBN_13, service.sanitize("9781845924539").getKey());
 
+		
+		
 
 		// Testing ean8
 		assertEquals(BarcodeType.GTIN_13, service.sanitize("40170725").getKey());

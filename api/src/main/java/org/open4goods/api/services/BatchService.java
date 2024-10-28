@@ -2,6 +2,8 @@ package org.open4goods.api.services;
 
 import java.util.concurrent.TimeUnit;
 
+import org.open4goods.commons.config.yml.ui.VerticalConfig;
+import org.open4goods.commons.dao.ProductRepository;
 import org.open4goods.commons.model.constants.TimeConstants;
 import org.open4goods.commons.model.crawlers.FetcherGlobalStats;
 import org.open4goods.commons.services.VerticalsConfigService;
@@ -34,15 +36,49 @@ public class BatchService {
 
 	private AggregationFacadeService aggregationFacadeService;
 
+	private ProductRepository dataRepository;
+	
 	public BatchService(AggregationFacadeService aggregationFacadeService,
-			CompletionFacadeService completionFacadeService, VerticalsConfigService verticalsConfigService) {
+			CompletionFacadeService completionFacadeService, VerticalsConfigService verticalsConfigService, ProductRepository dataRepository) {
 		super();
 		this.aggregationFacadeService = aggregationFacadeService;
 		this.completionFacadeService = completionFacadeService;
 		this.verticalsConfigService = verticalsConfigService;
+		this.dataRepository = dataRepository;
 
 	}
 
+	/**
+	 * Operate a clean on all verticals :
+	 * > Select all products having a category
+	 * > Rematch the vertical
+	 * > Save
+	 */
+	public void cleanVerticals() {
+		
+//		1 - Get all products having vertical
+		
+		dataRepository.getAllHavingVertical().forEach(e -> {
+			VerticalConfig v = verticalsConfigService.getVerticalForCategories(e.getDatasourceCategories());
+			
+			// Unassociating items where we have no mapped categories
+			if (e.getCategoriesByDatasources().size() == 0) {
+				logger.info("Unassociating vertical, no mapped categories for {}", e);
+				e.setVertical(null); 
+				dataRepository.index(e);
+				
+			} else {
+				if (null != v && v.getId().equals(e.getVertical())) {
+					logger.info("No vertical change for {}", e);
+				} else {
+					logger.info("Vertical changed from {} to {} for {}",e.getVertical(),v == null ? "null" : v.getId(),  e);
+					 e.setVertical(v == null ? null : v.getId());
+					 dataRepository.index(e);
+				}
+			}
+		});
+	}
+	
 	@Scheduled(cron = "0 0 1,13 * * ?")
 	// TODO : From conf
 	public void batch() {

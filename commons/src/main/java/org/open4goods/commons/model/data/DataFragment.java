@@ -89,6 +89,7 @@ public class DataFragment implements Standardisable, Validable {
 	private ProviderSupportType providerSupportType;
 
 
+	private Integer fragmentHashCode;
 
 	/**
 	 * The real merchant (website, or any) providing the offer, sometimes
@@ -127,7 +128,7 @@ public class DataFragment implements Standardisable, Validable {
 	 * It his built (or completed) at the ui level, when
 	 * got matching with longest ids
 	 */
-	private Set<UnindexedKeyValTimestamp> alternateIds = new HashSet<>();
+	private Set<String> alternateIds = new HashSet<>();
 
 	/**
 	 * The unmapped / uncategorized attributes
@@ -497,7 +498,7 @@ public class DataFragment implements Standardisable, Validable {
 			final String cleaned = IdHelper.getHashedName(val);
 			getReferentielAttributes().put(ReferentielKey.MODEL,cleaned);
 			if (!cleaned.equals(val)) {
-				alternateIds.add(new UnindexedKeyValTimestamp(ReferentielKey.MODEL.toString(),val));
+				alternateIds.add(val.toUpperCase());
 			}
 			//			} catch (final InvalidParameterException e) {
 			//				logger.warn("{} : cannot add brand for {}",e.getMessage(), this);
@@ -752,21 +753,23 @@ public class DataFragment implements Standardisable, Validable {
 		// Smart update, time consuming but necessary.
 		// TODO : Involve on a map on the new model
 		
-		Resource existing = resources.stream().filter(e -> e.equals(resource)).findFirst().orElse(null);
-		
-		if (null == existing) {
-			logger.info("Adding new resource : {}",resource);
-			resources.add(resource);
-		} else {
-			logger.info("Updating existing resource : {}",resource);
-			// Smart update
-			existing.setTags(resource.getTags());
-			existing.setHardTags(resource.getHardTags());
-			existing.setDatasourceName(resource.getDatasourceName());
-			
 			resources.remove(resource);
-			resources.add(existing);
-		}
+			resources.add(resource);
+		
+//		
+//		Resource existing = resources.stream().filter(e -> e.getUrl().equals(resource.getUrl()) ).findFirst().orElse(null);
+//		
+//		if (null == existing) {
+//			logger.info("Adding new resource : {}",resource);
+//			resources.add(resource);
+//		} else {
+//			logger.info("Updating existing resource : {}",resource);
+//			// Smart update
+//			existing.setTags(resource.getTags());
+//			existing.setHardTags(resource.getHardTags());
+//			existing.setDatasourceName(resource.getDatasourceName());
+//			
+//		}
 		
 	}
 
@@ -1121,13 +1124,6 @@ public class DataFragment implements Standardisable, Validable {
 
 
 
-	public Set<UnindexedKeyValTimestamp> getAlternateIds() {
-		return alternateIds;
-	}
-
-	public void setAlternateIds(Set<UnindexedKeyValTimestamp> alternateIds) {
-		this.alternateIds = alternateIds;
-	}
 
 	public InStock getInStock() {
 		return inStock;
@@ -1228,6 +1224,22 @@ public class DataFragment implements Standardisable, Validable {
 
 	public void setBrandFragment(boolean brandFragment) {
 		this.brandFragment = brandFragment;
+	}
+
+	public Integer getFragmentHashCode() {
+		return fragmentHashCode;
+	}
+
+	public void setFragmentHashCode(Integer fragmentHashCode) {
+		this.fragmentHashCode = fragmentHashCode;
+	}
+
+	public Set<String> getAlternateIds() {
+		return alternateIds;
+	}
+
+	public void setAlternateIds(Set<String> alternateIds) {
+		this.alternateIds = alternateIds;
 	}
 
 

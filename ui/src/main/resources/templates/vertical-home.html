@@ -180,8 +180,6 @@
 	    const verticalPath = /*[[${verticalPath}]]*/'';
 	    const additionalAttributes = /*[[${filters}]]*/'';
 	    const tpl = /*[[${tpl}]]*/'';
-	    
-	    
 	    	    	    
 	/*]]>*/
 </script>
@@ -234,9 +232,8 @@
 					data : data,
 					vertical: vertical,
   					productUrl : baseUrl+verticalPath+'/'+data.names.url['default'],
-  					ecoscore: Math.round((data.scores.ECOSCORE.value + Number.EPSILON) * 100) / 100 ,
-  					compensation: Math.round((data.price.minPrice.compensation + Number.EPSILON) * 100) / 100 ,
-  					
+  				    ecoscore: data.scores?.ECOSCORE?.value != null ? Math.round((data.scores.ECOSCORE.value + Number.EPSILON) * 100) / 100 : "",
+  					compensation: data.price?.minPrice?.compensation != null ? Math.round((data.price.minPrice.compensation + Number.EPSILON) * 100) / 100 : null,  					
   					
 // TODO : Default as a hack until full i18n is implemented
   					desc:   description(data),
@@ -254,13 +251,13 @@
                return  "" ;
            }
        },
-       { "data": "scores.ECOSCORE.value", "name" : "Ecoscore", "title" : "Ecoscore"  },
+       { "data": "scores.ECOSCORE.value", "name" : "Ecoscore", "title" : "Ecoscore", defaultContent:""  },
        { "data": "price.minPrice.price", "name" : "Prix", "title" : "Prix"  },
        { "data": "offersCount", "name" : "Concurrence", "title" : "Concurrence"  }
            ];
 
 	 	for ( i = 0; i <  additionalAttributes.length; i++) {						
-			columns[i+5] = JSON.parse('{ "data": "attributes.aggregatedAttributes.'+additionalAttributes[i]['key']+'.value", "name" : "'+additionalAttributes[i]['name'][siteLanguage]+'", "title" : "'+additionalAttributes[i]['name'][siteLanguage]+'"  }');
+			columns[i+5] = JSON.parse('{ "data": "attributes.indexed.'+additionalAttributes[i]['key']+'.value", "name" : "'+additionalAttributes[i]['name'][siteLanguage]+'", "title" : "'+additionalAttributes[i]['name'][siteLanguage]+'"  }');
 			columns[i+5].render = dummyRender;
 	 	}
 	 
@@ -285,15 +282,16 @@
 	            	// Adding slider rangers attributes
 	            	var sliderParameters = new Array();
 	            	$('.input-slider-range-container').each (function (e) {
-	            		sliderParameters.push( $(this).attr("id") + ":" + $(this).attr('data-range-value-min') + " : " + $(this).attr('data-range-value-max'));	            		
+	            		sliderParameters.push( $(this).attr("id") + ":" + $(this).attr('data-range-value-min') + ":" + $(this).attr('data-range-value-max')+":"+$('[id="include-undefined-'+$(this).attr("id") + '"]').is(':checked'));	            		
 		            	} 
 	            	);	            	
 	            	data.sliders=sliderParameters;
 	            	
 	            	// Adding checkboxes attributes
 	            	var checkboxesParameters = new Array();
-	            	$('input:checked').each (function (e) {	            	
-	            		checkboxesParameters.push( $(this).attr("id"));	            				            	
+	            	$('input.changeableBox:checked').each (function (e) {
+	            		    val = $(this).attr("data-id")+":"+$(this).attr("data-value");
+	            		  	checkboxesParameters.push( val);	            				            	
 	            		} 
 	            	);	
 	            	data.checkboxes=checkboxesParameters;

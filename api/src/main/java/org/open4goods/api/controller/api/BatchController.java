@@ -130,7 +130,11 @@ public class BatchController {
 	}
 	
 	
-	
+	@GetMapping("/sanitisation/verticals")
+	@Operation(summary="Launch sanitisation of verticals ID")
+	public void sanitizeVertical() throws InvalidParameterException, IOException {
+		batchService.cleanVerticals();
+	}
 	
 	@GetMapping("/sanitisation")
 	@Operation(summary="Launch sanitisation of all products")
@@ -141,7 +145,7 @@ public class BatchController {
 	@GetMapping("/sanitisation/{gtin}")
 	@Operation(summary="Launch sanitisation of a given products")
 	public void sanitizeOne(@PathVariable Long gtin ) throws InvalidParameterException, IOException, ResourceNotFoundException, AggregationSkipException {
-		aggregationFacadeService.sanitizeOne(repository.getById(gtin));
+		aggregationFacadeService.sanitizeAndSave(repository.getById(gtin));
 	}
 	
 }

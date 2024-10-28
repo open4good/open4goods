@@ -58,8 +58,8 @@ public class PriceAggregationService extends AbstractAggregationService {
 	@Override
 	public  Map<String, Object> onDataFragment(final DataFragment fragment, final Product aggregatedData,VerticalConfig vConf) throws AggregationSkipException {
 
-		if (!fragment.hasPrice() || !fragment.affiliated()) {
-			dedicatedLogger.info("No price for data fragment {}, skipping", fragment );
+		if (!fragment.hasPrice()) {
+			dedicatedLogger.warn("No price for data fragment {}, skipping", fragment );
 		} else if (fragment.getPrice().getPrice() == 0.0) {
 			// Checking price is not 0, can happens
 			dedicatedLogger.info("Price is 0 for datafragment {}, skipping", fragment);
@@ -76,7 +76,7 @@ public class PriceAggregationService extends AbstractAggregationService {
 
 	
 	@Override
-	public Map<String, Object> onProduct(Product data, VerticalConfig vConf) throws AggregationSkipException {
+	public void onProduct(Product data, VerticalConfig vConf) throws AggregationSkipException {
 
 		///////////////////
 		// Filtering : 
@@ -137,7 +137,6 @@ public class PriceAggregationService extends AbstractAggregationService {
 
 		// Setting the result
 		data.setPrice(aggPrices);
-		return null;
 
 		// Setting if has an occasion offer
 	}

@@ -28,10 +28,12 @@ import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
 import org.open4goods.api.config.yml.BackupConfig;
+import org.open4goods.api.services.AggregationFacadeService;
 import org.open4goods.commons.dao.ProductRepository;
+import org.open4goods.commons.exceptions.AggregationSkipException;
 import org.open4goods.commons.model.product.Product;
+import org.open4goods.commons.model.product.SourcedAttribute;
 import org.open4goods.commons.services.SerialisationService;
 import org.open4goods.xwiki.services.XWikiReadService;
 import org.slf4j.Logger;
@@ -62,6 +64,8 @@ public class BackupService implements HealthIndicator {
 	private ProductRepository productRepo;
 	private SerialisationService serialisationService;
 
+	private AggregationFacadeService aggregationService;
+	
 	private BackupConfig backupConfig;
 
 	// Used to trigger Health.down() if exception occurs
@@ -78,12 +82,15 @@ public class BackupService implements HealthIndicator {
 
 	
 	
-	public BackupService(XWikiReadService xwikiService, ProductRepository productRepo, BackupConfig backupConfig, SerialisationService serialisationService) {
+	
+	
+	public BackupService(XWikiReadService xwikiService, ProductRepository productRepo, BackupConfig backupConfig, SerialisationService serialisationService, AggregationFacadeService aggregationService) {
 		super();
 		this.xwikiService = xwikiService;
 		this.productRepo = productRepo;
 		this.backupConfig = backupConfig;
 		this.serialisationService = serialisationService;
+		this.aggregationService = aggregationService;
 	}
 
 	/**
@@ -133,6 +140,8 @@ public class BackupService implements HealthIndicator {
 	        
 	        // Setting the expected number of items (min, new items can be indexed during backup)
 	        expectedBackupedProducts.set(productRepo.countMainIndex());
+	        
+	        // TODO(p2,feature) : Export verticalis in separate files 
 	        
 	        // Exporting all datas to the blocking queue
 	        productRepo.exportAll()
@@ -245,7 +254,7 @@ public class BackupService implements HealthIndicator {
 						            logger.warn("Imported items so : {}", counter.get());
 						        }
 						        if (group.size() == backupConfig.getImportBulkSize()) {
-						        	productRepo.storeNoCache(group); // Index the current group
+						        	productRepo.store(group); // Index the current group
 						        	group.clear(); // Clear the group for the next batch
 						        }
 						    } catch (Exception e) {
@@ -255,7 +264,7 @@ public class BackupService implements HealthIndicator {
 						});
 
 						if (!group.isEmpty()) {
-						    productRepo.storeNoCache(group);
+						    productRepo.store(group);
 						}
 						logger.info("Importing file finished : {}", importFile.getAbsolutePath());
 					} catch (Exception e) {
@@ -283,10 +292,24 @@ public class BackupService implements HealthIndicator {
 	 */
 	private Product translate(Product p) {
 
+		
+		// Forcing fresh
+//		p.setLastChange(System.currentTimeMillis());
+				
+		// Attributes migration
+		// Purging aggregated
+//	
+//		try {
+//			aggregationService.sanitize(p);
+//		} catch (AggregationSkipException e) {
+//			logger.error("Error in import, with product sanitisation",e);
+//		}
+		
+		
 		// Setting datasources to new Map format
-		p.getMappedCategories().forEach(e -> {
-			p.getCategoriesByDatasources().put(e.getKey(), e.getValue());
-		});
+//		p.getMappedCategories().forEach(e -> {
+//			p.getCategoriesByDatasources().put(e.getKey(), e.getValue());
+//		});
 		
 		return p;
 	}
@@ -294,7 +317,7 @@ public class BackupService implements HealthIndicator {
 	/**
 	 * This method will periodicaly backup the Xwiki content
 	 */
-	// TODO : Schedule from conf
+	// TODO(p3,conf) : Schedule from conf
 	@Scheduled(initialDelay = 1000 * 3600, fixedDelay = 1000 * 3600 * 12)
 	@Timed(value = "backup.wiki", description = "Backup of all the xwiki content", extraTags = { "service" })
 	public void backupXwiki() {

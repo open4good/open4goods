@@ -98,16 +98,35 @@ attributesConfig:
 
   # Those attributes will be removed from unmatchedAttributes if found
   exclusions:
+    - "SOUSCATEGORIE"
+    - "DELIVERY_COST"
+    - "MERCHANT_CATEGORY"
+    - "DELIVERY_TIME"
+    - "MERCHANT_PRODUCT_THIRD_CATEGORY"
+    - "PRODUCT_MODEL"
+    - "ADVERT_RAKUPON_AMOUNT"
+    - "PRICE_WITH_RAKUPON"
+    - "FRAISDEPORT"
+    - "MERCHANT_PRODUCT_SECOND_CATEGORY"
+    - "ADVERT_RAKUPON_CONDITION"    
     - "CNET INLINE CONTENT"
+    - "ADVERT_RAKUPON_NAME"
+    - "AW_THUMB_URL"
+    - "PRODUCT_TYPE"
+    - "MERCHANT_PRODUCT_CATEGORY_PATH"
     - "CRAWLER"
-    - "EAN GGSHOPPING"
+    - "URLFICHEPRODUIT"
+    - "IDPRODUIT"
+#    - "EAN GGSHOPPING"
+    - "AW_IMAGE_URL"
     - "SEARCH KEYWORDS"
     - "ALTERNATE_IMAGE"
     - "AVERAGE_RATING"
     - "AW_DEEP_LINK"
+    - "LINK"
     - "AW_PRODUCT_ID"
     - "BRAND_ID"
-    - "BRAND_NAME"
+#    - "BRAND_NAME"
     - "CATEGORY_ID"
     - "CONDITION"
     - "CURRENCY"
@@ -121,11 +140,11 @@ attributesConfig:
     - "CUSTOM_8"
     - "CUSTOM_9"
     - "DATA_FEED_ID"
-    - "DELIVERY_COST"
-    - "DELIVERY_TIME"
+#    - "DELIVERY_COST"
+#    - "DELIVERY_TIME"
     - "DELIVERY_WEIGHT"
     - "DESCRIPTION"
-    - "EAN"
+ #   - "EAN"
     - "IN_STOCK"
     - "IS_FOR_SALE"
     - "MERCHANT_DEEP_LINK"
@@ -136,7 +155,7 @@ attributesConfig:
     - "MPN"
     - "PARENT_PRODUCT_ID"
     - "PRE_ORDER"
-    - "PRODUCT_GTIN"
+#    - "PRODUCT_GTIN"
     - "PRODUCT_SHORT_DESCRIPTION"
     - "RATING"
     - "SEARCH_PRICE"
@@ -144,17 +163,19 @@ attributesConfig:
     - "STOCK_STATUS"
     - "WEB_OFFER"
     - "BASE_PRICE"
-    - "CODEBARRE"
+#    - "CODEBARRE"
     - "DATEEXPEDITION"
-    - "ETAT"
-    - "DISPONIBILITE"
+#    - "ETAT"
+#    - "DISPONIBILITE"
     - "PRIX"
-    - "REFURBISHED"
+#    - "REFURBISHED"
     - "REVIEWS"
     - "SAVING"
     - "SAVINGS_PERCENT"
     - "SOLDES"
     - "TOP100"
+    - "ADVERT_RAKUPON_DISCOUNT"
+    - "ADVERT_RAKUPON_END"
 
   # Attributes having the following value will be classified as product features
   featuredValues:
@@ -405,31 +426,6 @@ attributesConfig:
 #      - "ANS"
       
 
-
-    ##################################
-     # DECIBELS_MAX
-     ##################################
-  - key: "DECIBELS_MAX"
-    faIcon: "up-right-and-down-left-from-center"
-    name:
-      default: "Niveau sonore (Db)"
-      fr: "Niveau sonore (Db)"
-    type: "NUMERIC"
-    
-    asRating: true
-    
-    synonyms:
-      all:      
-      - "NIVEAU SONORE MAXIMUM"
-   
-    parser:
-      normalize: true
-      trim: true
-      lowerCase: true
-      upperCase: false
-      removeParenthesis: false
-      deleteTokens: 
-        - "db"
 
 
 

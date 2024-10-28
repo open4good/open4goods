@@ -4,7 +4,7 @@ services:
 ###################################################################             
   xwiki:
     # Use an already built XWiki image from DockerHub.
-    image: "xwiki:16.7.1-mysql-tomcat"
+    image: "xwiki:16.8.0-mysql-tomcat"
     container_name: xwiki-mysql-tomcat-web
     depends_on:
       - mysql
@@ -28,7 +28,7 @@ services:
 ###################################################################  
   # The container that runs MySQL
   mysql:
-    image: "mysql:9.0.1"
+    image: "mysql:9.1.0"
     container_name: mysql
     restart: always
     command: ['mysqld', '--character-set-server=utf8mb4', '--collation-server=utf8mb4_unicode_ci']

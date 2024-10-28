@@ -1,6 +1,7 @@
 package org.open4goods.api.config;
 
 import org.open4goods.api.config.yml.ApiProperties;
+import org.open4goods.api.services.AggregationFacadeService;
 import org.open4goods.api.services.backup.BackupService;
 import org.open4goods.commons.dao.ProductRepository;
 import org.open4goods.commons.services.SerialisationService;
@@ -22,8 +23,8 @@ public class ApiConfigDev {
 
 	@Bean
 	@Autowired
-	BackupService backupService(XWikiReadService xwikiService, ProductRepository productRepository, SerialisationService serialisationService) {
-		return new BackupService(xwikiService, productRepository, apiProperties.getBackupConfig(), serialisationService);
+	BackupService backupService(XWikiReadService xwikiService, ProductRepository productRepository, SerialisationService serialisationService, AggregationFacadeService aggregationService) {
+		return new BackupService(xwikiService, productRepository, apiProperties.getBackupConfig(), serialisationService, aggregationService);
 	}
 
 }

@@ -57,12 +57,12 @@ public class DataTableController {
 		String[] checkboxes = request.getParameterValues("checkboxes[]");
 		if (null != checkboxes) {
 			for (String checkbox : checkboxes) {
-				String[] attr = checkbox.split("-");
+				String[] attr = checkbox.split(":");
 
 				// TODO : should have consts shared with javascript (vertical-home)
                 switch (attr[0]) {
-                    case "condition" -> vRequest.addTermFilter("price.offers.productState", attr[1]);
-                    case "brand" -> vRequest.addTermFilter("attributes.referentielAttributes.BRAND.keyword", attr[1]);
+                    case "condition" -> vRequest.addTermFilter("price.conditions", attr[1]);
+                    case "brand" -> vRequest.addTermFilter("attributes.referentielAttributes.BRAND", attr[1]);
                     case "countries" -> vRequest.addTermFilter("gtinInfos.country", attr[1]);
                     default -> vRequest.addTermFilter(attr[0], attr[1]);
                 }
@@ -80,7 +80,8 @@ public class DataTableController {
 	
 				Double min = Double.parseDouble(sliderValues[1]);
 				Double max = Double.parseDouble(sliderValues[2]) ;
-				vRequest.getNumericFilters().add(new NumericRangeFilter(sliderValues[0] ,min, max));
+				Boolean includeUndefined = Boolean.valueOf(sliderValues[3]);
+				vRequest.getNumericFilters().add(new NumericRangeFilter(sliderValues[0] ,min, max,includeUndefined));
 				}
 		}
 		// Sorting

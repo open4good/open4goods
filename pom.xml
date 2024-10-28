@@ -11,7 +11,7 @@
 	<url>https://github.com/open4good/open4goods</url>
 	<properties>
 		<github.global.server>github</github.global.server>
-		<springboot.version>3.3.4</springboot.version>
+		<springboot.version>3.3.5</springboot.version>
 		<java.version>21</java.version>
 		<maven.compiler.source>21</maven.compiler.source>
 		<maven.compiler.target>21</maven.compiler.target>
@@ -196,7 +196,7 @@
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>taglist-maven-plugin</artifactId>
-				<version>3.1.0</version>
+				<version>3.2.1</version>
 				<configuration>
 					<aggregate>true</aggregate>
 					<xmlOutputDirectory>${project.build.directory}/site/taglist</xmlOutputDirectory>
@@ -230,12 +230,12 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-site-plugin</artifactId>
-				<version>3.20.0</version>
+				<version>3.21.0</version>
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-project-info-reports-plugin</artifactId>
-				<version>3.7.0</version>
+				<version>3.8.0</version>
 			</plugin>
 
 		</plugins>
@@ -311,6 +311,19 @@
 							<directory>data</directory>
 							<followSymlinks>false</followSymlinks>
 						</fileset>
+                        <fileset>
+                            <directory>dist</directory>
+                            <followSymlinks>false</followSymlinks>
+                        </fileset>
+                        <fileset>
+                            <directory>node_modules</directory>
+                            <followSymlinks>false</followSymlinks>
+                        </fileset>
+                        <fileset>
+                            <directory>node_modules</directory>
+                            <followSymlinks>false</followSymlinks>
+                        </fileset>
+                        
 						<fileset>
 							<directory>src/test/resources/last</directory>
 							<followSymlinks>false</followSymlinks>
@@ -335,12 +348,12 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-site-plugin</artifactId>
-				<version>3.20.0</version>
+				<version>3.21.0</version>
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-project-info-reports-plugin</artifactId>
-				<version>3.7.0</version>
+				<version>3.8.0</version>
 			</plugin>
 
 		</plugins>

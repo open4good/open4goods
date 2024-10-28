@@ -49,6 +49,7 @@ public class IdentityAggregationService extends AbstractAggregationService {
 		/////////////////////////////
 		
 		if (null == output.getId()) {
+			// TODO(p2, features) : Should store the GTIN type when encountered in gtin infos, and then render with appropriate leading 0
 			output.setId(Long.valueOf(input.gtin()));
 		} else {
 			if (!output.gtin().equals(input.gtin())) {
@@ -59,23 +60,20 @@ public class IdentityAggregationService extends AbstractAggregationService {
 		/////////////////////////////
 		// Adding alternate models's
 		/////////////////////////////		
-		output.getAlternativeModels().addAll(input.getAlternateIds().stream().map(e-> e.getValue()).collect(Collectors.toSet()) );
+		output.getAkaModels().addAll(input.getAlternateIds());
 
 		/////////////////////////////
 		// Setting the dates
 		/////////////////////////////
 		
 		// The last update
-		if ( output.getLastChange() < input.getLastIndexationDate()) {
+		if ( output.getLastChange() <= input.getLastIndexationDate()) {
 			output.setLastChange(input.getLastIndexationDate());
 		} else {
-			dedicatedLogger.error("Data Fragment has an update date in the futur ! : {}",input);
+			dedicatedLogger.warn("Data Fragment has an update date in the futur. Probable erasure due to same gtin in different datasources in the same bulk ! : {}",input);
 		}
 
-		/////////////////////////////
-		// Updating the datasources
-		/////////////////////////////
-		output.getDatasourceNames().add(input.getDatasourceName());
+	
 
 		
 		onProduct(output, vConf);
@@ -83,7 +81,7 @@ public class IdentityAggregationService extends AbstractAggregationService {
 	}
 
 	@Override
-	public HashMap<String, Object> onProduct(Product output, VerticalConfig vConf) throws AggregationSkipException {
+	public void onProduct(Product output, VerticalConfig vConf) throws AggregationSkipException {
 
 		if (StringUtils.isEmpty(output.gtin())) {
 			dedicatedLogger.warn("Skipping product aggregation, empty barcode");
@@ -111,11 +109,12 @@ public class IdentityAggregationService extends AbstractAggregationService {
 			String country = gs1Service.detectCountry(output.gtin());
 			//		logger.info("Country for {} is {}", output.gtin(), country);
 			output.getGtinInfos().setCountry(country);
+		} else {
+			dedicatedLogger.warn("An unknown GTIN type, cannot complete with country and type : {}",output.getId());
 		}
 
 		// Setting barcode type
 		output.getGtinInfos().setUpcType(valResult.getKey());
-		return null;
 		
 	}
 

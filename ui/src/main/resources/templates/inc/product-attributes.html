@@ -1,6 +1,6 @@
-<div class="table-responsive table-caracteristics-fs mt-4" th:if="${product.attributes.aggregatedAttributes.size()} > 0">
+<div class="table-responsive table-caracteristics-fs mt-4" th:if="${product.attributes.indexed.size()} > 0">
 	<table class="table">
-		<th:block th:each="attribute : ${product.attributes.aggregatedAttributes.values()}">
+		<th:block th:each="attribute : ${product.attributes.indexed.values()}">
 			<tr>
 				<td class="align-middle" th:text="${helper.attributeName(attribute.name)}"></td>
 				
@@ -9,6 +9,7 @@
 					<td class="align-middle" th:case="*" th:text="${attribute.value}"></td>
 				</th:block>
 				<td class="align-middle">
+					
 					<span th:if="${attribute}" th:with="conflicts = ${attribute.hasConflicts()}, sourcesCount=${attribute.sourcesCount()}, distinctValues=${attribute.distinctValues()}">
 	
 						<!-- /** Conflicts  **/ -->

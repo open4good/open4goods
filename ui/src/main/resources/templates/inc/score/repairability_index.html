@@ -4,7 +4,7 @@
 		<div class="card-header border-0 bg-white text-center pb-0">
 			<span class="d-block my-3">
 				<span class="display-2 fw-bold">
-					<img th:src="'/icons/reparability/'+${product.attributes.aggregatedAttributes.get(score.name).value.toLowerCase()}+'.svg'">
+					<!--  <img th:src="'/icons/reparability/'+${product.attributes.indexed.get(score.name).value.toLowerCase()}+'.svg'">-->
 					</span>
 				</span>
 		</div>
@@ -16,7 +16,7 @@
 		<div>
 			<ul class="list-group list-group-flush price-list mb-4">
 				<li class="list-group-item border-0">
-					L'indice de réparabilité (<th:block th:text="${product.attributes.aggregatedAttributes.get(score.name).value}"></th:block>/10)compte pour <b><th:block th:text="${verticalConfig.ecoscorePercentOf(score.name)}"></th:block> %</b>
+					L'indice de réparabilité (<!-- <th:block th:text="${product.attributes.indexed.get(score.name).value}"></th:block> -->/10)compte pour <b><th:block th:text="${verticalConfig.ecoscorePercentOf(score.name)}"></th:block> %</b>
 					 dans la note totale (<th:block th:text="${verticalConfig.ecoscoreParticipationPointsOf20(score.name, score.relativ.value)}"> </th:block> points attribués, sur les 
 					<th:block th:text="${verticalConfig.ecoscoreParticipationMaxPointsOf20(score.name)}"> </th:block>  possibles)
 				</li>

@@ -5,29 +5,36 @@ public class IndexationConfig {
 	/**
 	 * Max size of the blocking queue for products
 	 */
-	int productsQueueMaxSize = 10000;
+	int productsQueueMaxSize = 5000;
+	
+	/**
+	 * Max size of the blocking queue for partial products
+	 */
+	int partialProductsQueueMaxSize = 5000;
 
 	/**
 	 * Max size of the blocking queue for products
 	 */
-	int datafragmentQueueMaxSize = 10000;
+	int datafragmentQueueMaxSize = 20000;
 	
 	/**
-	 * Bulk size  (applied for update of datafragments, means on fetching and on insertion in elastic cluster)
+	 * Bulk size  (applied for update of datafragments, means on fetching and processing in elastic cluster)
 	 */
 	
 	int dataFragmentbulkPageSize = 200;
 
 	int productsbulkPageSize = 200;
 
-	
+	int partialProductsbulkPageSize = 300;
 	
 	/**
-	 * Number ofconccurent workers for product (only save in es)
+	 * Number of conccurent workers for product (only save in es)
 	 */
 	int productWorkers = 2;
 	
-
+	int partialProductWorkers = 2;
+	
+	
 	/**
 	 * Number of concurent workers for datafragments aggregation (means retrieve from cluster, update and save bck)
 	 */
@@ -84,6 +91,27 @@ public class IndexationConfig {
 	}
 	public int getDataFragmentbulkPageSize() {
 		return dataFragmentbulkPageSize;
+	}
+	public int getPartialProductsQueueMaxSize() {
+		return partialProductsQueueMaxSize;
+	}
+	public void setPartialProductsQueueMaxSize(int partialProductsQueueMaxSize) {
+		this.partialProductsQueueMaxSize = partialProductsQueueMaxSize;
+	}
+	public void setDataFragmentbulkPageSize(int dataFragmentbulkPageSize) {
+		this.dataFragmentbulkPageSize = dataFragmentbulkPageSize;
+	}
+	public int getPartialProductsbulkPageSize() {
+		return partialProductsbulkPageSize;
+	}
+	public void setPartialProductsbulkPageSize(int partialProductsbulkPageSize) {
+		this.partialProductsbulkPageSize = partialProductsbulkPageSize;
+	}
+	public int getPartialProductWorkers() {
+		return partialProductWorkers;
+	}
+	public void setPartialProductWorkers(int partialProductWorkers) {
+		this.partialProductWorkers = partialProductWorkers;
 	}
 	
 

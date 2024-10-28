@@ -1,10 +1,10 @@
 package org.open4goods.commons.store.repository;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.open4goods.commons.dao.ProductRepository;
-import org.open4goods.commons.model.product.Product;
+import org.open4goods.commons.model.product.ProductPartialUpdateHolder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 /**
@@ -12,10 +12,10 @@ import org.slf4j.LoggerFactory;
  * @author goulven
  *
  */
-public class ProductIndexationWorker implements Runnable {
+public class PartialProductIndexationWorker implements Runnable {
 
 
-	private static final Logger logger = LoggerFactory.getLogger(ProductIndexationWorker.class);
+	private static final Logger logger = LoggerFactory.getLogger(PartialProductIndexationWorker.class);
 
 	/** The service used to "atomically" fetch and store / update DataFragments **/
 	private final ProductRepository service;
@@ -36,7 +36,7 @@ public class ProductIndexationWorker implements Runnable {
 	 * @param owningService
 	 * @param dequeuePageSize
 	 */
-	public ProductIndexationWorker(final ProductRepository owningService, final int dequeuePageSize, final int pauseDuration, String workerName) {
+	public PartialProductIndexationWorker(final ProductRepository owningService, final int dequeuePageSize, final int pauseDuration, String workerName) {
 		service = owningService;
 		this.dequeuePageSize = dequeuePageSize;
 		this.pauseDuration = pauseDuration;
@@ -51,7 +51,7 @@ public class ProductIndexationWorker implements Runnable {
 			try {
 				
 				// Computing if items presents, and how many to take
-				int itemsToTake = service.getQueue().size();
+				int itemsToTake = service.getPartialProductQueue().size();
 				if (itemsToTake > dequeuePageSize) {
 					itemsToTake = dequeuePageSize;
 				}
@@ -59,23 +59,17 @@ public class ProductIndexationWorker implements Runnable {
 				if (itemsToTake > 0) {
 					// There is data to consume and queue consummation is enabled
 					// A map to deduplicate --> MEANS WE CAN SOMETIMES LOOSE DATAFRAMENTS IF 2 ENTRIES ARE IN THE SAME BAG (no because we put back in queue)
-					final Map<String,Product> buffer = new HashMap<>();	
+					final Set<ProductPartialUpdateHolder> buffer = new HashSet<>();	
 										
 					// Dequeuing
 					for (int i = 0; i < itemsToTake; i++) {
-						Product item = service.getQueue().take();
-						
-						if (buffer.containsKey(item.gtin())) {
-							logger.info("Putting back in queue : {}", item.gtin() );
-							service.getQueue().put(item);
-						} else {
-							buffer.put(item.gtin(),item);							
-						}
+						ProductPartialUpdateHolder item = service.getPartialProductQueue().take();
+						buffer.add(item);						
 					}
 					
-					service.store(buffer.values());
+					service.bulkUpdateDocument(buffer);
 					
-					logger.warn ("{} has indexed {} products. {} Remaining in queue",workerName,  buffer.size(), service.getQueue().size());
+					logger.warn ("{} has indexed {} products. {} Remaining in queue",workerName,  buffer.size(), service.getPartialProductQueue().size());
 
 				} else {
 					try {
