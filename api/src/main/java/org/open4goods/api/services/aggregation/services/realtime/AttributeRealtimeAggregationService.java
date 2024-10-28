@@ -57,7 +57,7 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 			data.getAttributes().getAll().remove(e);
 		});
 
-		// TODO(p3,design) : Some kind of legacy bug, some attributes have to many sources. Hope this is a done bug..
+		// TODO(p3,design) : Remove, this is some kind of legacy bug, some attributes have uncoherent and too many sources. Hope this is a done bug..
 		data.getAttributes().getAll().keySet().removeIf(e-> data.getAttributes().getAll().get(e).sourcesCount() > 10);
 		
 		
