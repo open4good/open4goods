@@ -5,7 +5,8 @@
             "disable_score_absolute": {
                 "path_match": "scores.*.absolute",
                 "mapping": {
-                    "enabled": false
+                    "enabled": false,
+                    "type": "object"
                 }
             }
         },
@@ -13,7 +14,8 @@
             "disable_score_relativ": {
                 "path_match": "scores.*.relativ",
                 "mapping": {
-                    "enabled": false
+                    "enabled": false,
+                    "type": "object"
                 }
             }
         },
@@ -23,6 +25,15 @@
                 "mapping": {
                     "type": "keyword",
                     "ignore_above": 256
+                }
+            }
+        },
+         {
+            "disable_indexed_source_attributes": {
+                "path_match": "attributes.indexed.*.source",
+                "mapping": {
+                    "enabled": false,
+                    "type": "object"
                 }
             }
         },
