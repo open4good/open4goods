@@ -54,7 +54,6 @@ email: your@email.com
 google.recaptcha.secret: "[RECAPTCHA_SECRET]"
 
 webConfig:
-  templatesCaching: false
   webAuthentication: false
       
 ###############################################################

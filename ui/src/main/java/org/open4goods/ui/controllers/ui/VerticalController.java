@@ -80,7 +80,7 @@ public class VerticalController  extends AbstractController {
 		ret.addObject("products", products);
 		
 		ret.addObject("posts",blogService.getPosts(vertical));
-		ret.addObject("config",config);
+		ret.addObject("verticalConfig",config);
 
 		ret.addObject("filters",config.verticalFilters());
 		ret.addObject("vertical",this.vertical);

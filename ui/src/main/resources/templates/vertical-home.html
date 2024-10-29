@@ -8,22 +8,22 @@
     
 	<!-- Primary Meta Tags -->
 	<title th:text="#{index.title}"></title>
-	<meta name="title" th:content="${config.i18n(siteLanguage).verticalMetaTitle}">
-	<meta name="description" th:content="${config.i18n(siteLanguage).verticalMetaDescription}">
+	<meta name="title" th:content="${verticalConfig.i18n(siteLanguage).verticalMetaTitle}">
+	<meta name="description" th:content="${verticalConfig.i18n(siteLanguage).verticalMetaDescription}">
 		
 	<!-- Open Graph / Facebook -->
 	<meta property="og:type" content="website">
 	<meta property="og:url" th:content="${url}">
-	<meta property="og:title" th:content="${config.i18n(siteLanguage).productMetaOpenGraphTitle}">
-	<meta property="og:description" th:content="${config.i18n(siteLanguage).productMetaOpenGraphTitle}">
+	<meta property="og:title" th:content="${verticalConfig.i18n(siteLanguage).productMetaOpenGraphTitle}">
+	<meta property="og:description" th:content="${verticalConfig.i18n(siteLanguage).productMetaOpenGraphTitle}">
 	<meta property="og:image" th:content="${url} + 'assets/img/brand/light.svg'">
 	
 	<!-- Twitter -->
 	<meta name="twitter:card" content="summary_large_image">
 	<!-- TODO : Image of the category -->
 	<meta name="twitter:url" th:content="${url}">
-	<meta name="twitter:title" th:content="${config.i18n(siteLanguage).productMetaTwitterTitle}">
-	<meta name="twitter:description" th:content="${config.i18n(siteLanguage).productMetaTwitterDescription}">
+	<meta name="twitter:title" th:content="${verticalConfig.i18n(siteLanguage).productMetaTwitterTitle}">
+	<meta name="twitter:description" th:content="${verticalConfig.i18n(siteLanguage).productMetaTwitterDescription}">
 	<!-- TODO : Image of the category -->
 	<meta name="twitter:image" th:content="${url} + 'assets/img/brand/light.svg'">
 
@@ -59,8 +59,8 @@
 			                                <img class="mt-2" width="150" th:src="'/images/verticals/' + ${vertical} + '.png'">
 			                        </div>
 			                        <div class="col-lg-10">
-			                                <h1 class="mt-2 text-center" th:text="${config.i18n(siteLanguage).verticalHomeTitle}"></h1>
-			                                <p class="row p-2 mb-4" th:text="${config.i18n(siteLanguage).verticalHomeDescription}"> </p>		
+			                                <h1 class="mt-2 text-center" th:text="${verticalConfig.i18n(siteLanguage).verticalHomeTitle}"></h1>
+			                                <p class="row p-2 mb-4" th:text="${verticalConfig.i18n(siteLanguage).verticalHomeDescription}"> </p>		
 			                				
 			                        </div> 
 								</div>
@@ -74,11 +74,11 @@
                     <div class="col-lg-3 mb-3 mb-lg-0">
                     
                 		<!--/* Guides */-->	
-						<div th:if="${config.i18n(siteLanguage).getWikiPages().size() > 0}" class="row card shadow mb-2">
+						<div th:if="${verticalConfig.i18n(siteLanguage).getWikiPages().size() > 0}" class="row card shadow mb-2">
 							<div class="card-header"><h2 class="h5">Les guides</h2></div>
 							<div class="card-body">
 								<ul class="list-group list-group-flush price-list">
-									<li th:each="item : ${config.i18n(siteLanguage).getWikiPages()}" class="list-group-item border-0">
+									<li th:each="item : ${verticalConfig.i18n(siteLanguage).getWikiPages()}" class="list-group-item border-0">
 										<span class="fas" th:classappend="${item.faIcon}" ></span>
 										<a th:href="'/' + ${verticalPath} + '/'+ ${item.verticalUrl}" th:text="${item.title}"></a> 
 									</li>								
@@ -174,7 +174,7 @@
 <script th:inline="javascript">
 	/*<![CDATA[*/
 	
-	    const vertical = /*[[${config.id}]]*/ '';
+	    const vertical = /*[[${verticalConfig.id}]]*/ '';
 	    const siteLanguage = /*[[${siteLanguage}]]*/'';
 	    const baseUrl = /*[[${baseUrl}]]*/'';
 	    const verticalPath = /*[[${verticalPath}]]*/'';
