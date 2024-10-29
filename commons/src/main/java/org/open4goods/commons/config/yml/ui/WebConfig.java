@@ -38,6 +38,13 @@ public class WebConfig {
 	 */
 	private Boolean webAuthentication = true;
 
+	/**
+	 * If true, the CSS used will the one that is hot built from scss sources, using gulp. It allows to switch the inclusion in templates/inc/header-meta.html
+	 */
+	private Boolean useHotScss = false;
+	
+	
+	
 	
 	/**
 	 * The list of hosts allowed for CORS
@@ -99,6 +106,14 @@ public class WebConfig {
 
 	public void setCorsAllowedHosts(List<String> corsAllowedHosts) {
 		this.corsAllowedHosts = corsAllowedHosts;
+	}
+
+	public Boolean getUseHotScss() {
+		return useHotScss;
+	}
+
+	public void setUseHotScss(Boolean useHotScss) {
+		this.useHotScss = useHotScss;
 	}
 
 }
