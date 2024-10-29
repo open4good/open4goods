@@ -1,9 +1,9 @@
 {
     "name": "pixel-pro-ui-kit",
     "version": "5.4.0",
-    "description": "Pixel Pro - Premium Bootstrap 5 UI Kit created by Themesberg",
+    "description": "Nudger UI Kit",
     "main": "gulpfile.js",
-    "author": "Themesberg",
+    "author": "Nudger, from a Themesberg legit buy",
     "keywords": [
         "css",
         "sass",
@@ -14,11 +14,6 @@
         "accessible",
         "bootstrap 5"
     ],
-    "homepage": "https://themesberg.com/product/ui-kit/pixel-pro-premium-bootstrap-5-ui-kit",
-    "bugs": {
-        "email": "zoltan@themesberg.com"
-    },
-    "license": "https://themesberg.com/licensing",
     "devDependencies": {
         "browser-sync": "^3.0.0",
         "del": "^6.0.0",

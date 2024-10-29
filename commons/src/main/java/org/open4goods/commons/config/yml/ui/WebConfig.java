@@ -43,8 +43,17 @@ public class WebConfig {
 	 */
 	private Boolean useHotScss = false;
 	
+	/**
+	 * If set, the theme to use. Will map templates in templates/themes/$[theme} with fallback on the "default" theme
+	 */
 	
+	private String theme;
 	
+	/**
+	 * The absolute path to the templates folder if templates are on file system. Will be served from classpath if not set
+	 */
+	
+	private String templatesPath;
 	
 	/**
 	 * The list of hosts allowed for CORS
@@ -116,4 +125,21 @@ public class WebConfig {
 		this.useHotScss = useHotScss;
 	}
 
+	public String getTheme() {
+		return theme;
+	}
+
+	public void setTheme(String theme) {
+		this.theme = theme;
+	}
+
+	public String getTemplatesPath() {
+		return templatesPath;
+	}
+
+	public void setTemplatesPath(String templatesPath) {
+		this.templatesPath = templatesPath;
+	}
+
+	
 }

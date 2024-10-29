@@ -55,7 +55,7 @@ google.recaptcha.secret: "[RECAPTCHA_SECRET]"
 
 webConfig:
   webAuthentication: false
-      
+  templates-caching: false    
 ###############################################################
 # URL's 
 ###############################################################
