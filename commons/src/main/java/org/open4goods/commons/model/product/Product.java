@@ -42,7 +42,7 @@ import org.springframework.data.elasticsearch.annotations.Mapping;
 import org.springframework.data.elasticsearch.annotations.Setting;
 import org.springframework.data.elasticsearch.annotations.WriteTypeHint;
 
-@Document(indexName = Product.DEFAULT_REPO, alwaysWriteMapping = true, createIndex = true, writeTypeHint = WriteTypeHint.FALSE, dynamic = Dynamic.FALSE)
+@Document(indexName = Product.DEFAULT_REPO, alwaysWriteMapping = false, createIndex = true, writeTypeHint = WriteTypeHint.FALSE, dynamic = Dynamic.FALSE)
 @Setting( settingPath = "/product-settings.json")
 @Mapping(mappingPath = "/product-mappings.json")
 public class Product implements Standardisable {
