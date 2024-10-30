@@ -37,6 +37,7 @@ const paths = {
     },
     dev: {
         css: './src/main/resources/static/css/dev',
+        templates: './src/main/resources/templates',
     },
     base: {
         base: './',
@@ -127,8 +128,22 @@ gulp.task('build:dist', gulp.series('clean:dist', 'copy:dist:css', 'minify:css')
 
 // Watch for SCSS changes during development
 gulp.task('watch', function () {
-  gulp.watch(paths.src.scss, gulp.series('copy:dev:css', 'beautify:css'));
-});
+  
+    // Initialize BrowserSync to serve files from the root directory
+     browserSync.init({
+       proxy: "localhost:8082", // Use your Spring Boot local server URL
+       port: 3000
+     });
 
+     // Watch SCSS changes
+        gulp.watch(paths.src.scss, gulp.series('copy:dev:css', 'beautify:css'));
+
+     // Watch for CSS changes and reload the browser
+      gulp.watch(paths.dev.css + '/**/*.css').on('change', browserSync.reload);
+      gulp.watch(paths.dev.templates + '/**/*.html').on('change', browserSync.reload);
+       
+    
+    
+});
 // Default
 gulp.task('default', gulp.series('build:dist'));

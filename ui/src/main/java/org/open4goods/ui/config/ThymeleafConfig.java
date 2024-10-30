@@ -27,10 +27,8 @@ public class ThymeleafConfig {
         
         if (StringUtils.isEmpty(uiConfig.getWebConfig().getTemplatesPath())) {
         	customResolver.setPrefix(CLASSPATH_TEMPLATES_PREFIX+"/themes/"+uiConfig.getWebConfig().getTheme()+ "/");
-        	
         } else {
         	customResolver.setPrefix("file:"+uiConfig.getWebConfig().getTemplatesPath()+"/themes/"+uiConfig.getWebConfig().getTheme()+ "/");
-        	
         }
         
         customResolver.setSuffix(".html");
@@ -48,7 +46,6 @@ public class ThymeleafConfig {
         }
     	else {
         	defaultResolver.setPrefix("file:"+uiConfig.getWebConfig().getTemplatesPath()+"/default/");
-        		
     	}
         	
         defaultResolver.setSuffix(".html");

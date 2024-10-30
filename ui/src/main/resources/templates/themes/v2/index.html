@@ -1,0 +1,563 @@
+
+<!DOCTYPE html>
+<html th:lang="${siteLocale.language}">
+
+<head>
+
+    <!--/* Metas and CSS */-->
+    <th:block th:insert="~{inc/header-meta.html}"></th:block>
+    
+    <!-- Primary Meta Tags -->
+    <title>Comparateur écologique en ligne | Nudger</title>
+    <meta name="description" content="Nudger vous aide à comparer les scores écologiques des différents produits du marché. Utilisation gratuite !">
+        
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" th:content="${url}">
+    <meta property="og:title" th:content="#{index.title}">
+    <meta property="og:description" th:content="#{index.meta.description}">
+    <meta property="og:image" th:content="${url} + 'assets/img/brand/light.svg'">
+    
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:url" th:content="${url}">
+    <meta name="twitter:title" th:content="#{index.title}">
+    <meta name="twitter:description" th:content="#{index.meta.description}">
+    <meta name="twitter:image" th:content="${url} + 'assets/img/brand/light.svg'">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" integrity="sha512-c42qTSw/wPZ3/5LBzD+Bw5f7bSF2oxou6wEb+I/lqeaKV5FDIfMvvRp772y4jcJLKuGUOpbJMdg/BTl50fJYAw==" crossorigin="anonymous" referrerpolicy="no-referrer" />  
+
+    <meta name="google-site-verification" content="I2wSyJnnRSjrLjadtNgFzHHmtSN8DPbjhPePTkQNhp4" />
+</head>
+
+<body class="home-page">
+    
+    <!--/* Navbar */-->
+    <th:block th:insert="~{inc/navbar/navbar-home.html}"></th:block>
+    <!--/* Loader */-->
+    <th:block th:insert="~{inc/preloader.html}"></th:block>
+    
+    <main>  
+
+        <section id="section1"
+            class="section-header overflow-hidden bg-white vh-100 d-flex  navigation">
+            <div class="container">
+                <div class="row">
+                    <div  class="col-12 text-center">
+                        <span class="h1 fw-bolder display-2">
+                            Bienvenussse sur <img height="75"
+                                src="https://nudger.fr/assets/img/nudger-logo-small.png"
+                                alt="Nudger.fr">
+                        </span>
+                        <h2 class="h2 text-green-bg-transparent d-inline-flex px-3 mt-5 mb-5">Réconcilier écologie et pouvoir d'achat !</h2>
+                        <div class="container lead fw-normal text-muted mb-7"> 
+                        <th:block th:with="path='WIDGETS/accueil-jumbotron/'">
+                                    <th:block th:insert="~{inc/wiki.html}"></th:block>
+                                </th:block>
+                        
+                        </div>
+                        <!-- Button Modal -->
+                        <form class="" method="get" id="searchForm" action="/recherche">
+                            <div class="d-flex align-items-center row mt-lg-2">
+                                <div class="col-12 mb-3 mb-md-0 col-md-6 col-lg-4">
+                                    <label for="searchInput" class="bg-green px-3 py-2 mb-0">Commencez à nudger ici</label>
+                                </div>
+                                <div class="col-12 col-md-6 col-lg-8">
+                                    <div class="input-group">
+                                        <input type="text" id="searchInput" class="form-control"
+                                            th:placeholder="'Rechercher dans ' + ${#numbers.formatDecimal(totalItems, 0, 'COMMA', 0, 'POINT')} + ' produits'" aria-label="Search"
+                                            name="q" data-dashlane-rid="c04fc15a353ceabb"
+                                            data-form-type="">
+                                        <button
+                                            onclick="document.getElementById('searchForm').submit()"
+                                            class="btn btn-primary" type="button"
+                                            data-dashlane-label="true"
+                                            data-dashlane-rid="4c876b4b5578a952" data-form-type="">
+                                            <span class="fas fa-search"></span>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>          
+        </section>
+
+
+
+
+
+
+        <div id="section2" class="container-fluid mt-4 navigation">
+            <section class="text-center py-4">
+                <h2 class="h2 text-green-bg-transparent d-inline-flex px-3 my-3">Nos catégories de produits</h2>
+            </section>
+        </div>
+
+
+        <div id="section3" class="container mt-4 navigation">
+            <div class="row">
+
+
+                <div class="col-12 col-md-6 col-lg-3 mb-3">
+                
+                    <div th:each="vertical : ${verticals}" class="card text-center border-gray-300">
+                        <img
+                            class="profile-thumbnail small-thumbnail rounded mx-auto mt-4"
+                            th:src="'/images/verticals/' + ${vertical.id} + '.png'"
+                            th:alt="${vertical.i18n(siteLanguage).verticalHomeTitle}">
+                        <div class="card-body">
+                            <h3 class="h5 card-title" th:text="${vertical.i18n(siteLanguage).verticalHomeTitle}"></h3>
+                            <p class="card-text" th:text="${vertical.i18n(siteLanguage).truncatedHomeDescription(75)}"></p>
+                        </div>
+                        <div class="card-footer bg-white border-0 p-0">
+                            <div class="d-grid">
+                                <div th:if="${user}">
+                                        <a type="submit" class="btn btn-warning btn-sm" th:href="'/regenerate/' + ${vertical.id}">Changer l'image</a>
+                                </div>
+                                <a class="btn btn-primary rounded-0 rounded-bottom" th:href="'/'+${vertical.i18n(siteLanguage).verticalHomeUrl}">Découvrir</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                
+                
+                
+            
+            </div>
+        </div>
+
+
+
+
+
+
+
+        <section class="bg-green-transparent text-center py-4">
+            <h2> <span class="h1 mb-3">Consommer moins, consommer mieux !</span></h2>
+            <p class="lead mb-0">Nudger, le coup de pouce qui vous aide à amoindrir l'impact de votre shopping en ligne.</p>
+        </section>
+       
+
+        <div class="container container-semi-fluid py-5">
+            <div class="row justify-content-between align-items-center">
+                                
+                
+                <div class="col-12 col-md-12 text-center">
+                    <div class="row justify-content-center">
+                
+    
+                        
+                        
+
+                        
+                        
+                        <div class="col-12 col-md-6 col-lg-6 mb-3">
+                            <div class="card bg-white border-gray-300 text-gray p-4 h-100">
+                                <div class="card-header bg-white border-0 pb-0">
+                                    <h3 class="h4 m-0">Écoscore</h3>
+                                </div>
+                                <div class="card-body">
+                                    <p>
+                                        <th:block th:with="path='WIDGETS/accueil-ecoscore/'">
+                                            <th:block th:insert="~{inc/wiki.html}"></th:block>
+                                        </th:block>                                
+                                    </p>
+                                    <a href="#ecoscore" class="btn btn-sm btn-primary animate-up-2 mt-3">Score écologique</a>
+                                </div>
+                            </div>
+                        </div>                    
+
+                        <div class="col-12 col-md-6 col-lg-6 mb-3 ">
+                            <div class="card bg-white border-gray-300 text-gray p-4 h-100">
+                                <div class="card-header bg-white border-0 pb-0">
+                                    <h3 class="h4 m-0">Contribution écologique</h3>
+                                </div>
+                                <div class="card-body">
+                                    <p>
+                                        <th:block th:with="path='WIDGETS/accueil-compensation/'">
+                                            <th:block th:insert="~{inc/wiki.html}"></th:block>
+                                        </th:block>                                
+                                    </p>
+                                    <a href="#compensation" class="btn btn-sm btn-primary animate-up-2 mt-3">contribution environnementale</a>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <div class="col-12 col-md-6 mb-3 mb-lg-0">
+                            <div class="card bg-white border-gray-300 text-gray p-4 h-100">
+                                <div class="card-header bg-white border-0 pb-0">
+                                    <h3 class="h4 m-0">Modèle ouvert</h3>
+                                </div>
+                                <div class="card-body">
+                                    <p>
+                                        <th:block th:with="path='WIDGETS/accueil-modele-ouvert/'">
+                                            <th:block th:insert="~{inc/wiki.html}"></th:block>
+                                        </th:block>                                
+                                    </p>
+                                    <a href="#modele-ouvert" class="btn btn-sm btn-primary animate-up-2 mt-3">Modèle ouvert</a>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        
+                        <div class="col-12 col-md-6 mb-3  mb-lg-0">
+                            <div class="card bg-white border-gray-300 text-gray p-4 h-100x ">
+                                <div class="card-header bg-white border-0 pb-0">
+                                    <h3 class="h4 m-0">Numérique responsable</h3>
+                                </div>
+                                <div class="card-body">
+                                    <p>
+                                        <th:block th:with="path='WIDGETS/accueil-data-responsable'">
+                                            <th:block th:insert="~{inc/wiki.html}"></th:block>
+                                        </th:block>                                
+                                    </p>
+                                    <a href="#opendata" class=" level btn btn-sm btn-primary animate-up-2 mt-3">Data responsable</a>
+                                </div>
+                            </div>
+                        </div>                      
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <section class="bg-green-transparent text-center py-4">
+            <h2> <span class="h1 mb-3">Les chiffres clés</span></h2>
+            <p class="lead mb-0">Nudger, c'est :</p>
+        </section>
+
+        <section class="container text-center py-4">
+                <div class="row justify-content-center">
+                    <div class="col-12 col-md-6 col-lg-4 py-3">
+                        <div class="icon icon-shape icon-shape-secondary me-2 me-md-0 mb-2">
+                            <span class="fas fa-box-open"></span>
+                        </div>
+                        <span class="counter display-3 text-secondary d-block" th:data-value="${config.reversementConfig.getTotalReversements()}" ></span>
+                        <span class="lead">Montant en euros du coup de pouce à date de Nudger pour la planète</span>
+                    </div>
+
+                    <div class="col-12 col-md-6 col-lg-4 py-3">
+                        <div class="icon icon-shape icon-shape-secondary me-2 me-md-0 mb-2">
+                            <span class="fas fa-box-open"></span>
+                        </div>
+                        <span class="counter display-3 text-secondary d-block" th:data-value="${totalItems}" >15M+ Offres commerciales</span>
+                        <span class="lead">Un des comparateurs français les plus fournis en références de produits</span>
+                    </div>
+
+                    <div class="col-12 col-md-6 col-lg-4 py-3">
+                        <div class="icon icon-shape icon-shape-secondary me-2 me-md-0 mb-2">
+                            <span class="fas fa-box-open"></span>
+                        </div>
+                        <span class="counter display-3 text-secondary d-block" th:data-value="'53'" th:text="'53'"></span>
+                        <span class="lead"><a href="/partenaires"> Nombre de partenaires</a> de Nudger, dont les plus grandes enseignes !</span>
+                    </div>
+                </div>
+        </section>
+   
+        <section class="bg-green-transparent text-center py-4 mb-5">
+            <h2> <span class="h1 mb-3">Notre philosophie : le bien commun</span></h2>
+            <p class="lead mb-0">Nous sommes engagés à faire de la consommation un acte réfléchi et moins impactant pour la planète.</p>
+        </section>
+       
+       
+        <div class="container my-2">
+            <div class="d-flex justify-content-start">
+                <div class="col-12 col-md-12">
+                    <!-- Icon Boxes -->
+                    <div class="card shadow">
+                        <div class="row g-0 align-items-center">
+                            <div class="col-md-4 p-4 d-none d-md-block">
+                                <img src="/assets/img/illustrations/contribution.webp" alt="Contribution écologique" class="card-img-top rounded-top">
+                            </div>
+                            <div class="col-md-8">
+                                <div class="card-body">
+                                    <h3 id=compensation class="h5 card-title mt-3">Contribution écologique</h3>
+                                    <p class="card-text">
+                                        <th:block th:with="path='WIDGETS/accueil-compensation-full/'">
+                                            <th:block th:insert="~{inc/wiki.html}"></th:block>
+                                        </th:block>                                           
+                                    </p>
+                                    <a href="/compensation-ecologique" class="btn btn-primary btn-sm">En savoir plus sur la contribution environnementale</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- End of Icon Boxes -->
+                </div>
+            </div>
+
+            <div class="d-flex justify-content-end mt-3">
+                <div class="col-12 col-md-10">
+                    <!-- Icon Boxes -->
+                    <div class="card shadow">
+                        <div class="row g-0 align-items-center">
+                            <div class="col-md-8">
+                                <div class="card-body">
+                                    <h3 id=ecoscore class="h5 card-title mt-3">Évaluation environnementale</h3>
+                                    <p class="card-text">
+                                        <th:block th:with="path='WIDGETS/accueil-ecoscore-full/'">
+                                            <th:block th:insert="~{inc/wiki.html}"></th:block>
+                                        </th:block>   
+                                    </p>
+                                    <a href="/ecoscore" class="btn btn-primary btn-sm">En savoir plus sur l'évaluation écologique</a>
+                                </div>
+                            </div>
+                            <div class="col-md-4 p-4 d-none d-md-block">
+                                <img src="/assets/img/illustrations/evaluation-ecologique.webp" alt="Evaluationé cologique des produits" class="card-img-top rounded-top">
+                            </div>
+                        </div>
+                    </div>
+                    <!-- End of Icon Boxes -->
+                </div>
+            </div>  
+             
+            
+            <div class="d-flex justify-content-start mt-3">
+                <div class="col-12 col-md-10">
+                    <!-- Icon Boxes -->
+                    <div class="card shadow">
+                        <div class="row g-0 align-items-center">
+                            <div class="col-md-4 p-4 d-none d-md-block">
+                                <img src="/assets/img/illustrations/comparaison-prix.webp" alt="Comparateur de prix" class="card-img-top rounded-top">
+                            </div>
+                            <div class="col-md-8">
+                                <div class="card-body">
+                                    <h3 class="h5 card-title mt-3">Comparaison de prix</h3>
+                                    <p class="card-text">
+                                        <th:block th:with="path='WIDGETS/accueil-comparaison-prix-full/'">
+                                            <th:block th:insert="~{inc/wiki.html}"></th:block>
+                                        </th:block>                                          
+                                    </p>
+                                    <a href="/recherche" class="btn btn-primary btn-sm">Commencer à comparer</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- End of Icon Boxes -->
+                </div>
+            </div>
+
+
+
+
+
+            <div class="d-flex justify-content-end mt-3">
+                <div class="col-12 col-md-10">
+                    <!-- Icon Boxes -->
+                    <div class="card shadow">
+                        <div class="row g-0 align-items-center">
+                            <div class="col-md-8">
+                                <div class="card-body">
+                                    <h3 id=modele-ouvert class="h5 card-title mt-3">Numérique responsable</h3>
+                                    <p class="card-text">
+                                        <th:block th:with="path='WIDGETS/accueil-data-responsable-full/'">
+                                            <th:block th:insert="~{inc/wiki.html}"></th:block>
+                                        </th:block>
+                                    </p>
+                                    <a href="#" class="btn btn-primary btn-sm">En savoir plus sur l'utilisation de vos données</a>
+                                </div>
+                            </div>
+                            <div class="col-md-4 p-4 d-none d-md-block">
+                                <img src="/assets/img/illustrations/no_cookie.webp" alt="Pas de cookies" class=" card-img-top rounded-top">
+                            </div>
+                        </div>
+                    </div>
+                    <!-- End of Icon Boxes -->
+                </div>
+            </div>   
+
+
+
+
+
+            <div class="d-flex justify-content-start mt-3">
+                <div class="col-12 col-md-10">
+                    <!-- Icon Boxes -->
+                    <div class="card shadow">
+                        <div class="row g-0 align-items-center">
+                            <div class="col-md-4 d-none d-md-block">
+                                <img src="/assets/img/illustrations/opensource-opendata.webp" alt="Open source / Open data" class="card-img-top rounded-top">
+                            </div>
+                            <div class="col-md-8">
+                                <div class="card-body">
+                                    <h3 id=opendata class="h5 card-title mt-3">Comparateur ouvert</h3>
+                                    <p class="card-text">
+                                        <th:block th:with="path='WIDGETS/accueil-modele-ouvert-full/'">
+                                            <th:block th:insert="~{inc/wiki.html}"></th:block>
+                                        </th:block>                                         
+                                    </p>
+                                    <a href="/opendata" class="btn btn-primary btn-sm">Bases open-data</a>
+                                    <a href="/opensource" class="btn btn-primary btn-sm">Code opensource</a>
+                                    
+                                    
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- End of Icon Boxes -->
+                </div>
+            </div>        
+        </div>
+
+
+        <div class="step position-fixed mb-0"
+            style="bottom: 30px; right: 30px">
+            <a href="#section7"
+                class="step-shape shape-gray-300 rounded-circle mb-4"
+                style="max-width: 4rem; max-height: 4rem; display: inline-flex;"><span
+                class="step-icon icon-primary"><i class="fas fa-arrow-down"
+                    style="font-size: 1.75rem;"></i></span></a>
+        </div>
+    </main>
+
+<!--/* Footer */-->
+<th:block th:insert="~{inc/footer.html}"></th:block>    
+
+<!-- Core -->
+<script src="../../vendor/@popperjs/core/dist/umd/popper.min.js"></script>
+<script src="/webjars/bootstrap/js/bootstrap.min.js"></script>
+<script src="/webjars/jquery/jquery.min.js"></script>
+
+
+<script src="../../vendor/headroom.js/dist/headroom.min.js"></script>
+<script src="../../vendor/smooth-scroll/dist/smooth-scroll.polyfills.min.js"></script>
+
+<!-- Vendor JS -->
+
+<!-- 
+<script src="/webjars/headroom.js/headroom.min.js"></script>
+<script src="/webjars/smooth-scroll/smooth-scroll.polyfills.min.js"></script>
+ -->
+
+
+
+<script src="../../vendor/vivus/dist/vivus.min.js"></script>
+
+<script src="/webjars/jquery/jquery.min.js"></script>
+
+
+<script src="../../vendor/countup.js/dist/countUp.umd.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/waypoints/4.0.1/jquery.waypoints.min.js" integrity="sha512-CEiA+78TpP9KAIPzqBvxUv8hy41jyI3f2uHi7DGp/Y/Ka973qgSdybNegWFciqh6GrN2UePx2KkflnQUbUhNIA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/lettering.js/0.7.0/jquery.lettering.min.js" integrity="sha512-9ex1Kp3S7uKHVZmQ44o5qPV6PnP8/kYp8IpUHLDJ+GZ/qpKAqGgEEH7rhYlM4pTOSs/WyHtPubN2UePKTnTSww==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script src="../../assets/js/jquery.textillate.js"></script>
+
+<!-- pixel JS -->
+<script src="../../assets/js/pixel.js"></script>
+
+<!-- custom sources -->
+<script src="../../assets/js/pixel-custom.js"></script>
+
+<script>
+
+
+function animateText() {
+    $('.tlt').textillate({
+        loop: true,
+        initialDelay: 200,
+         in: {
+            // set the effect name
+            //effect: "",
+
+            // set the delay factor applied to each consecutive character
+            delayScale: 1.5,
+
+            // set the delay between each character
+            delay: 30,
+
+            // set to true to animate all the characters at the same time
+            sync: false,
+
+            // randomize the character sequence
+            // (note that shuffle doesn't make sense with sync = true)
+            shuffle: Math.random() < 0.5,
+
+            // reverse the character sequence
+            // (note that reverse doesn't make sense with sync = true)
+            reverse: false
+
+            // callback that executes once the animation has finished
+            //callback: function () {
+            // }
+          }
+    });
+
+
+
+}
+
+
+
+
+
+
+
+function countStart(){
+  const $counters = document.querySelectorAll(".counter"),
+        options = {
+          useEasing: true,
+          useGrouping: true,
+          separator: ",",
+          decimal: "."
+        };
+
+  $counters.forEach( (item) => {
+    const value = item.dataset.value;
+    const counter = new countUp.CountUp(item, value, options);
+    counter.start();
+  });
+}
+
+
+
+new Waypoint({
+  element: document.querySelector('.level'),
+  handler: function() {
+    countStart()
+    //this.destroy() //for once
+  },
+  offset: '50%'
+});
+
+
+
+$(document).ready(function() {
+      $( "body").on( "tplLoaded",function() {
+          animateText();
+        });
+} );
+
+
+</script>
+
+</body>
+
+</html>
