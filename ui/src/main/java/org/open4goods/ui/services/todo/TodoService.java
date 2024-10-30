@@ -62,7 +62,7 @@ public class TodoService implements HealthIndicator{
 			FileUtils.copyURLToFile(new URL( this.tagListPath), f);
 			this.todos = loadTodos(f);		
 		} catch (Exception e) {
-			logger.error("Error while loading taglist file at {} ",tagListPath, e);
+			logger.error("Error while loading taglist file at {} : {} ",tagListPath, e.getMessage());
 		} finally {
 			if (null != f) {
 				FileUtils.deleteQuietly(f);
