@@ -198,8 +198,7 @@ public class ResourceCompletionService  extends AbstractCompletionService{
 		
 		List<Resource> images = data.getResources().stream()
 				.filter(e -> !e.isEvicted())
-				// Filtering on images
-				.filter(e -> e.getResourceType() == ResourceType.IMAGE)
+				// Filtering on images				
 				// Checking if not a blacklisted md5
 				.map(e -> {
 					if (vertical.getResourcesConfig().getMd5Exclusions().contains(e.getMd5())) {
@@ -225,7 +224,7 @@ public class ResourceCompletionService  extends AbstractCompletionService{
 				// Filtering by number of pixels
 				.map(e -> {
 
-					if (e.getImageInfo().pixels() < vertical.getResourcesConfig().getMinPixelsEvictionSize()) {
+					if ( e.getResourceType() == ResourceType.IMAGE &&  e.getImageInfo().pixels() < vertical.getResourcesConfig().getMinPixelsEvictionSize()) {
 						logger.warn("Excluded because image is too small : {}", e.getUrl());
 						e.setStatus(ResourceStatus.TOO_SMALL);
 						e.setEvicted(true);
@@ -243,7 +242,7 @@ public class ResourceCompletionService  extends AbstractCompletionService{
 		/////////////////////////////////////////
 		// Images similarity clusterization
 		/////////////////////////////////////////
-		ArrayList<List<Resource>> classified = classify(images.stream().filter(e -> !e.isEvicted()).toList());
+		ArrayList<List<Resource>> classified = classify(images.stream().filter(e -> e.getResourceType() == ResourceType.IMAGE).filter(e -> !e.isEvicted()).toList());
 		
 		logger.info("{} - {} resources links, {} processed, {} retained and classified in {} bucket", data.gtin(), data.getResources().size(), resources.size(), images.size(), classified.size());
 		
