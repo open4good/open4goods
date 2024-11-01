@@ -112,15 +112,19 @@ public class ResourceController {
 	@GetMapping("/images/marques/{brand}.png")
 	public void brandLogo(@PathVariable String brand, final HttpServletResponse response) throws IOException, ValidationException, TechnicalException, InvalidParameterException {
 
-		if (!brandService.hasLogo(brand.toUpperCase())) {
-			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Image introuvable !");
-		}
+		try {
+			if (!brandService.hasLogo(brand.toUpperCase())) {
+				throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Image introuvable !");
+			}
 
-		response.addHeader(HEADER_CONTENT_TYPE, CONTENT_TYPE_IMAGE_PNG);
-		response.addHeader(HEADER_CACHE_CONTROL, "public, max-age=" + AppConfig.CACHE_PERIOD_SECONDS);
+			response.addHeader(HEADER_CONTENT_TYPE, CONTENT_TYPE_IMAGE_PNG);
+			response.addHeader(HEADER_CACHE_CONTROL, "public, max-age=" + AppConfig.CACHE_PERIOD_SECONDS);
 
-		try (InputStream stream = brandService.getLogo(brand.toUpperCase())) {
-			IOUtils.copy(stream, response.getOutputStream());
+			try (InputStream stream = brandService.getLogo(brand.toUpperCase())) {
+				IOUtils.copy(stream, response.getOutputStream());
+			}
+		} catch (Exception e) {
+			LOGGER.error("Error while rendering brand : {} - {}",brand, e.getMessage());
 		}
 	}
 	
