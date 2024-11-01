@@ -57,12 +57,8 @@ public class SearchService {
 
 	private ProductRepository aggregatedDataRepository;
 
-	// Dedicated loggers, to get some stats
-	private Logger globalstatsLogger;
-
 	public SearchService(ProductRepository aggregatedDataRepository, String logsFolder) {
 		this.aggregatedDataRepository = aggregatedDataRepository;
-		globalstatsLogger  = GenericFileLogger.initLogger("stats-search-global", Level.INFO, logsFolder);
 	}
 
 	/**
@@ -79,7 +75,7 @@ public class SearchService {
 
 
 		// Logging
-		globalstatsLogger.info("global search : {}",initialQuery);
+		LOGGER.info("global search : {}",initialQuery);
 
 		Criteria c = null;
 		if (StringUtils.isNumeric(query)) {
