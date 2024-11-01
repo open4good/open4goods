@@ -1,67 +1,98 @@
 <section class="section container container-semi-fluid" id="markerPrices">
+    <th:block th:with="
+        hasNewPriceHistory=${product.price.newPricehistory != null and !#lists.isEmpty(product.price.newPricehistory)},
+        hasOccasionPriceHistory=${product.price.occasionPricehistory != null and !#lists.isEmpty(product.price.occasionPricehistory)},
+        colSize=${hasNewPriceHistory and hasOccasionPriceHistory ? 6 : 12}
+    ">
+        <div class="row text-center justify-content-center">
+            <div class="col-md-8 mb-5">
+                <h2 class="display-3"><span th:text="${product.brandAndModel()}"></span> : une bonne affaire ?</h2>
+            </div>
+        </div>
 
-<div class="row text-center justify-content-center">
-              <div class="col-md-8 mb-5">
-                  <h2 class="display-3"><span th:text="${product.brandAndModel()}"></span> : une bonne affaire ?</h2>
-              </div>
-</div>	   
-        
-        
-	<div class="card shadow border-gray-300 text-center">
+        <div class="card shadow border-gray-300 text-center">
+            <div class="row align-items-center">
+                <!-- First column: Messages -->
+                <div th:attr="class='col-md-' + (${hasNewPriceHistory or hasOccasionPriceHistory} ? 4 : 12)">
+                    <!-- Content of messages -->
+                    <th:block>
+                        <!-- Messages -->
+                        <div class="m-4">
+                            <div th:if="${newTrend.trend == 0}" class="text-center alert alert-info" role="alert">
+                                😶‍🌫️ Le prix neuf est stable depuis <span th:text="${newTrend.formatedDuration()}"></span>
+                            </div>
+                            <div th:if="${newTrend.trend == 1}" class="text-center alert alert-tertiary" role="alert">
+                                🧐 Le prix neuf a augmenté de <b><span th:text="${#numbers.formatDecimal(newTrend.variation == null ? 0 : newTrend.variation, 0, 0)}"></span>€</b> depuis le dernier pointage (<span th:text="${newTrend.formatedDuration()}"></span>)
+                            </div>
+                            <div th:if="${newTrend.trend == -1}" class="text-center alert alert-success" role="alert">
+                                Le prix neuf a baissé de <b><span th:text="${#numbers.formatDecimal(newTrend.variation == null ? 0 : newTrend.variation, 0, 0)}"></span>€</b> depuis le dernier relevé (<span th:text="${newTrend.formatedDuration()}"></span>) 😊
+                            </div>
+                        </div>
 
-	                       
-			<div class="row align-items-center">
-				      <div class="col-md-4">
+                        <div class="card shadow m-4">
+                            <div class="card-body text-center text-md-left">
+                                <div class="row align-items-center">
+                                    <div th:if="${newTrend.historicalLowestPrice != 0}" class="col-md-12">
+                                        <span class="mb-3">Prix le plus bas historique ! </span>
+                                        <p class="mb-0">Nous n'avons jamais relevé de prix aussi bas pour le <span th:text="${product.brandAndModel()}"></span>.</p>
+                                    </div>
 
-				<th:block>
-				
-					<div class="m-4">
-					   <div th:if="${newTrend.trend == 0}" class="text-center alert alert-info" role="alert">😶‍🌫️ Le prix neuf est stable depuis <span th:text="${newTrend.formatedDuration()}"></span></div>
-					   <div th:if="${newTrend.trend == 1}"  class="text-center alert alert-tertiary" role="alert">🧐 Le prix neuf a augmenté de <b><span th:text="${#numbers.formatDecimal(newTrend.variation == null ? 0 : newTrend.variation, 0, 0)}"></span>€</b> depuis le dernier pointage (<span th:text="${newTrend.formatedDuration()}"></span>) </div>
-					   <div th:if="${newTrend.trend == -1}" class="text-center alert alert-success" role="alert">Le prix neuf a baissé de <b><span th:text="${#numbers.formatDecimal(newTrend.variation == null ? 0 : newTrend.variation, 0, 0)}"></span>€</b> depuis le dernier relevé (<span th:text="${newTrend.formatedDuration()}"></span>) 😊</div>
-					</div>	
-			
-	
-					<div  class="card shadow m-4">
-						<div class="card-body  text-center text-md-left">
-							<div class="row align-items-center">
-								<div th:if="${newTrend.historicalLowestPrice != 0}" class="col-md-8">
-									<span class="mb-3">Prix le plus bas historique ! </span>
-									<p class="mb-0">Nous n'avons jamais relevé de prix aussi bas pour le <span th:text="${product.brandAndModel()}"></span>.</p>
-								</div>
-								
-								<div th:unless="${newTrend.historicalLowestPrice != 0}" class="col-md-8">
-									<h2 class="mb-3">Ecart de prix historique</h2>
-									<p class="mb-0">Ecart de prix calculé avec le prix historique le plus bas (<span th:text="${newTrend.historicalLowestPrice}"></span>€) jamais relevé par Nudger sur le <span th:text="${product.brandAndModel()}"></span></p>
-								</div>
-								
-								
-								
-								<div th:unless="${newTrend.historicalLowestPrice != 0}"  class="col-12 col-md-4 mt-4 mt-md-0 text-md-right">
-									<span class="d-block my-3"><span
-										class="h3 fw-bold" th:text="${#numbers.formatDecimal(newTrend.historicalVariation == null ? 0 : newTrend.historicalVariation, 0, 1)}"></span><span
-											class="align-baseline font-medium">€</span></span>
-								</div>
-							</div>
-						</div>
-					</div>
-				</th:block>
-				          
-				      
-				          <a href="#markerEcoscore" style="width: 95%" class="text-center btn btn-primary">
-				              <span class="me-1">
-				                  <span class="fas fa-euro"></span>
-				              </span>
-				              Meilleur prix
-				          </a>
-				      </div>
-				      <div class="col-12 col-md-8 mt-5 mt-md-0 text-md-right">
-				         	<canvas class="mt-4" id="priceChart"></canvas>	
-				      </div>
-			</div>                                         
-	</div>
-	                     
-                     
-</section>   
-                        
-   
+                                    <div th:unless="${newTrend.historicalLowestPrice != 0}" class="col-md-8">
+                                        <h2 class="mb-3">Écart de prix historique</h2>
+                                        <p class="mb-0">Écart de prix calculé avec le prix historique le plus bas (<span th:text="${newTrend.historicalLowestPrice}"></span>€) jamais relevé par Nudger sur le <span th:text="${product.brandAndModel()}"></span></p>
+                                    </div>
+
+                                    <div th:unless="${newTrend.historicalLowestPrice != 0}" class="col-12 col-md-4 mt-4 mt-md-0 text-md-right">
+                                        <span class="d-block my-3">
+                                            <span class="h3 fw-bold" th:text="${#numbers.formatDecimal(newTrend.historicalVariation == null ? 0 : newTrend.historicalVariation, 0, 1)}"></span>
+                                            <span class="align-baseline font-medium">€</span>
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </th:block>
+
+                    <div class="card-shadow m-4">
+                        <a href="#markerEcoscore" class="text-center btn btn-primary w-100">
+                            <span class="me-1">
+                                <span class="fas fa-euro"></span>
+                            </span>
+                            Meilleur prix
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Second column: Charts -->
+                <div class="col-md-8 mt-5 mt-md-0" th:if="${hasNewPriceHistory or hasOccasionPriceHistory}">
+                    <div class="row">
+                        <!-- New Price Chart -->
+                        <div th:if="${hasNewPriceHistory}" th:attr="class='col-md-' + ${colSize}">
+                            <canvas class="mt-4" id="newPriceChart"></canvas>
+                            <div class="text-center">
+                                <div class="btn-group my-3" role="group" aria-label="Sélection de la période">
+                                    <button type="button" class="btn btn-secondary period-btn" id="btn-new-15days">15 jours</button>
+                                    <button type="button" class="btn btn-primary active-period-btn period-btn" id="btn-new-3months">3 mois</button>
+                                    <button type="button" class="btn btn-secondary period-btn" id="btn-new-6months">6 mois</button>
+                                    <button type="button" class="btn btn-secondary period-btn" id="btn-new-max">Max</button>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Used Price Chart -->
+                        <div th:if="${hasOccasionPriceHistory}" th:attr="class='col-md-' + ${colSize}">
+                            <canvas class="mt-4" id="usedPriceChart"></canvas>
+                            <div class="text-center">
+                                <div class="btn-group my-3" role="group" aria-label="Sélection de la période">
+                                    <button type="button" class="btn btn-secondary period-btn" id="btn-used-15days">15 jours</button>
+                                    <button type="button" class="btn btn-primary active-period-btn period-btn" id="btn-used-3months">3 mois</button>
+                                    <button type="button" class="btn btn-secondary period-btn" id="btn-used-6months">6 mois</button>
+                                    <button type="button" class="btn btn-secondary period-btn" id="btn-used-max">Max</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </th:block>
+</section>
