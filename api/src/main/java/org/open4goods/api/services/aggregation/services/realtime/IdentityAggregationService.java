@@ -91,7 +91,7 @@ public class IdentityAggregationService extends AbstractAggregationService {
 		SimpleEntry<BarcodeType, String> valResult = validationService.sanitize(output.gtin());
 
 		if (valResult.getKey().equals(BarcodeType.UNKNOWN)) {
-			dedicatedLogger.warn("{} is not a valid ISBN/UEAN13 barcode : {}",valResult.getValue() ,output.gtin());
+			dedicatedLogger.info("{} is not a valid ISBN/UEAN13 barcode : {}",valResult.getValue() ,output.gtin());
 			throw new AggregationSkipException("Invalid barcode : " + output.gtin());
 		}
 
