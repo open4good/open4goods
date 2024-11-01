@@ -38,9 +38,7 @@ public abstract class AbstractCompletionService {
 	public void completeAll(Integer max, boolean withExcluded)  {
 		logger.info("Completion for all verticals");
 		for (VerticalConfig vConf : verticalConfigService.getConfigsWithoutDefault()) {
-			if (vConf.getGenAiConfig().isEnabled()) {
 				complete(vConf, withExcluded);				
-			}
 		}
 	}
 		
