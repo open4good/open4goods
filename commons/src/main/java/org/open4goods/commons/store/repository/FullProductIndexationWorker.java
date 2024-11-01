@@ -68,7 +68,7 @@ public class FullProductIndexationWorker implements Runnable {
 					
 					service.store(buffer);
 					
-					logger.warn ("{} has indexed {} products. {} Remaining in queue",workerName,  buffer.size(), service.getFullProductQueue().size());
+					logger.info ("{} has indexed {} products. {} Remaining in queue",workerName,  buffer.size(), service.getFullProductQueue().size());
 
 				} else {
 					try {

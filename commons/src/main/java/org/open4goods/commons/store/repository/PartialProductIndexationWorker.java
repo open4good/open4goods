@@ -69,7 +69,7 @@ public class PartialProductIndexationWorker implements Runnable {
 					
 					service.bulkUpdateDocument(buffer);
 					
-					logger.warn ("{} has indexed {} products. {} Remaining in queue",workerName,  buffer.size(), service.getPartialProductQueue().size());
+					logger.info ("{} has indexed {} products. {} Remaining in queue",workerName,  buffer.size(), service.getPartialProductQueue().size());
 
 				} else {
 					try {
