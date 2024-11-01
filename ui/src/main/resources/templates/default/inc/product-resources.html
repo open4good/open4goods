@@ -22,11 +22,11 @@
 							<th>filename</th>
 							<th>ext</th>
 							<th>dimensions</th>
-							<!-- <th>md5</th> -->
 							<th>hardTags</th>
 							<th>tags</th>
 							<th>timestamp</th>
 							<th>cachekey</th>
+							 <th>md5</th> 
 						</thead>
 			
 						<th:block th:each="r : ${product.resources}">
@@ -43,11 +43,11 @@
 									<td class="align-middle"><span th:text="${r.fileName}"></span></td>
 									<td class="align-middle"><span th:text="${r.extension}"></span></td>
 									<td class="align-middle"><span th:text="${r.imageInfo}"></span></td>														
-									<!-- <td class="align-middle"><span th:text="${r.md5}"></span></td> -->
 								    <td class="align-middle"><span th:text="${r.hardTags}"></span></td>	
 								    <td class="align-middle"><span th:text="${r.tags}"></span></td>									
 									<td class="align-middle"><span th:text="${r.timeStamp}"></span></td>					
 									<td class="align-middle"><span th:text="${r.cacheKey}"></span></td>					
+									<td class="align-middle"><span th:text="${r.md5}"></span></td>
 								</tr>
 							</th:block>
 						</th:block>
