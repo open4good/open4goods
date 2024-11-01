@@ -101,6 +101,10 @@ public class IcecatCompletionService extends AbstractCompletionService {
 				logger.error("Error occurs during icecat aggregation",e);
 			}
 		}
+		
+		
+
+		
 
 
 		try {
@@ -161,10 +165,10 @@ public class IcecatCompletionService extends AbstractCompletionService {
 	private DataFragment convert(IceDataItem iceItem, Product data) {
 		DataFragment df = initDataFragment(data);
 		
-		completeGeneralInfos(iceItem.generalInfo, df);
-		completeImage(iceItem.image, df);
-		completeMultimedia(iceItem.multimedia,df);
-		completeGallery(iceItem.gallery,df);
+		completeGeneralInfos(iceItem.generalInfo, df,data);
+		completeImage(iceItem.image, df, data);
+		completeMultimedia(iceItem.multimedia,df,data);
+		completeGallery(iceItem.gallery,df,data);
 		completeFeaturesGroup(iceItem.featuresGroups,df);
 
 		
@@ -207,63 +211,88 @@ public class IcecatCompletionService extends AbstractCompletionService {
 		
 	}
 
-	private void completeGallery(List<Gallery> gallery, DataFragment df) {
+	private void completeGallery(List<Gallery> gallery, DataFragment df, Product p) {
 
 		for (Gallery g : gallery) {
 			try {
-				// TODO : mutualize tag
-				df.addResource(g.pic ,  Sets.newHashSet(g.type,"gallery"));
+				addResourceIfAbsent(df, p, g.pic, g.type);
 			} catch (ValidationException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				logger.warn("Error while adding resource {}",g.pic);
 			}
 		}
 		
 	}
 
-	private void completeMultimedia(List<Multimedia> multimedia, DataFragment df) {
+	/**
+	 * Adds the icecat only if not already done, filtering on the icecat completion token
+	 * @param df
+	 * @param p
+	 * @param g
+	 * @throws ValidationException
+	 */
+	private void addResourceIfAbsent(DataFragment df, Product p, String url, String tag) throws ValidationException {
+		
+		
+		String shortened = null;
+		int marker = url.indexOf("?access");
+		if (marker != -1) {
+			// TODO(P1,design) : Remove when tested
+			logger.error("Got an access protected resource from icecat : {} - {}",url,p );
+			shortened = url.substring(0,marker);
+		}
+		
+		if (null != shortened) {
+			
+			for (Resource r : p.getResources()) {
+				if (r.getUrl().startsWith(shortened)) {
+					if (r.isProcessed() == true && r.getFileSize() >0) {
+						logger.info("Resource have already been processed, skipping {}");
+						return;
+					}
+				}
+			}
+		}
+		
+		df.addResource(url ,  Sets.newHashSet(tag,"gallery"));
+	}
+
+	private void completeMultimedia(List<Multimedia> multimedia, DataFragment df, Product p) {
 
 		for (Multimedia m : multimedia) {
 			try {
 				// TODO : handle i18
-				df.addResource(m.url ,  Sets.newHashSet(m.type,"fr"));
+				addResourceIfAbsent(df, p, m.url, "fr");
 			} catch (ValidationException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				logger.info("Cannot validate multimedia resource : {}",m.url);
 			}
 		}
 				
 		
 	}
 
-	private void completeImage(Image image, DataFragment df) {
+	private void completeImage(Image image, DataFragment df, Product p) {
 		try {
 			
 			// Tweak to exclude "brand" images sometimes used as logo
 			if (!image.highPic.contains("brand")) {
-				Resource r = new Resource(image.highPic);
-				r.getHardTags().add(ResourceTag.PRIMARY);
-				df.addResource(r);
-				
+				addResourceIfAbsent(df, p, image.highPic, ResourceTag.PRIMARY.toString());
 			}
 			
 		} catch (ValidationException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.info("Cannot validate image resource : {}",image.highPic);
 		}
 		
 	}
 
-	private void completeGeneralInfos(GeneralInfo e, DataFragment df) {
+	private void completeGeneralInfos(GeneralInfo e, DataFragment df, Product p) {
 		
-		// TODO : HAndle end of year / end of year
+		// TODO(p3, feature) : HAndle end of year / end of year
 		if (null != e.releaseDate) {			
 			// TODO : i18n
 			try {
 				df.addAttribute("YEAR",  e.releaseDate.substring(e.releaseDate.lastIndexOf("-")+1) , "fr", false, null);
 			} catch (Exception e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
+				logger.error("Parsing year failed ! ",e);
 			}
 		}
 		
@@ -283,9 +312,7 @@ public class IcecatCompletionService extends AbstractCompletionService {
 		try {
 						
 			if (e.description != null && e.description.leafletPDFURL != null) {
-				Resource r = new Resource(e.description.leafletPDFURL);
-				r.getHardTags().add(ResourceTag.LEAFLET);
-				df.addResource(r);
+				addResourceIfAbsent(df, p, e.description.leafletPDFURL, ResourceTag.LEAFLET.toString());
 			}
 			
 		} catch (ValidationException e1) {
@@ -295,9 +322,8 @@ public class IcecatCompletionService extends AbstractCompletionService {
 		
 		try {
 			if (e.description != null && e.description.manualPDFURL != null) {
-				Resource r = new Resource(e.description.manualPDFURL);
-				r.getHardTags().add(ResourceTag.MANUAL);
-				df.addResource(r);
+				addResourceIfAbsent(df, p, e.description.manualPDFURL, ResourceTag.MANUAL.toString());
+
 			}
 		} catch (ValidationException e1) {
 			logger.error("Error while adding manual pdf {}", e.description.leafletPDFURL, e);
@@ -318,7 +344,7 @@ public class IcecatCompletionService extends AbstractCompletionService {
 	 */
 	private DataFragment initDataFragment( Product data) {
 		DataFragment df = new DataFragment();
-		// TODO : Constants
+		// TODO(p3,conf) : Constants
 		df.setDatasourceName("icecat.biz");
 		df.setDatasourceConfigName("icecat.biz.yml");
 		df.setLastIndexationDate(System.currentTimeMillis());

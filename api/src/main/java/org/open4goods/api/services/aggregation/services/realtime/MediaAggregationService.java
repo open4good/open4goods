@@ -72,6 +72,9 @@ public class MediaAggregationService extends AbstractAggregationService{
 				output.getResources().add(r);				
 			}
 		}
+		
+		onProduct(output, vConf);
+		
 		return null;
 	}
 
@@ -83,6 +86,17 @@ public class MediaAggregationService extends AbstractAggregationService{
 
 	@Override
 	public void onProduct(Product data, VerticalConfig vConf) throws AggregationSkipException {
+		
+		// TODO(p1, perf) : Remove when sure there are no more protected urls
+		// We clean icecat protected items
+		data.getResources().removeIf(e -> {
+			if (e.getUrl().contains("icecat.biz") && e.getUrl().contains("?access")) {
+				logger.error("Removing icecat protected url : {}",e.getUrl());
+				return true;
+			} else {
+				return false;
+			}
+		});
 	}
 
 
