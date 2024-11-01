@@ -334,12 +334,12 @@ public class OpenDataService implements HealthIndicator {
 			line[4] = String.valueOf(data.bestPrice().getPrice()); // "min_price"
 			line[5] = String.valueOf(data.bestPrice().getCompensation()); // "min_price_compensation"
 			line[6] = data.bestPrice().getCurrency().toString(); // "currency"
-			try {
-				// TODO(p3, i18N) : internationalize
-				line[7] = uiConfig.getBaseUrl(Locale.FRANCE) + data.getNames().getUrl().get("fr");
-			} catch (Exception e) {
-				LOGGER.error("Errro while extracting URL for ISBN {}",data.getId());
-			}
+		}
+		try {
+			// TODO(p3, i18N) : internationalize
+			line[7] = uiConfig.getBaseUrl(Locale.FRANCE) + data.getNames().getUrl().get("fr");
+		} catch (Exception e) {
+			LOGGER.error("Errro while extracting URL for ISBN {}",data.getId());
 		}
 
 		//TODO(p2, design) : We are looking for unormalized attributes. We should consider querying multiple  attributes in a failover mode
