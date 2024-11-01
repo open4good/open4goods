@@ -310,10 +310,12 @@ public class ProductController  {
 			inferAffiliationToken(request, data, price);
 		}
 
+		
 		// Adding the affiliationTokens in min and max price
-		inferAffiliationToken(request, data, data.getPrice().getMinPrice());
+		if (null != data.getPrice().getMinPrice()) {
+			inferAffiliationToken(request, data, data.getPrice().getMinPrice());
 		//		inferAffiliationToken(data, data.getPrice().getMaxPrice());
-
+		}
 		
 		
 		// Adding the diplay country
