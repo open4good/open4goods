@@ -16,7 +16,7 @@
 	<meta property="og:description" th:content="${helper.texts.get('opengraph-description')}">
 	<meta property="og:image" th:content="${baseUrl} + '/images/'+${product.gtin()}+'-cover.png'">
 
-	<!-- No indexing if not a verticalized page -->/
+	<!-- No indexing if not a verticalized page -->
 	<meta th:unless="${product.vertical}" name="robots" content="noindex">
 
 	<!-- Twitter -->
@@ -79,197 +79,129 @@
 
 <body>
 
-<!--/* Navbar */-->
+<!-- Navbar -->
 <th:block th:insert="~{inc/navbar/navbar-product.html}"></th:block>
-<!--/* Loader */-->
+<!-- Loader -->
 <th:block th:insert="~{inc/preloader.html}"></th:block>
 
 <main th:with="images = ${product.images()}" class="bg-gray-200">
 
-        <div  class="section section-lg pt-5">
-            <div class="container-fluid">
+	<div class="section section-lg pt-5">
+		<div class="container-fluid">
 
-								<h1 th:unless="${product.vertical}" class="h1 title text-uppercase text-center"
-									th:text="${product.bestName()}"></h1>
+			<h1 th:unless="${product.vertical}" class="h1 title text-uppercase text-center"
+				th:text="${product.bestName()}"></h1>
 
- 								<h1 th:if="${product.vertical}" class="h1 title text-uppercase text-center"
-									th:text="${helper.texts.title}"></h1>
+			<h1 th:if="${product.vertical}" class="h1 title text-uppercase text-center"
+				th:text="${helper.texts.title}"></h1>
 
+			<div class="card shadow p-4">
+				<!-- Header -->
+				<th:block th:insert="~{inc/product-header.html}"></th:block>
+			</div>
 
+			<!-- Presentation -->
+			<th:block th:insert="~{inc/product-presentation.html}"></th:block>
 
+			<!-- Descriptions -->
+			<th:block th:insert="~{inc/product-ecological.html}"></th:block>
 
-								<div class="card shadow p-4">
-									<!--/* Header */-->
-									<th:block th:insert="~{inc/product-header.html}"></th:block>
-								</div>
+			<!-- Product prices -->
+			<th:block th:insert="~{inc/product-price.html}"></th:block>
 
+			<!-- Product attributes details -->
+			<th:block th:insert="~{inc/product-attributes-details.html}"></th:block>
 
-								<!--/* Presentation */-->
-								<th:block th:insert="~{inc/product-presentation.html}"></th:block>
+			<div class="row mt-3">
+				<div class="col-lg-12">
 
-								<!--/* Descriptions */-->
-								<th:block th:insert="~{inc/product-ecological.html}"></th:block>
+					<!-- Authenticated section -->
+					<th:block th:if="${user}">
 
-								<!--/* Product prices  */-->
-								<th:block th:insert="~{inc/product-price.html}"></th:block>
+						<!-- Categories -->
+						<th:block th:insert="~{inc/product-categories.html}"></th:block>
 
+						<!-- Unmatched Attribute table -->
+						<th:block th:insert="~{inc/product-unmatched-attributes.html}"></th:block>
 
-								<!--/* Product prices  */-->
-								<th:block th:insert="~{inc/product-attributes-details.html}"></th:block>
+						<div class="card shadow mb-3 my-3">
+							<div class="card-header">
+								<h2 class="h5">Development Mode</h2>
+							</div>
+							<p>This section only appears to the Nudger team.</p>
 
+							<div class="card-body">
 
+								<h1 th:text="'taxonomy : ' + ${product.googleTaxonomyId}"></h1>
 
+								<!-- Resources -->
+								<th:block th:insert="~{inc/product-resources.html}"></th:block>
 
-								<div class="row mt-3">
-
-
-
-
-
-
-
-
-
-									<div class=" col-lg-12">
-
-
-										<!--  Authenticated section -->
-										<th:block th:if="${user}">
-
-
-
-											<!--/* Categories */-->
-											<th:block th:insert="~{inc/product-categories.html}"></th:block>
-
-
-
-            <!--Un matched Attribute table  -->
-
-                <!--/* Attributes */-->
-                <th:block th:insert="~{inc/product-unmatched-attributes.html}"></th:block>
-
-
-											<div class="card shadow mb-3 my-3">
-												<div class="card-header">
-													<h2 class="h5">Mode développement</h2>
-												</div>
-												<p>Cette section n'apparait qu'a là nudger team</p>
-
-
-
-
-
-
-
-												<div class="card-body">
-
-
-													<h1 th:text="'taxonomy : ' + ${product.googleTaxonomyId}"></h1>
-
-													<!--/* Resources */-->
-													<th:block th:insert="~{inc/product-resources.html}"></th:block>
-
-													<!--/* Mapped categories */-->
-													<div class="card shadow my-3">
-														<div class="card-header">
-															<h2 class="h5">Mapped Catégories</h2>
-														</div>
-														<div class="card-body">
-															<th:block
-																th:each="item, stat : ${product.categoriesByDatasources}">
-																<div class="alert alert-primary" role="alert">
-																	<span th:text="${item.key + ' : ' + item.value}"></span>
-																</div>
-															</th:block>
-														</div>
-													</div>
-
-
-												</div>
-											</div>
-
-
-
-
-											<!--  The Raw JSON -->
-
-
-											<!--/* Mapped categories */-->
-											<div class="card shadow my-3">
-												<div class="card-header">
-													<h2 class="h5">JSON</h2>
-												</div>
-												<div class="card-body">
-
-													<pre style="height: 500px">
-														<code id="json-output" class="json"></code>
-													</pre>
-													<script
-														src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.10.0/highlight.min.js"></script>
-
-
-													<script th:inline="javascript">
-												/*<![CDATA[*/
-
-												    const jsonObject = /*[[${raw}]]*/ '';
-
-												/*]]>*/
-
-
-										        // Stringify and format the JSON object
-										        const jsonString = JSON.stringify(jsonObject, null, 2);
-
-										        // Insert formatted JSON into the <code> element
-										        document.getElementById('json-output').textContent = jsonObject;
-
-										        // Highlight the JSON
-										        hljs.highlightAll();
-
-											</script>
-
-												</div>
-											</div>
-
-										</th:block>
-
+								<!-- Mapped categories -->
+								<div class="card shadow my-3">
+									<div class="card-header">
+										<h2 class="h5">Mapped Categories</h2>
 									</div>
-
-
+									<div class="card-body">
+										<th:block th:each="item, stat : ${product.categoriesByDatasources}">
+											<div class="alert alert-primary" role="alert">
+												<span th:text="${item.key + ' : ' + item.value}"></span>
+											</div>
+										</th:block>
+									</div>
 								</div>
-					</div>
+
+							</div>
+						</div>
+
+						<!-- The Raw JSON -->
+						<div class="card shadow my-3">
+							<div class="card-header">
+								<h2 class="h5">JSON</h2>
+							</div>
+							<div class="card-body">
+
+                                <pre style="height: 500px">
+                                    <code id="json-output" class="json"></code>
+                                </pre>
+								<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.10.0/highlight.min.js"></script>
+
+								<script th:inline="javascript">
+									/*<![CDATA[*/
+
+									const jsonObject = /*[[${raw}]]*/ '';
+
+									/*]]>*/
+
+									// Insert formatted JSON into the <code> element
+									document.getElementById('json-output').textContent = JSON.stringify(jsonObject, null, 2);
+
+									// Highlight the JSON
+									hljs.highlightAll();
+
+								</script>
+
+							</div>
+						</div>
+
+					</th:block>
+
+				</div>
+			</div>
 		</div>
+	</div>
 </main>
 
-<!--/* Product footer */-->
+<!-- Footer -->
 <th:block th:insert="~{inc/footer.html}"></th:block>
 
-
-    <!-- Core -->
+<!-- Core JS -->
 <script src="../../vendor/@popperjs/core/dist/umd/popper.min.js"></script>
 <script src="/webjars/bootstrap/js/bootstrap.min.js"></script>
-
-
 
 <!-- Vendor JS -->
 <script src="../../vendor/smooth-scroll/dist/smooth-scroll.polyfills.min.js"></script>
 <script src="../../vendor/vivus/dist/vivus.min.js"></script>
-
-
-<!--
-<script src="../../vendor/headroom.js/dist/headroom.min.js"></script>
-
-
-<script src="../../vendor/onscreen/dist/on-screen.umd.min.js"></script>
-<script src="../../vendor/nouislider/distribute/nouislider.min.js"></script>
-<script src="../../vendor/jarallax/dist/jarallax.min.js"></script>
-<script src="../../vendor/chartist/dist/chartist.min.js"></script>
-<script src="../../vendor/chartist-plugin-tooltips/dist/chartist-plugin-tooltip.min.js"></script>
-
-<script src="../../vendor/vanillajs-datepicker/dist/js/datepicker.min.js"></script>
-<script async defer src="https://buttons.github.io/buttons.js"></script>
-<script src="../../vendor/@glidejs/glide/dist/glide.min.js"></script>
- -->
-
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
@@ -278,9 +210,9 @@
 <script type="text/javascript" language="javascript" src="/webjars/datatables/js/dataTables.bootstrap5.min.js"></script>
 
 <script src="../../vendor/countup.js/dist/countUp.umd.js"></script>
-<!-- pixel JS -->
+<!-- Pixel JS -->
 <script src="../../assets/js/pixel.js"></script>
-<!-- custom sources -->
+<!-- Custom sources -->
 <script src="../../assets/js/pixel-custom.js"></script>
 
 <script src="/vendor/lightgallery/dist/lightgallery.min.js"></script>
@@ -288,12 +220,12 @@
 
 <script th:inline="javascript">
 	/*<![CDATA[*/
-	// Variable globale pour le compteur
+	// Global variable for the counter
 	var reversment;
 
-	// Fonction pour initialiser DataTable
+	// Function to initialize DataTable
 	function initTable(tableId) {
-		// Initialiser DataTable avec les options spécifiées
+		// Initialize DataTable with specified options
 		tableNew = $(tableId).DataTable({
 			searching: false,
 			paging: false,
@@ -302,15 +234,15 @@
 			"order": [ [1, 'asc'] ]
 		});
 
-		// Gestionnaire d'événements pour le clic sur une ligne du tableau
+		// Event handler for row click in the table
 		tableNew.on('click', 'tbody tr', (e) => {
 			let classList = e.currentTarget.classList;
 
-			// Récupérer les attributs de données de la ligne cliquée
+			// Retrieve data attributes from the clicked row
 			token = $(e.currentTarget).attr('data-token');
 			compensation = $(e.currentTarget).attr('data-compensation');
 
-			// Mettre à jour le token (par exemple, dans un champ caché)
+			// Update the token (e.g., in a hidden field)
 			$("#token").val(token);
 
 			var countUpUpdateoptions = {
@@ -324,52 +256,52 @@
 				suffix: ''
 			};
 
-			// Mettre à jour le compteur avec la nouvelle valeur de compensation
+			// Update the counter with the new compensation value
 			$("#countup-reversment").attr("data-max", compensation);
 			reversment.update(compensation);
 
-			// Gérer la classe 'selected' pour la ligne active
+			// Handle 'selected' class for the active row
 			tableNew.rows('.selected').nodes().each((row) => row.classList.remove('selected'));
 			classList.add('selected');
 		});
 	}
 
-	// Récupération et formatage des données de prix
+	// Retrieve and format price data
 	const newPriceHistoryData = /*[[${product.price.newPricehistory}]]*/ [];
 	const occasionPriceHistoryData = /*[[${product.price.occasionPricehistory}]]*/ [];
 
-	// Mappage des données uniquement si elles ne sont pas vides
+	// Map data only if they are not empty
 	const newPriceHistory = newPriceHistoryData.length > 0 ? newPriceHistoryData.map(({ timestamp: x, price: y }) => ({ x, y })) : [];
 	const occasionPriceHistory = occasionPriceHistoryData.length > 0 ? occasionPriceHistoryData.map(({ timestamp: x, price: y }) => ({ x, y })) : [];
 
-	// Fonction pour filtrer les données en fonction de la date
+	// Function to filter data based on date
 	function filterDataByDate(data, startDate) {
 		return data.filter(item => new Date(item.x) >= startDate);
 	}
 
 	const today = new Date();
 
-	// Définir les plages de dates pour le filtrage
+	// Define date ranges for filtering
 	const dateRanges = {
 		'15days': new Date(today.getTime() - (15 * 24 * 60 * 60 * 1000)),
 		'3months': new Date(today.getFullYear(), today.getMonth() - 3, today.getDate()),
 		'6months': new Date(today.getFullYear(), today.getMonth() - 6, today.getDate()),
-		'max': null // Toutes les données
+		'max': null // All data
 	};
 
-	// Fonction pour obtenir les données filtrées en fonction de la période
+	// Function to get filtered data based on the period
 	function getFilteredData(data, period) {
 		if (dateRanges[period]) {
 			return filterDataByDate(data, dateRanges[period]);
 		} else {
-			return data; // Retourne toutes les données pour 'max'
+			return data; // Return all data for 'max'
 		}
 	}
 
 	$(document).ready(function () {
 
 		///////////////////////////////////
-		// Initialisation du compteur CountUp
+		// Initialize CountUp counter
 		///////////////////////////////////
 		var countUpoptions = {
 			duration: 3,
@@ -382,25 +314,25 @@
 			suffix: ''
 		};
 
-		// Initialiser le compteur pour l'élément avec l'ID 'countup-reversment'
+		// Initialize the counter for the element with ID 'countup-reversment'
 		reversment = new countUp.CountUp("countup-reversment", $("#countup-reversment").attr("data-max"), countUpoptions);
 		setTimeout(reversment.start(), 5000);
 
 		///////////////////////////////////
-		// Initialisation de DataTables
+		// Initialize DataTables
 		///////////////////////////////////
 
-		// Initialiser le tableau des offres
+		// Initialize the offers table
 		initTable('#offres');
 
-		// Initialiser le tableau des attributs s'il existe
+		// Initialize attributes table if it exists
 		if ($("#allAttributes").length) {
 			$('#allAttributes').DataTable({
 				responsive: true
 			});
 		}
 
-		// Initialiser le tableau des images s'il existe
+		// Initialize images table if it exists
 		if ($("#imagesTable").length) {
 			$('#imagesTable').DataTable({
 				responsive: true
@@ -408,15 +340,15 @@
 		}
 
 		///////////////////////////////////
-		// Activer les tooltips Bootstrap
+		// Activate Bootstrap tooltips
 		///////////////////////////////////
 		$('[data-bs-toggle="tooltip"]').tooltip();
 
 		///////////////////////////////////
-		// Initialisation des graphiques de prix
+		// Initialize price charts
 		///////////////////////////////////
 
-		// Initialiser le graphique des prix neufs seulement s'il y a des données
+		// Initialize the 'New Price' chart only if data is available
 		if (newPriceHistory.length > 0) {
 			let defaultPeriod = '3months';
 			if (!hasDataInPeriod(newPriceHistory, defaultPeriod)) {
@@ -470,10 +402,10 @@
 				}
 			});
 
-			// Définir le bouton actif
+			// Set the active button
 			setActiveButton(document.getElementById('btn-new-' + defaultPeriod), 'new');
 
-			// Désactiver les boutons sans données
+			// Disable buttons without data
 			['15days', '3months', '6months'].forEach(period => {
 				if (!hasDataInPeriod(newPriceHistory, period)) {
 					const button = document.getElementById('btn-new-' + period);
@@ -482,7 +414,7 @@
 				}
 			});
 
-			// Gestionnaires d'événements pour les boutons du graphique "Prix Neuf"
+			// Event handlers for 'New Price' chart buttons
 			document.getElementById('btn-new-15days').addEventListener('click', function () {
 				updateChart(newPriceChart, newPriceHistory, '15days');
 				setActiveButton(this, 'new');
@@ -504,7 +436,7 @@
 			});
 		}
 
-		// Initialiser le graphique des prix d'occasion seulement s'il y a des données
+		// Initialize the 'Used Price' chart only if data is available
 		if (occasionPriceHistory.length > 0) {
 			let defaultPeriod = '3months';
 			if (!hasDataInPeriod(occasionPriceHistory, defaultPeriod)) {
@@ -558,10 +490,10 @@
 				}
 			});
 
-			// Définir le bouton actif
+			// Set the active button
 			setActiveButton(document.getElementById('btn-used-' + defaultPeriod), 'used');
 
-			// Désactiver les boutons sans données
+			// Disable buttons without data
 			['15days', '3months', '6months'].forEach(period => {
 				if (!hasDataInPeriod(occasionPriceHistory, period)) {
 					const button = document.getElementById('btn-used-' + period);
@@ -570,7 +502,7 @@
 				}
 			});
 
-			// Gestionnaires d'événements pour les boutons du graphique "Prix d'Occasion"
+			// Event handlers for 'Used Price' chart buttons
 			document.getElementById('btn-used-15days').addEventListener('click', function () {
 				updateChart(usedPriceChart, occasionPriceHistory, '15days');
 				setActiveButton(this, 'used');
@@ -592,18 +524,18 @@
 			});
 		}
 
-		// Fonction pour mettre à jour le graphique avec les données filtrées
+		// Function to update the chart with filtered data
 		function updateChart(chart, data, period) {
 			chart.data.datasets[0].data = getFilteredData(data, period);
 			chart.update();
 		}
 
-		// Fonction pour vérifier la présence de données dans une période donnée
+		// Function to check if data is available in a given period
 		function hasDataInPeriod(data, period) {
 			return getFilteredData(data, period).length > 0;
 		}
 
-		// Fonction pour définir visuellement le bouton actif
+		// Function to visually set the active button
 		function setActiveButton(activeButton, chartType) {
 			const buttonGroupSelector = chartType === 'new' ? '.btn-group .btn[id^="btn-new"]' : '.btn-group .btn[id^="btn-used"]';
 			const buttons = document.querySelectorAll(buttonGroupSelector);
@@ -616,19 +548,19 @@
 		}
 
 		///////////////////////////////////
-		// Initialisation de la galerie d'images
+		// Initialize image gallery
 		///////////////////////////////////
 
-		// Récupérer l'élément du carousel
+		// Get the carousel element
 		let carouselEl = document.getElementById('bootstrap-gallery-carousel');
 
-		// Créer une instance de Bootstrap Carousel avec les options spécifiées
+		// Create a Bootstrap Carousel instance with specified options
 		const carousel = new bootstrap.Carousel(carouselEl, {
 			interval: 10000,
 			wrap: false,
 		});
 
-		// Ajouter un écouteur d'événements pour 'slide.bs.carousel'
+		// Add event listener for 'slide.bs.carousel'
 		carouselEl.addEventListener('slide.bs.carousel', (event) => {
 			const container = document.querySelector('.carousel-inner');
 			window.lightGallery(container, {
