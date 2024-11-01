@@ -8,8 +8,6 @@
 	<!--/* Metas and CSS */-->
 	<th:block th:insert="~{inc/header-meta.html}"></th:block>
     
-
-	
 	<style>
 	tbody, td, tfoot, th, thead, tr {
     	 border-style: none;
@@ -46,23 +44,7 @@
 							</div>
 							
 							<form action="/feedback" method="post" class="mt-4">
-								
-							<div class="mb-4">
-									<label for="name">Url du problème</label>
-									<div class="input-group">
-										<span class="input-group-text" id="basic-addon3"><span
-											class="fas fa-link"></span></span> 
-											
-											<input type="text"
-											class="form-control" disabled="disabled"
-											 th:value="${urlSource}" >
-											
-											<input type="hidden"
-											id="url" name="url" th:value="${urlSource}" >
-											
-									</div>
-								</div>
-																
+					
 								<div class="mb-4">
 									<label for="name">Votre pseudo</label>
 									<div class="input-group">

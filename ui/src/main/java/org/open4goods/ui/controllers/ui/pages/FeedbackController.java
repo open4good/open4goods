@@ -69,7 +69,6 @@ public class FeedbackController implements SitemapExposedController {
 		if (null != model.getModel().get("user")) {
 			model.addObject("author", model.getModel().get("user"));
 		}
-		model.addObject("urlSource", url);
 
 		return model;
 	}
@@ -84,7 +83,6 @@ public class FeedbackController implements SitemapExposedController {
 		if (null != model.getModel().get("user")) {
 			model.addObject("author", model.getModel().get("user"));
 		}
-		model.addObject("urlSource", url);
 
 		return model;
 	}
@@ -117,12 +115,7 @@ public class FeedbackController implements SitemapExposedController {
 				labels.add("feature");
 			}
 
-			String url = formData.getFirst("url");
-			if (url.equals("/")) {
-				url = config.getBaseUrl(request.getLocale());
-			}
-
-			feedbackService.createBug(formData.getFirst("title"), formData.getFirst("message"), url,
+			feedbackService.createBug(formData.getFirst("title"), formData.getFirst("message"), "",
 					formData.getFirst("author"), labels);
 
 		} catch (IOException e) {
