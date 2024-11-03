@@ -2,8 +2,7 @@
 		<div class="row text-center justify-content-center">
                <div class="col-md-8 mb-5">
 				<h2 class="display-3">
-					Bilan écologique du <span th:text="${product.brandAndModel()}"></span> 
-					: 
+					Bilan écologique
 					<span class="mx-3 badge bg-success"><span th:if="${null != product.scores.get('ECOSCORE')}" th:text="${product.scores.ECOSCORE.relativ.value}"></span>/5</span>
 				</h2>
 		</div>
