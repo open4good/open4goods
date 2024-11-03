@@ -461,7 +461,7 @@ public class Product implements Standardisable {
 	 */
 	public String bestName() {
 		String ret;
-		if (null == brand() || null == model()) {
+		if (StringUtils.isEmpty(brand()) || StringUtils.isEmpty(model())) {
 			ret = shortestOfferName();
 		} else {
 			ret =  brandAndModel();
