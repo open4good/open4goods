@@ -141,10 +141,7 @@ public class AppConfig {
 //	  }
 
 
-    @Bean
-    BlogService blogService(@Autowired XwikiFacadeService xwikiReadService, @Autowired UiConfig config) {
-		return new BlogService(xwikiReadService, config.getBlogConfig(), config.getNamings().getBaseUrls());
-	}
+
 
     
     @Bean
