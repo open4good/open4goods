@@ -53,7 +53,7 @@ public class SearchService {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(SearchService.class);
 
-	public static final String OTHER_BUCKET = "ES-UNKNOWN";
+	public static final String MISSING_BUCKET = "ES-UNKNOWN";
 
 	private ProductRepository aggregatedDataRepository;
 
@@ -163,7 +163,20 @@ public class SearchService {
 
 		// Adding custom checkbox filters
 		for (Entry<String, Set<String>> filter : request.getTermsFilter().entrySet()) {
-			criterias.and(new Criteria(filter.getKey()).in(filter.getValue()) );
+			
+			// If we must show the missing, and if several clauses, we need a OR condition
+			if (filter.getValue().size() > 1 &&  filter.getValue().contains(MISSING_BUCKET)) {
+		    	criterias.subCriteria(new Criteria().or(filter.getKey()).exists().not()
+		    			.or(filter.getKey()).in(filter.getValue()))  ;
+			} else {
+				if (filter.getValue().contains(MISSING_BUCKET)) {
+					criterias.and(new Criteria(filter.getKey()).exists().not());					
+				} else {
+					criterias.and(new Criteria(filter.getKey()).in(filter.getValue()) );
+				}
+				
+			}
+			
 		}
 
 		// Setting the query
@@ -184,9 +197,9 @@ public class SearchService {
 				.withAggregation("max_price", 	Aggregation.of(a -> a.max(ta -> ta.field("price.minPrice.price"))))
 				.withAggregation("min_offers", 	Aggregation.of(a -> a.min(ta -> ta.field("offersCount"))))
 				.withAggregation("max_offers", 	Aggregation.of(a -> a.max(ta -> ta.field("offersCount"))))
-				.withAggregation("conditions", 	Aggregation.of(a -> a.terms(ta -> ta.field("price.conditions").missing(OTHER_BUCKET).size(3)  ))	)
-				.withAggregation("brands", 	Aggregation.of(a -> a.terms(ta -> ta.field("attributes.referentielAttributes.BRAND").missing(OTHER_BUCKET).size(AGGREGATION_BUCKET_SIZE)  ))	)
-				.withAggregation("country", 	Aggregation.of(a -> a.terms(ta -> ta.field("gtinInfos.country").missing(OTHER_BUCKET).size(AGGREGATION_BUCKET_SIZE)  ))	)
+				.withAggregation("conditions", 	Aggregation.of(a -> a.terms(ta -> ta.field("price.conditions").missing(MISSING_BUCKET).size(3)  ))	)
+				.withAggregation("brands", 	Aggregation.of(a -> a.terms(ta -> ta.field("attributes.referentielAttributes.BRAND").missing(MISSING_BUCKET).size(AGGREGATION_BUCKET_SIZE)  ))	)
+				.withAggregation("country", 	Aggregation.of(a -> a.terms(ta -> ta.field("gtinInfos.country").missing(MISSING_BUCKET).size(AGGREGATION_BUCKET_SIZE)  ))	)
 				;
 		////
 		// Sort order
@@ -207,7 +220,7 @@ public class SearchService {
 		// Adding custom attributes terms filters aggregations
 		for (AttributeConfig attrConfig : customAttrFilters) {
 			esQuery = esQuery
-					.withAggregation(attrConfig.getKey(), 	Aggregation.of(a -> a.terms(ta -> ta.field("attributes.indexed."+attrConfig.getKey()+".value").missing(OTHER_BUCKET).size(AGGREGATION_BUCKET_SIZE)  ))	);
+					.withAggregation(attrConfig.getKey(), 	Aggregation.of(a -> a.terms(ta -> ta.field("attributes.indexed."+attrConfig.getKey()+".value").missing(MISSING_BUCKET).size(AGGREGATION_BUCKET_SIZE)  ))	);
 		}
 		
 		// Adding custom range aggregations
@@ -295,8 +308,10 @@ public class SearchService {
 			vsr.getCustomFilters().put(attrConfig, new ArrayList<>());
 			for (StringTermsBucket bucket : agg.buckets().array()) {
 
-				if (!bucket.key().stringValue().equals(OTHER_BUCKET)) {
+				if (!bucket.key().stringValue().equals(MISSING_BUCKET)) {
 					vsr.getCustomFilters().get(attrConfig).add (new VerticalFilterTerm(bucket.key().stringValue(), bucket.docCount()));
+				} else {
+					vsr.getCustomFilters().get(attrConfig).add (new VerticalFilterTerm(MISSING_BUCKET, bucket.docCount()));
 				}
 			}
 
