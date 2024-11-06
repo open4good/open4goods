@@ -33,6 +33,7 @@ public class Attribute2ScoreAggregationService extends AbstractScoreAggregationS
 			try {
 				
 				AttributesConfig attributesConfig = vConf.getAttributesConfig();
+				// TODO(p1, design) : check
 				AttributeConfig attrConfig = attributesConfig.getAttributeConfigByKey(attributesConfig.getKeyForValue(aga.getName()));
 				if (null == attrConfig) {
                     dedicatedLogger.error("No attribute config for {}",aga);

@@ -11,6 +11,7 @@ import org.open4goods.commons.services.VerticalsConfigService;
 import org.springframework.context.annotation.Profile;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -55,15 +56,15 @@ public class IcecatController {
 	
 	@GetMapping("/{vertical}/featuregroups/")
 	@Operation(summary = " Loads the list of features, aggegated by UiFeatureGroup")
-	public Map<String, String> getFeaturesGroup( @PathParam(value = "vertical") String vertical) {
+	public Map<String, String> getFeaturesGroup( @PathVariable String vertical) {
 		VerticalConfig vc = verticalsService.getConfigByIdOrDefault(vertical);
 		return icecatService.types(vc);
 		
 	}
 	
 	@GetMapping("/features/{featuresId}/")
-	@Operation(summary = " Loads the Featurez for a given id")
-	public IcecatFeature getFeature( @PathParam(value = "featuresId") Integer featuresId) {
+	@Operation(summary = " Loads the Feature for a given id")
+	public IcecatFeature getFeature( @PathVariable Integer featuresId) {
 		return icecatService.getFeaturesById().get(featuresId) ;
 		
 	}

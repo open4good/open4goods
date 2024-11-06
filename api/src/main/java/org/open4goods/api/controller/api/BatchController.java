@@ -133,7 +133,7 @@ public class BatchController {
 	@GetMapping("/sanitisation/verticals")
 	@Operation(summary="Launch sanitisation of verticals ID")
 	public void sanitizeVertical() throws InvalidParameterException, IOException {
-		batchService.cleanVerticals();
+		aggregationFacadeService.sanitizeAllVerticals();
 	}
 	
 	@GetMapping("/sanitisation")

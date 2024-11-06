@@ -3,6 +3,7 @@ package org.open4goods.api.services;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import org.open4goods.api.config.yml.ApiProperties;
 import org.open4goods.api.services.aggregation.AbstractAggregationService;
@@ -24,7 +25,10 @@ import org.open4goods.commons.dao.ProductRepository;
 import org.open4goods.commons.exceptions.AggregationSkipException;
 import org.open4goods.commons.helper.GenericFileLogger;
 import org.open4goods.commons.model.data.DataFragment;
+import org.open4goods.commons.model.data.Resource;
 import org.open4goods.commons.model.product.Product;
+import org.open4goods.commons.model.product.ProductAttribute;
+import org.open4goods.commons.model.product.SourcedAttribute;
 import org.open4goods.commons.services.BarcodeValidationService;
 import org.open4goods.commons.services.BrandService;
 import org.open4goods.commons.services.DataSourceConfigService;
@@ -155,17 +159,32 @@ public class AggregationFacadeService {
 
 			// TODO : Performance, could parallelize
 			dataRepository.exportAll().forEach(p -> {
-                try {
-					batchAgg.onProduct(p);
-					dataRepository.index(p);
-				} catch (AggregationSkipException e) {
-					logger.error("Skipping product during batched sanitisation : ",e);
+				if (toBeDeleted(p)) {
+					logger.warn("Deleting item : {}",p);
+					dataRepository.delete(p);
+				} else {
+					try {
+						batchAgg.onProduct(p);
+						dataRepository.index(p);
+					} catch (AggregationSkipException e) {
+						logger.error("Skipping product during batched sanitisation : ",e);
+					}
 				}
             });
 			logger.info("done: Sanitisation batching for all items");			
 	}
 
 	
+	/**
+	 * Hacky method
+	 * Test if an item must be deleted
+	 * @param p
+	 * @return
+	 */
+	private boolean toBeDeleted(Product p) {
+		return false;
+	}
+
 	/**
 	 * Launch batch sanitization on all verticals
 	 */

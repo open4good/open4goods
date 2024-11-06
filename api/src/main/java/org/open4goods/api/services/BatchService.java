@@ -54,30 +54,30 @@ public class BatchService {
 	 * > Rematch the vertical
 	 * > Save
 	 */
-	public void cleanVerticals() {
-		
-//		1 - Get all products having vertical
-		
-		dataRepository.getAllHavingVertical().forEach(e -> {
-			VerticalConfig v = verticalsConfigService.getVerticalForCategories(e.getDatasourceCategories());
-			
-			// Unassociating items where we have no mapped categories
-			if (e.getCategoriesByDatasources().size() == 0) {
-				logger.info("Unassociating vertical, no mapped categories for {}", e);
-				e.setVertical(null); 
-				dataRepository.index(e);
-				
-			} else {
-				if (null != v && v.getId().equals(e.getVertical())) {
-					logger.info("No vertical change for {}", e);
-				} else {
-					logger.info("Vertical changed from {} to {} for {}",e.getVertical(),v == null ? "null" : v.getId(),  e);
-					 e.setVertical(v == null ? null : v.getId());
-					 dataRepository.index(e);
-				}
-			}
-		});
-	}
+//	public void cleanVerticals() {
+//		
+////		1 - Get all products having vertical
+//		
+//		dataRepository.getAllHavingVertical().forEach(e -> {
+//			VerticalConfig v = verticalsConfigService.getVerticalForCategories(e.getDatasourceCategories());
+//			
+//			// Unassociating items where we have no mapped categories
+//			if (e.getCategoriesByDatasources().size() == 0) {
+//				logger.info("Unassociating vertical, no mapped categories for {}", e);
+//				e.setVertical(null); 
+//				dataRepository.index(e);
+//				
+//			} else {
+//				if (null != v && v.getId().equals(e.getVertical())) {
+//					logger.info("No vertical change for {}", e);
+//				} else {
+//					logger.info("Vertical changed from {} to {} for {}",e.getVertical(),v == null ? "null" : v.getId(),  e);
+//					 e.setVertical(v == null ? null : v.getId());
+//					 dataRepository.index(e);
+//				}
+//			}
+//		});
+//	}
 	
 	@Scheduled(cron = "0 0 1,13 * * ?")
 	// TODO : From conf
