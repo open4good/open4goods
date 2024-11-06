@@ -736,6 +736,11 @@ public class ProductRepository {
 		return partialProductQueue;
 	}
 
+	public void delete(Product p) {
+		elasticsearchOperations.delete(p.gtin(), current_index);
+		
+	}
+
 
 
 

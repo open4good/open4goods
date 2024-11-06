@@ -13,16 +13,13 @@ import org.open4goods.commons.model.attribute.Attribute;
 import org.open4goods.commons.model.product.IAttribute;
 import org.open4goods.commons.model.product.IndexedAttribute;
 import org.open4goods.commons.model.product.ProductAttribute;
+import org.open4goods.commons.model.product.SourcedAttribute;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonMerge;
 
 public class AttributesConfig {
 
-	// Local cache
-	private Map<String, Map<String, String>> cacheHashedSynonyms;
-
-	private Map<String, String> valueKeyMap = new HashMap<String, String>();
 
 	/**
 	 * The mandatoryattributes
@@ -69,6 +66,10 @@ public class AttributesConfig {
 	private Map<String, AttributeConfig> hashedAttributesByKey;
 
 
+	// Local cache
+	private Map<String, Map<String, String>> cacheHashedSynonyms;
+
+	private Map<String, String> valueKeyMap = new HashMap<String, String>();
 
 
 	public AttributesConfig(Set<AttributeConfig> configs) {
@@ -93,6 +94,9 @@ public class AttributesConfig {
 		}
         return valueKeyMap.get(value);
     }
+	
+	
+	
 	
 	
 	/**
@@ -131,39 +135,74 @@ public class AttributesConfig {
 	}
 
 
+	public AttributeConfig resolveFromProductAttribute(ProductAttribute attr) {
 	
-	
-	public String isToBeIndexedAttribute(final ProductAttribute attr, final String provider) {
+		AttributeConfig ret = null;
+		
+		
+		// 1 - Checking from icecat forced taxonomy
+		for (SourcedAttribute source : attr.getSource()) {
+			// TODO
+//			if (source.getIcecatTaxonomyId())
+			
+		}
+		
+		
+		// 2 - Looking by specific datasource name
+		if (null == ret) {
+			for (SourcedAttribute source : attr.getSource()) {
+				Map<String, String> specSynonyms = synonyms().get(source.getDataSourcename());
 
-		Map<String, String> p = provider == null ? null : synonyms().get(provider);
-
-		// TODO(conf) : This rules should be weared at the config level.
-		String translated = attr.getName();
-
-		// Sanitization
-		//TODO : from conf
-//		translated = translated.replace("(+ D'INFOS)", "");
-
-//		if (translated.endsWith(":")) {
-//			translated = translated.substring(0, translated.length() - 1).trim();
-//		}
-//
-//		final int pos = translated.indexOf('|');
-//		if (pos != -1) {
-//			translated = translated.substring(pos + 1).trim();
-//		}
-
-		// Not nice, but due to current design, in order to handle attr name on unmatched attrs
-		attr.setName(translated);
-
-
-		if (null != p) {
-			// Trying on the specific provider name
-			final String r = p.get(translated);
-			if (r != null) {
-				return r;
+				if (null != specSynonyms) {
+					ret =  getAttributeConfigByKey(specSynonyms.get(attr.getName()));
+					if (null != ret) {
+						break;
+					}
+				}
 			}
 		}
+		
+		
+		
+		
+		
+		
+		// 3 - Looking in the all attributes
+		if (null == ret) {
+				Map<String, String> specSynonyms = synonyms().get("all");
+
+				if (null != specSynonyms) {
+					ret =  getAttributeConfigByKey(specSynonyms.get(attr.getName()));
+				}
+		}
+		
+		return ret;
+		
+		
+	}
+	
+	
+	
+	public String indexedAttributeNameOrNull(final ProductAttribute attr) {
+
+		// TODO(p1, design : must relink on the attribute config !!!! ) : This rules should be weared at the config level.
+		String translated = attr.getName();
+
+		
+		// Resolving from specific datasource config
+		Map<String, String> p  = new HashMap<String, String>();
+		for (SourcedAttribute source : attr.getSource()) {
+			
+			Map<String, String> provider = synonyms() == null ? null : synonyms().get(source.getDataSourcename()); 
+			if (null != provider) {
+				p.putAll(provider);
+			}
+		}
+
+		if (p.size() > 0) {
+			return translated;
+		}
+
 
 		// Trying on the "ALL" case
 		p = synonyms().get("all");

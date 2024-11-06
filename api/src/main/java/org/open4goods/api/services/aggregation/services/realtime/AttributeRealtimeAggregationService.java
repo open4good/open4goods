@@ -98,38 +98,42 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 
 			// Checking if a potential AggregatedAttribute
 			// TODO(P1) : Detect and parse from the icecat taxonomy
-			String indexedName = attributesConfig.isToBeIndexedAttribute(attr, null);
+			
+			AttributeConfig attrConfig = attributesConfig.resolveFromProductAttribute(attr);
+			
+			
+			
+			//String indexedName = attributesConfig.indexedAttributeNameOrNull(attr);
 
 			// We have a "raw" attribute that matches an aggregationconfig
-			if (null != indexedName) {
+			if (null != attrConfig) {
 
 				try {
-					AttributeConfig attrConfig = attributesConfig.getConfigFor(indexedName);
 
 					// Applying parsing rule
 					String cleanedValue =  parseAttributeValue(attr.getValue(), attrConfig);
 
 					if (StringUtils.isEmpty(cleanedValue)) {
-						dedicatedLogger.error("Empty indexed attribute value {}:{}",indexedName,attr.getValue());
+						dedicatedLogger.error("Empty indexed attribute value {}:{}",attrConfig.getKey(),attr.getValue());
 						continue;
 					}
 					
-					IndexedAttribute indexedAttr = indexed.get(indexedName);
+					IndexedAttribute indexedAttr = indexed.get(attrConfig.getKey());
 					if (null != indexedAttr) {
-						dedicatedLogger.info("Duplicate attribute candidate for indexation, for GTIN : {} and attrs {}",data.getId(), indexedName);
+						dedicatedLogger.info("Duplicate attribute candidate for indexation, for GTIN : {} and attrs {}",data.getId(), attrConfig.getKey());
 						if (!cleanedValue.equals(indexedAttr.getValue() )) {
 							// TODO(p3,design) : Means we have multiple attributes matching for indexedbuilding. Have a merge strategy
 							dedicatedLogger.error("Value mismatch for attribute {} : {}<>{}",attr.getName(),cleanedValue, indexedAttr.getValue());
 						} 						
 					} else {
-						 indexedAttr = new IndexedAttribute(indexedName, cleanedValue);
+						 indexedAttr = new IndexedAttribute(attrConfig.getKey(), cleanedValue);
 					}
 					
 					indexedAttr.getSource().addAll(attr.getSource());					
-					indexed.put(indexedName, indexedAttr);
+					indexed.put(attrConfig.getKey(), indexedAttr);
 					
 				} catch (Exception e) {
-					dedicatedLogger.error("Attribute parsing fail for matched attribute {}", indexedName);
+					dedicatedLogger.error("Attribute parsing fail for matched attribute {}", attrConfig.getKey());
 				}
 			}
 		}

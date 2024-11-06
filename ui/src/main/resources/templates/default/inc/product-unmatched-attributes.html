@@ -14,7 +14,15 @@
 			<th:block th:each="attribute : ${product.attributes.all.values()}">
 				<th:block t:if="${attribute.icecatTaxonomyIds.size() == 0">
 					<tr th:class="${attribute.bgRow()}">
-						<td th:if="${user}" class="align-middle"><span th:text="${attribute.icecatTaxonomyIds}"></span></td>					
+						<td th:if="${user}" class="align-middle">
+							<ul>
+							  <li th:each="iid : ${attribute.icecatTaxonomyIds}">
+							      <a target="_blank" th:href="'https://api.nudger.fr/features/' + ${iid}+'/'" th:text="${iid}"></a> 
+							  </li>
+							</ul>
+						</td>					
+						
+						
 						<td class="align-middle"><span th:text="${attribute.name}"></span></td>					
 						<td class="align-middle"><span th:text="${attribute.value}"></span></td>
 						<td class="align-middle">
