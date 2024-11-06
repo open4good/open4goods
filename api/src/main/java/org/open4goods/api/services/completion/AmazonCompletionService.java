@@ -399,7 +399,7 @@ public class AmazonCompletionService extends AbstractCompletionService {
 						current.addReferentielAttribute(ReferentielKey.MODEL, model);				
 					}
 				}
-				if (null != manufactureInfo.getWarranty()) current.addAttribute("WARRANTY",manufactureInfo.getWarranty().getDisplayValue(), "fr", false, null);
+				if (null != manufactureInfo.getWarranty()) current.addAttribute("WARRANTY",manufactureInfo.getWarranty().getDisplayValue(), "fr",null);
 				//if (null != manufactureInfo.getItemPartNumber()) current.addAttribute("ITEM_PART_NUMBER",manufactureInfo.getItemPartNumber().getDisplayValue(), "fr", false, null);
 			}
 		
@@ -407,17 +407,17 @@ public class AmazonCompletionService extends AbstractCompletionService {
 			ProductInfo productInfo = itemInfo.getProductInfo();
 			productInfo.getColor();
 			// TODO : Localisation
-			if (null != productInfo.getColor()) current.addAttribute("COLOR",productInfo.getColor().getDisplayValue(), "fr", false, null);
-			if (null != productInfo.getIsAdultProduct())  current.addAttribute("ADULT",productInfo.getIsAdultProduct().getLabel(), "fr", false, null);
-			if (null != productInfo.getItemDimensions())  current.addAttribute("HEIGHT",getDisplayUnit(productInfo.getItemDimensions().getHeight()), "fr", false, null);
-			if (null != productInfo.getItemDimensions()) current.addAttribute("WEIGHT",getDisplayUnit(productInfo.getItemDimensions().getWeight()), "fr", false, null);
-			if (null != productInfo.getItemDimensions()) current.addAttribute("WIDTH",getDisplayUnit(productInfo.getItemDimensions().getWidth()), "fr", false, null);
-			if (null != productInfo.getSize()) current.addAttribute("SIZE",productInfo.getSize().getDisplayValue() , "fr", false, null);
+			if (null != productInfo.getColor()) current.addAttribute("COLOR",productInfo.getColor().getDisplayValue(), "fr",  null);
+			if (null != productInfo.getIsAdultProduct())  current.addAttribute("ADULT",productInfo.getIsAdultProduct().getLabel(), "fr",  null);
+			if (null != productInfo.getItemDimensions())  current.addAttribute("HEIGHT",getDisplayUnit(productInfo.getItemDimensions().getHeight()), "fr", null);
+			if (null != productInfo.getItemDimensions()) current.addAttribute("WEIGHT",getDisplayUnit(productInfo.getItemDimensions().getWeight()), "fr",  null);
+			if (null != productInfo.getItemDimensions()) current.addAttribute("WIDTH",getDisplayUnit(productInfo.getItemDimensions().getWidth()), "fr",  null);
+			if (null != productInfo.getSize()) current.addAttribute("SIZE",productInfo.getSize().getDisplayValue() , "fr",  null);
 			
 			if (null != productInfo.getReleaseDate()) {
 				String year = productInfo.getReleaseDate().getDisplayValue().substring(0,4);			
 				if (StringUtils.isNumeric(year)) {
-					current.addAttribute("YEAR",year, "fr", false, null);
+					current.addAttribute("YEAR",year, "fr", null);
 				}
 			}
 			
@@ -428,7 +428,7 @@ public class AmazonCompletionService extends AbstractCompletionService {
 			if (null != technicalInfo) {
 				SingleStringValuedAttribute energyClass = technicalInfo.getEnergyEfficiencyClass();
 				if (null != energyClass) {
-					current.addAttribute("CLASSE ENERGETIQUE",energyClass.getDisplayValue(), "fr", false, null);					
+					current.addAttribute("CLASSE ENERGETIQUE",energyClass.getDisplayValue(), "fr", null);					
 				}
 				
 				MultiValuedAttribute formats = technicalInfo.getFormats();

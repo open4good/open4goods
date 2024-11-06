@@ -72,7 +72,7 @@ public class TableAttributeExtractor extends Extractor {
 							final String language = locale.getLanguage();
 
 							
-									p.addAttribute(name, value, language,c.getIgnoreCariageReturns(),c.getAttributeSeparators());
+									p.addAttribute(name, value, language,null);
 
 						}
 
@@ -112,7 +112,7 @@ public class TableAttributeExtractor extends Extractor {
 							getDedicatedLogger().info("Was expecting 2 fragments. Got {} for {} at {}",fragments.length,value,url);
 						} else {
 							logger.debug("Adding attribute : {}:{}", fragments[0], fragments[1]);
-							p.addAttribute(fragments[0], fragments[1], locale.getLanguage(),c.getIgnoreCariageReturns(),c.getAttributeSeparators());
+							p.addAttribute(fragments[0], fragments[1], locale.getLanguage(),null);
 						}
 
 
@@ -145,7 +145,7 @@ public class TableAttributeExtractor extends Extractor {
 						continue;
 					}
 
-					p.addAttribute(key, val, locale.getLanguage(),c.getIgnoreCariageReturns(),c.getAttributeSeparators());
+					p.addAttribute(key, val, locale.getLanguage(),null);
 
 				}
 			}

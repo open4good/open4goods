@@ -24,14 +24,16 @@ icecatTaxonomyId: 1584
 matchingCategories:
 #    - TV
 #    - HIFI | TELEVISION
+
+# Map on fnac, and some other datasources that return unclean 
 #    - TV & VIDEO & HOME CINEMA TELEVISEUR | APPAREILS ELECTRONIQUES > VIDEO > TELEVISEURS
+#    - TV & VIDEO & HOME CINEMA | TV & VIDEO & HOME CINEMA > TELEVISEUR > TV LED/LCD | TELEVISEUR | TV LED/LCD
+#    - TV, VIDEO, HOME CINEMA | TELEVISEUR
     - TV - VIDEO - SON | TV - VIDEO - SON > TELEVISEUR > TELEVISEUR LED | TELEVISEUR | TELEVISEUR LED
 #    - TV, VIDEO, HOME CINEMA / TELEVISEUR / TV LED | TV, VIDEO, HOME CINEMA>TELEVISEUR>TV LED | TELEVISEUR | TV LED
     - TV - VIDEO - SON > TELEVISEUR > TELEVISEUR LED
     - TV, VIDEO, HOME CINEMA / TELEVISEUR / TV LED
-#    - TV & VIDEO & HOME CINEMA | TV & VIDEO & HOME CINEMA > TELEVISEUR > TV LED/LCD | TELEVISEUR | TV LED/LCD
     - HIGH-TECH >  TELEVISION, HI-FI >  TELEVISION
-#    - TV, VIDEO, HOME CINEMA | TELEVISEUR
     - TV & VIDEO & HOME CINEMA > TELEVISEUR > TV LED/LCD
     - TV, VIDEO, HOME CINEMA | TV, VIDEO, HOME CINEMA>TELEVISEUR>TV LED | TELEVISEUR | TV, VIDEO, HOME CINEMA
     - TV, VIDEO, HOME CINEMA>TELEVISEUR>TV LED
@@ -220,6 +222,8 @@ attributesConfig:
      # DIAGONALE
      ##################################
      - key: "DIAGONALE_POUCES"
+       icecatFeaturesIds:
+         - 944       
        faIcon: "up-right-and-down-left-from-center"
        name:
          default: "Screen size"
@@ -230,8 +234,8 @@ attributesConfig:
        synonyms:
          all:
            - "DIAGONALE_POUCES" 
-#         rakuten.com:      
-#           - "DIAGONALE"
+         rakuten.com:      
+           - "DIAGONALE"
    
        parser:
          normalize: true

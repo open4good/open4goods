@@ -58,6 +58,7 @@ public class ProductAttribute extends SourcableAttribute implements IAttribute {
 			System.out.println("ERROR : Name mismatch in add attribute");
 		}
 
+		source.remove(attr);
 		source.add(attr);
 
 		value = bestValue();

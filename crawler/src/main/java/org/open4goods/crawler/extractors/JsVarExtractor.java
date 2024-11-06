@@ -47,7 +47,7 @@ public class JsVarExtractor extends Extractor {
 					p.addReferentielAttribute(attr.getKey().toUpperCase(), StringEscapeUtils.unescapeHtml4(jsVar).trim());
 				} else {
 					// Adding as classical attribute
-					p.addAttribute(attr.getKey(), StringEscapeUtils.unescapeHtml4(jsVar).trim(), locale.getLanguage(),c.getIgnoreCariageReturns(),c.getAttributeSeparators());
+					p.addAttribute(attr.getKey(), StringEscapeUtils.unescapeHtml4(jsVar).trim(), locale.getLanguage(),null);
 
 				}
 

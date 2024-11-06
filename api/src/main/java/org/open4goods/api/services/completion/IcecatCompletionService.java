@@ -202,7 +202,7 @@ public class IcecatCompletionService extends AbstractCompletionService {
 				if (!f.rawValue.equals(f.value)) {
 					logger.error("VALUE MISMATCH for {}", df.gtin());
 				}
-				df.addAttribute(f.featureDetail.name.value, f.rawValue,  f.featureDetail.name.language, false, null);
+				df.addAttribute(f.featureDetail.name.value, f.rawValue,  f.featureDetail.name.language, f.featureDetail.id);
 			});
 			
 			
@@ -290,7 +290,7 @@ public class IcecatCompletionService extends AbstractCompletionService {
 		if (null != e.releaseDate) {			
 			// TODO : i18n
 			try {
-				df.addAttribute("YEAR",  e.releaseDate.substring(e.releaseDate.lastIndexOf("-")+1) , "fr", false, null);
+				df.addAttribute("YEAR",  e.releaseDate.substring(e.releaseDate.lastIndexOf("-")+1) , "fr", null);
 			} catch (Exception e1) {
 				logger.error("Parsing year failed ! ",e);
 			}

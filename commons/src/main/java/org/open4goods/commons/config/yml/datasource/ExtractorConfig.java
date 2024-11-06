@@ -104,13 +104,6 @@ public class ExtractorConfig {
 	private String xpathJsonLdMustContains;
 
 
-	/**
-	 *
-	 */
-	private Set<String> attributeSeparators;
-
-	private Boolean ignoreCariageReturns = false;
-
 	//////////////////////////////////////////////////
 	// For attributes table extractor : keys/values
 	// xpath exp
@@ -616,22 +609,6 @@ public class ExtractorConfig {
 
 	public void setSanitize(final Boolean sanitize) {
 		this.sanitize = sanitize;
-	}
-
-	public Boolean getIgnoreCariageReturns() {
-		return ignoreCariageReturns;
-	}
-
-	public void setIgnoreCariageReturns(final Boolean ignoreCariageReturns) {
-		this.ignoreCariageReturns = ignoreCariageReturns;
-	}
-
-	public Set<String> getAttributeSeparators() {
-		return attributeSeparators;
-	}
-
-	public void setAttributeSeparators(final Set<String> attributeSeparators) {
-		this.attributeSeparators = attributeSeparators;
 	}
 
 	public Map<String, String> getResourceReplacements() {

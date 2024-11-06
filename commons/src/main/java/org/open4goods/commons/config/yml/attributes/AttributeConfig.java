@@ -44,6 +44,12 @@ public class AttributeConfig {
 
 	private AttributeType type = AttributeType.TEXT;
 
+	/**
+	 * The icecat features id this attribute is mapped to
+	 */
+	private Set<String> icecatFeaturesIds = new HashSet<String>(); 
+	
+	
 
 	/**
 	 * If true, this attribute will be added as a score, mapped through the numericMapping configuration attribute and an application of the scoring (min/max) mechanism
@@ -428,6 +434,14 @@ public class AttributeConfig {
 
 	public void setAsSearchFilter(boolean asSearchFilter) {
 		this.asSearchFilter = asSearchFilter;
+	}
+
+	public Set<String> getIcecatFeaturesIds() {
+		return icecatFeaturesIds;
+	}
+
+	public void setIcecatFeaturesIds(Set<String> icecatFeaturesIds) {
+		this.icecatFeaturesIds = icecatFeaturesIds;
 	}
 
 
