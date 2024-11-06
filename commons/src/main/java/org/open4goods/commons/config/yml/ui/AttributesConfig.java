@@ -71,6 +71,11 @@ public class AttributesConfig {
 
 	private Map<String, String> valueKeyMap = new HashMap<String, String>();
 
+	/**
+	 * Attributes config by feature groups
+	 */
+	private Map<String, AttributeConfig> byIcecatFeatureGroup = new HashMap<String, AttributeConfig>();
+	
 
 	public AttributesConfig(Set<AttributeConfig> configs) {
 		this.configs = configs;
@@ -114,6 +119,11 @@ public class AttributesConfig {
 	
 			if (null != configs) {
 				for (final AttributeConfig ac : configs) {
+					
+					for (String id : ac.getIcecatFeaturesIds()) {
+						byIcecatFeatureGroup.put(id, ac);
+					}
+					
 					for (final Entry<String, Set<String>> entry : ac.getSynonyms().entrySet()) {
 						if (!hashedSynonyms.containsKey(entry.getKey())) {
 							hashedSynonyms.put(entry.getKey(), new HashMap<>());
@@ -142,9 +152,14 @@ public class AttributesConfig {
 		
 		// 1 - Checking from icecat forced taxonomy
 		for (SourcedAttribute source : attr.getSource()) {
-			// TODO
-//			if (source.getIcecatTaxonomyId())
+
+			if (null != source.getIcecatTaxonomyId()) {
+				ret = byIcecatFeatureGroup.get(String.valueOf(source.getIcecatTaxonomyId()));				
+			}
 			
+			if (null != ret) {
+				break;
+			}
 		}
 		
 		

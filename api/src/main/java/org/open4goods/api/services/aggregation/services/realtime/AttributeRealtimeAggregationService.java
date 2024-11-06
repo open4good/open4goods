@@ -133,7 +133,7 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 					indexed.put(attrConfig.getKey(), indexedAttr);
 					
 				} catch (Exception e) {
-					dedicatedLogger.error("Attribute parsing fail for matched attribute {}", attrConfig.getKey());
+					dedicatedLogger.error("Attribute parsing fail for matched attribute {}", attrConfig.getKey(),e);
 				}
 			}
 		}
@@ -181,7 +181,6 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 					agg.setName(attr.getName());
 				}
 
-				// TODO(p1, gof) : update the add
 				agg.addSourceAttribute(new SourcedAttribute(attr, dataFragment.getDatasourceName()));
 
 				// Replacing new AggAttribute in product

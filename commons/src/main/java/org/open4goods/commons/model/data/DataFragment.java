@@ -540,7 +540,7 @@ public class DataFragment implements Standardisable, Validable {
 	 *
 	 * @return
 	 */
-	public void addAttribute(final String name, final String value, final String language, final Boolean ignoreCariageReturns,final Set<String> multivalueSeparators ) {
+	public void addAttribute(final String name, final String value, final String language, String  categoryFeatureId ) {
 		if (null == value || value.isBlank()) {
 			logger.debug("Cannot add null or empty values for attribute " + name);
 			return ;
@@ -562,19 +562,32 @@ public class DataFragment implements Standardisable, Validable {
 			sanitizedName = sanitizedName.substring(0, sanitizedName.length() -1).trim();
 		}
 
+		
 		attr.setName(sanitizedName);
-
-		if (ignoreCariageReturns.booleanValue()) {
-			attr.setRawValue(value.trim().replaceAll("[\\r\\n]+", " "));
-		} else {
-			attr.setRawValue(value);
+		attr.setLanguage(language);
+		attr.setRawValue(value);
+		
+		try {
+			if (null != categoryFeatureId) {
+				attr.setIcecatFeatureId(Integer.valueOf(  categoryFeatureId));
+				
+			}
+		} catch (NumberFormatException e) {
+			logger.error("Error while converting icecatFeatureID : {}",categoryFeatureId);
 		}
 
-		attr.setLanguage(language);
+		try {
+			attr.validate();
+		} catch (final ValidationException e) {
 
+			logger.info("Attribute validation failed : {}, {}",attr.getName(), e.getMessage());
+		}
 
+		attr.normalize();
 
-		addAttribute(attr, multivalueSeparators);
+		attributes.add(attr);
+	
+
 	}
 
 	/**
@@ -588,42 +601,6 @@ public class DataFragment implements Standardisable, Validable {
 	//		return addAttribute(attr, null);
 	//	}
 
-	/**
-	 * Add attribute and specify separator fields to be used to parse values. If
-	 * null, default split values will be used.
-	 *
-	 * @param attr
-	 * @param map
-	 * @return
-	 */
-	private void addAttribute(final Attribute attr, final Set<String> multivalueSeparator) {
-
-		attr.setName(attr.getName().trim().toUpperCase());
-
-
-		try {
-			attr.validate();
-		} catch (final ValidationException e) {
-
-			logger.info("Attribute validation failed : {}, {}",attr.getName(), e.getMessage());
-		}
-
-		// Parse the values from rawValue
-
-		if (!attributes.add(attr)) {
-			logger.info("Attribute conflict for : {}");
-
-			if (null == hashedAttributes) {
-				hashedAttributes = new HashMap<>();
-			}
-			// Adding in the hashed map for performances
-			hashedAttributes.put(attr.getName(), attr);
-		}
-
-		// Forcing String normalisation
-		attr.normalize();
-
-	}
 
 	public void addRating(final Rating rr) throws ValidationException {
 		rr.validate();

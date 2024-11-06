@@ -113,7 +113,7 @@ public class DataFragmentTestBuilder {
 	}
 
 	public DataFragmentTestBuilder attribute(final String name, final String value) {
-		dataFragment.addAttribute(name, value, "fr", true, null);
+		dataFragment.addAttribute(name, value, "fr", null);
 		return this;
 	}
 

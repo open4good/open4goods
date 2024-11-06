@@ -237,7 +237,7 @@ public class CsvIndexationWorker implements Runnable {
 
 						// Store the feedUrl as an attribute (for debug)
 						// TODO(p3,conf) : from conf
-						df.addAttribute("feed_url", url, "fr", true, null);
+						df.addAttribute("feed_url", url, "fr", null);
 
 						indexationService.index(df, dsConfName);
 						stats.incrementIndexed();
@@ -877,7 +877,7 @@ public class CsvIndexationWorker implements Runnable {
 	    CsvDataSourceProperties csvProperties = config.getCsvDatasource();
 	    if (csvProperties.getImportAllAttributes()) {
 	        for (Map.Entry<String, String> entry : item.entrySet()) {
-	            dataFragment.addAttribute(entry.getKey(), entry.getValue(), config.getLanguage(), true, Collections.emptySet());
+	            dataFragment.addAttribute(entry.getKey(), entry.getValue(), config.getLanguage(), null);
 	        }
 	    }
 	}
@@ -949,7 +949,7 @@ public class CsvIndexationWorker implements Runnable {
 				}
 
 				// Splitters from conf
-				pd.addAttribute(key, frags[1], config.getLanguage(), true, Sets.newHashSet());
+				pd.addAttribute(key, frags[1], config.getLanguage(), null);
 			}
 		}
 

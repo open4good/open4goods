@@ -66,7 +66,7 @@ public class XpathExtractor extends Extractor {
 					p.addReferentielAttribute(attr.getKey().toUpperCase(), StringEscapeUtils.unescapeHtml4(xpathVar).trim());
 				} else {
 					// Adding as classical attribute
-					p.addAttribute(attr.getKey(), StringEscapeUtils.unescapeHtml4(xpathVar).trim(), locale.getLanguage(),c.getIgnoreCariageReturns(),c.getAttributeSeparators());
+					p.addAttribute(attr.getKey(), StringEscapeUtils.unescapeHtml4(xpathVar).trim(), locale.getLanguage(),null);
 				}
 			}
 		}
@@ -245,8 +245,8 @@ public class XpathExtractor extends Extractor {
 					final String[] terms = eRes
 							.split(c.getBrandAndIdSeparator());
 
-					p.addAttribute(ReferentielKey.BRAND.toString(), terms[0], locale.getLanguage(),c.getIgnoreCariageReturns(),c.getAttributeSeparators());
-					p.addAttribute(ReferentielKey.MODEL.toString(), eRes.replace(terms[0], "") , locale.getLanguage(),c.getIgnoreCariageReturns(),c.getAttributeSeparators());
+					p.addAttribute(ReferentielKey.BRAND.toString(), terms[0], locale.getLanguage(),null);
+					p.addAttribute(ReferentielKey.MODEL.toString(), eRes.replace(terms[0], "") , locale.getLanguage(),null);
 				}
 			}
 
@@ -343,7 +343,7 @@ public class XpathExtractor extends Extractor {
 
 		if (!StringUtils.isEmpty(c.getBrandUid())) {
 			p.addAttribute(ReferentielKey.MODEL.toString(),
-					evalAndLogs(document, c.getBrandUid(), url), locale.getLanguage(),c.getIgnoreCariageReturns(),c.getAttributeSeparators());
+					evalAndLogs(document, c.getBrandUid(), url), locale.getLanguage(),null);
 		}
 	}
 
