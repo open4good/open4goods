@@ -35,6 +35,8 @@ public class AttributeConfig {
 	 */
 	private String key;
 
+	
+	
 	/**
 	 * The associated font awesome icon
 	 */
@@ -45,7 +47,7 @@ public class AttributeConfig {
 	private AttributeType type = AttributeType.TEXT;
 
 	/**
-	 * The icecat features id this attribute is mapped to
+	 * The icecat features id's this attribute is mapped to
 	 */
 	private Set<String> icecatFeaturesIds = new HashSet<String>(); 
 	
