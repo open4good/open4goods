@@ -10,12 +10,6 @@ public class VerticalFilterTerm {
 	String text;
 	Long count;
 
-
-
-
-
-
-
 	public VerticalFilterTerm(String text, Long count) {
 		super();
 		this.text = text;

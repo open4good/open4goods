@@ -65,19 +65,20 @@ public class VerticalController  extends AbstractController {
 		VerticalSearchRequest vRequest = new VerticalSearchRequest();
 		vRequest.setSortField("scores.ECOSCORE.value");
 		vRequest.setSortOrder("desc");
-		vRequest.getNumericFilters().add(new NumericRangeFilter("offersCount", 1.0, 10000.0, false));
-		vRequest.getNumericFilters().add(new NumericRangeFilter("price.minPrice.price", 0.0001, 500000.0, false));
+		vRequest.getNumericFilters().add(new NumericRangeFilter("offersCount", 1.0, 10000.0, 1.0, false));
+		vRequest.getNumericFilters().add(new NumericRangeFilter("price.minPrice.price", 0.0001, 500000.0, 100.0, false));
+		vRequest.getNumericFilters().add(new NumericRangeFilter("scores.ECOSCORE.value", 0.0001, 500000.0, 1.0, false));
 		
 		
-		VerticalSearchResponse products = searchService.verticalSearch(config,vRequest);
+		VerticalSearchResponse vResponse = searchService.verticalSearch(config,vRequest);
 		
 		Map<String,String> countryNames = new HashMap<>();
-		for (VerticalFilterTerm country : products.getCountries()) {
+		for (VerticalFilterTerm country : vResponse.getCountries()) {
 			countryNames.put(country.getText(), new ULocale("",country.getText()).getDisplayCountry( new ULocale(request.getLocale().toString())));
 		}
 
 		ret.addObject("countryNames", countryNames);
-		ret.addObject("products", products);
+		ret.addObject("products", vResponse);
 		
 		ret.addObject("posts",blogService.getPosts(vertical));
 		ret.addObject("verticalConfig",config);

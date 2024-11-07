@@ -10,6 +10,8 @@ import org.open4goods.commons.services.VerticalsConfigService;
 import org.open4goods.ui.controllers.dto.DataTableRequest;
 import org.open4goods.ui.controllers.dto.DataTableResults;
 import org.open4goods.ui.controllers.dto.PaginationCriteria;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -26,6 +28,8 @@ import jakarta.servlet.http.HttpServletResponse;
 @RestController
 public class DataTableController {
 
+	private static final Logger LOGGER = LoggerFactory.getLogger(DataTableController.class);
+	
 	private final org.open4goods.commons.services.SearchService searchService;
 	private @Autowired UiService uiService;
 	private final VerticalsConfigService verticalService;
@@ -81,7 +85,15 @@ public class DataTableController {
 				Double min = Double.parseDouble(sliderValues[1]);
 				Double max = Double.parseDouble(sliderValues[2]) ;
 				Boolean includeUndefined = Boolean.valueOf(sliderValues[3]);
-				vRequest.getNumericFilters().add(new NumericRangeFilter(sliderValues[0] ,min, max,includeUndefined));
+				Double interval;
+				try {
+					interval = Double.parseDouble(sliderValues[4]);
+				} catch (NumberFormatException e) {
+					LOGGER.error("Not a parsable interval for {}",slider);
+					interval = 50.0;
+				}
+				
+				vRequest.getNumericFilters().add(new NumericRangeFilter(sliderValues[0] ,min, max, interval, includeUndefined));
 				}
 		}
 		// Sorting
