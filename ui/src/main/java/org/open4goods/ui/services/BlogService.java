@@ -88,8 +88,8 @@ public class BlogService implements HealthIndicator{
 	}
 
 	// TODO(p3, conf) : Schedule from conf
-	@Scheduled(fixedDelay = 1000 * 3600*2)
-	@PostConstruct
+	@Scheduled(initialDelay = 0, fixedDelay = 1000 * 3600*2)
+//	@PostConstruct
 	public void refreshPosts() {
 		updateBlogPosts();
 	}
