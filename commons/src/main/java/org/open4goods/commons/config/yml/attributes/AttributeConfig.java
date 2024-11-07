@@ -71,7 +71,7 @@ public class AttributeConfig {
 	/**
 	 * The ordering that must be applied to this attributes values after aggregations. (ie rendered in search attributes selection)
 	 */
-	private Order attributeValuesOrdering = Order.ALPHA;
+	private Order attributeValuesOrdering = Order.COUNT;
 
 	/**
 	 * If true, the ordering applied to aggregations will be reversed
