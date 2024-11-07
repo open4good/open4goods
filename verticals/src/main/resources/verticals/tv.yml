@@ -181,7 +181,9 @@ ecoscoreConfig:
 
 verticalFilters:
   - "DIAGONALE_POUCES"
-  - "TV_TYPE"
+  - "DISPLAY_TECHNOLOGY"
+  - "COLOR"
+  
 #  - "CLASSE_ENERGY"   
 #  - "PARTS_AVAILLABILITY"
 #  - "WARRANTY"
@@ -224,7 +226,7 @@ attributesConfig:
      - key: "DIAGONALE_POUCES"
        icecatFeaturesIds:
          - 944       
-       faIcon: "up-right-and-down-left-from-center"
+       faIcon: "fa-arrow-up-right-from-square"
        name:
          default: "Screen size"
          fr: "Diagonale (en pouces)"
@@ -249,28 +251,30 @@ attributesConfig:
      ##################################
      # TYPE TV
      ##################################
-     - key: "TV_TYPE"
+     - key: "DISPLAY_TECHNOLOGY"
+       icecatFeaturesIds: 
+         - 9713          
        faIcon: "fa-tv"
        name:
-         default: "Tv type"
-         fr: "Type de TV"
+         default: "Display technology"
+         fr: "Technologie d'affichage"
        type: "TEXT"
    
        asRating: false
-       asSearchFilter: false       
+       
+       asSearchFilter: true
+              
        synonyms:
-         all:      
-         - "TYPssE DE PRODUIT"
-         - "TssV_DEFINITION"
-       mappings:
-         "TV OLED" : "OLED"
-         "TV QLED" : "QLED"
-         "TV LED" : "LED"
+#          all:
+#            - "DIAGONALE_POUCES" 
+          rakuten.com:      
+            - "TYPE DE PRODUIT"
          
        parser:
          normalize: true
-         trim: false
+         trim: true
          lowerCase: false
-         upperCase: true
+         upperCase: true    
          removeParenthesis: false
-   #      deleteTokens:   
+         deleteTokens:   
+           - "TV"

@@ -415,7 +415,7 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 		// Normalisation
 		///////////////////
 		if (conf.getParser().getNormalize()) {
-			string = StringUtils.normalizeSpace(source);
+			string = StringUtils.normalizeSpace(string);
 		}
 
 		///////////////////
