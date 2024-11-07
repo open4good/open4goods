@@ -193,10 +193,10 @@ public class SearchService {
 
 		// Adding standard aggregations
 		esQuery = esQuery
-				.withAggregation("min_price", 	Aggregation.of(a -> a.min(ta -> ta.field("price.minPrice.price"))))
-				.withAggregation("max_price", 	Aggregation.of(a -> a.max(ta -> ta.field("price.minPrice.price"))))
-				.withAggregation("min_offers", 	Aggregation.of(a -> a.min(ta -> ta.field("offersCount"))))
-				.withAggregation("max_offers", 	Aggregation.of(a -> a.max(ta -> ta.field("offersCount"))))
+//				.withAggregation("min_price", 	Aggregation.of(a -> a.min(ta -> ta.field("price.minPrice.price"))))
+//				.withAggregation("max_price", 	Aggregation.of(a -> a.max(ta -> ta.field("price.minPrice.price"))))
+//				.withAggregation("min_offers", 	Aggregation.of(a -> a.min(ta -> ta.field("offersCount"))))
+//				.withAggregation("max_offers", 	Aggregation.of(a -> a.max(ta -> ta.field("offersCount"))))
 				.withAggregation("conditions", 	Aggregation.of(a -> a.terms(ta -> ta.field("price.conditions").missing(MISSING_BUCKET).size(3)  ))	)
 				.withAggregation("brands", 	Aggregation.of(a -> a.terms(ta -> ta.field("attributes.referentielAttributes.BRAND").missing(MISSING_BUCKET).size(AGGREGATION_BUCKET_SIZE)  ))	)
 				.withAggregation("country", 	Aggregation.of(a -> a.terms(ta -> ta.field("gtinInfos.country").missing(MISSING_BUCKET).size(AGGREGATION_BUCKET_SIZE)  ))	)
@@ -226,8 +226,8 @@ public class SearchService {
 		// Adding custom range aggregations
 		for (NumericRangeFilter filter: request.getNumericFilters()) {
 			esQuery = esQuery
-			.withAggregation("min"+filter.getKey(),  	Aggregation.of(a -> a.min(ta -> ta.field(filter.getKey()))))
-			.withAggregation("max"+filter.getKey(), 	Aggregation.of(a -> a.max(ta -> ta.field(filter.getKey()))))		;		
+			.withAggregation("min_"+filter.getKey(),  	Aggregation.of(a -> a.min(ta -> ta.field(filter.getKey()))))
+			.withAggregation("max_"+filter.getKey(), 	Aggregation.of(a -> a.max(ta -> ta.field(filter.getKey()))))		;		
 		
 		}
 				
@@ -242,10 +242,10 @@ public class SearchService {
 		///////
 		// Numeric aggregations
 		///////
-		MinAggregate minPrice = aggregations.get("min_price").aggregation().getAggregate().min();
-		MaxAggregate maxPrice = aggregations.get("max_price").aggregation().getAggregate().max();
-		MaxAggregate maxOffers = aggregations.get("max_offers").aggregation().getAggregate().max();
-		MinAggregate minOffers = aggregations.get("min_offers").aggregation().getAggregate().min();
+		MinAggregate minPrice = aggregations.get("min_price.minPrice.price").aggregation().getAggregate().min();
+		MaxAggregate maxPrice = aggregations.get("max_price.minPrice.price").aggregation().getAggregate().max();
+		MaxAggregate maxOffers = aggregations.get("max_offersCount").aggregation().getAggregate().max();
+		MinAggregate minOffers = aggregations.get("min_offersCount").aggregation().getAggregate().min();
 		//
 		vsr.setMaxPrice(maxPrice.value());
 		vsr.setMinPrice(minPrice.value());
@@ -257,8 +257,8 @@ public class SearchService {
 		// Adding custom range aggregations
 		for (NumericRangeFilter filter: request.getNumericFilters()) {
 			
-			MinAggregate min = aggregations.get("min"+filter.getKey()).aggregation().getAggregate().min();
-			MaxAggregate max= aggregations.get("max"+filter.getKey()).aggregation().getAggregate().max();
+			MinAggregate min = aggregations.get("min_"+filter.getKey()).aggregation().getAggregate().min();
+			MaxAggregate max= aggregations.get("max_"+filter.getKey()).aggregation().getAggregate().max();
 		
 			NumericRangeFilter nrf = new NumericRangeFilter();
 			nrf.setMaxValue(min.value());
