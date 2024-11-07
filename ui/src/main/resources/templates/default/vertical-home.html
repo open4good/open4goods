@@ -346,6 +346,25 @@
 	    $('input:checkbox').click(function() { 
 			table.draw();					    	
 	   	});
+	    
+	    
+	    
+	    // Show more feature, on checkboxes filters
+	    
+	    $('.show-more-link').on('click', function() {
+	        let hiddenItems = $(this).siblings('.hidden-item').filter(function() {
+	          return $(this).css('display') === 'none';
+	        });
+
+	        hiddenItems.slice(0, 5).slideDown();
+
+	        if (hiddenItems.length <= 5) {
+alert("youhou");
+	          $(this).show();
+	        }
+	      });
+	    
+	    
 		
 	} );
 </script>
