@@ -176,12 +176,7 @@ public class AttributesConfig {
 				}
 			}
 		}
-		
-		
-		
-		
-		
-		
+
 		// 3 - Looking in the all attributes
 		if (null == ret) {
 				Map<String, String> specSynonyms = synonyms().get("all");
@@ -197,39 +192,6 @@ public class AttributesConfig {
 	}
 	
 	
-	
-	public String indexedAttributeNameOrNull(final ProductAttribute attr) {
-
-		// TODO(p1, design : must relink on the attribute config !!!! ) : This rules should be weared at the config level.
-		String translated = attr.getName();
-
-		
-		// Resolving from specific datasource config
-		Map<String, String> p  = new HashMap<String, String>();
-		for (SourcedAttribute source : attr.getSource()) {
-			
-			Map<String, String> provider = synonyms() == null ? null : synonyms().get(source.getDataSourcename()); 
-			if (null != provider) {
-				p.putAll(provider);
-			}
-		}
-
-		if (p.size() > 0) {
-			return translated;
-		}
-
-
-		// Trying on the "ALL" case
-		p = synonyms().get("all");
-
-		if (null != p) {
-			final String r = p.get(translated);
-			if (r != null) {
-				return r;
-			}
-		}
-		return null;
-	}
 
 	/**
 	 * Gets an attribute config by it's id
