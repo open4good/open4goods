@@ -73,6 +73,13 @@
                 	<!--/* Left column */-->                	
                     <div class="col-lg-3 mb-3 mb-lg-0">
                     
+                    
+                    
+                    <div class="accordion-body">
+	    <canvas id="priceChart" width="400" height="100"></canvas>
+	</div>
+                    
+                    
                 		<!--/* Guides */-->	
 						<div th:if="${verticalConfig.i18n(siteLanguage).getWikiPages().size() > 0}" class="row card shadow mb-2">
 							<div class="card-header"><h2 class="h5">Les guides</h2></div>
@@ -144,7 +151,7 @@
 <script src="../../vendor/@popperjs/core/dist/umd/popper.min.js"></script>
 <script src="/webjars/bootstrap/js/bootstrap.min.js"></script>
 <script src="../../vendor/headroom.js/dist/headroom.min.js"></script>
-
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <!-- Vendor JS -->
 
 <script src="../../vendor/smooth-scroll/dist/smooth-scroll.polyfills.min.js"></script>
@@ -180,6 +187,7 @@
 	    const verticalPath = /*[[${verticalPath}]]*/'';
 	    const additionalAttributes = /*[[${filters}]]*/'';
 	    const tpl = /*[[${tpl}]]*/'';
+	    const chartIntervals = /*[[${products.numericFilters}]]*/'';
 	    	    	    
 	/*]]>*/
 </script>
@@ -282,7 +290,7 @@
 	            	// Adding slider rangers attributes
 	            	var sliderParameters = new Array();
 	            	$('.input-slider-range-container').each (function (e) {
-	            		sliderParameters.push( $(this).attr("id") + ":" + $(this).attr('data-range-value-min') + ":" + $(this).attr('data-range-value-max')+":"+$('[id="include-undefined-'+$(this).attr("id") + '"]').is(':checked'));	            		
+	            		sliderParameters.push( $(this).attr("id") + ":" + $(this).attr('data-range-value-min') + ":" + $(this).attr('data-range-value-max')+":"+$('[id="include-undefined-'+$(this).attr("id") + '"]').is(':checked') + ":" + $(this).attr('data-chart-interval'));	            		
 		            	} 
 	            	);	            	
 	            	data.sliders=sliderParameters;
@@ -364,9 +372,75 @@
 	      });
 	    
 	    
-		
+	    
+	    // Init the chart.js intervals charts, on numeric attributes
+	    
+	 // Iterate over the keys in chartIntervals and call processInterval for each
+	    Object.keys(chartIntervals).forEach((key) => {
+	    	createChartInterval(key, chartIntervals[key]);
+	    });
+	    
+	    
+	    
 	} );
 </script>
+
+<script>
+
+
+function createChartInterval(chartId, intervalDatas) {
+    
+    ///////////////////////
+    // Chart.js interval charts initialisation
+    //////////////////////
+    const ctx = document.getElementById('chart-' + chartId).getContext('2d');
+    const priceData = intervalDatas.priceBuckets;
+    const labels = priceData.map(bucket => bucket.name); // X-axis labels
+    const data = priceData.map(bucket => bucket.count); // Y-axis data
+    
+    return new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [{
+                data: data,
+                borderWidth: 1
+            }]
+        },
+        options: {
+            plugins: {
+                legend: {
+                    display: false // Hide legend for the dataset
+                },
+                title: {
+                    display: false // Hide chart title
+                }
+            },
+            scales: {
+                x: {
+                    title: {
+                        display: false // Hide X-axis title
+                    }
+                },
+                y: {
+                    title: {
+                        display: false, // Hide Y-axis title
+                    },
+                    ticks: {
+                        callback: function(value) {
+                            return parseInt(value); // Convert Y-axis labels to integer
+                        }
+                    }
+                }
+            }
+        }
+    });
+}
+
+
+	
+</script>
+
 
 </body>
 

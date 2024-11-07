@@ -8,7 +8,8 @@
 					   id='price.minPrice.price',
 					   icon='fa-euro-sign',
 					   min=${products.minPrice},
-					   max=${products.maxPrice},   
+					   max=${products.maxPrice},
+	                   interval=100,
 					   includeUndefined=false,
                        showIncludeUndefinedButton=false">
 		<th:block th:insert="~{inc/vertical-filter-item-numeric.html}"></th:block>
@@ -21,7 +22,8 @@
 					   labelType='alert-success',	
 					   icon='fa-cart-plus',                   
 	                   min=${products.minOffers},
-	                   max=${products.maxOffers},   
+	                   max=${products.maxOffers},
+	                   interval=1,   
                        includeUndefined=false,
                        showIncludeUndefinedButton=false">
 		<th:block th:insert="~{inc/vertical-filter-item-numeric.html}"></th:block>

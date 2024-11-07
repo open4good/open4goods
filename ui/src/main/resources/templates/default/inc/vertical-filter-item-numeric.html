@@ -10,9 +10,15 @@
 			<div class="accordion-body">
 			   
 			   <div th:if="${label}" th:text="${label}" class="mb-6 alert" th:classappend="${labelType}" role="alert"></div>
-	                
-			  <!--/* Range slider container */-->							
-				<div class="input-slider-range-container mx-3 mt-5" th:id="${id}" th:attr="data-range-value-min=${min},data-range-value-max=${max}">
+	            
+	            
+	           <!-- interval Chart -->
+			<div >
+				<canvas class="intervalChart" th:id="'chart-'+${id}"></canvas>
+			</div>
+
+			<!--/* Range slider container */-->							
+				<div class="input-slider-range-container mx-3 mt-5" th:id="${id}" th:attr="data-range-value-min=${min},data-range-value-max=${max}, data-chart-interval=${interval}">
 					<!-- Range slider values -->
 					<div class="row d-none">
 						<div class="col-6">
@@ -26,6 +32,28 @@
 				</div>
 				<!--/* End of range slider values */-->				
 			</div>
+			
+			
+			
+			
+			
+			
+			
+
+
+
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
             
         
 	        <div th:if="${showIncludeUndefinedButton}" class="mt-5 form-check form-switch">
