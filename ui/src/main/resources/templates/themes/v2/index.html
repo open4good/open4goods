@@ -38,52 +38,281 @@
     
     <main>  
 
-        <section id="section1"
-            class="section-header overflow-hidden bg-white vh-100 d-flex  navigation">
+        <section class="hero__hp section-header d-flex align-items-center overflow-hidden pt-7 pt-lg-8 pb-4 bg-primary">
             <div class="container">
                 <div class="row">
-                    <div  class="col-12 text-center">
-                        <span class="h1 fw-bolder display-2">
-                            Bienvenue sur <img height="75"
-                                src="https://nudger.fr/assets/img/nudger-logo-small.png"
-                                alt="Nudger.fr">
-                        </span>
-                        <h2 class="h2 text-green-bg-transparent d-inline-flex px-3 mt-5 mb-5">Réconcilier écologie et pouvoir d'achat !</h2>
-                        <div class="container lead fw-normal text-muted mb-7"> 
-                        <th:block th:with="path='WIDGETS/accueil-jumbotron/'">
-                                    <th:block th:insert="~{inc/wiki.html}"></th:block>
-                                </th:block>
+                    <div class="col-12 text-center">
                         
-                        </div>
-                        <!-- Button Modal -->
-                        <form class="" method="get" id="searchForm" action="/recherche">
-                            <div class="d-flex align-items-center row mt-lg-2">
-                                <div class="col-12 mb-3 mb-md-0 col-md-6 col-lg-4">
-                                    <label for="searchInput" class="bg-green px-3 py-2 mb-0">Commencez à nudger ici</label>
-                                </div>
-                                <div class="col-12 col-md-6 col-lg-8">
-                                    <div class="input-group">
-                                        <input type="text" id="searchInput" class="form-control"
-                                            th:placeholder="'Rechercher dans ' + ${#numbers.formatDecimal(totalItems, 0, 'COMMA', 0, 'POINT')} + ' produits'" aria-label="Search"
-                                            name="q" data-dashlane-rid="c04fc15a353ceabb"
-                                            data-form-type="">
-                                        <button
-                                            onclick="document.getElementById('searchForm').submit()"
-                                            class="btn btn-primary" type="button"
-                                            data-dashlane-label="true"
-                                            data-dashlane-rid="4c876b4b5578a952" data-form-type="">
-                                            <span class="fas fa-search"></span>
-                                        </button>
+                        <h2 class="lead fw-normal mb-4 px-lg-10">Réconcilier écologie et pouvoir d'achat !</h2>
+
+                        <div class="row">
+                            <div class="nudger_pack col-12 py-4 px-5">
+                                <div class="row justify-content-center">
+                                    <div class="col-12 col-md-10">
+                                        <div class="d-flex flex-column flex-md-row justify-content-center justify-content-md-between">
+                                            <p class="mb-3 text-center text-md-start d-flex align-items-center">
+                                                <svg width="20" height="20" class="me-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 37.39 37.34">
+                                                    <defs>
+                                                        <style>
+                                                        .cls-1 {
+                                                            fill: #004b64;
+                                                        }
+                                                        </style>
+                                                    </defs>
+                                                    <g id="_01_-_tuiles" data-name="01 - tuiles">
+                                                        <path class="cls-1" d="M16.8,9.34v-4.67c0-1.31.45-2.41,1.35-3.31s2.01-1.35,3.31-1.35h4.67v4.67c0,1.31-.45,2.41-1.35,3.31s-2.01,1.35-3.31,1.35h-4.67ZM6.54,20.54c-1.8,0-3.35-.64-4.62-1.91-1.28-1.28-1.91-2.82-1.91-4.62v-6.54h6.54c1.8,0,3.35.64,4.62,1.91,1.28,1.28,1.91,2.82,1.91,4.62v6.54h-6.54ZM26.14,37.34c-1.21,0-2.37-.19-3.48-.56s-2.11-.89-3.01-1.54l-1.54,1.54c-.34.34-.78.51-1.31.51s-.96-.17-1.31-.51-.51-.78-.51-1.31.17-.96.51-1.31l1.54-1.54c-.65-.9-1.17-1.91-1.54-3.01-.37-1.1-.56-2.26-.56-3.48,0-3.11,1.09-5.77,3.27-7.96,2.18-2.19,4.82-3.29,7.94-3.29h11.25v11.25c0,3.11-1.1,5.76-3.29,7.94-2.19,2.18-4.85,3.27-7.96,3.27ZM26.14,33.61c2.09,0,3.84-.73,5.27-2.19s2.15-3.22,2.15-5.27v-7.47h-7.42c-2.05,0-3.81.72-5.27,2.17-1.46,1.45-2.19,3.21-2.19,5.3,0,.72.09,1.39.26,2.03s.43,1.24.77,1.8l5.13-5.13c.34-.34.78-.51,1.31-.51s.96.17,1.31.51.51.78.51,1.31-.17.96-.51,1.31l-5.13,5.13c.56.34,1.16.6,1.8.77s1.31.26,2.03.26Z"/>
+                                                    </g>
+                                                </svg>
+                                                Le comparateur Ecolo
+                                            </p>
+                                            
+                                            <p class="mb-3 d-flex align-items-center">
+                                                <svg width="20" height="20" class="me-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 42.95 35.48">
+                                                    <defs>
+                                                      <style>
+                                                        .cls-1 {
+                                                          fill: #004b64;
+                                                        }
+                                                      </style>
+                                                    </defs>
+                                                    <g id="_01_-_tuiles" data-name="01 - tuiles">
+                                                      <path class="cls-1" d="M30.25,23.34l7.1-6.07,5.6.47-8.22,7.14,2.43,10.6-4.76-2.89-2.15-9.24ZM25.86,9.71l-1.96-4.57,2.15-5.13,4.29,10.13-4.48-.42ZM12.79,27.68l5.88-3.55,5.88,3.59-1.54-6.72,5.18-4.48-6.82-.61-2.71-6.35-2.71,6.3-6.82.61,5.18,4.53-1.54,6.68ZM7.14,35.48l3.03-13.12L0,13.54l13.44-1.17L18.67,0l5.23,12.37,13.44,1.17-10.18,8.82,3.03,13.12-11.53-6.96-11.53,6.96Z"/>
+                                                    </g>
+                                                </svg>
+                                                Un Eco-score innovant
+                                            </p>
+                                            
+                                            <p class="mb-3 text-center text-md-end d-flex align-items-center">
+                                                <svg width="20" height="20" class="me-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 34.42 34.42">
+                                                    <defs>
+                                                      <style>
+                                                        .cls-1 {
+                                                          fill: #004b64;
+                                                        }
+                                                      </style>
+                                                    </defs>
+                                                    <g id="_01_-_tuiles" data-name="01 - tuiles">
+                                                      <path class="cls-1" d="M17.21,34.42c-2.38,0-4.62-.45-6.71-1.36s-3.91-2.13-5.46-3.68-2.77-3.37-3.68-5.46c-.9-2.09-1.36-4.33-1.36-6.71s.45-4.62,1.36-6.71c.9-2.09,2.13-3.91,3.68-5.46s3.37-2.77,5.46-3.68,4.33-1.36,6.71-1.36,4.62.45,6.71,1.36,3.91,2.13,5.46,3.68,2.77,3.37,3.68,5.46,1.36,4.33,1.36,6.71-.45,4.62-1.36,6.71-2.13,3.91-3.68,5.46-3.37,2.77-5.46,3.68-4.33,1.36-6.71,1.36ZM15.49,30.89v-3.36c-.95,0-1.76-.34-2.43-1.01-.67-.67-1.01-1.48-1.01-2.43v-1.72L3.79,14.11c-.09.52-.16,1.03-.24,1.55s-.11,1.03-.11,1.55c0,3.47,1.14,6.51,3.42,9.12,2.28,2.61,5.16,4.13,8.63,4.56ZM27.36,26.5c.57-.63,1.09-1.31,1.55-2.04.46-.73.84-1.49,1.14-2.28s.53-1.6.69-2.43.24-1.68.24-2.54c0-2.81-.78-5.38-2.34-7.7-1.56-2.32-3.65-4-6.26-5.03v.69c0,.95-.34,1.76-1.01,2.43s-1.48,1.01-2.43,1.01h-3.44v3.44c0,.49-.16.9-.49,1.23s-.74.49-1.23.49h-3.44v3.44h10.32c.49,0,.9.16,1.23.49s.49.74.49,1.23v5.16h1.72c.75,0,1.42.22,2.02.67s1.02,1.03,1.25,1.74Z"/>
+                                                    </g>
+                                                </svg>
+                                                Nudgez et sauvez la planète
+                                            </p>
+                                        </div>
+
+                                        <div class="card border-0 mt-3">
+                                            <div class="card-body p-0 text-start">
+                                                <div class="tab-content" id="tabcontent1">
+                                                    <div class="tab-pane fade show active" id="tabs-text-1" role="tabpanel" aria-labelledby="tabs-text-1-tab">
+                                                        <p>Chez Nudger, nous vous proposons un coup de pouce pour transformer vos achats en actes engagés pour la planète !</p>
+                                                        <p>Notre eco-score innovant vous guide vers les produits les plus écologiques. Nous comparons aussi les prix auprès d'un grand nombre de commerçants. La cerise sur le gâteau ? Nous reversons une partie de nos revenus à des organisations qui oeuvrent pour préserver notre belle planète !</p>
+                                                    </div>
+                                                    <div class="tab-pane fade" id="tabs-text-2" role="tabpanel" aria-labelledby="tabs-text-2-tab">
+                                                        <p>Photo booth stumptown tote bag Banksy, elit small batch freegan sed. Craft beer elit seitan exercitation, photo booth et 8-bit kale chips proident chillwave deep v laborum. Aliquip veniam delectus, Marfa eiusmod
+                                                            Pinterest in do umami readymade swag.</p>
+                                                        <p>Day handsome addition horrible sensible goodness two contempt. Evening for married his account removal. Estimable me disposing of be moonlight cordially curiosity.</p>
+                                                    </div>
+                                                    <div class="tab-pane fade" id="tabs-text-3" role="tabpanel" aria-labelledby="tabs-text-3-tab">
+                                                        <p>Exercitation photo booth stumptown tote bag Banksy, elit small batch freegan sed. Craft beer elit seitan exercitation, photo booth et 8-bit kale chips proident chillwave deep v laborum. Aliquip veniam delectus,
+                                                            Marfa eiusmod Pinterest in do umami readymade swag.</p>
+                                                        <p>Day handsome addition horrible sensible goodness two contempt. Evening for married his account removal. Estimable me disposing of be moonlight cordially curiosity.</p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-                        </form>
+                        </div>
                     </div>
                 </div>
-            </div>          
+            </div>
         </section>
 
+        <div class="container container-semi-fluid py-5">
+			<div class="row justify-content-between align-items-center">
+				<div class="col-12 text-center">
+					<div class="row justify-content-center">
+						<div class="col-12 col-md-6 mb-3">
+							<div class="card bg-white border-gray-300 text-gray p-4 h-100">
+								<div class="card-header bg-white border-0 pb-0">
+									<h2 class="h4 m-0">Modèle ouvert</h2>
+								</div>
+								<div class="card-body">
+									<p>
+	                                    Nous sommes dans une volonté de communs numériques. Notre code est en open-source, nos données sont disponibles en open-data.&nbsp;	                   
+									</p>
+									<a href="#modele-ouvert" class="btn btn-sm btn-primary animate-up-2 mt-3">Modèle ouvert</a>
+								</div>
+							</div>
+						</div>
+						
+						<div class="col-12 col-md-6 mb-3">
+							<div class="card bg-white border-gray-300 text-gray p-4 h-100x ">
+								<div class="card-header bg-white border-0 pb-0">
+									<h2 class="h4 m-0">Data responsable</h2>
+								</div>
+								<div class="card-body">
+									<p>	
+	                                    Pas de bandeau cookie, vous avez remarqué ? Nous sommes respectueux de votre vie privée. Nous ne collectons aucune donnée personnelle.	                                
+									</p>
+									<a href="#data-responsable" class=" level btn btn-sm btn-primary animate-up-2 mt-3">Data responsable</a>
+								</div>
+							</div>
+						</div>
+						
+						<div class="col-12 col-md-6 col-lg-4 mb-3 mb-lg-0">
+							<div class="card bg-white border-gray-300 text-gray p-4 h-100">
+								<div class="card-header bg-white border-0 pb-0">
+									<h2 class="h4 m-0">Eco-score</h2>
+								</div>
+								<div class="card-body">
+									<p>
+	                                    Nous calculons un score d'impact écologique innovant pour de nombreux produits, et nous mettons en avant les achats les plus éco-responsables.	                              
+									</p>
+									<a href="#evaluation-ecologique" class="btn btn-sm btn-primary animate-up-2 mt-3">Score écologique</a>
+								</div>
+							</div>
+						</div>                    
 
+						<div class="col-12 col-md-6 col-lg-4 mb-3 mb-lg-0">
+							<div class="card bg-white border-gray-300 text-gray p-4 h-100">
+								<div class="card-header bg-white border-0 pb-0">
+									<h2 class="h4 m-0">Compensation</h2>
+								</div>
+								<div class="card-body">
+									<p>	
+	                                    Notre "nudge" pour la planète : nous reversons 20% du chiffre d’affaires de la plateforme, auprès d'organisations que vous pouvez choisir !	                               
+									</p>
+									<a href="#compensation-carbone" class="btn btn-sm btn-primary animate-up-2 mt-3">Compensation écologique</a>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<section class="bg-white text-center py-4">
+			<h1 class="mb-3">Notre philosophie : le bien commun</h1>
+			<p class="lead mb-0">Découvrez nos valeurs et nos atouts</p>
+		</section>
+
+		<div class="container my-5">
+			<div class="d-flex justify-content-start">
+				<div class="col-12 col-md-10">
+					<!-- Icon Boxes -->
+					<div class="card shadow">
+						<div class="row g-0 align-items-center">
+							<div class="col-md-4">
+								<img src="../../assets/img/pages/design.svg" alt="Web design illustration" class="card-img-top rounded-top">
+							</div>
+							<div class="col-md-8">
+								<div class="card-body">
+									<h3 class="h5 card-title mt-3">Compensation environnementale</h3>
+									<p class="card-text">
+	                                    Face à la pollution massive engendrée par les différentes industries mondiales, les gouvernements ont mis en place des actions visant à réduire l’empreinte carbone émise. Cependant, de nombreux milieux ne peuvent pas être améliorés en ce sens. Afin que chacun puisse donc contribuer à sa manière à la dépollution de notre terre, la compensation environnementale a été mise en place sur l’achat de certains produits. Eco-Achat vous guide vers un shopping moins impactant pour la planète grâce à une solution innovante : une évaluation écologique des produits et une mise en avant des produits les plus vertueux. Notre comparateur de compensation environnementale analyse en permanence le catalogue de nos commerçants partenaires pour vous aider à acheter des produits écoresponsables aux meilleurs prix.&nbsp;	                                          
+									</p>
+									<a href="/compensation-carbone" class="btn btn-primary btn-sm">En savoir plus sur la compensation carbone</a>
+								</div>
+							</div>
+						</div>
+					</div>
+					<!-- End of Icon Boxes -->
+				</div>
+			</div>
+
+			<div class="d-flex justify-content-end mt-3">
+				<div class="col-12 col-md-10">
+					<!-- Icon Boxes -->
+					<div class="card shadow">
+						<div class="row g-0 align-items-center">
+							<div class="col-md-8">
+								<div class="card-body">
+									<h3 class="h5 card-title mt-3">Data responsable</h3>
+									<p class="card-text">
+	                                    Notre plateforme se veut être une solution de bien commun, responsable et éthique. Dans cette optique, nous n’exploitons pas les données personnelles de nos visiteurs. Comme vous pouvez le constater, il n’y a aucun bandeau de cookie sur les pages du site. Et pour cause, Eco-Achat n’exploite absolument aucun cookie. Nous prônons un modèle responsable de bout en bout et visons à conserver cette logique dans chaque aspect de développement. En utilisant Eco-Achat, aucune de vos données personnelles n’est exploitée. Vous pouvez ainsi explorer librement !
+									</p>
+									<a href="/donnees-personnelles" class="btn btn-primary btn-sm">En savoir plus sur l'utilisation de vos données</a>
+								</div>
+							</div>
+							<div class="col-md-4">
+								<img src="../../assets/img/pages/support.svg" alt="Web design illustration" class="card-img-top rounded-top">
+							</div>
+						</div>
+					</div>
+					<!-- End of Icon Boxes -->
+				</div>
+			</div>    
+			
+			<div class="d-flex justify-content-start mt-3">
+				<div class="col-12 col-md-10">
+					<!-- Icon Boxes -->
+					<div class="card shadow">
+						<div class="row g-0 align-items-center">
+							<div class="col-md-4">
+								<img src="../../assets/img/pages/technologies.svg" alt="Web design illustration" class="card-img-top rounded-top">
+							</div>
+							<div class="col-md-8">
+								<div class="card-body">
+									<h3 class="h5 card-title mt-3">Comparaison de prix</h3>
+									<p class="card-text">
+	                                    Eco-Achat est également une plateforme de comparaison des prix. Au-delà de la compensation carbone de chaque article, nous vous permettons de consulter en direct le tarif des produits chez de nombreux revendeurs, afin de trouver le meilleur prix. Notre algorithme met à jour très régulièrement la base de données afin de vous fournir l’information et les prix les plus récents. En quelques clics, vous pouvez trouver la télévision ou encore la machine à laver la plus économique et avec le meilleur score écologique.                                  
+									</p>
+									<a href="#" class="btn btn-primary btn-sm">En savoir plus sur la comparaison de prix</a>
+								</div>
+							</div>
+						</div>
+					</div>
+					<!-- End of Icon Boxes -->
+				</div>
+			</div>
+
+			<div class="d-flex justify-content-end mt-3">
+				<div class="col-12 col-md-10">
+					<!-- Icon Boxes -->
+					<div class="card shadow">
+						<div class="row g-0 align-items-center">
+							<div class="col-md-8">
+								<div class="card-body">
+									<h3 class="h5 card-title mt-3">Evaluation écologique</h3>
+									<p class="card-text">
+	                                    Eco-Achat calcule un score écologique pour un grand nombre de produits. Depuis notre outil de recherche, vous pouvez ainsi comparer en quelques clics de nombreux articles en vente sur le marché. L'éco-score n'est calculé qu'à partir des données produits (classe énergétique, disponibilité des pièces détachées, indice de réparabilité,...) par rapport aux modèles concurrents sur le même marché. Ce procédé de comparatif de produits responsables rend ainsi possible la sélection d’un article écologiquement optimal. Bien que l’impact environnemental de votre achat ne puisse être pleinement compensé, sélectionner le modèle ayant le meilleur score écologique est une première alternative viable.
+									</p>
+									<a href="/donnees-personnelles" class="btn btn-primary btn-sm">En savoir plus sur l'évaluation environnementale</a>
+								</div>
+							</div>
+							<div class="col-md-4">
+								<img src="../../assets/img/pages/support.svg" alt="Web design illustration" class="card-img-top rounded-top">
+							</div>
+						</div>
+					</div>
+					<!-- End of Icon Boxes -->
+				</div>
+			</div>  
+
+			<div class="d-flex justify-content-start mt-3">
+				<div class="col-12 col-md-10">
+					<!-- Icon Boxes -->
+					<div class="card shadow">
+						<div class="row g-0 align-items-center">
+							<div class="col-md-4">
+								<img src="../../assets/img/pages/code.svg" alt="Web design illustration" class="card-img-top rounded-top">
+							</div>
+							<div class="col-md-8">
+								<div class="card-body">
+									<h3 class="h5 card-title mt-3">Open-source et Open-data</h3>
+									<p class="card-text">
+	                                    Eco-Achat développe un système entièrement open source et open data pour garantir une transparence, une ré-utilisabilité et reverser la base de données produits au service du bien commun. Toutes nos données sont téléchargeables depuis la page dédiée sur notre site. Les données sont mises à jour de manière régulière pour fournir un annuaire des produits en ligne gratuit et accessible à tous. Par ailleurs, notre algorithme de recherche et de classement est basé sur une architecture open source. Le code peut être librement observé et téléchargé depuis GitHub.                           
+									</p>
+									<a href="/opendata" class="btn btn-primary btn-sm">En savoir plus sur le modèle ouvert</a>
+								</div>
+							</div>
+						</div>
+					</div>
+					<!-- End of Icon Boxes -->
+				</div>
+			</div>        
+		</div>
 
 
 

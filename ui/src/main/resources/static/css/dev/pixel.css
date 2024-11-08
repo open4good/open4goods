@@ -30848,4 +30848,8 @@ blockquote {
 .ct-line {
     pointer-events: none;
 }
+
+.bg-primary {
+    background: #00DE9F;
+}
 /*# sourceMappingURL=pixel.css.map */
