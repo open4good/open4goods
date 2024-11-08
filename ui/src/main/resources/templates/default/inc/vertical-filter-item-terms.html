@@ -12,8 +12,9 @@
 
       <div class="row">
         <!-- The always visible section -->
-        <div th:each="term, index: ${terms}" class="col-12">
-          <th:block th:if="${index.index} < 5">
+         
+        <!-- The collapsable area with show more link -->
+          <div th:each="term, index: ${terms}"  class="col-12" th:classappend="${index.index} <= 5 ? '' : 'hidden-item'" th:style="${index.index} <= 5 ? '' : 'display: none;'">
             <th:block th:if="${termsLineWidget}">
               <th:block th:insert="~{'inc/'+${termsLineWidget}+'.html'}"></th:block>
             </th:block>
@@ -24,29 +25,21 @@
                 <span th:text="${term.count}" th:id="'badge'+'-'+${id}+'-'+${term.id}" class="badge bg-gray badge-pill float-end"></span>
               </div>
             </th:block>
-          </th:block>
-        </div>
+          </div>
+          
 
         <!-- The collapsable area with show more link -->
         <th:block th:if="${terms.size()} > 5">
-          <div th:each="term, index: ${terms}" th:if="${index.index} >= 5" class="col-12 hidden-item" style="display: none;">
-            <th:block th:if="${termsLineWidget}">
-              <th:block th:insert="~{'inc/'+${termsLineWidget}+'.html'}"></th:block>
-            </th:block>
-            <th:block th:unless="${termsLineWidget}">
-              <div class="form-check mb-1">
-                <input class="form-check-input changeableBox" type="checkbox" th:data-id="${id}" th:data-value="${term.text}" th:id="${id}+'-'+${index.count}">
-                <label th:text="${term.text}" class="form-check-label" th:for="${id}+'-'+${index.count}"></label>
-                <span th:text="${term.count}" th:id="'badge'+'-'+${id}+'-'+${term.id}" class="badge bg-gray badge-pill float-end"></span>
-              </div>
-            </th:block>
-          </div>
-          
-          <div class="form-check mb-1">
-                <a href="javascript:void(0);" class="show-more-link float-end mt-2">Afficher plus</a>
+          <div class="show-more-link form-check mb-1">
+                <a href="javascript:void(0);" class="float-end mt-2">Afficher plus</a>
           </div>
           
         </th:block>
+        
+        
+        
+        
+        
       </div>
     </div>
   </div>

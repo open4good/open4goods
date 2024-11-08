@@ -141,9 +141,22 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 		
 		// Replacing all previously indexed
 		data.getAttributes().setIndexed(indexed);
-		
 	}
 
+	
+	// EXTRACTING FEATURES ATTRIBUTES
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
 	/**
 	 * On data fragment agg leveln we increment the "all" field, with sourced values
 	 * for new or existing attributes. product
