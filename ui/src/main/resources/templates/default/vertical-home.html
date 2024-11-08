@@ -182,6 +182,7 @@
 	/*<![CDATA[*/
 	
 	    const vertical = /*[[${verticalConfig.id}]]*/ '';
+    
 	    const siteLanguage = /*[[${siteLanguage}]]*/'';
 	    const baseUrl = /*[[${baseUrl}]]*/'';
 	    const verticalPath = /*[[${verticalPath}]]*/'';
@@ -364,11 +365,16 @@
 	          return $(this).css('display') === 'none';
 	        });
 
+	        
+	        hiddenCount = hiddenItems.length;
+	        
 	        hiddenItems.slice(0, 5).slideDown();
 
-	        if (hiddenItems.length <= 5) {
-	          $(this).show();
+	        // Removing show more links if no more..
+	        if (hiddenCount <= 5) {
+	          $(this).hide();
 	        }
+
 	      });
 	    
 	    
@@ -377,7 +383,7 @@
 	    
 	 // Iterate over the keys in chartIntervals and call processInterval for each
 	    Object.keys(chartIntervals).forEach((key) => {
-	    	createChartInterval(key, chartIntervals[key]);
+	    	createChartInterval(key, chartIntervals[key], vertical);
 	    });
 	    
 	    
@@ -387,16 +393,26 @@
 
 <script>
 
-
-function createChartInterval(chartId, intervalDatas) {
+function createChartInterval(chartId, intervalDatas, verticalName) {
     
     ///////////////////////
-    // Chart.js interval charts initialisation
+    // Chart.js interval charts initialization
     //////////////////////
     const ctx = document.getElementById('chart-' + chartId).getContext('2d');
     const priceData = intervalDatas.priceBuckets;
-    const labels = priceData.map(bucket => bucket.name); // X-axis labels
-    const data = priceData.map(bucket => bucket.count); // Y-axis data
+//    const labels = priceData.map(bucket => parseInt(bucket.name)); // X-axis labels
+//    const data = priceData.map(bucket => parseInt(bucket.count)); // Y-axis data
+    
+	const labels = priceData.map(bucket => {
+	    const parsedName = parseFloat(bucket.name);
+	    return Number.isInteger(parsedName) ? parsedName : parsedName.toFixed(1);
+	}); // X-axis labels
+	
+	const data = priceData.map(bucket => {
+	    const parsedCount = parseFloat(bucket.count);
+	    return Number.isInteger(parsedCount) ? parsedCount : parsedCount.toFixed(1);
+	}); // Y-axis data
+	    
     
     return new Chart(ctx, {
         type: 'bar',
@@ -404,7 +420,7 @@ function createChartInterval(chartId, intervalDatas) {
             labels: labels,
             datasets: [{
                 data: data,
-                borderWidth: 1
+                borderWidth: 0
             }]
         },
         options: {
@@ -414,6 +430,13 @@ function createChartInterval(chartId, intervalDatas) {
                 },
                 title: {
                     display: false // Hide chart title
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return verticalName +  ": " + parseInt(context.raw); // Custom tooltip text
+                        }
+                    }
                 }
             },
             scales: {
@@ -423,19 +446,15 @@ function createChartInterval(chartId, intervalDatas) {
                     }
                 },
                 y: {
-                    title: {
-                        display: false, // Hide Y-axis title
-                    },
-                    ticks: {
-                        callback: function(value) {
-                            return parseInt(value); // Convert Y-axis labels to integer
-                        }
-                    }
+                    display: false, // Hide Y-axis completely
                 }
-            }
+            },
+            barPercentage: 1.0, // Make bars occupy full width of the category
+            categoryPercentage: 1.0 // Remove spacing between categories
         }
     });
 }
+
 
 
 	

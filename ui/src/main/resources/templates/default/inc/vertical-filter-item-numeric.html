@@ -17,6 +17,21 @@
 				<canvas class="intervalChart" th:id="'chart-'+${id}"></canvas>
 			</div>
 
+			<!-- Input fields for min and max values below the chart -->
+			<div class="slider-input-container mx-5 mt-2">
+			    <div class="row">
+			        <div class="col-6">
+			            <input th:id="'slider-min-'+${id}" type="number" class="form-control slider-input-low text-start small-input" th:attr="value=${min}" />
+			        </div>
+			        <div class="col-6">
+			            <input th:id="'slider-max-'+${id}" type="number" class="form-control slider-input-high text-start small-input" th:attr="value=${max}" />
+			        </div>
+			    </div>
+			</div>
+
+
+
+
 			<!--/* Range slider container */-->							
 				<div class="input-slider-range-container mx-3 mt-5" th:id="${id}" th:attr="data-range-value-min=${min},data-range-value-max=${max}, data-chart-interval=${interval}">
 					<!-- Range slider values -->
@@ -35,27 +50,6 @@
 			
 			
 			
-			
-			
-			
-			
-
-
-
-			
-			
-			
-			
-			
-			
-			
-			
-			
-			
-			
-			
-            
-        
 	        <div th:if="${showIncludeUndefinedButton}" class="mt-5 form-check form-switch">
 	            <input class="form-check-input"  th:checked="${includeUndefined}" type="checkbox" th:id="'include-undefined-'+${id}">
 	            <label class="form-check-label" th:for="'include-undefined-'+${id}" th:text="${includeUndefinedLabel}"></label>
