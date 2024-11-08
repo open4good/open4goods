@@ -38,13 +38,117 @@
     
     <main>  
 
-        <section class="hero__hp section-header d-flex align-items-center overflow-hidden pt-7 pt-lg-8 pb-4 bg-primary">
+        <section class="hero__hp bg__degrade--bottom section-header d-flex align-items-center overflow-hidden pt-7 pt-lg-8 pb-4 bg-primary">
             <div class="container">
                 <div class="row">
                     <div class="col-12 text-center">
                         
                         <h2 class="lead fw-normal mb-4 px-lg-10">Réconcilier écologie et pouvoir d'achat !</h2>
+                        <div class="row">
+                            <!-- Button Modal -->
+                            <form method="post" id="searchForm" class="mb-3" action="/recherche">
+                                <div class="d-flex align-items-center justify-content-center">
+                                    <div class="col-12 col-md-6 col-lg-8">
+                                        <div class="input-group input-group__nudger">
+                                            <input type="text" id="searchInput" class="form-control" placeholder="Rechercher dans 85,682 produits" aria-label="Search" aria-describedby="basic-addon1" name="query" data-dashlane-rid="c04fc15a353ceabb" data-form-type="">
+                                            <button onclick="document.getElementById('searchForm').submit()" class="btn btn__nudger" type="button" data-dashlane-label="true" data-dashlane-rid="4c876b4b5578a952" data-form-type=""><span class="fas fa-search"></span></button>
+                                            <hr />
+                                        </div>
+                                    </div>
+                                </div>
+                            </form>
+                            <div class="d-flex flex-column flex-md-row justify-content-between gap-3 mt-3 mb-4 col-12 col-md-10 mx-auto">
+                                <button class="btn bg-white" type="button">
+                                    <span class="me-1">
+                                        <svg xmlns="http://www.w3.org/2000/svg" height="16" viewBox="0 0 39.51 33.59">
+                                            <defs>
+                                              <style>
+                                                .cls-1 {
+                                                  fill: #004b64;
+                                                }
+                                              </style>
+                                            </defs>
+                                            <g id="_01_-_Recherche_Boutons" data-name="01 - Recherche &amp;amp; Boutons">
+                                              <path class="cls-1" d="M3.95,33.59v-3.95c-1.09,0-2.02-.39-2.79-1.16-.77-.77-1.16-1.7-1.16-2.79V3.95C0,2.86.39,1.93,1.16,1.16S2.86,0,3.95,0h31.61c1.09,0,2.02.39,2.79,1.16s1.16,1.7,1.16,2.79v21.73c0,1.09-.39,2.02-1.16,2.79s-1.7,1.16-2.79,1.16v3.95h-1.98l-1.28-3.95H7.26l-1.33,3.95h-1.98ZM3.95,25.68h31.61V3.95H3.95v21.73Z"/>
+                                            </g>
+                                        </svg>
+                                    </span>
+                                     Image & son
+                                </button>
 
+                                <button class="btn bg-white" type="button">
+                                    <span class="me-1">
+                                        <svg xmlns="http://www.w3.org/2000/svg" height="16" viewBox="0 0 47.42 33.59">
+                                            <defs>
+                                              <style>
+                                                .cls-1 {
+                                                  fill: #004b64;
+                                                }
+                                              </style>
+                                            </defs>
+                                            <g id="_01_-_Recherche_Boutons" data-name="01 - Recherche &amp;amp; Boutons">
+                                              <path class="cls-1" d="M3.95,33.59c-1.09,0-2.02-.39-2.79-1.16-.77-.77-1.16-1.7-1.16-2.79h7.9c-1.09,0-2.02-.39-2.79-1.16-.77-.77-1.16-1.7-1.16-2.79V3.95c0-1.09.39-2.02,1.16-2.79s1.7-1.16,2.79-1.16h31.61c1.09,0,2.02.39,2.79,1.16s1.16,1.7,1.16,2.79v21.73c0,1.09-.39,2.02-1.16,2.79-.77.77-1.7,1.16-2.79,1.16h7.9c0,1.09-.39,2.02-1.16,2.79-.77.77-1.7,1.16-2.79,1.16H3.95ZM23.71,31.61c.56,0,1.03-.19,1.41-.57.38-.38.57-.85.57-1.41s-.19-1.03-.57-1.41c-.38-.38-.85-.57-1.41-.57s-1.03.19-1.41.57-.57.85-.57,1.41.19,1.03.57,1.41.85.57,1.41.57ZM7.9,25.68h31.61V3.95H7.9v21.73ZM7.9,25.68V3.95v21.73Z"/>
+                                            </g>
+                                        </svg>
+                                    </span>
+                                     Informatique
+                                </button>
+
+                                <button class="btn bg-white" type="button" disabled>
+                                    <span class="me-1">
+                                        <svg xmlns="http://www.w3.org/2000/svg" height="16" viewBox="0 0 29.64 39.51">
+                                            <defs>
+                                              <style>
+                                                .cls-1 {
+                                                  fill: #004b64;
+                                                }
+                                              </style>
+                                            </defs>
+                                            <g id="_01_-_Recherche_Boutons" data-name="01 - Recherche &amp;amp; Boutons">
+                                              <path class="cls-1" d="M9.88,39.51c-1.09,0-2.02-.39-2.79-1.16-.77-.77-1.16-1.7-1.16-2.79v-1.98c0-1.55.34-2.98,1.01-4.3.68-1.32,1.56-2.42,2.64-3.31l-1.23-8.2H3.95c-1.09,0-2.02-.39-2.79-1.16-.77-.77-1.16-1.7-1.16-2.79v-7.9c0-1.09.39-2.02,1.16-2.79.77-.77,1.7-1.16,2.79-1.16h9.88V0h7.9v1.98h7.85l-3.61,24c1.09.89,1.97,1.99,2.64,3.31.68,1.32,1.01,2.75,1.01,4.3v1.98c0,1.09-.39,2.02-1.16,2.79s-1.7,1.16-2.79,1.16h-15.81ZM7.75,13.83l-1.19-7.9h-2.62v7.9h3.8ZM17.78,33.59c.56,0,1.03-.19,1.41-.57.38-.38.57-.85.57-1.41s-.19-1.03-.57-1.41c-.38-.38-.85-.57-1.41-.57s-1.03.19-1.41.57-.57.85-.57,1.41.19,1.03.57,1.41.85.57,1.41.57ZM13.24,23.71h9.09l2.67-17.78h-14.42l2.67,17.78ZM9.88,35.56h15.81v-1.98c0-1.65-.58-3.05-1.73-4.2-1.15-1.15-2.55-1.73-4.2-1.73h-3.95c-1.65,0-3.05.58-4.2,1.73s-1.73,2.55-1.73,4.2v1.98Z"/>
+                                            </g>
+                                        </svg>
+                                    </span>
+                                     Electroménager
+                                </button>
+
+                                <button class="btn bg-white" type="button" disabled>
+                                    <span class="me-1">
+                                        <svg xmlns="http://www.w3.org/2000/svg" height="16" viewBox="0 0 26.4 41.49">
+                                            <defs>
+                                              <style>
+                                                .cls-1 {
+                                                  fill: #004b64;
+                                                }
+                                              </style>
+                                            </defs>
+                                            <g id="_01_-_Recherche_Boutons" data-name="01 - Recherche &amp;amp; Boutons">
+                                              <path class="cls-1" d="M3.77,41.49c-1.04,0-1.93-.37-2.66-1.11-.74-.74-1.11-1.63-1.11-2.66V3.77c0-1.04.37-1.93,1.11-2.66S2.73,0,3.77,0h18.86c1.04,0,1.93.37,2.66,1.11.74.74,1.11,1.63,1.11,2.66v33.95c0,1.04-.37,1.93-1.11,2.66-.74.74-1.63,1.11-2.66,1.11H3.77ZM3.77,32.06v5.66h18.86v-5.66H3.77ZM13.2,36.78c.53,0,.98-.18,1.34-.54.36-.36.54-.81.54-1.34s-.18-.98-.54-1.34c-.36-.36-.81-.54-1.34-.54s-.98.18-1.34.54-.54.81-.54,1.34.18.98.54,1.34.81.54,1.34.54ZM3.77,28.29h18.86V9.43H3.77v18.86ZM3.77,5.66h18.86v-1.89H3.77v1.89ZM3.77,32.06v5.66-5.66ZM3.77,5.66v-1.89,1.89Z"/>
+                                            </g>
+                                        </svg>
+                                    </span>
+                                     Téléphonie
+                                </button>
+
+                                <button class="btn bg-white" type="button">
+                                    <span class="me-1">
+                                        <svg xmlns="http://www.w3.org/2000/svg" height="16" viewBox="0 0 35.56 41.49">
+                                            <defs>
+                                              <style>
+                                                .cls-1 {
+                                                  fill: #004b64;
+                                                }
+                                              </style>
+                                            </defs>
+                                            <g id="_01_-_Recherche_Boutons" data-name="01 - Recherche &amp;amp; Boutons">
+                                              <path class="cls-1" d="M7.51,23.71l10.27,5.93,10.27-5.93-8.3-4.79v6.77h-3.95v-6.77l-8.3,4.79ZM15.81,14.37v-.84c-1.45-.43-2.63-1.24-3.56-2.44s-1.38-2.59-1.38-4.17c0-1.91.68-3.54,2.03-4.89,1.35-1.35,2.98-2.03,4.89-2.03s3.54.68,4.89,2.03,2.03,2.98,2.03,4.89c0,1.58-.46,2.97-1.38,4.17-.92,1.2-2.11,2.02-3.56,2.44v.84l13.83,7.95c.63.36,1.11.85,1.46,1.46s.52,1.28.52,2v3.75c0,.72-.17,1.39-.52,2s-.83,1.09-1.46,1.46l-13.83,7.95c-.63.36-1.28.54-1.98.54s-1.35-.18-1.98-.54l-13.83-7.95c-.63-.36-1.11-.85-1.46-1.46s-.52-1.28-.52-2v-3.75c0-.72.17-1.39.52-2s.83-1.09,1.46-1.46l13.83-7.95ZM15.81,33.04l-11.85-6.82v3.31l13.83,8,13.83-8v-3.31l-11.85,6.82c-.63.36-1.28.54-1.98.54s-1.35-.18-1.98-.54ZM17.78,9.88c.82,0,1.52-.29,2.1-.86.58-.58.86-1.28.86-2.1s-.29-1.52-.86-2.1c-.58-.58-1.28-.86-2.1-.86s-1.52.29-2.1.86-.86,1.28-.86,2.1.29,1.52.86,2.1,1.28.86,2.1.86Z"/>
+                                            </g>
+                                        </svg>
+                                    </span>
+                                     Jeux
+                                </button>
+                            </div>
+                        </div>
                         <div class="row">
                             <div class="nudger_pack col-12 py-4 px-5">
                                 <div class="row justify-content-center">
@@ -127,70 +231,138 @@
                 </div>
             </div>
         </section>
+        <section class="container-fluid bg__degrade--top">
+            <div class="container container-semi-fluid py-5">
+                <h2 class="h1 text-center">Réconcilier écologie et pouvoir d'achat !</h2>
+                <p class="lead text-center">Consommez moins, consommez mieux. Nudger, le coup de pouce qui vous aide <br class="d-none d-md-block">à amoindrir l'impact de votre shopping en ligne.</p>
+            </div>
+        </section>
+        <section class="container-fluid">
+            <div class="container container-semi-fluid">
+                <div class="row">
+                    <div class="col-12 col-md-4 mb-3">
+                        <div class="card card__ecoscore text-gray p-4 h-100">
+                            <div class="card-body">
+                                <p>
+                                    Notre eco-score innovant                
+                                </p>
+                                <a href="#modele-ouvert" class="btn btn-sm btn-primary animate-up-2 mt-3">Modèle ouvert</a>
 
-        <div class="container container-semi-fluid py-5">
-			<div class="row justify-content-between align-items-center">
-				<div class="col-12 text-center">
-					<div class="row justify-content-center">
-						<div class="col-12 col-md-6 mb-3">
-							<div class="card bg-white border-gray-300 text-gray p-4 h-100">
-								<div class="card-header bg-white border-0 pb-0">
-									<h2 class="h4 m-0">Modèle ouvert</h2>
-								</div>
-								<div class="card-body">
-									<p>
-	                                    Nous sommes dans une volonté de communs numériques. Notre code est en open-source, nos données sont disponibles en open-data.&nbsp;	                   
-									</p>
-									<a href="#modele-ouvert" class="btn btn-sm btn-primary animate-up-2 mt-3">Modèle ouvert</a>
-								</div>
-							</div>
-						</div>
-						
-						<div class="col-12 col-md-6 mb-3">
-							<div class="card bg-white border-gray-300 text-gray p-4 h-100x ">
-								<div class="card-header bg-white border-0 pb-0">
-									<h2 class="h4 m-0">Data responsable</h2>
-								</div>
-								<div class="card-body">
-									<p>	
-	                                    Pas de bandeau cookie, vous avez remarqué ? Nous sommes respectueux de votre vie privée. Nous ne collectons aucune donnée personnelle.	                                
-									</p>
-									<a href="#data-responsable" class=" level btn btn-sm btn-primary animate-up-2 mt-3">Data responsable</a>
-								</div>
-							</div>
-						</div>
-						
-						<div class="col-12 col-md-6 col-lg-4 mb-3 mb-lg-0">
-							<div class="card bg-white border-gray-300 text-gray p-4 h-100">
-								<div class="card-header bg-white border-0 pb-0">
-									<h2 class="h4 m-0">Eco-score</h2>
-								</div>
-								<div class="card-body">
-									<p>
-	                                    Nous calculons un score d'impact écologique innovant pour de nombreux produits, et nous mettons en avant les achats les plus éco-responsables.	                              
-									</p>
-									<a href="#evaluation-ecologique" class="btn btn-sm btn-primary animate-up-2 mt-3">Score écologique</a>
-								</div>
-							</div>
-						</div>                    
+                                <svg class="catagory_bg" width="30%" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 372.12 312.07">
+                                    <defs>
+                                      <style>
+                                        .cls-1 {
+                                          opacity: .5;
+                                        }
+                                  
+                                        .cls-1, .cls-2, .cls-3 {
+                                          fill: #fff;
+                                        }
+                                  
+                                        .cls-2 {
+                                          opacity: .25;
+                                        }
+                                  
+                                        .cls-3 {
+                                          opacity: .75;
+                                        }
+                                      </style>
+                                    </defs>
+                                    <g id="_02_-_4_Boutons" data-name="02 - 4 Boutons">
+                                      <g>
+                                        <path class="cls-2" d="M39.16,172.15C46.35,96.78,110.33,37.97,187.84,39.02c80.84,1.09,145.28,66.46,145.28,147.31,0,35.61-12.64,68.27-33.67,93.73-5.18,6.27-5.94,15.07-1.84,22.09.07.12.14.23.2.35,6.77,11.63,23.03,12.89,31.61,2.52,26.87-32.46,42.94-74.19,42.71-119.67C371.6,82.44,286.84-1,183.93,0,86.64.96,7.2,76.48,0,172.15h39.16Z"/>
+                                        <path class="cls-1" d="M356.25,110.98C327.32,45.61,261.88,0,185.8,0,87.66,0,7.24,75.87,0,172.15h39.16C46.29,97.44,109.21,39.01,185.8,39.01c60.69,0,112.81,36.71,135.37,89.13,2.71,7.63,9.97,13.1,18.52,13.1,10.86,0,19.67-8.81,19.67-19.67,0-3.9-1.15-7.53-3.11-10.58Z"/>
+                                        <path class="cls-3" d="M183.86,20.89c0-10.78-8.74-19.51-19.51-19.51-1.7,0-3.34.24-4.91.65l-.04-.17C73.58,14.04,6.58,84.66,0,172.15h39.16c6.51-68.22,59.55-122.86,127.03-131.84.22-.02.43-.06.64-.08.56-.07,1.11-.15,1.67-.21v-.06c8.77-1.9,15.36-9.71,15.36-19.06Z"/>
+                                      </g>
+                                    </g>
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-12 col-md-8 mb-3">
+                        <div class="card card__compensation text-gray p-4 h-100">
+                            <div class="card-body">
+                                <p>	
+                                    Pas de bandeau cookie, vous avez remarqué ? Nous sommes respectueux de votre vie privée. Nous ne collectons aucune donnée personnelle.	                                
+                                </p>
+                                <a href="#data-responsable" class=" level btn btn-sm btn-primary animate-up-2 mt-3">Data responsable</a>
 
-						<div class="col-12 col-md-6 col-lg-4 mb-3 mb-lg-0">
-							<div class="card bg-white border-gray-300 text-gray p-4 h-100">
-								<div class="card-header bg-white border-0 pb-0">
-									<h2 class="h4 m-0">Compensation</h2>
-								</div>
-								<div class="card-body">
-									<p>	
-	                                    Notre "nudge" pour la planète : nous reversons 20% du chiffre d’affaires de la plateforme, auprès d'organisations que vous pouvez choisir !	                               
-									</p>
-									<a href="#compensation-carbone" class="btn btn-sm btn-primary animate-up-2 mt-3">Compensation écologique</a>
-								</div>
-							</div>
-						</div>
-					</div>
-				</div>
-			</div>
-		</div>
+                                <svg class="catagory_bg" width="30%" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 310.8 323.07">
+                                    <defs>
+                                      <style>
+                                        .cls-1, .cls-2, .cls-3 {
+                                          fill: #fff;
+                                        }
+                                  
+                                        .cls-2 {
+                                          opacity: .25;
+                                        }
+                                  
+                                        .cls-3 {
+                                          opacity: .75;
+                                        }
+                                  
+                                        .cls-4 {
+                                          opacity: .5;
+                                        }
+                                      </style>
+                                    </defs>
+                                    <g id="_02_-_4_Boutons" data-name="02 - 4 Boutons">
+                                      <g>
+                                        <path class="cls-3" d="M253.39,0h-50.85c-11.43,0-21.99,6.1-27.7,15.99l-25.43,44.04c-5.71,9.9-5.71,22.09,0,31.98l25.43,44.04c5.71,9.9,16.27,15.99,27.7,15.99h50.85c11.43,0,21.99-6.1,27.7-15.99l25.43-44.04c5.71-9.9,5.71-22.09,0-31.98l-25.43-44.04c-5.71-9.9-16.27-15.99-27.7-15.99Z"/>
+                                        <g class="cls-4">
+                                          <path class="cls-1" d="M105.94,118.59l23.11,40.02-23.11,40.02h-46.21l-23.11-40.02,23.11-40.02h46.21M108.26,82.59h-50.85c-11.43,0-21.99,6.1-27.7,15.99l-25.43,44.04c-5.71,9.9-5.71,22.09,0,31.98l25.43,44.04c5.71,9.9,16.27,15.99,27.7,15.99h50.85c11.43,0,21.99-6.1,27.7-15.99l25.43-44.04c5.71-9.9,5.71-22.09,0-31.98l-25.43-44.04c-5.71-9.9-16.27-15.99-27.7-15.99h0Z"/>
+                                        </g>
+                                        <path class="cls-2" d="M253.39,171.03h-50.85c-11.43,0-21.99,6.1-27.7,15.99l-25.43,44.04c-5.71,9.9-5.71,22.09,0,31.98l25.43,44.04c5.71,9.9,16.27,15.99,27.7,15.99h50.85c11.43,0,21.99-6.1,27.7-15.99l25.43-44.04c5.71-9.9,5.71-22.09,0-31.98l-25.43-44.04c-5.71-9.9-16.27-15.99-27.7-15.99Z"/>
+                                      </g>
+                                    </g>
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-12 col-md-8">
+                        <div class="card card__numResponsable text-gray p-4 h-100">
+                            <div class="card-body">
+                                <p>
+                                    Nous calculons un score d'impact écologique innovant pour de nombreux produits, et nous mettons en avant les achats les plus éco-responsables.	                              
+                                </p>
+                                <a href="#evaluation-ecologique" class="btn btn-sm btn-primary animate-up-2 mt-3">Score écologique</a>
+
+                                <svg class="catagory_bg" width="30%" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 242.49 242.44">
+                                    <defs>
+                                      <style>
+                                        .cls-1 {
+                                          fill: #fff;
+                                          opacity: .75;
+                                        }
+                                      </style>
+                                    </defs>
+                                    <g id="_02_-_4_Boutons" data-name="02 - 4 Boutons">
+                                      <path class="cls-1" d="M34.24,208.2c-10.7-10.7-19.08-23.07-25.15-37.1C3.03,157.08,0,142.57,0,127.59s2.85-29.78,8.56-44.41c5.71-14.62,14.98-28.36,27.82-41.2,8.32-8.32,18.61-15.46,30.85-21.4,12.25-5.94,26.75-10.64,43.52-14.09C127.52,3.04,146.66.96,168.18.25c21.52-.71,45.6.12,72.23,2.5,1.9,25.21,2.5,48.39,1.78,69.56-.71,21.16-2.68,40.25-5.89,57.25s-7.73,31.87-13.55,44.59c-5.83,12.72-13.02,23.36-21.58,31.92-12.6,12.6-25.98,21.82-40.13,27.64-14.15,5.83-28.6,8.74-43.34,8.74s-30.56-3.03-45.3-9.1c-14.74-6.06-27.47-14.45-38.17-25.15ZM74.19,202.49c6.9,4.04,13.97,6.96,21.22,8.74,7.25,1.78,14.68,2.68,22.29,2.68,10.94,0,21.76-2.2,32.46-6.6,10.7-4.4,20.93-11.47,30.68-21.22,4.28-4.28,8.62-10.28,13.02-18.01,4.4-7.73,8.2-17.83,11.41-30.32s5.65-27.58,7.31-45.3c1.66-17.72,1.9-38.82.71-63.31-11.65-.48-24.79-.65-39.42-.54-14.62.12-29.19,1.25-43.7,3.39-14.51,2.14-28.3,5.59-41.38,10.34-13.08,4.76-23.78,11.3-32.1,19.62-10.7,10.7-18.07,21.28-22.12,31.75-4.04,10.46-6.06,20.57-6.06,30.32,0,14.03,2.68,26.34,8.03,36.92,5.35,10.58,10.05,18.01,14.09,22.29,9.99-19.02,23.19-37.27,39.59-54.75,16.41-17.48,35.55-31.81,57.43-42.98-17.12,14.98-32.04,31.92-44.77,50.83-12.72,18.9-22.29,40.96-28.71,66.17Z"/>
+                                    </g>
+                                </svg>
+                            </div>
+                        </div>
+                    </div>                    
+
+                    <div class="col-12 col-md-4">
+                        <div class="card card__openSource text-gray p-4 h-100">
+                            <div class="card-body">
+                                <p>	
+                                    Notre "nudge" pour la planète : nous reversons 20% du chiffre d’affaires de la plateforme, auprès d'organisations que vous pouvez choisir !	                               
+                                </p>
+                                <a href="#compensation-carbone" class="btn btn-sm btn-primary animate-up-2 mt-3">Compensation écologique</a>
+
+                                
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
 
 		<section class="bg-white text-center py-4">
 			<h1 class="mb-3">Notre philosophie : le bien commun</h1>

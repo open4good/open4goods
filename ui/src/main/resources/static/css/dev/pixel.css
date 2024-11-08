@@ -15,7 +15,7 @@
 * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software. Contact us if you want to remove it.
 
 */
-@import url("https://fonts.googleapis.com/css?family=Nunito+Sans:300,400,600,700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Hanken+Grotesk:ital,wght@0,100..900;1,100..900&display=swap");
 
 .datepicker {
     width: min-content;
@@ -30850,6 +30850,170 @@ blockquote {
 }
 
 .bg-primary {
-    background: #00DE9F;
+    background: linear-gradient(-48deg, #00DE9F, #00A1C2) !important;
+}
+
+.bg-secondary {
+    background: linear-gradient(-48deg, #008879, #00D19F) !important;
+}
+
+.preloader {
+    background: linear-gradient(-48deg, #FFCD90, #FF8479);
+}
+
+.bg__degrade {
+    z-index: 1;
+}
+
+.bg__degrade--bottom {
+    position: relative;
+}
+
+.bg__degrade--bottom::before {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    content: "";
+    width: 100%;
+    height: 60%;
+    background: linear-gradient(0deg, #00DE9F 25%, transparent) !important;
+    z-index: 0;
+}
+
+.bg__degrade--top {
+    position: relative;
+}
+
+.bg__degrade--top::before {
+    position: absolute;
+    top: 0;
+    left: 0;
+    content: "";
+    width: 100%;
+    height: 20%;
+    background: linear-gradient(180deg, #00DE9F, transparent) !important;
+    z-index: -1;
+}
+
+.hero__hp {
+    background: url("/assets/img/hero_hp.jpg") center !important;
+    background-size: cover !important;
+    height: 100vh;
+    position: relative;
+  /*&::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 70vh;
+      background: linear-gradient(0deg, $brand_mainColor 20%, transparent 100%);
+  }*/
+}
+
+.hero__hp * {
+    color: #004B64 !important;
+}
+
+.hero__hp .lead {
+    z-index: 1;
+    position: relative;
+    font-size: 1.5rem;
+    font-weight: 600;
+}
+
+.hero__hp .nudger_pack {
+    border-radius: 90px;
+    background: #ffffff;
+    z-index: 1;
+}
+
+.hero__hp .nudger_pack .nav-pills .nav-link {
+    border: 0 !important;
+    background: transparent !important;
+}
+
+.card {
+    position: relative;
+}
+
+.card svg.catagory_bg {
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+
+.card__ecoscore {
+    border-radius: 90px;
+    border: 0;
+    background: linear-gradient(-48deg, #008879, #00D19F) !important;
+}
+
+.card__compensation {
+    border-radius: 90px;
+    border: 0;
+    background: linear-gradient(-48deg, #5BDB3B, #A6E242) !important;
+}
+
+.card__openSource {
+    border-radius: 90px;
+    border: 0;
+    background: linear-gradient(-48deg, #FFCD90, #FF8479) !important;
+}
+
+.card__numResponsable {
+    border-radius: 90px;
+    border: 0;
+    background: linear-gradient(-48deg, #00D1CE, #0088D6) !important;
+}
+
+.input-group__nudger {
+    border-radius: 20px;
+    border: 2px solid #00DE9F;
+    background: #ffffff;
+    gap: 1rem !important;
+    position: relative;
+}
+
+.input-group__nudger hr {
+    position: absolute;
+    bottom: 0.6rem;
+    left: 1.3rem;
+    width: 85%;
+    height: 2px;
+    background: #5C8C9C;
+    margin: 0;
+}
+
+.input-group__nudger .form-control {
+    border-radius: 20px;
+    border: 0 !important;
+    background: transparent;
+    padding-left: 1.5rem;
+}
+
+.input-group__nudger .form-control:before {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border: 1px solid red;
+}
+
+.input-group__nudger .form-control + .btn__nudger {
+    border-radius: 20px !important;
+    border: 2px solid #ffffff;
+    box-shadow: 0 0 0 2px #00DE9F;
+    background: linear-gradient(to left, #008879, #00D19F) !important;
+    padding-right: 1.5rem !important;
+    padding-left: 1.5rem !important;
+}
+
+.input-group__nudger .btn:disabled {
+    background-color: dimgrey;
+    color: linen;
+    opacity: 1;
 }
 /*# sourceMappingURL=pixel.css.map */
