@@ -54,7 +54,7 @@ spring:
     openai:
       chat:
         options:
-          model: gpt-4o-mini
+          model: gpt-4o
           temperature: 1.0
           response-format:
             type: JSON_OBJECT

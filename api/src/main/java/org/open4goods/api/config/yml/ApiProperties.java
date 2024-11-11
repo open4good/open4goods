@@ -6,7 +6,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.lang3.ArrayUtils;
-import org.open4goods.api.controller.api.IndexationController;
 import org.open4goods.commons.config.BrandsConfiguration;
 import org.open4goods.commons.config.yml.DevModeConfiguration;
 import org.open4goods.commons.config.yml.GithubConfiguration;
@@ -205,6 +204,23 @@ public class ApiProperties {
 	 * Options for Wiki backup
 	 */
 	private BackupConfig backupConfig = new BackupConfig();
+	
+	
+	
+	
+	/**
+	 * Config for verticals generation service
+	 * @return
+	 */
+	
+	private VerticalsGenerationConfig verticalsGenerationConfig = new VerticalsGenerationConfig();
+	
+	
+	
+	
+	
+	
+	
 	
 	
 	public AmazonCompletionConfig getAmazonConfig() {
@@ -611,6 +627,18 @@ public class ApiProperties {
 
 	public void setIndexationConfig(IndexationConfig indexationConfig) {
 		this.indexationConfig = indexationConfig;
+	}
+
+
+
+	public VerticalsGenerationConfig getVerticalsGenerationConfig() {
+		return verticalsGenerationConfig;
+	}
+
+
+
+	public void setVerticalsGenerationConfig(VerticalsGenerationConfig verticalsGenerationConfig) {
+		this.verticalsGenerationConfig = verticalsGenerationConfig;
 	}
 
 
