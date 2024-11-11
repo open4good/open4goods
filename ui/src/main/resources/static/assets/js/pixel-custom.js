@@ -53,10 +53,7 @@ function getRange(lowValue, highValue) {
             start: [lowValue, highValue],
             connect: true,
             tooltips: true,
-            range: {
-                'min': lowValue,
-                'max': highValue
-            },
+            range: getRange(lowValue, highValue),
             step: 1
         });
 
