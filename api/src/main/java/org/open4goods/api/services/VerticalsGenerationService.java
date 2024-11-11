@@ -314,7 +314,7 @@ public class VerticalsGenerationService {
 			String frenchName = datas.get("frenchName");
 			
 			if (!StringUtils.isEmpty(englishName)) {
-				v.setId(IdHelper.brandName(frenchName).toLowerCase());
+				v.setId(IdHelper.brandName(englishName).toLowerCase());
 				
 				ProductI18nElements fr = new ProductI18nElements();
 				fr.setVerticalHomeUrl(frenchName);
