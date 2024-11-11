@@ -176,7 +176,13 @@ public class SearchService {
 				if (filter.getValue().contains(MISSING_BUCKET)) {
 					criterias.and(new Criteria(filter.getKey()).exists().not());					
 				} else {
-					criterias.and(new Criteria(filter.getKey()).in(filter.getValue()) );
+					
+//					// TODO : dirty hack
+//					if ("price.trend".equals(filter.getKey())) {
+//						criterias.and(new Criteria(filter.getKey()).is((filter.getValue().stream().findAny().orElse(null))));
+//					} else {
+						criterias.and(new Criteria(filter.getKey()).in(filter.getValue()) );
+//					}
 				}
 				
 			}

@@ -2,14 +2,21 @@
 package org.open4goods.api.services.aggregation.services.realtime;
 
 import java.io.IOException;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
+import org.checkerframework.checker.units.qual.min;
 import org.open4goods.api.services.aggregation.AbstractAggregationService;
 import org.open4goods.commons.config.yml.ui.VerticalConfig;
 import org.open4goods.commons.dao.ProductRepository;
@@ -151,60 +158,97 @@ public class PriceAggregationService extends AbstractAggregationService {
 		return price * averageAffiliationRatio * incomesToBenefitsRatio * percentBenefitsReversed;
 	}
 
-	/**
-	 * Compute the price history
-	 * 
-	 * @param prices
-	 * @param state
-	 */
-	private void computePriceHistory(AggregatedPrices prices, ProductCondition state) {
-		Optional<AggregatedPrice> oMinPrice = prices.getMinPrice(state);
-		if (oMinPrice.isEmpty()) {
-			return;
-		}
+    /**
+     * Compute the price history for a given product condition.
+     * 
+     * @param prices the aggregated prices data
+     * @param state  the product condition (NEW or OCCASION)
+     */
+    private void computePriceHistory(AggregatedPrices prices, ProductCondition state) {
+    	
+    	
+    	
+    	// TODO : put back when sanisation done
+        AggregatedPrice minPrice = prices.getMinPrice(state).orElse(null);
+//        if (minPrice.isEmpty()) {
+//            return; // Exit if no minimum price is found for the condition
+//        }
 
-		AggregatedPrice minPrice = oMinPrice.get();
+        ////////////////////
+        // Normalization
+        // Ensure only the lowest price is kept per day
+        // TODO (P1,perf): Remove when migration ok
+        ////////////////////
+        Map<Long, PriceHistory> dailyLowestPrices = new HashMap<>();
+        for (PriceHistory ph : prices.getHistory(state)) {
 
-		List<PriceHistory> history = prices.getHistory(state);
+            // Check if we have a price for the current day
+            dailyLowestPrices.merge(ph.getDay(), ph, (existing, newPrice) -> 
+                existing.getPrice() <= newPrice.getPrice() ? existing : newPrice);
+        }
 
-		if (history.size() == 0) {
-			// First price
-			prices.setTrend(0);
-			history.add(new PriceHistory(minPrice));
+        
+        // Update the history with normalized prices
+        List<PriceHistory> history = new ArrayList<>(dailyLowestPrices.values());
+        history.sort(Comparator.comparingLong(PriceHistory::getTimestamp)); // Sort by timestamp to maintain order
+        
 
-		} else {
-			PriceHistory lastPrice = history.get(history.size() - 1);
-			if (minPrice.getPrice() == lastPrice.getPrice().doubleValue()) {
-				prices.setTrend(0);
-				lastPrice.setTimestamp(System.currentTimeMillis());
-			} else if (minPrice.getPrice() > lastPrice.getPrice().doubleValue()) {
-				// Price has increased
-				prices.setTrend(1);
-				// NOTE : Should one day cut here if too long
-				history.add(new PriceHistory(minPrice));
-			} else {
-				// Price has decreased
-				prices.setTrend(-1);
-				// NOTE : Should one day cut here if too long
-				history.add(new PriceHistory(minPrice));
-			}
-		}
-		
-		
-		// Cleaning 0 values
-		history.removeIf(e -> e.getPrice() == 0.0);
-		
-		// Setting
-		switch (state) {
-		case NEW:
-			prices.setNewPricehistory(history);
-			break;
-		case OCCASION:
-			prices.setOccasionPricehistory(history);
-			break;
-		}
+        
+        /*
+         * We conserve one history price a day
+         */
+        if (minPrice != null ) {
+        	PriceHistory lastPrice = history.getLast();
+        	if (null != lastPrice) {
+        		if (lastPrice.getDay() ==  System.currentTimeMillis() / (1000 * 60 * 60 * 24)) {
+        			history.removeLast();
+        		} 
+        		
+        		if (history.size() ==  0 || !history.getLast().getPrice().equals(minPrice.getPrice())) {
+        			history.add(new PriceHistory(minPrice));        			
+        		}
+        		
+        	}
+        }
 
-	}
+        // Set the trend based on the last two price history values if the minimum price timestamp matches today's date
+        if (history.size() >= 2) {
+    		int trend = 0;
+            PriceHistory secondLastPrice = history.get(history.size() - 2);
+            PriceHistory lastPrice = history.get(history.size() - 1);
+
+            if (lastPrice.getPrice() < secondLastPrice.getPrice()) {
+                trend = -1; // Price decreased
+            } else if (lastPrice.getPrice() > secondLastPrice.getPrice()) {
+                trend = 1; // Price increased
+            }
+            prices.setTrend(trend);
+        } else {
+            prices.setTrend(0); // No recent price change or only one historical price
+        }
+
+       
+
+        LocalDate twoYearsAgoDate = LocalDate.now().minusYears(2);
+        Instant twoYearsAgo = twoYearsAgoDate.atStartOfDay(ZoneId.systemDefault()).toInstant();
+
+        // Remove entries with a price of 0.0 (invalid data) and entries older than 2 years
+        history = history.stream()
+            .filter(e -> e.getPrice() != 0.0) // Retain only valid price entries
+            .filter(e -> Instant.ofEpochMilli(e.getTimestamp()).isAfter(twoYearsAgo)) // Retain entries within the last 2 years
+            .collect(Collectors.toList());
+
+        // Update the price history based on the product condition
+        switch (state) {
+            case NEW:
+                prices.setNewPricehistory(history);
+                break;
+            case OCCASION:
+                prices.setOccasionPricehistory(history);
+                break;
+        }
+    }
+
 
 	/**
 	 * Add a key for a aprice and a marketplace.

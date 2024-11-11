@@ -6,16 +6,29 @@ import org.springframework.data.elasticsearch.annotations.FieldType;
 
 public class PriceHistory {
 
-	@Field(index = false, store = false, type=FieldType.Date, format = DateFormat.epoch_millis)
 	private Long timestamp;
 
-	@Field(index = false, store = false, type = FieldType.Double)
 	private Double price;
 
 
+	
+	@Override
+	public String toString() {
+		return timestamp+":"+price;
+	}
 	public PriceHistory() {
 	}
 
+	
+	/**
+	 * Get the number of the day this timestamp refers to
+	 * @return
+	 */
+	public Long getDay() {
+		return getTimestamp() / (1000 * 60 * 60 * 24); 
+	}
+
+	
 	public PriceHistory(AggregatedPrice minPrice) {
 		timestamp = minPrice.getTimeStamp();
 		price = minPrice.getPrice();
