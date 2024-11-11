@@ -9,6 +9,7 @@ import org.open4goods.api.services.AggregationFacadeService;
 import org.open4goods.api.services.BatchService;
 import org.open4goods.api.services.CompletionFacadeService;
 import org.open4goods.api.services.ScrapperOrchestrationService;
+import org.open4goods.api.services.VerticalsGenerationService;
 import org.open4goods.api.services.completion.AmazonCompletionService;
 import org.open4goods.api.services.completion.GenAiCompletionService;
 import org.open4goods.api.services.completion.IcecatCompletionService;
@@ -116,6 +117,12 @@ public class ApiConfig {
 		return new SerialisationService();
 	}
 
+	@Bean
+	@Autowired
+	VerticalsGenerationService verticalsGenerationService(ProductRepository pRepo, SerialisationService serialisationService, AiService aiService, GoogleTaxonomyService gTaxoService) throws SAXException {
+		return new VerticalsGenerationService(apiProperties.getVerticalsGenerationConfig(), pRepo,serialisationService,aiService, gTaxoService);
+	}
+	
 	
 	@Bean
 	@Autowired
@@ -223,8 +230,8 @@ public class ApiConfig {
 		// TODO : From conf 
 		// TODO : Add others
         try {
-//			gts.loadGoogleTaxonUrl("https://www.google.com/basepages/producttype/taxonomy-with-ids.fr-FR.txt", "fr");
-//			gts.loadGoogleTaxonUrl("https://www.google.com/basepages/producttype/taxonomy-with-ids.en-US.txt", "en");
+			gts.loadGoogleTaxonUrl("https://www.google.com/basepages/producttype/taxonomy-with-ids.fr-FR.txt", "fr");
+			gts.loadGoogleTaxonUrl("https://www.google.com/basepages/producttype/taxonomy-with-ids.en-US.txt", "en");
 //			gts.loadGoogleTaxonUrl("https://www.google.com/basepages/producttype/taxonomy-with-ids.de-DE.txt", "de");
 //			gts.loadGoogleTaxonUrl("https://www.google.com/basepages/producttype/taxonomy-with-ids.es-ES.txt", "es");
 //			gts.loadGoogleTaxonUrl("https://www.google.com/basepages/producttype/taxonomy-with-ids.nl-NL.txt", "nl");

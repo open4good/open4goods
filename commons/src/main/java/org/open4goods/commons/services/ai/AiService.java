@@ -57,6 +57,43 @@ public class AiService implements HealthIndicator{
 		this.serialisationService = serialisationService;
 	}
 
+	
+	
+	
+	
+	
+	
+	/**
+	 * 
+	 * @param prompt
+	 * @return
+	 */
+	public Map<String, String> jsonPrompt(String prompt) {
+		
+		Map<String,String> ret = ChatClient.create(chatModel).prompt()
+				.user(prompt)
+				.call()
+				.entity(new ParameterizedTypeReference<Map<String, String>>() {});
+		
+		
+		return ret;
+	}
+	
+	public String prompt(String prompt) {
+		
+		String ret = ChatClient.create(chatModel).prompt()
+				.user(prompt)
+				.call()
+				.content()
+				;
+		
+		
+		return ret;
+	}
+	
+	
+	
+	
 	/**
 	 * Completes AI descriptions for a product based on the provided vertical configuration, containing the prompts
 	 */

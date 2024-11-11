@@ -27,7 +27,7 @@ public class GoogleTaxonomyService {
 	protected static final Logger logger = LoggerFactory.getLogger(GoogleTaxonomyService.class);
 
 	/**
-	 * A mat associating last categories path with taxonomy id
+	 * A map associating last categories path with taxonomy id
 	 */
 	Map<String, Integer> lastCategoriesId = new HashMap<>();
 
