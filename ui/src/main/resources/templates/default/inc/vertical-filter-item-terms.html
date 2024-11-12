@@ -1,49 +1,50 @@
 <div class="accordion-item">
   <h2 class="accordion-header border-bottom border-2" th:id="'heading'+${id}">
-    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" th:attr="data-bs-target='#collapse'+${id}, aria-controls='collapse'+${id}" aria-expanded="false">
+    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" 
+      th:attr="data-bs-target='#collapse'+${id}, aria-controls='collapse'+${id}" aria-expanded="false">
       <span th:if="${icon}" class="fas me-2" th:classappend="${icon}"></span>
       <span th:unless="${icon}" class="fas me-2 fa-question-circle"></span>
       <th:block th:text="${title}"></th:block>
     </button>
   </h2>
-  <div th:id="'collapse'+${id}" class="accordion-collapse collapse" th:attr="aria-labelledby='heading'+${id},data-bs-parent='#'+${accordionId}">
+  
+  <div th:id="'collapse'+${id}" class="accordion-collapse collapse" 
+    th:attr="aria-labelledby='heading'+${id},data-bs-parent='#'+${accordionId}">
     <div class="accordion-body">
-      <div th:if="${label}" th:text="${label}" class="alert" th:classappend="${labelType}" role="alert"></div>
+      
+      <!-- Live Search and Sort Controls -->
+      <div class="d-flex justify-content-between mb-3">
+        <!-- Live Search Input -->
+        <input type="text" class="form-control w-50" id="searchInput-${id}" placeholder="Rechercher...">
+        
+        <!-- Sort Toggle -->
+        <select class="form-select w-25" id="sortToggle-${id}">
+          <option value="alphabetical">Ordre Alphabétique</option>
+          <option value="count">Par Compte</option>
+        </select>
+      </div>
 
-      <div class="row">
-        <!-- The always visible section -->
-         
-        <!-- The collapsable area with show more link -->
-          <div th:each="term, index: ${terms}"  class="col-12" th:classappend="${index.index} <= 5 ? '' : 'hidden-item'" th:style="${index.index} <= 5 ? '' : 'display: none;'">
-            <th:block th:if="${termsLineWidget}">
-              <th:block th:insert="~{'inc/'+${termsLineWidget}+'.html'}"></th:block>
-            </th:block>
-            <th:block th:unless="${termsLineWidget}">
-              <div class="form-check mb-1">
-                <input class="form-check-input changeableBox" type="checkbox" th:data-id="${id}" th:data-value="${term.text}" th:id="${id}+'-'+${index.count}">
-                
-                <label th:if="${mapToI18NPrefix}" th:text="#{${mapToI18NPrefix} +${term.text}}" class="form-check-label" th:for="${id}+'-'+${index.count}"></label>                
-                <label th:unless="${mapToI18NPrefix}" th:text="${term.text}" class="form-check-label" th:for="${id}+'-'+${index.count}"></label>
-                
-                
-                <span th:text="${term.count}" th:id="'badge'+'-'+${id}+'-'+${term.id}" class="badge bg-gray badge-pill float-end"></span>
-              </div>
-            </th:block>
-          </div>
+      <div class="row" id="filterList-${id}">
+        
+        <!-- The filter items -->
+        <div th:each="term, index: ${terms}" class="col-12 filter-item" 
+          th:classappend="${index.index} <= 5 ? '' : 'hidden-item'" 
+          th:style="${index.index} <= 5 ? '' : 'display: none;'">
           
-
-        <!-- The collapsable area with show more link -->
+          <div class="form-check mb-1">
+            <input class="form-check-input changeableBox" type="checkbox" 
+              th:data-id="${id}" th:data-value="${term.text}" th:id="${id}+'-'+${index.count}">
+            <label class="form-check-label" th:for="${id}+'-'+${index.count}" th:text="${term.text}"></label>
+            <span th:text="${term.count}" th:id="'badge'+'-'+${id}+'-'+${term.id}" class="badge bg-gray badge-pill float-end"></span>
+          </div>
+        </div>
+        
+        <!-- Show More Link -->
         <th:block th:if="${terms.size()} > 5">
           <div class="show-more-link form-check mb-1">
-                <a href="javascript:void(0);" class="float-end mt-2">Afficher plus</a>
+            <a href="javascript:void(0);" class="float-end mt-2 show-more">Afficher plus</a>
           </div>
-          
         </th:block>
-        
-        
-        
-        
-        
       </div>
     </div>
   </div>
