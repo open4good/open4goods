@@ -3,6 +3,8 @@ package org.open4goods.commons.model.product;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.apache.commons.lang3.StringUtils;
+
 public class ProductAttribute extends SourcableAttribute implements IAttribute {
 
 	/**
@@ -66,7 +68,24 @@ public class ProductAttribute extends SourcableAttribute implements IAttribute {
 
 	}
 
-	
+	/**
+	 * 
+	 * @return true if match a feature attribute
+	 */
+	public boolean isFeature() {
+		
+		if (StringUtils.isEmpty(value)) {
+			return true;
+		}
+		return switch (value.toLowerCase()) {
+		case "true" -> true;
+		case "oui" -> true;
+		case "yes" -> true;
+		case "y" -> true;
+		default -> false;
+		};
+
+	}
 
 	@Override
 	public String toString() {

@@ -377,6 +377,78 @@ attributesConfig:
 #      - "ANS"
       
 
+  ##################################
+  # POIDS
+  ##################################
+  
+  - key: "WEIGHT"
+    icecatFeaturesIds:
+      - 94
+      - 33015    
+    faIcon: "fa-weight"
+    name:
+      default: "Weight"
+      fr: "Poids"
+    type: "NUMERIC"
+    asRating: false
+    
+    synonyms:
+      all:
+      - "POIDS"
+      
+    parser:
+      normalize: true
+      trim: false
+      lowerCase: false
+      upperCase: true
+      removeParenthesis: false
+#      deleteTokens:
+#      - "ANS"
+      
+
+
+ ##################################
+  # ENERGY_CONSUMPTION_1000_HOURS
+  ##################################
+  
+  - key: "ENERGY_CONSUMPTION_1000_HOURS"
+    icecatFeaturesIds:
+      - 42859
+    faIcon: "fa-plug"
+    name:
+      default: "Energy consumption (/1000h)"
+      fr: "Consommation d'énergie (/1000h)"
+    type: "NUMERIC"
+    asRating: false
+    
+    synonyms:
+      all:
+      - "CONSOMMATION D'ENERGIE (HDR) POUR 1000 HEURES"
+      
+    parser:
+      normalize: true
+      trim: false
+      lowerCase: false
+      upperCase: true
+      removeParenthesis: false
+#      deleteTokens:
+#      - "ANS"
+      
+#################################################
+# UI Oriented attributes
+#################################################
+
+  ##################################
+  # FEATURES
+# Note : not associated with any vals, features of parsed base on yes or no values
+  ##################################
+  
+  - key: "FEATURES"
+    faIcon: "fa-list"
+    attributePath: attributes.features
+    name:
+      default: "Features"
+      fr: "Fonctionnalités"
 
 
 

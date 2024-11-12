@@ -120,6 +120,9 @@
                 "all": {
                     "type": "object",
                     "enabled": false
+                },
+                "features": {
+                    "type": "keyword"
                 }
             }
         },

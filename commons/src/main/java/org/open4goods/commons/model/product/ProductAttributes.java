@@ -27,7 +27,11 @@ public class ProductAttributes  {
 	// Instance life cache for fastenning features
 	private Set<ProductAttribute> featuresCache;
 
-	
+	/**
+	 * The features
+	 * TODO(p3,i18n) : Internationalisation
+	 */
+	private Set<String> features = new HashSet<String>();
 	
 	/**
 	 * Best effort method to return the string val of an attribute, looking up, by priority in :
@@ -135,6 +139,22 @@ public class ProductAttributes  {
 	}
 
 
+
+	public Set<ProductAttribute> getFeaturesCache() {
+		return featuresCache;
+	}
+
+	public void setFeaturesCache(Set<ProductAttribute> featuresCache) {
+		this.featuresCache = featuresCache;
+	}
+
+	public Set<String> getFeatures() {
+		return features;
+	}
+
+	public void setFeatures(Set<String> features) {
+		this.features = features;
+	}
 
 	public void setAll(Map<String, ProductAttribute> all) {
 		this.all = all;
