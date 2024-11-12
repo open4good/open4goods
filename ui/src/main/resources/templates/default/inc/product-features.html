@@ -6,7 +6,7 @@
 		
 		<ul>
 			<th:block th:each="item, stat : ${product.attributes.features}">
-				<li  role="alert" th:text="${item.name}"></li>
+				<li  role="alert" th:text="${item}"></li>
 			</th:block>
 		</ul>
 	</div>
