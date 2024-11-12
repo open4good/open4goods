@@ -12,11 +12,9 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.checkerframework.checker.units.qual.min;
 import org.open4goods.api.services.aggregation.AbstractAggregationService;
 import org.open4goods.commons.config.yml.ui.VerticalConfig;
 import org.open4goods.commons.dao.ProductRepository;
@@ -166,9 +164,7 @@ public class PriceAggregationService extends AbstractAggregationService {
      */
     private void computePriceHistory(AggregatedPrices prices, ProductCondition state) {
     	
-    	
-    	
-    	// TODO : put back when sanisation done
+    	// TODO(p1, migration)  : put back when sanisation done
         AggregatedPrice minPrice = prices.getMinPrice(state).orElse(null);
 //        if (minPrice.isEmpty()) {
 //            return; // Exit if no minimum price is found for the condition
@@ -229,6 +225,7 @@ public class PriceAggregationService extends AbstractAggregationService {
 
        
 
+        // TODO(p3,conf) : price history max size From conf
         LocalDate twoYearsAgoDate = LocalDate.now().minusYears(2);
         Instant twoYearsAgo = twoYearsAgoDate.atStartOfDay(ZoneId.systemDefault()).toInstant();
 

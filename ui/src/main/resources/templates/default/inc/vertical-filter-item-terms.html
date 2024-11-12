@@ -21,7 +21,11 @@
             <th:block th:unless="${termsLineWidget}">
               <div class="form-check mb-1">
                 <input class="form-check-input changeableBox" type="checkbox" th:data-id="${id}" th:data-value="${term.text}" th:id="${id}+'-'+${index.count}">
-                <label th:text="${term.text}" class="form-check-label" th:for="${id}+'-'+${index.count}"></label>
+                
+                <label th:if="${mapToI18NPrefix}" th:text="#{${mapToI18NPrefix} +${term.text}}" class="form-check-label" th:for="${id}+'-'+${index.count}"></label>                
+                <label th:unless="${mapToI18NPrefix}" th:text="${term.text}" class="form-check-label" th:for="${id}+'-'+${index.count}"></label>
+                
+                
                 <span th:text="${term.count}" th:id="'badge'+'-'+${id}+'-'+${term.id}" class="badge bg-gray badge-pill float-end"></span>
               </div>
             </th:block>

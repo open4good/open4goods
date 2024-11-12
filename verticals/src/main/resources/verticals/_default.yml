@@ -352,7 +352,7 @@ attributesConfig:
   ##################################
   
   - key: "COLOR"
-    faIcon: "droplet"
+    faIcon: "fa-droplet"
     name:
       default: "Color"
       fr: "Couleur"

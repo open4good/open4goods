@@ -34,7 +34,10 @@
 					   label='Les produits d\'occasions coûtent moins cher et réduisent considérablement l\'impact écologique de votre achat !',
 					   labelType='alert-success',		
 					   visibleSection=10,	   
-					   terms=${products.conditions}">
+					   terms=${products.conditions},
+					   mapToI18NPrefix='condition.'
+					   "
+					   >
 		<th:block th:insert="~{inc/vertical-filter-item-terms.html}"></th:block>
 	</th:block>	
 	
