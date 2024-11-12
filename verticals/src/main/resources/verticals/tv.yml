@@ -180,9 +180,11 @@ ecoscoreConfig:
 ##############################################################################
 
 verticalFilters:
-  - "DIAGONALE_POUCES"
-  - "DISPLAY_TECHNOLOGY"
-  - "COLOR"
+    - "DIAGONALE_POUCES"
+    - "DISPLAY_TECHNOLOGY"
+    - "COLOR"
+    - "WEIGHT"
+    - "ENERGY_CONSUMPTION_1000_HOURS"
   
 #  - "CLASSE_ENERGY"   
 #  - "PARTS_AVAILLABILITY"

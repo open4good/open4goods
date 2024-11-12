@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.open4goods.api.services.aggregation.AbstractAggregationService;
@@ -23,6 +24,7 @@ import org.open4goods.commons.model.product.AggregatedFeature;
 import org.open4goods.commons.model.product.IndexedAttribute;
 import org.open4goods.commons.model.product.Product;
 import org.open4goods.commons.model.product.ProductAttribute;
+import org.open4goods.commons.model.product.ProductAttributes;
 import org.open4goods.commons.model.product.SourcedAttribute;
 import org.open4goods.commons.services.BrandService;
 import org.open4goods.commons.services.IcecatService;
@@ -303,19 +305,20 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 	 * @param unmatchedFeatures
 	 * @return
 	 */
-	private Collection<AggregatedFeature> aggregateFeatures(List<Attribute> matchedFeatures) {
+	private void  extractFeatures(ProductAttributes attributes) {
 
-		Map<String, AggregatedFeature> ret = new HashMap<String, AggregatedFeature>();
-
-		// Adding matched attributes features
-		for (Attribute a : matchedFeatures) {
-			if (!ret.containsKey(a.getName())) {
-				ret.put(a.getName(), new AggregatedFeature(a.getName()));
-			}
-			// ret.get(a.getName()).getDatasources().add(a.getDatasourceName());
-		}
-
-		return ret.values();
+		attributes.getFeatures().clear();
+		
+		
+		Map<String, ProductAttribute> features = attributes.getAll().entrySet().stream()
+				.filter(e -> e.getValue().isFeature())
+			    .collect(Collectors.toMap(
+			            Map.Entry::getKey,    // key mapper: uses the key from each entry
+			            Map.Entry::getValue   // value mapper: uses the value from each entry
+			        ));
+		
+		attributes.getFeatures().addAll(features.keySet());
+		
 	}
 
 	/**
