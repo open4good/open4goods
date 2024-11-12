@@ -38,8 +38,12 @@ public class VerticalSearchResponse {
 
 	private Integer to;
 
+	// The number of products having a decreasing price
+	private Long priceDecreasing;
 
 	private List<VerticalFilterTerm> conditions = new ArrayList<>();
+	
+	
 	private List<VerticalFilterTerm> brands = new ArrayList<>();
 	private List<VerticalFilterTerm> countries = new ArrayList<>();
 	private Map<String,NumericRangeFilter> numericFilters = new HashMap<>();
@@ -219,6 +223,12 @@ public class VerticalSearchResponse {
 		this.numericFilters = numericFilters;
 	}
 
+	public Long getPriceDecreasing() {
+		return priceDecreasing;
+	}
 
+	public void setPriceDecreasing(Long priceDecreasing) {
+		this.priceDecreasing = priceDecreasing;
+	}
 
 }

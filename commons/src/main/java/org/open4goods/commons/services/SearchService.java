@@ -37,6 +37,8 @@ import co.elastic.clients.elasticsearch._types.aggregations.Aggregation;
 import co.elastic.clients.elasticsearch._types.aggregations.AggregationRange;
 import co.elastic.clients.elasticsearch._types.aggregations.HistogramAggregate;
 import co.elastic.clients.elasticsearch._types.aggregations.HistogramBucket;
+import co.elastic.clients.elasticsearch._types.aggregations.LongTermsAggregate;
+import co.elastic.clients.elasticsearch._types.aggregations.LongTermsBucket;
 import co.elastic.clients.elasticsearch._types.aggregations.MaxAggregate;
 import co.elastic.clients.elasticsearch._types.aggregations.MinAggregate;
 import co.elastic.clients.elasticsearch._types.aggregations.RangeAggregate;
@@ -208,8 +210,12 @@ public class SearchService {
 //				.withAggregation("min_offers", 	Aggregation.of(a -> a.min(ta -> ta.field("offersCount"))))
 //				.withAggregation("max_offers", 	Aggregation.of(a -> a.max(ta -> ta.field("offersCount"))))
 				.withAggregation("conditions", 	Aggregation.of(a -> a.terms(ta -> ta.field("price.conditions").missing(MISSING_BUCKET).size(3)))	)
+				.withAggregation("trend", 	Aggregation.of(a -> a.terms(ta -> ta.field("price.trend").size(3)))	)
+				
 				.withAggregation("brands", 	Aggregation.of(a -> a.terms(ta -> ta.field("attributes.referentielAttributes.BRAND").missing(MISSING_BUCKET).size(AGGREGATION_BUCKET_SIZE)  ))	)
 				.withAggregation("country", 	Aggregation.of(a -> a.terms(ta -> ta.field("gtinInfos.country").missing(MISSING_BUCKET).size(AGGREGATION_BUCKET_SIZE)  ))	)
+				
+				
 				;
 		////
 		// Sort order
@@ -314,12 +320,25 @@ public class SearchService {
 			
 		}
 		
+		
+		///////
+		// Price trend
+		///////
+
+		LongTermsAggregate productSate  =  aggregations.get("trend").aggregation().getAggregate().lterms();
+		for (LongTermsBucket b :   productSate.buckets().array()) {
+			
+			if (b.key() == -1) {
+				vsr.setPriceDecreasing(b.docCount());
+			}
+		}
+		
 		///////
 		// Item condition
 		///////
 
-		StringTermsAggregate productSate  =  aggregations.get("conditions").aggregation().getAggregate().sterms();
-		for (StringTermsBucket b :   productSate.buckets().array()) {
+		StringTermsAggregate priceTrend  =  aggregations.get("conditions").aggregation().getAggregate().sterms();
+		for (StringTermsBucket b :   priceTrend.buckets().array()) {
 			vsr.getConditions().add (new VerticalFilterTerm(b.key().stringValue(), b.docCount()));
 		}
 		vsr.getConditions().sort((o1, o2) -> o2.getCount().compareTo(o1.getCount()));
@@ -373,7 +392,7 @@ public class SearchService {
 
 		}
 
-		//		// Setting the response
+		// Setting the response
 		vsr.setTotalResults(results.getTotalHits());
 		vsr.setData(results.get().map(SearchHit::getContent).toList());
 

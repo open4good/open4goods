@@ -63,11 +63,13 @@ public class DataTableController {
 			for (String checkbox : checkboxes) {
 				String[] attr = checkbox.split(":");
 
-				// TODO : should have consts shared with javascript (vertical-home)
+				// TODO(p2,design) : should have consts shared with javascript (vertical-home)
                 switch (attr[0]) {
                     case "condition" -> vRequest.addTermFilter("price.conditions", attr[1]);
                     case "brand" -> vRequest.addTermFilter("attributes.referentielAttributes.BRAND", attr[1]);
                     case "countries" -> vRequest.addTermFilter("gtinInfos.country", attr[1]);
+                    case "trend" -> vRequest.addTermFilter("price.trend", attr[1]);
+                    
                     default -> vRequest.addTermFilter(attr[0], attr[1]);
                 }
 			}

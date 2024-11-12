@@ -50,7 +50,7 @@
 			
 	        <div th:if="${showPriceTrend}" class="float-end mt-5 form-check form-switch">
                 <input class="changeableBox form-check-input"  data-id="price.trend"  data-value="-1" th:checked="${includeUndefined}" type="checkbox" id="price.trend">
-                <label class="form-check-label" th:for="price.trend" >Prix en baisse<span></span></label>
+                <label class="form-check-label" th:for="price.trend" >Prix en baisse (<span th:text="${products.priceDecreasing}"></span>)</label>
             </div>		
 			
 	        <div th:if="${showIncludeUndefinedButton}" class="mt-5 form-check form-switch">
