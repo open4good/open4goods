@@ -312,8 +312,8 @@ public class SearchService {
 //			}
 //			
 			NumericRangeFilter nrf = new NumericRangeFilter();
-			nrf.setMaxValue(min.value());
-			nrf.setMinValue(max.value());
+			nrf.setMaxValue(max.value());
+			nrf.setMinValue(min.value());
 			nrf.setPriceBuckets(priceBuckets);
 			
 			vsr.getNumericFilters().put(filter.getKey(), nrf);

@@ -78,7 +78,7 @@ public class Attribute2ScoreAggregationService extends AbstractScoreAggregationS
 			throw new ValidationException("No attribute config for " + attributeKey);
 		}
 		
-		if (ac.getType().equals(AttributeType.NUMERIC)) {
+		if (ac.getFilteringType().equals(AttributeType.NUMERIC)) {
 			try {
 				return Double.valueOf(aga.getValue().replace(",", "."));
 			} catch (Exception e) {

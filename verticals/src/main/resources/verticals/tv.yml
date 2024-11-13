@@ -186,8 +186,8 @@ verticalFilters:
     - "WEIGHT"
     - "ENERGY_CONSUMPTION_1000_HOURS"
     - "CLASSE_ENERGY"   
-    - "WARRANTY"
     - "REPAIRABILITY_INDEX" 
+    - HDMI_PORTS_QUANTITY
   
 #  - "PARTS_AVAILLABILITY"
 #  - "DATA-QUALITY"  
@@ -232,7 +232,7 @@ attributesConfig:
        name:
          default: "Screen size"
          fr: "Diagonale (en pouces)"
-       type: "NUMERIC"
+       filteringType: "NUMERIC"
    
        asRating: false
        synonyms:
@@ -260,7 +260,7 @@ attributesConfig:
        name:
          default: "Display technology"
          fr: "Technologie d'affichage"
-       type: "TEXT"
+       filteringType: "TEXT"
    
        asRating: false
        

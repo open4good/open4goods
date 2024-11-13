@@ -2,9 +2,12 @@ package org.open4goods.ui.controllers.ui;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
+import org.open4goods.commons.config.yml.attributes.AttributeConfig;
 import org.open4goods.commons.config.yml.ui.VerticalConfig;
+import org.open4goods.commons.model.attribute.AttributeType;
 import org.open4goods.commons.model.dto.NumericRangeFilter;
 import org.open4goods.commons.model.dto.VerticalFilterTerm;
 import org.open4goods.commons.model.dto.VerticalSearchRequest;
@@ -68,6 +71,16 @@ public class VerticalController  extends AbstractController {
 		vRequest.getNumericFilters().add(new NumericRangeFilter("offersCount", 1.0, 10000.0, 1.0, false));
 		vRequest.getNumericFilters().add(new NumericRangeFilter("price.minPrice.price", 0.0001, 500000.0, 100.0, false));
 		vRequest.getNumericFilters().add(new NumericRangeFilter("scores.ECOSCORE.value", 0.0001, 500000.0, 0.1, false));
+		
+		
+		List<AttributeConfig> numericFilters = config.getVerticalFilters().stream()
+			.map(e -> config.getAttributesConfig().getAttributeConfigByKey(e))
+			.filter(e-> e != null)
+			.filter(e -> e.getFilteringType() == AttributeType.NUMERIC).toList();
+		
+		numericFilters.forEach(filter -> {
+			vRequest.getNumericFilters().add(new NumericRangeFilter("attributes.indexed."+ filter.getKey()+".numericValue", 0.0, 1000000.0, 1.0, true));
+		});
 		
 		
 		VerticalSearchResponse vResponse = searchService.verticalSearch(config,vRequest);

@@ -44,7 +44,7 @@ public class AttributeConfig {
 
 	private Localisable<String,String> name ;
 
-	private AttributeType type = AttributeType.TEXT;
+	private AttributeType filteringType = AttributeType.TEXT;
 
 	/**
 	 * The icecat features id's this attribute is mapped to
@@ -276,7 +276,7 @@ public class AttributeConfig {
 
 	@Override
 	public String toString() {
-		return key + ":" + type;
+		return key + ":" + filteringType;
 	}
 
 
@@ -307,13 +307,13 @@ public class AttributeConfig {
 		return name == null ? "null:"+language : name.i18n(language);
 	}
 
-	public AttributeType getType() {
-		return type;
+	public AttributeType getFilteringType() {
+		return filteringType;
 	}
 
 
-	public void setType(final AttributeType type) {
-		this.type = type;
+	public void setFilteringType(final AttributeType type) {
+		this.filteringType = type;
 	}
 
 	public String getKey() {

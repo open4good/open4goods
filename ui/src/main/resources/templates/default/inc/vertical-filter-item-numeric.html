@@ -48,12 +48,12 @@
 				<!--/* End of range slider values */-->				
 			</div>
 			
-	        <div th:if="${showPriceTrend}" class="float-end mt-5 form-check form-switch">
+	        <div th:if="${showPriceTrend}" class="float-end mt-3 form-check form-switch">
                 <input class="changeableBox form-check-input"  data-id="price.trend"  data-value="-1" th:checked="${includeUndefined}" type="checkbox" id="price.trend">
                 <label class="form-check-label" th:for="price.trend" >Prix en baisse (<span th:text="${products.priceDecreasing}"></span>)</label>
             </div>		
 			
-	        <div th:if="${showIncludeUndefinedButton}" class="mt-5 form-check form-switch">
+	        <div th:if="${showIncludeUndefinedButton}" class="float-end mt-3 mb-2 form-check form-switch">
 	            <input class="form-check-input"  th:checked="${includeUndefined}" type="checkbox" th:id="'include-undefined-'+${id}">
 	            <label class="form-check-label" th:for="'include-undefined-'+${id}" th:text="${includeUndefinedLabel}"></label>
 	        </div>

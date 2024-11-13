@@ -47,11 +47,10 @@ public class VerticalSearchResponse {
 	
 	private List<VerticalFilterTerm> brands = new ArrayList<>();
 	private List<VerticalFilterTerm> countries = new ArrayList<>();
+
+	
+	// TODO(design, p2)  : Bad design 
 	private Map<String,NumericRangeFilter> numericFilters = new HashMap<>();
-	
-	
-
-
 	/** The custom aggregations, pageNumber filters **/
 	private Map<AttributeConfig, List<VerticalFilterTerm>> customFilters = new HashMap<>();
 
@@ -99,7 +98,22 @@ public class VerticalSearchResponse {
 		return terms.stream().filter(e->SearchService.MISSING_BUCKET.equals(e.getText())).findFirst().map(e->e.getCount()).orElse(0L);
 	}
 	
-	
+	/**
+	 * Return the MIN for a numeric aggregation
+	 * @param key
+	 * @return
+	 */
+	public Double min(String key) {
+		//TODO(design,p2) : the contains is ugly. A miss design on numeric and terms filters in verticalsearchRequest and response, to be reviewed
+		Double ret = numericFilters. entrySet().stream().filter(e-> e.getKey().contains(key)).findFirst().map(e->e.getValue().getMinValue()).orElse(0.0);;
+		return ret; 
+	}
+
+	public Double max(String key) {
+		//TODO(design,p2) : the contains is ugly. A missdesign on numeric and terms filters in verticalsearchRequest and response, to be reviewed
+		Double  ret = numericFilters.entrySet().stream().filter(e-> e.getKey().contains(key)).findFirst().map(e->e.getValue().getMaxValue()).orElse(10000000.0);
+		return ret;
+	}
 	
 	public List<Product> limitedDatas(Integer to) {
 		if (to > data.size()) {
