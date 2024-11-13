@@ -265,11 +265,16 @@
        { "data": "offersCount", "name" : "Concurrence", "title" : "Concurrence"  }
            ];
 
-	 	for ( i = 0; i <  additionalAttributes.length; i++) {						
-			columns[i+5] = JSON.parse('{ "data": "attributes.indexed.'+additionalAttributes[i]['key']+'.value", "name" : "'+additionalAttributes[i]['name'][siteLanguage]+'", "title" : "'+additionalAttributes[i]['name'][siteLanguage]+'"  }');
-			columns[i+5].render = dummyRender;
-	 	}
-	 
+	/* Adding additional attributes columns with hidden titles
+	   for (var i = 0; i < additionalAttributes.length; i++) {
+	       columns.push({
+	           data: "attributes.indexed." + additionalAttributes[i]['key'] + ".value",
+	           name: additionalAttributes[i]['name'][siteLanguage],
+	           title: "", // Set an empty title to hide the header text
+	           render: dummyRender
+	       });
+	   }
+		**/
 	<!-- Datatable init function -->
 	var table;
 	
@@ -460,55 +465,6 @@ function createChartInterval(chartId, intervalDatas, verticalName) {
 	
 </script>
 
-
-<script>
-
-document.addEventListener('DOMContentLoaded', function() {
-	  const searchInput = document.getElementById('searchInput-${id}');
-	  const sortToggle = document.getElementById('sortToggle-${id}');
-	  const filterItems = Array.from(document.querySelectorAll('#filterList-${id} .filter-item'));
-	  const showMoreLink = document.querySelector('#filterList-${id} .show-more-link a');
-
-	  // Live search functionality
-	  searchInput.addEventListener('input', function() {
-	    const query = searchInput.value.toLowerCase();
-	    filterItems.forEach(item => {
-	      const text = item.querySelector('.form-check-label').textContent.toLowerCase();
-	      item.style.display = text.includes(query) ? '' : 'none';
-	    });
-	  });
-
-	  // Sorting functionality
-	  sortToggle.addEventListener('change', function() {
-	    const sortBy = sortToggle.value;
-	    filterItems.sort((a, b) => {
-	      if (sortBy === 'alphabetical') {
-	        return a.querySelector('.form-check-label').textContent.localeCompare(
-	          b.querySelector('.form-check-label').textContent
-	        );
-	      } else { // sortBy === 'count'
-	        return parseInt(b.querySelector('.badge').textContent) - parseInt(a.querySelector('.badge').textContent);
-	      }
-	    });
-	    // Re-attach sorted items to the DOM
-	    const container = document.getElementById('filterList-${id}');
-	    filterItems.forEach(item => container.appendChild(item));
-	  });
-
-	  // Show more functionality
-	  let visibleCount = 5;
-	  showMoreLink.addEventListener('click', function() {
-	    visibleCount += 5;
-	    filterItems.forEach((item, index) => {
-	      item.style.display = index < visibleCount ? '' : 'none';
-	    });
-	    if (visibleCount >= filterItems.length) {
-	      showMoreLink.style.display = 'none';
-	    }
-	  });
-	});
-
-</script>
 
 
 </body>

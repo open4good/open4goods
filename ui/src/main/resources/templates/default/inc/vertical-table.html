@@ -9,9 +9,11 @@
                 <th><small>Prix</small></th>
                 <th><small>Offres</small></th>
                 
-                <th:block th:each="filter : ${products.customFilters}">
+                <!--  
+                 <th:block th:each="filter : ${products.customFilters}">
 	                <th th:text="${filter.key.name.get(siteLanguage)}"></th>            
                 </th:block>
+                 -->
             </tr>
         </thead>
         <tbody>
@@ -29,10 +31,12 @@
                             <p th:if="${p.bestPrice() != null}" th:text="${p.bestPrice().price}"></p>
                             <p th:text="${p.offersCount}"></p>
                             
+                             <!--  
                             <th:block th:each="filter : ${products.customFilters}">
                                 <p th:if="${p.attributes.indexed.get(filter.key.key)}" th:text="${p.attributes.indexed.get(filter.key.key).value }"></p>            
                                 <p th:unless="${p.attributes.indexed.get(filter.key.key)}"></p>            
                             </th:block>
+                             -->
 
                        
                     </div>
