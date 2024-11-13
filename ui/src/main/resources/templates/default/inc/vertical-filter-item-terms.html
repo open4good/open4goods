@@ -12,18 +12,6 @@
     th:attr="aria-labelledby='heading'+${id},data-bs-parent='#'+${accordionId}">
     <div class="accordion-body">
       
-      <!-- Live Search and Sort Controls -->
-      <div class="d-flex justify-content-between mb-3">
-        <!-- Live Search Input -->
-        <input type="text" class="form-control w-50" id="searchInput-${id}" placeholder="Rechercher...">
-        
-        <!-- Sort Toggle -->
-        <select class="form-select w-25" id="sortToggle-${id}">
-          <option value="alphabetical">Ordre Alphabétique</option>
-          <option value="count">Par Compte</option>
-        </select>
-      </div>
-
       <div class="row" id="filterList-${id}">
         
         <!-- The filter items -->
@@ -31,10 +19,17 @@
           th:classappend="${index.index} <= 5 ? '' : 'hidden-item'" 
           th:style="${index.index} <= 5 ? '' : 'display: none;'">
           
-          <div class="form-check mb-1">
-            <input class="form-check-input changeableBox" type="checkbox" 
-              th:data-id="${id}" th:data-value="${term.text}" th:id="${id}+'-'+${index.count}">
-            <label class="form-check-label" th:for="${id}+'-'+${index.count}" th:text="${term.text}"></label>
+          
+          
+           <th:block th:if="${termsLineWidget}">
+              <th:block th:insert="~{'inc/'+${termsLineWidget}+'.html'}"></th:block>
+            </th:block>
+            
+          <div class="form-check mb-1" th:unless="${termsLineWidget}">
+              <input class="form-check-input changeableBox" type="checkbox" th:data-id="${id}" th:data-value="${term.text}" th:id="${id}+'-'+${index.count}">
+              <label th:if="${mapToI18NPrefix}" th:text="#{${mapToI18NPrefix} + ${term.text}}" class="form-check-label" th:for="${id}+'-'+${index.count}"></label>                
+              <label th:unless="${mapToI18NPrefix}" th:text="${term.text}" class="form-check-label" th:for="${id}+'-'+${index.count}"></label>
+     
             <span th:text="${term.count}" th:id="'badge'+'-'+${id}+'-'+${term.id}" class="badge bg-gray badge-pill float-end"></span>
           </div>
         </div>
