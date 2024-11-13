@@ -400,8 +400,8 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 		///////////////////
 		// To upperCase / lowerCase
 		///////////////////
-
 		if (conf.getParser().getLowerCase()) {
+			
 			string = string.toLowerCase();
 		}
 
@@ -437,7 +437,7 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 		// Trimming
 		///////////////////
 		if (conf.getParser().getTrim()) {
-			string = source.trim();
+			string = string.trim();
 		}
 
 		///////////////////
