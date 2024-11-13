@@ -8,6 +8,7 @@ import java.util.Map;
 import org.open4goods.commons.config.yml.attributes.AttributeConfig;
 import org.open4goods.commons.config.yml.ui.VerticalConfig;
 import org.open4goods.commons.model.product.Product;
+import org.open4goods.commons.services.SearchService;
 
 /**
  * Results of a search inside a specific vertical
@@ -78,6 +79,28 @@ public class VerticalSearchResponse {
 	public VerticalSearchResponse() {
 	}
 
+	
+	/**
+	 * UI Helper
+	 * Returns terms filtered, without the unknown (MISSIBNG BUCKET)
+	 * @param terms
+	 * @return
+	 */
+	public List<VerticalFilterTerm> filterKnownTerms(List<VerticalFilterTerm> terms) {
+		return terms.stream().filter(e->! SearchService.MISSING_BUCKET.equals(e.getText())).toList();
+	}
+	
+	/**
+	 * Return the missing bucket size
+	 * @param terms
+	 * @return
+	 */
+	public Long unknownTerms(List<VerticalFilterTerm> terms) {
+		return terms.stream().filter(e->SearchService.MISSING_BUCKET.equals(e.getText())).findFirst().map(e->e.getCount()).orElse(0L);
+	}
+	
+	
+	
 	public List<Product> limitedDatas(Integer to) {
 		if (to > data.size()) {
 			return data;

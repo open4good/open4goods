@@ -288,7 +288,7 @@ attributesConfig:
   ##################################
   
   - key: "WARRANTY"
-    faIcon: "check-double"
+    faIcon: "fa-certificate"
     name:
       default: "Warranty"
       fr: "Garantie"
