@@ -82,20 +82,24 @@ public class DataTableController {
 		if (null != slidersValue) {
 			
 			for (String slider : slidersValue) {
-				String[] sliderValues = slider.split(":");
-	
-				Double min = Double.parseDouble(sliderValues[1]);
-				Double max = Double.parseDouble(sliderValues[2]) ;
-				Boolean includeUndefined = Boolean.valueOf(sliderValues[3]);
-				Double interval;
 				try {
-					interval = Double.parseDouble(sliderValues[4]);
+					String[] sliderValues = slider.split(":");
+
+					Double min = Double.parseDouble(sliderValues[1]);
+					Double max = Double.parseDouble(sliderValues[2]) ;
+					Boolean includeUndefined = Boolean.valueOf(sliderValues[3]);
+					Double interval;
+					try {
+						interval = Double.parseDouble(sliderValues[4]);
+					} catch (NumberFormatException e) {
+						LOGGER.error("Not a parsable interval for {}",slider);
+						interval = 50.0;
+					}
+					
+					vRequest.getNumericFilters().add(new NumericRangeFilter(sliderValues[0] ,min, max, interval, includeUndefined));
 				} catch (NumberFormatException e) {
-					LOGGER.error("Not a parsable interval for {}",slider);
-					interval = 50.0;
+					LOGGER.error("Error while parsing slider values",e);
 				}
-				
-				vRequest.getNumericFilters().add(new NumericRangeFilter(sliderValues[0] ,min, max, interval, includeUndefined));
 				}
 		}
 		// Sorting

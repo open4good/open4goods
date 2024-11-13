@@ -199,7 +199,7 @@ attributesConfig:
     name:
       default: "Energy class"
       fr: "Classe énergétique"
-    type: "TEXT"
+    filteringType: "TEXT"
     asRating: true
 
     attributeValuesOrdering: "MAPPED"
@@ -259,7 +259,7 @@ attributesConfig:
     name:
       default: "Repairability index"
       fr: "Indice de réparabilité"
-    type: "NUMERIC"
+    filteringType: "NUMERIC"
     asRating: true
 
 
@@ -292,7 +292,7 @@ attributesConfig:
     name:
       default: "Warranty"
       fr: "Garantie"
-    type: "NUMERIC"
+    filteringType: "NUMERIC"
     asRating: true
 
 
@@ -326,7 +326,7 @@ attributesConfig:
     name:
       default: "Year"
       fr: "Année de mise en service"
-    type: "NUMERIC"
+    filteringType: "NUMERIC"
     asRating: false
     
     synonyms:
@@ -346,6 +346,37 @@ attributesConfig:
 
 
 
+  ##################################
+  # PORTS HDMI
+  ##################################
+  
+  - key: "HDMI_PORTS_QUANTITY"
+    faIcon: "fa-hdmi"
+    icecatFeaturesIds: 
+      - 3566      
+    name:
+      default: "HDMI ports quantity"
+      fr: "Quantité de ports HDMI"
+    filteringType: "NUMERIC"
+    asRating: false
+    
+    synonyms:
+      all:
+      - "QTE DE PORTS HDMI"
+      - "QUANTITE DE PORTS HDMI"
+      
+    parser:
+      normalize: true
+      trim: false
+      lowerCase: false
+      upperCase: true
+      removeParenthesis: false
+#      deleteTokens:
+#      - "ANS"
+
+
+
+
 
   ##################################
   # COULEUR
@@ -356,7 +387,7 @@ attributesConfig:
     name:
       default: "Color"
       fr: "Couleur"
-    type: "TEXT"
+    filteringType: "TEXT"
     asRating: false
     
     synonyms:
@@ -389,7 +420,7 @@ attributesConfig:
     name:
       default: "Weight"
       fr: "Poids"
-    type: "NUMERIC"
+    filteringType: "NUMERIC"
     asRating: false
     
     synonyms:
@@ -418,7 +449,7 @@ attributesConfig:
     name:
       default: "Energy consumption (/1000h)"
       fr: "Consommation d'énergie (/1000h)"
-    type: "NUMERIC"
+    filteringType: "NUMERIC"
     asRating: false
     
     synonyms:

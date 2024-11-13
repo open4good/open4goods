@@ -37,24 +37,41 @@
 	<!-- The custom filters -->
 	
 	<th:block th:each="filter : ${products.customFilters}">
-	
-		<th:block th:with="title=${filter.key.name.get(siteLanguage)},
+
+        <!-- NUMERIC AGGREGATION FILTER TYPE  -->	
+		<th:block th:if="${filter.key.filteringType.toString().equals('TEXT')}" th:with="title=${filter.key.name.get(siteLanguage)},
 		               id='attributes.indexed.'+${filter.key.key}+'.value',
 					   icon=${filter.key.faIcon},		                   
 					   visibleSection=10,
 					   terms=${filter.value}">
-			<th:block th:insert="~{inc/vertical-filter-item-terms.html}"></th:block>
+		      
+		      <th:block th:insert="~{inc/vertical-filter-item-terms.html}"></th:block>
 		</th:block>		
-	
-	
+
+        <!-- NUMERIC AGGREGATION FILTER TYPE  -->
+        <th:block th:if="${filter.key.filteringType.toString().equals('NUMERIC')}" 
+               th:with="title=${filter.key.name.get(siteLanguage)},
+                       id='attributes.indexed.'+${filter.key.key}+'.numericValue',
+                       icon=${filter.key.faIcon},                          
+                       min=${products.min(filter.key.key)},
+                       max=${products.max(filter.key.key)},
+                       interval=1,
+                       includeUndefined=true,
+                       showIncludeUndefinedButton=true,
+                       includeUndefinedLabel='Afficher les inconnus'
+                       ">
+                       
+                       
+                                     
+              <th:block th:insert="~{inc/vertical-filter-item-numeric.html}"></th:block>
+        </th:block>     
+
+
+
 	</th:block>
 	
 	
-	
-	
-	
 	<hr class="bg-light border-2 border-top border-light">
-		
 	
 	<!-- The brand condition -->
 	<th:block th:with="id='brand',
