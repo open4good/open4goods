@@ -101,6 +101,14 @@
 						
 
 						
+                        <!--/* Price Filters */-->                          
+                        <div class="row card shadow mb-2">
+                            <div class="card-header"><h2 class="h5">Prix</h2></div>
+                            <div class="card-body">
+                                <th:block th:insert="~{inc/vertical-filters-price.html}"></th:block>
+                                
+                            </div>
+                        </div>
 						                 
                                         
 				        <!--/* Ecological Filters */-->	
@@ -113,14 +121,6 @@
 						</div>
 
 
-                        <!--/* Price Filters */-->                          
-                        <div class="row card shadow mb-2">
-                            <div class="card-header"><h2 class="h5">Prix</h2></div>
-                            <div class="card-body">
-                                <th:block th:insert="~{inc/vertical-filters-price.html}"></th:block>
-                                
-                            </div>
-                        </div>
                         
                         
 				        <!--/* Technical Filters */-->							
@@ -190,6 +190,7 @@
 	    const siteLanguage = /*[[${siteLanguage}]]*/'';
 	    const baseUrl = /*[[${baseUrl}]]*/'';
 	    const verticalPath = /*[[${verticalPath}]]*/'';
+	    const additionalAttributes = /*[[${filters}]]*/'';
 	    const tpl = /*[[${tpl}]]*/'';
 	    const chartIntervals = /*[[${products.numericFilters}]]*/'';
 	    	    	    
@@ -319,6 +320,9 @@
 	         createdRow: function(row, data, dataIndex){
 	                 // Add COLSPAN attribute
 	                 $('td:eq(0)', row).attr('colspan', 9);	                 
+					 for ( i = 1; i < 5 ; i++) {						
+	                 	$('td:eq('+i+')', row).css('display', 'none');
+					 }
 	         },
 	         
 	        "columns": columns 
