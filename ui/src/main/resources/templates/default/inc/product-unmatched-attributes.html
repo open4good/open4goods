@@ -3,17 +3,18 @@
 
 	<div class="table-responsive table-caracteristics-fs">
 		
-		<table id="allAttributes" class="table">
+		<table style="width:100%" id="allAttributes" class="table">
 			<thead>
-				<th th:if="${user}" >Taxo</th>
-				<th>Nom</th>
-				<th>Valeur</th>
-				<th>Sources</th>
+				<th style="width:20%">Nom</th>
+				<th style="width:10%" >Taxo</th>
+				<th style="width:10%">Sources</th>
+				<th style="width:60%">Valeur</th>
 			</thead>
 
 			<th:block th:each="attribute : ${product.attributes.all.values()}">
 				<th:block t:if="${attribute.icecatTaxonomyIds.size() == 0">
 					<tr th:class="${attribute.bgRow()}">
+						<td class="align-middle"><span th:text="${attribute.name}"></span></td>					
 						<td th:if="${user}" class="align-middle">
 							<ul>
 							  <li th:each="iid : ${attribute.icecatTaxonomyIds}">
@@ -23,11 +24,10 @@
 						</td>					
 						
 						
-						<td class="align-middle"><span th:text="${attribute.name}"></span></td>					
-						<td class="align-middle"><span th:text="${attribute.value}"></span></td>
 						<td class="align-middle">
 							<th:block th:insert="~{inc/attribute-sourcing.html}"></th:block>
 						</td>
+						<td class="align-middle"><span th:text="${attribute.value}"></span></td>
 					</tr>
 				</th:block>
 			</th:block>
