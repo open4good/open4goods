@@ -184,14 +184,12 @@ ecoscoreConfig:
 ecoFilters:
     - "REPAIRABILITY_INDEX" 
     - "CLASSE_ENERGY"   
-    - "WEIGHT"
     - "ENERGY_CONSUMPTION_1000_HOURS"
 
 technicalFilters:
     - "DIAGONALE_POUCES"
     - "DISPLAY_TECHNOLOGY"
-    - "COLOR"
-    - HDMI_PORTS_QUANTITY
+    - "HDMI_PORTS_QUANTITY"
   
 #  - "PARTS_AVAILLABILITY"
 #  - "DATA-QUALITY"  
@@ -267,8 +265,6 @@ attributesConfig:
        filteringType: "TEXT"
    
        asRating: false
-       
-       asSearchFilter: true
               
        synonyms:
 #          all:

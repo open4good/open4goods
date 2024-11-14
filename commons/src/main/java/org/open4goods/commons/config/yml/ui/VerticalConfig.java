@@ -79,6 +79,13 @@ public class VerticalConfig{
 	private List<String> technicalFilters = new ArrayList<>();
 
 	
+	/**
+	 * The list of global technicals filters (weight, ..) 
+	 */
+	private List<String> globalTechnicalFilters = new ArrayList<>();
+
+	
+	
 	
 	public List<String> getEcoFilters() {
 		return ecoFilters;
@@ -309,7 +316,6 @@ public class VerticalConfig{
 				
 				.map(e -> getAttributesConfig().getAttributeConfigByKey(e))
 				.filter(Objects::nonNull)
-				.filter(AttributeConfig::isAsSearchFilter)
 				.collect(Collectors.toList());
 
 	}
@@ -323,6 +329,7 @@ public class VerticalConfig{
 		List<String> filters = new ArrayList<String>();
 		filters.addAll(ecoFilters);
 		filters.addAll(technicalFilters);
+		filters.addAll(globalTechnicalFilters);
 		return filters;
 	
 	}
@@ -702,4 +709,13 @@ public class VerticalConfig{
 		this.inexMappingConfig = inexMappingConfig;
 	}
 
+	public List<String> getGlobalTechnicalFilters() {
+		return globalTechnicalFilters;
+	}
+
+	public void setGlobalTechnicalFilters(List<String> globalTechnicalFilters) {
+		this.globalTechnicalFilters = globalTechnicalFilters;
+	}
+
+	
 }

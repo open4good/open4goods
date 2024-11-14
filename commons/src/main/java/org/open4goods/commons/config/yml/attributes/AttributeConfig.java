@@ -56,17 +56,9 @@ public class AttributeConfig {
 	/**
 	 * If true, this attribute will be added as a score, mapped through the numericMapping configuration attribute and an application of the scoring (min/max) mechanism
 	 */
-	// TODO : Rename to asScore
+	// TODO(p2,design) : Rename to asScore
 	private boolean asRating = false;
 
-	/**
-	 * If true, this attribute will be used as search filter
-	 */
-	private boolean asSearchFilter = true;
-
-	
-		
-	
 
 	/**
 	 * The ordering that must be applied to this attributes values after aggregations. (ie rendered in search attributes selection)
@@ -414,11 +406,12 @@ public class AttributeConfig {
 
 
 
-	public Localisable getName() {
+
+	public Localisable<String, String> getName() {
 		return name;
 	}
 
-	public void setName(final Localisable name) {
+	public void setName(Localisable<String, String> name) {
 		this.name = name;
 	}
 
@@ -430,13 +423,6 @@ public class AttributeConfig {
 		this.mappings = mappings;
 	}
 
-	public boolean isAsSearchFilter() {
-		return asSearchFilter;
-	}
-
-	public void setAsSearchFilter(boolean asSearchFilter) {
-		this.asSearchFilter = asSearchFilter;
-	}
 
 	public Set<String> getIcecatFeaturesIds() {
 		return icecatFeaturesIds;

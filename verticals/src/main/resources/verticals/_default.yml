@@ -90,6 +90,16 @@ descriptionsAggregationConfig:
   descriptionsTruncationLength: 4000
   descriptionsTruncationSuffix: "..."
 
+  
+        
+####################################################################################
+#                       GLOBALLY APPLIED FILTERS
+####################################################################################  
+
+        
+globalTechnicalFilters:
+  - "COLOR"
+      
 ####################################################################################
 # 						ATTRIBUTES CONFIGURATION
 ####################################################################################  
@@ -182,7 +192,9 @@ attributesConfig:
     - YES
     - OUI
     - Y
-    
+
+  
+  
 ####################################################################################
 # ATTRIBUTES DEFINITIONS
 # Those attributes will be availlable for all products if found
@@ -351,7 +363,7 @@ attributesConfig:
   ##################################
   
   - key: "HDMI_PORTS_QUANTITY"
-    faIcon: "fa-hdmi"
+    faIcon: "fa-sitemap"
     icecatFeaturesIds: 
       - 3566      
     name:
