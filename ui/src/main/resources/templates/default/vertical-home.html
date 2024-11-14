@@ -112,11 +112,22 @@
 							</div>
 						</div>
 
-				        <!--/* Classical Filters */-->							
+
+                        <!--/* Price Filters */-->                          
+                        <div class="row card shadow mb-2">
+                            <div class="card-header"><h2 class="h5">Prix</h2></div>
+                            <div class="card-body">
+                                <th:block th:insert="~{inc/vertical-filters-price.html}"></th:block>
+                                
+                            </div>
+                        </div>
+                        
+                        
+				        <!--/* Technical Filters */-->							
 						<div class="row card shadow mb-2">
-							<div class="card-header"><h2 class="h5">Filtres</h2></div>
+							<div class="card-header"><h2 class="h5">Caractéristiques</h2></div>
 							<div class="card-body">
-                    			<th:block th:insert="~{inc/vertical-filters.html}"></th:block>
+                    			<th:block th:insert="~{inc/vertical-filters-technical.html}"></th:block>
 								
 							</div>
 						</div>
@@ -179,7 +190,6 @@
 	    const siteLanguage = /*[[${siteLanguage}]]*/'';
 	    const baseUrl = /*[[${baseUrl}]]*/'';
 	    const verticalPath = /*[[${verticalPath}]]*/'';
-	    const additionalAttributes = /*[[${filters}]]*/'';
 	    const tpl = /*[[${tpl}]]*/'';
 	    const chartIntervals = /*[[${products.numericFilters}]]*/'';
 	    	    	    
@@ -309,9 +319,6 @@
 	         createdRow: function(row, data, dataIndex){
 	                 // Add COLSPAN attribute
 	                 $('td:eq(0)', row).attr('colspan', 9);	                 
-					 for ( i = 1; i < 5+ additionalAttributes.length; i++) {						
-	                 	$('td:eq('+i+')', row).css('display', 'none');
-					 }
 	         },
 	         
 	        "columns": columns 

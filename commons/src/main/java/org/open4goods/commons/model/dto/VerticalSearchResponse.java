@@ -4,11 +4,14 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.open4goods.commons.config.yml.attributes.AttributeConfig;
 import org.open4goods.commons.config.yml.ui.VerticalConfig;
 import org.open4goods.commons.model.product.Product;
 import org.open4goods.commons.services.SearchService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Results of a search inside a specific vertical
@@ -17,6 +20,7 @@ import org.open4goods.commons.services.SearchService;
  */
 public class VerticalSearchResponse {
 
+	private static final Logger LOGGER = LoggerFactory.getLogger(VerticalSearchResponse.class);
 
 	private VerticalConfig verticalConfig;
 
@@ -103,6 +107,49 @@ public class VerticalSearchResponse {
 	 * @param key
 	 * @return
 	 */
+	
+	
+	
+	
+
+	/**
+	 * TODO(P2, design) : So tweaky again. Design to be reviewed
+	 * @param key
+	 * @return
+	 */
+	public Entry<AttributeConfig, NumericRangeFilter> numericFilterEntryByKey(String key) {
+		AttributeConfig conf = verticalConfig.getAttributesConfig().getAttributeConfigByKey(key);
+		NumericRangeFilter value =  numericFilters. entrySet().stream().filter(e-> e.getKey().contains(key)).map(e -> e.getValue()).findFirst().orElse(null);	
+		if (value == null || key == null) {
+			LOGGER.warn("Cannot resolve numeric range filter for {}",key);
+			return null;
+		}
+		return Map.entry(conf, value); 
+	}
+
+	/**
+	 * NOTE(P2, design) : So tweaky again. Design to be reviewed
+	 * @param key
+	 * @return
+	 */
+	public Entry<AttributeConfig, List<VerticalFilterTerm>> termFilterEntryByKey(String key) {
+		return customFilters.entrySet().stream().filter(e -> e.getKey().getKey().equals(key)).findFirst().orElse(null); 
+	}
+
+	/**
+	 * NOTE(P2, design) : So tweaky again. Design to be reviewed
+	 * @param key
+	 * @return
+	 */
+
+	public Entry<Object, Object> resolveFilter(String key) {
+		
+		Entry ret = termFilterEntryByKey(key);
+		if (null == ret) {
+			ret = numericFilterEntryByKey(key);
+		}
+		return ret;
+	}
 	public Double min(String key) {
 		//TODO(design,p2) : the contains is ugly. A miss design on numeric and terms filters in verticalsearchRequest and response, to be reviewed
 		Double ret = numericFilters. entrySet().stream().filter(e-> e.getKey().contains(key)).findFirst().map(e->e.getValue().getMinValue()).orElse(0.0);;

@@ -69,9 +69,32 @@ public class VerticalConfig{
 
 	
 	/**
-	 * The categories to associate to this vertical
+	 * The list of filters to be added to the ecological filters group
 	 */
-	private List<String> verticalFilters = new ArrayList<>();
+	private List<String> ecoFilters = new ArrayList<>();
+
+	/**
+	 * The list of filters to be added to the technical filters group
+	 */
+	private List<String> technicalFilters = new ArrayList<>();
+
+	
+	
+	public List<String> getEcoFilters() {
+		return ecoFilters;
+	}
+
+	public void setEcoFilters(List<String> ecoFilters) {
+		this.ecoFilters = ecoFilters;
+	}
+
+	public List<String> getTechnicalFilters() {
+		return technicalFilters;
+	}
+
+	public void setTechnicalFilters(List<String> technicalFilters) {
+		this.technicalFilters = technicalFilters;
+	}
 
 	/**
 	 * The categories that MUST BE PRESENT to associate to this vertical
@@ -280,11 +303,9 @@ public class VerticalConfig{
 	 * @return the specific attributes config for this vertical
 	 */
 	public List<AttributeConfig> verticalFilters() {
-		if (null == verticalFilters) {
-			return new ArrayList<>();
-		}
+	
 		
-		return verticalFilters.stream()
+		return getVerticalFilters().stream()
 				
 				.map(e -> getAttributesConfig().getAttributeConfigByKey(e))
 				.filter(Objects::nonNull)
@@ -293,6 +314,18 @@ public class VerticalConfig{
 
 	}
 
+
+	/**
+	 * 
+	 * @return all attributes filters (eco & technical)
+	 */
+	public List<String> getVerticalFilters() {
+		List<String> filters = new ArrayList<String>();
+		filters.addAll(ecoFilters);
+		filters.addAll(technicalFilters);
+		return filters;
+	
+	}
 
 	/**
 	 * Return the root url for a given sitelocale, with the "default" behavior
@@ -580,15 +613,6 @@ public class VerticalConfig{
 	public void setMatchingCategories(Set<String> matchingCategories) {
 		this.matchingCategories = matchingCategories;
 	}
-
-	public List<String> getVerticalFilters() {
-		return verticalFilters;
-	}
-
-	public void setVerticalFilters(List<String> verticalFilters) {
-		this.verticalFilters = verticalFilters;
-	}
-
 	
 	public Set<String> getUnmatchingCategories() {
 		return unmatchingCategories;

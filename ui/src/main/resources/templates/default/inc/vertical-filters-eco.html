@@ -56,6 +56,14 @@
 	</th:block>	
 	
 	
+	<!--  Custom eco filters -->
+	<th:block th:each="filterName : ${verticalConfig.ecoFilters}">
+         <th:block th:with="filter = ${products.resolveFilter(filterName)}">
+               <th:block th:if="${filter}" th:insert="~{inc/vertical-filter-item.html}">       </th:block>
+         </th:block>       
+    </th:block>
+    
+	
 </div>
 
             
