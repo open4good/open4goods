@@ -96,7 +96,6 @@ public class VerticalController  extends AbstractController {
 		ret.addObject("posts",blogService.getPosts(vertical));
 		ret.addObject("verticalConfig",config);
 
-		ret.addObject("filters",config.verticalFilters());
 		ret.addObject("vertical",this.vertical);
 		ret.addObject("verticals",verticalService.getConfigsWithoutDefault());
 		

@@ -179,14 +179,18 @@ ecoscoreConfig:
 # will also be availlable in search for this vertical (must be an attribute or a score)
 ##############################################################################
 
-verticalFilters:
+
+
+ecoFilters:
+    - "REPAIRABILITY_INDEX" 
+    - "CLASSE_ENERGY"   
+    - "WEIGHT"
+    - "ENERGY_CONSUMPTION_1000_HOURS"
+
+technicalFilters:
     - "DIAGONALE_POUCES"
     - "DISPLAY_TECHNOLOGY"
     - "COLOR"
-    - "WEIGHT"
-    - "ENERGY_CONSUMPTION_1000_HOURS"
-    - "CLASSE_ENERGY"   
-    - "REPAIRABILITY_INDEX" 
     - HDMI_PORTS_QUANTITY
   
 #  - "PARTS_AVAILLABILITY"
