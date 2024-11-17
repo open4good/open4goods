@@ -23,7 +23,7 @@ public class VerticalsGenerationConfig {
 	/**
 	 * The minimum percent of product covrage an associated category must have to be conservated
 	 */
-	private Double associatedCatgoriesEvictionPercent = 0.05;
+	private Double associatedCategoriesEvictionPercent = 0.05;
 	
 	/**
 	 * The minimum total hits a category must have
@@ -55,12 +55,12 @@ public class VerticalsGenerationConfig {
 		this.limit = limit;
 	}
 
-	public Double getAssociatedCatgoriesEvictionPercent() {
-		return associatedCatgoriesEvictionPercent;
+	public Double getAssociatedCategoriesEvictionPercent() {
+		return associatedCategoriesEvictionPercent;
 	}
 
-	public void setAssociatedCatgoriesEvictionPercent(Double associatedCatgoriesEvictionPercent) {
-		this.associatedCatgoriesEvictionPercent = associatedCatgoriesEvictionPercent;
+	public void setAssociatedCategoriesEvictionPercent(Double associatedCatgoriesEvictionPercent) {
+		this.associatedCategoriesEvictionPercent = associatedCatgoriesEvictionPercent;
 	}
 
 	public Integer getMinimumTotalHits() {
