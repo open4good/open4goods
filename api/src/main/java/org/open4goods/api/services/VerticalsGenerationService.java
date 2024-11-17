@@ -29,7 +29,7 @@ import org.open4goods.commons.services.ai.AiService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import groovy.util.logging.Log;
+import com.fasterxml.jackson.core.type.TypeReference;
 
 public class VerticalsGenerationService {
 	
@@ -58,7 +58,7 @@ public class VerticalsGenerationService {
 	public void fullFromDb() throws IOException {
 		
 
-		loadCategoriesMappingFromDatabase();
+		importMappingFile();
 		LOGGER.info("loaded . {} mappings",	sortedMappings.size());
 		
 
@@ -161,7 +161,7 @@ public class VerticalsGenerationService {
 	    new HashMap<>(sortedMappings).entrySet().stream().forEach(entryKeyVal -> {
 	    	VerticalCategoryMapping currentValue = entryKeyVal.getValue();
 	        // Set threshold to X% of the total hits
-	        double threshold = currentValue.getTotalHits() * config.getAssociatedCatgoriesEvictionPercent();
+	        double threshold = currentValue.getTotalHits() * config.getAssociatedCategoriesEvictionPercent();
 	        
 	        // Use an iterator to safely remove entries below the threshold
 	        Iterator<Map.Entry<String, Long>> iterator = currentValue.getAssociatedCategories().entrySet().iterator();
@@ -261,14 +261,24 @@ public class VerticalsGenerationService {
 		}
 	}
 
+
 	/**
-	 * Load the mapping file from disk
+	 * Import categories mapping from file
 	 * @throws IOException
 	 */
 	public void importMappingFile() throws IOException {
-		sortedMappings= serialisationService.fromJson(org.apache.commons.io.FileUtils.readFileToString(new File(config.getMappingFilePath()), Charset.defaultCharset()), sortedMappings.getClass());
+	    String fileContent = org.apache.commons.io.FileUtils.readFileToString(
+	        new File(config.getMappingFilePath()), 
+	        Charset.defaultCharset()
+	    );
+
+	    // Deserialize with proper typing
+	    sortedMappings = serialisationService.getJsonMapper().readValue(
+	        fileContent, 
+	        new TypeReference<LinkedHashMap<String, VerticalCategoryMapping>>() {}
+	    );
 	}
-	
+
 	
 	/**
 	 * 
