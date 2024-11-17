@@ -43,6 +43,11 @@ public class ProductCategory {
 	private VerticalConfig vertical;
 	
 	/**
+	 * True if object or one of it's children has a defined vertical
+	 */
+	private boolean hasVerticals = false;
+	
+	/**
 	 * The children nodes
 	 */
 	private List<ProductCategory> children = new ArrayList<>();
@@ -99,6 +104,17 @@ public class ProductCategory {
 		
 	}
 	
+	/**
+	 * Set an associated vertical : Set the VerticalConfig and flag all the parents has having verticals
+	 * @param v
+	 */
+	public void vertical(VerticalConfig v) {
+		vertical = v;
+		hierarchy().forEach(p -> {
+			p.setHasVerticals(true);
+		});
+		
+	}
 
 	/**
 	 * Add a language for a category
@@ -185,6 +201,44 @@ public class ProductCategory {
 		return ret;
 	}
 	
+	
+	public List<ProductCategory> hierarchy(boolean havingVertical) {
+		List<ProductCategory> items = hierarchy();
+		if (havingVertical) {
+			items = items.stream().filter(e->e.isHasVerticals()).toList();
+		}
+		return items;
+	}
+	
+	
+	public List<ProductCategory> children(boolean havingVertical) {
+		List<ProductCategory> items = getChildren();
+		if (havingVertical) {
+			items = items.stream().filter(e->e.isHasVerticals()).toList();
+		}
+		return items;
+	}
+	
+	/**
+	 * 
+	 * @return the parents categories
+	 */
+	public List<ProductCategory> parents() {
+		List<ProductCategory> items = hierarchy();
+		return hierarchy().subList(0, items.size()-1);
+	}
+	
+	
+	public List<ProductCategory> parents(boolean havingVertical) {
+		List<ProductCategory> items = parents();
+		if (havingVertical) {
+			items = items.stream().filter(e->e.isHasVerticals()).toList();
+		}
+		return items;
+	}
+	
+	
+	
 	/////////////////////////////
 	// Getters and setters
 	/////////////////////////////
@@ -252,6 +306,16 @@ public class ProductCategory {
 	public void setHashedNames(Localisable<String, String> hashedNames) {
 		this.hashedNames = hashedNames;
 	}
+
+	public boolean isHasVerticals() {
+		return hasVerticals;
+	}
+
+	public void setHasVerticals(boolean hasVerticals) {
+		this.hasVerticals = hasVerticals;
+	}
+
+
 
 	
 	

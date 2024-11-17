@@ -84,6 +84,13 @@ public class VerticalsConfigService {
 
 		// initial configs loads
 		loadConfigs();
+		
+		
+		// Update the google product categories with defined verticals
+		getConfigsWithoutDefault().stream().forEach(v -> {
+			googleTaxonomyService.updateCategoryWithVertical(v);
+		});
+		
 
 	}
 
