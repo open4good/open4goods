@@ -466,6 +466,7 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 		// FIXED TEXT MAPPING
 		/////////////////////////////////
 		if (!conf.getMappings().isEmpty()) {
+			
 			string = conf.getMappings().get(string);
 		}
 

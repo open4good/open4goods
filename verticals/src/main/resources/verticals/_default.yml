@@ -415,6 +415,7 @@ attributesConfig:
       trim: false
       lowerCase: false
       upperCase: true
+      
       removeParenthesis: false
 #      deleteTokens:
 #      - "ANS"

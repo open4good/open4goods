@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html th:lang="${siteLocale.language}">
+
+<head>
+
+	<!--/* Metas and CSS */-->
+	<th:block th:insert="~{inc/header-meta.html}"></th:block>
+    
+	<!-- Primary Meta Tags 
+	<title th:text="#{search.title}"></title>
+	<meta name="title" th:content="#{search.meta.title}">
+	<meta name="description" th:content="#{search.meta.description}">
+	-->
+		
+	<!-- Open Graph / Facebook 
+	<meta property="og:type" content="website">
+	<meta property="og:url" th:content="${url}">
+	<meta property="og:title" th:content="#{search.title}">
+	<meta property="og:description" th:content="#{search.meta.description}">
+	<meta property="og:image"  th:content="${baseUrl} + '/assets/img/brand/light.svg'">
+	-->
+	
+	<!-- Twitter 
+	<meta name="twitter:card" content="summary_large_image">
+	<meta name="twitter:url" th:content="${url}">
+	<meta name="twitter:title" th:content="#{search.title}">
+	<meta name="twitter:description" th:content="#{search.meta.description}">
+	<meta name="twitter:image" th:content="${baseUrl} + 'assets/img/brand/light.svg'">
+	-->
+	
+</head>
+
+<body>
+    
+	<!--/* Navbar */-->
+    <th:block th:with="page = 'notre équipe'" th:insert="~{inc/navbar/navbar-page.html}"></th:block>
+    <!--/* Loader */-->
+    <th:block th:insert="~{inc/preloader.html}"></th:block>
+	
+    <main>	
+
+
+	
+        <!-- Hero for Core Team -->
+        <section class="section-header bg-green-transparent pb-8 pb-md-11 mb-4 mb-lg-6 ">
+            <div class="container">
+                <div class="row justify-content-center">
+                    <div class="col-12 col-md-10 col-lg-10 text-center">
+                        <h1 class="display-2  mb-3" th:text="${category.googleNames.i18n(siteLanguage)}"></h1>
+
+
+						<nav aria-label="breadcrumb">
+							<ol class="breadcrumb">
+								<th:block th:each="item,stat : ${category.hierarchy()}">
+									<li   class="breadcrumb-item" th:classappend="${stat.last ? 'active' : ''}" aria-current="page"><a th:href="'/categories/'  + ${item.url(siteLanguage)}" th:text="${item.googleNames.i18n(siteLanguage)}"></a></li>
+								</th:block>
+
+							</ol>
+						</nav>
+
+						<p class="lead">                        	                       
+                        	<th:block th:with="path='pages/team/hero-core-team/'">
+                        		<th:block th:insert="~{inc/wiki.html}"></th:block>
+                        	</th:block>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Core team Members -->
+        <section class="section section-lg pt-0">
+            <div class="container mt-n8 mt-lg-n10 z-2">
+                <div class="row mt-3">
+					<div th:each="child, stat : ${category.children}" th:classappend="${stat.first ? 'col-md-6 col-lg-4' : 'col-md-6 col-lg-4'} " class="col-12 mb-5 mb-lg-0">
+					     <div class="mb-5 card shadow border-gray-300">
+					         <img src="${child.imageUrl}" class="card-img-top rounded-top" th:alt="${child.googleNames.i18n(siteLanguage)}">
+					         <div class="card-body">
+					             <!-- Name 
+					             TODO : I18n
+					             -->
+					             <a th:href="'/categories/' + ${child.url(siteLanguage)}"><h2 class="text-center h4 card-title mb-2" th:text="${child.googleNames.i18n(siteLanguage)}"></h2></a>
+					             <!-- Title -->
+					             <div class="text-center card-subtitle text-gray fw-normal"><strong>blabla</strong></div>
+					             
+					             <p class="card-text my-3">
+					             </p>
+					             <!-- 
+					             <div class="text-center">
+					                     <a th:href="${member.linkedInUrl}" target="_blank" aria-label="linkedin social link" class="text-facebook me-3">
+					                         <span class="fab fa-2xl fa-linkedin"></span>
+					                     </a>
+					             </div>
+					              -->
+					         </div>
+					     </div>
+					 </div>
+                </div>
+            </div>
+        </section>
+        
+
+    </main>
+
+	<!--/* Footer */-->
+	<th:block th:insert="~{inc/footer.html}"></th:block>	
+
+<!-- Core -->
+<script src="/vendor/@popperjs/core/dist/umd/popper.min.js"></script>
+<script src="/webjars/bootstrap/js/bootstrap.min.js"></script>
+<script src="/vendor/headroom.js/dist/headroom.min.js"></script>
+
+<!-- Vendor JS -->
+
+<script src="/vendor/smooth-scroll/dist/smooth-scroll.polyfills.min.js"></script>
+<script src="/vendor/vivus/dist/vivus.min.js"></script>
+
+<script src="/webjars/jquery/jquery.min.js"></script>
+<!-- pixel JS -->
+<script src="/assets/js/pixel.js"></script>
+<!-- custom sources -->
+<script src="/assets/js/pixel-custom.js"></script>
+</body>
+
+</html>
