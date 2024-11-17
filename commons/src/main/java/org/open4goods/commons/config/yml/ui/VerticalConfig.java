@@ -86,23 +86,6 @@ public class VerticalConfig{
 
 	
 	
-	
-	public List<String> getEcoFilters() {
-		return ecoFilters;
-	}
-
-	public void setEcoFilters(List<String> ecoFilters) {
-		this.ecoFilters = ecoFilters;
-	}
-
-	public List<String> getTechnicalFilters() {
-		return technicalFilters;
-	}
-
-	public void setTechnicalFilters(List<String> technicalFilters) {
-		this.technicalFilters = technicalFilters;
-	}
-
 	/**
 	 * The categories that MUST BE PRESENT to associate to this vertical
 	 */
@@ -717,5 +700,22 @@ public class VerticalConfig{
 		this.globalTechnicalFilters = globalTechnicalFilters;
 	}
 
+
 	
+	public List<String> getEcoFilters() {
+		return ecoFilters;
+	}
+
+	public void setEcoFilters(List<String> ecoFilters) {
+		this.ecoFilters = ecoFilters;
+	}
+
+	public List<String> getTechnicalFilters() {
+		return technicalFilters;
+	}
+
+	public void setTechnicalFilters(List<String> technicalFilters) {
+		this.technicalFilters = technicalFilters;
+	}
+
 }

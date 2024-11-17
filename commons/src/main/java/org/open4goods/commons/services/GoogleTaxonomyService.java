@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
+import org.open4goods.commons.config.yml.ui.VerticalConfig;
 import org.open4goods.commons.exceptions.InvalidParameterException;
 import org.open4goods.commons.helper.IdHelper;
 import org.open4goods.commons.model.ProductCategories;
@@ -57,11 +58,6 @@ public class GoogleTaxonomyService {
 	private Map<Integer,ProductCategory> categoriesById = new HashMap<Integer, ProductCategory>();
 	
 	
-	
-	
-	
-	
-
 	private RemoteFileCachingService fileCachingService;
 
 	public GoogleTaxonomyService(RemoteFileCachingService fileCachingService) {
@@ -144,10 +140,18 @@ public class GoogleTaxonomyService {
 				}
 			}
 		}
-
+		
 		logger.info("Google categories loaded");
 	}
 
+	/**
+	 * 
+	 * @param v
+	 */
+	public void updateCategoryWithVertical(VerticalConfig v) {
+		categoriesById.get(v.getGoogleTaxonomyId()).vertical(v);
+	}
+	
 	/**
 	 * Resolve a category to a taxonomy id
 	 * @param category
@@ -249,6 +253,8 @@ public class GoogleTaxonomyService {
 	public void setCategories(ProductCategories categories) {
 		this.categories = categories;
 	}
+
+
 
 
 
