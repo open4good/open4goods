@@ -12,6 +12,8 @@ import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
 import org.open4goods.commons.exceptions.InvalidParameterException;
 import org.open4goods.commons.helper.IdHelper;
+import org.open4goods.commons.model.ProductCategories;
+import org.open4goods.commons.model.ProductCategory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,6 +43,24 @@ public class GoogleTaxonomyService {
 	 */
 
 	Map<String, Map<Integer, List<String>>> localizedTaxonomy = new HashMap<>();
+	
+	
+	/**
+	 * The tree version of google categories
+	 */
+	private ProductCategories categories = new ProductCategories();
+	
+	
+	/**
+	 * The categories by taxonomyId
+	 */
+	private Map<Integer,ProductCategory> categoriesById = new HashMap<Integer, ProductCategory>();
+	
+	
+	
+	
+	
+	
 
 	private RemoteFileCachingService fileCachingService;
 
@@ -77,11 +97,15 @@ public class GoogleTaxonomyService {
 			// Retrieving the id
 			Integer id = Integer.valueOf(line.substring(0, pos - 1));
 
+			// The number
+			List<String> fragments = Arrays.asList(line.substring(pos+1).split(">")).stream().map(e -> e.trim()).toList();
+			
+			ProductCategory node = categories.addGooglecategories(id,fragments,language);
+			categoriesById.put(id, node);
+			
 			// Adding in the full category id
 			fullCategoriesId.put(IdHelper.azCharAndDigits(line.substring(pos + 2)).toLowerCase(), id);
 
-			// The number
-			List<String> fragments = Arrays.asList(line.substring(pos+1).split(">")).stream().map(e -> e.trim()).toList();
 
 //           // Utilisation d'une variable pour stocker la catégorie trouvée
 			String foundCategory = null;
@@ -121,6 +145,7 @@ public class GoogleTaxonomyService {
 			}
 		}
 
+		logger.info("Google categories loaded");
 	}
 
 	/**
@@ -182,8 +207,6 @@ public class GoogleTaxonomyService {
 		return localizedTaxonomy.get("fr").get(taxonomyId);
 	}
 	
-	
-	
 	/**
 	 * Resolve the deepest category if from several one
 	 * @param language
@@ -217,6 +240,14 @@ public class GoogleTaxonomyService {
 
 	public void setFullCategoriesId(Map<String, Integer> fullCategoriesId) {
 		this.fullCategoriesId = fullCategoriesId;
+	}
+
+	public ProductCategories getCategories() {
+		return categories;
+	}
+
+	public void setCategories(ProductCategories categories) {
+		this.categories = categories;
 	}
 
 
