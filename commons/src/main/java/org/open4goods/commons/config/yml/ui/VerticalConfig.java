@@ -23,15 +23,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.cache.annotation.Cacheable;
-import org.springframework.context.annotation.Configuration;
 
 import com.fasterxml.jackson.annotation.JsonMerge;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.constraints.NotNull;
 
-@Configuration
-@ConfigurationProperties
+@ConfigurationProperties()
+
 /**
  * Le parametrage Yaml d'une verticale. Celui ci dispose soit de propriétés de premier niveau, soit de sous-objets de configuration.
  * @author goulven
@@ -56,6 +55,13 @@ public class VerticalConfig{
 	 * The corresponding icecat taxonomy ID 
 	 */
 	private Integer icecatTaxonomyId;
+	
+	
+	/** If true, then the vertical is handled through batch processing, but is not exposed on UI / sitemap. **/
+	private boolean enabled = false;
+	
+	
+	
 	
 	/**
 	 * The product url, metas title, description, ....
@@ -133,14 +139,7 @@ public class VerticalConfig{
 	@JsonMerge
 	private Map<String, Double> ecoscoreConfig = new HashMap<>();
 
-	
-	@JsonMerge
-	/**
-	 * Configuration of the dedicated elastic index
-	 */
-	private VerticalIndexMappingConfig inexMappingConfig = new VerticalIndexMappingConfig();
 
-	
 	
 //	
 //	/**
@@ -684,13 +683,6 @@ public class VerticalConfig{
 		this.icecatTaxonomyId = icecatTaxonomyId;
 	}
 
-	public VerticalIndexMappingConfig getInexMappingConfig() {
-		return inexMappingConfig;
-	}
-
-	public void setInexMappingConfig(VerticalIndexMappingConfig inexMappingConfig) {
-		this.inexMappingConfig = inexMappingConfig;
-	}
 
 	public List<String> getGlobalTechnicalFilters() {
 		return globalTechnicalFilters;
@@ -718,4 +710,15 @@ public class VerticalConfig{
 		this.technicalFilters = technicalFilters;
 	}
 
+	public boolean isEnabled() {
+		return enabled;
+	}
+
+	public void setEnabled(boolean enabled) {
+		this.enabled = enabled;
+	}
+
+	
+	
+	
 }

@@ -198,7 +198,10 @@ public class SitemapGenerationService {
 	private void addProductsPages( String baseUrl, String language) {	
 		SitemapGenerator sitemap = SitemapGenerator.of(baseUrl);
 		
-		for (VerticalConfig vertical : verticalsConfigService.getConfigsWithoutDefault()) {
+		for (VerticalConfig vertical : verticalsConfigService.getConfigsWithoutDefault(true)) {
+			
+			// 
+			
 			List<Product> datas = aggregatedDataRepository.exportVerticalWithValidDateOrderByEcoscore(vertical.getId(),false)
 			// Filtering on products having genAI content
 					.filter(e -> null != e.getGenaiTexts() && null != e.getGenaiTexts().get(language))
@@ -296,7 +299,7 @@ public class SitemapGenerationService {
 		
 		SitemapGenerator sitemap = SitemapGenerator.of(baseUrl);
 		
-		for (VerticalConfig v : verticalsConfigService.getConfigsWithoutDefault() )
+		for (VerticalConfig v : verticalsConfigService.getConfigsWithoutDefault(true) )
 		{
 
 			ProductI18nElements i18n = v.i18n(language) ;

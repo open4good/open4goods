@@ -50,6 +50,10 @@ public class Brand2ScoreAggregationService extends AbstractScoreAggregationServi
 			VerticalConfig vertical = verticalsConfigService.getConfigByIdOrDefault(data.getVertical());
 			
 			String company = vertical.resolveCompany(data.brand());
+			if (StringUtils.isEmpty(company)) {
+				dedicatedLogger.warn("Cannot resolve company for {}",data.brand());
+				return;
+			}
 			
 			// TODO : Handle aggragtion, for multiple brand RSE score providers
 			Double score = brandService.getBrandScore(company,"sustainalytics.com");
@@ -63,7 +67,7 @@ public class Brand2ScoreAggregationService extends AbstractScoreAggregationServi
 			Score s = new Score(BRAND_SUSTAINABILITY_SCORENAME, score);
 			// Saving in product
 			data.getScores().put(s.getName(),s);
-		} catch (ValidationException e) {
+		} catch (Exception e) {
 			dedicatedLogger.warn("Brand to score fail for {}",data,e);
 		}
 		

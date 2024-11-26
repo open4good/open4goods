@@ -179,13 +179,15 @@ public class VerticalsConfigService {
 	 * Instanciate a config with a previously defaulted one
 	 *
 	 * @param inputStream
-	 * @param existing
+	 * @param defaul
 	 * @return
 	 * @throws IOException
 	 */
-	public VerticalConfig getConfig(InputStream inputStream, VerticalConfig existing) throws IOException {
+	public VerticalConfig getConfig(InputStream inputStream, VerticalConfig defaul) throws IOException {
 
-		ObjectReader objectReader = serialisationService.getYamlMapper().readerForUpdating(existing);
+		// TODO(p3,perf) : chould be cached
+		VerticalConfig copy = serialisationService.fromYaml(serialisationService.toYaml(defaul),VerticalConfig.class);
+		ObjectReader objectReader = serialisationService.getYamlMapper().readerForUpdating(copy);
 		VerticalConfig ret = objectReader.readValue(inputStream);
 		inputStream.close();
 		return ret;
@@ -364,10 +366,23 @@ public class VerticalsConfigService {
 
 	/**
 	 *
-	 * @return all configs, except the _default 
+	 * @return all configs, except the _default.  Allow to filter on enabled verticals
+	 */
+	public Collection<VerticalConfig>  getConfigsWithoutDefault(boolean onlyEnabled) {
+		if (onlyEnabled) {
+			return getConfigs().values().stream().filter(e->e.isEnabled() == true).toList();			
+		} else {
+			return getConfigs().values();
+		}
+	}
+	
+
+	/**
+	 *
+	 * @return all configs, except the _default. 
 	 */
 	public Collection<VerticalConfig>  getConfigsWithoutDefault() {
-		return getConfigs().values();
+		return getConfigsWithoutDefault(false);
 	}
 	/**
 	 *
@@ -385,24 +400,27 @@ public class VerticalsConfigService {
 	 * @param vConfs A map of vertical configurations.
 	 */
 	private void generateImagesForVerticals(Map<String, VerticalConfig> vConfs) {
-		vConfs.values().forEach(vc -> executorService.submit(() -> {
-			String fileName = vc.getId() + ".png";
-			if (!imageGenerationService.shouldGenerateImage(fileName)) {
-				logger.info("Image for vertical {} already exists with file name {}. Skipping generation.", vc.getId(), fileName);
-				return;
-			}
 
-			String threadName = Thread.currentThread().getName();
-			logger.info("Starting image generation for vertical {} in thread {}", vc.getId(), threadName);
-
-			try {
-				String verticalTitle = vc.getI18n().get("default").getVerticalHomeTitle();
-				imageGenerationService.fullGenerate(verticalTitle, fileName);
-				logger.info("Generated and saved image for vertical {} with file name {} in thread {}", vc.getId(), fileName, threadName);
-			} catch (Exception e) {
-				logger.error("Failed to generate or save image for vertical {} in thread {}", vc.getId(), threadName, e);
-			}
-		}));
+		//TODO(P1,design) : disabling genai for now
+		//		vConfs.values().forEach(vc -> executorService.submit(() -> {
+//			String fileName = vc.getId() + ".png";
+//			if (!imageGenerationService.shouldGenerateImage(fileName)) {
+//				logger.info("Image for vertical {} already exists with file name {}. Skipping generation.", vc.getId(), fileName);
+//				return;
+//			}
+//
+//			String threadName = Thread.currentThread().getName();
+//			logger.info("Starting image generation for vertical {} in thread {}", vc.getId(), threadName);
+//
+//			try {
+//				//TODO(p3,i18n) ! i18n
+//				String verticalTitle = vc.getI18n().get("fr").getVerticalHomeTitle();
+//				imageGenerationService.fullGenerate(verticalTitle, fileName);
+//				logger.info("Generated and saved image for vertical {} with file name {} in thread {}", vc.getId(), fileName, threadName);
+//			} catch (Exception e) {
+//				logger.error("Failed to generate or save image for vertical {} in thread {}", vc.getId(), threadName, e);
+//			}
+//		}));
 	}
 
 
