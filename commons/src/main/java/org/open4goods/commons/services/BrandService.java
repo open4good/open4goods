@@ -248,6 +248,7 @@ public class BrandService {
 	}
 
 	/**
+	 *TODO(p1,design) : review on exact match 
 	 * Operates a brand name resolution against the brandscore repository, 
 	 * if successfull retrieve the associated score
 	 * @param brand
@@ -256,52 +257,58 @@ public class BrandService {
 	 */
 	@Cacheable(keyGenerator = CacheConstants.KEY_GENERATOR, cacheNames = CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME)
 	public Double getBrandScore(String brand, String datasourceName) {
-		Double score = null;
-		
-		brand = brand.trim().toLowerCase();
-		
-		// 1 : Trying a direct resolution
-		// TODO : With a find byid
-		
-		List<BrandScore> results = new ArrayList<>();
-		String id = BrandScore.id(datasourceName, brand);
-		
-		BrandScore result = brandRepository.findById(id).orElse(null);		
-		if (null != result) {
-			logger.info("Score found with a direct resolution for brand {} and datasource {}", brand, datasourceName);
-			score = Double.valueOf(result.getNormalized());
+		try {
+			Double score = null;
+			
+			brand = brand.trim().toLowerCase();
+			
+			// 1 : Trying a direct resolution
+			// TODO : With a find byid
+			
+			List<BrandScore> results = new ArrayList<>();
+			String id = BrandScore.id(datasourceName, brand);
+			
+			BrandScore result = brandRepository.findById(id).orElse(null);		
+			if (null != result) {
+				logger.info("Score found with a direct resolution for brand {} and datasource {}", brand, datasourceName);
+				score = Double.valueOf(result.getNormalized());
+				return score;
+			}
+			
+			
+			String bName =  URLEncoder.encode(brand);
+			if (null == score) {
+				// Trying a prefix resolution
+				logger.info("Trying a prefix resolution for brand {} and datasource {}", brand, datasourceName);
+				results = brandRepository.findByDatasourceNameAndBrandNameStartingWith(datasourceName, bName );
+				score = handleExtractionResult(brand, datasourceName, score, results);
+				if (null != score) {				
+					logger.info("Score found with a prefix resolution for brand {} and datasource {}", brand, datasourceName);
+				}
+			} 
+			
+			if (null == score) {
+				// Trying a contains resolution
+				logger.info("Trying a contains resolution for brand {} and datasource {}", brand, datasourceName);
+				results = brandRepository.findByDatasourceNameAndBrandNameLike(datasourceName, bName);
+				score = handleExtractionResult(brand, datasourceName, score, results);
+				if (null != score) {
+					logger.info("Score found with a contains resolution for brand {} and datasource {}", brand,	datasourceName);
+				}
+			}
+			
+			if (null == score) {
+				//TODO : Log to vertical reporter
+				logger.warn("No score found for brand {} and datasource {}, was {} possibilities", brand, datasourceName,results.size());
+			} else {
+				logger.info("Score found for brand {} and datasource {} : {}", brand, datasourceName, score);
+			}
 			return score;
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return null;
 		}
-		
-		
-		String bName =  URLEncoder.encode(brand);
-		if (null == score) {
-			// Trying a prefix resolution
-			logger.info("Trying a prefix resolution for brand {} and datasource {}", brand, datasourceName);
-			results = brandRepository.findByDatasourceNameAndBrandNameStartingWith(datasourceName, bName );
-			score = handleExtractionResult(brand, datasourceName, score, results);
-			if (null != score) {				
-				logger.info("Score found with a prefix resolution for brand {} and datasource {}", brand, datasourceName);
-			}
-		} 
-		
-		if (null == score) {
-			// Trying a contains resolution
-			logger.info("Trying a contains resolution for brand {} and datasource {}", brand, datasourceName);
-			results = brandRepository.findByDatasourceNameAndBrandNameLike(datasourceName, bName);
-			score = handleExtractionResult(brand, datasourceName, score, results);
-			if (null != score) {
-				logger.info("Score found with a contains resolution for brand {} and datasource {}", brand,	datasourceName);
-			}
-		}
-		
-		if (null == score) {
-			//TODO : Log to vertical reporter
-			logger.warn("No score found for brand {} and datasource {}, was {} possibilities", brand, datasourceName,results.size());
-		} else {
-			logger.info("Score found for brand {} and datasource {} : {}", brand, datasourceName, score);
-		}
-		return score;
 	}
 
 	private Double handleExtractionResult(String brand, String datasourceName, Double score, List<BrandScore> results) {

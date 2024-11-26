@@ -39,7 +39,11 @@ public class HomeController  {
 		// TODO(gof) : deduplicate (darty.com / darty.com-CSV)
 		model.addObject("partners",  datasourceConfigService.datasourceConfigs().size());
 
-		model.addObject("verticals",  verticalConfigService.getConfigsWithoutDefault());
+		if (model.getModel().containsKey("user")) {
+			model.addObject("verticals",  verticalConfigService.getConfigsWithoutDefault());			
+		} else {
+			model.addObject("verticals",  verticalConfigService.getConfigsWithoutDefault(true));
+		}
 
 		model.addObject("url",  "/");
 

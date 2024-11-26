@@ -54,10 +54,10 @@ spring:
     openai:
       chat:
         options:
-          model: gpt-4o
+          model: gpt-4o-mini
           temperature: 1.0
-          response-format:
-            type: JSON_OBJECT
+#          response-format:
+#            type: JSON_OBJECT
 
 springdoc:
   swagger-ui:

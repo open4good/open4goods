@@ -17,6 +17,10 @@ googleTaxonomyId: 404
 
 #TODO : Documentation
 icecatTaxonomyId: 1584
+
+# Indicates if the vertical must be UI / sitemap / search rendered
+enabled: true
+
 ##############################################################################
 # Product classification from categories
 ##############################################################################

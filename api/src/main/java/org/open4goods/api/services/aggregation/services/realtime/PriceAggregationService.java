@@ -194,16 +194,19 @@ public class PriceAggregationService extends AbstractAggregationService {
          * We conserve one history price a day
          */
         if (minPrice != null ) {
-        	PriceHistory lastPrice = history.getLast();
-        	if (null != lastPrice) {
-        		if (lastPrice.getDay() ==  System.currentTimeMillis() / (1000 * 60 * 60 * 24)) {
-        			history.removeLast();
-        		} 
-        		
-        		if (history.size() ==  0 || !history.getLast().getPrice().equals(minPrice.getPrice())) {
-        			history.add(new PriceHistory(minPrice));        			
-        		}
-        		
+        	if (history.size() ==  0 || !history.getLast().getPrice().equals(minPrice.getPrice())) {
+        		history.add(new PriceHistory(minPrice));        			
+        	}
+        	else {        	
+	        	PriceHistory lastPrice = history.getLast();
+	        	if (null != lastPrice) {
+	        		
+	        		
+	        		if (lastPrice.getDay() ==  System.currentTimeMillis() / (1000 * 60 * 60 * 24)) {
+	        			history.removeLast();
+	        		} 
+	        		
+	        	}
         	}
         }
 
