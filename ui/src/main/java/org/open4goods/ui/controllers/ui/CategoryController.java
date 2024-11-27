@@ -37,7 +37,7 @@ public class CategoryController  extends AbstractController {
 		ModelAndView ret = uiService.defaultModelAndView(("category"), request);
 
 		ret.addObject("category", category);
-		ret.addObject("havingVertical",false);
+		ret.addObject("havingVertical",true);
 		return ret;
 	}
 
