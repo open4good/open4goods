@@ -147,11 +147,14 @@ public class AdminController {
 	@PreAuthorize("hasAuthority('"+RolesConstants.ROLE_XWIKI_ALL+"')")
 	public ModelAndView regenerateVerticalImage(@PathVariable String verticalId) throws IOException {
 		VerticalConfig verticalConfig = verticalsConfigService.getConfigById(verticalId);
-		String verticalTitle = verticalConfig.getI18n().get("default").getVerticalHomeTitle();
-		String fileName = verticalId + ".png";
-		imageGenerationService.fullGenerate(verticalTitle, fileName);
-		logger.info("Image for vertical {} with title '{}' has been regenerated", verticalId, verticalTitle);
+
 		
+		
+//		String verticalTitle = verticalConfig.getI18n().get("default").getVerticalHomeTitle();
+//		String fileName = verticalId + ".png";
+//		imageGenerationService.fullGenerate(verticalTitle, fileName);
+//		logger.info("Image for vertical {} with title '{}' has been regenerated", verticalId, verticalTitle);
+//		
 		ModelAndView mv = new ModelAndView("redirect:/");
 		mv.setStatus(HttpStatus.MOVED_TEMPORARILY);
 		return mv;

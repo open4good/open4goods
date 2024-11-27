@@ -78,7 +78,12 @@
                 <div class="row mt-3">
 					<div th:each="child, stat : ${category.children(havingVertical)}" th:classappend="${stat.first ? 'col-md-6 col-lg-4' : 'col-md-6 col-lg-4'} " class="col-12 mb-5 mb-lg-0">
 					     <div class="mb-5 card shadow border-gray-300">
-					         <img src="${child.imageUrl}" class="card-img-top rounded-top" th:alt="${child.googleNames.i18n(siteLanguage)}">
+					         
+					       
+					         
+					         <img width="200" th:if="${child.vertical}" th:src="'/images/verticals/' + ${child.vertical.id} + '.jpg'" class="card-img-top rounded-top" th:alt="${child.googleNames.i18n(siteLanguage)}">
+					         
+					         
 					         <div class="card-body">
 					             <!-- Name 
 					             TODO : I18n
@@ -86,10 +91,12 @@
                                  <a th:if="${child.vertical == null}" th:href="'/categories/' + ${child.url(siteLanguage)}"><h2 class="text-center h4 card-title mb-2" th:text="${child.googleNames.i18n(siteLanguage)}"></h2></a>
                                  <a th:unless="${child.vertical == null}" th:href="'/'+ ${child.vertical.i18n.get(siteLanguage).verticalHomeUrl}"><h2 class="text-center h4 card-title mb-2" th:text="${child.googleNames.i18n(siteLanguage)}"></h2></a>
 					             <!-- Title -->
+					             <!-- 
 					             <div class="text-center card-subtitle text-gray fw-normal"><strong>blabla</strong></div>
 					             
 					             <p class="card-text my-3">
 					             </p>
+					              -->
 					             <!-- 
 					             <div class="text-center">
 					                     <a th:href="${member.linkedInUrl}" target="_blank" aria-label="linkedin social link" class="text-facebook me-3">

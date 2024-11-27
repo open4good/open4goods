@@ -105,7 +105,7 @@
 					<div th:each="vertical : ${verticals}" class="card text-center border-gray-300">
 						<img
 							class="profile-thumbnail small-thumbnail rounded mx-auto mt-4"
-							th:src="'/images/verticals/' + ${vertical.id} + '.png'"
+							th:src="'/images/verticals/' + ${vertical.id} + '.jpg'"
 							th:alt="${vertical.i18n(siteLanguage).verticalHomeTitle}">
 						<div class="card-body">
 							<h3 class="h5 card-title" th:text="${vertical.i18n(siteLanguage).verticalHomeTitle}"></h3>
@@ -114,7 +114,7 @@
 						<div class="card-footer bg-white border-0 p-0">
 							<div class="d-grid">
 								<div th:if="${user}">
-										<a type="submit" class="btn btn-warning btn-sm" th:href="'/regenerate/' + ${vertical.id}">Changer l'image</a>
+										<a type="submit" class="btn btn-warning btn-sm" th:href="'/images/verticals/' + ${vertical.id} + '.jpg/delete'">Changer l'image</a>
 								</div>
 								<a class="btn btn-primary rounded-0 rounded-bottom" th:href="'/'+${vertical.i18n(siteLanguage).verticalHomeUrl}">Découvrir</a>
 							</div>
