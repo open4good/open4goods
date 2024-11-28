@@ -1,0 +1,66 @@
+<footer class="footer pt-6 pb-5 bg-primary text-white">
+    
+    <div class="container">
+        <div class="row">
+            <div class="col-md-4">
+                
+                <p>nudger.fr est une approche ouverte pour évaluer écologiquement les biens de consommation et compenser partiellement l'impact de  vos achats en ligne.</p>
+                
+                <div class="h5 mt-2"><a  href="/mentions-legales">Mentions légales</a></div>
+                
+                <div class="h5 mt-2"><a  href="/blog">Notre blog</a></div>
+
+                <span th:if="${genericResponse != null && genericResponse.duration != 0}">Page générée en <span th:text="${genericResponse.duration}"> </span> ms</span>
+                
+            </div>
+            
+            <div class="col-6 col-md-4 mb-5 mb-lg-0">
+                <span class="h5">Nos mantras</span>
+                <ul class="footer-links mt-2 mb-2">
+					<li class="ms-3"><a href="/ecoscore">L'eco-score Nudger</a></li>
+                    <li class="ms-3"><a  href="/compensation-ecologique">Contribution environnementale</a></li>
+                </ul>
+                
+                
+                <span class="h5">Comparateur de bien commun</span>
+                <ul class="footer-links mt-2">
+                    <li class="ms-3"><a  href="/opendata">Open data</a></li>
+                    <li class="ms-3"><a  href="/opensource">Open source</a></li>
+                </ul>
+            
+            
+            </div>
+            
+
+            
+            
+            <div class="col-6 col-md-4 mb-5 mb-lg-0">
+				<span class="h5">Vous n'êtes pas seuls</span>
+                <ul class="footer-links mt-2 mb-2">
+                    <li class="ms-3"><a  href="/equipe">Notre équipe</a></li>
+                    <li class="ms-3"><a  href="/partenaires">Nos partenaires</a></li>
+                </ul>
+                
+                <span class="h5">Feedback</span>
+                <ul class="footer-links mt-2">
+                  <li class="ms-3"><a class="megamenu-link" href="/feedback/idea">Une idée ?</a></li>
+                  <li class="ms-3"><a class="megamenu-link" href="/feedback/issue">Un bug ?</a></li>
+                  <li class="ms-3"><a class="megamenu-link" href="/contact">Nous contacter</a></li>
+                               
+                </ul>
+
+            </div>
+        </div>
+        <hr class="bg-secondary my-3 my-lg-5">
+        <div class="row">
+            <div class="col mb-md-0">
+                <a href="/"  class="d-flex justify-content-center mb-3">  
+                    <img src="/assets/img/nudger_logo_v2.svg" height="30" class="me-2" alt="Logo un-geste">
+                </a>
+                <div class="d-flex text-center justify-content-center align-items-center" role="contentinfo">
+                    <p class="fw-normal font-small mb-0">Copyright © open4goods -<span class="current-year">2024</span>. Produit de bien commun</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</footer>

@@ -175,6 +175,13 @@ $nudger_radius: 90px;
         color: $maincolor!important;
     }
 
+    button {
+
+        .cls-1 {
+            fill: $maincolor!important;
+        }
+    }
+
     .lead {
         z-index: 1;
         position: relative;
@@ -199,37 +206,112 @@ $nudger_radius: 90px;
 
 .card {
     position: relative;
+    z-index: 2;
 
-    svg {
-        &.catagory_bg {
-            position: absolute;
-            top: 0;
-            left: 0;
+    .catagory_bg {
+        z-index: 1;
+    }
+
+    &__radius {
+        border-radius: $nudger_radius;
+        padding: 2rem;
+        min-height: 400px;
+
+        @include media-breakpoint-down(md) {
+            min-height: initial;
+          }
+
+        .card-body {
+            display: flex;
+            align-items: end;
+            justify-content: start;
+            padding-top: 0;
+            padding-bottom: 0;
+
+            h1 {
+                margin-bottom: 0;
+            }
         }
     }
 
     &__ecoscore {
-        border-radius: $nudger_radius;
         border: 0;
         background: linear-gradient(-48deg, $ecoscore_main, $ecoscore_secondary)!important;
+
+        .card-body {
+            background-image: url('/assets/img/svg/card_ecoscore.svg');
+            background-position: bottom center;
+            background-size: 60%;
+            background-repeat: no-repeat;
+        }
+
+        .catagory_bg {
+            position: absolute;
+            right: 0;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            margin: auto;
+        }
     }
 
     &__compensation {
-        border-radius: $nudger_radius;
         border: 0;
         background: linear-gradient(-48deg, $compensation_main, $compensation_secondary)!important;
+
+        .card-body {
+            background-image: url('/assets/img/svg/card_openSource.svg');
+            background-position: center right;
+            background-size: 45%;
+            background-repeat: no-repeat;
+        }
+
+        .catagory_bg {
+            position: absolute;
+            right: 2rem;
+            top: 0;
+            bottom: 0;
+            margin: auto;
+        }
     }
 
     &__openSource {
-        border-radius: $nudger_radius;
         border: 0;
         background: linear-gradient(-48deg, $openSource_main, $openSource_secondary)!important;
+
+        .card-body {
+            background-image: url('/assets/img/svg/card_contribution.svg');
+            background-position: center right;
+            background-size: 50%;
+            background-repeat: no-repeat;
+        }
+
+        .catagory_bg {
+            position: absolute;
+            right: 2rem;
+            top: 0;
+            bottom: 0;
+            margin: auto;
+        }
     }
 
     &__numResponsable {
-        border-radius: $nudger_radius;
         border: 0;
         background: linear-gradient(-48deg, $numResponsable_main, $numResponsable_secondary)!important;
+
+        .card-body {
+            background-image: url('/assets/img/svg/card_numResponsable.svg');
+            background-position: bottom right;
+            background-size: 30%;
+            background-repeat: no-repeat;
+        }
+
+        .catagory_bg {
+            position: absolute;
+            right: 2rem;
+            bottom: 2rem;
+            margin: auto;
+        }
     }
 }
 
@@ -286,5 +368,27 @@ $nudger_radius: 90px;
                 opacity: 1;
             }
         }
+    }
+}
+
+.chiffre__xxl {
+    font-size: 10rem;
+}
+
+.header-global {
+
+    #navbar-main {
+        border-bottom-left-radius: 50px;
+        border-bottom-right-radius: 50px;
+    }
+}
+
+.headroom--not-top.navbar-theme-primary {
+    background: linear-gradient(-48deg, $brand_mainColor, $brand_secondaryColor)!important;
+}
+
+@media (max-width: 768px) {
+    .headroom--not-top.navbar-theme-primary {
+        background: linear-gradient(-48deg, $brand_mainColor, $brand_secondaryColor)!important;
     }
 }

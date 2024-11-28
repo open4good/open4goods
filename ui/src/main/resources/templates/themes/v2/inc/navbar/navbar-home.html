@@ -1,0 +1,26 @@
+<header class="header-global">
+    <nav id="navbar-main" aria-label="Primary navigation" class="navbar navbar-main navbar-expand-lg navbar-theme-primary headroom headroom--not-bottom headroom--pinned headroom--top bg-white">
+        <div class="container position-relative">
+            <a class="navbar-brand mr-lg-5" href="/">
+                <img src="/assets/img/nudger_logo_v2.svg">
+            </a>
+            <div class="navbar-collapse collapse mr-auto" id="frontPagesDropdown">
+                <th:block th:insert="~{inc/navbar/navbar-logo.html}"></th:block>
+            </div>
+            <div class="d-flex align-items-center">
+                <!--/* Navbar mantras*/-->
+                <th:block th:insert="~{inc/navbar/navbar-mantras.html}"></th:block>
+                
+
+                <!--/* Navbar search*/-->
+                <th:block th:insert="~{inc/navbar/navbar-search.html}"></th:block> 
+
+                <!--/* Navbar user*/-->
+                <th:block th:insert="~{inc/navbar/navbar-user.html}"></th:block>  
+                <button class="navbar-toggler ml-2" type="button" data-toggle="collapse" data-target="#frontPagesDropdown" aria-controls="frontPagesDropdown" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+            </div>
+        </div>     
+    </nav>
+</header>
