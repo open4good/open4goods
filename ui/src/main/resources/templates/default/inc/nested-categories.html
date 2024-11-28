@@ -1,0 +1,15 @@
+
+<ul th:if="${children.size() > 0}">
+
+	<li th:each="item : ${children}">
+
+       <a th:if="${item.vertical == null}" th:href="'/categories/' + ${item.url(siteLanguage)}" th:text="${item.googleNames.i18n(siteLanguage)}"></a>
+       <a th:unless="${item.vertical == null}" th:href="'/'+ ${item.vertical.i18n.get(siteLanguage).verticalHomeUrl}"><b  th:text="${item.googleNames.i18n(siteLanguage)}"></b></a>
+	   <th:block
+			th:if="${child.isLeaf() == false}"
+			th:with="children= ${item.children(true)}">
+			<th:block th:insert="~{inc/nested-categories.html}"></th:block>
+
+
+		</th:block>
+</ul>

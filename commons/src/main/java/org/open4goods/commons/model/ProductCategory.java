@@ -176,8 +176,32 @@ public class ProductCategory {
 	 * 
 	 * @return true if this is a terminal leaf
 	 */
-	private boolean isLeaf() {
+	public boolean isLeaf() {
 		return children.size() == 0;
+	}
+	
+	/**
+	 * Return all leafs from this node
+	 */
+	public List<ProductCategory> leafs(boolean havingVertical) {
+		List<ProductCategory> ret = new ArrayList<ProductCategory>();
+		
+		for (ProductCategory c : children) {
+			ret.addAll(c.leafs(havingVertical));
+		}
+		
+		if (isLeaf()) {
+			if (getVertical() != null && havingVertical) {
+				ret.add(this);
+			} else if (!havingVertical){
+				ret.add(this);
+			}
+			
+		}
+
+		return ret;
+		
+		
 	}
 
 	/**

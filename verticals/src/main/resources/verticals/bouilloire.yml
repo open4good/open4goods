@@ -1,0 +1,247 @@
+####################################################################################################################################################################
+#
+# This is the configuration for the TV vertical. All the configs items are inherited from the "_default.yml" configuration
+# 
+# This "TV" vertical aims to be the demonstration one. Please use the below doc as a reference, and copy/paste/adapt to setup other verticals.
+# @See open4goods/commons/src/main/java/org/open4goods/config/yml/ui/VerticalConfig.java for commented POJO definition
+###################################################################################################################################################################
+
+# Unique identifier for this vertical. 
+# MUST contains only charracters
+# SHOULD be equal to the configuration file name, without the extension
+id: kettles
+
+# The associated google taxonomyID. (Ex : FR - https://www.google.com/basepages/producttype/taxonomy-with-ids.fr-FR.txt)
+# SHOULD be set, it will then force this taxonomy for all products in this vertical
+googleTaxonomyId: 751
+
+#TODO : Documentation
+#icecatTaxonomyId: 1584
+
+# Indicates if the vertical must be UI / sitemap / search rendered
+enabled: false
+
+##############################################################################
+# Product classification from categories
+##############################################################################
+# Will associate to this vertical if one of the following categorie is present for the product  
+matchingCategories:
+        - "BOUILLOIRE"
+        - "PETIT ELECTROMENAGER CUISINE / THEIERE ET BOUILLOIRE / BOUILLOIRE | PETIT ELECTROMENAGER CUISINE>THEIERE ET BOUILLOIRE>BOUILLOIRE | THEIERE ET BOUILLOIRE | BOUILLOIRE"
+        - "ELECTROMENAGER | ELECTROMENAGER > PETIT DEJEUNER - CAFE > BOUILLOIRE ELECTRIQUE | PETIT DEJEUNER - CAFE | BOUILLOIRE ELECTRIQUE"
+        - "ELECTROMENAGER | ELECTROMENAGER > PETIT ELECTROMENAGER > PETIT DEJEUNER > BOUILLOIRE | BOUILLOIRE"
+    
+
+# The categories that disengage a mapping in this vertical  
+#unmatchingCategories:
+
+#####################################################################################################################################
+# I18N CONFIGURATION
+# Configure in a i18n way all the texts of a product, including the Url, the title, the description, the open graph metas, ....
+# Use a micro templated language, that allows to introduce variables and "if condition", which allows to generate dynamic texts 
+######################################################################################################################################
+i18n:
+  fr:
+      # The layout a product url will have. Ex : 81234555-tv-led-samsung-QL659P 2023
+      url: 
+        # We can add ta custom prefix (with our conditional templating language if we want)
+        prefix: "bouilloire"
+        # Then we add some attributes values with hyphens if present (ex : led-samsung-QL659P-2023)
+        attrs:
+          - BRAND
+          - MODEL
+      ##################################
+      # Product page meta and h1 title 
+      ##################################
+      # The product h1 title. Constructed on the same basis than "url", but without the concatened hyphens
+      h1Title:  
+        prefix: "bouilloire"
+        attrs:
+          - BRAND
+          - MODEL
+          - YEAR
+        
+      productMetaTitle: "[(${p.brand()})] [(${p.model()})] : Eco-score, compensation écologique et meilleurs prix"
+      productMetaDescription:  "[(${p.brand()})] [(${p.model()})] : Eco-score, compensation || écologique | environnementale || et meilleurs prix."              
+      productMetaOpenGraphTitle: "[(${p.brand()})] - [(${p.model()})] : Ecoscore de [(${p.ecoscore()})]. Venez nudger ce téléviseur au meilleur prix, et reversez gratuitement [(${p.compensation()})]"
+      productMetaOpenGraphDescription: "productMetaOpenGraphDescription"
+      productMetaTwitterTitle: "productMetaTwitterTitle"
+      productMetaTwitterDescription: "productMetaTwitterDescription"
+
+      ##################################
+      # Vertical page elements 
+      ##################################
+      
+      # url for vertical (appened to baseUrl). No templating here 
+      verticalHomeUrl: "bouilloires-electriques"
+      # Text displaid as title for the vertical
+      # TODO : Make verticalHomeTitle/ verticalHomeDescription templatable
+      verticalHomeTitle: "Bouilloires électriques"
+      # Text displaid as title for the vertical
+      verticalHomeDescription: ""  
+      # The image used as a logo
+      verticalHomeLogo: "https://media.istockphoto.com/id/173240143/fr/photo/t%C3%A9l%C3%A9vision-avec-deux-masques-de-d%C3%A9tourage.jpg?s=612x612&w=0&k=20&c=GhzC3IyvkmRp9shUBHICxM_1Lsur2uWkpNKf2F22p8s="
+
+      ####################################################################################
+      # AI TEXTS CONFIGS
+      ####################################################################################  
+      aiConfigs:
+        override: false
+        pauseDurationMs: 1000
+        rootPrompt: |
+            analyse technique, fonctionnelle et écologique d'un téléviseur, textes en français uniquement.
+             
+            Caractéristiques : 
+            [(${p.caracteristics()})]
+          
+            Génère un fichier JSON clé-valeur pour l'objet concerné répondant uniquement et strictement aux prompts suivants :      
+
+        prompts: 
+           - key: "global-description"
+             prompt: |           
+                : en tant qu'expert technique, rédige une description de l'objet en mettant en avant ses principales caractéristiques techniques. Le texte doit comporter entre 180 et 200 mots et être composé de deux paragraphes distincts, séparés par un point-virgule. Veille à ce que chaque paragraphe soit équilibré en termes de longueur.
+   
+           - key: "ecological-description"
+             prompt: |           
+                : en tant qu'expert en impacts environnementaux, rédige une analyse de l'impact écologique de l'objet. Le texte doit comporter entre 180 et 200 mots et être composé de deux paragraphes distincts, séparés par un point-virgule. Veille à ce que chaque paragraphe soit équilibré en termes de longueur.
+   
+           - key: "pros"
+             prompt: |           
+                : en tant qu'expert technique, liste cinq avantages du produit dans une seule ligne, séparés par des points-virgules, dans un style formel.
+   
+           - key: "cons"
+             prompt: |           
+                : en tant qu'expert technique, liste cinq inconvénients techniques du produit dans une seule ligne, séparés par des points-virgules, dans un style formel.
+
+
+
+
+
+# GenAiConfig for this vertical
+genAiConfig:
+  # If false, will bypass the generativ ia texts generation  
+  enabled: false
+  # Max products to be generated. Products are ordered by ecoscore
+  maxPerVerticals: 100
+  
+  
+##############################################################################
+# Eco score configuration 
+# Specify here the specific ecoscore for this vertical. Format : 
+# >> EXISTING_SCORE: WEIGHT
+# Weight sum MUST BE equals to 1
+##############################################################################
+
+ecoscoreConfig:
+   BRAND_SUSTAINABILITY: 0.2
+   REPAIRABILITY_INDEX: 0.3
+   CLASSE_ENERGY : 0.3
+   WARRANTY: 0.1
+   DATA-QUALITY: 0.1
+
+##############################################################################
+# Custom search filters : the following filters
+# will also be availlable in search for this vertical (must be an attribute or a score)
+##############################################################################
+
+
+
+ecoFilters:
+    - "REPAIRABILITY_INDEX" 
+    - "CLASSE_ENERGY"   
+    - "ENERGY_CONSUMPTION_1000_HOURS"
+
+#technicalFilters:
+#    - "DIAGONALE_POUCES"
+#    - "DISPLAY_TECHNOLOGY"
+#    - "HDMI_PORTS_QUANTITY"
+  
+#  - "PARTS_AVAILLABILITY"
+#  - "DATA-QUALITY"  
+#  - "BRAND-SUSTAINABILITY"
+
+
+##############################################################################
+# We cannot always identify manually what comppany operates a brand, and there is often 
+# confilicts or multiple possibilities that need to be manually adressed. (eg. samsung a lot of activities / brand through different companies)
+#
+##############################################################################
+
+brandsCompanyMapping:
+  SAMSUNG: "Samsung Electronics Co., Ltd."
+  TCL: "TCL Electronics Holdings Ltd."
+  LG: "LG Electronics, Inc."
+  PHILIPS: "Koninklijke Philips NV"
+
+
+####################################################################################
+# ATTRIBUTES CONFIGURATION
+####################################################################################
+attributesConfig:
+  # If one of the following attribute is missing on a product, the product will be disassociated from this vertical. (setting vertical to null)
+#  mandatory:
+#   - "DIAGONALE_POUCES"
+#   - "REPAIRABILITY_INDEX"
+#   - "TV_TYPE"
+   
+  ####################################################################################
+  # ATTRIBUTES DEFINITIONS
+  # Those attributes will be availlable for all products if one is found.
+  ####################################################################################      
+  configs:  
+     ##################################
+     # DIAGONALE
+     ##################################
+     - key: "DIAGONALE_POUCES"
+       icecatFeaturesIds:
+         - 944       
+       faIcon: "fa-arrow-up-right-from-square"
+       name:
+         default: "Screen size"
+         fr: "Diagonale (en pouces)"
+       filteringType: "NUMERIC"
+   
+       asRating: false
+       synonyms:
+         all:
+           - "DIAGONALE_POUCES" 
+         rakuten.com:      
+           - "DIAGONALE"
+   
+       parser:
+         normalize: true
+         trim: false
+         lowerCase: false
+         upperCase: true
+         removeParenthesis: false
+   #      deleteTokens:
+
+   
+     ##################################
+     # TYPE TV
+     ##################################
+     - key: "DISPLAY_TECHNOLOGY"
+       icecatFeaturesIds: 
+         - 9713          
+       faIcon: "fa-tv"
+       name:
+         default: "Display technology"
+         fr: "Technologie d'affichage"
+       filteringType: "TEXT"
+   
+       asRating: false
+              
+       synonyms:
+#          all:
+#            - "DIAGONALE_POUCES" 
+          rakuten.com:      
+            - "TYPE DE PRODUIT"
+         
+       parser:
+         normalize: true
+         trim: true
+         lowerCase: false
+         upperCase: true    
+         removeParenthesis: false
+         deleteTokens:   
+           - "TV"

@@ -322,10 +322,11 @@ public class ResourceController {
 			LOGGER.info("Generating cover for {}",vConf.getId());
 			
 			List<Product> products = productRepository.exportVerticalWithValidDate(vConf, false).limit(200).toList();
-			Collections.shuffle(new ArrayList<>(products));
+			products = new ArrayList<>(products);
+			Collections.shuffle(products);
 			for (Product p : products) {
 				for (Resource r : p.getResources()) {
-					if (r.getUrl().contains(".jpg")) {
+					if (r.getUrl().contains(".jpg") || r.getUrl().contains(".jpeg")) {
           				try {
           					File dest = getVerticalCoverFile(vConf.getId());
           					LOGGER.info("Copying vertical image {} from {} to {}",vConf.getId(), r.getUrl(), dest);
