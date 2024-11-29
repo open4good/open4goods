@@ -48,25 +48,36 @@
                     <div class="col-12 col-md-10 col-lg-10 text-center p-4">
 
 
-                        <th:block th:unless="${category.parent == null}">
-	                        <h1 class="display-2  mb-3" th:text="${category.googleNames.i18n(siteLanguage)}"></h1>
+                        <th:block>
+	                        <th:block th:if="${category.googleCategoryId == 0}">
+	                            <h1 class="display-2  mb-3">Nos catégories produits</h1>
+	                        </th:block>
+	                        <th:block th:unless="${category.googleCategoryId == 0}">
+    	                        <h1 class="display-2  mb-3" th:text="${category.googleNames.i18n(siteLanguage)}"></h1>
+	                        </th:block>
+	                        
 	
 							<nav aria-label="breadcrumb">
 								<ol class="breadcrumb">
 	                                <li   class="breadcrumb-item" aria-current="page"><a href="/categories" >🏠</a></li>
 									<th:block th:each="item,stat : ${category.parents()}">
-										<li   class="breadcrumb-item" aria-current="page"><a th:href="'/categories/'  + ${item.url(siteLanguage)}" th:text="${item.googleNames.i18n(siteLanguage)}"></a></li>
-									</th:block>
-									<li class="breadcrumb-item active" aria-current="page"><a th:href="'/categories/'  + ${category.url(siteLanguage)}" th:text="${category.googleNames.i18n(siteLanguage)}"></a></li>
+                                        <li th:unless="${item.googleCategoryId == 0}"   class="breadcrumb-item" aria-current="page">
+                                          <a th:href="'/categories/'  + ${item.url(siteLanguage)}" th:text="${item.googleNames.i18n(siteLanguage)}"></a>
+                                        </li>									
+                                    </th:block>
+									<li th:unless="${category.googleCategoryId == 0}" class="breadcrumb-item active" aria-current="page">
+									   <a th:href="'/categories/'  + ${category.url(siteLanguage)}" th:text="${category.googleNames.i18n(siteLanguage)}"></a>
+									</li>
+                                    <li th:if="${category.googleCategoryId == 0}" class="breadcrumb-item active" aria-current="page">
+                                    </li>
+
+
 	
 								</ol>
 							</nav>
                         </th:block>
 
-                        <th:block th:if="${category.parent == null}">
-                            <h1 class="display-2  mb-3">Nos catégories produits</h1>
-    
-                        </th:block>
+                  
 
 
 
@@ -77,7 +88,7 @@
         </section>
         
         <!-- Core team Members -->
-        <section class="section section-lg pt-0">
+        <section class="pt-0">
             <div class="container  ">
                 <div class="row mt-3">
 					<div th:each="child, stat : ${category.children(havingVertical)}" th:classappend="${stat.first ? 'col-md-6 col-lg-4' : 'col-md-6 col-lg-4'} " class="col-12 mb-5 mb-lg-0">
@@ -95,10 +106,17 @@
 					             <img th:if="${child.vertical}" th:src="'/images/verticals/' + ${child.vertical.id} + '.jpg'" class="image-fluid p-4 card-img-top rounded-top" th:alt="${child.googleNames.i18n(siteLanguage)}">
 					            
 					             
-					             <th:block th:if="${child.isLeaf() == false}" th:with="children= ${child.children(true)}">
-					                   <th:block th:insert="~{inc/nested-categories.html}"></th:block>
-										
+					             <th:block th:if="${child.isLeaf() == false}" th:with="children = ${child.children(true)}">
+					                   <ul th:if="${children.size() > 0}">
 
+									    <li th:each="item : ${children}" th:if="${item.vertical == null}">
+									
+									       <a th:if="${item.vertical == null}" th:href="'/categories/' + ${item.url(siteLanguage)}" th:text="${item.googleNames.i18n(siteLanguage)}"></a>
+									       <!-- 
+									       <a th:unless="${item.vertical == null}" th:href="'/'+ ${item.vertical.i18n.get(siteLanguage).verticalHomeUrl}"><b  th:text="${item.googleNames.i18n(siteLanguage)}"></b></a>
+									        -->
+									
+									</ul>
 								</th:block>
 					              
 					             
@@ -124,13 +142,11 @@
         
         
         <!-- Quick access -->
-        <section class="section section-lg pt-0">
-        
-        
+        <section class="section bg-green-transparent section-lg pt-0">
           <div class="container ">
-                <div class="row mt-3">
+                <div class="row mt-6">
                     <div th:each="child, stat : ${category.leafs(true)}" th:classappend="${stat.first ? 'col-md-3 col-lg-3' : 'col-md-3 col-lg-3'} " class="col-12 mb-lg-0">
-                         <div class="card shadow border-gray-300 mt-2">
+                         <div th:unless="${category.children.contains(child)}" class="card shadow border-gray-300 mt-2">
                              
                              <div class="card-body">                                 
                                  <a th:unless="${child.vertical == null}" th:href="'/'+ ${child.vertical.i18n.get(siteLanguage).verticalHomeUrl}"><h2 class="text-center h4 card-title" th:text="${child.googleNames.i18n(siteLanguage)}"></h2></a>
@@ -141,8 +157,6 @@
                      </div>
                 </div>
             </div>
-            
-            
         </section>
         
 
