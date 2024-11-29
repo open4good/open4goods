@@ -38,7 +38,7 @@
         <!--/* Loader */-->
         <th:block th:insert="~{inc/preloader.html}"></th:block>
 
-        <section class="section section bg-primary pb-11 pb-lg-12 text-white overflow-hidden z-2"><!-- hero__hp bg__degrade--bottom section-header d-flex align-items-center overflow-hidden pt-7 pt-lg-8 pb-4 bg-primary -->
+        <section class="hero__hp bg__degrade--bottom section-header d-flex align-items-center overflow-hidden pt-7 pt-lg-8 pb-4 bg-primary"><!-- hero__hp bg__degrade--bottom section-header d-flex align-items-center overflow-hidden pt-7 pt-lg-8 pb-4 bg-primary -->
             <div class="container">
                 <div class="row">
                     <div class="col-12 text-center">
@@ -58,7 +58,7 @@
                                 </div>
                             </form>
                             <div class="d-flex flex-column flex-md-row justify-content-between gap-3 mt-3 mb-4 col-12 col-md-10 mx-auto">
-                                <button class="btn bg-white" type="button">
+                                <a class="btn bg-white" th:each="vertical : ${verticals}" th:href="'/'+${vertical.i18n(siteLanguage).verticalHomeUrl}">
                                     <span class="me-1">
                                         <svg xmlns="http://www.w3.org/2000/svg" height="16" viewBox="0 0 39.51 33.59">
                                             <defs>
@@ -73,8 +73,8 @@
                                             </g>
                                         </svg>
                                     </span>
-                                     Image & son
-                                </button>
+                                    <span th:text="${vertical.i18n(siteLanguage).verticalHomeTitle}"></span>
+                                </a>
 
                                 <button class="btn bg-white" type="button">
                                     <span class="me-1">
