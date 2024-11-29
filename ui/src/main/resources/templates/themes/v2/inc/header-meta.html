@@ -10,23 +10,23 @@
 <meta name="theme-color" content="#ffffff">
 
 
-<link type="text/css" href="../../vendor/@fortawesome/fontawesome-free/css/all.min.css" rel="stylesheet">
-<script src="../../vendor/countup.js/dist/countUp.umd.js"></script>
+<link type="text/css" href="/vendor/@fortawesome/fontawesome-free/css/all.min.css" rel="stylesheet">
+<script src="/vendor/countup.js/dist/countUp.umd.js"></script>
 
 <!-- Glide JS 
-<link rel="stylesheet" href="../../vendor/@glidejs/glide/dist/css/glide.core.min.css">
-<link rel="stylesheet" href="../../vendor/@glidejs/glide/dist/css/glide.theme.min.css">
+<link rel="stylesheet" href="/vendor/@glidejs/glide/dist/css/glide.core.min.css">
+<link rel="stylesheet" href="/vendor/@glidejs/glide/dist/css/glide.theme.min.css">
 -->
 
 <th:block th:if="${config.webConfig.useHotScss}">
-	<link type="text/css" href="../../css/dev/pixel.css" rel="stylesheet">
-	<link type="text/css" href="../../css/dev/custom.css" rel="stylesheet">
+	<link type="text/css" href="/css/dev/pixel.css" rel="stylesheet">
+	<link type="text/css" href="/css/dev/custom.css" rel="stylesheet">
 </th:block>
 
 
 <th:block th:unless="${config.webConfig.useHotScss}">
-    <link type="text/css" href="../../css/pixel.css" rel="stylesheet">
-    <link type="text/css" href="../../css/custom.css" rel="stylesheet">
+    <link type="text/css" href="/css/pixel.css" rel="stylesheet">
+    <link type="text/css" href="/css/custom.css" rel="stylesheet">
 </th:block>
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -36,4 +36,7 @@
 
 <link rel="search" type="application/opensearchdescription+xml" th:title="#{opensearch.title}" th:href="${baseUrl} + 'opensearch.xml'">
 
+<th:block unless="${dev}">
+    <script defer data-domain="nudger.fr" src="https://plausible.nudger.fr/js/script.js"></script>
+</th:block>
 
