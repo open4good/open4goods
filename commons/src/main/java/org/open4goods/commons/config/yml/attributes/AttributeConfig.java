@@ -44,7 +44,7 @@ public class AttributeConfig {
 
 	private Localisable<String,String> name ;
 
-	private AttributeType type = AttributeType.TEXT;
+	private AttributeType filteringType = AttributeType.TEXT;
 
 	/**
 	 * The icecat features id's this attribute is mapped to
@@ -56,17 +56,9 @@ public class AttributeConfig {
 	/**
 	 * If true, this attribute will be added as a score, mapped through the numericMapping configuration attribute and an application of the scoring (min/max) mechanism
 	 */
-	// TODO : Rename to asScore
+	// TODO(p2,design) : Rename to asScore
 	private boolean asRating = false;
 
-	/**
-	 * If true, this attribute will be used as search filter
-	 */
-	private boolean asSearchFilter = true;
-
-	
-		
-	
 
 	/**
 	 * The ordering that must be applied to this attributes values after aggregations. (ie rendered in search attributes selection)
@@ -276,7 +268,7 @@ public class AttributeConfig {
 
 	@Override
 	public String toString() {
-		return key + ":" + type;
+		return key + ":" + filteringType;
 	}
 
 
@@ -307,13 +299,13 @@ public class AttributeConfig {
 		return name == null ? "null:"+language : name.i18n(language);
 	}
 
-	public AttributeType getType() {
-		return type;
+	public AttributeType getFilteringType() {
+		return filteringType;
 	}
 
 
-	public void setType(final AttributeType type) {
-		this.type = type;
+	public void setFilteringType(final AttributeType type) {
+		this.filteringType = type;
 	}
 
 	public String getKey() {
@@ -414,11 +406,12 @@ public class AttributeConfig {
 
 
 
-	public Localisable getName() {
+
+	public Localisable<String, String> getName() {
 		return name;
 	}
 
-	public void setName(final Localisable name) {
+	public void setName(Localisable<String, String> name) {
 		this.name = name;
 	}
 
@@ -430,13 +423,6 @@ public class AttributeConfig {
 		this.mappings = mappings;
 	}
 
-	public boolean isAsSearchFilter() {
-		return asSearchFilter;
-	}
-
-	public void setAsSearchFilter(boolean asSearchFilter) {
-		this.asSearchFilter = asSearchFilter;
-	}
 
 	public Set<String> getIcecatFeaturesIds() {
 		return icecatFeaturesIds;

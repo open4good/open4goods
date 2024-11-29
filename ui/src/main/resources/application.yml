@@ -110,6 +110,11 @@ team-config:
     linkedInUrl: https://www.linkedin.com/in/nicolas-bonamy-827b63a3/
     imageUrl: /assets/img/team/Nicolas.jpeg
 
+  - name: Stephane Castrec
+    title: Developpements
+    linkedInUrl: https://www.linkedin.com/in/scastrec/
+    imageUrl: /assets/img/team/Stephane.jpeg
+    
 
 
 apiConfig:

@@ -8,9 +8,12 @@ import org.open4goods.commons.config.yml.WikiPageConfig;
 import org.open4goods.commons.config.yml.ui.ProductI18nElements;
 import org.open4goods.commons.config.yml.ui.VerticalConfig;
 import org.open4goods.commons.model.Localisable;
+import org.open4goods.commons.model.ProductCategory;
+import org.open4goods.commons.services.GoogleTaxonomyService;
 import org.open4goods.commons.services.SearchService;
 import org.open4goods.commons.services.VerticalsConfigService;
 import org.open4goods.ui.config.yml.UiConfig;
+import org.open4goods.ui.controllers.ui.CategoryController;
 import org.open4goods.ui.controllers.ui.UiService;
 import org.open4goods.ui.controllers.ui.VerticalController;
 import org.open4goods.ui.controllers.ui.XwikiController;
@@ -37,6 +40,8 @@ public class UrlHandlerMappingConfig {
 	@Autowired  VerticalsConfigService verticalService;
 	@Autowired  SearchService searchService;
 	@Autowired  BlogService blogService;
+	@Autowired  GoogleTaxonomyService googleTaxonomyService;
+	
 
 
     @Bean
@@ -83,6 +88,17 @@ public class UrlHandlerMappingConfig {
 			}
 		}
 
+		//////////////////////////////////////////////////////////
+		// Adding all categories path were we have a vertical id
+		//////////////////////////////////////////////////////////
+		// TODO(P3,i18n) : i18n
+		urlMap.put("categories", new CategoryController(uiService, googleTaxonomyService.getCategories().asRootNode()));
+		for (Entry<String, ProductCategory> category: googleTaxonomyService.getCategories().paths("fr").entrySet()) {
+			urlMap.put("categories/"+category.getKey(), new CategoryController(uiService, category.getValue()));
+		}
+		
+		
+		
 		wikiUrlHandlerMapping.setUrlMap(urlMap);
 		wikiUrlHandlerMapping.setOrder(Ordered.HIGHEST_PRECEDENCE);
 		

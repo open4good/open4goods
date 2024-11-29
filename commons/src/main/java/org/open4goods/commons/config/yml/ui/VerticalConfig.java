@@ -23,15 +23,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.cache.annotation.Cacheable;
-import org.springframework.context.annotation.Configuration;
 
 import com.fasterxml.jackson.annotation.JsonMerge;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.constraints.NotNull;
 
-@Configuration
-@ConfigurationProperties
+@ConfigurationProperties()
+
 /**
  * Le parametrage Yaml d'une verticale. Celui ci dispose soit de propriétés de premier niveau, soit de sous-objets de configuration.
  * @author goulven
@@ -57,6 +56,13 @@ public class VerticalConfig{
 	 */
 	private Integer icecatTaxonomyId;
 	
+	
+	/** If true, then the vertical is handled through batch processing, but is not exposed on UI / sitemap. **/
+	private boolean enabled = false;
+	
+	
+	
+	
 	/**
 	 * The product url, metas title, description, ....
 	 */
@@ -69,10 +75,23 @@ public class VerticalConfig{
 
 	
 	/**
-	 * The categories to associate to this vertical
+	 * The list of filters to be added to the ecological filters group
 	 */
-	private List<String> verticalFilters = new ArrayList<>();
+	private List<String> ecoFilters = new ArrayList<>();
 
+	/**
+	 * The list of filters to be added to the technical filters group
+	 */
+	private List<String> technicalFilters = new ArrayList<>();
+
+	
+	/**
+	 * The list of global technicals filters (weight, ..) 
+	 */
+	private List<String> globalTechnicalFilters = new ArrayList<>();
+
+	
+	
 	/**
 	 * The categories that MUST BE PRESENT to associate to this vertical
 	 */
@@ -120,14 +139,7 @@ public class VerticalConfig{
 	@JsonMerge
 	private Map<String, Double> ecoscoreConfig = new HashMap<>();
 
-	
-	@JsonMerge
-	/**
-	 * Configuration of the dedicated elastic index
-	 */
-	private VerticalIndexMappingConfig inexMappingConfig = new VerticalIndexMappingConfig();
 
-	
 	
 //	
 //	/**
@@ -280,19 +292,29 @@ public class VerticalConfig{
 	 * @return the specific attributes config for this vertical
 	 */
 	public List<AttributeConfig> verticalFilters() {
-		if (null == verticalFilters) {
-			return new ArrayList<>();
-		}
+	
 		
-		return verticalFilters.stream()
+		return getVerticalFilters().stream()
 				
 				.map(e -> getAttributesConfig().getAttributeConfigByKey(e))
 				.filter(Objects::nonNull)
-				.filter(AttributeConfig::isAsSearchFilter)
 				.collect(Collectors.toList());
 
 	}
 
+
+	/**
+	 * 
+	 * @return all attributes filters (eco & technical)
+	 */
+	public List<String> getVerticalFilters() {
+		List<String> filters = new ArrayList<String>();
+		filters.addAll(ecoFilters);
+		filters.addAll(technicalFilters);
+		filters.addAll(globalTechnicalFilters);
+		return filters;
+	
+	}
 
 	/**
 	 * Return the root url for a given sitelocale, with the "default" behavior
@@ -580,15 +602,6 @@ public class VerticalConfig{
 	public void setMatchingCategories(Set<String> matchingCategories) {
 		this.matchingCategories = matchingCategories;
 	}
-
-	public List<String> getVerticalFilters() {
-		return verticalFilters;
-	}
-
-	public void setVerticalFilters(List<String> verticalFilters) {
-		this.verticalFilters = verticalFilters;
-	}
-
 	
 	public Set<String> getUnmatchingCategories() {
 		return unmatchingCategories;
@@ -670,12 +683,42 @@ public class VerticalConfig{
 		this.icecatTaxonomyId = icecatTaxonomyId;
 	}
 
-	public VerticalIndexMappingConfig getInexMappingConfig() {
-		return inexMappingConfig;
+
+	public List<String> getGlobalTechnicalFilters() {
+		return globalTechnicalFilters;
 	}
 
-	public void setInexMappingConfig(VerticalIndexMappingConfig inexMappingConfig) {
-		this.inexMappingConfig = inexMappingConfig;
+	public void setGlobalTechnicalFilters(List<String> globalTechnicalFilters) {
+		this.globalTechnicalFilters = globalTechnicalFilters;
 	}
 
+
+	
+	public List<String> getEcoFilters() {
+		return ecoFilters;
+	}
+
+	public void setEcoFilters(List<String> ecoFilters) {
+		this.ecoFilters = ecoFilters;
+	}
+
+	public List<String> getTechnicalFilters() {
+		return technicalFilters;
+	}
+
+	public void setTechnicalFilters(List<String> technicalFilters) {
+		this.technicalFilters = technicalFilters;
+	}
+
+	public boolean isEnabled() {
+		return enabled;
+	}
+
+	public void setEnabled(boolean enabled) {
+		this.enabled = enabled;
+	}
+
+	
+	
+	
 }

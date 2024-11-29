@@ -56,7 +56,7 @@
 							
 								<div class="d-flex flex-wrap align-items-center row">
 			                        <div class="col-lg-2 text-center">
-			                                <img class="mt-2" width="150" th:src="'/images/verticals/' + ${vertical} + '.png'">
+			                                <img class="mt-2" width="150" th:src="'/images/verticals/' + ${vertical} + '.jpg'">
 			                        </div>
 			                        <div class="col-lg-10">
 			                                <h1 class="mt-2 text-center" th:text="${verticalConfig.i18n(siteLanguage).verticalHomeTitle}"></h1>
@@ -72,13 +72,6 @@
                 
                 	<!--/* Left column */-->                	
                     <div class="col-lg-3 mb-3 mb-lg-0">
-                    
-                    
-                    
-                    <div class="accordion-body">
-	    <canvas id="priceChart" width="400" height="100"></canvas>
-	</div>
-                    
                     
                 		<!--/* Guides */-->	
 						<div th:if="${verticalConfig.i18n(siteLanguage).getWikiPages().size() > 0}" class="row card shadow mb-2">
@@ -108,6 +101,14 @@
 						
 
 						
+                        <!--/* Price Filters */-->                          
+                        <div class="row card shadow mb-2">
+                            <div class="card-header"><h2 class="h5">Prix</h2></div>
+                            <div class="card-body">
+                                <th:block th:insert="~{inc/vertical-filters-price.html}"></th:block>
+                                
+                            </div>
+                        </div>
 						                 
                                         
 				        <!--/* Ecological Filters */-->	
@@ -119,11 +120,14 @@
 							</div>
 						</div>
 
-				        <!--/* Classical Filters */-->							
+
+                        
+                        
+				        <!--/* Technical Filters */-->							
 						<div class="row card shadow mb-2">
-							<div class="card-header"><h2 class="h5">Filtres</h2></div>
+							<div class="card-header"><h2 class="h5">Caractéristiques</h2></div>
 							<div class="card-body">
-                    			<th:block th:insert="~{inc/vertical-filters.html}"></th:block>
+                    			<th:block th:insert="~{inc/vertical-filters-technical.html}"></th:block>
 								
 							</div>
 						</div>
@@ -182,6 +186,7 @@
 	/*<![CDATA[*/
 	
 	    const vertical = /*[[${verticalConfig.id}]]*/ '';
+    
 	    const siteLanguage = /*[[${siteLanguage}]]*/'';
 	    const baseUrl = /*[[${baseUrl}]]*/'';
 	    const verticalPath = /*[[${verticalPath}]]*/'';
@@ -264,11 +269,16 @@
        { "data": "offersCount", "name" : "Concurrence", "title" : "Concurrence"  }
            ];
 
-	 	for ( i = 0; i <  additionalAttributes.length; i++) {						
-			columns[i+5] = JSON.parse('{ "data": "attributes.indexed.'+additionalAttributes[i]['key']+'.value", "name" : "'+additionalAttributes[i]['name'][siteLanguage]+'", "title" : "'+additionalAttributes[i]['name'][siteLanguage]+'"  }');
-			columns[i+5].render = dummyRender;
-	 	}
-	 
+	/* Adding additional attributes columns with hidden titles
+	   for (var i = 0; i < additionalAttributes.length; i++) {
+	       columns.push({
+	           data: "attributes.indexed." + additionalAttributes[i]['key'] + ".value",
+	           name: additionalAttributes[i]['name'][siteLanguage],
+	           title: "", // Set an empty title to hide the header text
+	           render: dummyRender
+	       });
+	   }
+		**/
 	<!-- Datatable init function -->
 	var table;
 	
@@ -310,7 +320,7 @@
 	         createdRow: function(row, data, dataIndex){
 	                 // Add COLSPAN attribute
 	                 $('td:eq(0)', row).attr('colspan', 9);	                 
-					 for ( i = 1; i < 5+ additionalAttributes.length; i++) {						
+					 for ( i = 1; i < 5 ; i++) {						
 	                 	$('td:eq('+i+')', row).css('display', 'none');
 					 }
 	         },
@@ -364,11 +374,16 @@
 	          return $(this).css('display') === 'none';
 	        });
 
+	        
+	        hiddenCount = hiddenItems.length;
+	        
 	        hiddenItems.slice(0, 5).slideDown();
 
-	        if (hiddenItems.length <= 5) {
-	          $(this).show();
+	        // Removing show more links if no more..
+	        if (hiddenCount <= 5) {
+	          $(this).hide();
 	        }
+
 	      });
 	    
 	    
@@ -377,7 +392,7 @@
 	    
 	 // Iterate over the keys in chartIntervals and call processInterval for each
 	    Object.keys(chartIntervals).forEach((key) => {
-	    	createChartInterval(key, chartIntervals[key]);
+	    	createChartInterval(key, chartIntervals[key], vertical);
 	    });
 	    
 	    
@@ -387,16 +402,26 @@
 
 <script>
 
-
-function createChartInterval(chartId, intervalDatas) {
+function createChartInterval(chartId, intervalDatas, verticalName) {
     
     ///////////////////////
-    // Chart.js interval charts initialisation
+    // Chart.js interval charts initialization
     //////////////////////
     const ctx = document.getElementById('chart-' + chartId).getContext('2d');
     const priceData = intervalDatas.priceBuckets;
-    const labels = priceData.map(bucket => bucket.name); // X-axis labels
-    const data = priceData.map(bucket => bucket.count); // Y-axis data
+//    const labels = priceData.map(bucket => parseInt(bucket.name)); // X-axis labels
+//    const data = priceData.map(bucket => parseInt(bucket.count)); // Y-axis data
+    
+	const labels = priceData.map(bucket => {
+	    const parsedName = parseFloat(bucket.name);
+	    return Number.isInteger(parsedName) ? parsedName : parsedName.toFixed(1);
+	}); // X-axis labels
+	
+	const data = priceData.map(bucket => {
+	    const parsedCount = parseFloat(bucket.count);
+	    return Number.isInteger(parsedCount) ? parsedCount : parsedCount.toFixed(1);
+	}); // Y-axis data
+	    
     
     return new Chart(ctx, {
         type: 'bar',
@@ -404,7 +429,7 @@ function createChartInterval(chartId, intervalDatas) {
             labels: labels,
             datasets: [{
                 data: data,
-                borderWidth: 1
+                borderWidth: 0
             }]
         },
         options: {
@@ -414,6 +439,13 @@ function createChartInterval(chartId, intervalDatas) {
                 },
                 title: {
                     display: false // Hide chart title
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return verticalName +  ": " + parseInt(context.raw); // Custom tooltip text
+                        }
+                    }
                 }
             },
             scales: {
@@ -423,23 +455,20 @@ function createChartInterval(chartId, intervalDatas) {
                     }
                 },
                 y: {
-                    title: {
-                        display: false, // Hide Y-axis title
-                    },
-                    ticks: {
-                        callback: function(value) {
-                            return parseInt(value); // Convert Y-axis labels to integer
-                        }
-                    }
+                    display: false, // Hide Y-axis completely
                 }
-            }
+            },
+            barPercentage: 1.0, // Make bars occupy full width of the category
+            categoryPercentage: 1.0 // Remove spacing between categories
         }
     });
 }
 
 
+
 	
 </script>
+
 
 
 </body>

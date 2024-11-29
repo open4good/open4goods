@@ -34,10 +34,15 @@ import org.springframework.data.elasticsearch.core.query.CriteriaQuery;
 import org.springframework.data.elasticsearch.core.query.CriteriaQueryBuilder;
 
 import co.elastic.clients.elasticsearch._types.aggregations.Aggregation;
+import co.elastic.clients.elasticsearch._types.aggregations.AggregationRange;
 import co.elastic.clients.elasticsearch._types.aggregations.HistogramAggregate;
 import co.elastic.clients.elasticsearch._types.aggregations.HistogramBucket;
+import co.elastic.clients.elasticsearch._types.aggregations.LongTermsAggregate;
+import co.elastic.clients.elasticsearch._types.aggregations.LongTermsBucket;
 import co.elastic.clients.elasticsearch._types.aggregations.MaxAggregate;
 import co.elastic.clients.elasticsearch._types.aggregations.MinAggregate;
+import co.elastic.clients.elasticsearch._types.aggregations.RangeAggregate;
+import co.elastic.clients.elasticsearch._types.aggregations.RangeBucket;
 import co.elastic.clients.elasticsearch._types.aggregations.StringTermsAggregate;
 import co.elastic.clients.elasticsearch._types.aggregations.StringTermsBucket;
 
@@ -173,7 +178,13 @@ public class SearchService {
 				if (filter.getValue().contains(MISSING_BUCKET)) {
 					criterias.and(new Criteria(filter.getKey()).exists().not());					
 				} else {
-					criterias.and(new Criteria(filter.getKey()).in(filter.getValue()) );
+					
+//					// TODO : dirty hack
+//					if ("price.trend".equals(filter.getKey())) {
+//						criterias.and(new Criteria(filter.getKey()).is((filter.getValue().stream().findAny().orElse(null))));
+//					} else {
+						criterias.and(new Criteria(filter.getKey()).in(filter.getValue()) );
+//					}
 				}
 				
 			}
@@ -198,9 +209,13 @@ public class SearchService {
 //				.withAggregation("max_price", 	Aggregation.of(a -> a.max(ta -> ta.field("price.minPrice.price"))))
 //				.withAggregation("min_offers", 	Aggregation.of(a -> a.min(ta -> ta.field("offersCount"))))
 //				.withAggregation("max_offers", 	Aggregation.of(a -> a.max(ta -> ta.field("offersCount"))))
-				.withAggregation("conditions", 	Aggregation.of(a -> a.terms(ta -> ta.field("price.conditions").missing(MISSING_BUCKET).size(3)  ))	)
+				.withAggregation("conditions", 	Aggregation.of(a -> a.terms(ta -> ta.field("price.conditions").missing(MISSING_BUCKET).size(3)))	)
+				.withAggregation("trend", 	Aggregation.of(a -> a.terms(ta -> ta.field("price.trend").size(3)))	)
+				
 				.withAggregation("brands", 	Aggregation.of(a -> a.terms(ta -> ta.field("attributes.referentielAttributes.BRAND").missing(MISSING_BUCKET).size(AGGREGATION_BUCKET_SIZE)  ))	)
 				.withAggregation("country", 	Aggregation.of(a -> a.terms(ta -> ta.field("gtinInfos.country").missing(MISSING_BUCKET).size(AGGREGATION_BUCKET_SIZE)  ))	)
+				
+				
 				;
 		////
 		// Sort order
@@ -231,11 +246,26 @@ public class SearchService {
 			.withAggregation("max_"+filter.getKey(), 	Aggregation.of(a -> a.max(ta -> ta.field(filter.getKey()))))
 			.withAggregation("interval_"+filter.getKey(), 
 				    Aggregation.of(a -> a.histogram(h -> h.field(filter.getKey())
-				    		// TODO(p1, conf) : Config the interval
-				            .interval(filter.getIntervalSize()) // Set the interval to 50, adjust as needed
-				            
+				            .interval(filter.getIntervalSize()) 
 				            .minDocCount(1)) // Ensure empty buckets are excluded
 				        ))
+//			 .withAggregation("range_" + filter.getKey(),
+//				        Aggregation.of(a -> a.range(r -> r
+//				            .field(filter.getKey())
+//				            .ranges(
+//				            	// TODO : From conf
+//				                // Fine-grained range for lower values
+//				                AggregationRange.of(r1 -> r1.key("0-500").from("0").to("500")),
+//				                AggregationRange.of(r2 -> r2.key("500-1500").from("500").to("1500")),
+//				                // Medium steps for mid-range values
+//				                AggregationRange.of(r3 -> r3.key("1500-5000").from("1500").to("5000")),
+//				                // Larger steps for higher values
+//				                AggregationRange.of(r4 -> r4.key("5000-10000").from("5000").to("10000")),
+//				                AggregationRange.of(r5 -> r5.key("10000+").from("10000")
+//				                )
+//				            )
+//				        ))
+//				    )
 			;		
 		}
 				
@@ -276,21 +306,39 @@ public class SearchService {
 			}
 			
 			
+//			RangeAggregate priceAgg =  aggregations.get("range_" + filter.getKey()).aggregation().getAggregate().range();
+//			for (RangeBucket rb : priceAgg.buckets().array()) {
+//				 priceBuckets.add(new PriceBucket(rb.key()+"", rb.docCount()));
+//			}
+//			
 			NumericRangeFilter nrf = new NumericRangeFilter();
-			nrf.setMaxValue(min.value());
-			nrf.setMinValue(max.value());
+			nrf.setMaxValue(max.value());
+			nrf.setMinValue(min.value());
 			nrf.setPriceBuckets(priceBuckets);
 			
 			vsr.getNumericFilters().put(filter.getKey(), nrf);
 			
 		}
 		
+		
+		///////
+		// Price trend
+		///////
+
+		LongTermsAggregate productSate  =  aggregations.get("trend").aggregation().getAggregate().lterms();
+		for (LongTermsBucket b :   productSate.buckets().array()) {
+			
+			if (b.key() == -1) {
+				vsr.setPriceDecreasing(b.docCount());
+			}
+		}
+		
 		///////
 		// Item condition
 		///////
 
-		StringTermsAggregate productSate  =  aggregations.get("conditions").aggregation().getAggregate().sterms();
-		for (StringTermsBucket b :   productSate.buckets().array()) {
+		StringTermsAggregate priceTrend  =  aggregations.get("conditions").aggregation().getAggregate().sterms();
+		for (StringTermsBucket b :   priceTrend.buckets().array()) {
 			vsr.getConditions().add (new VerticalFilterTerm(b.key().stringValue(), b.docCount()));
 		}
 		vsr.getConditions().sort((o1, o2) -> o2.getCount().compareTo(o1.getCount()));
@@ -344,7 +392,7 @@ public class SearchService {
 
 		}
 
-		//		// Setting the response
+		// Setting the response
 		vsr.setTotalResults(results.getTotalHits());
 		vsr.setData(results.get().map(SearchHit::getContent).toList());
 
