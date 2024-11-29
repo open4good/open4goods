@@ -152,6 +152,9 @@
                                  <a th:unless="${child.vertical == null}" th:href="'/'+ ${child.vertical.i18n.get(siteLanguage).verticalHomeUrl}"><h2 class="text-center h4 card-title" th:text="${child.googleNames.i18n(siteLanguage)}"></h2></a>
                                  <!-- Title -->
                                  <img th:if="${child.vertical}" th:src="'/images/verticals/' + ${child.vertical.id} + '.jpg'" class="image-fluid p-4 card-img-top rounded-top" th:alt="${child.googleNames.i18n(siteLanguage)}">
+                                        <div th:if="${user}">
+								             <a type="submit" class="btn btn-warning btn-sm" th:href="'/images/verticals/' + ${child.vertical.id} + '.jpg/delete'">Changer l'image</a>
+								       </div>
                              </div>
                          </div>
                      </div>
