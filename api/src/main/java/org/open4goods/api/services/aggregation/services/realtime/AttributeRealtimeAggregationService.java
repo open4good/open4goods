@@ -2,11 +2,11 @@ package org.open4goods.api.services.aggregation.services.realtime;
 
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.open4goods.api.services.aggregation.AbstractAggregationService;
@@ -24,6 +24,7 @@ import org.open4goods.commons.model.product.AggregatedFeature;
 import org.open4goods.commons.model.product.IndexedAttribute;
 import org.open4goods.commons.model.product.Product;
 import org.open4goods.commons.model.product.ProductAttribute;
+import org.open4goods.commons.model.product.ProductAttributes;
 import org.open4goods.commons.model.product.SourcedAttribute;
 import org.open4goods.commons.services.BrandService;
 import org.open4goods.commons.services.IcecatService;
@@ -141,9 +142,22 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 		
 		// Replacing all previously indexed
 		data.getAttributes().setIndexed(indexed);
-		
 	}
 
+	
+	// EXTRACTING FEATURES ATTRIBUTES
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
 	/**
 	 * On data fragment agg leveln we increment the "all" field, with sourced values
 	 * for new or existing attributes. product
@@ -291,19 +305,20 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 	 * @param unmatchedFeatures
 	 * @return
 	 */
-	private Collection<AggregatedFeature> aggregateFeatures(List<Attribute> matchedFeatures) {
+	private void  extractFeatures(ProductAttributes attributes) {
 
-		Map<String, AggregatedFeature> ret = new HashMap<String, AggregatedFeature>();
-
-		// Adding matched attributes features
-		for (Attribute a : matchedFeatures) {
-			if (!ret.containsKey(a.getName())) {
-				ret.put(a.getName(), new AggregatedFeature(a.getName()));
-			}
-			// ret.get(a.getName()).getDatasources().add(a.getDatasourceName());
-		}
-
-		return ret.values();
+		attributes.getFeatures().clear();
+		
+		
+		Map<String, ProductAttribute> features = attributes.getAll().entrySet().stream()
+				.filter(e -> e.getValue().isFeature())
+			    .collect(Collectors.toMap(
+			            Map.Entry::getKey,    // key mapper: uses the key from each entry
+			            Map.Entry::getValue   // value mapper: uses the value from each entry
+			        ));
+		
+		attributes.getFeatures().addAll(features.keySet());
+		
 	}
 
 	/**
@@ -385,8 +400,8 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 		///////////////////
 		// To upperCase / lowerCase
 		///////////////////
-
 		if (conf.getParser().getLowerCase()) {
+			
 			string = string.toLowerCase();
 		}
 
@@ -422,7 +437,7 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 		// Trimming
 		///////////////////
 		if (conf.getParser().getTrim()) {
-			string = source.trim();
+			string = string.trim();
 		}
 
 		///////////////////
@@ -451,6 +466,7 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 		// FIXED TEXT MAPPING
 		/////////////////////////////////
 		if (!conf.getMappings().isEmpty()) {
+			
 			string = conf.getMappings().get(string);
 		}
 

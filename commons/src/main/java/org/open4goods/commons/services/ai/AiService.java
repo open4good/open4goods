@@ -18,6 +18,12 @@ import org.open4goods.commons.services.SerialisationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ai.chat.client.ChatClient;
+import org.springframework.ai.chat.client.ChatClient.CallResponseSpec;
+import org.springframework.ai.chat.messages.SystemMessage;
+import org.springframework.ai.chat.messages.UserMessage;
+import org.springframework.ai.chat.model.ChatModel;
+import org.springframework.ai.chat.model.ChatResponse;
+import org.springframework.ai.chat.prompt.Prompt;
 import org.springframework.ai.openai.OpenAiChatModel;
 import org.springframework.boot.actuate.health.Health;
 import org.springframework.boot.actuate.health.Health.Builder;
@@ -57,6 +63,61 @@ public class AiService implements HealthIndicator{
 		this.serialisationService = serialisationService;
 	}
 
+	
+	
+	
+	/**
+	 * A prompt with a system message and a user message
+	 * @param systemMessage
+	 * @param userMessage
+	 * @return
+	 */
+	public String prompt(String systemMessage, String userMessage) {
+		
+		
+		CallResponseSpec ret = ChatClient.create(chatModel).prompt()
+				.system(systemMessage)
+				.user(userMessage)
+				.call();
+//				.entity(new ParameterizedTypeReference<Map<String, String>>() {});
+		
+		return ret.content();
+		
+			
+	}
+		
+
+	/**
+	 * 
+	 * @param prompt
+	 * @return
+	 */
+	public Map<String, String> jsonPrompt(String prompt) {
+		
+		Map<String,String> ret = ChatClient.create(chatModel).prompt()
+				.user(prompt)
+				.call()
+				.entity(new ParameterizedTypeReference<Map<String, String>>() {});
+		
+		
+		return ret;
+	}
+	
+	public String prompt(String prompt) {
+		
+		String ret = ChatClient.create(chatModel).prompt()
+				.user(prompt)
+				.call()
+				.content()
+				;
+		
+		
+		return ret;
+	}
+	
+	
+	
+	
 	/**
 	 * Completes AI descriptions for a product based on the provided vertical configuration, containing the prompts
 	 */
@@ -251,5 +312,22 @@ public class AiService implements HealthIndicator{
 				.withDetail("skipped_generations", skippedGenerations.longValue())
 				.build();
 	}
-	
+
+
+
+
+
+
+
+	public OpenAiChatModel getChatModel() {
+		return chatModel;
+	}
+
+
+
+
+
+
+
+
 }

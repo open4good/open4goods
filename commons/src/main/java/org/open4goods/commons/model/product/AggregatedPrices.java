@@ -158,9 +158,6 @@ public class AggregatedPrices implements Standardisable {
 		this.conditions = conditions;
 	}
 
-
-
-
 	public List<PriceHistory> getNewPricehistory() {
 		return newPricehistory;
 	}

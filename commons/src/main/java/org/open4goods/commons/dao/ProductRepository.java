@@ -39,6 +39,7 @@ import org.springframework.data.elasticsearch.core.document.Document;
 import org.springframework.data.elasticsearch.core.mapping.IndexCoordinates;
 import org.springframework.data.elasticsearch.core.query.Criteria;
 import org.springframework.data.elasticsearch.core.query.CriteriaQuery;
+import org.springframework.data.elasticsearch.core.query.FetchSourceFilter;
 import org.springframework.data.elasticsearch.core.query.IndexQuery;
 import org.springframework.data.elasticsearch.core.query.IndexQueryBuilder;
 import org.springframework.data.elasticsearch.core.query.Query;
@@ -155,6 +156,35 @@ public class ProductRepository {
 	}
 
 
+	/**
+	 * Retrieves only the mappedCategories for items having the minimal attributes set
+	 * @return
+	 */
+	public Stream<Product> exportForCategoriesMapping(Set<String> mustExistsfields, Integer maxResults) {
+	    Criteria c = new Criteria("datasourceCategories").exists();
+	    c = c.and(getRecentPriceQuery());
+	    
+	    for (String f : mustExistsfields) {
+	    	c = c.and(new Criteria(f).exists());
+	    }
+	    
+	    NativeQueryBuilder initialQueryBuilder = new NativeQueryBuilder()
+	            .withQuery(new CriteriaQuery(c))
+	            .withSourceFilter(new FetchSourceFilter(new String[]{"categoriesByDatasources"}, null));
+	    
+	    if (null != maxResults) {
+//            initialQueryBuilder = initialQueryBuilder.withMaxResults(maxResults);
+	    }
+	    
+	    NativeQuery initialQuery = initialQueryBuilder.build();
+	            
+	    initialQuery.setPageable(PageRequest.of(0, 1000)); 
+
+	    return elasticsearchOperations.searchForStream(initialQuery, Product.class, current_index).stream()
+	            .map(SearchHit::getContent);
+	}
+	
+	
 
 	public Stream<Product> exportAll(String vertical) {
 
@@ -520,6 +550,7 @@ public class ProductRepository {
 		return results.stream().map(SearchHit::getContent).collect(Collectors.toList());
 		
 	}
+	
 	
 	/**
 	 * Get multiple data from ids

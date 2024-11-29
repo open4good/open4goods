@@ -82,13 +82,21 @@ public class ProductController  {
 	public ModelAndView productInVertical(@PathVariable String vertical, @PathVariable Long id, final HttpServletRequest request, HttpServletResponse response) throws IOException {
 
 
-		VerticalConfig language = verticalConfigService.getVerticalForPath(vertical);
+		VerticalConfig vConf = verticalConfigService.getVerticalForPath(vertical);
 
-		if (null == language) {
+		if (null == vConf) {
 			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Produit " + request.getServletPath() + " introuvable !");
 		}
 
-		return buildProductView(id, vertical,request, response);
+		ModelAndView mv = buildProductView(id, vertical,request, response);
+
+		// Force authentication for wip verticals 
+		if (vConf.isEnabled() == false && !mv.getModel().containsKey("user")) {
+			throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Produit " + request.getServletPath() + " inaccessible !");
+		}
+		
+		
+		return mv;
 
 
 	}

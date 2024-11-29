@@ -36,10 +36,12 @@
     <th:block th:insert="~{inc/preloader.html}"></th:block>
 	
     <main>	
+        <th:block th:insert="~{inc/wip.html}"></th:block>
+
 
 		<section id="section1"
-			class="section-header overflow-hidden bg-white vh-100 d-flex  navigation">
-			<div class="container">
+			class=" overflow-hidden bg-white d-flex  navigation">
+			<div class="mt-6 container">
 				<div class="row">
 					<div  class="col-12 text-center">
 						<span class="h1 fw-bolder display-2">
@@ -47,13 +49,58 @@
 								src="https://nudger.fr/assets/img/nudger-logo-small.png"
 								alt="Nudger.fr">
 						</span>
-						<h2 class="h2 text-green-bg-transparent d-inline-flex px-3 mt-5 mb-5">Réconcilier écologie et pouvoir d'achat !</h2>
-						<div class="container lead fw-normal text-muted mb-7"> 
+						<div class="container lead fw-normal text-muted mb-4"> 
 						<th:block th:with="path='WIDGETS/accueil-jumbotron/'">
 									<th:block th:insert="~{inc/wiki.html}"></th:block>
 								</th:block>
 						
 						</div>
+						
+						<!-- Categories -->
+						<div th:if="${user}">
+							
+							<h2 class="h3 text-green-bg-transparent d-inline-flex px-3 mt-5 mb-5">Impact Score : catégories évaluées </h2>
+							
+							<nav class="navbar navbar-expand-lg navbar-transparent ">
+							    <div class="container container-semi-fluid  position-relative">
+							
+							        <div class="d-flex align-items-center">
+							           <ul class="navbar-nav navbar-nav-hover align-items-lg-center">
+	    
+										    
+										    <li class="nav-item dropdown">
+										        <a href="#" class="nav-link dropdown-toggle btn btn-lg btn-outline-light" id="verticalElectronics" aria-expanded="false" data-bs-toggle="dropdown">Produits électroniques<span class="fas fa-angle-down nav-link-arrow ms-1"></span></a>
+										        <div class="dropdown-menu  px-0 py-2 lg-4 p-lg-4" aria-labelledby="verticalElectronics">
+										                <ul class="list-style-none">
+										                    <li class="mb-2 megamenu-item"><a class="megamenu-link" href="/ecoscore">L'eco-score Nudger</a></li>
+										                    <li class="mb-2 megamenu-item"><a class="megamenu-link" href="/compensation-ecologique">La contribution écologique</a></li>
+										                </ul>  
+										        </div>
+										    </li>
+										    
+										    
+										</ul>
+							        </div>
+							        
+							        <ul class="navbar-nav navbar-nav-hover align-items-lg-center">
+                                             <li class="nav-item ">                                      
+                                                    <a href="/categories" class="bg-green px-3 py-2 mb-0 btn btn-lg">Toutes les catégories</a>       
+                                             </li>
+                                                
+                                        </ul>
+                                        
+                                        
+							    </div>
+							</nav>
+							
+						
+						  
+                            <h2 class="h3 text-green-bg-transparent d-inline-flex px-3 mt-5 mb-5">Contribution écologique : sur tous vos achats !</h2>
+                        
+                        
+						
+						</div>
+						
 						<!-- Button Modal -->
 						<form class="" method="get" id="searchForm" action="/recherche">
 							<div class="d-flex align-items-center row mt-lg-2">
@@ -87,14 +134,14 @@
 
 
 
-		<div id="section2" class="container-fluid mt-4 navigation">
+		<div th:unless="${user}" id="section2" class="container-fluid mt-4 navigation">
 			<section class="text-center py-4">
 				<h2 class="h2 text-green-bg-transparent d-inline-flex px-3 my-3">Nos catégories de produits</h2>
 			</section>
 		</div>
 
 
-		<div id="section3" class="container mt-4 navigation">
+		<div th:unless="${user}" id="section3" class="container mt-4 navigation">
 			<div class="row">
 
 
@@ -103,7 +150,7 @@
 					<div th:each="vertical : ${verticals}" class="card text-center border-gray-300">
 						<img
 							class="profile-thumbnail small-thumbnail rounded mx-auto mt-4"
-							th:src="'/images/verticals/' + ${vertical.id} + '.png'"
+							th:src="'/images/verticals/' + ${vertical.id} + '.jpg'"
 							th:alt="${vertical.i18n(siteLanguage).verticalHomeTitle}">
 						<div class="card-body">
 							<h3 class="h5 card-title" th:text="${vertical.i18n(siteLanguage).verticalHomeTitle}"></h3>
@@ -112,7 +159,7 @@
 						<div class="card-footer bg-white border-0 p-0">
 							<div class="d-grid">
 								<div th:if="${user}">
-										<a type="submit" class="btn btn-warning btn-sm" th:href="'/regenerate/' + ${vertical.id}">Changer l'image</a>
+										<a type="submit" class="btn btn-warning btn-sm" th:href="'/images/verticals/' + ${vertical.id} + '.jpg/delete'">Changer l'image</a>
 								</div>
 								<a class="btn btn-primary rounded-0 rounded-bottom" th:href="'/'+${vertical.i18n(siteLanguage).verticalHomeUrl}">Découvrir</a>
 							</div>

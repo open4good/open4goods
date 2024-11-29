@@ -17,6 +17,10 @@ googleTaxonomyId: 404
 
 #TODO : Documentation
 icecatTaxonomyId: 1584
+
+# Indicates if the vertical must be UI / sitemap / search rendered
+enabled: true
+
 ##############################################################################
 # Product classification from categories
 ##############################################################################
@@ -179,16 +183,20 @@ ecoscoreConfig:
 # will also be availlable in search for this vertical (must be an attribute or a score)
 ##############################################################################
 
-verticalFilters:
-  - "DIAGONALE_POUCES"
-  - "DISPLAY_TECHNOLOGY"
-  - "COLOR"
+
+
+ecoFilters:
+    - "REPAIRABILITY_INDEX" 
+    - "CLASSE_ENERGY"   
+    - "ENERGY_CONSUMPTION_1000_HOURS"
+
+technicalFilters:
+    - "DIAGONALE_POUCES"
+    - "DISPLAY_TECHNOLOGY"
+    - "HDMI_PORTS_QUANTITY"
   
-#  - "CLASSE_ENERGY"   
 #  - "PARTS_AVAILLABILITY"
-#  - "WARRANTY"
 #  - "DATA-QUALITY"  
-#  - "REPAIRABILITY_INDEX" 
 #  - "BRAND-SUSTAINABILITY"
 
 
@@ -230,7 +238,7 @@ attributesConfig:
        name:
          default: "Screen size"
          fr: "Diagonale (en pouces)"
-       type: "NUMERIC"
+       filteringType: "NUMERIC"
    
        asRating: false
        synonyms:
@@ -258,11 +266,9 @@ attributesConfig:
        name:
          default: "Display technology"
          fr: "Technologie d'affichage"
-       type: "TEXT"
+       filteringType: "TEXT"
    
        asRating: false
-       
-       asSearchFilter: true
               
        synonyms:
 #          all:
