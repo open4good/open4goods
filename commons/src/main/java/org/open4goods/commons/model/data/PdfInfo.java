@@ -1,4 +1,4 @@
-package org.open4goods.api.model;
+package org.open4goods.commons.model.data;
 
 import java.util.Calendar;
 
