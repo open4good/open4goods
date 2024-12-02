@@ -362,4 +362,8 @@ public class Resource implements Validable {
 	public PdfInfo getPdfInfo() {
 		return pdfInfo;
 	}
+
+	public void setPdfInfo(PdfInfo pdfInfo) {
+		this.pdfInfo = pdfInfo;
+	}
 }

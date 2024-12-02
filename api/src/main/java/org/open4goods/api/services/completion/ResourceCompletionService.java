@@ -18,6 +18,11 @@ import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.fluent.Request;
+import org.apache.pdfbox.Loader;
+import org.apache.pdfbox.pdmodel.PDDocument;
+import org.apache.pdfbox.pdmodel.PDDocumentInformation;
+import org.apache.pdfbox.text.PDFTextStripper;
+import org.apache.pdfbox.text.TextPosition;
 import org.apache.tika.Tika;
 import org.apache.tika.config.TikaConfig;
 import org.open4goods.api.config.yml.ApiProperties;
@@ -29,10 +34,7 @@ import org.open4goods.commons.exceptions.TechnicalException;
 import org.open4goods.commons.exceptions.ValidationException;
 import org.open4goods.commons.helper.IdHelper;
 import org.open4goods.commons.model.constants.ResourceType;
-import org.open4goods.commons.model.data.ImageInfo;
-import org.open4goods.commons.model.data.Resource;
-import org.open4goods.commons.model.data.ResourceStatus;
-import org.open4goods.commons.model.data.ResourceTag;
+import org.open4goods.commons.model.data.*;
 import org.open4goods.commons.model.product.Product;
 import org.open4goods.commons.services.ImageMagickService;
 import org.open4goods.commons.services.ResourceService;
@@ -531,14 +533,96 @@ public class ResourceCompletionService  extends AbstractCompletionService{
 		
 	}
 
-	private void processPdf(final Resource indexed, final File target) {
-		// TODO(p3,feature) : Generate default PNG version, generate thumnails from PDF
-		// handle metadatas
-		indexed.setResourceType(ResourceType.PDF);
-		
-		
-		
+	private void processPdf(Resource resource, File target) {
+		resource.setResourceType(ResourceType.PDF);
 
+		try (PDDocument document = Loader.loadPDF(target)) {
+			logger.info("PDF loaded successfully: {}", target.getName());
+			PdfInfo pdfInfo = new PdfInfo();
+
+			// File size
+			pdfInfo.setSize(target.length());
+
+			// File name
+			String fileName = target.getName();
+			int dotIndex = fileName.lastIndexOf('.');
+			if (dotIndex > 0) {
+				fileName = fileName.substring(0, dotIndex);
+			}
+			pdfInfo.setFileName(fileName);
+
+			// PDF Metadata
+			PDDocumentInformation info = document.getDocumentInformation();
+			pdfInfo.setMetadataTitle(info.getTitle());
+			pdfInfo.setAuthor(info.getAuthor());
+			pdfInfo.setSubject(info.getSubject());
+			pdfInfo.setKeywords(info.getKeywords());
+			pdfInfo.setCreationDate(info.getCreationDate());
+			pdfInfo.setModificationDate(info.getModificationDate());
+			pdfInfo.setProducer(info.getProducer());
+			pdfInfo.setNumberOfPages(document.getNumberOfPages());
+
+			// Manually extract title
+			MultiLineTitleStripper stripper = new MultiLineTitleStripper();
+			stripper.setSortByPosition(true);
+			stripper.setStartPage(1);
+			stripper.setEndPage(1);
+			stripper.getText(document);
+			pdfInfo.setExtractedTitle(stripper.getTitle().trim());
+			logger.info("Manually extracted title : {}", pdfInfo.getExtractedTitle());
+
+			resource.setPdfInfo(pdfInfo);
+			resource.setProcessed(true);
+			logger.info("PDF processed successfully : {}", target.getName());
+
+		} catch (IOException e) {
+			logger.error("Erreur lors du parsing du PDF : {}", e.getMessage());
+			resource.setStatus(ResourceStatus.PDF_PARSING_ERROR);
+			resource.setEvicted(true);
+		}
+	}
+
+	private static class MultiLineTitleStripper extends PDFTextStripper {
+		private StringBuilder largestText = new StringBuilder();
+		private float largestFontSize = 0;
+		private final float fontSizeTolerance = 0.8f;
+		private int maxLinesToRead = 10;
+		private int currentLine = 0;
+
+		public MultiLineTitleStripper() throws IOException {
+			super();
+		}
+
+		@Override
+		protected void writeString(String text, List<TextPosition> textPositions) throws IOException {
+
+			if (currentLine >= maxLinesToRead) {
+				return;
+			}
+
+			currentLine++;
+
+			if (text.trim().isEmpty()) return;
+
+			float fontSize = 0;
+			for (TextPosition tp : textPositions) {
+				fontSize += tp.getFontSizeInPt();
+			}
+			fontSize /= textPositions.size();
+
+			if (Math.abs(fontSize - largestFontSize) <= fontSizeTolerance) {
+				largestText.append(text).append(" ");
+			}
+			else if (fontSize > largestFontSize) {
+				largestFontSize = fontSize;
+				largestText.setLength(0);
+				largestText.append(text).append(" ");
+			}
+		}
+
+		public String getTitle() {
+			return largestText.toString().trim();
+		}
 	}
 
 	/**
