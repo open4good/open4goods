@@ -95,9 +95,13 @@ public class ResourceCompletionService  extends AbstractCompletionService{
 
 	@Override
 	public boolean shouldProcess(VerticalConfig vertical, Product data) {
-		if (data.getResources().stream().filter(e -> e.isProcessed() == false).findAny().isPresent()) {
+		if (data.getResources().stream()
+				.filter(e -> e.isProcessed() == false)
+				.filter(e -> e.isEvicted() == false)
+				.findAny().isPresent() || vertical.getResourcesConfig().getOverrideResources()) {
 			// Do not handle if all items are processed
 			// TODO(P2, perf) : check the exclusion pattern flag 
+			
 			return true;			
 		} else {
 			return false;
@@ -217,7 +221,8 @@ public class ResourceCompletionService  extends AbstractCompletionService{
 		
 		Set<String> md5s = new HashSet<>();
 		
-		List<Resource> images = data.getResources().stream()
+		List<Resource> res = data.getResources().stream()
+
 				.filter(e -> !e.isEvicted())
 				// Filtering on images				
 				// Checking if not a blacklisted md5
@@ -226,7 +231,6 @@ public class ResourceCompletionService  extends AbstractCompletionService{
 						logger.warn("Excluded because of blacklisted MD5 : {}", e.getUrl());
 						e.setStatus(ResourceStatus.MD5_EXCLUSION);
 						e.setEvicted(true);
-						e.setProcessed(true);						
 					}
 					return e;
 				})
@@ -237,7 +241,6 @@ public class ResourceCompletionService  extends AbstractCompletionService{
 						logger.warn("Excluded because a duplicate MD5 : {}", e.getUrl());
 						e.setStatus(ResourceStatus.MD5_DUPLICATE);
 						e.setEvicted(true);
-						e.setProcessed(true);
 					}
 					md5s.add(e.getMd5());
 					return e;
@@ -249,7 +252,6 @@ public class ResourceCompletionService  extends AbstractCompletionService{
 						logger.warn("Excluded because image is too small : {}", e.getUrl());
 						e.setStatus(ResourceStatus.TOO_SMALL);
 						e.setEvicted(true);
-						e.setProcessed(true);
 					}
 					return e;
 				})
@@ -257,15 +259,15 @@ public class ResourceCompletionService  extends AbstractCompletionService{
 
 
 		// Updating
-		data.getResources().removeAll(images);
-		data.getResources().addAll(images);
+		data.getResources().removeAll(res);
+		data.getResources().addAll(res);
 		
 		/////////////////////////////////////////
 		// Images similarity clusterization
 		/////////////////////////////////////////
-		ArrayList<List<Resource>> classified = classify(images.stream().filter(e -> e.getResourceType() == ResourceType.IMAGE).filter(e -> !e.isEvicted()).toList());
+		ArrayList<List<Resource>> classified = classify(res.stream().filter(e -> e.getResourceType() == ResourceType.IMAGE).filter(e -> !e.isEvicted()).toList());
 		
-		logger.info("{} - {} resources links, {} processed, {} retained and classified in {} bucket", data.gtin(), data.getResources().size(), resources.size(), images.size(), classified.size());
+		logger.info("{} - {} resources links, {} processed, {} retained and classified in {} bucket", data.gtin(), data.getResources().size(), resources.size(), res.size(), classified.size());
 		
 		
 		List<Resource> resultingImages = new ArrayList<>();
@@ -275,7 +277,7 @@ public class ResourceCompletionService  extends AbstractCompletionService{
 			resultingImages.add(dups.getFirst());			
 		}
 
-		logger.info("{}/{} images selected for product {} : \n  {}",resultingImages.size(),images.size(), data.gtin(), StringUtils.join(resultingImages,"\n  ") );
+		logger.info("{}/{} images selected for product {} : \n  {}",resultingImages.size(),res.size(), data.gtin(), StringUtils.join(resultingImages,"\n  ") );
 		
 		// TODO : Delete all evicted items after a given time
 		
@@ -415,6 +417,8 @@ public class ResourceCompletionService  extends AbstractCompletionService{
 	public Resource fetchResource(Resource resource, VerticalConfig vertical) {
 		logger.info("Handling resource : {} ", resource);
 
+		// Set processed state
+		resource.setProcessed(true);
 		// Set FNV cache key based on url
 		resource.setCacheKey(IdHelper.generateResourceId(resource.getUrl()));
 		resource.setTimeStamp(System.currentTimeMillis());
@@ -496,6 +500,7 @@ public class ResourceCompletionService  extends AbstractCompletionService{
 			case "application/pdf":
 				// Case of PDF
 				processPdf(resource, target);
+				resource.setProcessed(true);
 				break;
 			
 			case "video/quicktime":

@@ -84,7 +84,7 @@ public class IcecatCompletionService extends AbstractCompletionService {
 	public boolean shouldProcess(VerticalConfig vertical, Product data) {
 		// TODO(p2,perf) : should adda check on unprocessed resources
 		Long lastProcessed = data.getDatasourceCodes().get(getDatasourceName());
-		if (null != lastProcessed && System.currentTimeMillis() - lastProcessed < REFRESH_IN_DAYS * 1000 * 3600 * 24) {
+		if (null != lastProcessed &&  REFRESH_IN_DAYS * 1000 * 3600 * 24 < System.currentTimeMillis() - lastProcessed ) {
 			return false;
 		} else {
 			return true;
