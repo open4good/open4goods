@@ -17,6 +17,7 @@ import java.util.stream.Stream;
 
 import org.apache.commons.lang3.StringUtils;
 import org.open4goods.api.config.yml.VerticalsGenerationConfig;
+import org.open4goods.api.model.VerticalAttributesStats;
 import org.open4goods.api.model.VerticalCategoryMapping;
 import org.open4goods.commons.config.yml.ui.ProductI18nElements;
 import org.open4goods.commons.config.yml.ui.VerticalConfig;
@@ -25,6 +26,7 @@ import org.open4goods.commons.helper.IdHelper;
 import org.open4goods.commons.model.product.Product;
 import org.open4goods.commons.services.GoogleTaxonomyService;
 import org.open4goods.commons.services.SerialisationService;
+import org.open4goods.commons.services.VerticalsConfigService;
 import org.open4goods.commons.services.ai.AiService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,6 +37,7 @@ public class VerticalsGenerationService {
 	
 	private static final Logger LOGGER = LoggerFactory.getLogger(VerticalsGenerationService.class);
 	private VerticalsGenerationConfig config;
+	private VerticalsConfigService  verticalConfigservice;
 	private ProductRepository repository;
 	private SerialisationService serialisationService;
 
@@ -44,13 +47,14 @@ public class VerticalsGenerationService {
 	private AiService aiService;
 	private GoogleTaxonomyService googleTaxonomyService;
 	
-	public VerticalsGenerationService(VerticalsGenerationConfig config, ProductRepository repository, SerialisationService serialisationService, AiService aiService, GoogleTaxonomyService googleTaxonomyService) {
+	public VerticalsGenerationService(VerticalsGenerationConfig config, ProductRepository repository, SerialisationService serialisationService, AiService aiService, GoogleTaxonomyService googleTaxonomyService, VerticalsConfigService verticalsConfigService) {
 		super();
 		this.config = config;
 		this.repository = repository;
 		this.serialisationService = serialisationService;
 		this.aiService = aiService;
 		this.googleTaxonomyService = googleTaxonomyService;
+		this.verticalConfigservice = verticalsConfigService;
 	}
 	
 	
@@ -303,6 +307,31 @@ public class VerticalsGenerationService {
 
 
 	/**
+	 * Compute the attributes coverage stats for this vertical
+	 * @param vertical
+	 * @return
+	 */
+	public VerticalAttributesStats attributesStats(String vertical) {
+		VerticalConfig vc = verticalConfigservice.getConfigById(vertical);
+		VerticalAttributesStats ret = new VerticalAttributesStats() ;
+		if (null != vc) {
+			LOGGER.info("Attributes stats for vertical {} is running",vertical);
+			repository.exportVerticalWithValidDate(vc, false).forEach(p -> {
+				ret.process(p.getAttributes().getAll());
+			});
+	
+			// Cleaning the values
+			ret.clean();
+			
+			// Sorting the values
+			ret.sort();
+		}
+		
+		return ret;
+	}
+	
+	
+	/**
 	 * Generate a vertical stub, using our matching categories detected and adding informations through AI
 	 * @param cat
 	 * @return
@@ -385,6 +414,27 @@ Base your analyse on the following categories :
 		Integer ret = googleTaxonomyService.resolve(string);
 		LOGGER.info("Resolved google taxonomy for {} : {}",string,null); 
 		return ret;
+	}
+
+
+
+	/**
+	 * Generate the yaml fragment for a given category match
+	 * @param category
+	 * @return
+	 */
+	public String generateCategoryMappingFragmentFor(String category) {
+
+		VerticalCategoryMapping mapping = sortedMappings.get(category);
+		
+		StringBuilder ret = new StringBuilder();
+		ret.append("matchingCategories:").append("\n");
+		ret.append("    - \"").append(category).append("\"\n");
+		for (String cat : mapping.getAssociatedCategories().keySet()) {
+			ret.append("    - \"").append(cat).append("\"\n");
+		}
+		
+		return ret.toString();
 	}
 
 	
