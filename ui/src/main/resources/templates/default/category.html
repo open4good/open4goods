@@ -90,7 +90,7 @@
         <!-- Core team Members -->
         <section class="pt-0">
             <div class="container  ">
-                <div class="row mt-3">
+                <div class="row mt-4">
 					<div th:each="child, stat : ${category.children(havingVertical)}" th:classappend="${stat.first ? 'col-md-6 col-lg-4' : 'col-md-6 col-lg-4'} " class="col-12 mb-5 mb-lg-0">
 					     <div class="card shadow border-gray-300">
 					         
@@ -144,16 +144,18 @@
         <!-- Quick access -->
         <section class="section bg-green-transparent section-lg pt-0">
           <div class="container ">
-                <div class="row mt-6">
+                <div class="row mt-4">
                     <div th:each="child, stat : ${category.leafs(true)}" th:classappend="${stat.first ? 'col-md-3 col-lg-3' : 'col-md-3 col-lg-3'} " class="col-12 mb-lg-0">
                          <div th:unless="${category.children.contains(child)}" class="card shadow border-gray-300 mt-2">
                              
-                             <div class="card-body">                                 
-                                 <a th:unless="${child.vertical == null}" th:href="'/'+ ${child.vertical.i18n.get(siteLanguage).verticalHomeUrl}"><h2 class="text-center h4 card-title" th:text="${child.googleNames.i18n(siteLanguage)}"></h2></a>
+                             <div class="card-body text-center">                                 
+                                 <a th:unless="${child.vertical == null}" th:href="'/'+ ${child.vertical.i18n.get(siteLanguage).verticalHomeUrl}">
+                                    <span class="text-center h4 card-title" th:text="${child.googleNames.i18n(siteLanguage)}"></span>
                                  <!-- Title -->
-                                 <img th:if="${child.vertical}" th:src="'/images/verticals/' + ${child.vertical.id} + '.jpg'" class="image-fluid p-4 card-img-top rounded-top" th:alt="${child.googleNames.i18n(siteLanguage)}">
+                                     <img th:if="${child.vertical}" th:src="'/images/verticals/' + ${child.vertical.id} + '.jpg'" class="image-fluid p-4 card-img-top rounded-top" th:alt="${child.googleNames.i18n(siteLanguage)}">
+                                </a>
                                         <div th:if="${user}">
-								             <a type="submit" class="btn btn-warning btn-sm" th:href="'/images/verticals/' + ${child.vertical.id} + '.jpg/delete'">Changer l'image</a>
+								             <a type="submit" class="btn text-center btn-warning btn-sm" th:href="'/images/verticals/' + ${child.vertical.id} + '.jpg/delete'">Changer l'image</a>
 								       </div>
                              </div>
                          </div>
