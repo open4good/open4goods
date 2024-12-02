@@ -359,4 +359,7 @@ public class Resource implements Validable {
 		this.hardTags = hardTags;
 	}
 
+	public PdfInfo getPdfInfo() {
+		return pdfInfo;
+	}
 }
