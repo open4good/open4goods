@@ -5,16 +5,20 @@ package org.open4goods.api.controller.api;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 
+import org.open4goods.api.model.VerticalAttributesStats;
 import org.open4goods.api.model.VerticalCategoryMapping;
 import org.open4goods.api.services.VerticalsGenerationService;
 import org.open4goods.commons.config.yml.ui.VerticalConfig;
 import org.open4goods.commons.exceptions.ResourceNotFoundException;
+import org.open4goods.commons.model.constants.CacheConstants;
 import org.open4goods.commons.model.constants.RolesConstants;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -91,6 +95,7 @@ public class VerticalsGenerationController {
 	}
 	
 
+	
 	@GetMapping(path="/mappings/generate/verticals")
 	@Operation(summary="Generate verticals from the mapping")
 	@PreAuthorize("hasAuthority('"+RolesConstants.ROLE_ADMIN+"')")
@@ -99,4 +104,25 @@ public class VerticalsGenerationController {
 		
 	}	
 
+	@GetMapping(path="/assist/attributes/{vertical}")
+	@Operation(summary="Generate attributes coverage for a vertical")
+	@PreAuthorize("hasAuthority('"+RolesConstants.ROLE_ADMIN+"')")
+//	@Cacheable(keyGenerator = CacheConstants.KEY_GENERATOR, cacheNames = CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME)
+	public VerticalAttributesStats generateAttributesCoverage(@PathVariable String vertical) throws ResourceNotFoundException, IOException {
+		 return verticalsGenService.attributesStats(vertical);
+		
+	}
+	
+
+	@GetMapping(path="/assist/categories")
+	@Operation(summary="Generate the categories yaml fragment for a given match")
+	@PreAuthorize("hasAuthority('"+RolesConstants.ROLE_ADMIN+"')")
+//	@Cacheable(keyGenerator = CacheConstants.KEY_GENERATOR, cacheNames = CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME)
+	public String generateCategoryMappingsFragment(@RequestParam String category) throws ResourceNotFoundException, IOException {
+		 return verticalsGenService.generateCategoryMappingFragmentFor(category);
+		
+	}
+	
+	
+	
 }

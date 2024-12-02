@@ -119,8 +119,8 @@ public class ApiConfig {
 
 	@Bean
 	@Autowired
-	VerticalsGenerationService verticalsGenerationService(ProductRepository pRepo, SerialisationService serialisationService, AiService aiService, GoogleTaxonomyService gTaxoService) throws SAXException {
-		return new VerticalsGenerationService(apiProperties.getVerticalsGenerationConfig(), pRepo,serialisationService,aiService, gTaxoService);
+	VerticalsGenerationService verticalsGenerationService(ProductRepository pRepo, SerialisationService serialisationService, AiService aiService, GoogleTaxonomyService gTaxoService, VerticalsConfigService verticalsConfigService) throws SAXException {
+		return new VerticalsGenerationService(apiProperties.getVerticalsGenerationConfig(), pRepo,serialisationService,aiService, gTaxoService, verticalsConfigService);
 	}
 	
 	
