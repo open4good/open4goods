@@ -57,7 +57,9 @@ public class Resource implements Validable {
 
 	private ResourceType resourceType;
 
-	private ImageInfo imageInfo;	
+	private ImageInfo imageInfo;
+
+	private PdfInfo pdfInfo;
 
 	// The group (similarity based and popularity ranked) this resource belongs to
 	// TODO : Move into imageinfo
