@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.client.ClientProtocolException;
@@ -262,6 +263,9 @@ public class ResourceCompletionService  extends AbstractCompletionService{
 		data.getResources().removeAll(res);
 		data.getResources().addAll(res);
 		
+		// Deleting evicted resources
+		data.setResources(data.getResources().stream().filter(e-> !e.isEvicted()).collect(Collectors.toSet()));
+
 		/////////////////////////////////////////
 		// Images similarity clusterization
 		/////////////////////////////////////////
