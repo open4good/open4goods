@@ -61,6 +61,21 @@ public abstract class AbstractCompletionService {
 		
 	}
 
+	
+	/** 
+	 * Process the item if shouldProcess() is concluant)
+	 * @param vertical
+	 * @param data
+	 */
+	public void process(VerticalConfig vertical, Product data) {
+		if (shouldProcess(vertical, data)) {
+			logger.info("Completing {} with {}",data, this.getClass().getSimpleName());
+			processProduct(vertical, data);
+		} else {
+			logger.info("Skipping completion of {} with {}",data, this.getClass().getSimpleName());			
+		}
+	}
+	
 	/**
 	 * Proceed to the AI texts generation for a vertical
 	 */
@@ -75,7 +90,19 @@ public abstract class AbstractCompletionService {
 	 */
 	public abstract void processProduct(VerticalConfig vertical, Product data);
 
+	/**
+	 * Method that indicates if a product must be completed or not. This will use  Map<String,Integer> datasourceCodes
+	 * @param vertical
+	 * @param data
+	 * @return 
+	 */
+	public abstract boolean shouldProcess(VerticalConfig vertical, Product data);
 	
+	/**
+	 * Return the completetion datasource name. Used also as key  in dataSourceCodes to maintain arbitrary marker that allows to avoid skip handling if done
+	 */
+
+	public abstract String getDatasourceName();
 	
 	
 }

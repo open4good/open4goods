@@ -92,6 +92,27 @@ public class ResourceCompletionService  extends AbstractCompletionService{
 		hasher.setOpaqueHandling(Color.WHITE, alphaThreshold);
 	}
 
+
+	@Override
+	public boolean shouldProcess(VerticalConfig vertical, Product data) {
+		if (data.getResources().stream().filter(e -> e.isProcessed() == false).findAny().isPresent()) {
+			// Do not handle if all items are processed
+			// TODO(P2, perf) : check the exclusion pattern flag 
+			return true;			
+		} else {
+			return false;
+		}
+		
+	}
+
+	@Override
+	public String getDatasourceName() {
+		// No datasource name for resource completion
+		return null;
+	}
+
+
+	
 	/**
 	 * Process resources for one product
 	 * 
@@ -125,7 +146,10 @@ public class ResourceCompletionService  extends AbstractCompletionService{
 				// Exclude already the previously detected invalids
 				.filter(e -> vertical.getResourcesConfig().getOverrideResources() || !e.isEvicted())
 				// Download the resources and do the analyze
-				.map(e -> fetchResource(e, vertical)).toList();
+				.map(e -> fetchResource(e, vertical))
+				
+				
+				.toList();
 
 		// Updating
 		data.getResources().removeAll(resources);
@@ -549,6 +573,5 @@ public class ResourceCompletionService  extends AbstractCompletionService{
 		
 		
 	}
-
 
 }

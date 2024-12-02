@@ -21,7 +21,7 @@ public class GenAiCompletionService  extends AbstractCompletionService{
 	
 	
 	public GenAiCompletionService( AiService aiService, ProductRepository dataRepository, VerticalsConfigService verticalConfigService, ApiProperties apiProperties) {
-		// TODO : Should set a specific log level here (not "aggregation)" one)
+		// TODO(p3,design) : Should set a specific log level here (not "aggregation)" one)
 		super(dataRepository, verticalConfigService, apiProperties.logsFolder(), apiProperties.aggLogLevel());		
 		this.aiService = aiService;
 		this.apiProperties = apiProperties;
@@ -40,5 +40,17 @@ public class GenAiCompletionService  extends AbstractCompletionService{
 			Thread.currentThread().interrupt();
 			logger.error("Thread interrupted during rate limiting", e);
 		}
+	}
+
+	@Override
+	public boolean shouldProcess(VerticalConfig vertical, Product data) {
+		// The cache mechanism is handled at the AiCompletionService
+		return true;
+	}
+
+	@Override
+	public String getDatasourceName() {
+		// No datasource name for this kind of completion
+		return null;
 	}
 }

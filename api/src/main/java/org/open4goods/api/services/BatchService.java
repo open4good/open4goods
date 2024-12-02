@@ -1,11 +1,15 @@
 package org.open4goods.api.services;
 
+import java.util.HashSet;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 import org.open4goods.commons.config.yml.ui.VerticalConfig;
 import org.open4goods.commons.dao.ProductRepository;
 import org.open4goods.commons.model.constants.TimeConstants;
 import org.open4goods.commons.model.crawlers.FetcherGlobalStats;
+import org.open4goods.commons.model.product.Product;
 import org.open4goods.commons.services.VerticalsConfigService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,11 +28,6 @@ import com.google.common.cache.CacheBuilder;
 public class BatchService {
 
 	protected static final Logger logger = LoggerFactory.getLogger(BatchService.class);
-
-	// The status of the registered crawlers, which auto expires the crawlers if not
-	// seen
-	private Cache<String, FetcherGlobalStats> crawlerStatuses = CacheBuilder.newBuilder()
-			.expireAfterWrite(TimeConstants.API_EXPIRED_UNSEEN_CRAWLERS_IN_SECONDS, TimeUnit.SECONDS).build();
 
 	private VerticalsConfigService verticalsConfigService;
 
@@ -79,65 +78,80 @@ public class BatchService {
 //		});
 //	}
 	
-	@Scheduled(cron = "0 0 1,13 * * ?")
-	// TODO : From conf
+	// TODO(p3,conf) : schedule from conf
+	@Scheduled(cron = "0 0 13 * * ?")
 	public void batch() {
-
 		
-		// TODO (p1, design) : Here the sanitisation pass, that must applies on all matching categories and verticals with already defined ID
-		// at least to unset the no more matching categories
-		// BUT have to work on it on 2 passes which applies on 2 distinct datasets, this one as first with full hot memory on the "
-		//This is initial submission, batching the products to update catégories				
-		aggregationFacadeService.sanitizeAllVerticals();		
-				
-				
-				
-		logger.info("Starting batch");
-
-		try {
-			//  complete with icecat
-			completionFacadeService.icecatCompletionAll();
-			Thread.sleep(5000L);
-		} catch (Exception e) {
-			logger.error("Error in batch : icecat completion fail", e);
+		/////////////////////////////////////////////
+		// On each vertical, products are in memory loaded
+		/////////////////////////////////////////////
+		for (VerticalConfig vertical : verticalsConfigService.getConfigsWithoutDefault()) {
+			batch(vertical);
 		}
-
 		
+
+		logger.info("End of batch");
+	}
+
+	/**
+	 * Batch a specific vertical
+	 * @param vertical
+	 */
+	public void batch(VerticalConfig vertical) {
+		Set<Product> allProducts = new HashSet<>();
+		
+		logger.info("Loading products in memory for vertical {}", vertical);
+		
+		// We take all products
+		allProducts = 	dataRepository.getProductsMatchingCategoriesOrVerticalId(vertical).collect(Collectors.toSet());
+		
+		logger.info("Sanitisation of {} products", allProducts);
+
+		////////////////////			
+		// We apply simple classification to unmatch products from verticals if needed
+		////////////////////			
+		aggregationFacadeService.classificationAggregator(vertical, allProducts);
+		
+		// We filter the products into the "living one" (that have not been unmatched from caegories matching, and that have a valid price			
+		Set<Product> products = allProducts.stream()
+				.filter(e -> e.getOffersCount().intValue() > 0)
+				.filter(e-> null != e.getVertical())
+				.collect(Collectors.toSet());
+		
+		logger.info("Will complete {} products of {}", products.size(), allProducts.size() );
+		
+		////////////////////		
+		//  Launch completion on this products
+		////////////////////
+		completionFacadeService.processAll(products, vertical);
+
+		logger.info("Will aggregate {} products", products.size());
+		//////////////////////////////////
+		// Launch aggregation, (now will complete on more Datas (eg API ones)
+		/////////////////////////////////
+		aggregationFacadeService.sanitizeProducts(vertical, allProducts);
+		
+		
+		////////////////////		
+		//  Scoring
+		////////////////////			
 		try {
 			// Scoring
-			aggregationFacadeService.scoreAll();
+			aggregationFacadeService.score(vertical, products);
 			Thread.sleep(5000L);
 		} catch (Exception e) {
 			logger.error("Error in batch : scoring fail", e);
 		}
-
 		
 		
-		try {
-			//  resource complete
-			completionFacadeService.resourceCompletionAll();
-			Thread.sleep(5000L);
-		} catch (Exception e) {
-			logger.error("Error in batch : resource completion fail", e);
-		}
+		////////////////////		
+		//  Persisting
+		////////////////////	
 		
-		//  gen ai complete
-		try {
-			completionFacadeService.genaiCompletionAll();
-			Thread.sleep(5000L);
-		} catch (Exception e) {
-			logger.error("Error in batch : genai completion fail", e);
-		}
-		
-		try {
-			// amazon complete
-			// TODO(p1, feature) : enable amazon price completion
-			//completionFacadeService.amazonCompletionAll();
-		} catch (Exception e) {
-			logger.error("Error in batch : amazon completion fail", e);
-		}
-
-		logger.info("End of batch");
+		logger.info("Adding {} ({} completed) products to indexation",allProducts.size(), products.size());			
+		// We flush the queue, no matter the previous fragments, we want to be sure there are no erasure on completed items
+		dataRepository.getFullProductQueue().clear();
+		dataRepository.addToFullindexationQueue(allProducts);
 	}
 
 }

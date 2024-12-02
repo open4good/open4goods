@@ -114,7 +114,7 @@ public class Product implements Standardisable {
 	/**
 	 * The datasources participating to this product, with a hashcode used for fastening data processing (by skipping already processed items)
 	 */
-	private Map<String,Integer> datasourceCodes = new HashMap<>();
+	private Map<String,Long> datasourceCodes = new HashMap<>();
 	
 	/**
 	 * The media resources for this data
@@ -825,12 +825,13 @@ public class Product implements Standardisable {
 		this.categoriesByDatasources = categoriesByDatasources;
 	}
 
-	public Map<String, Integer> getDatasourceCodes() {
+
+	public Map<String, Long> getDatasourceCodes() {
 		return datasourceCodes;
 	}
 
-	public void setDatasourceCodes(Map<String, Integer> datasources) {
-		this.datasourceCodes = datasources;
+	public void setDatasourceCodes(Map<String, Long> datasourceCodes) {
+		this.datasourceCodes = datasourceCodes;
 	}
 
 	public Map<String, String> getAkaBrands() {

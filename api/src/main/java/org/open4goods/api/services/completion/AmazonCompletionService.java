@@ -125,6 +125,20 @@ public class AmazonCompletionService extends AbstractCompletionService {
 		}
 	}
 
+	
+	@Override
+	public boolean shouldProcess(VerticalConfig vertical, Product data) {
+		// TODO(p1,feature) : amazon completion disabled for now
+		return false;
+	}
+
+	@Override
+	public String getDatasourceName() {
+		return "amazon.fr";
+	}
+
+	
+	
 	/**
 	 * Trigger amazon call on a product. Here the logic : 
 	 * > If first call, then make a search, then associates the asin
@@ -557,6 +571,7 @@ public class AmazonCompletionService extends AbstractCompletionService {
 		}
 		return attr.getDisplayValue().toString() + " " + attr.getUnit();
 	}
+
 
 	
 }

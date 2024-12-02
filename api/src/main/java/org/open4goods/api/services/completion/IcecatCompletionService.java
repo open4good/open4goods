@@ -11,15 +11,16 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.open4goods.api.config.yml.ApiProperties;
 import org.open4goods.api.config.yml.IcecatCompletionConfig;
+import org.open4goods.api.model.IcecatData;
+import org.open4goods.api.model.IcecatData.FeaturesGroups;
+import org.open4goods.api.model.IcecatData.Gallery;
+import org.open4goods.api.model.IcecatData.GeneralInfo;
+import org.open4goods.api.model.IcecatData.IceDataItem;
+import org.open4goods.api.model.IcecatData.Image;
+import org.open4goods.api.model.IcecatData.Multimedia;
 import org.open4goods.api.services.AbstractCompletionService;
 import org.open4goods.api.services.AggregationFacadeService;
 import org.open4goods.api.services.aggregation.aggregator.StandardAggregator;
-import org.open4goods.api.services.completion.IcecatData.FeaturesGroups;
-import org.open4goods.api.services.completion.IcecatData.Gallery;
-import org.open4goods.api.services.completion.IcecatData.GeneralInfo;
-import org.open4goods.api.services.completion.IcecatData.IceDataItem;
-import org.open4goods.api.services.completion.IcecatData.Image;
-import org.open4goods.api.services.completion.IcecatData.Multimedia;
 import org.open4goods.commons.config.yml.ui.VerticalConfig;
 import org.open4goods.commons.dao.ProductRepository;
 import org.open4goods.commons.exceptions.AggregationSkipException;
@@ -51,6 +52,11 @@ public class IcecatCompletionService extends AbstractCompletionService {
 	
 	protected static final Logger logger = LoggerFactory.getLogger(IcecatCompletionService.class);
 
+	/**
+	 * Icecat completion will be triggered only if older than this const
+	 */
+	private static final int REFRESH_IN_DAYS = 30;
+
 	private ObjectMapper objectMapper = new ObjectMapper();
 	
 	// The specific icecat fetching properties
@@ -74,6 +80,23 @@ public class IcecatCompletionService extends AbstractCompletionService {
 		
 	}
 
+	@Override
+	public boolean shouldProcess(VerticalConfig vertical, Product data) {
+		// TODO(p2,perf) : should adda check on unprocessed resources
+		Long lastProcessed = data.getDatasourceCodes().get(getDatasourceName());
+		if (null != lastProcessed && System.currentTimeMillis() - lastProcessed < REFRESH_IN_DAYS * 1000 * 3600 * 24) {
+			return false;
+		} else {
+			return true;
+		}
+	}
+
+	@Override
+	public String getDatasourceName() {
+		return "icecat.biz";
+	}
+
+	
 	/**
 	 * Trigger icecat call on a product. Here the logic : 
 	 * > If first call, then make a search, then associates the asin
@@ -102,10 +125,8 @@ public class IcecatCompletionService extends AbstractCompletionService {
 			}
 		}
 		
-		
-
-		
-
+		// Setting the timestamp flag
+		data.getDatasourceCodes().put(getDatasourceName(), System.currentTimeMillis());
 
 		try {
 			Thread.sleep(icecatConfig.getPolitnessDelayMs());

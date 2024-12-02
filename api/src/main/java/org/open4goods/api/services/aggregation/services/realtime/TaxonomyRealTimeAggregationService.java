@@ -88,10 +88,10 @@ public class TaxonomyRealTimeAggregationService extends AbstractAggregationServi
 		}
 		
 //		// Setting no vertical if no category
-//		if (data.getDatasourceCategories().size() == 0) {
-//			dedicatedLogger.info("No category in {}, removing vertical", data);
-//			data.setVertical(null);
-//		}
+		if (data.getDatasourceCategories().size() == 0) {
+			dedicatedLogger.info("No category in {}, removing vertical", data);
+			data.setVertical(null);
+		}
 		
 		
 		// TODO : Disabling google taxonomy for now
