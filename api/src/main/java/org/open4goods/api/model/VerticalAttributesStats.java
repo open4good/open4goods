@@ -89,11 +89,20 @@ public class VerticalAttributesStats {
 		
 		// Removing if only low keys
 		stats.entrySet().stream().forEach(e-> {
+			
 			 Integer max = e.getValue().getValues().values().stream().max(Integer::compare).orElse(0);
 			 // TODO(p3,conf) : From conf
 			if (max < 5) {
 				toRemove.add(e.getKey());
 			}
+			
+			// Deleting the one with "1" unique value
+			Set<String> valToDelete = e.getValue().getValues().entrySet().stream().filter(e1-> e1.getValue().intValue() == 1).map(e1-> e1.getKey()).collect(Collectors.toSet());
+			valToDelete.forEach(td -> {
+				e.getValue().getValues().remove(td);
+			});
+			
+			
 		});
 		
 		toRemove.forEach(e-> {

@@ -107,7 +107,7 @@ public class VerticalsGenerationController {
 	@GetMapping(path="/assist/attributes/{vertical}")
 	@Operation(summary="Generate attributes coverage for a vertical")
 	@PreAuthorize("hasAuthority('"+RolesConstants.ROLE_ADMIN+"')")
-//	@Cacheable(keyGenerator = CacheConstants.KEY_GENERATOR, cacheNames = CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME)
+	@Cacheable(keyGenerator = CacheConstants.KEY_GENERATOR, cacheNames = CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME)
 	public VerticalAttributesStats generateAttributesCoverage(@PathVariable String vertical) throws ResourceNotFoundException, IOException {
 		 return verticalsGenService.attributesStats(vertical);
 		
@@ -117,7 +117,7 @@ public class VerticalsGenerationController {
 	@GetMapping(path="/assist/categories")
 	@Operation(summary="Generate the categories yaml fragment for a given match")
 	@PreAuthorize("hasAuthority('"+RolesConstants.ROLE_ADMIN+"')")
-//	@Cacheable(keyGenerator = CacheConstants.KEY_GENERATOR, cacheNames = CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME)
+	@Cacheable(keyGenerator = CacheConstants.KEY_GENERATOR, cacheNames = CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME)
 	public String generateCategoryMappingsFragment(@RequestParam String category) throws ResourceNotFoundException, IOException {
 		 return verticalsGenService.generateCategoryMappingFragmentFor(category);
 		
