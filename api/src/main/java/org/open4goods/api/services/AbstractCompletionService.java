@@ -50,12 +50,12 @@ public abstract class AbstractCompletionService {
 	public void complete(VerticalConfig vertical, Integer limit, boolean withExcluded)  {
 		logger.info("Generating AI texts for {} products {}",limit == null ? "all" : limit, vertical.getId());
 		dataRepository.exportVerticalWithValidDateOrderByEcoscore(vertical.getId(), limit,withExcluded).forEach(data -> {
-			completeProduct(vertical, data);
+			completeAndIndexProduct(vertical, data);
 			
 		});
 	}
 
-	public void completeProduct(VerticalConfig vertical, Product data) {
+	public void completeAndIndexProduct(VerticalConfig vertical, Product data) {
 		processProduct(vertical, data);
 		dataRepository.forceIndex(data);
 		
