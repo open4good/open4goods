@@ -84,7 +84,7 @@ public class CompletionController {
 		} catch (ResourceNotFoundException e) {
 			throw new ResponseStatusException(HttpStatus.NOT_FOUND);
 		}
-		resourceCompletionService.completeProduct(verticalConfigService.getConfigByIdOrDefault(data.getVertical()),
+		resourceCompletionService.completeAndIndexProduct(verticalConfigService.getConfigByIdOrDefault(data.getVertical()),
 				data);
 	}
 
@@ -114,7 +114,7 @@ public class CompletionController {
 		} catch (ResourceNotFoundException e) {
 			throw new ResponseStatusException(HttpStatus.NOT_FOUND);
 		}
-		aiCompletionService.completeProduct(verticalConfigService.getConfigByIdOrDefault(data.getVertical()), data);
+		aiCompletionService.completeAndIndexProduct(verticalConfigService.getConfigByIdOrDefault(data.getVertical()), data);
 	}
 
 	///////////////////////////////////
@@ -144,7 +144,7 @@ public class CompletionController {
 		} catch (ResourceNotFoundException e) {
 			throw new ResponseStatusException(HttpStatus.NOT_FOUND);
 		}
-		amazonCompletionService.completeProduct(verticalConfigService.getConfigByIdOrDefault(data.getVertical()), data);
+		amazonCompletionService.completeAndIndexProduct(verticalConfigService.getConfigByIdOrDefault(data.getVertical()), data);
 	}
 
 	
@@ -178,6 +178,6 @@ public class CompletionController {
 		} catch (ResourceNotFoundException e) {
 			throw new ResponseStatusException(HttpStatus.NOT_FOUND);
 		}
-		iceCatService.completeProduct(verticalConfigService.getConfigByIdOrDefault(data.getVertical()), data);
+		iceCatService.completeAndIndexProduct(verticalConfigService.getConfigByIdOrDefault(data.getVertical()), data);
 	}
 }

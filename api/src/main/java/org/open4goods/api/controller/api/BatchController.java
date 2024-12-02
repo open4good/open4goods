@@ -66,7 +66,7 @@ public class BatchController {
 		this.batchService = batchService;
 		
 	}
-	@PutMapping(path="/batch/")
+	@PostMapping(path="/batch/")
 	@Operation(summary="Launch the full batch (scoring, aggregation, completion batch), iso has @Scheduled")
 	@PreAuthorize("hasAuthority('"+RolesConstants.ROLE_ADMIN+"')")
 	public void batch( ) throws InvalidParameterException, JsonParseException, JsonMappingException, IOException, InterruptedException{

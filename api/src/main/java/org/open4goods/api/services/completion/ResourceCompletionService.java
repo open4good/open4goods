@@ -147,10 +147,7 @@ public class ResourceCompletionService  extends AbstractCompletionService{
 				.filter(e -> vertical.getResourcesConfig().getOverrideResources() || !e.isEvicted())
 				// Download the resources and do the analyze
 				.map(e -> fetchResource(e, vertical))
-				
-				
 				.toList();
-
 		// Updating
 		data.getResources().removeAll(resources);
 		data.getResources().addAll(resources);
