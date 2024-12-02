@@ -1,4 +1,4 @@
-package org.open4goods.api.services.completion;
+package org.open4goods.api.model;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonProperty;

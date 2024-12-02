@@ -29,6 +29,7 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.websocket.server.PathParam;
 
 /**
  * This controller allows informations and communications about DatasourceConfigurations
@@ -66,83 +67,49 @@ public class BatchController {
 		
 	}
 	@PutMapping(path="/batch/")
-	@Operation(summary="Launch the scoring and completion batch, iso has @Scheduled")
+	@Operation(summary="Launch the full batch (scoring, aggregation, completion batch), iso has @Scheduled")
 	@PreAuthorize("hasAuthority('"+RolesConstants.ROLE_ADMIN+"')")
-	public String batch( ) throws InvalidParameterException, JsonParseException, JsonMappingException, IOException, InterruptedException{
-		
+	public void batch( ) throws InvalidParameterException, JsonParseException, JsonMappingException, IOException, InterruptedException{
 		batchService.batch();
-		
-		return "done";
 	}
 	
-//	@PutMapping(path="/batch/verticals/")
-//	@Operation(summary="Create or update a vertical with a full yaml config. Can be long time processing")
-//	@PreAuthorize("hasAuthority('"+RolesConstants.ROLE_ADMIN+"')")
-//	public String fullUpdateFromConf( @RequestBody @NotBlank final String verticalConfig ) throws InvalidParameterException, JsonParseException, JsonMappingException, IOException, InterruptedException{
-//		
-//		// Adding the verticam to the vertical service
-//		VerticalConfig v = serialisationService.fromYaml(verticalConfig, VerticalConfig.class);
-//		verticalConfigService.addTmpConfig(v);
-//		
-//		// This is initial submission, batching the products to update catégories				
-//		aggregationFacadeService. sanitizeVertical(v);
-//		Thread.sleep(5000);
-//		aggregationFacadeService. score(v);
-//		
-//		return "done";
-//	}
-
-
-	@PostMapping(path="/full/verticals/")
-	@Operation(summary="Create or update a vertical with a given config name. Can be long time processing")
-	public String fullUpdateFromName( @RequestParam @NotBlank final String verticalConfig ) throws InvalidParameterException, JsonParseException, JsonMappingException, IOException, InterruptedException{
-		
-		// This is initial submission, batching the products to update catégories				
-		aggregationFacadeService.sanitizeVertical(verticalConfigService.getConfigById(verticalConfig));		
-		Thread.sleep(5000);
-		aggregationFacadeService. score(verticalConfigService.getConfigById(verticalConfig));
-		return "done";
-	}
-
-	
-	@PostMapping(path="/score/verticals/")
-	@Operation(summary="Score the vertical")
-	public String scoreFromName( @RequestParam @NotBlank final String verticalConfig ) throws InvalidParameterException, JsonParseException, JsonMappingException, IOException, InterruptedException{
-		
-		aggregationFacadeService. score(verticalConfigService.getConfigById(verticalConfig));
-		return "done";
+	@PostMapping(path="/batch/{vertical}")
+	@Operation(summary="Batch a specific vertical")
+	@PreAuthorize("hasAuthority('"+RolesConstants.ROLE_ADMIN+"')")
+	public void batchVertical( @PathVariable @NotBlank final String vertical ) throws InvalidParameterException, JsonParseException, JsonMappingException, IOException, InterruptedException{
+		batchService.batch(verticalConfigService.getConfigById(vertical));
 	}
 	
-	@GetMapping("/full/verticals")
-	@Operation(summary="Update all verticals (sanitisation + launch the scheduled batch that score all verticals)")
-	public void fullVerticals() throws InvalidParameterException, IOException, InterruptedException {
-		
-		aggregationFacadeService.sanitizeAllVerticals();	
-		Thread.sleep(5000);
-		aggregationFacadeService.scoreAll();
-	}
 
 	
-	@GetMapping("/score/verticals")
+	@PostMapping(path="/score/{vertical}")
+	@Operation(summary="Score a specific vertical")
+	public void scoreFromName(  @PathVariable @NotBlank final String vertical ) throws InvalidParameterException, JsonParseException, JsonMappingException, IOException, InterruptedException{
+		
+		aggregationFacadeService. score(verticalConfigService.getConfigById(vertical));
+	}
+	
+	
+	@GetMapping("/score/")
 	@Operation(summary="Score all verticals (sanitisation + launch the scheduled batch that score all verticals)")
 	public void scoreVerticals() throws InvalidParameterException, IOException, InterruptedException {
 		aggregationFacadeService.scoreAll();
 	}
 	
 	
-	@GetMapping("/sanitisation/verticals")
+	@GetMapping("/aggregate/verticals")
 	@Operation(summary="Launch sanitisation of verticals ID")
 	public void sanitizeVertical() throws InvalidParameterException, IOException {
 		aggregationFacadeService.sanitizeAllVerticals();
 	}
 	
-	@GetMapping("/sanitisation")
+	@GetMapping("/aggregate")
 	@Operation(summary="Launch sanitisation of all products")
 	public void sanitize() throws InvalidParameterException, IOException {
 		aggregationFacadeService.sanitizeAll();
 	}
 
-	@GetMapping("/sanitisation/{gtin}")
+	@GetMapping("/aggregate/{gtin}")
 	@Operation(summary="Launch sanitisation of a given products")
 	public void sanitizeOne(@PathVariable Long gtin ) throws InvalidParameterException, IOException, ResourceNotFoundException, AggregationSkipException {
 		aggregationFacadeService.sanitizeAndSave(repository.getById(gtin));

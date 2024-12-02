@@ -198,7 +198,7 @@ public class DataFragmentStoreService {
 				/////////////////////////////
 				
 				// Fastening, by checking if exaclty same datafragment than previously
-				Integer hash = data.getDatasourceCodes().get(df.getDatasourceName());				
+				Long hash = data.getDatasourceCodes().get(df.getDatasourceName());				
 				if (null != hash && hash.equals(df.getFragmentHashCode())) {
 					// We can proceed to partial update, we just update lasttimechange and prices
 					logger.info("Proceeding to partial update for {}",data.getId());
@@ -217,7 +217,7 @@ public class DataFragmentStoreService {
 				} else {
 					// Item has changed, we proceed to full update
 					logger.info("Proceeding to full update for {}",data.getId());
-					data.getDatasourceCodes().put(df.getDatasourceName(), df.getFragmentHashCode());
+					data.getDatasourceCodes().put(df.getDatasourceName(), Long.valueOf(df.getFragmentHashCode()));
 					
 					
 					// Proceeding to aggregation pipeline

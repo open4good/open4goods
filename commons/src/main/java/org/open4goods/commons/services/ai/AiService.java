@@ -124,6 +124,7 @@ public class AiService implements HealthIndicator{
 	public void complete(Product product, VerticalConfig verticalConfig, boolean force) {
 		// Discard if we do not have a minimum set of attributes, but applies if is in forced mode
 		if (!force && product.getAttributes().count() < MIN_REQUIRED_ATTRIBUTES) {
+			logger.error("Skipping because not enough attributes");
 			return;
 		}
 

@@ -2,12 +2,15 @@
 package org.open4goods.api.services;
 
 import java.io.IOException;
+import java.util.Set;
 
 import org.open4goods.api.services.completion.AmazonCompletionService;
 import org.open4goods.api.services.completion.GenAiCompletionService;
 import org.open4goods.api.services.completion.IcecatCompletionService;
 import org.open4goods.api.services.completion.ResourceCompletionService;
+import org.open4goods.commons.config.yml.ui.VerticalConfig;
 import org.open4goods.commons.exceptions.InvalidParameterException;
+import org.open4goods.commons.model.product.Product;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,6 +40,27 @@ public class CompletionFacadeService {
 		this.icecatCompletionService = icecatCompletionService;
 	}
 
+	
+	/**
+	 * Complete the provided products with all completors
+	 * @param products
+	 * @param vertical
+	 */
+	public void processAll(Set<Product> products, VerticalConfig vertical) {
+		logger.info("Completing {] products",products.size());
+		products.forEach(product -> {
+			resourceCompletionService.process(vertical, product);
+			icecatCompletionService.process(vertical, product);
+			aiCompletionService.process(vertical, product);
+			amazonCompletionService.process(vertical, product);
+		});
+		
+	}
+	
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	// TODO(P3,design) : Should be legacy, through a standard spring bean registration mechanism
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////	
+	
 	///////////////////////////////////
 	// Resource completion
 	///////////////////////////////////
@@ -69,5 +93,7 @@ public class CompletionFacadeService {
 		logger.warn("Completing verticals with icecat");
 		icecatCompletionService.completeAll(true);
 	}
+
+	
 
 }

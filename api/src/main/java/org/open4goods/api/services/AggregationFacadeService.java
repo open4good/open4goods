@@ -3,7 +3,7 @@ package org.open4goods.api.services;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
+import java.util.Set;
 
 import org.open4goods.api.config.yml.ApiProperties;
 import org.open4goods.api.services.aggregation.AbstractAggregationService;
@@ -25,10 +25,7 @@ import org.open4goods.commons.dao.ProductRepository;
 import org.open4goods.commons.exceptions.AggregationSkipException;
 import org.open4goods.commons.helper.GenericFileLogger;
 import org.open4goods.commons.model.data.DataFragment;
-import org.open4goods.commons.model.data.Resource;
 import org.open4goods.commons.model.product.Product;
-import org.open4goods.commons.model.product.ProductAttribute;
-import org.open4goods.commons.model.product.SourcedAttribute;
 import org.open4goods.commons.services.BarcodeValidationService;
 import org.open4goods.commons.services.BrandService;
 import org.open4goods.commons.services.DataSourceConfigService;
@@ -146,6 +143,23 @@ public class AggregationFacadeService {
 
 	}
 	
+	/**
+	 * Score verticals with the batch Aggragator
+	 * @throws AggregationSkipException 
+	 */
+	public void score(VerticalConfig vertical, Set<Product> products)  {
+
+		logger.info("Score batching for {} products in {}", products.size(), vertical.getId());
+
+		ScoringBatchedAggregator batchAgg = getScoringAggregator();
+
+		// Batched (scoring) aggregation
+		try {
+			batchAgg.score(products, verticalConfigService.getConfigByIdOrDefault(vertical.getId()));
+		} catch (AggregationSkipException e) {
+			logger.error("Skipping product during batched scoring : ",e);
+		}
+	}
 
 	/**
 	 * Launch batch sanitization : on a vertical if specified, on all items if not
@@ -155,7 +169,7 @@ public class AggregationFacadeService {
 	public void sanitizeAll()  {
 
 			logger.info("started : Sanitisation batching for all items");
-			StandardAggregator batchAgg = getFullSanitisationAggregator();
+			StandardAggregator batchAgg = getStandardAggregator();
 
 			// TODO : Performance, could parallelize
 			dataRepository.exportAll().forEach(p -> {
@@ -194,14 +208,14 @@ public class AggregationFacadeService {
 		}
 	}
 	/**
-	 * Launch batch sanitization : on a vertical if specified, on all items if not
+	 * Launch batch sanitization : with direct persistence
 	 * Sanitizer aggregator
 	 * @throws AggregationSkipException 
 	 */
 	public void sanitizeVertical(VerticalConfig vertical)  {
 
 			logger.info("started : Sanitisation batching for vertical : {}",vertical);
-			StandardAggregator batchAgg = getFullSanitisationAggregator();
+			StandardAggregator batchAgg = getStandardAggregator();
 
 			// TODO : Performance, could parallelize
 			// Note : a strong choice to rely on categories, to replay aggregation process from unmapped / unverticalized items
@@ -215,6 +229,52 @@ public class AggregationFacadeService {
             });
 			logger.info("done: Sanitisation batching for all items");			
 	}
+
+	
+	/**
+	 * Operates sanitisation on a collection of provided products, no persistence
+	 * @param vertical
+	 * @param products
+	 */
+	public void sanitizeProducts(VerticalConfig vertical, Set<Product> products)  {
+
+		logger.info("started : Sanitisation batching for {} products in vertical : {}",products.size(),  vertical);
+		StandardAggregator batchAgg = getStandardAggregator();
+
+		// TODO : Performance, could parallelize
+		// Note : a strong choice to rely on categories, to replay aggregation process from unmapped / unverticalized items
+		products.forEach(p -> {
+            try {
+				batchAgg.onProduct(p);
+			} catch (AggregationSkipException e) {
+				logger.error("Skipping product during batched sanitisation : ",e);
+			}
+        });
+		logger.info("done: Sanitisation batching for all items");			
+}
+
+	/**
+	 * Operates simple vertical (de) classification 
+	 * @param vertical
+	 * @param products
+	 */
+	public void classificationAggregator(VerticalConfig vertical, Set<Product> products)  {
+
+		logger.info("started : Sanitisation batching for {} products in vertical : {}",products.size(),  vertical);
+		StandardAggregator batchAgg = getCategorieClassificationAggregator();
+
+		// TODO : Performance, could parallelize
+		// Note : a strong choice to rely on categories, to replay aggregation process from unmapped / unverticalized items
+		products.forEach(p -> {
+            try {
+				batchAgg.onProduct(p);
+			} catch (AggregationSkipException e) {
+				logger.error("Skipping product during batched sanitisation : ",e);
+			}
+        });
+		logger.info("done: classification");			
+}
+
 	
 	
 	/**
@@ -224,7 +284,7 @@ public class AggregationFacadeService {
 	 */
 	// TODO(p3,design) : not a good design
 	public void sanitizeAndSave(Product product) throws AggregationSkipException {
-		sanitize(product);
+		aggregate(product);
 	    dataRepository.forceIndex(product);
 		logger.info("done : Sanitisation batching for {}", product);		
 	}
@@ -234,9 +294,9 @@ public class AggregationFacadeService {
 	 * @param product
 	 * @throws AggregationSkipException 
 	 */
-	public void sanitize(Product product) throws AggregationSkipException {
+	public void aggregate(Product product) throws AggregationSkipException {
 		logger.info("started : Sanitisation batching for {}",product);
-		StandardAggregator batchAgg = getFullSanitisationAggregator();
+		StandardAggregator batchAgg = getStandardAggregator();
 
 	    batchAgg.onProduct(product);
 		logger.info("done : Sanitisation batching for {}", product);		
@@ -292,6 +352,28 @@ public class AggregationFacadeService {
 
 		return ret;
 	}
+	
+	/**
+	 * Return an instance of realtime aggregator
+	 * @param config
+	 * @return
+	 */
+	public StandardAggregator getCategorieClassificationAggregator() {		
+		
+		Logger logger = GenericFileLogger.initLogger("categores_classif", apiProperties.aggLogLevel(), apiProperties.logsFolder()+"/aggregation");
+
+		final List<AbstractAggregationService> services = new ArrayList<>();
+		
+		services.add(new IdentityAggregationService( logger, gs1prefixService,barcodeValidationService));
+		services.add(new TaxonomyRealTimeAggregationService(  logger, verticalConfigService, taxonomyService));
+		
+		final StandardAggregator ret = new StandardAggregator(services, verticalConfigService);
+		autowireBeanFactory.autowireBean(ret);
+
+		return ret;
+	}
+	
+	
 
 	/**
 	 * The aggregator used to batch score verticals
@@ -322,7 +404,7 @@ public class AggregationFacadeService {
 	 * @param config
 	 * @return
 	 */
-	public StandardAggregator getFullSanitisationAggregator() {
+	public StandardAggregator getStandardAggregator() {
 		return getStandardAggregator("sanitisation");
 	}
 
