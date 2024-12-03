@@ -51,7 +51,7 @@ public class VerticalSearchResponse {
 	
 	private List<VerticalFilterTerm> brands = new ArrayList<>();
 	private List<VerticalFilterTerm> countries = new ArrayList<>();
-
+	private List<VerticalFilterTerm> excluded = new ArrayList<>();
 	
 	// TODO(design, p2)  : Bad design 
 	private Map<String,NumericRangeFilter> numericFilters = new HashMap<>();
@@ -313,6 +313,14 @@ public class VerticalSearchResponse {
 
 	public void setPriceDecreasing(Long priceDecreasing) {
 		this.priceDecreasing = priceDecreasing;
+	}
+
+	public List<VerticalFilterTerm> getExcluded() {
+		return excluded;
+	}
+
+	public void setExcluded(List<VerticalFilterTerm> excluded) {
+		this.excluded = excluded;
 	}
 
 }

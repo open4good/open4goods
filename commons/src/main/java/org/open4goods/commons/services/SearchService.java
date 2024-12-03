@@ -145,7 +145,12 @@ public class SearchService {
 		Criteria criterias = new Criteria("vertical").is(vertical.getId())
 				.and(aggregatedDataRepository.getRecentPriceQuery())
 				;
-
+		
+		// Adding the filter on excluded if set
+		if (!request.isExcluded()) {
+			criterias.and(new Criteria("excluded").is(false));
+		}
+		
 
 		// Adding custom numeric filters
 		for (NumericRangeFilter filter : request.getNumericFilters()) {
@@ -211,7 +216,7 @@ public class SearchService {
 //				.withAggregation("max_offers", 	Aggregation.of(a -> a.max(ta -> ta.field("offersCount"))))
 				.withAggregation("conditions", 	Aggregation.of(a -> a.terms(ta -> ta.field("price.conditions").missing(MISSING_BUCKET).size(3)))	)
 				.withAggregation("trend", 	Aggregation.of(a -> a.terms(ta -> ta.field("price.trend").size(3)))	)
-				
+				.withAggregation("excluded", 	Aggregation.of(a -> a.terms(ta -> ta.field("excluded").size(2)))	)				
 				.withAggregation("brands", 	Aggregation.of(a -> a.terms(ta -> ta.field("attributes.referentielAttributes.BRAND").missing(MISSING_BUCKET).size(AGGREGATION_BUCKET_SIZE)  ))	)
 				.withAggregation("country", 	Aggregation.of(a -> a.terms(ta -> ta.field("gtinInfos.country").missing(MISSING_BUCKET).size(AGGREGATION_BUCKET_SIZE)  ))	)
 				
@@ -355,7 +360,7 @@ public class SearchService {
 		vsr.getBrands().sort((o1, o2) -> o2.getCount().compareTo(o1.getCount()));
 
 		///////
-		// Brands
+		// Countries
 		///////
 
 		StringTermsAggregate countries  =  aggregations.get("country").aggregation().getAggregate().sterms() ;
@@ -364,7 +369,17 @@ public class SearchService {
 		}
 		vsr.getCountries().sort((o1, o2) -> o2.getCount().compareTo(o1.getCount()));
 
+		///////
+		// excluded
+		///////
 
+		LongTermsAggregate excluded  =  aggregations.get("excluded").aggregation().getAggregate().lterms() ;
+		for (LongTermsBucket b :   excluded.buckets().array()) {
+			vsr.getExcluded().add (new VerticalFilterTerm(b.keyAsString(), b.docCount()));
+		}
+		vsr.getExcluded().sort((o1, o2) -> o2.getCount().compareTo(o1.getCount()));
+
+		
 		//////////////
 		/// Attr filters
 		//////////////

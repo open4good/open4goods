@@ -26,6 +26,15 @@
          </th:block>       
     </th:block>
     
+        <!-- The brand condition -->
+    <th:block th:if="${user}" th:with="id='excluded',
+                       title='Exclus',
+                       icon='fa-excluded',                    
+                       visibleSection=10,
+                       terms=${products.excluded}"
+                       >
+        <th:block th:insert="~{inc/vertical-filter-item-terms.html}"></th:block>
+    </th:block> 
     
 </div>
 

@@ -236,7 +236,7 @@ public class AggregationFacadeService {
 	 * @param vertical
 	 * @param products
 	 */
-	public void sanitizeProducts(VerticalConfig vertical, Set<Product> products)  {
+	public void aggregateProducts(VerticalConfig vertical, Set<Product> products)  {
 
 		logger.info("started : Sanitisation batching for {} products in vertical : {}",products.size(),  vertical);
 		StandardAggregator batchAgg = getStandardAggregator();
