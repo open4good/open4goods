@@ -98,7 +98,7 @@ public class Product implements Standardisable {
 	private Set<String> akaModels = new HashSet<>();
 	
 	
-	/** The list of other id's known for this product **/
+	/** The list of other brands known for this product **/
 	private Map<String,String> akaBrands = new HashMap<String, String>(); 
 	
 		
@@ -611,14 +611,18 @@ public class Product implements Standardisable {
 		String model = StringUtils.normalizeSpace(value).toUpperCase();
 		
 		// TODO(conf,p2) : Eviction size from conf
-		if (StringUtils.isEmpty(value) || value.length() < 3) {
+		if (StringUtils.isEmpty(model) || model.length() < 3) {
 			return;
 		}
 		// Splitting on conventionnal suffixes (/ - .)
 		// TODO(conf,p2) : splitters from Const / conf
 		String[]frags = model.split("/|\\|.|-");
 
-		akaModels.add(value);
+		
+		if (!model.equals(model())) {
+			akaModels.add(model);
+		}
+		
 		if (frags.length > 1) {
 			logger.info("Found an alternative model : " + frags[0]);
 			akaModels.add(frags[0]);
@@ -638,6 +642,42 @@ public class Product implements Standardisable {
 		}		
 	}
 
+	/**
+	 * Add the brand referentiel attribute, applying some sanitisation mechanism
+	 * @param value
+	 */
+	public void addBrand(String datasource, String value, Set<String> brandExclusions, Map<String,String> brandsMappings) {
+		
+		if (StringUtils.isEmpty(value)) {
+			return;
+		}
+		
+		String brand = StringUtils.stripAccents(StringUtils.normalizeSpace(value)).toUpperCase();
+		
+		if (null != brandExclusions && brandExclusions.contains(brand)) {
+			logger.info("Excluding brand {}", brand);
+			return;
+		}
+		
+		if (null != brandsMappings) {
+			String replacement = brandsMappings.get(brand);
+			if (null != replacement) {
+				brand = replacement;
+				logger.info("replacing brand {} with {}", brand, replacement);
+			}
+		}
+		
+		
+		if (StringUtils.isEmpty(brand()) ) {
+			attributes.addReferentielAttribute(ReferentielKey.BRAND, brand);
+		} else {
+			if (!akaBrands.values().contains(brand)) {
+				akaBrands.put(datasource, brand);
+			}
+			
+		}		
+	}
+	
 	/**
 	 * 
 	 * @return the shortest model name	

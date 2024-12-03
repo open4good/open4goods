@@ -84,6 +84,7 @@ public class BatchController {
 	
 	@PostMapping(path="/score/{vertical}")
 	@Operation(summary="Score a specific vertical")
+	@PreAuthorize("hasAuthority('"+RolesConstants.ROLE_ADMIN+"')")
 	public void scoreFromName(  @PathVariable @NotBlank final String vertical ) throws InvalidParameterException, JsonParseException, JsonMappingException, IOException, InterruptedException{
 		
 		aggregationFacadeService. score(verticalConfigService.getConfigById(vertical));
@@ -92,25 +93,37 @@ public class BatchController {
 	
 	@GetMapping("/score/")
 	@Operation(summary="Score all verticals (sanitisation + launch the scheduled batch that score all verticals)")
+	@PreAuthorize("hasAuthority('"+RolesConstants.ROLE_ADMIN+"')")
 	public void scoreVerticals() throws InvalidParameterException, IOException, InterruptedException {
 		aggregationFacadeService.scoreAll();
 	}
 	
 	
 	@GetMapping("/aggregate/verticals")
-	@Operation(summary="Launch sanitisation of verticals ID")
-	public void sanitizeVertical() throws InvalidParameterException, IOException {
+	@Operation(summary="Launch aggregation of all verticals")
+	@PreAuthorize("hasAuthority('"+RolesConstants.ROLE_ADMIN+"')")	
+	public void sanitizeAllVertical() throws InvalidParameterException, IOException {
 		aggregationFacadeService.sanitizeAllVerticals();
 	}
+
+	@GetMapping("/aggregate/verticals/{vertical}")
+	@Operation(summary="Launch aggregation of a specific vertical")
+	@PreAuthorize("hasAuthority('"+RolesConstants.ROLE_ADMIN+"')")	
+	public void sanitizeSpecificVertical(@PathVariable String vertical) throws InvalidParameterException, IOException {
+		aggregationFacadeService.sanitizeVertical(verticalConfigService.getConfigById(vertical));
+	}
 	
-	@GetMapping("/aggregate")
-	@Operation(summary="Launch sanitisation of all products")
+	
+	@GetMapping("/aggregate/products")
+	@Operation(summary="Launch aggregation of all products")
+	@PreAuthorize("hasAuthority('"+RolesConstants.ROLE_ADMIN+"')")	
 	public void sanitize() throws InvalidParameterException, IOException {
 		aggregationFacadeService.sanitizeAll();
 	}
 
-	@GetMapping("/aggregate/{gtin}")
+	@GetMapping("/aggregate/gtin/{gtin}")
 	@Operation(summary="Launch sanitisation of a given products")
+	@PreAuthorize("hasAuthority('"+RolesConstants.ROLE_ADMIN+"')")	
 	public void sanitizeOne(@PathVariable Long gtin ) throws InvalidParameterException, IOException, ResourceNotFoundException, AggregationSkipException {
 		aggregationFacadeService.sanitizeAndSave(repository.getById(gtin));
 	}
