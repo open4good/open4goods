@@ -72,8 +72,6 @@ public class VerticalConfig{
 	@JsonMerge
 	private GenAiConfig genAiConfig = new GenAiConfig();
 	
-
-	
 	/**
 	 * The list of filters to be added to the ecological filters group
 	 */
@@ -102,7 +100,11 @@ public class VerticalConfig{
 	 */
 	private Set<String> unmatchingCategories = new HashSet<>();
 
-
+	/**
+	 * The attributes that must be present. If not, the product will have excluded set to true
+	 */
+	private Set<String> requiredAttributes = new HashSet<String>();
+	
 	/**
 	 * Configuration for commentsConfig aggregation (tagcloud rules, ...)
 	 */
@@ -716,6 +718,14 @@ public class VerticalConfig{
 
 	public void setEnabled(boolean enabled) {
 		this.enabled = enabled;
+	}
+
+	public Set<String> getRequiredAttributes() {
+		return requiredAttributes;
+	}
+
+	public void setRequiredAttributes(Set<String> requiredAttributes) {
+		this.requiredAttributes = requiredAttributes;
 	}
 
 	

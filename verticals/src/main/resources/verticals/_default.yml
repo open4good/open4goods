@@ -46,6 +46,9 @@ i18n:
 #          prompt: "écris un texte de maximum 100 mots, dans un style académique, une analyse de l'impact environnemental de [(${p.brand()})] [(${p.model()})], sur la base des caracteriques suivantes : [(${p.caracteristics()})]"
 
 
+
+requiredAttributes:
+#  - WEIGHT
 ####################################################################################
 # RESOURCES CONFIGURATION
 ####################################################################################  
