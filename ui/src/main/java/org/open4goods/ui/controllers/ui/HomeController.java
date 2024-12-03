@@ -2,6 +2,7 @@ package org.open4goods.ui.controllers.ui;
 
 import org.open4goods.commons.dao.ProductRepository;
 import org.open4goods.commons.services.DataSourceConfigService;
+import org.open4goods.commons.services.GoogleTaxonomyService;
 import org.open4goods.commons.services.VerticalsConfigService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,10 +23,13 @@ public class HomeController  {
 	private @Autowired UiService uiService;
 	private final VerticalsConfigService verticalConfigService;
 
-	public HomeController(ProductRepository aggregatedDataRepository, DataSourceConfigService datasourceConfigService, VerticalsConfigService verticalConfigService) {
+	private GoogleTaxonomyService googleTaxonomyService;
+
+	public HomeController(ProductRepository aggregatedDataRepository, DataSourceConfigService datasourceConfigService, VerticalsConfigService verticalConfigService, GoogleTaxonomyService googleService) {
 		this.aggregatedDataRepository = aggregatedDataRepository;
 		this.datasourceConfigService = datasourceConfigService;
 		this.verticalConfigService = verticalConfigService;
+		this.googleTaxonomyService = googleService;
 	}
 
 
@@ -46,7 +50,7 @@ public class HomeController  {
 		}
 
 		model.addObject("url",  "/");
-
+		model.addObject("googleProductService", googleTaxonomyService);
 		return model;
 	}
 
