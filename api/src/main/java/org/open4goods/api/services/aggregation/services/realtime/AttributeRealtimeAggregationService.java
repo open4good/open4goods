@@ -1,10 +1,8 @@
 package org.open4goods.api.services.aggregation.services.realtime;
 
-import java.util.Collection;
 import java.util.HashMap;
-import java.util.List;
+import java.util.HashSet;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -20,7 +18,6 @@ import org.open4goods.commons.exceptions.ValidationException;
 import org.open4goods.commons.model.attribute.Attribute;
 import org.open4goods.commons.model.constants.ReferentielKey;
 import org.open4goods.commons.model.data.DataFragment;
-import org.open4goods.commons.model.product.AggregatedFeature;
 import org.open4goods.commons.model.product.IndexedAttribute;
 import org.open4goods.commons.model.product.Product;
 import org.open4goods.commons.model.product.ProductAttribute;
@@ -53,30 +50,33 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 		//////////////////////////////////////////
 
 		// Remove excluded attributes
-		// TODO / Usefull for batch mode, could remove once initial sanitization
+		// TODO(p3,perf) / Usefull for batch mode, could remove once initial sanitization
 		vConf.getAttributesConfig().getExclusions().forEach(e -> {
 			data.getAttributes().getAll().remove(e);
 		});
 
-		// NOTE(p3,design) : Remove, this is some kind of legacy bug, some attributes have uncoherent and too many sources. Hope this is a done bug..
-		// data.getAttributes().getAll().keySet().removeIf(e-> data.getAttributes().getAll().get(e).sourcesCount() > 10);
 		
-		
-		//////////////////////////////////////////////////////////////////////////
-		// Checking if all mandatory attributes are present for this product
-		//////////////////////////////////////////////////////////////////////////
-//		if (!data.getAttributes().getAggregatedAttributes().keySet().containsAll(vConf.getAttributesConfig().getMandatory())) {
-//			// Missing attributes.
-//
-//			Set<String> missing = vConf.getAttributesConfig().getMandatory();
-//			missing.removeAll(data.getAttributes().getAggregatedAttributes().keySet());
-//
-//			dedicatedLogger.warn("{} excluded from {}. Missing mandatory attributes : {}", data.getId(), vConf.getId(), missing);
-//			data.setExcluded(true);
-//		} else {
-//			data.setExcluded(false);
-//		}
 
+		/////////////////////////////////////////////////
+		// Cleaning brands
+		// NOTE : Should be disabled after recovery batch, but need to be run each time to
+		// take in account modifications of configurable brandAlias() and brandExclusions()
+		/////////////////////////////////////////////////
+		
+		String actualBrand = data.brand();
+		Map<String,String> akaBrands = new HashMap<>(data.getAkaBrands());
+		
+		data.getAttributes().getReferentielAttributes().remove(ReferentielKey.BRAND);
+		data.akaBrands().clear();
+		data.addBrand(null, actualBrand, vConf.getBrandsExclusion(), vConf.getBrandsAlias());
+		
+		akaBrands.entrySet().forEach(e -> {
+			data.addBrand(e.getKey(), e.getValue(), vConf.getBrandsExclusion(), vConf.getBrandsAlias());
+		});
+		
+		
+		
+		
 		// Attributing taxomy to attributes
 		data.getAttributes().getAll().values().forEach(a -> {
 			Set<Integer> icecatTaxonomyIds = featureService.resolveFeatureName(a.getName());
@@ -98,14 +98,8 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 		for (ProductAttribute attr : data.getAttributes().getAll().values()) {
 
 			// Checking if a potential AggregatedAttribute
-			// TODO(P1) : Detect and parse from the icecat taxonomy
-			
 			AttributeConfig attrConfig = attributesConfig.resolveFromProductAttribute(attr);
 			
-			
-			
-			//String indexedName = attributesConfig.indexedAttributeNameOrNull(attr);
-
 			// We have a "raw" attribute that matches an aggregationconfig
 			if (null != attrConfig) {
 
@@ -171,7 +165,7 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 		}
 		
 		Set<String> attrKeys = data.getAttributes().getattributesAsStringKeys();
-		if (!attrKeys.containsAll(vConf.getRequiredAttributes())) {
+		if (vConf.getRequiredAttributes() != null && !attrKeys.containsAll(vConf.getRequiredAttributes())) {
 			dedicatedLogger.warn("Excluded because attributes are missing : {}", data );
 			return true;
 		}
@@ -179,19 +173,7 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 		return false;
 	}
 
-	
-	// EXTRACTING FEATURES ATTRIBUTES
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
+
 	
 	/**
 	 * On data fragment agg leveln we increment the "all" field, with sourced values
@@ -203,10 +185,6 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 	 */
 	@Override
 	public Map<String, Object> onDataFragment(final DataFragment dataFragment, final Product product, VerticalConfig vConf) throws AggregationSkipException {
-
-		if (dataFragment.getAttributes().size() == 0) {
-			return null;
-		}
 
 		try {
 
@@ -244,48 +222,12 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 			/////////////////////////////////////////
 			// Update referentiel attributes
 			/////////////////////////////////////////
-			handleReferentielAttributes(dataFragment, product);
+			handleReferentielAttributes(dataFragment, product, vConf);
 			// TODO : Add BRAND / MODEL from matches from attributes
 
-			//////////////////////////
-			// Aggregating unmatched attributes
-			///////////////////////////
-
-//			for (Attribute attr : dataFragment.getAttributes()) {
-//				// Checking if to be removed
-////				if (toRemoveFromUnmatched.contains(attr.getName())) {
-////					continue;
-////				}
-//
-//				// TODO : remove from a config list
-//
-//				ProductAttribute agg = product.getAttributes().getUnmapedAttributes().stream().filter(e -> e.getName().equals(attr.getName())).findAny().orElse(null);
-//
-//				if (null == agg) {
-//					// A first time match
-//					agg = new ProductAttribute();
-//					agg.setName(attr.getName());
-//				}
-//				agg.addAttribute(attr, new UnindexedKeyValTimestamp(dataFragment.getDatasourceName(), attr.getValue()));
-//
-//				product.getAttributes().getUnmapedAttributes().add(agg);
-//			}
-
-			// Removing
-//			product.getAttributes().setUnmapedAttributes(product.getAttributes().getUnmapedAttributes().stream()
-//					// TODO : Should be from path
-//					// TODO : apply from sanitisation
-//					.filter(e -> !e.getName().contains("CATEGORY")) 
-////					.filter(e -> !toRemoveFromUnmatched.contains(e.getName())) 
-//					.collect(Collectors.toSet()));
-
-			// TODO : Removing matchlist again to handle remove of old attributes in case of
-			// configuration change
-//		product.getAttributes().getUnmapedAttributes().
+	
 		} catch (Exception e) {
-			// TODO
 			dedicatedLogger.error("Unexpected error", e);
-			e.printStackTrace();
 		}
 
 		onProduct(product, vConf);
@@ -375,49 +317,48 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 	 * @param output   The product output to which referential attributes are to be
 	 *                 added or updated.
 	 */
-	private void handleReferentielAttributes(DataFragment fragment, Product output) {
-		for (Entry<ReferentielKey, String> attr : fragment.getReferentielAttributes().entrySet()) {
-			ReferentielKey key = attr.getKey();
-			String value = attr.getValue().toUpperCase();
+	private void handleReferentielAttributes(DataFragment fragment, Product output, VerticalConfig vConf) {
+		
+		///////////////////////
+		// Adding brand
+		///////////////////////
+		String brand = fragment.brand();
+		if (!StringUtils.isEmpty(brand)) {
+			output.addBrand(fragment.getDatasourceName(), brand, vConf.getBrandsExclusion(), vConf.getBrandsAlias());
+		}
+		
+		
+		///////////////////////
+		// Adding model
+		///////////////////////
+		String model = fragment.getReferentielAttributes().get(ReferentielKey.MODEL);
+		if (!StringUtils.isEmpty(model)) {
+			output.addModel(model);
+		}
 
-			if (StringUtils.isEmpty(value)) {
-				continue;
-			}
-
-			String existing = output.getAttributes().getReferentielAttributes().get(key);
-
-			if (StringUtils.isEmpty(existing)) {
-				output.getAttributes().addReferentielAttribute(key, value);
-			} else if (!existing.equals(value)) {
-				// We have a variation !
-				switch (key) {
-				case MODEL:
-					dedicatedLogger.info("Adding different {} name as alternate id. Existing is {}, would have erased with {}", key, existing, value);
-					output.addModel(value);
-					break;
-				case BRAND:				
-					output.getAkaBrands().put(fragment.getDatasourceName(), value);
-					break;
-				case GTIN:
-					if (value != null && !existing.equals(value)) {
-						try {
-							long existingGtin = Long.parseLong(existing);
-							long newGtin = Long.parseLong(value);
-							if (existingGtin != newGtin) {
-								dedicatedLogger.error("Overriding GTIN from {} to {}", existing, newGtin);
-								output.getAttributes().getReferentielAttributes().put(ReferentielKey.GTIN, value);
-							} 
-						} catch (NumberFormatException e) {
-							dedicatedLogger.error("Invalid GTIN format: existing = {}, new = {}", existing, value, e);
-						}
-					}
-					break;
-				default:
-					dedicatedLogger.warn("Skipping referential attribute erasure for {}. Existing is {}, would have erased with {}", key, existing, value);
-					break;
+		///////////////////////
+		// Handling gtin (NOTE : useless since gtin is used as ID, so coupling is done previously
+		///////////////////////
+		String gtin = fragment.gtin();
+		if (!StringUtils.isEmpty(gtin)) {
+			String existing = output.gtin();
+			
+			if (!existing.equals(gtin)) {
+				try {
+					long existingGtin = Long.parseLong(existing);
+					long newGtin = Long.parseLong(gtin);
+					if (existingGtin != newGtin) {
+						dedicatedLogger.error("Overriding GTIN from {} to {}", existing, newGtin);
+						output.getAttributes().getReferentielAttributes().put(ReferentielKey.GTIN, gtin);
+					} 
+				} catch (NumberFormatException e) {
+					dedicatedLogger.error("Invalid GTIN format: existing = {}, new = {}", existing, gtin, e);
 				}
 			}
+			
 		}
+		
+	
 	}
 
 	/**

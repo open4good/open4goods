@@ -103,6 +103,7 @@ public class VerticalConfig{
 	/**
 	 * The attributes that must be present. If not, the product will have excluded set to true
 	 */
+	@JsonMerge
 	private Set<String> requiredAttributes = new HashSet<String>();
 	
 	/**
@@ -111,8 +112,23 @@ public class VerticalConfig{
 	@JsonMerge
 	private CommentsAggregationConfig commentsConfig = new CommentsAggregationConfig();
 
+	/**
+	 * The company (sustainalytics form) that operates the brand
+	 */
 	@JsonMerge
 	private Map<String, String> brandsCompanyMapping = new HashMap<>();
+	
+	
+	@JsonMerge
+	/**
+	 * Brand alias mappings (eg : LG ELECTRONICS : LG)
+	 */
+	private Map<String, String> brandsAlias = new HashMap<>();
+	
+	/**
+	 * The brands that must be removes (eg. NON COMMUNIQUE)
+	 */
+	private Set<String> brandsExclusion = new HashSet<String>();
 	
 	
 	/**
@@ -726,6 +742,22 @@ public class VerticalConfig{
 
 	public void setRequiredAttributes(Set<String> requiredAttributes) {
 		this.requiredAttributes = requiredAttributes;
+	}
+
+	public Map<String, String> getBrandsAlias() {
+		return brandsAlias;
+	}
+
+	public void setBrandsAlias(Map<String, String> brandsAlias) {
+		this.brandsAlias = brandsAlias;
+	}
+
+	public Set<String> getBrandsExclusion() {
+		return brandsExclusion;
+	}
+
+	public void setBrandsExclusion(Set<String> brandsExclusion) {
+		this.brandsExclusion = brandsExclusion;
 	}
 
 	

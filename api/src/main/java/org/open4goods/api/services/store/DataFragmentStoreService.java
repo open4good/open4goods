@@ -199,7 +199,7 @@ public class DataFragmentStoreService {
 				
 				// Fastening, by checking if exaclty same datafragment than previously
 				Long hash = data.getDatasourceCodes().get(df.getDatasourceName());				
-				if (null != hash && hash.equals(df.getFragmentHashCode())) {
+				if (null != hash && hash.equals(Long.valueOf(df.getFragmentHashCode()))) {
 					// We can proceed to partial update, we just update lasttimechange and prices
 					logger.info("Proceeding to partial update for {}",data.getId());
 					// Updating price

@@ -22,13 +22,6 @@ public class AttributesConfig {
 
 
 	/**
-	 * The mandatoryattributes
-	 */
-	@JsonMerge
-	private Set<String> mandatory = new HashSet<>();
-
-	
-	/**
 	 * The specific configs configurations
 	 */
 	@JsonMerge
@@ -145,6 +138,11 @@ public class AttributesConfig {
 	}
 
 
+	/**
+	 * Resolve a product attribute against icecat taxonomy or faalback on attributes config 
+	 * @param attr
+	 * @return
+	 */
 	public AttributeConfig resolveFromProductAttribute(ProductAttribute attr) {
 	
 		AttributeConfig ret = null;
@@ -275,16 +273,6 @@ public class AttributesConfig {
 
 	public void setExclusions(Set<String> exclusions) {
 		this.exclusions = exclusions;
-	}
-
-
-	public Set<String> getMandatory() {
-		return mandatory;
-	}
-
-
-	public void setMandatory(Set<String> mandatory) {
-		this.mandatory = mandatory;
 	}
 
 
