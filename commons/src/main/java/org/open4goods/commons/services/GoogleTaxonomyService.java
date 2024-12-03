@@ -145,6 +145,15 @@ public class GoogleTaxonomyService {
 	}
 
 	/**
+	 * Return a product category by its ID
+	 * @param id
+	 * @return
+	 */
+	public ProductCategory byId(Integer id) {
+		return categoriesById.get(id);
+	}
+	
+	/**
 	 * 
 	 * @param v
 	 */
@@ -200,6 +209,22 @@ public class GoogleTaxonomyService {
 		
 		return deepest;
 				
+	}
+	
+	
+	/**
+	 * Retuen all leafes having vertical for a given category
+	 * @param googleTaxonomyId
+	 * @return
+	 */
+	public List<ProductCategory> leafs (Integer googleTaxonomyId) {
+		ProductCategory ret = categoriesById.get(googleTaxonomyId);
+		
+		if (null == ret) {
+			return new ArrayList<ProductCategory>();
+		}else {
+			return ret.leafs(true);
+		}
 	}
 	
 	/**

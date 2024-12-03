@@ -92,9 +92,9 @@ public class UrlHandlerMappingConfig {
 		// Adding all categories path were we have a vertical id
 		//////////////////////////////////////////////////////////
 		// TODO(P3,i18n) : i18n
-		urlMap.put("categories", new CategoryController(uiService, googleTaxonomyService.getCategories().asRootNode()));
+		urlMap.put("categories", new CategoryController(uiService, googleTaxonomyService.getCategories().asRootNode(), googleTaxonomyService));
 		for (Entry<String, ProductCategory> category: googleTaxonomyService.getCategories().paths("fr").entrySet()) {
-			urlMap.put("categories/"+category.getKey(), new CategoryController(uiService, category.getValue()));
+			urlMap.put("categories/"+category.getKey(), new CategoryController(uiService, category.getValue(), googleTaxonomyService));
 		}
 		
 		

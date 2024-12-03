@@ -149,13 +149,13 @@
                          <div th:unless="${category.children.contains(child)}" class="card shadow border-gray-300 mt-2">
                              
                              <div class="card-body text-center">                                 
-                                 <a th:unless="${child.vertical == null}" th:href="'/'+ ${child.vertical.i18n.get(siteLanguage).verticalHomeUrl}">
-                                    <span class="text-center h4 card-title" th:text="${child.googleNames.i18n(siteLanguage)}"></span>
-                                 <!-- Title -->
-                                     <img th:if="${child.vertical}" th:src="'/images/verticals/' + ${child.vertical.id} + '.jpg'" class="image-fluid p-4 card-img-top rounded-top" th:alt="${child.googleNames.i18n(siteLanguage)}">
-                                </a>
+		                                <a th:unless="${child.vertical == null}" th:href="'/'+ ${child.vertical.i18n.get(siteLanguage).verticalHomeUrl}">
+		                                    <span class="text-center h4 card-title" th:text="${child.googleNames.i18n(siteLanguage)}"></span>
+		                                 <!-- Title -->
+		                                    <img th:if="${child.vertical}" th:src="'/images/verticals/' + ${child.vertical.id} + '.jpg'" class="image-fluid p-4 card-img-top rounded-top" th:alt="${child.googleNames.i18n(siteLanguage)}">
+		                                </a>
                                         <div th:if="${user}">
-								             <a type="submit" class="btn text-center btn-warning btn-sm" th:href="'/images/verticals/' + ${child.vertical.id} + '.jpg/delete'">Changer l'image</a>
+								            <a type="submit" class="btn text-center btn-warning btn-sm" th:href="'/images/verticals/' + ${child.vertical.id} + '.jpg/delete'">Changer l'image</a>
 								       </div>
                              </div>
                          </div>

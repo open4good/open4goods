@@ -1,6 +1,7 @@
 package org.open4goods.ui.controllers.ui;
 
 import org.open4goods.commons.model.ProductCategory;
+import org.open4goods.commons.services.GoogleTaxonomyService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.servlet.ModelAndView;
@@ -20,10 +21,12 @@ public class CategoryController  extends AbstractController {
 	private static final Logger LOGGER = LoggerFactory.getLogger(CategoryController.class);
 	private  final UiService uiService;
 	private ProductCategory category;
+	private GoogleTaxonomyService googleService;
 
-	public CategoryController( UiService uiService, ProductCategory productCategory) {
+	public CategoryController( UiService uiService, ProductCategory productCategory, GoogleTaxonomyService googleService) {
 		this.uiService = uiService;
 		this.category = productCategory;
+		this.googleService = googleService;
 	}
 
 	//////////////////////////////////////////////////////////////
@@ -38,6 +41,7 @@ public class CategoryController  extends AbstractController {
 
 		ret.addObject("category", category);
 		ret.addObject("havingVertical",true);
+		ret.addObject("googleProductService", googleService);
 		return ret;
 	}
 
