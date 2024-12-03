@@ -402,27 +402,22 @@
 </script>
 
 <script>
-
 function createChartInterval(chartId, intervalDatas, verticalName) {
-    
     ///////////////////////
     // Chart.js interval charts initialization
     //////////////////////
     const ctx = document.getElementById('chart-' + chartId).getContext('2d');
     const priceData = intervalDatas.priceBuckets;
-//    const labels = priceData.map(bucket => parseInt(bucket.name)); // X-axis labels
-//    const data = priceData.map(bucket => parseInt(bucket.count)); // Y-axis data
-    
-	const labels = priceData.map(bucket => {
-	    const parsedName = parseFloat(bucket.name);
-	    return Number.isInteger(parsedName) ? parsedName : parsedName.toFixed(1);
-	}); // X-axis labels
-	
-	const data = priceData.map(bucket => {
-	    const parsedCount = parseFloat(bucket.count);
-	    return Number.isInteger(parsedCount) ? parsedCount : parsedCount.toFixed(1);
-	}); // Y-axis data
-	    
+
+    const labels = priceData.map(bucket => {
+        const parsedName = parseFloat(bucket.name);
+        return Number.isInteger(parsedName) ? parsedName : parsedName.toFixed(1);
+    }); // X-axis labels
+
+    const data = priceData.map(bucket => {
+        const parsedCount = parseFloat(bucket.count);
+        return Number.isInteger(parsedCount) ? parsedCount : parsedCount.toFixed(1);
+    }); // Y-axis data
     
     return new Chart(ctx, {
         type: 'bar',
@@ -444,7 +439,7 @@ function createChartInterval(chartId, intervalDatas, verticalName) {
                 tooltip: {
                     callbacks: {
                         label: function(context) {
-                            return verticalName +  ": " + parseInt(context.raw); // Custom tooltip text
+                            return verticalName + ": " + parseInt(context.raw); // Custom tooltip text
                         }
                     }
                 }
@@ -453,10 +448,18 @@ function createChartInterval(chartId, intervalDatas, verticalName) {
                 x: {
                     title: {
                         display: false // Hide X-axis title
+                    },
+                    grid: {
+                        display: false, // Disable vertical grid lines
+                        drawTicks: false, // Disable ticks on X-axis
+                        drawBorder: false // Disable border on X-axis
                     }
                 },
                 y: {
                     display: false, // Hide Y-axis completely
+                    grid: {
+                        display: false // Optionally hide horizontal grid lines
+                    }
                 }
             },
             barPercentage: 1.0, // Make bars occupy full width of the category
