@@ -536,23 +536,11 @@ public class ResourceCompletionService  extends AbstractCompletionService{
 	private void processPdf(Resource resource, File target) {
 
 		// TODO(p3,feature) : Generate default PNG version, generate thumnails from PDF
-		// handle metadatas
 		resource.setResourceType(ResourceType.PDF);
 
 		try (PDDocument document = Loader.loadPDF(target)) {
 			logger.info("PDF loaded successfully: {}", target.getName());
 			PdfInfo pdfInfo = new PdfInfo();
-
-			// File size
-			pdfInfo.setSize(target.length());
-
-			// File name
-			String fileName = target.getName();
-			int dotIndex = fileName.lastIndexOf('.');
-			if (dotIndex > 0) {
-				fileName = fileName.substring(0, dotIndex);
-			}
-			pdfInfo.setFileName(fileName);
 
 			// PDF Metadata
 			PDDocumentInformation info = document.getDocumentInformation();

@@ -4,33 +4,16 @@ import java.util.Calendar;
 
 public class PdfInfo {
 
-    private long size;
-    private String fileName;
     private String metadataTitle;
     private String extractedTitle;
     private int numberOfPages;
     private String author;
     private String subject;
     private String keywords;
+    // Dates en Long
     private Calendar creationDate;
     private Calendar modificationDate;
     private String producer;
-
-    public long getSize() {
-        return size;
-    }
-
-    public void setSize(long size) {
-        this.size = size;
-    }
-
-    public String getFileName() {
-        return fileName;
-    }
-
-    public void setFileName(String fileName) {
-        this.fileName = fileName;
-    }
 
     public String getMetadataTitle() {
         return metadataTitle;
