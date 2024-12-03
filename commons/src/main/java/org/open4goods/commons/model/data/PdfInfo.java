@@ -1,7 +1,5 @@
 package org.open4goods.commons.model.data;
 
-import java.util.Calendar;
-
 public class PdfInfo {
 
     private String metadataTitle;
@@ -10,10 +8,12 @@ public class PdfInfo {
     private String author;
     private String subject;
     private String keywords;
-    // Dates en Long
-    private Calendar creationDate;
-    private Calendar modificationDate;
+    // Timestamps in milliseconds since epoch
+    private Long creationDate;
+    private Long modificationDate;
     private String producer;
+    private String language;
+    private double languageConfidence;
 
     public String getMetadataTitle() {
         return metadataTitle;
@@ -63,19 +63,19 @@ public class PdfInfo {
         this.keywords = keywords;
     }
 
-    public Calendar getCreationDate() {
+    public Long getCreationDate() {
         return creationDate;
     }
 
-    public void setCreationDate(Calendar creationDate) {
+    public void setCreationDate(Long creationDate) {
         this.creationDate = creationDate;
     }
 
-    public Calendar getModificationDate() {
+    public Long getModificationDate() {
         return modificationDate;
     }
 
-    public void setModificationDate(Calendar modificationDate) {
+    public void setModificationDate(Long modificationDate) {
         this.modificationDate = modificationDate;
     }
 
@@ -85,5 +85,21 @@ public class PdfInfo {
 
     public void setProducer(String producer) {
         this.producer = producer;
+    }
+
+    public String getLanguage() {
+        return language;
+    }
+
+    public void setLanguage(String language) {
+        this.language = language;
+    }
+
+    public double getLanguageConfidence() {
+        return languageConfidence;
+    }
+
+    public void setLanguageConfidence(double languageConfidence) {
+        this.languageConfidence = languageConfidence;
     }
 }

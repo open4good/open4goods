@@ -25,6 +25,9 @@ import org.apache.pdfbox.text.PDFTextStripper;
 import org.apache.pdfbox.text.TextPosition;
 import org.apache.tika.Tika;
 import org.apache.tika.config.TikaConfig;
+import org.apache.tika.langdetect.optimaize.OptimaizeLangDetector;
+import org.apache.tika.language.detect.LanguageDetector;
+import org.apache.tika.language.detect.LanguageResult;
 import org.open4goods.api.config.yml.ApiProperties;
 import org.open4goods.api.config.yml.ResourceCompletionUrlTemplate;
 import org.open4goods.api.services.AbstractCompletionService;
@@ -533,6 +536,16 @@ public class ResourceCompletionService  extends AbstractCompletionService{
 		
 	}
 
+	/**
+	 * Process a PDF file to extract metadata, detect language and identify the title.
+	 * This method performs three main operations:
+	 * 1. Extract standard PDF metadata (title, author, dates, etc.)
+	 * 2. Detect the document's language using text content analysis
+	 * 3. Extract the most prominent text from the first page as a potential title
+	 *
+	 * @param resource The resource object to be enriched with PDF information
+	 * @param target The PDF file to analyze
+	 */
 	private void processPdf(Resource resource, File target) {
 
 		// TODO(p3,feature) : Generate default PNG version, generate thumnails from PDF
@@ -542,32 +555,51 @@ public class ResourceCompletionService  extends AbstractCompletionService{
 			logger.info("PDF loaded successfully: {}", target.getName());
 			PdfInfo pdfInfo = new PdfInfo();
 
-			// PDF Metadata
+			// Extract standard PDF metadata from document information dictionary
 			PDDocumentInformation info = document.getDocumentInformation();
 			pdfInfo.setMetadataTitle(info.getTitle());
 			pdfInfo.setAuthor(info.getAuthor());
 			pdfInfo.setSubject(info.getSubject());
 			pdfInfo.setKeywords(info.getKeywords());
-			pdfInfo.setCreationDate(info.getCreationDate());
-			pdfInfo.setModificationDate(info.getModificationDate());
+			pdfInfo.setCreationDate(info.getCreationDate() != null ? info.getCreationDate().getTimeInMillis() : null);
+			pdfInfo.setModificationDate(info.getModificationDate() != null ? info.getModificationDate().getTimeInMillis() : null);
 			pdfInfo.setProducer(info.getProducer());
 			pdfInfo.setNumberOfPages(document.getNumberOfPages());
 
-			// Manually extract title
+			// Perform language detection on the document's text content
+			try {
+				String text = extractText(document);
+				LanguageDetector detector = new OptimaizeLangDetector().loadModels();
+				LanguageResult langResult = detector.detect(text);
+				
+				pdfInfo.setLanguage(langResult.getLanguage());
+				
+				pdfInfo.setLanguageConfidence(langResult.getRawScore());
+				
+				logger.info("Language detected for PDF {} : {} (confidence: {})", 
+					target.getName(), 
+					langResult.getLanguage(), 
+					langResult.getRawScore());
+					
+			} catch (Exception e) {
+				logger.warn("Failed to detect document language: {}", e.getMessage());
+			}
+
+			// Extract title by analyzing text on first page
 			MultiLineTitleStripper stripper = new MultiLineTitleStripper();
 			stripper.setSortByPosition(true);
 			stripper.setStartPage(1);
 			stripper.setEndPage(1);
 			stripper.getText(document);
 			pdfInfo.setExtractedTitle(stripper.getTitle().trim());
-			logger.info("Manually extracted title : {}", pdfInfo.getExtractedTitle());
+			logger.info("Manually extracted title: {}", pdfInfo.getExtractedTitle());
 
 			resource.setPdfInfo(pdfInfo);
 			resource.setProcessed(true);
-			logger.info("PDF processed successfully : {}", target.getName());
+			logger.info("PDF processed successfully: {}", target.getName());
 
 		} catch (IOException e) {
-			logger.error("Erreur lors du parsing du PDF : {}", e.getMessage());
+			logger.error("Failed to parse PDF: {}", e.getMessage());
 			resource.setStatus(ResourceStatus.PDF_PARSING_ERROR);
 			resource.setEvicted(true);
 		}
@@ -653,6 +685,11 @@ public class ResourceCompletionService  extends AbstractCompletionService{
 		resource.setImageInfo(ii);
 		
 		
+	}
+
+	private String extractText(PDDocument document) throws IOException {
+		PDFTextStripper stripper = new PDFTextStripper();
+		return stripper.getText(document);
 	}
 
 }
