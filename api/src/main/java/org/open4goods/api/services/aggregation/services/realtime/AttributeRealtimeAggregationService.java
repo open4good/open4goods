@@ -142,6 +142,23 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 		
 		// Replacing all previously indexed
 		data.getAttributes().setIndexed(indexed);
+		
+		
+		
+		///////////////////////////////////////////
+		// Setting excluded state
+		////////////////////////////////////////// 
+		
+		// On brand
+		if (StringUtils.isEmpty(data.brand())) {
+			data.setExcluded(true);
+		}
+		
+		// On model
+		if (StringUtils.isEmpty(data.model())) {
+			data.setExcluded(true);
+		}
+		
 	}
 
 	

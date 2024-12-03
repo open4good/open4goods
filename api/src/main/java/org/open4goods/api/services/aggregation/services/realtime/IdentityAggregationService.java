@@ -73,8 +73,6 @@ public class IdentityAggregationService extends AbstractAggregationService {
 			dedicatedLogger.warn("Data Fragment has an update date in the futur. Probable erasure due to same gtin in different datasources in the same bulk ! : {}",input);
 		}
 
-	
-
 		
 		onProduct(output, vConf);
 		return null;

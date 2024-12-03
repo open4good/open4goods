@@ -129,16 +129,20 @@ public class BatchService {
 		//////////////////////////////////
 		// Launch aggregation, (now will complete on more Datas (eg API ones)
 		/////////////////////////////////
-		aggregationFacadeService.sanitizeProducts(vertical, allProducts);
+		aggregationFacadeService.aggregateProducts(vertical, allProducts);
 		
 		
 		////////////////////		
 		//  Scoring
-		////////////////////			
+		////////////////////	
+		
+		
 		try {
 			// Scoring
-			aggregationFacadeService.score(vertical, products);
-			Thread.sleep(5000L);
+			// We only score the products that are not excluded
+			Set<Product> scorable = products.stream().filter(e-> !e.isExcluded()).collect(Collectors.toSet());
+			logger.info("Will score {} products on a total of {}", scorable.size(), products.size());
+			aggregationFacadeService.score(vertical, scorable);
 		} catch (Exception e) {
 			logger.error("Error in batch : scoring fail", e);
 		}

@@ -66,11 +66,19 @@ public class VerticalController  extends AbstractController {
 		// TODO : strategy of injection of products for nativ SEO
 
 		VerticalSearchRequest vRequest = new VerticalSearchRequest();
+		
+		// We show excluded products only to logged in people
+		if (ret.getModel().containsKey("user")) {
+			vRequest.setExcluded(true);
+		}
+		
 		vRequest.setSortField("scores.ECOSCORE.value");
 		vRequest.setSortOrder("desc");
 		vRequest.getNumericFilters().add(new NumericRangeFilter("offersCount", 1.0, 10000.0, 1.0, false));
 		vRequest.getNumericFilters().add(new NumericRangeFilter("price.minPrice.price", 0.0001, 500000.0, 100.0, false));
 		vRequest.getNumericFilters().add(new NumericRangeFilter("scores.ECOSCORE.value", 0.0001, 500000.0, 0.1, false));
+		
+		
 		
 		
 		List<AttributeConfig> numericFilters = config.getVerticalFilters().stream()
