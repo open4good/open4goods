@@ -123,7 +123,7 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 					if (null != indexedAttr) {
 						dedicatedLogger.info("Duplicate attribute candidate for indexation, for GTIN : {} and attrs {}",data.getId(), attrConfig.getKey());
 						if (!cleanedValue.equals(indexedAttr.getValue() )) {
-							// TODO(p3,design) : Means we have multiple attributes matching for indexedbuilding. Have a merge strategy
+							// TODO(p3,design) : Means we have multiple attributes matching for indexed . Have a merge strategy
 							dedicatedLogger.error("Value mismatch for attribute {} : {}<>{}",attr.getName(),cleanedValue, indexedAttr.getValue());
 						} 						
 					} else {
@@ -149,16 +149,34 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 		// Setting excluded state
 		////////////////////////////////////////// 
 		
+		data.setExcluded(shouldExclude(data,vConf));
+		
+	}
+
+	/**
+	 * Set the product in excluded state (will not be exposed through indexation, searchservice,..) 
+	 * @param data
+	 */
+	private boolean shouldExclude(Product data, VerticalConfig vConf) {
 		// On brand
 		if (StringUtils.isEmpty(data.brand())) {
-			data.setExcluded(true);
+			dedicatedLogger.warn("Excluded because brand ismissing : {}", data );
+			return true;
 		}
 		
 		// On model
 		if (StringUtils.isEmpty(data.model())) {
-			data.setExcluded(true);
+			dedicatedLogger.warn("Excluded because model ismissing : {}", data );
+			return true;
 		}
 		
+		Set<String> attrKeys = data.getAttributes().getattributesAsStringKeys();
+		if (!attrKeys.containsAll(vConf.getRequiredAttributes())) {
+			dedicatedLogger.warn("Excluded because attributes are missing : {}", data );
+			return true;
+		}
+		
+		return false;
 	}
 
 	

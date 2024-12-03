@@ -109,7 +109,16 @@ public class ProductAttributes  {
 				));
 	}
 	
-
+	/**
+	 * 
+	 * @return all attributes keys (from indexed and all)
+	 */
+	public Set<String> getattributesAsStringKeys() {
+		Set<String> keys = new HashSet<String>();
+		keys.addAll(indexed.keySet());
+		keys.addAll(all.keySet());		
+		return keys;
+	}
 
 
 	public Map<ReferentielKey, String> getReferentielAttributes() {
@@ -159,5 +168,7 @@ public class ProductAttributes  {
 	public void setAll(Map<String, ProductAttribute> all) {
 		this.all = all;
 	}
+
+
 	
 }
