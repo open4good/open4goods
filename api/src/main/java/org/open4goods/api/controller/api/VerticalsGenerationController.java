@@ -124,5 +124,21 @@ public class VerticalsGenerationController {
 	}
 	
 	
+	@GetMapping(path="/assist/vertical")
+	@Operation(summary="Generate the vertical file")
+	@PreAuthorize("hasAuthority('"+RolesConstants.ROLE_ADMIN+"')")
+	public void generateCategoryMappingsFragment( 
+			@RequestParam String googleTaxonomyId,
+			@RequestParam										 String matchingCategories,
+			@RequestParam										 String urlPrefix,
+			@RequestParam										 String h1Prefix,
+			@RequestParam										 String verticalHomeUrl,
+			@RequestParam										 String verticalHomeTitle) throws ResourceNotFoundException, IOException {
+		
+		  verticalsGenService.verticalTemplatetoFile(googleTaxonomyId, matchingCategories, urlPrefix, h1Prefix, verticalHomeUrl, verticalHomeTitle);
+		
+	}
+	
+	
 	
 }

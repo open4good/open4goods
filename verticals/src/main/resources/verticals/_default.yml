@@ -82,6 +82,22 @@ genAiConfig:
    # If false, will bypass the generativ ia texts generation  
    enabled: false
 
+   
+##############################################################################
+# Eco score configuration 
+# Specify here the specific ecoscore for this vertical. Format : 
+# >> EXISTING_SCORE: WEIGHT
+# Weight sum MUST BE equals to 1
+##############################################################################
+
+ecoscoreConfig:
+   CLASSE_ENERGY : 0.3
+   WEIGHT: 0.3
+   BRAND_SUSTAINABILITY: 0.3
+   DATA-QUALITY: 0.1
+   
+   
+      
 requiredAttributes:
 #  - WEIGHT
 

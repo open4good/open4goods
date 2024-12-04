@@ -15,6 +15,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.open4goods.api.config.yml.VerticalsGenerationConfig;
 import org.open4goods.api.model.VerticalAttributesStats;
@@ -24,14 +25,19 @@ import org.open4goods.commons.config.yml.ui.VerticalConfig;
 import org.open4goods.commons.dao.ProductRepository;
 import org.open4goods.commons.helper.IdHelper;
 import org.open4goods.commons.model.product.Product;
+import org.open4goods.commons.services.EvaluationService;
 import org.open4goods.commons.services.GoogleTaxonomyService;
 import org.open4goods.commons.services.SerialisationService;
 import org.open4goods.commons.services.VerticalsConfigService;
 import org.open4goods.commons.services.ai.AiService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.support.ResourcePatternResolver;
 
 import com.fasterxml.jackson.core.type.TypeReference;
+
+import io.micrometer.core.instrument.util.IOUtils;
 
 public class VerticalsGenerationService {
 	
@@ -40,14 +46,16 @@ public class VerticalsGenerationService {
 	private VerticalsConfigService  verticalConfigservice;
 	private ProductRepository repository;
 	private SerialisationService serialisationService;
+	private ResourcePatternResolver resourceResolver;
 
 	
 
 	private Map<String, VerticalCategoryMapping> sortedMappings = new LinkedHashMap<String, VerticalCategoryMapping>();
 	private AiService aiService;
 	private GoogleTaxonomyService googleTaxonomyService;
+	private EvaluationService evalService;
 	
-	public VerticalsGenerationService(VerticalsGenerationConfig config, ProductRepository repository, SerialisationService serialisationService, AiService aiService, GoogleTaxonomyService googleTaxonomyService, VerticalsConfigService verticalsConfigService) {
+	public VerticalsGenerationService(VerticalsGenerationConfig config, ProductRepository repository, SerialisationService serialisationService, AiService aiService, GoogleTaxonomyService googleTaxonomyService, VerticalsConfigService verticalsConfigService, ResourcePatternResolver resourceResolver, EvaluationService evaluationService) {
 		super();
 		this.config = config;
 		this.repository = repository;
@@ -55,6 +63,8 @@ public class VerticalsGenerationService {
 		this.aiService = aiService;
 		this.googleTaxonomyService = googleTaxonomyService;
 		this.verticalConfigservice = verticalsConfigService;
+		this.resourceResolver = resourceResolver;
+		this.evalService = evaluationService;
 	}
 	
 	
@@ -430,13 +440,68 @@ Base your analyse on the following categories :
 		StringBuilder ret = new StringBuilder();
 		ret.append("matchingCategories:").append("\n");
 		ret.append("    - \"").append(category).append("\"\n");
-		for (String cat : mapping.getAssociatedCategories().keySet()) {
-			ret.append("    - \"").append(cat).append("\"\n");
+		if (null != mapping) {
+			for (String cat : mapping.getAssociatedCategories().keySet()) {
+				ret.append("    - \"").append(cat).append("\"\n");
+			}
 		}
-		
 		return ret.toString();
 	}
 
+	/**
+	 * Return a String containing a vertical config file, based on the "vertical.template" file
+	 * @param id
+	 * @param homeTitlefr
+	 * @param googleTaxonomyId
+	 * @param enabled
+	 * @param matchingCategories
+	 * @return
+	 */
+	public String verticalTemplate(String id, String googleTaxonomyId, String matchingCategories,String urlPrefix, String h1Prefix, String verticalHomeUrl, String verticalHomeTitle)  {
+		String ret = "";
+		try {
+			Resource r = resourceResolver.getResource("classpath:/templates/vertical.yml");
+			String content = r.getContentAsString(Charset.defaultCharset());
+			
+			Map<String, Object> context = new HashMap<String, Object>();
+
+			context.put("id",id );
+			context.put("googleTaxonomyId", googleTaxonomyId);
+			context.put("matchingCategories", generateCategoryMappingFragmentFor(matchingCategories));
+			context.put("urlPrefix", urlPrefix);
+			context.put("h1Prefix", h1Prefix);
+			context.put("verticalHomeUrl", verticalHomeUrl);
+			context.put("verticalHomeTitle", verticalHomeTitle);
+			
+			ret = evalService.thymeleafEval(context, content);
+		} catch (IOException e) {
+			LOGGER.error("Error while generating vertical file",e);
+		}
+		
+		return ret;
+		
+	}
+	
+	public void verticalTemplatetoFile(String googleTaxonomyId, String matchingCategories,String urlPrefix, String h1Prefix, String verticalHomeUrl, String verticalHomeTitle)  {
+
+		//TODO(p3, conf) : from conf 
+		String id = IdHelper.normalizeFileName(googleTaxonomyService.getLocalizedTaxonomy().get("en").get(Integer.valueOf(googleTaxonomyId)).getLast());
+
+		File f = new File("/opt/open4goods/tmp/");
+		f.mkdirs();
+		f = new File(f.getAbsolutePath() + "/" + id+".yml");
+		
+		try {
+			
+			FileUtils.write(f, verticalTemplate(id, googleTaxonomyId, matchingCategories, urlPrefix, h1Prefix, verticalHomeUrl, verticalHomeTitle));
+		} catch (IOException e) {
+			LOGGER.error("Error while writing template file", e);
+		}
+		
+		
+	}
+	
+	
 	
 	
 }

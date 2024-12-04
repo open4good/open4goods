@@ -96,6 +96,19 @@ public class EvaluationService {
 				return thymeleafEval(p, template, null);
 		}
 	 
+		
+		/**
+		 * Generate a name from the thymleaf template weared in conf
+		 * Sample : "blabla de [(${p.vertical})]"
+		 * TODO(p3,safety) : Should raise exception if unresolvable variable
+		 * @param p
+		 * @param template
+		 * @return
+		 */
+			public String thymeleafEval(final Map<String,Object> params, final String template) {
+					return thymeleafEval(null, template, params);
+			}
+		 
 	/**
 	 * Generate a name from the thymleaf template weared in conf
 	 * Sample : "blabla de [(${p.vertical})]"
@@ -121,16 +134,18 @@ public class EvaluationService {
 					ctx.setVariables(additionalParams);
 				}
 				
-				// Adding referentiel keys
-				for (Entry<ReferentielKey, String> e : p.getAttributes().getReferentielAttributes().entrySet()) {
-					ctx.setVariable(e.getKey().toString(), e.getValue());
+				if (p != null) {
+					// Adding referentiel keys
+					for (Entry<ReferentielKey, String> e : p.getAttributes().getReferentielAttributes().entrySet()) {
+						ctx.setVariable(e.getKey().toString(), e.getValue());
+					}
 				}
 	
 				final String ret = thymeleafTemplateEngine.process(template, ctx);
 				return ret;
 	
 			} catch (final Exception e) {
-				logger.warn("Eval failed for {} :  {} : {}", p, e.getMessage(), e.getCause().getMessage());
+				logger.warn("Eval failed for {} :  {} : {}", p, e.getMessage(), e.getCause());
 				return null;
 			}
 		}

@@ -15,9 +15,6 @@ id: tv
 # SHOULD be set, it will then force this taxonomy for all products in this vertical
 googleTaxonomyId: 404
 
-#TODO : Documentation
-icecatTaxonomyId: 1584
-
 # Indicates if the vertical must be UI / sitemap / search rendered
 enabled: true
 
@@ -72,7 +69,7 @@ i18n:
   fr:
       # The layout a product url will have. Ex : 81234555-tv-led-samsung-QL659P 2023
       url: 
-        # We can add ta custom prefix (with our conditional templating language if we want)
+        # We can add a custom prefix (with our conditional templating language if we want)
         prefix: "|| tv | television | televiseur ||"
         # Then we add some attributes values with hyphens if present (ex : led-samsung-QL659P-2023)
         attrs:
