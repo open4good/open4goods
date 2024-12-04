@@ -269,6 +269,11 @@ public class Product implements Standardisable {
 		for (Entry<ReferentielKey, String> attr : attributes.getReferentielAttributes().entrySet()) {
 			sb.append(" - ").append(attr.getKey().toString()).append(" : ").append(attr.getValue()).append("\n");
 		}
+
+		for (IndexedAttribute attr : attributes.getIndexed().values()) {
+				sb.append(" - ").append(attr.getName().toString()).append(" : ").append(attr.getValue()).append("\n");
+		}
+
 		
 		for (ProductAttribute attr : attributes.getAll().values()) {
 			if (attr.getIcecatTaxonomyIds().size() > 0) {

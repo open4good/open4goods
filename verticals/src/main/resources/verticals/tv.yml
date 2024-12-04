@@ -57,11 +57,11 @@ matchingCategories:
 
 
 # The categories that disengage a mapping in this vertical  
-unmatchingCategories:
-- "HIFI>APPAREILS-PHOTO"
-- "TV - VIDEO - SON | TV - VIDEO - SON > ACCESSOIRES TV - VIDEO - SON > FIXATION TV - SUPPORT TV - SUPPORT MURAL POUR TV | ACCESSOIRES TV - VIDEO - SON | FIXATION TV - SUPPORT TV - SUPPORT MURAL POUR TV"
-- "ACCESSOIRES DE TV"
-- "TV, VIDEO, HOME CINEMA | TV, VIDEO, HOME CINEMA>TELEVISEUR>SUPPORT MURAL POUR ECRAN PLAT | TELEVISEUR | TV, VIDEO, HOME CINEMA"
+#unmatchingCategories:
+#- "HIFI>APPAREILS-PHOTO"
+#- "TV - VIDEO - SON | TV - VIDEO - SON > ACCESSOIRES TV - VIDEO - SON > FIXATION TV - SUPPORT TV - SUPPORT MURAL POUR TV | ACCESSOIRES TV - VIDEO - SON | FIXATION TV - SUPPORT TV - SUPPORT MURAL POUR TV"
+#- "ACCESSOIRES DE TV"
+#- "TV, VIDEO, HOME CINEMA | TV, VIDEO, HOME CINEMA>TELEVISEUR>SUPPORT MURAL POUR ECRAN PLAT | TELEVISEUR | TV, VIDEO, HOME CINEMA"
 
 #####################################################################################################################################
 # I18N CONFIGURATION
@@ -92,12 +92,7 @@ i18n:
           - MODEL
           - YEAR
         
-      productMetaTitle: "[(${p.brand()})] [(${p.model()})] : Eco-score, compensation écologique et meilleurs prix"
-      productMetaDescription:  "[(${p.brand()})] [(${p.model()})] : Eco-score, compensation || écologique | environnementale || et meilleurs prix."              
-      productMetaOpenGraphTitle: "[(${p.brand()})] - [(${p.model()})] : Ecoscore de [(${p.ecoscore()})]. Venez nudger ce téléviseur au meilleur prix, et reversez gratuitement [(${p.compensation()})]"
-      productMetaOpenGraphDescription: "productMetaOpenGraphDescription"
-      productMetaTwitterTitle: "productMetaTwitterTitle"
-      productMetaTwitterDescription: "productMetaTwitterDescription"
+
 
       ##################################
       # Vertical page elements 
@@ -111,7 +106,7 @@ i18n:
       # Text displaid as title for the vertical
       verticalHomeDescription: "Bienvenue dans notre rubrique téléviseurs. Devenus des objets quasi-nécessaires, nos TV's ne sont malheureusement pas neutres pour l'environnement 🌏 ! Heureusement, Nudger est là pour vous informer et vous aider à choisir la TV la plus écologique et la plus adaptée à votre besoin."  
       # The image used as a logo
-      verticalHomeLogo: "https://media.istockphoto.com/id/173240143/fr/photo/t%C3%A9l%C3%A9vision-avec-deux-masques-de-d%C3%A9tourage.jpg?s=612x612&w=0&k=20&c=GhzC3IyvkmRp9shUBHICxM_1Lsur2uWkpNKf2F22p8s="
+
 
      # A mapping beetween custom page names behind this vertical and wiki pages
      # Copy and paste the wiki wiew url, without the "bin/view" prefix
@@ -121,47 +116,11 @@ i18n:
           title: "OLED, QLED,LCD, ... Quelle technologie choisir ?"
           faIcon: "fa-star"
 
-      ####################################################################################
-      # AI TEXTS CONFIGS
-      ####################################################################################  
-      aiConfigs:
-        override: false
-        pauseDurationMs: 1000
-        rootPrompt: |
-            analyse technique, fonctionnelle et écologique d'un téléviseur, textes en français uniquement.
-             
-            Caractéristiques : 
-            [(${p.caracteristics()})]
-          
-            Génère un fichier JSON clé-valeur pour l'objet concerné répondant uniquement et strictement aux prompts suivants :      
-
-        prompts: 
-           - key: "global-description"
-             prompt: |           
-                : en tant qu'expert technique, rédige une description de l'objet en mettant en avant ses principales caractéristiques techniques. Le texte doit comporter entre 180 et 200 mots et être composé de deux paragraphes distincts, séparés par un point-virgule. Veille à ce que chaque paragraphe soit équilibré en termes de longueur.
-   
-           - key: "ecological-description"
-             prompt: |           
-                : en tant qu'expert en impacts environnementaux, rédige une analyse de l'impact écologique de l'objet. Le texte doit comporter entre 180 et 200 mots et être composé de deux paragraphes distincts, séparés par un point-virgule. Veille à ce que chaque paragraphe soit équilibré en termes de longueur.
-   
-           - key: "pros"
-             prompt: |           
-                : en tant qu'expert technique, liste cinq avantages du produit dans une seule ligne, séparés par des points-virgules, dans un style formel.
-   
-           - key: "cons"
-             prompt: |           
-                : en tant qu'expert technique, liste cinq inconvénients techniques du produit dans une seule ligne, séparés par des points-virgules, dans un style formel.
-
-
-
-
-
+ 
 # GenAiConfig for this vertical
 genAiConfig:
   # If false, will bypass the generativ ia texts generation  
   enabled: true
-  # Max products to be generated. Products are ordered by ecoscore
-  maxPerVerticals: 100
   
   
 ##############################################################################
@@ -189,6 +148,7 @@ ecoFilters:
     - "REPAIRABILITY_INDEX" 
     - "CLASSE_ENERGY"   
     - "ENERGY_CONSUMPTION_1000_HOURS"
+    - "WEIGHT"
 
 technicalFilters:
     - "DIAGONALE_POUCES"
@@ -200,24 +160,15 @@ technicalFilters:
 #  - "BRAND-SUSTAINABILITY"
 
 
-##############################################################################
-# We cannot always identify manually what comppany operates a brand, and there is often 
-# confilicts or multiple possibilities that need to be manually adressed. (eg. samsung a lot of activities / brand through different companies)
-#
-##############################################################################
-
-brandsCompanyMapping:
-  SAMSUNG: "Samsung Electronics Co., Ltd."
-  TCL: "TCL Electronics Holdings Ltd."
-  LG: "LG Electronics, Inc."
-  PHILIPS: "Koninklijke Philips NV"
 
 
 ####################################################################################
 # ATTRIBUTES CONFIGURATION
 ####################################################################################
+requiredAttributes:
+  - DIAGONALE_POUCES
+
 attributesConfig:
-  # If one of the following attribute is missing on a product, the product will be disassociated from this vertical. (setting vertical to null)
    
   ####################################################################################
   # ATTRIBUTES DEFINITIONS

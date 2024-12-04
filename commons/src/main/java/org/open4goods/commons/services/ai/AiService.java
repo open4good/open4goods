@@ -1,6 +1,7 @@
 package org.open4goods.commons.services.ai;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -139,7 +140,7 @@ public class AiService implements HealthIndicator{
 		
         // Launch the genAiDescription
 		try {
-			generateTextsForProduct(product, iaConfigsPerLanguage, force);
+			generateTextsForProduct(product, iaConfigsPerLanguage, force, verticalConfig);
 		} catch (Exception e) {
 			logger.error("Error while generating AI description for product {}", product,e);
 			this.criticalExceptionsCounter++;
@@ -152,11 +153,12 @@ public class AiService implements HealthIndicator{
 	 * @param product The product to generate descriptions for.
 	 * @param iaConfigsPerLanguage The internationalization configuration.
 	 * @param force Whether to force generation even if not necessary.
+	 * @param verticalConfig 
 	 * @throws IOException 
 	 * @throws JsonMappingException 
 	 * @throws JsonParseException 
 	 */
-	private void generateTextsForProduct(Product product, Map<String, AiPromptsConfig> iaConfigsPerLanguage, boolean force) throws Exception {
+	private void generateTextsForProduct(Product product, Map<String, AiPromptsConfig> iaConfigsPerLanguage, boolean force, VerticalConfig verticalConfig) throws Exception {
 			// Iterate over each AiPromptsConfig, with language as a key
 			for (Entry<String, AiPromptsConfig> entry : iaConfigsPerLanguage.entrySet()) {
 				
@@ -168,7 +170,7 @@ public class AiService implements HealthIndicator{
 				}
 				
 				// Operates the merged prompt generation
-				AiDescriptions descriptions = createAiDescriptions(entry.getValue(), entry.getKey(), product,force);
+				AiDescriptions descriptions = createAiDescriptions(entry.getValue(), entry.getKey(), product,force, verticalConfig);
 
 				// Store the generated prompts
 				product.getGenaiTexts().put(entry.getKey(), descriptions);
@@ -209,14 +211,21 @@ public class AiService implements HealthIndicator{
 	 * @param aiConfigs The AI configuration.
 	 * @param language The language of the descriptions.
 	 * @param product The product to generate the descriptions for.
+	 * @param verticalConfig 
 	 * @return The generated AI descriptions.
 	 * @throws IOException 
 	 * @throws JsonMappingException 
 	 * @throws JsonParseException 
 	 */
-	private AiDescriptions createAiDescriptions(AiPromptsConfig aiConfigs, String language, Product product, boolean force) throws Exception {
+	private AiDescriptions createAiDescriptions(AiPromptsConfig aiConfigs, String language, Product product, boolean force, VerticalConfig verticalConfig) throws Exception {
 		// 1 - Evaluate the root prompt to inject variables
-		String evaluatedRootPrompt = spelEvaluationService.thymeleafEval(product, aiConfigs.getRootPrompt());
+		Map<String, Object> context = new HashMap<String, Object>();
+		
+		// We use the verticalHomeTitle to inject the product category 
+		context.put("VERTICAL_TITLE", verticalConfig.i18n(language).getVerticalHomeTitle());
+		
+		
+		String evaluatedRootPrompt = spelEvaluationService.thymeleafEval(product, aiConfigs.getRootPrompt(), context);
 
 		// 2 - Evaluate the other prompts
 		StringBuilder combinedPrompts = new StringBuilder(evaluatedRootPrompt);

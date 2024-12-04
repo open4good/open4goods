@@ -59,11 +59,6 @@ public class ProductI18nElements {
 	private String verticalHomeDescription ;
 
 	/**
-	 * The image logo on the vertical home page
-	 */
-	@JsonMerge
-	private String verticalHomeLogo ;
-	/**
 	 * The custom pages names and associated templates for this vertical
 	 */
 	@JsonMerge
@@ -220,14 +215,6 @@ public class ProductI18nElements {
 
 	public void setVerticalHomeDescription(String verticalHomeDescription) {
 		this.verticalHomeDescription = verticalHomeDescription;
-	}
-
-	public String getVerticalHomeLogo() {
-		return verticalHomeLogo;
-	}
-
-	public void setVerticalHomeLogo(String verticalHomeLogo) {
-		this.verticalHomeLogo = verticalHomeLogo;
 	}
 
 
