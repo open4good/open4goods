@@ -1,0 +1,147 @@
+####################################################################################################################################################################
+#
+# This is the configuration for the VACUUMS vertical. 
+# Generated on the vertical.yml template file, using the VerticalsGenerationService.verticalTemplate()
+# @See open4goods/commons/src/main/java/org/open4goods/config/yml/ui/VerticalConfig.java for commented POJO definition
+###################################################################################################################################################################
+
+# Unique identifier for this vertical. 
+# MUST contains only charracters
+# SHOULD be equal to the configuration file name, without the extension
+id: vacuums
+
+# The associated google taxonomyID. (Ex : FR - https://www.google.com/basepages/producttype/taxonomy-with-ids.fr-FR.txt)
+# SHOULD be set, it will then force this taxonomy for all products in this vertical
+googleTaxonomyId: 619
+
+# Indicates if the vertical must be UI / sitemap / search rendered
+enabled: false
+
+##############################################################################
+# Product classification from categories
+##############################################################################
+# Will associate to this vertical if one of the following categorie is present for the product  
+matchingCategories:
+    - "ELECTROMENAGER | ASPIRATEUR"
+    - "PETIT MENAGER & CUISINE - TRAITEMENT DES SOLS"
+    - "ELECTROMENAGER | ELECTROMENAGER > ENTRETIEN DES SOLS - ENTRETIEN DE LA MAISON > ASPIRATEUR BALAI | ENTRETIEN DES SOLS - ENTRETIEN DE LA MAISON | ASPIRATEUR BALAI"
+    - "ENTRETIEN ET SOIN DE LA MAISON / ASPIRATEUR / ASPIRATEUR BALAI | ENTRETIEN ET SOIN DE LA MAISON>ASPIRATEUR>ASPIRATEUR BALAI | ASPIRATEUR | ASPIRATEUR BALAI"
+    - "ASPIRATEUR TRAINEAU"
+    - "ELECTROMENAGER | ELECTROMENAGER > ENTRETIEN DES SOLS - ENTRETIEN DE LA MAISON > ASPIRATEUR TRAINEAU | ENTRETIEN DES SOLS - ENTRETIEN DE LA MAISON | ASPIRATEUR TRAINEAU"
+    - "ELECTROMENAGER | ELECTROMENAGER > ENTRETIEN DE LA MAISON > ASPIRATEUR > ASPIRATEUR BALAI | ASPIRATEUR BALAI"
+    - "ASPIRATEUR BALAI"
+    - "ENTRETIEN ET SOIN DE LA MAISON / ASPIRATEUR / ASPIRATEUR ROBOT | ENTRETIEN ET SOIN DE LA MAISON>ASPIRATEUR>ASPIRATEUR ROBOT | ASPIRATEUR | ASPIRATEUR ROBOT"
+    - "ELECTROMENAGER | ELECTROMENAGER > ENTRETIEN DES SOLS - ENTRETIEN DE LA MAISON > ASPIRATEUR ROBOT | ENTRETIEN DES SOLS - ENTRETIEN DE LA MAISON | ASPIRATEUR ROBOT"
+    - "ASPIRATEUR ROBOT"
+    - "ASPIRATEUR A MAIN"
+    - "ELECTROMENAGER | ELECTROMENAGER > ENTRETIEN DE LA MAISON > ASPIRATEUR > ASPIRATEUR ROBOT | ASPIRATEUR ROBOT"
+    - "ENTRETIEN ET SOIN DE LA MAISON / ASPIRATEUR / ASPIRATEUR SANS SAC | ENTRETIEN ET SOIN DE LA MAISON>ASPIRATEUR>ASPIRATEUR SANS SAC | ASPIRATEUR | ASPIRATEUR SANS SAC"
+    - "ENTRETIEN ET SOIN DE LA MAISON | ASPIRATEUR"
+    - "ENTRETIEN ET SOIN DE LA MAISON / ASPIRATEUR / ASPIRATEUR AVEC SAC | ENTRETIEN ET SOIN DE LA MAISON>ASPIRATEUR>ASPIRATEUR AVEC SAC | ASPIRATEUR | ASPIRATEUR AVEC SAC"
+    - "ENTRETIEN ET SOIN DE LA MAISON / ASPIRATEUR / ASPIRATEUR A MAIN | ENTRETIEN ET SOIN DE LA MAISON>ASPIRATEUR>ASPIRATEUR A MAIN | ASPIRATEUR | ASPIRATEUR A MAIN"
+    - "ELECTROMENAGER | ELECTROMENAGER > ENTRETIEN DE LA MAISON > ASPIRATEUR > ASPIRATEUR SANS SAC | ASPIRATEUR SANS SAC"
+    - "ELECTROMENAGER | ELECTROMENAGER > ENTRETIEN DES SOLS - ENTRETIEN DE LA MAISON > ASPIRATEUR A MAIN | ENTRETIEN DES SOLS - ENTRETIEN DE LA MAISON | ASPIRATEUR A MAIN"
+    - "ELECTROMENAGER | ELECTROMENAGER > ENTRETIEN DE LA MAISON > ASPIRATEUR > ASPIRATEUR AVEC SAC | ASPIRATEUR AVEC SAC"
+    - "HOME APPLIANCES > CLEANING APPLIANCES > VACUUM CLEANERS"
+    - "ELECTROMENAGER | ELECTROMENAGER > ENTRETIEN DE LA MAISON > ASPIRATEUR > ASPIRATEUR A MAIN | ASPIRATEUR A MAIN"
+    - "PETIT MENAGER & CUISINE TRAITEMENT DES SOLS"
+    - "474 | HAND TOOLS | OUTILLAGE | OUTILLAGE > MATERIEL ET AMENAGEMENT DE L'ATELIER > ASPIRATEUR DE CHANTIER > ASPIRATEUR PROFESSIONNEL, ASPIRATEUR DE CHANTIER | ASPIRATEUR PROFESSIONNEL, ASPIRATEUR DE CHANTIER"
+
+
+
+#####################################################################################################################################
+# I18N CONFIGURATION
+# Configure in a i18n way all the texts of a product, including the Url, the title, the description, the open graph metas, ....
+# Use a micro templated language, that allows to introduce variables and "if condition", which allows to generate dynamic texts 
+######################################################################################################################################
+i18n:
+  fr:
+      # The layout a product url will have. Ex : 81234555-tv-led-samsung-QL659P 2023
+      url: 
+        # We can add a custom prefix (with our conditional templating language if we want)
+        prefix: "aspirateur"
+        # Then we add some attributes values with hyphens if present (ex : led-samsung-QL659P-2023)
+        attrs:
+          - BRAND
+          - MODEL
+      ##################################
+      # Product page meta and h1 title 
+      ##################################
+      # The product h1 title. Constructed on the same basis than "url", but without the concatened hyphens
+      h1Title:  
+        prefix: "Aspirateur"
+        attrs:
+          - BRAND
+          - MODEL
+          - YEAR
+        
+      ##################################
+      # Vertical page elements 
+      ##################################
+      
+      # url for vertical (appened to baseUrl). No templating here 
+      verticalHomeUrl: "aspirateurs"
+      # Text displaid as title for the vertical
+      # TODO : Make verticalHomeTitle/ verticalHomeDescription templatable
+      verticalHomeTitle: "Aspirateurs"
+      # Text displaid as title for the vertical
+      # verticalHomeDescription: ""  
+
+     # A mapping beetween custom page names behind this vertical and wiki pages
+     # Copy and paste the wiki wiew url, without the "bin/view" prefix
+#      wikiPages:
+#        - wikiUrl: /verticals/tv/technologies-tv/WebHome
+#          verticalUrl: "oled-qled-lcd-que-choisir"
+#          title: "OLED, QLED,LCD, ... Quelle technologie choisir ?"
+#          faIcon: "fa-star"
+
+ 
+# GenAiConfig for this vertical
+genAiConfig:
+  # If false, will bypass the generativ ia texts generation  
+  enabled: false
+  
+  
+##############################################################################
+# Eco score configuration 
+# Specify here the specific ecoscore for this vertical. Format : 
+# >> EXISTING_SCORE: WEIGHT
+# Weight sum MUST BE equals to 1
+##############################################################################
+
+#ecoscoreConfig:
+#   CLASSE_ENERGY : 0.3
+#   WEIGHT: 0.3
+#   BRAND_SUSTAINABILITY: 0.3
+#   DATA-QUALITY: 0.1
+
+##############################################################################
+# Custom search filters : the following filters
+# will also be availlable in search for this vertical (must be an attribute or a score)
+##############################################################################
+
+
+
+ecoFilters:
+#    - "REPAIRABILITY_INDEX" 
+#    - "CLASSE_ENERGY"   
+#    - "ENERGY_CONSUMPTION_1000_HOURS"
+#    - "WEIGHT"
+
+technicalFilters:
+#    - "DIAGONALE_POUCES"
+#    - "DISPLAY_TECHNOLOGY"
+#    - "HDMI_PORTS_QUANTITY"
+
+#  - "PARTS_AVAILLABILITY"
+#  - "DATA-QUALITY"  
+#  - "BRAND-SUSTAINABILITY"
+
+
+
+
+####################################################################################
+# ATTRIBUTES CONFIGURATION
+####################################################################################
+#requiredAttributes:
+#  - DIAGONALE_POUCES

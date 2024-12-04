@@ -327,8 +327,14 @@ public class VerticalConfig{
 	 */
 	public List<String> getVerticalFilters() {
 		List<String> filters = new ArrayList<String>();
-		filters.addAll(ecoFilters);
-		filters.addAll(technicalFilters);
+		
+		if (null != ecoFilters) {
+			filters.addAll(ecoFilters);
+		}
+
+		if (null != technicalFilters) {
+			filters.addAll(technicalFilters);		
+		}
 		filters.addAll(globalTechnicalFilters);
 		return filters;
 	

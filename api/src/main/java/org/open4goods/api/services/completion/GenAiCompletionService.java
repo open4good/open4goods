@@ -30,15 +30,17 @@ public class GenAiCompletionService  extends AbstractCompletionService{
 	public void processProduct(VerticalConfig vertical, Product data) {
 		logger.info("AI text completion for {}", data.getId());
 		
-		// Operating genai completion
-		aiService.complete(data, vertical, false);
-		
-		// Sleeping, to avoid rate limitation
-		try {
-			Thread.sleep(apiProperties.getGenAiPauseDurationMs());
-		} catch (InterruptedException e) {
-			Thread.currentThread().interrupt();
-			logger.error("Thread interrupted during rate limiting", e);
+		if (vertical.getGenAiConfig().isEnabled()) {
+			// Operating genai completion
+			aiService.complete(data, vertical, false);
+			
+			// Sleeping, to avoid rate limitation
+			try {
+				Thread.sleep(apiProperties.getGenAiPauseDurationMs());
+			} catch (InterruptedException e) {
+				Thread.currentThread().interrupt();
+				logger.error("Thread interrupted during rate limiting", e);
+			}
 		}
 	}
 

@@ -1,0 +1,124 @@
+####################################################################################################################################################################
+#
+# This is the configuration for the REFRIGERATORS vertical. 
+# Generated on the vertical.yml template file, using the VerticalsGenerationService.verticalTemplate()
+# @See open4goods/commons/src/main/java/org/open4goods/config/yml/ui/VerticalConfig.java for commented POJO definition
+###################################################################################################################################################################
+
+# Unique identifier for this vertical. 
+# MUST contains only charracters
+# SHOULD be equal to the configuration file name, without the extension
+id: refrigerators
+
+# The associated google taxonomyID. (Ex : FR - https://www.google.com/basepages/producttype/taxonomy-with-ids.fr-FR.txt)
+# SHOULD be set, it will then force this taxonomy for all products in this vertical
+googleTaxonomyId: 686
+
+# Indicates if the vertical must be UI / sitemap / search rendered
+enabled: false
+
+##############################################################################
+# Product classification from categories
+##############################################################################
+# Will associate to this vertical if one of the following categorie is present for the product  
+matchingCategories:
+    - "REFRIGERATEUR"
+
+
+
+#####################################################################################################################################
+# I18N CONFIGURATION
+# Configure in a i18n way all the texts of a product, including the Url, the title, the description, the open graph metas, ....
+# Use a micro templated language, that allows to introduce variables and "if condition", which allows to generate dynamic texts 
+######################################################################################################################################
+i18n:
+  fr:
+      # The layout a product url will have. Ex : 81234555-tv-led-samsung-QL659P 2023
+      url: 
+        # We can add a custom prefix (with our conditional templating language if we want)
+        prefix: "refrigerateur"
+        # Then we add some attributes values with hyphens if present (ex : led-samsung-QL659P-2023)
+        attrs:
+          - BRAND
+          - MODEL
+      ##################################
+      # Product page meta and h1 title 
+      ##################################
+      # The product h1 title. Constructed on the same basis than "url", but without the concatened hyphens
+      h1Title:  
+        prefix: "Réfrigérateur"
+        attrs:
+          - BRAND
+          - MODEL
+          - YEAR
+        
+      ##################################
+      # Vertical page elements 
+      ##################################
+      
+      # url for vertical (appened to baseUrl). No templating here 
+      verticalHomeUrl: "refrigerateurs"
+      # Text displaid as title for the vertical
+      # TODO : Make verticalHomeTitle/ verticalHomeDescription templatable
+      verticalHomeTitle: "Refrigerateurs"
+      # Text displaid as title for the vertical
+      # verticalHomeDescription: ""  
+
+     # A mapping beetween custom page names behind this vertical and wiki pages
+     # Copy and paste the wiki wiew url, without the "bin/view" prefix
+#      wikiPages:
+#        - wikiUrl: /verticals/tv/technologies-tv/WebHome
+#          verticalUrl: "oled-qled-lcd-que-choisir"
+#          title: "OLED, QLED,LCD, ... Quelle technologie choisir ?"
+#          faIcon: "fa-star"
+
+ 
+# GenAiConfig for this vertical
+genAiConfig:
+  # If false, will bypass the generativ ia texts generation  
+  enabled: false
+  
+  
+##############################################################################
+# Eco score configuration 
+# Specify here the specific ecoscore for this vertical. Format : 
+# >> EXISTING_SCORE: WEIGHT
+# Weight sum MUST BE equals to 1
+##############################################################################
+
+#ecoscoreConfig:
+#   CLASSE_ENERGY : 0.3
+#   WEIGHT: 0.3
+#   BRAND_SUSTAINABILITY: 0.3
+#   DATA-QUALITY: 0.1
+
+##############################################################################
+# Custom search filters : the following filters
+# will also be availlable in search for this vertical (must be an attribute or a score)
+##############################################################################
+
+
+
+ecoFilters:
+#    - "REPAIRABILITY_INDEX" 
+#    - "CLASSE_ENERGY"   
+#    - "ENERGY_CONSUMPTION_1000_HOURS"
+#    - "WEIGHT"
+
+technicalFilters:
+#    - "DIAGONALE_POUCES"
+#    - "DISPLAY_TECHNOLOGY"
+#    - "HDMI_PORTS_QUANTITY"
+
+#  - "PARTS_AVAILLABILITY"
+#  - "DATA-QUALITY"  
+#  - "BRAND-SUSTAINABILITY"
+
+
+
+
+####################################################################################
+# ATTRIBUTES CONFIGURATION
+####################################################################################
+#requiredAttributes:
+#  - DIAGONALE_POUCES
