@@ -71,13 +71,22 @@ public class NamesAggregationService extends AbstractAggregationService {
 				// Computing url
 				// TODO(conf,p2) : Should allow override from conf
 				if (null == data.getNames().getUrl().get(lang)) {
+					logger.warn("Generating new product url for {}", data);
 					String urlSuffix = StringUtils.stripAccents(computePrefixedText(data, tConf.getUrl(), "-"));
 					urlSuffix = StringUtils.normalizeSpace(urlSuffix).replace(' ', '-');
 					data.getNames().getUrl().put(lang, data.gtin() + "-" + urlSuffix);
+				} else {
+					logger.info("Skipping URL generation for {}", data);
 				}
 				
-				// h1Title			
-				data.getNames().getH1Title().put(lang, computePrefixedText(data, tConf.getH1Title(), " "));
+				
+				if (null == data.getNames().getH1Title().get(lang)) {
+					// h1Title			
+					data.getNames().getH1Title().put(lang, computePrefixedText(data, tConf.getH1Title(), " "));
+				}
+				
+				
+				
 				// metaDescription
 				data.getNames().getMetaDescription().put(lang, blablaService.generateBlabla(tConf.getProductMetaDescription(), data));
 				// productMetaOpenGraphTitle

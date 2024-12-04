@@ -28,9 +28,8 @@ i18n:
           - MODEL
         
       productMetaTitle: "[(${p.brand()})] [(${p.model()})] : Eco-score, compensation écologique et meilleurs prix"
-      productMetaDescription:  "[(${p.brand()})] [(${p.model()})] : Eco-score, compensation écologique et meilleurs prix. "
-              
-      productMetaOpenGraphTitle: "productMetaOpenGraphTitle"
+      productMetaDescription:  "[(${p.brand()})] [(${p.model()})] : Eco-score, compensation || écologique | environnementale || et meilleurs prix."              
+      productMetaOpenGraphTitle: "[(${p.brand()})] - [(${p.model()})] : Ecoscore de [(${p.ecoscore()})]. Venez nudger ce téléviseur au meilleur prix, et reversez gratuitement [(${p.compensation()})]"
       productMetaOpenGraphDescription: "productMetaOpenGraphDescription"
       productMetaTwitterTitle: "productMetaTwitterTitle"
       productMetaTwitterDescription: "productMetaTwitterDescription"
@@ -45,10 +44,47 @@ i18n:
 #        - key: "ecological-description" 
 #          prompt: "écris un texte de maximum 100 mots, dans un style académique, une analyse de l'impact environnemental de [(${p.brand()})] [(${p.model()})], sur la base des caracteriques suivantes : [(${p.caracteristics()})]"
 
+  ####################################################################################
+   # AI TEXTS CONFIGS
+   ####################################################################################  
+      aiConfigs:
+         override: false
+         pauseDurationMs: 1000
+         rootPrompt: |
+             Tu es un expert en [(${VERTICAL_TITLE})]. Fais une recherche d'information, une analyse technique, fonctionnelle et écologique pour le produit suivant : 
+              
+             Caractéristiques : 
+             [(${p.caracteristics()})]
+           
+             Génère un fichier JSON clé-valeur, textes en français uniquement, pour l'objet concerné répondant uniquement et strictement aux prompts suivants :      
+    
+         prompts: 
+            - key: "global-description"
+              prompt: |           
+                 : en tant qu'expert technique, rédige une description de l'objet en mettant en avant ses principales caractéristiques techniques. Le texte doit comporter entre 180 et 200 mots et être composé de deux paragraphes distincts, séparés par un point-virgule. Veille à ce que chaque paragraphe soit équilibré en termes de longueur.
+    
+            - key: "ecological-description"
+              prompt: |           
+                 : en tant qu'expert en impacts environnementaux, rédige une analyse de l'impact écologique de l'objet. Le texte doit comporter entre 180 et 200 mots et être composé de deux paragraphes distincts, séparés par un point-virgule. Veille à ce que chaque paragraphe soit équilibré en termes de longueur.
+    
+            - key: "pros"
+              prompt: |           
+                 : en tant qu'expert technique, liste cinq avantages du produit dans une seule ligne, séparés par des points-virgules, dans un style formel.
+    
+            - key: "cons"
+              prompt: |           
+                 : en tant qu'expert technique, liste cinq inconvénients techniques du produit dans une seule ligne, séparés par des points-virgules, dans un style formel.
 
+
+                 
+# GenAiConfig for this vertical
+genAiConfig:
+   # If false, will bypass the generativ ia texts generation  
+   enabled: false
 
 requiredAttributes:
 #  - WEIGHT
+
 ####################################################################################
 # RESOURCES CONFIGURATION
 ####################################################################################  
@@ -119,7 +155,19 @@ brandsExclusion:
   
 #brandsMappings:
 #  RR : RR  
-  
+
+
+##############################################################################
+# We cannot always identify manually what comppany operates a brand, and there is often 
+# confilicts or multiple possibilities that need to be manually adressed. (eg. samsung a lot of activities / brand through different companies)
+#
+##############################################################################
+
+brandsCompanyMapping:
+  SAMSUNG: "Samsung Electronics Co., Ltd."
+  TCL: "TCL Electronics Holdings Ltd."
+  LG: "LG Electronics, Inc."
+  PHILIPS: "Koninklijke Philips NV"  
   
         
 ####################################################################################

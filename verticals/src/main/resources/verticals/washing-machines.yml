@@ -27,9 +27,6 @@ matchingCategories:
     - "ELECTROMENAGER | ELECTROMENAGER > LAVAGE-SECHAGE > LAVE-LINGE SECHANT | LAVAGE-SECHAGE | LAVE-LINGE SECHANT"
     - "535 | WASHING MACHINES | LAVE-LINGE"
     - "HIGH TECH | ELECTROMENAGER > GROS ELECTROMENAGER > LAVE-LINGE > LAVE-LINGE HUBLOT | GROS ELECTROMENAGER | LAVE-LINGE"
-# The categories that disengage a mapping in this vertical  
-#unmatchingCategories:
-#- "HIFI>APPAREILS-PHOTO"
 
 
 #####################################################################################################################################
@@ -59,13 +56,6 @@ i18n:
           - BRAND
           - MODEL
           - YEAR
-      # TODO : must be defined in default  
-      productMetaTitle: "[(${p.brand()})] [(${p.model()})] : Eco-score, compensation écologique et meilleurs prix"
-      productMetaDescription:  "[(${p.brand()})] [(${p.model()})] : Eco-score, contribution || écologique | environnementale || et meilleurs prix."              
-      productMetaOpenGraphTitle: "[(${p.brand()})] - [(${p.model()})] : Ecoscore de [(${p.ecoscore()})]. Venez nudger ce lave-linge au meilleur prix, et reversez gratuitement [(${p.compensation()})]"
-      productMetaOpenGraphDescription: "productMetaOpenGraphDescription"
-      productMetaTwitterTitle: "productMetaTwitterTitle"
-      productMetaTwitterDescription: "productMetaTwitterDescription"
 
       ##################################
       # Vertical page elements 
@@ -78,55 +68,6 @@ i18n:
       verticalHomeTitle: "Machines à laver"
       # Text displaid as title for the vertical
       verticalHomeDescription: "Bienvenue dans notre rubrique laves-linges. "  
-      # The image used as a logo
-      verticalHomeLogo: "https://www.electrodepot.fr/media/catalog/product/cache/658b581ef34fca3e4a094205b4fee287/P981282.jpg?frz-v=3258"
-
-     # A mapping beetween custom page names behind this vertical and wiki pages
-     # Copy and paste the wiki wiew url, without the "bin/view" prefix
-#      wikiPages:
-#        - wikiUrl: /verticals/tv/technologies-tv/WebHome
-#          verticalUrl: "oled-qled-lcd-que-choisir"
-#          title: "OLED, QLED,LCD, ... Quelle technologie choisir ?"
-#          faIcon: "fa-star"
-
-      ####################################################################################
-      # AI TEXTS CONFIGS
-      ####################################################################################  
-      aiConfigs:
-        override: false
-        pauseDurationMs: 1000
-        rootPrompt: |
-            analyse technique, fonctionnelle et écologique d'un téléviseur, textes en français uniquement.
-             
-            Caractéristiques : 
-            [(${p.caracteristics()})]
-          
-            Génère un fichier JSON clé-valeur pour l'objet concerné répondant uniquement et strictement aux prompts suivants :      
-
-        prompts: 
-           - key: "global-description"
-             prompt: |           
-                : en tant qu'expert technique, rédige une description de l'objet en mettant en avant ses principales caractéristiques techniques. Le texte doit comporter entre 180 et 200 mots et être composé de deux paragraphes distincts, séparés par un point-virgule. Veille à ce que chaque paragraphe soit équilibré en termes de longueur.
-   
-           - key: "ecological-description"
-             prompt: |           
-                : en tant qu'expert en impacts environnementaux, rédige une analyse de l'impact écologique de l'objet. Le texte doit comporter entre 180 et 200 mots et être composé de deux paragraphes distincts, séparés par un point-virgule. Veille à ce que chaque paragraphe soit équilibré en termes de longueur.
-   
-           - key: "pros"
-             prompt: |           
-                : en tant qu'expert technique, liste cinq avantages du produit dans une seule ligne, séparés par des points-virgules, dans un style formel.
-   
-           - key: "cons"
-             prompt: |           
-                : en tant qu'expert technique, liste cinq inconvénients techniques du produit dans une seule ligne, séparés par des points-virgules, dans un style formel.
-
-# GenAiConfig for this vertical
-genAiConfig:
-  # If false, will bypass the generativ ia texts generation  
-  enabled: false
-  # Max products to be generated. Products are ordered by ecoscore
-  maxPerVerticals: 100
-  
   
 ##############################################################################
 # Eco score configuration 
@@ -162,17 +103,4 @@ technicalFilters:
 #  - "PARTS_AVAILLABILITY"
 #  - "DATA-QUALITY"  
 #  - "BRAND-SUSTAINABILITY"
-
-
-##############################################################################
-# We cannot always identify manually what comppany operates a brand, and there is often 
-# confilicts or multiple possibilities that need to be manually adressed. (eg. samsung a lot of activities / brand through different companies)
-#
-##############################################################################
-
-brandsCompanyMapping:
-  SAMSUNG: "Samsung Electronics Co., Ltd."
-  TCL: "TCL Electronics Holdings Ltd."
-  LG: "LG Electronics, Inc."
-  PHILIPS: "Koninklijke Philips NV"
 

@@ -1,5 +1,6 @@
 package org.open4goods.commons.services;
 
+import java.util.Map;
 import java.util.Map.Entry;
 
 import org.open4goods.commons.model.constants.ReferentielKey;
@@ -82,16 +83,28 @@ public class EvaluationService {
 			return "";
 		}
 	}
-
+	
 	/**
 	 * Generate a name from the thymleaf template weared in conf
 	 * Sample : "blabla de [(${p.vertical})]"
-	 * TODO : Should raise exception if unresolvable variable
+	 * TODO(p3,safety) : Should raise exception if unresolvable variable
 	 * @param p
 	 * @param template
 	 * @return
 	 */
 		public String thymeleafEval(final Product p, final String template) {
+				return thymeleafEval(p, template, null);
+		}
+	 
+	/**
+	 * Generate a name from the thymleaf template weared in conf
+	 * Sample : "blabla de [(${p.vertical})]"
+	 * TODO(p3,safety) : Should raise exception if unresolvable variable
+	 * @param p
+	 * @param template
+	 * @return
+	 */
+		public String thymeleafEval(final Product p, final String template, Map<String,Object> additionalParams) {
 			/**
 			 * Generate a name from the thymleaf template weared in conf
 			 *
@@ -104,12 +117,14 @@ public class EvaluationService {
 				ctx.setVariable("data", p);
 				ctx.setVariable("p", p);
 				ctx.setVariable("product", p);
+				if (null != additionalParams) {
+					ctx.setVariables(additionalParams);
+				}
 				
 				// Adding referentiel keys
 				for (Entry<ReferentielKey, String> e : p.getAttributes().getReferentielAttributes().entrySet()) {
 					ctx.setVariable(e.getKey().toString(), e.getValue());
 				}
-	
 	
 				final String ret = thymeleafTemplateEngine.process(template, ctx);
 				return ret;
@@ -119,8 +134,5 @@ public class EvaluationService {
 				return null;
 			}
 		}
-	//
-
-
 
 }
