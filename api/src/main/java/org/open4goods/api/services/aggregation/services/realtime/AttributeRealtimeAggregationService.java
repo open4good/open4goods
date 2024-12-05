@@ -154,19 +154,19 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 	private boolean shouldExclude(Product data, VerticalConfig vConf) {
 		// On brand
 		if (StringUtils.isEmpty(data.brand())) {
-			dedicatedLogger.warn("Excluded because brand is missing : {}", data );
+			dedicatedLogger.info("Excluded because brand is missing : {}", data );
 			return true;
 		}
 		
 		// On model
 		if (StringUtils.isEmpty(data.model())) {
-			dedicatedLogger.warn("Excluded because model is missing : {}", data );
+			dedicatedLogger.info("Excluded because model is missing : {}", data );
 			return true;
 		}
 		
 		Set<String> attrKeys = data.getAttributes().getattributesAsStringKeys();
 		if (vConf.getRequiredAttributes() != null && !attrKeys.containsAll(vConf.getRequiredAttributes())) {
-			dedicatedLogger.warn("Excluded because attributes are missing : {}", data );
+			dedicatedLogger.info("Excluded because attributes are missing : {}", data );
 			return true;
 		}
 		
