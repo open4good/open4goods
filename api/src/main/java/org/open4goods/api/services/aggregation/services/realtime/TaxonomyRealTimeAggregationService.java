@@ -61,7 +61,7 @@ public class TaxonomyRealTimeAggregationService extends AbstractAggregationServi
 		////////////////////////////
 		// Setting google taxonomy
 		////////////////////////////
-		data.setGoogleTaxonomyId(null);
+		data.setGoogleTaxonomyId(vConf.getGoogleTaxonomyId());
 //		if (data.getDatasourceCategories().size() != 0) {
 //			Integer taxonomy =   googleTaxonomy(data);
 //			if (null != taxonomy) {			
