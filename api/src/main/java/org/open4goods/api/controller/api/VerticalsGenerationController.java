@@ -95,15 +95,6 @@ public class VerticalsGenerationController {
 	}
 	
 
-	
-	@GetMapping(path="/mappings/generate/verticals")
-	@Operation(summary="Generate verticals from the mapping")
-	@PreAuthorize("hasAuthority('"+RolesConstants.ROLE_ADMIN+"')")
-	public List<VerticalConfig> generateVerticals() throws ResourceNotFoundException, IOException {
-		 return verticalsGenService.generateVerticals();
-		
-	}	
-
 	@GetMapping(path="/assist/attributes/{vertical}")
 	@Operation(summary="Generate attributes coverage for a vertical")
 	@PreAuthorize("hasAuthority('"+RolesConstants.ROLE_ADMIN+"')")
@@ -118,8 +109,8 @@ public class VerticalsGenerationController {
 	@Operation(summary="Generate the categories yaml fragment for a given match")
 	@PreAuthorize("hasAuthority('"+RolesConstants.ROLE_ADMIN+"')")
 	@Cacheable(keyGenerator = CacheConstants.KEY_GENERATOR, cacheNames = CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME)
-	public String generateCategoryMappingsFragment(@RequestParam String category) throws ResourceNotFoundException, IOException {
-		 return verticalsGenService.generateCategoryMappingFragmentFor(category);
+	public String generateCategoryMappingsFragment(@RequestParam String gtins) throws ResourceNotFoundException, IOException {
+		 return verticalsGenService.generateCategoryMappingFragmentForGtin(gtins.split(","));
 		
 	}
 	

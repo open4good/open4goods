@@ -21,8 +21,21 @@ enabled: false
 # Product classification from categories
 ##############################################################################
 # Will associate to this vertical if one of the following categorie is present for the product  
+
 matchingCategories:
-    - "BEAUTE, FORME ET SANTE / EPILATEUR / EPILATEUR ELECTRIQUE | BEAUTE, FORME ET SANTE>EPILATEUR>EPILATEUR ELECTRIQUE | EPILATEUR | EPILATEUR ELECTRIQUE"
+  all: []
+  Electrodepot - Guides et Comparateurs:
+  - "ELECTRO DEPOT | EPILATION, RASAGE | EPILATEUR"
+  rueducommerce.fr:
+  - "EPILATEUR"
+  darty.com:
+  - "BEAUTE, FORME ET SANTE / EPILATEUR / EPILATEUR ELECTRIQUE | BEAUTE, FORME ET SANTE>EPILATEUR>EPILATEUR ELECTRIQUE | EPILATEUR | EPILATEUR ELECTRIQUE"
+#  rakuten.com-csv.yml:
+#  - "SOINS-BEAUTE | ACCESSOIRES-APPAREILS-SOINS-DU-CORPS"
+#  fnac.com:
+#  - "PETIT MENAGER & CUISINE - EPILATION FEMININE"
+  cdiscount.com:
+  - "ELECTROMENAGER | ELECTROMENAGER > BEAUTE - BIEN-ETRE > EPILATEUR ELECTRIQUE | BEAUTE - BIEN-ETRE | EPILATEUR ELECTRIQUE"
 
 
 

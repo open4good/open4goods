@@ -21,8 +21,50 @@ enabled: false
 # Product classification from categories
 ##############################################################################
 # Will associate to this vertical if one of the following categorie is present for the product  
+
 matchingCategories:
-    - "INFORMATIQUE / ECRAN / ECRAN PC | INFORMATIQUE>ECRAN>ECRAN PC | ECRAN | ECRAN PC"
+  all: []
+  Darty Pro - Cashback:
+  - "INFORMATIQUE | ECRAN"
+  rueducommerce.fr:
+  - "ECRAN PC"
+  WelcomeOffice.com:
+  - "ECRAN D'ORDINATEUR"
+  darty.com:
+  - "INFORMATIQUE | INFORMATIQUE>ECRAN>ECRAN PC | ECRAN | INFORMATIQUE"
+  - "INFORMATIQUE / ECRAN / ECRAN PC | INFORMATIQUE>ECRAN>ECRAN PC | ECRAN | ECRAN PC"
+  rakuten.com-csv.yml:
+  - "INFORMATIQUE | ECRAN"
+#  fnac.com:
+#  - "INFORMATIQUE - ECRAN | APPAREILS ELECTRONIQUES > VIDEO > ACCESSOIRES VIDEO > ACCESSOIRES POUR TELEVISEURS"
+#  - "INFORMATIQUE - MONITEUR | APPAREILS ELECTRONIQUES > VIDEO > ACCESSOIRES VIDEO > ACCESSOIRES POUR TELEVISEURS"
+  cdiscount.com:
+  - "65 | INPUT DEVICES | INFORMATIQUE | INFORMATIQUE > ECRAN - ENCEINTE > ECRAN ORDINATEUR | ECRAN - ENCEINTE | ECRAN ORDINATEUR"
+#  - "65 | INPUT DEVICES | INFORMATIQUE | INFORMATIQUE > PERIPHERIQUE PC > LECTEUR EMPREINTE DIGITALE | PERIPHERIQUE PC | LECTEUR EMPREINTE DIGITALE"
+  Joom FR:
+  - "ELECTRONICS > COMPUTERS & ACCESSORIES > COMPUTER PERIPHERALS > MONITORS"
+  alternate FR:
+  - "85 | MONITORS | TV & MONITEUR > MONITEUR"
+#  JPG - Cashback & Reward:
+#  - "MONITEURS | ACCESSOIRES ORDINATEURS & PERIPHERIQUES"
+  grosbill.com:
+  - "ECRAN PC > IIYAMA"
+  - "ECRAN PC > DELL"
+  - "ECRAN PC > PHILIPS"
+  - "ECRAN PC > ASUS"
+  - "ECRAN PC > SAMSUNG"
+  Inmac - Cashbackeurs:
+  - "IT | MONITEURS | MONITEUR 22'' - 23''"
+  - "IT | MONITEURS | MONITEUR BUREAUTIQUE + DE 32''"
+  - "IT | MONITEURS | MONITEUR AFFICHAGE COLLABORATIF"
+  - "IT | MONITEURS | MONITEUR 24'' - 26''"
+  - "IT | MONITEURS | MONITEUR 27'' - 30''"
+  - "IT | MONITEURS | MONITEUR - DE 22''"
+#  manomano.fr:
+#  - "ELECTROMENAGER | ELECTROMENAGER > PETIT ELECTROMENAGER > EAU - BOISSON - GLACON > MACHINE A SODA ET EAU GAZEUSE | MACHINE A SODA ET EAU GAZEUSE"
+#  e.leclerc:
+#  - "HIGH-TECH | HIGH-TECH>MARQUES HIGH-TECH>SAMSUNG HIGH-TECH>SAMSUNG MONITEURS>MONITEURS GAMING SAMSUNG>GAMME ODYSSEY SAMSUNG | MARQUES HIGH-TECH | SAMSUNG HIGH-TECH"
+#  - "HIGH-TECH | HIGH-TECH>INFORMATIQUE - TABLETTE>GAMING>ECRAN PC GAMER | INFORMATIQUE - TABLETTE | GAMING"
 
 
 
@@ -57,7 +99,7 @@ i18n:
       ##################################
       
       # url for vertical (appened to baseUrl). No templating here 
-      verticalHomeUrl: "ecrans-ordinateur"
+      verticalHomeUrl: "ecran-ordinateur"
       # Text displaid as title for the vertical
       # TODO : Make verticalHomeTitle/ verticalHomeDescription templatable
       verticalHomeTitle: "Ecrans"

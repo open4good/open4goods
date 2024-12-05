@@ -4,9 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 
-import org.open4goods.commons.model.data.DataFragment;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -19,8 +17,10 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.type.CollectionType;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+import com.fasterxml.jackson.dataformat.yaml.YAMLGenerator;
 
 @Service
 public class SerialisationService {
@@ -38,11 +38,13 @@ public class SerialisationService {
 
 	private final ObjectWriter jsonMapperWithPretttyPrint = new ObjectMapper().writerWithDefaultPrettyPrinter();
 
-	private final ObjectMapper yamlMapper = new ObjectMapper(new YAMLFactory())
+	private final ObjectMapper yamlMapper = new ObjectMapper(new YAMLFactory()	.disable(YAMLGenerator.Feature.SPLIT_LINES))
 			.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
-
 			.setSerializationInclusion(Include.NON_EMPTY)
-			.setSerializationInclusion(Include.NON_NULL);
+			.setSerializationInclusion(Include.NON_NULL)
+			.enable(SerializationFeature.INDENT_OUTPUT)
+		
+			;
 
 	public SerialisationService() {
 		super();

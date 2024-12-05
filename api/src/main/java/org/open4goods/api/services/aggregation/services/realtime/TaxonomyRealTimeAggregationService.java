@@ -75,7 +75,7 @@ public class TaxonomyRealTimeAggregationService extends AbstractAggregationServi
 		////////////////////////////
 		// Setting vertical from category
 		////////////////////////////
-		VerticalConfig vertical = verticalService.getVerticalForCategories(data.getDatasourceCategories());
+		VerticalConfig vertical = verticalService.getVerticalForCategories(data.getCategoriesByDatasources());
 		if (null != vertical) {
 			if ( null != data.getVertical() && !vertical.getId().equals(data.getVertical())) {
 				dedicatedLogger.warn("Will erase existing vertical {} with {} for product {}, because of category {}", data.getVertical(), vertical.getId(), data.bestName());

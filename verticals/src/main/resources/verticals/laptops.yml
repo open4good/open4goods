@@ -1,3 +1,9 @@
+####################################################################################################################################################################
+#
+# This is the configuration for the LAPTOPS vertical. 
+# Generated on the vertical.yml template file, using the VerticalsGenerationService.verticalTemplate()
+# @See open4goods/commons/src/main/java/org/open4goods/config/yml/ui/VerticalConfig.java for commented POJO definition
+###################################################################################################################################################################
 
 # Unique identifier for this vertical. 
 # MUST contains only charracters
@@ -8,22 +14,43 @@ id: laptops
 # SHOULD be set, it will then force this taxonomy for all products in this vertical
 googleTaxonomyId: 328
 
-#TODO : Documentation
-#icecatTaxonomyId: 1584
+# Indicates if the vertical must be UI / sitemap / search rendered
+enabled: false
+
 ##############################################################################
 # Product classification from categories
 ##############################################################################
 # Will associate to this vertical if one of the following categorie is present for the product  
+
 matchingCategories:
-     - INFORMATIQUE | ORDINATEUR-PORTABLE"
-     - "65 | INPUT DEVICES | INFORMATIQUE | INFORMATIQUE > ORDINATEUR PORTABLE - NETBOOK > ORDINATEUR PORTABLE | ORDINATEUR PORTABLE - NETBOOK | ORDINATEUR PORTABLE"
-     - "INFORMATIQUE / ORDINATEUR PORTABLE / PC PORTABLE | INFORMATIQUE>ORDINATEUR PORTABLE>PC PORTABLE | ORDINATEUR PORTABLE | PC PORTABLE"
-     - "INFORMATIQUE - ORDINATEUR PORTABLE | APPAREILS ELECTRONIQUES > ORDINATEURS > ORDINATEURS PORTABLES"
-     - "INFORMATIQUE ORDINATEUR PORTABLE | APPAREILS ELECTRONIQUES > ORDINATEURS > ORDINATEURS PORTABLES"
-     - "PC PORTABLE"
-     - "INFORMATIQUE | ORDINATEUR PORTABLE"
-     - "IT | PC PORTABLE | PC PORTABLE"
-     - "INFORMATIQUE | INFORMATIQUE>ORDINATEUR PORTABLE>PC PORTABLE | ORDINATEUR PORTABLE | INFORMATIQUE"
+  all: []
+  JPG - Cashback & Reward:
+  - "ORDINATEURS PORTABLES | ORDINATEURS"
+  Darty Pro - Cashback:
+  - "INFORMATIQUE | ORDINATEUR PORTABLE"
+  rueducommerce.fr:
+  - "PC PORTABLE"
+  grosbill.com:
+  - "PC PORTABLE > SAMSUNG"
+  - "PC PORTABLE > ACER"
+  - "PC PORTABLE > ASUS"
+  rakuten.com-csv.yml:
+  - "INFORMATIQUE | ORDINATEUR-PORTABLE"
+  darty.com:
+  - "INFORMATIQUE | INFORMATIQUE>ORDINATEUR PORTABLE>PC PORTABLE | ORDINATEUR PORTABLE | INFORMATIQUE"
+  - "INFORMATIQUE / ORDINATEUR PORTABLE / PC PORTABLE | INFORMATIQUE>ORDINATEUR PORTABLE>PC PORTABLE | ORDINATEUR PORTABLE | PC PORTABLE"
+  Inmac - Cashbackeurs:
+  - "IT | PC PORTABLE | PC PORTABLE"
+  fnac.com:
+  - "INFORMATIQUE - ORDINATEUR PORTABLE | APPAREILS ELECTRONIQUES > ORDINATEURS > ORDINATEURS PORTABLES"
+  cdiscount.com:
+  - "65 | INPUT DEVICES | INFORMATIQUE | INFORMATIQUE > ORDINATEUR PORTABLE - NETBOOK > ORDINATEUR PORTABLE | ORDINATEUR PORTABLE - NETBOOK | ORDINATEUR PORTABLE"
+  e.leclerc:
+  - "HIGH-TECH | HIGH-TECH>INFORMATIQUE - TABLETTE>PC>PC PORTABLE | INFORMATIQUE - TABLETTE | PC"
+  icecat.biz.yml:
+  - "LAPTOPS"
+
+
 
 #####################################################################################################################################
 # I18N CONFIGURATION
@@ -38,10 +65,8 @@ i18n:
         prefix: "ordinateur-portable"
         # Then we add some attributes values with hyphens if present (ex : led-samsung-QL659P-2023)
         attrs:
-#          - TV_TYPE
           - BRAND
           - MODEL
-          - YEAR
       ##################################
       # Product page meta and h1 title 
       ##################################
@@ -52,18 +77,34 @@ i18n:
           - BRAND
           - MODEL
           - YEAR
-    
+        
       ##################################
       # Vertical page elements 
       ##################################
       
       # url for vertical (appened to baseUrl). No templating here 
-      verticalHomeUrl: "ordinateurs-portables"
+      verticalHomeUrl: "ordinateurs-potable"
       # Text displaid as title for the vertical
       # TODO : Make verticalHomeTitle/ verticalHomeDescription templatable
       verticalHomeTitle: "Ordinateurs portables"
       # Text displaid as title for the vertical
-      verticalHomeDescription: "Bienvenue dans notre rubrique ordinateurs portables. "  
+      # verticalHomeDescription: ""  
+
+     # A mapping beetween custom page names behind this vertical and wiki pages
+     # Copy and paste the wiki wiew url, without the "bin/view" prefix
+#      wikiPages:
+#        - wikiUrl: /verticals/tv/technologies-tv/WebHome
+#          verticalUrl: "oled-qled-lcd-que-choisir"
+#          title: "OLED, QLED,LCD, ... Quelle technologie choisir ?"
+#          faIcon: "fa-star"
+
+ 
+# GenAiConfig for this vertical
+genAiConfig:
+  # If false, will bypass the generativ ia texts generation  
+  enabled: false
+  
+  
 ##############################################################################
 # Eco score configuration 
 # Specify here the specific ecoscore for this vertical. Format : 
@@ -71,12 +112,11 @@ i18n:
 # Weight sum MUST BE equals to 1
 ##############################################################################
 
-ecoscoreConfig:
-   BRAND_SUSTAINABILITY: 0.2
-   REPAIRABILITY_INDEX: 0.3
-   CLASSE_ENERGY : 0.3
-   WARRANTY: 0.1
-   DATA-QUALITY: 0.1
+#ecoscoreConfig:
+#   CLASSE_ENERGY : 0.3
+#   WEIGHT: 0.3
+#   BRAND_SUSTAINABILITY: 0.3
+#   DATA-QUALITY: 0.1
 
 ##############################################################################
 # Custom search filters : the following filters
@@ -86,17 +126,25 @@ ecoscoreConfig:
 
 
 ecoFilters:
-    - "REPAIRABILITY_INDEX" 
-    - "CLASSE_ENERGY"   
-    - "ENERGY_CONSUMPTION_1000_HOURS"
+#    - "REPAIRABILITY_INDEX" 
+#    - "CLASSE_ENERGY"   
+#    - "ENERGY_CONSUMPTION_1000_HOURS"
+#    - "WEIGHT"
 
 technicalFilters:
-    - "DIAGONALE_POUCES"
-    - "DISPLAY_TECHNOLOGY"
-    - "HDMI_PORTS_QUANTITY"
-  
+#    - "DIAGONALE_POUCES"
+#    - "DISPLAY_TECHNOLOGY"
+#    - "HDMI_PORTS_QUANTITY"
+
 #  - "PARTS_AVAILLABILITY"
 #  - "DATA-QUALITY"  
 #  - "BRAND-SUSTAINABILITY"
 
 
+
+
+####################################################################################
+# ATTRIBUTES CONFIGURATION
+####################################################################################
+#requiredAttributes:
+#  - DIAGONALE_POUCES
