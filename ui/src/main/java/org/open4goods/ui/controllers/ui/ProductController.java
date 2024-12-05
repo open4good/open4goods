@@ -90,6 +90,10 @@ public class ProductController  {
 
 		ModelAndView mv = buildProductView(id, vertical,request, response);
 
+		
+		if (null != mv.getStatus() && mv.getStatus().equals((HttpStatus.MOVED_PERMANENTLY))) {
+			return mv;
+		}
 		// Force authentication for wip verticals 
 		if (vConf.isEnabled() == false && !mv.getModel().containsKey("user")) {
 			throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Produit " + request.getServletPath() + " inaccessible !");
