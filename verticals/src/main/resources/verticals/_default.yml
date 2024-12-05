@@ -5,8 +5,8 @@
 #    > All verticals can override settings by redefining them in the dedicated vertical configuration file
 #####################################################################################################################################
 
-
-
+# If true, products url will be regenerated on each batch. Should not move too much, but... 
+forceNameGeneration: true
 #####################################################################################################################################
 # I18N CONFIGURATION
 # Configure in a i18n way all the texts of a product, including the Url, the title, the description, the open graph metas, ....

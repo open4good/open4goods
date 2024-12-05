@@ -119,7 +119,12 @@ public class VerticalConfig{
 	@JsonMerge
 	private Map<String, String> brandsCompanyMapping = new HashMap<>();
 	
+	/**
+	 * if true, will override generated url name, even if already geenrated
+	 */
+	private boolean forceNameGeneration = false;
 	
+		
 	@JsonMerge
 	/**
 	 * Brand alias mappings (eg : LG ELECTRONICS : LG)
@@ -764,6 +769,15 @@ public class VerticalConfig{
 		this.brandsExclusion = brandsExclusion;
 	}
 
+	public boolean isForceNameGeneration() {
+		return forceNameGeneration;
+	}
+
+	public void setForceNameGeneration(boolean forceUrlNameGeneration) {
+		this.forceNameGeneration = forceUrlNameGeneration;
+	}
+
+	
 	
 	
 	
