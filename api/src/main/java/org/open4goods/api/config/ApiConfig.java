@@ -259,8 +259,10 @@ public class ApiConfig {
 			@Autowired BrandService brandservice,
 			@Autowired GoogleTaxonomyService gts,
 			@Autowired BlablaService blablaService,
-			@Autowired IcecatService icecatFeatureService) {
-		return new AggregationFacadeService(evaluationService, standardiserService, autowireBeanFactory, aggregatedDataRepository, apiProperties, gs1prefixService, dataSourceConfigService, configService,  barcodeValidationService,brandservice, gts, blablaService, icecatFeatureService);
+			@Autowired IcecatService icecatFeatureService,
+			@Autowired SerialisationService serialisationService
+			) {
+		return new AggregationFacadeService(evaluationService, standardiserService, autowireBeanFactory, aggregatedDataRepository, apiProperties, gs1prefixService, dataSourceConfigService, configService,  barcodeValidationService,brandservice, gts, blablaService, icecatFeatureService, serialisationService);
 	}
 
 
