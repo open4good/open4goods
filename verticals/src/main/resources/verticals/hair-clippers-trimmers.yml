@@ -80,7 +80,7 @@ i18n:
       ##################################
       
       # url for vertical (appened to baseUrl). No templating here 
-      verticalHomeUrl: "tondeuses-barbes-cheveux"
+      verticalHomeUrl: "tondeuses-barbe-cheveux"
       # Text displaid as title for the vertical
       # TODO : Make verticalHomeTitle/ verticalHomeDescription templatable
       verticalHomeTitle: "Tondeuses barbe et cheveux"
