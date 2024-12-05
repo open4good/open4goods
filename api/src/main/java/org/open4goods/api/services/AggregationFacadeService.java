@@ -33,6 +33,7 @@ import org.open4goods.commons.services.EvaluationService;
 import org.open4goods.commons.services.GoogleTaxonomyService;
 import org.open4goods.commons.services.Gs1PrefixService;
 import org.open4goods.commons.services.IcecatService;
+import org.open4goods.commons.services.SerialisationService;
 import org.open4goods.commons.services.StandardiserService;
 import org.open4goods.commons.services.VerticalsConfigService;
 import org.open4goods.commons.services.textgen.BlablaService;
@@ -80,6 +81,8 @@ public class AggregationFacadeService {
 	private StandardAggregator realtimeAggregator;
 	
 	private IcecatService icecatFeatureService;
+
+	private SerialisationService serialisationService;
 	
 	public AggregationFacadeService(EvaluationService evaluationService,
 			StandardiserService standardiserService,
@@ -90,7 +93,8 @@ public class AggregationFacadeService {
 			BrandService brandService,
 			GoogleTaxonomyService taxonomyService,
 			BlablaService blablaService,
-			IcecatService icecatFeatureService
+			IcecatService icecatFeatureService,
+			SerialisationService serialisationService
 			) {
 		super();
 		this.evaluationService = evaluationService;
@@ -107,6 +111,7 @@ public class AggregationFacadeService {
 		this.blablaService = blablaService;
 		this.icecatFeatureService = icecatFeatureService;
 		this.realtimeAggregator = getStandardAggregator("realtime");
+		this.serialisationService = serialisationService;
 	
 	}
 
@@ -196,7 +201,9 @@ public class AggregationFacadeService {
 	 * @return
 	 */
 	private boolean toBeDeleted(Product p) {
-		return false;
+		
+		//TODO(p1,perf) : remove once migration done
+		return serialisationService.toJson(p).contains("openfoodfacts.org");
 	}
 
 	/**
