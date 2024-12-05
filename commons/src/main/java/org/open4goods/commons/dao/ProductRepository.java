@@ -126,11 +126,7 @@ public class ProductRepository {
 	 */
 	public Stream<Product> getProductsMatchingCategoriesOrVerticalId(VerticalConfig v) {
 		Criteria c = new Criteria("datasourceCategories").in(v.getMatchingCategories())
-		// TODO : Add exclusion
-//				.and(new Criteria("datasourceCategories").notIn(v.getMatchingCategories()))
 				.or(new Criteria("vertical").is(v.getId()));
-// TODO : Add or get by taxonomyId
-		
 		
 		final NativeQuery initialQuery = new NativeQueryBuilder().withQuery(new CriteriaQuery(c)).build();
 
@@ -139,6 +135,16 @@ public class ProductRepository {
 
 	}
 
+	public Stream<Product> getProductsMatchingVerticalId(VerticalConfig v) {
+		Criteria c = new Criteria("vertical").is(v.getId());
+		
+		final NativeQuery initialQuery = new NativeQueryBuilder().withQuery(new CriteriaQuery(c)).build();
+
+		return elasticsearchOperations.searchForStream(initialQuery, Product.class, current_index).stream()
+				.map(SearchHit::getContent);
+
+	}
+	
 	/**
 	 * Export all aggregated data
 	 * 

@@ -1,3 +1,9 @@
+####################################################################################################################################################################
+#
+# This is the configuration for the WASHING-MACHINES vertical. 
+# Generated on the vertical.yml template file, using the VerticalsGenerationService.verticalTemplate()
+# @See open4goods/commons/src/main/java/org/open4goods/config/yml/ui/VerticalConfig.java for commented POJO definition
+###################################################################################################################################################################
 
 # Unique identifier for this vertical. 
 # MUST contains only charracters
@@ -8,25 +14,36 @@ id: washing-machines
 # SHOULD be set, it will then force this taxonomy for all products in this vertical
 googleTaxonomyId: 2549
 
-#TODO : Documentation
-#icecatTaxonomyId: 1584
+# Indicates if the vertical must be UI / sitemap / search rendered
+enabled: false
+
 ##############################################################################
 # Product classification from categories
 ##############################################################################
 # Will associate to this vertical if one of the following categorie is present for the product  
+
 matchingCategories:
-    - "ELECTROMENAGER | LAVE-LINGE"
-    - "ELECTROMENAGER | ELECTROMENAGER > LAVAGE-SECHAGE > LAVE-LINGE | LAVAGE-SECHAGE | LAVE-LINGE"
-    - "LAVE-LINGE"
-    - "GROS ELECTROMENAGER / LAVE-LINGE / LAVE-LINGE HUBLOT | GROS ELECTROMENAGER>LAVE-LINGE>LAVE-LINGE HUBLOT | LAVE-LINGE | LAVE-LINGE HUBLOT"
-    - "ELECTROMENAGER | ELECTROMENAGER > GROS ELECTROMENAGER > LAVE-LINGE | LAVE-LINGE"
-    - "GROS ELECTROMENAGER | LAVE-LINGE"
-    - "LAVE-LINGE | MAGASIN CASTORAMA > CUISINE > GROS ELECTROMENAGER > LAVE-LINGE ET SECHE-LINGE > LAVE-LINGE | CUISINE | GROS ELECTROMENAGER"
-    - "GROS ELECTROMENAGER / LAVE-LINGE / LAVE-LINGE SECHANT | GROS ELECTROMENAGER>LAVE-LINGE>LAVE-LINGE SECHANT | LAVE-LINGE | LAVE-LINGE SECHANT"
-    - "GROS ELECTROMENAGER / LAVE-LINGE / LAVE-LINGE TOP | GROS ELECTROMENAGER>LAVE-LINGE>LAVE-LINGE TOP | LAVE-LINGE | LAVE-LINGE TOP"
-    - "ELECTROMENAGER | ELECTROMENAGER > LAVAGE-SECHAGE > LAVE-LINGE SECHANT | LAVAGE-SECHAGE | LAVE-LINGE SECHANT"
-    - "535 | WASHING MACHINES | LAVE-LINGE"
-    - "HIGH TECH | ELECTROMENAGER > GROS ELECTROMENAGER > LAVE-LINGE > LAVE-LINGE HUBLOT | GROS ELECTROMENAGER | LAVE-LINGE"
+  all: []
+  Darty Pro - Cashback:
+  - "GROS ELECTROMENAGER | LAVE-LINGE"
+  rueducommerce.fr:
+  - "LAVE-LINGE"
+  darty.com:
+  - "GROS ELECTROMENAGER | GROS ELECTROMENAGER>LAVE-LINGE>LAVE-LINGE HUBLOT | LAVE-LINGE | GROS ELECTROMENAGER"
+  - "GROS ELECTROMENAGER / LAVE-LINGE / LAVE-LINGE HUBLOT | GROS ELECTROMENAGER>LAVE-LINGE>LAVE-LINGE HUBLOT | LAVE-LINGE | LAVE-LINGE HUBLOT"
+  rakuten.com-csv.yml:
+  - "ELECTROMENAGER | LAVE-LINGE"
+  UNDERDOG FR:
+  - "535 | WASHING MACHINES | LAVE-LINGE"
+  manomano.fr:
+  - "ELECTROMENAGER | ELECTROMENAGER > GROS ELECTROMENAGER > LAVE-LINGE | LAVE-LINGE"
+  cdiscount.com:
+  - "ELECTROMENAGER | ELECTROMENAGER > LAVAGE-SECHAGE > LAVE-LINGE | LAVAGE-SECHAGE | LAVE-LINGE"
+  e.leclerc:
+  - "HIGH-TECH | ELECTROMENAGER>GROS ELECTROMENAGER>LAVE-LINGE>LAVE-LINGE HUBLOT | GROS ELECTROMENAGER | LAVE-LINGE"
+  icecat.biz.yml:
+  - "MACHINES A LAVER"
+
 
 
 #####################################################################################################################################
@@ -42,10 +59,8 @@ i18n:
         prefix: "|| lave-linge | machine-a-laver ||"
         # Then we add some attributes values with hyphens if present (ex : led-samsung-QL659P-2023)
         attrs:
-#          - TV_TYPE
           - BRAND
           - MODEL
-          - YEAR
       ##################################
       # Product page meta and h1 title 
       ##################################
@@ -56,7 +71,7 @@ i18n:
           - BRAND
           - MODEL
           - YEAR
-
+        
       ##################################
       # Vertical page elements 
       ##################################
@@ -67,7 +82,22 @@ i18n:
       # TODO : Make verticalHomeTitle/ verticalHomeDescription templatable
       verticalHomeTitle: "Machines à laver"
       # Text displaid as title for the vertical
-      verticalHomeDescription: "Bienvenue dans notre rubrique laves-linges. "  
+      # verticalHomeDescription: ""  
+
+     # A mapping beetween custom page names behind this vertical and wiki pages
+     # Copy and paste the wiki wiew url, without the "bin/view" prefix
+#      wikiPages:
+#        - wikiUrl: /verticals/tv/technologies-tv/WebHome
+#          verticalUrl: "oled-qled-lcd-que-choisir"
+#          title: "OLED, QLED,LCD, ... Quelle technologie choisir ?"
+#          faIcon: "fa-star"
+
+ 
+# GenAiConfig for this vertical
+genAiConfig:
+  # If false, will bypass the generativ ia texts generation  
+  enabled: false
+  
   
 ##############################################################################
 # Eco score configuration 
@@ -76,12 +106,11 @@ i18n:
 # Weight sum MUST BE equals to 1
 ##############################################################################
 
-ecoscoreConfig:
-   BRAND_SUSTAINABILITY: 0.2
-   REPAIRABILITY_INDEX: 0.3
-   CLASSE_ENERGY : 0.3
-   WARRANTY: 0.1
-   DATA-QUALITY: 0.1
+#ecoscoreConfig:
+#   CLASSE_ENERGY : 0.3
+#   WEIGHT: 0.3
+#   BRAND_SUSTAINABILITY: 0.3
+#   DATA-QUALITY: 0.1
 
 ##############################################################################
 # Custom search filters : the following filters
@@ -91,16 +120,25 @@ ecoscoreConfig:
 
 
 ecoFilters:
-    - "REPAIRABILITY_INDEX" 
-    - "CLASSE_ENERGY"   
-    - "ENERGY_CONSUMPTION_1000_HOURS"
+#    - "REPAIRABILITY_INDEX" 
+#    - "CLASSE_ENERGY"   
+#    - "ENERGY_CONSUMPTION_1000_HOURS"
+#    - "WEIGHT"
 
 technicalFilters:
-    - "DIAGONALE_POUCES"
-    - "DISPLAY_TECHNOLOGY"
-    - "HDMI_PORTS_QUANTITY"
-  
+#    - "DIAGONALE_POUCES"
+#    - "DISPLAY_TECHNOLOGY"
+#    - "HDMI_PORTS_QUANTITY"
+
 #  - "PARTS_AVAILLABILITY"
 #  - "DATA-QUALITY"  
 #  - "BRAND-SUSTAINABILITY"
 
+
+
+
+####################################################################################
+# ATTRIBUTES CONFIGURATION
+####################################################################################
+#requiredAttributes:
+#  - DIAGONALE_POUCES

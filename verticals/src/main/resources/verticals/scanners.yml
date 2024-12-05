@@ -1,6 +1,6 @@
 ####################################################################################################################################################################
 #
-# This is the configuration for the VIDEO-GAME-CONSOLES vertical. 
+# This is the configuration for the SCANNERS vertical. 
 # Generated on the vertical.yml template file, using the VerticalsGenerationService.verticalTemplate()
 # @See open4goods/commons/src/main/java/org/open4goods/config/yml/ui/VerticalConfig.java for commented POJO definition
 ###################################################################################################################################################################
@@ -8,11 +8,11 @@
 # Unique identifier for this vertical. 
 # MUST contains only charracters
 # SHOULD be equal to the configuration file name, without the extension
-id: video-game-consoles
+id: scanners
 
 # The associated google taxonomyID. (Ex : FR - https://www.google.com/basepages/producttype/taxonomy-with-ids.fr-FR.txt)
 # SHOULD be set, it will then force this taxonomy for all products in this vertical
-googleTaxonomyId: 1294
+googleTaxonomyId: 306
 
 # Indicates if the vertical must be UI / sitemap / search rendered
 enabled: false
@@ -24,8 +24,41 @@ enabled: false
 
 matchingCategories:
   all: []
+  Darty Pro - Cashback:
+  - "INFORMATIQUE | IMPRIMANTE ET SCANNER"
+#  Electrodepot - Guides et Comparateurs:
+#  - "ELECTRO DEPOT | IMPRIMANTE, PAPIER | IMPRIMANTE"
+  backmarket.fr:
+  - "ELECTRONICS > PRINT, COPY, SCAN & FAX > SCANNERS"
+  WelcomeOffice.com:
+  - "SCANNERS"
+  darty.com:
+  - "INFORMATIQUE | INFORMATIQUE>IMPRIMANTE ET SCANNER>SCANNER | IMPRIMANTE ET SCANNER | INFORMATIQUE"
+  - "INFORMATIQUE / IMPRIMANTE ET SCANNER / SCANNER | INFORMATIQUE>IMPRIMANTE ET SCANNER>SCANNER | IMPRIMANTE ET SCANNER | SCANNER"
   rakuten.com-csv.yml:
-  - "JEUX-VIDEO-ET-CONSOLES | CONSOLES"
+#  - "INFORMATIQUE | IMPRIMANTE"
+  - "INFORMATIQUE | SCANNERS"
+  fnac.com:
+#  - "INFORMATIQUE - IMPRIMANTE ET SCANNER | APPAREILS ELECTRONIQUES > IMPRESSION, COPIE, NUMERISATION ET TELECOPIE > IMPRIMANTES ET COPIEURS > IMPRIMANTES"
+  cdiscount.com:
+  - "65 | INPUT DEVICES | INFORMATIQUE | INFORMATIQUE > IMPRESSION - SCANNER > SCANNER | IMPRESSION - SCANNER | SCANNER"
+#  Joom FR:
+#  - "ELECTRONICS > COMPUTERS & ACCESSORIES > OFFICE EQUIPMENT > PRINTERS & ACCESSORIES > PRINTERS & MFP"
+  alternate FR:
+  - "211 | SCANNERS | SCANNER"
+  icecat.biz.yml:
+  - "SCANNERS"
+  JPG - Cashback & Reward:
+  - "SCANNERS | SCANNERS"
+  grosbill.com:
+  - "SCANNER > BROTHER"
+  - "SCANNER > EPSON"
+  Inmac - Cashbackeurs:
+  - "MULTIMEDIA | SCANNER DE PRODUCTION"
+  - "MULTIMEDIA | SCANNER BUREAUTIQUE"
+  - "MULTIMEDIA | SCANNER PORTABLE"
+  e.leclerc:
+  - "HIGH-TECH | HIGH-TECH>INFORMATIQUE - TABLETTE>PERIPHERIQUE & ACCESSOIRES>SCANNER | INFORMATIQUE - TABLETTE | PERIPHERIQUE & ACCESSOIRES"
 
 
 
@@ -39,7 +72,7 @@ i18n:
       # The layout a product url will have. Ex : 81234555-tv-led-samsung-QL659P 2023
       url: 
         # We can add a custom prefix (with our conditional templating language if we want)
-        prefix: "console"
+        prefix: "scanner"
         # Then we add some attributes values with hyphens if present (ex : led-samsung-QL659P-2023)
         attrs:
           - BRAND
@@ -49,7 +82,7 @@ i18n:
       ##################################
       # The product h1 title. Constructed on the same basis than "url", but without the concatened hyphens
       h1Title:  
-        prefix: "Consoles"
+        prefix: "Scanner"
         attrs:
           - BRAND
           - MODEL
@@ -60,10 +93,10 @@ i18n:
       ##################################
       
       # url for vertical (appened to baseUrl). No templating here 
-      verticalHomeUrl: "consoles"
+      verticalHomeUrl: "scanners"
       # Text displaid as title for the vertical
       # TODO : Make verticalHomeTitle/ verticalHomeDescription templatable
-      verticalHomeTitle: "Consoles"
+      verticalHomeTitle: "Scanners"
       # Text displaid as title for the vertical
       # verticalHomeDescription: ""  
 

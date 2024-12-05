@@ -102,8 +102,8 @@ public class BatchService {
 		
 		logger.info("Loading products in memory for vertical {}", vertical);
 		
-		// We take all products
-		allProducts = 	dataRepository.getProductsMatchingCategoriesOrVerticalId(vertical).collect(Collectors.toSet());
+		// We take all products that are typed with the given vertical
+		allProducts = 	dataRepository.getProductsMatchingVerticalId(vertical).collect(Collectors.toSet());
 		
 		logger.info("Sanitisation of {} products", allProducts);
 

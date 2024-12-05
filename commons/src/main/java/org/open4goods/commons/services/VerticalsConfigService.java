@@ -8,6 +8,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
@@ -32,8 +33,6 @@ import jakarta.annotation.PreDestroy;
  * This service is in charge to provide the Verticals configurations.
  * Configurations are provided from the classpath AND from a git specific
  * project (fresh local clone on app startup)
- * TODO : Should be in the verticals sub projetc
- * TODO : Should not have a dep to gtaxonomy
  * @author goulven
  *
  */
@@ -50,7 +49,8 @@ public class VerticalsConfigService {
 
 	private final Map<String, VerticalConfig> configs = new ConcurrentHashMap<>(100);
 
-	private final Map<String,VerticalConfig> categoriesToVertical = new ConcurrentHashMap<>();
+	// The cache of categories to verticalconfig association. datasource (or all) -> category -> VerticalConfig
+	private final Map<String,Map<String, VerticalConfig>> categoriesToVertical = new ConcurrentHashMap<>();
 
 	private Map<String,VerticalConfig> byUrl = new HashMap<>();
 
@@ -128,19 +128,34 @@ public class VerticalsConfigService {
 		// Associating categoriesToVertical
 		synchronized (categoriesToVertical) {
 			categoriesToVertical.clear();
-			configs.values().forEach(c -> c.getMatchingCategories().forEach(cc -> categoriesToVertical.put(cc, c)));
+			configs.values().forEach(c -> c.getMatchingCategories().entrySet().forEach(cc -> {
+				try {
+					if (!categoriesToVertical.containsKey(cc.getKey())) {
+						categoriesToVertical.put(cc.getKey(), new HashMap<String, VerticalConfig>());
+					}
+					if (null != cc.getValue()) {
+						cc.getValue().forEach(cat -> {
+							categoriesToVertical.get(cc.getKey()).put(cat, c);	
+						});
+					}
+				} catch (Exception e) {
+					logger.error("Error loading categories matching map : {}",c,e);
+				}
+				
+			}));
 		}
 
+		// Associati
+		
+		
 		// Mapping url to i18n
 		getConfigsWithoutDefault().forEach(vc -> vc.getI18n().forEach((key, value) -> {
 
 			toLang.put(value.getVerticalHomeUrl(), key);
 			byUrl.put(value.getVerticalHomeUrl(), vc);
 			byTaxonomy.put(vc.getGoogleTaxonomyId(), vc);
-//			verticalUrlByLanguage.put(key, value);
 		}));
 
-		generateImagesForVerticals(vConfs);
 	}
 
 
@@ -193,52 +208,34 @@ public class VerticalsConfigService {
 		return ret;
 	}
 
-//	/**	Add a config from api endpoint **/
-//	public void addTmpConfig(VerticalConfig vc) {
-//
-//		try {
-//			logger.warn("Adding a non versionned vertical config file. Have to do a PR on open4goods-config to persist it");
-//			File dest = new File(verticalsFolder + File.separator + vc.getId() + ".yml");
-//			serialisationService.getYamlMapper().writeValue(dest, vc);
-//
-//			// Reload configs
-//			loadConfigs();
-//		} catch (Exception e) {
-//			logger.error("Cannot persist vertical config", e);
-//		}
-//    }
-
 	/**
-	 * Instanciate a vertical config for a given category name
-	 * TODO :	Performance : cache the result : https://stackoverflow.com/questions/44529029/spring-cache-with-collection-of-items-entities
+	 * Instanciate a vertical config for a given categories bag
 	 * @param inputStream
 	 * @param existing
 	 * @return
 	 * @throws IOException
 	 */
-//	@Cacheable(key = "#root.methodName + ':' + #categories", cacheNames = CacheConstants.FOREVER_LOCAL_CACHE_NAME)
-	// ISSUE : Performance issue here, cache as a unique hash of categories
-	// TODO : Performance issue here, cache as a unique hash of categories
-	//labels:bug,perf
-	public VerticalConfig getVerticalForCategories(Set<String> categories) {
+	public VerticalConfig getVerticalForCategories(Map<String, String> productCategoriessByDatasource) {
 		
-
 		VerticalConfig vc = null;
 
-		for (String category : categories) {
-			vc = categoriesToVertical.get(category);
-
-			// Discarding if unmatching category
-			if (null != vc) {
-				if (!Collections.disjoint(vc.getUnmatchingCategories(), categories))	{
-					vc = null;
+		for (Entry<String, String> category : productCategoriessByDatasource.entrySet()) {
+			// Searching in the specific category
+			Map<String, VerticalConfig> keys = categoriesToVertical.get(category.getKey());
+			if (null != keys) {
+				
+				vc = keys.get(category.getValue());
+				if (null != vc) {
 					break;
 				}
 			}
-
+			
+			// Searching in the ALL category
+			vc = categoriesToVertical.get("all").get(category.getValue());
 			if (null != vc) {
 				break;
 			}
+			
 		}
 
 		return vc;
@@ -253,12 +250,6 @@ public class VerticalsConfigService {
 	 */
 	public VerticalConfig getVerticalForPath(String path) {
 		return byUrl.get(path);
-	}
-
-	
-	public String getLanguageForPath(String vertical) {
-		// TODO Auto-generated method stub
-		return null;
 	}
 
 	
@@ -289,7 +280,7 @@ public class VerticalsConfigService {
 	/**
 	 * Return a config by it's icecat categoryId
 	 * @param icecatCategoryId
-	 * TODO : PErf : Maintain a map for key/val access
+	 * TODO(p2,perf) : Maintain a map for key/val access
 	 * @return
 	 */
 	public VerticalConfig getByIcecatCategoryId(Integer icecatCategoryId) {
@@ -390,37 +381,6 @@ public class VerticalsConfigService {
 	 */
 	public Map<String, VerticalConfig> getConfigs() {
 		return configs;
-	}
-
-
-	/**
-	 * Submits tasks to generate images for each vertical configuration using ExecutorService.
-	 * Images are generated only if they do not already exist or if forceOverride is enabled.
-	 *
-	 * @param vConfs A map of vertical configurations.
-	 */
-	private void generateImagesForVerticals(Map<String, VerticalConfig> vConfs) {
-
-		//TODO(P1,design) : disabling genai for now
-		//		vConfs.values().forEach(vc -> executorService.submit(() -> {
-//			String fileName = vc.getId() + ".png";
-//			if (!imageGenerationService.shouldGenerateImage(fileName)) {
-//				logger.info("Image for vertical {} already exists with file name {}. Skipping generation.", vc.getId(), fileName);
-//				return;
-//			}
-//
-//			String threadName = Thread.currentThread().getName();
-//			logger.info("Starting image generation for vertical {} in thread {}", vc.getId(), threadName);
-//
-//			try {
-//				//TODO(p3,i18n) ! i18n
-//				String verticalTitle = vc.getI18n().get("fr").getVerticalHomeTitle();
-//				imageGenerationService.fullGenerate(verticalTitle, fileName);
-//				logger.info("Generated and saved image for vertical {} with file name {} in thread {}", vc.getId(), fileName, threadName);
-//			} catch (Exception e) {
-//				logger.error("Failed to generate or save image for vertical {} in thread {}", vc.getId(), threadName, e);
-//			}
-//		}));
 	}
 
 

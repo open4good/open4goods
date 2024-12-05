@@ -6,16 +6,19 @@ import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.Map.Entry;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang.NumberUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.open4goods.api.config.yml.VerticalsGenerationConfig;
 import org.open4goods.api.model.VerticalAttributesStats;
@@ -23,6 +26,7 @@ import org.open4goods.api.model.VerticalCategoryMapping;
 import org.open4goods.commons.config.yml.ui.ProductI18nElements;
 import org.open4goods.commons.config.yml.ui.VerticalConfig;
 import org.open4goods.commons.dao.ProductRepository;
+import org.open4goods.commons.exceptions.ResourceNotFoundException;
 import org.open4goods.commons.helper.IdHelper;
 import org.open4goods.commons.model.product.Product;
 import org.open4goods.commons.services.EvaluationService;
@@ -302,18 +306,6 @@ public class VerticalsGenerationService {
 		return sortedMappings;
 	}
 	
-	
-	public List<VerticalConfig> generateVerticals() {
-		List<VerticalConfig> ret = new ArrayList<VerticalConfig>();
-		
-		sortedMappings.entrySet().stream()
-			.filter(e->e.getValue().getAssociatedCategories().size() > 3)
-			.forEach(cat -> {				
-				ret.add(generateVertical(cat));				
-			});
-		return ret;
-	}
-
 
 
 	/**
@@ -340,48 +332,6 @@ public class VerticalsGenerationService {
 		return ret;
 	}
 	
-	
-	/**
-	 * Generate a vertical stub, using our matching categories detected and adding informations through AI
-	 * @param cat
-	 * @return
-	 */
-	private VerticalConfig generateVertical(Entry<String, VerticalCategoryMapping> cat) {
-		
-		VerticalConfig v = new VerticalConfig();
-		v.getMatchingCategories().add(cat.getKey());
-		v.getMatchingCategories().addAll(cat.getValue().getAssociatedCategories().keySet());
-		
-		Map<String, String> datas = aiDatas(v);
-		
-		Integer resolvedTaxonomy = resolveGoogleTaxonomy(datas.get("googleTaxonomy"));
-		if (null != resolvedTaxonomy) {
-			v.setGoogleTaxonomyId(resolvedTaxonomy);
-			LOGGER.warn("solved taxonomy for {} - {} ({})", cat.getKey(), datas,googleTaxonomyService.getTaxonomyName(resolvedTaxonomy) );
-			
-			String englishName = datas.get("englishName");
-			String frenchName = datas.get("frenchName");
-			
-			if (!StringUtils.isEmpty(englishName)) {
-				v.setId(IdHelper.brandName(englishName).toLowerCase());
-				
-				ProductI18nElements fr = new ProductI18nElements();
-				fr.setVerticalHomeUrl(frenchName);
-				// TODO(p1, features) : Complete with other datas
-				
-				v.getI18n().put("fr",fr );
-			
-			}
-			
-		} else {
-			LOGGER.warn("Unsolved taxonomy for {} - {}", cat.getKey(), datas);
-		}
-		
-		return v;
-	}
-
-
-
 	/**
 	 * A prompt used to enrich the VerticalConfig
 	 * @param v
@@ -416,35 +366,38 @@ Base your analyse on the following categories :
 	
 
 	/**
-	 * Resolve a google taxonomy ID
-	 * @param string
+	 * Generate the yaml categories mapping fragment from sample products
+	 * @param gtin
 	 * @return
 	 */
-	private Integer resolveGoogleTaxonomy(String string) {
-		Integer ret = googleTaxonomyService.resolve(string);
-		LOGGER.info("Resolved google taxonomy for {} : {}",string,null); 
-		return ret;
-	}
+	public String generateCategoryMappingFragmentForGtin(String[] gtins) {
 
-
-
-	/**
-	 * Generate the yaml fragment for a given category match
-	 * @param category
-	 * @return
-	 */
-	public String generateCategoryMappingFragmentFor(String category) {
-
-		VerticalCategoryMapping mapping = sortedMappings.get(category);
+		Map<String, Set<String>> matchingCategories = new HashMap<String, Set<String>>();
+		matchingCategories.put("all", new HashSet<String>());
 		
-		StringBuilder ret = new StringBuilder();
-		ret.append("matchingCategories:").append("\n");
-		ret.append("    - \"").append(category).append("\"\n");
-		if (null != mapping) {
-			for (String cat : mapping.getAssociatedCategories().keySet()) {
-				ret.append("    - \"").append(cat).append("\"\n");
+		for (String gtin : gtins) {
+			Product sample;
+			try {
+				if (NumberUtils.isDigits(gtin.trim())) {					
+					sample = repository.getById(Long.valueOf(gtin.trim()));
+					sample.getCategoriesByDatasources().entrySet().forEach(e -> {
+						if (!matchingCategories.containsKey(e.getKey())) {
+							matchingCategories.put(e.getKey(), new HashSet<String>());
+						}
+						matchingCategories.get(e.getKey()).add(e.getValue());
+						
+					});
+				}
+			} catch (Exception e) {
+				LOGGER.warn("Cannot generate matching categories data : {}", e);
 			}
 		}
+		
+		
+		Map<String,Object> retMAp = new HashMap<String, Object>();
+		retMAp.put("matchingCategories", matchingCategories);
+		String ret = serialisationService.toYaml(retMAp);
+		ret = ret.replaceFirst("---", "");
 		return ret.toString();
 	}
 
@@ -467,7 +420,8 @@ Base your analyse on the following categories :
 
 			context.put("id",id );
 			context.put("googleTaxonomyId", googleTaxonomyId);
-			context.put("matchingCategories", generateCategoryMappingFragmentFor(matchingCategories));
+			// Here is a tweak, we provide some sample products coma separated
+			context.put("matchingCategories", generateCategoryMappingFragmentForGtin(matchingCategories.split(",")));
 			context.put("urlPrefix", urlPrefix);
 			context.put("h1Prefix", h1Prefix);
 			context.put("verticalHomeUrl", verticalHomeUrl);
@@ -482,26 +436,30 @@ Base your analyse on the following categories :
 		
 	}
 	
-	public void verticalTemplatetoFile(String googleTaxonomyId, String matchingCategories,String urlPrefix, String h1Prefix, String verticalHomeUrl, String verticalHomeTitle)  {
+	/**
+	 * Generate a vertical to a local file
+	 * 
+	 * @param googleTaxonomyId
+	 * @param matchingCategories
+	 * @param urlPrefix
+	 * @param h1Prefix
+	 * @param verticalHomeUrl
+	 * @param verticalHomeTitle
+	 */
+	public void verticalTemplatetoFile(String googleTaxonomyId, String matchingCategories, String urlPrefix, String h1Prefix, String verticalHomeUrl, String verticalHomeTitle) {
 
-		//TODO(p3, conf) : from conf 
-		String id = IdHelper.normalizeFileName(googleTaxonomyService.getLocalizedTaxonomy().get("en").get(Integer.valueOf(googleTaxonomyId)).getLast());
-
-		File f = new File("/opt/open4goods/tmp/");
-		f.mkdirs();
-		f = new File(f.getAbsolutePath() + "/" + id+".yml");
-		
+		// TODO(p3, conf) : from conf
 		try {
-			
+			String id = IdHelper.normalizeFileName(googleTaxonomyService.byId(Integer.valueOf(googleTaxonomyId)).getGoogleNames().i18n("en"));
+
+			File f = new File("/opt/open4goods/tmp/");
+			f.mkdirs();
+			f = new File(f.getAbsolutePath() + "/" + id + ".yml");
+
 			FileUtils.write(f, verticalTemplate(id, googleTaxonomyId, matchingCategories, urlPrefix, h1Prefix, verticalHomeUrl, verticalHomeTitle));
 		} catch (IOException e) {
-			LOGGER.error("Error while writing template file", e);
+			LOGGER.error("Error while writing template file for gtaxonomy {} ", googleTaxonomyId, e);
 		}
-		
-		
 	}
-	
-	
-	
-	
+
 }

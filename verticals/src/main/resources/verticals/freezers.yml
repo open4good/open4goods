@@ -21,8 +21,25 @@ enabled: false
 # Product classification from categories
 ##############################################################################
 # Will associate to this vertical if one of the following categorie is present for the product  
+
 matchingCategories:
-    - "GROS ELECTROMENAGER / CONGELATEUR / CONGELATEUR ARMOIRE | GROS ELECTROMENAGER>CONGELATEUR>CONGELATEUR ARMOIRE | CONGELATEUR | CONGELATEUR ARMOIRE"
+  all: []
+  Darty Pro - Cashback:
+  - "GROS ELECTROMENAGER | CONGELATEUR"
+  rueducommerce.fr:
+  - "CONGELATEUR"
+  darty.com:
+  - "GROS ELECTROMENAGER | GROS ELECTROMENAGER>CONGELATEUR>CONGELATEUR COFFRE | CONGELATEUR | GROS ELECTROMENAGER"
+  rakuten.com-csv.yml:
+  - "ELECTROMENAGER | CONGELATEUR"
+  UNDERDOG FR:
+  - "378 | FREEZERS | CONGELATEUR"
+#  fnac.com:
+#  - "PETIT MENAGER & CUISINE - FROID"
+  manomano.fr:
+  - "ELECTROMENAGER | ELECTROMENAGER > GROS ELECTROMENAGER > CONGELATEUR | CONGELATEUR"
+  cdiscount.com:
+  - "ELECTROMENAGER | ELECTROMENAGER > FROID > CONGELATEUR COFFRE | FROID | CONGELATEUR COFFRE"
 
 
 

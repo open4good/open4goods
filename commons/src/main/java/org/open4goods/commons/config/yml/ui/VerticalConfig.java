@@ -91,14 +91,15 @@ public class VerticalConfig{
 	
 	
 	/**
-	 * The categories that MUST BE PRESENT to associate to this vertical
+	 * The categories that MUST BE PRESENT to associate to this vertical. Prefixed by datasource on which it applies, using "all" for all datasources
 	 */
-	private Set<String> matchingCategories = new HashSet<>();
 
+	private Map<String,Set<String>> matchingCategories = new HashMap<>();
+	
 	/**
 	 * The categories that MUST NOT BE PRESENT to associate to this vertical
 	 */
-	private Set<String> unmatchingCategories = new HashSet<>();
+//	private Set<String> unmatchingCategories = new HashSet<>();
 
 	/**
 	 * The attributes that must be present. If not, the product will have excluded set to true
@@ -616,24 +617,21 @@ public class VerticalConfig{
 		this.scoringAggregationConfig = scoringAggregationConfig;
 	}
 
-
-
-
-	public Set<String> getMatchingCategories() {
+	public Map<String, Set<String>> getMatchingCategories() {
 		return matchingCategories;
 	}
 
-	public void setMatchingCategories(Set<String> matchingCategories) {
+	public void setMatchingCategories(Map<String, Set<String>> matchingCategories) {
 		this.matchingCategories = matchingCategories;
 	}
-	
-	public Set<String> getUnmatchingCategories() {
-		return unmatchingCategories;
-	}
 
-	public void setUnmatchingCategories(Set<String> unmatchingCategories) {
-		this.unmatchingCategories = unmatchingCategories;
-	}
+//	public Set<String> getUnmatchingCategories() {
+//		return unmatchingCategories;
+//	}
+//
+//	public void setUnmatchingCategories(Set<String> unmatchingCategories) {
+//		this.unmatchingCategories = unmatchingCategories;
+//	}
 
 	public Map<String, Double> getEcoscoreConfig() {
 		return ecoscoreConfig;
