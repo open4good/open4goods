@@ -58,7 +58,7 @@ jobs:
       # Set up Maven Repositories
       ###########################################
       - name: Set up Maven Repositories
-        uses: s4u/maven-settings-action@v3.0.0
+        uses: s4u/maven-settings-action@v3.1.0
         with:
           repositories: |
             [
