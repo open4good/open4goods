@@ -12,7 +12,7 @@ import org.apache.tika.metadata.DublinCore;
 import org.apache.tika.metadata.Metadata;
 import org.apache.tika.parser.ParseContext;
 import org.apache.tika.parser.html.HtmlMapper;
-import org.apache.tika.parser.html.HtmlParser;
+import org.apache.tika.parser.html.JSoupParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,14 +29,14 @@ public class TikaHtmlParser implements edu.uci.ics.crawler4j.parser.HtmlParser {
     private final CrawlConfig config;
     private final TLDList tldList;
 
-    private final HtmlParser htmlParser;
+    private final JSoupParser htmlParser;
     private final ParseContext parseContext;
 
     public TikaHtmlParser(CrawlConfig config, TLDList tldList) throws InstantiationException, IllegalAccessException {
         this.config = config;
         this.tldList = tldList;
 
-        htmlParser = new HtmlParser();
+        htmlParser = new JSoupParser();
         parseContext = new ParseContext();
         parseContext.set(HtmlMapper.class, AllTagMapper.class.newInstance());
     }
