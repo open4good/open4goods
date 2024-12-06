@@ -37,7 +37,7 @@
         "@fortawesome/fontawesome-free": "5.15.4",
         "@glidejs/glide": "^3.4.1",
         "@popperjs/core": "^2.6.0",
-        "bootstrap": "5.0.1",
+        "bootstrap": "5.3.3",
         "chartist": "^0.11.4",
         "chartist-plugin-tooltips": "0.0.17",
         "countup.js": "^2.0.5",
