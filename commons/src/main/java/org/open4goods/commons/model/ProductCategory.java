@@ -201,9 +201,29 @@ public class ProductCategory {
 
 		return ret;
 		
+	}
+
+	
+	/**
+	 * Return all verticals defined from this google node
+	 */
+	public List<ProductCategory> verticals() {
+		List<ProductCategory> ret = new ArrayList<ProductCategory>();
+		
+		for (ProductCategory c : children) {
+			ret.addAll(c.verticals());
+		}
+		
+		if (vertical != null) {
+				ret.add(this);
+		}
+
+		return ret;
 		
 	}
 
+	
+	
 	/**
 	 * Return the hierarchy for this category
 	 * 
