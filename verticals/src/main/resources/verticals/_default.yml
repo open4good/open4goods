@@ -12,7 +12,7 @@ forceNameGeneration: true
 # These datasources will be excluded from categories matching 
 excludedFromCategoriesMatching:
   - "fnac.com"
-  - "rakuten.com-csv.yml"
+#  - "rakuten.com-csv.yml"
 
 excludingTokensFromCategoriesMatching:
   - ACCESSOIRE
@@ -204,26 +204,69 @@ attributesConfig:
 
   # Those attributes will be removed from unmatchedAttributes if found
   exclusions:
-    - "SOUSCATEGORIE"
-    - "DELIVERY_COST"
-    - "MERCHANT_CATEGORY"
-    - "DELIVERY_TIME"
-    - "MERCHANT_PRODUCT_THIRD_CATEGORY"
+# Comment the feed url if you need to debug the CSV datasources (get the CSV that provides a product)    
+    - "FEED_URL""
+
     - "PRODUCT_MODEL"
+    - "PRODUCT_TYPE"
+    - "IDPRODUIT"
+    - "PRODUCT_GTIN"
+    
+    - "EAN GGSHOPPING"
+    - "EAN"
+
+#    - "BRAND_ID"
+#    - "BRAND_NAME"
+
+            # USED TO BUILD categories path (concat all CSV fields that contains "catego*"") 
+    - "SOUSCATEGORIE"
+    - "MERCHANT_PRODUCT_SECOND_CATEGORY"
+    - "MERCHANT_PRODUCT_THIRD_CATEGORY"
+    - "MERCHANT_CATEGORY"
+    - "MERCHANT_PRODUCT_CATEGORY_PATH"
+    - "CATEGORY_ID"
+
+    
+    
+# TODO : Check pertinence    
+#    - "DESCRIPTION"
+#    - "PRODUCT_SHORT_DESCRIPTION"
+    
+#    - "CUSTOM_1"
+#    - "CUSTOM_2"
+#    - "CUSTOM_3"
+#    - "CUSTOM_4"
+#    - "CUSTOM_5"
+#    - "CUSTOM_6"
+#    - "CUSTOM_7"
+#    - "CUSTOM_8"
+#    - "CUSTOM_9"
+
+    # TODO Will one day be used to complete offers, better than deleting them
+    - "DELIVERY_COST"
+    - "FRAISDEPORT"
+    - "DELIVERY_TIME"
+    - "CONDITION"
+    - "CURRENCY"
+    - "DELIVERY_COST"
+    - "DELIVERY_TIME"
+    - "DELIVERY_WEIGHT"
+    - "IN_STOCK"
+    - "DATEEXPEDITION"
+    - "CODEBARRE"
+    - "ETAT"
+    - "REFURBISHED"
+    - "DISPONIBILITE"
+ 
+    # Noisy items   
     - "ADVERT_RAKUPON_AMOUNT"
     - "PRICE_WITH_RAKUPON"
-    - "FRAISDEPORT"
-    - "MERCHANT_PRODUCT_SECOND_CATEGORY"
     - "ADVERT_RAKUPON_CONDITION"    
     - "CNET INLINE CONTENT"
     - "ADVERT_RAKUPON_NAME"
     - "AW_THUMB_URL"
-    - "PRODUCT_TYPE"
-    - "MERCHANT_PRODUCT_CATEGORY_PATH"
     - "CRAWLER"
     - "URLFICHEPRODUIT"
-    - "IDPRODUIT"
-#    - "EAN GGSHOPPING"
     - "AW_IMAGE_URL"
     - "SEARCH KEYWORDS"
     - "ALTERNATE_IMAGE"
@@ -231,27 +274,7 @@ attributesConfig:
     - "AW_DEEP_LINK"
     - "LINK"
     - "AW_PRODUCT_ID"
-    - "BRAND_ID"
-#    - "BRAND_NAME"
-    - "CATEGORY_ID"
-    - "CONDITION"
-    - "CURRENCY"
-    - "CUSTOM_1"
-    - "CUSTOM_2"
-    - "CUSTOM_3"
-    - "CUSTOM_4"
-    - "CUSTOM_5"
-    - "CUSTOM_6"
-    - "CUSTOM_7"
-    - "CUSTOM_8"
-    - "CUSTOM_9"
     - "DATA_FEED_ID"
-#    - "DELIVERY_COST"
-#    - "DELIVERY_TIME"
-    - "DELIVERY_WEIGHT"
-    - "DESCRIPTION"
- #   - "EAN"
-    - "IN_STOCK"
     - "IS_FOR_SALE"
     - "MERCHANT_DEEP_LINK"
     - "MERCHANT_ID"
@@ -261,20 +284,13 @@ attributesConfig:
     - "MPN"
     - "PARENT_PRODUCT_ID"
     - "PRE_ORDER"
-#    - "PRODUCT_GTIN"
-    - "PRODUCT_SHORT_DESCRIPTION"
     - "RATING"
     - "SEARCH_PRICE"
     - "STOCK_QUANTITY"
     - "STOCK_STATUS"
     - "WEB_OFFER"
     - "BASE_PRICE"
-#    - "CODEBARRE"
-    - "DATEEXPEDITION"
-#    - "ETAT"
-#    - "DISPONIBILITE"
     - "PRIX"
-#    - "REFURBISHED"
     - "REVIEWS"
     - "SAVING"
     - "SAVINGS_PERCENT"
