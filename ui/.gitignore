@@ -16,3 +16,4 @@
 /.temp/
 /dist/
 /node/
+/package-lock.json
