@@ -96,6 +96,20 @@ public class VerticalConfig{
 
 	private Map<String,Set<String>> matchingCategories = new HashMap<>();
 	
+	
+	/**
+	 * A list a words that will exclude the item from the category if encountered
+	 */
+	private Set<String> excludingTokensFromCategoriesMatching = new HashSet<String>();	
+	
+	/**
+	 * The set of datasourcenames that will be excluded to generate categories matching
+	 */
+	@JsonMerge
+	private Set<String> excludedFromCategoriesMatching = new HashSet<String>();
+
+	
+	
 	/**
 	 * The categories that MUST NOT BE PRESENT to associate to this vertical
 	 */
@@ -156,12 +170,6 @@ public class VerticalConfig{
 	private AttributesConfig attributesConfig = new AttributesConfig();
 
 	
-	/**
-	 * The set of datasourcenames that will be excluded to generate categories matching
-	 */
-	@JsonMerge
-	private Set<String> excludedFromCategoriesMatching = new HashSet<String>();
-
 	
 	
 	/**
@@ -791,6 +799,14 @@ public class VerticalConfig{
 
 	public void setExcludedFromCategoriesMatching(Set<String> excludedFromCategoriesMatching) {
 		this.excludedFromCategoriesMatching = excludedFromCategoriesMatching;
+	}
+
+	public Set<String> getExcludingTokensFromCategoriesMatching() {
+		return excludingTokensFromCategoriesMatching;
+	}
+
+	public void setExcludingTokensFromCategoriesMatching(Set<String> excludingTokens) {
+		this.excludingTokensFromCategoriesMatching = excludingTokens;
 	}
 
 	
