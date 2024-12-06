@@ -12,6 +12,7 @@ forceNameGeneration: true
 # These datasources will be excluded from categories matching 
 excludedFromCategoriesMatching:
   - "fnac.com"
+  - "rakuten.com-csv.yml"
 
 
 #####################################################################################################################################
