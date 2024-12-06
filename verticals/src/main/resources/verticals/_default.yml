@@ -205,7 +205,7 @@ attributesConfig:
   # Those attributes will be removed from unmatchedAttributes if found
   exclusions:
 # Comment the feed url if you need to debug the CSV datasources (get the CSV that provides a product)    
-    - "FEED_URL""
+    - "FEED_URL"
 
     - "PRODUCT_MODEL"
     - "PRODUCT_TYPE"
