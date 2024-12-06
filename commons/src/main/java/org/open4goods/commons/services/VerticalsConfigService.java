@@ -237,6 +237,21 @@ public class VerticalsConfigService {
 			}
 			
 		}
+		
+		// Looking for words exclusions in categories
+		if (null != vc) {
+		    for (String token : vc.getExcludingTokensFromCategoriesMatching()) {
+		        for (String category : productCategoriessByDatasource.values()) {
+		            if (category.contains(token)) {
+		                logger.warn("Excluded from matching category {} because categories contains word {}", vc.getId(), token, category);
+		                vc = null;
+		                return null;
+		            }
+		        }
+		    }
+		}
+
+		
 
 		return vc;
 	}
