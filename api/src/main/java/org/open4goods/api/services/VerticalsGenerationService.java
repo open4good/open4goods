@@ -22,8 +22,10 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.NumberUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.open4goods.api.config.yml.VerticalsGenerationConfig;
+import org.open4goods.api.model.AttributesStats;
 import org.open4goods.api.model.VerticalAttributesStats;
 import org.open4goods.api.model.VerticalCategoryMapping;
+import org.open4goods.commons.config.yml.ui.AttributesConfig;
 import org.open4goods.commons.config.yml.ui.VerticalConfig;
 import org.open4goods.commons.dao.ProductRepository;
 import org.open4goods.commons.helper.IdHelper;
@@ -522,6 +524,35 @@ Base your analyse on the following categories :
 		} catch (IOException e1) {
 			LOGGER.error("Error while updaing vertical file {}",file,e1);
 		}
+	}
+	
+	
+	
+	/**
+	 * Generate the advised attributes for a vertical
+	 * @param vertical
+	 * @return
+	 */
+	public String generateAttributesMapping(String vertical, Set<String> excludeAttributes) {
+		VerticalAttributesStats stats = attributesStats(vertical);
+		
+		
+		
+		
+		int totalItems = stats.getTotalItems();
+		
+		for (Entry<String, AttributesStats> cat : stats.getStats().entrySet()) {
+			
+			if (null != excludeAttributes && !excludeAttributes.contains(cat.getKey())) {
+				
+				
+				
+//				AttributesConfig
+			}
+			
+		}
+		return null;
+		
 	}
 	
 	

@@ -27,12 +27,6 @@ public class AttributesConfig {
 	@JsonMerge
 	private Set<AttributeConfig> configs = new HashSet<AttributeConfig>();
 
-
-	/**
-	 * If true, will extract featured items
-	 */
-	private boolean featuredActivated = true;
-
 	/**
 	 * If set, the list of configs values making an attribute to be categorized as a "Feature" (must be uppercase)
 	 */
@@ -47,12 +41,6 @@ public class AttributesConfig {
 	private Set<String> exclusions = new HashSet<>();
 
 
-
-	/**
-	 * The list of matching on some attribute values. It allows to define custom
-	 * texts / icons / images on products having specific attribute values
-	 **/
-	private List<AttributeMatching> attributesMatching = new ArrayList<>();
 
 	// Internal map
 	@JsonIgnore
@@ -237,23 +225,6 @@ public class AttributesConfig {
 		configs = attributes;
 	}
 
-	public List<AttributeMatching> getAttributesMatching() {
-		return attributesMatching;
-	}
-
-	public void setAttributesMatching(List<AttributeMatching> attributesMatching) {
-		this.attributesMatching = attributesMatching;
-	}
-
-
-	public boolean isFeaturedActivated() {
-		return featuredActivated;
-	}
-
-
-	public void setFeaturedActivated(boolean featuredActivated) {
-		this.featuredActivated = featuredActivated;
-	}
 
 
 	public Set<String> getFeaturedValues() {
