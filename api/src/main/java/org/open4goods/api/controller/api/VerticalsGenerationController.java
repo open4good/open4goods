@@ -3,6 +3,7 @@
 package org.open4goods.api.controller.api;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -13,6 +14,7 @@ import org.open4goods.commons.config.yml.ui.VerticalConfig;
 import org.open4goods.commons.exceptions.ResourceNotFoundException;
 import org.open4goods.commons.model.constants.CacheConstants;
 import org.open4goods.commons.model.constants.RolesConstants;
+import org.open4goods.commons.services.VerticalsConfigService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -32,8 +34,10 @@ import io.swagger.v3.oas.annotations.Operation;
 @PreAuthorize("hasAuthority('"+RolesConstants.ROLE_ADMIN+"')")
 public class VerticalsGenerationController {
 
-	@Autowired
-	private  VerticalsGenerationService verticalsGenService;
+	@Autowired private  VerticalsGenerationService verticalsGenService;
+	@Autowired private  VerticalsConfigService verticalsConfigService;
+	
+	
 	
 
 	
@@ -105,14 +109,30 @@ public class VerticalsGenerationController {
 	}
 	
 
-	@GetMapping(path="/assist/categories")
+	@GetMapping(path="/assist/categories/gtin")
 	@Operation(summary="Generate the categories yaml fragment for a given match")
 	@PreAuthorize("hasAuthority('"+RolesConstants.ROLE_ADMIN+"')")
 	@Cacheable(keyGenerator = CacheConstants.KEY_GENERATOR, cacheNames = CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME)
 	public String generateCategoryMappingsFragment(@RequestParam String gtins) throws ResourceNotFoundException, IOException {
-		 return verticalsGenService.generateCategoryMappingFragmentForGtin(gtins.split(","));
+		 return verticalsGenService.generateCategoryMappingFragmentForGtin(Arrays.asList(gtins.split(",")), null );
 		
 	}
+	
+	
+	@GetMapping(path="/assist/categories/vertical")
+	@Operation(summary="Generate the categories yaml fragment for a given vertical")
+	@PreAuthorize("hasAuthority('"+RolesConstants.ROLE_ADMIN+"')")
+	@Cacheable(keyGenerator = CacheConstants.KEY_GENERATOR, cacheNames = CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME)
+	public String generateCategoryMappingsForExistinf(@RequestParam String vertical, @RequestParam(defaultValue = "5") Integer minOffersCount ) throws ResourceNotFoundException, IOException {
+
+		VerticalConfig vc = verticalsConfigService.getConfigById(vertical);
+		return verticalsGenService.generateMapping(vc,minOffersCount);
+		
+	}
+	
+	
+	
+	
 	
 	
 	@GetMapping(path="/assist/vertical")
