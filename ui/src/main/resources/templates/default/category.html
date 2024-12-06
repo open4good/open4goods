@@ -41,7 +41,7 @@
 
 
 	
-        <!-- Hero for Core Team -->
+        <!-- Hero section -->
         <section class="bg-green-transparent ">
             <div class="container">
                 <div class="row justify-content-center">
@@ -76,18 +76,12 @@
 								</ol>
 							</nav>
                         </th:block>
-
-                  
-
-
-
-					
                     </div>
                 </div>
             </div>
         </section>
         
-        <!-- Core team Members -->
+        <!-- Categories tree links  -->
         <section class="pt-0">
             <div class="container  ">
                 <div class="row mt-4">
@@ -141,11 +135,11 @@
         </section>
         
         
-        <!-- Quick access -->
+        <!-- All leaf categories  -->
         <section class="section bg-green-transparent section-lg pt-0">
           <div class="container ">
                 <div class="row mt-4">
-                    <div th:each="child, stat : ${category.leafs(true)}" th:classappend="${stat.first ? 'col-md-3 col-lg-3' : 'col-md-3 col-lg-3'} " class="col-12 mb-lg-0">
+                    <div th:each="child, stat : ${category.verticals()}" th:classappend="${stat.first ? 'col-md-3 col-lg-3' : 'col-md-3 col-lg-3'} " class="col-12 mb-lg-0">
                          <div th:unless="${category.children.contains(child)}" class="card shadow border-gray-300 mt-2">
                              
                              <div class="card-body text-center">                                 
