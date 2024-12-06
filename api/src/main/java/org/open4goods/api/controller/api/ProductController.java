@@ -12,6 +12,7 @@ import org.open4goods.commons.model.product.Product;
 import org.open4goods.commons.services.VerticalsConfigService;
 import org.open4goods.commons.services.ai.AiService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -19,7 +20,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import io.swagger.v3.oas.annotations.Operation;
-import jakarta.validation.constraints.NotBlank;
 
 /**
  * This controller allows informations and communications about DatasourceConfigurations
@@ -41,7 +41,7 @@ public class ProductController {
 	
 
 
-	@GetMapping(path="/product/")
+	@GetMapping(path="/product/", produces = MediaType.APPLICATION_JSON_VALUE)
 	@Operation(summary="Get a product from it's GTIN")
 	@PreAuthorize("hasAuthority('"+RolesConstants.ROLE_ADMIN+"')")
 	public Product get( @RequestParam final Long gtin) throws ResourceNotFoundException {
