@@ -3,7 +3,8 @@ package org.open4goods.api.services;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
-import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -11,8 +12,8 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -23,10 +24,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.open4goods.api.config.yml.VerticalsGenerationConfig;
 import org.open4goods.api.model.VerticalAttributesStats;
 import org.open4goods.api.model.VerticalCategoryMapping;
-import org.open4goods.commons.config.yml.ui.ProductI18nElements;
 import org.open4goods.commons.config.yml.ui.VerticalConfig;
 import org.open4goods.commons.dao.ProductRepository;
-import org.open4goods.commons.exceptions.ResourceNotFoundException;
 import org.open4goods.commons.helper.IdHelper;
 import org.open4goods.commons.model.product.Product;
 import org.open4goods.commons.services.EvaluationService;
@@ -40,8 +39,6 @@ import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.ResourcePatternResolver;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-
-import io.micrometer.core.instrument.util.IOUtils;
 
 public class VerticalsGenerationService {
 	
@@ -71,10 +68,7 @@ public class VerticalsGenerationService {
 		this.evalService = evaluationService;
 	}
 	
-	
-	
 	public void fullFromDb() throws IOException {
-		
 
 		importMappingFile();
 		LOGGER.info("loaded . {} mappings",	sortedMappings.size());
@@ -370,7 +364,7 @@ Base your analyse on the following categories :
 	 * @param gtin
 	 * @return
 	 */
-	public String generateCategoryMappingFragmentForGtin(String[] gtins) {
+	public String generateCategoryMappingFragmentForGtin(Collection<String> gtins, Set<String> excludedDatasources) {
 
 		Map<String, Set<String>> matchingCategories = new HashMap<String, Set<String>>();
 		matchingCategories.put("all", new HashSet<String>());
@@ -381,10 +375,16 @@ Base your analyse on the following categories :
 				if (NumberUtils.isDigits(gtin.trim())) {					
 					sample = repository.getById(Long.valueOf(gtin.trim()));
 					sample.getCategoriesByDatasources().entrySet().forEach(e -> {
-						if (!matchingCategories.containsKey(e.getKey())) {
-							matchingCategories.put(e.getKey(), new HashSet<String>());
+						
+						if (excludedDatasources != null && excludedDatasources.contains(e.getKey())) {
+							LOGGER.info("Skipping {}, in ignored list",e.getKey());
+						} else {
+							if (!matchingCategories.containsKey(e.getKey())) {
+								matchingCategories.put(e.getKey(), new HashSet<String>());
+							}
+							
+							matchingCategories.get(e.getKey()).add(e.getValue());
 						}
-						matchingCategories.get(e.getKey()).add(e.getValue());
 						
 					});
 				}
@@ -400,6 +400,27 @@ Base your analyse on the following categories :
 		ret = ret.replaceFirst("---", "");
 		return ret.toString();
 	}
+	
+	/**
+	 * Generate a categories mapping yaml definition from the top n offerscount, allowing exclusion of provided datasources
+	 * @param vc
+	 * @param excludedDatasources
+	 * @param minOfferscount
+	 * @return
+	 */
+	public String generateMapping(VerticalConfig vc, Integer minOfferscount) {
+		
+		// Exporting products
+		List<String> items =  repository.exportVerticalWithOffersCountGreater(vc, minOfferscount)
+				.map(e->e.gtin())
+				.toList();
+		
+		return generateCategoryMappingFragmentForGtin(items,vc.getExcludedFromCategoriesMatching());
+		
+		
+		
+	}
+	
 
 	/**
 	 * Return a String containing a vertical config file, based on the "vertical.template" file
@@ -421,7 +442,7 @@ Base your analyse on the following categories :
 			context.put("id",id );
 			context.put("googleTaxonomyId", googleTaxonomyId);
 			// Here is a tweak, we provide some sample products coma separated
-			context.put("matchingCategories", generateCategoryMappingFragmentForGtin(matchingCategories.split(",")));
+			context.put("matchingCategories", generateCategoryMappingFragmentForGtin(Arrays.asList(matchingCategories.split(",")), null));
 			context.put("urlPrefix", urlPrefix);
 			context.put("h1Prefix", h1Prefix);
 			context.put("verticalHomeUrl", verticalHomeUrl);
