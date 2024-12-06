@@ -22,7 +22,6 @@ public class ApiConfigDev {
 	}
 
 	@Bean
-	@Autowired
 	BackupService backupService(XWikiReadService xwikiService, ProductRepository productRepository, SerialisationService serialisationService, AggregationFacadeService aggregationService) {
 		return new BackupService(xwikiService, productRepository, apiProperties.getBackupConfig(), serialisationService, aggregationService);
 	}

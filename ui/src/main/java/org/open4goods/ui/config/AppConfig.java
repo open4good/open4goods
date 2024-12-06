@@ -98,13 +98,11 @@ public class AppConfig {
 	}
 	
 	@Bean 
-	@Autowired
 	SitemapGenerationService sitemapGenerationService(ProductRepository repository, VerticalsConfigService verticalConfigService, BlogService blogService, XwikiFacadeService wikiService, ApplicationContext context ) {
 		return new SitemapGenerationService(repository, config, verticalConfigService, blogService, wikiService, context);
 	}
 	
 	@Bean
-	@Autowired
 	GoogleIndexationService googleIndexationService(ProductRepository repository, VerticalsConfigService verticalConfigService) {
 		return new GoogleIndexationService(config.getGoogleApiJson(), config.getGoogleIndexationMarkerFile(), repository, verticalConfigService);
 	}
@@ -120,7 +118,6 @@ public class AppConfig {
 
 
     @Bean
-    @Autowired
     DevModeService devModeService(ProductRepository repository, SerialisationService serialisationService, VerticalsConfigService verticalsConfigService) {
 		return new DevModeService(config.getDevModeConfig(),repository, serialisationService, verticalsConfigService);
 	}
@@ -145,7 +142,6 @@ public class AppConfig {
 
     
     @Bean
-    @Autowired
     ContributionService contributionService (CacheManager cacheManager, SerialisationService serialisationService, ContributionVoteRepository repository, UiConfig uiConfig, ElasticsearchOperations esOps) {
     	return new ContributionService(cacheManager, serialisationService, repository, uiConfig.getReversementConfig(), esOps);
     }
@@ -163,7 +159,6 @@ public class AppConfig {
 
 
 	@Bean
-	@Autowired
 	AiService aiService (OpenAiChatModel chatModel,  EvaluationService spelEvaluationService, SerialisationService serialisationService) {
 		return new AiService(chatModel, spelEvaluationService, serialisationService);
 	}
@@ -184,7 +179,6 @@ public class AppConfig {
 	}
 
 	@Bean
-	@Autowired
 	IcecatService icecatFeatureService(UiConfig properties, RemoteFileCachingService fileCachingService, BrandService brandService, VerticalsConfigService verticalConfigService) throws SAXException {
 		// TODO : xmlMapper not injected because corruct the springdoc used one. Should use a @Primary derivation
 		return new IcecatService(new XmlMapper(), properties.getIcecatFeatureConfig(), fileCachingService, properties.getRemoteCachingFolder(), brandService, verticalConfigService);
@@ -312,7 +306,6 @@ public class AppConfig {
     
     
 	@Bean
-	@Autowired
 	VerticalsConfigService verticalConfigsService(ResourcePatternResolver resourceResolver, SerialisationService serialisationService,  GoogleTaxonomyService googleTaxonomyService, ProductRepository productRepository, ImageGenerationService imageGenerationService) throws IOException {
 		return new VerticalsConfigService( serialisationService, googleTaxonomyService, productRepository, resourceResolver, imageGenerationService);
 	}
