@@ -157,6 +157,14 @@ public class VerticalConfig{
 
 	
 	/**
+	 * The set of datasourcenames that will be excluded to generate categories matching
+	 */
+	@JsonMerge
+	private Set<String> excludedFromCategoriesMatching = new HashSet<String>();
+
+	
+	
+	/**
 	 * Configuration relativ to ecoscore computation. Key / values are : scoreName -> Ponderation (0.1 = 10%)
 	 * TODO : Ensure sum is 1
 	 */ 
@@ -775,6 +783,14 @@ public class VerticalConfig{
 
 	public void setForceNameGeneration(boolean forceUrlNameGeneration) {
 		this.forceNameGeneration = forceUrlNameGeneration;
+	}
+
+	public Set<String> getExcludedFromCategoriesMatching() {
+		return excludedFromCategoriesMatching;
+	}
+
+	public void setExcludedFromCategoriesMatching(Set<String> excludedFromCategoriesMatching) {
+		this.excludedFromCategoriesMatching = excludedFromCategoriesMatching;
 	}
 
 	
