@@ -40,6 +40,8 @@ import org.springframework.core.io.support.ResourcePatternResolver;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 
+import io.micrometer.core.instrument.util.IOUtils;
+
 public class VerticalsGenerationService {
 	
 	private static final Logger LOGGER = LoggerFactory.getLogger(VerticalsGenerationService.class);
@@ -182,7 +184,6 @@ public class VerticalsGenerationService {
 	            if (entry.getValue() < threshold) {
 	                iterator.remove(); // Safely remove entry from the map
 	            }
-	            
 	        }
 	    });
 	}
@@ -483,4 +484,48 @@ Base your analyse on the following categories :
 		}
 	}
 
+	/**
+	 * A hacky method that hard updates the categorys from predicted ones in the vertical yaml files
+	 * @param verticalFolderPath
+	 * @param minOffers
+	 */
+	public void updateVerticalsWithMappings(String verticalFolderPath, Integer minOffers) {
+		LOGGER.warn("Will update categories in vertical files. Be sure to review before publishing on github !");
+		List<File> files = Arrays.asList(new File(verticalFolderPath).listFiles());
+		files.stream().filter(e->e.getName().endsWith("yml")).forEach(file -> {
+			updateVerticalFile(minOffers, file.getAbsolutePath());
+		});
+		
+	}
+
+	/**
+	 * Update a vertical file with  categorys from predicted ones in the vertical yaml files
+	 * @param minOffers
+	 * @param fileName
+	 */
+	public void updateVerticalFile(Integer minOffers, String fileName) {
+		File file = new File(fileName);
+		try {
+			VerticalConfig vc = verticalConfigservice.getConfigById(file.getName().substring(0, file.getName().length()-4));
+			LOGGER.warn("Will update {}",file.getName());
+			String originalContent = FileUtils.readFileToString(file);
+			
+			int startIndex = originalContent.indexOf("matchingCategories:");
+			int endIndex = originalContent.indexOf("\n\n", startIndex);
+			
+			String newContent = originalContent.substring(0, startIndex);
+			newContent += generateMapping(vc, minOffers);
+			newContent += originalContent.substring(endIndex);
+			
+			FileUtils.writeStringToFile(file, newContent, Charset.defaultCharset());
+			
+		} catch (IOException e1) {
+			LOGGER.error("Error while updaing vertical file {}",file,e1);
+		}
+	}
+	
+	
+	
+	
+	
 }

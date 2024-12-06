@@ -151,5 +151,31 @@ public class VerticalsGenerationController {
 	}
 	
 	
+
+	
+	@GetMapping(path="/update/verticals/categoriesmapping")
+	@Operation(summary="Update the categories mapping directly in the files !")
+	@PreAuthorize("hasAuthority('"+RolesConstants.ROLE_ADMIN+"')")
+	public void updateVerticalsWithMappings( 
+			@RequestParam	(defaultValue = "3")									 Integer minOffers) throws ResourceNotFoundException, IOException {
+		
+		//TODO(p2,conf) : from conf
+ 		  verticalsGenService.updateVerticalsWithMappings("/home/goulven/git/open4goods/verticals/src/main/resources/verticals/",minOffers);
+		
+	}
+	
+	@GetMapping(path="/update/verticals/categoriesmapping/{vertical}")
+	@Operation(summary="Update the categories mapping for a given vertical directly in the file !")
+	@PreAuthorize("hasAuthority('"+RolesConstants.ROLE_ADMIN+"')")
+	public void updateVerticalWithMappings( 
+			@RequestParam	(defaultValue = "tv")									 String vertical,
+			@RequestParam	(defaultValue = "3")									 Integer minOffers) throws ResourceNotFoundException, IOException {
+		
+		//TODO(p2,conf) : from conf
+ 		  verticalsGenService.updateVerticalFile(minOffers, "/home/goulven/git/open4goods/verticals/src/main/resources/verticals/"+vertical+".yml");
+		
+	}
+	
+	
 	
 }
