@@ -119,29 +119,38 @@
                     <!-- Authenticated section -->
                     <th:block th:if="${user}">
 
-                        <!-- Categories -->
+                        <h1 class="text-center"> Mode admin</h1>
+                        <div class="text-center">
+                           <a target="_blank" th:text="'Source JSON de '+ ${product.gtin()}" th:href="'https://api.nudger.fr/product/?gtin='+${product.gtin()}"></a>
+                        </div>
+                        <!-- Categories
                         <th:block th:insert="~{inc/product-categories.html}"></th:block>
+                         -->
 
-                        <!-- Unmatched Attribute table -->
-                        <th:block th:insert="~{inc/product-unmatched-attributes.html}"></th:block>
+  
 
-                        <div class="card shadow mb-3 my-3">
-                            <div class="card-header">
-                                <h2 class="h5">Development Mode</h2>
-                            </div>
-                            <p>This section only appears to the Nudger team.</p>
+                            <!-- Offer names -->
+							<div class="row">
+								<div class="col-lg-12">
+									<div class="card shadow my-3">
+										<div class="card-header">
+											<h2 class="h5">Offernames</h2>
+										</div>
+										<div class="card-body">
+											<ul>
+												<li th:each="item, stat : ${product.offerNames}"
+													th:text="${item}"></li>
+											</ul>
 
-                            <div class="card-body">
-
-                                <h1 th:text="'taxonomy : ' + ${product.googleTaxonomyId}"></h1>
-
-                                <!-- Resources -->
-                                <th:block th:insert="~{inc/product-resources.html}"></th:block>
-
-                                <!-- Mapped categories -->
+										</div>
+									</div>
+								</div>
+							</div>
+							
+							 <!-- Mapped categories -->
                                 <div class="card shadow my-3">
                                     <div class="card-header">
-                                        <h2 class="h5">Mapped Categories</h2>
+                                        <h2 class="h5">Categories</h2>
                                     </div>
                                     <div class="card-body">
                                         <th:block th:each="item, stat : ${product.categoriesByDatasources}">
@@ -152,38 +161,11 @@
                                     </div>
                                 </div>
 
-                            </div>
-                        </div>
 
-                        <!-- The Raw JSON -->
-                        <div class="card shadow my-3">
-                            <div class="card-header">
-                                <h2 class="h5">JSON</h2>
-                            </div>
-                            <div class="card-body">
-
-                                <pre style="height: 500px">
-                                    <code id="json-output" class="json"></code>
-                                </pre>
-                                <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.10.0/highlight.min.js"></script>
-
-                                <script th:inline="javascript">
-                                    /*<![CDATA[*/
-
-                                    const jsonObject = /*[[${raw}]]*/ '';
-
-                                    /*]]>*/
-
-                                    // Insert formatted JSON into the <code> element
-                                    document.getElementById('json-output').textContent = JSON.stringify(jsonObject, null, 2);
-
-                                    // Highlight the JSON
-                                    hljs.highlightAll();
-
-                                </script>
-
-                            </div>
-                        </div>
+							<!-- Unmatched Attribute table -->
+                        <th:block th:insert="~{inc/product-unmatched-attributes.html}"></th:block>
+  <!-- Resources -->
+                        <th:block th:insert="~{inc/product-resources.html}"></th:block>
 
                     </th:block>
 
