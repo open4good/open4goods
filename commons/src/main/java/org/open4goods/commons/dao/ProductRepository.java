@@ -259,6 +259,32 @@ public class ProductRepository {
 				.map(SearchHit::getContent);
 	}
 
+
+	/**
+	 * Export all products in a vertical having at least the provided minOfferscount
+	 * @param vertical
+	 * @param minOfferscount
+	 * @return
+	 */
+	public Stream<Product> exportVerticalWithOffersCountGreater(VerticalConfig vertical, Integer minOfferscount) {
+	
+		
+		Criteria c = getRecentPriceQuery()
+				.and( new Criteria("vertical").is(vertical.getId()))
+				.and(new Criteria("offersCount").greaterThanEqual(minOfferscount) )
+
+				//				.or(new Criteria("datasourceCategories").in(vertical.getMatchingCategories())
+				;
+		
+		
+		final NativeQuery initialQuery = new NativeQueryBuilder()
+				.withQuery(new CriteriaQuery(c)).build();
+		return elasticsearchOperations.searchForStream(initialQuery, Product.class, current_index).stream()
+				.map(SearchHit::getContent);
+	}
+
+	
+	
 	
 	/**
 	 * Export all aggregateddatas for a vertical, ordered by ecoscore descending

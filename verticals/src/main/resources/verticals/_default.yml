@@ -7,6 +7,13 @@
 
 # If true, products url will be regenerated on each batch. Should not move too much, but... 
 forceNameGeneration: true
+
+
+# These datasources will be excluded from categories matching 
+excludedFromCategoriesMatching:
+  - "fnac.com"
+
+
 #####################################################################################################################################
 # I18N CONFIGURATION
 # Configure in a i18n way all the texts of a product, including the Url, the title, the description, the open graph metas, ....
