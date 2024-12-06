@@ -91,14 +91,12 @@ public class ApiConfig {
 	private final ApiProperties apiProperties;
 	private static final Logger logger = LoggerFactory.getLogger(ApiConfig.class);
 
-
 	protected final Environment env;
 
 	public ApiConfig(ApiProperties apiProperties, Environment env) {
-		this.env =	env;
+		this.env = env;
 		this.apiProperties = apiProperties;
 	}
-
 
 //    @Bean
 //    RedisTemplate<String, Product> redisTemplate(RedisConnectionFactory connectionFactory) {
@@ -118,154 +116,126 @@ public class ApiConfig {
 	}
 
 	@Bean
-	@Autowired
-	VerticalsGenerationService verticalsGenerationService(ProductRepository pRepo, SerialisationService serialisationService, AiService aiService, GoogleTaxonomyService gTaxoService, VerticalsConfigService verticalsConfigService, ResourcePatternResolver resourceResolver, EvaluationService evaluationService) throws SAXException {
-		return new VerticalsGenerationService(apiProperties.getVerticalsGenerationConfig(), pRepo,serialisationService,aiService, gTaxoService, verticalsConfigService, resourceResolver, evaluationService);
+	VerticalsGenerationService verticalsGenerationService(ProductRepository pRepo, SerialisationService serialisationService, AiService aiService, GoogleTaxonomyService gTaxoService, VerticalsConfigService verticalsConfigService, ResourcePatternResolver resourceResolver,
+			EvaluationService evaluationService) throws SAXException {
+		return new VerticalsGenerationService(apiProperties.getVerticalsGenerationConfig(), pRepo, serialisationService, aiService, gTaxoService, verticalsConfigService, resourceResolver, evaluationService);
 	}
-	
-	
+
 	@Bean
-	@Autowired
-	IcecatService icecatFeatureService( RemoteFileCachingService fileCachingService, BrandService brandService,  VerticalsConfigService verticalConfigService) throws SAXException {
-		// NOTE : xmlMapper not injected because corruct the springdoc used one. Could use a @Primary derivation
+
+	IcecatService icecatFeatureService(RemoteFileCachingService fileCachingService, BrandService brandService, VerticalsConfigService verticalConfigService) throws SAXException {
+		// NOTE : xmlMapper not injected because corruct the springdoc used one. Could
+		// use a @Primary derivation
 		return new IcecatService(new XmlMapper(), apiProperties.getIcecatFeatureConfig(), fileCachingService, apiProperties.remoteCachingFolder(), brandService, verticalConfigService);
 	}
-	
+
 	@Bean
-	@Autowired
+
 	GenAiCompletionService aiCompletionService(AiService aiService, ProductRepository productRepository, VerticalsConfigService verticalConfigService) {
 		return new GenAiCompletionService(aiService, productRepository, verticalConfigService, apiProperties);
 	}
 
 	@Bean
-	@Autowired
+
 	AiService aiService(OpenAiChatModel chatModel, EvaluationService spelEvaluationService, SerialisationService serialisationService) {
-		return new AiService(chatModel , spelEvaluationService, serialisationService);
+		return new AiService(chatModel, spelEvaluationService, serialisationService);
 	}
-	
+
 	@Bean
-	@Autowired
-	IcecatCompletionService icecatCompletionService( ProductRepository productRepository, VerticalsConfigService verticalConfigService, DataSourceConfigService dataSourceConfigService, AggregationFacadeService aggregationFacade) throws TechnicalException {
+
+	IcecatCompletionService icecatCompletionService(ProductRepository productRepository, VerticalsConfigService verticalConfigService, DataSourceConfigService dataSourceConfigService, AggregationFacadeService aggregationFacade) throws TechnicalException {
 		return new IcecatCompletionService(productRepository, verticalConfigService, apiProperties, dataSourceConfigService, aggregationFacade);
 	}
 
-	@Bean	
-	@Autowired
-	AmazonCompletionService amazonCompletionService(ProductRepository dataRepository, VerticalsConfigService verticalConfigService,
-			ApiProperties apiProperties, DataSourceConfigService dataSourceConfigService, AggregationFacadeService aggregationFacade) throws TechnicalException {
+	@Bean
+
+	AmazonCompletionService amazonCompletionService(ProductRepository dataRepository, VerticalsConfigService verticalConfigService, ApiProperties apiProperties, DataSourceConfigService dataSourceConfigService, AggregationFacadeService aggregationFacade) throws TechnicalException {
 		return new AmazonCompletionService(dataRepository, verticalConfigService, apiProperties, dataSourceConfigService, aggregationFacade);
 	}
 
 	@Bean
-	@Autowired
-	BatchService batchService(AggregationFacadeService aggregationFacadeService,
-			CompletionFacadeService completionFacadeService, VerticalsConfigService verticalsConfigService, ProductRepository productRepository) {
+	BatchService batchService(AggregationFacadeService aggregationFacadeService, CompletionFacadeService completionFacadeService, VerticalsConfigService verticalsConfigService, ProductRepository productRepository) {
 		return new BatchService(aggregationFacadeService, completionFacadeService, verticalsConfigService, productRepository);
 	}
-	
-	
+
 	@Bean
-	@Autowired
-	 CompletionFacadeService completionFacadeService(GenAiCompletionService aiCompletionService,
-			ResourceCompletionService resourceCompletionService, AmazonCompletionService amazonCompletionService, IcecatCompletionService icecatCompletionService) {
+	CompletionFacadeService completionFacadeService(GenAiCompletionService aiCompletionService, ResourceCompletionService resourceCompletionService, AmazonCompletionService amazonCompletionService, IcecatCompletionService icecatCompletionService) {
 		return new CompletionFacadeService(aiCompletionService, resourceCompletionService, amazonCompletionService, icecatCompletionService);
 	}
-	
-	@Bean	
+
+	@Bean
 	BlablaService blablaService(@Autowired EvaluationService evaluationService) {
 		return new BlablaService(evaluationService);
 	}
 
-    @Bean
-    @Autowired
-    DevModeService devModeService(ProductRepository repository, SerialisationService serialisationService, VerticalsConfigService verticalsConfigService) {
-		return new DevModeService(apiProperties.getDevModeConfig(),repository, serialisationService, verticalsConfigService);
+	@Bean
+	DevModeService devModeService(ProductRepository repository, SerialisationService serialisationService, VerticalsConfigService verticalsConfigService) {
+		return new DevModeService(apiProperties.getDevModeConfig(), repository, serialisationService, verticalsConfigService);
 	}
-	
-	
-    @Bean
-    @Autowired
-    FeedService feedService(SerialisationService serialisationService, DataSourceConfigService datasourceConfigService, CsvDatasourceFetchingService fetchingService,FetcherProperties  fetcherProperties) {
-		return new FeedService(serialisationService, datasourceConfigService, fetchingService, fetcherProperties.getFeedConfigs());
-    }
-
 
 	@Bean
-	@Autowired
-	VerticalsConfigService verticalConfigsService(ResourcePatternResolver resolver, SerialisationService serialisationService, GoogleTaxonomyService googleTaxonomyService, ProductRepository productRepository, ImageGenerationService imageGenService) throws IOException {
-		return new VerticalsConfigService(serialisationService, googleTaxonomyService, productRepository, resolver,imageGenService);
+	FeedService feedService(SerialisationService serialisationService, DataSourceConfigService datasourceConfigService, CsvDatasourceFetchingService fetchingService, FetcherProperties fetcherProperties) {
+		return new FeedService(serialisationService, datasourceConfigService, fetchingService, fetcherProperties.getFeedConfigs());
 	}
 
-    @Bean
-    ImageGenerationService imageGenerationService(@Autowired OpenAiImageModel imageModel) {
+	@Bean
+	VerticalsConfigService verticalConfigsService(ResourcePatternResolver resolver, SerialisationService serialisationService, GoogleTaxonomyService googleTaxonomyService, ProductRepository productRepository, ImageGenerationService imageGenService) throws IOException {
+		return new VerticalsConfigService(serialisationService, googleTaxonomyService, productRepository, resolver, imageGenService);
+	}
+
+	@Bean
+	ImageGenerationService imageGenerationService(@Autowired OpenAiImageModel imageModel) {
 		return new ImageGenerationService(imageModel, apiProperties.getImageGenerationConfig(), apiProperties.getGeneratedImagesFolder());
 	}
-	  
-	
+
 	@Bean
-	SearchService searchService(@Autowired ProductRepository aggregatedDataRepository, @Autowired  String logsFolder) {
+	SearchService searchService(@Autowired ProductRepository aggregatedDataRepository, @Autowired String logsFolder) {
 		return new SearchService(aggregatedDataRepository, logsFolder);
 	}
 
 	@Bean
-	BrandService brandService(@Autowired RemoteFileCachingService rfc, @Autowired  ApiProperties properties, @Autowired BrandScoresRepository brandRepository) {
-		return new BrandService(properties.getBrandConfig(),  rfc, brandRepository, properties.logsFolder());
+	BrandService brandService(@Autowired RemoteFileCachingService rfc, @Autowired ApiProperties properties, @Autowired BrandScoresRepository brandRepository) {
+		return new BrandService(properties.getBrandConfig(), rfc, brandRepository, properties.logsFolder());
 	}
-
-    @Bean
-    PromptConfig aiConfig() { return new PromptConfig(); }
 
 	@Bean
-	@Autowired  
-	ResourceCompletionService resourceCompletionService (ImageMagickService imageService, VerticalsConfigService verticalConfigService, ResourceService resourceService, ProductRepository dataRepository, ApiProperties apiProperties) {
-		return new ResourceCompletionService(imageService, verticalConfigService, resourceService, dataRepository, apiProperties);
-		
-		
+	PromptConfig aiConfig() {
+		return new PromptConfig();
 	}
 
-    @Bean
-    GoogleTaxonomyService googleTaxonomyService(@Autowired RemoteFileCachingService remoteFileCachingService) {
+	@Bean
+	ResourceCompletionService resourceCompletionService(ImageMagickService imageService, VerticalsConfigService verticalConfigService, ResourceService resourceService, ProductRepository dataRepository, ApiProperties apiProperties) {
+		return new ResourceCompletionService(imageService, verticalConfigService, resourceService, dataRepository, apiProperties);
+
+	}
+
+	@Bean
+	GoogleTaxonomyService googleTaxonomyService(@Autowired RemoteFileCachingService remoteFileCachingService) {
 		GoogleTaxonomyService gts = new GoogleTaxonomyService(remoteFileCachingService);
-		
-		// TODO : From conf 
+
+		// TODO : From conf
 		// TODO : Add others
-        try {
+		try {
 			gts.loadGoogleTaxonUrl("https://www.google.com/basepages/producttype/taxonomy-with-ids.fr-FR.txt", "fr");
 			gts.loadGoogleTaxonUrl("https://www.google.com/basepages/producttype/taxonomy-with-ids.en-US.txt", "en");
 //			gts.loadGoogleTaxonUrl("https://www.google.com/basepages/producttype/taxonomy-with-ids.de-DE.txt", "de");
 //			gts.loadGoogleTaxonUrl("https://www.google.com/basepages/producttype/taxonomy-with-ids.es-ES.txt", "es");
 //			gts.loadGoogleTaxonUrl("https://www.google.com/basepages/producttype/taxonomy-with-ids.nl-NL.txt", "nl");
-			
-			
-			
-			
+
 		} catch (Exception e) {
 			logger.error("Error loading google taxonomy", e);
-		}        
-        
-        
-        return gts;
+		}
+
+		return gts;
 	}
 
-	 
 	@Bean
-	AggregationFacadeService realtimeAggregationService( @Autowired EvaluationService evaluationService,
-			@Autowired StandardiserService standardiserService,
-			@Autowired AutowireCapableBeanFactory autowireBeanFactory, @Autowired ProductRepository aggregatedDataRepository,
-			@Autowired ApiProperties apiProperties, @Autowired Gs1PrefixService gs1prefixService,
-			@Autowired DataSourceConfigService dataSourceConfigService, 
-			@Autowired VerticalsConfigService configService, 
-			@Autowired BarcodeValidationService barcodeValidationService,
-			@Autowired BrandService brandservice,
-			@Autowired GoogleTaxonomyService gts,
-			@Autowired BlablaService blablaService,
-			@Autowired IcecatService icecatFeatureService,
-			@Autowired SerialisationService serialisationService
-			) {
-		return new AggregationFacadeService(evaluationService, standardiserService, autowireBeanFactory, aggregatedDataRepository, apiProperties, gs1prefixService, dataSourceConfigService, configService,  barcodeValidationService,brandservice, gts, blablaService, icecatFeatureService, serialisationService);
+	AggregationFacadeService realtimeAggregationService(@Autowired EvaluationService evaluationService, StandardiserService standardiserService, AutowireCapableBeanFactory autowireBeanFactory, @Autowired ProductRepository aggregatedDataRepository, ApiProperties apiProperties,
+			@Autowired Gs1PrefixService gs1prefixService, DataSourceConfigService dataSourceConfigService, VerticalsConfigService configService, BarcodeValidationService barcodeValidationService, BrandService brandservice, GoogleTaxonomyService gts, BlablaService blablaService,
+			IcecatService icecatFeatureService, SerialisationService serialisationService) {
+		return new AggregationFacadeService(evaluationService, standardiserService, autowireBeanFactory, aggregatedDataRepository, apiProperties, gs1prefixService, dataSourceConfigService, configService, barcodeValidationService, brandservice, gts, blablaService, icecatFeatureService,
+				serialisationService);
 	}
-
-
 
 	//////////////////////////////////////////////////////////
 	// SwaggerConfig
@@ -274,43 +244,33 @@ public class ApiConfig {
 	@Bean
 	GroupedOpenApi adminApi() {
 		return GroupedOpenApi.builder()
-				
+
 				.group("api")
-				//	              .pathsToMatch("/admin/**")
-				.packagesToScan("org.open4goods.api")
-				.addOpenApiCustomizer(apiSecurizer())
+				// .pathsToMatch("/admin/**")
+				.packagesToScan("org.open4goods.api").addOpenApiCustomizer(apiSecurizer())
 
 				.build();
 	}
 
 	@Bean
 	OpenApiCustomizer apiSecurizer() {
-		return openApi -> openApi.addSecurityItem(new SecurityRequirement().addList("Authorization"))
-				.components(new Components()
-						.addSecuritySchemes(UrlConstants.APIKEY_PARAMETER, new SecurityScheme()
-								.in(SecurityScheme.In.HEADER)
-								.type(SecurityScheme.Type.APIKEY)
-								.name(UrlConstants.APIKEY_PARAMETER)
-								)
+		return openApi -> openApi.addSecurityItem(new SecurityRequirement().addList("Authorization")).components(new Components().addSecuritySchemes(UrlConstants.APIKEY_PARAMETER, new SecurityScheme().in(SecurityScheme.In.HEADER).type(SecurityScheme.Type.APIKEY).name(UrlConstants.APIKEY_PARAMETER))
 
-						);
+		);
 
 	}
-
 
 	//////////////////////////////////////////////////////////
 	// The scheduling thread pool executor
 	//////////////////////////////////////////////////////////
 
-	
-
-	
 //	@Bean
 //	public TaskScheduler heartBeatScheduler() {
 //	    return new ThreadPoolTaskScheduler();
 //	}
 //	
-	@Bean TaskScheduler threadPoolTaskScheduler() {
+	@Bean
+	TaskScheduler threadPoolTaskScheduler() {
 		final ThreadPoolTaskScheduler threadPoolTaskScheduler = new ThreadPoolTaskScheduler();
 		threadPoolTaskScheduler.setPoolSize(5);
 		threadPoolTaskScheduler.setThreadNamePrefix("ThreadPoolTaskScheduler");
@@ -328,18 +288,12 @@ public class ApiConfig {
 		final CaffeineCache mCache = buildExpiryCache(CacheConstants.ONE_MINUTE_LOCAL_CACHE_NAME, ticker, 1);
 		final CaffeineCache dCache = buildExpiryCache(CacheConstants.ONE_DAY_LOCAL_CACHE_NAME, ticker, 60 * 24);
 		final SimpleCacheManager manager = new SimpleCacheManager();
-		manager.setCaches(Arrays.asList(fCache, dCache, hCache,mCache));
+		manager.setCaches(Arrays.asList(fCache, dCache, hCache, mCache));
 		return manager;
 	}
 
-	
-	
 	private CaffeineCache buildExpiryCache(final String name, final Ticker ticker, final int minutesToExpire) {
-		return new CaffeineCache(name,
-				Caffeine.newBuilder()
-				.recordStats()
-				.expireAfterWrite(minutesToExpire, TimeUnit.MINUTES)
-				.ticker(ticker).build());
+		return new CaffeineCache(name, Caffeine.newBuilder().recordStats().expireAfterWrite(minutesToExpire, TimeUnit.MINUTES).ticker(ticker).build());
 	}
 
 	@Bean
@@ -366,33 +320,33 @@ public class ApiConfig {
 	//////////////////////////////////////////////////////////
 
 	/** The bean providing datasource configurations **/
-	@Bean DataSourceConfigService datasourceConfigService(@Autowired final ApiProperties config) {
+	@Bean
+	DataSourceConfigService datasourceConfigService(@Autowired final ApiProperties config) {
 		return new DataSourceConfigService(config.getDatasourcesfolder());
 	}
 
-
-	@Bean ResourceService resourceService() {
+	@Bean
+	ResourceService resourceService() {
 		return new ResourceService(apiProperties.remoteCachingFolder());
 	}
-
 
 	@Bean
 	String logsFolder(@Autowired final ApiProperties config) {
 		return config.logsFolder();
 	}
 
-
-	@Bean ImageMagickService imageService() {
+	@Bean
+	ImageMagickService imageService() {
 		return new ImageMagickService();
 	}
 
-	@Bean RemoteFileCachingService remoteFileCachingService(@Autowired final ApiProperties config) {
+	@Bean
+	RemoteFileCachingService remoteFileCachingService(@Autowired final ApiProperties config) {
 		return new RemoteFileCachingService(config.remoteCachingFolder());
 	}
 
-
-	@Bean DataFragmentStoreService dataFragmentStoreService(
-			@Autowired final ApiProperties config, @Autowired StandardiserService standardiserService, @Autowired AggregationFacadeService generationService, @Autowired ProductRepository aggregatedDataRepository) {
+	@Bean
+	DataFragmentStoreService dataFragmentStoreService(final ApiProperties config, @Autowired StandardiserService standardiserService, @Autowired AggregationFacadeService generationService, @Autowired ProductRepository aggregatedDataRepository) {
 		return new DataFragmentStoreService(standardiserService, generationService, aggregatedDataRepository, config.getIndexationConfig());
 	}
 
@@ -401,7 +355,8 @@ public class ApiConfig {
 	 *
 	 * @return
 	 */
-	@Bean EvaluationService evaluationService() {
+	@Bean
+	EvaluationService evaluationService() {
 		return new EvaluationService();
 	}
 
@@ -409,7 +364,6 @@ public class ApiConfig {
 	ProductRepository aggregatedDatasRepository(@Autowired final ApiProperties config) {
 		return new ProductRepository(config.getIndexationConfig());
 	}
-
 
 	@Bean
 	StandardiserService standardiserService() {
@@ -422,26 +376,14 @@ public class ApiConfig {
 		};
 	}
 
-
 	@Bean
-	BarcodeValidationService barcodeValidationService () {
+	BarcodeValidationService barcodeValidationService() {
 		return new BarcodeValidationService();
 	}
 
 
-
-	//	@Bean
-	//	AggregationFacadeService fullGenerationService( @Autowired EvaluationService evaluationService,
-	//			@Autowired ReferentielService referentielService, @Autowired StandardiserService standardiserService,
-	//			@Autowired AutowireCapableBeanFactory autowireBeanFactory, @Autowired ProductRepository aggregatedDataRepository,
-	//			@Autowired ApiProperties apiProperties, @Autowired Gs1PrefixService gs1prefixService,
-	//			@Autowired DataSourceConfigService dataSourceConfigService, @Autowired VerticalsConfigService configService, @Autowired BarcodeValidationService barcodeValidationService, @Autowired GoogleTaxonomyService taxonomyService) {
-	//		return new AggregationFacadeService(repository, evaluationService, referentielService, standardiserService, autowireBeanFactory, aggregatedDataRepository, apiProperties, gs1prefixService, dataSourceConfigService, configService,  barcodeValidationService, taxonomyService);
-	//	}
-	//
-
-
-	@Bean Gs1PrefixService gs1prefixService (@Autowired ResourcePatternResolver resourceResolver) throws IOException{
+	@Bean
+	Gs1PrefixService gs1prefixService(@Autowired ResourcePatternResolver resourceResolver) throws IOException {
 		return new Gs1PrefixService("classpath:/gs1-prefix.csv", resourceResolver);
 
 	}
@@ -450,37 +392,26 @@ public class ApiConfig {
 	// Embeded crawler configuration
 	//////////////////////////////////////////////
 
-
 	// For the crawlController, inported from crawler
-	@Bean FetcherProperties fetcherProperties(@Autowired final ApiProperties apiProperties) {
+	@Bean
+	FetcherProperties fetcherProperties(@Autowired final ApiProperties apiProperties) {
 		return apiProperties.getFetcherProperties();
 	}
 
- 
-    
 	@Bean
-	CsvDatasourceFetchingService csvDatasourceFetchingService(
-			@Autowired final DataFragmentCompletionService completionService,
-			@Autowired final IndexationService indexationService, @Autowired final ApiProperties apiProperties,
-			@Autowired final WebDatasourceFetchingService webDatasourceFetchingService,
-			@Autowired final IndexationRepository indexationRepository,
-			@Autowired IndexationRepository csvIndexationRepo,
-			@Autowired RemoteFileCachingService remoteFileCachingService
-			
-			
-			) {
-		
-	        return new CsvDatasourceFetchingService(csvIndexationRepo, completionService, indexationService,
-				apiProperties.getFetcherProperties(), webDatasourceFetchingService,indexationRepository, webDatasourceFetchingService, remoteFileCachingService, apiProperties.logsFolder());
+	CsvDatasourceFetchingService csvDatasourceFetchingService(final DataFragmentCompletionService completionService, final IndexationService indexationService, @Autowired final ApiProperties apiProperties, final WebDatasourceFetchingService webDatasourceFetchingService,
+			final IndexationRepository indexationRepository, IndexationRepository csvIndexationRepo, RemoteFileCachingService remoteFileCachingService
+
+	) {
+
+		return new CsvDatasourceFetchingService(csvIndexationRepo, completionService, indexationService, apiProperties.getFetcherProperties(), webDatasourceFetchingService, indexationRepository, webDatasourceFetchingService, remoteFileCachingService, apiProperties.logsFolder());
 	}
 
 	@Bean
-	WebDatasourceFetchingService webDatasourceFetchingService(@Autowired final IndexationRepository indexationRepository,
-			@Autowired final IndexationService indexationService, @Autowired final ApiProperties apiProperties) {
+	WebDatasourceFetchingService webDatasourceFetchingService(@Autowired final IndexationRepository indexationRepository, final IndexationService indexationService, @Autowired final ApiProperties apiProperties) {
 
-	    return new WebDatasourceFetchingService(indexationService, apiProperties.getFetcherProperties(),indexationRepository, apiProperties.logsFolder());
+		return new WebDatasourceFetchingService(indexationService, apiProperties.getFetcherProperties(), indexationRepository, apiProperties.logsFolder());
 	}
-
 
 	/**
 	 * A custom "direct" implementation to update directly the local crawler status,
@@ -501,16 +432,12 @@ public class ApiConfig {
 	}
 
 	@Bean
-	FetchersService crawlersInterface(@Autowired final ApiProperties apiProperties,
-			@Autowired final CsvDatasourceFetchingService csvDatasourceFetchingService,
-			@Autowired final WebDatasourceFetchingService webDatasourceFetchingService
-			) {
-		return new FetchersService(apiProperties.getFetcherProperties(), webDatasourceFetchingService,
-				csvDatasourceFetchingService);
+	FetchersService crawlersInterface(@Autowired final ApiProperties apiProperties, final CsvDatasourceFetchingService csvDatasourceFetchingService, final WebDatasourceFetchingService webDatasourceFetchingService) {
+		return new FetchersService(apiProperties.getFetcherProperties(), webDatasourceFetchingService, csvDatasourceFetchingService);
 	}
 
 	@Bean
-	@Autowired
+
 	ScrapperOrchestrationService fetcherOrchestrationService(TaskScheduler taskScheduler, DataSourceConfigService dataSourceConfigService, ApiProperties apiProperties) {
 		return new ScrapperOrchestrationService(taskScheduler, dataSourceConfigService, apiProperties);
 	}
@@ -520,7 +447,6 @@ public class ApiConfig {
 		return new DataFragmentCompletionService(brandService);
 	}
 
-
 	@Bean
 	/**
 	 * A custom "direct" implementation to update directly the local crawler status,
@@ -528,10 +454,9 @@ public class ApiConfig {
 	 *
 	 * @return
 	 */
-	@Autowired
+
 	ApiSynchService apiSynchService(final ApiProperties apiProperties, FetchersService crawlersInterface, ScrapperOrchestrationService fetcherOrchestrationService) {
-		return new ApiSynchService(apiProperties.getFetcherProperties().getApiSynchConfig(), crawlersInterface, null,
-				null) {
+		return new ApiSynchService(apiProperties.getFetcherProperties().getApiSynchConfig(), crawlersInterface, null, null) {
 			@Override
 			@Scheduled(initialDelay = 0L, fixedDelay = TimeConstants.CRAWLER_UPDATE_STATUS_TO_API_MS)
 			public void updateStatus() {
@@ -540,12 +465,9 @@ public class ApiConfig {
 		};
 	}
 
-
-    @Bean
-    TimedAspect timedAspect(MeterRegistry registry) {
-	  return new TimedAspect(registry);
+	@Bean
+	TimedAspect timedAspect(MeterRegistry registry) {
+		return new TimedAspect(registry);
 	}
-    
- 
 
 }

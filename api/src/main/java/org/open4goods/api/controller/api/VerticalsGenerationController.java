@@ -34,28 +34,27 @@ import io.swagger.v3.oas.annotations.Operation;
 @PreAuthorize("hasAuthority('"+RolesConstants.ROLE_ADMIN+"')")
 public class VerticalsGenerationController {
 
-	@Autowired private  VerticalsGenerationService verticalsGenService;
-	@Autowired private  VerticalsConfigService verticalsConfigService;
+	private  VerticalsGenerationService verticalsGenService;
+	private  VerticalsConfigService verticalsConfigService;
 	
-	
-	
+	public VerticalsGenerationController(VerticalsGenerationService verticalsGenService, VerticalsConfigService verticalsConfigService) {
+		super();
+		this.verticalsGenService = verticalsGenService;
+		this.verticalsConfigService = verticalsConfigService;
+	}
 
-	
 	@GetMapping(path="/fullFromDb")
 	@Operation(summary="Loads the mappings from database, then clean and save to file")
 	@PreAuthorize("hasAuthority('"+RolesConstants.ROLE_ADMIN+"')")
 	public void full() throws ResourceNotFoundException, IOException {
 		verticalsGenService.fullFromDb();
-		
 	}
-	
 
 	@GetMapping(path="/mappings/load/database")
 	@Operation(summary="Loads the mappings from database")
 	@PreAuthorize("hasAuthority('"+RolesConstants.ROLE_ADMIN+"')")
 	public void load() throws ResourceNotFoundException {
 		verticalsGenService.loadCategoriesMappingFromDatabase();
-		
 	}
 
 	@GetMapping(path="/mappings/load/file")
