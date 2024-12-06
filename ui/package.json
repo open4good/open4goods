@@ -27,7 +27,7 @@
         "gulp-npm-dist": "^1.0.3",
         "gulp-plumber": "^1.2.1",
         "gulp-rename": "^2.0.0",
-        "gulp-sass": "^5.1.0",
+        "gulp-sass": "^6.0.0",
         "gulp-sourcemaps": "^3.0.0",
         "gulp-uglify": "^3.0.2",
         "gulp-wait": "^0.0.2",
