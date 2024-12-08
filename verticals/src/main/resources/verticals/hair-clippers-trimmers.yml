@@ -17,38 +17,11 @@ googleTaxonomyId: 533
 # Indicates if the vertical must be UI / sitemap / search rendered
 enabled: false
 
-##############################################################################
-# Product classification from categories
-##############################################################################
-# Will associate to this vertical if one of the following categorie is present for the product  
-
-matchingCategories:
-  all: []
-  Darty Pro - Cashback:
-  - "BEAUTE, FORME ET SANTE | TONDEUSE"
-  Electrodepot - Guides et Comparateurs:
-  - "ELECTRO DEPOT | EPILATION, RASAGE | TONDEUSE"
-#  rueducommerce.fr:
-#  - "TONDEUSE"
-#  Nocibé - Guides d'achat:
-#  - "CISEAUX DE COIFFURE | OUTILS COIFFANTS | CHEVEUX"
-  darty.com:
-  - "BEAUTE, FORME ET SANTE | BEAUTE, FORME ET SANTE>TONDEUSE>TONDEUSE HOMME | TONDEUSE | BEAUTE, FORME ET SANTE"
-#  fnac.com:
-#  - "PETIT MENAGER & CUISINE - RASAGE HOMME"
-#  - "PETIT MENAGER & CUISINE RASAGE HOMME"
-  cdiscount.com:
-  - "ELECTROMENAGER | ELECTROMENAGER > COIFFURE > TONDEUSE MULTI-USAGES | COIFFURE | TONDEUSE MULTI-USAGES"
-  - "ELECTROMENAGER | ELECTROMENAGER > COIFFURE > TONDEUSE A BARBE | COIFFURE | TONDEUSE A BARBE"
-  Joom FR:
-  - "HOME APPLIANCES > BEAUTY & HEALTH ELECTRONICS > ELECTRIC SHAVERS & TRIMMERS FOR MEN"
-  e.leclerc:
-  - "HIGH-TECH | ELECTROMENAGER>PETIT ELECTROMENAGER>BEAUTE, SANTE & BIEN-ETRE>TONDEUSE>TONDEUSE MULTIFONCTION | PETIT ELECTROMENAGER | BEAUTE, SANTE & BIEN-ETRE"
-  alternate FR:
-  - "107 | SHAVING | SOINS > SOIN DES CHEVEUX > TONDEUSE"
-
-
-
+# GenAiConfig for this vertical
+genAiConfig:
+  # If false, will bypass the generativ ia texts generation  
+  enabled: true
+  
 #####################################################################################################################################
 # I18N CONFIGURATION
 # Configure in a i18n way all the texts of a product, including the Url, the title, the description, the open graph metas, ....
@@ -80,11 +53,11 @@ i18n:
       ##################################
       
       # url for vertical (appened to baseUrl). No templating here 
-      verticalHomeUrl: "tondeuses-barbe-cheveux"
+      verticalHomeUrl: "tondeuses-barbes-cheveux"
       # Text displaid as title for the vertical
       # TODO : Make verticalHomeTitle/ verticalHomeDescription templatable
       verticalHomeTitle: "Tondeuses barbe et cheveux"
-      # Text displaid as title for the vertical
+      # Text displaid as jumbotron for the vertical
       # verticalHomeDescription: ""  
 
      # A mapping beetween custom page names behind this vertical and wiki pages
@@ -95,12 +68,7 @@ i18n:
 #          title: "OLED, QLED,LCD, ... Quelle technologie choisir ?"
 #          faIcon: "fa-star"
 
- 
-# GenAiConfig for this vertical
-genAiConfig:
-  # If false, will bypass the generativ ia texts generation  
-  enabled: false
-  
+
   
 ##############################################################################
 # Eco score configuration 
@@ -140,8 +108,59 @@ technicalFilters:
 
 
 
+
+# If set, all products that do not have this attribute will be marked as excluded
+#requiredAttributes:
+#  - ""
+
+##############################################################################
+# Product classification from categories
+##############################################################################
+# Will associate to this vertical if one of the following categorie is present for the product  
+
+matchingCategories:
+  all: []
+  Darty Pro - Cashback:
+  - "BEAUTE, FORME ET SANTE | TONDEUSE"
+  Electrodepot - Guides et Comparateurs:
+  - "ELECTRO DEPOT | EPILATION, RASAGE | TONDEUSE"
+  rueducommerce.fr:
+  - "TONDEUSE"
+  Nocibé - Guides d'achat:
+  - "CISEAUX DE COIFFURE | OUTILS COIFFANTS | CHEVEUX"
+  darty.com:
+  - "BEAUTE, FORME ET SANTE | BEAUTE, FORME ET SANTE>TONDEUSE>TONDEUSE HOMME | TONDEUSE | BEAUTE, FORME ET SANTE"
+  fnac.com:
+  - "PETIT MENAGER & CUISINE - RASAGE HOMME"
+  - "PETIT MENAGER & CUISINE RASAGE HOMME"
+  cdiscount.com:
+  - "ELECTROMENAGER | ELECTROMENAGER > COIFFURE > TONDEUSE MULTI-USAGES | COIFFURE | TONDEUSE MULTI-USAGES"
+  - "ELECTROMENAGER | ELECTROMENAGER > COIFFURE > TONDEUSE A BARBE | COIFFURE | TONDEUSE A BARBE"
+  Joom FR:
+  - "HOME APPLIANCES > BEAUTY & HEALTH ELECTRONICS > ELECTRIC SHAVERS & TRIMMERS FOR MEN"
+  e.leclerc:
+  - "HIGH TECH | ELECTROMENAGER > PETIT ELECTROMENAGER > BEAUTE, SANTE & BIEN-ETRE > TONDEUSE > TONDEUSE MULTIFONCTION | PETIT ELECTROMENAGER | BEAUTE, SANTE & BIEN-ETRE"
+  - "HIGH TECH | IDEES CADEAUX > IDEES CADEAUX SPECIAL FETE DES PERES > IDEES CADEAUX SPECIAL FETE DES PERES BEAUTE | IDEES CADEAUX SPECIAL FETE DES PERES | IDEES CADEAUX SPECIAL FETE DES PERES BEAUTE"
+  - "HIGH TECH | ELECTROMENAGER > PETIT ELECTROMENAGER > BEAUTE, SANTE & BIEN-ETRE > TONDEUSE | PETIT ELECTROMENAGER | BEAUTE, SANTE & BIEN-ETRE"
+  - "HIGH TECH | IDEES CADEAUX > IDEES CADEAUX SPECIAL FETE DES MERES > IDEES CADEAUX SPECIAL FETE DES MERES BEAUTE | IDEES CADEAUX SPECIAL FETE DES MERES | IDEES CADEAUX SPECIAL FETE DES MERES BEAUTE"
+  icecat.biz.yml:
+  - "TONDEUSES A BARBE"
+  alternate FR:
+  - "107 | SHAVING | SOINS > SOIN DES CHEVEUX > TONDEUSE"
+
 ####################################################################################
 # ATTRIBUTES CONFIGURATION
 ####################################################################################
-#requiredAttributes:
-#  - DIAGONALE_POUCES
+attributesConfig:
+   
+  ###################################################################################################################
+  # ATTRIBUTES MAPPINGS
+  # Those attributes will be availlable for all products if one is found.
+  # The line after configs: will be updated with the attribtes suggestion API, with commented attributes 
+  ##################################################################################################################      
+  configs: [] 
+  
+
+
+
+
