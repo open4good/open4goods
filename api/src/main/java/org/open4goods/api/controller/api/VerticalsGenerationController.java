@@ -175,6 +175,15 @@ public class VerticalsGenerationController {
 		
 	}
 	
-	
+	@GetMapping(path="/update/verticals/attributes/{vertical}")
+	@Operation(summary="Update the suggested attributes for a given vertical directly in the file !")
+	@PreAuthorize("hasAuthority('"+RolesConstants.ROLE_ADMIN+"')")
+	public void updateVerticalWithAttributes( 
+			@RequestParam	(defaultValue = "tv")									 String vertical) throws ResourceNotFoundException, IOException {
+		
+		//TODO(p2,conf) : from conf
+ 		  verticalsGenService.generateAttributesMapping(verticalsConfigService.getConfigById(vertical));
+		
+	}
 	
 }

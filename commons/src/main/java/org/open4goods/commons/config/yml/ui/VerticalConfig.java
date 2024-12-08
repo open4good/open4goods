@@ -103,11 +103,18 @@ public class VerticalConfig{
 	private Set<String> excludingTokensFromCategoriesMatching = new HashSet<String>();	
 	
 	/**
-	 * The set of datasourcenames that will be excluded to generate categories matching
+	 * The set of datasourcenames that will be excluded in generation of categories matching
 	 */
 	@JsonMerge
-	private Set<String> excludedFromCategoriesMatching = new HashSet<String>();
+	private Set<String> generationExcludedFromCategoriesMatching = new HashSet<String>();
 
+	/**
+	 * The set of attributes names  that will be excluded in generation of attributes suggestion
+	 */
+	
+	@JsonMerge
+	private  Set<String> generationExcludedFromAttributesMatching = new HashSet<String>();
+	 
 	
 	
 	/**
@@ -793,12 +800,12 @@ public class VerticalConfig{
 		this.forceNameGeneration = forceUrlNameGeneration;
 	}
 
-	public Set<String> getExcludedFromCategoriesMatching() {
-		return excludedFromCategoriesMatching;
+	public Set<String> getGenerationExcludedFromCategoriesMatching() {
+		return generationExcludedFromCategoriesMatching;
 	}
 
-	public void setExcludedFromCategoriesMatching(Set<String> excludedFromCategoriesMatching) {
-		this.excludedFromCategoriesMatching = excludedFromCategoriesMatching;
+	public void setGenerationExcludedFromCategoriesMatching(Set<String> excludedFromCategoriesMatching) {
+		this.generationExcludedFromCategoriesMatching = excludedFromCategoriesMatching;
 	}
 
 	public Set<String> getExcludingTokensFromCategoriesMatching() {
@@ -807,6 +814,14 @@ public class VerticalConfig{
 
 	public void setExcludingTokensFromCategoriesMatching(Set<String> excludingTokens) {
 		this.excludingTokensFromCategoriesMatching = excludingTokens;
+	}
+
+	public Set<String> getGenerationExcludedFromAttributesMatching() {
+		return generationExcludedFromAttributesMatching;
+	}
+
+	public void setGenerationExcludedFromAttributesMatching(Set<String> generationExcludedFromAttributesMatching) {
+		this.generationExcludedFromAttributesMatching = generationExcludedFromAttributesMatching;
 	}
 
 	
