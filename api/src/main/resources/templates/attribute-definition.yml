@@ -1,0 +1,33 @@
+  ################################################################################
+  #                         [(${name})]
+  ################################################################################
+  # Generated on [(${date})], coverage was [(${coveragePercent})]% ([(${attrHits})]/[(${totalHits})]) . 
+  # TOP attributes values are :
+[(${attributesSamples})]   
+  ################################################################################
+  - key: "[(${name})]"
+    filteringType: "[(${type})]"
+    asScore: false
+    faIcon: "[(${faicon})]"
+
+    icecatFeaturesIds:      
+#      - [(${icecatIds})] 
+    
+    name:
+      default: "[(${default_name})]"
+      fr: "[(${fr_name})]"
+    
+    synonyms:
+#      all:
+[(${synonyms})]           
+    parser:
+      normalize: true
+      trim: false
+      lowerCase: false
+      upperCase: true
+      removeParenthesis: false
+#      deleteTokens:   
+#        - "..."
+
+
+

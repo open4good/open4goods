@@ -40,7 +40,7 @@ public class Attribute2ScoreAggregationService extends AbstractScoreAggregationS
                     continue;
                 }
 				
-				if (attrConfig.isAsRating()) {
+				if (attrConfig.isAsScore()) {
 						try {
 							Double score = generateScoresFromAttribute(aga.getName() ,aga, vConf.getAttributesConfig());
 

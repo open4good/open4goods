@@ -171,7 +171,7 @@ public class VerticalsGenerationController {
 			@RequestParam	(defaultValue = "3")									 Integer minOffers) throws ResourceNotFoundException, IOException {
 		
 		//TODO(p2,conf) : from conf
- 		  verticalsGenService.updateVerticalFile(minOffers, "/home/goulven/git/open4goods/verticals/src/main/resources/verticals/"+vertical+".yml");
+ 		  verticalsGenService.updateVerticalFileWithCategories(minOffers, "/home/goulven/git/open4goods/verticals/src/main/resources/verticals/"+vertical+".yml");
 		
 	}
 	
@@ -182,7 +182,7 @@ public class VerticalsGenerationController {
 			@RequestParam	(defaultValue = "tv")									 String vertical) throws ResourceNotFoundException, IOException {
 		
 		//TODO(p2,conf) : from conf
- 		  verticalsGenService.generateAttributesMapping(verticalsConfigService.getConfigById(vertical));
+ 		  verticalsGenService.updateVerticalFileWithAttributes("/home/goulven/git/open4goods/verticals/src/main/resources/verticals/"+vertical+".yml");
 		
 	}
 	

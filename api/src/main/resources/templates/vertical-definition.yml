@@ -17,13 +17,6 @@ googleTaxonomyId: [(${googleTaxonomyId})]
 # Indicates if the vertical must be UI / sitemap / search rendered
 enabled: false
 
-##############################################################################
-# Product classification from categories
-##############################################################################
-# Will associate to this vertical if one of the following categorie is present for the product  
-[(${matchingCategories})]
-
-
 #####################################################################################################################################
 # I18N CONFIGURATION
 # Configure in a i18n way all the texts of a product, including the Url, the title, the description, the open graph metas, ....
@@ -115,8 +108,30 @@ technicalFilters:
 
 
 
+
+# If set, all products that do not have this attribute will be marked as excluded
+#requiredAttributes:
+#  - ""
+
+##############################################################################
+# Product classification from categories
+##############################################################################
+# Will associate to this vertical if one of the following categorie is present for the product  
+[(${matchingCategories})]
+
 ####################################################################################
 # ATTRIBUTES CONFIGURATION
 ####################################################################################
-#requiredAttributes:
-#  - DIAGONALE_POUCES
+attributesConfig:
+   
+  ###################################################################################################################
+  # ATTRIBUTES MAPPINGS
+  # Those attributes will be availlable for all products if one is found.
+  # The line after configs: will be updated with the attribtes suggestion API, with commented attributes 
+  ##################################################################################################################      
+  configs: [] 
+  
+
+
+
+

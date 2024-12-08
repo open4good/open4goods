@@ -1,7 +1,9 @@
 package org.open4goods.api.model;
 
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Set;
 
 import org.open4goods.commons.model.product.ProductAttribute;
 
@@ -11,6 +13,7 @@ public class AttributesStats {
 	 * Number of hits for this attribute
 	 */
 	private Integer hits = 0;
+	private Set<String> datasourceNames = new HashSet<>();
 	
 	/**
 	 * The values, with associated popularity
@@ -33,6 +36,8 @@ public class AttributesStats {
 	public void process(String key, ProductAttribute value) {
 	    hits++;
 
+	    datasourceNames.addAll(value.getSource().stream().map(e->e.getDataSourcename()).toList() );
+	    
 	    // Incrementing stats by value (value.getValue())
 	    // Assuming value.getValue() returns a string that represents the attribute value.
 	    if (value != null && value.getValue() != null) {
@@ -58,6 +63,14 @@ public class AttributesStats {
 	            .collect(LinkedHashMap::new, // Collect into a LinkedHashMap to maintain order
 	                    (map, entry) -> map.put(entry.getKey(), entry.getValue()),
 	                    LinkedHashMap::putAll);
+	}
+
+	public Set<String> getDatasourceNames() {
+		return datasourceNames;
+	}
+
+	public void setDatasourceNames(Set<String> datasourceNames) {
+		this.datasourceNames = datasourceNames;
 	}
 
 	

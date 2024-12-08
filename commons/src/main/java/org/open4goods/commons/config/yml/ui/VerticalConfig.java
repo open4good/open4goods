@@ -255,26 +255,6 @@ public class VerticalConfig{
 	public ProductI18nElements i18n(String lang) {		
 		return i18n.getOrDefault(lang, i18n.get("default"));		
 	}
-	/**
-	 *
-	 * @return the list of AttributeConfig that have to appear in search results,
-	 *         ordered by their display position
-	 */
-	public List<AttributeConfig> searchTableAttributes() {
-		final List<AttributeConfig> ret = new ArrayList<>();
-		for (final AttributeConfig a : attributesConfig.getConfigs()) {
-			if (null != a.getSearchTableOrder()) {
-				try {
-					ret.add(a.getSearchTableOrder(), a);
-				} catch (final IndexOutOfBoundsException e) {
-					LOGGER.warn("Attribute {} has invalid position 'searchTableOrders'. Adding last.", a);
-					ret.add(a);
-				}
-			}
-		}
-		return ret;
-	}
-
 	
 	/**
 	 * Return the participation in percentage of a score in the ecoscore
