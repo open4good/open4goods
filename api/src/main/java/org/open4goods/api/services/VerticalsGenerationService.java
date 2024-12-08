@@ -418,7 +418,7 @@ Base your analyse on the following categories :
 				.map(e->e.gtin())
 				.toList();
 		
-		return generateCategoryMappingFragmentForGtin(items,vc.getExcludedFromCategoriesMatching());
+		return generateCategoryMappingFragmentForGtin(items,vc.getGenerationExcludedFromCategoriesMatching());
 		
 		
 		
@@ -533,9 +533,23 @@ Base your analyse on the following categories :
 	 * @param vertical
 	 * @return
 	 */
-	public String generateAttributesMapping(String vertical, Set<String> excludeAttributes) {
-		VerticalAttributesStats stats = attributesStats(vertical);
+	public String generateAttributesMapping(VerticalConfig verticalConfig) {
+		LOGGER.info("Generating attributes mapping for {}", verticalConfig);
+		VerticalAttributesStats stats = attributesStats(verticalConfig.getId());
 		
+		Set<String> exclusions = new HashSet<String>();
+		if (null != verticalConfig.getGenerationExcludedFromAttributesMatching()) {
+			exclusions.addAll(verticalConfig.getGenerationExcludedFromAttributesMatching());
+		}
+		
+		// Adding existing defined attributes matching
+		verticalConfig.getAttributesConfig().getConfigs().stream().map(e->e.getSynonyms().values()).forEach(e -> {
+			e.forEach(elem -> {
+				elem.forEach(e1 -> {					
+					exclusions.add(e1);
+				});
+			});
+		});
 		
 		
 		
@@ -543,9 +557,9 @@ Base your analyse on the following categories :
 		
 		for (Entry<String, AttributesStats> cat : stats.getStats().entrySet()) {
 			
-			if (null != excludeAttributes && !excludeAttributes.contains(cat.getKey())) {
+			if (!exclusions.contains(cat.getKey())) {
 				
-				
+				LOGGER.info("An unknown attribute !");
 				
 //				AttributesConfig
 			}
@@ -555,8 +569,35 @@ Base your analyse on the following categories :
 		
 	}
 	
-	
-	
-	
+	/**
+	 * 
+	 * @return an attribute definition, from template 
+	 */
+//	public String attributeConfigTemplate()  {
+//		String ret = "";
+//		try {
+//			Resource r = resourceResolver.getResource("classpath:/templates/attribute.yml");
+//			String content = r.getContentAsString(Charset.defaultCharset());
+//			
+//			Map<String, Object> context = new HashMap<String, Object>();
+//
+//			context.put("id",id );
+//			context.put("googleTaxonomyId", googleTaxonomyId);
+//			// Here is a tweak, we provide some sample products coma separated
+//			context.put("matchingCategories", generateCategoryMappingFragmentForGtin(Arrays.asList(matchingCategories.split(",")), null));
+//			context.put("urlPrefix", urlPrefix);
+//			context.put("h1Prefix", h1Prefix);
+//			context.put("verticalHomeUrl", verticalHomeUrl);
+//			context.put("verticalHomeTitle", verticalHomeTitle);
+//			
+//			ret = evalService.thymeleafEval(context, content);
+//		} catch (IOException e) {
+//			LOGGER.error("Error while generating vertical file",e);
+//		}
+//		
+//		return ret;
+//		
+//	}
+//	
 	
 }
