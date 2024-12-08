@@ -17,36 +17,11 @@ googleTaxonomyId: 5139
 # Indicates if the vertical must be UI / sitemap / search rendered
 enabled: false
 
-##############################################################################
-# Product classification from categories
-##############################################################################
-# Will associate to this vertical if one of the following categorie is present for the product  
-
-matchingCategories:
-  all: []
-  Darty Pro - Cashback:
-  - "ENTRETIEN ET SOIN DE LA MAISON | FER / CENTRALE VAPEUR"
-  rueducommerce.fr:
-  - "FER A REPASSER"
-  darty.com:
-  - "ENTRETIEN ET SOIN DE LA MAISON / FER / CENTRALE VAPEUR / FER A REPASSER | ENTRETIEN ET SOIN DE LA MAISON>FER / CENTRALE VAPEUR>FER A REPASSER | FER / CENTRALE VAPEUR | FER A REPASSER"
-  - "ENTRETIEN ET SOIN DE LA MAISON | ENTRETIEN ET SOIN DE LA MAISON>FER / CENTRALE VAPEUR>FER A REPASSER | FER / CENTRALE VAPEUR | ENTRETIEN ET SOIN DE LA MAISON"
-#  rakuten.com-csv.yml:
-#  - "ELECTROMENAGER | REPASSAGE"
-#  fnac.com:
-#  - "PETIT MENAGER & CUISINE - SOIN DU LINGE"
-#  - "PETIT MENAGER & CUISINE SOIN DU LINGE"
-  cdiscount.com:
-  - "ELECTROMENAGER | ELECTROMENAGER > REPASSAGE - COUTURE > FER A REPASSER - FER A RESERVOIR AMOVIBLE - FER A REPASSER A RESERVOIR XL | REPASSAGE - COUTURE | FER A REPASSER - FER A RESERVOIR AMOVIBLE - FER A REPASSER A RESERVOIR XL"
-  manomano.fr:
-  - "ELECTROMENAGER | ELECTROMENAGER > ENTRETIEN DE LA MAISON > REPASSAGE > FER A REPASSER | FER A REPASSER"
-  Joom FR:
-  - "HOME APPLIANCES > CLOTHING CARE APPLIANCES > IRONS"
-  e.leclerc:
-  - "HIGH-TECH | ELECTROMENAGER>PETIT ELECTROMENAGER>ENTRETIEN & SOIN DE LA MAISON>SOIN DU LINGE>FER A REPASSER | PETIT ELECTROMENAGER | ENTRETIEN & SOIN DE LA MAISON"
-
-
-
+# GenAiConfig for this vertical
+genAiConfig:
+  # If false, will bypass the generativ ia texts generation  
+  enabled: true
+  
 #####################################################################################################################################
 # I18N CONFIGURATION
 # Configure in a i18n way all the texts of a product, including the Url, the title, the description, the open graph metas, ....
@@ -82,7 +57,7 @@ i18n:
       # Text displaid as title for the vertical
       # TODO : Make verticalHomeTitle/ verticalHomeDescription templatable
       verticalHomeTitle: "Fers à repasser"
-      # Text displaid as title for the vertical
+      # Text displaid as jumbotron for the vertical
       # verticalHomeDescription: ""  
 
      # A mapping beetween custom page names behind this vertical and wiki pages
@@ -93,12 +68,7 @@ i18n:
 #          title: "OLED, QLED,LCD, ... Quelle technologie choisir ?"
 #          faIcon: "fa-star"
 
- 
-# GenAiConfig for this vertical
-genAiConfig:
-  # If false, will bypass the generativ ia texts generation  
-  enabled: false
-  
+
   
 ##############################################################################
 # Eco score configuration 
@@ -138,8 +108,52 @@ technicalFilters:
 
 
 
+
+# If set, all products that do not have this attribute will be marked as excluded
+#requiredAttributes:
+#  - ""
+
+##############################################################################
+# Product classification from categories
+##############################################################################
+# Will associate to this vertical if one of the following categorie is present for the product  
+
+matchingCategories:
+  all: []
+  Darty Pro - Cashback:
+  - "ENTRETIEN ET SOIN DE LA MAISON | FER / CENTRALE VAPEUR"
+  rueducommerce.fr:
+  - "FER A REPASSER"
+  darty.com:
+  - "ENTRETIEN ET SOIN DE LA MAISON / FER / CENTRALE VAPEUR / FER A REPASSER | ENTRETIEN ET SOIN DE LA MAISON>FER / CENTRALE VAPEUR>FER A REPASSER | FER / CENTRALE VAPEUR | FER A REPASSER"
+  - "ENTRETIEN ET SOIN DE LA MAISON | ENTRETIEN ET SOIN DE LA MAISON>FER / CENTRALE VAPEUR>FER A REPASSER | FER / CENTRALE VAPEUR | ENTRETIEN ET SOIN DE LA MAISON"
+  rakuten.com-csv.yml:
+  - "ELECTROMENAGER | REPASSAGE"
+  cdiscount.com:
+  - "ELECTROMENAGER | ELECTROMENAGER > REPASSAGE - COUTURE > FER A REPASSER - FER A RESERVOIR AMOVIBLE - FER A REPASSER A RESERVOIR XL | REPASSAGE - COUTURE | FER A REPASSER - FER A RESERVOIR AMOVIBLE - FER A REPASSER A RESERVOIR XL"
+  manomano.fr:
+  - "ELECTROMENAGER | ELECTROMENAGER > ENTRETIEN DE LA MAISON > REPASSAGE > FER A REPASSER | FER A REPASSER"
+  Joom FR:
+  - "HOME APPLIANCES > CLOTHING CARE APPLIANCES > IRONS"
+  e.leclerc:
+  - "HIGH TECH | ELECTROMENAGER > PETIT ELECTROMENAGER > ENTRETIEN & SOIN DE LA MAISON > SOIN DU LINGE > FER A REPASSER | PETIT ELECTROMENAGER | ENTRETIEN & SOIN DE LA MAISON"
+  icecat.biz.yml:
+  - "FERS A REPASSER"
+
+
 ####################################################################################
 # ATTRIBUTES CONFIGURATION
 ####################################################################################
-#requiredAttributes:
-#  - DIAGONALE_POUCES
+attributesConfig:
+   
+  ###################################################################################################################
+  # ATTRIBUTES MAPPINGS
+  # Those attributes will be availlable for all products if one is found.
+  # The line after configs: will be updated with the attribtes suggestion API, with commented attributes 
+  ##################################################################################################################      
+  configs: [] 
+  
+
+
+
+

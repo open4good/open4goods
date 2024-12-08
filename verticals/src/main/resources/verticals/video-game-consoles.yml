@@ -17,18 +17,11 @@ googleTaxonomyId: 1294
 # Indicates if the vertical must be UI / sitemap / search rendered
 enabled: false
 
-##############################################################################
-# Product classification from categories
-##############################################################################
-# Will associate to this vertical if one of the following categorie is present for the product  
-
-matchingCategories:
-  all: []
-  rakuten.com-csv.yml:
-  - "JEUX-VIDEO-ET-CONSOLES | CONSOLES"
-
-
-
+# GenAiConfig for this vertical
+genAiConfig:
+  # If false, will bypass the generativ ia texts generation  
+  enabled: true
+  
 #####################################################################################################################################
 # I18N CONFIGURATION
 # Configure in a i18n way all the texts of a product, including the Url, the title, the description, the open graph metas, ....
@@ -64,7 +57,7 @@ i18n:
       # Text displaid as title for the vertical
       # TODO : Make verticalHomeTitle/ verticalHomeDescription templatable
       verticalHomeTitle: "Consoles"
-      # Text displaid as title for the vertical
+      # Text displaid as jumbotron for the vertical
       # verticalHomeDescription: ""  
 
      # A mapping beetween custom page names behind this vertical and wiki pages
@@ -75,12 +68,7 @@ i18n:
 #          title: "OLED, QLED,LCD, ... Quelle technologie choisir ?"
 #          faIcon: "fa-star"
 
- 
-# GenAiConfig for this vertical
-genAiConfig:
-  # If false, will bypass the generativ ia texts generation  
-  enabled: false
-  
+
   
 ##############################################################################
 # Eco score configuration 
@@ -120,8 +108,35 @@ technicalFilters:
 
 
 
+
+# If set, all products that do not have this attribute will be marked as excluded
+#requiredAttributes:
+#  - ""
+
+##############################################################################
+# Product classification from categories
+##############################################################################
+# Will associate to this vertical if one of the following categorie is present for the product  
+
+matchingCategories:
+  all: []
+  fnac.com:
+  - "CONSOLES DE JEUX CONSOLE NINTENDO SWITCH | APPAREILS ELECTRONIQUES > CONSOLES DE JEUX VIDEO"
+  rakuten.com-csv.yml:
+  - "JEUX-VIDEO-ET-CONSOLES | CONSOLES"
 ####################################################################################
 # ATTRIBUTES CONFIGURATION
 ####################################################################################
-#requiredAttributes:
-#  - DIAGONALE_POUCES
+attributesConfig:
+   
+  ###################################################################################################################
+  # ATTRIBUTES MAPPINGS
+  # Those attributes will be availlable for all products if one is found.
+  # The line after configs: will be updated with the attribtes suggestion API, with commented attributes 
+  ##################################################################################################################      
+  configs: [] 
+  
+
+
+
+

@@ -17,41 +17,11 @@ googleTaxonomyId: 686
 # Indicates if the vertical must be UI / sitemap / search rendered
 enabled: false
 
-##############################################################################
-# Product classification from categories
-##############################################################################
-# Will associate to this vertical if one of the following categorie is present for the product  
-
-matchingCategories:
-  all: []
-  Darty Pro - Cashback:
-  - "GROS ELECTROMENAGER | REFRIGERATEUR"
-  - "GROS ELECTROMENAGER | REFRIGERATEUR CONGELATEUR"
-  rueducommerce.fr:
-  - "REFRIGERATEUR"
-  darty.com:
-  - "GROS ELECTROMENAGER / REFRIGERATEUR CONGELATEUR / REFRIGERATEUR CONGELATEUR EN HAUT | GROS ELECTROMENAGER>REFRIGERATEUR CONGELATEUR>REFRIGERATEUR CONGELATEUR EN HAUT | REFRIGERATEUR CONGELATEUR | REFRIGERATEUR CONGELATEUR EN HAUT"
-  - "GROS ELECTROMENAGER | GROS ELECTROMENAGER>REFRIGERATEUR CONGELATEUR>REFRIGERATEUR CONGELATEUR EN BAS | REFRIGERATEUR CONGELATEUR | GROS ELECTROMENAGER"
-  - "GROS ELECTROMENAGER | GROS ELECTROMENAGER>REFRIGERATEUR>REFRIGERATEUR 1 PORTE | REFRIGERATEUR | GROS ELECTROMENAGER"
-  - "GROS ELECTROMENAGER | GROS ELECTROMENAGER>REFRIGERATEUR CONGELATEUR>REFRIGERATEUR CONGELATEUR EN HAUT | REFRIGERATEUR CONGELATEUR | GROS ELECTROMENAGER"
-  rakuten.com-csv.yml:
-  - "ELECTROMENAGER | REFRIGERATEUR"
-  Castorama FR:
-  - "REFRIGERATEUR CONGELATEUR A POSER | MAGASIN CASTORAMA > CUISINE > GROS ELECTROMENAGER > REFRIGERATEUR ET CONGELATEUR > REFRIGERATEUR CONGELATEUR > REFRIGERATEUR CONGELATEUR A POSER | CUISINE | GROS ELECTROMENAGER"
-  UNDERDOG FR:
-  - "380 | FRIDGE FREEZERS | REFRIGERATEUR"
-#  fnac.com:
-#  - "PETIT MENAGER & CUISINE FROID"
-  manomano.fr:
-  - "ELECTROMENAGER | ELECTROMENAGER > GROS ELECTROMENAGER > REFRIGERATEUR | REFRIGERATEUR"
-#  - "ELECTROMENAGER | ELECTROMENAGER > PETIT ELECTROMENAGER > EAU - BOISSON - GLACON > MACHINE A SODA ET EAU GAZEUSE | MACHINE A SODA ET EAU GAZEUSE"
-  cdiscount.com:
-  - "ELECTROMENAGER | ELECTROMENAGER > FROID > REFRIGERATEUR CLASSIQUE | FROID | REFRIGERATEUR CLASSIQUE"
-  e.leclerc:
-  - "HIGH-TECH | ELECTROMENAGER>GROS ELECTROMENAGER>REFRIGERATEUR>REFRIGERATEUR CONGELATEUR | GROS ELECTROMENAGER | REFRIGERATEUR"
-
-
-
+# GenAiConfig for this vertical
+genAiConfig:
+  # If false, will bypass the generativ ia texts generation  
+  enabled: true
+  
 #####################################################################################################################################
 # I18N CONFIGURATION
 # Configure in a i18n way all the texts of a product, including the Url, the title, the description, the open graph metas, ....
@@ -87,7 +57,7 @@ i18n:
       # Text displaid as title for the vertical
       # TODO : Make verticalHomeTitle/ verticalHomeDescription templatable
       verticalHomeTitle: "Refrigerateurs"
-      # Text displaid as title for the vertical
+      # Text displaid as jumbotron for the vertical
       # verticalHomeDescription: ""  
 
      # A mapping beetween custom page names behind this vertical and wiki pages
@@ -98,12 +68,7 @@ i18n:
 #          title: "OLED, QLED,LCD, ... Quelle technologie choisir ?"
 #          faIcon: "fa-star"
 
- 
-# GenAiConfig for this vertical
-genAiConfig:
-  # If false, will bypass the generativ ia texts generation  
-  enabled: false
-  
+
   
 ##############################################################################
 # Eco score configuration 
@@ -143,8 +108,60 @@ technicalFilters:
 
 
 
+
+# If set, all products that do not have this attribute will be marked as excluded
+#requiredAttributes:
+#  - ""
+
+##############################################################################
+# Product classification from categories
+##############################################################################
+# Will associate to this vertical if one of the following categorie is present for the product  
+
+matchingCategories:
+  all: []
+  Darty Pro - Cashback:
+  - "GROS ELECTROMENAGER | REFRIGERATEUR"
+  - "GROS ELECTROMENAGER | REFRIGERATEUR CONGELATEUR"
+  rueducommerce.fr:
+  - "REFRIGERATEUR"
+  darty.com:
+  - "GROS ELECTROMENAGER / REFRIGERATEUR CONGELATEUR / REFRIGERATEUR CONGELATEUR EN HAUT | GROS ELECTROMENAGER>REFRIGERATEUR CONGELATEUR>REFRIGERATEUR CONGELATEUR EN HAUT | REFRIGERATEUR CONGELATEUR | REFRIGERATEUR CONGELATEUR EN HAUT"
+  - "GROS ELECTROMENAGER | GROS ELECTROMENAGER>REFRIGERATEUR CONGELATEUR>REFRIGERATEUR CONGELATEUR EN BAS | REFRIGERATEUR CONGELATEUR | GROS ELECTROMENAGER"
+  - "GROS ELECTROMENAGER | GROS ELECTROMENAGER>REFRIGERATEUR>REFRIGERATEUR 1 PORTE | REFRIGERATEUR | GROS ELECTROMENAGER"
+  - "GROS ELECTROMENAGER | GROS ELECTROMENAGER>REFRIGERATEUR CONGELATEUR>REFRIGERATEUR CONGELATEUR EN HAUT | REFRIGERATEUR CONGELATEUR | GROS ELECTROMENAGER"
+  rakuten.com-csv.yml:
+  - "ELECTROMENAGER | REFRIGERATEUR"
+  Castorama FR:
+  - "REFRIGERATEUR CONGELATEUR A POSER | MAGASIN CASTORAMA > CUISINE > GROS ELECTROMENAGER > REFRIGERATEUR ET CONGELATEUR > REFRIGERATEUR CONGELATEUR > REFRIGERATEUR CONGELATEUR A POSER | CUISINE | GROS ELECTROMENAGER"
+  UNDERDOG FR:
+  - "380 | FRIDGE FREEZERS | REFRIGERATEUR"
+#  fnac.com:
+#  - "PETIT MENAGER & CUISINE FROID"
+  manomano.fr:
+  - "ELECTROMENAGER | ELECTROMENAGER > GROS ELECTROMENAGER > REFRIGERATEUR | REFRIGERATEUR"
+#  - "ELECTROMENAGER | ELECTROMENAGER > PETIT ELECTROMENAGER > EAU - BOISSON - GLACON > MACHINE A SODA ET EAU GAZEUSE | MACHINE A SODA ET EAU GAZEUSE"
+  cdiscount.com:
+  - "ELECTROMENAGER | ELECTROMENAGER > FROID > REFRIGERATEUR CLASSIQUE | FROID | REFRIGERATEUR CLASSIQUE"
+  e.leclerc:
+  - "HIGH-TECH | ELECTROMENAGER>GROS ELECTROMENAGER>REFRIGERATEUR>REFRIGERATEUR CONGELATEUR | GROS ELECTROMENAGER | REFRIGERATEUR"
+  icecat.biz.yml:
+  - "REFRIGERATEURS-CONGELATEURS"
+
+
 ####################################################################################
 # ATTRIBUTES CONFIGURATION
 ####################################################################################
-#requiredAttributes:
-#  - DIAGONALE_POUCES
+attributesConfig:
+   
+  ###################################################################################################################
+  # ATTRIBUTES MAPPINGS
+  # Those attributes will be availlable for all products if one is found.
+  # The line after configs: will be updated with the attribtes suggestion API, with commented attributes 
+  ##################################################################################################################      
+  configs: [] 
+  
+
+
+
+

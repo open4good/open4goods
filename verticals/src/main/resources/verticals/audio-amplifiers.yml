@@ -17,29 +17,11 @@ googleTaxonomyId: 224
 # Indicates if the vertical must be UI / sitemap / search rendered
 enabled: false
 
-##############################################################################
-# Product classification from categories
-##############################################################################
-# Will associate to this vertical if one of the following categorie is present for the product  
-
-matchingCategories:
-  all: []
-#  Darty Pro - Cashback:
-#  - "AUDIO, HIFI, CASQUE | ELEMENTS SEPARES HIFI"
-  rueducommerce.fr:
-  - "AMPLI HIFI"
-  darty.com:
-  - "AUDIO, HIFI, CASQUE / ELEMENTS SEPARES HIFI / AMPLIFICATEUR HI-FI | AUDIO, HIFI, CASQUE>ELEMENTS SEPARES HIFI>AMPLIFICATEUR HI-FI | ELEMENTS SEPARES HIFI | AMPLIFICATEUR HI-FI"
-  - "5 | AUDIO EQUIPMENT | AUDIO, HIFI, CASQUE | AUDIO, HIFI, CASQUE>ELEMENTS SEPARES HIFI>AMPLIFICATEUR HI-FI | ELEMENTS SEPARES HIFI | AUDIO, HIFI, CASQUE"
-  rakuten.com-csv.yml:
-  - "HIFI | AMPLIFICATEUR"
-  fnac.com:
-  - "SON & HIFI & LECTEURS MP3 - AMPLIFICATEUR | APPAREILS ELECTRONIQUES > AUDIO > COMPOSANTS AUDIO > AMPLIFICATEURS AUDIO"
-  cdiscount.com:
-  - "TV - VIDEO - SON | TV - VIDEO - SON > AMPLIFICATEUR - ENCEINTES > AMPLIFICATEUR HIFI | AMPLIFICATEUR - ENCEINTES | AMPLIFICATEUR HIFI"
-
-
-
+# GenAiConfig for this vertical
+genAiConfig:
+  # If false, will bypass the generativ ia texts generation  
+  enabled: true
+  
 #####################################################################################################################################
 # I18N CONFIGURATION
 # Configure in a i18n way all the texts of a product, including the Url, the title, the description, the open graph metas, ....
@@ -75,7 +57,7 @@ i18n:
       # Text displaid as title for the vertical
       # TODO : Make verticalHomeTitle/ verticalHomeDescription templatable
       verticalHomeTitle: "Amplificateurs"
-      # Text displaid as title for the vertical
+      # Text displaid as jumbotron for the vertical
       # verticalHomeDescription: ""  
 
      # A mapping beetween custom page names behind this vertical and wiki pages
@@ -86,12 +68,7 @@ i18n:
 #          title: "OLED, QLED,LCD, ... Quelle technologie choisir ?"
 #          faIcon: "fa-star"
 
- 
-# GenAiConfig for this vertical
-genAiConfig:
-  # If false, will bypass the generativ ia texts generation  
-  enabled: false
-  
+
   
 ##############################################################################
 # Eco score configuration 
@@ -131,8 +108,48 @@ technicalFilters:
 
 
 
+
+# If set, all products that do not have this attribute will be marked as excluded
+#requiredAttributes:
+#  - ""
+
+##############################################################################
+# Product classification from categories
+##############################################################################
+# Will associate to this vertical if one of the following categorie is present for the product  
+
+matchingCategories:
+  all: []
+#  Darty Pro - Cashback:
+#  - "AUDIO, HIFI, CASQUE | ELEMENTS SEPARES HIFI"
+  rueducommerce.fr:
+  - "AMPLI HIFI"
+  darty.com:
+  - "AUDIO, HIFI, CASQUE / ELEMENTS SEPARES HIFI / AMPLIFICATEUR HI-FI | AUDIO, HIFI, CASQUE>ELEMENTS SEPARES HIFI>AMPLIFICATEUR HI-FI | ELEMENTS SEPARES HIFI | AMPLIFICATEUR HI-FI"
+  - "5 | AUDIO EQUIPMENT | AUDIO, HIFI, CASQUE | AUDIO, HIFI, CASQUE>ELEMENTS SEPARES HIFI>AMPLIFICATEUR HI-FI | ELEMENTS SEPARES HIFI | AUDIO, HIFI, CASQUE"
+  rakuten.com-csv.yml:
+  - "HIFI | AMPLIFICATEUR"
+  fnac.com:
+  - "SON & HIFI & LECTEURS MP3 - AMPLIFICATEUR | APPAREILS ELECTRONIQUES > AUDIO > COMPOSANTS AUDIO > AMPLIFICATEURS AUDIO"
+  cdiscount.com:
+  - "TV - VIDEO - SON | TV - VIDEO - SON > AMPLIFICATEUR - ENCEINTES > AMPLIFICATEUR HIFI | AMPLIFICATEUR - ENCEINTES | AMPLIFICATEUR HIFI"
+
+
+
+
 ####################################################################################
 # ATTRIBUTES CONFIGURATION
 ####################################################################################
-#requiredAttributes:
-#  - DIAGONALE_POUCES
+attributesConfig:
+   
+  ###################################################################################################################
+  # ATTRIBUTES MAPPINGS
+  # Those attributes will be availlable for all products if one is found.
+  # The line after configs: will be updated with the attribtes suggestion API, with commented attributes 
+  ##################################################################################################################      
+  configs: [] 
+  
+
+
+
+
