@@ -42,8 +42,14 @@ public class AttributeConfig {
 	 */
 	private String faIcon = "fa-wrench";
 
+	/**
+	 * The localised names
+	 */
 	private Localisable<String,String> name ;
 
+	/**
+	 * Indicates if it is numeric or terms filter. Will impact how the queries are made, and how the attribute is rendered in vertical search
+	 */
 	private AttributeType filteringType = AttributeType.TEXT;
 
 	/**
@@ -56,8 +62,7 @@ public class AttributeConfig {
 	/**
 	 * If true, this attribute will be added as a score, mapped through the numericMapping configuration attribute and an application of the scoring (min/max) mechanism
 	 */
-	// TODO(p2,design) : Rename to asScore
-	private boolean asRating = false;
+	private boolean asScore = false;
 
 
 	/**
@@ -70,61 +75,9 @@ public class AttributeConfig {
 	 */
 	private Boolean attributeValuesReverseOrder = false;
 
-
-
-
-
-
-
-
-
-	/** If true, this attribute will be used for aggregations searches **/
-	// private Boolean searchable = false;
-
 	/**
-	 * The position in the search page navigation zone
+	 * The attribute name that matches this attribute definition. key is datasourcename or "all" if applies on any.
 	 */
-	// private Integer searchPresentationOrder = Integer.MIN_VALUE;
-
-	/**
-	 * If set, this attribute will appear at the given attributeValuesOrdering in tabularised
-	 * search results
-	 **/
-	private Integer searchTableOrder;
-
-	/**
-	 * If set, erase the default attributes typed template to use the defined
-	 * one
-	 **/
-	private String searchTemplate;
-
-
-//
-//	/**
-//	 * If non null, present the "count by" stats for this attribute, Will appear at the index designated by the integer value
-//	 */
-//	private Integer statsOrder;
-//
-//	/**
-//	 * the Chart.js chart type
-//	 */
-//	private AttrChartType statsType = AttrChartType.bar;
-//
-//	/**
-//	 * If true, will be the default stats rendered. (Should so only have one
-//	 * attribute set to true)
-//	 */
-//	private boolean statsDefaultView = false;
-
-
-
-
-
-
-
-
-
-
 	private Map<String, Set<String>> synonyms = new HashMap<>();
 
 
@@ -143,25 +96,6 @@ public class AttributeConfig {
 	 * If set, fixed text mappings conversion
 	 */
 	private Map<String,String> mappings = new HashMap<>();
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -234,7 +168,7 @@ public class AttributeConfig {
 	 * @throws NoSuchFieldException
 	 */
 	public Double maxRating() throws ValidationException, NoSuchFieldException {
-		if (!asRating) {
+		if (!asScore) {
 			throw new ValidationException("Attribute is not configured to be translated as a rating");
 		}
 
@@ -253,7 +187,7 @@ public class AttributeConfig {
 	 * @throws NoSuchFieldException
 	 */
 	public Double minRating() throws ValidationException, NoSuchFieldException {
-		if (!asRating) {
+		if (!asScore) {
 			throw new ValidationException("Attribute is not configured to be translated as a rating");
 		}
 
@@ -331,18 +265,6 @@ public class AttributeConfig {
 
 
 
-	/**
-	 * If set, this attribute will appear at the given attributeValuesOrdering in tabularised
-	 * search results
-	 **/
-	public Integer getSearchTableOrder() {
-		return searchTableOrder;
-	}
-
-	public void setSearchTableOrder(final Integer searchTableOrder) {
-		this.searchTableOrder = searchTableOrder;
-	}
-
 	public String getFaIcon() {
 		return faIcon;
 	}
@@ -351,14 +273,6 @@ public class AttributeConfig {
 		this.faIcon = faIcon;
 	}
 
-
-	public String getSearchTemplate() {
-		return searchTemplate;
-	}
-
-	public void setSearchTemplate(final String searchTemplate) {
-		this.searchTemplate = searchTemplate;
-	}
 
 	public AttributeParserConfig getParser() {
 		return parser;
@@ -396,12 +310,12 @@ public class AttributeConfig {
 		this.numericMapping = numericMapping;
 	}
 
-	public boolean isAsRating() {
-		return asRating;
+	public boolean isAsScore() {
+		return asScore;
 	}
 
-	public void setAsRating(boolean asRating) {
-		this.asRating = asRating;
+	public void setAsScore(boolean asRating) {
+		this.asScore = asRating;
 	}
 
 

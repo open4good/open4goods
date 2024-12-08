@@ -3,14 +3,17 @@ package org.open4goods.api.services;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
+import java.text.DateFormat;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale.Category;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -25,13 +28,13 @@ import org.open4goods.api.config.yml.VerticalsGenerationConfig;
 import org.open4goods.api.model.AttributesStats;
 import org.open4goods.api.model.VerticalAttributesStats;
 import org.open4goods.api.model.VerticalCategoryMapping;
-import org.open4goods.commons.config.yml.ui.AttributesConfig;
 import org.open4goods.commons.config.yml.ui.VerticalConfig;
 import org.open4goods.commons.dao.ProductRepository;
 import org.open4goods.commons.helper.IdHelper;
 import org.open4goods.commons.model.product.Product;
 import org.open4goods.commons.services.EvaluationService;
 import org.open4goods.commons.services.GoogleTaxonomyService;
+import org.open4goods.commons.services.IcecatService;
 import org.open4goods.commons.services.SerialisationService;
 import org.open4goods.commons.services.VerticalsConfigService;
 import org.open4goods.commons.services.ai.AiService;
@@ -42,8 +45,6 @@ import org.springframework.core.io.support.ResourcePatternResolver;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 
-import io.micrometer.core.instrument.util.IOUtils;
-
 public class VerticalsGenerationService {
 	
 	private static final Logger LOGGER = LoggerFactory.getLogger(VerticalsGenerationService.class);
@@ -52,6 +53,7 @@ public class VerticalsGenerationService {
 	private ProductRepository repository;
 	private SerialisationService serialisationService;
 	private ResourcePatternResolver resourceResolver;
+	private IcecatService icecatService;
 
 	
 
@@ -60,7 +62,7 @@ public class VerticalsGenerationService {
 	private GoogleTaxonomyService googleTaxonomyService;
 	private EvaluationService evalService;
 	
-	public VerticalsGenerationService(VerticalsGenerationConfig config, ProductRepository repository, SerialisationService serialisationService, AiService aiService, GoogleTaxonomyService googleTaxonomyService, VerticalsConfigService verticalsConfigService, ResourcePatternResolver resourceResolver, EvaluationService evaluationService) {
+	public VerticalsGenerationService(VerticalsGenerationConfig config, ProductRepository repository, SerialisationService serialisationService, AiService aiService, GoogleTaxonomyService googleTaxonomyService, VerticalsConfigService verticalsConfigService, ResourcePatternResolver resourceResolver, EvaluationService evaluationService, IcecatService icecatService) {
 		super();
 		this.config = config;
 		this.repository = repository;
@@ -70,6 +72,7 @@ public class VerticalsGenerationService {
 		this.verticalConfigservice = verticalsConfigService;
 		this.resourceResolver = resourceResolver;
 		this.evalService = evaluationService;
+		this.icecatService = icecatService;
 	}
 	
 	public void fullFromDb() throws IOException {
@@ -419,9 +422,6 @@ Base your analyse on the following categories :
 				.toList();
 		
 		return generateCategoryMappingFragmentForGtin(items,vc.getGenerationExcludedFromCategoriesMatching());
-		
-		
-		
 	}
 	
 
@@ -437,7 +437,7 @@ Base your analyse on the following categories :
 	public String verticalTemplate(String id, String googleTaxonomyId, String matchingCategories,String urlPrefix, String h1Prefix, String verticalHomeUrl, String verticalHomeTitle)  {
 		String ret = "";
 		try {
-			Resource r = resourceResolver.getResource("classpath:/templates/vertical.yml");
+			Resource r = resourceResolver.getResource("classpath:/templates/vertical-definition.yml");
 			String content = r.getContentAsString(Charset.defaultCharset());
 			
 			Map<String, Object> context = new HashMap<String, Object>();
@@ -495,7 +495,7 @@ Base your analyse on the following categories :
 		LOGGER.warn("Will update categories in vertical files. Be sure to review before publishing on github !");
 		List<File> files = Arrays.asList(new File(verticalFolderPath).listFiles());
 		files.stream().filter(e->e.getName().endsWith("yml")).forEach(file -> {
-			updateVerticalFile(minOffers, file.getAbsolutePath());
+			updateVerticalFileWithCategories(minOffers, file.getAbsolutePath());
 		});
 		
 	}
@@ -505,7 +505,7 @@ Base your analyse on the following categories :
 	 * @param minOffers
 	 * @param fileName
 	 */
-	public void updateVerticalFile(Integer minOffers, String fileName) {
+	public void updateVerticalFileWithCategories(Integer minOffers, String fileName) {
 		File file = new File(fileName);
 		try {
 			VerticalConfig vc = verticalConfigservice.getConfigById(file.getName().substring(0, file.getName().length()-4));
@@ -526,6 +526,33 @@ Base your analyse on the following categories :
 		}
 	}
 	
+	
+	/**
+	 * Update a vertical file with predicted attributes  in the vertical yaml files
+	 * @param minOffers
+	 * @param fileName
+	 */
+	public void updateVerticalFileWithAttributes(String fileName) {
+		File file = new File(fileName);
+		try {
+			VerticalConfig vc = verticalConfigservice.getConfigById(file.getName().substring(0, file.getName().length()-4));
+			LOGGER.warn("Will update {} for attributes",file.getName());
+			String originalContent = FileUtils.readFileToString(file);
+			
+			int startIndex = originalContent.indexOf("  configs:");
+			int endIndex = startIndex + "  configs:".length();
+			
+			String newContent = originalContent.substring(0, startIndex);
+			newContent += "  configs:\n";
+			newContent += generateAttributesMapping(vc);
+			newContent += originalContent.substring(endIndex);
+			
+			FileUtils.writeStringToFile(file, newContent, Charset.defaultCharset());
+			
+		} catch (IOException e1) {
+			LOGGER.error("Error while updaing vertical file {}",file,e1);
+		}
+	}
 	
 	
 	/**
@@ -555,49 +582,143 @@ Base your analyse on the following categories :
 		
 		int totalItems = stats.getTotalItems();
 		
+		String ret = "";
 		for (Entry<String, AttributesStats> cat : stats.getStats().entrySet()) {
 			
 			if (!exclusions.contains(cat.getKey())) {
 				
-				LOGGER.info("An unknown attribute !");
-				
-//				AttributesConfig
+				// TODO(p2,conf) : limit from conf
+				if (Double.valueOf(cat.getValue().getHits() / Double.valueOf(totalItems) * 100.0).intValue() > 15) {
+					LOGGER.info("Generating template for attribute : {}", cat.getKey());
+					// TODO(conf,p2) : numberofsamples from conf
+					ret += attributeConfigTemplate(cat, totalItems,10);					
+				} else {
+					LOGGER.info("Skipping {}, not enough coverage", cat.getKey());
+				}
 			}
-			
 		}
-		return null;
+		return ret;
 		
 	}
 	
-	/**
-	 * 
-	 * @return an attribute definition, from template 
-	 */
-//	public String attributeConfigTemplate()  {
-//		String ret = "";
-//		try {
-//			Resource r = resourceResolver.getResource("classpath:/templates/attribute.yml");
-//			String content = r.getContentAsString(Charset.defaultCharset());
+//	/**
+//	 * 
+//	 * @return an attribute definition, from template 
+//	 */
+	public String attributeConfigTemplate(Entry<String, AttributesStats> category, Integer totalItems, Integer maxSample)  {
+		String ret = "";
+		try {
+			Resource r = resourceResolver.getResource("classpath:/templates/attribute-definition.yml");
+			String content = r.getContentAsString(Charset.defaultCharset());
+			
+			Map<String, Object> context = new HashMap<String, Object>();
+
+			context.put("name",category.getKey());
+			context.put("date", DateFormat.getInstance().format(new Date()));
+			context.put("coveragePercent",  Double.valueOf(category.getValue().getHits() / Double.valueOf(totalItems) * 100.0).intValue());
+			context.put("attrHits",category.getValue().getHits());
+			context.put("totalHits",totalItems);
+			
+			context.put("faicon","");
+			
+//			context.put("",);
+//			context.put("",);
+//			context.put("",);
+			
+			
+			Set<Integer> icecatIds = icecatService.resolveFeatureName(category.getKey());
+			String default_name = "!!COMPLETE_HERE!!";
+			String fr_name = "!!COMPLETE_HERE!!";
+			String icecatIdsTpl = StringUtils.join(icecatIds,"\n  -") ; 
+			
+			if (null != icecatIds && icecatIds.size() > 0) {
+				
+				if (icecatIds.size() == 1) {
+					default_name=icecatService.getFeatureName(icecatIds.stream().findAny().orElse(null), "default");
+					fr_name=icecatService.getFeatureName(icecatIds.stream().findAny().orElse(null), "fr");
+					context.put("icecatIds" , icecatIds.stream().findAny().orElse(null));				
+					
+				} else {
+					LOGGER.warn("Multiple possibilities to name attribute {} : {}", category.getKey(), icecatIds);
+					default_name=icecatService.getFeatureName(icecatIds.stream().findAny().orElse(null), "default");
+					fr_name=icecatService.getFeatureName(icecatIds.stream().findAny().orElse(null), "fr");
+					context.put("icecatIds","!!!!" + icecatIds.toString());				
+
+				}
+				
+			}
+			
+			// Adding icecatIds
+			if (null != icecatIds) {
+				
+			}
+			
+			context.put("default_name",default_name);
+			context.put("fr_name",fr_name);
+			
+			// Type
+			boolean onlyNumeric = category.getValue().getValues().keySet().stream().filter(e -> !NumberUtils.isNumber(e)).toList().size()==0;
+			if (onlyNumeric) {
+				context.put("type","NUMERIC");
+			} else {
+				context.put("type","STRING");
+			}
+			
+			StringBuilder attrsSamples = new StringBuilder();
+			
+			// Attribute sample values
+			category.getValue().getValues().entrySet().stream().limit(maxSample).forEach(val -> {
+				attrsSamples.append("#     - ").append(val.getKey()).append(" (").append(val.getValue()).append(" items)\n");
+			});
+			
+			if (category.getValue().getValues().size()>maxSample) {
+				attrsSamples.append("#     + ").append(category.getValue().getValues().size() - maxSample).append(" more attributes...\n");
+			}
+			
+			context.put("attributesSamples",attrsSamples.toString());
+			
+			
+			//			synonyms
+			// Attribute sample values
+			
+			Set<String> datasources = new HashSet<String>();
+			category.getValue().getDatasourceNames().forEach(val -> {
+				datasources.add(val);
+			});
+			
+			
+			StringBuilder mapping = new StringBuilder("");
+			
+			datasources.forEach(e->{
+				mapping.append("      "). append(e).append(":\n");
+				mapping.append("        - \""). append(category.getKey()).append("\"\n");
+				
+			});
+			context.put("synonyms",mapping.toString());
+
 //			
-//			Map<String, Object> context = new HashMap<String, Object>();
-//
-//			context.put("id",id );
-//			context.put("googleTaxonomyId", googleTaxonomyId);
-//			// Here is a tweak, we provide some sample products coma separated
-//			context.put("matchingCategories", generateCategoryMappingFragmentForGtin(Arrays.asList(matchingCategories.split(",")), null));
-//			context.put("urlPrefix", urlPrefix);
-//			context.put("h1Prefix", h1Prefix);
-//			context.put("verticalHomeUrl", verticalHomeUrl);
-//			context.put("verticalHomeTitle", verticalHomeTitle);
-//			
-//			ret = evalService.thymeleafEval(context, content);
-//		} catch (IOException e) {
-//			LOGGER.error("Error while generating vertical file",e);
-//		}
-//		
-//		return ret;
-//		
-//	}
+			ret = evalService.thymeleafEval(context, content);
+		} catch (IOException e) {
+			LOGGER.error("Error while generating vertical file",e);
+		}
+		
+		
+		String[] lines = ret.split("\n");
+		
+		
+		// Commenting
+		StringBuilder sb = new StringBuilder();
+		for (String line : lines) {
+			sb.append("\n");
+			if (!line.trim().startsWith("#")) {
+				sb.append("#");
+			} 
+			sb.append(line);
+		}
+		
+		return sb.toString();
+		
+	}
 //	
 	
 }

@@ -175,6 +175,7 @@ descriptionsAggregationConfig:
         
 globalTechnicalFilters:
   - "COLOR"
+  - "WEIGHT"
 
   
   
@@ -337,7 +338,7 @@ attributesConfig:
       default: "Energy class"
       fr: "Classe énergétique"
     filteringType: "TEXT"
-    asRating: true
+    asScore: true
 
     attributeValuesOrdering: "MAPPED"
     synonyms:
@@ -397,7 +398,7 @@ attributesConfig:
       default: "Repairability index"
       fr: "Indice de réparabilité"
     filteringType: "NUMERIC"
-    asRating: true
+    asScore: true
 
 
     attributeValuesOrdering: "MAPPED"
@@ -430,7 +431,7 @@ attributesConfig:
       default: "Warranty"
       fr: "Garantie"
     filteringType: "NUMERIC"
-    asRating: true
+    asScore: true
 
 
     attributeValuesOrdering: "MAPPED"
@@ -464,7 +465,7 @@ attributesConfig:
       default: "Year"
       fr: "Année de mise en service"
     filteringType: "NUMERIC"
-    asRating: false
+    asScore: false
     
     synonyms:
       all:
@@ -495,7 +496,7 @@ attributesConfig:
       default: "HDMI ports quantity"
       fr: "Quantité de ports HDMI"
     filteringType: "NUMERIC"
-    asRating: false
+    asScore: false
     
     synonyms:
       all:
@@ -525,15 +526,18 @@ attributesConfig:
       default: "Color"
       fr: "Couleur"
     filteringType: "TEXT"
-    asRating: false
+    asScore: false
     
     synonyms:
       all:
       - "COULEUR"
       - "COULEUR DU PRODUIT"
       - "CATÉGORIE DE COULEUR"
+      - "CATEGORIE DE COULEUR"
       - "COULEUR GÉNÉRIQUE"
+      - "COULEUR GENÉRIQUE"
       - "COLOUR"
+      - "COLOR"
       
     parser:
       normalize: true
@@ -559,7 +563,7 @@ attributesConfig:
       default: "Weight"
       fr: "Poids"
     filteringType: "NUMERIC"
-    asRating: false
+    asScore: false
     
     synonyms:
       all:
@@ -588,7 +592,7 @@ attributesConfig:
       default: "Energy consumption (/1000h)"
       fr: "Consommation d'énergie (/1000h)"
     filteringType: "NUMERIC"
-    asRating: false
+    asScore: false
     
     synonyms:
       all:

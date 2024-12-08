@@ -117,8 +117,8 @@ public class ApiConfig {
 
 	@Bean
 	VerticalsGenerationService verticalsGenerationService(ProductRepository pRepo, SerialisationService serialisationService, AiService aiService, GoogleTaxonomyService gTaxoService, VerticalsConfigService verticalsConfigService, ResourcePatternResolver resourceResolver,
-			EvaluationService evaluationService) throws SAXException {
-		return new VerticalsGenerationService(apiProperties.getVerticalsGenerationConfig(), pRepo, serialisationService, aiService, gTaxoService, verticalsConfigService, resourceResolver, evaluationService);
+			EvaluationService evaluationService, IcecatService icecatService) throws SAXException {
+		return new VerticalsGenerationService(apiProperties.getVerticalsGenerationConfig(), pRepo, serialisationService, aiService, gTaxoService, verticalsConfigService, resourceResolver, evaluationService, icecatService);
 	}
 
 	@Bean

@@ -124,6 +124,7 @@ public class ProductRepository {
 	 * @param v
 	 * @return
 	 */
+	// TODO : Could add datasourcename in a virtual "all", then apply the logic filter to batch get all categories matching....
 	public Stream<Product> getProductsMatchingCategoriesOrVerticalId(VerticalConfig v) {
 		Criteria c = new Criteria("datasourceCategories").in(v.getMatchingCategories())
 				.or(new Criteria("vertical").is(v.getId()));
