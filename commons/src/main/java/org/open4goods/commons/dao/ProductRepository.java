@@ -80,13 +80,10 @@ public class ProductRepository {
 
 	private static final int MAX_TITLE_ITEMS_TO_FETCH = 5;
 
-	public IndexCoordinates current_index = IndexCoordinates.of(MAIN_INDEX_NAME);
+	public static IndexCoordinates CURRENT_INDEX = IndexCoordinates.of(MAIN_INDEX_NAME);
 
 	private @Autowired ElasticsearchOperations elasticsearchOperations;
 
-	public ElasticsearchOperations getElasticsearchOperations() {
-		return elasticsearchOperations;
-	}
 
 	private @Autowired SerialisationService serialisationService;
 
@@ -117,31 +114,14 @@ public class ProductRepository {
 
 	}
 
-	/**
-	 * Return all products matching the vertical in the config or already having a
-	 * vertical defined
-	 * 
-	 * @param v
-	 * @return
-	 */
-	// TODO : Could add datasourcename in a virtual "all", then apply the logic filter to batch get all categories matching....
-	public Stream<Product> getProductsMatchingCategoriesOrVerticalId(VerticalConfig v) {
-		Criteria c = new Criteria("datasourceCategories").in(v.getMatchingCategories())
-				.or(new Criteria("vertical").is(v.getId()));
-		
-		final NativeQuery initialQuery = new NativeQueryBuilder().withQuery(new CriteriaQuery(c)).build();
-
-		return elasticsearchOperations.searchForStream(initialQuery, Product.class, current_index).stream()
-				.map(SearchHit::getContent);
-
-	}
+	
 
 	public Stream<Product> getProductsMatchingVerticalId(VerticalConfig v) {
 		Criteria c = new Criteria("vertical").is(v.getId());
 		
 		final NativeQuery initialQuery = new NativeQueryBuilder().withQuery(new CriteriaQuery(c)).build();
 
-		return elasticsearchOperations.searchForStream(initialQuery, Product.class, current_index).stream()
+		return elasticsearchOperations.searchForStream(initialQuery, Product.class, CURRENT_INDEX).stream()
 				.map(SearchHit::getContent);
 
 	}
@@ -155,7 +135,7 @@ public class ProductRepository {
 	    Query query = Query.findAll();
 	    // TODO : From conf, apply to other
 	    query.setPageable(PageRequest.of(0, 10000)); // Fetch larger batches
-	    return elasticsearchOperations.searchForStream(query, Product.class, current_index)
+	    return elasticsearchOperations.searchForStream(query, Product.class, CURRENT_INDEX)
 	    		.stream()
 	    		// TODO : Check CPU usage
 	    		.parallel()
@@ -187,7 +167,7 @@ public class ProductRepository {
 	            
 	    initialQuery.setPageable(PageRequest.of(0, 1000)); 
 
-	    return elasticsearchOperations.searchForStream(initialQuery, Product.class, current_index).stream()
+	    return elasticsearchOperations.searchForStream(initialQuery, Product.class, CURRENT_INDEX).stream()
 	            .map(SearchHit::getContent);
 	}
 	
@@ -200,7 +180,7 @@ public class ProductRepository {
 		final NativeQuery initialQuery = new NativeQueryBuilder()
 				.withQuery(new CriteriaQuery(c)).build();
 
-		return elasticsearchOperations.searchForStream(initialQuery, Product.class, current_index).stream()
+		return elasticsearchOperations.searchForStream(initialQuery, Product.class, CURRENT_INDEX).stream()
 				.map(SearchHit::getContent);
 	}
 
@@ -214,7 +194,7 @@ public class ProductRepository {
 		Criteria criteria = new Criteria("gtinInfos.upcType").in((Object[]) barcodeTypes);
 		CriteriaQuery query = new CriteriaQuery(criteria);
 		
-		return elasticsearchOperations.searchForStream(query, Product.class, current_index).stream()
+		return elasticsearchOperations.searchForStream(query, Product.class, CURRENT_INDEX).stream()
 				.map(SearchHit::getContent);
 	}
 	
@@ -226,7 +206,7 @@ public class ProductRepository {
 		final NativeQuery initialQuery = new NativeQueryBuilder().withQuery(new CriteriaQuery(c))
 				.withPageable(PageRequest.of(from, to)).build();
 
-		return elasticsearchOperations.search(initialQuery, Product.class, current_index).stream()
+		return elasticsearchOperations.search(initialQuery, Product.class, CURRENT_INDEX).stream()
 				.map(SearchHit::getContent);
 
 	}
@@ -256,7 +236,7 @@ public class ProductRepository {
 		
 		final NativeQuery initialQuery = new NativeQueryBuilder()
 				.withQuery(new CriteriaQuery(c)).build();
-		return elasticsearchOperations.searchForStream(initialQuery, Product.class, current_index).stream()
+		return elasticsearchOperations.searchForStream(initialQuery, Product.class, CURRENT_INDEX).stream()
 				.map(SearchHit::getContent);
 	}
 
@@ -280,7 +260,7 @@ public class ProductRepository {
 		
 		final NativeQuery initialQuery = new NativeQueryBuilder()
 				.withQuery(new CriteriaQuery(c)).build();
-		return elasticsearchOperations.searchForStream(initialQuery, Product.class, current_index).stream()
+		return elasticsearchOperations.searchForStream(initialQuery, Product.class, CURRENT_INDEX).stream()
 				.map(SearchHit::getContent);
 	}
 
@@ -309,7 +289,7 @@ public class ProductRepository {
 
 		NativeQuery initialQuery = initialQueryBuilder.build();
 		
-		return elasticsearchOperations.searchForStream(initialQuery, Product.class, current_index).stream().map(SearchHit::getContent);
+		return elasticsearchOperations.searchForStream(initialQuery, Product.class, CURRENT_INDEX).stream().map(SearchHit::getContent);
 	}
 	
 	
@@ -346,7 +326,7 @@ public class ProductRepository {
 
 		NativeQuery initialQuery = initialQueryBuilder.build();
 		
-		return elasticsearchOperations.searchForStream(initialQuery, Product.class, current_index).stream().map(SearchHit::getContent);
+		return elasticsearchOperations.searchForStream(initialQuery, Product.class, CURRENT_INDEX).stream().map(SearchHit::getContent);
 	}
 
 
@@ -361,7 +341,7 @@ public class ProductRepository {
 
 		NativeQuery initialQuery = initialQueryBuilder.build();
 
-		return elasticsearchOperations.searchForStream(initialQuery, Product.class, current_index).stream().map(SearchHit::getContent);
+		return elasticsearchOperations.searchForStream(initialQuery, Product.class, CURRENT_INDEX).stream().map(SearchHit::getContent);
 
 	}
 
@@ -489,7 +469,7 @@ public class ProductRepository {
 	            .build())
 	        .collect(Collectors.toList());
 
-	    elasticsearchOperations.bulkIndex(indexQueries, current_index);
+	    elasticsearchOperations.bulkIndex(indexQueries, CURRENT_INDEX);
 	}
 
 
@@ -498,7 +478,7 @@ public class ProductRepository {
 		logger.info("Indexing  product {}", data.gtin());
 
 //		executor.submit(() -> {
-			elasticsearchOperations.save(data, current_index);
+			elasticsearchOperations.save(data, CURRENT_INDEX);
 //		});
 
 //		executor.submit(() -> {
@@ -616,7 +596,7 @@ public class ProductRepository {
 			
 			NativeQuery query = new NativeQueryBuilder().withIds(missingIds).build();
 	
-			elasticsearchOperations.multiGet(query, Product.class,current_index )
+			elasticsearchOperations.multiGet(query, Product.class,CURRENT_INDEX )
 			.stream().map(MultiGetItem::getItem)
 			.filter(Objects::nonNull)
 			.forEach(e -> ret.put(e.gtin(), e));
@@ -644,26 +624,26 @@ public class ProductRepository {
 
 	@Cacheable(keyGenerator = CacheConstants.KEY_GENERATOR, cacheNames = CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME)
 	public Long countMainIndex() {
-		return elasticsearchOperations.count(Query.findAll(), current_index);
+		return elasticsearchOperations.count(Query.findAll(), CURRENT_INDEX);
 	}
 
 	@Cacheable(keyGenerator = CacheConstants.KEY_GENERATOR, cacheNames = CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME)
 	public Long countMainIndexHavingRecentPrices() {
 		CriteriaQuery query = new CriteriaQuery(getRecentPriceQuery());
-		return elasticsearchOperations.count(query, current_index);
+		return elasticsearchOperations.count(query, CURRENT_INDEX);
 	}
 
 	@Cacheable(keyGenerator = CacheConstants.KEY_GENERATOR, cacheNames = CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME)
 	public Long countMainIndexHavingRecentUpdate() {
 		CriteriaQuery query = new CriteriaQuery(getRecentPriceQuery());
-		return elasticsearchOperations.count(query, current_index);
+		return elasticsearchOperations.count(query, CURRENT_INDEX);
 	}
 
     @Cacheable(cacheNames = CacheConstants.ONE_DAY_LOCAL_CACHE_NAME)
     public long countItemsByBarcodeType(BarcodeType... barcodeTypes) {
         Criteria criteria = new Criteria("gtinInfos.upcType").in((Object[]) barcodeTypes);
         CriteriaQuery query = new CriteriaQuery(criteria);
-        return elasticsearchOperations.count(query, current_index);
+        return elasticsearchOperations.count(query, CURRENT_INDEX);
     }
 	
 	@Cacheable(keyGenerator = CacheConstants.KEY_GENERATOR, cacheNames = CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME)
@@ -711,13 +691,13 @@ public class ProductRepository {
 	            Map<String, Object> fieldsToUpdate = product.getChanges();
 	            return UpdateQuery.builder(String.valueOf(product.getProductId()))
 	                .withDocument(Document.from(fieldsToUpdate))
-	                .withIndex(current_index.getIndexName())
+	                .withIndex(CURRENT_INDEX.getIndexName())
 	                .build();
 	        })
 	        .collect(Collectors.toList());
 
 	    // Perform the bulk update
-	    elasticsearchOperations.bulkUpdate(updateQueries, current_index);
+	    elasticsearchOperations.bulkUpdate(updateQueries, CURRENT_INDEX);
 	}
 
 //	/**
@@ -801,10 +781,13 @@ public class ProductRepository {
 	}
 
 	public void delete(Product p) {
-		elasticsearchOperations.delete(p.gtin(), current_index);
+		elasticsearchOperations.delete(p.gtin(), CURRENT_INDEX);
 		
 	}
 
+	public ElasticsearchOperations getElasticsearchOperations() {
+		return elasticsearchOperations;
+	}
 
 
 
