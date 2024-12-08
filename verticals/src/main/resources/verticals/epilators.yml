@@ -1,6 +1,6 @@
 ####################################################################################################################################################################
 #
-# This is the configuration for the COFFEE-MAKERS-ESPRESSO-MACHINES vertical. 
+# This is the configuration for the EPILATORS vertical. 
 # Generated on the vertical.yml template file, using the VerticalsGenerationService.verticalTemplate()
 # @See open4goods/commons/src/main/java/org/open4goods/config/yml/ui/VerticalConfig.java for commented POJO definition
 ###################################################################################################################################################################
@@ -8,11 +8,11 @@
 # Unique identifier for this vertical. 
 # MUST contains only charracters
 # SHOULD be equal to the configuration file name, without the extension
-id: coffee-makers-espresso-machines
+id: epilators
 
 # The associated google taxonomyID. (Ex : FR - https://www.google.com/basepages/producttype/taxonomy-with-ids.fr-FR.txt)
 # SHOULD be set, it will then force this taxonomy for all products in this vertical
-googleTaxonomyId: 736
+googleTaxonomyId: 4510
 
 # Indicates if the vertical must be UI / sitemap / search rendered
 enabled: false
@@ -32,7 +32,7 @@ i18n:
       # The layout a product url will have. Ex : 81234555-tv-led-samsung-QL659P 2023
       url: 
         # We can add a custom prefix (with our conditional templating language if we want)
-        prefix: "machine-expresso"
+        prefix: "epilateur"
         # Then we add some attributes values with hyphens if present (ex : led-samsung-QL659P-2023)
         attrs:
           - BRAND
@@ -42,7 +42,7 @@ i18n:
       ##################################
       # The product h1 title. Constructed on the same basis than "url", but without the concatened hyphens
       h1Title:  
-        prefix: "Machine à expresso"
+        prefix: "|| Rasoir éléctrique | Epilateur ||"
         attrs:
           - BRAND
           - MODEL
@@ -53,10 +53,10 @@ i18n:
       ##################################
       
       # url for vertical (appened to baseUrl). No templating here 
-      verticalHomeUrl: "machines-expresso"
+      verticalHomeUrl: "epilateurs"
       # Text displaid as title for the vertical
       # TODO : Make verticalHomeTitle/ verticalHomeDescription templatable
-      verticalHomeTitle: "Machines expresso"
+      verticalHomeTitle: "Epilateurs"
       # Text displaid as jumbotron for the vertical
       # verticalHomeDescription: ""  
 
@@ -120,45 +120,14 @@ technicalFilters:
 
 matchingCategories:
   all: []
-#  Darty Pro - Cashback:
-#  - "PETIT ELECTROMENAGER CUISINE | CAFETIERE, EXPRESSO ET MACHINE A CAFE"
   Electrodepot - Guides et Comparateurs:
-  - "ELECTRO DEPOT | MACHINE A CAFE | MACHINE A DOSETTES, CAPSULES"
-#  - "ELECTRO DEPOT | MACHINE A CAFE | MACHINE A CAFE A GRAIN"
-#  Maisons du monde France:
-#  - "ART DE LA TABLE | VAISSELLE | THEIERES"
-#  rueducommerce.fr:
-#  - "EXPRESSO & CAFETIERE"
-#  ComptoirsRichard - Standard:
-#  - "- | BIALETTI"
-#  WelcomeOffice.com:
-#  - "PETIT ELECTROMENAGER"
+  - "ELECTRO DEPOT | EPILATION, RASAGE | EPILATEUR"
+  rueducommerce.fr:
+  - "EPILATEUR"
   darty.com:
-  - "PETIT ELECTROMENAGER CUISINE | PETIT ELECTROMENAGER CUISINE>CAFETIERE, EXPRESSO ET MACHINE A CAFE>EXPRESSO AVEC BROYEUR | CAFETIERE, EXPRESSO ET MACHINE A CAFE | PETIT ELECTROMENAGER CUISINE"
-#  - "PETIT ELECTROMENAGER CUISINE / CAFETIERE, EXPRESSO ET MACHINE A CAFE / CAFETIERE FILTRE | PETIT ELECTROMENAGER CUISINE>CAFETIERE, EXPRESSO ET MACHINE A CAFE>CAFETIERE FILTRE | CAFETIERE, EXPRESSO ET MACHINE A CAFE | CAFETIERE FILTRE"
-  - "PETIT ELECTROMENAGER CUISINE | PETIT ELECTROMENAGER CUISINE>CAFETIERE, EXPRESSO ET MACHINE A CAFE>EXPRESSO | CAFETIERE, EXPRESSO ET MACHINE A CAFE | PETIT ELECTROMENAGER CUISINE"
-#  rakuten.com-csv.yml:
-#  - "ELECTROMENAGER | PETIT-DEJEUNER"
-#  fnac.com:
-#  - "PETIT MENAGER & CUISINE CUISSON PEM"
+  - "BEAUTE, FORME ET SANTE / EPILATEUR / EPILATEUR ELECTRIQUE | BEAUTE, FORME ET SANTE>EPILATEUR>EPILATEUR ELECTRIQUE | EPILATEUR | EPILATEUR ELECTRIQUE"
   cdiscount.com:
-#  - "430 | KITCHEN | ART DE LA TABLE - ARTICLES CULINAIRES | ART DE LA TABLE - ARTICLES CULINAIRES > SERVICE PETIT DEJEUNER > CAFETIERE - THEIERE - CHOCOLATIERE | SERVICE PETIT DEJEUNER | CAFETIERE - THEIERE - CHOCOLATIERE"
-  - "ELECTROMENAGER | ELECTROMENAGER > PETIT DEJEUNER - CAFE > MACHINE A CAFE DOSETTE - CAPSULE | PETIT DEJEUNER - CAFE | MACHINE A CAFE DOSETTE - CAPSULE"
-  - "ELECTROMENAGER | ELECTROMENAGER > PETIT DEJEUNER - CAFE > MACHINE A CAFE EXPRESSO BROYEUR | PETIT DEJEUNER - CAFE | MACHINE A CAFE EXPRESSO BROYEUR"
-#  Joom FR:
-#  - "HOME APPLIANCES > KITCHEN APPLIANCES > COFFEE MAKERS & COFFEE MACHINES"
-  alternate FR:
-  - "390 | COFFEE MAKERS | MACHINE A CAFE > MACHINE A ESPRESSO"
-#  - "390 | COFFEE MAKERS | MACHINE A CAFE > MACHINE A CAFE AUTOMATIQUE"
-#  JPG - Cashback & Reward:
-#  - "PETIT ELECTROMENAGER | PETIT ELECTROMENAGER"
-  Castorama FR:
-#  - "CAFETIERE A GRAIN | MAGASIN CASTORAMA > CUISINE > PETIT ELECTROMENAGER > CAFETIERE > CAFETIERE A GRAIN | CUISINE | PETIT ELECTROMENAGER"
-#  - "CAFETIERE ITALIENNE | MAGASIN CASTORAMA > CUISINE > PETIT ELECTROMENAGER > CAFETIERE > CAFETIERE ITALIENNE | CUISINE | PETIT ELECTROMENAGER"
-  manomano.fr:
-#  - "ELECTROMENAGER | ELECTROMENAGER > PETIT ELECTROMENAGER > MACHINE A CAFE > MACHINE A CAFE A GRAIN | MACHINE A CAFE A GRAIN"
-  - "ELECTROMENAGER | ELECTROMENAGER > PETIT ELECTROMENAGER > MACHINE A CAFE > MACHINE A CAFE A CAPSULE | MACHINE A CAFE A CAPSULE"
-  - "ELECTROMENAGER | ELECTROMENAGER > PETIT ELECTROMENAGER > MACHINE A CAFE > CAFETIERE EXPRESSO | CAFETIERE EXPRESSO"
+  - "ELECTROMENAGER | ELECTROMENAGER > BEAUTE - BIEN-ETRE > EPILATEUR ELECTRIQUE | BEAUTE - BIEN-ETRE | EPILATEUR ELECTRIQUE"
 
 
 ####################################################################################
