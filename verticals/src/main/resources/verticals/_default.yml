@@ -24,8 +24,16 @@ generationExcludedFromAttributesMatching:
   - AVAILABILITY
   - BRAND_NAME
   - BRAND
+  - MARQUE
   - NOMFOURNISSEUR
   - THEME
+  - PRODUCT_NAME
+  - CATEGORIE
+  - DESCRIPTIF
+  - TITRE,
+  - PRICE
+  - SIZE_STOCK_STATUS
+  - PRICE_NOREBATE  
 
 # If product categories contains one of this token, this will be unmatched
 excludingTokensFromCategoriesMatching:
@@ -276,6 +284,7 @@ attributesConfig:
     - "REFURBISHED"
     - "ETAT_PRODUIT"
     - "DISPONIBILITE"
+    - "SIZE_STOCK_STATUS"
  
     # Noisy items   
     - "ADVERT_RAKUPON_AMOUNT"
@@ -310,7 +319,9 @@ attributesConfig:
     - "STOCK_STATUS"
     - "WEB_OFFER"
     - "BASE_PRICE"
+    - "PRICE_NOREBATE"
     - "PRIX"
+    - "PRICE"
     - "REVIEWS"
     - "SAVING"
     - "SAVINGS_PERCENT"
@@ -354,6 +365,7 @@ attributesConfig:
       - "CLASSE ECO"
       - "CLASSE ENERGÉTIQUE"
       - "CLASSE D'EFFICACITÉ ÉNERGÉTIQUE"
+      - "CLASSE D'EFFICACITE ENERGETIQUE"
       - "CLASSE D'EFFICACITÉ ÉNERGÉTIQUE (HDR)"
       - "ENERGY EFFICIENCY CLASS"
       - "CLASSE_ENERGY"
@@ -477,7 +489,10 @@ attributesConfig:
       all:
       - "ANNÉE DE LANCEMENT"
       - "ANNÉE DE SORTIE"
+      - "ANNEE DE SORTIE"                
       - "ANNÉE DE MODÈLE"
+      - "ANNEE DE LANCEMENT"
+      - "YEAR"
       
     parser:
       normalize: true

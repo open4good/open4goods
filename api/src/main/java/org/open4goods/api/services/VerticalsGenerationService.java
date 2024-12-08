@@ -318,7 +318,7 @@ public class VerticalsGenerationService {
 		VerticalAttributesStats ret = new VerticalAttributesStats() ;
 		if (null != vc) {
 			LOGGER.info("Attributes stats for vertical {} is running",vertical);
-			repository.exportVerticalWithValidDate(vc, false).forEach(p -> {
+			repository.exportVerticalWithValidDate(vc, true).forEach(p -> {
 				ret.process(p.getAttributes().getAll());
 			});
 	
@@ -531,8 +531,9 @@ Base your analyse on the following categories :
 	 * Update a vertical file with predicted attributes  in the vertical yaml files
 	 * @param minOffers
 	 * @param fileName
+	 * @param minCoverage 
 	 */
-	public void updateVerticalFileWithAttributes(String fileName) {
+	public void updateVerticalFileWithAttributes(String fileName, int minCoverage) {
 		File file = new File(fileName);
 		try {
 			VerticalConfig vc = verticalConfigservice.getConfigById(file.getName().substring(0, file.getName().length()-4));
@@ -544,7 +545,7 @@ Base your analyse on the following categories :
 			
 			String newContent = originalContent.substring(0, startIndex);
 			newContent += "  configs:\n";
-			newContent += generateAttributesMapping(vc);
+			newContent += generateAttributesMapping(vc, minCoverage);
 			newContent += originalContent.substring(endIndex);
 			
 			FileUtils.writeStringToFile(file, newContent, Charset.defaultCharset());
@@ -557,10 +558,11 @@ Base your analyse on the following categories :
 	
 	/**
 	 * Generate the advised attributes for a vertical
+	 * @param minCoverage 
 	 * @param vertical
 	 * @return
 	 */
-	public String generateAttributesMapping(VerticalConfig verticalConfig) {
+	public String generateAttributesMapping(VerticalConfig verticalConfig, int minCoverage) {
 		LOGGER.info("Generating attributes mapping for {}", verticalConfig);
 		VerticalAttributesStats stats = attributesStats(verticalConfig.getId());
 		
@@ -587,8 +589,8 @@ Base your analyse on the following categories :
 			
 			if (!exclusions.contains(cat.getKey())) {
 				
-				// TODO(p2,conf) : limit from conf
-				if (Double.valueOf(cat.getValue().getHits() / Double.valueOf(totalItems) * 100.0).intValue() > 15) {
+
+				if (Double.valueOf(cat.getValue().getHits() / Double.valueOf(totalItems) * 100.0).intValue() > minCoverage) {
 					LOGGER.info("Generating template for attribute : {}", cat.getKey());
 					// TODO(conf,p2) : numberofsamples from conf
 					ret += attributeConfigTemplate(cat, totalItems,10);					
