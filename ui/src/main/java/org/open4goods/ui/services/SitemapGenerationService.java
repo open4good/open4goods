@@ -198,7 +198,9 @@ public class SitemapGenerationService {
 	private void addProductsPages( String baseUrl, String language) {	
 		SitemapGenerator sitemap = SitemapGenerator.of(baseUrl);
 		
-		for (VerticalConfig vertical : verticalsConfigService.getConfigsWithoutDefault(true)) {
+		for (VerticalConfig vertical : verticalsConfigService.getConfigsWithoutDefault(true)
+				// Filtering on enabled verticals
+				.stream().filter(e->e.isEnabled()).toList() ) {
 			
 			// 
 			
