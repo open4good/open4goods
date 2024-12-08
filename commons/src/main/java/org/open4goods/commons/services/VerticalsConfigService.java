@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -14,16 +15,23 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Stream;
 
 import org.open4goods.commons.config.yml.ui.VerticalConfig;
 import org.open4goods.commons.dao.ProductRepository;
 import org.open4goods.commons.model.constants.CacheConstants;
 import org.open4goods.commons.model.dto.ExpandedTaxonomy;
+import org.open4goods.commons.model.product.Product;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.ResourcePatternResolver;
+import org.springframework.data.elasticsearch.client.elc.NativeQuery;
+import org.springframework.data.elasticsearch.client.elc.NativeQueryBuilder;
+import org.springframework.data.elasticsearch.core.SearchHit;
+import org.springframework.data.elasticsearch.core.query.Criteria;
+import org.springframework.data.elasticsearch.core.query.CriteriaQuery;
 
 import com.fasterxml.jackson.databind.ObjectReader;
 
@@ -419,4 +427,43 @@ public class VerticalsConfigService {
 		}
 	}
 
+	
+	/**
+	 * Return all products matching the vertical in the config or already having a
+	 * vertical defined
+	 * 
+	 * @param v
+	 * @return
+	 */
+	// TODO : Could add datasourcename in a virtual "all", then apply the logic filter to batch get all categories matching....
+	public Stream<Product> getProductsMatchingCategoriesOrVerticalId(VerticalConfig v) {
+		
+		// We match larger, on all matching categories cause those fields are not indexed
+		Set<String> datasources = new HashSet<String>();
+		v.getMatchingCategories().values().forEach(cat -> {
+			cat.forEach(elem -> {
+				datasources.add(elem);
+			});
+		});
+		
+		Criteria c = new Criteria("datasourceCategories").in(datasources)
+				.or(new Criteria("vertical").is(v.getId()));
+		
+		final NativeQuery initialQuery = new NativeQueryBuilder().withQuery(new CriteriaQuery(c)).build();
+
+		return productRepository.getElasticsearchOperations()
+				.searchForStream(initialQuery, Product.class, ProductRepository.CURRENT_INDEX).stream()
+				.map(SearchHit::getContent)
+				// We have all categories matching, refine here to match the standard agg behaviour
+				.filter(e -> {
+					VerticalConfig cat = getVerticalForCategories(e.getCategoriesByDatasources());
+					if (null != cat && cat.getId().equals(v.getId())) {
+						return true;
+					}
+					return false;
+				});
+				
+
+	}
+	
 }
