@@ -87,8 +87,6 @@ i18n:
 # will also be availlable in search for this vertical (must be an attribute or a score)
 ##############################################################################
 
-
-
 ecoFilters:
 #    - "REPAIRABILITY_INDEX" 
 #    - "CLASSE_ENERGY"   
@@ -103,9 +101,6 @@ technicalFilters:
 #  - "PARTS_AVAILLABILITY"
 #  - "DATA-QUALITY"  
 #  - "BRAND-SUSTAINABILITY"
-
-
-
 
 
 # If set, all products that do not have this attribute will be marked as excluded
