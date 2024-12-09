@@ -41,8 +41,9 @@ public class BrandScoreService {
 	 * @param brand
 	 * @param datasourceProperties
 	 * @param scoreValue
+	 * @param url 
 	 */
-	public void addBrandScore(String brand, DataSourceProperties datasourceProperties, String scoreValue) {
+	public void addBrandScore(String brand, DataSourceProperties datasourceProperties, String scoreValue, String url) {
 
 		if (StringUtils.isEmpty(brand) || StringUtils.isEmpty(scoreValue)) {
 			logger.info("Cannot proceed empty brand or score, skipping");
@@ -58,7 +59,7 @@ public class BrandScoreService {
 
 		logger.info("Adding brand score {}:{} for brand {}", datasourceProperties.getName(), scoreValue, brand);
 
-		BrandScore brandScore = new BrandScore(datasourceProperties, brand, scoreValue);
+		BrandScore brandScore = new BrandScore(datasourceProperties, brand, scoreValue, url);
 		
 
 		

@@ -40,14 +40,18 @@ public class BrandScore {
 	
 	@Field(index = true, store = false, type = FieldType.Keyword)
 	private Set<String> tags = new HashSet<>();
+
+	@Field(index = true, store = false, type = FieldType.Keyword)
+	private String url;
 	
-	public BrandScore(DataSourceProperties datasourceProperties, String brandName, String scoreValue) {
+	public BrandScore(DataSourceProperties datasourceProperties, String brandName, String scoreValue, String url) {
 		super();
 		this.datasourceName = datasourceProperties.getName();
 		this.brandName = brandName.toLowerCase().trim();
 		this.id=id(datasourceProperties.getName(), brandName);
 		this.lastUpdate = System.currentTimeMillis();
 		this.scoreValue = scoreValue;
+		this.url = url;
 		
 		try {
 			Double norm;
@@ -145,6 +149,16 @@ public class BrandScore {
 
 	public void setNormalized(Double normalized) {
 		this.normalized = normalized;
+	}
+
+
+	public String getUrl() {
+		return url;
+	}
+
+
+	public void setUrl(String url) {
+		this.url = url;
 	}
 	
 	

@@ -129,7 +129,7 @@ public class DataFragmentCompletionService {
 			Attribute score = o.getAttributes().stream().filter(e-> e.getName().equals("SCORE")).findFirst().orElse(null);
 			if (null != score) {
 				LOGGER.info("Found a brand score for brand {} : {}",o.brand(),score.getRawValue());
-				brandService.addBrandScore(o.brand(), datasourceProperties, score.getRawValue());								
+				brandService.addBrandScore(o.brand(), datasourceProperties, score.getRawValue(), o.affiliatedUrlIfPossible());								
 			} else {
 				LOGGER.warn("Empty brand score found for brand {} ",o.brand());
 			}
