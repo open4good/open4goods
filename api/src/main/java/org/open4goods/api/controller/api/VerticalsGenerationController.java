@@ -187,5 +187,6 @@ public class VerticalsGenerationController {
  		  verticalsGenService.updateVerticalFileWithAttributes("/home/goulven/git/open4goods/verticals/src/main/resources/verticals/"+vertical+".yml", minCoverage);
 		
 	}
+
 	
 }

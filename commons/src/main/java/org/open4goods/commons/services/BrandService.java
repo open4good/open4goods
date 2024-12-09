@@ -5,6 +5,7 @@ import java.net.URL;
 import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -27,15 +28,15 @@ public class BrandService {
 	private  final Logger logger ;
 
 	private RemoteFileCachingService remoteFileCachingService;
-	private SerialisationService serialisatonService;
-
+	// The map that maintains stats on brands for the unresolvable companies
+	private Map<String,Long> missCounter = new ConcurrentHashMap<String, Long>();
+	
 
 	private Map<String, Brand> brandsByName = new HashMap<>();
 	
 	public BrandService( RemoteFileCachingService remoteFileCachingService, String logsFolder, SerialisationService serialisatonService) throws Exception {
 		this.remoteFileCachingService = remoteFileCachingService;
 		this.logger = 	GenericFileLogger.initLogger("brand-service", Level.INFO, logsFolder);
-		this.serialisatonService = serialisatonService;
 		
 		// TODO : Load brands from github
 		
@@ -104,8 +105,13 @@ public class BrandService {
 	 * @param brand
 	 */
 	public void incrementUnknown(String brand) {
-		// TODO Auto-generated method stub
-		
+		Long counter = missCounter.get(brand);
+		if (null == counter) {
+			counter = 1L;
+		} else {
+			counter ++;
+		}
+		missCounter.put(brand, counter);
 	}
 
 	public boolean hasLogo(String upperCase) {
@@ -118,6 +124,11 @@ public class BrandService {
 		return null;
 	}
 
+	public Map<String, Long> getMissCounter() {
+		return missCounter;
+	}
+
+	
 
 
 }
