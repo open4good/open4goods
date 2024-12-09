@@ -28,6 +28,8 @@ public class SustainalyticsAggregationService extends AbstractScoreAggregationSe
 
 	public static final String RISK_LEVEL = "risk-level";
 
+	public static final String COMPANY_URL = "url";
+
 	private BrandService brandService;
 	
 	private BrandScoreService brandScoreService;
@@ -74,7 +76,9 @@ public class SustainalyticsAggregationService extends AbstractScoreAggregationSe
 			Map<String, String> metadatas = new HashMap<>();
 			metadatas.put(RATING, brandResult.getScoreValue());
 			metadatas.put(RISK_LEVEL, getRiskLevel(brandResult));
+			metadatas.put(COMPANY_URL, brandResult.getUrl());
 			
+			s.setMetadatas(metadatas);
 			// Saving in product
 			data.getScores().put(s.getName(),s);
 		} catch (Exception e) {
