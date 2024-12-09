@@ -135,12 +135,6 @@ public class VerticalConfig{
 	private CommentsAggregationConfig commentsConfig = new CommentsAggregationConfig();
 
 	/**
-	 * The company (sustainalytics form) that operates the brand
-	 */
-	@JsonMerge
-	private Map<String, String> brandsCompanyMapping = new HashMap<>();
-	
-	/**
 	 * if true, will override generated url name, even if already geenrated
 	 */
 	private boolean forceNameGeneration = false;
@@ -364,24 +358,6 @@ public class VerticalConfig{
 		return i18n.getOrDefault(siteLocale, i18n.get("default")).getVerticalHomeUrl();
 	}
 
-	/**
-	 * Return the company for a given brand, if defined in vertical configuration
-	 * @param brand
-	 * @return
-	 */
-	public String resolveCompany(String brand) {
-		String resolved = brandsCompanyMapping.get(brand.toUpperCase());
-		
-		if (null == resolved) {
-			return brand;
-		} else {
-			return resolved.toLowerCase();
-		}
-		
-		
-	}
-
-	
 	/**
 	 * Retrieves the locale for the site through the request.
 	 *
@@ -676,20 +652,6 @@ public class VerticalConfig{
 	public void setGenAiConfig(GenAiConfig genAiConfig) {
 		this.genAiConfig = genAiConfig;
 	}
-
-
-
-	public Map<String, String> getBrandsCompanyMapping() {
-		return brandsCompanyMapping;
-	}
-
-
-
-	public void setBrandsCompanyMapping(Map<String, String> brandsCompanyMapping) {
-		this.brandsCompanyMapping = brandsCompanyMapping;
-	}
-
-
 
 	public List<FeatureGroup> getFeatureGroups() {
 		return featureGroups;

@@ -1,53 +1,38 @@
 package org.open4goods.commons.model.data;
 
-import java.util.HashSet;
-import java.util.Set;
-
 public class Brand {
 
-	private String name;
+	private String brandName;
 
-	private Set<String> aka = new HashSet<String>();
-
-	private String logo;;
-
+	private String companyName;
 	
 	@Override
 	public String toString() {
-		return name;
+		return brandName + companyName != null ? ("( " + companyName+")") : "";
 	}
 	
 	public Brand(String name) {
-		this.name = name;
+		this.brandName = name;
 	}
 	
 	public Brand() {
 		super();
 	}
 	
-	public String getName() {
-		return name;
+	public String getBrandName() {
+		return brandName;
 	}
 
-	public void setName(String name) {
-		this.name = name;
+	public void setBrandName(String name) {
+		this.brandName = name;
 	}
 
-	public Set<String> getAka() {
-		return aka;
+	public String getCompanyName() {
+		return companyName;
 	}
 
-	public void setAka(Set<String> aka) {
-		this.aka = aka;
-	}
-
-
-	public String getLogo() {
-		return logo;
-	}
-
-	public void setLogo(String logo) {
-		this.logo = logo;
+	public void setCompanyName(String companyName) {
+		this.companyName = companyName;
 	}
 
 	

@@ -27,6 +27,7 @@ import org.open4goods.commons.helper.GenericFileLogger;
 import org.open4goods.commons.model.data.DataFragment;
 import org.open4goods.commons.model.product.Product;
 import org.open4goods.commons.services.BarcodeValidationService;
+import org.open4goods.commons.services.BrandScoreService;
 import org.open4goods.commons.services.BrandService;
 import org.open4goods.commons.services.DataSourceConfigService;
 import org.open4goods.commons.services.EvaluationService;
@@ -73,6 +74,7 @@ public class AggregationFacadeService {
 	private BarcodeValidationService barcodeValidationService;
 
 	private BrandService brandService;
+	private BrandScoreService brandScoreService;
 	
 	private GoogleTaxonomyService taxonomyService;
 
@@ -94,7 +96,8 @@ public class AggregationFacadeService {
 			GoogleTaxonomyService taxonomyService,
 			BlablaService blablaService,
 			IcecatService icecatFeatureService,
-			SerialisationService serialisationService
+			SerialisationService serialisationService, 
+			BrandScoreService brandScoreService
 			) {
 		super();
 		this.evaluationService = evaluationService;
@@ -112,6 +115,7 @@ public class AggregationFacadeService {
 		this.icecatFeatureService = icecatFeatureService;
 		this.realtimeAggregator = getStandardAggregator("realtime");
 		this.serialisationService = serialisationService;
+		this.brandScoreService = brandScoreService;
 	
 	}
 
@@ -395,7 +399,7 @@ public class AggregationFacadeService {
 		
 		services.add(new CleanScoreAggregationService(logger));
 		services.add(new Attribute2ScoreAggregationService(logger));
-		services.add(new Brand2ScoreAggregationService( logger, brandService, verticalConfigService));
+		services.add(new Brand2ScoreAggregationService( logger, brandService, verticalConfigService,brandScoreService));
 		services.add(new DataCompletion2ScoreAggregationService(logger));
 		services.add(new EcoScoreAggregationService( logger));
 

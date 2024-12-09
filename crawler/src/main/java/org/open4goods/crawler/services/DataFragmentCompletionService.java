@@ -16,6 +16,7 @@ import org.open4goods.commons.model.attribute.Attribute;
 import org.open4goods.commons.model.constants.ReferentielKey;
 import org.open4goods.commons.model.data.DataFragment;
 import org.open4goods.commons.model.data.ProviderSupportType;
+import org.open4goods.commons.services.BrandScoreService;
 import org.open4goods.commons.services.BrandService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,10 +31,10 @@ public class DataFragmentCompletionService {
 
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(DataFragmentCompletionService.class);
-	private BrandService brandService;
+	private BrandScoreService brandService;
 
 
-	public DataFragmentCompletionService(BrandService brandService) {
+	public DataFragmentCompletionService(BrandScoreService brandService) {
 		this.brandService = brandService;
 	}
 
