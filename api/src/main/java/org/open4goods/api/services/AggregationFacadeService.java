@@ -10,10 +10,10 @@ import org.open4goods.api.services.aggregation.AbstractAggregationService;
 import org.open4goods.api.services.aggregation.aggregator.ScoringBatchedAggregator;
 import org.open4goods.api.services.aggregation.aggregator.StandardAggregator;
 import org.open4goods.api.services.aggregation.services.batch.scores.Attribute2ScoreAggregationService;
-import org.open4goods.api.services.aggregation.services.batch.scores.Brand2ScoreAggregationService;
 import org.open4goods.api.services.aggregation.services.batch.scores.CleanScoreAggregationService;
 import org.open4goods.api.services.aggregation.services.batch.scores.DataCompletion2ScoreAggregationService;
 import org.open4goods.api.services.aggregation.services.batch.scores.EcoScoreAggregationService;
+import org.open4goods.api.services.aggregation.services.batch.scores.SustainalyticsAggregationService;
 import org.open4goods.api.services.aggregation.services.realtime.AttributeRealtimeAggregationService;
 import org.open4goods.api.services.aggregation.services.realtime.IdentityAggregationService;
 import org.open4goods.api.services.aggregation.services.realtime.MediaAggregationService;
@@ -399,7 +399,7 @@ public class AggregationFacadeService {
 		
 		services.add(new CleanScoreAggregationService(logger));
 		services.add(new Attribute2ScoreAggregationService(logger));
-		services.add(new Brand2ScoreAggregationService( logger, brandService, verticalConfigService,brandScoreService));
+		services.add(new SustainalyticsAggregationService( logger, brandService, verticalConfigService,brandScoreService));
 		services.add(new DataCompletion2ScoreAggregationService(logger));
 		services.add(new EcoScoreAggregationService( logger));
 
