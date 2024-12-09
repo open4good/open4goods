@@ -239,6 +239,10 @@
         "scores": {
             "dynamic": "true",
             "properties": {
+                "metadatas": {
+                    "type": "object",
+                    "enabled": false
+                },
                 "absolute": {
                     "type": "object",
                     "enabled": false
