@@ -21,7 +21,7 @@ enabled: true
 # GenAiConfig for this vertical
 genAiConfig:
   # If false, will bypass the generativ ia texts generation  
-  enabled: true
+  enabled: false
 
 #####################################################################################################################################
 # I18N CONFIGURATION
