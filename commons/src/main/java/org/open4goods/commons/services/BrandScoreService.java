@@ -96,9 +96,7 @@ public class BrandScoreService {
 	 * @return
 	 */
 	@Cacheable(keyGenerator = CacheConstants.KEY_GENERATOR, cacheNames = CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME)
-	public Double getBrandScore(String brand, String datasourceName) {
-		try {
-			Double score = null;
+	public BrandScore getBrandScore(String brand, String datasourceName) {
 			
 			brand = brand.trim().toLowerCase();
 			
@@ -109,46 +107,14 @@ public class BrandScoreService {
 			String id = BrandScore.id(datasourceName, brand);
 			
 			BrandScore result = brandRepository.findById(id).orElse(null);		
-			if (null != result) {
-				logger.info("Score found with a direct resolution for brand {} and datasource {}", brand, datasourceName);
-				score = Double.valueOf(result.getNormalized());
-				return score;
-			}
 			
-			
-			String bName =  URLEncoder.encode(brand);
-			if (null == score) {
-				// Trying a prefix resolution
-				logger.info("Trying a prefix resolution for brand {} and datasource {}", brand, datasourceName);
-				results = brandRepository.findByDatasourceNameAndBrandNameStartingWith(datasourceName, bName );
-				score = handleExtractionResult(brand, datasourceName, score, results);
-				if (null != score) {				
-					logger.info("Score found with a prefix resolution for brand {} and datasource {}", brand, datasourceName);
-				}
-			} 
-			
-			if (null == score) {
-				// Trying a contains resolution
-				logger.info("Trying a contains resolution for brand {} and datasource {}", brand, datasourceName);
-				results = brandRepository.findByDatasourceNameAndBrandNameLike(datasourceName, bName);
-				score = handleExtractionResult(brand, datasourceName, score, results);
-				if (null != score) {
-					logger.info("Score found with a contains resolution for brand {} and datasource {}", brand,	datasourceName);
-				}
-			}
-			
-			if (null == score) {
+			if (null == result) {
 				//TODO : Log to vertical reporter
 				logger.warn("No score found for brand {} and datasource {}, was {} possibilities", brand, datasourceName,results.size());
 			} else {
-				logger.info("Score found for brand {} and datasource {} : {}", brand, datasourceName, score);
+				logger.info("Score found for brand {} and datasource {} : {}", brand, datasourceName, result.getNormalized());
 			}
-			return score;
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-			return null;
-		}
+			return result;
 	}
 
 	private Double handleExtractionResult(String brand, String datasourceName, Double score, List<BrandScore> results) {

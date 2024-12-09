@@ -49,7 +49,6 @@ public class Brand2ScoreAggregationService extends AbstractScoreAggregationServi
 		}
 		
 		try {
-			VerticalConfig vertical = verticalsConfigService.getConfigByIdOrDefault(data.getVertical());
 			
 			Brand brand = brandService.resolve(data.brand());
 			if (null == brand || StringUtils.isEmpty(brand.getCompanyName())) {
@@ -58,7 +57,7 @@ public class Brand2ScoreAggregationService extends AbstractScoreAggregationServi
 				return;
 			}
 			
-			Double score = brandScoreService.getBrandScore(brand.getCompanyName(),"sustainalytics.com");
+			Double score = brandScoreService.getBrandScore(brand.getCompanyName(),"sustainalytics.com").getNormalized();
 			if (null == score) {
 				dedicatedLogger.error("No score found for {} - {}",data.brand(), brand.getCompanyName());
 				return;
