@@ -230,22 +230,26 @@ public class IcecatService {
 			 List<IcecatSupplier> suppliers = xmlMapper.readValue(icecatFile, IcecatModel.class).getResponse().getSuppliersList().getSuppliers();
 			
 				for (IcecatSupplier supplier : suppliers) {
-					Brand brand = brandService.getBrandByName(supplier.getName());
+					Brand brand = brandService.resolve(supplier.getName());
 					if (null == brand) {
 						// The icecat brand has not been defined by YAML config, we add it
 						brand = new Brand();
-						brand.setName(IdHelper.brandName(supplier.getName()));
-						brand.setLogo(supplier.getLogoHighPic());
+						brand.setBrandName(IdHelper.brandName(supplier.getName()));
+						
+						//TODO(p1) : handle brand logos
+//						brand.setLogo(supplier.getLogoHighPic());
 //						brand.setAka(supplier.getNames().stream().colect(Collectors.toSet()));
 					} else {
-						if (null == brand.getLogo()) {
-							// We update the logo if none was defined
-							brand.setLogo(supplier.getLogoHighPic());
-						}						
+						//TODO(p1) : handle brand logos
+//						if (null == brand.getLogo()) {
+//							// We update the logo if none was defined
+//							brand.setLogo(supplier.getLogoHighPic());
+//						}						
 					}
 					
 					// Updating the brand
-					brandService.saveBrand(brand);
+					//TODO(p1) : handle brand logos
+//					brandService.saveBrand(brand);
 				}
 			
 			

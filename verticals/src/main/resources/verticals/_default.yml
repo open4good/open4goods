@@ -151,19 +151,6 @@ resourcesConfig:
 
 
 ####################################################################################
-# SITEMAP CONFIG
-# Possible values are : 
-#     > NONE : No products from this vertical included in the sitemap
-#     > ALL : All products from this vertical included in the sitemap
-#     > DATA_QUALITY : All products having a minimum data quality are included in the sitemap
-#     > TEXTIALIZED : Only products having texts generated  are included in the sitemap
-#
-# TODO : To be implemented
-#
-####################################################################################    
-siteMapStrategy : NONE
-
-####################################################################################
 # BARCODE CONFIG
 ####################################################################################    
 
@@ -190,37 +177,18 @@ descriptionsAggregationConfig:
 globalTechnicalFilters:
   - "COLOR"
   - "WEIGHT"
-
-  
-  
-  
-  
-  
-  
       
 ####################################################################################
 # Brands configuration
 ####################################################################################      
 brandsExclusion:
   - NON COMMUNIQUE    
-  - GENERIQUE  
-  
-#brandsMappings:
-#  RR : RR  
+  - GENERIQUE
+  - INCONNU
 
+brandsAlias:
+  "LG ELECTRONICS" : LG 
 
-##############################################################################
-# We cannot always identify manually what comppany operates a brand, and there is often 
-# confilicts or multiple possibilities that need to be manually adressed. (eg. samsung a lot of activities / brand through different companies)
-#
-##############################################################################
-
-brandsCompanyMapping:
-  SAMSUNG: "Samsung Electronics Co., Ltd."
-  TCL: "TCL Electronics Holdings Ltd."
-  LG: "LG Electronics, Inc."
-  PHILIPS: "Koninklijke Philips NV"  
-  
         
 ####################################################################################
 # 						ATTRIBUTES CONFIGURATION
@@ -320,6 +288,7 @@ attributesConfig:
     - "WEB_OFFER"
     - "BASE_PRICE"
     - "PRICE_NOREBATE"
+    - "PRODUCT_PRICE_OLD"
     - "PRIX"
     - "PRICE"
     - "REVIEWS"
@@ -329,6 +298,8 @@ attributesConfig:
     - "TOP100"
     - "ADVERT_RAKUPON_DISCOUNT"
     - "ADVERT_RAKUPON_END"
+    - "BRAND_ID"
+    - "LANGUAGE"
 
   # Attributes having the following value will be classified as product features
   featuredValues:

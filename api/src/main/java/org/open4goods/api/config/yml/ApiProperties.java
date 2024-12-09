@@ -6,7 +6,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.lang3.ArrayUtils;
-import org.open4goods.commons.config.BrandsConfiguration;
 import org.open4goods.commons.config.yml.DevModeConfiguration;
 import org.open4goods.commons.config.yml.GithubConfiguration;
 import org.open4goods.commons.config.yml.IcecatConfiguration;
@@ -145,11 +144,6 @@ public class ApiProperties {
 	 */
 	private ImageGenerationConfig imageGenerationConfig = new ImageGenerationConfig();
 	
-	/**
-	 * Configuration for the brand service
-	 */
-
-	private BrandsConfiguration brandConfig;
 
 	private GithubConfiguration githubConfig;
 
@@ -475,15 +469,6 @@ public class ApiProperties {
 
 
 
-	public BrandsConfiguration getBrandConfig() {
-		return brandConfig;
-	}
-
-
-
-	public void setBrandConfig(BrandsConfiguration brandConfig) {
-		this.brandConfig = brandConfig;
-	}
 
 
 

@@ -338,7 +338,9 @@ public class ProductController  {
 
 			
 			// Adding the brand informations
-			mv.addObject("hasBrandLogo", brandService.hasLogo(data.brand()));
+			//TODO(p1) : brand logo
+//			mv.addObject("hasBrandLogo", brandService.hasLogo(data.brand()));
+			mv.addObject("hasBrandLogo", false);
 			
 			// Adding the images resource
 

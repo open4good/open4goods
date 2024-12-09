@@ -68,6 +68,7 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 		
 		data.getAttributes().getReferentielAttributes().remove(ReferentielKey.BRAND);
 		data.akaBrands().clear();
+		// NOTE : No datasource for first, cause first will be set as referentiel brand
 		data.addBrand(null, actualBrand, vConf.getBrandsExclusion(), vConf.getBrandsAlias());
 		
 		akaBrands.entrySet().forEach(e -> {

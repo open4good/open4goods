@@ -1,12 +1,11 @@
 package org.open4goods.api.services.aggregation.services.batch.scores;
 
-import java.util.Map;
-
 import org.apache.commons.lang3.StringUtils;
 import org.open4goods.commons.config.yml.ui.VerticalConfig;
-import org.open4goods.commons.exceptions.ValidationException;
+import org.open4goods.commons.model.data.Brand;
 import org.open4goods.commons.model.data.Score;
 import org.open4goods.commons.model.product.Product;
+import org.open4goods.commons.services.BrandScoreService;
 import org.open4goods.commons.services.BrandService;
 import org.open4goods.commons.services.VerticalsConfigService;
 import org.slf4j.Logger;
@@ -23,11 +22,14 @@ public class Brand2ScoreAggregationService extends AbstractScoreAggregationServi
 
 	private BrandService brandService;
 	
+	private BrandScoreService brandScoreService;
+	
 	private VerticalsConfigService verticalsConfigService;
 	
-	public Brand2ScoreAggregationService(final Logger logger, BrandService brandService, VerticalsConfigService verticalsConfigService) {
+	public Brand2ScoreAggregationService(final Logger logger, BrandService brandService, VerticalsConfigService verticalsConfigService, BrandScoreService brandScoreService) {
 		super(logger);
 		this.brandService = brandService;
+		this.brandScoreService = brandScoreService;
 		this.verticalsConfigService = verticalsConfigService;
 	}
 
@@ -49,16 +51,16 @@ public class Brand2ScoreAggregationService extends AbstractScoreAggregationServi
 		try {
 			VerticalConfig vertical = verticalsConfigService.getConfigByIdOrDefault(data.getVertical());
 			
-			String company = vertical.resolveCompany(data.brand());
-			if (StringUtils.isEmpty(company)) {
+			Brand brand = brandService.resolve(data.brand());
+			if (null == brand || StringUtils.isEmpty(brand.getCompanyName())) {
+				brandService.incrementUnknown(data.brand());
 				dedicatedLogger.warn("Cannot resolve company for {}",data.brand());
 				return;
 			}
 			
-			// TODO : Handle aggragtion, for multiple brand RSE score providers
-			Double score = brandService.getBrandScore(company,"sustainalytics.com");
+			Double score = brandScoreService.getBrandScore(brand.getCompanyName(),"sustainalytics.com");
 			if (null == score) {
-				dedicatedLogger.error("No score found for brand {}",data.brand());
+				dedicatedLogger.error("No score found for {} - {}",data.brand(), brand.getCompanyName());
 				return;
 			}
 			

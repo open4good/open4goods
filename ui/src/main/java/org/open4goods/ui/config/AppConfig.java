@@ -174,8 +174,8 @@ public class AppConfig {
 	}
 	 
 	@Bean
-	BrandService brandService(@Autowired RemoteFileCachingService rfc, @Autowired  UiConfig properties, @Autowired  BrandScoresRepository brandRepository) {
-		return new BrandService(properties.getBrandConfig(),  rfc,brandRepository,properties.logsFolder());
+	BrandService brandService(@Autowired RemoteFileCachingService rfc, @Autowired  UiConfig properties, @Autowired  BrandScoresRepository brandRepository, SerialisationService serialisationService) throws Exception {
+		return new BrandService( rfc,properties.logsFolder(), serialisationService);
 	}
 
 	@Bean

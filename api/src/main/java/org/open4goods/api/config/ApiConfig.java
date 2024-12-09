@@ -27,6 +27,7 @@ import org.open4goods.commons.model.constants.UrlConstants;
 import org.open4goods.commons.model.data.DataFragment;
 import org.open4goods.commons.model.data.Price;
 import org.open4goods.commons.services.BarcodeValidationService;
+import org.open4goods.commons.services.BrandScoreService;
 import org.open4goods.commons.services.BrandService;
 import org.open4goods.commons.services.DataSourceConfigService;
 import org.open4goods.commons.services.EvaluationService;
@@ -194,10 +195,17 @@ public class ApiConfig {
 	}
 
 	@Bean
-	BrandService brandService(@Autowired RemoteFileCachingService rfc, @Autowired ApiProperties properties, @Autowired BrandScoresRepository brandRepository) {
-		return new BrandService(properties.getBrandConfig(), rfc, brandRepository, properties.logsFolder());
+	BrandService brandService(@Autowired RemoteFileCachingService rfc, @Autowired ApiProperties properties, @Autowired BrandScoresRepository brandRepository,@Autowired  SerialisationService serialisationService) throws Exception {
+		return new BrandService(rfc, properties.logsFolder(), serialisationService );
 	}
 
+	@Bean
+	BrandScoreService brandScoreService( @Autowired ApiProperties properties, @Autowired BrandScoresRepository brandScoreRepository) throws Exception {
+		return new BrandScoreService(brandScoreRepository, properties.logsFolder());
+	}
+
+	
+	
 	@Bean
 	PromptConfig aiConfig() {
 		return new PromptConfig();
@@ -232,9 +240,9 @@ public class ApiConfig {
 	@Bean
 	AggregationFacadeService realtimeAggregationService(@Autowired EvaluationService evaluationService, StandardiserService standardiserService, AutowireCapableBeanFactory autowireBeanFactory, @Autowired ProductRepository aggregatedDataRepository, ApiProperties apiProperties,
 			@Autowired Gs1PrefixService gs1prefixService, DataSourceConfigService dataSourceConfigService, VerticalsConfigService configService, BarcodeValidationService barcodeValidationService, BrandService brandservice, GoogleTaxonomyService gts, BlablaService blablaService,
-			IcecatService icecatFeatureService, SerialisationService serialisationService) {
+			IcecatService icecatFeatureService, SerialisationService serialisationService, BrandScoreService brandScoreService) {
 		return new AggregationFacadeService(evaluationService, standardiserService, autowireBeanFactory, aggregatedDataRepository, apiProperties, gs1prefixService, dataSourceConfigService, configService, barcodeValidationService, brandservice, gts, blablaService, icecatFeatureService,
-				serialisationService);
+				serialisationService, brandScoreService);
 	}
 
 	//////////////////////////////////////////////////////////
@@ -443,8 +451,8 @@ public class ApiConfig {
 	}
 
 	@Bean
-	DataFragmentCompletionService offerCompletionService(@Autowired BrandService brandService) {
-		return new DataFragmentCompletionService(brandService);
+	DataFragmentCompletionService offerCompletionService(@Autowired BrandScoreService brandScoreService) {
+		return new DataFragmentCompletionService(brandScoreService);
 	}
 
 	@Bean

@@ -1,13 +1,10 @@
 package org.open4goods.ui.config.yml;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-import org.open4goods.commons.config.BrandsConfiguration;
 import org.open4goods.commons.config.yml.BanCheckerConfig;
 import org.open4goods.commons.config.yml.BlogConfiguration;
 import org.open4goods.commons.config.yml.DevModeConfiguration;
@@ -188,8 +185,6 @@ public class UiConfig {
 	 */
 	private ImageGenerationConfig imageGenerationConfig = new ImageGenerationConfig();
 
-	private BrandsConfiguration brandConfig = new BrandsConfiguration();
-	
 	/**
 	 * Configuration for the reversements
 	 */
@@ -371,15 +366,6 @@ public class UiConfig {
 		this.pages = pages;
 	}
 
-
-	public BrandsConfiguration getBrandConfig() {
-		return brandConfig;
-	}
-
-
-	public void setBrandConfig(BrandsConfiguration brandConfig) {
-		this.brandConfig = brandConfig;
-	}
 
 
 	public BlogConfiguration getBlogConfig() {
