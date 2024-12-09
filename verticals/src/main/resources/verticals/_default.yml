@@ -9,11 +9,12 @@
 forceNameGeneration: true
 
 
-# These datasources will be excluded from categories matching 
+# These datasources will be excluded from categories matching (for generation assistance)
 generationExcludedFromCategoriesMatching:
   - "fnac.com"
 #  - "rakuten.com-csv.yml"
 
+# These attributes will be excluded from generation (for generation assistance)
 generationExcludedFromAttributesMatching:
   - FEED_URL
   - FABRICANT
