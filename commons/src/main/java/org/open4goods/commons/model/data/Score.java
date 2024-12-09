@@ -1,5 +1,7 @@
 package org.open4goods.commons.model.data;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 
 import org.open4goods.commons.exceptions.ValidationException;
@@ -9,8 +11,6 @@ import org.open4goods.commons.model.product.AggregatedPrice;
 import org.open4goods.commons.services.StandardiserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.data.elasticsearch.annotations.Field;
-import org.springframework.data.elasticsearch.annotations.FieldType;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
@@ -31,6 +31,10 @@ public class Score  implements Validable {
 	/** The relativised cardinalities, relativ mode.**/
 	private Cardinality relativ;
 	
+	/**
+	 * Optional metadatas this score could have
+	 */
+	private Map<String,String> metadatas = new HashMap<>();
 	
 	
 	
@@ -269,6 +273,16 @@ public class Score  implements Validable {
 
 	public void setValue(Double value) {
 		this.value = value;
+	}
+
+
+	public Map<String, String> getMetadatas() {
+		return metadatas;
+	}
+
+
+	public void setMetadatas(Map<String, String> metadatas) {
+		this.metadatas = metadatas;
 	}
 
 
