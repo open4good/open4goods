@@ -140,7 +140,9 @@ public class AiService implements HealthIndicator{
 		
         // Launch the genAiDescription
 		try {
-			generateTextsForProduct(product, iaConfigsPerLanguage, force, verticalConfig);
+			if (verticalConfig.getGenAiConfig().isEnabled()) {
+				generateTextsForProduct(product, iaConfigsPerLanguage, force, verticalConfig);				
+			}
 		} catch (Exception e) {
 			logger.error("Error while generating AI description for product {}", product,e);
 			this.criticalExceptionsCounter++;
