@@ -451,15 +451,15 @@ public class VerticalsConfigService {
 
 		return productRepository.getElasticsearchOperations()
 				.searchForStream(initialQuery, Product.class, ProductRepository.CURRENT_INDEX).stream()
-				.map(SearchHit::getContent)
+				.map(SearchHit::getContent);
 				// We have all categories matching, refine here to match the standard agg behaviour
-				.filter(e -> {
-					VerticalConfig cat = getVerticalForCategories(e.getCategoriesByDatasources());
-					if (null != cat && cat.getId().equals(v.getId())) {
-						return true;
-					}
-					return false;
-				});
+//				.filter(e -> {
+//					VerticalConfig cat = getVerticalForCategories(e.getCategoriesByDatasources());
+//					if (null != cat && cat.getId().equals(v.getId())) {
+//						return true;
+//					}
+//					return false;
+//				});
 				
 
 	}
