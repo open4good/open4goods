@@ -8,11 +8,13 @@ public class SourcedAttribute {
 	private String value;
 	private String language;
 	private Integer icecatTaxonomyId;
+	private String name;
 
-	public SourcedAttribute(Attribute attr, String dataspourcename) {
-		this.dataSourcename = dataspourcename;
+	public SourcedAttribute(Attribute attr, String datasourcename) {
+		this.dataSourcename = datasourcename;
 		this.value = attr.getValue();
 		this.icecatTaxonomyId = attr.getIcecatFeatureId();
+		this.name=attr.getName();
 	}
 
 	public SourcedAttribute() {
@@ -62,6 +64,14 @@ public class SourcedAttribute {
 
 	public void setIcecatTaxonomyId(Integer icecatTaxonomyId) {
 		this.icecatTaxonomyId = icecatTaxonomyId;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
 	}
 
 }
