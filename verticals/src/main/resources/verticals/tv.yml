@@ -126,7 +126,8 @@ attributesConfig:
   # Those attributes will be availlable for all products if one is found.
   # The line after configs: will be updated with the attribtes suggestion API, with commented attributes 
   ##################################################################################################################      
-  configs: 
+  configs:
+ 
 
   ###################################################################################################################
   # ATTRIBUTES DEFINITIONS
