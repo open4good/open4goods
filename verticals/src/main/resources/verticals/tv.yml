@@ -199,6 +199,10 @@ attributesConfig:
 ##############################################################################
 # Will associate to this vertical if one of the following categorie is present for the product  
 
+# If product categories contains one of this token, this will be unmatched
+excludingTokensFromCategoriesMatching:
+  - MEUBLE
+  
 matchingCategories:
      all: []
      Darty Pro - Cashback:

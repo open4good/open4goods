@@ -94,35 +94,40 @@ public class TaxonomyRealTimeAggregationService extends AbstractAggregationServi
 		// A hard filtering on datasource categories, that must at least contains one of the
 		// vertical natural names
 		////////////////////////////////////
-		
-		// Building offer name bags
-		StringBuilder productNameBag = new StringBuilder();
-		data.getOfferNames().forEach(name -> {
-			productNameBag.append(StringUtils.stripAccents(name).toLowerCase());
-		});
-		String pNames = productNameBag.toString();
+		if (null != data.getVertical()) {
 
-		try {
+			// Building offer name bags
+			StringBuilder productNameBag = new StringBuilder();
+			data.getOfferNames().forEach(name -> {
+				productNameBag.append(StringUtils.stripAccents(name).toLowerCase());
+			});
+			String pNames = productNameBag.toString();
 
-			if (null != vConf.getId() && null != data.getVertical()) {
+			try {
 
-				Set<String> verticalNames = vConf.getTokenNames(taxonomyService.byId(vConf.getGoogleTaxonomyId()).getGoogleNames().values().stream().map(e -> StringUtils.stripAccents(e.toLowerCase())).toList());
+				if (null != vConf.getId()) {
 
-				for (String term : verticalNames) {
+					Set<String> verticalNames = vConf.getTokenNames(taxonomyService.byId(vConf.getGoogleTaxonomyId()).getGoogleNames().values().stream().map(e -> StringUtils.stripAccents(e.toLowerCase())).toList());
 
-					if (pNames.contains(term)) {
-						dedicatedLogger.info("Vertical {} confirmed by product names match for {}", vConf, data);
-						data.setVertical(vConf.getId());
-						break;
-					} else {
-						dedicatedLogger.info("Vertical {} failed on product names match, unsetting vertical for {}", vConf, data);
-						data.setVertical(null);
+					for (String term : verticalNames) {
+
+						if (pNames.contains(term)) {
+							dedicatedLogger.info("Vertical {} confirmed by product names match for {}", vConf, data);
+							data.setVertical(vConf.getId());
+							break;
+						} else {
+							data.setVertical(null);
+						}
+
 					}
-
+					
+					if (null == data.getVertical()) {
+						dedicatedLogger.info("Vertical {} failed on product names match, unsetting vertical for {}", vConf, data);
+					}
 				}
+			} catch (Exception e) {
+				dedicatedLogger.error("Error while handling names vertical filtering", e);
 			}
-		} catch (Exception e) {
-			dedicatedLogger.error("Error while handling names vertical filtering", e);
 		}
 		
 		
