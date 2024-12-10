@@ -101,25 +101,29 @@ public class TaxonomyRealTimeAggregationService extends AbstractAggregationServi
 			productNameBag.append(StringUtils.stripAccents(name).toLowerCase());
 		});
 		String pNames = productNameBag.toString();
-		
-		// TODO : Singularize
-		// TODO : Cache
-		Set<String> verticalNames = vConf.getTokenNames(taxonomyService.byId(vConf.getGoogleTaxonomyId()).getGoogleNames().values().stream().map(e->StringUtils.stripAccents(e.toLowerCase())).toList() );
 
-		
-		for (String term : verticalNames) {
-			
-			if (pNames.contains(term)) {
-				dedicatedLogger.info("Vertical {} confirmed by product names match for {}", vConf,data);
-				data.setVertical(vConf.getId());
-				break;
-			} else {
-				dedicatedLogger.info("Vertical {} failed on product names match, unsetting vertical for {}", vConf,data);
-				data.setVertical(null);
+		try {
+
+			if (null != vConf.getId() && null != data.getVertical()) {
+
+				Set<String> verticalNames = vConf.getTokenNames(taxonomyService.byId(vConf.getGoogleTaxonomyId()).getGoogleNames().values().stream().map(e -> StringUtils.stripAccents(e.toLowerCase())).toList());
+
+				for (String term : verticalNames) {
+
+					if (pNames.contains(term)) {
+						dedicatedLogger.info("Vertical {} confirmed by product names match for {}", vConf, data);
+						data.setVertical(vConf.getId());
+						break;
+					} else {
+						dedicatedLogger.info("Vertical {} failed on product names match, unsetting vertical for {}", vConf, data);
+						data.setVertical(null);
+					}
+
+				}
 			}
-			
+		} catch (Exception e) {
+			dedicatedLogger.error("Error while handling names vertical filtering", e);
 		}
-		
 		
 		
 		

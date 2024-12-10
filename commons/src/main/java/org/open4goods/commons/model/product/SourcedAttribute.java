@@ -30,6 +30,11 @@ public class SourcedAttribute {
 		return dataSourcename != null ? dataSourcename.equals(that.dataSourcename) : that.dataSourcename == null;
 	}
 
+	
+	@Override
+	public String toString() {
+		return dataSourcename + ":" + value;
+	}
 	@Override
 	public int hashCode() {
 		return dataSourcename != null ? dataSourcename.hashCode() : 0;
