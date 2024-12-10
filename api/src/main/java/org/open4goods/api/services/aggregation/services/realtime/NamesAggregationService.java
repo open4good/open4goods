@@ -69,9 +69,8 @@ public class NamesAggregationService extends AbstractAggregationService {
 				ProductI18nElements tConf = e.getValue();
 				
 				// Computing url
-				// TODO(conf,p2) : Should allow override from conf
 				if (vConf.isForceNameGeneration() ||  (data.getVertical() == null ||  null == data.getNames().getUrl().get(lang))) {
-					logger.warn("Generating  product url for {}", data);
+					logger.info("Generating  product url for {}", data);
 					String urlSuffix = StringUtils.stripAccents(computePrefixedText(data, tConf.getUrl(), "-"));
 					urlSuffix = StringUtils.normalizeSpace(urlSuffix).replace(' ', '-');
 					
