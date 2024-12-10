@@ -41,6 +41,26 @@
 		<th:block th:insert="~{inc/vertical-filter-item-terms.html}"></th:block>
 	</th:block>	
 	
+	
+	
+	
+    <th:block th:with="title='Evaluation ESG',
+                       id='scores.BRAND_SUSTAINABILITY.value',
+                       labelType='alert-success',   
+                       icon='fa-cart-plus',                   
+                       label='Evaluation de performance ESG, par Sustainalytics',
+                       min=0,
+                       max=5,  
+                       interval=1, 
+                       includeUndefined=true,
+                       showIncludeUndefinedButton=true,
+                       includeUndefinedLabel='Afficher les non évalués'
+                       ">
+
+        <th:block th:insert="~{inc/vertical-filter-item-numeric.html}"></th:block>
+    </th:block> 
+    
+    	
 	<!-- The originating countries -->
 	<th:block th:with="id='countries',
 					   title='Origine du produit',

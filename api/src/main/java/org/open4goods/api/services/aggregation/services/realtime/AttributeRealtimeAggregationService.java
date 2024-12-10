@@ -107,7 +107,7 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 				try {
 
 					// Applying parsing rule
-					String cleanedValue =  parseAttributeValue(attr.getValue(), attrConfig);
+					String cleanedValue =  parseAttributeValue(attr, attrConfig, vConf);
 
 					if (StringUtils.isEmpty(cleanedValue)) {
 						dedicatedLogger.error("Empty indexed attribute value {}:{}",attrConfig.getKey(),attr.getValue());
@@ -365,24 +365,25 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 	/**
 	 * Type attribute and apply parsing rules. Return null if the Attribute fail to
 	 * exact parsing rules
+	 * @param vConf 
 	 *
 	 * @param translated
 	 * @param attributeConfigByKey
 	 * @return
 	 * @throws ValidationException
 	 */
-	public String parseAttributeValue(final String source, final AttributeConfig conf) throws ValidationException {
+	public String parseAttributeValue(final ProductAttribute attr, final AttributeConfig attrConf, VerticalConfig vConf) throws ValidationException {
 
-		String string = source;
+		String string = attr.getValue();
 		///////////////////
 		// To upperCase / lowerCase
 		///////////////////
-		if (conf.getParser().getLowerCase()) {
+		if (attrConf.getParser().getLowerCase()) {
 			
 			string = string.toLowerCase();
 		}
 
-		if (conf.getParser().getUpperCase()) {
+		if (attrConf.getParser().getUpperCase()) {
 			string = string.toUpperCase();
 		}
 
@@ -390,8 +391,8 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 		// Deleting arbitrary tokens
 		//////////////////////////////
 
-		if (null != conf.getParser().getDeleteTokens()) {
-			for (final String token : conf.getParser().getDeleteTokens()) {
+		if (null != attrConf.getParser().getDeleteTokens()) {
+			for (final String token : attrConf.getParser().getDeleteTokens()) {
 				string = string.replace(token, "");
 			}
 		}
@@ -399,21 +400,21 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 		///////////////////
 		// removing parenthesis tokens
 		///////////////////
-		if (conf.getParser().isRemoveParenthesis()) {
+		if (attrConf.getParser().isRemoveParenthesis()) {
 			string = string.replace("\\(.*\\)", "");
 		}
 
 		///////////////////
 		// Normalisation
 		///////////////////
-		if (conf.getParser().getNormalize()) {
+		if (attrConf.getParser().getNormalize()) {
 			string = StringUtils.normalizeSpace(string);
 		}
 
 		///////////////////
 		// Trimming
 		///////////////////
-		if (conf.getParser().getTrim()) {
+		if (attrConf.getParser().getTrim()) {
 			string = string.trim();
 		}
 
@@ -421,11 +422,11 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 		// Exact match option
 		///////////////////
 
-		if (null != conf.getParser().getTokenMatch()) {
+		if (null != attrConf.getParser().getTokenMatch()) {
 			boolean found = false;
 
 			final String val = string;
-			for (final String match : conf.getParser().getTokenMatch()) {
+			for (final String match : attrConf.getParser().getTokenMatch()) {
 				if (val.contains(match)) {
 					string = match;
 					found = true;
@@ -442,9 +443,9 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 		/////////////////////////////////
 		// FIXED TEXT MAPPING
 		/////////////////////////////////
-		if (!conf.getMappings().isEmpty()) {
+		if (!attrConf.getMappings().isEmpty()) {
 			
-			string = conf.getMappings().get(string);
+			string = attrConf.getMappings().get(string);
 		}
 
 		/////////////////////////////////
@@ -459,15 +460,15 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 		// Applying specific parser instance
 		/////////////////////////////////////
 
-		if (!StringUtils.isEmpty(conf.getParser().getClazz())) {
+		if (!StringUtils.isEmpty(attrConf.getParser().getClazz())) {
 			try {
-				final AttributeParser parser = conf.getParserInstance();
-				string  = parser.parse(string, conf);
+				final AttributeParser parser = attrConf.getParserInstance();
+				string  = parser.parse(attr, attrConf, vConf);
 			} catch (final ResourceNotFoundException e) {
-				dedicatedLogger.warn("Error while applying specific parser for {}", conf.getParser().getClazz(), e);
+				dedicatedLogger.warn("Error while applying specific parser for {}", attrConf.getParser().getClazz(), e);
 				throw new ValidationException(e.getMessage());
 			} catch (final Exception e) {
-				dedicatedLogger.error("Unexpected exception while parsing {} with {}", string, conf.getParser().getClazz(), e);
+				dedicatedLogger.error("Unexpected exception while parsing {} with {}", string, attrConf.getParser().getClazz(), e);
 				throw new ValidationException(e.getMessage());
 			}
 		}
