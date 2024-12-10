@@ -181,7 +181,7 @@ public class VerticalsGenerationController {
 	public void updateVerticalWithAttributes( 
 			@RequestParam	(defaultValue = "tv")									 String vertical,
 			@RequestParam	(defaultValue = "10")									 Integer minCoverage,
-			@RequestParam										 String containing
+			@RequestParam	(defaultValue = "")									 String containing
 			) throws ResourceNotFoundException, IOException {
 		
 		//TODO(p2,conf) : from conf

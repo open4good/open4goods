@@ -102,6 +102,7 @@ public class VerticalConfig{
 	/**
 	 * A list a words that will exclude the item from the category if encountered
 	 */
+	@JsonMerge
 	private Set<String> excludingTokensFromCategoriesMatching = new HashSet<String>();	
 	
 	/**
