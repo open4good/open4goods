@@ -56,7 +56,7 @@ public class WeightParser extends AttributeParser {
 		
 		// Looking on specific icecat id's, we know it's grams
 		// TODO : from conf
-		if (e.getIcecatTaxonomyId() == 94) {
+		if (e.getIcecatTaxonomyId() != null && e.getIcecatTaxonomyId() == 94) {
 			return value / 1000;
 		}
 		
