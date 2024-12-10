@@ -494,7 +494,7 @@ attributesConfig:
     synonyms:
       all:
       - "QTE DE PORTS HDMI"
-      - "QUANTITE DE PORTS HDMI"
+      - "QUANTITE DE PORTS HDMI"      
       
     parser:
       normalize: true
@@ -557,7 +557,7 @@ attributesConfig:
       default: "Weight"
       fr: "Poids"
     filteringType: "NUMERIC"
-    asScore: false
+    asScore: true
     
     synonyms:
       all:

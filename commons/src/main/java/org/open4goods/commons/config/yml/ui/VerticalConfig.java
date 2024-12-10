@@ -1,6 +1,7 @@
 package org.open4goods.commons.config.yml.ui;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -12,6 +13,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.StringUtils;
 import org.open4goods.commons.config.yml.CommentsAggregationConfig;
 import org.open4goods.commons.config.yml.attributes.AttributeConfig;
 import org.open4goods.commons.helper.IdHelper;
@@ -230,6 +232,10 @@ public class VerticalConfig{
 	 */
 	private List<FeatureGroup> featureGroups = new ArrayList<>();
 
+	
+	// A local cache for token names
+	private Set<String> cacheTokenNames;
+
 
 	@Override
 	public String toString() {
@@ -250,6 +256,50 @@ public class VerticalConfig{
 		return i18n.getOrDefault(lang, i18n.get("default"));		
 	}
 	
+	
+	/**
+	 * Compute the token names, used to do a product.offernames matching categories
+	 * 
+	 * @param additionalNames
+	 * @return
+	 */
+	public Set<String> getTokenNames(Collection<String> additionalNames) {
+
+		if (null == cacheTokenNames) {
+
+			Set<String> verticalNames = new HashSet<String>();
+			verticalNames.add(getId());
+			verticalNames.addAll(additionalNames);
+
+			getI18n().entrySet().forEach(e -> {
+				// verticalNames.add(e.getValue().getH1Title().getPrefix().toLowerCase());
+				verticalNames.add(e.getValue().getVerticalHomeUrl());
+				// verticalNames.add(e.getValue().getUrl().getPrefix());
+
+			});
+
+			// Adding singular derivativs, removing -
+			Set<String> derivativs = new HashSet<String>();
+			verticalNames.forEach(e -> {
+				String derivativ = e.replace("-", " ");
+				derivativs.add(derivativ);
+
+				if (derivativ.endsWith("s")) {
+					derivativ = derivativ.substring(0, derivativ.length() - 1);
+				}
+				derivativs.add(derivativ);
+
+				// If composed word (laves linges"
+				derivativ = derivativ.replace("s ", " ");
+				derivativs.add(derivativ);
+
+			});
+			
+			verticalNames.addAll(derivativs);
+			cacheTokenNames = verticalNames;
+		}
+		return cacheTokenNames;
+	}
 	/**
 	 * Return the participation in percentage of a score in the ecoscore
 	 * @param scoreName
@@ -765,6 +815,8 @@ public class VerticalConfig{
 	public void setGenerationExcludedFromAttributesMatching(Set<String> generationExcludedFromAttributesMatching) {
 		this.generationExcludedFromAttributesMatching = generationExcludedFromAttributesMatching;
 	}
+
+	
 
 	
 	
