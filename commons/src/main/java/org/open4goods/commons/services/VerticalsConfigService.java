@@ -259,8 +259,6 @@ public class VerticalsConfigService {
 		    }
 		}
 
-		
-
 		return vc;
 	}
 

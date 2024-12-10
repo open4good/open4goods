@@ -2,8 +2,10 @@ package org.open4goods.api.services.aggregation.services.realtime;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
 import org.open4goods.api.services.aggregation.AbstractAggregationService;
@@ -86,6 +88,42 @@ public class TaxonomyRealTimeAggregationService extends AbstractAggregationServi
 			// TODO(p1,design) : Should erase ai descriptions and generated names / urls : a telivision that unmaches continue to have "television" generated stuff 
 			data.setVertical(null);
 		}
+		
+		
+		/////////////////////////////////////
+		// A hard filtering on datasource categories, that must at least contains one of the
+		// vertical natural names
+		////////////////////////////////////
+		
+		// Building offer name bags
+		StringBuilder productNameBag = new StringBuilder();
+		data.getOfferNames().forEach(name -> {
+			productNameBag.append(StringUtils.stripAccents(name).toLowerCase());
+		});
+		String pNames = productNameBag.toString();
+		
+		// TODO : Singularize
+		// TODO : Cache
+		Set<String> verticalNames = vConf.getTokenNames(taxonomyService.byId(vConf.getGoogleTaxonomyId()).getGoogleNames().values().stream().map(e->StringUtils.stripAccents(e.toLowerCase())).toList() );
+
+		
+		for (String term : verticalNames) {
+			
+			if (pNames.contains(term)) {
+				dedicatedLogger.info("Vertical {} confirmed by product names match for {}", vConf,data);
+				data.setVertical(vConf.getId());
+				break;
+			} else {
+				dedicatedLogger.info("Vertical {} failed on product names match, unsetting vertical for {}", vConf,data);
+				data.setVertical(null);
+			}
+			
+		}
+		
+		
+		
+		
+		
 		
 //		// Setting no vertical if no category
 		if (data.getDatasourceCategories().size() == 0) {
