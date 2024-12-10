@@ -532,8 +532,9 @@ Base your analyse on the following categories :
 	 * @param minOffers
 	 * @param fileName
 	 * @param minCoverage 
+	 * @param containing 
 	 */
-	public void updateVerticalFileWithAttributes(String fileName, int minCoverage) {
+	public void updateVerticalFileWithAttributes(String fileName, int minCoverage, String containing) {
 		File file = new File(fileName);
 		try {
 			VerticalConfig vc = verticalConfigservice.getConfigById(file.getName().substring(0, file.getName().length()-4));
@@ -545,7 +546,7 @@ Base your analyse on the following categories :
 			
 			String newContent = originalContent.substring(0, startIndex);
 			newContent += "  configs:\n";
-			newContent += generateAttributesMapping(vc, minCoverage);
+			newContent += generateAttributesMapping(vc, minCoverage, containing);
 			newContent += originalContent.substring(endIndex);
 			
 			FileUtils.writeStringToFile(file, newContent, Charset.defaultCharset());
@@ -562,7 +563,7 @@ Base your analyse on the following categories :
 	 * @param vertical
 	 * @return
 	 */
-	public String generateAttributesMapping(VerticalConfig verticalConfig, int minCoverage) {
+	public String generateAttributesMapping(VerticalConfig verticalConfig, int minCoverage, String containing) {
 		LOGGER.info("Generating attributes mapping for {}", verticalConfig);
 		VerticalAttributesStats stats = attributesStats(verticalConfig.getId());
 		
@@ -593,7 +594,9 @@ Base your analyse on the following categories :
 				if (Double.valueOf(cat.getValue().getHits() / Double.valueOf(totalItems) * 100.0).intValue() > minCoverage) {
 					LOGGER.info("Generating template for attribute : {}", cat.getKey());
 					// TODO(conf,p2) : numberofsamples from conf
-					ret += attributeConfigTemplate(cat, totalItems,10);					
+					if (StringUtils.isEmpty(containing) || cat.getKey().toLowerCase().contains(containing.toLowerCase())) {
+						ret += attributeConfigTemplate(cat, totalItems,10);											
+					}
 				} else {
 					LOGGER.info("Skipping {}, not enough coverage", cat.getKey());
 				}

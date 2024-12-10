@@ -35,7 +35,7 @@ public class WeightParser extends AttributeParser {
 			
 			// Comparing
 			if (weightInGrams.doubleValue() != actualWeightInGrams.doubleValue()) {
-				// TODO : get icecat if defined
+				// TODO(P1, design) : exclude, alarm, get an election mechanism...
 				logger.error("Conflict : {} <> {}", weightInGrams, e );
 			}
 			

@@ -180,11 +180,12 @@ public class VerticalsGenerationController {
 	@PreAuthorize("hasAuthority('"+RolesConstants.ROLE_ADMIN+"')")
 	public void updateVerticalWithAttributes( 
 			@RequestParam	(defaultValue = "tv")									 String vertical,
-			@RequestParam	(defaultValue = "10")									 Integer minCoverage
+			@RequestParam	(defaultValue = "10")									 Integer minCoverage,
+			@RequestParam										 String containing
 			) throws ResourceNotFoundException, IOException {
 		
 		//TODO(p2,conf) : from conf
- 		  verticalsGenService.updateVerticalFileWithAttributes("/home/goulven/git/open4goods/verticals/src/main/resources/verticals/"+vertical+".yml", minCoverage);
+ 		  verticalsGenService.updateVerticalFileWithAttributes("/home/goulven/git/open4goods/verticals/src/main/resources/verticals/"+vertical+".yml", minCoverage, containing);
 		
 	}
 
