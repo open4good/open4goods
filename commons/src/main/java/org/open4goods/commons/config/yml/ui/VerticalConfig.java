@@ -13,13 +13,13 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.apache.commons.lang3.StringUtils;
 import org.open4goods.commons.config.yml.CommentsAggregationConfig;
 import org.open4goods.commons.config.yml.attributes.AttributeConfig;
 import org.open4goods.commons.helper.IdHelper;
 import org.open4goods.commons.model.constants.CacheConstants;
 import org.open4goods.commons.model.constants.UrlConstants;
 import org.open4goods.commons.model.data.FeatureGroup;
+import org.open4goods.commons.model.data.Score;
 import org.open4goods.commons.services.StandardiserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -178,9 +178,8 @@ public class VerticalConfig{
 	
 	/**
 	 * Configuration relativ to ecoscore computation. Key / values are : scoreName -> Ponderation (0.1 = 10%)
-	 * TODO : Ensure sum is 1
+	 * NOTE : No json merge, since default score has to be fully described if overrided
 	 */ 
-	@JsonMerge
 	private Map<String, Double> ecoscoreConfig = new HashMap<>();
 
 
@@ -499,6 +498,24 @@ public class VerticalConfig{
 
 
 
+	/**
+	 * Ui Helper : return the ecoscore composing score, allowing filtering on provided (existing) score
+	 * @param existing
+	 * @return
+	 */
+	public List<Score> ecoScoreDetails(Collection<Score> existing) {
+		
+		List<Score> ret = new ArrayList<Score>();
+		
+		ecoscoreConfig.keySet().forEach(ecoConfig-> {
+			existing.forEach(exisiting -> {
+				if (exisiting.getName().equals(ecoConfig)) {
+					ret.add(exisiting);
+				}
+			});
+		});
+		return ret;
+	}
 
 
 	/**

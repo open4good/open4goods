@@ -127,9 +127,9 @@ genAiConfig:
 ##############################################################################
 
 ecoscoreConfig:
-   CLASSE_ENERGY : 0.3
    WEIGHT: 0.3
    BRAND_SUSTAINABILITY: 0.3
+   POWER_CONSUMPTION: 0.3
    DATA-QUALITY: 0.1
    
    

@@ -29,7 +29,7 @@
 	<div>
 		<div id="accordionScore"  class="progress-wrapper accordion">
 			<!-- Sub scores -->
-			<div th:each="score, stat : ${product.realScores()}" class="">
+			<div th:each="score, stat : ${verticalConfig.ecoScoreDetails(product.realScores())}" class="">
 				<div style="max-height: 70px" 
 					 class="flex-wrapper accordion-header"
 					 th:id="'score-'+${stat.count}">
