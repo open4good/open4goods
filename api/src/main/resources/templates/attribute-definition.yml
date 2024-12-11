@@ -5,19 +5,19 @@
   # TOP attributes values are :
 [(${attributesSamples})]   
   ##################################
-  - key: "[(${name})]"
-    filteringType: "[(${type})]"
-    asScore: false
-    faIcon: "[(${faicon})]"
+   - key: "[(${name})]"
+     filteringType: "[(${type})]"
+     asScore: false
+     faIcon: "[(${faicon})]"
 
-    icecatFeaturesIds:      
+     icecatFeaturesIds:      
 #      - [(${icecatIds})] 
     
-    name:
+     name:
       default: "[(${default_name})]"
       fr: "[(${fr_name})]"
     
-    synonyms:
+     synonyms:
 #      all:
 [(${synonyms})]           
     parser:
