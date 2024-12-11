@@ -153,6 +153,7 @@ public class SearchService {
 		
 
 		// Adding custom numeric filters
+//		Criteria optional
 		for (NumericRangeFilter filter : request.getNumericFilters()) {
 
 		    if (!filter.isAllowEmptyValues()) {
