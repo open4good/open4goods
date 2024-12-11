@@ -10,7 +10,8 @@ public class NumericRangeFilter {
 	private Double minValue;
 	private Double maxValue;
 	private boolean allowEmptyValues = true;
-	private List<PriceBucket> priceBuckets = new ArrayList<PriceBucket>();
+	private Long unknown;
+	private List<NumericBucket> priceBuckets = new ArrayList<NumericBucket>();
 
 
 
@@ -70,10 +71,10 @@ public class NumericRangeFilter {
 	public void setAllowEmptyValues(boolean allowEmptyValues) {
 		this.allowEmptyValues = allowEmptyValues;
 	}
-	public List<PriceBucket> getPriceBuckets() {
+	public List<NumericBucket> getPriceBuckets() {
 		return priceBuckets;
 	}
-	public void setPriceBuckets(List<PriceBucket> priceBuckets) {
+	public void setPriceBuckets(List<NumericBucket> priceBuckets) {
 		this.priceBuckets = priceBuckets;
 	}
 	public Double getIntervalSize() {
@@ -81,6 +82,12 @@ public class NumericRangeFilter {
 	}
 	public void setIntervalSize(Double intervalSize) {
 		this.intervalSize = intervalSize;
+	}
+	public Long getUnknown() {
+		return unknown;
+	}
+	public void setUnknown(Long l) {
+		this.unknown = l;
 	}
 
 	

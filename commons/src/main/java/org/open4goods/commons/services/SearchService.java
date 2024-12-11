@@ -14,8 +14,8 @@ import org.open4goods.commons.config.yml.ui.VerticalConfig;
 import org.open4goods.commons.dao.ProductRepository;
 import org.open4goods.commons.model.constants.CacheConstants;
 import org.open4goods.commons.model.constants.ProductCondition;
+import org.open4goods.commons.model.dto.NumericBucket;
 import org.open4goods.commons.model.dto.NumericRangeFilter;
-import org.open4goods.commons.model.dto.PriceBucket;
 import org.open4goods.commons.model.dto.VerticalFilterTerm;
 import org.open4goods.commons.model.dto.VerticalSearchRequest;
 import org.open4goods.commons.model.dto.VerticalSearchResponse;
@@ -34,15 +34,13 @@ import org.springframework.data.elasticsearch.core.query.CriteriaQuery;
 import org.springframework.data.elasticsearch.core.query.CriteriaQueryBuilder;
 
 import co.elastic.clients.elasticsearch._types.aggregations.Aggregation;
-import co.elastic.clients.elasticsearch._types.aggregations.AggregationRange;
 import co.elastic.clients.elasticsearch._types.aggregations.HistogramAggregate;
 import co.elastic.clients.elasticsearch._types.aggregations.HistogramBucket;
 import co.elastic.clients.elasticsearch._types.aggregations.LongTermsAggregate;
 import co.elastic.clients.elasticsearch._types.aggregations.LongTermsBucket;
 import co.elastic.clients.elasticsearch._types.aggregations.MaxAggregate;
 import co.elastic.clients.elasticsearch._types.aggregations.MinAggregate;
-import co.elastic.clients.elasticsearch._types.aggregations.RangeAggregate;
-import co.elastic.clients.elasticsearch._types.aggregations.RangeBucket;
+import co.elastic.clients.elasticsearch._types.aggregations.MissingAggregate;
 import co.elastic.clients.elasticsearch._types.aggregations.StringTermsAggregate;
 import co.elastic.clients.elasticsearch._types.aggregations.StringTermsBucket;
 
@@ -251,6 +249,7 @@ public class SearchService {
 			esQuery = esQuery
 			.withAggregation("min_"+filter.getKey(),  	Aggregation.of(a -> a.min(ta -> ta.field(filter.getKey()))))
 			.withAggregation("max_"+filter.getKey(), 	Aggregation.of(a -> a.max(ta -> ta.field(filter.getKey()))))
+			.withAggregation("missing_"+filter.getKey(), 	Aggregation.of(a -> a.missing(ta -> ta.field(filter.getKey()))))
 			.withAggregation("interval_"+filter.getKey(), 
 				    Aggregation.of(a -> a.histogram(h -> h.field(filter.getKey())
 				            .interval(filter.getIntervalSize()) 
@@ -304,12 +303,12 @@ public class SearchService {
 			
 			MinAggregate min = aggregations.get("min_"+filter.getKey()).aggregation().getAggregate().min();
 			MaxAggregate max= aggregations.get("max_"+filter.getKey()).aggregation().getAggregate().max();
-		
+			MissingAggregate missing = aggregations.get("missing_"+filter.getKey()).aggregation().getAggregate().missing();
 			HistogramAggregate priceHistogram = aggregations.get("interval_" + filter.getKey()).aggregation().getAggregate().histogram();
 			
-			List<PriceBucket> priceBuckets = new ArrayList<>();
+			List<NumericBucket> priceBuckets = new ArrayList<>();
 			for (HistogramBucket bucket : priceHistogram.buckets().array()) {
-			    priceBuckets.add(new PriceBucket(bucket.key()+"", bucket.docCount()));
+			    priceBuckets.add(new NumericBucket(bucket.key()+"", bucket.docCount()));
 			}
 			
 			
@@ -322,6 +321,7 @@ public class SearchService {
 			nrf.setMaxValue(max.value());
 			nrf.setMinValue(min.value());
 			nrf.setPriceBuckets(priceBuckets);
+			nrf.setUnknown(missing.docCount());
 			
 			vsr.getNumericFilters().put(filter.getKey(), nrf);
 			

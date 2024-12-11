@@ -55,7 +55,11 @@
 			
 	        <div th:if="${showIncludeUndefinedButton}" class="float-end mt-3 mb-2 form-check form-switch">
 	            <input class="form-check-input"  th:checked="${includeUndefined}" type="checkbox" th:id="'include-undefined-'+${id}">
-	            <label class="form-check-label" th:for="'include-undefined-'+${id}" th:text="${includeUndefinedLabel}"></label>
+	            <label class="form-check-label" th:for="'include-undefined-'+${id}">
+	               <th:block th:if="${undefinedCount}" th:text="${includeUndefinedLabel} + '(' + ${ undefinedCount} +')' "> </th:block>
+                   <th:block th:unless="${undefinedCount}" th:text="${includeUndefinedLabel}"> </th:block>
+
+	           </label>
 	        </div>
             
             <input style="display:none" th:unless="${showIncludeUndefinedButton}" th:checked="${includeUndefined}" type="checkbox" th:id="'include-undefined-'+${id}">

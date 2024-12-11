@@ -161,6 +161,12 @@ public class VerticalSearchResponse {
 		Double  ret = numericFilters.entrySet().stream().filter(e-> e.getKey().contains(key)).findFirst().map(e->e.getValue().getMaxValue()).orElse(10000000.0);
 		return ret;
 	}
+
+	public Long unknown(String key) {
+		//TODO(design,p2) : the contains is ugly. A missdesign on numeric and terms filters in verticalsearchRequest and response, to be reviewed
+		Long  ret = numericFilters.entrySet().stream().filter(e-> e.getKey().contains(key)).findFirst().map(e->e.getValue().getUnknown()).orElse(null);
+		return ret;
+	}
 	
 	public List<Product> limitedDatas(Integer to) {
 		if (to > data.size()) {

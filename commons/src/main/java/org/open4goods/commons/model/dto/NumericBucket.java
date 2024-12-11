@@ -1,14 +1,14 @@
 package org.open4goods.commons.model.dto;
 
-public class PriceBucket {
+public class NumericBucket {
 
 	private String name;
 	private Long count;
 
-	public PriceBucket() {
+	public NumericBucket() {
 	}
 	
-	public PriceBucket(String keyAsString, long docCount) {
+	public NumericBucket(String keyAsString, long docCount) {
 		this.name = keyAsString;
 		this.count = docCount;
 	}
