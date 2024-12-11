@@ -122,7 +122,8 @@
                     "enabled": false
                 },
                 "features": {
-                    "type": "keyword"
+                    "type": "object",
+                    "enabled": false
                 }
             }
         },
@@ -143,6 +144,10 @@
         },
         "excluded": {
             "type": "boolean"
+        },
+        "excludedCauses": {
+            "type": "keyword",
+            "index": true
         },
         "externalIds": {
             "type": "object",

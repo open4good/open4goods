@@ -42,7 +42,7 @@ import org.springframework.data.elasticsearch.annotations.Mapping;
 import org.springframework.data.elasticsearch.annotations.Setting;
 import org.springframework.data.elasticsearch.annotations.WriteTypeHint;
 
-@Document(indexName = Product.DEFAULT_REPO, alwaysWriteMapping = false, createIndex = true, writeTypeHint = WriteTypeHint.FALSE, dynamic = Dynamic.FALSE)
+@Document(indexName = Product.DEFAULT_REPO, alwaysWriteMapping = true, createIndex = true, writeTypeHint = WriteTypeHint.FALSE, dynamic = Dynamic.FALSE)
 @Setting( settingPath = "/product-settings.json")
 @Mapping(mappingPath = "/product-mappings.json")
 public class Product implements Standardisable {
@@ -93,6 +93,9 @@ public class Product implements Standardisable {
 	
 	/** If true, means the item is excluded from vertical representation (because not enough data, ....)**/
 	private boolean excluded = false;
+
+	/** If set that contains cause of exclusion.**/
+	private Set<String> excludedCauses = new HashSet<String>();
 	
 	/** The list of other model's known for this product **/
 	private Set<String> akaModels = new HashSet<>();
@@ -893,6 +896,14 @@ public class Product implements Standardisable {
 
 	public void setAkaModels(Set<String> akaModels) {
 		this.akaModels = akaModels;
+	}
+
+	public Set<String> getExcludedCauses() {
+		return excludedCauses;
+	}
+
+	public void setExcludedCauses(Set<String> excludedCauses) {
+		this.excludedCauses = excludedCauses;
 	}
 
 
