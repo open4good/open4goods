@@ -144,7 +144,7 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 		// Setting excluded state
 		////////////////////////////////////////// 
 		
-		data.setExcluded(shouldExclude(data,vConf));
+		updateExcludeStatus(data,vConf);
 		
 	}
 
@@ -152,26 +152,39 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 	 * Set the product in excluded state (will not be exposed through indexation, searchservice,..) 
 	 * @param data
 	 */
-	private boolean shouldExclude(Product data, VerticalConfig vConf) {
+	private void updateExcludeStatus(Product data, VerticalConfig vConf) {
+		boolean ret = false;
 		// On brand
 		if (StringUtils.isEmpty(data.brand())) {
 			dedicatedLogger.info("Excluded because brand is missing : {}", data );
-			return true;
+			ret =  true;
+			data.getExcludedCauses().add("missing_brand");
 		}
 		
 		// On model
 		if (StringUtils.isEmpty(data.model())) {
 			dedicatedLogger.info("Excluded because model is missing : {}", data );
-			return true;
+			ret =  true;
+			data.getExcludedCauses().add("missing_model");
 		}
 		
 		Set<String> attrKeys = data.getAttributes().getattributesAsStringKeys();
 		if (vConf.getRequiredAttributes() != null && !attrKeys.containsAll(vConf.getRequiredAttributes())) {
+			
+			Set<String> missing = new HashSet<>(vConf.getRequiredAttributes());
+			missing.retainAll(attrKeys);
+			
+			missing.forEach(e-> {
+				data.getExcludedCauses().add("missing_attr_" + e);
+			});
+			
 			dedicatedLogger.info("Excluded because attributes are missing : {}", data );
-			return true;
+			ret =  true;
+			
 		}
 		
-		return false;
+		data.setExcluded(ret);
+		
 	}
 
 
@@ -283,21 +296,21 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 	 * @param unmatchedFeatures
 	 * @return
 	 */
-	private void  extractFeatures(ProductAttributes attributes) {
-
-		attributes.getFeatures().clear();
-		
-		
-		Map<String, ProductAttribute> features = attributes.getAll().entrySet().stream()
-				.filter(e -> e.getValue().isFeature())
-			    .collect(Collectors.toMap(
-			            Map.Entry::getKey,    // key mapper: uses the key from each entry
-			            Map.Entry::getValue   // value mapper: uses the value from each entry
-			        ));
-		
-		attributes.getFeatures().addAll(features.keySet());
-		
-	}
+//	private void  extractFeatures(ProductAttributes attributes) {
+//
+//		attributes.getFeatures().clear();
+//		
+//		
+//		Map<String, ProductAttribute> features = attributes.getAll().entrySet().stream()
+//				.filter(e -> e.getValue().isFeature())
+//			    .collect(Collectors.toMap(
+//			            Map.Entry::getKey,    // key mapper: uses the key from each entry
+//			            Map.Entry::getValue   // value mapper: uses the value from each entry
+//			        ));
+//		
+//		attributes.getFeatures().addAll(features.values());
+//		
+//	}
 
 	/**
 	 * Returns if an attribute is a feature, by comparing "yes" values from config

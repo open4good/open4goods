@@ -25,6 +25,8 @@ public class VerticalSearchRequest {
     Map<String, Set<String>> termsFilter = new HashMap<>();
 
     boolean excluded = false;
+    Set<String> excludedFilters = new HashSet<String>();
+    
 
     private String sortField;
     private String sortOrder;
@@ -147,6 +149,16 @@ public class VerticalSearchRequest {
             .append("sortOrder", sortOrder)
             .toString();
     }
+
+
+	public Set<String> getExcludedFilters() {
+		return excludedFilters;
+	}
+
+
+	public void setExcludedFilters(Set<String> excludedFilters) {
+		this.excludedFilters = excludedFilters;
+	}
     
     
 }

@@ -69,7 +69,7 @@ public class DataTableController {
                     case "brand" -> vRequest.addTermFilter("attributes.referentielAttributes.BRAND", attr[1]);
                     case "countries" -> vRequest.addTermFilter("gtinInfos.country", attr[1]);
                     case "trend" -> vRequest.addTermFilter("price.trend", attr[1]);
-                    case "excluded" -> handleExcludedState(vRequest, attr);
+                    case "excludedCauses" -> handleExcludedState(vRequest, attr);
                     default -> vRequest.addTermFilter(attr[0], attr[1]);
                 }
 			}
@@ -129,7 +129,7 @@ public class DataTableController {
 	 * @param attr
 	 */
 	private void handleExcludedState(VerticalSearchRequest vRequest, String[] attr) {
-		vRequest.addTermFilter("excluded", attr[1]);
+		vRequest.getExcludedFilters().add(attr[1]);
 		vRequest.setExcluded(true);
 	}
 }

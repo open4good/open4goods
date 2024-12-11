@@ -135,7 +135,7 @@ public class SearchService {
 	 * @param request
 	 * @return
 	 */
-	@Cacheable(keyGenerator = CacheConstants.KEY_GENERATOR, cacheNames = CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME)
+//	@Cacheable(keyGenerator = CacheConstants.KEY_GENERATOR, cacheNames = CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME)
 	public VerticalSearchResponse verticalSearch(VerticalConfig vertical, VerticalSearchRequest request) {
 
 		VerticalSearchResponse vsr = new VerticalSearchResponse();
@@ -147,7 +147,9 @@ public class SearchService {
 				;
 		
 		// Adding the filter on excluded if set
-		if (!request.isExcluded()) {
+		if (request.getExcludedFilters().size()>0) {
+			criterias.and(new Criteria("excludedCauses").in(request.getExcludedFilters()) );	
+		} else 	if (!request.isExcluded()) {
 			criterias.and(new Criteria("excluded").is(false));
 		}
 		
@@ -216,7 +218,7 @@ public class SearchService {
 //				.withAggregation("max_offers", 	Aggregation.of(a -> a.max(ta -> ta.field("offersCount"))))
 				.withAggregation("conditions", 	Aggregation.of(a -> a.terms(ta -> ta.field("price.conditions").missing(MISSING_BUCKET).size(3)))	)
 				.withAggregation("trend", 	Aggregation.of(a -> a.terms(ta -> ta.field("price.trend").size(3)))	)
-				.withAggregation("excluded", 	Aggregation.of(a -> a.terms(ta -> ta.field("excluded").size(2)))	)				
+				.withAggregation("excludedCauses", 	Aggregation.of(a -> a.terms(ta -> ta.field("excludedCauses").size(20)))	)				
 				.withAggregation("brands", 	Aggregation.of(a -> a.terms(ta -> ta.field("attributes.referentielAttributes.BRAND").missing(MISSING_BUCKET).size(AGGREGATION_BUCKET_SIZE)  ))	)
 				.withAggregation("country", 	Aggregation.of(a -> a.terms(ta -> ta.field("gtinInfos.country").missing(MISSING_BUCKET).size(AGGREGATION_BUCKET_SIZE)  ))	)
 				
@@ -373,9 +375,9 @@ public class SearchService {
 		// excluded
 		///////
 
-		LongTermsAggregate excluded  =  aggregations.get("excluded").aggregation().getAggregate().lterms() ;
-		for (LongTermsBucket b :   excluded.buckets().array()) {
-			vsr.getExcluded().add (new VerticalFilterTerm(b.keyAsString(), b.docCount()));
+		StringTermsAggregate excluded  =  aggregations.get("excludedCauses").aggregation().getAggregate().sterms() ;
+		for (StringTermsBucket b :   excluded.buckets().array()) {
+			vsr.getExcluded().add (new VerticalFilterTerm(b.key().stringValue(), b.docCount()));
 		}
 		vsr.getExcluded().sort((o1, o2) -> o2.getCount().compareTo(o1.getCount()));
 

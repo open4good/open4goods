@@ -10,7 +10,6 @@ import org.open4goods.commons.model.constants.ReferentielKey;
 import org.springframework.data.annotation.Transient;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-@JsonIgnoreProperties(ignoreUnknown = true)
 public class ProductAttributes  {
 
 	/**
@@ -23,15 +22,15 @@ public class ProductAttributes  {
 	
 	private Map<String, ProductAttribute> all = new HashMap<>();
 
-	@Transient
-	// Instance life cache for fastenning features
-	private Set<ProductAttribute> featuresCache;
+//	@Transient
+//	// Instance life cache for fastenning features
+//	private Set<ProductAttribute> featuresCache;
 
 	/**
 	 * The features
 	 * TODO(p3,i18n) : Internationalisation
 	 */
-	private Set<String> features = new HashSet<String>();
+//	private Set<ProductAttribute> features = new HashSet<ProductAttribute>();
 	
 	/**
 	 * Best effort method to return the string val of an attribute, looking up, by priority in :
@@ -76,13 +75,13 @@ public class ProductAttributes  {
 		return referentielAttributes.size() + indexed.size() + all.size();
 	}
 	
-	public Set<ProductAttribute> features() {
-		
-		if (this.featuresCache == null) {
-			featuresCache = all.values().stream().filter(e -> Boolean.TRUE.equals(IndexedAttribute.getBool(e.getValue()))  ).collect(Collectors.toSet());
-		}
-		return featuresCache;
-	}
+//	public Set<ProductAttribute> features() {
+//		
+//		if (this.featuresCache == null) {
+//			featuresCache = all.values().stream().filter(e -> Boolean.TRUE.equals(IndexedAttribute.getBool(e.getValue()))  ).collect(Collectors.toSet());
+//		}
+//		return featuresCache;
+//	}
 	
 	
 
@@ -148,22 +147,23 @@ public class ProductAttributes  {
 	}
 
 
+//
+//	public Set<ProductAttribute> getFeaturesCache() {
+//		return featuresCache;
+//	}
+//
+//	public void setFeaturesCache(Set<ProductAttribute> featuresCache) {
+//		this.featuresCache = featuresCache;
+//	}
 
-	public Set<ProductAttribute> getFeaturesCache() {
-		return featuresCache;
-	}
 
-	public void setFeaturesCache(Set<ProductAttribute> featuresCache) {
-		this.featuresCache = featuresCache;
-	}
-
-	public Set<String> getFeatures() {
-		return features;
-	}
-
-	public void setFeatures(Set<String> features) {
-		this.features = features;
-	}
+//	public Set<ProductAttribute> getFeatures() {
+//		return features;
+//	}
+//
+//	public void setFeatures(Set<ProductAttribute> features) {
+//		this.features = features;
+//	}
 
 	public void setAll(Map<String, ProductAttribute> all) {
 		this.all = all;
