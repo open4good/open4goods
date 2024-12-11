@@ -75,7 +75,20 @@
 					   ">
 		<th:block th:insert="~{inc/vertical-filter-item-terms.html}"></th:block>
 	</th:block>	
-	
+	<!-- 
+    <th:block th:with="title='Consommation en marche',
+                       id='attributes.indexed.POWER_CONSUMPTION.numericValue',
+                       labelType='alert-success',   
+                       icon='fa-cart-energy',                   
+                       label='Consommation en marche (typique / max)',
+                       min=0,
+                       max=500,  
+                       interval=1, 
+                       includeUndefined=true,
+                       showIncludeUndefinedButton=true,
+                       includeUndefinedLabel='Afficher les non évalués'
+                       ">
+	 -->
 	
 	<!--  Custom eco filters -->
 	<th:block th:each="filterName : ${verticalConfig.ecoFilters}">
