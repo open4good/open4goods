@@ -78,6 +78,14 @@ public class VerticalController  extends AbstractController {
 		vRequest.getNumericFilters().add(new NumericRangeFilter("price.minPrice.price", 0.0001, 500000.0, 100.0, false));
 		vRequest.getNumericFilters().add(new NumericRangeFilter("scores.ECOSCORE.value", 0.0001, 500000.0, 0.1, true));
 		vRequest.getNumericFilters().add(new NumericRangeFilter("scores.BRAND_SUSTAINABILITY.value", 0.0001, 500000.0, 0.1, true));
+		vRequest.getNumericFilters().add(new NumericRangeFilter("attributes.indexed.POWER_CONSUMPTION.numericValue", 0.0001, 500000.0, 0.1, true));
+		vRequest.getNumericFilters().add(new NumericRangeFilter("attributes.indexed.POWER_CONSUMPTION_OFF.numericValue", 0.0001, 500000.0, 0.1, true));
+		
+		
+		
+		
+		
+		
 		List<AttributeConfig> numericFilters = config.getVerticalFilters().stream()
 			.map(e -> config.getAttributesConfig().getAttributeConfigByKey(e))
 			.filter(e-> e != null)
