@@ -353,6 +353,7 @@ attributesConfig:
       deleteTokens:
       - "CLASSE"
       - "(ÉCHELLE A++ À E)"
+      - "NOT AVAILABLE"
     numericMapping:
       A+++: 18.0    
       A++: 18.0
@@ -629,7 +630,7 @@ attributesConfig:
 #     - 0, 3 W (2 items)
 #   
   ##################################
-  - key: "CONSOMMATION ELECTRIQUE (ARRET)"
+  - key: "POWER_CONSUMPTION_OFF"
     filteringType: "NUMERIC"
     asScore: true
     faIcon: ""
