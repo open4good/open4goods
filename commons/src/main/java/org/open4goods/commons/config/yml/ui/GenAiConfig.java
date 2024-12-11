@@ -1,7 +1,7 @@
 package org.open4goods.commons.config.yml.ui;
 
 public class GenAiConfig {
-	private boolean enabled = true;
+	private boolean enabled = false;
 	
 	public boolean isEnabled() {
 		return enabled;
