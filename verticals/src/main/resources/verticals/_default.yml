@@ -125,7 +125,7 @@ genAiConfig:
 # >> EXISTING_SCORE: WEIGHT
 # Weight sum MUST BE equals to 1
 ##############################################################################
-
+# Sum of weight(values) must be equals to 1
 ecoscoreConfig:
    WEIGHT: 0.3
    BRAND_SUSTAINABILITY: 0.3
