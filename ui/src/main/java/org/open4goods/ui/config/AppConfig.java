@@ -29,7 +29,7 @@ import org.open4goods.commons.services.SearchService;
 import org.open4goods.commons.services.SerialisationService;
 import org.open4goods.commons.services.StandardiserService;
 import org.open4goods.commons.services.VerticalsConfigService;
-import org.open4goods.commons.services.ai.AiService;
+import org.open4goods.commons.services.ai.LegacyAiService;
 import org.open4goods.commons.store.repository.elastic.BrandScoresRepository;
 import org.open4goods.ui.config.yml.UiConfig;
 import org.open4goods.ui.controllers.ui.UiService;
@@ -159,8 +159,8 @@ public class AppConfig {
 
 
 	@Bean
-	AiService aiService (OpenAiChatModel chatModel,  EvaluationService spelEvaluationService, SerialisationService serialisationService) {
-		return new AiService(chatModel, spelEvaluationService, serialisationService);
+	LegacyAiService aiService (OpenAiChatModel chatModel,  EvaluationService spelEvaluationService, SerialisationService serialisationService) {
+		return new LegacyAiService(chatModel, spelEvaluationService, serialisationService);
 	}
 
 

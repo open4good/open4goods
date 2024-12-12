@@ -10,7 +10,7 @@ import org.open4goods.commons.model.constants.RolesConstants;
 import org.open4goods.commons.model.data.AiDescriptions;
 import org.open4goods.commons.model.product.Product;
 import org.open4goods.commons.services.VerticalsConfigService;
-import org.open4goods.commons.services.ai.AiService;
+import org.open4goods.commons.services.ai.LegacyAiService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -37,7 +37,7 @@ public class ProductController {
 	private  VerticalsConfigService configService;
 		
 	@Autowired
-	private   AiService aiService;
+	private   LegacyAiService aiService;
 	
 
 

@@ -9,7 +9,7 @@ import org.open4goods.commons.model.constants.RolesConstants;
 import org.open4goods.commons.model.product.Product;
 import org.open4goods.commons.services.ImageGenerationService;
 import org.open4goods.commons.services.VerticalsConfigService;
-import org.open4goods.commons.services.ai.AiService;
+import org.open4goods.commons.services.ai.LegacyAiService;
 //import org.open4goods.services.ai.AiService;
 import org.open4goods.ui.config.yml.UiConfig;
 import org.open4goods.ui.services.GoogleIndexationService;
@@ -46,7 +46,7 @@ public class AdminController {
 
 	private final SitemapGenerationService sitemapService;
 
-	private final AiService aiService;
+	private final LegacyAiService aiService;
 
 	private ProductRepository repository;
 
@@ -57,7 +57,7 @@ public class AdminController {
 	private GoogleIndexationService googleIndexationService;
 	
 	public AdminController(UiConfig config, VerticalsConfigService verticalsConfigService,
-			ProductRepository repository, SitemapGenerationService sitemapService, ImageGenerationService imageGenerationService, AiService aiService, GoogleIndexationService googleIndexationService) {
+			ProductRepository repository, SitemapGenerationService sitemapService, ImageGenerationService imageGenerationService, LegacyAiService aiService, GoogleIndexationService googleIndexationService) {
 		this.config = config;
 		this.verticalService = verticalsConfigService;
 		this.sitemapService = sitemapService;

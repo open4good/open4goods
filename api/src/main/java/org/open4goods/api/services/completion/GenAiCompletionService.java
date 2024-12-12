@@ -7,7 +7,7 @@ import org.open4goods.commons.config.yml.ui.VerticalConfig;
 import org.open4goods.commons.dao.ProductRepository;
 import org.open4goods.commons.model.product.Product;
 import org.open4goods.commons.services.VerticalsConfigService;
-import org.open4goods.commons.services.ai.AiService;
+import org.open4goods.commons.services.ai.LegacyAiService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -15,12 +15,12 @@ public class GenAiCompletionService  extends AbstractCompletionService{
 
 	protected static final Logger logger = LoggerFactory.getLogger(GenAiCompletionService.class);
 
-	private AiService aiService;
+	private LegacyAiService aiService;
 
 	private ApiProperties apiProperties;
 	
 	
-	public GenAiCompletionService( AiService aiService, ProductRepository dataRepository, VerticalsConfigService verticalConfigService, ApiProperties apiProperties) {
+	public GenAiCompletionService( LegacyAiService aiService, ProductRepository dataRepository, VerticalsConfigService verticalConfigService, ApiProperties apiProperties) {
 		// TODO(p3,design) : Should set a specific log level here (not "aggregation)" one)
 		super(dataRepository, verticalConfigService, apiProperties.logsFolder(), apiProperties.aggLogLevel());		
 		this.aiService = aiService;

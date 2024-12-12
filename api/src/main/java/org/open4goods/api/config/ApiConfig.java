@@ -15,7 +15,7 @@ import org.open4goods.api.services.completion.GenAiCompletionService;
 import org.open4goods.api.services.completion.IcecatCompletionService;
 import org.open4goods.api.services.completion.ResourceCompletionService;
 import org.open4goods.api.services.store.DataFragmentStoreService;
-import org.open4goods.commons.config.yml.attributes.PromptConfig;
+import org.open4goods.commons.config.yml.attributes.LegacyPromptConfig;
 import org.open4goods.commons.dao.ProductRepository;
 import org.open4goods.commons.exceptions.TechnicalException;
 import org.open4goods.commons.exceptions.ValidationException;
@@ -42,7 +42,8 @@ import org.open4goods.commons.services.SearchService;
 import org.open4goods.commons.services.SerialisationService;
 import org.open4goods.commons.services.StandardiserService;
 import org.open4goods.commons.services.VerticalsConfigService;
-import org.open4goods.commons.services.ai.AiService;
+import org.open4goods.commons.services.ai.GenAiService;
+import org.open4goods.commons.services.ai.LegacyAiService;
 import org.open4goods.commons.services.textgen.BlablaService;
 import org.open4goods.commons.store.repository.elastic.BrandScoresRepository;
 import org.open4goods.crawler.config.yml.FetcherProperties;
@@ -60,7 +61,10 @@ import org.springdoc.core.customizers.OpenApiCustomizer;
 import org.springdoc.core.models.GroupedOpenApi;
 import org.springframework.ai.openai.OpenAiChatModel;
 import org.springframework.ai.openai.OpenAiImageModel;
+import org.springframework.ai.openai.api.OpenAiApi;
+import org.springframework.ai.retry.RetryUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.caffeine.CaffeineCache;
@@ -72,6 +76,8 @@ import org.springframework.core.io.support.ResourcePatternResolver;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
+import org.springframework.web.client.RestClient;
+import org.springframework.web.reactive.function.client.WebClient;
 import org.xml.sax.SAXException;
 
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
@@ -99,6 +105,9 @@ public class ApiConfig {
 		this.apiProperties = apiProperties;
 	}
 
+
+
+	
 //    @Bean
 //    RedisTemplate<String, Product> redisTemplate(RedisConnectionFactory connectionFactory) {
 //		  RedisTemplate<String, Product> template = new RedisTemplate<>();
@@ -117,7 +126,7 @@ public class ApiConfig {
 	}
 
 	@Bean
-	VerticalsGenerationService verticalsGenerationService(ProductRepository pRepo, SerialisationService serialisationService, AiService aiService, GoogleTaxonomyService gTaxoService, VerticalsConfigService verticalsConfigService, ResourcePatternResolver resourceResolver,
+	VerticalsGenerationService verticalsGenerationService(ProductRepository pRepo, SerialisationService serialisationService, LegacyAiService aiService, GoogleTaxonomyService gTaxoService, VerticalsConfigService verticalsConfigService, ResourcePatternResolver resourceResolver,
 			EvaluationService evaluationService, IcecatService icecatService) throws SAXException {
 		return new VerticalsGenerationService(apiProperties.getVerticalsGenerationConfig(), pRepo, serialisationService, aiService, gTaxoService, verticalsConfigService, resourceResolver, evaluationService, icecatService);
 	}
@@ -130,18 +139,41 @@ public class ApiConfig {
 		return new IcecatService(new XmlMapper(), apiProperties.getIcecatFeatureConfig(), fileCachingService, apiProperties.remoteCachingFolder(), brandService, verticalConfigService);
 	}
 
+	
 	@Bean
-
-	GenAiCompletionService aiCompletionService(AiService aiService, ProductRepository productRepository, VerticalsConfigService verticalConfigService) {
+	@Qualifier("perplexityChatModel")
+	OpenAiApi perplexityApi(ApiProperties apiConfig) {
+		return new OpenAiApi(apiConfig.getGenAiConfig().getPerplexityBaseUrl(),
+							 apiConfig.getGenAiConfig().getPerplexityApiKey(),
+							 apiConfig.getGenAiConfig().getPerplexityCompletionsPath(),
+							 "/v1/embeddings", RestClient.builder(), WebClient.builder(),
+							 RetryUtils.DEFAULT_RESPONSE_ERROR_HANDLER);
+	}
+	
+	@Bean
+	@Qualifier("openAiCustomApi")
+	OpenAiApi openAiCustomApi(ApiProperties apiConfig) {
+		return new OpenAiApi(apiConfig.getGenAiConfig().getOpenaiApiKey());
+	}
+	
+	@Bean
+	GenAiService genAiService (@Autowired @Qualifier("perplexityChatModel") OpenAiApi perplexityApi, 
+								@Autowired @Qualifier("openAiCustomApi") OpenAiApi openAiCustomApi,
+								ApiProperties apiConfig, EvaluationService spelEvaluationService, SerialisationService serialisationService) {
+		return new GenAiService(apiProperties.getGenAiConfig(), perplexityApi, openAiCustomApi, serialisationService, spelEvaluationService);
+	}
+	
+	@Bean
+	GenAiCompletionService aiCompletionService(LegacyAiService aiService, ProductRepository productRepository, VerticalsConfigService verticalConfigService) {
 		return new GenAiCompletionService(aiService, productRepository, verticalConfigService, apiProperties);
 	}
 
 	@Bean
-
-	AiService aiService(OpenAiChatModel chatModel, EvaluationService spelEvaluationService, SerialisationService serialisationService) {
-		return new AiService(chatModel, spelEvaluationService, serialisationService);
+	LegacyAiService aiService(OpenAiChatModel chatModel, EvaluationService spelEvaluationService, SerialisationService serialisationService) {
+		return new LegacyAiService(chatModel, spelEvaluationService, serialisationService);
 	}
 
+	
 	@Bean
 
 	IcecatCompletionService icecatCompletionService(ProductRepository productRepository, VerticalsConfigService verticalConfigService, DataSourceConfigService dataSourceConfigService, AggregationFacadeService aggregationFacade) throws TechnicalException {
@@ -199,6 +231,8 @@ public class ApiConfig {
 		return new BrandService(rfc, properties.logsFolder(), serialisationService );
 	}
 
+
+	
 	@Bean
 	BrandScoreService brandScoreService( @Autowired ApiProperties properties, @Autowired BrandScoresRepository brandScoreRepository) throws Exception {
 		return new BrandScoreService(brandScoreRepository, properties.logsFolder());
@@ -207,8 +241,8 @@ public class ApiConfig {
 	
 	
 	@Bean
-	PromptConfig aiConfig() {
-		return new PromptConfig();
+	LegacyPromptConfig aiConfig() {
+		return new LegacyPromptConfig();
 	}
 
 	@Bean
