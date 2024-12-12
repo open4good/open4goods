@@ -20,7 +20,7 @@ public class AiPromptsConfig {
 	/**
 	 * List of specific prompts
 	 */
-	List<PromptConfig> prompts = new ArrayList<>();
+	List<LegacyPromptConfig> prompts = new ArrayList<>();
 	
 	
 	/**
@@ -37,10 +37,10 @@ public class AiPromptsConfig {
 	public void setRootPrompt(String rootPrompt) {
 		this.rootPrompt = rootPrompt;
 	}
-	public List<PromptConfig> getPrompts() {
+	public List<LegacyPromptConfig> getPrompts() {
 		return prompts;
 	}
-	public void setPrompts(List<PromptConfig> configs) {
+	public void setPrompts(List<LegacyPromptConfig> configs) {
 		this.prompts = configs;
 	}
 	public boolean isOverride() {

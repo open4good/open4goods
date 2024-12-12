@@ -11,6 +11,7 @@ import org.open4goods.commons.config.yml.GithubConfiguration;
 import org.open4goods.commons.config.yml.IcecatConfiguration;
 import org.open4goods.commons.config.yml.IndexationConfig;
 import org.open4goods.commons.config.yml.ui.DescriptionsAggregationConfig;
+import org.open4goods.commons.config.yml.ui.GenAiConfig;
 import org.open4goods.commons.config.yml.ui.ImageGenerationConfig;
 import org.open4goods.crawler.config.yml.FetcherProperties;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -188,6 +189,11 @@ public class ApiProperties {
 	 */
 	private IndexationConfig indexationConfig = new IndexationConfig();
 	
+	
+	/**
+	 * Configuration for gen ai
+	 */
+	private GenAiConfig genAiConfig = new GenAiConfig();
 	
 	/**
 	 * Duration of the pause to apply beetween 2 subsequent GenAI generation
@@ -624,6 +630,18 @@ public class ApiProperties {
 
 	public void setVerticalsGenerationConfig(VerticalsGenerationConfig verticalsGenerationConfig) {
 		this.verticalsGenerationConfig = verticalsGenerationConfig;
+	}
+
+
+
+	public GenAiConfig getGenAiConfig() {
+		return genAiConfig;
+	}
+
+
+
+	public void setGenAiConfig(GenAiConfig genAiConfig) {
+		this.genAiConfig = genAiConfig;
 	}
 
 

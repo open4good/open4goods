@@ -6,7 +6,7 @@ package org.open4goods.commons.config.yml.attributes;
  * @author goulven
  *
  */
-public class PromptConfig {
+public class LegacyPromptConfig {
 
 	/**
 	 * The identifier for this attribute.

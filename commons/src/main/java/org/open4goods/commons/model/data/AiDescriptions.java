@@ -3,14 +3,14 @@ package org.open4goods.commons.model.data;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.open4goods.commons.config.yml.attributes.PromptConfig;
+import org.open4goods.commons.config.yml.attributes.LegacyPromptConfig;
 import org.springframework.data.elasticsearch.annotations.Field;
 import org.springframework.data.elasticsearch.annotations.FieldType;
 
 public class AiDescriptions {
 	
 	/**
-	 * Descriptions, keyed by the identifying key (matching {@link PromptConfig.key}
+	 * Descriptions, keyed by the identifying key (matching {@link LegacyPromptConfig.key}
 	 */
 	private Map<String,AiDescription> descriptions = new HashMap<String, AiDescription>();
 	

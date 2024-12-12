@@ -8,7 +8,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.open4goods.commons.config.yml.attributes.AiPromptsConfig;
-import org.open4goods.commons.config.yml.attributes.PromptConfig;
+import org.open4goods.commons.config.yml.attributes.LegacyPromptConfig;
 import org.open4goods.commons.config.yml.ui.ProductI18nElements;
 import org.open4goods.commons.config.yml.ui.VerticalConfig;
 import org.open4goods.commons.model.data.AiDescription;
@@ -39,14 +39,14 @@ import io.micrometer.core.annotation.Timed;
 /**
  * This service is in charge of generating texts through GenAI prompts
  */
-public class AiService implements HealthIndicator{
+public class LegacyAiService implements HealthIndicator{
 
 	// TODO(p2,conf) : From conf
 	private static final int MIN_REQUIRED_ATTRIBUTES = 15;
 	
 	
 	
-	private final Logger logger = LoggerFactory.getLogger(AiService.class);
+	private final Logger logger = LoggerFactory.getLogger(LegacyAiService.class);
 	private final OpenAiChatModel chatModel;
 	private final EvaluationService spelEvaluationService;
 	private final SerialisationService serialisationService;
@@ -58,7 +58,7 @@ public class AiService implements HealthIndicator{
 
 	
 	
-	public AiService(OpenAiChatModel chatModel,  EvaluationService spelEvaluationService, SerialisationService serialisationService) {
+	public LegacyAiService(OpenAiChatModel chatModel,  EvaluationService spelEvaluationService, SerialisationService serialisationService) {
 		this.chatModel = chatModel;
 		this.spelEvaluationService = spelEvaluationService;
 		this.serialisationService = serialisationService;
@@ -231,7 +231,7 @@ public class AiService implements HealthIndicator{
 
 		// 2 - Evaluate the other prompts
 		StringBuilder combinedPrompts = new StringBuilder(evaluatedRootPrompt);
-		for (PromptConfig promptConfig : aiConfigs.getPrompts()) {
+		for (LegacyPromptConfig promptConfig : aiConfigs.getPrompts()) {
 			
 			// We do not add the prompt if we already have a generation on it, unless force == true 
 			
