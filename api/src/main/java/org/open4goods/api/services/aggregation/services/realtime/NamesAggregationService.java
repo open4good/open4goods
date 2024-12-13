@@ -71,32 +71,18 @@ public class NamesAggregationService extends AbstractAggregationService {
 				// Computing url
 				if (vConf.isForceNameGeneration() ||  (data.getVertical() == null ||  null == data.getNames().getUrl().get(lang))) {
 					logger.info("Generating  product url for {}", data);
-					String urlSuffix = StringUtils.stripAccents(computePrefixedText(data, tConf.getUrl(), "-"));
-					urlSuffix = StringUtils.normalizeSpace(urlSuffix).replace(' ', '-');
-					
-					String url = data.gtin();
-					if (!StringUtils.isEmpty(urlSuffix)) {
-						url +=  "-" + urlSuffix;
-					}
-					
-					url = url.replaceAll("-{2,}", "-");
-					
-					if (url.endsWith("-")) {
-						url = url.substring(0,url.length()-1);
-					}
+					PrefixedAttrText urlPrefix = tConf.getUrl();
+					String url = generateUrl(data, urlPrefix);
 										
 					data.getNames().getUrl().put(lang, url);
 				} else {
 					logger.info("Skipping URL generation for {}", data);
 				}
 				
-				
 				if (vConf.isForceNameGeneration() || data.getVertical() == null || null == data.getNames().getH1Title().get(lang)) {
 					// h1Title			
 					data.getNames().getH1Title().put(lang, computePrefixedText(data, tConf.getH1Title(), " "));
 				}
-				
-				
 				
 				// metaDescription
 				data.getNames().getMetaDescription().put(lang, blablaService.generateBlabla(tConf.getProductMetaDescription(), data));
@@ -134,6 +120,23 @@ public class NamesAggregationService extends AbstractAggregationService {
 //				}
 //			}
 //		}
+	}
+
+	private String generateUrl(Product data, PrefixedAttrText urlPrefix) throws InvalidParameterException {
+		String urlSuffix = StringUtils.stripAccents(computePrefixedText(data, urlPrefix, "-"));
+		urlSuffix = StringUtils.normalizeSpace(urlSuffix).replace(' ', '-');
+		
+		String url = data.gtin();
+		if (!StringUtils.isEmpty(urlSuffix)) {
+			url +=  "-" + urlSuffix;
+		}
+		
+		url = url.replaceAll("-{2,}", "-");
+		
+		if (url.endsWith("-")) {
+			url = url.substring(0,url.length()-1);
+		}
+		return url;
 	}
 
 	
