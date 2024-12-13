@@ -69,10 +69,10 @@ public class NamesAggregationService extends AbstractAggregationService {
 				ProductI18nElements tConf = e.getValue();
 				
 				// Computing url
-				if (vConf.isForceNameGeneration() ||  (data.getVertical() == null ||  null == data.getNames().getUrl().get(lang))) {
+				if (vConf.isForceNameGeneration() ||  (  null == data.getNames().getUrl().get(lang))) {
 					logger.info("Generating  product url for {}", data);
 					PrefixedAttrText urlPrefix = tConf.getUrl();
-					String url = generateUrl(data, urlPrefix);
+					String url = generateUrl(data, urlPrefix, vConf);
 										
 					data.getNames().getUrl().put(lang, url);
 				} else {
@@ -122,21 +122,33 @@ public class NamesAggregationService extends AbstractAggregationService {
 //		}
 	}
 
-	private String generateUrl(Product data, PrefixedAttrText urlPrefix) throws InvalidParameterException {
-		String urlSuffix = StringUtils.stripAccents(computePrefixedText(data, urlPrefix, "-"));
-		urlSuffix = StringUtils.normalizeSpace(urlSuffix).replace(' ', '-');
+	private String generateUrl(Product data, PrefixedAttrText urlPrefix, VerticalConfig vConf) throws InvalidParameterException {
 		
 		String url = data.gtin();
+		String urlSuffix;
+		
+		if (null == vConf.getId()) {
+			// It is an undefined vertical, we apply shortest offername
+			 urlSuffix = data.shortestOfferName();
+		} else {
+			// It is a defined vertical, we apply names 
+			urlSuffix = StringUtils.stripAccents(computePrefixedText(data, urlPrefix, "-"));
+		}
+
 		if (!StringUtils.isEmpty(urlSuffix)) {
 			url +=  "-" + urlSuffix;
 		}
-		
+
+		// Url sanitisation
+		url = StringUtils.normalizeSpace(url).replace(' ', '-');
 		url = url.replaceAll("-{2,}", "-");
-		
+		url = url.toLowerCase();
 		if (url.endsWith("-")) {
 			url = url.substring(0,url.length()-1);
 		}
+		
 		return url;
+		
 	}
 
 	
