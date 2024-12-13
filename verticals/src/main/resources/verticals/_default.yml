@@ -605,7 +605,7 @@ attributesConfig:
       
     name:
         default: "Power consumption"
-        fr: "Consommation électrique"
+        fr: "Consommation électrique en marche"
       
     synonyms:
         all:
