@@ -1,6 +1,7 @@
 package org.open4goods.commons.services.ai;
 
 import java.io.File;
+import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -12,6 +13,7 @@ import org.open4goods.commons.config.yml.GenAiServiceType;
 import org.open4goods.commons.config.yml.PromptConfig;
 import org.open4goods.commons.config.yml.ui.GenAiConfig;
 import org.open4goods.commons.exceptions.ResourceNotFoundException;
+import org.open4goods.commons.model.EcoscoreResponse;
 import org.open4goods.commons.services.EvaluationService;
 import org.open4goods.commons.services.SerialisationService;
 import org.slf4j.Logger;
@@ -21,6 +23,10 @@ import org.springframework.ai.chat.client.ChatClient.CallResponseSpec;
 import org.springframework.ai.openai.OpenAiChatModel;
 import org.springframework.ai.openai.api.OpenAiApi;
 import org.springframework.core.ParameterizedTypeReference;
+
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JsonMappingException;
 
 /**
  * This service handle gen ai service capabilities, based on the OpenAiChatModel
@@ -69,7 +75,8 @@ public class GenAiService {
 	 */
 	public CallResponseSpec prompt(String promptKey, Map<String, Object> variables) throws ResourceNotFoundException {
 
-		PromptConfig pConf = prompts.get(promptKey);
+		// TODO : Enable only if genaiconfig.enabled
+		PromptConfig pConf =  getPromptConfig(promptKey);
 
 		if (null == pConf) {
 			logger.error("PromptConfig {}  does not exists", promptKey);
@@ -82,29 +89,41 @@ public class GenAiService {
 
 		// Checking there are no remainings unevaluated expression
 
-	// TODO Detect if remaining variables
+	// TODO(p2,safety)  Detect if remaining variables
 
-		CallResponseSpec ret = ChatClient.create(models.get(promptKey)).prompt()
+		CallResponseSpec ret = ChatClient.create( models.get(promptKey)).prompt()
 				.system(systemPrompt)
 				.user(userPrompt)
 				.options(pConf.getOptions()).call();
-//				.entity(new ParameterizedTypeReference<Map<String, String>>() {});
 
 		return ret;
 
 	}
 	
-	public Map<String, String> jsonPrompt(String promptKey, Map<String, Object> variables) throws ResourceNotFoundException {
-		
-		CallResponseSpec response = prompt(promptKey, variables);
-		return response.entity(new ParameterizedTypeReference<Map<String, String>>() {});
+	
+	/**
+	 * Prompt as json map
+	 * @param promptKey
+	 * @param variables
+	 * @return
+	 * @throws ResourceNotFoundException
+	 */
+	public Map<String, Object> jsonPrompt(String promptKey, Map<String, Object> variables) throws ResourceNotFoundException {
+		String response = prompt(promptKey, variables).content();
+		response = response.replace("```json", "").replace("```", "");
+		try {
+			return serialisationService.fromJsonTypeRef(response, new TypeReference<Map<String, Object>>() {});
+		} catch (Exception e) {
+			logger.error("Unable to map to json structure : {} \n {}",e.getMessage(),response );		
+			return new HashMap<String, Object>();
+		}
 	}
 
 	
-	public SamplePromptEntity entityPrompt(String promptKey, Map<String, Object> variables) throws ResourceNotFoundException {
+	public EcoscoreResponse entityPrompt(String promptKey, Map<String, Object> variables) throws ResourceNotFoundException {
 		
 		CallResponseSpec response = prompt(promptKey, variables);
-		return response.entity(SamplePromptEntity.class);
+		return response.entity(new ParameterizedTypeReference<EcoscoreResponse>() {});
 	}
 	
 	
@@ -129,7 +148,23 @@ public class GenAiService {
 	}
 
 	/**
-	 * Load the prompts config files in memory
+	 * 
+	 * @param promptKey
+	 * @return
+	 */
+	private PromptConfig getPromptConfig(String promptKey) {
+		if (genAiConfig.isCacheTemplates()) {
+			return prompts.get(promptKey);
+		} else {
+			
+			String path = genAiConfig.getPromptsTemplatesFolder()+"/"+promptKey+".yml";
+			return loadPrompt(new File(path));
+		}
+	}
+
+	
+	/**
+	 * Load all the prompts config files in memory
 	 * 
 	 * @param folderPath
 	 */
@@ -138,15 +173,27 @@ public class GenAiService {
 		List<File> promptsFile = Arrays.asList(new File(folderPath).listFiles()).stream().filter(e -> e.getName().endsWith(".yml")).toList();
 
 		promptsFile.forEach(f -> {
-			try {
-				PromptConfig pc = serialisationService.fromYaml(FileUtils.readFileToString(f, Charset.defaultCharset()), PromptConfig.class);
-				this.prompts.put(pc.getKey(), pc);
-			} catch (Exception e) {
-				logger.error("Error while reading prompt config file : {}", f.getAbsolutePath(), e);
-			}
+			PromptConfig pc = loadPrompt(f);
+			this.prompts.put(pc.getKey(), pc);
 
 		});
 
+	}
+
+	/**
+	 * Load a PromptConfig from a file
+	 * @param f
+	 * @return
+	 */
+	private PromptConfig loadPrompt(File f) {
+		PromptConfig pc = null;
+		try {
+			pc = serialisationService.fromYaml(FileUtils.readFileToString(f, Charset.defaultCharset()), PromptConfig.class);
+			
+		} catch (Exception e) {
+			logger.error("Error while reading prompt config file : {}", f.getAbsolutePath(), e);
+		}
+		return pc;
 	}
 
 }
