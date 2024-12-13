@@ -113,6 +113,9 @@ public class SerialisationService {
 		return jsonMapper.readValue(value, typeRef);
 	}
 
+	public Map<String, Object> fromJsonTypeRef(String value, TypeReference<Map<String, Object>> typeRef) 		throws JsonParseException, JsonMappingException, IOException {
+		return jsonMapper.readValue(value, typeRef);
+	}
 
 
 

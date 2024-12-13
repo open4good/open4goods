@@ -7,6 +7,8 @@ public class GenAiConfig {
 	 */
 	private String promptsTemplatesFolder;
 	
+	private boolean cacheTemplates = true;
+	
 	private String openaiApiKey;
 
 	private String perplexityApiKey;
@@ -55,6 +57,12 @@ public class GenAiConfig {
 	}
 	public void setPerplexityCompletionsPath(String perplexityCompletionsPath) {
 		this.perplexityCompletionsPath = perplexityCompletionsPath;
+	}
+	public boolean isCacheTemplates() {
+		return cacheTemplates;
+	}
+	public void setCacheTemplates(boolean cacheTemplates) {
+		this.cacheTemplates = cacheTemplates;
 	}
 
 	
