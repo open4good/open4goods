@@ -7,7 +7,7 @@ public class SamplePromptEntity {
 	private String analysis;
 	private String score_composition;
 	private String critical_review;
-	private Map<String,Double> ecoscoreConfig;
+	private Map<String,Double> impactScoreConfig;
 	public String getAnalysis() {
 		return analysis;
 	}
@@ -26,11 +26,11 @@ public class SamplePromptEntity {
 	public void setCritical_review(String critical_review) {
 		this.critical_review = critical_review;
 	}
-	public Map<String, Double> getEcoscoreConfig() {
-		return ecoscoreConfig;
+	public Map<String, Double> getimpactScoreConfig() {
+		return impactScoreConfig;
 	}
-	public void setEcoscoreConfig(Map<String, Double> ecoscoreConfig) {
-		this.ecoscoreConfig = ecoscoreConfig;
+	public void setimpactScoreConfig(Map<String, Double> impactScoreConfig) {
+		this.impactScoreConfig = impactScoreConfig;
 	}
 	
 	

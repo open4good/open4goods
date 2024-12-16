@@ -43,26 +43,26 @@ public class VerticalsGenerationController {
 		this.verticalsConfigService = verticalsConfigService;
 	}
 
-	@GetMapping(path="/fullFromDb")
-	@Operation(summary="Loads the mappings from database, then clean and save to file")
-	@PreAuthorize("hasAuthority('"+RolesConstants.ROLE_ADMIN+"')")
-	public void full() throws ResourceNotFoundException, IOException {
-		verticalsGenService.fullFromDb();
-	}
-
-	@GetMapping(path="/mappings/load/database")
-	@Operation(summary="Loads the mappings from database")
-	@PreAuthorize("hasAuthority('"+RolesConstants.ROLE_ADMIN+"')")
-	public void load() throws ResourceNotFoundException {
-		verticalsGenService.loadCategoriesMappingFromDatabase();
-	}
-
-	@GetMapping(path="/mappings/load/file")
-	@Operation(summary="Import the mapping file from JSON")
-	@PreAuthorize("hasAuthority('"+RolesConstants.ROLE_ADMIN+"')")
-	public void importMapping() throws ResourceNotFoundException, IOException {
-		verticalsGenService.importMappingFile();
-	}
+//	@GetMapping(path="/fullFromDb")
+//	@Operation(summary="Loads the mappings from database, then clean and save to file")
+//	@PreAuthorize("hasAuthority('"+RolesConstants.ROLE_ADMIN+"')")
+//	public void full() throws ResourceNotFoundException, IOException {
+//		verticalsGenService.fullFromDb();
+//	}
+//
+//	@GetMapping(path="/mappings/load/database")
+//	@Operation(summary="Loads the mappings from database")
+//	@PreAuthorize("hasAuthority('"+RolesConstants.ROLE_ADMIN+"')")
+//	public void load() throws ResourceNotFoundException {
+//		verticalsGenService.loadCategoriesMappingFromDatabase();
+//	}
+//
+//	@GetMapping(path="/mappings/load/file")
+//	@Operation(summary="Import the mapping file from JSON")
+//	@PreAuthorize("hasAuthority('"+RolesConstants.ROLE_ADMIN+"')")
+//	public void importMapping() throws ResourceNotFoundException, IOException {
+//		verticalsGenService.importMappingFile();
+//	}
 	
 	
 //	@GetMapping(path="/mappings/clean/threshold")
@@ -81,62 +81,29 @@ public class VerticalsGenerationController {
 	
 	
 
-	@GetMapping(path="/mappings")
-	@Operation(summary="Show the mappings")
-	@PreAuthorize("hasAuthority('"+RolesConstants.ROLE_ADMIN+"')")
-	public Map<String, VerticalCategoryMapping> get() throws ResourceNotFoundException {
-		return verticalsGenService.getMappings();
-		
-	}
-
-	@GetMapping(path="/mappings/export")
-	@Operation(summary="Export the mapping file to JSON")
-	@PreAuthorize("hasAuthority('"+RolesConstants.ROLE_ADMIN+"')")
-	public void exportMapping() throws ResourceNotFoundException, IOException {
-		 verticalsGenService.exportMappingFile();
-		
-	}
+//	@GetMapping(path="/mappings")
+//	@Operation(summary="Show the mappings")
+//	@PreAuthorize("hasAuthority('"+RolesConstants.ROLE_ADMIN+"')")
+//	public Map<String, VerticalCategoryMapping> get() throws ResourceNotFoundException {
+//		return verticalsGenService.getMappings();
+//		
+//	}
+//
+//	@GetMapping(path="/mappings/export")
+//	@Operation(summary="Export the mapping file to JSON")
+//	@PreAuthorize("hasAuthority('"+RolesConstants.ROLE_ADMIN+"')")
+//	public void exportMapping() throws ResourceNotFoundException, IOException {
+//		 verticalsGenService.exportMappingFile();
+//		
+//	}
 	
 
-	@GetMapping(path="/assist/attributes/{vertical}")
-	@Operation(summary="Generate attributes coverage for a vertical")
+	
+	
+	@GetMapping(path="/misc/vertical")
+	@Operation(summary="Generate the vertical files. Please, use https://docs.google.com/spreadsheets/d/1AyBdagWbn_rst2xZvUH9dVF7G2y_Wm_Xrq0IxDGkXoc/edit?gid=0#gid=0")
 	@PreAuthorize("hasAuthority('"+RolesConstants.ROLE_ADMIN+"')")
-	@Cacheable(keyGenerator = CacheConstants.KEY_GENERATOR, cacheNames = CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME)
-	public VerticalAttributesStats generateAttributesCoverage(@PathVariable String vertical) throws ResourceNotFoundException, IOException {
-		 return verticalsGenService.attributesStats(vertical);
-		
-	}
-	
-
-	@GetMapping(path="/assist/categories/gtin")
-	@Operation(summary="Generate the categories yaml fragment for a given match")
-	@PreAuthorize("hasAuthority('"+RolesConstants.ROLE_ADMIN+"')")
-	@Cacheable(keyGenerator = CacheConstants.KEY_GENERATOR, cacheNames = CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME)
-	public String generateCategoryMappingsFragment(@RequestParam String gtins) throws ResourceNotFoundException, IOException {
-		 return verticalsGenService.generateCategoryMappingFragmentForGtin(Arrays.asList(gtins.split(",")), null );
-		
-	}
-	
-	
-	@GetMapping(path="/assist/categories/vertical")
-	@Operation(summary="Generate the categories yaml fragment for a given vertical")
-	@PreAuthorize("hasAuthority('"+RolesConstants.ROLE_ADMIN+"')")
-	@Cacheable(keyGenerator = CacheConstants.KEY_GENERATOR, cacheNames = CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME)
-	public String generateCategoryMappingsForExistinf(@RequestParam String vertical, @RequestParam(defaultValue = "5") Integer minOffersCount ) throws ResourceNotFoundException, IOException {
-
-		VerticalConfig vc = verticalsConfigService.getConfigById(vertical);
-		return verticalsGenService.generateMapping(vc,minOffersCount);
-		
-	}
-	
-	
-	
-	
-	
-	
-	@GetMapping(path="/assist/vertical")
-	@Operation(summary="Generate the vertical file")
-	@PreAuthorize("hasAuthority('"+RolesConstants.ROLE_ADMIN+"')")
+	// Respond to https://docs.google.com/spreadsheets/d/1AyBdagWbn_rst2xZvUH9dVF7G2y_Wm_Xrq0IxDGkXoc/edit?gid=0#gid=0
 	public void generateCategoryMappingsFragment( 
 			@RequestParam String googleTaxonomyId,
 			@RequestParam										 String matchingCategories,
@@ -150,24 +117,70 @@ public class VerticalsGenerationController {
 	}
 	
 	
-
-	
-	@GetMapping(path="/update/verticals/categoriesmapping")
-	@Operation(summary="Update the categories mapping directly in the files !")
+	@GetMapping(path="/{vertical}/attributes/")
+	@Operation(summary="Generate attributes coverage for a vertical")
 	@PreAuthorize("hasAuthority('"+RolesConstants.ROLE_ADMIN+"')")
-	public void updateVerticalsWithMappings( 
-			@RequestParam	(defaultValue = "3")									 Integer minOffers) throws ResourceNotFoundException, IOException {
-		
-		//TODO(p2,conf) : from conf
- 		  verticalsGenService.updateVerticalsWithMappings("/home/goulven/git/open4goods/verticals/src/main/resources/verticals/",minOffers);
+	@Cacheable(keyGenerator = CacheConstants.KEY_GENERATOR, cacheNames = CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME)
+	public VerticalAttributesStats generateAttributesCoverage(@PathVariable String vertical) throws ResourceNotFoundException, IOException {
+		 return verticalsGenService.attributesStats(vertical);
+	}
+	
+
+//	@GetMapping(path="/misc/categories/gtin")
+//	@Operation(summary="Generate the categories yaml fragment for a given match")
+//	@PreAuthorize("hasAuthority('"+RolesConstants.ROLE_ADMIN+"')")
+//	@Cacheable(keyGenerator = CacheConstants.KEY_GENERATOR, cacheNames = CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME)
+//	public String generateCategoryMappingsFragment(@RequestParam String gtins) throws ResourceNotFoundException, IOException {
+//		 return verticalsGenService.generateCategoryMappingFragmentForGtin(Arrays.asList(gtins.split(",")), null );
+//		
+//	}
+	
+	
+	@GetMapping(path="/{vertical}/categories/")
+	@Operation(summary="Generate the categories yaml fragment for a given vertical")
+	@PreAuthorize("hasAuthority('"+RolesConstants.ROLE_ADMIN+"')")
+	@Cacheable(keyGenerator = CacheConstants.KEY_GENERATOR, cacheNames = CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME)
+	public String generateCategoryMappingsForExistinf(@PathVariable String vertical, @RequestParam(defaultValue = "5") Integer minOffersCount ) throws ResourceNotFoundException, IOException {
+
+		VerticalConfig vc = verticalsConfigService.getConfigById(vertical);
+		return verticalsGenService.generateMapping(vc,minOffersCount);
 		
 	}
 	
-	@GetMapping(path="/update/verticals/categoriesmapping/{vertical}")
+	
+	@GetMapping(path="/{vertical}/ecoscore/")
+	@Operation(summary="Generate the ecoscore yaml fragment for a given vertical")
+	@PreAuthorize("hasAuthority('"+RolesConstants.ROLE_ADMIN+"')")
+	@Cacheable(keyGenerator = CacheConstants.KEY_GENERATOR, cacheNames = CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME)
+	public String generateEcoscoreMappings(@PathVariable String vertical) throws ResourceNotFoundException, IOException {
+
+		VerticalConfig vc = verticalsConfigService.getConfigById(vertical);
+		return verticalsGenService.generateEcoscoreYamlConfig(vc);
+		
+	}
+	
+	
+
+	
+	
+
+	
+//	@GetMapping(path="/update/verticals/categoriesmapping")
+//	@Operation(summary="Update the categories mapping directly in the files !")
+//	@PreAuthorize("hasAuthority('"+RolesConstants.ROLE_ADMIN+"')")
+//	public void updateVerticalsWithMappings( 
+//			@RequestParam	(defaultValue = "3")									 Integer minOffers) throws ResourceNotFoundException, IOException {
+//		
+//		//TODO(p2,conf) : from conf
+// 		  verticalsGenService.updateAllVerticalFileWithCategories("/home/goulven/git/open4goods/verticals/src/main/resources/verticals/",minOffers);
+//		
+//	}
+	
+	@GetMapping(path="/{vertical}/categories/update")
 	@Operation(summary="Update the categories mapping for a given vertical directly in the file !")
 	@PreAuthorize("hasAuthority('"+RolesConstants.ROLE_ADMIN+"')")
 	public void updateVerticalWithMappings( 
-			@RequestParam	(defaultValue = "tv")									 String vertical,
+			@PathVariable															 String vertical,
 			@RequestParam	(defaultValue = "3")									 Integer minOffers) throws ResourceNotFoundException, IOException {
 		
 		//TODO(p2,conf) : from conf
@@ -175,11 +188,11 @@ public class VerticalsGenerationController {
 		
 	}
 	
-	@GetMapping(path="/update/verticals/attributes/{vertical}")
+	@GetMapping(path="/{vertical}/attributes/update")
 	@Operation(summary="Update the suggested attributes for a given vertical directly in the file !")
 	@PreAuthorize("hasAuthority('"+RolesConstants.ROLE_ADMIN+"')")
 	public void updateVerticalWithAttributes( 
-			@RequestParam	(defaultValue = "tv")									 String vertical,
+			@PathVariable										 String vertical,
 			@RequestParam	(defaultValue = "10")									 Integer minCoverage,
 			@RequestParam	(defaultValue = "")									 String containing
 			) throws ResourceNotFoundException, IOException {

@@ -1,6 +1,5 @@
 package org.open4goods.commons.dao;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -12,7 +11,6 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.open4goods.model.BarcodeType;
 import org.open4goods.commons.config.yml.IndexationConfig;
 import org.open4goods.commons.config.yml.ui.VerticalConfig;
 import org.open4goods.commons.exceptions.ResourceNotFoundException;
@@ -22,6 +20,7 @@ import org.open4goods.commons.model.product.ProductPartialUpdateHolder;
 import org.open4goods.commons.services.SerialisationService;
 import org.open4goods.commons.store.repository.FullProductIndexationWorker;
 import org.open4goods.commons.store.repository.PartialProductIndexationWorker;
+import org.open4goods.model.BarcodeType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -211,6 +210,33 @@ public class ProductRepository {
 
 	}
 
+	
+	
+	// TODO(P2,design) : in a stat service
+	
+	/**
+	 * Return the scores coverage stats for a vertical
+	 * @param vConf
+	 * @return
+	 */
+	public Map<String,Long> scoresCoverage(VerticalConfig vConf) {
+		
+		Map<String, Long> ret = new HashMap<>();
+		
+		vConf.getAvailableImpactScoreCriterias().entrySet().forEach(criteria -> {
+			
+			Long count = countMainIndexHavingScore(criteria.getKey(),vConf.getId());
+
+			// TODO(p2, conf) : threshold from conf
+			if (count > 10) {
+				ret.put(criteria.getKey() ,  count);
+			}
+		});
+		
+		
+		return ret;
+	}
+	
 	/**
 	 * Export all aggregateddatas for a vertical
 	 * 
@@ -634,6 +660,13 @@ public class ProductRepository {
 	}
 
 	@Cacheable(keyGenerator = CacheConstants.KEY_GENERATOR, cacheNames = CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME)
+	public Long countMainIndexHavingScore(String scoreName, String vertical) {
+		CriteriaQuery query = new CriteriaQuery(new Criteria("vertical").is(vertical) .and(new Criteria("scores." + scoreName + ".value").exists()));
+		return elasticsearchOperations.count(query, CURRENT_INDEX);
+	}
+	
+	
+	@Cacheable(keyGenerator = CacheConstants.KEY_GENERATOR, cacheNames = CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME)
 	public Long countMainIndexHavingRecentUpdate() {
 		CriteriaQuery query = new CriteriaQuery(getRecentPriceQuery());
 		return elasticsearchOperations.count(query, CURRENT_INDEX);
@@ -788,6 +821,8 @@ public class ProductRepository {
 	public ElasticsearchOperations getElasticsearchOperations() {
 		return elasticsearchOperations;
 	}
+
+
 
 
 

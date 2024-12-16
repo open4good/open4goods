@@ -189,7 +189,7 @@ public class VerticalsConfigService {
 			try {
 				ret.add(getConfig(r.getInputStream(), getDefaultConfig()));
 			} catch (IOException e) {
-				logger.error("Cannot retrieve vertical config",e);
+				logger.error("Cannot retrieve vertical config : {}",r.getFilename(), e);
 			}
 		}
 			
