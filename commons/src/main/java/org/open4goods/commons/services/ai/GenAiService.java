@@ -72,30 +72,47 @@ public class GenAiService {
 	 * @param variables
 	 * @return
 	 * @throws ResourceNotFoundException
+	 * @throws IOException 
+	 * @throws JsonMappingException 
+	 * @throws JsonParseException 
 	 */
-	public CallResponseSpec prompt(String promptKey, Map<String, Object> variables) throws ResourceNotFoundException {
+	public GenAiResponse<CallResponseSpec> prompt(String promptKey, Map<String, Object> variables) throws ResourceNotFoundException, JsonParseException, JsonMappingException, IOException {
 
 		// TODO : Enable only if genaiconfig.enabled
 		PromptConfig pConf =  getPromptConfig(promptKey);
+		GenAiResponse<CallResponseSpec> ret = new GenAiResponse<ChatClient.CallResponseSpec>();
 
 		if (null == pConf) {
 			logger.error("PromptConfig {}  does not exists", promptKey);
 			throw new ResourceNotFoundException("Prompt not found");
 		}
 
+		ret.setStart(System.currentTimeMillis());
 		// Evaluating prompts,
 		String systemPrompt = evaluationService.thymeleafEval(variables, pConf.getSystemPrompt());
 		String userPrompt = evaluationService.thymeleafEval(variables, pConf.getUserPrompt());
 
 		// Checking there are no remainings unevaluated expression
 
-	// TODO(p2,safety)  Detect if remaining variables
+		// TODO(p2,safety)  Detect if remaining variables
 
-		CallResponseSpec ret = ChatClient.create( models.get(promptKey)).prompt()
+		CallResponseSpec genAiResponse = ChatClient.create( models.get(promptKey)).prompt()
 				.system(systemPrompt)
 				.user(userPrompt)
 				.options(pConf.getOptions()).call();
 
+		ret.setBody(genAiResponse);
+		ret.setRaw(genAiResponse.content());
+		
+		// Cloning 
+		PromptConfig updateConfig = serialisationService.fromJson(serialisationService.toJson(pConf), PromptConfig.class);
+		updateConfig.setSystemPrompt(systemPrompt);
+		updateConfig.setUserPrompt(userPrompt);
+		ret.setPrompt(updateConfig);
+		
+		
+		ret.setDuration(System.currentTimeMillis()-ret.getStart());
+		
 		return ret;
 
 	}
@@ -107,25 +124,41 @@ public class GenAiService {
 	 * @param variables
 	 * @return
 	 * @throws ResourceNotFoundException
+	 * @throws IOException 
+	 * @throws JsonMappingException 
+	 * @throws JsonParseException 
 	 */
-	public Map<String, Object> jsonPrompt(String promptKey, Map<String, Object> variables) throws ResourceNotFoundException {
-		String response = prompt(promptKey, variables).content();
+	public GenAiResponse<Map<String, Object>> jsonPrompt(String promptKey, Map<String, Object> variables) throws ResourceNotFoundException, JsonParseException, JsonMappingException, IOException {
+		
+		GenAiResponse<Map<String, Object>>  ret = new GenAiResponse<Map<String, Object>>();
+		
+		GenAiResponse<CallResponseSpec> internal = prompt(promptKey, variables);
+		// Copy
+		ret.setDuration(internal.getDuration());
+		ret.setStart(internal.getStart());
+		ret.setPrompt(internal.getPrompt());
+		ret.setRaw(internal.getRaw());
+		
+		
+		
+		String response = internal.getBody().content();
 		response = response.replace("```json", "").replace("```", "");
 		try {
-			return serialisationService.fromJsonTypeRef(response, new TypeReference<Map<String, Object>>() {});
+			ret.setBody(serialisationService.fromJsonTypeRef(response, new TypeReference<Map<String, Object>>() {}));
 		} catch (Exception e) {
 			logger.error("Unable to map to json structure : {} \n {}",e.getMessage(),response );		
-			return new HashMap<String, Object>();
+			return null;
 		}
+		return ret;
 	}
 
 	
-	public EcoscoreResponse entityPrompt(String promptKey, Map<String, Object> variables) throws ResourceNotFoundException {
-		
-		CallResponseSpec response = prompt(promptKey, variables);
-		return response.entity(new ParameterizedTypeReference<EcoscoreResponse>() {});
-	}
-	
+//	public EcoscoreResponse entityPrompt(String promptKey, Map<String, Object> variables) throws ResourceNotFoundException {
+//		
+//		CallResponseSpec response = prompt(promptKey, variables);
+//		return response.entity(new ParameterizedTypeReference<EcoscoreResponse>() {});
+//	}
+//	
 	
 	
 
