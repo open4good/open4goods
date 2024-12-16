@@ -28,6 +28,8 @@ import org.open4goods.api.config.yml.VerticalsGenerationConfig;
 import org.open4goods.api.model.AttributesStats;
 import org.open4goods.api.model.VerticalAttributesStats;
 import org.open4goods.api.model.VerticalCategoryMapping;
+import org.open4goods.commons.config.yml.ImpactScoreConfig;
+import org.open4goods.commons.config.yml.ui.GenAiConfig;
 import org.open4goods.commons.config.yml.ui.VerticalConfig;
 import org.open4goods.commons.dao.ProductRepository;
 import org.open4goods.commons.exceptions.ResourceNotFoundException;
@@ -38,6 +40,7 @@ import org.open4goods.commons.services.GoogleTaxonomyService;
 import org.open4goods.commons.services.IcecatService;
 import org.open4goods.commons.services.SerialisationService;
 import org.open4goods.commons.services.VerticalsConfigService;
+import org.open4goods.commons.services.ai.GenAiResponse;
 import org.open4goods.commons.services.ai.GenAiService;
 import org.open4goods.commons.services.ai.LegacyAiService;
 import org.slf4j.Logger;
@@ -45,7 +48,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.ResourcePatternResolver;
 
+import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JsonMappingException;
 
 public class VerticalsGenerationService {
 	
@@ -627,9 +632,12 @@ public class VerticalsGenerationService {
 			
 			
 			// Prompt 
-			Map<String, Object> response = genAiService.jsonPrompt("impactscore-generation", context);
+			GenAiResponse<Map<String, Object>> response = genAiService.jsonPrompt("impactscore-generation", context);
 			
 			String rawRet = serialisationService.toYaml(response);
+			
+			ImpactScoreConfig impactScoreConfig = serialisationService.fromYaml(rawRet, ImpactScoreConfig.class);
+			// Setting prompt and response
 			
 			rawRet = rawRet.replace("---", "");
 			StringBuilder buffer = new StringBuilder("impactScoreConfig:\n");
@@ -644,6 +652,15 @@ public class VerticalsGenerationService {
 			
 		} catch (ResourceNotFoundException e) {
 			LOGGER.error("Ecoscore Generation failed for {} ",vConf, e);
+		} catch (JsonParseException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (JsonMappingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 		
 		return ret;
