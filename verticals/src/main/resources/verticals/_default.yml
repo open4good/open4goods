@@ -43,8 +43,7 @@ excludingTokensFromCategoriesMatching:
   - CABLE
 
 
-  # The scores that are available to build the impact score
-  # The scores that are available to build the impact score
+# The scores that are available to build the impact score
 availableImpactScoreCriterias:
     CLASSE_ENERGY:
       key: CLASSE_ENERGY
@@ -66,9 +65,10 @@ availableImpactScoreCriterias:
       key: POWER_CONSUMPTION_OFF
       description:
         fr: "La consommation électrique à l'arrêt, ou en veille"
-
-     
-     
+    BRAND_SUSTAINABILITY:
+      key: BRAND_SUSTAINABILITY
+      description:
+        fr: "L'évaluation ESG de l'entreprise (filiale ou société mère, suivant la finesse des données) qui fabrique le produit, d'après le score de performance ESG de Sustainalytics"
                 
       
 #####################################################################################################################################

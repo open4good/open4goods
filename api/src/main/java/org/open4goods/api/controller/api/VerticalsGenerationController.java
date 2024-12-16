@@ -176,7 +176,33 @@ public class VerticalsGenerationController {
 //		
 //	}
 	
-	@GetMapping(path="/{vertical}/categories/update")
+	@GetMapping(path="/update/{vertical}")
+	@Operation(summary="Update the vertical with attributes, mappings and ecoscore directly in the file !")
+	@PreAuthorize("hasAuthority('"+RolesConstants.ROLE_ADMIN+"')")
+	public void updateVerticalWithAll( 
+			@PathVariable															 String vertical) throws ResourceNotFoundException, IOException {
+		
+		// TODO(p2,conf) : from conf
+		verticalsGenService.updateVerticalFileWithImpactScore("/home/goulven/git/open4goods/verticals/src/main/resources/verticals/" + vertical + ".yml");
+		verticalsGenService.updateVerticalFileWithAttributes("/home/goulven/git/open4goods/verticals/src/main/resources/verticals/" + vertical + ".yml", 3, null); 	
+		verticalsGenService.updateVerticalFileWithCategories(2, "/home/goulven/git/open4goods/verticals/src/main/resources/verticals/"+vertical+".yml");
+			
+		
+	}
+	
+	@GetMapping(path="/update/{vertical}/impactscore/")
+	@Operation(summary="Update the categories mapping for a given vertical directly in the file !")
+	@PreAuthorize("hasAuthority('"+RolesConstants.ROLE_ADMIN+"')")
+	public void updateVerticalWithImpactScore( 
+			@PathVariable															 String vertical) throws ResourceNotFoundException, IOException {
+		
+		//TODO(p2,conf) : from conf
+ 		  verticalsGenService.updateVerticalFileWithImpactScore("/home/goulven/git/open4goods/verticals/src/main/resources/verticals/"+vertical+".yml");
+		
+	}
+	
+	
+	@GetMapping(path="/update/{vertical}/categories/")
 	@Operation(summary="Update the categories mapping for a given vertical directly in the file !")
 	@PreAuthorize("hasAuthority('"+RolesConstants.ROLE_ADMIN+"')")
 	public void updateVerticalWithMappings( 
@@ -188,7 +214,7 @@ public class VerticalsGenerationController {
 		
 	}
 	
-	@GetMapping(path="/{vertical}/attributes/update")
+	@GetMapping(path="/update/{vertical}/attributes/")
 	@Operation(summary="Update the suggested attributes for a given vertical directly in the file !")
 	@PreAuthorize("hasAuthority('"+RolesConstants.ROLE_ADMIN+"')")
 	public void updateVerticalWithAttributes( 
