@@ -75,6 +75,12 @@ public class UrlHandlerMappingConfig {
 				String url = "/" + i18n.getValue().getVerticalHomeUrl();
 				LOGGER.info("Adding vertical home page mapping : {}", url);				
 				urlMap.put(url, new VerticalController(verticalService, searchService, uiService, item.getId(), blogService)  );
+
+				/////////////////
+				// Adding ecoscore page
+				//////////////// 
+				LOGGER.info("Adding vertical ecoscore page mapping : {}", url);				
+				urlMap.put(url+"/ecoscore", new VerticalEcoscoreController(item, uiService)  );
 				
 				/////////////////
 				// Adding vertical specific wikipages
