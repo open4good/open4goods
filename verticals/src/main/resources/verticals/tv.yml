@@ -262,3 +262,23 @@ matchingCategories:
    #- "ACCESSOIRES DE TV"
    #- "TV, VIDEO, HOME CINEMA | TV, VIDEO, HOME CINEMA>TELEVISEUR>SUPPORT MURAL POUR ECRAN PLAT | TELEVISEUR | TV, VIDEO, HOME CINEMA"
 
+impactScoreConfig:
+# Generated with AI on 16 déc. 2024, 14:28:30
+  
+  texts:
+    fr:
+      purpose: "L'objectif de cette démarche est de créer un score d'impact environnemental pour les téléviseurs, en prenant en compte divers facteurs écologiques et sociétaux. Ce score permet de comparer les produits sur une base environnementale et d'encourager les choix plus durables."
+      availlableDatas: "Les données disponibles incluent l'indice de réparabilité, le poids, la consommation électrique en veille, la durabilité de la marque et la classe énergétique. Ces données sont pertinentes car elles couvrent des aspects clés de l'impact environnemental des téléviseurs, tels que la consommation d'énergie, la facilité de réparation, et l'engagement de la marque envers la durabilité."
+      criticalReview: "La méthodologie est robuste mais pourrait être améliorée par l'ajout de facteurs tels que l'impact des matériaux utilisés et la durée de vie prévue du produit. L'absence de certains facteurs peut être compensée par l'utilisation de valeurs moyennes, mais cela peut réduire la précision du score pour certains produits."
+      criteriasAnalysis:
+        REPAIRABILITY_INDEX: "L'indice de réparabilité est crucial car il influence directement la durée de vie du produit et sa capacité à être réparé plutôt que remplacé. Une bonne réparabilité réduit les déchets électroniques. La pondération retenue pour cet indice est élevée pour encourager les produits facilement réparables."
+        WEIGHT: "Le poids est un indicateur indirect de l'impact environnemental, car un poids plus élevé peut signifier plus de matériaux utilisés et des émissions accrues lors du transport. Cependant, son impact est moindre comparé à d'autres facteurs, donc sa pondération est modérée."
+        POWER_CONSUMPTION_OFF: "La consommation électrique en veille est importante car elle représente une consommation continue d'énergie. Réduire cette consommation est essentiel pour diminuer l'empreinte carbone globale du produit. La pondération est significative pour encourager les produits à faible consommation en veille."
+        BRAND_SUSTAINABILITY: "La durabilité de la marque reflète l'engagement global de l'entreprise envers des pratiques durables. Cela inclut des aspects sociaux et environnementaux, ce qui en fait un facteur important. La pondération est modérée pour refléter son importance sans surévaluer l'impact d'une seule entreprise."
+        CLASSE_ENERGY: "La classe énergétique est un indicateur direct de l'efficacité énergétique du produit en fonctionnement. C'est un facteur clé pour réduire l'impact environnemental à long terme, donc sa pondération est élevée."
+  criteriasPonderation:
+        REPAIRABILITY_INDEX: 0.25
+        WEIGHT: 0.15
+        POWER_CONSUMPTION_OFF: 0.2
+        BRAND_SUSTAINABILITY: 0.2
+        CLASSE_ENERGY: 0.2
