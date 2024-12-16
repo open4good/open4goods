@@ -56,7 +56,7 @@ public class EcoScoreAggregationService extends AbstractScoreAggregationService 
 		
 		
 		double va = 0.0;
-		for (String config :  vConf.getEcoscoreConfig().keySet()) {
+		for (String config :  vConf.getImpactScoreConfig().getCriteriasPonderation().keySet()) {
 			Score score = scores.get(config);
 			
 			if (null == score) {
@@ -65,7 +65,7 @@ public class EcoScoreAggregationService extends AbstractScoreAggregationService 
 			
 		
 			// Taking on the relativ
-			va += score. getRelativ().getValue() * Double.valueOf(vConf.getEcoscoreConfig().get(config));
+			va += score. getRelativ().getValue() * Double.valueOf(vConf.getImpactScoreConfig().getCriteriasPonderation().get(config));
 		}
 
 		return va;

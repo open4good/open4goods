@@ -7,7 +7,7 @@ public class GenAiConfig {
 	 */
 	private String promptsTemplatesFolder;
 	
-	private boolean cacheTemplates = true;
+	private boolean cacheTemplates = false;
 	
 	private String openaiApiKey;
 

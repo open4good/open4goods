@@ -14,6 +14,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.open4goods.commons.config.yml.CommentsAggregationConfig;
+import org.open4goods.commons.config.yml.ImpactScoreConfig;
 import org.open4goods.commons.config.yml.attributes.AttributeConfig;
 import org.open4goods.commons.helper.IdHelper;
 import org.open4goods.commons.model.constants.CacheConstants;
@@ -174,15 +175,21 @@ public class VerticalConfig{
 	private AttributesConfig attributesConfig = new AttributesConfig();
 
 	
-	
+	/**
+	 * The scores that are eligible to participate to the impact score construction
+	 */
+	@JsonMerge
+	private Map<String, ImpactScoreCriteria> availableImpactScoreCriterias = new HashMap<>();
 	
 	/**
 	 * Configuration relativ to ecoscore computation. Key / values are : scoreName -> Ponderation (0.1 = 10%)
 	 * NOTE : No json merge, since default score has to be fully described if overrided
 	 */ 
-	private Map<String, Double> ecoscoreConfig = new HashMap<>();
+	private ImpactScoreConfig impactScoreConfig = new ImpactScoreConfig();
 
 
+	
+	
 	
 //	
 //	/**
@@ -307,7 +314,7 @@ public class VerticalConfig{
 	 */
 	public Integer ecoscorePercentOf(String scoreName) {
 		
-		Double ponderation = ecoscoreConfig.get(scoreName);
+		Double ponderation = impactScoreConfig.getCriteriasPonderation().get(scoreName);
 		if (null == ponderation) {
 			return -1;
 		} else {
@@ -507,7 +514,7 @@ public class VerticalConfig{
 		
 		List<Score> ret = new ArrayList<Score>();
 		
-		ecoscoreConfig.keySet().forEach(ecoConfig-> {
+		impactScoreConfig.getCriteriasPonderation().keySet().forEach(ecoConfig-> {
 			existing.forEach(exisiting -> {
 				if (exisiting.getName().equals(ecoConfig)) {
 					ret.add(exisiting);
@@ -685,16 +692,17 @@ public class VerticalConfig{
 //		this.unmatchingCategories = unmatchingCategories;
 //	}
 
-	public Map<String, Double> getEcoscoreConfig() {
-		return ecoscoreConfig;
-	}
-
-	public void setEcoscoreConfig(Map<String, Double> ecoscoreConfig) {
-		this.ecoscoreConfig = ecoscoreConfig;
-	}
 
 	public Integer getGoogleTaxonomyId() {
 		return googleTaxonomyId;
+	}
+
+	public ImpactScoreConfig getImpactScoreConfig() {
+		return impactScoreConfig;
+	}
+
+	public void setImpactScoreConfig(ImpactScoreConfig impactScoreConfig) {
+		this.impactScoreConfig = impactScoreConfig;
 	}
 
 	public void setGoogleTaxonomyId(Integer taxonomyId) {
@@ -833,6 +841,15 @@ public class VerticalConfig{
 	public void setGenerationExcludedFromAttributesMatching(Set<String> generationExcludedFromAttributesMatching) {
 		this.generationExcludedFromAttributesMatching = generationExcludedFromAttributesMatching;
 	}
+
+	public Map<String, ImpactScoreCriteria> getAvailableImpactScoreCriterias() {
+		return availableImpactScoreCriterias;
+	}
+
+	public void setAvailableImpactScoreCriterias(Map<String, ImpactScoreCriteria> availableImpactScoreCriterias) {
+		this.availableImpactScoreCriterias = availableImpactScoreCriterias;
+	}
+
 
 	
 
