@@ -44,7 +44,7 @@ public class GenAiController {
 	public Map<String, Object> promptJson(@RequestParam(defaultValue = "test") String key, 
 			@RequestParam Map<String,Object> context) throws InvalidParameterException, IOException, ResourceNotFoundException, AggregationSkipException {
 		
-		return aiService.jsonPrompt(key, context);
+		return aiService.jsonPrompt(key, context).getBody();
 	}
 	
 	@GetMapping("/prompt/text")
@@ -52,6 +52,6 @@ public class GenAiController {
 	public String prompt(@RequestParam(defaultValue = "test") String key, 
 			@RequestParam Map<String,Object> context) throws InvalidParameterException, IOException, ResourceNotFoundException, AggregationSkipException {
 		
-		return aiService.prompt(key, context).content();
+		return aiService.prompt(key, context).getRaw();
 	}
 }
