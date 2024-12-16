@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html th:lang="${siteLocale.language}">
+
+<head>
+
+	<!--/* Metas and CSS */-->
+	<th:block th:insert="inc/header-meta.html"></th:block>
+    
+	<!-- Primary Meta Tags -->
+	<title>L'écoscore : classement écologique des produits | Nudger</title>
+	<meta name="description" content="Nudger vous propose d'évaluer l'impact environnemental de vos produits avec notre écoscore. Achetez malin, achetez responsable ! ☀️">
+		
+	<!-- Open Graph / Facebook -->
+	<meta property="og:type" content="website">
+	<meta property="og:url" th:content="${url}">
+	<meta property="og:title" th:content="#{ecoscore.title}">
+	<meta property="og:description" th:content="#{ecoscore.meta.description}">
+	<meta property="og:image" th:content="${baseUrl} + 'assets/img/brand/light.svg'">
+	
+	<!-- Twitter -->
+	<meta name="twitter:card" content="summary_large_image">
+	<meta name="twitter:url" th:content="${url}">
+	<meta name="twitter:title" th:content="#{ecoscore.title}">
+	<meta name="twitter:description" th:content="#{ecoscore.meta.description}">
+	<meta name="twitter:image" th:content="${baseUrl} + 'assets/img/brand/light.svg'">
+	
+</head>
+
+<body>
+    
+
+	<!--/* Navbar */-->
+	<th:block th:with="page = 'ecoscore'" th:insert="~{inc/navbar/navbar-home.html}"></th:block>
+	
+    <main>
+        <!--/* Loader */-->
+        <th:block th:insert="~{inc/preloader.html}"></th:block>
+
+        <!-- Hero -->
+
+	<div class="section section-header pb-7 pb-md-10 bg-primary overflow-hidden">
+            <div class="container z-2">
+                <div class="row justify-content-center text-white text-center">
+                    <div class="col-12 col-md-10">
+                        <div class="mb-3">
+                            <h1 class="display-3 font-size-md-down-5 fw-light mb-0">Impact-Score <span class="fw-bold" th:text="${verticalConfig.i18n(siteLanguage).verticalHomeTitle}"></span></h1>
+                        </div>
+                        <p class="my-4 px-0 px-lg-7 lead">L'Impact Score est un ecoscore innovant, boosté à l'IA. Il intégre, produit par produit l'impact écologique et soicétal des <span th:text="${verticalConfig.i18n(siteLanguage).verticalHomeTitle.toLowerCase()}"></span> afin de vous orienter vers une cosommation plus vertueuse . Nous présentons ici la méthodologie appliquée aux <span th:text="${verticalConfig.i18n(siteLanguage).verticalHomeTitle.toLowerCase()}"></span></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        
+        
+        <section class="section section-md pt-0">
+            <div class="container">
+                <div class="col-12 col-lg-12">
+                    <div class="row justify-content-center mt-n7 z-2">
+                        <div class="col-12 col-md-12">
+                            <div class="row mt-5 mt-lg-0 px-3">
+                                <!-- Icon Boxes -->
+                                <div class="card shadow border-gray-300">
+                                    <div class="card-body p-4 p-lg-5">
+                                        <h2 class="h4 mb-2">Impact Score ?</h2>
+                                        <p>Nous disposons de beaucoup de données sur les <span>téléviseurs</span>, et nous souhaitons orienter la consommation des utilisateurs vers les produits les moins impactants. Pour cela, nous intégrons....</p>
+                                         <a href="/ecoscore" class=" float-end btn btn-sm btn-primary">En savoir plus</a>
+                                    </div>
+                                </div>
+                                <!-- End of Icon Boxes -->
+                                <!-- Icon Boxes -->
+                               
+                        
+                                <!-- End of Icon Boxes -->
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        
+        
+        
+        <section>
+			<div class="container">
+				<div class="row justify-content-between align-items-center">
+					<div class="col-12 col-lg-6">
+						<div class="d-flex flex-wrap justify-content-lg-start">
+							<div class="my-4">
+								<div class="d-flex">
+									<div class="me-3 me-md-4">
+										<div class="icon icon-md icon-secondary-app">
+											<span class="fas fa-circle-dot"></span>
+										</div>
+									</div>
+									<div>
+                                       <h2 class="h4">Objectif</h2>
+                                        <p th:text="${impactscore.texts.i18n(siteLanguage).purpose}"></p>
+	
+									</div>
+								</div>
+							</div>
+							<div class="my-4">
+								<div class="d-flex">
+									<div class="me-3 me-md-4">
+										<div class="icon icon-md icon-secondary-app">
+											<span class="fas fa-database"></span>
+										</div>
+									</div>
+									<div>
+                                        <h2 class="h4">Données disponibles</h2>
+                                         <p th:text="${impactscore.texts.i18n(siteLanguage).availlableDatas}">
+                                         
+                                         <h3 class="h6">DATA_QUALITY</h3>
+                                         <p>La qualité de la donnée pour le produit. Quand un facteur manque pour un produit, on lui associe la moyenne de ce facteur pour sa catégorie, mai on dégrade le facteur DATA_QUALITY. Cela permet de pénaliser sans exclure les pruidts pour lequel un facteur est absent</p>
+                                         
+									</div>
+								</div>
+							</div>
+	
+						</div>
+					</div>
+					<div class="col-12 col-lg-5">
+						<img class="d-none d-lg-inline-block"
+							th:src="'/images/verticals/' + ${verticalConfig.id} + '.jpg'"
+							th:alt="'Ecoscore' + ${vertical}">
+					</div>
+				</div>
+			</div>
+
+
+
+
+		</section>
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+    
+        
+        <div class="section section-md bg-gray-200">
+            <div class="container">
+                <div class="row justify-content-center">
+                    <h1 class="text-center">Critères retenus</h1>
+                     <p class="lead mb-5">Les critères suivants sont retenus dans le calcul de l'eco score des téléviseurs. La pondération est indiquée en pourcentage. Plus d'informations sur le <a href="/ecoscore">calcul de l'eco score</a> ici)</p>
+					<div class="row mt-4">
+						<div th:each="item, stat : ${impactscore.texts.i18n(siteLanguage).criteriasAnalysis}" class="col-12 col-sm-6 col-md-4">
+							<!-- Step -->
+							<div th:with="attr = ${verticalConfig.attributesConfig.getAttributeConfigByKey(item.key)}" class="step text-center">
+								<div class="step-shape shape-gray-300 rounded-circle mb-4">
+									<span class="step-icon icon-primary">
+									   <span th:if="${attr}" th:class="'fas '+${attr.faIcon}"></span>
+									</span>
+								</div>
+								<h2 th:if="${attr}" class="h5 step-title"><span th:text="${attr.name.i18n(siteLanguage)}"></span> : <b><span th:text="${impactscore.criteriasPonderation.get(item.key)*100}"></span>%</b></h2>
+								<p th:text="${item.value}"></p>
+							</div>
+							<!-- End of Step -->
+						</div>
+					
+					</div>
+
+
+				</div>
+            </div>
+        </div>
+        
+        <section class="section">
+            <div class="container-fluid">
+                <div class="row justify-content-center">
+                        <div class="text-center">
+                            <h2 class="h1 fw-light">Audit
+                            </h2>
+                            <p class="lead mb-5">Notre éco-score est transparent et s'inscrit dans un modèle ouvert. Vous trouverez ici les élements nécessaires à son audit.</p>
+                        </div>
+
+
+                <div class="row justify-content-center text-center">
+
+						<div class="card">
+							<div class="card-header">Revue critique</div>
+							<div class="card-body">
+								<p class="my-4 px-0 px-lg-7 lead" th:text="${impactscore.texts.i18n(siteLanguage).criticalReview}"></p>
+							</div>
+						</div>
+                </div>
+                
+                
+                
+				<div class="row justify-content-center m-5">
+						<div class=" col-lg-6">
+							<div class="card">
+								<div class="card-header">Critères proposés</div>
+								<div class="card-body">
+									<table class="table table-hover table-responsive-sm">
+										<tbody>
+											<tr>
+												<th scope="col" id="class">Nom du critère</th>
+												<th scope="col" id="teacher">Pondération</th>
+											</tr>
+
+											<tr>
+												<td headers="secondyear Forsyth males">6</td>
+												<td headers="secondyear Forsyth females">9</td>
+											</tr>
+										</tbody>
+									</table>
+								</div>
+							</div>
+
+
+						</div>
+
+                        <div class=" col-lg-6">
+                            <div class="card">
+                                <div class="card-header">Critères retenus</div>
+                                <div class="card-body">
+                                    <table class="table table-hover table-responsive-sm">
+                                        <tbody>
+                                            <tr>
+                                                <th scope="col" id="class">Nom du critère</th>
+                                                <th scope="col" id="teacher">Pondération</th>
+                                            </tr>
+
+                                            <tr>
+                                                <td headers="secondyear Forsyth males">6</td>
+                                                <td headers="secondyear Forsyth females">9</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                    
+                                       <a rel = "nofollow" href="">Consulter la définition sur github </a>
+                                </div>
+                            </div>
+
+
+                        </div>                          
+                            
+						</div>
+
+
+
+
+                </div>
+            </div>
+
+
+
+
+
+
+
+
+
+
+            <div class="container-semi-fluid">
+            
+			<div class="col-md-10 col-lg-8">
+				<!-- Tab Nav -->
+				<div class="nav-wrapper position-relative mb-2">
+					<ul class="nav nav-pills nav-fill flex-column flex-md-row"
+						id="tabs-icons-text" role="tablist">
+						<li class="nav-item"><a
+							class="nav-link mb-sm-3 mb-md-0 active"
+							id="tabs-icons-text-1-tab" data-bs-toggle="tab"
+							href="#tabs-icons-text-1" role="tab"
+							aria-controls="tabs-icons-text-1" aria-selected="true"><span
+								class="fas fa-palette me-2"></span>Audit de génération de l'impact score</a></li>
+						<li class="nav-item"><a class="nav-link mb-sm-3 mb-md-0"
+							id="tabs-icons-text-2-tab" data-bs-toggle="tab"
+							href="#tabs-icons-text-2" role="tab"
+							aria-controls="tabs-icons-text-2" aria-selected="false"><span
+								class="fas fa-laptop-code me-2"></span>Prompt IA utilisé</a></li>
+						<li class="nav-item"><a class="nav-link mb-sm-3 mb-md-0"
+							id="tabs-icons-text-3-tab" data-bs-toggle="tab"
+							href="#tabs-icons-text-3" role="tab"
+							aria-controls="tabs-icons-text-3" aria-selected="false"><span
+								class="far fa-user me-2"></span>Réponse IA </a></li>
+					</ul>
+				</div>
+				<!-- End of Tab Nav -->
+				<!-- Tab Content -->
+				<div class="card border-0">
+					<div class="card-body p-0">
+						<div class="tab-content" id="tabcontent2">
+							<div class="tab-pane fade show active" id="tabs-icons-text-1"
+								role="tabpanel" aria-labelledby="tabs-icons-text-1-tab">
+								<p>Exercitation photo booth stumptown tote bag Banksy, elit
+									small batch freegan sed. Craft beer elit seitan exercitation,
+									photo booth et 8-bit kale chips proident chillwave deep v
+									laborum. Aliquip veniam delectus, Marfa eiusmod Pinterest in do
+									umami readymade swag.</p>
+								<p>Day handsome addition horrible sensible goodness two
+									contempt. Evening for married his account removal. Estimable me
+									disposing of be moonlight cordially curiosity.</p>
+							</div>
+							<div class="tab-pane fade" id="tabs-icons-text-2" role="tabpanel"
+								aria-labelledby="tabs-icons-text-2-tab">
+								<p>Photo booth stumptown tote bag Banksy, elit small batch
+									freegan sed. Craft beer elit seitan exercitation, photo booth
+									et 8-bit kale chips proident chillwave deep v laborum. Aliquip
+									veniam delectus, Marfa eiusmod Pinterest in do umami readymade
+									swag.</p>
+								<p>Day handsome addition horrible sensible goodness two
+									contempt. Evening for married his account removal. Estimable me
+									disposing of be moonlight cordially curiosity.</p>
+							</div>
+							<div class="tab-pane fade" id="tabs-icons-text-3" role="tabpanel"
+								aria-labelledby="tabs-icons-text-3-tab">
+								<p>Exercitation photo booth stumptown tote bag Banksy, elit
+									small batch freegan sed. Craft beer elit seitan exercitation,
+									photo booth et 8-bit kale chips proident chillwave deep v
+									laborum. Aliquip veniam delectus, Marfa eiusmod Pinterest in do
+									umami readymade swag.</p>
+								<p>Day handsome addition horrible sensible goodness two
+									contempt. Evening for married his account removal. Estimable me
+									disposing of be moonlight cordially curiosity.</p>
+							</div>
+						</div>
+					</div>
+				</div>
+				<!-- End of Tab Content -->
+			</div>
+			</div>
+		</section>
+        
+        
+        
+        
+
+    </main>
+    
+
+	<!--/* Footer */-->
+	<th:block th:insert="inc/footer.html"></th:block>	
+
+    <!-- Core -->
+<script src="../../vendor/@popperjs/core/dist/umd/popper.min.js"></script>
+<script src="/webjars/bootstrap/js/bootstrap.min.js"></script>
+<script src="../../vendor/headroom.js/dist/headroom.min.js"></script>
+
+<!-- Vendor JS -->
+<script src="../../vendor/onscreen/dist/on-screen.umd.min.js"></script>
+<script src="../../vendor/nouislider/distribute/nouislider.min.js"></script>
+<script src="../../vendor/jarallax/dist/jarallax.min.js"></script>
+<script src="../../vendor/smooth-scroll/dist/smooth-scroll.polyfills.min.js"></script>
+<script src="../../vendor/vivus/dist/vivus.min.js"></script>
+<script src="../../vendor/chartist/dist/chartist.min.js"></script>
+<script src="../../vendor/chartist-plugin-tooltips/dist/chartist-plugin-tooltip.min.js"></script>
+<script src="../../vendor/@glidejs/glide/dist/glide.min.js"></script>
+<script src="../../vendor/countup.js/dist/countUp.umd.js"></script>
+<script src="../../vendor/vanillajs-datepicker/dist/js/datepicker.min.js"></script>
+
+<script async defer src="https://buttons.github.io/buttons.js"></script>
+
+<script src="/webjars/jquery/jquery.min.js"></script>
+
+<!-- pixel JS -->
+<script src="../../assets/js/pixel.js"></script>
+<!-- custom sources -->
+<script src="../../assets/js/pixel-custom.js"></script>
+</body>
+
+</html>
