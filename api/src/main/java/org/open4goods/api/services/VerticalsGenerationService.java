@@ -497,6 +497,41 @@ public class VerticalsGenerationService {
 	}
 	
 	
+
+	public void updateVerticalFileWithImpactScore(String fileName) {
+		File file = new File(fileName);
+		try {
+			VerticalConfig vc = verticalConfigservice.getConfigById(file.getName().substring(0, file.getName().length()-4));
+			LOGGER.warn("Will update {} with impactscore",file.getName());
+			String originalContent = FileUtils.readFileToString(file);
+			
+			int startIndex = originalContent.indexOf("impactScoreConfig:");
+			int endIndex = originalContent.indexOf("\n\n", startIndex);
+			
+			if (-1 == startIndex) {
+				startIndex = originalContent.length();
+				endIndex=originalContent.length();
+			}
+				
+			if (endIndex == -1) {
+				endIndex=originalContent.length();
+			}
+			
+			
+			String newContent = originalContent.substring(0, startIndex);
+			newContent += generateEcoscoreYamlConfig(vc);
+			newContent += originalContent.substring(endIndex);
+			
+			FileUtils.writeStringToFile(file, newContent, Charset.defaultCharset());
+			
+		} catch (IOException e1) {
+			LOGGER.error("Error while updaing vertical file {}",file,e1);
+		}
+		
+	}
+	
+	
+	
 	/**
 	 * Update a vertical file with predicted attributes  in the vertical yaml files
 	 * @param minOffers
@@ -598,6 +633,7 @@ public class VerticalsGenerationService {
 			
 			rawRet = rawRet.replace("---", "");
 			StringBuilder buffer = new StringBuilder("impactScoreConfig:\n");
+			buffer.append("# Generated with AI on " ).append(new Date().toLocaleString()).append("\n");
 			Arrays.asList(rawRet.split("\n")).forEach(line -> {
 				buffer.append("  ").append(line).append("\n");
 				
@@ -620,10 +656,7 @@ public class VerticalsGenerationService {
 	 * @return
 	 */
 	private String getCriterias(VerticalConfig vConf) {
-			// TODO Auto-generated method stub
-		
 			Map<String, Long> criterias = repository.scoresCoverage(vConf);
-			
 			
 			StringBuilder ret = new StringBuilder();
 			
@@ -633,8 +666,6 @@ public class VerticalsGenerationService {
 				ret.append(vConf.getAvailableImpactScoreCriterias().get(score.getKey()).getDescription().get("fr"));
 				ret.append("\n");
 			});
-			
-			
 		
 			return ret.toString();
 		}
@@ -758,5 +789,6 @@ public class VerticalsGenerationService {
 		
 	}
 //	
+
 	
 }
