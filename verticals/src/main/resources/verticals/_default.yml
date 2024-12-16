@@ -69,6 +69,11 @@ availableImpactScoreCriterias:
       key: BRAND_SUSTAINABILITY
       description:
         fr: "L'évaluation ESG de l'entreprise (filiale ou société mère, suivant la finesse des données) qui fabrique le produit, d'après le score de performance ESG de Sustainalytics"
+    DATA_QUALITY:
+      key: DATA_QUALITY
+      description:
+        fr: "La qualité de la donnée pour le produit. Quand un facteur manque pour un produit, on lui associe la moyenne de ce facteur pour sa catégorie, mai on dégrade le facteur DATA_QUALITY. Cela permet de pénaliser sans exclure les pruidts pour lequel un facteur est absent.' "
+              
                 
       
 #####################################################################################################################################
