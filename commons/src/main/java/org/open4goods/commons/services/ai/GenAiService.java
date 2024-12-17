@@ -202,18 +202,22 @@ public class GenAiService {
 	public void loadPrompts(String folderPath) {
 
 		
-		File folder = new File(folderPath);
-		if (folder.exists() && folder.isDirectory()) {
-			
-			List<File> promptsFile = Arrays.asList(folder.listFiles()).stream().filter(e -> e.getName().endsWith(".yml")).toList();
-			
-			promptsFile.forEach(f -> {
-				PromptConfig pc = loadPrompt(f);
-				this.prompts.put(pc.getKey(), pc);
+		try {
+			File folder = new File(folderPath);
+			if (folder.exists() && folder.isDirectory()) {
 				
-			});
-		} else {
-			logger.error("!!!  Can not load prompts, folder {} is invalid", folderPath);
+				List<File> promptsFile = Arrays.asList(folder.listFiles()).stream().filter(e -> e.getName().endsWith(".yml")).toList();
+				
+				promptsFile.forEach(f -> {
+					PromptConfig pc = loadPrompt(f);
+					this.prompts.put(pc.getKey(), pc);
+					
+				});
+			} else {
+				logger.error("!!!  Can not load prompts, folder {} is invalid", folderPath);
+			}
+		} catch (Exception e) {
+			logger.error("Error loading prompts at {}",folderPath,  e);
 		}
 
 	}
