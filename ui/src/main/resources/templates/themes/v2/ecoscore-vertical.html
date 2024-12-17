@@ -305,25 +305,15 @@
 							</div>
 							<div class="tab-pane fade" id="tabs-icons-text-2" role="tabpanel"
 								aria-labelledby="tabs-icons-text-2-tab">
-								<p>Photo booth stumptown tote bag Banksy, elit small batch
-									freegan sed. Craft beer elit seitan exercitation, photo booth
-									et 8-bit kale chips proident chillwave deep v laborum. Aliquip
-									veniam delectus, Marfa eiusmod Pinterest in do umami readymade
-									swag.</p>
-								<p>Day handsome addition horrible sensible goodness two
-									contempt. Evening for married his account removal. Estimable me
-									disposing of be moonlight cordially curiosity.</p>
+								<pre>
+								    <code class="yaml" th:utext="${impactscore.aiJsonResponse}"></code>
+								</pre>
 							</div>
 							<div class="tab-pane fade" id="tabs-icons-text-3" role="tabpanel"
 								aria-labelledby="tabs-icons-text-3-tab">
-								<p>Exercitation photo booth stumptown tote bag Banksy, elit
-									small batch freegan sed. Craft beer elit seitan exercitation,
-									photo booth et 8-bit kale chips proident chillwave deep v
-									laborum. Aliquip veniam delectus, Marfa eiusmod Pinterest in do
-									umami readymade swag.</p>
-								<p>Day handsome addition horrible sensible goodness two
-									contempt. Evening for married his account removal. Estimable me
-									disposing of be moonlight cordially curiosity.</p>
+                                <pre>
+                                    <code class="yaml" th:utext="${impactscore.yamlPrompt}"></code>
+                                </pre>
 							</div>
 						</div>
 					</div>
@@ -368,6 +358,11 @@
 <script src="../../assets/js/pixel.js"></script>
 <!-- custom sources -->
 <script src="../../assets/js/pixel-custom.js"></script>
+
+<script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.5.0/highlight.min.js"></script>
+<script>hljs.initHighlightingOnLoad();</script> 
+
+
 </body>
 
 </html>

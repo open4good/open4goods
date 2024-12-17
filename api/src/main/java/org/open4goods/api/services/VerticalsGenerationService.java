@@ -626,28 +626,35 @@ public class VerticalsGenerationService {
 		try {
 			Map<String, Object> context = new HashMap<String, Object>();
 			
-			
 			context.put("AVAILABLE_CRITERIAS", getCriterias(vConf));
 			context.put("VERTICAL_NAME", vConf.getI18n().get("fr").getVerticalHomeTitle());
-			
 			
 			// Prompt 
 			GenAiResponse<Map<String, Object>> response = genAiService.jsonPrompt("impactscore-generation", context);
 			
-			String rawRet = serialisationService.toYaml(response);
-			
+			String rawRet = serialisationService.toYaml(response.getBody());
 			ImpactScoreConfig impactScoreConfig = serialisationService.fromYaml(rawRet, ImpactScoreConfig.class);
+			
+			// Completing
+			impactScoreConfig.setYamlPrompt(serialisationService.toYaml(response.getPrompt()));
+			impactScoreConfig.setAiJsonResponse(serialisationService.toJson(response.getBody()));
+			
+			
 			// Setting prompt and response
 			
 			rawRet = rawRet.replace("---", "");
-			StringBuilder buffer = new StringBuilder("impactScoreConfig:\n");
-			buffer.append("# Generated with AI on " ).append(new Date().toLocaleString()).append("\n");
-			Arrays.asList(rawRet.split("\n")).forEach(line -> {
-				buffer.append("  ").append(line).append("\n");
-				
-			});
 			
-			ret = buffer.toString();
+			Map<String, Object> map = new HashMap<String, Object>();
+			map.put("impactScoreConfig", impactScoreConfig);
+			
+//			StringBuilder buffer = new StringBuilder("impactScoreConfig:\n");
+//			buffer.append("# Generated with AI on " ).append(new Date().toLocaleString()).append("\n");
+//			Arrays.asList(rawRet.split("\n")).forEach(line -> {
+//				buffer.append("  ").append(line).append("\n");
+//				
+//			});
+			
+			ret = serialisationService.toYaml(map.replace("---", ""));
 			
 			
 		} catch (ResourceNotFoundException e) {
