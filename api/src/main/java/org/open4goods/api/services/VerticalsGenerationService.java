@@ -654,7 +654,7 @@ public class VerticalsGenerationService {
 //				
 //			});
 			
-			ret = serialisationService.toYaml(map.replace("---", ""));
+			ret = serialisationService.toYaml(map).replace("---", "");
 			
 			
 		} catch (ResourceNotFoundException e) {
