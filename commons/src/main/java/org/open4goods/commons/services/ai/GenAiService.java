@@ -13,7 +13,6 @@ import org.open4goods.commons.config.yml.GenAiServiceType;
 import org.open4goods.commons.config.yml.PromptConfig;
 import org.open4goods.commons.config.yml.ui.GenAiConfig;
 import org.open4goods.commons.exceptions.ResourceNotFoundException;
-import org.open4goods.commons.model.EcoscoreResponse;
 import org.open4goods.commons.services.EvaluationService;
 import org.open4goods.commons.services.SerialisationService;
 import org.slf4j.Logger;
@@ -22,7 +21,6 @@ import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.ChatClient.CallResponseSpec;
 import org.springframework.ai.openai.OpenAiChatModel;
 import org.springframework.ai.openai.api.OpenAiApi;
-import org.springframework.core.ParameterizedTypeReference;
 
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -137,12 +135,12 @@ public class GenAiService {
 		ret.setDuration(internal.getDuration());
 		ret.setStart(internal.getStart());
 		ret.setPrompt(internal.getPrompt());
-		ret.setRaw(internal.getRaw());
 		
 		
 		
 		String response = internal.getBody().content();
 		response = response.replace("```json", "").replace("```", "");
+		ret.setRaw(response);
 		try {
 			ret.setBody(serialisationService.fromJsonTypeRef(response, new TypeReference<Map<String, Object>>() {}));
 		} catch (Exception e) {
@@ -203,13 +201,20 @@ public class GenAiService {
 	 */
 	public void loadPrompts(String folderPath) {
 
-		List<File> promptsFile = Arrays.asList(new File(folderPath).listFiles()).stream().filter(e -> e.getName().endsWith(".yml")).toList();
-
-		promptsFile.forEach(f -> {
-			PromptConfig pc = loadPrompt(f);
-			this.prompts.put(pc.getKey(), pc);
-
-		});
+		
+		File folder = new File(folderPath);
+		if (folder.exists() && folder.isDirectory()) {
+			
+			List<File> promptsFile = Arrays.asList(folder.listFiles()).stream().filter(e -> e.getName().endsWith(".yml")).toList();
+			
+			promptsFile.forEach(f -> {
+				PromptConfig pc = loadPrompt(f);
+				this.prompts.put(pc.getKey(), pc);
+				
+			});
+		} else {
+			logger.error("!!!  Can not load prompts, folder {} is invalid", folderPath);
+		}
 
 	}
 
