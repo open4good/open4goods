@@ -43,7 +43,6 @@ public class SerialisationService {
 			.setSerializationInclusion(Include.NON_EMPTY)
 			.setSerializationInclusion(Include.NON_NULL)
 			.enable(SerializationFeature.INDENT_OUTPUT)
-		
 			;
 
 	public SerialisationService() {
