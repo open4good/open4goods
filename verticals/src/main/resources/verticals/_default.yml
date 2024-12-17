@@ -60,7 +60,7 @@ availableImpactScoreCriterias:
     POWER_CONSUMPTION_TYPICAL:
       key: POWER_CONSUMPTION_TYPICAL
       description:
-        fr: "La consommation électrique en marche"
+        fr: "La consommation électrique de l'objet en fonctionnement"
     POWER_CONSUMPTION_OFF:
       key: POWER_CONSUMPTION_OFF
       description:
