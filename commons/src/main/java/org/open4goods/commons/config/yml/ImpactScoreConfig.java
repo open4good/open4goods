@@ -3,7 +3,6 @@ package org.open4goods.commons.config.yml;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.checkerframework.checker.units.qual.K;
 import org.open4goods.commons.model.Localisable;
 
 public class ImpactScoreConfig {
@@ -19,6 +18,9 @@ public class ImpactScoreConfig {
 	
 	private Localisable<String, ImpactScoreTexts> texts = new Localisable<>();
 	
+	// For auditability. Strange in config file, but to be marbered with with criterias generation 
+	private String yamlPrompt;
+	private String aiJsonResponse;   
 	
 	// TODO : The validate method (check sums is 1)
 	public Map<String, Double> getCriteriasPonderation() {
@@ -32,6 +34,18 @@ public class ImpactScoreConfig {
 	}
 	public void setTexts(Localisable<String, ImpactScoreTexts> texts) {
 		this.texts = texts;
+	}
+	public String getYamlPrompt() {
+		return yamlPrompt;
+	}
+	public void setYamlPrompt(String yamlPrompt) {
+		this.yamlPrompt = yamlPrompt;
+	}
+	public String getAiJsonResponse() {
+		return aiJsonResponse;
+	}
+	public void setAiJsonResponse(String aiJsonResponse) {
+		this.aiJsonResponse = aiJsonResponse;
 	}
 	
 
