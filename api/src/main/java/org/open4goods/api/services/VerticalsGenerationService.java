@@ -632,12 +632,13 @@ public class VerticalsGenerationService {
 			// Prompt 
 			GenAiResponse<Map<String, Object>> response = genAiService.jsonPrompt("impactscore-generation", context);
 			
+			// TODO(p2, safety) : To strictYaml
 			String rawRet = serialisationService.toYaml(response.getBody());
 			ImpactScoreConfig impactScoreConfig = serialisationService.fromYaml(rawRet, ImpactScoreConfig.class);
 			
 			// Completing
 			impactScoreConfig.setYamlPrompt(serialisationService.toYaml(response.getPrompt()));
-			impactScoreConfig.setAiJsonResponse(serialisationService.toJson(response.getBody()));
+			impactScoreConfig.setAiJsonResponse(serialisationService.toJson(response.getBody(),true));
 			
 			
 			// Setting prompt and response
@@ -681,6 +682,7 @@ public class VerticalsGenerationService {
 	 */
 	private String getCriterias(VerticalConfig vConf) {
 			Map<String, Long> criterias = repository.scoresCoverage(vConf);
+
 			
 			StringBuilder ret = new StringBuilder();
 			
