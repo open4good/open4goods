@@ -640,7 +640,7 @@ attributesConfig:
   - key: "POWER_CONSUMPTION_OFF"
     filteringType: "NUMERIC"
     asScore: true
-    faIcon: ""
+    faIcon: "fa-plug-circle-xmark"
   
     icecatFeaturesIds:      
          - 2034
@@ -667,7 +667,7 @@ attributesConfig:
 
       
 #################################################
-# UI Oriented attributes
+# UI / Scores Oriented attributes
 #################################################
 
   ##################################
@@ -681,6 +681,14 @@ attributesConfig:
     name:
       default: "Features"
       fr: "Fonctionnalités"
+      
+  - key: "BRAND_SUSTAINABILITY"
+    faIcon: "fa-list"
+#    attributePath: attributes.features
+    name:
+      default: "Evaluation ESG (Sustainalytics) de la marque"
+      fr: "Evaluation ESG de la marque (Sustainalytics)"
+      
 
 
 
