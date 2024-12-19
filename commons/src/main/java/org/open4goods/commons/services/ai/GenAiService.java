@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.groovy.parser.antlr4.util.StringUtils;
 import org.open4goods.commons.config.yml.GenAiServiceType;
 import org.open4goods.commons.config.yml.PromptConfig;
 import org.open4goods.commons.config.yml.ui.GenAiConfig;
@@ -19,6 +20,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.ChatClient.CallResponseSpec;
+import org.springframework.ai.chat.client.ChatClient.ChatClientRequestSpec;
 import org.springframework.ai.openai.OpenAiChatModel;
 import org.springframework.ai.openai.api.OpenAiApi;
 
@@ -87,18 +89,24 @@ public class GenAiService {
 
 		ret.setStart(System.currentTimeMillis());
 		// Evaluating prompts,
-		String systemPrompt = evaluationService.thymeleafEval(variables, pConf.getSystemPrompt());
+		String systemPrompt = null == pConf.getSystemPrompt() ? "" : evaluationService.thymeleafEval(variables, pConf.getSystemPrompt());
 		String userPrompt = evaluationService.thymeleafEval(variables, pConf.getUserPrompt());
 
 		// Checking there are no remainings unevaluated expression
 
 		// TODO(p2,safety)  Detect if remaining variables
 
-		CallResponseSpec genAiResponse = ChatClient.create( models.get(promptKey)).prompt()
-				.system(systemPrompt)
+		ChatClientRequestSpec chatRequest = ChatClient.create( models.get(promptKey)).prompt()
 				.user(userPrompt)
-				.options(pConf.getOptions()).call();
-
+				.options(pConf.getOptions());
+		
+		if (!StringUtils.isEmpty(systemPrompt)) {
+			chatRequest = chatRequest.system(systemPrompt); 
+		}
+		
+		CallResponseSpec genAiResponse = chatRequest.call();
+		
+		
 		ret.setBody(genAiResponse);
 		ret.setRaw(genAiResponse.content());
 		
@@ -107,7 +115,6 @@ public class GenAiService {
 		updateConfig.setSystemPrompt(systemPrompt);
 		updateConfig.setUserPrompt(userPrompt);
 		ret.setPrompt(updateConfig);
-		
 		
 		ret.setDuration(System.currentTimeMillis()-ret.getStart());
 		
@@ -135,8 +142,6 @@ public class GenAiService {
 		ret.setDuration(internal.getDuration());
 		ret.setStart(internal.getStart());
 		ret.setPrompt(internal.getPrompt());
-		
-		
 		
 		String response = internal.getBody().content();
 		response = response.replace("```json", "").replace("```", "");
