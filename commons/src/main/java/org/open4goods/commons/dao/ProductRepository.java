@@ -230,6 +230,8 @@ public class ProductRepository {
 			// TODO(p2, conf) : threshold from conf
 			if (count > 10) {
 				ret.put(criteria.getKey() ,  count);
+			} else {
+				logger.info("Excluded from score mapping : {}", criteria );
 			}
 		});
 		

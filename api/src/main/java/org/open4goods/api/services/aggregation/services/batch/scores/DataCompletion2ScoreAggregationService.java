@@ -16,7 +16,7 @@ import org.slf4j.Logger;
  */
 public class DataCompletion2ScoreAggregationService extends AbstractScoreAggregationService {
 
-	private static final String DATA_QUALITY_SCORENAME = "DATA-QUALITY";
+	private static final String DATA_QUALITY_SCORENAME = "DATA_QUALITY";
 
 
 	public DataCompletion2ScoreAggregationService(final Logger logger) {
