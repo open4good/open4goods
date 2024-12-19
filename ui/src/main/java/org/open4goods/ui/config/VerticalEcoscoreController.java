@@ -5,7 +5,7 @@ import org.open4goods.commons.config.yml.ui.VerticalConfig;
 import org.open4goods.commons.services.SearchService;
 import org.open4goods.commons.services.SerialisationService;
 import org.open4goods.commons.services.VerticalsConfigService;
-import org.open4goods.commons.services.ai.GenAiResponse;
+import org.open4goods.commons.services.ai.PromptResponse;
 import org.open4goods.commons.services.ai.GenAiService;
 import org.open4goods.ui.controllers.ui.UiService;
 import org.open4goods.ui.services.BlogService;
