@@ -81,7 +81,7 @@ i18n:
 #   CLASSE_ENERGY : 0.3
 #   WEIGHT: 0.3
 #   BRAND_SUSTAINABILITY: 0.3
-#   DATA-QUALITY: 0.1
+#   DATA_QUALITY: 0.1
 
 ##############################################################################
 # Custom search filters : the following filters
@@ -102,7 +102,7 @@ technicalFilters:
 #    - "HDMI_PORTS_QUANTITY"
 
 #  - "PARTS_AVAILLABILITY"
-#  - "DATA-QUALITY"  
+#  - "DATA_QUALITY"  
 #  - "BRAND-SUSTAINABILITY"
 
 

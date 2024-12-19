@@ -167,12 +167,12 @@ impactScoreConfig:
     WEIGHT: "Le poids est un indicateur de l'empreinte matérielle du produit. Un poids plus élevé peut indiquer une utilisation accrue de matériaux, ce qui peut avoir un impact environnemental plus important en termes de ressources et de transport."
     POWER_CONSUMPTION: "La consommation électrique est cruciale car elle détermine l'efficacité énergétique du produit. Une consommation plus faible est préférable car elle réduit l'empreinte carbone liée à l'utilisation du produit."
     BRAND_SUSTAINABILITY: "L'évaluation ESG de la marque reflète l'engagement de l'entreprise envers des pratiques durables. Une meilleure évaluation indique que la marque est plus susceptible de minimiser son impact environnemental global."
-    DATA-QUALITY: "La qualité des données est essentielle pour garantir la fiabilité de l'évaluation. Des données complètes et précises permettent une meilleure estimation de l'impact environnemental."
+    DATA_QUALITY: "La qualité des données est essentielle pour garantir la fiabilité de l'évaluation. Des données complètes et précises permettent une meilleure estimation de l'impact environnemental."
   criteriasPonderation:
     WEIGHT: 0.25
     POWER_CONSUMPTION: 0.35
     BRAND_SUSTAINABILITY: 0.25
-    DATA-QUALITY: 0.15
+    DATA_QUALITY: 0.15
         
 requiredAttributes:
 #  - WEIGHT
