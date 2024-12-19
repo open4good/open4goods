@@ -11,6 +11,7 @@ import org.open4goods.commons.model.Localisable;
 import org.open4goods.commons.model.ProductCategory;
 import org.open4goods.commons.services.GoogleTaxonomyService;
 import org.open4goods.commons.services.SearchService;
+import org.open4goods.commons.services.SerialisationService;
 import org.open4goods.commons.services.VerticalsConfigService;
 import org.open4goods.ui.config.yml.UiConfig;
 import org.open4goods.ui.controllers.ui.CategoryController;
@@ -41,7 +42,7 @@ public class UrlHandlerMappingConfig {
 	@Autowired  SearchService searchService;
 	@Autowired  BlogService blogService;
 	@Autowired  GoogleTaxonomyService googleTaxonomyService;
-	
+	@Autowired  SerialisationService serialisationService;
 
 
     @Bean
@@ -80,7 +81,7 @@ public class UrlHandlerMappingConfig {
 				// Adding ecoscore page
 				//////////////// 
 				LOGGER.info("Adding vertical ecoscore page mapping : {}", url);				
-				urlMap.put(url+"/ecoscore", new VerticalEcoscoreController(item, uiService)  );
+				urlMap.put(url+"/ecoscore", new VerticalEcoscoreController(item, uiService,serialisationService)  );
 				
 				/////////////////
 				// Adding vertical specific wikipages

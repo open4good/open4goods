@@ -1,8 +1,12 @@
 package org.open4goods.ui.config;
 
+import org.open4goods.commons.config.yml.PromptConfig;
 import org.open4goods.commons.config.yml.ui.VerticalConfig;
 import org.open4goods.commons.services.SearchService;
+import org.open4goods.commons.services.SerialisationService;
 import org.open4goods.commons.services.VerticalsConfigService;
+import org.open4goods.commons.services.ai.GenAiResponse;
+import org.open4goods.commons.services.ai.GenAiService;
 import org.open4goods.ui.controllers.ui.UiService;
 import org.open4goods.ui.services.BlogService;
 import org.springframework.web.servlet.ModelAndView;
@@ -15,10 +19,12 @@ public class VerticalEcoscoreController extends AbstractController  {
 
 	private VerticalConfig verticalConfig;
 	private UiService uiService;
+	private SerialisationService serialisationService;
 
-	public VerticalEcoscoreController(VerticalConfig verticalConfig, UiService uiService) {
+	public VerticalEcoscoreController(VerticalConfig verticalConfig, UiService uiService, SerialisationService serialisationService) {
 		this.verticalConfig = verticalConfig;
 		this.uiService = uiService;
+		this.serialisationService = serialisationService;
 		
 	}
 
@@ -27,7 +33,14 @@ public class VerticalEcoscoreController extends AbstractController  {
 		ModelAndView ret = uiService.defaultModelAndView(("ecoscore-vertical"), request);
 		
 		ret.addObject("impactscore",verticalConfig.getImpactScoreConfig());
+		
+		// TODO(p2,perf) : cache
+		PromptConfig prompt = serialisationService.fromYaml(verticalConfig.getImpactScoreConfig().getYamlPrompt(), PromptConfig.class);
+		
+		
+		ret.addObject("prompt",prompt);
 		ret.addObject("verticalConfig",verticalConfig);
+
 		return ret;
 
 	}
