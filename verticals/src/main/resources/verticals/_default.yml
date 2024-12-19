@@ -566,6 +566,7 @@ attributesConfig:
       fr: "Poids"
     filteringType: "NUMERIC"
     asScore: true
+    reverseScore: true
     
     synonyms:
       all:
@@ -603,7 +604,8 @@ attributesConfig:
   - key: "POWER_CONSUMPTION_TYPICAL"
     filteringType: "NUMERIC"
     asScore: true
-    faIcon: ""
+    reverseScore: true    
+    faIcon: "fa-plug-circle-check"
   
     icecatFeaturesIds:      
         - 445
@@ -611,7 +613,7 @@ attributesConfig:
       
     name:
         default: "Power consumption"
-        fr: "Consommation électrique en marche"
+        fr: "Consommation électrique (en marche)"
       
     synonyms:
         all:
@@ -640,6 +642,7 @@ attributesConfig:
   - key: "POWER_CONSUMPTION_OFF"
     filteringType: "NUMERIC"
     asScore: true
+    reverseScore: true    
     faIcon: "fa-plug-circle-xmark"
   
     icecatFeaturesIds:      
@@ -683,11 +686,19 @@ attributesConfig:
       fr: "Fonctionnalités"
       
   - key: "BRAND_SUSTAINABILITY"
-    faIcon: "fa-list"
+    faIcon: "fa-globe"
 #    attributePath: attributes.features
     name:
       default: "Evaluation ESG (Sustainalytics) de la marque"
       fr: "Evaluation ESG de la marque (Sustainalytics)"
+      
+
+  - key: "DATA_QUALITY"
+    faIcon: "fa-data"
+#    attributePath: attributes.features
+    name:
+      default: "Data quality"
+      fr: "Qualité de la donnée"
       
 
 
