@@ -79,8 +79,8 @@
 												<h2 class="h4 mb-2">Impact Score ?</h2>
 												<p>
 													Cette page est spécifique au calcul d'impact
-													environnemental des <span
-														th:text="${verticalConfig.i18n(siteLanguage).verticalHomeTitle.toLowerCase()}"></span>,
+													environnemental des <a th:href="'/'+${verticalConfig.i18n(siteLanguage).verticalHomeUrl}"
+														th:text="${verticalConfig.i18n(siteLanguage).verticalHomeTitle.toLowerCase()}"></a>,
 													vous pouvez consulter ici les critères et les pondérations
 													qui sont spécifiquement appliquées aux <span
 														th:text="${verticalConfig.i18n(siteLanguage).verticalHomeTitle.toLowerCase()}"></span>.
@@ -90,8 +90,7 @@
 													électriques et électroniques à l'échelle
 												</p>
 												<a href="/ecoscore"
-													class=" float-end btn btn-sm btn-primary">En savoir
-													plus</a>
+													class=" float-end btn btn-sm btn-primary">En savoir	plus</a>
 											</div>
 										</div>
 
