@@ -7,22 +7,24 @@
 	<th:block th:insert="inc/header-meta.html"></th:block>
     
 	<!-- Primary Meta Tags -->
-	<title>L'écoscore : classement écologique des produits | Nudger</title>
-	<meta name="description" content="Nudger vous propose d'évaluer l'impact environnemental de vos produits avec notre écoscore. Achetez malin, achetez responsable ! ☀️">
+	<title>Impact Score Nudger : Un écoscore pour les <th:block th:text="${verticalConfig.i18n(siteLanguage).verticalHomeTitle}"></th:block></title>
+	<meta name="description" content="">
 		
-	<!-- Open Graph / Facebook -->
+	<!-- Open Graph / Facebook 
 	<meta property="og:type" content="website">
 	<meta property="og:url" th:content="${url}">
 	<meta property="og:title" th:content="#{ecoscore.title}">
 	<meta property="og:description" th:content="#{ecoscore.meta.description}">
 	<meta property="og:image" th:content="${baseUrl} + 'assets/img/brand/light.svg'">
+	-->
 	
-	<!-- Twitter -->
+	<!-- Twitter 
 	<meta name="twitter:card" content="summary_large_image">
 	<meta name="twitter:url" th:content="${url}">
 	<meta name="twitter:title" th:content="#{ecoscore.title}">
 	<meta name="twitter:description" th:content="#{ecoscore.meta.description}">
 	<meta name="twitter:image" th:content="${baseUrl} + 'assets/img/brand/light.svg'">
+	-->
 	
 </head>
 
@@ -211,125 +213,102 @@
         </div>
         
         <section class="section">
-            <div class="container-fluid">
-                <div class="row justify-content-center">
-                        <div class="text-center">
-                            <h2 class="h1 fw-light">Audit
-                            </h2>
-                            <p class="lead mb-5">Notre éco-score est transparent et s'inscrit dans un modèle ouvert. Vous trouverez ici les élements nécessaires à sa revue.</p>
-                        </div>
+        
+                    <div class="container">
+                    <div class="card shadow border-gray-300">
+                        <div class="card-body p-4 p-lg-5">
 
+                            <div class="row align-items-center">
+                                <div class="col-md-3 p-4">
+                                    <img class="img-fluid" style="height: 200px"
+                                        src="/icons/categories/ecoscore/revue_critique.jpg"
+                                        alt="ImpactScore Nudger">
+
+                                </div>
+                                <div class="col-12 col-md-9 mt-4 mt-md-0">
+                                    <h2 class="h3 mb-2">Revue critique</h2>
+                                    <p
+                                        th:text="${impactscore.texts.i18n(siteLanguage).criticalReview}"></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                
+            <div class="container-fluid">
+
+	
+
+
+
+				<div class="row justify-content-center">
+                        <div class="mt-6 text-center">
+                            <h2 class="h1 fw-light">Transparence et traçabilité
+                            </h2>
+                            <p class="lead mb-5">Nudger est construit dans un modèle ouvert, <a href="/opensource">open-source</a> et <a href="/opendata">open-data</a>. Notre éco-score sur les <span th:text="${verticalConfig.i18n(siteLanguage).verticalHomeTitle.toLowerCase()}"> </span> est à ce titre ouvert et transparent.</p>
+                        </div>
+                </div>
+                
 
                 <div>
 
                       <div class="row p-6">
-							<div class="col-8">
-								<div class="card shadow border-gray-300">
-									<div class="card-body p-4 p-lg-5">
+							<div class="col-lg-8">
 
-										<div class="row align-items-center">
-											<div class="col-md-3 p-4">
-												<img class="img-fluid" style="height: 200px"
-													src="/icons/categories/ecoscore/revue_critique.jpg"
-													alt="ImpactScore Nudger">
-
-											</div>
-											<div class="col-12 col-md-9 mt-4 mt-md-0">
-												<h2 class="h4 mb-2">Revue critique</h2>
-												<p
-													th:text="${impactscore.texts.i18n(siteLanguage).criticalReview}"></p>
-											</div>
-										</div>
-									</div>
-								</div>
-
-							</div>
-							
-							<div class="col-4">
-								<div class="card shadow border-gray-300">
-									<div class="card-body p-4 p-lg-5">
-
-										<div class="row align-items-center">
-												<h2 class="h4 mb-2">En discuter</h2>
-												<p> Nudger est un comparateur open-source, la définition de l'Impact Score et plus généralement de la catégorie 'tv' est disponible sur github. 
-												    N'hésitez pas à créer une issue si vous souhaitez échanger sur la construction de l'ImpactScore téléviseurs !
-												
-												</p>
-										</div>
-									</div>
-								</div>
-
-							</div>
-
-
-						</div>
-
-
-
-
-
-
-
-
-					</div>
-                
-                
-                
-				<div class="row justify-content-center m-5">
-						<div class=" col-lg-6">
 							<div class="card">
-								<div class="card-header">Critères proposés</div>
+								<div class="card-header">Synthèse et déploiement</div>
 								<div class="card-body">
 									<table class="table table-hover table-responsive-sm">
 										<tbody>
 											<tr>
-												<th scope="col" id="class">Nom du critère</th>
-												<th scope="col" id="teacher">Pondération</th>
+												<th scope="col" id="teacher">Nom</th>
+												<th scope="col" id="teacher">Coef. proposé</th>
+                                                <th scope="col" id="teacher">Coef. appliqué</th>
+                                                
 											</tr>
 
-											<tr>
-												<td headers="secondyear Forsyth males">6</td>
-												<td headers="secondyear Forsyth females">9</td>
+											<tr th:each="item, stat : ${impactscore.texts.i18n(siteLanguage).criteriasAnalysis}" th:with="attr = ${verticalConfig.attributesConfig.getAttributeConfigByKey(item.key)}">
+												<td headers="secondyear Forsyth females"><span th:text="${attr.name.i18n(siteLanguage)}"></span></td>
+                                                <td headers="secondyear Forsyth females"><span th:text="${impactscore.criteriasPonderation.get(attr.key)}"></span></td>
+                                                <td headers="secondyear Forsyth females"><span th:text="${verticalConfig.impactScoreConfig.criteriasPonderation.get(attr.key)}"></span></td>
+
 											</tr>
+											
 										</tbody>
 									</table>
+									
+									   <div>
+                                             Ce tableau permet de confronter les coefficients proposés par le système d'IA (Coef. proposé) à ceux actuellement utilisés par Nudger (Coef. appliqué). Les coefficients sont appliquées dans le									   
+									         <a target="_blank" rel="nofollow" th:href="'https://github.com/open4good/open4goods/blob/main/verticals/src/main/resources/verticals/'+${verticalConfig.id}+'.yml'"> fichier de configuration des <span
+                                                        th:text="${verticalConfig.i18n(siteLanguage).verticalHomeTitle.toLowerCase()}"></span></a>.
+									   </div>
+									
+									         
+									         
 								</div>
 							</div>
 
-
 						</div>
+							
+							<div class="col-lg-4">
+								<div class="card shadow border-gray-300">
+									<div class="card-body p-4 p-lg-5">
 
-                        <div class=" col-lg-6">
-                            <div class="card">
-                                <div class="card-header">Critères retenus</div>
-                                <div class="card-body">
-                                    <table class="table table-hover table-responsive-sm">
-                                        <tbody>
-                                            <tr>
-                                                <th scope="col" id="class">Nom du critère</th>
-                                                <th scope="col" id="teacher">Pondération</th>
-                                            </tr>
-
-                                            <tr>
-                                                <td headers="secondyear Forsyth males">6</td>
-                                                <td headers="secondyear Forsyth females">9</td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
-                                    
-                                       <a rel = "nofollow" href="">Consulter la définition sur github </a>
-                                </div>
-                            </div>
-
-
-                        </div>                          
-                            
+										<div class="row align-items-center">
+												<h2 class="text-center h4 mb-2">En discuter</h2>
+												<p> Nudger est un comparateur open-source, la définition de l'Impact Score (et plus généralement de la catégorie '<span th:text="${verticalConfig.i18n(siteLanguage).verticalHomeTitle}"></span>') est disponible sur <a target="_blank" rel="nofollow" th:href="'https://github.com/open4good/open4goods/blob/main/verticals/src/main/resources/verticals/'+${verticalConfig.id}+'.yml'">github</a>. 
+												    N'hésitez pas à <a target="_blank" rel="nofollow" href="https://github.com/open4good/open4goods/issues/new">créer une issue</a> si vous souhaitez discuter autour de l'élaboration de l'Impact Score !												
+												</p>
+												<a rel="nofollow" target="_blank" href="https://github.com/open4good/open4goods">
+    												<img class="img-fluid" src="/icons/github.png" alt="Comparateur écologique sur github">
+												</a>
+										</div>
+									</div>
+								</div>
+							</div>
 						</div>
-
-
-
-
-                </div>
+					</div>                
             </div>
 
 
@@ -341,65 +320,133 @@
 
 
 
-            <div class="container-semi-fluid">
-            
-			<div class="col-md-10 col-lg-8">
-				<!-- Tab Nav -->
-				<div class="nav-wrapper position-relative mb-2">
-					<ul class="nav nav-pills nav-fill flex-column flex-md-row"
-						id="tabs-icons-text" role="tablist">
-						<li class="nav-item"><a
-							class="nav-link mb-sm-3 mb-md-0 active"
-							id="tabs-icons-text-1-tab" data-bs-toggle="tab"
-							href="#tabs-icons-text-1" role="tab"
-							aria-controls="tabs-icons-text-1" aria-selected="true"><span
-								class="fas fa-palette me-2"></span>Audit de génération de l'impact score</a></li>
-						<li class="nav-item"><a class="nav-link mb-sm-3 mb-md-0"
-							id="tabs-icons-text-2-tab" data-bs-toggle="tab"
-							href="#tabs-icons-text-2" role="tab"
-							aria-controls="tabs-icons-text-2" aria-selected="false"><span
-								class="fas fa-laptop-code me-2"></span>Prompt IA utilisé</a></li>
-						<li class="nav-item"><a class="nav-link mb-sm-3 mb-md-0"
-							id="tabs-icons-text-3-tab" data-bs-toggle="tab"
-							href="#tabs-icons-text-3" role="tab"
-							aria-controls="tabs-icons-text-3" aria-selected="false"><span
-								class="far fa-user me-2"></span>Réponse IA </a></li>
-					</ul>
-				</div>
-				<!-- End of Tab Nav -->
-				<!-- Tab Content -->
-				<div class="card border-0">
-					<div class="card-body p-0">
-						<div class="tab-content" id="tabcontent2">
-							<div class="tab-pane fade show active" id="tabs-icons-text-1"
-								role="tabpanel" aria-labelledby="tabs-icons-text-1-tab">
-								<p>Exercitation photo booth stumptown tote bag Banksy, elit
-									small batch freegan sed. Craft beer elit seitan exercitation,
-									photo booth et 8-bit kale chips proident chillwave deep v
-									laborum. Aliquip veniam delectus, Marfa eiusmod Pinterest in do
-									umami readymade swag.</p>
-								<p>Day handsome addition horrible sensible goodness two
-									contempt. Evening for married his account removal. Estimable me
-									disposing of be moonlight cordially curiosity.</p>
-							</div>
-							<div class="tab-pane fade" id="tabs-icons-text-2" role="tabpanel"
-								aria-labelledby="tabs-icons-text-2-tab">
-								<pre>
-								    <code class="json" th:utext="${impactscore.aiJsonResponse}"></code>
-								</pre>
-							</div>
-							<div class="tab-pane fade" id="tabs-icons-text-3" role="tabpanel"
-								aria-labelledby="tabs-icons-text-3-tab">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        <div class="p-6">
+                            <div class="card">
+                                <div class="card-header">Pistes d'audit</div>
+                                <div class="card-body">
+
+
+
+
+
+
+
+        <!-- Tab Nav -->
+                <div class="nav-wrapper position-relative mb-2">
+                    <ul class="nav nav-pills nav-fill flex-column flex-md-row"
+                        id="tabs-icons-text" role="tablist">
+                        <li class="nav-item"><a
+                            class="nav-link mb-sm-3 mb-md-0 active"
+                            id="tabs-icons-text-1-tab" data-bs-toggle="tab"
+                            href="#tabs-icons-text-1" role="tab"
+                            aria-controls="tabs-icons-text-1" aria-selected="true"><span
+                                class="fas fa-palette me-2"></span>Audit de génération de l'impact score</a></li>
+                        <li class="nav-item"><a class="nav-link mb-sm-3 mb-md-0"
+                            id="tabs-icons-text-2-tab" data-bs-toggle="tab"
+                            href="#tabs-icons-text-2" role="tab"
+                            aria-controls="tabs-icons-text-2" aria-selected="false"><span
+                                class="fas fa-laptop-code me-2"></span>Prompt IA utilisé</a></li>
+                        <li class="nav-item"><a class="nav-link mb-sm-3 mb-md-0"
+                            id="tabs-icons-text-3-tab" data-bs-toggle="tab"
+                            href="#tabs-icons-text-3" role="tab"
+                            aria-controls="tabs-icons-text-3" aria-selected="false"><span
+                                class="far fa-user me-2"></span>Réponse IA </a></li>
+                    </ul>
+                </div>
+                <!-- End of Tab Nav -->
+                <!-- Tab Content -->
+                <div class="card border-0">
+                    <div class="card-body p-0">
+                        <div class="tab-content" id="tabcontent2">
+                            <div class="tab-pane fade show active" id="tabs-icons-text-1"
+                                role="tabpanel" aria-labelledby="tabs-icons-text-1-tab">
+                                <p>Exercitation photo booth stumptown tote bag Banksy, elit
+                                    small batch freegan sed. Craft beer elit seitan exercitation,
+                                    photo booth et 8-bit kale chips proident chillwave deep v
+                                    laborum. Aliquip veniam delectus, Marfa eiusmod Pinterest in do
+                                    umami readymade swag.</p>
+                                <p>Day handsome addition horrible sensible goodness two
+                                    contempt. Evening for married his account removal. Estimable me
+                                    disposing of be moonlight cordially curiosity.</p>
+                            </div>
+                            <div class="tab-pane fade" id="tabs-icons-text-2" role="tabpanel" aria-labelledby="tabs-icons-text-2-tab">
+
+
+
+										<div class="card shadow p-4 mb-5">
+											<div class="row align-items-center">
+												<div class="col-4">
+													<a href="#"><img src="../../assets/img/shop/item-2.png"	alt="big speakers"></a>
+												</div>
+												<div class="d-flex mb-2 fw-bold">
+													<a class="h5" href="#">Prompt IA</a>
+												</div>
+												<div class="col-4">
+													<ul class="ps-3">
+														<li class="small">Service IA : <span
+															th:text="${prompt.aiService}"></span></li>
+														<li class="small">Modèle : <span
+															th:text="${prompt.options.model}"></span></li>
+														<li class="small">Température : <span
+															th:text="${prompt.options.temperature}"></span></li>
+													</ul>
+												</div>
+											</div>
+										</div>
+
+
+
+										<pre>
+                                    <code class="json" th:utext="${impactscore.aiJsonResponse}"></code>
+                                </pre>
+                            </div>
+                            <div class="tab-pane fade" id="tabs-icons-text-3" role="tabpanel"
+                                aria-labelledby="tabs-icons-text-3-tab">
                                 <pre>
                                     <code class="yaml" th:utext="${impactscore.yamlPrompt}"></code>
                                 </pre>
-							</div>
-						</div>
-					</div>
-				</div>
-				<!-- End of Tab Content -->
-			</div>
-			</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- End of Tab Content -->
+
+
+        </div>
+
+
+
+
+
+
+
+
+
+                                             
+                                             
+                                </div>
+                            </div>
+                            
+                            
+                            
+                            
 		</section>
         
         
