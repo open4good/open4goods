@@ -123,30 +123,32 @@ public class LegacyAiService implements HealthIndicator{
 	 * Completes AI descriptions for a product based on the provided vertical configuration, containing the prompts
 	 */
 	public void complete(Product product, VerticalConfig verticalConfig, boolean force) {
-		// Discard if we do not have a minimum set of attributes, but applies if is in forced mode
-		if (!force && product.getAttributes().count() < MIN_REQUIRED_ATTRIBUTES) {
-			logger.error("Skipping because not enough attributes");
-			return;
-		}
-
-		logger.info("AI completion for product {}", product.getId());
-
-		// Retrieving the required prompts
-        Map<String, AiPromptsConfig> iaConfigsPerLanguage = verticalConfig.getI18n().entrySet().stream()
-            .collect(Collectors.toMap(
-            		Map.Entry<String, ProductI18nElements>::getKey,                     
-                entry -> entry.getValue().getAiConfigs()
-            ));
 		
-        // Launch the genAiDescription
-		try {
-			if (verticalConfig.getGenAiConfig().isEnabled()) {
-				generateTextsForProduct(product, iaConfigsPerLanguage, force, verticalConfig);				
-			}
-		} catch (Exception e) {
-			logger.error("Error while generating AI description for product {}", product,e);
-			this.criticalExceptionsCounter++;
-		}
+		// TODO(p1,bug) : FORCE NO GEN
+//		// Discard if we do not have a minimum set of attributes, but applies if is in forced mode
+//		if (!force && product.getAttributes().count() < MIN_REQUIRED_ATTRIBUTES) {
+//			logger.error("Skipping because not enough attributes");
+//			return;
+//		}
+//
+//		logger.info("AI completion for product {}", product.getId());
+//
+//		// Retrieving the required prompts
+//        Map<String, AiPromptsConfig> iaConfigsPerLanguage = verticalConfig.getI18n().entrySet().stream()
+//            .collect(Collectors.toMap(
+//            		Map.Entry<String, ProductI18nElements>::getKey,                     
+//                entry -> entry.getValue().getAiConfigs()
+//            ));
+//		
+//        // Launch the genAiDescription
+//		try {
+//			if (verticalConfig.getGenAiConfig().isEnabled()) {
+//				generateTextsForProduct(product, iaConfigsPerLanguage, force, verticalConfig);				
+//			}
+//		} catch (Exception e) {
+//			logger.error("Error while generating AI description for product {}", product,e);
+//			this.criticalExceptionsCounter++;
+//		}
 	}
 	
 	/**
