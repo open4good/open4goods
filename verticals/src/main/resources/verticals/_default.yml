@@ -694,7 +694,7 @@ attributesConfig:
       
 
   - key: "DATA_QUALITY"
-    faIcon: "fa-data"
+    faIcon: "fa-file-shield"
 #    attributePath: attributes.features
     name:
       default: "Data quality"

@@ -2,7 +2,7 @@ package org.open4goods.commons.services.ai;
 
 import org.open4goods.commons.config.yml.PromptConfig;
 
-public class GenAiResponse<T> {
+public class PromptResponse<T> {
 	
 	/**
 	 * The body of the response

@@ -76,11 +76,11 @@ public class GenAiService {
 	 * @throws JsonMappingException 
 	 * @throws JsonParseException 
 	 */
-	public GenAiResponse<CallResponseSpec> prompt(String promptKey, Map<String, Object> variables) throws ResourceNotFoundException, JsonParseException, JsonMappingException, IOException {
+	public PromptResponse<CallResponseSpec> prompt(String promptKey, Map<String, Object> variables) throws ResourceNotFoundException, JsonParseException, JsonMappingException, IOException {
 
 		// TODO : Enable only if genaiconfig.enabled
 		PromptConfig pConf =  getPromptConfig(promptKey);
-		GenAiResponse<CallResponseSpec> ret = new GenAiResponse<ChatClient.CallResponseSpec>();
+		PromptResponse<CallResponseSpec> ret = new PromptResponse<ChatClient.CallResponseSpec>();
 
 		if (null == pConf) {
 			logger.error("PromptConfig {}  does not exists", promptKey);
@@ -133,11 +133,11 @@ public class GenAiService {
 	 * @throws JsonMappingException 
 	 * @throws JsonParseException 
 	 */
-	public GenAiResponse<Map<String, Object>> jsonPrompt(String promptKey, Map<String, Object> variables) throws ResourceNotFoundException, JsonParseException, JsonMappingException, IOException {
+	public PromptResponse<Map<String, Object>> jsonPrompt(String promptKey, Map<String, Object> variables) throws ResourceNotFoundException, JsonParseException, JsonMappingException, IOException {
 		
-		GenAiResponse<Map<String, Object>>  ret = new GenAiResponse<Map<String, Object>>();
+		PromptResponse<Map<String, Object>>  ret = new PromptResponse<Map<String, Object>>();
 		
-		GenAiResponse<CallResponseSpec> internal = prompt(promptKey, variables);
+		PromptResponse<CallResponseSpec> internal = prompt(promptKey, variables);
 		// Copy
 		ret.setDuration(internal.getDuration());
 		ret.setStart(internal.getStart());

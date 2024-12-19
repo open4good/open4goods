@@ -40,7 +40,7 @@ import org.open4goods.commons.services.GoogleTaxonomyService;
 import org.open4goods.commons.services.IcecatService;
 import org.open4goods.commons.services.SerialisationService;
 import org.open4goods.commons.services.VerticalsConfigService;
-import org.open4goods.commons.services.ai.GenAiResponse;
+import org.open4goods.commons.services.ai.PromptResponse;
 import org.open4goods.commons.services.ai.GenAiService;
 import org.open4goods.commons.services.ai.LegacyAiService;
 import org.slf4j.Logger;
@@ -630,7 +630,7 @@ public class VerticalsGenerationService {
 			context.put("VERTICAL_NAME", vConf.getI18n().get("fr").getVerticalHomeTitle());
 			
 			// Prompt 
-			GenAiResponse<Map<String, Object>> response = genAiService.jsonPrompt("impactscore-generation", context);
+			PromptResponse<Map<String, Object>> response = genAiService.jsonPrompt("impactscore-generation", context);
 			
 			// TODO(p2, safety) : To strictYaml
 			String rawRet = serialisationService.toYaml(response.getBody());

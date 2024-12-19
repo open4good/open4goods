@@ -315,138 +315,44 @@
 
 
 
+			<div class="p-6">
+				<div class="card">
+					<div class="card-header">Audit de génération IA de l'impact score</div>
+					<div class="card-body">
 
 
 
+						<h3>Système d'IA utilisé</h3>
+
+						<p>Informations sur le service et le modèle d'IA utilisé pour générer cet ImpactScore</p>
+						<ul class="ps-3">
+							<li class="small">Service IA : <span th:text="${prompt.aiService}"></span></li>
+							<li class="small">Modèle : <span th:text="${prompt.options.model}"></span></li>
+						</ul>
 
 
 
+						<h3>User Prompt</h3>
+						<p>Ceci est l'instruction envoyée au modèle d'IA. A noter que nous utilisons un des modèles les plus performants (o1-preview), qui ne prend pas en compte le prompt système, ni la
+							température.</p>
 
 
+						<pre class="bg-gray-200 mb-4">
+                                            <code th:utext="${prompt.userPrompt}"></code>
+                        </pre>
+
+						<h3>Réponse</h3>
+						<p>Ceci est la réponse du sysème d'IA, au format JSON</p>
+						<pre class="bg-gray-200">
+                                            <code class="json" th:utext="${impactscore.aiJsonResponse}"></code>
+                                        </pre>
+
+					</div>
 
 
+				</div>
+			</div>
 
-
-
-
-
-
-
-
-
-
-
-
-        <div class="p-6">
-                            <div class="card">
-                                <div class="card-header">Pistes d'audit</div>
-                                <div class="card-body">
-
-
-
-
-
-
-
-        <!-- Tab Nav -->
-                <div class="nav-wrapper position-relative mb-2">
-                    <ul class="nav nav-pills nav-fill flex-column flex-md-row"
-                        id="tabs-icons-text" role="tablist">
-                        <li class="nav-item"><a
-                            class="nav-link mb-sm-3 mb-md-0 active"
-                            id="tabs-icons-text-1-tab" data-bs-toggle="tab"
-                            href="#tabs-icons-text-1" role="tab"
-                            aria-controls="tabs-icons-text-1" aria-selected="true"><span
-                                class="fas fa-palette me-2"></span>Audit de génération de l'impact score</a></li>
-                        <li class="nav-item"><a class="nav-link mb-sm-3 mb-md-0"
-                            id="tabs-icons-text-2-tab" data-bs-toggle="tab"
-                            href="#tabs-icons-text-2" role="tab"
-                            aria-controls="tabs-icons-text-2" aria-selected="false"><span
-                                class="fas fa-laptop-code me-2"></span>Prompt IA utilisé</a></li>
-                        <li class="nav-item"><a class="nav-link mb-sm-3 mb-md-0"
-                            id="tabs-icons-text-3-tab" data-bs-toggle="tab"
-                            href="#tabs-icons-text-3" role="tab"
-                            aria-controls="tabs-icons-text-3" aria-selected="false"><span
-                                class="far fa-user me-2"></span>Réponse IA </a></li>
-                    </ul>
-                </div>
-                <!-- End of Tab Nav -->
-                <!-- Tab Content -->
-                <div class="card border-0">
-                    <div class="card-body p-0">
-                        <div class="tab-content" id="tabcontent2">
-                            <div class="tab-pane fade show active" id="tabs-icons-text-1"
-                                role="tabpanel" aria-labelledby="tabs-icons-text-1-tab">
-                                <p>Exercitation photo booth stumptown tote bag Banksy, elit
-                                    small batch freegan sed. Craft beer elit seitan exercitation,
-                                    photo booth et 8-bit kale chips proident chillwave deep v
-                                    laborum. Aliquip veniam delectus, Marfa eiusmod Pinterest in do
-                                    umami readymade swag.</p>
-                                <p>Day handsome addition horrible sensible goodness two
-                                    contempt. Evening for married his account removal. Estimable me
-                                    disposing of be moonlight cordially curiosity.</p>
-                            </div>
-                            <div class="tab-pane fade" id="tabs-icons-text-2" role="tabpanel" aria-labelledby="tabs-icons-text-2-tab">
-
-
-
-										<div class="card shadow p-4 mb-5">
-											<div class="row align-items-center">
-												<div class="col-4">
-													<a href="#"><img src="../../assets/img/shop/item-2.png"	alt="big speakers"></a>
-												</div>
-												<div class="d-flex mb-2 fw-bold">
-													<a class="h5" href="#">Prompt IA</a>
-												</div>
-												<div class="col-4">
-													<ul class="ps-3">
-														<li class="small">Service IA : <span
-															th:text="${prompt.aiService}"></span></li>
-														<li class="small">Modèle : <span
-															th:text="${prompt.options.model}"></span></li>
-														<li class="small">Température : <span
-															th:text="${prompt.options.temperature}"></span></li>
-													</ul>
-												</div>
-											</div>
-										</div>
-
-
-
-										<pre>
-                                    <code class="json" th:utext="${impactscore.aiJsonResponse}"></code>
-                                </pre>
-                            </div>
-                            <div class="tab-pane fade" id="tabs-icons-text-3" role="tabpanel"
-                                aria-labelledby="tabs-icons-text-3-tab">
-                                <pre>
-                                    <code class="yaml" th:utext="${impactscore.yamlPrompt}"></code>
-                                </pre>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <!-- End of Tab Content -->
-
-
-        </div>
-
-
-
-
-
-
-
-
-
-                                             
-                                             
-                                </div>
-                            </div>
-                            
-                            
-                            
-                            
 		</section>
         
         
@@ -470,13 +376,7 @@
 <script src="/vendor/jarallax/dist/jarallax.min.js"></script>
 <script src="/vendor/smooth-scroll/dist/smooth-scroll.polyfills.min.js"></script>
 <script src="/vendor/vivus/dist/vivus.min.js"></script>
-<script src="/vendor/chartist/dist/chartist.min.js"></script>
-<script src="/vendor/chartist-plugin-tooltips/dist/chartist-plugin-tooltip.min.js"></script>
 <script src="/vendor/@glidejs/glide/dist/glide.min.js"></script>
-<script src="/vendor/countup.js/dist/countUp.umd.js"></script>
-<script src="/vendor/vanillajs-datepicker/dist/js/datepicker.min.js"></script>
-
-<script async defer src="https://buttons.github.io/buttons.js"></script>
 
 <script src="/webjars/jquery/jquery.min.js"></script>
 
@@ -484,10 +384,6 @@
 <script src="../../assets/js/pixel.js"></script>
 <!-- custom sources -->
 <script src="../../assets/js/pixel-custom.js"></script>
-
-<script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.0/highlight.min.js"></script>
-<script>hljs.initHighlightingOnLoad();</script> 
-
 
 </body>
 
