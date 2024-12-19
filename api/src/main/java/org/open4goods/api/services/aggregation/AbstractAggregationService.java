@@ -59,8 +59,9 @@ public abstract class AbstractAggregationService  implements Closeable {
 	/**
 	 * Called after data aggregation in batchmode
 	 * @param datas 
+	 * @param vConf 
 	 */
-	public void done(Collection<Product> datas) {
+	public void done(Collection<Product> datas, VerticalConfig vConf) {
 		
 	}
 	

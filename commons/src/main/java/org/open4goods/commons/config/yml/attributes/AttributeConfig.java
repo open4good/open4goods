@@ -64,6 +64,10 @@ public class AttributeConfig {
 	 */
 	private boolean asScore = false;
 
+	/**
+	 * If true, attribute value to score will be reversed (ie : for weight, the better score is the lowest weight)
+	 */
+	private boolean reverseScore = false;
 
 	/**
 	 * The ordering that must be applied to this attributes values after aggregations. (ie rendered in search attributes selection)
@@ -318,9 +322,6 @@ public class AttributeConfig {
 		this.asScore = asRating;
 	}
 
-
-
-
 	public Localisable<String, String> getName() {
 		return name;
 	}
@@ -344,6 +345,14 @@ public class AttributeConfig {
 
 	public void setIcecatFeaturesIds(Set<String> icecatFeaturesIds) {
 		this.icecatFeaturesIds = icecatFeaturesIds;
+	}
+
+	public boolean isReverseScore() {
+		return reverseScore;
+	}
+
+	public void setReverseScore(boolean reverseScore) {
+		this.reverseScore = reverseScore;
 	}
 
 

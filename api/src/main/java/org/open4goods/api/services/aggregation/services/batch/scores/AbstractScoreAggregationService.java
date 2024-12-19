@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.open4goods.api.services.aggregation.AbstractAggregationService;
+import org.open4goods.commons.config.yml.ui.VerticalConfig;
 import org.open4goods.commons.exceptions.ValidationException;
 import org.open4goods.commons.model.attribute.Cardinality;
 import org.open4goods.commons.model.data.Score;
@@ -15,7 +16,7 @@ import org.slf4j.Logger;
 public abstract class AbstractScoreAggregationService extends  AbstractAggregationService{
 
 
-	private Map<String, Cardinality>  batchDatas = new HashMap<>();
+	protected Map<String, Cardinality>  batchDatas = new HashMap<>();
 	
 	
 	public AbstractScoreAggregationService(Logger logger) {
@@ -31,11 +32,9 @@ public abstract class AbstractScoreAggregationService extends  AbstractAggregati
 
 	
 	@Override
-	public void done(Collection<Product> datas) {
-		super.done(datas);
+	public void done(Collection<Product> datas, VerticalConfig vConf) {
+		super.done(datas,vConf);
 
-
-		
 		dedicatedLogger.info("{} -> Scores relativisation for {} products", this.getClass().getSimpleName(), datas.size());
 
 		//////////////////////////
@@ -111,7 +110,6 @@ public abstract class AbstractScoreAggregationService extends  AbstractAggregati
 			return ;
 		}
 		
-		
 		Cardinality ret = new Cardinality();
 		ret.setMax(relativize(cardinality.getMax(),score.getAbsolute()));
 		ret.setMin(relativize(cardinality.getMin(),score.getAbsolute()));
@@ -122,12 +120,6 @@ public abstract class AbstractScoreAggregationService extends  AbstractAggregati
 
 		score.setRelativ(ret);
 		
-		try {
-
-
-		} catch (Exception e) {
-			dedicatedLogger.warn("Relativisation failed",e);
-		}
 	}
 
 
