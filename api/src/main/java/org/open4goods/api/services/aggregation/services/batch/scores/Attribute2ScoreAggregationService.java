@@ -1,7 +1,7 @@
 package org.open4goods.api.services.aggregation.services.batch.scores;
 
 import java.util.Collection;
-import java.util.Map;
+import java.util.List;
 
 import org.open4goods.commons.config.yml.attributes.AttributeConfig;
 import org.open4goods.commons.config.yml.ui.AttributesConfig;
@@ -9,7 +9,6 @@ import org.open4goods.commons.config.yml.ui.VerticalConfig;
 import org.open4goods.commons.exceptions.ValidationException;
 import org.open4goods.commons.model.attribute.AttributeType;
 import org.open4goods.commons.model.data.Score;
-import org.open4goods.commons.model.product.ProductAttribute;
 import org.open4goods.commons.model.product.IndexedAttribute;
 import org.open4goods.commons.model.product.Product;
 import org.slf4j.Logger;
@@ -27,7 +26,7 @@ public class Attribute2ScoreAggregationService extends AbstractScoreAggregationS
 	public void onProduct(Product data, VerticalConfig vConf) {
 
 		
-		Collection<IndexedAttribute> aggattrs =    data.getAttributes().getIndexed().values()  ;
+		Collection<IndexedAttribute> aggattrs = data.getAttributes().getIndexed().values()  ;
 		for (IndexedAttribute aga : aggattrs) {
 			// Scoring from attribute
 			try {
@@ -95,6 +94,43 @@ public class Attribute2ScoreAggregationService extends AbstractScoreAggregationS
 			throw new ValidationException("Was asking to  translate {} into rating, but no numericMapping definition nor numeric attribute found : " + aga);
 		}
 
+	}
+	
+	@Override
+	public void done(Collection<Product> datas, VerticalConfig vConf) {
+
+		/////////////////////////////////////////////////
+		//  Reversing the scores that need to be (ie. weight, electric consumption : lower values are the best scored)
+		// To reverse a score, we substract max absolute score from item absolute score 
+		/////////////////////////////////////////////////
+		
+		// Selecting the scores to reverse
+		List<String> scoresToReverse = vConf.getAttributesConfig().getConfigs().stream().filter(e->e.isReverseScore()).map(e->e.getKey()).toList();
+		
+		// For each score to reverse
+		for (String key : scoresToReverse) {
+			
+			// TODO : Check all cardinality are equivalent
+			// We iterate on every score, and we update score abs value and batchdatas abs cardinality
+			for (Product p : datas) {
+				if (!p.getScores().containsKey(key)) {
+					dedicatedLogger.info("No score {} for {}",key,p);
+				} else {
+					Double value = p.getScores().get(key).getValue();
+					Double max = batchDatas.get(key).getMax();
+					Double reversed = max - value;
+					
+					p.getScores().get(key).setValue(reversed);				
+					batchDatas.get(key).setValue(reversed);
+					
+					dedicatedLogger.info("Score {} reversed for {}. Original was {}, max is {}. New value is {}",key, p, value,max, reversed );
+				}
+				
+			}
+		}
+		
+		// SUPER important : Score relativisation is operated in the AbstactScoreAggService
+		super.done(datas, vConf);
 	}
 
 }

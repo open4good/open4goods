@@ -73,8 +73,8 @@ public class EcoScoreAggregationService extends AbstractScoreAggregationService 
 
 
 	@Override
-	public void done(Collection<Product> datas) {
-		super.done(datas);
+	public void done(Collection<Product> datas, VerticalConfig vConf) {
+		super.done(datas, vConf);
 		
 		///////////////////////
 		// EcoScore ranking and "best alternativ" reach

@@ -66,7 +66,7 @@ public class ScoringBatchedAggregator extends AbstractAggregator {
 			logger.warn("Post computing {} products using {} service",datas.size() ,service.getClass().getSimpleName());
 
 			// Done 
-			service.done(datas);
+			service.done(datas,vConf);
 		}
 
 		return ret;
