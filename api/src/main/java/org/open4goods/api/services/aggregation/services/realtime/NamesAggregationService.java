@@ -100,26 +100,7 @@ public class NamesAggregationService extends AbstractAggregationService {
 			} catch (InvalidParameterException e1) {
 				logger.error("Error while computing url for product {}", data.getId(), e1);
 			}
-
 		}
-
-		
-//		if (null != vConf) {
-//
-//			////////////////
-//			// AI generation
-//			/////////////////
-//			List<NamesConfig> namesConfigs = vConf.getNamesConfig();
-//			for (NamesConfig nameConfig : namesConfigs) {
-//				String key = nameConfig.getKey();
-//
-//				for (Entry<String, String> i18n : nameConfig.getValue().entrySet()) {
-//					String lang = i18n.getKey();
-//					String value = evaluationService.thymeleafEval(data, i18n.getValue());
-//					data.getNames().addName(lang, key, value);
-//				}
-//			}
-//		}
 	}
 
 	private String generateUrl(Product data, PrefixedAttrText urlPrefix, VerticalConfig vConf) throws InvalidParameterException {
