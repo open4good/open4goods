@@ -20,14 +20,13 @@
 
 <th:block th:if="${config.webConfig.useHotScss}">
 	<link type="text/css" href="/css/dev/pixel.css" rel="stylesheet">
-	<link type="text/css" href="/css/dev/custom.css" rel="stylesheet">
 </th:block>
 
 
 <th:block th:unless="${config.webConfig.useHotScss}">
     <link type="text/css" href="/css/pixel.css" rel="stylesheet">
-    <link type="text/css" href="/css/custom.css" rel="stylesheet">
 </th:block>
+<link type="text/css" href="/css/custom.css" rel="stylesheet">
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
