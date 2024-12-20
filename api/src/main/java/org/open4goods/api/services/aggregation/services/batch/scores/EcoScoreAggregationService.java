@@ -44,7 +44,7 @@ public class EcoScoreAggregationService extends AbstractScoreAggregationService 
 				Score s = new Score(ECOSCORE_SCORENAME, score);
 				data.getScores().put(s.getName(),s);
 			} else {
-				dedicatedLogger.error("No ImpactScore defined for vertical",vConf);
+				dedicatedLogger.info("No ImpactScore defined for vertical",vConf);
 			}
 		} catch (ValidationException e) {
 			dedicatedLogger.error("Ecoscore aggregation failed for {} : {}",data,e.getMessage());
@@ -75,35 +75,35 @@ public class EcoScoreAggregationService extends AbstractScoreAggregationService 
 
 	@Override
 	public void done(Collection<Product> datas, VerticalConfig vConf) {
-		super.done(datas, vConf);
-		
-		///////////////////////
-		// EcoScore ranking and "best alternativ" reach
-		///////////////////////
-		List<Product> sorted = new ArrayList<>();
-		sorted.addAll(datas);
 
-		try {
-			Collections.sort(sorted, (o1, o2) -> Double.compare(o1.ecoscore().getRelativ().getValue() , o2.ecoscore().getRelativ().getValue()));
-			
-			int count = sorted.size();
-			for (int i = 0; i < count; i++) {
-				Product p = sorted.get(i);
-				p.getRanking().setGlobalCount(count);
-				p.getRanking().setGlobalPosition(count - i);
-				p.getRanking().setGlobalBest(sorted.getLast().getId());
-				
-				if (i < count - 1) {
-					p.getRanking().setGlobalBetter(sorted.get(i+1).getId());
+		if (null != vConf.getImpactScoreConfig() && vConf.getImpactScoreConfig().getCriteriasPonderation().size() > 0) {
+
+			super.done(datas, vConf);
+
+			///////////////////////
+			// EcoScore ranking and "best alternativ" reach
+			///////////////////////
+			List<Product> sorted = new ArrayList<>();
+			sorted.addAll(datas);
+
+				Collections.sort(sorted, (o1, o2) -> Double.compare(o1.ecoscore().getRelativ().getValue(), o2.ecoscore().getRelativ().getValue()));
+
+				int count = sorted.size();
+				for (int i = 0; i < count; i++) {
+					Product p = sorted.get(i);
+					p.getRanking().setGlobalCount(count);
+					p.getRanking().setGlobalPosition(count - i);
+					p.getRanking().setGlobalBest(sorted.getLast().getId());
+
+					if (i < count - 1) {
+						p.getRanking().setGlobalBetter(sorted.get(i + 1).getId());
+					}
+
 				}
-
-			}
-		} catch (Exception e) {
-			// TODO : handle
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+	
+		} else {
+			dedicatedLogger.error("No ImpactScore defined for vertical",vConf);
 		}
-		
 		
 		
 	}
