@@ -21,7 +21,17 @@ enabled: false
 genAiConfig:
   # If false, will bypass the generativ ia texts generation  
   enabled: true
+
+
+#####################################################################################################################################
+# ImpacScore configuration, this is AI generated
+#####################################################################################################################################
+ 
+impactScoreConfig:
+
+
   
+    
 #####################################################################################################################################
 # I18N CONFIGURATION
 # Configure in a i18n way all the texts of a product, including the Url, the title, the description, the open graph metas, ....
