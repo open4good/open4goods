@@ -1,34 +1,4 @@
-<!--article th:unless="${internalReferer}" class="preloader nudger_vert--bg justify-content-center align-items-center">
-	<div class="position-relative wrapper__preloader-img text-center">
-		<img class="logo_loader img-fluid" src="/assets/img/logo/NUDGER.png">
-		<p class="h3 text-white">Consommer moins, consommer mieux.</p>
-		<svg id="loader-logo" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="100px" height="100px" viewBox="0 0 100 100" enable-background="new 0 0 100 100" xml:space="preserve">
-			<circle fill="none" stroke="#fff" stroke-width="4" stroke-miterlimit="10" cx="50" cy="50" r="48" />
-			<line fill="none" stroke-linecap="round" stroke="#fff" stroke-width="4" stroke-miterlimit="10" x1="50" y1="50" x2="85" y2="50.5">
-			  <animateTransform attributeName="transform" dur="2s" type="rotate" from="0 50 50" to="360 50 50" repeatCount="indefinite" />
-			</line>
-			<line fill="none" stroke-linecap="round" stroke="#fff" stroke-width="4"	stroke-miterlimit="10" x1="50" y1="50" x2="49.5" y2="74">
-			  <animateTransform attributeName="transform" dur="15s" type="rotate" from="0 50 50" to="360 50 50" repeatCount="indefinite" />
-			</line>
-		</svg>
-	</div>	
-</article-->
-
-<div class="preloader bg-dark flex-column justify-content-center align-items-center">
-    <!--svg id="loader-logo" xmlns="http://www.w3.org/2000/svg" width="50" height="50" viewBox="0 0 64 78.4">
-        <path fill="#fff" d="M10,0h1.2V11.2H0V10A10,10,0,0,1,10,0Z"/>
-        <rect fill="none" stroke="#fff" stroke-width="11.2" x="40" y="17.6" width="0" height="25.6"/>
-        <rect fill="none" stroke="#fff" stroke-opacity="0.4" stroke-width="11.2" x="23" y="35.2" width="0" height="25.6"/>
-        <path fill="#fff" d="M52.8,35.2H64V53.8a7,7,0,0,1-7,7H52.8V35.2Z"/>
-        <rect fill="none" stroke="#fff" stroke-width="11.2" x="6" y="52.8" width="0" height="25.6"/>
-        <path fill="#fff" d="M52.8,0H57a7,7,0,0,1,7,7h0v4.2H52.8V0Z"/>
-        <rect fill="none" stroke="#fff" stroke-opacity="0.4" stroke-width="11.2" x="57.8" y="17.6" width="0" height="11.2"/>
-        <rect fill="none" stroke="#fff" stroke-width="11.2" x="6" y="35.2" width="0" height="11.2"/>
-        <rect fill="none" stroke="#fff" stroke-width="11.2" x="40.2" y="49.6" width="0" height="11.2"/>
-        <path fill="#fff" d="M17.6,67.2H28.8v1.2a10,10,0,0,1-10,10H17.6V67.2Z"/>
-        <rect fill="none" stroke="#fff" stroke-opacity="0.4" stroke-width="28.8" x="31.6" width="0" height="11.2"/>
-        <rect fill="none" stroke="#fff" x="14" stroke-width="28.8" y="17.6" width="0" height="11.2"/>
-    </svg-->
+<div th:unless="${internalReferer}" class="preloader bg-dark flex-column justify-content-center align-items-center">
 	<div class="position-relative wrapper__preloader-img text-center">
 		<p class="h3 text-white">Consommer moins, consommer mieux.</p>
 		<svg id="loader-logo" width="70" height="70" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 72.74 72.74">
@@ -51,5 +21,4 @@
 			</g>
 		</svg>
 	</div>
-	
 </div>
