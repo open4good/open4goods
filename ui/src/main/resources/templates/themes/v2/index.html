@@ -43,7 +43,7 @@
                 <div class="row">
                     <div class="col-12 text-center">
                         
-                        <h1 class="fw-bolder display-2 mb-6">Le comparateur écologique</h1>
+                        <h1 class="fw-bolder display-2 mb-6 tlt" data-in-effect="rollIn">Le comparateur écologique</h1>
 
 
 
@@ -77,7 +77,7 @@
 											</th:block>
 
 
-											<br class="d-block d-md-none mt-3 mt-md-0 text-black"> <a href="/categories" class="fw-bold text-white text-underline mx-1">Toutes les catégories</a>
+											<br class="d-block d-md-none mt-3 mt-md-0 text-black"> <a href="/categories" class="fw-bold text-black text-underline mx-1">Toutes les catégories</a>
 
 										</div>
 									</div>
@@ -517,41 +517,55 @@
 
 
 function animateText() {
-    $('.tlt').textillate({
-        loop: true,
-        initialDelay: 200,
-         in: {
-            // set the effect name
-            //effect: "",
+    // Configurable parameters
+    const changeInterval = 5000; // Time in ms (5 seconds)
+    const effects = ["rollIn", "fadeIn", "bounceIn", "flipInX"]; // List of effects
+    const prefixes = ["Le", "Plus qu'un"];
+    const suffixes = ["écologique", "éthique","libre","ouvert", "open-source", "de prix"];
 
-            // set the delay factor applied to each consecutive character
-            delayScale: 1.5,
+    // Function to generate random text while keeping "comparateur" static
+    function generateRandomText() {
+        const randomPrefix = prefixes[Math.floor(Math.random() * prefixes.length)];
+        const randomSuffix = suffixes[Math.floor(Math.random() * suffixes.length)];
+        return `${randomPrefix} comparateur ${randomSuffix}`;
+    }
 
-            // set the delay between each character
-            delay: 30,
+    // Function to generate a random effect
+    function generateRandomEffect() {
+        return effects[Math.floor(Math.random() * effects.length)];
+    }
 
-            // set to true to animate all the characters at the same time
-            sync: false,
+    // Animate text with dynamic content
+    function updateText() {
+        // Generate new text and effect
+        const newText = generateRandomText();
+        const newEffect = generateRandomEffect();
 
-            // randomize the character sequence
-            // (note that shuffle doesn't make sense with sync = true)
-            shuffle: Math.random() < 0.5,
+        // Set the new text and animate it
+        $('.tlt')
+            .text(newText) // Update the text
+            .textillate({
+                in: {
+                    effect: newEffect,
+                    delayScale: 1.5,
+                    delay: 30,
+                    sync: false,
+                    shuffle: Math.random() < 0.5,
+                    reverse: false
+                }
+            });
+    }
 
-            // reverse the character sequence
-            // (note that reverse doesn't make sense with sync = true)
-            reverse: false
+    // Initial text update and animation
+    updateText();
 
-            // callback that executes once the animation has finished
-            //callback: function () {
-            // }
-          }
-    });
-
-
-
+    // Schedule text updates at the specified interval
+    setInterval(updateText, changeInterval);
 }
 
-
+$(document).ready(function() {
+    animateText();
+});
 
 
 
@@ -575,21 +589,8 @@ function countStart(){
 
 
 
-new Waypoint({
-  element: document.querySelector('.level'),
-  handler: function() {
-    countStart()
-    //this.destroy() //for once
-  },
-  offset: '50%'
-});
-
-
-
 $(document).ready(function() {
-      $( "body").on( "tplLoaded",function() {
           animateText();
-        });
 } );
 
 
