@@ -30,20 +30,26 @@
 </head>
 
 <body class="home-page">
-    
-    <!--/* Navbar */-->
-    <th:block th:insert="~{inc/navbar/navbar-home.html}"></th:block>
-    
-    <main>  
+    <header>
+	    <!--/* Navbar */-->
+	    <th:block th:insert="~{inc/navbar/navbar-home.html}"></th:block>
+	    
         <!--/* Loader */-->
         <th:block th:insert="~{inc/preloader.html}"></th:block>
+    </header>
+    
+    <main>  
 
         <section class="section-header overflow-hidden pt-7 pt-lg-8 pb-9 pb-lg-12 bg-primary text-white bg-primary"><!-- hero__hp bg__degrade--bottom section-header d-flex align-items-center overflow-hidden pt-7 pt-lg-8 pb-4 bg-primary -->
             <div class="container">
                 <div class="row">
                     <div class="col-12 text-center">
-                        
-                        <h1 class="fw-bolder display-2 mb-6 tlt" data-in-effect="rollIn">Le comparateur écologique</h1>
+
+						<h1 class="fw-bolder display-2 mb-6 tlt">
+							<span class="prefix"></span> 
+							<span class="comparateur">comparateur</span> 
+							<span class="suffix"></span>
+						</h1>
 
 
 
@@ -52,10 +58,7 @@
 
 
 
-
-
-
-                        <!-- Catégories / Impact score -->
+						<!-- Catégories / Impact score -->
 						<div class="col-12 col-lg-12">
 							<div class="card shadow mb-4">
 								<div class="card-body px-5 py-5 text-center text-md-left">
@@ -546,7 +549,7 @@ function animateText() {
             .text(newText) // Update the text
             .textillate({
                 in: {
-                    effect: newEffect,
+                    //effect: newEffect,
                     delayScale: 1.5,
                     delay: 30,
                     sync: false,
