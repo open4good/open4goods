@@ -29,12 +29,6 @@ genAiConfig:
 # ImpacScore configuration.
 #####################################################################################################################################
 
-
-
-
-
-
-
 impactScoreConfig:
   criteriasPonderation:
     POWER_CONSUMPTION_TYPICAL: 0.3
