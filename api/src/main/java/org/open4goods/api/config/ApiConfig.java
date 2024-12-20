@@ -164,7 +164,7 @@ public class ApiConfig {
 	}
 	
 	@Bean
-	GenAiCompletionService aiCompletionService(LegacyAiService aiService, ProductRepository productRepository, VerticalsConfigService verticalConfigService) {
+	GenAiCompletionService aiCompletionService(GenAiService aiService, ProductRepository productRepository, VerticalsConfigService verticalConfigService) {
 		return new GenAiCompletionService(aiService, productRepository, verticalConfigService, apiProperties);
 	}
 
