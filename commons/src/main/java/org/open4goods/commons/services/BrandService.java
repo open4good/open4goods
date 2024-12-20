@@ -36,7 +36,7 @@ public class BrandService {
 	
 	public BrandService( RemoteFileCachingService remoteFileCachingService, String logsFolder, SerialisationService serialisatonService) throws Exception {
 		this.remoteFileCachingService = remoteFileCachingService;
-		this.logger = 	GenericFileLogger.initLogger("brand-service", Level.INFO, logsFolder);
+		this.logger = 	GenericFileLogger.initLogger("brand-service", Level.WARN, logsFolder);
 		
 		// TODO : Load brands from github
 		
