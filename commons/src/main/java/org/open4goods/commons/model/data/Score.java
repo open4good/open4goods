@@ -36,6 +36,24 @@ public class Score  implements Validable {
 	 */
 	private Map<String,String> metadatas = new HashMap<>();
 	
+	/**
+	 * The ranking of this score in the pool. Cooresponds to the ranking of the relativValue, items count is given through cardinality.count
+	 */
+	private Integer ranking;
+	
+	/**
+	 * The GTIN id of the prouct having the lowest score
+	 */
+	private Long lowestScoreId;
+	
+	
+	/**
+	 * The GTIN id of the product having the highest score
+	 */
+	private Long highestScoreId;
+	
+	
+	
 	
 	
 	
@@ -283,6 +301,36 @@ public class Score  implements Validable {
 
 	public void setMetadatas(Map<String, String> metadatas) {
 		this.metadatas = metadatas;
+	}
+
+
+	public Integer getRanking() {
+		return ranking;
+	}
+
+
+	public void setRanking(Integer ranking) {
+		this.ranking = ranking;
+	}
+
+
+	public Long getLowestScoreId() {
+		return lowestScoreId;
+	}
+
+
+	public void setLowestScoreId(Long lowestScoreId) {
+		this.lowestScoreId = lowestScoreId;
+	}
+
+
+	public Long getHighestScoreId() {
+		return highestScoreId;
+	}
+
+
+	public void setHighestScoreId(Long highestScoreId) {
+		this.highestScoreId = highestScoreId;
 	}
 
 

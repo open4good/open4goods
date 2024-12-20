@@ -243,6 +243,19 @@ public class VerticalConfig{
 	// A local cache for token names
 	private Set<String> cacheTokenNames;
 
+	/**
+	 * If an item has a score is the last "worseLimit", then it will be bagged in product.worsesScores
+	 */
+	private Integer worseLimit = 3;
+	
+	
+	/**
+	 * If an item has a score is the top "bettersLimit", then it will be bagged in product.bestsScores
+	 */
+	private Integer bettersLimit = 3;
+	
+	
+	
 
 	@Override
 	public String toString() {
@@ -848,6 +861,22 @@ public class VerticalConfig{
 
 	public void setAvailableImpactScoreCriterias(Map<String, ImpactScoreCriteria> availableImpactScoreCriterias) {
 		this.availableImpactScoreCriterias = availableImpactScoreCriterias;
+	}
+
+	public Integer getWorseLimit() {
+		return worseLimit;
+	}
+
+	public void setWorseLimit(Integer worseLimit) {
+		this.worseLimit = worseLimit;
+	}
+
+	public Integer getBettersLimit() {
+		return bettersLimit;
+	}
+
+	public void setBettersLimit(Integer bettersLimit) {
+		this.bettersLimit = bettersLimit;
 	}
 
 

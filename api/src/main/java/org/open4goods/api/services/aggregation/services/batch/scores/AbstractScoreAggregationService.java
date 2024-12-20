@@ -2,6 +2,7 @@ package org.open4goods.api.services.aggregation.services.batch.scores;
 
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.open4goods.api.services.aggregation.AbstractAggregationService;
@@ -84,6 +85,41 @@ public abstract class AbstractScoreAggregationService extends  AbstractAggregati
 		}
 		
 
+			
+		////////////////////////
+		// Setting the ranking and worse / best bags
+		////////////////////////
+		
+		for (String scoreName : batchDatas.keySet()) {
+			// Sort in the list
+			List<Product> sorted = datas.stream(). sorted((e1, e2) -> Double.compare(
+				    e1.getScores().get(scoreName).getRelativ().getValue(),
+				    e2.getScores().get(scoreName).getRelativ().getValue()
+				)).toList();
+			
+			Long worseGtin = sorted.getFirst().getId();
+			Long bestGtin = sorted.getLast().getId();
+			
+			for (int i = 0 ; i < sorted.size(); i ++ ) {
+				Product d = sorted.get(i);
+				d.getScores().get(scoreName).setRanking(i);
+				d.getScores().get(scoreName).setLowestScoreId(worseGtin);
+				d.getScores().get(scoreName).setHighestScoreId(bestGtin);
+				
+				// Putting if the worse bag if match
+				if (i < vConf.getWorseLimit()) {
+					d.getWorsesScores().add(scoreName);
+				}
+				
+				// Putting if the worse bag if match
+				if (i >  sorted.size() -  vConf.getBettersLimit()) {
+					d.getWorsesScores().add(scoreName);
+				}
+				
+			}
+		}
+		
+		
 	}
 	
 	/////////////////////////////////////////
