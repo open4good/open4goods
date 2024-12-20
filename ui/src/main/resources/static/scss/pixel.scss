@@ -110,6 +110,7 @@ $numResponsable_secondary : #0088D6 !default;
 $white                    : #FFFFFF !default;
 
 $nudger_radius: 90px;
+$nudger_radius_mini : 40px;
 // *NUDGER ELEMENTS
 
 .bg-primary {
@@ -117,6 +118,9 @@ $nudger_radius: 90px;
 }
 .bg-secondary {
     background: linear-gradient(-48deg, $ecoscore_main, $ecoscore_secondary)!important;
+}
+.bg-brand_secondary {
+    background: $brand_secondaryColor;
 }
 .preloader {
     background: linear-gradient(-48deg, $openSource_main, $openSource_secondary);
@@ -219,7 +223,11 @@ $nudger_radius: 90px;
     &__radius {
         border-radius: $nudger_radius;
         padding: 2rem;
-        min-height: 400px;
+        min-height: initial;
+
+        &--mini {
+            border-radius: $nudger_radius_mini;
+        }
 
         @include media-breakpoint-down(md) {
             min-height: initial;
@@ -375,6 +383,16 @@ $nudger_radius: 90px;
     }
 }
 
+/* ********************** */
+.btn__nudger {
+    border-radius: 20px!important;
+    border: 2px solid $white;
+    box-shadow: 0 0 0 2px $brand_mainColor;
+    background: linear-gradient(to left, $ecoscore_main, $ecoscore_secondary)!important;
+    padding-right: 1.5rem !important;
+    padding-left: 1.5rem !important;
+}
+
 .chiffre__xxl {
     font-size: 10rem;
 }
@@ -396,3 +414,58 @@ $nudger_radius: 90px;
         background: linear-gradient(-48deg, $brand_mainColor, $brand_secondaryColor)!important;
     }
 }
+
+#carousel-tv {
+
+    .carousel-indicators {
+        margin-bottom: 0;
+        bottom: -35px; //taille default : voir quand image pour adapter
+
+        button {
+            text-indent: initial!important;
+            height: 40px;
+            width: initial;
+            background-color: transparent;
+        }
+    }
+}
+
+.table-nudger {
+    border: 1px solid $brand_mainColor;
+    background: $white;
+
+    &-price {
+        
+        .infos-text {
+            font-size: 30px;
+
+            &-secondary {
+                color: $ecoscore_main;
+            }
+        }
+    }
+}
+
+.nudger__reversement {
+    border: 1px solid $brand_mainColor;
+    border-radius: 40px 0 40px 40px;
+
+    .picto {
+        font-size: 30px;
+    }
+    .somme {
+        font-size: 30px;
+        color: $ecoscore_main;
+    }
+}
+
+.text-gradiant {
+    
+    &_ecoscore {
+        background: -webkit-linear-gradient(45deg, $ecoscore_main, $ecoscore_secondary 80%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+}
+    
+  
