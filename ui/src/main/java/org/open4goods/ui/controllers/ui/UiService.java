@@ -76,6 +76,7 @@ public class UiService {
 		final ModelAndView ret = new ModelAndView(template).addObject("config", config);
 
 		ret.addObject("userLocale", request.getLocale());
+		ret.addObject("pageName",tpl);
 		
 		ret.addObject("siteLanguage", getSiteLanguage(request));
 		Locale siteLocale = getSiteLocale(request);
