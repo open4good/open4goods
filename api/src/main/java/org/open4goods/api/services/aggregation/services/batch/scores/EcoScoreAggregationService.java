@@ -30,23 +30,24 @@ public class EcoScoreAggregationService extends AbstractScoreAggregationService 
 
 	@Override
 	public void onProduct(Product data, VerticalConfig vConf) {
-		if (StringUtils.isEmpty(data.brand())) {
-			return;
-		}
 		
 		try {
 
-			// Compute the ecoscore from existing scores
-			Double score = generateEcoScore(data.getScores(),vConf);
-
-			// Processing cardinality
-			incrementCardinality(ECOSCORE_SCORENAME,score);
-			
-			// Saving the actual score in the product, it will be relativized after this batch (see super().done())
-			Score s = new Score(ECOSCORE_SCORENAME, score);
-			data.getScores().put(s.getName(),s);
+			if (null != vConf.getImpactScoreConfig() && vConf.getImpactScoreConfig().getCriteriasPonderation().size() > 0 ) {
+				// Compute the ecoscore from existing scores
+				Double score = generateEcoScore(data.getScores(),vConf);
+				
+				// Processing cardinality
+				incrementCardinality(ECOSCORE_SCORENAME,score);
+				
+				// Saving the actual score in the product, it will be relativized after this batch (see super().done())
+				Score s = new Score(ECOSCORE_SCORENAME, score);
+				data.getScores().put(s.getName(),s);
+			} else {
+				dedicatedLogger.error("No ImpactScore defined for vertical",vConf);
+			}
 		} catch (ValidationException e) {
-			dedicatedLogger.warn("Brand to score fail for {} : {}",data,e.getMessage());
+			dedicatedLogger.error("Ecoscore aggregation failed for {} : {}",data,e.getMessage());
 		}
 	}
 
