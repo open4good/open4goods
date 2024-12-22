@@ -22,6 +22,7 @@ import org.joda.time.PeriodType;
 import org.joda.time.format.PeriodFormat;
 import org.joda.time.format.PeriodFormatter;
 import org.open4goods.commons.exceptions.ValidationException;
+import org.open4goods.commons.model.AiReview;
 import org.open4goods.commons.model.EcoScoreRanking;
 import org.open4goods.commons.model.Localisable;
 import org.open4goods.commons.model.Standardisable;
@@ -163,7 +164,10 @@ public class Product implements Standardisable {
 	 */
 	private Set<String> bestsScores = new HashSet<String>();
 	
-	
+	/**
+	 * The ai generated review for this product
+	 */
+	private Localisable<String, AiReview> aiReviews = new Localisable<String, AiReview>();
 	
 	
 	private EcoScoreRanking ranking = new EcoScoreRanking();
@@ -935,16 +939,13 @@ public class Product implements Standardisable {
 		this.bestsScores = betters;
 	}
 
+	public Localisable<String, AiReview> getAiReviews() {
+		return aiReviews;
+	}
 
-
-
-
-
-
-
-	
-
-
+	public void setAiReviews(Localisable<String, AiReview> aiReviews) {
+		this.aiReviews = aiReviews;
+	}
 
 
 	

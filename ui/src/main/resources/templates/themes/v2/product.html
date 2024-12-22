@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html th:lang="${siteLocale.language}">
+
+<head>
+    <!-- Importing meta tags and CSS files -->
+    <th:block th:insert="~{inc/header-meta.html}"></th:block>
+
+    <!-- Primary Meta Tags -->
+    <title th:text="${helper.getMetaTitle()}"></title>
+    <meta name="description" th:content="${helper.texts.get('meta-description')}">
+
+    <!-- Open Graph / Facebook Meta Tags -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" th:content="${url}">
+    <meta property="og:title" th:content="${helper.texts.get('opengraph-title')}">
+    <meta property="og:description" th:content="${helper.texts.get('opengraph-description')}">
+    <meta property="og:image" th:content="${baseUrl} + '/images/'+${product.gtin()}+'-cover.png'">
+
+    <!-- No indexing if not a verticalized page -->
+    <meta th:unless="${product.vertical}" name="robots" content="noindex">
+
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:url" th:content="${url}">
+    <meta name="twitter:title" th:content="${helper.texts.get('twitter-title')}">
+    <meta name="twitter:description" th:content="${helper.texts.get('twitter-description')}">
+    <meta name="twitter:image" th:content="${baseUrl} + '/images/'+${product.gtin()}+'-cover.png'">
+
+    <!-- CSS Stylesheets -->
+    <link rel="stylesheet" type="text/css" href="/webjars/datatables/css/dataTables.bootstrap5.min.css">
+    <link rel="stylesheet" type="text/css" href="/webjars/datatables-responsive/css/responsive.dataTables.min.css">
+
+    <!-- Conditional CSS for highlight.js if user is authenticated -->
+    <link th:if="${user}" rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.0/styles/default.min.css">
+
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/select/1.7.0/css/select.dataTables.min.css">
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/buttons/2.4.2/css/buttons.dataTables.min.css">
+    <link href="/vendor/lightgallery/dist/css/lightgallery-bundle.min.css" rel="stylesheet">
+
+    <style>
+    
+    
+    
+	    .source-span {
+		    font-size: 0.8rem; /* Reduce font size */
+		    vertical-align: super; /* Align to superscript */
+		    color: #6c757d; /* Optional: Use a Bootstrap light gray for text color */
+		    text-decoration: none; /* Remove underline for cleaner appearance */
+		}
+
+
+        /* Customizing carousel control icons */
+        .carousel-control-prev-icon::before {
+            content: '\f060';
+            font-family: "Font Awesome 5 Free";
+            font-size: 5rem;
+            color: gray;
+            font-weight: 900;
+        }
+
+        .carousel-control-next-icon:before {
+            font-family: "Font Awesome 5 Free";
+            content: "\f061";
+            font-size: 5rem;
+            color: gray;
+            font-weight: 900;
+        }
+
+        /* Style for selected row in DataTables */
+        table.dataTable tbody tr.selected {
+            font-size: 1.5em;
+        }
+
+        .active-period-btn {
+            background-color: #253154 !important;
+            color: white !important;
+            border: 2px solid #28365d !important;
+        }
+
+        .btn:focus {
+            outline: none !important;
+            box-shadow: none !important;
+        }
+
+        .btn {
+            transition: none !important;
+        }
+    </style>
+</head>
+
+<body>
+
+<!-- Navbar -->
+<th:block th:insert="~{inc/navbar/navbar-product.html}"></th:block>
+<!-- Loader -->
+<th:block th:insert="~{inc/preloader.html}"></th:block>
+
+<main th:with="images = ${product.images()}" class="bg-gray-200">
+    <th:block th:insert="~{inc/wip.html}"></th:block>
+
+    <div class="section section-lg pt-5">
+        <div class="container-fluid">
+
+            <h1 th:unless="${product.vertical}" class="h1 title text-uppercase text-center"
+                th:text="${product.bestName()}"></h1>
+
+            <h1 th:if="${product.vertical}" class="h1 title text-uppercase text-center"
+                th:text="${product.bestName()}"></h1>
+
+            <div class="card shadow p-4">
+                <!-- Header -->
+                <th:block th:insert="~{inc/product-header.html}"></th:block>
+            </div>
+
+            <div class="card">
+                  <div class="card-header">
+                <!-- Navigation pills header -->
+				<ul class="nav nav-pills" id="pills-tab" role="tablist">
+					<li class="nav-item" role="presentation">
+						<button class="nav-link active" id="pills-presentation-tab" data-bs-toggle="pill" data-bs-target="#pills-presentation" type="button" role="tab" aria-controls="pills-presentation" aria-selected="true">Presentation et test</button>
+					</li>
+					<li class="nav-item" role="presentation">
+						<button class="nav-link" id="pills-ecological-tab" data-bs-toggle="pill" data-bs-target="#pills-ecological" type="button" role="tab" aria-controls="pills-ecological" aria-selected="false">Bilan écologique</button>
+					</li>
+					
+					<li class="nav-item" role="presentation">
+						<button class="nav-link" id="pills-price-tab" data-bs-toggle="pill" data-bs-target="#pills-price" type="button" role="tab" aria-controls="pills-price" aria-selected="false">Prix</button>
+					</li>
+					
+					<li class="nav-item" role="presentation">
+                              <button class="nav-link" id="pills-technical-tab" data-bs-toggle="pill" data-bs-target="#pills-technical" type="button" role="tab" aria-controls="pills-technical" aria-selected="false">Caractéristiques techniques</button>
+                          </li>
+
+                          <li class="nav-item" role="presentation">
+                              <button class="nav-link" id="pills-resources-tab" data-bs-toggle="pill" data-bs-target="#pills-resources" type="button" role="tab" aria-controls="pills-resources" aria-selected="false">Ressources et documentation</button>
+                          </li>
+
+					
+					<li th:if="${user}" class="nav-item" role="presentation">
+                        <button class="nav-link" id="pills-admin-tab" data-bs-toggle="pill" data-bs-target="#pills-admin" type="button" role="tab" aria-controls="pills-price" aria-selected="false">Admin</button>
+                    </li>
+					
+				</ul>
+            </div>
+			
+			<!-- Tabs -->
+			<div class="tab-content" id="pills-tabContent">
+				<div class="tab-pane fade show active" id="pills-presentation" role="tabpanel" aria-labelledby="pills-presentation-tab">
+				   <!-- Presentation -->
+		            <th:block th:insert="~{inc/product-presentation.html}"></th:block>
+				</div>
+				
+				<div class="tab-pane fade" id="pills-ecological" role="tabpanel" aria-labelledby="pills-ecological-tab">
+                       <!-- Ecological -->
+                       <th:block th:insert="~{inc/product-ecological.html}"></th:block>
+				</div>
+				
+				<div class="tab-pane fade" id="pills-price" role="tabpanel" aria-labelledby="pills-price-tab">
+		            <!-- Product prices -->
+		            <th:block th:insert="~{inc/product-price.html}"></th:block>
+				</div>
+
+                      <div class="tab-pane fade" id="pills-technical" role="tabpanel" aria-labelledby="pills-technical-tab">
+                          <!-- Product attributes details -->
+                          <th:block th:insert="~{inc/product-attributes-details.html}"></th:block>
+                      </div>
+
+
+                      <div class="tab-pane fade" id="pills-tesources" role="tabpanel" aria-labelledby="pills-resources-tab">
+                          <!-- Product resources details -->
+                      </div>
+                                              
+				
+				    <div th:if="${user}" class="tab-pane fade" id="pills-admin" role="tabpanel" aria-labelledby="pills-admin-tab">
+				       <th:block th:insert="~{inc/product-admin.html}"></th:block>
+                    </div>
+                   
+                   
+				
+			</div>
+         </div>
+         
+         
+        </div>
+    </div>
+</main>
+
+<!-- Footer -->
+<th:block th:insert="~{inc/footer.html}"></th:block>
+
+<!-- Core JS -->
+<script src="/vendor/@popperjs/core/dist/umd/popper.min.js"></script>
+<script src="/webjars/bootstrap/js/bootstrap.min.js"></script>
+
+<!-- Vendor JS -->
+<script src="/vendor/smooth-scroll/dist/smooth-scroll.polyfills.min.js"></script>
+<script src="/vendor/vivus/dist/vivus.min.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
+<script src="/webjars/jquery/jquery.min.js"></script>
+<script type="text/javascript" language="javascript" src="/webjars/datatables/js/dataTables.min.js"></script>
+<script type="text/javascript" language="javascript" src="/webjars/datatables/js/dataTables.bootstrap5.min.js"></script>
+
+<script src="/vendor/countup.js/dist/countUp.umd.js"></script>
+<!-- Pixel JS -->
+<script src="../../assets/js/pixel.js"></script>
+<!-- Custom sources -->
+<script src="../../assets/js/pixel-custom.js"></script>
+
+<script src="/vendor/lightgallery/dist/lightgallery.min.js"></script>
+<script src="/vendor/lightgallery/dist/plugins/thumbnail/lg-thumbnail.min.js"></script>
+
+<script th:inline="javascript">
+    /*<![CDATA[*/
+    // Global variable for the counter
+    var reversment;
+
+    // Function to initialize DataTable
+    function initTable(tableId) {
+        // Initialize DataTable with specified options
+        tableNew = $(tableId).DataTable({
+            searching: false,
+            paging: false,
+            info: false,
+            select: 'single',
+            "order": [ [1, 'asc'] ]
+        });
+
+        // Event handler for row click in the table
+        tableNew.on('click', 'tbody tr', (e) => {
+            let classList = e.currentTarget.classList;
+
+            // Retrieve data attributes from the clicked row
+            token = $(e.currentTarget).attr('data-token');
+            compensation = $(e.currentTarget).attr('data-compensation');
+
+            // Update the token (e.g., in a hidden field)
+            $("#token").val(token);
+
+            var countUpUpdateoptions = {
+                duration: 1,
+                useEasing: false,
+                useGrouping: false,
+                separator: ',',
+                decimal: '.',
+                decimalPlaces: 2,
+                prefix: '',
+                suffix: ''
+            };
+
+            // Update the counter with the new compensation value
+            $("#countup-reversment").attr("data-max", compensation);
+            reversment.update(compensation);
+
+            // Handle 'selected' class for the active row
+            tableNew.rows('.selected').nodes().each((row) => row.classList.remove('selected'));
+            classList.add('selected');
+        });
+    }
+
+    // Retrieve and format price data
+    const newPriceHistoryData = /*[[${product.price.newPricehistory}]]*/ [];
+    const occasionPriceHistoryData = /*[[${product.price.occasionPricehistory}]]*/ [];
+
+    // Map data only if they are not empty
+    const newPriceHistory = newPriceHistoryData.length > 0 ? newPriceHistoryData.map(({ timestamp: x, price: y }) => ({ x, y })) : [];
+    const occasionPriceHistory = occasionPriceHistoryData.length > 0 ? occasionPriceHistoryData.map(({ timestamp: x, price: y }) => ({ x, y })) : [];
+
+    // Function to filter data based on date
+    function filterDataByDate(data, startDate) {
+        return data.filter(item => new Date(item.x) >= startDate);
+    }
+
+    const today = new Date();
+
+    // Define date ranges for filtering
+    const dateRanges = {
+        '15days': new Date(today.getTime() - (15 * 24 * 60 * 60 * 1000)),
+        '3months': new Date(today.getFullYear(), today.getMonth() - 3, today.getDate()),
+        '6months': new Date(today.getFullYear(), today.getMonth() - 6, today.getDate()),
+        'max': null // All data
+    };
+
+    // Function to get filtered data based on the period
+    function getFilteredData(data, period) {
+        if (dateRanges[period]) {
+            return filterDataByDate(data, dateRanges[period]);
+        } else {
+            return data; // Return all data for 'max'
+        }
+    }
+
+    $(document).ready(function () {
+
+        ///////////////////////////////////
+        // Initialize CountUp counter
+        ///////////////////////////////////
+        var countUpoptions = {
+            duration: 3,
+            useEasing: false,
+            useGrouping: false,
+            separator: ',',
+            decimal: '.',
+            decimalPlaces: 2,
+            prefix: '',
+            suffix: ''
+        };
+
+        // Initialize the counter for the element with ID 'countup-reversment'
+        reversment = new countUp.CountUp("countup-reversment", $("#countup-reversment").attr("data-max"), countUpoptions);
+        setTimeout(reversment.start(), 5000);
+
+        ///////////////////////////////////
+        // Initialize DataTables
+        ///////////////////////////////////
+
+        // Initialize the offers table
+        initTable('#offres');
+
+        // Initialize attributes table if it exists
+        if ($("#allAttributes").length) {
+            $('#allAttributes').DataTable({
+                responsive: true
+            });
+        }
+
+        // Initialize images table if it exists
+        if ($("#imagesTable").length) {
+            $('#imagesTable').DataTable({
+                responsive: true
+            });
+        }
+
+        ///////////////////////////////////
+        // Activate Bootstrap tooltips
+        ///////////////////////////////////
+        $('[data-bs-toggle="tooltip"]').tooltip();
+
+        ///////////////////////////////////
+        // Initialize price charts
+        ///////////////////////////////////
+
+        // Initialize the 'New Price' chart only if data is available
+        if (newPriceHistory.length > 0) {
+            let defaultPeriod = '3months';
+            if (!hasDataInPeriod(newPriceHistory, defaultPeriod)) {
+                defaultPeriod = 'max';
+            }
+
+            const newPriceCtx = document.getElementById('newPriceChart').getContext('2d');
+            const newPriceChart = new Chart(newPriceCtx, {
+                type: 'line',
+                data: {
+                    datasets: [{
+                        label: 'Prix Neuf',
+                        fill: true,
+                        data: getFilteredData(newPriceHistory, defaultPeriod),
+                        backgroundColor: '#4cb1ff',
+                        borderColor: '#41a3ef',
+                        borderWidth: 2,
+                        tension: 0,
+                        pointRadius: 0,
+                        pointHoverRadius: 6,
+                        pointHitRadius: 10,
+                    }]
+                },
+                options: {
+                    interaction: {
+                        mode: 'nearest',
+                        intersect: false
+                    },
+                    scales: {
+                        x: {
+                            type: 'time',
+                            time: {
+                                unit: 'day',
+                                displayFormats: {
+                                    day: 'dd/MM/yyyy'
+                                },
+                                tooltipFormat: 'dd/MM/yyyy'
+                            },
+                            title: {
+                                display: true,
+                                text: 'Date'
+                            }
+                        },
+                        y: {
+                            title: {
+                                display: true,
+                                text: 'Prix (€)'
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Set the active button
+            setActiveButton(document.getElementById('btn-new-' + defaultPeriod), 'new');
+
+            // Disable buttons without data
+            ['15days', '3months', '6months'].forEach(period => {
+                if (!hasDataInPeriod(newPriceHistory, period)) {
+                    const button = document.getElementById('btn-new-' + period);
+                    button.disabled = true;
+                    button.classList.add('disabled');
+                }
+            });
+
+            // Event handlers for 'New Price' chart buttons
+            document.getElementById('btn-new-15days').addEventListener('click', function () {
+                updateChart(newPriceChart, newPriceHistory, '15days');
+                setActiveButton(this, 'new');
+            });
+
+            document.getElementById('btn-new-3months').addEventListener('click', function () {
+                updateChart(newPriceChart, newPriceHistory, '3months');
+                setActiveButton(this, 'new');
+            });
+
+            document.getElementById('btn-new-6months').addEventListener('click', function () {
+                updateChart(newPriceChart, newPriceHistory, '6months');
+                setActiveButton(this, 'new');
+            });
+
+            document.getElementById('btn-new-max').addEventListener('click', function () {
+                updateChart(newPriceChart, newPriceHistory, 'max');
+                setActiveButton(this, 'new');
+            });
+        }
+
+        // Initialize the 'Used Price' chart only if data is available
+        if (occasionPriceHistory.length > 0) {
+            let defaultPeriod = '3months';
+            if (!hasDataInPeriod(occasionPriceHistory, defaultPeriod)) {
+                defaultPeriod = 'max';
+            }
+
+            const usedPriceCtx = document.getElementById('usedPriceChart').getContext('2d');
+            const usedPriceChart = new Chart(usedPriceCtx, {
+                type: 'line',
+                data: {
+                    datasets: [{
+                        label: 'Prix d\'Occasion',
+                        fill: true,
+                        data: getFilteredData(occasionPriceHistory, defaultPeriod),
+                        backgroundColor: '#ff6384',
+                        borderColor: '#fa486e',
+                        borderWidth: 2,
+                        tension: 0,
+                        pointRadius: 0,
+                        pointHoverRadius: 6,
+                        pointHitRadius: 10,
+                    }]
+                },
+                options: {
+                    interaction: {
+                        mode: 'nearest',
+                        intersect: false
+                    },
+                    scales: {
+                        x: {
+                            type: 'time',
+                            time: {
+                                unit: 'day',
+                                displayFormats: {
+                                    day: 'dd/MM/yyyy'
+                                },
+                                tooltipFormat: 'dd/MM/yyyy'
+                            },
+                            title: {
+                                display: true,
+                                text: 'Date'
+                            }
+                        },
+                        y: {
+                            title: {
+                                display: true,
+                                text: 'Prix (€)'
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Set the active button
+            setActiveButton(document.getElementById('btn-used-' + defaultPeriod), 'used');
+
+            // Disable buttons without data
+            ['15days', '3months', '6months'].forEach(period => {
+                if (!hasDataInPeriod(occasionPriceHistory, period)) {
+                    const button = document.getElementById('btn-used-' + period);
+                    button.disabled = true;
+                    button.classList.add('disabled');
+                }
+            });
+
+            // Event handlers for 'Used Price' chart buttons
+            document.getElementById('btn-used-15days').addEventListener('click', function () {
+                updateChart(usedPriceChart, occasionPriceHistory, '15days');
+                setActiveButton(this, 'used');
+            });
+
+            document.getElementById('btn-used-3months').addEventListener('click', function () {
+                updateChart(usedPriceChart, occasionPriceHistory, '3months');
+                setActiveButton(this, 'used');
+            });
+
+            document.getElementById('btn-used-6months').addEventListener('click', function () {
+                updateChart(usedPriceChart, occasionPriceHistory, '6months');
+                setActiveButton(this, 'used');
+            });
+
+            document.getElementById('btn-used-max').addEventListener('click', function () {
+                updateChart(usedPriceChart, occasionPriceHistory, 'max');
+                setActiveButton(this, 'used');
+            });
+        }
+
+        // Function to update the chart with filtered data
+        function updateChart(chart, data, period) {
+            chart.data.datasets[0].data = getFilteredData(data, period);
+            chart.update();
+        }
+
+        // Function to check if data is available in a given period
+        function hasDataInPeriod(data, period) {
+            return getFilteredData(data, period).length > 0;
+        }
+
+        // Function to visually set the active button
+        function setActiveButton(activeButton, chartType) {
+            const buttonGroupSelector = chartType === 'new' ? '.btn-group .btn[id^="btn-new"]' : '.btn-group .btn[id^="btn-used"]';
+            const buttons = document.querySelectorAll(buttonGroupSelector);
+            buttons.forEach(button => {
+                button.classList.remove('btn-primary', 'active-period-btn');
+                button.classList.add('btn-secondary');
+            });
+            activeButton.classList.remove('btn-secondary');
+            activeButton.classList.add('btn-primary', 'active-period-btn');
+        }
+
+        ///////////////////////////////////
+        // Initialize image gallery
+        ///////////////////////////////////
+
+        // Get the carousel element
+        let carouselEl = document.getElementById('bootstrap-gallery-carousel');
+
+        // Create a Bootstrap Carousel instance with specified options
+        const carousel = new bootstrap.Carousel(carouselEl, {
+            interval: 10000,
+            wrap: false,
+        });
+
+        // Add event listener for 'slide.bs.carousel'
+        carouselEl.addEventListener('slide.bs.carousel', (event) => {
+            const container = document.querySelector('.carousel-inner');
+            window.lightGallery(container, {
+                plugins: [lgThumbnail],
+                selector: '.lg-item',
+            });
+        });
+    });
+    /*]]>*/
+</script>
+
+</body>
+
+</html>

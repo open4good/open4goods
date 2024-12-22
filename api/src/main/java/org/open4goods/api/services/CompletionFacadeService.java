@@ -5,7 +5,7 @@ import java.io.IOException;
 import java.util.Set;
 
 import org.open4goods.api.services.completion.AmazonCompletionService;
-import org.open4goods.api.services.completion.GenAiCompletionService;
+import org.open4goods.api.services.completion.PerplexityReviewCompletionService;
 import org.open4goods.api.services.completion.IcecatCompletionService;
 import org.open4goods.api.services.completion.ResourceCompletionService;
 import org.open4goods.commons.config.yml.ui.VerticalConfig;
@@ -27,12 +27,12 @@ public class CompletionFacadeService {
 
 	protected static final Logger logger = LoggerFactory.getLogger(CompletionFacadeService.class);
 
-	private final GenAiCompletionService aiCompletionService;
+	private final PerplexityReviewCompletionService aiCompletionService;
 	private ResourceCompletionService resourceCompletionService;
 	private AmazonCompletionService amazonCompletionService;
 	private IcecatCompletionService icecatCompletionService;
 
-	public CompletionFacadeService(GenAiCompletionService aiCompletionService,
+	public CompletionFacadeService(PerplexityReviewCompletionService aiCompletionService,
 			ResourceCompletionService resourceCompletionService, AmazonCompletionService amazonCompletionService, IcecatCompletionService icecatCompletionService) {
 		this.aiCompletionService = aiCompletionService;
 		this.resourceCompletionService = resourceCompletionService;
