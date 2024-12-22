@@ -27,6 +27,8 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" integrity="sha512-c42qTSw/wPZ3/5LBzD+Bw5f7bSF2oxou6wEb+I/lqeaKV5FDIfMvvRp772y4jcJLKuGUOpbJMdg/BTl50fJYAw==" crossorigin="anonymous" referrerpolicy="no-referrer" />  
 
     <meta name="google-site-verification" content="I2wSyJnnRSjrLjadtNgFzHHmtSN8DPbjhPePTkQNhp4" />
+   
+   
 </head>
 
 <body class="home-page">
@@ -43,12 +45,12 @@
         <section class="section-header overflow-hidden pt-7 pt-lg-8 pb-9 pb-lg-12 bg-primary text-white bg-primary"><!-- hero__hp bg__degrade--bottom section-header d-flex align-items-center overflow-hidden pt-7 pt-lg-8 pb-4 bg-primary -->
             <div class="container">
                 <div class="row">
-                    <div class="col-12 text-center">
+                    <div class="col-12">
 
-						<h1 class="fw-bolder display-2 mb-6 tlt">
-							<span class="prefix"></span> 
+						<h1 class="ms-6 fw-bolder display-2 mb-6">
+							<span class="prefix">Plus qu'un </span> 
 							<span class="comparateur">comparateur</span> 
-							<span class="suffix"></span>
+							<span class="suffix tlt">écologique</span>
 						</h1>
 
 
@@ -505,10 +507,8 @@
 
 
 <script src="/vendor/countup.js/dist/countUp.umd.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/waypoints/4.0.1/jquery.waypoints.min.js" integrity="sha512-CEiA+78TpP9KAIPzqBvxUv8hy41jyI3f2uHi7DGp/Y/Ka973qgSdybNegWFciqh6GrN2UePx2KkflnQUbUhNIA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-
 <script src="https://cdnjs.cloudflare.com/ajax/libs/lettering.js/0.7.0/jquery.lettering.min.js" integrity="sha512-9ex1Kp3S7uKHVZmQ44o5qPV6PnP8/kYp8IpUHLDJ+GZ/qpKAqGgEEH7rhYlM4pTOSs/WyHtPubN2UePKTnTSww==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-<script src="../../assets/js/jquery.textillate.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/textillate@0.4.1/jquery.textillate.min.js"></script>
 
 <!-- pixel JS -->
 <script src="../../assets/js/pixel.js"></script>
@@ -517,62 +517,6 @@
 <script src="../../assets/js/pixel-custom.js"></script>
 
 <script>
-
-
-function animateText() {
-    // Configurable parameters
-    const changeInterval = 5000; // Time in ms (5 seconds)
-    const effects = ["rollIn", "fadeIn", "bounceIn", "flipInX"]; // List of effects
-    const prefixes = ["Le", "Plus qu'un"];
-    const suffixes = ["écologique", "éthique","libre","ouvert", "open-source", "de prix"];
-
-    // Function to generate random text while keeping "comparateur" static
-    function generateRandomText() {
-        const randomPrefix = prefixes[Math.floor(Math.random() * prefixes.length)];
-        const randomSuffix = suffixes[Math.floor(Math.random() * suffixes.length)];
-        return `${randomPrefix} comparateur ${randomSuffix}`;
-    }
-
-    // Function to generate a random effect
-    function generateRandomEffect() {
-        return effects[Math.floor(Math.random() * effects.length)];
-    }
-
-    // Animate text with dynamic content
-    function updateText() {
-        // Generate new text and effect
-        const newText = generateRandomText();
-        const newEffect = generateRandomEffect();
-
-        // Set the new text and animate it
-        $('.tlt')
-            .text(newText) // Update the text
-            .textillate({
-                in: {
-                    //effect: newEffect,
-                    delayScale: 1.5,
-                    delay: 30,
-                    sync: false,
-                    shuffle: Math.random() < 0.5,
-                    reverse: false
-                }
-            });
-    }
-
-    // Initial text update and animation
-    updateText();
-
-    // Schedule text updates at the specified interval
-    setInterval(updateText, changeInterval);
-}
-
-$(document).ready(function() {
-    animateText();
-});
-
-
-
-
 
 function countStart(){
   const $counters = document.querySelectorAll(".counter"),
@@ -590,11 +534,50 @@ function countStart(){
   });
 }
 
+$(document).ready(function () {
+    // Configuration array
+    const config = [
+        { newWord: "de prix", outEffect: "fadeOut", inEffect: "bounceIn", delay: 4000 },
+        { newWord: "éthique", outEffect: "bounceOut", inEffect: "bounceIn", delay: 4000 },
+        { newWord: "libre", outEffect: "fadeOut", inEffect: "zoomIn", delay: 4000 },
+        { newWord: "ouvert", outEffect: "bounceOut", inEffect: "rotateIn", delay: 4000 },
+        { newWord: "open source", outEffect: "fadeOut", inEffect: "flipInX", delay: 4000 },
+        { newWord: "open data", outEffect: "bounceOut", inEffect: "lightSpeedIn", delay: 4000 },
+        { newWord: "écologique", outEffect: "fadeOut", inEffect: "fadeIn", delay: 4000 }
+    ];
 
+    const $tlt = $('.tlt');
+    let currentIndex = 0;
 
-$(document).ready(function() {
-          animateText();
-} );
+    function animateSequence() {
+        const { newWord, outEffect, inEffect, delay } = config[currentIndex];
+
+        // Apply out effect
+        $tlt.addClass(`animate__animated animate__${outEffect}`).one('animationend', function () {
+            $tlt.removeClass(`animate__${outEffect}`); // Remove outEffect class
+
+            // Set new word
+            $tlt.text(newWord);
+
+            // Apply in effect
+            $tlt.addClass(`animate__animated animate__${inEffect}`).one('animationend', function () {
+                $tlt.removeClass(`animate__${inEffect}`); // Remove inEffect class
+
+                // Move to the next word after delay
+                setTimeout(() => {
+                    currentIndex++;
+                    if (currentIndex >= config.length) {
+                        currentIndex = 0; // Restart from the beginning
+                    }
+                    animateSequence(); // Start next animation
+                }, delay);
+            });
+        });
+    }
+
+    // Start the animation with an initial delay
+    setTimeout(animateSequence, 5000);
+});
 
 
 </script>
