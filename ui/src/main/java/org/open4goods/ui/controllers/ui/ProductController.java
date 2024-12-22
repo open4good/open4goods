@@ -11,6 +11,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.open4goods.commons.config.yml.ui.VerticalConfig;
 import org.open4goods.commons.dao.ProductRepository;
 import org.open4goods.commons.exceptions.ResourceNotFoundException;
+import org.open4goods.commons.model.AiReview;
 import org.open4goods.commons.model.data.AiDescription;
 import org.open4goods.commons.model.data.AiDescriptions;
 import org.open4goods.commons.model.data.ContributionVote;
@@ -260,10 +261,16 @@ public class ProductController  {
 				}
 			}
 
+			
+			// TODO : remove
 			mv.addObject("pros", pros);
 			mv.addObject("cons", cons);
 			mv.addObject("globalDescriptionParagraphs", globalDescriptionParagraphs);
 			mv.addObject("ecologicalDescriptionParagraphs", ecologicalDescriptionParagraphs);
+			
+			AiReview aiReview = data.getAiReviews().get(mv.getModel().get("siteLanguage"));
+			mv.addObject("aiReview", aiReview);
+			
 			
 			// Building the pricetrend
 			

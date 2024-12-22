@@ -11,7 +11,7 @@ import org.open4goods.api.services.CompletionFacadeService;
 import org.open4goods.api.services.ScrapperOrchestrationService;
 import org.open4goods.api.services.VerticalsGenerationService;
 import org.open4goods.api.services.completion.AmazonCompletionService;
-import org.open4goods.api.services.completion.GenAiCompletionService;
+import org.open4goods.api.services.completion.PerplexityReviewCompletionService;
 import org.open4goods.api.services.completion.IcecatCompletionService;
 import org.open4goods.api.services.completion.ResourceCompletionService;
 import org.open4goods.api.services.store.DataFragmentStoreService;
@@ -164,8 +164,8 @@ public class ApiConfig {
 	}
 	
 	@Bean
-	GenAiCompletionService aiCompletionService(GenAiService aiService, ProductRepository productRepository, VerticalsConfigService verticalConfigService) {
-		return new GenAiCompletionService(aiService, productRepository, verticalConfigService, apiProperties);
+	PerplexityReviewCompletionService aiCompletionService(GenAiService aiService, ProductRepository productRepository, VerticalsConfigService verticalConfigService) {
+		return new PerplexityReviewCompletionService(aiService, productRepository, verticalConfigService, apiProperties);
 	}
 
 	@Bean
@@ -192,7 +192,7 @@ public class ApiConfig {
 	}
 
 	@Bean
-	CompletionFacadeService completionFacadeService(GenAiCompletionService aiCompletionService, ResourceCompletionService resourceCompletionService, AmazonCompletionService amazonCompletionService, IcecatCompletionService icecatCompletionService) {
+	CompletionFacadeService completionFacadeService(PerplexityReviewCompletionService aiCompletionService, ResourceCompletionService resourceCompletionService, AmazonCompletionService amazonCompletionService, IcecatCompletionService icecatCompletionService) {
 		return new CompletionFacadeService(aiCompletionService, resourceCompletionService, amazonCompletionService, icecatCompletionService);
 	}
 

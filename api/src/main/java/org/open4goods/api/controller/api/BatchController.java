@@ -6,7 +6,7 @@ import java.io.IOException;
 
 import org.open4goods.api.services.AggregationFacadeService;
 import org.open4goods.api.services.BatchService;
-import org.open4goods.api.services.completion.GenAiCompletionService;
+import org.open4goods.api.services.completion.PerplexityReviewCompletionService;
 import org.open4goods.api.services.completion.ResourceCompletionService;
 import org.open4goods.commons.dao.ProductRepository;
 import org.open4goods.commons.exceptions.AggregationSkipException;
@@ -47,7 +47,7 @@ public class BatchController {
 	
 	private final AggregationFacadeService aggregationFacadeService;
 
-	private final GenAiCompletionService aiCompletionService;
+	private final PerplexityReviewCompletionService aiCompletionService;
 
 	@Autowired
 	private  ProductRepository repository;
@@ -57,7 +57,7 @@ public class BatchController {
 	private BatchService batchService;
 	
 	
-	public BatchController(BatchService batchService, AggregationFacadeService aggregationFacadeService, SerialisationService serialisationService, VerticalsConfigService verticalsConfigService, GenAiCompletionService aiCompletionService, ResourceCompletionService resourceCompletionService) {
+	public BatchController(BatchService batchService, AggregationFacadeService aggregationFacadeService, SerialisationService serialisationService, VerticalsConfigService verticalsConfigService, PerplexityReviewCompletionService aiCompletionService, ResourceCompletionService resourceCompletionService) {
 		this.serialisationService = serialisationService;
 		this.verticalConfigService = verticalsConfigService;
 		this.aggregationFacadeService = aggregationFacadeService;

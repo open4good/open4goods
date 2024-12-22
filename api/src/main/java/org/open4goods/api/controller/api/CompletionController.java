@@ -4,7 +4,7 @@ package org.open4goods.api.controller.api;
 import java.io.IOException;
 
 import org.open4goods.api.services.completion.AmazonCompletionService;
-import org.open4goods.api.services.completion.GenAiCompletionService;
+import org.open4goods.api.services.completion.PerplexityReviewCompletionService;
 import org.open4goods.api.services.completion.IcecatCompletionService;
 import org.open4goods.api.services.completion.ResourceCompletionService;
 import org.open4goods.commons.dao.ProductRepository;
@@ -37,7 +37,7 @@ public class CompletionController {
 
 	private final VerticalsConfigService verticalConfigService;
 
-	private final GenAiCompletionService aiCompletionService;
+	private final PerplexityReviewCompletionService aiCompletionService;
 	private ResourceCompletionService resourceCompletionService;
 	private AmazonCompletionService amazonCompletionService;
 
@@ -47,7 +47,7 @@ public class CompletionController {
 	private IcecatCompletionService iceCatService;
 
 	public CompletionController(VerticalsConfigService verticalsConfigService,
-			GenAiCompletionService aiCompletionService,
+			PerplexityReviewCompletionService aiCompletionService,
 			ResourceCompletionService resourceCompletionService,
 			AmazonCompletionService amazonCompletionService,
 			IcecatCompletionService iceCatService) {
