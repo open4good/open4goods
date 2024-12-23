@@ -648,7 +648,7 @@ public class Product implements Standardisable {
 			akaModels.add(model);
 		}
 		
-		if (frags.length > 1) {
+		if (frags.length > 3) {
 			logger.info("Found an alternative model : " + frags[0]);
 			akaModels.add(frags[0]);
 		}

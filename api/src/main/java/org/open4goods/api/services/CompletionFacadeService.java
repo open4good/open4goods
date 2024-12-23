@@ -7,6 +7,7 @@ import java.util.Set;
 import org.open4goods.api.services.completion.AmazonCompletionService;
 import org.open4goods.api.services.completion.PerplexityReviewCompletionService;
 import org.open4goods.api.services.completion.IcecatCompletionService;
+import org.open4goods.api.services.completion.PerplexityAttributesCompletionService;
 import org.open4goods.api.services.completion.ResourceCompletionService;
 import org.open4goods.commons.config.yml.ui.VerticalConfig;
 import org.open4goods.commons.exceptions.InvalidParameterException;
@@ -28,16 +29,18 @@ public class CompletionFacadeService {
 	protected static final Logger logger = LoggerFactory.getLogger(CompletionFacadeService.class);
 
 	private final PerplexityReviewCompletionService aiCompletionService;
+	private PerplexityAttributesCompletionService perplexityAttributesCompletionService;
 	private ResourceCompletionService resourceCompletionService;
 	private AmazonCompletionService amazonCompletionService;
 	private IcecatCompletionService icecatCompletionService;
 
 	public CompletionFacadeService(PerplexityReviewCompletionService aiCompletionService,
-			ResourceCompletionService resourceCompletionService, AmazonCompletionService amazonCompletionService, IcecatCompletionService icecatCompletionService) {
+			ResourceCompletionService resourceCompletionService, AmazonCompletionService amazonCompletionService, IcecatCompletionService icecatCompletionService, PerplexityAttributesCompletionService perplexityAttributesCompletionService) {
 		this.aiCompletionService = aiCompletionService;
 		this.resourceCompletionService = resourceCompletionService;
 		this.amazonCompletionService = amazonCompletionService;
 		this.icecatCompletionService = icecatCompletionService;
+		this.perplexityAttributesCompletionService = perplexityAttributesCompletionService;
 	}
 
 	

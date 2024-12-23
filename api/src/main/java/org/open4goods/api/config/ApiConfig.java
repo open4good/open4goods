@@ -13,6 +13,7 @@ import org.open4goods.api.services.VerticalsGenerationService;
 import org.open4goods.api.services.completion.AmazonCompletionService;
 import org.open4goods.api.services.completion.PerplexityReviewCompletionService;
 import org.open4goods.api.services.completion.IcecatCompletionService;
+import org.open4goods.api.services.completion.PerplexityAttributesCompletionService;
 import org.open4goods.api.services.completion.ResourceCompletionService;
 import org.open4goods.api.services.store.DataFragmentStoreService;
 import org.open4goods.commons.config.yml.attributes.LegacyPromptConfig;
@@ -164,10 +165,16 @@ public class ApiConfig {
 	}
 	
 	@Bean
-	PerplexityReviewCompletionService aiCompletionService(GenAiService aiService, ProductRepository productRepository, VerticalsConfigService verticalConfigService) {
+	PerplexityReviewCompletionService perplexityReviewCompletionService(GenAiService aiService, ProductRepository productRepository, VerticalsConfigService verticalConfigService) {
 		return new PerplexityReviewCompletionService(aiService, productRepository, verticalConfigService, apiProperties);
 	}
 
+	@Bean
+	PerplexityAttributesCompletionService perplexityAttributesCompletionService(GenAiService aiService, ProductRepository productRepository, VerticalsConfigService verticalConfigService) {
+		return new PerplexityAttributesCompletionService(aiService, productRepository, verticalConfigService, apiProperties);
+	}
+
+	
 	@Bean
 	LegacyAiService aiService(OpenAiChatModel chatModel, EvaluationService spelEvaluationService, SerialisationService serialisationService) {
 		return new LegacyAiService(chatModel, spelEvaluationService, serialisationService);
@@ -192,8 +199,8 @@ public class ApiConfig {
 	}
 
 	@Bean
-	CompletionFacadeService completionFacadeService(PerplexityReviewCompletionService aiCompletionService, ResourceCompletionService resourceCompletionService, AmazonCompletionService amazonCompletionService, IcecatCompletionService icecatCompletionService) {
-		return new CompletionFacadeService(aiCompletionService, resourceCompletionService, amazonCompletionService, icecatCompletionService);
+	CompletionFacadeService completionFacadeService(PerplexityReviewCompletionService aiCompletionService, ResourceCompletionService resourceCompletionService, AmazonCompletionService amazonCompletionService, IcecatCompletionService icecatCompletionService, PerplexityAttributesCompletionService perplexityAttributesCompletionService) {
+		return new CompletionFacadeService(aiCompletionService, resourceCompletionService, amazonCompletionService, icecatCompletionService, perplexityAttributesCompletionService);
 	}
 
 	@Bean

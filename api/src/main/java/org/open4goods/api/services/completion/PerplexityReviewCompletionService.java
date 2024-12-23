@@ -75,9 +75,11 @@ public class PerplexityReviewCompletionService  extends AbstractCompletionServic
 		context.put("PRODUCT_BRAND", data.brand());
 		context.put("PRODUCT_MODEL", data.model());
 		context.put("PRODUCT_GTIN", data.gtin());
+		context.put("PRODUCT", data);
+		
 
 		// AI Prompting
-		PromptResponse<CallResponseSpec> response = aiService.prompt("perplexity-review", context);
+		PromptResponse<CallResponseSpec> response = aiService.prompt("perplexity-product-review", context);
 		
 		AiReview review = new AiReview();
 		String[] frags  = response.getRaw().split("\n##");
@@ -93,10 +95,6 @@ public class PerplexityReviewCompletionService  extends AbstractCompletionServic
 		data.getDatasourceCodes().put(this.getClass().getSimpleName(), System.currentTimeMillis());
 		
 	}
-
-	
-	
-	
 
 	/**
 	 * Parse the perplexity bloc response

@@ -204,8 +204,8 @@ attributesConfig:
        asScore: false
               
        synonyms:
-#          all:
-#            - "DIAGONALE_POUCES" 
+          all:
+            - "DISPLAY_TECHNOLOGY" 
           rakuten.com:      
             - "TYPE DE PRODUIT"
          

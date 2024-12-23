@@ -106,7 +106,7 @@
 
 					<div th:if="${aiReview}" class="row ">
 						<!-- Avantages -->
-						<div th:if="${pros}" class="col-sm-12 col-md-12 col-lg-6 mt-3">
+						<div  class="col-sm-12 col-md-12 col-lg-6 mt-3">
 							<!-- Icon Box -->
 							<div class="card border-gray-300 ">
 								<div class="card-body">
@@ -196,7 +196,7 @@
 								</tr>
 								<tr th:each="item,stat : ${aiReview.sources}">
 									<td th:id="'review-source-'+${item.number}" scope="row"  ><span th:text="${item.number}" ></span></td>
-									<td scope="row" ><a th:href="${item.url}" th:text="${item.name}" ></a></td>
+									<td scope="row" ><a target="_blank" rel="nofollow" th:href="${item.url}" th:text="${item.name}" ></a></td>
 									<td scope="row" ><span th:text="${item.description}" ></span></td>
 								</tr>
 								
