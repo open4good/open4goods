@@ -23,12 +23,11 @@ import org.slf4j.LoggerFactory;
  *
  */
 
-// TODO : Scheduling from conf
 public class CompletionFacadeService {
 
 	protected static final Logger logger = LoggerFactory.getLogger(CompletionFacadeService.class);
 
-	private final PerplexityReviewCompletionService aiCompletionService;
+	private final PerplexityReviewCompletionService perplexityReviewCompletionService;
 	private PerplexityAttributesCompletionService perplexityAttributesCompletionService;
 	private ResourceCompletionService resourceCompletionService;
 	private AmazonCompletionService amazonCompletionService;
@@ -36,7 +35,7 @@ public class CompletionFacadeService {
 
 	public CompletionFacadeService(PerplexityReviewCompletionService aiCompletionService,
 			ResourceCompletionService resourceCompletionService, AmazonCompletionService amazonCompletionService, IcecatCompletionService icecatCompletionService, PerplexityAttributesCompletionService perplexityAttributesCompletionService) {
-		this.aiCompletionService = aiCompletionService;
+		this.perplexityReviewCompletionService = aiCompletionService;
 		this.resourceCompletionService = resourceCompletionService;
 		this.amazonCompletionService = amazonCompletionService;
 		this.icecatCompletionService = icecatCompletionService;
@@ -52,9 +51,12 @@ public class CompletionFacadeService {
 	public void processAll(Set<Product> products, VerticalConfig vertical) {
 		logger.info("Completing {] products",products.size());
 		products.forEach(product -> {
+			// TODO(p2, perf) : should paralellize (on verticals, at upper level)
 			resourceCompletionService.process(vertical, product);
 			icecatCompletionService.process(vertical, product);
-			aiCompletionService.process(vertical, product);
+			perplexityAttributesCompletionService.process(vertical, product);
+			perplexityReviewCompletionService.process(vertical, product);
+			
 			amazonCompletionService.process(vertical, product);
 		});
 		
@@ -78,7 +80,7 @@ public class CompletionFacadeService {
 
 	public void genaiCompletionAll() throws InvalidParameterException, IOException {
 		logger.warn("Completing verticals with genAI content");
-		aiCompletionService.completeAll(false);
+		perplexityReviewCompletionService.completeAll(false);
 	}
 
 	///////////////////////////////////
