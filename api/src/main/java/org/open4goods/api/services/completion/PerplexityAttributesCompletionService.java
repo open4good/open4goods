@@ -120,7 +120,7 @@ public class PerplexityAttributesCompletionService  extends AbstractCompletionSe
 			String key = entry.getKey().trim().toUpperCase();
 			String value = entry.getValue().toString().trim();
 			
-			if (entry.getValue() instanceof String) {
+			if (entry.getValue() instanceof String || entry.getValue() instanceof Integer || entry.getValue() instanceof Double || entry.getValue() instanceof Long) {
 				
 				
 				if (key.equalsIgnoreCase("inconnu")) {

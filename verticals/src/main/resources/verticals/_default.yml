@@ -503,7 +503,7 @@ attributesConfig:
       all:
       - "QTE DE PORTS HDMI"
       - "QUANTITE DE PORTS HDMI"   
-      - "HDMI_PORTS_QUANTITY""   
+      - "HDMI_PORTS_QUANTITY"
       
     parser:
       normalize: true
