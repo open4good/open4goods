@@ -49,6 +49,42 @@
                
                <div class="col-12 col-lg-4">
             
+            
+            
+            
+                  <!-- Tops -->
+			<div class="card shadow border-gray-300">
+				<div class="card-body p-4 p-lg-5">
+					<div class="d-flex p-3 justify-content-center">
+						<div class="icon icon-primary">
+							<span class="fas fa-trophy"></span>
+						</div>
+						<div class="ps-4">
+							<h3 class="h5 icon-box-title md-1">Les tops</h3>
+						</div>
+					</div>
+					<div class="lead" th:text="${product.bestsScores}"></div>
+				</div>
+			</div>
+
+			<!-- Flops -->
+                  <div  class="card shadow border-gray-300">
+                   <div class="card-body p-4 p-lg-5">
+                         <div class="d-flex p-3 justify-content-center">                                                     
+                             <div class="icon icon-primary">
+                                 <span class="fas fa-thumbs-down"></span>
+                             </div>                                                      
+                             <div class="ps-4">
+                                 <h3 class="h5 icon-box-title md-1">Les flops</h3>
+                             </div>
+                         </div>
+                         <div  th:text="${product.worsesScores}" class="lead">
+                         </div>
+                   </div>
+                 </div>
+  
+  
+  
 					<!-- Identity -->
                    <div  class="card shadow border-gray-300">
                       <div class="card-body p-4 p-lg-5">
@@ -65,21 +101,7 @@
                   </div>
                   
   
-                  <!-- Bilan -->
-                  <div th:if="${aiReview}" class="card shadow border-gray-300">
-                   <div class="card-body p-4 p-lg-5">
-                         <div class="d-flex p-3 justify-content-center">                                                     
-                             <div class="icon icon-primary">
-                                 <span class="fas fa-id-card"></span>
-                             </div>                                                      
-                             <div class="ps-4">
-                                 <h3 class="h5 icon-box-title md-1">Bilan</h3>
-                             </div>
-                         </div>
-                         <div  class="lead" th:utext="${aiReview.review}"></div>
-                   </div>
-                 </div>
-  
+
                   
                </div>                  
                
@@ -143,6 +165,24 @@
 							<!-- End of Icon Box -->
 						</div>
 					</div>
+					
+					
+                  <!-- Bilan -->
+                  <div th:if="${aiReview}" class="card shadow border-gray-300">
+                   <div class="card-body p-4 p-lg-5">
+                         <div class="d-flex p-3 justify-content-center">                                                     
+                             <div class="icon icon-primary">
+                                 <span class="fas fa-id-card"></span>
+                             </div>                                                      
+                             <div class="ps-4">
+                                 <h3 class="h5 icon-box-title md-1">Bilan</h3>
+                             </div>
+                         </div>
+                         <div  class="lead" th:utext="${aiReview.review}"></div>
+                   </div>
+                 </div>
+  
+					
 				</div>
 			</div>
 			
