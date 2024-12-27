@@ -1,4 +1,4 @@
-<div class="row">
+<div class="row pt-4">
 	<div class="col-12 col-lg-6">
 		<div id="ecoScore" class="card card__radius--mini border-0">
 			<div class="card-body">
@@ -18,7 +18,8 @@
 			<!--  Ecoscore  -->
 			<div class="card-body">
 				<a href="#markerEcological">
-					 <img class="img-fluid"
+					 <img 
+					 	class="img-fluid"
 						th:alt="'Ecoscore : ' + ${product.ecoscore.letter()}"
 						th:title="'éco-score : ' + ${product.ecoscore.letter()}"
 						th:src="'/icons/ecoscore/scoring-'+${product.ecoscore.letter()}+'.png'">
