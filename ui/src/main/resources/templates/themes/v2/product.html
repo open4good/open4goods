@@ -130,6 +130,110 @@
                 <!-- Presentation -->
                 <th:block th:insert="~{inc/product-presentation.html}"></th:block>
             </div>
+        </div>
+    </div>
+    <div class="section section-lg pt-6 pb-5">
+        <div class="container">
+            <div class="row justify-content-center mt-4">
+                <section id="markerPresentation">
+                    <div class="col-12 mb-5 text-center">
+                        <h2 class="h4 mb-0">Présentation</h2>   
+                    </div>
+                    
+                    <div class="row pt-5 pt-md-0">
+                        <div class="col-12 col-lg-5 mb-3 mb-lg-0">
+                            <!-- Identity -->
+                            <div  class="card border-gray-300 p-2 mb-lg-4">
+                                <div class="card-body p-2 d-none d-lg-block">
+                                    <div class="mb-4">														
+                                        <span class="h5">Identité</h3>
+                                    </div>
+                                    <th:block th:insert="~{inc/product-referentiel-attributes.html}"></th:block>
+                                </div>
+                            </div>
+                            <!-- Caracteristiques principales -->
+                            <div class="card border-gray-300 p-2">
+                                <div class="card-body p-2 d-none d-lg-block">
+                                    <div class="mb-4">														
+                                        <span class="h5">Caractéristiques</h3>
+                                    </div>
+			
+                                    <th:block th:insert="~{inc/product-attributes.html}"></th:block>
+
+                                    <a href="#markerCaracteristiques" class="w-100 btn btn__nudger mt-4">Toutes les caractéristiques</a>
+                                </div>
+                            </div>
+                            
+                        </div>                  
+                        
+                        <!-- Description -->
+                        <div class="col-12 col-lg-7">
+                            <div th:if="${globalDescriptionParagraphs}" class="row">
+                                <!-- Icon Boxes -->
+                                <div class="col-12 mb-4">
+                                    <div class="card border-gray-300 pt-2 pb-4">
+                                        <div class="card-body pt-2">
+                                            <div class="mb-4">														
+                                                <span class="h5">Téléviseur <span th:text="${product.bestName()}"></span></h3>
+                                            </div>
+                                            <p class="card-text">
+                                                <span th:each="paragraph : ${globalDescriptionParagraphs}" th:utext="${paragraph + '<br/><br/>'}"></span>
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- End of Icon Boxes -->
+                            </div>
+        
+                            <div class="row">
+                                <!-- Avantages -->
+                                <div th:if="${pros}" class="col-12 mb-4">
+                                    <!-- Icon Box -->
+                                    <div class="card border-gray-300">
+                                        <div class="card-body">
+                                            <div class="d-flex align-items-center mb-3">
+                                                <div class="icon icon-primary">
+                                                    <span class="fas fa-plus"></span>
+                                                </div>
+                                                <span class="h5 ms-3">Avantages</span>
+                                            </div>
+                                            <ul class="list-group list-group-flush price-list">
+                                                <li th:each="pro : ${pros}" class="list-group-item rounded-0" th:text="${pro}"></li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                    <!-- End of Icon Box -->
+                                </div>
+        
+                                <!-- Inconvénients -->
+                                <div th:if="${cons}" class="col-12 mb-4">
+                                    <!-- Icon Box -->
+                                    <div class="card border-gray-300">
+                                        <div class="card-body">
+                                            <div class="d-flex align-items-center mb-3">
+                                                <div class="icon icon-primary">
+                                                    <span class="fas fa-minus"></span>
+                                                </div>
+                                                <span class="h5 ms-3">Inconvénients</span>
+                                            </div>
+                                            <ul class="list-group list-group-flush price-list">
+                                                <li th:each="con : ${cons}" class="list-group-item rounded-0" th:text="${con}"></li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                    <!-- End of Icon Box -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+        </section> 
+            </div>
+        </div>
+    </div>
+    <div class="section section-lg pt-6 pb-5 bg-white">
+        <div class="container">
+            <div class="row justify-content-center mt-4">
+
             <div class="row">
                 <div class="col-12 col-lg-6 coucou" th:if="${product.ecoscore != null  && null != verticalConfig}">
                     <!--/* Best price */-->				

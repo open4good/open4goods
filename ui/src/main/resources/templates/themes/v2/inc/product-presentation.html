@@ -1,5 +1,5 @@
 <!-- Content -->
-<div id="accordionScore" class="accordion">
+<div id="accordionScore" class="accordion accordion-flush">
 	<!-- Sub scores -->
 	<div class="accordion-item" th:each="score, stat : ${verticalConfig.ecoScoreDetails(product.realScores())}">
 		<h2 class="accordion-header" th:id="'score-'+${stat.count}">
@@ -10,25 +10,7 @@
 				th:data-bs-target="'#collapse-score-'+${stat.count}"
 				th:aria-expanded="${stat.first == true ? 'true' : 'false'}" 
 				th:aria-controls="'collapse-score-'+${stat.count}">
-				
-					<!--span class="single-chart">
-						<svg viewBox="0 0 50 50" width="50" height="50" class="circular-chart" th:classappend="'circle-'+${score.letter()}">
-							<path class="circle-bg"
-							d="M18 2.0845
-								a 15.9155 15.9155 0 0 1 0 31.831
-								a 15.9155 15.9155 0 0 1 0 -31.831"
-							/>
-							<path class="circle"
-							th:stroke-dasharray="${score.percent()}+', 100'"
-							
-							d="M18 2.0845
-								a 15.9155 15.9155 0 0 1 0 31.831
-								a 15.9155 15.9155 0 0 1 0 -31.831"
-							/>
-							<text x="18" y="20.35" class="percentage" th:text="${score.percent()+'%'}"></text>
-						</svg>
-					</span-->
-				
+			
 				<span th:text="#{'score-'+${score.name}}"></span>
 				
 			</button>
@@ -41,147 +23,13 @@
 				<th:block th:insert="~{inc/score/__${score.name.toLowerCase()}__.html}"></th:block>
 			</div>
 		</div>
-	</div>
-	
-	
-	<!--  
-					<div class="  progress-info">
-
-						<span  class="h4 help-pointer progress-tooltip" data-bs-toggle="tooltip" data-bs-placement="top" th:title="#{'ecoscore.' +${score.name}+'.tooltip'(${score.absValue()}, ${score.relValue()}, ${product.attributes.indexed.get(score.name)})}" th:classappend="'bg-'+${score.colorClassName()}" th:text="#{'score-'+${score.name}}"></span>
-						<div class="progress-percentage">
-						</div>
-					</div>
-					<div class="progress">
-						<div class="progress-bar" th:classappend="'bg-'+${score.colorClassName()}" role="progressbar"
-								th:attrappend="aria-valuenow = ${score.percent()}, style='width: '+${score.percent()}+'%;'" aria-valuemin="0" aria-valuemax="100"></div>
-					</div>
-					
-					
-	-->
-					
+	</div>			
 </div>	
 
 <!-- End Content -->
-<div class="card-footer bg-white border-0 p-0">
+<!-- EST-CE PERTINENT LE BOUTON GOULVEN ? -->
+<!--div class="card-footer bg-white border-0 p-0">
 	<div class="d-grid">
 		<a href="#markerEcological" class="btn btn-primary rounded-0 rounded-bottom">Bilan écologique</a>
 	</div>
-</div>
-
-
-<section id="markerPresentation" class="container container-semi-fluid section">
-		<div class="row text-center justify-content-center">
-              <div class="col-md-8 mb-5">
-                  <h2 class="display-3">Présentation</h2>
-              </div>
-        </div>	   
-			<div class="row">
-                  
-               <!-- Identity -->
-               
-               <div class="col-12 col-lg-4">
-            
-					<!-- Identity -->
-                   <div  class="card shadow border-gray-300">
-                      <div class="card-body p-4 p-lg-5">
-                          	<div class="d-flex p-3 justify-content-center">														
-								<div class="icon icon-primary">
-									<span class="fas fa-id-card"></span>
-								</div>														
-								<div class="ps-4">
-									<h3 class="h5 icon-box-title md-1">Identité</h3>
-								</div>
-							</div>
-							<th:block th:insert="~{inc/product-referentiel-attributes.html}"></th:block>
-                      </div>
-                  </div>
-                  
-                  
-               <!-- Caracteristiques principales -->
-                 <div  class="card shadow mt-3 border-gray-300">
-                           <div class="card-body p-4 p-lg-5">
-                          	<div class="d-flex p-3 justify-content-center">														
-								<div class="icon icon-primary">
-									<span class="fas fa-list-check"></span>
-								</div>														
-								<div class="ps-4">
-									<h3 class="h5 icon-box-title md-1">Caractéristiques</h3>
-								</div>
-							</div>			
-									<th:block th:insert="~{inc/product-attributes.html}"></th:block>
-									<a href="#markerCaracteristiques" style="width:100%" class="btn btn-primary">Toutes les caractéristiques</a>
-                           </div>
-                  </div>
-                  
-               </div>                  
-               
-               <!-- Description -->
-				<div class="col-lg-8">
-					<div th:if="${globalDescriptionParagraphs}" class="row mt-5 mt-lg-0 px-3">
-						<!-- Icon Boxes -->
-						<div>
-							<div class="card-body text-center p-4 p-lg-5">
-								<!--
-                                    <img src="../../assets/img/pages/design.svg" alt="Web design illustration" class="image-md mb-4">
-                                    <h2  class="h4 mb-2">Description générale</h2>
-                                    <span  class="h5 text-light "></span>
-                                -->
-								<p class="lead">
-									<span th:each="paragraph : ${globalDescriptionParagraphs}" th:utext="${paragraph + '<br/><br/>'}"></span>
-								</p>
-							</div>
-						</div>
-						<!-- End of Icon Boxes -->
-					</div>
-
-					<div class="row ">
-						<!-- Avantages -->
-						<div th:if="${pros}" class="col-sm-12 col-md-12 col-lg-6 mt-3">
-							<!-- Icon Box -->
-							<div class="card border-gray-300 ">
-								<div class="card-body">
-									<div class="d-flex p-3">
-										<div class="icon icon-primary">
-											<span class="fas fa-plus"></span>
-										</div>
-										<div class="ps-4">
-											<h3 class="h5 icon-box-title md-1">Avantages</h3>
-										</div>
-									</div>
-									<ul class="list-group list-group-flush price-list mb-4">
-										<li th:each="pro : ${pros}" class="list-group-item border-0" th:text="${pro}"></li>
-									</ul>
-								</div>
-							</div>
-							<!-- End of Icon Box -->
-						</div>
-
-						<!-- Inconvénients -->
-						<div th:if="${cons}" class="col-sm-12 col-md-12 col-lg-6 mt-3">
-							<!-- Icon Box -->
-							<div class="card border-gray-300 ">
-								<div class="card-body">
-									<div class="d-flex p-3">
-										<div class="icon icon-primary">
-											<span class="fas fa-minus"></span>
-										</div>
-										<div class="ps-4">
-											<h3 class="h5 icon-box-title md-1">Inconvénients</h3>
-										</div>
-									</div>
-									<ul class="list-group list-group-flush price-list mb-4">
-										<li th:each="con : ${cons}" class="list-group-item border-0" th:text="${con}"></li>
-									</ul>
-								</div>
-							</div>
-							<!-- End of Icon Box -->
-						</div>
-					</div>
-				</div>
-			</div>
-</section> 
-	   
-	   
-	   
-	   
-
+</div-->
