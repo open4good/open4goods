@@ -7,6 +7,7 @@ import org.open4goods.commons.services.SerialisationService;
 import org.open4goods.commons.store.repository.elastic.BrandScoresRepository;
 import org.open4goods.commons.store.repository.elastic.ElasticProductRepository;
 import org.open4goods.commons.store.repository.elastic.ElasticTextRepository;
+import org.open4goods.commons.store.repository.elastic.VerticalPagesRepository;
 import org.open4goods.ui.repository.ContributionVoteRepository;
 import org.open4goods.ui.repository.UserSearchRepository;
 import org.slf4j.Logger;
@@ -29,7 +30,7 @@ import jakarta.annotation.PreDestroy;
 @EnableScheduling
 @EnableCaching
 @Configuration
-@EnableElasticsearchRepositories(basePackageClasses = {ContributionVoteRepository.class, UserSearchRepository.class, ElasticProductRepository.class, BrandScoresRepository.class, ElasticTextRepository.class})
+@EnableElasticsearchRepositories(basePackageClasses = {VerticalPagesRepository.class, ContributionVoteRepository.class, UserSearchRepository.class, ElasticProductRepository.class, BrandScoresRepository.class, ElasticTextRepository.class})
 //@EnableRedisRepositories(basePackageClasses = RedisProductRepository.class)
 public class Ui {
 

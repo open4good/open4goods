@@ -8,12 +8,14 @@ import org.open4goods.api.config.yml.ApiProperties;
 import org.open4goods.api.services.AggregationFacadeService;
 import org.open4goods.api.services.BatchService;
 import org.open4goods.api.services.CompletionFacadeService;
+import org.open4goods.api.services.PageGenerationService;
 import org.open4goods.api.services.ScrapperOrchestrationService;
 import org.open4goods.api.services.VerticalsGenerationService;
 import org.open4goods.api.services.completion.AmazonCompletionService;
-import org.open4goods.api.services.completion.PerplexityReviewCompletionService;
 import org.open4goods.api.services.completion.IcecatCompletionService;
 import org.open4goods.api.services.completion.PerplexityAttributesCompletionService;
+import org.open4goods.api.services.completion.PerplexityMarkdownService;
+import org.open4goods.api.services.completion.PerplexityReviewCompletionService;
 import org.open4goods.api.services.completion.ResourceCompletionService;
 import org.open4goods.api.services.store.DataFragmentStoreService;
 import org.open4goods.commons.config.yml.attributes.LegacyPromptConfig;
@@ -47,6 +49,7 @@ import org.open4goods.commons.services.ai.GenAiService;
 import org.open4goods.commons.services.ai.LegacyAiService;
 import org.open4goods.commons.services.textgen.BlablaService;
 import org.open4goods.commons.store.repository.elastic.BrandScoresRepository;
+import org.open4goods.commons.store.repository.elastic.VerticalPagesRepository;
 import org.open4goods.crawler.config.yml.FetcherProperties;
 import org.open4goods.crawler.repository.IndexationRepository;
 import org.open4goods.crawler.services.ApiSynchService;
@@ -163,10 +166,21 @@ public class ApiConfig {
 								ApiProperties apiConfig, EvaluationService spelEvaluationService, SerialisationService serialisationService) {
 		return new GenAiService(apiProperties.getGenAiConfig(), perplexityApi, openAiCustomApi, serialisationService, spelEvaluationService);
 	}
+
 	
 	@Bean
-	PerplexityReviewCompletionService perplexityReviewCompletionService(GenAiService aiService, ProductRepository productRepository, VerticalsConfigService verticalConfigService) {
-		return new PerplexityReviewCompletionService(aiService, productRepository, verticalConfigService, apiProperties);
+	PerplexityMarkdownService perplexityMarkdownService() {
+		return new PerplexityMarkdownService();
+	}
+	
+	@Bean
+	PageGenerationService pageGenerationService(GenAiService aiService, VerticalsConfigService verticalConfigService, PerplexityMarkdownService perplexityMarkdownService, VerticalPagesRepository pagesRepository) {
+		return new PageGenerationService(aiService, verticalConfigService, apiProperties, perplexityMarkdownService,  pagesRepository);
+	}
+	
+	@Bean
+	PerplexityReviewCompletionService perplexityReviewCompletionService(GenAiService aiService, ProductRepository productRepository, VerticalsConfigService verticalConfigService, PerplexityMarkdownService perplexityMarkdownService) {
+		return new PerplexityReviewCompletionService(aiService, productRepository, verticalConfigService, apiProperties,  perplexityMarkdownService);
 	}
 
 	@Bean

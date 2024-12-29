@@ -112,15 +112,16 @@
                 <th:block th:insert="~{inc/product-header.html}"></th:block>
             </div>
 
+            <!-- Tabed Pans -->
             <div class="card">
                   <div class="card-header">
                 <!-- Navigation pills header -->
 				<ul class="nav nav-pills" id="pills-tab" role="tablist">
 					<li class="nav-item" role="presentation">
-						<button class="nav-link active" id="pills-presentation-tab" data-bs-toggle="pill" data-bs-target="#pills-presentation" type="button" role="tab" aria-controls="pills-presentation" aria-selected="true">Presentation et test</button>
+						<button class="nav-link active" id="pills-presentation-tab" data-bs-toggle="pill" data-bs-target="#pills-presentation" type="button" role="tab" aria-controls="pills-presentation" aria-selected="true">Test</button>
 					</li>
 					<li class="nav-item" role="presentation">
-						<button class="nav-link" id="pills-ecological-tab" data-bs-toggle="pill" data-bs-target="#pills-ecological" type="button" role="tab" aria-controls="pills-ecological" aria-selected="false">Bilan écologique</button>
+						<button class="nav-link" id="pills-ecological-tab" data-bs-toggle="pill" data-bs-target="#pills-ecological" type="button" role="tab" aria-controls="pills-ecological" aria-selected="false">Impact écologique</button>
 					</li>
 					
 					<li class="nav-item" role="presentation">
@@ -564,6 +565,80 @@
     });
     /*]]>*/
 </script>
+
+
+
+
+<script>
+    // Data for the chart
+    const data = {
+        labels: [
+            'Performance ESG', 
+            'Indice de réparabilité', 
+            'Consommation en veille', 
+            'Consommation en marche', 
+            'Poids', 
+            'Classe énergétique'
+        ],
+        datasets: [
+            {
+                label: 'Worst Item',
+                data: [300, 400, 200, 150, 100, 250],  // Example values for worst item
+                backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                borderColor: 'rgba(255, 99, 132, 1)',
+                borderWidth: 1
+            },
+            {
+                label: 'Best Item',
+                data: [900, 950, 950, 920, 900, 950],  // Example values for best item
+                backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                borderColor: 'rgba(54, 162, 235, 1)',
+                borderWidth: 1
+            },
+            {
+                label: 'Average Item',
+                data: [600, 650, 500, 500, 550, 650],  // Example values for average item
+                backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                borderColor: 'rgba(75, 192, 192, 1)',
+                borderWidth: 1
+            },
+            {
+                label: 'Current Item',
+                data: [700, 750, 600, 680, 650, 750],  // Example values for current item
+                backgroundColor: 'rgba(153, 102, 255, 0.2)',
+                borderColor: 'rgba(153, 102, 255, 1)',
+                borderWidth: 1
+            }
+        ]
+    };
+
+    // Chart.js radar chart initialization
+    const config = {
+        type: 'radar',
+        data: data,
+        options: {
+            responsive: true,
+            scales: {
+                r: {
+                    min: 0,
+                    max: 1000,
+                    ticks: {
+                        stepSize: 200
+                    }
+                }
+            },
+            plugins: {
+                legend: {
+                    position: 'top',
+                }
+            }
+        }
+    };
+
+    // Create the chart
+    const radarChart = new Chart(document.getElementById('radarChart'), config);
+</script>
+
 
 </body>
 

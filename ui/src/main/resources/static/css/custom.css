@@ -436,11 +436,9 @@ Circular rating  css
   justify-content: space-around ;
 }
 
-.circular-chart {
-  display: block;
-  margin: 10px auto;
-  max-width: 80%;
-  max-height: 250px;
+.circular-chart-header {
+  display: inline-block;
+  max-height: 60px;
 }
 
 .circle-bg {

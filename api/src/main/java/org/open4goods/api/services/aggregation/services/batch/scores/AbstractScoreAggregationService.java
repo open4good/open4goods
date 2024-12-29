@@ -106,14 +106,14 @@ public abstract class AbstractScoreAggregationService extends  AbstractAggregati
 				d.getScores().get(scoreName).setLowestScoreId(worseGtin);
 				d.getScores().get(scoreName).setHighestScoreId(bestGtin);
 				
-				// Putting if the worse bag if match
+				// Putting in the worse bag if match
 				if (i < vConf.getWorseLimit()) {
 					d.getWorsesScores().add(scoreName);
 				}
 				
-				// Putting if the worse bag if match
+				// Putting in the best bag if match
 				if (i >  sorted.size() -  vConf.getBettersLimit()) {
-					d.getWorsesScores().add(scoreName);
+					d.getBestsScores().add(scoreName);
 				}
 				
 			}
