@@ -5,11 +5,14 @@ package org.open4goods.api.controller.api;
 import java.io.IOException;
 import java.util.Map;
 
+import org.open4goods.api.services.PageGenerationService;
+import org.open4goods.commons.config.yml.ui.VerticalConfig;
 import org.open4goods.commons.exceptions.AggregationSkipException;
 import org.open4goods.commons.exceptions.InvalidParameterException;
 import org.open4goods.commons.exceptions.ResourceNotFoundException;
-import org.open4goods.commons.model.EcoscoreResponse;
+import org.open4goods.commons.model.TopPage;
 import org.open4goods.commons.model.constants.RolesConstants;
+import org.open4goods.commons.services.VerticalsConfigService;
 import org.open4goods.commons.services.ai.GenAiService;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -31,10 +34,15 @@ public class GenAiController {
 
 	private GenAiService aiService;
 
+	private PageGenerationService pageGenService;
+	
+	private VerticalsConfigService verticalsConfigService;
 
 
-	public GenAiController(GenAiService aiService) {
+	public GenAiController(GenAiService aiService, PageGenerationService pageGenService,  VerticalsConfigService verticalsConfigService) {
 		this.aiService = aiService;
+		this.pageGenService = pageGenService;
+		this.verticalsConfigService = verticalsConfigService;
 	}
 	
 	
@@ -53,5 +61,22 @@ public class GenAiController {
 			@RequestParam Map<String,Object> context) throws InvalidParameterException, IOException, ResourceNotFoundException, AggregationSkipException {
 		
 		return aiService.prompt(key, context).getRaw();
+	}
+	
+	
+	@GetMapping("/page/generate")
+	@Operation(summary="Generate a page")
+	public TopPage prompt(@RequestParam(defaultValue = "test") String key, 
+			String question,
+			String vertical,
+			String id,
+			String title) throws InvalidParameterException, IOException, ResourceNotFoundException, AggregationSkipException {
+		
+		
+		VerticalConfig vc = verticalsConfigService.getConfigById(vertical);
+		
+		TopPage ret = pageGenService.generatePage(vc, question, id, question, title);
+		
+		return ret;
 	}
 }

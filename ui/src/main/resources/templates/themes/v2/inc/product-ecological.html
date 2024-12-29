@@ -1,11 +1,10 @@
     <section id="markerEcological" class="container container-semi-fluid">
 		<div class="row text-center justify-content-center">
-               <div class="col-md-8 mb-5">
+           <div class="col-md-8 mb-5">
 				<h2 class="display-3">
 					Bilan écologique
-					<span class="mx-3 badge bg-success"><span th:if="${null != product.scores.get('ECOSCORE')}" th:text="${product.scores.ECOSCORE.relativ.value}"></span>/5</span>
 				</h2>
-		</div>
+		  </div>
         </div>	   
   
 	
@@ -105,6 +104,67 @@
 			</div>
 			
 			
+			
+			 <div class="row mt-3">
+			 
+			 
+			     <!-- Comparison radar chart -->
+			     <div class="col-lg-4">
+			          <div class=" card shadow">
+                            <div class="card-header"><h3 class="h6">Comparaison</h3></div>
+                            <div class="card-body">
+     
+     
+                                 <canvas id="radarChart"></canvas>
+     
+                            </div>
+                        </div>
+			     </div>
+			 
+                 <!-- ImpactScore details -->
+                 <div class="col-lg-4" th:each="score, stat : ${verticalConfig.ecoScoreDetails(product.realScores())}" >
+                      <div class=" card shadow">
+                            <div style="max-height: 150px;" class="inline-block card-header">
+                            
+                          
+                                
+                            <div class="row align-middle">
+                                <div class="col-5" >
+                                    <th:block th:insert="~{inc/impactscore-percent-header.html}"></th:block>
+                                </div>
+                                <div class="align-middle col-7" >
+                                    <h3 class="h6" th:text="${score.name}"></h3>
+                                </div>
+                            </div>
+                            
+                            
+                            </div>
+                            <div class="card-body">
+                                    <th:block th:insert="~{inc/score/__${score.name.toLowerCase()}__.html}"></th:block>
+     
+     
+                            </div>
+                        </div>
+                 </div>			 
+			 
+			 
+			     <!-- Virtual score -->
+                 <div class="col-lg-4" >
+                      <div class=" card shadow">
+                            <div class="card-header"><h3 class="h6">Valeurs manquantes</h3></div>
+                            <div class="card-body">
+                                   
+     
+                                    + de detail sur le calcul ici
+                            </div>
+                        </div>
+                 </div>          
+             
+			 
+			 
+			 
+			 
+			 </div>
 			
 			
 			
