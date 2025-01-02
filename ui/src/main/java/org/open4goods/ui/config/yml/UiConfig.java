@@ -2,8 +2,10 @@ package org.open4goods.ui.config.yml;
 
 import java.io.File;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 
 import org.open4goods.commons.config.yml.BanCheckerConfig;
 import org.open4goods.commons.config.yml.BlogConfiguration;
@@ -62,6 +64,11 @@ public class UiConfig {
 	 * Folder where AI generated images are stored
 	 */
 	private String generatedImagesFolder = rootFolder + "generated-images" + File.separator;
+	
+	/**
+	 * The list of authorized dynamic image resizing suffixes
+	 */
+	private Set<String> allowedImagesSizeSuffixes = new HashSet<>();
 	
 	/**
 	 * The mapped wiki pages
@@ -490,6 +497,16 @@ public class UiConfig {
 	public void setTeamConfig(TeamConfig teamConfig) {
 		this.teamConfig = teamConfig;
 	}
+
+	public Set<String> getAllowedImagesSizeSuffixes() {
+		return allowedImagesSizeSuffixes;
+	}
+
+
+	public void setAllowedImagesSizeSuffixes(Set<String> allowedImagesSizeSuffixes) {
+		this.allowedImagesSizeSuffixes = allowedImagesSizeSuffixes;
+	}
+
 
 	public AmazonConfig getAmazonConfig() { return amazonConfig; }
 
