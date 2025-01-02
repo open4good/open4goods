@@ -51,6 +51,10 @@ public class EcoscoreController implements SitemapExposedController{
 		VerticalConfig verticalConfig = verticalsConfigService.getConfigById("tv");
 		ret.addObject("impactscore",verticalConfig .getImpactScoreConfig());
 		ret.addObject("verticalConfig",verticalConfig);
+		ret.addObject("verticals",verticalsConfigService.getConfigsWithoutDefault());
+		
+		
+		
 		
 		return ret;
 	}

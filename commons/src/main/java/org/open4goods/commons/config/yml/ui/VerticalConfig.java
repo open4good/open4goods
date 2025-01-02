@@ -424,6 +424,15 @@ public class VerticalConfig{
 	}
 
 
+	/**
+	 * 
+	 * @return the sum of the coefficient applyed to this ecoscore
+	 */
+	public Double getEcoscoreCriteriasSum() {
+		return impactScoreConfig.getCriteriasPonderation().values().stream()
+		.mapToDouble(Double::doubleValue)
+		.sum();
+	}
 	public String getBaseUrl(final String siteLocale) {
 		return i18n.getOrDefault(siteLocale, i18n.get("default")).getVerticalHomeUrl();
 	}
