@@ -59,7 +59,11 @@ spring:
     elasticsearch:
       repositories:
         enabled: true
-      
+
+allowedImagesSizeSuffixes:
+  - 50
+  - 30       
+              
 wikiPagesMapping:
   "[webpages/default/legal-notice/WebHome]":
     fr: "mentions-legales"

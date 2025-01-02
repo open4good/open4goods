@@ -34,6 +34,7 @@ import org.open4goods.commons.store.repository.elastic.BrandScoresRepository;
 import org.open4goods.ui.config.yml.UiConfig;
 import org.open4goods.ui.controllers.ui.UiService;
 import org.open4goods.ui.interceptors.GenericTemplateInterceptor;
+import org.open4goods.ui.interceptors.ImageResizeInterceptor;
 import org.open4goods.ui.repository.ContributionVoteRepository;
 import org.open4goods.ui.services.BlogService;
 import org.open4goods.ui.services.ContributionService;
@@ -380,15 +381,20 @@ public class AppConfig {
 	///////////////////////////////////
 	// Web MVC Config
 	///////////////////////////////////
+
+
 	@Bean
 	WebMvcConfigurer configurer() {
+		
 		return new WebMvcConfigurer() {
 
 			@Override
 			public void addInterceptors(final InterceptorRegistry registry) {
-				registry.addInterceptor(new BanCheckerInterceptor(config.getBancheckerConfig()));
-				registry.addInterceptor(AppConfig.localeChangeInterceptor());
+//				registry.addInterceptor(new BanCheckerInterceptor(config.getBancheckerConfig()));
+//				registry.addInterceptor(AppConfig.localeChangeInterceptor());
 				registry.addInterceptor(new GenericTemplateInterceptor());
+				registry.addInterceptor(new ImageResizeInterceptor(resourceService(),config.getAllowedImagesSizeSuffixes()));
+				
 			}
 
 			@Override
