@@ -1,9 +1,9 @@
-<header class="header-global">
-    <nav id="navbar-main" aria-label="Primary navigation" class="navbar navbar-main navbar-expand-lg navbar-light navbar-theme-primary headroom headroom--not-bottom headroom--pinned headroom--top bg-white">
+<div class="header-global">
+    <nav id="navbar-main" role="navigation" aria-label="Menu de navigation" class="navbar navbar-main navbar-expand-lg navbar-light navbar-theme-primary headroom headroom--not-bottom headroom--pinned headroom--top bg-white">
         <div class="container position-relative">
             <a class="navbar-brand me-lg-5" href="/">
-                <img class="navbar-brand-dark" src="/assets/img/nudger_logo_v2_small.svg" alt="Nudger logo light">
-                <img class="navbar-brand-light" src="/assets/img/nudger_logo_v2.svg" alt="Nudger logo dark">
+                <img loading="lazy" class="navbar-brand-dark" src="/assets/img/nudger_logo_v2_small.svg" alt="Nudger logo light">
+                <img loading="lazy" class="navbar-brand-light" src="/assets/img/nudger_logo_v2.svg" alt="Nudger logo dark">
             </a>
 
             <div class="d-flex align-items-center">
@@ -12,7 +12,7 @@
                         <div class="row">
                             <div class="col-6 collapse-brand">
                                 <a href="/">
-                                    <img src="/assets/img/nudger_logo_v2.svg" alt="Logo de Nudger, comparateur écologique">
+                                    <img loading="lazy" src="/assets/img/nudger_logo_v2.svg" alt="Logo de Nudger, comparateur écologique">
                                 </a>
                             </div>
                             <div class="col-6 collapse-close">
@@ -30,7 +30,7 @@
                             <div class="row g-0">
                                 <div class="col-lg-6 bg-dark d-none d-lg-block me-0 me-3">
                                     <div class="px-0 py-3 text-center">
-                                        <img src="@@path/assets/img/megamenu_image.png" alt="Pixel Components">
+                                        <img src="/assets/img/megamenu_image.png" alt="Pixel Components">
                                     </div>
                                     <div class="z-2 pb-3 text-center">
                                         <a href="@@path/html/components/all.html"  class="btn btn-outline-white animate-up-2 mb-2 mb-sm-0 me-3">
@@ -121,7 +121,7 @@
                             <form method="post" id="searchForm" action="/recherche">
                                 <div class="d-flex align-items-center justify-content-center">
                                     <div class="input-group input-group__nudger">
-                                        <input type="text" id="searchInput" class="form-control" placeholder="Rechercher dans 85,682 produits" aria-label="Search" aria-describedby="basic-addon1" name="query" data-dashlane-rid="c04fc15a353ceabb" data-form-type="">
+                                        <input type="text" id="searchInput" class="form-control" placeholder="Rechercher" aria-label="Search" aria-describedby="basic-addon1" name="query" data-dashlane-rid="c04fc15a353ceabb" data-form-type="">
                                         <button onclick="document.getElementById('searchForm').submit()" class="btn btn__nudger" type="button"><span class="fas fa-search"></span></button>
                                         <!--hr /-->
                                     </div>
@@ -136,4 +136,4 @@
             </div>
         </div>
     </nav>
-</header>
+</div>
