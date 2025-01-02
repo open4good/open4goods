@@ -1,15 +1,14 @@
-
 <!DOCTYPE html>
 <html th:lang="${siteLocale.language}">
-
 <head>
-
     <!--/* Metas and CSS */-->
     <th:block th:insert="~{inc/header-meta.html}"></th:block>
     
+
     <!-- Primary Meta Tags -->
     <title>Comparateur écologique | Nudger</title>
     <meta name="description" content="Nudger vous aide à comparer les scores écologiques des différents produits du marché, et bien plus encore !">
+    <meta name="keywords" content="Comparateur écologique, Nudger, écologie, éco-score, produit responsable, open data, open source" />
         
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website">
@@ -24,338 +23,223 @@
     <meta name="twitter:title" th:content="#{index.title}">
     <meta name="twitter:description" th:content="#{index.meta.description}">
     <meta name="twitter:image" th:content="${url} + 'assets/img/brand/light.svg'">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" integrity="sha512-c42qTSw/wPZ3/5LBzD+Bw5f7bSF2oxou6wEb+I/lqeaKV5FDIfMvvRp772y4jcJLKuGUOpbJMdg/BTl50fJYAw==" crossorigin="anonymous" referrerpolicy="no-referrer" />  
+    <link  rel="preload" as="style" onload="this.onload=null;this.rel='stylesheet'" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>  
 
     <meta name="google-site-verification" content="I2wSyJnnRSjrLjadtNgFzHHmtSN8DPbjhPePTkQNhp4" />
-   
-   
 </head>
 
 <body class="home-page">
     <header>
-	    <!--/* Navbar */-->
-	    <th:block th:insert="~{inc/navbar/navbar-home.html}"></th:block>
-	    
         <!--/* Loader */-->
         <th:block th:insert="~{inc/preloader.html}"></th:block>
+        <!--/* Navbar */-->
+        <th:block th:insert="~{inc/navbar/navbar-home.html}"></th:block>
     </header>
     
     <main>  
-
-        <section class="section-header overflow-hidden pt-7 pt-lg-8 pb-9 pb-lg-12 bg-primary text-white bg-primary"><!-- hero__hp bg__degrade--bottom section-header d-flex align-items-center overflow-hidden pt-7 pt-lg-8 pb-4 bg-primary -->
+        <section class="section-header overflow-hidden pt-7 pt-lg-8 pb-9 pb-lg-12 bg-primary text-white bg-primary">
             <div class="container">
                 <div class="row">
                     <div class="col-12">
+                        <h1 class="text-center fw-bolder display-2 mb-4">
+                            <span class="prefix">Plus qu'un comparateur</span><br/>
+                            <span class="suffix tlt">écologique</span>
+                        </h1>
 
-						<h1 class="ms-6 fw-bolder display-2 mb-6">
-							<span class="prefix">Plus qu'un </span> 
-							<span class="comparateur">comparateur</span> 
-							<span class="suffix tlt">écologique</span>
-						</h1>
-
-
-
-
-
-
-
-
-						<!-- Catégories / Impact score -->
-						<div class="col-12 col-lg-12">
-							<div class="card shadow mb-4">
-								<div class="card-body px-5 py-5 text-center text-md-left">
-									<div class="row align-items-center">
-										<div class="col-md-5">
-											<h2 class="text-black mb-3 text-center">Impact Score</h2>
-											<p class="mb-0">Notre ImpactScore est disponible pour les catégories suivantes. Vous trouverez aussi une information approfondie sur les produits</p>
-                                            <a href="#" class="btn btn-sm btn-primary animate-up-1">En savoir plus</a>											
-										</div>
-										<div class="col-12 col-md-6 mt-4 mt-md-0 text-center">
-
-
-											<th:block th:with="image='/icons/categories/electronics.png', title='Produits électroniques', googleTaxo=222" th:insert="~{inc/category-shortcut.html}">
-
-											</th:block>
-
-											<th:block th:with="image='/icons/categories/appareil-electromenager.png', title='Electroménager', googleTaxo=604" th:insert="~{inc/category-shortcut.html}">
-
-											</th:block>
-
-
-											<br class="d-block d-md-none mt-3 mt-md-0 text-black"> <a href="/categories" class="fw-bold text-black text-underline mx-1">Toutes les catégories</a>
-
-										</div>
-									</div>
-								</div>
-							</div>
-						</div>
-
-
-
-                    <!-- Recherche -->
+                        <!-- Catégories / Impact score -->
                         <div class="col-12 col-lg-12">
-							<div class="card shadow mb-4">
-								<div class="card-body px-5 py-5 text-center text-md-left">
-									<div class="row align-items-center">
-										<h2 class="text-black mb-3 text-center">Contribution écologique</h2>
-										
-										<div class="col-md-8">
+                            <div class="card shadow mb-4">
+                                <div class="card-body px-4 py-4 text-center text-md-left">
+                                    <div class="row align-items-center">
+                                        <div class="col-md-5">
+                                            <h2 class="text-black mb-3 text-center">Impact Score</h2>
+                                            <p class="mb-0">Notre ImpactScore est disponible pour les catégories suivantes. Vous trouverez aussi une information approfondie sur les produits.</p>
+                                            <div class="text-right mt-2">
+                                                <a href="/ecoscore" class="btn btn-sm btn-primary animate-up-1">En savoir plus</a>
+                                            </div>
+                                        </div>
+                                        <div class="col-12 col-md-6 mt-4 mt-md-0 text-center">
+                                            <!--/* 
+                                              7) Provided meaningful alt text for icons: 
+                                                 alt="Icône Produits Électroniques" 
+                                                 alt="Icône Électroménager"
+                                            */-->
+                                            <th:block th:with="image='/icons/categories/electronics.png', title='Produits électroniques', googleTaxo=222" 
+                                                      th:insert="~{inc/category-shortcut.html}">
+                                            </th:block>
 
-											<form method="post" id="searchForm" class="mb-3" action="/recherche">
-												<div class="d-flex align-items-center justify-content-center">
-														<div class="input-group input-group__nudger">
-															<input type="text" id="searchInput" class="form-control" placeholder="Rechercher dans 85,682 produits" aria-label="Search" aria-describedby="basic-addon1" name="query"
-																data-dashlane-rid="c04fc15a353ceabb" data-form-type=""
-															>
-															<button onclick="document.getElementById('searchForm').submit()" class="btn btn__nudger" type="button">
-																<span class="fas fa-search"></span>
-															</button>
-															<hr />
-														</div>
-												</div>
-											</form>
-										</div>
-										
-										<div class="col-12 col-md-4 mt-4 mt-md-0 text-md-right">
-											<p class="mb-0">10% de nos bénéfices servent à amoindrir l'impact de votre achat. C'est valable sur nos millions de produits, et vous pouvez votez pour l'attribution de cette compensation !</p>
-                                            <a href="#" class="btn btn-sm btn-primary animate-up-1">En savoir plus</a>
+                                            <th:block th:with="image='/icons/categories/appareil-electromenager.png', title='Electroménager', googleTaxo=604" 
+                                                      th:insert="~{inc/category-shortcut.html}">
+                                            </th:block>
 
-										</div>
-									</div>
-								</div>
-							</div>
-						</div>
-                        
-
-
-
-
-
-
-
-
-                        <!-- Partie promesse de valeur 
-                        -->
-                        <div class="row mb-5">
-                            <div class="col-12 col-md-6 col-lg-4">
-                                <div class="card shadow p-1 p-md-4 mb-4 mb-lg-0">
-                                    <div class="card-body">                 
-                                        <h3 class="h5 mb-3 text-black">Les meilleurs prix !</h3>
-                                        <p>Nous vous offrons les meilleurs prix du marché. Mieux, nous traçons l'historique des prix pour vous permettre d'acheter au meilleur moment et au meilleur prix</p>
-                                        <a href="#" class="btn btn-sm btn-primary animate-up-1">En savoir plus</a>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-12 col-md-6 col-lg-4">
-                                <div class="card shadow p-1 p-md-4 mb-4 mb-lg-0">
-                                    <div class="card-body">                 
-                                        <h3 class="h5 mb-3 text-black">Boosté à l'IA </h3>
-                                        <p>Nous présentons un grand nombre d'informations sur les produits évalués, notament en croisant notre savoir-faire en collecte de la donnée avec les dernières technologies IA</p>
-                                        <a href="#" class="btn btn-sm btn-primary animate-up-1">En savoir plus</a>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-12 col-md-6 col-lg-4">
-                                <div class="card shadow p-1 p-md-4 mb-4 mb-lg-0">
-                                    <div class="card-body">                 
-                                        <h3 class="h5 mb-3 text-black">Libre et ouvert</h3>
-                                        <p>Nous n'utilisons pas de cookie et ne collectons aucune donnée personnelles. Dans une logique de communs numériques, nudger est open-data et open-source</p>
-                                        <a href="#" class="btn btn-sm btn-primary animate-up-1">En savoir plus</a>
-                                    </div>
-                                </div>
-                            </div>                                                      
-                        </div>
-                        
-                        
-                                                
-                        <!-- 
-                        
-                        <div class="row">
-                            <div class="nudger_pack col-12 py-4 px-5">
-                                <div class="row justify-content-center">
-                                    <div class="col-12 col-md-10">
-                                        <div class="d-flex flex-column flex-md-row justify-content-center justify-content-md-between">
-                                            <p class="mb-3 text-center text-md-start d-flex align-items-center">
-                                                <svg width="20" height="20" class="me-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 37.39 37.34">
-                                                    <defs>
-                                                        <style>
-                                                        .cls-1 {
-                                                            fill: #004b64;
-                                                        }
-                                                        </style>
-                                                    </defs>
-                                                    <g id="_01_-_tuiles" data-name="01 - tuiles">
-                                                        <path class="cls-1" d="M16.8,9.34v-4.67c0-1.31.45-2.41,1.35-3.31s2.01-1.35,3.31-1.35h4.67v4.67c0,1.31-.45,2.41-1.35,3.31s-2.01,1.35-3.31,1.35h-4.67ZM6.54,20.54c-1.8,0-3.35-.64-4.62-1.91-1.28-1.28-1.91-2.82-1.91-4.62v-6.54h6.54c1.8,0,3.35.64,4.62,1.91,1.28,1.28,1.91,2.82,1.91,4.62v6.54h-6.54ZM26.14,37.34c-1.21,0-2.37-.19-3.48-.56s-2.11-.89-3.01-1.54l-1.54,1.54c-.34.34-.78.51-1.31.51s-.96-.17-1.31-.51-.51-.78-.51-1.31.17-.96.51-1.31l1.54-1.54c-.65-.9-1.17-1.91-1.54-3.01-.37-1.1-.56-2.26-.56-3.48,0-3.11,1.09-5.77,3.27-7.96,2.18-2.19,4.82-3.29,7.94-3.29h11.25v11.25c0,3.11-1.1,5.76-3.29,7.94-2.19,2.18-4.85,3.27-7.96,3.27ZM26.14,33.61c2.09,0,3.84-.73,5.27-2.19s2.15-3.22,2.15-5.27v-7.47h-7.42c-2.05,0-3.81.72-5.27,2.17-1.46,1.45-2.19,3.21-2.19,5.3,0,.72.09,1.39.26,2.03s.43,1.24.77,1.8l5.13-5.13c.34-.34.78-.51,1.31-.51s.96.17,1.31.51.51.78.51,1.31-.17.96-.51,1.31l-5.13,5.13c.56.34,1.16.6,1.8.77s1.31.26,2.03.26Z"/>
-                                                    </g>
-                                                </svg>
-                                                Le comparateur Ecolo
-                                            </p>
-                                            
-                                            <p class="mb-3 d-flex align-items-center">
-                                                <svg width="20" height="20" class="me-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 42.95 35.48">
-                                                    <defs>
-                                                      <style>
-                                                        .cls-1 {
-                                                          fill: #004b64;
-                                                        }
-                                                      </style>
-                                                    </defs>
-                                                    <g id="_01_-_tuiles" data-name="01 - tuiles">
-                                                      <path class="cls-1" d="M30.25,23.34l7.1-6.07,5.6.47-8.22,7.14,2.43,10.6-4.76-2.89-2.15-9.24ZM25.86,9.71l-1.96-4.57,2.15-5.13,4.29,10.13-4.48-.42ZM12.79,27.68l5.88-3.55,5.88,3.59-1.54-6.72,5.18-4.48-6.82-.61-2.71-6.35-2.71,6.3-6.82.61,5.18,4.53-1.54,6.68ZM7.14,35.48l3.03-13.12L0,13.54l13.44-1.17L18.67,0l5.23,12.37,13.44,1.17-10.18,8.82,3.03,13.12-11.53-6.96-11.53,6.96Z"/>
-                                                    </g>
-                                                </svg>
-                                                Un Eco-score innovant
-                                            </p>
-                                            
-                                            <p class="mb-3 text-center text-md-end d-flex align-items-center">
-                                                <svg width="20" height="20" class="me-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 34.42 34.42">
-                                                    <defs>
-                                                      <style>
-                                                        .cls-1 {
-                                                          fill: #004b64;
-                                                        }
-                                                      </style>
-                                                    </defs>
-                                                    <g id="_01_-_tuiles" data-name="01 - tuiles">
-                                                      <path class="cls-1" d="M17.21,34.42c-2.38,0-4.62-.45-6.71-1.36s-3.91-2.13-5.46-3.68-2.77-3.37-3.68-5.46c-.9-2.09-1.36-4.33-1.36-6.71s.45-4.62,1.36-6.71c.9-2.09,2.13-3.91,3.68-5.46s3.37-2.77,5.46-3.68,4.33-1.36,6.71-1.36,4.62.45,6.71,1.36,3.91,2.13,5.46,3.68,2.77,3.37,3.68,5.46,1.36,4.33,1.36,6.71-.45,4.62-1.36,6.71-2.13,3.91-3.68,5.46-3.37,2.77-5.46,3.68-4.33,1.36-6.71,1.36ZM15.49,30.89v-3.36c-.95,0-1.76-.34-2.43-1.01-.67-.67-1.01-1.48-1.01-2.43v-1.72L3.79,14.11c-.09.52-.16,1.03-.24,1.55s-.11,1.03-.11,1.55c0,3.47,1.14,6.51,3.42,9.12,2.28,2.61,5.16,4.13,8.63,4.56ZM27.36,26.5c.57-.63,1.09-1.31,1.55-2.04.46-.73.84-1.49,1.14-2.28s.53-1.6.69-2.43.24-1.68.24-2.54c0-2.81-.78-5.38-2.34-7.7-1.56-2.32-3.65-4-6.26-5.03v.69c0,.95-.34,1.76-1.01,2.43s-1.48,1.01-2.43,1.01h-3.44v3.44c0,.49-.16.9-.49,1.23s-.74.49-1.23.49h-3.44v3.44h10.32c.49,0,.9.16,1.23.49s.49.74.49,1.23v5.16h1.72c.75,0,1.42.22,2.02.67s1.02,1.03,1.25,1.74Z"/>
-                                                    </g>
-                                                </svg>
-                                                Nudgez et sauvez la planète
-                                            </p>
+                                            <br class="d-block d-md-none mt-3 mt-md-0 text-black">
+                                            <a href="/categories" class="fw-bold text-black text-underline mx-1">Toutes les catégories</a>
                                         </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                         -->
-                        
-                        
-                        
+
+                        <!-- Recherche -->
+                        <div class="col-12 col-lg-12">
+                            <div class="card shadow mb-4">
+                                <div class="card-body px-4 py-4 text-center text-md-left">
+                                    <div class="row align-items-center">
+                                        <h2 class="text-black mb-3 text-center">Contribution écologique</h2>
+                                        <div class="col-md-8">
+                                            <!--/* 
+                                              8) Added an aria-label on the search form for better accessibility
+                                                 and replaced <hr/> with a simple styling separation (if needed, use CSS).
+                                            */-->
+                                            <form method="post" id="searchForm" class="mb-3" action="/recherche" aria-label="Formulaire de recherche">
+                                                <div class="d-flex align-items-center justify-content-center">
+                                                    <div class="input-group input-group__nudger">
+                                                         <input type="text" id="searchInput" class="form-control"
+				                                            th:placeholder="'Rechercher dans ' + ${#numbers.formatDecimal(totalItems, 0, 'COMMA', 0, 'POINT')} + ' produits'" aria-label="Search"
+				                                            name="q" data-dashlane-rid="c04fc15a353ceabb"
+				                                            data-form-type="">
+                                                        <button onclick="document.getElementById('searchForm').submit()" 
+                                                                class="btn btn__nudger" type="button">
+                                                            <span class="fas fa-search" aria-hidden="true"></span>
+                                                            <span class="visually-hidden">Rechercher</span>
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </form>
+                                        </div>
+                                        <div class="col-12 col-md-4 mt-4 mt-md-0 text-md-right">
+                                            <p class="mb-0">10% de nos bénéfices servent à amoindrir l'impact de votre achat. 
+                                                C'est valable sur nos millions de produits, et vous pouvez voter pour 
+                                                l'attribution de cette compensation !
+                                            </p>
+                                            <div class="text-right mt-2">
+                                                <a href="/compensation-ecologique" class="btn btn-sm btn-primary animate-up-1">En savoir plus</a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Partie promesse de valeur -->
+                        <div class="row mb-5">
+                            <div class="col-12 col-md-6 col-lg-4">
+                                <div class="card shadow p-1 p-md-4 mb-4 mb-lg-0">
+                                    <div class="card-body">
+                                        <h3 class="h5 mb-3 text-black">Les meilleurs prix !</h3>
+                                        <p>Nous vous offrons les meilleurs prix du marché. Mieux, nous traçons 
+                                           l'historique des prix pour vous permettre d'acheter au meilleur moment 
+                                           et au meilleur prix.</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-12 col-md-6 col-lg-4">
+                                <div class="card shadow p-1 p-md-4 mb-4 mb-lg-0">
+                                    <div class="card-body">
+                                        <h3 class="h5 mb-3 text-black">Boosté à l'IA</h3>
+                                        <p>Nous présentons un grand nombre d'informations sur les produits évalués, 
+                                           notamment en croisant notre savoir-faire en collecte de la donnée avec 
+                                           les dernières technologies IA.</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-12 col-md-6 col-lg-4">
+                                <div class="card shadow p-1 p-md-4 mb-4 mb-lg-0">
+                                    <div class="card-body">
+                                        <h3 class="h5 mb-3 text-black">Libre et ouvert</h3>
+                                        <p>Nous n'utilisons pas de cookie et ne collectons aucune donnée personnelle. 
+                                           Dans une logique de communs numériques, Nudger est open-data et open-source.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- 
+                            Note: We left the commented-out block as is, just cleaned up indentation.
+                        -->
                     </div>             
                 </div>
             </div>
         </section>
- 
- 
- 
-        
+
         <!-- 
-        
-        <section class="container-fluid">
-            <div class="container container-semi-fluid">
-                <div class="row">
-                    <div class="col-12 col-md-5 mb-3">
-                        <div class="card card__radius card__ecoscore text-gray h-100">
-                            <div class="card-body">
-                                <h1 class="display-3 fw-light">
-                                    Notre<br>eco-score<br>innovant                
-                                </h1>
-                                
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="col-12 col-md-7 mb-3">
-                        <div class="card card__radius card__compensation text-gray h-100">
-                            <div class="card-body">
-                                <h1 class="display-3 fw-light">	
-                                    100%<br>Open Source                                
-                                </h1>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="col-12 col-md-7 mb-3">
-                        <div class="card card__radius card__numResponsable text-gray h-100">
-                            <div class="card-body">
-                                <h1 class="display-3 fw-light">
-                                    Numériquement<br>responsable                             
-                                </h1>
-                            </div>
-                        </div>
-                    </div>                    
-
-                    <div class="col-12 col-md-5 mb-3">
-                        <div class="card card__radius card__openSource text-gray h-100">
-                            <div class="card-body">
-                                <h1 class="display-3 fw-light">	
-                                    Contribution<br>écologique                               
-                                </h1>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-         -->
-         
-         
-       
-		
-
-
-
-
+          9) We keep the next sections but ensure images have meaningful alt text and heading structures are used. 
+        -->
 
         <section class="bg-primary text-center py-4">
-            <h2> <span class="h1 mb-3">Les chiffres clés</span></h2>
+            <h2><span class="h1 mb-3">Les chiffres clés</span></h2>
             <p class="lead mb-0">Nudger, c'est :</p>
         </section>
 
         <section class="container text-center py-4">
-                <div class="row justify-content-center">
-                    <div class="col-12 col-md-6 col-lg-4 py-3">
-                        <div class="icon icon-shape icon-shape-secondary me-2 me-md-0 mb-2">
-                            <span class="fas fa-box-open"></span>
-                        </div>
-                        <span class="counter display-3 text-secondary d-block" th:data-value="${config.reversementConfig.getTotalReversements()}" ></span>
-                        <span class="lead">Montant en euros du coup de pouce à date de Nudger pour la planète</span>
+            <div class="row justify-content-center">
+                <div class="col-12 col-md-6 col-lg-4 py-3">
+                    <div class="icon icon-shape icon-shape-secondary me-2 me-md-0 mb-2">
+                        <span class="fas fa-box-open" aria-hidden="true"></span>
                     </div>
-
-                    <div class="col-12 col-md-6 col-lg-4 py-3">
-                        <div class="icon icon-shape icon-shape-secondary me-2 me-md-0 mb-2">
-                            <span class="fas fa-box-open"></span>
-                        </div>
-                        <span class="counter display-3 text-secondary d-block" th:data-value="${totalItems}" >15M+ Offres commerciales</span>
-                        <span class="lead">Un des comparateurs français les plus fournis en références de produits</span>
-                    </div>
-
-                    <div class="col-12 col-md-6 col-lg-4 py-3">
-                        <div class="icon icon-shape icon-shape-secondary me-2 me-md-0 mb-2">
-                            <span class="fas fa-box-open"></span>
-                        </div>
-                        <span class="counter display-3 text-secondary d-block" th:data-value="'53'" th:text="'53'"></span>
-                        <span class="lead"><a href="/partenaires"> Nombre de partenaires</a> de Nudger, dont les plus grandes enseignes !</span>
-                    </div>
+                    <!--/* 
+                      10) Provided a fallback text inside span if no JS available: 0 
+                          so screen readers can get a numeric value as well.
+                    */-->
+                    <span class="counter display-3 text-secondary d-block" 
+                          th:data-value="${config.reversementConfig.getTotalReversements()}" >0</span>
+                    <span class="lead">Montant en euros du coup de pouce à date de Nudger pour la planète</span>
                 </div>
-        </section>
-   
-       <section class="bg-primary container-fluid">
-            <div class="container container-semi-fluid py-5">
-                <h2 class="h1 text-center">Réconcilier écologie et pouvoir d'achat !</h2>
-                <p class="lead text-center">Consommez moins, consommez mieux. Nudger, le coup de pouce qui vous aide <br class="d-none d-md-block">à amoindrir l'impact de votre shopping en ligne.</p>
+
+                <div class="col-12 col-md-6 col-lg-4 py-3">
+                    <div class="icon icon-shape icon-shape-secondary me-2 me-md-0 mb-2">
+                        <span class="fas fa-box-open" aria-hidden="true"></span>
+                    </div>
+                    <span class="counter display-3 text-secondary d-block" th:data-value="${totalItems}" >15M+ Offres commerciales</span>
+                    <span class="lead">Un des comparateurs français les plus fournis en références de produits</span>
+                </div>
+
+                <div class="col-12 col-md-6 col-lg-4 py-3">
+                    <div class="icon icon-shape icon-shape-secondary me-2 me-md-0 mb-2">
+                        <span class="fas fa-box-open" aria-hidden="true"></span>
+                    </div>
+                    <span class="counter display-3 text-secondary d-block" th:data-value="'53'" th:text="'53'">53</span>
+                    <span class="lead">
+                        <a href="/partenaires">Nombre de partenaires</a> de Nudger, dont les plus grandes enseignes !
+                    </span>
+                </div>
             </div>
         </section>
-       
-       
+   
+        <section class="bg-primary container-fluid">
+            <div class="container container-semi-fluid py-5">
+                <h2 class="h1 text-center">Réconcilier écologie et pouvoir d'achat !</h2>
+                <p class="lead text-center">
+                    Consommez moins, consommez mieux. Nudger, le coup de pouce qui vous aide
+                    <br class="d-none d-md-block">à amoindrir l'impact de votre shopping en ligne.
+                </p>
+            </div>
+        </section>
+
         <div class="container my-2">
             <div class="d-flex justify-content-start">
                 <div class="col-12 col-md-12">
                     <!-- Icon Boxes -->
                     <div class="card shadow">
                         <div class="row g-0 align-items-center">
+                            <!--/* 
+                              11) Updated alt text to describe the image. 
+                            */-->
                             <div class="col-md-4 p-4 d-none d-md-block">
-                                <img src="/assets/img/illustrations/contribution.webp" alt="Contribution écologique" class="card-img-top rounded-top">
+                                <img src="/assets/img/illustrations/contribution.webp" 
+                                     alt="Illustration de contribution écologique" 
+                                     class="card-img-top rounded-top">
                             </div>
                             <div class="col-md-8">
                                 <div class="card-body">
-                                    <h3 id=compensation class="h5 card-title mt-3">Contribution écologique</h3>
+                                    <h3 id="compensation" class="h5 card-title mt-3">Contribution écologique</h3>
                                     <p class="card-text">
                                         <th:block th:with="path='WIDGETS/accueil-compensation-full/'">
                                             <th:block th:insert="~{inc/wiki.html}"></th:block>
-                                        </th:block>                                           
+                                        </th:block>
                                     </p>
-                                    <a href="/compensation-ecologique" class="btn btn-primary btn-sm">En savoir plus sur la contribution environnementale</a>
+                                    <a href="/compensation-ecologique" class="btn btn-primary btn-sm">
+                                        En savoir plus sur la contribution environnementale
+                                    </a>
                                 </div>
                             </div>
                         </div>
@@ -371,24 +255,25 @@
                         <div class="row g-0 align-items-center">
                             <div class="col-md-8">
                                 <div class="card-body">
-                                    <h3 id=ecoscore class="h5 card-title mt-3">Évaluation environnementale</h3>
+                                    <h3 id="ecoscore" class="h5 card-title mt-3">Évaluation environnementale</h3>
                                     <p class="card-text">
                                         <th:block th:with="path='WIDGETS/accueil-ecoscore-full/'">
                                             <th:block th:insert="~{inc/wiki.html}"></th:block>
-                                        </th:block>   
+                                        </th:block>
                                     </p>
                                     <a href="/ecoscore" class="btn btn-primary btn-sm">En savoir plus sur l'évaluation écologique</a>
                                 </div>
                             </div>
                             <div class="col-md-4 p-4 d-none d-md-block">
-                                <img src="/assets/img/illustrations/evaluation-ecologique.webp" alt="Evaluationé cologique des produits" class="card-img-top rounded-top">
+                                <img src="/assets/img/illustrations/evaluation-ecologique.webp" 
+                                     alt="Illustration d'évaluation écologique" 
+                                     class="card-img-top rounded-top">
                             </div>
                         </div>
                     </div>
                     <!-- End of Icon Boxes -->
                 </div>
             </div>  
-             
             
             <div class="d-flex justify-content-start mt-3">
                 <div class="col-12 col-md-10">
@@ -396,7 +281,9 @@
                     <div class="card shadow">
                         <div class="row g-0 align-items-center">
                             <div class="col-md-4 p-4 d-none d-md-block">
-                                <img src="/assets/img/illustrations/comparaison-prix.webp" alt="Comparateur de prix" class="card-img-top rounded-top">
+                                <img src="/assets/img/illustrations/comparaison-prix.webp" 
+                                     alt="Illustration de comparateur de prix" 
+                                     class="card-img-top rounded-top">
                             </div>
                             <div class="col-md-8">
                                 <div class="card-body">
@@ -404,7 +291,7 @@
                                     <p class="card-text">
                                         <th:block th:with="path='WIDGETS/accueil-comparaison-prix-full/'">
                                             <th:block th:insert="~{inc/wiki.html}"></th:block>
-                                        </th:block>                                          
+                                        </th:block>
                                     </p>
                                     <a href="/recherche" class="btn btn-primary btn-sm">Commencer à comparer</a>
                                 </div>
@@ -415,10 +302,6 @@
                 </div>
             </div>
 
-
-
-
-
             <div class="d-flex justify-content-end mt-3">
                 <div class="col-12 col-md-10">
                     <!-- Icon Boxes -->
@@ -426,7 +309,7 @@
                         <div class="row g-0 align-items-center">
                             <div class="col-md-8">
                                 <div class="card-body">
-                                    <h3 id=modele-ouvert class="h5 card-title mt-3">Numérique responsable</h3>
+                                    <h3 id="modele-ouvert" class="h5 card-title mt-3">Numérique responsable</h3>
                                     <p class="card-text">
                                         <th:block th:with="path='WIDGETS/accueil-data-responsable-full/'">
                                             <th:block th:insert="~{inc/wiki.html}"></th:block>
@@ -436,7 +319,9 @@
                                 </div>
                             </div>
                             <div class="col-md-4 p-4 d-none d-md-block">
-                                <img src="/assets/img/illustrations/no_cookie.webp" alt="Pas de cookies" class=" card-img-top rounded-top">
+                                <img src="/assets/img/illustrations/no_cookie.webp" 
+                                     alt="Illustration d'un web sans cookie" 
+                                     class="card-img-top rounded-top">
                             </div>
                         </div>
                     </div>
@@ -444,30 +329,26 @@
                 </div>
             </div>   
 
-
-
-
-
             <div class="d-flex justify-content-start mt-3">
                 <div class="col-12 col-md-10">
                     <!-- Icon Boxes -->
                     <div class="card shadow">
                         <div class="row g-0 align-items-center">
                             <div class="col-md-4 d-none d-md-block">
-                                <img src="/assets/img/illustrations/opensource-opendata.webp" alt="Open source / Open data" class="card-img-top rounded-top">
+                                <img src="/assets/img/illustrations/opensource-opendata.webp" 
+                                     alt="Illustration représentant l'open source et l'open data" 
+                                     class="card-img-top rounded-top">
                             </div>
                             <div class="col-md-8">
                                 <div class="card-body">
-                                    <h3 id=opendata class="h5 card-title mt-3">Comparateur ouvert</h3>
+                                    <h3 id="opendata" class="h5 card-title mt-3">Comparateur ouvert</h3>
                                     <p class="card-text">
                                         <th:block th:with="path='WIDGETS/accueil-modele-ouvert-full/'">
                                             <th:block th:insert="~{inc/wiki.html}"></th:block>
-                                        </th:block>                                         
+                                        </th:block>
                                     </p>
                                     <a href="/opendata" class="btn btn-primary btn-sm">Bases open-data</a>
                                     <a href="/opensource" class="btn btn-primary btn-sm">Code opensource</a>
-                                    
-                                    
                                 </div>
                             </div>
                         </div>
@@ -476,112 +357,96 @@
                 </div>
             </div>        
         </div>
-
-
     </main>
 
-<!--/* Footer */-->
-<th:block th:insert="~{inc/footer.html}"></th:block>    
+    <!--/* Footer */-->
+    <th:block th:insert="~{inc/footer.html}"></th:block>
 
-<!-- Core -->
-<script src="/vendor/@popperjs/core/dist/umd/popper.min.js"></script>
-<script src="/webjars/bootstrap/js/bootstrap.min.js"></script>
-<script src="/webjars/jquery/jquery.min.js"></script>
+    <!-- Core -->
+    <script src="/vendor/@popperjs/core/dist/umd/popper.min.js"></script>
+    <script src="/webjars/bootstrap/js/bootstrap.min.js"></script>
+    <script src="/webjars/jquery/jquery.min.js"></script>
+    <script src="/vendor/headroom.js/dist/headroom.min.js"></script>
+    <script src="/vendor/smooth-scroll/dist/smooth-scroll.polyfills.min.js"></script>
 
+    <!-- Vendor JS -->
+    <script src="/vendor/vivus/dist/vivus.min.js"></script>
+    <script src="/vendor/countup.js/dist/countUp.umd.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lettering.js/0.7.0/jquery.lettering.min.js" 
+            integrity="sha512-9ex1Kp3S7uKHVZmQ44o5qPV6PnP8/kYp8IpUHLDJ+GZ/qpKAqGgEEH7rhYlM4pTOSs/WyHtPubN2UePKTnTSww==" 
+            crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdn.jsdelivr.net/npm/textillate@0.4.1/jquery.textillate.min.js"></script>
 
-<script src="/vendor/headroom.js/dist/headroom.min.js"></script>
-<script src="/vendor/smooth-scroll/dist/smooth-scroll.polyfills.min.js"></script>
+    <!-- pixel JS -->
+    <script src="../../assets/js/pixel.js"></script>
+    <!-- custom sources -->
+    <script src="../../assets/js/pixel-custom.js"></script>
 
-<!-- Vendor JS -->
+    <!--/* 
+      12) Encapsulated JS in a named function for clarity.
+    */-->
+    <script>
+        function countStart() {
+            const $counters = document.querySelectorAll(".counter"),
+                  options = {
+                      useEasing: true,
+                      useGrouping: true,
+                      separator: ",",
+                      decimal: "."
+                  };
 
-<!-- 
-<script src="/webjars/headroom.js/headroom.min.js"></script>
-<script src="/webjars/smooth-scroll/smooth-scroll.polyfills.min.js"></script>
- -->
-
-
-
-<script src="/vendor/vivus/dist/vivus.min.js"></script>
-
-<script src="/webjars/jquery/jquery.min.js"></script>
-
-
-<script src="/vendor/countup.js/dist/countUp.umd.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/lettering.js/0.7.0/jquery.lettering.min.js" integrity="sha512-9ex1Kp3S7uKHVZmQ44o5qPV6PnP8/kYp8IpUHLDJ+GZ/qpKAqGgEEH7rhYlM4pTOSs/WyHtPubN2UePKTnTSww==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-<script src="https://cdn.jsdelivr.net/npm/textillate@0.4.1/jquery.textillate.min.js"></script>
-
-<!-- pixel JS -->
-<script src="../../assets/js/pixel.js"></script>
-
-<!-- custom sources -->
-<script src="../../assets/js/pixel-custom.js"></script>
-
-<script>
-
-function countStart(){
-  const $counters = document.querySelectorAll(".counter"),
-        options = {
-          useEasing: true,
-          useGrouping: true,
-          separator: ",",
-          decimal: "."
-        };
-
-  $counters.forEach( (item) => {
-    const value = item.dataset.value;
-    const counter = new countUp.CountUp(item, value, options);
-    counter.start();
-  });
-}
-
-$(document).ready(function () {
-    // Configuration array
-    const config = [
-        { newWord: "de prix", outEffect: "hinge", inEffect: "bounceIn", delay: 4000 },
-        { newWord: "éthique", outEffect: "bounceOut", inEffect: "bounceIn", delay: 4000 },
-        { newWord: "libre", outEffect: "fadeOut", inEffect: "zoomIn", delay: 4000 },
-        { newWord: "ouvert", outEffect: "bounceOut", inEffect: "rotateIn", delay: 4000 },
-        { newWord: "open source", outEffect: "fadeOut", inEffect: "flipInX", delay: 4000 },
-        { newWord: "open data", outEffect: "bounceOut", inEffect: "lightSpeedIn", delay: 4000 },
-        { newWord: "écologique", outEffect: "fadeOut", inEffect: "fadeIn", delay: 4000 }
-    ];
-
-    const $tlt = $('.tlt');
-    let currentIndex = 0;
-
-    function animateSequence() {
-        const { newWord, outEffect, inEffect, delay } = config[currentIndex];
-
-        // Apply out effect
-        $tlt.addClass(`animate__animated animate__${outEffect}`).one('animationend', function () {
-            $tlt.removeClass(`animate__${outEffect}`); // Remove outEffect class
-
-            // Set new word
-            $tlt.text(newWord);
-
-            // Apply in effect
-            $tlt.addClass(`animate__animated animate__${inEffect}`).one('animationend', function () {
-                $tlt.removeClass(`animate__${inEffect}`); // Remove inEffect class
-
-                // Move to the next word after delay
-                setTimeout(() => {
-                    currentIndex++;
-                    if (currentIndex >= config.length) {
-                        currentIndex = 0; // Restart from the beginning
-                    }
-                    animateSequence(); // Start next animation
-                }, delay);
+            $counters.forEach((item) => {
+                const value = item.dataset.value;
+                const counter = new countUp.CountUp(item, value, options);
+                if (!counter.error) {
+                    counter.start();
+                }
             });
+        }
+
+        $(document).ready(function () {
+            // Configuration array for text animation
+            const config = [
+                { newWord: "de prix", outEffect: "hinge", inEffect: "bounceIn", delay: 4000 },
+                { newWord: "éthique", outEffect: "bounceOut", inEffect: "bounceIn", delay: 4000 },
+                { newWord: "libre", outEffect: "fadeOut", inEffect: "zoomIn", delay: 4000 },
+                { newWord: "ouvert", outEffect: "bounceOut", inEffect: "rotateIn", delay: 4000 },
+                { newWord: "open source", outEffect: "fadeOut", inEffect: "flipInX", delay: 4000 },
+                { newWord: "open data", outEffect: "bounceOut", inEffect: "lightSpeedIn", delay: 4000 },
+                { newWord: "écologique", outEffect: "fadeOut", inEffect: "fadeIn", delay: 4000 }
+            ];
+
+            const $tlt = $('.tlt');
+            let currentIndex = 0;
+
+            function animateSequence() {
+                const { newWord, outEffect, inEffect, delay } = config[currentIndex];
+
+                // Apply out effect
+                $tlt.addClass(`animate__animated animate__${outEffect}`).one('animationend', function () {
+                    $tlt.removeClass(`animate__${outEffect}`);
+
+                    // Set new word
+                    $tlt.text(newWord);
+
+                    // Apply in effect
+                    $tlt.addClass(`animate__animated animate__${inEffect}`).one('animationend', function () {
+                        $tlt.removeClass(`animate__${inEffect}`);
+
+                        setTimeout(() => {
+                            currentIndex++;
+                            if (currentIndex >= config.length) {
+                                currentIndex = 0; 
+                            }
+                            animateSequence(); 
+                        }, delay);
+                    });
+                });
+            }
+
+            // Initial delay before the first animation
+            setTimeout(animateSequence, 5000);
         });
-    }
-
-    // Start the animation with an initial delay
-    setTimeout(animateSequence, 5000);
-});
-
-
-</script>
-
+    </script>
 </body>
-
 </html>

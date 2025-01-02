@@ -23,8 +23,9 @@
 	<meta name="twitter:title" th:content="#{index.title}">
 	<meta name="twitter:description" th:content="#{index.meta.description}">
 	<meta name="twitter:image" th:content="${url} + 'assets/img/brand/light.svg'">
-	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" integrity="sha512-c42qTSw/wPZ3/5LBzD+Bw5f7bSF2oxou6wEb+I/lqeaKV5FDIfMvvRp772y4jcJLKuGUOpbJMdg/BTl50fJYAw==" crossorigin="anonymous" referrerpolicy="no-referrer" />	
-
+	
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" media="print" onload="this.media='all'">
+	
 	<meta name="google-site-verification" content="I2wSyJnnRSjrLjadtNgFzHHmtSN8DPbjhPePTkQNhp4" />
 </head>
 
@@ -494,7 +495,7 @@
 <script src="/vendor/@popperjs/core/dist/umd/popper.min.js"></script>
 <script src="/webjars/bootstrap/js/bootstrap.min.js"></script>
 <script src="/webjars/jquery/jquery.min.js"></script>
-
+<script src="/vendor/countup.js/dist/countUp.umd.js"></script>
 
 <script src="/vendor/headroom.js/dist/headroom.min.js"></script>
 <script src="/vendor/smooth-scroll/dist/smooth-scroll.polyfills.min.js"></script>
