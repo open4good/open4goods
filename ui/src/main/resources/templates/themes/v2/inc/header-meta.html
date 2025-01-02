@@ -10,14 +10,6 @@
 <meta name="theme-color" content="#ffffff">
 
 
-<link type="text/css" href="/vendor/@fortawesome/fontawesome-free/css/all.min.css" rel="stylesheet">
-<script src="/vendor/countup.js/dist/countUp.umd.js"></script>
-
-<!-- Glide JS 
-<link rel="stylesheet" href="/vendor/@glidejs/glide/dist/css/glide.core.min.css">
-<link rel="stylesheet" href="/vendor/@glidejs/glide/dist/css/glide.theme.min.css">
--->
-
 <th:block th:if="${config.webConfig.useHotScss}">
 	<link type="text/css" href="/css/dev/pixel.css" rel="stylesheet">
 </th:block>
@@ -26,11 +18,14 @@
 <th:block th:unless="${config.webConfig.useHotScss}">
     <link type="text/css" href="/css/pixel.css" rel="stylesheet">
 </th:block>
-<link type="text/css" href="/css/custom.css" rel="stylesheet">
+
+<link rel="stylesheet" href="/css/custom.css" >
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:ital,wght@0,100..900;1,100..900&display=swap" media="print" onload="this.media='all'">
+
+<link rel="stylesheet" href="/vendor/@fortawesome/fontawesome-free/css/all.min.css">
 
 
 <link rel="search" type="application/opensearchdescription+xml" th:title="#{opensearch.title}" th:href="${baseUrl} + 'opensearch.xml'">

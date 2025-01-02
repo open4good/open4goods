@@ -13,7 +13,7 @@ import org.springframework.data.elasticsearch.annotations.WriteTypeHint;
  * POJO Content for a page that presents tops, best, ..  
  */
 @Document(indexName = "vertical-pages", createIndex = true, writeTypeHint = WriteTypeHint.FALSE)
-public class TopPage {
+public class AiSourcedPage {
 	
 	
 	@Id
@@ -28,17 +28,19 @@ public class TopPage {
 	private String title;
 	
 	/***
+	 * question this article must answers
+	 */
+	@Field(index = true, store = false, type = FieldType.Text)
+	private String question;
+
+	
+	/***
 	 * description of the article
 	 */
 	@Field(index = true, store = false, type = FieldType.Text)
 	private String description;
 	
 	
-	/***
-	 * question this article must answers
-	 */
-	@Field(index = true, store = false, type = FieldType.Text)
-	private String question;
 	/** Conseils **/
 	
 	@Field(index = true, store = false, type = FieldType.Text)

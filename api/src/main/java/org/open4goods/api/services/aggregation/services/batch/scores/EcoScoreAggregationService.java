@@ -56,7 +56,7 @@ public class EcoScoreAggregationService extends AbstractScoreAggregationService 
 	private Double generateEcoScore(Map<String, Score> scores, VerticalConfig vConf) throws ValidationException {
 		
 		
-		double va = 0.0;
+		double ecoscoreVal = 0.0;
 		for (String config :  vConf.getImpactScoreConfig().getCriteriasPonderation().keySet()) {
 			Score score = scores.get(config);
 			
@@ -66,10 +66,10 @@ public class EcoScoreAggregationService extends AbstractScoreAggregationService 
 			
 		
 			// Taking on the relativ
-			va += score. getRelativ().getValue() * Double.valueOf(vConf.getImpactScoreConfig().getCriteriasPonderation().get(config));
+			ecoscoreVal += score. getRelativ().getValue() * Double.valueOf(vConf.getImpactScoreConfig().getCriteriasPonderation().get(config));
 		}
 
-		return va;
+		return ecoscoreVal;
 	}
 
 

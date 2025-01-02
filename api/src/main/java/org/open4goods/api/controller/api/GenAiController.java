@@ -10,7 +10,7 @@ import org.open4goods.commons.config.yml.ui.VerticalConfig;
 import org.open4goods.commons.exceptions.AggregationSkipException;
 import org.open4goods.commons.exceptions.InvalidParameterException;
 import org.open4goods.commons.exceptions.ResourceNotFoundException;
-import org.open4goods.commons.model.TopPage;
+import org.open4goods.commons.model.AiSourcedPage;
 import org.open4goods.commons.model.constants.RolesConstants;
 import org.open4goods.commons.services.VerticalsConfigService;
 import org.open4goods.commons.services.ai.GenAiService;
@@ -66,7 +66,7 @@ public class GenAiController {
 	
 	@GetMapping("/page/generate")
 	@Operation(summary="Generate a page")
-	public TopPage prompt(@RequestParam(defaultValue = "test") String key, 
+	public AiSourcedPage prompt(@RequestParam(defaultValue = "test") String key, 
 			String question,
 			String vertical,
 			String id,
@@ -75,7 +75,7 @@ public class GenAiController {
 		
 		VerticalConfig vc = verticalsConfigService.getConfigById(vertical);
 		
-		TopPage ret = pageGenService.generatePage(vc, question, id, question, title);
+		AiSourcedPage ret = pageGenService.generatePage(vc, question, id, question, title);
 		
 		return ret;
 	}

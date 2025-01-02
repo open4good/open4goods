@@ -48,7 +48,7 @@ public class DataCompletion2ScoreAggregationService extends AbstractScoreAggrega
 
 
 	/**
-	 * The data score is the number of score that are not virtuals
+	 * The data score is the number of scores that are not virtuals
 	 * @param map
 	 * @return
 	 */

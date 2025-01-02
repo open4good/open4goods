@@ -7,7 +7,7 @@
 	<th:block th:insert="inc/header-meta.html"></th:block>
     
 	<!-- Primary Meta Tags -->
-	<title>L'écoscore : classement écologique des produits | Nudger</title>
+	<title>L'Impact Score : Eco score des produits éléctroniques et éléctriques | Nudger</title>
 	<meta name="description" content="Nudger vous propose d'évaluer l'impact environnemental de vos produits avec notre écoscore. Achetez malin, achetez responsable ! ☀️">
 		
 	<!-- Open Graph / Facebook -->
@@ -29,19 +29,22 @@
 <body>
     
 
-	<!--/* Navbar */-->
-	<th:block th:with="page = 'ecoscore'" th:insert="~{inc/navbar/navbar-home.html}"></th:block>
-	
-    <main>
+    <header>
         <!--/* Loader */-->
         <th:block th:insert="~{inc/preloader.html}"></th:block>
+
+        <!--/* Navbar */-->
+        <th:block th:insert="~{inc/navbar/navbar-home.html}"></th:block>        
+    </header>
+    
+    <main>
 
         <!-- Hero -->
         <section class="section-header bg-secondary text-white">
             <div class="container container-semi-fluid">
                 <div class="row justify-content-between align-items-center">
                     <div class="col-12 col-md-8 col-lg-8 text-center text-md-left">
-                        <h1 class="display-2 mb-4">L’écoscore : l’évaluation écologique des produits</h1>
+                        <h1 class="display-2 mb-4">L’Impact Score : évaluation de l'impact environnemental de vos produits</h1>
                         <th:block th:with="path='ECOSCORE/1/'">
                             <div th:insert="~{inc/wiki.html}"></div>
                         </th:block>
@@ -60,7 +63,7 @@
             <div class="container container-semi-fluid">
                 <div class="row align-items-center justify-content-around">
                     <div class="col-md-6 col-xl-7 text-center text-md-left">
-                        <h2 class="h1 mb-5">Qu’est-ce que l’écoscore ?</h2>
+                        <h2 class="h1 mb-5">Qu’est-ce que l’Impact Score ?</h2>
                         <th:block th:with="path='ECOSCORE/2/'">
                             <th:block th:insert="~{inc/wiki.html}"></th:block>
                         </th:block>                        	
@@ -92,16 +95,64 @@
 		<section class="mt-5">
             <div class="container container-semi-fluid">
                 <div class="row align-items-center justify-content-around">
-                    <h1 class="display-2 mb-4">Règles de calculs de l'écoscore</h1>
-                    <div class="col-md-6 col-xl-7 text-center text-md-left">
+                    <h1 class="display-2 mb-4">Comment est calculé l'Impact Score ?</h1>
+                    
+                    
+                    <div class="col-md-12 col-xl-12 text-center text-md-left">
                         <th:block th:with="path='ECOSCORE/4/'">
                             <th:block th:insert="~{inc/wiki.html}"></th:block>
                         </th:block>    									
-					</div>
 					
-                    <div class="col-md-6 col-xl-4 mb-5">
-                        <img class="organic-radius img-fluid" src="/assets/img/ecologie3.jpg" >
-                    </div>
+                    
+                    <div class="">
+
+                            <div class="card">
+                                <div class="card-header">Synthèse et déploiement</div>
+                                <div class="card-body">
+                                    <table class="table table-hover table-responsive-sm">
+                                        <tbody>
+                                            <tr>
+                                                <th scope="col" id="teacher">Nom</th>
+                                                <th scope="col" id="teacher">Coef. proposé</th>
+                                                <th scope="col" id="teacher">Coef. appliqué</th>
+                                                
+                                            </tr>
+
+                                            <tr th:each="item, stat : ${impactscore.texts.i18n(siteLanguage).criteriasAnalysis}" th:with="attr = ${verticalConfig.attributesConfig.getAttributeConfigByKey(item.key)}">
+                                                <td headers="secondyear Forsyth females"><span th:text="${attr.name.i18n(siteLanguage)}"></span></td>
+                                                <td headers="secondyear Forsyth females"><span th:text="${impactscore.criteriasPonderation.get(attr.key)}"></span></td>
+                                                <td headers="secondyear Forsyth females"><span th:text="${verticalConfig.impactScoreConfig.criteriasPonderation.get(attr.key)}"></span></td>
+
+                                            </tr>
+                                            
+                                        </tbody>
+                                    </table>
+                                    
+                                       <div>
+                                             Ce tableau permet de confronter les coefficients proposés par le système d'IA (Coef. proposé) à ceux actuellement utilisés par Nudger (Coef. appliqué). Les coefficients sont appliquées dans le                                      
+                                             <a target="_blank" rel="nofollow" th:href="'https://github.com/open4good/open4goods/blob/main/verticals/src/main/resources/verticals/'+${verticalConfig.id}+'.yml'"> fichier de configuration des <span
+                                                        th:text="${verticalConfig.i18n(siteLanguage).verticalHomeTitle.toLowerCase()}"></span></a>.
+                                       </div>
+                                    
+                                             
+                                             
+                                </div>
+                            </div>
+
+                        </div>
+                        
+                        
+                    
+                        <th:block th:with="path='ECOSCORE/4-1/'">
+                            <th:block th:insert="~{inc/wiki.html}"></th:block>
+                        </th:block>                                     
+                    
+                    
+                    
+					</div>
+                    
+                    
+                    
                 </div>
 				
             </div>

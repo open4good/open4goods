@@ -10,7 +10,7 @@ import org.open4goods.commons.config.yml.ui.VerticalConfig;
 import org.open4goods.commons.dao.ProductRepository;
 import org.open4goods.commons.exceptions.ResourceNotFoundException;
 import org.open4goods.commons.model.AiReview;
-import org.open4goods.commons.model.TopPage;
+import org.open4goods.commons.model.AiSourcedPage;
 import org.open4goods.commons.model.product.Product;
 import org.open4goods.commons.services.VerticalsConfigService;
 import org.open4goods.commons.services.ai.GenAiService;
@@ -51,7 +51,7 @@ public class PageGenerationService {
 	 * @throws ResourceNotFoundException
 	 * @throws IOException
 	 */
-	public TopPage  generatePage(VerticalConfig vConf, String question, String id, String language, String title) throws JsonParseException, JsonMappingException, ResourceNotFoundException, IOException {
+	public AiSourcedPage  generatePage(VerticalConfig vConf, String question, String id, String language, String title) throws JsonParseException, JsonMappingException, ResourceNotFoundException, IOException {
 		
 		Map<String,Object> context = new HashMap<>();
 		
@@ -59,13 +59,12 @@ public class PageGenerationService {
 		context.put("VERTICAL_NAME", (vConf.getI18n().get("fr").getVerticalHomeTitle()));
 		context.put("QUESTION", question);
 		
-
 		// AI Prompting
 		PromptResponse<CallResponseSpec> response = aiService.prompt("perplexity-top-page-generation", context);
 		
 		System.out.println(response.getRaw());
 		
-		TopPage page = new TopPage();
+		AiSourcedPage page = new AiSourcedPage();
 		page.setId(id);
 		page.setLanguage(language);
 		page.setQuestion(question);

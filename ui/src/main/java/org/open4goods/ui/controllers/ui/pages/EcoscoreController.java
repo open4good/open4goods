@@ -1,6 +1,7 @@
 package org.open4goods.ui.controllers.ui.pages;
 
-import org.open4goods.ui.config.yml.UiConfig;
+import org.open4goods.commons.config.yml.ui.VerticalConfig;
+import org.open4goods.commons.services.VerticalsConfigService;
 import org.open4goods.ui.controllers.ui.UiService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,11 +28,10 @@ public class EcoscoreController implements SitemapExposedController{
 		
 	private static final Logger LOGGER = LoggerFactory.getLogger(EcoscoreController.class);
 	private @Autowired UiService uiService;
-	// The siteConfig
-	private final UiConfig config;
+	private @Autowired VerticalsConfigService verticalsConfigService;
+	
 
-	public EcoscoreController(UiConfig config) {
-		this.config = config;
+	public EcoscoreController() {
 	}
 
 
@@ -46,6 +46,12 @@ public class EcoscoreController implements SitemapExposedController{
 	public ModelAndView api(final HttpServletRequest request) {
 		ModelAndView ret = uiService.defaultModelAndView(("ecoscore"), request);
 		ret.addObject("page","évaluation environnementale");
+		
+		
+		VerticalConfig verticalConfig = verticalsConfigService.getConfigById("tv");
+		ret.addObject("impactscore",verticalConfig .getImpactScoreConfig());
+		ret.addObject("verticalConfig",verticalConfig);
+		
 		return ret;
 	}
 
