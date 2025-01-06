@@ -31,14 +31,14 @@
 <body>
     
 
-	<!--/* Navbar */-->
-	<th:block th:with="page = 'ecoscore'" th:insert="~{inc/navbar/navbar-home.html}"></th:block>
-	
-    <main>
+    <header>
         <!--/* Loader */-->
         <th:block th:insert="~{inc/preloader.html}"></th:block>
-
-        <!-- Hero -->
+        <!--/* Navbar */-->
+        <th:block th:insert="~{inc/navbar/navbar-home.html}"></th:block>
+    </header>  
+    
+    <main>
 
 	<div class="section section-header pb-7 pb-md-10 bg-primary overflow-hidden">
             <div class="container z-2">

@@ -28,13 +28,15 @@
 </head>
 
 <body>
-    
-	<!--/* Navbar */-->
-	<th:block th:with="page = 'contact'" th:insert="~{inc/navbar/navbar-home.html}"></th:block>
-	
-    <main>
-        <!--/* Loader */-->
-        <th:block th:insert="~{inc/preloader.html}"></th:block>
+
+	<header>
+		<!--/* Loader */-->
+		<th:block th:insert="~{inc/preloader.html}"></th:block>
+		<!--/* Navbar */-->
+		<th:block th:insert="~{inc/navbar/navbar-home.html}"></th:block>
+	</header>
+
+	<main>
    
         <!-- Hero -->
         <section  class="section section-header pb-11 bg-primary text-white">

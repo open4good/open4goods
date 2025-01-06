@@ -13,12 +13,15 @@
 </head>
 
 <body>
- 	<!--/* Navbar */-->
-	<th:block th:with="page = 'feedback >> Bug'" th:insert="~{inc/navbar/navbar-home.html}"></th:block>
-	
+
+    <header>
+        <!--/* Loader */-->
+        <th:block th:insert="~{inc/preloader.html}"></th:block>
+        <!--/* Navbar */-->
+        <th:block th:insert="~{inc/navbar/navbar-home.html}"></th:block>
+    </header>  
+    
     <main>	
-		<!--/* Loader */-->
-		<th:block th:insert="~{inc/preloader.html}"></th:block>
 
   		<section class="section-header bg-primary text-white pb-9 pb-lg-12 mb-4 mb-lg-6" data-background="../../assets/img/pages/form-image.jpg" style="background: url(&quot;../../assets/img/pages/form-image.jpg&quot;);">
 			<div class="container">

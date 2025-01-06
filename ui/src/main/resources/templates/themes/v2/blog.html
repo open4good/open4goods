@@ -27,13 +27,14 @@
 </head>
 
 <body>
-    
-
-	<!--/* Navbar */-->
-	<th:block th:with="page = 'blog'" th:insert="~{inc/navbar/navbar-home.html}"></th:block>
-    <main>
+    <header>
         <!--/* Loader */-->
         <th:block th:insert="~{inc/preloader.html}"></th:block>
+        <!--/* Navbar */-->
+        <th:block th:insert="~{inc/navbar/navbar-home.html}"></th:block>
+    </header>  
+    
+    <main>
         <!-- Hero -->
         <section class="section-header bg-primary text-white pb-10 pb-sm-8 pb-lg-11">
             <div class="container text-center">

@@ -276,7 +276,7 @@ public class VerticalsConfigService {
 	
 	
 	/**
-	 * Return the path for a vertical language, if any
+ 	 *  Return the path for a vertical language, if any
 	 * @param config 
 	 * @param path
 	 * @return
@@ -286,6 +286,36 @@ public class VerticalsConfigService {
 		return path;
 	}
 
+	/**
+	 * Splits the VerticalConfig objects into buckets of a specified size, limiting the total number of buckets.
+	 * This is UI HELPER METHOD
+	 * @param bucketSize the size of each bucket (number of VerticalConfig objects per bucket).
+	 * @param maxBucket the maximum number of buckets to return.
+	 * @return a list of buckets, where each bucket is a list of VerticalConfig objects.
+	 */
+	public List<List<VerticalConfig>> getImpactScoreVerticalsByBuckets(int bucketSize, int maxBucket) {
+	    // Get the map of VerticalConfig objects
+	    Map<String, VerticalConfig> theConfigs = getConfigs();
+
+	    // Create a list to hold all VerticalConfig objects
+	    List<VerticalConfig> configList = new ArrayList<>(theConfigs.values());
+
+	    // Create a list to hold the final buckets
+	    List<List<VerticalConfig>> buckets = new ArrayList<>();
+
+	    // Iterate and create buckets
+	    for (int i = 0; i < configList.size() && buckets.size() < maxBucket; i += bucketSize) {
+	        // Create a sublist for the current bucket
+	        List<VerticalConfig> bucket = configList.subList(i, Math.min(i + bucketSize, configList.size()));
+
+	        // Add the bucket to the list of buckets
+	        buckets.add(new ArrayList<>(bucket)); // Use a new ArrayList to ensure immutability of sublists
+	    }
+
+	    return buckets;
+	}
+
+	
 	/**
 	 *
 	 * @return
