@@ -1,96 +1,104 @@
-<div class="header-global">
-    <nav id="navbar-main" role="navigation" aria-label="Menu de navigation" class="navbar navbar-main navbar-expand-lg navbar-light navbar-theme-primary headroom headroom--not-bottom headroom--pinned headroom--top bg-white">
-        <div class="container position-relative">
-            <a class="navbar-brand me-lg-5" href="/">
-                <img loading="lazy" class="navbar-brand-dark" src="/assets/img/nudger_logo_v2_small.svg" alt="Nudger logo light">
-                <img loading="lazy" class="navbar-brand-light" src="/assets/img/nudger_logo_v2.svg" alt="Nudger logo dark">
-            </a>
+<header class="header-global">
+	<nav id="navbar-main" aria-label="Navigation principale"
+		class="navbar navbar-main navbar-expand-lg navbar-light navbar-theme-primary headroom headroom--not-bottom headroom--pinned headroom--top bg-white"
+	>
+		<div class="container position-relative">
+			<a class="navbar-brand me-lg-5" href="/"> <img class="navbar-brand-dark" src="/assets/img/nudger_logo_v2_small.svg" alt="Logo light"> <img class="navbar-brand-light"
+				src="/assets/img/nudger_logo_v2.svg" alt="Logo dark"
+			>
+			</a>
+			<div class="navbar-collapse collapse me-auto" id="navbar_global">
+				<div class="navbar-collapse-header">
+					<div class="row">
+						<div class="col-6 collapse-brand">
+							<a href="/"> <img src="/assets/img/nudger_logo_v2.svg" alt="Themesberg logo">
+							</a>
+						</div>
+						<div class="col-6 collapse-close">
+							<a href="#navbar_global" class="fas fa-times" data-bs-toggle="collapse" data-bs-target="#navbar_global" aria-controls="navbar_global" aria-expanded="false" title="close"
+								aria-label="Toggle navigation"
+							></a>
+						</div>
+					</div>
+				</div>
 
-            <div class="d-flex align-items-center">
-                <div class="navbar-collapse collapse" id="navbar_secondary">
-                    <div class="navbar-collapse-header">
-                        <div class="row">
-                            <div class="col-6 collapse-brand">
-                                <a href="/">
-                                    <img loading="lazy" src="/assets/img/nudger_logo_v2.svg" alt="Logo de Nudger, comparateur écologique">
-                                </a>
-                            </div>
-                            <div class="col-6 collapse-close">
-                                <a href="#navbar_secondary" class="fas fa-times" data-bs-toggle="collapse" data-bs-target="#navbar_secondary" aria-controls="navbar_secondary" aria-expanded="false" title="close" aria-label="Toggle navigation"></a>
-                            </div>
-                        </div>
-                    </div>
-                    <ul class="navbar-nav navbar-nav-hover align-items-lg-center">
-                      <li class="nav-item dropdown">
-                        <a href="/ecoscore" class="nav-link dropdown-toggle" id="componentsDropdown" aria-expanded="false" data-bs-toggle="dropdown">
-                            Impact Score
-                            <span class="fas fa-angle-down nav-link-arrow ms-1"></span>
-                        </a>
-                        <div class="dropdown-menu dropdown-megamenu-md p-0" aria-labelledby="componentsDropdown">
-                            <div class="row g-0">
-                                <div class="col-lg-6 bg-dark d-none d-lg-block me-0 me-3">
-                                    <div class="px-0 py-3 text-center">
-                                        <img src="/assets/img/megamenu_image.png" alt="Pixel Components">
-                                    </div>
-                                    <div class="z-2 pb-3 text-center">
-                                        <a href="@@path/html/components/all.html"  class="btn btn-outline-white animate-up-2 mb-2 mb-sm-0 me-3">
-                                            <span class="me-1"><span class="fas fa-th-large"></span></span>
-                                            Toutes les catégories
-                                        </a>
-                                        <a href="@@path/html/sections/all-sections.html" class="btn btn-tertiary animate-up-2 mb-2 mb-sm-0">
-                                            <span class="me-1"><span class="fas fa-pager"></span></span>
-                                            Documentation
-                                        </a>
-                                    </div>
-                                </div>
-                                <div class="col ps-0 py-3">
-                                    <ul class="list-style-none">
-                                        <li><a class="dropdown-item" href="@@path/html/components/accordions.html">Accordions</a></li>
-                                        <li><a class="dropdown-item" href="@@path/html/components/alerts.html">Alerts</a></li>
-                                        <li><a class="dropdown-item" href="@@path/html/components/badges.html">Badges</a></li>
-                                        <li><a class="dropdown-item" href="@@path/html/components/cards.html">Cards</a></li>
-                                        <li><a class="dropdown-item" href="@@path/html/components/charts.html">Charts</a></li>
-                                        <li><a class="dropdown-item" href="@@path/html/components/bootstrap-carousels.html">Bootstrap Carousels</a></li>
-                                        <li><a class="dropdown-item" href="@@path/html/components/breadcrumbs.html">Breadcrumbs</a></li>
-                                        <li><a class="dropdown-item" href="@@path/html/components/buttons.html">Buttons</a></li>
-                                        <li><a class="dropdown-item" href="@@path/html/components/counters.html">Counters</a></li>
-                                    </ul>
-                                </div>
-                                <div class="col ps-0 py-3">
-                                    <ul class="list-style-none">
-                                        <li><a class="dropdown-item" href="@@path/html/components/dropdowns.html">Dropdowns</a></li>
-                                        <li><a class="dropdown-item" href="@@path/html/components/e-commerce.html">E-commerce</a></li>
-                                        <li><a class="dropdown-item" href="@@path/html/components/forms.html">Forms</a></li>
-                                        <li><a class="dropdown-item" href="@@path/html/components/icon-boxes.html">Icon Boxes</a></li>
-                                        <li><a class="dropdown-item" href="@@path/html/components/modals.html">Modals</a></li>
-                                        <li><a class="dropdown-item" href="@@path/html/components/navs.html">Navs</a></li>
-                                        <li><a class="dropdown-item" href="@@path/html/components/glidejs-carousels.html">GlideJS Carousels</a></li>
-                                        <li><a class="dropdown-item" href="@@path/html/components/pagination.html">Pagination</a></li>
-                                        <li><a class="dropdown-item" href="@@path/html/components/popovers.html">Popovers</a></li>
-                                    </ul>
-                                </div>
-                                <div class="col ps-0 py-3">
-                                    <ul class="list-style-none">
-                                        <li><a class="dropdown-item" href="@@path/html/components/progress-bars.html">Progress Bars</a></li>
-                                        <li><a class="dropdown-item" href="@@path/html/components/steps.html">Steps</a></li>
-                                        <li><a class="dropdown-item" href="@@path/html/components/tables.html">Tables</a></li>
-                                        <li><a class="dropdown-item" href="@@path/html/components/tabs.html">Tabs</a> </li>
-                                        <li><a class="dropdown-item" href="@@path/html/components/toasts.html">Toasts</a> </li>
-                                        <li><a class="dropdown-item" href="@@path/html/components/timelines.html">Timelines</a></li>
-                                        <li><a class="dropdown-item" href="@@path/html/components/tooltips.html">Tooltips</a></li>
-                                        <li><a class="dropdown-item" href="@@path/html/components/typography.html">Typography</a></li>
-                                        <li><a class="dropdown-item" href="@@path/html/components/widgets.html">Widgets</a></li>
-                                    </ul>
-                                </div>
-                            </div>
-                        </div>
-                    </li>
-                        <li class="nav-item ">
-                            <a href="/compensation-ecologique" class="nav-link">Contribution écologique</a>       
-                        </li>
-                        <li class="nav-item ">
-                            <a href="/blog" class="nav-link">Blog</a>       
-                        </li>
+			</div>
+			<div class="d-flex align-items-center">
+				<div class="navbar-collapse collapse" id="navbar_global">
+					<div class="navbar-collapse-header">
+						<div class="row">
+							<div class="col-6 collapse-brand">
+								<a href="/"> <img src="/assets/img/nudger_logo_v2.svg" alt="Themesberg logo">
+								</a>
+							</div>
+							<div class="col-6 collapse-close">
+								<a href="#navbar_global" class="fas fa-times" data-bs-toggle="collapse" data-bs-target="#navbar_global" aria-controls="navbar_global" aria-expanded="false" title="close"
+									aria-label="Toggle navigation"
+								></a>
+							</div>
+						</div>
+					</div>
+					<ul class="navbar-nav navbar-nav-hover align-items-lg-center">
+						<li class="nav-item dropdown"><a href="/ecoscore" class="nav-link dropdown-toggle" id="componentsDropdown" aria-expanded="false" data-bs-toggle="dropdown"> Impact Score <span
+								class="fas fa-angle-down nav-link-arrow ms-1"
+							></span>
+						</a>
+							<div class="dropdown-menu dropdown-megamenu-md p-0" aria-labelledby="componentsDropdown">
+								<div class="row g-0">
+									<div class="col-lg-6 bg-dark d-none d-lg-block me-0 me-3">
+										<div class="px-0 py-3 text-center">
+											<img src="/assets/img/megamenu_image.png" alt="Pixel Components">
+										</div>
+										<div class="z-2 pb-3 text-center">
+											<a href="@@path/html/components/all.html" class="btn btn-outline-white animate-up-2 mb-2 mb-sm-0 me-3"> <span class="me-1"><span class="fas fa-th-large"></span></span> Toutes les
+												catégories
+											</a> <a  href="@@path/html/sections/all-sections.html" class="btn btn-tertiary animate-up-2 mb-2 mb-sm-0"> <span class="me-1"><span class="fas fa-pager"></span></span> Documentation
+											</a>
+										</div>
+									</div>
+									<div class="col ps-0 py-3">
+										<ul class="list-style-none">
+											<li><a class="dropdown-item" href="@@path/html/components/accordions.html">Accordions</a></li>
+											<li><a class="dropdown-item" href="@@path/html/components/alerts.html">Alerts</a></li>
+											<li><a class="dropdown-item" href="@@path/html/components/badges.html">Badges</a></li>
+											<li><a class="dropdown-item" href="@@path/html/components/cards.html">Cards</a></li>
+											<li><a class="dropdown-item" href="@@path/html/components/charts.html">Charts</a></li>
+											<li><a class="dropdown-item" href="@@path/html/components/bootstrap-carousels.html">Bootstrap Carousels</a></li>
+											<li><a class="dropdown-item" href="@@path/html/components/breadcrumbs.html">Breadcrumbs</a></li>
+											<li><a class="dropdown-item" href="@@path/html/components/buttons.html">Buttons</a></li>
+											<li><a class="dropdown-item" href="@@path/html/components/counters.html">Counters</a></li>
+										</ul>
+									</div>
+									<div class="col ps-0 py-3">
+										<ul class="list-style-none">
+											<li><a class="dropdown-item" href="@@path/html/components/dropdowns.html">Dropdowns</a></li>
+											<li><a class="dropdown-item" href="@@path/html/components/e-commerce.html">E-commerce</a></li>
+											<li><a class="dropdown-item" href="@@path/html/components/forms.html">Forms</a></li>
+											<li><a class="dropdown-item" href="@@path/html/components/icon-boxes.html">Icon Boxes</a></li>
+											<li><a class="dropdown-item" href="@@path/html/components/modals.html">Modals</a></li>
+											<li><a class="dropdown-item" href="@@path/html/components/navs.html">Navs</a></li>
+											<li><a class="dropdown-item" href="@@path/html/components/glidejs-carousels.html">GlideJS Carousels</a></li>
+											<li><a class="dropdown-item" href="@@path/html/components/pagination.html">Pagination</a></li>
+											<li><a class="dropdown-item" href="@@path/html/components/popovers.html">Popovers</a></li>
+										</ul>
+									</div>
+									<div class="col ps-0 py-3">
+										<ul class="list-style-none">
+											<li><a class="dropdown-item" href="@@path/html/components/progress-bars.html">Progress Bars</a></li>
+											<li><a class="dropdown-item" href="@@path/html/components/steps.html">Steps</a></li>
+											<li><a class="dropdown-item" href="@@path/html/components/tables.html">Tables</a></li>
+											<li><a class="dropdown-item" href="@@path/html/components/tabs.html">Tabs</a></li>
+											<li><a class="dropdown-item" href="@@path/html/components/toasts.html">Toasts</a></li>
+											<li><a class="dropdown-item" href="@@path/html/components/timelines.html">Timelines</a></li>
+											<li><a class="dropdown-item" href="@@path/html/components/tooltips.html">Tooltips</a></li>
+											<li><a class="dropdown-item" href="@@path/html/components/typography.html">Typography</a></li>
+											<li><a class="dropdown-item" href="@@path/html/components/widgets.html">Widgets</a></li>
+										</ul>
+									</div>
+								</div>
+							</div></li>
+						<li class="nav-item "><a href="/compensation-ecologique" class="nav-link">Contribution écologique</a></li>
+						<li class="nav-item "><a href="/blog" class="nav-link">Blog</a></li>
 						<th:block th:if="${user}">
 							<li class="nav-item dropdown"><a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" id="supportDropdown" aria-expanded="false"> Support Nudger <span
 									class="fas fa-angle-down nav-link-arrow ms-1"
@@ -118,22 +126,26 @@
 								</div></li>
 						</th:block>
 						<li th:unless="${pageName=='index'}" class="nav-item">
-                            <form method="post" id="searchForm" action="/recherche">
-                                <div class="d-flex align-items-center justify-content-center">
-                                    <div class="input-group input-group__nudger">
-                                        <input type="text" id="searchInput" class="form-control" placeholder="Rechercher" aria-label="Search" aria-describedby="basic-addon1" name="query" data-dashlane-rid="c04fc15a353ceabb" data-form-type="">
-                                        <button onclick="document.getElementById('searchForm').submit()" class="btn btn__nudger" type="button"><span class="fas fa-search"></span></button>
-                                        <!--hr /-->
-                                    </div>
-                                </div>
-                            </form>
-                        </li>
-                    </ul>
-                </div>
-                <button class="navbar-toggler ms-2" type="button" data-bs-toggle="collapse" data-bs-target="#navbar_global" aria-controls="navbar_global" aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-            </div>
-        </div>
-    </nav>
-</div>
+							<form method="post" id="searchForm" action="/recherche">
+								<div class="d-flex align-items-center justify-content-center">
+									<div class="input-group input-group__nudger">
+										<input type="text" id="searchInput" class="form-control" placeholder="Rechercher" aria-label="Search" aria-describedby="basic-addon1" name="query" data-dashlane-rid="c04fc15a353ceabb"
+											data-form-type=""
+										>
+										<button onclick="document.getElementById('searchForm').submit()" class="btn btn__nudger" type="button">
+											<span class="fas fa-search"></span>
+										</button>
+										<!--hr /-->
+									</div>
+								</div>
+							</form>
+						</li>
+					</ul>
+				</div>
+				<button class="navbar-toggler ms-2" type="button" data-bs-toggle="collapse" data-bs-target="#navbar_global" aria-controls="navbar_global" aria-expanded="false" aria-label="Toggle navigation">
+					<span class="navbar-toggler-icon"></span>
+				</button>
+			</div>
+		</div>
+	</nav>
+</header>

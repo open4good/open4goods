@@ -25,12 +25,12 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:ital,wght@0,100..900;1,100..900&display=swap" media="print" onload="this.media='all'">
 
-<link rel="stylesheet" href="/vendor/@fortawesome/fontawesome-free/css/all.min.css">
+<link rel="stylesheet" href="/vendor/@fortawesome/fontawesome-free/css/all.min.css" media="print" onload="this.media='all'">
 
 
 <link rel="search" type="application/opensearchdescription+xml" th:title="#{opensearch.title}" th:href="${baseUrl} + 'opensearch.xml'">
 
 <th:block unless="${dev}">
-    <script defer data-domain="nudger.fr" src="https://plausible.nudger.fr/js/script.js"></script>
+    <script async data-domain="nudger.fr" src="https://plausible.nudger.fr/js/script.js"></script>
 </th:block>
 
