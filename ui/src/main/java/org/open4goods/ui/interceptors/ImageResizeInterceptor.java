@@ -82,7 +82,7 @@ public class ImageResizeInterceptor implements HandlerInterceptor {
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws IOException {
         String requestURI = request.getRequestURI();
-        logger.info("Intercepting request URI: {}", requestURI);
+        logger.debug("Intercepting request URI: {}", requestURI);
 
         if (requestURI.endsWith(".webp")) {
             Resource resource = buildResource(requestURI);
