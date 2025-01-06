@@ -90,13 +90,15 @@
 
 <body>
 
-<!-- Navbar -->
-<th:block th:insert="~{inc/navbar/navbar-product.html}"></th:block>
-<!-- Loader -->
-<th:block th:insert="~{inc/preloader.html}"></th:block>
+    <header>
+        <!--/* Loader */-->
+        <th:block th:insert="~{inc/preloader.html}"></th:block>
+        <!--/* Navbar */-->
+        <th:block th:insert="~{inc/navbar/navbar-home.html}"></th:block>
+    </header>  
+    
 
-<main th:with="images = ${product.images()}" class="bg-gray-200">
-    <th:block th:insert="~{inc/wip.html}"></th:block>
+    <main th:with="images = ${product.images()}" class="bg-gray-200">
 
     <div class="section section-lg pt-5">
         <div class="container-fluid">

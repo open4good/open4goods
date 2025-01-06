@@ -7,6 +7,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
+import org.open4goods.commons.services.VerticalsConfigService;
 import org.open4goods.ui.config.yml.UiConfig;
 import org.open4goods.xwiki.services.XWikiHtmlService;
 import org.slf4j.Logger;
@@ -31,7 +32,7 @@ public class UiService {
 	private @Autowired Environment env;
 	protected @Autowired UiConfig config;
 	private @Autowired XWikiHtmlService xwikiService;
-
+	private @Autowired VerticalsConfigService verticalsConfigService;
 		
 	// Used to load Datasource configurations from classpath
 	private  int maxImg;
@@ -105,6 +106,8 @@ public class UiService {
 
 		ret.addObject("internalReferer", isInternalReferer(request));
 		
+		
+		ret.addObject("verticalsBuckets", verticalsConfigService. getImpactScoreVerticalsByBuckets(8,2));
 		
 		// Retrieve authentication status
 		Authentication authentication = SecurityContextHolder .getContext().getAuthentication();

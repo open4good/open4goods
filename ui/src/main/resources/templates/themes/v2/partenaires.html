@@ -29,12 +29,15 @@
 
 <body>
     
-	<!--/* Navbar */-->
-	<th:block th:with="page = 'partenaires'" th:insert="~{inc/navbar/navbar-home.html}"></th:block>
-	
+    <header>
+        <!--/* Loader */-->
+        <th:block th:insert="~{inc/preloader.html}"></th:block>
+        <!--/* Navbar */-->
+        <th:block th:insert="~{inc/navbar/navbar-home.html}"></th:block>
+    </header>  
+    	
     <main>	
-		<!--/* Loader */-->
-		<th:block th:insert="~{inc/preloader.html}"></th:block>
+
 		<!-- Hero -->
         <section class="section-header bg-primary text-white pb-9 pb-lg-12 mb-4 mb-lg-6">
             <div class="container">
