@@ -67,8 +67,8 @@ allowedImagesSizeSuffixes:
 wikiPagesMapping:
   "[webpages/default/legal-notice/WebHome]":
     fr: "mentions-legales"
-  "[webpages/opensource-contribution/WebHome]":
-      fr: "opensource/contribution-ecologique"
+  "[webpages/default/data-privacy/WebHome]":
+      fr: "politique-confidentialite"
 
 team-config:
   cores:
