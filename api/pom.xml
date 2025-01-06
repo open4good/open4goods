@@ -112,7 +112,7 @@
         <dependency>
             <groupId>ognl</groupId>
             <artifactId>ognl</artifactId>
-            <version>3.4.4</version>
+            <version>3.4.5</version>
         </dependency>
         <!-- https://mvnrepository.com/artifact/org.commonmark/commonmark -->
         <dependency>
