@@ -11,34 +11,23 @@
                     et compenser partiellement l'impact de vos achats en ligne.
                 </p>
 
-                <div class="h5 mt-2">
-                    <a th:href="@{/mentions-legales}" class="text-white text-decoration-none">
-                        Mentions légales
-                    </a>
-                </div>
+                
                 <div class="h5 mt-2">
                     <a th:href="@{/blog}" class="text-white text-decoration-none">
                         Notre blog
                     </a>
                 </div>
 
-                <span th:if="${genericResponse != null && genericResponse.duration != 0}">
+				
+
+				<span th:if="${genericResponse != null && genericResponse.duration != 0}">
                     Page générée en <span th:text="${genericResponse.duration}"> </span> ms
                 </span>
             </div>
 
             <div class="col-6 col-md-4 mb-5 mb-lg-0">
-                <span class="h5">Nos mantras</span>
-                <ul class="footer-links mt-2 mb-2 list-unstyled">
-                    <li class="ms-3">
-                        <a th:href="@{/ecoscore}" class="text-white text-decoration-none">L'eco-score Nudger</a>
-                    </li>
-                    <li class="ms-3">
-                        <a th:href="@{/compensation-ecologique}" class="text-white text-decoration-none">
-                            Contribution environnementale
-                        </a>
-                    </li>
-                </ul>
+                <div class="mb-4"> <b> <a th:href="@{/ecoscore}" class="h5 text-white text-decoration-none">Evaluation environnementale</a> </b></div>
+                <div class="mb-4">  <b><a th:href="@{/compensation-ecologique}" class="h5 text-white text-decoration-none">Contribution écologique</a></b></div>
 
                 <span class="h5">Comparateur de bien commun</span>
                 <ul class="footer-links mt-2 list-unstyled">
@@ -48,7 +37,16 @@
                     <li class="ms-3">
                         <a th:href="@{/opensource}" class="text-white text-decoration-none">Open source</a>
                     </li>
-                </ul>
+
+					<li class="ms-3">
+					   <a th:href="@{/politique-confidentialite}" class="text-white text-decoration-none">Politique de confidentialité </a>
+					</li>
+
+					<li class="ms-3">
+					   <a th:href="@{/mentions-legales}" class="text-white text-decoration-none">Mentions légales </a>
+					</li>
+
+				</ul>
             </div>
 
             <div class="col-6 col-md-4 mb-5 mb-lg-0">
@@ -73,7 +71,12 @@
                     <li class="ms-3">
                         <a th:href="@{/contact}" class="text-white text-decoration-none">Nous contacter</a>
                     </li>
-                </ul>
+
+					<li class="ms-3">
+					   <a target="_blank" rel="nofollow" href="https://www.linkedin.com/company/comparateur-nudger/" aria-label="twitter social link" class="icon-white me-2">
+					       <span class="fab fa-linkedin"></span> Nous suivre</a></li>
+
+				</ul>
             </div>
         </div>
 
@@ -93,7 +96,7 @@
                 <div class="d-flex text-center justify-content-center align-items-center">
                     <p class="fw-normal font-small mb-0">
                         Copyright ©
-                        <span class="current-year">2024</span> open4goods.
+                        <span class="current-year">2025</span> open4goods.
                         Produit de bien commun.
                     </p>
                 </div>
