@@ -1,5 +1,5 @@
 // Imports
-import autoprefixer from 'gulp-autoprefixer';
+@use autoprefixer from 'gulp-autoprefixer';
 import browserSyncPkg from 'browser-sync'; // Live browser reloading
 import cleanCss from 'gulp-clean-css'; // Minify CSS
 import { deleteAsync } from 'del'; // Delete files/folders
