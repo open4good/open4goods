@@ -75,7 +75,7 @@ public class GenAiController {
 		
 		VerticalConfig vc = verticalsConfigService.getConfigById(vertical);
 		
-		AiSourcedPage ret = pageGenService.generatePage(vc, question, id, question, title);
+		AiSourcedPage ret = pageGenService.perplexityCompletion(vc, question, id, question, title);
 		
 		return ret;
 	}

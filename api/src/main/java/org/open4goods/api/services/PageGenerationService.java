@@ -51,7 +51,7 @@ public class PageGenerationService {
 	 * @throws ResourceNotFoundException
 	 * @throws IOException
 	 */
-	public AiSourcedPage  generatePage(VerticalConfig vConf, String question, String id, String language, String title) throws JsonParseException, JsonMappingException, ResourceNotFoundException, IOException {
+	public AiSourcedPage  perplexityCompletion(VerticalConfig vConf, String question, String id, String language, String title) throws JsonParseException, JsonMappingException, ResourceNotFoundException, IOException {
 		
 		Map<String,Object> context = new HashMap<>();
 		
@@ -62,17 +62,31 @@ public class PageGenerationService {
 		// AI Prompting
 		PromptResponse<CallResponseSpec> response = aiService.prompt("perplexity-top-page-generation", context);
 		
+		
+		
+		
+		
 		System.out.println(response.getRaw());
 		
 		AiSourcedPage page = new AiSourcedPage();
 		page.setId(id);
 		page.setLanguage(language);
-		page.setQuestion(question);
 		page.setTitle(title);
 		
 		String[] frags  = response.getRaw().split("\n##");
-		page.setAdvices(perplexityMarkdownService.parsebloc(frags[0]));
 		
+		String rankingTableStr = frags[0];
+		
+		
+		
+//		page.setAdvices(perplexityMarkdownService.parsebloc(frags[0]));
+		page.setSources(perplexityMarkdownService.parsesources(frags[1]));
+		
+		
+		for (int i = 3; i < frags.length; i++) {
+			String productStr = frags[i];
+			System.out.println(productStr);
+		}
 		
 //		review.setSources(perplexityMarkdownService.parsesources(frags[5]));
 		

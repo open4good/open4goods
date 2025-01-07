@@ -371,7 +371,7 @@
 
     <!-- Vendor JS -->
     <script src="/vendor/vivus/dist/vivus.min.js"></script>
-    <script src="/vendor/countup.js/dist/countUp.umd.js"></script>
+    <script src="/vendor/countup.js/dist/countUp.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/lettering.js/0.7.0/jquery.lettering.min.js" 
             integrity="sha512-9ex1Kp3S7uKHVZmQ44o5qPV6PnP8/kYp8IpUHLDJ+GZ/qpKAqGgEEH7rhYlM4pTOSs/WyHtPubN2UePKTnTSww==" 
             crossorigin="anonymous" referrerpolicy="no-referrer"></script>
@@ -382,10 +382,9 @@
     <!-- custom sources -->
     <script src="../../assets/js/pixel-custom.js"></script>
 
-    <!--/* 
-      12) Encapsulated JS in a named function for clarity.
-    */-->
     <script>
+        import { CountUp } from './js/countUp.min.js';
+        
         function countStart() {
             const $counters = document.querySelectorAll(".counter"),
                   options = {
@@ -397,7 +396,7 @@
 
             $counters.forEach((item) => {
                 const value = item.dataset.value;
-                const counter = new countUp.CountUp(item, value, options);
+                const counter = new CountUp(item, value, options);
                 if (!counter.error) {
                     counter.start();
                 }

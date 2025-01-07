@@ -18,6 +18,7 @@ import org.springframework.ai.openai.OpenAiImageModel;
 
 /**
  * This service is in charge of generating images using OPENAI API and saving them to images folder
+ * TODO(p2, cleanup) : Not used, could discard
  *
  */
 public class ImageGenerationService {
@@ -35,9 +36,9 @@ public class ImageGenerationService {
 
     public ImageResponse generateImage(String promptContent) {
         ImageOptions imageOptions = ImageOptionsBuilder.builder()
-                .withN(1)
-                .withHeight(1024)
-                .withWidth(1024)
+                .N(1)
+                .height(1024)
+                .width(1024)
                 .build();
 
         return imageModel.call(new ImagePrompt(promptContent, imageOptions));
