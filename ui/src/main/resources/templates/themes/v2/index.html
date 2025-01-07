@@ -23,7 +23,7 @@
     <meta name="twitter:title" th:content="#{index.title}">
     <meta name="twitter:description" th:content="#{index.meta.description}">
     <meta name="twitter:image" th:content="${url} + 'assets/img/brand/light.svg'">
-    <link  rel="preload" as="style" onload="this.onload=null;this.rel='stylesheet'" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>  
+    <link rel="preload" as="style" onload="this.onload=null;this.rel='stylesheet'" href="/vendor/animate.css/animate.min.css"/>  
 
     <meta name="google-site-verification" content="I2wSyJnnRSjrLjadtNgFzHHmtSN8DPbjhPePTkQNhp4" />
 </head>
@@ -59,11 +59,6 @@
                                             </div>
                                         </div>
                                         <div class="col-12 col-md-6 mt-4 mt-md-0 text-center">
-                                            <!--/* 
-                                              7) Provided meaningful alt text for icons: 
-                                                 alt="Icône Produits Électroniques" 
-                                                 alt="Icône Électroménager"
-                                            */-->
                                             <th:block th:with="image='/icons/categories/electronics.png', title='Produits électroniques', googleTaxo=222" 
                                                       th:insert="~{inc/category-shortcut.html}">
                                             </th:block>
@@ -362,29 +357,14 @@
     <!--/* Footer */-->
     <th:block th:insert="~{inc/footer.html}"></th:block>
 
-    <!-- Core -->
-    <script src="/vendor/@popperjs/core/dist/umd/popper.min.js"></script>
-    <script src="/webjars/bootstrap/js/bootstrap.min.js"></script>
-    <script src="/webjars/jquery/jquery.min.js"></script>
-    <script src="/vendor/headroom.js/dist/headroom.min.js"></script>
-    <script src="/vendor/smooth-scroll/dist/smooth-scroll.polyfills.min.js"></script>
+    <!-- Specific libs -->
+    <script defer src="/vendor/countUp.umd.js"></script>
+    <script defer src="/vendor/jquery.lettering.min.js"></script>
+    <script defer src="/vendor/jquery.textillate.min.js"></script>
 
-    <!-- Vendor JS -->
-    <script src="/vendor/vivus/dist/vivus.min.js"></script>
-    <script src="/vendor/countup.js/dist/countUp.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/lettering.js/0.7.0/jquery.lettering.min.js" 
-            integrity="sha512-9ex1Kp3S7uKHVZmQ44o5qPV6PnP8/kYp8IpUHLDJ+GZ/qpKAqGgEEH7rhYlM4pTOSs/WyHtPubN2UePKTnTSww==" 
-            crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-    <script src="https://cdn.jsdelivr.net/npm/textillate@0.4.1/jquery.textillate.min.js"></script>
 
-    <!-- pixel JS -->
-    <script src="../../assets/js/pixel.js"></script>
-    <!-- custom sources -->
-    <script src="../../assets/js/pixel-custom.js"></script>
 
     <script>
-        import { CountUp } from './js/countUp.min.js';
-        
         function countStart() {
             const $counters = document.querySelectorAll(".counter"),
                   options = {
@@ -396,7 +376,7 @@
 
             $counters.forEach((item) => {
                 const value = item.dataset.value;
-                const counter = new CountUp(item, value, options);
+                const counter = new countUp.CountUp(item, value, options);
                 if (!counter.error) {
                     counter.start();
                 }

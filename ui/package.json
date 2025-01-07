@@ -1,8 +1,8 @@
 {
-    "name": "pixel-pro-ui-kit",
+    "name": "nudgerkit",
     "version": "5.4.0",
     "description": "Nudger UI Kit",
-    "main": "gulpfile.js",
+    "main": "gulpfile.mjs",
     "author": "Nudger, from a Themesberg legit buy",
     "keywords": [
         "css",
@@ -41,9 +41,9 @@
         "bootstrap": "5.3.3",
         "chartist": "^0.11.4",
         "chartist-plugin-tooltips": "0.0.17",
-        "countup.js": "^2.0.5",
         "headroom.js": "0.12.0",
         "jarallax": "2.2.1",
+        "jquery": "^2.2.4",
         "nouislider": "15.8.1",
         "onscreen": "1.4.0",
         "popper.js": "1.16.1",
@@ -51,6 +51,7 @@
         "smooth-scroll": "^16.1.0",
         "vanillajs-datepicker": "^1.0.3",
         "vivus": "^0.4.5",
-        "waypoints": "4.0.1"
+        "waypoints": "4.0.1",
+        "animate.css":"4.1.1"
     }
 }
