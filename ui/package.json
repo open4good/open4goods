@@ -43,7 +43,7 @@
         "chartist-plugin-tooltips": "0.0.17",
         "headroom.js": "0.12.0",
         "jarallax": "2.2.1",
-        "jquery": "^2.2.4",
+        "jquery": "^3.0.0",
         "nouislider": "15.8.1",
         "onscreen": "1.4.0",
         "popper.js": "1.16.1",
