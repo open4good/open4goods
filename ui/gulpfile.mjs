@@ -19,7 +19,7 @@ const browserSync = browserSyncPkg.create();
 
 // Define paths for better maintainability
 const paths = {
-    vendorJs: './src/main/resources/static/vendor/',
+    vendor: './src/main/resources/static/vendor/',
     dist: {
         base: './dist/',
         css: './src/main/resources/static/css/prod',
@@ -94,8 +94,31 @@ gulp.task('minify:pixel', function () {
 gulp.task('copy:minjs', function () {
     return gulp
         .src(['./node_modules/**/*min.js'], { base: './node_modules' }) // Copy minified JS files
-        .pipe(gulp.dest(paths.vendorJs));
+        .pipe(gulp.dest(paths.vendor));
 });
+
+// Task to copy *.min.css files to the production directory
+gulp.task('copy:mincss', function () {
+    return gulp
+        .src(['./node_modules/**/*min.css'], { base: './node_modules' }) // Copy minified JS files
+        .pipe(gulp.dest(paths.vendor)); // Copy them to the production CSS directory
+});
+
+// Task to copy *.min.css files to the production directory
+gulp.task('copy:minttf', function () {
+    return gulp
+        .src(['./node_modules/**/*.ttf'], { base: './node_modules' }) // Copy minified JS files
+        .pipe(gulp.dest(paths.vendor)); // Copy them to the production CSS directory
+});
+
+// Task to copy *.min.css files to the production directory
+gulp.task('copy:minwoff', function () {
+    return gulp
+        .src(['./node_modules/**/*.woff2'], { base: './node_modules' }) // Copy minified JS files
+        .pipe(gulp.dest(paths.vendor)); // Copy them to the production CSS directory
+});
+
+
 
 // Watch files for changes
 gulp.task('watch', function () {
@@ -112,15 +135,20 @@ gulp.task('watch', function () {
     gulp.watch(`${paths.dev.templates}/**/*.html`).on('change', browserSync.reload);
 });
 
+
+
 // Build distribution task
 gulp.task('build:dist', gulp.series(
     'clean:dist',    // Clean previous builds
     'copy:dist:css', // Copy and process SCSS files
     'minify:css',    // Minify CSS files
+    'copy:mincss',   // Copy minified CSS files
     'copy:minjs',    // Copy minified JavaScript files
+//    'copy:minttf',    // Copy minified JavaScript files
+//    'copy:minwoff',    // Copy minified JavaScript files
+    
     'minify:pixel'   // Minify pixel.js
 ));
-
 // Default build task
 gulp.task('build', gulp.series('build:dist'));
 
