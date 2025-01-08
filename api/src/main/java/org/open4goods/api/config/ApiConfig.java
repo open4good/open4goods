@@ -8,7 +8,7 @@ import org.open4goods.api.config.yml.ApiProperties;
 import org.open4goods.api.services.AggregationFacadeService;
 import org.open4goods.api.services.BatchService;
 import org.open4goods.api.services.CompletionFacadeService;
-import org.open4goods.api.services.PageGenerationService;
+import org.open4goods.api.services.ProductsReviewGenerationService;
 import org.open4goods.api.services.ScrapperOrchestrationService;
 import org.open4goods.api.services.VerticalsGenerationService;
 import org.open4goods.api.services.completion.AmazonCompletionService;
@@ -174,8 +174,8 @@ public class ApiConfig {
 	}
 	
 	@Bean
-	PageGenerationService pageGenerationService(GenAiService aiService, VerticalsConfigService verticalConfigService, PerplexityMarkdownService perplexityMarkdownService, VerticalPagesRepository pagesRepository) {
-		return new PageGenerationService(aiService, verticalConfigService, apiProperties, perplexityMarkdownService,  pagesRepository);
+	ProductsReviewGenerationService pageGenerationService(GenAiService aiService, VerticalsConfigService verticalConfigService, PerplexityMarkdownService perplexityMarkdownService, VerticalPagesRepository pagesRepository) {
+		return new ProductsReviewGenerationService(aiService, verticalConfigService, apiProperties, perplexityMarkdownService,  pagesRepository);
 	}
 	
 	@Bean

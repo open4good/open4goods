@@ -23,16 +23,16 @@ import org.springframework.ai.chat.client.ChatClient.CallResponseSpec;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 
-public class PageGenerationService {
+public class ProductsReviewGenerationService {
 
-	protected static final Logger logger = LoggerFactory.getLogger(PageGenerationService.class);
+	protected static final Logger logger = LoggerFactory.getLogger(ProductsReviewGenerationService.class);
 
 
 	private GenAiService aiService;
 	private PerplexityMarkdownService perplexityMarkdownService;
 	private VerticalPagesRepository pagesRepository;
 	
-	public PageGenerationService( GenAiService aiService, VerticalsConfigService verticalConfigService, ApiProperties apiProperties, PerplexityMarkdownService perplexityMarkdownService, VerticalPagesRepository pagesRepository) {
+	public ProductsReviewGenerationService( GenAiService aiService, VerticalsConfigService verticalConfigService, ApiProperties apiProperties, PerplexityMarkdownService perplexityMarkdownService, VerticalPagesRepository pagesRepository) {
 		// TODO(p3,design) : Should set a specific log level here (not "aggregation)" one)
 		this.perplexityMarkdownService = perplexityMarkdownService;
 		this.aiService = aiService;
@@ -51,6 +51,8 @@ public class PageGenerationService {
 	 * @throws ResourceNotFoundException
 	 * @throws IOException
 	 */
+	
+	
 	public AiSourcedPage  perplexityCompletion(VerticalConfig vConf, String question, String id, String language, String title) throws JsonParseException, JsonMappingException, ResourceNotFoundException, IOException {
 		
 		Map<String,Object> context = new HashMap<>();
@@ -60,6 +62,7 @@ public class PageGenerationService {
 		context.put("QUESTION", question);
 		
 		// AI Prompting
+		
 		PromptResponse<CallResponseSpec> response = aiService.prompt("perplexity-top-page-generation", context);
 		
 		
