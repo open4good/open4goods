@@ -30,12 +30,8 @@
     <link rel="stylesheet" type="text/css" href="/webjars/datatables/css/dataTables.bootstrap5.min.css">
     <link rel="stylesheet" type="text/css" href="/webjars/datatables-responsive/css/responsive.dataTables.min.css">
 
-    <!-- Conditional CSS for highlight.js if user is authenticated -->
-    <link th:if="${user}" rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/styles/default.min.css">
-
     <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/select/1.7.0/css/select.dataTables.min.css">
     <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/buttons/2.4.2/css/buttons.dataTables.min.css">
-    <link href="/vendor/lightgallery/dist/css/lightgallery-bundle.min.css" rel="stylesheet">
 
     <style>
     
@@ -101,8 +97,6 @@
     <main th:with="images = ${product.images()}" class="bg-gray-200">
 
 
-
-
     <section class="section-header pb-0">
         <div class="container">
             <div class="row align-items-center">
@@ -117,18 +111,8 @@
                 </div>
             </div>
         </div>
-        <div class="container fixed-bottom">
-            <nav class="mb-0">
-                <div class="nav nav-tabs shadow border-soft bg-white rounded justify-content-center p-2 p-lg-4">
-                    <a href="https://themesberg.com/themes" class="nav-item nav-link mr-lg-3">All themes</a> <a href="https://themesberg.com/templates/premium" class="nav-item nav-link mr-lg-3">Premium themes</a>
-                    <a href="https://themesberg.com/templates/free" class="nav-item nav-link mr-lg-3">Free themes</a> <a href="https://themesberg.com/templates/bootstrap" class="nav-item nav-link mr-lg-3">Bootstrap</a>
-                    <a href="https://themesberg.com/templates/tailwind-css" class="nav-item nav-link mr-lg-3">Tailwind CSS</a> <a href="https://themesberg.com/templates/react" class="nav-item nav-link mr-lg-3">React</a>
-                    <a href="https://themesberg.com/templates/laravel" class="nav-item nav-link mr-lg-3">Laravel</a> <a href="https://themesberg.com/templates/figma" class="nav-item nav-link mr-lg-3">Figma</a>
-                </div>
-            </nav>  
-        </div>          
+        
     </section>
-    
     
     <div class="section section-sm pt-0">
         <div class="container">
@@ -140,11 +124,24 @@
     </div>
     
     
+                          <!-- 
+        <div class="container fixed-bottom">
+            <nav class="mb-0">
+                <div class="nav nav-tabs shadow border-soft bg-white rounded justify-content-center p-2 p-lg-4">
+                    <a href="https://themesberg.com/themes" class="nav-item nav-link mr-lg-3">All themes</a> <a href="https://themesberg.com/templates/premium" class="nav-item nav-link mr-lg-3">Premium themes</a>
+                    <a href="https://themesberg.com/templates/free" class="nav-item nav-link mr-lg-3">Free themes</a> <a href="https://themesberg.com/templates/bootstrap" class="nav-item nav-link mr-lg-3">Bootstrap</a>
+                    <a href="https://themesberg.com/templates/tailwind-css" class="nav-item nav-link mr-lg-3">Tailwind CSS</a> <a href="https://themesberg.com/templates/react" class="nav-item nav-link mr-lg-3">React</a>
+                    <a href="https://themesberg.com/templates/laravel" class="nav-item nav-link mr-lg-3">Laravel</a> <a href="https://themesberg.com/templates/figma" class="nav-item nav-link mr-lg-3">Figma</a>
+                </div>
+            </nav>  
+        </div>          
+         -->
     
     
             <!-- Tabed Pans -->
             <div class="card">
-                  <div class="card-header">
+                <div class="fixed-bottom card-header nav nav-tabs shadow border-soft bg-white rounded justify-content-center p-2 p-lg-4">
+                  
                 <!-- Navigation pills header -->
                 <ul class="nav nav-pills" id="pills-tab" role="tablist">
                     <li class="nav-item" role="presentation">
@@ -160,13 +157,11 @@
                     
                     <li class="nav-item" role="presentation">
                               <button class="nav-link" id="pills-technical-tab" data-bs-toggle="pill" data-bs-target="#pills-technical" type="button" role="tab" aria-controls="pills-technical" aria-selected="false">Caractéristiques techniques</button>
-                          </li>
+                    </li>
 
-                          <li class="nav-item" role="presentation">
-                              <button class="nav-link" id="pills-resources-tab" data-bs-toggle="pill" data-bs-target="#pills-resources" type="button" role="tab" aria-controls="pills-resources" aria-selected="false">Ressources et documentation</button>
-                          </li>
-
-                    
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="pills-resources-tab" data-bs-toggle="pill" data-bs-target="#pills-resources" type="button" role="tab" aria-controls="pills-resources" aria-selected="false">Ressources et documentation</button>
+                    </li>
                     <li th:if="${user}" class="nav-item" role="presentation">
                         <button class="nav-link" id="pills-admin-tab" data-bs-toggle="pill" data-bs-target="#pills-admin" type="button" role="tab" aria-controls="pills-price" aria-selected="false">Admin</button>
                     </li>
@@ -214,15 +209,14 @@
 <!-- Footer -->
 <th:block th:insert="~{inc/footer.html}"></th:block>
 
-<script type="text/javascript" language="javascript" src="/webjars/datatables/js/dataTables.min.js"></script>
-<script type="text/javascript" language="javascript" src="/webjars/datatables/js/dataTables.bootstrap5.min.js"></script>
+<script defer type="text/javascript" language="javascript" src="/webjars/datatables/js/dataTables.min.js"></script>
+<script defer type="text/javascript" language="javascript" src="/webjars/datatables/js/dataTables.bootstrap5.min.js"></script>
 
+<script defer src="/vendor/countUp.umd.js"></script>
+<script defer src="/vendor/nouislider/dist/nouislider.min.js"></script>
 
-<script src="/vendor/lightgallery/dist/lightgallery.min.js"></script>
-<script src="/vendor/lightgallery/dist/plugins/thumbnail/lg-thumbnail.min.js"></script>
-
-<script src="/vendor/nouislider/distribute/nouislider.min.js"></script>
-
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns/dist/chartjs-adapter-date-fns.bundle.min.js"></script>    
 
 <script th:inline="javascript">
     /*<![CDATA[*/
@@ -553,27 +547,7 @@
             activeButton.classList.add('btn-primary', 'active-period-btn');
         }
 
-        ///////////////////////////////////
-        // Initialize image gallery
-        ///////////////////////////////////
-
-        // Get the carousel element
-        let carouselEl = document.getElementById('bootstrap-gallery-carousel');
-
-        // Create a Bootstrap Carousel instance with specified options
-        const carousel = new bootstrap.Carousel(carouselEl, {
-            interval: 10000,
-            wrap: false,
-        });
-
-        // Add event listener for 'slide.bs.carousel'
-        carouselEl.addEventListener('slide.bs.carousel', (event) => {
-            const container = document.querySelector('.carousel-inner');
-            window.lightGallery(container, {
-                plugins: [lgThumbnail],
-                selector: '.lg-item',
-            });
-        });
+  
     });
     /*]]>*/
 </script>

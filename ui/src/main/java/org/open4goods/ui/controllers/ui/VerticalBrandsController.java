@@ -1,5 +1,8 @@
 package org.open4goods.ui.controllers.ui;
 
+import java.net.URLDecoder;
+
+import org.apache.groovy.parser.antlr4.util.StringUtils;
 import org.open4goods.commons.config.yml.ui.SubsetCriteria;
 import org.open4goods.commons.config.yml.ui.SubsetCriteriaOperator;
 import org.open4goods.commons.config.yml.ui.VerticalConfig;
@@ -41,7 +44,13 @@ public class VerticalBrandsController  extends AbstractVerticalController {
 		ModelAndView ret = uiService.defaultModelAndView(("vertical-home"), request);
 
 		String brand = request.getServletPath().substring(request.getServletPath().lastIndexOf('/')+1);
-
+		
+		if (StringUtils.isEmpty(brand)) {
+			// TODO :(p2, design) : Throw invalid parameter / 404
+			return null;
+		}
+		
+		brand = URLDecoder.decode(brand,"UTF-8").toUpperCase();
 
 		VerticalConfig config = verticalService.getConfigById(this.vertical);
 
