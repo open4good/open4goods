@@ -34,19 +34,67 @@
          border-style: none;
     }   
     
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+ 
+.table-bordered.card {
+    border: 0 !important;
+}
+.card thead {
+    display: none;
+}
+
+.card tbody tr {
+    float: left;
+    width: 25em;
+    margin: 0.5em;
+    border: 1px solid #bfbfbf;
+    border-radius: 0.5em;
+    background-color: transparent !important;
+    box-shadow: 0.25rem 0.25rem 0.5rem rgba(0, 0, 0, 0.25);
+}
+.card tbody tr td {
+    display: block;
+    border: 0;
+}
+
+    
+    
+    
+    
+    
+    
+    
+    
     </style>
     
 </head>
 
 <body>
-    <!--/* Navbar */-->
-    <th:block th:insert="~{inc/navbar/navbar-home.html}"></th:block>
-    <!--/* Loader */-->
-    <th:block th:insert="~{inc/preloader.html}"></th:block>
+    
+    <header>
+        <!--/* Loader */-->
+        <th:block th:insert="~{inc/preloader.html}"></th:block>
+        <!--/* Navbar */-->
+        <th:block th:insert="~{inc/navbar/navbar-home.html}"></th:block>
+    </header>
     
     <main>  
   
-        <div class="section section-lg pt-5 pt-md-3 bg-gray-200">
+        <div class="section section-lg mb-6">
             <div class="container container-semi-fluid">
 
                 <!--/* Hero */-->                       
@@ -139,7 +187,17 @@
                     <!--/* Right column */-->
                     <div class="col-lg-9">
                         <div class="ms-1 row card shadow">
-                            <th:block th:insert="~{inc/vertical-table.html}"></th:block>
+
+
+							<div class="dt-buttons">
+								<div class="dt-buttons btn-group">
+				
+								</div>
+						
+							</div>
+							
+							
+							<th:block th:insert="~{inc/vertical-table.html}"></th:block>
                         </div>
 
                     </div>
@@ -154,16 +212,11 @@
 <script defer type="text/javascript" language="javascript" src="/webjars/datatables/js/dataTables.min.js"></script>
 <script defer type="text/javascript" language="javascript" src="/webjars/datatables/js/dataTables.bootstrap5.min.js"></script>
 
-<script defer src="/vendor/nouislider/dist/nouislider.min.js"></script>
 
-<!-- pixel JS -->
-<script src="/assets/js/pixel.js"></script>
-
-<!-- custom sources -->
-<script src="/assets/js/pixel-custom.js"></script>
-
-<script src="/webjars/mustache/mustache.min.js"></script>
-
+<script defer src="/webjars/mustache/mustache.min.js"></script>
+<script src="/vendor/nouislider/dist/nouislider.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns/dist/chartjs-adapter-date-fns.bundle.min.js"></script>    
 
 
 <!-- Ajax loaded table template -->
@@ -273,17 +326,20 @@
         **/
     <!-- Datatable init function -->
     var table;
+
+    
     
     function initDatatable () {
         
         return $('#tableProducts').DataTable({
             
             order: [ [2, 'desc'] ],
-            searching: false,
+            searching: true,
             "bLengthChange": false,  
             "processing": true,
             "serverSide": true,
             "orderMulti": false,
+            "autoWidth": true,
             "pageLength": 5,
             "ajax": {
                 "url": "/"+verticalPath+"/paginated",
@@ -322,7 +378,41 @@
                      }
              },
              
-            "columns": columns 
+            columns: columns,
+           // dom : '<"dt-buttons"Bf><"clear">lirtp',
+            buttons : [
+                "colvis",
+                "copyHtml5",
+                "csvHtml5",
+                "excelHtml5",
+                "pdfHtml5",
+                "print"
+            ],
+            initComplete : function (settings, json) {
+                $(".dt-buttons .btn-group").append(
+                    '<a id="cv" class="btn btn-primary" href="#">Cartes</a>'
+                );
+                $("#cv").on("click", function () {
+                    if ($("#tableProducts").hasClass("card")) {
+                        $(".colHeader").remove();
+                    } else {
+                        var labels = [];
+                        $("#tableProducts thead th").each(function () {
+                            labels.push($(this).text());
+                        });
+                        $("#tableProducts tbody tr").each(function () {
+                            $(this)
+                                .find("td")
+                                .each(function (column) {
+                                    $("<span class='colHeader'>" + labels[column] + ":</span>").prependTo(
+                                        $(this)
+                                    );
+                                });
+                        });
+                    }
+                    $("#tableProducts").toggleClass("card");
+                });
+            }
         });
     };
 

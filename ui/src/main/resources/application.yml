@@ -61,7 +61,8 @@ spring:
         enabled: true
 
 allowedImagesSizeSuffixes:
-  - 50
+  - 100
+  - 50    
   - 30     
   - 360  
               
