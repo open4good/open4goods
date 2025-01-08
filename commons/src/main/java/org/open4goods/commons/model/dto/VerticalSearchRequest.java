@@ -11,7 +11,7 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
-import org.open4goods.commons.model.constants.ProductCondition;
+import org.open4goods.commons.config.yml.ui.VerticalSubset;
 
 public class VerticalSearchRequest {
 
@@ -20,6 +20,17 @@ public class VerticalSearchRequest {
 
     Set<String> countries = new HashSet<>();
 
+	/**
+	 * The vertical custom subsets
+	 */
+	private List<VerticalSubset> subsets = new ArrayList<VerticalSubset>();
+	
+	/**
+	 * The subset dedicated to brands;
+	 */
+	private VerticalSubset brandsSubset = new VerticalSubset();
+    
+    
     List<NumericRangeFilter> numericFilters = new ArrayList<>();
 
     Map<String, Set<String>> termsFilter = new HashMap<>();
@@ -119,6 +130,9 @@ public class VerticalSearchRequest {
             .append(termsFilter, that.termsFilter)
             .append(sortField, that.sortField)
             .append(sortOrder, that.sortOrder)
+            .append(brandsSubset, that.brandsSubset)
+            .append(subsets, subsets)
+            
             .isEquals();
     }
 
@@ -133,6 +147,8 @@ public class VerticalSearchRequest {
             .append(excluded)
             .append(sortField)
             .append(sortOrder)
+            .append(subsets)
+            .append(brandsSubset)
             .toHashCode();
     }
     
@@ -159,6 +175,28 @@ public class VerticalSearchRequest {
 	public void setExcludedFilters(Set<String> excludedFilters) {
 		this.excludedFilters = excludedFilters;
 	}
-    
+
+
+	public List<VerticalSubset> getSubsets() {
+		return subsets;
+	}
+
+
+	public void setSubsets(List<VerticalSubset> subsets) {
+		this.subsets = subsets;
+	}
+
+
+	public VerticalSubset getBrandsSubset() {
+		return brandsSubset;
+	}
+
+
+	public void setBrandsSubset(VerticalSubset brandsSubset) {
+		this.brandsSubset = brandsSubset;
+	}
+
+
+	
     
 }

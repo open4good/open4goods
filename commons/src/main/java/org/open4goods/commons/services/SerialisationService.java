@@ -96,6 +96,22 @@ public class SerialisationService {
 	}
 
 	/**
+	 * Clone an object using json
+	 * @param <T>
+	 * @param valueType
+	 * @return
+	 * @throws JsonParseException
+	 * @throws JsonMappingException
+	 * @throws IOException
+	 */
+	public <T> T clone(T valueType)
+			throws JsonParseException, JsonMappingException, IOException {
+		return    (T) jsonMapper.readValue(toJson(valueType) , valueType.getClass());
+	}
+	
+	
+	
+	/**
 	 * JSON object de-serialisation
 	 * @param input
 	 * @param valueType
@@ -108,6 +124,7 @@ public class SerialisationService {
 			throws JsonParseException, JsonMappingException, IOException {
 		return jsonMapper.readValue(input, valueType);
 	}
+	
 	public Map<String, String> fromJson(String value, TypeReference<HashMap<String, String>> typeRef) 		throws JsonParseException, JsonMappingException, IOException {
 		return jsonMapper.readValue(value, typeRef);
 	}

@@ -1,6 +1,9 @@
 package org.open4goods.ui.controllers.ui;
 
+import org.open4goods.commons.config.yml.ui.SubsetCriteria;
+import org.open4goods.commons.config.yml.ui.SubsetCriteriaOperator;
 import org.open4goods.commons.config.yml.ui.VerticalConfig;
+import org.open4goods.commons.config.yml.ui.VerticalSubset;
 import org.open4goods.commons.model.dto.VerticalSearchRequest;
 import org.open4goods.commons.model.dto.VerticalSearchResponse;
 import org.open4goods.commons.services.SearchService;
@@ -20,11 +23,11 @@ import jakarta.servlet.http.HttpServletResponse;
  * @author gof
  *
  */
-public class VerticalController  extends AbstractVerticalController {
+public class VerticalBrandsController  extends AbstractVerticalController {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(VerticalController.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(VerticalBrandsController.class);
 
-	public VerticalController( VerticalsConfigService verticalService, SearchService searchService, UiService uiService, String vertical, BlogService blogService, SerialisationService serialisationService) {
+	public VerticalBrandsController( VerticalsConfigService verticalService, SearchService searchService, UiService uiService, String vertical, BlogService blogService, SerialisationService serialisationService) {
 		super(verticalService, searchService, uiService, vertical, blogService, serialisationService);
 	}
 
@@ -37,6 +40,8 @@ public class VerticalController  extends AbstractVerticalController {
 			throws Exception {
 		ModelAndView ret = uiService.defaultModelAndView(("vertical-home"), request);
 
+		String brand = request.getServletPath().substring(request.getServletPath().lastIndexOf('/')+1);
+
 
 		VerticalConfig config = verticalService.getConfigById(this.vertical);
 
@@ -45,8 +50,15 @@ public class VerticalController  extends AbstractVerticalController {
 		VerticalSearchRequest vRequest = buildDefaultRequest(ret, config);
 		
 		
+		// Get the default subset, to have texts and so on
+		VerticalSubset brandSubset = serialisationService.clone(config.getBrandsSubset());
+		brandSubset.getCriterias().add(new SubsetCriteria("attributes.referentielAttributes.BRAND",SubsetCriteriaOperator.EQUALS, brand));
+		vRequest.setBrandsSubset(brandSubset);
+		
+		// Searching the products
 		VerticalSearchResponse vResponse = searchService.verticalSearch(config,vRequest);
 		
+		// Complete the view with standards verticals attributes
 		completeResponse(request, ret, config, vResponse);
 
 		return ret;

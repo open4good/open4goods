@@ -10,6 +10,7 @@ import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
 import org.open4goods.commons.config.yml.attributes.AttributeConfig;
+import org.open4goods.commons.config.yml.ui.SubsetCriteria;
 import org.open4goods.commons.config.yml.ui.VerticalConfig;
 import org.open4goods.commons.dao.ProductRepository;
 import org.open4goods.commons.model.constants.CacheConstants;
@@ -143,6 +144,14 @@ public class SearchService {
 		Criteria criterias = new Criteria("vertical").is(vertical.getId())
 				.and(aggregatedDataRepository.getRecentPriceQuery())
 				;
+		
+		// Filtering on brand if in this disposition
+		if (request.getBrandsSubset() != null) {
+			if (request.getBrandsSubset().getCriterias().size() == 1) {
+				SubsetCriteria cr = request.getBrandsSubset().getCriterias().getFirst();
+				criterias.and(new Criteria(cr.getField()).is(cr.getValue()));
+			}
+		}
 		
 		// Adding the filter on excluded if set
 		if (request.getExcludedFilters().size()>0) {

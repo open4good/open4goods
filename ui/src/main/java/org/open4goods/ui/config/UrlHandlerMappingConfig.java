@@ -16,6 +16,8 @@ import org.open4goods.commons.services.VerticalsConfigService;
 import org.open4goods.ui.config.yml.UiConfig;
 import org.open4goods.ui.controllers.ui.CategoryController;
 import org.open4goods.ui.controllers.ui.UiService;
+import org.open4goods.ui.controllers.ui.VerticalBrandsController;
+import org.open4goods.ui.controllers.ui.VerticalBrandsController;
 import org.open4goods.ui.controllers.ui.VerticalController;
 import org.open4goods.ui.controllers.ui.XwikiController;
 import org.open4goods.ui.services.BlogService;
@@ -75,8 +77,17 @@ public class UrlHandlerMappingConfig {
 				// TODO : Forward i18n
 				String url = "/" + i18n.getValue().getVerticalHomeUrl();
 				LOGGER.info("Adding vertical home page mapping : {}", url);				
-				urlMap.put(url, new VerticalController(verticalService, searchService, uiService, item.getId(), blogService)  );
+				urlMap.put(url, new VerticalController(verticalService, searchService, uiService, item.getId(), blogService, serialisationService)  );
 
+				/////////////////
+				// Adding vertical brand pages
+				//////////////// 
+				// TODO : Forward i18n
+				url = "/" + i18n.getValue().getVerticalHomeUrl()+"/marques/*";
+				LOGGER.info("Adding vertical brand pages mapping : {}", url);				
+				urlMap.put(url, new VerticalBrandsController(verticalService, searchService, uiService, item.getId(), blogService, serialisationService)  );
+
+				
 				/////////////////
 				// Adding ecoscore page
 				//////////////// 

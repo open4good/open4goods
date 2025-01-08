@@ -5,7 +5,7 @@ package org.open4goods.api.controller.api;
 import java.io.IOException;
 import java.util.Map;
 
-import org.open4goods.api.services.PageGenerationService;
+import org.open4goods.api.services.ProductsReviewGenerationService;
 import org.open4goods.commons.config.yml.ui.VerticalConfig;
 import org.open4goods.commons.exceptions.AggregationSkipException;
 import org.open4goods.commons.exceptions.InvalidParameterException;
@@ -34,12 +34,12 @@ public class GenAiController {
 
 	private GenAiService aiService;
 
-	private PageGenerationService pageGenService;
+	private ProductsReviewGenerationService pageGenService;
 	
 	private VerticalsConfigService verticalsConfigService;
 
 
-	public GenAiController(GenAiService aiService, PageGenerationService pageGenService,  VerticalsConfigService verticalsConfigService) {
+	public GenAiController(GenAiService aiService, ProductsReviewGenerationService pageGenService,  VerticalsConfigService verticalsConfigService) {
 		this.aiService = aiService;
 		this.pageGenService = pageGenService;
 		this.verticalsConfigService = verticalsConfigService;

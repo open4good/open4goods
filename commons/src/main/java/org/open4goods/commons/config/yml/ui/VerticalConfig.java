@@ -189,7 +189,19 @@ public class VerticalConfig{
 
 
 	
+	////////////////////
+	// The subsets for this vertical
+	////////////////////
 	
+	/**
+	 * The vertical custom subsets
+	 */
+	private List<VerticalSubset> subsets = new ArrayList<VerticalSubset>();
+	
+	/**
+	 * The subset dedicated to brands;
+	 */
+	private VerticalSubset brandsSubset = new VerticalSubset();
 	
 //	
 //	/**
@@ -886,6 +898,22 @@ public class VerticalConfig{
 
 	public void setBettersLimit(Integer bettersLimit) {
 		this.bettersLimit = bettersLimit;
+	}
+
+	public List<VerticalSubset> getSubsets() {
+		return subsets;
+	}
+
+	public void setSubsets(List<VerticalSubset> subsets) {
+		this.subsets = subsets;
+	}
+
+	public VerticalSubset getBrandsSubset() {
+		return brandsSubset;
+	}
+
+	public void setBrandsSubset(VerticalSubset brandsSubset) {
+		this.brandsSubset = brandsSubset;
 	}
 
 
