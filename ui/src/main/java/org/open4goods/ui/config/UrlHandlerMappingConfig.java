@@ -80,6 +80,12 @@ public class UrlHandlerMappingConfig {
 				urlMap.put(url, new VerticalController(verticalService, searchService, uiService, item.getId(), blogService, serialisationService)  );
 
 				/////////////////
+				// Adding ecoscore page
+				//////////////// 
+				LOGGER.info("Adding vertical ecoscore page mapping : {}", url);				
+				urlMap.put(url+"/ecoscore", new VerticalEcoscoreController(item, uiService,serialisationService)  );
+				
+				/////////////////
 				// Adding vertical brand pages
 				//////////////// 
 				// TODO : Forward i18n
@@ -87,12 +93,6 @@ public class UrlHandlerMappingConfig {
 				LOGGER.info("Adding vertical brand pages mapping : {}", url);				
 				urlMap.put(url, new VerticalBrandsController(verticalService, searchService, uiService, item.getId(), blogService, serialisationService)  );
 
-				
-				/////////////////
-				// Adding ecoscore page
-				//////////////// 
-				LOGGER.info("Adding vertical ecoscore page mapping : {}", url);				
-				urlMap.put(url+"/ecoscore", new VerticalEcoscoreController(item, uiService,serialisationService)  );
 				
 				/////////////////
 				// Adding vertical specific wikipages
