@@ -16,7 +16,7 @@
 			th:class="${stat.first ? 'active' : ''}"
 			th:aria-current="${stat.first ? 'true' : ''}"
 			th:aria-label="'Image ' + ${stat.count}" style="text-indent: initial!important;height: 50px;width: initial;background-color: transparent;">
-			<img src="https://www.schneiderconsumer.com/app/uploads/2022/03/TV_LED32_SC410K_FRONT-1024x1024.png">
+			<img class="img-fluid"  th:src="${img.path(50)}">
 		</button>
     </div>
     <div class="carousel-inner">
@@ -25,7 +25,7 @@
 				th:data-lg-size="${img.imageInfo.width}+  '-' + ${img.imageInfo.height}" 
 				th:data-src="${img.path()}">
 					<!--img class="d-block w-100" th:src="${img.path()}" alt="First slide"-->
-					<img class="d-block w-100" src="https://www.schneiderconsumer.com/app/uploads/2022/03/TV_LED32_SC410K_FRONT-1024x1024.png">
+					<img class="img-fluid d-block w-100" th:src="${img.path(100)}">
 			</a>
         </div>
     </div>

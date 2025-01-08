@@ -144,7 +144,12 @@ public class Resource implements Validable {
 		return tags.stream().filter(e -> !e.contains(".")).findAny().orElse(nameFromUrl());
 	}
 
+	// UI Helper
 	public String path() {
+		return path(null);
+	}
+	// UI Helper
+	public String path(Integer width) {
 		StringBuilder sb = new StringBuilder();
 		
 		// TODO : share const with the resourcecontroller
@@ -167,11 +172,27 @@ public class Resource implements Validable {
 		sb.append(fileName);
 		sb.append("_");
 		sb.append(cacheKey);
-		sb.append(".");
-		sb.append(extension);
+		
+		// HAndling webp optimized resize
+		switch (resourceType) {
+		case IMAGE:
+			if (null != width) {
+				sb.append("-").append(width);
+			} 
+			sb.append(".");
+			sb.append("webp");
+			break;
+		
+		default:
+			sb.append(".");
+			sb.append(extension);
+		}
+		
 		return sb.toString();
 
 	}
+	
+	
 
 	public String nameFromUrl() {
 
