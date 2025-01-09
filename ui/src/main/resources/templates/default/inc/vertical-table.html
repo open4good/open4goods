@@ -16,10 +16,10 @@
                  -->
             </tr>
         </thead>
-        <tbody>
-            <tr>
-                <td>
-                    <div th:each="p : ${products.limitedDatas(20)}" >
+        <tbody style="display: table-caption;">
+            <tr th:each="p : ${products.limitedDatas(20)}">
+                <td colspan="5">
+                    <div  >
                         
                             <p th:if="${p.model()}"><a th:text="${p.model()}" th:href="'/'+${verticalPath}+ '/'+${p.url(siteLanguage)}"></a></p>
                             <p th:unless="${p.model()}"><a th:text="${p.bestName()}" th:href="'/'+${verticalPath}+ '/'+${p.url(siteLanguage)}"></a></p>
@@ -41,6 +41,8 @@
                        
                     </div>
                 </td>
+
+                
             </tr>
  
         </tbody>
