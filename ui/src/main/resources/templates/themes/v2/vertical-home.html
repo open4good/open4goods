@@ -116,6 +116,36 @@
                     <!--/* Left column */-->                    
                     <div class="col-lg-3 mb-3 mb-lg-0">
                     
+                    
+                    
+                        <!--/* Calcul impact score */--> 
+                        <div class="row card shadow mb-2">
+                            <div class="card-header"><h2 class="h5">Impact Score téléviseur</h2></div>
+                            <div class="card-body">
+                                Nudger a développé un score d'impact écologique pour les téléviseurs.
+                                <a class="btn btn-primary btn-sm"  th:href="'/' + ${verticalPath} + '/ecoscore'">
+                                    Eco score téléviseurs
+                                </a>
+                                
+                                
+                            </div>
+                        </div>
+
+                        <!--/* Acces rapide */--> 
+                        <div class="row card shadow mb-2">
+                            <div class="card-header"><h2 class="h5">Accès rapide</h2></div>
+                            <div class="card-body">
+                                Nudger a développé un score d'impact écologique pour les téléviseurs.
+                                <a class="btn btn-primary btn-sm"  th:href="'/' + ${verticalPath} + '/ecoscore'">
+                                    Eco score téléviseurs
+                                </a>
+                                
+                                
+                            </div>
+                        </div>
+                        
+
+                            
                         <!--/* Guides */--> 
                         <div th:if="${verticalConfig.i18n(siteLanguage).getWikiPages().size() > 0}" class="row card shadow mb-2">
                             <div class="card-header"><h2 class="h5">Les guides</h2></div>
@@ -144,32 +174,7 @@
                         
 
                         
-                        <!--/* Price Filters */-->                          
-                        <div class="row card shadow mb-2">
-                            <div class="card-header"><h2 class="h5">Prix</h2></div>
-                            <div class="card-body">
-                                <th:block th:insert="~{inc/vertical-filters-price.html}"></th:block>
-                                
-                            </div>
-                        </div>
-                                         
-                                        
-                        <!--/* Ecological Filters */--> 
-                        <div class="row card shadow mb-2 border-success text-secondary">
-                            <div class="card-header"><h2 class="h5">Eco-Filtres</h2></div>
-                            <div class="card-body">
-                                <th:block th:insert="~{inc/vertical-filters-eco.html}"></th:block>
-                                
-                            </div>
-                        </div>
                         
-                        <!--/* Technical Filters */-->                          
-                        <div class="row card shadow mb-2">
-                            <div class="card-header"><h2 class="h5">Caractéristiques</h2></div>
-                            <div class="card-body">
-                                <th:block th:insert="~{inc/vertical-filters-technical.html}"></th:block>
-                            </div>
-                        </div>
                         
                                                                     
                     </div>
@@ -187,7 +192,22 @@
 							</div>
 							
 							
-							<th:block th:insert="~{inc/vertical-table.html}"></th:block>
+                                <th:block th:insert="~{inc/vertical-filters-price.html}"></th:block>
+							
+							
+                                <th:block th:insert="~{inc/vertical-filters-eco.html}"></th:block>
+
+
+                                <th:block th:insert="~{inc/vertical-filters-technical.html}"></th:block>
+							
+							
+							
+							
+							
+							
+	                           						
+							
+    							<th:block th:insert="~{inc/vertical-table.html}"></th:block>
                         </div>
 
                     </div>
@@ -199,404 +219,37 @@
     <!--/* Footer */-->
     <th:block th:insert="~{inc/footer.html}"></th:block>    
 
-<script defer type="text/javascript" language="javascript" src="/webjars/datatables/js/dataTables.min.js"></script>
-<script defer type="text/javascript" language="javascript" src="/webjars/datatables/js/dataTables.bootstrap5.min.js"></script>
+    <!-- Specific vertical rendering scripts -->
+    <th:block th:insert="~{inc/vertical-script.html}"></th:block>    
 
-
-<script defer src="/webjars/mustache/mustache.min.js"></script>
-<script src="/vendor/nouislider/dist/nouislider.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns/dist/chartjs-adapter-date-fns.bundle.min.js"></script>    
-
-
-<!-- Ajax loaded table template -->
-<div id="tpl_place" class="hidden"></div>
-
-<!-- Setting up variables -->
-<script th:inline="javascript">
-    /*<![CDATA[*/
     
-        const vertical = /*[[${verticalConfig.id}]]*/ '';
     
-        const siteLanguage = /*[[${siteLanguage}]]*/'';
-        const baseUrl = /*[[${baseUrl}]]*/'';
-        const verticalPath = /*[[${verticalPath}]]*/'';
-        const additionalAttributes = /*[[${filters}]]*/'';
-        const tpl = /*[[${tpl}]]*/'';
-        const chartIntervals = /*[[${products.numericFilters}]]*/'';
-        const subsets = JSON.stringify(/*[[${products.request.subsets}]]*/'');
-        const brandsSubset = JSON.stringify(/*[[${products.request.brandsSubset}]]*/'');
-        
-                        
-    /*]]>*/
-</script>
-
+    
 <script>
+/////////////////////
+// Filter togglers
+///////////////////// 
+  document.addEventListener("DOMContentLoaded", function () {
+    // Add event listeners to all accordion headers
+    document.querySelectorAll(".accordion-button").forEach(function (button) {
+      button.addEventListener("click", function () {
+        const targetId = this.getAttribute("data-target");
+        const targetElement = document.getElementById(targetId);
 
-   var dummyRender = function(cell, type, data) {return  "" ;}
-   
-   function description (data) {
-    
-    if (data.genaiTexts == null) {
-        return "";
-    }
-    
-    // TODO : I18n
-    // TODO : Ugly, ugly....
-    if (data.genaiTexts['fr'] == null) {
-        return "";
-    }
-    
-
-    if (data.genaiTexts['fr'].descriptions['ecological-description'] != null) {
-        ret = data.genaiTexts['fr'].descriptions['ecological-description'].content;
-        
-        if (ret == null) {
-           return "";
-        }
-        
-        if (ret.length > 200) {
-            return ret.slice(0, 200) + "...";
+        if (targetElement.classList.contains("show")) {
+          // Collapse the body if it is visible
+          targetElement.classList.remove("show");
+          this.setAttribute("aria-expanded", "false");
         } else {
-            return ret;
+          // Expand the body if it is hidden
+          targetElement.classList.add("show");
+          this.setAttribute("aria-expanded", "true");
         }
-    } 
-    
-    return "";
-   }
-   
-   
-   ////////////////
-   // To handle list / cards view state and layout buffers
-   ///////////////
-   const cardsContentMap = new Map();
-   const listContentMap = new Map();
-   
-   
-   var viewState="list";
-   
-   function getViewState() {
-	   return viewState;    
-   }
-   
-   var columns = [
-       { 
-        "data": "attributes.referentielAttributes.MODEL", 
-        "name" : "Modèle",
-        "title" : "Modèle",
-        render: function(cell, type, data) {
-
-
-                
-                //////////////////////////////////
-                // setting in the card dictionary 
-                //////////////////////////////////
-                
-                
-                template = $('#template-product-card').html();
-                Mustache.parse(template);
-
-                cartContent =  Mustache.render(template, {
-                    data : data,
-                    vertical: vertical,
-                    // TODO : I18n
-                    productUrl : baseUrl+verticalPath+'/'+data.names.url['fr'],
-                    ecoscore: data.scores?.ECOSCORE?.value != null ? Math.round((data.scores.ECOSCORE.value + Number.EPSILON) * 100) / 100 : "",
-                    compensation: data.price?.minPrice?.compensation != null ? Math.round((data.price.minPrice.compensation + Number.EPSILON) * 100) / 100 : null,                      
-                    
-// TODO : Default as a hack until full i18n is implemented
-                    desc:   description(data),
-                    imageUrl : (data.coverImagePath),                               
-                    name : (data.attributes.referentielAttributes.MODEL == null ? data.names.name : data.attributes.referentielAttributes.MODEL)
-                 }
-                );    
-                cardsContentMap.set(cell, cartContent);
-                
-                //////////////////////////////////
-                // setting in the list dictionary 
-                //////////////////////////////////
-                
-                
-                template = $('#template-product-list').html();
-                Mustache.parse(template);
-
-                
-                listContent = Mustache.render(template, {
-                    data : data,
-                    vertical: vertical,
-                    // TODO : I18n
-                    productUrl : baseUrl+verticalPath+'/'+data.names.url['fr'],
-                    ecoscore: data.scores?.ECOSCORE?.value != null ? Math.round((data.scores.ECOSCORE.value + Number.EPSILON) * 100) / 100 : "",
-                    compensation: data.price?.minPrice?.compensation != null ? Math.round((data.price.minPrice.compensation + Number.EPSILON) * 100) / 100 : null,                      
-                    
-// TODO : Default as a hack until full i18n is implemented
-                    desc:   description(data),
-                    imageUrl : (data.coverImagePath),                               
-                    name : (data.attributes.referentielAttributes.MODEL == null ? data.names.name : data.attributes.referentielAttributes.MODEL)
-                 }
-                );    
-                listContentMap.set(cell, listContent);
-                
-                
-                // Returning wether
-                if (getViewState()=="list") {
-                	return listContent;
-                } else {
-                	return cartContent;
-                } 
-        }
-       },
-       
-       { 
-        "data": "attributes.referentielAttributes.BRAND", 
-        "name" : "Marque",
-        "title" : "Marque",
-        render: function(cell, type, data) {
-               return  "" ;
-           }
-       },
-       { "data": "scores.ECOSCORE.value", "name" : "Ecoscore", "title" : "Ecoscore", defaultContent:""  },
-       { "data": "price.minPrice.price", "name" : "Prix", "title" : "Prix"  },
-       { "data": "offersCount", "name" : "Concurrence", "title" : "Concurrence"  }
-           ];
-
-    /* Adding additional attributes columns with hidden titles
-       for (var i = 0; i < additionalAttributes.length; i++) {
-           columns.push({
-               data: "attributes.indexed." + additionalAttributes[i]['key'] + ".value",
-               name: additionalAttributes[i]['name'][siteLanguage],
-               title: "", // Set an empty title to hide the header text
-               render: dummyRender
-           });
-       }
-        **/
-    <!-- Datatable init function -->
-    var table;
-
-    
-    
-    function initDatatable () {
-        
-        return $('#tableProducts').DataTable({
-            
-            order: [ [2, 'desc'] ],
-            searching: false,
-            "bLengthChange": false,  
-            "processing": true,
-            "serverSide": true,
-            "orderMulti": false,
-            "pageLength": 10,
-            "ajax": {
-                "url": "/"+verticalPath+"/paginated",
-                "dataSrc": "data",
-                "data": function ( data ) {
-                    // Adding slider rangers attributes
-                    var sliderParameters = new Array();
-                    $('.input-slider-range-container').each (function (e) {
-                        sliderParameters.push( $(this).attr("id") + ":" + $(this).attr('data-range-value-min') + ":" + $(this).attr('data-range-value-max')+":"+$('[id="include-undefined-'+$(this).attr("id") + '"]').is(':checked') + ":" + $(this).attr('data-chart-interval'));                     
-                        } 
-                    );                  
-                    data.sliders=sliderParameters;
-                    
-                    // Adding checkboxes attributes
-                    var checkboxesParameters = new Array();
-                    $('input.changeableBox:checked').each (function (e) {
-                            val = $(this).attr("data-id")+":"+$(this).attr("data-value");
-                            checkboxesParameters.push( val);                                                
-                        } 
-                    );                      
-                    
-                    data.checkboxes=checkboxesParameters;
-
-                    data.brandsSubset = brandsSubset;
-                    data.subsets = subsets;
-                    
-                    
-                    return data;
-             }},
-             
-             createdRow: function(row, data, dataIndex){
-                     // Add COLSPAN attribute
-                     $('td:eq(0)', row).attr('colspan', 5);                  
-                     for ( i = 1; i < 5 ; i++) {                        
-                        $('td:eq('+i+')', row).css('display', 'none');
-                     }
-                     
-                     
-                     // Toggle the “card” class on the table
-                     
-                     if (getViewState() == 'card') {
-	                     $("td:eq(0)", row).addClass("cardTd");
-	                     $(row).addClass("cardTr");	               	                     
-                     }
-             }, 
-             
-            columns: columns,
-            
-
-        });
-    };
-
-    // On document Load
-    $(document).ready(function() {
-    	
-    	// Switch view / lit
-    	$("#cv").on("click", function (e) {
-                    e.preventDefault();
-
-                    if ($("#tableProducts").hasClass("card")) {
-                    	viewState="list";
-                    } else {
-                    	viewState="card";
-                    }
-                    
-                    $("#tableProducts").toggleClass("card")
-                    
-                    // Force reload, to take new teplate
-                    table.ajax.reload(null, false);
-         });
-    	
-    	
-    	
-        // Loading templates 
-        $.ajax({
-            url : '/tpl_table'+tpl+'.html',
-            dataType : 'html',
-            cache : true, // otherwise will get fresh copy every page load
-            success : function(e) {
-                // script loaded, do stuff!
-                $("#tpl_place").html(e);
-
-                // Init table           
-                table = initDatatable();
-            }
-        });
-                
-        // Range sliders listener
-        var slidersCounter = $('.input-slider-range-container').length;
-        $('.input-slider-range-container').on('change', function(e) {
-                        
-            // this change function is called on page load (component js init)
-            // This counter ensure the datatble is not drawn on page load
-            if (slidersCounter <= 0) {              
-                table.draw();               
-            } else {
-                slidersCounter--;
-            }
-            
-        });
-
-        // Checkboxes listener
-        $('input:checkbox').click(function() { 
-            table.draw();                           
-        });
-        
-        
-        
-        // Show more feature, on checkboxes filters
-        
-        $('.show-more-link').on('click', function() {
-            let hiddenItems = $(this).siblings('.hidden-item').filter(function() {
-              return $(this).css('display') === 'none';
-            });
-
-            
-            hiddenCount = hiddenItems.length;
-            
-            hiddenItems.slice(0, 5).slideDown();
-
-            // Removing show more links if no more..
-            if (hiddenCount <= 5) {
-              $(this).hide();
-            }
-
-          });
-        
-        
-        
-        // Init the chart.js intervals charts, on numeric attributes
-        
-     // Iterate over the keys in chartIntervals and call processInterval for each
-        Object.keys(chartIntervals).forEach((key) => {
-            createChartInterval(key, chartIntervals[key], vertical);
-        });
-        
-        
-        
-    } );
-</script>
-
-<script>
-function createChartInterval(chartId, intervalDatas, verticalName) {
-    ///////////////////////
-    // Chart.js interval charts initialization
-    //////////////////////
-    const ctx = document.getElementById('chart-' + chartId).getContext('2d');
-    const priceData = intervalDatas.priceBuckets;
-
-    const labels = priceData.map(bucket => {
-        const parsedName = parseFloat(bucket.name);
-        return Number.isInteger(parsedName) ? parsedName : parsedName.toFixed(1);
-    }); // X-axis labels
-
-    const data = priceData.map(bucket => {
-        const parsedCount = parseFloat(bucket.count);
-        return Number.isInteger(parsedCount) ? parsedCount : parsedCount.toFixed(1);
-    }); // Y-axis data
-    
-    return new Chart(ctx, {
-        type: 'bar',
-        data: {
-            labels: labels,
-            datasets: [{
-                data: data,
-                borderWidth: 0
-            }]
-        },
-        options: {
-            plugins: {
-                legend: {
-                    display: false // Hide legend for the dataset
-                },
-                title: {
-                    display: false // Hide chart title
-                },
-                tooltip: {
-                    callbacks: {
-                        label: function(context) {
-                            return verticalName + ": " + parseInt(context.raw); // Custom tooltip text
-                        }
-                    }
-                }
-            },
-            scales: {
-                x: {
-                    title: {
-                        display: false // Hide X-axis title
-                    },
-                    grid: {
-                        display: false, // Disable vertical grid lines
-                        drawTicks: false, // Disable ticks on X-axis
-                        drawBorder: false // Disable border on X-axis
-                    }
-                },
-                y: {
-                    display: false, // Hide Y-axis completely
-                    grid: {
-                        display: false // Optionally hide horizontal grid lines
-                    }
-                }
-            },
-            barPercentage: 1.0, // Make bars occupy full width of the category
-            categoryPercentage: 1.0 // Remove spacing between categories
-        }
+      });
     });
-}
-
-
-
-    
+  });
 </script>
+
 
 
 
