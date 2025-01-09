@@ -38,47 +38,6 @@
     
     
     
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
- 
-.table-bordered.card {
-    border: 0 !important;
-}
-.card thead {
-    display: none;
-}
-
-.card tbody tr {
-    float: left;
-    width: 25em;
-    margin: 0.5em;
-    border: 1px solid #bfbfbf;
-    border-radius: 0.5em;
-    background-color: transparent !important;
-    box-shadow: 0.25rem 0.25rem 0.5rem rgba(0, 0, 0, 0.25);
-}
-.card tbody tr td {
-    display: block;
-    border: 0;
-}
-
-    
-    
-    
-    
-    
-    
-    
-    
     </style>
     
 </head>
@@ -339,8 +298,7 @@
             "processing": true,
             "serverSide": true,
             "orderMulti": false,
-            "autoWidth": true,
-            "pageLength": 5,
+            "pageLength": 10,
             "ajax": {
                 "url": "/"+verticalPath+"/paginated",
                 "dataSrc": "data",
@@ -378,41 +336,8 @@
                      }
              },
              
-            columns: columns,
-           // dom : '<"dt-buttons"Bf><"clear">lirtp',
-            buttons : [
-                "colvis",
-                "copyHtml5",
-                "csvHtml5",
-                "excelHtml5",
-                "pdfHtml5",
-                "print"
-            ],
-            initComplete : function (settings, json) {
-                $(".dt-buttons .btn-group").append(
-                    '<a id="cv" class="btn btn-primary" href="#">Cartes</a>'
-                );
-                $("#cv").on("click", function () {
-                    if ($("#tableProducts").hasClass("card")) {
-                        $(".colHeader").remove();
-                    } else {
-                        var labels = [];
-                        $("#tableProducts thead th").each(function () {
-                            labels.push($(this).text());
-                        });
-                        $("#tableProducts tbody tr").each(function () {
-                            $(this)
-                                .find("td")
-                                .each(function (column) {
-                                    $("<span class='colHeader'>" + labels[column] + ":</span>").prependTo(
-                                        $(this)
-                                    );
-                                });
-                        });
-                    }
-                    $("#tableProducts").toggleClass("card");
-                });
-            }
+            columns: columns
+
         });
     };
 
