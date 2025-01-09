@@ -220,7 +220,7 @@
        	"name" : "Modèle",
        	"title" : "Modèle",
        	render: function(cell, type, data) {
-				var template = $('#template-product-search').html();
+				var template = $('#template-product-list').html();
 				Mustache.parse(template);
 
 				return Mustache.render(template, {
