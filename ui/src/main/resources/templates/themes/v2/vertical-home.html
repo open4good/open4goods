@@ -60,7 +60,7 @@
         /* Each <tr> in card view floats and has a fixed width (typical “card deck” style) */
         .cardTr {
             float: left;
-            width: 45%; /* adjust to your liking, or use 100% for single-column cards */
+            width: 20em; /* adjust to your liking, or use 100% for single-column cards */
             margin: 0.5em;
             border: 1px solid #bfbfbf;
             border-radius: 0.5em;
@@ -266,16 +266,37 @@
    }
    
    
+   ////////////////
+   // To handle list / cards view state and layout buffers
+   ///////////////
+   const cardsContentMap = new Map();
+   const listContentMap = new Map();
+   
+   
+   var viewState="list";
+   
+   function getViewState() {
+	   return viewState;    
+   }
+   
    var columns = [
        { 
         "data": "attributes.referentielAttributes.MODEL", 
         "name" : "Modèle",
         "title" : "Modèle",
         render: function(cell, type, data) {
-                var template = $('#template-product-search').html();
+
+
+                
+                //////////////////////////////////
+                // setting in the card dictionary 
+                //////////////////////////////////
+                
+                
+                template = $('#template-product-card').html();
                 Mustache.parse(template);
 
-                return Mustache.render(template, {
+                cartContent =  Mustache.render(template, {
                     data : data,
                     vertical: vertical,
                     // TODO : I18n
@@ -287,7 +308,42 @@
                     desc:   description(data),
                     imageUrl : (data.coverImagePath),                               
                     name : (data.attributes.referentielAttributes.MODEL == null ? data.names.name : data.attributes.referentielAttributes.MODEL)
-                });                 
+                 }
+                );    
+                cardsContentMap.set(cell, cartContent);
+                
+                //////////////////////////////////
+                // setting in the list dictionary 
+                //////////////////////////////////
+                
+                
+                template = $('#template-product-list').html();
+                Mustache.parse(template);
+
+                
+                listContent = Mustache.render(template, {
+                    data : data,
+                    vertical: vertical,
+                    // TODO : I18n
+                    productUrl : baseUrl+verticalPath+'/'+data.names.url['fr'],
+                    ecoscore: data.scores?.ECOSCORE?.value != null ? Math.round((data.scores.ECOSCORE.value + Number.EPSILON) * 100) / 100 : "",
+                    compensation: data.price?.minPrice?.compensation != null ? Math.round((data.price.minPrice.compensation + Number.EPSILON) * 100) / 100 : null,                      
+                    
+// TODO : Default as a hack until full i18n is implemented
+                    desc:   description(data),
+                    imageUrl : (data.coverImagePath),                               
+                    name : (data.attributes.referentielAttributes.MODEL == null ? data.names.name : data.attributes.referentielAttributes.MODEL)
+                 }
+                );    
+                listContentMap.set(cell, listContent);
+                
+                
+                // Returning wether
+                if (getViewState()=="list") {
+                	return listContent;
+                } else {
+                	return cartContent;
+                } 
         }
        },
        
@@ -324,7 +380,7 @@
         return $('#tableProducts').DataTable({
             
             order: [ [2, 'desc'] ],
-            searching: true,
+            searching: false,
             "bLengthChange": false,  
             "processing": true,
             "serverSide": true,
@@ -365,59 +421,43 @@
                      for ( i = 1; i < 5 ; i++) {                        
                         $('td:eq('+i+')', row).css('display', 'none');
                      }
+                     
+                     
+                     // Toggle the “card” class on the table
+                     
+                     if (getViewState() == 'card') {
+	                     $("td:eq(0)", row).addClass("cardTd");
+	                     $(row).addClass("cardTr");	               	                     
+                     }
              }, 
              
             columns: columns,
             
-            buttons: [
-                "colvis",
-            ],
-            initComplete: function (settings, json) {
-                // Add a custom toggle button for “card” view
-                $(".dt-buttons .btn-group").append(
-                    '<a id="cv" class="btn btn-primary" href="#">Cartes</a>'
-                );
-
-                $("#cv").on("click", function (e) {
-                    e.preventDefault();
-
-                    if ($("#tableProducts").hasClass("card")) {
-                        // Currently in card mode -> switch back to list view
-                        // Remove any added “colHeader” spans
-                        $("#tableProducts tbody tr").each(function () {
-                            $(this).find("td span.colHeader").remove();
-                        });
-
-                    } else {
-                        // Currently in list view -> switch to card mode
-                        var labels = [];
-                        $("#tableProducts thead th").each(function () {
-                            labels.push($(this).text());
-                        });
-                        $("#tableProducts tbody tr").each(function () {
-                            var tds = $(this).find("td");
-                            tds.each(function (column) {
-                                // Only prepend label if this cell is visible
-                                if ($(this).css("display") !== "none") {
-                                    $("<span class='colHeader'>" + labels[column] + ":</span>")
-                                        .prependTo($(this));
-                                }
-                            });
-                        });
-                    }
-
-                    // Toggle the “card” class on the table
-                    $("#tableProducts td").toggleClass("cardTd");
-                    $("#tableProducts tr").toggleClass("cardTr");
-                });
-            }
 
         });
     };
 
     // On document Load
     $(document).ready(function() {
-        
+    	
+    	// Switch view / lit
+    	$("#cv").on("click", function (e) {
+                    e.preventDefault();
+
+                    if ($("#tableProducts").hasClass("card")) {
+                    	viewState="list";
+                    } else {
+                    	viewState="card";
+                    }
+                    
+                    $("#tableProducts").toggleClass("card")
+                    
+                    // Force reload, to take new teplate
+                    table.ajax.reload(null, false);
+         });
+    	
+    	
+    	
         // Loading templates 
         $.ajax({
             url : '/tpl_table'+tpl+'.html',
