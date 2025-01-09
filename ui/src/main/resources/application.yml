@@ -61,10 +61,11 @@ spring:
         enabled: true
 
 allowedImagesSizeSuffixes:
-  - 100
-  - 50    
   - 30     
-  - 360  
+  - 50    
+  - 100
+  - 360 
+  - 1000 
               
 wikiPagesMapping:
   "[webpages/default/legal-notice/WebHome]":
