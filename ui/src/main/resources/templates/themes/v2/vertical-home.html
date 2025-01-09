@@ -35,8 +35,45 @@
     }   
     
     
-    
-    
+    /* Force the table to stretch full width in list view */
+        #tableProducts {
+            table-layout: auto !important; /* Instead of fixed */
+            width: 100% !important;
+        }
+
+        /* Ensure the single-colspan cell (list view) takes all horizontal space */
+        #tableProducts td[colspan] {
+            width: 100% !important;
+            display: table-cell; /* force it back to a normal table cell */
+        }
+
+        /* Remove border in "card mode" */
+        .table-bordered.card {
+            border: 0 !important;
+        }
+
+        /* Hide thead in card mode (since we prepend column labels) */
+        .card thead {
+            display: none;
+        }
+
+        /* Each <tr> in card view floats and has a fixed width (typical “card deck” style) */
+        .cardTr {
+            float: left;
+            width: 45%; /* adjust to your liking, or use 100% for single-column cards */
+            margin: 0.5em;
+            border: 1px solid #bfbfbf;
+            border-radius: 0.5em;
+            background-color: transparent !important;
+            box-shadow: 0.25rem 0.25rem 0.5rem rgba(0, 0, 0, 0.25);
+        }
+
+
+        /* Turn each cell into a block when in card mode */
+        .cardTd {
+            display: block;
+            border: 0;
+        }
     
     </style>
     
@@ -68,7 +105,6 @@
                                     <div class="col-lg-10">
                                             <h1 class="mt-2 text-center" th:text="${verticalConfig.i18n(siteLanguage).verticalHomeTitle}"></h1>
                                             <p class="row p-2 mb-4" th:text="${verticalConfig.i18n(siteLanguage).verticalHomeDescription}"> </p>        
-                                            
                                     </div> 
                                 </div>
                         </div>
@@ -126,19 +162,14 @@
                                 
                             </div>
                         </div>
-
-
-                        
                         
                         <!--/* Technical Filters */-->                          
                         <div class="row card shadow mb-2">
                             <div class="card-header"><h2 class="h5">Caractéristiques</h2></div>
                             <div class="card-body">
                                 <th:block th:insert="~{inc/vertical-filters-technical.html}"></th:block>
-                                
                             </div>
                         </div>
-                        
                         
                                                                     
                     </div>
@@ -330,13 +361,56 @@
              
              createdRow: function(row, data, dataIndex){
                      // Add COLSPAN attribute
-                     $('td:eq(0)', row).attr('colspan', 9);                  
+                     $('td:eq(0)', row).attr('colspan', 5);                  
                      for ( i = 1; i < 5 ; i++) {                        
                         $('td:eq('+i+')', row).css('display', 'none');
                      }
-             },
+             }, 
              
-            columns: columns
+            columns: columns,
+            
+            buttons: [
+                "colvis",
+            ],
+            initComplete: function (settings, json) {
+                // Add a custom toggle button for “card” view
+                $(".dt-buttons .btn-group").append(
+                    '<a id="cv" class="btn btn-primary" href="#">Cartes</a>'
+                );
+
+                $("#cv").on("click", function (e) {
+                    e.preventDefault();
+
+                    if ($("#tableProducts").hasClass("card")) {
+                        // Currently in card mode -> switch back to list view
+                        // Remove any added “colHeader” spans
+                        $("#tableProducts tbody tr").each(function () {
+                            $(this).find("td span.colHeader").remove();
+                        });
+
+                    } else {
+                        // Currently in list view -> switch to card mode
+                        var labels = [];
+                        $("#tableProducts thead th").each(function () {
+                            labels.push($(this).text());
+                        });
+                        $("#tableProducts tbody tr").each(function () {
+                            var tds = $(this).find("td");
+                            tds.each(function (column) {
+                                // Only prepend label if this cell is visible
+                                if ($(this).css("display") !== "none") {
+                                    $("<span class='colHeader'>" + labels[column] + ":</span>")
+                                        .prependTo($(this));
+                                }
+                            });
+                        });
+                    }
+
+                    // Toggle the “card” class on the table
+                    $("#tableProducts td").toggleClass("cardTd");
+                    $("#tableProducts tr").toggleClass("cardTr");
+                });
+            }
 
         });
     };
