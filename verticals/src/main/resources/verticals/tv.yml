@@ -123,10 +123,10 @@ subsets:
    - id: "price"  # Unique identifier for the subset
      group: "price"
      criterias:        # List of criteria for the subset
-       - field: "price.minPrice.price "          # Field to be filtered
+       - field: "price.minPrice.price"          # Field to be filtered
          operator: "LOWER_THAN"         # Operator for the condition (e.g., EQUALS, NOT_EQUALS)
          value: "500"       # Value for the condition
-       - field: "price.minPrice.price "          # Field to be filtered
+       - field: "price.minPrice.price"          # Field to be filtered
          operator: "GREATER_THAN"         # Operator for the condition (e.g., EQUALS, NOT_EQUALS)
          value: "0"       # Value for the condition
      image: "example-image.png"  # URL or path to the image

@@ -55,6 +55,7 @@ public class VerticalSubsetController  extends AbstractVerticalController {
 		
 		
 		completeResponse(request, ret, config, vResponse);
+		ret.addObject("subset",subset);
 
 		return ret;
 	}

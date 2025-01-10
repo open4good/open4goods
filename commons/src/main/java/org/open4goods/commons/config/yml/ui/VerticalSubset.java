@@ -2,6 +2,7 @@ package org.open4goods.commons.config.yml.ui;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import org.open4goods.commons.model.Localisable;
 
@@ -21,6 +22,28 @@ public class VerticalSubset {
 	
 	private Localisable<String, String> description;
 
+	
+	
+	@Override
+	public int hashCode() {
+		return Objects.hash(id, group, criterias, image, url, title, description);
+	}
+
+	// equals method
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		if (obj == null || getClass() != obj.getClass()) {
+			return false;
+		}
+		VerticalSubset other = (VerticalSubset) obj;
+		return Objects.equals(id, other.id) && Objects.equals(group, other.group) && Objects.equals(criterias, other.criterias) && Objects.equals(image, other.image) && Objects.equals(url, other.url) && Objects.equals(title, other.title) && Objects.equals(description, other.description);
+	}
+	    
+	    
+	    
 	public List<SubsetCriteria> getCriterias() {
 		return criterias;
 	}
