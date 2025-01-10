@@ -97,7 +97,7 @@ public class ImageResizeInterceptor implements HandlerInterceptor {
                 BufferedImage sourceImage = findSourceImage(requestURI, dimensions != null);
 
                 if (sourceImage == null) {
-                    logger.warn("Source image not found for URI: {}", requestURI);
+                    logger.warn("Source image () not found for URI: {}", cachedFile.getAbsolutePath(),  requestURI);
                     response.sendError(HttpServletResponse.SC_NOT_FOUND, "Image not found");
                     return false;
                 }
@@ -185,6 +185,7 @@ public class ImageResizeInterceptor implements HandlerInterceptor {
         	baseName = baseName.substring(0, baseImageName.lastIndexOf("-"));
         }
         
+        // TODO(p1,feature) : Enable original webp handling, (infinite loop cause re intercepted)
         String[] extensions = { "png", "jpg", "jpeg"};
         for (String ext : extensions) {
             String url = IMAGE_BASE_URL + baseName + "." + ext;

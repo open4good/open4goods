@@ -37,13 +37,11 @@ public class VerticalController  extends AbstractVerticalController {
 			throws Exception {
 		ModelAndView ret = uiService.defaultModelAndView(("vertical-home"), request);
 
-
 		VerticalConfig config = verticalService.getConfigById(this.vertical);
 
 		// TODO : strategy of injection of products for nativ SEO
 
 		VerticalSearchRequest vRequest = buildDefaultRequest(ret, config);
-		
 		
 		VerticalSearchResponse vResponse = searchService.verticalSearch(config,vRequest);
 		
