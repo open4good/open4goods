@@ -67,7 +67,7 @@
 									<th:block th:each="bucket : ${verticalsBuckets}">
 										<div  class="col ps-0 py-3">
 	                                        <ul class="list-style-none">
-	                                            <li th:each="v : ${bucket}"><a  class="dropdown-item" th:href="${v.i18n(siteLanguage).verticalHomeUrl}" th:text="${v.i18n(siteLanguage).verticalHomeTitle}"></a></li>
+	                                            <li th:each="v : ${bucket}"><a  class="dropdown-item" th:href="'/'+${v.i18n(siteLanguage).verticalHomeUrl}" th:text="${v.i18n(siteLanguage).verticalHomeTitle}"></a></li>
 	                                        </ul>
 	                                    </div>
 									</th:block>
