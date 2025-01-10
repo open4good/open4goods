@@ -7,9 +7,13 @@ import org.open4goods.commons.model.Localisable;
 
 public class VerticalSubset {
 	
+	private String id;
+	
 	private List<SubsetCriteria> criterias = new ArrayList<>();
 	
 	private String image;
+	
+	private Localisable<String, String> url;
 	
 	private Localisable<String, String> title;
 	
@@ -45,6 +49,22 @@ public class VerticalSubset {
 
 	public void setDescription(Localisable<String, String> description) {
 		this.description = description;
+	}
+
+	public String getId() {
+		return id;
+	}
+
+	public void setId(String id) {
+		this.id = id;
+	}
+
+	public Localisable<String, String> getUrl() {
+		return url;
+	}
+
+	public void setUrl(Localisable<String, String> url) {
+		this.url = url;
 	}
 	
 	

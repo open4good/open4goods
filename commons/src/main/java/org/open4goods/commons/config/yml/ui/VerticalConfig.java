@@ -199,7 +199,8 @@ public class VerticalConfig{
 	private List<VerticalSubset> subsets = new ArrayList<VerticalSubset>();
 	
 	/**
-	 * The subset dedicated to brands;
+	 * The subset dedicated to brands; Technical, no yaml def needed
+	 * TODO(p2, design) : move outside
 	 */
 	private VerticalSubset brandsSubset = new VerticalSubset();
 	
