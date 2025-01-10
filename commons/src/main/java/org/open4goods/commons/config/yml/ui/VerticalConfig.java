@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -290,6 +291,25 @@ public class VerticalConfig{
 	}
 	
 	
+
+    /**
+     * Groups VerticalSubset objects into a LinkedHashMap, where the key is the group name
+     * and the value is the list of VerticalSubset objects for that group. The order of the keys
+     * in the map matches the order of appearance of the group values in the input list.
+     *
+     * @param subsets The input list of VerticalSubset objects to group.
+     * @return A LinkedHashMap where the key is the group name and the value is the list of VerticalSubset objects.
+     */
+    public LinkedHashMap<String, List<VerticalSubset>> getSubsetGroups() {
+        // Use LinkedHashMap to preserve the order of appearance of groups
+        return subsets.stream()
+                .collect(Collectors.groupingBy(
+                        VerticalSubset::getGroup,
+                        LinkedHashMap::new, // Ensures order of keys matches order of appearance
+                        Collectors.toList()
+                ));
+    }
+
 	/**
 	 * Compute the token names, used to do a product.offernames matching categories
 	 * 

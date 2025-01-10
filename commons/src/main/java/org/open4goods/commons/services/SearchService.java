@@ -11,6 +11,7 @@ import java.util.Set;
 import org.apache.commons.lang3.StringUtils;
 import org.open4goods.commons.config.yml.attributes.AttributeConfig;
 import org.open4goods.commons.config.yml.ui.SubsetCriteria;
+import org.open4goods.commons.config.yml.ui.SubsetCriteriaOperator;
 import org.open4goods.commons.config.yml.ui.VerticalConfig;
 import org.open4goods.commons.dao.ProductRepository;
 import org.open4goods.commons.model.constants.CacheConstants;
@@ -152,6 +153,34 @@ public class SearchService {
 				criterias.and(new Criteria(cr.getField()).is(cr.getValue()));
 			}
 		}
+		
+		request.getSubsets().forEach(subset -> {
+			subset.getCriterias().forEach(criteria -> {
+				switch (criteria.getOperator()) {
+				case LOWER_THAN: {
+	//				criterias.and(new Criteria(criteria.getField()).lessThan(Double.valueOf(criteria.getValue())));
+					break;
+				}
+				case GREATER_THAN: {
+//					criterias.and(new Criteria(criteria.getField()).greaterThan(Double.valueOf( criteria.getValue())));					
+					break;
+				}
+				case EQUALS: {
+					criterias.and(new Criteria(criteria.getField()).is(criteria.getValue()));
+
+					break;
+				}
+				
+				
+				
+				default:
+					throw new IllegalArgumentException("Unexpected value: " + criteria.getOperator());
+				}
+				
+			});
+		});
+		
+		
 		
 		// Adding the filter on excluded if set
 		if (request.getExcludedFilters().size()>0) {
