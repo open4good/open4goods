@@ -89,7 +89,7 @@ public class ImageResizeInterceptor implements HandlerInterceptor {
 
             File cachedFile = resourceService.getCacheFile(resource);
             if (!cachedFile.exists()) {
-                logger.info("Cache miss for file: {}", requestURI);
+            	logger.info("Cache miss for file: {}", requestURI);
 
                 int[] dimensions = parseDimensions(requestURI);
                 
@@ -97,7 +97,7 @@ public class ImageResizeInterceptor implements HandlerInterceptor {
                 BufferedImage sourceImage = findSourceImage(requestURI, dimensions != null);
 
                 if (sourceImage == null) {
-                    logger.warn("Source image () not found for URI: {}", cachedFile.getAbsolutePath(),  requestURI);
+                    logger.warn("Source image not found for URI: {}", requestURI);
                     response.sendError(HttpServletResponse.SC_NOT_FOUND, "Image not found");
                     return false;
                 }
@@ -189,11 +189,15 @@ public class ImageResizeInterceptor implements HandlerInterceptor {
         String[] extensions = { "png", "jpg", "jpeg"};
         for (String ext : extensions) {
             String url = IMAGE_BASE_URL + baseName + "." + ext;
+            logger.info("Testing image url  {} for basename {} (hasDimensions:{})",url,baseName, hasDimensionsArgument);
             BufferedImage image = fetchImageFromURL(url);
             if (image != null) {
-                return image;
+                logger.info("Found image url {} for basename {} (hasDimensions:{})",url,baseName, hasDimensionsArgument);
+            	return image;
             }
         }
+        logger.warn("No base image found for basename {} (hasDimensions:{})",baseName, hasDimensionsArgument);
+
         return null;
     }
 
