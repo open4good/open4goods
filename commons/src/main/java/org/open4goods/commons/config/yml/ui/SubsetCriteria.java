@@ -18,6 +18,11 @@ public class SubsetCriteria {
 		this.operator = operator;
 		this.value = value;
 	}
+	
+	@Override
+	public String toString() {
+		return field + " " + operator + " " + value;
+	}
 	public String getField() {
 		return field;
 	}

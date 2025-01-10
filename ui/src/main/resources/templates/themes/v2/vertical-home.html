@@ -114,7 +114,7 @@
                 <div class="row ">
                 
                     <!--/* Left column */-->                    
-                    <div class="col-lg-3 mb-3 mb-lg-0">
+                    <div th:unless="${subset}" class="col-lg-3 mb-3 mb-lg-0">
                     
                     
                     
@@ -148,10 +148,6 @@
                              
                              </th:block>
                              
-                             
-                             
-                                
-                                
                             </div>
                         </div>
                         
@@ -182,17 +178,12 @@
                                 </ul>
                             </div>
                         </div>   
-                        
-
-                        
-                        
-                        
                                                                     
                     </div>
 
                     <!--/* Right column */-->
-                    <div class="col-lg-9">
-                        <div class="ms-1 row card shadow">
+                    <div th:class="${subset} ? 'col-lg-12' : 'col-lg-9'">
+                        <div class="row card shadow">
 
 
 							<div class="dt-buttons">
@@ -202,21 +193,11 @@
 						
 							</div>
 							
-							
                                 <th:block th:insert="~{inc/vertical-filters-price.html}"></th:block>
-							
 							
                                 <th:block th:insert="~{inc/vertical-filters-eco.html}"></th:block>
 
-
                                 <th:block th:insert="~{inc/vertical-filters-technical.html}"></th:block>
-							
-							
-							
-							
-							
-							
-	                           						
 							
     							<th:block th:insert="~{inc/vertical-table.html}"></th:block>
                         </div>
@@ -233,8 +214,6 @@
     <!-- Specific vertical rendering scripts -->
     <th:block th:insert="~{inc/vertical-script.html}"></th:block>    
 
-    
-    
     
 <script>
 /////////////////////
