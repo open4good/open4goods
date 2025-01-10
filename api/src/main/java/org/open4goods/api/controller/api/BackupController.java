@@ -22,7 +22,7 @@ import io.swagger.v3.oas.annotations.Operation;
  */
 @RestController
 @PreAuthorize("hasAuthority('" + RolesConstants.ROLE_ADMIN + "')")
-@Profile("!beta")
+//@Profile("!beta")
 public class BackupController {
 
 	private final BackupService backupService;
