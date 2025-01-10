@@ -9,6 +9,8 @@ public class VerticalSubset {
 	
 	private String id;
 	
+	private String group;
+	
 	private List<SubsetCriteria> criterias = new ArrayList<>();
 	
 	private String image;
@@ -65,6 +67,14 @@ public class VerticalSubset {
 
 	public void setUrl(Localisable<String, String> url) {
 		this.url = url;
+	}
+
+	public String getGroup() {
+		return group;
+	}
+
+	public void setGroup(String group) {
+		this.group = group;
 	}
 	
 	

@@ -135,10 +135,21 @@
                         <div class="row card shadow mb-2">
                             <div class="card-header"><h2 class="h5">Accès rapide</h2></div>
                             <div class="card-body">
-                                Nudger a développé un score d'impact écologique pour les téléviseurs.
-                                <a class="btn btn-primary btn-sm"  th:href="'/' + ${verticalPath} + '/ecoscore'">
-                                    Eco score téléviseurs
-                                </a>
+                             
+                             <th:block th:each="subsetGroup : ${verticalConfig.getSubsetGroups()}">
+                             
+                                <span th:text="${subsetGroup.key}"></span>
+                                
+                                <ul>
+                                <li th:each="subset : ${subsetGroup.value}">
+                                    <a th:href="'/'+${verticalPath} +'/' + ${subset.url.i18n(siteLanguage)}" th:text="${subset.title.i18n(siteLanguage)}"></a>
+                                </li>
+                                </ul>
+                             
+                             </th:block>
+                             
+                             
+                             
                                 
                                 
                             </div>
