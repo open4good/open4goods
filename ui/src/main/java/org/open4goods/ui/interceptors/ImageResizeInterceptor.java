@@ -46,7 +46,8 @@ public class ImageResizeInterceptor implements HandlerInterceptor {
     private static final Logger logger = LoggerFactory.getLogger(ImageResizeInterceptor.class);
 
     /** Base URL for fetching source images. Can be configured for deployment. */
-    private static final String IMAGE_BASE_URL = "http://127.0.0.1:8082";
+    // TODO(p1, conf) a big hack here, to bypass 401 on beta. Means that we cache the prod, on every environments !
+    private static final String IMAGE_BASE_URL = "https://nudger.fr";
 
     /** Regex pattern for parsing dimensions from the request URI. */
     private static final Pattern DIMENSION_PATTERN = Pattern.compile(
