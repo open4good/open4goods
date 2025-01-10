@@ -3,6 +3,8 @@ package org.open4goods.commons.config.yml.ui;
 public class SubsetCriteria {
 
 	private String field;
+	// Optional owning group name
+	private String group;
 	private SubsetCriteriaOperator operator;
 	private String value;
 	

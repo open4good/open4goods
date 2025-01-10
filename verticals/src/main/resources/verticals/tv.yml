@@ -117,6 +117,29 @@ i18n:
           faIcon: "fa-star"
 
  
+          
+          
+subsets:
+   - id: "example-id"  # Unique identifier for the subset
+     group: "price"
+     criterias:        # List of criteria for the subset
+       - field: "category"          # Field to be filtered
+         operator: "EQUALS"         # Operator for the condition (e.g., EQUALS, NOT_EQUALS)
+         value: "electronics"       # Value for the condition
+       - field: "price"
+         operator: "GREATER_THAN"
+         value: "100"
+     image: "example-image.png"  # URL or path to the image
+     url:                       # Localisable URL object
+       en: "https://example.com/en"  # URL for English
+       fr: "https://example.com/fr"  # URL for French
+     title:                     # Localisable title object
+       en: "English Title"
+       fr: "French Title"
+     description:               # Localisable description object
+       en: "Description in English"
+       fr: "Description in French"              
+          
 ##############################################################################
 # Custom search filters : the following filters
 # will also be availlable in search for this vertical (must be an attribute or a score)
