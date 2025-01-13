@@ -133,12 +133,16 @@ subsets:
      url:                       # Localisable URL object
        en: "petits-prix"  # URL for English
        fr: "petits-prix"  # URL for French
-     title:                     # Localisable title object
+     caption:                     # Localisable title object
        en: "English Title"
        fr: "< 500 €"
+
+     title:                     # Localisable title object
+       en: "English Title"
+       fr: "TV pas chères"
      description:               # Localisable description object
        en: "Description in English"
-       fr: "Les TV pas chères"              
+       fr: "Les TV dont le prix est inférieur à 500€"              
           
 ##############################################################################
 # Custom search filters : the following filters

@@ -105,7 +105,7 @@ public class UrlHandlerMappingConfig {
 				//////////////// 
 				// TODO : Forward i18n
 				LOGGER.info("Adding vertical brand pages mapping : {}", baseUrl);				
-				urlMap.put(baseUrl + i18n.getValue().getVerticalHomeUrl()+"/marques/*", new VerticalBrandsController(verticalService, searchService, uiService, item.getId(), blogService, serialisationService)  );
+				urlMap.put(baseUrl +"/marques/*", new VerticalBrandsController(verticalService, searchService, uiService, item.getId(), blogService, serialisationService)  );
 
 				
 				/////////////////
