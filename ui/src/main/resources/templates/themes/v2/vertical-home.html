@@ -102,10 +102,25 @@
                                     <div class="col-lg-2 text-center">
                                             <img class="mt-2" width="150" th:src="'/images/verticals/' + ${vertical} + '.jpg'">
                                     </div>
-                                    <div class="col-lg-10">
+                                    
+                                    
+                                    
+                                    
+                                    <div th:unless="${subset}" class="col-lg-10">
                                             <h1 class="mt-2 text-center" th:text="${verticalConfig.i18n(siteLanguage).verticalHomeTitle}"></h1>
                                             <p class="row p-2 mb-4" th:text="${verticalConfig.i18n(siteLanguage).verticalHomeDescription}"> </p>        
-                                    </div> 
+                                    </div>
+                                    
+                                    
+                                    <div th:if="${subset}" class="col-lg-10">
+                                            <h1 class="mt-2 text-center"   th:text="${subset.title.i18n(siteLanguage)}"></h1>
+                                             <p class="row p-2 mb-4" th:utext="${subset.description.i18n(siteLanguage)}"> </p>     
+                                    </div>
+                                    
+                                  
+                                    
+                                    
+                                     
                                 </div>
                         </div>
                     </div>
@@ -133,7 +148,7 @@
 
                         <!--/* Acces rapide */--> 
                         <div class="row card shadow mb-2">
-                            <div class="card-header"><h2 class="h5">Accès rapide</h2></div>
+                            <div class="card-header"><h2 class="h5">Vouc cherchez :</h2></div>
                             <div class="card-body">
                              
                              <th:block th:each="subsetGroup : ${verticalConfig.getSubsetGroups()}">
@@ -142,7 +157,7 @@
                                 
                                 <ul>
                                 <li th:each="subset : ${subsetGroup.value}">
-                                    <a th:href="'/'+${verticalPath} +'/' + ${subset.url.i18n(siteLanguage)}" th:text="${subset.title.i18n(siteLanguage)}"></a>
+                                    <a th:href="'/'+${verticalPath} +'/' + ${subset.url.i18n(siteLanguage)}" th:text="${subset.caption.i18n(siteLanguage)}"></a>
                                 </li>
                                 </ul>
                              

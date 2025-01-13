@@ -18,9 +18,12 @@ public class VerticalSubset {
 	
 	private Localisable<String, String> url;
 	
-	private Localisable<String, String> title;
+	// For rendering in list in vertical-home
+	private Localisable<String, String> caption = new Localisable<String, String>();
 	
-	private Localisable<String, String> description;
+	private Localisable<String, String> title = new Localisable<String, String>();
+	
+	private Localisable<String, String> description = new Localisable<String, String>();
 
 	
 	
@@ -98,6 +101,14 @@ public class VerticalSubset {
 
 	public void setGroup(String group) {
 		this.group = group;
+	}
+
+	public Localisable<String, String> getCaption() {
+		return caption;
+	}
+
+	public void setCaption(Localisable<String, String> caption) {
+		this.caption = caption;
 	}
 	
 	
