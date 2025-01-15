@@ -105,17 +105,23 @@
                                             <img class="mt-2" th:src="'/images/verticals/' + ${vertical} + '.webp'">
                                     </div>
                                     
-                                    
-                                    
-                                    
                                     <div th:unless="${subset}" class="col-lg-10">
                                             <h1 class="mt-2 text-center" th:text="${verticalConfig.i18n(siteLanguage).verticalHomeTitle}"></h1>
-                                            <p class="row p-2 mb-4" th:text="${verticalConfig.i18n(siteLanguage).verticalHomeDescription}"> </p>        
-                                    </div>
+                                            <!--  Breadcrumb -->
+                                            <th:block 
+                                                    th:with="vConf = ${verticaConfig}", 
+                                                    th:insert="~{inc/breadcrumb-vertical.html}">
+                                            </th:block>                                                
+                                            <p class="row p-2 mb-4" th:text="${verticalConfig.i18n(siteLanguage).verticalHomeDescription}"> </p>
+							     	</div>
                                     
                                     
                                     <div th:if="${subset}" class="col-lg-10">
                                             <h1 class="mt-2 text-center"   th:text="${subset.title.i18n(siteLanguage)}"></h1>
+                                            <th:block 
+                                                    th:with="vConf = ${verticaConfig}, pageLabel=${subset.caption.i18n(siteLanguage)}", 
+                                                    th:insert="~{inc/breadcrumb-vertical.html}">
+                                            </th:block> 
                                              <p class="row p-2 mb-4" th:utext="${subset.description.i18n(siteLanguage)}"> </p>     
                                     </div>
                                     
@@ -141,7 +147,7 @@
                             <div class="card-body">
                                 Nudger a développé un score d'impact écologique spécifique pour les <th:block th:text="${verticalConfig.i18n(siteLanguage).verticalHomeTitle.toLowerCase()}"></th:block>.
                                <div class="mt-2 text-center">
-	                                <a class="btn btn-primary btn-sm"  th:href="'/' + ${verticalPath} + '/ecoscore'">
+	                                <a class="btn btn-primary btn-sm m-2"  th:href="'/' + ${verticalPath} + '/ecoscore'">
 	                                    Impact Score <th:block th:text="${verticalConfig.i18n(siteLanguage).verticalHomeTitle.toLowerCase()}"></th:block>
 	                                </a>
                                </div>
