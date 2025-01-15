@@ -40,6 +40,21 @@
   width: 5%;
 }
     
+    
+    <style>
+    /* Ensure consistent height for the title container */
+    .title-container {
+        max-width: 100%;
+        height: 2.5em; /* Adjust based on your font size */
+        line-height: 1.25em; /* Match the line height to your font size */
+        overflow: hidden; /* Hide overflow content */
+        white-space: nowrap; /* Prevent carriage returns */
+        text-overflow: ellipsis; /* Add ellipsis for truncated text */
+    }
+	</style>
+	
+
+
     </style>
 </head>
 
@@ -55,7 +70,7 @@
     </header>
     
     <main>  
-        <section class="section-header overflow-hidden pt-7 pt-lg-8 pb-9 pb-lg-12 bg-primary text-white bg-primary">
+        <section class="section bg-primary text-white bg-primary">
             <div class="container">
                 <div class="row">
                     <div class="col-12">
@@ -69,14 +84,14 @@
                             <div class="card shadow mb-4">
                                 <div class="card-body px-4 py-4 text-center text-md-left">
                                     <div class="row align-items-center">
-                                        <div class="col-md-5">
+                                        <div class="col-lg-4">
                                             <h2 class="text-black mb-3 text-center">Impact Score</h2>
                                             <p class="mb-0">Notre ImpactScore est disponible pour les catégories suivantes. Vous trouverez aussi une information approfondie sur les produits.</p>
-                                            <div class="text-right mt-2">
+                                            <div class="text-center mt-4">
                                                 <a href="/ecoscore" class="btn btn-sm btn-primary animate-up-1">En savoir plus</a>
                                             </div>
                                         </div>
-                                        <div class="col-12 col-md-6 mt-4 mt-md-0 text-center">
+                                        <div class="col-12 col-lg-8 mt-4 mt-md-0 text-center">
                                         <!-- 
                                             <th:block th:with="image='/icons/categories/electronics.png', title='Produits électroniques', googleTaxo=222" 
                                                       th:insert="~{inc/category-shortcut.html}">
@@ -89,46 +104,37 @@
                                             <br class="d-block d-md-none mt-3 mt-md-0 text-black">
                                          -->
 
-											<div class="container my-5 text-black">
-												<div id="multiItemCarousel" class="carousel slide" data-bs-ride="carousel">
-													<!-- Indicators -->
-													<div class="carousel-indicators">
-														<button th:each="verticalGroup, stat : ${verticalsCarrouselBuckets}" type="button" data-bs-target="#multiItemCarousel" th:data-bs-slide-to="${stat.index}"
-															th:classappend="${stat.index == 0} ? 'active'" th:aria-label="'Slide ' + ${stat.index + 1}"
-														></button>
-													</div>
+										<div class="container my-5 text-black">
+										    <div id="multiItemCarousel" class="carousel slide" data-bs-ride="carousel">
+										        <!-- Indicators -->
+										        <div class="carousel-indicators">
+										            <button th:each="verticalGroup, stat : ${verticalsCarrouselBuckets}" type="button" data-bs-target="#multiItemCarousel" th:data-bs-slide-to="${stat.index}"
+										                th:classappend="${stat.index == 0} ? 'active'" th:aria-label="'Slide ' + ${stat.index + 1}"></button>
+										        </div>
+										
+										        <!-- Carousel Items -->
+										        <div class="carousel-inner">
+										            <div th:each="verticalGroup, stat : ${verticalsCarrouselBuckets}" th:class="'carousel-item' + (${stat.index == 0} ? ' active' : '')">
+										                <div class="row justify-content-center">
+										                    <div th:each="vertical : ${verticalGroup}" class="col-12 col-md-4">
+										                        <a th:href="'/'+${vertical.i18n(siteLanguage).verticalHomeUrl}" class="d-flex flex-column align-items-center justify-content-center h-100 text-center">
+										                            <img th:src="'/images/verticals/' + ${vertical.id} + '-360.webp'" class="img-fluid lazy" th:alt="'Illustration de ' + ${vertical.i18n(siteLanguage).verticalHomeTitle}" loading="lazy" style="max-height: 200px; object-fit: contain;">
+                                                                    <span class="h5 mt-auto text-truncate title-container" th:text="${vertical.i18n(siteLanguage).verticalHomeTitle}"></span>										                        </a>
+										                    </div>
+										                </div>
+										            </div>
+										        </div>
+										
+										        <!-- Controls -->
+										        <button class="carousel-control-prev" type="button" data-bs-target="#multiItemCarousel" data-bs-slide="prev">
+										            <span class="carousel-control-prev-icon" aria-hidden="true"></span> <span class="visually-hidden">Précédent</span>
+										        </button>
+										        <button class="carousel-control-next" type="button" data-bs-target="#multiItemCarousel" data-bs-slide="next">
+										            <span class="carousel-control-next-icon" aria-hidden="true"></span> <span class="visually-hidden">Suivant</span>
+										        </button>
+										    </div>
+										</div>
 
-													<!-- Carousel Items -->
-													<div class="carousel-inner">
-														<div th:each="verticalGroup, stat : ${verticalsCarrouselBuckets}" th:class="'carousel-item' + (${stat.index == 0} ? ' active' : '')">
-															<div class="row justify-content-center">
-																<div th:each="vertical : ${verticalGroup}" class="col-12 col-md-4 text-center">
-																	<img th:src="'/images/verticals/' + ${vertical.id} + '.webp'" class="d-block w-100 lazy" th:alt="'Illustration de ' + ${vertical.i18n(siteLanguage).verticalHomeTitle}" loading="lazy">
-																	<h3 class="h5 mt-2" th:text="${vertical.i18n(siteLanguage).verticalHomeTitle}"></h3>
-																</div>
-															</div>
-														</div>
-													</div>
-
-													<!-- Controls -->
-													<button class="carousel-control-prev" type="button" data-bs-target="#multiItemCarousel" data-bs-slide="prev">
-														<span class="carousel-control-prev-icon" aria-hidden="true"></span> <span class="visually-hidden">Précédent</span>
-													</button>
-													<button class="carousel-control-next" type="button" data-bs-target="#multiItemCarousel" data-bs-slide="next">
-														<span class="carousel-control-next-icon" aria-hidden="true"></span> <span class="visually-hidden">Suivant</span>
-													</button>
-												</div>
-											</div>
-
-
-
-
-                                            
-                                            
-                                            
-                                            
-                                            
-                                            
                                             
                                             <a href="/categories" class="fw-bold text-black text-underline mx-1">Toutes les catégories</a>
                                         </div>
@@ -143,7 +149,7 @@
                                 <div class="card-body px-4 py-4 text-center text-md-left">
                                     <div class="row align-items-center">
                                         <h2 class="text-black mb-3 text-center">Contribution écologique</h2>
-                                        <div class="col-md-8">
+                                        <div class="col-lg-7">
                                             <!--/* 
                                               8) Added an aria-label on the search form for better accessibility
                                                  and replaced <hr/> with a simple styling separation (if needed, use CSS).
@@ -164,7 +170,7 @@
                                                 </div>
                                             </form>
                                         </div>
-                                        <div class="col-12 col-md-4 mt-4 mt-md-0 text-md-right">
+                                        <div class="col-12 col-lg-5 mt-4 mt-md-0 text-md-right">
                                             <p class="mb-0">10% de nos bénéfices servent à amoindrir l'impact de votre achat. 
                                                 C'est valable sur nos millions de produits, et vous pouvez voter pour 
                                                 l'attribution de cette compensation !
@@ -182,18 +188,26 @@
                         <div class="row mb-5">
                             <div class="col-12 col-md-6 col-lg-4">
                                 <div class="card shadow p-1 p-md-4 mb-4 mb-lg-0">
-                                    <div class="card-body">
-                                        <h3 class="h5 mb-3 text-black">Les meilleurs prix !</h3>
-                                        <p>Nous vous offrons les meilleurs prix du marché. Mieux, nous traçons 
-                                           l'historique des prix pour vous permettre d'acheter au meilleur moment 
-                                           et au meilleur prix.</p>
-                                    </div>
+                                  <div class="card-body">
+									    <h3 class="h5 mb-3 text-black">
+									        <i class="fas fa-euro-sign text-success me-2"></i> 
+									        Les meilleurs prix !
+									    </h3>
+									    <p>
+									        Nous vous offrons les meilleurs prix du marché. Mieux, nous traçons 
+									        l'historique des prix pour vous permettre d'acheter au meilleur moment 
+									        et au meilleur prix.
+									    </p>
+									</div>
                                 </div>
                             </div>
                             <div class="col-12 col-md-6 col-lg-4">
                                 <div class="card shadow p-1 p-md-4 mb-4 mb-lg-0">
                                     <div class="card-body">
-                                        <h3 class="h5 mb-3 text-black">Boosté à l'IA</h3>
+                                        <h3 class="h5 mb-3 text-black">
+                                        <i class="fas fa-robot text-success me-2"></i>
+                                        Boosté à l'IA
+                                        </h3>
                                         <p>Nous présentons beaucoup d'informations sur les produits évalués, 
                                            en croisant notre savoir-faire en collecte de la donnée avec 
                                            les dernières technologies IA.</p>
@@ -203,7 +217,10 @@
                             <div class="col-12 col-md-6 col-lg-4">
                                 <div class="card shadow p-1 p-md-4 mb-4 mb-lg-0">
                                     <div class="card-body">
-                                        <h3 class="h5 mb-3 text-black">Libre et ouvert</h3>
+                                        <h3 class="h5 mb-3 text-black">
+                                        <i class="fa-brands fa-github text-success me-2"></i>
+                                        Libre et ouvert
+                                        </h3>
                                         <p>Nous n'utilisons pas de cookie et ne collectons aucune donnée personnelle. 
                                            Dans une logique de communs numériques, Nudger est open-data et open-source.</p>
                                     </div>
