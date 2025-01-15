@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -293,13 +293,15 @@ public class VerticalsConfigService {
 	 * @param maxBucket the maximum number of buckets to return.
 	 * @return a list of buckets, where each bucket is a list of VerticalConfig objects.
 	 */
+	//TODO(p1, perf) : cache
 	public List<List<VerticalConfig>> getImpactScoreVerticalsByBuckets(int bucketSize, int maxBucket) {
 	    // Get the map of VerticalConfig objects
 	    Map<String, VerticalConfig> theConfigs = getConfigs();
 
 	    // Create a list to hold all VerticalConfig objects
-	    List<VerticalConfig> configList = new ArrayList<>(theConfigs.values());
+	    List<VerticalConfig> configList = new ArrayList<>(getConfigsWithoutDefault());
 
+	    
 	    // Create a list to hold the final buckets
 	    List<List<VerticalConfig>> buckets = new ArrayList<>();
 
@@ -407,17 +409,16 @@ public class VerticalsConfigService {
 	
 
 	/**
-	 *
-	 * @return all configs, except the _default.  Allow to filter on enabled verticals
+	 * @return all configs, except the _default. Allows filtering on enabled verticals,
+	 * and returns the list ordered by the VerticalConfig.order field.
 	 */
-	public Collection<VerticalConfig>  getConfigsWithoutDefault(boolean onlyEnabled) {
-		if (onlyEnabled) {
-			return getConfigs().values().stream().filter(e->e.isEnabled() == true).toList();			
-		} else {
-			return getConfigs().values();
-		}
+	// TODO (p1, perf): cache
+	public List<VerticalConfig> getConfigsWithoutDefault(boolean onlyEnabled) {
+	    return getConfigs().values().stream()
+	        .filter(config -> !onlyEnabled || config.isEnabled())
+	        .sorted(Comparator.comparingInt(VerticalConfig::getOrder))
+	        .toList();
 	}
-	
 
 	/**
 	 *

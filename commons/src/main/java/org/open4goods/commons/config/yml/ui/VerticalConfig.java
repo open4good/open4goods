@@ -156,6 +156,11 @@ public class VerticalConfig{
 	 */
 	private Set<String> brandsExclusion = new HashSet<String>();
 	
+	/**
+	 * The order of this vertical, for restitution 
+	 */
+	
+	private Integer order = Integer.MAX_VALUE;
 	
 	/**
 	 * The I18n URL Mappings. Think SEO !
@@ -935,6 +940,14 @@ public class VerticalConfig{
 
 	public void setBrandsSubset(VerticalSubset brandsSubset) {
 		this.brandsSubset = brandsSubset;
+	}
+
+	public Integer getOrder() {
+		return order;
+	}
+
+	public void setOrder(Integer order) {
+		this.order = order;
 	}
 
 

@@ -1,10 +1,16 @@
 
 
-
-
-        <th:block th:insert="~{inc/vertical-filters.html}"></th:block>
 <div>
-     <a id="cv" class="btn btn-primary" href="#">Vue carte</a>
+<div class="row">
+    <span>
+        <button type="button" class="mt-2 btn btn-secondary" data-bs-toggle="modal" data-bs-target="#exampleModal">Filtrer</button>
+        <button id="cv" class="float-end btn btn-light" title="Vue carte"><i class="fas fa-th fa-2x"></i> <!-- Default icon: Grid view -->    </button>
+    </span>
+
+</div>
+                            
+
+
 
 
     <table id="tableProducts" class="table table-bordered" cellspacing="0" width="100%">

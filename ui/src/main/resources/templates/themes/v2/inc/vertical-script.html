@@ -239,9 +239,23 @@
     // On document Load
     $(document).ready(function() {
         
+    	 
+    	 
         // Switch view / lit
         $("#cv").on("click", function (e) {
-                    e.preventDefault();
+		        	 e.preventDefault();
+		             const icon = $(this).find('i');
+
+		             // Toggle between grid view and list view icons
+		             if (icon.hasClass('fa-th')) {
+		                 icon.removeClass('fa-th').addClass('fa-list'); // Switch to list view
+		                 $(this).attr('title', 'Vue liste'); // Update the tooltip
+		             } else {
+		                 icon.removeClass('fa-list').addClass('fa-th'); // Switch to grid view
+		                 $(this).attr('title', 'Vue carte'); // Update the tooltip
+		             }
+		             
+		             // Handle the view class 
 
                     if ($("#tableProducts").hasClass("card")) {
                         viewState="list";

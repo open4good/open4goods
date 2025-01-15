@@ -90,7 +90,9 @@
     
     <main>  
   
-        <div class="section section-lg mb-6">
+
+
+		<div class="section section-lg mb-6">
             <div class="container container-semi-fluid">
 
                 <!--/* Hero */-->                       
@@ -126,6 +128,7 @@
                     </div>
                 </div>
                         
+   
                 <div class="row ">
                 
                     <!--/* Left column */-->                    
@@ -138,22 +141,23 @@
                             <div class="card-header"><h2 class="h5">Impact Score téléviseur</h2></div>
                             <div class="card-body">
                                 Nudger a développé un score d'impact écologique pour les téléviseurs.
-                                <a class="btn btn-primary btn-sm"  th:href="'/' + ${verticalPath} + '/ecoscore'">
-                                    Eco score téléviseurs
-                                </a>
-                                
+                               <div class="mt-2 text-center">
+	                                <a class="btn btn-primary btn-sm"  th:href="'/' + ${verticalPath} + '/ecoscore'">
+	                                    Eco score téléviseurs
+	                                </a>
+                               </div>
                                 
                             </div>
                         </div>
 
                         <!--/* Acces rapide */--> 
                         <div class="row card shadow mb-2">
-                            <div class="card-header"><h2 class="h5">Vouc cherchez :</h2></div>
+                            <div class="card-header"><h2 class="h5">Vous cherchez :</h2></div>
                             <div class="card-body">
                              
                              <th:block th:each="subsetGroup : ${verticalConfig.getSubsetGroups()}">
                              
-                                <span th:text="${subsetGroup.key}"></span>
+                                <span th:text="#{'subset.'+${subsetGroup.key}+'.panelTitle'}"></span>
                                 
                                 <ul>
                                 <li th:each="subset : ${subsetGroup.value}">
@@ -199,22 +203,7 @@
                     <!--/* Right column */-->
                     <div th:class="${subset} ? 'col-lg-12' : 'col-lg-9'">
                         <div class="row card shadow">
-
-
-							<div class="dt-buttons">
-								<div class="dt-buttons btn-group">
-				
-								</div>
-						
-							</div>
-							
-                                <th:block th:insert="~{inc/vertical-filters-price.html}"></th:block>
-							
-                                <th:block th:insert="~{inc/vertical-filters-eco.html}"></th:block>
-
-                                <th:block th:insert="~{inc/vertical-filters-technical.html}"></th:block>
-							
-    							<th:block th:insert="~{inc/vertical-table.html}"></th:block>
+							<th:block th:insert="~{inc/vertical-table.html}"></th:block>
                         </div>
 
                     </div>
@@ -223,37 +212,83 @@
         </div>
     </main>
 
+
+
+
+
+        <!-- Attributes filters modal -->
+        <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-xxl">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalLabel">Filtres de recherche</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                    <div class="row">
+						<!--/* Price Filters */-->
+						<div class="col-lg-4">
+							<div class="card shadow mb-2">
+								<div class="card-header">
+									<h2 class="h5">Prix</h2>
+								</div>
+								<div class="">
+									<th:block th:insert="~{inc/vertical-filters-price.html}"></th:block>
+
+								</div>
+							</div>
+						</div>
+
+						<!--/* Ecological Filters */-->
+						<div class="col-lg-4">
+							<div class="card shadow mb-2 border-success text-secondary">
+								<div class="card-header">
+									<h2 class="h5">Eco-Filtres</h2>
+								</div>
+								<div class="">
+									<th:block th:insert="~{inc/vertical-filters-eco.html}"></th:block>
+								</div>
+							</div>
+						</div>
+                    
+	                        <!--/* Technical Filters */-->                          
+                        <div class="col-lg-4">
+	                        <div class="card shadow mb-2">
+	                            <div class="card-header"><h2 class="h5">Caractéristiques</h2></div>
+	                            <div class="">
+	                                <th:block th:insert="~{inc/vertical-filters-technical.html}"></th:block>
+	                            </div>
+	                        </div>                        
+                        </div>
+                    
+                    
+                    </div>
+                    
+                             
+                                        
+
+
+
+                        
+                        
+
+                        
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
     <!--/* Footer */-->
     <th:block th:insert="~{inc/footer.html}"></th:block>    
 
     <!-- Specific vertical rendering scripts -->
     <th:block th:insert="~{inc/vertical-script.html}"></th:block>    
 
-    
-<script>
-/////////////////////
-// Filter togglers
-///////////////////// 
-  document.addEventListener("DOMContentLoaded", function () {
-    // Add event listeners to all accordion headers
-    document.querySelectorAll(".accordion-button").forEach(function (button) {
-      button.addEventListener("click", function () {
-        const targetId = this.getAttribute("data-target");
-        const targetElement = document.getElementById(targetId);
 
-        if (targetElement.classList.contains("show")) {
-          // Collapse the body if it is visible
-          targetElement.classList.remove("show");
-          this.setAttribute("aria-expanded", "false");
-        } else {
-          // Expand the body if it is hidden
-          targetElement.classList.add("show");
-          this.setAttribute("aria-expanded", "true");
-        }
-      });
-    });
-  });
-</script>
 
 
 
