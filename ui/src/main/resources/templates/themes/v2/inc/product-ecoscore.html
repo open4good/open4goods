@@ -1,8 +1,33 @@
 <div class="row pt-4">
-	<div class="col-12 col-lg-6">
+
+
+        <div id="ecoScore" class="card card__radius--mini border-0">
+            <div class="card-body text-center">
+                        <div>
+                        <a href="#"> Impact Score : 
+	                        <span class="display-5" th:text="${product.ecoscore.on20()}"></span>
+	                        <span class="display-6">/20</span>
+                        </a>
+                        </div>
+  <div class="star-rating" data-rating="3.7" aria-label="Rating: 3.7 out of 5 stars">
+    <div class="stars">
+        <span class="star"></span>
+        <span class="star"></span>
+        <span class="star"></span>
+        <span class="star"></span>
+        <span class="star"></span>
+    </div>
+</div>
+            
+            
+            
+            
+            </div>
+        </div>
+            
+	<!-- <div class="col-12 col-lg-6">
 		<div id="ecoScore" class="card card__radius--mini border-0">
 			<div class="card-body">
-				<!-- 20 rating -->
 				<div class="d-flex align-items-center justify-content-center">
 					<h2 class="text-gradiant text-gradiant_ecoscore">
 						<span class="display-2" th:text="${product.ecoscore.on20()}"></span>
@@ -13,9 +38,7 @@
 		</div>
 	</div>
 	<div class="col-12 col-lg-6">
-		<!-- Ecoscore -->
 		<div class="card card__radius--mini border-0">
-			<!--  Ecoscore  -->
 			<div class="card-body">
 				<a href="#markerEcological">
 					 <img 
@@ -27,4 +50,5 @@
 			</div>
 		</div>
 	</div>
+	 -->
 </div>

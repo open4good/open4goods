@@ -1,3 +1,63 @@
+.star-rating {
+    display: inline-block;
+    position: relative;
+    line-height: 0; /* Prevent spacing issues */
+}
+
+.star-rating .stars {
+    display: flex;
+    justify-content: center;
+}
+
+.star-rating .star {
+    display: inline-block;
+    width: 3em;
+    height: 3em;
+    margin: 0 0.1em;
+    clip-path: polygon(
+        50% 0%,
+        61% 35%,
+        98% 35%,
+        68% 57%,
+        79% 91%,
+        50% 70%,
+        21% 91%,
+        32% 57%,
+        2% 35%,
+        39% 35%
+    );
+    background: linear-gradient(90deg, #00D19F, #00A7FF); /* Gradient for active stars */
+    background-size: 100%; /* Full gradient for full stars */
+    opacity: 0.3; /* Default transparency for disabled stars */
+    transition: opacity 0.3s;
+}
+
+.star-rating .star.full {
+    opacity: 1; /* Fully opaque for filled stars */
+}
+
+.star-rating .star.partial {
+    background: linear-gradient(
+        90deg,
+        #00D19F calc(var(--partial-width, 0%)),
+        transparent calc(var(--partial-width, 0%))
+    ); /* Gradient stops at the partial width */
+    opacity: 1;
+}
+
+.star-rating .star:hover {
+    cursor: pointer;
+}
+
+
+
+
+
+
+
+
+
+
 .modal-xxl {
     max-width: 90%; /* Adjust width as needed */
     width: 90%; /* Ensure responsiveness */
