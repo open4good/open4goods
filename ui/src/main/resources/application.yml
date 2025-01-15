@@ -63,6 +63,7 @@ spring:
 allowedImagesSizeSuffixes:
   - 30     
   - 50    
+  
   - 100
   - 360 
   - 1000 
