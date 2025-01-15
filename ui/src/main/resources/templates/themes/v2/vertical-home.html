@@ -102,7 +102,7 @@
                             
                                 <div class="d-flex flex-wrap align-items-center row">
                                     <div class="col-lg-2 text-center">
-                                            <img class="mt-2" width="150" th:src="'/images/verticals/' + ${vertical} + '.jpg'">
+                                            <img class="mt-2" th:src="'/images/verticals/' + ${vertical} + '.webp'">
                                     </div>
                                     
                                     
@@ -138,12 +138,11 @@
                     
                         <!--/* Calcul impact score */--> 
                         <div class="row card shadow mb-2">
-                            <div class="card-header"><h2 class="h5">Impact Score téléviseur</h2></div>
                             <div class="card-body">
-                                Nudger a développé un score d'impact écologique pour les téléviseurs.
+                                Nudger a développé un score d'impact écologique spécifique pour les <th:block th:text="${verticalConfig.i18n(siteLanguage).verticalHomeTitle.toLowerCase()}"></th:block>.
                                <div class="mt-2 text-center">
 	                                <a class="btn btn-primary btn-sm"  th:href="'/' + ${verticalPath} + '/ecoscore'">
-	                                    Eco score téléviseurs
+	                                    Impact Score <th:block th:text="${verticalConfig.i18n(siteLanguage).verticalHomeTitle.toLowerCase()}"></th:block>
 	                                </a>
                                </div>
                                 
