@@ -1,3 +1,9 @@
+.modal-xxl {
+    max-width: 90%; /* Adjust width as needed */
+    width: 90%; /* Ensure responsiveness */
+}
+
+
 /** {
 	font-family: 'League Spartan', sans-serif!important;
 }

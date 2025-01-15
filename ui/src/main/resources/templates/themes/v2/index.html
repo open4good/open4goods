@@ -26,6 +26,21 @@
     <link rel="preload" as="style" onload="this.onload=null;this.rel='stylesheet'" href="/vendor/animate.css/animate.min.css"/>  
 
     <meta name="google-site-verification" content="I2wSyJnnRSjrLjadtNgFzHHmtSN8DPbjhPePTkQNhp4" />
+    
+    <style>
+    .carousel-control-prev-icon,
+.carousel-control-next-icon {
+  background-color: rgba(0, 0, 0, 0.5);
+  border-radius: 50%;
+  padding: 10px;
+}
+
+.carousel-control-prev,
+.carousel-control-next {
+  width: 5%;
+}
+    
+    </style>
 </head>
 
 <body class="home-page">
@@ -34,6 +49,9 @@
         <th:block th:insert="~{inc/preloader.html}"></th:block>
         <!--/* Navbar */-->
         <th:block th:insert="~{inc/navbar/navbar-home.html}"></th:block>
+        
+        
+        
     </header>
     
     <main>  
@@ -59,6 +77,7 @@
                                             </div>
                                         </div>
                                         <div class="col-12 col-md-6 mt-4 mt-md-0 text-center">
+                                        <!-- 
                                             <th:block th:with="image='/icons/categories/electronics.png', title='Produits électroniques', googleTaxo=222" 
                                                       th:insert="~{inc/category-shortcut.html}">
                                             </th:block>
@@ -68,6 +87,49 @@
                                             </th:block>
 
                                             <br class="d-block d-md-none mt-3 mt-md-0 text-black">
+                                         -->
+
+											<div class="container my-5 text-black">
+												<div id="multiItemCarousel" class="carousel slide" data-bs-ride="carousel">
+													<!-- Indicators -->
+													<div class="carousel-indicators">
+														<button th:each="verticalGroup, stat : ${verticalsCarrouselBuckets}" type="button" data-bs-target="#multiItemCarousel" th:data-bs-slide-to="${stat.index}"
+															th:classappend="${stat.index == 0} ? 'active'" th:aria-label="'Slide ' + ${stat.index + 1}"
+														></button>
+													</div>
+
+													<!-- Carousel Items -->
+													<div class="carousel-inner">
+														<div th:each="verticalGroup, stat : ${verticalsCarrouselBuckets}" th:class="'carousel-item' + (${stat.index == 0} ? ' active' : '')">
+															<div class="row justify-content-center">
+																<div th:each="vertical : ${verticalGroup}" class="col-12 col-md-4 text-center">
+																	<img th:src="'/images/verticals/' + ${vertical.id} + '.webp'" class="d-block w-100 lazy" th:alt="'Illustration de ' + ${vertical.i18n(siteLanguage).verticalHomeTitle}" loading="lazy">
+																	<h3 class="h5 mt-2" th:text="${vertical.i18n(siteLanguage).verticalHomeTitle}"></h3>
+																</div>
+															</div>
+														</div>
+													</div>
+
+													<!-- Controls -->
+													<button class="carousel-control-prev" type="button" data-bs-target="#multiItemCarousel" data-bs-slide="prev">
+														<span class="carousel-control-prev-icon" aria-hidden="true"></span> <span class="visually-hidden">Précédent</span>
+													</button>
+													<button class="carousel-control-next" type="button" data-bs-target="#multiItemCarousel" data-bs-slide="next">
+														<span class="carousel-control-next-icon" aria-hidden="true"></span> <span class="visually-hidden">Suivant</span>
+													</button>
+												</div>
+											</div>
+
+
+
+
+                                            
+                                            
+                                            
+                                            
+                                            
+                                            
+                                            
                                             <a href="/categories" class="fw-bold text-black text-underline mx-1">Toutes les catégories</a>
                                         </div>
                                     </div>
@@ -132,8 +194,8 @@
                                 <div class="card shadow p-1 p-md-4 mb-4 mb-lg-0">
                                     <div class="card-body">
                                         <h3 class="h5 mb-3 text-black">Boosté à l'IA</h3>
-                                        <p>Nous présentons un grand nombre d'informations sur les produits évalués, 
-                                           notamment en croisant notre savoir-faire en collecte de la donnée avec 
+                                        <p>Nous présentons beaucoup d'informations sur les produits évalués, 
+                                           en croisant notre savoir-faire en collecte de la donnée avec 
                                            les dernières technologies IA.</p>
                                     </div>
                                 </div>
@@ -427,5 +489,41 @@
             setTimeout(animateSequence, 5000);
         });
     </script>
+    
+    
+    
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      const carousel = document.getElementById('multiItemCarousel');
+      const prevBtn = document.getElementById('prevBtn');
+      const nextBtn = document.getElementById('nextBtn');
+
+      function updateNavigationButtons() {
+        const activeIndex = Array.from(carousel.querySelectorAll('.carousel-item')).findIndex(item => item.classList.contains('active'));
+        const totalItems = carousel.querySelectorAll('.carousel-item').length;
+
+        // Hide/show previous button
+        if (activeIndex === 0) {
+          prevBtn.style.display = 'none';
+        } else {
+          prevBtn.style.display = 'block';
+        }
+
+        // Hide/show next button
+        if (activeIndex === totalItems - 1) {
+          nextBtn.style.display = 'none';
+        } else {
+          nextBtn.style.display = 'block';
+        }
+      }
+
+      // Attach event listeners for slide changes
+      carousel.addEventListener('slid.bs.carousel', updateNavigationButtons);
+
+      // Initial check
+      updateNavigationButtons();
+    });
+  </script>
+    
 </body>
 </html>

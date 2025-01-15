@@ -11,6 +11,7 @@
 # SHOULD be equal to the configuration file name, without the extension
 id: tv
 
+order: 1
 # The associated google taxonomyID. (Ex : FR - https://www.google.com/basepages/producttype/taxonomy-with-ids.fr-FR.txt)
 # SHOULD be set, it will then force this taxonomy for all products in this vertical
 googleTaxonomyId: 404
@@ -120,7 +121,10 @@ i18n:
           
           
 subsets:
-   - id: "price"  # Unique identifier for the subset
+################
+# Price
+################
+   - id: "price_lower_500"  # Unique identifier for the subset
      group: "price"
      criterias:        # List of criteria for the subset
        - field: "price.minPrice.price"          # Field to be filtered
@@ -142,8 +146,52 @@ subsets:
        fr: "TV pas chères"
      description:               # Localisable description object
        en: "Description in English"
-       fr: "Les TV dont le prix est inférieur à 500€"              
-          
+       fr: "Les TV dont le prix est inférieur à 500€"    
+                 
+   - id: "price_500_1000"  # Unique identifier for the subset
+     group: "price"
+     criterias:        # List of criteria for the subset
+       - field: "price.minPrice.price"          # Field to be filtered
+         operator: "GREATER_THAN"         # Operator for the condition (e.g., EQUALS, NOT_EQUALS)
+         value: "500"       # Value for the condition
+       - field: "price.minPrice.price"          # Field to be filtered
+         operator: "LOWER_THAN"         # Operator for the condition (e.g., EQUALS, NOT_EQUALS)
+         value: "1000"       # Value for the condition
+     image: "example-image.png"  # URL or path to the image
+     url:                       # Localisable URL object
+       en: "tv-500-1000-euros"  # URL for English
+       fr: "tv-500-1000-euros"  # URL for French
+     caption:                     # Localisable title object
+       en: "English Title"
+       fr: "500 - 1000 €"
+
+     title:                     # Localisable title object
+       en: "English Title"
+       fr: "TV pas chères"
+     description:               # Localisable description object
+       en: "Description in English"
+       fr: "Les TV dont le prix est compris entre 500€ et 1000€"     
+   - id: "price_freater_1000"  # Unique identifier for the subset
+     group: "price"
+     criterias:        # List of criteria for the subset
+       - field: "price.minPrice.price"          # Field to be filtered
+         operator: "GREATER_THAN"         # Operator for the condition (e.g., EQUALS, NOT_EQUALS)
+         value: "1000"       # Value for the condition
+     image: "example-image.png"  # URL or path to the image
+     url:                       # Localisable URL object
+#       en: "petits-prix"  # URL for English
+       fr: "petits-prix"  # URL for French
+     caption:                     # Localisable title object
+#       en: "English Title"
+       fr: "> 1000 €"
+
+     title:                     # Localisable title object
+       en: "English Title"
+       fr: "TV haut de gamme"
+     description:               # Localisable description object
+       en: "Description in English"
+       fr: "Les TV dont le prix est supérieur à 1000€"    
+                 
 ##############################################################################
 # Custom search filters : the following filters
 # will also be availlable in search for this vertical (must be an attribute or a score)
