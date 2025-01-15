@@ -121,24 +121,32 @@
 <script defer src="/assets/js/pixel.js"></script>
 </th:block>
 
-
 <script>
-document.querySelectorAll('.star-rating').forEach(function (ratingElement) {
-    const rating = parseFloat(ratingElement.dataset.rating || 0);
-    const stars = ratingElement.querySelectorAll('.star');
 
-    const fullStars = Math.floor(rating);
-    const partialWidth = ((rating % 1) * 100).toFixed(2);
+function updateStarsRating() {
+	document.querySelectorAll('.star-rating').forEach(function (ratingElement) {
+	    const rating = parseFloat(ratingElement.dataset.rating || 0);
+	    const stars = ratingElement.querySelectorAll('.star');
 
-    stars.forEach((star, index) => {
-        if (index < fullStars) {
-            star.classList.add('full');
-        } else if (index === fullStars) {
-            star.classList.add('partial');
-            star.style.setProperty('--partial-width', `${partialWidth}%`);
-        }
-    });
-});
+	    const fullStars = Math.floor(rating);
+	    const partialWidth = ((rating % 1) * 100).toFixed(2);
 
+	    stars.forEach((star, index) => {
+	        if (index < fullStars) {
+	            star.classList.add('full');
+	        } else if (index === fullStars) {
+	            star.classList.add('partial');
+	            star.style.setProperty('--partial-width', `${partialWidth}%`);
+	        }
+	    });
+	});
+
+
+}
+
+
+updateStarsRating();
 
 </script>
+
+

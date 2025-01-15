@@ -20,7 +20,7 @@
 
             <!-- Thumbnail: use lazy loading + alt text -->
             <img class="img-fluid" 
-                 th:src="${img.path(50)}" 
+                 th:src="${img.path(100)}" 
                  th:alt="'Miniature de ' + ${product.brandAndModel()}" 
                  loading="lazy" />
         </button>
@@ -32,7 +32,7 @@
              th:classappend="${stat.first} ? ' active' : ''"
              class="carousel-item">
 
-            <!-- We'll use a picture element for performance (WebP + fallback) -->
+            <!-- Picture Element for Performance -->
             <a href="#" 
                th:href="@{/#}" 
                data-lightbox="gallery" 
@@ -40,11 +40,14 @@
                role="button" 
                aria-label="Open fullscreen gallery">
                
-               <img class="img-fluid d-block w-100" 
-                    th:src="${img.path(1000)}"
-                    th:alt="'Image relative au ' + ${product.bestName()}"
-                    loading="lazy"
-               />
+               <!-- Responsive container for aspect ratio -->
+               <div class="image-container">
+                   <img class="img-fluid" 
+                        th:src="${img.path(1000)}"
+                        th:alt="'Image relative au ' + ${product.bestName()}"
+                        loading="lazy"
+                   />
+               </div>
             </a>
         </div>
     </div>
@@ -57,33 +60,3 @@
         <span class="carousel-control-next-icon" aria-hidden="true"></span>
     </button>
 </div>
-
-<!-- Modal / Lightbox (Option A: using Bootstrap modal) -->
-<div class="modal fade" id="lightboxModal" tabindex="-1" aria-hidden="true" aria-labelledby="lightboxModalLabel">
-    <div class="modal-dialog modal-fullscreen">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="lightboxModalLabel">Fullscreen Gallery</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <!-- A container for the fullscreen image or carousel -->
-                <img id="fullscreen-img" class="img-fluid w-100" src="" alt="" />
-            </div>
-        </div>
-    </div>
-</div>
-
-<script>
-	document.querySelectorAll('a[data-lightbox="gallery"]').forEach(function(link) {
-	    link.addEventListener('click', function(e) {
-	        e.preventDefault();
-	        // Retrieve full-size image URL, e.g. from `img.path(1080)` 
-	        const fullSrc = link.querySelector('img').src;
-	        document.getElementById('fullscreen-img').src = fullSrc;
-	        // Show the modal
-	        const myModal = new bootstrap.Modal(document.getElementById('lightboxModal'));
-	        myModal.show();
-	    });
-	});
-</script>

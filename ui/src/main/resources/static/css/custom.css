@@ -1,3 +1,35 @@
+
+
+
+.image-container {
+    position: relative;
+    width: 100%;
+    padding-top: 56.25%; /* Aspect ratio (16:9) */
+    overflow: hidden;
+    background-color: #f0f0f0; /* Placeholder color for empty space */
+}
+
+.image-container img {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: contains; /* Ensures images cover the container while maintaining aspect ratio */
+    object-position: center; /* Centers the image */
+}
+
+
+
+
+
+
+
+
+
+
+
+
 .star-rating {
     display: inline-block;
     position: relative;
@@ -11,8 +43,8 @@
 
 .star-rating .star {
     display: inline-block;
-    width: 3em;
-    height: 3em;
+    width: 2em; /* Default size */
+    height: 2em;
     margin: 0 0.1em;
     clip-path: polygon(
         50% 0%,
@@ -27,7 +59,7 @@
         39% 35%
     );
     background: linear-gradient(90deg, #00D19F, #00A7FF); /* Gradient for active stars */
-    background-size: 100%; /* Full gradient for full stars */
+    background-size: 100%;
     opacity: 0.3; /* Default transparency for disabled stars */
     transition: opacity 0.3s;
 }
@@ -45,9 +77,26 @@
     opacity: 1;
 }
 
+/* Responsive Sizes */
+.star-rating-lg .star {
+    width: 3em;
+    height: 3em;
+}
+
+.star-rating-md .star {
+    width: 2em;
+    height: 2em;
+}
+
+.star-rating-sm .star {
+    width: 1em;
+    height: 1em;
+}
+
 .star-rating .star:hover {
     cursor: pointer;
 }
+
 
 
 

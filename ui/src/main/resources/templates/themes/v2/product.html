@@ -84,22 +84,24 @@
     <section class="section-header pb-0">
         <div class="container">
             <div class="row align-items-center">
-                <div class="col-12 col-md-6 mb-5">
+                <div class="col-12 col-lg-12 mb-2">
                     <h2 th:unless="${product.vertical}" class="h4 mb-0 text-center" th:text="${product.bestName()}"></h2>
 
                     <h2 th:if="${product.vertical}" class="h4 mb-0 text-center" th:text="${product.bestName()}"></h2>
                     
-                     <th:block 
+                     <div class="mt-2" 
                                   th:with="vConf = ${verticaConfig}, pageLabel=${product.bestName()}", 
                                   th:insert="~{inc/breadcrumb-vertical.html}">
-                     </th:block> 
+                     </div> 
                                             
                                             
                 </div>
 
+<!-- 
                 <div class="col-12 col-md-6 mb-5">
                     <h2 class="h4 mb-0 text-center">Où acheter cette TV au meilleur prix ?</h2>
                 </div>
+ -->
             </div>
         </div>
         
@@ -131,7 +133,7 @@
     
             <!-- Tabed Pans -->
             <div class="card">
-                <div class="fixed-bottom card-header nav nav-tabs shadow border-soft bg-white rounded justify-content-center p-2 p-lg-4">
+                <div class="card-header nav nav-tabs shadow border-soft bg-white rounded justify-content-center p-2 p-lg-4">
                   
                 <!-- Navigation pills header -->
                 <ul class="nav nav-pills" id="pills-tab" role="tablist">

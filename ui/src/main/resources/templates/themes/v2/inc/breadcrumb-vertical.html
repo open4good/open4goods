@@ -3,7 +3,7 @@
                 <li class="breadcrumb-item" aria-current="page"><a href="/">🏠</a></li>
 
                 <li  class="breadcrumb-item" th:classappend="${pageLabel == null ? 'active' : ''}" aria-current="page">
-                     <a th:href="${verticalConfig.i18n(siteLanguage).verticalHomeUrl}" th:text="${verticalConfig.i18n(siteLanguage).verticalHomeTitle}"></a>
+                     <a th:href="'/'+${verticalConfig.i18n(siteLanguage).verticalHomeUrl}" th:text="${verticalConfig.i18n(siteLanguage).verticalHomeTitle}"></a>
                  </li>
                  
                  

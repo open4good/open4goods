@@ -13,8 +13,21 @@
                         <div class="col-md-6">
                             <div class="info-main">
                                 <a href="{{productUrl}}" class="h5 title">{{data.attributes.referentielAttributes.BRAND}} - {{name}}</a>
-                                <div class="d-flex my-3">
-                                    <span class="">Ecoscore : <strong>{{ecoscore}} / 5</strong></span>
+                                <div class="my-3">
+
+
+                                    <div class="row star-rating star-rating-md " data-rating="{{ecoscore}}" aria-label="Rating: 3.7 out of 5 stars">
+									    <div class="stars">
+									        <span class="star"></span>
+									        <span class="star"></span>
+									        <span class="star"></span>
+									        <span class="star"></span>
+									        <span class="star"></span>
+									    </div>
+									</div>
+									<div class="row">
+                                        <span class="">ImpactScore : <strong>{{ecoscore}} / 5</strong></span>
+									</div>
                                     
                                 </div>
 
@@ -46,9 +59,10 @@
 
 
 	<!-- Template for cards layout -->
-	<div id="template-product-card">
+	<div class="text-center" id="template-product-card">
           <a href="{{productUrl}}">
               <img height="200" src="{{imageUrl}}" alt="{{name}}">
+              <a href="{{productUrl}}" class="h5 title">{{data.attributes.referentielAttributes.BRAND}} - {{name}}</a>
           </a>
 	</div>
 	
