@@ -114,7 +114,7 @@ public class UrlHandlerMappingConfig {
 				for (WikiPageConfig page : i18n.getValue().getWikiPages()) {
 					String pUrl =  baseUrl+ "/" + page.getVerticalUrl();
 					LOGGER.info("Adding vertical specific page mapping : {}", pUrl);				
-					urlMap.put(pUrl, new  XwikiController(xwikiService, uiService, page.getWikiUrl()));					
+					urlMap.put(pUrl, new  XwikiController(xwikiService, uiService, page.getWikiUrl(),item));					
 				}
 				
 			}

@@ -25,8 +25,13 @@
             <div class="container" th:classappend="${width}">
                 <div class="row justify-content-center">
                     <div class="col-12 col-md-8 text-center">
-                        <p class="display-2" th:utext="${pageTitle}"></p>                       
-                    </div>
+                        <h1 class="display-2" th:utext="${pageTitle}"></h1>
+
+						<th:block th:if="${verticalConfig != null}" th:with="vConf = ${verticalConfig}, pageLabel=${pageTitle}" 
+						          th:insert="~{inc/breadcrumb-vertical.html}">
+						</th:block>
+
+					</div>
                 </div>
             </div>
         </section>
