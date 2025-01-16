@@ -42,6 +42,8 @@
                     <h1 id="impact-score-title" class="display-2 mb-4">
                         L’Impact Score : évaluation de l'impact environnemental de vos produits
                     </h1>
+                    <div class="mt-2" th:with="page='ecoscore'" th:insert="~{inc/breadcrumb-1level.html}"></div>
+                    
                     <th:block th:with="path='ECOSCORE/1/'">
                         <div th:insert="~{inc/wiki.html}"></div>
                     </th:block>

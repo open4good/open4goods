@@ -45,10 +45,12 @@
                     <div class="col-12 col-xl-8 text-center">
                     	<th:block th:unless="${info}">
 	                        <h1 class="display-2 mb-3">Nous contacter</h1>
+	                        <div class="mt-2" th:with="page='contact'" th:insert="~{inc/breadcrumb-1level.html}"></div>	                        
 	                        <p class="lead">Vous avez une question ou une remarque ? N'hésitez pas à utiliser le formulaire ci-dessous, nous tâcherons de vous répondre dans les meilleurs délais.</p>        
                     	</th:block>
                     	<th:block th:if="${info}">
 	                        <h1 class="display-2 mb-3">Message envoyé !</h1>
+                            <div class="mt-2" th:with="page='contact'" th:insert="~{inc/breadcrumb-1level.html}"></div>	                        
 	                        <p class="lead">Merci pour votre message, nous en prendrons connaissance rapidement et tâcherons d'y apporter une réponse dans les meilleurs délais.</p>        
                     	</th:block>
                     </div>

@@ -35,6 +35,18 @@
                     <div class="col-12 col-lg-10 text-center">
                         <div class="mb-4">
                         <h1 class="display-3 mb-4 px-lg-5" th:text="${post.title}"></h1>
+                         <nav aria-label="breadcrumb">
+                                 <ol class="breadcrumb">
+                                     <li class="breadcrumb-item" aria-current="page"><a href="/">🏠</a></li>
+                                     <li  class="breadcrumb-item"  aria-current="page">
+                                          <a th:href="#{'nav.blog.href'}" th:text="#{'nav.blog.text'}"></a>
+                                      </li>
+                                     <li th:if="${page != null}" class="breadcrumb-item" aria-current="page" th:text="#{'nav.'+${page}+'.text'}"></li>
+                                      <li class="breadcrumb-item" aria-current="active page" th:text="${post.title}"></li>
+                                </ol>
+                          </nav>
+                            
+                            
                         <th:block th:each="item,stat : ${post.category}">
                             <a th:href="'/blog/tag/'+${item}" class="badge bg-success text-uppercase me-2 px-3" th:text="${item}"></a>                        
                         </th:block>
