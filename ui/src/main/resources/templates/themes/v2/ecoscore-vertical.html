@@ -46,7 +46,16 @@
                     <div class="col-12 col-md-10">
                         <div class="mb-3">
                             <h1 class="display-3 font-size-md-down-5 fw-light mb-0">Impact-Score <span class="fw-bold" th:text="${verticalConfig.i18n(siteLanguage).verticalHomeTitle}"></span></h1>
-                        </div>
+
+							<!--  Breadcrumb 
+							TODO : I18n
+							-->
+							<th:block th:with="vConf = ${verticaConfig}, pageLabel='Impact Score'"  
+                                     th:insert="~{inc/breadcrumb-vertical.html}">
+							</th:block>
+
+
+						</div>
                         
                         <p class="my-4 px-0 px-lg-7 lead" th:with="path='pages/impactscore-vertical-jumbotron'">
                             <th:block th:insert="~{inc/wiki.html}"></th:block>
