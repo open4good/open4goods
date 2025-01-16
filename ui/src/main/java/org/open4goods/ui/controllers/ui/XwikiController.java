@@ -2,6 +2,9 @@ package org.open4goods.ui.controllers.ui;
 
 import java.util.Locale;
 
+import org.open4goods.commons.config.yml.WikiPageConfig;
+import org.open4goods.commons.config.yml.ui.VerticalConfig;
+import org.open4goods.ui.config.yml.UiConfig;
 import org.open4goods.xwiki.model.FullPage;
 import org.open4goods.xwiki.services.XwikiFacadeService;
 import org.slf4j.Logger;
@@ -36,15 +39,25 @@ public class XwikiController extends AbstractController {
 
 	private String frags;
 
+	private VerticalConfig verticalConfig;
+
 	public XwikiController() {
 		super();
 	}
 
-	public XwikiController(XwikiFacadeService xwikiService, UiService uiService, String wikiPage) {
+	public XwikiController(XwikiFacadeService xwikiService, UiService uiService, String wikiPage, VerticalConfig verticalConfig) {
 		super();
 		this.xwikiService = xwikiService;
 		this.uiService = uiService;
 		this.frags = wikiPage;
+		this.verticalConfig = verticalConfig;
+	}
+
+	public XwikiController(XwikiFacadeService xwikiService, UiService uiService, String key) {
+		super();
+		this.xwikiService = xwikiService;
+		this.uiService = uiService;
+		this.frags = key;
 	}
 
 	@Override
@@ -58,7 +71,7 @@ public class XwikiController extends AbstractController {
 		mv.addObject(WEBPAGE_CLASS_PAGE_TITLE, fullPage.getProp(WEBPAGE_CLASS_PAGE_TITLE));
 		mv.addObject(WEBPAGE_CLASS_HTML, getHtml(fullPage));
 		mv.addObject(WEBPAGE_CLASS_WIDTH, fullPage.getProp(WEBPAGE_CLASS_WIDTH));
-
+		mv.addObject("verticalConfig", verticalConfig);
 		mv.addObject("editLink", xwikiService.getPathHelper().getEditpath(frags.replace('.', '/')));
 		mv.addObject("userLocale", request.getLocale());
 		// TODO(i18n,p3) : localisation
