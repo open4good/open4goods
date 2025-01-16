@@ -23,7 +23,7 @@
     <meta name="twitter:title" th:content="#{index.title}">
     <meta name="twitter:description" th:content="#{index.meta.description}">
     <meta name="twitter:image" th:content="${url} + 'assets/img/brand/light.svg'">
-    <link rel="preload" as="style" onload="this.onload=null;this.rel='stylesheet'" href="/vendor/animate.css/animate.min.css"/>  
+    <link rel="stylesheet"  href="/vendor/animate.css/animate.min.css"/>  
 
     <meta name="google-site-verification" content="I2wSyJnnRSjrLjadtNgFzHHmtSN8DPbjhPePTkQNhp4" />
     
@@ -62,9 +62,6 @@
         <th:block th:insert="~{inc/preloader.html}"></th:block>
         <!--/* Navbar */-->
         <th:block th:insert="~{inc/navbar/navbar-home.html}"></th:block>
-        
-        
-        
     </header>
     
     <main>  
@@ -74,7 +71,7 @@
                     <div class="col-12">
                         <h1 class="text-center fw-bolder display-2 mb-4 mt-4">
                             <span class="prefix">Plus qu'un comparateur</span><br/>
-                            <span class="suffix tlt">écologique</span>
+                            <div class="suffix tlt">écologique</div>
                         </h1>
 
                         <!-- Catégories / Impact score -->
@@ -84,6 +81,18 @@
                                     <div class="row align-items-center">
                                         <div class="col-lg-4">
                                             <h2 class="text-black mb-3 text-center">Impact Score</h2>
+                                            <div class="text-center ">
+                                            <div class="star-rating star-rating-md" data-rating="5" aria-label="Rating: 3.7 out of 5 stars">
+						                        <div class="stars">
+						                            <span class="star full"></span>
+						                            <span class="star full"></span>
+						                            <span class="star full"></span>
+						                            <span class="star full"></span>
+						                            <span class="star full"></span>
+						                        </div>
+						                    </div>
+                                            </div>
+						                    
                                             <p class="mb-0">Notre ImpactScore est disponible pour les catégories suivantes. Vous trouverez aussi une information approfondie sur les produits.</p>
                                             <div class="text-center mt-4">
                                                 <a href="/ecoscore" class="btn btn-sm btn-primary animate-up-1">En savoir plus</a>
@@ -463,20 +472,41 @@
         $(document).ready(function () {
             // Configuration array for text animation
             const config = [
-                { newWord: "de prix", outEffect: "hinge", inEffect: "pulse", delay: 4000 },
-                { newWord: "éthique", outEffect: "bounceOut", inEffect: "pulse", delay: 4000 },
-                { newWord: "libre", outEffect: "fadeOut", inEffect: "zoomIn", delay: 4000 },
-                { newWord: "ouvert", outEffect: "bounceOut", inEffect: "rotateIn", delay: 4000 },
-                { newWord: "open source", outEffect: "fadeOut", inEffect: "flipInX", delay: 4000 },
-                { newWord: "open data", outEffect: "bounceOut", inEffect: "lightSpeedIn", delay: 4000 },
-                { newWord: "écologique", outEffect: "fadeOut", inEffect: "fadeIn", delay: 4000 }
+                { newWord: "de prix", outEffect: "bounceOut", inEffect: "bounceIn", delay: 2000 },
+                { newWord: "éthique", outEffect: "flipOutX", inEffect: "flipInX", delay: 2000 },
+                { newWord: "libre", outEffect: "zoomOut", inEffect: "zoomIn", delay: 2000 },
+                { newWord: "ouvert", outEffect: "bounceOut", inEffect: "zoomIn", delay: 2000 },
+                { newWord: "de prix", outEffect: "fadeOut", inEffect: "fadeIn", delay: 2000 },
+                { newWord: "open source", outEffect: "fadeOut", inEffect: "flipInX", delay: 2000 },
+                { newWord: "open data", outEffect: "pulse", inEffect: "lightSpeedIn", delay: 2000 },
+                { newWord: "écologique", outEffect: "fadeOut", inEffect: "fadeIn", delay: 2000 }
             ];
 
             const $tlt = $('.tlt');
             let currentIndex = 0;
 
+            // Helper function to check if an animation class exists
+            function isAnimationSupported(animationClass) {
+                const dummyElement = $('<div>').addClass(`animate__animated ${animationClass}`).css('position', 'absolute').appendTo('body');
+                const animationName = dummyElement.css('animation-name');
+                dummyElement.remove();
+                return animationName !== 'none';
+            }
+
             function animateSequence() {
-                const { newWord, outEffect, inEffect, delay } = config[currentIndex];
+                let { newWord, outEffect, inEffect, delay } = config[currentIndex];
+
+                // Validate animation classes and fallback if invalid
+                if (!isAnimationSupported(`animate__${outEffect}`)) {
+                    console.warn(`Unsupported outEffect animation: "${outEffect}". Using "fadeOut" as fallback.`);
+                    outEffect = "fadeOut";
+                }
+                if (!isAnimationSupported(`animate__${inEffect}`)) {
+                    console.warn(`Unsupported inEffect animation: "${inEffect}". Using "fadeIn" as fallback.`);
+                    inEffect = "fadeIn";
+                }
+
+                console.log(`Animating: Word = "${newWord}", OutEffect = "${outEffect}", InEffect = "${inEffect}"`);
 
                 // Apply out effect
                 $tlt.addClass(`animate__animated animate__${outEffect}`).one('animationend', function () {
@@ -492,17 +522,18 @@
                         setTimeout(() => {
                             currentIndex++;
                             if (currentIndex >= config.length) {
-                                currentIndex = 0; 
+                                currentIndex = 0;
                             }
-                            animateSequence(); 
+                            animateSequence();
                         }, delay);
                     });
                 });
             }
 
             // Initial delay before the first animation
-            setTimeout(animateSequence, 5000);
+            setTimeout(animateSequence, 2000);
         });
+
     </script>
     
     
@@ -517,23 +548,8 @@
         const activeIndex = Array.from(carousel.querySelectorAll('.carousel-item')).findIndex(item => item.classList.contains('active'));
         const totalItems = carousel.querySelectorAll('.carousel-item').length;
 
-        // Hide/show previous button
-        if (activeIndex === 0) {
-          prevBtn.style.display = 'none';
-        } else {
-          prevBtn.style.display = 'block';
-        }
-
-        // Hide/show next button
-        if (activeIndex === totalItems - 1) {
-          nextBtn.style.display = 'none';
-        } else {
-          nextBtn.style.display = 'block';
-        }
       }
 
-      // Attach event listeners for slide changes
-      carousel.addEventListener('slid.bs.carousel', updateNavigationButtons);
 
       // Initial check
       updateNavigationButtons();
