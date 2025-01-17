@@ -326,6 +326,9 @@
 	<!--/* Footer */-->
 	<th:block th:insert="~{inc/footer.html}"></th:block>
 
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns/dist/chartjs-adapter-date-fns.bundle.min.js"></script>    
+    <script defer src="/vendor/countUp.umd.js"></script>
 
 	<!-- Setting up variables -->
 	<script th:inline="javascript">
@@ -333,6 +336,8 @@
 		const repartition = /*[[${repartition}]]*/{};
 		/*]]>*/
 	</script>
+
+
 
 	<!-- Vote Chart -->
 	<script>
