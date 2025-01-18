@@ -82,15 +82,10 @@
                                         <div class="col-lg-4">
                                             <h2 class="text-black mb-3 text-center">Impact Score</h2>
                                             <div class="text-center ">
-                                            <div class="star-rating star-rating-md" data-rating="5" aria-label="Rating: 3.7 out of 5 stars">
-						                        <div class="stars">
-						                            <span class="star full"></span>
-						                            <span class="star full"></span>
-						                            <span class="star full"></span>
-						                            <span class="star full"></span>
-						                            <span class="star full"></span>
-						                        </div>
-						                    </div>
+	                                            <th:block 
+	                                                    th:with="rating=4.5, class='star-rating-md'",
+	                                                    th:insert="~{inc/impactscore.html}">
+	                                            </th:block>
                                             </div>
 						                    
                                             <p class="mb-0">Notre ImpactScore est disponible pour les catégories suivantes. Vous trouverez aussi une information approfondie sur les produits.</p>
@@ -472,14 +467,15 @@
         $(document).ready(function () {
             // Configuration array for text animation
             const config = [
-                { newWord: "de prix", outEffect: "bounceOut", inEffect: "bounceIn", delay: 2000 },
+                { newWord: "de prix", outEffect: "bounceOut", inEffect: "bounceIn", delay: 3500 },
                 { newWord: "éthique", outEffect: "flipOutX", inEffect: "flipInX", delay: 2000 },
-                { newWord: "libre", outEffect: "zoomOut", inEffect: "zoomIn", delay: 2000 },
-                { newWord: "ouvert", outEffect: "bounceOut", inEffect: "zoomIn", delay: 2000 },
-                { newWord: "de prix", outEffect: "fadeOut", inEffect: "fadeIn", delay: 2000 },
-                { newWord: "open source", outEffect: "fadeOut", inEffect: "flipInX", delay: 2000 },
-                { newWord: "open data", outEffect: "pulse", inEffect: "lightSpeedIn", delay: 2000 },
-                { newWord: "écologique", outEffect: "fadeOut", inEffect: "fadeIn", delay: 2000 }
+                { newWord: "libre", outEffect: "zoomOut", inEffect: "zoomIn", delay: 750 },
+                { newWord: "indépendant", outEffect: "fadeOut", inEffect: "fadeIn", delay: 750 },
+                { newWord: "open source", outEffect: "fadeOut", inEffect: "flipInX", delay: 750 },
+                { newWord: "open data", outEffect: "pulse", inEffect: "lightSpeedIn", delay: 750 },
+                { newWord: "ouvert", outEffect: "bounceOut", inEffect: "zoomIn", delay: 3000 },
+                { newWord: "🩷", outEffect: "bounceOut", inEffect: "zoomIn", delay: 3000 },                
+                { newWord: "écologique", outEffect: "fadeOut", inEffect: "fadeIn", delay: 4000 }
             ];
 
             const $tlt = $('.tlt');
