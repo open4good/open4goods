@@ -40,7 +40,7 @@
 						</div>
 					</div>
 					<ul class="navbar-nav navbar-nav-hover align-items-lg-center">
-						<li class="nav-item dropdown"><a href="/ecoscore" class="nav-link dropdown-toggle" id="componentsDropdown" aria-expanded="false" data-bs-toggle="dropdown"> Impact Score <span
+						<li class="nav-item dropdown"><a href="/ecoscore" class="nav-link dropdown-toggle" id="componentsDropdown" aria-expanded="false" data-bs-toggle="dropdown">Catégories<span
 								class="fas fa-angle-down nav-link-arrow ms-1"
 							></span>
 						</a>
@@ -50,7 +50,13 @@
 									
 									<div class="col-lg-6 bg-dark d-none d-lg-block me-0 me-3">
 										<div class="px-0 py-3 text-center">
-											<img src="/assets/img/illustrations/compensation-carbone-360.webp" alt="Illustration d'évaluation écologique">
+										<h1 class="text-white" >Impact Score</h1>
+                                            <div class="text-center ">
+                                                <th:block 
+                                                        th:with="rating=3.5, class='star-rating-lg'",
+                                                        th:insert="~{inc/impactscore.html}">
+                                                </th:block>
+                                            </div>
 										</div>
 										<div class="z-2 pb-3 text-center">
 											 <a  href="/ecoscore" class="btn btn-tertiary animate-up-2 mb-2 mb-sm-0"> 
