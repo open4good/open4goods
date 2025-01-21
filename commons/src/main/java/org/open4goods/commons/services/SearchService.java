@@ -125,9 +125,6 @@ public class SearchService {
 		return vsr;
 	}
 
-
-
-	
 	
 	/**
 	 * Advanced search in a vertical
@@ -154,9 +151,6 @@ public class SearchService {
 				criterias.and(new Criteria(cr.getField()).is(cr.getValue()));
 			}
 		}
-		
-		
-		
 		
 		// Adding the filter on excluded if set
 		if (request.getExcludedFilters().size()>0) {
@@ -219,11 +213,11 @@ public class SearchService {
 			subset.getCriterias().forEach(criteria -> {
 				switch (criteria.getOperator()) {
 				case LOWER_THAN: {
-					criterias.and(new Criteria(criteria.getField()).lessThan(Double.valueOf(criteria.getValue())));
+					criterias.and(new Criteria(criteria.getField()).lessThanEqual(Double.valueOf(criteria.getValue())));
 					break;
 				}
 				case GREATER_THAN: {
-					criterias.and(new Criteria(criteria.getField()).greaterThan(Double.valueOf( criteria.getValue())));					
+					criterias.and(new Criteria(criteria.getField()).greaterThanEqual(Double.valueOf( criteria.getValue())));					
 					break;
 				}
 				case EQUALS: {
