@@ -284,7 +284,32 @@
                 table = initDatatable();
             }
         });
+
+        
+        // Event listener for the sort combobox
+        $('#sort-combobox').on('change', function () {
+            var value = $(this).val();
+            
+            if (value === "none") {
+                // Reset sorting
+                table.order([]).draw();
+            } else {
+                // Parse value for column index and direction
+                var parts = value.split("-");
+                var column = parseInt(parts[0]);
+                var direction = parts[1];
                 
+                // Apply sorting
+                table.order([column, direction]).draw();
+            }
+        });        
+        
+        
+        
+        
+        
+        
+        
         // Range sliders listener
         var slidersCounter = $('.input-slider-range-container').length;
         $('.input-slider-range-container').on('change', function(e) {

@@ -2,8 +2,19 @@
 
 <div>
 <div class="row">
-    <span>
-        <button type="button" class="mt-2 btn btn-secondary" data-bs-toggle="modal" data-bs-target="#exampleModal">Filtrer</button>
+    <span class="mt-2">
+        <button type="button" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#exampleModal">Filtrer</button>
+        
+        <select class="btn btn-secondary" id="sort-combobox">
+            <option value="none">Trier</option>
+            <option value="2-asc">ImpactScore (-)</option>
+            <option value="2-desc">ImpactScore (+)</option>
+            <option value="3-asc">Prix (-)</option>
+            <option value="3-desc">Prix (+)</option>
+            <option value="4-asc">Concurrence (-)</option>
+            <option value="4-desc">Concurrence (+)</option>
+        </select>
+        
         <button id="cv" class="float-end btn btn-light" title="Vue carte"><i class="fas fa-th fa-2x"></i> <!-- Default icon: Grid view -->    </button>
     </span>
 

@@ -150,8 +150,7 @@
 	                                <a class="btn btn-primary btn-sm m-2"  th:href="'/' + ${verticalPath} + '/ecoscore'">
 	                                    Impact Score <th:block th:text="${verticalConfig.i18n(siteLanguage).verticalHomeTitle.toLowerCase()}"></th:block>
 	                                </a>
-                               </div>
-                                
+                               </div>                                
                             </div>
                         </div>
 
@@ -165,9 +164,9 @@
                                 <span th:text="#{'subset.'+${subsetGroup.key}+'.panelTitle'}"></span>
                                 
                                 <ul>
-                                <li th:each="subset : ${subsetGroup.value}">
-                                    <a th:href="'/'+${verticalPath} +'/' + ${subset.url.i18n(siteLanguage)}" th:text="${subset.caption.i18n(siteLanguage)}"></a>
-                                </li>
+	                                <li th:each="subset : ${subsetGroup.value}">
+	                                    <a th:href="'/'+${verticalPath} +'/' + ${subset.url.i18n(siteLanguage)}" th:text="${subset.caption.i18n(siteLanguage)}"></a>
+	                                </li>
                                 </ul>
                              
                              </th:block>
