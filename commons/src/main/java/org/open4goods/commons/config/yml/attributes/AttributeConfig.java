@@ -42,6 +42,13 @@ public class AttributeConfig {
 	 */
 	private String faIcon = "fa-wrench";
 
+	
+	/**
+	 * The localised units
+	 */
+	private Localisable<String,String> unit;
+	
+	
 	/**
 	 * The localised names
 	 */
@@ -353,6 +360,14 @@ public class AttributeConfig {
 
 	public void setReverseScore(boolean reverseScore) {
 		this.reverseScore = reverseScore;
+	}
+
+	public Localisable<String, String> getUnit() {
+		return unit;
+	}
+
+	public void setUnit(Localisable<String, String> unit) {
+		this.unit = unit;
 	}
 
 

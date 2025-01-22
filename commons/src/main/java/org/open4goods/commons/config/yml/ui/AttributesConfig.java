@@ -25,7 +25,7 @@ public class AttributesConfig {
 	 * The specific configs configurations
 	 */
 	@JsonMerge
-	private Set<AttributeConfig> configs = new HashSet<AttributeConfig>();
+	private List<AttributeConfig> configs = new ArrayList<AttributeConfig>();
 
 	/**
 	 * If set, the list of configs values making an attribute to be categorized as a "Feature" (must be uppercase)
@@ -58,7 +58,7 @@ public class AttributesConfig {
 	private Map<String, AttributeConfig> byIcecatFeatureGroup = new HashMap<String, AttributeConfig>();
 	
 
-	public AttributesConfig(Set<AttributeConfig> configs) {
+	public AttributesConfig(List<AttributeConfig> configs) {
 		this.configs = configs;
 
 	}
@@ -217,14 +217,16 @@ public class AttributesConfig {
 
 
 
-	public Set<AttributeConfig> getConfigs() {
+
+
+	public List<AttributeConfig> getConfigs() {
 		return configs;
 	}
 
-	public void setConfigs(Set<AttributeConfig> attributes) {
-		configs = attributes;
-	}
 
+	public void setConfigs(List<AttributeConfig> configs) {
+		this.configs = configs;
+	}
 
 
 	public Set<String> getFeaturedValues() {
