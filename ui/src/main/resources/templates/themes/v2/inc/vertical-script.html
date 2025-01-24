@@ -283,8 +283,12 @@
                 // Init table           
                 table = initDatatable();
                 
-                // Update stars
-                updateStarsRating();
+                table.on('draw', function () {
+                    // Update stars
+                    updateStarsRating();
+                    console.log('Redraw occurred at: ' + new Date().getTime());
+                });
+                
             }
         });
 
@@ -304,6 +308,8 @@
                 
                 // Apply sorting
                 table.order([column, direction]).draw();
+                // Update stars
+                updateStarsRating();
             }
         });        
         
