@@ -90,6 +90,8 @@ public class UiService {
 		
 		ret.addObject("dev", env.acceptsProfiles(Profiles.of("dev","devsec")));
 
+		ret.addObject("beta", env.acceptsProfiles(Profiles.of("beta")));
+
 		ret.addObject("url",request.getRequestURL().toString() );
 
 		ret.addObject("baseUrl",config.getBaseUrl(siteLocale));
