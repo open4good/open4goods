@@ -28,8 +28,6 @@
 
 
 
-
-
 .star-rating {
     display: inline-block;
     position: relative;
@@ -57,7 +55,7 @@
         32% 57%,
         2% 35%,
         39% 35%
-    );
+    ); /* Star shape */
     background: linear-gradient(90deg, #00D19F, #00A7FF); /* Gradient for active stars */
     background-size: 100%;
     opacity: 0.3; /* Default transparency for disabled stars */
@@ -72,9 +70,37 @@
     background: linear-gradient(
         90deg,
         #00D19F calc(var(--partial-width, 0%)),
-        transparent calc(var(--partial-width, 0%))
+        rgba(0, 0, 0, 0.05) calc(var(--partial-width, 0%))
     ); /* Gradient stops at the partial width */
-    opacity: 1;
+    background-size: 100%;
+    opacity: 1; /* Fully opaque for partial stars */
+    position: relative; /* Ensure proper overlay */
+    overflow: hidden; /* Clip content properly */
+}
+
+.star-rating .star.partial::after {
+
+	    background: linear-gradient(90deg, #00D19F, #00A7FF);
+    opacity: 0.2; /* Fully opaque for partial stars */
+	content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    clip-path: polygon(
+        50% 0%,
+        61% 35%,
+        98% 35%,
+        68% 57%,
+        79% 91%,
+        50% 70%,
+        21% 91%,
+        32% 57%,
+        2% 35%,
+        39% 35%
+    ); /* Match star shape */
+    mix-blend-mode: lighten; /* Blend to ensure proper transparency */
 }
 
 /* Responsive Sizes */
@@ -92,12 +118,6 @@
     width: 1em;
     height: 1em;
 }
-
-.star-rating .star:hover {
-    cursor: pointer;
-}
-
-
 
 
 
