@@ -359,7 +359,9 @@
         
      // Iterate over the keys in chartIntervals and call processInterval for each
         Object.keys(chartIntervals).forEach((key) => {
-            createChartInterval(key, chartIntervals[key], vertical);
+			if (null != chartIntervals[key]) {
+			            createChartInterval(key, chartIntervals[key], vertical);
+			}
         });
         
         
@@ -372,7 +374,12 @@ function createChartInterval(chartId, intervalDatas, verticalName) {
     ///////////////////////
     // Chart.js interval charts initialization
     //////////////////////
-    const ctx = document.getElementById('chart-' + chartId).getContext('2d');
+    var elem = document.getElementById('chart-' + chartId);
+    if (null == elem) {
+        return;
+    }
+    
+    const ctx = elem.getContext('2d');
     const priceData = intervalDatas.priceBuckets;
 
     const labels = priceData.map(bucket => {
