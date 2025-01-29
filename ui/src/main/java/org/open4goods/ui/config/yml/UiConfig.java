@@ -123,6 +123,11 @@ public class UiConfig {
 	//
 	private WebConfig webConfig = new WebConfig();
 
+	
+	/**
+	 * Config for url checking
+	 */
+	private UrlCheckConfig urlcheck;
 
 	/***
 	 * Config for IP and UA banChecking
@@ -505,6 +510,16 @@ public class UiConfig {
 
 	public void setAllowedImagesSizeSuffixes(Set<String> allowedImagesSizeSuffixes) {
 		this.allowedImagesSizeSuffixes = allowedImagesSizeSuffixes;
+	}
+
+
+	public UrlCheckConfig getUrlcheck() {
+		return urlcheck;
+	}
+
+
+	public void setUrlcheck(UrlCheckConfig urlcheck) {
+		this.urlcheck = urlcheck;
 	}
 
 

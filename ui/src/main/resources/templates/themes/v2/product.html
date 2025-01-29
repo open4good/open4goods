@@ -65,6 +65,18 @@
         .btn {
             transition: none !important;
         }
+        
+        
+        #pills-tab {
+		    position: sticky;
+		    top: 0;
+		    z-index: 1020; /* Ensures it appears above other elements */
+		    background-color: white; /* Keeps the header background visible */
+		    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Optional: Adds a subtle shadow for better visibility */
+		}
+
+        
+        
     </style>
 </head>
 
@@ -73,7 +85,8 @@
     <header>
         <!--/* Loader */-->
         <th:block th:insert="~{inc/preloader.html}"></th:block>
-        <!--/* Navbar */-->
+        <!--/* Navbar 
+        */-->
         <th:block th:insert="~{inc/navbar/navbar-home.html}"></th:block>
     </header>  
     
@@ -97,11 +110,6 @@
                                             
                 </div>
 
-<!-- 
-                <div class="col-12 col-md-6 mb-5">
-                    <h2 class="h4 mb-0 text-center">Où acheter cette TV au meilleur prix ?</h2>
-                </div>
- -->
             </div>
         </div>
         
@@ -117,23 +125,8 @@
     </div>
     
     
-                          <!-- 
-        <div class="container fixed-bottom">
-            <nav class="mb-0">
-                <div class="nav nav-tabs shadow border-soft bg-white rounded justify-content-center p-2 p-lg-4">
-                    <a href="https://themesberg.com/themes" class="nav-item nav-link mr-lg-3">All themes</a> <a href="https://themesberg.com/templates/premium" class="nav-item nav-link mr-lg-3">Premium themes</a>
-                    <a href="https://themesberg.com/templates/free" class="nav-item nav-link mr-lg-3">Free themes</a> <a href="https://themesberg.com/templates/bootstrap" class="nav-item nav-link mr-lg-3">Bootstrap</a>
-                    <a href="https://themesberg.com/templates/tailwind-css" class="nav-item nav-link mr-lg-3">Tailwind CSS</a> <a href="https://themesberg.com/templates/react" class="nav-item nav-link mr-lg-3">React</a>
-                    <a href="https://themesberg.com/templates/laravel" class="nav-item nav-link mr-lg-3">Laravel</a> <a href="https://themesberg.com/templates/figma" class="nav-item nav-link mr-lg-3">Figma</a>
-                </div>
-            </nav>  
-        </div>          
-         -->
-    
-    
             <!-- Tabed Pans -->
-            <div class="card">
-                <div class="card-header nav nav-tabs shadow border-soft bg-white rounded justify-content-center p-2 p-lg-4">
+            <div class="sticky-top sticky-lg-top card-header nav nav-tabs shadow border-soft bg-white rounded justify-content-center p-2 p-lg-4">
                   
                 <!-- Navigation pills header -->
                 <ul class="nav nav-pills" id="pills-tab" role="tablist">

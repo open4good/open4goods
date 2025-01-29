@@ -59,11 +59,24 @@
 
 
 	<!-- Template for cards layout -->
-	<div class="text-center" id="template-product-card">
-          <a href="{{productUrl}}">
-              <img height="200" src="{{imageUrl}}" alt="{{name}}">
-              <a href="{{productUrl}}" class="h5 title">{{data.attributes.referentielAttributes.BRAND}} - {{name}}</a>
-          </a>
+	<div id="template-product-card">
+		<div class="text-center" >
+	          <a href="{{productUrl}}">
+	              <img height="200" src="{{imageUrl}}" alt="{{name}}">
+	              <a href="{{productUrl}}" class="h5 title">{{data.attributes.referentielAttributes.BRAND}} - {{name}}</a>
+	          </a>
+              <div class="row star-rating star-rating-sm " data-rating="{{ecoscore}}" aria-label="Rating: {{ecoscore}} out of 5 stars">
+                   <div class="stars">
+                       <span class="star"></span>
+                       <span class="star"></span>
+                       <span class="star"></span>
+                       <span class="star"></span>
+                       <span class="star"></span>
+                   </div>
+               </div>
+               
+                                    
+		</div>
 	</div>
 	
 	
