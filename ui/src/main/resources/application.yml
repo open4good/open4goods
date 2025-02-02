@@ -27,13 +27,7 @@ amazonConfig:
   amazon-search-link: "https://www.amazon.fr/s?k={search_terms}&tag={affiliate_tag}"
 
   
-urlcheck:
-    sitemap-url: "https://nudger.fr/sitemap_index.xml"
-    bad-patterns:
-      - "Internal Server Error"
-      - "database error"
-      - "Fatal error"
-    thread-pool-size: 5  
+
   
 spring:
   ai:
