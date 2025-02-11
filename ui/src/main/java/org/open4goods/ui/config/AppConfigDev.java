@@ -21,19 +21,6 @@ public class AppConfigDev {
 	}
 
 
-
-	
-	@Bean
-	public MessageSource messageSource()
-	{       
-	    ReloadableResourceBundleMessageSource messageSource = new ReloadableResourceBundleMessageSource();
-	    messageSource.setBasenames( "file:" + config.resourceBundleFolder(), "classpath:/i18n/messages" );
-	    messageSource.setCacheMillis(0);
-//	    messageSource.setDefaultEncoding( );
-	    return messageSource;
-	}
-	
-	
     @Bean
     BlogService blogService(@Autowired XwikiFacadeService xwikiReadService, @Autowired UiConfig config) {
 		return new BlogService(xwikiReadService, null, null) {

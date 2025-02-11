@@ -28,9 +28,9 @@ import jakarta.servlet.http.HttpServletRequest;
  * @author Goulven.Furet
  *
  */
-public class NudgerResourceBundle extends ReloadableResourceBundleMessageSource implements HealthIndicator{
+public class ResourceBundle extends ReloadableResourceBundleMessageSource implements HealthIndicator{
 
-	private static final Logger logger = LoggerFactory.getLogger(NudgerResourceBundle.class);
+	private static final Logger logger = LoggerFactory.getLogger(ResourceBundle.class);
 
 	@Autowired HttpServletRequest servletRequest;
 

@@ -24,6 +24,7 @@ import org.open4goods.commons.services.ImageMagickService;
 import org.open4goods.commons.services.MailService;
 import org.open4goods.commons.services.RecaptchaService;
 import org.open4goods.commons.services.RemoteFileCachingService;
+import org.open4goods.commons.services.ResourceBundle;
 import org.open4goods.commons.services.ResourceService;
 import org.open4goods.commons.services.SearchService;
 import org.open4goods.commons.services.SerialisationService;
@@ -141,6 +142,20 @@ public class AppConfig {
 
 
 
+    @Bean
+    public ResourceBundle messageSource() {
+        ResourceBundle messageSource = new ResourceBundle();
+        
+        // Set multiple base names for properties files
+        messageSource.setBasenames(
+            "classpath:i18n/messages",  // default.properties
+            "classpath:i18n/metas"      // metas.properties
+        );
+        
+        messageSource.setDefaultEncoding("UTF-8");
+        messageSource.setCacheSeconds(3600);  // Refresh every hour
+        return messageSource;
+    }
     
     @Bean
     ContributionService contributionService (CacheManager cacheManager, SerialisationService serialisationService, ContributionVoteRepository repository, UiConfig uiConfig, ElasticsearchOperations esOps) {
