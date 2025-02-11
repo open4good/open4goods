@@ -9,6 +9,9 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.actuate.health.Health;
+import org.springframework.boot.actuate.health.HealthIndicator;
+import org.springframework.boot.actuate.health.Health.Builder;
 import org.springframework.context.support.ReloadableResourceBundleMessageSource;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -25,17 +28,15 @@ import jakarta.servlet.http.HttpServletRequest;
  * @author Goulven.Furet
  *
  */
-public class CapsuleResourceBundle extends ReloadableResourceBundleMessageSource {
+public class NudgerResourceBundle extends ReloadableResourceBundleMessageSource implements HealthIndicator{
 
-	private static final Logger logger = LoggerFactory.getLogger(CapsuleResourceBundle.class);
+	private static final Logger logger = LoggerFactory.getLogger(NudgerResourceBundle.class);
 
 	@Autowired HttpServletRequest servletRequest;
 
-	private final Map<String,Long> counters = new ConcurrentHashMap<>();
 
 	private final Set<String> unknownKeys = new HashSet<>();
 
-	private final Set<String> failKeys = new HashSet<>();
 
 	@Override
 	protected String getMessageInternal(String code, Object[] args, Locale locale) {
@@ -43,10 +44,6 @@ public class CapsuleResourceBundle extends ReloadableResourceBundleMessageSource
 		/////////////////////////
 		// Incrementing counters
 		/////////////////////////
-		logger.debug("Incrementing counters",code);
-		Long val = counters.get(code);
-		counters.put(code, val == null ? 0L : val +1);
-
 
 		////////////////////////////////////////////
 		// 	Getting original 18n translated message
@@ -60,7 +57,7 @@ public class CapsuleResourceBundle extends ReloadableResourceBundleMessageSource
 		if (null == ret) {
 			logger.warn("{} i18n key does not exists",code);
 			unknownKeys.add(code);
-			return "??"+code+"??";
+			return "???"+code+"???";
 		}
 
 		return ret;
@@ -68,26 +65,6 @@ public class CapsuleResourceBundle extends ReloadableResourceBundleMessageSource
 	}
 
 
-
-	/**
-	 * Clear the i18n counters
-	 */
-	public void clearCounters() {
-		counters.clear();
-		unknownKeys.clear();
-	}
-
-	///////////////////////////
-	// Getters
-	///////////////////////////
-
-	/**
-	 *
-	 * @return the i18n key counters
-	 */
-	public Map<String, Long> getCounters() {
-		return counters;
-	}
 
 
 	/**
@@ -97,14 +74,20 @@ public class CapsuleResourceBundle extends ReloadableResourceBundleMessageSource
 	public Set<String> getUnknownKeys() {
 		return unknownKeys;
 	}
-
-
 	/**
-	 *
-	 * @return the fail keys
+	 * Custom healthcheck, 
 	 */
-	public Set<String> getFailKeys() {
-		return failKeys;
+	@Override
+	public Health health() {
+		
+		if (unknownKeys.size() == 0) {
+			Builder health = Health.up()
+					;
+			return health.build();
+		} else {
+			return Health.down().withDetail("missing_translation", unknownKeys).build();
+		}
+		
 	}
 
 }
