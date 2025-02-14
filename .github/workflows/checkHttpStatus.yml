@@ -21,7 +21,8 @@ jobs:
                     "https://nudger.fr/televiseurs/oled-qled-lcd-que-choisir", 
                     "https://nudger.fr/mentions-legales",
                     "https://nudger.fr/blog/ouverture-du-prototype",
-                    "https://nudger.fr/sitemap_index.xml"
+                    "https://nudger.fr/sitemap_index.xml",
+                    "https://plausible.nudger.fr/"
                   ]' 
           expected: '[200, 
                       401,
@@ -29,6 +30,7 @@ jobs:
                       401,
                       200,
                       401,
+                      200,
                       200,
                       200,
                       200,
