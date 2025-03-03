@@ -411,7 +411,7 @@ public class UrlCheckService implements HealthIndicator {
     }
 
     // ---------------------------------------------------------------------------------------
-    // GETTERS for counters, if needed from other controllers
+    // GETTERS for counters, if needed from other classes
     // ---------------------------------------------------------------------------------------
     public int getTotalUrlsTested()     { return totalUrlsTested.get(); }
     public int getTotal500Errors()      { return total500Errors.get(); }

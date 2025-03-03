@@ -35,6 +35,7 @@
 		<module>crawler</module>
 		<module>api</module>
 		<module>ui</module>
+		<module>services/urlfetching</module>
 	</modules>
 
 	<issueManagement>

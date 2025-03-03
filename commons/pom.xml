@@ -55,11 +55,7 @@
             <artifactId>spring-boot-starter-actuator</artifactId>
         </dependency>
 
-        <dependency>
-            <groupId>com.vladsch.flexmark</groupId>
-            <artifactId>flexmark-all</artifactId>
-            <version>0.64.8</version>
-        </dependency>
+
 
         <dependency>
             <groupId>com.ibm.icu</groupId>
@@ -76,6 +72,14 @@
             <groupId>org.thymeleaf</groupId>
             <artifactId>thymeleaf-spring6</artifactId>
         </dependency>
+
+
+        <!-- https://mvnrepository.com/artifact/org.seleniumhq.selenium/selenium-java -->
+        <dependency>
+            <groupId>org.seleniumhq.selenium</groupId>
+            <artifactId>selenium-java</artifactId>
+        </dependency>
+        
 
 <!--
         <dependency>
