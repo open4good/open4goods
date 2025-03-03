@@ -36,6 +36,8 @@
 		<module>api</module>
 		<module>ui</module>
 		<module>services/urlfetching</module>
+        <module>services/googlesearch</module>
+        
 	</modules>
 
 	<issueManagement>
