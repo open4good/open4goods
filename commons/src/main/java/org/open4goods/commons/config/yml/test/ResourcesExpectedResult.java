@@ -2,7 +2,7 @@ package org.open4goods.commons.config.yml.test;
 
 import java.util.Set;
 
-import org.open4goods.commons.model.data.Resource;
+import org.open4goods.model.resource.Resource;
 
 public class ResourcesExpectedResult extends NumericExpectedResult {
 

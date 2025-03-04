@@ -6,14 +6,14 @@ import java.io.IOException;
 import java.util.Map;
 
 import org.open4goods.api.services.ProductsReviewGenerationService;
-import org.open4goods.commons.config.yml.ui.VerticalConfig;
 import org.open4goods.commons.exceptions.AggregationSkipException;
-import org.open4goods.commons.exceptions.InvalidParameterException;
-import org.open4goods.commons.exceptions.ResourceNotFoundException;
 import org.open4goods.commons.model.AiSourcedPage;
 import org.open4goods.commons.model.constants.RolesConstants;
 import org.open4goods.commons.services.VerticalsConfigService;
 import org.open4goods.commons.services.ai.GenAiService;
+import org.open4goods.model.exceptions.InvalidParameterException;
+import org.open4goods.model.exceptions.ResourceNotFoundException;
+import org.open4goods.model.vertical.VerticalConfig;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;

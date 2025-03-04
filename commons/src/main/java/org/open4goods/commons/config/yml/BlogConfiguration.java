@@ -1,6 +1,6 @@
 package org.open4goods.commons.config.yml;
 
-import org.open4goods.commons.model.Localisable;
+import org.open4goods.model.Localisable;
 
 /**
  * Configuration for an XWiki connexion

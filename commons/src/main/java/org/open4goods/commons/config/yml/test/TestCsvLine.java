@@ -1,6 +1,6 @@
 package org.open4goods.commons.config.yml.test;
 
-import org.open4goods.commons.model.data.DataFragment;
+import org.open4goods.model.datafragment.DataFragment;
 import org.springframework.validation.annotation.Validated;
 
 import jakarta.validation.constraints.NotBlank;

@@ -10,8 +10,8 @@
 //import java.util.Random;
 //
 //import org.apache.commons.io.IOUtils;
-//import org.open4goods.exceptions.ResourceNotFoundException;
-//import org.open4goods.exceptions.ValidationException;
+//import org.open4goods.model.exceptions.ResourceNotFoundException;
+//import org.open4goods.model.exceptions.ValidationException;
 //import org.open4goods.helper.IdHelper;
 //import org.open4goods.services.ResourceService;
 //import org.slf4j.Logger;

@@ -6,7 +6,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 
-import org.open4goods.commons.config.yml.ui.ImageGenerationConfig;
+import org.open4goods.model.vertical.ImageGenerationConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ai.image.ImageOptions;

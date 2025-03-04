@@ -2,8 +2,8 @@ package org.open4goods.ui.controllers.ui;
 
 import java.util.Locale;
 
-import org.open4goods.commons.config.yml.WikiPageConfig;
-import org.open4goods.commons.config.yml.ui.VerticalConfig;
+import org.open4goods.model.vertical.VerticalConfig;
+import org.open4goods.model.vertical.WikiPageConfig;
 import org.open4goods.ui.config.yml.UiConfig;
 import org.open4goods.xwiki.model.FullPage;
 import org.open4goods.xwiki.services.XwikiFacadeService;

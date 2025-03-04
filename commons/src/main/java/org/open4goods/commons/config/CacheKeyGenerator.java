@@ -1,5 +1,5 @@
 package org.open4goods.commons.config;
-import org.open4goods.commons.model.constants.CacheConstants;
+import org.open4goods.model.constants.CacheConstants;
 import org.springframework.cache.interceptor.KeyGenerator;
 import org.springframework.stereotype.Component;
 

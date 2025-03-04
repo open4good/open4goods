@@ -6,12 +6,12 @@ import java.util.List;
 import java.util.Map;
 
 import org.open4goods.api.services.aggregation.AbstractAggregationService;
-import org.open4goods.commons.config.yml.ui.VerticalConfig;
-import org.open4goods.commons.exceptions.ValidationException;
-import org.open4goods.commons.model.attribute.Cardinality;
-import org.open4goods.commons.model.data.Score;
-import org.open4goods.commons.model.product.Product;
-import org.open4goods.commons.services.StandardiserService;
+import org.open4goods.model.StandardiserService;
+import org.open4goods.model.exceptions.ValidationException;
+import org.open4goods.model.product.Product;
+import org.open4goods.model.product.Score;
+import org.open4goods.model.rating.Cardinality;
+import org.open4goods.model.vertical.VerticalConfig;
 import org.slf4j.Logger;
 
 public abstract class AbstractScoreAggregationService extends  AbstractAggregationService{

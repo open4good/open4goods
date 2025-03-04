@@ -4,7 +4,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.open4goods.commons.config.yml.datasource.DataSourceProperties;
-import org.open4goods.commons.helper.IdHelper;
+import org.open4goods.model.helper.IdHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.annotation.Id;

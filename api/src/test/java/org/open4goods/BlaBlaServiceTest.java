@@ -4,7 +4,7 @@
 //import static org.junit.jupiter.api.Assertions.fail;
 //
 //import org.junit.jupiter.api.Test;
-//import org.open4goods.exceptions.InvalidParameterException;
+//import org.open4goods.model.exceptions.InvalidParameterException;
 //import org.open4goods.model.attribute.Attribute;
 //import org.open4goods.model.attribute.AttributeType;
 //import org.open4goods.model.attribute.Cardinality;

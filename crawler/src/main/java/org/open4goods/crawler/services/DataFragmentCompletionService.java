@@ -10,14 +10,14 @@ import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
 import org.open4goods.commons.config.yml.datasource.DataSourceProperties;
-import org.open4goods.commons.exceptions.InvalidParameterException;
-import org.open4goods.commons.helper.IdHelper;
-import org.open4goods.commons.model.attribute.Attribute;
-import org.open4goods.commons.model.constants.ReferentielKey;
-import org.open4goods.commons.model.data.DataFragment;
-import org.open4goods.commons.model.data.ProviderSupportType;
 import org.open4goods.commons.services.BrandScoreService;
 import org.open4goods.commons.services.BrandService;
+import org.open4goods.model.attribute.Attribute;
+import org.open4goods.model.attribute.ReferentielKey;
+import org.open4goods.model.datafragment.DataFragment;
+import org.open4goods.model.datafragment.ProviderSupportType;
+import org.open4goods.model.exceptions.InvalidParameterException;
+import org.open4goods.model.helper.IdHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
