@@ -7,8 +7,8 @@ import org.springframework.stereotype.Component;
 /**
  * Configuration properties for Google Custom Search.
  * <p>
- * Properties are loaded from the application.yml (or application-test.yml for tests) file.
- * Example:
+ * These properties are loaded from the application.yml (or application-test.yml for tests).
+ * Example configuration:
  * <pre>
  * googlesearch:
  *   apiKey: "YOUR_API_KEY"
@@ -18,7 +18,7 @@ import org.springframework.stereotype.Component;
  */
 @Component
 @ConfigurationProperties(prefix = "googlesearch")
-public class GoogleSearchProperties {
+public class GoogleSearchConfig {
 
     private String apiKey;
     private String cx;
@@ -50,8 +50,8 @@ public class GoogleSearchProperties {
 
     @Override
     public String toString() {
-        return "GoogleSearchProperties{" +
-                "apiKey='" + apiKey + '\'' +
+        return "GoogleSearchConfig{" +
+                "apiKey='****'" + // Do not expose the API key in logs
                 ", cx='" + cx + '\'' +
                 ", searchUrl='" + searchUrl + '\'' +
                 '}';
@@ -65,8 +65,8 @@ public class GoogleSearchProperties {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof GoogleSearchProperties)) return false;
-        GoogleSearchProperties that = (GoogleSearchProperties) o;
+        if (!(o instanceof GoogleSearchConfig)) return false;
+        GoogleSearchConfig that = (GoogleSearchConfig) o;
         return Objects.equals(apiKey, that.apiKey) &&
                Objects.equals(cx, that.cx) &&
                Objects.equals(searchUrl, that.searchUrl);

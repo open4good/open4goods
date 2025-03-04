@@ -3,27 +3,24 @@
     {
       "name": "googlesearch",
       "type": "org.open4goods.services.googlesearch.config.GoogleSearchProperties",
-      "description": "Configuration properties for Google Custom Search API."
+      "sourceType": "org.open4goods.services.googlesearch.config.GoogleSearchProperties"
     }
   ],
   "properties": [
     {
       "name": "googlesearch.apiKey",
       "type": "java.lang.String",
-      "description": "The API key for Google Custom Search.",
-      "defaultValue": ""
+      "description": "API key for accessing the Google Custom Search API."
     },
     {
       "name": "googlesearch.cx",
       "type": "java.lang.String",
-      "description": "The custom search engine identifier (cx) for Google Custom Search.",
-      "defaultValue": ""
+      "description": "Search engine identifier (cx) for the Google Custom Search API."
     },
     {
       "name": "googlesearch.searchUrl",
       "type": "java.lang.String",
-      "description": "The URL endpoint for Google Custom Search API.",
-      "defaultValue": "https://www.googleapis.com/customsearch/v1"
+      "description": "The URL endpoint for the Google Custom Search API."
     }
   ]
 }

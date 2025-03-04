@@ -14,7 +14,7 @@ public class GoogleSearchResult {
      * Constructs a new GoogleSearchResult.
      *
      * @param title the title of the search result
-     * @param link the URL of the search result
+     * @param link  the URL of the search result
      */
     public GoogleSearchResult(String title, String link) {
         this.title = title;
