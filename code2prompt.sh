@@ -22,7 +22,7 @@ if [ ! -d "$TARGET_DIR" ]; then
 fi
 
 # Configurable allowed file extensions (without the dot)
-ALLOWED_EXTENSIONS=("md" "java" "yml" "xml")
+ALLOWED_EXTENSIONS=("md" "java" "yml" "xml" "json")
 
 # Configurable allowed first-level directories (only these folders will be recursed)
 ALLOWED_FOLDERS=("src" "test")
@@ -81,7 +81,7 @@ for item in "$TARGET_DIR"/*; do
 done
 
 echo ""
-echo "* File content *"
+echo "* Files content *"
 echo ""
 
 #############################################
