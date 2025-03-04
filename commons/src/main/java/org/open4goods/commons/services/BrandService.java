@@ -11,6 +11,7 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.open4goods.commons.helper.GenericFileLogger;
 import org.open4goods.commons.model.data.Brand;
+import org.open4goods.serialisation.service.SerialisationService;
 import org.slf4j.Logger;
 
 import com.fasterxml.jackson.core.type.TypeReference;

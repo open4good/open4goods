@@ -1,4 +1,4 @@
-package org.open4goods.commons.services;
+package org.open4goods.serialisation.service;
 
 import java.io.IOException;
 import java.io.InputStream;

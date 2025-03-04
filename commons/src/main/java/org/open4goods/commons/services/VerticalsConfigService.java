@@ -22,6 +22,7 @@ import org.open4goods.commons.model.dto.ExpandedTaxonomy;
 import org.open4goods.model.constants.CacheConstants;
 import org.open4goods.model.product.Product;
 import org.open4goods.model.vertical.VerticalConfig;
+import org.open4goods.serialisation.service.SerialisationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cache.annotation.Cacheable;

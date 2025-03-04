@@ -15,6 +15,7 @@ import org.open4goods.commons.config.yml.datasource.DataSourceProperties;
 import org.open4goods.commons.config.yml.datasource.HtmlDataSourceProperties;
 import org.open4goods.model.constants.CacheConstants;
 import org.open4goods.model.exceptions.InvalidParameterException;
+import org.open4goods.serialisation.service.SerialisationService;
 import org.quartz.CronExpression;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

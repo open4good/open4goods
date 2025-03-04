@@ -1,11 +1,7 @@
 package org.open4goods.crawler.config;
 
-import org.apache.commons.lang3.ArrayUtils;
-import org.open4goods.commons.services.EvaluationService;
 import org.open4goods.commons.services.RemoteFileCachingService;
-import org.open4goods.commons.services.SerialisationService;
 import org.open4goods.crawler.config.yml.FetcherProperties;
-import org.open4goods.crawler.repository.IndexationRepository;
 import org.open4goods.crawler.repository.IndexationRepository;
 import org.open4goods.crawler.services.ApiSynchService;
 import org.open4goods.crawler.services.DataFragmentCompletionService;
@@ -13,6 +9,8 @@ import org.open4goods.crawler.services.FetchersService;
 import org.open4goods.crawler.services.IndexationService;
 import org.open4goods.crawler.services.fetching.CsvDatasourceFetchingService;
 import org.open4goods.crawler.services.fetching.WebDatasourceFetchingService;
+import org.open4goods.evaluation.service.EvaluationService;
+import org.open4goods.serialisation.service.SerialisationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -28,9 +26,6 @@ public class CrawlerConfig {
     public CrawlerConfig(Environment env) {
         this.env = env;
     }
-
-
-
 
     
 //    @Bean
