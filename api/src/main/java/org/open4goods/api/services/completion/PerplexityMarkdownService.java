@@ -11,8 +11,8 @@ import org.commonmark.parser.Parser;
 import org.commonmark.renderer.html.HtmlRenderer;
 import org.open4goods.api.services.AbstractCompletionService;
 import org.open4goods.commons.dao.ProductRepository;
-import org.open4goods.commons.model.AiSource;
 import org.open4goods.commons.services.VerticalsConfigService;
+import org.open4goods.model.ai.AiSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

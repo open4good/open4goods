@@ -3,15 +3,15 @@ package org.open4goods.ui.controllers.ui;
 import java.io.IOException;
 
 import org.apache.groovy.parser.antlr4.util.StringUtils;
-import org.open4goods.commons.config.yml.ui.VerticalConfig;
-import org.open4goods.commons.config.yml.ui.VerticalSubset;
 import org.open4goods.commons.model.dto.NumericRangeFilter;
 import org.open4goods.commons.model.dto.VerticalSearchRequest;
 import org.open4goods.commons.model.dto.VerticalSearchResponse;
-import org.open4goods.commons.model.product.Product;
 import org.open4goods.commons.services.SearchService;
 import org.open4goods.commons.services.SerialisationService;
 import org.open4goods.commons.services.VerticalsConfigService;
+import org.open4goods.model.product.Product;
+import org.open4goods.model.vertical.VerticalConfig;
+import org.open4goods.model.vertical.VerticalSubset;
 import org.open4goods.ui.controllers.dto.DataTableRequest;
 import org.open4goods.ui.controllers.dto.DataTableResults;
 import org.open4goods.ui.controllers.dto.PaginationCriteria;

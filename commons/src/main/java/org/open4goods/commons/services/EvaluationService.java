@@ -3,8 +3,8 @@ package org.open4goods.commons.services;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.open4goods.commons.model.constants.ReferentielKey;
-import org.open4goods.commons.model.product.Product;
+import org.open4goods.model.attribute.ReferentielKey;
+import org.open4goods.model.product.Product;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.expression.EvaluationException;

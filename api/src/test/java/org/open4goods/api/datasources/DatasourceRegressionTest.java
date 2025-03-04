@@ -24,7 +24,7 @@
 //import org.open4goods.crawler.services.fetching.CsvDatasourceFetchingService;
 //import org.open4goods.crawler.services.fetching.DataFragmentWebCrawler;
 //import org.open4goods.crawler.services.fetching.WebDatasourceFetchingService;
-//import org.open4goods.exceptions.ValidationException;
+//import org.open4goods.model.exceptions.ValidationException;
 //import org.open4goods.model.constants.Currency;
 //import org.open4goods.model.data.DataFragment;
 //import org.open4goods.model.data.Price;

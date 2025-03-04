@@ -10,11 +10,11 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
-import org.open4goods.commons.config.yml.ui.VerticalConfig;
-import org.open4goods.commons.exceptions.InvalidParameterException;
-import org.open4goods.commons.helper.IdHelper;
 import org.open4goods.commons.model.ProductCategories;
 import org.open4goods.commons.model.ProductCategory;
+import org.open4goods.model.exceptions.InvalidParameterException;
+import org.open4goods.model.helper.IdHelper;
+import org.open4goods.model.vertical.VerticalConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

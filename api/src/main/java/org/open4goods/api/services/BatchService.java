@@ -5,12 +5,12 @@ import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
-import org.open4goods.commons.config.yml.ui.VerticalConfig;
 import org.open4goods.commons.dao.ProductRepository;
 import org.open4goods.commons.model.constants.TimeConstants;
 import org.open4goods.commons.model.crawlers.FetcherGlobalStats;
-import org.open4goods.commons.model.product.Product;
 import org.open4goods.commons.services.VerticalsConfigService;
+import org.open4goods.model.product.Product;
+import org.open4goods.model.vertical.VerticalConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Scheduled;

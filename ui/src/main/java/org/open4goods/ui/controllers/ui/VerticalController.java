@@ -1,11 +1,11 @@
 package org.open4goods.ui.controllers.ui;
 
-import org.open4goods.commons.config.yml.ui.VerticalConfig;
 import org.open4goods.commons.model.dto.VerticalSearchRequest;
 import org.open4goods.commons.model.dto.VerticalSearchResponse;
 import org.open4goods.commons.services.SearchService;
 import org.open4goods.commons.services.SerialisationService;
 import org.open4goods.commons.services.VerticalsConfigService;
+import org.open4goods.model.vertical.VerticalConfig;
 import org.open4goods.ui.services.BlogService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

@@ -12,9 +12,9 @@ import java.util.regex.Pattern;
 import javax.imageio.ImageIO;
 
 import org.apache.commons.io.FileUtils;
-import org.open4goods.commons.helper.IdHelper;
-import org.open4goods.commons.model.data.Resource;
 import org.open4goods.commons.services.ResourceService;
+import org.open4goods.model.helper.IdHelper;
+import org.open4goods.model.resource.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;

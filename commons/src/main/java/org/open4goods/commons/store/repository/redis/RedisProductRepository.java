@@ -1,6 +1,6 @@
-//package org.open4goods.commons.store.repository.redis;
+//package org.open4goods.model.store.repository.redis;
 //
-//import org.open4goods.commons.model.product.Product;
+//import org.open4goods.model.product.Product;
 //import org.springframework.data.repository.CrudRepository;
 //
 ///**

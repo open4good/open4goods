@@ -6,8 +6,8 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import org.apache.commons.io.IOUtils;
-import org.open4goods.commons.exceptions.ValidationException;
-import org.open4goods.commons.model.data.Resource;
+import org.open4goods.model.exceptions.ValidationException;
+import org.open4goods.model.resource.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

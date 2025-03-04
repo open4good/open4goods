@@ -30,6 +30,7 @@
 
 	<modules>
 		<module>admin</module>
+        <module>model</module>
 		<module>commons</module>
 		<module>verticals</module>
 		<module>crawler</module>
@@ -37,7 +38,7 @@
 		<module>ui</module>
 		<module>services/urlfetching</module>
         <module>services/googlesearch</module>
-        
+
 	</modules>
 
 	<issueManagement>

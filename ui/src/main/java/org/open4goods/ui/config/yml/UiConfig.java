@@ -12,12 +12,11 @@ import org.open4goods.commons.config.yml.BlogConfiguration;
 import org.open4goods.commons.config.yml.DevModeConfiguration;
 import org.open4goods.commons.config.yml.FeedbackConfiguration;
 import org.open4goods.commons.config.yml.IcecatConfiguration;
-import org.open4goods.commons.config.yml.ui.ApiConfig;
-import org.open4goods.commons.config.yml.ui.ImageGenerationConfig;
 import org.open4goods.commons.config.yml.ui.OpenSearchConfig;
-import org.open4goods.commons.config.yml.ui.SiteNaming;
 import org.open4goods.commons.config.yml.ui.WebConfig;
-import org.open4goods.commons.model.Localisable;
+import org.open4goods.model.Localisable;
+import org.open4goods.model.vertical.ImageGenerationConfig;
+import org.open4goods.model.vertical.SiteNaming;
 import org.open4goods.xwiki.config.XWikiServiceProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -85,7 +84,6 @@ public class UiConfig {
 
 	private OpenSearchConfig openSearchConfig = new OpenSearchConfig();
 
-	private ApiConfig apiConfig = new ApiConfig();
 
 	/**
 	 * Elastic search host
@@ -275,13 +273,6 @@ public class UiConfig {
 		this.openSearchConfig = openSearchConfig;
 	}
 
-	public ApiConfig getApiConfig() {
-		return apiConfig;
-	}
-
-	public void setApiConfig(ApiConfig apiConfig) {
-		this.apiConfig = apiConfig;
-	}
 
 	public WebConfig getWebConfig() {
 		return webConfig;

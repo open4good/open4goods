@@ -16,15 +16,15 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.open4goods.api.services.aggregation.AbstractAggregationService;
-import org.open4goods.commons.config.yml.ui.VerticalConfig;
 import org.open4goods.commons.dao.ProductRepository;
 import org.open4goods.commons.exceptions.AggregationSkipException;
-import org.open4goods.commons.model.constants.ProductCondition;
-import org.open4goods.commons.model.data.DataFragment;
-import org.open4goods.commons.model.product.AggregatedPrice;
-import org.open4goods.commons.model.product.AggregatedPrices;
-import org.open4goods.commons.model.product.PriceHistory;
-import org.open4goods.commons.model.product.Product;
+import org.open4goods.model.datafragment.DataFragment;
+import org.open4goods.model.price.AggregatedPrice;
+import org.open4goods.model.price.AggregatedPrices;
+import org.open4goods.model.price.PriceHistory;
+import org.open4goods.model.product.Product;
+import org.open4goods.model.product.ProductCondition;
+import org.open4goods.model.vertical.VerticalConfig;
 import org.slf4j.Logger;
 
 import com.google.common.collect.Sets;

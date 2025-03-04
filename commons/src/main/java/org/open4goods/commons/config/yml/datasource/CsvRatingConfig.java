@@ -1,6 +1,6 @@
 package org.open4goods.commons.config.yml.datasource;
 
-import org.open4goods.commons.model.data.RatingType;
+import org.open4goods.model.rating.RatingType;
 import org.springframework.validation.annotation.Validated;
 
 import jakarta.validation.constraints.NotEmpty;

@@ -9,19 +9,19 @@ import java.util.Objects;
 import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
-import org.open4goods.commons.config.yml.attributes.AttributeConfig;
-import org.open4goods.commons.config.yml.ui.SubsetCriteria;
-import org.open4goods.commons.config.yml.ui.SubsetCriteriaOperator;
-import org.open4goods.commons.config.yml.ui.VerticalConfig;
 import org.open4goods.commons.dao.ProductRepository;
-import org.open4goods.commons.model.constants.CacheConstants;
-import org.open4goods.commons.model.constants.ProductCondition;
 import org.open4goods.commons.model.dto.NumericBucket;
 import org.open4goods.commons.model.dto.NumericRangeFilter;
 import org.open4goods.commons.model.dto.VerticalFilterTerm;
 import org.open4goods.commons.model.dto.VerticalSearchRequest;
 import org.open4goods.commons.model.dto.VerticalSearchResponse;
-import org.open4goods.commons.model.product.Product;
+import org.open4goods.model.constants.CacheConstants;
+import org.open4goods.model.product.Product;
+import org.open4goods.model.product.ProductCondition;
+import org.open4goods.model.vertical.AttributeConfig;
+import org.open4goods.model.vertical.SubsetCriteria;
+import org.open4goods.model.vertical.SubsetCriteriaOperator;
+import org.open4goods.model.vertical.VerticalConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cache.annotation.Cacheable;
@@ -441,7 +441,7 @@ public class SearchService {
 				}
 			}
 
-			if (attrConfig.getAttributeValuesOrdering().equals(org.open4goods.commons.config.yml.attributes.Order.COUNT ) ) {
+			if (attrConfig.getAttributeValuesOrdering().equals(org.open4goods.model.vertical.Order.COUNT ) ) {
 				vsr.getCustomFilters().get(attrConfig).sort((o1, o2) -> o2.getCount().compareTo(o1.getCount()));
 			}
 			else {

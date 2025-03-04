@@ -9,9 +9,9 @@ import org.open4goods.api.services.completion.PerplexityReviewCompletionService;
 import org.open4goods.api.services.completion.IcecatCompletionService;
 import org.open4goods.api.services.completion.PerplexityAttributesCompletionService;
 import org.open4goods.api.services.completion.ResourceCompletionService;
-import org.open4goods.commons.config.yml.ui.VerticalConfig;
-import org.open4goods.commons.exceptions.InvalidParameterException;
-import org.open4goods.commons.model.product.Product;
+import org.open4goods.model.exceptions.InvalidParameterException;
+import org.open4goods.model.product.Product;
+import org.open4goods.model.vertical.VerticalConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

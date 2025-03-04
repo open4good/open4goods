@@ -2,8 +2,8 @@ package org.open4goods.commons.model.data;
 
 import java.util.UUID;
 
-import org.open4goods.commons.model.product.AggregatedPrice;
-import org.open4goods.commons.model.product.Product;
+import org.open4goods.model.price.AggregatedPrice;
+import org.open4goods.model.product.Product;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.elasticsearch.annotations.Document;
 import org.springframework.data.elasticsearch.annotations.Field;

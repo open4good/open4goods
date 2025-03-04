@@ -4,7 +4,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.open4goods.commons.dao.ProductRepository;
-import org.open4goods.commons.model.product.ProductPartialUpdateHolder;
+import org.open4goods.model.product.ProductPartialUpdateHolder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 /**

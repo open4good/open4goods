@@ -1,13 +1,13 @@
 package org.open4goods.commons.test;
 
-import org.open4goods.commons.exceptions.ValidationException;
-import org.open4goods.commons.model.constants.Currency;
-import org.open4goods.commons.model.constants.ReferentielKey;
-import org.open4goods.commons.model.data.DataFragment;
-import org.open4goods.commons.model.data.Price;
-import org.open4goods.commons.model.data.Rating;
-import org.open4goods.commons.model.data.RatingType;
-import org.open4goods.commons.model.data.Resource;
+import org.open4goods.model.attribute.ReferentielKey;
+import org.open4goods.model.datafragment.DataFragment;
+import org.open4goods.model.exceptions.ValidationException;
+import org.open4goods.model.price.Currency;
+import org.open4goods.model.price.Price;
+import org.open4goods.model.rating.Rating;
+import org.open4goods.model.rating.RatingType;
+import org.open4goods.model.resource.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
