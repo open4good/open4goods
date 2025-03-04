@@ -1,6 +1,5 @@
 package org.open4goods.ui.controllers.ui;
 
-import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
@@ -74,13 +73,13 @@ public class ProductController  {
 	 * @param response
 	 * @param updatedData
 	 * @return
-	 * @throws IOException
+	 * @throws Exception 
 	 * @throws UnirestException
 	 */
 
 
 	@GetMapping("/{vertical}/{id:\\d+}-*")
-	public ModelAndView productInVertical(@PathVariable String vertical, @PathVariable Long id, final HttpServletRequest request, HttpServletResponse response) throws IOException {
+	public ModelAndView productInVertical(@PathVariable String vertical, @PathVariable Long id, final HttpServletRequest request, HttpServletResponse response) throws Exception {
 
 
 		VerticalConfig vConf = verticalConfigService.getVerticalForPath(vertical);
@@ -118,7 +117,7 @@ public class ProductController  {
 	 */
 	
 	@GetMapping("/{id:\\d+}*")
-	public ModelAndView product(@PathVariable Long id, final HttpServletRequest request, HttpServletResponse response) throws IOException {
+	public ModelAndView product(@PathVariable Long id, final HttpServletRequest request, HttpServletResponse response) throws Exception {
 
 		ModelAndView ret = buildProductView(id, null, request, response);;
 		
@@ -150,9 +149,10 @@ public class ProductController  {
 	 * @param request
 	 * @param response
 	 * @return
+	 * @throws Exception 
 	 */
 	private ModelAndView buildProductView(Long id, String vertical, final HttpServletRequest request,
-			HttpServletResponse response) {
+			HttpServletResponse response) throws Exception {
 		
 		try {
 			// Getting the product name

@@ -20,7 +20,6 @@ import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.data.elasticsearch.repository.config.EnableElasticsearchRepositories;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.mashape.unirest.http.Unirest;
 
 import jakarta.annotation.PostConstruct;
@@ -64,7 +63,7 @@ public abstract class Api {
 			@Override
 			public <T> T readValue(final String value, final Class<T> valueType) {
 				try {
-					return serialisationService.getJsonMapper().readValue(value, valueType);
+					return serialisationService.jsonMapper().readValue(value, valueType);
 				} catch (final IOException e) {
 					throw new RuntimeException(e);
 				}
@@ -73,8 +72,8 @@ public abstract class Api {
 			@Override
 			public String writeValue(final Object value) {
 				try {
-					return serialisationService.getJsonMapper().writeValueAsString(value);
-				} catch (final JsonProcessingException e) {
+					return serialisationService.jsonMapper().writeValueAsString(value);
+				} catch (final IOException e) {
 					throw new RuntimeException(e);
 				}
 			}

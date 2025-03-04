@@ -198,11 +198,11 @@ public class BackupService implements HealthIndicator {
 	            Stream<Product> str = productRepo.exportAll(vertical);
 
 	            str.forEach(p -> {
-	                String json = serialisationService.toJson(p);
 	                try {
+	                	String json = serialisationService.toJson(p);
 	                    writer.write(json);
 	                    writer.newLine(); // Ensure each JSON object is on a new line
-	                } catch (IOException e) {
+	                } catch (Exception e) {
 	                    logger.error("Serialization exception", e);
 	                }
 	            });

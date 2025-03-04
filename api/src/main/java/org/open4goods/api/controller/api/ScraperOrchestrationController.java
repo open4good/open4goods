@@ -15,6 +15,7 @@ import org.open4goods.model.constants.UrlConstants;
 import org.open4goods.model.datafragment.DataFragment;
 import org.open4goods.model.exceptions.InvalidParameterException;
 import org.open4goods.model.exceptions.ValidationException;
+import org.open4goods.services.serialisation.exception.SerialisationException;
 import org.open4goods.services.serialisation.service.SerialisationService;
 import org.springframework.http.MediaType;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -127,7 +128,7 @@ public class ScraperOrchestrationController {
 	@PostMapping(path=UrlConstants.MASTER_API_CRAWLERS  + UrlConstants.MASTER_API_CRAWLER_SYNCH_FETCH_WITH_CONFIG)
 	@Operation(summary="Run an url direct fetching against the best availlable node, with a given DataSourceProperties")
 	@PreAuthorize("hasAuthority('"+RolesConstants.ROLE_ADMIN+"')")
-	public DataFragment fetchUrlWithConfig(  @RequestParam @NotBlank final String url, @RequestBody @NotBlank final String datasourceProperty ) throws InvalidParameterException, JsonParseException, JsonMappingException, IOException{
+	public DataFragment fetchUrlWithConfig(  @RequestParam @NotBlank final String url, @RequestBody @NotBlank final String datasourceProperty ) throws InvalidParameterException, JsonParseException, JsonMappingException, IOException, SerialisationException{
 		// Get the providerName corresponding to the url
 		return fetcherOrchestrationService.triggerHttpSynchFetching( serialisationService.fromYaml(datasourceProperty, DataSourceProperties.class), url);
 	}

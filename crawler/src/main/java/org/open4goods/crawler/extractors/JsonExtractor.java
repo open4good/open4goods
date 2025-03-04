@@ -16,6 +16,7 @@ import org.open4goods.model.attribute.ReferentielKey;
 import org.open4goods.model.datafragment.DataFragment;
 import org.open4goods.model.exceptions.ValidationException;
 import org.open4goods.model.rating.Rating;
+import org.open4goods.services.serialisation.exception.SerialisationException;
 import org.slf4j.Logger;
 import org.w3c.dom.Document;
 
@@ -43,12 +44,12 @@ public class JsonExtractor extends Extractor {
 
 	public  void parse(final String json, final DataFragment p, final org.slf4j.Logger dedicatedLogger,
 			final ExtractorConfig c, final Page page, final Locale locale, final DataSourceProperties provider,
-			 final DataFragmentWebCrawler offerWebCrawler) throws IOException {
+			 final DataFragmentWebCrawler offerWebCrawler) throws IOException, SerialisationException {
 
 		final String url = page.getWebURL().getURL();
 		JsonNode root;
 		// try {
-		root = serialisationService.getJsonMapper().readTree(json);
+		root = serialisationService.jsonMapper().readTree(json);
 
 
 		if ("INFO".contentEquals(provider.getDedicatedLogLevel())) {

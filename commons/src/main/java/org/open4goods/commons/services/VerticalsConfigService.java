@@ -17,11 +17,14 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
 
+import javax.sql.rowset.serial.SerialException;
+
 import org.open4goods.commons.dao.ProductRepository;
 import org.open4goods.commons.model.dto.ExpandedTaxonomy;
 import org.open4goods.model.constants.CacheConstants;
 import org.open4goods.model.product.Product;
 import org.open4goods.model.vertical.VerticalConfig;
+import org.open4goods.services.serialisation.exception.SerialisationException;
 import org.open4goods.services.serialisation.service.SerialisationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -116,7 +119,7 @@ public class VerticalsConfigService {
 		try {
 			Resource r = resourceResolver.getResource(CLASSPATH_VERTICALS_DEFAULT);
 			defaultConfig =  serialisationService.fromYaml(r.getInputStream(), VerticalConfig.class);
-		} catch (IOException e) {
+		} catch (Exception e) {
 			logger.error("Cannot load  default config from {}", CLASSPATH_VERTICALS_DEFAULT, e);
 		}
 		
@@ -189,7 +192,7 @@ public class VerticalsConfigService {
 			}
 			try {
 				ret.add(getConfig(r.getInputStream(), getDefaultConfig()));
-			} catch (IOException e) {
+			} catch (Exception e) {
 				logger.error("Cannot retrieve vertical config : {}",r.getFilename(), e);
 			}
 		}
@@ -207,7 +210,7 @@ public class VerticalsConfigService {
 	 * @return
 	 * @throws IOException
 	 */
-	public VerticalConfig getConfig(InputStream inputStream, VerticalConfig defaul) throws IOException {
+	public VerticalConfig getConfig(InputStream inputStream, VerticalConfig defaul) throws SerialisationException, IOException {
 
 		// TODO(p3,perf) : chould be cached
 		VerticalConfig copy = serialisationService.fromYaml(serialisationService.toYaml(defaul),VerticalConfig.class);

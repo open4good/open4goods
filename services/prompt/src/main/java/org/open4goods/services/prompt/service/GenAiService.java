@@ -15,6 +15,7 @@ import org.open4goods.services.evaluation.service.EvaluationService;
 import org.open4goods.services.prompt.config.GenAiServiceType;
 import org.open4goods.services.prompt.config.PromptConfig;
 import org.open4goods.services.prompt.dto.PromptResponse;
+import org.open4goods.services.serialisation.exception.SerialisationException;
 import org.open4goods.services.serialisation.service.SerialisationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -97,12 +98,13 @@ public class GenAiService {
      * @param variables The variables to resolve within the prompt templates.
      * @return A {@link PromptResponse} containing the AI call response and additional metadata.
      * @throws ResourceNotFoundException if the prompt configuration is not found.
+     * @throws SerialisationException 
      * @throws IOException               if an error occurs during prompt processing.
      * @throws JsonMappingException      if the response mapping fails.
      * @throws JsonParseException        if the JSON parsing fails.
      */
     public PromptResponse<CallResponseSpec> prompt(String promptKey, Map<String, Object> variables)
-            throws ResourceNotFoundException, JsonParseException, JsonMappingException, IOException {
+            throws ResourceNotFoundException, SerialisationException{
 
         PromptConfig pConf = getPromptConfig(promptKey);
         if (pConf == null) {
@@ -154,12 +156,13 @@ public class GenAiService {
      * @param variables The variables to resolve within the prompt templates.
      * @return A {@link PromptResponse} containing the response as a JSON map.
      * @throws ResourceNotFoundException if the prompt configuration is not found.
+     * @throws SerialisationException 
      * @throws IOException               if an error occurs during prompt processing.
      * @throws JsonMappingException      if the response mapping fails.
      * @throws JsonParseException        if the JSON parsing fails.
      */
     public PromptResponse<Map<String, Object>> jsonPrompt(String promptKey, Map<String, Object> variables)
-            throws ResourceNotFoundException, JsonParseException, JsonMappingException, IOException {
+            throws ResourceNotFoundException, SerialisationException  {
 
         PromptResponse<Map<String, Object>> ret = new PromptResponse<>();
         PromptResponse<CallResponseSpec> internal = prompt(promptKey, variables);

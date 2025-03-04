@@ -53,8 +53,8 @@ class GenAiServiceTest {
         when(mockConfig.getPromptsTemplatesFolder()).thenReturn("src/test/resources/prompts");
 
         // Stub serialization behavior (for simplicity, assume identity conversion)
-        when(serialisationService.toJson(any())).thenAnswer(invocation -> invocation.getArgument(0).toString());
         try {
+        	when(serialisationService.toJson(any())).thenAnswer(invocation -> invocation.getArgument(0).toString());
 			when(serialisationService.fromJson(anyString(), eq(PromptConfig.class)))
 			        .thenReturn(new PromptConfig());
 		} catch (Exception e) {
