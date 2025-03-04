@@ -13,10 +13,13 @@ public class GoogleSearchRequest {
     /**
      * Constructs a new GoogleSearchRequest.
      *
-     * @param query the search query
+     * @param query      the search query (must not be null or empty)
      * @param numResults the number of results to retrieve
      */
     public GoogleSearchRequest(String query, int numResults) {
+        if (query == null || query.isBlank()) {
+            throw new IllegalArgumentException("Search query must not be null or empty");
+        }
         this.query = query;
         this.numResults = numResults;
     }
