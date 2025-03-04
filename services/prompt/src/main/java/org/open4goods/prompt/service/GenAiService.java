@@ -1,4 +1,4 @@
-package org.open4goods.commons.services.ai;
+package org.open4goods.prompt.service;
 
 import java.io.File;
 import java.io.IOException;
@@ -10,11 +10,12 @@ import java.util.Map;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.groovy.parser.antlr4.util.StringUtils;
-import org.open4goods.commons.config.yml.GenAiServiceType;
-import org.open4goods.commons.config.yml.PromptConfig;
 import org.open4goods.evaluation.service.EvaluationService;
 import org.open4goods.model.exceptions.ResourceNotFoundException;
 import org.open4goods.model.vertical.GenAiConfig;
+import org.open4goods.prompt.config.GenAiServiceType;
+import org.open4goods.prompt.config.PromptConfig;
+import org.open4goods.prompt.dto.PromptResponse;
 import org.open4goods.serialisation.service.SerialisationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

@@ -40,6 +40,8 @@
         <module>services/googlesearch</module>
         <module>services/evaluation</module>
         <module>services/serialisation</module>
+        <module>services/prompt</module>
+        
 	</modules>
 
 	<issueManagement>

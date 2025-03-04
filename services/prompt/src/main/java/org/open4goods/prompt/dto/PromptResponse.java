@@ -1,6 +1,6 @@
-package org.open4goods.commons.services.ai;
+package org.open4goods.prompt.dto;
 
-import org.open4goods.commons.config.yml.PromptConfig;
+import org.open4goods.prompt.config.PromptConfig;
 
 public class PromptResponse<T> {
 	
