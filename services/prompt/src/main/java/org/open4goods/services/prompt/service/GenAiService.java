@@ -9,7 +9,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.groovy.parser.antlr4.util.StringUtils;
 import org.open4goods.model.exceptions.ResourceNotFoundException;
 import org.open4goods.model.vertical.GenAiConfig;
 import org.open4goods.services.evaluation.service.EvaluationService;
@@ -24,224 +23,240 @@ import org.springframework.ai.chat.client.ChatClient.CallResponseSpec;
 import org.springframework.ai.chat.client.ChatClient.ChatClientRequestSpec;
 import org.springframework.ai.openai.OpenAiChatModel;
 import org.springframework.ai.openai.api.OpenAiApi;
+import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonMappingException;
 
 /**
- * This service handle gen ai service capabilities, based on the OpenAiChatModel
- * and OpenAiChatOptions from Spring AI. It is used to prompt precisly from open
- * ai and perplexity It is based on files containing model options and
- * templatized prompts
+ * Service handling interactions with generative AI services.
+ * <p>
+ * It loads prompt templates from YAML files, instantiates chat models based on configuration, and
+ * processes prompt evaluations with provided variables.
+ * </p>
+ * <p>
+ * This implementation uses the OpenAiChatModel from Spring AI to communicate with the appropriate AI
+ * backend (e.g., OpenAI or Perplexity).
+ * </p>
  */
+@Service
 public class GenAiService {
 
-	private final Logger logger = LoggerFactory.getLogger(GenAiService.class);
+    private static final Logger logger = LoggerFactory.getLogger(GenAiService.class);
 
-	private Map<String, OpenAiChatModel> models = new HashMap<String, OpenAiChatModel>();
+    /**
+     * Cache for chat models (keyed by prompt config key).
+     */
+    private final Map<String, OpenAiChatModel> models = new HashMap<>();
 
-	private Map<String, PromptConfig> prompts = new HashMap<String, PromptConfig>();
+    /**
+     * Cache for prompt configurations (loaded from YAML files).
+     */
+    private final Map<String, PromptConfig> prompts = new HashMap<>();
 
-	private OpenAiApi openAiApi;
-	private OpenAiApi perplexityApi;
+    private final OpenAiApi openAiApi;
+    private final OpenAiApi perplexityApi;
+    private final SerialisationService serialisationService;
+    private final EvaluationService evaluationService;
+    private final GenAiConfig genAiConfig;
 
-	private SerialisationService serialisationService;
-	private EvaluationService evaluationService;
-	private GenAiConfig genAiConfig;
+    /**
+     * Constructs a new GenAiService with the given dependencies.
+     *
+     * @param genAiConfig          The configuration for the GenAI service.
+     * @param perplexityApi        The API instance for Perplexity.
+     * @param openAiCustomApi      The API instance for OpenAI.
+     * @param serialisationService Service to handle serialization/deserialization.
+     * @param evaluationService    Service to evaluate prompt templates.
+     */
+    public GenAiService(GenAiConfig genAiConfig, OpenAiApi perplexityApi, OpenAiApi openAiCustomApi,
+                        SerialisationService serialisationService, EvaluationService evaluationService) {
+        this.openAiApi = openAiCustomApi;
+        this.perplexityApi = perplexityApi;
+        this.evaluationService = evaluationService;
+        this.serialisationService = serialisationService;
+        this.genAiConfig = genAiConfig;
 
-	public GenAiService(GenAiConfig genAiConfig, OpenAiApi perplexityApi, OpenAiApi openAiCustomApi, SerialisationService serialisationService, EvaluationService evaluationService) {
-		super();
-		this.openAiApi = openAiCustomApi;
-		this.perplexityApi = perplexityApi;
-		this.evaluationService = evaluationService;
-		this.serialisationService = serialisationService;
-		this.genAiConfig = genAiConfig;
+        // Check if the service is enabled (if supported by configuration)
+        if (!genAiConfig.isEnabled()) {
+            logger.warn("GenAiService is disabled via configuration.");
+            throw new IllegalStateException("GenAiService is disabled by configuration");
+        }
 
-		// Loading the prompts template files
-		loadPrompts(genAiConfig.getPromptsTemplatesFolder());
+        // Load prompt templates and initialize chat models
+        loadPrompts(genAiConfig.getPromptsTemplatesFolder());
+        loadModels();
+    }
 
-		// Instanciating the chat models
-		loadModels();
-	}
+    /**
+     * Executes a prompt against an AI service based on a prompt key and provided variables.
+     *
+     * @param promptKey The key identifying the prompt configuration.
+     * @param variables The variables to resolve within the prompt templates.
+     * @return A {@link PromptResponse} containing the AI call response and additional metadata.
+     * @throws ResourceNotFoundException if the prompt configuration is not found.
+     * @throws IOException               if an error occurs during prompt processing.
+     * @throws JsonMappingException      if the response mapping fails.
+     * @throws JsonParseException        if the JSON parsing fails.
+     */
+    public PromptResponse<CallResponseSpec> prompt(String promptKey, Map<String, Object> variables)
+            throws ResourceNotFoundException, JsonParseException, JsonMappingException, IOException {
 
-	/**
-	 * Run a prompt against an IA Service, given the config file corresponding to
-	 * promptKey
-	 * 
-	 * @param promptKey
-	 * @param variables
-	 * @return
-	 * @throws ResourceNotFoundException
-	 * @throws IOException 
-	 * @throws JsonMappingException 
-	 * @throws JsonParseException 
-	 */
-	public PromptResponse<CallResponseSpec> prompt(String promptKey, Map<String, Object> variables) throws ResourceNotFoundException, JsonParseException, JsonMappingException, IOException {
+        PromptConfig pConf = getPromptConfig(promptKey);
+        if (pConf == null) {
+            logger.error("PromptConfig {} does not exist", promptKey);
+            throw new ResourceNotFoundException("Prompt not found");
+        }
 
-		// TODO : Enable only if genaiconfig.enabled
-		PromptConfig pConf =  getPromptConfig(promptKey);
-		PromptResponse<CallResponseSpec> ret = new PromptResponse<ChatClient.CallResponseSpec>();
+        PromptResponse<CallResponseSpec> ret = new PromptResponse<>();
+        ret.setStart(System.currentTimeMillis());
 
-		if (null == pConf) {
-			logger.error("PromptConfig {}  does not exists", promptKey);
-			throw new ResourceNotFoundException("Prompt not found");
-		}
+        // Evaluate system and user prompts using Thymeleaf
+        String systemPromptEvaluated = pConf.getSystemPrompt() == null ? "" :
+                evaluationService.thymeleafEval(variables, pConf.getSystemPrompt());
+        String userPromptEvaluated = evaluationService.thymeleafEval(variables, pConf.getUserPrompt());
 
-		ret.setStart(System.currentTimeMillis());
-		// Evaluating prompts,
-		String systemPrompt = null == pConf.getSystemPrompt() ? "" : evaluationService.thymeleafEval(variables, pConf.getSystemPrompt());
-		String userPrompt = evaluationService.thymeleafEval(variables, pConf.getUserPrompt());
 
-		// Checking there are no remainings unevaluated expression
+        // Build the chat client request with evaluated prompts and options
+        ChatClientRequestSpec chatRequest = ChatClient.create(models.get(promptKey))
+                .prompt()
+                .user(userPromptEvaluated)
+                .options(pConf.getOptions());
 
-		// TODO(p2,safety)  Detect if remaining variables
+        if (StringUtils.hasText(systemPromptEvaluated)) {
+            chatRequest = chatRequest.system(systemPromptEvaluated);
+        }
 
-		ChatClientRequestSpec chatRequest = ChatClient.create( models.get(promptKey)).prompt()
-				.user(userPrompt)
-				.options(pConf.getOptions());
-		
-		if (!StringUtils.isEmpty(systemPrompt)) {
-			chatRequest = chatRequest.system(systemPrompt); 
-		}
-		
-		CallResponseSpec genAiResponse = chatRequest.call();
-		
-		
-		ret.setBody(genAiResponse);
-		ret.setRaw(genAiResponse.content());
-		
-		// Cloning 
-		PromptConfig updateConfig = serialisationService.fromJson(serialisationService.toJson(pConf), PromptConfig.class);
-		updateConfig.setSystemPrompt(systemPrompt);
-		updateConfig.setUserPrompt(userPrompt);
-		ret.setPrompt(updateConfig);
-		
-		ret.setDuration(System.currentTimeMillis()-ret.getStart());
-		
-		return ret;
+        // Execute the request
+        CallResponseSpec genAiResponse = chatRequest.call();
 
-	}
-	
-	
-	/**
-	 * Prompt as json map
-	 * @param promptKey
-	 * @param variables
-	 * @return
-	 * @throws ResourceNotFoundException
-	 * @throws IOException 
-	 * @throws JsonMappingException 
-	 * @throws JsonParseException 
-	 */
-	public PromptResponse<Map<String, Object>> jsonPrompt(String promptKey, Map<String, Object> variables) throws ResourceNotFoundException, JsonParseException, JsonMappingException, IOException {
-		
-		PromptResponse<Map<String, Object>>  ret = new PromptResponse<Map<String, Object>>();
-		
-		PromptResponse<CallResponseSpec> internal = prompt(promptKey, variables);
-		// Copy
-		ret.setDuration(internal.getDuration());
-		ret.setStart(internal.getStart());
-		ret.setPrompt(internal.getPrompt());
-		
-		String response = internal.getBody().content();
-		response = response.replace("```json", "").replace("```", "");
-		ret.setRaw(response);
-		try {
-			ret.setBody(serialisationService.fromJsonTypeRef(response, new TypeReference<Map<String, Object>>() {}));
-		} catch (Exception e) {
-			logger.error("Unable to map to json structure : {} \n {}",e.getMessage(),response );		
-			return null;
-		}
-		return ret;
-	}
+        // Populate the response object
+        ret.setBody(genAiResponse);
+        ret.setRaw(genAiResponse.content());
 
-	
-//	public EcoscoreResponse entityPrompt(String promptKey, Map<String, Object> variables) throws ResourceNotFoundException {
-//		
-//		CallResponseSpec response = prompt(promptKey, variables);
-//		return response.entity(new ParameterizedTypeReference<EcoscoreResponse>() {});
-//	}
-//	
-	
-	
+        // Clone prompt configuration and update with evaluated prompts
+        PromptConfig updatedConfig = serialisationService.fromJson(
+                serialisationService.toJson(pConf), PromptConfig.class);
+        updatedConfig.setSystemPrompt(systemPromptEvaluated);
+        updatedConfig.setUserPrompt(userPromptEvaluated);
+        ret.setPrompt(updatedConfig);
 
-	/**
-	 * Load the models, depending on the api type
-	 */
-	public void loadModels() {
+        ret.setDuration(System.currentTimeMillis() - ret.getStart());
+        return ret;
+    }
 
-		for (PromptConfig promptConfig : prompts.values()) {
+    /**
+     * Executes a prompt and converts the response into a JSON map.
+     *
+     * @param promptKey The key identifying the prompt configuration.
+     * @param variables The variables to resolve within the prompt templates.
+     * @return A {@link PromptResponse} containing the response as a JSON map.
+     * @throws ResourceNotFoundException if the prompt configuration is not found.
+     * @throws IOException               if an error occurs during prompt processing.
+     * @throws JsonMappingException      if the response mapping fails.
+     * @throws JsonParseException        if the JSON parsing fails.
+     */
+    public PromptResponse<Map<String, Object>> jsonPrompt(String promptKey, Map<String, Object> variables)
+            throws ResourceNotFoundException, JsonParseException, JsonMappingException, IOException {
 
-			OpenAiChatModel model = switch (promptConfig.getAiService()) {
-			case GenAiServiceType.OPEN_AI -> new OpenAiChatModel(openAiApi);
-			case GenAiServiceType.PERPLEXITY -> new OpenAiChatModel(perplexityApi);
-			default -> throw new IllegalArgumentException("Unexpected value: " + promptConfig.getAiService());
-			};
+        PromptResponse<Map<String, Object>> ret = new PromptResponse<>();
+        PromptResponse<CallResponseSpec> internal = prompt(promptKey, variables);
 
-			models.put(promptConfig.getKey(), model);
-		}
+        ret.setDuration(internal.getDuration());
+        ret.setStart(internal.getStart());
+        ret.setPrompt(internal.getPrompt());
 
-	}
+        // Clean up markdown formatting from the response
+        String response = internal.getBody().content().replace("```json", "").replace("```", "");
+        ret.setRaw(response);
+        try {
+            ret.setBody(serialisationService.fromJsonTypeRef(response,
+                    new TypeReference<Map<String, Object>>() {
+                    }));
+        } catch (Exception e) {
+            logger.error("Unable to map to JSON structure: {} \nResponse: {}", e.getMessage(), response);
+            throw new IllegalStateException("Response mapping to JSON failed", e);
+        }
+        return ret;
+    }
 
-	/**
-	 * 
-	 * @param promptKey
-	 * @return
-	 */
-	private PromptConfig getPromptConfig(String promptKey) {
-		if (genAiConfig.isCacheTemplates()) {
-			return prompts.get(promptKey);
-		} else {
-			
-			String path = genAiConfig.getPromptsTemplatesFolder()+"/"+promptKey+".yml";
-			return loadPrompt(new File(path));
-		}
-	}
+    /**
+     * Loads and instantiates chat models based on the prompt configurations.
+     */
+    public void loadModels() {
+        for (PromptConfig promptConfig : prompts.values()) {
+            OpenAiChatModel model = switch (promptConfig.getAiService()) {
+                case OPEN_AI -> new OpenAiChatModel(openAiApi);
+                case PERPLEXITY -> new OpenAiChatModel(perplexityApi);
+                default -> throw new IllegalArgumentException("Unexpected value: " + promptConfig.getAiService());
+            };
+            models.put(promptConfig.getKey(), model);
+        }
+    }
 
-	
-	/**
-	 * Load all the prompts config files in memory
-	 * 
-	 * @param folderPath
-	 */
-	public void loadPrompts(String folderPath) {
+    /**
+     * Retrieves the prompt configuration for the given key.
+     * <p>
+     * If caching is enabled, the configuration is retrieved from memory; otherwise, it is loaded from the file.
+     * </p>
+     *
+     * @param promptKey The unique key identifying the prompt configuration.
+     * @return The {@link PromptConfig} or {@code null} if not found.
+     */
+    private PromptConfig getPromptConfig(String promptKey) {
+        if (genAiConfig.isCacheTemplates()) {
+            return prompts.get(promptKey);
+        } else {
+            String path = genAiConfig.getPromptsTemplatesFolder() + "/" + promptKey + ".yml";
+            return loadPrompt(new File(path));
+        }
+    }
 
-		
-		try {
-			File folder = new File(folderPath);
-			if (folder.exists() && folder.isDirectory()) {
-				
-				List<File> promptsFile = Arrays.asList(folder.listFiles()).stream().filter(e -> e.getName().endsWith(".yml")).toList();
-				
-				promptsFile.forEach(f -> {
-					PromptConfig pc = loadPrompt(f);
-					this.prompts.put(pc.getKey(), pc);
-					
-				});
-			} else {
-				logger.error("!!!  Can not load prompts, folder {} is invalid", folderPath);
-			}
-		} catch (Exception e) {
-			logger.error("Error loading prompts at {}",folderPath,  e);
-		}
+    /**
+     * Loads all prompt configuration files from the specified folder.
+     *
+     * @param folderPath The folder containing YAML prompt templates.
+     */
+    public void loadPrompts(String folderPath) {
+        try {
+            File folder = new File(folderPath);
+            if (folder.exists() && folder.isDirectory()) {
+                // Filter YAML files and load each prompt configuration
+                List<File> promptsFile = Arrays.stream(folder.listFiles())
+                        .filter(e -> e.getName().endsWith(".yml"))
+                        .toList();
 
-	}
+                promptsFile.forEach(f -> {
+                    PromptConfig pc = loadPrompt(f);
+                    if (pc != null) {
+                        this.prompts.put(pc.getKey(), pc);
+                    } else {
+                        logger.error("Failed to load prompt configuration from file: {}", f.getAbsolutePath());
+                    }
+                });
+            } else {
+                logger.error("Cannot load prompts: folder {} is invalid", folderPath);
+            }
+        } catch (Exception e) {
+            logger.error("Error loading prompts from {}", folderPath, e);
+        }
+    }
 
-	/**
-	 * Load a PromptConfig from a file
-	 * @param f
-	 * @return
-	 */
-	private PromptConfig loadPrompt(File f) {
-		PromptConfig pc = null;
-		try {
-			pc = serialisationService.fromYaml(FileUtils.readFileToString(f, Charset.defaultCharset()), PromptConfig.class);
-			
-		} catch (Exception e) {
-			logger.error("Error while reading prompt config file : {}", f.getAbsolutePath(), e);
-		}
-		return pc;
-	}
-
+    /**
+     * Loads a single {@link PromptConfig} from a YAML file.
+     *
+     * @param file The YAML file containing the prompt configuration.
+     * @return The loaded {@link PromptConfig} or {@code null} if an error occurs.
+     */
+    private PromptConfig loadPrompt(File file) {
+        try {
+            String content = FileUtils.readFileToString(file, Charset.defaultCharset());
+            return serialisationService.fromYaml(content, PromptConfig.class);
+        } catch (Exception e) {
+            logger.error("Error while reading prompt config file: {}", file.getAbsolutePath(), e);
+            return null;
+        }
+    }
 }
