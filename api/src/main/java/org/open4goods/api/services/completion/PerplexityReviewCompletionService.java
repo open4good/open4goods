@@ -14,6 +14,7 @@ import org.open4goods.model.product.Product;
 import org.open4goods.model.vertical.VerticalConfig;
 import org.open4goods.services.prompt.dto.PromptResponse;
 import org.open4goods.services.prompt.service.GenAiService;
+import org.open4goods.services.serialisation.exception.SerialisationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ai.chat.client.ChatClient.CallResponseSpec;
@@ -53,9 +54,10 @@ public class PerplexityReviewCompletionService  extends AbstractCompletionServic
 	 * @throws JsonParseException
 	 * @throws JsonMappingException
 	 * @throws ResourceNotFoundException
+	 * @throws SerialisationException 
 	 * @throws IOException
 	 */
-	private void completePerplexity(VerticalConfig vConf, Product data) throws JsonParseException, JsonMappingException, ResourceNotFoundException, IOException {
+	private void completePerplexity(VerticalConfig vConf, Product data) throws  ResourceNotFoundException, SerialisationException {
 		
 		Map<String,Object> context = new HashMap<>();
 		

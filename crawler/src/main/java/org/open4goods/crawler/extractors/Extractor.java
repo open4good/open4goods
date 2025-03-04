@@ -184,7 +184,7 @@ public abstract class Extractor {
 	 */
 	protected JsonNode getJsonRootNode(final GetRequest request) {
 		try {
-			return  serialisationService.getJsonMapper().readTree(request.asJson().getBody().toString());
+			return  serialisationService.jsonMapper().readTree(request.asJson().getBody().toString());
 		} catch (final Exception e) {
 			throw new EvaluationException(e.getMessage());
 		}

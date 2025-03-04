@@ -206,8 +206,7 @@ public class AggregationFacadeService {
 	 */
 	private boolean toBeDeleted(Product p) {
 		
-		//TODO(p1,perf) : remove once migration done
-		return serialisationService.toJson(p).contains("openfoodfacts.org");
+		return false;
 	}
 
 	/**

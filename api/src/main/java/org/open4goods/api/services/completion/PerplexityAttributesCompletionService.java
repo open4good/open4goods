@@ -28,6 +28,7 @@ import org.open4goods.model.product.Product;
 import org.open4goods.model.vertical.VerticalConfig;
 import org.open4goods.services.prompt.dto.PromptResponse;
 import org.open4goods.services.prompt.service.GenAiService;
+import org.open4goods.services.serialisation.exception.SerialisationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ai.chat.client.ChatClient.CallResponseSpec;
@@ -71,8 +72,9 @@ public class PerplexityAttributesCompletionService  extends AbstractCompletionSe
 	 * @throws JsonMappingException
 	 * @throws ResourceNotFoundException
 	 * @throws IOException
+	 * @throws SerialisationException 
 	 */
-	private void completePerplexity(VerticalConfig vConf, Product data) throws JsonParseException, JsonMappingException, ResourceNotFoundException, IOException {
+	private void completePerplexity(VerticalConfig vConf, Product data) throws  SerialisationException, ResourceNotFoundException {
 		
 		Map<String,Object> context = new HashMap<>();
 		
@@ -96,10 +98,6 @@ public class PerplexityAttributesCompletionService  extends AbstractCompletionSe
 		// AI Prompting
 		PromptResponse<Map<String, Object>> response = aiService.jsonPrompt("perplexity-product-attributes", context);
 		
-		//
-		
-		
-		System.out.println(response.getRaw());
 		
 		// Updating product attributes
 		updateProductAttributes(response.getBody(), data, vConf);

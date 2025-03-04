@@ -84,11 +84,11 @@ public class ProductBackupThread implements Runnable {
                 	logger.info("Handling done for this thread");
                 	break;
                 } else {
-                    String json = serialisationService.toJson(product);
                     try {
+                    	String json = serialisationService.toJson(product);
 						writer.write(json);
 						writer.newLine(); // Ensure each JSON object is on a new line
-					} catch (IOException e) {
+					} catch (Exception e) {
 						   logger.error("Serialiation exception", e);
 					}
                 }

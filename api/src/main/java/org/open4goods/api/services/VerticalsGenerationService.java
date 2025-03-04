@@ -35,6 +35,7 @@ import org.open4goods.model.vertical.VerticalConfig;
 import org.open4goods.services.evaluation.service.EvaluationService;
 import org.open4goods.services.prompt.dto.PromptResponse;
 import org.open4goods.services.prompt.service.GenAiService;
+import org.open4goods.services.serialisation.exception.SerialisationException;
 import org.open4goods.services.serialisation.service.SerialisationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -369,7 +370,12 @@ public class VerticalsGenerationService {
 		
 		Map<String,Object> retMAp = new HashMap<String, Object>();
 		retMAp.put("matchingCategories", matchingCategories);
-		String ret = serialisationService.toYaml(retMAp);
+		String ret = "";
+		try {
+			ret = serialisationService.toYaml(retMAp);
+		} catch (SerialisationException e) {
+			LOGGER.error("Serialisation exception",e);
+		}
 		ret = ret.replaceFirst("---", "");
 		return ret.toString();
 	}
@@ -650,18 +656,9 @@ public class VerticalsGenerationService {
 			ret = serialisationService.toYaml(map).replace("---", "");
 			
 			
-		} catch (ResourceNotFoundException e) {
+		} catch (Exception e) {
 			LOGGER.error("Ecoscore Generation failed for {} ",vConf, e);
-		} catch (JsonParseException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (JsonMappingException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		} 
 		
 		return ret;
 		

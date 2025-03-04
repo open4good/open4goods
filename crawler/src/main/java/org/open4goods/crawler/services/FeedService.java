@@ -20,6 +20,7 @@ import org.open4goods.commons.config.yml.datasource.FeedConfiguration;
 import org.open4goods.commons.services.DataSourceConfigService;
 import org.open4goods.crawler.services.fetching.CsvDatasourceFetchingService;
 import org.open4goods.model.helper.IdHelper;
+import org.open4goods.services.serialisation.exception.SerialisationException;
 import org.open4goods.services.serialisation.service.SerialisationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -318,8 +319,9 @@ public class FeedService {
 	 * @throws IOException 
 	 * @throws JsonMappingException 
 	 * @throws JsonParseException 
+	 * @throws SerialisationException 
 	 */
-	private DataSourceProperties getVolatileDataSource(String feedKey, FeedConfiguration feedConfig, String feedUrl) throws IllegalAccessException, InstantiationException, InvocationTargetException, NoSuchMethodException, JsonParseException, JsonMappingException, IOException {
+	private DataSourceProperties getVolatileDataSource(String feedKey, FeedConfiguration feedConfig, String feedUrl) throws IllegalAccessException, InstantiationException, InvocationTargetException, NoSuchMethodException, JsonParseException, JsonMappingException, IOException, SerialisationException {
 		
 		// Checking if a custom vertical has been defined for this feedkey
 		DataSourceProperties existing = datasourceConfigService.getDatasourcePropertiesForFeed(feedKey);

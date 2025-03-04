@@ -64,7 +64,7 @@ public class PartenairesController  implements SitemapExposedController{
 			String link;
 			try {
 				link = URLEncoder.encode(serialisationService.compressString(serialisationService.toJson(token)), Charset.defaultCharset());
-			} catch (IOException e) {
+			} catch (Exception e) {
 				LOGGER.error("Error while generating link for partner",e);
 				link = dsp.getPortalUrl();
 			}

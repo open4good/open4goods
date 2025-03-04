@@ -5,287 +5,318 @@ import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.open4goods.services.serialisation.exception.SerialisationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
-import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.type.CollectionType;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.fasterxml.jackson.dataformat.yaml.YAMLGenerator;
+import org.apache.commons.codec.binary.Base64;
 
+/**
+ * Service for serializing and deserializing objects to/from JSON and YAML formats.
+ * Provides methods for Base64 encoding/decoding of string content.
+ *
+ * <p>This service is part of the Open4Goods project.</p>
+ */
 @Service
 public class SerialisationService {
 
-	private static final Logger logger = LoggerFactory.getLogger(SerialisationService.class);
+    private static final Logger logger = LoggerFactory.getLogger(SerialisationService.class);
 
-	private final ObjectMapper jsonMapper = new ObjectMapper()
-			//			.enable(DeserializationFeature.READ_ENUMS_USING_TO_STRING)
-			.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+    private final ObjectMapper jsonMapper;
+    private final ObjectWriter jsonMapperWithPrettyPrint;
+    private final ObjectMapper yamlMapper;
 
-			.setSerializationInclusion(Include.NON_EMPTY)
-			.setSerializationInclusion(Include.NON_NULL)
+    /**
+     * Constructor initializing JSON and YAML ObjectMappers with desired configurations.
+     */
+    public SerialisationService() {
+        // Initialize JSON mapper with NON_EMPTY inclusion and disable failure on unknown properties.
+        this.jsonMapper = new ObjectMapper()
+                .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+                .setSerializationInclusion(Include.NON_EMPTY);
+        
+        // Create a pretty-print writer for JSON.
+        this.jsonMapperWithPrettyPrint = new ObjectMapper().writerWithDefaultPrettyPrinter();
+        
+        // Initialize YAML mapper with NON_EMPTY inclusion and pretty output.
+        this.yamlMapper = new ObjectMapper(new YAMLFactory().disable(YAMLGenerator.Feature.SPLIT_LINES))
+                .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+                .setSerializationInclusion(Include.NON_EMPTY)
+                .enable(SerializationFeature.INDENT_OUTPUT);
+    }
 
-			;
+    /**
+     * Serializes an object to its JSON representation.
+     *
+     * @param o the object to serialize
+     * @return JSON string representation of the object
+     * @throws SerialisationException if serialization fails
+     */
+    public String toJson(final Object o) throws SerialisationException {
+        try {
+            return jsonMapper.writeValueAsString(o);
+        } catch (final JsonProcessingException e) {
+            logger.error("Error serializing {} to JSON", o, e);
+            throw new SerialisationException("Error serializing object to JSON", e);
+        }
+    }
 
-	private final ObjectWriter jsonMapperWithPretttyPrint = new ObjectMapper().writerWithDefaultPrettyPrinter();
+    /**
+     * Serializes an object to its YAML representation.
+     *
+     * @param o the object to serialize
+     * @return YAML string representation of the object
+     * @throws SerialisationException if serialization fails
+     */
+    public String toYaml(final Object o) throws SerialisationException {
+        try {
+            return yamlMapper.writeValueAsString(o);
+        } catch (final JsonProcessingException e) {
+            logger.error("Error serializing {} to YAML", o, e);
+            throw new SerialisationException("Error serializing object to YAML", e);
+        }
+    }
 
-	private final ObjectMapper yamlMapper = new ObjectMapper(new YAMLFactory()	.disable(YAMLGenerator.Feature.SPLIT_LINES))
-			.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
-			.setSerializationInclusion(Include.NON_EMPTY)
-			.setSerializationInclusion(Include.NON_NULL)
-			.enable(SerializationFeature.INDENT_OUTPUT)
-			;
+    /**
+     * Serializes an object to its JSON representation with an option for pretty printing.
+     *
+     * @param o the object to serialize
+     * @param prettyPrint if true, output will be pretty printed
+     * @return JSON string representation of the object
+     * @throws SerialisationException if serialization fails
+     */
+    public String toJson(final Object o, final boolean prettyPrint) throws SerialisationException {
+        if (prettyPrint) {
+            try {
+                return jsonMapperWithPrettyPrint.writeValueAsString(o);
+            } catch (final JsonProcessingException e) {
+                logger.error("Error serializing {} to JSON with pretty print", o, e);
+                throw new SerialisationException("Error serializing object to JSON with pretty print", e);
+            }
+        } else {
+            return toJson(o);
+        }
+    }
 
-	public SerialisationService() {
-		super();
-	}
+    /**
+     * Creates a deep clone of an object using JSON serialization.
+     *
+     * @param <T> the type of the object
+     * @param value the object to clone
+     * @return a deep clone of the object
+     * @throws SerialisationException if cloning fails
+     */
+    public <T> T clone(final T value) throws SerialisationException {
+        try {
+            String json = toJson(value);
+            @SuppressWarnings("unchecked")
+            T clonedObject = (T) jsonMapper.readValue(json, value.getClass());
+            return clonedObject;
+        } catch (final IOException e) {
+            logger.error("Error cloning object: {}", value, e);
+            throw new SerialisationException("Error cloning object", e);
+        }
+    }
 
-	/**
-	 * JSON object serialisation
-	 * @return
-	 */
-	public String toJson(final Object o) {
-		try {
-			return jsonMapper.writeValueAsString(o);
-		} catch (final JsonProcessingException e) {
-			logger.error("Error while serialising {} to JSON", o, e);
-			return null;
-		}
-	}
+    /**
+     * Deserializes a JSON string into an object of the specified type.
+     *
+     * @param <T> the type of the object
+     * @param input the JSON string
+     * @param valueType the target class
+     * @return deserialized object
+     * @throws SerialisationException if deserialization fails
+     */
+    public <T> T fromJson(final String input, final Class<T> valueType) throws SerialisationException {
+        try {
+            return jsonMapper.readValue(input, valueType);
+        } catch (final IOException e) {
+            logger.error("Error deserializing JSON to {}", valueType, e);
+            throw new SerialisationException("Error deserializing JSON", e);
+        }
+    }
 
-	/**
-	 * YAML object serialisation
-	 * @param o
-	 * @return
-	 */
-	public String toYaml(final Object o) {
-		try {
-			return yamlMapper.writeValueAsString(o);
-		} catch (final JsonProcessingException e) {
-			logger.error("Error while serialising {} to JSON", o, e);
-			return null;
-		}
-	}
+    /**
+     * Deserializes a JSON string into a Map of String keys and values.
+     *
+     * @param value the JSON string
+     * @param typeRef the type reference for the map
+     * @return deserialized map
+     * @throws SerialisationException if deserialization fails
+     */
+    public Map<String, String> fromJson(String value, TypeReference<HashMap<String, String>> typeRef) throws SerialisationException {
+        try {
+            return jsonMapper.readValue(value, typeRef);
+        } catch (final IOException e) {
+            logger.error("Error deserializing JSON to HashMap<String, String>", e);
+            throw new SerialisationException("Error deserializing JSON to HashMap<String, String>", e);
+        }
+    }
 
-	/**
-	 * JSON object serialisation, with prettyprint options
-	 * @param o
-	 * @param prettyPrint
-	 * @return
-	 */
-	public String toJson(final Object o, final boolean prettyPrint) {
-		if (prettyPrint) {
-			try {
-				return jsonMapperWithPretttyPrint.writeValueAsString(o);
-			} catch (final JsonProcessingException e) {
-				logger.error("Error while serialising {} to JSON (with prettyPrint)", o, e);
-				return null;
-			}
-		} else {
-			return toJson(o);
-		}
-	}
+    /**
+     * Deserializes a JSON string into a Map of String keys and Object values.
+     *
+     * @param value the JSON string
+     * @param typeRef the type reference for the map
+     * @return deserialized map
+     * @throws SerialisationException if deserialization fails
+     */
+    public Map<String, Object> fromJsonTypeRef(String value, TypeReference<Map<String, Object>> typeRef) throws SerialisationException {
+        try {
+            return jsonMapper.readValue(value, typeRef);
+        } catch (final IOException e) {
+            logger.error("Error deserializing JSON to Map<String, Object>", e);
+            throw new SerialisationException("Error deserializing JSON to Map<String, Object>", e);
+        }
+    }
 
-	/**
-	 * Clone an object using json
-	 * @param <T>
-	 * @param valueType
-	 * @return
-	 * @throws JsonParseException
-	 * @throws JsonMappingException
-	 * @throws IOException
-	 */
-	public <T> T clone(T valueType)
-			throws JsonParseException, JsonMappingException, IOException {
-		return    (T) jsonMapper.readValue(toJson(valueType) , valueType.getClass());
-	}
-	
-	
-	
-	/**
-	 * JSON object de-serialisation
-	 * @param input
-	 * @param valueType
-	 * @return
-	 * @throws JsonParseException
-	 * @throws JsonMappingException
-	 * @throws IOException
-	 */
-	public <T> T fromJson(final String input, final Class<T> valueType)
-			throws JsonParseException, JsonMappingException, IOException {
-		return jsonMapper.readValue(input, valueType);
-	}
-	
-	public Map<String, String> fromJson(String value, TypeReference<HashMap<String, String>> typeRef) 		throws JsonParseException, JsonMappingException, IOException {
-		return jsonMapper.readValue(value, typeRef);
-	}
+    /**
+     * Deserializes a YAML string into an object of the specified type.
+     *
+     * @param <T> the type of the object
+     * @param input the YAML string
+     * @param valueType the target class
+     * @return deserialized object
+     * @throws SerialisationException if deserialization fails
+     */
+    public <T> T fromYaml(final String input, final Class<T> valueType) throws SerialisationException {
+        try {
+            return yamlMapper.readValue(input, valueType);
+        } catch (final IOException e) {
+            logger.error("Error deserializing YAML to {}", valueType, e);
+            throw new SerialisationException("Error deserializing YAML", e);
+        }
+    }
 
-	public Map<String, Object> fromJsonTypeRef(String value, TypeReference<Map<String, Object>> typeRef) 		throws JsonParseException, JsonMappingException, IOException {
-		return jsonMapper.readValue(value, typeRef);
-	}
+    /**
+     * Deserializes a YAML string into an object using the specified collection type.
+     *
+     * @param <T> the type of the object
+     * @param input the YAML string
+     * @param collectionType the collection type reference
+     * @return deserialized object
+     * @throws SerialisationException if deserialization fails
+     */
+    public <T> T fromYaml(final String input, final CollectionType collectionType) throws SerialisationException {
+        try {
+            return yamlMapper.readValue(input, collectionType);
+        } catch (final IOException e) {
+            logger.error("Error deserializing YAML to collection type {}", collectionType, e);
+            throw new SerialisationException("Error deserializing YAML to collection type", e);
+        }
+    }
 
+    /**
+     * Deserializes YAML content from an InputStream into an object of the specified type.
+     *
+     * @param <T> the type of the object
+     * @param input the InputStream containing YAML content
+     * @param valueType the target class
+     * @return deserialized object
+     * @throws SerialisationException if deserialization fails
+     */
+    public <T> T fromYaml(final InputStream input, final Class<T> valueType) throws SerialisationException {
+        try {
+            return yamlMapper.readValue(input, valueType);
+        } catch (final IOException e) {
+            logger.error("Error deserializing YAML InputStream to {}", valueType, e);
+            throw new SerialisationException("Error deserializing YAML InputStream", e);
+        }
+    }
 
+    /**
+     * Deserializes a binary JSON representation into an object of the specified type.
+     *
+     * @param <T> the type of the object
+     * @param bytes the byte array containing JSON data
+     * @param c the target class
+     * @return deserialized object
+     * @throws SerialisationException if deserialization fails
+     */
+    public <T> T fromBytes(final byte[] bytes, final Class<T> c) throws SerialisationException {
+        try {
+            return jsonMapper.readValue(bytes, c);
+        } catch (final IOException e) {
+            logger.error("Error deserializing bytes to {}", c, e);
+            throw new SerialisationException("Error deserializing bytes", e);
+        }
+    }
 
-	/**
-	 * YAML object de-serialisation
-	 * @param input
-	 * @param valueType
-	 * @return
-	 * @throws JsonParseException
-	 * @throws JsonMappingException
-	 * @throws IOException
-	 */
-	public <T> T fromYaml(final String input, final Class<T> valueType)
-			throws JsonParseException, JsonMappingException, IOException {
-		return yamlMapper.readValue(input, valueType);
-	}
+    /**
+     * Serializes an object into its binary JSON representation.
+     *
+     * @param o the object to serialize
+     * @return byte array representing the serialized object
+     * @throws SerialisationException if serialization fails
+     */
+    public byte[] toBytes(final Object o) throws SerialisationException {
+        return toJson(o).getBytes();
+    }
 
-	public <T> T fromYaml(final String input, final CollectionType valueType)
-			throws JsonParseException, JsonMappingException, IOException {
-		return yamlMapper.readValue(input, valueType);
-	}
+    /**
+     * Retrieves the underlying JSON ObjectMapper.
+     *
+     * @return the JSON ObjectMapper
+     */
+    public ObjectMapper jsonMapper() {
+        return jsonMapper;
+    }
 
-	public <T> T fromYaml(final InputStream input, final Class<T> valueType)
-			throws IOException {
-		return yamlMapper.readValue(input, valueType);
-	}
+    /**
+     * Retrieves the underlying YAML ObjectMapper.
+     *
+     * @return the YAML ObjectMapper
+     */
+    public ObjectMapper getYamlMapper() {
+        return yamlMapper;
+    }
 
+    /**
+     * Compresses a string by encoding it using Base64.
+     * <p>
+     * Note: This method uses Base64 encoding only and does not perform actual compression.
+     * </p>
+     *
+     * @param srcTxt the source text to compress
+     * @return Base64 encoded string
+     * @throws SerialisationException if encoding fails
+     */
+    public String compressString(final String srcTxt) throws SerialisationException {
+        try {
+            return Base64.encodeBase64String(srcTxt.getBytes());
+        } catch (final Exception e) {
+            logger.error("Error compressing string", e);
+            throw new SerialisationException("Error compressing string", e);
+        }
+    }
 
-
-
-
-
-
-
-
-
-
-	/**
-	 * Binary object de-serialisation
-	 * @param bytes
-	 * @param c
-	 * @return
-	 * @throws IOException
-	 * @throws JsonMappingException
-	 * @throws JsonParseException
-	 */
-	public <T> T fromBytes(final byte[] bytes, final Class<T> c) throws JsonParseException, JsonMappingException, IOException {
-		return jsonMapper.readValue(bytes,c);
-	}
-
-	/**
-	 * Binary object serialisation
-	 * @param o
-	 * @return
-	 */
-	public byte[] toBytes(final Object o) {
-		return toJson(o).getBytes();
-	}
-
-	public ObjectMapper jsonMapper() {
-		return jsonMapper;
-	}
-
-
-	//	/**
-	//	 * Binary object de-serialisation
-	//	 * @param bytes
-	//	 * @param c
-	//	 * @return
-	//	 * @throws IOException
-	//	 * @throws JsonMappingException
-	//	 * @throws JsonParseException
-	//	 */
-	//	public <T> T fromBinaryB64(String base64, Class<T> c) throws JsonParseException, JsonMappingException, IOException {
-	//		byte[] decoded = Base64.getDecoder().decode(base64);
-	//		return fromBytes(decoded, c);
-	//	}
-	//
-	//	/**
-	//	 * Binary object serialisation
-	//	 * @param o
-	//	 * @return
-	//	 */
-	//	public String toBinaryB64(Object o) {
-	//		byte[] bytes = toBytes(o);
-	//		byte[] encoded = Base64.getEncoder().encode(bytes);
-	//		return new String(encoded);
-	//	}
-
-	/**
-	 *
-	 * @return the Jackson json obect-mapper
-	 */
-	public ObjectMapper getJsonMapper() {
-		return jsonMapper;
-	}
-
-
-	/**
-	 *
-	 * @return the Jackson yaml obect-mapper
-	 */
-	public ObjectMapper getYamlMapper() {
-		return yamlMapper;
-	}
-
-
-
-	/**
-	 * At server side, use ZipOutputStream to zip text to byte array, then convert
-	 * byte array to base64 string, so it can be trasnfered via http request.
-	 */
-	//TODO(gof) : perf : zip that content
-	public  String compressString(final String srcTxt)
-			throws IOException {
-		//	    ByteArrayOutputStream rstBao = new ByteArrayOutputStream();
-		//	    GZIPOutputStream zos = new GZIPOutputStream(rstBao);
-		//	    zos.write(srcTxt.getBytes());
-		//	    IOUtils.closeQuietly(zos);
-		//
-		//	    byte[] bytes = rstBao.toByteArray();
-		// In my solr project, I use org.apache.solr.co mmon.util.Base64.
-		// return = org.apache.solr.common.util.Base64.byteArrayToBase64(bytes, 0,
-		// bytes.length);
-		return org.apache.commons.codec.binary.Base64.encodeBase64String(srcTxt.getBytes());
-	}
-
-
-	/**
-	 * When client receives the zipped base64 string, it first decode base64
-	 * String to byte array, then use ZipInputStream to revert the byte array to a
-	 * string.
-	 */
-	//TODO(gof) : perf : zip that content
-	public static String uncompressString(final String zippedBase64Str)
-			throws IOException {
-		//	    String result = null;
-		//
-		//	    // In my solr project, I use org.apache.solr.common.util.Base64.
-		//	    // byte[] bytes =
-		//	    // org.apache.solr.common.util.Base64.base64ToByteArray(zippedBase64Str);
-		//	    byte[] bytes = org.apache.commons.codec.binary.Base64.decodeBase64(zippedBase64Str);
-		//	    GZIPInputStream zi = null;
-		//	    try {
-		//	      zi = new GZIPInputStream(new ByteArrayInputStream(bytes));
-		//	      result = IOUtils.toString(zi);
-		//	    } finally {
-		//	      IOUtils.closeQuietly(zi);
-		//	    }
-		//	    return result;
-
-		return new String( org.apache.commons.codec.binary.Base64.decodeBase64(zippedBase64Str));
-	}
-
-	
-
+    /**
+     * Decompresses a Base64 encoded string.
+     * <p>
+     * Note: This method uses Base64 decoding only and does not perform actual decompression.
+     * </p>
+     *
+     * @param zippedBase64Str the Base64 encoded string to decompress
+     * @return the decompressed string
+     * @throws SerialisationException if decoding fails
+     */
+    public static String uncompressString(final String zippedBase64Str) throws SerialisationException {
+        try {
+            return new String(Base64.decodeBase64(zippedBase64Str));
+        } catch (final Exception e) {
+            logger.error("Error uncompressing string", e);
+            throw new SerialisationException("Error uncompressing string", e);
+        }
+    }
 }

@@ -16,6 +16,7 @@ import org.open4goods.model.product.Product;
 import org.open4goods.model.vertical.VerticalConfig;
 import org.open4goods.services.prompt.dto.PromptResponse;
 import org.open4goods.services.prompt.service.GenAiService;
+import org.open4goods.services.serialisation.exception.SerialisationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ai.chat.client.ChatClient.CallResponseSpec;
@@ -49,11 +50,12 @@ public class ProductsReviewGenerationService {
 	 * @throws JsonParseException
 	 * @throws JsonMappingException
 	 * @throws ResourceNotFoundException
+	 * @throws SerialisationException 
 	 * @throws IOException
 	 */
 	
 	
-	public AiSourcedPage  perplexityCompletion(VerticalConfig vConf, String question, String id, String language, String title) throws JsonParseException, JsonMappingException, ResourceNotFoundException, IOException {
+	public AiSourcedPage  perplexityCompletion(VerticalConfig vConf, String question, String id, String language, String title) throws ResourceNotFoundException, SerialisationException{
 		
 		Map<String,Object> context = new HashMap<>();
 		

@@ -115,7 +115,7 @@ public class DevModeService {
 				try {
 					// Set last offer date to provide a longer product visibility in UI
 					response.getWriter().write(serialisationService.toJson(p)+"\n");
-				} catch (IOException e) {
+				} catch (Exception e) {
 					LOGGER.error("Error while streaming products", e);
 				}
 			});

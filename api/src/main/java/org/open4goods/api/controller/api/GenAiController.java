@@ -14,6 +14,7 @@ import org.open4goods.model.exceptions.InvalidParameterException;
 import org.open4goods.model.exceptions.ResourceNotFoundException;
 import org.open4goods.model.vertical.VerticalConfig;
 import org.open4goods.services.prompt.service.GenAiService;
+import org.open4goods.services.serialisation.exception.SerialisationException;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -50,7 +51,7 @@ public class GenAiController {
 	@GetMapping("/prompt/json")
 	@Operation(summary="Launch prompt")
 	public Map<String, Object> promptJson(@RequestParam(defaultValue = "test") String key, 
-			@RequestParam Map<String,Object> context) throws InvalidParameterException, IOException, ResourceNotFoundException, AggregationSkipException {
+			@RequestParam Map<String,Object> context) throws ResourceNotFoundException, SerialisationException {
 		
 		return aiService.jsonPrompt(key, context).getBody();
 	}
@@ -58,7 +59,7 @@ public class GenAiController {
 	@GetMapping("/prompt/text")
 	@Operation(summary="Launch prompt")
 	public String prompt(@RequestParam(defaultValue = "test") String key, 
-			@RequestParam Map<String,Object> context) throws InvalidParameterException, IOException, ResourceNotFoundException, AggregationSkipException {
+			@RequestParam Map<String,Object> context) throws ResourceNotFoundException, SerialisationException {
 		
 		return aiService.prompt(key, context).getRaw();
 	}
@@ -70,7 +71,7 @@ public class GenAiController {
 			String question,
 			String vertical,
 			String id,
-			String title) throws InvalidParameterException, IOException, ResourceNotFoundException, AggregationSkipException {
+			String title) throws ResourceNotFoundException, SerialisationException{
 		
 		
 		VerticalConfig vc = verticalsConfigService.getConfigById(vertical);
