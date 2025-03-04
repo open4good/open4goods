@@ -1,6 +1,6 @@
-package org.open4goods.prompt.dto;
+package org.open4goods.services.prompt.dto;
 
-import org.open4goods.prompt.config.PromptConfig;
+import org.open4goods.services.prompt.config.PromptConfig;
 
 public class PromptResponse<T> {
 	

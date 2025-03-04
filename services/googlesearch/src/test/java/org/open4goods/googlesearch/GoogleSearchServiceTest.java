@@ -8,9 +8,9 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import java.io.IOException;
 
 import org.junit.jupiter.api.Test;
-import org.open4goods.googlesearch.dto.GoogleSearchRequest;
-import org.open4goods.googlesearch.dto.GoogleSearchResponse;
-import org.open4goods.googlesearch.service.GoogleSearchService;
+import org.open4goods.services.googlesearch.dto.GoogleSearchRequest;
+import org.open4goods.services.googlesearch.dto.GoogleSearchResponse;
+import org.open4goods.services.googlesearch.service.GoogleSearchService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringBootConfiguration;
 import org.springframework.boot.actuate.health.Status;
@@ -62,9 +62,9 @@ public class GoogleSearchServiceTest {
      */
     @SpringBootConfiguration
     @EnableAutoConfiguration
-    @ComponentScan(basePackages = {"org.open4goods.googlesearch"})
+    @ComponentScan(basePackages = {"org.open4goods.services.googlesearch"})
     public static class TestConfig {
         // This class remains empty; its purpose is to trigger component scanning
-        // in the org.open4goods.googlesearch package and enable auto-configuration.
+        // in the org.open4goods.services.googlesearch package and enable auto-configuration.
     }
 }

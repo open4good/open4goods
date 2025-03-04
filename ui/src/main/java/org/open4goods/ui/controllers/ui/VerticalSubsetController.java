@@ -6,7 +6,7 @@ import org.open4goods.commons.services.SearchService;
 import org.open4goods.commons.services.VerticalsConfigService;
 import org.open4goods.model.vertical.VerticalConfig;
 import org.open4goods.model.vertical.VerticalSubset;
-import org.open4goods.serialisation.service.SerialisationService;
+import org.open4goods.services.serialisation.service.SerialisationService;
 import org.open4goods.ui.controllers.ui.AbstractVerticalController;
 import org.open4goods.ui.controllers.ui.UiService;
 import org.open4goods.ui.services.BlogService;

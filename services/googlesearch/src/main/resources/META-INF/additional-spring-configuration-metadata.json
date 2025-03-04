@@ -2,7 +2,7 @@
   "groups": [
     {
       "name": "googlesearch",
-      "type": "org.open4goods.googlesearch.config.GoogleSearchProperties",
+      "type": "org.open4goods.services.googlesearch.config.GoogleSearchProperties",
       "description": "Configuration properties for Google Custom Search API."
     }
   ],

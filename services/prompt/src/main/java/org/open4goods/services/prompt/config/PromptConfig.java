@@ -1,4 +1,4 @@
-package org.open4goods.prompt.config;
+package org.open4goods.services.prompt.config;
 
 import org.springframework.ai.openai.OpenAiChatOptions;
 

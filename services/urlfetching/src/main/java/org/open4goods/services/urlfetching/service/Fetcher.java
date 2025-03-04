@@ -1,7 +1,8 @@
-package org.open4goods.urlfetching.service;
+package org.open4goods.services.urlfetching.service;
 
 import java.util.concurrent.CompletableFuture;
-import org.open4goods.urlfetching.dto.FetchResponse;
+
+import org.open4goods.services.urlfetching.dto.FetchResponse;
 
 /**
  * Interface for URL fetching strategies.

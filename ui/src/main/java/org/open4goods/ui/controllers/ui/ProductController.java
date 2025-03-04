@@ -23,7 +23,7 @@ import org.open4goods.model.price.AggregatedPrice;
 import org.open4goods.model.price.PriceTrend;
 import org.open4goods.model.product.Product;
 import org.open4goods.model.vertical.VerticalConfig;
-import org.open4goods.serialisation.service.SerialisationService;
+import org.open4goods.services.serialisation.service.SerialisationService;
 import org.open4goods.ui.config.yml.UiConfig;
 import org.open4goods.ui.helper.UiHelper;
 import org.slf4j.Logger;

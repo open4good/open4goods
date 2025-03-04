@@ -1,4 +1,4 @@
-package org.open4goods.googlesearch.config;
+package org.open4goods.services.googlesearch.config;
 
 import java.util.Objects;
 import org.springframework.boot.context.properties.ConfigurationProperties;

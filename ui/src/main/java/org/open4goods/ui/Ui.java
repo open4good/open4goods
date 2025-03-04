@@ -3,11 +3,12 @@ package org.open4goods.ui;
 
 import java.io.IOException;
 
+import org.open4goods.commons.config.CacheKeyGenerator;
 import org.open4goods.commons.store.repository.elastic.BrandScoresRepository;
 import org.open4goods.commons.store.repository.elastic.ElasticProductRepository;
 import org.open4goods.commons.store.repository.elastic.ElasticTextRepository;
 import org.open4goods.commons.store.repository.elastic.VerticalPagesRepository;
-import org.open4goods.serialisation.service.SerialisationService;
+import org.open4goods.services.serialisation.service.SerialisationService;
 import org.open4goods.ui.repository.CheckedUrlRepository;
 import org.open4goods.ui.repository.ContributionVoteRepository;
 import org.open4goods.ui.repository.UserSearchRepository;
@@ -27,7 +28,7 @@ import com.mashape.unirest.http.Unirest;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 
-@SpringBootApplication(scanBasePackages = "org.open4goods")
+@SpringBootApplication(scanBasePackages = {"org.open4goods.services"}, scanBasePackageClasses = { Ui.class, CacheKeyGenerator.class})
 @EnableScheduling
 @EnableCaching
 @Configuration

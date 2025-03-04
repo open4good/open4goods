@@ -1,4 +1,4 @@
-package org.open4goods.urlfetching.config;
+package org.open4goods.services.urlfetching.config;
 
 import java.util.HashMap;
 import java.util.Map;

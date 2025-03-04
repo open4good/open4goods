@@ -1,4 +1,4 @@
-package org.open4goods.evaluation.exception;
+package org.open4goods.services.evaluation.exception;
 
 /**
  * Exception thrown when a Thymeleaf template evaluation fails due to unresolved variables.

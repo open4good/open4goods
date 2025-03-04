@@ -1,18 +1,18 @@
-package org.open4goods.urlfetching.service;
+package org.open4goods.services.urlfetching.service;
 
 import java.net.URI;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executors;
 
-import org.open4goods.urlfetching.config.FetchStrategy;
-import org.open4goods.urlfetching.config.UrlFetcherConfig;
-import org.open4goods.urlfetching.config.UrlFetcherConfig.DomainConfig;
-import org.open4goods.urlfetching.dto.FetchResponse;
-import org.open4goods.urlfetching.service.fetchers.HttpFetcher;
-import org.open4goods.urlfetching.service.fetchers.ProxifiedHttpFetcher;
-import org.open4goods.urlfetching.service.fetchers.SeleniumHttpFetcher;
-
 import io.micrometer.core.instrument.MeterRegistry;
+
+import org.open4goods.services.urlfetching.config.FetchStrategy;
+import org.open4goods.services.urlfetching.config.UrlFetcherConfig;
+import org.open4goods.services.urlfetching.config.UrlFetcherConfig.DomainConfig;
+import org.open4goods.services.urlfetching.dto.FetchResponse;
+import org.open4goods.services.urlfetching.service.fetchers.HttpFetcher;
+import org.open4goods.services.urlfetching.service.fetchers.ProxifiedHttpFetcher;
+import org.open4goods.services.urlfetching.service.fetchers.SeleniumHttpFetcher;
 import org.springframework.stereotype.Service;
 
 /**

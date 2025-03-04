@@ -1,9 +1,9 @@
 package org.open4goods.commons.services.textgen;
 
 import org.apache.commons.lang3.StringUtils;
-import org.open4goods.evaluation.service.EvaluationService;
 import org.open4goods.model.exceptions.InvalidParameterException;
 import org.open4goods.model.product.Product;
+import org.open4goods.services.evaluation.service.EvaluationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
