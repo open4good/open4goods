@@ -1,0 +1,26 @@
+{
+  "groups": [
+    {
+      "name": "genAiConfig",
+      "type": "org.open4goods.model.vertical.GenAiConfig",
+      "sourceType": "org.open4goods.model.vertical.GenAiConfig"
+    }
+  ],
+  "properties": [
+    {
+      "name": "genAiConfig.promptsTemplatesFolder",
+      "type": "java.lang.String",
+      "description": "Folder path for prompt templates."
+    },
+    {
+      "name": "genAiConfig.cacheTemplates",
+      "type": "java.lang.Boolean",
+      "description": "Determines if prompt templates should be cached in memory."
+    },
+    {
+      "name": "genAiConfig.enabled",
+      "type": "java.lang.Boolean",
+      "description": "Flag to enable or disable the GenAi service."
+    }
+  ]
+}
