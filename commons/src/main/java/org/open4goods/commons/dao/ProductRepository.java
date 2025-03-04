@@ -12,7 +12,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.open4goods.commons.config.yml.IndexationConfig;
-import org.open4goods.commons.services.SerialisationService;
 import org.open4goods.commons.store.repository.FullProductIndexationWorker;
 import org.open4goods.commons.store.repository.PartialProductIndexationWorker;
 import org.open4goods.model.constants.CacheConstants;
@@ -21,6 +20,7 @@ import org.open4goods.model.product.BarcodeType;
 import org.open4goods.model.product.Product;
 import org.open4goods.model.product.ProductPartialUpdateHolder;
 import org.open4goods.model.vertical.VerticalConfig;
+import org.open4goods.serialisation.service.SerialisationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

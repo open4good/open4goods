@@ -38,7 +38,8 @@
 		<module>ui</module>
 		<module>services/urlfetching</module>
         <module>services/googlesearch</module>
-
+        <module>services/evaluation</module>
+        <module>services/serialisation</module>
 	</modules>
 
 	<issueManagement>

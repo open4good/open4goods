@@ -1,4 +1,4 @@
-package org.open4goods.commons.services;
+package org.open4goods.evaluation.service;
 
 import java.util.Map;
 import java.util.Map.Entry;

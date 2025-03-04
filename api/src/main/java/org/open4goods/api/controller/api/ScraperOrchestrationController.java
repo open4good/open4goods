@@ -1,8 +1,6 @@
 package org.open4goods.api.controller.api;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -13,11 +11,11 @@ import org.open4goods.commons.model.constants.RolesConstants;
 import org.open4goods.commons.model.crawlers.FetcherGlobalStats;
 import org.open4goods.commons.model.dto.FetchRequestResponse;
 import org.open4goods.commons.services.DataSourceConfigService;
-import org.open4goods.commons.services.SerialisationService;
 import org.open4goods.model.constants.UrlConstants;
 import org.open4goods.model.datafragment.DataFragment;
 import org.open4goods.model.exceptions.InvalidParameterException;
 import org.open4goods.model.exceptions.ValidationException;
+import org.open4goods.serialisation.service.SerialisationService;
 import org.springframework.http.MediaType;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
