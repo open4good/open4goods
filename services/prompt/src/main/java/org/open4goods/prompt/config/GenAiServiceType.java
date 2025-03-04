@@ -1,4 +1,4 @@
-package org.open4goods.commons.config.yml;
+package org.open4goods.prompt.config;
 
 public enum GenAiServiceType {
 	OPEN_AI,
