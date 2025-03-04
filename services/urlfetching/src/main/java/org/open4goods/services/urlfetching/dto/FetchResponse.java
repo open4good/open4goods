@@ -1,4 +1,4 @@
-package org.open4goods.urlfetching.dto;
+package org.open4goods.services.urlfetching.dto;
 
 /**
  * Data Transfer Object for fetch responses.

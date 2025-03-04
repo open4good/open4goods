@@ -10,7 +10,7 @@ import org.open4goods.commons.store.repository.elastic.ElasticTextRepository;
 import org.open4goods.commons.store.repository.elastic.VerticalPagesRepository;
 import org.open4goods.crawler.controller.CrawlController;
 import org.open4goods.crawler.repository.IndexationRepository;
-import org.open4goods.serialisation.service.SerialisationService;
+import org.open4goods.services.serialisation.service.SerialisationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,7 +27,7 @@ import jakarta.annotation.PostConstruct;
 
 
 
-@SpringBootApplication (scanBasePackageClasses = { Api.class, CrawlController.class, CacheKeyGenerator.class})
+@SpringBootApplication (scanBasePackages = {"org.open4goods.services"}, scanBasePackageClasses = { Api.class, CrawlController.class, CacheKeyGenerator.class})
 
 @EnableScheduling
 @EnableElasticsearchRepositories(basePackageClasses = {VerticalPagesRepository.class, ElasticProductRepository.class, IndexationRepository.class, BrandScoresRepository.class, ElasticTextRepository.class})

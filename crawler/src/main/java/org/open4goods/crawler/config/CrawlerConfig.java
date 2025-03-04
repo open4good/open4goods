@@ -9,8 +9,9 @@ import org.open4goods.crawler.services.FetchersService;
 import org.open4goods.crawler.services.IndexationService;
 import org.open4goods.crawler.services.fetching.CsvDatasourceFetchingService;
 import org.open4goods.crawler.services.fetching.WebDatasourceFetchingService;
-import org.open4goods.evaluation.service.EvaluationService;
-import org.open4goods.serialisation.service.SerialisationService;
+import org.open4goods.services.evaluation.config.EvaluationConfig;
+import org.open4goods.services.evaluation.service.EvaluationService;
+import org.open4goods.services.serialisation.service.SerialisationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -43,8 +44,8 @@ public class CrawlerConfig {
      * The service that hot evaluates thymeleaf / spel expressions
      * @return
      */
-     @Bean EvaluationService evaluationService() {
-		return new EvaluationService();
+     @Bean EvaluationService evaluationService(@Autowired EvaluationConfig evalConfig) {
+		return new EvaluationService(evalConfig);
 	}
 
     @Bean

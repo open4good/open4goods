@@ -12,7 +12,7 @@ import org.open4goods.model.vertical.SubsetCriteria;
 import org.open4goods.model.vertical.SubsetCriteriaOperator;
 import org.open4goods.model.vertical.VerticalConfig;
 import org.open4goods.model.vertical.VerticalSubset;
-import org.open4goods.serialisation.service.SerialisationService;
+import org.open4goods.services.serialisation.service.SerialisationService;
 import org.open4goods.ui.services.BlogService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

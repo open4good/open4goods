@@ -16,7 +16,7 @@ import java.util.zip.GZIPOutputStream;
 
 import org.apache.commons.io.IOUtils;
 import org.open4goods.model.product.Product;
-import org.open4goods.serialisation.service.SerialisationService;
+import org.open4goods.services.serialisation.service.SerialisationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

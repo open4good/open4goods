@@ -68,8 +68,8 @@ Run the microservice as a Spring Boot application using your preferred method.
 The `EvaluationService` is a Spring-managed service that can be injected into your controllers or other services. Here are some example usages:
 
 ```java
-import org.open4goods.evaluation.service.EvaluationService;
-import org.open4goods.evaluation.exception.TemplateEvaluationException;
+import org.open4goods.services.evaluation.service.EvaluationService;
+import org.open4goods.services.evaluation.exception.TemplateEvaluationException;
 import org.open4goods.model.product.Product;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

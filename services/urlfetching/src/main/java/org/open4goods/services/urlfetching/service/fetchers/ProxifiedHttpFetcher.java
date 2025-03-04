@@ -1,4 +1,4 @@
-package org.open4goods.urlfetching.service.fetchers;
+package org.open4goods.services.urlfetching.service.fetchers;
 
 import java.net.InetSocketAddress;
 import java.net.ProxySelector;
@@ -11,11 +11,13 @@ import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 
+import org.open4goods.services.urlfetching.config.UrlFetcherConfig.DomainConfig;
+import org.open4goods.services.urlfetching.config.UrlFetcherConfig.ProxyConfig;
+import org.open4goods.services.urlfetching.dto.FetchResponse;
+import org.open4goods.services.urlfetching.service.Fetcher;
+
 import com.vladsch.flexmark.html2md.converter.FlexmarkHtmlConverter;
-import org.open4goods.urlfetching.dto.FetchResponse;
-import org.open4goods.urlfetching.service.Fetcher;
-import org.open4goods.urlfetching.config.UrlFetcherConfig.DomainConfig;
-import org.open4goods.urlfetching.config.UrlFetcherConfig.ProxyConfig;
+
 import io.micrometer.core.instrument.MeterRegistry;
 
 /**

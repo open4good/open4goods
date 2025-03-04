@@ -25,12 +25,13 @@ import org.open4goods.commons.services.SearchService;
 import org.open4goods.commons.services.VerticalsConfigService;
 import org.open4goods.commons.services.ai.LegacyAiService;
 import org.open4goods.commons.store.repository.elastic.BrandScoresRepository;
-import org.open4goods.evaluation.service.EvaluationService;
 import org.open4goods.model.StandardiserService;
 import org.open4goods.model.constants.CacheConstants;
 import org.open4goods.model.price.Currency;
 import org.open4goods.model.price.Price;
-import org.open4goods.serialisation.service.SerialisationService;
+import org.open4goods.services.evaluation.config.EvaluationConfig;
+import org.open4goods.services.evaluation.service.EvaluationService;
+import org.open4goods.services.serialisation.service.SerialisationService;
 import org.open4goods.ui.config.yml.UiConfig;
 import org.open4goods.ui.controllers.ui.UiService;
 import org.open4goods.ui.interceptors.GenericTemplateInterceptor;
@@ -280,12 +281,16 @@ public class AppConfig {
 		};
 	}
 
+	/**
+	 * The service that hot evaluates thymeleaf / spel expressions
+	 *
+	 * @return
+	 */
 	@Bean
-	EvaluationService evaluationService() {
-		return new EvaluationService();
+	EvaluationService evaluationService(@Autowired EvaluationConfig evalConfig) {
+		return new EvaluationService(evalConfig);
 	}
 
-	
 	
 
 	// TODO : should not be required at ui side

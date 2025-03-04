@@ -7,7 +7,8 @@ import com.sun.net.httpserver.HttpServer;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.open4goods.urlfetching.dto.FetchResponse;
+import org.open4goods.services.urlfetching.dto.FetchResponse;
+import org.open4goods.services.urlfetching.service.UrlFetchingService;
 import org.springframework.boot.SpringBootConfiguration;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.context.annotation.ComponentScan;
@@ -44,10 +45,10 @@ public class UrlFetchingServiceTest {
      */
     @SpringBootConfiguration
     @EnableAutoConfiguration
-    @ComponentScan(basePackages = {"org.open4goods.urlfetching"})
+    @ComponentScan(basePackages = {"org.open4goods.services.urlfetching"})
     public static class TestConfig {
         // This class remains empty; its purpose is to trigger component scanning in the
-        // org.open4goods.urlfetching package and enable auto-configuration.
+        // org.open4goods.services.urlfetching package and enable auto-configuration.
     }
 
     /**

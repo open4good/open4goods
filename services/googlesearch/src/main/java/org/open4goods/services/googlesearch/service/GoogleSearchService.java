@@ -1,12 +1,13 @@
-package org.open4goods.googlesearch.service;
+package org.open4goods.services.googlesearch.service;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
-import org.open4goods.googlesearch.config.GoogleSearchProperties;
-import org.open4goods.googlesearch.dto.GoogleSearchRequest;
-import org.open4goods.googlesearch.dto.GoogleSearchResponse;
-import org.open4goods.googlesearch.dto.GoogleSearchResult;
+
+import org.open4goods.services.googlesearch.config.GoogleSearchProperties;
+import org.open4goods.services.googlesearch.dto.GoogleSearchRequest;
+import org.open4goods.services.googlesearch.dto.GoogleSearchResponse;
+import org.open4goods.services.googlesearch.dto.GoogleSearchResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.actuate.health.Health;

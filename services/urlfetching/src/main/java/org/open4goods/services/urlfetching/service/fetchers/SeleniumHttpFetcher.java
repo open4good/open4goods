@@ -1,13 +1,14 @@
-package org.open4goods.urlfetching.service.fetchers;
+package org.open4goods.services.urlfetching.service.fetchers;
 
 import java.time.Duration;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
-import org.open4goods.urlfetching.dto.FetchResponse;
-import org.open4goods.urlfetching.service.Fetcher;
-import org.open4goods.urlfetching.config.UrlFetcherConfig.DomainConfig;
 import io.micrometer.core.instrument.MeterRegistry;
+
+import org.open4goods.services.urlfetching.config.UrlFetcherConfig.DomainConfig;
+import org.open4goods.services.urlfetching.dto.FetchResponse;
+import org.open4goods.services.urlfetching.service.Fetcher;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;

@@ -1,12 +1,12 @@
-package org.open4goods.evaluation.service;
+package org.open4goods.services.evaluation.service;
 
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.open4goods.evaluation.config.EvaluationConfig;
-import org.open4goods.evaluation.exception.TemplateEvaluationException;
-import org.open4goods.model.attribute.ReferentielKey;
 import org.open4goods.model.product.Product;
+import org.open4goods.services.evaluation.StrictSpringStandardDialect;
+import org.open4goods.services.evaluation.config.EvaluationConfig;
+import org.open4goods.services.evaluation.exception.TemplateEvaluationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.expression.EvaluationException;
@@ -33,7 +33,6 @@ public class EvaluationService {
 
     // Constants for template variable markers (used for checking unresolved variables)
     private static final String TPL_VAR_START = "${";
-    private static final String TPL_VAR_STOP = "}";
 
     // SpEL expression parser (trusted expressions)
     private static ExpressionParser expressionParser;
@@ -44,18 +43,19 @@ public class EvaluationService {
     /**
      * Constructs a new EvaluationService and initializes the template engines.
      *
-     * @param evaluationConfig the evaluation properties injected from configuration.
+     * @param evaluationProperties the evaluation properties injected from configuration.
      */
-    public EvaluationService(EvaluationConfig evaluationConfig) {
+    public EvaluationService(EvaluationConfig evaluationProperties) {
         super();
 
-        // Initialize Thymeleaf engine
+        // Initialize Thymeleaf engine with custom strict dialect for variable evaluation
         thymeleafTemplateEngine = new SpringTemplateEngine();
         final StringTemplateResolver templateResolver = new StringTemplateResolver();
         templateResolver.setTemplateMode(TemplateMode.TEXT);
         // Set caching based on external configuration read from YAML
-        templateResolver.setCacheable(evaluationConfig.isCacheable());
+        templateResolver.setCacheable(evaluationProperties.isCacheable());
         thymeleafTemplateEngine.setTemplateResolver(templateResolver);
+        thymeleafTemplateEngine.setDialect(new StrictSpringStandardDialect());
 
         // Initialize SpEL engine (expressions are trusted)
         expressionParser = new SpelExpressionParser();
@@ -145,22 +145,14 @@ public class EvaluationService {
 
             // If a product is provided, add referential attributes to the context.
             if (p != null) {
-                for (Entry<ReferentielKey, String> e : p.getAttributes().getReferentielAttributes().entrySet()) {
+                for (Entry<?, ?> e : p.getAttributes().getReferentielAttributes().entrySet()) {
                     ctx.setVariable(e.getKey().toString(), e.getValue());
                 }
             }
 
             // Process the template with the provided context.
-            final String result = thymeleafTemplateEngine.process(template, ctx);
-
-            // Check if the result contains unresolved variables (i.e., still contains the pattern "${").
-            if (result.contains(TPL_VAR_START)) {
-                String errorMsg = "Template evaluation failed, unresolved variables in template: " + template;
-                logger.error(errorMsg);
-                throw new TemplateEvaluationException(errorMsg);
-            }
-
-            return result;
+            // With the custom dialect in place, if any variable is unresolvable, a TemplateEvaluationException will be thrown.
+            return thymeleafTemplateEngine.process(template, ctx);
 
         } catch (final Exception e) {
             // Log error and rethrow as TemplateEvaluationException for critical failures.

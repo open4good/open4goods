@@ -13,10 +13,11 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.open4goods.evaluation.config.EvaluationConfig;
-import org.open4goods.evaluation.exception.TemplateEvaluationException;
 import org.open4goods.model.attribute.ProductAttributes;
 import org.open4goods.model.product.Product;
+import org.open4goods.services.evaluation.config.EvaluationConfig;
+import org.open4goods.services.evaluation.exception.TemplateEvaluationException;
+import org.open4goods.services.evaluation.service.EvaluationService;
 import org.springframework.boot.SpringBootConfiguration;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.context.annotation.ComponentScan;
@@ -91,12 +92,12 @@ public class EvaluationServiceTest {
      */
     @Test
     public void testThymeleafEvalUnresolvedVariable() {
-        // Template with an unresolved variable (no value provided).
+        // Template with an unresolved variable using inlined expression syntax.
         String template = "Product vertical: [[${vertical}]]";
         TemplateEvaluationException exception = assertThrows(TemplateEvaluationException.class, () -> {
             evaluationService.thymeleafEval(productMock, template);
         });
-        assertTrue(exception.getMessage().contains("unresolved variables"));
+        assertTrue(exception.getMessage().contains("Template evaluation failed"));
     }
 
     /**
@@ -104,9 +105,9 @@ public class EvaluationServiceTest {
      */
     @SpringBootConfiguration
     @EnableAutoConfiguration
-    @ComponentScan(basePackages = {"org.open4goods.evaluation"})
+    @ComponentScan(basePackages = {"org.open4goods.services.evaluation"})
     static class TestConfig {
         // This class remains empty; its purpose is to trigger component scanning in the
-        // org.open4goods.evaluation package and enable auto-configuration.
+        // org.open4goods.services.evaluation package and enable auto-configuration.
     }
 }

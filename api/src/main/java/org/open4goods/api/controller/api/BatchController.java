@@ -15,7 +15,7 @@ import org.open4goods.commons.model.constants.RolesConstants;
 import org.open4goods.commons.services.VerticalsConfigService;
 import org.open4goods.model.exceptions.InvalidParameterException;
 import org.open4goods.model.exceptions.ResourceNotFoundException;
-import org.open4goods.serialisation.service.SerialisationService;
+import org.open4goods.services.serialisation.service.SerialisationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;

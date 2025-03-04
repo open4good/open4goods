@@ -48,7 +48,6 @@ import org.open4goods.crawler.services.FetchersService;
 import org.open4goods.crawler.services.IndexationService;
 import org.open4goods.crawler.services.fetching.CsvDatasourceFetchingService;
 import org.open4goods.crawler.services.fetching.WebDatasourceFetchingService;
-import org.open4goods.evaluation.service.EvaluationService;
 import org.open4goods.model.StandardiserService;
 import org.open4goods.model.constants.CacheConstants;
 import org.open4goods.model.constants.UrlConstants;
@@ -57,8 +56,10 @@ import org.open4goods.model.exceptions.ValidationException;
 import org.open4goods.model.price.Currency;
 import org.open4goods.model.price.Price;
 import org.open4goods.model.vertical.LegacyPromptConfig;
-import org.open4goods.prompt.service.GenAiService;
-import org.open4goods.serialisation.service.SerialisationService;
+import org.open4goods.services.evaluation.config.EvaluationConfig;
+import org.open4goods.services.evaluation.service.EvaluationService;
+import org.open4goods.services.prompt.service.GenAiService;
+import org.open4goods.services.serialisation.service.SerialisationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springdoc.core.customizers.OpenApiCustomizer;
@@ -419,8 +420,8 @@ public class ApiConfig {
 	 * @return
 	 */
 	@Bean
-	EvaluationService evaluationService() {
-		return new EvaluationService();
+	EvaluationService evaluationService(@Autowired EvaluationConfig evalConfig) {
+		return new EvaluationService(evalConfig);
 	}
 
 	@Bean

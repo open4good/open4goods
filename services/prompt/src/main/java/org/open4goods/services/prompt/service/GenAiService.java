@@ -1,4 +1,4 @@
-package org.open4goods.prompt.service;
+package org.open4goods.services.prompt.service;
 
 import java.io.File;
 import java.io.IOException;
@@ -10,13 +10,13 @@ import java.util.Map;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.groovy.parser.antlr4.util.StringUtils;
-import org.open4goods.evaluation.service.EvaluationService;
 import org.open4goods.model.exceptions.ResourceNotFoundException;
 import org.open4goods.model.vertical.GenAiConfig;
-import org.open4goods.prompt.config.GenAiServiceType;
-import org.open4goods.prompt.config.PromptConfig;
-import org.open4goods.prompt.dto.PromptResponse;
-import org.open4goods.serialisation.service.SerialisationService;
+import org.open4goods.services.evaluation.service.EvaluationService;
+import org.open4goods.services.prompt.config.GenAiServiceType;
+import org.open4goods.services.prompt.config.PromptConfig;
+import org.open4goods.services.prompt.dto.PromptResponse;
+import org.open4goods.services.serialisation.service.SerialisationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ai.chat.client.ChatClient;

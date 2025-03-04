@@ -7,14 +7,14 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.open4goods.evaluation.service.EvaluationService;
 import org.open4goods.model.ai.AiDescription;
 import org.open4goods.model.ai.AiDescriptions;
 import org.open4goods.model.product.Product;
 import org.open4goods.model.vertical.AiPromptsConfig;
 import org.open4goods.model.vertical.LegacyPromptConfig;
 import org.open4goods.model.vertical.VerticalConfig;
-import org.open4goods.serialisation.service.SerialisationService;
+import org.open4goods.services.evaluation.service.EvaluationService;
+import org.open4goods.services.serialisation.service.SerialisationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ai.chat.client.ChatClient;

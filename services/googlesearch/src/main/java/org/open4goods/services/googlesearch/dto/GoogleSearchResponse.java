@@ -1,4 +1,4 @@
-package org.open4goods.googlesearch.dto;
+package org.open4goods.services.googlesearch.dto;
 
 import java.util.List;
 import java.util.Objects;

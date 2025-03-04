@@ -34,7 +34,7 @@ import org.open4goods.commons.dao.ProductRepository;
 import org.open4goods.commons.exceptions.AggregationSkipException;
 import org.open4goods.model.attribute.SourcedAttribute;
 import org.open4goods.model.product.Product;
-import org.open4goods.serialisation.service.SerialisationService;
+import org.open4goods.services.serialisation.service.SerialisationService;
 import org.open4goods.xwiki.services.XWikiReadService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

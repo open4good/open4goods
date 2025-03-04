@@ -1,4 +1,4 @@
-package org.open4goods.evaluation.config;
+package org.open4goods.services.evaluation.config;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;

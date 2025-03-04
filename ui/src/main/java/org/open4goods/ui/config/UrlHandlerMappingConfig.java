@@ -12,7 +12,7 @@ import org.open4goods.model.Localisable;
 import org.open4goods.model.vertical.ProductI18nElements;
 import org.open4goods.model.vertical.VerticalConfig;
 import org.open4goods.model.vertical.WikiPageConfig;
-import org.open4goods.serialisation.service.SerialisationService;
+import org.open4goods.services.serialisation.service.SerialisationService;
 import org.open4goods.ui.config.yml.UiConfig;
 import org.open4goods.ui.controllers.ui.CategoryController;
 import org.open4goods.ui.controllers.ui.UiService;

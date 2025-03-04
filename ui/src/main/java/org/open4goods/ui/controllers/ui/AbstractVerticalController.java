@@ -14,7 +14,7 @@ import org.open4goods.commons.services.VerticalsConfigService;
 import org.open4goods.model.attribute.AttributeType;
 import org.open4goods.model.vertical.AttributeConfig;
 import org.open4goods.model.vertical.VerticalConfig;
-import org.open4goods.serialisation.service.SerialisationService;
+import org.open4goods.services.serialisation.service.SerialisationService;
 import org.open4goods.ui.services.BlogService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
