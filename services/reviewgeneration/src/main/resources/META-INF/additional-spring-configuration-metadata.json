@@ -1,0 +1,34 @@
+{
+  "groups": [
+    {
+      "name": "review.generation",
+      "type": "org.open4goods.reviewgeneration.config.ReviewGenerationProperties",
+      "sourceType": "org.open4goods.reviewgeneration.config.ReviewGenerationProperties"
+    }
+  ],
+  "properties": [
+    {
+      "name": "review.generation.thread-pool-size",
+      "type": "java.lang.Integer",
+      "defaultValue": 10,
+      "description": "Size of the thread pool for processing review generation tasks."
+    },
+    {
+      "name": "review.generation.max-characters-to-remove",
+      "type": "java.lang.Integer",
+      "defaultValue": 4,
+      "description": "Maximum number of characters to remove iteratively from the model name."
+    },
+    {
+      "name": "review.generation.number-of-results",
+      "type": "java.lang.Integer",
+      "defaultValue": 10,
+      "description": "Number of search results to fetch from Google."
+    },
+    {
+      "name": "review.generation.preferred-domains",
+      "type": "java.util.List",
+      "description": "List of preferred domains that must be present in search results."
+    }
+  ]
+}

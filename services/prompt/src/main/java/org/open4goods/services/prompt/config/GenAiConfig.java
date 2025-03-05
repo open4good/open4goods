@@ -1,5 +1,10 @@
-package org.open4goods.model.vertical;
+package org.open4goods.services.prompt.config;
 
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.stereotype.Component;
+
+@Component
+@ConfigurationProperties(prefix = "gen-ai-config")
 public class GenAiConfig {
 	
 	/**

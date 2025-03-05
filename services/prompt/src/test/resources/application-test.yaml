@@ -1,0 +1,5 @@
+gen-ai-config:
+  cache-templates: true
+  enabled: true
+  prompts-templates-folder: src/test/resources/prompts
+  
