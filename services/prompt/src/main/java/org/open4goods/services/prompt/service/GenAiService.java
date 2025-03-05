@@ -10,8 +10,8 @@ import java.util.Map;
 
 import org.apache.commons.io.FileUtils;
 import org.open4goods.model.exceptions.ResourceNotFoundException;
-import org.open4goods.model.vertical.GenAiConfig;
 import org.open4goods.services.evaluation.service.EvaluationService;
+import org.open4goods.services.prompt.config.GenAiConfig;
 import org.open4goods.services.prompt.config.GenAiServiceType;
 import org.open4goods.services.prompt.config.PromptConfig;
 import org.open4goods.services.prompt.dto.PromptResponse;
@@ -82,8 +82,7 @@ public class GenAiService {
 
         // Check if the service is enabled (if supported by configuration)
         if (!genAiConfig.isEnabled()) {
-            logger.warn("GenAiService is disabled via configuration.");
-            throw new IllegalStateException("GenAiService is disabled by configuration");
+            logger.error("GenAiService is disabled via configuration.");
         }
 
         // Load prompt templates and initialize chat models

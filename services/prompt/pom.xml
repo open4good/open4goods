@@ -35,25 +35,38 @@
       <artifactId>evaluation</artifactId>
       <version>${global.version}</version>
     </dependency>
+    <dependency>
+    	<groupId>org.springframework.boot</groupId>
+    	<artifactId>spring-boot-configuration-processor</artifactId>
+    	<optional>true</optional>
+    </dependency>
   </dependencies>
-  
-  <build>
+   <build>
     <plugins>
+      <plugin>
+      <groupId>org.apache.maven.plugins</groupId>
+      <artifactId>maven-jar-plugin</artifactId>
+      <version>3.2.2</version>
+      <executions>
+        <execution>
+          <goals>
+            <goal>test-jar</goal>
+          </goals>
+        </execution>
+      </executions>
+    </plugin>
       <!-- Maven Compiler Plugin -->
       <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
         <configuration>
-          <source>${maven.compiler.source}</source>
-          <target>${maven.compiler.target}</target>
-          <encoding>${project.build.sourceEncoding}</encoding>
+          <source>${java.version}</source>
+          <target>${java.version}</target>
         </configuration>
       </plugin>
-      <!-- Surefire Plugin for Unit Tests -->
+      <!-- Spring Boot Maven Plugin -->
       <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-surefire-plugin</artifactId>
-        <version>3.5.2</version>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-maven-plugin</artifactId>
       </plugin>
     </plugins>
   </build>

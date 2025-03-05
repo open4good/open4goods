@@ -14,8 +14,8 @@ import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.open4goods.model.exceptions.ResourceNotFoundException;
-import org.open4goods.model.vertical.GenAiConfig;
 import org.open4goods.services.evaluation.service.EvaluationService;
+import org.open4goods.services.prompt.config.GenAiConfig;
 import org.open4goods.services.prompt.config.PromptConfig;
 import org.open4goods.services.serialisation.service.SerialisationService;
 import org.springframework.ai.openai.api.OpenAiApi;
@@ -29,6 +29,7 @@ import org.springframework.context.annotation.ComponentScan;
 @SpringBootConfiguration
 @EnableAutoConfiguration
 @ComponentScan(basePackages = {"org.open4goods.services.prompt"})
+
 class GenAiServiceTest {
 
     private GenAiService genAiService;

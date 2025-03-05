@@ -67,8 +67,8 @@ public class VerticalConfig{
 	@JsonMerge
 	private Map<String,ProductI18nElements> i18n = new HashMap<>();
 	
-	@JsonMerge
-	private GenAiConfig genAiConfig = new GenAiConfig();
+//	@JsonMerge
+//	private GenAiConfig genAiConfig = new GenAiConfig();
 	
 	/**
 	 * The list of filters to be added to the ecological filters group
@@ -722,16 +722,16 @@ public class VerticalConfig{
 	}
 
 
-
-	public GenAiConfig getGenAiConfig() {
-		return genAiConfig;
-	}
-
-
-
-	public void setGenAiConfig(GenAiConfig genAiConfig) {
-		this.genAiConfig = genAiConfig;
-	}
+//
+//	public GenAiConfig getGenAiConfig() {
+//		return genAiConfig;
+//	}
+//
+//
+//
+//	public void setGenAiConfig(GenAiConfig genAiConfig) {
+//		this.genAiConfig = genAiConfig;
+//	}
 
 	public List<FeatureGroup> getFeatureGroups() {
 		return featureGroups;

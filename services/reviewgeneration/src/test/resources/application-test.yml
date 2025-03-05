@@ -1,0 +1,13 @@
+spring:
+  ai:
+    openai:
+        api-key: sk-proj-FI9z9MAyJTarx13yZZNZuz66PL-ywf0hR1iX4e8sxa3aVoOtYfgOVnb3uUb84K-ugm9D-zhz5iT3BlbkFJZiHIaVGF8Z_qS-
+        chat:
+          api-key: sk-proj-FI9z9MAyJTarx13yZZNZuz66PL-ywf0hR1iX4e8sxa3aVoOtYfgOVnb3uUb84K-ugm9D-zhz5iT3BlbkFJZiHIaVGF8Z_qS-
+            
+gen-ai-config:
+  cache-templates: true
+  enabled: true
+  prompts-templates-folder: src/test/resources/prompts
+  
+  

@@ -22,7 +22,7 @@ public class GoogleSearchConfig {
 
     private String apiKey;
     private String cx;
-    private String searchUrl;
+    private String searchUrl = "https://www.googleapis.com/customsearch/v1";
 
     public String getApiKey() {
         return apiKey;
