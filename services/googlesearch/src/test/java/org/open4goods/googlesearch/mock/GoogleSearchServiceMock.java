@@ -1,4 +1,4 @@
-package org.open4goods.googlesearch;
+package org.open4goods.googlesearch.mock;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -14,7 +14,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Primary;
 
 @TestConfiguration
-public class GoogleSearchServiceTestConfig {
+public class GoogleSearchServiceMock {
 
     @Bean
     @Primary

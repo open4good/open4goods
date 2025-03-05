@@ -26,7 +26,12 @@
             <artifactId>flexmark-all</artifactId>
             <version>0.64.8</version>
         </dependency>
-        
+
+        <dependency>
+        	<groupId>org.springframework.boot</groupId>
+        	<artifactId>spring-boot-configuration-processor</artifactId>
+        	<optional>true</optional>
+        </dependency>
     </dependencies>
   
   

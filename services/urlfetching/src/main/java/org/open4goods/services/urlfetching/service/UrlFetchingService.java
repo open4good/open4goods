@@ -2,10 +2,10 @@ package org.open4goods.services.urlfetching.service;
 
 import java.net.URI;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
 import io.micrometer.core.instrument.MeterRegistry;
-
 import org.open4goods.services.urlfetching.config.FetchStrategy;
 import org.open4goods.services.urlfetching.config.UrlFetcherConfig;
 import org.open4goods.services.urlfetching.config.UrlFetcherConfig.DomainConfig;
@@ -13,6 +13,8 @@ import org.open4goods.services.urlfetching.dto.FetchResponse;
 import org.open4goods.services.urlfetching.service.fetchers.HttpFetcher;
 import org.open4goods.services.urlfetching.service.fetchers.ProxifiedHttpFetcher;
 import org.open4goods.services.urlfetching.service.fetchers.SeleniumHttpFetcher;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 /**
@@ -21,22 +23,23 @@ import org.springframework.stereotype.Service;
 @Service
 public class UrlFetchingService {
 
+    private static final Logger logger = LoggerFactory.getLogger(UrlFetchingService.class);
+
     private final UrlFetcherConfig urlFetcherConfig;
     private final MeterRegistry meterRegistry;
-
-    // Shared executor for HTTP-based fetchers
-    // TODO : From conf
-    private final java.util.concurrent.Executor executor = Executors.newFixedThreadPool(10);
+    private final Executor executor;
 
     /**
      * Constructs a new UrlFetchingService.
      *
      * @param urlFetcherConfig the URL fetcher configuration properties
      * @param meterRegistry    the Micrometer MeterRegistry for metrics
+     * @param executor         the Executor for asynchronous operations
      */
     public UrlFetchingService(UrlFetcherConfig urlFetcherConfig, MeterRegistry meterRegistry) {
         this.urlFetcherConfig = urlFetcherConfig;
         this.meterRegistry = meterRegistry;
+        this.executor = Executors.newFixedThreadPool(urlFetcherConfig.getThreadPoolSize());
     }
 
     /**
@@ -46,9 +49,11 @@ public class UrlFetchingService {
      * @return a CompletableFuture of FetchResponse
      */
     public CompletableFuture<FetchResponse> fetchUrl(String url) {
+        logger.info("Initiating fetch for URL: {}", url);
         String domain = getDomainFromUrl(url);
         DomainConfig domainConfig = urlFetcherConfig.getDomains().get(domain);
         if (domainConfig == null) {
+            logger.warn("No specific configuration found for domain '{}'. Using default configuration.", domain);
             // Use a default configuration if none is provided for the domain
             domainConfig = new DomainConfig();
             domainConfig.setUserAgent("DefaultUserAgent/1.0");
@@ -73,11 +78,14 @@ public class UrlFetchingService {
         }
         switch (domainConfig.getStrategy()) {
             case PROXIFIED:
+                logger.info("Selected PROXIFIED strategy for fetching");
                 return new ProxifiedHttpFetcher(domainConfig, executor, meterRegistry);
             case SELENIUM:
+                logger.info("Selected SELENIUM strategy for fetching");
                 return new SeleniumHttpFetcher(domainConfig, meterRegistry);
             case HTTP:
             default:
+                logger.info("Selected HTTP strategy for fetching");
                 return new HttpFetcher(domainConfig, executor, meterRegistry);
         }
     }
@@ -85,8 +93,8 @@ public class UrlFetchingService {
     /**
      * Executes the fetch operation with retry logic.
      *
-     * @param fetcher   the Fetcher to use
-     * @param url       the URL to fetch
+     * @param fetcher    the Fetcher to use
+     * @param url        the URL to fetch
      * @param maxRetries maximum number of retries
      * @return a CompletableFuture of FetchResponse
      */
@@ -95,6 +103,8 @@ public class UrlFetchingService {
             if (ex == null) {
                 return CompletableFuture.completedFuture(response);
             } else if (maxRetries > 0) {
+                logger.warn("Error fetching URL {}. Retrying... Remaining retries: {}. Error: {}",
+                        url, maxRetries, ex.getMessage());
                 try {
                     // Delay before retrying based on configuration
                     DomainConfig config = urlFetcherConfig.getDomains().get(getDomainFromUrl(url));
@@ -104,6 +114,7 @@ public class UrlFetchingService {
                 }
                 return executeWithRetry(fetcher, url, maxRetries - 1);
             } else {
+                logger.error("Failed to fetch URL {} after retries. Error: {}", url, ex.getMessage());
                 CompletableFuture<FetchResponse> failedFuture = new CompletableFuture<>();
                 failedFuture.completeExceptionally(ex);
                 return failedFuture;
@@ -122,6 +133,7 @@ public class UrlFetchingService {
             URI uri = new URI(url);
             return uri.getHost();
         } catch (Exception e) {
+            logger.error("Invalid URL: {}", url, e);
             throw new IllegalArgumentException("Invalid URL: " + url, e);
         }
     }

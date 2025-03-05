@@ -23,12 +23,25 @@ public class UrlFetcherConfig {
      */
     private Map<String, DomainConfig> domains = new HashMap<>();
 
+    /**
+     * Thread pool size for asynchronous fetching.
+     */
+    private int threadPoolSize = 10;
+
     public Map<String, DomainConfig> getDomains() {
         return domains;
     }
 
     public void setDomains(Map<String, DomainConfig> domains) {
         this.domains = domains;
+    }
+
+    public int getThreadPoolSize() {
+        return threadPoolSize;
+    }
+
+    public void setThreadPoolSize(int threadPoolSize) {
+        this.threadPoolSize = threadPoolSize;
     }
 
     /**

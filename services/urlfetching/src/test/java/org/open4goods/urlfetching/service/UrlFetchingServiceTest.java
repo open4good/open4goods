@@ -99,14 +99,14 @@ public class UrlFetchingServiceTest {
         FetchResponse response = futureResponse.get(5, TimeUnit.SECONDS);
 
         // Verify that the response has a 200 status code.
-        assertEquals(200, response.getStatusCode(), "Expected HTTP status 200");
+        assertEquals(200, response.statusCode(), "Expected HTTP status 200");
 
         // Check that the HTML contains our expected content.
-        assertTrue(response.getHtmlContent().contains("Hello, World!"),
+        assertTrue(response.htmlContent().contains("Hello, World!"),
                 "Expected HTML content to contain 'Hello, World!'");
 
         // Optionally, verify that the markdown conversion contains expected text.
-        assertTrue(response.getMarkdownContent().contains("Hello, World!"),
+        assertTrue(response.markdownContent().contains("Hello, World!"),
                 "Expected Markdown content to contain 'Hello, World!'");
     }
     
@@ -127,14 +127,14 @@ public class UrlFetchingServiceTest {
         FetchResponse response = futureResponse.get(5, TimeUnit.SECONDS);
 
         // Verify that the response has a 200 status code.
-        assertEquals(200, response.getStatusCode(), "Expected HTTP status 200");
+        assertEquals(200, response.statusCode(), "Expected HTTP status 200");
 
         // Check that the HTML contains our expected content.
-        assertTrue(response.getHtmlContent().contains("Hello, World!"),
+        assertTrue(response.htmlContent().contains("Hello, World!"),
                 "Expected HTML content to contain 'Hello, World!'");
 
         // Optionally, verify that the markdown conversion contains expected text.
-        assertTrue(response.getMarkdownContent().contains("Hello, World!"),
+        assertTrue(response.markdownContent().contains("Hello, World!"),
                 "Expected Markdown content to contain 'Hello, World!'");
     }
 }

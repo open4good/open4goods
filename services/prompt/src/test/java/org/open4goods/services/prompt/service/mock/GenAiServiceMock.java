@@ -1,4 +1,4 @@
-package org.open4goods.services.prompt.service;
+package org.open4goods.services.prompt.service.mock;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -8,13 +8,14 @@ import org.mockito.Mockito;
 import org.open4goods.model.exceptions.ResourceNotFoundException;
 import org.open4goods.services.prompt.config.PromptConfig;
 import org.open4goods.services.prompt.dto.PromptResponse;
+import org.open4goods.services.prompt.service.GenAiService;
 import org.open4goods.services.serialisation.exception.SerialisationException;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Primary;
 
 @TestConfiguration
-public class GenAiServiceTestConfig {
+public class GenAiServiceMock {
 
     @Bean
     @Primary

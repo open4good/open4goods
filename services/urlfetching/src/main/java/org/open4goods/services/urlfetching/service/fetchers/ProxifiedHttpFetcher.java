@@ -15,15 +15,17 @@ import org.open4goods.services.urlfetching.config.UrlFetcherConfig.DomainConfig;
 import org.open4goods.services.urlfetching.config.UrlFetcherConfig.ProxyConfig;
 import org.open4goods.services.urlfetching.dto.FetchResponse;
 import org.open4goods.services.urlfetching.service.Fetcher;
-
-import com.vladsch.flexmark.html2md.converter.FlexmarkHtmlConverter;
-
+import org.open4goods.services.urlfetching.util.HtmlToMarkdownConverter;
 import io.micrometer.core.instrument.MeterRegistry;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Implementation of Fetcher that supports fetching via a proxy.
  */
 public class ProxifiedHttpFetcher implements Fetcher {
+
+    private static final Logger logger = LoggerFactory.getLogger(ProxifiedHttpFetcher.class);
 
     private final HttpClient httpClient;
     private final String userAgent;
@@ -51,12 +53,14 @@ public class ProxifiedHttpFetcher implements Fetcher {
                 .connectTimeout(this.timeout);
         if (proxy != null && proxy.getHost() != null) {
             builder.proxy(ProxySelector.of(new InetSocketAddress(proxy.getHost(), proxy.getPort())));
+            logger.info("Using proxy {}:{} for fetching", proxy.getHost(), proxy.getPort());
         }
         this.httpClient = builder.build();
     }
 
     @Override
     public CompletableFuture<FetchResponse> fetchUrl(String url) {
+        logger.info("Fetching URL {} using ProxifiedHttpFetcher", url);
         HttpRequest.Builder requestBuilder = HttpRequest.newBuilder()
                 .uri(URI.create(url))
                 .GET()
@@ -73,55 +77,12 @@ public class ProxifiedHttpFetcher implements Fetcher {
                 .thenApply(response -> {
                     int statusCode = response.statusCode();
                     String htmlContent = response.body();
-                    String markdownContent = convertHtmlToMarkdown(htmlContent);
+                    String markdownContent = HtmlToMarkdownConverter.convert(htmlContent);
                     // Increment metrics
                     meterRegistry.counter("url.fetch.total").increment();
                     meterRegistry.counter("url.fetch.status", "code", String.valueOf(statusCode)).increment();
+                    logger.info("Fetched URL {} with status code {}", url, statusCode);
                     return new FetchResponse(statusCode, htmlContent, markdownContent);
                 });
-    }
-
-    /**
-     * Converts HTML content to markdown using FlexmarkHtmlConverter.
-     *
-     * @param html the HTML content
-     * @return markdown representation of the HTML content
-     */
-    private String convertHtmlToMarkdown(String html) {
-        String markdown = FlexmarkHtmlConverter.builder().build().convert(html);
-        String trimmed = trimBeforeFirstHeading(markdown);
-        return (!trimmed.isEmpty()) ? trimmed : replaceMarkdownLinks(markdown);
-    }
-
-    /**
-     * Trims content before the first heading.
-     *
-     * @param input the markdown content
-     * @return trimmed markdown content
-     */
-    private String trimBeforeFirstHeading(String input) {
-        String[] lines = input.split("\n");
-        StringBuilder sb = new StringBuilder();
-        boolean foundHeading = false;
-        for (String line : lines) {
-            if (!foundHeading && line.startsWith("*") && line.length() > 1 && !line.substring(1, 2).equals(" ")) {
-                foundHeading = true;
-            }
-            if (foundHeading) {
-                sb.append(line).append("\n");
-            }
-        }
-        return sb.toString();
-    }
-
-    /**
-     * Replaces markdown links with just their text.
-     *
-     * @param input the markdown content
-     * @return markdown content without links
-     */
-    private String replaceMarkdownLinks(String input) {
-        String regex = "\\[(.*?)\\]\\((https?://[^\\s)]+)(?:\\s+\"[^\"]*\")?\\)";
-        return input.replaceAll(regex, "$1");
     }
 }
