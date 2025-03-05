@@ -7,15 +7,15 @@ import static org.junit.jupiter.api.Assertions.fail;
 import java.util.Set;
 
 import org.junit.jupiter.api.Test;
-import org.open4goods.googlesearch.GoogleSearchServiceTestConfig;
+import org.open4goods.googlesearch.mock.GoogleSearchServiceMock;
 import org.open4goods.model.attribute.ReferentielKey;
 import org.open4goods.model.product.Product;
 import org.open4goods.model.vertical.VerticalConfig;
-import org.open4goods.services.prompt.service.GenAiServiceTestConfig;
+import org.open4goods.services.prompt.service.mock.GenAiServiceMock;
 import org.open4goods.services.reviewgeneration.config.ReviewGenerationProperties;
 import org.open4goods.services.reviewgeneration.dto.ProcessStatus;
 import org.open4goods.services.reviewgeneration.service.ReviewGenerationService;
-import org.open4goods.urlfetching.service.UrlFetchingServiceTestConfig;
+import org.open4goods.urlfetching.service.mock.UrlFetchingServiceMock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringBootConfiguration;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
@@ -28,7 +28,7 @@ import org.springframework.test.context.TestPropertySource;
 @SpringBootTest(classes = {ReviewGenerationService.class, ReviewGenerationProperties.class, ReviewGenerationServiceTest.TestConfig.class})
 @TestPropertySource(locations = "classpath:application-test.yml")
 @ActiveProfiles("test")
-@Import({GoogleSearchServiceTestConfig.class, UrlFetchingServiceTestConfig.class, GenAiServiceTestConfig.class})
+@Import({GoogleSearchServiceMock.class, UrlFetchingServiceMock.class, GenAiServiceMock.class})
 
 public class ReviewGenerationServiceTest {
 

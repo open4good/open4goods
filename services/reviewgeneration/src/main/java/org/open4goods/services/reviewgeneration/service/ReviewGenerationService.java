@@ -220,8 +220,8 @@ public class ReviewGenerationService implements HealthIndicator {
                     try {
                         CompletableFuture<FetchResponse> fetchFuture = urlFetchingService.fetchUrl(result.getLink());
                         FetchResponse fetchResponse = fetchFuture.get(); // wait for result
-                        if (fetchResponse != null && fetchResponse.getMarkdownContent() != null) {
-                            markdownContents.add(fetchResponse.getMarkdownContent());
+                        if (fetchResponse != null && fetchResponse.markdownContent() != null) {
+                            markdownContents.add(fetchResponse.markdownContent());
                         }
                     } catch (Exception e) {
                         logger.warn("Failed to fetch content from URL {}: {}", result.getLink(), e.getMessage());
