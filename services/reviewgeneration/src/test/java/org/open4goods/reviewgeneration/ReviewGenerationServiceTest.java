@@ -12,7 +12,7 @@ import org.open4goods.model.attribute.ReferentielKey;
 import org.open4goods.model.product.Product;
 import org.open4goods.model.vertical.VerticalConfig;
 import org.open4goods.services.prompt.service.mock.GenAiServiceMock;
-import org.open4goods.services.reviewgeneration.config.ReviewGenerationProperties;
+import org.open4goods.services.reviewgeneration.config.ReviewGenerationConfig;
 import org.open4goods.services.reviewgeneration.dto.ProcessStatus;
 import org.open4goods.services.reviewgeneration.service.ReviewGenerationService;
 import org.open4goods.urlfetching.service.mock.UrlFetchingServiceMock;
@@ -25,7 +25,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
 
-@SpringBootTest(classes = {ReviewGenerationService.class, ReviewGenerationProperties.class, ReviewGenerationServiceTest.TestConfig.class})
+@SpringBootTest(classes = {ReviewGenerationService.class, ReviewGenerationConfig.class, ReviewGenerationServiceTest.TestConfig.class})
 @TestPropertySource(locations = "classpath:application-test.yml")
 @ActiveProfiles("test")
 @Import({GoogleSearchServiceMock.class, UrlFetchingServiceMock.class, GenAiServiceMock.class})
@@ -51,7 +51,7 @@ public class ReviewGenerationServiceTest {
         // Create a dummy product.
         Product product = new Product();
         product.setId(1234567890123L);
-        product.getAttributes().getReferentielAttributes().put(ReferentielKey.BRAND, "TestBrand");
+        product.getAttributes().getReferentielAttributes().put(ReferentielKey.BRAND, "SAMSUNG");
         product.getAttributes().getReferentielAttributes().put(ReferentielKey.MODEL, "TestModel");
         product.setAkaModels(Set.of("TestModelAlt1", "TestModelAlt2"));
 

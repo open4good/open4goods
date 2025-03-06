@@ -7,15 +7,14 @@ import com.vladsch.flexmark.html2md.converter.FlexmarkHtmlConverter;
  */
 public final class HtmlToMarkdownConverter {
 
-    private HtmlToMarkdownConverter() {
-        // Prevent instantiation
-    }
+    // Private constructor to prevent instantiation
+    private HtmlToMarkdownConverter() { }
 
     /**
-     * Converts HTML content to markdown.
+     * Converts HTML content to Markdown.
      *
      * @param html the HTML content
-     * @return markdown representation of the HTML content
+     * @return the Markdown representation of the HTML content
      */
     public static String convert(String html) {
         String markdown = FlexmarkHtmlConverter.builder().build().convert(html);
@@ -26,8 +25,8 @@ public final class HtmlToMarkdownConverter {
     /**
      * Trims content before the first heading.
      *
-     * @param input the markdown content
-     * @return trimmed markdown content
+     * @param input the Markdown content
+     * @return the trimmed Markdown content
      */
     public static String trimBeforeFirstHeading(String input) {
         String[] lines = input.split("\n");
@@ -45,10 +44,10 @@ public final class HtmlToMarkdownConverter {
     }
 
     /**
-     * Replaces markdown links with just their text.
+     * Replaces Markdown links with just their text.
      *
-     * @param input the markdown content
-     * @return markdown content without links
+     * @param input the Markdown content
+     * @return the Markdown content without hyperlinks
      */
     public static String replaceMarkdownLinks(String input) {
         String regex = "\\[(.*?)\\]\\((https?://[^\\s)]+)(?:\\s+\"[^\"]*\")?\\)";

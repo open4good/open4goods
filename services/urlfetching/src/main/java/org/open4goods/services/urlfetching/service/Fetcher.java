@@ -13,7 +13,7 @@ public interface Fetcher {
      * Asynchronously fetches the content from the given URL.
      *
      * @param url the URL to fetch
-     * @return a CompletableFuture of FetchResponse
+     * @return a CompletableFuture of {@link FetchResponse}
      */
     CompletableFuture<FetchResponse> fetchUrl(String url);
 }

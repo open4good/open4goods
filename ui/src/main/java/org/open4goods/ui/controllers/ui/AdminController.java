@@ -10,6 +10,7 @@ import org.open4goods.commons.services.ai.LegacyAiService;
 import org.open4goods.model.exceptions.ResourceNotFoundException;
 import org.open4goods.model.product.Product;
 import org.open4goods.model.vertical.VerticalConfig;
+import org.open4goods.services.reviewgeneration.service.ReviewGenerationService;
 //import org.open4goods.services.ai.AiService;
 import org.open4goods.ui.config.yml.UiConfig;
 import org.open4goods.ui.services.GoogleIndexationService;
@@ -49,6 +50,8 @@ public class AdminController {
 	private final LegacyAiService aiService;
 
 	private ProductRepository repository;
+	
+	private ReviewGenerationService reviewGenerationService;
 
 	private ImageGenerationService imageGenerationService;
 
@@ -57,7 +60,7 @@ public class AdminController {
 	private GoogleIndexationService googleIndexationService;
 	
 	public AdminController(UiConfig config, VerticalsConfigService verticalsConfigService,
-			ProductRepository repository, SitemapGenerationService sitemapService, ImageGenerationService imageGenerationService, LegacyAiService aiService, GoogleIndexationService googleIndexationService) {
+			ProductRepository repository, SitemapGenerationService sitemapService, ImageGenerationService imageGenerationService, LegacyAiService aiService, GoogleIndexationService googleIndexationService,ReviewGenerationService reviewGenerationService) {
 		this.config = config;
 		this.verticalService = verticalsConfigService;
 		this.sitemapService = sitemapService;
@@ -66,6 +69,7 @@ public class AdminController {
 		this.verticalsConfigService = verticalsConfigService;
 		this.aiService = aiService;
 		this.googleIndexationService = googleIndexationService;
+		this.reviewGenerationService = reviewGenerationService;
 	}
 
 	//////////////////////////////////////////////////////////////
@@ -195,6 +199,20 @@ public class AdminController {
 		mv.setStatus(HttpStatus.MOVED_TEMPORARILY);
 		return mv;
 	}
+	
+	
+
+	@GetMapping("/review/{gtin}")
+	// 8806091548818
+	// TODO
+//	@PreAuthorize("hasAuthority('"+RolesConstants.ROLE_XWIKI_ALL+"')")
+	public ModelAndView generateReview(@PathVariable Long gtin) throws IOException, ResourceNotFoundException {
+		Product product = repository.getById(gtin);
+		
+		reviewGenerationService.generateReviewAsync(product, verticalsConfigService.getConfigById(product.getVertical()));
+		return null;
+	}
+
 	
 
 

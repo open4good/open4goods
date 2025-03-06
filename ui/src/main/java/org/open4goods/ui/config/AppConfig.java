@@ -31,6 +31,8 @@ import org.open4goods.model.price.Currency;
 import org.open4goods.model.price.Price;
 import org.open4goods.services.evaluation.config.EvaluationConfig;
 import org.open4goods.services.evaluation.service.EvaluationService;
+import org.open4goods.services.prompt.config.GenAiConfig;
+import org.open4goods.services.prompt.service.GenAiService;
 import org.open4goods.services.serialisation.service.SerialisationService;
 import org.open4goods.ui.config.yml.UiConfig;
 import org.open4goods.ui.controllers.ui.UiService;
@@ -47,7 +49,10 @@ import org.open4goods.ui.services.todo.TodoService;
 import org.open4goods.xwiki.services.XwikiFacadeService;
 import org.springframework.ai.openai.OpenAiChatModel;
 import org.springframework.ai.openai.OpenAiImageModel;
+import org.springframework.ai.openai.api.OpenAiApi;
+import org.springframework.ai.retry.RetryUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.web.client.ClientHttpRequestFactories;
 import org.springframework.boot.web.client.ClientHttpRequestFactorySettings;
 import org.springframework.boot.web.client.RestClientCustomizer;
@@ -62,6 +67,8 @@ import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.web.firewall.HttpFirewall;
 import org.springframework.security.web.firewall.StrictHttpFirewall;
+import org.springframework.web.client.RestClient;
+import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.servlet.LocaleResolver;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.PathMatchConfigurer;
@@ -92,7 +99,34 @@ public class AppConfig {
 	public AppConfig(UiConfig config) {
 		this.config = config;
 	}
+	
+	@Bean
+	@Qualifier("perplexityChatModel")
+	OpenAiApi perplexityApi(@Autowired GenAiConfig genAiConfig) {
+		return new OpenAiApi(genAiConfig.getPerplexityBaseUrl(),
+							 genAiConfig.getPerplexityApiKey(),
+							 genAiConfig.getPerplexityCompletionsPath(),
+							 "/v1/embeddings", RestClient.builder(), WebClient.builder(),
+							 RetryUtils.DEFAULT_RESPONSE_ERROR_HANDLER);
+	}
+	
+	@Bean
+	@Qualifier("openAiCustomApi")
+	OpenAiApi openAiCustomApi(@Autowired GenAiConfig genAiConfig) {
+		return new OpenAiApi(genAiConfig.getOpenaiApiKey());
+	}
+	
+	
+	@Bean
+	GenAiService genAiService (@Autowired @Qualifier("perplexityChatModel") OpenAiApi perplexityApi, 
+								@Autowired @Qualifier("openAiCustomApi") OpenAiApi openAiCustomApi,
+								@Autowired  EvaluationService spelEvaluationService, 
+								@Autowired  SerialisationService serialisationService,
+								@Autowired GenAiConfig genAiConfig) {
+		return new GenAiService(genAiConfig, perplexityApi, openAiCustomApi, serialisationService, spelEvaluationService);
+	}
 
+	
 	
 	@Bean
 	TodoService todoService() {

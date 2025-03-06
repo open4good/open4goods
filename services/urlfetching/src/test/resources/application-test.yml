@@ -9,3 +9,6 @@ urlfetcher:
       retryPolicy:
         maxRetries: 1
         delayBetweenRetries: 500
+  mock:
+    enabled: true
+    destination-folder: "src/test/resources/urlfetching/mocks"

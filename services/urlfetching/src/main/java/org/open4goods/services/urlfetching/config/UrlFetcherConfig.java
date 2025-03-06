@@ -9,9 +9,9 @@ import org.springframework.context.annotation.Configuration;
 /**
  * Configuration properties for URL fetching.
  * <p>
- * This configuration holds a map of domain-specific configurations. Each domain
- * key maps to a DomainConfig which defines the user agent, fetching strategy,
- * custom headers, timeout, retry policy, and optional proxy settings.
+ * This configuration holds a map of domain-specific configurations. Each key maps to a
+ * {@link DomainConfig} which defines the user agent, fetching strategy, custom headers,
+ * timeout, retry policy, and optional proxy settings.
  * </p>
  */
 @Configuration
@@ -28,6 +28,15 @@ public class UrlFetcherConfig {
      */
     private int threadPoolSize = 10;
 
+    /**
+     * Configuration for recording mode.
+     * <p>
+     * Note: This configuration is intended for test purposes only. Recorded responses will
+     * only be played back via the {@code UrlFetchingServiceMock} and are not used in production.
+     * </p>
+     */
+    private RecordConfig record = new RecordConfig();
+
     public Map<String, DomainConfig> getDomains() {
         return domains;
     }
@@ -42,6 +51,14 @@ public class UrlFetcherConfig {
 
     public void setThreadPoolSize(int threadPoolSize) {
         this.threadPoolSize = threadPoolSize;
+    }
+
+    public RecordConfig getRecord() {
+        return record;
+    }
+
+    public void setRecord(RecordConfig record) {
+        this.record = record;
     }
 
     /**
@@ -187,6 +204,40 @@ public class UrlFetcherConfig {
 
         public void setPort(int port) {
             this.port = port;
+        }
+    }
+
+    /**
+     * Configuration for recording mode.
+     * <p>
+     * Note: These properties are used exclusively in test configurations (e.g., via {@code UrlFetchingServiceMock})
+     * and are not applied in production.
+     * </p>
+     */
+    public static class RecordConfig {
+        /**
+         * Flag to enable or disable recording mode.
+         */
+        private boolean enabled = false;
+        /**
+         * Destination folder for storing/retrieving recorded responses.
+         */
+        private String destinationFolder = "src/test/resources/urlfetching/mocks";
+
+        public boolean isEnabled() {
+            return enabled;
+        }
+
+        public void setEnabled(boolean enabled) {
+            this.enabled = enabled;
+        }
+
+        public String getDestinationFolder() {
+            return destinationFolder;
+        }
+
+        public void setDestinationFolder(String destinationFolder) {
+            this.destinationFolder = destinationFolder;
         }
     }
 }
