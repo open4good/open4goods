@@ -34,7 +34,7 @@ import org.open4goods.model.vertical.ImpactScoreConfig;
 import org.open4goods.model.vertical.VerticalConfig;
 import org.open4goods.services.evaluation.service.EvaluationService;
 import org.open4goods.services.prompt.dto.PromptResponse;
-import org.open4goods.services.prompt.service.GenAiService;
+import org.open4goods.services.prompt.service.PromptService;
 import org.open4goods.services.serialisation.exception.SerialisationException;
 import org.open4goods.services.serialisation.service.SerialisationService;
 import org.slf4j.Logger;
@@ -61,9 +61,9 @@ public class VerticalsGenerationService {
 	private LegacyAiService aiService;
 	private GoogleTaxonomyService googleTaxonomyService;
 	private EvaluationService evalService;
-	private GenAiService genAiService;
+	private PromptService genAiService;
 	
-	public VerticalsGenerationService(VerticalsGenerationConfig config, ProductRepository repository, SerialisationService serialisationService, LegacyAiService aiService, GoogleTaxonomyService googleTaxonomyService, VerticalsConfigService verticalsConfigService, ResourcePatternResolver resourceResolver, EvaluationService evaluationService, IcecatService icecatService, GenAiService genAiService ) {
+	public VerticalsGenerationService(VerticalsGenerationConfig config, ProductRepository repository, SerialisationService serialisationService, LegacyAiService aiService, GoogleTaxonomyService googleTaxonomyService, VerticalsConfigService verticalsConfigService, ResourcePatternResolver resourceResolver, EvaluationService evaluationService, IcecatService icecatService, PromptService genAiService ) {
 		super();
 		this.config = config;
 		this.repository = repository;

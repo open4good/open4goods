@@ -5,7 +5,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 @ConfigurationProperties(prefix = "gen-ai-config")
-public class GenAiConfig {
+public class PromptServiceConfig {
 	
 	/**
 	 * The folder to the yaml prompt files 
@@ -22,11 +22,18 @@ public class GenAiConfig {
 
 	private String perplexityCompletionsPath = "/chat/completions";
 	
-	
-	
-	
 	private boolean enabled = false;
 	
+	/**
+	 * Flag to enable recording of prompt responses as mocks.
+	 */
+	private boolean recordEnabled = false;
+	
+	/**
+	 * Folder path where recorded prompt responses (mocks) are stored.
+	 */
+	private String recordFolder;
+
 	public boolean isEnabled() {
 		return enabled;
 	}
@@ -69,7 +76,20 @@ public class GenAiConfig {
 	public void setCacheTemplates(boolean cacheTemplates) {
 		this.cacheTemplates = cacheTemplates;
 	}
-
 	
+	public boolean isRecordEnabled() {
+	    return recordEnabled;
+	}
 	
+	public void setRecordEnabled(boolean recordEnabled) {
+	    this.recordEnabled = recordEnabled;
+	}
+	
+	public String getRecordFolder() {
+	    return recordFolder;
+	}
+	
+	public void setRecordFolder(String recordFolder) {
+	    this.recordFolder = recordFolder;
+	}
 }

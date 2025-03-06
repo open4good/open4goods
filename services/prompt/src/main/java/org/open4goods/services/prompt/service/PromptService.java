@@ -11,7 +11,7 @@ import java.util.Map;
 import org.apache.commons.io.FileUtils;
 import org.open4goods.model.exceptions.ResourceNotFoundException;
 import org.open4goods.services.evaluation.service.EvaluationService;
-import org.open4goods.services.prompt.config.GenAiConfig;
+import org.open4goods.services.prompt.config.PromptServiceConfig;
 import org.open4goods.services.prompt.config.GenAiServiceType;
 import org.open4goods.services.prompt.config.PromptConfig;
 import org.open4goods.services.prompt.dto.PromptResponse;
@@ -43,9 +43,9 @@ import com.fasterxml.jackson.databind.JsonMappingException;
  * </p>
  */
 @Service
-public class GenAiService {
+public class PromptService {
 
-    private static final Logger logger = LoggerFactory.getLogger(GenAiService.class);
+    private static final Logger logger = LoggerFactory.getLogger(PromptService.class);
 
     /**
      * Cache for chat models (keyed by prompt config key).
@@ -61,7 +61,7 @@ public class GenAiService {
     private final OpenAiApi perplexityApi;
     private final SerialisationService serialisationService;
     private final EvaluationService evaluationService;
-    private final GenAiConfig genAiConfig;
+    private final PromptServiceConfig genAiConfig;
 
     /**
      * Constructs a new GenAiService with the given dependencies.
@@ -72,7 +72,7 @@ public class GenAiService {
      * @param serialisationService Service to handle serialization/deserialization.
      * @param evaluationService    Service to evaluate prompt templates.
      */
-    public GenAiService(GenAiConfig genAiConfig, OpenAiApi perplexityApi, OpenAiApi openAiCustomApi,
+    public PromptService(PromptServiceConfig genAiConfig, OpenAiApi perplexityApi, OpenAiApi openAiCustomApi,
                         SerialisationService serialisationService, EvaluationService evaluationService) {
         this.openAiApi = openAiCustomApi;
         this.perplexityApi = perplexityApi;
@@ -119,7 +119,6 @@ public class GenAiService {
                 evaluationService.thymeleafEval(variables, pConf.getSystemPrompt());
         String userPromptEvaluated = evaluationService.thymeleafEval(variables, pConf.getUserPrompt());
 
-
         // Build the chat client request with evaluated prompts and options
         ChatClientRequestSpec chatRequest = ChatClient.create(models.get(promptKey))
                 .prompt()
@@ -130,6 +129,16 @@ public class GenAiService {
             chatRequest = chatRequest.system(systemPromptEvaluated);
         }
 
+        // Clone prompt configuration and update with evaluated prompts
+        String yamlPromptConfig = serialisationService.toYaml(pConf);
+        PromptConfig updatedConfig = serialisationService.fromYaml(
+        		yamlPromptConfig, PromptConfig.class);
+        updatedConfig.setSystemPrompt(systemPromptEvaluated);
+        updatedConfig.setUserPrompt(userPromptEvaluated);
+        ret.setPrompt(updatedConfig);
+        logger.info("Resolved prompt config for {} is : {} \n",promptKey,serialisationService.toYaml(updatedConfig));
+
+        
         // Execute the request
         CallResponseSpec genAiResponse = chatRequest.call();
 
@@ -137,14 +146,27 @@ public class GenAiService {
         ret.setBody(genAiResponse);
         ret.setRaw(genAiResponse.content());
 
-        // Clone prompt configuration and update with evaluated prompts
-        PromptConfig updatedConfig = serialisationService.fromJson(
-                serialisationService.toJson(pConf), PromptConfig.class);
-        updatedConfig.setSystemPrompt(systemPromptEvaluated);
-        updatedConfig.setUserPrompt(userPromptEvaluated);
-        ret.setPrompt(updatedConfig);
 
+        
         ret.setDuration(System.currentTimeMillis() - ret.getStart());
+
+        // --- New recording functionality ---
+        if (genAiConfig.isRecordEnabled() && genAiConfig.getRecordFolder() != null) {
+            try {
+                String json = serialisationService.toJson(ret);
+                File recordDir = new File(genAiConfig.getRecordFolder());
+                if (!recordDir.exists()) {
+                    recordDir.mkdirs();
+                }
+                File recordFile = new File(recordDir, promptKey + ".json");
+                FileUtils.writeStringToFile(recordFile, json, Charset.defaultCharset());
+                logger.info("Recorded prompt response to file: {}", recordFile.getAbsolutePath());
+            } catch (Exception e) {
+                logger.error("Error recording prompt response for key {}: {}", promptKey, e.getMessage(), e);
+            }
+        }
+        // ---------------------------------
+
         return ret;
     }
 
@@ -260,5 +282,23 @@ public class GenAiService {
             logger.error("Error while reading prompt config file: {}", file.getAbsolutePath(), e);
             return null;
         }
+    }
+    
+    /**
+     * Protected getter for the GenAi configuration.
+     * 
+     * @return the PromptServiceConfig
+     */
+    protected PromptServiceConfig getGenAiConfig() {
+        return genAiConfig;
+    }
+    
+    /**
+     * Protected getter for the SerialisationService.
+     * 
+     * @return the SerialisationService
+     */
+    protected SerialisationService getSerialisationService() {
+        return serialisationService;
     }
 }

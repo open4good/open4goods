@@ -15,7 +15,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.open4goods.model.exceptions.ResourceNotFoundException;
 import org.open4goods.services.evaluation.service.EvaluationService;
-import org.open4goods.services.prompt.config.GenAiConfig;
+import org.open4goods.services.prompt.config.PromptServiceConfig;
 import org.open4goods.services.prompt.config.PromptConfig;
 import org.open4goods.services.serialisation.service.SerialisationService;
 import org.springframework.ai.openai.api.OpenAiApi;
@@ -30,10 +30,10 @@ import org.springframework.context.annotation.ComponentScan;
 @EnableAutoConfiguration
 @ComponentScan(basePackages = {"org.open4goods.services.prompt"})
 
-class GenAiServiceTest {
+class PromptServiceTest {
 
-    private GenAiService genAiService;
-    private GenAiConfig mockConfig;
+    private PromptService genAiService;
+    private PromptServiceConfig mockConfig;
     private OpenAiApi openAiApi;
     private OpenAiApi perplexityApi;
     private SerialisationService serialisationService;
@@ -42,7 +42,7 @@ class GenAiServiceTest {
     @BeforeEach
     void setUp() {
         // Create mocks for dependencies
-        mockConfig = mock(GenAiConfig.class);
+        mockConfig = mock(PromptServiceConfig.class);
         openAiApi = mock(OpenAiApi.class);
         perplexityApi = mock(OpenAiApi.class);
         serialisationService = mock(SerialisationService.class);
@@ -63,7 +63,7 @@ class GenAiServiceTest {
 		}
 
         // Instantiate the service under test
-        genAiService = new GenAiService(mockConfig, perplexityApi, openAiApi, serialisationService, evaluationService);
+        genAiService = new PromptService(mockConfig, perplexityApi, openAiApi, serialisationService, evaluationService);
     }
 
     @Test

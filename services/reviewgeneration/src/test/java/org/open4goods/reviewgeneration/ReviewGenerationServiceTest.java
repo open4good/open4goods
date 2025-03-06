@@ -10,8 +10,10 @@ import org.junit.jupiter.api.Test;
 import org.open4goods.googlesearch.mock.GoogleSearchServiceMock;
 import org.open4goods.model.attribute.ReferentielKey;
 import org.open4goods.model.product.Product;
+import org.open4goods.model.vertical.PrefixedAttrText;
+import org.open4goods.model.vertical.ProductI18nElements;
 import org.open4goods.model.vertical.VerticalConfig;
-import org.open4goods.services.prompt.service.mock.GenAiServiceMock;
+import org.open4goods.services.prompt.service.mock.PromptServiceMock;
 import org.open4goods.services.reviewgeneration.config.ReviewGenerationConfig;
 import org.open4goods.services.reviewgeneration.dto.ProcessStatus;
 import org.open4goods.services.reviewgeneration.service.ReviewGenerationService;
@@ -28,7 +30,7 @@ import org.springframework.test.context.TestPropertySource;
 @SpringBootTest(classes = {ReviewGenerationService.class, ReviewGenerationConfig.class, ReviewGenerationServiceTest.TestConfig.class})
 @TestPropertySource(locations = "classpath:application-test.yml")
 @ActiveProfiles("test")
-@Import({GoogleSearchServiceMock.class, UrlFetchingServiceMock.class, GenAiServiceMock.class})
+@Import({GoogleSearchServiceMock.class, UrlFetchingServiceMock.class, PromptServiceMock.class})
 
 public class ReviewGenerationServiceTest {
 
@@ -37,7 +39,7 @@ public class ReviewGenerationServiceTest {
      */
     @SpringBootConfiguration
     @EnableAutoConfiguration
-    @ComponentScan(basePackages = {"org.open4goods.services.reviewgeneration"})
+    @ComponentScan(basePackages = {"org.open4goods.services"})
     public static class TestConfig {
         // This class remains empty; its purpose is to trigger component scanning.
    
@@ -50,13 +52,19 @@ public class ReviewGenerationServiceTest {
     public void testGenerateReviewSync() {
         // Create a dummy product.
         Product product = new Product();
-        product.setId(1234567890123L);
-        product.getAttributes().getReferentielAttributes().put(ReferentielKey.BRAND, "SAMSUNG");
-        product.getAttributes().getReferentielAttributes().put(ReferentielKey.MODEL, "TestModel");
-        product.setAkaModels(Set.of("TestModelAlt1", "TestModelAlt2"));
+        product.setId(8806091548818L);
+        product.getAttributes().getReferentielAttributes().put(ReferentielKey.BRAND, "LG");
+        product.getAttributes().getReferentielAttributes().put(ReferentielKey.MODEL, "24TQ510S");
+        product.setAkaModels(Set.of("24TQ510S-PZ.API", "24TQ510S-PZ"));
 
         // Dummy vertical configuration (as a String for testing).
         VerticalConfig verticalConfig = new VerticalConfig();
+        verticalConfig.setId("tv");
+        ProductI18nElements i18n = new ProductI18nElements();
+        PrefixedAttrText p = new PrefixedAttrText();
+        p.setPrefix("téléviseur");
+    	i18n.setH1Title(p);
+		verticalConfig.getI18n().put("fr", i18n);
 
         // Invoke synchronous review generation.
         try {
