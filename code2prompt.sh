@@ -1,21 +1,42 @@
 #!/bin/bash
 # Usage: script.sh <directory> [output_file]
-# This script lists files and directories in <directory> (ignoring hidden files).
-# It includes files in the root folder and recursively processes only the first-level subdirectories
-# that match allowed names (by default: src and test). It then prints a directory tree followed by
-# file contents (for files with allowed extensions: .md, .java, .yml, .xml, .json).
+# This script recursively lists files and directories in <directory> (ignoring hidden files).
+# It outputs a directory tree followed by file contents (for allowed extensions: .md, .java, .yml, .xml, .json)
+# in Markdown format, using tilde fences (~~~) to wrap the content.
 #
-# Updates in this version:
-# - File contents are wrapped in Markdown code fences using tilde characters (~~~).
-# - Any file named "pom.xml" (or "pom.xml (pom parent)") is printed after all other files.
-# - The pom.xml from the current working directory is labeled as "(pom parent)".
-# - Files with the basename "pom.xml" are skipped during the normal loops and printed at last.
+# Special ordering:
+# - Files with "service" in their name are printed first.
+# - Files named "pom.xml" are omitted during the main file output and printed at the end.
+# - If a pom.xml exists in the current working directory (and TARGET_DIR is not the current directory),
+#   it is labeled as "pom.xml (pom parent)" and printed at the end.
+#
+# Launch the script with no arguments or with -? to display extensive documentation.
 
-# Show help if no arguments are provided.
-if [ $# -lt 1 ]; then
-    echo "Usage: $0 <directory> [output_file]"
-    echo "Recursively lists files and outputs the directory structure and file contents."
-    exit 1
+# Extensive documentation (if no arguments or -? is provided)
+if [ $# -lt 1 ] || [ "$1" = "-?" ]; then
+    cat <<'EOF'
+Usage: script.sh <directory> [output_file]
+
+Description:
+  This script recursively lists files and directories in the given <directory> (ignoring hidden files).
+  It outputs the directory structure and then prints the contents of files with the allowed extensions:
+    md, java, yml, xml, json.
+  
+  The script processes files in the root folder and in the allowed first-level subdirectories
+  (by default: src and test). The output is formatted as Markdown:
+    - File contents are wrapped in code fences using tilde characters (~~~).
+    - Files whose names contain "service" (case-insensitive) are printed first.
+    - Files named "pom.xml" are omitted during the main output and printed at the end.
+    - If a pom.xml exists in the current working directory (and it’s not part of the target directory),
+      it is labeled as "pom.xml (pom parent)" and printed at the end.
+    - Each file title shows the filename, followed by a hyphen and the file's full path.
+  
+Examples:
+  script.sh /path/to/target
+  script.sh /path/to/target output.md
+
+EOF
+    exit 0
 fi
 
 TARGET_DIR="$1"
@@ -33,8 +54,10 @@ ALLOWED_EXTENSIONS=("md" "java" "yml" "xml" "json")
 # Configurable allowed first-level directories (only these folders will be recursed)
 ALLOWED_FOLDERS=("src" "test")
 
-# Array to hold pom.xml files (both pom and pom parent)
-POM_FILES=()
+# Arrays to hold files
+SERVICE_FILES=()   # non-pom files containing "service"
+OTHER_FILES=()     # other non-pom files
+POM_FILES=()       # all pom.xml files
 
 # If output file provided, redirect stdout (overwriting)
 if [ -n "$OUTPUT_FILE" ]; then
@@ -128,7 +151,22 @@ add_pom_file() {
 }
 
 #############################################
-# Process allowed files in the root folder (except pom.xml).
+# Helper function to add a non-pom file to the appropriate array.
+# Files whose basename contains "service" (case-insensitive) are added to SERVICE_FILES.
+#############################################
+add_non_pom_file() {
+    local file="$1"
+    local base
+    base=$(basename "$file")
+    if [[ "${base,,}" == *"service"* ]]; then
+         SERVICE_FILES+=("$file")
+    else
+         OTHER_FILES+=("$file")
+    fi
+}
+
+#############################################
+# Process allowed files in the root folder (excluding pom.xml).
 #############################################
 for item in "$TARGET_DIR"/*; do
     [ -e "$item" ] || continue
@@ -138,17 +176,13 @@ for item in "$TARGET_DIR"/*; do
                 add_pom_file "$item"
                 continue
             fi
-            echo "## [$(basename "$item")]"
-            echo '~~~'
-            cat "$item"
-            echo '~~~'
-            echo ""
+            add_non_pom_file "$item"
         fi
     fi
 done
 
 #############################################
-# Process allowed files in allowed first-level subdirectories (except pom.xml).
+# Process allowed files in allowed first-level subdirectories (excluding pom.xml).
 #############################################
 for item in "$TARGET_DIR"/*; do
     [ -e "$item" ] || continue
@@ -162,11 +196,7 @@ for item in "$TARGET_DIR"/*; do
                         add_pom_file "$file"
                         continue
                     fi
-                    echo "## [$(basename "$file")]"
-                    echo '~~~'
-                    cat "$file"
-                    echo '~~~'
-                    echo ""
+                    add_non_pom_file "$file"
                 fi
             done < <(find "$item" -type f -not -path '*/.*' -print0)
         fi
@@ -181,14 +211,32 @@ if [ "$(realpath "$TARGET_DIR")" != "$(pwd)" ] && [ -f "./pom.xml" ]; then
 fi
 
 #############################################
-# Print all pom.xml files at the end.
+# Print non-pom files: "service" files first, then others.
+#############################################
+for file in "${SERVICE_FILES[@]}"; do
+    echo "## [$(basename "$file") - $(realpath "$file")]"
+    echo '~~~'
+    cat "$file"
+    echo '~~~'
+    echo ""
+done
+
+for file in "${OTHER_FILES[@]}"; do
+    echo "## [$(basename "$file") - $(realpath "$file")]"
+    echo '~~~'
+    cat "$file"
+    echo '~~~'
+    echo ""
+done
+
+#############################################
+# Finally, print all pom.xml files at the end.
 #############################################
 for pom in "${POM_FILES[@]}"; do
-    # Check if this pom.xml is the one in the current directory.
     if [ "$(realpath "$pom")" = "$(realpath ./pom.xml)" ]; then
-        echo "## [$(basename "$pom") (pom parent)]"
+        echo "## [$(basename "$pom") (pom parent) - $(realpath "$pom")]"
     else
-        echo "## [$(basename "$pom")]"
+        echo "## [$(basename "$pom") - $(realpath "$pom")]"
     fi
     echo '~~~'
     cat "$pom"
