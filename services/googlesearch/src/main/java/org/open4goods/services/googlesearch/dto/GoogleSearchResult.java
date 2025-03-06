@@ -7,8 +7,8 @@ import java.util.Objects;
  */
 public class GoogleSearchResult {
 
-    private final String title;
-    private final String link;
+    private String title;
+    private String link;
 
     /**
      * Constructs a new GoogleSearchResult.
@@ -21,6 +21,11 @@ public class GoogleSearchResult {
         this.link = link;
     }
 
+    public GoogleSearchResult() {
+        this.title = null;
+        this.link = null;
+    }
+    
     public String getTitle() {
         return title;
     }
@@ -50,4 +55,14 @@ public class GoogleSearchResult {
         return Objects.equals(title, that.title) &&
                Objects.equals(link, that.link);
     }
+
+	public void setTitle(String title) {
+		this.title = title;
+	}
+
+	public void setLink(String link) {
+		this.link = link;
+	}
+    
+    
 }

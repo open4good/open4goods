@@ -1,5 +1,6 @@
 package org.open4goods.services.googlesearch.dto;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -8,8 +9,16 @@ import java.util.Objects;
  */
 public class GoogleSearchResponse {
 
-    private final List<GoogleSearchResult> results;
+    private List<GoogleSearchResult> results = new ArrayList<GoogleSearchResult>();
 
+
+    /**
+     * Constructs a new GoogleSearchResponse.
+     *
+     */
+    public GoogleSearchResponse() {
+    }
+    
     /**
      * Constructs a new GoogleSearchResponse.
      *
@@ -42,4 +51,10 @@ public class GoogleSearchResponse {
         GoogleSearchResponse that = (GoogleSearchResponse) o;
         return Objects.equals(results, that.results);
     }
+
+	public void setResults(List<GoogleSearchResult> results) {
+		this.results = results;
+	}
+    
+    
 }
