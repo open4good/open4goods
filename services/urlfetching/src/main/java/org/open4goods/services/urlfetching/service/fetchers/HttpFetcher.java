@@ -18,7 +18,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Implementation of Fetcher using java.net.http.HttpClient.
+ * Implementation of {@link Fetcher} using java.net.http.HttpClient.
+ * <p>
+ * This implementation supports adding a user agent and custom headers.
+ * </p>
  */
 public class HttpFetcher implements Fetcher {
 
@@ -48,6 +51,12 @@ public class HttpFetcher implements Fetcher {
                 .build();
     }
 
+    /**
+     * Asynchronously fetches the URL using HttpClient.
+     *
+     * @param url the URL to fetch
+     * @return a CompletableFuture of FetchResponse
+     */
     @Override
     public CompletableFuture<FetchResponse> fetchUrl(String url) {
         logger.info("Fetching URL {} using HttpFetcher", url);

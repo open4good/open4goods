@@ -19,7 +19,7 @@ import org.open4goods.services.googlesearch.dto.GoogleSearchRequest;
 import org.open4goods.services.googlesearch.dto.GoogleSearchResponse;
 import org.open4goods.services.googlesearch.service.GoogleSearchService;
 import org.open4goods.services.prompt.service.GenAiService;
-import org.open4goods.services.reviewgeneration.config.ReviewGenerationProperties;
+import org.open4goods.services.reviewgeneration.config.ReviewGenerationConfig;
 import org.open4goods.services.reviewgeneration.dto.ProcessStatus;
 import org.open4goods.services.reviewgeneration.dto.ProcessStatus.Status;
 import org.open4goods.services.urlfetching.dto.FetchResponse;
@@ -48,7 +48,7 @@ public class ReviewGenerationService implements HealthIndicator {
 
     private static final Logger logger = LoggerFactory.getLogger(ReviewGenerationService.class);
 
-    private final ReviewGenerationProperties properties;
+    private final ReviewGenerationConfig properties;
     private final GoogleSearchService googleSearchService;
     private final UrlFetchingService urlFetchingService;
     private final GenAiService genAiService;
@@ -77,7 +77,7 @@ public class ReviewGenerationService implements HealthIndicator {
      * @param genAiService the Gen AI service.
      * @param meterRegistry the actuator meter registry.
      */
-    public ReviewGenerationService(ReviewGenerationProperties properties,
+    public ReviewGenerationService(ReviewGenerationConfig properties,
                                    GoogleSearchService googleSearchService,
                                    UrlFetchingService urlFetchingService,
                                    GenAiService genAiService,
@@ -185,108 +185,148 @@ public class ReviewGenerationService implements HealthIndicator {
      * @return the generated review.
      * @throws Exception if an error occurs during generation.
      */
-    private String executeReviewGeneration(Product product, VerticalConfig verticalConfig) throws Exception {
-        String brand = product.brand();
-        String primaryModel = product.model();
-        Set<String> alternateModels = product.getAkaModels();
 
-        List<String> markdownContents = new ArrayList<>();
+	private String executeReviewGeneration(Product product, VerticalConfig verticalConfig) throws Exception {
+	    String brand = product.brand();
+	    String primaryModel = product.model();
+	    Set<String> alternateModels = product.getAkaModels();
+	
+	    // Map to collect source URL -> markdown content
+	    Map<String, String> sourcesMap = new HashMap<>();
+	
+	    // Build a list of model names: primary first, then alternate models.
+	    List<String> modelNames = new ArrayList<>();
+	    modelNames.add(primaryModel);
+	    if (alternateModels != null) {
+	        modelNames.addAll(alternateModels);
+	    }
+	
+	    // For each model name variant...
+	    for (String modelName : modelNames) {
+	        int callsMade = 0;
+	        // Try iterative removal of trailing characters.
+	        for (int removeCount = 0; removeCount <= properties.getMaxCharactersToRemove(); removeCount++) {
+	            String modifiedModel = modelName;
+	            if (removeCount > 0 && modelName.length() > removeCount) {
+	                modifiedModel = modelName.substring(0, modelName.length() - removeCount);
+	            }
+	            // Use query template from config: e.g. "test %s \"%s\""
+	            String query = String.format(properties.getQueryTemplate(), brand, modifiedModel);
+	            logger.debug("Executing search query: {}", query);
+	
+	            // Create the search request using configured number of results.
+	            GoogleSearchRequest searchRequest = new GoogleSearchRequest(query, properties.getNumberOfResults());
+	            GoogleSearchResponse searchResponse = googleSearchService.search(searchRequest);
+	            callsMade++;
+	
+	            // Process each search result.
+	            searchResponse.getResults().forEach(result -> {
+	                try {
+	                    CompletableFuture<FetchResponse> fetchFuture = urlFetchingService.fetchUrl(result.getLink());
+	                    FetchResponse fetchResponse = fetchFuture.get(); // wait for result
+	                    if (fetchResponse != null && fetchResponse.markdownContent() != null 
+	                        && !fetchResponse.markdownContent().isEmpty()) {
+	                        // Maintain the map: source URL -> markdown content.
+	                        sourcesMap.put(result.getLink(), fetchResponse.markdownContent());
+	                    }
+	                } catch (Exception e) {
+	                    logger.warn("Failed to fetch content from URL {}: {}", result.getLink(), e.getMessage());
+	                }
+	            });
+	
+	            // Check if at least one search result contains a preferred domain.
+	            boolean containsPreferredDomain = searchResponse.getResults().stream()
+	                    .anyMatch(r -> properties.getPreferredDomains().stream()
+	                            .anyMatch(domain -> r.getLink().contains(domain)));
+	            if (containsPreferredDomain) {
+	                logger.debug("Preferred domain found in search results for query: {}", query);
+	                break; // exit the iterative removal loop for this model name
+	            }
+	            if (callsMade >= properties.getMaxSearchCalls()) {
+	                logger.debug("Reached max search calls ({}) for model variant: {}", properties.getMaxSearchCalls(), modifiedModel);
+	                break;
+	            }
+	        }
+	    }
+	
+	    // Sorting and filtering sources:
+	    // Keep only those with non-empty markdown content and length between min and max.
+	    List<Map.Entry<String, String>> validSources = sourcesMap.entrySet().stream()
+	            .filter(e -> {
+	                String content = e.getValue();
+	                int length = content.length();
+	                return length >= properties.getMinMarkdownLength() && length <= properties.getMaxMarkdownLength();
+	            })
+	            // Sort: entries from preferred domains come first.
+	            .sorted((e1, e2) -> {
+	                boolean e1Preferred = properties.getPreferredDomains().stream().anyMatch(domain -> e1.getKey().contains(domain));
+	                boolean e2Preferred = properties.getPreferredDomains().stream().anyMatch(domain -> e2.getKey().contains(domain));
+	                if (e1Preferred && !e2Preferred) return -1;
+	                if (!e1Preferred && e2Preferred) return 1;
+	                return 0;
+	            })
+	            .toList();
+	
+	    if (validSources.size() > properties.getMaxSources()) {
+	        logger.warn("Number of markdown sources ({}) exceeds the maximum limit ({}). Trimming extra sources.",
+	                validSources.size(), properties.getMaxSources());
+	        validSources = validSources.subList(0, properties.getMaxSources());
+	    }
+	
+	    Map<String, String> finalSourcesMap = new HashMap<>();
+	    validSources.forEach(e -> finalSourcesMap.put(e.getKey(), e.getValue()));
+	
+	    // Compose the prompt variables including the collected markdown content.
+	    Map<String, Object> promptVariables = new HashMap<>();
 
-        // Build a list of model names: primary first, then alternate models.
-        List<String> modelNames = new ArrayList<>();
-        modelNames.add(primaryModel);
-        if (alternateModels != null) {
-            modelNames.addAll(alternateModels);
-        }
-
-        // For each model name variant...
-        for (String modelName : modelNames) {
-            // Try iterative removal of trailing characters.
-            for (int removeCount = 0; removeCount <= properties.getMaxCharactersToRemove(); removeCount++) {
-                String modifiedModel = modelName;
-                if (removeCount > 0 && modelName.length() > removeCount) {
-                    modifiedModel = modelName.substring(0, modelName.length() - removeCount);
-                }
-                // Build the query as: BRAND "MODEL" (exact match on model)
-                String query = brand + " \"" + modifiedModel + "\"";
-                logger.debug("Executing search query: {}", query);
-
-                GoogleSearchRequest searchRequest = new GoogleSearchRequest(query,properties.getNumberOfResults() );
-
-                GoogleSearchResponse searchResponse = googleSearchService.search(searchRequest);
-
-                // Process each search result.
-                searchResponse.getResults().forEach(result -> {
-                    try {
-                        CompletableFuture<FetchResponse> fetchFuture = urlFetchingService.fetchUrl(result.getLink());
-                        FetchResponse fetchResponse = fetchFuture.get(); // wait for result
-                        if (fetchResponse != null && fetchResponse.markdownContent() != null) {
-                            markdownContents.add(fetchResponse.markdownContent());
-                        }
-                    } catch (Exception e) {
-                        logger.warn("Failed to fetch content from URL {}: {}", result.getLink(), e.getMessage());
-                    }
-                });
-
-                // Check if at least one search result contains a preferred domain.
-                boolean containsPreferredDomain = searchResponse.getResults().stream()
-                        .anyMatch(r -> properties.getPreferredDomains().stream()
-                                .anyMatch(domain -> r.getLink().contains(domain)));
-                if (containsPreferredDomain) {
-                    logger.debug("Preferred domain found in search results for query: {}", query);
-                    break; // exit the iterative removal loop for this model name
-                }
-            }
-        }
-
-        // Compose the prompt variables including the collected markdown content.
-        Map<String, Object> promptVariables = new HashMap<>();
-        promptVariables.put("MARKDOWN_CONTENT", String.join("\n", markdownContents));
-
-        // Use the GenAiService with the prompt template "review-generation".
-        return genAiService.prompt("review-generation", promptVariables).getRaw();
-    }
-
-    /**
-     * Returns the status of a review generation process by UPC.
-     *
-     * @param upc the UPC identifier.
-     * @return the process status, or null if not found.
-     */
-    public ProcessStatus getProcessStatus(long upc) {
-        return processStatusMap.get(upc);
-    }
-
-    /**
-     * Returns global processing statistics.
-     *
-     * @return a map with keys: totalProcessed, successful, failed, and ongoing.
-     */
-    public Map<String, Integer> getGlobalStats() {
-        Map<String, Integer> stats = new HashMap<>();
-        stats.put("totalProcessed", totalProcessed.get());
-        stats.put("successful", successfulCount.get());
-        stats.put("failed", failedCount.get());
-        // Count processes that are still PENDING or PROCESSING.
-        long ongoing = processStatusMap.values().stream()
-                .filter(s -> s.getStatus() == Status.PENDING || s.getStatus() == Status.PROCESSING)
-                .count();
-        stats.put("ongoing", (int) ongoing);
-        return stats;
-    }
-
-    /**
-     * Health check implementation.
-     * <p>
-     * The service is reported as DOWN if any review generation failure has occurred.
-     *
-     * @return Health status UP if healthy; otherwise DOWN with error details.
-     */
-    @Override
-    public Health health() {
-        if (lastGenerationFailed) {
-            return Health.down().withDetail("error", "One or more review generations have failed").build();
-        }
-        return Health.up().build();
-    }
-}
+	    promptVariables.put("sources", finalSourcesMap);
+	    promptVariables.put("VERTICAL_NAME", verticalConfig.i18n("fr").getH1Title());
+	    
+	    
+	    // Use the GenAiService with the prompt template "review-generation".
+	    return genAiService.prompt("review-generation", promptVariables).getRaw();
+	}
+	
+	    /**
+	     * Returns the status of a review generation process by UPC.
+	     *
+	     * @param upc the UPC identifier.
+	     * @return the process status, or null if not found.
+	     */
+	    public ProcessStatus getProcessStatus(long upc) {
+	        return processStatusMap.get(upc);
+	    }
+	
+	    /**
+	     * Returns global processing statistics.
+	     *
+	     * @return a map with keys: totalProcessed, successful, failed, and ongoing.
+	     */
+	    public Map<String, Integer> getGlobalStats() {
+	        Map<String, Integer> stats = new HashMap<>();
+	        stats.put("totalProcessed", totalProcessed.get());
+	        stats.put("successful", successfulCount.get());
+	        stats.put("failed", failedCount.get());
+	        // Count processes that are still PENDING or PROCESSING.
+	        long ongoing = processStatusMap.values().stream()
+	                .filter(s -> s.getStatus() == Status.PENDING || s.getStatus() == Status.PROCESSING)
+	                .count();
+	        stats.put("ongoing", (int) ongoing);
+	        return stats;
+	    }
+	
+	    /**
+	     * Health check implementation.
+	     * <p>
+	     * The service is reported as DOWN if any review generation failure has occurred.
+	     *
+	     * @return Health status UP if healthy; otherwise DOWN with error details.
+	     */
+	    @Override
+	    public Health health() {
+	        if (lastGenerationFailed) {
+	            return Health.down().withDetail("error", "One or more review generations have failed").build();
+	        }
+	        return Health.up().build();
+	    }
+	}

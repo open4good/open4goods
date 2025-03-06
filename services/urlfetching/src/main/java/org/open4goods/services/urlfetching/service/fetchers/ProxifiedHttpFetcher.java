@@ -21,7 +21,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Implementation of Fetcher that supports fetching via a proxy.
+ * Implementation of {@link Fetcher} that supports fetching via a proxy.
  */
 public class ProxifiedHttpFetcher implements Fetcher {
 
@@ -47,7 +47,7 @@ public class ProxifiedHttpFetcher implements Fetcher {
         this.meterRegistry = meterRegistry;
         ProxyConfig proxy = domainConfig.getProxy();
 
-        // Build HttpClient with proxy if provided
+        // Build HttpClient with proxy settings if provided
         HttpClient.Builder builder = HttpClient.newBuilder()
                 .executor(executor)
                 .connectTimeout(this.timeout);
@@ -58,6 +58,12 @@ public class ProxifiedHttpFetcher implements Fetcher {
         this.httpClient = builder.build();
     }
 
+    /**
+     * Asynchronously fetches the URL using an HttpClient configured with a proxy.
+     *
+     * @param url the URL to fetch
+     * @return a CompletableFuture of FetchResponse
+     */
     @Override
     public CompletableFuture<FetchResponse> fetchUrl(String url) {
         logger.info("Fetching URL {} using ProxifiedHttpFetcher", url);
