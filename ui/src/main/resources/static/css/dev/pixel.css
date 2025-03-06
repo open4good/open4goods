@@ -33584,6 +33584,20 @@ blockquote {
     color: #008879;
 }
 
+.page-vertical .table-nudger {
+    border-radius: 10px;
+    border-collapse: separate !important;
+    border-spacing: 0;
+}
+
+.page-vertical .table-nudger th:first-child {
+    border-radius: 10px 0 0 0;
+}
+
+.page-vertical .table-nudger th:last-child {
+    border-radius: 0 10px 0 0;
+}
+
 .nudger__reversement {
     border: 1px solid #00DE9F;
     border-radius: 40px 0 40px 40px;
@@ -33602,5 +33616,29 @@ blockquote {
     background: -webkit-linear-gradient(45deg, #008879, #00D19F 80%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
+}
+
+.noUi-connect {
+    background-color: #008879;
+}
+
+.border[class*="-1"] {
+    border-color: #FF8479;
+}
+
+.border[class*="-2"] {
+    border-color: #FFCD90;
+}
+
+.border[class*="-3"] {
+    border-color: #00DE9F;
+}
+
+.border[class*="-4"] {
+    border-color: #A6E242;
+}
+
+.border[class*="-5"] {
+    border-color: #5BDB3B;
 }
 /*# sourceMappingURL=pixel.css.map */
