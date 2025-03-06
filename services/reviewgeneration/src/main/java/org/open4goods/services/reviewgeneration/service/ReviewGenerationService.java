@@ -18,7 +18,7 @@ import org.open4goods.model.vertical.VerticalConfig;
 import org.open4goods.services.googlesearch.dto.GoogleSearchRequest;
 import org.open4goods.services.googlesearch.dto.GoogleSearchResponse;
 import org.open4goods.services.googlesearch.service.GoogleSearchService;
-import org.open4goods.services.prompt.service.GenAiService;
+import org.open4goods.services.prompt.service.PromptService;
 import org.open4goods.services.reviewgeneration.config.ReviewGenerationConfig;
 import org.open4goods.services.reviewgeneration.dto.ProcessStatus;
 import org.open4goods.services.reviewgeneration.dto.ProcessStatus.Status;
@@ -51,7 +51,7 @@ public class ReviewGenerationService implements HealthIndicator {
     private final ReviewGenerationConfig properties;
     private final GoogleSearchService googleSearchService;
     private final UrlFetchingService urlFetchingService;
-    private final GenAiService genAiService;
+    private final PromptService genAiService;
     private final MeterRegistry meterRegistry;
 
     // Thread pool executor for asynchronous processing.
@@ -80,7 +80,7 @@ public class ReviewGenerationService implements HealthIndicator {
     public ReviewGenerationService(ReviewGenerationConfig properties,
                                    GoogleSearchService googleSearchService,
                                    UrlFetchingService urlFetchingService,
-                                   GenAiService genAiService,
+                                   PromptService genAiService,
                                    MeterRegistry meterRegistry) {
         this.properties = properties;
         this.googleSearchService = googleSearchService;

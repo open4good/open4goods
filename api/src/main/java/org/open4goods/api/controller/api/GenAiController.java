@@ -13,7 +13,7 @@ import org.open4goods.commons.services.VerticalsConfigService;
 import org.open4goods.model.exceptions.InvalidParameterException;
 import org.open4goods.model.exceptions.ResourceNotFoundException;
 import org.open4goods.model.vertical.VerticalConfig;
-import org.open4goods.services.prompt.service.GenAiService;
+import org.open4goods.services.prompt.service.PromptService;
 import org.open4goods.services.serialisation.exception.SerialisationException;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -33,14 +33,14 @@ import io.swagger.v3.oas.annotations.Operation;
 public class GenAiController {
 
 
-	private GenAiService aiService;
+	private PromptService aiService;
 
 	private ProductsReviewGenerationService pageGenService;
 	
 	private VerticalsConfigService verticalsConfigService;
 
 
-	public GenAiController(GenAiService aiService, ProductsReviewGenerationService pageGenService,  VerticalsConfigService verticalsConfigService) {
+	public GenAiController(PromptService aiService, ProductsReviewGenerationService pageGenService,  VerticalsConfigService verticalsConfigService) {
 		this.aiService = aiService;
 		this.pageGenService = pageGenService;
 		this.verticalsConfigService = verticalsConfigService;

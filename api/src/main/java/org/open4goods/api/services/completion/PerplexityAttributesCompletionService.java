@@ -27,7 +27,7 @@ import org.open4goods.model.exceptions.ResourceNotFoundException;
 import org.open4goods.model.product.Product;
 import org.open4goods.model.vertical.VerticalConfig;
 import org.open4goods.services.prompt.dto.PromptResponse;
-import org.open4goods.services.prompt.service.GenAiService;
+import org.open4goods.services.prompt.service.PromptService;
 import org.open4goods.services.serialisation.exception.SerialisationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,10 +45,10 @@ public class PerplexityAttributesCompletionService  extends AbstractCompletionSe
 	// Markdown parser
 	private Parser parser = Parser.builder().build();
 	
-	private GenAiService aiService;
+	private PromptService aiService;
 
 	
-	public PerplexityAttributesCompletionService( GenAiService aiService, ProductRepository dataRepository, VerticalsConfigService verticalConfigService, ApiProperties apiProperties) {
+	public PerplexityAttributesCompletionService( PromptService aiService, ProductRepository dataRepository, VerticalsConfigService verticalConfigService, ApiProperties apiProperties) {
 		// TODO(p3,design) : Should set a specific log level here (not "aggregation)" one)
 		super(dataRepository, verticalConfigService, apiProperties.logsFolder(), apiProperties.aggLogLevel());		
 		this.aiService = aiService;

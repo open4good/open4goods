@@ -31,8 +31,8 @@ import org.open4goods.model.price.Currency;
 import org.open4goods.model.price.Price;
 import org.open4goods.services.evaluation.config.EvaluationConfig;
 import org.open4goods.services.evaluation.service.EvaluationService;
-import org.open4goods.services.prompt.config.GenAiConfig;
-import org.open4goods.services.prompt.service.GenAiService;
+import org.open4goods.services.prompt.config.PromptServiceConfig;
+import org.open4goods.services.prompt.service.PromptService;
 import org.open4goods.services.serialisation.service.SerialisationService;
 import org.open4goods.ui.config.yml.UiConfig;
 import org.open4goods.ui.controllers.ui.UiService;
@@ -102,7 +102,7 @@ public class AppConfig {
 	
 	@Bean
 	@Qualifier("perplexityChatModel")
-	OpenAiApi perplexityApi(@Autowired GenAiConfig genAiConfig) {
+	OpenAiApi perplexityApi(@Autowired PromptServiceConfig genAiConfig) {
 		return new OpenAiApi(genAiConfig.getPerplexityBaseUrl(),
 							 genAiConfig.getPerplexityApiKey(),
 							 genAiConfig.getPerplexityCompletionsPath(),
@@ -112,18 +112,18 @@ public class AppConfig {
 	
 	@Bean
 	@Qualifier("openAiCustomApi")
-	OpenAiApi openAiCustomApi(@Autowired GenAiConfig genAiConfig) {
+	OpenAiApi openAiCustomApi(@Autowired PromptServiceConfig genAiConfig) {
 		return new OpenAiApi(genAiConfig.getOpenaiApiKey());
 	}
 	
 	
 	@Bean
-	GenAiService genAiService (@Autowired @Qualifier("perplexityChatModel") OpenAiApi perplexityApi, 
+	PromptService genAiService (@Autowired @Qualifier("perplexityChatModel") OpenAiApi perplexityApi, 
 								@Autowired @Qualifier("openAiCustomApi") OpenAiApi openAiCustomApi,
 								@Autowired  EvaluationService spelEvaluationService, 
 								@Autowired  SerialisationService serialisationService,
-								@Autowired GenAiConfig genAiConfig) {
-		return new GenAiService(genAiConfig, perplexityApi, openAiCustomApi, serialisationService, spelEvaluationService);
+								@Autowired PromptServiceConfig genAiConfig) {
+		return new PromptService(genAiConfig, perplexityApi, openAiCustomApi, serialisationService, spelEvaluationService);
 	}
 
 	

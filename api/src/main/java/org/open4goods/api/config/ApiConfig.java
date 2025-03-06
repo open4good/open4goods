@@ -58,7 +58,7 @@ import org.open4goods.model.price.Price;
 import org.open4goods.model.vertical.LegacyPromptConfig;
 import org.open4goods.services.evaluation.config.EvaluationConfig;
 import org.open4goods.services.evaluation.service.EvaluationService;
-import org.open4goods.services.prompt.service.GenAiService;
+import org.open4goods.services.prompt.service.PromptService;
 import org.open4goods.services.serialisation.service.SerialisationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -132,7 +132,7 @@ public class ApiConfig {
 
 	@Bean
 	VerticalsGenerationService verticalsGenerationService(ProductRepository pRepo, SerialisationService serialisationService, LegacyAiService aiService, GoogleTaxonomyService gTaxoService, VerticalsConfigService verticalsConfigService, ResourcePatternResolver resourceResolver,
-			EvaluationService evaluationService, IcecatService icecatService, GenAiService genAiService) throws SAXException {
+			EvaluationService evaluationService, IcecatService icecatService, PromptService genAiService) throws SAXException {
 		return new VerticalsGenerationService(apiProperties.getVerticalsGenerationConfig(), pRepo, serialisationService, aiService, gTaxoService, verticalsConfigService, resourceResolver, evaluationService, icecatService, genAiService);
 	}
 
@@ -162,10 +162,10 @@ public class ApiConfig {
 	}
 	
 	@Bean
-	GenAiService genAiService (@Autowired @Qualifier("perplexityChatModel") OpenAiApi perplexityApi, 
+	PromptService genAiService (@Autowired @Qualifier("perplexityChatModel") OpenAiApi perplexityApi, 
 								@Autowired @Qualifier("openAiCustomApi") OpenAiApi openAiCustomApi,
 								ApiProperties apiConfig, EvaluationService spelEvaluationService, SerialisationService serialisationService) {
-		return new GenAiService(apiProperties.getGenAiConfig(), perplexityApi, openAiCustomApi, serialisationService, spelEvaluationService);
+		return new PromptService(apiProperties.getGenAiConfig(), perplexityApi, openAiCustomApi, serialisationService, spelEvaluationService);
 	}
 
 	
@@ -175,17 +175,17 @@ public class ApiConfig {
 	}
 	
 	@Bean
-	ProductsReviewGenerationService pageGenerationService(GenAiService aiService, VerticalsConfigService verticalConfigService, PerplexityMarkdownService perplexityMarkdownService, VerticalPagesRepository pagesRepository) {
+	ProductsReviewGenerationService pageGenerationService(PromptService aiService, VerticalsConfigService verticalConfigService, PerplexityMarkdownService perplexityMarkdownService, VerticalPagesRepository pagesRepository) {
 		return new ProductsReviewGenerationService(aiService, verticalConfigService, apiProperties, perplexityMarkdownService,  pagesRepository);
 	}
 	
 	@Bean
-	PerplexityReviewCompletionService perplexityReviewCompletionService(GenAiService aiService, ProductRepository productRepository, VerticalsConfigService verticalConfigService, PerplexityMarkdownService perplexityMarkdownService) {
+	PerplexityReviewCompletionService perplexityReviewCompletionService(PromptService aiService, ProductRepository productRepository, VerticalsConfigService verticalConfigService, PerplexityMarkdownService perplexityMarkdownService) {
 		return new PerplexityReviewCompletionService(aiService, productRepository, verticalConfigService, apiProperties,  perplexityMarkdownService);
 	}
 
 	@Bean
-	PerplexityAttributesCompletionService perplexityAttributesCompletionService(GenAiService aiService, ProductRepository productRepository, VerticalsConfigService verticalConfigService) {
+	PerplexityAttributesCompletionService perplexityAttributesCompletionService(PromptService aiService, ProductRepository productRepository, VerticalsConfigService verticalConfigService) {
 		return new PerplexityAttributesCompletionService(aiService, productRepository, verticalConfigService, apiProperties);
 	}
 
