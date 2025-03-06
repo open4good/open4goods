@@ -7,16 +7,19 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.open4goods.services.googlesearch.config.GoogleSearchConfig;
-
 import org.open4goods.services.googlesearch.dto.GoogleSearchRequest;
 import org.open4goods.services.googlesearch.dto.GoogleSearchResponse;
 import org.open4goods.services.googlesearch.dto.GoogleSearchResult;
 import org.open4goods.services.googlesearch.exception.GoogleSearchException;
+import org.open4goods.services.serialisation.service.SerialisationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.actuate.health.Health;
@@ -32,8 +35,8 @@ import io.micrometer.core.instrument.MeterRegistry;
 /**
  * Service for interacting with the Google Custom Search API.
  * <p>
- * It externalizes its configuration via {@link GoogleSearchProperties}, increments actuator metrics for each search,
- * and implements a health check based on proper configuration and recent API call outcomes.
+ * It externalizes its configuration via {@link GoogleSearchConfig}, increments actuator metrics for each search,
+ * records search responses to file when enabled, and implements a health check based on proper configuration and recent API call outcomes.
  */
 @Service
 public class GoogleSearchService implements HealthIndicator {
@@ -44,6 +47,7 @@ public class GoogleSearchService implements HealthIndicator {
     private final Gson gson;
     private final GoogleSearchConfig properties;
     private final MeterRegistry meterRegistry;
+    private final SerialisationService serialisationService;
     
     // Volatile variable to hold the last error message if a non-200 response was received.
     private volatile String lastErrorMessage = null;
@@ -51,10 +55,11 @@ public class GoogleSearchService implements HealthIndicator {
     /**
      * Constructs a new GoogleSearchService.
      *
-     * @param properties    the Google search configuration properties
-     * @param meterRegistry the actuator meter registry for metrics
+     * @param properties           the Google search configuration properties
+     * @param meterRegistry        the actuator meter registry for metrics
+     * @param serialisationService the service for JSON serialization/deserialization
      */
-    public GoogleSearchService(GoogleSearchConfig properties, MeterRegistry meterRegistry) {
+    public GoogleSearchService(GoogleSearchConfig properties, MeterRegistry meterRegistry, SerialisationService serialisationService) {
         // Create an HttpClient with a connection timeout.
         this.httpClient = HttpClient.newBuilder()
                                     .connectTimeout(Duration.ofSeconds(10))
@@ -62,14 +67,18 @@ public class GoogleSearchService implements HealthIndicator {
         this.gson = new Gson();
         this.properties = properties;
         this.meterRegistry = meterRegistry;
+        this.serialisationService = serialisationService;
     }
 
     /**
      * Executes a search against the Google Custom Search API.
+     * <p>
+     * This method now supports additional parameters (lr, cr, safe, sort, gl, hl). For each of these,
+     * if not provided in the {@link GoogleSearchRequest}, the default value from the configuration is used.
      *
-     * @param request a {@link GoogleSearchRequest} containing the query and desired number of results
+     * @param request a {@link GoogleSearchRequest} containing the query, desired number of results, and optional search parameters
      * @return a {@link GoogleSearchResponse} containing the search results
-     * @throws IOException          if an I/O error occurs during the HTTP call
+     * @throws IOException          if an I/O error occurs during the HTTP call or recording the response
      * @throws InterruptedException if the HTTP request is interrupted
      * @throws GoogleSearchException if the API responds with an error or the response cannot be parsed
      */
@@ -81,19 +90,45 @@ public class GoogleSearchService implements HealthIndicator {
         final String encodedQuery = URLEncoder.encode(request.getQuery(), Charset.defaultCharset());
         
         // Build the API URL using externalized configuration.
-        final String url = String.format("%s?q=%s&key=%s&cx=%s&num=%d",
+        StringBuilder urlBuilder = new StringBuilder(String.format("%s?q=%s&key=%s&cx=%s&num=%d",
                 properties.getSearchUrl(),
                 encodedQuery,
                 properties.getApiKey(),
                 properties.getCx(),
-                request.getNumResults());
+                request.getNumResults()));
+        
+        // Resolve additional parameters: use the request value if provided; otherwise, fallback to configuration defaults.
+        String lr = (request.getLr() != null && !request.getLr().isBlank()) ? request.getLr() : properties.getDefaults().getLr();
+        String cr = (request.getCr() != null && !request.getCr().isBlank()) ? request.getCr() : properties.getDefaults().getCr();
+        String safe = (request.getSafe() != null && !request.getSafe().isBlank()) ? request.getSafe() : properties.getDefaults().getSafe();
+        String sort = (request.getSort() != null && !request.getSort().isBlank()) ? request.getSort() : properties.getDefaults().getSort();
+        String gl = (request.getGl() != null && !request.getGl().isBlank()) ? request.getGl() : properties.getDefaults().getGl();
+        String hl = (request.getHl() != null && !request.getHl().isBlank()) ? request.getHl() : properties.getDefaults().getHl();
+        
+        // Append additional parameters to the URL if non-empty.
+        if (lr != null && !lr.isBlank()) {
+            urlBuilder.append("&lr=").append(URLEncoder.encode(lr, Charset.defaultCharset()));
+        }
+        if (cr != null && !cr.isBlank()) {
+            urlBuilder.append("&cr=").append(URLEncoder.encode(cr, Charset.defaultCharset()));
+        }
+        if (safe != null && !safe.isBlank()) {
+            urlBuilder.append("&safe=").append(URLEncoder.encode(safe, Charset.defaultCharset()));
+        }
+        if (sort != null && !sort.isBlank()) {
+            urlBuilder.append("&sort=").append(URLEncoder.encode(sort, Charset.defaultCharset()));
+        }
+        if (gl != null && !gl.isBlank()) {
+            urlBuilder.append("&gl=").append(URLEncoder.encode(gl, Charset.defaultCharset()));
+        }
+        if (hl != null && !hl.isBlank()) {
+            urlBuilder.append("&hl=").append(URLEncoder.encode(hl, Charset.defaultCharset()));
+        }
+        
+        String url = urlBuilder.toString();
         
         // Prepare a safe version of the URL for logging (masking the API key)
-        final String safeUrl = String.format("%s?q=%s&key=****&cx=%s&num=%d",
-                properties.getSearchUrl(),
-                encodedQuery,
-                properties.getCx(),
-                request.getNumResults());
+        String safeUrl = url.replace(properties.getApiKey(), "****");
         logger.debug("Executing search with URL: {}", safeUrl);
 
         // Build the HTTP request with a timeout.
@@ -120,7 +155,29 @@ public class GoogleSearchService implements HealthIndicator {
         logger.info("Search performed for query: '{}' with HTTP status: {}", request.getQuery(), response.statusCode());
 
         // Parse the JSON response into our DTO.
-        return parseResponse(response.body());
+        GoogleSearchResponse result = parseResponse(response.body());
+        
+        // If recording is enabled, store the result as a JSON file in the provided folder.
+        if (properties.isRecordEnabled() && properties.getRecordFolder() != null && !properties.getRecordFolder().isBlank()) {
+            try {
+                // Sanitize the query for a safe file name.
+                String sanitizedQuery = sanitizeUrlToFileName(request.getQuery());
+                String fileName = sanitizedQuery + "-" + request.getNumResults() + ".json";
+                Path folderPath = Paths.get(properties.getRecordFolder());
+                if (!Files.exists(folderPath)) {
+                    Files.createDirectories(folderPath);
+                }
+                Path filePath = folderPath.resolve(fileName);
+                String jsonContent = serialisationService.toJson(result,true);
+                Files.writeString(filePath, jsonContent);
+                logger.info("Recorded search result to file: {}", filePath.toAbsolutePath());
+            } catch (Exception e) {
+                // Log the error but do not break the search functionality.
+                logger.error("Failed to record search result: {}", e.getMessage());
+            }
+        }
+        
+        return result;
     }
 
     /**
@@ -178,4 +235,15 @@ public class GoogleSearchService implements HealthIndicator {
         logger.debug("Google Search properties are properly configured and no recent errors encountered.");
         return Health.up().build();
     }
+    
+    /**
+     * Sanitizes a URL into a safe file name by removing the protocol and replacing non-alphanumeric characters.
+     *
+     * @param url the URL to sanitize
+     * @return a sanitized file name ending with .txt
+     */
+    public static String sanitizeUrlToFileName(String url) {
+        String sanitized = url.replaceFirst("^(https?://)", "").replaceAll("[^a-zA-Z0-9]", "_");
+        return sanitized + ".txt";
+    }    
 }
