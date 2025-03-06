@@ -9,16 +9,19 @@
 <meta name="msapplication-TileColor" content="#da532c">
 <meta name="theme-color" content="#ffffff">
 
-
-<th:block th:if="${config.webConfig.useHotScss}">
-	<link type="text/css" href="/css/dev/pixel.css" rel="stylesheet">
+<th:block th:if="${config}">
+	<th:block th:if="${config.webConfig.useHotScss}">
+		<link type="text/css" href="/css/dev/pixel.css" rel="stylesheet">
+	</th:block>
+	
+	
+	<th:block th:unless="${config.webConfig.useHotScss}">
+	    <link type="text/css" href="/css/pixel.css" rel="stylesheet">
+	</th:block>
 </th:block>
-
-
-<th:block th:unless="${config.webConfig.useHotScss}">
-    <link type="text/css" href="/css/pixel.css" rel="stylesheet">
+<th:block th:unless="${config}">
+     <link type="text/css" href="/css/pixel.css" rel="stylesheet">
 </th:block>
-
 <link rel="stylesheet" href="/css/custom.css" >
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
