@@ -3,7 +3,13 @@
 # This script lists files and directories in <directory> (ignoring hidden files).
 # It includes files in the root folder and recursively processes only the first-level subdirectories
 # that match allowed names (by default: src and test). It then prints a directory tree followed by
-# file contents (for files with allowed extensions: .md, .java, .yml, .xml).
+# file contents (for files with allowed extensions: .md, .java, .yml, .xml, .json).
+#
+# Updates in this version:
+# - File contents are wrapped in Markdown code fences using tilde characters (~~~).
+# - Any file named "pom.xml" (or "pom.xml (pom parent)") is printed after all other files.
+# - The pom.xml from the current working directory is labeled as "(pom parent)".
+# - Files with the basename "pom.xml" are skipped during the normal loops and printed at last.
 
 # Show help if no arguments are provided.
 if [ $# -lt 1 ]; then
@@ -26,6 +32,9 @@ ALLOWED_EXTENSIONS=("md" "java" "yml" "xml" "json")
 
 # Configurable allowed first-level directories (only these folders will be recursed)
 ALLOWED_FOLDERS=("src" "test")
+
+# Array to hold pom.xml files (both pom and pom parent)
+POM_FILES=()
 
 # If output file provided, redirect stdout (overwriting)
 if [ -n "$OUTPUT_FILE" ]; then
@@ -57,7 +66,7 @@ print_tree_rec() {
 #############################################
 # Output the directory structure
 #############################################
-echo "* Directory structure *"
+echo "# Directory structure "
 
 # Process files in the root folder.
 for item in "$TARGET_DIR"/*; do
@@ -81,7 +90,7 @@ for item in "$TARGET_DIR"/*; do
 done
 
 echo ""
-echo "* Files content *"
+echo "# Files content"
 echo ""
 
 #############################################
@@ -103,22 +112,44 @@ has_allowed_extension() {
 }
 
 #############################################
-# Output file contents for allowed files.
+# Helper function to add a pom.xml file to POM_FILES array if not already added.
 #############################################
+add_pom_file() {
+    local file="$1"
+    # Check for duplicates by comparing real paths.
+    local real_file
+    real_file=$(realpath "$file")
+    for existing in "${POM_FILES[@]}"; do
+        if [ "$(realpath "$existing")" = "$real_file" ]; then
+            return
+        fi
+    done
+    POM_FILES+=("$file")
+}
 
-# Process allowed files in the root folder.
+#############################################
+# Process allowed files in the root folder (except pom.xml).
+#############################################
 for item in "$TARGET_DIR"/*; do
     [ -e "$item" ] || continue
     if [ -f "$item" ] && [[ "$(basename "$item")" != .* ]]; then
         if has_allowed_extension "$item"; then
-            echo "** [$item] **"
+            if [ "$(basename "$item")" = "pom.xml" ]; then
+                add_pom_file "$item"
+                continue
+            fi
+            echo "## [$(basename "$item")]"
+            echo '~~~'
             cat "$item"
+            echo '~~~'
             echo ""
         fi
     fi
 done
 
-# Process allowed files in allowed first-level subdirectories.
+#############################################
+# Process allowed files in allowed first-level subdirectories (except pom.xml).
+#############################################
 for item in "$TARGET_DIR"/*; do
     [ -e "$item" ] || continue
     if [ -d "$item" ] && [[ "$(basename "$item")" != .* ]]; then
@@ -127,11 +158,40 @@ for item in "$TARGET_DIR"/*; do
             # Use find to recursively list files, excluding hidden ones.
             while IFS= read -r -d '' file; do
                 if has_allowed_extension "$file"; then
-                    echo "** [$file] **"
+                    if [ "$(basename "$file")" = "pom.xml" ]; then
+                        add_pom_file "$file"
+                        continue
+                    fi
+                    echo "## [$(basename "$file")]"
+                    echo '~~~'
                     cat "$file"
+                    echo '~~~'
                     echo ""
                 fi
             done < <(find "$item" -type f -not -path '*/.*' -print0)
         fi
     fi
+done
+
+#############################################
+# If TARGET_DIR is not the current directory, include the current directory pom.xml (as pom parent)
+#############################################
+if [ "$(realpath "$TARGET_DIR")" != "$(pwd)" ] && [ -f "./pom.xml" ]; then
+    add_pom_file "./pom.xml"
+fi
+
+#############################################
+# Print all pom.xml files at the end.
+#############################################
+for pom in "${POM_FILES[@]}"; do
+    # Check if this pom.xml is the one in the current directory.
+    if [ "$(realpath "$pom")" = "$(realpath ./pom.xml)" ]; then
+        echo "## [$(basename "$pom") (pom parent)]"
+    else
+        echo "## [$(basename "$pom")]"
+    fi
+    echo '~~~'
+    cat "$pom"
+    echo '~~~'
+    echo ""
 done
