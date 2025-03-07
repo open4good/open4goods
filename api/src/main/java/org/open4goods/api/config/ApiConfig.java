@@ -164,8 +164,9 @@ public class ApiConfig {
 	@Bean
 	PromptService genAiService (@Autowired @Qualifier("perplexityChatModel") OpenAiApi perplexityApi, 
 								@Autowired @Qualifier("openAiCustomApi") OpenAiApi openAiCustomApi,
-								ApiProperties apiConfig, EvaluationService spelEvaluationService, SerialisationService serialisationService) {
-		return new PromptService(apiProperties.getGenAiConfig(), perplexityApi, openAiCustomApi, serialisationService, spelEvaluationService);
+								ApiProperties apiConfig, EvaluationService spelEvaluationService, SerialisationService serialisationService,
+								@Autowired MeterRegistry meterRegistry) {
+		return new PromptService(apiProperties.getGenAiConfig(), perplexityApi, openAiCustomApi, serialisationService, spelEvaluationService,  meterRegistry);
 	}
 
 	

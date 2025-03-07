@@ -23,6 +23,8 @@ import org.springframework.boot.SpringBootConfiguration;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.context.annotation.ComponentScan;
 
+import io.micrometer.core.instrument.MeterRegistry;
+
 /**
  * Minimal test configuration to bootstrap the Spring context.
  */
@@ -38,6 +40,7 @@ class PromptServiceTest {
     private OpenAiApi perplexityApi;
     private SerialisationService serialisationService;
     private EvaluationService evaluationService;
+    private MeterRegistry meterRegistry;
 
     @BeforeEach
     void setUp() {
@@ -47,6 +50,7 @@ class PromptServiceTest {
         perplexityApi = mock(OpenAiApi.class);
         serialisationService = mock(SerialisationService.class);
         evaluationService = mock(EvaluationService.class);
+        meterRegistry = mock(MeterRegistry.class);
 
         // Stub configuration methods
         when(mockConfig.isEnabled()).thenReturn(true);
@@ -63,7 +67,7 @@ class PromptServiceTest {
 		}
 
         // Instantiate the service under test
-        genAiService = new PromptService(mockConfig, perplexityApi, openAiApi, serialisationService, evaluationService);
+        genAiService = new PromptService(mockConfig, perplexityApi, openAiApi, serialisationService, evaluationService, meterRegistry);
     }
 
     @Test

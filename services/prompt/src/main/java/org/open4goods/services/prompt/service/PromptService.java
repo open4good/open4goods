@@ -1,7 +1,6 @@
 package org.open4goods.services.prompt.service;
 
 import java.io.File;
-import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -10,10 +9,10 @@ import java.util.Map;
 
 import org.apache.commons.io.FileUtils;
 import org.open4goods.model.exceptions.ResourceNotFoundException;
+import org.open4goods.services.evaluation.exception.TemplateEvaluationException;
 import org.open4goods.services.evaluation.service.EvaluationService;
-import org.open4goods.services.prompt.config.PromptServiceConfig;
-import org.open4goods.services.prompt.config.GenAiServiceType;
 import org.open4goods.services.prompt.config.PromptConfig;
+import org.open4goods.services.prompt.config.PromptServiceConfig;
 import org.open4goods.services.prompt.dto.PromptResponse;
 import org.open4goods.services.serialisation.exception.SerialisationException;
 import org.open4goods.services.serialisation.service.SerialisationService;
@@ -24,18 +23,21 @@ import org.springframework.ai.chat.client.ChatClient.CallResponseSpec;
 import org.springframework.ai.chat.client.ChatClient.ChatClientRequestSpec;
 import org.springframework.ai.openai.OpenAiChatModel;
 import org.springframework.ai.openai.api.OpenAiApi;
+import org.springframework.boot.actuate.health.Health;
+import org.springframework.boot.actuate.health.HealthIndicator;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
-import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.JsonMappingException;
+
+import io.micrometer.core.instrument.MeterRegistry;
 
 /**
  * Service handling interactions with generative AI services.
  * <p>
  * It loads prompt templates from YAML files, instantiates chat models based on configuration, and
- * processes prompt evaluations with provided variables.
+ * processes prompt evaluations with provided variables. It also implements HealthIndicator,
+ * checking that required external AI API keys are provided and that the latest external API call succeeded.
  * </p>
  * <p>
  * This implementation uses the OpenAiChatModel from Spring AI to communicate with the appropriate AI
@@ -43,7 +45,7 @@ import com.fasterxml.jackson.databind.JsonMappingException;
  * </p>
  */
 @Service
-public class PromptService {
+public class PromptService implements HealthIndicator {
 
     private static final Logger logger = LoggerFactory.getLogger(PromptService.class);
 
@@ -62,23 +64,33 @@ public class PromptService {
     private final SerialisationService serialisationService;
     private final EvaluationService evaluationService;
     private final PromptServiceConfig genAiConfig;
+    private final MeterRegistry meterRegistry;
 
     /**
-     * Constructs a new GenAiService with the given dependencies.
+     * Flag indicating the health status of the external API calls.
+     * True means the last external API call succeeded, false if an exception was encountered.
+     */
+    private volatile boolean externalApiHealthy = true;
+
+    
+    /**
+     * Constructs a new PromptService with the given dependencies including a MeterRegistry for metrics.
      *
      * @param genAiConfig          The configuration for the GenAI service.
      * @param perplexityApi        The API instance for Perplexity.
      * @param openAiCustomApi      The API instance for OpenAI.
      * @param serialisationService Service to handle serialization/deserialization.
      * @param evaluationService    Service to evaluate prompt templates.
+     * @param meterRegistry        The MeterRegistry for actuator metrics.
      */
     public PromptService(PromptServiceConfig genAiConfig, OpenAiApi perplexityApi, OpenAiApi openAiCustomApi,
-                        SerialisationService serialisationService, EvaluationService evaluationService) {
+                         SerialisationService serialisationService, EvaluationService evaluationService, MeterRegistry meterRegistry) {
         this.openAiApi = openAiCustomApi;
         this.perplexityApi = perplexityApi;
         this.evaluationService = evaluationService;
         this.serialisationService = serialisationService;
         this.genAiConfig = genAiConfig;
+        this.meterRegistry = meterRegistry;
 
         // Check if the service is enabled (if supported by configuration)
         if (!genAiConfig.isEnabled()) {
@@ -92,32 +104,51 @@ public class PromptService {
 
     /**
      * Executes a prompt against an AI service based on a prompt key and provided variables.
+     * <p>
+     * The evaluated prompt request is recorded to a YAML file before invoking the external API.
+     * This ensures that the request is captured even if the API call fails.
+     * </p>
      *
      * @param promptKey The key identifying the prompt configuration.
      * @param variables The variables to resolve within the prompt templates.
      * @return A {@link PromptResponse} containing the AI call response and additional metadata.
      * @throws ResourceNotFoundException if the prompt configuration is not found.
-     * @throws SerialisationException 
-     * @throws IOException               if an error occurs during prompt processing.
-     * @throws JsonMappingException      if the response mapping fails.
-     * @throws JsonParseException        if the JSON parsing fails.
+     * @throws SerialisationException    if a serialization error occurs.
      */
     public PromptResponse<CallResponseSpec> prompt(String promptKey, Map<String, Object> variables)
-            throws ResourceNotFoundException, SerialisationException{
+            throws ResourceNotFoundException, SerialisationException {
 
         PromptConfig pConf = getPromptConfig(promptKey);
         if (pConf == null) {
             logger.error("PromptConfig {} does not exist", promptKey);
             throw new ResourceNotFoundException("Prompt not found");
         }
+        
+        // Increment request metric
+        meterRegistry.counter("prompt.requests", "model", promptKey).increment();
 
         PromptResponse<CallResponseSpec> ret = new PromptResponse<>();
         ret.setStart(System.currentTimeMillis());
 
-        // Evaluate system and user prompts using Thymeleaf
-        String systemPromptEvaluated = pConf.getSystemPrompt() == null ? "" :
-                evaluationService.thymeleafEval(variables, pConf.getSystemPrompt());
-        String userPromptEvaluated = evaluationService.thymeleafEval(variables, pConf.getUserPrompt());
+        // Evaluate system and user prompts using Thymeleaf with TemplateEvaluationException handling
+        String systemPromptEvaluated = "";
+        if (pConf.getSystemPrompt() != null) {
+            try {
+                systemPromptEvaluated = evaluationService.thymeleafEval(variables, pConf.getSystemPrompt());
+            } catch (TemplateEvaluationException e) {
+                meterRegistry.counter("prompt.errors", "model", promptKey).increment();
+                logger.error("Template evaluation error for system prompt in {}: {}", promptKey, e.getMessage());
+                throw e;
+            }
+        }
+        String userPromptEvaluated;
+        try {
+            userPromptEvaluated = evaluationService.thymeleafEval(variables, pConf.getUserPrompt());
+        } catch (TemplateEvaluationException e) {
+            meterRegistry.counter("prompt.errors", "model", promptKey).increment();
+            logger.error("Template evaluation error for user prompt in {}: {}", promptKey, e.getMessage());
+            throw e;
+        }
 
         // Build the chat client request with evaluated prompts and options
         ChatClientRequestSpec chatRequest = ChatClient.create(models.get(promptKey))
@@ -131,41 +162,57 @@ public class PromptService {
 
         // Clone prompt configuration and update with evaluated prompts
         String yamlPromptConfig = serialisationService.toYaml(pConf);
-        PromptConfig updatedConfig = serialisationService.fromYaml(
-        		yamlPromptConfig, PromptConfig.class);
+        PromptConfig updatedConfig = serialisationService.fromYaml(yamlPromptConfig, PromptConfig.class);
         updatedConfig.setSystemPrompt(systemPromptEvaluated);
         updatedConfig.setUserPrompt(userPromptEvaluated);
         ret.setPrompt(updatedConfig);
-        logger.info("Resolved prompt config for {} is : {} \n",promptKey,serialisationService.toYaml(updatedConfig));
+        logger.info("Resolved prompt config for {} is : {} \n", promptKey, serialisationService.toYaml(updatedConfig));
 
-        
-        // Execute the request
-        CallResponseSpec genAiResponse = chatRequest.call();
-
-        // Populate the response object
-        ret.setBody(genAiResponse);
-        ret.setRaw(genAiResponse.content());
-
-
-        
-        ret.setDuration(System.currentTimeMillis() - ret.getStart());
-
-        // --- New recording functionality ---
+        // --- Recording Request BEFORE API call ---
         if (genAiConfig.isRecordEnabled() && genAiConfig.getRecordFolder() != null) {
             try {
-                String json = serialisationService.toJson(ret);
                 File recordDir = new File(genAiConfig.getRecordFolder());
                 if (!recordDir.exists()) {
                     recordDir.mkdirs();
                 }
-                File recordFile = new File(recordDir, promptKey + ".json");
-                FileUtils.writeStringToFile(recordFile, json, Charset.defaultCharset());
-                logger.info("Recorded prompt response to file: {}", recordFile.getAbsolutePath());
+                String requestYaml = serialisationService.toYaml(updatedConfig);
+                File requestFile = new File(recordDir, promptKey + "-request.yaml");
+                FileUtils.writeStringToFile(requestFile, requestYaml, Charset.defaultCharset());
+                logger.info("Recorded prompt request to file: {}", requestFile.getAbsolutePath());
             } catch (Exception e) {
-                logger.error("Error recording prompt response for key {}: {}", promptKey, e.getMessage(), e);
+                logger.error("Error recording prompt request for key {}: {}", promptKey, e.getMessage(), e);
             }
         }
-        // ---------------------------------
+        // ------------------------------------------------
+
+        // Execute the API call and record response if successful.
+        CallResponseSpec genAiResponse;
+        try {
+            genAiResponse = chatRequest.call();
+            externalApiHealthy = true; // API call succeeded, mark healthy.
+            // --- Recording Response AFTER API call ---
+            if (genAiConfig.isRecordEnabled() && genAiConfig.getRecordFolder() != null) {
+                try {
+                    File recordDir = new File(genAiConfig.getRecordFolder());
+                    String responseYaml = serialisationService.toYaml(genAiResponse);
+                    File responseFile = new File(recordDir, promptKey + "-response.yaml");
+                    FileUtils.writeStringToFile(responseFile, responseYaml, Charset.defaultCharset());
+                    logger.info("Recorded prompt response to file: {}", responseFile.getAbsolutePath());
+                } catch (Exception e) {
+                    logger.error("Error recording prompt response for key {}: {}", promptKey, e.getMessage(), e);
+                }
+            }
+        } catch (Exception e) {
+            externalApiHealthy = false; // Mark as unhealthy due to API call exception.
+            meterRegistry.counter("prompt.errors", "model", promptKey).increment();
+            logger.error("Error during API call for promptKey {}: {}", promptKey, e.getMessage(), e);
+            throw e;
+        }
+
+        // Populate the response object
+        ret.setBody(genAiResponse);
+        ret.setRaw(genAiResponse.content());
+        ret.setDuration(System.currentTimeMillis() - ret.getStart());
 
         return ret;
     }
@@ -177,13 +224,10 @@ public class PromptService {
      * @param variables The variables to resolve within the prompt templates.
      * @return A {@link PromptResponse} containing the response as a JSON map.
      * @throws ResourceNotFoundException if the prompt configuration is not found.
-     * @throws SerialisationException 
-     * @throws IOException               if an error occurs during prompt processing.
-     * @throws JsonMappingException      if the response mapping fails.
-     * @throws JsonParseException        if the JSON parsing fails.
+     * @throws SerialisationException    if a serialization error occurs.
      */
     public PromptResponse<Map<String, Object>> jsonPrompt(String promptKey, Map<String, Object> variables)
-            throws ResourceNotFoundException, SerialisationException  {
+            throws ResourceNotFoundException, SerialisationException {
 
         PromptResponse<Map<String, Object>> ret = new PromptResponse<>();
         PromptResponse<CallResponseSpec> internal = prompt(promptKey, variables);
@@ -196,9 +240,7 @@ public class PromptService {
         String response = internal.getBody().content().replace("```json", "").replace("```", "");
         ret.setRaw(response);
         try {
-            ret.setBody(serialisationService.fromJsonTypeRef(response,
-                    new TypeReference<Map<String, Object>>() {
-                    }));
+            ret.setBody(serialisationService.fromJsonTypeRef(response, new TypeReference<Map<String, Object>>() {}));
         } catch (Exception e) {
             logger.error("Unable to map to JSON structure: {} \nResponse: {}", e.getMessage(), response);
             throw new IllegalStateException("Response mapping to JSON failed", e);
@@ -300,5 +342,26 @@ public class PromptService {
      */
     protected SerialisationService getSerialisationService() {
         return serialisationService;
+    }
+
+    /**
+     * Health check for the Prompt Service.
+     * <p>
+     * Returns DOWN if either the OpenAI or Perplexity API key is missing,
+     * or if the last external API call resulted in an exception.
+     * </p>
+     *
+     * @return the Health status.
+     */
+    @Override
+    public Health health() {
+        if (genAiConfig.getOpenaiApiKey() == null || genAiConfig.getOpenaiApiKey().isBlank() ||
+            genAiConfig.getPerplexityApiKey() == null || genAiConfig.getPerplexityApiKey().isBlank()) {
+            return Health.down().withDetail("Error", "Missing API keys for external AI services").build();
+        }
+        if (!externalApiHealthy) {
+            return Health.down().withDetail("Error", "Exception encountered during external API call").build();
+        }
+        return Health.up().build();
     }
 }

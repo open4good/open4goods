@@ -122,8 +122,9 @@ public class AppConfig {
 								@Autowired @Qualifier("openAiCustomApi") OpenAiApi openAiCustomApi,
 								@Autowired  EvaluationService spelEvaluationService, 
 								@Autowired  SerialisationService serialisationService,
-								@Autowired PromptServiceConfig genAiConfig) {
-		return new PromptService(genAiConfig, perplexityApi, openAiCustomApi, serialisationService, spelEvaluationService);
+								@Autowired PromptServiceConfig genAiConfig,
+								@Autowired MeterRegistry meterRegistry) {
+		return new PromptService(genAiConfig, perplexityApi, openAiCustomApi, serialisationService, spelEvaluationService, meterRegistry);
 	}
 
 	
