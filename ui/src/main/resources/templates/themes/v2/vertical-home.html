@@ -29,271 +29,447 @@
 
     <link rel="stylesheet" type="text/css" href="/webjars/datatables/css/dataTables.bootstrap5.min.css">
     
-    <style>
-    tbody, td, tfoot, th, thead, tr {
-         border-style: none;
-    }   
-    
-    
-    /* Force the table to stretch full width in list view */
-        #tableProducts {
-            table-layout: auto !important; /* Instead of fixed */
-            width: 100% !important;
-        }
-
-        /* Ensure the single-colspan cell (list view) takes all horizontal space */
-        #tableProducts td[colspan] {
-            width: 100% !important;
-            display: table-cell; /* force it back to a normal table cell */
-        }
-
-        /* Remove border in "card mode" */
-        .table-bordered.card {
-            border: 0 !important;
-        }
-
-        /* Hide thead in card mode (since we prepend column labels) */
-        .card thead {
-            display: none;
-        }
-
-        /* Each <tr> in card view floats and has a fixed width (typical “card deck” style) */
-        .cardTr {
-            float: left;
-            width: 20em; /* adjust to your liking, or use 100% for single-column cards */
-            margin: 0.5em;
-            border: 1px solid #bfbfbf;
-            border-radius: 0.5em;
-            background-color: transparent !important;
-            box-shadow: 0.25rem 0.25rem 0.5rem rgba(0, 0, 0, 0.25);
-        }
-
-
-        /* Turn each cell into a block when in card mode */
-        .cardTd {
-            display: block;
-            border: 0;
-        }
-    
-    </style>
-    
 </head>
 
-<body>
+<body class="page-vertical">
+    <th:block th:insert="~{inc/navbar/navbar-home.html}"></th:block>
     
-    <header>
-        <!--/* Loader */-->
+    <main class="bg-gray-200">
+        <!-- Loader -->
         <th:block th:insert="~{inc/preloader.html}"></th:block>
-        <!--/* Navbar */-->
-        <th:block th:insert="~{inc/navbar/navbar-home.html}"></th:block>
-    </header>
-    
-    <main>  
-  
 
+        <section class="section-header pb-0">
+            <div class="row">
+                <th:block th:insert="~{inc/wip.html}"></th:block>
+            </div>
 
-		<div class="section section-lg mb-6">
             <div class="container container-semi-fluid">
-
                 <!--/* Hero */-->                       
                 <div class="row mb-2">                          
-                    <div class="card shadow">
-                        <div class=" align-items-center">
-                            
-                                <div class="d-flex flex-wrap align-items-center row">
-                                    <div class="col-lg-2 text-center">
-                                            <img class="mt-2" th:src="'/images/verticals/' + ${vertical} + '.webp'">
-                                    </div>
-                                    
-                                    <div th:unless="${subset}" class="col-lg-10">
-                                            <h1 class="mt-2 text-center" th:text="${verticalConfig.i18n(siteLanguage).verticalHomeTitle}"></h1>
-                                            <!--  Breadcrumb -->
-                                            <th:block 
-                                                    th:with="vConf = ${verticaConfig}", 
-                                                    th:insert="~{inc/breadcrumb-vertical.html}">
-                                            </th:block>                                                
-                                            <p class="row p-2 mb-4" th:text="${verticalConfig.i18n(siteLanguage).verticalHomeDescription}"> </p>
-							     	</div>
-                                    
-                                    
-                                    <div th:if="${subset}" class="col-lg-10">
-                                            <h1 class="mt-2 text-center"   th:text="${subset.title.i18n(siteLanguage)}"></h1>
-                                            <th:block 
-                                                    th:with="vConf = ${verticaConfig}, pageLabel=${subset.caption.i18n(siteLanguage)}", 
-                                                    th:insert="~{inc/breadcrumb-vertical.html}">
-                                            </th:block> 
-                                             <p class="row p-2 mb-4" th:utext="${subset.description.i18n(siteLanguage)}"> </p>     
-                                    </div>
-                                    
-                                  
-                                    
-                                    
-                                     
-                                </div>
+                    <div class="d-flex align-items-center">
+                        <div class="d-flex flex-wrap align-items-center row">
+                            <!--div class="col-lg-2 text-center">
+                                    <img class="mt-2" width="150" th:src="'/images/verticals/' + ${vertical} + '.jpg'">
+                            </div-->
+                            <div class="col-lg-10">
+                                <h2 class="h4 mb-0 text-center" th:text="${verticalConfig.i18n(siteLanguage).verticalHomeTitle}"></h2>
+                                <p class="row p-2 mb-4" th:text="${verticalConfig.i18n(siteLanguage).verticalHomeDescription}"> </p>            
+                            </div> 
                         </div>
                     </div>
                 </div>
-                        
-   
-                <div class="row ">
-                
-                    <!--/* Left column */-->                    
-                    <div th:unless="${subset}" class="col-lg-3 mb-3 mb-lg-0">
-                    
-                    
-                    
-                        <!--/* Calcul impact score */--> 
-                        <div class="row card shadow mb-2">
-                            <div class="card-body">
-                                Nudger a développé un score d'impact écologique spécifique pour les <th:block th:text="${verticalConfig.i18n(siteLanguage).verticalHomeTitle.toLowerCase()}"></th:block>.
-                               <div class="mt-2 text-center">
-	                                <a class="btn btn-primary btn-sm m-2"  th:href="'/' + ${verticalPath} + '/ecoscore'">
-	                                    Impact Score <th:block th:text="${verticalConfig.i18n(siteLanguage).verticalHomeTitle.toLowerCase()}"></th:block>
-	                                </a>
-                               </div>                                
+            </div>
+        </section>
+        <div class="container-fluid">       
+            <div class="row mb-5">
+                <!--/* Left column */-->                    
+                <div class="col-lg-3">
+                    <!--/* Guides */--> 
+                    <aside class="card border-gray-300 bg-transparent p-2 mb-4" th:if="${verticalConfig.i18n(siteLanguage).getWikiPages().size() > 0}">
+                        <div class="card-header bg-transparent border-0 text-center d-flex flex-row flex-lg-column align-items-center justify-content-center px-1 px-lg-4">
+                            <span class="h5 my-0 my-lg-3 me-3 me-lg-0">Les guides</span>
+                        </div>
+                        <div class="card-body p-2 d-none d-lg-block">
+                            <div class="list-group dashboard-menu list-group-sm">
+                                <a 
+                                    class="d-flex list-group-item border-0 list-group-item-action" 
+                                    th:href="'/' + ${verticalPath} + '/'+ ${item.verticalUrl}" 
+                                    th:each="item : ${verticalConfig.i18n(siteLanguage).getWikiPages()}">
+                                    <span th:text="${item.title}"></span>
+                                    <span class="icon icon-xs ms-auto">
+                                        <span class="fas fa-chevron-right"></span>
+                                    </span>
+                                </a>                                
                             </div>
                         </div>
-
-                        <!--/* Acces rapide */--> 
-                        <div class="row card shadow mb-2">
-                            <div class="card-header"><h2 class="h5">Vous cherchez :</h2></div>
-                            <div class="card-body">
-                             
-                             <th:block th:each="subsetGroup : ${verticalConfig.getSubsetGroups()}">
-                             
-                                <span th:text="#{'subset.'+${subsetGroup.key}+'.panelTitle'}"></span>
-                                
-                                <ul>
-	                                <li th:each="subset : ${subsetGroup.value}">
-	                                    <a th:href="'/'+${verticalPath} +'/' + ${subset.url.i18n(siteLanguage)}" th:text="${subset.caption.i18n(siteLanguage)}"></a>
-	                                </li>
-                                </ul>
-                             
-                             </th:block>
-                             
+                    </aside>   
+                    
+                    <!--/* Blog posts */--> 
+                    <aside class="card border-gray-300 bg-transparent p-2 mb-4" th:if="${posts.size()>0}">
+                        <div class="card-header bg-transparent border-0 text-center d-flex flex-row flex-lg-column align-items-center justify-content-center px-1 px-lg-4">
+                            <span class="h5 my-0 my-lg-3 me-3 me-lg-0">On en parle dans le blog</span>
+                        </div>
+                        <div class="card-body p-2">
+                            <div class="list-group dashboard-menu list-group-sm">
+                                <a
+                                    class="d-flex list-group-item border-0 list-group-item-action" 
+                                    th:each="post : ${posts}"
+                                    th:href="'/blog/'+${post.url}">                                     
+                                    <span th:text="${post.title}"></span>
+                                    <span class="icon icon-xs ms-auto">
+                                        <span class="fas fa-chevron-right"></span>
+                                    </span>
+                                </a>
                             </div>
                         </div>
-                        
-
-                            
-                        <!--/* Guides */--> 
-                        <div th:if="${verticalConfig.i18n(siteLanguage).getWikiPages().size() > 0}" class="row card shadow mb-2">
-                            <div class="card-header"><h2 class="h5">Les guides</h2></div>
-                            <div class="card-body">
-                                <ul class="list-group list-group-flush price-list">
-                                    <li th:each="item : ${verticalConfig.i18n(siteLanguage).getWikiPages()}" class="list-group-item border-0">
-                                        <span class="fas" th:classappend="${item.faIcon}" ></span>
-                                        <a th:href="'/' + ${verticalPath} + '/'+ ${item.verticalUrl}" th:text="${item.title}"></a> 
-                                    </li>                               
-                                </ul>
-                            </div>
-                        </div>   
-                        
-
-                        <!--/* Blog posts */--> 
-                        <div th:if="${posts.size()>0}" class="row card shadow mb-2">
-                            <div class="card-header"><h2 class="h5">On en parle dans le blog</h2></div>
-                            <div class="card-body">
-                                <ul class="list-group list-group-flush price-list">
-                                    <li th:each="post : ${posts}" class="list-group-item border-0">                                     
-                                        <a th:href="'/blog/'+${post.url}" th:text="${post.title}"></a> 
-                                    </li>
-                                </ul>
-                            </div>
-                        </div>   
-                                                                    
-                    </div>
-
-                    <!--/* Right column */-->
-                    <div th:class="${subset} ? 'col-lg-12' : 'col-lg-9'">
-                        <div class="row card shadow">
-							<th:block th:insert="~{inc/vertical-table.html}"></th:block>
+                    </aside>   
+                    
+                    <!--/* Price Filters */-->                          
+                    <aside class="card border-gray-300 bg-transparent p-2 mb-4">
+                        <div class="card-header bg-transparent border-0 text-center d-flex flex-row flex-lg-column align-items-center justify-content-center px-1 px-lg-4">
+                            <span class="h5 my-0 my-lg-3 me-3 me-lg-0">Prix</span>
                         </div>
+                        <div class="card-body p-2">
+                            <th:block th:insert="~{inc/vertical-filters-price.html}"></th:block>
+                        </div>
+                    </aside>
+                                        
+                    <!--/* Ecological Filters */--> 
+                    <aside class="card border-gray-300 bg-transparent p-2 mb-4">
+                        <div class="card-header bg-transparent border-0 text-center d-flex flex-row flex-lg-column align-items-center justify-content-center px-1 px-lg-4">
+                            <span class="h5 my-0 my-lg-3 me-3 me-lg-0">Eco-Filtres</span>
+                        </div>
+                        <div class="card-body p-2">
+                            <th:block th:insert="~{inc/vertical-filters-eco.html}"></th:block>
+                        </div>
+                    </aside>
 
-                    </div>
+                    <!--/* Technical Filters */-->                          
+                    <div class="row card shadow mb-2">
+                        <div class="card-header"><h2 class="h5">Caractéristiques</h2></div>
+                        <div class="card-body">
+                            <th:block th:insert="~{inc/vertical-filters-technical.html}"></th:block>
+                        </div>
+                    </div>                          
+                </div>
+
+                <!--/* Right column */-->
+                <div class="col-lg-9">
+                    <!--div class="card border-gray-300 bg-transparent p-2 mb-4">
+                        <div class="card-body p-2"-->
+                            <th:block th:insert="~{inc/vertical-table.html}"></th:block>
+                        <!--/div>
+                    </div-->
                 </div>
             </div>
         </div>
     </main>
 
-
-
-
-
-        <!-- Attributes filters modal -->
-        <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-            <div class="modal-dialog modal-xxl">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="exampleModalLabel">Filtres de recherche</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body">
-                    <div class="row">
-						<!--/* Price Filters */-->
-						<div class="col-lg-4">
-							<div class="card shadow mb-2">
-								<div class="card-header">
-									<h2 class="h5">Prix</h2>
-								</div>
-								<div class="">
-									<th:block th:insert="~{inc/vertical-filters-price.html}"></th:block>
-
-								</div>
-							</div>
-						</div>
-
-						<!--/* Ecological Filters */-->
-						<div class="col-lg-4">
-							<div class="card shadow mb-2 border-success text-secondary">
-								<div class="card-header">
-									<h2 class="h5">Eco-Filtres</h2>
-								</div>
-								<div class="">
-									<th:block th:insert="~{inc/vertical-filters-eco.html}"></th:block>
-								</div>
-							</div>
-						</div>
-                    
-	                        <!--/* Technical Filters */-->                          
-                        <div class="col-lg-4">
-	                        <div class="card shadow mb-2">
-	                            <div class="card-header"><h2 class="h5">Caractéristiques</h2></div>
-	                            <div class="">
-	                                <th:block th:insert="~{inc/vertical-filters-technical.html}"></th:block>
-	                            </div>
-	                        </div>                        
-                        </div>
-                    
-                    
-                    </div>
-                    
-                             
-                                        
-
-
-
-                        
-                        
-
-                        
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-
     <!--/* Footer */-->
     <th:block th:insert="~{inc/footer.html}"></th:block>    
 
-    <!-- Specific vertical rendering scripts -->
-    <th:block th:insert="~{inc/vertical-script.html}"></th:block>    
+<!-- Core -->
+<script src="/vendor/@popperjs/core/dist/umd/popper.min.js"></script>
+<script src="/webjars/bootstrap/js/bootstrap.min.js"></script>
+<script src="/vendor/headroom.js/dist/headroom.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<!-- Vendor JS -->
+
+<script src="/vendor/smooth-scroll/dist/smooth-scroll.polyfills.min.js"></script>
+<script src="/vendor/vivus/dist/vivus.min.js"></script>
+<script src="/webjars/jquery/jquery.min.js"></script>
+<script src="/vendor/@popperjs/core/dist/umd/popper.min.js"></script>
+
+<script type="text/javascript" language="javascript" src="/webjars/datatables/js/dataTables.min.js"></script>
+<script type="text/javascript" language="javascript" src="/webjars/datatables/js/dataTables.bootstrap5.min.js"></script>
+
+<script src="/vendor/nouislider/distribute/nouislider.min.js"></script>
+
+<!-- pixel JS -->
+<script src="../../assets/js/pixel.js"></script>
+
+<!-- custom sources -->
+<script src="../../assets/js/pixel-custom.js"></script>
+
+<script src="/webjars/mustache/mustache.min.js"></script>
 
 
 
+<!-- Ajax loaded table template -->
+<div id="tpl_place" class="hidden"></div>
+
+<!-- Setting up variables -->
+<script th:inline="javascript">
+    /*<![CDATA[*/
+    
+        const vertical = /*[[${verticalConfig.id}]]*/ '';
+    
+        const siteLanguage = /*[[${siteLanguage}]]*/'';
+        const baseUrl = /*[[${baseUrl}]]*/'';
+        const verticalPath = /*[[${verticalPath}]]*/'';
+        const additionalAttributes = /*[[${filters}]]*/'';
+        const tpl = /*[[${tpl}]]*/'';
+        const chartIntervals = /*[[${products.numericFilters}]]*/'';
+                        
+    /*]]>*/
+</script>
+
+<script>
+
+   var dummyRender = function(cell, type, data) {return  "" ;}
+   
+   function description (data) {
+    
+    if (data.genaiTexts == null) {
+        return "";
+    }
+    
+    // TODO : I18n
+    // TODO : Ugly, ugly....
+    if (data.genaiTexts['fr'] == null) {
+        return "";
+    }
+    
+
+    if (data.genaiTexts['fr'].descriptions['ecological-description'] != null) {
+        ret = data.genaiTexts['fr'].descriptions['ecological-description'].content;
+        
+        if (ret == null) {
+           return "";
+        }
+        
+        if (ret.length > 200) {
+            return ret.slice(0, 200) + "...";
+        } else {
+            return ret;
+        }
+    } 
+    
+    return "";
+   }
+   
+   
+   var columns = [
+       { 
+        "data": "attributes.referentielAttributes.MODEL", 
+        "name" : "Modèle",
+        "title" : "Modèle",
+        render: function(cell, type, data) {
+                var template = $('#template-product-search').html();
+                Mustache.parse(template);
+
+                return Mustache.render(template, {
+                    data : data,
+                    vertical: vertical,
+                    // TODO : I18n
+                    productUrl : baseUrl+verticalPath+'/'+data.names.url['fr'],
+                    ecoscore: data.scores?.ECOSCORE?.value != null ? Math.round((data.scores.ECOSCORE.value + Number.EPSILON) * 100) / 100 : "",
+                    compensation: data.price?.minPrice?.compensation != null ? Math.round((data.price.minPrice.compensation + Number.EPSILON) * 100) / 100 : null,                      
+                    
+// TODO : Default as a hack until full i18n is implemented
+                    desc:   description(data),
+                    imageUrl : (data.coverImagePath),                               
+                    name : (data.attributes.referentielAttributes.MODEL == null ? data.names.name : data.attributes.referentielAttributes.MODEL)
+                });                 
+        }
+       },
+       
+       { 
+        "data": "attributes.referentielAttributes.BRAND", 
+        "name" : "Marque",
+        "title" : "Marque",
+        render: function(cell, type, data) {
+               return  "" ;
+           }
+       },
+       { "data": "scores.ECOSCORE.value", "name" : "Ecoscore", "title" : "Ecoscore", defaultContent:""  },
+       { "data": "price.minPrice.price", "name" : "Prix", "title" : "Prix"  },
+       { "data": "offersCount", "name" : "Concurrence", "title" : "Concurrence"  }
+           ];
+
+    /* Adding additional attributes columns with hidden titles
+       for (var i = 0; i < additionalAttributes.length; i++) {
+           columns.push({
+               data: "attributes.indexed." + additionalAttributes[i]['key'] + ".value",
+               name: additionalAttributes[i]['name'][siteLanguage],
+               title: "", // Set an empty title to hide the header text
+               render: dummyRender
+           });
+       }
+        **/
+    <!-- Datatable init function -->
+    var table;
+    
+    function initDatatable () {
+        
+        return $('#tableProducts').DataTable({
+            
+            order: [ [2, 'desc'] ],
+            searching: false,
+            "bLengthChange": false,  
+            "processing": true,
+            "serverSide": true,
+            "orderMulti": false,
+            "pageLength": 5,
+            "ajax": {
+                "url": "/"+verticalPath+"/paginated",
+                "dataSrc": "data",
+                "data": function ( data ) {
+                    // Adding slider rangers attributes
+                    var sliderParameters = new Array();
+                    $('.input-slider-range-container').each (function (e) {
+                        sliderParameters.push( $(this).attr("id") + ":" + $(this).attr('data-range-value-min') + ":" + $(this).attr('data-range-value-max')+":"+$('[id="include-undefined-'+$(this).attr("id") + '"]').is(':checked') + ":" + $(this).attr('data-chart-interval'));                     
+                        } 
+                    );                  
+                    data.sliders=sliderParameters;
+                    
+                    // Adding checkboxes attributes
+                    var checkboxesParameters = new Array();
+                    $('input.changeableBox:checked').each (function (e) {
+                            val = $(this).attr("data-id")+":"+$(this).attr("data-value");
+                            checkboxesParameters.push( val);                                                
+                        } 
+                    );                      
+                    
+                    data.checkboxes=checkboxesParameters;
+
+                    return data;
+             }},
+             
+             createdRow: function(row, data, dataIndex){
+                     // Add COLSPAN attribute
+                     $('td:eq(0)', row).attr('colspan', 9);                  
+                     for ( i = 1; i < 5 ; i++) {                        
+                        $('td:eq('+i+')', row).css('display', 'none');
+                     }
+             },
+             
+            "columns": columns 
+        });
+    };
+
+    // On document Load
+    $(document).ready(function() {
+        
+        // Loading templates 
+        $.ajax({
+            url : '/tpl_table'+tpl+'.html',
+            dataType : 'html',
+            cache : true, // otherwise will get fresh copy every page load
+            success : function(e) {
+                // script loaded, do stuff!
+                $("#tpl_place").html(e);
+
+                // Init table           
+                table = initDatatable();
+            }
+        });
+                
+        // Range sliders listener
+        var slidersCounter = $('.input-slider-range-container').length;
+        $('.input-slider-range-container').on('change', function(e) {
+                        
+            // this change function is called on page load (component js init)
+            // This counter ensure the datatble is not drawn on page load
+            if (slidersCounter <= 0) {              
+                table.draw();               
+            } else {
+                slidersCounter--;
+            }
+            
+        });
+
+        // Checkboxes listener
+        $('input:checkbox').click(function() { 
+            table.draw();                           
+        });
+        
+        
+        
+        // Show more feature, on checkboxes filters
+        
+        $('.show-more-link').on('click', function() {
+            let hiddenItems = $(this).siblings('.hidden-item').filter(function() {
+              return $(this).css('display') === 'none';
+            });
+
+            
+            hiddenCount = hiddenItems.length;
+            
+            hiddenItems.slice(0, 5).slideDown();
+
+            // Removing show more links if no more..
+            if (hiddenCount <= 5) {
+              $(this).hide();
+            }
+
+          });
+        
+        
+        
+        // Init the chart.js intervals charts, on numeric attributes
+        
+     // Iterate over the keys in chartIntervals and call processInterval for each
+        Object.keys(chartIntervals).forEach((key) => {
+            createChartInterval(key, chartIntervals[key], vertical);
+        });
+        
+        
+        
+    } );
+</script>
+
+<script>
+function createChartInterval(chartId, intervalDatas, verticalName) {
+    ///////////////////////
+    // Chart.js interval charts initialization
+    //////////////////////
+    const ctx = document.getElementById('chart-' + chartId).getContext('2d');
+    const priceData = intervalDatas.priceBuckets;
+
+    const labels = priceData.map(bucket => {
+        const parsedName = parseFloat(bucket.name);
+        return Number.isInteger(parsedName) ? parsedName : parsedName.toFixed(1);
+    }); // X-axis labels
+
+    const data = priceData.map(bucket => {
+        const parsedCount = parseFloat(bucket.count);
+        return Number.isInteger(parsedCount) ? parsedCount : parsedCount.toFixed(1);
+    }); // Y-axis data
+    
+    return new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [{
+                data: data,
+                borderWidth: 0
+            }]
+        },
+        options: {
+            plugins: {
+                legend: {
+                    display: false // Hide legend for the dataset
+                },
+                title: {
+                    display: false // Hide chart title
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return verticalName + ": " + parseInt(context.raw); // Custom tooltip text
+                        }
+                    }
+                }
+            },
+            scales: {
+                x: {
+                    title: {
+                        display: false // Hide X-axis title
+                    },
+                    grid: {
+                        display: false, // Disable vertical grid lines
+                        drawTicks: false, // Disable ticks on X-axis
+                        drawBorder: false // Disable border on X-axis
+                    }
+                },
+                y: {
+                    display: false, // Hide Y-axis completely
+                    grid: {
+                        display: false // Optionally hide horizontal grid lines
+                    }
+                }
+            },
+            barPercentage: 1.0, // Make bars occupy full width of the category
+            categoryPercentage: 1.0 // Remove spacing between categories
+        }
+    });
+}
+
+
+
+    
+</script>
 
 
 
