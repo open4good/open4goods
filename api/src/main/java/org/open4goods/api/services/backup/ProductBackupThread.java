@@ -15,8 +15,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.zip.GZIPOutputStream;
 
 import org.apache.commons.io.IOUtils;
-import org.open4goods.commons.model.product.Product;
-import org.open4goods.commons.services.SerialisationService;
+import org.open4goods.model.product.Product;
+import org.open4goods.services.serialisation.service.SerialisationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -84,11 +84,11 @@ public class ProductBackupThread implements Runnable {
                 	logger.info("Handling done for this thread");
                 	break;
                 } else {
-                    String json = serialisationService.toJson(product);
                     try {
+                    	String json = serialisationService.toJson(product);
 						writer.write(json);
 						writer.newLine(); // Ensure each JSON object is on a new line
-					} catch (IOException e) {
+					} catch (Exception e) {
 						   logger.error("Serialiation exception", e);
 					}
                 }

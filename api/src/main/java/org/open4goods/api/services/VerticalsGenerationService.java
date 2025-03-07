@@ -6,20 +6,14 @@ import java.nio.charset.Charset;
 import java.text.DateFormat;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Locale.Category;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.NumberUtils;
@@ -28,28 +22,27 @@ import org.open4goods.api.config.yml.VerticalsGenerationConfig;
 import org.open4goods.api.model.AttributesStats;
 import org.open4goods.api.model.VerticalAttributesStats;
 import org.open4goods.api.model.VerticalCategoryMapping;
-import org.open4goods.commons.config.yml.ImpactScoreConfig;
-import org.open4goods.commons.config.yml.ui.GenAiConfig;
-import org.open4goods.commons.config.yml.ui.VerticalConfig;
 import org.open4goods.commons.dao.ProductRepository;
-import org.open4goods.commons.exceptions.ResourceNotFoundException;
-import org.open4goods.commons.helper.IdHelper;
-import org.open4goods.commons.model.product.Product;
-import org.open4goods.commons.services.EvaluationService;
 import org.open4goods.commons.services.GoogleTaxonomyService;
 import org.open4goods.commons.services.IcecatService;
-import org.open4goods.commons.services.SerialisationService;
 import org.open4goods.commons.services.VerticalsConfigService;
-import org.open4goods.commons.services.ai.PromptResponse;
-import org.open4goods.commons.services.ai.GenAiService;
 import org.open4goods.commons.services.ai.LegacyAiService;
+import org.open4goods.model.exceptions.ResourceNotFoundException;
+import org.open4goods.model.helper.IdHelper;
+import org.open4goods.model.product.Product;
+import org.open4goods.model.vertical.ImpactScoreConfig;
+import org.open4goods.model.vertical.VerticalConfig;
+import org.open4goods.services.evaluation.service.EvaluationService;
+import org.open4goods.services.prompt.dto.PromptResponse;
+import org.open4goods.services.prompt.service.PromptService;
+import org.open4goods.services.serialisation.exception.SerialisationException;
+import org.open4goods.services.serialisation.service.SerialisationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.ResourcePatternResolver;
 
 import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonMappingException;
 
 public class VerticalsGenerationService {
@@ -68,9 +61,9 @@ public class VerticalsGenerationService {
 	private LegacyAiService aiService;
 	private GoogleTaxonomyService googleTaxonomyService;
 	private EvaluationService evalService;
-	private GenAiService genAiService;
+	private PromptService genAiService;
 	
-	public VerticalsGenerationService(VerticalsGenerationConfig config, ProductRepository repository, SerialisationService serialisationService, LegacyAiService aiService, GoogleTaxonomyService googleTaxonomyService, VerticalsConfigService verticalsConfigService, ResourcePatternResolver resourceResolver, EvaluationService evaluationService, IcecatService icecatService, GenAiService genAiService ) {
+	public VerticalsGenerationService(VerticalsGenerationConfig config, ProductRepository repository, SerialisationService serialisationService, LegacyAiService aiService, GoogleTaxonomyService googleTaxonomyService, VerticalsConfigService verticalsConfigService, ResourcePatternResolver resourceResolver, EvaluationService evaluationService, IcecatService icecatService, PromptService genAiService ) {
 		super();
 		this.config = config;
 		this.repository = repository;
@@ -377,7 +370,12 @@ public class VerticalsGenerationService {
 		
 		Map<String,Object> retMAp = new HashMap<String, Object>();
 		retMAp.put("matchingCategories", matchingCategories);
-		String ret = serialisationService.toYaml(retMAp);
+		String ret = "";
+		try {
+			ret = serialisationService.toYaml(retMAp);
+		} catch (SerialisationException e) {
+			LOGGER.error("Serialisation exception",e);
+		}
 		ret = ret.replaceFirst("---", "");
 		return ret.toString();
 	}
@@ -658,18 +656,9 @@ public class VerticalsGenerationService {
 			ret = serialisationService.toYaml(map).replace("---", "");
 			
 			
-		} catch (ResourceNotFoundException e) {
+		} catch (Exception e) {
 			LOGGER.error("Ecoscore Generation failed for {} ",vConf, e);
-		} catch (JsonParseException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (JsonMappingException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		} 
 		
 		return ret;
 		

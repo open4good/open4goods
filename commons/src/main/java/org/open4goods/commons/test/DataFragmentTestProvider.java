@@ -2,7 +2,7 @@ package org.open4goods.commons.test;
 
 import java.util.UUID;
 
-import org.open4goods.commons.model.data.DataFragment;
+import org.open4goods.model.datafragment.DataFragment;
 
 public class DataFragmentTestProvider {
 

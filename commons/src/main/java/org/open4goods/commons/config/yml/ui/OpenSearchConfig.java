@@ -1,6 +1,6 @@
 package org.open4goods.commons.config.yml.ui;
 
-import org.open4goods.commons.model.Localisable;
+import org.open4goods.model.Localisable;
 
 /**
  * Documentation on opensearch here : https://developer.mozilla.org/en-US/docs/Web/OpenSearch

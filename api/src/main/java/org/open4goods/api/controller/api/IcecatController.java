@@ -3,11 +3,11 @@ package org.open4goods.api.controller.api;
 
 import java.util.Map;
 
-import org.open4goods.commons.config.yml.ui.VerticalConfig;
 import org.open4goods.commons.model.constants.RolesConstants;
-import org.open4goods.commons.model.icecat.IcecatFeature;
 import org.open4goods.commons.services.IcecatService;
 import org.open4goods.commons.services.VerticalsConfigService;
+import org.open4goods.model.icecat.IcecatFeature;
+import org.open4goods.model.vertical.VerticalConfig;
 import org.springframework.context.annotation.Profile;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;

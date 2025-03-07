@@ -1,0 +1,14 @@
+urlfetcher:
+  domains:
+    "localhost":
+      userAgent: "TestAgent/1.0"
+      strategy: "SELENIUM"
+      customHeaders:
+        Accept: "application/json"
+      timeout: 5000
+      retryPolicy:
+        maxRetries: 1
+        delayBetweenRetries: 500
+  mock:
+    enabled: true
+    destination-folder: "src/test/resources/urlfetching/mocks"

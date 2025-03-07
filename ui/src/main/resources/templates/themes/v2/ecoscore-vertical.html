@@ -31,14 +31,14 @@
 <body>
     
 
-	<!--/* Navbar */-->
-	<th:block th:with="page = 'ecoscore'" th:insert="~{inc/navbar/navbar-home.html}"></th:block>
-	
-    <main>
+    <header>
         <!--/* Loader */-->
         <th:block th:insert="~{inc/preloader.html}"></th:block>
-
-        <!-- Hero -->
+        <!--/* Navbar */-->
+        <th:block th:insert="~{inc/navbar/navbar-home.html}"></th:block>
+    </header>  
+    
+    <main>
 
 	<div class="section section-header pb-7 pb-md-10 bg-primary overflow-hidden">
             <div class="container z-2">
@@ -46,7 +46,16 @@
                     <div class="col-12 col-md-10">
                         <div class="mb-3">
                             <h1 class="display-3 font-size-md-down-5 fw-light mb-0">Impact-Score <span class="fw-bold" th:text="${verticalConfig.i18n(siteLanguage).verticalHomeTitle}"></span></h1>
-                        </div>
+
+							<!--  Breadcrumb 
+							TODO : I18n
+							-->
+							<th:block th:with="vConf = ${verticaConfig}, pageLabel='Impact Score'"  
+                                     th:insert="~{inc/breadcrumb-vertical.html}">
+							</th:block>
+
+
+						</div>
                         
                         <p class="my-4 px-0 px-lg-7 lead" th:with="path='pages/impactscore-vertical-jumbotron'">
                             <th:block th:insert="~{inc/wiki.html}"></th:block>
@@ -364,26 +373,7 @@
 	<!--/* Footer */-->
 	<th:block th:insert="inc/footer.html"></th:block>	
 
-    <!-- Core -->
-<script src="/vendor/@popperjs/core/dist/umd/popper.min.js"></script>
-<script src="/webjars/bootstrap/js/bootstrap.min.js"></script>
-<script src="/vendor/headroom.js/dist/headroom.min.js"></script>
-
-<!-- Vendor JS -->
-<script src="/vendor/onscreen/dist/on-screen.umd.min.js"></script>
-<script src="/vendor/nouislider/distribute/nouislider.min.js"></script>
-<script src="/vendor/jarallax/dist/jarallax.min.js"></script>
-<script src="/vendor/smooth-scroll/dist/smooth-scroll.polyfills.min.js"></script>
-<script src="/vendor/vivus/dist/vivus.min.js"></script>
-<script src="/vendor/@glidejs/glide/dist/glide.min.js"></script>
-
-<script src="/webjars/jquery/jquery.min.js"></script>
-
-<!-- pixel JS -->
-<script src="../../assets/js/pixel.js"></script>
-<!-- custom sources -->
-<script src="../../assets/js/pixel-custom.js"></script>
-
+  
 </body>
 
 </html>

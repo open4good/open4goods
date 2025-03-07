@@ -26,10 +26,23 @@
             <artifactId>spring-boot-starter-cache</artifactId>
         </dependency>
 
+
+        <dependency>
+            <groupId>org.sejda.imageio</groupId>
+            <artifactId>webp-imageio</artifactId>
+            <version>0.1.6</version>
+        </dependency>
+
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-devtools</artifactId>
             <optional>true</optional>
+        </dependency>
+
+        <dependency>
+            <groupId>com.github.crawler-commons</groupId>
+            <artifactId>crawler-commons</artifactId>
+            <version>1.4</version>
         </dependency>
 
         <dependency>
@@ -57,7 +70,7 @@
         <dependency>
             <groupId>de.codecentric</groupId>
             <artifactId>spring-boot-admin-starter-client</artifactId>
-            <version>3.4.1</version>
+            <version>3.4.4</version>
         </dependency>
 
         <dependency>
@@ -74,7 +87,7 @@
         <dependency>
             <groupId>com.opencsv</groupId>
             <artifactId>opencsv</artifactId>
-            <version>5.9</version>
+            <version>5.10</version>
         </dependency>
         <dependency>
             <groupId>com.google.apis</groupId>
@@ -94,6 +107,13 @@
             <artifactId>verticals</artifactId>
             <version>${global.version}</version>
         </dependency>
+
+        <dependency>
+            <groupId>org.open4goods</groupId>
+            <artifactId>reviewgeneration</artifactId>
+            <version>${global.version}</version>
+        </dependency>
+
 
         <!-- Commons  -->
         <dependency>
@@ -218,7 +238,7 @@
     <build>
         <plugins>
 
-            <!-- Plugin for running npm and gulp -->
+            <!-- Plugin for running npm and gulp 
             <plugin>
                 <groupId>com.github.eirslett</groupId>
                 <artifactId>frontend-maven-plugin</artifactId>
@@ -226,7 +246,6 @@
                 
                 <executions>
                   
-                    <!-- Install npm packages -->
                     <execution>
                         <id>install-node-and-npm</id>
                         <goals>
@@ -237,7 +256,6 @@
                             <npmVersion>8.19.2</npmVersion>
                         </configuration>
                     </execution>
-                    <!-- Run npm install -->
                     <execution>
                         <id>npm-install</id>
                         <goals>
@@ -247,7 +265,6 @@
                             <arguments>install</arguments>
                         </configuration>
                     </execution>
-                    <!-- Run gulp sass task on Maven build -->
                     <execution>
                         <id>gulp-build-css</id>
                         <goals>
@@ -259,6 +276,7 @@
                     </execution>
                 </executions>
             </plugin>
+            -->
 
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>

@@ -30,29 +30,21 @@
     <link rel="stylesheet" type="text/css" href="/webjars/datatables/css/dataTables.bootstrap5.min.css">
     <link rel="stylesheet" type="text/css" href="/webjars/datatables-responsive/css/responsive.dataTables.min.css">
 
-    <!-- Conditional CSS for highlight.js if user is authenticated -->
-    <link th:if="${user}" rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/11.10.0/styles/default.min.css">
-
     <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/select/1.7.0/css/select.dataTables.min.css">
     <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/buttons/2.4.2/css/buttons.dataTables.min.css">
-    <link href="/vendor/lightgallery/dist/css/lightgallery-bundle.min.css" rel="stylesheet">
 
-    <!--style>
-        .carousel-control-prev-icon::before {
-            content: '\f060';
-            font-family: "Font Awesome 5 Free";
-            font-size: 5rem;
-            color: gray;
-            font-weight: 900;
-        }
+    <style>
+    
+    
+    
+	    .source-span {
+		    font-size: 0.8rem; /* Reduce font size */
+		    vertical-align: super; /* Align to superscript */
+		    color: #6c757d; /* Optional: Use a Bootstrap light gray for text color */
+		    text-decoration: none; /* Remove underline for cleaner appearance */
+		}
 
-        .carousel-control-next-icon:before {
-            font-family: "Font Awesome 5 Free";
-            content: "\f061";
-            font-size: 5rem;
-            color: gray;
-            font-weight: 900;
-        }
+
 
         /* Style for selected row in DataTables */
         table.dataTable tbody tr.selected {
@@ -73,49 +65,56 @@
         .btn {
             transition: none !important;
         }
-    </style-->
+        
+        
+        #pills-tab {
+		    position: sticky;
+		    top: 0;
+		    z-index: 1020; /* Ensures it appears above other elements */
+		    background-color: white; /* Keeps the header background visible */
+		    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Optional: Adds a subtle shadow for better visibility */
+		}
+
+        
+        
+    </style>
 </head>
 
 <body>
 
-<!-- Navbar -->
-<th:block th:insert="~{inc/navbar/navbar-home.html}"></th:block>
+    <header>
+        <!--/* Loader */-->
+        <th:block th:insert="~{inc/preloader.html}"></th:block>
+        <!--/* Navbar 
+        */-->
+        <th:block th:insert="~{inc/navbar/navbar-home.html}"></th:block>
+    </header>  
+    
 
+    <main th:with="images = ${product.images()}" class="bg-gray-200">
 
-<main th:with="images = ${product.images()}" class="bg-gray-200">
-    <!-- Loader -->
-    <th:block th:insert="~{inc/preloader.html}"></th:block>
 
     <section class="section-header pb-0">
-        <div class="row">
-            <th:block th:insert="~{inc/wip.html}"></th:block>
-        </div>
-
         <div class="container">
             <div class="row align-items-center">
-                <div class="col-12 col-md-6 mb-5">
+                <div class="col-12 col-lg-12 mb-2">
                     <h2 th:unless="${product.vertical}" class="h4 mb-0 text-center" th:text="${product.bestName()}"></h2>
 
                     <h2 th:if="${product.vertical}" class="h4 mb-0 text-center" th:text="${product.bestName()}"></h2>
+                    
+                     <div class="mt-2" 
+                                  th:with="vConf = ${verticaConfig}, pageLabel=${product.bestName()}", 
+                                  th:insert="~{inc/breadcrumb-vertical.html}">
+                     </div> 
+                                            
+                                            
                 </div>
 
-                <div class="col-12 col-md-6 mb-5">
-                    <h2 class="h4 mb-0 text-center">Où acheter cette TV au meilleur prix ?</h2>
-                </div>
             </div>
         </div>
-        <div class="container fixed-bottom">
-            <nav class="mb-0">
-                <div class="nav nav-tabs shadow border-soft bg-white rounded justify-content-center p-2 p-lg-4">
-                    <a href="https://themesberg.com/themes" class="nav-item nav-link mr-lg-3">All themes</a> <a href="https://themesberg.com/templates/premium" class="nav-item nav-link mr-lg-3">Premium themes</a>
-                    <a href="https://themesberg.com/templates/free" class="nav-item nav-link mr-lg-3">Free themes</a> <a href="https://themesberg.com/templates/bootstrap" class="nav-item nav-link mr-lg-3">Bootstrap</a>
-                    <a href="https://themesberg.com/templates/tailwind-css" class="nav-item nav-link mr-lg-3">Tailwind CSS</a> <a href="https://themesberg.com/templates/react" class="nav-item nav-link mr-lg-3">React</a>
-                    <a href="https://themesberg.com/templates/laravel" class="nav-item nav-link mr-lg-3">Laravel</a> <a href="https://themesberg.com/templates/figma" class="nav-item nav-link mr-lg-3">Figma</a>
-                </div>
-            </nav>  
-        </div>          
+        
     </section>
-
+    
     <div class="section section-sm pt-0">
         <div class="container">
             <div class="row">
@@ -124,221 +123,90 @@
             </div>
         </div>
     </div>
-    <div class="section section-lg pt-6 pb-5 bg-white">
-        <div class="container">
-            <div class="row justify-content-center mt-4">
-                <!-- Presentation -->
-                <th:block th:insert="~{inc/product-presentation.html}"></th:block>
-            </div>
-        </div>
-    </div>
-    <div class="section section-lg pt-6 pb-5">
-        <div class="container">
-            <div class="row justify-content-center mt-4">
-                <section id="markerPresentation">
-                    <div class="col-12 mb-5 text-center">
-                        <h2 class="h4 mb-0">Présentation</h2>   
-                    </div>
+    
+    
+            <!-- Tabed Pans -->
+            <div class="sticky-top sticky-lg-top card-header nav nav-tabs shadow border-soft bg-white rounded justify-content-center p-2 p-lg-4">
+                  
+                <!-- Navigation pills header -->
+                <ul class="nav nav-pills" id="pills-tab" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="pills-presentation-tab" data-bs-toggle="pill" data-bs-target="#pills-presentation" type="button" role="tab" aria-controls="pills-presentation" aria-selected="true">Avis général</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="pills-ecological-tab" data-bs-toggle="pill" data-bs-target="#pills-ecological" type="button" role="tab" aria-controls="pills-ecological" aria-selected="false">Impact écologique</button>
+                    </li>
                     
-                    <div class="row pt-5 pt-md-0">
-                        <div class="col-12 col-lg-5 mb-3 mb-lg-0">
-                            <!-- Identity -->
-                            <div  class="card border-gray-300 p-2 mb-lg-4">
-                                <div class="card-body p-2 d-none d-lg-block">
-                                    <div class="mb-4">														
-                                        <span class="h5">Identité</h3>
-                                    </div>
-                                    <th:block th:insert="~{inc/product-referentiel-attributes.html}"></th:block>
-                                </div>
-                            </div>
-                            <!-- Caracteristiques principales -->
-                            <div class="card border-gray-300 p-2">
-                                <div class="card-body p-2 d-none d-lg-block">
-                                    <div class="mb-4">														
-                                        <span class="h5">Caractéristiques</h3>
-                                    </div>
-			
-                                    <th:block th:insert="~{inc/product-attributes.html}"></th:block>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="pills-price-tab" data-bs-toggle="pill" data-bs-target="#pills-price" type="button" role="tab" aria-controls="pills-price" aria-selected="false">Prix</button>
+                    </li>
+                    
+                    <li class="nav-item" role="presentation">
+                              <button class="nav-link" id="pills-technical-tab" data-bs-toggle="pill" data-bs-target="#pills-technical" type="button" role="tab" aria-controls="pills-technical" aria-selected="false">Caractéristiques techniques</button>
+                    </li>
 
-                                    <a href="#markerCaracteristiques" class="w-100 btn btn__nudger mt-4">Toutes les caractéristiques</a>
-                                </div>
-                            </div>
-                            
-                        </div>                  
-                        
-                        <!-- Description -->
-                        <div class="col-12 col-lg-7">
-                            <div th:if="${globalDescriptionParagraphs}" class="row">
-                                <!-- Icon Boxes -->
-                                <div class="col-12 mb-4">
-                                    <div class="card border-gray-300 pt-2 pb-4">
-                                        <div class="card-body pt-2">
-                                            <div class="mb-4">														
-                                                <span class="h5">Téléviseur <span th:text="${product.bestName()}"></span></h3>
-                                            </div>
-                                            <p class="card-text">
-                                                <span th:each="paragraph : ${globalDescriptionParagraphs}" th:utext="${paragraph + '<br/><br/>'}"></span>
-                                            </p>
-                                        </div>
-                                    </div>
-                                </div>
-                                <!-- End of Icon Boxes -->
-                            </div>
-        
-                            <div class="row">
-                                <!-- Avantages -->
-                                <div th:if="${pros}" class="col-12 mb-4">
-                                    <!-- Icon Box -->
-                                    <div class="card border-gray-300">
-                                        <div class="card-body">
-                                            <div class="d-flex align-items-center mb-3">
-                                                <div class="icon icon-primary">
-                                                    <span class="fas fa-plus"></span>
-                                                </div>
-                                                <span class="h5 ms-3">Avantages</span>
-                                            </div>
-                                            <ul class="list-group list-group-flush price-list">
-                                                <li th:each="pro : ${pros}" class="list-group-item rounded-0" th:text="${pro}"></li>
-                                            </ul>
-                                        </div>
-                                    </div>
-                                    <!-- End of Icon Box -->
-                                </div>
-        
-                                <!-- Inconvénients -->
-                                <div th:if="${cons}" class="col-12 mb-4">
-                                    <!-- Icon Box -->
-                                    <div class="card border-gray-300">
-                                        <div class="card-body">
-                                            <div class="d-flex align-items-center mb-3">
-                                                <div class="icon icon-primary">
-                                                    <span class="fas fa-minus"></span>
-                                                </div>
-                                                <span class="h5 ms-3">Inconvénients</span>
-                                            </div>
-                                            <ul class="list-group list-group-flush price-list">
-                                                <li th:each="con : ${cons}" class="list-group-item rounded-0" th:text="${con}"></li>
-                                            </ul>
-                                        </div>
-                                    </div>
-                                    <!-- End of Icon Box -->
-                                </div>
-                            </div>
-                        </div>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="pills-resources-tab" data-bs-toggle="pill" data-bs-target="#pills-resources" type="button" role="tab" aria-controls="pills-resources" aria-selected="false">Ressources et documentation</button>
+                    </li>
+                    <li th:if="${user}" class="nav-item" role="presentation">
+                        <button class="nav-link" id="pills-admin-tab" data-bs-toggle="pill" data-bs-target="#pills-admin" type="button" role="tab" aria-controls="pills-price" aria-selected="false">Admin</button>
+                    </li>
+                    
+                </ul>
+            </div>
+    
+			<!-- Tabs -->
+			<div class="tab-content" id="pills-tabContent">
+				<div class="tab-pane fade show active" id="pills-presentation" role="tabpanel" aria-labelledby="pills-presentation-tab">
+				   <!-- Presentation -->
+		            <th:block th:insert="~{inc/product-presentation.html}"></th:block>
+				</div>
+				
+				<div class="tab-pane fade" id="pills-ecological" role="tabpanel" aria-labelledby="pills-ecological-tab">
+                       <!-- Ecological -->
+                       <th:block th:insert="~{inc/product-ecological.html}"></th:block>
+				</div>
+				
+				<div class="tab-pane fade" id="pills-price" role="tabpanel" aria-labelledby="pills-price-tab">
+		            <!-- Product prices -->
+		            <th:block th:insert="~{inc/product-price.html}"></th:block>
+				</div>
+
+                      <div class="tab-pane fade" id="pills-technical" role="tabpanel" aria-labelledby="pills-technical-tab">
+                          <!-- Product attributes details -->
+                          <th:block th:insert="~{inc/product-attributes-details.html}"></th:block>
+                      </div>
+
+
+                      <div class="tab-pane fade" id="pills-tesources" role="tabpanel" aria-labelledby="pills-resources-tab">
+                          <!-- Product resources details -->
+                          
+                          YOUHOU
+                          
+                          
+                      </div>
+                                              
+				
+				    <div th:if="${user}" class="tab-pane fade" id="pills-admin" role="tabpanel" aria-labelledby="pills-admin-tab">
+				       <th:block th:insert="~{inc/product-admin.html}"></th:block>
                     </div>
-        </section> 
-            </div>
-        </div>
-    </div>
-    <div class="section section-lg pt-6 pb-5 bg-white">
-        <div class="container">
-            <div class="row justify-content-center mt-4">
-
-            <div class="row">
-                <div class="col-12 col-lg-6 coucou" th:if="${product.ecoscore != null  && null != verticalConfig}">
-                    <!--/* Best price */-->				
-                    <!--th:block th:insert="~{inc/product-price.html}"></th:block-->
-                </div>
-            </div>
-            <div class="row">
-                <!-- Descriptions -->
-                <th:block th:insert="~{inc/product-ecological.html}"></th:block>
-            </div>
-            <div class="row">
-                <!-- Product prices -->
-                <th:block th:insert="~{inc/product-price.html}"></th:block>
-            </div>
-            <div class="row">
-                <!-- Product attributes details -->
-                <th:block th:insert="~{inc/product-attributes-details.html}"></th:block>
-            </div>
-            <div class="row">
-                <div class="col-lg-12">
-
-                    <!-- Authenticated section -->
-                    <th:block th:if="${user}">
-
-                        <h1 class="text-center"> Mode admin</h1>
-                        <div class="text-center">
-                        <a target="_blank" th:text="'Source JSON de '+ ${product.gtin()}" th:href="'https://api.nudger.fr/product/?gtin='+${product.gtin()}"></a>
-                        </div>
-                        <!-- Categories
-                        <th:block th:insert="~{inc/product-categories.html}"></th:block>
-                        -->
-
-
-
-                            <!-- Offer names -->
-                            <div class="row">
-                                <div class="col-lg-12">
-                                    <div class="card shadow my-3">
-                                        <div class="card-header">
-                                            <h2 class="h5">Offernames</h2>
-                                        </div>
-                                        <div class="card-body">
-                                            <ul>
-                                                <li th:each="item, stat : ${product.offerNames}"
-                                                    th:text="${item}"></li>
-                                            </ul>
-
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <!-- Mapped categories -->
-                                <div class="card shadow my-3">
-                                    <div class="card-header">
-                                        <h2 class="h5">Categories</h2>
-                                    </div>
-                                    <div class="card-body">
-                                        <th:block th:each="item, stat : ${product.categoriesByDatasources}">
-                                            <div class="alert alert-primary" role="alert">
-                                                <span th:text="${item.key + ' : ' + item.value}"></span>
-                                            </div>
-                                        </th:block>
-                                    </div>
-                                </div>
-
-
-                            <!-- Unmatched Attribute table -->
-                        <th:block th:insert="~{inc/product-unmatched-attributes.html}"></th:block>
-<!-- Resources -->
-                        <th:block th:insert="~{inc/product-resources.html}"></th:block>
-
-                    </th:block>
-
-                </div>
-            </div>
-        </div>
-    </div>
+                   
+                   
+				
+			</div>
 </main>
 
 <!-- Footer -->
 <th:block th:insert="~{inc/footer.html}"></th:block>
 
-<!-- Core JS -->
-<script src="../../vendor/@popperjs/core/dist/umd/popper.min.js"></script>
-<script src="/webjars/bootstrap/js/bootstrap.min.js"></script>
+<script defer type="text/javascript" language="javascript" src="/webjars/datatables/js/dataTables.min.js"></script>
+<script defer type="text/javascript" language="javascript" src="/webjars/datatables/js/dataTables.bootstrap5.min.js"></script>
 
-<!-- Vendor JS -->
-<script src="../../vendor/smooth-scroll/dist/smooth-scroll.polyfills.min.js"></script>
-<script src="../../vendor/vivus/dist/vivus.min.js"></script>
+<script defer src="/vendor/countUp.umd.js"></script>
+<script defer src="/vendor/nouislider/dist/nouislider.min.js"></script>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
-<script src="/webjars/jquery/jquery.min.js"></script>
-<script type="text/javascript" language="javascript" src="/webjars/datatables/js/dataTables.min.js"></script>
-<script type="text/javascript" language="javascript" src="/webjars/datatables/js/dataTables.bootstrap5.min.js"></script>
-
-<script src="../../vendor/countup.js/dist/countUp.umd.js"></script>
-<!-- Pixel JS -->
-<script src="../../assets/js/pixel.js"></script>
-<!-- Custom sources -->
-<script src="../../assets/js/pixel-custom.js"></script>
-
-<script src="/vendor/lightgallery/dist/lightgallery.min.js"></script>
-<script src="/vendor/lightgallery/dist/plugins/thumbnail/lg-thumbnail.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns/dist/chartjs-adapter-date-fns.bundle.min.js"></script>    
 
 <script th:inline="javascript">
     /*<![CDATA[*/
@@ -669,30 +537,84 @@
             activeButton.classList.add('btn-primary', 'active-period-btn');
         }
 
-        ///////////////////////////////////
-        // Initialize image gallery
-        ///////////////////////////////////
-
-        // Get the carousel element
-        let carouselEl = document.getElementById('bootstrap-gallery-carousel');
-
-        // Create a Bootstrap Carousel instance with specified options
-        const carousel = new bootstrap.Carousel(carouselEl, {
-            interval: 10000,
-            wrap: false,
-        });
-
-        // Add event listener for 'slide.bs.carousel'
-        carouselEl.addEventListener('slide.bs.carousel', (event) => {
-            const container = document.querySelector('.carousel-inner');
-            window.lightGallery(container, {
-                plugins: [lgThumbnail],
-                selector: '.lg-item',
-            });
-        });
+  
     });
     /*]]>*/
 </script>
+
+
+
+
+<script>
+    // Data for the chart
+    const data = {
+        labels: [
+            'Performance ESG', 
+            'Indice de réparabilité', 
+            'Consommation en veille', 
+            'Consommation en marche', 
+            'Poids', 
+            'Classe énergétique'
+        ],
+        datasets: [
+            {
+                label: 'Worst Item',
+                data: [300, 400, 200, 150, 100, 250],  // Example values for worst item
+                backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                borderColor: 'rgba(255, 99, 132, 1)',
+                borderWidth: 1
+            },
+            {
+                label: 'Best Item',
+                data: [900, 950, 950, 920, 900, 950],  // Example values for best item
+                backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                borderColor: 'rgba(54, 162, 235, 1)',
+                borderWidth: 1
+            },
+            {
+                label: 'Average Item',
+                data: [600, 650, 500, 500, 550, 650],  // Example values for average item
+                backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                borderColor: 'rgba(75, 192, 192, 1)',
+                borderWidth: 1
+            },
+            {
+                label: 'Current Item',
+                data: [700, 750, 600, 680, 650, 750],  // Example values for current item
+                backgroundColor: 'rgba(153, 102, 255, 0.2)',
+                borderColor: 'rgba(153, 102, 255, 1)',
+                borderWidth: 1
+            }
+        ]
+    };
+
+    // Chart.js radar chart initialization
+    const config = {
+        type: 'radar',
+        data: data,
+        options: {
+            responsive: true,
+            scales: {
+                r: {
+                    min: 0,
+                    max: 1000,
+                    ticks: {
+                        stepSize: 200
+                    }
+                }
+            },
+            plugins: {
+                legend: {
+                    position: 'top',
+                }
+            }
+        }
+    };
+
+    // Create the chart
+    const radarChart = new Chart(document.getElementById('radarChart'), config);
+</script>
+
 
 </body>
 

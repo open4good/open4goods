@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -17,11 +17,15 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
 
-import org.open4goods.commons.config.yml.ui.VerticalConfig;
+import javax.sql.rowset.serial.SerialException;
+
 import org.open4goods.commons.dao.ProductRepository;
-import org.open4goods.commons.model.constants.CacheConstants;
 import org.open4goods.commons.model.dto.ExpandedTaxonomy;
-import org.open4goods.commons.model.product.Product;
+import org.open4goods.model.constants.CacheConstants;
+import org.open4goods.model.product.Product;
+import org.open4goods.model.vertical.VerticalConfig;
+import org.open4goods.services.serialisation.exception.SerialisationException;
+import org.open4goods.services.serialisation.service.SerialisationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cache.annotation.Cacheable;
@@ -115,7 +119,7 @@ public class VerticalsConfigService {
 		try {
 			Resource r = resourceResolver.getResource(CLASSPATH_VERTICALS_DEFAULT);
 			defaultConfig =  serialisationService.fromYaml(r.getInputStream(), VerticalConfig.class);
-		} catch (IOException e) {
+		} catch (Exception e) {
 			logger.error("Cannot load  default config from {}", CLASSPATH_VERTICALS_DEFAULT, e);
 		}
 		
@@ -188,7 +192,7 @@ public class VerticalsConfigService {
 			}
 			try {
 				ret.add(getConfig(r.getInputStream(), getDefaultConfig()));
-			} catch (IOException e) {
+			} catch (Exception e) {
 				logger.error("Cannot retrieve vertical config : {}",r.getFilename(), e);
 			}
 		}
@@ -206,7 +210,7 @@ public class VerticalsConfigService {
 	 * @return
 	 * @throws IOException
 	 */
-	public VerticalConfig getConfig(InputStream inputStream, VerticalConfig defaul) throws IOException {
+	public VerticalConfig getConfig(InputStream inputStream, VerticalConfig defaul) throws SerialisationException, IOException {
 
 		// TODO(p3,perf) : chould be cached
 		VerticalConfig copy = serialisationService.fromYaml(serialisationService.toYaml(defaul),VerticalConfig.class);
@@ -276,7 +280,7 @@ public class VerticalsConfigService {
 	
 	
 	/**
-	 * Return the path for a vertical language, if any
+ 	 *  Return the path for a vertical language, if any
 	 * @param config 
 	 * @param path
 	 * @return
@@ -286,6 +290,38 @@ public class VerticalsConfigService {
 		return path;
 	}
 
+	/**
+	 * Splits the VerticalConfig objects into buckets of a specified size, limiting the total number of buckets.
+	 * This is UI HELPER METHOD
+	 * @param bucketSize the size of each bucket (number of VerticalConfig objects per bucket).
+	 * @param maxBucket the maximum number of buckets to return.
+	 * @return a list of buckets, where each bucket is a list of VerticalConfig objects.
+	 */
+	//TODO(p1, perf) : cache
+	public List<List<VerticalConfig>> getImpactScoreVerticalsByBuckets(int bucketSize, int maxBucket) {
+	    // Get the map of VerticalConfig objects
+	    Map<String, VerticalConfig> theConfigs = getConfigs();
+
+	    // Create a list to hold all VerticalConfig objects
+	    List<VerticalConfig> configList = new ArrayList<>(getConfigsWithoutDefault());
+
+	    
+	    // Create a list to hold the final buckets
+	    List<List<VerticalConfig>> buckets = new ArrayList<>();
+
+	    // Iterate and create buckets
+	    for (int i = 0; i < configList.size() && buckets.size() < maxBucket; i += bucketSize) {
+	        // Create a sublist for the current bucket
+	        List<VerticalConfig> bucket = configList.subList(i, Math.min(i + bucketSize, configList.size()));
+
+	        // Add the bucket to the list of buckets
+	        buckets.add(new ArrayList<>(bucket)); // Use a new ArrayList to ensure immutability of sublists
+	    }
+
+	    return buckets;
+	}
+
+	
 	/**
 	 *
 	 * @return
@@ -377,17 +413,16 @@ public class VerticalsConfigService {
 	
 
 	/**
-	 *
-	 * @return all configs, except the _default.  Allow to filter on enabled verticals
+	 * @return all configs, except the _default. Allows filtering on enabled verticals,
+	 * and returns the list ordered by the VerticalConfig.order field.
 	 */
-	public Collection<VerticalConfig>  getConfigsWithoutDefault(boolean onlyEnabled) {
-		if (onlyEnabled) {
-			return getConfigs().values().stream().filter(e->e.isEnabled() == true).toList();			
-		} else {
-			return getConfigs().values();
-		}
+	// TODO (p1, perf): cache
+	public List<VerticalConfig> getConfigsWithoutDefault(boolean onlyEnabled) {
+	    return getConfigs().values().stream()
+	        .filter(config -> !onlyEnabled || config.isEnabled())
+	        .sorted(Comparator.comparingInt(VerticalConfig::getOrder))
+	        .toList();
 	}
-	
 
 	/**
 	 *

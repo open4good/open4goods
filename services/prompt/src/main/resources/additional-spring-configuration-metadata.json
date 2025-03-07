@@ -1,0 +1,36 @@
+{
+  "groups": [
+    {
+      "name": "genAiConfig",
+      "type": "org.open4goods.services.prompt.config.PromptServiceConfig",
+      "sourceType": "org.open4goods.services.prompt.config.PromptServiceConfig"
+    }
+  ],
+  "properties": [
+    {
+      "name": "genAiConfig.promptsTemplatesFolder",
+      "type": "java.lang.String",
+      "description": "Folder path for prompt templates."
+    },
+    {
+      "name": "genAiConfig.cacheTemplates",
+      "type": "java.lang.Boolean",
+      "description": "Determines if prompt templates should be cached in memory."
+    },
+    {
+      "name": "genAiConfig.enabled",
+      "type": "java.lang.Boolean",
+      "description": "Flag to enable or disable the GenAi service."
+    },
+    {
+      "name": "genAiConfig.recordEnabled",
+      "type": "java.lang.Boolean",
+      "description": "Flag to enable recording of prompt responses as mocks."
+    },
+    {
+      "name": "genAiConfig.recordFolder",
+      "type": "java.lang.String",
+      "description": "Folder path where recorded prompt responses (mocks) are stored."
+    }
+  ]
+}

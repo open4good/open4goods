@@ -442,7 +442,7 @@ attributesConfig:
       - "INDICE DE RÉPARABILITÉ (NOTE SUR 10)"
       - "INDICE DE RÉPARABILITÉ"
       - "L’INDICE DE RÉPARABILITÉ"
-      
+      - "REPAIRABILITY_INDEX"
     parser:
       normalize: true
       trim: false
@@ -502,7 +502,8 @@ attributesConfig:
     synonyms:
       all:
       - "QTE DE PORTS HDMI"
-      - "QUANTITE DE PORTS HDMI"      
+      - "QUANTITE DE PORTS HDMI"   
+      - "HDMI_PORTS_QUANTITY"
       
     parser:
       normalize: true
@@ -571,6 +572,7 @@ attributesConfig:
     synonyms:
       all:
       - "POIDS"
+      - "WEIGHT"
       
     parser:
       clazz: org.open4goods.api.services.aggregation.services.realtime.parser.WeightParser  
@@ -613,12 +615,13 @@ attributesConfig:
       
     name:
         default: "Power consumption"
-        fr: "Consommation électrique (en marche)"
+        fr: "Consommation électrique (typique/max)"
       
     synonyms:
         all:
           - "CONSOMMATION ELECTRIQUE TYPIQUE"
           - "CONSOMMATION (MAX)"
+          - "POWER_CONSUMPTION_TYPICAL"
           
              
     parser:
@@ -651,12 +654,13 @@ attributesConfig:
       
     name:
          default: "Power consumption (off)"
-         fr: "Consommation électrique (arrêt)"
+         fr: "Consommation électrique (arrêt/veille)"
       
     synonyms:
          all:
            - "CONSOMMATION ELECTRIQUE (ARRET)"
            - "CONSOMMATION D'ENERGIE (MODE VEILLE)"
+           - "POWER_CONSUMPTION_OFF"
              
     parser:
          normalize: true

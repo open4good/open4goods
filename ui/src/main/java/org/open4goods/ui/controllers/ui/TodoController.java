@@ -29,7 +29,7 @@ public class TodoController {
 		super();
 	}
 
-	@GetMapping("/todos")
+	@GetMapping("/opensource/todos")
 	protected ModelAndView todo(HttpServletRequest request, HttpServletResponse response) throws Exception {
 		ModelAndView mv = uiService.defaultModelAndView("todo", request);
 		mv.addObject("todos", todoService.getTodos());

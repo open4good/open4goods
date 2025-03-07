@@ -1,4 +1,3 @@
-<section class="section container container-semi-fluid" id="markerPrices">
     <th:block th:with="
         hasNewPriceHistory=${product.price.newPricehistory != null and !#lists.isEmpty(product.price.newPricehistory)},
         hasOccasionPriceHistory=${product.price.occasionPricehistory != null and !#lists.isEmpty(product.price.occasionPricehistory)},
@@ -10,14 +9,14 @@
             </div>
         </div>
 
-        <div class="card shadow border-gray-300 text-center">
+        <div id="markerPrices" class="card shadow border-gray-300 text-center">
             <div class="row align-items-center">
                 <!-- First column: Messages -->
                 <div th:attr="class='col-md-' + (${hasNewPriceHistory or hasOccasionPriceHistory} ? 4 : 12)">
                     <!-- Content of messages -->
                     <th:block>
                         <!-- Messages -->
-                        <!--div class="m-4">
+                        <div class="m-4">
                             <div th:if="${newTrend.trend == 0}" class="text-center alert alert-info" role="alert">
                                 😶‍🌫️ Le prix neuf est stable depuis <span th:text="${newTrend.formatedDuration()}"></span>
                             </div>
@@ -27,7 +26,7 @@
                             <div th:if="${newTrend.trend == -1}" class="text-center alert alert-success" role="alert">
                                 Le prix neuf a baissé de <b><span th:text="${#numbers.formatDecimal(newTrend.variation == null ? 0 : newTrend.variation, 0, 0)}"></span>€</b> depuis le dernier relevé (<span th:text="${newTrend.formatedDuration()}"></span>) 😊
                             </div>
-                        </div-->
+                        </div>
 
                         <div class="card shadow m-4">
                             <div class="card-body text-center text-md-left">
@@ -95,4 +94,3 @@
             </div>
         </div>
     </th:block>
-</section>

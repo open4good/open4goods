@@ -1,8 +1,8 @@
 package org.open4goods.commons.config.yml.test;
 
-import org.open4goods.commons.model.constants.Currency;
-import org.open4goods.commons.model.constants.InStock;
-import org.open4goods.commons.model.data.Price;
+import org.open4goods.model.price.Currency;
+import org.open4goods.model.price.Price;
+import org.open4goods.model.product.InStock;
 
 public class PriceExpectedResult extends NumericExpectedResult {
 

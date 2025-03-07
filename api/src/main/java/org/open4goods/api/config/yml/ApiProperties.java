@@ -10,10 +10,10 @@ import org.open4goods.commons.config.yml.DevModeConfiguration;
 import org.open4goods.commons.config.yml.GithubConfiguration;
 import org.open4goods.commons.config.yml.IcecatConfiguration;
 import org.open4goods.commons.config.yml.IndexationConfig;
-import org.open4goods.commons.config.yml.ui.DescriptionsAggregationConfig;
-import org.open4goods.commons.config.yml.ui.GenAiConfig;
-import org.open4goods.commons.config.yml.ui.ImageGenerationConfig;
 import org.open4goods.crawler.config.yml.FetcherProperties;
+import org.open4goods.model.vertical.DescriptionsAggregationConfig;
+import org.open4goods.model.vertical.ImageGenerationConfig;
+import org.open4goods.services.prompt.config.PromptServiceConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
@@ -193,7 +193,7 @@ public class ApiProperties {
 	/**
 	 * Configuration for gen ai
 	 */
-	private GenAiConfig genAiConfig = new GenAiConfig();
+	private PromptServiceConfig genAiConfig = new PromptServiceConfig();
 	
 	/**
 	 * Duration of the pause to apply beetween 2 subsequent GenAI generation
@@ -634,13 +634,13 @@ public class ApiProperties {
 
 
 
-	public GenAiConfig getGenAiConfig() {
+	public PromptServiceConfig getGenAiConfig() {
 		return genAiConfig;
 	}
 
 
 
-	public void setGenAiConfig(GenAiConfig genAiConfig) {
+	public void setGenAiConfig(PromptServiceConfig genAiConfig) {
 		this.genAiConfig = genAiConfig;
 	}
 

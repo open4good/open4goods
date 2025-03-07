@@ -7,7 +7,7 @@ import java.util.List;
 
 import org.open4goods.api.config.yml.ApiProperties;
 import org.open4goods.commons.model.constants.RolesConstants;
-import org.open4goods.commons.model.constants.UrlConstants;
+import org.open4goods.model.constants.UrlConstants;
 
 import static org.springframework.security.config.Customizer.withDefaults;
 

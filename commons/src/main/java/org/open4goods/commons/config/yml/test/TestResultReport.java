@@ -3,7 +3,7 @@ package org.open4goods.commons.config.yml.test;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.open4goods.commons.model.data.DataFragment;
+import org.open4goods.model.datafragment.DataFragment;
 
 public class TestResultReport {
 

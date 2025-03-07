@@ -1,6 +1,6 @@
 package org.open4goods.commons.model.dto;
 
-import org.open4goods.commons.config.yml.ui.VerticalConfig;
+import org.open4goods.model.vertical.VerticalConfig;
 
 public class ExpandedTaxonomy {
 	

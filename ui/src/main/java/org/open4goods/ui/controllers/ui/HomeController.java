@@ -50,6 +50,8 @@ public class HomeController  {
 		}
 
 		model.addObject("url",  "/");
+		model.addObject("verticalsCarrouselBuckets", verticalConfigService. getImpactScoreVerticalsByBuckets(3,Integer.MAX_VALUE));
+		
 		model.addObject("googleProductService", googleTaxonomyService);
 		return model;
 	}

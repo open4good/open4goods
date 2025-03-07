@@ -25,14 +25,13 @@ import javax.xml.xpath.XPathFactory;
 import org.apache.commons.lang3.StringUtils;
 import org.open4goods.commons.config.yml.datasource.DataSourceProperties;
 import org.open4goods.commons.config.yml.datasource.ExtractorConfig;
-import org.open4goods.commons.exceptions.ResourceNotFoundException;
-import org.open4goods.commons.exceptions.ValidationException;
-import org.open4goods.commons.helper.GenericFileLogger;
-import org.open4goods.commons.helper.IdHelper;
-import org.open4goods.commons.model.data.DataFragment;
-import org.open4goods.commons.services.EvaluationService;
-import org.open4goods.commons.services.SerialisationService;
 import org.open4goods.crawler.services.fetching.DataFragmentWebCrawler;
+import org.open4goods.model.datafragment.DataFragment;
+import org.open4goods.model.exceptions.ResourceNotFoundException;
+import org.open4goods.model.exceptions.ValidationException;
+import org.open4goods.model.helper.IdHelper;
+import org.open4goods.services.evaluation.service.EvaluationService;
+import org.open4goods.services.serialisation.service.SerialisationService;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
@@ -45,7 +44,6 @@ import org.w3c.dom.NodeList;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.mashape.unirest.request.GetRequest;
 
-import ch.qos.logback.classic.Level;
 import edu.uci.ics.crawler4j.crawler.CrawlController;
 import edu.uci.ics.crawler4j.crawler.Page;
 import edu.uci.ics.crawler4j.parser.HtmlParseData;
@@ -186,7 +184,7 @@ public abstract class Extractor {
 	 */
 	protected JsonNode getJsonRootNode(final GetRequest request) {
 		try {
-			return  serialisationService.getJsonMapper().readTree(request.asJson().getBody().toString());
+			return  serialisationService.jsonMapper().readTree(request.asJson().getBody().toString());
 		} catch (final Exception e) {
 			throw new EvaluationException(e.getMessage());
 		}

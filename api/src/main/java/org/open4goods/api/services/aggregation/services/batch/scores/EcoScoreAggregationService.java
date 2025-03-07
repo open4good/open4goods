@@ -7,10 +7,10 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
-import org.open4goods.commons.config.yml.ui.VerticalConfig;
-import org.open4goods.commons.exceptions.ValidationException;
-import org.open4goods.commons.model.data.Score;
-import org.open4goods.commons.model.product.Product;
+import org.open4goods.model.exceptions.ValidationException;
+import org.open4goods.model.product.Product;
+import org.open4goods.model.product.Score;
+import org.open4goods.model.vertical.VerticalConfig;
 import org.slf4j.Logger;
 
 /**
@@ -30,23 +30,24 @@ public class EcoScoreAggregationService extends AbstractScoreAggregationService 
 
 	@Override
 	public void onProduct(Product data, VerticalConfig vConf) {
-		if (StringUtils.isEmpty(data.brand())) {
-			return;
-		}
 		
 		try {
 
-			// Compute the ecoscore from existing scores
-			Double score = generateEcoScore(data.getScores(),vConf);
-
-			// Processing cardinality
-			incrementCardinality(ECOSCORE_SCORENAME,score);
-			
-			// Saving the actual score in the product, it will be relativized after this batch (see super().done())
-			Score s = new Score(ECOSCORE_SCORENAME, score);
-			data.getScores().put(s.getName(),s);
+			if (null != vConf.getImpactScoreConfig() && vConf.getImpactScoreConfig().getCriteriasPonderation().size() > 0 ) {
+				// Compute the ecoscore from existing scores
+				Double score = generateEcoScore(data.getScores(),vConf);
+				
+				// Processing cardinality
+				incrementCardinality(ECOSCORE_SCORENAME,score);
+				
+				// Saving the actual score in the product, it will be relativized after this batch (see super().done())
+				Score s = new Score(ECOSCORE_SCORENAME, score);
+				data.getScores().put(s.getName(),s);
+			} else {
+				dedicatedLogger.info("No ImpactScore defined for vertical",vConf);
+			}
 		} catch (ValidationException e) {
-			dedicatedLogger.warn("Brand to score fail for {} : {}",data,e.getMessage());
+			dedicatedLogger.error("Ecoscore aggregation failed for {} : {}",data,e.getMessage());
 		}
 	}
 
@@ -55,7 +56,7 @@ public class EcoScoreAggregationService extends AbstractScoreAggregationService 
 	private Double generateEcoScore(Map<String, Score> scores, VerticalConfig vConf) throws ValidationException {
 		
 		
-		double va = 0.0;
+		double ecoscoreVal = 0.0;
 		for (String config :  vConf.getImpactScoreConfig().getCriteriasPonderation().keySet()) {
 			Score score = scores.get(config);
 			
@@ -65,44 +66,44 @@ public class EcoScoreAggregationService extends AbstractScoreAggregationService 
 			
 		
 			// Taking on the relativ
-			va += score. getRelativ().getValue() * Double.valueOf(vConf.getImpactScoreConfig().getCriteriasPonderation().get(config));
+			ecoscoreVal += score. getRelativ().getValue() * Double.valueOf(vConf.getImpactScoreConfig().getCriteriasPonderation().get(config));
 		}
 
-		return va;
+		return ecoscoreVal;
 	}
 
 
 	@Override
 	public void done(Collection<Product> datas, VerticalConfig vConf) {
-		super.done(datas, vConf);
-		
-		///////////////////////
-		// EcoScore ranking and "best alternativ" reach
-		///////////////////////
-		List<Product> sorted = new ArrayList<>();
-		sorted.addAll(datas);
 
-		try {
-			Collections.sort(sorted, (o1, o2) -> Double.compare(o1.ecoscore().getRelativ().getValue() , o2.ecoscore().getRelativ().getValue()));
-			
-			int count = sorted.size();
-			for (int i = 0; i < count; i++) {
-				Product p = sorted.get(i);
-				p.getRanking().setGlobalCount(count);
-				p.getRanking().setGlobalPosition(count - i);
-				p.getRanking().setGlobalBest(sorted.getLast().getId());
-				
-				if (i < count - 1) {
-					p.getRanking().setGlobalBetter(sorted.get(i+1).getId());
+		if (null != vConf.getImpactScoreConfig() && vConf.getImpactScoreConfig().getCriteriasPonderation().size() > 0) {
+
+			super.done(datas, vConf);
+
+			///////////////////////
+			// EcoScore ranking and "best alternativ" reach
+			///////////////////////
+			List<Product> sorted = new ArrayList<>();
+			sorted.addAll(datas);
+
+				Collections.sort(sorted, (o1, o2) -> Double.compare(o1.ecoscore().getRelativ().getValue(), o2.ecoscore().getRelativ().getValue()));
+
+				int count = sorted.size();
+				for (int i = 0; i < count; i++) {
+					Product p = sorted.get(i);
+					p.getRanking().setGlobalCount(count);
+					p.getRanking().setGlobalPosition(count - i);
+					p.getRanking().setGlobalBest(sorted.getLast().getId());
+
+					if (i < count - 1) {
+						p.getRanking().setGlobalBetter(sorted.get(i + 1).getId());
+					}
+
 				}
-
-			}
-		} catch (Exception e) {
-			// TODO : handle
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+	
+		} else {
+			dedicatedLogger.error("No ImpactScore defined for vertical",vConf);
 		}
-		
 		
 		
 	}

@@ -5,12 +5,12 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.open4goods.api.services.aggregation.AbstractAggregationService;
-import org.open4goods.commons.config.yml.ui.VerticalConfig;
 import org.open4goods.commons.exceptions.AggregationSkipException;
-import org.open4goods.commons.helper.IdHelper;
-import org.open4goods.commons.model.data.DataFragment;
-import org.open4goods.commons.model.data.Resource;
-import org.open4goods.commons.model.product.Product;
+import org.open4goods.model.datafragment.DataFragment;
+import org.open4goods.model.helper.IdHelper;
+import org.open4goods.model.product.Product;
+import org.open4goods.model.resource.Resource;
+import org.open4goods.model.vertical.VerticalConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

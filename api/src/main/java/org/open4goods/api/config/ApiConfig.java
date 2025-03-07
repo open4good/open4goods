@@ -8,29 +8,24 @@ import org.open4goods.api.config.yml.ApiProperties;
 import org.open4goods.api.services.AggregationFacadeService;
 import org.open4goods.api.services.BatchService;
 import org.open4goods.api.services.CompletionFacadeService;
+import org.open4goods.api.services.ProductsReviewGenerationService;
 import org.open4goods.api.services.ScrapperOrchestrationService;
 import org.open4goods.api.services.VerticalsGenerationService;
 import org.open4goods.api.services.completion.AmazonCompletionService;
-import org.open4goods.api.services.completion.GenAiCompletionService;
 import org.open4goods.api.services.completion.IcecatCompletionService;
+import org.open4goods.api.services.completion.PerplexityAttributesCompletionService;
+import org.open4goods.api.services.completion.PerplexityMarkdownService;
+import org.open4goods.api.services.completion.PerplexityReviewCompletionService;
 import org.open4goods.api.services.completion.ResourceCompletionService;
 import org.open4goods.api.services.store.DataFragmentStoreService;
-import org.open4goods.commons.config.yml.attributes.LegacyPromptConfig;
 import org.open4goods.commons.dao.ProductRepository;
 import org.open4goods.commons.exceptions.TechnicalException;
-import org.open4goods.commons.exceptions.ValidationException;
 import org.open4goods.commons.helper.DevModeService;
-import org.open4goods.commons.model.constants.CacheConstants;
-import org.open4goods.commons.model.constants.Currency;
 import org.open4goods.commons.model.constants.TimeConstants;
-import org.open4goods.commons.model.constants.UrlConstants;
-import org.open4goods.commons.model.data.DataFragment;
-import org.open4goods.commons.model.data.Price;
 import org.open4goods.commons.services.BarcodeValidationService;
 import org.open4goods.commons.services.BrandScoreService;
 import org.open4goods.commons.services.BrandService;
 import org.open4goods.commons.services.DataSourceConfigService;
-import org.open4goods.commons.services.EvaluationService;
 import org.open4goods.commons.services.GoogleTaxonomyService;
 import org.open4goods.commons.services.Gs1PrefixService;
 import org.open4goods.commons.services.IcecatService;
@@ -39,13 +34,11 @@ import org.open4goods.commons.services.ImageMagickService;
 import org.open4goods.commons.services.RemoteFileCachingService;
 import org.open4goods.commons.services.ResourceService;
 import org.open4goods.commons.services.SearchService;
-import org.open4goods.commons.services.SerialisationService;
-import org.open4goods.commons.services.StandardiserService;
 import org.open4goods.commons.services.VerticalsConfigService;
-import org.open4goods.commons.services.ai.GenAiService;
 import org.open4goods.commons.services.ai.LegacyAiService;
 import org.open4goods.commons.services.textgen.BlablaService;
 import org.open4goods.commons.store.repository.elastic.BrandScoresRepository;
+import org.open4goods.commons.store.repository.elastic.VerticalPagesRepository;
 import org.open4goods.crawler.config.yml.FetcherProperties;
 import org.open4goods.crawler.repository.IndexationRepository;
 import org.open4goods.crawler.services.ApiSynchService;
@@ -55,6 +48,18 @@ import org.open4goods.crawler.services.FetchersService;
 import org.open4goods.crawler.services.IndexationService;
 import org.open4goods.crawler.services.fetching.CsvDatasourceFetchingService;
 import org.open4goods.crawler.services.fetching.WebDatasourceFetchingService;
+import org.open4goods.model.StandardiserService;
+import org.open4goods.model.constants.CacheConstants;
+import org.open4goods.model.constants.UrlConstants;
+import org.open4goods.model.datafragment.DataFragment;
+import org.open4goods.model.exceptions.ValidationException;
+import org.open4goods.model.price.Currency;
+import org.open4goods.model.price.Price;
+import org.open4goods.model.vertical.LegacyPromptConfig;
+import org.open4goods.services.evaluation.config.EvaluationConfig;
+import org.open4goods.services.evaluation.service.EvaluationService;
+import org.open4goods.services.prompt.service.PromptService;
+import org.open4goods.services.serialisation.service.SerialisationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springdoc.core.customizers.OpenApiCustomizer;
@@ -127,7 +132,7 @@ public class ApiConfig {
 
 	@Bean
 	VerticalsGenerationService verticalsGenerationService(ProductRepository pRepo, SerialisationService serialisationService, LegacyAiService aiService, GoogleTaxonomyService gTaxoService, VerticalsConfigService verticalsConfigService, ResourcePatternResolver resourceResolver,
-			EvaluationService evaluationService, IcecatService icecatService, GenAiService genAiService) throws SAXException {
+			EvaluationService evaluationService, IcecatService icecatService, PromptService genAiService) throws SAXException {
 		return new VerticalsGenerationService(apiProperties.getVerticalsGenerationConfig(), pRepo, serialisationService, aiService, gTaxoService, verticalsConfigService, resourceResolver, evaluationService, icecatService, genAiService);
 	}
 
@@ -157,17 +162,34 @@ public class ApiConfig {
 	}
 	
 	@Bean
-	GenAiService genAiService (@Autowired @Qualifier("perplexityChatModel") OpenAiApi perplexityApi, 
+	PromptService genAiService (@Autowired @Qualifier("perplexityChatModel") OpenAiApi perplexityApi, 
 								@Autowired @Qualifier("openAiCustomApi") OpenAiApi openAiCustomApi,
 								ApiProperties apiConfig, EvaluationService spelEvaluationService, SerialisationService serialisationService) {
-		return new GenAiService(apiProperties.getGenAiConfig(), perplexityApi, openAiCustomApi, serialisationService, spelEvaluationService);
+		return new PromptService(apiProperties.getGenAiConfig(), perplexityApi, openAiCustomApi, serialisationService, spelEvaluationService);
+	}
+
+	
+	@Bean
+	PerplexityMarkdownService perplexityMarkdownService() {
+		return new PerplexityMarkdownService();
 	}
 	
 	@Bean
-	GenAiCompletionService aiCompletionService(GenAiService aiService, ProductRepository productRepository, VerticalsConfigService verticalConfigService) {
-		return new GenAiCompletionService(aiService, productRepository, verticalConfigService, apiProperties);
+	ProductsReviewGenerationService pageGenerationService(PromptService aiService, VerticalsConfigService verticalConfigService, PerplexityMarkdownService perplexityMarkdownService, VerticalPagesRepository pagesRepository) {
+		return new ProductsReviewGenerationService(aiService, verticalConfigService, apiProperties, perplexityMarkdownService,  pagesRepository);
+	}
+	
+	@Bean
+	PerplexityReviewCompletionService perplexityReviewCompletionService(PromptService aiService, ProductRepository productRepository, VerticalsConfigService verticalConfigService, PerplexityMarkdownService perplexityMarkdownService) {
+		return new PerplexityReviewCompletionService(aiService, productRepository, verticalConfigService, apiProperties,  perplexityMarkdownService);
 	}
 
+	@Bean
+	PerplexityAttributesCompletionService perplexityAttributesCompletionService(PromptService aiService, ProductRepository productRepository, VerticalsConfigService verticalConfigService) {
+		return new PerplexityAttributesCompletionService(aiService, productRepository, verticalConfigService, apiProperties);
+	}
+
+	
 	@Bean
 	LegacyAiService aiService(OpenAiChatModel chatModel, EvaluationService spelEvaluationService, SerialisationService serialisationService) {
 		return new LegacyAiService(chatModel, spelEvaluationService, serialisationService);
@@ -192,8 +214,8 @@ public class ApiConfig {
 	}
 
 	@Bean
-	CompletionFacadeService completionFacadeService(GenAiCompletionService aiCompletionService, ResourceCompletionService resourceCompletionService, AmazonCompletionService amazonCompletionService, IcecatCompletionService icecatCompletionService) {
-		return new CompletionFacadeService(aiCompletionService, resourceCompletionService, amazonCompletionService, icecatCompletionService);
+	CompletionFacadeService completionFacadeService(PerplexityReviewCompletionService aiCompletionService, ResourceCompletionService resourceCompletionService, AmazonCompletionService amazonCompletionService, IcecatCompletionService icecatCompletionService, PerplexityAttributesCompletionService perplexityAttributesCompletionService) {
+		return new CompletionFacadeService(aiCompletionService, resourceCompletionService, amazonCompletionService, icecatCompletionService, perplexityAttributesCompletionService);
 	}
 
 	@Bean
@@ -398,8 +420,8 @@ public class ApiConfig {
 	 * @return
 	 */
 	@Bean
-	EvaluationService evaluationService() {
-		return new EvaluationService();
+	EvaluationService evaluationService(@Autowired EvaluationConfig evalConfig) {
+		return new EvaluationService(evalConfig);
 	}
 
 	@Bean

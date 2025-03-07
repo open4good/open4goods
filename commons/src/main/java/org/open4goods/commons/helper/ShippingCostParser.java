@@ -2,7 +2,7 @@ package org.open4goods.commons.helper;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
-import org.open4goods.commons.exceptions.InvalidParameterException;
+import org.open4goods.model.exceptions.InvalidParameterException;
 import org.slf4j.Logger;
 
 import ch.qos.logback.classic.Level;

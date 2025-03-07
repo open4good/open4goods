@@ -1,7 +1,7 @@
 package org.open4goods.commons.config.yml.test;
 
-import org.open4goods.commons.model.data.Rating;
-import org.open4goods.commons.model.data.RatingType;
+import org.open4goods.model.rating.Rating;
+import org.open4goods.model.rating.RatingType;
 
 public class RatingsExpectedResult extends NumericExpectedResult {
 

@@ -4,12 +4,13 @@ package org.open4goods.api;
 import java.io.IOException;
 
 import org.open4goods.commons.config.CacheKeyGenerator;
-import org.open4goods.commons.services.SerialisationService;
 import org.open4goods.commons.store.repository.elastic.BrandScoresRepository;
 import org.open4goods.commons.store.repository.elastic.ElasticProductRepository;
 import org.open4goods.commons.store.repository.elastic.ElasticTextRepository;
+import org.open4goods.commons.store.repository.elastic.VerticalPagesRepository;
 import org.open4goods.crawler.controller.CrawlController;
 import org.open4goods.crawler.repository.IndexationRepository;
+import org.open4goods.services.serialisation.service.SerialisationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,17 +20,16 @@ import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.data.elasticsearch.repository.config.EnableElasticsearchRepositories;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.mashape.unirest.http.Unirest;
 
 import jakarta.annotation.PostConstruct;
 
 
 
-@SpringBootApplication (scanBasePackageClasses = { Api.class, CrawlController.class, CacheKeyGenerator.class})
+@SpringBootApplication (scanBasePackages = {"org.open4goods.services"}, scanBasePackageClasses = { Api.class, CrawlController.class, CacheKeyGenerator.class})
 
 @EnableScheduling
-@EnableElasticsearchRepositories(basePackageClasses = {ElasticProductRepository.class, IndexationRepository.class, BrandScoresRepository.class, ElasticTextRepository.class})
+@EnableElasticsearchRepositories(basePackageClasses = {VerticalPagesRepository.class, ElasticProductRepository.class, IndexationRepository.class, BrandScoresRepository.class, ElasticTextRepository.class})
 //@EnableRedisRepositories(basePackageClasses = RedisProductRepository.class)
 @EnableCaching
 
@@ -63,7 +63,7 @@ public abstract class Api {
 			@Override
 			public <T> T readValue(final String value, final Class<T> valueType) {
 				try {
-					return serialisationService.getJsonMapper().readValue(value, valueType);
+					return serialisationService.jsonMapper().readValue(value, valueType);
 				} catch (final IOException e) {
 					throw new RuntimeException(e);
 				}
@@ -72,8 +72,8 @@ public abstract class Api {
 			@Override
 			public String writeValue(final Object value) {
 				try {
-					return serialisationService.getJsonMapper().writeValueAsString(value);
-				} catch (final JsonProcessingException e) {
+					return serialisationService.jsonMapper().writeValueAsString(value);
+				} catch (final IOException e) {
 					throw new RuntimeException(e);
 				}
 			}

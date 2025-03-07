@@ -1,35 +1,271 @@
-<!-- Content -->
-<div id="accordionScore" class="accordion accordion-flush">
-	<!-- Sub scores -->
-	<div class="accordion-item" th:each="score, stat : ${verticalConfig.ecoScoreDetails(product.realScores())}">
-		<h2 class="accordion-header" th:id="'score-'+${stat.count}">
-			<button 
-				class="accordion-button collapsed" 
-				type="button" 
-				data-bs-toggle="collapse" 
-				th:data-bs-target="'#collapse-score-'+${stat.count}"
-				th:aria-expanded="${stat.first == true ? 'true' : 'false'}" 
-				th:aria-controls="'collapse-score-'+${stat.count}">
-			
-				<span th:text="#{'score-'+${score.name}}"></span>
-				
-			</button>
-		</h2>
-		<div th:id="'collapse-score-'+${stat.count}" 
-			class="accordion-collapse collapse"
-			th:aria-labelledby="'collapse-score-'+${stat.count}"
-			data-bs-parent="#accordionScore">
-			<div class="accordion-body">
-				<th:block th:insert="~{inc/score/__${score.name.toLowerCase()}__.html}"></th:block>
+<section id="markerPresentation" class="container container-semi-fluid section">
+
+        <div class="row text-center justify-content-center">
+           <div class="col-md-8 mb-5">
+                <h2 class="display-3">
+                    Test du <span  th:text="${product.bestName()}"></span>
+                </h2>
+          </div>
+        </div>  
+        
+    <!-- Podium section 
+
+	<div class="row mb-5">
+		<div class="col-12 col-md-6 col-lg-4">
+			<div class="card shadow p-1 p-md-4 mb-4 mb-lg-0">
+				<div class="card-body">
+					<div class="icon icon-shape icon-shape-primary rounded-circle mb-4">
+						<span class="far fa-lightbulb"></span>
+					</div>
+					<h3 class="h5 mb-3">Dans le top 3 des consommations électriques</h3>
+					<p>Ce téléviseur est dans le top 3 des consommations</p>
+					<a href="#" class="btn btn-sm btn-primary animate-up-1">Learn more</a>
+				</div>
 			</div>
 		</div>
-	</div>			
-</div>	
-
-<!-- End Content -->
-<!-- EST-CE PERTINENT LE BOUTON GOULVEN ? -->
-<!--div class="card-footer bg-white border-0 p-0">
-	<div class="d-grid">
-		<a href="#markerEcological" class="btn btn-primary rounded-0 rounded-bottom">Bilan écologique</a>
+		<div class="col-12 col-md-6 col-lg-4">
+			<div class="card shadow p-1 p-md-4 mb-4 mb-lg-0">
+				<div class="card-body">
+					<div class="icon icon-shape icon-shape-primary rounded mb-4">
+						<span class="fas fa-chess-queen"></span>
+					</div>
+					<h3 class="h5 mb-3">Powerful Techniques</h3>
+					<p>Designed with the latest design trends in mind. Our product feels modern, creative, and beautiful.</p>
+					<a href="#" class="btn btn-sm btn-primary animate-up-1">Learn more</a>
+				</div>
+			</div>
+		</div>
+		<div class="col-12 col-md-6 col-lg-4">
+			<div class="card shadow p-1 p-md-4 mb-4 mb-lg-0">
+				<div class="card-body">
+					<div class="icon icon-shape icon-shape-primary organic-radius mb-4">
+						<span class="fas fa-smile-beam"></span>
+					</div>
+					<h3 class="h5 mb-3">100% Satisfaction</h3>
+					<p>Designed with the latest design trends in mind. Our product feels modern, creative, and beautiful.</p>
+					<a href="#" class="btn btn-sm btn-primary animate-up-1">Learn more</a>
+				</div>
+			</div>
+		</div>
 	</div>
-</div-->
+
+    -->
+			<div class="row">
+                  
+               <!-- Identity -->
+               
+               <div class="col-12 col-lg-4">
+            
+            
+            
+            
+                  <!-- Tops -->
+			<div class="card shadow border-gray-300">
+				<div class="card-body p-4 p-lg-5">
+					<div class="d-flex p-3 justify-content-center">
+						<div class="icon icon-primary">
+							<span class="fas fa-trophy"></span>
+						</div>
+						<div class="ps-4">
+							<h3 class="h5 icon-box-title md-1">Les tops</h3>
+						</div>
+					</div>
+					<div class="lead" th:text="${product.bestsScores}"></div>
+				</div>
+			</div>
+
+			<!-- Flops -->
+                  <div  class="card shadow border-gray-300">
+                   <div class="card-body p-4 p-lg-5">
+                         <div class="d-flex p-3 justify-content-center">                                                     
+                             <div class="icon icon-primary">
+                                 <span class="fas fa-thumbs-down"></span>
+                             </div>                                                      
+                             <div class="ps-4">
+                                 <h3 class="h5 icon-box-title md-1">Les flops</h3>
+                             </div>
+                         </div>
+                         <div  th:text="${product.worsesScores}" class="lead">
+                         </div>
+                   </div>
+                 </div>
+  
+  
+  
+					<!-- Identity -->
+                   <div  class="card shadow border-gray-300">
+                      <div class="card-body p-4 p-lg-5">
+                          	<div class="d-flex p-3 justify-content-center">														
+								<div class="icon icon-primary">
+									<span class="fas fa-id-card"></span>
+								</div>														
+								<div class="ps-4">
+									<h3 class="h5 icon-box-title md-1">Fiche d'identité</h3>
+								</div>
+							</div>
+							<th:block th:insert="~{inc/product-referentiel-attributes.html}"></th:block>
+                      </div>
+                  </div>
+                  
+  
+
+                  
+               </div>                  
+               
+               <!-- Description -->
+				<div class="col-lg-8">
+					
+					
+					
+					
+				   <!-- Presentation -->
+                   <div th:if="${aiReview}" class="card shadow border-gray-300">
+                      <div class="card-body p-4 p-lg-5">
+                            <div class="d-flex p-3 justify-content-center">                                                     
+                                <div class="icon icon-primary">
+                                    <span class="fas fa-id-card"></span>
+                                </div>                                                      
+                                <div class="ps-4">
+                                    <h3 class="h5 icon-box-title md-1">Présentation</h3>
+                                </div>
+                            </div>
+                            <div  class="lead" th:utext="${aiReview.description}"></div>
+                      </div>
+					</div>
+
+					<div th:if="${aiReview}" class="row ">
+						<!-- Avantages -->
+						<div  class="col-sm-12 col-md-12 col-lg-6 mt-3">
+							<!-- Icon Box -->
+							<div class="card border-gray-300 ">
+								<div class="card-body">
+									<div class="d-flex p-3">
+										<div class="icon icon-primary">
+											<span class="fas fa-plus"></span>
+										</div>
+										<div class="ps-4">
+											<h3 class="h5 icon-box-title md-1">Avantages</h3>
+										</div>
+									</div>
+									 <th:block th:utext="${aiReview.pros}"></th:block>
+								</div>
+							</div>
+							<!-- End of Icon Box -->
+						</div>
+
+						<!-- Inconvénients -->
+						<div th:if="${aiReview}" class="col-sm-12 col-md-12 col-lg-6 mt-3">
+							<!-- Icon Box -->
+							<div class="card border-gray-300 ">
+								<div class="card-body">
+									<div class="d-flex p-3">
+										<div class="icon icon-primary">
+											<span class="fas fa-minus"></span>
+										</div>
+										<div class="ps-4">
+											<h3 class="h5 icon-box-title md-1">Inconvénients</h3>
+										</div>
+									</div>
+									 <th:block th:utext="${aiReview.cons}"></th:block>
+								</div>
+							</div>
+							<!-- End of Icon Box -->
+						</div>
+					</div>
+					
+					
+                  <!-- Bilan -->
+                  <div th:if="${aiReview}" class="card shadow border-gray-300">
+                   <div class="card-body p-4 p-lg-5">
+                         <div class="d-flex p-3 justify-content-center">                                                     
+                             <div class="icon icon-primary">
+                                 <span class="fas fa-id-card"></span>
+                             </div>                                                      
+                             <div class="ps-4">
+                                 <h3 class="h5 icon-box-title md-1">Verdict</h3>
+                             </div>
+                         </div>
+                         <div  class="lead" th:utext="${aiReview.review}"></div>
+                   </div>
+                 </div>
+  
+					
+				</div>
+			</div>
+			
+			
+			
+			<!-- Sources -->
+			
+			
+            <div class="row">
+                  
+               
+               <div class="col-12 col-lg-4">
+                   <!-- Data Quality -->
+                   <div th:if="${aiReview}" class="card shadow border-gray-300">
+                      <div class="card-body p-4 p-lg-5">
+                            <div class="d-flex p-3 justify-content-center">                                                     
+                                <div class="icon icon-primary">
+                                    <span class="fas fa-id-card"></span>
+                                </div>                                                      
+                                <div class="ps-4">
+                                    <h3 class="h5 icon-box-title md-1">Notoriété</h3>
+                                </div>
+                            </div>
+                            <div  class="lead" th:utext="${aiReview.dataQuality}"></div>
+                      </div>
+                    </div>
+               
+               
+	           </div>
+	            
+	            <!-- Table sources -->
+               <div class="col-12 col-lg-8">
+                   <!-- Presentation -->
+                   <div th:if="${aiReview}" class="card shadow border-gray-300">
+                      <div class="card-body p-4 p-lg-5">
+                            <div class="d-flex p-3 justify-content-center">                                                     
+                                <div class="icon icon-primary">
+                                    <span class="fas fa-id-card"></span>
+                                </div>                                                      
+                                <div class="ps-4">
+                                    <h3 class="h5 icon-box-title md-1">Sources</h3>
+                                </div>
+                            </div>
+					<div class="table-responsive">
+						<table class="table table-striped">
+							<tbody>
+								<tr>
+									<th scope="col" id="class2">Ref</th>
+									<th scope="col" id="teacher2">Nom</th>
+									<th scope="col" id="males2">Description</th>
+								</tr>
+								<tr th:each="item,stat : ${aiReview.sources}">
+									<td th:id="'review-source-'+${item.number}" scope="row"  ><span th:text="${item.number}" ></span></td>
+									<td scope="row" ><a target="_blank" rel="nofollow" th:href="${item.url}" th:text="${item.name}" ></a></td>
+									<td scope="row" ><span th:text="${item.description}" ></span></td>
+								</tr>
+								
+							</tbody>
+						</table>
+					</div>
+
+
+
+				</div>
+                    </div>
+               
+               
+               </div>
+                
+            
+            </div>
+            
+			
+</section> 
+	   
+	   
+	   
+	   
+

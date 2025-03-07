@@ -1,6 +1,30 @@
 
-<div class="table-responsive-sm">
-    <table id="tableProducts" class="table">
+
+<div>
+<div class="row">
+    <span class="mt-2">
+        <button type="button" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#exampleModal">Filtrer</button>
+        
+        <select class="btn btn-secondary" id="sort-combobox">
+            <option value="none">Trier</option>
+            <option value="2-asc">ImpactScore (-)</option>
+            <option value="2-desc">ImpactScore (+)</option>
+            <option value="3-asc">Prix (-)</option>
+            <option value="3-desc">Prix (+)</option>
+            <option value="4-asc">Concurrence (-)</option>
+            <option value="4-desc">Concurrence (+)</option>
+        </select>
+        
+        <button id="cv" class="float-end btn btn-light" title="Vue carte"><i class="fas fa-th fa-2x"></i> <!-- Default icon: Grid view -->    </button>
+    </span>
+
+</div>
+                            
+
+
+
+
+    <table id="tableProducts" class="table table-bordered" cellspacing="0" width="100%">
         <thead>
             <tr>
                 <th><small>Nom</small></th>
@@ -16,10 +40,10 @@
                  -->
             </tr>
         </thead>
-        <tbody>
-            <tr>
-                <td>
-                    <div th:each="p : ${products.limitedDatas(20)}" >
+        <tbody style="display: table-caption;">
+            <tr th:each="p : ${products.limitedDatas(20)}">
+                <td colspan="5">
+                    <div  >
                         
                             <p th:if="${p.model()}"><a th:text="${p.model()}" th:href="'/'+${verticalPath}+ '/'+${p.url(siteLanguage)}"></a></p>
                             <p th:unless="${p.model()}"><a th:text="${p.bestName()}" th:href="'/'+${verticalPath}+ '/'+${p.url(siteLanguage)}"></a></p>
@@ -41,6 +65,8 @@
                        
                     </div>
                 </td>
+
+                
             </tr>
  
         </tbody>

@@ -6,19 +6,17 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.open4goods.api.services.aggregation.AbstractAggregationService;
-import org.open4goods.commons.config.yml.ui.PrefixedAttrText;
-import org.open4goods.commons.config.yml.ui.ProductI18nElements;
-import org.open4goods.commons.config.yml.ui.VerticalConfig;
 import org.open4goods.commons.exceptions.AggregationSkipException;
-import org.open4goods.commons.exceptions.InvalidParameterException;
-import org.open4goods.commons.helper.IdHelper;
-import org.open4goods.commons.model.constants.ReferentielKey;
-import org.open4goods.commons.model.data.DataFragment;
-import org.open4goods.commons.model.product.ProductAttribute;
-import org.open4goods.commons.model.product.Product;
-import org.open4goods.commons.services.EvaluationService;
 import org.open4goods.commons.services.VerticalsConfigService;
 import org.open4goods.commons.services.textgen.BlablaService;
+import org.open4goods.model.datafragment.DataFragment;
+import org.open4goods.model.exceptions.InvalidParameterException;
+import org.open4goods.model.helper.IdHelper;
+import org.open4goods.model.product.Product;
+import org.open4goods.model.vertical.PrefixedAttrText;
+import org.open4goods.model.vertical.ProductI18nElements;
+import org.open4goods.model.vertical.VerticalConfig;
+import org.open4goods.services.evaluation.service.EvaluationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -100,26 +98,7 @@ public class NamesAggregationService extends AbstractAggregationService {
 			} catch (InvalidParameterException e1) {
 				logger.error("Error while computing url for product {}", data.getId(), e1);
 			}
-
 		}
-
-		
-//		if (null != vConf) {
-//
-//			////////////////
-//			// AI generation
-//			/////////////////
-//			List<NamesConfig> namesConfigs = vConf.getNamesConfig();
-//			for (NamesConfig nameConfig : namesConfigs) {
-//				String key = nameConfig.getKey();
-//
-//				for (Entry<String, String> i18n : nameConfig.getValue().entrySet()) {
-//					String lang = i18n.getKey();
-//					String value = evaluationService.thymeleafEval(data, i18n.getValue());
-//					data.getNames().addName(lang, key, value);
-//				}
-//			}
-//		}
 	}
 
 	private String generateUrl(Product data, PrefixedAttrText urlPrefix, VerticalConfig vConf) throws InvalidParameterException {

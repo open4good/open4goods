@@ -9,7 +9,7 @@ import java.util.Map;
 import org.open4goods.commons.config.yml.datasource.DataSourceProperties;
 import org.open4goods.commons.model.data.ContributionVote;
 import org.open4goods.commons.services.DataSourceConfigService;
-import org.open4goods.commons.services.SerialisationService;
+import org.open4goods.services.serialisation.service.SerialisationService;
 import org.open4goods.ui.config.yml.UiConfig;
 import org.open4goods.ui.controllers.ui.UiService;
 import org.slf4j.Logger;
@@ -64,7 +64,7 @@ public class PartenairesController  implements SitemapExposedController{
 			String link;
 			try {
 				link = URLEncoder.encode(serialisationService.compressString(serialisationService.toJson(token)), Charset.defaultCharset());
-			} catch (IOException e) {
+			} catch (Exception e) {
 				LOGGER.error("Error while generating link for partner",e);
 				link = dsp.getPortalUrl();
 			}

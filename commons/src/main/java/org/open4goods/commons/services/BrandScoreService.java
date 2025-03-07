@@ -1,15 +1,14 @@
 package org.open4goods.commons.services;
 
-import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
 import org.open4goods.commons.config.yml.datasource.DataSourceProperties;
 import org.open4goods.commons.helper.GenericFileLogger;
-import org.open4goods.commons.model.constants.CacheConstants;
 import org.open4goods.commons.model.data.BrandScore;
 import org.open4goods.commons.store.repository.elastic.BrandScoresRepository;
+import org.open4goods.model.constants.CacheConstants;
 import org.slf4j.Logger;
 import org.springframework.cache.annotation.Cacheable;
 

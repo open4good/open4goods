@@ -1,6 +1,6 @@
 package org.open4goods.commons.test;
 
-import org.open4goods.commons.model.product.Product;
+import org.open4goods.model.product.Product;
 public class ProductTestBuilder {
 
 	private final Product aggregatedData;

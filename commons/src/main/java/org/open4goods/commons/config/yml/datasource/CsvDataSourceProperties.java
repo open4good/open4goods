@@ -9,7 +9,7 @@ import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
 import org.open4goods.commons.config.yml.test.TestCsvLine;
-import org.open4goods.commons.model.constants.ReferentielKey;
+import org.open4goods.model.attribute.ReferentielKey;
 import org.springframework.validation.annotation.Validated;
 
 @Validated
@@ -147,7 +147,7 @@ public class CsvDataSourceProperties {
 	/**
 	 * The currency, as static expression
 	 */
-	protected org.open4goods.commons.model.constants.Currency currency;
+	protected org.open4goods.model.price.Currency currency;
 
 	/**
 	 * Column name containing the name of the product
@@ -292,11 +292,11 @@ public class CsvDataSourceProperties {
 		this.price = price;
 	}
 
-	public org.open4goods.commons.model.constants.Currency getCurrency() {
+	public org.open4goods.model.price.Currency getCurrency() {
 		return currency;
 	}
 
-	public void setCurrency(final org.open4goods.commons.model.constants.Currency currency) {
+	public void setCurrency(final org.open4goods.model.price.Currency currency) {
 		this.currency = currency;
 	}
 

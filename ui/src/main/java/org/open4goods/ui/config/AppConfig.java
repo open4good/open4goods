@@ -8,14 +8,9 @@ import java.util.concurrent.TimeUnit;
 
 import org.open4goods.commons.dao.ProductRepository;
 import org.open4goods.commons.helper.DevModeService;
-import org.open4goods.commons.interceptors.BanCheckerInterceptor;
-import org.open4goods.commons.model.constants.CacheConstants;
-import org.open4goods.commons.model.constants.Currency;
-import org.open4goods.commons.model.data.Price;
 import org.open4goods.commons.services.BarcodeValidationService;
 import org.open4goods.commons.services.BrandService;
 import org.open4goods.commons.services.DataSourceConfigService;
-import org.open4goods.commons.services.EvaluationService;
 import org.open4goods.commons.services.FeedbackService;
 import org.open4goods.commons.services.GoogleTaxonomyService;
 import org.open4goods.commons.services.IcecatService;
@@ -24,16 +19,25 @@ import org.open4goods.commons.services.ImageMagickService;
 import org.open4goods.commons.services.MailService;
 import org.open4goods.commons.services.RecaptchaService;
 import org.open4goods.commons.services.RemoteFileCachingService;
+import org.open4goods.commons.services.ResourceBundle;
 import org.open4goods.commons.services.ResourceService;
 import org.open4goods.commons.services.SearchService;
-import org.open4goods.commons.services.SerialisationService;
-import org.open4goods.commons.services.StandardiserService;
 import org.open4goods.commons.services.VerticalsConfigService;
 import org.open4goods.commons.services.ai.LegacyAiService;
 import org.open4goods.commons.store.repository.elastic.BrandScoresRepository;
+import org.open4goods.model.StandardiserService;
+import org.open4goods.model.constants.CacheConstants;
+import org.open4goods.model.price.Currency;
+import org.open4goods.model.price.Price;
+import org.open4goods.services.evaluation.config.EvaluationConfig;
+import org.open4goods.services.evaluation.service.EvaluationService;
+import org.open4goods.services.prompt.config.PromptServiceConfig;
+import org.open4goods.services.prompt.service.PromptService;
+import org.open4goods.services.serialisation.service.SerialisationService;
 import org.open4goods.ui.config.yml.UiConfig;
 import org.open4goods.ui.controllers.ui.UiService;
 import org.open4goods.ui.interceptors.GenericTemplateInterceptor;
+import org.open4goods.ui.interceptors.ImageResizeInterceptor;
 import org.open4goods.ui.repository.ContributionVoteRepository;
 import org.open4goods.ui.services.BlogService;
 import org.open4goods.ui.services.ContributionService;
@@ -45,7 +49,10 @@ import org.open4goods.ui.services.todo.TodoService;
 import org.open4goods.xwiki.services.XwikiFacadeService;
 import org.springframework.ai.openai.OpenAiChatModel;
 import org.springframework.ai.openai.OpenAiImageModel;
+import org.springframework.ai.openai.api.OpenAiApi;
+import org.springframework.ai.retry.RetryUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.web.client.ClientHttpRequestFactories;
 import org.springframework.boot.web.client.ClientHttpRequestFactorySettings;
 import org.springframework.boot.web.client.RestClientCustomizer;
@@ -60,6 +67,8 @@ import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.web.firewall.HttpFirewall;
 import org.springframework.security.web.firewall.StrictHttpFirewall;
+import org.springframework.web.client.RestClient;
+import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.servlet.LocaleResolver;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.PathMatchConfigurer;
@@ -90,7 +99,34 @@ public class AppConfig {
 	public AppConfig(UiConfig config) {
 		this.config = config;
 	}
+	
+	@Bean
+	@Qualifier("perplexityChatModel")
+	OpenAiApi perplexityApi(@Autowired PromptServiceConfig genAiConfig) {
+		return new OpenAiApi(genAiConfig.getPerplexityBaseUrl(),
+							 genAiConfig.getPerplexityApiKey(),
+							 genAiConfig.getPerplexityCompletionsPath(),
+							 "/v1/embeddings", RestClient.builder(), WebClient.builder(),
+							 RetryUtils.DEFAULT_RESPONSE_ERROR_HANDLER);
+	}
+	
+	@Bean
+	@Qualifier("openAiCustomApi")
+	OpenAiApi openAiCustomApi(@Autowired PromptServiceConfig genAiConfig) {
+		return new OpenAiApi(genAiConfig.getOpenaiApiKey());
+	}
+	
+	
+	@Bean
+	PromptService genAiService (@Autowired @Qualifier("perplexityChatModel") OpenAiApi perplexityApi, 
+								@Autowired @Qualifier("openAiCustomApi") OpenAiApi openAiCustomApi,
+								@Autowired  EvaluationService spelEvaluationService, 
+								@Autowired  SerialisationService serialisationService,
+								@Autowired PromptServiceConfig genAiConfig) {
+		return new PromptService(genAiConfig, perplexityApi, openAiCustomApi, serialisationService, spelEvaluationService);
+	}
 
+	
 	
 	@Bean
 	TodoService todoService() {
@@ -140,6 +176,20 @@ public class AppConfig {
 
 
 
+    @Bean
+    public ResourceBundle messageSource() {
+        ResourceBundle messageSource = new ResourceBundle();
+        
+        // Set multiple base names for properties files
+        messageSource.setBasenames(
+            "classpath:i18n/messages",  // default.properties
+            "classpath:i18n/metas"      // metas.properties
+        );
+        
+        messageSource.setDefaultEncoding("UTF-8");
+        messageSource.setCacheSeconds(3600);  // Refresh every hour
+        return messageSource;
+    }
     
     @Bean
     ContributionService contributionService (CacheManager cacheManager, SerialisationService serialisationService, ContributionVoteRepository repository, UiConfig uiConfig, ElasticsearchOperations esOps) {
@@ -265,12 +315,16 @@ public class AppConfig {
 		};
 	}
 
+	/**
+	 * The service that hot evaluates thymeleaf / spel expressions
+	 *
+	 * @return
+	 */
 	@Bean
-	EvaluationService evaluationService() {
-		return new EvaluationService();
+	EvaluationService evaluationService(@Autowired EvaluationConfig evalConfig) {
+		return new EvaluationService(evalConfig);
 	}
 
-	
 	
 
 	// TODO : should not be required at ui side
@@ -380,15 +434,20 @@ public class AppConfig {
 	///////////////////////////////////
 	// Web MVC Config
 	///////////////////////////////////
+
+
 	@Bean
 	WebMvcConfigurer configurer() {
+		
 		return new WebMvcConfigurer() {
 
 			@Override
 			public void addInterceptors(final InterceptorRegistry registry) {
-				registry.addInterceptor(new BanCheckerInterceptor(config.getBancheckerConfig()));
-				registry.addInterceptor(AppConfig.localeChangeInterceptor());
+//				registry.addInterceptor(new BanCheckerInterceptor(config.getBancheckerConfig()));
+//				registry.addInterceptor(AppConfig.localeChangeInterceptor());
 				registry.addInterceptor(new GenericTemplateInterceptor());
+				registry.addInterceptor(new ImageResizeInterceptor(resourceService(),config.getAllowedImagesSizeSuffixes()));
+				
 			}
 
 			@Override

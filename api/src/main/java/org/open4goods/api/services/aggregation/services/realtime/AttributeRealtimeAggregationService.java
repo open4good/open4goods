@@ -8,24 +8,24 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.open4goods.api.services.aggregation.AbstractAggregationService;
-import org.open4goods.commons.config.yml.attributes.AttributeConfig;
-import org.open4goods.commons.config.yml.attributes.AttributeParser;
-import org.open4goods.commons.config.yml.ui.AttributesConfig;
-import org.open4goods.commons.config.yml.ui.VerticalConfig;
 import org.open4goods.commons.exceptions.AggregationSkipException;
-import org.open4goods.commons.exceptions.ResourceNotFoundException;
-import org.open4goods.commons.exceptions.ValidationException;
-import org.open4goods.commons.model.attribute.Attribute;
-import org.open4goods.commons.model.constants.ReferentielKey;
-import org.open4goods.commons.model.data.DataFragment;
-import org.open4goods.commons.model.product.IndexedAttribute;
-import org.open4goods.commons.model.product.Product;
-import org.open4goods.commons.model.product.ProductAttribute;
-import org.open4goods.commons.model.product.ProductAttributes;
-import org.open4goods.commons.model.product.SourcedAttribute;
 import org.open4goods.commons.services.BrandService;
 import org.open4goods.commons.services.IcecatService;
 import org.open4goods.commons.services.VerticalsConfigService;
+import org.open4goods.model.attribute.Attribute;
+import org.open4goods.model.attribute.IndexedAttribute;
+import org.open4goods.model.attribute.ProductAttribute;
+import org.open4goods.model.attribute.ProductAttributes;
+import org.open4goods.model.attribute.ReferentielKey;
+import org.open4goods.model.attribute.SourcedAttribute;
+import org.open4goods.model.datafragment.DataFragment;
+import org.open4goods.model.exceptions.ResourceNotFoundException;
+import org.open4goods.model.exceptions.ValidationException;
+import org.open4goods.model.product.Product;
+import org.open4goods.model.vertical.AttributeConfig;
+import org.open4goods.model.vertical.AttributeParser;
+import org.open4goods.model.vertical.AttributesConfig;
+import org.open4goods.model.vertical.VerticalConfig;
 import org.slf4j.Logger;
 
 public class AttributeRealtimeAggregationService extends AbstractAggregationService {

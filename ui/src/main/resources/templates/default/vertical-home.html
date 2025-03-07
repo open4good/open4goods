@@ -3,153 +3,150 @@
 
 <head>
 
-	<!--/* Metas and CSS */-->
-	<th:block th:insert="~{inc/header-meta.html}"></th:block>
+    <!--/* Metas and CSS */-->
+    <th:block th:insert="~{inc/header-meta.html}"></th:block>
     
-	<!-- Primary Meta Tags -->
-	<title th:text="#{index.title}"></title>
-	<meta name="title" th:content="${verticalConfig.i18n(siteLanguage).verticalMetaTitle}">
-	<meta name="description" th:content="${verticalConfig.i18n(siteLanguage).verticalMetaDescription}">
-		
-	<!-- Open Graph / Facebook -->
-	<meta property="og:type" content="website">
-	<meta property="og:url" th:content="${url}">
-	<meta property="og:title" th:content="${verticalConfig.i18n(siteLanguage).productMetaOpenGraphTitle}">
-	<meta property="og:description" th:content="${verticalConfig.i18n(siteLanguage).productMetaOpenGraphTitle}">
-	<meta property="og:image" th:content="${url} + 'assets/img/brand/light.svg'">
-	
-	<!-- Twitter -->
-	<meta name="twitter:card" content="summary_large_image">
-	<!-- TODO : Image of the category -->
-	<meta name="twitter:url" th:content="${url}">
-	<meta name="twitter:title" th:content="${verticalConfig.i18n(siteLanguage).productMetaTwitterTitle}">
-	<meta name="twitter:description" th:content="${verticalConfig.i18n(siteLanguage).productMetaTwitterDescription}">
-	<!-- TODO : Image of the category -->
-	<meta name="twitter:image" th:content="${url} + 'assets/img/brand/light.svg'">
+    <!-- Primary Meta Tags -->
+    <title th:text="#{index.title}"></title>
+    <meta name="title" th:content="${verticalConfig.i18n(siteLanguage).verticalMetaTitle}">
+    <meta name="description" th:content="${verticalConfig.i18n(siteLanguage).verticalMetaDescription}">
+        
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" th:content="${url}">
+    <meta property="og:title" th:content="${verticalConfig.i18n(siteLanguage).productMetaOpenGraphTitle}">
+    <meta property="og:description" th:content="${verticalConfig.i18n(siteLanguage).productMetaOpenGraphTitle}">
+    <meta property="og:image" th:content="${url} + 'assets/img/brand/light.svg'">
+    
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image">
+    <!-- TODO : Image of the category -->
+    <meta name="twitter:url" th:content="${url}">
+    <meta name="twitter:title" th:content="${verticalConfig.i18n(siteLanguage).productMetaTwitterTitle}">
+    <meta name="twitter:description" th:content="${verticalConfig.i18n(siteLanguage).productMetaTwitterDescription}">
+    <!-- TODO : Image of the category -->
+    <meta name="twitter:image" th:content="${url} + 'assets/img/brand/light.svg'">
 
-	<link rel="stylesheet" type="text/css" href="/webjars/datatables/css/dataTables.bootstrap5.min.css">
-	
-	<style>
-	tbody, td, tfoot, th, thead, tr {
-    	 border-style: none;
-	}	
-	
-	</style>
-	
+    <link rel="stylesheet" type="text/css" href="/webjars/datatables/css/dataTables.bootstrap5.min.css">
+    
 </head>
 
-<body>
- 	<!--/* Navbar */-->
-	<th:block th:insert="~{inc/navbar/navbar-vertical.html}"></th:block>
-    <!--/* Loader */-->
-    <th:block th:insert="~{inc/preloader.html}"></th:block>
-	
-    <main>	
-  
-        <div class="section section-lg pt-5 pt-md-3 bg-gray-200">
+<body class="page-vertical">
+    <th:block th:insert="~{inc/navbar/navbar-home.html}"></th:block>
+    
+    <main class="bg-gray-200">
+        <!-- Loader -->
+        <th:block th:insert="~{inc/preloader.html}"></th:block>
+
+        <section class="section-header pb-0">
+            <div class="row">
+                <th:block th:insert="~{inc/wip.html}"></th:block>
+            </div>
+
             <div class="container container-semi-fluid">
-
-				<!--/* Hero */-->						
-				<div class="row mb-2">							
-					<div class="card shadow">
-						<div class=" align-items-center">
-							
-								<div class="d-flex flex-wrap align-items-center row">
-			                        <div class="col-lg-2 text-center">
-			                                <img class="mt-2" width="150" th:src="'/images/verticals/' + ${vertical} + '.jpg'">
-			                        </div>
-			                        <div class="col-lg-10">
-			                                <h1 class="mt-2 text-center" th:text="${verticalConfig.i18n(siteLanguage).verticalHomeTitle}"></h1>
-			                                <p class="row p-2 mb-4" th:text="${verticalConfig.i18n(siteLanguage).verticalHomeDescription}"> </p>		
-			                				
-			                        </div> 
-								</div>
-	                    </div>
-					</div>
-				</div>
-						
-                <div class="row ">
-                
-                	<!--/* Left column */-->                	
-                    <div class="col-lg-3 mb-3 mb-lg-0">
-                    
-                		<!--/* Guides */-->	
-						<div th:if="${verticalConfig.i18n(siteLanguage).getWikiPages().size() > 0}" class="row card shadow mb-2">
-							<div class="card-header"><h2 class="h5">Les guides</h2></div>
-							<div class="card-body">
-								<ul class="list-group list-group-flush price-list">
-									<li th:each="item : ${verticalConfig.i18n(siteLanguage).getWikiPages()}" class="list-group-item border-0">
-										<span class="fas" th:classappend="${item.faIcon}" ></span>
-										<a th:href="'/' + ${verticalPath} + '/'+ ${item.verticalUrl}" th:text="${item.title}"></a> 
-									</li>								
-								</ul>
-							</div>
-						</div>   
-						
-
-                		<!--/* Blog posts */-->	
-						<div th:if="${posts.size()>0}" class="row card shadow mb-2">
-							<div class="card-header"><h2 class="h5">On en parle dans le blog</h2></div>
-							<div class="card-body">
-								<ul class="list-group list-group-flush price-list">
-									<li th:each="post : ${posts}" class="list-group-item border-0">										
-										<a th:href="'/blog/'+${post.url}" th:text="${post.title}"></a> 
-									</li>
-								</ul>
-							</div>
-						</div>   
-						
-
-						
-                        <!--/* Price Filters */-->                          
-                        <div class="row card shadow mb-2">
-                            <div class="card-header"><h2 class="h5">Prix</h2></div>
-                            <div class="card-body">
-                                <th:block th:insert="~{inc/vertical-filters-price.html}"></th:block>
-                                
+                <!--/* Hero */-->                       
+                <div class="row mb-2">                          
+                    <div class="d-flex align-items-center">
+                        <div class="d-flex flex-wrap align-items-center row">
+                            <!--div class="col-lg-2 text-center">
+                                    <img class="mt-2" width="150" th:src="'/images/verticals/' + ${vertical} + '.jpg'">
+                            </div-->
+                            <div class="col-lg-10">
+                                <h2 class="h4 mb-0 text-center" th:text="${verticalConfig.i18n(siteLanguage).verticalHomeTitle}"></h2>
+                                <p class="row p-2 mb-4" th:text="${verticalConfig.i18n(siteLanguage).verticalHomeDescription}"> </p>            
+                            </div> 
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <div class="container-fluid">       
+            <div class="row mb-5">
+                <!--/* Left column */-->                    
+                <div class="col-lg-3">
+                    <!--/* Guides */--> 
+                    <aside class="card border-gray-300 bg-transparent p-2 mb-4" th:if="${verticalConfig.i18n(siteLanguage).getWikiPages().size() > 0}">
+                        <div class="card-header bg-transparent border-0 text-center d-flex flex-row flex-lg-column align-items-center justify-content-center px-1 px-lg-4">
+                            <span class="h5 my-0 my-lg-3 me-3 me-lg-0">Les guides</span>
+                        </div>
+                        <div class="card-body p-2 d-none d-lg-block">
+                            <div class="list-group dashboard-menu list-group-sm">
+                                <a 
+                                    class="d-flex list-group-item border-0 list-group-item-action" 
+                                    th:href="'/' + ${verticalPath} + '/'+ ${item.verticalUrl}" 
+                                    th:each="item : ${verticalConfig.i18n(siteLanguage).getWikiPages()}">
+                                    <span th:text="${item.title}"></span>
+                                    <span class="icon icon-xs ms-auto">
+                                        <span class="fas fa-chevron-right"></span>
+                                    </span>
+                                </a>                                
                             </div>
                         </div>
-						                 
+                    </aside>   
+                    
+                    <!--/* Blog posts */--> 
+                    <aside class="card border-gray-300 bg-transparent p-2 mb-4" th:if="${posts.size()>0}">
+                        <div class="card-header bg-transparent border-0 text-center d-flex flex-row flex-lg-column align-items-center justify-content-center px-1 px-lg-4">
+                            <span class="h5 my-0 my-lg-3 me-3 me-lg-0">On en parle dans le blog</span>
+                        </div>
+                        <div class="card-body p-2">
+                            <div class="list-group dashboard-menu list-group-sm">
+                                <a
+                                    class="d-flex list-group-item border-0 list-group-item-action" 
+                                    th:each="post : ${posts}"
+                                    th:href="'/blog/'+${post.url}">                                     
+                                    <span th:text="${post.title}"></span>
+                                    <span class="icon icon-xs ms-auto">
+                                        <span class="fas fa-chevron-right"></span>
+                                    </span>
+                                </a>
+                            </div>
+                        </div>
+                    </aside>   
+                    
+                    <!--/* Price Filters */-->                          
+                    <aside class="card border-gray-300 bg-transparent p-2 mb-4">
+                        <div class="card-header bg-transparent border-0 text-center d-flex flex-row flex-lg-column align-items-center justify-content-center px-1 px-lg-4">
+                            <span class="h5 my-0 my-lg-3 me-3 me-lg-0">Prix</span>
+                        </div>
+                        <div class="card-body p-2">
+                            <th:block th:insert="~{inc/vertical-filters-price.html}"></th:block>
+                        </div>
+                    </aside>
                                         
-				        <!--/* Ecological Filters */-->	
-						<div class="row card shadow mb-2 border-success text-secondary">
-							<div class="card-header"><h2 class="h5">Eco-Filtres</h2></div>
-							<div class="card-body">
-                    			<th:block th:insert="~{inc/vertical-filters-eco.html}"></th:block>
-								
-							</div>
-						</div>
+                    <!--/* Ecological Filters */--> 
+                    <aside class="card border-gray-300 bg-transparent p-2 mb-4">
+                        <div class="card-header bg-transparent border-0 text-center d-flex flex-row flex-lg-column align-items-center justify-content-center px-1 px-lg-4">
+                            <span class="h5 my-0 my-lg-3 me-3 me-lg-0">Eco-Filtres</span>
+                        </div>
+                        <div class="card-body p-2">
+                            <th:block th:insert="~{inc/vertical-filters-eco.html}"></th:block>
+                        </div>
+                    </aside>
 
+                    <!--/* Technical Filters */-->                          
+                    <div class="row card shadow mb-2">
+                        <div class="card-header"><h2 class="h5">Caractéristiques</h2></div>
+                        <div class="card-body">
+                            <th:block th:insert="~{inc/vertical-filters-technical.html}"></th:block>
+                        </div>
+                    </div>                          
+                </div>
 
-                        
-                        
-				        <!--/* Technical Filters */-->							
-						<div class="row card shadow mb-2">
-							<div class="card-header"><h2 class="h5">Caractéristiques</h2></div>
-							<div class="card-body">
-                    			<th:block th:insert="~{inc/vertical-filters-technical.html}"></th:block>
-								
-							</div>
-						</div>
-						
-						
-						  				        					
-					</div>
-
-					<!--/* Right column */-->
-					<div class="col-lg-9">
-						<div class="ms-1 row card shadow">
-							<th:block th:insert="~{inc/vertical-table.html}"></th:block>
-						</div>
-
-					</div>
-				</div>
-        	</div>
-       	</div>
+                <!--/* Right column */-->
+                <div class="col-lg-9">
+                    <!--div class="card border-gray-300 bg-transparent p-2 mb-4">
+                        <div class="card-body p-2"-->
+                            <th:block th:insert="~{inc/vertical-table.html}"></th:block>
+                        <!--/div>
+                    </div-->
+                </div>
+            </div>
+        </div>
     </main>
 
-	<!--/* Footer */-->
-	<th:block th:insert="~{inc/footer.html}"></th:block>	
+    <!--/* Footer */-->
+    <th:block th:insert="~{inc/footer.html}"></th:block>    
 
 <!-- Core -->
 <script src="/vendor/@popperjs/core/dist/umd/popper.min.js"></script>
@@ -183,18 +180,18 @@
 
 <!-- Setting up variables -->
 <script th:inline="javascript">
-	/*<![CDATA[*/
-	
-	    const vertical = /*[[${verticalConfig.id}]]*/ '';
+    /*<![CDATA[*/
     
-	    const siteLanguage = /*[[${siteLanguage}]]*/'';
-	    const baseUrl = /*[[${baseUrl}]]*/'';
-	    const verticalPath = /*[[${verticalPath}]]*/'';
-	    const additionalAttributes = /*[[${filters}]]*/'';
-	    const tpl = /*[[${tpl}]]*/'';
-	    const chartIntervals = /*[[${products.numericFilters}]]*/'';
-	    	    	    
-	/*]]>*/
+        const vertical = /*[[${verticalConfig.id}]]*/ '';
+    
+        const siteLanguage = /*[[${siteLanguage}]]*/'';
+        const baseUrl = /*[[${baseUrl}]]*/'';
+        const verticalPath = /*[[${verticalPath}]]*/'';
+        const additionalAttributes = /*[[${filters}]]*/'';
+        const tpl = /*[[${tpl}]]*/'';
+        const chartIntervals = /*[[${products.numericFilters}]]*/'';
+                        
+    /*]]>*/
 </script>
 
 <script>
@@ -202,66 +199,66 @@
    var dummyRender = function(cell, type, data) {return  "" ;}
    
    function description (data) {
-   	
-   	if (data.genaiTexts == null) {
-   		return "";
-   	}
-   	
-   	// TODO : I18n
-   	// TODO : Ugly, ugly....
-   	if (data.genaiTexts['fr'] == null) {
+    
+    if (data.genaiTexts == null) {
         return "";
     }
-   	
+    
+    // TODO : I18n
+    // TODO : Ugly, ugly....
+    if (data.genaiTexts['fr'] == null) {
+        return "";
+    }
+    
 
-   	if (data.genaiTexts['fr'].descriptions['ecological-description'] != null) {
-   		ret = data.genaiTexts['fr'].descriptions['ecological-description'].content;
-   		
-   		if (ret == null) {
-   		   return "";
-   		}
-   		
-   		if (ret.length > 200) {
-   			return ret.slice(0, 200) + "...";
-   		} else {
-   		    return ret;
-   		}
-   	} 
-   	
-   	return "";
+    if (data.genaiTexts['fr'].descriptions['ecological-description'] != null) {
+        ret = data.genaiTexts['fr'].descriptions['ecological-description'].content;
+        
+        if (ret == null) {
+           return "";
+        }
+        
+        if (ret.length > 200) {
+            return ret.slice(0, 200) + "...";
+        } else {
+            return ret;
+        }
+    } 
+    
+    return "";
    }
    
    
    var columns = [
        { 
-       	"data": "attributes.referentielAttributes.MODEL", 
-       	"name" : "Modèle",
-       	"title" : "Modèle",
-       	render: function(cell, type, data) {
-				var template = $('#template-product-search').html();
-				Mustache.parse(template);
+        "data": "attributes.referentielAttributes.MODEL", 
+        "name" : "Modèle",
+        "title" : "Modèle",
+        render: function(cell, type, data) {
+                var template = $('#template-product-search').html();
+                Mustache.parse(template);
 
-				return Mustache.render(template, {
-					data : data,
-					vertical: vertical,
-					// TODO : I18n
-  					productUrl : baseUrl+verticalPath+'/'+data.names.url['fr'],
-  				    ecoscore: data.scores?.ECOSCORE?.value != null ? Math.round((data.scores.ECOSCORE.value + Number.EPSILON) * 100) / 100 : "",
-  					compensation: data.price?.minPrice?.compensation != null ? Math.round((data.price.minPrice.compensation + Number.EPSILON) * 100) / 100 : null,  					
-  					
+                return Mustache.render(template, {
+                    data : data,
+                    vertical: vertical,
+                    // TODO : I18n
+                    productUrl : baseUrl+verticalPath+'/'+data.names.url['fr'],
+                    ecoscore: data.scores?.ECOSCORE?.value != null ? Math.round((data.scores.ECOSCORE.value + Number.EPSILON) * 100) / 100 : "",
+                    compensation: data.price?.minPrice?.compensation != null ? Math.round((data.price.minPrice.compensation + Number.EPSILON) * 100) / 100 : null,                      
+                    
 // TODO : Default as a hack until full i18n is implemented
-  					desc:   description(data),
-  					imageUrl : (data.coverImagePath),           					
-					name : (data.attributes.referentielAttributes.MODEL == null ? data.names.name : data.attributes.referentielAttributes.MODEL)
-				});                	
-       	}
+                    desc:   description(data),
+                    imageUrl : (data.coverImagePath),                               
+                    name : (data.attributes.referentielAttributes.MODEL == null ? data.names.name : data.attributes.referentielAttributes.MODEL)
+                });                 
+        }
        },
        
        { 
-       	"data": "attributes.referentielAttributes.BRAND", 
-       	"name" : "Marque",
-       	"title" : "Marque",
-       	render: function(cell, type, data) {
+        "data": "attributes.referentielAttributes.BRAND", 
+        "name" : "Marque",
+        "title" : "Marque",
+        render: function(cell, type, data) {
                return  "" ;
            }
        },
@@ -270,136 +267,136 @@
        { "data": "offersCount", "name" : "Concurrence", "title" : "Concurrence"  }
            ];
 
-	/* Adding additional attributes columns with hidden titles
-	   for (var i = 0; i < additionalAttributes.length; i++) {
-	       columns.push({
-	           data: "attributes.indexed." + additionalAttributes[i]['key'] + ".value",
-	           name: additionalAttributes[i]['name'][siteLanguage],
-	           title: "", // Set an empty title to hide the header text
-	           render: dummyRender
-	       });
-	   }
-		**/
-	<!-- Datatable init function -->
-	var table;
-	
-	function initDatatable () {
-		
-		return $('#tableProducts').DataTable({
-			
-			order: [ [2, 'desc'] ],
-	    	searching: false,
-	        "bLengthChange": false,	 
-	        "processing": true,
-	        "serverSide": true,
-	        "orderMulti": false,
-	        "pageLength": 5,
-	        "ajax": {
-	            "url": "/"+verticalPath+"/paginated",
-	            "dataSrc": "data",
-	            "data": function ( data ) {
-	            	// Adding slider rangers attributes
-	            	var sliderParameters = new Array();
-	            	$('.input-slider-range-container').each (function (e) {
-	            		sliderParameters.push( $(this).attr("id") + ":" + $(this).attr('data-range-value-min') + ":" + $(this).attr('data-range-value-max')+":"+$('[id="include-undefined-'+$(this).attr("id") + '"]').is(':checked') + ":" + $(this).attr('data-chart-interval'));	            		
-		            	} 
-	            	);	            	
-	            	data.sliders=sliderParameters;
-	            	
-	            	// Adding checkboxes attributes
-	            	var checkboxesParameters = new Array();
-	            	$('input.changeableBox:checked').each (function (e) {
-	            		    val = $(this).attr("data-id")+":"+$(this).attr("data-value");
-	            		  	checkboxesParameters.push( val);	            				            	
-	            		} 
-	            	);		            	
-	            	
-	            	data.checkboxes=checkboxesParameters;
+    /* Adding additional attributes columns with hidden titles
+       for (var i = 0; i < additionalAttributes.length; i++) {
+           columns.push({
+               data: "attributes.indexed." + additionalAttributes[i]['key'] + ".value",
+               name: additionalAttributes[i]['name'][siteLanguage],
+               title: "", // Set an empty title to hide the header text
+               render: dummyRender
+           });
+       }
+        **/
+    <!-- Datatable init function -->
+    var table;
+    
+    function initDatatable () {
+        
+        return $('#tableProducts').DataTable({
+            
+            order: [ [2, 'desc'] ],
+            searching: false,
+            "bLengthChange": false,  
+            "processing": true,
+            "serverSide": true,
+            "orderMulti": false,
+            "pageLength": 5,
+            "ajax": {
+                "url": "/"+verticalPath+"/paginated",
+                "dataSrc": "data",
+                "data": function ( data ) {
+                    // Adding slider rangers attributes
+                    var sliderParameters = new Array();
+                    $('.input-slider-range-container').each (function (e) {
+                        sliderParameters.push( $(this).attr("id") + ":" + $(this).attr('data-range-value-min') + ":" + $(this).attr('data-range-value-max')+":"+$('[id="include-undefined-'+$(this).attr("id") + '"]').is(':checked') + ":" + $(this).attr('data-chart-interval'));                     
+                        } 
+                    );                  
+                    data.sliders=sliderParameters;
+                    
+                    // Adding checkboxes attributes
+                    var checkboxesParameters = new Array();
+                    $('input.changeableBox:checked').each (function (e) {
+                            val = $(this).attr("data-id")+":"+$(this).attr("data-value");
+                            checkboxesParameters.push( val);                                                
+                        } 
+                    );                      
+                    
+                    data.checkboxes=checkboxesParameters;
 
-	 				return data;
-	         }},
-	         
-	         createdRow: function(row, data, dataIndex){
-	                 // Add COLSPAN attribute
-	                 $('td:eq(0)', row).attr('colspan', 9);	                 
-					 for ( i = 1; i < 5 ; i++) {						
-	                 	$('td:eq('+i+')', row).css('display', 'none');
-					 }
-	         },
-	         
-	        "columns": columns 
-	 	});
-	};
+                    return data;
+             }},
+             
+             createdRow: function(row, data, dataIndex){
+                     // Add COLSPAN attribute
+                     $('td:eq(0)', row).attr('colspan', 9);                  
+                     for ( i = 1; i < 5 ; i++) {                        
+                        $('td:eq('+i+')', row).css('display', 'none');
+                     }
+             },
+             
+            "columns": columns 
+        });
+    };
 
-	// On document Load
-	$(document).ready(function() {
-		
-		// Loading templates 
-		$.ajax({
-			url : '/tpl_table'+tpl+'.html',
-			dataType : 'html',
-			cache : true, // otherwise will get fresh copy every page load
-			success : function(e) {
-				// script loaded, do stuff!
-				$("#tpl_place").html(e);
+    // On document Load
+    $(document).ready(function() {
+        
+        // Loading templates 
+        $.ajax({
+            url : '/tpl_table'+tpl+'.html',
+            dataType : 'html',
+            cache : true, // otherwise will get fresh copy every page load
+            success : function(e) {
+                // script loaded, do stuff!
+                $("#tpl_place").html(e);
 
-				// Init table 			
-	    		table = initDatatable();
-			}
-		});
-				
-		// Range sliders listener
-		var slidersCounter = $('.input-slider-range-container').length;
-	    $('.input-slider-range-container').on('change', function(e) {
-	    		    	
-	    	// this change function is called on page load (component js init)
-	    	// This counter ensure the datatble is not drawn on page load
-	    	if (slidersCounter <= 0) {	    		
-				table.draw();				
-	    	} else {
-	    		slidersCounter--;
-	    	}
-	    	
-		});
+                // Init table           
+                table = initDatatable();
+            }
+        });
+                
+        // Range sliders listener
+        var slidersCounter = $('.input-slider-range-container').length;
+        $('.input-slider-range-container').on('change', function(e) {
+                        
+            // this change function is called on page load (component js init)
+            // This counter ensure the datatble is not drawn on page load
+            if (slidersCounter <= 0) {              
+                table.draw();               
+            } else {
+                slidersCounter--;
+            }
+            
+        });
 
-	    // Checkboxes listener
-	    $('input:checkbox').click(function() { 
-			table.draw();					    	
-	   	});
-	    
-	    
-	    
-	    // Show more feature, on checkboxes filters
-	    
-	    $('.show-more-link').on('click', function() {
-	        let hiddenItems = $(this).siblings('.hidden-item').filter(function() {
-	          return $(this).css('display') === 'none';
-	        });
+        // Checkboxes listener
+        $('input:checkbox').click(function() { 
+            table.draw();                           
+        });
+        
+        
+        
+        // Show more feature, on checkboxes filters
+        
+        $('.show-more-link').on('click', function() {
+            let hiddenItems = $(this).siblings('.hidden-item').filter(function() {
+              return $(this).css('display') === 'none';
+            });
 
-	        
-	        hiddenCount = hiddenItems.length;
-	        
-	        hiddenItems.slice(0, 5).slideDown();
+            
+            hiddenCount = hiddenItems.length;
+            
+            hiddenItems.slice(0, 5).slideDown();
 
-	        // Removing show more links if no more..
-	        if (hiddenCount <= 5) {
-	          $(this).hide();
-	        }
+            // Removing show more links if no more..
+            if (hiddenCount <= 5) {
+              $(this).hide();
+            }
 
-	      });
-	    
-	    
-	    
-	    // Init the chart.js intervals charts, on numeric attributes
-	    
-	 // Iterate over the keys in chartIntervals and call processInterval for each
-	    Object.keys(chartIntervals).forEach((key) => {
-	    	createChartInterval(key, chartIntervals[key], vertical);
-	    });
-	    
-	    
-	    
-	} );
+          });
+        
+        
+        
+        // Init the chart.js intervals charts, on numeric attributes
+        
+     // Iterate over the keys in chartIntervals and call processInterval for each
+        Object.keys(chartIntervals).forEach((key) => {
+            createChartInterval(key, chartIntervals[key], vertical);
+        });
+        
+        
+        
+    } );
 </script>
 
 <script>
@@ -471,7 +468,7 @@ function createChartInterval(chartId, intervalDatas, verticalName) {
 
 
 
-	
+    
 </script>
 
 
