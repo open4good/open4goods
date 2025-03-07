@@ -446,6 +446,23 @@ $nudger_radius_mini : 40px;
     }
 }
 
+.page-vertical {
+    .table-nudger {
+        border-radius: 10px;
+        border-collapse: separate !important;
+        border-spacing: 0;
+
+        th {
+            &:first-child {
+                border-radius: 10px 0 0 0;
+            }
+            &:last-child {
+                border-radius: 0 10px 0 0;
+            }
+        }
+    }
+}
+
 .nudger__reversement {
     border: 1px solid $brand_mainColor;
     border-radius: 40px 0 40px 40px;
@@ -467,5 +484,25 @@ $nudger_radius_mini : 40px;
         -webkit-text-fill-color: transparent;
     }
 }
-    
-  
+
+.noUi-connect {
+    background-color: $ecoscore_main;
+}
+
+.border {
+    &[class*="-1"] {
+        border-color: $openSource_secondary;
+    }
+    &[class*="-2"] {
+        border-color: $openSource_main;
+    }
+    &[class*="-3"] {
+        border-color: $brand_mainColor;
+    }
+    &[class*="-4"] {
+        border-color: $compensation_secondary;
+    }
+    &[class*="-5"] {
+        border-color: $compensation_main;
+    }
+}
