@@ -3,10 +3,10 @@ package org.open4goods.api.services.aggregation.services.batch.scores;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
-import org.open4goods.commons.config.yml.ui.VerticalConfig;
-import org.open4goods.commons.exceptions.ValidationException;
-import org.open4goods.commons.model.data.Score;
-import org.open4goods.commons.model.product.Product;
+import org.open4goods.model.exceptions.ValidationException;
+import org.open4goods.model.product.Product;
+import org.open4goods.model.product.Score;
+import org.open4goods.model.vertical.VerticalConfig;
 import org.slf4j.Logger;
 
 /**
@@ -48,7 +48,7 @@ public class DataCompletion2ScoreAggregationService extends AbstractScoreAggrega
 
 
 	/**
-	 * The data score is the number of score that are not virtuals
+	 * The data score is the number of scores that are not virtuals
 	 * @param map
 	 * @return
 	 */

@@ -11,8 +11,8 @@ import org.kohsuke.github.GHIssueBuilder;
 import org.kohsuke.github.GHRepository;
 import org.kohsuke.github.GitHubBuilder;
 import org.open4goods.commons.config.yml.FeedbackConfiguration;
-import org.open4goods.commons.exceptions.InvalidParameterException;
-import org.open4goods.commons.helper.IdHelper;
+import org.open4goods.model.exceptions.InvalidParameterException;
+import org.open4goods.model.helper.IdHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

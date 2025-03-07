@@ -27,13 +27,14 @@
 </head>
 
 <body>
-    
-
-	<!--/* Navbar */-->
-	<th:block th:with="page = 'blog'" th:insert="~{inc/navbar/navbar-home.html}"></th:block>
-    <main>
+    <header>
         <!--/* Loader */-->
         <th:block th:insert="~{inc/preloader.html}"></th:block>
+        <!--/* Navbar */-->
+        <th:block th:insert="~{inc/navbar/navbar-home.html}"></th:block>
+    </header>  
+    
+    <main>
         <!-- Hero -->
         <section class="section-header bg-primary text-white pb-10 pb-sm-8 pb-lg-11">
             <div class="container text-center">
@@ -44,7 +45,11 @@
                                 <img style="height: 100px" src="/icons/rss.png">
                             </a>
                             Le blog Nudger
+                            
+                            
+                            
                         </h1>
+                        <div class="mt-2" th:with="page='blog'" th:insert="~{inc/breadcrumb-1level.html}"></div>
                         <p class="lead">Nos actualités et nos billets</p>
                     </div>
                 </div>
@@ -125,34 +130,7 @@
 	<!--/* Footer */-->
 	<th:block th:insert="~{inc/footer.html}"></th:block>	
 
-    <!-- Core -->
-<script src="/vendor/@popperjs/core/dist/umd/popper.min.js"></script>
-<script src="/webjars/bootstrap/js/bootstrap.min.js"></script>
-
-
-<script src="/vendor/headroom.js/dist/headroom.min.js"></script>
-
-<!-- Vendor JS -->
-<script src="/vendor/smooth-scroll/dist/smooth-scroll.polyfills.min.js"></script>
-<script src="/vendor/vivus/dist/vivus.min.js"></script>
-
  
- 
-
-<script src="/webjars/jquery/jquery.min.js"></script>
-<script type="text/javascript" language="javascript" src="/webjars/datatables/js/dataTables.min.js"></script>
-<script type="text/javascript" language="javascript" src="/webjars/datatables/js/dataTables.bootstrap5.min.js"></script>
-<script type="text/javascript" language="javascript" src="/webjars/datatables-responsive/js/dataTables.responsive.min.js"></script>
-
-
-
-<script src="/vendor/countup.js/dist/countUp.umd.js"></script>
-<!-- pixel JS -->
-<script src="../../assets/js/pixel.js"></script>
-<!-- custom sources -->
-<script src="../../assets/js/pixel-custom.js"></script>
-
-
     <script>
         // here you should load content from an Ajax request and when it
         // loads you can disable the button from loading

@@ -14,13 +14,13 @@ import org.open4goods.api.services.aggregation.services.realtime.PriceAggregatio
 import org.open4goods.commons.config.yml.IndexationConfig;
 import org.open4goods.commons.dao.ProductRepository;
 import org.open4goods.commons.exceptions.AggregationSkipException;
-import org.open4goods.commons.exceptions.ValidationException;
-import org.open4goods.commons.model.Standardisable;
-import org.open4goods.commons.model.data.DataFragment;
-import org.open4goods.commons.model.product.Product;
-import org.open4goods.commons.model.product.ProductPartialUpdateHolder;
-import org.open4goods.commons.services.StandardiserService;
 import org.open4goods.commons.store.repository.FullProductIndexationWorker;
+import org.open4goods.model.Standardisable;
+import org.open4goods.model.StandardiserService;
+import org.open4goods.model.datafragment.DataFragment;
+import org.open4goods.model.exceptions.ValidationException;
+import org.open4goods.model.product.Product;
+import org.open4goods.model.product.ProductPartialUpdateHolder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

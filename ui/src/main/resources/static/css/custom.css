@@ -1,3 +1,138 @@
+
+
+
+.image-container {
+    position: relative;
+    width: 100%;
+    padding-top: 56.25%; /* Aspect ratio (16:9) */
+    overflow: hidden;
+    background-color: #f0f0f0; /* Placeholder color for empty space */
+}
+
+.image-container img {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: contains; /* Ensures images cover the container while maintaining aspect ratio */
+    object-position: center; /* Centers the image */
+}
+
+
+
+
+
+
+
+
+
+
+.star-rating {
+    display: inline-block;
+    position: relative;
+    line-height: 0; /* Prevent spacing issues */
+}
+
+.star-rating .stars {
+    display: flex;
+    justify-content: center;
+}
+
+.star-rating .star {
+    display: inline-block;
+    width: 2em; /* Default size */
+    height: 2em;
+    margin: 0 0.1em;
+    clip-path: polygon(
+        50% 0%,
+        61% 35%,
+        98% 35%,
+        68% 57%,
+        79% 91%,
+        50% 70%,
+        21% 91%,
+        32% 57%,
+        2% 35%,
+        39% 35%
+    ); /* Star shape */
+    background: linear-gradient(90deg, #00D19F, #00A7FF); /* Gradient for active stars */
+    background-size: 100%;
+    opacity: 0.3; /* Default transparency for disabled stars */
+    transition: opacity 0.3s;
+}
+
+.star-rating .star.full {
+    opacity: 1; /* Fully opaque for filled stars */
+}
+
+.star-rating .star.partial {
+    background: linear-gradient(
+        90deg,
+        #00D19F calc(var(--partial-width, 0%)),
+        rgba(0, 0, 0, 0.05) calc(var(--partial-width, 0%))
+    ); /* Gradient stops at the partial width */
+    background-size: 100%;
+    opacity: 1; /* Fully opaque for partial stars */
+    position: relative; /* Ensure proper overlay */
+    overflow: hidden; /* Clip content properly */
+}
+
+.star-rating .star.partial::after {
+
+	    background: linear-gradient(90deg, #00D19F, #00A7FF);
+    opacity: 0.2; /* Fully opaque for partial stars */
+	content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    clip-path: polygon(
+        50% 0%,
+        61% 35%,
+        98% 35%,
+        68% 57%,
+        79% 91%,
+        50% 70%,
+        21% 91%,
+        32% 57%,
+        2% 35%,
+        39% 35%
+    ); /* Match star shape */
+    mix-blend-mode: lighten; /* Blend to ensure proper transparency */
+}
+
+/* Responsive Sizes */
+.star-rating-lg .star {
+    width: 3em;
+    height: 3em;
+}
+
+.star-rating-md .star {
+    width: 2em;
+    height: 2em;
+}
+
+.star-rating-sm .star {
+    width: 1em;
+    height: 1em;
+}
+
+
+
+
+
+
+
+
+
+.modal-xxl {
+    max-width: 90%; /* Adjust width as needed */
+    width: 90%; /* Ensure responsiveness */
+}
+
+
 /** {
 	font-family: 'League Spartan', sans-serif!important;
 }
@@ -34,17 +169,92 @@ CUSTOM
 Xwiki css
 **************************************************/
 /** Xwiki box **/
-.box {
-	min-height: 20px;
+
+.box, .plainmessage, fieldset.xwikimessage {
+    min-height: 20px;
     padding: 19px;
     margin-bottom: 20px;
     background-color: #fafafa;
     border: 1px solid #e8e8e8;
-    border-radius: 4px;
+    border-radius: 7px;
     -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.05);
     box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.05);
     overflow-x: auto;
-}    
+}
+
+.box blockquote, .plainmessage blockquote, fieldset.xwikimessage blockquote {
+    border-color: #ddd;
+    border-color: rgba(0, 0, 0, 0.15);
+}
+
+.box > *:last-child, .box > .xwiki-metadata-container > *:last-child {
+    margin-bottom: 0;
+}
+
+.plainmessage {
+    background-repeat: no-repeat;
+}
+
+.successmessage {
+    color: #3c763d;
+    background-color: #e5f3df;
+    border-color: #dbeccc;
+    border-color: #077537;
+}
+
+.successmessage hr {
+    border-top-color: #cee5ba;
+}
+
+.successmessage .alert-link {
+    color: #2b542c;
+}
+
+.errormessage {
+    color: #a94442;
+    background-color: #f8ecec;
+    border-color: #f1d9dd;
+    border-color: #ca302c;
+}
+
+.errormessage hr {
+    border-top-color: #eac7cd;
+}
+
+.errormessage .alert-link {
+    color: #843534;
+}
+
+.warningmessage {
+    color: #8a6d3b;
+    background-color: #fcf8e3;
+    border-color: #faebcc;
+    border-color: #f0ad4e;
+}
+
+.warningmessage hr {
+    border-top-color: #f7e1b5;
+}
+
+.warningmessage .alert-link {
+    color: #66512c;
+}
+
+.infomessage {
+    color: #31708f;
+    background-color: #e1f1f9;
+    border-color: #c3ebf3;
+    border-color: #2f70a7;
+}
+
+.infomessage hr {
+    border-top-color: #aee4ef;
+}
+
+.infomessage .alert-link {
+    color: #245269;
+}
+
     
     
 /** legacy bootsrap 3 jumbotron **/
@@ -436,11 +646,9 @@ Circular rating  css
   justify-content: space-around ;
 }
 
-.circular-chart {
-  display: block;
-  margin: 10px auto;
-  max-width: 80%;
-  max-height: 250px;
+.circular-chart-header {
+  display: inline-block;
+  max-height: 60px;
 }
 
 .circle-bg {

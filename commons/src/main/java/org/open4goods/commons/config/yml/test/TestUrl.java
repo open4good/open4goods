@@ -3,9 +3,9 @@ package org.open4goods.commons.config.yml.test;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
-import org.open4goods.commons.model.constants.ProductCondition;
-import org.open4goods.commons.model.data.DataFragment;
-import org.open4goods.commons.model.data.RatingType;
+import org.open4goods.model.datafragment.DataFragment;
+import org.open4goods.model.product.ProductCondition;
+import org.open4goods.model.rating.RatingType;
 
 public class TestUrl {
 

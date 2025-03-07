@@ -5,7 +5,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 
-import org.open4goods.commons.model.product.ProductAttribute;
+import org.open4goods.model.attribute.ProductAttribute;
 
 public class AttributesStats {
 

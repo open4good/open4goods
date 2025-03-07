@@ -26,6 +26,9 @@ amazonConfig:
   affiliate-tag: nudger-21
   amazon-search-link: "https://www.amazon.fr/s?k={search_terms}&tag={affiliate_tag}"
 
+  
+
+  
 spring:
   ai:
     openai:
@@ -59,12 +62,20 @@ spring:
     elasticsearch:
       repositories:
         enabled: true
-      
+
+allowedImagesSizeSuffixes:
+  - 30     
+  - 50    
+  
+  - 100
+  - 360 
+  - 1000 
+              
 wikiPagesMapping:
   "[webpages/default/legal-notice/WebHome]":
     fr: "mentions-legales"
-  "[webpages/opensource-contribution/WebHome]":
-      fr: "opensource/contribution-ecologique"
+  "[webpages/default/data-privacy/WebHome]":
+      fr: "politique-confidentialite"
 
 team-config:
   cores:

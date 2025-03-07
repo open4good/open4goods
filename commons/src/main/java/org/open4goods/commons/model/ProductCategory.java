@@ -6,8 +6,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import org.open4goods.commons.config.yml.ui.VerticalConfig;
-import org.open4goods.commons.helper.IdHelper;
+import org.open4goods.model.Localisable;
+import org.open4goods.model.helper.IdHelper;
+import org.open4goods.model.vertical.VerticalConfig;
 
 /**
  * A ProductCategory is an tree node of ProductCategories. It is built from 

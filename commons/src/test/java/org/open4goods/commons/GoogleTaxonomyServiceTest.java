@@ -1,11 +1,11 @@
-//package org.open4goods.commons;
+//package org.open4goods.model;
 //import static org.junit.Assert.assertTrue;
 //
 //import java.io.IOException;
 //
 //import org.junit.jupiter.api.Test;
 //import org.open4goods.config.TestConfig;
-//import org.open4goods.exceptions.InvalidParameterException;
+//import org.open4goods.model.exceptions.InvalidParameterException;
 //import org.open4goods.services.GoogleTaxonomyService;
 //import org.open4goods.services.RemoteFileCachingService;
 //import org.springframework.beans.factory.annotation.Autowired;

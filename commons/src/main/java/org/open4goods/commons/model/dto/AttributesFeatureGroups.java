@@ -3,8 +3,8 @@ package org.open4goods.commons.model.dto;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.open4goods.commons.model.data.FeatureGroup;
-import org.open4goods.commons.model.product.ProductAttribute;
+import org.open4goods.model.attribute.ProductAttribute;
+import org.open4goods.model.vertical.FeatureGroup;
 
 /**
  * A convenient pojo holding feature groups and attributes,

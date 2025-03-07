@@ -6,10 +6,10 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.open4goods.commons.config.yml.ui.VerticalConfig;
 import org.open4goods.commons.exceptions.AggregationSkipException;
-import org.open4goods.commons.model.data.DataFragment;
-import org.open4goods.commons.model.product.Product;
+import org.open4goods.model.datafragment.DataFragment;
+import org.open4goods.model.product.Product;
+import org.open4goods.model.vertical.VerticalConfig;
 import org.slf4j.Logger;
 
 

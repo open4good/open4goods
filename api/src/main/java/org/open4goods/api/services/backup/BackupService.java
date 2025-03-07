@@ -32,9 +32,9 @@ import org.open4goods.api.config.yml.BackupConfig;
 import org.open4goods.api.services.AggregationFacadeService;
 import org.open4goods.commons.dao.ProductRepository;
 import org.open4goods.commons.exceptions.AggregationSkipException;
-import org.open4goods.commons.model.product.Product;
-import org.open4goods.commons.model.product.SourcedAttribute;
-import org.open4goods.commons.services.SerialisationService;
+import org.open4goods.model.attribute.SourcedAttribute;
+import org.open4goods.model.product.Product;
+import org.open4goods.services.serialisation.service.SerialisationService;
 import org.open4goods.xwiki.services.XWikiReadService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -198,11 +198,11 @@ public class BackupService implements HealthIndicator {
 	            Stream<Product> str = productRepo.exportAll(vertical);
 
 	            str.forEach(p -> {
-	                String json = serialisationService.toJson(p);
 	                try {
+	                	String json = serialisationService.toJson(p);
 	                    writer.write(json);
 	                    writer.newLine(); // Ensure each JSON object is on a new line
-	                } catch (IOException e) {
+	                } catch (Exception e) {
 	                    logger.error("Serialization exception", e);
 	                }
 	            });

@@ -39,16 +39,38 @@
             <version>${global.version}</version>
         </dependency>
 
-        <dependency>
-            <groupId>org.springframework.ai</groupId>
-            <artifactId>spring-ai-openai-spring-boot-starter</artifactId>
-            <version>1.0.0-SNAPSHOT</version>
-        </dependency>
+      <dependency>
+            <groupId>org.open4goods</groupId>
+            <artifactId>evaluation</artifactId>
+            <version>${global.version}</version>
+      </dependency>
 
+      <dependency>
+            <groupId>org.open4goods</groupId>
+            <artifactId>serialisation</artifactId>
+            <version>${global.version}</version>
+      </dependency>
+
+      <dependency>
+            <groupId>org.open4goods</groupId>
+            <artifactId>prompt</artifactId>
+            <version>${global.version}</version>
+      </dependency>
+
+        
+
+        <dependency>
+            <groupId>org.open4goods</groupId>
+            <artifactId>model</artifactId>
+            <version>${global.version}</version>
+        </dependency>
+        
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-actuator</artifactId>
         </dependency>
+
+
 
         <dependency>
             <groupId>com.ibm.icu</groupId>
@@ -61,10 +83,8 @@
             <artifactId>spring-data-elasticsearch</artifactId>
         </dependency>
 
-        <dependency>
-            <groupId>org.thymeleaf</groupId>
-            <artifactId>thymeleaf-spring6</artifactId>
-        </dependency>
+    
+        
 
 <!--
         <dependency>
@@ -79,12 +99,14 @@
         </dependency>
 -->
 
-
+<!--
         <dependency>
             <groupId>com.googlecode.concurrent-trees</groupId>
             <artifactId>concurrent-trees</artifactId>
             <version>2.6.1</version>
         </dependency>
+-->
+    
 
         <!---
 		<dependency>
@@ -138,13 +160,13 @@
         <dependency>
             <groupId>org.jsoup</groupId>
             <artifactId>jsoup</artifactId>
-            <version>1.18.3</version>
+            <version>1.19.1</version>
         </dependency>
 
         <dependency>
             <groupId>org.kohsuke</groupId>
             <artifactId>github-api</artifactId>
-            <version>1.326</version>
+            <version>1.327</version>
         </dependency>
 
 
@@ -160,11 +182,7 @@
             <version>2.11.5</version>
         </dependency>
 
-        <dependency>
-            <groupId>joda-time</groupId>
-            <artifactId>joda-time</artifactId>
-            <version>2.13.0</version>
-        </dependency>
+
 
         <dependency>
             <groupId>org.quartz-scheduler</groupId>
@@ -176,10 +194,7 @@
             <artifactId>jackson-dataformat-csv</artifactId>
         </dependency>
 
-        <dependency>
-            <groupId>com.fasterxml.jackson.dataformat</groupId>
-            <artifactId>jackson-dataformat-xml</artifactId>
-        </dependency>
+
 
         <dependency>
             <groupId>net.sourceforge.htmlcleaner</groupId>
@@ -212,10 +227,6 @@
         </dependency>
 
 
-        <dependency>
-            <groupId>com.fasterxml.jackson.dataformat</groupId>
-            <artifactId>jackson-dataformat-yaml</artifactId>
-        </dependency>
 
         <dependency>
             <groupId>org.apache.httpcomponents</groupId>

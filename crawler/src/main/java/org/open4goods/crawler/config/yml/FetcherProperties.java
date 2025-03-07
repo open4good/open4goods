@@ -6,8 +6,8 @@ import java.util.Map;
 
 import org.open4goods.commons.config.yml.datasource.CrawlProperties;
 import org.open4goods.commons.config.yml.datasource.FeedConfiguration;
-import org.open4goods.commons.model.constants.UrlConstants;
 import org.open4goods.commons.model.crawlers.ApiSynchConfig;
+import org.open4goods.model.constants.UrlConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.context.properties.ConfigurationProperties;

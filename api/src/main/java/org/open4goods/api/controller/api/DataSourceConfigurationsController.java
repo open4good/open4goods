@@ -7,9 +7,9 @@ import java.util.Map;
 
 import org.open4goods.commons.config.yml.datasource.DataSourceProperties;
 import org.open4goods.commons.model.constants.RolesConstants;
-import org.open4goods.commons.model.constants.UrlConstants;
 import org.open4goods.commons.services.DataSourceConfigService;
 import org.open4goods.crawler.services.IndexationService;
+import org.open4goods.model.constants.UrlConstants;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;

@@ -4,15 +4,16 @@ package org.open4goods.api.controller.api;
 import java.io.IOException;
 
 import org.open4goods.api.services.completion.AmazonCompletionService;
-import org.open4goods.api.services.completion.GenAiCompletionService;
+import org.open4goods.api.services.completion.PerplexityReviewCompletionService;
 import org.open4goods.api.services.completion.IcecatCompletionService;
+import org.open4goods.api.services.completion.PerplexityAttributesCompletionService;
 import org.open4goods.api.services.completion.ResourceCompletionService;
 import org.open4goods.commons.dao.ProductRepository;
-import org.open4goods.commons.exceptions.InvalidParameterException;
-import org.open4goods.commons.exceptions.ResourceNotFoundException;
 import org.open4goods.commons.model.constants.RolesConstants;
-import org.open4goods.commons.model.product.Product;
 import org.open4goods.commons.services.VerticalsConfigService;
+import org.open4goods.model.exceptions.InvalidParameterException;
+import org.open4goods.model.exceptions.ResourceNotFoundException;
+import org.open4goods.model.product.Product;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -37,7 +38,8 @@ public class CompletionController {
 
 	private final VerticalsConfigService verticalConfigService;
 
-	private final GenAiCompletionService aiCompletionService;
+	private final PerplexityReviewCompletionService aireviewCompletionService;
+	private PerplexityAttributesCompletionService perplexityAttributesCompletionService;
 	private ResourceCompletionService resourceCompletionService;
 	private AmazonCompletionService amazonCompletionService;
 
@@ -47,15 +49,17 @@ public class CompletionController {
 	private IcecatCompletionService iceCatService;
 
 	public CompletionController(VerticalsConfigService verticalsConfigService,
-			GenAiCompletionService aiCompletionService,
+			PerplexityReviewCompletionService aiCompletionService,
 			ResourceCompletionService resourceCompletionService,
 			AmazonCompletionService amazonCompletionService,
-			IcecatCompletionService iceCatService) {
+			IcecatCompletionService iceCatService, 
+			PerplexityAttributesCompletionService perplexityAttributesCompletionService) {
 		this.verticalConfigService = verticalsConfigService;
-		this.aiCompletionService = aiCompletionService;
+		this.aireviewCompletionService = aiCompletionService;
 		this.resourceCompletionService = resourceCompletionService;
 		this.amazonCompletionService = amazonCompletionService;
 		this.iceCatService = iceCatService;
+		this.perplexityAttributesCompletionService = perplexityAttributesCompletionService;
 	}
 
 	///////////////////////////////////
@@ -88,33 +92,63 @@ public class CompletionController {
 				data);
 	}
 
+	
 	///////////////////////////////////
-	// Genai completion
+	// Genai attributes completion
 	///////////////////////////////////
 
-	@GetMapping("/completion/genai")
-	@Operation(summary = "Launch genai completion on all verticals")
-	public void genaiCompletionAll() throws InvalidParameterException, IOException {
-		aiCompletionService.completeAll(false);
+	@GetMapping("/completion/genai/attributes")
+	@Operation(summary = "Launch genai attributes completion on all verticals")
+	public void genaiAttributesCompletionAll() throws InvalidParameterException, IOException {
+		perplexityAttributesCompletionService.completeAll(false);
 	}
 
-	@GetMapping("/completion/genai/")
-	@Operation(summary = "Launch genai completion on the specified vertical")
-	public void genaiCompletionVertical(@RequestParam @NotBlank final String verticalConfig, @RequestParam Integer max)
+	@GetMapping("/completion/genai/vertical/attributes")
+	@Operation(summary = "Launch genai attributes completion on the specified vertical")
+	public void genaiAttributesCompletionVertical(@RequestParam @NotBlank final String verticalConfig, @RequestParam Integer max)
 			throws InvalidParameterException, IOException {
-		aiCompletionService.complete(verticalConfigService.getConfigById(verticalConfig), max,false);
+		perplexityAttributesCompletionService.complete(verticalConfigService.getConfigById(verticalConfig), max,false);
 	}
 
-	@GetMapping("/completion/genai/gtin/")
-	@Operation(summary = "Launch genai completion on the specified vertical")
-	public void genaiCompletionProduct(@RequestParam final Long gtin) {
+	@GetMapping("/completion/genai/attributes/gtin")
+	@Operation(summary = "Launch genai attributes completion on the specified vertical")
+	public void genaiAttributesCompletionProduct(@RequestParam final Long gtin) {
 		Product data;
 		try {
 			data = repository.getById(gtin);
 		} catch (ResourceNotFoundException e) {
 			throw new ResponseStatusException(HttpStatus.NOT_FOUND);
 		}
-		aiCompletionService.completeAndIndexProduct(verticalConfigService.getConfigByIdOrDefault(data.getVertical()), data);
+		perplexityAttributesCompletionService.completeAndIndexProduct(verticalConfigService.getConfigByIdOrDefault(data.getVertical()), data);
+	}
+	
+	///////////////////////////////////
+	// Genai review completion
+	///////////////////////////////////
+
+	@GetMapping("/completion/genai/review/vertical")
+	@Operation(summary = "Launch genai review completion on all verticals")
+	public void genaiReviewCompletionAll() throws InvalidParameterException, IOException {
+		aireviewCompletionService.completeAll(false);
+	}
+
+	@GetMapping("/completion/genai/review")
+	@Operation(summary = "Launch genai reviewcompletion on the specified vertical")
+	public void genaiReviewCompletionVertical(@RequestParam @NotBlank final String verticalConfig, @RequestParam Integer max)
+			throws InvalidParameterException, IOException {
+		aireviewCompletionService.complete(verticalConfigService.getConfigById(verticalConfig), max,false);
+	}
+
+	@GetMapping("/completion/genai/review/gtin")
+	@Operation(summary = "Launch genai review completion on the specified vertical")
+	public void genaiReviewCompletionProduct(@RequestParam final Long gtin) {
+		Product data;
+		try {
+			data = repository.getById(gtin);
+		} catch (ResourceNotFoundException e) {
+			throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+		}
+		aireviewCompletionService.completeAndIndexProduct(verticalConfigService.getConfigByIdOrDefault(data.getVertical()), data);
 	}
 
 	///////////////////////////////////

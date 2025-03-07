@@ -6,10 +6,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.open4goods.commons.config.yml.attributes.AttributeConfig;
-import org.open4goods.commons.config.yml.ui.VerticalConfig;
-import org.open4goods.commons.model.product.Product;
 import org.open4goods.commons.services.SearchService;
+import org.open4goods.model.product.Product;
+import org.open4goods.model.vertical.AttributeConfig;
+import org.open4goods.model.vertical.VerticalConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

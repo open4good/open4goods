@@ -3,7 +3,7 @@ package org.open4goods.commons.services;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.open4goods.commons.model.attribute.Cardinality;
+import org.open4goods.model.rating.Cardinality;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

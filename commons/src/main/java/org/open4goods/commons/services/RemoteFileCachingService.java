@@ -12,13 +12,12 @@ import java.util.zip.GZIPInputStream;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
-import org.open4goods.commons.exceptions.InvalidParameterException;
 import org.open4goods.commons.exceptions.TechnicalException;
-import org.open4goods.commons.helper.IdHelper;
 import org.open4goods.commons.model.CacheResourceConfig;
+import org.open4goods.model.exceptions.InvalidParameterException;
+import org.open4goods.model.helper.IdHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.ClientHttpRequest;

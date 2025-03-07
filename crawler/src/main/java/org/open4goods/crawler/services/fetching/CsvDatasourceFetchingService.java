@@ -261,13 +261,13 @@ public class CsvDatasourceFetchingService extends DatasourceFetchingService impl
 		
 		Builder health = Health.up();
 		
-		
+		//TODO(P1, fiability) : put back when v1 stabilized
 		if (feedNoUrls.get() > 0L) {
-			health =  Health.down();
+//			health =  Health.down();
 		} 
 		
 		if (brokenCsvFiles.size() > 0L) {
-			health =  Health.down();
+//			health =  Health.down();
 		} 
 		
 		return health

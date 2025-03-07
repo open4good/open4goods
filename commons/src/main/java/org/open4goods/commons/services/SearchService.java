@@ -9,17 +9,18 @@ import java.util.Objects;
 import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
-import org.open4goods.commons.config.yml.attributes.AttributeConfig;
-import org.open4goods.commons.config.yml.ui.VerticalConfig;
 import org.open4goods.commons.dao.ProductRepository;
-import org.open4goods.commons.model.constants.CacheConstants;
-import org.open4goods.commons.model.constants.ProductCondition;
 import org.open4goods.commons.model.dto.NumericBucket;
 import org.open4goods.commons.model.dto.NumericRangeFilter;
 import org.open4goods.commons.model.dto.VerticalFilterTerm;
 import org.open4goods.commons.model.dto.VerticalSearchRequest;
 import org.open4goods.commons.model.dto.VerticalSearchResponse;
-import org.open4goods.commons.model.product.Product;
+import org.open4goods.model.constants.CacheConstants;
+import org.open4goods.model.product.Product;
+import org.open4goods.model.product.ProductCondition;
+import org.open4goods.model.vertical.AttributeConfig;
+import org.open4goods.model.vertical.SubsetCriteria;
+import org.open4goods.model.vertical.VerticalConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cache.annotation.Cacheable;
@@ -123,9 +124,6 @@ public class SearchService {
 		return vsr;
 	}
 
-
-
-	
 	
 	/**
 	 * Advanced search in a vertical
@@ -133,7 +131,8 @@ public class SearchService {
 	 * @param request
 	 * @return
 	 */
-//	@Cacheable(keyGenerator = CacheConstants.KEY_GENERATOR, cacheNames = CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME)
+	// @Cacheable(keyGenerator = CacheConstants.KEY_GENERATOR, cacheNames = CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME)
+	// TODO(p1, performance) : put back,but collision hash with verticalsubsets (i guess)
 	public VerticalSearchResponse verticalSearch(VerticalConfig vertical, VerticalSearchRequest request) {
 
 		VerticalSearchResponse vsr = new VerticalSearchResponse();
@@ -143,6 +142,14 @@ public class SearchService {
 		Criteria criterias = new Criteria("vertical").is(vertical.getId())
 				.and(aggregatedDataRepository.getRecentPriceQuery())
 				;
+		
+		// Filtering on brand if in this disposition
+		if (request.getBrandsSubset() != null) {
+			if (request.getBrandsSubset().getCriterias().size() == 1) {
+				SubsetCriteria cr = request.getBrandsSubset().getCriterias().getFirst();
+				criterias.and(new Criteria(cr.getField()).is(cr.getValue()));
+			}
+		}
 		
 		// Adding the filter on excluded if set
 		if (request.getExcludedFilters().size()>0) {
@@ -197,6 +204,38 @@ public class SearchService {
 			
 		}
 
+		/////////////////////////////////
+		// Adding subset hard filtering
+		/////////////////////////////////
+		
+		request.getSubsets().forEach(subset -> {
+			subset.getCriterias().forEach(criteria -> {
+				switch (criteria.getOperator()) {
+				case LOWER_THAN: {
+					criterias.and(new Criteria(criteria.getField()).lessThanEqual(Double.valueOf(criteria.getValue())));
+					break;
+				}
+				case GREATER_THAN: {
+					criterias.and(new Criteria(criteria.getField()).greaterThanEqual(Double.valueOf( criteria.getValue())));					
+					break;
+				}
+				case EQUALS: {
+					criterias.and(new Criteria(criteria.getField()).is(criteria.getValue()));
+
+					break;
+				}
+				
+				
+				
+				default:
+					throw new IllegalArgumentException("Unexpected value: " + criteria.getOperator());
+				}
+				
+			});
+		});
+		
+		
+		
 		// Setting the query
 		NativeQueryBuilder esQuery = new NativeQueryBuilder().withQuery(new CriteriaQuery(criterias));
 
@@ -401,7 +440,7 @@ public class SearchService {
 				}
 			}
 
-			if (attrConfig.getAttributeValuesOrdering().equals(org.open4goods.commons.config.yml.attributes.Order.COUNT ) ) {
+			if (attrConfig.getAttributeValuesOrdering().equals(org.open4goods.model.vertical.Order.COUNT ) ) {
 				vsr.getCustomFilters().get(attrConfig).sort((o1, o2) -> o2.getCount().compareTo(o1.getCount()));
 			}
 			else {

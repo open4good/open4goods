@@ -4,19 +4,22 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.open4goods.commons.config.yml.WikiPageConfig;
-import org.open4goods.commons.config.yml.ui.ProductI18nElements;
-import org.open4goods.commons.config.yml.ui.VerticalConfig;
-import org.open4goods.commons.model.Localisable;
 import org.open4goods.commons.model.ProductCategory;
 import org.open4goods.commons.services.GoogleTaxonomyService;
 import org.open4goods.commons.services.SearchService;
-import org.open4goods.commons.services.SerialisationService;
 import org.open4goods.commons.services.VerticalsConfigService;
+import org.open4goods.model.Localisable;
+import org.open4goods.model.vertical.ProductI18nElements;
+import org.open4goods.model.vertical.VerticalConfig;
+import org.open4goods.model.vertical.WikiPageConfig;
+import org.open4goods.services.serialisation.service.SerialisationService;
 import org.open4goods.ui.config.yml.UiConfig;
 import org.open4goods.ui.controllers.ui.CategoryController;
 import org.open4goods.ui.controllers.ui.UiService;
+import org.open4goods.ui.controllers.ui.VerticalBrandsController;
+import org.open4goods.ui.controllers.ui.VerticalBrandsController;
 import org.open4goods.ui.controllers.ui.VerticalController;
+import org.open4goods.ui.controllers.ui.VerticalSubsetController;
 import org.open4goods.ui.controllers.ui.XwikiController;
 import org.open4goods.ui.services.BlogService;
 import org.open4goods.xwiki.services.XwikiFacadeService;
@@ -73,23 +76,45 @@ public class UrlHandlerMappingConfig {
 				// Adding vertical home page
 				//////////////// 
 				// TODO : Forward i18n
-				String url = "/" + i18n.getValue().getVerticalHomeUrl();
-				LOGGER.info("Adding vertical home page mapping : {}", url);				
-				urlMap.put(url, new VerticalController(verticalService, searchService, uiService, item.getId(), blogService)  );
+				String baseUrl = "/" + i18n.getValue().getVerticalHomeUrl();
+				LOGGER.info("Adding vertical home page mapping : {}", baseUrl);				
+				urlMap.put(baseUrl, new VerticalController(verticalService, searchService, uiService, item.getId(), blogService, serialisationService)  );
 
 				/////////////////
 				// Adding ecoscore page
 				//////////////// 
-				LOGGER.info("Adding vertical ecoscore page mapping : {}", url);				
-				urlMap.put(url+"/ecoscore", new VerticalEcoscoreController(item, uiService,serialisationService)  );
+				LOGGER.info("Adding vertical ecoscore page mapping : {}", baseUrl);				
+				urlMap.put(baseUrl+"/ecoscore", new VerticalEcoscoreController(item, uiService,serialisationService)  );
+
+				
+				
+				/////////////////
+				// Adding subset pages
+				//////////////// 
+				item.getSubsets().forEach(subset -> {
+					LOGGER.info("Adding vertical subset page mapping : {}", subset.getId());
+					// TODO(p3,i18n)
+					urlMap.put(baseUrl+"/"+subset.getUrl().i18n("fr"), new VerticalSubsetController(verticalService, searchService, uiService, item.getId(), blogService, serialisationService, subset)  );
+				});
+				
+				
+				
+				
+				/////////////////
+				// Adding vertical brand pages
+				//////////////// 
+				// TODO : Forward i18n
+				LOGGER.info("Adding vertical brand pages mapping : {}", baseUrl);				
+				urlMap.put(baseUrl +"/marques/*", new VerticalBrandsController(verticalService, searchService, uiService, item.getId(), blogService, serialisationService)  );
+
 				
 				/////////////////
 				// Adding vertical specific wikipages
 				//////////////// 
 				for (WikiPageConfig page : i18n.getValue().getWikiPages()) {
-					String pUrl =  "/" + i18n.getValue().getVerticalHomeUrl() + "/" + page.getVerticalUrl();
-					LOGGER.info("Adding vertical specific page mapping : {}", url);				
-					urlMap.put(pUrl, new  XwikiController(xwikiService, uiService, page.getWikiUrl()));					
+					String pUrl =  baseUrl+ "/" + page.getVerticalUrl();
+					LOGGER.info("Adding vertical specific page mapping : {}", pUrl);				
+					urlMap.put(pUrl, new  XwikiController(xwikiService, uiService, page.getWikiUrl(),item));					
 				}
 				
 			}

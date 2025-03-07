@@ -113,7 +113,7 @@ public class TodoService implements HealthIndicator{
 		
 		if (fileName.startsWith("org.open4goods.ui")) {
 			component = "ui";
-		} else if (fileName.startsWith("org.open4goods.commons")){
+		} else if (fileName.startsWith("org.open4goods.model")){
 			component = "commons";
 		} else if (fileName.startsWith("org.open4goods.api")){
 			component = "api";

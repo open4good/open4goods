@@ -1,0 +1,27 @@
+{
+  "properties": [
+    {
+      "name": "urlfetcher.domains",
+      "type": "java.util.Map<java.lang.String, org.open4goods.services.urlfetching.config.UrlFetcherConfig$DomainConfig>",
+      "description": "Map of domain configurations for URL fetching"
+    },
+    {
+      "name": "urlfetcher.threadPoolSize",
+      "type": "int",
+      "defaultValue": 10,
+      "description": "Thread pool size for asynchronous URL fetching"
+    },
+    {
+      "name": "urlfetcher.record.enabled",
+      "type": "boolean",
+      "defaultValue": false,
+      "description": "Flag to enable or disable recording mode (for test purposes only)"
+    },
+    {
+      "name": "urlfetcher.record.destinationFolder",
+      "type": "java.lang.String",
+      "defaultValue": "src/test/resources/urlfetching/mocks",
+      "description": "Destination folder for storing/retrieving recorded responses (used only in tests)"
+    }
+  ]
+}

@@ -1,12 +1,17 @@
 package org.open4goods.ui.controllers.ui;
 
-import org.open4goods.commons.config.yml.ui.VerticalConfig;
+import java.io.IOException;
+
+import org.apache.groovy.parser.antlr4.util.StringUtils;
 import org.open4goods.commons.model.dto.NumericRangeFilter;
 import org.open4goods.commons.model.dto.VerticalSearchRequest;
 import org.open4goods.commons.model.dto.VerticalSearchResponse;
-import org.open4goods.commons.model.product.Product;
 import org.open4goods.commons.services.SearchService;
 import org.open4goods.commons.services.VerticalsConfigService;
+import org.open4goods.model.product.Product;
+import org.open4goods.model.vertical.VerticalConfig;
+import org.open4goods.model.vertical.VerticalSubset;
+import org.open4goods.services.serialisation.service.SerialisationService;
 import org.open4goods.ui.controllers.dto.DataTableRequest;
 import org.open4goods.ui.controllers.dto.DataTableResults;
 import org.open4goods.ui.controllers.dto.PaginationCriteria;
@@ -17,6 +22,9 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
+
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.databind.JsonMappingException;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -32,6 +40,7 @@ public class DataTableController {
 	
 	private final org.open4goods.commons.services.SearchService searchService;
 	private @Autowired UiService uiService;
+	private @Autowired SerialisationService serialisationService;
 	private final VerticalsConfigService verticalService;
 
 	public DataTableController(SearchService searchService, VerticalsConfigService verticalService) {
@@ -57,6 +66,20 @@ public class DataTableController {
 		vRequest.setPageNumber(pagination.getFrom() / pagination.getPageSize() );
 		vRequest.setPageSize( pagination.getPageSize() );
 
+		// initial search response (also contains initial request, for example for subsets definitions)
+		String subsets = request.getParameter("subsets");
+		String brandsSubsetStr= request.getParameter("brandsSubset");
+		
+		if (!StringUtils.isEmpty(brandsSubsetStr)) {
+			try {
+				VerticalSubset brandsSubset = serialisationService.fromJson(brandsSubsetStr, VerticalSubset.class);
+				vRequest.setBrandsSubset(brandsSubset);
+			} catch (Exception e) {
+				LOGGER.error("Error while parsing brandSubset",e);
+			}
+		}
+		
+		
 		// Handle checkboxes values
 		String[] checkboxes = request.getParameterValues("checkboxes[]");
 		if (null != checkboxes) {

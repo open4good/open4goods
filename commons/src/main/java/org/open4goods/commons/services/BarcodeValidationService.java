@@ -7,7 +7,7 @@ import java.util.AbstractMap.SimpleEntry;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.validator.routines.ISBNValidator;
 import org.apache.commons.validator.routines.checkdigit.EAN13CheckDigit;
-import org.open4goods.commons.model.BarcodeType;
+import org.open4goods.model.product.BarcodeType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

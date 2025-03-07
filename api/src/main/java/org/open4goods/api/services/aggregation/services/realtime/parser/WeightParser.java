@@ -1,12 +1,12 @@
 package org.open4goods.api.services.aggregation.services.realtime.parser;
 
 import org.open4goods.api.services.BatchService;
-import org.open4goods.commons.config.yml.attributes.AttributeConfig;
-import org.open4goods.commons.config.yml.attributes.AttributeParser;
-import org.open4goods.commons.config.yml.ui.VerticalConfig;
-import org.open4goods.commons.exceptions.ParseException;
-import org.open4goods.commons.model.product.ProductAttribute;
-import org.open4goods.commons.model.product.SourcedAttribute;
+import org.open4goods.model.attribute.ProductAttribute;
+import org.open4goods.model.attribute.SourcedAttribute;
+import org.open4goods.model.exceptions.ParseException;
+import org.open4goods.model.vertical.AttributeConfig;
+import org.open4goods.model.vertical.AttributeParser;
+import org.open4goods.model.vertical.VerticalConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

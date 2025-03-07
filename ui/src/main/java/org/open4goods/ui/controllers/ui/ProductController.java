@@ -1,6 +1,5 @@
 package org.open4goods.ui.controllers.ui;
 
-import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
@@ -8,21 +7,22 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
-import org.open4goods.commons.config.yml.ui.VerticalConfig;
 import org.open4goods.commons.dao.ProductRepository;
-import org.open4goods.commons.exceptions.ResourceNotFoundException;
-import org.open4goods.commons.model.data.AiDescription;
-import org.open4goods.commons.model.data.AiDescriptions;
 import org.open4goods.commons.model.data.ContributionVote;
 import org.open4goods.commons.model.dto.AttributesFeatureGroups;
-import org.open4goods.commons.model.product.AggregatedPrice;
-import org.open4goods.commons.model.product.PriceTrend;
-import org.open4goods.commons.model.product.Product;
 import org.open4goods.commons.services.BarcodeValidationService;
 import org.open4goods.commons.services.BrandService;
 import org.open4goods.commons.services.IcecatService;
-import org.open4goods.commons.services.SerialisationService;
 import org.open4goods.commons.services.VerticalsConfigService;
+import org.open4goods.model.ai.AiDescription;
+import org.open4goods.model.ai.AiDescriptions;
+import org.open4goods.model.ai.AiReview;
+import org.open4goods.model.exceptions.ResourceNotFoundException;
+import org.open4goods.model.price.AggregatedPrice;
+import org.open4goods.model.price.PriceTrend;
+import org.open4goods.model.product.Product;
+import org.open4goods.model.vertical.VerticalConfig;
+import org.open4goods.services.serialisation.service.SerialisationService;
 import org.open4goods.ui.config.yml.UiConfig;
 import org.open4goods.ui.helper.UiHelper;
 import org.slf4j.Logger;
@@ -73,13 +73,13 @@ public class ProductController  {
 	 * @param response
 	 * @param updatedData
 	 * @return
-	 * @throws IOException
+	 * @throws Exception 
 	 * @throws UnirestException
 	 */
 
 
 	@GetMapping("/{vertical}/{id:\\d+}-*")
-	public ModelAndView productInVertical(@PathVariable String vertical, @PathVariable Long id, final HttpServletRequest request, HttpServletResponse response) throws IOException {
+	public ModelAndView productInVertical(@PathVariable String vertical, @PathVariable Long id, final HttpServletRequest request, HttpServletResponse response) throws Exception {
 
 
 		VerticalConfig vConf = verticalConfigService.getVerticalForPath(vertical);
@@ -117,7 +117,7 @@ public class ProductController  {
 	 */
 	
 	@GetMapping("/{id:\\d+}*")
-	public ModelAndView product(@PathVariable Long id, final HttpServletRequest request, HttpServletResponse response) throws IOException {
+	public ModelAndView product(@PathVariable Long id, final HttpServletRequest request, HttpServletResponse response) throws Exception {
 
 		ModelAndView ret = buildProductView(id, null, request, response);;
 		
@@ -149,9 +149,10 @@ public class ProductController  {
 	 * @param request
 	 * @param response
 	 * @return
+	 * @throws Exception 
 	 */
 	private ModelAndView buildProductView(Long id, String vertical, final HttpServletRequest request,
-			HttpServletResponse response) {
+			HttpServletResponse response) throws Exception {
 		
 		try {
 			// Getting the product name
@@ -260,10 +261,16 @@ public class ProductController  {
 				}
 			}
 
+			
+			// TODO : remove
 			mv.addObject("pros", pros);
 			mv.addObject("cons", cons);
 			mv.addObject("globalDescriptionParagraphs", globalDescriptionParagraphs);
 			mv.addObject("ecologicalDescriptionParagraphs", ecologicalDescriptionParagraphs);
+			
+			AiReview aiReview = data.getAiReviews().get(mv.getModel().get("siteLanguage"));
+			mv.addObject("aiReview", aiReview);
+			
 			
 			// Building the pricetrend
 			

@@ -1,0 +1,249 @@
+    <section id="markerEcological" class="container container-semi-fluid">
+		<div class="row text-center justify-content-center">
+           <div class="col-md-8 mb-5">
+				<h2 class="display-3">
+					Bilan écologique
+				</h2>
+		  </div>
+        </div>	   
+  
+	
+	   
+	   <div th:if="${product.ecoscore()}" class="mt-3 card shadow px-4 py-1 mb-3">
+				<div class="card-body text-center text-md-left">
+					<div class="row">
+						<div class="col-12 col-md-3 ">
+						
+						<div class="">
+						
+							<div class="  text-center">
+								<img class="mb-1" width="350px"
+									th:alt="'Ecoscore : ' + ${product.ecoscore.letter()}"
+									th:title="'éco-score : ' + ${product.ecoscore.letter()}"
+									th:src="'/icons/ecoscore/scoring-'+${product.ecoscore.letter()}+'.png'">									
+							</div>
+						
+							<br/>
+						
+							<div class="card border-gray-300 my-2">
+												<div class="card-body">
+													<div class="d-flex p-3">														
+														<div class="icon icon-primary">
+															<span class="fas fa-trophy"></span>
+														</div>														
+														<div class="ps-4">
+															<span class="h5 icon-box-title md-1">Classement</span>
+														</div>
+													</div>
+										
+													<ul class="list-group list-group-flush price-list ms-3">
+																<!-- <li class="list-group-item border-0"><span class="far fa-lightbulb"></span>Petites télévision : <span>25/150</span></li> -->
+																<li class="list-group-item border-0"><span class="far fa-hdd"></span>Téléviseurs : <span th:text="${product.ranking.globalPosition}"></span>/<span th:text="${product.ranking.globalCount}"></span></li>
+													</ul>	
+													
+												</div>
+								</div>
+								
+								
+								
+								
+								
+							<div class="align-text-bottom ">
+							<br/>
+							<br/>
+								<a style="width:100%" href="#markerEcoscore" class="mt-2 btn btn-primary animate-up-2 text-center">Détail du score</a>
+								
+								<a style="width:100%" href="/ecoscore" class="mt-2 btn btn-outline-tertiary animate-up-2 text-center">Tout savoir sur l'ecoscore Nudger</a>
+							</div>				
+								
+						
+						</div>		
+								
+								
+						
+						
+						
+						
+						
+						
+						
+						
+						
+						
+						
+
+							
+							
+																		<!-- Icon Box -->
+	
+											
+
+		<!-- 					<img th:src="${cover.path()}">  -->
+                              
+                                
+							
+						</div>
+						<div class="col-md-9">
+
+
+							<th:block th:if="${ecologicalDescriptionParagraphs}" id="evaluation-ecologique" class="card shadow border-gray-300 mt-3">
+								<p class="lead p-4">
+									<span th:each="paragraph : ${ecologicalDescriptionParagraphs}" th:utext="${paragraph + '<br/><br/>'}"></span>
+								</p>
+							</th:block>
+                            
+                            
+                            
+     
+                            
+                            
+                            
+						</div>
+					</div>
+				</div>
+			</div>
+			
+			
+			
+			 <div class="row mt-3">
+			 
+			 
+			     <!-- Comparison radar chart -->
+			     <div class="col-lg-4">
+			          <div class=" card shadow">
+                            <div class="card-header"><h3 class="h6">Comparaison</h3></div>
+                            <div class="card-body">
+     
+     
+                                 <canvas id="radarChart"></canvas>
+     
+                            </div>
+                        </div>
+			     </div>
+			 
+                 <!-- ImpactScore details -->
+                 <div class="col-lg-4" th:each="score, stat : ${verticalConfig.ecoScoreDetails(product.realScores())}" >
+                      <div class=" card shadow">
+                            <div style="max-height: 150px;" class="inline-block card-header">
+                            
+                          
+                                
+                            <div class="row align-middle">
+                                <div class="col-5" >
+                                    <th:block th:insert="~{inc/impactscore-percent-header.html}"></th:block>
+                                </div>
+                                <div class="align-middle col-7" >
+                                    <h3 class="h6" th:text="${score.name}"></h3>
+                                </div>
+                            </div>
+                            
+                            
+                            </div>
+                            <div class="card-body">
+                                    <th:block th:insert="~{inc/score/__${score.name.toLowerCase()}__.html}"></th:block>
+     
+     
+                            </div>
+                        </div>
+                 </div>			 
+			 
+			 
+			     <!-- Virtual score -->
+                 <div class="col-lg-4" >
+                      <div class=" card shadow">
+                            <div class="card-header"><h3 class="h6">Valeurs manquantes</h3></div>
+                            <div class="card-body">
+                                   
+     
+                                    + de detail sur le calcul ici
+                            </div>
+                        </div>
+                 </div>          
+             
+			 
+			 
+			 
+			 
+			 </div>
+			
+			
+			
+			<div class="row mt-3">
+						<!-- Origine -->
+						<div class="col-sm-12 col-md-12 col-lg-4 mb-2">
+							<!-- Icon Box -->
+							<div class="card border-gray-300 ">
+								<div class="">
+									<div class="d-flex p-3">
+										<div class="icon icon-primary">
+											<span class="fas fa-earth"></span>
+										</div>
+										<div class="ps-4">
+											<h3 class="h5 icon-box-title md-1">Origine</h3>
+										</div>
+									</div>
+		
+									<div class="card-body text-center ">
+                                        <div  class="h4" th:text="${originCountry}"></div>
+                                        <img th:if="${product.gtinInfos.country}" th:title="${originCountry}" th:src="'/assets/img/flags/'+${product.gtinInfos.country.toLowerCase()}+'.png'" th:alt="${originCountry}" class="image-md mb-4">
+                                        <div  class="h3 text-light mb-2 " ></div>
+											<p class="mb-4">Cette information est récuperée par les
+											premiers chiffres du code barre  (<b><span th:text="${product.gtin().substring(0,3)}"></span></b>), et indique la nationalité de 
+											l'organisme qui a délivré le code barre. Cela n'indique pas nécessairement le lieu de production.</p>
+                                 	 </div>
+								</div>
+							</div>
+							<!-- End of Icon Box -->
+						</div>
+		
+						<!-- Avantages -->
+		<div class="col-sm-12 col-md-12 col-lg-8">
+			<!-- Icon Box -->
+			<div class="card border-gray-300 ">
+				<div class="card-body">
+					<div class="d-flex p-3">
+						<div class="icon icon-primary">
+							<span class="fas fa-user-md"></span>
+						</div>
+						<div class="ps-4">
+							<h3 class="h5 icon-box-title md-1">Alternatives</h3>
+						</div>
+					</div>
+
+
+
+						<div class=" row">
+							<!-- Better -->
+							<div class="col-sm-12 col-md-6 col-lg-6 mb-2">
+								<th:block th:with="item = ${better}" th:insert="~{inc/product-mini.html}"></th:block>
+							</div>
+
+							<!-- Best -->
+							<div class="col-sm-12 col-md-6 col-lg-6 mb-2">
+								<th:block th:with="item = ${best}" th:insert="~{inc/product-mini.html}"></th:block>
+							</div>
+
+							<!-- End of Icon Box -->
+						</div>
+
+
+
+
+
+
+
+
+
+
+				</div>
+			</div>
+		</div>
+		<!-- End of Icon Box -->
+						</div>
+		
+		
+					</div>
+			
+			
+ 
+	   </section> 

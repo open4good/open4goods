@@ -2,20 +2,21 @@ package org.open4goods.ui.config.yml;
 
 import java.io.File;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 
 import org.open4goods.commons.config.yml.BanCheckerConfig;
 import org.open4goods.commons.config.yml.BlogConfiguration;
 import org.open4goods.commons.config.yml.DevModeConfiguration;
 import org.open4goods.commons.config.yml.FeedbackConfiguration;
 import org.open4goods.commons.config.yml.IcecatConfiguration;
-import org.open4goods.commons.config.yml.ui.ApiConfig;
-import org.open4goods.commons.config.yml.ui.ImageGenerationConfig;
 import org.open4goods.commons.config.yml.ui.OpenSearchConfig;
-import org.open4goods.commons.config.yml.ui.SiteNaming;
 import org.open4goods.commons.config.yml.ui.WebConfig;
-import org.open4goods.commons.model.Localisable;
+import org.open4goods.model.Localisable;
+import org.open4goods.model.vertical.ImageGenerationConfig;
+import org.open4goods.model.vertical.SiteNaming;
 import org.open4goods.xwiki.config.XWikiServiceProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -64,6 +65,11 @@ public class UiConfig {
 	private String generatedImagesFolder = rootFolder + "generated-images" + File.separator;
 	
 	/**
+	 * The list of authorized dynamic image resizing suffixes
+	 */
+	private Set<String> allowedImagesSizeSuffixes = new HashSet<>();
+	
+	/**
 	 * The mapped wiki pages
 	 */
 	@JsonMerge
@@ -78,7 +84,6 @@ public class UiConfig {
 
 	private OpenSearchConfig openSearchConfig = new OpenSearchConfig();
 
-	private ApiConfig apiConfig = new ApiConfig();
 
 	/**
 	 * Elastic search host
@@ -116,6 +121,11 @@ public class UiConfig {
 	//
 	private WebConfig webConfig = new WebConfig();
 
+	
+	/**
+	 * Config for url checking
+	 */
+	private UrlCheckConfig urlcheck;
 
 	/***
 	 * Config for IP and UA banChecking
@@ -263,13 +273,6 @@ public class UiConfig {
 		this.openSearchConfig = openSearchConfig;
 	}
 
-	public ApiConfig getApiConfig() {
-		return apiConfig;
-	}
-
-	public void setApiConfig(ApiConfig apiConfig) {
-		this.apiConfig = apiConfig;
-	}
 
 	public WebConfig getWebConfig() {
 		return webConfig;
@@ -490,6 +493,26 @@ public class UiConfig {
 	public void setTeamConfig(TeamConfig teamConfig) {
 		this.teamConfig = teamConfig;
 	}
+
+	public Set<String> getAllowedImagesSizeSuffixes() {
+		return allowedImagesSizeSuffixes;
+	}
+
+
+	public void setAllowedImagesSizeSuffixes(Set<String> allowedImagesSizeSuffixes) {
+		this.allowedImagesSizeSuffixes = allowedImagesSizeSuffixes;
+	}
+
+
+	public UrlCheckConfig getUrlcheck() {
+		return urlcheck;
+	}
+
+
+	public void setUrlcheck(UrlCheckConfig urlcheck) {
+		this.urlcheck = urlcheck;
+	}
+
 
 	public AmazonConfig getAmazonConfig() { return amazonConfig; }
 

@@ -9,7 +9,7 @@
 //import org.junit.jupiter.api.Test;
 //import org.open4goods.crawler.extractors.Extractor;
 //import org.open4goods.crawler.services.fetching.AwinCatalogService;
-//import org.open4goods.exceptions.ValidationException;
+//import org.open4goods.model.exceptions.ValidationException;
 //
 //public class AwinCatalogServiceTest {
 //

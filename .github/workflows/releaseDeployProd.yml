@@ -112,7 +112,7 @@ jobs:
       ###########################################
       - name: Build Changelog
         id: build_changelog
-        uses: mikepenz/release-changelog-builder-action@v5.0.0
+        uses: mikepenz/release-changelog-builder-action@v5.2.0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}      
         with:
@@ -153,7 +153,7 @@ jobs:
       ###########################################
       - name: Build Changelog Push Oriented
         id: build_changelog_push
-        uses: mikepenz/release-changelog-builder-action@v5.0.0
+        uses: mikepenz/release-changelog-builder-action@v5.2.0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}   
         with:
@@ -225,7 +225,7 @@ jobs:
       # Restart Applications
       ###########################################
       - name: Start Applications
-        uses: appleboy/ssh-action@v1.2.0
+        uses: appleboy/ssh-action@v1.2.1
         with:
           host: ${{ secrets.REMOTE_HOST }}
           username: ${{ secrets.REMOTE_USER }}

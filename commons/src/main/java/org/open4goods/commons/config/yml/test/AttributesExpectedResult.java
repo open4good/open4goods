@@ -3,8 +3,8 @@ package org.open4goods.commons.config.yml.test;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.open4goods.commons.model.constants.ReferentielKey;
-import org.open4goods.commons.model.data.DataFragment;
+import org.open4goods.model.attribute.ReferentielKey;
+import org.open4goods.model.datafragment.DataFragment;
 
 import java.util.Set;
 

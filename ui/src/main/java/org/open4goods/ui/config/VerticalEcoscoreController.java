@@ -1,12 +1,12 @@
 package org.open4goods.ui.config;
 
-import org.open4goods.commons.config.yml.PromptConfig;
-import org.open4goods.commons.config.yml.ui.VerticalConfig;
 import org.open4goods.commons.services.SearchService;
-import org.open4goods.commons.services.SerialisationService;
 import org.open4goods.commons.services.VerticalsConfigService;
-import org.open4goods.commons.services.ai.PromptResponse;
-import org.open4goods.commons.services.ai.GenAiService;
+import org.open4goods.model.vertical.VerticalConfig;
+import org.open4goods.services.prompt.config.PromptConfig;
+import org.open4goods.services.prompt.dto.PromptResponse;
+import org.open4goods.services.prompt.service.PromptService;
+import org.open4goods.services.serialisation.service.SerialisationService;
 import org.open4goods.ui.controllers.ui.UiService;
 import org.open4goods.ui.services.BlogService;
 import org.springframework.web.servlet.ModelAndView;

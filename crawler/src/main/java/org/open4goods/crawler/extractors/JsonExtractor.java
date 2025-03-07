@@ -9,13 +9,14 @@ import org.apache.commons.lang3.StringUtils;
 import org.open4goods.commons.config.yml.datasource.DataSourceProperties;
 import org.open4goods.commons.config.yml.datasource.ExtractorConfig;
 import org.open4goods.commons.config.yml.datasource.RatingConfig;
-import org.open4goods.commons.exceptions.ValidationException;
 import org.open4goods.commons.helper.InStockParser;
 import org.open4goods.commons.helper.WarrantyParser;
-import org.open4goods.commons.model.constants.ReferentielKey;
-import org.open4goods.commons.model.data.DataFragment;
-import org.open4goods.commons.model.data.Rating;
 import org.open4goods.crawler.services.fetching.DataFragmentWebCrawler;
+import org.open4goods.model.attribute.ReferentielKey;
+import org.open4goods.model.datafragment.DataFragment;
+import org.open4goods.model.exceptions.ValidationException;
+import org.open4goods.model.rating.Rating;
+import org.open4goods.services.serialisation.exception.SerialisationException;
 import org.slf4j.Logger;
 import org.w3c.dom.Document;
 
@@ -43,12 +44,12 @@ public class JsonExtractor extends Extractor {
 
 	public  void parse(final String json, final DataFragment p, final org.slf4j.Logger dedicatedLogger,
 			final ExtractorConfig c, final Page page, final Locale locale, final DataSourceProperties provider,
-			 final DataFragmentWebCrawler offerWebCrawler) throws IOException {
+			 final DataFragmentWebCrawler offerWebCrawler) throws IOException, SerialisationException {
 
 		final String url = page.getWebURL().getURL();
 		JsonNode root;
 		// try {
-		root = serialisationService.getJsonMapper().readTree(json);
+		root = serialisationService.jsonMapper().readTree(json);
 
 
 		if ("INFO".contentEquals(provider.getDedicatedLogLevel())) {

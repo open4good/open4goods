@@ -1,23 +1,22 @@
 package org.open4goods.api.controller.api;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
 import org.open4goods.api.services.ScrapperOrchestrationService;
 import org.open4goods.api.services.store.DataFragmentStoreService;
 import org.open4goods.commons.config.yml.datasource.DataSourceProperties;
-import org.open4goods.commons.exceptions.InvalidParameterException;
-import org.open4goods.commons.exceptions.ValidationException;
 import org.open4goods.commons.model.constants.RolesConstants;
-import org.open4goods.commons.model.constants.UrlConstants;
 import org.open4goods.commons.model.crawlers.FetcherGlobalStats;
-import org.open4goods.commons.model.data.DataFragment;
 import org.open4goods.commons.model.dto.FetchRequestResponse;
 import org.open4goods.commons.services.DataSourceConfigService;
-import org.open4goods.commons.services.SerialisationService;
+import org.open4goods.model.constants.UrlConstants;
+import org.open4goods.model.datafragment.DataFragment;
+import org.open4goods.model.exceptions.InvalidParameterException;
+import org.open4goods.model.exceptions.ValidationException;
+import org.open4goods.services.serialisation.exception.SerialisationException;
+import org.open4goods.services.serialisation.service.SerialisationService;
 import org.springframework.http.MediaType;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -129,7 +128,7 @@ public class ScraperOrchestrationController {
 	@PostMapping(path=UrlConstants.MASTER_API_CRAWLERS  + UrlConstants.MASTER_API_CRAWLER_SYNCH_FETCH_WITH_CONFIG)
 	@Operation(summary="Run an url direct fetching against the best availlable node, with a given DataSourceProperties")
 	@PreAuthorize("hasAuthority('"+RolesConstants.ROLE_ADMIN+"')")
-	public DataFragment fetchUrlWithConfig(  @RequestParam @NotBlank final String url, @RequestBody @NotBlank final String datasourceProperty ) throws InvalidParameterException, JsonParseException, JsonMappingException, IOException{
+	public DataFragment fetchUrlWithConfig(  @RequestParam @NotBlank final String url, @RequestBody @NotBlank final String datasourceProperty ) throws InvalidParameterException, JsonParseException, JsonMappingException, IOException, SerialisationException{
 		// Get the providerName corresponding to the url
 		return fetcherOrchestrationService.triggerHttpSynchFetching( serialisationService.fromYaml(datasourceProperty, DataSourceProperties.class), url);
 	}

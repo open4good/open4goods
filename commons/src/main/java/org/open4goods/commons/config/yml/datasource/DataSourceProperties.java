@@ -7,10 +7,10 @@ import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 
-import org.open4goods.commons.model.constants.Currency;
-import org.open4goods.commons.model.constants.ProductCondition;
-import org.open4goods.commons.model.constants.ReferentielKey;
 import org.open4goods.commons.model.constants.TimeConstants;
+import org.open4goods.model.attribute.ReferentielKey;
+import org.open4goods.model.price.Currency;
+import org.open4goods.model.product.ProductCondition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.validation.annotation.Validated;

@@ -7,7 +7,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.open4goods.commons.model.product.ProductAttribute;
+import org.open4goods.model.attribute.ProductAttribute;
 
 /**
  * Repesents attributes stats for a vertical
