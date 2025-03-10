@@ -629,6 +629,16 @@ public class Product implements Standardisable {
 		return names.getUrl().getOrDefault(language, names.getUrl().get("default"));
 	}
 	
+	
+	public void forceModel(String extractedModel) {
+		String oldModel = model();
+		getAttributes().getReferentielAttributes().put(ReferentielKey.MODEL, extractedModel);
+		akaModels.add(oldModel);
+		akaModels.remove(extractedModel);
+		
+	}
+
+	
 	/**
 	 * Add the model referentiel attribute, applying some spliting mechanism and cleaning pass
 	 * @param value
@@ -948,6 +958,7 @@ public class Product implements Standardisable {
 	public void setAiReviews(Localisable<String, AiReview> aiReviews) {
 		this.aiReviews = aiReviews;
 	}
+
 
 
 	
