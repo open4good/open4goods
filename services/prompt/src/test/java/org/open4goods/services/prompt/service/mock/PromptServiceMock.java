@@ -9,6 +9,8 @@ import java.nio.file.Paths;
 import java.util.Map;
 
 import org.mockito.Mockito;
+import org.open4goods.model.exceptions.ResourceNotFoundException;
+import org.open4goods.services.evaluation.service.EvaluationService;
 import org.open4goods.services.prompt.config.PromptServiceConfig;
 import org.open4goods.services.prompt.dto.PromptResponse;
 import org.open4goods.services.prompt.service.PromptService;
@@ -16,6 +18,9 @@ import org.open4goods.services.serialisation.exception.SerialisationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ai.chat.client.ChatClient.CallResponseSpec;
+import org.springframework.ai.chat.client.DefaultChatClient.DefaultCallResponseSpec;
+import org.springframework.ai.chat.client.DefaultChatClient.DefaultChatClientRequestSpec;
+import org.springframework.ai.openai.api.OpenAiApi;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Primary;
@@ -23,10 +28,6 @@ import org.springframework.core.io.ClassPathResource;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
-import org.open4goods.model.exceptions.ResourceNotFoundException;
-import org.open4goods.services.evaluation.service.EvaluationService;
-import org.springframework.ai.openai.api.OpenAiApi;
 
 /**
  * Test configuration for providing a primary PromptService bean for tests.
@@ -62,16 +63,17 @@ public class PromptServiceMock {
                    String promptKey = invocation.getArgument(0);
                    @SuppressWarnings("unchecked")
                    Map<String, Object> variables = invocation.getArgument(1);
-                   String fileName = promptKey + ".json";
+                   // Use the new naming convention for raw response files
+                   String fileName = promptKey + "-response.txt";
                    String resourcePath = "prompt/mocks/" + fileName;
 
-                   // Attempt to load the recorded response from the classpath.
+                   String rawContent = null;
+                   // Attempt to load the recorded raw response from the classpath.
                    ClassPathResource resource = new ClassPathResource(resourcePath);
                    if (resource.exists()) {
                        try (InputStream is = resource.getInputStream()) {
-                           String json = new String(is.readAllBytes(), StandardCharsets.UTF_8);
-                           logger.debug("Loaded prompt mock from classpath: {}", resourcePath);
-                           return objectMapper.readValue(json, new TypeReference<PromptResponse<CallResponseSpec>>() {});
+                           rawContent = new String(is.readAllBytes(), StandardCharsets.UTF_8);
+                           logger.debug("Loaded prompt mock raw response from classpath: {}", resourcePath);
                        } catch (IOException e) {
                            logger.error("Failed to load recorded response from classpath: {}", e.getMessage());
                        }
@@ -80,13 +82,12 @@ public class PromptServiceMock {
                    }
 
                    // If not found in classpath, try the folder if recording is enabled.
-                   if (properties.isRecordEnabled() && properties.getRecordFolder() != null && !properties.getRecordFolder().isBlank()) {
+                   if (rawContent == null && properties.isRecordEnabled() && properties.getRecordFolder() != null && !properties.getRecordFolder().isBlank()) {
                        try {
                            Path filePath = Paths.get(properties.getRecordFolder()).resolve(fileName);
                            if (Files.exists(filePath)) {
-                               String json = Files.readString(filePath, StandardCharsets.UTF_8);
-                               logger.debug("Loaded prompt mock from folder: {}", filePath.toAbsolutePath());
-                               return objectMapper.readValue(json, new TypeReference<PromptResponse<CallResponseSpec>>() {});
+                               rawContent = Files.readString(filePath, StandardCharsets.UTF_8);
+                               logger.debug("Loaded prompt mock raw response from folder: {}", filePath.toAbsolutePath());
                            } else {
                                logger.debug("No file found at folder path: {}", filePath.toAbsolutePath());
                            }
@@ -95,22 +96,20 @@ public class PromptServiceMock {
                        }
                    }
 
-                   // Fallback: return a dummy response prefixed with the marker.
-                   logger.warn("No recorded mock response found for promptKey: {}. Returning dummy response.", promptKey);
-                   PromptResponse<CallResponseSpec> dummy = new PromptResponse<>();
-                   dummy.setStart(System.currentTimeMillis());
-                   dummy.setDuration(1);
-                   String originalResponse = "dummy response";
-                   dummy.setRaw("ORIGINAL PROMPT AS MOCKED RESPONSE: " + originalResponse);
-//                   CallResponseSpec dummyBody = new CallResponseSpec() {
-//                       @Override
-//                       public String content() {
-//                           return originalResponse;
-//                       }
-//                   };
-//                   dummy.setBody(dummyBody);
-                   dummy.setPrompt(new org.open4goods.services.prompt.config.PromptConfig());
-                   return dummy;
+                   // If still not found, use fallback dummy response.
+                   if (rawContent == null) {
+                       logger.warn("No recorded mock response found for promptKey: {}. Returning dummy response.", promptKey);
+                       rawContent = "dummy response";
+                   }
+
+                   // Wrap the raw content in a dummy CallResponseSpec instance.
+                   PromptResponse<String> response = new PromptResponse<>();
+                   response.setStart(System.currentTimeMillis());
+                   response.setDuration(1);
+                   response.setRaw(rawContent);
+                   response.setPrompt(new org.open4goods.services.prompt.config.PromptConfig());
+                   response.setBody(rawContent);
+                   return response;
                });
 
         // Configure the jsonPrompt() method.
