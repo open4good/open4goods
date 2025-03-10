@@ -71,7 +71,7 @@ public class PerplexityReviewCompletionService  extends AbstractCompletionServic
 		
 
 		// AI Prompting
-		PromptResponse<CallResponseSpec> response = aiService.prompt("perplexity-product-review", context);
+		PromptResponse<String> response = aiService.prompt("perplexity-product-review", context);
 		
 		AiReview review = new AiReview();
 		String[] frags  = response.getRaw().split("\n##");
