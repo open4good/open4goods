@@ -1,10 +1,11 @@
 package org.open4goods.api.services.aggregation.services.realtime;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.open4goods.api.services.aggregation.AbstractAggregationService;
@@ -15,7 +16,6 @@ import org.open4goods.commons.services.VerticalsConfigService;
 import org.open4goods.model.attribute.Attribute;
 import org.open4goods.model.attribute.IndexedAttribute;
 import org.open4goods.model.attribute.ProductAttribute;
-import org.open4goods.model.attribute.ProductAttributes;
 import org.open4goods.model.attribute.ReferentielKey;
 import org.open4goods.model.attribute.SourcedAttribute;
 import org.open4goods.model.datafragment.DataFragment;
@@ -76,6 +76,10 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 		});
 		
 		
+		
+		// Adding model from title
+		extractModelFromTitles(data);
+
 		
 		
 		// Attributing taxomy to attributes
@@ -147,6 +151,91 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 		updateExcludeStatus(data,vConf);
 		
 	}
+
+	
+	public void extractModelFromTitles(Product data) {
+	    // Retrieve current brand and model from the product.
+	    String brand = data.brand();
+	    String currentModel = data.model();
+	    
+	    if (brand == null || currentModel == null || currentModel.isEmpty()) {
+	        dedicatedLogger.warn("Brand or model is null/empty; cannot extract model from titles.");
+	        return;
+	    }
+	    
+	    // Determine the model prefix: use the entire model if it's shorter than 3 characters.
+	    String modelPrefix = currentModel.length() < 3 ? currentModel : currentModel.substring(0, 3);
+	    
+	    // Updated regex pattern explanation:
+	    // (?i)               -> Enables case-insensitive matching.
+	    // .*                 -> Matches any preceding characters.
+	    // Pattern for BRAND  -> Matches the literal brand (quoted for regex safety).
+	    // [ .-]?            -> Allows for an optional separator: a space, a period, or a dash.
+	    // (                  -> Start capturing group for the model.
+	    //    modelPrefix    -> Matches the model prefix (quoted for regex safety).
+	    //    [^\s]*         -> Matches zero or more non-whitespace characters.
+	    // )                  -> End capturing group.
+	    // (?:\s|$)          -> Ensures that the captured model is terminated by a whitespace or the end of the string.
+	    // .*                 -> Matches any trailing characters.
+	    String regex = "(?i).*" 
+	                 + java.util.regex.Pattern.quote(brand)
+	                 + "[ .-]?" 
+	                 + "(" 
+	                 + java.util.regex.Pattern.quote(modelPrefix)
+	                 + "[^\\s]*)" 
+	                 + "(?:\\s|$).*";
+	    
+	    dedicatedLogger.info("Compiled regex pattern: " + regex);
+	    
+	    // Compile the pattern only once.
+	    java.util.regex.Pattern pattern = java.util.regex.Pattern.compile(regex);
+	    
+	    // List to collect extracted model candidates.
+	    List<String> extractedModels = new ArrayList<>();
+	    for (String offerName : data.getOfferNames()) {
+	        if (offerName == null) {
+	            continue;
+	        }
+	        java.util.regex.Matcher matcher = pattern.matcher(offerName);
+	        if (matcher.matches()) {
+	            // Extract captured group (the model) from the offer name.
+	            String candidate = matcher.group(1);
+	            extractedModels.add(candidate);
+	        }
+	    }
+	    
+	    if (extractedModels.isEmpty()) {
+	        dedicatedLogger.info("No matching offer names found.");
+	        return;
+	    }
+	    
+	    // Find the shortest candidate model (if multiple candidates have the same length, the first is chosen).
+	    String shortestModel = extractedModels.get(0);
+	    for (String candidate : extractedModels) {
+	        if (candidate.length() < shortestModel.length()) {
+	            shortestModel = candidate;
+	        }
+	    }
+	    
+	    // Convert the extracted model to uppercase.
+	    String extractedModel = shortestModel.toUpperCase();
+	    
+	    // If the extracted model is different from the current model, update it using forceModel.
+	    if (!extractedModel.equals(currentModel)) {
+	        data.forceModel(extractedModel);
+	        dedicatedLogger.info("Model updated from '" + currentModel + "' to '" + extractedModel + "'.");
+	    }
+	    
+	    // Add any additional extracted models (converted to uppercase) to the akaModels set.
+	    for (String candidate : extractedModels) {
+	        String candidateUpper = candidate.toUpperCase();
+	        if (!candidateUpper.equals(extractedModel) && !data.getAkaModels().contains(candidateUpper)) {
+	            data.getAkaModels().add(candidateUpper);
+	            dedicatedLogger.info("Added alternate model: " + candidateUpper);
+	        }
+	    }
+	}
+
 
 	/**
 	 * Set the product in excluded state (will not be exposed through indexation, searchservice,..) 
