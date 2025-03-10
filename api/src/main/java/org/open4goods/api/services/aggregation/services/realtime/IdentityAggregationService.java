@@ -67,12 +67,7 @@ public class IdentityAggregationService extends AbstractAggregationService {
 		/////////////////////////////
 		
 		// The last update
-		if ( output.getLastChange() <= input.getLastIndexationDate()) {
-			output.setLastChange(input.getLastIndexationDate());
-		} else {
-			dedicatedLogger.warn("Data Fragment has an update date in the futur. Probable erasure due to same gtin in different datasources in the same bulk ! : {}",input);
-		}
-
+		output.setLastChange(System.currentTimeMillis());
 		
 		onProduct(output, vConf);
 		return null;
@@ -98,6 +93,8 @@ public class IdentityAggregationService extends AbstractAggregationService {
 		output.setId(Long.valueOf(valResult.getValue()));
 
 
+	
+			
 		/////////////////////////////
 		// Adding country information
 		/////////////////////////////
