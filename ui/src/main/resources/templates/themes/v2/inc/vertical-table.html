@@ -1,0 +1,51 @@
+
+<style>
+    /* en raison de balises DIV qui se chargent sans que je ne sache pourquoi, ce style est là pour reset tout ça*/
+    #tableProducts_wrapper > div.row.mt-2 {
+        margin-top: 0!important;
+    }
+    #tableProducts_wrapper tbody {
+        border-style: initial!important;
+    }
+    #tableProducts_wrapper tfoot {
+        display: none!important
+    }
+</style>
+<div class="table-responsive-sm">
+    <table id="tableProducts" class="table table-hover table-nudger table-nudger-price">
+        <thead>
+            <tr>
+                <th><small>Nom</small></th>
+                <th><small>Marque</small></th>
+                <th><small>Eco-score</small></th>
+                <th><small>Prix</small></th>
+                <th><small>Offres</small></th>
+                <!--  
+                    <th:block th:each="filter : ${products.customFilters}">
+	                    <th th:text="${filter.key.name.get(siteLanguage)}"></th>            
+                    </th:block>
+                -->
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td class="p-0">
+                    <div th:each="p : ${products.limitedDatas(20)}" >
+                        <p th:if="${p.model()}"><a th:text="${p.model()}" th:href="'/'+${verticalPath}+ '/'+${p.url(siteLanguage)}"></a></p>
+                        <p th:unless="${p.model()}"><a th:text="${p.bestName()}" th:href="'/'+${verticalPath}+ '/'+${p.url(siteLanguage)}"></a></p>
+                        <p th:text="${p.brand()}"></p>
+                        <p></p>
+                        <p th:if="${p.bestPrice() != null}" th:text="${p.bestPrice().price}"></p>
+                        <p th:text="${p.offersCount}"></p>
+                        <!--  
+                        <th:block th:each="filter : ${products.customFilters}">
+                            <p th:if="${p.attributes.indexed.get(filter.key.key)}" th:text="${p.attributes.indexed.get(filter.key.key).value }"></p>            
+                            <p th:unless="${p.attributes.indexed.get(filter.key.key)}"></p>            
+                        </th:block>
+                        -->
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
