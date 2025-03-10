@@ -19,7 +19,22 @@ public class SerialisationServiceTest {
 
     private final SerialisationService serialisationService = new SerialisationService();
 
-
+    @Test
+    public void testSnakeYamlMultilineSerialization() {
+        try {
+            Map<String, String> sample = Map.of("key", "line1\nline2\nline3");
+            String yamlOutput = serialisationService.toYamLiteral(sample);
+            assertNotNull(yamlOutput, "SnakeYAML serialization returned null");
+            // Check that the YAML output uses the literal block scalar indicator (|).
+            assertTrue(yamlOutput.contains("|"), "YAML output does not use literal block scalar style");
+            // Verify that the content is correctly rendered in multiple lines.
+            assertTrue(yamlOutput.contains("line1"), "YAML output missing 'line1'");
+            assertTrue(yamlOutput.contains("line2"), "YAML output missing 'line2'");
+            assertTrue(yamlOutput.contains("line3"), "YAML output missing 'line3'");
+        } catch (SerialisationException e) {
+            fail(e);
+        }
+    }
 
 
     @Test

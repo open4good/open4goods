@@ -5,10 +5,13 @@ import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.commons.codec.binary.Base64;
 import org.open4goods.services.serialisation.exception.SerialisationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.yaml.snakeyaml.DumperOptions;
+import org.yaml.snakeyaml.Yaml;
 
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -20,7 +23,6 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.type.CollectionType;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.fasterxml.jackson.dataformat.yaml.YAMLGenerator;
-import org.apache.commons.codec.binary.Base64;
 
 /**
  * Service for serializing and deserializing objects to/from JSON and YAML formats.
@@ -37,6 +39,8 @@ public class SerialisationService {
     private final ObjectWriter jsonMapperWithPrettyPrint;
     private final ObjectMapper yamlMapper;
 
+	private Yaml yaml;
+
     /**
      * Constructor initializing JSON and YAML ObjectMappers with desired configurations.
      */
@@ -50,10 +54,23 @@ public class SerialisationService {
         this.jsonMapperWithPrettyPrint = new ObjectMapper().writerWithDefaultPrettyPrinter();
         
         // Initialize YAML mapper with NON_EMPTY inclusion and pretty output.
-        this.yamlMapper = new ObjectMapper(new YAMLFactory().disable(YAMLGenerator.Feature.SPLIT_LINES))
-                .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
-                .setSerializationInclusion(Include.NON_EMPTY)
-                .enable(SerializationFeature.INDENT_OUTPUT);
+        YAMLFactory yamlFactory = new YAMLFactory()
+        	    .disable(YAMLGenerator.Feature.SPLIT_LINES);
+        this.yamlMapper =  new ObjectMapper(yamlFactory)
+        	    .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+        	    .setSerializationInclusion(Include.NON_EMPTY)
+        	    .enable(SerializationFeature.INDENT_OUTPUT);
+        	
+        	
+        // Low level yaml for literals rendering
+        DumperOptions options = new DumperOptions();
+        // Use literal style (|) so that "\n" is rendered as a multiline block.
+        options.setDefaultScalarStyle(DumperOptions.ScalarStyle.LITERAL);
+        options.setPrettyFlow(true);
+        options.setSplitLines(false);
+        
+        options.setIndent(2);
+        this.yaml = new Yaml(options);
     }
 
     /**
@@ -88,6 +105,16 @@ public class SerialisationService {
         }
     }
 
+    public String toYamLiteral(final Object o) throws SerialisationException {
+        try {
+  
+            return yaml.dump(o);
+        } catch (Exception e) {
+            logger.error("Error serializing {} to YAML using SnakeYAML", o, e);
+            throw new SerialisationException("Error serializing object to YAML using SnakeYAML", e);
+        }
+    }
+    
     /**
      * Serializes an object to its JSON representation with an option for pretty printing.
      *
