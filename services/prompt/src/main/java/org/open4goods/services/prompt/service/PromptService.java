@@ -72,7 +72,6 @@ public class PromptService implements HealthIndicator {
      */
     private volatile boolean externalApiHealthy = true;
 
-    
     /**
      * Constructs a new PromptService with the given dependencies including a MeterRegistry for metrics.
      *
@@ -115,7 +114,7 @@ public class PromptService implements HealthIndicator {
      * @throws ResourceNotFoundException if the prompt configuration is not found.
      * @throws SerialisationException    if a serialization error occurs.
      */
-    public PromptResponse<CallResponseSpec> prompt(String promptKey, Map<String, Object> variables)
+    private PromptResponse<CallResponseSpec> promptNativ(String promptKey, Map<String, Object> variables)
             throws ResourceNotFoundException, SerialisationException {
 
         PromptConfig pConf = getPromptConfig(promptKey);
@@ -161,12 +160,12 @@ public class PromptService implements HealthIndicator {
         }
 
         // Clone prompt configuration and update with evaluated prompts
-        String yamlPromptConfig = serialisationService.toYaml(pConf);
+        String yamlPromptConfig = serialisationService.toYamLiteral(pConf);
         PromptConfig updatedConfig = serialisationService.fromYaml(yamlPromptConfig, PromptConfig.class);
         updatedConfig.setSystemPrompt(systemPromptEvaluated);
         updatedConfig.setUserPrompt(userPromptEvaluated);
         ret.setPrompt(updatedConfig);
-        logger.info("Resolved prompt config for {} is : {} \n", promptKey, serialisationService.toYaml(updatedConfig));
+        logger.info("Resolved prompt config for {} is : {} \n", promptKey, serialisationService.toYamLiteral(updatedConfig));
 
         // --- Recording Request BEFORE API call ---
         if (genAiConfig.isRecordEnabled() && genAiConfig.getRecordFolder() != null) {
@@ -175,7 +174,7 @@ public class PromptService implements HealthIndicator {
                 if (!recordDir.exists()) {
                     recordDir.mkdirs();
                 }
-                String requestYaml = serialisationService.toYaml(updatedConfig);
+                String requestYaml = serialisationService.toYamLiteral(updatedConfig);
                 File requestFile = new File(recordDir, promptKey + "-request.yaml");
                 FileUtils.writeStringToFile(requestFile, requestYaml, Charset.defaultCharset());
                 logger.info("Recorded prompt request to file: {}", requestFile.getAbsolutePath());
@@ -194,10 +193,15 @@ public class PromptService implements HealthIndicator {
             if (genAiConfig.isRecordEnabled() && genAiConfig.getRecordFolder() != null) {
                 try {
                     File recordDir = new File(genAiConfig.getRecordFolder());
-                    String responseYaml = serialisationService.toYaml(genAiResponse);
-                    File responseFile = new File(recordDir, promptKey + "-response.yaml");
-                    FileUtils.writeStringToFile(responseFile, responseYaml, Charset.defaultCharset());
-                    logger.info("Recorded prompt response to file: {}", responseFile.getAbsolutePath());
+                    if (!recordDir.exists()) {
+                        recordDir.mkdirs();
+                    }
+                    // Instead of serializing the whole CallResponseSpec (which cannot be done),
+                    // record only its raw string content.
+                    String responseContent = genAiResponse.content();
+                    File responseFile = new File(recordDir, promptKey + "-response.txt");
+                    FileUtils.writeStringToFile(responseFile, responseContent, Charset.defaultCharset());
+                    logger.info("Recorded prompt response content to file: {}", responseFile.getAbsolutePath());
                 } catch (Exception e) {
                     logger.error("Error recording prompt response for key {}: {}", promptKey, e.getMessage(), e);
                 }
@@ -217,6 +221,21 @@ public class PromptService implements HealthIndicator {
         return ret;
     }
 
+    public PromptResponse<String> prompt(String promptKey, Map<String, Object> variables)
+            throws ResourceNotFoundException, SerialisationException {
+        
+        PromptResponse<String> ret = new PromptResponse<String>();
+        
+        PromptResponse<CallResponseSpec> nativ = promptNativ(promptKey, variables);
+        ret.setBody(nativ.getRaw());
+        ret.setRaw(nativ.getRaw());
+        ret.setDuration(nativ.getDuration());
+        ret.setPrompt(nativ.getPrompt());
+        ret.setStart(nativ.getStart());
+        
+        return ret;
+    }
+
     /**
      * Executes a prompt and converts the response into a JSON map.
      *
@@ -230,7 +249,7 @@ public class PromptService implements HealthIndicator {
             throws ResourceNotFoundException, SerialisationException {
 
         PromptResponse<Map<String, Object>> ret = new PromptResponse<>();
-        PromptResponse<CallResponseSpec> internal = prompt(promptKey, variables);
+        PromptResponse<CallResponseSpec> internal = promptNativ(promptKey, variables);
 
         ret.setDuration(internal.getDuration());
         ret.setStart(internal.getStart());

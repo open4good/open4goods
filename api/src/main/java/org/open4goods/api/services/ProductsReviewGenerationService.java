@@ -65,7 +65,7 @@ public class ProductsReviewGenerationService {
 		
 		// AI Prompting
 		
-		PromptResponse<CallResponseSpec> response = aiService.prompt("perplexity-top-page-generation", context);
+		PromptResponse<String> response = aiService.prompt("perplexity-top-page-generation", context);
 		
 		
 		
