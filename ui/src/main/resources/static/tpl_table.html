@@ -1,84 +1,41 @@
-<div style="display:none">	
-	
-	<!-- Template for cards layout -->
-	<div id="template-product-list">
-	
-			<div class="card shadow p-4">
-                    <div class="row align-items-center">
-                        <aside class="col-md-3 text-center">
-                            <a href="{{productUrl}}">
-                                <img height="200" src="{{imageUrl}}" alt="{{name}}">
-                            </a>
-                        </aside> <!-- col.// -->
-                        <div class="col-md-6">
-                            <div class="info-main">
-                                <a href="{{productUrl}}" class="h5 title">{{data.attributes.referentielAttributes.BRAND}} - {{name}}</a>
-                                <div class="my-3">
-
-
-                                    <div class="row star-rating star-rating-md " data-rating="{{ecoscore}}" aria-label="Rating: {{ecoscore}} out of 5 stars">
-									    <div class="stars">
-									        <span class="star"></span>
-									        <span class="star"></span>
-									        <span class="star"></span>
-									        <span class="star"></span>
-									        <span class="star"></span>
-									    </div>
-									</div>
-									<div class="row">
-                                        <span class="">ImpactScore : <strong>{{ecoscore20}} / 20</strong></span>
-									</div>
-                                    
-                                </div>
-
-                                <p>{{desc}}</p>
-                            </div>
-                        </div> 
-                        <div class="col-12 col-md-3">
-                            <div class="d-flex align-items-center">
-                                <span class="h5 mb-2 text-danger me-2">
-                                    {{data.price.minPrice.price}} {{data.price.minPrice.currency}}
-                                </span>
-                            </div> <!-- info-price-detail // -->
-                            <span class="text-success small"><span class="fas fa-leaf me-1"></span>Compensation : {{compensation}} {{data.price.minPrice.currency}}</span>
-                            <br/>
-                            <span class="small text-primary "><span class="fas fa-shopping-cart me-1"></span>{{data.offersCount}} offre(s)</span>
-                           
-                            <div class="d-grid gap-2 mt-4">
-                                <a class="btn btn-primary btn-sm" href="{{productUrl}}">
-                                    Details
-                                </a>
-                            </div>
-                            
-                        </div> 
-                    </div> 
+<div style="display:none">
+    <div id="template-product-search">
+        <div class="border-{{ecoscore}} d-flex align-items-center p-2 border-5 border-start">
+            <!-- Image du produit -->
+            <div class="me-3">
+                <img src="{{imageUrl}}" alt="{{name}}" width="90" height="90" class="border-gray-300" style="object-fit: cover;">
+            </div>
+        
+            <!-- Informations du produit -->
+            <div class="flex-grow-1">
+                <h5 class="mb-1">
+                    <a href="{{productUrl}}" class="text-decoration-none text-dark fw-bold">{{data.attributes.referentielAttributes.BRAND}} - {{name}}</a>
+                </h5>
+        
+                <!-- Éco-score -->
+                <span class="badge bg-success">Ecoscore : <strong>{{ecoscore}} / 5</strong></span>
+        
+                <!-- Indicateurs clés -->
+                <div class="mt-2 d-flex flex-wrap">
+                    <span class="me-3"><strong>Réparabilité :</strong> 8/10 <span class="badge bg-success">(new)</span></span>
+                    <span class="me-3"><strong>Consommation :</strong> 120 kWh/an <span class="badge bg-success">(new)</span></span>
+                    <span class="me-3"><strong>Pièces :</strong> 10 ans <span class="badge bg-success">(new)</span></span>
+                    <span class="me-3"><strong>Compensation :</strong> {{compensation}} {{data.price.minPrice.currency}}</span>
+                    <span class="me-3"><strong>Prix :</strong> {{data.price.minPrice.price}} {{data.price.minPrice.currency}}</span>
                 </div>
-	</div>
+            </div>
+        
+            <!-- Bouton Comparer -->
+            <!--div>
+                <button class="btn btn-outline-primary btn-sm">Comparer <span class="badge bg-success">(new)</span></button>
+            </div-->
 
-
-
-
-	<!-- Template for cards layout -->
-	<div id="template-product-card">
-		<div class="text-center" >
-	          <a href="{{productUrl}}">
-	              <img height="200" src="{{imageUrl}}" alt="{{name}}">
-	              <a href="{{productUrl}}" class="h5 title">{{data.attributes.referentielAttributes.BRAND}} - {{name}}</a>
-	          </a>
-              <div class="row star-rating star-rating-sm " data-rating="{{ecoscore}}" aria-label="Rating: {{ecoscore}} out of 5 stars">
-                   <div class="stars">
-                       <span class="star"></span>
-                       <span class="star"></span>
-                       <span class="star"></span>
-                       <span class="star"></span>
-                       <span class="star"></span>
-                   </div>
-               </div>
-               
-                                    
-		</div>
-	</div>
-	
-	
-</div>
-
+            <div>
+                <a href="{{productUrl}}" class="btn btn__nudger text-decoration-none text-white">
+                    &#62;
+                </a>
+            </div>
+        </div>
+    </div>
+ </div>
+ 
