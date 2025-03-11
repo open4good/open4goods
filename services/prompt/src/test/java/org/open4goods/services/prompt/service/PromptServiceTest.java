@@ -5,7 +5,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.util.HashMap;
@@ -15,8 +14,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.open4goods.model.exceptions.ResourceNotFoundException;
 import org.open4goods.services.evaluation.service.EvaluationService;
-import org.open4goods.services.prompt.config.PromptServiceConfig;
 import org.open4goods.services.prompt.config.PromptConfig;
+import org.open4goods.services.prompt.config.PromptServiceConfig;
 import org.open4goods.services.serialisation.service.SerialisationService;
 import org.springframework.ai.openai.api.OpenAiApi;
 import org.springframework.boot.SpringBootConfiguration;
@@ -31,7 +30,6 @@ import io.micrometer.core.instrument.MeterRegistry;
 @SpringBootConfiguration
 @EnableAutoConfiguration
 @ComponentScan(basePackages = {"org.open4goods.services.prompt"})
-
 class PromptServiceTest {
 
     private PromptService genAiService;
@@ -45,12 +43,12 @@ class PromptServiceTest {
     @BeforeEach
     void setUp() {
         // Create mocks for dependencies
-        mockConfig = mock(PromptServiceConfig.class);
-        openAiApi = mock(OpenAiApi.class);
-        perplexityApi = mock(OpenAiApi.class);
-        serialisationService = mock(SerialisationService.class);
-        evaluationService = mock(EvaluationService.class);
-        meterRegistry = mock(MeterRegistry.class);
+        mockConfig = org.mockito.Mockito.mock(PromptServiceConfig.class);
+        openAiApi = org.mockito.Mockito.mock(OpenAiApi.class);
+        perplexityApi = org.mockito.Mockito.mock(OpenAiApi.class);
+        serialisationService = org.mockito.Mockito.mock(SerialisationService.class);
+        evaluationService = org.mockito.Mockito.mock(EvaluationService.class);
+        meterRegistry = org.mockito.Mockito.mock(MeterRegistry.class);
 
         // Stub configuration methods
         when(mockConfig.isEnabled()).thenReturn(true);
@@ -59,12 +57,12 @@ class PromptServiceTest {
 
         // Stub serialization behavior (for simplicity, assume identity conversion)
         try {
-        	when(serialisationService.toJson(any())).thenAnswer(invocation -> invocation.getArgument(0).toString());
-			when(serialisationService.fromJson(anyString(), eq(PromptConfig.class)))
-			        .thenReturn(new PromptConfig());
-		} catch (Exception e) {
-			fail(e);
-		}
+            when(serialisationService.toYamLiteral(any())).thenAnswer(invocation -> invocation.getArgument(0).toString());
+            when(serialisationService.fromYaml(anyString(), eq(PromptConfig.class)))
+                    .thenReturn(new PromptConfig());
+        } catch (Exception e) {
+            fail(e);
+        }
 
         // Instantiate the service under test
         genAiService = new PromptService(mockConfig, perplexityApi, openAiApi, serialisationService, evaluationService, meterRegistry);
@@ -77,5 +75,5 @@ class PromptServiceTest {
         assertThrows(ResourceNotFoundException.class, () -> genAiService.prompt("nonExistentKey", variables));
     }
 
-    // Additional tests should be implemented to cover jsonPrompt and other methods.
+    
 }

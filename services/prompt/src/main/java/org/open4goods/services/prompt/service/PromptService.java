@@ -1,8 +1,10 @@
 package org.open4goods.services.prompt.service;
 
 import java.io.File;
+import java.lang.Math;
 import java.nio.charset.Charset;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -105,6 +107,8 @@ public class PromptService implements HealthIndicator {
      * Executes a prompt against an AI service based on a prompt key and provided variables.
      * <p>
      * The evaluated prompt request is recorded to a YAML file before invoking the external API.
+     * Additionally, if recording is enabled, a human-readable text file containing both the system
+     * and user prompts (with header metadata) is generated.
      * This ensures that the request is captured even if the API call fails.
      * </p>
      *
@@ -164,10 +168,11 @@ public class PromptService implements HealthIndicator {
         PromptConfig updatedConfig = serialisationService.fromYaml(yamlPromptConfig, PromptConfig.class);
         updatedConfig.setSystemPrompt(systemPromptEvaluated);
         updatedConfig.setUserPrompt(userPromptEvaluated);
+        
         ret.setPrompt(updatedConfig);
         logger.info("Resolved prompt config for {} is : {} \n", promptKey, serialisationService.toYamLiteral(updatedConfig));
 
-        // --- Recording Request BEFORE API call ---
+        // --- Recording Request (YAML) BEFORE API call ---
         if (genAiConfig.isRecordEnabled() && genAiConfig.getRecordFolder() != null) {
             try {
                 File recordDir = new File(genAiConfig.getRecordFolder());
@@ -180,6 +185,35 @@ public class PromptService implements HealthIndicator {
                 logger.info("Recorded prompt request to file: {}", requestFile.getAbsolutePath());
             } catch (Exception e) {
                 logger.error("Error recording prompt request for key {}: {}", promptKey, e.getMessage(), e);
+            }
+        }
+        // ------------------------------------------------
+
+        // --- Recording Prompt Texts (Readable) BEFORE API call ---
+        if (genAiConfig.isRecordEnabled() && genAiConfig.getRecordFolder() != null) {
+            try {
+                File recordDir = new File(genAiConfig.getRecordFolder());
+                if (!recordDir.exists()) {
+                    recordDir.mkdirs();
+                }
+                int systemTokens = estimateTokens(systemPromptEvaluated);
+                int userTokens = estimateTokens(userPromptEvaluated);
+                String headerSystem = "####################################################################\n" +
+                        "Generation Date: " + new Date() + "\n" +
+                        "Prompt Type: SYSTEM\n" +
+                        "Estimated Tokens: " + systemTokens + "\n" +
+                        "####################################################################\n";
+                String headerUser = "####################################################################\n" +
+                        "Generation Date: " + new Date() + "\n" +
+                        "Prompt Type: USER\n" +
+                        "Estimated Tokens: " + userTokens + "\n" +
+                        "####################################################################\n";
+                String promptRecordContent = headerSystem + systemPromptEvaluated + "\n\n" + headerUser + userPromptEvaluated;
+                File promptRecordFile = new File(recordDir, promptKey + "-request-prompts.txt");
+                FileUtils.writeStringToFile(promptRecordFile, promptRecordContent, Charset.defaultCharset());
+                logger.info("Recorded prompt texts to file: {}", promptRecordFile.getAbsolutePath());
+            } catch (Exception e) {
+                logger.error("Error recording prompt texts for key {}: {}", promptKey, e.getMessage(), e);
             }
         }
         // ------------------------------------------------
@@ -363,6 +397,22 @@ public class PromptService implements HealthIndicator {
         return serialisationService;
     }
 
+    /**
+     * Estimate the number of tokens for a given text.
+     *
+     * @param text the text to estimate tokens for
+     * @return the estimated token count
+     */
+    public int estimateTokens(String text) {
+        if (text == null || text.isEmpty()) {
+            return 0;
+        }
+        // Approximate: 1.3 tokens per word
+        int words = text.split("\\s+").length;
+        return (int) Math.ceil(words * 1.3);
+    }
+    
+    
     /**
      * Health check for the Prompt Service.
      * <p>
