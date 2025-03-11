@@ -14,36 +14,29 @@ import org.springframework.context.annotation.Configuration;
 public class ReviewGenerationConfig {
 
     private int threadPoolSize = 10;
-    private int maxCharactersToRemove = 4;
-    private int numberOfResults = 10;
+
     private List<String> preferredDomains = new ArrayList<>();
 
-    // New properties for improved behavior:
+    // Existing property used for building search queries.
     private String queryTemplate = "test %s \"%s\"";
-    private int maxSearchCalls = 2;
-    private int maxSources = 15;
-    private int minMarkdownLength = 150;
-    private int maxMarkdownLength = 500000;
 
-    // Getters and setters for existing properties...
+    // Retained property to limit the number of search queries.
+    private int maxSearch = 2;
 
+    // New properties for token-based content aggregation.
+    private int maxTotalTokens = 100000;
+    private int sourceMinTokens = 150;
+    private int sourceMaxTokens = 10000;
+
+    // New property: maximum concurrent URL fetch operations.
+    private int maxConcurrentFetch = 3;
+
+    // Getters and setters for existing properties.
     public int getThreadPoolSize() {
         return threadPoolSize;
     }
     public void setThreadPoolSize(int threadPoolSize) {
         this.threadPoolSize = threadPoolSize;
-    }
-    public int getMaxCharactersToRemove() {
-        return maxCharactersToRemove;
-    }
-    public void setMaxCharactersToRemove(int maxCharactersToRemove) {
-        this.maxCharactersToRemove = maxCharactersToRemove;
-    }
-    public int getNumberOfResults() {
-        return numberOfResults;
-    }
-    public void setNumberOfResults(int numberOfResults) {
-        this.numberOfResults = numberOfResults;
     }
     public List<String> getPreferredDomains() {
         return preferredDomains;
@@ -51,36 +44,44 @@ public class ReviewGenerationConfig {
     public void setPreferredDomains(List<String> preferredDomains) {
         this.preferredDomains = preferredDomains;
     }
-
-    // Getters and setters for new properties:
     public String getQueryTemplate() {
         return queryTemplate;
     }
     public void setQueryTemplate(String queryTemplate) {
         this.queryTemplate = queryTemplate;
     }
-    public int getMaxSearchCalls() {
-        return maxSearchCalls;
+
+    // Getters and setters for new properties.
+    public int getMaxSearch() {
+        return maxSearch;
     }
-    public void setMaxSearchCalls(int maxSearchCalls) {
-        this.maxSearchCalls = maxSearchCalls;
+    public void setMaxSearch(int maxSearch) {
+        this.maxSearch = maxSearch;
     }
-    public int getMaxSources() {
-        return maxSources;
+    public int getMaxTotalTokens() {
+        return maxTotalTokens;
     }
-    public void setMaxSources(int maxSources) {
-        this.maxSources = maxSources;
+    public void setMaxTotalTokens(int maxTokensPerRequest) {
+        this.maxTotalTokens = maxTokensPerRequest;
     }
-    public int getMinMarkdownLength() {
-        return minMarkdownLength;
+    public int getSourceMinTokens() {
+        return sourceMinTokens;
     }
-    public void setMinMarkdownLength(int minMarkdownLength) {
-        this.minMarkdownLength = minMarkdownLength;
+    public void setSourceMinTokens(int minTokens) {
+        this.sourceMinTokens = minTokens;
     }
-    public int getMaxMarkdownLength() {
-        return maxMarkdownLength;
+    public int getMaxConcurrentFetch() {
+        return maxConcurrentFetch;
     }
-    public void setMaxMarkdownLength(int maxMarkdownLength) {
-        this.maxMarkdownLength = maxMarkdownLength;
+    public void setMaxConcurrentFetch(int maxConcurrentFetch) {
+        this.maxConcurrentFetch = maxConcurrentFetch;
     }
+	public int getSourceMaxTokens() {
+		return sourceMaxTokens;
+	}
+	public void setSourceMaxTokens(int sourceMaxTokens) {
+		this.sourceMaxTokens = sourceMaxTokens;
+	}
+    
+    
 }

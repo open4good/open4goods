@@ -74,7 +74,7 @@ public class UrlFetcherConfig {
         /**
          * The fetching strategy to apply (HTTP, PROXIFIED, SELENIUM).
          */
-        private FetchStrategy strategy;
+        private FetchStrategy strategy = FetchStrategy.SELENIUM;
 
         /**
          * Custom headers to be added to the request.

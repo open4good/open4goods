@@ -113,7 +113,7 @@ public class UrlFetchingService {
                 logger.info("Selected HTTP strategy for fetching");
                 return new HttpFetcher(domainConfig, executor, meterRegistry);
             default:
-                logger.info("Selected default strategy for fetching (SELENIUM)");
+                logger.info("Selected SELENIUM strategy for fetching (default)");
                 return new SeleniumHttpFetcher(domainConfig, meterRegistry);
         }
     }

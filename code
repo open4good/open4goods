@@ -1,1380 +1,853 @@
 # Directory structure 
 - pom.xml
-- README.md
 - src
 --- main
 ---- java
 ----- org
 ------ open4goods
 ------- services
--------- prompt
+-------- reviewgeneration
 --------- config
----------- GenAiServiceType.java
----------- PromptConfig.java
----------- PromptServiceConfig.java
+---------- ReviewGenerationConfig.java
 --------- dto
----------- PromptResponse.java
+---------- ProcessStatus.java
+---------- ReviewRequest.java
 --------- service
----------- PromptService.java
+---------- ReviewGenerationService.java
 ---- resources
------ additional-spring-configuration-metadata.json
+----- META-INF
+------ additional-spring-configuration-metadata.json
 --- test
 ---- java
 ----- org
 ------ open4goods
-------- services
--------- prompt
---------- service
----------- mock
------------ PromptServiceMock.java
----------- PromptServiceTest.java
+------- reviewgeneration
+-------- ReviewGenerationServiceTest.java
 ---- resources
------ application-test.yaml
+----- application-test.yml
 
 # Files content
 
-## [PromptService.java - /home/goulven/git/open4goods/services/prompt/src/main/java/org/open4goods/services/prompt/service/PromptService.java]
+## [ReviewGenerationService.java - /home/goulven/git/open4goods/services/reviewgeneration/src/main/java/org/open4goods/services/reviewgeneration/service/ReviewGenerationService.java]
 ~~~
-package org.open4goods.services.prompt.service;
+package org.open4goods.services.reviewgeneration.service;
 
-import java.io.File;
-import java.nio.charset.Charset;
-import java.util.Arrays;
+import java.time.Instant;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicInteger;
 
-import org.apache.commons.io.FileUtils;
-import org.open4goods.model.exceptions.ResourceNotFoundException;
-import org.open4goods.services.evaluation.exception.TemplateEvaluationException;
-import org.open4goods.services.evaluation.service.EvaluationService;
-import org.open4goods.services.prompt.config.PromptConfig;
-import org.open4goods.services.prompt.config.PromptServiceConfig;
-import org.open4goods.services.prompt.dto.PromptResponse;
-import org.open4goods.services.serialisation.exception.SerialisationException;
-import org.open4goods.services.serialisation.service.SerialisationService;
+import org.open4goods.model.product.Product;
+import org.open4goods.model.vertical.VerticalConfig;
+import org.open4goods.services.googlesearch.dto.GoogleSearchRequest;
+import org.open4goods.services.googlesearch.dto.GoogleSearchResponse;
+import org.open4goods.services.googlesearch.service.GoogleSearchService;
+import org.open4goods.services.prompt.service.PromptService;
+import org.open4goods.services.reviewgeneration.config.ReviewGenerationConfig;
+import org.open4goods.services.reviewgeneration.dto.ProcessStatus;
+import org.open4goods.services.reviewgeneration.dto.ProcessStatus.Status;
+import org.open4goods.services.urlfetching.dto.FetchResponse;
+import org.open4goods.services.urlfetching.service.UrlFetchingService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.ai.chat.client.ChatClient;
-import org.springframework.ai.chat.client.ChatClient.CallResponseSpec;
-import org.springframework.ai.chat.client.ChatClient.ChatClientRequestSpec;
-import org.springframework.ai.openai.OpenAiChatModel;
-import org.springframework.ai.openai.api.OpenAiApi;
 import org.springframework.boot.actuate.health.Health;
 import org.springframework.boot.actuate.health.HealthIndicator;
 import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils;
-
-import com.fasterxml.jackson.core.type.TypeReference;
 
 import io.micrometer.core.instrument.MeterRegistry;
 
 /**
- * Service handling interactions with generative AI services.
+ * Service for generating AI-assisted reviews.
  * <p>
- * It loads prompt templates from YAML files, instantiates chat models based on configuration, and
- * processes prompt evaluations with provided variables. It also implements HealthIndicator,
- * checking that required external AI API keys are provided and that the latest external API call succeeded.
- * </p>
+ * It uses GoogleSearchService to fetch URLs based on the product’s brand and model,
+ * applies a retry mechanism (using primary and alternate model names with iterative character removal),
+ * fetches markdown content from the found URLs using UrlFetchingService,
+ * and finally composes a prompt to generate the review using GenAiService.
  * <p>
- * This implementation uses the OpenAiChatModel from Spring AI to communicate with the appropriate AI
- * backend (e.g., OpenAI or Perplexity).
- * </p>
+ * The service supports both synchronous and asynchronous calls and tracks process status in memory.
+ * Also, it implements HealthIndicator to report service health based on generation failures.
  */
 @Service
-public class PromptService implements HealthIndicator {
+public class ReviewGenerationService implements HealthIndicator {
 
-    private static final Logger logger = LoggerFactory.getLogger(PromptService.class);
+    private static final Logger logger = LoggerFactory.getLogger(ReviewGenerationService.class);
 
-    /**
-     * Cache for chat models (keyed by prompt config key).
-     */
-    private final Map<String, OpenAiChatModel> models = new HashMap<>();
-
-    /**
-     * Cache for prompt configurations (loaded from YAML files).
-     */
-    private final Map<String, PromptConfig> prompts = new HashMap<>();
-
-    private final OpenAiApi openAiApi;
-    private final OpenAiApi perplexityApi;
-    private final SerialisationService serialisationService;
-    private final EvaluationService evaluationService;
-    private final PromptServiceConfig genAiConfig;
+    private final ReviewGenerationConfig properties;
+    private final GoogleSearchService googleSearchService;
+    private final UrlFetchingService urlFetchingService;
+    private final PromptService genAiService;
     private final MeterRegistry meterRegistry;
 
-    /**
-     * Flag indicating the health status of the external API calls.
-     * True means the last external API call succeeded, false if an exception was encountered.
-     */
-    private volatile boolean externalApiHealthy = true;
+    // Thread pool executor for asynchronous processing.
+    private final ExecutorService executorService;
+
+    // In-memory storage of process status keyed by UPC.
+    private final ConcurrentMap<Long, ProcessStatus> processStatusMap = new ConcurrentHashMap<>();
+
+    // Global metrics for review generations.
+    private final AtomicInteger totalProcessed = new AtomicInteger(0);
+    private final AtomicInteger successfulCount = new AtomicInteger(0);
+    private final AtomicInteger failedCount = new AtomicInteger(0);
+
+    // Flag used by the health check: set to true if any generation failed.
+    private volatile boolean lastGenerationFailed = false;
 
     /**
-     * Constructs a new PromptService with the given dependencies including a MeterRegistry for metrics.
+     * Constructs a new ReviewGenerationService.
      *
-     * @param genAiConfig          The configuration for the GenAI service.
-     * @param perplexityApi        The API instance for Perplexity.
-     * @param openAiCustomApi      The API instance for OpenAI.
-     * @param serialisationService Service to handle serialization/deserialization.
-     * @param evaluationService    Service to evaluate prompt templates.
-     * @param meterRegistry        The MeterRegistry for actuator metrics.
+     * @param properties the review generation configuration properties.
+     * @param googleSearchService the Google search service.
+     * @param urlFetchingService the URL fetching service.
+     * @param genAiService the Gen AI service.
+     * @param meterRegistry the actuator meter registry.
      */
-    public PromptService(PromptServiceConfig genAiConfig, OpenAiApi perplexityApi, OpenAiApi openAiCustomApi,
-                         SerialisationService serialisationService, EvaluationService evaluationService, MeterRegistry meterRegistry) {
-        this.openAiApi = openAiCustomApi;
-        this.perplexityApi = perplexityApi;
-        this.evaluationService = evaluationService;
-        this.serialisationService = serialisationService;
-        this.genAiConfig = genAiConfig;
+    public ReviewGenerationService(ReviewGenerationConfig properties,
+                                   GoogleSearchService googleSearchService,
+                                   UrlFetchingService urlFetchingService,
+                                   PromptService genAiService,
+                                   MeterRegistry meterRegistry) {
+        this.properties = properties;
+        this.googleSearchService = googleSearchService;
+        this.urlFetchingService = urlFetchingService;
+        this.genAiService = genAiService;
         this.meterRegistry = meterRegistry;
-
-        // Check if the service is enabled (if supported by configuration)
-        if (!genAiConfig.isEnabled()) {
-            logger.error("GenAiService is disabled via configuration.");
-        }
-
-        // Load prompt templates and initialize chat models
-        loadPrompts(genAiConfig.getPromptsTemplatesFolder());
-        loadModels();
+        this.executorService = Executors.newFixedThreadPool(properties.getThreadPoolSize());
     }
 
     /**
-     * Executes a prompt against an AI service based on a prompt key and provided variables.
-     * <p>
-     * The evaluated prompt request is recorded to a YAML file before invoking the external API.
-     * This ensures that the request is captured even if the API call fails.
-     * </p>
+     * Synchronously generates a review for the given product and vertical configuration.
      *
-     * @param promptKey The key identifying the prompt configuration.
-     * @param variables The variables to resolve within the prompt templates.
-     * @return A {@link PromptResponse} containing the AI call response and additional metadata.
-     * @throws ResourceNotFoundException if the prompt configuration is not found.
-     * @throws SerialisationException    if a serialization error occurs.
+     * @param product the product containing brand, primary model, and alternate models.
+     * @param verticalConfig the vertical configuration.
+     * @return the generated review.
      */
-    private PromptResponse<CallResponseSpec> promptNativ(String promptKey, Map<String, Object> variables)
-            throws ResourceNotFoundException, SerialisationException {
-
-        PromptConfig pConf = getPromptConfig(promptKey);
-        if (pConf == null) {
-            logger.error("PromptConfig {} does not exist", promptKey);
-            throw new ResourceNotFoundException("Prompt not found");
-        }
-        
-        // Increment request metric
-        meterRegistry.counter("prompt.requests", "model", promptKey).increment();
-
-        PromptResponse<CallResponseSpec> ret = new PromptResponse<>();
-        ret.setStart(System.currentTimeMillis());
-
-        // Evaluate system and user prompts using Thymeleaf with TemplateEvaluationException handling
-        String systemPromptEvaluated = "";
-        if (pConf.getSystemPrompt() != null) {
-            try {
-                systemPromptEvaluated = evaluationService.thymeleafEval(variables, pConf.getSystemPrompt());
-            } catch (TemplateEvaluationException e) {
-                meterRegistry.counter("prompt.errors", "model", promptKey).increment();
-                logger.error("Template evaluation error for system prompt in {}: {}", promptKey, e.getMessage());
-                throw e;
-            }
-        }
-        String userPromptEvaluated;
+    public String generateReviewSync(Product product, VerticalConfig verticalConfig) {
+        long upc = product.getId();
+        ProcessStatus status = new ProcessStatus();
+        status.setUpc(upc);
+        status.setStatus(Status.PROCESSING);
+        status.setStartTime(Instant.now());
+        processStatusMap.put(upc, status);
         try {
-            userPromptEvaluated = evaluationService.thymeleafEval(variables, pConf.getUserPrompt());
-        } catch (TemplateEvaluationException e) {
-            meterRegistry.counter("prompt.errors", "model", promptKey).increment();
-            logger.error("Template evaluation error for user prompt in {}: {}", promptKey, e.getMessage());
-            throw e;
-        }
-
-        // Build the chat client request with evaluated prompts and options
-        ChatClientRequestSpec chatRequest = ChatClient.create(models.get(promptKey))
-                .prompt()
-                .user(userPromptEvaluated)
-                .options(pConf.getOptions());
-
-        if (StringUtils.hasText(systemPromptEvaluated)) {
-            chatRequest = chatRequest.system(systemPromptEvaluated);
-        }
-
-        // Clone prompt configuration and update with evaluated prompts
-        String yamlPromptConfig = serialisationService.toYamLiteral(pConf);
-        PromptConfig updatedConfig = serialisationService.fromYaml(yamlPromptConfig, PromptConfig.class);
-        updatedConfig.setSystemPrompt(systemPromptEvaluated);
-        updatedConfig.setUserPrompt(userPromptEvaluated);
-        
-        System.out.println(serialisationService.toYamLiteral(updatedConfig));
-        
-        
-        ret.setPrompt(updatedConfig);
-        logger.info("Resolved prompt config for {} is : {} \n", promptKey, serialisationService.toYamLiteral(updatedConfig));
-
-        // --- Recording Request BEFORE API call ---
-        if (genAiConfig.isRecordEnabled() && genAiConfig.getRecordFolder() != null) {
-            try {
-                File recordDir = new File(genAiConfig.getRecordFolder());
-                if (!recordDir.exists()) {
-                    recordDir.mkdirs();
-                }
-                String requestYaml = serialisationService.toYamLiteral(updatedConfig);
-                File requestFile = new File(recordDir, promptKey + "-request.yaml");
-                FileUtils.writeStringToFile(requestFile, requestYaml, Charset.defaultCharset());
-                logger.info("Recorded prompt request to file: {}", requestFile.getAbsolutePath());
-            } catch (Exception e) {
-                logger.error("Error recording prompt request for key {}: {}", promptKey, e.getMessage(), e);
-            }
-        }
-        // ------------------------------------------------
-
-        // Execute the API call and record response if successful.
-        CallResponseSpec genAiResponse;
-        try {
-            genAiResponse = chatRequest.call();
-            externalApiHealthy = true; // API call succeeded, mark healthy.
-            // --- Recording Response AFTER API call ---
-            if (genAiConfig.isRecordEnabled() && genAiConfig.getRecordFolder() != null) {
-                try {
-                    File recordDir = new File(genAiConfig.getRecordFolder());
-                    if (!recordDir.exists()) {
-                        recordDir.mkdirs();
-                    }
-                    // Instead of serializing the whole CallResponseSpec (which cannot be done),
-                    // record only its raw string content.
-                    String responseContent = genAiResponse.content();
-                    File responseFile = new File(recordDir, promptKey + "-response.txt");
-                    FileUtils.writeStringToFile(responseFile, responseContent, Charset.defaultCharset());
-                    logger.info("Recorded prompt response content to file: {}", responseFile.getAbsolutePath());
-                } catch (Exception e) {
-                    logger.error("Error recording prompt response for key {}: {}", promptKey, e.getMessage(), e);
-                }
-            }
+            String review = executeReviewGeneration(product, verticalConfig);
+            status.setResult(review);
+            status.setStatus(Status.SUCCESS);
+            status.setEndTime(Instant.now());
+            successfulCount.incrementAndGet();
+            meterRegistry.counter("review.generation.success").increment();
+            return review;
         } catch (Exception e) {
-            externalApiHealthy = false; // Mark as unhealthy due to API call exception.
-            meterRegistry.counter("prompt.errors", "model", promptKey).increment();
-            logger.error("Error during API call for promptKey {}: {}", promptKey, e.getMessage(), e);
-            throw e;
+            logger.error("Review generation failed for UPC {}: {}", upc, e.getMessage(), e);
+            status.setStatus(Status.FAILED);
+            status.setErrorMessage(e.getMessage());
+            status.setEndTime(Instant.now());
+            failedCount.incrementAndGet();
+            meterRegistry.counter("review.generation.failed").increment();
+            lastGenerationFailed = true;
+            throw new RuntimeException("Review generation failed", e);
+        } finally {
+            totalProcessed.incrementAndGet();
         }
-
-        // Populate the response object
-        ret.setBody(genAiResponse);
-        ret.setRaw(genAiResponse.content());
-        ret.setDuration(System.currentTimeMillis() - ret.getStart());
-
-        return ret;
-    }
-
-    public PromptResponse<String> prompt(String promptKey, Map<String, Object> variables)
-            throws ResourceNotFoundException, SerialisationException {
-        
-        PromptResponse<String> ret = new PromptResponse<String>();
-        
-        PromptResponse<CallResponseSpec> nativ = promptNativ(promptKey, variables);
-        ret.setBody(nativ.getRaw());
-        ret.setRaw(nativ.getRaw());
-        ret.setDuration(nativ.getDuration());
-        ret.setPrompt(nativ.getPrompt());
-        ret.setStart(nativ.getStart());
-        
-        return ret;
     }
 
     /**
-     * Executes a prompt and converts the response into a JSON map.
+     * Asynchronously initiates review generation for the given product and vertical configuration.
      *
-     * @param promptKey The key identifying the prompt configuration.
-     * @param variables The variables to resolve within the prompt templates.
-     * @return A {@link PromptResponse} containing the response as a JSON map.
-     * @throws ResourceNotFoundException if the prompt configuration is not found.
-     * @throws SerialisationException    if a serialization error occurs.
+     * @param product the product containing brand, primary model, and alternate models.
+     * @param verticalConfig the vertical configuration.
+     * @return the process ID (UPC) used to track generation status.
      */
-    public PromptResponse<Map<String, Object>> jsonPrompt(String promptKey, Map<String, Object> variables)
-            throws ResourceNotFoundException, SerialisationException {
-
-        PromptResponse<Map<String, Object>> ret = new PromptResponse<>();
-        PromptResponse<CallResponseSpec> internal = promptNativ(promptKey, variables);
-
-        ret.setDuration(internal.getDuration());
-        ret.setStart(internal.getStart());
-        ret.setPrompt(internal.getPrompt());
-
-        // Clean up markdown formatting from the response
-        String response = internal.getBody().content().replace("```json", "").replace("```", "");
-        ret.setRaw(response);
-        try {
-            ret.setBody(serialisationService.fromJsonTypeRef(response, new TypeReference<Map<String, Object>>() {}));
-        } catch (Exception e) {
-            logger.error("Unable to map to JSON structure: {} \nResponse: {}", e.getMessage(), response);
-            throw new IllegalStateException("Response mapping to JSON failed", e);
-        }
-        return ret;
-    }
-
-    /**
-     * Loads and instantiates chat models based on the prompt configurations.
-     */
-    public void loadModels() {
-        for (PromptConfig promptConfig : prompts.values()) {
-            OpenAiChatModel model = switch (promptConfig.getAiService()) {
-                case OPEN_AI -> new OpenAiChatModel(openAiApi);
-                case PERPLEXITY -> new OpenAiChatModel(perplexityApi);
-                default -> throw new IllegalArgumentException("Unexpected value: " + promptConfig.getAiService());
-            };
-            models.put(promptConfig.getKey(), model);
-        }
-    }
-
-    /**
-     * Retrieves the prompt configuration for the given key.
-     * <p>
-     * If caching is enabled, the configuration is retrieved from memory; otherwise, it is loaded from the file.
-     * </p>
-     *
-     * @param promptKey The unique key identifying the prompt configuration.
-     * @return The {@link PromptConfig} or {@code null} if not found.
-     */
-    private PromptConfig getPromptConfig(String promptKey) {
-        if (genAiConfig.isCacheTemplates()) {
-            return prompts.get(promptKey);
-        } else {
-            String path = genAiConfig.getPromptsTemplatesFolder() + "/" + promptKey + ".yml";
-            return loadPrompt(new File(path));
-        }
-    }
-
-    /**
-     * Loads all prompt configuration files from the specified folder.
-     *
-     * @param folderPath The folder containing YAML prompt templates.
-     */
-    public void loadPrompts(String folderPath) {
-        try {
-            File folder = new File(folderPath);
-            if (folder.exists() && folder.isDirectory()) {
-                // Filter YAML files and load each prompt configuration
-                List<File> promptsFile = Arrays.stream(folder.listFiles())
-                        .filter(e -> e.getName().endsWith(".yml"))
-                        .toList();
-
-                promptsFile.forEach(f -> {
-                    PromptConfig pc = loadPrompt(f);
-                    if (pc != null) {
-                        this.prompts.put(pc.getKey(), pc);
-                    } else {
-                        logger.error("Failed to load prompt configuration from file: {}", f.getAbsolutePath());
-                    }
-                });
+    public long generateReviewAsync(Product product, VerticalConfig verticalConfig) {
+        long upc = product.getId();
+        // Avoid duplicate runs on the same UPC if already processing.
+        processStatusMap.compute(upc, (key, existingStatus) -> {
+            if (existingStatus != null && existingStatus.getStatus() == Status.PROCESSING) {
+                return existingStatus;
             } else {
-                logger.error("Cannot load prompts: folder {} is invalid", folderPath);
+                ProcessStatus status = new ProcessStatus();
+                status.setUpc(upc);
+                status.setStatus(Status.PENDING);
+                status.setStartTime(Instant.now());
+                return status;
             }
-        } catch (Exception e) {
-            logger.error("Error loading prompts from {}", folderPath, e);
-        }
+        });
+
+        // Submit the review generation task asynchronously.
+        executorService.submit(() -> {
+            ProcessStatus status = processStatusMap.get(upc);
+            status.setStatus(Status.PROCESSING);
+            try {
+                String review = executeReviewGeneration(product, verticalConfig);
+                status.setResult(review);
+                status.setStatus(Status.SUCCESS);
+                meterRegistry.counter("review.generation.success").increment();
+            } catch (Exception e) {
+                logger.error("Asynchronous review generation failed for UPC {}: {}", upc, e.getMessage(), e);
+                status.setStatus(Status.FAILED);
+                status.setErrorMessage(e.getMessage());
+                meterRegistry.counter("review.generation.failed").increment();
+                lastGenerationFailed = true;
+            } finally {
+                status.setEndTime(Instant.now());
+                totalProcessed.incrementAndGet();
+            }
+        });
+        return upc;
     }
 
     /**
-     * Loads a single {@link PromptConfig} from a YAML file.
+     * Executes the review generation process:
+     * <ol>
+     *   <li>Builds search queries using the product’s brand and model variations (primary and alternate),
+     *       trying iterative character removal (up to configured max) until a result contains one of the preferred domains.</li>
+     *   <li>For each query, performs a Google search and fetches the markdown content of each result.</li>
+     *   <li>Aggregates the markdown content and composes a prompt which is sent to the GenAiService.</li>
+     * </ol>
      *
-     * @param file The YAML file containing the prompt configuration.
-     * @return The loaded {@link PromptConfig} or {@code null} if an error occurs.
+     * @param product the product.
+     * @param verticalConfig the vertical configuration.
+     * @return the generated review.
+     * @throws Exception if an error occurs during generation.
      */
-    private PromptConfig loadPrompt(File file) {
-        try {
-            String content = FileUtils.readFileToString(file, Charset.defaultCharset());
-            return serialisationService.fromYaml(content, PromptConfig.class);
-        } catch (Exception e) {
-            logger.error("Error while reading prompt config file: {}", file.getAbsolutePath(), e);
-            return null;
-        }
-    }
-    
-    /**
-     * Protected getter for the GenAi configuration.
-     * 
-     * @return the PromptServiceConfig
-     */
-    protected PromptServiceConfig getGenAiConfig() {
-        return genAiConfig;
-    }
-    
-    /**
-     * Protected getter for the SerialisationService.
-     * 
-     * @return the SerialisationService
-     */
-    protected SerialisationService getSerialisationService() {
-        return serialisationService;
-    }
 
-    
-    /**
-     * Estimate the number of tokens for a given text
-     * @param text
-     * @return
-     */
-    public  int estimateTokens(String text) {
-        if (text == null || text.isEmpty()) {
-            return 0;
-        }
-        // Approximate: 1.3 tokens per word
-        int words = text.split("\\s+").length;
-        return (int) Math.ceil(words * 1.3);
-    }
-    
-    
-    /**
-     * Health check for the Prompt Service.
-     * <p>
-     * Returns DOWN if either the OpenAI or Perplexity API key is missing,
-     * or if the last external API call resulted in an exception.
-     * </p>
-     *
-     * @return the Health status.
-     */
-    @Override
-    public Health health() {
-        if (genAiConfig.getOpenaiApiKey() == null || genAiConfig.getOpenaiApiKey().isBlank() ||
-            genAiConfig.getPerplexityApiKey() == null || genAiConfig.getPerplexityApiKey().isBlank()) {
-            return Health.down().withDetail("Error", "Missing API keys for external AI services").build();
-        }
-        if (!externalApiHealthy) {
-            return Health.down().withDetail("Error", "Exception encountered during external API call").build();
-        }
-        return Health.up().build();
-    }
-}
+	private String executeReviewGeneration(Product product, VerticalConfig verticalConfig) throws Exception {
+	    String brand = product.brand();
+	    String primaryModel = product.model();
+	    Set<String> alternateModels = product.getAkaModels();
+	
+	    // Map to collect source URL -> markdown content
+	    Map<String, String> sourcesMap = new HashMap<>();
+	
+	    // Build a list of model names: primary first, then alternate models.
+	    List<String> modelNames = new ArrayList<>();
+	    modelNames.add(primaryModel);
+	    if (alternateModels != null) {
+	        modelNames.addAll(alternateModels);
+	    }
+	
+	    // For each model name variant...
+	    for (String modelName : modelNames) {
+	        int callsMade = 0;
+	        // Try iterative removal of trailing characters.
+	        for (int removeCount = 0; removeCount <= properties.getMaxCharactersToRemove(); removeCount++) {
+	            String modifiedModel = modelName;
+	            if (removeCount > 0 && modelName.length() > removeCount) {
+	                modifiedModel = modelName.substring(0, modelName.length() - removeCount);
+	            }
+	            // Use query template from config: e.g. "test %s \"%s\""
+	            String query = String.format(properties.getQueryTemplate(), brand, modifiedModel);
+	            logger.debug("Executing search query: {}", query);
+	
+	            // Create the search request using configured number of results.
+	            GoogleSearchRequest searchRequest = new GoogleSearchRequest(query, properties.getNumberOfResults());
+	            GoogleSearchResponse searchResponse = googleSearchService.search(searchRequest);
+	            callsMade++;
+	
+	            // Process each search result.
+	            searchResponse.getResults().forEach(result -> {
+	                try {
+	                    CompletableFuture<FetchResponse> fetchFuture = urlFetchingService.fetchUrl(result.getLink());
+	                    FetchResponse fetchResponse = fetchFuture.get(); // wait for result
+	                    if (fetchResponse != null && fetchResponse.markdownContent() != null 
+	                        && !fetchResponse.markdownContent().isEmpty()) {
+	                        // Maintain the map: source URL -> markdown content.
+	                        sourcesMap.put(result.getLink(), fetchResponse.markdownContent());
+	                    }
+	                } catch (Exception e) {
+	                    logger.warn("Failed to fetch content from URL {}: {}", result.getLink(), e.getMessage());
+	                }
+	            });
+	
+	            // Check if at least one search result contains a preferred domain.
+	            boolean containsPreferredDomain = searchResponse.getResults().stream()
+	                    .anyMatch(r -> properties.getPreferredDomains().stream()
+	                            .anyMatch(domain -> r.getLink().contains(domain)));
+	            if (containsPreferredDomain) {
+	                logger.debug("Preferred domain found in search results for query: {}", query);
+	                break; // exit the iterative removal loop for this model name
+	            }
+	            if (callsMade >= properties.getMaxSearchCalls()) {
+	                logger.debug("Reached max search calls ({}) for model variant: {}", properties.getMaxSearchCalls(), modifiedModel);
+	                break;
+	            }
+	        }
+	    }
+	
+	    // Sorting and filtering sources:
+	    // Keep only those with non-empty markdown content and length between min and max.
+	    List<Map.Entry<String, String>> validSources = sourcesMap.entrySet().stream()
+	            .filter(e -> {
+	                String content = e.getValue();
+	                int length = content.length();
+	                return length >= properties.getMinMarkdownLength() && length <= properties.getMaxMarkdownLength();
+	            })
+	            // Sort: entries from preferred domains come first.
+	            .sorted((e1, e2) -> {
+	                boolean e1Preferred = properties.getPreferredDomains().stream().anyMatch(domain -> e1.getKey().contains(domain));
+	                boolean e2Preferred = properties.getPreferredDomains().stream().anyMatch(domain -> e2.getKey().contains(domain));
+	                if (e1Preferred && !e2Preferred) return -1;
+	                if (!e1Preferred && e2Preferred) return 1;
+	                return 0;
+	            })
+	            .toList();
+	
+	    if (validSources.size() > properties.getMaxSources()) {
+	        logger.warn("Number of markdown sources ({}) exceeds the maximum limit ({}). Trimming extra sources.",
+	                validSources.size(), properties.getMaxSources());
+	        validSources = validSources.subList(0, properties.getMaxSources());
+	    }
+	
+	    Map<String, String> finalSourcesMap = new HashMap<>();
+	    validSources.forEach(e -> finalSourcesMap.put(e.getKey(), e.getValue()));
+	
+	    // Compose the prompt variables including the collected markdown content.
+	    Map<String, Object> promptVariables = new HashMap<>();
+
+	    promptVariables.put("sources", finalSourcesMap);
+	    promptVariables.put("VERTICAL_NAME", verticalConfig.i18n("fr").getH1Title());
+	    
+	    
+	    // Use the GenAiService with the prompt template "review-generation".
+	    return genAiService.prompt("review-generation", promptVariables).getRaw();
+	}
+	
+	    /**
+	     * Returns the status of a review generation process by UPC.
+	     *
+	     * @param upc the UPC identifier.
+	     * @return the process status, or null if not found.
+	     */
+	    public ProcessStatus getProcessStatus(long upc) {
+	        return processStatusMap.get(upc);
+	    }
+	
+	    /**
+	     * Returns global processing statistics.
+	     *
+	     * @return a map with keys: totalProcessed, successful, failed, and ongoing.
+	     */
+	    public Map<String, Integer> getGlobalStats() {
+	        Map<String, Integer> stats = new HashMap<>();
+	        stats.put("totalProcessed", totalProcessed.get());
+	        stats.put("successful", successfulCount.get());
+	        stats.put("failed", failedCount.get());
+	        // Count processes that are still PENDING or PROCESSING.
+	        long ongoing = processStatusMap.values().stream()
+	                .filter(s -> s.getStatus() == Status.PENDING || s.getStatus() == Status.PROCESSING)
+	                .count();
+	        stats.put("ongoing", (int) ongoing);
+	        return stats;
+	    }
+	
+	    /**
+	     * Health check implementation.
+	     * <p>
+	     * The service is reported as DOWN if any review generation failure has occurred.
+	     *
+	     * @return Health status UP if healthy; otherwise DOWN with error details.
+	     */
+	    @Override
+	    public Health health() {
+	        if (lastGenerationFailed) {
+	            return Health.down().withDetail("error", "One or more review generations have failed").build();
+	        }
+	        return Health.up().build();
+	    }
+	}
 ~~~
 
-## [PromptServiceConfig.java - /home/goulven/git/open4goods/services/prompt/src/main/java/org/open4goods/services/prompt/config/PromptServiceConfig.java]
+## [ReviewGenerationServiceTest.java - /home/goulven/git/open4goods/services/reviewgeneration/src/test/java/org/open4goods/reviewgeneration/ReviewGenerationServiceTest.java]
 ~~~
-package org.open4goods.services.prompt.config;
+package org.open4goods.reviewgeneration;
 
-import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.stereotype.Component;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.fail;
 
-@Component
-@ConfigurationProperties(prefix = "gen-ai-config")
-public class PromptServiceConfig {
-	
-	/**
-	 * The folder to the yaml prompt files 
-	 */
-	private String promptsTemplatesFolder;
-	
-	private boolean cacheTemplates = false;
-	
-	private String openaiApiKey;
+import java.util.Set;
 
-	private String perplexityApiKey;
-	
-	private String perplexityBaseUrl = "https://api.perplexity.ai";
-
-	private String perplexityCompletionsPath = "/chat/completions";
-	
-	private boolean enabled = false;
-	
-	/**
-	 * Flag to enable recording of prompt responses as mocks.
-	 */
-	private boolean recordEnabled = false;
-	
-	/**
-	 * Folder path where recorded prompt responses (mocks) are stored.
-	 */
-	private String recordFolder;
-
-	public boolean isEnabled() {
-		return enabled;
-	}
-	public void setEnabled(boolean enabled) {
-		this.enabled = enabled;
-	}
-	public String getPromptsTemplatesFolder() {
-		return promptsTemplatesFolder;
-	}
-	public void setPromptsTemplatesFolder(String promptsTemplatesFoler) {
-		this.promptsTemplatesFolder = promptsTemplatesFoler;
-	}
-	public String getOpenaiApiKey() {
-		return openaiApiKey;
-	}
-	public void setOpenaiApiKey(String openaiApiKey) {
-		this.openaiApiKey = openaiApiKey;
-	}
-	public String getPerplexityApiKey() {
-		return perplexityApiKey;
-	}
-	public void setPerplexityApiKey(String perplexityApiKey) {
-		this.perplexityApiKey = perplexityApiKey;
-	}
-	public String getPerplexityBaseUrl() {
-		return perplexityBaseUrl;
-	}
-	public void setPerplexityBaseUrl(String perplexityBaseUrl) {
-		this.perplexityBaseUrl = perplexityBaseUrl;
-	}
-	public String getPerplexityCompletionsPath() {
-		return perplexityCompletionsPath;
-	}
-	public void setPerplexityCompletionsPath(String perplexityCompletionsPath) {
-		this.perplexityCompletionsPath = perplexityCompletionsPath;
-	}
-	public boolean isCacheTemplates() {
-		return cacheTemplates;
-	}
-	public void setCacheTemplates(boolean cacheTemplates) {
-		this.cacheTemplates = cacheTemplates;
-	}
-	
-	public boolean isRecordEnabled() {
-	    return recordEnabled;
-	}
-	
-	public void setRecordEnabled(boolean recordEnabled) {
-	    this.recordEnabled = recordEnabled;
-	}
-	
-	public String getRecordFolder() {
-	    return recordFolder;
-	}
-	
-	public void setRecordFolder(String recordFolder) {
-	    this.recordFolder = recordFolder;
-	}
-}
-~~~
-
-## [GenAiServiceType.java - /home/goulven/git/open4goods/services/prompt/src/main/java/org/open4goods/services/prompt/config/GenAiServiceType.java]
-~~~
-package org.open4goods.services.prompt.config;
-
-/**
- * Enumeration representing the supported generative AI service types.
- */
-public enum GenAiServiceType {
-    OPEN_AI,
-    PERPLEXITY
-}
-~~~
-
-## [PromptServiceTest.java - /home/goulven/git/open4goods/services/prompt/src/test/java/org/open4goods/services/prompt/service/PromptServiceTest.java]
-~~~
-package org.open4goods.services.prompt.service;
-
-import static org.assertj.core.api.Assertions.fail;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-
-import java.util.HashMap;
-import java.util.Map;
-
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.open4goods.model.exceptions.ResourceNotFoundException;
-import org.open4goods.services.evaluation.service.EvaluationService;
-import org.open4goods.services.prompt.config.PromptServiceConfig;
-import org.open4goods.services.prompt.config.PromptConfig;
-import org.open4goods.services.serialisation.service.SerialisationService;
-import org.springframework.ai.openai.api.OpenAiApi;
+import org.open4goods.googlesearch.mock.GoogleSearchServiceMock;
+import org.open4goods.model.attribute.ReferentielKey;
+import org.open4goods.model.product.Product;
+import org.open4goods.model.vertical.PrefixedAttrText;
+import org.open4goods.model.vertical.ProductI18nElements;
+import org.open4goods.model.vertical.VerticalConfig;
+import org.open4goods.services.prompt.service.mock.PromptServiceMock;
+import org.open4goods.services.reviewgeneration.config.ReviewGenerationConfig;
+import org.open4goods.services.reviewgeneration.dto.ProcessStatus;
+import org.open4goods.services.reviewgeneration.service.ReviewGenerationService;
+import org.open4goods.urlfetching.service.mock.UrlFetchingServiceMock;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringBootConfiguration;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.Import;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.TestPropertySource;
 
-import io.micrometer.core.instrument.MeterRegistry;
+@SpringBootTest(classes = {ReviewGenerationService.class, ReviewGenerationConfig.class, ReviewGenerationServiceTest.TestConfig.class})
+@TestPropertySource(locations = "classpath:application-test.yml")
+@ActiveProfiles("test")
+@Import({GoogleSearchServiceMock.class, UrlFetchingServiceMock.class, PromptServiceMock.class})
 
-/**
- * Minimal test configuration to bootstrap the Spring context.
- */
-@SpringBootConfiguration
-@EnableAutoConfiguration
-@ComponentScan(basePackages = {"org.open4goods.services.prompt"})
+public class ReviewGenerationServiceTest {
 
-class PromptServiceTest {
-
-    private PromptService genAiService;
-    private PromptServiceConfig mockConfig;
-    private OpenAiApi openAiApi;
-    private OpenAiApi perplexityApi;
-    private SerialisationService serialisationService;
-    private EvaluationService evaluationService;
-    private MeterRegistry meterRegistry;
-
-    @BeforeEach
-    void setUp() {
-        // Create mocks for dependencies
-        mockConfig = mock(PromptServiceConfig.class);
-        openAiApi = mock(OpenAiApi.class);
-        perplexityApi = mock(OpenAiApi.class);
-        serialisationService = mock(SerialisationService.class);
-        evaluationService = mock(EvaluationService.class);
-        meterRegistry = mock(MeterRegistry.class);
-
-        // Stub configuration methods
-        when(mockConfig.isEnabled()).thenReturn(true);
-        when(mockConfig.isCacheTemplates()).thenReturn(true);
-        when(mockConfig.getPromptsTemplatesFolder()).thenReturn("src/test/resources/prompts");
-
-        // Stub serialization behavior (for simplicity, assume identity conversion)
-        try {
-        	when(serialisationService.toJson(any())).thenAnswer(invocation -> invocation.getArgument(0).toString());
-			when(serialisationService.fromJson(anyString(), eq(PromptConfig.class)))
-			        .thenReturn(new PromptConfig());
-		} catch (Exception e) {
-			fail(e);
-		}
-
-        // Instantiate the service under test
-        genAiService = new PromptService(mockConfig, perplexityApi, openAiApi, serialisationService, evaluationService, meterRegistry);
+    /**
+     * Minimal test configuration to bootstrap the Spring context.
+     */
+    @SpringBootConfiguration
+    @EnableAutoConfiguration
+    @ComponentScan(basePackages = {"org.open4goods.services"})
+    public static class TestConfig {
+        // This class remains empty; its purpose is to trigger component scanning.
+   
     }
+
+    @Autowired
+    private ReviewGenerationService reviewGenerationService;
 
     @Test
-    void testPromptNotFound() {
-        // Expect a ResourceNotFoundException when a non-existent prompt key is used
-        Map<String, Object> variables = new HashMap<>();
-        assertThrows(ResourceNotFoundException.class, () -> genAiService.prompt("nonExistentKey", variables));
-    }
+    public void testGenerateReviewSync() {
+        // Create a dummy product.
+        Product product = new Product();
+        product.setId(8806091548818L);
+        product.getAttributes().getReferentielAttributes().put(ReferentielKey.BRAND, "LG");
+        product.getAttributes().getReferentielAttributes().put(ReferentielKey.MODEL, "24TQ510S");
+        product.setAkaModels(Set.of("24TQ510S-PZ.API", "24TQ510S-PZ"));
 
-    // Additional tests should be implemented to cover jsonPrompt and other methods.
-}
-~~~
+        // Dummy vertical configuration (as a String for testing).
+        VerticalConfig verticalConfig = new VerticalConfig();
+        verticalConfig.setId("tv");
+        ProductI18nElements i18n = new ProductI18nElements();
+        PrefixedAttrText p = new PrefixedAttrText();
+        p.setPrefix("téléviseur");
+    	i18n.setH1Title(p);
+		verticalConfig.getI18n().put("fr", i18n);
 
-## [PromptServiceMock.java - /home/goulven/git/open4goods/services/prompt/src/test/java/org/open4goods/services/prompt/service/mock/PromptServiceMock.java]
-~~~
-package org.open4goods.services.prompt.service.mock;
+        // Invoke synchronous review generation.
+        try {
+            String review = reviewGenerationService.generateReviewSync(product, verticalConfig);
+            assertNotNull(review, "The generated review should not be null");
+            System.out.println("Generated Review: " + review);
+        } catch (Exception e) {
+            fail("Review generation failed: ", e);
+        }
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.Map;
-
-import org.mockito.Mockito;
-import org.open4goods.model.exceptions.ResourceNotFoundException;
-import org.open4goods.services.evaluation.service.EvaluationService;
-import org.open4goods.services.prompt.config.PromptServiceConfig;
-import org.open4goods.services.prompt.dto.PromptResponse;
-import org.open4goods.services.prompt.service.PromptService;
-import org.open4goods.services.serialisation.exception.SerialisationException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.ai.chat.client.ChatClient.CallResponseSpec;
-import org.springframework.ai.chat.client.DefaultChatClient.DefaultCallResponseSpec;
-import org.springframework.ai.chat.client.DefaultChatClient.DefaultChatClientRequestSpec;
-import org.springframework.ai.openai.api.OpenAiApi;
-import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Primary;
-import org.springframework.core.io.ClassPathResource;
-
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-/**
- * Test configuration for providing a primary PromptService bean for tests.
- * <p>
- * It systematically attempts to load a recorded mock response using Spring's classpath resource mechanism.
- * The resource is expected under "prompt/mocks/". If not found and if recording is enabled with a record folder configured,
- * it falls back to reading from that folder. Otherwise, it returns a dummy response with the raw response prefixed by
- * "ORIGINAL PROMPT AS MOCKED RESPONSE:".
- * <p>
- * This configuration uses an embedded ObjectMapper for JSON serialization/deserialization and provides dummy beans for
- * the OpenAiApi dependencies.
- */
-@TestConfiguration
-public class PromptServiceMock {
-
-    private static final Logger logger = LoggerFactory.getLogger(PromptServiceMock.class);
-
-    @Bean
-    @Primary
-    public PromptService promptService(PromptServiceConfig properties,
-                                       EvaluationService evaluationService,
-                                       OpenAiApi openAiApi,
-                                       OpenAiApi perplexityApi) throws ResourceNotFoundException, SerialisationException {
-        // Create an embedded ObjectMapper instance.
-        ObjectMapper objectMapper = new ObjectMapper();
-
-        // Create a Mockito mock for the PromptService.
-        PromptService mockService = Mockito.mock(PromptService.class);
-
-        // Configure the prompt() method.
-        Mockito.when(mockService.prompt(Mockito.anyString(), Mockito.anyMap()))
-               .thenAnswer(invocation -> {
-                   String promptKey = invocation.getArgument(0);
-                   @SuppressWarnings("unchecked")
-                   Map<String, Object> variables = invocation.getArgument(1);
-                   // Use the new naming convention for raw response files
-                   String fileName = promptKey + "-response.txt";
-                   String resourcePath = "prompt/mocks/" + fileName;
-
-                   String rawContent = null;
-                   // Attempt to load the recorded raw response from the classpath.
-                   ClassPathResource resource = new ClassPathResource(resourcePath);
-                   if (resource.exists()) {
-                       try (InputStream is = resource.getInputStream()) {
-                           rawContent = new String(is.readAllBytes(), StandardCharsets.UTF_8);
-                           logger.debug("Loaded prompt mock raw response from classpath: {}", resourcePath);
-                       } catch (IOException e) {
-                           logger.error("Failed to load recorded response from classpath: {}", e.getMessage());
-                       }
-                   } else {
-                       logger.debug("No classpath resource found at: {}", resourcePath);
-                   }
-
-                   // If not found in classpath, try the folder if recording is enabled.
-                   if (rawContent == null && properties.isRecordEnabled() && properties.getRecordFolder() != null && !properties.getRecordFolder().isBlank()) {
-                       try {
-                           Path filePath = Paths.get(properties.getRecordFolder()).resolve(fileName);
-                           if (Files.exists(filePath)) {
-                               rawContent = Files.readString(filePath, StandardCharsets.UTF_8);
-                               logger.debug("Loaded prompt mock raw response from folder: {}", filePath.toAbsolutePath());
-                           } else {
-                               logger.debug("No file found at folder path: {}", filePath.toAbsolutePath());
-                           }
-                       } catch (IOException e) {
-                           logger.error("Failed to load recorded response from folder: {}", e.getMessage());
-                       }
-                   }
-
-                   // If still not found, use fallback dummy response.
-                   if (rawContent == null) {
-                       logger.warn("No recorded mock response found for promptKey: {}. Returning dummy response.", promptKey);
-                       rawContent = "dummy response";
-                   }
-
-                   // Wrap the raw content in a dummy CallResponseSpec instance.
-                   PromptResponse<String> response = new PromptResponse<>();
-                   response.setStart(System.currentTimeMillis());
-                   response.setDuration(1);
-                   response.setRaw(rawContent);
-                   response.setPrompt(new org.open4goods.services.prompt.config.PromptConfig());
-                   response.setBody(rawContent);
-                   return response;
-               });
-
-        // Configure the jsonPrompt() method.
-        Mockito.when(mockService.jsonPrompt(Mockito.anyString(), Mockito.anyMap()))
-               .thenAnswer(invocation -> {
-                   String promptKey = invocation.getArgument(0);
-                   @SuppressWarnings("unchecked")
-                   Map<String, Object> variables = invocation.getArgument(1);
-                   String fileName = promptKey + ".json";
-                   String resourcePath = "prompt/mocks/" + fileName;
-
-                   // Attempt to load the recorded JSON response from the classpath.
-                   ClassPathResource resource = new ClassPathResource(resourcePath);
-                   if (resource.exists()) {
-                       try (InputStream is = resource.getInputStream()) {
-                           String json = new String(is.readAllBytes(), StandardCharsets.UTF_8);
-                           logger.debug("Loaded prompt JSON mock from classpath: {}", resourcePath);
-                           return objectMapper.readValue(json, new TypeReference<PromptResponse<Map<String, Object>>>() {});
-                       } catch (IOException e) {
-                           logger.error("Failed to load recorded JSON response from classpath: {}", e.getMessage());
-                       }
-                   } else {
-                       logger.debug("No classpath resource found at: {}", resourcePath);
-                   }
-
-                   // If not found in classpath, try the folder if recording is enabled.
-                   if (properties.isRecordEnabled() && properties.getRecordFolder() != null && !properties.getRecordFolder().isBlank()) {
-                       try {
-                           Path filePath = Paths.get(properties.getRecordFolder()).resolve(fileName);
-                           if (Files.exists(filePath)) {
-                               String json = Files.readString(filePath, StandardCharsets.UTF_8);
-                               logger.debug("Loaded prompt JSON mock from folder: {}", filePath.toAbsolutePath());
-                               return objectMapper.readValue(json, new TypeReference<PromptResponse<Map<String, Object>>>() {});
-                           } else {
-                               logger.debug("No file found at folder path: {}", filePath.toAbsolutePath());
-                           }
-                       } catch (IOException e) {
-                           logger.error("Failed to load recorded JSON response from folder: {}", e.getMessage());
-                       }
-                   }
-
-                   // Fallback: return a dummy JSON response prefixed with the marker.
-                   logger.warn("No recorded JSON mock response found for promptKey: {}. Returning dummy response.", promptKey);
-                   PromptResponse<Map<String, Object>> dummy = new PromptResponse<>();
-                   dummy.setStart(System.currentTimeMillis());
-                   dummy.setDuration(1);
-                   String originalResponse = "dummy JSON response";
-                   dummy.setRaw("ORIGINAL PROMPT AS MOCKED RESPONSE: " + originalResponse);
-                   dummy.setBody(Map.of());
-                   dummy.setPrompt(new org.open4goods.services.prompt.config.PromptConfig());
-                   return dummy;
-               });
-
-        return mockService;
-    }
-
-    // Provide a dummy OpenAiApi bean.
-    @Bean
-    public OpenAiApi openAiApi() {
-        return Mockito.mock(OpenAiApi.class);
-    }
-
-    // Provide a dummy perplexityApi bean.
-    @Bean
-    public OpenAiApi perplexityApi() {
-        return Mockito.mock(OpenAiApi.class);
+        // Verify that the process status is SUCCESS.
+        ProcessStatus status = reviewGenerationService.getProcessStatus(product.getId());
+        assertNotNull(status, "Process status should be available");
+        assertEquals(ProcessStatus.Status.SUCCESS, status.getStatus());
     }
 }
 ~~~
 
-## [README.md - /home/goulven/git/open4goods/services/prompt/README.md]
-~~~
-# Prompt Service
-
-The **Prompt Service** is part of the [open4goods](https://github.com/open4good/open4goods) project. It provides capabilities to interact with generative AI services (e.g., OpenAI, Perplexity) by loading prompt templates, evaluating them using Thymeleaf, and executing chat-based requests.
-
-## Features
-
-- Loads YAML prompt templates from a configurable folder.
-- Supports multiple AI backends (OpenAI and Perplexity).
-- Evaluates dynamic variables in prompt templates.
-- Returns both raw and parsed responses.
-
-## Requirements
-
-- Java 11 or higher
-- Maven 3.6+
-- Spring Boot
-
-## Installation
-
-Clone the repository and build using Maven:
-
-```bash
-git clone https://github.com/open4good/open4goods.git
-cd open4goods/services/prompt
-mvn clean install
-```
-
-## Usage
-
-### Configuring the Service
-
-Set the following properties (for example, in your `application.yml`):
-
-```yaml
-genAiConfig:
-  promptsTemplatesFolder: "src/main/resources/prompts"
-  cacheTemplates: true
-  enabled: true
-```
-
-### Calling the Service
-
-Below is an example of using the service in your application:
-
-```java
-// Inject GenAiService via Spring
-@Autowired
-private GenAiService genAiService;
-
-public void executePrompt() {
-    Map<String, Object> variables = new HashMap<>();
-    variables.put("username", "John Doe");
-
-    try {
-        PromptResponse<?> response = genAiService.prompt("impactscore-prompt", variables);
-        System.out.println("Raw Response: " + response.getRaw());
-    } catch (Exception e) {
-        // Handle exceptions appropriately
-        e.printStackTrace();
-    }
-}
-```
-
-
-### Prompt sample
-
-Below is an example of prompt, the one used by Nudger to compute the Impact Score
-
-```yaml
-
-
-#####################################################################################
-# Represents a prompt config (a chat model configuration and a chat model options),
-# associated to system and user templatised prompts
-#
-# This template uses the following variables : 
-# VERTICAL_NAME  : The vertical name (vConf.getI18n().get("fr").getVerticalHomeTitle()))
-# AVAILABLE_CRITERIAS : The availlable criterias, (key : description\n) 
-#
-#####################################################################################
-# The unique key used to identify this prompt config
-key: "impactscore-prompt"
-
-# The Gen ai service to use
-aiService: "OPEN_AI"
-#aiService: "PERPLEXITY"
-
-# The system prompt
-# No system prompt with o1
-#systemPrompt: |
-#  Tu es un agent expert en évaluation environnementale des produits électriques et electroniques.
-#  Adopte une démarche d’expert en analyse du cycle de vie des produits. 
-#  Nous allons travailler sur des [[${VERTICAL_NAME}]]
-#  Ne fournir en réponse que du JSON, conformément à la structure indiquée, sans commentaire, ni texte supplémentaire
-
-# The user prompt
-userPrompt: |
-
-
-    ## Ton rôle
-    Tu es un agent expert en évaluation environnementale des produits électriques et electroniques.
-    Adopte une démarche d’expert en analyse du cycle de vie des produits. 
-    Nous allons travailler sur des [[${VERTICAL_NAME}]]
-    Ne fournir en réponse que du JSON, conformément à la structure indiquée, sans commentaire, ni texte supplémentaire
-
-    ### Création d'un eco-score pour les [[${VERTICAL_NAME}]] 
-
-    Tu vas créer un score d'impact environnemental, qui prend en compte les impacts écologiques et sociétaux pour les [[${VERTICAL_NAME}]].
-    
-    Cet Impact Score est une composition de différents facteurs coefficientés. Les facteurs disponibles sont : 
-    [[${AVAILABLE_CRITERIAS}]]
-  
-    ### Principe de fonctionnement de l'eco-score
-       
-    Les principes de fonctionnement que tu dois prendre en compte
-       principe de relativisation des facteurs : Chacun des facteurs est représenté de manière relative, sous forme de classement. Le produit de la catégorie ayant le meilleur facteur pour l'environnement obtient 100/100, le produit ayant le moins bon score obtient 0/100' 
-       principe de virtualisation des scores manquants : si un des facteurs est absent, nous appliquons pour ce facteur la valeur moyenne de ce facteur pour l'ensemble des produits. Cet indicateur DATA_QUALITY est permet donc d'avantager les produits pour lequel toute l'info est disponible, sans pour autant pénaliser outre mesure les produits pour lesquels l'information est absente.
-       la somme des différents facteurs coefficientés doit être égale à 1
-       
-    Tu vas travailler à partir des facteurs disponibles, pour élaborer un score d'impact environnemental pertinent pour des [[${VERTICAL_NAME}]].
-    
-    ### Format de réponse attendu : JSON 
-        
-     Tout écart par rapport à la structure JSON fournie est inacceptable.
-     Aucune information supplémentaire ne doit être fournie en dehors du JSON (pas de phrases avant ou après).
-     Conserve l’ordre des clés et leur orthographe. Les clés doivent correspondre exactement à celles indiquées. Si un champ est nul ou non applicable, omets-le de la réponse.
-     Fournis une réponse JSON respectant strictement la structure suivante :
-
-     {
-        criteriasPonderation : {
-          "FACTEUR_1" : PONDERATION_1,
-          "FACTEUR_2" : PONDERATION_2,
-          ...                        
-        },
-        texts: {
-            fr: {
-               "purpose": "Décris la démarche et la méthodologie",
-               "availlableDatas": "Analyse de façon générale les données disponibles et leur pertinence pour la réalisation de cet eco-score",
-               "criticalReview": "Revue critique et retour constructif sur la démarche et la méthodologie, en évaluant les facteurs absents ou inutiles",
-               "criteriasAnalysis": {
-                    "FACTEUR_1" : "Détail et analyse de l'importance du FACTEUR_1 dans l'analyse environnemental des [[${VERTICAL_NAME}]]. Explique et justifie la pondération retenue pour le FACTEUR_1",
-                    "FACTEUR_2" : "Détail et analyse de l'importance du FACTEUR_2 dans l'analyse environnemental des [[${VERTICAL_NAME}]]. Explique et justifie la pondération retenue pour le FACTEUR_2",
-                    ...                                    
-               }
-            }    
-         }
-     }
-# The options (temperature, top k...) given to the chat model
-options:
-  # ID of the model to use
-  #model: "gpt-4o"
-  model: "o1-preview"  
-  #model: "llama-3.1-sonar-small-128k-online"
-  
-  # Sampling temperature to use, between 0 and 1
-  # Only default temperature (1) with 01-preview
-  temperature: 1
-
-          
-  # An object specifying the format that the model must output
- # response-format:
- #   type: JSON_OBJECT
-
-      # Number between -2.0 and 2.0. Positive values penalize new tokens based on their existing frequency in the text so far,
-  # decreasing the model's likelihood to repeat the same line verbatim.
-  #frequency_penalty: 0.0
-
-  # Modify the likelihood of specified tokens appearing in the completion. Accepts a JSON object
-  # that maps tokens (specified by their token ID in the tokenizer) to an associated bias value from -100 to 100.
-  #logit_bias: {}
-
-  # Whether to return log probabilities of the output tokens or not
-  #logprobs: false
-
-  # An integer between 0 and 5 specifying the number of most likely tokens to return at each token position
-  #top_logprobs: 0
-
-  # The maximum number of tokens to generate in the chat completion
-  #max_tokens: 100
-
-  # An upper bound for the number of tokens that can be generated for a completion
-  #max_completion_tokens: 0
-
-  # How many chat completion choices to generate for each input message
-  #n: 1
-
-  # Output types that you would like the model to generate for this request
-  #modalities: []
-
-  # Audio parameters for the audio generation
-  #audio: {}
-
-  # Number between -2.0 and 2.0. Positive values penalize new tokens based on whether they appear in the text so far
-  #presence_penalty: 0.0
-
-  # Options for streaming response
-  #stream_options: {}
-
-  # A seed value to enable deterministic output
-  #seed: 0
-
-  # Up to 4 sequences where the API will stop generating further tokens
-  #stop: []
-
-
-  # Nucleus sampling probability mass, between 0 and 1
-  #top_p: 0.0
-
-  # A list of tools the model may call
-  #tools: []
-
-  # Controls which (if any) function is called by the model
-  #tool_choice: ""
-
-  # A unique identifier representing your end-user
-  #user: ""
-
-  # Whether to enable parallel function calling
-  #parallel_tool_calls: false
-
-
-```
-
-
-### Testing
-
-A minimal test configuration is provided in the test source folder. To run the tests:
-
-```bash
-mvn test
-```
-
-## Contributing
-
-Contributions are welcome! Please submit a pull request or open an issue for any improvements or bugs.
-
-## License
-
-This project is licensed under the MIT License.
-~~~
-
-## [additional-spring-configuration-metadata.json - /home/goulven/git/open4goods/services/prompt/src/main/resources/additional-spring-configuration-metadata.json]
+## [additional-spring-configuration-metadata.json - /home/goulven/git/open4goods/services/reviewgeneration/src/main/resources/META-INF/additional-spring-configuration-metadata.json]
 ~~~
 {
   "groups": [
     {
-      "name": "genAiConfig",
-      "type": "org.open4goods.services.prompt.config.PromptServiceConfig",
-      "sourceType": "org.open4goods.services.prompt.config.PromptServiceConfig"
+      "name": "review.generation",
+      "type": "org.open4goods.reviewgeneration.config.ReviewGenerationProperties",
+      "sourceType": "org.open4goods.reviewgeneration.config.ReviewGenerationProperties"
     }
   ],
   "properties": [
     {
-      "name": "genAiConfig.promptsTemplatesFolder",
-      "type": "java.lang.String",
-      "description": "Folder path for prompt templates."
+      "name": "review.generation.thread-pool-size",
+      "type": "java.lang.Integer",
+      "defaultValue": 10,
+      "description": "Size of the thread pool for processing review generation tasks."
     },
     {
-      "name": "genAiConfig.cacheTemplates",
-      "type": "java.lang.Boolean",
-      "description": "Determines if prompt templates should be cached in memory."
+      "name": "review.generation.max-characters-to-remove",
+      "type": "java.lang.Integer",
+      "defaultValue": 4,
+      "description": "Maximum number of characters to remove iteratively from the model name."
     },
     {
-      "name": "genAiConfig.enabled",
-      "type": "java.lang.Boolean",
-      "description": "Flag to enable or disable the GenAi service."
+      "name": "review.generation.number-of-results",
+      "type": "java.lang.Integer",
+      "defaultValue": 10,
+      "description": "Number of search results to fetch from Google."
     },
     {
-      "name": "genAiConfig.recordEnabled",
-      "type": "java.lang.Boolean",
-      "description": "Flag to enable recording of prompt responses as mocks."
-    },
-    {
-      "name": "genAiConfig.recordFolder",
-      "type": "java.lang.String",
-      "description": "Folder path where recorded prompt responses (mocks) are stored."
+      "name": "review.generation.preferred-domains",
+      "type": "java.util.List",
+      "description": "List of preferred domains that must be present in search results."
     }
   ]
 }
 ~~~
 
-## [PromptResponse.java - /home/goulven/git/open4goods/services/prompt/src/main/java/org/open4goods/services/prompt/dto/PromptResponse.java]
+## [ProcessStatus.java - /home/goulven/git/open4goods/services/reviewgeneration/src/main/java/org/open4goods/services/reviewgeneration/dto/ProcessStatus.java]
 ~~~
-package org.open4goods.services.prompt.dto;
+package org.open4goods.services.reviewgeneration.dto;
 
-import org.open4goods.services.prompt.config.PromptConfig;
+import java.time.Instant;
 import java.util.Objects;
 
 /**
- * Data transfer object representing the response of a prompt execution.
- *
- * @param <T> the type of the response body
+ * DTO representing the status of a review generation process.
  */
-public class PromptResponse<T> {
+public class ProcessStatus {
 
     /**
-     * The body of the response.
+     * Possible states of a generation process.
      */
-    private T body;
+    public enum Status {
+        PENDING, PROCESSING, SUCCESS, FAILED;
+    }
+    
+    private long upc;
+    private Status status;
+    private Instant startTime;
+    private Instant endTime;
+    private String result;
+    private String errorMessage;
 
-    /**
-     * The resolved prompt configuration with variables evaluated.
-     */
-    private PromptConfig prompt = new PromptConfig();
+    // Getters and setters
 
-    /**
-     * The raw response content.
-     */
-    private String raw;
-
-    /**
-     * Duration of the generation process (in milliseconds).
-     */
-    private long duration;
-
-    /**
-     * Timestamp (epoch ms) when the generation occurred.
-     */
-    private long start;
-
-    public T getBody() {
-        return body;
+    public long getUpc() {
+        return upc;
     }
 
-    public void setBody(T body) {
-        this.body = body;
+    public void setUpc(long upc) {
+        this.upc = upc;
     }
 
-    public PromptConfig getPrompt() {
-        return prompt;
+    public Status getStatus() {
+        return status;
     }
 
-    public void setPrompt(PromptConfig prompt) {
-        this.prompt = prompt;
+    public void setStatus(Status status) {
+        this.status = status;
     }
 
-    public long getDuration() {
-        return duration;
+    public Instant getStartTime() {
+        return startTime;
     }
 
-    public void setDuration(long duration) {
-        this.duration = duration;
+    public void setStartTime(Instant startTime) {
+        this.startTime = startTime;
     }
 
-    public long getStart() {
-        return start;
+    public Instant getEndTime() {
+        return endTime;
     }
 
-    public void setStart(long start) {
-        this.start = start;
+    public void setEndTime(Instant endTime) {
+        this.endTime = endTime;
     }
 
-    public String getRaw() {
-        return raw;
+    public String getResult() {
+        return result;
     }
 
-    public void setRaw(String raw) {
-        this.raw = raw;
+    public void setResult(String result) {
+        this.result = result;
     }
+
+    public String getErrorMessage() {
+        return errorMessage;
+    }
+
+    public void setErrorMessage(String errorMessage) {
+        this.errorMessage = errorMessage;
+    }
+
+    // toString, equals, and hashCode
 
     @Override
     public String toString() {
-        return "PromptResponse{" +
-                "body=" + body +
-                ", prompt=" + prompt +
-                ", raw='" + raw + '\'' +
-                ", duration=" + duration +
-                ", start=" + start +
+        return "ProcessStatus{" +
+                "upc=" + upc +
+                ", status=" + status +
+                ", startTime=" + startTime +
+                ", endTime=" + endTime +
+                ", result='" + result + '\'' +
+                ", errorMessage='" + errorMessage + '\'' +
                 '}';
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(body, prompt, raw, duration, start);
+        return Objects.hash(upc, status, startTime, endTime, result, errorMessage);
     }
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof PromptResponse)) return false;
-        PromptResponse<?> that = (PromptResponse<?>) o;
-        return duration == that.duration &&
-               start == that.start &&
-               Objects.equals(body, that.body) &&
-               Objects.equals(prompt, that.prompt) &&
-               Objects.equals(raw, that.raw);
+        if (!(o instanceof ProcessStatus)) return false;
+        ProcessStatus that = (ProcessStatus) o;
+        return upc == that.upc &&
+                status == that.status &&
+                Objects.equals(startTime, that.startTime) &&
+                Objects.equals(endTime, that.endTime) &&
+                Objects.equals(result, that.result) &&
+                Objects.equals(errorMessage, that.errorMessage);
     }
 }
 ~~~
 
-## [PromptConfig.java - /home/goulven/git/open4goods/services/prompt/src/main/java/org/open4goods/services/prompt/config/PromptConfig.java]
+## [ReviewRequest.java - /home/goulven/git/open4goods/services/reviewgeneration/src/main/java/org/open4goods/services/reviewgeneration/dto/ReviewRequest.java]
 ~~~
-package org.open4goods.services.prompt.config;
+package org.open4goods.services.reviewgeneration.dto;
 
-import org.springframework.ai.openai.OpenAiChatOptions;
 import java.util.Objects;
 
+import org.open4goods.model.product.Product;
+import org.open4goods.model.vertical.VerticalConfig;
+
 /**
- * Represents a prompt configuration which defines the AI service to use,
- * templated prompts, and associated options for the chat model.
+ * DTO representing a review generation request.
  */
-public class PromptConfig {
+public class ReviewRequest {
 
+    private Product product;
+    
     /**
-     * The unique key used to identify this prompt configuration.
+     * Vertical configuration (provided as an object; replace with a concrete type if available).
      */
-    private String key;
+    private VerticalConfig verticalConfig;
 
-    /**
-     * The generative AI service to use.
-     */
-    private GenAiServiceType aiService;
+    // Getters and setters
 
-    /**
-     * The system prompt template.
-     */
-    private String systemPrompt;
-
-    /**
-     * The user prompt template.
-     */
-    private String userPrompt;
-
-    /**
-     * Options for the chat model (e.g., temperature, top-k).
-     */
-    private OpenAiChatOptions options;
-
-    public String getKey() {
-        return key;
+    public Product getProduct() {
+        return product;
     }
 
-    public void setKey(String key) {
-        this.key = key;
+    public void setProduct(Product product) {
+        this.product = product;
     }
 
-    public GenAiServiceType getAiService() {
-        return aiService;
-    }
 
-    public void setAiService(GenAiServiceType aiService) {
-        this.aiService = aiService;
-    }
+    public VerticalConfig getVerticalConfig() {
+		return verticalConfig;
+	}
 
-    public String getSystemPrompt() {
-        return systemPrompt;
-    }
+	public void setVerticalConfig(VerticalConfig verticalConfig) {
+		this.verticalConfig = verticalConfig;
+	}
 
-    public void setSystemPrompt(String systemPrompt) {
-        this.systemPrompt = systemPrompt;
-    }
-
-    public String getUserPrompt() {
-        return userPrompt;
-    }
-
-    public void setUserPrompt(String userPrompt) {
-        this.userPrompt = userPrompt;
-    }
-
-    public OpenAiChatOptions getOptions() {
-        return options;
-    }
-
-    public void setOptions(OpenAiChatOptions options) {
-        this.options = options;
-    }
-
-    @Override
+	@Override
     public String toString() {
-        return "PromptConfig{" +
-                "key='" + key + '\'' +
-                ", aiService=" + aiService +
-                ", systemPrompt='" + systemPrompt + '\'' +
-                ", userPrompt='" + userPrompt + '\'' +
-                ", options=" + options +
+        return "ReviewRequest{" +
+                "product=" + product +
+                ", verticalConfig=" + verticalConfig +
                 '}';
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(key, aiService, systemPrompt, userPrompt, options);
+        return Objects.hash(product, verticalConfig);
     }
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof PromptConfig)) return false;
-        PromptConfig that = (PromptConfig) o;
-        return Objects.equals(key, that.key) &&
-               aiService == that.aiService &&
-               Objects.equals(systemPrompt, that.systemPrompt) &&
-               Objects.equals(userPrompt, that.userPrompt) &&
-               Objects.equals(options, that.options);
+        if (!(o instanceof ReviewRequest)) return false;
+        ReviewRequest that = (ReviewRequest) o;
+        return Objects.equals(product, that.product) &&
+               Objects.equals(verticalConfig, that.verticalConfig);
     }
 }
 ~~~
 
-## [pom.xml - /home/goulven/git/open4goods/services/prompt/pom.xml]
+## [ReviewGenerationConfig.java - /home/goulven/git/open4goods/services/reviewgeneration/src/main/java/org/open4goods/services/reviewgeneration/config/ReviewGenerationConfig.java]
+~~~
+package org.open4goods.services.reviewgeneration.config;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.context.annotation.Configuration;
+
+/**
+ * Configuration properties for the review generation service.
+ */
+@Configuration
+@ConfigurationProperties(prefix = "review.generation")
+public class ReviewGenerationConfig {
+
+    private int threadPoolSize = 10;
+    private int maxCharactersToRemove = 4;
+    private int numberOfResults = 10;
+    private List<String> preferredDomains = new ArrayList<>();
+
+    // New properties for improved behavior:
+    private String queryTemplate = "test %s \"%s\"";
+    private int maxSearchCalls = 2;
+    private int maxSources = 15;
+    private int minMarkdownLength = 150;
+    private int maxMarkdownLength = 500000;
+
+    // Getters and setters for existing properties...
+
+    public int getThreadPoolSize() {
+        return threadPoolSize;
+    }
+    public void setThreadPoolSize(int threadPoolSize) {
+        this.threadPoolSize = threadPoolSize;
+    }
+    public int getMaxCharactersToRemove() {
+        return maxCharactersToRemove;
+    }
+    public void setMaxCharactersToRemove(int maxCharactersToRemove) {
+        this.maxCharactersToRemove = maxCharactersToRemove;
+    }
+    public int getNumberOfResults() {
+        return numberOfResults;
+    }
+    public void setNumberOfResults(int numberOfResults) {
+        this.numberOfResults = numberOfResults;
+    }
+    public List<String> getPreferredDomains() {
+        return preferredDomains;
+    }
+    public void setPreferredDomains(List<String> preferredDomains) {
+        this.preferredDomains = preferredDomains;
+    }
+
+    // Getters and setters for new properties:
+    public String getQueryTemplate() {
+        return queryTemplate;
+    }
+    public void setQueryTemplate(String queryTemplate) {
+        this.queryTemplate = queryTemplate;
+    }
+    public int getMaxSearchCalls() {
+        return maxSearchCalls;
+    }
+    public void setMaxSearchCalls(int maxSearchCalls) {
+        this.maxSearchCalls = maxSearchCalls;
+    }
+    public int getMaxSources() {
+        return maxSources;
+    }
+    public void setMaxSources(int maxSources) {
+        this.maxSources = maxSources;
+    }
+    public int getMinMarkdownLength() {
+        return minMarkdownLength;
+    }
+    public void setMinMarkdownLength(int minMarkdownLength) {
+        this.minMarkdownLength = minMarkdownLength;
+    }
+    public int getMaxMarkdownLength() {
+        return maxMarkdownLength;
+    }
+    public void setMaxMarkdownLength(int maxMarkdownLength) {
+        this.maxMarkdownLength = maxMarkdownLength;
+    }
+}
+~~~
+
+## [application-test.yml - /home/goulven/git/open4goods/services/reviewgeneration/src/test/resources/application-test.yml]
+~~~
+spring:
+  ai:
+    openai:
+        api-key: sk-proj-FI9z9MAyJTarx13yZZNZuz66PL-ywf0hR1iX4e8sxa3aVoOtYfgOVnb3uUb84K-ugm9D-zhz5iT3BlbkFJZiHIaVGF8Z_qS-
+        chat:
+          api-key: sk-proj-FI9z9MAyJTarx13yZZNZuz66PL-ywf0hR1iX4e8sxa3aVoOtYfgOVnb3uUb84K-ugm9D-zhz5iT3BlbkFJZiHIaVGF8Z_qS-
+            
+gen-ai-config:
+  cache-templates: true
+  enabled: true
+  prompts-templates-folder: src/test/resources/prompts
+  
+  ~~~
+
+## [pom.xml - /home/goulven/git/open4goods/services/reviewgeneration/pom.xml]
 ~~~
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
-  
   <parent>
     <groupId>org.open4goods</groupId>
     <artifactId>org.open4goods</artifactId>
     <version>0.0.1-SNAPSHOT</version>
   </parent>
+  <artifactId>reviewgeneration</artifactId>
   
-  <artifactId>prompt</artifactId>
   
-  <dependencies>
-    <!-- OpenAI Spring Boot Starter -->
-    <dependency>
-      <groupId>org.springframework.ai</groupId>
-      <artifactId>spring-ai-openai-spring-boot-starter</artifactId>
-      <version>1.0.0-SNAPSHOT</version>
-    </dependency>
-    <!-- Commons Codec -->
-    <dependency>
-      <groupId>commons-codec</groupId>
-      <artifactId>commons-codec</artifactId>
-    </dependency>
-    <!-- Serialisation module -->
-    <dependency>
-      <groupId>org.open4goods</groupId>
-      <artifactId>serialisation</artifactId>
-      <version>${global.version}</version>
-    </dependency>
-    <!-- Evaluation module -->
-    <dependency>
-      <groupId>org.open4goods</groupId>
-      <artifactId>evaluation</artifactId>
-      <version>${global.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.springframework.boot</groupId>
-      <artifactId>spring-boot-starter-actuator</artifactId>
-    </dependency>
+    <dependencies>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-actuator</artifactId>
+        </dependency>
+
     
-    <dependency>
-    	<groupId>org.springframework.boot</groupId>
-    	<artifactId>spring-boot-configuration-processor</artifactId>
-    	<optional>true</optional>
-    </dependency>
-  </dependencies>
-   <build>
+
+        <dependency>
+            <groupId>org.open4goods</groupId>
+            <artifactId>model</artifactId>
+            <version>${global.version}</version>
+        </dependency>
+        
+        <dependency>
+            <groupId>org.open4goods</groupId>
+            <artifactId>googlesearch</artifactId>
+            <version>${global.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.open4goods</groupId>
+            <artifactId>googlesearch</artifactId>
+            <version>${global.version}</version>
+            <classifier>tests</classifier>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.open4goods</groupId>
+            <artifactId>urlfetching</artifactId>
+            <version>${global.version}</version>
+            <classifier>tests</classifier>
+            <scope>test</scope>
+        </dependency>
+        
+        <dependency>
+            <groupId>org.open4goods</groupId>
+            <artifactId>prompt</artifactId>
+            <version>${global.version}</version>
+            <classifier>tests</classifier>
+            <scope>test</scope>
+        </dependency>
+        
+        <dependency>
+            <groupId>org.open4goods</groupId>
+            <artifactId>urlfetching</artifactId>
+            <version>${global.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.open4goods</groupId>
+            <artifactId>prompt</artifactId>
+            <version>${global.version}</version>
+        </dependency>
+
+
+        <dependency>
+        	<groupId>org.springframework.boot</groupId>
+        	<artifactId>spring-boot-configuration-processor</artifactId>
+        	<optional>true</optional>
+        </dependency>
+    </dependencies>
+  
+    <build>
     <plugins>
       <plugin>
       <groupId>org.apache.maven.plugins</groupId>

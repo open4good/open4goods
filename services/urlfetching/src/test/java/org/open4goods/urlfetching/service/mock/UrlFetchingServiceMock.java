@@ -7,6 +7,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.concurrent.CompletableFuture;
 
+import org.open4goods.services.urlfetching.config.FetchStrategy;
 import org.open4goods.services.urlfetching.dto.FetchResponse;
 import org.open4goods.services.urlfetching.service.UrlFetchingService;
 import org.springframework.boot.test.context.TestConfiguration;
@@ -88,21 +89,21 @@ public class UrlFetchingServiceMock {
                 // Fallback: Return predefined dummy responses based on URL content.
                 if (url.contains("example.com")) {
                     return CompletableFuture.completedFuture(
-                            new FetchResponse(200, "<html>Example Domain</html>", "Example Domain"));
+                            new FetchResponse(url, 200, "<html>Example Domain</html>", "Example Domain", FetchStrategy.HTTP));
                 } else if (url.contains("error.com")) {
                     CompletableFuture<FetchResponse> errorFuture = new CompletableFuture<>();
                     errorFuture.completeExceptionally(new RuntimeException("Simulated error for error.com"));
                     return errorFuture;
                 } else if (url.contains("delayed.com")) {
                     return CompletableFuture.supplyAsync(() ->
-                            new FetchResponse(200, "<html>Delayed Response</html>", "Delayed Response"));
+                            new FetchResponse(url, 200, "<html>Delayed Response</html>", "Delayed Response", FetchStrategy.SELENIUM));
                 } else if (url == null || url.trim().isEmpty()) {
                     CompletableFuture<FetchResponse> invalidFuture = new CompletableFuture<>();
                     invalidFuture.completeExceptionally(new IllegalArgumentException("Invalid URL provided"));
                     return invalidFuture;
                 } else {
                     return CompletableFuture.completedFuture(
-                            new FetchResponse(200, "<html>Default Response</html>", "Default Response"));
+                            new FetchResponse(url, 200, "<html>Default Response</html>", "Default Response", FetchStrategy.HTTP));
                 }
             });
 

@@ -35,7 +35,7 @@ public class GoogleSearchServiceTest {
     @Test
     public void testSearch() throws IOException, InterruptedException {
         // Prepare a sample search request with a known query.
-        GoogleSearchRequest request = new GoogleSearchRequest("Spring Boot", 5);
+        GoogleSearchRequest request = new GoogleSearchRequest("Spring Boot", "lang_fr", "countryFR");
         
         try {
             googleSearchService.search(request);
