@@ -7,31 +7,19 @@ import java.util.Objects;
  */
 public class GoogleSearchRequest {
     
-    private final String query;
+    private static final int DEFAULT_SEARCH_RESULTS = 10;
+	private final String query;
     private final int numResults;
 
     // New optional search parameters corresponding to Google API options.
     private String lr;   // Language restriction (e.g., lang_en)
     private String cr;   // Country restriction (e.g., countryUS)
-    private String safe; // Safe search parameter (e.g., active, off)
+    private String safe = "off"; // Safe search parameter (e.g., active, off)
     private String sort; // Sort option
     private String gl;   // Geolocation (e.g., us)
     private String hl;   // Interface language (e.g., en)
 
-    /**
-     * Constructs a new GoogleSearchRequest with mandatory fields.
-     *
-     * @param query      the search query (must not be null or empty)
-     * @param numResults the number of results to retrieve
-     */
-    public GoogleSearchRequest(String query, int numResults) {
-        if (query == null || query.isBlank()) {
-            throw new IllegalArgumentException("Search query must not be null or empty");
-        }
-        this.query = query;
-        this.numResults = numResults;
-    }
-    
+  
     /**
      * Constructs a new GoogleSearchRequest with all options.
      *
@@ -45,16 +33,23 @@ public class GoogleSearchRequest {
      * @param hl         interface language parameter (optional)
      */
     public GoogleSearchRequest(String query, int numResults, String lr, String cr, String safe, String sort, String gl, String hl) {
-        this(query, numResults);
         this.lr = lr;
         this.cr = cr;
         this.safe = safe;
         this.sort = sort;
         this.gl = gl;
         this.hl = hl;
+		this.query = query;
+		this.numResults = numResults;
     }
 
-    public String getQuery() {
+    public GoogleSearchRequest(String query, String lr, String cr) {
+        this.lr = lr;
+        this.cr = cr;
+		this.query = query;
+		this.numResults = DEFAULT_SEARCH_RESULTS;
+    }
+	public String getQuery() {
         return query;
     }
 

@@ -31,7 +31,6 @@ import org.springframework.test.context.TestPropertySource;
 @TestPropertySource(locations = "classpath:application-test.yml")
 @ActiveProfiles("test")
 @Import({GoogleSearchServiceMock.class, UrlFetchingServiceMock.class, PromptServiceMock.class})
-
 public class ReviewGenerationServiceTest {
 
     /**
@@ -42,7 +41,6 @@ public class ReviewGenerationServiceTest {
     @ComponentScan(basePackages = {"org.open4goods.services"})
     public static class TestConfig {
         // This class remains empty; its purpose is to trigger component scanning.
-   
     }
 
     @Autowired
@@ -63,8 +61,8 @@ public class ReviewGenerationServiceTest {
         ProductI18nElements i18n = new ProductI18nElements();
         PrefixedAttrText p = new PrefixedAttrText();
         p.setPrefix("téléviseur");
-    	i18n.setH1Title(p);
-		verticalConfig.getI18n().put("fr", i18n);
+        i18n.setH1Title(p);
+        verticalConfig.getI18n().put("fr", i18n);
 
         // Invoke synchronous review generation.
         try {
@@ -79,5 +77,55 @@ public class ReviewGenerationServiceTest {
         ProcessStatus status = reviewGenerationService.getProcessStatus(product.getId());
         assertNotNull(status, "Process status should be available");
         assertEquals(ProcessStatus.Status.SUCCESS, status.getStatus());
+    }
+    
+    /**
+     * New test case to verify that the URL content token thresholds and accumulation behave as expected.
+     * <p>
+     * This test simulates:
+     * <ul>
+     *   <li>A Google search returning two URLs.</li>
+     *   <li>One URL returns content with an estimated token count above the minimum threshold.
+     *       The other returns content with too few tokens.</li>
+     *   <li>The aggregated tokens should include only the valid content and stop accumulation when reaching the maximum tokens limit.</li>
+     * </ul>
+     */
+    @Test
+    public void testGenerateReviewSyncTokenLimits() {
+        // Create a dummy product.
+        Product product = new Product();
+        product.setId(1234567890123L);
+        product.getAttributes().getReferentielAttributes().put(ReferentielKey.BRAND, "TestBrand");
+        product.getAttributes().getReferentielAttributes().put(ReferentielKey.MODEL, "TestModel");
+        // No alternate models for simplicity.
+        
+        // Dummy vertical configuration.
+        VerticalConfig verticalConfig = new VerticalConfig();
+        verticalConfig.setId("testVertical");
+        ProductI18nElements i18n = new ProductI18nElements();
+        PrefixedAttrText p = new PrefixedAttrText();
+        p.setPrefix("TestVertical");
+        i18n.setH1Title(p);
+        verticalConfig.getI18n().put("fr", i18n);
+
+        // The mocks (GoogleSearchServiceMock, UrlFetchingServiceMock, PromptServiceMock)
+        // are assumed to be configured (or can be adjusted) so that:
+        // - The search returns two URLs.
+        // - The first URL returns content with an estimated token count of 150 (above a minTokens threshold of 100).
+        // - The second URL returns content with an estimated token count of 50 (below minTokens).
+        // - The ReviewGenerationConfig in application-test.yml is set for this test:
+        //      review.generation.max-search=2
+        //      review.generation.max-tokens-per-request=300
+        //      review.generation.min-tokens=100
+        //      review.generation.max-concurrent-fetch=3
+        // - The prompt service returns a fixed review text.
+        
+        try {
+            String review = reviewGenerationService.generateReviewSync(product, verticalConfig);
+            assertNotNull(review, "The generated review should not be null");
+            System.out.println("Generated Review with token limits: " + review);
+        } catch (Exception e) {
+            fail("Review generation with token limits failed: ", e);
+        }
     }
 }

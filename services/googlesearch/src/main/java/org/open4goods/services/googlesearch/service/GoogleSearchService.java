@@ -170,7 +170,9 @@ public class GoogleSearchService implements HealthIndicator {
                 Path filePath = folderPath.resolve(fileName);
                 String jsonContent = serialisationService.toJson(result,true);
                 Files.writeString(filePath, jsonContent);
+                logger.info("Search results for {} are : \n{}",request.getQuery(), jsonContent);
                 logger.info("Recorded search result to file: {}", filePath.toAbsolutePath());
+                
             } catch (Exception e) {
                 // Log the error but do not break the search functionality.
                 logger.error("Failed to record search result: {}", e.getMessage());

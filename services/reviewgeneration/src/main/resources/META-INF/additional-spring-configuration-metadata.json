@@ -2,33 +2,58 @@
   "groups": [
     {
       "name": "review.generation",
-      "type": "org.open4goods.reviewgeneration.config.ReviewGenerationProperties",
-      "sourceType": "org.open4goods.reviewgeneration.config.ReviewGenerationProperties"
+      "type": "org.open4goods.services.reviewgeneration.config.ReviewGenerationConfig",
+      "sourceType": "org.open4goods.services.reviewgeneration.config.ReviewGenerationConfig"
     }
   ],
   "properties": [
     {
       "name": "review.generation.thread-pool-size",
       "type": "java.lang.Integer",
-      "defaultValue": 10,
-      "description": "Size of the thread pool for processing review generation tasks."
-    },
-    {
-      "name": "review.generation.max-characters-to-remove",
-      "type": "java.lang.Integer",
-      "defaultValue": 4,
-      "description": "Maximum number of characters to remove iteratively from the model name."
-    },
-    {
-      "name": "review.generation.number-of-results",
-      "type": "java.lang.Integer",
-      "defaultValue": 10,
-      "description": "Number of search results to fetch from Google."
+      "description": "Number of threads allocated for processing.",
+      "defaultValue": 10
     },
     {
       "name": "review.generation.preferred-domains",
-      "type": "java.util.List",
-      "description": "List of preferred domains that must be present in search results."
+      "type": "java.util.List<java.lang.String>",
+      "description": "List of preferred domains to fetch content from.",
+      "defaultValue": []
+    },
+    {
+      "name": "review.generation.query-template",
+      "type": "java.lang.String",
+      "description": "Template for constructing search queries.",
+      "defaultValue": "test %s \"%s\""
+    },
+    {
+      "name": "review.generation.max-search",
+      "type": "java.lang.Integer",
+      "description": "Maximum number of search queries allowed.",
+      "defaultValue": 2
+    },
+    {
+      "name": "review.generation.max-total-tokens",
+      "type": "java.lang.Integer",
+      "description": "Maximum total number of tokens allowed for aggregation.",
+      "defaultValue": 100000
+    },
+    {
+      "name": "review.generation.source-min-tokens",
+      "type": "java.lang.Integer",
+      "description": "Minimum number of tokens required for a source to be considered.",
+      "defaultValue": 150
+    },
+    {
+      "name": "review.generation.source-max-tokens",
+      "type": "java.lang.Integer",
+      "description": "Maximum number of tokens allowed per source.",
+      "defaultValue": 10000
+    },
+    {
+      "name": "review.generation.max-concurrent-fetch",
+      "type": "java.lang.Integer",
+      "description": "Maximum number of concurrent URL fetch operations.",
+      "defaultValue": 3
     }
   ]
 }

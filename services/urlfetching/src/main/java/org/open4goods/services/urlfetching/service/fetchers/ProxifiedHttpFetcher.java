@@ -11,6 +11,7 @@ import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 
+import org.open4goods.services.urlfetching.config.FetchStrategy;
 import org.open4goods.services.urlfetching.config.UrlFetcherConfig.DomainConfig;
 import org.open4goods.services.urlfetching.config.UrlFetcherConfig.ProxyConfig;
 import org.open4goods.services.urlfetching.dto.FetchResponse;
@@ -88,7 +89,7 @@ public class ProxifiedHttpFetcher implements Fetcher {
                     meterRegistry.counter("url.fetch.total").increment();
                     meterRegistry.counter("url.fetch.status", "code", String.valueOf(statusCode)).increment();
                     logger.info("Fetched URL {} with status code {}", url, statusCode);
-                    return new FetchResponse(statusCode, htmlContent, markdownContent);
+                    return new FetchResponse(url, statusCode, htmlContent, markdownContent,FetchStrategy.PROXIFIED);
                 });
     }
 }

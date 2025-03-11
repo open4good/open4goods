@@ -412,6 +412,17 @@ public class PromptService implements HealthIndicator {
         return (int) Math.ceil(words * 1.3);
     }
     
+    /**
+     * Estimate the number of tokens for a given prompt config.
+     *
+     * @param text the text to estimate tokens for
+     * @return the estimated token count
+     */
+    public int estimateTokens(PromptConfig promptConfig) {
+    	return estimateTokens(promptConfig.getSystemPrompt()) + estimateTokens(promptConfig.getUserPrompt());
+    
+    }
+    
     
     /**
      * Health check for the Prompt Service.

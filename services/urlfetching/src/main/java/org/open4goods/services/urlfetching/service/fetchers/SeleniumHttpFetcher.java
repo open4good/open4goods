@@ -5,6 +5,8 @@ import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
 import io.micrometer.core.instrument.MeterRegistry;
+
+import org.open4goods.services.urlfetching.config.FetchStrategy;
 import org.open4goods.services.urlfetching.config.UrlFetcherConfig.DomainConfig;
 import org.open4goods.services.urlfetching.dto.FetchResponse;
 import org.open4goods.services.urlfetching.service.Fetcher;
@@ -66,7 +68,7 @@ public class SeleniumHttpFetcher implements Fetcher {
                 meterRegistry.counter("url.fetch.total").increment();
                 meterRegistry.counter("url.fetch.status", "code", "200").increment();
                 logger.info("Successfully fetched URL {} with status code 200", url);
-                return new FetchResponse(200, htmlContent, markdownContent);
+                return new FetchResponse(url, 200, htmlContent, markdownContent,FetchStrategy.SELENIUM);
             } finally {
                 driver.quit();
                 logger.debug("Closed Selenium WebDriver for URL {}", url);
