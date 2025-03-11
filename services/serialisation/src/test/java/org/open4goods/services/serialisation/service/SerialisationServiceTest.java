@@ -20,7 +20,7 @@ public class SerialisationServiceTest {
     private final SerialisationService serialisationService = new SerialisationService();
 
     @Test
-    public void testSnakeYamlMultilineSerialization() {
+    public void testYamlMultilineSerialization() {
         try {
             Map<String, String> sample = Map.of("key", "line1\nline2\nline3");
             String yamlOutput = serialisationService.toYamLiteral(sample);
