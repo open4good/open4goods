@@ -51,8 +51,6 @@ public class AdminController {
 
 	private ProductRepository repository;
 	
-	private ReviewGenerationService reviewGenerationService;
-
 	private ImageGenerationService imageGenerationService;
 
 	private VerticalsConfigService verticalsConfigService;
@@ -60,7 +58,7 @@ public class AdminController {
 	private GoogleIndexationService googleIndexationService;
 	
 	public AdminController(UiConfig config, VerticalsConfigService verticalsConfigService,
-			ProductRepository repository, SitemapGenerationService sitemapService, ImageGenerationService imageGenerationService, LegacyAiService aiService, GoogleIndexationService googleIndexationService,ReviewGenerationService reviewGenerationService) {
+			ProductRepository repository, SitemapGenerationService sitemapService, ImageGenerationService imageGenerationService, LegacyAiService aiService, GoogleIndexationService googleIndexationService) {
 		this.config = config;
 		this.verticalService = verticalsConfigService;
 		this.sitemapService = sitemapService;
@@ -69,7 +67,6 @@ public class AdminController {
 		this.verticalsConfigService = verticalsConfigService;
 		this.aiService = aiService;
 		this.googleIndexationService = googleIndexationService;
-		this.reviewGenerationService = reviewGenerationService;
 	}
 
 	//////////////////////////////////////////////////////////////
@@ -200,19 +197,6 @@ public class AdminController {
 		return mv;
 	}
 	
-	
-
-	@GetMapping("/review/{gtin}")
-	// 8806091548818
-	// TODO
-//	@PreAuthorize("hasAuthority('"+RolesConstants.ROLE_XWIKI_ALL+"')")
-	public ModelAndView generateReview(@PathVariable Long gtin) throws IOException, ResourceNotFoundException {
-		Product product = repository.getById(gtin);
-		
-		reviewGenerationService.generateReviewAsync(product, verticalsConfigService.getConfigById(product.getVertical()));
-		return null;
-	}
-
 	
 
 
