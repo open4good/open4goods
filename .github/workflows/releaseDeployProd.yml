@@ -73,32 +73,6 @@ jobs:
             ]
 
       ############################################
-      # Install Chrome Manually (Avoids `ar` issue)
-      ############################################
-      - name: Install Chrome Manually
-        run: |
-          wget -qO- https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb > chrome.deb
-          dpkg --extract chrome.deb chrome-files/
-          sudo cp -r chrome-files/usr/* /usr/
-          rm -rf chrome-files chrome.deb
-          
-      ############################################
-      # Install ChromeDriver (Matches Chrome)
-      ############################################
-      - name: Install ChromeDriver
-        uses: nanasess/setup-chromedriver@v2
-        with:
-          chromedriver-version: latest
-
-      ############################################
-      # Verify Chrome & ChromeDriver Installation
-      ############################################
-      - name: Verify Chrome & ChromeDriver
-        run: |
-          google-chrome --version
-          chromedriver --version
-
-      ############################################
       # Checkout Main Repository
       ###########################################
       - uses: actions/checkout@v4
