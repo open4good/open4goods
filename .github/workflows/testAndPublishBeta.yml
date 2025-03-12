@@ -51,19 +51,33 @@ jobs:
                 }
               }
             ]
-        ############################################
-        # Install Chrome & ChromeDriver
-        ############################################
-      - name: Set up Chrome and ChromeDriver
-        uses: browser-actions/setup-chrome@v1
-        with:
-          chrome-version: stable # Installs latest stable version
-        
+
+      ############################################
+      # Install Chrome Manually (Avoids `ar` issue)
+      ############################################
+      - name: Install Chrome Manually
+        run: |
+          wget -qO- https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb > chrome.deb
+          dpkg --extract chrome.deb chrome-files/
+          sudo cp -r chrome-files/usr/* /usr/
+          rm -rf chrome-files chrome.deb
+          
+      ############################################
+      # Install ChromeDriver (Matches Chrome)
+      ############################################
       - name: Install ChromeDriver
         uses: nanasess/setup-chromedriver@v2
         with:
-          chromedriver-version: latest # Match with Chrome version
-          
+          chromedriver-version: latest
+
+      ############################################
+      # Verify Chrome & ChromeDriver Installation
+      ############################################
+      - name: Verify Chrome & ChromeDriver
+        run: |
+          google-chrome --version
+          chromedriver --version
+
       ############################################
       # Checkout and Build xwiki-springboot-starter
       ###########################################
@@ -75,7 +89,7 @@ jobs:
       - name: Build and Test xwiki-springboot-starter
         working-directory: ./xwiki-spring-boot-starter        
         run: mvn --batch-mode --update-snapshots install
-      
+
       ############################################
       # Checkout the Main Repository
       ###########################################
