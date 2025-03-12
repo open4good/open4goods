@@ -73,6 +73,22 @@ jobs:
             ]
 
       ############################################
+      # Install chrome drivers
+      ###########################################
+            
+      - name: Install Chrome
+        run: sudo apt-get install -y google-chrome-stable
+    
+      - name: Install ChromeDriver
+        run: |
+          CHROME_VERSION=$(google-chrome --version | grep -oP '[0-9.]+' | head -1)
+          DRIVER_VERSION=$(curl -sS chromedriver.storage.googleapis.com/LATEST_RELEASE_${CHROME_VERSION%.*})
+          curl -sS -o chromedriver.zip "https://chromedriver.storage.googleapis.com/${DRIVER_VERSION}/chromedriver_linux64.zip"
+          unzip chromedriver.zip
+          sudo mv chromedriver /usr/local/bin/
+          chmod +x /usr/local/bin/
+                            
+      ############################################
       # Build and test xwiki-springboot-starter
       ###########################################
       - name: Build and Test xwiki-springboot-starter
