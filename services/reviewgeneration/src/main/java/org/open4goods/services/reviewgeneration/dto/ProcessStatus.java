@@ -1,6 +1,8 @@
 package org.open4goods.services.reviewgeneration.dto;
 
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 import org.open4goods.model.ai.AiReview;
@@ -14,7 +16,7 @@ public class ProcessStatus {
      * Possible states of a generation process.
      */
     public enum Status {
-        PENDING, PROCESSING, SUCCESS, FAILED;
+        PENDING, QUEUED, PROCESSING, SUCCESS, FAILED;
     }
     
     private long upc;
@@ -23,6 +25,11 @@ public class ProcessStatus {
     private Instant endTime;
     private AiReview result;
     private String errorMessage;
+    
+    /**
+     * List of processing messages that track the internal state.
+     */
+    private List<String> messages = new ArrayList<>();
 
     // Getters and setters
 
@@ -58,21 +65,37 @@ public class ProcessStatus {
         this.endTime = endTime;
     }
 
-
     public AiReview getResult() {
-		return result;
-	}
+        return result;
+    }
 
-	public void setResult(AiReview result) {
-		this.result = result;
-	}
+    public void setResult(AiReview result) {
+        this.result = result;
+    }
 
-	public String getErrorMessage() {
+    public String getErrorMessage() {
         return errorMessage;
     }
 
     public void setErrorMessage(String errorMessage) {
         this.errorMessage = errorMessage;
+    }
+
+    public List<String> getMessages() {
+        return messages;
+    }
+
+    public void setMessages(List<String> messages) {
+        this.messages = messages;
+    }
+    
+    /**
+     * Appends a new message to the process status messages.
+     *
+     * @param message the message to add.
+     */
+    public void addMessage(String message) {
+        this.messages.add(message);
     }
 
     // toString, equals, and hashCode
@@ -84,14 +107,15 @@ public class ProcessStatus {
                 ", status=" + status +
                 ", startTime=" + startTime +
                 ", endTime=" + endTime +
-                ", result='" + result + '\'' +
+                ", result=" + result +
                 ", errorMessage='" + errorMessage + '\'' +
+                ", messages=" + messages +
                 '}';
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(upc, status, startTime, endTime, result, errorMessage);
+        return Objects.hash(upc, status, startTime, endTime, result, errorMessage, messages);
     }
 
     @Override
@@ -104,6 +128,7 @@ public class ProcessStatus {
                 Objects.equals(startTime, that.startTime) &&
                 Objects.equals(endTime, that.endTime) &&
                 Objects.equals(result, that.result) &&
-                Objects.equals(errorMessage, that.errorMessage);
+                Objects.equals(errorMessage, that.errorMessage) &&
+                Objects.equals(messages, that.messages);
     }
 }

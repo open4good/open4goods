@@ -8,11 +8,12 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -51,7 +52,7 @@ import io.micrometer.core.instrument.MeterRegistry;
  *   <li>Next, URLs are fetched concurrently (up to {@code maxConcurrentFetch} tasks in parallel).
  *       For each fetched URL, the PromptService.estimateTokens() method is used to count tokens.
  *       Only pages with at least {@code minTokens} tokens are accepted and pages are aggregated until the total tokens
- *       reach {@code maxTokensPerRequest}.</li>
+ *       reach {@code maxTotalTokens}.</li>
  *   <li>Finally, the collected markdown contents are passed as prompt variables to generate the review.</li>
  * </ol>
  * <p>
@@ -70,7 +71,7 @@ public class ReviewGenerationService implements HealthIndicator {
     private final MeterRegistry meterRegistry;
 
     // Thread pool executor for asynchronous processing.
-    private final ExecutorService executorService;
+    private final ThreadPoolExecutor executorService;
 
     // In-memory storage of process status keyed by UPC.
     private final ConcurrentMap<Long, ProcessStatus> processStatusMap = new ConcurrentHashMap<>();
@@ -102,7 +103,14 @@ public class ReviewGenerationService implements HealthIndicator {
         this.urlFetchingService = urlFetchingService;
         this.genAiService = genAiService;
         this.meterRegistry = meterRegistry;
-        this.executorService = Executors.newFixedThreadPool(properties.getThreadPoolSize());
+        this.executorService = new ThreadPoolExecutor(
+            properties.getThreadPoolSize(),
+            properties.getThreadPoolSize(),
+            0L,
+            TimeUnit.MILLISECONDS,
+            new ArrayBlockingQueue<>(properties.getMaxQueueSize()),
+            new ThreadPoolExecutor.AbortPolicy()
+        );
     }
 
     /**
@@ -120,7 +128,7 @@ public class ReviewGenerationService implements HealthIndicator {
         status.setStartTime(Instant.now());
         processStatusMap.put(upc, status);
         try {
-            PromptResponse<AiReview> review = executeReviewGeneration(product, verticalConfig);
+            PromptResponse<AiReview> review = executeReviewGeneration(product, verticalConfig, status);
             status.setResult(review.getBody());
             status.setStatus(Status.SUCCESS);
             status.setEndTime(Instant.now());
@@ -152,12 +160,12 @@ public class ReviewGenerationService implements HealthIndicator {
         long upc = product.getId();
         // Avoid duplicate runs on the same UPC if already processing.
         processStatusMap.compute(upc, (key, existingStatus) -> {
-            if (existingStatus != null && existingStatus.getStatus() == Status.PROCESSING) {
+            if (existingStatus != null && existingStatus.getStatus() == ProcessStatus.Status.PROCESSING) {
                 return existingStatus;
             } else {
                 ProcessStatus status = new ProcessStatus();
                 status.setUpc(upc);
-                status.setStatus(Status.PENDING);
+                status.setStatus(ProcessStatus.Status.PENDING);
                 status.setStartTime(Instant.now());
                 return status;
             }
@@ -166,15 +174,16 @@ public class ReviewGenerationService implements HealthIndicator {
         // Submit the review generation task asynchronously.
         executorService.submit(() -> {
             ProcessStatus status = processStatusMap.get(upc);
-            status.setStatus(Status.PROCESSING);
+            // Update status as the task starts execution.
+            status.setStatus(ProcessStatus.Status.PROCESSING);
             try {
-                PromptResponse<AiReview> review = executeReviewGeneration(product, verticalConfig);
+                PromptResponse<AiReview> review = executeReviewGeneration(product, verticalConfig, status);
                 status.setResult(review.getBody());
-                status.setStatus(Status.SUCCESS);
+                status.setStatus(ProcessStatus.Status.SUCCESS);
                 meterRegistry.counter("review.generation.success").increment();
             } catch (Exception e) {
                 logger.error("Asynchronous review generation failed for UPC {}: {}", upc, e.getMessage(), e);
-                status.setStatus(Status.FAILED);
+                status.setStatus(ProcessStatus.Status.FAILED);
                 status.setErrorMessage(e.getMessage());
                 meterRegistry.counter("review.generation.failed").increment();
                 lastGenerationFailed = true;
@@ -183,6 +192,13 @@ public class ReviewGenerationService implements HealthIndicator {
                 totalProcessed.incrementAndGet();
             }
         });
+
+        // Immediately after submission, update the status to QUEUED.
+        int waiting = executorService.getQueue().size();
+        ProcessStatus status = processStatusMap.get(upc);
+        status.setStatus(ProcessStatus.Status.QUEUED);
+        status.addMessage("Queued for execution. Number waiting in queue: " + waiting);
+
         return upc;
     }
 
@@ -197,16 +213,20 @@ public class ReviewGenerationService implements HealthIndicator {
      *   <li>Fetches the markdown content for each URL concurrently (up to {@code maxConcurrentFetch} tasks).
      *       For each fetched page, its token count is estimated via {@code PromptService.estimateTokens(String text)}.
      *       Pages with token counts below {@code minTokens} are discarded and pages are aggregated until
-     *       the total token count reaches {@code maxTokensPerRequest}.</li>
+     *       the total token count reaches {@code maxTotalTokens}.</li>
      *   <li>Finally, the aggregated markdown content is passed as a prompt variable to generate the review.</li>
      * </ol>
+     * <p>
+     * During the process, the provided {@code ProcessStatus} is updated with messages that track key steps:
+     * "Searching the web...", "Analysing {domain}", and "AI generation".
      *
      * @param product the product.
      * @param verticalConfig the vertical configuration.
+     * @param status the process status to update with processing messages.
      * @return the generated review.
      * @throws Exception if an error occurs during generation.
      */
-    private PromptResponse<AiReview> executeReviewGeneration(Product product, VerticalConfig verticalConfig) throws Exception {
+    private PromptResponse<AiReview> executeReviewGeneration(Product product, VerticalConfig verticalConfig, ProcessStatus status) throws Exception {
         String brand = product.brand();
         String primaryModel = product.model();
         Set<String> alternateModels = product.getAkaModels();
@@ -220,6 +240,9 @@ public class ReviewGenerationService implements HealthIndicator {
             }
         }
 
+        // Record initial message for search queries.
+        status.addMessage("Searching the web...");
+
         // Perform searches up to the maximum allowed (maxSearch).
         int searchesMade = 0;
         List<GoogleSearchResult> allResults = new ArrayList<>();
@@ -229,6 +252,7 @@ public class ReviewGenerationService implements HealthIndicator {
                 break;
             }
             logger.debug("Executing search query: {}", query);
+            status.addMessage("Executing search query: " + query);
             //TODO(p3,i18N) : internationalisation from ReviewGenConfig
             GoogleSearchRequest searchRequest = new GoogleSearchRequest(query, "lang_fr", "countryFR");
             GoogleSearchResponse searchResponse = googleSearchService.search(searchRequest);
@@ -264,7 +288,14 @@ public class ReviewGenerationService implements HealthIndicator {
                 .toList();
 
         // Prepare to fetch URL content concurrently using a dedicated executor.
-        ExecutorService fetchExecutor = Executors.newFixedThreadPool(properties.getMaxConcurrentFetch());
+        ThreadPoolExecutor fetchExecutor = new ThreadPoolExecutor(
+            properties.getMaxConcurrentFetch(),
+            properties.getMaxConcurrentFetch(),
+            0L,
+            TimeUnit.MILLISECONDS,
+            new ArrayBlockingQueue<>(properties.getMaxQueueSize()),
+            new ThreadPoolExecutor.AbortPolicy()
+        );
         Map<String, CompletableFuture<FetchResponse>> fetchFutures = new HashMap<>();
         for (GoogleSearchResult result : sortedResults) {
             String url = result.getLink();
@@ -280,10 +311,13 @@ public class ReviewGenerationService implements HealthIndicator {
         }
         fetchExecutor.shutdown();
 
+        // Record message before fetching and analysing content.
+        status.addMessage("Fetching URL content concurrently...");
+
         // Aggregate fetched markdown content until the maximum token limit is reached.
         int maxTotalTokens = properties.getMaxTotalTokens();
         int minTokens = properties.getSourceMinTokens();
-        int maxTokens = properties.getMaxTotalTokens();
+        int maxTokens = properties.getSourceMaxTokens();
         
         int accumulatedTokens = 0;
         Map<String, String> finalSourcesMap = new LinkedHashMap<>();
@@ -309,15 +343,21 @@ public class ReviewGenerationService implements HealthIndicator {
                 continue;
             }
             
-            
             if (accumulatedTokens + tokenCount > maxTotalTokens) {
                 logger.warn("Reached max tokens threshold. Current tokens: {}, URL tokens: {}, threshold: {}",
                         accumulatedTokens, tokenCount, maxTotalTokens);
                 break;
             }
             finalSourcesMap.put(url, content);
-            finalTokensMap.put(url, genAiService.estimateTokens(content));
+            finalTokensMap.put(url, tokenCount);
             accumulatedTokens += tokenCount;
+            // Record message for the analysed URL, including its domain.
+            try {
+                String domain = new URL(url).getHost();
+                status.addMessage("Analysing " + domain);
+            } catch (Exception e) {
+                status.addMessage("Analysing " + url);
+            }
         }
         logger.info("Aggregated {} tokens from {} sources.", accumulatedTokens, finalSourcesMap.size());
 
@@ -332,18 +372,18 @@ public class ReviewGenerationService implements HealthIndicator {
         promptVariables.put("PRODUCT_GTIN", product.gtin());
         promptVariables.put("PRODUCT", product);
 		
-		
         promptVariables.put("VERTICAL_NAME", verticalConfig.i18n("fr").getH1Title().getPrefix());
 
-		StringBuilder sb = new StringBuilder();
-		verticalConfig.getAttributesConfig().getConfigs().forEach(attrConf -> {
-			if (attrConf.getSynonyms().size()>0 ) {
-				sb.append("        ").append("- ").append(attrConf.getKey()).append(" (").append(attrConf.getName().get("fr")).append(")").append("\n");				
-			}
-			
-		});
-		promptVariables.put("ATTRIBUTES", sb.toString());
+        StringBuilder sb = new StringBuilder();
+        verticalConfig.getAttributesConfig().getConfigs().forEach(attrConf -> {
+            if (attrConf.getSynonyms().size() > 0 ) {
+                sb.append("        ").append("- ").append(attrConf.getKey()).append(" (").append(attrConf.getName().get("fr")).append(")").append("\n");				
+            }
+        });
+        promptVariables.put("ATTRIBUTES", sb.toString());
 		
+        // Record message before initiating AI generation.
+        status.addMessage("AI generation");
         // Generate the review using the GenAiService with the prompt template "review-generation".
         return genAiService.objectPrompt("review-generation", promptVariables, AiReview.class);
     }
@@ -368,9 +408,11 @@ public class ReviewGenerationService implements HealthIndicator {
         stats.put("totalProcessed", totalProcessed.get());
         stats.put("successful", successfulCount.get());
         stats.put("failed", failedCount.get());
-        // Count processes that are still PENDING or PROCESSING.
+        // Count processes that are still PENDING, QUEUED or PROCESSING.
         long ongoing = processStatusMap.values().stream()
-                .filter(s -> s.getStatus() == Status.PENDING || s.getStatus() == Status.PROCESSING)
+                .filter(s -> s.getStatus() == ProcessStatus.Status.PENDING ||
+                             s.getStatus() == ProcessStatus.Status.QUEUED ||
+                             s.getStatus() == ProcessStatus.Status.PROCESSING)
                 .count();
         stats.put("ongoing", (int) ongoing);
         return stats;

@@ -31,7 +31,6 @@ import org.open4goods.commons.services.RemoteFileCachingService;
 import org.open4goods.commons.services.ResourceService;
 import org.open4goods.commons.services.SearchService;
 import org.open4goods.commons.services.VerticalsConfigService;
-import org.open4goods.commons.services.ai.LegacyAiService;
 import org.open4goods.commons.services.textgen.BlablaService;
 import org.open4goods.commons.store.repository.elastic.BrandScoresRepository;
 import org.open4goods.crawler.config.yml.FetcherProperties;
@@ -59,7 +58,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springdoc.core.customizers.OpenApiCustomizer;
 import org.springdoc.core.models.GroupedOpenApi;
-import org.springframework.ai.openai.OpenAiChatModel;
 import org.springframework.ai.openai.OpenAiImageModel;
 import org.springframework.ai.openai.api.OpenAiApi;
 import org.springframework.ai.retry.RetryUtils;
@@ -107,28 +105,15 @@ public class ApiConfig {
 
 
 
-	
-//    @Bean
-//    RedisTemplate<String, Product> redisTemplate(RedisConnectionFactory connectionFactory) {
-//		  RedisTemplate<String, Product> template = new RedisTemplate<>();
-//		    template.setConnectionFactory(connectionFactory);
-//		    
-//		    // Configure serialization
-//		    template.setKeySerializer(new StringRedisSerializer());
-//		    template.setValueSerializer(new GenericJackson2JsonRedisSerializer());
-//
-//		    return template;
-//	  }
-//	 
 	@Bean
 	SerialisationService serialisationService() {
 		return new SerialisationService();
 	}
 
 	@Bean
-	VerticalsGenerationService verticalsGenerationService(ProductRepository pRepo, SerialisationService serialisationService, LegacyAiService aiService, GoogleTaxonomyService gTaxoService, VerticalsConfigService verticalsConfigService, ResourcePatternResolver resourceResolver,
+	VerticalsGenerationService verticalsGenerationService(ProductRepository pRepo, SerialisationService serialisationService, GoogleTaxonomyService gTaxoService, VerticalsConfigService verticalsConfigService, ResourcePatternResolver resourceResolver,
 			EvaluationService evaluationService, IcecatService icecatService, PromptService genAiService) throws SAXException {
-		return new VerticalsGenerationService(apiProperties.getVerticalsGenerationConfig(), pRepo, serialisationService, aiService, gTaxoService, verticalsConfigService, resourceResolver, evaluationService, icecatService, genAiService);
+		return new VerticalsGenerationService(apiProperties.getVerticalsGenerationConfig(), pRepo, serialisationService, gTaxoService, verticalsConfigService, resourceResolver, evaluationService, icecatService, genAiService);
 	}
 
 	@Bean
@@ -165,14 +150,6 @@ public class ApiConfig {
 //	}
 
 	
-	
-
-	
-	@Bean
-	LegacyAiService aiService(OpenAiChatModel chatModel, EvaluationService spelEvaluationService, SerialisationService serialisationService) {
-		return new LegacyAiService(chatModel, spelEvaluationService, serialisationService);
-	}
-
 	
 	@Bean
 

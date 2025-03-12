@@ -14,7 +14,7 @@ import org.springframework.context.annotation.Configuration;
 public class ReviewGenerationConfig {
 
     private int threadPoolSize = 10;
-
+    private int maxQueueSize = 100;  // New property: maximum size of the executor queue
     private List<String> preferredDomains = new ArrayList<>();
 
     // Existing property used for building search queries.
@@ -38,6 +38,14 @@ public class ReviewGenerationConfig {
     public void setThreadPoolSize(int threadPoolSize) {
         this.threadPoolSize = threadPoolSize;
     }
+
+    public int getMaxQueueSize() {
+        return maxQueueSize;
+    }
+    public void setMaxQueueSize(int maxQueueSize) {
+        this.maxQueueSize = maxQueueSize;
+    }
+
     public List<String> getPreferredDomains() {
         return preferredDomains;
     }
@@ -76,12 +84,10 @@ public class ReviewGenerationConfig {
     public void setMaxConcurrentFetch(int maxConcurrentFetch) {
         this.maxConcurrentFetch = maxConcurrentFetch;
     }
-	public int getSourceMaxTokens() {
-		return sourceMaxTokens;
-	}
-	public void setSourceMaxTokens(int sourceMaxTokens) {
-		this.sourceMaxTokens = sourceMaxTokens;
-	}
-    
-    
+    public int getSourceMaxTokens() {
+        return sourceMaxTokens;
+    }
+    public void setSourceMaxTokens(int sourceMaxTokens) {
+        this.sourceMaxTokens = sourceMaxTokens;
+    }
 }

@@ -26,8 +26,6 @@ import org.open4goods.commons.dao.ProductRepository;
 import org.open4goods.commons.services.GoogleTaxonomyService;
 import org.open4goods.commons.services.IcecatService;
 import org.open4goods.commons.services.VerticalsConfigService;
-import org.open4goods.commons.services.ai.LegacyAiService;
-import org.open4goods.model.exceptions.ResourceNotFoundException;
 import org.open4goods.model.helper.IdHelper;
 import org.open4goods.model.product.Product;
 import org.open4goods.model.vertical.ImpactScoreConfig;
@@ -42,9 +40,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.ResourcePatternResolver;
 
-import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.databind.JsonMappingException;
-
 public class VerticalsGenerationService {
 	
 	private static final Logger LOGGER = LoggerFactory.getLogger(VerticalsGenerationService.class);
@@ -58,17 +53,15 @@ public class VerticalsGenerationService {
 	
 
 	private Map<String, VerticalCategoryMapping> sortedMappings = new LinkedHashMap<String, VerticalCategoryMapping>();
-	private LegacyAiService aiService;
 	private GoogleTaxonomyService googleTaxonomyService;
 	private EvaluationService evalService;
 	private PromptService genAiService;
 	
-	public VerticalsGenerationService(VerticalsGenerationConfig config, ProductRepository repository, SerialisationService serialisationService, LegacyAiService aiService, GoogleTaxonomyService googleTaxonomyService, VerticalsConfigService verticalsConfigService, ResourcePatternResolver resourceResolver, EvaluationService evaluationService, IcecatService icecatService, PromptService genAiService ) {
+	public VerticalsGenerationService(VerticalsGenerationConfig config, ProductRepository repository, SerialisationService serialisationService, GoogleTaxonomyService googleTaxonomyService, VerticalsConfigService verticalsConfigService, ResourcePatternResolver resourceResolver, EvaluationService evaluationService, IcecatService icecatService, PromptService genAiService ) {
 		super();
 		this.config = config;
 		this.repository = repository;
 		this.serialisationService = serialisationService;
-		this.aiService = aiService;
 		this.googleTaxonomyService = googleTaxonomyService;
 		this.verticalConfigservice = verticalsConfigService;
 		this.resourceResolver = resourceResolver;
