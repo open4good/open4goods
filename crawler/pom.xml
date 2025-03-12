@@ -11,6 +11,8 @@
 		    <name>In Project Repo</name>
 		    <url>file://${project.basedir}/libs</url>
 		</repository>
+		
+		
 	</repositories>
 
 	<parent>
