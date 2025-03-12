@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<metadata>
+  <groupId>com.linkedin.urls</groupId>
+  <artifactId>url-detector</artifactId>
+  <versioning>
+    <release>0.2.3-alpha</release>
+    <versions>
+      <version>0.2.3-alpha</version>
+    </versions>
+    <lastUpdated>20250312073635</lastUpdated>
+  </versioning>
+</metadata>

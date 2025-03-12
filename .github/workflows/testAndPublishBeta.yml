@@ -49,22 +49,6 @@ jobs:
                 "snapshots": {
                   "enabled": false
                 }
-              },
-              {
-                "id": "spring-snapshots",
-                "name": "spring-snapshots",
-                "url": "https://repo.spring.io/snapshot",
-                "snapshots": {
-                  "enabled": true
-                }
-              },
-              {
-                "id": "linkedin",
-                "name": "linkedin",
-                "url": "https://linkedin.jfrog.io/artifactory/open-source/",
-                "snapshots": {
-                  "enabled": false
-                }
               }
             ]
 
