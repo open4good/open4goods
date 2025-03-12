@@ -77,8 +77,7 @@ public class UrlFetchingService {
         }
 
         Fetcher fetcher = getFetcherForStrategy(domainConfig);
-        int maxRetries = domainConfig.getRetryPolicy() != null ? domainConfig.getRetryPolicy().getMaxRetries() : 0;
-        CompletableFuture<FetchResponse> future = executeWithRetry(fetcher, url, maxRetries);
+        CompletableFuture<FetchResponse> future = fetcher.fetchUrl(url);
         return future.thenApply(response -> {
             // Recording mode: if enabled, record the fetch response to file.
             if (urlFetcherConfig.getRecord() != null && urlFetcherConfig.getRecord().isEnabled()) {
@@ -116,37 +115,6 @@ public class UrlFetchingService {
                 logger.info("Selected SELENIUM strategy for fetching (default)");
                 return new SeleniumHttpFetcher(domainConfig, meterRegistry);
         }
-    }
-
-    /**
-     * Executes the fetch operation with retry logic.
-     *
-     * @param fetcher    the Fetcher to use
-     * @param url        the URL to fetch
-     * @param maxRetries maximum number of retries
-     * @return a CompletableFuture of FetchResponse
-     */
-    private CompletableFuture<FetchResponse> executeWithRetry(Fetcher fetcher, String url, int maxRetries) {
-        return fetcher.fetchUrl(url).handle((response, ex) -> {
-            if (ex == null) {
-                return CompletableFuture.completedFuture(response);
-            } else if (maxRetries > 0) {
-                logger.warn("Error fetching URL {}. Retrying... Remaining retries: {}. Error: {}",
-                        url, maxRetries, ex.getMessage());
-                try {
-                    DomainConfig config = urlFetcherConfig.getDomains().get(getDomainFromUrl(url));
-                    Thread.sleep(config.getRetryPolicy().getDelayBetweenRetries());
-                } catch (InterruptedException e) {
-                    Thread.currentThread().interrupt();
-                }
-                return executeWithRetry(fetcher, url, maxRetries - 1);
-            } else {
-                logger.error("Failed to fetch URL {} after retries. Error: {}", url, ex.getMessage());
-                CompletableFuture<FetchResponse> failedFuture = new CompletableFuture<>();
-                failedFuture.completeExceptionally(ex);
-                return failedFuture;
-            }
-        }).thenCompose(future -> future);
     }
 
     /**

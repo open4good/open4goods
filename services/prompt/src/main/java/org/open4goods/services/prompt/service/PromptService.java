@@ -1,7 +1,6 @@
 package org.open4goods.services.prompt.service;
 
 import java.io.File;
-import java.lang.Math;
 import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.Date;
@@ -23,8 +22,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.ChatClient.CallResponseSpec;
 import org.springframework.ai.chat.client.ChatClient.ChatClientRequestSpec;
+import org.springframework.ai.converter.BeanOutputConverter;
 import org.springframework.ai.openai.OpenAiChatModel;
+import org.springframework.ai.openai.OpenAiChatOptions;
 import org.springframework.ai.openai.api.OpenAiApi;
+import org.springframework.ai.openai.api.ResponseFormat;
 import org.springframework.boot.actuate.health.Health;
 import org.springframework.boot.actuate.health.HealthIndicator;
 import org.springframework.stereotype.Service;
@@ -114,11 +116,12 @@ public class PromptService implements HealthIndicator {
      *
      * @param promptKey The key identifying the prompt configuration.
      * @param variables The variables to resolve within the prompt templates.
+     * @param jsonSchema Optional jsonschema we must conform on
      * @return A {@link PromptResponse} containing the AI call response and additional metadata.
      * @throws ResourceNotFoundException if the prompt configuration is not found.
      * @throws SerialisationException    if a serialization error occurs.
      */
-    private PromptResponse<CallResponseSpec> promptNativ(String promptKey, Map<String, Object> variables)
+    private PromptResponse<CallResponseSpec> promptNativ(String promptKey, Map<String, Object> variables, String jsonSchema)
             throws ResourceNotFoundException, SerialisationException {
 
         PromptConfig pConf = getPromptConfig(promptKey);
@@ -156,8 +159,15 @@ public class PromptService implements HealthIndicator {
         // Build the chat client request with evaluated prompts and options
         ChatClientRequestSpec chatRequest = ChatClient.create(models.get(promptKey))
                 .prompt()
-                .user(userPromptEvaluated)
-                .options(pConf.getOptions());
+                .user(userPromptEvaluated);
+      
+                if (!org.apache.commons.lang3.StringUtils.isEmpty(jsonSchema)) {
+                	OpenAiChatOptions opts = serialisationService.clone(pConf.getOptions());
+                	opts.setResponseFormat(new ResponseFormat(ResponseFormat.Type.JSON_SCHEMA, jsonSchema));
+                	chatRequest.options(opts);
+                } else {
+                	chatRequest.options(pConf.getOptions());
+                }
 
         if (StringUtils.hasText(systemPromptEvaluated)) {
             chatRequest = chatRequest.system(systemPromptEvaluated);
@@ -260,7 +270,7 @@ public class PromptService implements HealthIndicator {
         
         PromptResponse<String> ret = new PromptResponse<String>();
         
-        PromptResponse<CallResponseSpec> nativ = promptNativ(promptKey, variables);
+        PromptResponse<CallResponseSpec> nativ = promptNativ(promptKey, variables, null);
         ret.setBody(nativ.getRaw());
         ret.setRaw(nativ.getRaw());
         ret.setDuration(nativ.getDuration());
@@ -270,6 +280,27 @@ public class PromptService implements HealthIndicator {
         return ret;
     }
 
+    
+    public <T> PromptResponse<T> objectPrompt(String promptKey, Map<String, Object> variables, Class<T> type)
+            throws ResourceNotFoundException, SerialisationException {
+        
+        PromptResponse<T> ret = new PromptResponse<T>();
+        
+        
+        var outputConverter = new BeanOutputConverter<>(type);
+        var jsonSchema = outputConverter.getJsonSchema();        
+        logger.info("Deducted json schema for prompt {} with type {} is {}", promptKey, type, jsonSchema);
+        
+        PromptResponse<CallResponseSpec> nativ = promptNativ(promptKey, variables, jsonSchema);
+        ret.setBody(outputConverter.convert(nativ.getRaw()));
+        ret.setRaw(nativ.getRaw());
+        ret.setDuration(nativ.getDuration());
+        ret.setPrompt(nativ.getPrompt());
+        ret.setStart(nativ.getStart());
+        
+        return ret;
+    }
+    
     /**
      * Executes a prompt and converts the response into a JSON map.
      *
@@ -283,7 +314,7 @@ public class PromptService implements HealthIndicator {
             throws ResourceNotFoundException, SerialisationException {
 
         PromptResponse<Map<String, Object>> ret = new PromptResponse<>();
-        PromptResponse<CallResponseSpec> internal = promptNativ(promptKey, variables);
+        PromptResponse<CallResponseSpec> internal = promptNativ(promptKey, variables, null);
 
         ret.setDuration(internal.getDuration());
         ret.setStart(internal.getStart());

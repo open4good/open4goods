@@ -2,17 +2,11 @@
 
 package org.open4goods.api.controller.api;
 
-import java.io.IOException;
 import java.util.Map;
 
-import org.open4goods.api.services.ProductsReviewGenerationService;
-import org.open4goods.commons.exceptions.AggregationSkipException;
-import org.open4goods.commons.model.AiSourcedPage;
 import org.open4goods.commons.model.constants.RolesConstants;
 import org.open4goods.commons.services.VerticalsConfigService;
-import org.open4goods.model.exceptions.InvalidParameterException;
 import org.open4goods.model.exceptions.ResourceNotFoundException;
-import org.open4goods.model.vertical.VerticalConfig;
 import org.open4goods.services.prompt.service.PromptService;
 import org.open4goods.services.serialisation.exception.SerialisationException;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -35,14 +29,12 @@ public class GenAiController {
 
 	private PromptService aiService;
 
-	private ProductsReviewGenerationService pageGenService;
 	
 	private VerticalsConfigService verticalsConfigService;
 
 
-	public GenAiController(PromptService aiService, ProductsReviewGenerationService pageGenService,  VerticalsConfigService verticalsConfigService) {
+	public GenAiController(PromptService aiService,  VerticalsConfigService verticalsConfigService) {
 		this.aiService = aiService;
-		this.pageGenService = pageGenService;
 		this.verticalsConfigService = verticalsConfigService;
 	}
 	
@@ -65,19 +57,5 @@ public class GenAiController {
 	}
 	
 	
-	@GetMapping("/page/generate")
-	@Operation(summary="Generate a page")
-	public AiSourcedPage prompt(@RequestParam(defaultValue = "test") String key, 
-			String question,
-			String vertical,
-			String id,
-			String title) throws ResourceNotFoundException, SerialisationException{
-		
-		
-		VerticalConfig vc = verticalsConfigService.getConfigById(vertical);
-		
-		AiSourcedPage ret = pageGenService.perplexityCompletion(vc, question, id, question, title);
-		
-		return ret;
-	}
+	
 }

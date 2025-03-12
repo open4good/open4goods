@@ -5,9 +5,7 @@ import java.io.IOException;
 import java.util.Set;
 
 import org.open4goods.api.services.completion.AmazonCompletionService;
-import org.open4goods.api.services.completion.PerplexityReviewCompletionService;
 import org.open4goods.api.services.completion.IcecatCompletionService;
-import org.open4goods.api.services.completion.PerplexityAttributesCompletionService;
 import org.open4goods.api.services.completion.ResourceCompletionService;
 import org.open4goods.model.exceptions.InvalidParameterException;
 import org.open4goods.model.product.Product;
@@ -27,19 +25,15 @@ public class CompletionFacadeService {
 
 	protected static final Logger logger = LoggerFactory.getLogger(CompletionFacadeService.class);
 
-	private final PerplexityReviewCompletionService perplexityReviewCompletionService;
-	private PerplexityAttributesCompletionService perplexityAttributesCompletionService;
 	private ResourceCompletionService resourceCompletionService;
 	private AmazonCompletionService amazonCompletionService;
 	private IcecatCompletionService icecatCompletionService;
 
-	public CompletionFacadeService(PerplexityReviewCompletionService aiCompletionService,
-			ResourceCompletionService resourceCompletionService, AmazonCompletionService amazonCompletionService, IcecatCompletionService icecatCompletionService, PerplexityAttributesCompletionService perplexityAttributesCompletionService) {
-		this.perplexityReviewCompletionService = aiCompletionService;
+	public CompletionFacadeService(
+			ResourceCompletionService resourceCompletionService, AmazonCompletionService amazonCompletionService, IcecatCompletionService icecatCompletionService) {
 		this.resourceCompletionService = resourceCompletionService;
 		this.amazonCompletionService = amazonCompletionService;
 		this.icecatCompletionService = icecatCompletionService;
-		this.perplexityAttributesCompletionService = perplexityAttributesCompletionService;
 	}
 
 	
@@ -54,8 +48,6 @@ public class CompletionFacadeService {
 			// TODO(p2, perf) : should paralellize (on verticals, at upper level)
 			resourceCompletionService.process(vertical, product);
 			icecatCompletionService.process(vertical, product);
-			perplexityAttributesCompletionService.process(vertical, product);
-			perplexityReviewCompletionService.process(vertical, product);
 			
 			amazonCompletionService.process(vertical, product);
 		});
@@ -78,10 +70,7 @@ public class CompletionFacadeService {
 	// Genai completion
 	///////////////////////////////////
 
-	public void genaiCompletionAll() throws InvalidParameterException, IOException {
-		logger.warn("Completing verticals with genAI content");
-		perplexityReviewCompletionService.completeAll(false);
-	}
+	
 
 	///////////////////////////////////
 	// Amazon completion

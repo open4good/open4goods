@@ -4,9 +4,7 @@ package org.open4goods.api.controller.api;
 import java.io.IOException;
 
 import org.open4goods.api.services.completion.AmazonCompletionService;
-import org.open4goods.api.services.completion.PerplexityReviewCompletionService;
 import org.open4goods.api.services.completion.IcecatCompletionService;
-import org.open4goods.api.services.completion.PerplexityAttributesCompletionService;
 import org.open4goods.api.services.completion.ResourceCompletionService;
 import org.open4goods.commons.dao.ProductRepository;
 import org.open4goods.commons.model.constants.RolesConstants;
@@ -38,8 +36,6 @@ public class CompletionController {
 
 	private final VerticalsConfigService verticalConfigService;
 
-	private final PerplexityReviewCompletionService aireviewCompletionService;
-	private PerplexityAttributesCompletionService perplexityAttributesCompletionService;
 	private ResourceCompletionService resourceCompletionService;
 	private AmazonCompletionService amazonCompletionService;
 
@@ -49,17 +45,14 @@ public class CompletionController {
 	private IcecatCompletionService iceCatService;
 
 	public CompletionController(VerticalsConfigService verticalsConfigService,
-			PerplexityReviewCompletionService aiCompletionService,
 			ResourceCompletionService resourceCompletionService,
 			AmazonCompletionService amazonCompletionService,
-			IcecatCompletionService iceCatService, 
-			PerplexityAttributesCompletionService perplexityAttributesCompletionService) {
+			IcecatCompletionService iceCatService 
+			) {
 		this.verticalConfigService = verticalsConfigService;
-		this.aireviewCompletionService = aiCompletionService;
 		this.resourceCompletionService = resourceCompletionService;
 		this.amazonCompletionService = amazonCompletionService;
 		this.iceCatService = iceCatService;
-		this.perplexityAttributesCompletionService = perplexityAttributesCompletionService;
 	}
 
 	///////////////////////////////////
@@ -93,63 +86,6 @@ public class CompletionController {
 	}
 
 	
-	///////////////////////////////////
-	// Genai attributes completion
-	///////////////////////////////////
-
-	@GetMapping("/completion/genai/attributes")
-	@Operation(summary = "Launch genai attributes completion on all verticals")
-	public void genaiAttributesCompletionAll() throws InvalidParameterException, IOException {
-		perplexityAttributesCompletionService.completeAll(false);
-	}
-
-	@GetMapping("/completion/genai/vertical/attributes")
-	@Operation(summary = "Launch genai attributes completion on the specified vertical")
-	public void genaiAttributesCompletionVertical(@RequestParam @NotBlank final String verticalConfig, @RequestParam Integer max)
-			throws InvalidParameterException, IOException {
-		perplexityAttributesCompletionService.complete(verticalConfigService.getConfigById(verticalConfig), max,false);
-	}
-
-	@GetMapping("/completion/genai/attributes/gtin")
-	@Operation(summary = "Launch genai attributes completion on the specified vertical")
-	public void genaiAttributesCompletionProduct(@RequestParam final Long gtin) {
-		Product data;
-		try {
-			data = repository.getById(gtin);
-		} catch (ResourceNotFoundException e) {
-			throw new ResponseStatusException(HttpStatus.NOT_FOUND);
-		}
-		perplexityAttributesCompletionService.completeAndIndexProduct(verticalConfigService.getConfigByIdOrDefault(data.getVertical()), data);
-	}
-	
-	///////////////////////////////////
-	// Genai review completion
-	///////////////////////////////////
-
-	@GetMapping("/completion/genai/review/vertical")
-	@Operation(summary = "Launch genai review completion on all verticals")
-	public void genaiReviewCompletionAll() throws InvalidParameterException, IOException {
-		aireviewCompletionService.completeAll(false);
-	}
-
-	@GetMapping("/completion/genai/review")
-	@Operation(summary = "Launch genai reviewcompletion on the specified vertical")
-	public void genaiReviewCompletionVertical(@RequestParam @NotBlank final String verticalConfig, @RequestParam Integer max)
-			throws InvalidParameterException, IOException {
-		aireviewCompletionService.complete(verticalConfigService.getConfigById(verticalConfig), max,false);
-	}
-
-	@GetMapping("/completion/genai/review/gtin")
-	@Operation(summary = "Launch genai review completion on the specified vertical")
-	public void genaiReviewCompletionProduct(@RequestParam final Long gtin) {
-		Product data;
-		try {
-			data = repository.getById(gtin);
-		} catch (ResourceNotFoundException e) {
-			throw new ResponseStatusException(HttpStatus.NOT_FOUND);
-		}
-		aireviewCompletionService.completeAndIndexProduct(verticalConfigService.getConfigByIdOrDefault(data.getVertical()), data);
-	}
 
 	///////////////////////////////////
 	// Amazon completion
