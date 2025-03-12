@@ -2,6 +2,7 @@ package org.open4goods.reviewgeneration;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import java.util.Set;
@@ -74,10 +75,14 @@ public class ReviewGenerationServiceTest {
             fail("Review generation failed: ", e);
         }
 
-        // Verify that the process status is SUCCESS.
+        // Verify that the process status is SUCCESS and that processing messages were recorded.
         ProcessStatus status = reviewGenerationService.getProcessStatus(product.getId());
         assertNotNull(status, "Process status should be available");
         assertEquals(ProcessStatus.Status.SUCCESS, status.getStatus());
+        assertTrue(status.getMessages().stream().anyMatch(msg -> msg.contains("Searching the web")),
+                "Process messages should contain a web search message");
+        assertTrue(status.getMessages().stream().anyMatch(msg -> msg.contains("AI generation")),
+                "Process messages should contain an AI generation message");
     }
     
     /**
@@ -109,18 +114,6 @@ public class ReviewGenerationServiceTest {
         i18n.setH1Title(p);
         verticalConfig.getI18n().put("fr", i18n);
 
-        // The mocks (GoogleSearchServiceMock, UrlFetchingServiceMock, PromptServiceMock)
-        // are assumed to be configured (or can be adjusted) so that:
-        // - The search returns two URLs.
-        // - The first URL returns content with an estimated token count of 150 (above a minTokens threshold of 100).
-        // - The second URL returns content with an estimated token count of 50 (below minTokens).
-        // - The ReviewGenerationConfig in application-test.yml is set for this test:
-        //      review.generation.max-search=2
-        //      review.generation.max-tokens-per-request=300
-        //      review.generation.min-tokens=100
-        //      review.generation.max-concurrent-fetch=3
-        // - The prompt service returns a fixed review text.
-        
         try {
             AiReview review = reviewGenerationService.generateReviewSync(product, verticalConfig);
             assertNotNull(review, "The generated review should not be null");

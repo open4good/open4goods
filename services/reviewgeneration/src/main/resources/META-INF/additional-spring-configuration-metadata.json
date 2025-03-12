@@ -14,6 +14,12 @@
       "defaultValue": 10
     },
     {
+      "name": "review.generation.max-queue-size",
+      "type": "java.lang.Integer",
+      "description": "Maximum size of the executor queue.",
+      "defaultValue": 100
+    },
+    {
       "name": "review.generation.preferred-domains",
       "type": "java.util.List<java.lang.String>",
       "description": "List of preferred domains to fetch content from.",

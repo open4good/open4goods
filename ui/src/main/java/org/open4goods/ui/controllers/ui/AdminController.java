@@ -6,11 +6,8 @@ import org.open4goods.commons.dao.ProductRepository;
 import org.open4goods.commons.model.constants.RolesConstants;
 import org.open4goods.commons.services.ImageGenerationService;
 import org.open4goods.commons.services.VerticalsConfigService;
-import org.open4goods.commons.services.ai.LegacyAiService;
 import org.open4goods.model.exceptions.ResourceNotFoundException;
-import org.open4goods.model.product.Product;
 import org.open4goods.model.vertical.VerticalConfig;
-import org.open4goods.services.reviewgeneration.service.ReviewGenerationService;
 //import org.open4goods.services.ai.AiService;
 import org.open4goods.ui.config.yml.UiConfig;
 import org.open4goods.ui.services.GoogleIndexationService;
@@ -47,8 +44,6 @@ public class AdminController {
 
 	private final SitemapGenerationService sitemapService;
 
-	private final LegacyAiService aiService;
-
 	private ProductRepository repository;
 	
 	private ImageGenerationService imageGenerationService;
@@ -58,14 +53,13 @@ public class AdminController {
 	private GoogleIndexationService googleIndexationService;
 	
 	public AdminController(UiConfig config, VerticalsConfigService verticalsConfigService,
-			ProductRepository repository, SitemapGenerationService sitemapService, ImageGenerationService imageGenerationService, LegacyAiService aiService, GoogleIndexationService googleIndexationService) {
+			ProductRepository repository, SitemapGenerationService sitemapService, ImageGenerationService imageGenerationService,  GoogleIndexationService googleIndexationService) {
 		this.config = config;
 		this.verticalService = verticalsConfigService;
 		this.sitemapService = sitemapService;
 		this.repository = repository;
 		this.imageGenerationService = imageGenerationService;
 		this.verticalsConfigService = verticalsConfigService;
-		this.aiService = aiService;
 		this.googleIndexationService = googleIndexationService;
 	}
 
@@ -84,34 +78,6 @@ public class AdminController {
 	public ModelAndView reloadConfigs(final HttpServletRequest request,
 			@RequestParam(name = "r", required = false) String redircectUrl) {
 		verticalService.loadConfigs();
-		ModelAndView mv = null;
-		if (null != redircectUrl) {
-			mv = new ModelAndView("redirect:" + redircectUrl);
-			mv.setStatus(HttpStatus.MOVED_TEMPORARILY);
-		}
-		return mv;
-	}
-
-	/**
-	 * reload verticals config
-	 *
-	 * @param request
-	 * @return
-	 * @throws ResourceNotFoundException
-	 */
-	@GetMapping("/aiAssist")
-	@PreAuthorize("hasAuthority('" + RolesConstants.ROLE_XWIKI_ALL + "')")
-	public ModelAndView aiAssist(final HttpServletRequest request,
-			@RequestParam(name = "r", required = false) String redircectUrl,
-			@RequestParam(name = "gtin", required = false) Long gtin) throws ResourceNotFoundException {
-
-		Product data = repository.getById(gtin);
-
-		// We always force when human triggered
-		aiService.complete(data, verticalsConfigService.getConfigByIdOrDefault(data.getVertical()),true);
-
-		repository.forceIndex(data);
-
 		ModelAndView mv = null;
 		if (null != redircectUrl) {
 			mv = new ModelAndView("redirect:" + redircectUrl);

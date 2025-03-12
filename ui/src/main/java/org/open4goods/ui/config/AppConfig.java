@@ -23,7 +23,6 @@ import org.open4goods.commons.services.ResourceBundle;
 import org.open4goods.commons.services.ResourceService;
 import org.open4goods.commons.services.SearchService;
 import org.open4goods.commons.services.VerticalsConfigService;
-import org.open4goods.commons.services.ai.LegacyAiService;
 import org.open4goods.commons.store.repository.elastic.BrandScoresRepository;
 import org.open4goods.model.StandardiserService;
 import org.open4goods.model.constants.CacheConstants;
@@ -47,7 +46,6 @@ import org.open4goods.ui.services.OpenDataService;
 import org.open4goods.ui.services.SitemapGenerationService;
 import org.open4goods.ui.services.todo.TodoService;
 import org.open4goods.xwiki.services.XwikiFacadeService;
-import org.springframework.ai.openai.OpenAiChatModel;
 import org.springframework.ai.openai.OpenAiImageModel;
 import org.springframework.ai.openai.api.OpenAiApi;
 import org.springframework.ai.retry.RetryUtils;
@@ -206,12 +204,6 @@ public class AppConfig {
 	@Bean
 	FeedbackService feedbackService(@Autowired UiConfig config) {
 		return new FeedbackService(config.getFeedbackConfig());
-	}
-
-
-	@Bean
-	LegacyAiService aiService (OpenAiChatModel chatModel,  EvaluationService spelEvaluationService, SerialisationService serialisationService) {
-		return new LegacyAiService(chatModel, spelEvaluationService, serialisationService);
 	}
 
 
