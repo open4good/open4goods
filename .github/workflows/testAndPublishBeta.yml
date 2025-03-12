@@ -59,7 +59,7 @@ jobs:
         run: |
           wget -qO- https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb > chrome.deb
           dpkg --extract chrome.deb chrome-files/
-          sudo cp -r chrome-files/usr/* /usr/
+          cp -r chrome-files/usr/* /usr/
           rm -rf chrome-files chrome.deb
           
       ############################################
