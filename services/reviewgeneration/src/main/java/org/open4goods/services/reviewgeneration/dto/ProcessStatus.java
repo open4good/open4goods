@@ -3,6 +3,8 @@ package org.open4goods.services.reviewgeneration.dto;
 import java.time.Instant;
 import java.util.Objects;
 
+import org.open4goods.model.ai.AiReview;
+
 /**
  * DTO representing the status of a review generation process.
  */
@@ -19,7 +21,7 @@ public class ProcessStatus {
     private Status status;
     private Instant startTime;
     private Instant endTime;
-    private String result;
+    private AiReview result;
     private String errorMessage;
 
     // Getters and setters
@@ -56,15 +58,16 @@ public class ProcessStatus {
         this.endTime = endTime;
     }
 
-    public String getResult() {
-        return result;
-    }
 
-    public void setResult(String result) {
-        this.result = result;
-    }
+    public AiReview getResult() {
+		return result;
+	}
 
-    public String getErrorMessage() {
+	public void setResult(AiReview result) {
+		this.result = result;
+	}
+
+	public String getErrorMessage() {
         return errorMessage;
     }
 

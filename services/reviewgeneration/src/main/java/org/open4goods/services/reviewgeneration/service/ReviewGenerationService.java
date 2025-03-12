@@ -17,12 +17,14 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
+import org.open4goods.model.ai.AiReview;
 import org.open4goods.model.product.Product;
 import org.open4goods.model.vertical.VerticalConfig;
 import org.open4goods.services.googlesearch.dto.GoogleSearchRequest;
 import org.open4goods.services.googlesearch.dto.GoogleSearchResponse;
 import org.open4goods.services.googlesearch.dto.GoogleSearchResult;
 import org.open4goods.services.googlesearch.service.GoogleSearchService;
+import org.open4goods.services.prompt.dto.PromptResponse;
 import org.open4goods.services.prompt.service.PromptService;
 import org.open4goods.services.reviewgeneration.config.ReviewGenerationConfig;
 import org.open4goods.services.reviewgeneration.dto.ProcessStatus;
@@ -110,7 +112,7 @@ public class ReviewGenerationService implements HealthIndicator {
      * @param verticalConfig the vertical configuration.
      * @return the generated review.
      */
-    public String generateReviewSync(Product product, VerticalConfig verticalConfig) {
+    public AiReview generateReviewSync(Product product, VerticalConfig verticalConfig) {
         long upc = product.getId();
         ProcessStatus status = new ProcessStatus();
         status.setUpc(upc);
@@ -118,13 +120,13 @@ public class ReviewGenerationService implements HealthIndicator {
         status.setStartTime(Instant.now());
         processStatusMap.put(upc, status);
         try {
-            String review = executeReviewGeneration(product, verticalConfig);
-            status.setResult(review);
+            PromptResponse<AiReview> review = executeReviewGeneration(product, verticalConfig);
+            status.setResult(review.getBody());
             status.setStatus(Status.SUCCESS);
             status.setEndTime(Instant.now());
             successfulCount.incrementAndGet();
             meterRegistry.counter("review.generation.success").increment();
-            return review;
+            return review.getBody();
         } catch (Exception e) {
             logger.error("Review generation failed for UPC {}: {}", upc, e.getMessage(), e);
             status.setStatus(Status.FAILED);
@@ -166,8 +168,8 @@ public class ReviewGenerationService implements HealthIndicator {
             ProcessStatus status = processStatusMap.get(upc);
             status.setStatus(Status.PROCESSING);
             try {
-                String review = executeReviewGeneration(product, verticalConfig);
-                status.setResult(review);
+                PromptResponse<AiReview> review = executeReviewGeneration(product, verticalConfig);
+                status.setResult(review.getBody());
                 status.setStatus(Status.SUCCESS);
                 meterRegistry.counter("review.generation.success").increment();
             } catch (Exception e) {
@@ -204,7 +206,7 @@ public class ReviewGenerationService implements HealthIndicator {
      * @return the generated review.
      * @throws Exception if an error occurs during generation.
      */
-    private String executeReviewGeneration(Product product, VerticalConfig verticalConfig) throws Exception {
+    private PromptResponse<AiReview> executeReviewGeneration(Product product, VerticalConfig verticalConfig) throws Exception {
         String brand = product.brand();
         String primaryModel = product.model();
         Set<String> alternateModels = product.getAkaModels();
@@ -241,7 +243,8 @@ public class ReviewGenerationService implements HealthIndicator {
         // 2. Sort so that entries from preferred domains come first.
         List<GoogleSearchResult> sortedResults = allResults.stream()
                 .filter(r -> r.getLink() != null && !r.getLink().isEmpty())
-                
+                // excluding pdf
+                .filter(r -> !r.getLink().endsWith(".pdf"))
                 .filter(distinctByKey(r -> {
                     try {
                         return new URL(r.getLink()).getHost();
@@ -342,7 +345,7 @@ public class ReviewGenerationService implements HealthIndicator {
 		promptVariables.put("ATTRIBUTES", sb.toString());
 		
         // Generate the review using the GenAiService with the prompt template "review-generation".
-        return genAiService.prompt("review-generation", promptVariables).getRaw();
+        return genAiService.objectPrompt("review-generation", promptVariables, AiReview.class);
     }
 
     /**

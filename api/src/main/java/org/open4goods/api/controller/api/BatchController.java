@@ -6,8 +6,6 @@ import java.io.IOException;
 
 import org.open4goods.api.services.AggregationFacadeService;
 import org.open4goods.api.services.BatchService;
-import org.open4goods.api.services.completion.PerplexityAttributesCompletionService;
-import org.open4goods.api.services.completion.PerplexityReviewCompletionService;
 import org.open4goods.api.services.completion.ResourceCompletionService;
 import org.open4goods.commons.dao.ProductRepository;
 import org.open4goods.commons.exceptions.AggregationSkipException;
@@ -21,8 +19,6 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.fasterxml.jackson.core.JsonParseException;
@@ -30,7 +26,6 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.websocket.server.PathParam;
 
 /**
  * This controller allows informations and communications about DatasourceConfigurations
@@ -48,9 +43,7 @@ public class BatchController {
 	
 	private final AggregationFacadeService aggregationFacadeService;
 
-	private final PerplexityReviewCompletionService aiCompletionService;
 
-	private PerplexityAttributesCompletionService perplexityAttributesCompletionService;
 	@Autowired
 	private  ProductRepository repository;
 
@@ -59,13 +52,11 @@ public class BatchController {
 	private BatchService batchService;
 	
 	
-	public BatchController(BatchService batchService, AggregationFacadeService aggregationFacadeService, SerialisationService serialisationService, VerticalsConfigService verticalsConfigService, PerplexityReviewCompletionService aiCompletionService, ResourceCompletionService resourceCompletionService, PerplexityAttributesCompletionService perplexityAttributesCompletionService) {
+	public BatchController(BatchService batchService, AggregationFacadeService aggregationFacadeService, SerialisationService serialisationService, VerticalsConfigService verticalsConfigService) {
 		this.serialisationService = serialisationService;
 		this.verticalConfigService = verticalsConfigService;
 		this.aggregationFacadeService = aggregationFacadeService;
-		this.aiCompletionService =  aiCompletionService;
 		this.resourceCompletionService = resourceCompletionService;
-		this.perplexityAttributesCompletionService = perplexityAttributesCompletionService;
 		this.batchService = batchService;
 		
 	}

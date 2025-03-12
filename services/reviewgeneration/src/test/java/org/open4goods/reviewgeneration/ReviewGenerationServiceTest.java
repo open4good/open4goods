@@ -8,6 +8,7 @@ import java.util.Set;
 
 import org.junit.jupiter.api.Test;
 import org.open4goods.googlesearch.mock.GoogleSearchServiceMock;
+import org.open4goods.model.ai.AiReview;
 import org.open4goods.model.attribute.ReferentielKey;
 import org.open4goods.model.product.Product;
 import org.open4goods.model.vertical.PrefixedAttrText;
@@ -66,7 +67,7 @@ public class ReviewGenerationServiceTest {
 
         // Invoke synchronous review generation.
         try {
-            String review = reviewGenerationService.generateReviewSync(product, verticalConfig);
+            AiReview review = reviewGenerationService.generateReviewSync(product, verticalConfig);
             assertNotNull(review, "The generated review should not be null");
             System.out.println("Generated Review: " + review);
         } catch (Exception e) {
@@ -121,7 +122,7 @@ public class ReviewGenerationServiceTest {
         // - The prompt service returns a fixed review text.
         
         try {
-            String review = reviewGenerationService.generateReviewSync(product, verticalConfig);
+            AiReview review = reviewGenerationService.generateReviewSync(product, verticalConfig);
             assertNotNull(review, "The generated review should not be null");
             System.out.println("Generated Review with token limits: " + review);
         } catch (Exception e) {

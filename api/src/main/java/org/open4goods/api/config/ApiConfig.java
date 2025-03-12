@@ -8,14 +8,10 @@ import org.open4goods.api.config.yml.ApiProperties;
 import org.open4goods.api.services.AggregationFacadeService;
 import org.open4goods.api.services.BatchService;
 import org.open4goods.api.services.CompletionFacadeService;
-import org.open4goods.api.services.ProductsReviewGenerationService;
 import org.open4goods.api.services.ScrapperOrchestrationService;
 import org.open4goods.api.services.VerticalsGenerationService;
 import org.open4goods.api.services.completion.AmazonCompletionService;
 import org.open4goods.api.services.completion.IcecatCompletionService;
-import org.open4goods.api.services.completion.PerplexityAttributesCompletionService;
-import org.open4goods.api.services.completion.PerplexityMarkdownService;
-import org.open4goods.api.services.completion.PerplexityReviewCompletionService;
 import org.open4goods.api.services.completion.ResourceCompletionService;
 import org.open4goods.api.services.store.DataFragmentStoreService;
 import org.open4goods.commons.dao.ProductRepository;
@@ -38,7 +34,6 @@ import org.open4goods.commons.services.VerticalsConfigService;
 import org.open4goods.commons.services.ai.LegacyAiService;
 import org.open4goods.commons.services.textgen.BlablaService;
 import org.open4goods.commons.store.repository.elastic.BrandScoresRepository;
-import org.open4goods.commons.store.repository.elastic.VerticalPagesRepository;
 import org.open4goods.crawler.config.yml.FetcherProperties;
 import org.open4goods.crawler.repository.IndexationRepository;
 import org.open4goods.crawler.services.ApiSynchService;
@@ -170,25 +165,7 @@ public class ApiConfig {
 //	}
 
 	
-	@Bean
-	PerplexityMarkdownService perplexityMarkdownService() {
-		return new PerplexityMarkdownService();
-	}
 	
-	@Bean
-	ProductsReviewGenerationService pageGenerationService(PromptService aiService, VerticalsConfigService verticalConfigService, PerplexityMarkdownService perplexityMarkdownService, VerticalPagesRepository pagesRepository) {
-		return new ProductsReviewGenerationService(aiService, verticalConfigService, apiProperties, perplexityMarkdownService,  pagesRepository);
-	}
-	
-	@Bean
-	PerplexityReviewCompletionService perplexityReviewCompletionService(PromptService aiService, ProductRepository productRepository, VerticalsConfigService verticalConfigService, PerplexityMarkdownService perplexityMarkdownService) {
-		return new PerplexityReviewCompletionService(aiService, productRepository, verticalConfigService, apiProperties,  perplexityMarkdownService);
-	}
-
-	@Bean
-	PerplexityAttributesCompletionService perplexityAttributesCompletionService(PromptService aiService, ProductRepository productRepository, VerticalsConfigService verticalConfigService) {
-		return new PerplexityAttributesCompletionService(aiService, productRepository, verticalConfigService, apiProperties);
-	}
 
 	
 	@Bean
@@ -215,8 +192,8 @@ public class ApiConfig {
 	}
 
 	@Bean
-	CompletionFacadeService completionFacadeService(PerplexityReviewCompletionService aiCompletionService, ResourceCompletionService resourceCompletionService, AmazonCompletionService amazonCompletionService, IcecatCompletionService icecatCompletionService, PerplexityAttributesCompletionService perplexityAttributesCompletionService) {
-		return new CompletionFacadeService(aiCompletionService, resourceCompletionService, amazonCompletionService, icecatCompletionService, perplexityAttributesCompletionService);
+	CompletionFacadeService completionFacadeService(ResourceCompletionService resourceCompletionService, AmazonCompletionService amazonCompletionService, IcecatCompletionService icecatCompletionService) {
+		return new CompletionFacadeService(resourceCompletionService, amazonCompletionService, icecatCompletionService);
 	}
 
 	@Bean
