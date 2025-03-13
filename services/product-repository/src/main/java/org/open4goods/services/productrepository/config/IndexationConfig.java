@@ -1,4 +1,4 @@
-package org.open4goods.commons.config.yml;
+package org.open4goods.services.productrepository.config;
 
 public class IndexationConfig {
 	

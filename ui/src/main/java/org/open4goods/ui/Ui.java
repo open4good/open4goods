@@ -5,8 +5,7 @@ import java.io.IOException;
 
 import org.open4goods.commons.config.CacheKeyGenerator;
 import org.open4goods.commons.store.repository.elastic.BrandScoresRepository;
-import org.open4goods.commons.store.repository.elastic.ElasticProductRepository;
-import org.open4goods.commons.store.repository.elastic.ElasticTextRepository;
+import org.open4goods.services.productrepository.repository.ElasticProductRepository;
 import org.open4goods.services.serialisation.service.SerialisationService;
 import org.open4goods.ui.repository.CheckedUrlRepository;
 import org.open4goods.ui.repository.ContributionVoteRepository;
@@ -31,7 +30,7 @@ import jakarta.annotation.PreDestroy;
 @EnableScheduling
 @EnableCaching
 @Configuration
-@EnableElasticsearchRepositories(basePackageClasses = {CheckedUrlRepository.class, ContributionVoteRepository.class, UserSearchRepository.class, ElasticProductRepository.class, BrandScoresRepository.class, ElasticTextRepository.class})
+@EnableElasticsearchRepositories(basePackageClasses = {CheckedUrlRepository.class, ContributionVoteRepository.class, UserSearchRepository.class, ElasticProductRepository.class, BrandScoresRepository.class})
 //@EnableRedisRepositories(basePackageClasses = RedisProductRepository.class)
 public class Ui {
 

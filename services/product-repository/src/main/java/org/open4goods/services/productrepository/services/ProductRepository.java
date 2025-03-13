@@ -1,4 +1,4 @@
-package org.open4goods.commons.dao;
+package org.open4goods.services.productrepository.services;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -11,15 +11,15 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.open4goods.commons.config.yml.IndexationConfig;
-import org.open4goods.commons.store.repository.FullProductIndexationWorker;
-import org.open4goods.commons.store.repository.PartialProductIndexationWorker;
 import org.open4goods.model.constants.CacheConstants;
 import org.open4goods.model.exceptions.ResourceNotFoundException;
 import org.open4goods.model.product.BarcodeType;
 import org.open4goods.model.product.Product;
 import org.open4goods.model.product.ProductPartialUpdateHolder;
 import org.open4goods.model.vertical.VerticalConfig;
+import org.open4goods.services.productrepository.config.IndexationConfig;
+import org.open4goods.services.productrepository.workers.FullProductIndexationWorker;
+import org.open4goods.services.productrepository.workers.PartialProductIndexationWorker;
 import org.open4goods.services.serialisation.service.SerialisationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

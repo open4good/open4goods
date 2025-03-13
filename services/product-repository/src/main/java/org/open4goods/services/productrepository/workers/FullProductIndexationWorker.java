@@ -1,10 +1,10 @@
-package org.open4goods.commons.store.repository;
+package org.open4goods.services.productrepository.workers;
 
 import java.util.HashSet;
 import java.util.Set;
 
-import org.open4goods.commons.dao.ProductRepository;
 import org.open4goods.model.product.Product;
+import org.open4goods.services.productrepository.services.ProductRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 /**

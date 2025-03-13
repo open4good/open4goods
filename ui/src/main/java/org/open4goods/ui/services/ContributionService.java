@@ -2,17 +2,13 @@ package org.open4goods.ui.services;
 
 import java.net.URLDecoder;
 import java.nio.charset.Charset;
-import java.time.LocalDate;
-import java.time.ZoneId;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.open4goods.commons.model.data.ContributionVote;
 import org.open4goods.model.constants.CacheConstants;
 import org.open4goods.services.serialisation.service.SerialisationService;
-import org.open4goods.ui.config.yml.Reversement;
 import org.open4goods.ui.config.yml.ReversementConfig;
 import org.open4goods.ui.repository.ContributionVoteRepository;
 import org.slf4j.Logger;

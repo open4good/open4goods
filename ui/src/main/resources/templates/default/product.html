@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html th:lang="${siteLocale.language}">
+<html th:lang="${siteLanguage}">
 
 <head>
     <!-- Importing meta tags and CSS files -->
@@ -17,6 +17,7 @@
     <meta property="og:image" th:content="${baseUrl} + '/images/'+${product.gtin()}+'-cover.png'">
 
     <!-- No indexing if not a verticalized page -->
+    <!--/*@thymesVar id="product" type=""*/-->
     <meta th:unless="${product.vertical}" name="robots" content="noindex">
 
     <!-- Twitter -->

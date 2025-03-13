@@ -6,7 +6,6 @@ import java.time.Duration;
 import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
 
-import org.open4goods.commons.dao.ProductRepository;
 import org.open4goods.commons.helper.DevModeService;
 import org.open4goods.commons.services.BarcodeValidationService;
 import org.open4goods.commons.services.BrandService;
@@ -30,6 +29,9 @@ import org.open4goods.model.price.Currency;
 import org.open4goods.model.price.Price;
 import org.open4goods.services.evaluation.config.EvaluationConfig;
 import org.open4goods.services.evaluation.service.EvaluationService;
+import org.open4goods.services.googlesearch.config.GoogleSearchConfig;
+import org.open4goods.services.googlesearch.service.GoogleSearchService;
+import org.open4goods.services.productrepository.services.ProductRepository;
 import org.open4goods.services.prompt.config.PromptServiceConfig;
 import org.open4goods.services.prompt.service.PromptService;
 import org.open4goods.services.serialisation.service.SerialisationService;
@@ -146,16 +148,8 @@ public class AppConfig {
 	BarcodeValidationService barcodeValidationService () {
 		return new BarcodeValidationService();
 	}
-	
-	@Bean UiService uiService () {
-		return new UiService();
-	}
 
 
-    @Bean
-    DevModeService devModeService(ProductRepository repository, SerialisationService serialisationService, VerticalsConfigService verticalsConfigService) {
-		return new DevModeService(config.getDevModeConfig(),repository, serialisationService, verticalsConfigService);
-	}
 
 
 //    @Bean

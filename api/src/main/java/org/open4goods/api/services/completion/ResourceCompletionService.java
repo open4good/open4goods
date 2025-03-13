@@ -23,7 +23,6 @@ import org.apache.tika.config.TikaConfig;
 import org.open4goods.api.config.yml.ApiProperties;
 import org.open4goods.api.config.yml.ResourceCompletionUrlTemplate;
 import org.open4goods.api.services.AbstractCompletionService;
-import org.open4goods.commons.dao.ProductRepository;
 import org.open4goods.commons.exceptions.TechnicalException;
 import org.open4goods.commons.services.ImageMagickService;
 import org.open4goods.commons.services.ResourceService;
@@ -37,6 +36,7 @@ import org.open4goods.model.resource.ResourceStatus;
 import org.open4goods.model.resource.ResourceTag;
 import org.open4goods.model.resource.ResourceType;
 import org.open4goods.model.vertical.VerticalConfig;
+import org.open4goods.services.productrepository.services.ProductRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
