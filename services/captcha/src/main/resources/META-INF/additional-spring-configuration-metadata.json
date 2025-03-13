@@ -1,0 +1,23 @@
+{
+  "groups": [
+    {
+      "name": "captcha",
+      "type": "org.open4goods.services.captcha.config.CaptchaProperties",
+      "sourceType": "org.open4goods.services.captcha.config.CaptchaProperties"
+    }
+  ],
+  "properties": [
+    {
+      "name": "captcha.secret-key",
+      "type": "java.lang.String",
+      "description": "Secret key used for captcha verification.",
+      "defaultValue": ""
+    },
+    {
+      "name": "captcha.valid-role",
+      "type": "java.lang.String",
+      "description": "Spring Security role assigned to users upon successful captcha verification.",
+      "defaultValue": "ROLE_CAPTCHA_VERIFIED"
+    }
+  ]
+}

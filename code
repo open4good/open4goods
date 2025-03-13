@@ -6,14 +6,12 @@
 ----- org
 ------ open4goods
 ------- services
--------- reviewgeneration
+-------- captcha
 --------- config
----------- ReviewGenerationConfig.java
---------- dto
----------- ProcessStatus.java
----------- ReviewRequest.java
+---------- CaptchaProperties.java
+--------- HcaptchaUtil.java
 --------- service
----------- ReviewGenerationService.java
+---------- HcaptchaService.java
 ---- resources
 ----- META-INF
 ------ additional-spring-configuration-metadata.json
@@ -21,906 +19,319 @@
 ---- java
 ----- org
 ------ open4goods
-------- reviewgeneration
--------- ReviewGenerationServiceTest.java
+------- services
+-------- captcha
+--------- service
+---------- HcaptchaServiceTest.java
 ---- resources
------ application-test.yml
 
 # Files content
 
-## [ReviewGenerationService.java - /home/goulven/git/open4goods/services/reviewgeneration/src/main/java/org/open4goods/services/reviewgeneration/service/ReviewGenerationService.java]
+## [HcaptchaService.java - /home/goulven/git/open4goods/services/captcha/src/main/java/org/open4goods/services/captcha/service/HcaptchaService.java]
 ~~~
-package org.open4goods.services.reviewgeneration.service;
+package org.open4goods.services.captcha.service;
 
-import java.net.URL;
-import java.time.Instant;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.Function;
-import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
-import org.open4goods.model.ai.AiReview;
-import org.open4goods.model.product.Product;
-import org.open4goods.model.vertical.VerticalConfig;
-import org.open4goods.services.googlesearch.dto.GoogleSearchRequest;
-import org.open4goods.services.googlesearch.dto.GoogleSearchResponse;
-import org.open4goods.services.googlesearch.dto.GoogleSearchResult;
-import org.open4goods.services.googlesearch.service.GoogleSearchService;
-import org.open4goods.services.prompt.dto.PromptResponse;
-import org.open4goods.services.prompt.service.PromptService;
-import org.open4goods.services.reviewgeneration.config.ReviewGenerationConfig;
-import org.open4goods.services.reviewgeneration.dto.ProcessStatus;
-import org.open4goods.services.reviewgeneration.dto.ProcessStatus.Status;
-import org.open4goods.services.urlfetching.dto.FetchResponse;
-import org.open4goods.services.urlfetching.service.UrlFetchingService;
+import org.open4goods.services.captcha.HcaptchaUtil;
+import org.open4goods.services.captcha.config.CaptchaProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.boot.actuate.health.Health;
-import org.springframework.boot.actuate.health.HealthIndicator;
+import org.springframework.boot.web.client.RestTemplateBuilder;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
-
-import io.micrometer.core.instrument.MeterRegistry;
+import org.springframework.web.client.RestTemplate;
 
 /**
- * Service for generating AI-assisted reviews.
+ * Service that performs hCaptcha Recaptcha validation and assigns a spring role to users 
+ * upon successful verification.
  * <p>
- * This implementation has been refactored to use a new review generation logic:
- * <ol>
- *   <li>It builds search queries using the product’s brand and model (and alternate models) with a query template.
- *       A maximum of {@code maxSearch} queries are performed.</li>
- *   <li>All search results are then sorted so that URLs containing preferred domains (configured via {@code preferredDomains})
- *       appear first.</li>
- *   <li>Next, URLs are fetched concurrently (up to {@code maxConcurrentFetch} tasks in parallel).
- *       For each fetched URL, the PromptService.estimateTokens() method is used to count tokens.
- *       Only pages with at least {@code minTokens} tokens are accepted and pages are aggregated until the total tokens
- *       reach {@code maxTokensPerRequest}.</li>
- *   <li>Finally, the collected markdown contents are passed as prompt variables to generate the review.</li>
- * </ol>
- * <p>
- * The service supports both synchronous and asynchronous calls and tracks process status in memory.
- * It also implements HealthIndicator to report service health based on generation failures.
+ * This class uses the {@link CaptchaProperties} configuration to retrieve the secret key 
+ * and the role that must be assigned to a valid user.
+ * </p>
+ * 
+ * @author Goulven
  */
 @Service
-public class ReviewGenerationService implements HealthIndicator {
+public class HcaptchaService {
 
-    private static final Logger logger = LoggerFactory.getLogger(ReviewGenerationService.class);
+    private static final String H_RECAPTCHA_VERIFY_URL = "https://api.hcaptcha.com/siteverify";
+    private static final Logger logger = LoggerFactory.getLogger(HcaptchaService.class);
 
-    private final ReviewGenerationConfig properties;
-    private final GoogleSearchService googleSearchService;
-    private final UrlFetchingService urlFetchingService;
-    private final PromptService genAiService;
-    private final MeterRegistry meterRegistry;
-
-    // Thread pool executor for asynchronous processing.
-    private final ExecutorService executorService;
-
-    // In-memory storage of process status keyed by UPC.
-    private final ConcurrentMap<Long, ProcessStatus> processStatusMap = new ConcurrentHashMap<>();
-
-    // Global metrics for review generations.
-    private final AtomicInteger totalProcessed = new AtomicInteger(0);
-    private final AtomicInteger successfulCount = new AtomicInteger(0);
-    private final AtomicInteger failedCount = new AtomicInteger(0);
-
-    // Flag used by the health check: set to true if any generation failed.
-    private volatile boolean lastGenerationFailed = false;
+    private final CaptchaProperties captchaProperties;
+    private final RestTemplate restTemplate;
 
     /**
-     * Constructs a new ReviewGenerationService.
+     * Constructor that initializes the service with externalized captcha properties and a RestTemplate.
      *
-     * @param properties the review generation configuration properties.
-     * @param googleSearchService the Google search service.
-     * @param urlFetchingService the URL fetching service.
-     * @param genAiService the Gen AI service.
-     * @param meterRegistry the actuator meter registry.
+     * @param captchaProperties the configuration properties for captcha verification
+     * @param restTemplateBuilder the builder to create a RestTemplate instance
      */
-    public ReviewGenerationService(ReviewGenerationConfig properties,
-                                   GoogleSearchService googleSearchService,
-                                   UrlFetchingService urlFetchingService,
-                                   PromptService genAiService,
-                                   MeterRegistry meterRegistry) {
-        this.properties = properties;
-        this.googleSearchService = googleSearchService;
-        this.urlFetchingService = urlFetchingService;
-        this.genAiService = genAiService;
-        this.meterRegistry = meterRegistry;
-        this.executorService = Executors.newFixedThreadPool(properties.getThreadPoolSize());
+    public HcaptchaService(CaptchaProperties captchaProperties, RestTemplateBuilder restTemplateBuilder) {
+        this.captchaProperties = captchaProperties;
+        this.restTemplate = restTemplateBuilder.build();
     }
 
     /**
-     * Synchronously generates a review for the given product and vertical configuration.
+     * Verifies the captcha response and, if valid, assigns the configured spring role to the current user.
      *
-     * @param product the product containing brand, primary model, and alternate models.
-     * @param verticalConfig the vertical configuration.
-     * @return the generated review.
+     * @param ip the remote IP address of the user
+     * @param recaptchaResponse the captcha response token
+     * @throws SecurityException if captcha verification fails
      */
-    public AiReview generateReviewSync(Product product, VerticalConfig verticalConfig) {
-        long upc = product.getId();
-        ProcessStatus status = new ProcessStatus();
-        status.setUpc(upc);
-        status.setStatus(Status.PROCESSING);
-        status.setStartTime(Instant.now());
-        processStatusMap.put(upc, status);
-        try {
-            PromptResponse<AiReview> review = executeReviewGeneration(product, verticalConfig);
-            status.setResult(review.getBody());
-            status.setStatus(Status.SUCCESS);
-            status.setEndTime(Instant.now());
-            successfulCount.incrementAndGet();
-            meterRegistry.counter("review.generation.success").increment();
-            return review.getBody();
-        } catch (Exception e) {
-            logger.error("Review generation failed for UPC {}: {}", upc, e.getMessage(), e);
-            status.setStatus(Status.FAILED);
-            status.setErrorMessage(e.getMessage());
-            status.setEndTime(Instant.now());
-            failedCount.incrementAndGet();
-            meterRegistry.counter("review.generation.failed").increment();
-            lastGenerationFailed = true;
-            throw new RuntimeException("Review generation failed", e);
-        } finally {
-            totalProcessed.incrementAndGet();
-        }
-    }
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    public void verifyRecaptcha(final String ip, final String recaptchaResponse) throws SecurityException {
+        final Map<String, String> body = new HashMap<>();
+        body.put("secret", captchaProperties.getSecretKey());
+        body.put("response", recaptchaResponse);
+        body.put("remoteip", ip);
 
-    /**
-     * Asynchronously initiates review generation for the given product and vertical configuration.
-     *
-     * @param product the product containing brand, primary model, and alternate models.
-     * @param verticalConfig the vertical configuration.
-     * @return the process ID (UPC) used to track generation status.
-     */
-    public long generateReviewAsync(Product product, VerticalConfig verticalConfig) {
-        long upc = product.getId();
-        // Avoid duplicate runs on the same UPC if already processing.
-        processStatusMap.compute(upc, (key, existingStatus) -> {
-            if (existingStatus != null && existingStatus.getStatus() == Status.PROCESSING) {
-                return existingStatus;
-            } else {
-                ProcessStatus status = new ProcessStatus();
-                status.setUpc(upc);
-                status.setStatus(Status.PENDING);
-                status.setStartTime(Instant.now());
-                return status;
-            }
-        });
+        final ResponseEntity<Map> recaptchaResponseEntity = restTemplate.postForEntity(
+                H_RECAPTCHA_VERIFY_URL + "?secret={secret}&response={response}&remoteip={remoteip}",
+                body, Map.class, body);
 
-        // Submit the review generation task asynchronously.
-        executorService.submit(() -> {
-            ProcessStatus status = processStatusMap.get(upc);
-            status.setStatus(Status.PROCESSING);
-            try {
-                PromptResponse<AiReview> review = executeReviewGeneration(product, verticalConfig);
-                status.setResult(review.getBody());
-                status.setStatus(Status.SUCCESS);
-                meterRegistry.counter("review.generation.success").increment();
-            } catch (Exception e) {
-                logger.error("Asynchronous review generation failed for UPC {}: {}", upc, e.getMessage(), e);
-                status.setStatus(Status.FAILED);
-                status.setErrorMessage(e.getMessage());
-                meterRegistry.counter("review.generation.failed").increment();
-                lastGenerationFailed = true;
-            } finally {
-                status.setEndTime(Instant.now());
-                totalProcessed.incrementAndGet();
-            }
-        });
-        return upc;
-    }
+        final Map<String, Object> responseBody = recaptchaResponseEntity.getBody();
+        final boolean recaptchaSuccess = (Boolean) responseBody.get("success");
 
-    /**
-     * Executes the review generation process using the new logic:
-     * <ol>
-     *   <li>Builds search queries using the product’s brand and primary model and then alternate models
-     *       using the configured query template. A maximum of {@code maxSearch} queries are performed.</li>
-     *   <li>Performs a Google search for each query and aggregates the search results.</li>
-     *   <li>Deduplicates the search results to keep only one URL per distinct domain, and then sorts the results so that
-     *       results from preferred domains appear first.</li>
-     *   <li>Fetches the markdown content for each URL concurrently (up to {@code maxConcurrentFetch} tasks).
-     *       For each fetched page, its token count is estimated via {@code PromptService.estimateTokens(String text)}.
-     *       Pages with token counts below {@code minTokens} are discarded and pages are aggregated until
-     *       the total token count reaches {@code maxTokensPerRequest}.</li>
-     *   <li>Finally, the aggregated markdown content is passed as a prompt variable to generate the review.</li>
-     * </ol>
-     *
-     * @param product the product.
-     * @param verticalConfig the vertical configuration.
-     * @return the generated review.
-     * @throws Exception if an error occurs during generation.
-     */
-    private PromptResponse<AiReview> executeReviewGeneration(Product product, VerticalConfig verticalConfig) throws Exception {
-        String brand = product.brand();
-        String primaryModel = product.model();
-        Set<String> alternateModels = product.getAkaModels();
-
-        // Build a list of search queries using the configured query template.
-        List<String> queries = new ArrayList<>();
-        queries.add(String.format(properties.getQueryTemplate(), brand, primaryModel));
-        if (alternateModels != null) {
-            for (String akaModel : alternateModels) {
-                queries.add(String.format(properties.getQueryTemplate(), brand, akaModel));
-            }
+        if (!recaptchaSuccess) {
+            final List<String> errorCodes = (List) responseBody.get("error-codes");
+            final String errorMessage = errorCodes.stream()
+                    .map(HcaptchaUtil.RECAPTCHA_ERROR_CODE::get)
+                    .collect(Collectors.joining(", "));
+            logger.warn("Captcha verification failed: {}", errorMessage);
+            throw new SecurityException(errorMessage);
         }
 
-        // Perform searches up to the maximum allowed (maxSearch).
-        int searchesMade = 0;
-        List<GoogleSearchResult> allResults = new ArrayList<>();
-        int maxSearch = properties.getMaxSearch();
-        for (String query : queries) {
-            if (searchesMade >= maxSearch) {
-                break;
-            }
-            logger.debug("Executing search query: {}", query);
-            //TODO(p3,i18N) : internationalisation from ReviewGenConfig
-            GoogleSearchRequest searchRequest = new GoogleSearchRequest(query, "lang_fr", "countryFR");
-            GoogleSearchResponse searchResponse = googleSearchService.search(searchRequest);
-            searchesMade++;
-            if (searchResponse != null && searchResponse.getResults() != null) {
-                allResults.addAll(searchResponse.getResults());
-            }
-        }
-
-        // Deduplicate and sort the search results:
-        // 1. Keep only one URL per distinct domain.
-        // 2. Sort so that entries from preferred domains come first.
-        List<GoogleSearchResult> sortedResults = allResults.stream()
-                .filter(r -> r.getLink() != null && !r.getLink().isEmpty())
-                // excluding pdf
-                .filter(r -> !r.getLink().endsWith(".pdf"))
-                .filter(distinctByKey(r -> {
-                    try {
-                        return new URL(r.getLink()).getHost();
-                    } catch (Exception e) {
-                        return r.getLink();
-                    }
-                }))
-                .sorted((r1, r2) -> {
-                    boolean r1Preferred = properties.getPreferredDomains().stream()
-                            .anyMatch(domain -> r1.getLink().contains(domain));
-                    boolean r2Preferred = properties.getPreferredDomains().stream()
-                            .anyMatch(domain -> r2.getLink().contains(domain));
-                    if (r1Preferred && !r2Preferred) return -1;
-                    if (!r1Preferred && r2Preferred) return 1;
-                    return 0;
-                })
-                .toList();
-
-        // Prepare to fetch URL content concurrently using a dedicated executor.
-        ExecutorService fetchExecutor = Executors.newFixedThreadPool(properties.getMaxConcurrentFetch());
-        Map<String, CompletableFuture<FetchResponse>> fetchFutures = new HashMap<>();
-        for (GoogleSearchResult result : sortedResults) {
-            String url = result.getLink();
-            CompletableFuture<FetchResponse> future = CompletableFuture.supplyAsync(() -> {
-                try {
-                    return urlFetchingService.fetchUrl(url).get();
-                } catch (Exception e) {
-                    logger.warn("Failed to fetch content from URL {}: {}", url, e.getMessage());
-                    return null;
-                }
-            }, fetchExecutor);
-            fetchFutures.put(url, future);
-        }
-        fetchExecutor.shutdown();
-
-        // Aggregate fetched markdown content until the maximum token limit is reached.
-        int maxTotalTokens = properties.getMaxTotalTokens();
-        int minTokens = properties.getSourceMinTokens();
-        int maxTokens = properties.getMaxTotalTokens();
-        
-        int accumulatedTokens = 0;
-        Map<String, String> finalSourcesMap = new LinkedHashMap<>();
-        Map<String, Integer> finalTokensMap = new LinkedHashMap<>();
-        
-        // Process the sorted URLs in order.
-        for (GoogleSearchResult result : sortedResults) {
-            String url = result.getLink();
-            CompletableFuture<FetchResponse> future = fetchFutures.get(url);
-            if (future == null) continue;
-            FetchResponse fetchResponse = future.get();
-            if (fetchResponse == null || fetchResponse.markdownContent() == null || fetchResponse.markdownContent().isEmpty()) {
-                continue;
-            }
-            String content = fetchResponse.markdownContent();
-            int tokenCount = genAiService.estimateTokens(content);
-            if (tokenCount < minTokens) {
-                logger.warn("Content from URL {} discarded due to insufficient tokens: {}", url, tokenCount);
-                continue;
-            }
-            if (tokenCount > maxTokens) {
-                logger.warn("Content from URL {} discarded, exceed tokens limit: {}", url, tokenCount);
-                continue;
-            }
-            
-            
-            if (accumulatedTokens + tokenCount > maxTotalTokens) {
-                logger.warn("Reached max tokens threshold. Current tokens: {}, URL tokens: {}, threshold: {}",
-                        accumulatedTokens, tokenCount, maxTotalTokens);
-                break;
-            }
-            finalSourcesMap.put(url, content);
-            finalTokensMap.put(url, genAiService.estimateTokens(content));
-            accumulatedTokens += tokenCount;
-        }
-        logger.info("Aggregated {} tokens from {} sources.", accumulatedTokens, finalSourcesMap.size());
-
-        // Compose the prompt variables including the collected markdown content.
-        Map<String, Object> promptVariables = new HashMap<>();
-        promptVariables.put("sources", finalSourcesMap);
-        promptVariables.put("tokens", finalTokensMap);
-        
-        promptVariables.put("PRODUCT_NAME", product.shortestOfferName());
-        promptVariables.put("PRODUCT_BRAND", product.brand());
-        promptVariables.put("PRODUCT_MODEL", product.model());
-        promptVariables.put("PRODUCT_GTIN", product.gtin());
-        promptVariables.put("PRODUCT", product);
-		
-		
-        promptVariables.put("VERTICAL_NAME", verticalConfig.i18n("fr").getH1Title().getPrefix());
-
-		StringBuilder sb = new StringBuilder();
-		verticalConfig.getAttributesConfig().getConfigs().forEach(attrConf -> {
-			if (attrConf.getSynonyms().size()>0 ) {
-				sb.append("        ").append("- ").append(attrConf.getKey()).append(" (").append(attrConf.getName().get("fr")).append(")").append("\n");				
-			}
-			
-		});
-		promptVariables.put("ATTRIBUTES", sb.toString());
-		
-        // Generate the review using the GenAiService with the prompt template "review-generation".
-        return genAiService.objectPrompt("review-generation", promptVariables, AiReview.class);
+        // On successful captcha verification, assign the configured spring role to the user
+        assignRoleToUser(captchaProperties.getValidRole());
+        logger.info("Captcha verified successfully, assigned role: {}", captchaProperties.getValidRole());
     }
 
     /**
-     * Returns the status of a review generation process by UPC.
+     * Updates the current Spring Security context by adding the given role to the user's granted authorities.
      *
-     * @param upc the UPC identifier.
-     * @return the process status, or null if not found.
+     * @param role the role to assign to the authenticated user
      */
-    public ProcessStatus getProcessStatus(long upc) {
-        return processStatusMap.get(upc);
-    }
-
-    /**
-     * Returns global processing statistics.
-     *
-     * @return a map with keys: totalProcessed, successful, failed, and ongoing.
-     */
-    public Map<String, Integer> getGlobalStats() {
-        Map<String, Integer> stats = new HashMap<>();
-        stats.put("totalProcessed", totalProcessed.get());
-        stats.put("successful", successfulCount.get());
-        stats.put("failed", failedCount.get());
-        // Count processes that are still PENDING or PROCESSING.
-        long ongoing = processStatusMap.values().stream()
-                .filter(s -> s.getStatus() == Status.PENDING || s.getStatus() == Status.PROCESSING)
-                .count();
-        stats.put("ongoing", (int) ongoing);
-        return stats;
-    }
-
-    /**
-     * Health check implementation.
-     * <p>
-     * The service is reported as DOWN if any review generation failure has occurred.
-     *
-     * @return Health status UP if healthy; otherwise DOWN with error details.
-     */
-    @Override
-    public Health health() {
-        if (lastGenerationFailed) {
-            return Health.down().withDetail("error", "One or more review generations have failed").build();
+    private void assignRoleToUser(String role) {
+        Authentication currentAuth = SecurityContextHolder.getContext().getAuthentication();
+        if (currentAuth != null && currentAuth.isAuthenticated()) {
+            // Copy current authorities and add new role if not already present
+            List<GrantedAuthority> updatedAuthorities = new ArrayList<>(currentAuth.getAuthorities());
+            SimpleGrantedAuthority newAuthority = new SimpleGrantedAuthority(role);
+            if (updatedAuthorities.stream().noneMatch(auth -> auth.getAuthority().equals(newAuthority.getAuthority()))) {
+                updatedAuthorities.add(newAuthority);
+            }
+            // Create a new authentication token with the updated authorities
+            Authentication newAuth = new UsernamePasswordAuthenticationToken(
+                    currentAuth.getPrincipal(), currentAuth.getCredentials(), updatedAuthorities);
+            SecurityContextHolder.getContext().setAuthentication(newAuth);
+            logger.debug("Updated authentication authorities: {}", updatedAuthorities);
+        } else {
+            logger.warn("No authenticated user found. Role {} not assigned.", role);
         }
-        return Health.up().build();
-    }
-
-    /**
-     * Returns a predicate that maintains state about what keys have been seen so far, filtering out duplicates.
-     *
-     * @param keyExtractor a function to extract the key for comparison.
-     * @param <T> the type of the input elements.
-     * @return a predicate that returns true if the element is encountered for the first time.
-     */
-    private static <T> Predicate<T> distinctByKey(Function<? super T, ?> keyExtractor) {
-        Map<Object, Boolean> seen = new ConcurrentHashMap<>();
-        return t -> seen.putIfAbsent(keyExtractor.apply(t), Boolean.TRUE) == null;
     }
 }
 ~~~
 
-## [ReviewGenerationServiceTest.java - /home/goulven/git/open4goods/services/reviewgeneration/src/test/java/org/open4goods/reviewgeneration/ReviewGenerationServiceTest.java]
+## [HcaptchaServiceTest.java - /home/goulven/git/open4goods/services/captcha/src/test/java/org/open4goods/services/captcha/service/HcaptchaServiceTest.java]
 ~~~
-package org.open4goods.reviewgeneration;
+package org.open4goods.services.captcha.service;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.fail;
-
-import java.util.Set;
-
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.open4goods.googlesearch.mock.GoogleSearchServiceMock;
-import org.open4goods.model.ai.AiReview;
-import org.open4goods.model.attribute.ReferentielKey;
-import org.open4goods.model.product.Product;
-import org.open4goods.model.vertical.PrefixedAttrText;
-import org.open4goods.model.vertical.ProductI18nElements;
-import org.open4goods.model.vertical.VerticalConfig;
-import org.open4goods.services.prompt.service.mock.PromptServiceMock;
-import org.open4goods.services.reviewgeneration.config.ReviewGenerationConfig;
-import org.open4goods.services.reviewgeneration.dto.ProcessStatus;
-import org.open4goods.services.reviewgeneration.service.ReviewGenerationService;
-import org.open4goods.urlfetching.service.mock.UrlFetchingServiceMock;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.SpringBootConfiguration;
-import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.annotation.ComponentScan;
-import org.springframework.context.annotation.Import;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.TestPropertySource;
+import org.mockito.Mockito;
+import org.open4goods.services.captcha.config.CaptchaProperties;
+import org.springframework.boot.web.client.RestTemplateBuilder;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.client.RestTemplate;
 
-@SpringBootTest(classes = {ReviewGenerationService.class, ReviewGenerationConfig.class, ReviewGenerationServiceTest.TestConfig.class})
-@TestPropertySource(locations = "classpath:application-test.yml")
-@ActiveProfiles("test")
-@Import({GoogleSearchServiceMock.class, UrlFetchingServiceMock.class, PromptServiceMock.class})
-public class ReviewGenerationServiceTest {
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 
-    /**
-     * Minimal test configuration to bootstrap the Spring context.
-     */
-    @SpringBootConfiguration
-    @EnableAutoConfiguration
-    @ComponentScan(basePackages = {"org.open4goods.services"})
-    public static class TestConfig {
-        // This class remains empty; its purpose is to trigger component scanning.
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.when;
+
+public class HcaptchaServiceTest {
+
+    private RestTemplate restTemplate;
+    private RestTemplateBuilder restTemplateBuilder;
+    private CaptchaProperties captchaProperties;
+    private HcaptchaService recaptchaService;
+
+    @BeforeEach
+    public void setUp() {
+        captchaProperties = new CaptchaProperties();
+        captchaProperties.setSecretKey("dummySecret");
+        captchaProperties.setValidRole("ROLE_CAPTCHA_VERIFIED");
+
+        restTemplate = Mockito.mock(RestTemplate.class);
+        restTemplateBuilder = Mockito.mock(RestTemplateBuilder.class);
+        when(restTemplateBuilder.build()).thenReturn(restTemplate);
+
+        // Set up a dummy authentication in the security context
+        Authentication auth = new UsernamePasswordAuthenticationToken("user", "pass", new ArrayList<>());
+        SecurityContextHolder.getContext().setAuthentication(auth);
+
+        recaptchaService = new HcaptchaService(captchaProperties, restTemplateBuilder);
     }
 
-    @Autowired
-    private ReviewGenerationService reviewGenerationService;
-
     @Test
-    public void testGenerateReviewSync() {
-        // Create a dummy product.
-        Product product = new Product();
-        product.setId(8806091548818L);
-        product.getAttributes().getReferentielAttributes().put(ReferentielKey.BRAND, "LG");
-        product.getAttributes().getReferentielAttributes().put(ReferentielKey.MODEL, "24TQ510S");
-        product.setAkaModels(Set.of("24TQ510S-PZ.API", "24TQ510S-PZ"));
+    public void testVerifyRecaptchaSuccess() {
+        // Prepare a mock response for a successful captcha verification
+        Map<String, Object> responseMap = new HashMap<>();
+        responseMap.put("success", true);
+        ResponseEntity<Map> responseEntity = ResponseEntity.ok(responseMap);
+        when(restTemplate.postForEntity(anyString(), any(), eq(Map.class), any(Map.class)))
+                .thenReturn(responseEntity);
 
-        // Dummy vertical configuration (as a String for testing).
-        VerticalConfig verticalConfig = new VerticalConfig();
-        verticalConfig.setId("tv");
-        ProductI18nElements i18n = new ProductI18nElements();
-        PrefixedAttrText p = new PrefixedAttrText();
-        p.setPrefix("téléviseur");
-        i18n.setH1Title(p);
-        verticalConfig.getI18n().put("fr", i18n);
+        assertDoesNotThrow(() -> recaptchaService.verifyRecaptcha("127.0.0.1", "dummyResponse"));
 
-        // Invoke synchronous review generation.
-        try {
-            AiReview review = reviewGenerationService.generateReviewSync(product, verticalConfig);
-            assertNotNull(review, "The generated review should not be null");
-            System.out.println("Generated Review: " + review);
-        } catch (Exception e) {
-            fail("Review generation failed: ", e);
-        }
-
-        // Verify that the process status is SUCCESS.
-        ProcessStatus status = reviewGenerationService.getProcessStatus(product.getId());
-        assertNotNull(status, "Process status should be available");
-        assertEquals(ProcessStatus.Status.SUCCESS, status.getStatus());
+        // Check that the role has been assigned
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        boolean hasRole = auth.getAuthorities().stream()
+                .anyMatch(authority -> authority.getAuthority().equals("ROLE_CAPTCHA_VERIFIED"));
+        assertTrue(hasRole);
     }
-    
-    /**
-     * New test case to verify that the URL content token thresholds and accumulation behave as expected.
-     * <p>
-     * This test simulates:
-     * <ul>
-     *   <li>A Google search returning two URLs.</li>
-     *   <li>One URL returns content with an estimated token count above the minimum threshold.
-     *       The other returns content with too few tokens.</li>
-     *   <li>The aggregated tokens should include only the valid content and stop accumulation when reaching the maximum tokens limit.</li>
-     * </ul>
-     */
-    @Test
-    public void testGenerateReviewSyncTokenLimits() {
-        // Create a dummy product.
-        Product product = new Product();
-        product.setId(1234567890123L);
-        product.getAttributes().getReferentielAttributes().put(ReferentielKey.BRAND, "TestBrand");
-        product.getAttributes().getReferentielAttributes().put(ReferentielKey.MODEL, "TestModel");
-        // No alternate models for simplicity.
-        
-        // Dummy vertical configuration.
-        VerticalConfig verticalConfig = new VerticalConfig();
-        verticalConfig.setId("testVertical");
-        ProductI18nElements i18n = new ProductI18nElements();
-        PrefixedAttrText p = new PrefixedAttrText();
-        p.setPrefix("TestVertical");
-        i18n.setH1Title(p);
-        verticalConfig.getI18n().put("fr", i18n);
 
-        // The mocks (GoogleSearchServiceMock, UrlFetchingServiceMock, PromptServiceMock)
-        // are assumed to be configured (or can be adjusted) so that:
-        // - The search returns two URLs.
-        // - The first URL returns content with an estimated token count of 150 (above a minTokens threshold of 100).
-        // - The second URL returns content with an estimated token count of 50 (below minTokens).
-        // - The ReviewGenerationConfig in application-test.yml is set for this test:
-        //      review.generation.max-search=2
-        //      review.generation.max-tokens-per-request=300
-        //      review.generation.min-tokens=100
-        //      review.generation.max-concurrent-fetch=3
-        // - The prompt service returns a fixed review text.
-        
-        try {
-            AiReview review = reviewGenerationService.generateReviewSync(product, verticalConfig);
-            assertNotNull(review, "The generated review should not be null");
-            System.out.println("Generated Review with token limits: " + review);
-        } catch (Exception e) {
-            fail("Review generation with token limits failed: ", e);
-        }
+    @Test
+    public void testVerifyRecaptchaFailure() {
+        // Prepare a mock response for a failed captcha verification
+        Map<String, Object> responseMap = new HashMap<>();
+        responseMap.put("success", false);
+        responseMap.put("error-codes", Arrays.asList("missing-input-response"));
+        ResponseEntity<Map> responseEntity = ResponseEntity.ok(responseMap);
+        when(restTemplate.postForEntity(anyString(), any(), eq(Map.class), any(Map.class)))
+                .thenReturn(responseEntity);
+
+        SecurityException exception = assertThrows(SecurityException.class,
+                () -> recaptchaService.verifyRecaptcha("127.0.0.1", "dummyResponse"));
+        assertTrue(exception.getMessage().contains("The response parameter is missing"));
     }
 }
 ~~~
 
-## [additional-spring-configuration-metadata.json - /home/goulven/git/open4goods/services/reviewgeneration/src/main/resources/META-INF/additional-spring-configuration-metadata.json]
+## [additional-spring-configuration-metadata.json - /home/goulven/git/open4goods/services/captcha/src/main/resources/META-INF/additional-spring-configuration-metadata.json]
 ~~~
 {
   "groups": [
     {
-      "name": "review.generation",
-      "type": "org.open4goods.services.reviewgeneration.config.ReviewGenerationConfig",
-      "sourceType": "org.open4goods.services.reviewgeneration.config.ReviewGenerationConfig"
+      "name": "captcha",
+      "type": "org.open4goods.services.captcha.config.CaptchaProperties",
+      "sourceType": "org.open4goods.services.captcha.config.CaptchaProperties"
     }
   ],
   "properties": [
     {
-      "name": "review.generation.thread-pool-size",
-      "type": "java.lang.Integer",
-      "description": "Number of threads allocated for processing.",
-      "defaultValue": 10
-    },
-    {
-      "name": "review.generation.preferred-domains",
-      "type": "java.util.List<java.lang.String>",
-      "description": "List of preferred domains to fetch content from.",
-      "defaultValue": []
-    },
-    {
-      "name": "review.generation.query-template",
+      "name": "captcha.secret-key",
       "type": "java.lang.String",
-      "description": "Template for constructing search queries.",
-      "defaultValue": "test %s \"%s\""
+      "description": "Secret key used for captcha verification.",
+      "defaultValue": ""
     },
     {
-      "name": "review.generation.max-search",
-      "type": "java.lang.Integer",
-      "description": "Maximum number of search queries allowed.",
-      "defaultValue": 2
-    },
-    {
-      "name": "review.generation.max-total-tokens",
-      "type": "java.lang.Integer",
-      "description": "Maximum total number of tokens allowed for aggregation.",
-      "defaultValue": 100000
-    },
-    {
-      "name": "review.generation.source-min-tokens",
-      "type": "java.lang.Integer",
-      "description": "Minimum number of tokens required for a source to be considered.",
-      "defaultValue": 150
-    },
-    {
-      "name": "review.generation.source-max-tokens",
-      "type": "java.lang.Integer",
-      "description": "Maximum number of tokens allowed per source.",
-      "defaultValue": 10000
-    },
-    {
-      "name": "review.generation.max-concurrent-fetch",
-      "type": "java.lang.Integer",
-      "description": "Maximum number of concurrent URL fetch operations.",
-      "defaultValue": 3
+      "name": "captcha.valid-role",
+      "type": "java.lang.String",
+      "description": "Spring Security role assigned to users upon successful captcha verification.",
+      "defaultValue": "ROLE_CAPTCHA_VERIFIED"
     }
   ]
 }
 ~~~
 
-## [ProcessStatus.java - /home/goulven/git/open4goods/services/reviewgeneration/src/main/java/org/open4goods/services/reviewgeneration/dto/ProcessStatus.java]
+## [HcaptchaUtil.java - /home/goulven/git/open4goods/services/captcha/src/main/java/org/open4goods/services/captcha/HcaptchaUtil.java]
 ~~~
-package org.open4goods.services.reviewgeneration.dto;
+package org.open4goods.services.captcha;
 
-import java.time.Instant;
-import java.util.Objects;
+import java.util.HashMap;
+import java.util.Map;
 
-import org.open4goods.model.ai.AiReview;
+public class HcaptchaUtil {
 
-/**
- * DTO representing the status of a review generation process.
- */
-public class ProcessStatus {
+	public static final Map<String, String>
+	RECAPTCHA_ERROR_CODE = new HashMap<>();
 
-    /**
-     * Possible states of a generation process.
-     */
-    public enum Status {
-        PENDING, PROCESSING, SUCCESS, FAILED;
-    }
-    
-    private long upc;
-    private Status status;
-    private Instant startTime;
-    private Instant endTime;
-    private AiReview result;
-    private String errorMessage;
-
-    // Getters and setters
-
-    public long getUpc() {
-        return upc;
-    }
-
-    public void setUpc(long upc) {
-        this.upc = upc;
-    }
-
-    public Status getStatus() {
-        return status;
-    }
-
-    public void setStatus(Status status) {
-        this.status = status;
-    }
-
-    public Instant getStartTime() {
-        return startTime;
-    }
-
-    public void setStartTime(Instant startTime) {
-        this.startTime = startTime;
-    }
-
-    public Instant getEndTime() {
-        return endTime;
-    }
-
-    public void setEndTime(Instant endTime) {
-        this.endTime = endTime;
-    }
-
-
-    public AiReview getResult() {
-		return result;
+	static {
+		RECAPTCHA_ERROR_CODE.put("missing-input-secret",
+				"The secret parameter is missing");
+		RECAPTCHA_ERROR_CODE.put("invalid-input-secret",
+				"The secret parameter is invalid or malformed");
+		RECAPTCHA_ERROR_CODE.put("missing-input-response",
+				"The response parameter is missing");
+		RECAPTCHA_ERROR_CODE.put("invalid-input-response",
+				"The response parameter is invalid or malformed");
+		RECAPTCHA_ERROR_CODE.put("bad-request",
+				"The request is invalid or malformed");
 	}
+}~~~
 
-	public void setResult(AiReview result) {
-		this.result = result;
-	}
-
-	public String getErrorMessage() {
-        return errorMessage;
-    }
-
-    public void setErrorMessage(String errorMessage) {
-        this.errorMessage = errorMessage;
-    }
-
-    // toString, equals, and hashCode
-
-    @Override
-    public String toString() {
-        return "ProcessStatus{" +
-                "upc=" + upc +
-                ", status=" + status +
-                ", startTime=" + startTime +
-                ", endTime=" + endTime +
-                ", result='" + result + '\'' +
-                ", errorMessage='" + errorMessage + '\'' +
-                '}';
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(upc, status, startTime, endTime, result, errorMessage);
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof ProcessStatus)) return false;
-        ProcessStatus that = (ProcessStatus) o;
-        return upc == that.upc &&
-                status == that.status &&
-                Objects.equals(startTime, that.startTime) &&
-                Objects.equals(endTime, that.endTime) &&
-                Objects.equals(result, that.result) &&
-                Objects.equals(errorMessage, that.errorMessage);
-    }
-}
+## [CaptchaProperties.java - /home/goulven/git/open4goods/services/captcha/src/main/java/org/open4goods/services/captcha/config/CaptchaProperties.java]
 ~~~
-
-## [ReviewRequest.java - /home/goulven/git/open4goods/services/reviewgeneration/src/main/java/org/open4goods/services/reviewgeneration/dto/ReviewRequest.java]
-~~~
-package org.open4goods.services.reviewgeneration.dto;
-
-import java.util.Objects;
-
-import org.open4goods.model.product.Product;
-import org.open4goods.model.vertical.VerticalConfig;
-
-/**
- * DTO representing a review generation request.
- */
-public class ReviewRequest {
-
-    private Product product;
-    
-    /**
-     * Vertical configuration (provided as an object; replace with a concrete type if available).
-     */
-    private VerticalConfig verticalConfig;
-
-    // Getters and setters
-
-    public Product getProduct() {
-        return product;
-    }
-
-    public void setProduct(Product product) {
-        this.product = product;
-    }
-
-
-    public VerticalConfig getVerticalConfig() {
-		return verticalConfig;
-	}
-
-	public void setVerticalConfig(VerticalConfig verticalConfig) {
-		this.verticalConfig = verticalConfig;
-	}
-
-	@Override
-    public String toString() {
-        return "ReviewRequest{" +
-                "product=" + product +
-                ", verticalConfig=" + verticalConfig +
-                '}';
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(product, verticalConfig);
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof ReviewRequest)) return false;
-        ReviewRequest that = (ReviewRequest) o;
-        return Objects.equals(product, that.product) &&
-               Objects.equals(verticalConfig, that.verticalConfig);
-    }
-}
-~~~
-
-## [ReviewGenerationConfig.java - /home/goulven/git/open4goods/services/reviewgeneration/src/main/java/org/open4goods/services/reviewgeneration/config/ReviewGenerationConfig.java]
-~~~
-package org.open4goods.services.reviewgeneration.config;
-
-import java.util.ArrayList;
-import java.util.List;
+package org.open4goods.services.captcha.config;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.context.annotation.Configuration;
+import org.springframework.stereotype.Component;
 
 /**
- * Configuration properties for the review generation service.
+ * Configuration properties for captcha validation.
+ * <p>
+ * Holds the secret key used for captcha verification and the spring role to assign upon successful verification.
+ * </p>
  */
-@Configuration
-@ConfigurationProperties(prefix = "review.generation")
-public class ReviewGenerationConfig {
+@Component
+@ConfigurationProperties(prefix = "captcha")
+public class CaptchaProperties {
 
-    private int threadPoolSize = 10;
+    /**
+     * The secret key for captcha verification.
+     */
+    private String secretKey;
 
-    private List<String> preferredDomains = new ArrayList<>();
+    /**
+     * The spring role assigned to users upon successful captcha verification.
+     */
+    private String validRole = "ROLE_CAPTCHA_VERIFIED";
 
-    // Existing property used for building search queries.
-    private String queryTemplate = "test %s \"%s\"";
-
-    // Retained property to limit the number of search queries.
-    private int maxSearch = 2;
-
-    // New properties for token-based content aggregation.
-    private int maxTotalTokens = 100000;
-    private int sourceMinTokens = 150;
-    private int sourceMaxTokens = 10000;
-
-    // New property: maximum concurrent URL fetch operations.
-    private int maxConcurrentFetch = 3;
-
-    // Getters and setters for existing properties.
-    public int getThreadPoolSize() {
-        return threadPoolSize;
-    }
-    public void setThreadPoolSize(int threadPoolSize) {
-        this.threadPoolSize = threadPoolSize;
-    }
-    public List<String> getPreferredDomains() {
-        return preferredDomains;
-    }
-    public void setPreferredDomains(List<String> preferredDomains) {
-        this.preferredDomains = preferredDomains;
-    }
-    public String getQueryTemplate() {
-        return queryTemplate;
-    }
-    public void setQueryTemplate(String queryTemplate) {
-        this.queryTemplate = queryTemplate;
+    public String getSecretKey() {
+        return secretKey;
     }
 
-    // Getters and setters for new properties.
-    public int getMaxSearch() {
-        return maxSearch;
+    public void setSecretKey(String secretKey) {
+        this.secretKey = secretKey;
     }
-    public void setMaxSearch(int maxSearch) {
-        this.maxSearch = maxSearch;
+
+    public String getValidRole() {
+        return validRole;
     }
-    public int getMaxTotalTokens() {
-        return maxTotalTokens;
+
+    public void setValidRole(String validRole) {
+        this.validRole = validRole;
     }
-    public void setMaxTotalTokens(int maxTokensPerRequest) {
-        this.maxTotalTokens = maxTokensPerRequest;
+
+    /**
+     * For security reasons, the secretKey is not displayed.
+     */
+    @Override
+    public String toString() {
+        return "CaptchaProperties{secretKey=****, validRole='" + validRole + '\'' + '}';
     }
-    public int getSourceMinTokens() {
-        return sourceMinTokens;
-    }
-    public void setSourceMinTokens(int minTokens) {
-        this.sourceMinTokens = minTokens;
-    }
-    public int getMaxConcurrentFetch() {
-        return maxConcurrentFetch;
-    }
-    public void setMaxConcurrentFetch(int maxConcurrentFetch) {
-        this.maxConcurrentFetch = maxConcurrentFetch;
-    }
-	public int getSourceMaxTokens() {
-		return sourceMaxTokens;
-	}
-	public void setSourceMaxTokens(int sourceMaxTokens) {
-		this.sourceMaxTokens = sourceMaxTokens;
-	}
-    
-    
 }
 ~~~
 
-## [application-test.yml - /home/goulven/git/open4goods/services/reviewgeneration/src/test/resources/application-test.yml]
-~~~
-spring:
-  ai:
-    openai:
-        api-key: sk-proj-FI9z9MAyJTarx13yZZNZuz66PL-ywf0hR1iX4e8sxa3aVoOtYfgOVnb3uUb84K-ugm9D-zhz5iT3BlbkFJZiHIaVGF8Z_qS-
-        chat:
-          api-key: sk-proj-FI9z9MAyJTarx13yZZNZuz66PL-ywf0hR1iX4e8sxa3aVoOtYfgOVnb3uUb84K-ugm9D-zhz5iT3BlbkFJZiHIaVGF8Z_qS-
-            
-gen-ai-config:
-  cache-templates: true
-  enabled: true
-  prompts-templates-folder: src/test/resources/prompts
-  
-  ~~~
-
-## [pom.xml - /home/goulven/git/open4goods/services/reviewgeneration/pom.xml]
+## [pom.xml - /home/goulven/git/open4goods/services/captcha/pom.xml]
 ~~~
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -931,72 +342,32 @@ gen-ai-config:
     <artifactId>org.open4goods</artifactId>
     <version>0.0.1-SNAPSHOT</version>
   </parent>
-  <artifactId>reviewgeneration</artifactId>
+  <artifactId>captcha</artifactId>
   
   
     <dependencies>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-actuator</artifactId>
-        </dependency>
-
-    
-
-        <dependency>
-            <groupId>org.open4goods</groupId>
-            <artifactId>model</artifactId>
-            <version>${global.version}</version>
-        </dependency>
-        
-        <dependency>
-            <groupId>org.open4goods</groupId>
-            <artifactId>googlesearch</artifactId>
-            <version>${global.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.open4goods</groupId>
-            <artifactId>googlesearch</artifactId>
-            <version>${global.version}</version>
-            <classifier>tests</classifier>
-            <scope>test</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>org.open4goods</groupId>
-            <artifactId>urlfetching</artifactId>
-            <version>${global.version}</version>
-            <classifier>tests</classifier>
-            <scope>test</scope>
-        </dependency>
-        
-        <dependency>
-            <groupId>org.open4goods</groupId>
-            <artifactId>prompt</artifactId>
-            <version>${global.version}</version>
-            <classifier>tests</classifier>
-            <scope>test</scope>
-        </dependency>
-        
-        <dependency>
-            <groupId>org.open4goods</groupId>
-            <artifactId>urlfetching</artifactId>
-            <version>${global.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.open4goods</groupId>
-            <artifactId>prompt</artifactId>
-            <version>${global.version}</version>
-        </dependency>
-
-
+       
         <dependency>
         	<groupId>org.springframework.boot</groupId>
         	<artifactId>spring-boot-configuration-processor</artifactId>
         	<optional>true</optional>
         </dependency>
+        
+        <!-- TODO : Should not include starter, but classical spring deps-->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-security</artifactId>
+        </dependency>
+
+
+
     </dependencies>
+  
   
     <build>
     <plugins>
@@ -1027,6 +398,7 @@ gen-ai-config:
       </plugin>
     </plugins>
   </build>
+  
 </project>
 ~~~
 
@@ -1075,7 +447,9 @@ gen-ai-config:
         <module>services/evaluation</module>
         <module>services/serialisation</module>
         <module>services/prompt</module>
-        <module>services/reviewgeneration</module>
+        <module>services/review-generation</module>
+        <module>services/product-repository</module>
+        <module>services/captcha</module>
         
         
 	</modules>

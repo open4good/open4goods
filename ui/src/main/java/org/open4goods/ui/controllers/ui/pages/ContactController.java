@@ -2,7 +2,7 @@ package org.open4goods.ui.controllers.ui.pages;
 
 import org.open4goods.commons.helper.IpHelper;
 import org.open4goods.commons.services.MailService;
-import org.open4goods.commons.services.RecaptchaService;
+import org.open4goods.services.captcha.service.HcaptchaService;
 import org.open4goods.ui.config.yml.UiConfig;
 import org.open4goods.ui.controllers.ui.UiService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,9 +24,9 @@ public class ContactController implements SitemapExposedController{
 	private @Autowired UiService uiService;
 	private final UiConfig uiConfig;
 
-	private final RecaptchaService captchaService;
+	private final HcaptchaService captchaService;
 
-	public ContactController(MailService mailService, UiConfig uiConfig, RecaptchaService captchaService) {
+	public ContactController(MailService mailService, UiConfig uiConfig, HcaptchaService captchaService) {
 		this.mailService = mailService;
 		this.uiConfig = uiConfig;
 		this.captchaService = captchaService;

@@ -16,7 +16,6 @@ import org.open4goods.commons.services.IcecatService;
 import org.open4goods.commons.services.ImageGenerationService;
 import org.open4goods.commons.services.ImageMagickService;
 import org.open4goods.commons.services.MailService;
-import org.open4goods.commons.services.RecaptchaService;
 import org.open4goods.commons.services.RemoteFileCachingService;
 import org.open4goods.commons.services.ResourceBundle;
 import org.open4goods.commons.services.ResourceService;
@@ -27,6 +26,7 @@ import org.open4goods.model.StandardiserService;
 import org.open4goods.model.constants.CacheConstants;
 import org.open4goods.model.price.Currency;
 import org.open4goods.model.price.Price;
+import org.open4goods.services.captcha.service.HcaptchaService;
 import org.open4goods.services.evaluation.config.EvaluationConfig;
 import org.open4goods.services.evaluation.service.EvaluationService;
 import org.open4goods.services.googlesearch.config.GoogleSearchConfig;
@@ -255,8 +255,8 @@ public class AppConfig {
 
 
 	@Bean
-	RecaptchaService recaptchaService() {
-		return new RecaptchaService();
+	HcaptchaService recaptchaService() {
+		return new HcaptchaService();
 	}
 
 

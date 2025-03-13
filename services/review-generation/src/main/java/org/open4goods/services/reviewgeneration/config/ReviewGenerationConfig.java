@@ -1,5 +1,6 @@
 package org.open4goods.services.reviewgeneration.config;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -14,22 +15,34 @@ import org.springframework.context.annotation.Configuration;
 public class ReviewGenerationConfig {
 
     private int threadPoolSize = 10;
-    private int maxQueueSize = 100;  // New property: maximum size of the executor queue
+    private int maxQueueSize = 100;  // Maximum size of the executor queue.
     private List<String> preferredDomains = new ArrayList<>();
 
-    // Existing property used for building search queries.
+    // Property used for building search queries.
     private String queryTemplate = "test %s \"%s\"";
 
-    // Retained property to limit the number of search queries.
+    // Limit the number of search queries.
     private int maxSearch = 2;
 
-    // New properties for token-based content aggregation.
+    // Properties for token-based content aggregation.
     private int maxTotalTokens = 100000;
     private int sourceMinTokens = 150;
     private int sourceMaxTokens = 10000;
 
-    // New property: maximum concurrent URL fetch operations.
+    // Maximum concurrent URL fetch operations.
     private int maxConcurrentFetch = 3;
+
+    /**
+     * The delay in months after which an existing AI review is considered outdated.
+     * Default value is 6 months.
+     */
+    private int refreshDelayMonths = 6;
+
+    /**
+     * Estimated time for the review generation process.
+     * Used to compute the remaining time.
+     */
+    private Duration estimatedTime = Duration.parse("PT2M");
 
     // Getters and setters for existing properties.
     public int getThreadPoolSize() {
@@ -59,7 +72,6 @@ public class ReviewGenerationConfig {
         this.queryTemplate = queryTemplate;
     }
 
-    // Getters and setters for new properties.
     public int getMaxSearch() {
         return maxSearch;
     }
@@ -89,5 +101,20 @@ public class ReviewGenerationConfig {
     }
     public void setSourceMaxTokens(int sourceMaxTokens) {
         this.sourceMaxTokens = sourceMaxTokens;
+    }
+
+    public int getRefreshDelayMonths() {
+        return refreshDelayMonths;
+    }
+    public void setRefreshDelayMonths(int refreshDelayMonths) {
+        this.refreshDelayMonths = refreshDelayMonths;
+    }
+    
+    public Duration getEstimatedTime() {
+        return estimatedTime;
+    }
+    
+    public void setEstimatedTime(Duration estimatedTime) {
+        this.estimatedTime = estimatedTime;
     }
 }
