@@ -8,8 +8,8 @@
           </div>
         </div>  
         
-        <form action="./review" method="post">
-            <input class="btn btn-facebook mb-3" type="button" value="generate">
+        <form th:action="${url}+'/review'" method="post">
+            <input class="btn btn-facebook mb-3" type="submit" value="generate">
         </form>
         
     <!-- Podium section 
@@ -180,17 +180,17 @@
 					
                   <!-- Bilan -->
                   <div th:if="${aiReview}" class="card shadow border-gray-300">
-                   <div class="card-body p-4 p-lg-5">
-                         <div class="d-flex p-3 justify-content-center">                                                     
-                             <div class="icon icon-primary">
-                                 <span class="fas fa-id-card"></span>
-                             </div>                                                      
-                             <div class="ps-4">
-                                 <h3 class="h5 icon-box-title md-1">Verdict</h3>
-                             </div>
-                         </div>
-                         <div  class="lead" th:utext="${aiReview.review}"></div>
-                   </div>
+	                   <div class="card-body p-4 p-lg-5">
+	                         <div class="d-flex p-3 justify-content-center">                                                     
+	                             <div class="icon icon-primary">
+	                                 <span class="fas fa-id-card"></span>
+	                             </div>                                                      
+	                             <div class="ps-4">
+	                                 <h3 class="h5 icon-box-title md-1">Verdict</h3>
+	                             </div>
+	                         </div>
+	                         <div  class="lead" th:utext="${aiReview.review}"></div>
+	                   </div>
                  </div>
   
 					

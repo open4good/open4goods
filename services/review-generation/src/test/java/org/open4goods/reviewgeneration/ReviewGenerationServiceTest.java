@@ -17,7 +17,7 @@ import org.open4goods.model.vertical.ProductI18nElements;
 import org.open4goods.model.vertical.VerticalConfig;
 import org.open4goods.services.prompt.service.mock.PromptServiceMock;
 import org.open4goods.services.reviewgeneration.config.ReviewGenerationConfig;
-import org.open4goods.services.reviewgeneration.dto.ProcessStatus;
+import org.open4goods.services.reviewgeneration.dto.ReviewGenerationStatus;
 import org.open4goods.services.reviewgeneration.service.ReviewGenerationService;
 import org.open4goods.urlfetching.service.mock.UrlFetchingServiceMock;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -56,8 +56,10 @@ public class ReviewGenerationServiceTest {
         product.getAttributes().getReferentielAttributes().put(ReferentielKey.BRAND, "LG");
         product.getAttributes().getReferentielAttributes().put(ReferentielKey.MODEL, "24TQ510S");
         product.setAkaModels(Set.of("24TQ510S-PZ.API", "24TQ510S-PZ"));
+        // Assume product has a setter for GTIN.
+        product.setId(123L);
 
-        // Dummy vertical configuration (as a String for testing).
+        // Dummy vertical configuration.
         VerticalConfig verticalConfig = new VerticalConfig();
         verticalConfig.setId("tv");
         ProductI18nElements i18n = new ProductI18nElements();
@@ -76,9 +78,9 @@ public class ReviewGenerationServiceTest {
         }
 
         // Verify that the process status is SUCCESS and that processing messages were recorded.
-        ProcessStatus status = reviewGenerationService.getProcessStatus(product.getId());
+        ReviewGenerationStatus status = reviewGenerationService.getProcessStatus(product.getId());
         assertNotNull(status, "Process status should be available");
-        assertEquals(ProcessStatus.Status.SUCCESS, status.getStatus());
+        assertEquals(ReviewGenerationStatus.Status.SUCCESS, status.getStatus());
         assertTrue(status.getMessages().stream().anyMatch(msg -> msg.contains("Searching the web")),
                 "Process messages should contain a web search message");
         assertTrue(status.getMessages().stream().anyMatch(msg -> msg.contains("AI generation")),
@@ -87,7 +89,6 @@ public class ReviewGenerationServiceTest {
     
     /**
      * New test case to verify that the URL content token thresholds and accumulation behave as expected.
-     * <p>
      * This test simulates:
      * <ul>
      *   <li>A Google search returning two URLs.</li>
@@ -103,6 +104,7 @@ public class ReviewGenerationServiceTest {
         product.setId(1234567890123L);
         product.getAttributes().getReferentielAttributes().put(ReferentielKey.BRAND, "TestBrand");
         product.getAttributes().getReferentielAttributes().put(ReferentielKey.MODEL, "TestModel");
+        product.setId(123L);
         // No alternate models for simplicity.
         
         // Dummy vertical configuration.
@@ -120,6 +122,40 @@ public class ReviewGenerationServiceTest {
             System.out.println("Generated Review with token limits: " + review);
         } catch (Exception e) {
             fail("Review generation with token limits failed: ", e);
+        }
+    }
+    
+    /**
+     * New test case to verify that duplicate submissions for the same GTIN are disabled.
+     */
+    @Test
+    public void testDuplicateSubmission() {
+        // Create a dummy product.
+        Product product = new Product();
+        product.setId(1111111111111L);
+        product.getAttributes().getReferentielAttributes().put(ReferentielKey.BRAND, "DuplicateBrand");
+        product.getAttributes().getReferentielAttributes().put(ReferentielKey.MODEL, "Model1");
+        product.setAkaModels(Set.of());
+        product.setId(0L);
+        
+        // Dummy vertical configuration.
+        VerticalConfig verticalConfig = new VerticalConfig();
+        verticalConfig.setId("dup");
+        ProductI18nElements i18n = new ProductI18nElements();
+        PrefixedAttrText p = new PrefixedAttrText();
+        p.setPrefix("Duplicate");
+        i18n.setH1Title(p);
+        verticalConfig.getI18n().put("fr", i18n);
+        
+        // First submission (async) should succeed.
+        long upc1 = reviewGenerationService.generateReviewAsync(product, verticalConfig);
+        // Second submission with same GTIN should throw an exception.
+        try {
+            reviewGenerationService.generateReviewAsync(product, verticalConfig);
+            fail("Expected an exception for duplicate submission with same GTIN");
+        } catch (IllegalStateException e) {
+            // Expected exception.
+            System.out.println("Caught expected duplicate submission exception: " + e.getMessage());
         }
     }
 }

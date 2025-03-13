@@ -1,9 +1,9 @@
-package org.open4goods.commons.helper;
+package org.open4goods.services.captcha;
 
 import java.util.HashMap;
 import java.util.Map;
 
-public class RecaptchaUtil {
+public class HcaptchaUtil {
 
 	public static final Map<String, String>
 	RECAPTCHA_ERROR_CODE = new HashMap<>();

@@ -60,6 +60,18 @@
       "type": "java.lang.Integer",
       "description": "Maximum number of concurrent URL fetch operations.",
       "defaultValue": 3
+    },
+    {
+      "name": "review.generation.refresh-delay-months",
+      "type": "java.lang.Integer",
+      "description": "Delay in months after which an existing AI review is considered outdated.",
+      "defaultValue": 6
+    },
+    {
+      "name": "review.generation.estimated-time",
+      "type": "java.time.Duration",
+      "description": "Estimated time for review generation process. Used to compute remaining time.",
+      "defaultValue": "PT2M"
     }
   ]
 }

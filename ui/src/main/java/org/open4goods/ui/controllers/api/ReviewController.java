@@ -7,7 +7,7 @@ import org.open4goods.commons.services.VerticalsConfigService;
 import org.open4goods.model.exceptions.ResourceNotFoundException;
 import org.open4goods.model.product.Product;
 import org.open4goods.services.productrepository.services.ProductRepository;
-import org.open4goods.services.reviewgeneration.dto.ProcessStatus;
+import org.open4goods.services.reviewgeneration.dto.ReviewGenerationStatus;
 import org.open4goods.services.reviewgeneration.service.ReviewGenerationService;
 import org.open4goods.ui.config.yml.UiConfig;
 import org.slf4j.Logger;
@@ -54,10 +54,10 @@ public class ReviewController  {
 	
 	
 	@GetMapping(path = {"/{vertical}/{id:\\d+}-*/review","/{id:\\d+}-*/review"}   )
-	@PreAuthorize("hasAuthority('"+RolesConstants.ROLE_XWIKI_ALL+"')")
-	public ProcessStatus generateReviewStatus(@PathVariable Long id, @PathVariable(required = false) String vertical) throws IOException, ResourceNotFoundException {
+//	@PreAuthorize("hasAuthority('"+RolesConstants.ROLE_XWIKI_ALL+"')")
+	public ReviewGenerationStatus generateReviewStatus(@PathVariable Long id, @PathVariable(required = false) String vertical) throws IOException, ResourceNotFoundException {
 		
-		ProcessStatus ret = reviewGenerationService.getProcessStatus(id);
+		ReviewGenerationStatus ret = reviewGenerationService.getProcessStatus(id);
 		return ret;
 	}
 
