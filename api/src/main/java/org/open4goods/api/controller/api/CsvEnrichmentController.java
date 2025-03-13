@@ -12,13 +12,13 @@ import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 import org.open4goods.api.model.EnrichmentFacet;
-import org.open4goods.commons.dao.ProductRepository;
 import org.open4goods.commons.model.constants.RolesConstants;
 import org.open4goods.commons.services.BarcodeValidationService;
 import org.open4goods.model.exceptions.ResourceNotFoundException;
 import org.open4goods.model.product.BarcodeType;
 import org.open4goods.model.product.Product;
 import org.open4goods.model.product.ProductCondition;
+import org.open4goods.services.productrepository.services.ProductRepository;
 import org.open4goods.services.serialisation.service.SerialisationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

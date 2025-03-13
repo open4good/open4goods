@@ -9,7 +9,6 @@ import java.util.Objects;
 import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
-import org.open4goods.commons.dao.ProductRepository;
 import org.open4goods.commons.model.dto.NumericBucket;
 import org.open4goods.commons.model.dto.NumericRangeFilter;
 import org.open4goods.commons.model.dto.VerticalFilterTerm;
@@ -21,6 +20,7 @@ import org.open4goods.model.product.ProductCondition;
 import org.open4goods.model.vertical.AttributeConfig;
 import org.open4goods.model.vertical.SubsetCriteria;
 import org.open4goods.model.vertical.VerticalConfig;
+import org.open4goods.services.productrepository.services.ProductRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cache.annotation.Cacheable;

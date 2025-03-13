@@ -21,7 +21,6 @@ import org.springframework.web.servlet.ModelAndView;
 
 import com.mashape.unirest.http.exceptions.UnirestException;
 
-import io.micrometer.core.annotation.Timed;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 

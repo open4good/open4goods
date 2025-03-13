@@ -5,10 +5,9 @@ import java.io.IOException;
 
 import org.open4goods.commons.config.CacheKeyGenerator;
 import org.open4goods.commons.store.repository.elastic.BrandScoresRepository;
-import org.open4goods.commons.store.repository.elastic.ElasticProductRepository;
-import org.open4goods.commons.store.repository.elastic.ElasticTextRepository;
 import org.open4goods.crawler.controller.CrawlController;
 import org.open4goods.crawler.repository.IndexationRepository;
+import org.open4goods.services.productrepository.repository.ElasticProductRepository;
 import org.open4goods.services.serialisation.service.SerialisationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,8 +27,7 @@ import jakarta.annotation.PostConstruct;
 @SpringBootApplication (scanBasePackages = {"org.open4goods.services"}, scanBasePackageClasses = { Api.class, CrawlController.class, CacheKeyGenerator.class})
 
 @EnableScheduling
-@EnableElasticsearchRepositories(basePackageClasses = {ElasticProductRepository.class, IndexationRepository.class, BrandScoresRepository.class, ElasticTextRepository.class})
-//@EnableRedisRepositories(basePackageClasses = RedisProductRepository.class)
+@EnableElasticsearchRepositories(basePackageClasses = {ElasticProductRepository.class, IndexationRepository.class, BrandScoresRepository.class})
 @EnableCaching
 
 public abstract class Api {

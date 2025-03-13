@@ -8,8 +8,6 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
-import org.open4goods.commons.dao.ProductRepository;
-import org.open4goods.commons.model.constants.RolesConstants;
 import org.open4goods.commons.model.data.ContributionVote;
 import org.open4goods.commons.model.dto.AttributesFeatureGroups;
 import org.open4goods.commons.services.BrandService;
@@ -23,6 +21,7 @@ import org.open4goods.model.price.AggregatedPrice;
 import org.open4goods.model.price.PriceTrend;
 import org.open4goods.model.product.Product;
 import org.open4goods.model.vertical.VerticalConfig;
+import org.open4goods.services.productrepository.services.ProductRepository;
 import org.open4goods.services.reviewgeneration.service.ReviewGenerationService;
 import org.open4goods.services.serialisation.service.SerialisationService;
 import org.open4goods.ui.config.yml.UiConfig;
@@ -31,7 +30,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -385,22 +383,6 @@ public class ProductController  {
 			LOGGER.error("Error while generating affiliation token for {} : {}", data, e.getMessage());
 		}
 	}
-
-	
-
-
-	@GetMapping(path = {"/{vertical}/{id:\\d+}-*/review","/{id:\\d+}-*/review"}   )
-	// 8806091548818
-	// TODO
-	@PreAuthorize("hasAuthority('"+RolesConstants.ROLE_XWIKI_ALL+"')")
-	public ModelAndView generateReview(@PathVariable Long id, @PathVariable(required = false) String vertical) throws IOException, ResourceNotFoundException {
-		Product product = productRepository.getById(id);
-		
-		reviewGenerationService.generateReviewAsync(product, verticalConfigService.getConfigById(product.getVertical()));
-		return null;
-	}
-
-	
 	
 	
 }

@@ -41,7 +41,8 @@
         <module>services/evaluation</module>
         <module>services/serialisation</module>
         <module>services/prompt</module>
-        <module>services/reviewgeneration</module>
+        <module>services/review-generation</module>
+        <module>services/product-repository</module>
         
         
 	</modules>

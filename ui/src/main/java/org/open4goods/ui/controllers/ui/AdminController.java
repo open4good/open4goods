@@ -2,12 +2,12 @@ package org.open4goods.ui.controllers.ui;
 
 import java.io.IOException;
 
-import org.open4goods.commons.dao.ProductRepository;
 import org.open4goods.commons.model.constants.RolesConstants;
 import org.open4goods.commons.services.ImageGenerationService;
 import org.open4goods.commons.services.VerticalsConfigService;
 import org.open4goods.model.exceptions.ResourceNotFoundException;
 import org.open4goods.model.vertical.VerticalConfig;
+import org.open4goods.services.productrepository.services.ProductRepository;
 //import org.open4goods.services.ai.AiService;
 import org.open4goods.ui.config.yml.UiConfig;
 import org.open4goods.ui.services.GoogleIndexationService;

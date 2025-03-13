@@ -2,9 +2,7 @@
 package org.open4goods.api.services.aggregation.services.realtime;
 
 import java.util.AbstractMap.SimpleEntry;
-import java.util.HashMap;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.open4goods.api.services.aggregation.AbstractAggregationService;

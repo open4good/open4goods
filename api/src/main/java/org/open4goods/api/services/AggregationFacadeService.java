@@ -20,7 +20,6 @@ import org.open4goods.api.services.aggregation.services.realtime.MediaAggregatio
 import org.open4goods.api.services.aggregation.services.realtime.NamesAggregationService;
 import org.open4goods.api.services.aggregation.services.realtime.PriceAggregationService;
 import org.open4goods.api.services.aggregation.services.realtime.TaxonomyRealTimeAggregationService;
-import org.open4goods.commons.dao.ProductRepository;
 import org.open4goods.commons.exceptions.AggregationSkipException;
 import org.open4goods.commons.helper.GenericFileLogger;
 import org.open4goods.commons.services.BarcodeValidationService;
@@ -37,6 +36,7 @@ import org.open4goods.model.datafragment.DataFragment;
 import org.open4goods.model.product.Product;
 import org.open4goods.model.vertical.VerticalConfig;
 import org.open4goods.services.evaluation.service.EvaluationService;
+import org.open4goods.services.productrepository.services.ProductRepository;
 import org.open4goods.services.serialisation.service.SerialisationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

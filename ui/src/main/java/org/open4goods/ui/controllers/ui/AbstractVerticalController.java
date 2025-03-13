@@ -1,6 +1,5 @@
 package org.open4goods.ui.controllers.ui;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -18,14 +17,12 @@ import org.open4goods.services.serialisation.service.SerialisationService;
 import org.open4goods.ui.services.BlogService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.AbstractController;
 
 import com.ibm.icu.util.ULocale;
 
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 
 /**
  * This controller maps the verticals pages
