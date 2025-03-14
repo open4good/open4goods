@@ -254,11 +254,6 @@ public class AppConfig {
 	}
 
 
-	@Bean
-	HcaptchaService recaptchaService() {
-		return new HcaptchaService();
-	}
-
 
 	@Bean MailService mailService(@Autowired final JavaMailSender sender) {
 		return new MailService(sender);

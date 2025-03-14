@@ -13,6 +13,14 @@ import org.springframework.stereotype.Component;
 @ConfigurationProperties(prefix = "captcha")
 public class HcaptchaProperties {
 
+	
+    /**
+     * The (public) key identifying captcha app.
+     */
+    private String key;
+
+    
+    
     /**
      * The secret key for captcha verification.
      */
@@ -21,7 +29,7 @@ public class HcaptchaProperties {
     /**
      * The Spring Security role assigned to users upon successful captcha verification.
      */
-    private String validRole = "ROLE_CAPTCHA_VERIFIED";
+    private String validRole = "ROLE_HUMAN";
 
     public String getSecretKey() {
         return secretKey;
@@ -49,4 +57,14 @@ public class HcaptchaProperties {
     public String toString() {
         return "CaptchaProperties{secretKey=****, validRole='" + validRole + '\'' + '}';
     }
+
+	public String getKey() {
+		return key;
+	}
+
+	public void setKey(String key) {
+		this.key = key;
+	}
+    
+    
 }

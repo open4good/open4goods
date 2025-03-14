@@ -13,6 +13,12 @@
       "description": "Secret key used for captcha verification.",
       "defaultValue": ""
     },
+  {
+      "name": "captcha.key",
+      "type": "java.lang.String",
+      "description": "key used to identify captcha app.",
+      "defaultValue": ""
+    },
     {
       "name": "captcha.valid-role",
       "type": "java.lang.String",

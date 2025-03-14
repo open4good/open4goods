@@ -1,6 +1,5 @@
 package org.open4goods.services.reviewgeneration.config;
 
-import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -42,7 +41,7 @@ public class ReviewGenerationConfig {
      * Estimated time for the review generation process.
      * Used to compute the remaining time.
      */
-    private Duration estimatedTime = Duration.parse("PT2M");
+    private Long estimatedTime = 1000L * 60 * 2;
 
     // Getters and setters for existing properties.
     public int getThreadPoolSize() {
@@ -110,11 +109,11 @@ public class ReviewGenerationConfig {
         this.refreshDelayMonths = refreshDelayMonths;
     }
     
-    public Duration getEstimatedTime() {
+    public Long getEstimatedTime() {
         return estimatedTime;
     }
     
-    public void setEstimatedTime(Duration estimatedTime) {
+    public void setEstimatedTime(Long estimatedTime) {
         this.estimatedTime = estimatedTime;
     }
 }

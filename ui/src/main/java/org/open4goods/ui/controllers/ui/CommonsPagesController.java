@@ -9,6 +9,7 @@ import java.nio.file.Path;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
+import org.open4goods.services.captcha.config.HcaptchaProperties;
 import org.open4goods.ui.config.yml.UiConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,6 +36,8 @@ public class CommonsPagesController  {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CommonsPagesController.class);
 	private @Autowired UiService uiService;
+
+	
 	// The siteConfig
 	private final UiConfig config;
 
@@ -68,6 +71,8 @@ public class CommonsPagesController  {
 		return uiService.defaultModelAndView("opensearch", request).addObject("opensearch", config.getOpenSearchConfig());
 	}
 
+
+	
 	@GetMapping(path= "/sitemap_index.xml", produces = MediaType.APPLICATION_XML_VALUE)
 	public void sitemapIndex(final HttpServletRequest request, HttpServletResponse response) throws IOException {
 		
