@@ -27,10 +27,11 @@ public class ReviewGenerationStatus {
     
     private long upc;
     private Status status;
-    private Instant startTime;
-    private Instant endTime;
+    private Long startTime;
+    private Long endTime;
     private AiReview result;
     private String errorMessage;
+    private Integer percent = 0;
     
     /**
      * List of processing messages that track the internal state.
@@ -70,23 +71,24 @@ public class ReviewGenerationStatus {
         this.status = status;
     }
 
-    public Instant getStartTime() {
-        return startTime;
-    }
 
-    public void setStartTime(Instant startTime) {
-        this.startTime = startTime;
-    }
+    public Long getStartTime() {
+		return startTime;
+	}
 
-    public Instant getEndTime() {
-        return endTime;
-    }
+	public void setStartTime(Long startTime) {
+		this.startTime = startTime;
+	}
 
-    public void setEndTime(Instant endTime) {
-        this.endTime = endTime;
-    }
+	public Long getEndTime() {
+		return endTime;
+	}
 
-    public AiReview getResult() {
+	public void setEndTime(Long endTime) {
+		this.endTime = endTime;
+	}
+
+	public AiReview getResult() {
         return result;
     }
 
@@ -143,9 +145,20 @@ public class ReviewGenerationStatus {
         this.gtin = gtin;
     }
 
+    
+    
+    
     // toString, equals, and hashCode
 
-    @Override
+    public Integer getPercent() {
+		return percent;
+	}
+
+	public void setPercent(Integer percent) {
+		this.percent = percent;
+	}
+
+	@Override
     public String toString() {
         return "ReviewGenerationStatus{" +
                 "upc=" + upc +

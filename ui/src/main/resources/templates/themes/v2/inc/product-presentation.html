@@ -3,16 +3,56 @@
         <div class="row text-center justify-content-center">
            <div class="col-md-8 mb-5">
                 <h2 class="display-3">
-                    Test du <span  th:text="${product.bestName()}"></span>
+                    Bilan du <span  th:text="${product.bestName()}"></span>
                 </h2>
           </div>
         </div>  
         
-        <form th:action="${url}+'/review'" method="post">
-            <input class="btn btn-facebook mb-3" type="submit" value="generate">
-        </form>
         
-    <!-- Podium section 
+        
+        
+            <button id="triggerButton" class="btn btn-facebook mb-3">Génerer</button>
+ 
+			<!-- Modal structure -->
+			<div class="modal fade modal-lg" id="reviewProcessModal" tabindex="-1" role="dialog" 
+			     aria-labelledby="reviewProcessModalLabel" aria-hidden="true" 
+			     data-backdrop="static" 
+			     data-keyboard="false">
+			  <div class="modal-dialog" role="document">
+			    <div class="modal-content">
+			      <div class="modal-header">
+			        <h5 class="modal-title" id="reviewProcessModalLabel">Analyse de <span th:text="${product.brandAndModel()}"></span></h5>
+			        <!-- Dismiss button removed to enforce non-dismissible behavior -->
+			      </div>
+			      <div class="modal-body" id="modalContentContainer">
+			        <!-- Content will be loaded here dynamically -->
+			      </div>
+			      <div class="modal-footer">
+			        <!-- Optional footer content -->
+			      </div>
+			    </div>
+			  </div>
+			</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+	<!-- Podium section 
 
 	<div class="row mb-5">
 		<div class="col-12 col-md-6 col-lg-4">
@@ -151,7 +191,10 @@
 											<h3 class="h5 icon-box-title md-1">Avantages</h3>
 										</div>
 									</div>
-									 <th:block th:utext="${aiReview.pros}"></th:block>
+									 <ul>
+									   <li th:each="pro : ${aiReview.pros}" th:utext="${pro}"></li>
+									 
+									 </ul>
 								</div>
 							</div>
 							<!-- End of Icon Box -->
@@ -170,7 +213,10 @@
 											<h3 class="h5 icon-box-title md-1">Inconvénients</h3>
 										</div>
 									</div>
-									 <th:block th:utext="${aiReview.cons}"></th:block>
+									                                    <ul>
+                                       <li th:each="con : ${aiReview.cons}" th:utext="${con}"></li>
+                                     
+                                     </ul>
 								</div>
 							</div>
 							<!-- End of Icon Box -->
@@ -178,8 +224,59 @@
 					</div>
 					
 					
+					
+					
+					
+					<div th:if="${aiReview}" class="row ">
+                        <!-- Avantages -->
+                        <div  class="col-sm-12 col-md-12 col-lg-6 mt-3">
+                            <!-- Icon Box -->
+                            <div class="card border-gray-300 ">
+                                <div class="card-body">
+                                    <div class="d-flex p-3">
+                                        <div class="icon icon-primary">
+                                            <span class="fas fa-plus"></span>
+                                        </div>
+                                        <div class="ps-4">
+                                            <h3 class="h5 icon-box-title md-1">Revue technique</h3>
+                                        </div>
+                                    </div>
+                                     <p th:text="${aiReview.technicalReview}" ></p>
+                                </div>
+                            </div>
+                            <!-- End of Icon Box -->
+                        </div>
+
+                        <!-- Inconvénients -->
+                        <div th:if="${aiReview}" class="col-sm-12 col-md-12 col-lg-6 mt-3">
+                            <!-- Icon Box -->
+                            <div class="card border-gray-300 ">
+                                <div class="card-body">
+                                    <div class="d-flex p-3">
+                                        <div class="icon icon-primary">
+                                            <span class="fas fa-minus"></span>
+                                        </div>
+                                        <div class="ps-4">
+                                            <h3 class="h5 icon-box-title md-1">Ecologie et durabilité</h3>
+                                        </div>
+                                    </div>
+                                    <p th:text="${aiReview.ecologicalReview}" ></p>
+                                </div>
+                            </div>
+                            <!-- End of Icon Box -->
+                        </div>
+                    </div>
+					
+					
+					
+					
+					
+					
+					
+					
+					
                   <!-- Bilan -->
-                  <div th:if="${aiReview}" class="card shadow border-gray-300">
+                  <div th:if="${aiReview}" class="mt-4 card shadow border-gray-300">
 	                   <div class="card-body p-4 p-lg-5">
 	                         <div class="d-flex p-3 justify-content-center">                                                     
 	                             <div class="icon icon-primary">
@@ -189,7 +286,7 @@
 	                                 <h3 class="h5 icon-box-title md-1">Verdict</h3>
 	                             </div>
 	                         </div>
-	                         <div  class="lead" th:utext="${aiReview.review}"></div>
+	                         <div  class="lead" th:utext="${aiReview.summary}"></div>
 	                   </div>
                  </div>
   

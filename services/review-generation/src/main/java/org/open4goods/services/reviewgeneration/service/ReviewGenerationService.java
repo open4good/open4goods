@@ -1,7 +1,6 @@
 package org.open4goods.services.reviewgeneration.service;
 
 import java.net.URL;
-import java.time.Duration;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
@@ -169,7 +168,7 @@ public class ReviewGenerationService implements HealthIndicator {
         status.setUpc(upc);
         status.setGtin(product.gtin());
         status.setStatus(Status.PENDING);
-        status.setStartTime(Instant.now());
+        status.setStartTime(Instant.now().toEpochMilli());
         processStatusMap.put(upc, status);
 
         try {
@@ -177,7 +176,7 @@ public class ReviewGenerationService implements HealthIndicator {
             AiReview newReview = reviewResponse.getBody();
             status.setResult(newReview);
             status.setStatus(Status.SUCCESS);
-            status.setEndTime(Instant.now());
+            status.setEndTime(Instant.now().toEpochMilli());
             computeTimings(status);
             successfulCount.incrementAndGet();
             meterRegistry.counter("review.generation.success").increment();
@@ -190,7 +189,7 @@ public class ReviewGenerationService implements HealthIndicator {
             logger.error("Review generation failed for UPC {}: {}", upc, e.getMessage(), e);
             status.setStatus(Status.FAILED);
             status.setErrorMessage(e.getMessage());
-            status.setEndTime(Instant.now());
+            status.setEndTime(Instant.now().toEpochMilli());
             computeTimings(status);
             failedCount.incrementAndGet();
             meterRegistry.counter("review.generation.failed").increment();
@@ -222,8 +221,8 @@ public class ReviewGenerationService implements HealthIndicator {
             status.setGtin(product.gtin());
             status.setStatus(Status.SUCCESS);
             status.addMessage("Existing valid AI review found. Skipping generation.");
-            status.setStartTime(Instant.now());
-            status.setEndTime(Instant.now());
+            status.setStartTime(Instant.now().toEpochMilli());
+            status.setEndTime(Instant.now().toEpochMilli());
             computeTimings(status);
             processStatusMap.put(upc, status);
             return upc;
@@ -247,7 +246,7 @@ public class ReviewGenerationService implements HealthIndicator {
                 status.setUpc(upc);
                 status.setGtin(product.gtin());
                 status.setStatus(Status.PENDING);
-                status.setStartTime(Instant.now());
+                status.setStartTime(Instant.now().toEpochMilli());
                 return status;
             }
         });
@@ -274,7 +273,7 @@ public class ReviewGenerationService implements HealthIndicator {
                 meterRegistry.counter("review.generation.failed").increment();
                 lastGenerationFailed = true;
             } finally {
-                status.setEndTime(Instant.now());
+                status.setEndTime(Instant.now().toEpochMilli());
                 computeTimings(status);
                 totalProcessed.incrementAndGet();
             }
@@ -498,9 +497,13 @@ public class ReviewGenerationService implements HealthIndicator {
         if (existingReview == null) {
             return true;
         }
-        Instant reviewCreated = Instant.ofEpochMilli(existingReview.createdMs());
-        Instant threshold = Instant.now().minus(properties.getRefreshDelayMonths(), ChronoUnit.MONTHS);
-        return reviewCreated.isBefore(threshold);
+        
+        // TODO : HAndle the time limit we can generate again
+//        Instant reviewCreated = Instant.ofEpochMilli(existingReview.createdMs());
+//        Instant threshold = Instant.now().minus(properties.getRefreshDelayMonths(), ChronoUnit.MONTHS);
+//        return reviewCreated.isBefore(threshold);
+        
+        return false;
     }
 
     /**
@@ -510,11 +513,29 @@ public class ReviewGenerationService implements HealthIndicator {
      */
     private void computeTimings(ReviewGenerationStatus status) {
         if (status.getStartTime() != null && status.getEndTime() != null) {
-            long duration = status.getEndTime().toEpochMilli() - status.getStartTime().toEpochMilli();
-            long estimated = properties.getEstimatedTime().toMillis();
+            long duration = status.getEndTime() - status.getStartTime();
+            long estimated = properties.getEstimatedTime();
             long remaining = estimated - duration;
             status.setDuration(duration);
             status.setRemaining(remaining);
+            status.setPercent(new Long (Math.round(Double.valueOf(duration) / Double.valueOf(estimated) * 100)).intValue());
+        }
+    }
+    
+    /**
+     * Updates the timings dynamically for an ongoing process.
+     *
+     * @param status the process status to update.
+     */
+    private void updateDynamicTimings(ReviewGenerationStatus status) {
+        if (status.getStartTime() != null && (status.getStatus() != Status.SUCCESS && status.getStatus() != Status.FAILED)) {
+            long elapsed = Instant.now().toEpochMilli() - status.getStartTime();
+            long estimated = properties.getEstimatedTime();
+            long remaining = Math.max(estimated - elapsed, 0);
+            int percent = (int) Math.min(100, Math.round((double) elapsed / estimated * 100));
+            status.setDuration(elapsed);
+            status.setRemaining(remaining);
+            status.setPercent(percent);
         }
     }
 
@@ -525,7 +546,11 @@ public class ReviewGenerationService implements HealthIndicator {
      * @return the process status, or null if not found.
      */
     public ReviewGenerationStatus getProcessStatus(long upc) {
-        return processStatusMap.get(upc);
+        ReviewGenerationStatus status = processStatusMap.get(upc);
+        if (status != null && status.getStatus() != Status.SUCCESS && status.getStatus() != Status.FAILED) {
+            updateDynamicTimings(status);
+        }
+        return status;
     }
 
     /**

@@ -21,6 +21,7 @@ import org.open4goods.model.price.AggregatedPrice;
 import org.open4goods.model.price.PriceTrend;
 import org.open4goods.model.product.Product;
 import org.open4goods.model.vertical.VerticalConfig;
+import org.open4goods.services.captcha.config.HcaptchaProperties;
 import org.open4goods.services.productrepository.services.ProductRepository;
 import org.open4goods.services.reviewgeneration.service.ReviewGenerationService;
 import org.open4goods.services.serialisation.service.SerialisationService;
@@ -30,9 +31,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.ModelAndView;
 
@@ -67,6 +70,8 @@ public class ProductController  {
 
 	private @Autowired BrandService brandService;
 	private @Autowired UiService uiService;
+	
+	private @Autowired HcaptchaProperties captchaProps;
 
 	// TODO: Should not have a direct dependency to the icecat service,
 	// icecat stuff should be exposed through preloading vertical config 
@@ -383,6 +388,22 @@ public class ProductController  {
 			LOGGER.error("Error while generating affiliation token for {} : {}", data, e.getMessage());
 		}
 	}
+	
+	
+	///////////////////
+	///// For review
+	////////////////////
+	///
+	///	TODO(p2,design) -> Out in dedicated controller
+	@GetMapping(path = {"/review-request/{id:\\d+}"}   )
+	public ModelAndView review(final HttpServletRequest request, @PathVariable(required = false) String vertical, @PathVariable Long id) {
+		return uiService.defaultModelAndView("review-request", request)
+					.addObject("captchaKey", captchaProps.getKey())
+					.addObject("gtin",id)
+							
+							;
+	}
+	
 	
 	
 }

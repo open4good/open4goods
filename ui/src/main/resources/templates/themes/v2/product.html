@@ -615,7 +615,35 @@
     const radarChart = new Chart(document.getElementById('radarChart'), config);
 </script>
 
+<script th:inline="javascript">
+    /*<![CDATA[*/
+    
+        const gtin = /*[[${product.id}]]*/ '';
+        
+                        
+    /*]]>*/
+</script>
 
+
+
+<script>
+$(document).ready(function(){
+
+    var myModal = new bootstrap.Modal(document.getElementById('reviewProcessModal'), {
+        backdrop: 'static', // Prevent closing when clicking outside
+        keyboard: false      // Prevent closing with Esc key
+    });
+    
+	
+	  $('#triggerButton').on('click', function(){
+	    // Open the modal
+	    myModal.show();
+	    // Dynamically load the content into the modal body
+	    $('#modalContentContainer').load('/review-request/'+gtin);
+	  });
+	});
+
+</script>
 </body>
 
 </html>

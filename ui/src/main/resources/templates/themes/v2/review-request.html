@@ -1,0 +1,155 @@
+<!-- Include hCaptcha script -->
+<script src="https://js.hcaptcha.com/1/api.js?hl=fr" async defer></script>
+
+<div class="container m-3">
+  <div >
+
+    <div >
+      <form id="reviewRequestForm">
+        <!-- hCaptcha widget container -->
+             <div class="mt-4">
+              <h4 class="mb-4" >Etes vous humain ?</h4>
+	          <div class="h-captcha" th:attr="data-sitekey=${captchaKey}"></div>
+        </div>
+        
+        
+        <!-- Title and description above the agreement checkbox -->
+        <div class="mt-4">
+          <h4>Conditions d'utilisation</h4>
+          <p>J'autorise Nudger à agir en mon nom pour l'analyse IA de ce produit. J'autorise également Nudger à republier ces informations, pour les rendre disponibles à tous.</p>
+        </div>
+        
+        <!-- Terms agreement checkbox -->
+        <div class="form-check mt-2">
+          <input type="checkbox" checked class="form-check-input" id="agreeCheckbox">
+          <label class="form-check-label" for="agreeCheckbox">Je suis d'accord</label>
+        </div>
+        
+        <button type="button" id="btnStartAnalysis" class="btn btn-primary mt-3">Démarrer l'analyse</button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Hidden Loading Template -->
+<div id="loadingTemplate" class="d-none">
+  <div class="review-loader">
+    <div class="row align-items-center justify-content-between">
+      <div class="col-12 col-md-6">
+        <img class="img-fluid" src="/icons/loader.gif" alt="Loading data">
+      </div>
+      <div class="col-12 col-md-6 text-center text-md-left">
+        <h2 class="h1 mb-4 mt-4 mt-sm-0">Analyse en cours</h2>
+        
+        <!-- TODO: Insert text carousel here (auto-rotating every 10s, with clickable bullets) -->
+        <p class="lead">
+          Themesberg is an experienced and passionate group of designers, developers, project managers, writers, and artists.
+          Every client we work with becomes a part of the team. Together we face the challenges and celebrate the victories.
+        </p>
+        
+        <div class="progress-wrapper mt-5">
+          <div class="progress-info">
+            <div class="progress-label">
+              <span>
+                <!-- TODO: Show status message via Thymeleaf i18n keys -->
+                <i class="fas fa-info-circle"></i> <span id="statusMessage"></span>
+              </span>
+            </div>
+          </div>
+          <div class="progress">
+            <!-- TODO: Bind width to the status.progressionPercent attribute -->
+            <div class="progress-bar bg-primary" style="width: 0%" role="progressbar" 
+                 aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Set up variables -->
+<script th:inline="javascript">
+    /*<![CDATA[*/
+        const reviewId = /*[[${gtin}]]*/ '';
+    /*]]>*/
+</script>
+
+
+
+<script>
+$(document).ready(function(){
+  
+  
+  
+  
+function startPolling() {
+  var polling = setInterval(function(){
+    $.getJSON('/review/' + reviewId, function(data) {
+      // Update the status message in the modal
+      $('#statusMessage').text(data.status + ' ('+data.percent +'%)');
+      
+      // If progressionPercent exists, update the progress bar width
+      if (data.percent !== undefined) {
+         $('#modalContentContainer .progress-bar')
+            .css('width', data.percent + '%')
+            .attr('aria-valuenow', data.percent);
+      }
+      
+
+      
+      // Check for the FINISHED status and then update the modal content
+      if (data.status === 'SUCCESS') {
+        clearInterval(polling);
+        // Replace the modal content with a success message or image
+        $('#modalContentContainer').html('<div class="text-center"><img src="/icons/ok.png" alt="Success" class="img-fluid"/><p class="mt-3">Analyse complète !</p></div>');
+        // Wait 5 second then reload the page
+        setTimeout(function(){
+          location.reload();
+        }, 3500);
+      } else if (data.status === 'FAILED') {
+          clearInterval(polling);
+          // Replace the modal content with a success message or image
+          $('#modalContentContainer').html('<div class="text-center"><img src="/icons/ko.png" alt="Fail" class="img-fluid"/><p class="mt-3">Echec de l\'analyse !</p></div>');
+          // Wait 5 second then reload the page
+          setTimeout(function(){
+            location.reload();
+          }, 3500);
+        } 
+    });
+  }, 1000); // Polling every second
+}
+
+$('#btnStartAnalysis').on('click', function(){
+  // Check if the terms are agreed to
+  if (!$('#agreeCheckbox').is(':checked')) {
+    alert("Please agree to the terms.");
+    return;
+  }
+  
+  // Get hCaptcha token (requires hCaptcha API)
+  var hcaptchaResponse = hcaptcha.getResponse();
+  if (!hcaptchaResponse) {
+    alert("Please complete the captcha.");
+    return;
+  }
+  
+  // Send POST request with the captcha token
+  $.post('/review/' + reviewId, { hcaptchaResponse: hcaptchaResponse }, function(response) {
+    // Optionally handle the response
+    $('#reviewRequestForm').fadeOut();
+    // Load the hidden loading template into the modal content container
+    var loadingContent = $('#loadingTemplate').html();
+    $('#modalContentContainer').html(loadingContent);
+    // Show the modal
+    $('#reviewProcessModal').modal('show');
+    // Start polling for progress updates
+    startPolling();
+  });
+});
+
+
+
+
+});
+</script>
+
