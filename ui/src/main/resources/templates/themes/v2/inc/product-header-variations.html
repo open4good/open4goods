@@ -190,16 +190,16 @@
     <div class="d-flex gap-3">
       <!-- Best Occasion Offer card (with eco icon) -->
       <div class="card flex-fill border" th:if="${bestOccasionOffer != null}"
-           th:classappend="${selectedOffer == product.bestOccasionOffer.affiliationToken} ? ' border-primary' : ''"
+           th:classappend="${selectedOffer == bestOccasionOffer.affiliationToken} ? ' border-primary' : ''"
            style="cursor: pointer;" 
-           onclick="document.getElementById('selectedOffer').value='[[${product.bestOccasionOffer.affiliationToken}]]'; highlightSelected(this);">
+           onclick="document.getElementById('selectedOffer').value='[[${bestOccasionOffer.affiliationToken}]]'; highlightSelected(this);">
         <div class="card-body text-center p-2">
           <div class="mb-2">
             <i class="fas fa-recycle text-success"></i>
           </div>
-          <h6 th:text="${product.bestOccasionOffer.datasourceName}">Occasion Merchant</h6>
-          <p class="mb-0" th:text="${product.bestOccasionOffer.price} + ' ' + ${product.bestOccasionOffer.currency}">Price</p>
-          <p class="small" th:text="#{'condition.'+${product.bestOccasionOffer.productState}}">State</p>
+          <h6 th:text="${bestOccasionOffer.datasourceName}">Occasion Merchant</h6>
+          <p class="mb-0" th:text="${bestOccasionOffer.price} + ' ' + ${bestOccasionOffer.currency}">Price</p>
+          <p class="small" th:text="#{'condition.'+${bestOccasionOffer.productState}}">State</p>
         </div>
       </div>
       
@@ -266,17 +266,17 @@ function highlightSelected(selectedCard) { // Remove the primary border from all
   <form method="POST" action="/nudge">
     <div class="d-flex gap-3">
       <!-- Best Occasion Offer card with eco icon -->
-      <div class="card card__radius--mini bg-white" th:if="${product.bestOccasionOffer != null}"
-           th:classappend="${selectedOffer == product.bestOccasionOffer.affiliationToken} ? ' border-primary' : ' border' "
+      <div class="card card__radius--mini bg-white" th:if="${bestOccasionOffer != null}"
+           th:classappend="${selectedOffer == bestOccasionOffer.affiliationToken} ? ' border-primary' : ' border' "
            style="cursor: pointer; flex: 1;" 
-           onclick="document.getElementById('selectedOffer').value='[[${product.bestOccasionOffer.affiliationToken}]]'; highlightSelectedPixel(this);">
+           onclick="document.getElementById('selectedOffer').value='[[${bestOccasionOffer.affiliationToken}]]'; highlightSelectedPixel(this);">
         <div class="card-body text-center p-2">
           <div class="mb-2">
             <i class="fas fa-recycle text-success"></i>
           </div>
-          <h6 th:text="${product.bestOccasionOffer.datasourceName}">Occasion Merchant</h6>
-          <p class="mb-0" th:text="${product.bestOccasionOffer.price} + ' ' + ${product.bestOccasionOffer.currency}">Price</p>
-          <p class="small" th:text="#{'condition.'+${product.bestOccasionOffer.productState}}">State</p>
+          <h6 th:text="${bestOccasionOffer.datasourceName}">Occasion Merchant</h6>
+          <p class="mb-0" th:text="${bestOccasionOffer.price} + ' ' + ${bestOccasionOffer.currency}">Price</p>
+          <p class="small" th:text="#{'condition.'+${bestOccasionOffer.productState}}">State</p>
         </div>
       </div>
       <!-- Best New Offer card -->

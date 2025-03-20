@@ -6,7 +6,7 @@
 
 
 
-<th:block th:fragment="bilan-widget-variation-0">
+<th:block th:fragment="product-presentation-variations-0">
 
 
 
@@ -363,13 +363,13 @@
    SNIPPET #1
    =============================================================================
    Contains Variation 1 & Variation 2 using only Bootstrap 5 classes.
-   Put this into: inc/bilan-widget-variations.html
+   Put this into: inc/product-presentation-variationss.html
    =============================================================================
 -->
 
 <!--/* Variation 1 - Classic two-column layout with a small card for the AI generation (TODO) 
        using only native Bootstrap 5 classes. Light, standard look. */-->
-<th:block th:fragment="bilan-widget-variation-1">
+<th:block th:fragment="product-presentation-variations-1">
 <section id="markerPresentation" class="container section my-5">
 
     <!--/* Title row */-->
@@ -557,7 +557,7 @@
        Still Bootstrap 5 only. 
        Keep identity card separate on the left. 
 */-->
-<th:block th:fragment="bilan-widget-variation-2">
+<th:block th:fragment="product-presentation-variations-2">
 <section id="markerPresentation" class="container section my-5">
 
     <div class="row text-center mb-4">
@@ -736,13 +736,13 @@
    SNIPPET #2
    =============================================================================
    Contains Variation 3 (Bootstrap 5) and Variation 4 (Pixel UI kit).
-   Put this in the same inc/bilan-widget-variations.html file or appended below 
+   Put this in the same inc/product-presentation-variationss.html file or appended below 
    the snippet #1.
    =============================================================================
 -->
 
 <!--/* Variation 3 - “Grid of Cards” approach with Bootstrap 5, each section in its own card. */-->
-<th:block th:fragment="bilan-widget-variation-3">
+<th:block th:fragment="product-presentation-variations-3">
 <section class="container my-5">
     <!--/* Title and optional generation button (TODO) */-->
     <div class="row mb-4">
@@ -899,10 +899,10 @@
 <!--/* Variation 4 - Using Pixel Pro UI kit classes. 
        Example: icon, shape, shadow, border-gray-300, btn-tertiary, etc. 
 */-->
-<th:block th:fragment="bilan-widget-variation-4">
-<section class="container section mt-5">
+<th:block th:fragment="product-presentation-variations-4">
+<section class="container container-semi-fluid">
     <!--/* Title row with Pixel classes */-->
-    <div class="row text-center justify-content-center mb-5">
+    <div class="row text-center justify-content-center mt-4 mb-4 ">
         <div class="col-md-8">
             <h2 class="display-4">Bilan du 
                 <span class="text-tertiary" th:text="${product.bestName()}"></span>
@@ -1101,14 +1101,14 @@
    SNIPPET #3
    =============================================================================
    Contains Variation 5 & Variation 6, using Pixel UI kit classes.
-   Append to inc/bilan-widget-variations.html
+   Append to inc/product-presentation-variationss.html
    =============================================================================
 -->
 
 <!--/* Variation 5 - Step-like layout using Pixel "step" classes. 
        Each part is a "step" in the overall product review. 
 */-->
-<th:block th:fragment="bilan-widget-variation-5">
+<th:block th:fragment="product-presentation-variations-5">
 <section class="container section pt-5 pb-5">
     <div class="row text-center justify-content-center mb-4">
         <div class="col-lg-8">
@@ -1289,7 +1289,7 @@
 <!--/* Variation 6 - Another Pixel-based layout, for example a flush “tabbed” layout 
        or a horizontal approach with “card-rotate” or “rotating-card.” 
 */-->
-<th:block th:fragment="bilan-widget-variation-6">
+<th:block th:fragment="product-presentation-variations-6">
 <section class="container section pt-5 pb-5">
 
     <div class="row text-center justify-content-center mb-5">

@@ -291,8 +291,10 @@ public class ProductController  {
 			// Building the pricetrend
 			
 			PriceTrend newTrends = PriceTrend.of(data.getPrice().getNewPricehistory());
+			PriceTrend occasionTrend = PriceTrend.of(data.getPrice().getOccasionPricehistory());
 			
 			mv.addObject("newTrend", newTrends);
+			mv.addObject("occasionTrend", occasionTrend);
 			
 			
 			VerticalConfig verticalConfig = verticalConfigService.getVerticalForPath(vertical);
