@@ -20,6 +20,7 @@ import org.open4goods.model.exceptions.ResourceNotFoundException;
 import org.open4goods.model.price.AggregatedPrice;
 import org.open4goods.model.price.PriceTrend;
 import org.open4goods.model.product.Product;
+import org.open4goods.model.product.ProductCondition;
 import org.open4goods.model.vertical.VerticalConfig;
 import org.open4goods.services.captcha.config.HcaptchaProperties;
 import org.open4goods.services.productrepository.services.ProductRepository;
@@ -228,6 +229,11 @@ public class ProductController  {
 				
 				
 			}
+			
+			// Adding bestOccasionOffer and bestNewOffer
+			mv.addObject("bestOccasionOffer", data.getPrice().bestOffer(ProductCondition.OCCASION));
+			mv.addObject("bestNewOffer", data.getPrice().bestOffer(ProductCondition.NEW));
+			
 			
 			
 			// Adding the cover image
