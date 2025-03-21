@@ -15,6 +15,7 @@ import org.open4goods.commons.model.ProductCategory;
 import org.open4goods.model.exceptions.InvalidParameterException;
 import org.open4goods.model.helper.IdHelper;
 import org.open4goods.model.vertical.VerticalConfig;
+import org.open4goods.services.remotefilecaching.service.RemoteFileCachingService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

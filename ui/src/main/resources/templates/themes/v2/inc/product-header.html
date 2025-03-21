@@ -65,15 +65,20 @@
                data-offer-type="occasion"
                th:classappend="' selected'">
             <!-- Diagonal banner -->
-            <div class="diagonal-banner">Better for the planet</div>
+            <div class="diagonal-banner"
+			     data-bs-toggle="tooltip"
+			     data-bs-html="true"
+			     title="et pour le <strong>portefeuille</strong> 😎">
+			  🌳Meilleur pour<br/> la planète !
+			</div>
+			
             <div class="card-body text-center">
-              <h6 class="text-muted">🌳 Occasion</h6>
+              <h6 class="text-muted">Occasion</h6>
               <div class="d-flex align-items-center justify-content-center mb-3">
-                <img th:src="@{'/icon/' + ${bestOccasionOffer.datasourceName}}"
-                     alt="Logo du magasin pour l'offre Occasion"
-                     height="30"
-                     class="me-2" />
-                <h5 class="mb-0" th:text="${bestOccasionOffer.datasourceName}">Store Name</h5>
+                    
+                <img  th:replace="inc/favicon :: remoteFavicon(${bestOccasionOffer.datasourceName}, 32)">
+                    
+                <h5 class="mb-0" th:text="${bestOccasionOffer.datasourceName}"></h5>
               </div>
               <!-- Price Section -->
               <div class="text-success d-flex justify-content-center align-items-baseline mb-0">
@@ -105,7 +110,7 @@
                 <div class="card-body text-center">
                   <h6 class="text-muted">Neuf</h6>
                   <div class="d-flex align-items-center justify-content-center mb-3">
-                    <img th:src="@{'/icon/' + ${bestNewOffer.datasourceName}}" alt="Logo du magasin pour l'offre Neuf" height="30" class="me-2" />
+                    <img  th:replace="inc/favicon :: remoteFavicon(${bestNewOffer.datasourceName}, 32)">
                     <h5 class="mb-0" th:text="${bestNewOffer.datasourceName}">Store Name</h5>
                   </div>
                   <!--/* Price Row: Price and Currency Side-by-Side */-->

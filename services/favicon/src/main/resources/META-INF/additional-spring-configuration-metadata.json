@@ -1,0 +1,21 @@
+{
+  "groups": [
+    {
+      "name": "favicon",
+      "type": "org.open4goods.services.favicon.config.FaviconConfig",
+      "sourceType": "org.open4goods.services.favicon.config.FaviconConfig"
+    }
+  ],
+  "properties": [
+    {
+      "name": "favicon.cacheFolder",
+      "type": "java.lang.String",
+      "description": "The folder where favicon files are cached."
+    },
+    {
+      "name": "favicon.domainMapping",
+      "type": "java.util.Map<java.lang.String, java.lang.String>",
+      "description": "Mapping of domains to direct favicon resource locations. Values can be a URL, a file path, or a classpath resource."
+    }
+  ]
+}

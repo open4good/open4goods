@@ -5,13 +5,13 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.open4goods.commons.config.yml.datasource.DataSourceProperties;
-import org.open4goods.commons.exceptions.TechnicalException;
 import org.open4goods.commons.model.crawlers.FetcherGlobalStats;
 import org.open4goods.commons.model.crawlers.IndexationJobStat;
 import org.open4goods.commons.model.crawlers.IndexationJobStat;
 import org.open4goods.crawler.config.yml.FetcherProperties;
 import org.open4goods.crawler.services.fetching.CsvDatasourceFetchingService;
 import org.open4goods.crawler.services.fetching.WebDatasourceFetchingService;
+import org.open4goods.model.exceptions.TechnicalException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

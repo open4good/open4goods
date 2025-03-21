@@ -2,7 +2,6 @@ package org.open4goods.services.reviewgeneration.service;
 
 import java.net.URL;
 import java.time.Instant;
-import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
