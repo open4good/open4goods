@@ -142,22 +142,23 @@
     }
     /* Diagonal banner style */
     .diagonal-banner {
-	    position: absolute;
-	    left: -10px;
-	    top: 60%;
-	    width: 175px;
-	    height: 25px;
-	    background-color: #90ee90;
-	    transform: translate(0, -50%) rotate(-46deg);
-	    transform-origin: left center;
-	    border-bottom-left-radius: 0.25rem;
-	    display: flex;
-	    align-items: center;
-	    justify-content: center;
-	    color: #fff;
-	    font-weight: bold;
-	    font-size: 0.8rem;
-	    z-index: 10;
+    position: absolute;
+    left: -15px;
+    top: 60%;
+    width: 195px;
+    height: 37px;
+    background: linear-gradient(90deg, #00D19F, #00A7FF);
+    transform: translate(0, -50%) rotate(-46deg);
+    transform-origin: left center;
+    border-bottom-left-radius: 0.25rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-weight: bold;
+    font-size: 0.8rem;
+    z-index: 10;
+    text-align: center
     }
   </style>
     
@@ -219,7 +220,7 @@
                     <th:block th:insert="~{inc/product-presentation.html}"></th:block>
                      -->
 
-                  <th:block th:with="fixed=-1 ">
+                  <th:block th:with="fixed=4 ">
 	                  <th:block th:with="varValue=${param.var != null ? param.var[0] : '0'},  fragmentName=${fixed >= 0 ? fixed : varValue}">
 	                        <div th:replace="~{inc/product-presentation-variations :: 'product-presentation-variations-' + ${fragmentName}}"></div>
 	                  </th:block>

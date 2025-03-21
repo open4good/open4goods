@@ -44,6 +44,10 @@
         <module>services/review-generation</module>
         <module>services/product-repository</module>
         <module>services/captcha</module>
+        <module>services/remotefilecaching</module>
+        
+        <module>services/favicon</module>
+        
         
         
 	</modules>
