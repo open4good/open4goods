@@ -49,7 +49,9 @@
           Choisissez le meilleur prix
           <span class="ms-auto d-flex align-items-center">
             <a href="#" class="text-decoration-none text-primary fw-bold" aria-label="Voir les offres">
-              Voir les <span class="text-success">6</span> offres
+            <th:block th:if="${product.price.offers.size() > 1 }">
+              (<span class="text-success" th:text="${product.price.offers.size()}"></span> offres)
+            </th:block>
             </a>
           </span>
         </h6>
@@ -60,7 +62,7 @@
             <div th:class="${(bestOccasionOffer != null and bestNewOffer != null) ? 'col-12 col-md-6' : 'col-12'}">
               <div class="card selectable-offer" th:data-token="${bestOccasionOffer.affiliationToken}" data-offer-type="occasion" th:classappend="' selected'">
                 <div class="card-body text-center">
-                  <h6 class="text-muted">Occasion</h6>
+                  <h6 class="text-muted">🌳 Occasion</h6>
                   <div class="d-flex align-items-center justify-content-center mb-3">
                     <img th:src="@{'/icon/' + ${bestOccasionOffer.datasourceName}}" alt="Logo du magasin pour l'offre Occasion" height="30" class="me-2" />
                     <h5 class="mb-0" th:text="${bestOccasionOffer.datasourceName}">Store Name</h5>
@@ -74,20 +76,14 @@
                   <p th:if="${occasionTrend.trend == -1}">
                     <span class="fas fa-angle-down text-success"></span>
                     <span class="fs-6">Prix en baisse</span>
-                    <br>
-                    <span class="fw-bold fs-6">depuis <span th:text="${occasionTrend.formatedDuration()}"></span></span>
                   </p>
                   <p th:if="${occasionTrend.trend == 0}">
                     <span class="fas fa-equals text-info"></span>
                     <span class="fs-6">Prix stable</span>
-                    <br>
-                    <span class="fw-bold fs-6">depuis <span th:text="${occasionTrend.formatedDuration()}"></span></span>
                   </p>
                   <p th:if="${occasionTrend.trend == 1}">
                     <span class="fas fa-angle-up text-danger"></span>
                     <span class="fs-6">Prix en hausse</span>
-                    <br>
-                    <span class="fw-bold fs-6">depuis <span th:text="${occasionTrend.formatedDuration()}"></span></span>
                   </p>
                 </div>
               </div>
@@ -113,20 +109,14 @@
                   <p th:if="${newTrend.trend == -1}">
                     <span class="fas fa-angle-down text-success"></span>
                     <span class="fs-6">Prix en baisse</span>
-                    <br>
-                    <span class="fw-bold fs-6">depuis <span th:text="${newTrend.formatedDuration()}"></span></span>
                   </p>
                   <p th:if="${newTrend.trend == 0}">
                     <span class="fas fa-equals text-info"></span>
                     <span class="fs-6">Prix stable</span>
-                    <br>
-                    <span class="fw-bold fs-6">depuis <span th:text="${newTrend.formatedDuration()}"></span></span>
                   </p>
                   <p th:if="${newTrend.trend == 1}">
                     <span class="fas fa-angle-up text-danger"></span>
                     <span class="fs-6">Prix en hausse</span>
-                    <br>
-                    <span class="fw-bold fs-6">depuis <span th:text="${newTrend.formatedDuration()}"></span></span>
                   </p>
                 </div>
               </div>
@@ -137,11 +127,25 @@
         <!--/* Hidden Field to Hold the Selected Offer Token */-->
         <input type="hidden" id="selectedOfferToken" name="token" th:value="${bestOccasionOffer != null ? bestOccasionOffer.affiliationToken : bestNewOffer.affiliationToken}" />
       
+      
+      
+      
+      
         <!--/* Association Selection Section */-->
         <label class="mt-4 h6 d-flex align-items-center border-1" for="inlineFormCustomSelectPref">
           <span class="badge input-group__nudger text-black me-2">2</span>
           Choisissez votre association préférée
         </label>
+        
+        
+                <select name="nudge" class="form-select mb-3" id="inlineFormCustomSelectPref" aria-label="Choisissez votre cause">
+          <option value="nudger" selected>Laisser nudger choisir !</option>
+          <th:block th:each="org : ${config.reversementConfig.contributedOrganisations}">
+            <option th:value="${org.key}" th:text="${org.value.name}"></option>
+          </th:block>
+        </select>
+        
+        
         <div class="nudger__reversement d-flex align-items-center gap-3 px-3 py-2 bg-white my-4" th:if="${product.bestPrice()}">
           <span class="somme">
             <span id="countup-reversment" th:data-max="${product.bestPrice().compensation}"></span>
@@ -151,12 +155,6 @@
             reversés si vous finalisez votre achat (<a href="/compensation-ecologique" aria-label="En savoir plus sur la compensation écologique">en savoir plus</a>)
           </span>
         </div>
-        <select name="nudge" class="form-select mb-3" id="inlineFormCustomSelectPref" aria-label="Choisissez votre cause">
-          <option value="nudger" selected>Laisser nudger choisir !</option>
-          <th:block th:each="org : ${config.reversementConfig.contributedOrganisations}">
-            <option th:value="${org.key}" th:text="${org.value.name}"></option>
-          </th:block>
-        </select>
         
         <label class="h6 d-flex align-items-center border-1" for="inlineFormCustomSelectPref">
           <span class="badge input-group__nudger text-black me-2">3</span>

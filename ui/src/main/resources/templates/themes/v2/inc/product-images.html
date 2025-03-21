@@ -1,4 +1,4 @@
-<!-- Carousel Container -->
+<!--/* Thymeleaf comment: Carousel Container with integrated LightGallery for fullscreen image/video gallery */-->
 <div th:if="${images.size() > 0}" 
      id="carousel-tv" 
      class="carousel slide" 
@@ -6,57 +6,92 @@
      aria-roledescription="carousel"
      aria-live="polite">
 
-    <!-- Indicators -->
-    <div class="carousel-indicators" style="margin-bottom: 0; bottom: -35px;">
-        <button 
-            th:each="img, stat : ${images}" 
-            type="button"
-            data-bs-target="#carousel-tv"
-            th:data-bs-slide-to="${stat.count - 1}"
-            th:class="${stat.first} ? 'active' : ''"
-            th:aria-current="${stat.first} ? 'true' : ''"
-            th:aria-label="'Slide ' + ${stat.count}" 
-            style="text-indent: initial!important; height: 50px; width: initial; background-color: transparent;">
-
-            <!-- Thumbnail: use lazy loading + alt text -->
-            <img class="img-fluid" 
-                 th:src="${img.path(100)}" 
-                 th:alt="'Miniature de ' + ${product.brandAndModel()}" 
-                 loading="lazy" />
-        </button>
-    </div>
-
-    <!-- Slides -->
-    <div class="carousel-inner">
+    <!--/* Thymeleaf comment: Slides Container - Each slide contains a clickable image wrapped in a link that triggers LightGallery */-->
+    <div class="carousel-inner" >
         <div th:each="img, stat : ${images}"
              th:classappend="${stat.first} ? ' active' : ''"
              class="carousel-item">
-
-            <!-- Picture Element for Performance -->
+             
+            <!--/* Thymeleaf comment: The anchor triggers LightGallery. 
+                 data-lg-size is a placeholder; customize if you have actual dimensions.
+                 data-src points to the high-resolution image (or video).
+                 data-sub-html displays the image metadata (title and description) in LightGallery. */-->
             <a href="#" 
                th:href="@{/#}" 
-               data-lightbox="gallery" 
-               th:data-title="${img.fileName}" 
+               th:data-lg-size="${img.imageInfo.width}+'-'+${img.imageInfo.height}"
+               th:data-src="${img.path()}"
+               th:data-sub-html="'<h4>' + ${img.fileName} + '</h4><p>' + ${img} + '</p>'"
                role="button" 
                aria-label="Open fullscreen gallery">
                
-               <!-- Responsive container for aspect ratio -->
-               <div class="image-container">
-                   <img class="img-fluid" 
-                        th:src="${img.path(1000)}"
-                        th:alt="'Image relative au ' + ${product.bestName()}"
-                        loading="lazy"
-                   />
-               </div>
+                <!--/* Thymeleaf comment: Custom Fluid Aspect Ratio Container 
+                     The inline style calculates padding-top based on image height and width.
+                     This ensures the container preserves the image’s aspect ratio. */-->
+                <div 
+                     class="min-vh-10 image-container">
+                     
+                    <img class="img-fluid" 
+                         th:src="${img.path(360)}"
+                         th:alt="'Image relative au ' + ${product.bestName()}"
+                         loading="lazy"
+                        />
+                </div>
             </a>
         </div>
     </div>
 
-    <!-- (Optional) Controls -->
-    <button class="carousel-control-prev" type="button" data-bs-target="#carousel-tv" data-bs-slide="prev" aria-label="Previous Slide">
+    <!--/* Thymeleaf comment: Carousel Controls for navigation */-->
+    <button class="carousel-control-prev" 
+            type="button" 
+            data-bs-target="#carousel-tv" 
+            data-bs-slide="prev" 
+            aria-label="Previous Slide">
         <span class="carousel-control-prev-icon" aria-hidden="true"></span>
     </button>
-    <button class="carousel-control-next" type="button" data-bs-target="#carousel-tv" data-bs-slide="next" aria-label="Next Slide">
+    <button class="carousel-control-next" 
+            type="button" 
+            data-bs-target="#carousel-tv" 
+            data-bs-slide="next" 
+            aria-label="Next Slide">
         <span class="carousel-control-next-icon" aria-hidden="true"></span>
     </button>
 </div>
+
+<div class="text-center thumbnail-bar">
+    <span th:each="img, stat : ${images}">
+        <img th:src="${img.path(100)}"
+             th:alt="'Miniature de ' + ${product.brandAndModel()}"
+             loading="lazy"
+             th:onclick="|showSlide(${stat.index})|"/>
+    </span>
+</div>
+
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/lightgallery/2.8.3/lightgallery.umd.min.js" integrity="sha512-/VsY1Sfve8m/zbDYWoy4VXfTv95J/KvvvpsItJXys3sfneOcOT1FhjQbFE8S+xOrvLT/MKt1VMLjiEIUMRR4RQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/lightgallery/2.8.3/plugins/zoom/lg-zoom.umd.min.js" integrity="sha512-kb+bFSTztWA/jCvJQJ+fQdvjsD1zUJ3FNVvhkZg4boL4DA2j8PytzjFFoXepCstLzW4fBX/mACT2d8yTmjGZSg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+
+<!--/* Thymeleaf comment: JavaScript function to change carousel slides based on thumbnail click */-->
+<script>
+    function showSlide(slideIndex) {
+        var carousel = document.querySelector('#carousel-tv');
+        var bsCarousel = bootstrap.Carousel.getOrCreateInstance(carousel);
+        bsCarousel.to(slideIndex);
+    }
+</script>
+
+
+<!--/* Thymeleaf comment: Initialize LightGallery on the carousel container.
+     The selector 'a' ensures that each slide's anchor is a gallery item. */-->
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        var lightGalleryElement = document.getElementById('carousel-tv');
+        lightGallery(lightGalleryElement, {
+            selector: 'a',
+            plugins: [lgZoom],
+            licenseKey: '0000-0000-000-0000', // Replace with your license key if needed.
+            speed: 500
+        });
+    });
+</script>

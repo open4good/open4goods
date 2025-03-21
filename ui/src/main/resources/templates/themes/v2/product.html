@@ -104,6 +104,42 @@
         
         
     </style>
+    
+    
+    
+    
+    
+    
+    
+    
+    
+<!--/* Thymeleaf comment: Separate Thumbnail Navigation Bar (Horizontal Scroll Pane) */-->
+<style>
+    .thumbnail-bar {
+        background-color: #fff; /* white background for SEO/accessibility */
+        white-space: nowrap;    /* keep thumbnails in one row */
+        overflow-x: auto;       /* enable horizontal scrolling */
+        padding: 0.5rem;
+        margin-top: 1rem;
+    }
+    .thumbnail-bar img {
+        cursor: pointer;
+        max-height: 70px;       /* fixed height for uniform layout */
+        object-fit: cover;
+        margin-right: 0.5rem;
+    }
+</style>
+
+<!--/* Thymeleaf comment: Include LightGallery CSS and JS from CDN (free & open source) with zoom plugin support. 
+     Ensure these are included in your page’s <head> or before the closing </body> tag. */-->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/lightgallery/2.8.3/css/lightgallery-bundle.min.css" integrity="sha512-fXavT4uA4L0uTUFHC275D7zd751ohbSuD6VUMc5JysWfmR+NxTI3w7etE7N9hjTETcoh0w0V+24Cel4xXnqvCg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+    
+    
+    
+    
+    
+    
 </head>
 
 <body>
@@ -161,7 +197,7 @@
                     <th:block th:insert="~{inc/product-presentation.html}"></th:block>
                      -->
 
-                  <th:block th:with="fixed=4 ">
+                  <th:block th:with="fixed=-1 ">
 	                  <th:block th:with="varValue=${param.var != null ? param.var[0] : '0'},  fragmentName=${fixed >= 0 ? fixed : varValue}">
 	                        <div th:replace="~{inc/product-presentation-variations :: 'product-presentation-variations-' + ${fragmentName}}"></div>
 	                  </th:block>
@@ -229,6 +265,11 @@
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns/dist/chartjs-adapter-date-fns.bundle.min.js"></script>    
+
+
+
+
+
 
 <script th:inline="javascript">
     /*<![CDATA[*/
