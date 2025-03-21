@@ -59,36 +59,44 @@
         <div class="row">
           <!--/* Occasion Offer Card Section */-->
           <th:block th:if="${bestOccasionOffer != null}">
-            <div th:class="${(bestOccasionOffer != null and bestNewOffer != null) ? 'col-12 col-md-6' : 'col-12'}">
-              <div class="card selectable-offer" th:data-token="${bestOccasionOffer.affiliationToken}" data-offer-type="occasion" th:classappend="' selected'">
-                <div class="card-body text-center">
-                  <h6 class="text-muted">🌳 Occasion</h6>
-                  <div class="d-flex align-items-center justify-content-center mb-3">
-                    <img th:src="@{'/icon/' + ${bestOccasionOffer.datasourceName}}" alt="Logo du magasin pour l'offre Occasion" height="30" class="me-2" />
-                    <h5 class="mb-0" th:text="${bestOccasionOffer.datasourceName}">Store Name</h5>
-                  </div>
-                  <!--/* Price Row: Price and Currency Side-by-Side */-->
-                  <div class="text-success d-flex justify-content-center align-items-baseline mb-0">
-                    <h2 class="display-4 fw-bold mb-0" th:text="${bestOccasionOffer.shortPrice()}">0</h2>
-                    <span class="ms-2" th:text="#{'symbol.'+${bestOccasionOffer.currency}}"></span>
-                  </div>
-                  <!-- Added Price Trend Indicator for Occasion -->
-                  <p th:if="${occasionTrend.trend == -1}">
-                    <span class="fas fa-angle-down text-success"></span>
-                    <span class="fs-6">Prix en baisse</span>
-                  </p>
-                  <p th:if="${occasionTrend.trend == 0}">
-                    <span class="fas fa-equals text-info"></span>
-                    <span class="fs-6">Prix stable</span>
-                  </p>
-                  <p th:if="${occasionTrend.trend == 1}">
-                    <span class="fas fa-angle-up text-danger"></span>
-                    <span class="fs-6">Prix en hausse</span>
-                  </p>
-                </div>
+        <div th:class="${(bestOccasionOffer != null and bestNewOffer != null) ? 'col-12 col-md-6' : 'col-12'}">
+          <div class="card selectable-offer occasion-card"
+               th:data-token="${bestOccasionOffer.affiliationToken}"
+               data-offer-type="occasion"
+               th:classappend="' selected'">
+            <!-- Diagonal banner -->
+            <div class="diagonal-banner">Better for the planet</div>
+            <div class="card-body text-center">
+              <h6 class="text-muted">🌳 Occasion</h6>
+              <div class="d-flex align-items-center justify-content-center mb-3">
+                <img th:src="@{'/icon/' + ${bestOccasionOffer.datasourceName}}"
+                     alt="Logo du magasin pour l'offre Occasion"
+                     height="30"
+                     class="me-2" />
+                <h5 class="mb-0" th:text="${bestOccasionOffer.datasourceName}">Store Name</h5>
               </div>
+              <!-- Price Section -->
+              <div class="text-success d-flex justify-content-center align-items-baseline mb-0">
+                <h2 class="display-4 fw-bold mb-0" th:text="${bestOccasionOffer.shortPrice()}">0</h2>
+                <span class="ms-2" th:text="#{'symbol.'+${bestOccasionOffer.currency}}"></span>
+              </div>
+              <!-- Trend Indicators -->
+              <p th:if="${occasionTrend.trend == -1}">
+                <span class="fas fa-angle-down text-success"></span>
+                <span class="fs-6">Prix en baisse</span>
+              </p>
+              <p th:if="${occasionTrend.trend == 0}">
+                <span class="fas fa-equals text-info"></span>
+                <span class="fs-6">Prix stable</span>
+              </p>
+              <p th:if="${occasionTrend.trend == 1}">
+                <span class="fas fa-angle-up text-danger"></span>
+                <span class="fs-6">Prix en hausse</span>
+              </p>
             </div>
-          </th:block>
+          </div>
+        </div>
+      </th:block>
           
           <!--/* New Price Offer Card Section */-->
           <th:block th:if="${bestNewOffer != null}">

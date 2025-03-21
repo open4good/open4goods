@@ -133,11 +133,33 @@
 <!--/* Thymeleaf comment: Include LightGallery CSS and JS from CDN (free & open source) with zoom plugin support. 
      Ensure these are included in your page’s <head> or before the closing </body> tag. */-->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/lightgallery/2.8.3/css/lightgallery-bundle.min.css" integrity="sha512-fXavT4uA4L0uTUFHC275D7zd751ohbSuD6VUMc5JysWfmR+NxTI3w7etE7N9hjTETcoh0w0V+24Cel4xXnqvCg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
-
-    
-    
-    
-    
+ <style>
+    /* Card container style */
+    .occasion-card {
+      position: relative;
+      overflow: hidden;
+      border-radius: 0.25rem; /* Ensure integration with banner */
+    }
+    /* Diagonal banner style */
+    .diagonal-banner {
+	    position: absolute;
+	    left: -10px;
+	    top: 60%;
+	    width: 175px;
+	    height: 25px;
+	    background-color: #90ee90;
+	    transform: translate(0, -50%) rotate(-46deg);
+	    transform-origin: left center;
+	    border-bottom-left-radius: 0.25rem;
+	    display: flex;
+	    align-items: center;
+	    justify-content: center;
+	    color: #fff;
+	    font-weight: bold;
+	    font-size: 0.8rem;
+	    z-index: 10;
+    }
+  </style>
     
     
 </head>
