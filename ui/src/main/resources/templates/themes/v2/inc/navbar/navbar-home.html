@@ -48,26 +48,18 @@
 								<div class="row g-0">
 									
 									
-									<div class="col-lg-6 bg-dark d-none d-lg-block me-0 me-3">
+									<div class="col-lg-6 bg-brand_secondary d-none d-lg-block me-0 me-3 text-center text-white px-3">
 										<div class="px-0 py-3 text-center">
-										<h1 class="text-white" >Impact Score</h1>
-                                            <div class="text-center ">
+											<h1 class="text-white" >Impact Score</h1>
+                                            <div class="text-center">
                                                 <th:block 
                                                         th:with="rating=3.5, class='star-rating-lg'",
                                                         th:insert="~{inc/impactscore.html}">
                                                 </th:block>
                                             </div>
 										</div>
-										<div class="z-2 pb-3 text-center">
-											 <a  href="/ecoscore" class="btn btn-tertiary animate-up-2 mb-2 mb-sm-0"> 
-											     <span class="me-1"><span class="fas fa-pager"></span></span> Documentation
-											</a>
-											
-								    <a href="/categories" class="btn btn-outline-white animate-up-2 mb-2 mb-sm-0 me-3"> <span class="me-1"><span class="fas fa-th-large"></span></span> Toutes les
-                                             catégories
-                                         </a>
-                                            
-										</div>
+										AJOUTER ICI L GUIDE DE LA PAGE VERTICAL ?<br>
+										pour le moment impossible, erreur de "positionnement"
 									</div>
 									
 									<th:block th:each="bucket : ${verticalsBuckets}">
