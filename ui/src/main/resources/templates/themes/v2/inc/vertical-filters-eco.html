@@ -1,13 +1,9 @@
-<div class="card accordion" id="ecoAccordionFilter" th:with="accordionId=ecoAccordionFilter">
-
-		<!-- The num offers condition 
-		
-		TODO : Min / max
-	                   min=${products.numericFilters.get('CLASSE_ENERGY').getMinValue},
-	                   max=${products.numericFilters.CLASSE_ENERGY.maxValue}">
-		
-
-		-->
+<div class="accordion accordion-flush" id="ecoAccordionFilter" th:with="accordionId=ecoAccordionFilter">
+    <!-- The num offers condition 
+    TODO : Min / max
+                    min=${products.numericFilters.get('CLASSE_ENERGY').getMinValue},
+                    max=${products.numericFilters.CLASSE_ENERGY.maxValue}">
+    -->
 	<th:block th:with="title='Ecoscore',
 	                   id='scores.ECOSCORE.value',
 					   labelType='alert-success',	
@@ -19,13 +15,9 @@
                        includeUndefined=true,
                        showIncludeUndefinedButton=true,
                        includeUndefinedLabel='Afficher les non évalués'
-                       ">
-
+                       " class="mb-2">
 		<th:block th:insert="~{inc/vertical-filter-item-numeric.html}"></th:block>
 	</th:block>	
-		
-	
-    
     <!-- 
     <th:block th:with="title='Evaluation ESG',
                        id='scores.BRAND_SUSTAINABILITY.value',
@@ -39,11 +31,9 @@
                        showIncludeUndefinedButton=true,
                        includeUndefinedLabel='Afficher les non évalués'
                        ">
-
         <th:block th:insert="~{inc/vertical-filter-item-numeric.html}"></th:block>
     </th:block> 
      -->
-    
     <th:block th:with="title='Consommation en marche',
                        id='attributes.indexed.POWER_CONSUMPTION.numericValue',
                        labelType='alert-success',   
@@ -56,7 +46,7 @@
                        showIncludeUndefinedButton=true,
                        includeUndefinedLabel='Afficher les non évalués',
                        undefinedCount=${products.unknown('attributes.indexed.POWER_CONSUMPTION.numericValue')}
-                       ">
+                       " class="mb-2">
         <th:block th:insert="~{inc/vertical-filter-item-numeric.html}"></th:block>
     </th:block>                        
 
@@ -72,11 +62,9 @@
                        showIncludeUndefinedButton=true,
                        includeUndefinedLabel='Afficher les non évalués',
                        undefinedCount=${products.unknown('attributes.indexed.POWER_CONSUMPTION_OFF.numericValue')}
-                       ">
+                       " class="mb-2">
         <th:block th:insert="~{inc/vertical-filter-item-numeric.html}"></th:block>
     </th:block>    
-
-		
 	<!-- The item condition -->
 	<th:block th:with="id='condition',
 					   title='Neuf ou occasion ?',
@@ -86,16 +74,9 @@
 					   visibleSection=10,	   
 					   terms=${products.conditions},
 					   mapToI18NPrefix='condition.'
-					   "
-					   >
+					   " class="mb-2">
 		<th:block th:insert="~{inc/vertical-filter-item-terms.html}"></th:block>
 	</th:block>	
-	
-	
-
-                       
-                           
-    	
 	<!-- The originating countries -->
 	<th:block th:with="id='countries',
 					   title='Origine du produit',
@@ -105,22 +86,13 @@
 					   visibleSection=10,				   
 					   terms=${products.countries},
 					   termsLineWidget='vertical-filter-item-term-country'
-					   
-					   ">
+					   " class="mb-2">
 		<th:block th:insert="~{inc/vertical-filter-item-terms.html}"></th:block>
 	</th:block>	
-	
-
-	
 	<!--  Custom eco filters -->
 	<th:block th:each="filterName : ${verticalConfig.ecoFilters}">
          <th:block th:with="filter = ${products.resolveFilter(filterName)}">
-               <th:block th:if="${filter}" th:insert="~{inc/vertical-filter-item.html}">       </th:block>
+               <th:block th:if="${filter}" th:insert="~{inc/vertical-filter-item.html}"></th:block>
          </th:block>       
     </th:block>
-    
-	
 </div>
-
-            
-            

@@ -1,5 +1,5 @@
 <div class="accordion-item">
-  <h2 class="accordion-header border-bottom border-2" th:id="'heading'+${id}">
+  <h2 class="accordion-header border-bottom" th:id="'heading'+${id}">
     <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" 
       th:attr="data-bs-target='#collapse'+${id}, aria-controls='collapse'+${id}" aria-expanded="false">
       <span th:if="${icon}" class="fas me-2" th:classappend="${icon}"></span>
@@ -8,14 +8,13 @@
     </button>
   </h2>
   
-  <div th:id="'collapse'+${id}" class="accordion-collapse collapse" 
-    th:attr="aria-labelledby='heading'+${id},data-bs-parent='#'+${accordionId}">
+  <div th:id="'collapse'+${id}" class="accordion-collapse collapse mb-2" th:attr="aria-labelledby='heading'+${id},data-bs-parent='#'+${accordionId}">
     <div class="accordion-body">
       
-      <div class="row" id="filterList-${id}">
+      <div id="filterList-${id}">
         
         <!-- The filter items -->
-        <div th:each="term, index: ${products.filterKnownTerms(terms)}" class="col-12 filter-item" 
+        <div th:each="term, index: ${products.filterKnownTerms(terms)}" class="filter-item" 
           th:classappend="${index.index} <= 5 ? '' : 'hidden-item'" 
           th:style="${index.index} <= 5 ? '' : 'display: none;'">
           
@@ -34,7 +33,7 @@
         
         <!--  Missing bucket -->
         <th:block th:with="missing = ${products.unknownTerms(terms)}">
-	         <div th:if="${missing != null && missing > 0}" class="col-12 filter-item">
+	         <div th:if="${missing != null && missing > 0}" class="filter-item">
 	           <input class="form-check-input changeableBox" type="checkbox" th:data-id="${id}" data-value="ES-UNKNOWN" th:id="${id}+'-missing'">
                <label  class="form-check-label" th:for="${id}+'-missing'">Inconnus</label>
                <span th:text="${missing}" th:id="'badge'+'-'+${id}+'-missing'" class="badge bg-gray badge-pill float-end"></span>
