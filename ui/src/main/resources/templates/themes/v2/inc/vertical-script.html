@@ -101,6 +101,7 @@
                     // TODO : I18n
                     productUrl : baseUrl+verticalPath+'/'+data.names.url['fr'],
                     ecoscore: data.scores?.ECOSCORE?.value != null ? Math.round((data.scores.ECOSCORE.value + Number.EPSILON) * 100) / 100 : "",
+                    ecoscoreInt: data.scores?.ECOSCORE?.value != null ? Math.round(data.scores.ECOSCORE.value) : -1,
                     compensation: data.price?.minPrice?.compensation != null ? Math.round((data.price.minPrice.compensation + Number.EPSILON) * 100) / 100 : null,                      
                     
 // TODO : Default as a hack until full i18n is implemented
@@ -126,6 +127,7 @@
                     // TODO : I18n
                     productUrl : baseUrl+verticalPath+'/'+data.names.url['fr'],
                     ecoscore: data.scores?.ECOSCORE?.value != null ? Math.round((data.scores.ECOSCORE.value + Number.EPSILON) * 100) / 100 : "",
+                    ecoscoreInt: data.scores?.ECOSCORE?.value != null ? Math.round(data.scores.ECOSCORE.value) : -1,
                     ecoscore20: data.scores?.ECOSCORE?.value != null ? Math.round((data.scores.ECOSCORE.value * 4 + Number.EPSILON) * 100) / 100 : "",
                     compensation: data.price?.minPrice?.compensation != null ? Math.round((data.price.minPrice.compensation + Number.EPSILON) * 100) / 100 : null,                      
                     
@@ -186,6 +188,9 @@
             "serverSide": true,
             "orderMulti": false,
             "pageLength": 10,
+            "drawCallback": function() {
+            	  $(this.api().table().header()).hide();
+            	},
             "ajax": {
                 "url": "/"+verticalPath+"/paginated",
                 "dataSrc": "data",

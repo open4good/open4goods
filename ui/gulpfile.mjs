@@ -144,6 +144,7 @@ gulp.task('build:dist', gulp.series(
     'minify:css',    // Minify CSS files
     'copy:mincss',   // Copy minified CSS files
     'copy:minjs',    // Copy minified JavaScript files
+    'scss',
 //    'copy:minttf',    // Copy minified JavaScript files
 //    'copy:minwoff',    // Copy minified JavaScript files
     

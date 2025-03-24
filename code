@@ -1,88 +1,19 @@
-
-# Goal
-
- * You will create a java spring microservice, meaning a set of DTO, service class, model beans, configuration properties..
- * You will base your code generation on a sample microservice provided as sample. You must follow the sample for  package namings convention (model, service, config, ..) , implements metrics and healtch checks in the same way, generate a child pom.xml with same parent dependencies..    
- * You ask for directions if needed to do a better work
- 
- 
-## Job to do
- 
- * 
-
-
-## Guidelines 
-You will provide classes and files (documentation, configurations, ...).
-You will follow the following guidelines 
-
-1. **Documentation **
-   - **Javadoc:**  generate detailed Javadoc comments at both the class and method levels, clearly explaining purpose and behavior of the feature / code
-   - **Inline Comments:** Add  in-method comments to clarify complex logic and overall flow.
-   - generate  the `additional-spring-configuration-metadata.json` if relevant
-   
-2. **Code Quality and Safety**
-   - **Security:** Security by design is required
-   - **Performance:** Optimize code where performance gains are achievable.
-   - **Modern Java Features:**  
-     - Leverage Java records for immutable data structures where applicable (Java 16+).
-   - **Readability & Maintainability:**  
-     - Adhere to SOLID principles.
-   - **Exception Management:**  
-     - Consider error handling with custom exceptions if needed.
-
-3. **Logging **
-   - Add structured logging and ensure appropriate log levels (INFO, WARN, ERROR) are used.
-
-4. **POJO Enhancements**
-   - Implement`toString()`, `hashCode()`, and `equals()` methods in model classes where relevant. 
-
-5. **Configuration and Externalization**
-   - Use `@ConfigurationProperties` for externalized configuration.
-
-
-6. **Testing**
-   - Create complete and meaningfull tests, in order to test the service
-
-
-8. **Structural Changes**
-    - split code into multiple classes when needed
-    - **Important:** If you require additional context (e.g., details on dependency classes or intended functionality), ask clarifying questions before making significant structural changes.
-
-9. **Caching & Monitoring:**   
-  - Consider emiting actuator metrics 
-  - consider implementing HealthCheck  (by making the service class implements HealthIndicator and overriding the health() method) if pertinent
-  - Evaluate potential caching improvements using Spring Cache abstraction.
-
-
------------------------------------------------------------------------------------------------------------------------------
-
-
-
-
-# Sample microservice layout
-
-
-
-## Directory structure 
+# Directory structure 
 - pom.xml
-- README.md
 - src
 --- main
 ---- java
 ----- org
 ------ open4goods
 ------- services
--------- googlesearch
+-------- reviewgeneration
 --------- config
----------- GoogleSearchConfig.java
+---------- ReviewGenerationConfig.java
 --------- dto
----------- GoogleSearchRequest.java
----------- GoogleSearchResponse.java
----------- GoogleSearchResult.java
---------- exception
----------- GoogleSearchException.java
+---------- ReviewGenerationStatus.java
+---------- ReviewRequest.java
 --------- service
----------- GoogleSearchService.java
+---------- ReviewGenerationService.java
 ---- resources
 ----- META-INF
 ------ additional-spring-configuration-metadata.json
@@ -90,1209 +21,1357 @@ You will follow the following guidelines
 ---- java
 ----- org
 ------ open4goods
-------- googlesearch
--------- GoogleSearchServiceTest.java
--------- mock
---------- GoogleSearchServiceMock.java
+------- reviewgeneration
+-------- ReviewGenerationServiceTest.java
 ---- resources
 ----- application-test.yml
 
-## Files content
+# Files content
 
-## [GoogleSearchService.java - /home/goulven/git/open4goods/services/googlesearch/src/main/java/org/open4goods/services/googlesearch/service/GoogleSearchService.java]
+## [ReviewGenerationService.java - /home/goulven/git/open4goods/services/review-generation/src/main/java/org/open4goods/services/reviewgeneration/service/ReviewGenerationService.java]
 ~~~
-package org.open4goods.services.googlesearch.service;
+package org.open4goods.services.reviewgeneration.service;
 
-import java.io.IOException;
-import java.net.URI;
-import java.net.URLEncoder;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
-import java.nio.charset.Charset;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.time.Duration;
+import java.net.URL;
+import java.time.Instant;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Function;
+import java.util.function.Predicate;
 
-import org.open4goods.services.googlesearch.config.GoogleSearchConfig;
+import org.open4goods.model.ai.AiReview;
+import org.open4goods.model.product.Product;
+import org.open4goods.model.vertical.VerticalConfig;
 import org.open4goods.services.googlesearch.dto.GoogleSearchRequest;
 import org.open4goods.services.googlesearch.dto.GoogleSearchResponse;
 import org.open4goods.services.googlesearch.dto.GoogleSearchResult;
-import org.open4goods.services.googlesearch.exception.GoogleSearchException;
-import org.open4goods.services.serialisation.service.SerialisationService;
+import org.open4goods.services.googlesearch.service.GoogleSearchService;
+import org.open4goods.services.productrepository.services.ProductRepository;
+import org.open4goods.services.prompt.dto.PromptResponse;
+import org.open4goods.services.prompt.service.PromptService;
+import org.open4goods.services.reviewgeneration.config.ReviewGenerationConfig;
+import org.open4goods.services.reviewgeneration.dto.ReviewGenerationStatus;
+import org.open4goods.services.reviewgeneration.dto.ReviewGenerationStatus.Status;
+import org.open4goods.services.urlfetching.dto.FetchResponse;
+import org.open4goods.services.urlfetching.service.UrlFetchingService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.actuate.health.Health;
 import org.springframework.boot.actuate.health.HealthIndicator;
 import org.springframework.stereotype.Service;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
-
 import io.micrometer.core.instrument.MeterRegistry;
 
 /**
- * Service for interacting with the Google Custom Search API.
+ * Service for generating AI-assisted reviews.
  * <p>
- * It externalizes its configuration via {@link GoogleSearchConfig}, increments actuator metrics for each search,
- * records search responses to file when enabled, and implements a health check based on proper configuration and recent API call outcomes.
+ * This implementation has been refactored to use a new review generation logic:
+ * <ol>
+ *   <li>Before launching AI review generation, a preprocessing check is performed:
+ *       <ul>
+ *         <li>If the product does not have an associated AI review, generation proceeds.</li>
+ *         <li>If a review exists, it is only regenerated if its creation date is older than the configured refresh delay (default 6 months).</li>
+ *       </ul>
+ *   </li>
+ *   <li>It builds search queries using the product’s brand and model (and alternate models) with a query template.
+ *       A maximum of {@code maxSearch} queries are performed.</li>
+ *   <li>All search results are then sorted so that URLs containing preferred domains (configured via {@code preferredDomains})
+ *       appear first.</li>
+ *   <li>Next, URLs are fetched concurrently (up to {@code maxConcurrentFetch} tasks in parallel).
+ *       For each fetched URL, the PromptService.estimateTokens() method is used to count tokens.
+ *       Only pages with at least {@code sourceMinTokens} tokens are accepted and pages are aggregated until the total tokens
+ *       reach {@code maxTotalTokens}.</li>
+ *   <li>Finally, the collected markdown contents are passed as prompt variables to generate the review.</li>
+ * </ol>
+ * <p>
+ * After generating the review, the product is updated with the new AI review and re-indexed using {@code productRepository.forceIndex()}.
+ * <p>
+ * The service supports both synchronous and asynchronous calls and tracks process status in memory.
+ * It also implements HealthIndicator to report service health based on generation failures.
  */
 @Service
-public class GoogleSearchService implements HealthIndicator {
+public class ReviewGenerationService implements HealthIndicator {
 
-    private static final Logger logger = LoggerFactory.getLogger(GoogleSearchService.class);
+    private static final Logger logger = LoggerFactory.getLogger(ReviewGenerationService.class);
 
-    private final HttpClient httpClient;
-    private final Gson gson;
-    private final GoogleSearchConfig properties;
+    private final ReviewGenerationConfig properties;
+    private final GoogleSearchService googleSearchService;
+    private final UrlFetchingService urlFetchingService;
+    private final PromptService genAiService;
     private final MeterRegistry meterRegistry;
-    private final SerialisationService serialisationService;
-    
-    // Volatile variable to hold the last error message if a non-200 response was received.
-    private volatile String lastErrorMessage = null;
+    private final ProductRepository productRepository;
+
+    // Thread pool executor for asynchronous processing.
+    private final ThreadPoolExecutor executorService;
+
+    // In-memory storage of process status keyed by UPC.
+    private final ConcurrentMap<Long, ReviewGenerationStatus> processStatusMap = new ConcurrentHashMap<>();
+
+    // Global metrics for review generations.
+    private final AtomicInteger totalProcessed = new AtomicInteger(0);
+    private final AtomicInteger successfulCount = new AtomicInteger(0);
+    private final AtomicInteger failedCount = new AtomicInteger(0);
+
+    // Flag used by the health check: set to true if any generation failed.
+    private volatile boolean lastGenerationFailed = false;
 
     /**
-     * Constructs a new GoogleSearchService.
+     * Constructs a new ReviewGenerationService.
      *
-     * @param properties           the Google search configuration properties
-     * @param meterRegistry        the actuator meter registry for metrics
-     * @param serialisationService the service for JSON serialization/deserialization
+     * @param properties the review generation configuration properties.
+     * @param googleSearchService the Google search service.
+     * @param urlFetchingService the URL fetching service.
+     * @param genAiService the Gen AI service.
+     * @param meterRegistry the actuator meter registry.
+     * @param productRepository the product repository service.
      */
-    public GoogleSearchService(GoogleSearchConfig properties, MeterRegistry meterRegistry, SerialisationService serialisationService) {
-        // Create an HttpClient with a connection timeout.
-        this.httpClient = HttpClient.newBuilder()
-                                    .connectTimeout(Duration.ofSeconds(10))
-                                    .build();
-        this.gson = new Gson();
+    public ReviewGenerationService(ReviewGenerationConfig properties,
+                                   GoogleSearchService googleSearchService,
+                                   UrlFetchingService urlFetchingService,
+                                   PromptService genAiService,
+                                   MeterRegistry meterRegistry,
+                                   ProductRepository productRepository) {
         this.properties = properties;
+        this.googleSearchService = googleSearchService;
+        this.urlFetchingService = urlFetchingService;
+        this.genAiService = genAiService;
         this.meterRegistry = meterRegistry;
-        this.serialisationService = serialisationService;
+        this.productRepository = productRepository;
+        this.executorService = new ThreadPoolExecutor(
+            properties.getThreadPoolSize(),
+            properties.getThreadPoolSize(),
+            0L,
+            TimeUnit.MILLISECONDS,
+            new ArrayBlockingQueue<>(properties.getMaxQueueSize()),
+            new ThreadPoolExecutor.AbortPolicy()
+        );
     }
 
     /**
-     * Executes a search against the Google Custom Search API.
+     * Checks if a review generation process for the given GTIN is already active.
+     *
+     * @param gtin the product GTIN.
+     * @return true if an active process exists; false otherwise.
+     */
+    private boolean isActiveForGtin(String gtin) {
+        return processStatusMap.values().stream()
+                .anyMatch(s -> s.getGtin() != null && s.getGtin().equals(gtin)
+                        && s.getStatus() != Status.SUCCESS && s.getStatus() != Status.FAILED);
+    }
+
+    /**
+     * Synchronously generates a review for the given product and vertical configuration.
      * <p>
-     * This method now supports additional parameters (lr, cr, safe, sort, gl, hl). For each of these,
-     * if not provided in the {@link GoogleSearchRequest}, the default value from the configuration is used.
+     * Preprocessing check: If the product already has an AI review and it is not older than the configured refresh delay,
+     * the existing review is returned without triggering a new generation.
      *
-     * @param request a {@link GoogleSearchRequest} containing the query, desired number of results, and optional search parameters
-     * @return a {@link GoogleSearchResponse} containing the search results
-     * @throws IOException          if an I/O error occurs during the HTTP call or recording the response
-     * @throws InterruptedException if the HTTP request is interrupted
-     * @throws GoogleSearchException if the API responds with an error or the response cannot be parsed
+     * @param product the product containing brand, primary model, and alternate models.
+     * @param verticalConfig the vertical configuration.
+     * @return the generated or existing AI review.
      */
-    public GoogleSearchResponse search(GoogleSearchRequest request) throws IOException, InterruptedException {
-        // Increment the actuator metric for the number of searches performed.
-        meterRegistry.counter("google.search.count").increment();
+    public AiReview generateReviewSync(Product product, VerticalConfig verticalConfig) {
+        long upc = product.getId();
 
-        // Validate input query (constructor of GoogleSearchRequest already does basic validation)
-        final String encodedQuery = URLEncoder.encode(request.getQuery(), Charset.defaultCharset());
-        
-        // Build the API URL using externalized configuration.
-        StringBuilder urlBuilder = new StringBuilder(String.format("%s?q=%s&key=%s&cx=%s&num=%d",
-                properties.getSearchUrl(),
-                encodedQuery,
-                properties.getApiKey(),
-                properties.getCx(),
-                request.getNumResults()));
-        
-        // Resolve additional parameters: use the request value if provided; otherwise, fallback to configuration defaults.
-        String lr = (request.getLr() != null && !request.getLr().isBlank()) ? request.getLr() : properties.getDefaults().getLr();
-        String cr = (request.getCr() != null && !request.getCr().isBlank()) ? request.getCr() : properties.getDefaults().getCr();
-        String safe = (request.getSafe() != null && !request.getSafe().isBlank()) ? request.getSafe() : properties.getDefaults().getSafe();
-        String sort = (request.getSort() != null && !request.getSort().isBlank()) ? request.getSort() : properties.getDefaults().getSort();
-        String gl = (request.getGl() != null && !request.getGl().isBlank()) ? request.getGl() : properties.getDefaults().getGl();
-        String hl = (request.getHl() != null && !request.getHl().isBlank()) ? request.getHl() : properties.getDefaults().getHl();
-        
-        // Append additional parameters to the URL if non-empty.
-        if (lr != null && !lr.isBlank()) {
-            urlBuilder.append("&lr=").append(URLEncoder.encode(lr, Charset.defaultCharset()));
-        }
-        if (cr != null && !cr.isBlank()) {
-            urlBuilder.append("&cr=").append(URLEncoder.encode(cr, Charset.defaultCharset()));
-        }
-        if (safe != null && !safe.isBlank()) {
-            urlBuilder.append("&safe=").append(URLEncoder.encode(safe, Charset.defaultCharset()));
-        }
-        if (sort != null && !sort.isBlank()) {
-            urlBuilder.append("&sort=").append(URLEncoder.encode(sort, Charset.defaultCharset()));
-        }
-        if (gl != null && !gl.isBlank()) {
-            urlBuilder.append("&gl=").append(URLEncoder.encode(gl, Charset.defaultCharset()));
-        }
-        if (hl != null && !hl.isBlank()) {
-            urlBuilder.append("&hl=").append(URLEncoder.encode(hl, Charset.defaultCharset()));
-        }
-        
-        String url = urlBuilder.toString();
-        
-        // Prepare a safe version of the URL for logging (masking the API key)
-        String safeUrl = url.replace(properties.getApiKey(), "****");
-        logger.debug("Executing search with URL: {}", safeUrl);
-
-        // Build the HTTP request with a timeout.
-        final HttpRequest httpRequest = HttpRequest.newBuilder()
-                .uri(URI.create(url))
-                .GET()
-                .timeout(Duration.ofSeconds(10))
-                .build();
-
-        // Send the HTTP request and obtain the response.
-        final HttpResponse<String> response = httpClient.send(httpRequest, HttpResponse.BodyHandlers.ofString());
-
-        // Check the HTTP status code; if not 200, log and throw a custom exception.
-        if (response.statusCode() != 200) {
-            String errorMsg = "Error from Google Custom Search API: HTTP " + response.statusCode() + " - " + response.body();
-            logger.error(errorMsg);
-            lastErrorMessage = errorMsg;
-            throw new GoogleSearchException(errorMsg);
-        } else {
-            // Clear any previous error if the current call is successful.
-            lastErrorMessage = null;
+        // Preprocessing: Check if review generation is necessary.
+        if (!shouldGenerateReview(product)) {
+            logger.info("Skipping AI review generation for UPC {} because an up-to-date review already exists.", upc);
+            //TODO(p3,i18n) : i18n
+            return product.getAiReviews().i18n("fr");
         }
 
-        logger.info("Search performed for query: '{}' with HTTP status: {}", request.getQuery(), response.statusCode());
-
-        // Parse the JSON response into our DTO.
-        GoogleSearchResponse result = parseResponse(response.body());
-        
-        // If recording is enabled, store the result as a JSON file in the provided folder.
-        if (properties.isRecordEnabled() && properties.getRecordFolder() != null && !properties.getRecordFolder().isBlank()) {
-            try {
-                // Sanitize the query for a safe file name.
-                String sanitizedQuery = sanitizeUrlToFileName(request.getQuery());
-                String fileName = sanitizedQuery + "-" + request.getNumResults() + ".json";
-                Path folderPath = Paths.get(properties.getRecordFolder());
-                if (!Files.exists(folderPath)) {
-                    Files.createDirectories(folderPath);
-                }
-                Path filePath = folderPath.resolve(fileName);
-                String jsonContent = serialisationService.toJson(result,true);
-                Files.writeString(filePath, jsonContent);
-                logger.info("Search results for {} are : \n{}",request.getQuery(), jsonContent);
-                logger.info("Recorded search result to file: {}", filePath.toAbsolutePath());
-                
-            } catch (Exception e) {
-                // Log the error but do not break the search functionality.
-                logger.error("Failed to record search result: {}", e.getMessage());
-            }
+        // Check duplicate submission for same GTIN.
+        if (isActiveForGtin(product.gtin())) {
+            throw new IllegalStateException("Review generation already in progress for product with GTIN " + product.gtin());
         }
-        
-        return result;
+
+        ReviewGenerationStatus status = new ReviewGenerationStatus();
+        status.setUpc(upc);
+        status.setGtin(product.gtin());
+        status.setStatus(Status.PENDING);
+        status.setStartTime(Instant.now().toEpochMilli());
+        processStatusMap.put(upc, status);
+
+        try {
+            PromptResponse<AiReview> reviewResponse = executeReviewGeneration(product, verticalConfig, status);
+            AiReview newReview = reviewResponse.getBody();
+            status.setResult(newReview);
+            status.setStatus(Status.SUCCESS);
+            status.setEndTime(Instant.now().toEpochMilli());
+            computeTimings(status);
+            successfulCount.incrementAndGet();
+            meterRegistry.counter("review.generation.success").increment();
+            // Update product with the new AI review and force index update.
+            //TODO(p3,i18n) : i18n
+            product.getAiReviews().put("fr", newReview);
+            productRepository.forceIndex(product);
+            return newReview;
+        } catch (Exception e) {
+            logger.error("Review generation failed for UPC {}: {}", upc, e.getMessage(), e);
+            status.setStatus(Status.FAILED);
+            status.setErrorMessage(e.getMessage());
+            status.setEndTime(Instant.now().toEpochMilli());
+            computeTimings(status);
+            failedCount.incrementAndGet();
+            meterRegistry.counter("review.generation.failed").increment();
+            lastGenerationFailed = true;
+            throw new RuntimeException("Review generation failed", e);
+        } finally {
+            totalProcessed.incrementAndGet();
+        }
     }
 
     /**
-     * Parses the JSON response returned by the Google Custom Search API.
+     * Asynchronously initiates review generation for the given product and vertical configuration.
+     * <p>
+     * Preprocessing check: If the product already has an AI review and it is not older than the configured refresh delay,
+     * the generation is skipped and the existing review remains.
      *
-     * @param jsonResponse the raw JSON response as a String
-     * @return a {@link GoogleSearchResponse} containing the parsed search results
-     * @throws GoogleSearchException if parsing fails or the expected JSON structure is missing
+     * @param product the product containing brand, primary model, and alternate models.
+     * @param verticalConfig the vertical configuration.
+     * @return the process ID (UPC) used to track generation status.
      */
-    private GoogleSearchResponse parseResponse(String jsonResponse) {
-        logger.debug("Parsing response JSON: {}", jsonResponse);
-        try {
-            JsonObject jsonObject = gson.fromJson(jsonResponse, JsonObject.class);
-            JsonArray items = jsonObject.getAsJsonArray("items");
+    public long generateReviewAsync(Product product, VerticalConfig verticalConfig) {
+        long upc = product.getId();
 
-            final List<GoogleSearchResult> results = new ArrayList<>();
-            if (items != null) {
-                // Iterate over each item and extract title and link.
-                items.forEach(item -> {
-                    JsonObject obj = item.getAsJsonObject();
-                    String title = obj.get("title").getAsString();
-                    String link = obj.get("link").getAsString();
-                    results.add(new GoogleSearchResult(title, link));
-                });
-            }
-            return new GoogleSearchResponse(results);
-        } catch (Exception e) {
-            String errorMsg = "Failed to parse Google Custom Search API response";
-            logger.error(errorMsg, e);
-            throw new GoogleSearchException(errorMsg, e);
+        // Preprocessing: Check if review generation is necessary.
+        if (!shouldGenerateReview(product)) {
+            logger.info("Skipping asynchronous AI review generation for UPC {} because an up-to-date review already exists.", upc);
+            ReviewGenerationStatus status = new ReviewGenerationStatus();
+            status.setUpc(upc);
+            status.setGtin(product.gtin());
+            status.setStatus(Status.SUCCESS);
+            status.addMessage("Existing valid AI review found. Skipping generation.");
+            status.setStartTime(Instant.now().toEpochMilli());
+            status.setEndTime(Instant.now().toEpochMilli());
+            computeTimings(status);
+            processStatusMap.put(upc, status);
+            return upc;
         }
+
+        // Check duplicate submission for same GTIN.
+        if (isActiveForGtin(product.gtin())) {
+            throw new IllegalStateException("Review generation already in progress for product with GTIN " + product.gtin());
+        }
+
+        // Avoid duplicate runs on the same UPC if already processing.
+        processStatusMap.compute(upc, (key, existingStatus) -> {
+            if (existingStatus != null && (existingStatus.getStatus() == Status.PENDING ||
+                    existingStatus.getStatus() == Status.QUEUED ||
+                    existingStatus.getStatus() == Status.SEARCHING ||
+                    existingStatus.getStatus() == Status.FETCHING ||
+                    existingStatus.getStatus() == Status.ANALYSING)) {
+                return existingStatus;
+            } else {
+                ReviewGenerationStatus status = new ReviewGenerationStatus();
+                status.setUpc(upc);
+                status.setGtin(product.gtin());
+                status.setStatus(Status.PENDING);
+                status.setStartTime(Instant.now().toEpochMilli());
+                return status;
+            }
+        });
+
+        // Submit the review generation task asynchronously.
+        executorService.submit(() -> {
+            ReviewGenerationStatus status = processStatusMap.get(upc);
+            // Update status as the task starts execution.
+            status.setStatus(Status.SEARCHING);
+            try {
+                PromptResponse<AiReview> reviewResponse = executeReviewGeneration(product, verticalConfig, status);
+                AiReview newReview = reviewResponse.getBody();
+                status.setResult(newReview);
+                status.setStatus(Status.SUCCESS);
+                // Update product with the new AI review and force index update.
+                //TODO(p3, i18n) : i18n
+                product.getAiReviews().put("fr", newReview);
+                productRepository.forceIndex(product);
+                meterRegistry.counter("review.generation.success").increment();
+            } catch (Exception e) {
+                logger.error("Asynchronous review generation failed for UPC {}: {}", upc, e.getMessage(), e);
+                status.setStatus(Status.FAILED);
+                status.setErrorMessage(e.getMessage());
+                meterRegistry.counter("review.generation.failed").increment();
+                lastGenerationFailed = true;
+            } finally {
+                status.setEndTime(Instant.now().toEpochMilli());
+                computeTimings(status);
+                totalProcessed.incrementAndGet();
+            }
+        });
+
+        // Immediately after submission, update the status to QUEUED.
+        int waiting = executorService.getQueue().size();
+        ReviewGenerationStatus status = processStatusMap.get(upc);
+        status.setStatus(Status.QUEUED);
+        status.addMessage("Queued for execution. Number waiting in queue: " + waiting);
+
+        return upc;
+    }
+
+    /**
+     * Executes the review generation process using the new logic.
+     * <ol>
+     *   <li>Builds search queries using the product’s brand and primary model and then alternate models using the configured query template.
+     *       A maximum of {@code maxSearch} queries are performed.</li>
+     *   <li>Performs a Google search for each query and aggregates the search results.</li>
+     *   <li>Deduplicates the search results to keep only one URL per distinct domain, and then sorts the results so that
+     *       results from preferred domains come first.</li>
+     *   <li>Fetches the markdown content for each URL concurrently (up to {@code maxConcurrentFetch} tasks).
+     *       For each fetched page, its token count is estimated via {@code PromptService.estimateTokens(String text)}.
+     *       Pages with token counts below {@code sourceMinTokens} are discarded and pages are aggregated until
+     *       the total token count reaches {@code maxTotalTokens}.</li>
+     *   <li>Finally, the aggregated markdown content is passed as a prompt variable to generate the review.</li>
+     * </ol>
+     * <p>
+     * During the process, the provided {@code ProcessStatus} is updated with messages that track key steps.
+     *
+     * @param product the product.
+     * @param verticalConfig the vertical configuration.
+     * @param status the process status to update with processing messages.
+     * @return the generated review.
+     * @throws Exception if an error occurs during generation.
+     */
+    private PromptResponse<AiReview> executeReviewGeneration(Product product, VerticalConfig verticalConfig, ReviewGenerationStatus status) throws Exception {
+        String brand = product.brand();
+        String primaryModel = product.model();
+        Set<String> alternateModels = product.getAkaModels();
+
+        // Build a list of search queries using the configured query template.
+        List<String> queries = new ArrayList<>();
+        queries.add(String.format(properties.getQueryTemplate(), brand, primaryModel));
+        if (alternateModels != null) {
+            for (String akaModel : alternateModels) {
+                queries.add(String.format(properties.getQueryTemplate(), brand, akaModel));
+            }
+        }
+
+        // Record initial message for search queries.
+        status.addMessage("Searching the web...");
+
+        // (Status already set to SEARCHING in caller)
+
+        // Perform searches up to the maximum allowed (maxSearch).
+        int searchesMade = 0;
+        List<GoogleSearchResult> allResults = new ArrayList<>();
+        int maxSearch = properties.getMaxSearch();
+        for (String query : queries) {
+            if (searchesMade >= maxSearch) {
+                break;
+            }
+            logger.debug("Executing search query: {}", query);
+            status.addMessage("Executing search query: " + query);
+            //TODO(p3,i18N) : internationalisation from ReviewGenConfig
+            GoogleSearchRequest searchRequest = new GoogleSearchRequest(query, "lang_fr", "countryFR");
+            GoogleSearchResponse searchResponse = googleSearchService.search(searchRequest);
+            searchesMade++;
+            if (searchResponse != null && searchResponse.getResults() != null) {
+                allResults.addAll(searchResponse.getResults());
+            }
+        }
+
+        // Update status to FETCHING before starting URL fetch.
+        status.setStatus(Status.FETCHING);
+
+        // Deduplicate and sort the search results:
+        // 1. Keep only one URL per distinct domain.
+        // 2. Sort so that entries from preferred domains come first.
+        List<GoogleSearchResult> sortedResults = allResults.stream()
+                .filter(r -> r.getLink() != null && !r.getLink().isEmpty())
+                // excluding pdf
+                .filter(r -> !r.getLink().endsWith(".pdf"))
+                .filter(distinctByKey(r -> {
+                    try {
+                        return new URL(r.getLink()).getHost();
+                    } catch (Exception e) {
+                        return r.getLink();
+                    }
+                }))
+                .sorted((r1, r2) -> {
+                    boolean r1Preferred = properties.getPreferredDomains().stream()
+                            .anyMatch(domain -> r1.getLink().contains(domain));
+                    boolean r2Preferred = properties.getPreferredDomains().stream()
+                            .anyMatch(domain -> r2.getLink().contains(domain));
+                    if (r1Preferred && !r2Preferred) return -1;
+                    if (!r1Preferred && r2Preferred) return 1;
+                    return 0;
+                })
+                .toList();
+
+        // Prepare to fetch URL content concurrently using a dedicated executor.
+        ThreadPoolExecutor fetchExecutor = new ThreadPoolExecutor(
+            properties.getMaxConcurrentFetch(),
+            properties.getMaxConcurrentFetch(),
+            0L,
+            TimeUnit.MILLISECONDS,
+            new ArrayBlockingQueue<>(properties.getMaxQueueSize()),
+            new ThreadPoolExecutor.AbortPolicy()
+        );
+        Map<String, CompletableFuture<FetchResponse>> fetchFutures = new HashMap<>();
+        for (GoogleSearchResult result : sortedResults) {
+            String url = result.getLink();
+            CompletableFuture<FetchResponse> future = CompletableFuture.supplyAsync(() -> {
+                try {
+                    return urlFetchingService.fetchUrl(url).get();
+                } catch (Exception e) {
+                    logger.warn("Failed to fetch content from URL {}: {}", url, e.getMessage());
+                    return null;
+                }
+            }, fetchExecutor);
+            fetchFutures.put(url, future);
+        }
+        fetchExecutor.shutdown();
+
+        // Update status to ANALYSING before processing fetched content.
+        status.setStatus(Status.ANALYSING);
+        status.addMessage("Fetching URL content concurrently...");
+
+        // Aggregate fetched markdown content until the maximum token limit is reached.
+        int maxTotalTokens = properties.getMaxTotalTokens();
+        int minTokens = properties.getSourceMinTokens();
+        int maxTokens = properties.getSourceMaxTokens();
+        
+        int accumulatedTokens = 0;
+        Map<String, String> finalSourcesMap = new LinkedHashMap<>();
+        Map<String, Integer> finalTokensMap = new LinkedHashMap<>();
+        
+        // Process the sorted URLs in order.
+        for (GoogleSearchResult result : sortedResults) {
+            String url = result.getLink();
+            CompletableFuture<FetchResponse> future = fetchFutures.get(url);
+            if (future == null) continue;
+            FetchResponse fetchResponse = future.get();
+            if (fetchResponse == null || fetchResponse.markdownContent() == null || fetchResponse.markdownContent().isEmpty()) {
+                continue;
+            }
+            String content = fetchResponse.markdownContent();
+            int tokenCount = genAiService.estimateTokens(content);
+            if (tokenCount < minTokens) {
+                logger.warn("Content from URL {} discarded due to insufficient tokens: {}", url, tokenCount);
+                continue;
+            }
+            if (tokenCount > maxTokens) {
+                logger.warn("Content from URL {} discarded, exceed tokens limit: {}", url, tokenCount);
+                continue;
+            }
+            
+            if (accumulatedTokens + tokenCount > maxTotalTokens) {
+                logger.warn("Reached max tokens threshold. Current tokens: {}, URL tokens: {}, threshold: {}",
+                        accumulatedTokens, tokenCount, maxTotalTokens);
+                break;
+            }
+            finalSourcesMap.put(url, content);
+            finalTokensMap.put(url, tokenCount);
+            accumulatedTokens += tokenCount;
+            // Record message for the analysed URL, including its domain.
+            try {
+                String domain = new URL(url).getHost();
+                status.addMessage("Analysing " + domain);
+            } catch (Exception e) {
+                status.addMessage("Analysing " + url);
+            }
+        }
+        logger.info("Aggregated {} tokens from {} sources.", accumulatedTokens, finalSourcesMap.size());
+
+        // Compose the prompt variables including the collected markdown content.
+        Map<String, Object> promptVariables = new HashMap<>();
+        promptVariables.put("sources", finalSourcesMap);
+        promptVariables.put("tokens", finalTokensMap);
+        
+        promptVariables.put("PRODUCT_NAME", product.shortestOfferName());
+        promptVariables.put("PRODUCT_BRAND", product.brand());
+        promptVariables.put("PRODUCT_MODEL", product.model());
+        promptVariables.put("PRODUCT_GTIN", product.gtin());
+        promptVariables.put("PRODUCT", product);
+		
+        promptVariables.put("VERTICAL_NAME", verticalConfig.i18n("fr").getH1Title().getPrefix());
+
+        StringBuilder sb = new StringBuilder();
+        verticalConfig.getAttributesConfig().getConfigs().forEach(attrConf -> {
+            if (attrConf.getSynonyms().size() > 0 ) {
+                sb.append("        ").append("- ").append(attrConf.getKey()).append(" (").append(attrConf.getName().get("fr")).append(")").append("\n");				
+            }
+        });
+        promptVariables.put("ATTRIBUTES", sb.toString());
+		
+        status.addMessage("AI generation");
+        // Generate the review using the GenAiService with the prompt template "review-generation".
+        PromptResponse<AiReview> ret = genAiService.objectPrompt("review-generation", promptVariables, AiReview.class);
+        return ret;
+    }
+
+    /**
+     * Determines if a new AI review should be generated for the product.
+     * <p>
+     * Generation is required if:
+     * <ul>
+     *   <li>The product does not have an associated AI review.</li>
+     *   <li>Or the existing review's creation date is older than the configured refresh delay.</li>
+     * </ul>
+     *
+     * @param product the product to check.
+     * @return true if generation should proceed; false otherwise.
+     */
+    private boolean shouldGenerateReview(Product product) {
+        // TODO(p3, i18n)
+        AiReview existingReview = product.getAiReviews().i18n("fr");
+        if (existingReview == null) {
+            return true;
+        }
+        
+        // TODO : HAndle the time limit we can generate again
+//        Instant reviewCreated = Instant.ofEpochMilli(existingReview.createdMs());
+//        Instant threshold = Instant.now().minus(properties.getRefreshDelayMonths(), ChronoUnit.MONTHS);
+//        return reviewCreated.isBefore(threshold);
+        
+        return false;
+    }
+
+    /**
+     * Computes and sets the duration and remaining time for a given process.
+     *
+     * @param status the process status to update.
+     */
+    private void computeTimings(ReviewGenerationStatus status) {
+        if (status.getStartTime() != null && status.getEndTime() != null) {
+            long duration = status.getEndTime() - status.getStartTime();
+            long estimated = properties.getEstimatedTime();
+            long remaining = estimated - duration;
+            status.setDuration(duration);
+            status.setRemaining(remaining);
+            status.setPercent(new Long (Math.round(Double.valueOf(duration) / Double.valueOf(estimated) * 100)).intValue());
+        }
+    }
+    
+    /**
+     * Updates the timings dynamically for an ongoing process.
+     *
+     * @param status the process status to update.
+     */
+    private void updateDynamicTimings(ReviewGenerationStatus status) {
+        if (status.getStartTime() != null && (status.getStatus() != Status.SUCCESS && status.getStatus() != Status.FAILED)) {
+            long elapsed = Instant.now().toEpochMilli() - status.getStartTime();
+            long estimated = properties.getEstimatedTime();
+            long remaining = Math.max(estimated - elapsed, 0);
+            int percent = (int) Math.min(100, Math.round((double) elapsed / estimated * 100));
+            status.setDuration(elapsed);
+            status.setRemaining(remaining);
+            status.setPercent(percent);
+        }
+    }
+
+    /**
+     * Returns the status of a review generation process by UPC.
+     *
+     * @param upc the UPC identifier.
+     * @return the process status, or null if not found.
+     */
+    public ReviewGenerationStatus getProcessStatus(long upc) {
+        ReviewGenerationStatus status = processStatusMap.get(upc);
+        if (status != null && status.getStatus() != Status.SUCCESS && status.getStatus() != Status.FAILED) {
+            updateDynamicTimings(status);
+        }
+        return status;
+    }
+
+    /**
+     * Returns global processing statistics.
+     *
+     * @return a map with keys: totalProcessed, successful, failed, and ongoing.
+     */
+    public Map<String, Integer> getGlobalStats() {
+        Map<String, Integer> stats = new HashMap<>();
+        stats.put("totalProcessed", totalProcessed.get());
+        stats.put("successful", successfulCount.get());
+        stats.put("failed", failedCount.get());
+        // Count processes that are still PENDING, QUEUED, SEARCHING, FETCHING or ANALYSING.
+        long ongoing = processStatusMap.values().stream()
+                .filter(s -> s.getStatus() == Status.PENDING ||
+                             s.getStatus() == Status.QUEUED ||
+                             s.getStatus() == Status.SEARCHING ||
+                             s.getStatus() == Status.FETCHING ||
+                             s.getStatus() == Status.ANALYSING)
+                .count();
+        stats.put("ongoing", (int) ongoing);
+        return stats;
     }
 
     /**
      * Health check implementation.
      * <p>
-     * The service is considered healthy if the necessary configuration properties are set and the last search returned HTTP 200.
+     * The service is reported as DOWN if any review generation failure has occurred.
      *
-     * @return a Health status indicating UP if properties are properly configured and no recent error was encountered; otherwise DOWN.
+     * @return Health status UP if healthy; otherwise DOWN with error details.
      */
     @Override
     public Health health() {
-        if (properties.getApiKey() == null || properties.getApiKey().isEmpty() ||
-            properties.getCx() == null || properties.getCx().isEmpty() ||
-            properties.getSearchUrl() == null || properties.getSearchUrl().isEmpty()) {
-            logger.error("Google Search properties are not properly configured.");
-            return Health.down().withDetail("error", "Google Search properties are missing or invalid").build();
+        if (lastGenerationFailed) {
+            return Health.down().withDetail("error", "One or more review generations have failed").build();
         }
-        
-        if (lastErrorMessage != null) {
-            logger.error("Health check failed due to previous error: {}", lastErrorMessage);
-            return Health.down().withDetail("error", lastErrorMessage).build();
-        }
-        
-        logger.debug("Google Search properties are properly configured and no recent errors encountered.");
         return Health.up().build();
     }
-    
+
     /**
-     * Sanitizes a URL into a safe file name by removing the protocol and replacing non-alphanumeric characters.
+     * Returns a predicate that maintains state about what keys have been seen so far, filtering out duplicates.
      *
-     * @param url the URL to sanitize
-     * @return a sanitized file name ending with .txt
+     * @param keyExtractor a function to extract the key for comparison.
+     * @param <T> the type of the input elements.
+     * @return a predicate that returns true if the element is encountered for the first time.
      */
-    public static String sanitizeUrlToFileName(String url) {
-        String sanitized = url.replaceFirst("^(https?://)", "").replaceAll("[^a-zA-Z0-9]", "_");
-        return sanitized + ".txt";
-    }    
-}
-~~~
-
-## [GoogleSearchServiceMock.java - /home/goulven/git/open4goods/services/googlesearch/src/test/java/org/open4goods/googlesearch/mock/GoogleSearchServiceMock.java]
-~~~
-package org.open4goods.googlesearch.mock;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.List;
-
-import org.mockito.Mockito;
-import org.open4goods.services.googlesearch.config.GoogleSearchConfig;
-import org.open4goods.services.googlesearch.dto.GoogleSearchRequest;
-import org.open4goods.services.googlesearch.dto.GoogleSearchResponse;
-import org.open4goods.services.googlesearch.dto.GoogleSearchResult;
-import org.open4goods.services.googlesearch.service.GoogleSearchService;
-import org.open4goods.services.serialisation.service.SerialisationService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Primary;
-import org.springframework.core.io.ClassPathResource;
-
-/**
- * Test configuration for providing a primary GoogleSearchService bean for tests.
- * <p>
- * It systematically attempts to load a recorded mock response using Spring's classpath resource mechanism.
- * The resource is expected under "googlesearch/mocks/". If not found and if recording is enabled with a record folder configured,
- * it falls back to reading from that folder. Otherwise, it returns a dummy response.
- */
-@TestConfiguration
-public class GoogleSearchServiceMock {
-
-    private static final Logger logger = LoggerFactory.getLogger(GoogleSearchServiceMock.class);
-
-    @Bean
-    @Primary
-    GoogleSearchService googleSearchService(GoogleSearchConfig properties, SerialisationService serialisationService)
-            throws IOException, InterruptedException {
-        // Create a Mockito mock that simulates common behavior.
-        GoogleSearchService mockService = Mockito.mock(GoogleSearchService.class);
-        Mockito.when(mockService.search(Mockito.any())).thenAnswer(invocation -> {
-            GoogleSearchRequest request = invocation.getArgument(0);
-            // Sanitize the query to create a safe file name.
-            String sanitizedQuery = GoogleSearchService.sanitizeUrlToFileName(request.getQuery());
-            String fileName = sanitizedQuery + "-" + request.getNumResults() + ".json";
-            // Define the path where mocks are expected in the classpath.
-            String resourcePath = "googlesearch/mocks/" + fileName;
-
-            // Attempt to load the recorded response from classpath using Spring's ClassPathResource.
-            ClassPathResource resource = new ClassPathResource(resourcePath);
-            if (resource.exists()) {
-                try (InputStream is = resource.getInputStream()) {
-                    String json = new String(is.readAllBytes(), StandardCharsets.UTF_8);
-                    logger.debug("Loaded mock response from classpath resource: {}", resourcePath);
-                    return serialisationService.fromJson(json, GoogleSearchResponse.class);
-                } catch (IOException e) {
-                    logger.error("Failed to load recorded response from classpath: {}", e.getMessage());
-                }
-            } else {
-                logger.debug("No classpath resource found at: {}", resourcePath);
-            }
-
-            // If not found in classpath, and if recording is enabled with a record folder, attempt to load from that folder.
-            if (properties.isRecordEnabled() && properties.getRecordFolder() != null && !properties.getRecordFolder().isBlank()) {
-                try {
-                    Path filePath = Paths.get(properties.getRecordFolder()).resolve(fileName);
-                    if (Files.exists(filePath)) {
-                        String json = Files.readString(filePath);
-                        logger.debug("Loaded mock response from folder: {}", filePath.toAbsolutePath());
-                        return serialisationService.fromJson(json, GoogleSearchResponse.class);
-                    } else {
-                        logger.debug("No file found at folder path: {}", filePath.toAbsolutePath());
-                    }
-                } catch (IOException e) {
-                    logger.error("Failed to load recorded response from folder: {}", e.getMessage());
-                }
-            }
-
-            // Default dummy response if no recorded file is found.
-            logger.warn("No recorded mock response found for request: {}. Returning dummy response.", request);
-            List<GoogleSearchResult> res = new ArrayList<>();
-            res.add(new GoogleSearchResult("link1", "http://link1"));
-            res.add(new GoogleSearchResult("link2", "http://link2"));
-            res.add(new GoogleSearchResult("link3", "http://link3"));
-            return new GoogleSearchResponse(res);
-        });
-        return mockService;
+    private static <T> Predicate<T> distinctByKey(Function<? super T, ?> keyExtractor) {
+        Map<Object, Boolean> seen = new ConcurrentHashMap<>();
+        return t -> seen.putIfAbsent(keyExtractor.apply(t), Boolean.TRUE) == null;
     }
 }
 ~~~
 
-## [GoogleSearchServiceTest.java - /home/goulven/git/open4goods/services/googlesearch/src/test/java/org/open4goods/googlesearch/GoogleSearchServiceTest.java]
+## [ReviewGenerationServiceTest.java - /home/goulven/git/open4goods/services/review-generation/src/test/java/org/open4goods/reviewgeneration/ReviewGenerationServiceTest.java]
 ~~~
-package org.open4goods.googlesearch;
-
-import static org.assertj.core.api.Assertions.fail;
-import static org.junit.Assert.assertTrue;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
-import java.io.IOException;
-
-import org.junit.jupiter.api.Test;
-import org.open4goods.services.googlesearch.dto.GoogleSearchRequest;
-import org.open4goods.services.googlesearch.service.GoogleSearchService;
-import org.open4goods.services.serialisation.service.SerialisationService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.SpringBootConfiguration;
-import org.springframework.boot.actuate.health.Status;
-import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.annotation.ComponentScan;
-import org.springframework.test.context.ActiveProfiles;
-
-/**
- * Unit tests for {@link GoogleSearchService}.
- */
-@SpringBootTest(classes= {GoogleSearchServiceTest.TestConfig.class})
-@ActiveProfiles("test")
-public class GoogleSearchServiceTest {
-
-    @Autowired
-    private GoogleSearchService googleSearchService;
-    /**
-     * Test that the search method returns an error for a bad request.
-     * <p>
-     * This test expects the search to fail with an error message containing "400".
-     */
-    @Test
-    public void testSearch() throws IOException, InterruptedException {
-        // Prepare a sample search request with a known query.
-        GoogleSearchRequest request = new GoogleSearchRequest("Spring Boot", "lang_fr", "countryFR");
-        
-        try {
-            googleSearchService.search(request);
-        } catch (Exception e) {
-            // We expect an error response due to test configuration (e.g., invalid API key)
-            assertTrue(e.getMessage().contains("400") || e.getMessage().contains("Error"));
-            return;
-        }
-        fail("Search should have failed with a 400 exception");
-    }
-
-    /**
-     * Test that the health check returns UP when properties are properly configured.
-     */
-    @Test
-    public void testHealth() {
-        // Verify that the health indicator returns a status of UP
-        assertEquals(Status.UP, googleSearchService.health().getStatus(), "Health check should be UP");
-    }
-
-    /**
-     * Minimal test configuration to bootstrap the Spring context.
-     */
-    @SpringBootConfiguration
-    @EnableAutoConfiguration
-    @ComponentScan(basePackages = {"org.open4goods.services"})
-    public static class TestConfig {
-        // This class remains empty; its purpose is to trigger component scanning in the
-        // org.open4goods.services.googlesearch package and enable auto-configuration.
-    }
-}
+// TODO : Have to mock product repository
+package org.open4goods.reviewgeneration;
+//
+//import static org.junit.jupiter.api.Assertions.assertEquals;
+//import static org.junit.jupiter.api.Assertions.assertNotNull;
+//import static org.junit.jupiter.api.Assertions.assertTrue;
+//import static org.junit.jupiter.api.Assertions.fail;
+//
+//import java.util.Set;
+//
+//import org.junit.jupiter.api.Test;
+//import org.open4goods.googlesearch.mock.GoogleSearchServiceMock;
+//import org.open4goods.model.ai.AiReview;
+//import org.open4goods.model.attribute.ReferentielKey;
+//import org.open4goods.model.product.Product;
+//import org.open4goods.model.vertical.PrefixedAttrText;
+//import org.open4goods.model.vertical.ProductI18nElements;
+//import org.open4goods.model.vertical.VerticalConfig;
+//import org.open4goods.services.prompt.service.mock.PromptServiceMock;
+//import org.open4goods.services.reviewgeneration.config.ReviewGenerationConfig;
+//import org.open4goods.services.reviewgeneration.dto.ReviewGenerationStatus;
+//import org.open4goods.services.reviewgeneration.service.ReviewGenerationService;
+//import org.open4goods.urlfetching.service.mock.UrlFetchingServiceMock;
+//import org.springframework.beans.factory.annotation.Autowired;
+//import org.springframework.boot.SpringBootConfiguration;
+//import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
+//import org.springframework.boot.test.context.SpringBootTest;
+//import org.springframework.context.annotation.ComponentScan;
+//import org.springframework.context.annotation.Import;
+//import org.springframework.test.context.ActiveProfiles;
+//import org.springframework.test.context.TestPropertySource;
+//
+//@SpringBootTest(classes = {ReviewGenerationService.class, ReviewGenerationConfig.class, ReviewGenerationServiceTest.TestConfig.class})
+//@TestPropertySource(locations = "classpath:application-test.yml")
+//@ActiveProfiles("test")
+//@Import({GoogleSearchServiceMock.class, UrlFetchingServiceMock.class, PromptServiceMock.class})
+//public class ReviewGenerationServiceTest {
+//
+//    /**
+//     * Minimal test configuration to bootstrap the Spring context.
+//     */
+//    @SpringBootConfiguration
+//    @EnableAutoConfiguration
+//    @ComponentScan(basePackages = {"org.open4goods.services"})
+//    public static class TestConfig {
+//        // This class remains empty; its purpose is to trigger component scanning.
+//    }
+//
+//    @Autowired
+//    private ReviewGenerationService reviewGenerationService;
+//
+////    @Test
+////    public void testGenerateReviewSync() {
+////        // Create a dummy product.
+////        Product product = new Product();
+////        product.setId(8806091548818L);
+////        product.getAttributes().getReferentielAttributes().put(ReferentielKey.BRAND, "LG");
+////        product.getAttributes().getReferentielAttributes().put(ReferentielKey.MODEL, "24TQ510S");
+////        product.setAkaModels(Set.of("24TQ510S-PZ.API", "24TQ510S-PZ"));
+////        // Assume product has a setter for GTIN.
+////        product.setId(123L);
+////
+////        // Dummy vertical configuration.
+////        VerticalConfig verticalConfig = new VerticalConfig();
+////        verticalConfig.setId("tv");
+////        ProductI18nElements i18n = new ProductI18nElements();
+////        PrefixedAttrText p = new PrefixedAttrText();
+////        p.setPrefix("téléviseur");
+////        i18n.setH1Title(p);
+////        verticalConfig.getI18n().put("fr", i18n);
+////
+////        // Invoke synchronous review generation.
+////        try {
+////            AiReview review = reviewGenerationService.generateReviewSync(product, verticalConfig);
+////            assertNotNull(review, "The generated review should not be null");
+////            System.out.println("Generated Review: " + review);
+////        } catch (Exception e) {
+////            fail("Review generation failed: ", e);
+////        }
+////
+////        // Verify that the process status is SUCCESS and that processing messages were recorded.
+////        ReviewGenerationStatus status = reviewGenerationService.getProcessStatus(product.getId());
+////        assertNotNull(status, "Process status should be available");
+////        assertEquals(ReviewGenerationStatus.Status.SUCCESS, status.getStatus());
+////        assertTrue(status.getMessages().stream().anyMatch(msg -> msg.contains("Searching the web")),
+////                "Process messages should contain a web search message");
+////        assertTrue(status.getMessages().stream().anyMatch(msg -> msg.contains("AI generation")),
+////                "Process messages should contain an AI generation message");
+////    }
+//    
+//    /**
+//     * New test case to verify that the URL content token thresholds and accumulation behave as expected.
+//     * This test simulates:
+//     * <ul>
+//     *   <li>A Google search returning two URLs.</li>
+//     *   <li>One URL returns content with an estimated token count above the minimum threshold.
+//     *       The other returns content with too few tokens.</li>
+//     *   <li>The aggregated tokens should include only the valid content and stop accumulation when reaching the maximum tokens limit.</li>
+//     * </ul>
+//     */
+////    @Test
+////    public void testGenerateReviewSyncTokenLimits() {
+////        // Create a dummy product.
+////        Product product = new Product();
+////        product.setId(1234567890123L);
+////        product.getAttributes().getReferentielAttributes().put(ReferentielKey.BRAND, "TestBrand");
+////        product.getAttributes().getReferentielAttributes().put(ReferentielKey.MODEL, "TestModel");
+////        product.setId(123L);
+////        // No alternate models for simplicity.
+////        
+////        // Dummy vertical configuration.
+////        VerticalConfig verticalConfig = new VerticalConfig();
+////        verticalConfig.setId("testVertical");
+////        ProductI18nElements i18n = new ProductI18nElements();
+////        PrefixedAttrText p = new PrefixedAttrText();
+////        p.setPrefix("TestVertical");
+////        i18n.setH1Title(p);
+////        verticalConfig.getI18n().put("fr", i18n);
+////
+////        try {
+////            AiReview review = reviewGenerationService.generateReviewSync(product, verticalConfig);
+////            assertNotNull(review, "The generated review should not be null");
+////            System.out.println("Generated Review with token limits: " + review);
+////        } catch (Exception e) {
+////            fail("Review generation with token limits failed: ", e);
+////        }
+////    }
+////    
+//    /**
+//     * New test case to verify that duplicate submissions for the same GTIN are disabled.
+//     */
+//    @Test
+//    public void testDuplicateSubmission() {
+//        // Create a dummy product.
+//        Product product = new Product();
+//        product.setId(1111111111111L);
+//        product.getAttributes().getReferentielAttributes().put(ReferentielKey.BRAND, "DuplicateBrand");
+//        product.getAttributes().getReferentielAttributes().put(ReferentielKey.MODEL, "Model1");
+//        product.setAkaModels(Set.of());
+//        product.setId(0L);
+//        
+//        // Dummy vertical configuration.
+//        VerticalConfig verticalConfig = new VerticalConfig();
+//        verticalConfig.setId("dup");
+//        ProductI18nElements i18n = new ProductI18nElements();
+//        PrefixedAttrText p = new PrefixedAttrText();
+//        p.setPrefix("Duplicate");
+//        i18n.setH1Title(p);
+//        verticalConfig.getI18n().put("fr", i18n);
+//        
+//        // First submission (async) should succeed.
+//        long upc1 = reviewGenerationService.generateReviewAsync(product, verticalConfig);
+//        // Second submission with same GTIN should throw an exception.
+//        try {
+//            reviewGenerationService.generateReviewAsync(product, verticalConfig);
+//            fail("Expected an exception for duplicate submission with same GTIN");
+//        } catch (IllegalStateException e) {
+//            // Expected exception.
+//            System.out.println("Caught expected duplicate submission exception: " + e.getMessage());
+//        }
+//    }
+//}
 ~~~
 
-## [README.md - /home/goulven/git/open4goods/services/googlesearch/README.md]
-~~~
-# GoogleSearch Service
-
-This service is part of the [open4goods](https://github.com/open4good/open4goods) project. It provides a Spring Boot-based integration with the Google Custom Search API.
-
-## Overview
-
-The **GoogleSearch Service** allows you to perform searches against the Google Custom Search API using externalized configuration. It also integrates with Spring Boot Actuator for health checks and metrics.
-
-## Features
-
-- **Custom Search API Integration:** Execute searches using a configurable API key, search engine ID (cx), and search URL.
-- **Health Check:** The service implements a health indicator that checks if the necessary properties are configured and if the last search call was successful.
-- **Metrics:** Each search increments an actuator metric (`google.search.count`).
-
-## Configuration
-
-Configuration properties can be set in your `application.yml` or `application-test.yml`. For example:
-
-```yaml
-googlesearch:
-  apiKey: "YOUR_API_KEY"
-  cx: "YOUR_CX"
-  searchUrl: "https://www.googleapis.com/customsearch/v1"
-```
-
-## How to Use
-
-1. **Include the Dependency:**
-
-   Make sure to include the `googlesearch` module as a dependency in your project (it is built as a JAR).
-
-2. **Autowire the Service:**
-
-   In your Spring Boot application, autowire the `GoogleSearchService`:
-   
-   ```java
-   @Autowired
-   private GoogleSearchService googleSearchService;
-   ```
-
-3. **Perform a Search:**
-
-   Create a search request and execute the search:
-   
-   ```java
-   GoogleSearchRequest request = new GoogleSearchRequest("Spring Boot", 5);
-   try {
-       GoogleSearchResponse response = googleSearchService.search(request);
-       response.getResults().forEach(result ->
-           System.out.println("Title: " + result.getTitle() + ", Link: " + result.getLink())
-       );
-   } catch (Exception e) {
-       // Handle error
-       e.printStackTrace();
-   }
-   ```
-
-## Testing
-
-A sample unit test is provided in `src/test/java/org/open4goods/googlesearch/GoogleSearchServiceTest.java`. The test configuration is bootstrapped using an `application-test.yml`.
-
-## Maven Build
-
-The Maven POM is configured with the necessary dependencies and plugins. To build the service, run:
-
-```bash
-mvn clean install
-```
-
-## License
-
-This project is licensed under the terms of the [MIT License](LICENSE).
-~~~
-
-## [additional-spring-configuration-metadata.json - /home/goulven/git/open4goods/services/googlesearch/src/main/resources/META-INF/additional-spring-configuration-metadata.json]
+## [additional-spring-configuration-metadata.json - /home/goulven/git/open4goods/services/review-generation/src/main/resources/META-INF/additional-spring-configuration-metadata.json]
 ~~~
 {
   "groups": [
     {
-      "name": "googlesearch",
-      "type": "org.open4goods.services.googlesearch.config.GoogleSearchConfig",
-      "sourceType": "org.open4goods.services.googlesearch.config.GoogleSearchConfig"
-    },
-    {
-      "name": "googlesearch.defaults",
-      "type": "org.open4goods.services.googlesearch.config.GoogleSearchConfig$Defaults",
-      "sourceType": "org.open4goods.services.googlesearch.config.GoogleSearchConfig"
+      "name": "review.generation",
+      "type": "org.open4goods.services.reviewgeneration.config.ReviewGenerationConfig",
+      "sourceType": "org.open4goods.services.reviewgeneration.config.ReviewGenerationConfig"
     }
   ],
   "properties": [
     {
-      "name": "googlesearch.apiKey",
+      "name": "review.generation.thread-pool-size",
+      "type": "java.lang.Integer",
+      "description": "Number of threads allocated for processing.",
+      "defaultValue": 10
+    },
+    {
+      "name": "review.generation.max-queue-size",
+      "type": "java.lang.Integer",
+      "description": "Maximum size of the executor queue.",
+      "defaultValue": 100
+    },
+    {
+      "name": "review.generation.preferred-domains",
+      "type": "java.util.List<java.lang.String>",
+      "description": "List of preferred domains to fetch content from.",
+      "defaultValue": []
+    },
+    {
+      "name": "review.generation.query-template",
       "type": "java.lang.String",
-      "description": "API key for accessing the Google Custom Search API."
+      "description": "Template for constructing search queries.",
+      "defaultValue": "test %s \"%s\""
     },
     {
-      "name": "googlesearch.cx",
-      "type": "java.lang.String",
-      "description": "Search engine identifier (cx) for the Google Custom Search API."
+      "name": "review.generation.max-search",
+      "type": "java.lang.Integer",
+      "description": "Maximum number of search queries allowed.",
+      "defaultValue": 2
     },
     {
-      "name": "googlesearch.searchUrl",
-      "type": "java.lang.String",
-      "description": "The URL endpoint for the Google Custom Search API."
+      "name": "review.generation.max-total-tokens",
+      "type": "java.lang.Integer",
+      "description": "Maximum total number of tokens allowed for aggregation.",
+      "defaultValue": 100000
     },
     {
-      "name": "googlesearch.record.enabled",
-      "type": "java.lang.Boolean",
-      "defaultValue": "false",
-      "description": "Enable recording of search results to a file."
+      "name": "review.generation.source-min-tokens",
+      "type": "java.lang.Integer",
+      "description": "Minimum number of tokens required for a source to be considered.",
+      "defaultValue": 150
     },
     {
-      "name": "googlesearch.record.folder",
-      "type": "java.lang.String",
-      "description": "The folder where recorded search results will be stored."
+      "name": "review.generation.source-max-tokens",
+      "type": "java.lang.Integer",
+      "description": "Maximum number of tokens allowed per source.",
+      "defaultValue": 10000
     },
     {
-      "name": "googlesearch.record.fromClasspath",
-      "type": "java.lang.Boolean",
-      "defaultValue": "true",
-      "description": "Enable loading recorded search results from classpath resources before falling back to the folder."
+      "name": "review.generation.max-concurrent-fetch",
+      "type": "java.lang.Integer",
+      "description": "Maximum number of concurrent URL fetch operations.",
+      "defaultValue": 3
     },
     {
-      "name": "googlesearch.defaults.lr",
-      "type": "java.lang.String",
-      "defaultValue": "lang_en",
-      "description": "Default language restriction (lr) for the search."
+      "name": "review.generation.refresh-delay-months",
+      "type": "java.lang.Integer",
+      "description": "Delay in months after which an existing AI review is considered outdated.",
+      "defaultValue": 6
     },
     {
-      "name": "googlesearch.defaults.cr",
-      "type": "java.lang.String",
-      "defaultValue": "countryUS",
-      "description": "Default country restriction (cr) for the search."
-    },
-    {
-      "name": "googlesearch.defaults.safe",
-      "type": "java.lang.String",
-      "defaultValue": "off",
-      "description": "Default safe search filtering option (safe)."
-    },
-    {
-      "name": "googlesearch.defaults.sort",
-      "type": "java.lang.String",
-      "defaultValue": "",
-      "description": "Default sort option for the search."
-    },
-    {
-      "name": "googlesearch.defaults.gl",
-      "type": "java.lang.String",
-      "defaultValue": "us",
-      "description": "Default geolocation (gl) for the search."
-    },
-    {
-      "name": "googlesearch.defaults.hl",
-      "type": "java.lang.String",
-      "defaultValue": "en",
-      "description": "Default interface language (hl) for the search."
+      "name": "review.generation.estimated-time",
+      "type": "java.time.Duration",
+      "description": "Estimated time for review generation process. Used to compute remaining time.",
+      "defaultValue": "PT2M"
     }
   ]
 }
 ~~~
 
-## [GoogleSearchRequest.java - /home/goulven/git/open4goods/services/googlesearch/src/main/java/org/open4goods/services/googlesearch/dto/GoogleSearchRequest.java]
+## [ReviewGenerationStatus.java - /home/goulven/git/open4goods/services/review-generation/src/main/java/org/open4goods/services/reviewgeneration/dto/ReviewGenerationStatus.java]
 ~~~
-package org.open4goods.services.googlesearch.dto;
+package org.open4goods.services.reviewgeneration.dto;
 
-import java.util.Objects;
-
-/**
- * Data Transfer Object representing a Google Search Request.
- */
-public class GoogleSearchRequest {
-    
-    private static final int DEFAULT_SEARCH_RESULTS = 10;
-	private final String query;
-    private final int numResults;
-
-    // New optional search parameters corresponding to Google API options.
-    private String lr;   // Language restriction (e.g., lang_en)
-    private String cr;   // Country restriction (e.g., countryUS)
-    private String safe = "off"; // Safe search parameter (e.g., active, off)
-    private String sort; // Sort option
-    private String gl;   // Geolocation (e.g., us)
-    private String hl;   // Interface language (e.g., en)
-
-  
-    /**
-     * Constructs a new GoogleSearchRequest with all options.
-     *
-     * @param query      the search query (must not be null or empty)
-     * @param numResults the number of results to retrieve
-     * @param lr         language restriction parameter (optional)
-     * @param cr         country restriction parameter (optional)
-     * @param safe       safe search option (optional)
-     * @param sort       sort option (optional)
-     * @param gl         geolocation parameter (optional)
-     * @param hl         interface language parameter (optional)
-     */
-    public GoogleSearchRequest(String query, int numResults, String lr, String cr, String safe, String sort, String gl, String hl) {
-        this.lr = lr;
-        this.cr = cr;
-        this.safe = safe;
-        this.sort = sort;
-        this.gl = gl;
-        this.hl = hl;
-		this.query = query;
-		this.numResults = numResults;
-    }
-
-    public GoogleSearchRequest(String query, String lr, String cr) {
-        this.lr = lr;
-        this.cr = cr;
-		this.query = query;
-		this.numResults = DEFAULT_SEARCH_RESULTS;
-    }
-	public String getQuery() {
-        return query;
-    }
-
-    public int getNumResults() {
-        return numResults;
-    }
-    
-    public String getLr() {
-        return lr;
-    }
-    
-    public void setLr(String lr) {
-        this.lr = lr;
-    }
-    
-    public String getCr() {
-        return cr;
-    }
-    
-    public void setCr(String cr) {
-        this.cr = cr;
-    }
-    
-    public String getSafe() {
-        return safe;
-    }
-    
-    public void setSafe(String safe) {
-        this.safe = safe;
-    }
-    
-    public String getSort() {
-        return sort;
-    }
-    
-    public void setSort(String sort) {
-        this.sort = sort;
-    }
-    
-    public String getGl() {
-        return gl;
-    }
-    
-    public void setGl(String gl) {
-        this.gl = gl;
-    }
-    
-    public String getHl() {
-        return hl;
-    }
-    
-    public void setHl(String hl) {
-        this.hl = hl;
-    }
-
-    @Override
-    public String toString() {
-        return "GoogleSearchRequest{" +
-                "query='" + query + '\'' +
-                ", numResults=" + numResults +
-                ", lr='" + lr + '\'' +
-                ", cr='" + cr + '\'' +
-                ", safe='" + safe + '\'' +
-                ", sort='" + sort + '\'' +
-                ", gl='" + gl + '\'' +
-                ", hl='" + hl + '\'' +
-                '}';
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(query, numResults, lr, cr, safe, sort, gl, hl);
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof GoogleSearchRequest)) return false;
-        GoogleSearchRequest that = (GoogleSearchRequest) o;
-        return numResults == that.numResults &&
-               Objects.equals(query, that.query) &&
-               Objects.equals(lr, that.lr) &&
-               Objects.equals(cr, that.cr) &&
-               Objects.equals(safe, that.safe) &&
-               Objects.equals(sort, that.sort) &&
-               Objects.equals(gl, that.gl) &&
-               Objects.equals(hl, that.hl);
-    }
-}
-~~~
-
-## [GoogleSearchResult.java - /home/goulven/git/open4goods/services/googlesearch/src/main/java/org/open4goods/services/googlesearch/dto/GoogleSearchResult.java]
-~~~
-package org.open4goods.services.googlesearch.dto;
-
-import java.util.Objects;
-
-/**
- * Data Transfer Object representing an individual search result.
- */
-public class GoogleSearchResult {
-
-    private String title;
-    private String link;
-
-    /**
-     * Constructs a new GoogleSearchResult.
-     *
-     * @param title the title of the search result
-     * @param link  the URL of the search result
-     */
-    public GoogleSearchResult(String title, String link) {
-        this.title = title;
-        this.link = link;
-    }
-
-    public GoogleSearchResult() {
-        this.title = null;
-        this.link = null;
-    }
-    
-    public String getTitle() {
-        return title;
-    }
-
-    public String getLink() {
-        return link;
-    }
-
-    @Override
-    public String toString() {
-        return "GoogleSearchResult{" +
-                "title='" + title + '\'' +
-                ", link='" + link + '\'' +
-                '}';
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(title, link);
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof GoogleSearchResult)) return false;
-        GoogleSearchResult that = (GoogleSearchResult) o;
-        return Objects.equals(title, that.title) &&
-               Objects.equals(link, that.link);
-    }
-
-	public void setTitle(String title) {
-		this.title = title;
-	}
-
-	public void setLink(String link) {
-		this.link = link;
-	}
-    
-    
-}
-~~~
-
-## [GoogleSearchResponse.java - /home/goulven/git/open4goods/services/googlesearch/src/main/java/org/open4goods/services/googlesearch/dto/GoogleSearchResponse.java]
-~~~
-package org.open4goods.services.googlesearch.dto;
-
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+import org.open4goods.model.ai.AiReview;
+
 /**
- * Data Transfer Object representing a Google Search Response.
+ * DTO representing the status of a review generation process.
  */
-public class GoogleSearchResponse {
-
-    private List<GoogleSearchResult> results = new ArrayList<GoogleSearchResult>();
-
+public class ReviewGenerationStatus {
 
     /**
-     * Constructs a new GoogleSearchResponse.
-     *
+     * Possible states of a generation process.
      */
-    public GoogleSearchResponse() {
+    public enum Status {
+        PENDING, 
+        QUEUED, 
+        SEARCHING, 
+        FETCHING, 
+        ANALYSING, 
+        SUCCESS, 
+        FAILED;
+    }
+    
+    private long upc;
+    private Status status;
+    private Long startTime;
+    private Long endTime;
+    private AiReview result;
+    private String errorMessage;
+    private Integer percent = 0;
+    
+    /**
+     * List of processing messages that track the internal state.
+     */
+    private List<String> messages = new ArrayList<>();
+    
+    /**
+     * Duration of the review generation process in milliseconds.
+     */
+    private long duration;
+    
+    /**
+     * Remaining time (in milliseconds) computed as estimatedTime - duration.
+     */
+    private long remaining;
+    
+    /**
+     * The product GTIN associated with the generation request.
+     */
+    private String gtin;
+
+    // Getters and setters
+
+    public long getUpc() {
+        return upc;
+    }
+
+    public void setUpc(long upc) {
+        this.upc = upc;
+    }
+
+    public Status getStatus() {
+        return status;
+    }
+
+    public void setStatus(Status status) {
+        this.status = status;
+    }
+
+
+    public Long getStartTime() {
+		return startTime;
+	}
+
+	public void setStartTime(Long startTime) {
+		this.startTime = startTime;
+	}
+
+	public Long getEndTime() {
+		return endTime;
+	}
+
+	public void setEndTime(Long endTime) {
+		this.endTime = endTime;
+	}
+
+	public AiReview getResult() {
+        return result;
+    }
+
+    public void setResult(AiReview result) {
+        this.result = result;
+    }
+
+    public String getErrorMessage() {
+        return errorMessage;
+    }
+
+    public void setErrorMessage(String errorMessage) {
+        this.errorMessage = errorMessage;
+    }
+
+    public List<String> getMessages() {
+        return messages;
+    }
+
+    public void setMessages(List<String> messages) {
+        this.messages = messages;
     }
     
     /**
-     * Constructs a new GoogleSearchResponse.
+     * Appends a new message to the process status messages.
      *
-     * @param results the list of search results
+     * @param message the message to add.
      */
-    public GoogleSearchResponse(List<GoogleSearchResult> results) {
-        this.results = results;
+    public void addMessage(String message) {
+        this.messages.add(message);
+    }
+    
+    public long getDuration() {
+        return duration;
+    }
+    
+    public void setDuration(long duration) {
+        this.duration = duration;
+    }
+    
+    public long getRemaining() {
+        return remaining;
+    }
+    
+    public void setRemaining(long remaining) {
+        this.remaining = remaining;
+    }
+    
+    public String getGtin() {
+        return gtin;
+    }
+    
+    public void setGtin(String gtin) {
+        this.gtin = gtin;
     }
 
-    public List<GoogleSearchResult> getResults() {
-        return results;
-    }
+    
+    
+    
+    // toString, equals, and hashCode
 
-    @Override
+    public Integer getPercent() {
+		return percent;
+	}
+
+	public void setPercent(Integer percent) {
+		this.percent = percent;
+	}
+
+	@Override
     public String toString() {
-        return "GoogleSearchResponse{" +
-                "results=" + results +
+        return "ReviewGenerationStatus{" +
+                "upc=" + upc +
+                ", status=" + status +
+                ", startTime=" + startTime +
+                ", endTime=" + endTime +
+                ", result=" + result +
+                ", errorMessage='" + errorMessage + '\'' +
+                ", messages=" + messages +
+                ", duration=" + duration +
+                ", remaining=" + remaining +
+                ", gtin='" + gtin + '\'' +
                 '}';
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(results);
+        return Objects.hash(upc, status, startTime, endTime, result, errorMessage, messages, duration, remaining, gtin);
     }
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof GoogleSearchResponse)) return false;
-        GoogleSearchResponse that = (GoogleSearchResponse) o;
-        return Objects.equals(results, that.results);
+        if (!(o instanceof ReviewGenerationStatus)) return false;
+        ReviewGenerationStatus that = (ReviewGenerationStatus) o;
+        return upc == that.upc &&
+                duration == that.duration &&
+                remaining == that.remaining &&
+                status == that.status &&
+                Objects.equals(startTime, that.startTime) &&
+                Objects.equals(endTime, that.endTime) &&
+                Objects.equals(result, that.result) &&
+                Objects.equals(errorMessage, that.errorMessage) &&
+                Objects.equals(messages, that.messages) &&
+                Objects.equals(gtin, that.gtin);
     }
-
-	public void setResults(List<GoogleSearchResult> results) {
-		this.results = results;
-	}
-    
-    
 }
 ~~~
 
-## [GoogleSearchConfig.java - /home/goulven/git/open4goods/services/googlesearch/src/main/java/org/open4goods/services/googlesearch/config/GoogleSearchConfig.java]
+## [ReviewRequest.java - /home/goulven/git/open4goods/services/review-generation/src/main/java/org/open4goods/services/reviewgeneration/dto/ReviewRequest.java]
 ~~~
-package org.open4goods.services.googlesearch.config;
+package org.open4goods.services.reviewgeneration.dto;
 
 import java.util.Objects;
-import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.stereotype.Component;
+
+import org.open4goods.model.product.Product;
+import org.open4goods.model.vertical.VerticalConfig;
 
 /**
- * Configuration properties for Google Custom Search.
- * <p>
- * These properties are loaded from the application.yml (or application-test.yml for tests).
- * Example configuration:
- * <pre>
- * googlesearch:
- *   apiKey: "YOUR_API_KEY"
- *   cx: "YOUR_CX"
- *   searchUrl: "https://www.googleapis.com/customsearch/v1"
- *   defaults:
- *     lr: "lang_en"
- *     cr: "countryUS"
- *     safe: "off"
- *     sort: ""
- *     gl: "us"
- *     hl: "en"
- *   record:
- *     enabled: true
- *     folder: "/path/to/record/folder"
- *     fromClasspath: true
- * </pre>
+ * DTO representing a review generation request.
  */
-@Component
-@ConfigurationProperties(prefix = "googlesearch")
-public class GoogleSearchConfig {
+public class ReviewRequest {
 
-    private String apiKey;
-    private String cx;
-    private String searchUrl = "https://www.googleapis.com/customsearch/v1";
+    private Product product;
     
-    // New properties for recording search results.
-    private boolean recordEnabled = false;
-    private String recordFolder;
+    /**
+     * Vertical configuration (provided as an object; replace with a concrete type if available).
+     */
+    private VerticalConfig verticalConfig;
 
-    // New default properties for additional search options.
-    private Defaults defaults = new Defaults();
+    // Getters and setters
 
-    public String getApiKey() {
-        return apiKey;
-    }
-
-    public void setApiKey(String apiKey) {
-        this.apiKey = apiKey;
+    public Product getProduct() {
+        return product;
     }
 
-    public String getCx() {
-        return cx;
+    public void setProduct(Product product) {
+        this.product = product;
     }
 
-    public void setCx(String cx) {
-        this.cx = cx;
-    }
 
-    public String getSearchUrl() {
-        return searchUrl;
-    }
+    public VerticalConfig getVerticalConfig() {
+		return verticalConfig;
+	}
 
-    public void setSearchUrl(String searchUrl) {
-        this.searchUrl = searchUrl;
-    }
-    
-    public boolean isRecordEnabled() {
-        return recordEnabled;
-    }
-    
-    public void setRecordEnabled(boolean recordEnabled) {
-        this.recordEnabled = recordEnabled;
-    }
-    
-    public String getRecordFolder() {
-        return recordFolder;
-    }
-    
-    public void setRecordFolder(String recordFolder) {
-        this.recordFolder = recordFolder;
-    }
+	public void setVerticalConfig(VerticalConfig verticalConfig) {
+		this.verticalConfig = verticalConfig;
+	}
 
-    public Defaults getDefaults() {
-        return defaults;
-    }
-
-    public void setDefaults(Defaults defaults) {
-        this.defaults = defaults;
-    }
-
-    @Override
+	@Override
     public String toString() {
-        return "GoogleSearchConfig{" +
-                "apiKey='****'" + // Do not expose the API key in logs
-                ", cx='" + cx + '\'' +
-                ", searchUrl='" + searchUrl + '\'' +
-                ", recordEnabled=" + recordEnabled +
-                ", recordFolder='" + recordFolder + '\'' +
-                ", defaults=" + defaults +
+        return "ReviewRequest{" +
+                "product=" + product +
+                ", verticalConfig=" + verticalConfig +
                 '}';
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(apiKey, cx, searchUrl, recordEnabled, recordFolder, defaults);
+        return Objects.hash(product, verticalConfig);
     }
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof GoogleSearchConfig)) return false;
-        GoogleSearchConfig that = (GoogleSearchConfig) o;
-        return recordEnabled == that.recordEnabled &&
-               Objects.equals(apiKey, that.apiKey) &&
-               Objects.equals(cx, that.cx) &&
-               Objects.equals(searchUrl, that.searchUrl) &&
-               Objects.equals(recordFolder, that.recordFolder) &&
-               Objects.equals(defaults, that.defaults);
-    }
-
-    /**
-     * Nested class to encapsulate default values for additional search options.
-     */
-    public static class Defaults {
-        /**
-         * Default language restriction (lr).
-         */
-        private String lr = "lang_fr";
-        /**
-         * Default country restriction (cr).
-         */
-        private String cr = "countryFR";
-        /**
-         * Default safe search filtering (safe).
-         */
-        private String safe = "off";
-        /**
-         * Default sort option.
-         */
-        private String sort = "";
-        /**
-         * Default geolocation (gl).
-         */
-        private String gl = "fr";
-        /**
-         * Default interface language (hl).
-         */
-        private String hl = "fr";
-
-        public String getLr() {
-            return lr;
-        }
-
-        public void setLr(String lr) {
-            this.lr = lr;
-        }
-
-        public String getCr() {
-            return cr;
-        }
-
-        public void setCr(String cr) {
-            this.cr = cr;
-        }
-
-        public String getSafe() {
-            return safe;
-        }
-
-        public void setSafe(String safe) {
-            this.safe = safe;
-        }
-
-        public String getSort() {
-            return sort;
-        }
-
-        public void setSort(String sort) {
-            this.sort = sort;
-        }
-
-        public String getGl() {
-            return gl;
-        }
-
-        public void setGl(String gl) {
-            this.gl = gl;
-        }
-
-        public String getHl() {
-            return hl;
-        }
-
-        public void setHl(String hl) {
-            this.hl = hl;
-        }
-
-        @Override
-        public String toString() {
-            return "Defaults{" +
-                    "lr='" + lr + '\'' +
-                    ", cr='" + cr + '\'' +
-                    ", safe='" + safe + '\'' +
-                    ", sort='" + sort + '\'' +
-                    ", gl='" + gl + '\'' +
-                    ", hl='" + hl + '\'' +
-                    '}';
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(lr, cr, safe, sort, gl, hl);
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) return true;
-            if (!(o instanceof Defaults)) return false;
-            Defaults defaults = (Defaults) o;
-            return Objects.equals(lr, defaults.lr) &&
-                   Objects.equals(cr, defaults.cr) &&
-                   Objects.equals(safe, defaults.safe) &&
-                   Objects.equals(sort, defaults.sort) &&
-                   Objects.equals(gl, defaults.gl) &&
-                   Objects.equals(hl, defaults.hl);
-        }
+        if (!(o instanceof ReviewRequest)) return false;
+        ReviewRequest that = (ReviewRequest) o;
+        return Objects.equals(product, that.product) &&
+               Objects.equals(verticalConfig, that.verticalConfig);
     }
 }
 ~~~
 
-## [GoogleSearchException.java - /home/goulven/git/open4goods/services/googlesearch/src/main/java/org/open4goods/services/googlesearch/exception/GoogleSearchException.java]
+## [ReviewGenerationConfig.java - /home/goulven/git/open4goods/services/review-generation/src/main/java/org/open4goods/services/reviewgeneration/config/ReviewGenerationConfig.java]
 ~~~
-package org.open4goods.services.googlesearch.exception;
+package org.open4goods.services.reviewgeneration.config;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.context.annotation.Configuration;
 
 /**
- * Exception thrown when an error occurs while interacting with the Google Custom Search API.
+ * Configuration properties for the review generation service.
  */
-public class GoogleSearchException extends RuntimeException {
+@Configuration
+@ConfigurationProperties(prefix = "review.generation")
+public class ReviewGenerationConfig {
+
+    private int threadPoolSize = 10;
+    private int maxQueueSize = 100;  // Maximum size of the executor queue.
+    private List<String> preferredDomains = new ArrayList<>();
+
+    // Property used for building search queries.
+    private String queryTemplate = "test %s \"%s\"";
+
+    // Limit the number of search queries.
+    private int maxSearch = 2;
+
+    // Properties for token-based content aggregation.
+    private int maxTotalTokens = 100000;
+    private int sourceMinTokens = 150;
+    private int sourceMaxTokens = 10000;
+
+    // Maximum concurrent URL fetch operations.
+    private int maxConcurrentFetch = 3;
 
     /**
-     * Constructs a new GoogleSearchException with the specified detail message.
-     *
-     * @param message the detail message
+     * The delay in months after which an existing AI review is considered outdated.
+     * Default value is 6 months.
      */
-    public GoogleSearchException(String message) {
-        super(message);
+    private int refreshDelayMonths = 6;
+
+    /**
+     * Estimated time for the review generation process.
+     * Used to compute the remaining time.
+     */
+    private Long estimatedTime = 1000L * 60 * 2;
+
+    // Getters and setters for existing properties.
+    public int getThreadPoolSize() {
+        return threadPoolSize;
+    }
+    public void setThreadPoolSize(int threadPoolSize) {
+        this.threadPoolSize = threadPoolSize;
     }
 
-    /**
-     * Constructs a new GoogleSearchException with the specified detail message and cause.
-     *
-     * @param message the detail message
-     * @param cause   the cause
-     */
-    public GoogleSearchException(String message, Throwable cause) {
-        super(message, cause);
+    public int getMaxQueueSize() {
+        return maxQueueSize;
+    }
+    public void setMaxQueueSize(int maxQueueSize) {
+        this.maxQueueSize = maxQueueSize;
+    }
+
+    public List<String> getPreferredDomains() {
+        return preferredDomains;
+    }
+    public void setPreferredDomains(List<String> preferredDomains) {
+        this.preferredDomains = preferredDomains;
+    }
+    public String getQueryTemplate() {
+        return queryTemplate;
+    }
+    public void setQueryTemplate(String queryTemplate) {
+        this.queryTemplate = queryTemplate;
+    }
+
+    public int getMaxSearch() {
+        return maxSearch;
+    }
+    public void setMaxSearch(int maxSearch) {
+        this.maxSearch = maxSearch;
+    }
+    public int getMaxTotalTokens() {
+        return maxTotalTokens;
+    }
+    public void setMaxTotalTokens(int maxTokensPerRequest) {
+        this.maxTotalTokens = maxTokensPerRequest;
+    }
+    public int getSourceMinTokens() {
+        return sourceMinTokens;
+    }
+    public void setSourceMinTokens(int minTokens) {
+        this.sourceMinTokens = minTokens;
+    }
+    public int getMaxConcurrentFetch() {
+        return maxConcurrentFetch;
+    }
+    public void setMaxConcurrentFetch(int maxConcurrentFetch) {
+        this.maxConcurrentFetch = maxConcurrentFetch;
+    }
+    public int getSourceMaxTokens() {
+        return sourceMaxTokens;
+    }
+    public void setSourceMaxTokens(int sourceMaxTokens) {
+        this.sourceMaxTokens = sourceMaxTokens;
+    }
+
+    public int getRefreshDelayMonths() {
+        return refreshDelayMonths;
+    }
+    public void setRefreshDelayMonths(int refreshDelayMonths) {
+        this.refreshDelayMonths = refreshDelayMonths;
+    }
+    
+    public Long getEstimatedTime() {
+        return estimatedTime;
+    }
+    
+    public void setEstimatedTime(Long estimatedTime) {
+        this.estimatedTime = estimatedTime;
     }
 }
 ~~~
 
-## [application-test.yml - /home/goulven/git/open4goods/services/googlesearch/src/test/resources/application-test.yml]
+## [application-test.yml - /home/goulven/git/open4goods/services/review-generation/src/test/resources/application-test.yml]
 ~~~
-googlesearch:
-  apiKey: "API-KEY"
-  cx: "API-CX"
-  searchUrl: "https://www.googleapis.com/customsearch/v1"
-~~~
+spring:
+  ai:
+    openai:
+        api-key: sk-proj-FI9z9MAyJTarx13yZZNZuz66PL-ywf0hR1iX4e8sxa3aVoOtYfgOVnb3uUb84K-ugm9D-zhz5iT3BlbkFJZiHIaVGF8Z_qS-
+        chat:
+          api-key: sk-proj-FI9z9MAyJTarx13yZZNZuz66PL-ywf0hR1iX4e8sxa3aVoOtYfgOVnb3uUb84K-ugm9D-zhz5iT3BlbkFJZiHIaVGF8Z_qS-
+            
+gen-ai-config:
+  cache-templates: true
+  enabled: true
+  prompts-templates-folder: src/test/resources/prompts
+  
+  ~~~
 
-## [pom.xml - /home/goulven/git/open4goods/services/googlesearch/pom.xml]
+## [pom.xml - /home/goulven/git/open4goods/services/review-generation/pom.xml]
 ~~~
-
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 
-                             http://maven.apache.org/xsd/maven-4.0.0.xsd">
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
-  
   <parent>
     <groupId>org.open4goods</groupId>
     <artifactId>org.open4goods</artifactId>
     <version>0.0.1-SNAPSHOT</version>
   </parent>
+  <artifactId>reviewgeneration</artifactId>
   
-  <artifactId>googlesearch</artifactId>
   
-  
-  <dependencies>
-    <!-- Spring Boot Actuator for health and metrics -->
-    <dependency>
-      <groupId>org.springframework.boot</groupId>
-      <artifactId>spring-boot-starter-actuator</artifactId>
-    </dependency>
-    
-    
-    <dependency>
-        <groupId>org.open4goods</groupId>
-        <artifactId>serialisation</artifactId>
-        <version>${global.version}</version>
-    </dependency>
-    <!-- Gson for JSON processing -->
-    <dependency>
-      <groupId>com.google.code.gson</groupId>
-      <artifactId>gson</artifactId>
-    </dependency>
+    <dependencies>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-actuator</artifactId>
+        </dependency>
 
-    <!-- Configuration Processor for metadata generation -->
-    <dependency>
-      <groupId>org.springframework.boot</groupId>
-      <artifactId>spring-boot-configuration-processor</artifactId>
-      <optional>true</optional>
-    </dependency>
     
-    <!-- Test Dependencies -->
-    <dependency>
-      <groupId>org.springframework.boot</groupId>
-      <artifactId>spring-boot-starter-test</artifactId>
-      <scope>test</scope>
-    </dependency>
-  </dependencies>
+
+        <dependency>
+            <groupId>org.open4goods</groupId>
+            <artifactId>model</artifactId>
+            <version>${global.version}</version>
+        </dependency>
+        
+        <dependency>
+            <groupId>org.open4goods</groupId>
+            <artifactId>googlesearch</artifactId>
+            <version>${global.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.open4goods</groupId>
+            <artifactId>product-repository</artifactId>
+            <version>${global.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.open4goods</groupId>
+            <artifactId>googlesearch</artifactId>
+            <version>${global.version}</version>
+            <classifier>tests</classifier>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.open4goods</groupId>
+            <artifactId>urlfetching</artifactId>
+            <version>${global.version}</version>
+            <classifier>tests</classifier>
+            <scope>test</scope>
+        </dependency>
+        
+        <dependency>
+            <groupId>org.open4goods</groupId>
+            <artifactId>prompt</artifactId>
+            <version>${global.version}</version>
+            <classifier>tests</classifier>
+            <scope>test</scope>
+        </dependency>
+        
+        <dependency>
+            <groupId>org.open4goods</groupId>
+            <artifactId>urlfetching</artifactId>
+            <version>${global.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.open4goods</groupId>
+            <artifactId>prompt</artifactId>
+            <version>${global.version}</version>
+        </dependency>
+
+
+        <dependency>
+        	<groupId>org.springframework.boot</groupId>
+        	<artifactId>spring-boot-configuration-processor</artifactId>
+        	<optional>true</optional>
+        </dependency>
+    </dependencies>
   
-  <build>
+    <build>
     <plugins>
       <plugin>
       <groupId>org.apache.maven.plugins</groupId>
@@ -1372,6 +1451,10 @@ googlesearch:
         <module>services/review-generation</module>
         <module>services/product-repository</module>
         <module>services/captcha</module>
+        <module>services/remotefilecaching</module>
+        
+        <module>services/favicon</module>
+        
         
         
 	</modules>

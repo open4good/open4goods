@@ -86,6 +86,7 @@ public class FaviconServiceImpl implements FaviconService, HealthIndicator {
      * @return a fully-qualified URL.
      */
     private String normalizeUrl(String url) {
+    	url = url.trim();
         if (url == null) {
             return null;
         }

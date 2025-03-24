@@ -27,8 +27,7 @@
 				<td class="align-middle" th:text="${item}"></td>
 			</tr>
 			<tr th:unless="${stat.first}">
-				<th class="align-middle" scope="col" th:text="${item}"></th>
-				<td class="align-middle" th:text="${item}"></td>
+				<td colspan="2" class="align-middle" th:text="${item}"></td>
 			</tr>
 		</th:block>
 		<tr>
@@ -46,6 +45,7 @@
 				<span th:text="${product.gtin()}"></span>
 			</td>
 		</tr>
+		<!-- 
 		<tr th:if="${product.pdfs().size()>0}">
 			<td colspan="2">
 				<p class="h5 my-4">Documentation</p>
@@ -60,5 +60,6 @@
 				</a>
 			</td>
 		</tr>
+		 -->
 	</table>
 </div>
