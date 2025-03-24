@@ -1,0 +1,1722 @@
+
+# Goal
+
+ * You will create a java spring microservice, meaning a set of DTO, service class, model beans, configuration properties..
+ * You will base your code generation on a sample microservice provided as sample. You must follow the sample for  package namings convention (model, service, config, ..) , implements metrics and healtch checks in the same way, generate a child pom.xml with same parent dependencies..    
+ * You ask for directions if needed to do a better work
+ 
+ 
+## Job to do
+ 
+ * 
+
+
+## Guidelines 
+You will provide classes and files (documentation, configurations, ...).
+You will follow the following guidelines 
+
+1. **Documentation **
+   - **Javadoc:**  generate detailed Javadoc comments at both the class and method levels, clearly explaining purpose and behavior of the feature / code
+   - **Inline Comments:** Add  in-method comments to clarify complex logic and overall flow.
+   - generate  the `additional-spring-configuration-metadata.json` if relevant
+   
+2. **Code Quality and Safety**
+   - **Security:** Security by design is required
+   - **Performance:** Optimize code where performance gains are achievable.
+   - **Modern Java Features:**  
+     - Leverage Java records for immutable data structures where applicable (Java 16+).
+   - **Readability & Maintainability:**  
+     - Adhere to SOLID principles.
+   - **Exception Management:**  
+     - Consider error handling with custom exceptions if needed.
+
+3. **Logging **
+   - Add structured logging and ensure appropriate log levels (INFO, WARN, ERROR) are used.
+
+4. **POJO Enhancements**
+   - Implement`toString()`, `hashCode()`, and `equals()` methods in model classes where relevant. 
+
+5. **Configuration and Externalization**
+   - Use `@ConfigurationProperties` for externalized configuration.
+
+
+6. **Testing**
+   - Create complete and meaningfull tests, in order to test the service
+
+
+8. **Structural Changes**
+    - split code into multiple classes when needed
+    - **Important:** If you require additional context (e.g., details on dependency classes or intended functionality), ask clarifying questions before making significant structural changes.
+
+9. **Caching & Monitoring:**   
+  - Consider emiting actuator metrics 
+  - consider implementing HealthCheck  (by making the service class implements HealthIndicator and overriding the health() method) if pertinent
+  - Evaluate potential caching improvements using Spring Cache abstraction.
+
+
+-----------------------------------------------------------------------------------------------------------------------------
+
+
+
+
+# Sample microservice layout
+
+
+
+## Directory structure 
+- pom.xml
+- README.md
+- src
+--- main
+---- java
+----- org
+------ open4goods
+------- services
+-------- googlesearch
+--------- config
+---------- GoogleSearchConfig.java
+--------- dto
+---------- GoogleSearchRequest.java
+---------- GoogleSearchResponse.java
+---------- GoogleSearchResult.java
+--------- exception
+---------- GoogleSearchException.java
+--------- service
+---------- GoogleSearchService.java
+---- resources
+----- META-INF
+------ additional-spring-configuration-metadata.json
+--- test
+---- java
+----- org
+------ open4goods
+------- googlesearch
+-------- GoogleSearchServiceTest.java
+-------- mock
+--------- GoogleSearchServiceMock.java
+---- resources
+----- application-test.yml
+
+## Files content
+
+## [GoogleSearchService.java - /home/goulven/git/open4goods/services/googlesearch/src/main/java/org/open4goods/services/googlesearch/service/GoogleSearchService.java]
+~~~
+package org.open4goods.services.googlesearch.service;
+
+import java.io.IOException;
+import java.net.URI;
+import java.net.URLEncoder;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.time.Duration;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.open4goods.services.googlesearch.config.GoogleSearchConfig;
+import org.open4goods.services.googlesearch.dto.GoogleSearchRequest;
+import org.open4goods.services.googlesearch.dto.GoogleSearchResponse;
+import org.open4goods.services.googlesearch.dto.GoogleSearchResult;
+import org.open4goods.services.googlesearch.exception.GoogleSearchException;
+import org.open4goods.services.serialisation.service.SerialisationService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.boot.actuate.health.Health;
+import org.springframework.boot.actuate.health.HealthIndicator;
+import org.springframework.stereotype.Service;
+
+import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
+
+import io.micrometer.core.instrument.MeterRegistry;
+
+/**
+ * Service for interacting with the Google Custom Search API.
+ * <p>
+ * It externalizes its configuration via {@link GoogleSearchConfig}, increments actuator metrics for each search,
+ * records search responses to file when enabled, and implements a health check based on proper configuration and recent API call outcomes.
+ */
+@Service
+public class GoogleSearchService implements HealthIndicator {
+
+    private static final Logger logger = LoggerFactory.getLogger(GoogleSearchService.class);
+
+    private final HttpClient httpClient;
+    private final Gson gson;
+    private final GoogleSearchConfig properties;
+    private final MeterRegistry meterRegistry;
+    private final SerialisationService serialisationService;
+    
+    // Volatile variable to hold the last error message if a non-200 response was received.
+    private volatile String lastErrorMessage = null;
+
+    /**
+     * Constructs a new GoogleSearchService.
+     *
+     * @param properties           the Google search configuration properties
+     * @param meterRegistry        the actuator meter registry for metrics
+     * @param serialisationService the service for JSON serialization/deserialization
+     */
+    public GoogleSearchService(GoogleSearchConfig properties, MeterRegistry meterRegistry, SerialisationService serialisationService) {
+        // Create an HttpClient with a connection timeout.
+        this.httpClient = HttpClient.newBuilder()
+                                    .connectTimeout(Duration.ofSeconds(10))
+                                    .build();
+        this.gson = new Gson();
+        this.properties = properties;
+        this.meterRegistry = meterRegistry;
+        this.serialisationService = serialisationService;
+    }
+
+    /**
+     * Executes a search against the Google Custom Search API.
+     * <p>
+     * This method now supports additional parameters (lr, cr, safe, sort, gl, hl). For each of these,
+     * if not provided in the {@link GoogleSearchRequest}, the default value from the configuration is used.
+     *
+     * @param request a {@link GoogleSearchRequest} containing the query, desired number of results, and optional search parameters
+     * @return a {@link GoogleSearchResponse} containing the search results
+     * @throws IOException          if an I/O error occurs during the HTTP call or recording the response
+     * @throws InterruptedException if the HTTP request is interrupted
+     * @throws GoogleSearchException if the API responds with an error or the response cannot be parsed
+     */
+    public GoogleSearchResponse search(GoogleSearchRequest request) throws IOException, InterruptedException {
+        // Increment the actuator metric for the number of searches performed.
+        meterRegistry.counter("google.search.count").increment();
+
+        // Validate input query (constructor of GoogleSearchRequest already does basic validation)
+        final String encodedQuery = URLEncoder.encode(request.getQuery(), Charset.defaultCharset());
+        
+        // Build the API URL using externalized configuration.
+        StringBuilder urlBuilder = new StringBuilder(String.format("%s?q=%s&key=%s&cx=%s&num=%d",
+                properties.getSearchUrl(),
+                encodedQuery,
+                properties.getApiKey(),
+                properties.getCx(),
+                request.getNumResults()));
+        
+        // Resolve additional parameters: use the request value if provided; otherwise, fallback to configuration defaults.
+        String lr = (request.getLr() != null && !request.getLr().isBlank()) ? request.getLr() : properties.getDefaults().getLr();
+        String cr = (request.getCr() != null && !request.getCr().isBlank()) ? request.getCr() : properties.getDefaults().getCr();
+        String safe = (request.getSafe() != null && !request.getSafe().isBlank()) ? request.getSafe() : properties.getDefaults().getSafe();
+        String sort = (request.getSort() != null && !request.getSort().isBlank()) ? request.getSort() : properties.getDefaults().getSort();
+        String gl = (request.getGl() != null && !request.getGl().isBlank()) ? request.getGl() : properties.getDefaults().getGl();
+        String hl = (request.getHl() != null && !request.getHl().isBlank()) ? request.getHl() : properties.getDefaults().getHl();
+        
+        // Append additional parameters to the URL if non-empty.
+        if (lr != null && !lr.isBlank()) {
+            urlBuilder.append("&lr=").append(URLEncoder.encode(lr, Charset.defaultCharset()));
+        }
+        if (cr != null && !cr.isBlank()) {
+            urlBuilder.append("&cr=").append(URLEncoder.encode(cr, Charset.defaultCharset()));
+        }
+        if (safe != null && !safe.isBlank()) {
+            urlBuilder.append("&safe=").append(URLEncoder.encode(safe, Charset.defaultCharset()));
+        }
+        if (sort != null && !sort.isBlank()) {
+            urlBuilder.append("&sort=").append(URLEncoder.encode(sort, Charset.defaultCharset()));
+        }
+        if (gl != null && !gl.isBlank()) {
+            urlBuilder.append("&gl=").append(URLEncoder.encode(gl, Charset.defaultCharset()));
+        }
+        if (hl != null && !hl.isBlank()) {
+            urlBuilder.append("&hl=").append(URLEncoder.encode(hl, Charset.defaultCharset()));
+        }
+        
+        String url = urlBuilder.toString();
+        
+        // Prepare a safe version of the URL for logging (masking the API key)
+        String safeUrl = url.replace(properties.getApiKey(), "****");
+        logger.debug("Executing search with URL: {}", safeUrl);
+
+        // Build the HTTP request with a timeout.
+        final HttpRequest httpRequest = HttpRequest.newBuilder()
+                .uri(URI.create(url))
+                .GET()
+                .timeout(Duration.ofSeconds(10))
+                .build();
+
+        // Send the HTTP request and obtain the response.
+        final HttpResponse<String> response = httpClient.send(httpRequest, HttpResponse.BodyHandlers.ofString());
+
+        // Check the HTTP status code; if not 200, log and throw a custom exception.
+        if (response.statusCode() != 200) {
+            String errorMsg = "Error from Google Custom Search API: HTTP " + response.statusCode() + " - " + response.body();
+            logger.error(errorMsg);
+            lastErrorMessage = errorMsg;
+            throw new GoogleSearchException(errorMsg);
+        } else {
+            // Clear any previous error if the current call is successful.
+            lastErrorMessage = null;
+        }
+
+        logger.info("Search performed for query: '{}' with HTTP status: {}", request.getQuery(), response.statusCode());
+
+        // Parse the JSON response into our DTO.
+        GoogleSearchResponse result = parseResponse(response.body());
+        
+        // If recording is enabled, store the result as a JSON file in the provided folder.
+        if (properties.isRecordEnabled() && properties.getRecordFolder() != null && !properties.getRecordFolder().isBlank()) {
+            try {
+                // Sanitize the query for a safe file name.
+                String sanitizedQuery = sanitizeUrlToFileName(request.getQuery());
+                String fileName = sanitizedQuery + "-" + request.getNumResults() + ".json";
+                Path folderPath = Paths.get(properties.getRecordFolder());
+                if (!Files.exists(folderPath)) {
+                    Files.createDirectories(folderPath);
+                }
+                Path filePath = folderPath.resolve(fileName);
+                String jsonContent = serialisationService.toJson(result,true);
+                Files.writeString(filePath, jsonContent);
+                logger.info("Search results for {} are : \n{}",request.getQuery(), jsonContent);
+                logger.info("Recorded search result to file: {}", filePath.toAbsolutePath());
+                
+            } catch (Exception e) {
+                // Log the error but do not break the search functionality.
+                logger.error("Failed to record search result: {}", e.getMessage());
+            }
+        }
+        
+        return result;
+    }
+
+    /**
+     * Parses the JSON response returned by the Google Custom Search API.
+     *
+     * @param jsonResponse the raw JSON response as a String
+     * @return a {@link GoogleSearchResponse} containing the parsed search results
+     * @throws GoogleSearchException if parsing fails or the expected JSON structure is missing
+     */
+    private GoogleSearchResponse parseResponse(String jsonResponse) {
+        logger.debug("Parsing response JSON: {}", jsonResponse);
+        try {
+            JsonObject jsonObject = gson.fromJson(jsonResponse, JsonObject.class);
+            JsonArray items = jsonObject.getAsJsonArray("items");
+
+            final List<GoogleSearchResult> results = new ArrayList<>();
+            if (items != null) {
+                // Iterate over each item and extract title and link.
+                items.forEach(item -> {
+                    JsonObject obj = item.getAsJsonObject();
+                    String title = obj.get("title").getAsString();
+                    String link = obj.get("link").getAsString();
+                    results.add(new GoogleSearchResult(title, link));
+                });
+            }
+            return new GoogleSearchResponse(results);
+        } catch (Exception e) {
+            String errorMsg = "Failed to parse Google Custom Search API response";
+            logger.error(errorMsg, e);
+            throw new GoogleSearchException(errorMsg, e);
+        }
+    }
+
+    /**
+     * Health check implementation.
+     * <p>
+     * The service is considered healthy if the necessary configuration properties are set and the last search returned HTTP 200.
+     *
+     * @return a Health status indicating UP if properties are properly configured and no recent error was encountered; otherwise DOWN.
+     */
+    @Override
+    public Health health() {
+        if (properties.getApiKey() == null || properties.getApiKey().isEmpty() ||
+            properties.getCx() == null || properties.getCx().isEmpty() ||
+            properties.getSearchUrl() == null || properties.getSearchUrl().isEmpty()) {
+            logger.error("Google Search properties are not properly configured.");
+            return Health.down().withDetail("error", "Google Search properties are missing or invalid").build();
+        }
+        
+        if (lastErrorMessage != null) {
+            logger.error("Health check failed due to previous error: {}", lastErrorMessage);
+            return Health.down().withDetail("error", lastErrorMessage).build();
+        }
+        
+        logger.debug("Google Search properties are properly configured and no recent errors encountered.");
+        return Health.up().build();
+    }
+    
+    /**
+     * Sanitizes a URL into a safe file name by removing the protocol and replacing non-alphanumeric characters.
+     *
+     * @param url the URL to sanitize
+     * @return a sanitized file name ending with .txt
+     */
+    public static String sanitizeUrlToFileName(String url) {
+        String sanitized = url.replaceFirst("^(https?://)", "").replaceAll("[^a-zA-Z0-9]", "_");
+        return sanitized + ".txt";
+    }    
+}
+~~~
+
+## [GoogleSearchServiceMock.java - /home/goulven/git/open4goods/services/googlesearch/src/test/java/org/open4goods/googlesearch/mock/GoogleSearchServiceMock.java]
+~~~
+package org.open4goods.googlesearch.mock;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.mockito.Mockito;
+import org.open4goods.services.googlesearch.config.GoogleSearchConfig;
+import org.open4goods.services.googlesearch.dto.GoogleSearchRequest;
+import org.open4goods.services.googlesearch.dto.GoogleSearchResponse;
+import org.open4goods.services.googlesearch.dto.GoogleSearchResult;
+import org.open4goods.services.googlesearch.service.GoogleSearchService;
+import org.open4goods.services.serialisation.service.SerialisationService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Primary;
+import org.springframework.core.io.ClassPathResource;
+
+/**
+ * Test configuration for providing a primary GoogleSearchService bean for tests.
+ * <p>
+ * It systematically attempts to load a recorded mock response using Spring's classpath resource mechanism.
+ * The resource is expected under "googlesearch/mocks/". If not found and if recording is enabled with a record folder configured,
+ * it falls back to reading from that folder. Otherwise, it returns a dummy response.
+ */
+@TestConfiguration
+public class GoogleSearchServiceMock {
+
+    private static final Logger logger = LoggerFactory.getLogger(GoogleSearchServiceMock.class);
+
+    @Bean
+    @Primary
+    GoogleSearchService googleSearchService(GoogleSearchConfig properties, SerialisationService serialisationService)
+            throws IOException, InterruptedException {
+        // Create a Mockito mock that simulates common behavior.
+        GoogleSearchService mockService = Mockito.mock(GoogleSearchService.class);
+        Mockito.when(mockService.search(Mockito.any())).thenAnswer(invocation -> {
+            GoogleSearchRequest request = invocation.getArgument(0);
+            // Sanitize the query to create a safe file name.
+            String sanitizedQuery = GoogleSearchService.sanitizeUrlToFileName(request.getQuery());
+            String fileName = sanitizedQuery + "-" + request.getNumResults() + ".json";
+            // Define the path where mocks are expected in the classpath.
+            String resourcePath = "googlesearch/mocks/" + fileName;
+
+            // Attempt to load the recorded response from classpath using Spring's ClassPathResource.
+            ClassPathResource resource = new ClassPathResource(resourcePath);
+            if (resource.exists()) {
+                try (InputStream is = resource.getInputStream()) {
+                    String json = new String(is.readAllBytes(), StandardCharsets.UTF_8);
+                    logger.debug("Loaded mock response from classpath resource: {}", resourcePath);
+                    return serialisationService.fromJson(json, GoogleSearchResponse.class);
+                } catch (IOException e) {
+                    logger.error("Failed to load recorded response from classpath: {}", e.getMessage());
+                }
+            } else {
+                logger.debug("No classpath resource found at: {}", resourcePath);
+            }
+
+            // If not found in classpath, and if recording is enabled with a record folder, attempt to load from that folder.
+            if (properties.isRecordEnabled() && properties.getRecordFolder() != null && !properties.getRecordFolder().isBlank()) {
+                try {
+                    Path filePath = Paths.get(properties.getRecordFolder()).resolve(fileName);
+                    if (Files.exists(filePath)) {
+                        String json = Files.readString(filePath);
+                        logger.debug("Loaded mock response from folder: {}", filePath.toAbsolutePath());
+                        return serialisationService.fromJson(json, GoogleSearchResponse.class);
+                    } else {
+                        logger.debug("No file found at folder path: {}", filePath.toAbsolutePath());
+                    }
+                } catch (IOException e) {
+                    logger.error("Failed to load recorded response from folder: {}", e.getMessage());
+                }
+            }
+
+            // Default dummy response if no recorded file is found.
+            logger.warn("No recorded mock response found for request: {}. Returning dummy response.", request);
+            List<GoogleSearchResult> res = new ArrayList<>();
+            res.add(new GoogleSearchResult("link1", "http://link1"));
+            res.add(new GoogleSearchResult("link2", "http://link2"));
+            res.add(new GoogleSearchResult("link3", "http://link3"));
+            return new GoogleSearchResponse(res);
+        });
+        return mockService;
+    }
+}
+~~~
+
+## [GoogleSearchServiceTest.java - /home/goulven/git/open4goods/services/googlesearch/src/test/java/org/open4goods/googlesearch/GoogleSearchServiceTest.java]
+~~~
+package org.open4goods.googlesearch;
+
+import static org.assertj.core.api.Assertions.fail;
+import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+import java.io.IOException;
+
+import org.junit.jupiter.api.Test;
+import org.open4goods.services.googlesearch.dto.GoogleSearchRequest;
+import org.open4goods.services.googlesearch.service.GoogleSearchService;
+import org.open4goods.services.serialisation.service.SerialisationService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.SpringBootConfiguration;
+import org.springframework.boot.actuate.health.Status;
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.test.context.ActiveProfiles;
+
+/**
+ * Unit tests for {@link GoogleSearchService}.
+ */
+@SpringBootTest(classes= {GoogleSearchServiceTest.TestConfig.class})
+@ActiveProfiles("test")
+public class GoogleSearchServiceTest {
+
+    @Autowired
+    private GoogleSearchService googleSearchService;
+    /**
+     * Test that the search method returns an error for a bad request.
+     * <p>
+     * This test expects the search to fail with an error message containing "400".
+     */
+    @Test
+    public void testSearch() throws IOException, InterruptedException {
+        // Prepare a sample search request with a known query.
+        GoogleSearchRequest request = new GoogleSearchRequest("Spring Boot", "lang_fr", "countryFR");
+        
+        try {
+            googleSearchService.search(request);
+        } catch (Exception e) {
+            // We expect an error response due to test configuration (e.g., invalid API key)
+            assertTrue(e.getMessage().contains("400") || e.getMessage().contains("Error"));
+            return;
+        }
+        fail("Search should have failed with a 400 exception");
+    }
+
+    /**
+     * Test that the health check returns UP when properties are properly configured.
+     */
+    @Test
+    public void testHealth() {
+        // Verify that the health indicator returns a status of UP
+        assertEquals(Status.UP, googleSearchService.health().getStatus(), "Health check should be UP");
+    }
+
+    /**
+     * Minimal test configuration to bootstrap the Spring context.
+     */
+    @SpringBootConfiguration
+    @EnableAutoConfiguration
+    @ComponentScan(basePackages = {"org.open4goods.services"})
+    public static class TestConfig {
+        // This class remains empty; its purpose is to trigger component scanning in the
+        // org.open4goods.services.googlesearch package and enable auto-configuration.
+    }
+}
+~~~
+
+## [README.md - /home/goulven/git/open4goods/services/googlesearch/README.md]
+~~~
+# GoogleSearch Service
+
+This service is part of the [open4goods](https://github.com/open4good/open4goods) project. It provides a Spring Boot-based integration with the Google Custom Search API.
+
+## Overview
+
+The **GoogleSearch Service** allows you to perform searches against the Google Custom Search API using externalized configuration. It also integrates with Spring Boot Actuator for health checks and metrics.
+
+## Features
+
+- **Custom Search API Integration:** Execute searches using a configurable API key, search engine ID (cx), and search URL.
+- **Health Check:** The service implements a health indicator that checks if the necessary properties are configured and if the last search call was successful.
+- **Metrics:** Each search increments an actuator metric (`google.search.count`).
+
+## Configuration
+
+Configuration properties can be set in your `application.yml` or `application-test.yml`. For example:
+
+```yaml
+googlesearch:
+  apiKey: "YOUR_API_KEY"
+  cx: "YOUR_CX"
+  searchUrl: "https://www.googleapis.com/customsearch/v1"
+```
+
+## How to Use
+
+1. **Include the Dependency:**
+
+   Make sure to include the `googlesearch` module as a dependency in your project (it is built as a JAR).
+
+2. **Autowire the Service:**
+
+   In your Spring Boot application, autowire the `GoogleSearchService`:
+   
+   ```java
+   @Autowired
+   private GoogleSearchService googleSearchService;
+   ```
+
+3. **Perform a Search:**
+
+   Create a search request and execute the search:
+   
+   ```java
+   GoogleSearchRequest request = new GoogleSearchRequest("Spring Boot", 5);
+   try {
+       GoogleSearchResponse response = googleSearchService.search(request);
+       response.getResults().forEach(result ->
+           System.out.println("Title: " + result.getTitle() + ", Link: " + result.getLink())
+       );
+   } catch (Exception e) {
+       // Handle error
+       e.printStackTrace();
+   }
+   ```
+
+## Testing
+
+A sample unit test is provided in `src/test/java/org/open4goods/googlesearch/GoogleSearchServiceTest.java`. The test configuration is bootstrapped using an `application-test.yml`.
+
+## Maven Build
+
+The Maven POM is configured with the necessary dependencies and plugins. To build the service, run:
+
+```bash
+mvn clean install
+```
+
+## License
+
+This project is licensed under the terms of the [MIT License](LICENSE).
+~~~
+
+## [additional-spring-configuration-metadata.json - /home/goulven/git/open4goods/services/googlesearch/src/main/resources/META-INF/additional-spring-configuration-metadata.json]
+~~~
+{
+  "groups": [
+    {
+      "name": "googlesearch",
+      "type": "org.open4goods.services.googlesearch.config.GoogleSearchConfig",
+      "sourceType": "org.open4goods.services.googlesearch.config.GoogleSearchConfig"
+    },
+    {
+      "name": "googlesearch.defaults",
+      "type": "org.open4goods.services.googlesearch.config.GoogleSearchConfig$Defaults",
+      "sourceType": "org.open4goods.services.googlesearch.config.GoogleSearchConfig"
+    }
+  ],
+  "properties": [
+    {
+      "name": "googlesearch.apiKey",
+      "type": "java.lang.String",
+      "description": "API key for accessing the Google Custom Search API."
+    },
+    {
+      "name": "googlesearch.cx",
+      "type": "java.lang.String",
+      "description": "Search engine identifier (cx) for the Google Custom Search API."
+    },
+    {
+      "name": "googlesearch.searchUrl",
+      "type": "java.lang.String",
+      "description": "The URL endpoint for the Google Custom Search API."
+    },
+    {
+      "name": "googlesearch.record.enabled",
+      "type": "java.lang.Boolean",
+      "defaultValue": "false",
+      "description": "Enable recording of search results to a file."
+    },
+    {
+      "name": "googlesearch.record.folder",
+      "type": "java.lang.String",
+      "description": "The folder where recorded search results will be stored."
+    },
+    {
+      "name": "googlesearch.record.fromClasspath",
+      "type": "java.lang.Boolean",
+      "defaultValue": "true",
+      "description": "Enable loading recorded search results from classpath resources before falling back to the folder."
+    },
+    {
+      "name": "googlesearch.defaults.lr",
+      "type": "java.lang.String",
+      "defaultValue": "lang_en",
+      "description": "Default language restriction (lr) for the search."
+    },
+    {
+      "name": "googlesearch.defaults.cr",
+      "type": "java.lang.String",
+      "defaultValue": "countryUS",
+      "description": "Default country restriction (cr) for the search."
+    },
+    {
+      "name": "googlesearch.defaults.safe",
+      "type": "java.lang.String",
+      "defaultValue": "off",
+      "description": "Default safe search filtering option (safe)."
+    },
+    {
+      "name": "googlesearch.defaults.sort",
+      "type": "java.lang.String",
+      "defaultValue": "",
+      "description": "Default sort option for the search."
+    },
+    {
+      "name": "googlesearch.defaults.gl",
+      "type": "java.lang.String",
+      "defaultValue": "us",
+      "description": "Default geolocation (gl) for the search."
+    },
+    {
+      "name": "googlesearch.defaults.hl",
+      "type": "java.lang.String",
+      "defaultValue": "en",
+      "description": "Default interface language (hl) for the search."
+    }
+  ]
+}
+~~~
+
+## [GoogleSearchRequest.java - /home/goulven/git/open4goods/services/googlesearch/src/main/java/org/open4goods/services/googlesearch/dto/GoogleSearchRequest.java]
+~~~
+package org.open4goods.services.googlesearch.dto;
+
+import java.util.Objects;
+
+/**
+ * Data Transfer Object representing a Google Search Request.
+ */
+public class GoogleSearchRequest {
+    
+    private static final int DEFAULT_SEARCH_RESULTS = 10;
+	private final String query;
+    private final int numResults;
+
+    // New optional search parameters corresponding to Google API options.
+    private String lr;   // Language restriction (e.g., lang_en)
+    private String cr;   // Country restriction (e.g., countryUS)
+    private String safe = "off"; // Safe search parameter (e.g., active, off)
+    private String sort; // Sort option
+    private String gl;   // Geolocation (e.g., us)
+    private String hl;   // Interface language (e.g., en)
+
+  
+    /**
+     * Constructs a new GoogleSearchRequest with all options.
+     *
+     * @param query      the search query (must not be null or empty)
+     * @param numResults the number of results to retrieve
+     * @param lr         language restriction parameter (optional)
+     * @param cr         country restriction parameter (optional)
+     * @param safe       safe search option (optional)
+     * @param sort       sort option (optional)
+     * @param gl         geolocation parameter (optional)
+     * @param hl         interface language parameter (optional)
+     */
+    public GoogleSearchRequest(String query, int numResults, String lr, String cr, String safe, String sort, String gl, String hl) {
+        this.lr = lr;
+        this.cr = cr;
+        this.safe = safe;
+        this.sort = sort;
+        this.gl = gl;
+        this.hl = hl;
+		this.query = query;
+		this.numResults = numResults;
+    }
+
+    public GoogleSearchRequest(String query, String lr, String cr) {
+        this.lr = lr;
+        this.cr = cr;
+		this.query = query;
+		this.numResults = DEFAULT_SEARCH_RESULTS;
+    }
+	public String getQuery() {
+        return query;
+    }
+
+    public int getNumResults() {
+        return numResults;
+    }
+    
+    public String getLr() {
+        return lr;
+    }
+    
+    public void setLr(String lr) {
+        this.lr = lr;
+    }
+    
+    public String getCr() {
+        return cr;
+    }
+    
+    public void setCr(String cr) {
+        this.cr = cr;
+    }
+    
+    public String getSafe() {
+        return safe;
+    }
+    
+    public void setSafe(String safe) {
+        this.safe = safe;
+    }
+    
+    public String getSort() {
+        return sort;
+    }
+    
+    public void setSort(String sort) {
+        this.sort = sort;
+    }
+    
+    public String getGl() {
+        return gl;
+    }
+    
+    public void setGl(String gl) {
+        this.gl = gl;
+    }
+    
+    public String getHl() {
+        return hl;
+    }
+    
+    public void setHl(String hl) {
+        this.hl = hl;
+    }
+
+    @Override
+    public String toString() {
+        return "GoogleSearchRequest{" +
+                "query='" + query + '\'' +
+                ", numResults=" + numResults +
+                ", lr='" + lr + '\'' +
+                ", cr='" + cr + '\'' +
+                ", safe='" + safe + '\'' +
+                ", sort='" + sort + '\'' +
+                ", gl='" + gl + '\'' +
+                ", hl='" + hl + '\'' +
+                '}';
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(query, numResults, lr, cr, safe, sort, gl, hl);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof GoogleSearchRequest)) return false;
+        GoogleSearchRequest that = (GoogleSearchRequest) o;
+        return numResults == that.numResults &&
+               Objects.equals(query, that.query) &&
+               Objects.equals(lr, that.lr) &&
+               Objects.equals(cr, that.cr) &&
+               Objects.equals(safe, that.safe) &&
+               Objects.equals(sort, that.sort) &&
+               Objects.equals(gl, that.gl) &&
+               Objects.equals(hl, that.hl);
+    }
+}
+~~~
+
+## [GoogleSearchResult.java - /home/goulven/git/open4goods/services/googlesearch/src/main/java/org/open4goods/services/googlesearch/dto/GoogleSearchResult.java]
+~~~
+package org.open4goods.services.googlesearch.dto;
+
+import java.util.Objects;
+
+/**
+ * Data Transfer Object representing an individual search result.
+ */
+public class GoogleSearchResult {
+
+    private String title;
+    private String link;
+
+    /**
+     * Constructs a new GoogleSearchResult.
+     *
+     * @param title the title of the search result
+     * @param link  the URL of the search result
+     */
+    public GoogleSearchResult(String title, String link) {
+        this.title = title;
+        this.link = link;
+    }
+
+    public GoogleSearchResult() {
+        this.title = null;
+        this.link = null;
+    }
+    
+    public String getTitle() {
+        return title;
+    }
+
+    public String getLink() {
+        return link;
+    }
+
+    @Override
+    public String toString() {
+        return "GoogleSearchResult{" +
+                "title='" + title + '\'' +
+                ", link='" + link + '\'' +
+                '}';
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(title, link);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof GoogleSearchResult)) return false;
+        GoogleSearchResult that = (GoogleSearchResult) o;
+        return Objects.equals(title, that.title) &&
+               Objects.equals(link, that.link);
+    }
+
+	public void setTitle(String title) {
+		this.title = title;
+	}
+
+	public void setLink(String link) {
+		this.link = link;
+	}
+    
+    
+}
+~~~
+
+## [GoogleSearchResponse.java - /home/goulven/git/open4goods/services/googlesearch/src/main/java/org/open4goods/services/googlesearch/dto/GoogleSearchResponse.java]
+~~~
+package org.open4goods.services.googlesearch.dto;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+
+/**
+ * Data Transfer Object representing a Google Search Response.
+ */
+public class GoogleSearchResponse {
+
+    private List<GoogleSearchResult> results = new ArrayList<GoogleSearchResult>();
+
+
+    /**
+     * Constructs a new GoogleSearchResponse.
+     *
+     */
+    public GoogleSearchResponse() {
+    }
+    
+    /**
+     * Constructs a new GoogleSearchResponse.
+     *
+     * @param results the list of search results
+     */
+    public GoogleSearchResponse(List<GoogleSearchResult> results) {
+        this.results = results;
+    }
+
+    public List<GoogleSearchResult> getResults() {
+        return results;
+    }
+
+    @Override
+    public String toString() {
+        return "GoogleSearchResponse{" +
+                "results=" + results +
+                '}';
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(results);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof GoogleSearchResponse)) return false;
+        GoogleSearchResponse that = (GoogleSearchResponse) o;
+        return Objects.equals(results, that.results);
+    }
+
+	public void setResults(List<GoogleSearchResult> results) {
+		this.results = results;
+	}
+    
+    
+}
+~~~
+
+## [GoogleSearchConfig.java - /home/goulven/git/open4goods/services/googlesearch/src/main/java/org/open4goods/services/googlesearch/config/GoogleSearchConfig.java]
+~~~
+package org.open4goods.services.googlesearch.config;
+
+import java.util.Objects;
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.stereotype.Component;
+
+/**
+ * Configuration properties for Google Custom Search.
+ * <p>
+ * These properties are loaded from the application.yml (or application-test.yml for tests).
+ * Example configuration:
+ * <pre>
+ * googlesearch:
+ *   apiKey: "YOUR_API_KEY"
+ *   cx: "YOUR_CX"
+ *   searchUrl: "https://www.googleapis.com/customsearch/v1"
+ *   defaults:
+ *     lr: "lang_en"
+ *     cr: "countryUS"
+ *     safe: "off"
+ *     sort: ""
+ *     gl: "us"
+ *     hl: "en"
+ *   record:
+ *     enabled: true
+ *     folder: "/path/to/record/folder"
+ *     fromClasspath: true
+ * </pre>
+ */
+@Component
+@ConfigurationProperties(prefix = "googlesearch")
+public class GoogleSearchConfig {
+
+    private String apiKey;
+    private String cx;
+    private String searchUrl = "https://www.googleapis.com/customsearch/v1";
+    
+    // New properties for recording search results.
+    private boolean recordEnabled = false;
+    private String recordFolder;
+
+    // New default properties for additional search options.
+    private Defaults defaults = new Defaults();
+
+    public String getApiKey() {
+        return apiKey;
+    }
+
+    public void setApiKey(String apiKey) {
+        this.apiKey = apiKey;
+    }
+
+    public String getCx() {
+        return cx;
+    }
+
+    public void setCx(String cx) {
+        this.cx = cx;
+    }
+
+    public String getSearchUrl() {
+        return searchUrl;
+    }
+
+    public void setSearchUrl(String searchUrl) {
+        this.searchUrl = searchUrl;
+    }
+    
+    public boolean isRecordEnabled() {
+        return recordEnabled;
+    }
+    
+    public void setRecordEnabled(boolean recordEnabled) {
+        this.recordEnabled = recordEnabled;
+    }
+    
+    public String getRecordFolder() {
+        return recordFolder;
+    }
+    
+    public void setRecordFolder(String recordFolder) {
+        this.recordFolder = recordFolder;
+    }
+
+    public Defaults getDefaults() {
+        return defaults;
+    }
+
+    public void setDefaults(Defaults defaults) {
+        this.defaults = defaults;
+    }
+
+    @Override
+    public String toString() {
+        return "GoogleSearchConfig{" +
+                "apiKey='****'" + // Do not expose the API key in logs
+                ", cx='" + cx + '\'' +
+                ", searchUrl='" + searchUrl + '\'' +
+                ", recordEnabled=" + recordEnabled +
+                ", recordFolder='" + recordFolder + '\'' +
+                ", defaults=" + defaults +
+                '}';
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(apiKey, cx, searchUrl, recordEnabled, recordFolder, defaults);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof GoogleSearchConfig)) return false;
+        GoogleSearchConfig that = (GoogleSearchConfig) o;
+        return recordEnabled == that.recordEnabled &&
+               Objects.equals(apiKey, that.apiKey) &&
+               Objects.equals(cx, that.cx) &&
+               Objects.equals(searchUrl, that.searchUrl) &&
+               Objects.equals(recordFolder, that.recordFolder) &&
+               Objects.equals(defaults, that.defaults);
+    }
+
+    /**
+     * Nested class to encapsulate default values for additional search options.
+     */
+    public static class Defaults {
+        /**
+         * Default language restriction (lr).
+         */
+        private String lr = "lang_fr";
+        /**
+         * Default country restriction (cr).
+         */
+        private String cr = "countryFR";
+        /**
+         * Default safe search filtering (safe).
+         */
+        private String safe = "off";
+        /**
+         * Default sort option.
+         */
+        private String sort = "";
+        /**
+         * Default geolocation (gl).
+         */
+        private String gl = "fr";
+        /**
+         * Default interface language (hl).
+         */
+        private String hl = "fr";
+
+        public String getLr() {
+            return lr;
+        }
+
+        public void setLr(String lr) {
+            this.lr = lr;
+        }
+
+        public String getCr() {
+            return cr;
+        }
+
+        public void setCr(String cr) {
+            this.cr = cr;
+        }
+
+        public String getSafe() {
+            return safe;
+        }
+
+        public void setSafe(String safe) {
+            this.safe = safe;
+        }
+
+        public String getSort() {
+            return sort;
+        }
+
+        public void setSort(String sort) {
+            this.sort = sort;
+        }
+
+        public String getGl() {
+            return gl;
+        }
+
+        public void setGl(String gl) {
+            this.gl = gl;
+        }
+
+        public String getHl() {
+            return hl;
+        }
+
+        public void setHl(String hl) {
+            this.hl = hl;
+        }
+
+        @Override
+        public String toString() {
+            return "Defaults{" +
+                    "lr='" + lr + '\'' +
+                    ", cr='" + cr + '\'' +
+                    ", safe='" + safe + '\'' +
+                    ", sort='" + sort + '\'' +
+                    ", gl='" + gl + '\'' +
+                    ", hl='" + hl + '\'' +
+                    '}';
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(lr, cr, safe, sort, gl, hl);
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (!(o instanceof Defaults)) return false;
+            Defaults defaults = (Defaults) o;
+            return Objects.equals(lr, defaults.lr) &&
+                   Objects.equals(cr, defaults.cr) &&
+                   Objects.equals(safe, defaults.safe) &&
+                   Objects.equals(sort, defaults.sort) &&
+                   Objects.equals(gl, defaults.gl) &&
+                   Objects.equals(hl, defaults.hl);
+        }
+    }
+}
+~~~
+
+## [GoogleSearchException.java - /home/goulven/git/open4goods/services/googlesearch/src/main/java/org/open4goods/services/googlesearch/exception/GoogleSearchException.java]
+~~~
+package org.open4goods.services.googlesearch.exception;
+
+/**
+ * Exception thrown when an error occurs while interacting with the Google Custom Search API.
+ */
+public class GoogleSearchException extends RuntimeException {
+
+    /**
+     * Constructs a new GoogleSearchException with the specified detail message.
+     *
+     * @param message the detail message
+     */
+    public GoogleSearchException(String message) {
+        super(message);
+    }
+
+    /**
+     * Constructs a new GoogleSearchException with the specified detail message and cause.
+     *
+     * @param message the detail message
+     * @param cause   the cause
+     */
+    public GoogleSearchException(String message, Throwable cause) {
+        super(message, cause);
+    }
+}
+~~~
+
+## [application-test.yml - /home/goulven/git/open4goods/services/googlesearch/src/test/resources/application-test.yml]
+~~~
+googlesearch:
+  apiKey: "API-KEY"
+  cx: "API-CX"
+  searchUrl: "https://www.googleapis.com/customsearch/v1"
+~~~
+
+## [pom.xml - /home/goulven/git/open4goods/services/googlesearch/pom.xml]
+~~~
+
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 
+                             http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  
+  <parent>
+    <groupId>org.open4goods</groupId>
+    <artifactId>org.open4goods</artifactId>
+    <version>0.0.1-SNAPSHOT</version>
+  </parent>
+  
+  <artifactId>googlesearch</artifactId>
+  
+  
+  <dependencies>
+    <!-- Spring Boot Actuator for health and metrics -->
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-actuator</artifactId>
+    </dependency>
+    
+    
+    <dependency>
+        <groupId>org.open4goods</groupId>
+        <artifactId>serialisation</artifactId>
+        <version>${global.version}</version>
+    </dependency>
+    <!-- Gson for JSON processing -->
+    <dependency>
+      <groupId>com.google.code.gson</groupId>
+      <artifactId>gson</artifactId>
+    </dependency>
+
+    <!-- Configuration Processor for metadata generation -->
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-configuration-processor</artifactId>
+      <optional>true</optional>
+    </dependency>
+    
+    <!-- Test Dependencies -->
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-test</artifactId>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+  
+  <build>
+    <plugins>
+      <plugin>
+      <groupId>org.apache.maven.plugins</groupId>
+      <artifactId>maven-jar-plugin</artifactId>
+      <version>3.4.2</version>
+      <executions>
+        <execution>
+          <goals>
+            <goal>test-jar</goal>
+          </goals>
+        </execution>
+      </executions>
+    </plugin>
+      <!-- Maven Compiler Plugin -->
+      <plugin>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <configuration>
+          <source>${java.version}</source>
+          <target>${java.version}</target>
+        </configuration>
+      </plugin>
+      <!-- Spring Boot Maven Plugin -->
+      <plugin>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-maven-plugin</artifactId>
+      </plugin>
+    </plugins>
+  </build>
+</project>
+~~~
+
+## [pom.xml (pom parent) - /home/goulven/git/open4goods/pom.xml]
+~~~
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+		 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>org.open4goods</groupId>
+	<artifactId>org.open4goods</artifactId>
+	<name>parent</name>
+	<version>0.0.1-SNAPSHOT</version>
+	<packaging>pom</packaging>
+	<description>The open4goods project parent pom</description>
+	<url>https://github.com/open4good/open4goods</url>
+	<properties>
+		<github.global.server>github</github.global.server>
+		<springboot.version>3.4.3</springboot.version>
+		<java.version>21</java.version>
+		<maven.compiler.source>21</maven.compiler.source>
+		<maven.compiler.target>21</maven.compiler.target>
+		<global.version>0.0.1-SNAPSHOT</global.version>
+		<swagger.version>2.9.2</swagger.version>
+		<jacoco.version>0.8.12</jacoco.version>
+		<xwiki.version>11.10.2</xwiki.version>
+
+		<processDependencyManagement>false</processDependencyManagement>
+		<processPluginDependenciesInPluginManagement>true</processPluginDependenciesInPluginManagement>
+		<maven-compiler-plugin-version>3.14.0</maven-compiler-plugin-version>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>		
+		<dependency.locations.enabled>false</dependency.locations.enabled>
+		<exclude.tests>nothing-to-exclude</exclude.tests>
+	</properties>
+
+	<modules>
+		<module>admin</module>
+        <module>model</module>
+		<module>commons</module>
+		<module>verticals</module>
+		<module>crawler</module>
+		<module>api</module>
+		<module>ui</module>
+		<module>services/urlfetching</module>
+        <module>services/googlesearch</module>
+        <module>services/evaluation</module>
+        <module>services/serialisation</module>
+        <module>services/prompt</module>
+        <module>services/review-generation</module>
+        <module>services/product-repository</module>
+        <module>services/captcha</module>
+        
+        
+	</modules>
+
+	<issueManagement>
+		<url>https://github.com/open4good/open4goods/issues</url>
+		<system>GitHub Issues</system>
+	</issueManagement>
+
+	<licenses>
+		<license>
+			<name>GNU AFFERO GENERAL PUBLIC LICENSE + Morality License</name>
+			<url>
+				https://raw.githubusercontent.com/open4good/open4goods/main/LICENSE</url>
+			<distribution>repo</distribution>
+		</license>
+	</licenses>
+
+	<scm>
+		<url>https://github.com/open4good/open4goods</url>
+		<connection>scm:git://github.com/open4good/open4goods</connection>
+	</scm>
+
+
+	<repositories>
+		<repository>
+			<id>central</id>
+			<url>https://repo1.maven.org/maven2</url>
+		</repository>
+
+	</repositories>
+
+
+	<distributionManagement>
+		<site>
+			<id>maven</id>
+			<url>https://nudger.fr</url>
+		</site>
+	</distributionManagement>
+
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<!-- Import dependency management from Spring Boot -->
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-dependencies</artifactId>
+				<version>${springboot.version}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
+
+
+	<dependencies>
+
+		<!--
+		<dependency>
+		    <groupId>org.springframework.boot</groupId>
+		    <artifactId>spring-boot-docker-compose</artifactId>
+		</dependency>
+-->
+
+
+		<dependency>
+			<groupId>net.sf.barcode4j</groupId>
+			<artifactId>barcode4j</artifactId>
+			<version>2.1</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.sleepycat</groupId>
+			<artifactId>je</artifactId>
+			<version>18.3.12</version>
+		</dependency>
+
+
+		<dependency>
+			<groupId>commons-io</groupId>
+			<artifactId>commons-io</artifactId>
+			<version>2.18.0</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-validation</artifactId>
+		</dependency>
+
+
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-lang3</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-text</artifactId>
+			<version>1.13.0</version>
+		</dependency>
+
+		<dependency>
+			<groupId>ch.qos.logback</groupId>
+			<artifactId>logback-classic</artifactId>
+		</dependency>
+
+
+
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-test</artifactId>
+			<scope>test</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-devtools</artifactId>
+			<optional>true</optional>
+		</dependency>
+	</dependencies>
+
+
+	<reporting>
+
+
+		<plugins>
+
+			<plugin>
+				<groupId>org.jacoco</groupId>
+				<artifactId>jacoco-maven-plugin</artifactId>
+				<version>${jacoco.version}</version>
+
+				<reportSets>
+					<reportSet>
+						<reports>
+							<report>report</report>
+						</reports>
+					</reportSet>
+				</reportSets>
+			</plugin>
+
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>versions-maven-plugin</artifactId>
+				<version>2.18.0</version>
+				<reportSets>
+					<reportSet>
+						<reports>
+							<report>dependency-updates-report</report>
+							<report>plugin-updates-report</report>
+							<report>property-updates-report</report>
+						</reports>
+					</reportSet>
+				</reportSets>
+			</plugin>
+
+
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>taglist-maven-plugin</artifactId>
+				<version>3.2.1</version>
+				<configuration>
+					<aggregate>true</aggregate>
+					<xmlOutputDirectory>${project.build.directory}/site/taglist</xmlOutputDirectory>
+
+				</configuration>
+				<reportSets>
+					<reportSet>
+						<!-- defines taglist reports in the modules -->
+						<id>taglist-report</id>
+						<reports>
+							<report>taglist</report>
+						</reports>
+					</reportSet>
+
+					<reportSet>
+						<!-- defines taglist aggregate report -->
+						<id>taglist-aggregate</id>
+						<inherited>false</inherited>
+						<reports>
+							<report>taglist</report>
+						</reports>
+						<configuration>
+							<aggregate>true</aggregate>
+						</configuration>
+					</reportSet>
+				</reportSets>
+			</plugin>
+
+
+			<!-- Maven site plugin configuration -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-site-plugin</artifactId>
+				<version>3.21.0</version>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-project-info-reports-plugin</artifactId>
+				<version>3.9.0</version>
+			</plugin>
+
+		</plugins>
+
+	</reporting>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-enforcer-plugin</artifactId>
+				<version>3.5.0</version>
+				<executions>
+					<execution>
+						<id>enforce-banned-dependencies</id>
+						<goals>
+							<goal>enforce</goal>
+						</goals>
+						<configuration>
+							<rules>
+								<bannedDependencies>
+									<excludes>
+										<!--this is to check we do not have the xml-apis included since
+											JRE provides it already -->
+										<exclude>xml-apis:xml-apis</exclude>
+
+									</excludes>
+								</bannedDependencies>
+							</rules>
+							<fail>true</fail>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+
+			<!-- Jacoco plugin configuration -->
+			<plugin>
+				<groupId>org.jacoco</groupId>
+				<artifactId>jacoco-maven-plugin</artifactId>
+				<executions>
+					<execution>
+						<goals>
+							<goal>prepare-agent</goal>
+						</goals>
+					</execution>
+					<execution>
+						<id>report</id>
+						<phase>test</phase>
+						<goals>
+							<goal>report</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+
+
+			<!-- Maven clean plugin configuration -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-clean-plugin</artifactId>
+				<version>3.4.1</version>
+				<configuration>
+					<filesets>
+						<fileset>
+							<directory>logs</directory>
+							<followSymlinks>false</followSymlinks>
+						</fileset>
+						<fileset>
+							<directory>target</directory>
+							<followSymlinks>false</followSymlinks>
+						</fileset>
+						<fileset>
+							<directory>data</directory>
+							<followSymlinks>false</followSymlinks>
+						</fileset>
+                        <fileset>
+                            <directory>dist</directory>
+                            <followSymlinks>false</followSymlinks>
+                        </fileset>
+                        <fileset>
+                            <directory>node_modules</directory>
+                            <followSymlinks>false</followSymlinks>
+                        </fileset>
+                        <fileset>
+                            <directory>node_modules</directory>
+                            <followSymlinks>false</followSymlinks>
+                        </fileset>
+                        
+						<fileset>
+							<directory>src/test/resources/last</directory>
+							<followSymlinks>false</followSymlinks>
+						</fileset>
+					</filesets>
+				</configuration>
+			</plugin>
+
+
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<version>3.5.2</version>
+			</plugin>
+
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-failsafe-plugin</artifactId>
+				<version>3.5.2</version>
+			</plugin>
+
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-site-plugin</artifactId>
+				<version>3.21.0</version>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-project-info-reports-plugin</artifactId>
+				<version>3.9.0</version>
+			</plugin>
+
+		</plugins>
+
+		<pluginManagement>
+			<plugins>
+				<!-- Maven compiler plugin configuration -->
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-compiler-plugin</artifactId>
+					<version>${maven-compiler-plugin-version}</version>
+					<configuration>
+						<release>21</release>
+						<source>21</source>
+						<target>21</target>
+						<forceJavacCompilerUse>true</forceJavacCompilerUse>
+						<parameters>true</parameters>
+					</configuration>
+				</plugin>
+
+				<!-- Jacoco plugin configuration -->
+				<plugin>
+					<groupId>org.jacoco</groupId>
+					<artifactId>jacoco-maven-plugin</artifactId>
+					<version>${jacoco.version}</version>
+				</plugin>
+			</plugins>
+		</pluginManagement>
+	</build>
+</project>~~~
+

@@ -94,3 +94,87 @@
             </div>
         </div>
     </th:block>
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    <form method="POST" action="/nudge" class="">
+    <div class="table-responsive-sm">
+        <table th:id="offres" class="table table-hover table-nudger table-nudger-price bg-white">
+            <thead>
+                <tr>
+                    <th scope="col"></th>
+                    <th scope="col">Marchand</th>
+                    <th scope="col">Prix</th>
+                    <th scope="col">Etat</th>
+                </tr>
+            </thead>
+            <tbody>
+                <th:block th:each="offer , stats: ${product.price.offers}">
+                    <tr class="p-3 align-middle" th:data-token="${offer.affiliationToken}" th:data-compensation="${offer.compensation}">
+                        <td class="p-0 infos-text">
+                            <span class="p-3 d-inline-flex bg-brand_secondary">
+                        <img  th:replace="inc/favicon :: remoteFavicon(${offer.datasourceName}, 32)">
+                            </span>  
+                        </td>
+                        <td class="p-0 infos-text" data-toggle="tooltip" data-placement="top" th:title="${offer.offerName}" nowrap>
+                            <span class="h-100 d-flex align-items-center">
+                                <span class="" th:text="${offer.datasourceName}"></span>
+                            </span>
+                            
+                        </td>
+                        <td class="p-0 infos-text infos-text-secondary text-center">
+                            <span class="" th:text="${offer.price}"></span> 
+                            <span th:text="#{'symbol.'+${offer.currency}}"></span>
+                        </td>
+                        <td class="p-0 pe-3 text-end">
+                            <span th:text="#{'condition.'+${offer.productState}}"></span>
+                        </td>
+                    </tr>
+                
+                </th:block>
+            
+            </tbody>
+        
+        </table>
+    </div>
+
+    
+
+    <label class="h6 d-flex align-items-center border-1" for="inlineFormCustomSelectPref"><span class="badge input-group__nudger text-black me-2">2</span>Choisissez votre association préférée</label>
+    <select name="nudge" width="100%" class="form-select mb-3" id="inlineFormCustomSelectPref" aria-label="Choisissez votre cause">
+        <option value="nudger" selected="selected">
+            Laisser nudger choisir !
+        </option>
+        <th:block th:each="org : ${config.reversementConfig.contributedOrganisations}">
+            <option th:value="${org.key}" th:text="${org.value.name}"></option>
+        </th:block>
+    </select>
+            
+    
+    <div class="d-flex justify-content-center">
+        <input th:if="${product.bestPrice()}" type ="submit" value="Nudger" formtarget="_blank" class="w-100 btn btn__nudger">
+        <input  th:if="${product.bestPrice()}" type="hidden" id="token" name="token" th:value="${product.bestPrice().affiliationToken}">
+    </div>
+</form>
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    

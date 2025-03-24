@@ -3,112 +3,112 @@
 
 <head>
 
-	<!--/* Metas and CSS */-->
-	<th:block th:insert="~{inc/header-meta.html}"></th:block>
+    <!--/* Metas and CSS */-->
+    <th:block th:insert="~{inc/header-meta.html}"></th:block>
     
-	<!-- Primary Meta Tags -->
-	<title th:text="#{index.title}"></title>
-	<meta name="title" th:content="${verticalConfig.i18n(siteLanguage).verticalMetaTitle}">
-	<meta name="description" th:content="${verticalConfig.i18n(siteLanguage).verticalMetaDescription}">
-		
-	<!-- Open Graph / Facebook -->
-	<meta property="og:type" content="website">
-	<meta property="og:url" th:content="${url}">
-	<meta property="og:title" th:content="${verticalConfig.i18n(siteLanguage).productMetaOpenGraphTitle}">
-	<meta property="og:description" th:content="${verticalConfig.i18n(siteLanguage).productMetaOpenGraphTitle}">
-	<meta property="og:image" th:content="${url} + 'assets/img/brand/light.svg'">
-	
-	<!-- Twitter -->
-	<meta name="twitter:card" content="summary_large_image">
-	<!-- TODO : Image of the category -->
-	<meta name="twitter:url" th:content="${url}">
-	<meta name="twitter:title" th:content="${verticalConfig.i18n(siteLanguage).productMetaTwitterTitle}">
-	<meta name="twitter:description" th:content="${verticalConfig.i18n(siteLanguage).productMetaTwitterDescription}">
-	<!-- TODO : Image of the category -->
-	<meta name="twitter:image" th:content="${url} + 'assets/img/brand/light.svg'">
+    <!-- Primary Meta Tags -->
+    <title th:text="#{index.title}"></title>
+    <meta name="title" th:content="${verticalConfig.i18n(siteLanguage).verticalMetaTitle}">
+    <meta name="description" th:content="${verticalConfig.i18n(siteLanguage).verticalMetaDescription}">
+        
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" th:content="${url}">
+    <meta property="og:title" th:content="${verticalConfig.i18n(siteLanguage).productMetaOpenGraphTitle}">
+    <meta property="og:description" th:content="${verticalConfig.i18n(siteLanguage).productMetaOpenGraphTitle}">
+    <meta property="og:image" th:content="${url} + 'assets/img/brand/light.svg'">
+    
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image">
+    <!-- TODO : Image of the category -->
+    <meta name="twitter:url" th:content="${url}">
+    <meta name="twitter:title" th:content="${verticalConfig.i18n(siteLanguage).productMetaTwitterTitle}">
+    <meta name="twitter:description" th:content="${verticalConfig.i18n(siteLanguage).productMetaTwitterDescription}">
+    <!-- TODO : Image of the category -->
+    <meta name="twitter:image" th:content="${url} + 'assets/img/brand/light.svg'">
 
-	<link rel="stylesheet" type="text/css" href="/webjars/datatables/css/dataTables.bootstrap5.min.css">
-	
+    <link rel="stylesheet" type="text/css" href="/webjars/datatables/css/dataTables.bootstrap5.min.css">
+    
 </head>
 
 <body class="page-vertical">
-	<th:block th:insert="~{inc/navbar/navbar-home.html}"></th:block>
-	
+    <th:block th:insert="~{inc/navbar/navbar-home.html}"></th:block>
+    
     <main class="bg-gray-200">
-		<!-- Loader -->
-		<th:block th:insert="~{inc/preloader.html}"></th:block>
+        <!-- Loader -->
+        <th:block th:insert="~{inc/preloader.html}"></th:block>
 
-		<section class="section-header pb-0">
-			<div class="row">
-				<th:block th:insert="~{inc/wip.html}"></th:block>
-			</div>
+        <section class="section-header pb-0">
+            <div class="row">
+                <th:block th:insert="~{inc/wip.html}"></th:block>
+            </div>
 
             <div class="container container-semi-fluid">
-				<!--/* Hero */-->						
-				<div class="row mb-2">							
-					<div class="d-flex align-items-center">
-						<div class="d-flex flex-wrap align-items-center row">
-							<div class="col-lg-10">
-								<h2 class="h4 mb-0 text-center" th:text="${verticalConfig.i18n(siteLanguage).verticalHomeTitle}"></h2>
-								<p class="row p-2 mb-4" th:text="${verticalConfig.i18n(siteLanguage).verticalHomeDescription}"> </p>			
-							</div> 
-						</div>
-					</div>
-				</div>
-			</div>
-		</section>
-		<div class="container-fluid">		
-			<div class="row mb-5">
-				<!--/* Left column */-->                	
-				<div class="col-lg-3">
-					<div class="d-flex align-items-center">
-						<!--/* Guides */-->	
-						<aside class="card border-gray-300 bg-transparent p-2 mb-4 w-100" th:if="${verticalConfig.i18n(siteLanguage).getWikiPages().size() > 0}">
-							<div class="card-header py-0 bg-transparent border-0 text-center d-flex flex-row flex-lg-column align-items-center justify-content-center px-1 px-lg-4">
-								<span class="h5 my-0 my-lg-3 me-3 me-lg-0">Les guides</span>
-							</div>
-							<div class="card-body p-2 d-none d-lg-block">
-								<div class="list-group dashboard-menu list-group-sm">
-									<a 
-										class="d-flex list-group-item border-0 list-group-item-action" 
-										th:href="'/' + ${verticalPath} + '/'+ ${item.verticalUrl}" 
-										th:each="item : ${verticalConfig.i18n(siteLanguage).getWikiPages()}">
-										<span th:text="${item.title}"></span>
-										<span class="icon icon-xs ms-auto">
-											<span class="fas fa-chevron-right"></span>
-										</span>
-									</a>								
-								</div>
-							</div>
-						</aside>   
-						
-						<!--/* Blog posts */-->	
-						<aside class="card border-gray-300 bg-transparent p-2 mb-4 w-100" th:if="${posts.size()>0}">
-							<div class="card-header py-0 bg-transparent border-0 text-center d-flex flex-row flex-lg-column align-items-center justify-content-center px-1 px-lg-4">
-								<span class="h5 my-0 my-lg-3 me-3 me-lg-0">On en parle dans le blog</span>
-							</div>
-							<div class="card-body p-2">
-								<div class="list-group dashboard-menu list-group-sm">
-									<a
-										class="d-flex list-group-item border-0 list-group-item-action" 
-										th:each="post : ${posts}"
-										th:href="'/blog/'+${post.url}">										
-										<span th:text="${post.title}"></span>
-										<span class="icon icon-xs ms-auto">
-											<span class="fas fa-chevron-right"></span>
-										</span>
-									</a>
-								</div>
-							</div>
-						</aside>
-					</div>
-				</div>
-				<!--/* Right column */-->
-				<div class="col">
-					<th:block th:insert="~{inc/vertical-table.html}"></th:block>
-				</div>
-			</div>
-		</div>
+                <!--/* Hero */-->                       
+                <div class="row mb-2">                          
+                    <div class="d-flex align-items-center">
+                        <div class="d-flex flex-wrap align-items-center row">
+                            <div class="col-lg-10">
+                                <h2 class="h4 mb-0 text-center" th:text="${verticalConfig.i18n(siteLanguage).verticalHomeTitle}"></h2>
+                                <p class="row p-2 mb-4" th:text="${verticalConfig.i18n(siteLanguage).verticalHomeDescription}"> </p>            
+                            </div> 
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <div class="container-fluid">       
+            <div class="row mb-5">
+                <!--/* Left column */-->                    
+                <div class="col-lg-3">
+                    <div class="d-flex align-items-center">
+                        <!--/* Guides */--> 
+                        <aside class="card border-gray-300 bg-transparent p-2 mb-4 w-100" th:if="${verticalConfig.i18n(siteLanguage).getWikiPages().size() > 0}">
+                            <div class="card-header py-0 bg-transparent border-0 text-center d-flex flex-row flex-lg-column align-items-center justify-content-center px-1 px-lg-4">
+                                <span class="h5 my-0 my-lg-3 me-3 me-lg-0">Les guides</span>
+                            </div>
+                            <div class="card-body p-2 d-none d-lg-block">
+                                <div class="list-group dashboard-menu list-group-sm">
+                                    <a 
+                                        class="d-flex list-group-item border-0 list-group-item-action" 
+                                        th:href="'/' + ${verticalPath} + '/'+ ${item.verticalUrl}" 
+                                        th:each="item : ${verticalConfig.i18n(siteLanguage).getWikiPages()}">
+                                        <span th:text="${item.title}"></span>
+                                        <span class="icon icon-xs ms-auto">
+                                            <span class="fas fa-chevron-right"></span>
+                                        </span>
+                                    </a>                                
+                                </div>
+                            </div>
+                        </aside>   
+                        
+                        <!--/* Blog posts */--> 
+                        <aside class="card border-gray-300 bg-transparent p-2 mb-4 w-100" th:if="${posts.size()>0}">
+                            <div class="card-header py-0 bg-transparent border-0 text-center d-flex flex-row flex-lg-column align-items-center justify-content-center px-1 px-lg-4">
+                                <span class="h5 my-0 my-lg-3 me-3 me-lg-0">On en parle dans le blog</span>
+                            </div>
+                            <div class="card-body p-2">
+                                <div class="list-group dashboard-menu list-group-sm">
+                                    <a
+                                        class="d-flex list-group-item border-0 list-group-item-action" 
+                                        th:each="post : ${posts}"
+                                        th:href="'/blog/'+${post.url}">                                     
+                                        <span th:text="${post.title}"></span>
+                                        <span class="icon icon-xs ms-auto">
+                                            <span class="fas fa-chevron-right"></span>
+                                        </span>
+                                    </a>
+                                </div>
+                            </div>
+                        </aside>
+                    </div>
+                </div>
+                <!--/* Right column */-->
+                <div class="col">
+                    <th:block th:insert="~{inc/vertical-table.html}"></th:block>
+                </div>
+            </div>
+        </div>
     </main>
 
 
@@ -118,42 +118,42 @@
     <!-- Specific vertical rendering scripts -->
     <th:block th:insert="~{inc/vertical-script.html}"></th:block>    
 
-	<!-- Attributes filters modal -->
-	<div class="modal fade" id="modal-default" tabindex="-1" role="dialog" aria-labelledby="modal-default" aria-hidden="true">
-		<div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-xl" role="document">
-			<div class="modal-content">
-				<div class="modal-header">
-					<h6 class="modal-title">Filtres de recherche</h6>
-				</div>
-				<div class="modal-body">
-					<div class="row">
-						<!--/* Price Filters */-->
-						<div class="col-lg-6">
-							<h2 class="h5">Prix</h2>
-							<th:block th:insert="~{inc/vertical-filters-price.html}"></th:block>
-						</div>
+    <!-- Attributes filters modal -->
+    <div class="modal fade" id="modal-default" tabindex="-1" role="dialog" aria-labelledby="modal-default" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-xl" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h6 class="modal-title">Filtres de recherche</h6>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <!--/* Price Filters */-->
+                        <div class="col-lg-6">
+                            <h2 class="h5">Prix</h2>
+                            <th:block th:insert="~{inc/vertical-filters-price.html}"></th:block>
+                        </div>
 
-						<!--/* Ecological Filters */-->
-						<div class="col-lg-6">
-							<h2 class="h5">Eco-Filtres</h2>
-							<th:block th:insert="~{inc/vertical-filters-eco.html}"></th:block>
-						</div>
-					
-							<!--/* Technical Filters */-->                          
-						<div class="col">
-							<h2 class="h5">Caractéristiques</h2>
-							<th:block th:insert="~{inc/vertical-filters-technical.html}"></th:block>                      
-						</div>
-					
-					
-					</div>
-				</div>
-            	<div class="modal-footer">
-					<button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Fermer</button>
-				</div>
-			</div>
-		</div>
-	</div>
+                        <!--/* Ecological Filters */-->
+                        <div class="col-lg-6">
+                            <h2 class="h5">Eco-Filtres</h2>
+                            <th:block th:insert="~{inc/vertical-filters-eco.html}"></th:block>
+                        </div>
+                    
+                            <!--/* Technical Filters */-->                          
+                        <div class="col">
+                            <h2 class="h5">Caractéristiques</h2>
+                            <th:block th:insert="~{inc/vertical-filters-technical.html}"></th:block>                      
+                        </div>
+                    
+                    
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Fermer</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
 
 

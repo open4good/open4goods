@@ -8,10 +8,13 @@
           </div>
         </div>  
         
+            
+            <th:block th:unless="${aiReview}">
+                <!--  TODO : card Widget with big AI icon-on the left, and a title and a description on the right-> -->
+                <button id="triggerButton" class="btn btn-facebook mb-3">Génerer</button>
+            </th:block>        
         
         
-        
-            <button id="triggerButton" class="btn btn-facebook mb-3">Génerer</button>
  
 			<!-- Modal structure -->
 			<div class="modal fade modal-lg" id="reviewProcessModal" tabindex="-1" role="dialog" 
@@ -103,7 +106,7 @@
             
             
             
-                  <!-- Tops -->
+                  <!-- Tops 
 			<div class="card shadow border-gray-300">
 				<div class="card-body p-4 p-lg-5">
 					<div class="d-flex p-3 justify-content-center">
@@ -117,8 +120,9 @@
 					<div class="lead" th:text="${product.bestsScores}"></div>
 				</div>
 			</div>
+                  -->
 
-			<!-- Flops -->
+			<!-- Flops
                   <div  class="card shadow border-gray-300">
                    <div class="card-body p-4 p-lg-5">
                          <div class="d-flex p-3 justify-content-center">                                                     
@@ -133,6 +137,7 @@
                          </div>
                    </div>
                  </div>
+			 -->
   
   
   
@@ -267,16 +272,9 @@
                         </div>
                     </div>
 					
-					
-					
-					
-					
-					
-					
-					
-					
+
                   <!-- Bilan -->
-                  <div th:if="${aiReview}" class="mt-4 card shadow border-gray-300">
+                  <div th:if="${aiReview}" class="mt-4 mb-4 card shadow border-gray-300">
 	                   <div class="card-body p-4 p-lg-5">
 	                         <div class="d-flex p-3 justify-content-center">                                                     
 	                             <div class="icon icon-primary">
@@ -294,35 +292,10 @@
 				</div>
 			</div>
 			
-			
-			
 			<!-- Sources -->
-			
-			
             <div class="row">
-                  
-               
-               <div class="col-12 col-lg-4">
-                   <!-- Data Quality -->
-                   <div th:if="${aiReview}" class="card shadow border-gray-300">
-                      <div class="card-body p-4 p-lg-5">
-                            <div class="d-flex p-3 justify-content-center">                                                     
-                                <div class="icon icon-primary">
-                                    <span class="fas fa-id-card"></span>
-                                </div>                                                      
-                                <div class="ps-4">
-                                    <h3 class="h5 icon-box-title md-1">Notoriété</h3>
-                                </div>
-                            </div>
-                            <div  class="lead" th:utext="${aiReview.dataQuality}"></div>
-                      </div>
-                    </div>
-               
-               
-	           </div>
-	            
 	            <!-- Table sources -->
-               <div class="col-12 col-lg-8">
+               <div class="col-12 col-lg-12">
                    <!-- Presentation -->
                    <div th:if="${aiReview}" class="card shadow border-gray-300">
                       <div class="card-body p-4 p-lg-5">
