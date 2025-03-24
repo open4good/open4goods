@@ -82,16 +82,17 @@ public class NamesAggregationService extends AbstractAggregationService {
 					data.getNames().getH1Title().put(lang, computePrefixedText(data, tConf.getH1Title(), " "));
 				}
 				
+				// TODO(p1, seo)  : Implement product meta data
 				// metaDescription
-				data.getNames().getMetaDescription().put(lang, blablaService.generateBlabla(tConf.getProductMetaDescription(), data));
+				//data.getNames().getMetaDescription().put(lang, blablaService.generateBlabla(tConf.getProductMetaDescription(), data));
 				// productMetaOpenGraphTitle
-				data.getNames().getProductMetaOpenGraphTitle().put(lang, blablaService.generateBlabla(tConf.getProductMetaOpenGraphTitle(), data));
+				//data.getNames().getProductMetaOpenGraphTitle().put(lang, blablaService.generateBlabla(tConf.getProductMetaOpenGraphTitle(), data));
 				// productMetaOpenGraphDescription
-				data.getNames().getProductMetaOpenGraphDescription().put(lang, blablaService.generateBlabla(tConf.getProductMetaOpenGraphDescription(), data));
+				//data.getNames().getProductMetaOpenGraphDescription().put(lang, blablaService.generateBlabla(tConf.getProductMetaOpenGraphDescription(), data));
 				// productMetaTwitterTitle
-				data.getNames().getProductMetaTwitterTitle().put(lang, blablaService.generateBlabla(tConf.getProductMetaTwitterTitle(), data));
+				//data.getNames().getProductMetaTwitterTitle().put(lang, blablaService.generateBlabla(tConf.getProductMetaTwitterTitle(), data));
 				// productMetaTwitterDescription
-				data.getNames().getProductMetaTwitterDescription().put(lang, blablaService.generateBlabla(tConf.getProductMetaTwitterDescription(), data));
+				//data.getNames().getProductMetaTwitterDescription().put(lang, blablaService.generateBlabla(tConf.getProductMetaTwitterDescription(), data));
 
 			
 			

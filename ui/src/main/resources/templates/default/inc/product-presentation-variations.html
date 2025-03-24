@@ -1078,9 +1078,7 @@
                                 <tbody>
                                     <tr th:each="item : ${aiReview.sources}">
                                         <td th:text="${item.number}"></td>
-                                        <td>
-                                            <a th:href="${item.url}" target="_blank" rel="nofollow" th:text="${item.name}"></a>
-                                        </td>
+                                    <td scope="row" >  <a target="_blank" rel="nofollow" th:href="${item.url}" ><img  th:replace="inc/favicon :: remoteFavicon(${item.url}, 32)"> <span th:text="${item.name}"></span></a></td>
                                         <td th:text="${item.description}"></td>
                                     </tr>
                                 </tbody>
