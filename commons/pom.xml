@@ -47,6 +47,14 @@
 
       <dependency>
             <groupId>org.open4goods</groupId>
+            <artifactId>remotefilecaching</artifactId>
+            <version>${global.version}</version>
+      </dependency>
+
+
+
+      <dependency>
+            <groupId>org.open4goods</groupId>
             <artifactId>serialisation</artifactId>
             <version>${global.version}</version>
       </dependency>
@@ -126,7 +134,7 @@
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
-            <version>33.4.0-jre</version>
+            <version>33.4.5-jre</version>
         </dependency>
 
         <dependency>
@@ -184,12 +192,7 @@
 			<artifactId>micrometer-core</artifactId>
 		</dependency>
 -->
-        <dependency>
-            <groupId>net.lingala.zip4j</groupId>
-            <artifactId>zip4j</artifactId>
-            <version>2.11.5</version>
-        </dependency>
-
+  
 
 
         <dependency>

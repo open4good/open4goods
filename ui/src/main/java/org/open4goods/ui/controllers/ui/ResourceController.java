@@ -15,7 +15,6 @@ import java.util.List;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
-import org.open4goods.commons.exceptions.TechnicalException;
 import org.open4goods.commons.model.constants.RolesConstants;
 import org.open4goods.commons.services.BrandService;
 import org.open4goods.commons.services.DataSourceConfigService;
@@ -23,6 +22,7 @@ import org.open4goods.commons.services.ImageGenerationService;
 import org.open4goods.commons.services.ResourceService;
 import org.open4goods.commons.services.VerticalsConfigService;
 import org.open4goods.model.exceptions.InvalidParameterException;
+import org.open4goods.model.exceptions.TechnicalException;
 import org.open4goods.model.exceptions.ValidationException;
 import org.open4goods.model.product.Product;
 import org.open4goods.model.resource.Resource;

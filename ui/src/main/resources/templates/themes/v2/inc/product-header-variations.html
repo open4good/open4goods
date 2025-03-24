@@ -1,0 +1,304 @@
+<!-- PRODUCT HEADER VARIATIONS -->
+
+<!-- Variation 0: Original (unchanged) -->
+<th:block th:fragment="product-header-variation-0">
+  <div class="row">
+    <!-- Left column: product images and ecoscore (unchanged) -->
+    <div class="col-12 col-lg-6">
+      <div class="card card__radius--mini border-0 mb-5">
+        <th:block th:insert="~{inc/product-images.html}"></th:block>
+      </div>
+      <div id="markerEcoscore">
+        <div class="row pt-4">
+          <div id="ecoScore" class="card card__radius--mini border-0">
+            <div class="card-body text-center">
+              <div>
+                <a href="#"> Impact Score :
+                  <span class="display-5" th:text="${product.ecoscore.on20()}"></span>
+                  <span class="display-6">/20</span>
+                </a>
+              </div>
+              <!-- Star rating -->
+              <div class="star-rating star-rating-lg" th:data-rating="${product.ecoscore.absolute.value}"
+                   th:aria-label="'Evaluation de ' + ${product.ecoscore.absolute.value} + ' sur 5'">
+                <div class="stars">
+                  <span class="star"></span>
+                  <span class="star"></span>
+                  <span class="star"></span>
+                  <span class="star"></span>
+                  <span class="star"></span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- (Other left–column code, if any, remains unchanged) -->
+        </div>
+      </div>
+    </div>
+    
+    <!-- Right column: original offers table -->
+    <div class="col-12 col-lg-6">
+      <h6 class="d-flex align-items-center border-1">
+        <span class="badge input-group__nudger text-black me-2">1</span>Choisissez la meilleure offre
+      </h6>
+      <form method="POST" action="/nudge" class="">
+        <div class="table-responsive-sm">
+          <table th:id="offres" class="table table-hover table-nudger table-nudger-price bg-white">
+            <thead>
+              <tr>
+                <th scope="col"></th>
+                <th scope="col">Marchand</th>
+                <th scope="col">Prix</th>
+                <th scope="col">Etat</th>
+              </tr>
+            </thead>
+            <tbody>
+              <th:block th:each="offer, stats: ${product.price.offers}">
+                <tr class="p-3 align-middle" th:data-token="${offer.affiliationToken}" th:data-compensation="${offer.compensation}">
+                  <td class="p-0 infos-text">
+                    <span class="p-3 d-inline-flex bg-brand_secondary">
+                      <img height="30" th:src="'/icon/'+${offer.datasourceName}" th:title="'icône ' + ${offer.shortDataSourceName()}">
+                    </span>
+                  </td>
+                  <td class="p-0 infos-text" data-toggle="tooltip" data-placement="top" th:title="${offer.offerName}" nowrap>
+                    <span class="h-100 d-flex align-items-center">
+                      <span th:text="${offer.datasourceName}"></span>
+                    </span>
+                  </td>
+                  <td class="p-0 infos-text infos-text-secondary text-center">
+                    <span th:text="${offer.price}"></span>
+                    <span th:text="#{'symbol.'+${offer.currency}}"></span>
+                  </td>
+                  <td class="p-0 pe-3 text-end">
+                    <span th:text="#{'condition.'+${offer.productState}}"></span>
+                  </td>
+                </tr>
+              </th:block>
+            </tbody>
+          </table>
+        </div>
+  
+        <div class="nudger__reversement d-flex align-items-center gap-3 px-3 py-2 bg-white my-4" th:if="${product.bestPrice()}">
+          <span class="picto">ⓘ</span>
+          <span class="somme">
+            <span id="countup-reversment" th:data-max="${product.bestPrice().compensation}"></span>
+            <span th:text="#{'symbol.'+${product.bestPrice().currency}}"></span>
+          </span>
+          seront reversé à votre association préférée<br>
+          si vous choisissez ce vendeur
+        </div>
+  
+        <label class="h6 d-flex align-items-center border-1" for="inlineFormCustomSelectPref">
+          <span class="badge input-group__nudger text-black me-2">2</span>Choisissez votre association préférée
+        </label>
+        <select name="nudge" width="100%" class="form-select mb-3" id="inlineFormCustomSelectPref" aria-label="Choisissez votre cause">
+          <option value="nudger" selected="selected">
+            Laisser nudger choisir !
+          </option>
+          <th:block th:each="org : ${config.reversementConfig.contributedOrganisations}">
+            <option th:value="${org.key}" th:text="${org.value.name}"></option>
+          </th:block>
+        </select>
+  
+        <div class="card border-gray-300 mb-3">
+          <div class="card-body d-block d-md-flex align-items-center">
+            <div class="icon icon-shape icon-md icon-shape-primary rounded-circle me-3 mb-4 mb-md-0">
+              <span th:if="${newTrend.trend == 1}" class="fas fa-file-invoice-dollar text-danger"></span>
+              <span th:if="${newTrend.trend == 0}" class="fas fa-file-invoice-dollar text-info"></span>
+              <span th:if="${newTrend.trend == -1}" class="fas fa-file-invoice-dollar text-success"></span>
+            </div>
+            <div>
+              <span class="d-block h6 fw-normal">Evolution du prix</span>
+              <h5 th:if="${newTrend.trend == 0}" class="h3 fw-bold mb-1 text-info">
+                <span th:text="${#numbers.formatDecimal(newTrend.variation == null ? 0 : newTrend.variation, 0, 0)}"></span>€
+              </h5>
+              <h5 th:if="${newTrend.trend == 1}" class="h3 fw-bold mb-1 text-danger">
+                <span th:text="${#numbers.formatDecimal(newTrend.variation == null ? 0 : newTrend.variation, 0, 0)}"></span>€
+              </h5>
+              <h5 th:if="${newTrend.trend == -1}" class="h3 fw-bold mb-1 text-success">
+                <span th:text="${#numbers.formatDecimal(newTrend.variation == null ? 0 : newTrend.variation, 0, 0)}"></span>€
+              </h5>
+              <div class="small mt-2">
+                <p th:if="${newTrend.trend == -1}">
+                  <span class="fas fa-angle-down text-success"></span>
+                  <span class="fs-6">Le prix neuf a baissé</span>
+                  <br>
+                  <span class="fw-bold fs-6">depuis <span th:text="${newTrend.formatedDuration()}"></span></span>
+                </p>
+                <p th:if="${newTrend.trend == 0}">
+                  <span class="fas fa-equals text-info"></span>
+                  <span class="fs-6">Le prix neuf est stable</span>
+                  <br>
+                  <span class="fw-bold fs-6">depuis <span th:text="${newTrend.formatedDuration()}"></span></span>
+                </p>
+                <p th:if="${newTrend.trend == 1}">
+                  <span class="fas fa-angle-up text-danger"></span>
+                  <span class="fs-6">Le prix neuf a augmenté</span>
+                  <br>
+                  <span class="fw-bold fs-6">depuis <span th:text="${newTrend.formatedDuration()}"></span></span>
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+  
+        <div class="d-flex justify-content-center">
+          <input th:if="${product.bestPrice()}" type="submit" value="Nudger" formtarget="_blank" class="w-100 btn btn__nudger">
+          <input th:if="${product.bestPrice()}" type="hidden" id="token" name="token" th:value="${product.bestPrice().affiliationToken}">
+        </div>
+      </form>
+    </div>
+  </div>
+</th:block>
+
+
+
+
+<!-- Variation 1: Native Bootstrap 5 – Offers section is replaced with two togglable cards -->
+<th:block th:fragment="product-header-variation-1">
+	<div class="row">
+		<!-- Left column remains unchanged -->
+		<div class="col-12 col-lg-6">
+			<div class="card card__radius--mini border-0 mb-5">
+				<th:block th:insert="~{inc/product-images.html}"></th:block>
+			</div>
+			<div id="markerEcoscore">
+				<div class="row pt-4">
+					<div id="ecoScore" class="card card__radius--mini border-0">
+						<div class="card-body text-center">
+							<div>
+								<a href="#"> Impact Score : <span class="display-5" th:text="${product.ecoscore.on20()}"></span> <span class="display-6">/20</span>
+								</a>
+							</div>
+							<div class="star-rating star-rating-lg" th:data-rating="${product.ecoscore.absolute.value}" th:aria-label="'Evaluation de ' + ${product.ecoscore.absolute.value} + ' sur 5'">
+								<div class="stars">
+									<span class="star"></span> <span class="star"></span> <span class="star"></span> <span class="star"></span> <span class="star"></span>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		
+		<!-- Right column: New offers cards -->
+<div class="col-12 col-lg-6">
+  <h6 class="d-flex align-items-center border-1">
+    <span class="badge input-group__nudger text-black me-2">1</span>Choisissez la meilleure offre
+  </h6>
+  <form method="POST" action="/nudge">
+    <div class="d-flex gap-3">
+      <!-- Best Occasion Offer card (with eco icon) -->
+      <div class="card flex-fill border" th:if="${bestOccasionOffer != null}"
+           th:classappend="${selectedOffer == bestOccasionOffer.affiliationToken} ? ' border-primary' : ''"
+           style="cursor: pointer;" 
+           onclick="document.getElementById('selectedOffer').value='[[${bestOccasionOffer.affiliationToken}]]'; highlightSelected(this);">
+        <div class="card-body text-center p-2">
+          <div class="mb-2">
+            <i class="fas fa-recycle text-success"></i>
+          </div>
+          <h6 th:text="${bestOccasionOffer.datasourceName}">Occasion Merchant</h6>
+          <p class="mb-0" th:text="${bestOccasionOffer.price} + ' ' + ${bestOccasionOffer.currency}">Price</p>
+          <p class="small" th:text="#{'condition.'+${bestOccasionOffer.productState}}">State</p>
+        </div>
+      </div>
+      
+      <!-- Best New Offer card -->
+      <div class="card flex-fill border" th:if="${bestNewOffer != null}"
+           th:classappend="${selectedOffer == bestNewOffer.affiliationToken} ? ' border-primary' : ''"
+           style="cursor: pointer;" 
+           onclick="document.getElementById('selectedOffer').value='[[${bestNewOffer.affiliationToken}]]'; highlightSelected(this);">
+        <div class="card-body text-center p-2">
+          <h6 th:text="${bestNewOffer.datasourceName}">New Merchant</h6>
+          <p class="mb-0" th:text="${bestNewOffer.price} + ' ' + ${bestNewOffer.currency}">Price</p>
+          <p class="small" th:text="#{'condition.'+${bestNewOffer.productState}}">State</p>
+        </div>
+      </div>
+    </div>
+    <input type="hidden" id="selectedOffer" name="token" th:value="${product.bestPrice().affiliationToken}">
+    <div class="mt-3">
+      <a href="#" class="btn btn-link">Voir toutes les offres</a>
+    </div>
+  </form>
+</div>
+
+
+</div> 
+<script> 
+function highlightSelected(selectedCard) { // Remove the primary border from all cards var cards = document.querySelectorAll('.card.flex-fill'); cards.forEach(function(card) { card.classList.remove('border-primary'); }); // Add the primary border to the clicked card selectedCard.classList.add('border-primary'); } 
+</script>
+}
+
+</th:block>		
+
+<!-- Variation 2: Pixel UI Kit based – using Pixel classes for a lighter, compact card look -->
+<th:block th:fragment="product-header-variation-2">
+
+	<div class="row">
+		<!-- Left column: same as original -->
+		<div class="col-12 col-lg-6">
+			<div class="card card__radius--mini border-0 mb-5">
+				<th:block th:insert="~{inc/product-images.html}"></th:block>
+			</div>
+			<div id="markerEcoscore">
+				<div class="row pt-4">
+					<div id="ecoScore" class="card card__radius--mini border-0">
+						<div class="card-body text-center">
+							<div>
+								<a href="#"> Impact Score : <span class="display-5" th:text="${product.ecoscore.on20()}"></span> <span class="display-6">/20</span>
+								</a>
+							</div>
+							<div class="star-rating star-rating-lg" th:data-rating="${product.ecoscore.absolute.value}" th:aria-label="'Evaluation de ' + ${product.ecoscore.absolute.value} + ' sur 5'">
+								<div class="stars">
+									<span class="star"></span> <span class="star"></span> <span class="star"></span> <span class="star"></span> <span class="star"></span>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<!-- Right column: Offers section with Pixel UI kit classes -->
+<div class="col-12 col-lg-6">
+  <h6 class="d-flex align-items-center border-1">
+    <span class="badge input-group__nudger text-black me-2">1</span>Choisissez la meilleure offre
+  </h6>
+  <form method="POST" action="/nudge">
+    <div class="d-flex gap-3">
+      <!-- Best Occasion Offer card with eco icon -->
+      <div class="card card__radius--mini bg-white" th:if="${bestOccasionOffer != null}"
+           th:classappend="${selectedOffer == bestOccasionOffer.affiliationToken} ? ' border-primary' : ' border' "
+           style="cursor: pointer; flex: 1;" 
+           onclick="document.getElementById('selectedOffer').value='[[${bestOccasionOffer.affiliationToken}]]'; highlightSelectedPixel(this);">
+        <div class="card-body text-center p-2">
+          <div class="mb-2">
+            <i class="fas fa-recycle text-success"></i>
+          </div>
+          <h6 th:text="${bestOccasionOffer.datasourceName}">Occasion Merchant</h6>
+          <p class="mb-0" th:text="${bestOccasionOffer.price} + ' ' + ${bestOccasionOffer.currency}">Price</p>
+          <p class="small" th:text="#{'condition.'+${bestOccasionOffer.productState}}">State</p>
+        </div>
+      </div>
+      <!-- Best New Offer card -->
+      <div class="card card__radius--mini bg-white" th:if="${bestNewOffer != null}"
+           th:classappend="${selectedOffer == bestNewOffer.affiliationToken} ? ' border-primary' : ' border' "
+           style="cursor: pointer; flex: 1;" 
+           onclick="document.getElementById('selectedOffer').value='[[${bestNewOffer.affiliationToken}]]'; highlightSelectedPixel(this);">
+        <div class="card-body text-center p-2">
+          <h6 th:text="${bestNewOffer.datasourceName}">New Merchant</h6>
+          <p class="mb-0" th:text="${bestNewOffer.price} + ' ' + ${bestNewOffer.currency}">Price</p>
+          <p class="small" th:text="#{'condition.'+${bestNewOffer.productState}}">State</p>
+        </div>
+      </div>
+    </div>
+    <input type="hidden" id="selectedOffer" name="token" th:value="${product.bestPrice().affiliationToken}">
+    <div class="mt-3">
+      <a href="#" class="btn btn-link">Voir toutes les offres</a>
+    </div>
+  </form>
+</div>
+
+</div> <script> function highlightSelectedPixel(selectedCard) { var cards = document.querySelectorAll('.card.card__radius--mini'); cards.forEach(function(card) { card.classList.remove('border-primary'); card.classList.add('border'); }); selectedCard.classList.remove('border'); selectedCard.classList.add('border-primary'); } </script>
+</th:block>
+
+		

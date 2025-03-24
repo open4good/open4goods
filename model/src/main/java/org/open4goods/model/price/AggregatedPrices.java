@@ -61,6 +61,15 @@ public class AggregatedPrices implements Standardisable {
 
 	}
 	
+	
+	public AggregatedPrice bestOffer(ProductCondition condition) {
+		var list = sortedOffers(condition);
+		if (list != null && list.size() > 0 ) {
+			return list.getFirst();
+		}
+		return null;
+		
+	}
 
 	public List<PriceHistory> getHistory(ProductCondition state) {
 
