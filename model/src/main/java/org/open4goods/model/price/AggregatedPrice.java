@@ -2,7 +2,13 @@
 package org.open4goods.model.price;
 
 import java.text.DecimalFormat;
+import java.util.Locale;
 
+import org.joda.time.DurationFieldType;
+import org.joda.time.Period;
+import org.joda.time.PeriodType;
+import org.joda.time.format.PeriodFormat;
+import org.joda.time.format.PeriodFormatter;
 import org.open4goods.model.datafragment.DataFragment;
 import org.open4goods.model.product.ProductCondition;
 import org.springframework.data.annotation.Transient;
@@ -74,6 +80,39 @@ public class AggregatedPrice extends Price {
 
 	}
 
+	/**
+	 * TODO : merge with the one on price()
+	 * @return a localised formated duration of when the product was last indexed
+	 */
+	public String ago(Locale locale) {
+
+		long duration = System.currentTimeMillis() - getTimeStamp();
+		
+		
+		
+		Period period;
+		if (duration < 3600000) {
+			DurationFieldType[] min = { DurationFieldType.minutes(), DurationFieldType.seconds() };
+			period = new Period(duration, PeriodType.forFields(min)).normalizedStandard();
+		} else {
+			DurationFieldType[] full = { DurationFieldType.days(), DurationFieldType.hours() };
+			period = new Period(duration, PeriodType.forFields(full)).normalizedStandard();
+
+		}
+		
+		PeriodFormatter formatter = PeriodFormat.wordBased();
+
+		String ret = (formatter. print(period));
+		
+		
+		return ret;
+	}
+	
+	public String formatedDuration() {
+		// TODO : LOCALIZE
+		return ago(Locale.FRANCE);
+	}
+	
 
 	/**
 	 * A human readable price (2 decimals max, skipped if int)
