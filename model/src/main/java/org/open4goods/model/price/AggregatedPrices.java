@@ -87,6 +87,7 @@ public class AggregatedPrices implements Standardisable {
 		
 	}
 
+	
 	public List<PriceHistory> getHistory(ProductCondition state) {
 
 		return switch (state) {
@@ -94,9 +95,59 @@ public class AggregatedPrices implements Standardisable {
 	    case NEW -> this.newPricehistory;
 		default -> throw new IllegalArgumentException("Unexpected value: " + state);
 
-	};
+		};
 	}
+	 /**
+     * Returns the lowest historical price for the given condition (NEW or OCCASION).
+     *
+     * @param condition the product condition
+     * @return the PriceHistory object with the lowest price, or null if history is empty
+     */
+    public PriceHistory getHistoryLowest(ProductCondition condition) {
+        List<PriceHistory> history = getHistory(condition);
 
+        return history.stream()
+                .min(Comparator.comparing(PriceHistory::getPrice))
+                .orElse(null);
+    }
+    
+    public boolean isHistoricalLowest(AggregatedPrice price) {
+    	PriceHistory lowest = getHistoryLowest(price.getProductState());
+    	return (lowest.getPrice().equals(bestOffer(price.getProductState()).getPrice()));
+    }
+
+    /**
+     * Returns the highest historical price for the given condition (NEW or OCCASION).
+     *
+     * @param condition the product condition
+     * @return the PriceHistory object with the highest price, or null if history is empty
+     */
+    public PriceHistory getHistoryHighest(ProductCondition condition) {
+        List<PriceHistory> history = getHistory(condition);
+
+        return history.stream()
+                .max(Comparator.comparing(PriceHistory::getPrice))
+                .orElse(null);
+    }
+
+    /**
+     * Calculates the average price from the historical data for the given condition.
+     *
+     * @param condition the product condition
+     * @return the average historical price, or null if history is empty
+     */
+    public Double getHistoryAverage(ProductCondition condition) {
+        List<PriceHistory> history = getHistory(condition);
+
+        return history.stream()
+                .mapToDouble(PriceHistory::getPrice)
+                .average()
+                .orElse(Double.NaN); // Can also return null if preferred
+    }
+	
+	
+	
+	
 	/**
 	 * Get the gap between cureent best price and the lowest price ever measured
 	 * @return
