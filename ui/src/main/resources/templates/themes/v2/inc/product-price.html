@@ -1,498 +1,454 @@
-
 <th:block
-	th:with="
+    th:with="
         priceHistory=${product.price.newPricehistory != null and !#lists.isEmpty(product.price.newPricehistory)},
         colSize=6,
         offer=${product.price.bestNewOffer()},
         offers=${product.price.newOffers()},
-        trend=${newTrend}
-        
-    "
->
-
-	<section class="" role="main" aria-label="Prix (neuf moins chers et évolution) du produit">
-
-
-
-<div th:if="${priceHistory}" th:attr="class='col-md-' + ${colSize}">
-                            <div class="m-4 card shadow border-gray-300 text-center">
-
-                                <div class="row text-center justify-content-center mt-4 mb-4">
-                                    <div class="col-md-8">
-                                        <h2 class="display-4">Prix neufs</h2>
+        trend=${newTrend},
+        events=${config.priceConfig.events.i18n('fr')}
+    ">
+    
+    <!--/*[[ Main section: Affichage du prix neuf et historique, incluant les graphiques et offres ]]*/-->
+    <section role="main" aria-label="Prix (neuf moins chers et évolution) du produit">
+    
+        <div th:if="${priceHistory}" th:attr="class='col-md-' + ${colSize}">
+            <div class="m-4 card shadow border-gray-300 text-center">
+    
+                <div class="row text-center justify-content-center mt-4 mb-4">
+                    <div class="col-md-8">
+                        <h2 class="display-4">Prix neufs</h2>
+                    </div>
+                </div>
+    
+                <th:block>
+                    <!--/*[[ Bloc messages et informations d'offres ]]*/-->
+                    <div class="row">
+                        <div class="col-6">
+                            <div class="ms-4 card selectable-offer occasion-card"
+                                 th:data-token="${offer.affiliationToken}"
+                                 data-offer-type="occasion"
+                                 th:classappend="' selected'">
+                                <div class="card-body text-center">
+                                    <h6 class="text-muted">Meilleur prix</h6>
+                                    <div class="d-flex align-items-center justify-content-center mb-3">
+                                        <img th:replace="inc/favicon :: remoteFavicon(${offer.datasourceName}, 32)" alt="Favicon de l'offre"/>
+                                        <h5 class="mb-0" th:text="${offer.datasourceName}"></h5>
+                                    </div>
+                                    <!-- Price Section -->
+                                    <div class="text-success d-flex justify-content-center align-items-baseline mb-0">
+                                        <h2 class="display-4 fw-bold mb-0" th:text="${offer.shortPrice()}">0</h2>
+                                        <span class="ms-2" th:text="#{'symbol.'+${offer.currency}}"></span>
                                     </div>
                                 </div>
-
-                                <!-- Content of messages -->
-                                <th:block>
-                                    <!-- Messages -->
-
-                                    <div class="row">
-                                        <div class="col-6">
-
-                                            <div class="ms-4 card selectable-offer occasion-card" th:data-token="${offer.affiliationToken}" data-offer-type="occasion" th:classappend="' selected'">
-
-
-                                                <div class="card-body text-center">
-                                                    <h6 class="text-muted">Meilleur prix</h6>
-                                                    <div class="d-flex align-items-center justify-content-center mb-3">
-
-                                                        <img th:replace="inc/favicon :: remoteFavicon(${offer.datasourceName}, 32)">
-
-                                                        <h5 class="mb-0" th:text="${offer.datasourceName}"></h5>
-                                                    </div>
-                                                    <!-- Price Section -->
-                                                    <div class="text-success d-flex justify-content-center align-items-baseline mb-0">
-                                                        <h2 class="display-4 fw-bold mb-0" th:text="${offer.shortPrice()}">0</h2>
-                                                        <span class="ms-2" th:text="#{'symbol.'+${offer.currency}}"></span>
-                                                    </div>
-
-                                                </div>
-                                            </div>
-                                        </div>
-
-
-
-                                        <div class="col-6">
-                                            <div class="m-4">
-                                                <div th:if="${trend.trend == 0}" class="text-center alert alert-info" role="alert">
-                                                    😶‍🌫️ Le prix neuf est stable depuis <span th:text="${trend.formatedDuration()}"></span>
-                                                </div>
-                                                <div th:if="${trend.trend == 1}" class="text-center alert alert-tertiary" role="alert">
-                                                    🧐 Le prix neuf a augmenté de <b><span th:text="${#numbers.formatDecimal(trend.variation == null ? 0 : trend.variation, 0, 0)}"></span>€</b> depuis le dernier pointage (<span
-                                                        th:text="${trend.formatedDuration()}"
-                                                    ></span>)
-                                                </div>
-                                                <div th:if="${trend.trend == -1}" class="text-center alert alert-success" role="alert">
-                                                    Le prix neuf a baissé de <b><span th:text="${#numbers.formatDecimal(trend.variation == null ? 0 : trend.variation, 0, 0)}"></span>€</b> depuis le dernier relevé (<span
-                                                        th:text="${trend.formatedDuration()}"
-                                                    ></span>) 😊
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                    </div>
-
-
-                                    <div class="card shadow m-4">
-                                        <div class="card-body text-center text-md-left">
-                                            <div class="row align-items-center">
-                                                <div th:if="${trend.historicalLowestPrice != 0}" class="col-md-12">
-                                                    <span class="mb-3">Prix le plus bas historique ! </span>
-                                                    <p class="mb-0">
-                                                        Nous n'avons jamais relevé de prix aussi bas pour le <span th:text="${product.brandAndModel()}"></span>.
-                                                    </p>
-                                                </div>
-
-                                                <div th:unless="${trend.historicalLowestPrice != 0}" class="col-md-8">
-                                                    <h2 class="mb-3">Écart de prix historique</h2>
-                                                    <p class="mb-0">
-                                                        Écart de prix calculé avec le prix historique le plus bas (<span th:text="${trend.historicalLowestPrice}"></span>€) jamais relevé par Nudger sur le <span
-                                                            th:text="${product.brandAndModel()}"
-                                                        ></span>
-                                                    </p>
-                                                </div>
-
-                                                <div th:unless="${trend.historicalLowestPrice != 0}" class="col-12 col-md-4 mt-4 mt-md-0 text-md-right">
-                                                    <span class="d-block my-3"> <span class="h3 fw-bold" th:text="${#numbers.formatDecimal(trend.historicalVariation == null ? 0 : trend.historicalVariation, 0, 1)}"></span> <span
-                                                        class="align-baseline font-medium"
-                                                    >€</span>
-                                                    </span>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </th:block>
-
-
-
-
-
-                                <canvas class="mt-4" id="newPriceChart"></canvas>
-                                <div class="text-center">
-                                    <div class="btn-group my-3" role="group" aria-label="Sélection de la période">
-                                        <button type="button" class="btn btn-secondary period-btn" id="btn-new-15days">15 jours</button>
-                                        <button type="button" class="btn btn-primary active-period-btn period-btn" id="btn-new-3months">3 mois</button>
-                                        <button type="button" class="btn btn-secondary period-btn" id="btn-new-6months">6 mois</button>
-                                        <button type="button" class="btn btn-secondary period-btn" id="btn-new-max">Max</button>
-                                    </div>
-                                </div>
-
-
-
-                                <form method="POST" action="/nudge" class="">
-                                    <div class="table-responsive-sm">
-                                        <table th:id="new-offers" class="table table-hover bg-white">
-                                            <thead>
-                                                <tr>
-                                                    <th scope="col"></th>
-                                                    <th scope="col">Marchand</th>
-                                                    <th scope="col">Prix</th>
-                                                    <th scope="col">Etat</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                <th:block th:each="offer , stats: ${product.price.newOffers}">
-                                                    <tr class="p-3 align-middle" th:data-token="${offer.affiliationToken}" th:data-compensation="${offer.compensation}">
-                                                        <td class="p-0 infos-text"><span class="p-3 d-inline-flex "> <img th:replace="inc/favicon :: remoteFavicon(${offer.datasourceName}, 16)">
-                                                        </span></td>
-                                                        <td class="p-0 infos-text" data-toggle="tooltip" data-placement="top" th:title="${offer.offerName}" nowrap><span class="h-100 d-flex align-items-center"> <span class=""
-                                                                th:text="${offer.datasourceName}"
-                                                            ></span>
-                                                        </span></td>
-                                                        <td class="p-0 infos-text infos-text-secondary text-center"><span class="" th:text="${offer.price}"></span> <span th:text="#{'symbol.'+${offer.currency}}"></span></td>
-                                                        <td class="p-0 pe-3 text-end"><span th:text="#{'condition.'+${offer.productState}}"></span></td>
-                                                    </tr>
-
-                                                </th:block>
-
-                                            </tbody>
-
-                                        </table>
-                                    </div>
-
-
-
-                                    <label class="h6 d-flex align-items-center border-1" for="inlineFormCustomSelectPref"><span class="badge input-group__nudger text-black me-2">2</span>Choisissez votre association
-                                        préférée</label> <select name="nudge" width="100%" class="form-select mb-3" id="inlineFormCustomSelectPref" aria-label="Choisissez votre cause">
-                                        <option value="nudger" selected="selected">Laisser nudger choisir !</option>
-                                        <th:block th:each="org : ${config.reversementConfig.contributedOrganisations}">
-                                            <option th:value="${org.key}" th:text="${org.value.name}"></option>
-                                        </th:block>
-                                    </select>
-
-
-                                    <div class="d-flex justify-content-center">
-                                        <input th:if="${product.bestPrice()}" type="submit" value="Nudger" formtarget="_blank" class="w-100 btn btn__nudger"> <input th:if="${product.bestPrice()}" type="hidden" id="token"
-                                            name="token" th:value="${offer.affiliationToken}"
-                                        >
-                                    </div>
-                                </form>
-
-
                             </div>
                         </div>
-
-	</section>
-	
-	
-	<script>
-	
-	 // Function to initialize DataTable
-    function initTable(tableId) {
-        // Initialize DataTable with specified options
-        tableNew = $(tableId).DataTable({
-            searching: false,
-            paging: false,
-            info: false,
-            select: 'single',
-            "order": [ [1, 'asc'] ]
-        });
-
-        // Event handler for row click in the table
-        tableNew.on('click', 'tbody tr', (e) => {
-            let classList = e.currentTarget.classList;
-
-            // Retrieve data attributes from the clicked row
-            token = $(e.currentTarget).attr('data-token');
-            compensation = $(e.currentTarget).attr('data-compensation');
-
-            // Update the token (e.g., in a hidden field)
-            $("#token").val(token);
-
-            var countUpUpdateoptions = {
-                duration: 1,
-                useEasing: false,
-                useGrouping: false,
-                separator: ',',
-                decimal: '.',
-                decimalPlaces: 2,
-                prefix: '',
-                suffix: ''
-            };
-
-            // Update the counter with the new compensation value
-            $("#countup-reversment").attr("data-max", compensation);
-            reversment.update(compensation);
-
-            // Handle 'selected' class for the active row
-            tableNew.rows('.selected').nodes().each((row) => row.classList.remove('selected'));
-            classList.add('selected');
-        });
-    }
     
-	 
-	 
-	
-	</script>
-	
-	
-	
- <!--/* 
-      EMBEDDED JAVASCRIPT FOR CHARTS & TABLES
-      (Place this just before </body> or in your desired script location)
-    */-->
-    <script th:inline="javascript">
-    /*<![CDATA[*/
-    // Retrieve and format price data
-    const newPriceHistoryData = /*[[${product.price.newPricehistory}]]*/ [];
-    const occasionPriceHistoryData = /*[[${product.price.occasionPricehistory}]]*/ [];
+                        <div class="col-6">
+                            <div class="m-4">
+                                <div th:if="${trend.trend == 0}" class="text-center alert alert-info" role="alert">
+                                    😶‍🌫️ Le prix neuf est stable depuis <span th:text="${trend.formatedDuration()}"></span>
+                                </div>
+                                <div th:if="${trend.trend == 1}" class="text-center alert alert-tertiary" role="alert">
+                                    🧐 Le prix neuf a augmenté de <b>
+                                        <span th:text="${#numbers.formatDecimal(trend.variation == null ? 0 : trend.variation, 0, 0)}"></span>€
+                                    </b> depuis le dernier pointage (<span th:text="${trend.formatedDuration()}"></span>)
+                                </div>
+                                <div th:if="${trend.trend == -1}" class="text-center alert alert-success" role="alert">
+                                    Le prix neuf a baissé de <b>
+                                        <span th:text="${#numbers.formatDecimal(trend.variation == null ? 0 : trend.variation, 0, 0)}"></span>€
+                                    </b> depuis le dernier relevé (<span th:text="${trend.formatedDuration()}"></span>) 😊
+                                </div>
+                            </div>
+                        </div>
+                    </div>
 
-    // Map data only if they are not empty
-    const newPriceHistory = newPriceHistoryData.length > 0
-        ? newPriceHistoryData.map(({ timestamp: x, price: y }) => ({ x, y }))
-        : [];
-    const occasionPriceHistory = occasionPriceHistoryData.length > 0
-        ? occasionPriceHistoryData.map(({ timestamp: x, price: y }) => ({ x, y }))
-        : [];
 
-    // Function to filter data based on date
-    function filterDataByDate(data, startDate) {
-        return data.filter(item => new Date(item.x) >= startDate);
-    }
+					<div class="card-body d-flex flex-row align-items-center flex-0 border-bottom">
 
-    const today = new Date();
+						<div class="d-block ms-auto">
+							<div class="d-flex align-items-center text-right mb-2">
+								<span class="shape-xs rounded-circle bg-dark me-2"></span> <span class="fw-normal small">Prix le plus bas : <b></b></span>
+							</div>
+							<div class="d-flex align-items-center text-right mb-2">
+								<span class="shape-xs rounded-circle bg-tertiary me-2"></span> <span class="fw-normal small">Prix moyen : <b></b> </span>
+							</div>
+							<div class="d-flex align-items-center text-right mb-2">
+								<span class="shape-xs rounded-circle bg-primary me-2"></span> <span class="fw-normal small">Prix le plus haut : <b></b></span>
+							</div>
+		
+						</div>
+					</div>
 
-    // Define date ranges for filtering
-    const dateRanges = {
-        '15days': new Date(today.getTime() - (15 * 24 * 60 * 60 * 1000)),
-        '3months': new Date(today.getFullYear(), today.getMonth() - 3, today.getDate()),
-        '6months': new Date(today.getFullYear(), today.getMonth() - 6, today.getDate()),
-        'max': null // All data
+
+					<!--/*[[ Mise à jour de la carte "Prix le plus bas historique !" ]]*/-->
+                    <div class="card shadow m-4">
+                        <div class="card-body">
+                            <div class="row align-items-center">
+                                <div class="col-2 text-center">
+                                    <img src="/icons/medal.png" alt="Icône prix le plus bas historique"/>
+                                </div>
+                                <div class="col-10">
+                                    <h3 class="h4 mb-3">Prix le plus bas historique !</h3>
+                                    <p class="mb-0">
+                                        Nous n'avons jamais relevé de prix neuf aussi bas pour le 
+                                        <span th:text="${product.brandAndModel()}"></span>.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+    
+                </th:block>
+    
+                <canvas class="m-4" id="newPriceChart"></canvas>
+    
+                <div class="text-center">
+                    <div class="btn-group my-3" role="group" aria-label="Sélection de la période">
+                        <!--/*[[ TODO : apply a light transparency on unselected items to highlight selected period ]]*/-->
+                        <button type="button" class="mx-2 btn btn__nudger period-btn" id="btn-new-15days">15 jours</button>
+                        <button type="button" class="mx-2 btn btn__nudger active-period-btn period-btn" id="btn-new-3months">3 mois</button>
+                        <button type="button" class="mx-2 btn btn__nudger period-btn" id="btn-new-6months">6 mois</button>
+                        <button type="button" class="mx-2 btn btn__nudger period-btn" id="btn-new-max">Max</button>
+                    </div>
+                </div>
+    
+                <form method="POST" action="/nudge">
+                    <div class="m-2 table-responsive-sm">
+                        <table th:id="new-offers" class="table table-hover bg-white">
+                            <thead>
+                                <tr>
+                                    <th scope="col"></th>
+                                    <th scope="col">Marchand</th>
+                                    <th scope="col">Prix</th>
+                                    <th scope="col">Etat</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <th:block th:each="offer, stats : ${product.price.newOffers}">
+                                    <tr class="p-3 align-middle"
+                                        th:data-token="${offer.affiliationToken}"
+                                        th:data-compensation="${offer.compensation}">
+                                        <td class="p-0 infos-text">
+                                            <span class="p-3 d-inline-flex">
+                                                <img th:replace="inc/favicon :: remoteFavicon(${offer.datasourceName}, 16)" alt="Favicon de l'offre"/>
+                                            </span>
+                                        </td>
+                                        <td class="p-0 infos-text" data-bs-toggle="tooltip" data-bs-placement="top" th:title="${offer.offerName}" nowrap>
+                                            <span class="h-100 d-flex align-items-center">
+                                                <span th:text="${offer.datasourceName}"></span>
+                                            </span>
+                                        </td>
+                                        <td class="p-0 infos-text infos-text-secondary text-center">
+                                            <span th:text="${offer.price}"></span> 
+                                            <span th:text="#{'symbol.'+${offer.currency}}"></span>
+                                        </td>
+                                        <td class="p-0 pe-3 text-end">
+                                            <span th:text="#{'condition.'+${offer.productState}}"></span>
+                                        </td>
+                                    </tr>
+                                </th:block>
+                            </tbody>
+                        </table>
+                    </div>
+                </form>
+    
+            </div>
+        </div>
+    
+    </section>
+    
+   <!-- Server-side comments with thymeleaf syntax as requested -->
+<!--/*[[  JAVASCRIPT: Initialisation des tableaux et graphiques, incluant les annotations pour les événements commerciaux  ]]*/-->
+<!--/*[[  JAVASCRIPT: Initialisation des tableaux et graphiques, incluant les annotations pour les événements commerciaux  ]]*/-->
+<script th:inline="javascript">
+/*<![CDATA[*/
+
+// ---------------------------------------------------------
+// 1) Prepare all your data & helper functions
+// ---------------------------------------------------------
+
+const newPriceHistoryData = /*[[${product.price.newPricehistory}]]*/ [];
+const newPriceHistory = newPriceHistoryData.length > 0
+    ? newPriceHistoryData.map(({ timestamp: x, price: y }) => ({ x, y }))
+    : [];
+
+const commercialEvents = /*[[${events}]]*/ [];
+
+/* 
+    Build annotations for Chart.js annotation plugin based on commercial events, 
+    with labels displayed permanently on the chart.
+*/
+const annotations = {};
+commercialEvents.forEach((event, index) => {
+    // Lighter background color for box events
+    const boxBgColor = 'rgba(0, 0, 0, 0.1)';
+    const boxBorderColor = 'rgba(0, 0, 0, 0.6)';
+
+    // Common label styling
+    const commonLabel = {
+        display: true,
+        content: event.label,
+        backgroundColor: 'rgba(255,255,255,0.7)',
+        color: '#000',
+        font: {
+            size: 10,
+            weight: 'bold'
+        },
+        padding: 4,
+        borderRadius: 4
     };
 
-    // Function to get filtered data based on the period
-    function getFilteredData(data, period) {
-        if (dateRanges[period]) {
-            return filterDataByDate(data, dateRanges[period]);
-        } else {
-            return data; // Return all data for 'max'
-        }
-    }
-
-    // Utility function to check if there's data in a given period
-    function hasDataInPeriod(data, period) {
-        return getFilteredData(data, period).length > 0;
-    }
-
-    // Function to update the chart with filtered data
-    function updateChart(chart, data, period) {
-        chart.data.datasets[0].data = getFilteredData(data, period);
-        chart.update();
-    }
-
-    // Function to visually set the active button
-    function setActiveButton(activeButton, chartType) {
-        const buttonGroupSelector = (chartType === 'new')
-            ? '.btn-group .btn[id^="btn-new"]'
-            : '.btn-group .btn[id^="btn-used"]';
-        const buttons = document.querySelectorAll(buttonGroupSelector);
-        buttons.forEach(button => {
-            button.classList.remove('btn-primary', 'active-period-btn');
-            button.classList.add('btn-secondary');
-        });
-        activeButton.classList.remove('btn-secondary');
-        activeButton.classList.add('btn-primary', 'active-period-btn');
-    }
-
-    // On document ready
-    document.addEventListener('DOMContentLoaded', function() {
-
-        // Initialize any tooltip if using Bootstrap 5
-        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
-            return new bootstrap.Tooltip(tooltipTriggerEl);
-        });
-
-        // Initialize the offers tables (DataTables or custom)
-        // Fix: match the correct IDs
-        initTable('#new-offers');
-        initTable('#occasion-offers');
-
-        // If newPriceHistory has data, build the chart
-        if (newPriceHistory.length > 0) {
-            let defaultPeriod = '3months';
-            if (!hasDataInPeriod(newPriceHistory, defaultPeriod)) {
-                defaultPeriod = 'max';
+    if (event.startDate === event.endDate) {
+        // Single-day event: vertical line annotation
+        annotations['event' + index] = {
+            type: 'line',
+            mode: 'vertical',
+            scaleID: 'x',
+            value: event.startDate,
+            borderColor: boxBorderColor,
+            borderWidth: 2,
+            label: {
+                ...commonLabel,
+                position: 'start'
             }
-
-            const newPriceCtx = document.getElementById('newPriceChart').getContext('2d');
-            const newPriceChart = new Chart(newPriceCtx, {
-                type: 'line',
-                data: {
-                    datasets: [{
-                        label: 'Prix Neuf',
-                        fill: true,
-                        data: getFilteredData(newPriceHistory, defaultPeriod),
-                        backgroundColor: '#4cb1ff',
-                        borderColor: '#41a3ef',
-                        borderWidth: 2,
-                        tension: 0,
-                        pointRadius: 0,
-                        pointHoverRadius: 6,
-                        pointHitRadius: 10
-                    }]
-                },
-                options: {
-                    interaction: {
-                        mode: 'nearest',
-                        intersect: false
-                    },
-                    scales: {
-                        x: {
-                            type: 'time',
-                            time: {
-                                unit: 'day',
-                                displayFormats: {
-                                    day: 'dd/MM/yyyy'
-                                },
-                                tooltipFormat: 'dd/MM/yyyy'
-                            },
-                            title: {
-                                display: true,
-                                text: 'Date'
-                            }
-                        },
-                        y: {
-                            title: {
-                                display: true,
-                                text: 'Prix (€)'
-                            }
-                        }
-                    }
-                }
-            });
-
-            // Set active button
-            setActiveButton(document.getElementById('btn-new-' + defaultPeriod), 'new');
-
-            // Disable buttons with no data
-            ['15days', '3months', '6months'].forEach(period => {
-                if (!hasDataInPeriod(newPriceHistory, period)) {
-                    const button = document.getElementById('btn-new-' + period);
-                    button.disabled = true;
-                    button.classList.add('disabled');
-                }
-            });
-
-            // Event handlers
-            document.getElementById('btn-new-15days').addEventListener('click', function () {
-                updateChart(newPriceChart, newPriceHistory, '15days');
-                setActiveButton(this, 'new');
-            });
-            document.getElementById('btn-new-3months').addEventListener('click', function () {
-                updateChart(newPriceChart, newPriceHistory, '3months');
-                setActiveButton(this, 'new');
-            });
-            document.getElementById('btn-new-6months').addEventListener('click', function () {
-                updateChart(newPriceChart, newPriceHistory, '6months');
-                setActiveButton(this, 'new');
-            });
-            document.getElementById('btn-new-max').addEventListener('click', function () {
-                updateChart(newPriceChart, newPriceHistory, 'max');
-                setActiveButton(this, 'new');
-            });
-        }
-
-        /*
-        // If occasionPriceHistory has data, build the chart
-        if (occasionPriceHistory.length > 0) {
-            let defaultPeriod = '3months';
-            if (!hasDataInPeriod(occasionPriceHistory, defaultPeriod)) {
-                defaultPeriod = 'max';
+        };
+    } else {
+        // Multi-day event: box annotation
+        annotations['event' + index] = {
+            type: 'box',
+            xMin: event.startDate,
+            xMax: event.endDate,
+            backgroundColor: boxBgColor,
+            borderColor: boxBorderColor,
+            borderWidth: 1,
+            label: {
+                ...commonLabel,
+                position: 'start'
             }
+        };
+    }
+});
 
-            const usedPriceCtx = document.getElementById('usedPriceChart').getContext('2d');
-            const usedPriceChart = new Chart(usedPriceCtx, {
-                type: 'line',
-                data: {
-                    datasets: [{
-                        label: 'Prix d\'Occasion',
-                        fill: true,
-                        data: getFilteredData(occasionPriceHistory, defaultPeriod),
-                        backgroundColor: '#ff6384',
-                        borderColor: '#fa486e',
-                        borderWidth: 2,
-                        tension: 0,
-                        pointRadius: 0,
-                        pointHoverRadius: 6,
-                        pointHitRadius: 10
-                    }]
-                },
-                options: {
-                    interaction: {
-                        mode: 'nearest',
-                        intersect: false
-                    },
-                    scales: {
-                        x: {
-                            type: 'time',
-                            time: {
-                                unit: 'day',
-                                displayFormats: {
-                                    day: 'dd/MM/yyyy'
-                                },
-                                tooltipFormat: 'dd/MM/yyyy'
-                            },
-                            title: {
-                                display: true,
-                                text: 'Date'
-                            }
-                        },
-                        y: {
-                            title: {
-                                display: true,
-                                text: 'Prix (€)'
-                            }
-                        }
-                    }
-                }
-            });
 
-            // Set active button
-            setActiveButton(document.getElementById('btn-used-' + defaultPeriod), 'used');
+const today = new Date();
+const dateRanges = {
+    '15days': new Date(today.getTime() - (15 * 24 * 60 * 60 * 1000)),
+    '3months': new Date(today.getFullYear(), today.getMonth() - 3, today.getDate()),
+    '6months': new Date(today.getFullYear(), today.getMonth() - 6, today.getDate()),
+    'max': null // All data
+};
 
-            // Disable buttons with no data
-            ['15days', '3months', '6months'].forEach(period => {
-                if (!hasDataInPeriod(occasionPriceHistory, period)) {
-                    const button = document.getElementById('btn-used-' + period);
-                    button.disabled = true;
-                    button.classList.add('disabled');
-                }
-            });
 
-            // Event handlers
-            document.getElementById('btn-used-15days').addEventListener('click', function () {
-                updateChart(usedPriceChart, occasionPriceHistory, '15days');
-                setActiveButton(this, 'used');
-            });
-            document.getElementById('btn-used-3months').addEventListener('click', function () {
-                updateChart(usedPriceChart, occasionPriceHistory, '3months');
-                setActiveButton(this, 'used');
-            });
-            document.getElementById('btn-used-6months').addEventListener('click', function () {
-                updateChart(usedPriceChart, occasionPriceHistory, '6months');
-                setActiveButton(this, 'used');
-            });
-            document.getElementById('btn-used-max').addEventListener('click', function () {
-                updateChart(usedPriceChart, occasionPriceHistory, 'max');
-                setActiveButton(this, 'used');
-            });
-        }*/
+const timeUnitMapping = {
+    '15days': 'day',
+    '3months': 'week',
+    '6months': 'week',
+    'max': 'month'
+};
 
+// Helper to filter data by date
+function filterDataByDate(data, startDate) {
+    return data.filter(item => new Date(item.x) >= startDate);
+}
+
+// Return the filtered dataset for a given period
+function getFilteredData(data, period) {
+    if (dateRanges[period]) {
+        return filterDataByDate(data, dateRanges[period]);
+    } else {
+        return data; // 'max'
+    }
+}
+
+// Check if there's any data in the given period
+function hasDataInPeriod(data, period) {
+    return getFilteredData(data, period).length > 0;
+}
+
+// Find absolute min & max from a dataset
+function findMinValue(data) {
+    return data.reduce((min, p) => p.y < min ? p.y : min, data[0].y);
+}
+function findMaxValue(data) {
+    return data.reduce((max, p) => p.y > max ? p.y : max, data[0].y);
+}
+
+// Light transparency on unselected period buttons
+function setActiveButton(activeButton, chartType) {
+    const buttonGroupSelector = chartType === 'new'
+        ? '.btn-group .btn[id^="btn-new"]'
+        : '.btn-group .btn[id^="btn-used"]';
+    const buttons = document.querySelectorAll(buttonGroupSelector);
+    buttons.forEach(button => {
+        button.classList.remove('btn-primary', 'active-period-btn');
+        button.classList.add('btn-secondary');
+        // Slight transparency for inactive
+        button.style.opacity = '0.5';
     });
-    /*]]>*/
-    </script>
+    activeButton.classList.remove('btn-secondary');
+    activeButton.classList.add('btn-primary', 'active-period-btn');
+    // Fully opaque for the active
+    activeButton.style.opacity = '1';
+}
+
+/**
+ * Update chart data, x-axis time unit, and min/max so it only shows data
+ * in the chosen period. Then calls chart.update().
+ */
+function updateChart(chart, data, period) {
+    const filteredData = getFilteredData(data, period);
+    chart.data.datasets[0].data = filteredData;
+    chart.options.scales.x.time.unit = timeUnitMapping[period] || 'month';
+
+    if (filteredData.length > 0) {
+        const newMin = findMinValue(filteredData);
+        const newMax = findMaxValue(filteredData);
+
+        // Slight padding on y-axis
+        chart.options.scales.y.suggestedMin = Math.floor(newMin * 0.98);
+        chart.options.scales.y.suggestedMax = Math.ceil(newMax * 1.02);
+
+        // Adjust x-axis to the date range of the filtered data
+        chart.options.scales.x.min = filteredData[0].x;
+        chart.options.scales.x.max = filteredData[filteredData.length - 1].x;
+    }
+    chart.update();
+}
+
+
+// ---------------------------------------------------------
+// 2) On DOM load, initialize the chart with correct scaling
+// ---------------------------------------------------------
+document.addEventListener('DOMContentLoaded', function() {
+
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl);
+    });
+
+    // If there's any price history data
+    if (newPriceHistory.length > 0) {
+        // Decide a default period
+        let defaultPeriod = '3months';
+        if (!hasDataInPeriod(newPriceHistory, defaultPeriod)) {
+            defaultPeriod = 'max';
+        }
+
+        // Prepare the initial filtered data
+        const initialFiltered = getFilteredData(newPriceHistory, defaultPeriod);
+
+        // We'll compute initial min/max for the chart
+        let xMinVal, xMaxVal, yMinVal, yMaxVal;
+        if (initialFiltered.length > 0) {
+            xMinVal = initialFiltered[0].x;
+            xMaxVal = initialFiltered[initialFiltered.length - 1].x;
+            yMinVal = findMinValue(initialFiltered);
+            yMaxVal = findMaxValue(initialFiltered);
+        }
+
+        // Create the chart with the initial min/max
+        const newPriceCtx = document.getElementById('newPriceChart').getContext('2d');
+        const newPriceChart = new Chart(newPriceCtx, {
+            type: 'line',
+            data: {
+                datasets: [{
+                    label: 'Prix Neuf', // Hidden from legend if legend.display = false
+                    data: initialFiltered,
+                    fill: true,
+                    backgroundColor: '#4cb1ff',
+                    borderColor: '#41a3ef',
+                    borderWidth: 2,
+                    tension: 0,
+                    pointRadius: 0,
+                    pointHoverRadius: 6,
+                    pointHitRadius: 10
+                }]
+            },
+            options: {
+                interaction: {
+                    mode: 'nearest',
+                    intersect: false
+                },
+                scales: {
+                    x: {
+                        type: 'time',
+                        time: {
+                            unit: timeUnitMapping[defaultPeriod] || 'month',
+                            displayFormats: {
+                                day: 'dd MMM yy',
+                                week: 'dd MMM yy',
+                                month: 'MMM yy'
+                            },
+                            tooltipFormat: 'dd MMM yyyy'
+                        },
+                        // Apply the min & max if we have them
+                        min: xMinVal,
+                        max: xMaxVal,
+                        title: {
+                            display: true,
+                            text: 'Date'
+                        }
+                    },
+                    y: {
+                        suggestedMin: yMinVal ? Math.floor(yMinVal * 0.98) : undefined,
+                        suggestedMax: yMaxVal ? Math.ceil(yMaxVal * 1.02) : undefined,
+                        title: {
+                            display: true,
+                            text: 'Prix (€)'
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        display: false // hide the "Prix Neuf" legend
+                    },
+                    annotation: {
+                        clip: false,
+                        annotations: annotations
+                    }
+                }
+            }
+        });
+
+        // Force a chart update to finalize scaling
+        newPriceChart.update();
+
+        // Mark the default button as active
+        setActiveButton(document.getElementById('btn-new-' + defaultPeriod), 'new');
+
+        // Disable period buttons if no data for that period
+        ['15days', '3months', '6months'].forEach(period => {
+            if (!hasDataInPeriod(newPriceHistory, period)) {
+                const button = document.getElementById('btn-new-' + period);
+                if (button) {
+                    button.disabled = true;
+                    button.classList.add('disabled');
+                    button.style.opacity = '0.3';
+                }
+            }
+        });
+
+        // Attach event listeners for period changes
+        document.getElementById('btn-new-15days').addEventListener('click', function () {
+            updateChart(newPriceChart, newPriceHistory, '15days');
+            setActiveButton(this, 'new');
+        });
+        document.getElementById('btn-new-3months').addEventListener('click', function () {
+            updateChart(newPriceChart, newPriceHistory, '3months');
+            setActiveButton(this, 'new');
+        });
+        document.getElementById('btn-new-6months').addEventListener('click', function () {
+            updateChart(newPriceChart, newPriceHistory, '6months');
+            setActiveButton(this, 'new');
+        });
+        document.getElementById('btn-new-max').addEventListener('click', function () {
+            updateChart(newPriceChart, newPriceHistory, 'max');
+            setActiveButton(this, 'new');
+        });
+    }
+});
+/*]]>*/
+</script>
+
+
 </th:block>
-
-
-
-
-
-
-
-
-
-
-
-
