@@ -1,180 +1,498 @@
-    <th:block th:with="
-        hasNewPriceHistory=${product.price.newPricehistory != null and !#lists.isEmpty(product.price.newPricehistory)},
-        hasOccasionPriceHistory=${product.price.occasionPricehistory != null and !#lists.isEmpty(product.price.occasionPricehistory)},
-        colSize=${hasNewPriceHistory and hasOccasionPriceHistory ? 6 : 12}
-    ">
-        <div class="row text-center justify-content-center">
-            <div class="col-md-8 mb-5">
-            <h2>une bonne affaire ?</h2>
-            </div>
-        </div>
 
-        <div id="markerPrices" class="card shadow border-gray-300 text-center">
-            <div class="row align-items-center">
-                <!-- First column: Messages -->
-                <div th:attr="class='col-md-' + (${hasNewPriceHistory or hasOccasionPriceHistory} ? 4 : 12)">
-                    <!-- Content of messages -->
-                    <th:block>
-                        <!-- Messages -->
-                        <div class="m-4">
-                            <div th:if="${newTrend.trend == 0}" class="text-center alert alert-info" role="alert">
-                                😶‍🌫️ Le prix neuf est stable depuis <span th:text="${newTrend.formatedDuration()}"></span>
-                            </div>
-                            <div th:if="${newTrend.trend == 1}" class="text-center alert alert-tertiary" role="alert">
-                                🧐 Le prix neuf a augmenté de <b><span th:text="${#numbers.formatDecimal(newTrend.variation == null ? 0 : newTrend.variation, 0, 0)}"></span>€</b> depuis le dernier pointage (<span th:text="${newTrend.formatedDuration()}"></span>)
-                            </div>
-                            <div th:if="${newTrend.trend == -1}" class="text-center alert alert-success" role="alert">
-                                Le prix neuf a baissé de <b><span th:text="${#numbers.formatDecimal(newTrend.variation == null ? 0 : newTrend.variation, 0, 0)}"></span>€</b> depuis le dernier relevé (<span th:text="${newTrend.formatedDuration()}"></span>) 😊
-                            </div>
-                        </div>
-
-                        <div class="card shadow m-4">
-                            <div class="card-body text-center text-md-left">
-                                <div class="row align-items-center">
-                                    <div th:if="${newTrend.historicalLowestPrice != 0}" class="col-md-12">
-                                        <span class="mb-3">Prix le plus bas historique ! </span>
-                                        <p class="mb-0">Nous n'avons jamais relevé de prix aussi bas pour le <span th:text="${product.brandAndModel()}"></span>.</p>
-                                    </div>
-
-                                    <div th:unless="${newTrend.historicalLowestPrice != 0}" class="col-md-8">
-                                        <h2 class="mb-3">Écart de prix historique</h2>
-                                        <p class="mb-0">Écart de prix calculé avec le prix historique le plus bas (<span th:text="${newTrend.historicalLowestPrice}"></span>€) jamais relevé par Nudger sur le <span th:text="${product.brandAndModel()}"></span></p>
-                                    </div>
-
-                                    <div th:unless="${newTrend.historicalLowestPrice != 0}" class="col-12 col-md-4 mt-4 mt-md-0 text-md-right">
-                                        <span class="d-block my-3">
-                                            <span class="h3 fw-bold" th:text="${#numbers.formatDecimal(newTrend.historicalVariation == null ? 0 : newTrend.historicalVariation, 0, 1)}"></span>
-                                            <span class="align-baseline font-medium">€</span>
-                                        </span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </th:block>
-
-                    <div class="card-shadow m-4">
-                        <a href="#markerEcoscore" class="text-center btn btn-primary w-100">
-                            <span class="me-1">
-                                <span class="fas fa-euro"></span>
-                            </span>
-                            Meilleur prix
-                        </a>
-                    </div>
-                </div>
-
-                <!-- Second column: Charts -->
-                <div class="col-md-8 mt-5 mt-md-0" th:if="${hasNewPriceHistory or hasOccasionPriceHistory}">
-                    <div class="row">
-                        <!-- New Price Chart -->
-                        <div th:if="${hasNewPriceHistory}" th:attr="class='col-md-' + ${colSize}">
-                            <canvas class="mt-4" id="newPriceChart"></canvas>
-                            <div class="text-center">
-                                <div class="btn-group my-3" role="group" aria-label="Sélection de la période">
-                                    <button type="button" class="btn btn-secondary period-btn" id="btn-new-15days">15 jours</button>
-                                    <button type="button" class="btn btn-primary active-period-btn period-btn" id="btn-new-3months">3 mois</button>
-                                    <button type="button" class="btn btn-secondary period-btn" id="btn-new-6months">6 mois</button>
-                                    <button type="button" class="btn btn-secondary period-btn" id="btn-new-max">Max</button>
-                                </div>
-                            </div>
-                        </div>
-                        <!-- Used Price Chart -->
-                        <div th:if="${hasOccasionPriceHistory}" th:attr="class='col-md-' + ${colSize}">
-                            <canvas class="mt-4" id="usedPriceChart"></canvas>
-                            <div class="text-center">
-                                <div class="btn-group my-3" role="group" aria-label="Sélection de la période">
-                                    <button type="button" class="btn btn-secondary period-btn" id="btn-used-15days">15 jours</button>
-                                    <button type="button" class="btn btn-primary active-period-btn period-btn" id="btn-used-3months">3 mois</button>
-                                    <button type="button" class="btn btn-secondary period-btn" id="btn-used-6months">6 mois</button>
-                                    <button type="button" class="btn btn-secondary period-btn" id="btn-used-max">Max</button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </th:block>
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    <form method="POST" action="/nudge" class="">
-    <div class="table-responsive-sm">
-        <table th:id="offres" class="table table-hover table-nudger table-nudger-price bg-white">
-            <thead>
-                <tr>
-                    <th scope="col"></th>
-                    <th scope="col">Marchand</th>
-                    <th scope="col">Prix</th>
-                    <th scope="col">Etat</th>
-                </tr>
-            </thead>
-            <tbody>
-                <th:block th:each="offer , stats: ${product.price.offers}">
-                    <tr class="p-3 align-middle" th:data-token="${offer.affiliationToken}" th:data-compensation="${offer.compensation}">
-                        <td class="p-0 infos-text">
-                            <span class="p-3 d-inline-flex bg-brand_secondary">
-                                 <img  th:replace="inc/favicon :: remoteFavicon(${offer.datasourceName}, 32)">
-                            </span>  
-                        </td>
-                        <td class="p-0 infos-text" data-toggle="tooltip" data-placement="top" th:title="${offer.offerName}" nowrap>
-                            <span class="h-100 d-flex align-items-center">
-                                <span class="" th:text="${offer.datasourceName}"></span>
-                            </span>
-                            
-                        </td>
-                        <td class="p-0 infos-text infos-text-secondary text-center">
-                            <span class="" th:text="${offer.price}"></span> 
-                            <span th:text="#{'symbol.'+${offer.currency}}"></span>
-                        </td>
-                        <td class="p-0 pe-3 text-end">
-                            <span th:text="#{'condition.'+${offer.productState}}"></span>
-                        </td>
-                    </tr>
-                
-                </th:block>
-            
-            </tbody>
+<th:block
+	th:with="
+        priceHistory=${product.price.newPricehistory != null and !#lists.isEmpty(product.price.newPricehistory)},
+        colSize=6,
+        offer=${product.price.bestNewOffer()},
+        offers=${product.price.newOffers()},
+        trend=${newTrend}
         
-        </table>
-    </div>
+    "
+>
 
-    
+	<section class="" role="main" aria-label="Prix (neuf moins chers et évolution) du produit">
 
-    <label class="h6 d-flex align-items-center border-1" for="inlineFormCustomSelectPref"><span class="badge input-group__nudger text-black me-2">2</span>Choisissez votre association préférée</label>
-    <select name="nudge" width="100%" class="form-select mb-3" id="inlineFormCustomSelectPref" aria-label="Choisissez votre cause">
-        <option value="nudger" selected="selected">
-            Laisser nudger choisir !
-        </option>
-        <th:block th:each="org : ${config.reversementConfig.contributedOrganisations}">
-            <option th:value="${org.key}" th:text="${org.value.name}"></option>
-        </th:block>
-    </select>
-            
+
+
+<div th:if="${priceHistory}" th:attr="class='col-md-' + ${colSize}">
+                            <div class="m-4 card shadow border-gray-300 text-center">
+
+                                <div class="row text-center justify-content-center mt-4 mb-4">
+                                    <div class="col-md-8">
+                                        <h2 class="display-4">Prix neufs</h2>
+                                    </div>
+                                </div>
+
+                                <!-- Content of messages -->
+                                <th:block>
+                                    <!-- Messages -->
+
+                                    <div class="row">
+                                        <div class="col-6">
+
+                                            <div class="ms-4 card selectable-offer occasion-card" th:data-token="${offer.affiliationToken}" data-offer-type="occasion" th:classappend="' selected'">
+
+
+                                                <div class="card-body text-center">
+                                                    <h6 class="text-muted">Meilleur prix</h6>
+                                                    <div class="d-flex align-items-center justify-content-center mb-3">
+
+                                                        <img th:replace="inc/favicon :: remoteFavicon(${offer.datasourceName}, 32)">
+
+                                                        <h5 class="mb-0" th:text="${offer.datasourceName}"></h5>
+                                                    </div>
+                                                    <!-- Price Section -->
+                                                    <div class="text-success d-flex justify-content-center align-items-baseline mb-0">
+                                                        <h2 class="display-4 fw-bold mb-0" th:text="${offer.shortPrice()}">0</h2>
+                                                        <span class="ms-2" th:text="#{'symbol.'+${offer.currency}}"></span>
+                                                    </div>
+
+                                                </div>
+                                            </div>
+                                        </div>
+
+
+
+                                        <div class="col-6">
+                                            <div class="m-4">
+                                                <div th:if="${trend.trend == 0}" class="text-center alert alert-info" role="alert">
+                                                    😶‍🌫️ Le prix neuf est stable depuis <span th:text="${trend.formatedDuration()}"></span>
+                                                </div>
+                                                <div th:if="${trend.trend == 1}" class="text-center alert alert-tertiary" role="alert">
+                                                    🧐 Le prix neuf a augmenté de <b><span th:text="${#numbers.formatDecimal(trend.variation == null ? 0 : trend.variation, 0, 0)}"></span>€</b> depuis le dernier pointage (<span
+                                                        th:text="${trend.formatedDuration()}"
+                                                    ></span>)
+                                                </div>
+                                                <div th:if="${trend.trend == -1}" class="text-center alert alert-success" role="alert">
+                                                    Le prix neuf a baissé de <b><span th:text="${#numbers.formatDecimal(trend.variation == null ? 0 : trend.variation, 0, 0)}"></span>€</b> depuis le dernier relevé (<span
+                                                        th:text="${trend.formatedDuration()}"
+                                                    ></span>) 😊
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                    </div>
+
+
+                                    <div class="card shadow m-4">
+                                        <div class="card-body text-center text-md-left">
+                                            <div class="row align-items-center">
+                                                <div th:if="${trend.historicalLowestPrice != 0}" class="col-md-12">
+                                                    <span class="mb-3">Prix le plus bas historique ! </span>
+                                                    <p class="mb-0">
+                                                        Nous n'avons jamais relevé de prix aussi bas pour le <span th:text="${product.brandAndModel()}"></span>.
+                                                    </p>
+                                                </div>
+
+                                                <div th:unless="${trend.historicalLowestPrice != 0}" class="col-md-8">
+                                                    <h2 class="mb-3">Écart de prix historique</h2>
+                                                    <p class="mb-0">
+                                                        Écart de prix calculé avec le prix historique le plus bas (<span th:text="${trend.historicalLowestPrice}"></span>€) jamais relevé par Nudger sur le <span
+                                                            th:text="${product.brandAndModel()}"
+                                                        ></span>
+                                                    </p>
+                                                </div>
+
+                                                <div th:unless="${trend.historicalLowestPrice != 0}" class="col-12 col-md-4 mt-4 mt-md-0 text-md-right">
+                                                    <span class="d-block my-3"> <span class="h3 fw-bold" th:text="${#numbers.formatDecimal(trend.historicalVariation == null ? 0 : trend.historicalVariation, 0, 1)}"></span> <span
+                                                        class="align-baseline font-medium"
+                                                    >€</span>
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </th:block>
+
+
+
+
+
+                                <canvas class="mt-4" id="newPriceChart"></canvas>
+                                <div class="text-center">
+                                    <div class="btn-group my-3" role="group" aria-label="Sélection de la période">
+                                        <button type="button" class="btn btn-secondary period-btn" id="btn-new-15days">15 jours</button>
+                                        <button type="button" class="btn btn-primary active-period-btn period-btn" id="btn-new-3months">3 mois</button>
+                                        <button type="button" class="btn btn-secondary period-btn" id="btn-new-6months">6 mois</button>
+                                        <button type="button" class="btn btn-secondary period-btn" id="btn-new-max">Max</button>
+                                    </div>
+                                </div>
+
+
+
+                                <form method="POST" action="/nudge" class="">
+                                    <div class="table-responsive-sm">
+                                        <table th:id="new-offers" class="table table-hover bg-white">
+                                            <thead>
+                                                <tr>
+                                                    <th scope="col"></th>
+                                                    <th scope="col">Marchand</th>
+                                                    <th scope="col">Prix</th>
+                                                    <th scope="col">Etat</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <th:block th:each="offer , stats: ${product.price.newOffers}">
+                                                    <tr class="p-3 align-middle" th:data-token="${offer.affiliationToken}" th:data-compensation="${offer.compensation}">
+                                                        <td class="p-0 infos-text"><span class="p-3 d-inline-flex "> <img th:replace="inc/favicon :: remoteFavicon(${offer.datasourceName}, 16)">
+                                                        </span></td>
+                                                        <td class="p-0 infos-text" data-toggle="tooltip" data-placement="top" th:title="${offer.offerName}" nowrap><span class="h-100 d-flex align-items-center"> <span class=""
+                                                                th:text="${offer.datasourceName}"
+                                                            ></span>
+                                                        </span></td>
+                                                        <td class="p-0 infos-text infos-text-secondary text-center"><span class="" th:text="${offer.price}"></span> <span th:text="#{'symbol.'+${offer.currency}}"></span></td>
+                                                        <td class="p-0 pe-3 text-end"><span th:text="#{'condition.'+${offer.productState}}"></span></td>
+                                                    </tr>
+
+                                                </th:block>
+
+                                            </tbody>
+
+                                        </table>
+                                    </div>
+
+
+
+                                    <label class="h6 d-flex align-items-center border-1" for="inlineFormCustomSelectPref"><span class="badge input-group__nudger text-black me-2">2</span>Choisissez votre association
+                                        préférée</label> <select name="nudge" width="100%" class="form-select mb-3" id="inlineFormCustomSelectPref" aria-label="Choisissez votre cause">
+                                        <option value="nudger" selected="selected">Laisser nudger choisir !</option>
+                                        <th:block th:each="org : ${config.reversementConfig.contributedOrganisations}">
+                                            <option th:value="${org.key}" th:text="${org.value.name}"></option>
+                                        </th:block>
+                                    </select>
+
+
+                                    <div class="d-flex justify-content-center">
+                                        <input th:if="${product.bestPrice()}" type="submit" value="Nudger" formtarget="_blank" class="w-100 btn btn__nudger"> <input th:if="${product.bestPrice()}" type="hidden" id="token"
+                                            name="token" th:value="${offer.affiliationToken}"
+                                        >
+                                    </div>
+                                </form>
+
+
+                            </div>
+                        </div>
+
+	</section>
+	
+	
+	<script>
+	
+	 // Function to initialize DataTable
+    function initTable(tableId) {
+        // Initialize DataTable with specified options
+        tableNew = $(tableId).DataTable({
+            searching: false,
+            paging: false,
+            info: false,
+            select: 'single',
+            "order": [ [1, 'asc'] ]
+        });
+
+        // Event handler for row click in the table
+        tableNew.on('click', 'tbody tr', (e) => {
+            let classList = e.currentTarget.classList;
+
+            // Retrieve data attributes from the clicked row
+            token = $(e.currentTarget).attr('data-token');
+            compensation = $(e.currentTarget).attr('data-compensation');
+
+            // Update the token (e.g., in a hidden field)
+            $("#token").val(token);
+
+            var countUpUpdateoptions = {
+                duration: 1,
+                useEasing: false,
+                useGrouping: false,
+                separator: ',',
+                decimal: '.',
+                decimalPlaces: 2,
+                prefix: '',
+                suffix: ''
+            };
+
+            // Update the counter with the new compensation value
+            $("#countup-reversment").attr("data-max", compensation);
+            reversment.update(compensation);
+
+            // Handle 'selected' class for the active row
+            tableNew.rows('.selected').nodes().each((row) => row.classList.remove('selected'));
+            classList.add('selected');
+        });
+    }
     
-    <div class="d-flex justify-content-center">
-        <input th:if="${product.bestPrice()}" type ="submit" value="Nudger" formtarget="_blank" class="w-100 btn btn__nudger">
-        <input  th:if="${product.bestPrice()}" type="hidden" id="token" name="token" th:value="${product.bestPrice().affiliationToken}">
-    </div>
-</form>
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
+	 
+	 
+	
+	</script>
+	
+	
+	
+ <!--/* 
+      EMBEDDED JAVASCRIPT FOR CHARTS & TABLES
+      (Place this just before </body> or in your desired script location)
+    */-->
+    <script th:inline="javascript">
+    /*<![CDATA[*/
+    // Retrieve and format price data
+    const newPriceHistoryData = /*[[${product.price.newPricehistory}]]*/ [];
+    const occasionPriceHistoryData = /*[[${product.price.occasionPricehistory}]]*/ [];
+
+    // Map data only if they are not empty
+    const newPriceHistory = newPriceHistoryData.length > 0
+        ? newPriceHistoryData.map(({ timestamp: x, price: y }) => ({ x, y }))
+        : [];
+    const occasionPriceHistory = occasionPriceHistoryData.length > 0
+        ? occasionPriceHistoryData.map(({ timestamp: x, price: y }) => ({ x, y }))
+        : [];
+
+    // Function to filter data based on date
+    function filterDataByDate(data, startDate) {
+        return data.filter(item => new Date(item.x) >= startDate);
+    }
+
+    const today = new Date();
+
+    // Define date ranges for filtering
+    const dateRanges = {
+        '15days': new Date(today.getTime() - (15 * 24 * 60 * 60 * 1000)),
+        '3months': new Date(today.getFullYear(), today.getMonth() - 3, today.getDate()),
+        '6months': new Date(today.getFullYear(), today.getMonth() - 6, today.getDate()),
+        'max': null // All data
+    };
+
+    // Function to get filtered data based on the period
+    function getFilteredData(data, period) {
+        if (dateRanges[period]) {
+            return filterDataByDate(data, dateRanges[period]);
+        } else {
+            return data; // Return all data for 'max'
+        }
+    }
+
+    // Utility function to check if there's data in a given period
+    function hasDataInPeriod(data, period) {
+        return getFilteredData(data, period).length > 0;
+    }
+
+    // Function to update the chart with filtered data
+    function updateChart(chart, data, period) {
+        chart.data.datasets[0].data = getFilteredData(data, period);
+        chart.update();
+    }
+
+    // Function to visually set the active button
+    function setActiveButton(activeButton, chartType) {
+        const buttonGroupSelector = (chartType === 'new')
+            ? '.btn-group .btn[id^="btn-new"]'
+            : '.btn-group .btn[id^="btn-used"]';
+        const buttons = document.querySelectorAll(buttonGroupSelector);
+        buttons.forEach(button => {
+            button.classList.remove('btn-primary', 'active-period-btn');
+            button.classList.add('btn-secondary');
+        });
+        activeButton.classList.remove('btn-secondary');
+        activeButton.classList.add('btn-primary', 'active-period-btn');
+    }
+
+    // On document ready
+    document.addEventListener('DOMContentLoaded', function() {
+
+        // Initialize any tooltip if using Bootstrap 5
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+
+        // Initialize the offers tables (DataTables or custom)
+        // Fix: match the correct IDs
+        initTable('#new-offers');
+        initTable('#occasion-offers');
+
+        // If newPriceHistory has data, build the chart
+        if (newPriceHistory.length > 0) {
+            let defaultPeriod = '3months';
+            if (!hasDataInPeriod(newPriceHistory, defaultPeriod)) {
+                defaultPeriod = 'max';
+            }
+
+            const newPriceCtx = document.getElementById('newPriceChart').getContext('2d');
+            const newPriceChart = new Chart(newPriceCtx, {
+                type: 'line',
+                data: {
+                    datasets: [{
+                        label: 'Prix Neuf',
+                        fill: true,
+                        data: getFilteredData(newPriceHistory, defaultPeriod),
+                        backgroundColor: '#4cb1ff',
+                        borderColor: '#41a3ef',
+                        borderWidth: 2,
+                        tension: 0,
+                        pointRadius: 0,
+                        pointHoverRadius: 6,
+                        pointHitRadius: 10
+                    }]
+                },
+                options: {
+                    interaction: {
+                        mode: 'nearest',
+                        intersect: false
+                    },
+                    scales: {
+                        x: {
+                            type: 'time',
+                            time: {
+                                unit: 'day',
+                                displayFormats: {
+                                    day: 'dd/MM/yyyy'
+                                },
+                                tooltipFormat: 'dd/MM/yyyy'
+                            },
+                            title: {
+                                display: true,
+                                text: 'Date'
+                            }
+                        },
+                        y: {
+                            title: {
+                                display: true,
+                                text: 'Prix (€)'
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Set active button
+            setActiveButton(document.getElementById('btn-new-' + defaultPeriod), 'new');
+
+            // Disable buttons with no data
+            ['15days', '3months', '6months'].forEach(period => {
+                if (!hasDataInPeriod(newPriceHistory, period)) {
+                    const button = document.getElementById('btn-new-' + period);
+                    button.disabled = true;
+                    button.classList.add('disabled');
+                }
+            });
+
+            // Event handlers
+            document.getElementById('btn-new-15days').addEventListener('click', function () {
+                updateChart(newPriceChart, newPriceHistory, '15days');
+                setActiveButton(this, 'new');
+            });
+            document.getElementById('btn-new-3months').addEventListener('click', function () {
+                updateChart(newPriceChart, newPriceHistory, '3months');
+                setActiveButton(this, 'new');
+            });
+            document.getElementById('btn-new-6months').addEventListener('click', function () {
+                updateChart(newPriceChart, newPriceHistory, '6months');
+                setActiveButton(this, 'new');
+            });
+            document.getElementById('btn-new-max').addEventListener('click', function () {
+                updateChart(newPriceChart, newPriceHistory, 'max');
+                setActiveButton(this, 'new');
+            });
+        }
+
+        /*
+        // If occasionPriceHistory has data, build the chart
+        if (occasionPriceHistory.length > 0) {
+            let defaultPeriod = '3months';
+            if (!hasDataInPeriod(occasionPriceHistory, defaultPeriod)) {
+                defaultPeriod = 'max';
+            }
+
+            const usedPriceCtx = document.getElementById('usedPriceChart').getContext('2d');
+            const usedPriceChart = new Chart(usedPriceCtx, {
+                type: 'line',
+                data: {
+                    datasets: [{
+                        label: 'Prix d\'Occasion',
+                        fill: true,
+                        data: getFilteredData(occasionPriceHistory, defaultPeriod),
+                        backgroundColor: '#ff6384',
+                        borderColor: '#fa486e',
+                        borderWidth: 2,
+                        tension: 0,
+                        pointRadius: 0,
+                        pointHoverRadius: 6,
+                        pointHitRadius: 10
+                    }]
+                },
+                options: {
+                    interaction: {
+                        mode: 'nearest',
+                        intersect: false
+                    },
+                    scales: {
+                        x: {
+                            type: 'time',
+                            time: {
+                                unit: 'day',
+                                displayFormats: {
+                                    day: 'dd/MM/yyyy'
+                                },
+                                tooltipFormat: 'dd/MM/yyyy'
+                            },
+                            title: {
+                                display: true,
+                                text: 'Date'
+                            }
+                        },
+                        y: {
+                            title: {
+                                display: true,
+                                text: 'Prix (€)'
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Set active button
+            setActiveButton(document.getElementById('btn-used-' + defaultPeriod), 'used');
+
+            // Disable buttons with no data
+            ['15days', '3months', '6months'].forEach(period => {
+                if (!hasDataInPeriod(occasionPriceHistory, period)) {
+                    const button = document.getElementById('btn-used-' + period);
+                    button.disabled = true;
+                    button.classList.add('disabled');
+                }
+            });
+
+            // Event handlers
+            document.getElementById('btn-used-15days').addEventListener('click', function () {
+                updateChart(usedPriceChart, occasionPriceHistory, '15days');
+                setActiveButton(this, 'used');
+            });
+            document.getElementById('btn-used-3months').addEventListener('click', function () {
+                updateChart(usedPriceChart, occasionPriceHistory, '3months');
+                setActiveButton(this, 'used');
+            });
+            document.getElementById('btn-used-6months').addEventListener('click', function () {
+                updateChart(usedPriceChart, occasionPriceHistory, '6months');
+                setActiveButton(this, 'used');
+            });
+            document.getElementById('btn-used-max').addEventListener('click', function () {
+                updateChart(usedPriceChart, occasionPriceHistory, 'max');
+                setActiveButton(this, 'used');
+            });
+        }*/
+
+    });
+    /*]]>*/
+    </script>
+</th:block>
+
+
+
+
+
+
+
+
+
+
+
+
