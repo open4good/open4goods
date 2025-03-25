@@ -221,9 +221,11 @@ public class PriceAggregationService extends AbstractAggregationService {
             } else if (lastPrice.getPrice() > secondLastPrice.getPrice()) {
                 trend = 1; // Price increased
             }
-            prices.setTrend(trend);
+            
+            prices.getTrends().put(state, trend);
+            
         } else {
-            prices.setTrend(0); // No recent price change or only one historical price
+        	 prices.getTrends().put(state, 0);
         }
 
        

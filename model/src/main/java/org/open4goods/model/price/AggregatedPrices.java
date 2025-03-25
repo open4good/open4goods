@@ -3,14 +3,17 @@ package org.open4goods.model.price;
 
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.open4goods.model.Standardisable;
 import org.open4goods.model.StandardiserService;
+import org.open4goods.model.product.Product;
 import org.open4goods.model.product.ProductCondition;
 
 public class AggregatedPrices implements Standardisable {
@@ -27,7 +30,12 @@ public class AggregatedPrices implements Standardisable {
 	// 0 -> equals
 	// 1 -> Increasing
 	// -1 -> Decreasing
-	private Integer trend= 0;
+	// TODO(perf, p2) : Remove, migration on trends
+//	private Integer trend= 0;
+	
+	
+	/** Trends by product condition **/
+	private Map<ProductCondition, Integer> trends = new HashMap<>();
 
 
 	// Contains the conditions for this product. Shortcut for elastic queryng
@@ -61,6 +69,14 @@ public class AggregatedPrices implements Standardisable {
 
 	}
 	
+	public AggregatedPrice bestOccasionOffer() {
+		return bestOffer(ProductCondition.OCCASION);
+	}
+
+	public AggregatedPrice bestNewOffer() {
+		return bestOffer(ProductCondition.NEW);
+	}
+
 	
 	public AggregatedPrice bestOffer(ProductCondition condition) {
 		var list = sortedOffers(condition);
@@ -148,13 +164,17 @@ public class AggregatedPrices implements Standardisable {
 	}
 
 
-	public Integer getTrend() {
-		return trend;
+
+
+	public Map<ProductCondition, Integer> getTrends() {
+		return trends;
 	}
 
-	public void setTrend(Integer trend) {
-		this.trend = trend;
+
+	public void setTrends(Map<ProductCondition, Integer> trends) {
+		this.trends = trends;
 	}
+
 
 	public Set<ProductCondition> getConditions() {
 		return conditions;

@@ -13,6 +13,7 @@ import org.open4goods.commons.config.yml.DevModeConfiguration;
 import org.open4goods.commons.config.yml.FeedbackConfiguration;
 import org.open4goods.commons.config.yml.IcecatConfiguration;
 import org.open4goods.commons.config.yml.ui.OpenSearchConfig;
+import org.open4goods.commons.config.yml.ui.PriceRestitutionConfig;
 import org.open4goods.commons.config.yml.ui.WebConfig;
 import org.open4goods.model.Localisable;
 import org.open4goods.model.vertical.ImageGenerationConfig;
@@ -121,6 +122,8 @@ public class UiConfig {
 	//
 	private WebConfig webConfig = new WebConfig();
 
+	
+	private PriceRestitutionConfig priceConfig = new PriceRestitutionConfig();
 	
 	/**
 	 * Config for url checking
@@ -511,6 +514,16 @@ public class UiConfig {
 
 	public void setUrlcheck(UrlCheckConfig urlcheck) {
 		this.urlcheck = urlcheck;
+	}
+
+
+	public PriceRestitutionConfig getPriceConfig() {
+		return priceConfig;
+	}
+
+
+	public void setPriceConfig(PriceRestitutionConfig priceConfig) {
+		this.priceConfig = priceConfig;
 	}
 
 

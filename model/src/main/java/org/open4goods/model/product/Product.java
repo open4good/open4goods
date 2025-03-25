@@ -86,7 +86,7 @@ public class Product implements Standardisable {
 	private long creationDate;
 	
 	/**
-	 * The last date this product has changed (new data, price change, new comment,	 * so on...)
+	 * The last date this product has changed (new data, new comment,	 * so on...)
 	 */
 	private long lastChange;
 

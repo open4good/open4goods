@@ -1,29 +1,6 @@
-<!-- 
-TODO Instructions
-
-You will handle the TODO you find in this bootstrap 5 / thymeleaf / jquery template
-
- you must consider : 
- ** User experience : improvements on the perception of the user
- ** Light : The widget integrates in a light and sober global design
- ** UX completion : consider going deep in the UX experience, and completing it : for example, you can add tooltip, or propose different approaches
- 
- 
-
-# Considerations
-* If you detect TODO tag, they are indications on job todo, you must integ  rate them in your thinking and in the jobs to do
-* Comment using server side comments (Thymeleaf syntax). Replace all html comments in this form
-* integrate SEO best practices and accessibility in your generated code
-* you can use or update existing fontawesome icons
-* use triple backticks to render code  avoid formatting issues
-* If you need any code (additional thymeleaf inclusions, pixel.css, ...) please ask
-* Ask for any question that would allow you to do a better job
-
- -->
-
-<section class="container container-semi-fluid">
+<section class="container container-semi-fluid" role="main" aria-label="Bilan du produit">
     <!--/* Title row with Pixel classes */-->
-    <div class="row text-center justify-content-center mt-4 mb-4 ">
+    <div class="row text-center justify-content-center mt-4 mb-4">
         <div class="col-md-8">
             <h2 class="display-4">Bilan du 
                 <span class="text-tertiary" th:text="${product.bestName()}"></span>
@@ -31,17 +8,10 @@ You will handle the TODO you find in this bootstrap 5 / thymeleaf / jquery templ
         </div>
     </div>
 
-   
-
-    
-    
-    <!-- Pixel-styled modal -->
-    <!--  TODO : user must not be able to close the modal -->
-    <!--  TODO : modal must be larger -->
-    
-    <div class="modal fade" id="reviewProcessModal" tabindex="-1" role="dialog"
-         aria-labelledby="reviewModalLabel4" aria-hidden="true" data-backdrop="static" data-keyboard="false">
-        <div class="modal-dialog modal-tertiary modal-dialog-centered" role="document">
+    <!--/* Modal with enhanced UX: Non-dismissible and enlarged modal for a focused review process */-->
+    <div class="modal fade" id="reviewProcessModal" tabindex="-1" role="dialog" aria-modal="true"
+         aria-labelledby="reviewModalLabel4" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+        <div class="modal-dialog modal-tertiary modal-dialog-centered modal-lg" role="document">
             <div class="modal-content text-white">
                 <div class="modal-header border-0">
                     <h5 class="modal-title" id="reviewModalLabel4">
@@ -49,7 +19,7 @@ You will handle the TODO you find in this bootstrap 5 / thymeleaf / jquery templ
                     </h5>
                 </div>
                 <div class="modal-body" id="modalContentContainer">
-                    <!-- loaded dynamically -->
+                    <!--/* Content loaded dynamically */-->
                 </div>
             </div>
         </div>
@@ -57,72 +27,81 @@ You will handle the TODO you find in this bootstrap 5 / thymeleaf / jquery templ
 
     <!-- Identity + Review row -->
     <div class="row">
-
-
-        <!-- TODO :  this column must be col-8 and centered if no aiReview-->
-        <div class="col-lg-4">
-
-		
-		 <!-- AI generation card (if no aiReview) with pixel classes -->
-		    <th:block th:unless="${aiReview}">
-		        <div class="card shadow border-gray-300 mb-4">
-		            <div class="card-body d-flex align-items-center">
-		                <div class="icon icon-shape icon-shape-secondary rounded-circle me-3">
-		                    <span class="fas fa-robot"></span>
-		                </div>
-		                <div>
-		                    <h3 class="h5">Génération automatique</h3>
-		                    <p class="mb-0">Cliquez pour obtenir un bilan AI.</p>
-		                </div>
-		                <button id="triggerButton" class="btn btn-tertiary ms-auto">
-		                    Générer
-		                </button>
-		            </div>
-		        </div>
-		    </th:block>
-		
-		
-		
-
-		    <!-- AI information card (if  aiReview)  -->
-		    <th:block th:if="${aiReview}">
-		        <div class="card shadow border-gray-300 mb-4">
-		            <div class="card-body d-flex align-items-center">
-		                <div class="icon icon-shape icon-shape-secondary rounded-circle me-3">
-		                    <span class="fas fa-robot"></span>
-		                </div>
-		                <div>
-		                    <h3 class="h5">Analyse automatique</h3>
-		                    <p class="mb-0">Le bilan IA du <span th:text="${product.bestName()}"></span> a été généré à la demande le <span th:text="${aiReview.createdMs}"></span> </p>
-		                </div>
-		            </div>
-		        </div>
-		    </th:block>
-		    
-        <!-- Identity block -->
+        <!--/* Adjust column size: if no AI review, center the content in a wider column */-->
+        <div th:class="${aiReview} ? 'col-lg-4' : 'col-lg-8 offset-lg-2'">
+        
+         <!-- AI generation card (if no aiReview) with pixel classes -->
+            <th:block th:unless="${aiReview}">
+                <div class="card shadow border-gray-300 mb-4">
+                    <div class="card-body d-flex align-items-center">
+                        <div class="icon icon-shape icon-shape-secondary rounded-circle me-3">
+                            <span class="fas fa-robot" aria-hidden="true"></span>
+                        </div>
+                        <div>
+                            <h3 class="h5">Génération automatique</h3>
+                            <p class="mb-0">Cliquez pour obtenir un bilan AI.</p>
+                        </div>
+                        <button id="triggerButton" class="btn btn-tertiary ms-auto" 
+                            data-bs-toggle="tooltip" data-bs-placement="top" title="Générer un bilan AI automatiquement"
+                            aria-label="Générer un bilan AI">
+                            Générer
+                        </button>
+                    </div>
+                </div>
+            </th:block>
+        
+            <!-- AI information card (if aiReview)  -->
+            <th:block th:if="${aiReview}">
+                <div class="card shadow border-gray-300 mb-4">
+                    <div class="card-body d-flex align-items-center">
+                        <div class="icon icon-shape icon-shape-secondary rounded-circle me-3">
+                            <span class="fas fa-robot" aria-hidden="true"></span>
+                        </div>
+                        <div>
+                            <h3 class="h5">Analyse automatique</h3>
+                            <p class="mb-0">Le bilan IA du <span th:text="${product.bestName()}"></span> a été généré à la demande le <span th:text="${aiReview.createdMs}"></span> </p>
+                        </div>
+                    </div>
+                </div>
+            </th:block>
+        
+            <!-- Identity block -->
             <div class="card border-gray-300 shadow mb-4">
                 <div class="card-body p-4">
                     <div class="d-flex align-items-center mb-3">
                         <div class="icon icon-primary me-3">
-                            <span class="fas fa-id-badge"></span>
+                            <span class="fas fa-id-badge" aria-hidden="true"></span>
                         </div>
                         <h3 class="h5">Fiche d'identité</h3>
                     </div>
                     <th:block th:insert="~{inc/product-referentiel-attributes.html}"></th:block>
                 </div>
             </div>
+            
+            <!-- Verdict -->
+            <div th:if="${aiReview}" class="card border-gray-300 shadow mb-4">
+                <div class="card-body">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="icon icon-warning me-3">
+                            <span class="fas fa-flag-checkered" aria-hidden="true"></span>
+                        </div>
+                        <h4 class="h6 mb-0">Verdict</h4>
+                    </div>
+                    <div th:utext="${aiReview.summary}" class="lead"></div>
+                </div>
+            </div>
+            
         </div>
         
         <!-- Right side for AI content (if present) -->
         <div class="col-lg-8">
             <th:block th:if="${aiReview}">
                 <!-- Pixel-like icon boxes for each section -->
-
                 <div class="card border-gray-300 shadow mb-4">
                     <div class="card-body p-4">
                         <div class="d-flex align-items-center mb-3">
                             <div class="icon icon-info me-3">
-                                <span class="fas fa-info-circle"></span>
+                                <span class="fas fa-info-circle" aria-hidden="true"></span>
                             </div>
                             <h3 class="h6">Présentation</h3>
                         </div>
@@ -137,7 +116,7 @@ You will handle the TODO you find in this bootstrap 5 / thymeleaf / jquery templ
                             <div class="card-body">
                                 <div class="d-flex align-items-center mb-3">
                                     <div class="icon icon-success me-3">
-                                        <span class="fas fa-thumbs-up"></span>
+                                        <span class="fas fa-thumbs-up" aria-hidden="true"></span>
                                     </div>
                                     <h4 class="h6 mb-0">Avantages</h4>
                                 </div>
@@ -152,7 +131,7 @@ You will handle the TODO you find in this bootstrap 5 / thymeleaf / jquery templ
                             <div class="card-body">
                                 <div class="d-flex align-items-center mb-3">
                                     <div class="icon icon-danger me-3">
-                                        <span class="fas fa-thumbs-down"></span>
+                                        <span class="fas fa-thumbs-down" aria-hidden="true"></span>
                                     </div>
                                     <h4 class="h6 mb-0">Inconvénients</h4>
                                 </div>
@@ -171,11 +150,11 @@ You will handle the TODO you find in this bootstrap 5 / thymeleaf / jquery templ
                             <div class="card-body">
                                 <div class="d-flex align-items-center mb-3">
                                     <div class="icon icon-primary me-3">
-                                        <span class="fas fa-cog"></span>
+                                        <span class="fas fa-cog" aria-hidden="true"></span>
                                     </div>
                                     <h4 class="h6 mb-0">Revue technique</h4>
                                 </div>
-                                <p th:text="${aiReview.technicalReview}"></p>
+                                <p th:utext="${aiReview.technicalReview}"></p>
                             </div>
                         </div>
                     </div>
@@ -184,40 +163,24 @@ You will handle the TODO you find in this bootstrap 5 / thymeleaf / jquery templ
                             <div class="card-body">
                                 <div class="d-flex align-items-center mb-3">
                                     <div class="icon icon-tertiary me-3">
-                                        <span class="fas fa-seedling"></span>
+                                        <span class="fas fa-seedling" aria-hidden="true"></span>
                                     </div>
                                     <h4 class="h6 mb-0">Écologie</h4>
                                 </div>
-                                <p th:text="${aiReview.ecologicalReview}"></p>
+                                <p th:utext="${aiReview.ecologicalReview}"></p>
                             </div>
                         </div>
                     </div>
                 </div>
-
-                <!-- Verdict -->
-                <div class="card border-gray-300 shadow mb-4">
-                    <div class="card-body">
-                        <div class="d-flex align-items-center mb-3">
-                            <div class="icon icon-warning me-3">
-                                <span class="fas fa-flag-checkered"></span>
-                            </div>
-                            <h4 class="h6 mb-0">Verdict</h4>
-                        </div>
-                        <div th:utext="${aiReview.summary}" class="lead"></div>
-                    </div>
-                </div>
-
-
             </th:block>
         </div>
-        
         
         <!-- Sources in a Pixel table style -->
         <div th:if="${aiReview}" class="card border-gray-300 shadow mb-4">
             <div class="card-body">
                 <div class="d-flex align-items-center mb-3">
                     <div class="icon icon-dark me-3">
-                        <span class="fas fa-book"></span>
+                        <span class="fas fa-book" aria-hidden="true"></span>
                     </div>
                     <h4 class="h6 mb-0">Sources</h4>
                 </div>
@@ -225,15 +188,20 @@ You will handle the TODO you find in this bootstrap 5 / thymeleaf / jquery templ
                     <table class="table table-striped">
                         <thead>
                             <tr>
-                                <th>Ref</th>
-                                <th>Nom</th>
-                                <th>Description</th>
+                                <th scope="col">Ref</th>
+                                <th scope="col">Nom</th>
+                                <th scope="col">Description</th>
                             </tr>
                         </thead>
                         <tbody>
                             <tr th:each="item : ${aiReview.sources}">
-                                <td th:id="'review-ref'+${item.number}" th:text="${item.number}"></td>
-                                <td scope="row" >  <a target="_blank" rel="nofollow" th:href="${item.url}" ><img  th:replace="inc/favicon :: remoteFavicon(${item.url}, 16)"> <span th:text="${item.name}"></span></a></td>
+                                <td th:id="'review-ref-'+${item.number}" th:text="${item.number}"></td>
+                                <td scope="row">
+                                    <a target="_blank" rel="nofollow" th:href="${item.url}">
+                                        <img th:replace="inc/favicon :: remoteFavicon(${item.url}, 16)" alt="favicon"> 
+                                        <span th:text="${item.name}"></span>
+                                    </a>
+                                </td>
                                 <td th:text="${item.description}"></td>
                             </tr>
                         </tbody>
