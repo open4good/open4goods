@@ -21,6 +21,11 @@
       "name": "favicon.urlTimeout",
       "type": "java.lang.Integer",
       "description": "The URL read timeout in milliseconds for fetching HTML pages."
+    },
+    {
+      "name": "favicon.fallbackUrl",
+      "type": "java.lang.String",
+      "description": "The URL template for fallback favicon retrieval. Use {url} as placeholder for the site URL. Defaults to 'https://t3.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url={url}&size=64'."
     }
   ]
 }

@@ -65,7 +65,7 @@ public class RemoteFileCachingService {
 	}
 
 
-	public File getResource(final String url) throws InvalidParameterException {
+	public File getResource(final String url) throws InvalidParameterException, IOException {
 
 		File resource = new File(resourceFolder+File.separator+IdHelper.getHashedName(url));
 

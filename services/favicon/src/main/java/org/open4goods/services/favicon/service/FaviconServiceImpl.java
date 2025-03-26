@@ -4,6 +4,8 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URL;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
@@ -36,6 +38,7 @@ import io.micrometer.core.instrument.MeterRegistry;
  * It also caches favicons (including their MIME type) in memory and updates actuator metrics.
  * Additionally, the service accepts either a full URL or just a domain name (e.g. "google.com").
  * The favicon retrieval sequence is: in-memory cache, file cache (via direct mapping), then remote fetch.
+ * If no favicon is found from primary sources, a fallback mechanism is employed using a configurable URL.
  * </p>
  */
 @Service
@@ -164,6 +167,12 @@ public class FaviconServiceImpl implements FaviconService, HealthIndicator {
                                         .get();
                     faviconResponse = parseFaviconFromDocument(doc, rootUrl);
                 }
+            }
+
+            // If still not found, attempt fallback retrieval.
+            if (faviconResponse == null || faviconResponse.faviconData() == null || faviconResponse.faviconData().length == 0) {
+                logger.info("No favicon found from primary sources. Attempting fallback using fallback URL.");
+                faviconResponse = fetchFallbackFavicon(url);
             }
 
             if (faviconResponse == null || faviconResponse.faviconData() == null || faviconResponse.faviconData().length == 0) {
@@ -362,6 +371,34 @@ public class FaviconServiceImpl implements FaviconService, HealthIndicator {
             logger.warn("Unable to parse sizes attribute '{}': {}", sizes, e.getMessage());
         }
         return 0;
+    }
+
+    /**
+     * Fallback method for retrieving favicon using an external service.
+     * It builds the fallback URL using the configured fallback URL template and retrieves the favicon.
+     *
+     * @param url the original URL.
+     * @return a FaviconResponse with the retrieved favicon data, or null if retrieval fails.
+     */
+    private FaviconResponse fetchFallbackFavicon(String url) {
+        try {
+            String rootUrl = getRootUrl(url);
+            String fallbackTemplate = faviconConfig.getFallbackUrl();
+            if (!StringUtils.hasText(fallbackTemplate)) {
+                fallbackTemplate = "https://t3.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url={url}&size=64";
+            }
+            String fallbackUrl = fallbackTemplate.replace("{url}", URLEncoder.encode(rootUrl, StandardCharsets.UTF_8));
+            logger.info("Using fallback URL: {}", fallbackUrl);
+            File fallbackFile = remoteFileCachingService.getResource(fallbackUrl);
+            if (fallbackFile.exists()) {
+                byte[] data = java.nio.file.Files.readAllBytes(fallbackFile.toPath());
+                String mimeType = detectMimeType(data, fallbackUrl);
+                return new FaviconResponse(data, mimeType);
+            }
+        } catch (Exception e) {
+            logger.error("Fallback favicon retrieval failed for URL {}: {}", url, e.getMessage());
+        }
+        return null;
     }
 
     /**
