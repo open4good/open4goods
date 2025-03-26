@@ -1,39 +1,115 @@
-<!--  TODO : Adjust colsize computing, intended to adjust width if price or occasion offers not presents. 
-Colsize is 8 if alone, 6 if both  ${product.price.occasionOffers()}, and ${product.price.newOffers()} are present,-->
+<div class="row">
+    <div class="col-6">
 
 
 
 
-
-
-<th:block
+<th:block    
     th:with="
         priceHistory=${product.price.newPricehistory},
-        colSize=6,
+        colSize=${(product.price.occasionOffers() != null and !#lists.isEmpty(product.price.occasionOffers()) 
+                  and product.price.newOffers() != null and !#lists.isEmpty(product.price.newOffers())) ? 6 : 8},
         offer=${product.price.bestNewOffer()},
         offers=${product.price.newOffers()},
         trend=${newTrend},
         events=${config.priceConfig.events.i18n('fr')},
         priceCondition=${T(org.open4goods.model.product.ProductCondition).NEW},
-        
+        widgetPrefix='new'
     ">
     
+    <!--/* TODO: Inject a prefix ('new') that will be used to generate appropriate chart, table and other ids */-->
     <th:block th:insert="~{inc/product-price-widget.html}"></th:block>
+    
+    <!--/* TODO: And after Thymeleaf HTML inclusion, call the JavaScript init method that will update/init chart and table for 'new' offers */-->
+    <script th:inline="javascript">
+        /*<![CDATA[*/
+        document.addEventListener('DOMContentLoaded', function() {
+            initPriceWidget({
+                widgetPrefix: /*[[${widgetPrefix}]]*/,
+                priceHistory: /*[[${product.price.newPricehistory}]]*/,
+                events: /*[[${events}]]*/,
+                canvasId: /*[[( ${widgetPrefix} + 'PriceChart' )]]*/,
+                tableId: /*[[( ${widgetPrefix} + '-offers' )]]*/,
+                periodButtons: {
+                    '15days': /*[[( 'btn-' + ${widgetPrefix} + '-15days' )]]*/,
+                    '3months': /*[[( 'btn-' + ${widgetPrefix} + '-3months' )]]*/,
+                    '6months': /*[[( 'btn-' + ${widgetPrefix} + '-6months' )]]*/,
+                    'max': /*[[( 'btn-' + ${widgetPrefix} + '-max' )]]*/
+                },
+                defaultPeriod: '3months'
+                // Optional: you can pass chartColors here if needed.
+            });
+        });
+        /*]]>*/
+    </script>
+    
 </th:block>
 
-<!-- TODO : Sample inclusion code for occasion offers after your code updates
-<th:block
+
+
+
+
+
+    </div>
+    <div class="col-6">
+
+
+
+<th:block    
     th:with="
-        priceHistory=${product.price.occasionPricehistory != null and !#lists.isEmpty(product.price.occasionPricehistory)},
-        colSize=6,
+        priceHistory=${product.price.occasionPricehistory},
+        colSize=${(product.price.newOffers() != null and !#lists.isEmpty(product.price.newOffers()) 
+                  and product.price.occasionOffers() != null and !#lists.isEmpty(product.price.occasionOffers())) ? 6 : 8},
         offer=${product.price.bestOccasionOffer()},
         offers=${product.price.occasionOffers()},
         trend=${occasionTrend},
         events=${config.priceConfig.events.i18n('fr')},
-        priceCondition=${T(org.open4goods.model.product.ProductCondition).NEW}
+        priceCondition=${T(org.open4goods.model.product.ProductCondition).OCCASION},
+        widgetPrefix='occasion'
     ">
     
     <th:block th:insert="~{inc/product-price-widget.html}"></th:block>
+    
+    <script th:inline="javascript">
+        /*<![CDATA[*/
+        document.addEventListener('DOMContentLoaded', function() {
+            initPriceWidget({
+                widgetPrefix: /*[[${widgetPrefix}]]*/,
+                priceHistory: /*[[${product.price.occasionPricehistory}]]*/,
+                events: /*[[${events}]]*/,
+                canvasId: /*[[( ${widgetPrefix} + 'PriceChart' )]]*/,
+                tableId: /*[[( ${widgetPrefix} + '-offers' )]]*/,
+                periodButtons: {
+                    '15days': /*[[( 'btn-' + ${widgetPrefix} + '-15days' )]]*/,
+                    '3months': /*[[( 'btn-' + ${widgetPrefix} + '-3months' )]]*/,
+                    '6months': /*[[( 'btn-' + ${widgetPrefix} + '-6months' )]]*/,
+                    'max': /*[[( 'btn-' + ${widgetPrefix} + '-max' )]]*/
+                },
+                defaultPeriod: '3months'
+                // Optional: you can pass chartColors here if needed.
+            });
+        });
+        /*]]>*/
+    </script>
+    
 </th:block>
 
- -->
+
+
+
+
+
+
+    </div>
+
+</div>
+
+
+
+
+
+
+
+
+
+

@@ -1,8 +1,6 @@
-
-<!--/*[[ Main section: Affichage du prix neuf et historique, incluant les graphiques et offres ]]*/-->
+<!--/* Main section: Affichage du prix neuf et historique, incluant les graphiques et offres */-->
 <section role="main" aria-label="Prix (neuf moins chers et évolution) du produit">
-    
-    <div th:if="${priceHistory}" th:attr="class='col-md-' + ${colSize}">
+    <div th:if="${priceHistory}" >
         <div class="m-4 card shadow border-gray-300 text-center">
     
             <div class="row text-center justify-content-center mt-4 mb-4">
@@ -12,9 +10,9 @@
             </div>
     
             <th:block>
-                <!--/*[[ Bloc messages et informations d'offres ]]*/-->
+                <!--/* Bloc messages et informations d'offres */-->
                 <div class="row">
-                    <div class="col-4 ">
+                    <div class="col-4">
                         <div class="ms-4 card offer-link occasion-card"
                              th:data-token="${offer.affiliationToken}"
                              data-offer-type="occasion"
@@ -25,7 +23,6 @@
                                     <img th:replace="inc/favicon :: remoteFavicon(${offer.datasourceName}, 32)" alt="Favicon de l'offre"/>
                                     <h5 class="mb-0" th:text="${offer.datasourceName}"></h5>
                                 </div>
-                                <!-- Price Section -->
                                 <div class="text-success d-flex justify-content-center align-items-baseline mb-0">
                                     <h2 class="display-4 fw-bold mb-0" th:text="${offer.shortPrice()}">0</h2>
                                     <span class="ms-2" th:text="#{'symbol.'+${offer.currency}}"></span>
@@ -35,8 +32,6 @@
                     </div>
     
                     <div class="col-8">
-                        
-                        <!--/*[[ Mise à jour de la carte "Prix le plus bas historique !" ]]*/-->
                         <div th:if="${product.price.isHistoricalLowest(offer)}" class="card shadow me-4">
                             <div class="card-body">
                                 <div class="row align-items-center">
@@ -53,8 +48,7 @@
                                 </div>
                             </div>
                         </div>
-                        
-                        <!--/*[[ Mise à jour de la carte "Infos prix" avec les historiques bas, moyen et haut ]]*/-->
+    
                         <div th:unless="${product.price.isHistoricalLowest(offer)}" class="card shadow me-4">
                             <div class="card-body">
                                 <div class="row align-items-center">
@@ -64,7 +58,6 @@
                                     </div>
                                     <div class="col-6">
                                         <div class="d-block ms-auto">
-                                            <!--/*[[ Rendering historical price information: lowest, average, highest ]]*/-->
                                             <div class="d-flex align-items-center text-right mb-2">
                                                 <span class="shape-xs rounded-circle bg-dark me-2"></span>
                                                 <span class="fw-normal small">
@@ -113,362 +106,60 @@
     
             </th:block>
     
-            <canvas class="m-4" id="newPriceChart"></canvas>
+            <canvas class="m-4" th:id="|${widgetPrefix}PriceChart|"></canvas>
     
             <div class="text-center">
                 <div class="btn-group my-3" role="group" aria-label="Sélection de la période">
-                    <!--/*[[ TODO : apply a light transparency on unselected items to highlight selected period ]]*/-->
-                    <button type="button" class="mx-2 btn btn__nudger period-btn" id="btn-new-15days">15 jours</button>
-                    <button type="button" class="mx-2 btn btn__nudger active-period-btn period-btn" id="btn-new-3months">3 mois</button>
-                    <button type="button" class="mx-2 btn btn__nudger period-btn" id="btn-new-6months">6 mois</button>
-                    <button type="button" class="mx-2 btn btn__nudger period-btn" id="btn-new-max">Max</button>
+                    <!--/* TODO: Apply a light transparency on unselected items to highlight selected period */-->
+                    <button type="button" class="mx-2 btn btn__nudger period-btn" th:id="|btn-${widgetPrefix}-15days|">15 jours</button>
+                    <button type="button" class="mx-2 btn btn__nudger period-btn active-period-btn" th:id="|btn-${widgetPrefix}-3months|">3 mois</button>
+                    <button type="button" class="mx-2 btn btn__nudger period-btn" th:id="|btn-${widgetPrefix}-6months|">6 mois</button>
+                    <button type="button" class="mx-2 btn btn__nudger period-btn" th:id="|btn-${widgetPrefix}-max|">Max</button>
                 </div>
             </div>
     
     
-            <h3 class="mt-4 display-4">Toutes les offres</h2>
+            <h3 class="mt-4 display-4">Toutes les offres</h3>
             
             
-                <div class="m-4 table-responsive-sm">
-                    <table th:id="new-offers" class="table table-hover bg-white">
-                        <thead>
-                            <tr>
-                                <th scope="col"></th>
-                                <th scope="col">Marchand</th>
-                                <th scope="col">Prix</th>
-                                <th scope="col">Mise à jour</th>
+            <div class="m-4 table-responsive-sm">
+                <table th:id="|${widgetPrefix}-offers|" class="table table-hover bg-white">
+                    <thead>
+                        <tr>
+                            <th scope="col"></th>
+                            <th scope="col">Marchand</th>
+                            <th scope="col">Prix</th>
+                            <th scope="col">Mise à jour</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <th:block th:each="offer, stats : ${offers}">
+                            <tr class="p-3 align-middle offer-link"
+                                th:data-token="${offer.affiliationToken}"
+                                th:data-compensation="${offer.compensation}">
+                                <td class="p-0 infos-text">
+                                    <span class="p-3 d-inline-flex">
+                                        <img th:replace="inc/favicon :: remoteFavicon(${offer.datasourceName}, 16)" alt="Favicon de l'offre"/>
+                                    </span>
+                                </td>
+                                <td class="p-0 infos-text" data-bs-toggle="tooltip" data-bs-placement="top" th:title="${offer.offerName}" nowrap>
+                                    <span class="h-100 d-flex align-items-center">
+                                        <span th:text="${offer.datasourceName}"></span>
+                                    </span>
+                                </td>
+                                <td class="p-0 infos-text infos-text-secondary text-center">
+                                    <span th:text="${offer.price}"></span> 
+                                    <span th:text="#{'symbol.'+${offer.currency}}"></span>
+                                </td>
+                                <td class="p-0 pe-3 text-end">
+                                    <span th:text="${offer.formatedDuration()}"></span>
+                                </td>
                             </tr>
-                        </thead>
-                        <tbody>
-                            <th:block th:each="offer, stats : ${product.price.newOffers}">
-                                <tr class="p-3 align-middle offer-link"
-                                    th:data-token="${offer.affiliationToken}"
-                                    th:data-compensation="${offer.compensation}">
-                                    <td class="p-0 infos-text">
-                                        <span class="p-3 d-inline-flex">
-                                            <img th:replace="inc/favicon :: remoteFavicon(${offer.datasourceName}, 16)" alt="Favicon de l'offre"/>
-                                        </span>
-                                    </td>
-                                    <td class="p-0 infos-text" data-bs-toggle="tooltip" data-bs-placement="top" th:title="${offer.offerName}" nowrap>
-                                        <span class="h-100 d-flex align-items-center">
-                                            <span th:text="${offer.datasourceName}"></span>
-                                        </span>
-                                    </td>
-                                    <td class="p-0 infos-text infos-text-secondary text-center">
-                                        <span th:text="${offer.price}"></span> 
-                                        <span th:text="#{'symbol.'+${offer.currency}}"></span>
-                                    </td>
-                                    <td class="p-0 pe-3 text-end">
-                                        <span th:text="${offer.formatedDuration()}"></span>
-                                    </td>
-                                </tr>
-                            </th:block>
-                        </tbody>
-                    </table>
-                </div>
+                        </th:block>
+                    </tbody>
+                </table>
+            </div>
     
         </div>
     </div>
-    
 </section>
-    
-<!--/*[[ JAVASCRIPT: Initialisation des tableaux et graphiques, incluant les annotations pour les événements commerciaux ]]*/-->
-<script th:inline="javascript">
-/*<![CDATA[*/
-
-// TODO : You will externalize the javascript behaviour of the graph and of the table into functions, that will init chart and table.
-// The goal is to allow to have another product-price-widget.html inclusion in product-price.html, in order to present same widget for occasion offers
-// Depending on your advice, i think we could place this javascript code in the product-price.html file, and init the components (table and chart) also from this file 
-	
-	
-// ---------------------------------------------------------
-// 1) Prepare all your data & helper functions
-// TODO : The thymeleaf injected vars must be infered as function parameters
-// TODO : Also inject canvas ant table ids, and all other required parameters 
-// TODO : Also inject chart color schemes, as optional parameters with default values
-// ---------------------------------------------------------
-
-const newPriceHistoryData = /*[[${product.price.newPricehistory}]]*/ [];
-const newPriceHistory = newPriceHistoryData.length > 0
-    ? newPriceHistoryData.map(({ timestamp: x, price: y }) => ({ x, y }))
-    : [];
-
-const commercialEvents = /*[[${events}]]*/ [];
-
-
-
-
-
-
-/* 
-    Build annotations for Chart.js annotation plugin based on commercial events, 
-    with labels displayed permanently on the chart.
-*/
-const annotations = {};
-commercialEvents.forEach((event, index) => {
-    // Lighter background color for box events
-    const boxBgColor = 'rgba(0, 0, 0, 0.1)';
-    const boxBorderColor = 'rgba(0, 0, 0, 0.6)';
-
-    // Common label styling
-    const commonLabel = {
-        display: true,
-        content: event.label,
-        backgroundColor: 'rgba(255,255,255,0.7)',
-        color: '#000',
-        font: {
-            size: 10,
-            weight: 'bold'
-        },
-        padding: 4,
-        borderRadius: 4
-    };
-
-    if (event.startDate === event.endDate) {
-        // Single-day event: vertical line annotation
-        annotations['event' + index] = {
-            type: 'line',
-            mode: 'vertical',
-            scaleID: 'x',
-            value: event.startDate,
-            borderColor: boxBorderColor,
-            borderWidth: 2,
-            label: {
-                ...commonLabel,
-                position: 'start'
-            }
-        };
-    } else {
-        // Multi-day event: box annotation
-        annotations['event' + index] = {
-            type: 'box',
-            xMin: event.startDate,
-            xMax: event.endDate,
-            backgroundColor: boxBgColor,
-            borderColor: boxBorderColor,
-            borderWidth: 1,
-            label: {
-                ...commonLabel,
-                position: 'start'
-            }
-        };
-    }
-});
-
-const today = new Date();
-const dateRanges = {
-    '15days': new Date(today.getTime() - (15 * 24 * 60 * 60 * 1000)),
-    '3months': new Date(today.getFullYear(), today.getMonth() - 3, today.getDate()),
-    '6months': new Date(today.getFullYear(), today.getMonth() - 6, today.getDate()),
-    'max': null // All data
-};
-
-const timeUnitMapping = {
-    '15days': 'day',
-    '3months': 'week',
-    '6months': 'week',
-    'max': 'month'
-};
-
-// Helper to filter data by date
-function filterDataByDate(data, startDate) {
-    return data.filter(item => new Date(item.x) >= startDate);
-}
-
-// Return the filtered dataset for a given period
-function getFilteredData(data, period) {
-    if (dateRanges[period]) {
-        return filterDataByDate(data, dateRanges[period]);
-    } else {
-        return data; // 'max'
-    }
-}
-
-// Check if there's any data in the given period
-function hasDataInPeriod(data, period) {
-    return getFilteredData(data, period).length > 0;
-}
-
-// Find absolute min & max from a dataset
-function findMinValue(data) {
-    return data.reduce((min, p) => p.y < min ? p.y : min, data[0].y);
-}
-function findMaxValue(data) {
-    return data.reduce((max, p) => p.y > max ? p.y : max, data[0].y);
-}
-
-// Light transparency on unselected period buttons
-function setActiveButton(activeButton, chartType) {
-    const buttonGroupSelector = chartType === 'new'
-        ? '.btn-group .btn[id^="btn-new"]'
-        : '.btn-group .btn[id^="btn-used"]';
-    const buttons = document.querySelectorAll(buttonGroupSelector);
-    buttons.forEach(button => {
-        button.classList.remove('btn-primary', 'active-period-btn');
-        button.classList.add('btn-secondary');
-        // Slight transparency for inactive
-        button.style.opacity = '0.5';
-    });
-    activeButton.classList.remove('btn-secondary');
-    activeButton.classList.add('btn-primary', 'active-period-btn');
-    // Fully opaque for the active
-    activeButton.style.opacity = '1';
-}
-
-/**
- * Update chart data, x-axis time unit, and min/max so it only shows data
- * in the chosen period. Then calls chart.update().
- */
-function updateChart(chart, data, period) {
-    const filteredData = getFilteredData(data, period);
-    chart.data.datasets[0].data = filteredData;
-    chart.options.scales.x.time.unit = timeUnitMapping[period] || 'month';
-
-    if (filteredData.length > 0) {
-        const newMin = findMinValue(filteredData);
-        const newMax = findMaxValue(filteredData);
-
-        // Slight padding on y-axis
-        chart.options.scales.y.suggestedMin = Math.floor(newMin * 0.98);
-        chart.options.scales.y.suggestedMax = Math.ceil(newMax * 1.02);
-
-        // Adjust x-axis to the date range of the filtered data
-        chart.options.scales.x.min = filteredData[0].x;
-        chart.options.scales.x.max = filteredData[filteredData.length - 1].x;
-    }
-    chart.update();
-}
-
-// ---------------------------------------------------------
-// 2) On DOM load, initialize the chart with correct scaling
-// ---------------------------------------------------------
-document.addEventListener('DOMContentLoaded', function() {
-
-    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-    tooltipTriggerList.map(function (tooltipTriggerEl) {
-        return new bootstrap.Tooltip(tooltipTriggerEl);
-    });
-
-    // If there's any price history data
-    if (newPriceHistory.length > 0) {
-        // Decide a default period
-        let defaultPeriod = '3months';
-        if (!hasDataInPeriod(newPriceHistory, defaultPeriod)) {
-            defaultPeriod = 'max';
-        }
-
-        // Prepare the initial filtered data
-        const initialFiltered = getFilteredData(newPriceHistory, defaultPeriod);
-
-        // We'll compute initial min/max for the chart
-        let xMinVal, xMaxVal, yMinVal, yMaxVal;
-        if (initialFiltered.length > 0) {
-            xMinVal = initialFiltered[0].x;
-            xMaxVal = initialFiltered[initialFiltered.length - 1].x;
-            yMinVal = findMinValue(initialFiltered);
-            yMaxVal = findMaxValue(initialFiltered);
-        }
-
-        // Create the chart with the initial min/max
-        const newPriceCtx = document.getElementById('newPriceChart').getContext('2d');
-        const newPriceChart = new Chart(newPriceCtx, {
-            type: 'line',
-            data: {
-                datasets: [{
-                    label: 'Prix Neuf', // Hidden from legend if legend.display = false
-                    data: initialFiltered,
-                    fill: true,
-                    backgroundColor: '#4cb1ff',
-                    borderColor: '#41a3ef',
-                    borderWidth: 2,
-                    tension: 0,
-                    pointRadius: 0,
-                    pointHoverRadius: 6,
-                    pointHitRadius: 10
-                }]
-            },
-            options: {
-                interaction: {
-                    mode: 'nearest',
-                    intersect: false
-                },
-                scales: {
-                    x: {
-                        type: 'time',
-                        time: {
-                            unit: timeUnitMapping[defaultPeriod] || 'month',
-                            displayFormats: {
-                                day: 'dd MMM yy',
-                                week: 'dd MMM yy',
-                                month: 'MMM yy'
-                            },
-                            tooltipFormat: 'dd MMM yyyy'
-                        },
-                        // Apply the min & max if we have them
-                        min: xMinVal,
-                        max: xMaxVal,
-                        title: {
-                            display: true,
-                            text: 'Date'
-                        }
-                    },
-                    y: {
-                        suggestedMin: yMinVal ? Math.floor(yMinVal * 0.98) : undefined,
-                        suggestedMax: yMaxVal ? Math.ceil(yMaxVal * 1.02) : undefined,
-                        title: {
-                            display: true,
-                            text: 'Prix (€)'
-                        }
-                    }
-                },
-                plugins: {
-                    legend: {
-                        display: false // hide the "Prix Neuf" legend
-                    },
-                    annotation: {
-                        clip: false,
-                        annotations: annotations
-                    }
-                }
-            }
-        });
-
-        // Force a chart update to finalize scaling
-        newPriceChart.update();
-
-        // Mark the default button as active
-        setActiveButton(document.getElementById('btn-new-' + defaultPeriod), 'new');
-
-        // Disable period buttons if no data for that period
-        ['15days', '3months', '6months'].forEach(period => {
-            if (!hasDataInPeriod(newPriceHistory, period)) {
-                const button = document.getElementById('btn-new-' + period);
-                if (button) {
-                    button.disabled = true;
-                    button.classList.add('disabled');
-                    button.style.opacity = '0.3';
-                }
-            }
-        });
-
-        // Attach event listeners for period changes
-        document.getElementById('btn-new-15days').addEventListener('click', function () {
-            updateChart(newPriceChart, newPriceHistory, '15days');
-            setActiveButton(this, 'new');
-        });
-        document.getElementById('btn-new-3months').addEventListener('click', function () {
-            updateChart(newPriceChart, newPriceHistory, '3months');
-            setActiveButton(this, 'new');
-        });
-        document.getElementById('btn-new-6months').addEventListener('click', function () {
-            updateChart(newPriceChart, newPriceHistory, '6months');
-            setActiveButton(this, 'new');
-        });
-        document.getElementById('btn-new-max').addEventListener('click', function () {
-            updateChart(newPriceChart, newPriceHistory, 'max');
-            setActiveButton(this, 'new');
-        });
-    }
-});
-/*]]>*/
-</script>
