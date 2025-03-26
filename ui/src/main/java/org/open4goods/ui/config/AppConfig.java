@@ -176,7 +176,8 @@ public class AppConfig {
         // Set multiple base names for properties files
         messageSource.setBasenames(
             "classpath:i18n/messages",  // default.properties
-            "classpath:i18n/metas"      // metas.properties
+            "classpath:i18n/metas",      // metas.properties
+            "classpath:i18n/product"      // metas.properties
         );
         
         messageSource.setDefaultEncoding("UTF-8");
