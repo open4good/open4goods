@@ -423,7 +423,6 @@ $(document).ready(function(){
 <script>
   $(document).ready(function () {
     $('.offer-link[data-token]').on('click', function (e) {
-alert('e');
       e.preventDefault(); // prevent default link or button behavior
       const token = $(this).data('token');
       $('#selectedOfferToken').val(token);
