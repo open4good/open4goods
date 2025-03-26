@@ -16,6 +16,9 @@ public class ContributedOrganisation {
 	@NotEmpty
 	private String description;
 
+	@NotEmpty
+	private String shortDescription;
+	
 	public String getName() {
 		return name;
 	}
@@ -47,6 +50,15 @@ public class ContributedOrganisation {
 	public void setDescription(String description) {
 		this.description = description;
 	}
+
+	public String getShortDescription() {
+		return shortDescription;
+	}
+
+	public void setShortDescription(String shortDescription) {
+		this.shortDescription = shortDescription;
+	}
+	
 	
 	
 	
