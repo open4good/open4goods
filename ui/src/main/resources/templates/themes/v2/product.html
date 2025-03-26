@@ -322,48 +322,7 @@
     // Global variable for the counter
     var reversment;
 
-    // Function to initialize DataTable
-    function initTable(tableId) {
-        // Initialize DataTable with specified options
-        tableNew = $(tableId).DataTable({
-            searching: false,
-            paging: false,
-            info: false,
-            select: 'single',
-            "order": [ [1, 'asc'] ]
-        });
-
-        // Event handler for row click in the table
-        tableNew.on('click', 'tbody tr', (e) => {
-            let classList = e.currentTarget.classList;
-
-            // Retrieve data attributes from the clicked row
-            token = $(e.currentTarget).attr('data-token');
-            compensation = $(e.currentTarget).attr('data-compensation');
-
-            // Update the token (e.g., in a hidden field)
-            $("#token").val(token);
-
-            var countUpUpdateoptions = {
-                duration: 1,
-                useEasing: false,
-                useGrouping: false,
-                separator: ',',
-                decimal: '.',
-                decimalPlaces: 2,
-                prefix: '',
-                suffix: ''
-            };
-
-            // Update the counter with the new compensation value
-            $("#countup-reversment").attr("data-max", compensation);
-            reversment.update(compensation);
-
-            // Handle 'selected' class for the active row
-            tableNew.rows('.selected').nodes().each((row) => row.classList.remove('selected'));
-            classList.add('selected');
-        });
-    }
+    
     
     
     // Initialize attributes table if it exists

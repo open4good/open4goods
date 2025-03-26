@@ -176,8 +176,16 @@
 <script th:inline="javascript">
 /*<![CDATA[*/
 
+// TODO : You will externalize the javascript behaviour of the graph and of the table into functions, that will init chart and table.
+// The goal is to allow to have another product-price-widget.html inclusion in product-price.html, in order to present same widget for occasion offers
+// Depending on your advice, i think we could place this javascript code in the product-price.html file, and init the components (table and chart) also from this file 
+	
+	
 // ---------------------------------------------------------
 // 1) Prepare all your data & helper functions
+// TODO : The thymeleaf injected vars must be infered as function parameters
+// TODO : Also inject canvas ant table ids, and all other required parameters 
+// TODO : Also inject chart color schemes, as optional parameters with default values
 // ---------------------------------------------------------
 
 const newPriceHistoryData = /*[[${product.price.newPricehistory}]]*/ [];
@@ -186,6 +194,11 @@ const newPriceHistory = newPriceHistoryData.length > 0
     : [];
 
 const commercialEvents = /*[[${events}]]*/ [];
+
+
+
+
+
 
 /* 
     Build annotations for Chart.js annotation plugin based on commercial events, 

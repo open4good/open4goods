@@ -1,6 +1,11 @@
 <!--  TODO : Adjust colsize computing, intended to adjust width if price or occasion offers not presents. 
 Colsize is 8 if alone, 6 if both  ${product.price.occasionOffers()}, and ${product.price.newOffers()} are present,-->
 
+
+
+
+
+
 <th:block
     th:with="
         priceHistory=${product.price.newPricehistory},
@@ -16,7 +21,7 @@ Colsize is 8 if alone, 6 if both  ${product.price.occasionOffers()}, and ${produ
     <th:block th:insert="~{inc/product-price-widget.html}"></th:block>
 </th:block>
 
-<!-- TODO : I will uncomment after your code updates
+<!-- TODO : Sample inclusion code for occasion offers after your code updates
 <th:block
     th:with="
         priceHistory=${product.price.occasionPricehistory != null and !#lists.isEmpty(product.price.occasionPricehistory)},
