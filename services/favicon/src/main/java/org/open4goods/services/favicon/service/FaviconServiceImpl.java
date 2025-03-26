@@ -4,8 +4,9 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URL;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 import org.apache.tika.Tika;
 import org.jsoup.Jsoup;
@@ -31,9 +32,10 @@ import io.micrometer.core.instrument.MeterRegistry;
  * Implementation of FaviconService that retrieves favicons for a given URL.
  * <p>
  * It supports direct domain mapping from configuration or, if not available,
- * fetching the root domain page and parsing for favicon links (using jsoup).
+ * fetching the provided URL and/or the root domain page and parsing for favicon links (using jsoup).
  * It also caches favicons (including their MIME type) in memory and updates actuator metrics.
  * Additionally, the service accepts either a full URL or just a domain name (e.g. "google.com").
+ * The favicon retrieval sequence is: in-memory cache, file cache (via direct mapping), then remote fetch.
  * </p>
  */
 @Service
@@ -45,7 +47,7 @@ public class FaviconServiceImpl implements FaviconService, HealthIndicator {
     private final RemoteFileCachingService remoteFileCachingService;
     private final MeterRegistry meterRegistry;
 
-    // In-memory cache: key is the URL, value is FaviconResponse (data + content type).
+    // In-memory cache: key is the normalized URL, value is FaviconResponse (data + content type).
     private final Map<String, FaviconResponse> faviconCache = new ConcurrentHashMap<>();
 
     // Metrics counters.
@@ -53,12 +55,16 @@ public class FaviconServiceImpl implements FaviconService, HealthIndicator {
     private final Counter faviconsFetchedOkCounter;
     private final Counter faviconsFetchedKoCounter;
 
-    // Favicon link relation priorities.
+    // Favicon link relation priorities (extended with msapplication-TileImage).
     private static final String[] FAVICON_REL_PRIORITIES = {
-            "icon", "shortcut icon", "apple-touch-icon", "apple-touch-icon-precomposed", "mask-icon", "fluid-icon"
+            "icon", "shortcut icon", "apple-touch-icon", "apple-touch-icon-precomposed",
+            "mask-icon", "fluid-icon", "msapplication-TileImage"
     };
 
     private final Tika tika = new Tika();
+
+    // Negative cache response to represent a failed favicon retrieval.
+    private static final FaviconResponse NEGATIVE_RESPONSE = new FaviconResponse(new byte[0], "");
 
     /**
      * Constructs a new FaviconServiceImpl.
@@ -86,10 +92,10 @@ public class FaviconServiceImpl implements FaviconService, HealthIndicator {
      * @return a fully-qualified URL.
      */
     private String normalizeUrl(String url) {
-    	url = url.trim();
         if (url == null) {
             return null;
         }
+        url = url.trim();
         if (!url.contains("://")) {
             return "http://" + url;
         }
@@ -99,7 +105,6 @@ public class FaviconServiceImpl implements FaviconService, HealthIndicator {
     @Override
     public boolean hasFavicon(String url) {
         try {
-            // Normalize URL and attempt to retrieve the favicon.
             FaviconResponse response = getFavicon(url);
             return response != null && response.faviconData() != null && response.faviconData().length > 0;
         } catch (FaviconException e) {
@@ -125,7 +130,7 @@ public class FaviconServiceImpl implements FaviconService, HealthIndicator {
 
         try {
             String domain = extractDomain(url);
-            FaviconResponse faviconResponse;
+            FaviconResponse faviconResponse = null;
 
             // Check for a direct mapping.
             if (faviconConfig.getDomainMapping() != null && faviconConfig.getDomainMapping().containsKey(domain)) {
@@ -133,15 +138,38 @@ public class FaviconServiceImpl implements FaviconService, HealthIndicator {
                 logger.info("Domain {} found in direct mapping. Using resource: {}", domain, mappedResource);
                 faviconResponse = fetchFaviconAndDetectType(mappedResource);
             } else {
-                // Otherwise, fetch and parse the root page.
+                // Try fetching from the provided URL if it's not a root URL.
                 String rootUrl = getRootUrl(url);
-                logger.info("Fetching HTML from root URL: {}", rootUrl);
-                Document doc = Jsoup.connect(rootUrl).get();
-                faviconResponse = parseFaviconFromDocument(doc, rootUrl);
+                if (!url.equals(rootUrl)) {
+                    logger.info("Fetching HTML from provided URL: {}", url);
+                    try {
+                        Document doc = Jsoup.connect(url)
+                                            .timeout(faviconConfig.getUrlTimeout())
+                                            .get();
+                        faviconResponse = parseFaviconFromDocument(doc, url);
+                        if (faviconResponse != null && faviconResponse.faviconData() != null && faviconResponse.faviconData().length > 0) {
+                            logger.info("Favicon found from provided URL: {}", url);
+                        } else {
+                            logger.info("No favicon found at provided URL: {}. Falling back to root URL: {}", url, rootUrl);
+                        }
+                    } catch (Exception e) {
+                        logger.warn("Failed to fetch favicon from provided URL {}: {}. Falling back to root URL.", url, e.getMessage());
+                    }
+                }
+                // If favicon not found from provided URL, try root URL.
+                if (faviconResponse == null || faviconResponse.faviconData() == null || faviconResponse.faviconData().length == 0) {
+                    logger.info("Fetching HTML from root URL: {}", rootUrl);
+                    Document doc = Jsoup.connect(rootUrl)
+                                        .timeout(faviconConfig.getUrlTimeout())
+                                        .get();
+                    faviconResponse = parseFaviconFromDocument(doc, rootUrl);
+                }
             }
 
             if (faviconResponse == null || faviconResponse.faviconData() == null || faviconResponse.faviconData().length == 0) {
                 faviconsFetchedKoCounter.increment();
+                // Cache negative result to avoid repeated remote calls.
+                faviconCache.put(url, NEGATIVE_RESPONSE);
                 throw new FaviconException("Favicon not found for URL: " + url);
             }
 
@@ -154,10 +182,14 @@ public class FaviconServiceImpl implements FaviconService, HealthIndicator {
         } catch (IOException e) {
             faviconsFetchedKoCounter.increment();
             logger.error("I/O error retrieving favicon for URL {}: {}", url, e.getMessage());
+            // Cache negative result.
+            faviconCache.put(url, NEGATIVE_RESPONSE);
             throw new FaviconException("I/O error retrieving favicon for URL: " + url, e);
         } catch (Exception e) {
             faviconsFetchedKoCounter.increment();
             logger.error("Error retrieving favicon for URL {}: {}", url, e.getMessage());
+            // Cache negative result.
+            faviconCache.put(url, NEGATIVE_RESPONSE);
             throw new FaviconException("Error retrieving favicon for URL: " + url, e);
         }
     }
@@ -197,6 +229,7 @@ public class FaviconServiceImpl implements FaviconService, HealthIndicator {
     /**
      * Fetches favicon data from a resource location and detects its MIME type.
      * The resource may be a URL, file system path, or classpath resource.
+     *
      * @throws InvalidParameterException 
      */
     private FaviconResponse fetchFaviconAndDetectType(String resourceLocation) throws IOException, InvalidParameterException {
@@ -224,16 +257,21 @@ public class FaviconServiceImpl implements FaviconService, HealthIndicator {
 
     /**
      * Parses the HTML document for a favicon link using the defined priority order.
+     * Links are sorted in descending order by their size (if available) to maximize quality.
      */
     private FaviconResponse parseFaviconFromDocument(Document doc, String baseUrl) throws IOException {
         for (String rel : FAVICON_REL_PRIORITIES) {
             Elements links = doc.select("link[rel~=(?i)" + rel + "]");
             if (!links.isEmpty()) {
-                for (Element link : links) {
+                // Sort links by size descending.
+                List<Element> sortedLinks = links.stream()
+                        .sorted((e1, e2) -> Integer.compare(getIconSize(e2), getIconSize(e1)))
+                        .collect(Collectors.toList());
+                for (Element link : sortedLinks) {
                     String href = link.attr("href");
                     if (StringUtils.hasText(href)) {
                         String faviconUrl = resolveUrl(baseUrl, href);
-                        logger.info("Found favicon link with rel='{}': {}", rel, faviconUrl);
+                        logger.info("Found favicon link with rel='{}' and sizes='{}': {}", rel, link.attr("sizes"), faviconUrl);
                         try {
                             File faviconFile = remoteFileCachingService.getResource(faviconUrl);
                             if (faviconFile.exists()) {
@@ -285,7 +323,6 @@ public class FaviconServiceImpl implements FaviconService, HealthIndicator {
         } catch (Exception e) {
             logger.warn("Tika detection failed for {}: {}. Falling back to file extension.", resourceUrl, e.getMessage());
         }
-        // Fallback: check the resource URL file extension.
         String lowerUrl = resourceUrl.toLowerCase();
         if (lowerUrl.endsWith(".ico")) {
             return "image/x-icon";
@@ -296,8 +333,35 @@ public class FaviconServiceImpl implements FaviconService, HealthIndicator {
         } else if (lowerUrl.endsWith(".gif")) {
             return "image/gif";
         }
-        // Default to image/png.
         return "image/png";
+    }
+
+    /**
+     * Extracts icon size from a link element based on the "sizes" attribute.
+     * Returns an integer representing the area (width * height) or a default value if not available.
+     *
+     * @param link the HTML link element.
+     * @return the computed size, with "any" being considered as Integer.MAX_VALUE.
+     */
+    private int getIconSize(Element link) {
+        String sizes = link.attr("sizes");
+        if (!StringUtils.hasText(sizes)) {
+            return 0;
+        }
+        if ("any".equalsIgnoreCase(sizes.trim())) {
+            return Integer.MAX_VALUE;
+        }
+        try {
+            String[] dimensions = sizes.trim().split("x");
+            if (dimensions.length == 2) {
+                int width = Integer.parseInt(dimensions[0].trim());
+                int height = Integer.parseInt(dimensions[1].trim());
+                return width * height;
+            }
+        } catch (NumberFormatException e) {
+            logger.warn("Unable to parse sizes attribute '{}': {}", sizes, e.getMessage());
+        }
+        return 0;
     }
 
     /**

@@ -7,11 +7,12 @@ import java.util.Map;
 /**
  * Configuration properties for the Favicon Service.
  * <p>
- * This configuration includes a cache folder and domain mappings.
+ * This configuration includes a cache folder, domain mappings, and URL read timeout.
  * Example configuration in application.yml:
  * <pre>
  * favicon:
  *   cacheFolder: "/path/to/cache"
+ *   urlTimeout: 5000
  *   domainMapping:
  *     example.com: "http://www.example.com/favicon.ico"
  *     anotherdomain.com: "file:/opt/favicon.ico"
@@ -31,6 +32,11 @@ public class FaviconConfig {
      */
     private Map<String, String> domainMapping;
 
+    /**
+     * URL read timeout in milliseconds for fetching HTML pages.
+     */
+    private int urlTimeout = 5000; // default to 5000 ms
+
     public String getCacheFolder() {
         return cacheFolder;
     }
@@ -44,11 +50,20 @@ public class FaviconConfig {
         this.domainMapping = domainMapping;
     }
 
+    public int getUrlTimeout() {
+        return urlTimeout;
+    }
+
+    public void setUrlTimeout(int urlTimeout) {
+        this.urlTimeout = urlTimeout;
+    }
+
     @Override
     public String toString() {
         return "FaviconConfig{" +
                 "cacheFolder='" + cacheFolder + '\'' +
                 ", domainMapping=" + domainMapping +
+                ", urlTimeout=" + urlTimeout +
                 '}';
     }
 }

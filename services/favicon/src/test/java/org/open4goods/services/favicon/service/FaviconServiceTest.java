@@ -26,17 +26,25 @@ public class FaviconServiceTest {
     @Test
     public void testHasFavicon_InvalidUrl() {
         String url = "invalid-url";
-        // Expect false or an exception wrapped as false.
         assertFalse(faviconService.hasFavicon(url));
+    }
+    
+    @Test
+    public void testNegativeCaching() {
+        String url = "http://nonexistent.example.com/favicon.ico";
+        // First call triggers remote fetch (and failure), caching the negative result.
+        boolean existsFirst = faviconService.hasFavicon(url);
+        // Second call should hit the negative cache and return quickly.
+        boolean existsSecond = faviconService.hasFavicon(url);
+        assertFalse(existsFirst, "Expected no favicon for nonexistent URL on first attempt.");
+        assertFalse(existsSecond, "Expected no favicon for nonexistent URL on second attempt (cached).");
     }
 
     @Test
     public void testClearCache() {
         faviconService.clearCache();
-        // If no exception is thrown, we consider it successful.
     }
 
-    // Minimal test configuration to bootstrap the Spring context.
     @SpringBootConfiguration
     @EnableAutoConfiguration
     @ComponentScan(basePackages = {"org.open4goods.services.favicon", "org.open4goods.commons.services"})
