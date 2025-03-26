@@ -1,7 +1,7 @@
 <!-- Main widget fragment: displays price history, chart, and offers -->
 <section role="main" th:aria-label="#{'product.price.' + ${widgetPrefix} + '.title'}">
     <div th:if="${priceHistory}">
-        <div class="m-4 card shadow border-gray-300 text-center" style="min-height: 400px;">
+        <div class="m-4 card shadow border-gray-300 text-center" >
     
             <div class="row text-center justify-content-center mt-4 mb-4">
                 <div class="col-md-8">
@@ -23,7 +23,7 @@
                                     <h5 class="mb-0" th:text="${offer.datasourceName}">Datasource</h5>
                                 </div>
                                 <div class="text-success d-flex justify-content-center align-items-baseline mb-0">
-                                    <h2 class="display-4 fw-bold mb-0 best-price" th:text="${offer.shortPrice()}">0</h2>
+                                    <h2 class="display-3 fw-bold mb-0 best-price" th:text="${offer.shortPrice()}">0</h2>
                                     <span class="ms-2" th:text="#{'symbol.' + ${offer.currency}}"></span>
                                 </div>
                             </div>
@@ -53,11 +53,11 @@
 						<div th:unless="${product.price.isHistoricalLowest(offer)}" class="card shadow me-4">
 						    <div class="card-body">
 						        <div class="row align-items-center">
-						            <div class="col-6 text-center">
 						                <h3 class="h4 mb-3" th:text="#{'product.price.' + ${widgetPrefix} + '.historical'}">Historique</h3>
+						            <div class="col-4 text-center">
 						                <i style="    font-size: 3em;" class="fa fa-history" aria-hidden="true"></i>
 						            </div>
-						            <div class="col-6">
+						            <div class="col-8">
 						                <div class="d-block ms-auto">
 						                    <!-- Lowest price -->
 						                    <div class="d-flex align-items-center text-right mb-2">
@@ -132,7 +132,8 @@
     
             </th:block>
     
-            <!-- Chart canvas -->
+            <!-- Chart canvas 
+            -->
             <canvas class="m-4" th:id="|${widgetPrefix}PriceChart|"></canvas>
     
 			<!-- Period selection buttons -->
