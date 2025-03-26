@@ -16,6 +16,11 @@
       "name": "favicon.domainMapping",
       "type": "java.util.Map<java.lang.String, java.lang.String>",
       "description": "Mapping of domains to direct favicon resource locations. Values can be a URL, a file path, or a classpath resource."
+    },
+    {
+      "name": "favicon.urlTimeout",
+      "type": "java.lang.Integer",
+      "description": "The URL read timeout in milliseconds for fetching HTML pages."
     }
   ]
 }

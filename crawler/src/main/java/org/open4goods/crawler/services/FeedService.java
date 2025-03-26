@@ -199,7 +199,7 @@ public class FeedService {
 		return ds;
 	}
 
-	/**TOTO : Implementa	tion with BeanUtils.copy make me feel like a bad design...
+	/**TODO : Implementation with BeanUtils.copy make me feel like a bad design...
 	 * Load a catalog
 	 * @param catalogUrl
 	 * @param feedConfig

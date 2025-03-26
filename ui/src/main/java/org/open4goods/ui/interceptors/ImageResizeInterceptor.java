@@ -38,7 +38,7 @@ import jakarta.servlet.http.HttpServletResponse;
  * </ul>
  * 
  * This class is a Spring {@link Component} and implements {@link HandlerInterceptor}.
- * TODO(p2, perf) : perf : add a inmemory cache for commons url patterns (/assets, ...)
+ * TODO(p2, perf) : perf : add a in memory cache for commons url patterns (/assets, ...)
  */
 @Component
 public class ImageResizeInterceptor implements HandlerInterceptor {
