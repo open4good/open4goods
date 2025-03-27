@@ -55,7 +55,7 @@
 						        <div class="row align-items-center">
 						                <h3 class="h4 mb-3" th:text="#{'product.price.' + ${widgetPrefix} + '.historical'}">Historique</h3>
 						            <div class="col-4 text-center">
-						                <i style="    font-size: 3em;" class="fa fa-history" aria-hidden="true"></i>
+						                <i style="    font-size:  2.5em;" class="fa fa-chart-line" aria-hidden="true"></i>
 						            </div>
 						            <div class="col-8">
 						                <div class="d-block ms-auto">
@@ -116,17 +116,17 @@
                 <!-- Trend messages -->
                 <div class="m-4">
                     <div th:if="${trend.trend == 0}" class="text-center alert alert-info" role="alert">
-                        😶‍🌫️ <span th:text="#{trend.stable}">Le prix est stable depuis</span> <span th:text="${trend.formatedDuration()}"></span>
+                        😶‍🌫️ <span th:text="#{trend.stable}">Le prix est stable depuis</span> <span th:text="${trend.formatedDuration()}">)</span>
                     </div>
                     <div th:if="${trend.trend == 1}" class="text-center alert alert-tertiary" role="alert">
                         🧐 <span th:text="#{trend.increased}">Le prix a augmenté de</span> <b>
                             <span th:text="${#numbers.formatDecimal(trend.variation == null ? 0 : trend.variation, 0, 0)}"></span>€
-                        </b> <span th:text="#{trend.since}">depuis</span> <span th:text="${trend.formatedDuration()}"></span>
+                        </b> <span th:text="#{trend.since}">depuis</span> <span th:text="${trend.formatedDuration()}">)</span>
                     </div>
                     <div th:if="${trend.trend == -1}" class="text-center alert alert-success" role="alert">
                         <span th:text="#{trend.decreased}">Le prix a baissé de</span> <b>
                             <span th:text="${#numbers.formatDecimal(trend.variation == null ? 0 : trend.variation, 0, 0)}"></span>€
-                        </b> <span th:text="#{trend.since}">depuis</span> <span th:text="${trend.formatedDuration()}"></span> 😊
+                        </b> <span th:text="#{trend.since}">depuis</span> <span th:text="${trend.formatedDuration()}">)</span> 😊
                     </div>
                 </div>
     

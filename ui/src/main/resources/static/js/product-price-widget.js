@@ -1,6 +1,5 @@
 /* product-price-widget.js */
 
-
 // Function to initialize DataTable
 function initTable(tableId) {
     // Initialize DataTable with specified options
@@ -12,8 +11,6 @@ function initTable(tableId) {
         "order": [ [2, 'asc'] ]
     });
 }
-
-
 
 /**
  * Utility function to parse your date string if needed.
@@ -94,16 +91,10 @@ function filterDataByDateRange(data, startDate) {
 
 /**
  * Remove period buttons if your dataset does not cover those periods.
- * 
- * Example logic: We check the total date span in priceHistory. If it's under some threshold,
- * we remove the relevant button from the DOM. 
- * 
- * Or, you can keep the existing "hasDataInPeriod" approach if you prefer. 
  */
 function removePeriodButtonsIfNotEnoughData(priceHistory, periodButtons) {
     if (priceHistory.length < 2) {
         // If there's 0 or 1 data points, you can remove everything or keep only "max"
-        // For demonstration, we remove everything except "max":
         Object.keys(periodButtons).forEach(period => {
             if (period !== 'max') {
                 const btn = document.getElementById(periodButtons[period]);
@@ -119,7 +110,6 @@ function removePeriodButtonsIfNotEnoughData(priceHistory, periodButtons) {
     const latest = priceHistory[priceHistory.length - 1].x;
     const diffDays = (latest - earliest) / (1000 * 3600 * 24);
 
-    // If the entire data range is under 15 days, remove 3months, 6months, max
     if (diffDays < 15) {
         ['3months', '6months', 'max'].forEach(p => {
             const btn = document.getElementById(periodButtons[p]);
@@ -127,7 +117,6 @@ function removePeriodButtonsIfNotEnoughData(priceHistory, periodButtons) {
         });
         return;
     }
-    // If < 90 days (3 months), remove 6months, max
     if (diffDays < 90) {
         ['6months', 'max'].forEach(p => {
             const btn = document.getElementById(periodButtons[p]);
@@ -135,7 +124,6 @@ function removePeriodButtonsIfNotEnoughData(priceHistory, periodButtons) {
         });
         return;
     }
-    // If < 180 days (6 months), remove max
     if (diffDays < 180) {
         const btn = document.getElementById(periodButtons['max']);
         btn && btn.remove();
@@ -144,27 +132,9 @@ function removePeriodButtonsIfNotEnoughData(priceHistory, periodButtons) {
 
 /**
  * initPriceWidget: Main function to initialize the chart + period buttons + events.
- * 
- * options: {
- *   widgetPrefix: string,
- *   priceHistory: [ { timestamp: 'YYYY-MM-DD...', price: number }, ... ],
- *   events: [ { startDate: 'YYYY-MM-DD...', endDate: 'YYYY-MM-DD...', label: string }, ... ],
- *   canvasId: string,
- *   tableId: string,
- *   periodButtons: {
- *       '15days': string,
- *       '3months': string,
- *       '6months': string,
- *       'max': string
- *   },
- *   defaultPeriod: '3months' | '15days' | '6months' | 'max',
- *   chartColors: { backgroundColor, borderColor }
- * }
  */
 function initPriceWidget(options) {
-    
-    
-    initTable('#'+options.tableId);
+    initTable('#' + options.tableId);
     
     // Set defaults if not provided
     options.defaultPeriod = options.defaultPeriod || '3months';
@@ -208,10 +178,10 @@ function initPriceWidget(options) {
     // 4) Remove period buttons if not enough data
     removePeriodButtonsIfNotEnoughData(priceHistory, options.periodButtons);
 
+    // 5) Update chart function with event remapping (Option B)
     function updateChart(chart, period) {
         const startDate = dateRanges[period] || null;
         const filteredData = filterDataByDateRange(priceHistory, startDate);
-
         chart.data.datasets[0].data = filteredData.slice();
 
         if (filteredData.length > 0) {
@@ -223,14 +193,75 @@ function initPriceWidget(options) {
             chart.options.scales.y.suggestedMin = Math.floor(minVal * 0.98);
             chart.options.scales.y.suggestedMax = Math.ceil(maxVal * 1.02);
 
-            // Filter events to only those that intersect this range
+            // ---- Handle commercial events ignoring the year ----
             const minDate = filteredData[0].x;
             const maxDate = filteredData[filteredData.length - 1].x;
-            const visibleEvents = commercialEvents.filter(ev =>
-                ev.endDate >= minDate && ev.startDate <= maxDate
-            );
-            chart.options.plugins.annotation.annotations = buildAnnotations(visibleEvents);
 
+            function extractMonthDay(date) {
+                return date.getMonth() * 100 + date.getDate(); // e.g., March 5 -> 305
+            }
+
+            // 1) Filter by month/day only
+            const minMD = extractMonthDay(minDate);
+            const maxMD = extractMonthDay(maxDate);
+
+            const visibleEvents = commercialEvents.filter(ev => {
+                const startMD = extractMonthDay(ev.startDate);
+                const endMD   = extractMonthDay(ev.endDate);
+
+                if (minMD <= maxMD) {
+                    // Normal case: e.g. March → May
+                    return endMD >= minMD && startMD <= maxMD;
+                } else {
+                    // Cross-year case: e.g. November → February
+                    return endMD >= minMD || startMD <= maxMD;
+                }
+            });
+
+            // 2) Remap each event’s month/day into the chart’s actual year(s)
+            function remapEventToChartYear(ev, minDate, maxDate) {
+                const minYear = minDate.getFullYear();
+                const maxYear = maxDate.getFullYear();
+
+                const minMD = extractMonthDay(minDate);
+                const maxMD = extractMonthDay(maxDate);
+
+                const startMD = extractMonthDay(ev.startDate);
+                const endMD   = extractMonthDay(ev.endDate);
+
+                if (minYear === maxYear) {
+                    // Single-year chart range
+                    return {
+                        startDate: new Date(minYear, ev.startDate.getMonth(), ev.startDate.getDate()),
+                        endDate:   new Date(minYear, ev.endDate.getMonth(),   ev.endDate.getDate()),
+                        label: ev.label
+                    };
+                }
+
+                // Cross-year chart range (assume maxYear = minYear + 1)
+                let newStartYear = (startMD >= minMD) ? minYear : maxYear;
+                let newEndYear   = (endMD   >= minMD) ? minYear : maxYear;
+
+                let newStartDate = new Date(newStartYear, ev.startDate.getMonth(), ev.startDate.getDate());
+                let newEndDate   = new Date(newEndYear,   ev.endDate.getMonth(),   ev.endDate.getDate());
+
+                // Ensure start <= end
+                if (newStartDate > newEndDate) {
+                    const temp = newStartDate;
+                    newStartDate = newEndDate;
+                    newEndDate = temp;
+                }
+                return {
+                    startDate: newStartDate,
+                    endDate:   newEndDate,
+                    label: ev.label
+                };
+            }
+
+            const mappedEvents = visibleEvents.map(ev => remapEventToChartYear(ev, minDate, maxDate));
+
+            // 3) Build the annotation config
+            chart.options.plugins.annotation.annotations = buildAnnotations(mappedEvents);
         } else {
             // No data => clear or handle gracefully
             chart.options.scales.x.min = undefined;
@@ -245,29 +276,6 @@ function initPriceWidget(options) {
         chart.update();
     }
 
-    function setActiveButton(activeBtn) {
-        // Deactivate all
-        const allBtns = document.querySelectorAll('.period-group .period-btn');
-        allBtns.forEach(b => {
-            b.classList.remove('btn-primary', 'active-period-btn');
-            b.classList.add('btn-secondary');
-            b.style.opacity = '0.5';
-
-            // Accessibility
-            b.setAttribute('aria-checked', 'false');
-            b.removeAttribute('aria-current');
-        });
-
-        // Activate the clicked one
-        activeBtn.classList.remove('btn-secondary');
-        activeBtn.classList.add('btn-primary', 'active-period-btn');
-        activeBtn.style.opacity = '1';
-
-        // Accessibility
-        activeBtn.setAttribute('aria-checked', 'true');
-        activeBtn.setAttribute('aria-current', 'true');
-    }
-
     // 6) Initialize the chart (if we have data)
     function initChart() {
         if (priceHistory.length === 0) {
@@ -277,9 +285,6 @@ function initPriceWidget(options) {
 
         // Determine the default period
         let currentPeriod = options.defaultPeriod;
-        // If we do not want to check "hasDataInPeriod" logic, we skip it
-        // but if you do, you could test if filterDataByDateRange(...) has length > 0
-
         // Prepare initial filtered data
         const startDate = dateRanges[currentPeriod] || null;
         const initialData = filterDataByDateRange(priceHistory, startDate);
@@ -348,6 +353,8 @@ function initPriceWidget(options) {
                     },
                     annotation: {
                         clip: false,
+                        // Initially build annotations from the raw events.
+                        // They will be corrected immediately after via updateChart().
                         annotations: buildAnnotations(commercialEvents)
                     }
                 }
@@ -358,7 +365,7 @@ function initPriceWidget(options) {
         Object.keys(options.periodButtons).forEach(periodKey => {
             const btnId = options.periodButtons[periodKey];
             const button = document.getElementById(btnId);
-            if (!button) return; // it might be removed
+            if (!button) return;
 
             // Make it "active" if it's our default
             if (periodKey === currentPeriod) {
@@ -370,9 +377,12 @@ function initPriceWidget(options) {
                 setActiveButton(button);
             });
         });
+
+        // IMPORTANT: Call updateChart once on initial load
+        updateChart(myChart, currentPeriod);
     }
 
-    // Simple helper to style the active button
+    // 8) Simple helper to style the active button
     function setActiveButton(activeBtn) {
         const allBtns = document.querySelectorAll('.period-group .period-btn');
         allBtns.forEach(b => {
@@ -385,7 +395,7 @@ function initPriceWidget(options) {
         activeBtn.style.opacity = '1';
     }
 
-    // 8) Initialize Bootstrap tooltips (if using them)
+    // 9) Initialize Bootstrap tooltips (if using them)
     function initTooltips() {
         const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
         tooltipTriggerList.map(el => new bootstrap.Tooltip(el));
