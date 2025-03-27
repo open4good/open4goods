@@ -234,7 +234,13 @@
                 "trend": {
                     "type": "integer",
                     "index": false
+                },
+                "trends": {
+                    "type": "object",
+                    "enabled": false
                 }
+                
+                
             }
         },
         "ranking": {

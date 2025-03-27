@@ -140,24 +140,28 @@
 			<div class="text-center" role="radiogroup" aria-label="Sélection de la période">
 			    <div class="btn-group my-3 period-group" role="group">
 			        <button type="button" class="mx-2 btn btn__nudger period-btn"
+			                th:classappend="'period-btn-'+ ${widgetPrefix}"
 			                th:id="|btn-${widgetPrefix}-15days|"
 			                role="radio" aria-checked="false"
 			                th:text="#{'product.price.' + ${widgetPrefix} + '.period.15days'}">
 			            15 jours
 			        </button>
 			        <button type="button" class="mx-2 btn btn__nudger period-btn"
+			                th:classappend="'period-btn-'+ ${widgetPrefix}"
 			                th:id="|btn-${widgetPrefix}-3months|"
 			                role="radio" aria-checked="false"
 			                th:text="#{'product.price.' + ${widgetPrefix} + '.period.3months'}">
 			            3 mois
 			        </button>
 			        <button type="button" class="mx-2 btn btn__nudger period-btn"
+			                th:classappend="'period-btn-'+ ${widgetPrefix}"
 			                th:id="|btn-${widgetPrefix}-6months|"
 			                role="radio" aria-checked="false"
 			                th:text="#{'product.price.' + ${widgetPrefix} + '.period.6months'}">
 			            6 mois
 			        </button>
 			        <button type="button" class="mx-2 btn btn__nudger period-btn"
+			                th:classappend="'period-btn-'+ ${widgetPrefix}"
 			                th:id="|btn-${widgetPrefix}-max|"
 			                role="radio" aria-checked="false"
 			                th:text="#{'product.price.' + ${widgetPrefix} + '.period.max'}">
@@ -167,47 +171,49 @@
 			</div>
 
     
-            <h3 class="mt-4 display-4" th:text="#{'product.price.' + ${widgetPrefix} + '.allOffers'}">Toutes les offres</h3>
-            
-            <!-- Offers table -->
-            <div class="m-4 table-responsive-sm">
-                <table th:id="|${widgetPrefix}-offers|" class="table table-hover bg-white">
-                    <thead>
-                        <tr>
-                            <th scope="col"></th>
-                            <th scope="col" th:text="#{table.merchant}">Marchand</th>
-                            <th scope="col" th:text="#{table.price}">Prix</th>
-                            <th scope="col" th:text="#{table.updated}">Mise à jour</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <th:block th:each="offer, stats : ${offers}">
-                            <tr class="p-3 align-middle offer-link"
-                                th:data-token="${offer.affiliationToken}"
-                                th:data-compensation="${offer.compensation}">
-                                <td class="p-0 infos-text">
-                                    <span class="p-3 d-inline-flex">
-                                        <img th:replace="inc/favicon :: remoteFavicon(${offer.datasourceName}, 16)" alt="Favicon"/>
-                                    </span>
-                                </td>
-                                <td class="p-0 infos-text" data-bs-toggle="tooltip" data-bs-placement="top" th:title="${offer.offerName}" nowrap>
-                                    <span class="h-100 d-flex align-items-center">
-                                        <span th:text="${offer.datasourceName}"></span>
-                                    </span>
-                                </td>
-                                <td class="p-0 infos-text infos-text-secondary text-center">
-                                    <span th:text="${offer.price}"></span> 
-                                    <span th:text="#{'symbol.' + ${offer.currency}}"></span>
-                                </td>
-                                <td class="p-0 pe-3 text-end">
-                                    <span th:text="${offer.formatedDuration()}"></span>
-                                </td>
-                            </tr>
-                        </th:block>
-                    </tbody>
-                </table>
-            </div>
-    
+            <th:block th:if="${offers.size > 1}">
+	
+	            <h3 class="mt-4 display-4" th:text="#{'product.price.' + ${widgetPrefix} + '.allOffers'}">Toutes les offres</h3>
+	            
+	            <!-- Offers table -->
+	            <div class="m-4 table-responsive-sm">
+	                <table th:id="|${widgetPrefix}-offers|" class="table table-hover bg-white">
+	                    <thead>
+	                        <tr>
+	                            <th scope="col"></th>
+	                            <th scope="col" th:text="#{table.merchant}">Marchand</th>
+	                            <th scope="col" th:text="#{table.price}">Prix</th>
+	                            <th scope="col" th:text="#{table.updated}">Mise à jour</th>
+	                        </tr>
+	                    </thead>
+	                    <tbody>
+	                        <th:block th:each="offer, stats : ${offers}">
+	                            <tr class="p-3 align-middle offer-link"
+	                                th:data-token="${offer.affiliationToken}"
+	                                th:data-compensation="${offer.compensation}">
+	                                <td class="p-0 infos-text">
+	                                    <span class="p-3 d-inline-flex">
+	                                        <img th:replace="inc/favicon :: remoteFavicon(${offer.datasourceName}, 16)" alt="Favicon"/>
+	                                    </span>
+	                                </td>
+	                                <td class="p-0 infos-text" data-bs-toggle="tooltip" data-bs-placement="top" th:title="${offer.offerName}" nowrap>
+	                                    <span class="h-100 d-flex align-items-center">
+	                                        <span th:text="${offer.datasourceName}"></span>
+	                                    </span>
+	                                </td>
+	                                <td class="p-0 infos-text infos-text-secondary text-center">
+	                                    <span th:text="${offer.price}"></span> 
+	                                    <span th:text="#{'symbol.' + ${offer.currency}}"></span>
+	                                </td>
+	                                <td class="p-0 pe-3 text-end">
+	                                    <span th:text="${offer.formatedDuration()}"></span>
+	                                </td>
+	                            </tr>
+	                        </th:block>
+	                    </tbody>
+	                </table>
+	            </div>
+            </th:block>
         </div>
     </div>
 </section>
