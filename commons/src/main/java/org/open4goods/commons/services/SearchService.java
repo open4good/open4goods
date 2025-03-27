@@ -26,6 +26,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.elasticsearch.UncategorizedElasticsearchException;
 import org.springframework.data.elasticsearch.client.elc.ElasticsearchAggregations;
 import org.springframework.data.elasticsearch.client.elc.NativeQueryBuilder;
 import org.springframework.data.elasticsearch.core.SearchHit;
@@ -34,6 +35,7 @@ import org.springframework.data.elasticsearch.core.query.Criteria;
 import org.springframework.data.elasticsearch.core.query.CriteriaQuery;
 import org.springframework.data.elasticsearch.core.query.CriteriaQueryBuilder;
 
+import co.elastic.clients.elasticsearch._types.ElasticsearchException;
 import co.elastic.clients.elasticsearch._types.aggregations.Aggregation;
 import co.elastic.clients.elasticsearch._types.aggregations.HistogramAggregate;
 import co.elastic.clients.elasticsearch._types.aggregations.HistogramBucket;
@@ -267,12 +269,12 @@ public class SearchService {
 		/////
 
 		if (null == request.getSortField()) {
-			esQuery = esQuery.withSort(Sort.by("offersCount").descending());
+			//esQuery = esQuery.withSort(Sort.by("offersCount").descending());
 		} else {
 			if (request.getSortOrder().equalsIgnoreCase("DESC") ) {
-				esQuery = esQuery.withSort(Sort.by(Sort.Order.desc(request.getSortField()).nullsLast()));
+				//esQuery = esQuery.withSort(Sort.by(Sort.Order.desc(request.getSortField()).nullsLast()));
 			} else if (request.getSortOrder().equalsIgnoreCase("ASC") ){
-				esQuery = esQuery.withSort(Sort.by(Sort.Order.asc(request.getSortField()).nullsLast()) );
+			//	esQuery = esQuery.withSort(Sort.by(Sort.Order.asc(request.getSortField()).nullsLast()) );
 			} else {
 				throw new RuntimeException("implement");
 			}
@@ -315,7 +317,20 @@ public class SearchService {
 			;		
 		}
 				
-		SearchHits<Product> results = aggregatedDataRepository.search(esQuery.build(),ProductRepository.MAIN_INDEX_NAME);
+		SearchHits<Product> results;
+		try {
+			results = aggregatedDataRepository.search(esQuery.build(),ProductRepository.MAIN_INDEX_NAME);
+		} catch (Exception e) {
+			
+			if (e instanceof UncategorizedElasticsearchException) {
+			    Throwable cause = e.getCause();
+			    if (cause instanceof ElasticsearchException ee) {
+			        LOGGER.error ("Elasticsearch error: " + ee.response());
+			    }
+			}
+
+			throw e;
+		}
 
 
 		// Handling aggregations results if relevant
