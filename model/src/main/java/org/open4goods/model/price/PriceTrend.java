@@ -23,15 +23,14 @@ public class PriceTrend {
 	
 	
 	
-	public static PriceTrend of(List<PriceHistory> history) {
+	public static PriceTrend of(List<PriceHistory> history, AggregatedPrice actual) {
 		PriceTrend trend = new PriceTrend();
-        if(history.size() > 1) {
-            PriceHistory actual = history.getLast();
+        if(history.size() >= 1) {
             PriceHistory last = history.get(history.size() - 2);
             trend.setActualPrice(actual.getPrice());
             trend.setLastPrice(last.getPrice());
             trend.setVariation(actual.getPrice() - last.getPrice());
-            trend.setPeriod(actual.getTimestamp() - last.getTimestamp());
+            trend.setPeriod(actual.getTimeStamp() - last.getTimestamp());
             trend.setTrend(trend.getVariation() > 0 ? 1 : (trend.getVariation() < 0 ? -1 : 0));
             trend.setHistoricalLowestPrice(history.stream().mapToDouble(PriceHistory::getPrice).min().orElse(0));
             trend.setHistoricalVariation(trend.getActualPrice() - trend.getHistoricalLowestPrice());
