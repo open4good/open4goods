@@ -116,17 +116,17 @@
                 <!-- Trend messages -->
                 <div class="m-4">
                     <div th:if="${trend.trend == 0}" class="text-center alert alert-info" role="alert">
-                        😶‍🌫️ <span th:text="#{trend.stable}">Le prix est stable depuis</span> <span th:text="${trend.formatedDuration()}">)</span>
+                        😶‍🌫️ <span th:text="#{trend.stable}">Le prix est stable depuis</span> <span th:text="${trend.formatedDuration()}"></span>)
                     </div>
-                    <div th:if="${trend.trend == 1}" class="text-center alert alert-tertiary" role="alert">
+                    <div th:if="${trend.trend == 1}" class="text-center alert alert-danger" role="alert">
                         🧐 <span th:text="#{trend.increased}">Le prix a augmenté de</span> <b>
                             <span th:text="${#numbers.formatDecimal(trend.variation == null ? 0 : trend.variation, 0, 0)}"></span>€
-                        </b> <span th:text="#{trend.since}">depuis</span> <span th:text="${trend.formatedDuration()}">)</span>
+                        </b> <span th:text="#{trend.since}">depuis</span> <span th:text="${trend.formatedDuration()}"></span>)
                     </div>
                     <div th:if="${trend.trend == -1}" class="text-center alert alert-success" role="alert">
                         <span th:text="#{trend.decreased}">Le prix a baissé de</span> <b>
                             <span th:text="${#numbers.formatDecimal(trend.variation == null ? 0 : trend.variation, 0, 0)}"></span>€
-                        </b> <span th:text="#{trend.since}">depuis</span> <span th:text="${trend.formatedDuration()}">)</span> 😊
+                        </b> <span th:text="#{trend.since}">depuis</span> <span th:text="${trend.formatedDuration()}"></span>) 😊
                     </div>
                 </div>
     
