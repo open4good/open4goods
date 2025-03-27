@@ -384,7 +384,7 @@ function initPriceWidget(options) {
 
     // 8) Simple helper to style the active button
     function setActiveButton(activeBtn) {
-        const allBtns = document.querySelectorAll('.period-group .period-btn');
+        const allBtns = document.querySelectorAll('.period-group .period-btn-'+options.widgetPrefix);
         allBtns.forEach(b => {
             b.classList.remove('btn-primary', 'active-period-btn');
             b.classList.add('btn-secondary');

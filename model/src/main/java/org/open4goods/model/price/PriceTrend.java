@@ -25,7 +25,7 @@ public class PriceTrend {
 	
 	public static PriceTrend of(List<PriceHistory> history, AggregatedPrice actual) {
 		PriceTrend trend = new PriceTrend();
-        if(history.size() > 1) {
+        if(history.size() > 1 && null != actual) {
             PriceHistory last = history.get(history.size() - 2);
             trend.setActualPrice(actual.getPrice());
             trend.setLastPrice(last.getPrice());
@@ -34,6 +34,8 @@ public class PriceTrend {
             trend.setTrend(trend.getVariation() > 0 ? 1 : (trend.getVariation() < 0 ? -1 : 0));
             trend.setHistoricalLowestPrice(history.stream().mapToDouble(PriceHistory::getPrice).min().orElse(0));
             trend.setHistoricalVariation(trend.getActualPrice() - trend.getHistoricalLowestPrice());
+        } else {
+        	trend.setTrend(0);
         }
         
         

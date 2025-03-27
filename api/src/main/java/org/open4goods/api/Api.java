@@ -30,7 +30,7 @@ import jakarta.annotation.PostConstruct;
 @EnableElasticsearchRepositories(basePackageClasses = {ElasticProductRepository.class, IndexationRepository.class, BrandScoresRepository.class})
 @EnableCaching
 
-public abstract class Api {
+public class Api {
 
 	/** The Constant logger. */
 	protected static final Logger logger = LoggerFactory.getLogger(Api.class);

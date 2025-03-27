@@ -142,7 +142,7 @@
           </div> <!-- .row -->
 
           <!--/* Hidden Field to Hold the Selected Offer Token */-->
-          <input type="hidden"
+          <input th:if="${product.offersCount > 0}" type="hidden"
                  id="selectedOfferToken"
                  name="token"
                  th:value="${bestOccasionOffer != null ? bestOccasionOffer.affiliationToken : bestNewOffer.affiliationToken}" />
