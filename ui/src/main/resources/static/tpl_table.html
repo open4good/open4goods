@@ -1,56 +1,58 @@
 <div style="display:none">	
 	<!-- Template for list layout -->
 	<div id="template-product-list">
-        <div class="border-{{ecoscoreInt}} d-flex align-items-center p-2 border-5 border-start bg-white">
-            <!-- Image du produit -->
-            <div class="me-3">
-                <img src="{{imageUrl}}" alt="{{name}}" width="90" height="90" class="border-gray-300" style="object-fit: cover;">
-            </div>
-        
-            <!-- Informations du produit -->
-            <div class="flex-grow-1">
-                <h5 class="mb-1">
-                    <a href="{{productUrl}}" class="text-decoration-none text-dark fw-bold">{{data.attributes.referentielAttributes.BRAND}} - {{name}}</a>
-                </h5>
-                
-                <div class="row star-rating star-rating-md " data-rating="{{ecoscore}}" aria-label="Rating: {{ecoscore}} out of 5 stars">
-                    <div class="stars">
-                        <span class="star"></span>
-                        <span class="star"></span>
-                        <span class="star"></span>
-                        <span class="star"></span>
-                        <span class="star"></span>
+        <div class="card card-body bg-white border-gray-300 mb-2 card-nudger">
+            <div class="border-{{ecoscoreInt}} d-flex align-items-center p-2 border-start bg-white">
+                <!-- Image du produit -->
+                <div class="me-3">
+                    <img src="{{imageUrl}}" alt="{{name}}" width="90" height="90" class="border-gray-300">
+                </div>
+            
+                <!-- Informations du produit -->
+                <div class="flex-grow-1">
+                    <h2 class="h5 mb-4">
+                        <a href="{{productUrl}}" class="text-decoration-none text-dark">{{data.attributes.referentielAttributes.BRAND}} - {{name}}</a>
+                    </h2>
+                    
+                    <div class="row star-rating star-rating-md " data-rating="{{ecoscore}}" aria-label="Rating: {{ecoscore}} out of 5 stars">
+                        <div class="stars">
+                            <span class="star"></span>
+                            <span class="star"></span>
+                            <span class="star"></span>
+                            <span class="star"></span>
+                            <span class="star"></span>
+                        </div>
+                    </div>
+                    <!-- Éco-score -->
+                    <span class="badge bg-success">Ecoscore : <strong>{{ecoscore}} / 5</strong></span>
+            
+                    <!-- Indicateurs clés -->
+                    <div class="mt-2 d-flex flex-wrap">
+                        <span class="me-3"><strong>Réparabilité :</strong> 8/10 <span class="badge bg-success">(new)</span></span>
+                        <span class="me-3"><strong>Consommation :</strong> 120 kWh/an <span class="badge bg-success">(new)</span></span>
+                        <span class="me-3"><strong>Pièces :</strong> 10 ans <span class="badge bg-success">(new)</span></span>
+                        <span class="me-3"><strong>Compensation :</strong> {{compensation}} {{data.price.minPrice.currency}}</span>
+                        <span class="me-3"><strong>Prix :</strong> {{data.price.minPrice.price}} {{data.price.minPrice.currency}}</span>
                     </div>
                 </div>
-                <!-- Éco-score -->
-                <span class="badge bg-success">Ecoscore : <strong>{{ecoscore}} / 5</strong></span>
-        
-                <!-- Indicateurs clés -->
-                <div class="mt-2 d-flex flex-wrap">
-                    <span class="me-3"><strong>Réparabilité :</strong> 8/10 <span class="badge bg-success">(new)</span></span>
-                    <span class="me-3"><strong>Consommation :</strong> 120 kWh/an <span class="badge bg-success">(new)</span></span>
-                    <span class="me-3"><strong>Pièces :</strong> 10 ans <span class="badge bg-success">(new)</span></span>
-                    <span class="me-3"><strong>Compensation :</strong> {{compensation}} {{data.price.minPrice.currency}}</span>
-                    <span class="me-3"><strong>Prix :</strong> {{data.price.minPrice.price}} {{data.price.minPrice.currency}}</span>
-                </div>
-            </div>
-        
-            <!-- Bouton Comparer -->
-            <!--div>
-                <button class="btn btn-outline-primary btn-sm">Comparer <span class="badge bg-success">(new)</span></button>
-            </div-->
+            
+                <!-- Bouton Comparer -->
+                <!--div>
+                    <button class="btn btn-outline-primary btn-sm">Comparer <span class="badge bg-success">(new)</span></button>
+                </div-->
 
-            <div>
-                <a href="{{productUrl}}" class="btn btn__nudger text-decoration-none text-white">
-                    &#62;
-                </a>
+                <div>
+                    <a href="{{productUrl}}" class="btn btn__nudger text-decoration-none text-white">
+                        &#62;
+                    </a>
+                </div>
             </div>
         </div>
 	</div>
 
 	<!-- Template for cards layout -->
 	<div id="template-product-card">
-		<div class="text-center" >
+		<div class="card card-body bg-white border-gray-300 mb-2 card-nudger">
 	          <a href="{{productUrl}}">
 	              <img height="200" src="{{imageUrl}}" alt="{{name}}">
 	              <a href="{{productUrl}}" class="h5 title">{{data.attributes.referentielAttributes.BRAND}} - {{name}}</a>
