@@ -56,7 +56,14 @@
         opacity: 1;
       }
     </style>
-      
+      <script defer type="text/javascript" language="javascript" src="/webjars/datatables/js/dataTables.min.js"></script>
+<script defer type="text/javascript" language="javascript" src="/webjars/datatables/js/dataTables.bootstrap5.min.js"></script>
+      <script src="/js/product-price-widget.js"></script>
+      <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns/dist/chartjs-adapter-date-fns.bundle.min.js"></script>    
+
+<!--/* TODO: place this in your <head> or just before the chart script */-->
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@latest/dist/chartjs-plugin-annotation.min.js"></script>
       
     <style>
     
@@ -327,17 +334,12 @@
 <!-- Footer -->
 <th:block th:insert="~{inc/footer.html}"></th:block>
 
-<script defer type="text/javascript" language="javascript" src="/webjars/datatables/js/dataTables.min.js"></script>
-<script defer type="text/javascript" language="javascript" src="/webjars/datatables/js/dataTables.bootstrap5.min.js"></script>
+
 
 <script defer src="/vendor/countUp.umd.js"></script>
 <script defer src="/vendor/nouislider/dist/nouislider.min.js"></script>
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns/dist/chartjs-adapter-date-fns.bundle.min.js"></script>    
 
-<!--/* TODO: place this in your <head> or just before the chart script */-->
-<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@latest/dist/chartjs-plugin-annotation.min.js"></script>
 
 
 
@@ -554,7 +556,6 @@ $(document).ready(function(){
 
 
     
-<script src="/js/product-price-widget.js"></script>
 </body>
 
 </html>

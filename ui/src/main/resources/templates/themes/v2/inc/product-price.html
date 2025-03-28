@@ -1,3 +1,4 @@
+
 <th:block 
     th:with="
         hasNewOffers=${product.price.newOffers() != null and !#lists.isEmpty(product.price.newOffers())},
@@ -20,7 +21,7 @@
 
                 <script th:inline="javascript">
                     /*<![CDATA[*/
-                    document.addEventListener('DOMContentLoaded', function() {
+                 window.addEventListener('load', function() {
                         initPriceWidget({
                             widgetPrefix: /*[[${widgetPrefix}]]*/,
                             priceHistory: /*[[${priceHistory}]]*/,
@@ -56,7 +57,7 @@
 
                 <script th:inline="javascript">
                     /*<![CDATA[*/
-                    document.addEventListener('DOMContentLoaded', function() {
+                  window.addEventListener('load', function() {
                         initPriceWidget({
                             widgetPrefix: /*[[${widgetPrefix}]]*/,
                             priceHistory: /*[[${priceHistory}]]*/,
