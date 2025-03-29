@@ -95,7 +95,7 @@ public class RemoteFileCachingService {
 
 
 
-	private File retrieve(final CacheResourceConfig conf) throws TechnicalException {
+	public File retrieve(final CacheResourceConfig conf) throws TechnicalException {
 
 		try {
 			File tmpFile = new File(resourceFolder+File.separator+"tmp-"+IdHelper.getHashedName(conf.getUrl()));

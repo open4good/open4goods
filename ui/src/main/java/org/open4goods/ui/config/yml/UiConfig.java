@@ -7,6 +7,8 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
+import org.open4goods.api.services.feed.AffiliationConfig;
+import org.open4goods.api.services.feed.FeedConfiguration;
 import org.open4goods.commons.config.yml.BanCheckerConfig;
 import org.open4goods.commons.config.yml.BlogConfiguration;
 import org.open4goods.commons.config.yml.DevModeConfiguration;
@@ -130,6 +132,12 @@ public class UiConfig {
 	 */
 	private UrlCheckConfig urlcheck;
 
+	
+	private AffiliationConfig affiliationConfig = new AffiliationConfig();
+	
+	
+	private Map<String, FeedConfiguration> feedConfigs = new HashMap<>();
+	
 	/***
 	 * Config for IP and UA banChecking
 	 */
@@ -524,6 +532,26 @@ public class UiConfig {
 
 	public void setPriceConfig(PriceRestitutionConfig priceConfig) {
 		this.priceConfig = priceConfig;
+	}
+
+
+	public AffiliationConfig getAffiliationConfig() {
+		return affiliationConfig;
+	}
+
+
+	public void setAffiliationConfig(AffiliationConfig affiliationConfig) {
+		this.affiliationConfig = affiliationConfig;
+	}
+
+
+	public Map<String, FeedConfiguration> getFeedConfigs() {
+		return feedConfigs;
+	}
+
+
+	public void setFeedConfigs(Map<String, FeedConfiguration> feedConfigs) {
+		this.feedConfigs = feedConfigs;
 	}
 
 

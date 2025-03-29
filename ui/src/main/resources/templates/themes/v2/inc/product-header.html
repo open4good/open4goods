@@ -78,7 +78,7 @@
                   <div class="card-body text-center">
                     <h6 class="text-muted">Occasion</h6>
                     <div class="d-flex align-items-center justify-content-center mb-3">
-                      <img th:replace="inc/favicon :: remoteFavicon(${bestOccasionOffer.datasourceName}, 32)">
+                      <img th:replace="inc/datasource :: icon(${bestOccasionOffer}, 32)">
                       <h5 class="mb-0" th:text="${bestOccasionOffer.datasourceName}"></h5>
                     </div>
                     <!-- Price Section -->

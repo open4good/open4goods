@@ -4,9 +4,14 @@ package org.open4goods.ui.config;
 import java.io.IOException;
 import java.time.Duration;
 import java.util.Arrays;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-import org.open4goods.commons.helper.DevModeService;
+import org.open4goods.api.services.feed.AbstractFeedService;
+import org.open4goods.api.services.feed.AwinFeedService;
+import org.open4goods.api.services.feed.EffiliationFeedService;
+import org.open4goods.api.services.feed.FeedConfiguration;
+import org.open4goods.api.services.feed.FeedService;
 import org.open4goods.commons.services.BarcodeValidationService;
 import org.open4goods.commons.services.BrandService;
 import org.open4goods.commons.services.DataSourceConfigService;
@@ -25,18 +30,14 @@ import org.open4goods.model.StandardiserService;
 import org.open4goods.model.constants.CacheConstants;
 import org.open4goods.model.price.Currency;
 import org.open4goods.model.price.Price;
-import org.open4goods.services.captcha.service.HcaptchaService;
 import org.open4goods.services.evaluation.config.EvaluationConfig;
 import org.open4goods.services.evaluation.service.EvaluationService;
-import org.open4goods.services.googlesearch.config.GoogleSearchConfig;
-import org.open4goods.services.googlesearch.service.GoogleSearchService;
 import org.open4goods.services.productrepository.services.ProductRepository;
 import org.open4goods.services.prompt.config.PromptServiceConfig;
 import org.open4goods.services.prompt.service.PromptService;
 import org.open4goods.services.remotefilecaching.service.RemoteFileCachingService;
 import org.open4goods.services.serialisation.service.SerialisationService;
 import org.open4goods.ui.config.yml.UiConfig;
-import org.open4goods.ui.controllers.ui.UiService;
 import org.open4goods.ui.interceptors.GenericTemplateInterceptor;
 import org.open4goods.ui.interceptors.ImageResizeInterceptor;
 import org.open4goods.ui.repository.ContributionVoteRepository;
@@ -168,7 +169,40 @@ public class AppConfig {
 
 
 
+	
+    @Bean
+    public AwinFeedService awinFeedService(
+                                           RemoteFileCachingService remoteFileCachingService,
+                                           DataSourceConfigService dataSourceConfigService,
+                                           SerialisationService serialisationService,
+                                           UiConfig uiConfig
+    		
+    		) {
+        // Retrieve Awin-specific feed configuration from the fetcher properties
+        FeedConfiguration awinConfig = uiConfig.getFeedConfigs().get("awin");
+        return new AwinFeedService(awinConfig, remoteFileCachingService, dataSourceConfigService, serialisationService, uiConfig.getAffiliationConfig().getAwinAdvertiserId(), uiConfig.getAffiliationConfig().getAwinAccessToken());
+    }
 
+    @Bean
+    public EffiliationFeedService effiliationFeedService(
+                                                         RemoteFileCachingService remoteFileCachingService,
+                                                         DataSourceConfigService dataSourceConfigService,
+                                                         SerialisationService serialisationService, 
+                                                         UiConfig uiConfig) {
+        // Retrieve Effiliation-specific feed configuration from the fetcher properties
+        FeedConfiguration effiliationConfig = uiConfig.getFeedConfigs().get("effiliation");
+        return new EffiliationFeedService(effiliationConfig, remoteFileCachingService, dataSourceConfigService, serialisationService, uiConfig.getAffiliationConfig().getEffiliationApiKey());
+    }
+
+    @Bean
+    public FeedService feedService(List<AbstractFeedService> feedServices,
+                                   DataSourceConfigService dataSourceConfigService) {
+        // The FeedService aggregates all concrete feed implementations.
+        return new FeedService(feedServices, dataSourceConfigService);
+    }
+
+    
+    
     @Bean
     public ResourceBundle messageSource() {
         ResourceBundle messageSource = new ResourceBundle();

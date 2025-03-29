@@ -1,10 +1,16 @@
 package org.open4goods.api.services;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.open4goods.api.services.feed.FeedService;
+import org.open4goods.commons.config.yml.datasource.DataSourceProperties;
 import org.open4goods.commons.services.VerticalsConfigService;
+import org.open4goods.crawler.services.fetching.CsvDatasourceFetchingService;
+import org.open4goods.model.helper.IdHelper;
 import org.open4goods.model.product.Product;
 import org.open4goods.model.vertical.VerticalConfig;
 import org.open4goods.services.productrepository.services.ProductRepository;
@@ -28,16 +34,21 @@ public class BatchService {
 	private CompletionFacadeService completionFacadeService;
 
 	private AggregationFacadeService aggregationFacadeService;
+	
+	private CsvDatasourceFetchingService csvDatasourceFetchingService;
+	
+	private FeedService feedService;
 
 	private ProductRepository dataRepository;
 	
 	public BatchService(AggregationFacadeService aggregationFacadeService,
-			CompletionFacadeService completionFacadeService, VerticalsConfigService verticalsConfigService, ProductRepository dataRepository) {
+			CompletionFacadeService completionFacadeService, VerticalsConfigService verticalsConfigService, ProductRepository dataRepository, CsvDatasourceFetchingService csvDatasourceFetchingService) {
 		super();
 		this.aggregationFacadeService = aggregationFacadeService;
 		this.completionFacadeService = completionFacadeService;
 		this.verticalsConfigService = verticalsConfigService;
 		this.dataRepository = dataRepository;
+		this.csvDatasourceFetchingService = csvDatasourceFetchingService;
 
 	}
 
@@ -152,4 +163,113 @@ public class BatchService {
 		dataRepository.addToFullindexationQueue(allProducts);
 	}
 
+	
+	
+	
+
+	///////////////////////
+	///// Feeds retrieving
+	///////////////////////
+	///
+
+	
+	
+	
+	
+	/**
+     * Fetches all feeds by aggregating datasource properties from all feed services and orphan configurations,
+     * then starting the fetching process for each datasource.
+     */
+    @Scheduled(cron = "19 13 1 * * ?") // For example, schedule daily at 1 AM.
+    public void fetchFeeds() {
+        logger.info("Initiating full feed fetching process.");
+        Set<DataSourceProperties> datasources = feedService.getFeedsUrl();
+        
+        List<DataSourceProperties> datasourceList = new ArrayList<>(datasources);
+        long seed = System.nanoTime();
+        java.util.Collections.shuffle(datasourceList, new java.util.Random(seed));
+        
+        logger.info("Total feeds to fetch: {}", datasourceList.size());
+        for (DataSourceProperties ds : datasourceList) {
+            try {
+                logger.info("Fetching feed: {}", ds);
+                csvDatasourceFetchingService.start(ds, ds.getDatasourceConfigName());
+            } catch (Exception e) {
+                logger.error("Error fetching feed {}: ", ds, e);
+            }
+        }
+    }
+	
+	
+    
+    /**
+     * Fetches feeds that match the specified feed URL.
+     *
+     * @param url the feed URL to match
+     */
+    public void fetchFeedsByUrl(String url) {
+        logger.info("Fetching feeds with URL: {}", url);
+        Set<DataSourceProperties> datasources =  feedService.getFeedsUrl();
+        logger.info("Found {} feeds for processing.", datasources.size());
+        
+        for (DataSourceProperties ds : datasources) {
+            try {
+                if (ds.getCsvDatasource().getDatasourceUrls().contains(url)) {
+                    logger.info("Fetching feed: {}", ds);
+                    csvDatasourceFetchingService.start(ds, ds.getDatasourceConfigName());
+                } else {
+                    logger.debug("Skipping feed: {}", ds);
+                }
+            } catch (Exception e) {
+                logger.error("Error fetching feed {}: ", ds, e);
+            }
+        }
+    }
+    
+    /**
+     * Fetches feeds that match the specified feed key.
+     *
+     * @param feedKey the feed key to match
+     */
+    public void fetchFeedsByKey(String feedKey) {
+        logger.info("Fetching feeds with key: {}", feedKey);
+        Set<DataSourceProperties> datasources = matchingKey(feedKey);
+        for (DataSourceProperties ds : datasources) {
+            try {
+                logger.info("Fetching feed {}: {}", ds.getDatasourceConfigName(), ds);
+                csvDatasourceFetchingService.start(ds, ds.getDatasourceConfigName());
+            } catch (Exception e) {
+                logger.error("Error fetching feed {}: ", ds.getDatasourceConfigName(), e);
+            }
+        }
+    }
+    
+    
+
+    /**
+     * Filters and returns datasource properties that match the provided feed key.
+     *
+     * @param feedKey the feed key to match
+     * @return a set of matching datasource properties
+     */
+    private Set<DataSourceProperties> matchingKey(String feedKey) {
+        String cleanedKey = IdHelper.azCharAndDigits(feedKey).toLowerCase();
+        Set<DataSourceProperties> result = new HashSet<>();
+        for (DataSourceProperties ds : feedService.getFeedsUrl()) {
+            try {
+                String configName = IdHelper.azCharAndDigits(ds.getDatasourceConfigName()).toLowerCase();
+                String dsName = IdHelper.azCharAndDigits(ds.getName()).toLowerCase();
+                if (cleanedKey.equals(configName) || cleanedKey.equals(dsName)) {
+                    result.add(ds);
+                    logger.info("Matched feed: {}", ds);
+                }
+            } catch (Exception e) {
+                logger.error("Error matching feed {}: ", ds, e);
+            }
+        }
+        return result;
+    }
+    
+    
+	
 }

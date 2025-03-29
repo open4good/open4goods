@@ -1,9 +1,11 @@
-package org.open4goods.commons.config.yml.datasource;
+package org.open4goods.api.services.feed;
 
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+
+import org.open4goods.commons.config.yml.datasource.CsvDataSourceProperties;
 
 public class FeedConfiguration {
 

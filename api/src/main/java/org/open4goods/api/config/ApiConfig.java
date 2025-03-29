@@ -2,6 +2,7 @@ package org.open4goods.api.config;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import org.open4goods.api.config.yml.ApiProperties;
@@ -13,6 +14,11 @@ import org.open4goods.api.services.VerticalsGenerationService;
 import org.open4goods.api.services.completion.AmazonCompletionService;
 import org.open4goods.api.services.completion.IcecatCompletionService;
 import org.open4goods.api.services.completion.ResourceCompletionService;
+import org.open4goods.api.services.feed.AbstractFeedService;
+import org.open4goods.api.services.feed.AwinFeedService;
+import org.open4goods.api.services.feed.EffiliationFeedService;
+import org.open4goods.api.services.feed.FeedConfiguration;
+import org.open4goods.api.services.feed.FeedService;
 import org.open4goods.api.services.store.DataFragmentStoreService;
 import org.open4goods.commons.helper.DevModeService;
 import org.open4goods.commons.model.constants.TimeConstants;
@@ -34,7 +40,6 @@ import org.open4goods.crawler.config.yml.FetcherProperties;
 import org.open4goods.crawler.repository.IndexationRepository;
 import org.open4goods.crawler.services.ApiSynchService;
 import org.open4goods.crawler.services.DataFragmentCompletionService;
-import org.open4goods.crawler.services.FeedService;
 import org.open4goods.crawler.services.FetchersService;
 import org.open4goods.crawler.services.IndexationService;
 import org.open4goods.crawler.services.fetching.CsvDatasourceFetchingService;
@@ -164,8 +169,8 @@ public class ApiConfig {
 	}
 
 	@Bean
-	BatchService batchService(AggregationFacadeService aggregationFacadeService, CompletionFacadeService completionFacadeService, VerticalsConfigService verticalsConfigService, ProductRepository productRepository) {
-		return new BatchService(aggregationFacadeService, completionFacadeService, verticalsConfigService, productRepository);
+	BatchService batchService(AggregationFacadeService aggregationFacadeService, CompletionFacadeService completionFacadeService, VerticalsConfigService verticalsConfigService, ProductRepository productRepository, CsvDatasourceFetchingService csvDatasourceFetchingService) {
+		return new BatchService(aggregationFacadeService, completionFacadeService, verticalsConfigService, productRepository,  csvDatasourceFetchingService);
 	}
 
 	@Bean
@@ -183,10 +188,37 @@ public class ApiConfig {
 		return new DevModeService(apiProperties.getDevModeConfig(), repository, serialisationService, verticalsConfigService);
 	}
 
-	@Bean
-	FeedService feedService(SerialisationService serialisationService, DataSourceConfigService datasourceConfigService, CsvDatasourceFetchingService fetchingService, FetcherProperties fetcherProperties) {
-		return new FeedService(serialisationService, datasourceConfigService, fetchingService, fetcherProperties.getFeedConfigs());
-	}
+	
+    @Bean
+    public AwinFeedService awinFeedService(FetcherProperties fetcherProperties,
+                                           RemoteFileCachingService remoteFileCachingService,
+                                           DataSourceConfigService dataSourceConfigService,
+                                           SerialisationService serialisationService,
+                                           ApiProperties props
+    		
+    		) {
+        // Retrieve Awin-specific feed configuration from the fetcher properties
+        FeedConfiguration awinConfig = fetcherProperties.getFeedConfigs().get("awin");
+        return new AwinFeedService(awinConfig, remoteFileCachingService, dataSourceConfigService, serialisationService, props.getAffiliationConfig().getAwinAdvertiserId(), props.getAffiliationConfig().getAwinAccessToken());
+    }
+
+    @Bean
+    public EffiliationFeedService effiliationFeedService(FetcherProperties fetcherProperties,
+                                                         RemoteFileCachingService remoteFileCachingService,
+                                                         DataSourceConfigService dataSourceConfigService,
+                                                         SerialisationService serialisationService, 
+                                                         ApiProperties props) {
+        // Retrieve Effiliation-specific feed configuration from the fetcher properties
+        FeedConfiguration effiliationConfig = fetcherProperties.getFeedConfigs().get("effiliation");
+        return new EffiliationFeedService(effiliationConfig, remoteFileCachingService, dataSourceConfigService, serialisationService, props.getAffiliationConfig().getEffiliationApiKey());
+    }
+
+    @Bean
+    public FeedService feedService(List<AbstractFeedService> feedServices,
+                                   DataSourceConfigService dataSourceConfigService) {
+        // The FeedService aggregates all concrete feed implementations.
+        return new FeedService(feedServices, dataSourceConfigService);
+    }
 
 	@Bean
 	VerticalsConfigService verticalConfigsService(ResourcePatternResolver resolver, SerialisationService serialisationService, GoogleTaxonomyService googleTaxonomyService, ProductRepository productRepository, ImageGenerationService imageGenService) throws IOException {

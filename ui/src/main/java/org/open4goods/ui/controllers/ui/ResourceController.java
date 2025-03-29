@@ -15,6 +15,9 @@ import java.util.List;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
+import org.open4goods.api.services.feed.FeedService;
+import org.open4goods.commons.config.yml.RemoteCacheFileConfig;
+import org.open4goods.commons.config.yml.datasource.DataSourceProperties;
 import org.open4goods.commons.model.constants.RolesConstants;
 import org.open4goods.commons.services.BrandService;
 import org.open4goods.commons.services.DataSourceConfigService;
@@ -28,6 +31,7 @@ import org.open4goods.model.product.Product;
 import org.open4goods.model.resource.Resource;
 import org.open4goods.model.vertical.VerticalConfig;
 import org.open4goods.services.productrepository.services.ProductRepository;
+import org.open4goods.services.remotefilecaching.service.RemoteFileCachingService;
 import org.open4goods.ui.config.AppConfig;
 import org.open4goods.ui.config.yml.UiConfig;
 import org.open4goods.ui.services.GtinService;
@@ -67,11 +71,14 @@ public class ResourceController {
 	private final BrandService brandService;
 	private final ResourceService resourceService;
 	private final GtinService gtinService;
+	private final FeedService feedservice;
+	private final RemoteFileCachingService remoteFilecache;
+	
 	private ProductRepository productRepository;
 
 	private VerticalsConfigService verticalsConfigService;
 
-	public ResourceController( VerticalsConfigService verticalsConfigService,  ProductRepository productRepository,  UiConfig config, DataSourceConfigService dsConfigService, ResourceService resourceService, BrandService brandService, ImageGenerationService imageGenerationService, GtinService gtinService) {
+	public ResourceController( VerticalsConfigService verticalsConfigService,  ProductRepository productRepository,  UiConfig config, DataSourceConfigService dsConfigService, ResourceService resourceService, BrandService brandService, ImageGenerationService imageGenerationService, GtinService gtinService, FeedService feedservice, RemoteFileCachingService remoteFilecache) {
 		this.productRepository = productRepository;
 		this.imageGenerationService = imageGenerationService;
 		this.config = config;
@@ -80,6 +87,8 @@ public class ResourceController {
 		this.resourceService = resourceService;
 		this.gtinService = gtinService;
 		this.verticalsConfigService = verticalsConfigService;
+		this.feedservice = feedservice;
+		this.remoteFilecache = remoteFilecache;
 	}
 
 
@@ -155,14 +164,40 @@ public class ResourceController {
 	 * @throws InvalidParameterException if an invalid parameter is provided.
 	 */
 	@GetMapping("/icon/{datasourceName}")
+	// TODO : Have to maintain an inmemory cache to fasten response
+	// TODO : Handle error
+	// TODO : Detect original image type to render correct content type
 	public void datasourceIcon(@PathVariable String datasourceName, final HttpServletResponse response) {
 
 		response.addHeader(HEADER_CONTENT_TYPE, CONTENT_TYPE_IMAGE_PNG);
 		response.addHeader(HEADER_CACHE_CONTROL, "public, max-age=" + AppConfig.CACHE_PERIOD_SECONDS);
 
-		try (InputStream stream = datasourceConfigService.getFavicon(datasourceName)) {
+		// TODO : First try with datasourceConfigService
+			DataSourceProperties ds = datasourceConfigService.getDatasourceConfig(datasourceName);
+			String iconUrl = null;
+			if (null != ds) {
+				 iconUrl = ds.getFavico();
+			}
+		
+		// TODO : If fail, retrieve try from the feed service
+			ds = feedservice.getFeedsUrl().stream().filter(e-> (e.getDatasourceConfigName().equalsIgnoreCase(datasourceName) || e.getName().equalsIgnoreCase(datasourceName))   ).findAny().orElse(null);
+			if (null != ds) {
+				 iconUrl = ds.getFavico();
+			}
+			
+			
+			File f = null;
+			try {
+				//TODO : Null check
+				f = remoteFilecache.getResource(iconUrl);
+			} catch (InvalidParameterException | IOException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+		
+			try (InputStream stream = FileUtils.openInputStream(f)) {
 			IOUtils.copy(stream, response.getOutputStream());
-		} catch (FileNotFoundException | InvalidParameterException e) {
+		} catch (FileNotFoundException e) {
 			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Image introuvable !");
 		} catch (IOException e) {
 			throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Error rendering image");

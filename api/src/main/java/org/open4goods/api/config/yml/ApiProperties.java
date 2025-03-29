@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.lang3.ArrayUtils;
+import org.open4goods.api.services.feed.AffiliationConfig;
 import org.open4goods.commons.config.yml.DevModeConfiguration;
 import org.open4goods.commons.config.yml.GithubConfiguration;
 import org.open4goods.commons.config.yml.IcecatConfiguration;
@@ -140,6 +141,7 @@ public class ApiProperties {
 	private boolean operatesLanguageDetection = false;
 
 
+	private AffiliationConfig affiliationConfig = new AffiliationConfig();
 	/**
 	 * Config gor IA Generated images
 	 */
@@ -642,6 +644,18 @@ public class ApiProperties {
 
 	public void setGenAiConfig(PromptServiceConfig genAiConfig) {
 		this.genAiConfig = genAiConfig;
+	}
+
+
+
+	public AffiliationConfig getAffiliationConfig() {
+		return affiliationConfig;
+	}
+
+
+
+	public void setAffiliationConfig(AffiliationConfig affiliationConfig) {
+		this.affiliationConfig = affiliationConfig;
 	}
 
 
