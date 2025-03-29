@@ -29361,6 +29361,15 @@ blockquote {
   padding-right: 1.5rem !important;
   padding-left: 1.5rem !important;
 }
+.btn__nudger--mainColor {
+  border: 0;
+  box-shadow: none;
+  background: #004B64 !important;
+  color: #fff !important;
+}
+.btn__nudger--mainColor:hover {
+  background: #FF8479 !important;
+}
 
 .chiffre__xxl {
   font-size: 10rem;
@@ -29436,27 +29445,33 @@ blockquote {
   background-color: #008879;
 }
 
-.border-1 {
+.eco_border-1 {
   border-color: #FF8479 !important;
 }
 
-.border-2 {
+.eco_border-2 {
   border-color: #FFCD90 !important;
 }
 
-.border-3 {
+.eco_border-3 {
   border-color: #00DE9F !important;
 }
 
-.border-4 {
+.eco_border-4 {
   border-color: #A6E242 !important;
 }
 
-.border-5 {
+.eco_border-5 {
   border-color: #5BDB3B !important;
 }
 
 .card-nudger {
   border-radius: 1rem 4rem !important;
+}
+
+.text__price {
+  font-size: 20px;
+  line-height: 1.3;
+  color: #FF8479 !important;
 }
 /*# sourceMappingURL=pixel.css.map */
