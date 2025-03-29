@@ -1,6 +1,7 @@
 
 package org.open4goods.commons.config.yml.datasource;
 
+import java.net.URI;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -278,6 +279,40 @@ public class DataSourceProperties {
 	
 
 	
+	/**
+	 * Extracts and returns the capitalized domain name from the portal URL.
+	 * <p>
+	 * Example:
+	 * If portalUrl is "https://www.example.com/path", the method will return "Example".
+	 *
+	 * @return The domain name with the first letter capitalized.
+	 */
+	public String name() {
+
+	    try {
+	        // Use URI to safely parse the URL
+	        URI uri = new URI(portalUrl);
+	        String host = uri.getHost(); // e.g., www.example.com
+
+	        if (host == null) {
+	            return "Unknown";
+	        }
+
+	        // Remove "www." if present
+	        if (host.startsWith("www.")) {
+	            host = host.substring(4);
+	        }
+
+	        // Extract domain (first part before dot)
+	        String domain = host.split("\\.")[0];
+
+	        // Capitalize first letter
+	        return domain.substring(0, 1).toUpperCase() + domain.substring(1);
+	    } catch (Exception e) {
+	        // Log if needed
+	        return name;
+	    }
+	}
 	///////////////////////////////
 	// Random generation
 	//////////////////////////////

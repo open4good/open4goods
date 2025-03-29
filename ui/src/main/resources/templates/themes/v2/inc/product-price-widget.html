@@ -193,7 +193,7 @@
 	                                th:data-compensation="${offer.compensation}">
 	                                <td class="p-0 infos-text">
 	                                    <span class="p-3 d-inline-flex">
-	                                        <img th:replace="inc/favicon :: remoteFavicon(${offer.datasourceName}, 16)" alt="Favicon"/>
+	                                        <img th:replace="inc/datasource :: icon(${offer}, 16)" alt="Favicon"/>
 	                                    </span>
 	                                </td>
 	                                <td class="p-0 infos-text" data-bs-toggle="tooltip" data-bs-placement="top" th:title="${offer.offerName}" nowrap>

@@ -78,7 +78,8 @@ public class GoogleTaxonomyService {
 
 		localizedTaxonomy.put(language, new HashMap<>());
 
-		File taxonFile = fileCachingService.getResource(url);
+//    	TODO(p3,conf) : Freshness from conf
+		File taxonFile = fileCachingService.getResource(url,7);
 
 		List<String> lines = Files.readAllLines(taxonFile.toPath());
 

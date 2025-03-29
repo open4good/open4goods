@@ -65,7 +65,7 @@ public class RemoteFileCachingService {
 	}
 
 
-	public File getResource(final String url) throws InvalidParameterException, IOException {
+	public File getResource(final String url, Integer refreshInDays) throws InvalidParameterException, IOException {
 
 		File resource = new File(resourceFolder+File.separator+IdHelper.getHashedName(url));
 
@@ -73,6 +73,7 @@ public class RemoteFileCachingService {
 		if (null == conf) {
 			logger.info("No cache config, caching with default config",url );
 			conf = new CacheResourceConfig();
+			conf.setRefreshInDays(refreshInDays);
 			conf.setUrl(url);
 			configs.put(url, conf);
 		}

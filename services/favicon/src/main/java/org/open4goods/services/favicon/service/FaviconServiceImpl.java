@@ -147,6 +147,7 @@ public class FaviconServiceImpl implements FaviconService, HealthIndicator {
                     logger.info("Fetching HTML from provided URL: {}", url);
                     try {
                         Document doc = Jsoup.connect(url)
+                        					.followRedirects(false)
                                             .timeout(faviconConfig.getUrlTimeout())
                                             .get();
                         faviconResponse = parseFaviconFromDocument(doc, url);
@@ -162,10 +163,15 @@ public class FaviconServiceImpl implements FaviconService, HealthIndicator {
                 // If favicon not found from provided URL, try root URL.
                 if (faviconResponse == null || faviconResponse.faviconData() == null || faviconResponse.faviconData().length == 0) {
                     logger.info("Fetching HTML from root URL: {}", rootUrl);
-                    Document doc = Jsoup.connect(rootUrl)
-                                        .timeout(faviconConfig.getUrlTimeout())
-                                        .get();
-                    faviconResponse = parseFaviconFromDocument(doc, rootUrl);
+                    try {
+						Document doc = Jsoup.connect(rootUrl)
+						                    .timeout(faviconConfig.getUrlTimeout())
+						                    .followRedirects(false)
+						                    .get();
+						faviconResponse = parseFaviconFromDocument(doc, rootUrl);
+					} catch (Exception e) {
+						logger.warn("Errror while fetching {}",rootUrl,e);
+					}
                 }
             }
 
@@ -244,7 +250,8 @@ public class FaviconServiceImpl implements FaviconService, HealthIndicator {
     private FaviconResponse fetchFaviconAndDetectType(String resourceLocation) throws IOException, InvalidParameterException {
         File faviconFile;
         if (resourceLocation.startsWith("http")) {
-            faviconFile = remoteFileCachingService.getResource(resourceLocation);
+//        	TODO(p3,conf) : Freshness from conf
+            faviconFile = remoteFileCachingService.getResource(resourceLocation, 1);
         } else if (resourceLocation.startsWith("file:")) {
             faviconFile = new File(resourceLocation.substring(5));
         } else if (resourceLocation.startsWith("classpath:")) {
@@ -282,7 +289,8 @@ public class FaviconServiceImpl implements FaviconService, HealthIndicator {
                         String faviconUrl = resolveUrl(baseUrl, href);
                         logger.info("Found favicon link with rel='{}' and sizes='{}': {}", rel, link.attr("sizes"), faviconUrl);
                         try {
-                            File faviconFile = remoteFileCachingService.getResource(faviconUrl);
+//            	        	TODO(p3,conf) : Freshness from conf
+                            File faviconFile = remoteFileCachingService.getResource(faviconUrl,1);
                             if (faviconFile.exists()) {
                                 byte[] data = java.nio.file.Files.readAllBytes(faviconFile.toPath());
                                 String mimeType = detectMimeType(data, faviconUrl);
@@ -389,7 +397,8 @@ public class FaviconServiceImpl implements FaviconService, HealthIndicator {
             }
             String fallbackUrl = fallbackTemplate.replace("{url}", URLEncoder.encode(rootUrl, StandardCharsets.UTF_8));
             logger.info("Using fallback URL: {}", fallbackUrl);
-            File fallbackFile = remoteFileCachingService.getResource(fallbackUrl);
+//        	TODO(p3,conf) : Freshness from conf
+            File fallbackFile = remoteFileCachingService.getResource(fallbackUrl,1);
             if (fallbackFile.exists()) {
                 byte[] data = java.nio.file.Files.readAllBytes(fallbackFile.toPath());
                 String mimeType = detectMimeType(data, fallbackUrl);
