@@ -2,13 +2,14 @@ package org.open4goods.api.controller.api;
 
 import java.util.Set;
 
+import org.open4goods.api.services.BatchService;
 import org.open4goods.api.services.ScrapperOrchestrationService;
+import org.open4goods.api.services.feed.FeedService;
 import org.open4goods.api.services.store.DataFragmentStoreService;
 import org.open4goods.commons.config.yml.datasource.DataSourceProperties;
 import org.open4goods.commons.model.constants.RolesConstants;
 import org.open4goods.commons.model.dto.api.IndexationResponse;
 import org.open4goods.commons.services.DataSourceConfigService;
-import org.open4goods.crawler.services.FeedService;
 import org.open4goods.crawler.services.fetching.CsvDatasourceFetchingService;
 import org.open4goods.services.serialisation.service.SerialisationService;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -33,10 +34,10 @@ public class FeedController {
 
 	private final CsvDatasourceFetchingService  csvDatasourceFetchingService;
 	
-	private final FeedService feedService;
+	private final BatchService batchService;
 	
-	public FeedController( FeedService feedService, CsvDatasourceFetchingService  csvDatasourceFetchingService) {
-		this.feedService = feedService;
+	public FeedController( BatchService batchService, CsvDatasourceFetchingService  csvDatasourceFetchingService) {
+		this.batchService = batchService;
 		this.csvDatasourceFetchingService = csvDatasourceFetchingService;
 	}
 	
@@ -44,16 +45,11 @@ public class FeedController {
 	@Operation(summary="Manualy run the indexation of all feeds")
 	@PreAuthorize("hasAuthority('"+RolesConstants.ROLE_ADMIN+"')")
 	public IndexationResponse indexFeeds() {
-		feedService.fetchFeeds();
+		batchService.fetchFeeds();
 		return new IndexationResponse();
 	}
 	
-	@GetMapping(path = "/feeds")
-	@Operation(summary="List all feeds from catalogs")
-	@PreAuthorize("hasAuthority('"+RolesConstants.ROLE_ADMIN+"')")
-	public Set<DataSourceProperties> getFeeds() {
-		return feedService.getFeedsUrl();
-	}
+
 
 	
 	@GetMapping(path = "/feed/queue")
@@ -67,14 +63,14 @@ public class FeedController {
 	@Operation(summary="List all feeds from catalogs corresponding the given field key")
 	@PreAuthorize("hasAuthority('"+RolesConstants.ROLE_ADMIN+"')")
 	public void feedByKey(@RequestParam @NotBlank final String feedKey) {
-		feedService.fetchFeedsByKey(feedKey);
+		batchService.fetchFeedsByKey(feedKey);
 	}
 	
 	@PatchMapping(path = "/feedsByUrl")
 	@Operation(summary="List all feeds from catalogs corresponding the given url")
 	@PreAuthorize("hasAuthority('"+RolesConstants.ROLE_ADMIN+"')")
 	public void feedByUrl(@RequestParam @NotBlank final String url) {
-		feedService.fetchFeedsByUrl(url);
+		batchService.fetchFeedsByUrl(url);
 	}
 	
 

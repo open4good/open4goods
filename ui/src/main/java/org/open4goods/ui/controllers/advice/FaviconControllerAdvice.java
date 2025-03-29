@@ -12,6 +12,8 @@ public class FaviconControllerAdvice {
 
     private final FaviconService faviconService;
 
+   
+    
     public FaviconControllerAdvice(FaviconService faviconService) {
         this.faviconService = faviconService;
     }
@@ -25,4 +27,5 @@ public class FaviconControllerAdvice {
     public FaviconService faviconService() {
         return faviconService;
     }
+    
 }
