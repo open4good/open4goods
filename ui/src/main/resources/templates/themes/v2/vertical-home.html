@@ -47,12 +47,10 @@
                 <!--/* Hero */-->                       
                 <div class="row mb-2">                          
                     <div class="d-flex align-items-center">
-                        <div class="d-flex flex-wrap align-items-center row">
-                            <div class="col-lg-10">
-                                <h2 class="h4 mb-0 text-center" th:text="${verticalConfig.i18n(siteLanguage).verticalHomeTitle}"></h2>
-                                <p class="row p-2 mb-4" th:text="${verticalConfig.i18n(siteLanguage).verticalHomeDescription}"> </p>            
-                            </div> 
-                        </div>
+                        <div class="col-lg-10">
+                            <h2 class="h4 mb-0 text-center" th:text="${verticalConfig.i18n(siteLanguage).verticalHomeTitle}"></h2>
+                            <p class="row p-2 mb-4" th:text="${verticalConfig.i18n(siteLanguage).verticalHomeDescription}"> </p>            
+                        </div> 
                     </div>
                 </div>
             </div>
@@ -61,7 +59,7 @@
             <div class="row mb-5">
                 <!--/* Left column */-->                    
                 <div class="col-lg-3">
-                    <div class="d-flex align-items-center">
+                    <div class="">
                         <!--/* Guides */--> 
                         <aside class="card border-gray-300 bg-transparent p-2 mb-4 w-100" th:if="${verticalConfig.i18n(siteLanguage).getWikiPages().size() > 0}">
                             <div class="card-header py-0 bg-transparent border-0 text-center d-flex flex-row flex-lg-column align-items-center justify-content-center px-1 px-lg-4">
