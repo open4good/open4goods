@@ -1,20 +1,20 @@
 <div style="display:none">	
 	<!-- Template for list layout -->
 	<div id="template-product-list">
-        <div class="card card-body bg-white border-gray-300 mb-2 card-nudger">
-            <div class="border-{{ecoscoreInt}} d-flex align-items-center p-2 border-start bg-white">
-                <!-- Image du produit -->
-                <div class="me-3">
-                    <img src="{{imageUrl}}" alt="{{name}}" width="90" height="90" class="border-gray-300">
-                </div>
-            
-                <!-- Informations du produit -->
-                <div class="flex-grow-1">
-                    <h2 class="h5 mb-4">
-                        <a href="{{productUrl}}" class="text-decoration-none text-dark">{{data.attributes.referentielAttributes.BRAND}} - {{name}}</a>
-                    </h2>
-                    
-                    <div class="row star-rating star-rating-md " data-rating="{{ecoscore}}" aria-label="Rating: {{ecoscore}} out of 5 stars">
+        <div class="row border-{{ecoscoreInt}} p-3">
+            <!-- Image du produit -->
+            <div class="col-md-2">
+                <img src="{{imageUrl}}" alt="{{name}}" width="190">
+            </div>
+        
+            <!-- Informations du produit -->
+            <div class="col-md-8">
+                <h2 class="h5 mb-0">
+                    <a href="{{productUrl}}" class="text-decoration-none text-dark">{{data.attributes.referentielAttributes.BRAND}} - {{name}}</a>
+                </h2>
+                
+                <div class="d-flex align-items-center mb-2">
+                    <div class="star-rating star-rating-sm me-2" data-rating="{{ecoscore}}" aria-label="Rating: {{ecoscore}} out of 5 stars">
                         <div class="stars">
                             <span class="star"></span>
                             <span class="star"></span>
@@ -25,25 +25,42 @@
                     </div>
                     <!-- Éco-score -->
                     <span class="badge bg-success">Ecoscore : <strong>{{ecoscore}} / 5</strong></span>
-            
-                    <!-- Indicateurs clés -->
-                    <div class="mt-2 d-flex flex-wrap">
-                        <span class="me-3"><strong>Réparabilité :</strong> 8/10 <span class="badge bg-success">(new)</span></span>
-                        <span class="me-3"><strong>Consommation :</strong> 120 kWh/an <span class="badge bg-success">(new)</span></span>
-                        <span class="me-3"><strong>Pièces :</strong> 10 ans <span class="badge bg-success">(new)</span></span>
-                        <span class="me-3"><strong>Compensation :</strong> {{compensation}} {{data.price.minPrice.currency}}</span>
-                        <span class="me-3"><strong>Prix :</strong> {{data.price.minPrice.price}} {{data.price.minPrice.currency}}</span>
+                </div>
+        
+                <!-- Indicateurs clés -->
+                <div class="mt-2 border border-1 px-2 py-3">
+                    <div class="d-flex align-items-center">
+                        <strong>Réparabilité :</strong> 
+                        <span class="ms-auto badge bg-brand_secondary">8/10</span>
+                    </div>
+                    <div class="d-flex align-items-center">
+                        <strong>Consommation :</strong> 
+                        <span class="ms-auto badge bg-brand_secondary">120 kWh/an</span>
+                    </div>
+                    <div class="d-flex align-items-center">
+                        <strong>Pièces :</strong> 
+                        <span class="ms-auto badge bg-brand_secondary">10 ans</span>
                     </div>
                 </div>
-            
-                <!-- Bouton Comparer -->
-                <!--div>
-                    <button class="btn btn-outline-primary btn-sm">Comparer <span class="badge bg-success">(new)</span></button>
-                </div-->
+            </div>
+        
+            <!-- Bouton Comparer -->
+            <!--div>
+                <button class="btn btn-outline-primary btn-sm">Comparer <span class="badge bg-success">(new)</span></button>
+            </div-->
 
-                <div>
-                    <a href="{{productUrl}}" class="btn btn__nudger text-decoration-none text-white">
-                        &#62;
+            <div class="col-md-2">
+                <div class="d-flex align-items-start flex-column h-100">
+                    <div class="d-flex align-items-end flex-column mb-auto">
+                        <span class="text__price border border-1 w-100 px-2 py-1 fw-bold">
+                            {{data.price.minPrice.price}} {{data.price.minPrice.currency}}
+                        </span>
+                        <span class="border border-1 w-100 px-2 py-1 fw-bold font-small">
+                            <strong>Compensation :</strong> {{compensation}} {{data.price.minPrice.currency}}
+                        </span>
+                    </div>
+                    <a href="{{productUrl}}" class="btn btn__nudger btn__nudger--mainColor w-100">
+                        Voir le produit
                     </a>
                 </div>
             </div>
