@@ -86,7 +86,7 @@ public class FaviconServiceTest {
             }
             
             @Override
-            public File getResource(String resourceLocation) throws IOException {
+            public File getResource(String resourceLocation, Integer fresh) throws IOException {
                 if (resourceLocation.contains("t3.gstatic.com/faviconV2")) {
                     // Create a temporary file with dummy favicon data.
                     File tempFile = File.createTempFile("fallback-favicon", ".png");

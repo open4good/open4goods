@@ -84,7 +84,9 @@ public class DataSourceConfigService {
 		if (null == dataSourceProperties) {
 			throw new InvalidParameterException("Datasource " + datasourceName + " not found");
 		}
-		try {File f = cachingService.getResource(dataSourceProperties.getFavico() );
+		
+		// TODO(p3, conf) : freshness from conf
+		try {File f = cachingService.getResource(dataSourceProperties.getFavico(), 1 );
 			return IOUtils.toBufferedInputStream(new FileInputStream(f));
 		} catch (Exception e) {
 			logger.error("Error while loading favicon for datasource {} : {} --> {}",  datasourceName, dataSourceProperties.getFavico(), e.getMessage() );
@@ -100,10 +102,12 @@ public class DataSourceConfigService {
 		// Initialising cache if necessary
 		datasourceConfigs();
 
-		File f = cachingService.getResource(datasourcesByConfigName.get(datasourceName).getLogo() );
+		// TODO(p3, conf) : freshness from conf
+		File f = cachingService.getResource(datasourcesByConfigName.get(datasourceName).getLogo(),1 );
 		return IOUtils.toBufferedInputStream(new FileInputStream(f));
 	}
 
+	
 	/**
 	 * Return the next Date the given datasource will be fetched
 	 * @param datasourceName

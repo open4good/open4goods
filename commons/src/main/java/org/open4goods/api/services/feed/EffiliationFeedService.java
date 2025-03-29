@@ -1,17 +1,18 @@
 package org.open4goods.api.services.feed;
 
 import java.io.File;
-import java.net.HttpURLConnection;
-import java.net.URL;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.util.HashSet;
 import java.util.Set;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
 import org.open4goods.commons.config.yml.datasource.DataSourceProperties;
+import org.open4goods.commons.services.DataSourceConfigService;
 import org.open4goods.services.remotefilecaching.config.CacheResourceConfig;
 import org.open4goods.services.remotefilecaching.service.RemoteFileCachingService;
-import org.open4goods.commons.services.DataSourceConfigService;
 import org.open4goods.services.serialisation.service.SerialisationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,17 +22,16 @@ import org.springframework.stereotype.Service;
 /**
  * Feed service implementation for Effiliation.
  * This implementation uses a REST API call to fetch JSON feed data and maps it to datasource properties.
- * The getVolatileDatasource method is used to ensure consistent CSV parsing options.
+ * The API response is cached using RemoteFileCachingService to avoid repeated downloads.
  */
 @Service
 public class EffiliationFeedService extends AbstractFeedService {
 
     private final Logger logger = LoggerFactory.getLogger(EffiliationFeedService.class);
-    
+
     private final ObjectMapper objectMapper;
-    // Placeholder Effiliation API key; should be injected from external configuration.
     private final String effiliationApiKey;
-    
+
     /**
      * Constructor.
      *
@@ -39,14 +39,18 @@ public class EffiliationFeedService extends AbstractFeedService {
      * @param remoteFileCachingService service for caching remote files
      * @param dataSourceConfigService service to retrieve existing datasource properties
      * @param serialisationService service to deep copy datasource properties
+     * @param effiliationApiKey the Effiliation API key
      */
-    public EffiliationFeedService(FeedConfiguration feedConfig, RemoteFileCachingService remoteFileCachingService,
-                                  DataSourceConfigService dataSourceConfigService, SerialisationService serialisationService, String effiliationApiKey) {
+    public EffiliationFeedService(FeedConfiguration feedConfig,
+                                   RemoteFileCachingService remoteFileCachingService,
+                                   DataSourceConfigService dataSourceConfigService,
+                                   SerialisationService serialisationService,
+                                   String effiliationApiKey) {
         super(feedConfig, remoteFileCachingService, dataSourceConfigService, serialisationService);
         this.objectMapper = new ObjectMapper();
         this.effiliationApiKey = effiliationApiKey;
     }
-    
+
     /**
      * Scheduled refresh of Effiliation datasource properties every day at a random time (with a 30-second offset).
      */
@@ -57,59 +61,59 @@ public class EffiliationFeedService extends AbstractFeedService {
         logger.info("Scheduled refresh of Effiliation datasources initiated.");
         load();
     }
-    
+
     @Override
     protected Set<DataSourceProperties> loadDatasources() throws Exception {
         Set<DataSourceProperties> result = new HashSet<>();
-        
-        // Retrieve feed data via Effiliation REST API.
-        JsonNode root = retrieveEffiliationFeeds(effiliationApiKey, null);
+
+        // Retrieve feed data via Effiliation REST API with caching
+        JsonNode root = retrieveEffiliationFeeds(effiliationApiKey);
         if (root != null && root.has("feeds")) {
             for (JsonNode feedNode : root.get("feeds")) {
-                // Use the "nom" field as the feed key.
                 String feedKey = feedNode.path("nom").asText();
                 if (feedKey == null || feedKey.trim().isEmpty()) {
                     logger.warn("Skipping Effiliation feed entry due to missing 'nom': {}", feedNode);
                     continue;
                 }
+
                 String feedUrl = feedNode.path("code").asText();
-                // Instantiate a volatile datasource with proper CSV parsing settings.
                 DataSourceProperties ds = getVolatileDatasource(feedKey, feedConfig, feedUrl);
-                
-                // Set additional properties from the Effiliation JSON.
+
                 ds.setPortalUrl(feedNode.path("url_affilieur").asText());
                 ds.setLogo(feedNode.path("url_logo").asText());
-                ds.setFavico(feedNode.path("url_logo").asText());
-                
+
                 result.add(ds);
             }
         } else {
             logger.warn("No 'feeds' node found in Effiliation API response.");
         }
+
         logger.info("Effiliation datasources loaded: {} entries", result.size());
         return result;
     }
-    
+
     /**
-     * Retrieves feed data from the Effiliation REST API.
+     * Retrieves Effiliation feed metadata using a cached API response.
+     * The response is cached on disk using the RemoteFileCachingService and refreshed every day.
      *
-     * @param apiKey Effiliation API key
-     * @param merchantId (optional) merchant identifier
-     * @return a JsonNode representing the API response
-     * @throws Exception if the API call fails
+     * @param apiKey the Effiliation API key
+     * @return JsonNode representing the response, or null if retrieval fails
+     * @throws Exception if the cache or deserialization fails
      */
-    public JsonNode retrieveEffiliationFeeds(String apiKey, String merchantId) throws Exception {
+    public JsonNode retrieveEffiliationFeeds(String apiKey) throws Exception {
         String endpoint = "https://apiv2.effiliation.com/apiv2/productfeeds.json?filter=mines&lg=fr&key=" + apiKey;
-        URL url = new URL(endpoint);
-        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-        connection.setRequestMethod("GET");
-        connection.setConnectTimeout(35000);
-        connection.setReadTimeout(35000);
-        
-        int responseCode = connection.getResponseCode();
-        if (responseCode != HttpURLConnection.HTTP_OK) {
-            throw new Exception("Failed to retrieve Effiliation feeds, response code: " + responseCode);
+
+        logger.info("Retrieving Effiliation feed metadata from endpoint: {}", endpoint);
+
+
+
+        // TODO(p3,conf) : refresh in days from conf
+        File cachedResponse = remoteFileCachingService.getResource(endpoint,1);
+        if (cachedResponse == null || !cachedResponse.exists()) {
+            throw new Exception("Effiliation cached response file not found.");
         }
-        return objectMapper.readTree(connection.getInputStream());
+
+        String jsonResponse = new String(Files.readAllBytes(cachedResponse.toPath()), StandardCharsets.UTF_8);
+        return objectMapper.readTree(jsonResponse);
     }
 }

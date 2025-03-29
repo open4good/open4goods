@@ -42,13 +42,14 @@ public class BatchService {
 	private ProductRepository dataRepository;
 	
 	public BatchService(AggregationFacadeService aggregationFacadeService,
-			CompletionFacadeService completionFacadeService, VerticalsConfigService verticalsConfigService, ProductRepository dataRepository, CsvDatasourceFetchingService csvDatasourceFetchingService) {
+			CompletionFacadeService completionFacadeService, VerticalsConfigService verticalsConfigService, ProductRepository dataRepository, CsvDatasourceFetchingService csvDatasourceFetchingService, FeedService feedService) {
 		super();
 		this.aggregationFacadeService = aggregationFacadeService;
 		this.completionFacadeService = completionFacadeService;
 		this.verticalsConfigService = verticalsConfigService;
 		this.dataRepository = dataRepository;
 		this.csvDatasourceFetchingService = csvDatasourceFetchingService;
+		this.feedService = feedService;
 
 	}
 

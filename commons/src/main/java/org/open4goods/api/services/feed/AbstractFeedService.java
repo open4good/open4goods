@@ -4,6 +4,7 @@ import java.util.Set;
 
 import org.open4goods.commons.config.yml.datasource.DataSourceProperties;
 import org.open4goods.commons.services.DataSourceConfigService;
+import org.open4goods.model.helper.IdHelper;
 import org.open4goods.services.remotefilecaching.service.RemoteFileCachingService;
 import org.open4goods.services.serialisation.service.SerialisationService;
 import org.slf4j.Logger;
@@ -117,7 +118,7 @@ public abstract class AbstractFeedService {
         
         // Set identification details.
         if (existing == null) {
-            String name = feedKey.replaceAll("[^a-zA-Z0-9]", "").toLowerCase();
+            String name = IdHelper.azCharAndDigitsPointsDash(feedKey.toLowerCase());
             volatileDs.setName(name);
         } else {
             volatileDs.setDatasourceConfigName(ds.getName());

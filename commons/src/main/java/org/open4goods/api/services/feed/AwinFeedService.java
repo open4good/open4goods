@@ -134,12 +134,15 @@ public class AwinFeedService extends AbstractFeedService {
             }
             
             if (!merchants.isEmpty()) {
+            	//TODO(performance) : should use a map 
                 AwinMerchant merchant = merchants.stream().filter(e-> (e.getId() == (programId)) || (e.getName().equalsIgnoreCase(feedKey)) ).findFirst().orElse(null);
                 if (null != merchant ) {
-                	
-                ds.setFavico(merchant.getDisplayUrl());
+//                ds.setName(merchant.getName());
+                ds.setDatasourceConfigName(merchant.getName());
+                    
+//                ds.setFavico(merchant.getLogoUrl());
                 ds.setLogo(merchant.getLogoUrl());
-                ds.setPortalUrl(merchant.getClickThroughUrl());
+                ds.setPortalUrl(merchant.getDisplayUrl());
                 }
             } else {
                 logger.warn("No Awin merchant metadata found for feed key '{}'.", feedKey);
@@ -167,12 +170,9 @@ public class AwinFeedService extends AbstractFeedService {
                 + "/programmes?relationship=joined&accessToken=" + accessToken;
         logger.info("Retrieving Awin merchant metadata from endpoint: {}", endpoint);
         
-        CacheResourceConfig cacheConf = new CacheResourceConfig();
-        cacheConf.setUrl(endpoint);
-        cacheConf.setRefreshInDays(1);
+        // TODO(p3,conf) : refresh in days from conf
+        File cachedResponse = remoteFileCachingService.getResource(endpoint,1);
         
-        // Retrieve the cached API response file.
-        File cachedResponse = remoteFileCachingService.retrieve(cacheConf);
         if (cachedResponse == null || !cachedResponse.exists()) {
             throw new Exception("Cached response file not found for Awin merchant metadata");
         }
