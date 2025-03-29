@@ -200,7 +200,7 @@
                                 <td th:id="'review-ref-'+${item.number}" th:text="${item.number}"></td>
                                 <td scope="row">
                                     <a target="_blank" rel="nofollow" th:href="${item.url}">
-                                        <img th:replace="inc/favicon :: remoteFavicon(${item.url}, 16)" alt="favicon"> 
+                                        <img th:replace="inc/favicon :: favicon(${item.url}, 16)" alt="favicon"> 
                                         <span th:text="${item.name}"></span>
                                     </a>
                                 </td>

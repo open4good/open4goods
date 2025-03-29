@@ -78,8 +78,8 @@
                   <div class="card-body text-center">
                     <h6 class="text-muted">Occasion</h6>
                     <div class="d-flex align-items-center justify-content-center mb-3">
-                      <img th:replace="inc/datasource :: icon(${bestOccasionOffer}, 32)">
-                      <h5 class="mb-0" th:text="${bestOccasionOffer.datasourceName}"></h5>
+                      <img th:replace="inc/favicon :: favicon(${bestOccasionOffer.datasourceName}, 48)" alt="Favicon"/>
+                      <h5 class="mb-0 ms-2" th:text="${bestOccasionOffer.datasourceName}"></h5>
                     </div>
                     <!-- Price Section -->
                     <div class="text-success d-flex justify-content-center align-items-baseline mb-0">
@@ -114,8 +114,8 @@
                   <div class="card-body text-center">
                     <h6 class="text-muted">Neuf</h6>
                     <div class="d-flex align-items-center justify-content-center mb-3">
-                      <img th:replace="inc/favicon :: remoteFavicon(${bestNewOffer.datasourceName}, 32)">
-                      <h5 class="mb-0" th:text="${bestNewOffer.datasourceName}">Store Name</h5>
+                      <img th:replace="inc/favicon :: favicon(${bestNewOffer.datasourceName}, 40)" alt="Favicon"/>
+                      <span class="ms-2 h4 mb-0" th:text="${bestNewOffer.datasourceName}">Store Name</span>
                     </div>
                     <!--/* Price Row: Price and Currency Side-by-Side */-->
                     <div class="text-info d-flex justify-content-center align-items-baseline mb-0">

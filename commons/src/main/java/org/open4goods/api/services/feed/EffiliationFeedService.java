@@ -81,6 +81,7 @@ public class EffiliationFeedService extends AbstractFeedService {
 
                 ds.setPortalUrl(feedNode.path("url_affilieur").asText());
                 ds.setLogo(feedNode.path("url_logo").asText());
+                ds.setName(extractNameAndTld(ds.getPortalUrl()));
 
                 result.add(ds);
             }
