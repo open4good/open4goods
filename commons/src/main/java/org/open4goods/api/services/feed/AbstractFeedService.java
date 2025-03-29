@@ -1,5 +1,7 @@
 package org.open4goods.api.services.feed;
 
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.Set;
 
 import org.open4goods.commons.config.yml.datasource.DataSourceProperties;
@@ -130,5 +132,30 @@ public abstract class AbstractFeedService {
         
         logger.debug("Volatile datasource for key '{}' created with feed URL '{}'.", feedKey, feedUrl);
         return volatileDs;
+    }
+    
+    public  String extractNameAndTld(String url) {
+        try {
+            URI uri = new URI(url);
+            String host = uri.getHost();
+            if (host == null) {
+                // Handle cases like "example.com" without scheme
+                uri = new URI("http://" + url);
+                host = uri.getHost();
+            }
+
+            if (host == null) return null;
+
+            String[] parts = host.split("\\.");
+            int len = parts.length;
+            if (len >= 2) {
+                return parts[len - 2] + "." + parts[len - 1];
+            } else {
+                return host;
+            }
+
+        } catch (URISyntaxException e) {
+            return null;
+        }
     }
 }

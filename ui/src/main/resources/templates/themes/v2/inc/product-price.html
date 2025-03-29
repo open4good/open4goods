@@ -6,7 +6,7 @@
         colSize=${(hasNewOffers and hasOccasionOffers) ? 6 : 8}
 ">
     <div class="row">
-        <div th:if="${hasNewOffers}" class="mx-auto" th:classappend="'col-' + ${colSize}">
+        <div th:if="${hasNewOffers}" class="mx-auto" th:classappend="'col-lg-' + ${colSize}">
             <th:block    
                 th:with="
                     priceHistory=${product.price.newPricehistory},
@@ -25,6 +25,7 @@
                         initPriceWidget({
                             widgetPrefix: /*[[${widgetPrefix}]]*/,
                             priceHistory: /*[[${priceHistory}]]*/,
+                            
                             events: /*[[${events}]]*/,
                             canvasId: /*[[( ${widgetPrefix} + 'PriceChart' )]]*/,
                             tableId: /*[[( ${widgetPrefix} + '-offers' )]]*/,
@@ -42,7 +43,7 @@
             </th:block>
         </div>
 
-        <div th:if="${hasOccasionOffers}" class="mx-auto" th:classappend="'col-' + ${colSize}">
+        <div th:if="${hasOccasionOffers}" class="mx-auto" th:classappend="'col-lg-' + ${colSize}">
             <th:block    
                 th:with="
                     priceHistory=${product.price.occasionPricehistory},

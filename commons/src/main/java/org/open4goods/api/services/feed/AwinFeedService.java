@@ -137,12 +137,12 @@ public class AwinFeedService extends AbstractFeedService {
             	//TODO(performance) : should use a map 
                 AwinMerchant merchant = merchants.stream().filter(e-> (e.getId() == (programId)) || (e.getName().equalsIgnoreCase(feedKey)) ).findFirst().orElse(null);
                 if (null != merchant ) {
-//                ds.setName(merchant.getName());
                 ds.setDatasourceConfigName(merchant.getName());
                     
-//                ds.setFavico(merchant.getLogoUrl());
                 ds.setLogo(merchant.getLogoUrl());
                 ds.setPortalUrl(merchant.getDisplayUrl());
+                ds.setName(extractNameAndTld(ds.getPortalUrl()));
+                
                 }
             } else {
                 logger.warn("No Awin merchant metadata found for feed key '{}'.", feedKey);

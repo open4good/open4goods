@@ -19,8 +19,8 @@
                             <div class="card-body text-center">
                                 <h6 class="text-muted" th:text="#{'product.price.' + ${widgetPrefix} + '.bestPrice'}">Best Price</h6>
                                 <div class="d-flex align-items-center justify-content-center mb-3">
-                                    <img th:replace="inc/favicon :: remoteFavicon(${offer.datasourceName}, 32)" alt="Favicon"/>
-                                    <h5 class="mb-0" th:text="${offer.datasourceName}">Datasource</h5>
+                                    <img th:replace="inc/favicon :: favicon(${offer.datasourceName}, 32)" alt="Favicon"/>
+                                    <h5 class="ms-2 mb-0" th:text="${offer.datasourceName}">Datasource</h5>
                                 </div>
                                 <div class="text-success d-flex justify-content-center align-items-baseline mb-0">
                                     <h2 class="display-3 fw-bold mb-0 best-price" th:text="${offer.shortPrice()}">0</h2>
@@ -193,7 +193,7 @@
 	                                th:data-compensation="${offer.compensation}">
 	                                <td class="p-0 infos-text">
 	                                    <span class="p-3 d-inline-flex">
-	                                        <img th:replace="inc/datasource :: icon(${offer}, 16)" alt="Favicon"/>
+	                                        <img th:replace="inc/favicon :: favicon(${offer.datasourceName}, 32)" />
 	                                    </span>
 	                                </td>
 	                                <td class="p-0 infos-text" data-bs-toggle="tooltip" data-bs-placement="top" th:title="${offer.offerName}" nowrap>

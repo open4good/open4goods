@@ -1,4 +1,4 @@
-<img th:fragment="remoteFavicon(url, size)"
+<img th:fragment="favicon(url, size)"
      th:if="${faviconService.hasFavicon(url)}"
      th:src="@{/favicon(url=${url})}"
      th:width="${size}"

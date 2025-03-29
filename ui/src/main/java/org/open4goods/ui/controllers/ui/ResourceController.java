@@ -163,12 +163,30 @@ public class ResourceController {
 	
 	@GetMapping("/icon/{datasourceName}")
 	public void datasourceIcon(@PathVariable String datasourceName, final HttpServletResponse response) {
-	    datasourceImageService.serveDatasourceImage(datasourceName, true, response);
+		   DatasourceImageService.ImageResult image = datasourceImageService.getDatasourceImage(datasourceName, false);
+		    response.setContentType(image.contentType());
+		    response.setHeader("Cache-Control", "public, max-age=86400");
+		    try {
+				response.getOutputStream().write(image.data());
+				response.flushBuffer();
+			} catch (IOException e) {
+				LOGGER.error("Error rendering datasource image for {} ",datasourceName, e);
+				throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Error rendering image ");
+			}
 	}
 
 	@GetMapping("/logo/{datasourceName}")
 	public void datasourceLogo(@PathVariable String datasourceName, final HttpServletResponse response) {
-	    datasourceImageService.serveDatasourceImage(datasourceName, false, response);
+	    DatasourceImageService.ImageResult image = datasourceImageService.getDatasourceImage(datasourceName, true);
+	    response.setContentType(image.contentType());
+	    response.setHeader("Cache-Control", "public, max-age=86400");
+	    try {
+			response.getOutputStream().write(image.data());
+			response.flushBuffer();
+		} catch (IOException e) {
+			LOGGER.error("Error rendering datasource image for {} ",datasourceName, e);
+			throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Error rendering image ");
+		}
 	}
 
 	/**
