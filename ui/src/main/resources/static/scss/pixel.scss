@@ -15,9 +15,9 @@
 
 */
 
-//@import url('https://fonts.googleapis.com/css?family=Nunito+Sans:300,400,600,700&display=swap');
+@import url('https://fonts.googleapis.com/css?family=Nunito+Sans:300,400,600,700&display=swap');
 
-@import url('https://fonts.googleapis.com/css2?family=Hanken+Grotesk:ital,wght@0,100..900;1,100..900&display=swap');
+//@import url('https://fonts.googleapis.com/css2?family=Hanken+Grotesk:ital,wght@0,100..900;1,100..900&display=swap');
 
 // update variables here
 @import "custom/variables";
@@ -490,25 +490,29 @@ $nudger_radius_mini : 40px;
 }
 
 .border-1 {
-        border-color: $openSource_secondary;
+        border-color: $openSource_secondary!important;
 }
 
 .border-2 {
-        border-color:  $openSource_main;
+        border-color:  $openSource_main!important;
 }
 
 
 .border-3 {
-        border-color:  $brand_mainColor;
+        border-color:  $brand_mainColor!important;
 }
 
 
 .border-4 {
-        border-color: $compensation_secondary;
+        border-color: $compensation_secondary!important;
 }
 
 
 .border-5 {
-        border-color: $compensation_main;
+        border-color: $compensation_main!important;
+}
+
+.card-nudger {
+    border-radius: 1rem 4rem!important;
 }
 
