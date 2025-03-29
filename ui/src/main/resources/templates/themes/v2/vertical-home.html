@@ -45,13 +45,11 @@
 
             <div class="container container-semi-fluid">
                 <!--/* Hero */-->                       
-                <div class="row mb-2">                          
-                    <div class="d-flex align-items-center">
-                        <div class="col-lg-10">
-                            <h2 class="h4 mb-0 text-center" th:text="${verticalConfig.i18n(siteLanguage).verticalHomeTitle}"></h2>
-                            <p class="row p-2 mb-4" th:text="${verticalConfig.i18n(siteLanguage).verticalHomeDescription}"> </p>            
-                        </div> 
-                    </div>
+                <div class="row justify-content-center mb-2">                          
+                    <div class="col-lg-10">
+                        <h2 class="h4 mb-0 text-center" th:text="${verticalConfig.i18n(siteLanguage).verticalHomeTitle}"></h2>
+                        <p class="row p-2 mb-4" th:text="${verticalConfig.i18n(siteLanguage).verticalHomeDescription}"> </p>            
+                    </div> 
                 </div>
             </div>
         </section>
@@ -99,11 +97,15 @@
                                 </div>
                             </div>
                         </aside>
+
+                        Goulven, peux tu remettre la balise des prix inf à 100€ etc,<br>meme dans le template defaut ça n'y ai plus dans mon local
                     </div>
                 </div>
                 <!--/* Right column */-->
                 <div class="col">
-                    <th:block th:insert="~{inc/vertical-table.html}"></th:block>
+                    <div class="bg-white p-3" style="border-radius:1rem">
+                        <th:block th:insert="~{inc/vertical-table.html}"></th:block>
+                    </div>
                 </div>
             </div>
         </div>

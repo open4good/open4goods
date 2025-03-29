@@ -422,14 +422,14 @@ Xwiki css
 /* bandeau séparateur */
 
 /* les titre avec la font spartan */
-h1[class^="h"],
+/*h1[class^="h"],
 h2[class^="h"],
 h3[class^="h"],
 h4[class^="h"],
 h5[class^="h"],
 h6[class^="h"] {
 	font-family: 'League Spartan', sans-serif!important;
-}
+}*/
 
 /* preloader style */
 
@@ -451,12 +451,10 @@ h6[class^="h"] {
 }
 
 .wrapper__preloader-img svg {
-	position: absolute;
-	width:50px;
-	height:50px;
-	bottom: 10px;
-	right: 10px;
+	width:100px;
+	height:100px;
 	mix-blend-mode:difference;
+  margin: 1rem;
 }
 
 /* flip card */
