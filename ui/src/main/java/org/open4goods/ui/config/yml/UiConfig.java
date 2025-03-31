@@ -56,6 +56,10 @@ public class UiConfig {
 	private String resourceTemplateFolder;
 
 
+	
+	/** A localised list of fun facts **/
+	private Localisable<String,FunFactsConfig> funFacts = new Localisable<>(); 
+	
 	/**
 	 * Folder where datasources definitions are stored
 	 */
@@ -552,6 +556,17 @@ public class UiConfig {
 
 	public void setFeedConfigs(Map<String, FeedConfiguration> feedConfigs) {
 		this.feedConfigs = feedConfigs;
+	}
+
+	
+
+	public Localisable<String, FunFactsConfig> getFunFacts() {
+		return funFacts;
+	}
+
+
+	public void setFunFacts(Localisable<String, FunFactsConfig> funFacts) {
+		this.funFacts = funFacts;
 	}
 
 
