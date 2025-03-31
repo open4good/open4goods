@@ -8,32 +8,52 @@ function initTable(tableId) {
         paging: false,
         info: false,
         select: 'single',
-        "order": [ [2, 'asc'] ]
+        "order": [[2, 'asc']]
     });
 }
 
 /**
- * Utility function to parse your date string if needed.
- * If your timestamp is already "YYYY-MM-DD", new Date(...) usually works fine.
- * Adjust as necessary if you have time components or different formats.
+ * Utility function to parse your date string (price data).
+ * If your timestamp is "YYYY-MM-DD", new Date(...) works fine.
  */
 function parseDate(str) {
-    // Example: handle "YYYY-MM-DD" or "YYYY-MM-DD HH:mm:ss"
-    // If you have "YYYY-MM-DD HH:mm:ss", you might do:
-    // return new Date(str.replace(' ', 'T'));
+    // If needed, handle time component, e.g. new Date(str.replace(' ', 'T'));
     return new Date(str);
 }
 
 /**
- * Builds annotations for Chart.js annotation plugin from an array of events.
- * Each event has: { startDate, endDate, label } as Date objects + a string label.
+ * Parse an event date ignoring the year. Return {month, day} (0-based month).
+ */
+function parseEventMonthDay(str) {
+    // str is "YYYY-MM-DD"
+    const parts = str.split('-');
+    // parts[0] = YYYY, parts[1] = MM, parts[2] = DD
+    return {
+        month: parseInt(parts[1], 10) - 1, // zero-based
+        day:   parseInt(parts[2], 10)
+    };
+}
+
+/**
+ * Build Chart.js annotations from an array of "mapped" events
+ * (where startDate and endDate are actual Date objects).
  */
 function buildAnnotations(events) {
     const annotations = {};
+
+    // Create vertical offsets for labels to avoid collisions
+    const yOffsets = [0, 15, 30, -15, -30];
+
     events.forEach((ev, i) => {
-        // Basic styling
-        const boxBgColor = 'rgba(0, 0, 0, 0.1)';
-        const boxBorderColor = 'rgba(0, 0, 0, 0.6)';
+        // Use the event’s color or a fallback
+        const defaultBgColor = 'rgba(39, 245, 41, 0.5)'; // box fill
+        const defaultBorderColor = 'rgba(0, 0, 0, 0.3)';
+        const eventColor = ev.color || defaultBgColor;
+
+        // Single day => line, multi-day => box?
+        const isSingleDay = ev.startDate.getTime() === ev.endDate.getTime();
+
+        // Common label settings
         const commonLabel = {
             display: true,
             content: ev.label,
@@ -47,36 +67,39 @@ function buildAnnotations(events) {
             borderRadius: 4
         };
 
-        if (ev.startDate.getTime() === ev.endDate.getTime()) {
+        if (isSingleDay) {
             // Single-day event => vertical line
             annotations['event_' + i] = {
                 type: 'line',
                 mode: 'vertical',
                 scaleID: 'x',
                 value: ev.startDate,
-                borderColor: boxBorderColor,
+                borderColor: eventColor || defaultBorderColor,
                 borderWidth: 2,
                 label: {
                     ...commonLabel,
-                    position: 'start'
+                    position: 'start', // bottom of chart area
+                    yAdjust: yOffsets[i % yOffsets.length] 
                 }
             };
         } else {
-            // Multi-day event => box annotation
+            // Multi-day event => box
             annotations['event_' + i] = {
                 type: 'box',
                 xMin: ev.startDate,
                 xMax: ev.endDate,
-                backgroundColor: boxBgColor,
-                borderColor: boxBorderColor,
+                backgroundColor: eventColor,
+                borderColor: defaultBorderColor,
                 borderWidth: 1,
                 label: {
                     ...commonLabel,
-                    position: 'start'
+                    position: 'start',
+                    yAdjust: yOffsets[i % yOffsets.length]
                 }
             };
         }
     });
+
     return annotations;
 }
 
@@ -94,7 +117,7 @@ function filterDataByDateRange(data, startDate) {
  */
 function removePeriodButtonsIfNotEnoughData(priceHistory, periodButtons) {
     if (priceHistory.length < 2) {
-        // If there's 0 or 1 data points, you can remove everything or keep only "max"
+        // If there are 0 or 1 data points, remove everything except "max"
         Object.keys(periodButtons).forEach(period => {
             if (period !== 'max') {
                 const btn = document.getElementById(periodButtons[period]);
@@ -131,11 +154,66 @@ function removePeriodButtonsIfNotEnoughData(priceHistory, periodButtons) {
 }
 
 /**
+ * Main chart update function. Re-filters data and rebuilds the annotation config.
+ */
+function updateChart(chart, period, priceHistory, commercialEvents, dateRanges, timeUnitMapping) {
+    const startDate = dateRanges[period] || null;
+    const filteredData = filterDataByDateRange(priceHistory, startDate);
+
+    chart.data.datasets[0].data = filteredData.slice();
+
+    if (filteredData.length > 0) {
+        chart.options.scales.x.min = filteredData[0].x;
+        chart.options.scales.x.max = filteredData[filteredData.length - 1].x;
+
+        const minVal = filteredData.reduce((acc, p) => Math.min(acc, p.y), filteredData[0].y);
+        const maxVal = filteredData.reduce((acc, p) => Math.max(acc, p.y), filteredData[0].y);
+        chart.options.scales.y.suggestedMin = Math.floor(minVal * 0.98);
+        chart.options.scales.y.suggestedMax = Math.ceil(maxVal * 1.02);
+
+        // Compute the year range in the filtered data
+        const startYear = filteredData[0].x.getFullYear();
+        const endYear = filteredData[filteredData.length - 1].x.getFullYear();
+
+        let mappedEvents = [];
+        // Map each commercial event to every year in the range
+        for (let y = startYear; y <= endYear; y++) {
+            commercialEvents.forEach(ev => {
+                mappedEvents.push({
+                    startDate: new Date(y, ev.startMonthDay.month, ev.startMonthDay.day),
+                    endDate:   new Date(y, ev.endMonthDay.month, ev.endMonthDay.day),
+                    label: ev.label,
+                    color: ev.color
+                });
+            });
+        }
+
+        // Filter events to only those that intersect with the filteredData range (unless period is "max")
+        const finalEvents = period === "max" ? mappedEvents : mappedEvents.filter(e => {
+            return e.endDate >= filteredData[0].x && e.startDate <= filteredData[filteredData.length - 1].x;
+        });
+
+        chart.options.plugins.annotation.annotations = buildAnnotations(finalEvents);
+    } else {
+        // No data => clear or handle gracefully
+        chart.options.scales.x.min = undefined;
+        chart.options.scales.x.max = undefined;
+        chart.options.scales.y.suggestedMin = undefined;
+        chart.options.scales.y.suggestedMax = undefined;
+        chart.options.plugins.annotation.annotations = {};
+    }
+
+    // Adjust time unit for x-axis
+    chart.options.scales.x.time.unit = timeUnitMapping[period] || 'month';
+    chart.update();
+}
+
+/**
  * initPriceWidget: Main function to initialize the chart + period buttons + events.
  */
 function initPriceWidget(options) {
     initTable('#' + options.tableId);
-    
+
     // Set defaults if not provided
     options.defaultPeriod = options.defaultPeriod || '3months';
     options.chartColors = options.chartColors || {
@@ -150,12 +228,14 @@ function initPriceWidget(options) {
         y: ph.price
     })).sort((a, b) => a.x - b.x);
 
-    // 2) Parse events
+    // 2) Parse events ignoring year
     const rawEvents = options.events || [];
+    // Store month/day plus the label & color
     const commercialEvents = rawEvents.map(ev => ({
-        startDate: parseDate(ev.startDate),
-        endDate: parseDate(ev.endDate),
-        label: ev.label
+        startMonthDay: parseEventMonthDay(ev.startDate),
+        endMonthDay: parseEventMonthDay(ev.endDate),
+        label: ev.label,
+        color: ev.color // e.g. "rgba(176,255,76,0.25)"
     }));
 
     // 3) Define dateRanges for each period
@@ -178,105 +258,7 @@ function initPriceWidget(options) {
     // 4) Remove period buttons if not enough data
     removePeriodButtonsIfNotEnoughData(priceHistory, options.periodButtons);
 
-    // 5) Update chart function with event remapping (Option B)
-    function updateChart(chart, period) {
-        const startDate = dateRanges[period] || null;
-        const filteredData = filterDataByDateRange(priceHistory, startDate);
-        chart.data.datasets[0].data = filteredData.slice();
-
-        if (filteredData.length > 0) {
-            chart.options.scales.x.min = filteredData[0].x;
-            chart.options.scales.x.max = filteredData[filteredData.length - 1].x;
-
-            const minVal = filteredData.reduce((acc, p) => Math.min(acc, p.y), filteredData[0].y);
-            const maxVal = filteredData.reduce((acc, p) => Math.max(acc, p.y), filteredData[0].y);
-            chart.options.scales.y.suggestedMin = Math.floor(minVal * 0.98);
-            chart.options.scales.y.suggestedMax = Math.ceil(maxVal * 1.02);
-
-            // ---- Handle commercial events ignoring the year ----
-            const minDate = filteredData[0].x;
-            const maxDate = filteredData[filteredData.length - 1].x;
-
-            function extractMonthDay(date) {
-                return date.getMonth() * 100 + date.getDate(); // e.g., March 5 -> 305
-            }
-
-            // 1) Filter by month/day only
-            const minMD = extractMonthDay(minDate);
-            const maxMD = extractMonthDay(maxDate);
-
-            const visibleEvents = commercialEvents.filter(ev => {
-                const startMD = extractMonthDay(ev.startDate);
-                const endMD   = extractMonthDay(ev.endDate);
-
-                if (minMD <= maxMD) {
-                    // Normal case: e.g. March → May
-                    return endMD >= minMD && startMD <= maxMD;
-                } else {
-                    // Cross-year case: e.g. November → February
-                    return endMD >= minMD || startMD <= maxMD;
-                }
-            });
-
-            // 2) Remap each event’s month/day into the chart’s actual year(s)
-            function remapEventToChartYear(ev, minDate, maxDate) {
-                const minYear = minDate.getFullYear();
-                const maxYear = maxDate.getFullYear();
-
-                const minMD = extractMonthDay(minDate);
-                const maxMD = extractMonthDay(maxDate);
-
-                const startMD = extractMonthDay(ev.startDate);
-                const endMD   = extractMonthDay(ev.endDate);
-
-                if (minYear === maxYear) {
-                    // Single-year chart range
-                    return {
-                        startDate: new Date(minYear, ev.startDate.getMonth(), ev.startDate.getDate()),
-                        endDate:   new Date(minYear, ev.endDate.getMonth(),   ev.endDate.getDate()),
-                        label: ev.label
-                    };
-                }
-
-                // Cross-year chart range (assume maxYear = minYear + 1)
-                let newStartYear = (startMD >= minMD) ? minYear : maxYear;
-                let newEndYear   = (endMD   >= minMD) ? minYear : maxYear;
-
-                let newStartDate = new Date(newStartYear, ev.startDate.getMonth(), ev.startDate.getDate());
-                let newEndDate   = new Date(newEndYear,   ev.endDate.getMonth(),   ev.endDate.getDate());
-
-                // Ensure start <= end
-                if (newStartDate > newEndDate) {
-                    const temp = newStartDate;
-                    newStartDate = newEndDate;
-                    newEndDate = temp;
-                }
-                return {
-                    startDate: newStartDate,
-                    endDate:   newEndDate,
-                    label: ev.label
-                };
-            }
-
-            const mappedEvents = visibleEvents.map(ev => remapEventToChartYear(ev, minDate, maxDate));
-
-            // 3) Build the annotation config
-            chart.options.plugins.annotation.annotations = buildAnnotations(mappedEvents);
-        } else {
-            // No data => clear or handle gracefully
-            chart.options.scales.x.min = undefined;
-            chart.options.scales.x.max = undefined;
-            chart.options.scales.y.suggestedMin = undefined;
-            chart.options.scales.y.suggestedMax = undefined;
-            chart.options.plugins.annotation.annotations = {};
-        }
-
-        // Adjust time unit
-        chart.options.scales.x.time.unit = timeUnitMapping[period] || 'month';
-        chart.update();
-    }
-
-    // 6) Initialize the chart (if we have data)
+    // 5) Initialize the chart (if we have data)
     function initChart() {
         if (priceHistory.length === 0) {
             // No data => you might hide the chart container or show a "No data" message
@@ -353,38 +335,42 @@ function initPriceWidget(options) {
                     },
                     annotation: {
                         clip: false,
-                        // Initially build annotations from the raw events.
-                        // They will be corrected immediately after via updateChart().
-                        annotations: buildAnnotations(commercialEvents)
+                        // Start with empty. We'll fill it after we know the chart’s date range:
+                        annotations: {}
                     }
                 }
             }
         });
 
-        // 7) Hook up period buttons
+        // 6) Hook up period buttons
         Object.keys(options.periodButtons).forEach(periodKey => {
             const btnId = options.periodButtons[periodKey];
             const button = document.getElementById(btnId);
             if (!button) return;
 
-            // Make it "active" if it's our default
+            // Mark it as active if it matches the default period
             if (periodKey === currentPeriod) {
                 setActiveButton(button);
             }
 
             button.addEventListener('click', () => {
-                updateChart(myChart, periodKey);
+                updateChart(myChart, periodKey, priceHistory, commercialEvents, dateRanges, timeUnitMapping);
                 setActiveButton(button);
             });
         });
 
-        // IMPORTANT: Call updateChart once on initial load
-        updateChart(myChart, currentPeriod);
+        // Call updateChart once on initial load
+        updateChart(myChart, currentPeriod, priceHistory, commercialEvents, dateRanges, timeUnitMapping);
+
+        // Force a final update on the next frame to ensure annotations are correctly positioned
+        requestAnimationFrame(() => {
+            myChart.update();
+        });
     }
 
-    // 8) Simple helper to style the active button
+    // Simple helper to style the active period button
     function setActiveButton(activeBtn) {
-        const allBtns = document.querySelectorAll('.period-group .period-btn-'+options.widgetPrefix);
+        const allBtns = document.querySelectorAll('.period-group .period-btn-' + options.widgetPrefix);
         allBtns.forEach(b => {
             b.classList.remove('btn-primary', 'active-period-btn');
             b.classList.add('btn-secondary');
@@ -395,7 +381,7 @@ function initPriceWidget(options) {
         activeBtn.style.opacity = '1';
     }
 
-    // 9) Initialize Bootstrap tooltips (if using them)
+    // Initialize Bootstrap tooltips (if used)
     function initTooltips() {
         const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
         tooltipTriggerList.map(el => new bootstrap.Tooltip(el));
