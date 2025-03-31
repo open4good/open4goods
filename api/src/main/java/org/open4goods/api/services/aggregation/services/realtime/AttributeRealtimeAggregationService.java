@@ -153,80 +153,78 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 	}
 
 	
+	/**
+	 * Extracts a model identifier from a product's offer titles based on the brand and existing model,
+	 * using regex matching. The extracted model must contain at least one letter and one digit,
+	 * or consist only of digits.
+	 * <p>
+	 * If a matching model different from the current one is found, it will update the model using {@code forceModel}.
+	 * Additional variants are stored in {@code akaModels}.
+	 *
+	 * @param data the product from which to extract model information
+	 */
 	public void extractModelFromTitles(Product data) {
 	    // Retrieve current brand and model from the product.
 	    String brand = data.brand();
 	    String currentModel = data.model();
-	    
+
 	    if (brand == null || currentModel == null || currentModel.isEmpty()) {
 	        dedicatedLogger.warn("Brand or model is null/empty; cannot extract model from titles.");
 	        return;
 	    }
-	    
+
 	    // Determine the model prefix: use the entire model if it's shorter than 3 characters.
 	    String modelPrefix = currentModel.length() < 3 ? currentModel : currentModel.substring(0, 3);
-	    
-	    // Updated regex pattern explanation:
-	    // (?i)               -> Enables case-insensitive matching.
-	    // .*                 -> Matches any preceding characters.
-	    // Pattern for BRAND  -> Matches the literal brand (quoted for regex safety).
-	    // [ .-]?            -> Allows for an optional separator: a space, a period, or a dash.
-	    // (                  -> Start capturing group for the model.
-	    //    modelPrefix    -> Matches the model prefix (quoted for regex safety).
-	    //    [^\s]*         -> Matches zero or more non-whitespace characters.
-	    // )                  -> End capturing group.
-	    // (?:\s|$)          -> Ensures that the captured model is terminated by a whitespace or the end of the string.
-	    // .*                 -> Matches any trailing characters.
-	    String regex = "(?i).*" 
+
+	    // Construct a case-insensitive regex pattern to capture model-like substrings following the brand.
+	    String regex = "(?i).*"
 	                 + java.util.regex.Pattern.quote(brand)
-	                 + "[ .-]?" 
-	                 + "(" 
+	                 + "[ .-]?"
+	                 + "("
 	                 + java.util.regex.Pattern.quote(modelPrefix)
-	                 + "[^\\s]*)" 
+	                 + "[^\\s]*)"
 	                 + "(?:\\s|$).*";
-	    
+
 	    dedicatedLogger.info("Compiled regex pattern: " + regex);
-	    
-	    // Compile the pattern only once.
+
 	    java.util.regex.Pattern pattern = java.util.regex.Pattern.compile(regex);
-	    
-	    // List to collect extracted model candidates.
 	    List<String> extractedModels = new ArrayList<>();
+
 	    for (String offerName : data.getOfferNames()) {
-	        if (offerName == null) {
-	            continue;
-	        }
+	        if (offerName == null) continue;
+
 	        java.util.regex.Matcher matcher = pattern.matcher(offerName);
 	        if (matcher.matches()) {
-	            // Extract captured group (the model) from the offer name.
 	            String candidate = matcher.group(1);
-	            extractedModels.add(candidate);
+	            // Must contain at least one digit and one letter, or only digits
+	            if ((candidate.matches(".*\\d.*") && candidate.matches(".*[a-zA-Z].*")) ||
+	                candidate.matches("^\\d+$")) {
+	                extractedModels.add(candidate);
+	            }
 	        }
 	    }
-	    
+
 	    if (extractedModels.isEmpty()) {
 	        dedicatedLogger.info("No matching offer names found.");
 	        return;
 	    }
-	    
-	    // Find the shortest candidate model (if multiple candidates have the same length, the first is chosen).
+
+	    // Find the shortest model candidate
 	    String shortestModel = extractedModels.get(0);
 	    for (String candidate : extractedModels) {
 	        if (candidate.length() < shortestModel.length()) {
 	            shortestModel = candidate;
 	        }
 	    }
-	    
-	    // Convert the extracted model to uppercase.
+
 	    String extractedModel = shortestModel.toUpperCase();
-	    
-	    // If the extracted model is different from the current model, update it using forceModel.
+
 	    if (!extractedModel.equals(currentModel)) {
 	        data.forceModel(extractedModel);
 	        dedicatedLogger.info("Model updated from '" + currentModel + "' to '" + extractedModel + "'.");
 	    }
-	    
-	    // Add any additional extracted models (converted to uppercase) to the akaModels set.
+
+	    // Add alternate models
 	    for (String candidate : extractedModels) {
 	        String candidateUpper = candidate.toUpperCase();
 	        if (!candidateUpper.equals(extractedModel) && !data.getAkaModels().contains(candidateUpper)) {
@@ -235,6 +233,7 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 	        }
 	    }
 	}
+
 
 
 	/**
