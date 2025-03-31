@@ -14,7 +14,7 @@
 		<img class="img-fluid" th:src="${cover}">
 	</div>
 	<div th:if="${images.size() > 0}" id="bootstrap-gallery-carousel" class="carousel slide" data-bs-ride="carousel">
-		<div class="carousel-indicators">
+		<div class="bg-primary carousel-indicators" style="position:relative;">
 			<button th:each="img, stat : ${images}" type="button" 
 					data-bs-target="#bootstrap-gallery-carousel"
 					th:data-bs-slide-to="${stat.count-1}" 

@@ -125,7 +125,52 @@ price-config:
           endDate: "2025-12-25"
           color: "rgba(176,255,76,0.25)"
 
-      
+          
+fun-facts:
+  fr:
+    facts:
+      - title: "La biodiversité, c'est vital"
+        description: "La biodiversité maintient l'équilibre des écosystèmes et assure la survie de milliers d'espèces."
+      - title: "Les forêts purifient l'air"
+        description: "Les arbres absorbent le CO2 et produisent de l'oxygène, jouant un rôle essentiel dans la lutte contre le changement climatique."
+      - title: "L'énergie solaire, une ressource illimitée"
+        description: "Le soleil fournit plus d'énergie en une heure que l'humanité n'en consomme en une année."
+      - title: "La réduction des déchets plastiques"
+        description: "Recycler et diminuer l'usage du plastique est crucial pour protéger les océans et la vie marine."
+      - title: "Les toits verts"
+        description: "Les toits végétalisés améliorent l'isolation thermique et réduisent l'effet d'îlot de chaleur en ville."
+      - title: "Les abeilles, gardiennes de la pollinisation"
+        description: "Les abeilles sont indispensables à la pollinisation, soutenant la production alimentaire mondiale."
+      - title: "L'eau, source de vie"
+        description: "La gestion durable de l'eau est essentielle pour préserver les écosystèmes et garantir l'avenir."
+      - title: "Les énergies renouvelables"
+        description: "L'éolien, le solaire et l'hydroélectrique offrent des alternatives propres aux énergies fossiles."
+      - title: "Les zones humides, poumons de la Terre"
+        description: "Les zones humides filtrent l'eau, préviennent les inondations et abritent une biodiversité riche."
+      - title: "Les océans, régulateurs climatiques"
+        description: "Les océans absorbent le CO2 et modèrent les températures globales, agissant comme un thermostat naturel."
+      - title: "Le compostage, un geste écologique"
+        description: "Transformer les déchets organiques en compost enrichit le sol et réduit la quantité de déchets."
+      - title: "La mobilité douce"
+        description: "Favoriser la marche, le vélo et les transports en commun aide à réduire les émissions de gaz à effet de serre."
+      - title: "Les circuits courts"
+        description: "Acheter localement diminue l'empreinte carbone liée au transport des produits et soutient l'économie locale."
+      - title: "La permaculture, agriculture durable"
+        description: "La permaculture imite les processus naturels pour créer des systèmes agricoles résilients et durables."
+      - title: "Les micro-habitats urbains"
+        description: "Même en ville, de petits espaces peuvent devenir des refuges pour la biodiversité locale."
+      - title: "Les emballages écologiques"
+        description: "Utiliser des emballages biodégradables aide à réduire la pollution et facilite le recyclage."
+      - title: "La réduction des émissions de CO2"
+        description: "Des gestes quotidiens simples, comme éteindre la lumière inutilement, contribuent à diminuer l'empreinte carbone."
+      - title: "Les zones protégées"
+        description: "Les parcs nationaux et réserves naturelles préservent des habitats uniques et soutiennent la biodiversité."
+      - title: "L'éducation environnementale"
+        description: "Sensibiliser dès le plus jeune âge aux enjeux écologiques est essentiel pour un avenir durable."
+      - title: "L'agriculture biologique"
+        description: "L'agriculture biologique favorise la santé des sols et limite l'utilisation de produits chimiques nocifs."
+
+    
       
 team-config:
   cores:

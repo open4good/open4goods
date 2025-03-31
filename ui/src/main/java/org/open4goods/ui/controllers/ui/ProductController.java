@@ -26,6 +26,7 @@ import org.open4goods.services.captcha.config.HcaptchaProperties;
 import org.open4goods.services.productrepository.services.ProductRepository;
 import org.open4goods.services.reviewgeneration.service.ReviewGenerationService;
 import org.open4goods.services.serialisation.service.SerialisationService;
+import org.open4goods.ui.config.yml.FunFactsConfig;
 import org.open4goods.ui.config.yml.UiConfig;
 import org.open4goods.ui.helper.UiHelper;
 import org.slf4j.Logger;
@@ -303,6 +304,7 @@ public class ProductController  {
 			mv.addObject("features",features);
 			
 			
+
 			mv.addObject("verticalConfig", verticalConfig);
 
 			UiHelper uiHelper = new UiHelper(request, verticalConfig, data);
@@ -405,11 +407,16 @@ public class ProductController  {
 	///	TODO(p2,design) -> Out in dedicated controller
 	@GetMapping(path = {"/review-request/{id:\\d+}"}   )
 	public ModelAndView review(final HttpServletRequest request, @PathVariable(required = false) String vertical, @PathVariable Long id) {
-		return uiService.defaultModelAndView("review-request", request)
+		ModelAndView ret = uiService.defaultModelAndView("review-request", request)
 					.addObject("captchaKey", captchaProps.getKey())
-					.addObject("gtin",id)
+					.addObject("gtin",id);
+		
+		// TODO : i18n, check not null 
+		FunFactsConfig funFacts = config.getFunFacts().i18n("fr");
+		ret.addObject("funFacts",funFacts.getFacts());
+		
+		return ret;
 							
-							;
 	}
 	
 	
