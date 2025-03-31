@@ -1,75 +1,98 @@
 <section id="markerCaracteristiques" class="container container-semi-fluid section">
-		
-		
-		                
-               <!-- Caracteristiques principales -->
-                 <div  class="card shadow mt-3 border-gray-300">
-                           <div class="card-body p-4 p-lg-5">
-                            <div class="d-flex p-3 justify-content-center">                                                     
-                                <div class="icon icon-primary">
-                                    <span class="fas fa-list-check"></span>
-                                </div>                                                      
-                                <div class="ps-4">
-                                    <h3 class="h5 icon-box-title md-1">Caractéristiques</h3>
-                                </div>
-                            </div>          
-                                    <th:block th:insert="~{inc/product-attributes.html}"></th:block>
-                                    <a href="#markerCaracteristiques" style="width:100%" class="btn btn-primary">Toutes les caractéristiques</a>
-                           </div>
-                  </div>
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		<div class="row text-center justify-content-center">
-              <div class="col-md-8 mb-5">
-                  <h2 class="display-3">Caractéristiques détaillées</h2>
-              </div>
-        </div>	   
 
-		<div class="row">
-			<!--  Features 
-			<div th:with="features = ${product.attributes.features()}" class="col-lg-3">
-				<div class="mt-3"
-					th:if="${features.size > 0}"
-					th:insert="~{inc/product-features.html}">
-				</div>
-			</div>
-			-->
-		
+    <!-- Caractéristiques principales -->
+    <div class="mx-auto col-8 card shadow mt-3 border-gray-300">
+        <div class="card-body p-4 p-lg-5">
+            <div class="d-flex p-3 justify-content-center">
+                <div class="icon icon-primary">
+                    <span class="fas fa-list-check"></span>
+                </div>
+                <div class="ps-4">
+                    <h3 class="h5 icon-box-title md-1">Caractéristiques principales</h3>
+                </div>
+            </div>
+            <th:block th:insert="~{inc/product-attributes.html}"></th:block>
+        </div>
+    </div>
 
-			<!-- All attributes -->
-			<div class="col-lg-5">
-				<div class="row">
-					<div class="col-6" th:each="featureGroup, stat : ${features}">
-								<table class="table">
-									<th:block th:each="attr,stat : ${featureGroup.attributes}">
-										<tr th:if="${stat.first}">
-											<th colspan="2" class="h4"><strong th:text="${featureGroup.name}"></strong></th>			
-										</tr>
-									
-										<tr>
-											<td class="align-middle"><span th:text="${attr.name}"></span></td>
-											<td  class="align-middle"> <b><th:block th:utext="${attr.value}"></th:block></b></td>
-										</tr>
-									</th:block>
-								</table>
-					</div>
-				</div>
-				
-			</div>
-
-		</div>
+    <!-- Section Title -->
+    <div class="row text-center justify-content-center">
+        <div class="col-md-8 mt-4">
+            <h2 class="display-3">Caractéristiques détaillées</h2>
+        </div>
+    </div>
 
 
 
+<!-- All Attributes -->
+<div class="mt-4 masonry-columns">
+    <div th:each="featureGroup : ${features}" class="masonry-item">
+        <div class="card shadow border-gray-300 mb-3">
+            <div class="card-body p-4 p-lg-5">
+                <div class="d-flex p-3 justify-content-center">
+                    <div class="ps-4">
+                        <h5 class="h4">
+                            <strong th:text="${featureGroup.name}"></strong>
+                        </h5>
+                    </div>
+                </div>
 
-		
+                <!-- Features and Unfeatures List -->
+                <div class="row">
+                    <!-- Both -->
+                    <th:block th:if="${!#lists.isEmpty(featureGroup.features()) and !#lists.isEmpty(featureGroup.unFeatures())}">
+                        <div class="col-6">
+                            <ul class="list-unstyled">
+                                <li th:each="attr : ${featureGroup.features()}">
+                                    ✅ <span th:text="${attr.name}"></span>
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="col-6">
+                            <ul class="list-unstyled">
+                                <li th:each="attr : ${featureGroup.unFeatures()}">
+                                    ❌ <span th:text="${attr.name}"></span>
+                                </li>
+                            </ul>
+                        </div>
+                    </th:block>
+
+                    <!-- Only Features -->
+                    <div th:if="${!#lists.isEmpty(featureGroup.features()) and #lists.isEmpty(featureGroup.unFeatures())}" class="col-10 mx-auto">
+                        <ul class="list-unstyled">
+                            <li th:each="attr : ${featureGroup.features()}">
+                                ✅ <span th:text="${attr.name}"></span>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <!-- Only Unfeatures -->
+                    <div th:if="${#lists.isEmpty(featureGroup.features()) and !#lists.isEmpty(featureGroup.unFeatures())}" class="col-10 mx-auto">
+                        <ul class="list-unstyled">
+                            <li th:each="attr : ${featureGroup.unFeatures()}">
+                                ❌ <span th:text="${attr.name}"></span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Attributes Table -->
+                <table class="table table-sm mb-0">
+                    <tbody>
+                        <tr th:each="attr : ${featureGroup.attributes()}">
+                            <td class="align-middle">
+                                <span th:text="${attr.name}"></span>
+                            </td>
+                            <td class="align-middle">
+                                <b><th:block th:utext="${attr.value}"></th:block></b>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+
 </section>

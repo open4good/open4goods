@@ -19,6 +19,20 @@ public class AttributesFeatureGroups {
 	
 	private List<ProductAttribute> attributes = new ArrayList<>();
 
+	
+	
+	public List<ProductAttribute> features () {
+		return attributes.stream().filter(e->e.isFeature()).toList();		
+	}
+	
+	public List<ProductAttribute> unFeatures () {
+		return attributes.stream().filter(e->e.isUnfeature()).toList();		
+	}
+
+	public List<ProductAttribute> attributes()  {
+		return attributes.stream().filter(e-> (!e.isUnfeature() && ! e.isFeature())).toList();		
+	}
+	
 	public FeatureGroup getFeatureGroup() {
 		return featureGroup;
 	}

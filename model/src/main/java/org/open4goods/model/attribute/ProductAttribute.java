@@ -87,6 +87,26 @@ public class ProductAttribute extends SourcableAttribute implements IAttribute {
 
 	}
 
+	/**
+	 * 
+	 * @return true if match a feature attribute
+	 */
+	public boolean isUnfeature() {
+		
+		if (StringUtils.isEmpty(value)) {
+			return false;
+		}
+		return switch (value.toLowerCase()) {
+		case "false" -> true;
+		case "non" -> true;
+		case "no" -> true;
+		case "n" -> true;
+		default -> false;
+		};
+
+	}
+	
+	
 	@Override
 	public String toString() {
 		return name +":"+ value+   " ("+ source.size() + " source(s)";
