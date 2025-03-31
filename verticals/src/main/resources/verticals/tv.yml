@@ -16,6 +16,10 @@ order: 1
 # SHOULD be set, it will then force this taxonomy for all products in this vertical
 googleTaxonomyId: 404
 
+
+icecatTaxonomyId: 1584
+
+
 # Indicates if the vertical must be UI / sitemap / search rendered
 enabled: true
 
