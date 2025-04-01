@@ -115,7 +115,7 @@
     
                 <!-- Trend messages -->
                 <div class="m-4">
-                    <div th:if="${trend.trend == 0}" class="text-center alert alert-info" role="alert">
+                    <div th:if="${trend.trend == 0 && trend.period != null }" class="text-center alert alert-info" role="alert">
                         😶‍🌫️ <span th:text="#{trend.stable}">Le prix est stable depuis</span> <span th:text="${trend.formatedDuration()}"></span>)
                     </div>
                     <div th:if="${trend.trend == 1}" class="text-center alert alert-danger" role="alert">
