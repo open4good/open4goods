@@ -141,7 +141,7 @@
                                     <div class="carousel-inner">
                                         <div th:each="verticalGroup, stat : ${verticalsCarrouselBuckets}" th:class="'carousel-item' + (${stat.index == 0} ? ' active' : '')">
                                             <div class="row">
-                                                <div th:each="vertical : ${verticalGroup}" class="col-12 col-md-4">
+                                                <div th:each="vertical : ${verticalGroup}" class="col-12 col-md-3">
                                                     <a th:href="'/'+${vertical.i18n(siteLanguage).verticalHomeUrl}" class="d-flex flex-column">
                                                         <span class="">
                                                             <img th:src="'/images/verticals/' + ${vertical.id} + '-360.webp'" height="150" class="lazy" th:alt="'Illustration de ' + ${vertical.i18n(siteLanguage).verticalHomeTitle}" loading="lazy">
