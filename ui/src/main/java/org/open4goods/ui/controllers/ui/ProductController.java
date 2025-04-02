@@ -5,7 +5,13 @@ import java.net.URLEncoder;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.open4goods.commons.model.data.ContributionVote;
@@ -33,11 +39,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.ModelAndView;
 
@@ -231,9 +235,41 @@ public class ProductController  {
 				
 			}
 			
+			
+			// Fetching products with scores worse or best in a map. 
+
+			Set<Long> worsesId = data.realScores().stream().filter(e->e.getLowestScoreId() != null).map(e->e.getLowestScoreId()).collect(Collectors.toSet());
+			Set<Long> bestId = data.realScores().stream().filter(e->e.getHighestScoreId() != null).map(e->e.getHighestScoreId()).collect(Collectors.toSet());
+			Set<Long> all = new HashSet<>();
+			all.addAll(worsesId);
+			all.addAll(bestId);
+			
+			
+			
+			//TODO(p1,perf) : heavy cache
+			Map<String, Product> prds = productRepository.multiGetById(all);
+			
+			// Re-building products in a map
+			Map<Long, Product> extrems = all.stream()
+			    .map(e -> prds.get(e.toString()))
+			    .filter(Objects::nonNull)
+			    .collect(Collectors.toMap(
+			        Product::getId, // or e -> e.getId(), or e -> e.toString()
+			        Function.identity(),
+			        (a, b) -> a // in case of duplicates, keep the first
+			    ));			
+			
+			mv.addObject("extrems",extrems);
+			
 			// Adding bestOccasionOffer and bestNewOffer
 			mv.addObject("bestOccasionOffer", data.getPrice().bestOffer(ProductCondition.OCCASION));
 			mv.addObject("bestNewOffer", data.getPrice().bestOffer(ProductCondition.NEW));
+			
+			
+			
+			// TODO: i18n
+
+			
 			
 			
 			
@@ -306,6 +342,8 @@ public class ProductController  {
 			
 
 			mv.addObject("verticalConfig", verticalConfig);
+			mv.addObject("verticalPath",verticalConfigService.getPathForVerticalLanguage("fr",verticalConfig));
+
 
 			UiHelper uiHelper = new UiHelper(request, verticalConfig, data);
 			// Adding the UiHelper class

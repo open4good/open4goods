@@ -14,9 +14,7 @@
 				<p class="card-text border-bottom pb-3">
 					La performance RSE de <th:block th:text="${product.brand()}"></th:block> (obtenue auprès de l'agence de notation sustainalytics) compte pour <b>
 					<th:block th:text="${#numbers.formatDecimal(verticalConfig.ecoscorePercentOf(score.name), 0, 'COMMA', 1, 'POINT')}"></th:block> %</b>
-						dans la note totale (<b><th:block th:text="${#numbers.formatDecimal(verticalConfig.ecoscoreParticipationPointsOf20(score.name, score.relativ.value), 0, 'COMMA', 1, 'POINT')}"> </th:block>
-						points</b> attribués, sur les 
-					<th:block th:text="${verticalConfig.ecoscoreParticipationMaxPointsOf20(score.name)}"> </th:block>  possibles)
+						dans la note totale 
 				</p>								
 				<p class="card-text">
 					<span class="far fa-lightbulb"></span>

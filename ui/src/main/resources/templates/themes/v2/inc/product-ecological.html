@@ -1,248 +1,315 @@
-    <section id="markerEcological" class="container container-semi-fluid">
-		<div class="row text-center justify-content-center">
-           <div class="col-md-8 mb-5">
-				<h2 class="display-3">
-					Bilan écologique
-				</h2>
-		  </div>
-        </div>	   
-  
+<section id="markerEcological" class="container container-semi-fluid" role="region" aria-labelledby="heading-ecological-impact">
+  <!-- Title -->
+  <div class="row text-center justify-content-center mt-4 mb-4">
+    <div class="col-md-8">
+      <h2 id="heading-ecological-impact" class="display-4">
+        Impact écologique du 
+        <span class="text-tertiary" th:text="${product.model()}"></span>
+      </h2>
+    </div>
+  </div>
+
+  <!-- Ecoscore Card -->
+  <div th:if="${product.ecoscore()}" class="card shadow px-4 py-3 mb-4">
+    <div class="card-body">
+      <div class="row align-items-start">
+        <!-- Left Column: Score + Classement -->
+        <div class="col-md-3">
+          <article aria-labelledby="impact-score-title">
+            <div class="card card__radius--mini border-0 mb-3">
+              <div class="card-body text-center">
+                <h3 id="impact-score-title" class="h5">Impact Score</h3>
+                <!-- Star rating -->
+                <div class="star-rating star-rating-lg" 
+                     th:data-rating="${product.ecoscore.absolute.value}" 
+                     th:aria-label="'Évaluation de ' + ${product.ecoscore.absolute.value} + ' sur 5'">
+                  <div class="stars" aria-hidden="true">
+                    <span class="star"></span>
+                    <span class="star"></span>
+                    <span class="star"></span>
+                    <span class="star"></span>
+                    <span class="star"></span>
+                  </div>
+                </div>
+                <div class="mt-3">
+                  <span class="display-4" th:text="${product.ecoscore.on20()}"></span>
+                  <span class="display-5">/20</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Classement -->
+            <div class="card border-gray-300 mb-3">
+              <div class="card-body">
+                <div class="d-flex align-items-center">
+                  <div class="icon icon-primary" aria-hidden="true">
+                    <span class="fas fa-trophy" aria-hidden="true"></span>
+                  </div>
+                  <div class="ps-3">
+                    <h4 class="h6 mb-1">Classement</h4>
+                  </div>
+                </div>
+                <p class="mt-2">
+                  Ce modèle est classé 
+                  <strong th:text="${product.ranking.globalPosition}"></strong> sur 
+                  <strong th:text="${product.ranking.globalCount}"></strong> dans la catégorie 
+                  <span th:text="${verticalConfig.i18n(siteLanguage).verticalHomeTitle.toLowerCase()}"></span>.
+                </p>
+              </div>
+            </div>
+
+            <!-- CTA button -->
+            <a class="btn btn-outline-tertiary w-100 mt-2 animate-up-2 text-center"
+               th:href="'/' + ${verticalConfig.i18n(siteLanguage).verticalHomeUrl} + '/ecoscore'"
+               role="button" aria-label="Voir les scores d’impact de la catégorie">
+              Impact Score <th:block th:text="${verticalConfig.i18n(siteLanguage).verticalHomeTitle.toLowerCase()}"></th:block>
+            </a>
+          </article>
+        </div>
+
+        <!-- Right Column: Description -->
+        <div class="col-md-9">
+          <article aria-labelledby="desc-ecologique">
+            <div th:if="${ecologicalDescriptionParagraphs}" class="card shadow border-gray-300 p-4">
+              <h3 id="desc-ecologique" class="h5 visually-hidden">Détails écologiques</h3>
+              <p class="lead">
+                <span th:each="paragraph : ${ecologicalDescriptionParagraphs}" th:utext="${paragraph + '<br/><br/>'}"></span>
+              </p>
+            </div>
+          </article>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Details Row: Radar, Factors, Virtual -->
+  <div class="row mt-3">
+
 	
-	   
-	   <div th:if="${product.ecoscore()}" class="mt-3 card shadow px-4 py-1 mb-3">
-				<div class="card-body text-center text-md-left">
-					<div class="row">
-						<div class="col-12 col-md-3 ">
-						
-						<div class="">
-						
-							<div class="  text-center">
-								<img class="mb-1" width="350px"
-									th:alt="'Ecoscore : ' + ${product.ecoscore.letter()}"
-									th:title="'éco-score : ' + ${product.ecoscore.letter()}"
-									th:src="'/icons/ecoscore/scoring-'+${product.ecoscore.letter()}+'.png'">									
-							</div>
-						
-							<br/>
-						
-							<div class="card border-gray-300 my-2">
-												<div class="card-body">
-													<div class="d-flex p-3">														
-														<div class="icon icon-primary">
-															<span class="fas fa-trophy"></span>
-														</div>														
-														<div class="ps-4">
-															<span class="h5 icon-box-title md-1">Classement</span>
-														</div>
-													</div>
-										
-													<ul class="list-group list-group-flush price-list ms-3">
-																<!-- <li class="list-group-item border-0"><span class="far fa-lightbulb"></span>Petites télévision : <span>25/150</span></li> -->
-																<li class="list-group-item border-0"><span class="far fa-hdd"></span>Téléviseurs : <span th:text="${product.ranking.globalPosition}"></span>/<span th:text="${product.ranking.globalCount}"></span></li>
-													</ul>	
-													
-												</div>
-								</div>
-								
-								
-								
-								
-								
-							<div class="align-text-bottom ">
-							<br/>
-							<br/>
-								<a style="width:100%" href="#markerEcoscore" class="mt-2 btn btn-primary animate-up-2 text-center">Détail du score</a>
-								
-								<a style="width:100%" href="/ecoscore" class="mt-2 btn btn-outline-tertiary animate-up-2 text-center">Tout savoir sur l'ecoscore Nudger</a>
-							</div>				
-								
-						
-						</div>		
-								
-								
-						
-						
-						
-						
-						
-						
-						
-						
-						
-						
-						
-
-							
-							
-																		<!-- Icon Box -->
-	
-											
-
-		<!-- 					<img th:src="${cover.path()}">  -->
-                              
-                                
-							
-						</div>
-						<div class="col-md-9">
+	<!-- Radar Chart Section -->
+	<div class="col-lg-4">
+	  <figure class="card shadow" role="group" aria-labelledby="radar-chart-title">
+	    <figcaption class="card-header">
+	      <h3 id="radar-chart-title" class="h6">Comparaison des indicateurs</h3>
+	    </figcaption>
+	    <div class="card-body">
+	      <canvas id="radarChart"
+	              role="img"
+	              aria-label="Diagramme radar comparant les performances environnementales du produit aux valeurs de référence (moyenne, minimum, maximum)">
+	      </canvas>
+	      <noscript>
+	        <p>
+	          Le graphique radar nécessite JavaScript pour être affiché. Veuillez activer JavaScript dans votre navigateur.
+	        </p>
+	      </noscript>
+	    </div>
+	  </figure>
+	</div>
 
 
-							<th:block th:if="${ecologicalDescriptionParagraphs}" id="evaluation-ecologique" class="card shadow border-gray-300 mt-3">
-								<p class="lead p-4">
-									<span th:each="paragraph : ${ecologicalDescriptionParagraphs}" th:utext="${paragraph + '<br/><br/>'}"></span>
-								</p>
-							</th:block>
-                            
-                            
-                            
-     
-                            
-                            
-                            
-						</div>
-					</div>
-				</div>
-			</div>
-			
-			
-			
-			 <div class="row mt-3">
-			 
-			 
-			     <!-- Comparison radar chart -->
-			     <div class="col-lg-4">
-			          <div class=" card shadow">
-                            <div class="card-header"><h3 class="h6">Comparaison</h3></div>
-                            <div class="card-body">
-     
-     
-                                 <canvas id="radarChart"></canvas>
-     
-                            </div>
-                        </div>
-			     </div>
-			 
-                 <!-- ImpactScore details -->
-                 <div class="col-lg-4" th:each="score, stat : ${verticalConfig.ecoScoreDetails(product.realScores())}" >
-                      <div class=" card shadow">
-                            <div style="max-height: 150px;" class="inline-block card-header">
-                            
-                          
-                                
-                            <div class="row align-middle">
-                                <div class="col-5" >
-                                    <th:block th:insert="~{inc/impactscore-percent-header.html}"></th:block>
-                                </div>
-                                <div class="align-middle col-7" >
-                                    <h3 class="h6" th:text="${score.name}"></h3>
-                                </div>
-                            </div>
-                            
-                            
-                            </div>
-                            <div class="card-body">
-                                    <th:block th:insert="~{inc/score/__${score.name.toLowerCase()}__.html}"></th:block>
-     
-     
-                            </div>
-                        </div>
-                 </div>			 
-			 
-			 
-			     <!-- Virtual score -->
-                 <div class="col-lg-4" >
-                      <div class=" card shadow">
-                            <div class="card-header"><h3 class="h6">Valeurs manquantes</h3></div>
-                            <div class="card-body">
-                                   
-     
-                                    + de detail sur le calcul ici
-                            </div>
-                        </div>
-                 </div>          
-             
-			 
-			 
-			 
-			 
-			 </div>
-			
-			
-			
-			<div class="row mt-3">
-						<!-- Origine -->
-						<div class="col-sm-12 col-md-12 col-lg-4 mb-2">
-							<!-- Icon Box -->
-							<div class="card border-gray-300 ">
-								<div class="">
-									<div class="d-flex p-3">
-										<div class="icon icon-primary">
-											<span class="fas fa-earth"></span>
-										</div>
-										<div class="ps-4">
-											<h3 class="h5 icon-box-title md-1">Origine</h3>
-										</div>
-									</div>
-		
-									<div class="card-body text-center ">
-                                        <div  class="h4" th:text="${originCountry}"></div>
-                                        <img th:if="${product.gtinInfos.country}" th:title="${originCountry}" th:src="'/assets/img/flags/'+${product.gtinInfos.country.toLowerCase()}+'.png'" th:alt="${originCountry}" class="image-md mb-4">
-                                        <div  class="h3 text-light mb-2 " ></div>
-											<p class="mb-4">Cette information est récuperée par les
-											premiers chiffres du code barre  (<b><span th:text="${product.gtin().substring(0,3)}"></span></b>), et indique la nationalité de 
-											l'organisme qui a délivré le code barre. Cela n'indique pas nécessairement le lieu de production.</p>
-                                 	 </div>
-								</div>
-							</div>
-							<!-- End of Icon Box -->
-						</div>
-		
-						<!-- Avantages -->
-		<div class="col-sm-12 col-md-12 col-lg-8">
-			<!-- Icon Box -->
-			<div class="card border-gray-300 ">
-				<div class="card-body">
-					<div class="d-flex p-3">
-						<div class="icon icon-primary">
-							<span class="fas fa-user-md"></span>
-						</div>
-						<div class="ps-4">
-							<h3 class="h5 icon-box-title md-1">Alternatives</h3>
-						</div>
-					</div>
+    <!-- Impact Details -->
+    <div class="col-lg-4" th:each="score, stat : ${verticalConfig.ecoScoreDetails(product.realScores())}">
+      <th:block th:switch="${score.name}">
+        <div th:case="'CLASSE_ENERGY'">
+          <th:block th:with="img = '/icons/energy/'+${product.attributes.indexed.get(score.name).value.toLowerCase().replace('+','p')}+'.svg'"
+                     th:insert="~{inc/score/score-card.html}">
+          </th:block>
+        </div>
+        <div th:case="*">
+            <div class="alert alert-danger">Missing layout for <span th:text="${score.name}"></span></div>
+        
+        </div>
+      </th:block>
+    </div>
+
+    <!-- Virtual Score -->
+    <div class="col-lg-4">
+      <article class="card shadow" aria-labelledby="missing-values-title">
+        <div class="card-header">
+          <h3 id="missing-values-title" class="h6">Valeurs manquantes</h3>
+        </div>
+        <div class="card-body">
+          + de detail sur le calcul ici
+        </div>
+      </article>
+    </div>
+  </div>
+
+  <!-- Origine + Alternatives -->
+  <div class="row mt-3">
+    <!-- Origine -->
+    <div class="col-lg-4 mb-3">
+      <article class="card border-gray-300" aria-labelledby="origine-title">
+        <div class="d-flex align-items-center p-3">
+          <div class="icon icon-primary" aria-hidden="true">
+            <span class="fas fa-earth" aria-hidden="true"></span>
+          </div>
+          <div class="ps-3">
+            <h3 id="origine-title" class="h5">Origine</h3>
+          </div>
+        </div>
+        <div class="card-body text-center">
+          <div class="h4" th:text="${originCountry}"></div>
+          <img th:if="${product.gtinInfos.country}" 
+               th:title="${originCountry}" 
+               th:src="'/assets/img/flags/'+${product.gtinInfos.country.toLowerCase()}+'.png'" 
+               th:alt="'Drapeau du pays d’origine : ' + ${originCountry}" 
+               class="image-md mb-4" loading="lazy">
+          <p class="mb-0">
+            Cette information est récupérée par les premiers chiffres du code barre (<strong><span th:text="${product.gtin().substring(0,3)}"></span></strong>),
+            et indique la nationalité de l'organisme qui a délivré le code barre. Cela n'indique pas nécessairement le lieu de production.
+          </p>
+        </div>
+      </article>
+    </div>
+
+    <!-- Alternatives -->
+    <div class="col-lg-8">
+      <article class="card border-gray-300" aria-labelledby="alternatives-title">
+        <div class="card-body">
+          <div class="d-flex align-items-center p-3">
+            <div class="icon icon-primary" aria-hidden="true">
+              <span class="fas fa-user-md" aria-hidden="true"></span>
+            </div>
+            <div class="ps-3">
+              <h3 id="alternatives-title" class="h5">Alternatives</h3>
+            </div>
+          </div>
+          <div class="row">
+            <!-- Better -->
+            <div class="col-md-6 mb-2">
+              <th:block th:with="item = ${better}" th:insert="~{inc/product-mini.html}"></th:block>
+            </div>
+            <!-- Best -->
+            <div class="col-md-6 mb-2">
+              <th:block th:with="item = ${best}" th:insert="~{inc/product-mini.html}"></th:block>
+            </div>
+          </div>
+        </div>
+      </article>
+    </div>
+  </div>
+</section>
+
+<script th:inline="javascript">
+/*<![CDATA[*/
+
+  // Ordered list of criteria keys
+  const criteriaOrder = /*[[${verticalConfig.availableImpactScoreCriterias.keySet()}]]*/ [];
+
+  // Labels with i18n
+  const labels = [
+    /*[# th:each="key, stat : ${verticalConfig.availableImpactScoreCriterias.keySet()}"]*/
+      /*[[${key}]]*/ ,
+    /*[/]*/
+  ];
+
+  const minValues = [];
+  const avgValues = [];
+  const maxValues = [];
+  const currentValues = [];
+
+  // Map real scores
+  const realScores = {};
+  /*[# th:each="score : ${product.realScores()}"]*/
+    realScores[ [[${score.name}]] ] = {
+      value: /*[[${score.relativ.value}]]*/,
+      min: /*[[${score.relativ.min}]]*/,
+      avg: /*[[${score.relativ.avg}]]*/,
+      max: /*[[${score.relativ.max}]]*/
+    };
+  /*[/]*/
+
+  criteriaOrder.forEach(name => {
+    const score = realScores[name];
+    if (score) {
+      minValues.push(score.min || 0);
+      avgValues.push(score.avg || 0);
+      maxValues.push(score.max || 0);
+      currentValues.push(score.value || 0);
+    } else {
+      minValues.push(0);
+      avgValues.push(0);
+      maxValues.push(0);
+      currentValues.push(0);
+    }
+  });
+
+  const radarData = {
+    labels: labels,
+    datasets: [
+      {
+        label: 'Le pire',
+        data: minValues,
+        backgroundColor: 'rgba(220, 53, 69, 0.2)',
+        borderColor: 'rgba(220, 53, 69, 1)',
+        borderWidth: 1
+      },
+      {
+        label: 'La moyenne',
+        data: avgValues,
+        backgroundColor: 'rgba(13, 202, 240, 0.2)',
+        borderColor: 'rgba(13, 202, 240, 1)',
+        borderWidth: 1
+      },
+      {
+        label: 'Le meilleur',
+        data: maxValues,
+        backgroundColor: 'rgba(25, 135, 84, 0.2)',
+        borderColor: 'rgba(25, 135, 84, 1)',
+        borderWidth: 1
+      },
+      {
+        label: 'Ce produit',
+        data: currentValues,
+        backgroundColor: 'rgba(111, 66, 193, 0.2)',
+        borderColor: 'rgba(111, 66, 193, 1)',
+        borderWidth: 2,
+        pointBackgroundColor: 'rgba(111, 66, 193, 1)',
+        pointBorderColor: '#fff'
+      }
+    ]
+  };
+
+  const radarConfig = {
+    type: 'radar',
+    data: radarData,
+    options: {
+      responsive: true,
+      scales: {
+        r: {
+          beginAtZero: true,
+          ticks: {
+            stepSize: 10,
+            precision: 0
+          }
+        }
+      },
+      plugins: {
+        tooltip: {
+          callbacks: {
+            label: function (context) {
+              return context.dataset.label + ': ' + context.raw;
+            }
+          }
+        },
+        legend: {
+          position: 'top',
+          labels: {
+            usePointStyle: true
+          }
+        }
+      }
+    }
+  };
+
+  const radarChartEl = document.getElementById('radarChart');
+  if (radarChartEl) {
+    new Chart(radarChartEl, radarConfig);
+  }
+/*]]>*/
+</script>
 
 
 
-						<div class=" row">
-							<!-- Better -->
-							<div class="col-sm-12 col-md-6 col-lg-6 mb-2">
-								<th:block th:with="item = ${better}" th:insert="~{inc/product-mini.html}"></th:block>
-							</div>
 
-							<!-- Best -->
-							<div class="col-sm-12 col-md-6 col-lg-6 mb-2">
-								<th:block th:with="item = ${best}" th:insert="~{inc/product-mini.html}"></th:block>
-							</div>
-
-							<!-- End of Icon Box -->
-						</div>
-
-
-
-
-
-
-
-
-
-
-				</div>
-			</div>
-		</div>
-		<!-- End of Icon Box -->
-						</div>
-		
-		
-			
-			
- 
-	   </section> 

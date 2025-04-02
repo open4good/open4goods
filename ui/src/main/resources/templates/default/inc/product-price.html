@@ -18,7 +18,7 @@
                     <th:block>
                         <!-- Messages -->
                         <div class="m-4">
-                            <div th:if="${newTrend.trend == 0}" class="text-center alert alert-info" role="alert">
+                            <div th:if="${newTrend.trend == 0 && newTrend.period}" class="text-center alert alert-info" role="alert">
                                 😶‍🌫️ Le prix neuf est stable depuis <span th:text="${newTrend.formatedDuration()}"></span>
                             </div>
                             <div th:if="${newTrend.trend == 1}" class="text-center alert alert-tertiary" role="alert">
