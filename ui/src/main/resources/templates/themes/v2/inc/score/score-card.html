@@ -6,7 +6,7 @@
 
     <figcaption class="card-header">
         <div class="row text-center">
-            <h3 class="h4" th:text="${verticalConfig.availableImpactScoreCriterias.get(score.name).description.i18n(siteLanguage)}">
+            <h3 class="h4" th:text="${verticalConfig.availableImpactScoreCriterias.get(score.name).title.i18n(siteLanguage)}">
                 <!-- Criterion Title -->
             </h3>
         </div>
@@ -27,7 +27,8 @@
             </div>
 
             <div class="col-4 text-center">
-                <img th:src="${img}"
+                <img th:if="${img}"
+                     th:src="${img}"
                      th:alt="'Icône de performance pour ' + ${verticalConfig.availableImpactScoreCriterias.get(score.name).description.i18n(siteLanguage)}"
                      loading="lazy"
                      class="img-fluid">
@@ -38,19 +39,21 @@
                     <p class="card-text">
                         <strong><span class="far fa-lightbulb"></span> Explications :</strong>
                         <ul>
-                            <li th:utext="#{${'score.' + score.name + '.explanation.worst'}(
+                            <li th:if="${worse.attributes.indexed.get(score.name)}" th:utext="#{${'score.' + score.name + '.explanation.worst'}(
                                 ${verticalConfig.i18n(siteLanguage).getVerticalHomeTitle().toLowerCase()},
                                 ${worse.attributes.indexed.get(score.name).value},
                                 ${worse.scores.get(score.name).on20}
                             )}"></li>
 
-                            <li th:utext="#{${'score.' + score.name + '.explanation.best'}(
+                            <li th:if="${best.attributes.indexed.get(score.name)}"
+                                th:utext="#{${'score.' + score.name + '.explanation.best'}(
                                 ${verticalConfig.i18n(siteLanguage).getVerticalHomeTitle().toLowerCase()},
                                 ${best.attributes.indexed.get(score.name).value},
                                 ${best.scores.get(score.name).on20}
                             )}"></li>
 
-                            <li th:utext="#{${'score.' + score.name + '.explanation.current'}(
+                            <li th:if="${product.attributes.indexed.get(score.name)}"
+                                th:utext="#{${'score.' + score.name + '.explanation.current'}(
                                 ${product.attributes.indexed.get(score.name).value},
                                 ${score.on20}
                             )}"></li>
