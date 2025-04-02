@@ -599,6 +599,7 @@ public class ProductRepository {
 	 * @return
 	 * @throws ResourceNotFoundException
 	 */
+	//TODO(P1,perf) : Heavy cache
 	public Map<String, Product> multiGetById( final Collection<Long> ids)
 			throws ResourceNotFoundException {
 
@@ -616,7 +617,7 @@ public class ProductRepository {
 //
 		// Getting the one we don't have in redis from elastic 		
 		Set<String> missingIds = ids.stream().filter(e -> !ret.containsKey(e)).map(e-> String.valueOf(e)) .collect(Collectors.toSet());
-		logger.info("redis hits : {}, missing : {}, queue size : {}",ret.size(), missingIds.size(),fullProductQueue.size());
+		logger.info("returned hits : {}, missing : {}",ret.size(), missingIds.size());
 		
 		
 		if (missingIds.size() != 0) {

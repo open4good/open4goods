@@ -110,6 +110,7 @@ public class UiService {
 
 		ret.addObject("internalReferer", isInternalReferer(request));
 		
+	
 		
 		ret.addObject("verticalsBuckets", verticalsConfigService. getImpactScoreVerticalsByBuckets(8,2));
 		
