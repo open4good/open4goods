@@ -72,9 +72,38 @@
           <article aria-labelledby="desc-ecologique">
             <div th:if="${ecologicalDescriptionParagraphs}" class="card shadow border-gray-300 p-4">
               <h3 id="desc-ecologique" class="h5 visually-hidden">Détails écologiques</h3>
-              <p class="lead">
-                <span th:each="paragraph : ${ecologicalDescriptionParagraphs}" th:utext="${paragraph + '<br/><br/>'}"></span>
-              </p>
+
+							
+							<div class="mb-5">
+								<div class="mb-4">
+									<span class="h5">Détails de l'évaluation</span>
+								</div>
+								<div class="table-responsive-sm">
+									<table class="table table-striped">
+										<tbody>
+											<tr>
+												<th scope="col" id="teacher2">Composante</th>
+												<th scope="col" id="males2">Coefficient</th>
+												<th scope="col" id="females2">Note</th>
+											</tr>
+											<tr  th:each="score, stat : ${verticalConfig.ecoScoreDetails(product.realScores())}">
+												<td><a th:href="'#detail-'+${score.name}"> <span th:text="${verticalConfig.availableImpactScoreCriterias.get(score.name).title.i18n(siteLanguage)}"></a></span></td>
+												<td><span th:text="${verticalConfig.impactScoreConfig.criteriasPonderation.get(score.name)}"></span></td>
+												<td><span th:text="${score.on20()}"></span>/20</td>
+											</tr>
+											
+										</tbody>
+									</table>
+								</div>
+							</div>
+
+
+
+
+
+							
+							
+							
             </div>
           </article>
         </div>
@@ -115,9 +144,16 @@
                      th:insert="~{inc/score/score-card.html}">
           </th:block>
         </div>
-        <div th:case="*">
-            <div class="alert alert-danger">Missing layout for <span th:text="${score.name}"></span></div>
         
+        <div th:case="'POWER_CONSUMPTION_TYPICAL'">
+          <th:block th:insert="~{inc/score/score-card.html}"></th:block>
+        </div>
+        
+        
+        
+        <div th:case="*">
+            <div class="alert alert-danger">!!Missing definition for <span th:text="${score.name}"></span>!!</div>
+            <th:block th:insert="~{inc/score/score-card.html}"></th:block>
         </div>
       </th:block>
     </div>

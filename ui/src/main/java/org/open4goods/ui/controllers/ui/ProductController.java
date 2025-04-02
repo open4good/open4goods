@@ -342,7 +342,9 @@ public class ProductController  {
 			
 
 			mv.addObject("verticalConfig", verticalConfig);
-			mv.addObject("verticalPath",verticalConfigService.getPathForVerticalLanguage("fr",verticalConfig));
+			if (null != verticalConfig) {
+				mv.addObject("verticalPath",verticalConfigService.getPathForVerticalLanguage("fr",verticalConfig));				
+			}
 
 
 			UiHelper uiHelper = new UiHelper(request, verticalConfig, data);

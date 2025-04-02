@@ -8,8 +8,14 @@ public class ImpactScoreCriteria {
 
 	private String key;
 	
+	
+
 	@JsonMerge
 	private Localisable<String, String> description = new Localisable<>();
+
+	
+	@JsonMerge
+	private Localisable<String, String> title = new Localisable<>();
 
 	public String getKey() {
 		return key;
@@ -26,6 +32,15 @@ public class ImpactScoreCriteria {
 	public void setDescription(Localisable<String, String> description) {
 		this.description = description;
 	}
+
+	public Localisable<String, String> getTitle() {
+		return title;
+	}
+
+	public void setTitle(Localisable<String, String> title) {
+		this.title = title;
+	}
+	
 	
 	
 }
