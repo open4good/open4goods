@@ -10,15 +10,15 @@
   </div>
 
   <!-- Ecoscore Card -->
-  <div th:if="${product.ecoscore()}" class="card shadow px-4 py-3 mb-4">
-    <div class="card-body">
+  <div th:if="${product.ecoscore()}" class=" px-4 py-3 mb-4">
+    <div class="">
       <div class="row align-items-start">
         <!-- Left Column: Score + Classement -->
-        <div class="col-md-4">
+        <div class="col-md-3">
           <article aria-labelledby="impact-score-title">
             <div class="card card__radius--mini border-0 mb-3">
               <div class="card-body text-center">
-                <h3 id="impact-score-title" class="h5">Impact Score</h3>
+                <h3 id="impact-score-title" class="h2">Impact Score</h3>
                 <!-- Star rating -->
                 <div class="star-rating star-rating-lg" 
                      th:data-rating="${product.ecoscore.absolute.value}" 
@@ -68,7 +68,7 @@
         </div>
 
         <!-- Right Column: Description -->
-        <div class="col-md-8">
+        <div class="col-md-5">
           <article aria-labelledby="desc-ecologique">
             <div th:if="${ecologicalDescriptionParagraphs}" class="card shadow border-gray-300 p-4">
               <h3 id="desc-ecologique" class="h5 visually-hidden">Détails écologiques</h3>
@@ -107,6 +107,30 @@
             </div>
           </article>
         </div>
+        
+        
+	    <!-- Radar Chart Section -->
+	    <div class="col-md-4">
+	      <figure class="card shadow" role="group" aria-labelledby="radar-chart-title">
+	        <figcaption class="card-header">
+	          <h3 id="radar-chart-title" class="h6">Positionnement du modèle</h3>
+	        </figcaption>
+	        <div class="card-body">
+	          <canvas id="radarChart"
+	                  role="img"
+	                  aria-label="Diagramme radar comparant les performances environnementales du produit aux valeurs de référence (moyenne, minimum, maximum)">
+	          </canvas>
+	          <noscript>
+	            <p>
+	              Le graphique radar nécessite JavaScript pour être affiché. Veuillez activer JavaScript dans votre navigateur.
+	            </p>
+	          </noscript>
+	        </div>
+	      </figure>
+	    </div>
+        
+        
+        
       </div>
     </div>
   </div>
@@ -115,25 +139,7 @@
   <div class="row mt-3">
 
 	
-	<!-- Radar Chart Section -->
-	<div class="col-lg-4">
-	  <figure class="card shadow" role="group" aria-labelledby="radar-chart-title">
-	    <figcaption class="card-header">
-	      <h3 id="radar-chart-title" class="h6">Comparaison des indicateurs</h3>
-	    </figcaption>
-	    <div class="card-body">
-	      <canvas id="radarChart"
-	              role="img"
-	              aria-label="Diagramme radar comparant les performances environnementales du produit aux valeurs de référence (moyenne, minimum, maximum)">
-	      </canvas>
-	      <noscript>
-	        <p>
-	          Le graphique radar nécessite JavaScript pour être affiché. Veuillez activer JavaScript dans votre navigateur.
-	        </p>
-	      </noscript>
-	    </div>
-	  </figure>
-	</div>
+
 
 
     <!-- Impact Details -->
@@ -155,9 +161,7 @@
 
 
         <div th:case="'DATA_QUALITY'">
-          <th:block 
-                
-                     th:insert="~{inc/score/score-card.html}">
+          <th:block  th:insert="~{inc/score/score-card-data-quality.html}">
           </th:block>
         </div>
         
@@ -183,32 +187,7 @@
 
     <!-- Virtual Score -->
     <div class="col-lg-4">
-      <article class="card shadow" aria-labelledby="missing-values-title">
-        <div class="card-header">
-          <h3 id="missing-values-title" class="h6">Valeurs manquantes</h3>
-        </div>
-        <div class="card-body">
-          <p> Les valeurs suivantes sont manquantes. Le score moyen pour la catégorie a été appliqué et le score de qualité de donnée a été dégradé en conséquence.</p>
-          
-                            <table class="table table-striped">
-                                        <tbody>
-                                            <tr>
-                                                <th scope="col" id="teacher2">Critère</th>
-                                                <th scope="col" id="males2">Coef</th>
-                                                <th scope="col" id="females2">Note</th>
-                                            </tr>
-                                            <tr  th:each="score, stat : ${verticalConfig.ecoScoreDetails(product.virtualScores())}">
-                                                <td><a th:href="'#detail-'+${score.name}"> <span th:text="${verticalConfig.availableImpactScoreCriterias.get(score.name).title.i18n(siteLanguage)}"></a></span></td>
-                                                <td><span th:text="${verticalConfig.impactScoreConfig.criteriasPonderation.get(score.name)}"></span></td>
-                                                <td><span th:text="${score.on20()}"></span>/20</td>
-                                            </tr>
-                                            
-                                        </tbody>
-                                    </table>
-          
-          
-        </div>
-      </article>
+      
     </div>
   </div>
 
