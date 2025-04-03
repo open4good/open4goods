@@ -264,6 +264,18 @@ public class Product implements Standardisable {
 		return list;
 	}
 
+
+	
+	public List<Score> virtualScores() {
+		List<Score> ret = scores.values().stream()
+				.filter(e -> e.getVirtual())
+				.filter(e -> !e.getName().equals(ECOSCORE_NAME))
+				.sorted( (o1, o2) -> o2.getRelativ().getValue().compareTo(o1.getRelativ().getValue()))
+				.toList();
+		
+		return ret;
+	}
+	
 	
 	public List<Score> realScores() {
 		List<Score> ret = scores.values().stream()
