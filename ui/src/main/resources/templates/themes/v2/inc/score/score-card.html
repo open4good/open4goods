@@ -1,5 +1,5 @@
 
-<figure class="card shadow"
+<figure th:id="'detail-'+${score.name}"  class="card shadow"
         th:with="worse = ${extrems.get(score.lowestScoreId)},
                  best = ${extrems.get(score.highestScoreId)},
                  currentScorePercent = ${score.on20 * 5}">
@@ -43,6 +43,7 @@
                                 ${verticalConfig.i18n(siteLanguage).getVerticalHomeTitle().toLowerCase()},
                                 ${worse.attributes.indexed.get(score.name).value},
                                 ${worse.scores.get(score.name).on20}
+                                
                             )}"></li>
 
                             <li th:if="${best.attributes.indexed.get(score.name)}"
@@ -55,7 +56,8 @@
                             <li th:if="${product.attributes.indexed.get(score.name)}"
                                 th:utext="#{${'score.' + score.name + '.explanation.current'}(
                                 ${product.attributes.indexed.get(score.name).value},
-                                ${score.on20}
+                                ${score.on20},
+                                ${product.bestName}
                             )}"></li>
                         </ul>
                     </p>

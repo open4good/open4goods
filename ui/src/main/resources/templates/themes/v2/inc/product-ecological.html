@@ -14,7 +14,7 @@
     <div class="card-body">
       <div class="row align-items-start">
         <!-- Left Column: Score + Classement -->
-        <div class="col-md-3">
+        <div class="col-md-4">
           <article aria-labelledby="impact-score-title">
             <div class="card card__radius--mini border-0 mb-3">
               <div class="card-body text-center">
@@ -68,7 +68,7 @@
         </div>
 
         <!-- Right Column: Description -->
-        <div class="col-md-9">
+        <div class="col-md-8">
           <article aria-labelledby="desc-ecologique">
             <div th:if="${ecologicalDescriptionParagraphs}" class="card shadow border-gray-300 p-4">
               <h3 id="desc-ecologique" class="h5 visually-hidden">Détails écologiques</h3>
@@ -82,7 +82,7 @@
 									<table class="table table-striped">
 										<tbody>
 											<tr>
-												<th scope="col" id="teacher2">Composante</th>
+												<th scope="col" id="teacher2">Critère</th>
 												<th scope="col" id="males2">Coefficient</th>
 												<th scope="col" id="females2">Note</th>
 											</tr>
@@ -137,10 +137,26 @@
 
 
     <!-- Impact Details -->
-    <div class="col-lg-4" th:each="score, stat : ${verticalConfig.ecoScoreDetails(product.realScores())}">
+    <div class="col-lg-4 mb-2" th:each="score, stat : ${verticalConfig.ecoScoreDetails(product.realScores())}">
       <th:block th:switch="${score.name}">
         <div th:case="'CLASSE_ENERGY'">
           <th:block th:with="img = '/icons/energy/'+${product.attributes.indexed.get(score.name).value.toLowerCase().replace('+','p')}+'.svg'"
+                     th:insert="~{inc/score/score-card.html}">
+          </th:block>
+        </div>
+
+        <div th:case="'REPAIRABILITY_INDEX'">
+          <th:block th:with="img = '/icons/reparability/'+${product.attributes.indexed.get(score.name).value.toLowerCase().replace(',','.')}+'.svg'"
+                     th:insert="~{inc/score/score-card.html}">
+          </th:block>
+        </div>
+
+
+
+
+        <div th:case="'DATA_QUALITY'">
+          <th:block 
+                
                      th:insert="~{inc/score/score-card.html}">
           </th:block>
         </div>
@@ -148,7 +164,14 @@
         <div th:case="'POWER_CONSUMPTION_TYPICAL'">
           <th:block th:insert="~{inc/score/score-card.html}"></th:block>
         </div>
-        
+
+        <div th:case="'POWER_CONSUMPTION_OFF'">
+          <th:block th:insert="~{inc/score/score-card.html}"></th:block>
+        </div>
+
+        <div th:case="'WEIGHT'">
+          <th:block th:insert="~{inc/score/score-card.html}"></th:block>
+        </div>                
         
         
         <div th:case="*">
@@ -165,7 +188,25 @@
           <h3 id="missing-values-title" class="h6">Valeurs manquantes</h3>
         </div>
         <div class="card-body">
-          + de detail sur le calcul ici
+          <p> Les valeurs suivantes sont manquantes. Le score moyen pour la catégorie a été appliqué et le score de qualité de donnée a été dégradé en conséquence.</p>
+          
+                            <table class="table table-striped">
+                                        <tbody>
+                                            <tr>
+                                                <th scope="col" id="teacher2">Critère</th>
+                                                <th scope="col" id="males2">Coef</th>
+                                                <th scope="col" id="females2">Note</th>
+                                            </tr>
+                                            <tr  th:each="score, stat : ${verticalConfig.ecoScoreDetails(product.virtualScores())}">
+                                                <td><a th:href="'#detail-'+${score.name}"> <span th:text="${verticalConfig.availableImpactScoreCriterias.get(score.name).title.i18n(siteLanguage)}"></a></span></td>
+                                                <td><span th:text="${verticalConfig.impactScoreConfig.criteriasPonderation.get(score.name)}"></span></td>
+                                                <td><span th:text="${score.on20()}"></span>/20</td>
+                                            </tr>
+                                            
+                                        </tbody>
+                                    </table>
+          
+          
         </div>
       </article>
     </div>
