@@ -89,7 +89,7 @@
                     <!-- Trend Indicators -->
                     <p th:if="${occasionTrend.trend == -1}">
                       <span class="fas fa-angle-down text-success"></span>
-                      <span class="fs-6">Prix en baisse</span>
+                      <span class="fs-6">Prix en baisse (-<span class="fs-6" th:text="${#numbers.formatDecimal(occasionTrend.percentVariation(), 1, 1)}"  ></span> %)</span>
                     </p>
                     <p th:if="${occasionTrend.trend == 0}">
                       <span class="fas fa-equals text-info"></span>
@@ -97,7 +97,7 @@
                     </p>
                     <p th:if="${occasionTrend.trend == 1}">
                       <span class="fas fa-angle-up text-danger"></span>
-                      <span class="fs-6">Prix en hausse</span>
+                      <span class="fs-6">Prix en hausse (+<span class="fs-6" th:text="${#numbers.formatDecimal(occasionTrend.percentVariation(), 1, 1)}" ></span> %)</span>
                     </p>
                   </div> <!-- .card-body -->
                 </div> <!-- .card.selectable-offer -->
@@ -125,7 +125,7 @@
                     <!-- Added Price Trend Indicator for New -->
                     <p th:if="${newTrend.trend == -1}">
                       <span class="fas fa-angle-down text-success"></span>
-                      <span class="fs-6">Prix en baisse</span>
+                      <span class="fs-6">Prix en baisse (-<span class="fs-6" th:text="${#numbers.formatDecimal(newTrend.percentVariation(), 1, 1)}" ></span> %)</span>
                     </p>
                     <p th:if="${newTrend.trend == 0}">
                       <span class="fas fa-equals text-info"></span>
@@ -133,7 +133,7 @@
                     </p>
                     <p th:if="${newTrend.trend == 1}">
                       <span class="fas fa-angle-up text-danger"></span>
-                      <span class="fs-6">Prix en hausse</span>
+                          <span class="fs-6">Prix en hausse (+<span class="fs-6" th:text="${#numbers.formatDecimal(newTrend.percentVariation(), 1, 1)}" ></span> %)</span>
                     </p>
                   </div> <!-- .card-body -->
                 </div> <!-- .card.selectable-offer -->
