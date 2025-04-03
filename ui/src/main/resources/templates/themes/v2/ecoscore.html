@@ -24,134 +24,87 @@
     <meta name="twitter:image" th:content="${baseUrl} + 'assets/img/brand/light.svg'"/>
 </head>
 
-<body>
-<header>
-    <!--/* [# th:comment="Loader" /] */-->
-    <th:block th:insert="~{inc/preloader.html}"></th:block>
-
-    <!--/* [# th:comment="Navbar" /] */-->
-    <th:block th:insert="~{inc/navbar/navbar-home.html}"></th:block>
-</header>
+<body class="ecoscore">
+    <header>
+        <!--/* Loader */-->
+        <th:block th:insert="~{inc/preloader.html}"></th:block>
+        <!--/* Navbar */-->
+        <th:block th:insert="~{inc/navbar/navbar-home.html}"></th:block>
+    </header>
 
 <main>
+    <!--div class="mt-2" th:with="page='ecoscore'" th:insert="~{inc/breadcrumb-1level.html}"></div-->
     <!--/* [# th:comment="Hero Section" /] */-->
-    <section class="section-header bg-secondary text-white" aria-labelledby="impact-score-title">
+    <section class="section-header bg-primary text-white pb-9 pb-lg-12 mb-4 mb-lg-6">
         <div class="container">
-            <div class="row justify-content-between align-items-center">
-                <div class=" text-center text-md-left">
-                    <h1 id="impact-score-title" class="display-2 mb-4">
-                        L’Impact Score : évaluation de l'impact environnemental de vos produits
-                    </h1>
-                    <div class="mt-2" th:with="page='ecoscore'" th:insert="~{inc/breadcrumb-1level.html}"></div>
-                    
+            <div class="row justify-content-center">
+                <div class="col-12 col-md-8 text-center">
+                    <div class="display-2 mb-3">L’Impact Score : évaluation de l'impact environnemental de vos produits</div>
                     <th:block th:with="path='ECOSCORE/1/'">
-                        <div th:insert="~{inc/wiki.html}"></div>
-                    </th:block>
-                </div>
-     
-            </div>
-        </div>
-    </section>
-    <!--/* End Hero Section */-->
-
-    <!--/* [# th:comment="What is Impact Score Section" /] */-->
-    <section class="mt-5" aria-labelledby="qu-est-ce-impact-score">
-        <div class="container container-semi-fluid">
-            <div class="row align-items-center justify-content-around">
-                <div class="col-md-6 col-xl-7 text-center text-md-left">
-                    <h2 id="qu-est-ce-impact-score" class="h1 mb-5">Qu’est-ce que l’Impact Score&nbsp;?</h2>
-                    <th:block th:with="path='ECOSCORE/2/'">
-                        <th:block th:insert="~{inc/wiki.html}"></th:block>
-                    </th:block>
-                </div>
-                <div class="col-md-6 col-xl-4 mb-5">
-                    <img class="organic-radius img-fluid"
-                         src="/assets/img/ecologie1.jpg"
-                         alt="Exemple d'impact écologique"
-                         loading="lazy"/>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!--/* [# th:comment="Our Ecoscore Section" /] */-->
-    <section class="mt-5" aria-labelledby="ecoscore-transparent-innovant">
-        <div class="container container-semi-fluid">
-            <div class="row align-items-center justify-content-around">
-                <div class="col-md-6 col-xl-4 mb-5">
-                    <img class="organic-radius img-fluid"
-                         src="/assets/img/ecologie2.jpg"
-                         alt="Illustration d'un écoscore transparent et innovant"
-                         loading="lazy"/>
-                </div>
-                <div class="col-md-6 col-xl-7 text-center text-md-left">
-                    <h2 id="ecoscore-transparent-innovant" class="h1 mb-5">
-                        Notre ecoscore&nbsp;: transparent, innovant et performant
-                    </h2>
-                    <th:block th:with="path='ECOSCORE/3/'">
-                        <th:block th:insert="~{inc/wiki.html}"></th:block>
+                        <div class="lead" th:insert="~{inc/wiki.html}"></div>
                     </th:block>
                 </div>
             </div>
         </div>
     </section>
+    <section class="section section-lg pt-0">
+        <div class="container mt-n8 mt-lg-n12 z-2">
+            <div class="row justify-content-center">
+                <div class="col">
+                    <div class="card shadow border-gray-300 p-4 p-lg-5">
+                        <h2 class="h3 mb-4">Qu’est-ce que l’Impact Score&nbsp;?</h2>
+                        <th:block th:with="path='ECOSCORE/2/'">
+                            <th:block th:insert="~{inc/wiki.html}"></th:block>
+                        </th:block>
+                        <div class="col-12 col-md-6 mx-auto">
+                            <img class="organic-radius img-fluid" src="/assets/img/ecologie1.jpg" alt="Exemple d'impact écologique" loading="lazy"/>
+                        </div>
 
-    <!--/* [# th:comment="Calculation Explanation Section" /] */-->
-    <section class="mt-5" aria-labelledby="calcule-impact-score">
-        <div class="container container-semi-fluid">
-            <div class="row align-items-center justify-content-around">
-                <div class="col-12">
-                    <h2 id="calcule-impact-score" class="display-4 mb-4">
-                        Comment est calculé l'Impact Score&nbsp;?
-                    </h2>
-                    
-                    
-                    <p>
-                        Les règles de calcul de l'ecoscore sont expliquées sur chaque produit, au travers de l'explication détaillée de l'évaluation dans la section "bilan écologique". Surtout, chaque catégorie de produit dispose de ses propres critères et pondérations. Voici la liste des catégories que nous couvrons, vous trouverez le détail des critères et coefficients via les liens ci-dessous.
-                        
-                    </p>
+                        <h2 id="ecoscore-transparent-innovant" class="h3 my-4">Notre ecoscore&nbsp;: transparent, innovant et performant</h2>
+                        <th:block th:with="path='ECOSCORE/3/'">
+                            <th:block th:insert="~{inc/wiki.html}"></th:block>
+                        </th:block>
+                        <div class="col-12 col-md-6 mx-auto">
+                            <img class="organic-radius img-fluid" src="/assets/img/ecologie2.jpg" alt="Illustration d'un écoscore transparent et innovant" loading="lazy"/>
+                        </div>
 
-						<div class="card shadow border-gray-300 mb-4">
-							<div class="card-body p-lg-5">
+                        <h2 id="calcule-impact-score" class="h3 my-4">Comment est calculé l'Impact Score&nbsp;?</h2>
+                        <p>
+                            Les règles de calcul de l'ecoscore sont expliquées sur chaque produit, au travers de l'explication détaillée de l'évaluation dans la section "bilan écologique". Surtout, chaque catégorie de produit dispose de ses propres critères et pondérations. Voici la liste des catégories que nous couvrons, vous trouverez le détail des critères et coefficients via les liens ci-dessous.
+                        </p>
+                        <div class="card border-gray-300 mb-1 py-3 col-12 col-md-6 mx-auto" th:each="item, stat : ${verticals}">
+                            <div class="card-body d-flex align-items-center flex-wrap flex-lg-nowrap py-0">
+                                <a class="w-100" th:href="${item.i18n(siteLanguage).verticalHomeUrl}+'/ecoscore'" th:text="${item.i18n(siteLanguage).verticalHomeTitle}">
+                                    <span class="icon icon-xs ms-auto">
+                                        <span class="fas fa-chevron-right"></span>
+                                    </span>
+                                </a>
+                            </div>
+                        </div>
+                        <div class="my-4">
+                            <th:block th:with="path='ECOSCORE/4/'">
+                                <th:block th:insert="~{inc/wiki.html}"></th:block>
+                            </th:block>
+                        </div>
 
-								<div >
-									<span th:each="item, stat : ${verticals}"> <a th:href="${item.i18n(siteLanguage).verticalHomeUrl}+'/ecoscore'" th:text="${item.i18n(siteLanguage).verticalHomeTitle}"></a> <span
-										th:unless="${stat.last}"
-									>, </span>
-									</span>
-								</div>
-
-							</div>
-						</div>
-
-
-					</div>
-                <div class="col-md-12 col-xl-12 text-center text-md-left">
-                    <th:block th:with="path='ECOSCORE/4/'">
-                        <th:block th:insert="~{inc/wiki.html}"></th:block>
-                    </th:block>
-
-                    <!-- Table representing the criteria & coefficients -->
-                    <div class="card">
-                        <div class="card-header">Critères et coefficients de l'ecoscore téléviseurs</div>
-                        <div class="card-body">
-                            <table class="table table-hover table-responsive-sm">
+                        <h2 class="h3 mt-4">Critères et coefficients de l'ecoscore téléviseurs</h2>
+                        <div class="table-responsive-sm">
+                            <table class="table table-striped">
                                 <thead>
-                                <tr>
-                                    <th scope="col">Nom du critère</th>
-                                    <th scope="col">Coefficient (0-1)</th>
-                                </tr>
+                                    <tr>
+                                        <th scope="col">Nom du critère</th>
+                                        <th scope="col">Coefficient (0-1)</th>
+                                    </tr>
                                 </thead>
                                 <tbody>
-                                <tr th:each="item : ${impactscore.texts.i18n(siteLanguage).criteriasAnalysis}"
-                                    th:with="attr = ${verticalConfig.attributesConfig.getAttributeConfigByKey(item.key)}">
-                                    <td>
-                                        <span th:text="${attr.name.i18n(siteLanguage)}">Critère</span>
-                                    </td>
-                                    <td>
-                                        <span th:text="${verticalConfig.impactScoreConfig.criteriasPonderation.get(attr.key)}">0.0</span>
-                                    </td>
-                                </tr>
+                                    <tr th:each="item : ${impactscore.texts.i18n(siteLanguage).criteriasAnalysis}" th:with="attr = ${verticalConfig.attributesConfig.getAttributeConfigByKey(item.key)}">
+                                        <td>
+                                            <span th:text="${attr.name.i18n(siteLanguage)}">Critère</span>
+                                        </td>
+                                        <td>
+                                            <span th:text="${verticalConfig.impactScoreConfig.criteriasPonderation.get(attr.key)}">0.0</span>
+                                        </td>
+                                    </tr>
                                 </tbody>
                                 <tfoot>
                                 <tr>
@@ -165,11 +118,12 @@
                                 </tfoot>
                             </table>
                         </div>
+                        <div class="my-4">
+                            <th:block th:with="path='ECOSCORE/4-1/'">
+                                <th:block th:insert="~{inc/wiki.html}"></th:block>
+                            </th:block>
+                        </div>
                     </div>
-
-                    <th:block th:with="path='ECOSCORE/4-1/'">
-                        <th:block th:insert="~{inc/wiki.html}"></th:block>
-                    </th:block>
                 </div>
             </div>
         </div>
