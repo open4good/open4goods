@@ -611,7 +611,108 @@ $(document).ready(function(){
 </script>
 
 
+<!-- Creating impact score representation charts -->
+<script>
+    /*<![CDATA[*/
 
+    const vertical = "tv";    
+    const siteLanguage = "fr";      
+
+    const chartIntervals = [
+        {"key":"scores.DATA_QUALITY.value","intervalSize":0.1,"minValue":1.0E-4,"maxValue":500000.0,"allowEmptyValues":true,"unknown":null,"priceBuckets":[]},
+        {"key":"scores.POWER_CONSUMPTION_OFF.value","intervalSize":0.1,"minValue":1.0E-4,"maxValue":500000.0,"allowEmptyValues":true,"unknown":null,"priceBuckets":[]},
+        {"key":"scores.POWER_CONSUMPTION_TYPICAL.value","intervalSize":0.1,"minValue":1.0E-4,"maxValue":500000.0,"allowEmptyValues":true,"unknown":null,"priceBuckets":[]},
+        {"key":"scores.REPAIRABILITY_INDEX.value","intervalSize":0.1,"minValue":1.0E-4,"maxValue":500000.0,"allowEmptyValues":true,"unknown":null,"priceBuckets":[]},
+        {"key":"scores.WEIGHT.value","intervalSize":0.1,"minValue":1.0E-4,"maxValue":500000.0,"allowEmptyValues":true,"unknown":null,"priceBuckets":[]},
+        {"key":"scores.BRAND_SUSTAINABILITY.value","intervalSize":0.1,"minValue":1.0E-4,"maxValue":500000.0,"allowEmptyValues":true,"unknown":null,"priceBuckets":[]},
+        {"key":"scores.CLASSE_ENERGY.value","intervalSize":0.1,"minValue":1.0E-4,"maxValue":500000.0,"allowEmptyValues":true,"unknown":null,"priceBuckets":[]}
+    ];
+
+    // Convert array into object for fast lookup
+    const chartIntervalsMap = {};
+    chartIntervals.forEach(entry => {
+        chartIntervalsMap[entry.key] = entry;
+    });
+
+    /*]]>*/
+
+    
+
+    function createChartInterval(chartId, intervalDatas, verticalName) {
+        var elem = document.getElementById('chart-impactscore-'+chartId);
+        
+        
+        if (elem == null) {
+            return;
+        }
+
+        const ctx = elem.getContext('2d');
+        const priceData = intervalDatas.priceBuckets;
+
+        const labels = priceData.map(bucket => {
+            const parsedName = parseFloat(bucket.name);
+            return Number.isInteger(parsedName) ? parsedName : parsedName.toFixed(1);
+        });
+
+        const data = priceData.map(bucket => {
+            const parsedCount = parseFloat(bucket.count);
+            return Number.isInteger(parsedCount) ? parsedCount : parsedCount.toFixed(1);
+        });
+
+        return new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [{
+                    data: data,
+                    borderWidth: 0
+                }]
+            },
+            options: {
+                plugins: {
+                    legend: { display: false },
+                    title: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return verticalName + ": " + parseInt(context.raw);
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        title: { display: false },
+                        grid: {
+                            display: false,
+                            drawTicks: false,
+                            drawBorder: false
+                        }
+                    },
+                    y: {
+                        display: false,
+                        grid: { display: false }
+                    }
+                },
+                barPercentage: 1.0,
+                categoryPercentage: 1.0
+            }
+        });
+    }
+
+    // On document load, render all charts
+    $(document).ready(function() {
+        $(".intervalChart").each(function() {
+            var scoreName = "scores." + $(this).attr("data-score") + ".value";
+            var intervalData = chartIntervalsMap[scoreName];
+
+            if (intervalData != null) {
+                createChartInterval(scoreName, intervalData, vertical);
+            }
+        });
+    });
+
+</script>
 
 
 
