@@ -18,8 +18,10 @@ import org.open4goods.commons.model.data.ContributionVote;
 import org.open4goods.commons.model.dto.AttributesFeatureGroups;
 import org.open4goods.commons.model.dto.NumericRangeFilter;
 import org.open4goods.commons.model.dto.VerticalSearchRequest;
+import org.open4goods.commons.model.dto.VerticalSearchResponse;
 import org.open4goods.commons.services.BrandService;
 import org.open4goods.commons.services.IcecatService;
+import org.open4goods.commons.services.SearchService;
 import org.open4goods.commons.services.VerticalsConfigService;
 import org.open4goods.model.ai.AiDescription;
 import org.open4goods.model.ai.AiDescriptions;
@@ -78,6 +80,8 @@ public class ProductController  {
 
 	private @Autowired VerticalsConfigService verticalConfigService;
 
+	private @Autowired SearchService searchService;
+	
 	private @Autowired BrandService brandService;
 	private @Autowired UiService uiService;
 	
@@ -354,8 +358,12 @@ public class ProductController  {
 
 			
 			// Adding the stats (from a full search aggregation)
-			VerticalSearchRequest stats = buildStatRequest(verticalConfig, data);
-			mv.addObject("stats",stats);
+			VerticalSearchRequest statsRequest = buildStatRequest(verticalConfig, data);
+			// TODO : Check heavy caching
+			VerticalSearchResponse statsResponse = searchService.verticalSearch(verticalConfig, statsRequest);
+			
+			
+			mv.addObject("stats",statsResponse);
 			
 
 			UiHelper uiHelper = new UiHelper(request, verticalConfig, data);
@@ -479,16 +487,15 @@ public class ProductController  {
 		vRequest.setSortField("scores.ECOSCORE.value");
 		vRequest.setSortOrder("desc");
 		
+		vRequest.getNumericFilters().add(new NumericRangeFilter("offersCount", 1.0, 10000.0, 1.0, false));
+		vRequest.getNumericFilters().add(new NumericRangeFilter("price.minPrice.price", 0.0001, 500000.0, 100.0, false));
+
+		
 		data.realScores().forEach(s -> {
-			vRequest.getNumericFilters().add(new NumericRangeFilter("scores."+s.getName()+".value", 0.0001, 500000.0, 0.1, true));
+			vRequest.getNumericFilters().add(new NumericRangeFilter("scores."+s.getName()+".value", 0.0001, 500000.0, 1.0, true));
 			
 		});
 		
-		
-		List<AttributeConfig> numericFilters = config.getVerticalFilters().stream()
-			.map(e -> config.getAttributesConfig().getAttributeConfigByKey(e))
-			.filter(e-> e != null)
-			.filter(e -> e.getFilteringType() == AttributeType.NUMERIC).toList();
 		
 		return vRequest;
 	}
