@@ -16,17 +16,21 @@ import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import org.open4goods.commons.model.data.ContributionVote;
 import org.open4goods.commons.model.dto.AttributesFeatureGroups;
+import org.open4goods.commons.model.dto.NumericRangeFilter;
+import org.open4goods.commons.model.dto.VerticalSearchRequest;
 import org.open4goods.commons.services.BrandService;
 import org.open4goods.commons.services.IcecatService;
 import org.open4goods.commons.services.VerticalsConfigService;
 import org.open4goods.model.ai.AiDescription;
 import org.open4goods.model.ai.AiDescriptions;
 import org.open4goods.model.ai.AiReview;
+import org.open4goods.model.attribute.AttributeType;
 import org.open4goods.model.exceptions.ResourceNotFoundException;
 import org.open4goods.model.price.AggregatedPrice;
 import org.open4goods.model.price.PriceTrend;
 import org.open4goods.model.product.Product;
 import org.open4goods.model.product.ProductCondition;
+import org.open4goods.model.vertical.AttributeConfig;
 import org.open4goods.model.vertical.VerticalConfig;
 import org.open4goods.services.captcha.config.HcaptchaProperties;
 import org.open4goods.services.productrepository.services.ProductRepository;
@@ -173,6 +177,8 @@ public class ProductController  {
 		try {
 			// Getting the product name
 			String path= URLEncoder.encode(request.getServletPath().substring(1), StandardCharsets.UTF_8);
+			
+			
 			
 			
 			// Retrieve the Product
@@ -346,6 +352,11 @@ public class ProductController  {
 				mv.addObject("verticalPath",verticalConfigService.getPathForVerticalLanguage("fr",verticalConfig));				
 			}
 
+			
+			// Adding the stats (from a full search aggregation)
+			VerticalSearchRequest stats = buildStatRequest(verticalConfig, data);
+			mv.addObject("stats",stats);
+			
 
 			UiHelper uiHelper = new UiHelper(request, verticalConfig, data);
 			// Adding the UiHelper class
@@ -459,6 +470,28 @@ public class ProductController  {
 							
 	}
 	
+	
+	// TODO(p1, performance) : heavy cache
+	public  VerticalSearchRequest buildStatRequest(VerticalConfig config, Product data) {
+		VerticalSearchRequest vRequest = new VerticalSearchRequest();
+		
+		
+		vRequest.setSortField("scores.ECOSCORE.value");
+		vRequest.setSortOrder("desc");
+		
+		data.realScores().forEach(s -> {
+			vRequest.getNumericFilters().add(new NumericRangeFilter("scores."+s.getName()+".value", 0.0001, 500000.0, 0.1, true));
+			
+		});
+		
+		
+		List<AttributeConfig> numericFilters = config.getVerticalFilters().stream()
+			.map(e -> config.getAttributesConfig().getAttributeConfigByKey(e))
+			.filter(e-> e != null)
+			.filter(e -> e.getFilteringType() == AttributeType.NUMERIC).toList();
+		
+		return vRequest;
+	}
 	
 	
 }

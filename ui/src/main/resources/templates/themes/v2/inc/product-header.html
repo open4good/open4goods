@@ -232,35 +232,32 @@
        * Format each association item in the dropdown:
        * Show a thumbnail on the left, and text on the right
        */
-      function formatOrg(org) {
-        // If it’s the placeholder (no id), just return text
-        if (!org.id) {
-          return org.text;
-        }
+       function formatOrg(org) {
+    	   if (!org.id) {
+    	     return org.text;
+    	   }
 
-        // Grab data from the <option> element
-        var imgUrl = $(org.element).data('img-url');
-        var desc   = $(org.element).data('description');
-        var name   = org.text; // This is the <option> text
+    	   const imgUrl = $(org.element).data('img-url');
+    	   const desc = $(org.element).data('description');
+    	   const name = org.text;
 
-        // If no extra data, just return the name
-        if (!imgUrl || !desc) {
-          return name;
-        }
+    	   // DROPDOWN item rendering
+    	   if (!org.selected) {
+    	     if (!imgUrl || !desc) return name;
 
-        // Build a small card-like layout
-        var $org = $(
-          '<div class="d-flex align-items-start">' +
-            '<img src="' + imgUrl + '" ' +
-                 'alt="' + name + '" ' +
-                 'class="img-thumbnail me-2" style="width: 80px; height: auto;" />' +
-            '<div>' +
-              '<div class="fw-bold">' + name + '</div>' +
-              '<small class="text-muted">' + desc + '</small>' +
-            '</div>' +
-          '</div>'
-        );
-        return $org;
-      }
+    	     return $(
+    	       '<div class="d-flex align-items-start">' +
+    	         '<img src="' + imgUrl + '" alt="' + name + '" class="img-thumbnail me-2" style="width: 80px; height: auto;" />' +
+    	         '<div>' +
+    	           '<div class="fw-bold">' + name + '</div>' +
+    	           '<small class="text-muted">' + desc + '</small>' +
+    	         '</div>' +
+    	       '</div>'
+    	     );
+    	   }
+
+    	   // SELECTED item rendering (simple: text only)
+    	   return name;
+    	 }
     });
   </script>

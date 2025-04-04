@@ -73,15 +73,17 @@
             </p>
         </div>
 
-        <!-- Score Scale with Markers + Arrows -->
+
+        <canvas class="intervalChart" th:data-score= "${score.name}" th:id="'chart-impactscore-scores.'+${score.name}+'.value'"></canvas>
+
+
+        <!-- Score Scale with Markers + Arrows 
         <div class="overflow-x-auto">
             <div class="position-relative mx-2 my-4" style="height: 160px; min-width: 400px;">
 
-                <!-- Gradient Scale -->
                 <div class="gradient-scale position-absolute top-100 start-0 end-0 translate-middle-y rounded-pill"
                      style="height: 10px;"></div>
 
-                <!-- WORST Product (left side) -->
                 <div class="position-absolute text-center" style="left: 0%;">
 
                     <a th:href="'/'+${verticalPath}+ '/'+${worse.url(siteLanguage)}">
@@ -97,11 +99,9 @@
                             <span th:text="${worse.brandAndModel}"></span>
                         </a>
                     </div>
-                    <!-- Arrow pointing up, color red -->
                     <div class="triangle-up mx-auto" style="border-bottom-color: #dc3545; margin-bottom: 6px;"></div>
                 </div>
 
-                <!-- CURRENT Product (dynamic position) -->
                 <div class="position-absolute text-center translate-middle-x"
                      th:style="'left:' + ${score.on20 * 5} + '%'">
 
@@ -113,11 +113,9 @@
                     <div class="fw-bold small mt-1">
                         Ce produit
                     </div>
-                    <!-- Arrow pointing up, color in-between (yellowish) -->
                     <div class="triangle-up mx-auto" style="border-bottom-color: #ffc107; margin-bottom: 6px;"></div>
                 </div>
 
-                <!-- BEST Product (right side) -->
                 <div class="position-absolute text-center translate-middle-x" style="left: 100%;">
 
                     <a th:href="'/'+${verticalPath}+ '/'+${best.url(siteLanguage)}">
@@ -133,12 +131,14 @@
                             <span th:text="${best.brandAndModel}"></span>
                         </a>
                     </div>
-                    <!-- Arrow pointing up, color green -->
                     <div class="triangle-up mx-auto" style="border-bottom-color: #28a745; margin-bottom: 6px;"></div>
                 </div>
 
             </div>
         </div>
+        
+        
+        -->
 
     </div>
 </figure>

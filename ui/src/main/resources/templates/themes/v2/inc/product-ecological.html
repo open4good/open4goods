@@ -87,13 +87,16 @@
 												<th scope="col" id="females2">Note</th>
 											</tr>
 											<tr  th:each="score, stat : ${verticalConfig.ecoScoreDetails(product.realScores())}">
-												<td><a th:href="'#detail-'+${score.name}"> <span th:text="${verticalConfig.availableImpactScoreCriterias.get(score.name).title.i18n(siteLanguage)}"></a></span></td>
+												<td><a class="lead" th:href="'#detail-'+${score.name}"> <span th:text="${verticalConfig.availableImpactScoreCriterias.get(score.name).title.i18n(siteLanguage)}"></a></span></td>
 												<td><span th:text="${verticalConfig.impactScoreConfig.criteriasPonderation.get(score.name)}"></span></td>
-												<td><span th:text="${score.on20()}"></span>/20</td>
+												<td><b><span class="lead" th:text="${score.on20()}"></span>/20</b></td>
 											</tr>
 											
 										</tbody>
 									</table>
+									
+									
+									<p>Les coefficients sont proposés par des modèles d'IA puissants, ils sont appliqués sur les données produits que nous parvenons à récupérer. <a href="/ecoscore">En savoir plus</a> </p>
 								</div>
 							</div>
 
