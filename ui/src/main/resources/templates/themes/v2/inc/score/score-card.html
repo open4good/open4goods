@@ -74,7 +74,14 @@
         </div>
 
 
-        <canvas class="intervalChart" th:data-score= "${score.name}" th:id="'chart-impactscore-scores.'+${score.name}+'.value'"></canvas>
+	     <canvas class="intervalChart"
+	        th:data-score="${score.name}"
+	        th:data-current-score="${score.value}"
+	        th:data-product-image="@{${product.coverImagePath}}"
+	        th:data-product-label="${product.brandAndModel}"
+	        th:id="'chart-impactscore-scores.'+${score.name}+'.value'"
+	        style="min-height: 200px; width: 100%;">
+	    </canvas>
 
 
         <!-- Score Scale with Markers + Arrows 
