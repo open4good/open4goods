@@ -6,6 +6,9 @@
 # @See open4goods/commons/src/main/java/org/open4goods/config/yml/ui/VerticalConfig.java for commented POJO definition
 ###################################################################################################################################################################
 
+resourcesConfig:
+  overrideResources: true
+        
 # Unique identifier for this vertical. 
 # MUST contains only charracters
 # SHOULD be equal to the configuration file name, without the extension
