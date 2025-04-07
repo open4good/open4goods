@@ -49,6 +49,18 @@
             </exclusions>
         </dependency>
 
+    <dependency>
+            <groupId>org.apache.pdfbox</groupId>
+            <artifactId>pdfbox</artifactId>
+            <version>3.0.3</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.tika</groupId>
+            <artifactId>tika-langdetect-optimaize</artifactId>
+            <version>3.0.0</version>
+        </dependency>
+        
         <!-- servlet container -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
