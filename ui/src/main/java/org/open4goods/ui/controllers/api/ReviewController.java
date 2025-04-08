@@ -1,9 +1,8 @@
 package org.open4goods.ui.controllers.api;
 
-import java.io.IOException;
+import java.util.concurrent.CompletableFuture;
 
 import org.open4goods.commons.helper.IpHelper;
-import org.open4goods.commons.model.constants.RolesConstants;
 import org.open4goods.commons.services.VerticalsConfigService;
 import org.open4goods.model.exceptions.ResourceNotFoundException;
 import org.open4goods.model.product.Product;
@@ -15,7 +14,6 @@ import org.open4goods.ui.config.yml.UiConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -41,10 +39,10 @@ public class ReviewController  {
 	private @Autowired ProductRepository productRepository;
 
 	private @Autowired VerticalsConfigService verticalConfigService;
-
 	
 	private @Autowired ReviewGenerationService reviewGenerationService;
 
+	
 
 	private @Autowired HcaptchaService captchaService;
 
@@ -65,7 +63,13 @@ public class ReviewController  {
 			captchaService.verifyRecaptcha(IpHelper.getIp(request), recaptchaResponse);
 			Product product = productRepository.getById(id);
 			
-			long ret = reviewGenerationService.generateReviewAsync(product, verticalConfigService.getConfigById(product.getVertical()));
+			CompletableFuture<Void> externalTask = CompletableFuture.runAsync(() -> {
+				// TODO : complete with icecat
+//				iceCatService.completeAndIndexProduct(verticalConfigService.getConfigByIdOrDefault(data.getVertical()), data);
+			});
+
+			
+			long ret = reviewGenerationService.generateReviewAsync(product, verticalConfigService.getConfigById(product.getVertical()), externalTask);
 			return ret;
 		} catch (SecurityException e) {
 			// TODO Redirect with proper 403

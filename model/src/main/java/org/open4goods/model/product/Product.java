@@ -169,7 +169,7 @@ public class Product implements Standardisable {
 	/**
 	 * The ai generated review for this product
 	 */
-	private Localisable<String, AiReview> aiReviews = new Localisable<String, AiReview>();
+	private Localisable<String, AiReviewHolder> reviews = new Localisable<String, AiReviewHolder>();
 	
 	
 	private EcoScoreRanking ranking = new EcoScoreRanking();
@@ -964,14 +964,13 @@ public class Product implements Standardisable {
 		this.bestsScores = betters;
 	}
 
-	public Localisable<String, AiReview> getAiReviews() {
-		return aiReviews;
+	public Localisable<String, AiReviewHolder> getReviews() {
+		return reviews;
 	}
 
-	public void setAiReviews(Localisable<String, AiReview> aiReviews) {
-		this.aiReviews = aiReviews;
+	public void setReviews(Localisable<String, AiReviewHolder> aiReviews) {
+		this.reviews = aiReviews;
 	}
-
 
 
 	
