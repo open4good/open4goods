@@ -3,10 +3,22 @@ package org.open4goods.services.prompt.config;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
+import jakarta.validation.constraints.NotBlank;
+
 @Component
 @ConfigurationProperties(prefix = "gen-ai-config")
 public class PromptServiceConfig {
 	
+	
+	/** Maximum total tokens per batch file (to avoid exceeding limits). */
+    private int batchMaxTokens = 200_000;  // default 200k
+
+    /** Folder path where batch files (input/output) and job IDs will be stored. */
+    @NotBlank
+    private String batchFolder = "/opt/open4goods/.cached/batch-ia/";  // e.g. "/var/open4goods/genai_batches"
+
+    
+    
 	/**
 	 * The folder to the yaml prompt files 
 	 */
@@ -92,4 +104,18 @@ public class PromptServiceConfig {
 	public void setRecordFolder(String recordFolder) {
 	    this.recordFolder = recordFolder;
 	}
+	public int getBatchMaxTokens() {
+		return batchMaxTokens;
+	}
+	public void setBatchMaxTokens(int batchMaxTokens) {
+		this.batchMaxTokens = batchMaxTokens;
+	}
+	public String getBatchFolder() {
+		return batchFolder;
+	}
+	public void setBatchFolder(String batchFolder) {
+		this.batchFolder = batchFolder;
+	}
+	
+	
 }
