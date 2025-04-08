@@ -23,6 +23,13 @@ public class ReviewGenerationConfig {
     // Limit the number of search queries.
     private int maxSearch = 5;
 
+    
+    // Minimum global tokens and source count required for valid generation.
+    private int minGlobalTokens = 7500;
+    private int minUrlCount = 4;
+
+    
+    
     // Properties for token-based content aggregation.
     private int maxTotalTokens = 100000;
     private int sourceMinTokens = 150;
@@ -149,4 +156,18 @@ public class ReviewGenerationConfig {
     public void setRetryDelayDays(int retryDelayDays) {
         this.retryDelayDays = retryDelayDays;
     }
+	public int getMinGlobalTokens() {
+		return minGlobalTokens;
+	}
+	public void setMinGlobalTokens(int minGlobalTokens) {
+		this.minGlobalTokens = minGlobalTokens;
+	}
+	public int getMinUrlCount() {
+		return minUrlCount;
+	}
+	public void setMinUrlCount(int minUrlCount) {
+		this.minUrlCount = minUrlCount;
+	}
+    
+    
 }

@@ -66,11 +66,6 @@
                             <h3 class="h5">Génération automatique</h3>
                             <p class="mb-0">Pas assez de données pour génerer le bilan IA du <span th:text="${product.model()}"></span></p>
                         </div>
-                        <button id="triggerButton" class="btn btn-tertiary ms-auto" 
-                            data-bs-toggle="tooltip" data-bs-placement="top" title="Générer un bilan AI automatiquement"
-                            aria-label="Générer un bilan AI">
-                            Générer
-                        </button>
                     </div>
                 </div>
             </th:block>
@@ -84,7 +79,7 @@
                         </div>
                         <div>
                             <h3 class="h5">Analyse automatique</h3>
-                            <p class="mb-0">Le bilan IA du <span th:text="${product.bestName()}"></span> a été généré à la demande le <span th:text="${aiReview.review.createdMs}"></span> </p>
+                            <p class="mb-0">Le bilan IA du <span th:text="${product.bestName()}"></span> a été généré à la demande le <span th:text="${aiReview.createdMs}"></span> </p>
                         </div>
                     </div>
                 </div>

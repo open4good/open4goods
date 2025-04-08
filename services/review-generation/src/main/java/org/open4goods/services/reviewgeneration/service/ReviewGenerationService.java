@@ -83,10 +83,9 @@ public class ReviewGenerationService implements HealthIndicator {
 
     private static final Logger logger = LoggerFactory.getLogger(ReviewGenerationService.class);
 
-    // Minimum global tokens and source count required for valid generation.
-    private static final int MIN_GLOBAL_TOKENS = 50000;
-    private static final int MIN_URL_COUNT = 3;
 
+
+    
     private final ReviewGenerationConfig properties;
     private final GoogleSearchService googleSearchService;
     private final UrlFetchingService urlFetchingService;
@@ -197,6 +196,7 @@ public class ReviewGenerationService implements HealthIndicator {
         processStatusMap.put(upc, status);
 
         AiReviewHolder holder = new AiReviewHolder();
+        holder.setCreatedMs(Instant.now().toEpochMilli());
         try {
             // Execute review generation and capture aggregated sources.
             GenerationResult genResult = executeReviewGeneration(product, verticalConfig, status);
@@ -208,7 +208,6 @@ public class ReviewGenerationService implements HealthIndicator {
 
             // Build the holder with aggregated token information.
             holder.setReview(newReview);
-            holder.setCreatedMs(Instant.now().toEpochMilli());
             holder.setSources(genResult.sources());
             holder.setEnoughData(true);
 
@@ -304,6 +303,7 @@ public class ReviewGenerationService implements HealthIndicator {
         executorService.submit(() -> {
             ReviewGenerationStatus status = processStatusMap.get(upc);
             AiReviewHolder holder = new AiReviewHolder();
+            holder.setCreatedMs(Instant.now().toEpochMilli());
             try {
                 // If an external pre-processing future is provided, execute it first.
                 if (preProcessingFuture != null) {
@@ -320,7 +320,6 @@ public class ReviewGenerationService implements HealthIndicator {
                 newReview = updateAiReviewReferences(newReview);
                 
                 holder.setReview(newReview);
-                holder.setCreatedMs(Instant.now().toEpochMilli());
                 holder.setSources(genResult.sources());
                 holder.setEnoughData(true);
                 
@@ -509,7 +508,7 @@ public class ReviewGenerationService implements HealthIndicator {
         logger.info("Aggregated {} tokens from {} sources.", accumulatedTokens, finalSourcesMap.size());
 
         // Check if sufficient data has been gathered.
-        if (accumulatedTokens < MIN_GLOBAL_TOKENS || finalSourcesMap.size() < MIN_URL_COUNT) {
+        if (accumulatedTokens < properties.getMinGlobalTokens() || finalSourcesMap.size() < properties.getMinUrlCount()) {
             throw new NotEnoughDataException("Insufficient data for review generation: accumulatedTokens=" + accumulatedTokens + ", sources=" + finalSourcesMap.size());
         }
         
@@ -558,7 +557,7 @@ public class ReviewGenerationService implements HealthIndicator {
      */
     private boolean shouldGenerateReview(Product product) {
         AiReviewHolder existingReview = product.getReviews().i18n("fr");
-        if (existingReview == null) {
+        if (existingReview == null || existingReview.getCreatedMs() == null) {
             return true;
         }
         Instant reviewCreated = Instant.ofEpochMilli(existingReview.getCreatedMs());
