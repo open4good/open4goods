@@ -9,10 +9,6 @@ import java.util.List;
  */
 public record AiReview(
 		
-	/**
-	 * Date the AIReview was created
-	 */
-	 @JsonProperty(required = true, value = "createdMs") Long createdMs,
 	
     /**
      * A detailed description of the product.

@@ -75,24 +75,6 @@ public class IdentityAggregationService extends AbstractAggregationService {
 	@Override
 	public void onProduct(Product output, VerticalConfig vConf) throws AggregationSkipException {
 
-		// TODO
-		// Erase ai review if old format
-		
-		
-		AiReview review = output.getAiReviews().get("fr");
-		if (review != null && review.attributes() == null )  {
-			// A old one
-			output.getAiReviews().clear();
-			logger.info("Cleared review for : {}" , output );
-		}
-		
-		if (review != null && review.attributes() != null )  {
-			// A actual one
-			logger.info("Up to date review for : {}" , output );
-
-		}
-		
-		
 		if (StringUtils.isEmpty(output.gtin())) {
 			dedicatedLogger.warn("Skipping product aggregation, empty barcode");
 			throw new AggregationSkipException("Cannot proceed, empty barcode");

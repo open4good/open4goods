@@ -72,6 +72,18 @@
       "type": "java.time.Duration",
       "description": "Estimated time for review generation process. Used to compute remaining time.",
       "defaultValue": "PT2M"
+    },
+    {
+      "name": "review.generation.regeneration-delay-days",
+      "type": "java.lang.Integer",
+      "description": "Delay in days after which a successful AI review is considered outdated and can be regenerated.",
+      "defaultValue": 30
+    },
+    {
+      "name": "review.generation.retry-delay-days",
+      "type": "java.lang.Integer",
+      "description": "Delay in days after which an unsuccessful AI review generation (insufficient data) can be retried.",
+      "defaultValue": 7
     }
   ]
 }

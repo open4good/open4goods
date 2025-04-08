@@ -21,7 +21,7 @@ public class ReviewGenerationConfig {
     private String queryTemplate = "test %s \"%s\"";
 
     // Limit the number of search queries.
-    private int maxSearch = 2;
+    private int maxSearch = 5;
 
     // Properties for token-based content aggregation.
     private int maxTotalTokens = 100000;
@@ -43,7 +43,22 @@ public class ReviewGenerationConfig {
      */
     private Long estimatedTime = 1000L * 60 * 2;
 
-    // Getters and setters for existing properties.
+    // ---------------------- New Properties ---------------------- //
+
+    /**
+     * Delay in days after which a successful AI review (enoughData == true) is considered outdated.
+     * Default is 30 days.
+     */
+    private int regenerationDelayDays = 30;
+
+    /**
+     * Delay in days after which an unsuccessful AI review generation (enoughData == false) can be retried.
+     * Default is 7 days.
+     */
+    private int retryDelayDays = 7;
+
+    // ---------------------- Getters/Setters ---------------------- //
+
     public int getThreadPoolSize() {
         return threadPoolSize;
     }
@@ -64,6 +79,7 @@ public class ReviewGenerationConfig {
     public void setPreferredDomains(List<String> preferredDomains) {
         this.preferredDomains = preferredDomains;
     }
+
     public String getQueryTemplate() {
         return queryTemplate;
     }
@@ -77,29 +93,33 @@ public class ReviewGenerationConfig {
     public void setMaxSearch(int maxSearch) {
         this.maxSearch = maxSearch;
     }
+
     public int getMaxTotalTokens() {
         return maxTotalTokens;
     }
-    public void setMaxTotalTokens(int maxTokensPerRequest) {
-        this.maxTotalTokens = maxTokensPerRequest;
+    public void setMaxTotalTokens(int maxTotalTokens) {
+        this.maxTotalTokens = maxTotalTokens;
     }
+
     public int getSourceMinTokens() {
         return sourceMinTokens;
     }
-    public void setSourceMinTokens(int minTokens) {
-        this.sourceMinTokens = minTokens;
+    public void setSourceMinTokens(int sourceMinTokens) {
+        this.sourceMinTokens = sourceMinTokens;
     }
-    public int getMaxConcurrentFetch() {
-        return maxConcurrentFetch;
-    }
-    public void setMaxConcurrentFetch(int maxConcurrentFetch) {
-        this.maxConcurrentFetch = maxConcurrentFetch;
-    }
+
     public int getSourceMaxTokens() {
         return sourceMaxTokens;
     }
     public void setSourceMaxTokens(int sourceMaxTokens) {
         this.sourceMaxTokens = sourceMaxTokens;
+    }
+
+    public int getMaxConcurrentFetch() {
+        return maxConcurrentFetch;
+    }
+    public void setMaxConcurrentFetch(int maxConcurrentFetch) {
+        this.maxConcurrentFetch = maxConcurrentFetch;
     }
 
     public int getRefreshDelayMonths() {
@@ -115,5 +135,18 @@ public class ReviewGenerationConfig {
     
     public void setEstimatedTime(Long estimatedTime) {
         this.estimatedTime = estimatedTime;
+    }
+    
+    public int getRegenerationDelayDays() {
+        return regenerationDelayDays;
+    }
+    public void setRegenerationDelayDays(int regenerationDelayDays) {
+        this.regenerationDelayDays = regenerationDelayDays;
+    }
+    public int getRetryDelayDays() {
+        return retryDelayDays;
+    }
+    public void setRetryDelayDays(int retryDelayDays) {
+        this.retryDelayDays = retryDelayDays;
     }
 }

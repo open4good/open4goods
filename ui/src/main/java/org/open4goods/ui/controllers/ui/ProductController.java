@@ -30,6 +30,7 @@ import org.open4goods.model.attribute.AttributeType;
 import org.open4goods.model.exceptions.ResourceNotFoundException;
 import org.open4goods.model.price.AggregatedPrice;
 import org.open4goods.model.price.PriceTrend;
+import org.open4goods.model.product.AiReviewHolder;
 import org.open4goods.model.product.Product;
 import org.open4goods.model.product.ProductCondition;
 import org.open4goods.model.vertical.AttributeConfig;
@@ -331,7 +332,7 @@ public class ProductController  {
 			mv.addObject("globalDescriptionParagraphs", globalDescriptionParagraphs);
 			mv.addObject("ecologicalDescriptionParagraphs", ecologicalDescriptionParagraphs);
 			
-			AiReview aiReview = data.getAiReviews().get(mv.getModel().get("siteLanguage"));
+			AiReviewHolder aiReview = data.getReviews().get(mv.getModel().get("siteLanguage"));
 			mv.addObject("aiReview", aiReview);
 			
 			

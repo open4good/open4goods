@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Objects;
 
 import org.open4goods.model.ai.AiReview;
+import org.open4goods.model.product.AiReviewHolder;
 
 /**
  * DTO representing the status of a review generation process.
@@ -22,6 +23,7 @@ public class ReviewGenerationStatus {
         FETCHING, 
         ANALYSING, 
         SUCCESS, 
+        PREPROCESSING,
         FAILED;
     }
     
@@ -29,7 +31,7 @@ public class ReviewGenerationStatus {
     private Status status;
     private Long startTime;
     private Long endTime;
-    private AiReview result;
+    private AiReviewHolder result;
     private String errorMessage;
     private Integer percent = 0;
     
@@ -88,15 +90,17 @@ public class ReviewGenerationStatus {
 		this.endTime = endTime;
 	}
 
-	public AiReview getResult() {
-        return result;
-    }
 
-    public void setResult(AiReview result) {
-        this.result = result;
-    }
 
-    public String getErrorMessage() {
+    public AiReviewHolder getResult() {
+		return result;
+	}
+
+	public void setResult(AiReviewHolder result) {
+		this.result = result;
+	}
+
+	public String getErrorMessage() {
         return errorMessage;
     }
 
