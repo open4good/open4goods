@@ -1,7 +1,8 @@
-package org.open4goods.commons.services;
+package org.open4goods.services.feedback.service;
 
 
 import java.io.IOException;
+import java.security.InvalidParameterException;
 import java.util.Collection;
 import java.util.Set;
 
@@ -10,9 +11,8 @@ import org.kohsuke.github.GHIssue;
 import org.kohsuke.github.GHIssueBuilder;
 import org.kohsuke.github.GHRepository;
 import org.kohsuke.github.GitHubBuilder;
-import org.open4goods.commons.config.yml.FeedbackConfiguration;
-import org.open4goods.model.exceptions.InvalidParameterException;
 import org.open4goods.model.helper.IdHelper;
+import org.open4goods.services.feedback.config.FeedbackConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

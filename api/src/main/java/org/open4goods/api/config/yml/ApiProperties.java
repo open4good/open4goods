@@ -8,7 +8,6 @@ import java.util.List;
 import org.apache.commons.lang3.ArrayUtils;
 import org.open4goods.api.services.feed.AffiliationConfig;
 import org.open4goods.commons.config.yml.DevModeConfiguration;
-import org.open4goods.commons.config.yml.GithubConfiguration;
 import org.open4goods.commons.config.yml.IcecatConfiguration;
 import org.open4goods.crawler.config.yml.FetcherProperties;
 import org.open4goods.model.vertical.DescriptionsAggregationConfig;
@@ -148,7 +147,6 @@ public class ApiProperties {
 	private ImageGenerationConfig imageGenerationConfig = new ImageGenerationConfig();
 	
 
-	private GithubConfiguration githubConfig;
 
 	/**
 	 * The configuration for developpement mode services
@@ -472,23 +470,6 @@ public class ApiProperties {
 		this.datasourcesfolder = datasourcesfolder;
 	}
 
-
-
-
-
-
-
-
-
-	public GithubConfiguration getGithubConfig() {
-		return githubConfig;
-	}
-
-
-
-	public void setGithubConfig(GithubConfiguration githubConfig) {
-		this.githubConfig = githubConfig;
-	}
 
 
 

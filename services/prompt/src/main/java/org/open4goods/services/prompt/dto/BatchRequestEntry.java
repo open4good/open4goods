@@ -1,5 +1,7 @@
 package org.open4goods.services.prompt.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 /**
  * Represents a single request entry in a batch submission.
  */
@@ -13,6 +15,7 @@ public class BatchRequestEntry {
         return customId;
     }
 
+    @JsonProperty("custom_id")
     public void setCustomId(String customId) {
         this.customId = customId;
     }

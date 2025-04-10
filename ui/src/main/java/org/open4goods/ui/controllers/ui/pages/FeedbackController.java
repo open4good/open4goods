@@ -6,8 +6,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.open4goods.commons.services.FeedbackService;
 import org.open4goods.model.exceptions.InvalidParameterException;
+import org.open4goods.services.feedback.service.FeedbackService;
 import org.open4goods.ui.config.yml.UiConfig;
 import org.open4goods.ui.controllers.ui.UiService;
 import org.slf4j.Logger;
@@ -122,10 +122,6 @@ public class FeedbackController implements SitemapExposedController {
 			LOGGER.error("Error while creating issue", e);
 			return uiService.defaultModelAndView("feedback-error", request).addObject("msg",
 					"Internal exception : " + e.getMessage());
-		} catch (InvalidParameterException e) {
-			LOGGER.error("Error while creating issue, invalid parameters", e);
-			return uiService.defaultModelAndView("feedback-error", request).addObject("msg",
-					"Invalid parameter exception : " + e.getMessage());
 		}
 
 		return uiService.defaultModelAndView("feedback-success", request).addObject("backUrl",
