@@ -1,4 +1,6 @@
-package org.open4goods.commons.config.yml;
+package org.open4goods.services.feedback.config;
+
+import org.open4goods.services.feedback.GithubConfiguration;
 
 public class FeedbackConfiguration {
 

@@ -1,4 +1,4 @@
-package org.open4goods.commons.config.yml;
+package org.open4goods.services.feedback;
 
 /**
  * Configuration for an XWiki connexion

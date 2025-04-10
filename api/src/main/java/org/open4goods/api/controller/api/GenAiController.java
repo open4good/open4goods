@@ -76,7 +76,7 @@ public class GenAiController {
 	
 	@GetMapping("/review/batch")
 	@Operation(summary = "Launch batch review generation")
-	public BatchPromptResponse<AiReview> batchReview(
+	public String batchReview(
 	        @RequestParam(defaultValue = "tv") String vertical,
 	        @RequestParam(defaultValue = "2") Integer numberOfProducts)
 	        throws ResourceNotFoundException, SerialisationException {

@@ -407,9 +407,10 @@ public class ReviewGenerationService implements HealthIndicator {
      * @param verticalConfig the vertical configuration.
      * @return a BatchPromptResponse containing the job ID and a future that will complete with the prompt response.
      */
-    public BatchPromptResponse<AiReview> generateReviewBatch(List<Product> products, VerticalConfig verticalConfig) {
+    public String generateReviewBatch(List<Product> products, VerticalConfig verticalConfig) {
         
     	List<Map<String, Object>> promptVariables = new ArrayList<>();
+    	List<String> ids = new ArrayList<>();
     	for (Product product : products) {
     		
 	    	long upc = product.getId();
@@ -436,15 +437,17 @@ public class ReviewGenerationService implements HealthIndicator {
 	        // Prepare the prompt variables (includes search & aggregation).
 	        try {
 	            promptVariables.add(preparePromptVariables(product, verticalConfig, status));
+	            ids.add(product.gtin());
 	        } catch (Exception e) {
-	            throw new RuntimeException("Failed to prepare prompt variables", e);
+	        	logger.error("Error while preparing prompt for {} : {}", product.getId(), e.getMessage());
+//	            throw new RuntimeException("Failed to prepare prompt variables", e);
 	        }
     	}
 
         
         
         // Submit batch job.
-        BatchPromptResponse<String> batchResponse = batchAiService.batchPrompt("review-generation", promptVariables);
+        BatchPromptResponse<String> batchResponse = batchAiService.batchPrompt("review-generation", promptVariables, ids);
         // Register a callback for when the batch future completes.
         batchResponse.futureResponse().whenComplete((promptResponse, ex) -> {
             if (ex == null) {
@@ -487,7 +490,7 @@ public class ReviewGenerationService implements HealthIndicator {
             }
             totalProcessed.incrementAndGet();
         });
-        return null;
+        return batchResponse.jobId();
     }
 
     /**

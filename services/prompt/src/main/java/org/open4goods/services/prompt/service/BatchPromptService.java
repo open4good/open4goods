@@ -86,12 +86,12 @@ public class BatchPromptService implements HealthIndicator {
      * @param variablesList A list of variable maps for prompt evaluation.
      * @return a BatchPromptResponse holding the jobId and a Future that will complete when the batch response is available.
      */
-    public BatchPromptResponse<String> batchPrompt(String promptKey, List<Map<String, Object>> variablesList) {
+    public BatchPromptResponse<String> batchPrompt(String promptKey, List<Map<String, Object>> variablesList, List<String> customIds) {
         List<BatchRequestEntry> requestEntries = new ArrayList<>();
         int totalEstimatedTokens = 0;
         int index = 0;
         for (Map<String, Object> vars : variablesList) {
-            BatchRequestEntry entry = createBatchRequestEntry(promptKey, vars, index);
+            BatchRequestEntry entry = createBatchRequestEntry(promptKey, vars, index, customIds.get(index));
             requestEntries.add(entry);
             totalEstimatedTokens += estimateTokensFromBatchEntry(entry);
             index++;
@@ -143,7 +143,7 @@ public class BatchPromptService implements HealthIndicator {
      * @param index     The index of the request in the batch.
      * @return a BatchRequestEntry representing the request.
      */
-    private BatchRequestEntry createBatchRequestEntry(String promptKey, Map<String, Object> variables, int index) {
+    private BatchRequestEntry createBatchRequestEntry(String promptKey, Map<String, Object> variables, int index, String customId) {
         var promptConfig = promptService.getPromptConfig(promptKey);
         if (promptConfig == null) {
             throw new IllegalStateException("Prompt config not found for " + promptKey);
@@ -173,7 +173,7 @@ public class BatchPromptService implements HealthIndicator {
         // Create the request entry.
         var entry = new org.open4goods.services.prompt.dto.BatchRequestEntry();
         // Use a generated UUID as the custom_id (alternatively, you can prefix it with the jobId when available)
-        entry.setCustomId(UUID.randomUUID().toString());
+        entry.setCustomId(customId);
         entry.setMethod("POST");
         entry.setUrl("/v1/chat/completions");
         entry.setBody(body);
