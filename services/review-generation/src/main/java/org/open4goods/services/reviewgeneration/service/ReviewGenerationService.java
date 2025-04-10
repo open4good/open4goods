@@ -1,7 +1,9 @@
 package org.open4goods.services.reviewgeneration.service;
 
+import java.io.IOException;
 import java.net.URL;
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -12,13 +14,17 @@ import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.stream.Stream;
 
 import org.open4goods.model.ai.AiReview;
+import org.open4goods.model.exceptions.ResourceNotFoundException;
+import org.open4goods.model.product.AiReviewHolder;
 import org.open4goods.model.product.Product;
 import org.open4goods.model.vertical.VerticalConfig;
 import org.open4goods.services.googlesearch.dto.GoogleSearchRequest;
@@ -26,11 +32,14 @@ import org.open4goods.services.googlesearch.dto.GoogleSearchResponse;
 import org.open4goods.services.googlesearch.dto.GoogleSearchResult;
 import org.open4goods.services.googlesearch.service.GoogleSearchService;
 import org.open4goods.services.productrepository.services.ProductRepository;
+import org.open4goods.services.prompt.dto.BatchPromptResponse;
 import org.open4goods.services.prompt.dto.PromptResponse;
+import org.open4goods.services.prompt.service.BatchPromptService;
 import org.open4goods.services.prompt.service.PromptService;
 import org.open4goods.services.reviewgeneration.config.ReviewGenerationConfig;
 import org.open4goods.services.reviewgeneration.dto.ReviewGenerationStatus;
 import org.open4goods.services.reviewgeneration.dto.ReviewGenerationStatus.Status;
+import org.open4goods.services.serialisation.exception.SerialisationException;
 import org.open4goods.services.urlfetching.dto.FetchResponse;
 import org.open4goods.services.urlfetching.service.UrlFetchingService;
 import org.slf4j.Logger;
@@ -44,35 +53,16 @@ import io.micrometer.core.instrument.MeterRegistry;
 /**
  * Service for generating AI-assisted reviews.
  * <p>
- * This implementation has been refactored to use a new review generation logic:
+ * This implementation has been refactored to support two different review generation flows:
  * <ol>
- *   <li>Before launching AI review generation, a preprocessing check is performed:
- *       <ul>
- *         <li>If the product does not have an associated AI review, generation proceeds.</li>
- *         <li>If a review exists, it is only regenerated if its creation date is older than the configured refresh delay (default 6 months).</li>
- *       </ul>
- *   </li>
- *   <li>It builds search queries using the product’s brand and model (and alternate models) with a query template.
- *       A maximum of {@code maxSearch} queries are performed.</li>
- *   <li>All search results are then sorted so that URLs containing preferred domains (configured via {@code preferredDomains})
- *       appear first.</li>
- *   <li>Next, URLs are fetched concurrently (up to {@code maxConcurrentFetch} tasks in parallel).
- *       For each fetched URL, the PromptService.estimateTokens() method is used to count tokens.
- *       Only pages with at least {@code sourceMinTokens} tokens are accepted and pages are aggregated until the total tokens
- *       reach {@code maxTotalTokens}.</li>
- *   <li>Finally, the collected markdown content is passed as prompt variables to generate the review.
- *       <br>
- *       <strong>New:</strong> After generation the text attributes of the generated review (description, shortDescription,
- *       mediumTitle, shortTitle, technicalReview, ecologicalReview, summary, pros, cons, and the nested fields in sources and attributes,
- *       as well as dataQuality) are precomputed to replace numeric references (e.g. “[1]”) with corresponding HTML links.
- *       For example: <code>&lt;a class="review-ref" href="#review-ref-1"&gt;[1]&lt;/a&gt;</code>.
- *   </li>
+ *   <li>The original realtime flow (using PromptService) for use cases that require immediate execution.</li>
+ *   <li>A new batch flow (using BatchPromptService) that leverages OpenAI’s JSONL Batch API.
+ *       On batch callback, the review is processed and the product is updated (data indexation).</li>
  * </ol>
  * <p>
- * After generating the review, the product is updated with the new AI review and re-indexed using {@code productRepository.forceIndex()}.
- * <p>
- * The service supports both synchronous and asynchronous calls and tracks process status in memory.
- * It also implements HealthIndicator to report service health based on generation failures.
+ * In both cases, a preprocessing stage is performed (including Google searches, URL fetching, token counting,
+ * and prompt variables composition) to aggregate markdown sources. Process status is tracked in memory,
+ * and products are updated and re-indexed upon successful review generation.
  */
 @Service
 public class ReviewGenerationService implements HealthIndicator {
@@ -82,21 +72,23 @@ public class ReviewGenerationService implements HealthIndicator {
     private final ReviewGenerationConfig properties;
     private final GoogleSearchService googleSearchService;
     private final UrlFetchingService urlFetchingService;
+    // Real-time service for non-batch use cases.
     private final PromptService genAiService;
+    // New batch service.
+    private final BatchPromptService batchAiService;
     private final MeterRegistry meterRegistry;
     private final ProductRepository productRepository;
 
     // Thread pool executor for asynchronous processing.
     private final ThreadPoolExecutor executorService;
-
+    // Instance-level thread pool for URL fetching.
+    private final ThreadPoolExecutor fetchExecutor;
     // In-memory storage of process status keyed by UPC.
     private final ConcurrentMap<Long, ReviewGenerationStatus> processStatusMap = new ConcurrentHashMap<>();
-
     // Global metrics for review generations.
     private final AtomicInteger totalProcessed = new AtomicInteger(0);
     private final AtomicInteger successfulCount = new AtomicInteger(0);
     private final AtomicInteger failedCount = new AtomicInteger(0);
-
     // Flag used by the health check: set to true if any generation failed.
     private volatile boolean lastGenerationFailed = false;
 
@@ -106,7 +98,8 @@ public class ReviewGenerationService implements HealthIndicator {
      * @param properties the review generation configuration properties.
      * @param googleSearchService the Google search service.
      * @param urlFetchingService the URL fetching service.
-     * @param genAiService the Gen AI service.
+     * @param genAiService the realtime PromptService.
+     * @param batchAiService the new batch PromptService.
      * @param meterRegistry the actuator meter registry.
      * @param productRepository the product repository service.
      */
@@ -114,17 +107,27 @@ public class ReviewGenerationService implements HealthIndicator {
                                    GoogleSearchService googleSearchService,
                                    UrlFetchingService urlFetchingService,
                                    PromptService genAiService,
+                                   BatchPromptService batchAiService,
                                    MeterRegistry meterRegistry,
                                    ProductRepository productRepository) {
         this.properties = properties;
         this.googleSearchService = googleSearchService;
         this.urlFetchingService = urlFetchingService;
         this.genAiService = genAiService;
+        this.batchAiService = batchAiService;
         this.meterRegistry = meterRegistry;
         this.productRepository = productRepository;
         this.executorService = new ThreadPoolExecutor(
             properties.getThreadPoolSize(),
             properties.getThreadPoolSize(),
+            0L,
+            TimeUnit.MILLISECONDS,
+            new ArrayBlockingQueue<>(properties.getMaxQueueSize()),
+            new ThreadPoolExecutor.AbortPolicy()
+        );
+        this.fetchExecutor = new ThreadPoolExecutor(
+            properties.getMaxConcurrentFetch(),
+            properties.getMaxConcurrentFetch(),
             0L,
             TimeUnit.MILLISECONDS,
             new ArrayBlockingQueue<>(properties.getMaxQueueSize()),
@@ -145,190 +148,41 @@ public class ReviewGenerationService implements HealthIndicator {
     }
 
     /**
-     * Synchronously generates a review for the given product and vertical configuration.
-     * <p>
-     * Preprocessing check: If the product already has an AI review and it is not older than the configured refresh delay,
-     * the existing review is returned without triggering a new generation.
+     * Determines if a new AI review should be generated for the product.
+     * Generation is required if the product does not already have a review or if the existing review is outdated.
      *
-     * @param product the product containing brand, primary model, and alternate models.
-     * @param verticalConfig the vertical configuration.
-     * @return the generated or existing AI review.
+     * @param product the product to check.
+     * @return true if generation should proceed; false otherwise.
      */
-    public AiReview generateReviewSync(Product product, VerticalConfig verticalConfig) {
-        long upc = product.getId();
-
-        // Preprocessing: Check if review generation is necessary.
-        if (!shouldGenerateReview(product)) {
-            logger.info("Skipping AI review generation for UPC {} because an up-to-date review already exists.", upc);
-            // TODO(p3,i18n) : i18n
-            return product.getAiReviews().i18n("fr");
+    private boolean shouldGenerateReview(Product product) {
+        AiReviewHolder existingReview = product.getReviews().i18n("fr");
+        if (existingReview == null || existingReview.getCreatedMs() == null) {
+            return true;
         }
-
-        // Check duplicate submission for same GTIN.
-        if (isActiveForGtin(product.gtin())) {
-            throw new IllegalStateException("Review generation already in progress for product with GTIN " + product.gtin());
-        }
-
-        ReviewGenerationStatus status = new ReviewGenerationStatus();
-        status.setUpc(upc);
-        status.setGtin(product.gtin());
-        status.setStatus(ReviewGenerationStatus.Status.PENDING);
-        status.setStartTime(Instant.now().toEpochMilli());
-        processStatusMap.put(upc, status);
-
-        try {
-            PromptResponse<AiReview> reviewResponse = executeReviewGeneration(product, verticalConfig, status);
-            AiReview newReview = reviewResponse.getBody();
-
-            // Precompute update fields for all text attributes by constructing a new AiReview record.
-            newReview = updateAiReviewReferences(newReview);
-
-            status.setResult(newReview);
-            status.setStatus(ReviewGenerationStatus.Status.SUCCESS);
-            status.setEndTime(Instant.now().toEpochMilli());
-            computeTimings(status);
-            successfulCount.incrementAndGet();
-            meterRegistry.counter("review.generation.success").increment();
-            // Update product with the new AI review and force index update.
-            // TODO(p3,i18n) : i18n
-            product.getAiReviews().put("fr", newReview);
-            productRepository.forceIndex(product);
-            return newReview;
-        } catch (Exception e) {
-            logger.error("Review generation failed for UPC {}: {}", upc, e.getMessage(), e);
-            status.setStatus(ReviewGenerationStatus.Status.FAILED);
-            status.setErrorMessage(e.getMessage());
-            status.setEndTime(Instant.now().toEpochMilli());
-            computeTimings(status);
-            failedCount.incrementAndGet();
-            meterRegistry.counter("review.generation.failed").increment();
-            lastGenerationFailed = true;
-            throw new RuntimeException("Review generation failed", e);
-        } finally {
-            totalProcessed.incrementAndGet();
-        }
+        Instant reviewCreated = Instant.ofEpochMilli(existingReview.getCreatedMs());
+        int delayDays = existingReview.isEnoughData() ? properties.getRegenerationDelayDays() : properties.getRetryDelayDays();
+        Instant threshold = reviewCreated.plus(delayDays, ChronoUnit.DAYS);
+        return Instant.now().isAfter(threshold);
     }
 
     /**
-     * Asynchronously initiates review generation for the given product and vertical configuration.
-     * <p>
-     * Preprocessing check: If the product already has an AI review and it is not older than the configured refresh delay,
-     * the generation is skipped and the existing review remains.
-     *
-     * @param product the product containing brand, primary model, and alternate models.
-     * @param verticalConfig the vertical configuration.
-     * @return the process ID (UPC) used to track generation status.
-     */
-    public long generateReviewAsync(Product product, VerticalConfig verticalConfig) {
-        long upc = product.getId();
-
-        // Preprocessing: Check if review generation is necessary.
-        if (!shouldGenerateReview(product)) {
-            logger.info("Skipping asynchronous AI review generation for UPC {} because an up-to-date review already exists.", upc);
-            ReviewGenerationStatus status = new ReviewGenerationStatus();
-            status.setUpc(upc);
-            status.setGtin(product.gtin());
-            status.setStatus(ReviewGenerationStatus.Status.SUCCESS);
-            status.addMessage("Existing valid AI review found. Skipping generation.");
-            status.setStartTime(Instant.now().toEpochMilli());
-            status.setEndTime(Instant.now().toEpochMilli());
-            computeTimings(status);
-            processStatusMap.put(upc, status);
-            return upc;
-        }
-
-        // Check duplicate submission for same GTIN.
-        if (isActiveForGtin(product.gtin())) {
-            throw new IllegalStateException("Review generation already in progress for product with GTIN " + product.gtin());
-        }
-
-        // Avoid duplicate runs on the same UPC if already processing.
-        processStatusMap.compute(upc, (key, existingStatus) -> {
-            if (existingStatus != null && (existingStatus.getStatus() == ReviewGenerationStatus.Status.PENDING ||
-                    existingStatus.getStatus() == ReviewGenerationStatus.Status.QUEUED ||
-                    existingStatus.getStatus() == ReviewGenerationStatus.Status.SEARCHING ||
-                    existingStatus.getStatus() == ReviewGenerationStatus.Status.FETCHING ||
-                    existingStatus.getStatus() == ReviewGenerationStatus.Status.ANALYSING)) {
-                return existingStatus;
-            } else {
-                ReviewGenerationStatus status = new ReviewGenerationStatus();
-                status.setUpc(upc);
-                status.setGtin(product.gtin());
-                status.setStatus(ReviewGenerationStatus.Status.PENDING);
-                status.setStartTime(Instant.now().toEpochMilli());
-                return status;
-            }
-        });
-
-        // Submit the review generation task asynchronously.
-        executorService.submit(() -> {
-            ReviewGenerationStatus status = processStatusMap.get(upc);
-            // Update status as the task starts execution.
-            status.setStatus(ReviewGenerationStatus.Status.SEARCHING);
-            try {
-                PromptResponse<AiReview> reviewResponse = executeReviewGeneration(product, verticalConfig, status);
-                AiReview newReview = reviewResponse.getBody();
-                // Precompute update fields: update all text attributes by constructing a new AiReview record.
-                newReview = updateAiReviewReferences(newReview);
-                
-                status.setResult(newReview);
-                status.setStatus(ReviewGenerationStatus.Status.SUCCESS);
-                // Update product with the new AI review and force index update.
-                // TODO(p3, i18n) : i18n
-                product.getAiReviews().put("fr", newReview);
-                productRepository.forceIndex(product);
-                meterRegistry.counter("review.generation.success").increment();
-            } catch (Exception e) {
-                logger.error("Asynchronous review generation failed for UPC {}: {}", upc, e.getMessage(), e);
-                status.setStatus(ReviewGenerationStatus.Status.FAILED);
-                status.setErrorMessage(e.getMessage());
-                meterRegistry.counter("review.generation.failed").increment();
-                lastGenerationFailed = true;
-            } finally {
-                status.setEndTime(Instant.now().toEpochMilli());
-                computeTimings(status);
-                totalProcessed.incrementAndGet();
-            }
-        });
-
-        // Immediately after submission, update the status to QUEUED.
-        int waiting = executorService.getQueue().size();
-        ReviewGenerationStatus status = processStatusMap.get(upc);
-        status.setStatus(ReviewGenerationStatus.Status.QUEUED);
-        status.addMessage("Queued for execution. Number waiting in queue: " + waiting);
-
-        return upc;
-    }
-
-    /**
-     * Executes the review generation process using the new logic.
-     * <ol>
-     *   <li>Builds search queries using the product’s brand and primary model and then alternate models using the configured query template.
-     *       A maximum of {@code maxSearch} queries are performed.</li>
-     *   <li>Performs a Google search for each query and aggregates the search results.</li>
-     *   <li>Deduplicates the search results to keep only one URL per distinct domain, and then sorts the results so that
-     *       results from preferred domains come first.</li>
-     *   <li>Fetches the markdown content for each URL concurrently (up to {@code maxConcurrentFetch} tasks).
-     *       For each fetched page, its token count is estimated via {@code PromptService.estimateTokens(String text)}.
-     *       Pages with token counts below {@code sourceMinTokens} are discarded and pages are aggregated until
-     *       the total token count reaches {@code maxTotalTokens}.</li>
-     *   <li>Finally, the aggregated markdown content is passed as a prompt variable to generate the review.</li>
-     * </ol>
-     * <p>
-     * During the process, the provided {@code ProcessStatus} is updated with messages that track key steps.
+     * Prepares the prompt variables used for review generation.
+     * This common code builds search queries, executes Google searches, fetches URLs concurrently,
+     * and aggregates markdown sources and token counts.
      *
      * @param product the product.
      * @param verticalConfig the vertical configuration.
-     * @param status the process status to update with processing messages.
-     * @return the generated review.
-     * @throws Exception if an error occurs during generation.
+     * @param status the process status to update.
+     * @return a map of prompt variables.
+     * @throws IOException, InterruptedException, ExecutionException, SerialisationException, ResourceNotFoundException, NotEnoughDataException 
      */
-    private PromptResponse<AiReview> executeReviewGeneration(Product product, VerticalConfig verticalConfig, ReviewGenerationStatus status) throws Exception {
+    private Map<String, Object> preparePromptVariables(Product product, VerticalConfig verticalConfig, ReviewGenerationStatus status)
+            throws IOException, InterruptedException, ExecutionException, ResourceNotFoundException, SerialisationException, NotEnoughDataException {
         String brand = product.brand();
         String primaryModel = product.model();
         Set<String> alternateModels = product.getAkaModels();
 
-        // Build a list of search queries using the configured query template.
+        // Build search queries.
         List<String> queries = new ArrayList<>();
         queries.add(String.format(properties.getQueryTemplate(), brand, primaryModel));
         if (alternateModels != null) {
@@ -337,12 +191,7 @@ public class ReviewGenerationService implements HealthIndicator {
             }
         }
 
-        // Record initial message for search queries.
         status.addMessage("Searching the web...");
-
-        // (Status already set to SEARCHING in caller)
-
-        // Perform searches up to the maximum allowed (maxSearch).
         int searchesMade = 0;
         List<GoogleSearchResult> allResults = new ArrayList<>();
         int maxSearch = properties.getMaxSearch();
@@ -352,7 +201,6 @@ public class ReviewGenerationService implements HealthIndicator {
             }
             logger.debug("Executing search query: {}", query);
             status.addMessage("Executing search query: " + query);
-            // TODO(p3,i18N) : internationalisation from ReviewGenConfig
             GoogleSearchRequest searchRequest = new GoogleSearchRequest(query, "lang_fr", "countryFR");
             GoogleSearchResponse searchResponse = googleSearchService.search(searchRequest);
             searchesMade++;
@@ -361,15 +209,11 @@ public class ReviewGenerationService implements HealthIndicator {
             }
         }
 
-        // Update status to FETCHING before starting URL fetch.
         status.setStatus(ReviewGenerationStatus.Status.FETCHING);
 
-        // Deduplicate and sort the search results:
-        // 1. Keep only one URL per distinct domain.
-        // 2. Sort so that entries from preferred domains come first.
+        // Sort and deduplicate results.
         List<GoogleSearchResult> sortedResults = allResults.stream()
                 .filter(r -> r.getLink() != null && !r.getLink().isEmpty())
-                // excluding pdf
                 .filter(r -> !r.getLink().endsWith(".pdf"))
                 .filter(distinctByKey(r -> {
                     try {
@@ -389,15 +233,7 @@ public class ReviewGenerationService implements HealthIndicator {
                 })
                 .toList();
 
-        // Prepare to fetch URL content concurrently using a dedicated executor.
-        ThreadPoolExecutor fetchExecutor = new ThreadPoolExecutor(
-            properties.getMaxConcurrentFetch(),
-            properties.getMaxConcurrentFetch(),
-            0L,
-            TimeUnit.MILLISECONDS,
-            new ArrayBlockingQueue<>(properties.getMaxQueueSize()),
-            new ThreadPoolExecutor.AbortPolicy()
-        );
+        // Fetch URL contents concurrently.
         Map<String, CompletableFuture<FetchResponse>> fetchFutures = new HashMap<>();
         for (GoogleSearchResult result : sortedResults) {
             String url = result.getLink();
@@ -411,22 +247,18 @@ public class ReviewGenerationService implements HealthIndicator {
             }, fetchExecutor);
             fetchFutures.put(url, future);
         }
-        fetchExecutor.shutdown();
 
-        // Update status to ANALYSING before processing fetched content.
         status.setStatus(ReviewGenerationStatus.Status.ANALYSING);
         status.addMessage("Fetching URL content concurrently...");
 
-        // Aggregate fetched markdown content until the maximum token limit is reached.
         int maxTotalTokens = properties.getMaxTotalTokens();
         int minTokens = properties.getSourceMinTokens();
         int maxTokens = properties.getSourceMaxTokens();
-        
+
         int accumulatedTokens = 0;
         Map<String, String> finalSourcesMap = new LinkedHashMap<>();
         Map<String, Integer> finalTokensMap = new LinkedHashMap<>();
-        
-        // Process the sorted URLs in order.
+
         for (GoogleSearchResult result : sortedResults) {
             String url = result.getLink();
             CompletableFuture<FetchResponse> future = fetchFutures.get(url);
@@ -445,7 +277,6 @@ public class ReviewGenerationService implements HealthIndicator {
                 logger.warn("Content from URL {} discarded, exceed tokens limit: {}", url, tokenCount);
                 continue;
             }
-            
             if (accumulatedTokens + tokenCount > maxTotalTokens) {
                 logger.warn("Reached max tokens threshold. Current tokens: {}, URL tokens: {}, threshold: {}",
                         accumulatedTokens, tokenCount, maxTotalTokens);
@@ -454,7 +285,6 @@ public class ReviewGenerationService implements HealthIndicator {
             finalSourcesMap.put(url, content);
             finalTokensMap.put(url, tokenCount);
             accumulatedTokens += tokenCount;
-            // Record message for the analysed URL, including its domain.
             try {
                 String domain = new URL(url).getHost();
                 status.addMessage("Analysing " + domain);
@@ -464,62 +294,294 @@ public class ReviewGenerationService implements HealthIndicator {
         }
         logger.info("Aggregated {} tokens from {} sources.", accumulatedTokens, finalSourcesMap.size());
 
-        // Compose the prompt variables including the collected markdown content.
+        // Check for minimum required data.
+        if (accumulatedTokens < properties.getMinGlobalTokens() || finalSourcesMap.size() < properties.getMinUrlCount()) {
+            throw new NotEnoughDataException("Insufficient data for review generation: accumulatedTokens=" + accumulatedTokens + ", sources=" + finalSourcesMap.size());
+        }
+
+        // Compose prompt variables.
         Map<String, Object> promptVariables = new HashMap<>();
         promptVariables.put("sources", finalSourcesMap);
         promptVariables.put("tokens", finalTokensMap);
-        
         promptVariables.put("PRODUCT_NAME", product.shortestOfferName());
         promptVariables.put("PRODUCT_BRAND", product.brand());
         promptVariables.put("PRODUCT_MODEL", product.model());
         promptVariables.put("PRODUCT_GTIN", product.gtin());
         promptVariables.put("PRODUCT", product);
-		
         promptVariables.put("VERTICAL_NAME", verticalConfig.i18n("fr").getH1Title().getPrefix());
 
         StringBuilder sb = new StringBuilder();
         verticalConfig.getAttributesConfig().getConfigs().forEach(attrConf -> {
-            if (attrConf.getSynonyms().size() > 0 ) {
-                sb.append("        ").append("- ").append(attrConf.getKey()).append(" (").append(attrConf.getName().get("fr")).append(")").append("\n");				
+            if (attrConf.getSynonyms().size() > 0) {
+                sb.append("        ")
+                  .append("- ")
+                  .append(attrConf.getKey())
+                  .append(" (")
+                  .append(attrConf.getName().get("fr"))
+                  .append(")")
+                  .append("\n");
             }
         });
         promptVariables.put("ATTRIBUTES", sb.toString());
-		
         status.addMessage("AI generation");
-        // Generate the review using the GenAiService with the prompt template "review-generation".
-        PromptResponse<AiReview> ret = genAiService.objectPrompt("review-generation", promptVariables, AiReview.class);
-        return ret;
+
+        // Store the aggregated tokens in the returned params, for conveniency
+        // TOSO : use const
+        promptVariables.put("TOTAL_TOKENS", accumulatedTokens);
+        promptVariables.put("SOURCE_TOKENS", finalTokensMap);
+        
+        
+        return promptVariables;
     }
 
     /**
-     * Determines if a new AI review should be generated for the product.
-     * <p>
-     * Generation is required if:
-     * <ul>
-     *   <li>The product does not have an associated AI review.</li>
-     *   <li>Or the existing review's creation date is older than the configured refresh delay.</li>
-     * </ul>
+     * Synchronous review generation using the realtime prompt service.
+     * (Existing method; kept for backwards compatibility.)
      *
-     * @param product the product to check.
-     * @return true if generation should proceed; false otherwise.
+     * @param product the product.
+     * @param verticalConfig the vertical configuration.
+     * @return the generated or existing AiReviewHolder.
      */
-    private boolean shouldGenerateReview(Product product) {
-        // TODO(p3, i18n)
-        AiReview existingReview = product.getAiReviews().i18n("fr");
-        if (existingReview == null) {
-            return true;
+    public AiReviewHolder generateReviewSync(Product product, VerticalConfig verticalConfig) {
+        long upc = product.getId();
+
+        if (!shouldGenerateReview(product)) {
+            logger.info("Skipping AI review generation for UPC {} because an up-to-date review already exists.", upc);
+            return product.getReviews().i18n("fr");
         }
-        
-        // TODO: Handle the time limit for regenerating the review
-//        Instant reviewCreated = Instant.ofEpochMilli(existingReview.createdMs());
-//        Instant threshold = Instant.now().minus(properties.getRefreshDelayMonths(), ChronoUnit.MONTHS);
-//        return reviewCreated.isBefore(threshold);
-        
-        return false;
+        if (isActiveForGtin(product.gtin())) {
+            throw new IllegalStateException("Review generation already in progress for product with GTIN " + product.gtin());
+        }
+
+        ReviewGenerationStatus status = new ReviewGenerationStatus();
+        status.setUpc(upc);
+        status.setGtin(product.gtin());
+        status.setStatus(ReviewGenerationStatus.Status.PENDING);
+        status.setStartTime(Instant.now().toEpochMilli());
+        processStatusMap.put(upc, status);
+
+        AiReviewHolder holder = new AiReviewHolder();
+        holder.setCreatedMs(Instant.now().toEpochMilli());
+        try {
+            Map<String, Object> promptVariables = preparePromptVariables(product, verticalConfig, status);
+            // Use the realtime prompt service.
+            PromptResponse<AiReview> reviewResponse = genAiService.objectPrompt("review-generation", promptVariables, AiReview.class);
+            AiReview newReview = reviewResponse.getBody();
+            newReview = updateAiReviewReferences(newReview);
+            holder.setReview(newReview);
+            // TODO : share const
+            holder.setSources((Map<String, Integer>) promptVariables.get("SOURCE_TOKENS")); // You may also choose to store additional aggregated data.
+            holder.setTotalTokens((Integer) promptVariables.get("TOTAL_TOKENS")); // You may also choose to store additional aggregated data.
+            
+            holder.setEnoughData(true);
+            status.setResult(holder);
+            status.setStatus(ReviewGenerationStatus.Status.SUCCESS);
+            status.setEndTime(Instant.now().toEpochMilli());
+            computeTimings(status);
+            successfulCount.incrementAndGet();
+            meterRegistry.counter("review.generation.success").increment();
+        } catch (Exception e) {
+            logger.error("Review generation failed for UPC {}: {}", upc, e.getMessage(), e);
+            status.setStatus(ReviewGenerationStatus.Status.FAILED);
+            status.setErrorMessage(e.getMessage());
+            status.setEndTime(Instant.now().toEpochMilli());
+            computeTimings(status);
+            failedCount.incrementAndGet();
+            meterRegistry.counter("review.generation.failed").increment();
+            lastGenerationFailed = true;
+            throw new RuntimeException("Review generation failed", e);
+        } finally {
+            totalProcessed.incrementAndGet();
+        }
+        product.getReviews().put("fr", holder);
+        productRepository.forceIndex(product);
+        return holder;
     }
 
     /**
-     * Computes and sets the duration and remaining time for a given process.
+     * Synchronous review generation using the new batch service.
+     * Instead of waiting for a synchronous API call, this method immediately returns a BatchPromptResponse.
+     * A callback is registered on the batch future to perform product update and data indexation when complete.
+     *
+     * @param product the product.
+     * @param verticalConfig the vertical configuration.
+     * @return a BatchPromptResponse containing the job ID and a future that will complete with the prompt response.
+     */
+    public BatchPromptResponse<AiReview> generateReviewBatch(List<Product> products, VerticalConfig verticalConfig) {
+        
+    	List<Map<String, Object>> promptVariables = new ArrayList<>();
+    	for (Product product : products) {
+    		
+	    	long upc = product.getId();
+	        if (!shouldGenerateReview(product)) {
+	            logger.info("Skipping AI review generation for UPC {} because an up-to-date review already exists.", upc);
+	            // For batch method, one might return a dummy completed BatchPromptResponse.
+	            
+	            // TODO
+	//            CompletableFuture<PromptResponse<AiReview>> dummy = CompletableFuture.completedFuture(product.getReviews().i18n("fr"));
+	//            return new BatchPromptResponse<>("dummy", dummy);
+	//            
+	           continue;
+	        }
+	        if (isActiveForGtin(product.gtin())) {
+	           continue;
+	        }
+	        ReviewGenerationStatus status = new ReviewGenerationStatus();
+	        status.setUpc(upc);
+	        status.setGtin(product.gtin());
+	        status.setStatus(ReviewGenerationStatus.Status.PENDING);
+	        status.setStartTime(Instant.now().toEpochMilli());
+	        processStatusMap.put(upc, status);
+	
+	        // Prepare the prompt variables (includes search & aggregation).
+	        try {
+	            promptVariables.add(preparePromptVariables(product, verticalConfig, status));
+	        } catch (Exception e) {
+	            throw new RuntimeException("Failed to prepare prompt variables", e);
+	        }
+    	}
+
+        
+        
+        // Submit batch job.
+        BatchPromptResponse<String> batchResponse = batchAiService.batchPrompt("review-generation", promptVariables);
+        // Register a callback for when the batch future completes.
+        batchResponse.futureResponse().whenComplete((promptResponse, ex) -> {
+            if (ex == null) {
+//                try {
+                	logger.error("OPEN AI Call back : {}, {}",promptResponse, ex);
+                	
+                	
+                	System.out.println(promptResponse.getBody());
+                	
+//                    AiReview newReview = promptResponse.getBody();
+//                    newReview = updateAiReviewReferences(newReview);
+//                    AiReviewHolder holder = new AiReviewHolder();
+//                    holder.setCreatedMs(Instant.now().toEpochMilli());
+//                    holder.setReview(newReview);
+//                 // TODO : share const
+//                    holder.setSources((Map<String, Integer>) promptVariables.get("SOURCE_TOKENS")); // You may also choose to store additional aggregated data.
+//                    holder.setTotalTokens((Integer) promptVariables.get("TOTAL_TOKENS")); // You may also choose to store additional aggregated data.
+//                    
+//                    holder.setEnoughData(true);
+//                    status.setResult(holder);
+//                    status.setStatus(ReviewGenerationStatus.Status.SUCCESS);
+//                    status.setEndTime(Instant.now().toEpochMilli());
+//                    computeTimings(status);
+//                    successfulCount.incrementAndGet();
+//                    meterRegistry.counter("review.generation.success").increment();
+//                    // Update product review and force index.
+//                    product.getReviews().put("fr", holder);
+//                    productRepository.forceIndex(product);
+//                } catch (Exception callbackEx) {
+//                    logger.error("Error in batch callback for UPC {}: {}", upc, callbackEx.getMessage(), callbackEx);
+//                }
+            } else {
+//                logger.error("Batch review generation failed for UPC {}: {}", upc, ex.getMessage(), ex);
+//                status.setStatus(ReviewGenerationStatus.Status.FAILED);
+//                status.setErrorMessage(ex.getMessage());
+//                status.setEndTime(Instant.now().toEpochMilli());
+//                computeTimings(status);
+//                failedCount.incrementAndGet();
+//                meterRegistry.counter("review.generation.failed").increment();
+            }
+            totalProcessed.incrementAndGet();
+        });
+        return null;
+    }
+
+    /**
+     * Asynchronously initiates realtime review generation.
+     * (Existing asynchronous method using PromptService.)
+     *
+     * @param product the product.
+     * @param verticalConfig the vertical configuration.
+     * @param preProcessingFuture an optional external preprocessing future.
+     * @return the product UPC used to track generation status.
+     */
+    public long generateReviewAsync(Product product, VerticalConfig verticalConfig, CompletableFuture<Void> preProcessingFuture) {
+        long upc = product.getId();
+        if (!shouldGenerateReview(product)) {
+            logger.info("Skipping asynchronous AI review generation for UPC {} because an up-to-date review already exists.", upc);
+            ReviewGenerationStatus status = new ReviewGenerationStatus();
+            status.setUpc(upc);
+            status.setGtin(product.gtin());
+            status.setStatus(ReviewGenerationStatus.Status.SUCCESS);
+            status.addMessage("Existing valid AI review found. Skipping generation.");
+            status.setStartTime(Instant.now().toEpochMilli());
+            status.setEndTime(Instant.now().toEpochMilli());
+            computeTimings(status);
+            processStatusMap.put(upc, status);
+            return upc;
+        }
+        if (isActiveForGtin(product.gtin())) {
+            throw new IllegalStateException("Review generation already in progress for product with GTIN " + product.gtin());
+        }
+        processStatusMap.compute(upc, (key, existingStatus) -> {
+            if (existingStatus != null && (existingStatus.getStatus() == ReviewGenerationStatus.Status.PENDING ||
+                    existingStatus.getStatus() == ReviewGenerationStatus.Status.QUEUED ||
+                    existingStatus.getStatus() == ReviewGenerationStatus.Status.SEARCHING ||
+                    existingStatus.getStatus() == ReviewGenerationStatus.Status.FETCHING ||
+                    existingStatus.getStatus() == ReviewGenerationStatus.Status.ANALYSING ||
+                    existingStatus.getStatus() == ReviewGenerationStatus.Status.PREPROCESSING)) {
+                return existingStatus;
+            } else {
+                ReviewGenerationStatus status = new ReviewGenerationStatus();
+                status.setUpc(upc);
+                status.setGtin(product.gtin());
+                status.setStatus(ReviewGenerationStatus.Status.PENDING);
+                status.setStartTime(Instant.now().toEpochMilli());
+                return status;
+            }
+        });
+        executorService.submit(() -> {
+            ReviewGenerationStatus status = processStatusMap.get(upc);
+            AiReviewHolder holder = new AiReviewHolder();
+            holder.setCreatedMs(Instant.now().toEpochMilli());
+            try {
+                if (preProcessingFuture != null) {
+                    status.setStatus(ReviewGenerationStatus.Status.PREPROCESSING);
+                    status.addMessage("Executing external preprocessing step...");
+                    preProcessingFuture.get();
+                    status.addMessage("External preprocessing complete.");
+                }
+                status.setStatus(ReviewGenerationStatus.Status.SEARCHING);
+                Map<String, Object> promptVariables = preparePromptVariables(product, verticalConfig, status);
+                PromptResponse<AiReview> reviewResponse = genAiService.objectPrompt("review-generation", promptVariables, AiReview.class);
+                AiReview newReview = reviewResponse.getBody();
+                newReview = updateAiReviewReferences(newReview);
+                holder.setReview(newReview);
+             // TODO : share const
+                holder.setSources((Map<String, Integer>) promptVariables.get("SOURCE_TOKENS")); // You may also choose to store additional aggregated data.
+                holder.setTotalTokens((Integer) promptVariables.get("TOTAL_TOKENS")); // You may also choose to store additional aggregated data.
+                
+                holder.setEnoughData(true);
+                status.setResult(holder);
+                status.setStatus(ReviewGenerationStatus.Status.SUCCESS);
+                meterRegistry.counter("review.generation.success").increment();
+            } catch (Exception e) {
+                logger.error("Asynchronous review generation failed for UPC {}: {}", upc, e.getMessage(), e);
+                status.setStatus(ReviewGenerationStatus.Status.FAILED);
+                status.setErrorMessage(e.getMessage());
+                meterRegistry.counter("review.generation.failed").increment();
+                lastGenerationFailed = true;
+            } finally {
+                status.setEndTime(Instant.now().toEpochMilli());
+                computeTimings(status);
+                totalProcessed.incrementAndGet();
+            }
+            product.getReviews().put("fr", holder);
+            productRepository.forceIndex(product);
+        });
+        int waiting = executorService.getQueue().size();
+        ReviewGenerationStatus status = processStatusMap.get(upc);
+        status.setStatus(ReviewGenerationStatus.Status.QUEUED);
+        status.addMessage("Queued for execution. Number waiting in queue: " + waiting);
+        return upc;
+    }
+
+    /**
+     * Computes and sets the duration and remaining time for a process based on start and end times.
      *
      * @param status the process status to update.
      */
@@ -530,12 +592,12 @@ public class ReviewGenerationService implements HealthIndicator {
             long remaining = estimated - duration;
             status.setDuration(duration);
             status.setRemaining(remaining);
-            status.setPercent(new Long(Math.round(Double.valueOf(duration) / Double.valueOf(estimated) * 100)).intValue());
+            status.setPercent((int) Math.round((double) duration / estimated * 100));
         }
     }
-    
+
     /**
-     * Updates the timings dynamically for an ongoing process.
+     * Dynamically updates timings for an ongoing process.
      *
      * @param status the process status to update.
      */
@@ -575,7 +637,6 @@ public class ReviewGenerationService implements HealthIndicator {
         stats.put("totalProcessed", totalProcessed.get());
         stats.put("successful", successfulCount.get());
         stats.put("failed", failedCount.get());
-        // Count processes that are still PENDING, QUEUED, SEARCHING, FETCHING or ANALYSING.
         long ongoing = processStatusMap.values().stream()
                 .filter(s -> s.getStatus() == ReviewGenerationStatus.Status.PENDING ||
                              s.getStatus() == ReviewGenerationStatus.Status.QUEUED ||
@@ -589,8 +650,6 @@ public class ReviewGenerationService implements HealthIndicator {
 
     /**
      * Health check implementation.
-     * <p>
-     * The service is reported as DOWN if any review generation failure has occurred.
      *
      * @return Health status UP if healthy; otherwise DOWN with error details.
      */
@@ -603,26 +662,22 @@ public class ReviewGenerationService implements HealthIndicator {
     }
 
     /**
-     * Returns a predicate that maintains state about what keys have been seen so far, filtering out duplicates.
+     * Returns a predicate to filter distinct elements based on a key extractor.
      *
-     * @param keyExtractor a function to extract the key for comparison.
-     * @param <T> the type of the input elements.
-     * @return a predicate that returns true if the element is encountered for the first time.
+     * @param keyExtractor a function to extract the key.
+     * @param <T> the element type.
+     * @return a predicate that yields true only for the first occurrence.
      */
     private static <T> Predicate<T> distinctByKey(Function<? super T, ?> keyExtractor) {
         Map<Object, Boolean> seen = new ConcurrentHashMap<>();
         return t -> seen.putIfAbsent(keyExtractor.apply(t), Boolean.TRUE) == null;
     }
-    
+
     /**
      * Replaces numeric references in the given text with corresponding HTML links.
-     * For example, a reference "[1]" is replaced by:
-     * <code>&lt;a class="review-ref" href="#review-ref-1"&gt;[1]&lt;/a&gt;</code>.
      *
-     * <p>This method precomputes the updated field value without using reflection.
-     *
-     * @param text the original text possibly containing references.
-     * @return the updated text with HTML links.
+     * @param text the original text.
+     * @return text with HTML link replacements.
      */
     private String replaceReferences(String text) {
         if (text == null) {
@@ -630,10 +685,9 @@ public class ReviewGenerationService implements HealthIndicator {
         }
         return text.replaceAll("\\[(\\d+)\\]", "<a class=\"review-ref\" href=\"#review-ref-$1\">[$1]</a>");
     }
-    
+
     /**
-     * Updates all textual fields of the provided AiReview by replacing numeric references with HTML links.
-     * Since AiReview is an immutable record, a new instance is constructed.
+     * Updates textual fields in the provided AiReview by replacing numeric references with HTML links.
      *
      * @param review the original AiReview.
      * @return a new AiReview with updated text fields.
@@ -647,19 +701,14 @@ public class ReviewGenerationService implements HealthIndicator {
         String ecologicalReview = replaceReferences(review.ecologicalReview());
         String summary = replaceReferences(review.summary());
         String dataQuality = replaceReferences(review.dataQuality());
-        
-        List<String> pros = review.pros().stream()
-                .map(this::replaceReferences)
-                .toList();
-        List<String> cons = review.cons().stream()
-                .map(this::replaceReferences)
-                .toList();
+        List<String> pros = review.pros().stream().map(this::replaceReferences).toList();
+        List<String> cons = review.cons().stream().map(this::replaceReferences).toList();
         List<AiReview.AiSource> sources = review.sources().stream()
                 .map(source -> new AiReview.AiSource(
                         source.number(),
                         replaceReferences(source.name()),
                         replaceReferences(source.description()),
-                        source.url()  // URL remains unchanged
+                        source.url()
                 ))
                 .toList();
         List<AiReview.AiAttribute> attributes = review.attributes().stream()
@@ -668,9 +717,7 @@ public class ReviewGenerationService implements HealthIndicator {
                         replaceReferences(attr.value())
                 ))
                 .toList();
-        
         return new AiReview(
-                review.createdMs(),
                 description,
                 shortDescription,
                 mediumTitle,
@@ -685,4 +732,6 @@ public class ReviewGenerationService implements HealthIndicator {
                 dataQuality
         );
     }
+
+   
 }

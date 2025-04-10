@@ -169,7 +169,7 @@ public class Product implements Standardisable {
 	/**
 	 * The ai generated review for this product
 	 */
-	private Localisable<String, AiReview> aiReviews = new Localisable<String, AiReview>();
+	private Localisable<String, AiReviewHolder> reviews = new Localisable<String, AiReviewHolder>();
 	
 	
 	private EcoScoreRanking ranking = new EcoScoreRanking();
@@ -264,6 +264,18 @@ public class Product implements Standardisable {
 		return list;
 	}
 
+
+	
+	public List<Score> virtualScores() {
+		List<Score> ret = scores.values().stream()
+				.filter(e -> e.getVirtual())
+				.filter(e -> !e.getName().equals(ECOSCORE_NAME))
+				.sorted( (o1, o2) -> o2.getRelativ().getValue().compareTo(o1.getRelativ().getValue()))
+				.toList();
+		
+		return ret;
+	}
+	
 	
 	public List<Score> realScores() {
 		List<Score> ret = scores.values().stream()
@@ -326,7 +338,8 @@ public class Product implements Standardisable {
 	
 	
 	public List<Resource> pdfs () {
-		return resources.stream().filter(e-> e.getResourceType() != null &&  e.getResourceType().equals(ResourceType.PDF)).toList();
+		List<Resource> ret = resources.stream().filter(e-> e.getResourceType() != null &&  e.getResourceType().equals(ResourceType.PDF)).toList();
+		return ret;
 	}
 		
 	
@@ -951,14 +964,13 @@ public class Product implements Standardisable {
 		this.bestsScores = betters;
 	}
 
-	public Localisable<String, AiReview> getAiReviews() {
-		return aiReviews;
+	public Localisable<String, AiReviewHolder> getReviews() {
+		return reviews;
 	}
 
-	public void setAiReviews(Localisable<String, AiReview> aiReviews) {
-		this.aiReviews = aiReviews;
+	public void setReviews(Localisable<String, AiReviewHolder> aiReviews) {
+		this.reviews = aiReviews;
 	}
-
 
 
 	

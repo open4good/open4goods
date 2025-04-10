@@ -1,0 +1,74 @@
+
+<figure th:id="'detail-'+${score.name}"  class="card shadow"
+        th:with="worse = ${extrems.get(score.lowestScoreId)},
+                 best = ${extrems.get(score.highestScoreId)},
+                 currentScorePercent = ${score.on20 * 5}">
+
+    <figcaption class="card-header">
+        <div class="row text-center">
+            <h3 class="h4" th:text="${verticalConfig.availableImpactScoreCriterias.get(score.name).title.i18n(siteLanguage)}">
+                <!-- Criterion Title -->
+            </h3>
+        </div>
+    </figcaption>
+
+    <div class="card-body">
+
+        <div class="row g-0 align-items-center mb-4">
+            <div class="col-4 text-center">
+                <span class="display-3" th:text="${score.on20()}"></span>
+                <span class="display-5">/20</span>
+            </div>
+
+            <div class="col-8 text-center">
+                <div class="alert alert-success text-center" role="alert">
+                    Compte pour <b><span th:text="${verticalConfig.ecoscorePercentOf(score.name)}"></span>%</b> dans la note totale
+                </div>
+            </div>
+
+            <div >
+                <section class="card-body">
+        
+        
+        <th:block th:if="${product.virtualScores().size()>0}">
+	        <div >
+	          <h3 id="missing-values-title" class="h6">Valeurs manquantes</h3>
+	        </div>
+	        <div class="card-body">
+	          <p> Les valeurs suivantes sont manquantes. Le score moyen pour la catégorie a été appliqué et le score de qualité de donnée a été dégradé en conséquence.</p>
+	          
+	                            <table class="table table-striped">
+	                                        <tbody>
+	                                            <tr>
+	                                                <th scope="col" id="teacher2">Critère</th>
+	                                                <th scope="col" id="males2">Coef</th>
+	                                                <th scope="col" id="females2">Note</th>
+	                                            </tr>
+	                                            <tr  th:each="score, stat : ${verticalConfig.ecoScoreDetails(product.virtualScores())}">
+	                                                <td><a th:href="'#detail-'+${score.name}"> <span th:text="${verticalConfig.availableImpactScoreCriterias.get(score.name).title.i18n(siteLanguage)}"></a></span></td>
+	                                                <td><span th:text="${verticalConfig.impactScoreConfig.criteriasPonderation.get(score.name)}"></span></td>
+	                                                <td><span th:text="${score.on20()}"></span>/20</td>
+	                                            </tr>
+	                                            
+	                                        </tbody>
+	                                    </table>
+	          
+	          
+	        </div>
+        </th:block>
+        
+         <th:block th:unless="${product.virtualScores().size()>0}">
+            <p>
+             Toutes les données nécessaires au calcul de l'Impact Score du <span th:text="${product.bestName()}"></span> sont présentes ! 
+            </p>
+         </th:block>
+        
+                </section>
+            </div>
+        </div>
+
+  
+        
+
+    </div>
+</figure>

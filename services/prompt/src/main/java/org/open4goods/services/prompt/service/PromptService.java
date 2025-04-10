@@ -355,7 +355,7 @@ public class PromptService implements HealthIndicator {
      * @param promptKey The unique key identifying the prompt configuration.
      * @return The {@link PromptConfig} or {@code null} if not found.
      */
-    private PromptConfig getPromptConfig(String promptKey) {
+    public PromptConfig getPromptConfig(String promptKey) {
         if (genAiConfig.isCacheTemplates()) {
             return prompts.get(promptKey);
         } else {

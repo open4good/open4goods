@@ -53,11 +53,28 @@
                 <div class="col">
                     <div class="card shadow border-gray-300 p-4 p-lg-5">
                         <h2 class="h3 mb-4">Qu’est-ce que l’Impact Score&nbsp;?</h2>
+                        
+                        
+                        <div class="text-center ">
+							                                                <!-- TODO : I18n -->
+							<div class="star-rating star-rating-md star-rating-md" data-rating="${rating}" aria-label="Evaluation : 4.5 sur 5">
+							    <div class="stars">
+							        <span class="star full"></span>
+							        <span class="star full"></span>
+							        <span class="star full"></span>
+							        <span class="star full"></span>
+							        <span class="star full"></span>
+							    </div>
+							</div>
+							                                            </div>
+                        
                         <th:block th:with="path='ECOSCORE/2/'">
                             <th:block th:insert="~{inc/wiki.html}"></th:block>
                         </th:block>
-                        <div class="col-12 col-md-6 mx-auto">
-                            <img class="organic-radius img-fluid" src="/assets/img/ecologie1.jpg" alt="Exemple d'impact écologique" loading="lazy"/>
+                        
+                        
+                        <div class="col-12 col-md-6 mx-auto p-4">
+                            <img class=" img-fluid" src="/img/what-impactscore.png" alt="Illustration d'impact écologique" loading="lazy"/>
                         </div>
 
                         <h2 id="ecoscore-transparent-innovant" class="h3 my-4">Notre ecoscore&nbsp;: transparent, innovant et performant</h2>
@@ -65,7 +82,7 @@
                             <th:block th:insert="~{inc/wiki.html}"></th:block>
                         </th:block>
                         <div class="col-12 col-md-6 mx-auto">
-                            <img class="organic-radius img-fluid" src="/assets/img/ecologie2.jpg" alt="Illustration d'un écoscore transparent et innovant" loading="lazy"/>
+                            <img class=" img-fluid" src="/img/impactscore-illustration.png" alt="Illustration d'un écoscore transparent et innovant" loading="lazy"/>
                         </div>
 
                         <h2 id="calcule-impact-score" class="h3 my-4">Comment est calculé l'Impact Score&nbsp;?</h2>
@@ -119,9 +136,35 @@
                             </table>
                         </div>
                         <div class="my-4">
-                            <th:block th:with="path='ECOSCORE/4-1/'">
+                        
+                            <div class="row">
+                                <div class="col-lg-8">
+                                              <th:block th:with="path='ECOSCORE/4-1/'">
                                 <th:block th:insert="~{inc/wiki.html}"></th:block>
                             </th:block>
+                                </div>
+                                <div class="col-lg-4">
+                                <img class="img-fluid" src="/img/relativisation.png" alt="Illustration de relativisation d'ecoscore" loading="lazy">
+                                </div>
+                            
+                            </div>
+                        
+                        
+                                       
+                            <div class="row">
+                                <div class="col-lg-4">
+                                   <img class="img-fluid" src="/img/data-quality.png" alt="Illustration de relativisation d'ecoscore" loading="lazy">
+                                
+                                </div>
+                                <div class="col-lg-8">
+                                              <th:block th:with="path='ECOSCORE/4-2/'">
+                                               <th:block th:insert="~{inc/wiki.html}"></th:block>
+                            </th:block>
+                                </div>
+                            
+                            </div>
+                        
+              
                         </div>
                     </div>
                 </div>

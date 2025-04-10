@@ -27,6 +27,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.elasticsearch.UncategorizedElasticsearchException;
 import org.springframework.data.elasticsearch.client.elc.ElasticsearchAggregations;
 import org.springframework.data.elasticsearch.client.elc.NativeQuery;
 import org.springframework.data.elasticsearch.client.elc.NativeQueryBuilder;
@@ -44,9 +45,14 @@ import org.springframework.data.elasticsearch.core.query.IndexQueryBuilder;
 import org.springframework.data.elasticsearch.core.query.Query;
 import org.springframework.data.elasticsearch.core.query.UpdateQuery;
 
+import co.elastic.clients.elasticsearch._types.ElasticsearchException;
+import co.elastic.clients.elasticsearch._types.FieldSort;
+import co.elastic.clients.elasticsearch._types.SortOptions;
+import co.elastic.clients.elasticsearch._types.SortOrder;
 import co.elastic.clients.elasticsearch._types.aggregations.Aggregation;
 import co.elastic.clients.elasticsearch._types.aggregations.LongTermsAggregate;
 import co.elastic.clients.elasticsearch._types.aggregations.LongTermsBucket;
+import co.elastic.clients.elasticsearch._types.mapping.FieldType;
 
 /**
  * The Elastic Data Access Object for products TODO : Could maintain the elastic
@@ -335,26 +341,54 @@ public class ProductRepository {
 	 * @param indexName
 	 * @return
 	 */
+
 	public Stream<Product> exportVerticalWithValidDateOrderByEcoscore(String vertical, Integer max, boolean withExcluded) {
 
-		Criteria c = new Criteria("vertical").is(vertical)
-				.and(getRecentPriceQuery())
-				;
+	    Criteria criteria = new Criteria("vertical").is(vertical)
+	        .and(getRecentPriceQuery());
 
-		if (!withExcluded) {
-            c = c.and(new Criteria("excluded").is(false));
-        }
-		
-		NativeQueryBuilder initialQueryBuilder = new NativeQueryBuilder().withQuery(new CriteriaQuery(c));
-		
-		initialQueryBuilder =  initialQueryBuilder.withSort(Sort.by(org.springframework.data.domain.Sort.Order.desc("scores.ECOSCORE.value")));									
-		if (null != max) {
-			initialQueryBuilder = initialQueryBuilder.withMaxResults(max);
-		}
+	    if (!withExcluded) {
+	        criteria = criteria.and(new Criteria("excluded").is(false));
+	    }
 
-		NativeQuery initialQuery = initialQueryBuilder.build();
-		
-		return elasticsearchOperations.searchForStream(initialQuery, Product.class, CURRENT_INDEX).stream().map(SearchHit::getContent);
+	    // Ensure scores.ECOSCORE.value is present
+	    criteria = criteria.and(new Criteria("scores.ECOSCORE.value").exists());
+
+	    // Build sort with unmapped_type to avoid shard-level mapping issues
+	    SortOptions ecoscoreSort = new SortOptions.Builder()
+	        .field(new FieldSort.Builder()
+	            .field("scores.ECOSCORE.value")
+	            .order(SortOrder.Desc)
+	            .unmappedType(FieldType.Float)
+	            .missing("_last")
+	            .build())
+	        .build();
+
+	    NativeQueryBuilder queryBuilder = new NativeQueryBuilder()
+	        .withQuery(new CriteriaQuery(criteria))
+	        .withSort(ecoscoreSort);
+
+	    if (max != null) {
+	        queryBuilder = queryBuilder.withMaxResults(max);
+	    }
+
+	    NativeQuery query = queryBuilder.build();
+
+	    try {
+	        return elasticsearchOperations
+	            .searchForStream(query, Product.class, CURRENT_INDEX)
+	            .stream()
+	            .map(SearchHit::getContent);
+	    } catch (Exception e) {
+	        if (e instanceof UncategorizedElasticsearchException) {
+	            Throwable cause = e.getCause();
+	            if (cause instanceof ElasticsearchException ee) {
+	                logger.error("Elasticsearch error: " + ee.response());
+	            }
+	        }
+
+	        throw e;
+	    }
 	}
 
 

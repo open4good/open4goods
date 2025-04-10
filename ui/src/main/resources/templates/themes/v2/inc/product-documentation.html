@@ -1,0 +1,42 @@
+<section id="markerDoc" class="container container-semi-fluid ">
+    <!-- Caractéristiques principales -->
+    <div class="mx-auto col-8 card shadow mt-3 border-gray-300">
+        <div class="card-body p-4 p-lg-5">
+            <div class="d-flex p-3 justify-content-center">
+                <div class="icon icon-primary">
+                    <span class="fas fa-list-check"></span>
+                </div>
+                <div class="ps-4">
+                    <h3 class="h5 icon-box-title md-1">Documentation</h3>
+                    
+                    
+                    
+<tr th:if="${product.pdfs().size()>0}">
+            <td colspan="2">
+                <p class="h5 my-4">Documentation</p>
+            </td>                   
+        </tr>
+        <tr th:each="item,stat : ${product.pdfs()}">
+            <td th:if="${item.getHardTags().size >0}" class="align-middle" th:text="#{${item.firstHardTag()}}"></td>    
+            <td th:unless="${item.getHardTags().size >0}" class="align-middle" th:text="${item.bestNameFromTag()}"></td>            
+            <td class="align-middle">
+                <a target="_blank" class="d-flex align-items-center" rel="nofollow noindex" th:href="${item.path()}" title="fichier PDF">
+                    <span class="fas fa-file-pdf fs-3 me-2"></span>(<span class="fs-6" th:text="${item.humanReadableSize()}"></span>)
+                </a>
+            </td>
+        </tr>
+        
+        
+        
+        
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+
+</section>
+
+
