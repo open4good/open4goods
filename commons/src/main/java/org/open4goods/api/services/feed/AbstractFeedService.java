@@ -3,6 +3,7 @@ package org.open4goods.api.services.feed;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.open4goods.commons.config.yml.datasource.DataSourceProperties;
 import org.open4goods.commons.services.DataSourceConfigService;
@@ -57,7 +58,10 @@ public abstract class AbstractFeedService {
     public synchronized void load() {
         try {
             logger.info("Loading datasource properties from catalog: {}", feedConfig.getCatalogUrl());
-            datasourceCache = loadDatasources();
+            Set<DataSourceProperties> initialSources = loadDatasources();
+            // Filtering the excluded datasources
+            datasourceCache = initialSources.stream().filter(e-> !feedConfig.getExcludeFeedKeyContains().contains(e.getFeedKey())).collect(Collectors.toSet());
+            
             if (datasourceCache == null || datasourceCache.isEmpty()) {
                 logger.warn("Datasource cache is empty after loading from catalog: {}", feedConfig.getCatalogUrl());
                 // Optionally, integrate with Spring Actuator health checks here.

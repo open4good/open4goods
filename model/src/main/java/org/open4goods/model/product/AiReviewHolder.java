@@ -22,6 +22,8 @@ public class AiReviewHolder {
 	// If false, means generation could not be launched, not enough data to proceed
 	private boolean enoughData;
 	
+	private Integer totalTokens;
+	
 	/**
 	 * Date the AIReview was created
 	 */
@@ -57,6 +59,14 @@ public class AiReviewHolder {
 
 	public void setEnoughData(boolean enoughData) {
 		this.enoughData = enoughData;
+	}
+
+	public Integer getTotalTokens() {
+		return totalTokens;
+	}
+
+	public void setTotalTokens(Integer totalTokens) {
+		this.totalTokens = totalTokens;
 	}
 	
 	

@@ -31,6 +31,21 @@
       "name": "genAiConfig.recordFolder",
       "type": "java.lang.String",
       "description": "Folder path where recorded prompt responses (mocks) are stored."
+    },
+    {
+      "name": "genAiConfig.batchFolder",
+      "type": "java.lang.String",
+      "description": "Folder path where batch submission and response files are stored."
+    },
+    {
+      "name": "genAiConfig.batchMaxTokens",
+      "type": "int",
+      "description": "Maximum total tokens per batch file."
+    },
+    {
+      "name": "genAiConfig.batchApiEndpoint",
+      "type": "java.lang.String",
+      "description": "The OpenAI Batch API endpoint URL."
     }
   ]
 }
