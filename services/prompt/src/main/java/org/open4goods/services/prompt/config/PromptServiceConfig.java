@@ -10,14 +10,15 @@ import jakarta.validation.constraints.NotBlank;
 public class PromptServiceConfig {
 	
 	
-	/** Maximum total tokens per batch file (to avoid exceeding limits). */
+	  /** Maximum total tokens per batch file (to avoid exceeding limits). */
     private int batchMaxTokens = 200_000;  // default 200k
 
     /** Folder path where batch files (input/output) and job IDs will be stored. */
     @NotBlank
-    private String batchFolder = "/opt/open4goods/.cached/batch-ia/";  // e.g. "/var/open4goods/genai_batches"
+    private String batchFolder = "/opt/open4goods/.cached/batch-ia/";
 
-    
+    /** The OpenAI Batch API endpoint. */
+    private String batchApiEndpoint = "https://api.openai.com/v1/batches";
     
 	/**
 	 * The folder to the yaml prompt files 
@@ -115,6 +116,12 @@ public class PromptServiceConfig {
 	}
 	public void setBatchFolder(String batchFolder) {
 		this.batchFolder = batchFolder;
+	}
+	public String getBatchApiEndpoint() {
+		return batchApiEndpoint;
+	}
+	public void setBatchApiEndpoint(String batchApiEndpoint) {
+		this.batchApiEndpoint = batchApiEndpoint;
 	}
 	
 	
