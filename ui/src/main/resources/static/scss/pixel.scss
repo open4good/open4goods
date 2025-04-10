@@ -113,12 +113,96 @@ $nudger_radius: 90px;
 $nudger_radius_mini : 40px;
 // *NUDGER ELEMENTS
 
-.bg-primary {
-    background: linear-gradient(-48deg, $brand_mainColor, $brand_secondaryColor)!important;
+.bg-primary,
+.btn-primary {
+    //background: linear-gradient(-48deg, $brand_mainColor, $brand_secondaryColor)!important;
+    background-color: $color_primary!important;
+    border: none!important;
 }
-.bg-secondary {
-    background: linear-gradient(-48deg, $ecoscore_main, $ecoscore_secondary)!important;
+
+    .bg-primary {
+
+        color: $color_dark!important;
+
+        &.text-white {
+            color: $color_dark!important;
+        }
+
+        .btn-primary,
+        .btn-secondary,
+        .btn-tertiary {
+            color: #fff!important;
+            background-color: $color_dark!important;
+        }
+    }
+.bg-secondary,
+.btn-secondary {
+    //background: linear-gradient(-48deg, $ecoscore_main, $ecoscore_secondary)!important;
+    background-color: $color_secondary!important;
+    border: none!important;
 }
+
+    .bg-secondary {
+
+        color: $color_light!important;
+
+        &.text-white {
+            color: $color_dark!important;
+        }
+        
+        .btn-primary,
+        .btn-secondary,
+        .btn-tertiary {
+            color: #000!important;
+            background-color: $color_light!important;
+        }
+    }
+.bg-tertiray,
+.btn-tertiary {
+    //background: linear-gradient(-48deg, $ecoscore_main, $ecoscore_secondary)!important;
+    background-color: $color_tertiary!important;
+    border: none!important;
+}
+
+    .bg-tertiary {
+
+        color: $color_dark!important;
+
+        &.text-white {
+            color: $color_dark!important;
+        }
+        
+        .btn-primary,
+        .btn-secondary,
+        .btn-tertiary {
+            color: #000!important;
+            background-color: $color_light!important;
+        }
+    }
+
+
+
+
+
+
+.color-primary,
+.text-primary {
+    //background: linear-gradient(-48deg, $brand_mainColor, $brand_secondaryColor)!important;
+    color: $color_primary!important;
+}
+.color-secondary,
+.text-secondary {
+    //background: linear-gradient(-48deg, $ecoscore_main, $ecoscore_secondary)!important;
+    color: $color_secondary!important;
+}
+.color-tertiary,
+.text-tertiary {
+    //background: linear-gradient(-48deg, $ecoscore_main, $ecoscore_secondary)!important;
+    color: $color_tertiary!important;
+}
+
+
+
 .bg-brand_secondary {
     background: $brand_secondaryColor;
 }
