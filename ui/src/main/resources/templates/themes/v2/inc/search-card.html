@@ -1,0 +1,88 @@
+<!--div th:with="purl = ${item.names.url.get(siteLocale)}" class="card shadow p-2 animate-up-3">
+        <div class="row align-items-center">
+            <aside class="col-md-2">
+                <img height="150" th:src="${item.externalCover()}" th:alt="${item.longestOfferName()}">
+            </aside>
+            <div class="col-md-7">
+                <div class="info-main">
+                    <a th:href="'/'+${purl == null ? item.gtin() : purl}" class="h5 title mb-2" th:text="${item.bestName()}"></a>
+            
+                </div>
+            </div> 
+            <div class="col-12 col-md-3 mt-3">
+                <th:block th:if="${item.bestPrice()}">
+                    <div class="d-flex align-items-center">
+                        <span class="h5 mb-0 text-gray me-2"><span th:text="${item.bestPrice().price}"></span>
+                        <span class="align-baseline font-medium" th:text="#{'symbol.'+${item.bestPrice().currency}}"></span></span>                       
+                    </div>
+                    <span class="text-success small">Meilleur prix sur </span>   <span class="h6 mb-0 text-danger"><span th:text='${item.offersCount}'></span> offres</span>
+                </th:block>                    
+            
+            <div  class="d-grid gap-2 mt-4">
+                <a class="btn btn-primary btn-sm" th:href="'/'+${purl == null ? item.gtin() : purl}">Details</a>                        
+            </div>
+            
+        </div> 
+    </div> 
+</div-->
+
+<div id="template-product-list">
+    <div th:with="purl = ${item.names.url.get(siteLocale)}" class="row border-{{ecoscoreInt}} p-3 border-bottom border-1 pb-4 mt-3">
+        <!-- Image du produit -->
+        <div class="col-md-2">
+            <img th:src="${item.externalCover()}" th:alt="${item.longestOfferName()}" width="190">
+        </div>
+    
+        <!-- Informations du produit -->
+        <div class="col-md-7">
+            <h2 class="h5 mb-0">
+                <a th:href="'/'+${purl == null ? item.gtin() : purl}" class="text-decoration-none text-dark" th:text="${item.bestName()}"></a>
+            </h2>
+            
+            <!--div class="d-flex align-items-center mb-2">
+                <div class="star-rating star-rating-sm me-2" data-rating="{{ecoscore}}" aria-label="Rating: {{ecoscore}} out of 5 stars">
+                    <div class="stars">
+                        <span class="star"></span>
+                        <span class="star"></span>
+                        <span class="star"></span>
+                        <span class="star"></span>
+                        <span class="star"></span>
+                    </div>
+                </div>
+                <span class="badge bg-success">Ecoscore : <strong>{{ecoscore}} / 5</strong></span>
+            </div-->
+    
+            <!-- Indicateurs clés -->
+            <div class="mt-2 border border-1 px-2 py-3">
+                <div class="d-flex align-items-center">
+                    <strong>Réparabilité :</strong> 
+                    <span class="ms-auto badge bg-brand_secondary">8/10</span>
+                </div>
+                <div class="d-flex align-items-center">
+                    <strong>Consommation :</strong> 
+                    <span class="ms-auto badge bg-brand_secondary">120 kWh/an</span>
+                </div>
+                <div class="d-flex align-items-center">
+                    <strong>Pièces :</strong> 
+                    <span class="ms-auto badge bg-brand_secondary">10 ans</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="d-flex align-items-center h-100">
+                <div>
+                    <th:block th:if="${item.bestPrice()}">
+                        <div class="d-flex align-items-end mb-auto fw-bold">
+                            <span th:text="${item.bestPrice().price}" class="text__price"></span><span th:text="#{'symbol.'+${item.bestPrice().currency}}" class="text__price">
+                            </span>
+                        </div>
+                    </th:block>
+                    <a th:href="'/'+${purl == null ? item.gtin() : purl}" class="btn btn__nudger btn__nudger--mainColor w-100">
+                        Voir le produit
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
