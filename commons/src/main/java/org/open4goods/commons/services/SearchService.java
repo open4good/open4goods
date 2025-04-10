@@ -36,6 +36,9 @@ import org.springframework.data.elasticsearch.core.query.CriteriaQuery;
 import org.springframework.data.elasticsearch.core.query.CriteriaQueryBuilder;
 
 import co.elastic.clients.elasticsearch._types.ElasticsearchException;
+import co.elastic.clients.elasticsearch._types.FieldSort;
+import co.elastic.clients.elasticsearch._types.SortOptions;
+import co.elastic.clients.elasticsearch._types.SortOrder;
 import co.elastic.clients.elasticsearch._types.aggregations.Aggregation;
 import co.elastic.clients.elasticsearch._types.aggregations.HistogramAggregate;
 import co.elastic.clients.elasticsearch._types.aggregations.HistogramBucket;
@@ -46,6 +49,7 @@ import co.elastic.clients.elasticsearch._types.aggregations.MinAggregate;
 import co.elastic.clients.elasticsearch._types.aggregations.MissingAggregate;
 import co.elastic.clients.elasticsearch._types.aggregations.StringTermsAggregate;
 import co.elastic.clients.elasticsearch._types.aggregations.StringTermsBucket;
+import co.elastic.clients.elasticsearch._types.mapping.FieldType;
 
 /**
  * Service in charge of the search in Products
@@ -268,16 +272,19 @@ public class SearchService {
 		// Sort order
 		/////
 
-		if (null == request.getSortField()) {
-			//esQuery = esQuery.withSort(Sort.by("offersCount").descending());
-		} else {
-			if (request.getSortOrder().equalsIgnoreCase("DESC") ) {
-				//esQuery = esQuery.withSort(Sort.by(Sort.Order.desc(request.getSortField()).nullsLast()));
-			} else if (request.getSortOrder().equalsIgnoreCase("ASC") ){
-			//	esQuery = esQuery.withSort(Sort.by(Sort.Order.asc(request.getSortField()).nullsLast()) );
-			} else {
-				throw new RuntimeException("implement");
-			}
+		if (request.getSortField() != null) {
+		    SortOrder order = request.getSortOrder().equalsIgnoreCase("DESC") ? SortOrder.Desc : SortOrder.Asc;
+
+		    SortOptions sortOptions = new SortOptions.Builder()
+		        .field(new FieldSort.Builder()
+		            .field(request.getSortField())
+		            .order(order)
+		            .unmappedType(FieldType.Float) // or "keyword"/"long" depending on the field
+		            .missing("_last")
+		            .build())
+		        .build();
+
+		    esQuery = esQuery.withSort(sortOptions);
 		}
 
 		// Adding custom attributes terms filters aggregations

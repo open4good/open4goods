@@ -64,130 +64,131 @@
         <!--/* Navbar */-->
         <th:block th:insert="~{inc/navbar/navbar-home.html}"></th:block>
     </header>
-    
+   
     <main>  
+
         <section class="section-header overflow-hidden pt-7 pt-lg-8 pb-5 bg-secondary text-white">
+
             <div class="container">
                 <div class="row">
-                    <div class="col-12 text-center">
-                        <h1 class="fw-bolder display-2">
+                    <div class="col-12">
+                        <h1 class="text-center fw-bolder display-2 mb-4 mt-4">
                             <span class="prefix">Plus qu'un comparateur</span><br/>
                             <div class="suffix tlt">écologique</div>
                         </h1>
 
-                        <!-- Recherche -->
-                        <div class="mb-4">
-                            <div class="px-4 py-4">
-                                <div class="row align-items-center">
-                                    <!--h2 class="text-black mb-3 text-center">Contribution écologique</h2-->
-                                    <!--/* 
-                                        8) Added an aria-label on the search form for better accessibility
-                                            and replaced <hr/> with a simple styling separation (if needed, use CSS).
-                                    */-->
-                                    <form method="post" id="searchForm" class="mb-3" action="/recherche" aria-label="Formulaire de recherche">
-                                        <div class="d-flex align-items-center justify-content-center">
-                                            <!-- th:placeholder="'Rechercher dans ' + ${#numbers.formatDecimal(totalItems, 0, 'COMMA', 0, 'POINT')} + ' produits'" -->
-                                            <div class="input-group input-group__nudger">
-                                                <input 
-                                                    type="text" 
-                                                    id="searchInput" 
-                                                    class="form-control"
-                                                    placeholder="<<écran TV 4K>>, <<console de jeu>>, Quel sera votre prochain Nudge ?" 
-                                                    aria-label="Search"
-                                                    name="q">
-                                                <button onclick="document.getElementById('searchForm').submit()" 
-                                                        class="btn btn__nudger" type="button">
-                                                    <span class="fas fa-search" aria-hidden="true"></span>
-                                                    <span>Rechercher</span>
+                        <!-- Catégories / Impact score -->
+                        <div class="col-12 col-lg-12">
+                            <div class="card shadow mb-4">
+                                <div class="card-body px-4 py-4 text-center text-md-left">
+                                    <div class="row align-items-center">
+                                        <div class="col-lg-4">
+                                            <h2 class="text-black mb-3 text-center">Impact Score</h2>
+                                            <div class="text-center ">
+                                                <th:block 
+                                                        th:with="rating=4.5, class='star-rating-md'",
+                                                        th:insert="~{inc/impactscore.html}">
+                                                </th:block>
+                                            </div>
+                                            
+                                            <p class="mb-0">Notre ImpactScore est une évaluation environnementale, il est disponible pour les catégories suivantes. Les produits évalués disposent également d'une information approfondie sur les produits.</p>
+                                            <div class="text-center mt-4">
+                                                <a href="/ecoscore" class="btn btn-sm btn-primary animate-up-1">En savoir plus</a>
+                                            </div>
+                                        </div>
+                                        <div class="col-12 col-lg-8 mt-4 mt-md-0 text-center">
+                                        <!-- 
+                                            <th:block th:with="image='/icons/categories/electronics.png', title='Produits électroniques', googleTaxo=222" 
+                                                      th:insert="~{inc/category-shortcut.html}">
+                                            </th:block>
+
+                                            <th:block th:with="image='/icons/categories/appareil-electromenager.png', title='Electroménager', googleTaxo=604" 
+                                                      th:insert="~{inc/category-shortcut.html}">
+                                            </th:block>
+
+                                            <br class="d-block d-md-none mt-3 mt-md-0 text-black">
+                                         -->
+
+                                        <div class="container my-5 text-black">
+                                            <div id="multiItemCarousel" class="carousel slide" data-bs-ride="carousel">
+                                                <!-- Indicators -->
+                                                <div class="carousel-indicators">
+                                                    <button th:each="verticalGroup, stat : ${verticalsCarrouselBuckets}" type="button" data-bs-target="#multiItemCarousel" th:data-bs-slide-to="${stat.index}"
+                                                        th:classappend="${stat.index == 0} ? 'active'" th:aria-label="'Slide ' + ${stat.index + 1}"></button>
+                                                </div>
+                                        
+                                                <!-- Carousel Items -->
+                                                <div class="px-5 carousel-inner">
+                                                    <div th:each="verticalGroup, stat : ${verticalsCarrouselBuckets}" th:class="'carousel-item' + (${stat.index == 0} ? ' active' : '')">
+                                                        <div class="row justify-content-center">
+                                                            <div th:each="vertical : ${verticalGroup}" class="col-12 col-md-4">
+                                                                <a th:href="'/'+${vertical.i18n(siteLanguage).verticalHomeUrl}" class="d-flex flex-column align-items-center justify-content-center h-100 text-center">
+                                                                    <img th:src="'/images/verticals/' + ${vertical.id} + '-360.webp'" class="img-fluid lazy" th:alt="'Illustration de ' + ${vertical.i18n(siteLanguage).verticalHomeTitle}" loading="lazy" style="max-height: 200px; object-fit: contain;">
+                                                                    <span class="h5 mt-auto text-truncate title-container" th:text="${vertical.i18n(siteLanguage).verticalHomeTitle}"></span>                                                               </a>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                        
+                                                <!-- Controls -->
+                                                <button class="carousel-control-prev" type="button" data-bs-target="#multiItemCarousel" data-bs-slide="prev">
+                                                    <span class="carousel-control-prev-icon" aria-hidden="true"></span> <span class="visually-hidden">Précédent</span>
+                                                </button>
+                                                <button class="carousel-control-next" type="button" data-bs-target="#multiItemCarousel" data-bs-slide="next">
+                                                    <span class="carousel-control-next-icon" aria-hidden="true"></span> <span class="visually-hidden">Suivant</span>
                                                 </button>
                                             </div>
                                         </div>
-                                    </form>
-                                    <p class="lead fw-normal text-muted mb-4 px-lg-10">10% de nos bénéfices servent à amoindrir l'impact de votre achat. 
-                                        C'est valable sur nos millions de produits, et vous pouvez voter pour 
-                                        l'attribution de cette compensation !
-                                    </p>
-                                    <div class="text-center">
-                                        <a href="/compensation-ecologique" class="btn btn-tertiary mb-3 mt-2 me-2 me-md-3 animate-up-2">En savoir plus</a>
+
+                                            
+                                            <a href="/categories" class="fw-bold text-black text-underline mx-1">Toutes les catégories</a>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
 
-                        <div class="mt-4">
-                            <!-- 
-                                <th:block th:with="image='/icons/categories/electronics.png', title='Produits électroniques', googleTaxo=222" 
-                                          th:insert="~{inc/category-shortcut.html}">
-                                </th:block>
-
-                                <th:block th:with="image='/icons/categories/appareil-electromenager.png', title='Electroménager', googleTaxo=604" 
-                                          th:insert="~{inc/category-shortcut.html}">
-                                </th:block>
-
-                                <br class="d-block d-md-none mt-3 mt-md-0 text-black">
-                             -->
-
-                            <div class="text-black">
-                                <div id="multiItemCarousel" class="carousel slide bg-white p-3" data-bs-ride="carousel">
-                                    <!-- Indicators -->
-                                    <!--div class="carousel-indicators">
-                                        <button th:each="verticalGroup, stat : ${verticalsCarrouselBuckets}" type="button" data-bs-target="#multiItemCarousel" th:data-bs-slide-to="${stat.index}"
-                                            th:classappend="${stat.index == 0} ? 'active'" th:aria-label="'Slide ' + ${stat.index + 1}"></button>
-                                    </div-->
-                            
-                                    <!-- Carousel Items -->
-                                    <div class="carousel-inner">
-                                        <div th:each="verticalGroup, stat : ${verticalsCarrouselBuckets}" th:class="'carousel-item' + (${stat.index == 0} ? ' active' : '')">
-                                            <div class="row">
-                                                <div th:each="vertical : ${verticalGroup}" class="col-12 col-md-3">
-                                                    <a th:href="'/'+${vertical.i18n(siteLanguage).verticalHomeUrl}" class="d-flex flex-column">
-                                                        <span class="">
-                                                            <img th:src="'/images/verticals/' + ${vertical.id} + '-360.webp'" height="150" class="lazy" th:alt="'Illustration de ' + ${vertical.i18n(siteLanguage).verticalHomeTitle}" loading="lazy">
-                                                        </span>
-                                                        <span class="lead fw-bold" th:text="${vertical.i18n(siteLanguage).verticalHomeTitle}"></span>
-                                                    </a>
+                        <!-- Recherche -->
+                        <div class="col-12 col-lg-12">
+                            <div class="card shadow mb-4">
+                                <div class="card-body px-4 py-4 text-center text-md-left">
+                                    <div class="row align-items-center">
+                                        <h2 class="text-black mb-3 text-center">Contribution écologique</h2>
+                                        <div class="col-lg-7">
+                                            <!--/* 
+                                              8) Added an aria-label on the search form for better accessibility
+                                                 and replaced <hr/> with a simple styling separation (if needed, use CSS).
+                                            */-->
+                                            <form method="post" id="searchForm" class="mb-3" action="/recherche" aria-label="Formulaire de recherche">
+                                                <div class="d-flex align-items-center justify-content-center">
+                                                    <div class="input-group input-group__nudger">
+                                                         <input type="text" id="searchInput" class="form-control"
+                                                            th:placeholder="'Rechercher dans ' + ${#numbers.formatDecimal(totalItems, 0, 'COMMA', 0, 'POINT')} + ' produits'" aria-label="Search"
+                                                            name="q" data-dashlane-rid="c04fc15a353ceabb"
+                                                            data-form-type="">
+                                                        <button onclick="document.getElementById('searchForm').submit()" 
+                                                                class="btn btn__nudger" type="button">
+                                                            <span class="fas fa-search" aria-hidden="true"></span>
+                                                            <span class="visually-hidden">Rechercher</span>
+                                                        </button>
+                                                    </div>
                                                 </div>
+                                            </form>
+                                        </div>
+                                        <div class="col-12 col-lg-5 mt-4 mt-md-0 text-md-right">
+                                            <p class="mb-0">10% de nos bénéfices servent à amoindrir l'impact de votre achat. 
+                                                C'est valable sur nos millions de produits, et vous pouvez voter pour 
+                                                l'attribution de cette compensation !
+                                            </p>
+                                            <div class="text-right mt-2">
+                                                <a href="/compensation-ecologique" class="btn btn-sm btn-primary animate-up-1">En savoir plus</a>
                                             </div>
                                         </div>
                                     </div>
-                            
-                                    <!-- Controls -->
-                                    <a class="carousel-control-prev" role="button" data-bs-target="#multiItemCarousel" data-bs-slide="prev">
-                                        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-                                        <span class="visually-hidden">Précédent</span>
-                                    </a>
-                                    <a class="carousel-control-next" role="button" data-bs-target="#multiItemCarousel" data-bs-slide="next">
-                                        <span class="carousel-control-next-icon" aria-hidden="true"></span>
-                                        <span class="visually-hidden">Suivant</span>
-                                    </a>
-                                </div>
-                            </div>
-
-                                
-                                <a href="/categories" class="mx-auto my-4 btn btn__nudger">Toutes les catégories</a>
-                        </div>
-
-                        <!-- Catégories / Impact score -->
-                        <div class="card shadow mb-4">
-                            <div class="card-body px-4 py-4 text-center text-md-left">
-                                <div class="row align-items-center">
-                                    <div class="">
-                                        <h2 class="text-black mb-3 text-center">Impact Score</h2>
-                                        <div class="text-center ">
-                                            <th:block 
-                                                    th:with="rating=4.5, class='star-rating-md'",
-                                                    th:insert="~{inc/impactscore.html}">
-                                            </th:block>
-                                        </div>
-                                        
-                                        <p class="mb-0">Notre ImpactScore est une évaluation environnementale, il est disponible pour les catégories suivantes. Les produits évalués disposent également d'une information approfondie sur les produits.</p>
-                                        <div class="text-center mt-4">
-                                            <a href="/ecoscore" class="btn btn__nudger">En savoir plus</a>
-                                        </div>
-                                    </div>
                                 </div>
                             </div>
                         </div>
+
 
 
                         <!-- Partie promesse de valeur -->
@@ -299,9 +300,9 @@
             <div class="container mb-5">
                 <div class="row justify-content-between align-items-center">
                     <div class="col-12 col-lg-5">
-                        <img src="/img/contribution-ecologique.jpg" 
+                        <img src="/img/contribution-ecologique.png" 
                                     alt="Illustration de contribution écologique" 
-                                    class="d-none d-lg-inline-block organic-radius">
+                                    class="d-none d-lg-inline-block">
                     </div>
                     <div class="col-12 col-lg-6">
                         <div class="d-flex flex-wrap justify-content-lg-start">
@@ -335,9 +336,9 @@
                         </div>
                     </div>
                     <div class="col-12 col-lg-5">
-                        <img src="/img/evaluation-environnementale.jpg" 
+                        <img src="/img/impactscore-illustration.png" 
                             alt="Illustration d'évaluation écologique"  
-                            class="d-none d-lg-inline-block organic-radius">
+                            class="d-none d-lg-inline-block">
                     </div>
                 </div>
             </div>
@@ -345,9 +346,9 @@
             <div class="container mb-5">
                 <div class="row justify-content-between align-items-center">
                     <div class="col-12 col-lg-5">
-                        <img src="/img/comparaison-prix.jpg" 
+                        <img src="/img/comparateur-prix.png" 
                         alt="Illustration de comparateur de prix"  
-                        class="d-none d-lg-inline-block organic-radius">
+                        class="d-none d-lg-inline-block">
                     </div>
                     <div class="col-12 col-lg-6">
                         <div class="d-flex flex-wrap justify-content-lg-start">
@@ -381,9 +382,9 @@
                         </div>
                     </div>
                     <div class="col-12 col-lg-5">
-                        <img src="/img/numerique-responsable.jpg" 
+                        <img src="/img/numerique-responsable.png" 
                         alt="Illustration d'un web sans cookie"  
-                            class="d-none d-lg-inline-block organic-radius">
+                            class="d-none d-lg-inline-block">
                     </div>
                 </div>
             </div>
@@ -391,9 +392,9 @@
             <div class="container mb-5">
                 <div class="row justify-content-between align-items-center">
                     <div class="col-12 col-lg-5">
-                        <img src="/img/comparateur-ouvert.jpg" 
+                        <img src="/img/modele-ouvert.png" 
                         alt="Illustration représentant l'open source et l'open data"  
-                        class="d-none d-lg-inline-block organic-radius">
+                        class="d-none d-lg-inline-block fluid">
                     </div>
                     <div class="col-12 col-lg-6">
                         <div class="d-flex flex-wrap justify-content-lg-start">
@@ -430,9 +431,9 @@
                         </div>
                     </div>
                     <div class="col-12 col-lg-5">
-                        <img src="/img/ai4good.jpg" 
+                        <img src="/img/ai4good.png" 
                         alt="Illustration d'une  IA au service du bien commun"  
-                            class="d-none d-lg-inline-block organic-radius">
+                            class="d-none d-lg-inline-block">
                     </div>
                 </div>
             </div>

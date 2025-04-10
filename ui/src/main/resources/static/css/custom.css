@@ -9,15 +9,14 @@
     width: 100%;
     padding-top: 56.25%; /* Aspect ratio (16:9) */
     overflow: hidden;
-    background-color: #f0f0f0; /* Placeholder color for empty space */
+    background-color: rgb(255, 255, 255); /* Placeholder color for empty space */
 }
 
 .image-container img {
     position: absolute;
     top: 0;
     left: 0;
-    width: 100%;
-    height: 100%;
+
     object-fit: contains; /* Ensures images cover the container while maintaining aspect ratio */
     object-position: center; /* Centers the image */
 }

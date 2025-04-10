@@ -76,7 +76,8 @@ public abstract class AbstractVerticalController  extends AbstractController {
 		ret.addObject("verticalPath",verticalService.getPathForVerticalLanguage("fr",config));
 	}
 
-	protected VerticalSearchRequest buildDefaultRequest(ModelAndView ret, VerticalConfig config) {
+	// TODO(p2, design) : Externalize in a service
+	public static VerticalSearchRequest buildDefaultRequest(ModelAndView ret, VerticalConfig config) {
 		VerticalSearchRequest vRequest = new VerticalSearchRequest();
 		
 		// We show excluded products only to logged in people

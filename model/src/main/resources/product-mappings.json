@@ -161,10 +161,11 @@
             "type": "object",
             "enabled": false
         },
-        "aiReviews": {
+        "reviews": {
             "type": "object",
             "enabled": false
         },        
+
         "googleTaxonomyId": {
             "type": "integer",
             "index": false
