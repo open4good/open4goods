@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 import org.open4goods.api.services.feed.FeedService;
@@ -14,6 +15,8 @@ import org.open4goods.model.helper.IdHelper;
 import org.open4goods.model.product.Product;
 import org.open4goods.model.vertical.VerticalConfig;
 import org.open4goods.services.productrepository.services.ProductRepository;
+import org.open4goods.services.serialisation.exception.SerialisationException;
+import org.open4goods.services.serialisation.service.SerialisationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -40,9 +43,12 @@ public class BatchService {
 	private FeedService feedService;
 
 	private ProductRepository dataRepository;
+
+	private SerialisationService serialisationService;
+	
 	
 	public BatchService(AggregationFacadeService aggregationFacadeService,
-			CompletionFacadeService completionFacadeService, VerticalsConfigService verticalsConfigService, ProductRepository dataRepository, CsvDatasourceFetchingService csvDatasourceFetchingService, FeedService feedService) {
+			CompletionFacadeService completionFacadeService, VerticalsConfigService verticalsConfigService, ProductRepository dataRepository, CsvDatasourceFetchingService csvDatasourceFetchingService, FeedService feedService, SerialisationService serialisationService) {
 		super();
 		this.aggregationFacadeService = aggregationFacadeService;
 		this.completionFacadeService = completionFacadeService;
@@ -50,6 +56,7 @@ public class BatchService {
 		this.dataRepository = dataRepository;
 		this.csvDatasourceFetchingService = csvDatasourceFetchingService;
 		this.feedService = feedService;
+		this.serialisationService = serialisationService;
 
 	}
 
@@ -270,6 +277,32 @@ public class BatchService {
         }
         return result;
     }
+
+    
+    // TODO(p3,design) : remove
+	public void clean() {
+		AtomicInteger counter = new AtomicInteger();
+		dataRepository.exportAll().forEach(p -> {
+			int i = counter.incrementAndGet();
+			if (i % 1000 == 0) {
+				logger.warn("Batched items : {}", i);
+			}
+			String textVersion = null;
+			try {
+				textVersion = serialisationService.toJson(p);
+				if (textVersion.contains("openfoodfacts")) {
+					logger.error("Will remove {}", p);
+					dataRepository.delete(p);
+				} 
+				
+			} catch (SerialisationException e) {
+				e.printStackTrace();
+			}
+			
+		});
+		
+		
+	}
     
     
 	
