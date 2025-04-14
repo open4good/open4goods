@@ -361,10 +361,11 @@ public class ProductController  {
 			// Adding the stats (from a full search aggregation)
 			VerticalSearchRequest statsRequest = buildStatRequest(verticalConfig, data);
 			// TODO : Check heavy caching
-			VerticalSearchResponse statsResponse = searchService.verticalSearch(verticalConfig, statsRequest);
 			
-			
-			mv.addObject("stats",statsResponse);
+			if (null != verticalConfig) {				
+				VerticalSearchResponse statsResponse = searchService.verticalSearch(verticalConfig, statsRequest);
+				mv.addObject("stats",statsResponse);
+			} 
 			
 
 			UiHelper uiHelper = new UiHelper(request, verticalConfig, data);

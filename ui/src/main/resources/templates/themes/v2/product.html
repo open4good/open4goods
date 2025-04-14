@@ -611,14 +611,28 @@ $(document).ready(function(){
 </script>
 
 
+
+
+
+<!-- Creating impact score representation charts -->
+<script th:if="${verticaConfig}" th:inline="javascript">
+
+/*<![CDATA[*/
+
+    
+        const vertical = /*[[${verticalConfig.id}]]*/ '';    
+        const chartIntervals = /*[[${stats.numericFilters}]]*/'';
+
+    /*]]>*/
+</script>
+
+
 <!-- Creating impact score representation charts -->
 <script th:inline="javascript">
 /*<![CDATA[*/
 
     
-        const vertical = /*[[${verticalConfig.id}]]*/ '';    
         const siteLanguage = /*[[${siteLanguage}]]*/'';      
-        const chartIntervals = /*[[${stats.numericFilters}]]*/'';
         
         // Expose the current product data for the annotation
         const currentProductCover = /*[[${product.coverImagePath}]]*/ ''; 
