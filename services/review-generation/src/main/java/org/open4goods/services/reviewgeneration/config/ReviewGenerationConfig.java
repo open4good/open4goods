@@ -17,7 +17,7 @@ public class ReviewGenerationConfig {
 	
 	private String batchFolder = "/opt/open4goods/batch-ids/";
     private int threadPoolSize = 10;
-    private int maxQueueSize = 100;  // Maximum size of the executor queue.
+    private int maxQueueSize = 1000;  // Maximum size of the executor queue.
     private List<String> preferredDomains = new ArrayList<>();
 
     // Property used for building search queries.

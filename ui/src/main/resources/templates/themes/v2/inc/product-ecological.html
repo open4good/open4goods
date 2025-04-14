@@ -146,7 +146,7 @@
 
 
     <!-- Impact Details -->
-    <th:block th:if="${verticaConfig}">
+    <th:block th:if="${verticalConfig}">
 	    <div class="col-lg-4 mb-2" th:each="score, stat : ${verticalConfig.ecoScoreDetails(product.realScores())}">
 	      <th:block th:switch="${score.name}">
 	        <div th:case="'CLASSE_ENERGY'">
@@ -248,7 +248,7 @@
   </div>
 </section>
 
-<script th:if="${verticaConfig}" th:inline="javascript">
+<script th:if="${verticalConfig}" th:inline="javascript">
 /*<![CDATA[*/
 
   // Ordered list of criteria keys

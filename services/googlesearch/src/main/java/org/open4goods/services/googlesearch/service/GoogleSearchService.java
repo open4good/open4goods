@@ -82,7 +82,7 @@ public class GoogleSearchService implements HealthIndicator {
      * @throws InterruptedException if the HTTP request is interrupted
      * @throws GoogleSearchException if the API responds with an error or the response cannot be parsed
      */
-    public GoogleSearchResponse search(GoogleSearchRequest request) throws IOException, InterruptedException {
+    public GoogleSearchResponse search(GoogleSearchRequest request) throws IOException, InterruptedException, GoogleSearchException {
         // Increment the actuator metric for the number of searches performed.
         meterRegistry.counter("google.search.count").increment();
 
@@ -189,7 +189,7 @@ public class GoogleSearchService implements HealthIndicator {
      * @return a {@link GoogleSearchResponse} containing the parsed search results
      * @throws GoogleSearchException if parsing fails or the expected JSON structure is missing
      */
-    private GoogleSearchResponse parseResponse(String jsonResponse) {
+    private GoogleSearchResponse parseResponse(String jsonResponse) throws GoogleSearchException {
         logger.debug("Parsing response JSON: {}", jsonResponse);
         try {
             JsonObject jsonObject = gson.fromJson(jsonResponse, JsonObject.class);

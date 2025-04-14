@@ -3,7 +3,7 @@ package org.open4goods.services.googlesearch.exception;
 /**
  * Exception thrown when an error occurs while interacting with the Google Custom Search API.
  */
-public class GoogleSearchException extends RuntimeException {
+public class GoogleSearchException extends Exception {
 
     /**
      * Constructs a new GoogleSearchException with the specified detail message.

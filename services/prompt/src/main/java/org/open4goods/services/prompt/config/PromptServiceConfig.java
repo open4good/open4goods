@@ -11,7 +11,7 @@ public class PromptServiceConfig {
 	
 	
 	  /** Maximum total tokens per batch file (to avoid exceeding limits). */
-    private int batchMaxTokens = 200_000;  // default 200k
+    private int batchMaxTokens = 200_000_000;  // default 200k
 
     /** Folder path where batch files (input/output) and job IDs will be stored. */
     @NotBlank
