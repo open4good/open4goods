@@ -7,9 +7,12 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.apache.commons.io.FileUtils;
+import org.open4goods.model.ai.AiFieldScanner;
 import org.open4goods.model.exceptions.ResourceNotFoundException;
+import org.open4goods.model.product.Product;
 import org.open4goods.services.evaluation.exception.TemplateEvaluationException;
 import org.open4goods.services.evaluation.service.EvaluationService;
 import org.open4goods.services.prompt.config.PromptConfig;
@@ -117,11 +120,12 @@ public class PromptService implements HealthIndicator {
      * @param promptKey The key identifying the prompt configuration.
      * @param variables The variables to resolve within the prompt templates.
      * @param jsonSchema Optional jsonschema we must conform on
+     * @param instructions 
      * @return A {@link PromptResponse} containing the AI call response and additional metadata.
      * @throws ResourceNotFoundException if the prompt configuration is not found.
      * @throws SerialisationException    if a serialization error occurs.
      */
-    private PromptResponse<CallResponseSpec> promptNativ(String promptKey, Map<String, Object> variables, String jsonSchema)
+    private PromptResponse<CallResponseSpec> promptNativ(String promptKey, Map<String, Object> variables, String jsonSchema, Map<String, String> instructions)
             throws ResourceNotFoundException, SerialisationException {
 
         PromptConfig pConf = getPromptConfig(promptKey);
@@ -169,6 +173,18 @@ public class PromptService implements HealthIndicator {
                 	chatRequest.options(pConf.getOptions());
                 }
 
+                
+                
+        // Adding the instructions at the end of system prompt if presents
+                
+        if (instructions.size() > 0) {
+        	systemPromptEvaluated +="\n. En complément du schéma JSON, voici les instructions concernant chaque champs que tu dois fournir.\n";
+        	for (Entry<String, String> entry : instructions.entrySet()) {
+        		systemPromptEvaluated+=entry.getKey() + " : " + entry.getValue()+"\n";
+        	}
+        }
+                
+                
         if (StringUtils.hasText(systemPromptEvaluated)) {
             chatRequest = chatRequest.system(systemPromptEvaluated);
         }
@@ -270,7 +286,7 @@ public class PromptService implements HealthIndicator {
         
         PromptResponse<String> ret = new PromptResponse<String>();
         
-        PromptResponse<CallResponseSpec> nativ = promptNativ(promptKey, variables, null);
+        PromptResponse<CallResponseSpec> nativ = promptNativ(promptKey, variables, null, null);
         ret.setBody(nativ.getRaw());
         ret.setRaw(nativ.getRaw());
         ret.setDuration(nativ.getDuration());
@@ -286,12 +302,15 @@ public class PromptService implements HealthIndicator {
         
         PromptResponse<T> ret = new PromptResponse<T>();
         
-        
+        // TODO(p2, perf) : should cache instructions scanner and bean output converter
         var outputConverter = new BeanOutputConverter<>(type);
         var jsonSchema = outputConverter.getJsonSchema();        
         logger.info("Deducted json schema for prompt {} with type {} is {}", promptKey, type, jsonSchema);
         
-        PromptResponse<CallResponseSpec> nativ = promptNativ(promptKey, variables, jsonSchema);
+       Map<String, String> instructions = AiFieldScanner.getGenAiInstruction(type);
+        
+        
+        PromptResponse<CallResponseSpec> nativ = promptNativ(promptKey, variables, jsonSchema, instructions);
         ret.setBody(outputConverter.convert(nativ.getRaw()));
         ret.setRaw(nativ.getRaw());
         ret.setDuration(nativ.getDuration());
@@ -314,7 +333,7 @@ public class PromptService implements HealthIndicator {
             throws ResourceNotFoundException, SerialisationException {
 
         PromptResponse<Map<String, Object>> ret = new PromptResponse<>();
-        PromptResponse<CallResponseSpec> internal = promptNativ(promptKey, variables, null);
+        PromptResponse<CallResponseSpec> internal = promptNativ(promptKey, variables, null, null);
 
         ret.setDuration(internal.getDuration());
         ret.setStart(internal.getStart());

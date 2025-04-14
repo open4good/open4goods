@@ -3,6 +3,7 @@ package org.open4goods.services.reviewgeneration.service;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.net.URI;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -26,6 +27,10 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 
 import org.open4goods.model.ai.AiReview;
+import org.open4goods.model.ai.AiReview.AiSource;
+import org.open4goods.model.attribute.Attribute;
+import org.open4goods.model.attribute.ProductAttribute;
+import org.open4goods.model.attribute.SourcedAttribute;
 import org.open4goods.model.exceptions.ResourceNotFoundException;
 import org.open4goods.model.product.AiReviewHolder;
 import org.open4goods.model.product.Product;
@@ -33,6 +38,7 @@ import org.open4goods.model.vertical.VerticalConfig;
 import org.open4goods.services.googlesearch.dto.GoogleSearchRequest;
 import org.open4goods.services.googlesearch.dto.GoogleSearchResponse;
 import org.open4goods.services.googlesearch.dto.GoogleSearchResult;
+import org.open4goods.services.googlesearch.exception.GoogleSearchException;
 import org.open4goods.services.googlesearch.service.GoogleSearchService;
 import org.open4goods.services.productrepository.services.ProductRepository;
 import org.open4goods.services.prompt.dto.PromptResponse;
@@ -147,10 +153,10 @@ public class ReviewGenerationService implements HealthIndicator {
         );
         this.fetchExecutor = new ThreadPoolExecutor(
             properties.getMaxConcurrentFetch(),
-            properties.getMaxConcurrentFetch(),
+            properties.getMaxQueueSize(),
             0L,
             TimeUnit.MILLISECONDS,
-            new ArrayBlockingQueue<>(properties.getMaxQueueSize()),
+            new ArrayBlockingQueue<>(properties.getMaxQueueSize()*10),
             new ThreadPoolExecutor.AbortPolicy()
         );
         // Initialize the tracking folder based on configuration (or derive from batch folder).
@@ -207,9 +213,10 @@ public class ReviewGenerationService implements HealthIndicator {
      * @param status the process status to update.
      * @return a map of prompt variables.
      * @throws IOException, InterruptedException, ExecutionException, SerialisationException, ResourceNotFoundException, NotEnoughDataException 
+     * @throws GoogleSearchException 
      */
     private Map<String, Object> preparePromptVariables(Product product, VerticalConfig verticalConfig, ReviewGenerationStatus status)
-            throws IOException, InterruptedException, ExecutionException, ResourceNotFoundException, SerialisationException, NotEnoughDataException {
+            throws IOException, InterruptedException, ExecutionException, ResourceNotFoundException, SerialisationException, NotEnoughDataException, GoogleSearchException {
         String brand = product.brand();
         String primaryModel = product.model();
         Set<String> alternateModels = product.getAkaModels();
@@ -364,70 +371,7 @@ public class ReviewGenerationService implements HealthIndicator {
         return promptVariables;
     }
 
-    // -------------------- Realtime Review Generation Methods -------------------- //
-
-    /**
-     * Synchronous review generation using the realtime prompt service.
-     * (Retained for backwards compatibility.)
-     *
-     * @param product the product.
-     * @param verticalConfig the vertical configuration.
-     * @return the generated or existing AiReviewHolder.
-     */
-    public AiReviewHolder generateReviewSync(Product product, VerticalConfig verticalConfig) {
-        long upc = product.getId();
-
-        if (!shouldGenerateReview(product)) {
-            logger.info("Skipping AI review generation for UPC {} because an up-to-date review already exists.", upc);
-            return product.getReviews().i18n("fr");
-        }
-        if (isActiveForGtin(product.gtin())) {
-            throw new IllegalStateException("Review generation already in progress for product with GTIN " + product.gtin());
-        }
-
-        ReviewGenerationStatus status = new ReviewGenerationStatus();
-        status.setUpc(upc);
-        status.setGtin(product.gtin());
-        status.setStatus(ReviewGenerationStatus.Status.PENDING);
-        status.setStartTime(Instant.now().toEpochMilli());
-        processStatusMap.put(upc, status);
-
-        AiReviewHolder holder = new AiReviewHolder();
-        holder.setCreatedMs(Instant.now().toEpochMilli());
-        try {
-            Map<String, Object> promptVariables = preparePromptVariables(product, verticalConfig, status);
-            PromptResponse<AiReview> reviewResponse = genAiService.objectPrompt("review-generation", promptVariables, AiReview.class);
-            AiReview newReview = reviewResponse.getBody();
-            newReview = updateAiReviewReferences(newReview);
-            holder.setReview(newReview);
-            // Example: store aggregated token data.
-            holder.setSources((Map<String, Integer>) promptVariables.get("SOURCE_TOKENS"));
-            holder.setTotalTokens((Integer) promptVariables.get("TOTAL_TOKENS"));
-            holder.setEnoughData(true);
-            status.setResult(holder);
-            status.setStatus(ReviewGenerationStatus.Status.SUCCESS);
-            status.setEndTime(Instant.now().toEpochMilli());
-            computeTimings(status);
-            successfulCount.incrementAndGet();
-            meterRegistry.counter("review.generation.success").increment();
-        } catch (Exception e) {
-            logger.error("Review generation failed for UPC {}: {}", upc, e.getMessage(), e);
-            status.setStatus(ReviewGenerationStatus.Status.FAILED);
-            status.setErrorMessage(e.getMessage());
-            status.setEndTime(Instant.now().toEpochMilli());
-            computeTimings(status);
-            failedCount.incrementAndGet();
-            meterRegistry.counter("review.generation.failed").increment();
-            lastGenerationFailed = true;
-            throw new RuntimeException("Review generation failed", e);
-        } finally {
-            totalProcessed.incrementAndGet();
-        }
-        product.getReviews().put("fr", holder);
-        productRepository.forceIndex(product);
-        return holder;
-    }
-
+   
     /**
      * Asynchronous review generation using the realtime prompt service.
      * (Uses a ThreadPoolExecutor to run the process asynchronously.)
@@ -488,6 +432,10 @@ public class ReviewGenerationService implements HealthIndicator {
                 PromptResponse<AiReview> reviewResponse = genAiService.objectPrompt("review-generation", promptVariables, AiReview.class);
                 AiReview newReview = reviewResponse.getBody();
                 newReview = updateAiReviewReferences(newReview);
+                
+            	// Populate attributes
+            	populateAttributes(product, newReview);
+
                 holder.setReview(newReview);
                 holder.setSources((Map<String, Integer>) promptVariables.get("SOURCE_TOKENS"));
                 holder.setTotalTokens((Integer) promptVariables.get("TOTAL_TOKENS"));
@@ -495,6 +443,9 @@ public class ReviewGenerationService implements HealthIndicator {
                 status.setResult(holder);
                 status.setStatus(ReviewGenerationStatus.Status.SUCCESS);
                 meterRegistry.counter("review.generation.success").increment();
+            } catch (NotEnoughDataException e) {
+            	logger.warn("Not enought data for generating ai review for {}",product);
+            	holder.setEnoughData(false);
             } catch (Exception e) {
                 logger.error("Asynchronous review generation failed for UPC {}: {}", upc, e.getMessage(), e);
                 status.setStatus(ReviewGenerationStatus.Status.FAILED);
@@ -553,6 +504,13 @@ public class ReviewGenerationService implements HealthIndicator {
             try {
                 promptVariablesList.add(preparePromptVariables(product, verticalConfig, status));
                 ids.add(product.gtin());
+            } catch (NotEnoughDataException e) {
+                logger.error("Not enough data while preparing prompt for UPC {}: {}", product.getId(), e.getMessage());
+                AiReviewHolder holder = new AiReviewHolder();
+                holder.setCreatedMs(Instant.now().toEpochMilli());
+                holder.setEnoughData(false);
+                product.getReviews().put("fr", holder);
+                productRepository.index(product);
             } catch (Exception e) {
                 logger.error("Error while preparing prompt for UPC {}: {}", product.getId(), e.getMessage());
             }
@@ -562,7 +520,7 @@ public class ReviewGenerationService implements HealthIndicator {
             return "NoBatchJob";
         }
         // Submit batch job using the updated batchPromptRequest method in BatchPromptService.
-        String jobId = batchAiService.batchPromptRequest("review-generation", promptVariablesList, ids);
+        String jobId = batchAiService.batchPromptRequest("review-generation", promptVariablesList, ids, AiReview.class);
         logger.info("Launched batch review generation job with ID: {}", jobId);
         // Write a tracking file (JSON) mapping the job ID to the list of product GTINs.
         File trackingFile = new File(trackingFolder, "tracking_" + jobId + ".json");
@@ -610,6 +568,8 @@ public class ReviewGenerationService implements HealthIndicator {
                             // Process the BatchOutput to convert it into an AiReview.
                             AiReview newReview = processBatchOutputToAiReview(output);
                             if (null != newReview) {
+                            	// Populate attributes
+                            	populateAttributes(product, newReview);
                             	
 	                            AiReviewHolder holder = new AiReviewHolder();
 	                            holder.setCreatedMs(Instant.now().toEpochMilli());
@@ -618,6 +578,8 @@ public class ReviewGenerationService implements HealthIndicator {
 	                            product.getReviews().put("fr", holder);
 	                            productRepository.forceIndex(product);
 	                            logger.info("Updated review for product with GTIN {}", productGtin);
+                            } else {
+                            	logger.error("Null AI review returned for {}", productGtin);
                             }
                         } else {
                             logger.warn("No product found with GTIN {}", productGtin);
@@ -632,8 +594,53 @@ public class ReviewGenerationService implements HealthIndicator {
         }
     }
 
-    // -------------------- Helper Methods -------------------- //
+    /**
+     * Extract attrbutes from the gen ai response and populate the AiReview object
+     * @param product
+     * @param newReview
+     */
+	private void populateAttributes(Product product, AiReview newReview) {
+		// Handling attributes
+		newReview.attributes().stream().forEach(a -> {
+			
+			ProductAttribute agg = product.getAttributes().getAll().get(a.name());
+			if (null == agg) {
+				// A first time match
+				agg = new ProductAttribute();
+				agg.setName(a.name());
+			}
 
+			
+			String source;
+			try {
+				// TODO
+				source = "openai.com";
+				agg.addSourceAttribute(new SourcedAttribute(new Attribute(a.name(), a.value(), "fr") , source));
+				
+				// Replacing new AggAttribute in product
+				product.getAttributes().getAll().put(agg.getName(), agg);
+			} catch (Exception e1) {
+				logger.error("Cannot extract domain name",e1);
+			}
+			
+		
+			
+		});
+	}
+
+    // -------------------- Helper Methods -------------------- //
+    /**
+     * Extracts the domain from the URL.
+     */
+    private String extractDomain(String url) throws Exception {
+        URI uri = new URI(url);
+        String domain = uri.getHost();
+        if (domain == null) {
+            throw new Exception("Invalid URL: " + url);
+        }
+        return domain.startsWith("www.") ? domain.substring(4) : domain;
+    }
+    
     private AiReview processBatchOutputToAiReview(BatchOutput output) {
     	if (output.response().body().choices().size() > 0) {
     		logger.error("Error, multiple choices for {}", output);
@@ -758,7 +765,7 @@ public class ReviewGenerationService implements HealthIndicator {
         List<AiReview.AiAttribute> attributes = review.attributes().stream()
                 .map(attr -> new AiReview.AiAttribute(
                         replaceReferences(attr.name()),
-                        replaceReferences(attr.value())
+                        replaceReferences(attr.value()), attr.number()
                 ))
                 .toList();
         return new AiReview(

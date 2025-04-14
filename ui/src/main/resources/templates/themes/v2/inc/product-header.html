@@ -5,7 +5,7 @@
       <h2 th:if="${product.vertical}" class="h4 mb-0 text-center" th:text="${product.bestName()}"></h2>
       
       <!--/* Breadcrumb Insertion Section */-->
-      <div th:if="${verticaConfig}" class="mt-2" th:with="vConf=${verticaConfig}, pageLabel=${product.bestName()}" th:insert="~{inc/breadcrumb-vertical.html}">
+      <div th:if="${verticalConfig}" class="mt-2" th:with="vConf=${verticalConfig}, pageLabel=${product.bestName()}" th:insert="~{inc/breadcrumb-vertical.html}">
       </div>
       
       <!--/* Left Column: Product Images and Ecoscore */-->
@@ -19,7 +19,7 @@
           
           
           
-          <div th:if="${verticaConfig}" class="row m-4">
+          <div th:if="${verticalConfig}" class="row m-4">
             <div id="ecoScore" class="card card__radius--mini border-0">
               <div class="card-body text-center">
                 <div>

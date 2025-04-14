@@ -14,6 +14,7 @@ import org.open4goods.services.googlesearch.config.GoogleSearchConfig;
 import org.open4goods.services.googlesearch.dto.GoogleSearchRequest;
 import org.open4goods.services.googlesearch.dto.GoogleSearchResponse;
 import org.open4goods.services.googlesearch.dto.GoogleSearchResult;
+import org.open4goods.services.googlesearch.exception.GoogleSearchException;
 import org.open4goods.services.googlesearch.service.GoogleSearchService;
 import org.open4goods.services.serialisation.service.SerialisationService;
 import org.slf4j.Logger;
@@ -38,7 +39,7 @@ public class GoogleSearchServiceMock {
     @Bean
     @Primary
     GoogleSearchService googleSearchService(GoogleSearchConfig properties, SerialisationService serialisationService)
-            throws IOException, InterruptedException {
+            throws IOException, InterruptedException, GoogleSearchException {
         // Create a Mockito mock that simulates common behavior.
         GoogleSearchService mockService = Mockito.mock(GoogleSearchService.class);
         Mockito.when(mockService.search(Mockito.any())).thenAnswer(invocation -> {

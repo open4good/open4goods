@@ -8,9 +8,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.Map.Entry;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.open4goods.model.ai.AiFieldScanner;
 import org.open4goods.services.evaluation.service.EvaluationService;
 import org.open4goods.services.prompt.config.PromptServiceConfig;
 import org.open4goods.services.prompt.dto.BatchPromptResponse;
@@ -23,6 +25,9 @@ import org.open4goods.services.prompt.exceptions.BatchTokenLimitExceededExceptio
 import org.open4goods.services.serialisation.service.SerialisationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.ai.converter.BeanOutputConverter;
+import org.springframework.ai.openai.OpenAiChatOptions;
+import org.springframework.ai.openai.api.ResponseFormat;
 import org.springframework.boot.actuate.health.Health;
 import org.springframework.boot.actuate.health.HealthIndicator;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -88,12 +93,12 @@ public class BatchPromptService implements HealthIndicator {
      * @return the generated batch job ID.
      * @throws BatchTokenLimitExceededException if the total estimated tokens exceed the allowed limit.
      */
-    public String batchPromptRequest(String promptKey, List<Map<String, Object>> variablesList, List<String> customIds) {
+    public String batchPromptRequest(String promptKey, List<Map<String, Object>> variablesList, List<String> customIds, Class type) {
         List<BatchRequestEntry> requestEntries = new ArrayList<>();
         int totalEstimatedTokens = 0;
         for (int index = 0; index < variablesList.size(); index++) {
             Map<String, Object> vars = variablesList.get(index);
-            BatchRequestEntry entry = createBatchRequestEntry(promptKey, vars, index, customIds.get(index));
+            BatchRequestEntry entry = createBatchRequestEntry(promptKey, vars, index, customIds.get(index), type);
             requestEntries.add(entry);
             totalEstimatedTokens += estimateTokensFromBatchEntry(entry);
         }
@@ -258,7 +263,7 @@ public class BatchPromptService implements HealthIndicator {
 //        return new BatchPromptResponse<>(jobId, futureResponse);
 //    }
 
-    private BatchRequestEntry createBatchRequestEntry(String promptKey, Map<String, Object> variables, int index, String customId) {
+    private BatchRequestEntry createBatchRequestEntry(String promptKey, Map<String, Object> variables, int index, String customId, Class type) {
         var promptConfig = promptService.getPromptConfig(promptKey);
         if (promptConfig == null) {
             throw new IllegalStateException("Prompt config not found for " + promptKey);
@@ -269,6 +274,28 @@ public class BatchPromptService implements HealthIndicator {
         }
         String userEvaluated = evaluationService.thymeleafEval(variables, promptConfig.getUserPrompt());
 
+        
+        // TODO(p2, perf) : cache
+        var outputConverter = new BeanOutputConverter<>(type);
+        var jsonSchema = outputConverter.getJsonSchema();  
+        Map<String, String> instructions = AiFieldScanner.getGenAiInstruction(type);
+        
+        // Adding json fields instructions
+        if (instructions.size() > 0) {
+        	systemEvaluated +="\n. En complément du schéma JSON, voici les instructions concernant chaque champs que tu dois fournir.\n";
+        	for (Entry<String, String> entry : instructions.entrySet()) {
+        		systemEvaluated+=entry.getKey() + " : " + entry.getValue()+"\n";
+        	}
+        }
+                
+        if (!StringUtils.isEmpty(jsonSchema)) {
+        	systemEvaluated+="\n\n Output response format must strictly follow the following json schema : \n\n";
+        	systemEvaluated+=jsonSchema + "\n\n";
+        }
+        
+        
+        
+        
         // Build the message list.
         List<org.open4goods.services.prompt.dto.openai.BatchMessage> messages = new ArrayList<>();
         if (StringUtils.hasText(systemEvaluated)) {
