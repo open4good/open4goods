@@ -60,6 +60,18 @@ public class BatchController {
 		this.batchService = batchService;
 		
 	}
+	
+	
+	
+	@PostMapping(path="/batch/tweak")
+	@Operation(summary="Launch the data cleanup routine, if implemented")
+	@PreAuthorize("hasAuthority('"+RolesConstants.ROLE_ADMIN+"')")
+	public void batchCleanup( ) throws InvalidParameterException, JsonParseException, JsonMappingException, IOException, InterruptedException{
+		batchService.clean();
+	}
+	
+	
+	
 	@PostMapping(path="/batch/")
 	@Operation(summary="Launch the full batch (scoring, aggregation, completion batch), iso has @Scheduled")
 	@PreAuthorize("hasAuthority('"+RolesConstants.ROLE_ADMIN+"')")
