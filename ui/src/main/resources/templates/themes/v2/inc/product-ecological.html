@@ -146,52 +146,50 @@
 
 
     <!-- Impact Details -->
-    <div class="col-lg-4 mb-2" th:each="score, stat : ${verticalConfig.ecoScoreDetails(product.realScores())}">
-      <th:block th:switch="${score.name}">
-        <div th:case="'CLASSE_ENERGY'">
-          <th:block th:with="img = '/icons/energy/'+${product.attributes.indexed.get(score.name).value.toLowerCase().replace('+','p')}+'.svg'"
-                     th:insert="~{inc/score/score-card.html}">
-          </th:block>
-        </div>
+    <th:block th:if="${verticaConfig}">
+	    <div class="col-lg-4 mb-2" th:each="score, stat : ${verticalConfig.ecoScoreDetails(product.realScores())}">
+	      <th:block th:switch="${score.name}">
+	        <div th:case="'CLASSE_ENERGY'">
+	          <th:block th:with="img = '/icons/energy/'+${product.attributes.indexed.get(score.name).value.toLowerCase().replace('+','p')}+'.svg'"
+	                     th:insert="~{inc/score/score-card.html}">
+	          </th:block>
+	        </div>
+	
+	        <div th:case="'REPAIRABILITY_INDEX'">
+	          <th:block th:with="img = '/icons/reparability/'+${product.attributes.indexed.get(score.name).value.toLowerCase().replace(',','.')}+'.svg'"
+	                     th:insert="~{inc/score/score-card.html}">
+	          </th:block>
+	        </div>
+	
+	
+	
+	
+	        <div th:case="'DATA_QUALITY'">
+	          <th:block  th:insert="~{inc/score/score-card-data-quality.html}">
+	          </th:block>
+	        </div>
+	        
+	        <div th:case="'POWER_CONSUMPTION_TYPICAL'">
+	          <th:block th:insert="~{inc/score/score-card.html}"></th:block>
+	        </div>
+	
+	        <div th:case="'POWER_CONSUMPTION_OFF'">
+	          <th:block th:insert="~{inc/score/score-card.html}"></th:block>
+	        </div>
+	
+	        <div th:case="'WEIGHT'">
+	          <th:block th:insert="~{inc/score/score-card.html}"></th:block>
+	        </div>                
+	        
+	        
+	        <div th:case="*">
+	            <div class="alert alert-danger">!!Missing definition for <span th:text="${score.name}"></span>!!</div>
+	            <th:block th:insert="~{inc/score/score-card.html}"></th:block>
+	        </div>
+	      </th:block>
+	    </div>
+    </th:block>
 
-        <div th:case="'REPAIRABILITY_INDEX'">
-          <th:block th:with="img = '/icons/reparability/'+${product.attributes.indexed.get(score.name).value.toLowerCase().replace(',','.')}+'.svg'"
-                     th:insert="~{inc/score/score-card.html}">
-          </th:block>
-        </div>
-
-
-
-
-        <div th:case="'DATA_QUALITY'">
-          <th:block  th:insert="~{inc/score/score-card-data-quality.html}">
-          </th:block>
-        </div>
-        
-        <div th:case="'POWER_CONSUMPTION_TYPICAL'">
-          <th:block th:insert="~{inc/score/score-card.html}"></th:block>
-        </div>
-
-        <div th:case="'POWER_CONSUMPTION_OFF'">
-          <th:block th:insert="~{inc/score/score-card.html}"></th:block>
-        </div>
-
-        <div th:case="'WEIGHT'">
-          <th:block th:insert="~{inc/score/score-card.html}"></th:block>
-        </div>                
-        
-        
-        <div th:case="*">
-            <div class="alert alert-danger">!!Missing definition for <span th:text="${score.name}"></span>!!</div>
-            <th:block th:insert="~{inc/score/score-card.html}"></th:block>
-        </div>
-      </th:block>
-    </div>
-
-    <!-- Virtual Score -->
-    <div class="col-lg-4">
-      
-    </div>
   </div>
 
   <!-- Origine + Alternatives -->
@@ -250,7 +248,7 @@
   </div>
 </section>
 
-<script th:inline="javascript">
+<script th:if="${verticaConfig}" th:inline="javascript">
 /*<![CDATA[*/
 
   // Ordered list of criteria keys
