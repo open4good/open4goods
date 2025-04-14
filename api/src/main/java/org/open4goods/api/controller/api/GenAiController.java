@@ -8,12 +8,13 @@ import java.util.stream.Stream;
 
 import org.open4goods.commons.model.constants.RolesConstants;
 import org.open4goods.commons.services.VerticalsConfigService;
-import org.open4goods.model.ai.AiReview;
 import org.open4goods.model.exceptions.ResourceNotFoundException;
 import org.open4goods.model.product.Product;
 import org.open4goods.model.vertical.VerticalConfig;
 import org.open4goods.services.productrepository.services.ProductRepository;
-import org.open4goods.services.prompt.dto.BatchPromptResponse;
+import org.open4goods.services.prompt.dto.PromptResponse;
+import org.open4goods.services.prompt.dto.openai.BatchJobResponse;
+import org.open4goods.services.prompt.dto.openai.BatchOutput;
 import org.open4goods.services.prompt.service.BatchPromptService;
 import org.open4goods.services.prompt.service.PromptService;
 import org.open4goods.services.reviewgeneration.service.ReviewGenerationService;
@@ -74,7 +75,7 @@ public class GenAiController {
 		return aiService.prompt(key, context).getRaw();
 	}
 	
-	@GetMapping("/review/batch")
+	@GetMapping("/batch/request")
 	@Operation(summary = "Launch batch review generation")
 	public String batchReview(
 	        @RequestParam(defaultValue = "tv") String vertical,
@@ -86,10 +87,35 @@ public class GenAiController {
 	    List<Product> products = productsStream.filter(e -> e.getReviews().size() == 0)
 	            .limit(numberOfProducts)
 	            .toList();
-	    return reviewGenerationService.generateReviewBatch(products, verticalConfig);
+	    // Now generate the batch job and return the tracking job id.
+	    return reviewGenerationService.generateReviewBatchRequest(products, verticalConfig);
 	}
+
 	
-	
-	
+	/**
+     * Endpoint to check the current status of a batch job.
+     *
+     * @param jobId the identifier of the batch job.
+     * @return the BatchJobResponse containing the job status.
+     */
+    @GetMapping("/batch/checkStatus")
+    @Operation(summary = "Check batch job status by jobId")
+    public BatchJobResponse checkStatus(@RequestParam String jobId) {
+        return batchAiService.checkStatus(jobId);
+    }
+
+    /**
+     * Endpoint to process and retrieve the response of a completed batch job.
+     *
+     * @param jobId the identifier of the batch job.
+     * @return a PromptResponse containing a list of BatchOutput objects.
+     */
+    @GetMapping("/batch/processresponse")
+    @Operation(summary = "Process and retrieve batch job response by jobId")
+    public void processResponse() {
+        reviewGenerationService.checkBatchJobStatuses();
+        
+        
+    }
 	
 }

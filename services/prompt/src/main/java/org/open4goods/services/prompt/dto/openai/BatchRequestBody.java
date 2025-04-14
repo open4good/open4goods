@@ -1,4 +1,4 @@
-package org.open4goods.services.prompt.dto;
+package org.open4goods.services.prompt.dto.openai;
 
 import java.util.List;
 
@@ -7,7 +7,7 @@ import java.util.List;
  */
 public class BatchRequestBody {
     private String model;
-    private List<Message> messages;
+    private List<BatchMessage> messages;
 
     public String getModel() {
         return model;
@@ -17,11 +17,13 @@ public class BatchRequestBody {
         this.model = model;
     }
 
-    public List<Message> getMessages() {
-        return messages;
-    }
+	public List<BatchMessage> getMessages() {
+		return messages;
+	}
 
-    public void setMessages(List<Message> messages) {
-        this.messages = messages;
-    }
+	public void setMessages(List<BatchMessage> messages) {
+		this.messages = messages;
+	}
+
+
 }

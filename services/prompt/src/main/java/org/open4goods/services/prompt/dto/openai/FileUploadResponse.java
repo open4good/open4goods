@@ -1,4 +1,4 @@
-package org.open4goods.services.prompt.dto;
+package org.open4goods.services.prompt.dto.openai;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.Objects;

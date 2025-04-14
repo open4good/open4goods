@@ -13,6 +13,9 @@ import org.springframework.context.annotation.Configuration;
 @ConfigurationProperties(prefix = "review.generation")
 public class ReviewGenerationConfig {
 
+	
+	
+	private String batchFolder = "/opt/open4goods/batch-ids/";
     private int threadPoolSize = 10;
     private int maxQueueSize = 100;  // Maximum size of the executor queue.
     private List<String> preferredDomains = new ArrayList<>();
@@ -167,6 +170,12 @@ public class ReviewGenerationConfig {
 	}
 	public void setMinUrlCount(int minUrlCount) {
 		this.minUrlCount = minUrlCount;
+	}
+	public String getBatchFolder() {
+		return batchFolder;
+	}
+	public void setBatchFolder(String batchFolder) {
+		this.batchFolder = batchFolder;
 	}
     
     
