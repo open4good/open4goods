@@ -17,15 +17,24 @@ import org.springframework.security.config.annotation.authentication.builders.Au
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.SavedRequestAwareAuthenticationSuccessHandler;
+import org.springframework.web.filter.OncePerRequestFilter;
 
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.Ticker;
 
 import de.codecentric.boot.admin.server.config.AdminServerProperties;
+import jakarta.servlet.Filter;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 @Configuration
 @EnableWebSecurity
@@ -37,6 +46,9 @@ import de.codecentric.boot.admin.server.config.AdminServerProperties;
  *
  */
 public class WebSecurityConfig {
+
+	// We bing on a xwiki admin role
+	private static final String REQUIRED_ROLE = "XWIKIADMINGROUP";
 
 	private final AdminServerProperties adminServer;
 
@@ -61,7 +73,8 @@ public class WebSecurityConfig {
                  .authorizeHttpRequests(req ->
                          req.requestMatchers(this.adminServer.getContextPath() + "/assets/**").permitAll()
                                  .requestMatchers(this.adminServer.getContextPath() + "/login").permitAll()
-                                 .anyRequest().authenticated())
+                                 .anyRequest().hasRole(REQUIRED_ROLE)
+                		 			)
                  .formLogin(formLogin -> formLogin.loginPage(this.adminServer.getContextPath() + "/login")
                          .successHandler(successHandler))
                  .logout((logout) -> logout.logoutUrl(this.adminServer.getContextPath() + "/logout"))
@@ -73,6 +86,27 @@ public class WebSecurityConfig {
         return http.build();
 
 	}
+	 
+		@Bean
+		public Filter logUserRolesFilter() {
+		    return new OncePerRequestFilter() {
+		        @Override
+		        protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
+		                throws ServletException, java.io.IOException {
+		            Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+		            if (auth != null && auth.isAuthenticated()) {
+		                System.out.println("User: " + auth.getName());
+		                System.out.println("Roles: ");
+		                for (GrantedAuthority authority : auth.getAuthorities()) {
+		                    System.out.println(" - " + authority.getAuthority());
+		                }
+		            }
+		            filterChain.doFilter(request, response);
+		        }
+		    };
+		}
+		
+		
 
 	@Bean
 	AuthenticationManager authManager(HttpSecurity http) throws Exception {
