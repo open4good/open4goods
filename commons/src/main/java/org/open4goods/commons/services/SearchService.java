@@ -137,8 +137,7 @@ public class SearchService {
 	 * @param request
 	 * @return
 	 */
-	// @Cacheable(keyGenerator = CacheConstants.KEY_GENERATOR, cacheNames = CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME)
-	// TODO(p1, performance) : put back,but collision hash with verticalsubsets (i guess)
+	 @Cacheable(keyGenerator = CacheConstants.KEY_GENERATOR, cacheNames = CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME)
 	public VerticalSearchResponse verticalSearch(VerticalConfig vertical, VerticalSearchRequest request) {
 
 		VerticalSearchResponse vsr = new VerticalSearchResponse();
