@@ -13,10 +13,12 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.open4goods.services.evaluation.service.EvaluationService;
 import org.open4goods.services.prompt.config.PromptServiceConfig;
-import org.open4goods.services.prompt.dto.BatchJobResponse;
 import org.open4goods.services.prompt.dto.BatchPromptResponse;
-import org.open4goods.services.prompt.dto.BatchRequestEntry;
 import org.open4goods.services.prompt.dto.PromptResponse;
+import org.open4goods.services.prompt.dto.openai.BatchJobResponse;
+import org.open4goods.services.prompt.dto.openai.BatchOutput;
+import org.open4goods.services.prompt.dto.openai.BatchRequestEntry;
+import org.open4goods.services.prompt.dto.openai.BatchResponse;
 import org.open4goods.services.prompt.exceptions.BatchTokenLimitExceededException;
 import org.open4goods.services.serialisation.service.SerialisationService;
 import org.slf4j.Logger;
@@ -27,7 +29,6 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import jakarta.annotation.PostConstruct;
@@ -52,18 +53,9 @@ public class BatchPromptService implements HealthIndicator {
     private final OpenAiBatchClient openAiBatchClient;
     private final PromptService promptService; // for retrieving prompt config and evaluation
 
-    // Map to track active batch jobs by our internal jobId.
-    private final ConcurrentHashMap<String, CompletableFuture<PromptResponse<String>>> activeBatchJobs = new ConcurrentHashMap<>();
+    // Map to track active batch jobs; now the future holds PromptResponse with a List of BatchOutput.
+    private final ConcurrentHashMap<String, CompletableFuture<PromptResponse<List<BatchOutput>>>> activeBatchJobs = new ConcurrentHashMap<>();
 
-    /**
-     * Constructs a new BatchPromptService.
-     *
-     * @param config                The prompt service configuration.
-     * @param evaluationService     The service used for evaluating prompt templates.
-     * @param serialisationService  The service for (de)serialization operations.
-     * @param openAiBatchClient     The client for communicating with OpenAI’s Batch API.
-     * @param promptService         The prompt service used to retrieve prompt configurations.
-     */
     public BatchPromptService(PromptServiceConfig config,
                               EvaluationService evaluationService,
                               SerialisationService serialisationService,
@@ -77,24 +69,33 @@ public class BatchPromptService implements HealthIndicator {
         this.objectMapper = new ObjectMapper();
     }
 
+    
+    
+    
+    
+    
     /**
-     * Submits a batch prompt request with a list of variable maps.
-     * Each prompt is fully evaluated and mapped into a NDJSON entry according to the OpenAI Batch API.
-     * The NDJSON file is saved (for recovery) and then submitted via the OpenAiBatchClient.
+     * Submits a batch prompt request.
+     * <p>
+     * This method builds NDJSON entries for each set of prompt variables,
+     * writes the submission file, and invokes the external batch API.
+     * It returns the generated job ID.
+     * </p>
      *
-     * @param promptKey     The key of the prompt template to use.
-     * @param variablesList A list of variable maps for prompt evaluation.
-     * @return a BatchPromptResponse holding the jobId and a Future that will complete when the batch response is available.
+     * @param promptKey     the prompt configuration key.
+     * @param variablesList the list of prompt variable maps.
+     * @param customIds     the list of custom IDs (typically product identifiers).
+     * @return the generated batch job ID.
+     * @throws BatchTokenLimitExceededException if the total estimated tokens exceed the allowed limit.
      */
-    public BatchPromptResponse<String> batchPrompt(String promptKey, List<Map<String, Object>> variablesList, List<String> customIds) {
+    public String batchPromptRequest(String promptKey, List<Map<String, Object>> variablesList, List<String> customIds) {
         List<BatchRequestEntry> requestEntries = new ArrayList<>();
         int totalEstimatedTokens = 0;
-        int index = 0;
-        for (Map<String, Object> vars : variablesList) {
+        for (int index = 0; index < variablesList.size(); index++) {
+            Map<String, Object> vars = variablesList.get(index);
             BatchRequestEntry entry = createBatchRequestEntry(promptKey, vars, index, customIds.get(index));
             requestEntries.add(entry);
             totalEstimatedTokens += estimateTokensFromBatchEntry(entry);
-            index++;
         }
         logger.info("Batch prompt {} submitted with total estimated tokens: {}", promptKey, totalEstimatedTokens);
         if (totalEstimatedTokens > config.getBatchMaxTokens()) {
@@ -102,10 +103,10 @@ public class BatchPromptService implements HealthIndicator {
                     " exceed maximum allowed " + config.getBatchMaxTokens());
         }
 
-        // Generate a unique internal jobId for this batch submission.
+        // Generate a unique job ID (using a UUID in this example).
         String jobId = UUID.randomUUID().toString();
 
-        // Write NDJSON file: one JSON object per request.
+        // Write NDJSON submission file.
         File batchFolder = new File(config.getBatchFolder());
         if (!batchFolder.exists() && !batchFolder.mkdirs()) {
             logger.error("Failed to create batch folder at {}", config.getBatchFolder());
@@ -122,27 +123,141 @@ public class BatchPromptService implements HealthIndicator {
             throw new IllegalStateException(e);
         }
 
-        // Submit the batch job via the OpenAI Batch API.
+        // Submit the batch job.
         BatchJobResponse batchJobResponse = openAiBatchClient.submitBatch(submissionFile);
-        logger.info("Submitted batch job to OpenAI: {}", batchJobResponse.getId());
-
-        // Create a CompletableFuture to be completed when a response is found.
-        CompletableFuture<PromptResponse<String>> futureResponse = new CompletableFuture<>();
-        activeBatchJobs.put(jobId, futureResponse);
-
-        return new BatchPromptResponse<>(jobId, futureResponse);
+        logger.info("Submitted batch job to OpenAI: {}", batchJobResponse.id());
+        // Optionally, you might want to use the job ID from the response. Here we return our generated jobId.
+        return batchJobResponse.id();
     }
 
     /**
-     * Creates a BatchRequestEntry by evaluating the prompt fully.
-     * It retrieves the prompt configuration and evaluates system and user prompts,
-     * then builds the request body (with messages and model).
+     * Processes and returns the batch prompt response.
+     * <p>
+     * This method checks the external batch job status.
+     * If the job is completed, it downloads the output file and parses the batch outputs.
+     * </p>
      *
-     * @param promptKey The prompt configuration key.
-     * @param variables The map of variables for template evaluation.
-     * @param index     The index of the request in the batch.
-     * @return a BatchRequestEntry representing the request.
+     * @param jobId the job ID to process.
+     * @return a PromptResponse containing the list of BatchOutput objects.
      */
+    public PromptResponse<List<BatchOutput>> batchPromptResponse(String jobId) {
+        BatchJobResponse batchStatus = openAiBatchClient.getBatchStatus(jobId);
+        logger.debug("Batch job {} status: {}", jobId, batchStatus.status());
+        if (!"completed".equalsIgnoreCase(batchStatus.status())) {
+            throw new IllegalStateException("Batch job " + jobId + " is not completed yet");
+        }
+        String outputContent = openAiBatchClient.downloadBatchOutput(jobId);
+        // Write output to a local file for record keeping.
+        File outputFile = new File(config.getBatchFolder(), "batch-" + jobId + "-output.jsonl");
+        try {
+            Files.writeString(outputFile.toPath(), outputContent, Charset.defaultCharset());
+        } catch (Exception e) {
+            logger.error("Error writing output file for job {}: {}", jobId, e.getMessage(), e);
+        }
+
+        List<String> lines;
+        List<BatchOutput> batchOutputs = new ArrayList<>();
+        try {
+            lines = Files.readAllLines(outputFile.toPath(), Charset.defaultCharset());
+            long submittedAt = 0;
+            for (String line : lines) {
+                if (StringUtils.hasText(line)) {
+                    BatchOutput output = objectMapper.readValue(line, BatchOutput.class);
+                    batchOutputs.add(output);
+                    if (submittedAt == 0 && output.response() != null && output.response().body() != null) {
+                        submittedAt = output.response().body().created();
+                    }
+                }
+            }
+            Files.deleteIfExists(outputFile.toPath());
+        } catch (Exception e) {
+            logger.error("Error processing batch output for job {}: {}", jobId, e.getMessage(), e);
+            throw new IllegalStateException(e);
+        }
+        PromptResponse<List<BatchOutput>> promptResponse = new PromptResponse<>();
+        promptResponse.setBody(batchOutputs);
+        promptResponse.setRaw(outputContent);
+        promptResponse.setStart(batchStatus.createdAt() != null ? batchStatus.createdAt() : System.currentTimeMillis());
+        promptResponse.setDuration(System.currentTimeMillis() - promptResponse.getStart());
+        return promptResponse;
+    }
+    
+    
+    /**
+     * Checks the status of a batch job.
+     * <p>
+     * Calls the OpenAiBatchClient to retrieve the current status of the remote batch job.
+     * </p>
+     *
+     * @param jobId the unique identifier of the batch job.
+     * @return the BatchJobResponse representing the current status.
+     */
+    public BatchJobResponse checkStatus(String jobId) {
+        BatchJobResponse status = openAiBatchClient.getBatchStatus(jobId);
+        logger.info("Checked batch status for job {}: {}", jobId, status.status());
+        return status;
+    }
+    
+//    
+//    /**
+//     * Submits a batch prompt request with a list of variable maps.
+//     * <p>
+//     * Each prompt is fully evaluated and mapped into a NDJSON entry according to the OpenAI Batch API.
+//     * The NDJSON file is saved (for recovery) and then submitted via the OpenAiBatchClient.
+//     * </p>
+//     *
+//     * @param promptKey     The key of the prompt template to use.
+//     * @param variablesList A list of variable maps for prompt evaluation.
+//     * @param customIds     A list of custom IDs corresponding to each prompt entry.
+//     * @return a BatchPromptResponse holding the jobId and a Future that will complete when the batch response is available.
+//     */
+//    public BatchPromptResponse<List<BatchOutput>> batchPrompt(String promptKey, List<Map<String, Object>> variablesList, List<String> customIds) {
+//        List<BatchRequestEntry> requestEntries = new ArrayList<>();
+//        int totalEstimatedTokens = 0;
+//        int index = 0;
+//        for (Map<String, Object> vars : variablesList) {
+//            BatchRequestEntry entry = createBatchRequestEntry(promptKey, vars, index, customIds.get(index));
+//            requestEntries.add(entry);
+//            totalEstimatedTokens += estimateTokensFromBatchEntry(entry);
+//            index++;
+//        }
+//        logger.info("Batch prompt {} submitted with total estimated tokens: {}", promptKey, totalEstimatedTokens);
+//        if (totalEstimatedTokens > config.getBatchMaxTokens()) {
+//            throw new BatchTokenLimitExceededException("Total tokens " + totalEstimatedTokens +
+//                    " exceed maximum allowed " + config.getBatchMaxTokens());
+//        }
+//
+//        // Generate a unique internal jobId for this batch submission.
+//        String jobId = UUID.randomUUID().toString();
+//
+//        // Write NDJSON file: one JSON object per request.
+//        File batchFolder = new File(config.getBatchFolder());
+//        if (!batchFolder.exists() && !batchFolder.mkdirs()) {
+//            logger.error("Failed to create batch folder at {}", config.getBatchFolder());
+//            throw new IllegalStateException("Cannot create batch folder");
+//        }
+//        File submissionFile = new File(batchFolder, "batch-" + jobId + "-submission.jsonl");
+//        try (FileWriter writer = new FileWriter(submissionFile, Charset.defaultCharset())) {
+//            for (BatchRequestEntry entry : requestEntries) {
+//                String line = objectMapper.writeValueAsString(entry);
+//                writer.write(line + System.lineSeparator());
+//            }
+//        } catch (Exception e) {
+//            logger.error("Error writing batch submission file: {}", e.getMessage(), e);
+//            throw new IllegalStateException(e);
+//        }
+//
+//        // Submit the batch job via the OpenAI Batch API.
+//        BatchJobResponse batchJobResponse = openAiBatchClient.submitBatch(submissionFile);
+//        logger.info("Submitted batch job to OpenAI: {}", batchJobResponse.id());
+//
+//        // Create a CompletableFuture to be completed when a response is found.
+//        CompletableFuture<PromptResponse<List<BatchOutput>>> futureResponse = new CompletableFuture<>();
+//        activeBatchJobs.put(jobId, futureResponse);
+//
+//        return new BatchPromptResponse<>(jobId, futureResponse);
+//    }
+
     private BatchRequestEntry createBatchRequestEntry(String promptKey, Map<String, Object> variables, int index, String customId) {
         var promptConfig = promptService.getPromptConfig(promptKey);
         if (promptConfig == null) {
@@ -155,14 +270,14 @@ public class BatchPromptService implements HealthIndicator {
         String userEvaluated = evaluationService.thymeleafEval(variables, promptConfig.getUserPrompt());
 
         // Build the message list.
-        List<org.open4goods.services.prompt.dto.Message> messages = new ArrayList<>();
+        List<org.open4goods.services.prompt.dto.openai.BatchMessage> messages = new ArrayList<>();
         if (StringUtils.hasText(systemEvaluated)) {
-            messages.add(new org.open4goods.services.prompt.dto.Message("system", systemEvaluated));
+            messages.add(new org.open4goods.services.prompt.dto.openai.BatchMessage("system", systemEvaluated));
         }
-        messages.add(new org.open4goods.services.prompt.dto.Message("user", userEvaluated));
+        messages.add(new org.open4goods.services.prompt.dto.openai.BatchMessage("user", userEvaluated));
 
         // Build the request body.
-        var body = new org.open4goods.services.prompt.dto.BatchRequestBody();
+        var body = new org.open4goods.services.prompt.dto.openai.BatchRequestBody();
         if (promptConfig.getOptions() != null && StringUtils.hasText(promptConfig.getOptions().getModel())) {
             body.setModel(promptConfig.getOptions().getModel());
         } else {
@@ -171,8 +286,7 @@ public class BatchPromptService implements HealthIndicator {
         body.setMessages(messages);
 
         // Create the request entry.
-        var entry = new org.open4goods.services.prompt.dto.BatchRequestEntry();
-        // Use a generated UUID as the custom_id (alternatively, you can prefix it with the jobId when available)
+        var entry = new org.open4goods.services.prompt.dto.openai.BatchRequestEntry();
         entry.setCustomId(customId);
         entry.setMethod("POST");
         entry.setUrl("/v1/chat/completions");
@@ -180,26 +294,14 @@ public class BatchPromptService implements HealthIndicator {
         return entry;
     }
 
-    /**
-     * Estimates tokens from a BatchRequestEntry by summing tokens in all message contents.
-     *
-     * @param entry The request entry.
-     * @return estimated token count.
-     */
-    private int estimateTokensFromBatchEntry(org.open4goods.services.prompt.dto.BatchRequestEntry entry) {
+    private int estimateTokensFromBatchEntry(org.open4goods.services.prompt.dto.openai.BatchRequestEntry entry) {
         int tokens = 0;
-        for (org.open4goods.services.prompt.dto.Message m : entry.getBody().getMessages()) {
+        for (org.open4goods.services.prompt.dto.openai.BatchMessage m : entry.getBody().getMessages()) {
             tokens += estimateTokens(m.getContent());
         }
         return tokens;
     }
 
-    /**
-     * Simple token estimation: approximates 1.3 tokens per word.
-     *
-     * @param text The text.
-     * @return estimated token count.
-     */
     private int estimateTokens(String text) {
         if (text == null || text.isEmpty())
             return 0;
@@ -208,73 +310,69 @@ public class BatchPromptService implements HealthIndicator {
     }
 
     /**
-     * Scheduled task runs every 5 minutes to scan the batch folder for response files.
-     * When found, it aggregates responses and completes the corresponding CompletableFuture.
+     * Scheduled task runs every 5 minutes to scan active batch jobs.
+     * <p>
+     * For each active job, it checks the batch status via the OpenAiBatchClient. If the job’s status is "completed",
+     * it downloads the output file (saved locally with a "-output" suffix), parses each line into a BatchOutput object,
+     * aggregates them into a list, completes the corresponding CompletableFuture with a PromptResponse containing the list,
+     * and then cleans up the file.
+     * </p>
      */
-    @Scheduled(fixedDelay = 300_000) // every 5 minutes
     public void scanBatchResponses() {
-        File folder = new File(config.getBatchFolder());
-        if (!folder.exists() || !folder.isDirectory()) {
-            logger.warn("Batch folder {} is not available", config.getBatchFolder());
-            return;
-        }
-        // Look for files named "batch-<jobId>-response.jsonl"
-        File[] responseFiles = folder.listFiles((dir, name) -> name.matches("batch-.*-response\\.jsonl$"));
-        if (responseFiles == null || responseFiles.length == 0) {
-            logger.debug("No batch response files found");
-            return;
-        }
-        for (File responseFile : responseFiles) {
+        // Iterate over a copy of job IDs to avoid concurrent modification.
+        for (String jobRawId : new ArrayList<>(activeBatchJobs.keySet())) {
+            // Convert the raw job id to match the expected batch API format.
+//            String jobId = "batch_" + jobRawId.replace("-", "");
+        	String jobId = "batch_67f7cde83c8c8190b7386d4179f17efe";
             try {
-                // Extract jobId from file name.
-                String fileName = responseFile.getName();
-                String jobId = fileName.substring("batch-".length(), fileName.indexOf("-response.jsonl"));
-                List<String> lines = Files.readAllLines(responseFile.toPath(), Charset.defaultCharset());
-                StringBuilder aggregatedResponse = new StringBuilder();
-                long submittedAt = 0;
-                for (String line : lines) {
-                    if (StringUtils.hasText(line)) {
-                        JsonNode node = objectMapper.readTree(line);
-                        if (aggregatedResponse.length() > 0) {
-                            aggregatedResponse.append("\n");
-                        }
-                        aggregatedResponse.append(node.get("response").asText());
-                        if (submittedAt == 0 && node.has("submittedAt")) {
-                            submittedAt = node.get("submittedAt").asLong();
+                BatchJobResponse batchStatus = openAiBatchClient.getBatchStatus(jobId);
+                logger.debug("Batch job {} status: {}", jobId, batchStatus.status());
+
+                if ("completed".equalsIgnoreCase(batchStatus.status())) {
+                    String outputContent = openAiBatchClient.downloadBatchOutput(jobId);
+                    File outputFile = new File(config.getBatchFolder(), "batch-" + jobId + "-output.jsonl");
+                    Files.writeString(outputFile.toPath(), outputContent, Charset.defaultCharset());
+                    logger.info("Downloaded output for batch job {} to file {}", jobId, outputFile.getName());
+
+                    List<String> lines = Files.readAllLines(outputFile.toPath(), Charset.defaultCharset());
+                    List<BatchOutput> batchOutputs = new ArrayList<>();
+                    long submittedAt = 0;
+                    for (String line : lines) {
+                        if (StringUtils.hasText(line)) {
+                            // Parse the line into a BatchOutput object.
+                            BatchOutput output = objectMapper.readValue(line, BatchOutput.class);
+                            batchOutputs.add(output);
+                            if (submittedAt == 0 && output.response() != null && output.response().body() != null) {
+                                submittedAt = output.response().body().created();
+                            }
                         }
                     }
-                }
-                CompletableFuture<PromptResponse<String>> future = activeBatchJobs.get(jobId);
-                if (future != null) {
-                    var promptResponse = new PromptResponse<String>();
-                    promptResponse.setRaw(aggregatedResponse.toString());
-                    promptResponse.setStart(submittedAt);
-                    promptResponse.setDuration(System.currentTimeMillis() - submittedAt);
-                    future.complete(promptResponse);
-                    activeBatchJobs.remove(jobId);
-                    logger.info("Batch job {} completed via file {}", jobId, responseFile.getName());
-                    Files.deleteIfExists(responseFile.toPath());
+
+                    CompletableFuture<PromptResponse<List<BatchOutput>>> future = activeBatchJobs.get(jobId);
+                    if (future != null) {
+                        PromptResponse<List<BatchOutput>> promptResponse = new PromptResponse<>();
+                        promptResponse.setBody(batchOutputs);
+                        promptResponse.setRaw(outputContent);
+                        promptResponse.setStart(submittedAt);
+                        promptResponse.setDuration(System.currentTimeMillis() - submittedAt);
+                        future.complete(promptResponse);
+                        activeBatchJobs.remove(jobId);
+                        logger.info("Batch job {} processed and future completed.", jobId);
+                    }
+                    Files.deleteIfExists(outputFile.toPath());
+                } else {
+                    logger.error("Batch with uncompleted status: {}", jobId);
                 }
             } catch (Exception e) {
-                logger.error("Error processing batch response file {}: {}", responseFile.getName(), e.getMessage(), e);
+                logger.error("Error processing batch job {}: {}", jobId, e.getMessage(), e);
             }
         }
     }
 
-    /**
-     * Exposes the status of current batch jobs.
-     *
-     * @return a BatchStatus DTO containing the number of active jobs and their job IDs.
-     */
-    public org.open4goods.services.prompt.dto.BatchStatus status() {
-        return new org.open4goods.services.prompt.dto.BatchStatus(activeBatchJobs.size(), new ArrayList<>(activeBatchJobs.keySet()));
+    public org.open4goods.services.prompt.dto.openai.BatchStatus status() {
+        return new org.open4goods.services.prompt.dto.openai.BatchStatus(activeBatchJobs.size(), new ArrayList<>(activeBatchJobs.keySet()));
     }
 
-    /**
-     * Health check for the BatchPromptService.
-     *
-     * @return Health status.
-     */
     @Override
     public Health health() {
         File folder = new File(config.getBatchFolder());
@@ -284,9 +382,6 @@ public class BatchPromptService implements HealthIndicator {
         return Health.up().build();
     }
 
-    /**
-     * Reinitializes pending batch jobs from submission files when the application starts.
-     */
     @PostConstruct
     public void init() {
         logger.info("BatchPromptService initialized with batch folder {} and max tokens {}",
