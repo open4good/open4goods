@@ -1,5 +1,6 @@
 package org.open4goods.services.urlfetching.service.fetchers;
 
+import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.ProxySelector;
 import java.net.URI;
@@ -10,6 +11,8 @@ import java.time.Duration;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
+
+import javax.management.RuntimeErrorException;
 
 import org.open4goods.services.urlfetching.config.FetchStrategy;
 import org.open4goods.services.urlfetching.config.UrlFetcherConfig.DomainConfig;
@@ -66,7 +69,7 @@ public class ProxifiedHttpFetcher implements Fetcher {
      * @return a CompletableFuture of FetchResponse
      */
     @Override
-    public CompletableFuture<FetchResponse> fetchUrl(String url) {
+    public CompletableFuture<FetchResponse> fetchUrlAsync(String url) {
         logger.info("Fetching URL {} using ProxifiedHttpFetcher", url);
         HttpRequest.Builder requestBuilder = HttpRequest.newBuilder()
                 .uri(URI.create(url))
@@ -92,4 +95,10 @@ public class ProxifiedHttpFetcher implements Fetcher {
                     return new FetchResponse(url, statusCode, htmlContent, markdownContent,FetchStrategy.PROXIFIED);
                 });
     }
+
+	@Override
+	public FetchResponse fetchUrlSync(String url) throws IOException {
+		// TODO(p2, feature) : implement
+		throw new RuntimeException("Not implemented");
+	}
 }
