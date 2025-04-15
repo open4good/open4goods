@@ -1,7 +1,6 @@
 package org.open4goods.commons.services;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map.Entry;
@@ -28,15 +27,16 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.elasticsearch.UncategorizedElasticsearchException;
 import org.springframework.data.elasticsearch.client.elc.ElasticsearchAggregations;
+import org.springframework.data.elasticsearch.client.elc.NativeQuery;
 import org.springframework.data.elasticsearch.client.elc.NativeQueryBuilder;
 import org.springframework.data.elasticsearch.core.SearchHit;
 import org.springframework.data.elasticsearch.core.SearchHits;
 import org.springframework.data.elasticsearch.core.query.Criteria;
 import org.springframework.data.elasticsearch.core.query.CriteriaQuery;
-import org.springframework.data.elasticsearch.core.query.CriteriaQueryBuilder;
 
 import co.elastic.clients.elasticsearch._types.ElasticsearchException;
 import co.elastic.clients.elasticsearch._types.FieldSort;
+import co.elastic.clients.elasticsearch._types.FieldValue;
 import co.elastic.clients.elasticsearch._types.SortOptions;
 import co.elastic.clients.elasticsearch._types.SortOrder;
 import co.elastic.clients.elasticsearch._types.aggregations.Aggregation;
@@ -50,6 +50,12 @@ import co.elastic.clients.elasticsearch._types.aggregations.MissingAggregate;
 import co.elastic.clients.elasticsearch._types.aggregations.StringTermsAggregate;
 import co.elastic.clients.elasticsearch._types.aggregations.StringTermsBucket;
 import co.elastic.clients.elasticsearch._types.mapping.FieldType;
+import co.elastic.clients.elasticsearch._types.query_dsl.BoolQuery;
+import co.elastic.clients.elasticsearch._types.query_dsl.FunctionBoostMode;
+import co.elastic.clients.elasticsearch._types.query_dsl.FunctionScoreQuery;
+import co.elastic.clients.elasticsearch._types.query_dsl.Query;
+import co.elastic.clients.elasticsearch._types.query_dsl.RangeQuery;
+import co.elastic.clients.json.JsonData;
 
 /**
  * Service in charge of the search in Products
@@ -79,56 +85,169 @@ public class SearchService {
 	 * @param query
 	 * @return
 	 */
-	@Cacheable(keyGenerator = CacheConstants.KEY_GENERATOR, cacheNames = CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME)
-	public VerticalSearchResponse globalSearch(String initialQuery, Integer fromPrice, Integer toPrice, Set<String> categories, ProductCondition condition, int from, int to, int minOffers, boolean sort) {
+//	@Cacheable(
+//		    keyGenerator = CacheConstants.KEY_GENERATOR,
+//		    cacheNames = CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME
+//		)
+	/**
+	 * Performs a global product search across multiple fields and dimensions
+	 * with boosted relevance for referential attributes (BRAND, MODEL) and offer names.
+	 * 
+	 * <p>Supports typo tolerance via fuzzy matching, filtering on price, categories, and condition.
+	 * Also boosts documents based on number of offers using a dynamic script score.</p>
+	 *
+	 * @param initialQuery  User input string to search for
+	 * @param fromPrice     Optional minimum price filter
+	 * @param toPrice       Optional maximum price filter
+	 * @param categories    Optional set of categories to filter by
+	 * @param condition     Optional product condition filter (e.g., NEW, USED)
+	 * @param from          Pagination start index
+	 * @param to            Pagination end index (inclusive)
+	 * @param minOffers     Minimum number of offers (reserved for future use)
+	 * @param sort          Whether to sort by offersCount descending
+	 * @return VerticalSearchResponse with matching products and metadata
+	 */
+//	@Cacheable(
+//	    keyGenerator = CacheConstants.KEY_GENERATOR,
+//	    cacheNames = CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME
+//	)
+	public VerticalSearchResponse globalSearch(
+	        String initialQuery,
+	        Integer fromPrice,
+	        Integer toPrice,
+	        Set<String> categories,
+	        ProductCondition condition,
+	        int from,
+	        int to,
+	        int minOffers,
+	        boolean sort
+	) {
+	    String query = sanitize(initialQuery);
+	    LOGGER.info("Global search : {}", initialQuery);
 
-		String query =  sanitize(initialQuery);
+	    NativeQueryBuilder nativeQueryBuilder = NativeQuery.builder();
 
+	
+        String[] tokens = query.split(" ");
+        List<Query> shouldClauses = new ArrayList<>();
 
-		// Logging
-		LOGGER.info("global search : {}",initialQuery);
+        for (String token : tokens) {
+            // Boosted referential attributes
+//            shouldClauses.add(Query.of(q -> q.term(t ->
+//                t.field("attributes.referentielAttributes.BRAND").value(token).boost(5.0f))));
+//
+//            shouldClauses.add(Query.of(q -> q.term(t ->
+//                t.field("attributes.referentielAttributes.MODEL").value(token).boost(4.0f))));
 
-		Criteria c = null;
-		if (StringUtils.isNumeric(query)) {
-			// Showing even if no offers when by GTIN
-			c = new Criteria("id").is(initialQuery);
-		}
-		else {
-			// TODO(p1,security) : sanitize, web input !!
-			c = 	new Criteria("offerNames").matchesAll(Arrays.asList(query.split(" ")))
-					.and(aggregatedDataRepository.getRecentPriceQuery())
-					;
+            // Prefix match in offer names (autocomplete behavior)
+            shouldClauses.add(Query.of(q -> q.matchPhrasePrefix(m ->
+                m.field("offerNames").query(token).boost(5.0f))));
 
-			// NOTE : could add
-			//			price
-			//			vertical
-			//			offerscount
-			//			neuf / occasion
-			//
-			//			barcode nationality
-			//			garantie
-			//			ecoscore
-			//			classe energie
+            // Standard match in offer names
+            shouldClauses.add(Query.of(q -> q.match(m ->
+                m.field("offerNames").query(token).boost(2.0f))));
 
-		}
+            // Fuzzy match in offer names (for typos)
+            shouldClauses.add(Query.of(q -> q.match(m ->
+                m.field("offerNames").query(token).fuzziness("AUTO").boost(0.6f))));
+        }
 
+        // Construct bool query with optional filters
+        BoolQuery boolQuery = BoolQuery.of(b -> {
+            b.should(shouldClauses).minimumShouldMatch(""+tokens.length);
+            
+            // Only on activ products
+            b.filter(Query.of(q -> q.range(r -> {
+                return r.number(n -> n.field(query)
+                    .field("offersCount")
+                    .gte(1.0)
+                    );
+            })));
+            
+//
+//	            // Filter: price range
+            if (fromPrice != null || toPrice != null) {
+                b.filter(Query.of(q -> q.range(r -> {
+                    return r.number(n -> n.field(query)
+                        .field("price.minPrice.price")
+                        .gte(fromPrice == null ? 0.0 : Double.valueOf(fromPrice))
+                        .lte(toPrice == null ? Double.MAX_VALUE : Double.valueOf(toPrice)));
+                })));
+            }
+            
+   
+            
+            // Filter: condition (new/used)
+            if (condition != null) {
+                b.filter(Query.of(q -> q.term(t ->
+                    t.field("price.minPrice.productState").value(condition.name()))));
+            }
+            
+            
+            
 
-		CriteriaQueryBuilder esQuery = new CriteriaQueryBuilder(c)
-				//		.withQuery(new CriteriaQuery(c))
-				.withPageable(PageRequest.of(from, to))
-				.withSort(Sort.by(org.springframework.data.domain.Sort.Order.desc("offersCount")));
+            // Filter: categories
+            if (categories != null && !categories.isEmpty()) {
+                b.filter(Query.of(q -> q.terms(t ->
+                    t.field("datasourceCategories").terms(terms -> terms.value(
+                        categories.stream().map(FieldValue::of).toList()
+                    )))));
+            }
 
-		SearchHits<Product> results = aggregatedDataRepository.search(esQuery.build(),ProductRepository.MAIN_INDEX_NAME);
-		VerticalSearchResponse vsr = new VerticalSearchResponse();
+            return b;
+        });
 
-		//		// Setting the response
-		vsr.setTotalResults(results.getTotalHits());
-		vsr.setFrom(from);
-		vsr.setTo(to);
-		vsr.setData(results.get().map(SearchHit::getContent).toList());
+        // Apply function score with dynamic boost on offersCount
+        FunctionScoreQuery functionScoreQuery = FunctionScoreQuery.of(fs -> fs
+            .query(Query.of(q -> q.bool(boolQuery)))
+            .functions(f -> f
+                .scriptScore(ss -> ss
+                    .script(s -> s
+                        .source("doc['offersCount'].size() > 0 ? Math.log(doc['offersCount'].value + 1) : 0")
+                    )
+                )
+            )
+            .boostMode(FunctionBoostMode.Sum)
+        );
 
-		return vsr;
+        nativeQueryBuilder.withQuery(Query.of(q -> q.functionScore(functionScoreQuery)));
+    
+
+	    // Sorting (if enabled)
+	    if (sort) {
+	        nativeQueryBuilder.withSort(Sort.by(Sort.Order.desc("offersCount")));
+	    }
+
+	    // Pagination
+	    nativeQueryBuilder.withPageable(PageRequest.of(from, to));
+
+	    
+	    
+	    // Execute search
+	    SearchHits<Product> results = aggregatedDataRepository.search(
+	        nativeQueryBuilder.build(),
+	        ProductRepository.MAIN_INDEX_NAME
+	    );
+
+	    // Log top results for validation
+	    results.get().limit(5).forEach(hit -> {
+	        Product product = hit.getContent();
+	        float score = hit.getScore();
+	        LOGGER.info("Hit: [score={} id={} name={}]", score, product.getId(),
+	            product.bestName());
+	    });
+
+	    // Build and return response
+	    VerticalSearchResponse vsr = new VerticalSearchResponse();
+	    vsr.setTotalResults(results.getTotalHits());
+	    vsr.setFrom(from);
+	    vsr.setTo(to);
+	    vsr.setData(results.get().map(SearchHit::getContent).toList());
+
+	    return vsr;
 	}
+
+
 
 	
 	/**

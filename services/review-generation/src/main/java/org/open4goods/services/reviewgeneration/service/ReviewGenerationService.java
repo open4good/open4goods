@@ -542,6 +542,7 @@ public class ReviewGenerationService implements HealthIndicator {
      * checks the job status via batchPromptResponse (which will throw if not complete),
      * and if the job is complete, processes each BatchOutput to update the corresponding product review.
      * Finally, the tracking file is deleted.
+     * TODO(p2,design) : separate the handle method 
      * </p>
      */
     public void checkBatchJobStatuses() {
@@ -555,44 +556,59 @@ public class ReviewGenerationService implements HealthIndicator {
                 Map<String, Object> trackingInfo = objectMapper.readValue(file, Map.class);
                 String jobId = (String) trackingInfo.get("jobId");
                 @SuppressWarnings("unchecked")
-                // Retrieve batch results; this method throws if the job is not yet complete.
+                // Retrieve batch results; this method throws if the job is not yet complete. 
                 PromptResponse<List<BatchOutput>> response = batchAiService.batchPromptResponse(jobId);
                 if (response != null && response.getBody() != null && !response.getBody().isEmpty()) {
-                    logger.info("Batch job {} completed. Processing {} outputs.", jobId, response.getBody().size());
-                    // For each batch output (assumed to contain a customId that corresponds to the product GTIN)
-                    for (BatchOutput output : response.getBody()) {
-                        String productGtin = output.customId();
-                        // Retrieve the product from the repository.
-                        Product product = productRepository.getById(Long.valueOf(productGtin));
-                        if (product != null) {
-                            // Process the BatchOutput to convert it into an AiReview.
-                            AiReview newReview = processBatchOutputToAiReview(output);
-                            if (null != newReview) {
-                            	// Populate attributes
-                            	populateAttributes(product, newReview);
-                            	
-	                            AiReviewHolder holder = new AiReviewHolder();
-	                            holder.setCreatedMs(Instant.now().toEpochMilli());
-	                            holder.setReview(newReview);
-	                            holder.setEnoughData(true);
-	                            product.getReviews().put("fr", holder);
-	                            productRepository.forceIndex(product);
-	                            logger.info("Updated review for product with GTIN {}", productGtin);
-                            } else {
-                            	logger.error("Null AI review returned for {}", productGtin);
-                            }
-                        } else {
-                            logger.warn("No product found with GTIN {}", productGtin);
-                        }
-                    }
-                    // Delete the tracking file after processing.
-                    Files.deleteIfExists(file.toPath());
+                    handleBatchResponse( jobId, response);
+                 // Delete the tracking file after processing.
+            		Files.deleteIfExists(file.toPath());
                 }
             } catch (Exception e) {
                 logger.error("Error processing tracking file {}: {}", file.getName(), e.getMessage(), e);
             }
         }
     }
+    
+    public void triggerResponseHandling(String jobId) throws ResourceNotFoundException, IOException {
+    	
+    	 // Retrieve batch results; this method throws if the job is not yet complete. 
+        PromptResponse<List<BatchOutput>> response = batchAiService.batchPromptResponse(jobId);
+        if (response != null && response.getBody() != null && !response.getBody().isEmpty()) {
+            handleBatchResponse( jobId, response);
+        }
+    }
+
+
+	private void handleBatchResponse( String jobId, PromptResponse<List<BatchOutput>> response) throws ResourceNotFoundException, IOException {
+		logger.info("Batch job {} completed. Processing {} outputs.", jobId, response.getBody().size());
+		// For each batch output (assumed to contain a customId that corresponds to the product GTIN)
+		for (BatchOutput output : response.getBody()) {
+		    String productGtin = output.customId();
+		    // Retrieve the product from the repository.
+		    Product product = productRepository.getById(Long.valueOf(productGtin));
+		    if (product != null) {
+		        // Process the BatchOutput to convert it into an AiReview.
+		        AiReview newReview = processBatchOutputToAiReview(output);
+		        if (null != newReview) {
+		        	// Populate attributes
+		        	populateAttributes(product, newReview);
+		        	
+		            AiReviewHolder holder = new AiReviewHolder();
+		            holder.setCreatedMs(Instant.now().toEpochMilli());
+		            holder.setReview(newReview);
+		            holder.setEnoughData(true);
+		            product.getReviews().put("fr", holder);
+		            productRepository.forceIndex(product);
+		            logger.info("Updated review for product with GTIN {}", productGtin);
+		        } else {
+		        	logger.error("Null AI review returned for {}", productGtin);
+		        }
+		    } else {
+		        logger.warn("No product found with GTIN {}", productGtin);
+		    }
+		}
+		
+	}
 
     /**
      * Extract attrbutes from the gen ai response and populate the AiReview object
@@ -642,7 +658,7 @@ public class ReviewGenerationService implements HealthIndicator {
     }
     
     private AiReview processBatchOutputToAiReview(BatchOutput output) {
-    	if (output.response().body().choices().size() > 0) {
+    	if (output.response().body().choices().size() > 1) {
     		logger.error("Error, multiple choices for {}", output);
     	}
     	var outputConverter = new BeanOutputConverter<>(AiReview.class);
@@ -650,7 +666,7 @@ public class ReviewGenerationService implements HealthIndicator {
 		  String jsonContent = output.response().body().choices().getFirst().message().getContent();
 		  AiReview ret = outputConverter.convert(jsonContent);
 		    		
-		    
+		  ret = updateAiReviewReferences(ret);
 		    
 //			AiReview ret = serialisationService.fromJson(jsonContent, AiReview.class);
 		return ret;
