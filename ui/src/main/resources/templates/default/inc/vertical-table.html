@@ -1,12 +1,13 @@
-
-
-<div>
-<div class="row">
-    <span class="mt-2">
-        <button type="button" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#exampleModal">Filtrer</button>
-        
-        <select class="btn btn-secondary" id="sort-combobox">
-            <option value="none">Trier</option>
+<div class="d-flex mb-3">
+    <div class="d-flex flex-column col-md-2">
+        <label class="my-1 me-2" for="sort-combobox">Trier</label>
+        <div>
+            <button type="button" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#modal-default">Filtrer</button>
+        </div>
+    </div>
+    <div class="col-md-2 mx-3">
+        <label class="my-1 me-2" for="sort-combobox">Trier</label>
+        <select class="form-select" id="sort-combobox">
             <option value="2-asc">ImpactScore (-)</option>
             <option value="2-desc">ImpactScore (+)</option>
             <option value="3-asc">Prix (-)</option>
@@ -14,62 +15,56 @@
             <option value="4-asc">Concurrence (-)</option>
             <option value="4-desc">Concurrence (+)</option>
         </select>
-        
-        <button id="cv" class="float-end btn btn-light" title="Vue carte"><i class="fas fa-th fa-2x"></i> <!-- Default icon: Grid view -->    </button>
-    </span>
-
+    </div>
+    <!--div class="ms-auto text-right d-flex flex-column col-md-2">
+        <label class="my-1 me-2" for="cv">vue Grille</label>
+        <div>
+            <button id="cv" class="btn btn-light" title="Vue carte">
+                <i class="fas fa-th fa-2x"></i>
+            </button>
+        </div>
+    </div-->
 </div>
-                            
-
-
-
-
-    <table id="tableProducts" class="table table-bordered" cellspacing="0" width="100%">
-        <thead>
-            <tr>
-                <th><small>Nom</small></th>
-                <th><small>Marque</small></th>
-                <th><small>Eco-score</small></th>
-                <th><small>Prix</small></th>
-                <th><small>Offres</small></th>
-                
-                <!--  
-                 <th:block th:each="filter : ${products.customFilters}">
-	                <th th:text="${filter.key.name.get(siteLanguage)}"></th>            
-                </th:block>
-                 -->
-            </tr>
-        </thead>
-        <tbody style="display: table-caption;">
-            <tr th:each="p : ${products.limitedDatas(20)}">
-                <td colspan="5">
-                    <div  >
                         
-                            <p th:if="${p.model()}"><a th:text="${p.model()}" th:href="'/'+${verticalPath}+ '/'+${p.url(siteLanguage)}"></a></p>
-                            <p th:unless="${p.model()}"><a th:text="${p.bestName()}" th:href="'/'+${verticalPath}+ '/'+${p.url(siteLanguage)}"></a></p>
+<table id="tableProducts" class="table table-responsive">
+    <tbody>
+        <tr th:each="p : ${products.limitedDatas(20)}">
+            <td colspan="5">
+                <div th:each="p : ${products.limitedDatas(20)}" >
+                    <p th:if="${p.model()}"><a th:text="${p.model()}" th:href="'/'+${verticalPath}+ '/'+${p.url(siteLanguage)}"></a></p>
+                    <p th:unless="${p.model()}"><a th:text="${p.bestName()}" th:href="'/'+${verticalPath}+ '/'+${p.url(siteLanguage)}"></a></p>
+                    <p th:text="${p.brand()}"></p>
+                    <p></p>
+                    <p th:if="${p.bestPrice() != null}" th:text="${p.bestPrice().price}"></p>
+                    <p th:text="${p.offersCount}"></p>
+                    <!--  
+                    <th:block th:each="filter : ${products.customFilters}">
+                        <p th:if="${p.attributes.indexed.get(filter.key.key)}" th:text="${p.attributes.indexed.get(filter.key.key).value }"></p>            
+                        <p th:unless="${p.attributes.indexed.get(filter.key.key)}"></p>            
+                    </th:block>
+                    -->
+                </div>
+                <div>
+                    
+                        <p th:if="${p.model()}"><a th:text="${p.model()}" th:href="'/'+${verticalPath}+ '/'+${p.url(siteLanguage)}"></a></p>
+                        <p th:unless="${p.model()}"><a th:text="${p.bestName()}" th:href="'/'+${verticalPath}+ '/'+${p.url(siteLanguage)}"></a></p>
+                    
+                    
+                    
+                        <p th:text="${p.brand()}"></p>
+                        <p th:if="${p.bestPrice() != null}" th:text="${p.bestPrice().price}"></p>
+                        <p th:text="${p.offersCount}"></p>
                         
-                        
-                        
-                            <p th:text="${p.brand()}"></p>
-                            <p></p>
-                            <p th:if="${p.bestPrice() != null}" th:text="${p.bestPrice().price}"></p>
-                            <p th:text="${p.offersCount}"></p>
-                            
-                             <!--  
-                            <th:block th:each="filter : ${products.customFilters}">
-                                <p th:if="${p.attributes.indexed.get(filter.key.key)}" th:text="${p.attributes.indexed.get(filter.key.key).value }"></p>            
-                                <p th:unless="${p.attributes.indexed.get(filter.key.key)}"></p>            
-                            </th:block>
-                             -->
+                            <!--  
+                        <th:block th:each="filter : ${products.customFilters}">
+                            <p th:if="${p.attributes.indexed.get(filter.key.key)}" th:text="${p.attributes.indexed.get(filter.key.key).value }"></p>            
+                            <p th:unless="${p.attributes.indexed.get(filter.key.key)}"></p>            
+                        </th:block>
+                            -->
 
-                       
-                    </div>
-                </td>
-
-                
-            </tr>
- 
-        </tbody>
-
-    </table>
-</div>
+                    
+                </div>
+            </td>
+        </tr>
+    </tbody>
+</table>

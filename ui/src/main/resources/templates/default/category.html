@@ -32,10 +32,14 @@
 
 <body>
     
-	<!--/* Navbar */-->
-    <th:block th:with="page = 'catégories'" th:insert="~{inc/navbar/navbar-page.html}"></th:block>
-    <!--/* Loader */-->
-    <th:block th:insert="~{inc/preloader.html}"></th:block>
+    <header>
+        <!--/* Loader */-->
+        <th:block th:insert="~{inc/preloader.html}"></th:block>
+        <!--/* Navbar */-->
+        <th:block th:insert="~{inc/navbar/navbar-home.html}"></th:block>
+    </header>  
+    
+
 	
     <main>	
 

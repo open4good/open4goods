@@ -29,63 +29,59 @@
 
 <body>
     
-	<!--/* Navbar */-->
-	<th:block th:with="page = 'partenaires'" th:insert="~{inc/navbar/navbar-page.html}"></th:block>
-
-    <!--/* Loader */-->
-    <th:block th:insert="~{inc/preloader.html}"></th:block>
-	
+    <header>
+        <!--/* Loader */-->
+        <th:block th:insert="~{inc/preloader.html}"></th:block>
+        <!--/* Navbar */-->
+        <th:block th:insert="~{inc/navbar/navbar-home.html}"></th:block>
+    </header>  
+    	
     <main>	
-		
-		    <!-- Hero -->
+
+		<!-- Hero -->
         <section class="section-header bg-primary text-white pb-9 pb-lg-12 mb-4 mb-lg-6">
-            <div class="container container-semi-fluid">
-                <div class="row justify-content-center">
-                    <div class="col-12 col-md-8 text-center">
-                        <p class="display-2 mb-3">Nos partenaires</p>
+            <div class="container">
+				<div class="row justify-content-center">
+					<div class="col-12 col-md-8 text-center">
+						<h1 class="display-2 mb-3">Nos partenaires</h1>
                     </div>
                 </div>
             </div>
         </section>
         
-        
- 		<section class="section section-lg pt-0">
-            <div class="mt-n8 mt-lg-n12 z-2 container container-semi-fluid">
-                <div class="row justify-content-center">
-                    <div class="col">
-                        <div class="card shadow border-gray-300 p-4 p-lg-5">
+        <section class="section section-lg pt-0">
+			<div class="container mt-n8 mt-lg-n12 z-2">
+				<div class="row justify-content-center">
+					<div class="col">
+						<div class="card border-light p-4 p-lg-5">
 							<th:block th:with="path='WIDGETS/partenaires/'">
                         		<th:block th:insert="~{inc/wiki.html}"></th:block>
                         	</th:block>
-								<div class="container container-semi-fluid">
-					     
-					                <div class="row">
-					                
-					               
-					               		<div class="mb-3">
-					                    	<div class="input-group">
-					                        	<span class="input-group-text" id="partnersSearchLabel"><span class="fas fa-search"></span></span>
-					                        	<input type="text" class="form-control" id="partnersSearch" placeholder="Filtrer" aria-label="Search" aria-describedby="partnersSearchLabel">
-					                    	</div>
-					                	</div>
-					                	                
-							            <th:block th:each="partner : ${partners}">
-											<div class="partnerCard col-md-4 col-lg-4 mb-5 mb-lg-0 mt-3" th:attr="data-string=${partner.key.name}">
-								                <div class="text-center card shadow p-4">
-								                	<a th:href="'/compensation/'+${partner.value}" rel="nofollow" >
-								                    	<img height="150" class="img-fluid" th:src="'/logo/'+${partner.key.name}"  th:alt="${partner.key.name}">
-								                	</a>
+							<div class="container container-semi-fluid">
+						
+								<div class="row">
+								
+								
+									<div class="mb-3">
+										<div class="input-group">
+											<span class="input-group-text" id="partnersSearchLabel"><span class="fas fa-search"></span></span>
+											<input type="text" class="form-control" id="partnersSearch" placeholder="Filtrer" aria-label="Search" aria-describedby="partnersSearchLabel">
+										</div>
+									</div>
+													
+									<th:block th:each="partner : ${partners}">
+										<div class="partnerCard col-md-4 col-lg-4 mb-5 mb-lg-0 mt-3" th:attr="data-string=${partner.key.name}">
+											<div class="text-center card shadow p-4">
+												<a th:href="'/compensation/'+${partner.value}" rel="nofollow" >
+													<img height="150" class="img-fluid" th:src="'/logo/'+${partner.key.name}"  th:alt="${partner.key.name}">
+												</a>
+				
+											</div>
+										</div>
+									</th:block>
+								</div>
 					
-								                </div>
-								            </div>
-							            </th:block>
-					                </div>
-	                   
-                   
-                   
-            </div>
-            
-            
+							</div>
                         </div>
 
                     </div>
@@ -93,26 +89,12 @@
              </div>
         </section>
 
-
     </main>
 
 	<!--/* Footer */-->
 	<th:block th:insert="~{inc/footer.html}"></th:block>	
 
-<!-- Core -->
-<script src="/vendor/bootstrap/dist/js/bootstrap.min.js"></script>
-<script src="/vendor/headroom.js/dist/headroom.min.js"></script>
 
-<!-- Vendor JS -->
-
-<script src="/vendor/smooth-scroll/dist/smooth-scroll.polyfills.min.js"></script>
-<script src="/vendor/vivus/dist/vivus.min.js"></script>
-<script src="/vendor/jquery/dist/jquery.min.js"></script>
-
-<!-- pixel JS -->
-<script src="../../assets/js/pixel.js"></script>
-<!-- custom sources -->
-<script src="../../assets/js/pixel-custom.js"></script>
 <script>
 $(document).ready(function() {
 

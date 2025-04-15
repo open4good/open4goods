@@ -38,12 +38,13 @@
 
 <body>
     
-	<!--/* Navbar */-->
-	<th:block th:with="page = 'opensource'" th:insert="~{inc/navbar/navbar-page.html}"></th:block>
-
-    <!--/* Loader */-->
-    <th:block th:insert="~{inc/preloader.html}"></th:block>
-	
+    <header>
+        <!--/* Loader */-->
+        <th:block th:insert="~{inc/preloader.html}"></th:block>
+        <!--/* Navbar */-->
+        <th:block th:insert="~{inc/navbar/navbar-home.html}"></th:block>
+    </header>  
+    
     <main>
     
     
@@ -54,6 +55,11 @@
                     <div class="col-lg-8 col-xl-8 text-center">
                         <h1 class="display-2 fw-light mb-4"> <span class="fw-bold">Open Source - Guide d'édition des verticales</span>
                         </h1>
+                        
+                            <div class="mt-2" th:with="parent='opensource', page='verticals-edition'" th:insert="~{inc/breadcrumb-2levels.html}"></div>
+                        
+                        
+                        
                         <p class="lead">  Ce comparateur est open source, la première intention est l'ouverture de nos catégories produits (appelées verticales dans le jargon de Nudger),
                          et de l'eco score qui est défini dans ces mêmes fichiers de configuration. Ce sont des fichiers au format YAML qui définissent le fonctionnement et le comportement 
                          d'une catégorie de produit, par exemple dans les textes affichés ou générés par IA, dans le calcul de l'ecoscore, ou encore  l'interpretation des attributs. 
@@ -192,23 +198,6 @@
 	<!--/* Footer */-->
 	<th:block th:insert="~{inc/footer.html}"></th:block>	
 
-<!-- Core -->
-<script src="/vendor/@popperjs/core/dist/umd/popper.min.js"></script>
-<script src="/vendor/bootstrap/dist/js/bootstrap.min.js"></script>
-<script src="/vendor/headroom.js/dist/headroom.min.js"></script>
-
-<!-- Vendor JS -->
-
-<script src="/vendor/smooth-scroll/dist/smooth-scroll.polyfills.min.js"></script>
-<script src="/vendor/vivus/dist/vivus.min.js"></script>
-<script src="/vendor/jquery/dist/jquery.min.js"></script>
-
-<script src="/vendor/jquery/dist/jquery.min.js"></script>
-
-<!-- pixel JS -->
-<script src="../../assets/js/pixel.js"></script>
-<!-- custom sources -->
-<script src="../../assets/js/pixel-custom.js"></script>
 <script>
 $(document).ready(function() {
     

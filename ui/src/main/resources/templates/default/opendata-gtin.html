@@ -18,14 +18,24 @@
 </head>
 
 <body>
-<th:block th:with="page = 'opendata'" th:insert="~{inc/navbar/navbar-page.html}"></th:block>
-<th:block th:insert="~{inc/preloader.html}"></th:block>
+
+    <header>
+        <!--/* Loader */-->
+        <th:block th:insert="~{inc/preloader.html}"></th:block>
+        <!--/* Navbar */-->
+        <th:block th:insert="~{inc/navbar/navbar-home.html}"></th:block>
+    </header>  
+    
+
+
+
 <main>
     <section class="section-header bg-primary text-white pb-9 pb-lg-12 mb-4 mb-lg-6">
         <div class="container-fluid">
             <div class="row justify-content-center">
                 <div class="col-12 col-md-8 text-center">
                     <h1 class="display-2 mb-3">Open Data : base de données de codes barres</h1>
+                     <div class="mt-2" th:with="parent='opendata', page='gtin'" th:insert="~{inc/breadcrumb-2levels.html}"></div>
                 </div>
             </div>
         </div>
@@ -334,21 +344,7 @@
     </section>
 </main>
 <th:block th:insert="~{inc/footer.html}"></th:block>
-<script src="/vendor/@popperjs/core/dist/umd/popper.min.js"></script>
-<script src="/vendor/bootstrap/dist/js/bootstrap.min.js"></script>
-<script src="/vendor/headroom.js/dist/headroom.min.js"></script>
-<script src="/vendor/smooth-scroll/dist/smooth-scroll.polyfills.min.js"></script>
-<script src="/vendor/vivus/dist/vivus.min.js"></script>
-<script src="/vendor/jquery/dist/jquery.min.js"></script>
-<script src="../../assets/js/pixel.js"></script>
-<script src="../../assets/js/pixel-custom.js"></script>
-<script>
-    $(document).ready(function() {
-        $('#searchInput').on("change", function(e) {
-            $('#searchForm').attr("action", "/recherche/" + encodeURIComponent($('#searchInput').val()));
-        });
-    });
-</script>
+
 </body>
 
 </html>

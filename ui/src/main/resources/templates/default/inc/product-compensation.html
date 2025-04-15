@@ -1,76 +1,135 @@
-<form method="POST" action="/nudge">
-	<div th:if="${product.bestPrice()}" class="row">
-		<div class="col-8">
-			<span class="h4 title">Contribution écologique</span>
-			<div class="h5 title"><a href="/compensation-ecologique">ⓘ Gratuite pour vous</a></div>
-		</div>
+<h6 class="d-flex align-items-center border-1">
+	<span class="badge input-group__nudger text-black me-2">1</span>Choisissez la meilleure offre
+</h6>
 
-		<div class="col-4">
-			<span class="h1 mb-0 text-gray mb-3">				
-				<span id="countup-reversment" th:data-max="${product.bestPrice().compensation}"></span> 
-				<span th:text="#{'symbol.'+${product.bestPrice().currency}}"></span>				
-			</span>			
-		</div>	
+<form method="POST" action="/nudge" class="">
+	<div class="table-responsive-sm">
+		<table th:id="offres" class="table table-hover table-nudger table-nudger-price bg-white">
+			<thead>
+				<tr>
+					<th scope="col"></th>
+					<th scope="col">Marchand</th>
+					<th scope="col">Prix</th>
+					<th scope="col">Etat</th>
+				</tr>
+			</thead>
+			<tbody>
+				<th:block th:each="offer , stats: ${product.price.offers}">
+					<tr class="p-3 align-middle" th:data-token="${offer.affiliationToken}" th:data-compensation="${offer.compensation}">
+						<td class="p-0 infos-text">
+							<span class="p-3 d-inline-flex bg-brand_secondary">
+								<img height="30" th:src="'/icon/'+${offer.datasourceName}" th:title="'icône ' + ${offer.shortDataSourceName()}">
+							</span>  
+						</td>
+						<td class="p-0 infos-text" data-toggle="tooltip" data-placement="top" th:title="${offer.offerName}" nowrap>
+							<span class="h-100 d-flex align-items-center">
+								<span class="" th:text="${offer.datasourceName}"></span>
+							</span>
+							
+						</td>
+						<td class="p-0 infos-text infos-text-secondary text-center">
+							<span class="" th:text="${offer.price}"></span> 
+							<span th:text="#{'symbol.'+${offer.currency}}"></span>
+						</td>
+						<td class="p-0 pe-3 text-end">
+							<span th:text="#{'condition.'+${offer.productState}}"></span>
+						</td>
+					</tr>
+				
+				</th:block>
+			
+			</tbody>
+		
+		</table>
 	</div>
 
+	<!--span class="h4 title">Contribution écologique</span-->
+	<div class="nudger__reversement d-flex align-items-center gap-3 px-3 py-2 bg-white my-4" th:if="${product.bestPrice()}">
+		<span class="picto">ⓘ</span>
+		<span class="somme">
+			<span id="countup-reversment" th:data-max="${product.bestPrice().compensation}"></span> 
+			<span th:text="#{'symbol.'+${product.bestPrice().currency}}"></span>
+		</span>
+		<!--a href="/compensation-ecologique"-->
+			seront reversé à votre association préférée<br>
+			si vous choisissez ce vendeur
+		<!--/a-->
+	</div>
 
-
-	<label class="my-1 me-2" for="inlineFormCustomSelectPref">Reversés au nom de votre achat</label>
+	<label class="h6 d-flex align-items-center border-1" for="inlineFormCustomSelectPref"><span class="badge input-group__nudger text-black me-2">2</span>Choisissez votre association préférée</label>
 	<select name="nudge" width="100%" class="form-select mb-3" id="inlineFormCustomSelectPref" aria-label="Choisissez votre cause">
-		<option value="nudger" selected="selected">Laisser nudger choisir !</option>
+		<option value="nudger" selected="selected">
+			Laisser nudger choisir !
+		</option>
 		<th:block th:each="org : ${config.reversementConfig.contributedOrganisations}">
     		<option th:value="${org.key}" th:text="${org.value.name}"></option>
 		</th:block>
 	</select>
 			
-	<a href="#markerPrices">
-	
-		
-		   <div th:if="${newTrend.trend == 0}" class="text-center alert alert-info" role="alert">😶‍🌫️ Le prix neuf est stable depuis <span th:text="${newTrend.formatedDuration()}"></span></div>
-		   <div th:if="${newTrend.trend == 1}"  class="text-center alert alert-tertiary" role="alert">🧐 Le prix neuf a augmenté de <b><span th:text="${#numbers.formatDecimal(newTrend.variation == null ? 0 : newTrend.variation, 0, 0)}"></span>€</b> depuis <span th:text="${newTrend.formatedDuration()}"></span> </div>
-		   <div th:if="${newTrend.trend == -1}" class="text-center alert alert-success" role="alert">Le prix neuf a baissé de <b><span th:text="${#numbers.formatDecimal(newTrend.variation == null ? 0 : newTrend.variation, 0, 0)}"></span>€</b> depuis <span th:text="${newTrend.formatedDuration()}"></span> 😊</div>
-		   <!--  
-		   <span th:text="#{'trend.'+${product.price.trend}}"></span> 
-		   -->
-	</a>
-			
-			
-<table th:id="offres" class="table table-striped" style="width: 100%">
-	<thead>
-		<tr>
-			<th>Marchand</th>
-			<th>Prix</th>
-			<th>Etat</th>
-		</tr>
-	</thead>
-	<tbody>
-	
-		<th:block  th:each="offer , stats: ${product.price.offers}">
-			<tr th:data-token="${offer.affiliationToken}" th:data-compensation="${offer.compensation}"  th:class =" ${stats.first} ? 'selected' : ''">
-				<td data-toggle="tooltip" data-placement="top" th:title="${offer.offerName}" nowrap>
-					<img height="16" width="16" class="me-2" th:src="'/icon/'+${offer.datasourceName}" th:title="'icône ' + ${offer.shortDataSourceName()}">  
-				
-					<span>
-						 <span th:text="${offer.datasourceName}"></span>
-					</span>
-				
-				</td>
-				<td><span th:text="${offer.price}"></span> <span th:text="#{'symbol.'+${offer.currency}}"></span></td>
-				<td><span th:text="#{'condition.'+${offer.productState}}"></span></td>
-			</tr>
-		
-		</th:block>
-	
-	</tbody>
+	<div class="card border-gray-300 mb-3">
+		<div class="card-body d-block d-md-flex align-items-center">
+			<div class="icon icon-shape icon-md icon-shape-primary rounded-circle me-3 mb-4 mb-md-0">
+				<span th:if="${newTrend.trend == 1}" class="fas fa-file-invoice-dollar text-danger"></span>
+				<span th:if="${newTrend.trend == 0}" class="fas fa-file-invoice-dollar text-info"></span>
+				<span th:if="${newTrend.trend == -1}" class="fas fa-file-invoice-dollar text-success"></span>
+			</div>
+			<div>
+				<span class="d-block h6 fw-normal">Evolution du prix</span>
+				<h5 th:if="${newTrend.trend == 0}" class="h3 fw-bold mb-1 text-info">
+					<span th:text="${#numbers.formatDecimal(newTrend.variation == null ? 0 : newTrend.variation, 0, 0)}"></span>€
+				</h5>
+				<h5 th:if="${newTrend.trend == 1}" class="h3 fw-bold mb-1 text-danger">
+					<span th:text="${#numbers.formatDecimal(newTrend.variation == null ? 0 : newTrend.variation, 0, 0)}"></span>€
+				</h5>
+				<h5 th:if="${newTrend.trend == -1}" class="h3 fw-bold mb-1 text-success">
+					<span th:text="${#numbers.formatDecimal(newTrend.variation == null ? 0 : newTrend.variation, 0, 0)}"></span>€
+				</h5>
+				<div class="small mt-2">
+					<p th:if="${newTrend.trend == -1}">
+						<span class="fas fa-angle-down text-success"></span>
+						<span class="fs-6">Le prix neuf a baissé</span>
+						<br>
+						<span class="fw-bold fs-6">depuis <span th:text="${newTrend.formatedDuration()}"></span></span>
+					</p>
+					<p th:if="${newTrend.trend == 0}">
+						<span class="fas fa-equals text-info"></span>
+						<span class="fs-6">Le prix neuf est stable</span>
+						<br>
+						<span class="fw-bold fs-6">depuis <span th:text="${newTrend.formatedDuration()}"></span></span>
+					</p>
+					<p th:if="${newTrend.trend == 1}">
+						<span class="fas fa-angle-up text-danger"></span>
+						<span class="fs-6">Le prix neuf a augmenté</span>
+						<br>
+						<span class="fw-bold fs-6">depuis <span th:text="${newTrend.formatedDuration()}"></span></span>
+					</p>
+				</div>
+				<!--a href="#markerPrices">
+					<span th:if="${newTrend.trend == 0}" class="text-center alert alert-info" role="alert">😶‍🌫️  <span th:text="${newTrend.formatedDuration()}"></span></span>
+					<span th:if="${newTrend.trend == 1}"  class="text-center alert alert-tertiary" role="alert">🧐  <b><span th:text="${#numbers.formatDecimal(newTrend.variation == null ? 0 : newTrend.variation, 0, 0)}"></span>€</b> depuis <span th:text="${newTrend.formatedDuration()}"></span> </span>
+					<span th:if="${newTrend.trend == -1}" class="text-center alert alert-success" role="alert"> <b><span th:text="${#numbers.formatDecimal(newTrend.variation == null ? 0 : newTrend.variation, 0, 0)}"></span>€</b> depuis <span th:text="${newTrend.formatedDuration()}"></span> 😊</span>
+ 
+					<span th:text="#{'trend.'+${product.price.trend}}"></span> 
 
-</table>
-			
-			
+				 </a-->
 
-	<input th:if="${product.bestPrice()}" type ="submit" style="width:100%" value="Nudger" formtarget="_blank" class="btn-lg btn-primary">
-
-	<input  th:if="${product.bestPrice()}" type="hidden" id="token" name="token" th:value="${product.bestPrice().affiliationToken}">			
-			
-			
-
+				 <!--a href="#markerPrices">
+					<span th:if="${newTrend.trend == 0}" class="d-block h6 fw-normal">😶‍🌫️ Le prix neuf est stable depuis <span th:text="${newTrend.formatedDuration()}"></span></span>
+					<span th:if="${newTrend.trend == 1}" class="d-block h6 fw-normal">🧐 Le prix neuf a augmenté de</span>
+					<h5 th:if="${newTrend.trend == 1}" class="h3 fw-bold mb-1">
+						<span th:text="${#numbers.formatDecimal(newTrend.variation == null ? 0 : newTrend.variation, 0, 0)}"></span>€
+					</h5> 
+					depuis <span th:text="${newTrend.formatedDuration()}"></span> </span>
+					<span th:if="${newTrend.trend == -1}" class="d-block h6 fw-normal">Le prix neuf a baissé de <b><span th:text="${#numbers.formatDecimal(newTrend.variation == null ? 0 : newTrend.variation, 0, 0)}"></span>€</b> depuis <span th:text="${newTrend.formatedDuration()}"></span> 😊</span>
+					
+					<span th:text="#{'trend.'+${product.price.trend}}"></span> 
+					
+				 </a-->
+			</div>
+		</div>
+	</div>
+	<div class="d-flex justify-content-center">
+		<input th:if="${product.bestPrice()}" type ="submit" value="Nudger" formtarget="_blank" class="w-100 btn btn__nudger">
+		<input  th:if="${product.bestPrice()}" type="hidden" id="token" name="token" th:value="${product.bestPrice().affiliationToken}">
+	</div>
 </form>

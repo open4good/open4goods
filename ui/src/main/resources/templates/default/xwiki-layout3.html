@@ -14,10 +14,14 @@
 
 <body>
     
-	<!--/* Navbar */-->
-	<th:block th:with="page = ${pageTitle}" th:insert="~{inc/navbar/navbar-page.html}"></th:block>
+    <header>
         <!--/* Loader */-->
         <th:block th:insert="~{inc/preloader.html}"></th:block>
+        <!--/* Navbar */-->
+        <th:block th:insert="~{inc/navbar/navbar-home.html}"></th:block>
+    </header>  
+    
+
 	
     <main>	
 		
@@ -27,6 +31,8 @@
                 <div class="row justify-content-center">
                     <div class="col-12 col-md-8 text-center">
                         <h1 th:text=${pageTitle} class="display-2 mb-3"></h1>
+                        <th:block th:if="${verticalConfig != null}" th:with="vConf = ${verticalConfig}, pageLabel=${pageTitle}" th:insert="~{inc/breadcrumb-vertical.html}">
+                        </th:block>                        
                     </div>
                 </div>
             </div>
@@ -60,21 +66,6 @@
 	<!--/* Footer */-->
 	<th:block th:insert="~{inc/footer.html}"></th:block>	
 
-<!-- Core -->
-<script src="/vendor/@popperjs/core/dist/umd/popper.min.js"></script>
-<script src="/vendor/bootstrap/dist/js/bootstrap.min.js"></script>
-<script src="/vendor/headroom.js/dist/headroom.min.js"></script>
-
-<!-- Vendor JS -->
-
-<script src="/vendor/smooth-scroll/dist/smooth-scroll.polyfills.min.js"></script>
-<script src="/vendor/vivus/dist/vivus.min.js"></script>
-
-<script src="/vendor/jquery/dist/jquery.min.js"></script>
-<!-- pixel JS -->
-<script src="../../assets/js/pixel.js"></script>
-<!-- custom sources -->
-<script src="../../assets/js/pixel-custom.js"></script>
 </body>
 
 </html>

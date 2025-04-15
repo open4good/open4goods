@@ -21,10 +21,14 @@
 </head>
 
 <body>
- 	<!--/* Navbar */-->
-	<th:block th:insert="~{inc/navbar/navbar-home.html}"></th:block>
-    <!--/* Loader */-->
-    <th:block th:insert="~{inc/preloader.html}"></th:block>
+    <header>
+        <!--/* Loader */-->
+        <th:block th:insert="~{inc/preloader.html}"></th:block>
+        <!--/* Navbar */-->
+        <th:block th:insert="~{inc/navbar/navbar-home.html}"></th:block>
+    </header>  
+    
+
 	
     <main>
 
@@ -40,6 +44,9 @@
 					</div>
 					<div class="col-12 col-md-9 text-center text-md-left">
 						<h2 class="h1 mb-4 mt-4 mt-sm-0">Todo Driven Development!</h2>
+
+						<div class="mt-2" th:with="parent='opensource', page='todo'" th:insert="~{inc/breadcrumb-2levels.html}"></div>
+
 						<p class="lead">Un code parfait, ça n'existe pas ! Les TODO's permettent de consulter dans le code les points de progres, bugs potentiels, évolutions possibles. C'est un marqueur important côté technique.</p>
 						
 						
@@ -174,36 +181,14 @@
 	<!--/* Footer */-->
 	<th:block th:insert="~{inc/footer.html}"></th:block>	
 
-<!-- Core -->
-<script src="/vendor/bootstrap/dist/js/bootstrap.min.js"></script>
-<script src="/vendor/headroom.js/dist/headroom.min.js"></script>
-
-<!-- Vendor JS -->
-
-<script src="/vendor/smooth-scroll/dist/smooth-scroll.polyfills.min.js"></script>
-<script src="/vendor/vivus/dist/vivus.min.js"></script>
-<script src="/vendor/jquery/dist/jquery.min.js"></script>
-<script src="/vendor/@popperjs/core/dist/umd/popper.min.js"></script>
+    <!--/* Footer */-->
+    <th:block th:insert="~{inc/footer.html}"></th:block>
+    
 
 <script type="text/javascript" language="javascript" src="/webjars/datatables/js/dataTables.min.js"></script>
 <script type="text/javascript" language="javascript" src="/webjars/datatables/js/dataTables.bootstrap5.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-
-<script src="/vendor/nouislider/dist/nouislider.min.js"></script>
-
-<!-- pixel JS -->
-<script src="../../assets/js/pixel.js"></script>
-
-<!-- custom sources -->
-<script src="../../assets/js/pixel-custom.js"></script>
-
-<script src="/webjars/mustache/mustache.min.js"></script>
-
-
-
-<!-- Ajax loaded table template -->
-<div id="tpl_place" class="hidden"></div>
 
 <!-- Setting up variables -->
 <script th:inline="javascript">
