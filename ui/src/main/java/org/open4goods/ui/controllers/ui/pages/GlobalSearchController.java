@@ -51,14 +51,11 @@ public class GlobalSearchController  implements SitemapExposedController{
 						   .add(SitemapEntry.LANGUAGE_FR, FR_PATH);
 	}
 	
-	@PostMapping({ FR_PATH+ "/{query}",  DEFAULT_PATH+ "/{query}"})
-	public ModelAndView searchPost(final HttpServletRequest request, @PathVariable String query, HttpServletResponse response) {
+	@PostMapping({ FR_PATH,  DEFAULT_PATH})
+	public ModelAndView searchPost(final HttpServletRequest request, @RequestParam String q, HttpServletResponse response) {
 
-		response.setStatus(HttpServletResponse.SC_MOVED_PERMANENTLY);
-
-		String[] frags = request.getServletPath().substring(1).split("/");
-		response.setHeader("Location", config.getBaseUrl(Locale.FRANCE) +  frags[0]+"/"+ URLEncoder.encode(frags[1],Charset.defaultCharset()) );
-		return null;
+		
+		return searchGet(request, q);
 	}
 
 	@GetMapping({FR_PATH, DEFAULT_PATH})

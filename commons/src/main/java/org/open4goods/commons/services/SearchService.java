@@ -127,10 +127,16 @@ public class SearchService {
 
 	    NativeQueryBuilder nativeQueryBuilder = NativeQuery.builder();
 
-	
+	    // TODO(P1,security) : entry sanitisation
         String[] tokens = query.split(" ");
         List<Query> shouldClauses = new ArrayList<>();
-
+        
+        
+        
+        
+        shouldClauses.add(Query.of(q -> q.matchPhrasePrefix(m ->
+        m.field("offerNames").query(initialQuery).boost(5.0f))));
+                
         for (String token : tokens) {
             // Boosted referential attributes
 //            shouldClauses.add(Query.of(q -> q.term(t ->
@@ -141,15 +147,15 @@ public class SearchService {
 
             // Prefix match in offer names (autocomplete behavior)
             shouldClauses.add(Query.of(q -> q.matchPhrasePrefix(m ->
-                m.field("offerNames").query(token).boost(5.0f))));
+                m.field("offerNames").query(token).boost(3.0f))));
 
             // Standard match in offer names
             shouldClauses.add(Query.of(q -> q.match(m ->
                 m.field("offerNames").query(token).boost(2.0f))));
 
-            // Fuzzy match in offer names (for typos)
-            shouldClauses.add(Query.of(q -> q.match(m ->
-                m.field("offerNames").query(token).fuzziness("AUTO").boost(0.6f))));
+//            // Fuzzy match in offer names (for typos)
+//            shouldClauses.add(Query.of(q -> q.match(m ->
+//                m.field("offerNames").query(token).fuzziness("AUTO").boost(0.6f))));
         }
 
         // Construct bool query with optional filters
@@ -215,7 +221,7 @@ public class SearchService {
 
 	    // Sorting (if enabled)
 	    if (sort) {
-	        nativeQueryBuilder.withSort(Sort.by(Sort.Order.desc("offersCount")));
+	        //nativeQueryBuilder.withSort(Sort.by(Sort.Order.desc("offersCount")));
 	    }
 
 	    // Pagination
