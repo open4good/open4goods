@@ -56,6 +56,15 @@ public class NamesAggregationService extends AbstractAggregationService {
 
 		logger.info("Name generation for product {}", data.getId());
 
+		
+		// Cleaning offernames too long.. Can happens on some CSV parsing bugs
+		// TODO(p3,conf) : limit from conf
+		data.setOfferNames(data.getOfferNames().stream().filter(e->e.length() < 200).collect(Collectors.toSet()));
+		
+		
+		
+		
+		
 		// Getting the config for the category, if any
 		Map<String, ProductI18nElements> tConfs = verticalService.getConfigByIdOrDefault(data.getVertical()).getI18n();
 
