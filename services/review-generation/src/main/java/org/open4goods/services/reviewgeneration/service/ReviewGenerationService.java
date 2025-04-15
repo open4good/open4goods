@@ -617,21 +617,21 @@ public class ReviewGenerationService implements HealthIndicator {
      */
 	private void populateAttributes(Product product, AiReview newReview) {
 		// Handling attributes
-		newReview.attributes().stream().forEach(a -> {
+		newReview.getAttributes().stream().forEach(a -> {
 			
-			ProductAttribute agg = product.getAttributes().getAll().get(a.name());
+			ProductAttribute agg = product.getAttributes().getAll().get(a.getName());
 			if (null == agg) {
 				// A first time match
 				agg = new ProductAttribute();
-				agg.setName(a.name());
+				agg.setName(a.getName());
 			}
 
 			
 			String source;
 			try {
-				// TODO
+				// TODO : i18n, const or deduct  provider name from source
 				source = "openai.com";
-				agg.addSourceAttribute(new SourcedAttribute(new Attribute(a.name(), a.value(), "fr") , source));
+				agg.addSourceAttribute(new SourcedAttribute(new Attribute(a.getName(), a.getValue(), "fr") , source));
 				
 				// Replacing new AggAttribute in product
 				product.getAttributes().getAll().put(agg.getName(), agg);
@@ -661,6 +661,7 @@ public class ReviewGenerationService implements HealthIndicator {
     	if (output.response().body().choices().size() > 1) {
     		logger.error("Error, multiple choices for {}", output);
     	}
+    	//TODO(p2, perf) : instance variable
     	var outputConverter = new BeanOutputConverter<>(AiReview.class);
 		  
 		  String jsonContent = output.response().body().choices().getFirst().message().getContent();
@@ -760,28 +761,28 @@ public class ReviewGenerationService implements HealthIndicator {
      * @return a new AiReview with updated text fields.
      */
     private AiReview updateAiReviewReferences(AiReview review) {
-        String description = replaceReferences(review.description());
-        String shortDescription = replaceReferences(review.shortDescription());
-        String mediumTitle = replaceReferences(review.mediumTitle());
-        String shortTitle = replaceReferences(review.shortTitle());
-        String technicalReview = replaceReferences(review.technicalReview());
-        String ecologicalReview = replaceReferences(review.ecologicalReview());
-        String summary = replaceReferences(review.summary());
-        String dataQuality = replaceReferences(review.dataQuality());
-        List<String> pros = review.pros().stream().map(this::replaceReferences).toList();
-        List<String> cons = review.cons().stream().map(this::replaceReferences).toList();
-        List<AiReview.AiSource> sources = review.sources().stream()
+        String description = replaceReferences(review.getDescription());
+        String shortDescription = replaceReferences(review.getShortDescription());
+        String mediumTitle = replaceReferences(review.getMediumTitle());
+        String shortTitle = replaceReferences(review.getShortTitle());
+        String technicalReview = replaceReferences(review.getTechnicalReview());
+        String ecologicalReview = replaceReferences(review.getEcologicalReview());
+        String summary = replaceReferences(review.getSummary());
+        String dataQuality = replaceReferences(review.getDataQuality());
+        List<String> pros = review.getPros().stream().map(this::replaceReferences).toList();
+        List<String> cons = review.getCons().stream().map(this::replaceReferences).toList();
+        List<AiReview.AiSource> sources = review.getSources().stream()
                 .map(source -> new AiReview.AiSource(
-                        source.number(),
-                        replaceReferences(source.name()),
-                        replaceReferences(source.description()),
-                        source.url()
+                        source.getNumber(),
+                        replaceReferences(source.getName()),
+                        replaceReferences(source.getDescription()),
+                        source.getUrl()
                 ))
                 .toList();
-        List<AiReview.AiAttribute> attributes = review.attributes().stream()
+        List<AiReview.AiAttribute> attributes = review.getAttributes().stream()
                 .map(attr -> new AiReview.AiAttribute(
-                        replaceReferences(attr.name()),
-                        replaceReferences(attr.value()), attr.number()
+                        replaceReferences(attr.getName()),
+                        replaceReferences(attr.getValue()), attr.getNumber()
                 ))
                 .toList();
         return new AiReview(
