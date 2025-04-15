@@ -55,7 +55,7 @@ public class UrlFetchingServiceMock {
     public UrlFetchingService urlFetchingService() {
         UrlFetchingService mockService = org.mockito.Mockito.mock(UrlFetchingService.class);
 
-        org.mockito.Mockito.when(mockService.fetchUrl(org.mockito.ArgumentMatchers.anyString()))
+        org.mockito.Mockito.when(mockService.fetchUrlAsync(org.mockito.ArgumentMatchers.anyString()))
             .thenAnswer(invocation -> {
                 String url = invocation.getArgument(0, String.class);
                 String fileName = sanitizeUrlToFileName(url);

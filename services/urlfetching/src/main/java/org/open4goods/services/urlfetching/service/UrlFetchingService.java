@@ -65,7 +65,7 @@ public class UrlFetchingService {
      * @param url the URL to fetch
      * @return a CompletableFuture of FetchResponse
      */
-    public CompletableFuture<FetchResponse> fetchUrl(String url) {
+    public CompletableFuture<FetchResponse> fetchUrlAsync(String url) {
         logger.info("Initiating fetch for URL: {}", url);
         String domain = getDomainFromUrl(url);
         DomainConfig domainConfig = urlFetcherConfig.getDomains().get(domain);
@@ -77,7 +77,7 @@ public class UrlFetchingService {
         }
 
         Fetcher fetcher = getFetcherForStrategy(domainConfig);
-        CompletableFuture<FetchResponse> future = fetcher.fetchUrl(url);
+        CompletableFuture<FetchResponse> future = fetcher.fetchUrlAsync(url);
         return future.thenApply(response -> {
             // Recording mode: if enabled, record the fetch response to file.
             if (urlFetcherConfig.getRecord() != null && urlFetcherConfig.getRecord().isEnabled()) {
@@ -90,7 +90,25 @@ public class UrlFetchingService {
             return response;
         });
     }
+    public FetchResponse fetchUrlSync(String url) throws IOException, InterruptedException {
+        logger.info("Initiating fetch for URL: {}", url);
+        String domain = getDomainFromUrl(url);
+        DomainConfig domainConfig = urlFetcherConfig.getDomains().get(domain);
+        if (domainConfig == null) {
+            logger.warn("No specific configuration found for domain '{}'. Using default configuration.", domain);
+            domainConfig = new DomainConfig();
+            domainConfig.setUserAgent("DefaultUserAgent/1.0");
+            domainConfig.setStrategy(FetchStrategy.HTTP);
+        }
 
+        Fetcher fetcher = getFetcherForStrategy(domainConfig);
+        FetchResponse response = fetcher.fetchUrlSync(url);
+        recordResponse(url, response);
+        return response;
+        
+        
+    }
+    
     /**
      * Returns a Fetcher implementation based on the configured strategy.
      *

@@ -1,5 +1,6 @@
 package org.open4goods.services.urlfetching.service.fetchers;
 
+import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -63,7 +64,7 @@ public class HttpFetcher implements Fetcher {
      * @return a CompletableFuture of FetchResponse
      */
     @Override
-    public CompletableFuture<FetchResponse> fetchUrl(String url) {
+    public CompletableFuture<FetchResponse> fetchUrlAsync(String url) {
     	logger.info("Executor stats before fetchUrl: active={}, queued={}, poolSize={}",
     		    ((ThreadPoolExecutor) executor).getActiveCount(),
     		    ((ThreadPoolExecutor) executor).getQueue().size(),
@@ -93,4 +94,38 @@ public class HttpFetcher implements Fetcher {
                     return new FetchResponse(url, statusCode, htmlContent, markdownContent,FetchStrategy.HTTP);
                 });
     }
+    
+    public FetchResponse fetchUrlSync(String url) throws IOException, InterruptedException {
+        logger.info("Executor stats before fetchUrl: active={}, queued={}, poolSize={}",
+                ((ThreadPoolExecutor) executor).getActiveCount(),
+                ((ThreadPoolExecutor) executor).getQueue().size(),
+                ((ThreadPoolExecutor) executor).getPoolSize());
+
+        HttpRequest.Builder requestBuilder = HttpRequest.newBuilder()
+                .uri(URI.create(url))
+                .GET()
+                .timeout(timeout)
+                .header("User-Agent", this.userAgent);
+
+        // Add custom headers if available
+        if (customHeaders != null) {
+            customHeaders.forEach(requestBuilder::header);
+        }
+
+        HttpRequest request = requestBuilder.build();
+
+        HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+
+        int statusCode = response.statusCode();
+        String htmlContent = response.body();
+        String markdownContent = HtmlToMarkdownConverter.convert(htmlContent);
+
+        // Increment metrics
+        meterRegistry.counter("url.fetch.total").increment();
+        meterRegistry.counter("url.fetch.status", "code", String.valueOf(statusCode)).increment();
+        logger.info("Fetched URL {} with status code {}", url, statusCode);
+
+        return new FetchResponse(url, statusCode, htmlContent, markdownContent, FetchStrategy.HTTP);
+    }
+
 }

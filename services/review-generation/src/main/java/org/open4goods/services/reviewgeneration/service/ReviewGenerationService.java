@@ -278,7 +278,7 @@ public class ReviewGenerationService implements HealthIndicator {
             String url = result.getLink();
             CompletableFuture<FetchResponse> future = CompletableFuture.supplyAsync(() -> {
                 try {
-                    return urlFetchingService.fetchUrl(url).get();
+                    return urlFetchingService.fetchUrlAsync(url).get();
                 } catch (Exception e) {
                     logger.warn("Failed to fetch content from URL {}: {}", url, e.getMessage());
                     return null;

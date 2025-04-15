@@ -1,5 +1,6 @@
 package org.open4goods.services.urlfetching.service;
 
+import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
 
 import org.open4goods.services.urlfetching.dto.FetchResponse;
@@ -15,5 +16,9 @@ public interface Fetcher {
      * @param url the URL to fetch
      * @return a CompletableFuture of {@link FetchResponse}
      */
-    CompletableFuture<FetchResponse> fetchUrl(String url);
+    CompletableFuture<FetchResponse> fetchUrlAsync(String url);
+    
+    
+    FetchResponse fetchUrlSync(String url) throws IOException, InterruptedException ;
+    	
 }
