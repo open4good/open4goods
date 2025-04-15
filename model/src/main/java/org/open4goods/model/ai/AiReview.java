@@ -1,149 +1,320 @@
 package org.open4goods.model.ai;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+
+import java.util.ArrayList;
 import java.util.List;
 
 /**
  * Represents an AI-generated review of a product, including descriptions, pros and cons, 
  * data quality assessment, and sourced information.
  */
-public record AiReview(
-		
-	
-    /**
-     * A detailed description of the product.
-     */
-    @JsonProperty(required = true, value = "description") 
-    @AiGeneratedField(instruction="Description du produit, 150 mots maximum")
-    String description,
-    
-    /**
-     * A brief summary of the product.
-     */
-    @JsonProperty(required = true, value = "short_description") 
-    @AiGeneratedField(instruction="Description courte du produit, 50 mots maximum")
-    String shortDescription,
+public class AiReview {
 
-    /**
-     * A medium-length title summarizing the product.
-     */
-    @JsonProperty(required = true, value = "mediumTitle") 
-    @AiGeneratedField(instruction="Titre de longueur moyenne, 10 mots maximum")
-    String mediumTitle,
+    public AiReview(String description, String shortDescription, String mediumTitle, String shortTitle, String technicalReview, String ecologicalReview, String summary, List<String> pros, List<String> cons, List<AiSource> sources, List<AiAttribute> attributes, String dataQuality) {
+		super();
+		this.description = description;
+		this.shortDescription = shortDescription;
+		this.mediumTitle = mediumTitle;
+		this.shortTitle = shortTitle;
+		this.technicalReview = technicalReview;
+		this.ecologicalReview = ecologicalReview;
+		this.summary = summary;
+		this.pros = pros;
+		this.cons = cons;
+		this.sources = sources;
+		this.attributes = attributes;
+		this.dataQuality = dataQuality;
+	}
 
-    /**
-     * A short title for the product.
-     */
-    @JsonProperty(required = true, value = "shortTitle") 
-    @AiGeneratedField(instruction="Titre court, 5 mots maximum")
-    String shortTitle,
+	/** A detailed description of the product. */
+    @JsonProperty(required = true, value = "description")
+    @AiGeneratedField(instruction = "Description du produit, 150 mots maximum")
+    private String description;
 
-    /**
-     * The technical review of the product.
-     */
+    /** A brief summary of the product. */
+    @JsonProperty(required = true, value = "short_description")
+    @AiGeneratedField(instruction = "Description courte du produit, 50 mots maximum")
+    private String shortDescription;
+
+    /** A medium-length title summarizing the product. */
+    @JsonProperty(required = true, value = "mediumTitle")
+    @AiGeneratedField(instruction = "Titre de longueur moyenne, 10 mots maximum")
+    private String mediumTitle;
+
+    /** A short title for the product. */
+    @JsonProperty(required = true, value = "shortTitle")
+    @AiGeneratedField(instruction = "Titre court, 5 mots maximum")
+    private String shortTitle;
+
+    /** The technical review of the product. */
     @JsonProperty(required = true, value = "technicalReview")
-    @AiGeneratedField(instruction="Revue technique approfondie du produit, uniquement basée sur le contenu des pages webs fournies.")
-    String technicalReview,
+    @AiGeneratedField(instruction = "Revue technique approfondie du produit, uniquement basée sur le contenu des pages webs fournies.")
+    private String technicalReview;
 
-    /**
-     * The ecological review of the product.
-     */
-    @JsonProperty(required = true, value = "ecologicalReview") 
-    @AiGeneratedField(instruction="Revue écologique du produit")
-    String ecologicalReview,
+    /** The ecological review of the product. */
+    @JsonProperty(required = true, value = "ecologicalReview")
+    @AiGeneratedField(instruction = "Revue écologique du produit")
+    private String ecologicalReview;
 
-    /**
-     * A summary of the product review.
-     */
-    @JsonProperty(required = true, value = "summary") 
-    @AiGeneratedField(instruction="Synthèse des évaluations et tests réalisés sur ce produit")
-    String summary,
+    /** A summary of the product review. */
+    @JsonProperty(required = true, value = "summary")
+    @AiGeneratedField(instruction = "Synthèse des évaluations et tests réalisés sur ce produit")
+    private String summary;
 
-    /**
-     * The pros of the product.
-     */
-    @AiGeneratedField(instruction="Les avantages du produit")
-    @JsonProperty(required = true, value = "pros") List<String> pros,
+    /** The pros of the product. */
+    @JsonProperty(required = true, value = "pros")
+    @AiGeneratedField(instruction = "Les avantages du produit")
+    private List<String> pros = new ArrayList<>();
 
-    /**
-     * The cons of the product.
-     */
-    @AiGeneratedField(instruction="Les inconvénients du produit")
-    @JsonProperty(required = true, value = "cons") List<String> cons,
+    /** The cons of the product. */
+    @JsonProperty(required = true, value = "cons")
+    @AiGeneratedField(instruction = "Les inconvénients du produit")
+    private List<String> cons = new ArrayList<>();
 
-    /**
-     * The sources providing the information for this review.
-     */
-    @JsonProperty(required = true, value = "sources") List<AiSource> sources,
+    /** The sources providing the information for this review. */
+    @JsonProperty(required = true, value = "sources")
+    private List<AiSource> sources = new ArrayList<>();
 
-    /**
-     * The attributes related to the product.
-     */
-    @JsonProperty(required = true, value = "attributes") List<AiAttribute> attributes,
+    /** The attributes related to the product. */
+    @JsonProperty(required = true, value = "attributes")
+    private List<AiAttribute> attributes = new ArrayList<>();
 
-    /**
-     * The quality of data used for the review.
-     */
-    @JsonProperty(required = true, value = "dataQuality") 
-    @AiGeneratedField(instruction="Analyse de la qualité et de la richesse des contenus webs qui te sont fournis")
-    String dataQuality
-) {
+    /** The quality of data used for the review. */
+    @JsonProperty(required = true, value = "dataQuality")
+    @AiGeneratedField(instruction = "Analyse de la qualité et de la richesse des contenus webs qui te sont fournis")
+    private String dataQuality;
 
+    /** No-args constructor (required for deserialization) */
+    public AiReview() {}
+
+    // Getters and setters
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public String getShortDescription() {
+        return shortDescription;
+    }
+
+    public void setShortDescription(String shortDescription) {
+        this.shortDescription = shortDescription;
+    }
+
+    public String getMediumTitle() {
+        return mediumTitle;
+    }
+
+    public void setMediumTitle(String mediumTitle) {
+        this.mediumTitle = mediumTitle;
+    }
+
+    public String getShortTitle() {
+        return shortTitle;
+    }
+
+    public void setShortTitle(String shortTitle) {
+        this.shortTitle = shortTitle;
+    }
+
+    public String getTechnicalReview() {
+        return technicalReview;
+    }
+
+    public void setTechnicalReview(String technicalReview) {
+        this.technicalReview = technicalReview;
+    }
+
+    public String getEcologicalReview() {
+        return ecologicalReview;
+    }
+
+    public void setEcologicalReview(String ecologicalReview) {
+        this.ecologicalReview = ecologicalReview;
+    }
+
+    public String getSummary() {
+        return summary;
+    }
+
+    public void setSummary(String summary) {
+        this.summary = summary;
+    }
+
+    public List<String> getPros() {
+        return pros;
+    }
+
+    public void setPros(List<String> pros) {
+        this.pros = pros;
+    }
+
+    public List<String> getCons() {
+        return cons;
+    }
+
+    public void setCons(List<String> cons) {
+        this.cons = cons;
+    }
+
+    public List<AiSource> getSources() {
+        return sources;
+    }
+
+    public void setSources(List<AiSource> sources) {
+        this.sources = sources;
+    }
+
+    public List<AiAttribute> getAttributes() {
+        return attributes;
+    }
+
+    public void setAttributes(List<AiAttribute> attributes) {
+        this.attributes = attributes;
+    }
+
+    public String getDataQuality() {
+        return dataQuality;
+    }
+
+    public void setDataQuality(String dataQuality) {
+        this.dataQuality = dataQuality;
+    }
+
+    // --- Inner static classes converted from records ---
 
     /**
      * Represents a source of information for an AI-generated review.
      */
-    public record AiSource(
-        /**
-         * The reference number of the source.
-         */
-        @JsonProperty(required = true, value = "number") 
-        @AiGeneratedField(instruction="Le numéro de la source documentaire fournie")
-        Integer number,
+    public static class AiSource {
 
-        /**
-         * The name of the source.
-         */
-        @AiGeneratedField(instruction="Le nom de la source documentaire fournie")
-        @JsonProperty(required = true, value = "name") String name,
+        public AiSource() {
+			super();
+		}
 
-        /**
-         * A description of the source.
-         */
-        @AiGeneratedField(instruction="Courte description de la source documentaire fournie")
-        @JsonProperty(required = true, value = "description") String description,
+		public AiSource(Integer number, String name, String description, String url) {
+			super();
+			this.number = number;
+			this.name = name;
+			this.description = description;
+			this.url = url;
+		}
 
-        /**
-         * The URL of the source.
-         */
-        @AiGeneratedField(instruction="URL de la source documentaire fournie")
-        @JsonProperty(required = true, value = "url") String url
-    ) {}
+		/** The reference number of the source. */
+        @JsonProperty(required = true, value = "number")
+        @AiGeneratedField(instruction = "Le numéro de la source documentaire fournie")
+        private Integer number;
+
+        /** The name of the source. */
+        @JsonProperty(required = true, value = "name")
+        @AiGeneratedField(instruction = "Le nom de la source documentaire fournie")
+        private String name;
+
+        /** A description of the source. */
+        @JsonProperty(required = true, value = "description")
+        @AiGeneratedField(instruction = "Courte description de la source documentaire fournie")
+        private String description;
+
+        /** The URL of the source. */
+        @JsonProperty(required = true, value = "url")
+        @AiGeneratedField(instruction = "URL de la source documentaire fournie")
+        private String url;
+
+
+        public Integer getNumber() {
+            return number;
+        }
+
+        public void setNumber(Integer number) {
+            this.number = number;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public void setName(String name) {
+            this.name = name;
+        }
+
+        public String getDescription() {
+            return description;
+        }
+
+        public void setDescription(String description) {
+            this.description = description;
+        }
+
+        public String getUrl() {
+            return url;
+        }
+
+        public void setUrl(String url) {
+            this.url = url;
+        }
+    }
 
     /**
      * Represents an attribute of the product.
      */
-    public record AiAttribute(
-        /**
-         * The name of the attribute.
-         */
-        @JsonProperty(required = true, value = "name") 
-        @AiGeneratedField(instruction="Le nom de l'attribut")
-        String name,
+    public static class AiAttribute {
+    	
+    	
 
-        /**
-         * The value of the attribute.
-         */
-        @JsonProperty(required = true, value = "value") 
-        @AiGeneratedField(instruction="La valeur de l'attribut")
-        String value,
-        
-        /**
-         * The source of the attribute.
-         */
-        @JsonProperty(required = true, value = "number") 
-        @AiGeneratedField(instruction="La référence de la source qui indique cet attribut")
-        Integer number
-        
-    ) {}
+        public AiAttribute() {
+			super();
+		}
+
+		public AiAttribute(String name, String value, Integer number) {
+			super();
+			this.name = name;
+			this.value = value;
+			this.number = number;
+		}
+
+		/** The name of the attribute. */
+        @JsonProperty(required = true, value = "name")
+        @AiGeneratedField(instruction = "Le nom de l'attribut")
+        private String name;
+
+        /** The value of the attribute. */
+        @JsonProperty(required = true, value = "value")
+        @AiGeneratedField(instruction = "La valeur de l'attribut")
+        private String value;
+
+        /** The source number of the attribute. */
+        @JsonProperty(required = true, value = "number")
+        @AiGeneratedField(instruction = "La référence de la source qui indique cet attribut")
+        private Integer number;
+
+
+        public String getName() {
+            return name;
+        }
+
+        public void setName(String name) {
+            this.name = name;
+        }
+
+        public String getValue() {
+            return value;
+        }
+
+        public void setValue(String value) {
+            this.value = value;
+        }
+
+        public Integer getNumber() {
+            return number;
+        }
+
+        public void setNumber(Integer number) {
+            this.number = number;
+        }
+    }
 }
