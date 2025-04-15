@@ -26,26 +26,25 @@
 <meta name="twitter:image" th:content="${baseUrl} + 'assets/img/brand/light.svg'">
 </head>
 
-<body>
-	<!--/* Top navigation with semantic header */-->
-	<header role="banner">
-		<div class="bg-green-transparent">
-			<th:block th:with="page = 'contribution écologique'" th:insert="~{inc/navbar/navbar-page.html}"></th:block>
-		</div>
-	</header>
-
-	<!--/* Loader (if needed) */-->
-	<th:block th:insert="~{inc/preloader.html}"></th:block>
-
+<body class="contribution">
+    <header>
+        <!--/* Loader */-->
+        <th:block th:insert="~{inc/preloader.html}"></th:block>
+        <!--/* Navbar */-->
+        <th:block th:insert="~{inc/navbar/navbar-home.html}"></th:block>
+    </header>
 	<main>
+		<!--div class="mt-2" th:with="page='contribution'" th:insert="~{inc/breadcrumb-1level.html}"></div-->
 		<!--/* Hero Section */-->
-		<section class="section-header overflow-hidden pt-7 pt-lg-8 pb-7 bg-green-transparent" role="region" aria-labelledby="hero-section-title">
+		<section class="section-header overflow-hidden pt-7 pt-lg-8 pb-7 bg-primary" role="region" aria-labelledby="hero-section-title">
 			<div class="container">
-				<div class="row justify-content-between align-items-center">
+				<div class="row justify-content-between align-items-center text-white text-center">
 					<h1 id="hero-section-title" class="display-2 mb-4">La contribution écologique</h1>
-					<th:block th:with="path='pages/contribution/hero/'">
-						<th:block th:insert="~{inc/wiki.html}"></th:block>
-					</th:block>
+					<div class="lead fw-normal text-muted mb-4 px-lg-10">
+						<th:block th:with="path='pages/contribution/hero/'">
+							<th:block th:insert="~{inc/wiki.html}"></th:block>
+						</th:block>
+					</div>
 				</div>
 			</div>
 			<figure class="position-absolute bottom-0 left-0 w-100 d-none d-md-block mb-n2">
@@ -58,10 +57,10 @@
 		<!--/* Contribution Section */-->
 		<section class="section section-md" role="region" aria-labelledby="contribution-section">
 			<div class="container">
-				<div class="row d-flex flex-wrap align-items-center justify-content-around">
-					<div class="col-lg-5 mb-5">
+				<div class="row d-flex flex-wrap align-items-center">
+					<div class="col-lg-5">
 						<!-- Use lazy loading for performance improvement -->
-						<img class="organic-radius img-fluid" src="../../assets/img/illustrations/compensation-carbone.jpg" alt="Compensation carbone" loading="lazy">
+						<img class="organic-radius img-fluid" src="/img/compensation-ecologique-top.jpg" alt="Compensation carbone" loading="lazy">
 					</div>
 					<div class="col-lg-7">
 						<blockquote class="blockquote text-center">
@@ -79,239 +78,202 @@
 		</section>
 
 		<!--/* Nudger Numbers Section */-->
-		<section role="region" aria-labelledby="nudger-numbers-title">
-			<div class="bg-green-transparent text-center py-4 mb-2">
-				<h2 id="nudger-numbers-title" class="h1 mb-3">L'action de Nudger en chiffres</h2>
-				<p class="lead mb-0">Ce n'est qu'un début !</p>
-			</div>
-			<div class="container text-center">
+		<section class="text-center py-4" role="region" aria-labelledby="nudger-numbers-title">
+			<h2 class="h1 mb-3">L'action de Nudger en chiffres</h2>
+			<p class="lead mb-0">Ce n'est qu'un début !</p>
+			
+			<section class="container text-center py-4">
 				<div class="row justify-content-center">
-					<div class="row justify-content-center">
-						<div class="col-12 col-md-6 col-lg-4 py-3">
-							<div class="icon-box mb-4">
-								<div class="icon icon-shape icon-shape-secondary me-2 me-md-0 mb-2" aria-hidden="true">
-									<span class="fas fa-user"></span>
-								</div>
-								<h3 class="h5">Organismes</h3>
-								<span class="counter display-3 text-gray d-block" th:text="${config.reversementConfig.getDistingReversementsOrganisation()}"></span>
-							</div>
+					<div class="col-12 col-md-6 col-lg-4 py-3">
+						<div class="icon icon-shape icon-lg bg-white shadow-lg border-light rounded-circle mb-4">
+							<span class="fas fa-user text-tertiary" aria-hidden="true"></span>
 						</div>
-						<div class="col-12 col-md-6 col-lg-4 py-3">
-							<div class="icon-box mb-4">
-								<div class="icon icon-shape icon-shape-secondary me-2 me-md-0 mb-2" aria-hidden="true">
-									<span class="fas fa-money-check"></span>
-								</div>
-								<h3 class="h5">Versements effectués</h3>
-								<span class="counter display-3 text-gray d-block">2</span>
-							</div>
-						</div>
-						<div class="col-12 col-md-6 col-lg-4 py-3">
-							<div class="icon-box mb-4">
-								<div class="icon icon-shape icon-shape-secondary me-2 me-md-0 mb-2" aria-hidden="true">
-									<span class="fas fa-euro-sign"></span>
-								</div>
-								<h3 class="h5">Montant reversé</h3>
-								<span> <span class="display-3 text-gray d-block" th:text="${config.reversementConfig.getTotalReversements()}"></span>€
-								</span>
-							</div>
-						</div>
+						<span class="counter display-3 fw-bolder d-block my-4" th:text="${config.reversementConfig.getDistingReversementsOrganisation()}"></span>
+						<span class="text-gray">Organismes</span>
 					</div>
+					<div class="col-12 col-md-6 col-lg-4 py-3">
+						<div class="icon icon-shape icon-lg bg-white shadow-lg border-light rounded-circle mb-4">
+							<span class="fas fa-money-check text-tertiary" aria-hidden="true"></span>
+						</div>
+						<span class="counter display-3 fw-bolder d-block my-4">2</span>
+						<span class="text-gray">Versements effectués</span>
+					</div>
+					<div class="col-12 col-md-6 col-lg-4 py-3">
+						<div class="icon icon-shape icon-lg bg-white shadow-lg border-light rounded-circle mb-4">
+							<span class="fas fa-euro-sign text-tertiary" aria-hidden="true"></span>
+						</div>
+						<span class="counter display-3 fw-bolder d-block my-4" th:text="${config.reversementConfig.getTotalReversements()}"></span>
+						<span class="text-gray">Montant reversé</span>
+					</div>		
 				</div>
-			</div>
-		</section>
+			</section>
 
 		<!--/* Vote Section */-->
-		<section role="region" aria-labelledby="vote-section-title">
-			<div id="vote" class="bg-green-transparent text-center py-4 mb-5">
-				<h2 id="vote-section-title" class="h1 mb-3">Vous décidez !</h2>
-			</div>
-			<div class="container">
-				<div class="row justify-content-between align-items-center">
+		<section class="section section-lg bg-primary">
+            <div class="container">
+				<div class="row justify-content-center mb-4 mb-lg-6 text-white">
+					<div class="col-12 col-lg-9 text-center">
+                		<h2 class="display-3 fw-light mb-4">Vous décidez !</h2>
+						<p class="lead">Système de vote de Nudger</p>
+            		</div>
+				</div>
 
-					<!-- Explanation of vote system -->
-					<div class="col-12 col-lg-6">
-						<div class="d-flex flex-wrap justify-content-lg-start">
-							<h3 class="h3 text-center text-lg-left mb-5">Système de vote de Nudger</h3>
-
-							<!-- Step 1 -->
-							<div class="my-4">
-								<div class="d-flex">
-									<div class="me-3 me-md-4">
-										<div class="icon icon-shape icon-shape-secondary organic-radius" aria-hidden="true">
-											<span class="fas fa-user-circle"></span>
-										</div>
-									</div>
-									<div>
-										<h4 class="h4">Vous choisissez l'organisation</h4>
-										<p>
-											<th:block th:with="path='pages/contribution/vote-1'">
-												<th:block th:insert="~{inc/wiki.html}"></th:block>
-											</th:block>
-										</p>
-									</div>
+				<div class="row">
+					<!-- Step 1 -->
+					<div class="col-12 col-lg-6 col-xl-4 mb-5">
+						<div class="card border-gray-300 rounded-md mb-3 px-2">
+							<div class="card-header bg-white border-gray-300 p-4">
+								<div class="text-center mb-3">
+									<span class="price display-2 mb-0 text-primary">1</span>
 								</div>
-							</div>
-
-							<!-- Step 2 -->
-							<div class="my-4">
-								<div class="d-flex">
-									<div class="me-3 me-md-4">
-										<div class="icon icon-shape icon-shape-secondary organic-radius" aria-hidden="true">
-											<span class="fas fa-shield-alt"></span>
-										</div>
-									</div>
-									<div>
-										<h4 class="h4">Fonctionnement du vote</h4>
-										<p>
-											<th:block th:with="path='pages/contribution/vote-2'">
-												<th:block th:insert="~{inc/wiki.html}"></th:block>
-											</th:block>
-										</p>
-									</div>
-								</div>
-							</div>
-
-							<!-- Step 3 -->
-							<div class="my-4">
-								<div class="d-flex">
-									<div class="me-3 me-md-4">
-										<div class="icon icon-shape icon-shape-secondary organic-radius" aria-hidden="true">
-											<span class="fas fa-chart-pie"></span>
-										</div>
-									</div>
-									<div>
-										<h4 class="h4">Répartition des revenus</h4>
-										<p>
-											<th:block th:with="path='pages/contribution/vote-3'">
-												<th:block th:insert="~{inc/wiki.html}"></th:block>
-											</th:block>
-										</p>
-									</div>
-								</div>
+								<h3 class="h4 mb-3 text-black">Vous choisissez l'organisation</h3>
+								<p class="fw-normal font-small mb-0">
+									<th:block th:with="path='pages/contribution/vote-1'">
+										<th:block th:insert="~{inc/wiki.html}"></th:block>
+									</th:block>
+								</p>
 							</div>
 						</div>
 					</div>
-
-					<!-- Transparency + Votes card -->
-					<div class="col-12 col-md-12 col-sm-12 col-lg-4 mb-5 mb-lg-0">
-						<div class="my-4">
-							<div class="d-flex">
-								<div>
-									<h4 class="h4">En toute transparence</h4>
-									<p>
-										<th:block th:with="path='pages/contribution/vote-4'">
-											<th:block th:insert="~{inc/wiki.html}"></th:block>
-										</th:block>
-									</p>
+					<!-- Step 2 -->
+					<div class="col-12 col-lg-6 col-xl-4 mb-5">
+						<div class="card border-gray-300 rounded-md mb-3 px-2">
+							<div class="card-header bg-white border-gray-300 p-4">
+								<div class="text-center mb-3">
+									<span class="price display-2 mb-0 text-primary">2</span>
 								</div>
+								<h3 class="h4 mb-3 text-black">Fonctionnement du vote</h3>
+								<p class="fw-normal font-small mb-0">
+									<th:block th:with="path='pages/contribution/vote-2'">
+										<th:block th:insert="~{inc/wiki.html}"></th:block>
+									</th:block>
+								</p>
 							</div>
 						</div>
-
-						<!-- Votes Card -->
-						<div class="card shadow text-center">
-							<div class="card-header bg-white p-3">
-								<h3 class="text-primary mb-4">Votes</h3>
-								<span class="d-block"> <span class="display-1 text-dark fw-bold" th:text="${votes}">--</span>
-								</span>
-								<p>Depuis le dernier reversement</p>
-							</div>
-							<div class="card-body">
-								<canvas class="mt-4" id="voteChart" aria-label="Chart showing the distribution of votes"></canvas>
-								<p th:unless="${duplicateVotes} == 0" class="mt-2">
-									<b><span th:text="${duplicateVotes}"></span></b> votes en double, exclus des données ci-dessus
+					</div>
+					<!-- Step 3 -->
+					<div class="col-12 col-lg-6 col-xl-4 mb-5">
+						<div class="card border-gray-300 rounded-md mb-3 px-2">
+							<div class="card-header bg-white border-gray-300 p-4">
+								<div class="text-center mb-3">
+									<span class="price display-2 mb-0 text-primary">3</span>
+								</div>
+								<h3 class="h4 mb-3 text-black">Répartition des revenus</h3>
+								<p class="fw-normal font-small mb-0">
+									<th:block th:with="path='pages/contribution/vote-3'">
+										<th:block th:insert="~{inc/wiki.html}"></th:block>
+									</th:block>
 								</p>
 							</div>
 						</div>
 					</div>
 				</div>
-			</div>
-		</section>
+        </section>
 
-		<!--/* Donation Details Section */-->
-		<section class="mt-3 pt-0" role="region" aria-labelledby="donation-details-title">
-			<div class="bg-green-transparent text-center py-4 mb-5">
-				<h2 id="donation-details-title" class="h1 mb-3">Détails des dons</h2>
-			</div>
-			<div class="container container-semi-fluid">
-				<div class="row">
-					<div class="row">
-						<!-- Choice of organizations -->
-						<div class="col-lg-6 px-5">
-							<h3 class="h5 text-center">Choix des organisations</h3>
-							<div th:each="org : ${config.reversementConfig.contributedOrganisations.values()}" class="card shadow p-4 mb-5">
-								<div class="row align-items-center">
-									<div class="col-4">
-										<a th:href="${org.url}"> <!-- Use lazy loading and ensure alt is set --> <img th:src="${org.img}" th:alt="${org.name}" loading="lazy">
-										</a>
-									</div>
-									<div class="col-8">
-										<p th:text="${org.description}"></p>
-									</div>
-								</div>
-							</div>
-						</div>
-
-						<!-- Reversed amount  -->
-						<div class="col-lg-6 px-5">
-							<h3 class="h5 text-center">Dons effectués</h3>
-							<div class="card bg-white border-gray-300">
-								<div th:each="reversement : ${config.reversementConfig.reversements}" class="border-bottom px-4 py-4">
-									<div th:with="org = ${config.reversementConfig.contributedOrganisations.get(reversement.orgKey)}" class="row align-items-center text-center">
-										<div class="col-12 col-md-3 pb-3 pb-md-0">
-											<img th:src="${org.img}" th:alt="${org.name}" loading="lazy">
-										</div>
-										<div class="col-md-5 pb-2 pb-md-0">
-											<span class="h5 mb-3"> <span th:text="${reversement.amount}"></span> €
-											</span>
-										</div>
-										<div class="col-md-4 text-md-right">
-											<span class="badge bg-primary" th:text="${reversement.date}"></span>
-										</div>
-									</div>
-								</div>
-							</div>
-
-							<!-- Disclaimer -->
-							<div class="alert alert-danger alert-dismissible fade show mt-5" role="alert">
-								<strong>Que ça depuis 2021 ???</strong> Vous êtes vigilants, et vous faîtes bien ! L'aventure Nudger était initialement un projet "geek" annexe... Mais tel le Phénix, Nudger revient en 2024
-								avec l'ambition de passer à l'échelle !
-								<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fermer"></button>
-							</div>
-						</div>
+		<section class="section-header bg-primary text-white pb-9 pb-lg-12 mb-4 mb-lg-6">
+			<div class="container">
+				<div class="row justify-content-center">
+					<div class="col-12 col-md-8 text-center">
+						<div class="display-2 mb-3">En toute transparence</div>
 					</div>
 				</div>
 			</div>
 		</section>
+		<section class="section section-lg pt-0">
+			<div class="container mt-n8 mt-lg-n12 z-2">
+				<div class="row justify-content-center">
+					<div class="col">
+						<div class="card shadow border-gray-300 p-4 p-lg-5">
+							<p class="lead">
+								<th:block th:with="path='pages/contribution/vote-4'">
+									<th:block th:insert="~{inc/wiki.html}"></th:block>
+								</th:block>
+							</p>
 
-		<!--/* Ecological Contribution Details */-->
-		<section role="region" aria-labelledby="contribution-details-title">
-			<div class="bg-green-transparent text-center py-4 mb-5">
-				<h2 id="contribution-details-title" class="h1 mb-3">La contribution écologique en détail</h2>
-			</div>
-			<div class="container container-semi-fluid">
-				<div class="row d-flex flex-wrap align-items-center justify-content-around">
-					<div>
-						<h3 class="h2 mb-3">Contribution écologique, compensation carbone. Quelles différences ?</h3>
-						<div>
-							<th:block th:with="path='pages/contribution/differences-carbone/'">
-								<th:block th:insert="~{inc/wiki.html}"></th:block>
-							</th:block>
-						</div>
-					</div>
-					<div>
-						<h3 class="h2 mb-3">Comment sont calculés les dons ?</h3>
-						<div>
-							<th:block th:with="path='pages/contribution/calcul/'">
-								<th:block th:insert="~{inc/wiki.html}"></th:block>
-							</th:block>
-						</div>
-					</div>
-					<div>
-						<h3 class="h2 mb-3">Puis-je vérifier ?</h3>
-						<div>
-							<th:block th:with="path='pages/contribution/check-opensource',plaintext=true">
-								<th:block th:insert="~{inc/wiki.html}"></th:block>
-							</th:block>
+							<h2 class="h3 mb-4">Votes</h2>
+							<p class="display-2 mb-3" th:text="${votes}"></p>
+							<p class="lead">Depuis le dernier reversement</p>
+
+							<div class="card shadow-0 border-0">
+								<div class="row g-0 align-items-center">
+									<div class="col-md-5">
+										<h3 class="h5 card-title mb-0" th:unless="${duplicateVotes} == 0">
+											<b><span th:text="${duplicateVotes}"></span></b> votes en double, exclus des données ci-dessus
+										</h3>
+									</div>
+									<div class="col-md-7">
+										<div class="card-body d-flex align-items-center">
+											<canvas id="voteChart" aria-label="Chart showing the distribution of votes"></canvas>
+										</div>
+									</div>
+								</div>
+							</div>
+
+							<h2 class="h3 mb-4" role="region" aria-labelledby="donation-details-title">Détails des dons</h2>
+							
+
+							<div class="row">
+								<div class="col-lg-6">
+									<p class="lead">Choix des organisations</p>
+									<div class="pb-4 mb-4" th:each="org : ${config.reversementConfig.contributedOrganisations.values()}">
+										<h1 class="display-1 font-weight-extreme mb-4 col-6 col-lg-4 mx-auto">
+											<img class="img-thumbnail" th:src="${org.img}" th:alt="${org.name}" loading="lazy">
+										</h1>
+										<p class="mb-4 mb-lg-5 me-lg-5 text-start" th:text="${org.description}"></p>
+										<a class="btn btn-tertiary" th:href="${org.url}">
+											Se rendre sur le site 
+											<span class="fas fa-angle-right ms-2"></span>
+										</a>
+									</div>
+								</div>
+								<div class="col-lg-6">
+									<p class="lead">Dons effectués</p>
+									<div th:each="reversement : ${config.reversementConfig.reversements}" class="border-bottom p-3">
+										<div th:with="org = ${config.reversementConfig.contributedOrganisations.get(reversement.orgKey)}" class="row align-items-center justify-content-start">
+											<div class="col-md-3">
+												<img th:src="${org.img}" th:alt="${org.name}" loading="lazy">
+											</div>
+											<div class="col-md-5">
+												<span class="h5 mb-3"> <span th:text="${reversement.amount}"></span> €
+												</span>
+											</div>
+											<div class="col-md-4">
+												<span class="badge bg-primary" th:text="${reversement.date}"></span>
+											</div>
+										</div>
+									</div>
+
+									<div class="alert alert-warning p-4 my-3 mb-5 my-lg-5 text-start" role="alert">
+										<div class="media">
+											<span class="mt-1 me-3"><i class="fas fa-file-alt"></i></span>
+											<div class="media-body">
+												<strong>Que ça depuis 2021&nbsp;???</strong> Vous êtes vigilants, et vous faîtes bien&nbsp;! L'aventure Nudger était initialement un projet "geek" annexe... Mais tel le Phénix, Nudger revient en 2024 avec l'ambition de passer à l'échelle&nbsp;!
+											</div>
+										</div>
+									</div>
+								</div>
+							</div>
+
+							<div class="mt-5 pt-5 border-top border-1" role="region" aria-labelledby="contribution-details-title">
+								<h2 class="h3 mb-4 text-start">La contribution écologique en détail</h2>
+								<div class="lead text-start">
+									<th:block th:with="path='pages/contribution/differences-carbone/'">
+										<th:block th:insert="~{inc/wiki.html}"></th:block>
+									</th:block>
+								</div>
+								<h2 class="h3 my-4 text-start">Comment sont calculés les dons ?</h2>
+								<div class="lead text-start">
+									<th:block th:with="path='pages/contribution/calcul/'">
+										<th:block th:insert="~{inc/wiki.html}"></th:block>
+									</th:block>
+								</div>
+								<h2 class="h3 my-4 text-start">Puis-je vérifier ?</h2>
+								<div class="lead text-start">
+									<th:block th:with="path='pages/contribution/check-opensource'">
+										<th:block th:insert="~{inc/wiki.html}"></th:block>
+									</th:block>
+								</div>
+							</div>
 						</div>
 					</div>
 				</div>
@@ -320,32 +282,11 @@
 	</main>
 
 	<!--/* Footer */-->
-	<footer role="contentinfo">
-		<th:block th:insert="~{inc/footer.html}"></th:block>
-	</footer>
+	<th:block th:insert="~{inc/footer.html}"></th:block>
 
-	<!--/* Scripts */-->
-	<!-- Core -->
-	<script src="/vendor/@popperjs/core/dist/umd/popper.min.js"></script>
-	<script src="/vendor/bootstrap/dist/js/bootstrap.min.js"></script>
-	<script src="/vendor/headroom.js/dist/headroom.min.js"></script>
-	<!-- Vendor JS -->
-	<script src="/vendor/onscreen/dist/on-screen.umd.min.js"></script>
-	<script src="/vendor/nouislider/dist/nouislider.min.js"></script>
-	<script src="/vendor/jarallax/dist/jarallax.min.js"></script>
-	<script src="/vendor/smooth-scroll/dist/smooth-scroll.polyfills.min.js"></script>
-	<script src="/vendor/vivus/dist/vivus.min.js"></script>
-	<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-	<script src="/vendor/@glidejs/glide/dist/glide.min.js"></script>
-	<script src="/vendor/countup.js/dist/countUp.min.js"></script>
-	<script src="/vendor/vanillajs-datepicker/dist/js/datepicker.min.js"></script>
-	<script async defer src="https://buttons.github.io/buttons.js"></script>
-	<script src="/vendor/jquery/dist/jquery.min.js"></script>
-
-	<!-- Pixel JS -->
-	<script src="../../assets/js/pixel.js"></script>
-	<!-- Custom sources -->
-	<script src="../../assets/js/pixel-custom.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns/dist/chartjs-adapter-date-fns.bundle.min.js"></script>    
+    <script defer src="/vendor/countUp.umd.js"></script>
 
 	<!-- Setting up variables -->
 	<script th:inline="javascript">
@@ -353,6 +294,8 @@
 		const repartition = /*[[${repartition}]]*/{};
 		/*]]>*/
 	</script>
+
+
 
 	<!-- Vote Chart -->
 	<script>

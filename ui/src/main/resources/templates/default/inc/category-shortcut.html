@@ -1,5 +1,5 @@
 
-<li th:with = "root = ${googleProductService.byId(googleTaxo)}" class="me-2 text-green-bg-transparent nav-item dropdown">
+<!--li th:with = "root = ${googleProductService.byId(googleTaxo)}" class="me-2 text-green-bg-transparent nav-item dropdown">
     <a
 	th:href="${root.url(siteLanguage)}"
 	class="nav-link dropdown-toggle btn btn-lg btn-outline-light btn-border"
@@ -20,4 +20,32 @@
 			 </li>
 		</ul>
 	</div>
-</li>
+</li-->
+
+<div class="btn-group me-2 mb-2 dropstart " th:with = "root = ${googleProductService.byId(googleTaxo)}">
+	<button type="button" class="btn btn-white">
+		<img th:src="${image}" height="20" class="me-2">
+		<span th:text="${title}"></span>
+	</button>
+	<button 
+		type="button" 
+		class="btn btn-white dropdown-toggle dropdown-toggle-split" 
+		th:href="${root.url(siteLanguage)}" 
+		th:id="'vertical'+${googleTaxo}" 
+		data-bs-toggle="dropdown" 
+		aria-haspopup="true" 
+		aria-expanded="false">
+		<span class="fas fa-angle-down dropdown-arrow"></span>
+		<span class="sr-only">Toggle Dropdown</span>
+	</button>
+	
+	<div class="dropdown-menu py-0" th:aria-labelledby="'vertical'+${googleTaxo}">
+		<div th:each="cat : ${googleProductService.leafs(googleTaxo)}">
+			<a 
+				class="dropdown-item text-primary"  
+				th:href="'/' + ${cat.vertical.i18n.get(siteLanguage).verticalHomeUrl}" 
+				th:text="${cat.googleNames.i18n(siteLanguage)}">
+			</a>
+		</div>
+	</div>
+</div>

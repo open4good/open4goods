@@ -1,8 +1,8 @@
-<div class="table-responsive table-caracteristics-fs mt-4" th:if="${product.attributes.indexed.size()} > 0">
-	<table class="table">
+<div class="table-responsive" th:if="${product.attributes.indexed.size()} > 0">
+	<table class="table table-striped">
 		<th:block th:each="attribute : ${product.attributes.indexed.values()}">
 			<tr>
-				<td class="align-middle" th:text="${helper.attributeName(attribute.name)}"></td>
+				<th class="align-middle" scope="col" th:text="${helper.attributeName(attribute.name)}"></th>
 				
 				<th:block th:switch="${attribute.name}">
 					<!-- <td class="align-middle" th:case="'REPAIRABILITY_INDEX'"  th:insert="~{inc/attributes/class_energy.html}"> </td>-->

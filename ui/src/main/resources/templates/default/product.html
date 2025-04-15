@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html th:lang="${siteLanguage}">
+<html th:lang="${siteLocale.language}">
 
 <head>
     <!-- Importing meta tags and CSS files -->
@@ -17,7 +17,6 @@
     <meta property="og:image" th:content="${baseUrl} + '/images/'+${product.gtin()}+'-cover.png'">
 
     <!-- No indexing if not a verticalized page -->
-    <!--/*@thymesVar id="product" type=""*/-->
     <meta th:unless="${product.vertical}" name="robots" content="noindex">
 
     <!-- Twitter -->
@@ -31,30 +30,111 @@
     <link rel="stylesheet" type="text/css" href="/webjars/datatables/css/dataTables.bootstrap5.min.css">
     <link rel="stylesheet" type="text/css" href="/webjars/datatables-responsive/css/responsive.dataTables.min.css">
 
-    <!-- Conditional CSS for highlight.js if user is authenticated -->
-    <link th:if="${user}" rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/styles/default.min.css">
-
     <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/select/1.7.0/css/select.dataTables.min.css">
     <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/buttons/2.4.2/css/buttons.dataTables.min.css">
-    <link href="/vendor/lightgallery/dist/css/lightgallery-bundle.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" integrity="sha512-nMNlpuaDPrqlEls3IX/Q56H36qvBASwb3ipuo3MxeWbsQB1881ox0cRv7UPTgBlriqoynt35KjEwgGUeUXIPnw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+  <!--/* Custom Styles for Offer Cards */-->
+    <style>
+      /* Base style for selectable offer cards with transparency effect for non-selected cards */
+      .selectable-offer {
+        cursor: pointer;
+        transition: opacity 0.3s, box-shadow 0.3s, border-color 0.3s;
+        opacity: 0.6;
+      }
+      .selectable-offer:hover {
+        opacity: 0.8;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+      }
+      /* Selected state: fully opaque with Bootstrap color variables for border */
+      .selectable-offer.selected[data-offer-type="occasion"] {
+        border: 2px solid var(--bs-success);
+        opacity: 1;
+      }
+      .selectable-offer.selected[data-offer-type="new"] {
+        border: 2px solid var(--bs-info);
+        opacity: 1;
+      }
+    </style>
+      <script defer type="text/javascript" language="javascript" src="/webjars/datatables/js/dataTables.min.js"></script>
+<script defer type="text/javascript" language="javascript" src="/webjars/datatables/js/dataTables.bootstrap5.min.js"></script>
+      <script src="/js/product-price-widget.js"></script>
+      <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns/dist/chartjs-adapter-date-fns.bundle.min.js"></script>    
+
+<!--/* TODO: place this in your <head> or just before the chart script */-->
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@latest/dist/chartjs-plugin-annotation.min.js"></script>
+      
+    <!-- For attributes details-->
+    <style>
+	    .masonry-columns {
+		    column-count: 3;
+		    column-gap: 1.5rem;
+		}
+		
+		.masonry-item {
+		    break-inside: avoid;
+		    margin-bottom: 1.5rem;
+		}
+    </style>
+      
+    
+<!--  -->    
 
     <style>
-        /* Customizing carousel control icons */
-        .carousel-control-prev-icon::before {
-            content: '\f060';
-            font-family: "Font Awesome 5 Free";
-            font-size: 5rem;
-            color: gray;
-            font-weight: 900;
+        /* Invert the gradient: red on the left, green on the right */
+        .gradient-scale {
+            background: linear-gradient(to right, #dc3545, #28a745);
         }
 
-        .carousel-control-next-icon:before {
-            font-family: "Font Awesome 5 Free";
-            content: "\f061";
-            font-size: 5rem;
-            color: gray;
-            font-weight: 900;
+        /*
+         * Simple triangle pointing up.
+         * Adjust "border-bottom-color" for each item if you want different colors.
+         */
+        .triangle-up {
+            width: 0;
+            height: 0;
+            border-left: 12px solid transparent;
+            border-right: 12px solid transparent;
+            border-bottom: 16px solid #6c757d; /* default gray; override inline if needed */
         }
+
+        /* A small helper to handle horizontal scrolling if needed */
+        .overflow-x-auto {
+            overflow-x: auto;
+        }
+    </style>
+
+  
+    <style>
+    
+        .carousel-indicators {
+            box-sizing: content-box;
+		    flex: 0 1 auto;
+		    width: 10px;
+		    height: 10px;
+		    padding: 0;
+		    margin-right: 3px;
+		    margin-left: 3px;
+		    text-indent: -999px;
+		    cursor: pointer;
+		    background-color: #00D19F;
+		    background-clip: padding-box;
+		    border: 0;
+		    border-top: 10px solid transparent;
+		    border-bottom: 10px solid transparent;
+		    opacity: 0.5;
+		    transition: opacity 0.6s ease;
+        }
+    
+	    .source-span {
+		    font-size: 0.8rem; /* Reduce font size */
+		    vertical-align: super; /* Align to superscript */
+		    color: #6c757d; /* Optional: Use a Bootstrap light gray for text color */
+		    text-decoration: none; /* Remove underline for cleaner appearance */
+		}
+
+
 
         /* Style for selected row in DataTables */
         table.dataTable tbody tr.selected {
@@ -75,212 +155,425 @@
         .btn {
             transition: none !important;
         }
+        
+        
+        #pills-tab {
+		    position: sticky;
+		    top: 0;
+		    z-index: 1020; /* Ensures it appears above other elements */
+		    background-color: white; /* Keeps the header background visible */
+		    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Optional: Adds a subtle shadow for better visibility */
+		}
+
+        
+        
     </style>
+    
+    
+    
+    
+    
+    
+    
+    
+    
+<!--/* Thymeleaf comment: Separate Thumbnail Navigation Bar (Horizontal Scroll Pane) */-->
+<style>
+    .thumbnail-bar {
+        background-color: #fff; /* white background for SEO/accessibility */
+        white-space: nowrap;    /* keep thumbnails in one row */
+        overflow-x: auto;       /* enable horizontal scrolling */
+        padding: 0.5rem;
+        margin-top: 1rem;
+    }
+    .thumbnail-bar img {
+        cursor: pointer;
+        max-height: 70px;       /* fixed height for uniform layout */
+        object-fit: cover;
+        margin-right: 0.5rem;
+    }
+</style>
+
+<!--/* Thymeleaf comment: Include LightGallery CSS and JS from CDN (free & open source) with zoom plugin support. 
+     Ensure these are included in your page’s <head> or before the closing </body> tag. */-->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/lightgallery/2.8.3/css/lightgallery-bundle.min.css" integrity="sha512-fXavT4uA4L0uTUFHC275D7zd751ohbSuD6VUMc5JysWfmR+NxTI3w7etE7N9hjTETcoh0w0V+24Cel4xXnqvCg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+ <style>
+    /* Card container style */
+    .occasion-card {
+      position: relative;
+      overflow: hidden;
+      border-radius: 0.25rem; /* Ensure integration with banner */
+    }
+    /* Diagonal banner style */
+    .diagonal-banner {
+    position: absolute;
+    left: -20px;
+    top: 45%;
+    width: 150px;
+    height: 40px;
+    background: linear-gradient(90deg, #00D19F, #00A7FF);
+    transform: translate(0, -50%) rotate(-46deg);
+    transform-origin: left center;
+    border-bottom-left-radius: 0.25rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-weight: bold;
+    font-size: 0.8rem;
+    z-index: 10;
+    text-align: center;
+    }
+  </style>
+    
+
+
+<!-- Reference quote style -->    
+<style>
+.review-ref {
+  font-size: 0.75em;         /* Smaller than normal text */
+  vertical-align: top;       /* Align top like superscript */
+  text-decoration: none;     /* Remove underline */
+  margin-left: 0.15em;       /* Small space before the reference */
+  color: #555;               /* Slightly muted color */
+}
+
+.review-ref:hover {
+  text-decoration: underline;
+  color: #007bff;            /* Bootstrap primary color on hover */
+}
+</style>
+
+<style type="text/css">
+/* Ensure period buttons show proper opacity */
+.period-btn {
+  opacity: 0.5;
+  transition: opacity 0.3s ease;
+}
+.period-btn.active-period-btn {
+  opacity: 1;
+}
+
+
+
+/* Enhance the historique card */
+.card-historical {
+  border: 2px solid #41a3ef; /* Refined border color */
+  background-color: #f9f9f9;
+}
+.best-price {
+  font-weight: bold;
+  color: #d9534f; /* Light emphasis for best price */
+}
+
+</style>
+
+
+
+
+
 </head>
 
 <body>
 
-<!-- Navbar -->
-<th:block th:insert="~{inc/navbar/navbar-product.html}"></th:block>
-<!-- Loader -->
-<th:block th:insert="~{inc/preloader.html}"></th:block>
+    <header>
+        <!--/* Loader */-->
+        <th:block th:insert="~{inc/preloader.html}"></th:block>
+        <!--/* Navbar 
+        */-->
+        <th:block th:insert="~{inc/navbar/navbar-home.html}"></th:block>
+    </header>  
+    
 
-<main th:with="images = ${product.images()}" class="bg-gray-200">
-    <th:block th:insert="~{inc/wip.html}"></th:block>
+    <main th:with="images = ${product.images()}" class="bg-gray-200">
 
-    <div class="section section-lg pt-5">
-        <div class="container-fluid">
 
-            <h1 th:unless="${product.vertical}" class="h1 title text-uppercase text-center"
-                th:text="${product.bestName()}"></h1>
 
-            <h1 th:if="${product.vertical}" class="h1 title text-uppercase text-center"
-                th:text="${product.bestName()}"></h1>
-
-            <div class="card shadow p-4">
-                <!-- Header -->
+    
+    <div class="">
+        <div class="container">
+            <div class="">
+                <!-- Header 
+                -->
                 <th:block th:insert="~{inc/product-header.html}"></th:block>
-            </div>
+        
+			</th:block>
+			
 
-            <!-- Presentation -->
-            <th:block th:insert="~{inc/product-presentation.html}"></th:block>
-
-            <!-- Descriptions -->
-            <th:block th:insert="~{inc/product-ecological.html}"></th:block>
-
-            <!-- Product prices -->
-            <th:block th:insert="~{inc/product-price.html}"></th:block>
-
-            <!-- Product attributes details -->
-            <th:block th:insert="~{inc/product-attributes-details.html}"></th:block>
-
-            <div class="row mt-3">
-                <div class="col-lg-12">
-
-                    <!-- Authenticated section -->
-                    <th:block th:if="${user}">
-
-                        <h1 class="text-center"> Mode admin</h1>
-                        <div class="text-center">
-                           <a target="_blank" th:text="'Source JSON de '+ ${product.gtin()}" th:href="'https://api.nudger.fr/product/?gtin='+${product.gtin()}"></a>
-                        </div>
-                        <!-- Categories
-                        <th:block th:insert="~{inc/product-categories.html}"></th:block>
-                         -->
-
-  
-
-                            <!-- Offer names -->
-							<div class="row">
-								<div class="col-lg-12">
-									<div class="card shadow my-3">
-										<div class="card-header">
-											<h2 class="h5">Offernames</h2>
-										</div>
-										<div class="card-body">
-											<ul>
-												<li th:each="item, stat : ${product.offerNames}"
-													th:text="${item}"></li>
-											</ul>
-
-										</div>
-									</div>
-								</div>
-							</div>
-							
-							 <!-- Mapped categories -->
-                                <div class="card shadow my-3">
-                                    <div class="card-header">
-                                        <h2 class="h5">Categories</h2>
-                                    </div>
-                                    <div class="card-body">
-                                        <th:block th:each="item, stat : ${product.categoriesByDatasources}">
-                                            <div class="alert alert-primary" role="alert">
-                                                <span th:text="${item.key + ' : ' + item.value}"></span>
-                                            </div>
-                                        </th:block>
-                                    </div>
-                                </div>
-
-
-							<!-- Unmatched Attribute table -->
-                        <th:block th:insert="~{inc/product-unmatched-attributes.html}"></th:block>
-  <!-- Resources -->
-                        <th:block th:insert="~{inc/product-resources.html}"></th:block>
-
-                    </th:block>
-
-                </div>
             </div>
         </div>
     </div>
+    
+    <div class="bg-primary">
+    
+            <div class="mt-4">
+    
+                <!-- The navbar 
+                -->
+<th:block>
+
+                    <div class="sticky-top bg-white px-6 shadow-sm pt-3 pb-0" 
+                         role="tablist" 
+                         aria-label="Product Tabs Variation 2">
+                        <ul class="nav nav-pills nav-fill fs-5">
+                            <li class="nav-item">
+                                <button class="active nav-link d-flex align-items-center justify-content-center" 
+                                        id="pills-ecological2-tab" 
+                                        data-bs-toggle="pill" 
+                                        data-bs-target="#pills-ecological" 
+                                        type="button" role="tab" 
+                                        aria-controls="pills-ecological" 
+                                        aria-selected="false">
+                                    <i class="fas fa-leaf me-2"></i>
+                                    Impact écologique
+                                </button>
+                            </li>
+                            <li class="nav-item">
+                                <button class="nav-link  d-flex align-items-center justify-content-center" 
+                                        id="pills-presentation2-tab" 
+                                        data-bs-toggle="pill" 
+                                        data-bs-target="#pills-presentation" 
+                                        type="button" role="tab" 
+                                        aria-controls="pills-presentation" 
+                                        aria-selected="true">
+                                    <i class="fas fa-info-circle me-2"></i>
+                                    Synthèse des tests
+                                </button>
+                            </li>
+                            <li class="nav-item">
+                                <button class="nav-link d-flex align-items-center justify-content-center" 
+                                        id="pills-price2-tab" 
+                                        data-bs-toggle="pill" 
+                                        data-bs-target="#pills-price" 
+                                        type="button" role="tab" 
+                                        aria-controls="pills-price" 
+                                        aria-selected="false">
+                                    <i class="fas fa-euro me-2"></i>
+                                    Prix
+                                </button>
+                            </li>
+                            <li class="nav-item">
+                                <button class="nav-link d-flex align-items-center justify-content-center" 
+                                        id="pills-technical2-tab" 
+                                        data-bs-toggle="pill" 
+                                        data-bs-target="#pills-technical" 
+                                        type="button" role="tab" 
+                                        aria-controls="pills-technical" 
+                                        aria-selected="false">
+                                    <i class="fas fa-cogs me-2"></i>
+                                    Caractéristiques
+                                </button>
+                            </li>
+                            <li class="nav-item">
+                                <button class="nav-link d-flex align-items-center justify-content-center" 
+                                        id="pills-resources2-tab" 
+                                        data-bs-toggle="pill" 
+                                        data-bs-target="#pills-resources" 
+                                        type="button" role="tab" 
+                                        aria-controls="pills-resources" 
+                                        aria-selected="false">
+                                    <i class="fas fa-book me-2"></i>
+                                    Documentation
+                                </button>
+                            </li>
+                            <li th:if="${user}" class="nav-item">
+                                <button class="nav-link d-flex align-items-center justify-content-center" 
+                                        id="pills-admin2-tab" 
+                                        data-bs-toggle="pill" 
+                                        data-bs-target="#pills-admin" 
+                                        type="button" role="tab" 
+                                        aria-controls="pills-admin" 
+                                        aria-selected="false">
+                                    <i class="fas fa-user-shield me-2"></i>
+                                    Admin
+                                </button>
+                            </li>
+                        </ul>
+                    </div>
+                </th:block>
+            
+            </div>
+            
+    
+			<!-- Tabs -->
+			<div class="tab-content" id="pills-tabContent">
+			
+				<div class="tab-pane fade show active" id="pills-ecological" role="tabpanel" aria-labelledby="pills-ecological-tab">
+                       <!-- Ecological -->
+                       <th:block th:insert="~{inc/product-ecological.html}"></th:block>
+				</div>
+
+				<div class="tab-pane fade" id="pills-presentation" role="tabpanel" aria-labelledby="pills-presentation-tab">
+				   <!-- Presentation -->
+
+                    <th:block th:insert="~{inc/product-presentation.html}"></th:block>
+
+                    <!-- 
+                  <th:block th:with="fixed=4 ">
+	                  <th:block th:with="varValue=${param.var != null ? param.var[0] : '0'},  fragmentName=${fixed >= 0 ? fixed : varValue}">
+	                        <div th:replace="~{inc/product-presentation-variations :: 'product-presentation-variations-' + ${fragmentName}}"></div>
+	                  </th:block>
+                  </th:block>
+                     -->
+                  
+
+
+
+				</div>
+				
+				
+				<div class="tab-pane fade" id="pills-price" role="tabpanel" aria-labelledby="pills-price-tab">
+		            <!-- Product prices 
+		            -->
+		            <th:block th:insert="~{inc/product-price.html}"></th:block>
+		            
+		            
+		            
+		            
+		            <!-- Variation include snippet 
+					<th:block th:with="varValue=${param.var != null ? param.var[0] : '1'}">
+					    <div th:replace="~{inc/product-price-variations :: 'product-price-variation-' + ${varValue}}"></div>
+					</th:block>
+		            -->
+							            
+				</div>
+
+                      <div class="tab-pane fade" id="pills-technical" role="tabpanel" aria-labelledby="pills-technical-tab">
+                          <!-- Product attributes details
+                           -->
+                          <th:block th:insert="~{inc/product-attributes-details.html}"></th:block>
+                      </div>
+
+
+                      <div class="tab-pane fade" id="pills-resources" role="tabpanel" aria-labelledby="pills-resources-tab">
+                          <!-- Product resources details -->
+                          
+                             <th:block th:insert="~{inc/product-documentation.html}"></th:block>
+                          
+                          
+                      </div>
+                                              
+				
+				    <div th:if="${user}" class="tab-pane fade" id="pills-admin" role="tabpanel" aria-labelledby="pills-admin-tab">
+				       <!-- 
+				       <th:block th:insert="~{inc/product-admin.html}"></th:block>
+				        -->
+                    </div>
+                   
+                   
+				
+			</div>
+    </div>			
 </main>
 
 <!-- Footer -->
 <th:block th:insert="~{inc/footer.html}"></th:block>
 
-<!-- Core JS -->
-<script src="/vendor/@popperjs/core/dist/umd/popper.min.js"></script>
-<script src="/vendor/bootstrap/dist/js/bootstrap.min.js"></script>
 
-<!-- Vendor JS -->
-<script src="/vendor/smooth-scroll/dist/smooth-scroll.polyfills.min.js"></script>
-<script src="/vendor/vivus/dist/vivus.min.js"></script>
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
-<script src="/vendor/jquery/dist/jquery.min.js"></script>
-<script type="text/javascript" language="javascript" src="/webjars/datatables/js/dataTables.min.js"></script>
-<script type="text/javascript" language="javascript" src="/webjars/datatables/js/dataTables.bootstrap5.min.js"></script>
+<script defer src="/vendor/countUp.umd.js"></script>
+<script defer src="/vendor/nouislider/dist/nouislider.min.js"></script>
 
-<script src="/vendor/countup.js/dist/countUp.min.js"></script>
-<!-- Pixel JS -->
-<script src="../../assets/js/pixel.js"></script>
-<!-- Custom sources -->
-<script src="../../assets/js/pixel-custom.js"></script>
 
-<script src="/vendor/lightgallery/dist/lightgallery.min.js"></script>
-<script src="/vendor/lightgallery/dist/plugins/thumbnail/lg-thumbnail.min.js"></script>
+
+
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js" integrity="sha512-2ImtlRlf2VVmiGZsjm9bEyhjGW4dU7B6TNwh/hx/iSByxNENtj3WVE6o/9Lj4TJeVXPi4bnOIMXFIJJAeufa0A==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+
+
+<script th:inline="javascript">
+
+
+
+    /*<![CDATA[*/
+    // Global variable for the counter
+    var reversment;
+
+    
+    
+    
+    // Initialize attributes table if it exists
+    if ($("#allAttributes").length) {
+        $('#allAttributes').DataTable({
+            responsive: true
+        });
+    }
+
+    // Initialize images table if it exists
+    if ($("#imagesTable").length) {
+        $('#imagesTable').DataTable({
+            responsive: true
+        });
+    }
+
+    
+    ///////////////////////////////////
+    // Activate Bootstrap tooltips
+    ///////////////////////////////////
+    //$('[data-bs-toggle="tooltip"]').tooltip();
+    
+    
+    
+    </script>
+    
+    
+<script th:inline="javascript">
+    /*<![CDATA[*/
+    
+        const gtin = /*[[${product.id}]]*/ '';
+        
+                        
+    /*]]>*/
+
+$(document).ready(function(){
+
+    var myModal = new bootstrap.Modal(document.getElementById('reviewProcessModal'), {
+        backdrop: 'static', // Prevent closing when clicking outside
+        keyboard: false      // Prevent closing with Esc key
+    });
+    
+    
+      $('#triggerButton').on('click', function(){
+        // Open the modal
+        myModal.show();
+        // Dynamically load the content into the modal body
+        $('#modalContentContainer').load('/review-request/'+gtin);
+      });
+    });
+
+</script>
+
+
+
+<!-- Click handler on nudge elements -->
+<script>
+  $(document).ready(function () {
+    $('.offer-link[data-token]').on('click', function (e) {
+      e.preventDefault(); // prevent default link or button behavior
+      const token = $(this).data('token');
+      $('#selectedOfferToken').val(token);
+      $('#nudgeForm').submit();
+    });
+  });
+</script>
+
+
+
+
+
+
+
+
 
 <script th:inline="javascript">
     /*<![CDATA[*/
     // Global variable for the counter
     var reversment;
 
-    // Function to initialize DataTable
-    function initTable(tableId) {
-        // Initialize DataTable with specified options
-        tableNew = $(tableId).DataTable({
-            searching: false,
-            paging: false,
-            info: false,
-            select: 'single',
-            "order": [ [1, 'asc'] ]
-        });
 
-        // Event handler for row click in the table
-        tableNew.on('click', 'tbody tr', (e) => {
-            let classList = e.currentTarget.classList;
-
-            // Retrieve data attributes from the clicked row
-            token = $(e.currentTarget).attr('data-token');
-            compensation = $(e.currentTarget).attr('data-compensation');
-
-            // Update the token (e.g., in a hidden field)
-            $("#token").val(token);
-
-            var countUpUpdateoptions = {
-                duration: 1,
-                useEasing: false,
-                useGrouping: false,
-                separator: ',',
-                decimal: '.',
-                decimalPlaces: 2,
-                prefix: '',
-                suffix: ''
-            };
-
-            // Update the counter with the new compensation value
-            $("#countup-reversment").attr("data-max", compensation);
-            reversment.update(compensation);
-
-            // Handle 'selected' class for the active row
-            tableNew.rows('.selected').nodes().each((row) => row.classList.remove('selected'));
-            classList.add('selected');
-        });
-    }
-
-    // Retrieve and format price data
-    const newPriceHistoryData = /*[[${product.price.newPricehistory}]]*/ [];
-    const occasionPriceHistoryData = /*[[${product.price.occasionPricehistory}]]*/ [];
-
-    // Map data only if they are not empty
-    const newPriceHistory = newPriceHistoryData.length > 0 ? newPriceHistoryData.map(({ timestamp: x, price: y }) => ({ x, y })) : [];
-    const occasionPriceHistory = occasionPriceHistoryData.length > 0 ? occasionPriceHistoryData.map(({ timestamp: x, price: y }) => ({ x, y })) : [];
-
-    // Function to filter data based on date
-    function filterDataByDate(data, startDate) {
-        return data.filter(item => new Date(item.x) >= startDate);
-    }
-
-    const today = new Date();
-
-    // Define date ranges for filtering
-    const dateRanges = {
-        '15days': new Date(today.getTime() - (15 * 24 * 60 * 60 * 1000)),
-        '3months': new Date(today.getFullYear(), today.getMonth() - 3, today.getDate()),
-        '6months': new Date(today.getFullYear(), today.getMonth() - 6, today.getDate()),
-        'max': null // All data
-    };
-
-    // Function to get filtered data based on the period
-    function getFilteredData(data, period) {
-        if (dateRanges[period]) {
-            return filterDataByDate(data, dateRanges[period]);
-        } else {
-            return data; // Return all data for 'max'
-        }
-    }
+    
+    
 
     $(document).ready(function () {
 
@@ -302,272 +595,208 @@
         reversment = new countUp.CountUp("countup-reversment", $("#countup-reversment").attr("data-max"), countUpoptions);
         setTimeout(reversment.start(), 5000);
 
-        ///////////////////////////////////
-        // Initialize DataTables
-        ///////////////////////////////////
 
-        // Initialize the offers table
-        initTable('#offres');
 
-        // Initialize attributes table if it exists
-        if ($("#allAttributes").length) {
-            $('#allAttributes').DataTable({
-                responsive: true
-            });
-        }
-
-        // Initialize images table if it exists
-        if ($("#imagesTable").length) {
-            $('#imagesTable').DataTable({
-                responsive: true
-            });
-        }
 
         ///////////////////////////////////
         // Activate Bootstrap tooltips
         ///////////////////////////////////
         $('[data-bs-toggle="tooltip"]').tooltip();
 
-        ///////////////////////////////////
-        // Initialize price charts
-        ///////////////////////////////////
+        
 
-        // Initialize the 'New Price' chart only if data is available
-        if (newPriceHistory.length > 0) {
-            let defaultPeriod = '3months';
-            if (!hasDataInPeriod(newPriceHistory, defaultPeriod)) {
-                defaultPeriod = 'max';
-            }
-
-            const newPriceCtx = document.getElementById('newPriceChart').getContext('2d');
-            const newPriceChart = new Chart(newPriceCtx, {
-                type: 'line',
-                data: {
-                    datasets: [{
-                        label: 'Prix Neuf',
-                        fill: true,
-                        data: getFilteredData(newPriceHistory, defaultPeriod),
-                        backgroundColor: '#4cb1ff',
-                        borderColor: '#41a3ef',
-                        borderWidth: 2,
-                        tension: 0,
-                        pointRadius: 0,
-                        pointHoverRadius: 6,
-                        pointHitRadius: 10,
-                    }]
-                },
-                options: {
-                    interaction: {
-                        mode: 'nearest',
-                        intersect: false
-                    },
-                    scales: {
-                        x: {
-                            type: 'time',
-                            time: {
-                                unit: 'day',
-                                displayFormats: {
-                                    day: 'dd/MM/yyyy'
-                                },
-                                tooltipFormat: 'dd/MM/yyyy'
-                            },
-                            title: {
-                                display: true,
-                                text: 'Date'
-                            }
-                        },
-                        y: {
-                            title: {
-                                display: true,
-                                text: 'Prix (€)'
-                            }
-                        }
-                    }
-                }
-            });
-
-            // Set the active button
-            setActiveButton(document.getElementById('btn-new-' + defaultPeriod), 'new');
-
-            // Disable buttons without data
-            ['15days', '3months', '6months'].forEach(period => {
-                if (!hasDataInPeriod(newPriceHistory, period)) {
-                    const button = document.getElementById('btn-new-' + period);
-                    button.disabled = true;
-                    button.classList.add('disabled');
-                }
-            });
-
-            // Event handlers for 'New Price' chart buttons
-            document.getElementById('btn-new-15days').addEventListener('click', function () {
-                updateChart(newPriceChart, newPriceHistory, '15days');
-                setActiveButton(this, 'new');
-            });
-
-            document.getElementById('btn-new-3months').addEventListener('click', function () {
-                updateChart(newPriceChart, newPriceHistory, '3months');
-                setActiveButton(this, 'new');
-            });
-
-            document.getElementById('btn-new-6months').addEventListener('click', function () {
-                updateChart(newPriceChart, newPriceHistory, '6months');
-                setActiveButton(this, 'new');
-            });
-
-            document.getElementById('btn-new-max').addEventListener('click', function () {
-                updateChart(newPriceChart, newPriceHistory, 'max');
-                setActiveButton(this, 'new');
-            });
-        }
-
-        // Initialize the 'Used Price' chart only if data is available
-        if (occasionPriceHistory.length > 0) {
-            let defaultPeriod = '3months';
-            if (!hasDataInPeriod(occasionPriceHistory, defaultPeriod)) {
-                defaultPeriod = 'max';
-            }
-
-            const usedPriceCtx = document.getElementById('usedPriceChart').getContext('2d');
-            const usedPriceChart = new Chart(usedPriceCtx, {
-                type: 'line',
-                data: {
-                    datasets: [{
-                        label: 'Prix d\'Occasion',
-                        fill: true,
-                        data: getFilteredData(occasionPriceHistory, defaultPeriod),
-                        backgroundColor: '#ff6384',
-                        borderColor: '#fa486e',
-                        borderWidth: 2,
-                        tension: 0,
-                        pointRadius: 0,
-                        pointHoverRadius: 6,
-                        pointHitRadius: 10,
-                    }]
-                },
-                options: {
-                    interaction: {
-                        mode: 'nearest',
-                        intersect: false
-                    },
-                    scales: {
-                        x: {
-                            type: 'time',
-                            time: {
-                                unit: 'day',
-                                displayFormats: {
-                                    day: 'dd/MM/yyyy'
-                                },
-                                tooltipFormat: 'dd/MM/yyyy'
-                            },
-                            title: {
-                                display: true,
-                                text: 'Date'
-                            }
-                        },
-                        y: {
-                            title: {
-                                display: true,
-                                text: 'Prix (€)'
-                            }
-                        }
-                    }
-                }
-            });
-
-            // Set the active button
-            setActiveButton(document.getElementById('btn-used-' + defaultPeriod), 'used');
-
-            // Disable buttons without data
-            ['15days', '3months', '6months'].forEach(period => {
-                if (!hasDataInPeriod(occasionPriceHistory, period)) {
-                    const button = document.getElementById('btn-used-' + period);
-                    button.disabled = true;
-                    button.classList.add('disabled');
-                }
-            });
-
-            // Event handlers for 'Used Price' chart buttons
-            document.getElementById('btn-used-15days').addEventListener('click', function () {
-                updateChart(usedPriceChart, occasionPriceHistory, '15days');
-                setActiveButton(this, 'used');
-            });
-
-            document.getElementById('btn-used-3months').addEventListener('click', function () {
-                updateChart(usedPriceChart, occasionPriceHistory, '3months');
-                setActiveButton(this, 'used');
-            });
-
-            document.getElementById('btn-used-6months').addEventListener('click', function () {
-                updateChart(usedPriceChart, occasionPriceHistory, '6months');
-                setActiveButton(this, 'used');
-            });
-
-            document.getElementById('btn-used-max').addEventListener('click', function () {
-                updateChart(usedPriceChart, occasionPriceHistory, 'max');
-                setActiveButton(this, 'used');
-            });
-        }
-
-        // Function to update the chart with filtered data
-        function updateChart(chart, data, period) {
-            chart.data.datasets[0].data = getFilteredData(data, period);
-            chart.update();
-        }
-
-        // Function to check if data is available in a given period
-        function hasDataInPeriod(data, period) {
-            return getFilteredData(data, period).length > 0;
-        }
-
-        // Function to visually set the active button
-        function setActiveButton(activeButton, chartType) {
-            const buttonGroupSelector = chartType === 'new' ? '.btn-group .btn[id^="btn-new"]' : '.btn-group .btn[id^="btn-used"]';
-            const buttons = document.querySelectorAll(buttonGroupSelector);
-            buttons.forEach(button => {
-                button.classList.remove('btn-primary', 'active-period-btn');
-                button.classList.add('btn-secondary');
-            });
-            activeButton.classList.remove('btn-secondary');
-            activeButton.classList.add('btn-primary', 'active-period-btn');
-        }
-
-        ///////////////////////////////////
-        // Initialize image gallery
-        ///////////////////////////////////
-
-        // Get the carousel element
-        let carouselEl = document.getElementById('bootstrap-gallery-carousel');
-
-        // Create a Bootstrap Carousel instance with specified options
-        const carousel = new bootstrap.Carousel(carouselEl, {
-            interval: 10000,
-            wrap: false,
-        });
-
-        // Add event listener for 'slide.bs.carousel'
-        carouselEl.addEventListener('slide.bs.carousel', (event) => {
-            const container = document.querySelector('.carousel-inner');
-            window.lightGallery(container, {
-                plugins: [lgThumbnail],
-                selector: '.lg-item',
-            });
-        });
+  
     });
     /*]]>*/
 </script>
 
-<!-- Initialize bootstrap tooltips -->
-<script>
-  document.addEventListener('DOMContentLoaded', function () {
-    const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
-    tooltipTriggerList.forEach(function (tooltipTriggerEl) {
-      new bootstrap.Tooltip(tooltipTriggerEl)
-    })
-  })
+
+
+
+
+<!-- Creating impact score representation charts -->
+<script th:if="${verticalConfig}" th:inline="javascript">
+
+/*<![CDATA[*/
+
+    
+        const vertical = /*[[${verticalConfig.id}]]*/ '';    
+        const chartIntervals = /*[[${stats.numericFilters}]]*/'';
+
+    /*]]>*/
+</script>
+
+
+<!-- Creating impact score representation charts -->
+<script th:inline="javascript">
+/*<![CDATA[*/
+
+    
+        const siteLanguage = /*[[${siteLanguage}]]*/'';      
+        
+        // Expose the current product data for the annotation
+        const currentProductCover = /*[[${product.coverImagePath}]]*/ ''; 
+        const currentProductName  = /*[[${product.brandAndModel}]]*/ '';
+        
+
+    /*]]>*/
+
+
+    
+
+function createChartInterval(chartId, intervalDatas, verticalName, productCover, productLabel) {
+    const elem = document.getElementById('chart-impactscore-' + chartId);
+    if (!elem) {
+        return;
+    }
+
+    const ctx = elem.getContext('2d');
+
+    // Example data extraction
+    const buckets = intervalDatas.priceBuckets; // or "scoreBuckets", etc.
+    const labels = buckets.map(b => parseFloat(b.name));
+    const data   = buckets.map(b => parseFloat(b.count));
+
+    // Identify the index of the product’s bar (assuming it exactly matches a label)
+    // If it’s not exact, you could find the nearest bar:
+    const productValue = parseFloat(intervalDatas.currentProductValue); 
+    let xIndex = labels.indexOf(productValue);
+    if (xIndex < 0) {
+        // If exact match not found, find nearest:
+        let closestDiff = Infinity;
+        labels.forEach((val, idx) => {
+            let diff = Math.abs(val - productValue);
+            if (diff < closestDiff) {
+                closestDiff = diff;
+                xIndex = idx;
+            }
+        });
+    }
+
+    // Prepare an annotation config (only if we have a valid index)
+    let annotationConfig = {};
+    if (xIndex >= 0) {
+        // We want the annotation to appear near the top of the bar,
+        // so yValue is the data for that bar:
+        const yVal = data[xIndex];
+
+        // We can pick a side for the callout or let it be “auto.”
+        // Alternatively, do a quick check for left vs right:
+        annotationConfig = {
+            type: 'label',
+            xValue: xIndex,   // index on the X axis
+            yValue: yVal,     // the bar height
+            backgroundColor: 'rgba(255,255,255,0.8)',
+            borderColor: '#333',
+            borderWidth: 1,
+            // Show the callout line from the bar to the label
+            callout: {
+                enabled: true,
+                // We'll choose side in the afterLayout callback or do something simpler:
+                side: 'auto' 
+            },
+            // A small padding so the text/image is not flush to the border
+            padding: 6,
+            content: () => {
+                // Return an HTML string with the product image and name
+                // (Since content can be a string or function returning string)
+                return `
+                  <div style="text-align:center; line-height:1.2;">
+                    <img 
+                      src="${productCover}" 
+                      alt="Produit actuel : ${productLabel}" 
+                      style="width:60px; height:60px; object-fit:cover; border-radius:4px;"
+                    /><br/>
+                    <strong style="font-size:0.9em;">${productLabel}</strong>
+                  </div>
+                `;
+            },
+            font: {
+                size: 12
+            }
+        };
+    }
+
+    return new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [{
+                data: data,
+                borderWidth: 0,
+                backgroundColor: '#66b2ff' // for example
+            }]
+        },
+        options: {
+            onClick: (evt, elements, chart) => {
+                if (elements && elements.length) {
+                    const firstEl = elements[0];
+                    const idx = firstEl.index;
+                    const label = chart.data.labels[idx];
+                    const value = chart.data.datasets[firstEl.datasetIndex].data[idx];
+                    // Show them in console, or in your own <div>, or an alert:
+                    console.log(`Clicked bar at index ${idx}: label=${label}, value=${value}`);
+                }
+            },
+            plugins: {
+                legend: { display: false },
+                title: { display: false },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return verticalName + ": " + parseInt(context.raw);
+                        }
+                    }
+                },
+                annotation: {
+                    // Add your annotation here if xIndex is valid
+                    annotations: xIndex >= 0 ? {
+                        productAnnotation: annotationConfig
+                    } : {}
+                }
+            },
+            scales: {
+                x: {
+                    grid: { display: false },
+                    ticks: { display: true }
+                },
+                y: {
+                    display: false,
+                    grid: { display: false }
+                }
+            },
+            // Make bars full width
+            barPercentage: 1.0,
+            categoryPercentage: 1.0
+        }
+    });
+}
+
+
+
+$(document).ready(function() {
+    $(".intervalChart").each(function() {
+        const scoreName = "scores." + $(this).attr("data-score") + ".value";
+        const intervalData = chartIntervals[scoreName];
+
+        if (intervalData) {
+            // Pass in the product cover + brand model + numeric value
+            createChartInterval(
+                scoreName,
+                intervalData,
+                vertical,
+                currentProductCover,  // from Thymeleaf variable
+                currentProductName    // from Thymeleaf variable
+            );
+        }
+    });
+});
 </script>
 
 
 
+
+    
 </body>
 
 </html>
