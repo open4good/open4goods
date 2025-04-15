@@ -8,6 +8,7 @@ import java.time.Duration;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
+import java.util.concurrent.ThreadPoolExecutor;
 
 import org.open4goods.services.urlfetching.config.FetchStrategy;
 import org.open4goods.services.urlfetching.config.UrlFetcherConfig.DomainConfig;
@@ -34,6 +35,8 @@ public class HttpFetcher implements Fetcher {
     private final Duration timeout;
     private final MeterRegistry meterRegistry;
 
+	private Executor executor;
+
     /**
      * Constructs a new HttpFetcher.
      *
@@ -46,6 +49,7 @@ public class HttpFetcher implements Fetcher {
         this.customHeaders = domainConfig.getCustomHeaders();
         this.timeout = Duration.ofMillis(domainConfig.getTimeout());
         this.meterRegistry = meterRegistry;
+        this.executor = executor;
         this.httpClient = HttpClient.newBuilder()
                 .executor(executor)
                 .connectTimeout(this.timeout)
@@ -60,7 +64,10 @@ public class HttpFetcher implements Fetcher {
      */
     @Override
     public CompletableFuture<FetchResponse> fetchUrl(String url) {
-        logger.info("Fetching URL {} using HttpFetcher", url);
+    	logger.info("Executor stats before fetchUrl: active={}, queued={}, poolSize={}",
+    		    ((ThreadPoolExecutor) executor).getActiveCount(),
+    		    ((ThreadPoolExecutor) executor).getQueue().size(),
+    		    ((ThreadPoolExecutor) executor).getPoolSize());
         HttpRequest.Builder requestBuilder = HttpRequest.newBuilder()
                 .uri(URI.create(url))
                 .GET()

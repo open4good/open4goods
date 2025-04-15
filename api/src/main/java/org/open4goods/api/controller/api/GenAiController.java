@@ -2,6 +2,7 @@
 
 package org.open4goods.api.controller.api;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
@@ -104,6 +105,22 @@ public class GenAiController {
         return batchAiService.checkStatus(jobId);
     }
 
+    
+	/**
+     * Endpoint to check the current status of a batch job.
+     *
+     * @param jobId the identifier of the batch job.
+     * @return the BatchJobResponse containing the job status.
+	 * @throws IOException 
+	 * @throws ResourceNotFoundException 
+     */
+    @GetMapping("/batch/processResponse")
+    @Operation(summary = "Process the response for a given jobId")
+    public void trigger(@RequestParam String jobId) throws ResourceNotFoundException, IOException {
+         reviewGenerationService.triggerResponseHandling(jobId);
+    }
+    
+    
     /**
      * Endpoint to process and retrieve the response of a completed batch job.
      *
