@@ -72,6 +72,15 @@ jobs:
               }
             ]
 
+            
+            
+      ############################################
+      # Build and test xwiki-springboot-starter
+      ###########################################
+      - name: Build and Test xwiki-springboot-starter
+        working-directory: ./xwiki-spring-boot-starter        
+        run: mvn --batch-mode --update-snapshots install
+
       ############################################
       # Checkout Main Repository
       ###########################################
