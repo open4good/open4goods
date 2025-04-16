@@ -26,7 +26,7 @@ public class FaviconConfig {
     /**
      * The folder where favicon files are cached.
      */
-    private String cacheFolder;
+    private String cacheFolder = "/opt/open4goods/.cached/";
 
     /**
      * Mapping of domains to direct favicon resource locations.
