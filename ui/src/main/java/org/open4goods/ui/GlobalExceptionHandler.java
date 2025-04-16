@@ -12,6 +12,7 @@ import org.springframework.boot.actuate.health.HealthIndicator;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authorization.AuthorizationDeniedException;
 import org.springframework.stereotype.Component;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -76,6 +77,8 @@ public class GlobalExceptionHandler implements HealthIndicator {
             return HttpStatus.valueOf(responseStatusException.getStatusCode().value());
         } else if (ex instanceof NoResourceFoundException) {
             return HttpStatus.NOT_FOUND; // 404
+        } else if (ex instanceof AuthorizationDeniedException) {
+            return HttpStatus.FORBIDDEN; // 403
         }
         return HttpStatus.INTERNAL_SERVER_ERROR; // Default 500
     }
