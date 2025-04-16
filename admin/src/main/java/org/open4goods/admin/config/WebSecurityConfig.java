@@ -86,27 +86,6 @@ public class WebSecurityConfig {
         return http.build();
 
 	}
-	 
-		@Bean
-		public Filter logUserRolesFilter() {
-		    return new OncePerRequestFilter() {
-		        @Override
-		        protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
-		                throws ServletException, java.io.IOException {
-		            Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-		            if (auth != null && auth.isAuthenticated()) {
-		                System.out.println("User: " + auth.getName());
-		                System.out.println("Roles: ");
-		                for (GrantedAuthority authority : auth.getAuthorities()) {
-		                    System.out.println(" - " + authority.getAuthority());
-		                }
-		            }
-		            filterChain.doFilter(request, response);
-		        }
-		    };
-		}
-		
-		
 
 	@Bean
 	AuthenticationManager authManager(HttpSecurity http) throws Exception {
