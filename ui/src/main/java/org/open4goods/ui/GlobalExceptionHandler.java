@@ -1,5 +1,6 @@
 package org.open4goods.ui;
 
+import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -41,7 +42,9 @@ public class GlobalExceptionHandler implements HealthIndicator {
     private final AtomicInteger clientErrorCount = new AtomicInteger(0);
     private final Map<String, Integer> serverErrorEndpoints = new ConcurrentHashMap<>();
     private final Map<String, Integer> clientErrorEndpoints = new ConcurrentHashMap<>();
-
+    
+    // Max number of recorded failed urls (rendered in sb admin client)
+    private static final int MAX_ENDPOINTS = 10;
     /**
      * Handles all exceptions and determines the response format (JSON or Thymeleaf error page).
      *
@@ -77,19 +80,33 @@ public class GlobalExceptionHandler implements HealthIndicator {
         return HttpStatus.INTERNAL_SERVER_ERROR; // Default 500
     }
 
-    /**
-     * Tracks errors per endpoint and increments the respective counters.
-     *
-     * @param status  The HTTP status of the error.
-     * @param endpoint The endpoint where the error occurred.
-     */
+    
+
     private void trackError(HttpStatus status, String endpoint) {
         if (status.is4xxClientError()) {
             clientErrorCount.incrementAndGet();
-            clientErrorEndpoints.merge(endpoint, 1, Integer::sum);
+            synchronized (clientErrorEndpoints) {
+                clientErrorEndpoints.merge(endpoint, 1, Integer::sum);
+                if (clientErrorEndpoints.size() > MAX_ENDPOINTS) {
+                    removeOldestEntry(clientErrorEndpoints);
+                }
+            }
         } else if (status.is5xxServerError()) {
             serverErrorCount.incrementAndGet();
-            serverErrorEndpoints.merge(endpoint, 1, Integer::sum);
+            synchronized (serverErrorEndpoints) {
+                serverErrorEndpoints.merge(endpoint, 1, Integer::sum);
+                if (serverErrorEndpoints.size() > MAX_ENDPOINTS) {
+                    removeOldestEntry(serverErrorEndpoints);
+                }
+            }
+        }
+    }
+
+    private void removeOldestEntry(Map<String, Integer> map) {
+        Iterator<String> it = map.keySet().iterator();
+        if (it.hasNext()) {
+            it.next();
+            it.remove();
         }
     }
 
