@@ -39,14 +39,14 @@
                     <p class="card-text">
                         <strong><span class="far fa-lightbulb"></span> Explications :</strong>
                         <ul>
-                            <li th:if="${worse != null && worse.attributes.indexed.get(score.name)}" th:utext="#{${'score.' + score.name + '.explanation.worst'}(
+                            <li th:if="${worse != null && worse.attributes.indexed.get(score.name) != null}" th:utext="#{${'score.' + score.name + '.explanation.worst'}(
                                 ${verticalConfig.i18n(siteLanguage).getVerticalHomeTitle().toLowerCase()},
                                 ${worse.attributes.indexed.get(score.name).value},
                                 ${worse.scores.get(score.name).on20}
                                 
                             )}"></li>
 
-                            <li th:if="${best != null && best.attributes.indexed.get(score.name)}"
+                            <li th:if="${best != null && best.attributes.indexed.get(score.name) != null}"
                                 th:utext="#{${'score.' + score.name + '.explanation.best'}(
                                 ${verticalConfig.i18n(siteLanguage).getVerticalHomeTitle().toLowerCase()},
                                 ${best.attributes.indexed.get(score.name).value},
