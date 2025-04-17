@@ -6,39 +6,30 @@
      aria-roledescription="carousel"
      aria-live="polite">
 
-    <!--/* Thymeleaf comment: Slides Container - Each slide contains a clickable image wrapped in a link that triggers LightGallery */-->
-    <div class="carousel-inner" >
-        <div th:each="img, stat : ${images}"
-             th:classappend="${stat.first} ? ' active' : ''"
-             class="carousel-item">
-             
-            <!--/* Thymeleaf comment: The anchor triggers LightGallery. 
-                 data-lg-size is a placeholder; customize if you have actual dimensions.
-                 data-src points to the high-resolution image (or video).
-                 data-sub-html displays the image metadata (title and description) in LightGallery. */-->
-            <a href="#" 
-               th:href="@{/#}" 
-               th:data-lg-size="${img.imageInfo.width}+'-'+${img.imageInfo.height}"
-               th:data-src="${img.path()}"
-               th:data-sub-html="'<h4>' + ${img.fileName} + '</h4><p>' + ${img} + '</p>'"
-               role="button" 
-               aria-label="Open fullscreen gallery">
-               
-                <!--/* Thymeleaf comment: Custom Fluid Aspect Ratio Container 
-                     The inline style calculates padding-top based on image height and width.
-                     This ensures the container preserves the image’s aspect ratio. */-->
-                <div 
-                     class="image-container">
-                     
-                    <img class="img-fluid" 
-                         th:src="${img.path(360)}"
-                         th:alt="'Image relative au ' + ${product.bestName()}"
-                         loading="lazy"
-                        />
-                </div>
-            </a>
-        </div>
-    </div>
+   <!--/*  Slides Container - Each slide contains a clickable image wrapped in a link that triggers LightGallery */-->
+	<div class="carousel-inner">
+	    <div th:each="img, stat : ${images}"
+	         th:class="'carousel-item' + (${stat.first} ? ' active' : '')"
+	         class="carousel-item">
+	
+	        <!-- ✅ Anchor is direct child of carousel-item for LightGallery -->
+	        <a th:href="@{/#}"
+	           th:data-lg-size="${img.imageInfo.width} + '-' + ${img.imageInfo.height}"
+	           th:data-src="${img.path()}"
+	           th:data-sub-html="'<h4>' + ${img.fileName} + '</h4><p>' + ${img} + '</p>'"
+	           role="button"
+	           aria-label="Open fullscreen gallery"
+	           class="d-flex justify-content-center align-items-center"
+	           style="min-height: 300px;"> <!-- ⬅ Controls vertical spacing -->
+	
+	            <img class="img-fluid"
+	                 th:src="${img.path(360)}"
+	                 th:alt="'Image relative au ' + ${product.bestName()}"
+	                 loading="lazy" />
+	        </a>
+	    </div>
+	</div>
+
 
     <!--/* Thymeleaf comment: Carousel Controls for navigation */-->
     <button class="carousel-control-prev" 
@@ -90,7 +81,6 @@
         lightGallery(lightGalleryElement, {
             selector: 'a',
             plugins: [lgZoom],
-            licenseKey: '0000-0000-000-0000', // Replace with your license key if needed.
             speed: 500
         });
     });
