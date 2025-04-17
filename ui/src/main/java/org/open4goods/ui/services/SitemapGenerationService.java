@@ -206,8 +206,7 @@ public class SitemapGenerationService {
 			
 			List<Product> datas = aggregatedDataRepository.exportVerticalWithValidDateOrderByEcoscore(vertical.getId(),false)
 			// Filtering on products having genAI content
-					.filter(e -> null != e.getGenaiTexts() && null != e.getGenaiTexts().get(language))
-					.filter(e -> e.getGenaiTexts().get(language).getDescriptions().size() > 1)
+			.filter(e ->   null != e.getReviews().get(language) || null != e.ecoscore() )
 					
 			.toList();
 			
