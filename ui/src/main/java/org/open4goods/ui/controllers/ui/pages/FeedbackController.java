@@ -1,133 +1,186 @@
+// src/main/java/org/open4goods/ui/controllers/ui/pages/FeedbackController.java
 package org.open4goods.ui.controllers.ui.pages;
 
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
-import org.open4goods.model.exceptions.InvalidParameterException;
-import org.open4goods.services.feedback.service.FeedbackService;
+import org.open4goods.commons.helper.IpHelper;
+import org.open4goods.services.captcha.service.HcaptchaService;
+import org.open4goods.services.captcha.config.HcaptchaProperties;
+import org.open4goods.services.feedback.dto.IssueDTO;
+import org.open4goods.services.feedback.exception.VotingLimitExceededException;
+import org.open4goods.services.feedback.exception.VotingNotAllowedException;
+import org.open4goods.services.feedback.service.IssueService;
+import org.open4goods.services.feedback.service.VoteResponse;
+import org.open4goods.services.feedback.service.VoteService;
 import org.open4goods.ui.config.yml.UiConfig;
 import org.open4goods.ui.controllers.ui.UiService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.MultiValueMap;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 
-import cz.jiripinkas.jsitemapgenerator.ChangeFreq;
 import jakarta.servlet.http.HttpServletRequest;
 
+/**
+ * Thymeleaf + AJAX controller for creating issues and voting.
+ */
 @Controller
-public class FeedbackController implements SitemapExposedController {
+public class FeedbackController {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(FeedbackController.class);
-	private static final String IDEA_PATH_DEFAULT = "/feedback/idea";
-	private static final String BUG_PATH_DEFAULT = "/feedback/issue";
+    private static final Logger LOGGER = LoggerFactory.getLogger(FeedbackController.class);
 
-	private @Autowired UiService uiService;
-	private @Autowired UiConfig config;
+    private final UiService uiService;
+    private final UiConfig uiConfig;
+    private final IssueService issueService;
+    private final VoteService voteService;
+    private final HcaptchaService hcaptchaService;
+    private final HcaptchaProperties hcaptchaProperties;
 
-	private FeedbackService feedbackService;
+    public FeedbackController(UiService uiService,
+                              UiConfig uiConfig,
+                              IssueService issueService,
+                              VoteService voteService,
+                              HcaptchaService hcaptchaService,
+                              HcaptchaProperties hcaptchaProperties) {
+        this.uiService   = uiService;
+        this.uiConfig    = uiConfig;
+        this.issueService = issueService;
+        this.voteService = voteService;
+        this.hcaptchaService = hcaptchaService;
+        this.hcaptchaProperties = hcaptchaProperties;
+    }
 
-	public FeedbackController(FeedbackService feedbackService) {
-		this.feedbackService = feedbackService;
-	}
+    @GetMapping("/feedback/issue")
+    public ModelAndView issueForm(HttpServletRequest request) {
+        String ip = IpHelper.getIp(request);
+        var model = uiService.defaultModelAndView("feedback-issue", request);
+        model.addObject("votes", voteService.getRemainingVotes(ip));
+        model.addObject("hcaptchaSiteKey", hcaptchaProperties.getKey());
+        return model;
+    }
 
-	@Override
-	public List<SitemapEntry> getMultipleExposedUrls() {
+    @GetMapping("/feedback/idea")
+    public ModelAndView ideaForm(HttpServletRequest request) {
+        return uiService.defaultModelAndView("feedback-idea", request);
+    }
 
-		SitemapEntry issue = SitemapEntry.of(SitemapEntry.LANGUAGE_DEFAULT, IDEA_PATH_DEFAULT, 0.3, ChangeFreq.YEARLY)
-				;
+    @PostMapping("/feedback")
+    public ModelAndView createIssue(
+            HttpServletRequest request,
+            @RequestBody MultiValueMap<String, String> formData
+    ) {
+        String ip = IpHelper.getIp(request);
+        // Verify hCaptcha
+        try {
+            String token = formData.getFirst("h-captcha-response");
+            hcaptchaService.verifyRecaptcha(ip, token);
+        } catch (SecurityException e) {
+            LOGGER.warn("Invalid captcha: {}", e.getMessage());
+            return uiService.defaultModelAndView("feedback-error", request)
+                             .addObject("msg", "Captcha non valide : " + e.getMessage());
+        }
 
-		SitemapEntry idea = SitemapEntry.of(SitemapEntry.LANGUAGE_DEFAULT, BUG_PATH_DEFAULT, 0.3, ChangeFreq.YEARLY)
-				;
+        // Create GitHub issue
+        try {
+            Set<String> labels = new HashSet<>(Set.of("nudger.fr", "feedback"));
+            String type = formData.getFirst("type");
+            if ("bug".equals(type)) {
+                issueService.createBug(
+                    formData.getFirst("title"),
+                    formData.getFirst("message"),
+                    formData.getFirst("url"),
+                    formData.getFirst("author"),
+                    labels
+                );
+            } else {
+                issueService.createIdea(
+                    formData.getFirst("title"),
+                    formData.getFirst("message"),
+                    formData.getFirst("url"),
+                    formData.getFirst("author"),
+                    labels
+                );
+            }
+        } catch (IOException e) {
+            LOGGER.error("Error creating GitHub issue", e);
+            return uiService.defaultModelAndView("feedback-error", request)
+                            .addObject("msg", "Internal error: " + e.getMessage());
+        }
+        return uiService.defaultModelAndView("feedback-success", request)
+                        .addObject("backUrl", formData.getFirst("url"));
+    }
 
-		return Arrays.asList(issue, idea);
-	}
-	
-	@Override
-	public SitemapEntry getExposedUrls() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-	
+    @GetMapping("/feedback/votes/remaining")
+    @ResponseBody
+    public Map<String, Integer> remainingVotes(HttpServletRequest request) {
+        String ip = IpHelper.getIp(request);
+        return Map.of("remainingVotes", voteService.getRemainingVotes(ip));
+    }
 
-	@GetMapping("/feedback/issue")
-	public ModelAndView issue(final HttpServletRequest request,
-			@RequestParam(required = false, name = "url") String url) {
+    @GetMapping("/feedback/votes/can")
+    @ResponseBody
+    public Map<String, Boolean> canVote(HttpServletRequest request) {
+        String ip = IpHelper.getIp(request);
+        return Map.of("canVote", voteService.userCanVote(ip));
+    }
 
-		ModelAndView model = uiService.defaultModelAndView("feedback-issue", request);
+    @PostMapping("/feedback/vote")
+    @ResponseBody
+    public ResponseEntity<?> voteOnIssue(
+            @RequestParam("issueId") String issueId,
+            HttpServletRequest request
+    ) {
+        String ip = IpHelper.getIp(request);
+        try {
+            VoteResponse resp = voteService.vote(issueId, ip);
+            return ResponseEntity.ok(Map.of(
+                "remainingVotes", resp.remainingVotes(),
+                "totalVotes", resp.totalVotes()
+            ));
+        } catch (VotingNotAllowedException ex) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(Map.of("message", ex.getMessage()));
+        } catch (VotingLimitExceededException ex) {
+            return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS)
+                    .body(Map.of("message", ex.getMessage()));
+        }
+    }
 
-		// Adding authenticated user
-		if (null != model.getModel().get("user")) {
-			model.addObject("author", model.getModel().get("user"));
-		}
+    @GetMapping("/feedback/ideas")
+    @ResponseBody
+    public List<IssueDTO> listIdeas() throws IOException {
+        return issueService.listIdeas().stream()
+            .map(issue -> new IssueDTO(
+                String.valueOf(issue.getNumber()),
+                issue.getNumber(),
+                issue.getTitle(),
+                issue.getHtmlUrl().toString(),
+                voteService.getTotalVotes(String.valueOf(issue.getNumber()))
+            ))
+            .sorted((a, b) -> Integer.compare(b.votes(), a.votes()))
+            .toList();
+    }
 
-		return model;
-	}
-
-	@GetMapping("/feedback/idea")
-	public ModelAndView idea(final HttpServletRequest request,
-			@RequestParam(required = false, name = "url") String url) {
-
-		ModelAndView model = uiService.defaultModelAndView("feedback-idea", request);
-
-		// Adding authenticated user
-		if (null != model.getModel().get("user")) {
-			model.addObject("author", model.getModel().get("user"));
-		}
-
-		return model;
-	}
-
-	@PostMapping("/feedback")
-	public ModelAndView createIssue(final HttpServletRequest request,
-			@RequestBody MultiValueMap<String, String> formData) {
-
-		if (formData == null) {
-			LOGGER.warn("No form data");
-
-			return uiService.defaultModelAndView("feedback-error", request).addObject("msg", "No form data");
-		}
-
-		if (formData.getFirst("captcha") == null || !formData.getFirst("captcha").equals("1")) {
-			LOGGER.warn("Captcha is not valid");
-			return uiService.defaultModelAndView("feedback-error", request).addObject("msg", "Invalid captcha");
-		}
-
-		try {
-			Set<String> labels = new HashSet<String>();
-			// TODO : from conf
-			labels.add("nudger.fr");
-			labels.add("feedback");
-
-			if (formData.getFirst("type").equals("bug")) {
-				labels.add("bug");
-
-			} else if (formData.getFirst("type").equals("idea")) {
-				labels.add("feature");
-			}
-
-			feedbackService.createBug(formData.getFirst("title"), formData.getFirst("message"), "",
-					formData.getFirst("author"), labels);
-
-		} catch (IOException e) {
-			LOGGER.error("Error while creating issue", e);
-			return uiService.defaultModelAndView("feedback-error", request).addObject("msg",
-					"Internal exception : " + e.getMessage());
-		}
-
-		return uiService.defaultModelAndView("feedback-success", request).addObject("backUrl",
-				formData.getFirst("url"));
-	}
-
-
-
+    @GetMapping("/feedback/bugs")
+    @ResponseBody
+    public List<IssueDTO> listBugs() throws IOException {
+        return issueService.listBugs().stream()
+            .map(issue -> new IssueDTO(
+                String.valueOf(issue.getNumber()),
+                issue.getNumber(),
+                issue.getTitle(),
+                issue.getHtmlUrl().toString(),
+                voteService.getTotalVotes(String.valueOf(issue.getNumber()))
+            ))
+            .sorted((a, b) -> Integer.compare(b.votes(), a.votes()))
+            .toList();
+    }
 }
