@@ -174,7 +174,6 @@ public class UiConfig {
 
 	private BlogConfiguration blogConfig = new BlogConfiguration();
 	
-	private FeedbackConfiguration feedbackConfig = new FeedbackConfiguration();
 	
 	/**
 	 * The configuration for developpement mode services
@@ -396,14 +395,6 @@ public class UiConfig {
 	}
 
 
-	public FeedbackConfiguration getFeedbackConfig() {
-		return feedbackConfig;
-	}
-
-
-	public void setFeedbackConfig(FeedbackConfiguration feedbackConfig) {
-		this.feedbackConfig = feedbackConfig;
-	}
 
 
 	public ReversementConfig getReversementConfig() {
