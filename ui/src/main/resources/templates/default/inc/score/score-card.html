@@ -1,89 +1,70 @@
 
-<figure th:id="'detail-'+${score.name}"  class="card shadow"
-        th:with="worse = ${extrems.get(score.lowestScoreId)},
-                 best = ${extrems.get(score.highestScoreId)},
-                 currentScorePercent = ${score.on20 * 5}">
+<div class="card shadow border-gray-300 animate-up-3 p-0 h-100" th:id="'detail-'+${score.name}" th:with="worse = ${extrems.get(score.lowestScoreId)}, best = ${extrems.get(score.highestScoreId)}, currentScorePercent = ${score.on20 * 5}">
+    <div class="card-header">
+        <h3 id="impact-score-title" class="h6 py-0 my-0" th:text="${verticalConfig.availableImpactScoreCriterias.get(score.name).title.i18n(siteLanguage)}"></h3>
+    </div>
+    <div class="card-body p-4">
+        <div class="d-flex align-items-end justify-content-center mt-3 text-gradiant text-gradiant_ecoscore">
+            <b class="chiffre__xxl" th:text="${score.on20()}"></b>
+            <span class="chiffre__xl">/20</span>
+        </div>
 
-    <figcaption class="card-header">
-        <div class="row text-center">
-            <h3 class="h4" th:text="${verticalConfig.availableImpactScoreCriterias.get(score.name).title.i18n(siteLanguage)}">
-                <!-- Criterion Title -->
+        <div class="d-flex align-items-center justify-content-center">
+            <div class="badge bg-tertiary p-2">
+                Compte pour <b><span th:text="${verticalConfig.ecoscorePercentOf(score.name)}">></span>%</b> dans la note totale
+            </div>
+        </div>
+
+        <div class="row align-items-center text-start">
+            <div class="col-12 col-md-4">
+                <img th:if="${img}" th:src="${img}" th:alt="'Icône de performance pour ' + ${verticalConfig.availableImpactScoreCriterias.get(score.name).description.i18n(siteLanguage)}" loading="lazy" class="img-fluid">
+            </div>
+            <h3 class="col-12 col-md-8 h4">
+                <span class="far fa-lightbulb"></span> Explications :
             </h3>
         </div>
-    </figcaption>
 
-    <div class="card-body">
+        <div class="d-flex align-items-end flex-column">
+            <section class="text-start">
+                <ul class="list-group">
+                    <li class="small list-group-item rounded-0 mb-0" th:if="${worse != null && worse.attributes.indexed.get(score.name) != null}" th:utext="#{${'score.' + score.name + '.explanation.worst'}(
+                        ${verticalConfig.i18n(siteLanguage).getVerticalHomeTitle().toLowerCase()},
+                        ${worse.attributes.indexed.get(score.name).value},
+                        ${worse.scores.get(score.name).on20}
+                        
+                    )}"></li>
 
-        <div class="row g-0 align-items-center mb-4">
-            <div class="col-4 text-center">
-                <span class="display-3" th:text="${score.on20()}"></span>
-                <span class="display-5">/20</span>
-            </div>
+                    <li class="small list-group-item rounded-0 mb-0" th:if="${best != null && best.attributes.indexed.get(score.name) != null}"
+                        th:utext="#{${'score.' + score.name + '.explanation.best'}(
+                        ${verticalConfig.i18n(siteLanguage).getVerticalHomeTitle().toLowerCase()},
+                        ${best.attributes.indexed.get(score.name).value},
+                        ${best.scores.get(score.name).on20}
+                    )}"></li>
 
-            <div class="col-8 text-center">
-                <div class="alert alert-success text-center" role="alert">
-                    Compte pour <b><span th:text="${verticalConfig.ecoscorePercentOf(score.name)}"></span>%</b> dans la note totale
-                </div>
-            </div>
+                    <li class="small list-group-item rounded-0 mb-0" th:if="${product.attributes.indexed.get(score.name)}"
+                        th:utext="#{${'score.' + score.name + '.explanation.current'}(
+                        ${product.attributes.indexed.get(score.name).value},
+                        ${score.on20},
+                        ${product.bestName}
+                    )}"></li>
+                </ul>
+            </section>
 
-            <div class="col-4 text-center">
-                <img th:if="${img}"
-                     th:src="${img}"
-                     th:alt="'Icône de performance pour ' + ${verticalConfig.availableImpactScoreCriterias.get(score.name).description.i18n(siteLanguage)}"
-                     loading="lazy"
-                     class="img-fluid">
-            </div>
+            <!-- Score Scale with Markers -->
+            <!-- Section Title -->
+            <div class="w-100 mt-auto">
+                <h3 class="h4 my-3">Illustration</h3>
 
-            <div class="col-md-8">
-                <section class="card-body">
-                    <p class="card-text">
-                        <strong><span class="far fa-lightbulb"></span> Explications :</strong>
-                        <ul>
-                            <li th:if="${worse != null && worse.attributes.indexed.get(score.name) != null}" th:utext="#{${'score.' + score.name + '.explanation.worst'}(
-                                ${verticalConfig.i18n(siteLanguage).getVerticalHomeTitle().toLowerCase()},
-                                ${worse.attributes.indexed.get(score.name).value},
-                                ${worse.scores.get(score.name).on20}
-                                
-                            )}"></li>
-
-                            <li th:if="${best != null && best.attributes.indexed.get(score.name) != null}"
-                                th:utext="#{${'score.' + score.name + '.explanation.best'}(
-                                ${verticalConfig.i18n(siteLanguage).getVerticalHomeTitle().toLowerCase()},
-                                ${best.attributes.indexed.get(score.name).value},
-                                ${best.scores.get(score.name).on20}
-                            )}"></li>
-
-                            <li th:if="${product.attributes.indexed.get(score.name)}"
-                                th:utext="#{${'score.' + score.name + '.explanation.current'}(
-                                ${product.attributes.indexed.get(score.name).value},
-                                ${score.on20},
-                                ${product.bestName}
-                            )}"></li>
-                        </ul>
-                    </p>
-                </section>
+                <canvas class="intervalChart"
+                    th:data-score="${score.name}"
+                    th:data-current-score="${score.value}"
+                    th:data-product-image="@{${product.coverImagePath}}"
+                    th:data-product-label="${product.brandAndModel}"
+                    th:id="'chart-impactscore-scores.'+${score.name}+'.value'"
+                    style="height: 300px; width: 100%;">
+                </canvas>
             </div>
         </div>
-
-        <!-- Score Scale with Markers -->
-        <!-- Section Title -->
-        <div class="mt-4">
-            <p class="card-text">
-                <strong>Illustration</strong>
-            </p>
-        </div>
-
-
-	     <canvas class="intervalChart"
-	        th:data-score="${score.name}"
-	        th:data-current-score="${score.value}"
-	        th:data-product-image="@{${product.coverImagePath}}"
-	        th:data-product-label="${product.brandAndModel}"
-	        th:id="'chart-impactscore-scores.'+${score.name}+'.value'"
-	        style="min-height: 200px; width: 100%;">
-	    </canvas>
-
-
         <!-- Score Scale with Markers + Arrows 
         <div class="overflow-x-auto">
             <div class="position-relative mx-2 my-4" style="height: 160px; min-width: 400px;">
@@ -146,6 +127,5 @@
         
         
         -->
-
     </div>
-</figure>
+</div>
