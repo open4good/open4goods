@@ -120,70 +120,65 @@ $nudger_radius_mini : 40px;
     border: none!important;
 }
 
-    .bg-primary {
+.bg-primary {
+    color: $color_dark!important;
 
+    &.text-white {
         color: $color_dark!important;
-
-        &.text-white {
-            color: $color_dark!important;
-        }
-
-        .btn-primary,
-        .btn-secondary,
-        .btn-tertiary {
-            color: #fff!important;
-            background-color: $color_dark!important;
-        }
     }
+
+    .btn-primary,
+    .btn-secondary,
+    .btn-tertiary {
+        color: #fff!important;
+        background-color: $color_dark!important;
+    }
+}
+
 .bg-secondary,
 .btn-secondary {
     //background: linear-gradient(-48deg, $ecoscore_main, $ecoscore_secondary)!important;
-    background-color: $color_secondary!important;
+    background-color: $openSource_secondary!important;
     border: none!important;
 }
 
-    .bg-secondary {
+.bg-secondary {
+    color: $color_light!important;
 
-        color: $color_light!important;
-
-        &.text-white {
-            color: $color_dark!important;
-        }
-        
-        .btn-primary,
-        .btn-secondary,
-        .btn-tertiary {
-            color: #000!important;
-            background-color: $color_light!important;
-        }
+    &.text-white {
+        color: $color_dark!important;
     }
-.bg-tertiray,
+    
+    .btn-primary,
+    .btn-secondary,
+    .btn-tertiary {
+        color: #000!important;
+        background-color: $color_light!important;
+    }
+}
+
+.bg-tertiary,
 .btn-tertiary {
     //background: linear-gradient(-48deg, $ecoscore_main, $ecoscore_secondary)!important;
     background-color: $color_tertiary!important;
     border: none!important;
 }
 
-    .bg-tertiary {
+.bg-tertiary {
 
+    color: $color_dark!important;
+
+    /*&.text-white {
         color: $color_dark!important;
-
-        &.text-white {
-            color: $color_dark!important;
-        }
-        
-        .btn-primary,
-        .btn-secondary,
-        .btn-tertiary {
-            color: #000!important;
-            background-color: $color_light!important;
-        }
+    }*/
+    
+    .btn-primary,
+    .btn-secondary,
+    .btn-tertiary {
+        color: #000!important;
+        background-color: $color_light!important;
     }
-
-
-
-
-
+}
 
 .color-primary,
 .text-primary {
@@ -249,7 +244,7 @@ $nudger_radius_mini : 40px;
 
 .hero__hp {
     background: url('/assets/img/hero_hp.jpg') center !important;
-    background-size: cover!important;
+    background-size: contain!important;
     height: 100vh;
     position: relative;
 
@@ -489,7 +484,12 @@ $nudger_radius_mini : 40px;
 }
 
 .chiffre__xxl {
-    font-size: 10rem;
+    font-size: 5rem;
+    line-height: 5rem;
+}
+.chiffre__xl {
+    font-size: 3rem;
+    line-height: 5rem;
 }
 
 .header-global {
@@ -618,4 +618,20 @@ $nudger_radius_mini : 40px;
         line-height: 1.3;
         color: $openSource_secondary!important;
     }
+}
+
+#sticky-header.sticky {
+    position: fixed;
+    top: 0; /* sera modifié en JS entre 0px et 95px */
+    left: 0;
+    right: 0;
+    width: 100%;
+    z-index: 999;
+}
+
+.bg-index {
+    background-image: url('assets/img/bg-index.jpg');
+    background-size: contain;
+    background-repeat: no-repeat;
+    position: absolute;
 }
