@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html th:lang="${siteLocale.language}">
-
 <head>
     <!-- Importing meta tags and CSS files -->
     <th:block th:insert="~{inc/header-meta.html}"></th:block>
@@ -56,14 +55,14 @@
         opacity: 1;
       }
     </style>
-      <script defer type="text/javascript" language="javascript" src="/webjars/datatables/js/dataTables.min.js"></script>
-<script defer type="text/javascript" language="javascript" src="/webjars/datatables/js/dataTables.bootstrap5.min.js"></script>
-      <script src="/js/product-price-widget.js"></script>
-      <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns/dist/chartjs-adapter-date-fns.bundle.min.js"></script>    
+    <script defer type="text/javascript" language="javascript" src="/webjars/datatables/js/dataTables.min.js"></script>
+    <script defer type="text/javascript" language="javascript" src="/webjars/datatables/js/dataTables.bootstrap5.min.js"></script>
+    <script src="/js/product-price-widget.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns/dist/chartjs-adapter-date-fns.bundle.min.js"></script>    
 
-<!--/* TODO: place this in your <head> or just before the chart script */-->
-<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@latest/dist/chartjs-plugin-annotation.min.js"></script>
+    <!--/* TODO: place this in your <head> or just before the chart script */-->
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@latest/dist/chartjs-plugin-annotation.min.js"></script>
       
     <!-- For attributes details-->
     <style>
@@ -77,10 +76,7 @@
 		    margin-bottom: 1.5rem;
 		}
     </style>
-      
-    
-<!--  -->    
-
+    <!--  -->    
     <style>
         /* Invert the gradient: red on the left, green on the right */
         .gradient-scale {
@@ -104,8 +100,6 @@
             overflow-x: auto;
         }
     </style>
-
-  
     <style>
     
         .carousel-indicators {
@@ -168,110 +162,94 @@
         
         
     </style>
-    
-    
-    
-    
-    
-    
-    
-    
-    
-<!--/* Thymeleaf comment: Separate Thumbnail Navigation Bar (Horizontal Scroll Pane) */-->
-<style>
-    .thumbnail-bar {
-        background-color: #fff; /* white background for SEO/accessibility */
-        white-space: nowrap;    /* keep thumbnails in one row */
-        overflow-x: auto;       /* enable horizontal scrolling */
-        padding: 0.5rem;
-        margin-top: 1rem;
-    }
-    .thumbnail-bar img {
-        cursor: pointer;
-        max-height: 70px;       /* fixed height for uniform layout */
-        object-fit: cover;
-        margin-right: 0.5rem;
-    }
-</style>
+    <!--/* Thymeleaf comment: Separate Thumbnail Navigation Bar (Horizontal Scroll Pane) */-->
+    <style>
+        .thumbnail-bar {
+            background-color: #fff; /* white background for SEO/accessibility */
+            white-space: nowrap;    /* keep thumbnails in one row */
+            overflow-x: auto;       /* enable horizontal scrolling */
+            padding: 0.5rem;
+            margin-top: 1rem;
+        }
+        .thumbnail-bar img {
+            cursor: pointer;
+            max-height: 70px;       /* fixed height for uniform layout */
+            object-fit: cover;
+            margin-right: 0.5rem;
+        }
+    </style>
 
-<!--/* Thymeleaf comment: Include LightGallery CSS and JS from CDN (free & open source) with zoom plugin support. 
+    <!--/* Thymeleaf comment: Include LightGallery CSS and JS from CDN (free & open source) with zoom plugin support. 
      Ensure these are included in your page’s <head> or before the closing </body> tag. */-->
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/lightgallery/2.8.3/css/lightgallery-bundle.min.css" integrity="sha512-fXavT4uA4L0uTUFHC275D7zd751ohbSuD6VUMc5JysWfmR+NxTI3w7etE7N9hjTETcoh0w0V+24Cel4xXnqvCg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
- <style>
-    /* Card container style */
-    .occasion-card {
-      position: relative;
-      overflow: hidden;
-      border-radius: 0.25rem; /* Ensure integration with banner */
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/lightgallery/2.8.3/css/lightgallery-bundle.min.css" integrity="sha512-fXavT4uA4L0uTUFHC275D7zd751ohbSuD6VUMc5JysWfmR+NxTI3w7etE7N9hjTETcoh0w0V+24Cel4xXnqvCg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <style>
+        /* Card container style */
+        .occasion-card {
+            position: relative;
+            overflow: hidden;
+            border-radius: 0.25rem; /* Ensure integration with banner */
+        }
+        /* Diagonal banner style */
+        .diagonal-banner {
+            position: absolute;
+            left: -20px;
+            top: 45%;
+            width: 150px;
+            height: 40px;
+            background: linear-gradient(90deg, #00D19F, #00A7FF);
+            transform: translate(0, -50%) rotate(-46deg);
+            transform-origin: left center;
+            border-bottom-left-radius: 0.25rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-weight: bold;
+            font-size: 0.8rem;
+            z-index: 10;
+            text-align: center;
+        }
+    </style>
+
+    <!-- Reference quote style -->    
+    <style>
+    .review-ref {
+    font-size: 0.75em;         /* Smaller than normal text */
+    vertical-align: top;       /* Align top like superscript */
+    text-decoration: none;     /* Remove underline */
+    margin-left: 0.15em;       /* Small space before the reference */
+    color: #555;               /* Slightly muted color */
     }
-    /* Diagonal banner style */
-    .diagonal-banner {
-    position: absolute;
-    left: -20px;
-    top: 45%;
-    width: 150px;
-    height: 40px;
-    background: linear-gradient(90deg, #00D19F, #00A7FF);
-    transform: translate(0, -50%) rotate(-46deg);
-    transform-origin: left center;
-    border-bottom-left-radius: 0.25rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: #fff;
+
+    .review-ref:hover {
+    text-decoration: underline;
+    color: #007bff;            /* Bootstrap primary color on hover */
+    }
+    </style>
+
+    <style type="text/css">
+    /* Ensure period buttons show proper opacity */
+    .period-btn {
+    opacity: 0.5;
+    transition: opacity 0.3s ease;
+    }
+    .period-btn.active-period-btn {
+    opacity: 1;
+    }
+
+
+
+    /* Enhance the historique card */
+    .card-historical {
+    border: 2px solid #41a3ef; /* Refined border color */
+    background-color: #f9f9f9;
+    }
+    .best-price {
     font-weight: bold;
-    font-size: 0.8rem;
-    z-index: 10;
-    text-align: center;
+    color: #d9534f; /* Light emphasis for best price */
     }
-  </style>
-    
 
-
-<!-- Reference quote style -->    
-<style>
-.review-ref {
-  font-size: 0.75em;         /* Smaller than normal text */
-  vertical-align: top;       /* Align top like superscript */
-  text-decoration: none;     /* Remove underline */
-  margin-left: 0.15em;       /* Small space before the reference */
-  color: #555;               /* Slightly muted color */
-}
-
-.review-ref:hover {
-  text-decoration: underline;
-  color: #007bff;            /* Bootstrap primary color on hover */
-}
-</style>
-
-<style type="text/css">
-/* Ensure period buttons show proper opacity */
-.period-btn {
-  opacity: 0.5;
-  transition: opacity 0.3s ease;
-}
-.period-btn.active-period-btn {
-  opacity: 1;
-}
-
-
-
-/* Enhance the historique card */
-.card-historical {
-  border: 2px solid #41a3ef; /* Refined border color */
-  background-color: #f9f9f9;
-}
-.best-price {
-  font-weight: bold;
-  color: #d9534f; /* Light emphasis for best price */
-}
-
-</style>
-
-
-
-
-
+    </style>
 </head>
 
 <body>
@@ -285,36 +263,14 @@
     </header>  
     
 
-    <main th:with="images = ${product.images()}" class="bg-gray-200">
-
-
-
+    <main class="bg-soft" th:with="images = ${product.images()}">
     
-    <div class="">
-        <div class="container">
-            <div class="">
-                <!-- Header 
-                -->
-                <th:block th:insert="~{inc/product-header.html}"></th:block>
-        
-			</th:block>
-			
-
-            </div>
-        </div>
-    </div>
-    
-    <div class="bg-primary">
-    
-            <div class="mt-4">
-    
-                <!-- The navbar 
-                -->
-<th:block>
-
-                    <div class="sticky-top bg-white px-6 shadow-sm pt-3 pb-0" 
-                         role="tablist" 
-                         aria-label="Product Tabs Variation 2">
+        <th:block th:insert="~{inc/product-header.html}"></th:block>
+	
+        <div class="section section-md pb-0 sticky-top">
+            <div class="container-fluid z-2 mt-n9 mt-lg-n10">
+                <div id="sticky-top" class="sticky-top bg-primary">
+                    <div class="bg-white px-6 shadow-sm pt-3 pb-0" role="tablist" aria-label="Product Tabs Variation 2">
                         <ul class="nav nav-pills nav-fill fs-5">
                             <li class="nav-item">
                                 <button class="active nav-link d-flex align-items-center justify-content-center" 
@@ -390,11 +346,52 @@
                             </li>
                         </ul>
                     </div>
-                </th:block>
-            
+                </div>
             </div>
-            
+        </div>
+        <style>
+            .freeze {
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                z-index: 999;
+                box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            }
+        </style>
+        <script>
+            const target = document.getElementById('sticky-top');
+            let initialTop = null;
+
+            function updatePosition() {
+            if (!target.classList.contains('freeze')) {
+                // On mesure tant que l'élément est dans le flow normal
+                initialTop = target.getBoundingClientRect().top + window.scrollY;
+            }
+
+            const currentTop = target.getBoundingClientRect().top;
+
+            if (window.scrollY >= initialTop && !target.classList.contains('freeze')) {
+                target.classList.add('freeze');
+            } else if (window.scrollY < initialTop && target.classList.contains('freeze')) {
+                target.classList.remove('freeze');
+            }
+            }
+
+            window.addEventListener('scroll', updatePosition);
+            window.addEventListener('resize', () => {
+            // Recalcul de la position initiale en cas de resize
+            if (!target.classList.contains('freeze')) {
+                initialTop = target.getBoundingClientRect().top + window.scrollY;
+            }
+            });
+
+            // Initialisation
+            updatePosition();
+        </script>
     
+            
+        <div class="container container-semi-fluid">
 			<!-- Tabs -->
 			<div class="tab-content" id="pills-tabContent">
 			
@@ -404,67 +401,45 @@
 				</div>
 
 				<div class="tab-pane fade" id="pills-presentation" role="tabpanel" aria-labelledby="pills-presentation-tab">
-				   <!-- Presentation -->
-
-                    <th:block th:insert="~{inc/product-presentation.html}"></th:block>
-
+				    <!-- Presentation -->
+                    <!--<th:block th:insert="~{inc/product-presentation.html}"></th:block>-->
                     <!-- 
-                  <th:block th:with="fixed=4 ">
-	                  <th:block th:with="varValue=${param.var != null ? param.var[0] : '0'},  fragmentName=${fixed >= 0 ? fixed : varValue}">
-	                        <div th:replace="~{inc/product-presentation-variations :: 'product-presentation-variations-' + ${fragmentName}}"></div>
-	                  </th:block>
-                  </th:block>
+                        <th:block th:with="fixed=4 ">
+                            <th:block th:with="varValue=${param.var != null ? param.var[0] : '0'},  fragmentName=${fixed >= 0 ? fixed : varValue}">
+                                    <div th:replace="~{inc/product-presentation-variations :: 'product-presentation-variations-' + ${fragmentName}}"></div>
+                            </th:block>
+                        </th:block>
                      -->
-                  
-
-
-
 				</div>
 				
-				
 				<div class="tab-pane fade" id="pills-price" role="tabpanel" aria-labelledby="pills-price-tab">
-		            <!-- Product prices 
-		            -->
-		            <th:block th:insert="~{inc/product-price.html}"></th:block>
-		            
-		            
-		            
-		            
+		            <!-- Product prices -->
+		            <!--<th:block th:insert="~{inc/product-price.html}"></th:block>-->
 		            <!-- Variation include snippet 
 					<th:block th:with="varValue=${param.var != null ? param.var[0] : '1'}">
 					    <div th:replace="~{inc/product-price-variations :: 'product-price-variation-' + ${varValue}}"></div>
 					</th:block>
-		            -->
-							            
+		            -->	            
 				</div>
 
-                      <div class="tab-pane fade" id="pills-technical" role="tabpanel" aria-labelledby="pills-technical-tab">
-                          <!-- Product attributes details
-                           -->
-                          <th:block th:insert="~{inc/product-attributes-details.html}"></th:block>
-                      </div>
+                <div class="tab-pane fade" id="pills-technical" role="tabpanel" aria-labelledby="pills-technical-tab">
+                    <!-- Product attributes details -->
+                    <!--<th:block th:insert="~{inc/product-attributes-details.html}"></th:block>-->
+                </div>
 
-
-                      <div class="tab-pane fade" id="pills-resources" role="tabpanel" aria-labelledby="pills-resources-tab">
-                          <!-- Product resources details -->
-                          
-                             <th:block th:insert="~{inc/product-documentation.html}"></th:block>
-                          
-                          
-                      </div>
+                <div class="tab-pane fade" id="pills-resources" role="tabpanel" aria-labelledby="pills-resources-tab">
+                    <!-- Product resources details -->
+                    <!--<th:block th:insert="~{inc/product-documentation.html}"></th:block>-->
+                </div>
                                               
-				
-				    <div th:if="${user}" class="tab-pane fade" id="pills-admin" role="tabpanel" aria-labelledby="pills-admin-tab">
-				       <!-- 
-				       <th:block th:insert="~{inc/product-admin.html}"></th:block>
-				        -->
-                    </div>
-                   
-                   
-				
-			</div>
-    </div>			
-</main>
+                <div th:if="${user}" class="tab-pane fade" id="pills-admin" role="tabpanel" aria-labelledby="pills-admin-tab">
+                    <!-- 
+                    <th:block th:insert="~{inc/product-admin.html}"></th:block>
+                    -->
+                </div>
+            </div>
+        </div>			
+    </main>
 
 <!-- Footer -->
 <th:block th:insert="~{inc/footer.html}"></th:block>
@@ -526,7 +501,7 @@
                         
     /*]]>*/
 
-$(document).ready(function(){
+    $(document).ready(function(){
 
     var myModal = new bootstrap.Modal(document.getElementById('reviewProcessModal'), {
         backdrop: 'static', // Prevent closing when clicking outside
@@ -534,7 +509,7 @@ $(document).ready(function(){
     });
     
     
-      $('#triggerButton').on('click', function(){
+    $('#triggerButton').on('click', function(){
         // Open the modal
         myModal.show();
         // Dynamically load the content into the modal body
@@ -557,6 +532,57 @@ $(document).ready(function(){
     });
   });
 </script>
+
+<script>
+    const header = document.getElementById('sticky-header');
+    const trigger = document.getElementById('trigger-element');
+    const headroomElement = document.querySelector('.headroom');
+    
+    let isSticky = false; // Nouveau flag de statut
+    
+    // Observer l'entrée du trigger pour savoir si sticky ou pas
+    const observer = new IntersectionObserver(([entry]) => {
+        isSticky = !entry.isIntersecting;
+    
+        if (isSticky) {
+            header.classList.add('sticky');
+        } else {
+            header.classList.remove('sticky');
+            header.style.top = ''; // reset si on n'est plus sticky
+        }
+    
+        updateStickyHeaderPosition();
+    }, {
+        root: null,
+        threshold: 0
+    });
+    
+    // Lancer l’observation du trigger
+    observer.observe(trigger);
+    
+    // Fonction mise à jour du `top` du header sticky
+    function updateStickyHeaderPosition() {
+        if (!isSticky) return; // Ne rien faire si pas sticky
+    
+        const isHeadroomVisible = !headroomElement.classList.contains('headroom--unpinned');
+        header.style.top = isHeadroomVisible ? '95px' : '0px';
+    }
+    
+    // Observer les changements de classe du headroom
+    const mutationObserver = new MutationObserver(updateStickyHeaderPosition);
+    mutationObserver.observe(headroomElement, {
+        attributes: true,
+        attributeFilter: ['class']
+    });
+    
+    // Écoute du scroll pour détecter retour haut de page
+    window.addEventListener('scroll', updateStickyHeaderPosition);
+    
+    // Init au chargement
+    window.addEventListener('DOMContentLoaded', () => {
+        updateStickyHeaderPosition();
+    });
+  </script>
 
 
 
