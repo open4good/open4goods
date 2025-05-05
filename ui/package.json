@@ -38,7 +38,7 @@
         "@fortawesome/fontawesome-free": "6.7.2",
         "@glidejs/glide": "^3.4.1",
         "@popperjs/core": "^2.6.0",
-        "bootstrap": "5.3.3",
+        "bootstrap": "5.3.6",
         "chartist": "^0.11.4",
         "chartist-plugin-tooltips": "0.0.17",
         "headroom.js": "0.12.0",
