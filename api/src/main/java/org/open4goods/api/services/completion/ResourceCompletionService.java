@@ -608,16 +608,24 @@ public class ResourceCompletionService  extends AbstractCompletionService{
 				return;
 			}
 
-			LanguageResult primary = results.get(0);
-			pdfInfo.setLanguage(primary.getLanguage());
-			pdfInfo.setLanguageConfidence(primary.getRawScore());
+			double MIN_CONFIDENCE = 0.2;
 
-			logger.info("Language detected for PDF {}: {} (confidence: {})",
-					resource.getFileName(), primary.getLanguage(), primary.getRawScore());
+			long distinctLanguages = results.stream()
+					.filter(r -> r.getRawScore() >= MIN_CONFIDENCE)
+					.map(LanguageResult::getLanguage)
+					.distinct()
+					.count();
 
-			if (results.size() > 1 && results.stream().map(LanguageResult::getLanguage).distinct().count() > 1) {
-				resource.getTags().add("MULTILANGUE");
-				logger.info("Multiple languages detected for PDF: tagging as MULTILANGUE");
+			if (distinctLanguages > 1) {
+				pdfInfo.setLanguage("Multilingue");
+				pdfInfo.setLanguageConfidence(1.0);
+				logger.info("Multiple languages detected for PDF: MULTILANGUE");
+			} else {
+				LanguageResult primary = results.get(0);
+				pdfInfo.setLanguage(primary.getLanguage());
+				pdfInfo.setLanguageConfidence(primary.getRawScore());
+				logger.info("Language detected for PDF {}: {} (confidence: {})",
+						resource.getFileName(), primary.getLanguage(), primary.getRawScore());
 			}
 
 		} catch (Exception e) {
