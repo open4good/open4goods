@@ -1,88 +1,87 @@
 <section id="markerDoc" class="container container-semi-fluid">
     <div class="row justify-content-center mt-3">
-        <div class="col-12 col-lg-8 mx-auto">
+        <div class="col-12 col-lg-10">
             <div class="card shadow mt-3 border-gray-300">
                 <div class="card-body p-4 p-lg-5">
-                    <div class="d-flex p-3 justify-content-center border-bottom">
-                        <div class="icon icon-primary">
-                            <span class="fas fa-file-pdf fa-2x"></span>
-                        </div>
-                        <div class="ps-4">
+                    <div class="d-flex p-2 justify-content-center border-bottom">
+                        <div class="text-center">
                             <h3 class="h5 icon-box-title mb-0">Documentation PDF</h3>
                             <p class="text-muted small mb-0">Cliquez sur un document pour le visualiser</p>
                         </div>
                     </div>
 
                     <div class="row mt-4 g-4">
-                        <div class="col-md-6">
-                            <div class="overflow-auto" style="max-height:70vh;">
+                        <!-- VIGNETTES À GAUCHE -->
+                        <div class="col-md-5 col-lg-4">
+                            <div class="overflow-auto" style="max-height:65vh;">
                                 <div th:if="${#lists.isEmpty(product.pdfs())}" class="text-center py-5">
                                     <i class="fas fa-file-circle-xmark fa-3x text-muted mb-3"></i>
                                     <p class="text-muted mb-0">Aucun document disponible</p>
                                 </div>
 
                                 <div th:each="item,iterStat : ${product.pdfs()}"
-                                     class="pdf-card mb-3 card hover-shadow transition-all"
+                                     class="pdf-thumb-style card transition-all mb-3"
                                      th:attr="data-pdf-url=${item.path()}, data-pdf-download=${item.path()}"
                                      th:classappend="${iterStat.index == 0} ? ' active'">
-                                    <div class="card-body p-3">
-                                        <div class="d-flex align-items-start">
-                                            <div class="bg-primary text-white rounded-circle p-2 me-3">
-                                                <i class="fas fa-file-pdf fa-lg"></i>
+                                    <div class="card-body py-3 px-4 d-flex flex-column justify-content-between h-100">
+                                        <div>
+                                            <h6 class="fw-bold mb-2" th:text="${item.pdfInfo?.extractedTitle ?: 'Document PDF'}">Instructions de sécurité</h6>
+                                            <div class="small text-muted mb-2">
+                                                <span th:if="${item.pdfInfo?.subject}">
+                                                    Version <span th:text="${item.pdfInfo.subject}">2.0.1</span> |
+                                                </span>
+                                                <span th:text="${item.humanReadableSize()}">4.81 MB</span>
+                                                <span th:if="${item.pdfInfo?.numberOfPages>0}">
+                                                    | <span th:text="${item.pdfInfo.numberOfPages}">8</span> pages
+                                                </span>
+                                                |
+                                                <span th:text="${#dates.format(item.pdfInfo?.creationDate != null ? item.pdfInfo.creationDate : 0, 'dd/MM/yyyy')}">24/01/2025</span>
                                             </div>
-                                            <div class="flex-grow-1">
-                                                <h5 class="mb-1" th:text="${item.getHardTags().size()>0 ? item.firstHardTag() : item.bestNameFromTag()}"></h5>
-                                                <div class="d-flex gap-2 small text-muted">
-                                                    <span th:if="${item.pdfInfo?.numberOfPages>0}" class="badge bg-light text-dark">
-                                                        <i class="fas fa-file me-1"></i>
-                                                        <span th:text="${item.pdfInfo.numberOfPages+' pages'}"></span>
-                                                    </span>
-                                                    <span th:if="${item.pdfInfo?.language}" class="badge bg-light text-dark">
-                                                        <i class="fas fa-globe me-1"></i>
-                                                        <span th:text="${item.pdfInfo.language}"></span>
-                                                    </span>
-                                                </div>
+
+                                            <div class="text-muted small d-flex align-items-center gap-1">
+                                                <span th:text="${item.pdfInfo?.language ?: 'Multilingue'}">Multilingue</span>
+                                                <i class="fas fa-circle-info" data-bs-toggle="tooltip" title="Langue du document détectée"></i>
                                             </div>
                                         </div>
 
-                                        <div class="mt-2 small text-muted" th:if="${item.pdfInfo!=null}">
-                                            <ul class="list-unstyled mb-0">
-                                                <li th:if="${item.pdfInfo.extractedTitle}">
-                                                    📄 <strong>Titre :</strong> <span th:text="${item.pdfInfo.extractedTitle}"></span>
-                                                </li>
-                                                <li th:if="${item.pdfInfo.author}">
-                                                    ✍️ <strong>Auteur :</strong> <span th:text="${item.pdfInfo.author}"></span>
-                                                </li>
-                                                <li th:if="${item.pdfInfo.subject}">
-                                                    🗂️ <strong>Sujet :</strong> <span th:text="${item.pdfInfo.subject}"></span>
-                                                </li>
-                                                <li th:if="${item.pdfInfo.language}">
-                                                    🌐 <strong>Langue :</strong>
-                                                    <span th:text="${item.pdfInfo.language}"></span>
-                                                    (<span th:text="${#numbers.formatDecimal(item.pdfInfo.languageConfidence,1,2)}"></span>)
-                                                </li>
-                                            </ul>
+                                        <div class="mt-3">
+                                            <a th:href="${item.path()}" class="btn btn-dark btn-sm text-white btn-download-fixed" download>
+                                                Télécharger
+                                            </a>
                                         </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
 
-                        <div class="col-md-6 d-flex flex-column">
-                            <div class="pdf-toolbar border-bottom p-3 bg-light d-flex align-items-center gap-2">
+                        <!-- VIEWER À DROITE -->
+                        <div class="col-md-7 col-lg-8 d-flex flex-column">
+                            <div id="pdfContainer" class="flex-grow-1 overflow-hidden d-flex justify-content-center align-items-center" style="height:55vh;">
+                                <canvas id="pdfViewer"></canvas>
+                            </div>
+
+                            <div class="pdf-toolbar border-top p-2 bg-light d-flex flex-wrap align-items-center justify-content-center gap-2">
                                 <button id="zoomOut" class="btn btn-sm btn-outline-secondary">
                                     <i class="fas fa-search-minus"></i>
                                 </button>
-                                <input type="range" id="zoomRange" class="form-range" min="0.5" max="3" step="0.25" value="1.5">
                                 <button id="zoomIn" class="btn btn-sm btn-outline-secondary">
                                     <i class="fas fa-search-plus"></i>
                                 </button>
-                                <span class="ms-auto badge bg-primary">PDF Viewer</span>
+                                <button id="prevPage" class="btn btn-sm btn-outline-primary">
+                                    <i class="fas fa-chevron-left"></i>
+                                </button>
+                                <span id="pageInfo" class="badge bg-secondary align-self-center small">Page 1/1</span>
+                                <button id="nextPage" class="btn btn-sm btn-outline-primary">
+                                    <i class="fas fa-chevron-right"></i>
+                                </button>
+                                <a id="downloadLink" href="#" class="btn btn-sm btn-primary" target="_blank">
+                                    <i class="fas fa-download"></i>
+                                </a>
+                                <button id="printBtn" class="btn btn-sm btn-outline-secondary">
+                                    <i class="fas fa-print"></i>
+                                </button>
                             </div>
 
-                            <div class="flex-grow-1 overflow-auto d-flex justify-content-center align-items-center" style="max-height:70vh;">
-                                <canvas id="pdfViewer"></canvas>
-                            </div>
 
                             <div class="p-3 border-top bg-light">
                                 <div class="d-flex justify-content-between align-items-center mb-3">
@@ -113,35 +112,47 @@
 </section>
 
 <style>
-    .pdf-card {
+    .pdf-thumb-style {
+        border-radius: 12px;
+        border: 2px solid #dee2e6;
         cursor: pointer;
-        transition: all .2s ease;
-        border-left: 3px solid transparent;
+        transition: border-color .2s ease-in-out, box-shadow .2s ease-in-out;
+        height: 100%;
+        min-height: 160px;
     }
 
-    .pdf-card:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 .5rem 1rem rgba(0,0,0,.1)!important;
+    .pdf-thumb-style:hover {
+        box-shadow: 0 0.25rem 0.5rem rgba(0, 0, 0, 0.05);
+        border-color: #adb5bd;
     }
 
-    .pdf-card.active {
-        border-left-color: #0d6efd;
-        background-color: #f8f9fa;
-        box-shadow: 0 .5rem 1rem rgba(13,110,253,.1)!important;
+    .pdf-thumb-style.active {
+        border-color: #000;
+        box-shadow: none;
+    }
+
+    .btn-download-fixed {
+        width: 160px;
+    }
+
+    #pdfContainer {
+        background: #f8f9fa;
+        border: 2px solid #dee2e6;
+        border-radius: 12px;
+        position: relative;
     }
 
     #pdfViewer {
-        border: 1px solid #dee2e6;
-        border-radius: .25rem;
-        background: repeating-conic-gradient(#f8f9fa 0 25%, #fff 0 50%) 50%/20px 20px;
+        background: white;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        cursor: grab;
     }
 
     .pdf-toolbar {
-        min-height: 56px;
-    }
-
-    .transition-all {
-        transition: all .3s ease;
+        min-height: 48px;
     }
 </style>
 
@@ -156,20 +167,29 @@
         nextPageBtn = document.getElementById("nextPage"),
         downloadLink = document.getElementById("downloadLink"),
         printBtn = document.getElementById("printBtn"),
-        zoomRange = document.getElementById("zoomRange"),
         zoomIn = document.getElementById("zoomIn"),
-        zoomOut = document.getElementById("zoomOut");
+        zoomOut = document.getElementById("zoomOut"),
+        container = document.getElementById('pdfContainer');
 
     let currentPDF,
         currentPage = 1,
         totalPages = 0,
-        currentScale = 1.5;
+        currentScale = 1.5,
+        isDragging = false,
+        startX, startY, scrollLeft, scrollTop;
 
-    zoomRange.value = currentScale;
-
-    async function renderPage(pageNum) {
+    async function renderPage(pageNum, autoScale = false) {
         if (!currentPDF) return;
         const page = await currentPDF.getPage(pageNum);
+
+        let scale = currentScale;
+        if (autoScale) {
+            const containerHeight = container.clientHeight;
+            const viewport = page.getViewport({ scale: 1 });
+            scale = containerHeight / viewport.height;
+            currentScale = scale;
+        }
+
         const viewport = page.getViewport({ scale: currentScale });
         const ctx = pdfViewer.getContext('2d');
 
@@ -178,7 +198,7 @@
 
         await page.render({ canvasContext: ctx, viewport }).promise;
 
-        pageInfo.textContent = `Page ${pageNum} / ${totalPages}`;
+        pageInfo.textContent = `Page ${pageNum}/${totalPages}`;
         prevPageBtn.disabled = pageNum <= 1;
         nextPageBtn.disabled = pageNum >= totalPages;
     }
@@ -187,9 +207,10 @@
         currentPDF = await pdfjsLib.getDocument(url).promise;
         totalPages = currentPDF.numPages;
         currentPage = 1;
-        await renderPage(currentPage);
         downloadLink.href = dl || url;
+        await renderPage(currentPage, true);
     }
+
 
     prevPageBtn.addEventListener("click", () => {
         if (currentPage > 1) renderPage(--currentPage);
@@ -200,19 +221,12 @@
     });
 
     zoomIn.addEventListener("click", () => {
-        currentScale = Math.min(3, currentScale + 0.25);
-        zoomRange.value = currentScale;
+        currentScale = Math.min(4, currentScale + 0.25);
         renderPage(currentPage);
     });
 
     zoomOut.addEventListener("click", () => {
         currentScale = Math.max(0.5, currentScale - 0.25);
-        zoomRange.value = currentScale;
-        renderPage(currentPage);
-    });
-
-    zoomRange.addEventListener("input", e => {
-        currentScale = parseFloat(e.target.value);
         renderPage(currentPage);
     });
 
@@ -220,16 +234,48 @@
         if (currentPDF) window.open(downloadLink.href, '_blank').print();
     });
 
-    document.querySelectorAll('.pdf-card').forEach(card => {
+    document.querySelectorAll('.pdf-thumb-style').forEach(card => {
         card.addEventListener('click', () => {
-            document.querySelectorAll('.pdf-card').forEach(c => c.classList.remove('active'));
+            document.querySelectorAll('.pdf-thumb-style').forEach(c => c.classList.remove('active'));
             card.classList.add('active');
             loadPDF(card.getAttribute('data-pdf-url'), card.getAttribute('data-pdf-download'));
         });
     });
 
-    const first = document.querySelector('.pdf-card');
-    if (first) {
-        loadPDF(first.getAttribute('data-pdf-url'), first.getAttribute('data-pdf-download'));
-    }
+    window.addEventListener('load', () => {
+        const first = document.querySelector('.pdf-thumb-style');
+        if (first) {
+            loadPDF(first.getAttribute('data-pdf-url'), first.getAttribute('data-pdf-download'));
+        }
+    });
+
+    container.addEventListener('mousedown', (e) => {
+        isDragging = true;
+        container.style.cursor = 'grabbing';
+        startX = e.pageX;
+        startY = e.pageY;
+        scrollLeft = container.scrollLeft;
+        scrollTop = container.scrollTop;
+    });
+
+    container.addEventListener('mouseup', () => {
+        isDragging = false;
+        container.style.cursor = 'grab';
+    });
+
+    container.addEventListener('mouseleave', () => {
+        isDragging = false;
+        container.style.cursor = 'grab';
+    });
+
+    container.addEventListener('mousemove', (e) => {
+        if (!isDragging) return;
+        e.preventDefault();
+        const x = e.pageX;
+        const y = e.pageY;
+        const walkX = (startX - x);
+        const walkY = (startY - y);
+        container.scrollLeft = scrollLeft + walkX;
+        container.scrollTop = scrollTop + walkY;
+    });
 </script>

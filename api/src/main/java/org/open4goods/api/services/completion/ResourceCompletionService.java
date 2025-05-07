@@ -552,56 +552,19 @@ public class ResourceCompletionService  extends AbstractCompletionService{
 	 * @param target The PDF file to analyze
 	 */
 	private void processPdf(Resource resource, File target) {
-
-		// TODO(p3,feature) : Generate default PNG version, generate thumnails from PDF
 		resource.setResourceType(ResourceType.PDF);
 
 		try (PDDocument document = Loader.loadPDF(target)) {
 			logger.info("PDF loaded successfully: {}", target.getName());
 			PdfInfo pdfInfo = new PdfInfo();
 
-			// Extract standard PDF metadata from document information dictionary
-			PDDocumentInformation info = document.getDocumentInformation();
-			pdfInfo.setMetadataTitle(info.getTitle());
-			pdfInfo.setAuthor(info.getAuthor());
-			pdfInfo.setSubject(info.getSubject());
-			pdfInfo.setKeywords(info.getKeywords());
-			pdfInfo.setCreationDate(info.getCreationDate() != null ? info.getCreationDate().getTimeInMillis() : null);
-			pdfInfo.setModificationDate(info.getModificationDate() != null ? info.getModificationDate().getTimeInMillis() : null);
-			pdfInfo.setProducer(info.getProducer());
-			pdfInfo.setNumberOfPages(document.getNumberOfPages());
-
-			// Perform language detection on the document's text content
-			try {
-				String text = extractText(document);
-				// TODO : @Louis : Have to speak ;)
-				LanguageDetector detector = new OptimaizeLangDetector().loadModels();
-				LanguageResult langResult = detector.detect(text);
-
-				pdfInfo.setLanguage(langResult.getLanguage());
-
-				pdfInfo.setLanguageConfidence(langResult.getRawScore());
-
-				logger.info("Language detected for PDF {} : {} (confidence: {})", 
-					target.getName(), 
-					langResult.getLanguage(), 
-					langResult.getRawScore());
-
-			} catch (Exception e) {
-				logger.warn("Failed to detect document language: {}", e.getMessage());
-			}
-
-			// Extract title by analyzing text on first page
-			MultiLineTitleStripper stripper = new MultiLineTitleStripper();
-			stripper.setSortByPosition(true);
-			stripper.setStartPage(1);
-			stripper.setEndPage(1);
-			stripper.getText(document);
-			pdfInfo.setExtractedTitle(stripper.getTitle().trim());
-			logger.info("Manually extracted title: {}", pdfInfo.getExtractedTitle());
+			extractMetadata(document, pdfInfo);
+			extractTitle(document, pdfInfo);
+			detectLanguage(document, pdfInfo, resource);
 
 			resource.setPdfInfo(pdfInfo);
 			resource.setProcessed(true);
+
 			logger.info("PDF processed successfully: {}", target.getName());
 
 		} catch (IOException e) {
@@ -611,9 +574,68 @@ public class ResourceCompletionService  extends AbstractCompletionService{
 		}
 	}
 
-	
+	private void extractMetadata(PDDocument document, PdfInfo pdfInfo) {
+		PDDocumentInformation info = document.getDocumentInformation();
+		pdfInfo.setMetadataTitle(info.getTitle());
+		pdfInfo.setAuthor(info.getAuthor());
+		pdfInfo.setSubject(info.getSubject());
+		pdfInfo.setKeywords(info.getKeywords());
+		pdfInfo.setCreationDate(info.getCreationDate() != null ? info.getCreationDate().getTimeInMillis() : null);
+		pdfInfo.setModificationDate(info.getModificationDate() != null ? info.getModificationDate().getTimeInMillis() : null);
+		pdfInfo.setProducer(info.getProducer());
+		pdfInfo.setNumberOfPages(document.getNumberOfPages());
+	}
+
+	private void extractTitle(PDDocument document, PdfInfo pdfInfo) throws IOException {
+		MultiLineTitleStripper stripper = new MultiLineTitleStripper();
+		stripper.setSortByPosition(true);
+		stripper.setStartPage(1);
+		stripper.setEndPage(1);
+		stripper.getText(document);
+		pdfInfo.setExtractedTitle(stripper.getTitle().trim());
+		logger.info("Manually extracted title: {}", pdfInfo.getExtractedTitle());
+	}
+
+	private void detectLanguage(PDDocument document, PdfInfo pdfInfo, Resource resource) {
+		try {
+			String text = extractText(document);
+
+			LanguageDetector detector = new OptimaizeLangDetector().loadModels();
+			List<LanguageResult> results = detector.detectAll(text);
+
+			if (results.isEmpty()) {
+				logger.warn("No language detected for PDF");
+				return;
+			}
+
+			double MIN_CONFIDENCE = 0.2;
+
+			long distinctLanguages = results.stream()
+					.filter(r -> r.getRawScore() >= MIN_CONFIDENCE)
+					.map(LanguageResult::getLanguage)
+					.distinct()
+					.count();
+
+			if (distinctLanguages > 1) {
+				pdfInfo.setLanguage("Multilingue");
+				pdfInfo.setLanguageConfidence(1.0);
+				logger.info("Multiple languages detected for PDF: MULTILANGUE");
+			} else {
+				LanguageResult primary = results.get(0);
+				pdfInfo.setLanguage(primary.getLanguage());
+				pdfInfo.setLanguageConfidence(primary.getRawScore());
+				logger.info("Language detected for PDF {}: {} (confidence: {})",
+						resource.getFileName(), primary.getLanguage(), primary.getRawScore());
+			}
+
+		} catch (Exception e) {
+			logger.warn("Failed to detect document language: {}", e.getMessage());
+		}
+	}
+
 	private String extractText(PDDocument document) throws IOException {
 		// TODO : @Louis : should we really instanciate each time ?
+		// Instanciation à chaque appel recommandée car PDFTextStripper n'est pas thread-safe
 		PDFTextStripper stripper = new PDFTextStripper();
 		return stripper.getText(document);
 	}
