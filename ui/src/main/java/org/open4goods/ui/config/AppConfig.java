@@ -31,7 +31,6 @@ import org.open4goods.model.price.Currency;
 import org.open4goods.model.price.Price;
 import org.open4goods.services.evaluation.config.EvaluationConfig;
 import org.open4goods.services.evaluation.service.EvaluationService;
-import org.open4goods.services.feedback.service.FeedbackService;
 import org.open4goods.services.productrepository.services.ProductRepository;
 import org.open4goods.services.prompt.config.PromptServiceConfig;
 import org.open4goods.services.prompt.service.PromptService;
@@ -230,10 +229,6 @@ public class AppConfig {
 		return new ImageGenerationService(imageModel, uiConfig.getImageGenerationConfig(), uiConfig.getGeneratedImagesFolder());
 	}
 	  
-	@Bean
-	FeedbackService feedbackService(@Autowired UiConfig config) {
-		return new FeedbackService(config.getFeedbackConfig());
-	}
 
 
     /** Override the default RestTemplate with a custom one that has a longer timeout (For ImageGenerationService) **/
