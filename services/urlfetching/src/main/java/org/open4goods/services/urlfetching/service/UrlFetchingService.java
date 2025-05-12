@@ -105,10 +105,10 @@ public class UrlFetchingService {
         FetchResponse response = fetcher.fetchUrlSync(url);
         recordResponse(url, response);
         return response;
-        
-        
+
+
     }
-    
+
     /**
      * Returns a Fetcher implementation based on the configured strategy.
      *

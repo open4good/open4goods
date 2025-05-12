@@ -7,9 +7,7 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.Charset;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.nio.file.*;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
@@ -48,7 +46,7 @@ public class GoogleSearchService implements HealthIndicator {
     private final GoogleSearchConfig properties;
     private final MeterRegistry meterRegistry;
     private final SerialisationService serialisationService;
-    
+
     // Volatile variable to hold the last error message if a non-200 response was received.
     private volatile String lastErrorMessage = null;
 
@@ -88,7 +86,7 @@ public class GoogleSearchService implements HealthIndicator {
 
         // Validate input query (constructor of GoogleSearchRequest already does basic validation)
         final String encodedQuery = URLEncoder.encode(request.getQuery(), Charset.defaultCharset());
-        
+
         // Build the API URL using externalized configuration.
         StringBuilder urlBuilder = new StringBuilder(String.format("%s?q=%s&key=%s&cx=%s&num=%d",
                 properties.getSearchUrl(),
@@ -96,7 +94,7 @@ public class GoogleSearchService implements HealthIndicator {
                 properties.getApiKey(),
                 properties.getCx(),
                 request.getNumResults()));
-        
+
         // Resolve additional parameters: use the request value if provided; otherwise, fallback to configuration defaults.
         String lr = (request.getLr() != null && !request.getLr().isBlank()) ? request.getLr() : properties.getDefaults().getLr();
         String cr = (request.getCr() != null && !request.getCr().isBlank()) ? request.getCr() : properties.getDefaults().getCr();
@@ -104,7 +102,7 @@ public class GoogleSearchService implements HealthIndicator {
         String sort = (request.getSort() != null && !request.getSort().isBlank()) ? request.getSort() : properties.getDefaults().getSort();
         String gl = (request.getGl() != null && !request.getGl().isBlank()) ? request.getGl() : properties.getDefaults().getGl();
         String hl = (request.getHl() != null && !request.getHl().isBlank()) ? request.getHl() : properties.getDefaults().getHl();
-        
+
         // Append additional parameters to the URL if non-empty.
         if (lr != null && !lr.isBlank()) {
             urlBuilder.append("&lr=").append(URLEncoder.encode(lr, Charset.defaultCharset()));
@@ -124,9 +122,9 @@ public class GoogleSearchService implements HealthIndicator {
         if (hl != null && !hl.isBlank()) {
             urlBuilder.append("&hl=").append(URLEncoder.encode(hl, Charset.defaultCharset()));
         }
-        
+
         String url = urlBuilder.toString();
-        
+
         // Prepare a safe version of the URL for logging (masking the API key)
         String safeUrl = url.replace(properties.getApiKey(), "****");
         logger.debug("Executing search with URL: {}", safeUrl);
@@ -156,7 +154,7 @@ public class GoogleSearchService implements HealthIndicator {
 
         // Parse the JSON response into our DTO.
         GoogleSearchResponse result = parseResponse(response.body());
-        
+
         // If recording is enabled, store the result as a JSON file in the provided folder.
         if (properties.isRecordEnabled() && properties.getRecordFolder() != null && !properties.getRecordFolder().isBlank()) {
             try {
@@ -172,13 +170,13 @@ public class GoogleSearchService implements HealthIndicator {
                 Files.writeString(filePath, jsonContent);
                 logger.info("Search results for {} are : \n{}",request.getQuery(), jsonContent);
                 logger.info("Recorded search result to file: {}", filePath.toAbsolutePath());
-                
+
             } catch (Exception e) {
                 // Log the error but do not break the search functionality.
                 logger.error("Failed to record search result: {}", e.getMessage());
             }
         }
-        
+
         return result;
     }
 
@@ -228,16 +226,16 @@ public class GoogleSearchService implements HealthIndicator {
             logger.error("Google Search properties are not properly configured.");
             return Health.down().withDetail("error", "Google Search properties are missing or invalid").build();
         }
-        
+
         if (lastErrorMessage != null) {
             logger.error("Health check failed due to previous error: {}", lastErrorMessage);
             return Health.down().withDetail("error", lastErrorMessage).build();
         }
-        
+
         logger.debug("Google Search properties are properly configured and no recent errors encountered.");
         return Health.up().build();
     }
-    
+
     /**
      * Sanitizes a URL into a safe file name by removing the protocol and replacing non-alphanumeric characters.
      *
@@ -247,5 +245,5 @@ public class GoogleSearchService implements HealthIndicator {
     public static String sanitizeUrlToFileName(String url) {
         String sanitized = url.replaceFirst("^(https?://)", "").replaceAll("[^a-zA-Z0-9]", "_");
         return sanitized + ".txt";
-    }    
+    }
 }

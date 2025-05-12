@@ -3,8 +3,7 @@ package org.open4goods.urlfetching.service.mock;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.file.Files;
-import java.nio.file.Paths;
+import java.nio.file.*;
 import java.util.concurrent.CompletableFuture;
 
 import org.open4goods.services.urlfetching.config.FetchStrategy;
