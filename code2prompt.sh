@@ -21,7 +21,7 @@ Description:
   This script recursively lists files and directories in the given <directory> (ignoring hidden files).
   It outputs the directory structure and then prints the contents of files with the allowed extensions:
     md, java, yml, xml, json.
-  
+
   The script processes files in the root folder and in the allowed first-level subdirectories
   (by default: src and test). The output is formatted as Markdown:
     - File contents are wrapped in code fences using tilde characters (~~~).
@@ -30,7 +30,7 @@ Description:
     - If a pom.xml exists in the current working directory (and it’s not part of the target directory),
       it is labeled as "pom.xml (pom parent)" and printed at the end.
     - Each file title shows the filename, followed by a hyphen and the file's full path.
-  
+
 Examples:
   script.sh /path/to/target
   script.sh /path/to/target output.md
@@ -49,7 +49,7 @@ if [ ! -d "$TARGET_DIR" ]; then
 fi
 
 # Configurable allowed file extensions (without the dot)
-ALLOWED_EXTENSIONS=("md" "java" "yml" "xml" "json")
+ALLOWED_EXTENSIONS=("md" "java" "yml" "xml" "json" "html")
 
 # Configurable allowed first-level directories (only these folders will be recursed)
 ALLOWED_FOLDERS=("src" "test")

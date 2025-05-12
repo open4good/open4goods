@@ -3,30 +3,30 @@
 <head>
     <!--/* Metas and CSS */-->
     <th:block th:insert="~{inc/header-meta.html}"></th:block>
-    
+
 
     <!-- Primary Meta Tags -->
     <title>Comparateur écologique | Nudger</title>
     <meta name="description" content="Nudger vous aide à comparer les scores écologiques des différents produits du marché, et bien plus encore !">
     <meta name="keywords" content="Comparateur écologique, Nudger, écologie, éco-score, produit responsable, open data, open source" />
-        
+
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website">
     <meta property="og:url" th:content="${url}">
     <meta property="og:title" th:content="#{index.title}">
     <meta property="og:description" th:content="#{index.meta.description}">
     <meta property="og:image" th:content="${url} + 'assets/img/brand/light.svg'">
-    
+
     <!-- Twitter -->
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:url" th:content="${url}">
     <meta name="twitter:title" th:content="#{index.title}">
     <meta name="twitter:description" th:content="#{index.meta.description}">
     <meta name="twitter:image" th:content="${url} + 'assets/img/brand/light.svg'">
-    <link rel="stylesheet"  href="/vendor/animate.css/animate.min.css"/>  
+    <link rel="stylesheet"  href="/vendor/animate.css/animate.min.css"/>
 
     <meta name="google-site-verification" content="I2wSyJnnRSjrLjadtNgFzHHmtSN8DPbjhPePTkQNhp4" />
-    
+
     <style>
         .carousel-control-prev-icon,
         .carousel-control-next-icon {
@@ -42,8 +42,8 @@
         .carousel-control-next {
             width: 5%;
         }
-            
-            
+
+
         /* Ensure consistent height for the title container */
         .title-container {
             max-width: 100%;
@@ -54,7 +54,7 @@
             text-overflow: ellipsis; /* Add ellipsis for truncated text */
         }
     </style>
-	
+
 </head>
 
 <body class="home-page">
@@ -64,10 +64,10 @@
         <!--/* Navbar */-->
         <th:block th:insert="~{inc/navbar/navbar-home.html}"></th:block>
     </header>
-   
-    <main>  
 
-        <section class="section-header overflow-hidden pt-7 pt-lg-8 pb-5 bg-secondary text-white">
+    <main>
+
+        <section class="section-header overflow-hidden pt-7 pt-lg-8 pb-5 bg-primary text-white">
 
             <div class="container">
                 <div class="row">
@@ -85,24 +85,24 @@
                                         <div class="col-lg-4">
                                             <h2 class="text-black mb-3 text-center">Impact Score</h2>
                                             <div class="text-center ">
-                                                <th:block 
+                                                <th:block
                                                         th:with="rating=4.5, class='star-rating-md'",
                                                         th:insert="~{inc/impactscore.html}">
                                                 </th:block>
                                             </div>
-                                            
+
                                             <p class="mb-0">Notre ImpactScore© est un écoscore innovant, qui s'appuie sur des systèmes d'IA pour passer à l'échelle l'évaluation environnementale des produits. Il est pour l'instant disponible pour les catégories suivantes. </p>
                                             <div class="text-center mt-4">
                                                 <a href="/ecoscore" class="btn btn-sm btn-primary animate-up-1">En savoir plus</a>
                                             </div>
                                         </div>
                                         <div class="col-12 col-lg-8 mt-4 mt-md-0 text-center">
-                                        <!-- 
-                                            <th:block th:with="image='/icons/categories/electronics.png', title='Produits électroniques', googleTaxo=222" 
+                                        <!--
+                                            <th:block th:with="image='/icons/categories/electronics.png', title='Produits électroniques', googleTaxo=222"
                                                       th:insert="~{inc/category-shortcut.html}">
                                             </th:block>
 
-                                            <th:block th:with="image='/icons/categories/appareil-electromenager.png', title='Electroménager', googleTaxo=604" 
+                                            <th:block th:with="image='/icons/categories/appareil-electromenager.png', title='Electroménager', googleTaxo=604"
                                                       th:insert="~{inc/category-shortcut.html}">
                                             </th:block>
 
@@ -116,7 +116,7 @@
                                                     <button th:each="verticalGroup, stat : ${verticalsCarrouselBuckets}" type="button" data-bs-target="#multiItemCarousel" th:data-bs-slide-to="${stat.index}"
                                                         th:classappend="${stat.index == 0} ? 'active'" th:aria-label="'Slide ' + ${stat.index + 1}"></button>
                                                 </div>
-                                        
+
                                                 <!-- Carousel Items -->
                                                 <div class="px-5 carousel-inner">
                                                     <div th:each="verticalGroup, stat : ${verticalsCarrouselBuckets}" th:class="'carousel-item' + (${stat.index == 0} ? ' active' : '')">
@@ -129,7 +129,7 @@
                                                         </div>
                                                     </div>
                                                 </div>
-                                        
+
                                                 <!-- Controls -->
                                                 <button class="carousel-control-prev" type="button" data-bs-target="#multiItemCarousel" data-bs-slide="prev">
                                                     <span class="carousel-control-prev-icon" aria-hidden="true"></span> <span class="visually-hidden">Précédent</span>
@@ -140,7 +140,7 @@
                                             </div>
                                         </div>
 
-                                            
+
                                             <a href="/categories" class="fw-bold text-black text-underline mx-1">Toutes les catégories</a>
                                         </div>
                                     </div>
@@ -155,7 +155,7 @@
                                     <div class="row align-items-center">
                                         <h2 class="text-black mb-3 text-center">Contribution écologique</h2>
                                         <div class="col-lg-7">
-                                            <!--/* 
+                                            <!--/*
                                               8) Added an aria-label on the search form for better accessibility
                                                  and replaced <hr/> with a simple styling separation (if needed, use CSS).
                                             */-->
@@ -166,7 +166,7 @@
                                                             th:placeholder="'Rechercher dans ' + ${#numbers.formatDecimal(totalItems, 0, 'COMMA', 0, 'POINT')} + ' produits'" aria-label="Search"
                                                             name="q" data-dashlane-rid="c04fc15a353ceabb"
                                                             data-form-type="">
-                                                        <button onclick="document.getElementById('searchForm').submit()" 
+                                                        <button onclick="document.getElementById('searchForm').submit()"
                                                                 class="btn btn__nudger" type="button">
                                                             <span class="fas fa-search" aria-hidden="true"></span>
                                                             <span class="visually-hidden">Rechercher</span>
@@ -176,8 +176,8 @@
                                             </form>
                                         </div>
                                         <div class="col-12 col-lg-5 mt-4 mt-md-0 text-md-right">
-                                            <p class="mb-0">10% de nos bénéfices servent à amoindrir l'impact de votre achat. 
-                                                C'est valable sur nos millions de produits, et vous pouvez voter pour 
+                                            <p class="mb-0">10% de nos bénéfices servent à amoindrir l'impact de votre achat.
+                                                C'est valable sur nos millions de produits, et vous pouvez voter pour
                                                 l'attribution de cette compensation !
                                             </p>
                                             <div class="text-right mt-2">
@@ -197,12 +197,12 @@
                                 <div class="card shadow p-1 p-md-4 mb-4 mb-lg-0">
                                   <div class="card-body">
 									    <h3 class="h5 mb-3 text-black">
-									        <i class="fas fa-euro-sign text-success me-2"></i> 
+									        <i class="fas fa-euro-sign text-success me-2"></i>
 									        Les meilleurs prix !
 									    </h3>
 									    <p>
-									        Nous vous offrons les meilleurs prix du marché. Mieux, nous traçons 
-									        l'historique des prix pour vous permettre d'acheter au meilleur moment 
+									        Nous vous offrons les meilleurs prix du marché. Mieux, nous traçons
+									        l'historique des prix pour vous permettre d'acheter au meilleur moment
 									        et au meilleur prix.
 									    </p>
 									</div>
@@ -215,8 +215,8 @@
                                         <i class="fas fa-robot text-success me-2"></i>
                                         Boosté à l'IA
                                         </h3>
-                                        <p>Nous présentons beaucoup d'informations sur les produits évalués, 
-                                           en croisant notre savoir-faire en collecte de la donnée avec 
+                                        <p>Nous présentons beaucoup d'informations sur les produits évalués,
+                                           en croisant notre savoir-faire en collecte de la donnée avec
                                            les dernières technologies IA.</p>
                                     </div>
                                 </div>
@@ -228,22 +228,22 @@
                                         <i class="fa-brands fa-github text-success me-2"></i>
                                         Libre et ouvert
                                         </h3>
-                                        <p>Nous n'utilisons pas de cookie et ne collectons aucune donnée personnelle. 
+                                        <p>Nous n'utilisons pas de cookie et ne collectons aucune donnée personnelle.
                                            Dans une logique de communs numériques, Nudger est open-data et open-source.</p>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                        <!-- 
+                        <!--
                             Note: We left the commented-out block as is, just cleaned up indentation.
                         -->
-                    </div>             
+                    </div>
                 </div>
             </div>
         </section>
 
-        <!-- 
-          9) We keep the next sections but ensure images have meaningful alt text and heading structures are used. 
+        <!--
+          9) We keep the next sections but ensure images have meaningful alt text and heading structures are used.
         -->
 
         <section class="text-center py-4">
@@ -257,11 +257,11 @@
                     <div class="icon icon-shape icon-lg bg-white shadow-lg border-light rounded-circle mb-4">
                         <span class="fas fa-box-open text-tertiary" aria-hidden="true"></span>
                     </div>
-                    <!--/* 
-                      10) Provided a fallback text inside span if no JS available: 0 
+                    <!--/*
+                      10) Provided a fallback text inside span if no JS available: 0
                           so screen readers can get a numeric value as well.
                     */-->
-                    <span class="counter display-3 fw-bolder d-block my-4" 
+                    <span class="counter display-3 fw-bolder d-block my-4"
                           th:data-value="${config.reversementConfig.getTotalReversements()}">0</span>
                     <span class="text-gray">Montant en euros du coup de pouce à date de Nudger pour la planète</span>
                 </div>
@@ -285,7 +285,7 @@
                 </div>
             </div>
         </section>
-   
+
         <section class="container-fluid bg-gray-200">
             <div class="container py-5">
                 <h2 class="display-2 mb-4"><span class="text-secondary-app fw-bold">Réconcilier</span> écologie et pouvoir d'achat !</h2>
@@ -300,8 +300,8 @@
             <div class="container mb-5">
                 <div class="row justify-content-between align-items-center">
                     <div class="col-12 col-lg-5">
-                        <img src="/img/contribution-ecologique.png" 
-                                    alt="Illustration de contribution écologique" 
+                        <img src="/img/contribution-ecologique.png"
+                                    alt="Illustration de contribution écologique"
                                     class="d-none d-lg-inline-block">
                     </div>
                     <div class="col-12 col-lg-6">
@@ -336,8 +336,8 @@
                         </div>
                     </div>
                     <div class="col-12 col-lg-5">
-                        <img src="/img/impactscore-illustration.png" 
-                            alt="Illustration d'évaluation écologique"  
+                        <img src="/img/impactscore-illustration.png"
+                            alt="Illustration d'évaluation écologique"
                             class="d-none d-lg-inline-block">
                     </div>
                 </div>
@@ -346,8 +346,8 @@
             <div class="container mb-5">
                 <div class="row justify-content-between align-items-center">
                     <div class="col-12 col-lg-5">
-                        <img src="/img/comparateur-prix.png" 
-                        alt="Illustration de comparateur de prix"  
+                        <img src="/img/comparateur-prix.png"
+                        alt="Illustration de comparateur de prix"
                         class="d-none d-lg-inline-block">
                     </div>
                     <div class="col-12 col-lg-6">
@@ -382,8 +382,8 @@
                         </div>
                     </div>
                     <div class="col-12 col-lg-5">
-                        <img src="/img/numerique-responsable.png" 
-                        alt="Illustration d'un web sans cookie"  
+                        <img src="/img/numerique-responsable.png"
+                        alt="Illustration d'un web sans cookie"
                             class="d-none d-lg-inline-block">
                     </div>
                 </div>
@@ -392,8 +392,8 @@
             <div class="container mb-5">
                 <div class="row justify-content-between align-items-center">
                     <div class="col-12 col-lg-5">
-                        <img src="/img/modele-ouvert.png" 
-                        alt="Illustration représentant l'open source et l'open data"  
+                        <img src="/img/modele-ouvert.png"
+                        alt="Illustration représentant l'open source et l'open data"
                         class="d-none d-lg-inline-block fluid">
                     </div>
                     <div class="col-12 col-lg-6">
@@ -408,7 +408,7 @@
                                 <a href="/opendata" class="btn btn__nudger text-decoration-none text-white mb-4 mb-lg-0">
                                     Bases open-data
                                 </a>
-    
+
                                 <a href="/opensource" class="btn btn__nudger text-decoration-none text-white">
                                     Code opensource
                                 </a>
@@ -431,8 +431,8 @@
                         </div>
                     </div>
                     <div class="col-12 col-lg-5">
-                        <img src="/img/ai4good.png" 
-                        alt="Illustration d'une  IA au service du bien commun"  
+                        <img src="/img/ai4good.png"
+                        alt="Illustration d'une  IA au service du bien commun"
                             class="d-none d-lg-inline-block">
                     </div>
                 </div>
@@ -479,7 +479,7 @@
                 { newWord: "open source", outEffect: "fadeOut", inEffect: "flipInX", delay: 750 },
                 { newWord: "open data", outEffect: "pulse", inEffect: "lightSpeedIn", delay: 750 },
                 { newWord: "ouvert", outEffect: "bounceOut", inEffect: "zoomIn", delay: 3000 },
-                { newWord: "🩷", outEffect: "bounceOut", inEffect: "zoomIn", delay: 3000 },                
+                { newWord: "🩷", outEffect: "bounceOut", inEffect: "zoomIn", delay: 3000 },
                 { newWord: "écologique", outEffect: "fadeOut", inEffect: "fadeIn", delay: 4000 }
             ];
 
@@ -536,9 +536,9 @@
         });
 
     </script>
-    
-    
-    
+
+
+
   <script>
     document.addEventListener("DOMContentLoaded", function () {
       const carousel = document.getElementById('multiItemCarousel');
@@ -556,6 +556,6 @@
       updateNavigationButtons();
     });
   </script>
-    
+
 </body>
 </html>
