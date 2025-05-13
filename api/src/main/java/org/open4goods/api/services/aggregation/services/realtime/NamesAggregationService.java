@@ -111,6 +111,7 @@ public class NamesAggregationService extends AbstractAggregationService {
 		}
 	}
 
+	// TODO : Should have an enforcing test
 	private String generateUrl(Product data, PrefixedAttrText urlPrefix, VerticalConfig vConf) throws InvalidParameterException {
 
 		String url = data.gtin();
