@@ -29,7 +29,7 @@ public class NamesAggregationService extends AbstractAggregationService {
 	private VerticalsConfigService verticalService;
 
 	private BlablaService blablaService;
-	
+
 	public NamesAggregationService(final Logger logger,
 			final VerticalsConfigService verticalService, EvaluationService evaluationService, BlablaService blablaService) {
 		super(logger);
@@ -56,15 +56,15 @@ public class NamesAggregationService extends AbstractAggregationService {
 
 		logger.info("Name generation for product {}", data.getId());
 
-		
+
 		// Cleaning offernames too long.. Can happens on some CSV parsing bugs
 		// TODO(p3,conf) : limit from conf
 		data.setOfferNames(data.getOfferNames().stream().filter(e->e.length() < 200).collect(Collectors.toSet()));
-		
-		
-		
-		
-		
+
+
+
+
+
 		// Getting the config for the category, if any
 		Map<String, ProductI18nElements> tConfs = verticalService.getConfigByIdOrDefault(data.getVertical()).getI18n();
 
@@ -74,23 +74,23 @@ public class NamesAggregationService extends AbstractAggregationService {
 			try {
 				String lang = e.getKey();
 				ProductI18nElements tConf = e.getValue();
-				
+
 				// Computing url
 				if (vConf.isForceNameGeneration() ||  (  null == data.getNames().getUrl().get(lang))) {
 					logger.info("Generating  product url for {}", data);
 					PrefixedAttrText urlPrefix = tConf.getUrl();
 					String url = generateUrl(data, urlPrefix, vConf);
-										
+
 					data.getNames().getUrl().put(lang, url);
 				} else {
 					logger.info("Skipping URL generation for {}", data);
 				}
-				
+
 				if (vConf.isForceNameGeneration() || data.getVertical() == null || null == data.getNames().getH1Title().get(lang)) {
-					// h1Title			
+					// h1Title
 					data.getNames().getH1Title().put(lang, computePrefixedText(data, tConf.getH1Title(), " "));
 				}
-				
+
 				// TODO(p1, seo)  : Implement product meta data
 				// metaDescription
 				//data.getNames().getMetaDescription().put(lang, blablaService.generateBlabla(tConf.getProductMetaDescription(), data));
@@ -103,8 +103,8 @@ public class NamesAggregationService extends AbstractAggregationService {
 				// productMetaTwitterDescription
 				//data.getNames().getProductMetaTwitterDescription().put(lang, blablaService.generateBlabla(tConf.getProductMetaTwitterDescription(), data));
 
-			
-			
+
+
 			} catch (InvalidParameterException e1) {
 				logger.error("Error while computing url for product {}", data.getId(), e1);
 			}
@@ -112,15 +112,15 @@ public class NamesAggregationService extends AbstractAggregationService {
 	}
 
 	private String generateUrl(Product data, PrefixedAttrText urlPrefix, VerticalConfig vConf) throws InvalidParameterException {
-		
+
 		String url = data.gtin();
 		String urlSuffix;
-		
+
 		if (null == vConf.getId()) {
 			// It is an undefined vertical, we apply shortest offername
 			 urlSuffix = data.shortestOfferName();
 		} else {
-			// It is a defined vertical, we apply names 
+			// It is a defined vertical, we apply names
 			urlSuffix = StringUtils.stripAccents(computePrefixedText(data, urlPrefix, "-"));
 		}
 
@@ -129,49 +129,50 @@ public class NamesAggregationService extends AbstractAggregationService {
 		}
 
 		// Url sanitisation
+		url = IdHelper.azCharAndDigits(url, "-");
 		url = StringUtils.normalizeSpace(url).replace(' ', '-');
 		url = url.replaceAll("-{2,}", "-");
 		url = url.toLowerCase();
 		if (url.endsWith("-")) {
 			url = url.substring(0,url.length()-1);
 		}
-		
+
 		return url;
-		
+
 	}
 
-	
+
 	/**
-	 * 
+	 *
 	 * @param data
 	 * @param textsConfigUrl
 	 * @return
-	 * @throws InvalidParameterException 
+	 * @throws InvalidParameterException
 	 */
 	private String computePrefixedText(Product data, PrefixedAttrText textsConfigUrl, String separator) throws InvalidParameterException {
-		
+
 		StringBuilder sb = new StringBuilder();
-		
+
 		// Adding the prefix
 		String p = textsConfigUrl.getPrefix();
-		
+
 		if (!StringUtils.isEmpty(p)) {
 			String prefix = blablaService.generateBlabla(p, data);
-			if (!StringUtils.isEmpty(prefix)) {			
+			if (!StringUtils.isEmpty(prefix)) {
 				sb.append(prefix);
 			}
 		}
-		
-		// Adding the mentioned attrs if existing		
+
+		// Adding the mentioned attrs if existing
 		for (String attr : textsConfigUrl.getAttrs()) {
 			// Checking in referentiel attrs
 			String refVal = data.getAttributes().val(attr);
-			
+
 			if (null != refVal) {
 				sb.append(separator).append(IdHelper.azCharAndDigits(refVal).toLowerCase());
-			} 
+			}
 		}
-		
+
 		return sb.toString();
 	}
 
@@ -179,5 +180,5 @@ public class NamesAggregationService extends AbstractAggregationService {
 		return name.trim();
 	}
 
-	
+
 }
