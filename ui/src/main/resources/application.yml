@@ -204,6 +204,11 @@ team-config:
     linkedInUrl: https://www.linkedin.com/in/maxziliani/
     imageUrl: /assets/img/team/Max.jpeg
 
+  - name: Candide Chérel
+    title: Gestion et conduite de projet
+    linkedInUrl: https://www.linkedin.com/in/candide-cherel/?originalSubdomain=fr
+    imageUrl: /assets/img/team/Candide.jpeg
+        
   contributors:
   - name: Thierry Ledan
     title: Développements backend
