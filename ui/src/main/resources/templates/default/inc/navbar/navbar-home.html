@@ -3,8 +3,8 @@
 		class="navbar navbar-main navbar-expand-lg navbar-light navbar-theme-primary bg-white"
 	>
 		<div class="container position-relative">
-			<a class="navbar-brand me-lg-5" href="/"> 
-			     <img class="navbar-brand-dark" loading="lazy" src="/assets/img/nudger_logo_v2_light.svg" alt="Le logo de Nudger (clair)"> 
+			<a class="navbar-brand me-lg-5" href="/">
+			     <img class="navbar-brand-dark" loading="lazy" src="/assets/img/nudger_logo_v2_light.svg" alt="Le logo de Nudger (clair)">
 			     <img class="navbar-brand-light" loading="lazy" src="/assets/img/nudger_logo_v2_dark.svg" alt="Le logo de Nudger (sombre)"
 			>
 			</a>
@@ -46,13 +46,13 @@
 						</a>
 							<div class="dropdown-menu dropdown-megamenu-md p-0" aria-labelledby="componentsDropdown">
 								<div class="row g-0">
-									
-									
+
+
 									<div class="col-lg-6 bg-brand_secondary d-none d-lg-block me-0 me-3 text-center text-white px-3">
 										<div class="px-0 py-3 text-center">
 											<h1 class="text-white" >Impact Score</h1>
                                             <div class="text-center">
-                                                <th:block 
+                                                <th:block
                                                         th:with="rating=3.5, class='star-rating-lg'",
                                                         th:insert="~{inc/impactscore.html}">
                                                 </th:block>
@@ -61,7 +61,7 @@
 										AJOUTER ICI L GUIDE DE LA PAGE VERTICAL ?<br>
 										pour le moment impossible, erreur de "positionnement"
 									</div>
-									
+
 									<th:block th:each="bucket : ${verticalsBuckets}">
 										<div  class="col ps-0 py-3">
 	                                        <ul class="list-style-none">
@@ -69,7 +69,7 @@
 	                                        </ul>
 	                                    </div>
 									</th:block>
-									
+
 								</div>
 							</div></li>
 						<li class="nav-item "><a href="/compensation-ecologique" class="nav-link">Contribution écologique</a></li>
@@ -121,6 +121,23 @@
 					<span class="navbar-toggler-icon"></span>
 				</button>
 			</div>
+
+
+
+
 		</div>
 	</nav>
+
+		 <div class="mt-6 mb-0 row alert alert-warning alert-dismissible fade show" role="alert">
+		          <span class="fas fa-bullhorn me-1"></span>
+		          <strong>En développement actif ! </strong>
+		          <div style="display: block;" >
+		          N'hésitez pas à nous faire part des <a href="/feedback/issue">bugs</a> que vous rencontrez, ou à soumettre ou pioriser les <a href="/feedback/idea">idées d'évolutions ! </a>.
+		          </div>
+
+		          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+
+		  </div>
+
+
 </header>
