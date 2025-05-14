@@ -1,3 +1,44 @@
+// external Image loading (try on multiple source, show default error image if failed)
+async function tryLoadOneImage(imgElement) {
+  const raw = imgElement.getAttribute("data-src") || "";
+  const cleaned = raw.trim().replace(/^\[|\]$/g, ""); // Remove [ and ]
+  const urls = cleaned.split(",").map(url => url.trim()).filter(Boolean);
+  const defaultSrc = imgElement.getAttribute("data-default") || "/images/default.jpg";
+
+  for (const url of urls) {
+    const preloader = new Image();
+
+    const loadPromise = new Promise((resolve, reject) => {
+      preloader.onload = () => resolve(url); // image exists and loads
+      preloader.onerror = reject; // try next image
+    });
+
+    preloader.src = url;
+
+    try {
+      await loadPromise;
+      imgElement.src = url;
+      imgElement.classList.add("loaded");
+      return;
+    } catch (_) {
+      // Silent fail: continue loop
+      //console.warn(`Image failed to load: ${url}`);
+    }
+  }
+
+  // Fallback image
+  imgElement.src = defaultSrc;
+  imgElement.classList.add("loaded");
+}
+
+function loadFallbackImages(selector = "img.smart-image") {
+  document.querySelectorAll(selector).forEach(img => {
+    if (!img.src || img.src.endsWith("default.jpg")) {
+      tryLoadOneImage(img);
+    }
+  });
+}
+
 /*
 
 =========================================================
@@ -490,7 +531,7 @@ d.addEventListener("DOMContentLoaded", function (event) {
 
 
 ////////////////////////
-// NAVBAR SEARCH 
+// NAVBAR SEARCH
 ///////////////////////
 
 $(document).ready(function() {
