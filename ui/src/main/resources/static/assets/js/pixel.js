@@ -1,33 +1,48 @@
-// external Image loading (try on multiple source, show default error image if failed)
 async function tryLoadOneImage(imgElement) {
   const raw = imgElement.getAttribute("data-src") || "";
-  const cleaned = raw.trim().replace(/^\[|\]$/g, ""); // Remove [ and ]
+  const cleaned = raw.trim().replace(/^\[|\]$/g, "");
   const urls = cleaned.split(",").map(url => url.trim()).filter(Boolean);
   const defaultSrc = imgElement.getAttribute("data-default") || "/images/default.jpg";
+  const minWidth = parseInt(imgElement.getAttribute("data-min-img-width") || "0", 10);
+
+  const loadedImages = [];
 
   for (const url of urls) {
     const preloader = new Image();
 
     const loadPromise = new Promise((resolve, reject) => {
-      preloader.onload = () => resolve(url); // image exists and loads
-      preloader.onerror = reject; // try next image
+      preloader.onload = () => resolve(preloader);
+      preloader.onerror = reject;
     });
 
     preloader.src = url;
 
     try {
-      await loadPromise;
-      imgElement.src = url;
-      imgElement.classList.add("loaded");
-      return;
+      const loaded = await loadPromise;
+      loaded._src = url; // Keep track of the original URL
+      loadedImages.push(loaded);
+
+      if (loaded.naturalWidth >= minWidth) {
+        imgElement.src = url;
+        imgElement.classList.add("loaded");
+        return;
+      }
     } catch (_) {
-      // Silent fail: continue loop
-      //console.warn(`Image failed to load: ${url}`);
+      // Silent fail, continue to next image
     }
   }
 
-  // Fallback image
-  imgElement.src = defaultSrc;
+  // Try largest image if none met min width
+  if (loadedImages.length > 0) {
+    const best = loadedImages.reduce((max, img) =>
+      img.naturalWidth > max.naturalWidth ? img : max
+    );
+    imgElement.src = best._src;
+  } else {
+    // Fallback
+    imgElement.src = defaultSrc;
+  }
+
   imgElement.classList.add("loaded");
 }
 

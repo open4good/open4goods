@@ -773,6 +773,12 @@ function createChartInterval(chartId, intervalDatas, verticalName, productCover,
 
 
 $(document).ready(function() {
+
+    // Load external images
+    loadFallbackImages();
+
+
+
     $(".intervalChart").each(function() {
         const scoreName = "scores." + $(this).attr("data-score") + ".value";
         const intervalData = chartIntervals[scoreName];
@@ -790,9 +796,6 @@ $(document).ready(function() {
     });
 });
 </script>
-
-
-
 
 
 </body>
