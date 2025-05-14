@@ -367,7 +367,8 @@ public class Product implements Standardisable {
 
 	// Helper for ui
 	public List<String> unprocessedImagesUrl() {
-		return unprocessedimages().stream().map(e->e.getUrl()).toList();
+		List<String> ret = unprocessedimages().stream().map(e->e.getUrl()).toList();
+		return ret;
 	}
 
 	// TODO(p2,perf) : Should be cached
