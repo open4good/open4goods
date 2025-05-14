@@ -76,7 +76,7 @@
                 <div class="row justify-content-center">
                     <div class="col">
                         <div class="card shadow border-gray-300 p-4 p-lg-5">
-                            
+
                             <!-- Si des résultats sont trouvés -->
                             <th:block th:if="${not #lists.isEmpty(results.data)}">
                                 <div th:each="item: ${results.data}" class="col-12 col-md-12 mb-3">
@@ -131,6 +131,15 @@
             $('#searchInput').on("change", function (e) {
                 $('#searchForm').attr("action", "/recherche/" + ($('#searchInput').val()));
             });
+
+
+         // Auto-run on DOM ready
+           loadFallbackImages();
+
+
+
+
+
         });
     </script>
 </body>

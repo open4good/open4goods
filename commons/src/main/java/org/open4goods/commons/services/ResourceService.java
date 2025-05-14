@@ -68,35 +68,19 @@ public class ResourceService {
 	 */
 	public InputStream getResourceFileStream(final Resource r) throws FileNotFoundException, IOException {
 		return IOUtils.toBufferedInputStream(new FileInputStream(getCacheFile(r)));
-		
+
 	}
-	
-	
+
+
 	public File getCacheFile(final Resource r) {
 		return new File(remoteCachingFolder + File.separator+ r.folderHashPrefix() + File.separator+ r.getCacheKey());
 	}
 
-	public File getTranslatedCacheFile(final Resource r) throws ValidationException {
-		return new File(remoteCachingFolder + File.separator+ r.folderHashPrefix() + File.separator + r.getCacheKey() + "_ORIGINAL.png");
-	}
-
-	public File getThumbnailCacheFile(final Resource r, final Integer height) throws ValidationException {
-		return new File(
-				remoteCachingFolder + File.separator + r.folderHashPrefix() + File.separator + r.getCacheKey() + "_" + height + ".png");
-	}
 
 	public File getCacheFile(final String hash) throws ValidationException {
 		return new File(remoteCachingFolder + File.separator + Resource.folderHashPrefix(hash) + File.separator + hash);
 	}
 
-	public File getTranslatedCacheFile(final String hash) throws ValidationException {
-		return new File(remoteCachingFolder + File.separator + Resource.folderHashPrefix(hash) + File.separator + hash + "_ORIGINAL.png");
-	}
-
-	public File getThumbnailCacheFile(final String hash, final Integer height) throws ValidationException {
-		return new File(
-				remoteCachingFolder + File.separator + Resource.folderHashPrefix(hash) + File.separator + hash + "_" + height + ".png");
-	}
 
 
 
