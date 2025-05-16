@@ -31,6 +31,7 @@ import org.open4goods.commons.services.Gs1PrefixService;
 import org.open4goods.commons.services.IcecatService;
 import org.open4goods.commons.services.ImageGenerationService;
 import org.open4goods.commons.services.ImageMagickService;
+import org.open4goods.commons.services.ProductNameSelectionService;
 import org.open4goods.commons.services.ResourceService;
 import org.open4goods.commons.services.SearchService;
 import org.open4goods.commons.services.VerticalsConfigService;
@@ -122,6 +123,11 @@ public class ApiConfig {
 	}
 
 	@Bean
+	ProductNameSelectionService productNameSelectionService() {
+		return new ProductNameSelectionService();
+	}
+
+	@Bean
 
 	IcecatService icecatFeatureService(RemoteFileCachingService fileCachingService, BrandService brandService, VerticalsConfigService verticalConfigService) throws SAXException {
 		// NOTE : xmlMapper not injected because corruct the springdoc used one. Could
@@ -129,7 +135,7 @@ public class ApiConfig {
 		return new IcecatService(new XmlMapper(), apiProperties.getIcecatFeatureConfig(), fileCachingService, apiProperties.remoteCachingFolder(), brandService, verticalConfigService);
 	}
 
-	
+
 	@Bean
 	@Qualifier("perplexityChatModel")
 	OpenAiApi perplexityApi(ApiProperties apiConfig) {
@@ -139,23 +145,23 @@ public class ApiConfig {
 							 "/v1/embeddings", RestClient.builder(), WebClient.builder(),
 							 RetryUtils.DEFAULT_RESPONSE_ERROR_HANDLER);
 	}
-	
+
 	@Bean
 	@Qualifier("openAiCustomApi")
 	OpenAiApi openAiCustomApi(ApiProperties apiConfig) {
 		return new OpenAiApi(apiConfig.getGenAiConfig().getOpenaiApiKey());
 	}
-	
+
 //	@Bean
-//	PromptService genAiService (@Autowired @Qualifier("perplexityChatModel") OpenAiApi perplexityApi, 
+//	PromptService genAiService (@Autowired @Qualifier("perplexityChatModel") OpenAiApi perplexityApi,
 //								@Autowired @Qualifier("openAiCustomApi") OpenAiApi openAiCustomApi,
 //								ApiProperties apiConfig, EvaluationService spelEvaluationService, SerialisationService serialisationService,
 //								@Autowired MeterRegistry meterRegistry) {
 //		return new PromptService(apiProperties.getGenAiConfig(), perplexityApi, openAiCustomApi, serialisationService, spelEvaluationService,  meterRegistry);
 //	}
 
-	
-	
+
+
 	@Bean
 
 	IcecatCompletionService icecatCompletionService(ProductRepository productRepository, VerticalsConfigService verticalConfigService, DataSourceConfigService dataSourceConfigService, AggregationFacadeService aggregationFacade) throws TechnicalException {
@@ -188,14 +194,14 @@ public class ApiConfig {
 		return new DevModeService(apiProperties.getDevModeConfig(), repository, serialisationService, verticalsConfigService);
 	}
 
-	
+
     @Bean
     public AwinFeedService awinFeedService(FetcherProperties fetcherProperties,
                                            RemoteFileCachingService remoteFileCachingService,
                                            DataSourceConfigService dataSourceConfigService,
                                            SerialisationService serialisationService,
                                            ApiProperties props
-    		
+
     		) {
         // Retrieve Awin-specific feed configuration from the fetcher properties
         FeedConfiguration awinConfig = fetcherProperties.getFeedConfigs().get("awin");
@@ -206,7 +212,7 @@ public class ApiConfig {
     public EffiliationFeedService effiliationFeedService(FetcherProperties fetcherProperties,
                                                          RemoteFileCachingService remoteFileCachingService,
                                                          DataSourceConfigService dataSourceConfigService,
-                                                         SerialisationService serialisationService, 
+                                                         SerialisationService serialisationService,
                                                          ApiProperties props) {
         // Retrieve Effiliation-specific feed configuration from the fetcher properties
         FeedConfiguration effiliationConfig = fetcherProperties.getFeedConfigs().get("effiliation");
@@ -241,14 +247,14 @@ public class ApiConfig {
 	}
 
 
-	
+
 	@Bean
 	BrandScoreService brandScoreService( @Autowired ApiProperties properties, @Autowired BrandScoresRepository brandScoreRepository) throws Exception {
 		return new BrandScoreService(brandScoreRepository, properties.logsFolder());
 	}
 
-	
-	
+
+
 	@Bean
 	LegacyPromptConfig aiConfig() {
 		return new LegacyPromptConfig();
@@ -319,7 +325,7 @@ public class ApiConfig {
 //	public TaskScheduler heartBeatScheduler() {
 //	    return new ThreadPoolTaskScheduler();
 //	}
-//	
+//
 	@Bean
 	TaskScheduler threadPoolTaskScheduler() {
 		final ThreadPoolTaskScheduler threadPoolTaskScheduler = new ThreadPoolTaskScheduler();
