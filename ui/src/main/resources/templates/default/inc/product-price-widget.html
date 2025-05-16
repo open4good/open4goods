@@ -2,13 +2,13 @@
 <section role="main" th:aria-label="#{'product.price.' + ${widgetPrefix} + '.title'}">
     <div th:if="${priceHistory}">
         <div class="m-4 card shadow border-gray-300 text-center" >
-    
+
             <div class="row text-center justify-content-center mt-4 mb-4">
                 <div class="col-md-8">
                     <h2 class="display-4" th:text="#{'product.price.' + ${widgetPrefix} + '.title'}">Default Title</h2>
                 </div>
             </div>
-    
+
             <th:block>
                 <!-- Block for offer information -->
                 <div class="row">
@@ -29,7 +29,7 @@
                             </div>
                         </div>
                     </div>
-    
+
                     <div class="col-8">
                         <!-- If the offer is the historical lowest -->
                         <div th:if="${product.price.isHistoricalLowest(offer)}" class="card  me-4 card-historical">
@@ -48,7 +48,7 @@
                                 </div>
                             </div>
                         </div>
-    
+
                         <!-- If not the historical lowest, show historical stats -->
 						<div th:unless="${product.price.isHistoricalLowest(offer)}" class="card shadow me-4">
 						    <div class="card-body">
@@ -68,8 +68,8 @@
 						                            <b class="fw-bold h6 text-success">
 						                                <!-- Price + currency -->
 						                                <span th:text="${
-						                                  product.price.getHistoryLowest(priceCondition) != null 
-						                                    ? product.price.getHistoryLowest(priceCondition).price 
+						                                  product.price.getHistoryLowest(priceCondition) != null
+						                                    ? product.price.getHistoryLowest(priceCondition).price
 						                                    : 'N/A'
 						                                }"></span> €
 						                            </b>
@@ -83,8 +83,8 @@
 						                            <span th:text="#{historical.averageLabel}">Prix moyen :</span>
 						                            <b class="text-primary">
 						                                <span th:text="${
-						                                  product.price.getHistoryAverage(priceCondition) != null 
-						                                    ? #numbers.formatDecimal(product.price.getHistoryAverage(priceCondition), 2, 2) 
+						                                  product.price.getHistoryAverage(priceCondition) != null
+						                                    ? #numbers.formatDecimal(product.price.getHistoryAverage(priceCondition), 2, 2)
 						                                    : 'N/A'
 						                                }"></span> €
 						                            </b>
@@ -97,8 +97,8 @@
 						                            <span th:text="#{historical.highestLabel}">Prix le plus haut :</span>
 						                            <b class="text-danger">
 						                                <span th:text="${
-						                                  product.price.getHistoryHighest(priceCondition) != null 
-						                                    ? product.price.getHistoryHighest(priceCondition).price 
+						                                  product.price.getHistoryHighest(priceCondition) != null
+						                                    ? product.price.getHistoryHighest(priceCondition).price
 						                                    : 'N/A'
 						                                }"></span> €
 						                            </b>
@@ -109,10 +109,10 @@
 						        </div>
 						    </div>
 						</div>
-    
+
                     </div>
                 </div>
-    
+
                 <!-- Trend messages -->
                 <div class="m-4">
                     <div th:if="${trend.trend == 0 && trend.period != null }" class="text-center alert alert-info" role="alert">
@@ -129,13 +129,13 @@
                         </b> <span th:text="#{trend.since}">depuis</span> <span th:text="${trend.formatedDuration()}"></span>) 😊
                     </div>
                 </div>
-    
+
             </th:block>
-    
-            <!-- Chart canvas 
+
+            <!-- Chart canvas
             -->
             <canvas class="m-4" th:id="|${widgetPrefix}PriceChart|"></canvas>
-    
+
 			<!-- Period selection buttons -->
 			<div class="text-center" role="radiogroup" aria-label="Sélection de la période">
 			    <div class="btn-group my-3 period-group" role="group">
@@ -170,11 +170,11 @@
 			    </div>
 			</div>
 
-    
+
             <th:block th:if="${offers.size > 1}">
-	
+
 	            <h3 class="mt-4 display-4" th:text="#{'product.price.' + ${widgetPrefix} + '.allOffers'}">Toutes les offres</h3>
-	            
+
 	            <!-- Offers table -->
 	            <div class="m-4 table-responsive-sm">
 	                <table th:id="|${widgetPrefix}-offers|" class="table table-hover bg-white">
@@ -202,7 +202,7 @@
 	                                    </span>
 	                                </td>
 	                                <td class="p-0 infos-text infos-text-secondary text-center">
-	                                    <span th:text="${offer.price}"></span> 
+	                                    <span th:text="${offer.price}"></span>
 	                                    <span th:text="#{'symbol.' + ${offer.currency}}"></span>
 	                                </td>
 	                                <td class="p-0 pe-3 text-end">

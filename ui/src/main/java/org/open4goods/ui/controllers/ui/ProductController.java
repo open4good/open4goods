@@ -70,26 +70,26 @@ public class ProductController  {
 	private static final Logger LOGGER = LoggerFactory.getLogger(ProductController.class);
 
 	private @Autowired UiConfig config;
-	
+
 	private @Autowired ProductRepository productRepository;
 
 
 	private @Autowired ReviewGenerationService reviewGenerationService;
 
-	
+
 	private @Autowired SerialisationService serialisationService;
 
 	private @Autowired VerticalsConfigService verticalConfigService;
 
 	private @Autowired SearchService searchService;
-	
+
 	private @Autowired BrandService brandService;
 	private @Autowired UiService uiService;
-	
+
 	private @Autowired HcaptchaProperties captchaProps;
 
 	// TODO: Should not have a direct dependency to the icecat service,
-	// icecat stuff should be exposed through preloading vertical config 
+	// icecat stuff should be exposed through preloading vertical config
 	private @Autowired 	IcecatService icecatService;
 	/**
 	 * A product, associated with a vertical at the home level.
@@ -98,7 +98,7 @@ public class ProductController  {
 	 * @param response
 	 * @param updatedData
 	 * @return
-	 * @throws Exception 
+	 * @throws Exception
 	 * @throws UnirestException
 	 */
 
@@ -115,21 +115,21 @@ public class ProductController  {
 
 		ModelAndView mv = buildProductView(id, vertical,request, response);
 
-		
+
 		if (null != mv.getStatus() && mv.getStatus().equals((HttpStatus.MOVED_PERMANENTLY))) {
 			return mv;
 		}
-		// Force authentication for wip verticals 
+		// Force authentication for wip verticals
 		if (vConf.isEnabled() == false && !mv.getModel().containsKey("user")) {
 			throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Produit " + request.getServletPath() + " inaccessible !");
 		}
-		
-		
+
+
 		return mv;
 
 
 	}
-		
+
 	/**
 	 * A product, not associated with a vertical at the home level.
 	 *
@@ -140,33 +140,33 @@ public class ProductController  {
 	 * @throws IOException
 	 * @throws UnirestException
 	 */
-	
+
 	@GetMapping("/{id:\\d+}*")
 	public ModelAndView product(@PathVariable Long id, final HttpServletRequest request, HttpServletResponse response) throws Exception {
 
 		ModelAndView ret = buildProductView(id, null, request, response);;
-		
+
 		if (null!= ret.getStatus() && ret.getStatus().is3xxRedirection() ) {
 			return ret;
 		}
-		
+
 		UiHelper uiHelper = (UiHelper) ret.getModel().get("helper");
 		String url = uiHelper.url();
-	
+
 		// Testing if on a vertical, redirect if so
 		Product product = (Product) ret.getModel().get("product");
-		
+
 		if (null != product && !StringUtils.isEmpty(product.getVertical())) {
-			String vPath = verticalConfigService.getConfigById(product.getVertical()).getBaseUrl(uiService.getSiteLocale(request)); 
+			String vPath = verticalConfigService.getConfigById(product.getVertical()).getBaseUrl(uiService.getSiteLocale(request));
 			ModelAndView mv = new ModelAndView("redirect:/"  + vPath+ "/"+url);
-			mv.setStatus(HttpStatus.MOVED_PERMANENTLY);				
-			return mv;			
-		}			
-				
+			mv.setStatus(HttpStatus.MOVED_PERMANENTLY);
+			return mv;
+		}
+
 		return ret;
 	}
 
-	
+
 	/**
 	 * Product rendering build logic
 	 * @param id
@@ -174,18 +174,18 @@ public class ProductController  {
 	 * @param request
 	 * @param response
 	 * @return
-	 * @throws Exception 
+	 * @throws Exception
 	 */
 	private ModelAndView buildProductView(Long id, String vertical, final HttpServletRequest request,
 			HttpServletResponse response) throws Exception {
-		
+
 		try {
 			// Getting the product name
 			String path= URLEncoder.encode(request.getServletPath().substring(1), StandardCharsets.UTF_8);
-			
-			
-			
-			
+
+
+
+
 			// Retrieve the Product
 			Product data;
 			try {
@@ -203,10 +203,14 @@ public class ProductController  {
 			ModelAndView mv = null;
 
 
-			
-			
-			
-			mv = uiService.defaultModelAndView("product", request);
+
+
+			String tplName = StringUtils.isEmpty(data.getVertical()) ? "product-novertical" : "product";
+			mv = uiService.defaultModelAndView(tplName, request);
+
+
+
+
 
 			if (mv.getModel().get("user") != null) {
 				mv.addObject("raw", serialisationService.toJson(data, true));
@@ -214,13 +218,13 @@ public class ProductController  {
 
 
 			mv.addObject("product", data);
-			
+
 			// Fetching better and best objects
 			if (null != data.ecoscore()) {
-				
+
 				Long globalBestId = data.getRanking().getGlobalBest();
 				Long globalBetter = data.getRanking().getGlobalBetter();
-				
+
 				if (null != globalBestId && globalBestId.longValue() !=0) {
 					Product best = null;
 					try {
@@ -231,7 +235,7 @@ public class ProductController  {
 					}
 					mv.addObject("best", best);
 				}
-				
+
 				if (null != globalBetter && globalBetter.longValue() != 0) {
 					Product better = null;
 					try {
@@ -242,24 +246,24 @@ public class ProductController  {
 					}
 					mv.addObject("better", better);
 				}
-				
-				
+
+
 			}
-			
-			
-			// Fetching products with scores worse or best in a map. 
+
+
+			// Fetching products with scores worse or best in a map.
 
 			Set<Long> worsesId = data.realScores().stream().filter(e->e.getLowestScoreId() != null).map(e->e.getLowestScoreId()).collect(Collectors.toSet());
 			Set<Long> bestId = data.realScores().stream().filter(e->e.getHighestScoreId() != null).map(e->e.getHighestScoreId()).collect(Collectors.toSet());
 			Set<Long> all = new HashSet<>();
 			all.addAll(worsesId);
 			all.addAll(bestId);
-			
-			
-			
+
+
+
 			//TODO(p1,perf) : heavy cache
 			Map<String, Product> prds = productRepository.multiGetById(all);
-			
+
 			// Re-building products in a map
 			Map<Long, Product> extrems = all.stream()
 			    .map(e -> prds.get(e.toString()))
@@ -268,24 +272,24 @@ public class ProductController  {
 			        Product::getId, // or e -> e.getId(), or e -> e.toString()
 			        Function.identity(),
 			        (a, b) -> a // in case of duplicates, keep the first
-			    ));			
-			
+			    ));
+
 			mv.addObject("extrems",extrems);
-			
+
 			// Adding bestOccasionOffer and bestNewOffer
 			mv.addObject("bestOccasionOffer", data.getPrice().bestOffer(ProductCondition.OCCASION));
 			mv.addObject("bestNewOffer", data.getPrice().bestOffer(ProductCondition.NEW));
-			
-			
-			
+
+
+
 			// TODO: i18n
 
-			
-			
-			
-			
+
+
+
+
 			// Adding the cover image
-			
+
 			String cover = "/icons/no-image.png";
 			if (data.getCoverImagePath() != null) {
 			    cover =  data.getCoverImagePath();
@@ -293,22 +297,22 @@ public class ProductController  {
 				cover = data.externalCover();
 			}
 			mv.addObject("cover", cover);
-			
+
 			// Easiying accessess to pros and cons
-			
+
 			List<String> pros = null;
 			List<String> cons = null;
 			List<String> globalDescriptionParagraphs = null;
 			List<String> ecologicalDescriptionParagraphs = null;
-			
+
 			AiDescriptions aiDescriptions = data.getGenaiTexts().i18n(request);
 			if (null != aiDescriptions) {
-				
+
 				AiDescription ps = aiDescriptions.getDescriptions().get("pros");
 				if (null != ps) {
 					pros = (Arrays.asList(ps.getContent().split("\n|<br/>|;")));
 				}
-				
+
 				AiDescription cs = data.getGenaiTexts().i18n(request).getDescriptions().get("cons");
 				if (null != cs) {
 					cons = (Arrays.asList(cs.getContent().split("\n|<br/>|;")));
@@ -325,53 +329,53 @@ public class ProductController  {
 				}
 			}
 
-			
+
 			// TODO : remove
 			mv.addObject("pros", pros);
 			mv.addObject("cons", cons);
 			mv.addObject("globalDescriptionParagraphs", globalDescriptionParagraphs);
 			mv.addObject("ecologicalDescriptionParagraphs", ecologicalDescriptionParagraphs);
-			
+
 			AiReviewHolder aiReview = data.getReviews().get(mv.getModel().get("siteLanguage"));
 			mv.addObject("aiReview", aiReview);
-			
-			
+
+
 			// Building the pricetrend
-			
+
 			PriceTrend newTrends = PriceTrend.of(data.getPrice().getNewPricehistory(), data.getPrice().bestNewOffer());
 			PriceTrend occasionTrend = PriceTrend.of(data.getPrice().getOccasionPricehistory(), data.getPrice().bestOccasionOffer());
-			
+
 			mv.addObject("newTrend", newTrends);
 			mv.addObject("occasionTrend", occasionTrend);
-			
-			
+
+
 			VerticalConfig verticalConfig = verticalConfigService.getVerticalForPath(vertical);
-			
+
 			List<AttributesFeatureGroups> features = icecatService.features(verticalConfig, mv.getModelMap().get("siteLanguage").toString(), data);
 			mv.addObject("features",features);
-			
-			
+
+
 
 			mv.addObject("verticalConfig", verticalConfig);
 			if (null != verticalConfig) {
-				mv.addObject("verticalPath",verticalConfigService.getPathForVerticalLanguage("fr",verticalConfig));				
+				mv.addObject("verticalPath",verticalConfigService.getPathForVerticalLanguage("fr",verticalConfig));
 			}
 
-			
+
 			// Adding the stats (from a full search aggregation)
 			VerticalSearchRequest statsRequest = buildStatRequest(verticalConfig, data);
 			// TODO : Check heavy caching
-			
-			if (null != verticalConfig) {				
+
+			if (null != verticalConfig) {
 				VerticalSearchResponse statsResponse = searchService.verticalSearch(verticalConfig, statsRequest);
 				mv.addObject("stats",statsResponse);
-			} 
-			
+			}
+
 
 			UiHelper uiHelper = new UiHelper(request, verticalConfig, data);
 			// Adding the UiHelper class
 			mv.addObject("helper", uiHelper);
-			
+
 			if (null == vertical) {
 
 				// Sending 301 id no match with product name
@@ -411,35 +415,35 @@ public class ProductController  {
 				inferAffiliationToken(request, data, price);
 			}
 
-			
+
 			// Adding the affiliationTokens in min and max price
 			if (null != data.getPrice().getMinPrice()) {
 				inferAffiliationToken(request, data, data.getPrice().getMinPrice());
 			//		inferAffiliationToken(data, data.getPrice().getMaxPrice());
 			}
-			
-			
+
+
 			// Adding the diplay country
 			if (null != data.getGtinInfos().getCountry()) {
 				mv.addObject("originCountry", new ULocale("",data.getGtinInfos().getCountry()).getDisplayCountry( new ULocale(request.getLocale().toString())));
 			}
 
-			
+
 			// Adding the brand informations
 			//TODO(p1) : brand logo
 //			mv.addObject("hasBrandLogo", brandService.hasLogo(data.brand()));
 			mv.addObject("hasBrandLogo", false);
-			
+
 			// Adding the images resource
 
 			return mv;
 		} catch (Exception e) {
 			LOGGER.error("Error while building view for {}",id,e);
-			
+
 			throw e;
 		}
 	}
-	
+
 	/**
 	 * Infer the affiliation token in an aggregated price
 	 *
@@ -451,16 +455,16 @@ public class ProductController  {
 
 		try {
 			ContributionVote token = new ContributionVote( price, data);
-			
-			
+
+
 			String serToken = URLEncoder.encode(serialisationService.compressString(serialisationService.toJson(token)), Charset.defaultCharset());
 			price.setAffiliationToken(serToken);
 		} catch (Exception e) {
 			LOGGER.error("Error while generating affiliation token for {} : {}", data, e.getMessage());
 		}
 	}
-	
-	
+
+
 	///////////////////
 	///// For review
 	////////////////////
@@ -471,36 +475,36 @@ public class ProductController  {
 		ModelAndView ret = uiService.defaultModelAndView("review-request", request)
 					.addObject("captchaKey", captchaProps.getKey())
 					.addObject("gtin",id);
-		
-		// TODO : i18n, check not null 
+
+		// TODO : i18n, check not null
 		FunFactsConfig funFacts = config.getFunFacts().i18n("fr");
 		ret.addObject("funFacts",funFacts.getFacts());
-		
+
 		return ret;
-							
+
 	}
-	
-	
+
+
 	// TODO(p1, performance) : heavy cache
 	public  VerticalSearchRequest buildStatRequest(VerticalConfig config, Product data) {
 		VerticalSearchRequest vRequest = new VerticalSearchRequest();
-		
-		
+
+
 		vRequest.setSortField("scores.ECOSCORE.value");
 		vRequest.setSortOrder("desc");
-		
+
 		vRequest.getNumericFilters().add(new NumericRangeFilter("offersCount", 1.0, 10000.0, 1.0, false));
 		vRequest.getNumericFilters().add(new NumericRangeFilter("price.minPrice.price", 0.0001, 500000.0, 100.0, false));
 
-		
+
 		data.realScores().forEach(s -> {
 			vRequest.getNumericFilters().add(new NumericRangeFilter("scores."+s.getName()+".value", 0.0001, 500000.0, 1.0, true));
-			
+
 		});
-		
-		
+
+
 		return vRequest;
 	}
-	
-	
+
+
 }
