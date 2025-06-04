@@ -392,6 +392,19 @@
 					<artifactId>jacoco-maven-plugin</artifactId>
 					<version>${jacoco.version}</version>
 				</plugin>
+                                <!-- Maven JAR plugin configuration -->
+                                <plugin>
+                                        <groupId>org.apache.maven.plugins</groupId>
+                                        <artifactId>maven-jar-plugin</artifactId>
+                                        <version>3.4.2</version>
+                                </plugin>
+
+                                <!-- Spring Boot plugin configuration -->
+                                <plugin>
+                                        <groupId>org.springframework.boot</groupId>
+                                        <artifactId>spring-boot-maven-plugin</artifactId>
+                                        <version>${springboot.version}</version>
+                                </plugin>
 			</plugins>
 		</pluginManagement>
 	</build>
