@@ -133,25 +133,6 @@
         </dependency>
 
 
-        <!-- https://mvnrepository.com/artifact/ognl/ognl -->
-        <dependency>
-            <groupId>ognl</groupId>
-            <artifactId>ognl</artifactId>
-            <version>3.4.7</version>
-        </dependency>
-        <!-- https://mvnrepository.com/artifact/org.commonmark/commonmark -->
-        <dependency>
-            <groupId>org.commonmark</groupId>
-            <artifactId>commonmark</artifactId>
-            <version>0.24.0</version>
-        </dependency>
-
-
-        <dependency>
-            <groupId>com.squareup.okio</groupId>
-            <artifactId>okio</artifactId>
-            <version>3.11.0</version>
-        </dependency>
 
 
         <!-- API DOC -->
@@ -168,7 +149,6 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>
-                <version>3.4.2</version>
                 <configuration>
                     <excludes>
                         <!-- This is where the exclusion occurs -->
@@ -191,7 +171,6 @@
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
-                <version>${springboot.version}</version>
                 <executions>
                     <execution>
                         <goals>
