@@ -19,7 +19,7 @@ import org.open4goods.api.services.feed.FeedService;
 import org.open4goods.commons.model.constants.RolesConstants;
 import org.open4goods.commons.services.BrandService;
 import org.open4goods.commons.services.DataSourceConfigService;
-import org.open4goods.commons.services.ImageGenerationService;
+import org.open4goods.services.imageprocessing.service.ImageGenerationService;
 import org.open4goods.commons.services.ResourceService;
 import org.open4goods.commons.services.VerticalsConfigService;
 import org.open4goods.model.exceptions.InvalidParameterException;

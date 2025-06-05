@@ -49,6 +49,7 @@
         <module>services/favicon</module>
         <module>services/github-feedback</module>
         <module>services/xwiki-spring-boot-starter</module>
+        <module>services/image-processing</module>
 
 
 

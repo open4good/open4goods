@@ -27,7 +27,7 @@
  *  -------------------------------------------------------------------------------
  */
 
-package org.open4goods.commons.helper;
+package org.open4goods.services.imageprocessing.helper;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
