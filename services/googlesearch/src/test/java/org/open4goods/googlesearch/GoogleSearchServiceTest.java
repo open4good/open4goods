@@ -32,20 +32,21 @@ public class GoogleSearchServiceTest {
      * <p>
      * This test expects the search to fail with an error message containing "400".
      */
-    @Test
-    public void testSearch() throws IOException, InterruptedException {
-        // Prepare a sample search request with a known query.
-        GoogleSearchRequest request = new GoogleSearchRequest("Spring Boot", "lang_fr", "countryFR");
-        
-        try {
-            googleSearchService.search(request);
-        } catch (Exception e) {
-            // We expect an error response due to test configuration (e.g., invalid API key)
-            assertTrue(e.getMessage().contains("400") || e.getMessage().contains("Error"));
-            return;
-        }
-        fail("Search should have failed with a 400 exception");
-    }
+    // NOTE : disabled to avoid remote call
+//    @Test
+//    public void testSearch() throws IOException, InterruptedException {
+//        // Prepare a sample search request with a known query.
+//        GoogleSearchRequest request = new GoogleSearchRequest("Spring Boot", "lang_fr", "countryFR");
+//
+//        try {
+//            googleSearchService.search(request);
+//        } catch (Exception e) {
+//            // We expect an error response due to test configuration (e.g., invalid API key)
+//            assertTrue(e.getMessage().contains("400") || e.getMessage().contains("Error"));
+//            return;
+//        }
+//        fail("Search should have failed with a 400 exception");
+//    }
 
     /**
      * Test that the health check returns UP when properties are properly configured.
