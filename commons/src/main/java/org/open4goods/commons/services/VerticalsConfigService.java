@@ -24,7 +24,6 @@ import org.open4goods.model.vertical.VerticalConfig;
 import org.open4goods.services.productrepository.services.ProductRepository;
 import org.open4goods.services.serialisation.exception.SerialisationException;
 import org.open4goods.services.serialisation.service.SerialisationService;
-import org.open4goods.services.imageprocessing.service.ImageGenerationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cache.annotation.Cacheable;
@@ -76,7 +75,6 @@ public class VerticalsConfigService {
 
 	private ResourcePatternResolver resourceResolver;
 
-	private ImageGenerationService imageGenerationService;
 
 	//
 	private final ExecutorService executorService = Executors.newFixedThreadPool(1);
@@ -85,23 +83,22 @@ public class VerticalsConfigService {
 	private VerticalConfig defaultConfig;
 
 
-	public VerticalsConfigService(SerialisationService serialisationService, GoogleTaxonomyService googleTaxonomyService, ProductRepository productRepository, ResourcePatternResolver resourceResolver, ImageGenerationService imageGenerationService) {
+	public VerticalsConfigService(SerialisationService serialisationService, GoogleTaxonomyService googleTaxonomyService, ProductRepository productRepository, ResourcePatternResolver resourceResolver) {
 		super();
 		this.serialisationService = serialisationService;
 		this.googleTaxonomyService = googleTaxonomyService;
 		this.productRepository = productRepository;
 		this.resourceResolver = resourceResolver;
-		this.imageGenerationService = imageGenerationService;
 
 		// initial configs loads
 		loadConfigs();
-		
-		
+
+
 		// Update the google product categories with defined verticals
 		getConfigsWithoutDefault().stream().forEach(v -> {
 			googleTaxonomyService.updateCategoryWithVertical(v);
 		});
-		
+
 
 	}
 
@@ -121,7 +118,7 @@ public class VerticalsConfigService {
 		} catch (Exception e) {
 			logger.error("Cannot load  default config from {}", CLASSPATH_VERTICALS_DEFAULT, e);
 		}
-		
+
 		/////////////////////////////////////////
 		// Load configurations from classpath
 		/////////////////////////////////////////
@@ -146,19 +143,19 @@ public class VerticalsConfigService {
 					}
 					if (null != cc.getValue()) {
 						cc.getValue().forEach(cat -> {
-							categoriesToVertical.get(cc.getKey()).put(cat, c);	
+							categoriesToVertical.get(cc.getKey()).put(cat, c);
 						});
 					}
 				} catch (Exception e) {
 					logger.error("Error loading categories matching map : {}",c,e);
 				}
-				
+
 			}));
 		}
 
 		// Associati
-		
-		
+
+
 		// Mapping url to i18n
 		getConfigsWithoutDefault().forEach(vc -> vc.getI18n().forEach((key, value) -> {
 
@@ -172,7 +169,7 @@ public class VerticalsConfigService {
 
 
 	/**
-	 * 
+	 *
 	 * @return the available verticals configurations from classpath
 	 */
 	private List<VerticalConfig> loadFromClasspath() {
@@ -195,12 +192,12 @@ public class VerticalsConfigService {
 				logger.error("Cannot retrieve vertical config : {}",r.getFilename(), e);
 			}
 		}
-			
+
 		return ret;
 	}
-	
-	
-	
+
+
+
 	/**
 	 * Instanciate a config with a previously defaulted one
 	 *
@@ -227,28 +224,28 @@ public class VerticalsConfigService {
 	 * @throws IOException
 	 */
 	public VerticalConfig getVerticalForCategories(Map<String, String> productCategoriessByDatasource) {
-		
+
 		VerticalConfig vc = null;
 
 		for (Entry<String, String> category : productCategoriessByDatasource.entrySet()) {
 			// Searching in the specific category
 			Map<String, VerticalConfig> keys = categoriesToVertical.get(category.getKey());
 			if (null != keys) {
-				
+
 				vc = keys.get(category.getValue());
 				if (null != vc) {
 					break;
 				}
 			}
-			
+
 			// Searching in the ALL category
 			vc = categoriesToVertical.get("all").get(category.getValue());
 			if (null != vc) {
 				break;
 			}
-			
+
 		}
-		
+
 		// Looking for words exclusions in categories
 		if (null != vc) {
 		    for (String token : vc.getExcludingTokensFromCategoriesMatching()) {
@@ -276,16 +273,16 @@ public class VerticalsConfigService {
 		return byUrl.get(path);
 	}
 
-	
-	
+
+
 	/**
  	 *  Return the path for a vertical language, if any
-	 * @param config 
+	 * @param config
 	 * @param path
 	 * @return
 	 */
 	public String getPathForVerticalLanguage(String language, VerticalConfig config) {
-		String path = configs.get(config.getId()).i18n(language).getVerticalHomeUrl();		
+		String path = configs.get(config.getId()).i18n(language).getVerticalHomeUrl();
 		return path;
 	}
 
@@ -304,7 +301,7 @@ public class VerticalsConfigService {
 	    // Create a list to hold all VerticalConfig objects
 	    List<VerticalConfig> configList = new ArrayList<>(getConfigsWithoutDefault());
 
-	    
+
 	    // Create a list to hold the final buckets
 	    List<List<VerticalConfig>> buckets = new ArrayList<>();
 
@@ -320,7 +317,7 @@ public class VerticalsConfigService {
 	    return buckets;
 	}
 
-	
+
 	/**
 	 *
 	 * @return
@@ -329,7 +326,7 @@ public class VerticalsConfigService {
 	public VerticalConfig getDefaultConfig() {
 
 		return defaultConfig;
-	
+
 	}
 
 
@@ -351,7 +348,7 @@ public class VerticalsConfigService {
 	public VerticalConfig getByGoogleTaxonomy(Integer googleCategoryId) {
 		return configs.values().stream().filter(e ->googleCategoryId.equals(e.getGoogleTaxonomyId())).findFirst().orElse(null);
 	}
-	
+
 	/**
 	 * Return all expanded taxonomies, from the taxonomy service and from queryning on the store
 	 * @return
@@ -367,10 +364,10 @@ public class VerticalsConfigService {
             et.setAssociatedVertical(getVerticalForTaxonomy(t.getKey()));
             ret.add(et);
         });
-		
+
 		return ret;
 	}
-	
+
 	/**
 	 * Return a vertical config for a given taxonomy id
 	 * @param key
@@ -390,7 +387,7 @@ public class VerticalsConfigService {
 	public VerticalConfig getConfigById(String verticalName) {
 		if (null == verticalName) {
 			return null;
-		} else {			
+		} else {
 			return configs.get(verticalName);
 		}
 	}
@@ -403,13 +400,13 @@ public class VerticalsConfigService {
 	public VerticalConfig getConfigByIdOrDefault(String vertical) {
 		// Getting the config for the category, if any
 		VerticalConfig vConf = getConfigById(vertical);
-		
+
 		if (null == vConf) {
 			vConf = getDefaultConfig();
 		}
 		return vConf;
 	}
-	
+
 
 	/**
 	 * @return all configs, except the _default. Allows filtering on enabled verticals,
@@ -425,7 +422,7 @@ public class VerticalsConfigService {
 
 	/**
 	 *
-	 * @return all configs, except the _default. 
+	 * @return all configs, except the _default.
 	 */
 	public Collection<VerticalConfig>  getConfigsWithoutDefault() {
 		return getConfigsWithoutDefault(false);
@@ -459,17 +456,17 @@ public class VerticalsConfigService {
 		}
 	}
 
-	
+
 	/**
 	 * Return all products matching the vertical in the config or already having a
 	 * vertical defined
-	 * 
+	 *
 	 * @param v
 	 * @return
 	 */
 	// TODO : Could add datasourcename in a virtual "all", then apply the logic filter to batch get all categories matching....
 	public Stream<Product> getProductsMatchingCategoriesOrVerticalId(VerticalConfig v) {
-		
+
 		// We match larger, on all matching categories cause those fields are not indexed
 		Set<String> datasources = new HashSet<String>();
 		v.getMatchingCategories().values().forEach(cat -> {
@@ -477,10 +474,10 @@ public class VerticalsConfigService {
 				datasources.add(elem);
 			});
 		});
-		
+
 		Criteria c = new Criteria("datasourceCategories").in(datasources)
 				.or(new Criteria("vertical").is(v.getId()));
-		
+
 		final NativeQuery initialQuery = new NativeQueryBuilder().withQuery(new CriteriaQuery(c)).build();
 
 		return productRepository.getElasticsearchOperations()
@@ -494,8 +491,8 @@ public class VerticalsConfigService {
 //					}
 //					return false;
 //				});
-				
+
 
 	}
-	
+
 }

@@ -19,7 +19,6 @@ import org.open4goods.api.services.feed.FeedService;
 import org.open4goods.commons.model.constants.RolesConstants;
 import org.open4goods.commons.services.BrandService;
 import org.open4goods.commons.services.DataSourceConfigService;
-import org.open4goods.services.imageprocessing.service.ImageGenerationService;
 import org.open4goods.commons.services.ResourceService;
 import org.open4goods.commons.services.VerticalsConfigService;
 import org.open4goods.model.exceptions.InvalidParameterException;
@@ -59,13 +58,12 @@ public class ResourceController {
 
 	private static final String CONTENT_TYPE_IMAGE_PNG = "image/png";
 	private static final String CONTENT_TYPE_IMAGE_JPEG = "image/jpeg";
-	
+
 	private static final String CONTENT_TYPE_JAVA_ARCHIVE = "application/java-archive";
 	private static final String HEADER_CONTENT_TYPE = "Content-type";
 	private static final String HEADER_CACHE_CONTROL = "Cache-Control";
 
-	
-	private final ImageGenerationService imageGenerationService;
+
 	private final UiConfig config;
 	private final DataSourceConfigService datasourceConfigService;
 	private final BrandService brandService;
@@ -75,16 +73,15 @@ public class ResourceController {
 	private final RemoteFileCachingService remoteFilecache;
 	private final FaviconService faviconService;
 	private final  DatasourceImageService datasourceImageService;
-	
-	
-	
+
+
+
 	private ProductRepository productRepository;
 
 	private VerticalsConfigService verticalsConfigService;
 
-	public ResourceController( VerticalsConfigService verticalsConfigService,  ProductRepository productRepository,  UiConfig config, DataSourceConfigService dsConfigService, ResourceService resourceService, BrandService brandService, ImageGenerationService imageGenerationService, GtinService gtinService, FeedService feedservice, RemoteFileCachingService remoteFilecache, FaviconService faviconService, DatasourceImageService datasourceImageService) {
+	public ResourceController( VerticalsConfigService verticalsConfigService,  ProductRepository productRepository,  UiConfig config, DataSourceConfigService dsConfigService, ResourceService resourceService, BrandService brandService,  GtinService gtinService, FeedService feedservice, RemoteFileCachingService remoteFilecache, FaviconService faviconService, DatasourceImageService datasourceImageService) {
 		this.productRepository = productRepository;
-		this.imageGenerationService = imageGenerationService;
 		this.config = config;
 		this.datasourceConfigService = dsConfigService;
 		this.brandService = brandService;
@@ -112,26 +109,26 @@ public class ResourceController {
 	 */
 	@GetMapping("/{type:images|videos|pdfs}/{resourceName:[\\w|\\-]+}_{hashkey:\\d+}.{ext:[a-z]{2,4}}")
 	public void resource(
-			@PathVariable String type, 
-	        @PathVariable String hashkey, 
+			@PathVariable String type,
+	        @PathVariable String hashkey,
 	        @PathVariable String resourceName,
-	        @PathVariable String ext,	        
+	        @PathVariable String ext,
 	        final HttpServletResponse response, HttpServletRequest request) {
-		
+
 			Resource img = new Resource();
 			img.setCacheKey(hashkey);
 			img.setMimeType(URLConnection.guessContentTypeFromName("."+ext));
-	
+
 		try (InputStream stream = resourceService.getResourceFileStream(img)) {
 			setResponseAndCopyStream(response, stream, img.getMimeType());
 		} catch (FileNotFoundException e) {
 			throw new ResponseStatusException( HttpStatus.NOT_FOUND, "Resource not found"	);
 		} catch (IOException e) {
 			throw new ResponseStatusException( HttpStatus.INTERNAL_SERVER_ERROR, "Error handling resource"	);
-		} 
+		}
 	}
 
-	
+
 	/**
 	 * Serves the logo image of the specified brand.
 	 *
@@ -160,7 +157,7 @@ public class ResourceController {
 			LOGGER.error("Error while rendering brand : {} - {}",brand, e.getMessage());
 		}
 	}
-	
+
 	@GetMapping("/icon/{datasourceName}")
 	public void datasourceIcon(@PathVariable String datasourceName, final HttpServletResponse response) {
 		   DatasourceImageService.ImageResult image = datasourceImageService.getDatasourceImage(datasourceName, false);
@@ -208,9 +205,9 @@ public class ResourceController {
 			IOUtils.copy(stream, response.getOutputStream());
 		} catch (Exception e) {
 			throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Error rendering image");
-		} 
+		}
 	}
-	
+
 
 
 	/**
@@ -232,7 +229,7 @@ public class ResourceController {
 		}
 	}
 
-	
+
 	//////////////////////////
 	// Response helpers
 	/////////////////////////
@@ -248,9 +245,9 @@ public class ResourceController {
 	private void setResponseAndCopyStream(HttpServletResponse response, InputStream stream, String contentType)
 			throws IOException {
 		response.addHeader(HEADER_CONTENT_TYPE, contentType);
-		response.addHeader(HEADER_CACHE_CONTROL, "public, max-age=" + AppConfig.CACHE_PERIOD_SECONDS);		
+		response.addHeader(HEADER_CACHE_CONTROL, "public, max-age=" + AppConfig.CACHE_PERIOD_SECONDS);
 			IOUtils.copy(stream, response.getOutputStream());
-		
+
 	}
 
 	/**
@@ -262,13 +259,13 @@ public class ResourceController {
 	 */
 	@GetMapping("/images/verticals/{verticalId}.jpg")
 	public void serveVerticalImage(@PathVariable String verticalId, final HttpServletResponse response) throws IOException {
-		
-		VerticalConfig vConf = verticalsConfigService.getConfigById(verticalId);			
+
+		VerticalConfig vConf = verticalsConfigService.getConfigById(verticalId);
 		//		NOTE(security,p2) : Resolution acts as sanitisation
 		if (null == vConf) {
 			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Image not found");
 		}
-		
+
 		File imageFile = getVerticalCoverFile(verticalId);
 
 		if (!imageFile.exists()) {
@@ -292,12 +289,12 @@ public class ResourceController {
 	@GetMapping("/images/verticals/{verticalId}.jpg/delete")
 	@PreAuthorize("hasAuthority('"+RolesConstants.ROLE_XWIKI_ALL+"')")
 	public ModelAndView deleteVerticalImage(@PathVariable String verticalId, final HttpServletResponse response) throws IOException {
-		VerticalConfig vConf = verticalsConfigService.getConfigById(verticalId);			
+		VerticalConfig vConf = verticalsConfigService.getConfigById(verticalId);
 		//		NOTE(security,p2) : Resolution acts as sanitisation
 		if (null == vConf) {
 			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Image not found");
 		}
-		
+
 		File imageFile = getVerticalCoverFile(verticalId);
 		FileUtils.deleteQuietly(imageFile);
 
@@ -305,19 +302,19 @@ public class ResourceController {
 		mv.setStatus(HttpStatus.MOVED_TEMPORARILY);
 		return mv;
 	}
-	
 
-	
-	
+
+
+
 	/**
-	 * Will take the first image cover of a product to set it as the vertical cover image, by copying the file 
+	 * Will take the first image cover of a product to set it as the vertical cover image, by copying the file
 	 * to/verticals/img
 	 * NOTE : Could be in a dedicated service
 	 */
 	public void generateVerticalCover(VerticalConfig vConf) {
 		if (null != vConf) {
 			LOGGER.info("Generating cover for {}",vConf.getId());
-			
+
 			List<Product> products = productRepository.exportVerticalWithValidDate(vConf, false).limit(200).toList();
 			products = new ArrayList<>(products);
 			Collections.shuffle(products);
@@ -334,12 +331,12 @@ public class ResourceController {
 						}
 					}
 				}
-			}			
+			}
 		}
 	}
-	
+
 	private File getVerticalCoverFile(String verticalId) {
 		return new File(resourceService.getRemoteCachingFolder() + "/verticals/" + verticalId+".jpg");
 	}
-	
+
 }

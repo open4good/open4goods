@@ -11,7 +11,6 @@ import org.open4goods.commons.config.yml.DevModeConfiguration;
 import org.open4goods.commons.config.yml.IcecatConfiguration;
 import org.open4goods.crawler.config.yml.FetcherProperties;
 import org.open4goods.model.vertical.DescriptionsAggregationConfig;
-import org.open4goods.model.vertical.ImageGenerationConfig;
 import org.open4goods.services.productrepository.config.IndexationConfig;
 import org.open4goods.services.prompt.config.PromptServiceConfig;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,8 +33,8 @@ import jakarta.validation.constraints.NotNull;
  */
 public class ApiProperties {
 
-	
-	@Autowired Environment env;	
+
+	@Autowired Environment env;
 
 	/**
 	 * The location where dedicated snapshots will be stored
@@ -58,13 +57,13 @@ public class ApiProperties {
 	 * Folder where AI generated images are stored
 	 */
 	private String generatedImagesFolder = rootFolder + "generated-images" + File.separator;
-	
+
 	/**
 	 * Configuration for resource completion
 	 */
 	private ResourceCompletionConfig resourceCompletionConfig = new ResourceCompletionConfig();
-	
-	
+
+
 	/*
 	 * Proxy, if neededpsule
 	 */
@@ -95,7 +94,7 @@ public class ApiProperties {
 	private List<String> testKeys = new ArrayList<>();
 
 
-	
+
 	/**
 	 * The list of crawler api keys to authorize
 	 */
@@ -141,88 +140,82 @@ public class ApiProperties {
 
 
 	private AffiliationConfig affiliationConfig = new AffiliationConfig();
-	/**
-	 * Config gor IA Generated images
-	 */
-	private ImageGenerationConfig imageGenerationConfig = new ImageGenerationConfig();
-	
-
 
 	/**
 	 * The configuration for developpement mode services
 	 */
 	private DevModeConfiguration devModeConfig = new DevModeConfiguration();
-	
-	
+
+
 	/**
 	 * The log level for aggregation
      *
 	 */
 	private String aggregationLogLevel = "INFO";
-	
+
 	/**
 	 * The configuration for amazon completion
 	 */
 	private AmazonCompletionConfig amazonConfig = new AmazonCompletionConfig();
-	
-	
+
+
 	/**
 	 * The configuration for icecat
 	 */
 	private IcecatCompletionConfig icecatCompletionConfig = new IcecatCompletionConfig();
-	
+
 	/**
 	 * The configuration for icecat features
-     
+
 	 */
 	private IcecatConfiguration icecatFeatureConfig = new IcecatConfiguration();
-	
+
 
 	/**
 	 * The list of hosts allowed for CORS
 	 */
 	private List<String> corsAllowedHosts = new ArrayList<>();
-	
-	
+
+
 	/**
 	 * Configuration for indexation (number of threads, batch size, ...)
 	 */
 	private IndexationConfig indexationConfig = new IndexationConfig();
-	
-	
+
+
 	/**
 	 * Configuration for gen ai
 	 */
 	private PromptServiceConfig genAiConfig = new PromptServiceConfig();
-	
+
 	/**
 	 * Duration of the pause to apply beetween 2 subsequent GenAI generation
 	 */
 	private long genAiPauseDurationMs = 0L;
-	
+
 	/**
 	 * Options for Wiki backup
 	 */
 	private BackupConfig backupConfig = new BackupConfig();
-	
-	
-	
-	
+
+
+
+
 	/**
 	 * Config for verticals generation service
 	 * @return
 	 */
-	
+
 	private VerticalsGenerationConfig verticalsGenerationConfig = new VerticalsGenerationConfig();
-	
-	
-	
-	
-	
-	
-	
-	
-	
+
+
+
+
+
+
+
+
+
 	public AmazonCompletionConfig getAmazonConfig() {
 		return amazonConfig;
 	}
@@ -239,8 +232,8 @@ public class ApiProperties {
 		return Level.toLevel(aggregationLogLevel);
 	}
 
-	
-	
+
+
 	public Environment getEnv() {
 		return env;
 	}
@@ -269,7 +262,7 @@ public class ApiProperties {
 	 */
 	public boolean isDevMode() {
 		return ArrayUtils.contains(env.getActiveProfiles(), "dev") || ArrayUtils.contains(env.getActiveProfiles(), "devsec");
-        
+
 	}
 	public String workFolder() {
 		return rootFolder+"/.work/";
@@ -530,19 +523,6 @@ public class ApiProperties {
 	public void setGeneratedImagesFolder(String generatedImagesFolder) {
 		this.generatedImagesFolder = generatedImagesFolder;
 	}
-
-
-
-	public ImageGenerationConfig getImageGenerationConfig() {
-		return imageGenerationConfig;
-	}
-
-
-
-	public void setImageGenerationConfig(ImageGenerationConfig imageGenerationConfig) {
-		this.imageGenerationConfig = imageGenerationConfig;
-	}
-
 
 
 	public ResourceCompletionConfig getResourceCompletionConfig() {

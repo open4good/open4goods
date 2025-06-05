@@ -3,7 +3,6 @@ package org.open4goods.ui.controllers.ui;
 import java.io.IOException;
 
 import org.open4goods.commons.model.constants.RolesConstants;
-import org.open4goods.services.imageprocessing.service.ImageGenerationService;
 import org.open4goods.commons.services.VerticalsConfigService;
 import org.open4goods.model.exceptions.ResourceNotFoundException;
 import org.open4goods.model.vertical.VerticalConfig;
@@ -45,20 +44,18 @@ public class AdminController {
 	private final SitemapGenerationService sitemapService;
 
 	private ProductRepository repository;
-	
-	private ImageGenerationService imageGenerationService;
+
 
 	private VerticalsConfigService verticalsConfigService;
 
 	private GoogleIndexationService googleIndexationService;
-	
+
 	public AdminController(UiConfig config, VerticalsConfigService verticalsConfigService,
-			ProductRepository repository, SitemapGenerationService sitemapService, ImageGenerationService imageGenerationService,  GoogleIndexationService googleIndexationService) {
+			ProductRepository repository, SitemapGenerationService sitemapService) {
 		this.config = config;
 		this.verticalService = verticalsConfigService;
 		this.sitemapService = sitemapService;
 		this.repository = repository;
-		this.imageGenerationService = imageGenerationService;
 		this.verticalsConfigService = verticalsConfigService;
 		this.googleIndexationService = googleIndexationService;
 	}
@@ -69,7 +66,7 @@ public class AdminController {
 
 	/**
 	 * reload verticals config
-	 * 
+	 *
 	 * @param request
 	 * @return
 	 */
@@ -87,15 +84,15 @@ public class AdminController {
 	}
 
 	/**
-	 * reload verticals config 
+	 * reload verticals config
 	 * @param request
-	 * @return 
-	 * @throws ResourceNotFoundException 
+	 * @return
+	 * @throws ResourceNotFoundException
 	 */
 	@GetMapping("/sitemap")
 	@PreAuthorize("hasAuthority('"+RolesConstants.ROLE_XWIKI_ALL+"')")
 	public ModelAndView sitemap(final HttpServletRequest request) throws ResourceNotFoundException {
-		
+
 		sitemapService.generate();
 		ModelAndView mv = new ModelAndView("redirect:/");
 		mv.setStatus(HttpStatus.MOVED_TEMPORARILY);
@@ -115,55 +112,55 @@ public class AdminController {
 	public ModelAndView regenerateVerticalImage(@PathVariable String verticalId) throws IOException {
 		VerticalConfig verticalConfig = verticalsConfigService.getConfigById(verticalId);
 
-		
-		
+
+
 //		String verticalTitle = verticalConfig.getI18n().get("default").getVerticalHomeTitle();
 //		String fileName = verticalId + ".png";
 //		imageGenerationService.fullGenerate(verticalTitle, fileName);
 //		logger.info("Image for vertical {} with title '{}' has been regenerated", verticalId, verticalTitle);
-//		
+//
 		ModelAndView mv = new ModelAndView("redirect:/");
 		mv.setStatus(HttpStatus.MOVED_TEMPORARILY);
 		return mv;
 	}
 
-	
-	
+
+
 	@GetMapping("/index/{verticalId}")
 	@PreAuthorize("hasAuthority('"+RolesConstants.ROLE_XWIKI_ALL+"')")
 	public ModelAndView index(@PathVariable String verticalId, HttpServletRequest request) throws IOException {
-		
+
 		// TODO(p3,i18n) : Should be siteLocale
 		googleIndexationService.indexVertical(verticalId, config.getBaseUrl(request.getLocale()));
-		
+
 		ModelAndView mv = new ModelAndView("redirect:/");
 		mv.setStatus(HttpStatus.MOVED_TEMPORARILY);
 		return mv;
 	}
-	
+
 	@GetMapping("/index")
 	@PreAuthorize("hasAuthority('"+RolesConstants.ROLE_XWIKI_ALL+"')")
 	public ModelAndView indexPage(HttpServletRequest request, @RequestParam(name = "r", required = false) String redircectUrl) throws IOException {
-		
+
 		googleIndexationService.indexPage(redircectUrl);
-		
+
 		ModelAndView mv = new ModelAndView("redirect:/");
 		mv.setStatus(HttpStatus.MOVED_TEMPORARILY);
 		return mv;
 	}
-	
+
 	@GetMapping("/indexNew")
 	@PreAuthorize("hasAuthority('"+RolesConstants.ROLE_XWIKI_ALL+"')")
 	public ModelAndView indexNew(HttpServletRequest request ) throws IOException {
-		
+
 		googleIndexationService.indexNewProducts();
-		
+
 		ModelAndView mv = new ModelAndView("redirect:/");
 		mv.setStatus(HttpStatus.MOVED_TEMPORARILY);
 		return mv;
 	}
-	
-	
+
+
 
 
 }

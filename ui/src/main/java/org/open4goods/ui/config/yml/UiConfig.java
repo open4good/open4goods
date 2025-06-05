@@ -17,9 +17,7 @@ import org.open4goods.commons.config.yml.ui.OpenSearchConfig;
 import org.open4goods.commons.config.yml.ui.PriceRestitutionConfig;
 import org.open4goods.commons.config.yml.ui.WebConfig;
 import org.open4goods.model.Localisable;
-import org.open4goods.model.vertical.ImageGenerationConfig;
 import org.open4goods.model.vertical.SiteNaming;
-import org.open4goods.services.feedback.config.FeedbackConfiguration;
 import org.open4goods.xwiki.config.XWikiServiceProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,40 +47,40 @@ public class UiConfig {
 	 */
 	private String rootFolder = File.separator+"opt"+File.separator+"open4goods"+File.separator;
 
-	
+
 	/**
 	 * if defined, use to templatize from a local folder
 	 */
 	private String resourceTemplateFolder;
 
 
-	
+
 	/** A localised list of fun facts **/
-	private Localisable<String,FunFactsConfig> funFacts = new Localisable<>(); 
-	
+	private Localisable<String,FunFactsConfig> funFacts = new Localisable<>();
+
 	/**
 	 * Folder where datasources definitions are stored
 	 */
 	private String datasourcesfolder=rootFolder+ File.separator+ "config"+File.separator+"datasources"+File.separator;
 
-	
+
 	/**
 	 * Folder where AI generated images are stored
 	 */
 	private String generatedImagesFolder = rootFolder + "generated-images" + File.separator;
-	
+
 	/**
 	 * The list of authorized dynamic image resizing suffixes
 	 */
 	private Set<String> allowedImagesSizeSuffixes = new HashSet<>();
-	
+
 	/**
 	 * The mapped wiki pages
 	 */
 	@JsonMerge
 	private Map<String,String> pages = new HashMap<>();
-	
-	
+
+
 	/**
 	 * The URL namings
 	 */
@@ -114,100 +112,96 @@ public class UiConfig {
     /**
      * Secret and key  for captcha system
      */
-	private String captchaKey;	
+	private String captchaKey;
 	private String captchaSecret;
-	
+
 	/**
 	 * The google API, for indexing services
 	 */
 	private String googleApiJson;
-	
+
 	//	/**
 	//	 * Relativ pageSize the web ( trackings id, ....)
 	//	 */
 	//
 	private WebConfig webConfig = new WebConfig();
 
-	
+
 	private PriceRestitutionConfig priceConfig = new PriceRestitutionConfig();
-	
+
 	/**
 	 * Config for url checking
 	 */
 	private UrlCheckConfig urlcheck;
 
-	
+
 	private AffiliationConfig affiliationConfig = new AffiliationConfig();
-	
-	
+
+
 	private Map<String, FeedConfiguration> feedConfigs = new HashMap<>();
-	
+
 	/***
 	 * Config for IP and UA banChecking
 	 */
 	private BanCheckerConfig bancheckerConfig = new BanCheckerConfig();
-	
+
 	/**
 	 * The configuration for icecat features
-     
+
 	 */
 	private IcecatConfiguration icecatFeatureConfig = new IcecatConfiguration();
-	
-	
-	
+
+
+
 	/**
 	 * The Xwiki instance configuration
 	 */
 	private XWikiServiceProperties wikiConfig = new XWikiServiceProperties();
 
 	/**
-	 * The localised mapping of exposed spaces in the wiki. Eg : "/mentions-legales" -> "/", "legalspace" -> "/legals""     
+	 * The localised mapping of exposed spaces in the wiki. Eg : "/mentions-legales" -> "/", "legalspace" -> "/legals""
 	 */
 	private Map<String,Localisable<String,String>> wikiPagesMapping = new HashMap<>();
-	
-	
+
+
 	/**
 	 * Containing the project members, for restitution in /team
 	 */
 	private TeamConfig teamConfig = new TeamConfig();
-	
+
 
 	private BlogConfiguration blogConfig = new BlogConfiguration();
-	
-	
+
+
 	/**
 	 * The configuration for developpement mode services
 	 */
 	private DevModeConfiguration devModeConfig = new DevModeConfiguration();
-	
+
 	public String getThymeLeafTemplateFolder() {
 		return resourceTemplateFolder + "templates"+File.separator;
 	}
 
-	
+
 	/**
-	 * 
+	 *
 	 * @return a File pointing to the ui Jar File
 	 */
 	public File uiJarFile() {
 
 		return new File(rootFolder+ File.separator+"bin"+File.separator+"latest"+File.separator+"ui-latest.jar");
 	}
-	
-	
+
+
 	public String resourceBundleFolder() {
-		
+
 		return resourceTemplateFolder+"i18n"+File.separator+"messages";
 	}
 
 	/**
 	 * Configuration for the brand service
 	 */
-  
-	/**
-	 * Configuration for the AI Image Generation service
-	 */
-	private ImageGenerationConfig imageGenerationConfig = new ImageGenerationConfig();
+
 
 	/**
 	 * Configuration for the reversements
@@ -241,7 +235,7 @@ public class UiConfig {
 		return getRemoteCachingFolder() + "google-indexation-timestamp";
 	}
 
-	
+
 	public String logsFolder() {
 		return rootFolder + File.separator+ "logs" + File.separator;
 	}
@@ -320,14 +314,6 @@ public class UiConfig {
 		this.namings = namings;
 	}
 
-	public ImageGenerationConfig getImageGenerationConfig() {
-		return imageGenerationConfig;
-	}
-
-	public void setImageGenerationConfig(ImageGenerationConfig imageGenerationConfig) {
-		this.imageGenerationConfig = imageGenerationConfig;
-	}
-
 	public String getGeneratedImagesFolder() {
 		return generatedImagesFolder;
 	}
@@ -336,7 +322,7 @@ public class UiConfig {
 		this.generatedImagesFolder = generatedImagesFolder;
 	}
 
-	
+
 	public String getDatasourcesfolder() {
 		return datasourcesfolder;
 	}
@@ -437,7 +423,7 @@ public class UiConfig {
 		this.captchaKey = captchaKey;
 	}
 
-	
+
 
 
 
@@ -549,7 +535,7 @@ public class UiConfig {
 		this.feedConfigs = feedConfigs;
 	}
 
-	
+
 
 	public Localisable<String, FunFactsConfig> getFunFacts() {
 		return funFacts;
