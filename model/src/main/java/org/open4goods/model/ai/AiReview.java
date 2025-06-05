@@ -191,130 +191,42 @@ public class AiReview {
     /**
      * Represents a source of information for an AI-generated review.
      */
-    public static class AiSource {
+    public static record AiSource(
+            @JsonProperty(required = true, value = "number")
+            @AiGeneratedField(instruction = "Le numéro de la source documentaire fournie")
+            Integer number,
+            @JsonProperty(required = true, value = "name")
+            @AiGeneratedField(instruction = "Le nom de la source documentaire fournie")
+            String name,
+            @JsonProperty(required = true, value = "description")
+            @AiGeneratedField(instruction = "Courte description de la source documentaire fournie")
+            String description,
+            @JsonProperty(required = true, value = "url")
+            @AiGeneratedField(instruction = "URL de la source documentaire fournie")
+            String url) {
 
-        public AiSource() {
-			super();
-		}
-
-		public AiSource(Integer number, String name, String description, String url) {
-			super();
-			this.number = number;
-			this.name = name;
-			this.description = description;
-			this.url = url;
-		}
-
-		/** The reference number of the source. */
-        @JsonProperty(required = true, value = "number")
-        @AiGeneratedField(instruction = "Le numéro de la source documentaire fournie")
-        private Integer number;
-
-        /** The name of the source. */
-        @JsonProperty(required = true, value = "name")
-        @AiGeneratedField(instruction = "Le nom de la source documentaire fournie")
-        private String name;
-
-        /** A description of the source. */
-        @JsonProperty(required = true, value = "description")
-        @AiGeneratedField(instruction = "Courte description de la source documentaire fournie")
-        private String description;
-
-        /** The URL of the source. */
-        @JsonProperty(required = true, value = "url")
-        @AiGeneratedField(instruction = "URL de la source documentaire fournie")
-        private String url;
-
-
-        public Integer getNumber() {
-            return number;
-        }
-
-        public void setNumber(Integer number) {
-            this.number = number;
-        }
-
-        public String getName() {
-            return name;
-        }
-
-        public void setName(String name) {
-            this.name = name;
-        }
-
-        public String getDescription() {
-            return description;
-        }
-
-        public void setDescription(String description) {
-            this.description = description;
-        }
-
-        public String getUrl() {
-            return url;
-        }
-
-        public void setUrl(String url) {
-            this.url = url;
-        }
+        public Integer getNumber() { return number; }
+        public String getName() { return name; }
+        public String getDescription() { return description; }
+        public String getUrl() { return url; }
     }
 
     /**
      * Represents an attribute of the product.
      */
-    public static class AiAttribute {
-    	
-    	
+    public static record AiAttribute(
+            @JsonProperty(required = true, value = "name")
+            @AiGeneratedField(instruction = "Le nom de l'attribut")
+            String name,
+            @JsonProperty(required = true, value = "value")
+            @AiGeneratedField(instruction = "La valeur de l'attribut")
+            String value,
+            @JsonProperty(required = true, value = "number")
+            @AiGeneratedField(instruction = "La référence de la source qui indique cet attribut")
+            Integer number) {
 
-        public AiAttribute() {
-			super();
-		}
-
-		public AiAttribute(String name, String value, Integer number) {
-			super();
-			this.name = name;
-			this.value = value;
-			this.number = number;
-		}
-
-		/** The name of the attribute. */
-        @JsonProperty(required = true, value = "name")
-        @AiGeneratedField(instruction = "Le nom de l'attribut")
-        private String name;
-
-        /** The value of the attribute. */
-        @JsonProperty(required = true, value = "value")
-        @AiGeneratedField(instruction = "La valeur de l'attribut")
-        private String value;
-
-        /** The source number of the attribute. */
-        @JsonProperty(required = true, value = "number")
-        @AiGeneratedField(instruction = "La référence de la source qui indique cet attribut")
-        private Integer number;
-
-
-        public String getName() {
-            return name;
-        }
-
-        public void setName(String name) {
-            this.name = name;
-        }
-
-        public String getValue() {
-            return value;
-        }
-
-        public void setValue(String value) {
-            this.value = value;
-        }
-
-        public Integer getNumber() {
-            return number;
-        }
-
-        public void setNumber(Integer number) {
-            this.number = number;
-        }
+        public String getName() { return name; }
+        public String getValue() { return value; }
+        public Integer getNumber() { return number; }
     }
 }

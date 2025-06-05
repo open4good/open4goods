@@ -1,37 +1,34 @@
 package org.open4goods.model.ai;
 
-public class AiDescription {
-	
-	private long ts;
-	
-	private String content;
-	
-	public AiDescription() {
-		super();
-	}
+/**
+ * Simple holder for AI generated text along with its creation timestamp.
+ */
+public record AiDescription(long ts, String content) {
 
-	public AiDescription(String content) {
-		this.ts = System.currentTimeMillis();
-		this.content = content;
-	}
+    /**
+     * Convenience constructor initializing the timestamp to the current time.
+     *
+     * @param content the generated text
+     */
+    public AiDescription(String content) {
+        this(System.currentTimeMillis(), content);
+    }
 
-	public long getTs() {
-		return ts;
-	}
+    /**
+     * Accessor preserving the former {@code getTs()} API.
+     *
+     * @return the timestamp of creation
+     */
+    public long getTs() {
+        return ts;
+    }
 
-	public void setTs(long ts) {
-		this.ts = ts;
-	}
-
-	public String getContent() {
-		return content;
-	}
-
-	public void setContent(String content) {
-		this.content = content;
-	}
-
-	
-
-
+    /**
+     * Accessor preserving the former {@code getContent()} API.
+     *
+     * @return the textual content
+     */
+    public String getContent() {
+        return content;
+    }
 }
