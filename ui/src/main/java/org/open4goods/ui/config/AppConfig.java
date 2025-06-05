@@ -17,8 +17,6 @@ import org.open4goods.commons.services.BrandService;
 import org.open4goods.commons.services.DataSourceConfigService;
 import org.open4goods.commons.services.GoogleTaxonomyService;
 import org.open4goods.commons.services.IcecatService;
-import org.open4goods.services.imageprocessing.service.ImageGenerationService;
-import org.open4goods.services.imageprocessing.service.ImageMagickService;
 import org.open4goods.commons.services.MailService;
 import org.open4goods.commons.services.ResourceBundle;
 import org.open4goods.commons.services.ResourceService;
@@ -31,6 +29,7 @@ import org.open4goods.model.price.Currency;
 import org.open4goods.model.price.Price;
 import org.open4goods.services.evaluation.config.EvaluationConfig;
 import org.open4goods.services.evaluation.service.EvaluationService;
+import org.open4goods.services.imageprocessing.service.ImageMagickService;
 import org.open4goods.services.productrepository.services.ProductRepository;
 import org.open4goods.services.prompt.config.PromptServiceConfig;
 import org.open4goods.services.prompt.service.PromptService;
@@ -48,7 +47,6 @@ import org.open4goods.ui.services.OpenDataService;
 import org.open4goods.ui.services.SitemapGenerationService;
 import org.open4goods.ui.services.todo.TodoService;
 import org.open4goods.xwiki.services.XwikiFacadeService;
-import org.springframework.ai.openai.OpenAiImageModel;
 import org.springframework.ai.openai.api.OpenAiApi;
 import org.springframework.ai.retry.RetryUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -88,18 +86,18 @@ import io.micrometer.core.instrument.MeterRegistry;
 @Configuration
 public class AppConfig {
 
-	
-	
+
+
 	// TODO : Cache period pageNumber conf
 	public static final int CACHE_PERIOD_SECONDS = 3600*24*7;
 	private final UiConfig config;
 
-	
-	
+
+
 	public AppConfig(UiConfig config) {
 		this.config = config;
 	}
-	
+
 	@Bean
 	@Qualifier("perplexityChatModel")
 	OpenAiApi perplexityApi(@Autowired PromptServiceConfig genAiConfig) {
@@ -109,36 +107,36 @@ public class AppConfig {
 							 "/v1/embeddings", RestClient.builder(), WebClient.builder(),
 							 RetryUtils.DEFAULT_RESPONSE_ERROR_HANDLER);
 	}
-	
+
 	@Bean
 	@Qualifier("openAiCustomApi")
 	OpenAiApi openAiCustomApi(@Autowired PromptServiceConfig genAiConfig) {
 		return new OpenAiApi(genAiConfig.getOpenaiApiKey());
 	}
-	
-	
+
+
 	@Bean
-	PromptService genAiService (@Autowired @Qualifier("perplexityChatModel") OpenAiApi perplexityApi, 
+	PromptService genAiService (@Autowired @Qualifier("perplexityChatModel") OpenAiApi perplexityApi,
 								@Autowired @Qualifier("openAiCustomApi") OpenAiApi openAiCustomApi,
-								@Autowired  EvaluationService spelEvaluationService, 
+								@Autowired  EvaluationService spelEvaluationService,
 								@Autowired  SerialisationService serialisationService,
 								@Autowired PromptServiceConfig genAiConfig,
 								@Autowired MeterRegistry meterRegistry) {
 		return new PromptService(genAiConfig, perplexityApi, openAiCustomApi, serialisationService, spelEvaluationService, meterRegistry);
 	}
 
-	
-	
+
+
 	@Bean
 	TodoService todoService() {
 		return new TodoService(config.getTagListUrl());
 	}
-	
-	@Bean 
+
+	@Bean
 	SitemapGenerationService sitemapGenerationService(ProductRepository repository, VerticalsConfigService verticalConfigService, BlogService blogService, XwikiFacadeService wikiService, ApplicationContext context ) {
 		return new SitemapGenerationService(repository, config, verticalConfigService, blogService, wikiService, context);
 	}
-	
+
 	@Bean
 	GoogleIndexationService googleIndexationService(ProductRepository repository, VerticalsConfigService verticalConfigService) {
 		return new GoogleIndexationService(config.getGoogleApiJson(), config.getGoogleIndexationMarkerFile(), repository, verticalConfigService);
@@ -156,26 +154,26 @@ public class AppConfig {
 //    RedisTemplate<String, Product> redisTemplate(RedisConnectionFactory connectionFactory) {
 //		  RedisTemplate<String, Product> template = new RedisTemplate<>();
 //		    template.setConnectionFactory(connectionFactory);
-//		    
+//
 //		    // Configure serialization
 //		    template.setKeySerializer(new StringRedisSerializer());
 //		    template.setValueSerializer(new GenericJackson2JsonRedisSerializer());
 //
-//		    
+//
 //		    // Add some specific configuration here. Key serializers, etc.
 //		    return template;
 //	  }
 
 
 
-	
+
     @Bean
     public AwinFeedService awinFeedService(
                                            RemoteFileCachingService remoteFileCachingService,
                                            DataSourceConfigService dataSourceConfigService,
                                            SerialisationService serialisationService,
                                            UiConfig uiConfig
-    		
+
     		) {
         // Retrieve Awin-specific feed configuration from the fetcher properties
         FeedConfiguration awinConfig = uiConfig.getFeedConfigs().get("awin");
@@ -186,7 +184,7 @@ public class AppConfig {
     public EffiliationFeedService effiliationFeedService(
                                                          RemoteFileCachingService remoteFileCachingService,
                                                          DataSourceConfigService dataSourceConfigService,
-                                                         SerialisationService serialisationService, 
+                                                         SerialisationService serialisationService,
                                                          UiConfig uiConfig) {
         // Retrieve Effiliation-specific feed configuration from the fetcher properties
         FeedConfiguration effiliationConfig = uiConfig.getFeedConfigs().get("effiliation");
@@ -200,35 +198,29 @@ public class AppConfig {
         return new FeedService(feedServices, dataSourceConfigService);
     }
 
-    
-    
+
+
     @Bean
     public ResourceBundle messageSource() {
         ResourceBundle messageSource = new ResourceBundle();
-        
+
         // Set multiple base names for properties files
         messageSource.setBasenames(
             "classpath:i18n/messages",  // default.properties
             "classpath:i18n/metas",      // metas.properties
             "classpath:i18n/product"      // metas.properties
         );
-        
+
         messageSource.setDefaultEncoding("UTF-8");
         messageSource.setCacheSeconds(3600);  // Refresh every hour
         return messageSource;
     }
-    
+
     @Bean
     ContributionService contributionService (CacheManager cacheManager, SerialisationService serialisationService, ContributionVoteRepository repository, UiConfig uiConfig, ElasticsearchOperations esOps) {
     	return new ContributionService(cacheManager, serialisationService, repository, uiConfig.getReversementConfig(), esOps);
     }
-    
-    
-    @Bean
-    ImageGenerationService imageGenerationService(@Autowired OpenAiImageModel imageModel, @Autowired UiConfig uiConfig) {
-		return new ImageGenerationService(imageModel, uiConfig.getImageGenerationConfig(), uiConfig.getGeneratedImagesFolder());
-	}
-	  
+
 
 
     /** Override the default RestTemplate with a custom one that has a longer timeout (For ImageGenerationService) **/
@@ -239,7 +231,7 @@ public class AppConfig {
 						.withConnectTimeout(Duration.ofSeconds(60))
 						.withReadTimeout(Duration.ofSeconds(60))));
 	}
-	 
+
 	@Bean
 	BrandService brandService(@Autowired RemoteFileCachingService rfc, @Autowired  UiConfig properties, @Autowired  BrandScoresRepository brandRepository, SerialisationService serialisationService) throws Exception {
 		return new BrandService( rfc,properties.logsFolder(), serialisationService);
@@ -264,19 +256,19 @@ public class AppConfig {
 	//		return new SitemapGenerationService(aggregatedDataRepository, props);
 	//	}
 	//
-	
-	
+
+
 //	@Bean AuthenticationProvider xwikiAuthenticationProvider(@Autowired XWikiAuthenticationService xwikiAuthenticationService) {
 //		return new XwikiAuthenticationProvider(xwikiAuthenticationService);
 //	}
-	
+
 //	@Bean
 //	XWikiReadService readService(@Autowired UiConfig props, @Autowired XwikiMappingService mappingService) {
 //		return new XWikiReadService(mappingService, props.getWikiConfig());
 //	}
 
 
-	
+
 
 	/** The bean providing datasource configurations **/
 	@Bean DataSourceConfigService datasourceConfigService(@Autowired final UiConfig config) {
@@ -337,7 +329,7 @@ public class AppConfig {
 		return new EvaluationService(evalConfig);
 	}
 
-	
+
 
 	// TODO : should not be required at ui side
 	@Bean RemoteFileCachingService remoteFileCachingService() {
@@ -348,8 +340,8 @@ public class AppConfig {
     @Bean
     GoogleTaxonomyService googleTaxonomyService(@Autowired RemoteFileCachingService remoteFileCachingService) {
 		GoogleTaxonomyService gts = new GoogleTaxonomyService(remoteFileCachingService);
-		
-		// TODO : From conf 
+
+		// TODO : From conf
 		// TODO : Add others
         try {
 			gts.loadGoogleTaxonUrl("https://www.google.com/basepages/producttype/taxonomy-with-ids.fr-FR.txt", "fr");
@@ -357,23 +349,23 @@ public class AppConfig {
 //			gts.loadGoogleTaxonUrl("https://www.google.com/basepages/producttype/taxonomy-with-ids.de-DE.txt", "de");
 //			gts.loadGoogleTaxonUrl("https://www.google.com/basepages/producttype/taxonomy-with-ids.es-ES.txt", "es");
 //			gts.loadGoogleTaxonUrl("https://www.google.com/basepages/producttype/taxonomy-with-ids.nl-NL.txt", "nl");
-			
-			
-			
-			
+
+
+
+
 		} catch (Exception e) {
 			// TODO
 			e.printStackTrace();
-		}        
-        
-        
+		}
+
+
         return gts;
 	}
-    
-    
+
+
 	@Bean
-	VerticalsConfigService verticalConfigsService(ResourcePatternResolver resourceResolver, SerialisationService serialisationService,  GoogleTaxonomyService googleTaxonomyService, ProductRepository productRepository, ImageGenerationService imageGenerationService) throws IOException {
-		return new VerticalsConfigService( serialisationService, googleTaxonomyService, productRepository, resourceResolver, imageGenerationService);
+	VerticalsConfigService verticalConfigsService(ResourcePatternResolver resourceResolver, SerialisationService serialisationService,  GoogleTaxonomyService googleTaxonomyService, ProductRepository productRepository) throws IOException {
+		return new VerticalsConfigService( serialisationService, googleTaxonomyService, productRepository, resourceResolver);
 	}
 
 	////////////////////////////////////
@@ -450,7 +442,7 @@ public class AppConfig {
 
 	@Bean
 	WebMvcConfigurer configurer() {
-		
+
 		return new WebMvcConfigurer() {
 
 			@Override
@@ -459,7 +451,7 @@ public class AppConfig {
 //				registry.addInterceptor(AppConfig.localeChangeInterceptor());
 				registry.addInterceptor(new GenericTemplateInterceptor());
 				registry.addInterceptor(new ImageResizeInterceptor(resourceService(),config.getAllowedImagesSizeSuffixes()));
-				
+
 			}
 
 			@Override
@@ -470,5 +462,5 @@ public class AppConfig {
 			}
 		};
 	}
-	
+
 }

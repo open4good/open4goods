@@ -29,8 +29,6 @@ import org.open4goods.commons.services.DataSourceConfigService;
 import org.open4goods.commons.services.GoogleTaxonomyService;
 import org.open4goods.commons.services.Gs1PrefixService;
 import org.open4goods.commons.services.IcecatService;
-import org.open4goods.services.imageprocessing.service.ImageGenerationService;
-import org.open4goods.services.imageprocessing.service.ImageMagickService;
 import org.open4goods.commons.services.ProductNameSelectionService;
 import org.open4goods.commons.services.ResourceService;
 import org.open4goods.commons.services.SearchService;
@@ -56,6 +54,7 @@ import org.open4goods.model.price.Price;
 import org.open4goods.model.vertical.LegacyPromptConfig;
 import org.open4goods.services.evaluation.config.EvaluationConfig;
 import org.open4goods.services.evaluation.service.EvaluationService;
+import org.open4goods.services.imageprocessing.service.ImageMagickService;
 import org.open4goods.services.productrepository.services.ProductRepository;
 import org.open4goods.services.prompt.service.PromptService;
 import org.open4goods.services.remotefilecaching.service.RemoteFileCachingService;
@@ -64,7 +63,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springdoc.core.customizers.OpenApiCustomizer;
 import org.springdoc.core.models.GroupedOpenApi;
-import org.springframework.ai.openai.OpenAiImageModel;
 import org.springframework.ai.openai.api.OpenAiApi;
 import org.springframework.ai.retry.RetryUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -227,14 +225,10 @@ public class ApiConfig {
     }
 
 	@Bean
-	VerticalsConfigService verticalConfigsService(ResourcePatternResolver resolver, SerialisationService serialisationService, GoogleTaxonomyService googleTaxonomyService, ProductRepository productRepository, ImageGenerationService imageGenService) throws IOException {
-		return new VerticalsConfigService(serialisationService, googleTaxonomyService, productRepository, resolver, imageGenService);
+	VerticalsConfigService verticalConfigsService(ResourcePatternResolver resolver, SerialisationService serialisationService, GoogleTaxonomyService googleTaxonomyService, ProductRepository productRepository) throws IOException {
+		return new VerticalsConfigService(serialisationService, googleTaxonomyService, productRepository, resolver);
 	}
 
-	@Bean
-	ImageGenerationService imageGenerationService(@Autowired OpenAiImageModel imageModel) {
-		return new ImageGenerationService(imageModel, apiProperties.getImageGenerationConfig(), apiProperties.getGeneratedImagesFolder());
-	}
 
 	@Bean
 	SearchService searchService(@Autowired ProductRepository aggregatedDataRepository, @Autowired String logsFolder) {
