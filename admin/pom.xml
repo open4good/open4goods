@@ -35,12 +35,12 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-mail</artifactId>
         </dependency>
-        
+
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-security</artifactId>
 		</dependency>
-	
+
 		<dependency>
 			<groupId>org.open4goods</groupId>
 			<artifactId>xwiki-spring-boot-starter</artifactId>
@@ -104,7 +104,6 @@
                 <configuration>
                     <layers>
                         <enabled>true</enabled>
-                        <includeLayerTools>true</includeLayerTools>
                     </layers>
                 </configuration>
 
