@@ -5,39 +5,36 @@ import java.util.Locale;
 
 import org.open4goods.model.Localisable;
 
-public class SiteNaming {
+public record SiteNaming(Localisable<String, String> serverNames,
+                         Localisable<String, String> baseUrls) {
+
+        public SiteNaming() {
+                this(new Localisable<>(), new Localisable<>());
+        }
 
 
 	/**
 	 * The site names, per languages. Use "default" for the international, non
 	 * language specific version
 	 */
-	private Localisable<String,String> serverNames = new Localisable<>();
+        /**
+         * Shortcut method to get the given name for a locale
+         *
+         * @param l
+         * @return
+         */
 
-	/**
-	 * The root url for each site, according to serverNames
-	 */
-	private Localisable<String,String> baseUrls = new Localisable<>();
+        public String getSiteName(final Locale l) {
+                return serverNames.getOrDefault(l.getLanguage(), serverNames.get("default"));
+        }
 
-	public String getSiteName(final Locale l) {
-		return serverNames.getOrDefault(l.getLanguage(), serverNames.get("default"));
-	}
+        public Localisable<String, String> getServerNames() {
+                return serverNames;
+        }
 
-	public Localisable<String, String> getServerNames() {
-		return serverNames;
-	}
-
-	public void setServerNames(Localisable<String, String> serverNames) {
-		this.serverNames = serverNames;
-	}
-
-	public Localisable<String, String> getBaseUrls() {
-		return baseUrls;
-	}
-
-	public void setBaseUrls(Localisable<String, String> baseUrls) {
-		this.baseUrls = baseUrls;
-	}
+        public Localisable<String, String> getBaseUrls() {
+                return baseUrls;
+        }
 
 	
 

@@ -3,27 +3,21 @@ package org.open4goods.model.vertical;
 import java.util.ArrayList;
 import java.util.List;
 
-public class PrefixedAttrText {
+public record PrefixedAttrText(String prefix, List<String> attrs) {
 
-	private String prefix;
-	
-	private List<String> attrs = new ArrayList<>();
+        public PrefixedAttrText() {
+                this(null, new ArrayList<>());
+        }
 
 	public String getPrefix() {
 		return prefix;
 	}
 
-	public void setPrefix(String prefix) {
-		this.prefix = prefix;
-	}
 
 	public List<String> getAttrs() {
 		return attrs;
 	}
 
-	public void setAttrs(List<String> attr) {
-		this.attrs = attr;
-	}
 	
 	 
       

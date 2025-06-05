@@ -5,21 +5,15 @@ import java.util.List;
 
 import jakarta.validation.constraints.NotNull;
 
-public class RecommandationsConfig {
+public record RecommandationsConfig(@NotNull List<RecommandationCriteria> recommandations) {
 
-	/**
-	 *  The config for recommandations
-	 */
-	@NotNull
-	private  List<RecommandationCriteria> recommandations = new ArrayList<RecommandationCriteria>();
+        public RecommandationsConfig() {
+                this(new ArrayList<>());
+        }
 
-	public List<RecommandationCriteria> getRecommandations() {
-		return recommandations;
-	}
-
-	public void setRecommandations(List<RecommandationCriteria> recommandations) {
-		this.recommandations = recommandations;
-	}
+        public List<RecommandationCriteria> getRecommandations() {
+                return recommandations;
+        }
 
 
 

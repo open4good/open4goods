@@ -6,12 +6,12 @@ import org.open4goods.model.Localisable;
 import org.springframework.data.elasticsearch.annotations.Field;
 import org.springframework.data.elasticsearch.annotations.FieldType;
 
-public class Urls {
-	/**
-	 * i18n product urls. Use "default" for default international name
-	 */
-	@Field(index = true, store = false, type = FieldType.Object)
-	private Localisable<String,String> urls = new Localisable<>();
+public record Urls(@Field(index = true, store = false, type = FieldType.Object)
+                   Localisable<String, String> urls) {
+
+        public Urls() {
+                this(new Localisable<>());
+        }
 
 	/**
 	 * Shortcut method to get the given name for a locale
@@ -27,13 +27,9 @@ public class Urls {
 		return urls.getOrDefault(l, urls.get("default"));
 	}
 
-	public Localisable<String, String> getUrls() {
-		return urls;
-	}
-
-	public void setUrls(Localisable<String, String> urls) {
-		this.urls = urls;
-	}
+        public Localisable<String, String> getUrls() {
+                return urls;
+        }
 
 
 

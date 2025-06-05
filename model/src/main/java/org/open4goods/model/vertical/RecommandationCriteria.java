@@ -3,14 +3,13 @@ package org.open4goods.model.vertical;
 import java.util.ArrayList;
 import java.util.List;
 
-public class RecommandationCriteria {
+public record RecommandationCriteria(
+                List<RecommandationChoice> choices,
+                String panelType) {
 
-	private List<RecommandationChoice> choices = new ArrayList<>();
-
-	/**
-	 * The class suffix to apply (warning, danger, primary, default, success, ...)
-	 */
-	private String panelType ="success";
+        public RecommandationCriteria() {
+                this(new ArrayList<>(), "success");
+        }
 
 
 
@@ -18,17 +17,9 @@ public class RecommandationCriteria {
 		return choices;
 	}
 
-	public void setChoices(final List<RecommandationChoice> choices) {
-		this.choices = choices;
-	}
-
-	public String getPanelType() {
-		return panelType;
-	}
-
-	public void setPanelType(final String panelType) {
-		this.panelType = panelType;
-	}
+        public String getPanelType() {
+                return panelType;
+        }
 
 
 
