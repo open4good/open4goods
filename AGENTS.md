@@ -1,15 +1,18 @@
 # open4goods Agents Guide
 
-This file guides AI agents and other collaborators working with the repository. It summarizes the project layout and the conventions you should follow when contributing code or documentation.
+This file guides AI agents and other collaborators working with the repository.
+It summarizes the project layout and the conventions you should follow when contributing code or documentation.
 
 ## Project structure
 
+This project is a maven multi module project.
+
 - `/commons` – shared utilities and configurations
-- `/crawler` – web crawler component
+- `/crawler` – web crawler component. Can be distibuted as executable spring jar, and is orchestrated with the api component. A crawler in embeded in the API component 
 - `/model` – domain model classes
 - `/verticals` – YAML configuration for product verticals
-- `/api` – main Spring Boot API exposing REST endpoints. Also runs the batches and handle the data pipelines that populate the elastic search instance
-- `/ui` – Spring Boot UI, as a spring thymeleaf app. Ui is based on an existing bootstrap 5 kit and jquery. Saas / gulp is used to build custom css components.
+- `/api` – main Spring Boot API exposing REST endpoints, distibuted as executable spring jar. Also runs the batches and handle the data pipelines that populate the elastic search instance
+- `/ui` – Spring Boot UI, as a spring executable thymeleaf app. UI is based on an existing bootstrap 5 kit and jquery. Saas / gulp is used to build custom css components.
 - `/admin` – admin web application built with Spring Boot Admin
 - `/services` – collection of standalone Spring Boot services. Team is engaging a long term refactoring to extract services from monolythics projects (commons, ui, api) to move them in this "micro services" like scheme.
     - `captcha`
@@ -24,7 +27,6 @@ This file guides AI agents and other collaborators working with the repository. 
     - `serialisation`
     - `urlfetching`
 
-Most modules are regular Maven projects packaged as JARs.
 
 ## Coding conventions
 
