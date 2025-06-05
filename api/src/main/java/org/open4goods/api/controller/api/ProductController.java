@@ -11,7 +11,6 @@ import org.open4goods.commons.services.VerticalsConfigService;
 import org.open4goods.model.exceptions.ResourceNotFoundException;
 import org.open4goods.model.product.Product;
 import org.open4goods.services.productrepository.services.ProductRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -29,15 +28,17 @@ import io.swagger.v3.oas.annotations.Operation;
 @PreAuthorize("hasAuthority('"+RolesConstants.ROLE_ADMIN+"')")
 public class ProductController {
 
-	@Autowired
-	private  ProductRepository repository;
+        private final ProductRepository repository;
+        private final VerticalsConfigService configService;
+        private final ProductNameSelectionService productNameSelectionService;
 
-	@Autowired
-	private  VerticalsConfigService configService;
-
-
-	@Autowired
-	private  ProductNameSelectionService productNameSelectionService;
+        public ProductController(ProductRepository repository,
+                                 VerticalsConfigService configService,
+                                 ProductNameSelectionService productNameSelectionService) {
+                this.repository = repository;
+                this.configService = configService;
+                this.productNameSelectionService = productNameSelectionService;
+        }
 
 
 	@GetMapping(path="/product/", produces = MediaType.APPLICATION_JSON_VALUE)
