@@ -1,4 +1,4 @@
-package org.open4goods.commons.services;
+package org.open4goods.services.imageprocessing.service;
 
 import java.io.File;
 import java.io.FileOutputStream;

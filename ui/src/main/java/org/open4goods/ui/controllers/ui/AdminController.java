@@ -3,7 +3,7 @@ package org.open4goods.ui.controllers.ui;
 import java.io.IOException;
 
 import org.open4goods.commons.model.constants.RolesConstants;
-import org.open4goods.commons.services.ImageGenerationService;
+import org.open4goods.services.imageprocessing.service.ImageGenerationService;
 import org.open4goods.commons.services.VerticalsConfigService;
 import org.open4goods.model.exceptions.ResourceNotFoundException;
 import org.open4goods.model.vertical.VerticalConfig;
