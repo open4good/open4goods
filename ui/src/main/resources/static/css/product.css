@@ -1,6 +1,3 @@
-
-  <!--/* Custom Styles for Offer Cards */-->
-    <style>
       /* Base style for selectable offer cards with transparency effect for non-selected cards */
       .selectable-offer {
         cursor: pointer;
@@ -20,10 +17,6 @@
         border: 2px solid var(--bs-info);
         opacity: 1;
       }
-    </style>
-
-    <!-- For attributes details-->
-    <style>
         .masonry-columns {
             column-count: 3;
             column-gap: 1.5rem;
@@ -33,12 +26,6 @@
             break-inside: avoid;
             margin-bottom: 1.5rem;
         }
-    </style>
-
-
-<!--  -->
-
-    <style>
         /* Invert the gradient: red on the left, green on the right */
         .gradient-scale {
             background: linear-gradient(to right, #dc3545, #28a745);
@@ -60,10 +47,6 @@
         .overflow-x-auto {
             overflow-x: auto;
         }
-    </style>
-
-
-    <style>
 
         .carousel-indicators {
             box-sizing: content-box;
@@ -124,18 +107,6 @@
 
 
 
-    </style>
-
-
-
-
-
-
-
-
-
-<!--/* Thymeleaf comment: Separate Thumbnail Navigation Bar (Horizontal Scroll Pane) */-->
-<style>
     .thumbnail-bar {
         background-color: #fff; /* white background for SEO/accessibility */
         white-space: nowrap;    /* keep thumbnails in one row */
@@ -149,12 +120,6 @@
         object-fit: cover;
         margin-right: 0.5rem;
     }
-</style>
-
-<!--/* Thymeleaf comment: Include LightGallery CSS and JS from CDN (free & open source) with zoom plugin support.
-     Ensure these are included in your page’s <head> or before the closing </body> tag. */-->
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/lightgallery/2.8.3/css/lightgallery-bundle.min.css" integrity="sha512-fXavT4uA4L0uTUFHC275D7zd751ohbSuD6VUMc5JysWfmR+NxTI3w7etE7N9hjTETcoh0w0V+24Cel4xXnqvCg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
- <style>
     /* Card container style */
     .occasion-card {
       position: relative;
@@ -181,12 +146,6 @@
     z-index: 10;
     text-align: center;
     }
-  </style>
-
-
-
-<!-- Reference quote style -->
-<style>
 .review-ref {
   font-size: 0.75em;         /* Smaller than normal text */
   vertical-align: top;       /* Align top like superscript */
@@ -199,9 +158,6 @@
   text-decoration: underline;
   color: #007bff;            /* Bootstrap primary color on hover */
 }
-</style>
-
-<style type="text/css">
 /* Ensure period buttons show proper opacity */
 .period-btn {
   opacity: 0.5;
@@ -223,4 +179,3 @@
   color: #d9534f; /* Light emphasis for best price */
 }
 
-</style>
