@@ -1,54 +1,42 @@
 package org.open4goods.model.price;
 
-import org.springframework.data.elasticsearch.annotations.DateFormat;
-import org.springframework.data.elasticsearch.annotations.Field;
-import org.springframework.data.elasticsearch.annotations.FieldType;
+/**
+ * Historical price entry consisting of a timestamp and the associated price.
+ */
+public record PriceHistory(Long timestamp, Double price) {
 
-public class PriceHistory {
+    /**
+     * Creates a history entry from an {@link AggregatedPrice} instance.
+     *
+     * @param minPrice the aggregated price to build from
+     */
+    public PriceHistory(AggregatedPrice minPrice) {
+        this(minPrice.getTimeStamp(), minPrice.getPrice());
+    }
 
-	private Long timestamp;
+    /**
+     * Number of days corresponding to this history timestamp.
+     *
+     * @return the day count
+     */
+    public Long getDay() {
+        return timestamp / (1000 * 60 * 60 * 24);
+    }
 
-	private Double price;
+    // Compatibility accessors ----------------------------------------------
 
+    /** @return timestamp accessor mirroring the former getter */
+    public Long getTimestamp() {
+        return timestamp;
+    }
 
-	
-	@Override
-	public String toString() {
-		return timestamp+":"+price;
-	}
-	public PriceHistory() {
-	}
+    /** @return price accessor mirroring the former getter */
+    public Double getPrice() {
+        return price;
+    }
 
-	
-	/**
-	 * Get the number of the day this timestamp refers to
-	 * @return
-	 */
-	public Long getDay() {
-		return getTimestamp() / (1000 * 60 * 60 * 24); 
-	}
-
-	
-	public PriceHistory(AggregatedPrice minPrice) {
-		timestamp = minPrice.getTimeStamp();
-		price = minPrice.getPrice();
-	}
-
-	public Long getTimestamp() {
-		return timestamp;
-	}
-
-	public void setTimestamp(Long timestamp) {
-		this.timestamp = timestamp;
-	}
-
-	public Double getPrice() {
-		return price;
-	}
-
-	public void setPrice(Double price) {
-		this.price = price;
-	}
-
-
+    @Override
+    public String toString() {
+        return timestamp + ":" + price;
+    }
 }
