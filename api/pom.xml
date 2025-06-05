@@ -60,7 +60,7 @@
             <artifactId>tika-langdetect-optimaize</artifactId>
             <version>3.1.0</version>
         </dependency>
-        
+
         <!-- servlet container -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -125,13 +125,13 @@
             <artifactId>image-processing</artifactId>
             <version>${global.version}</version>
         </dependency>
-     
+
         <dependency>
             <groupId>org.open4goods</groupId>
             <artifactId>reviewgeneration</artifactId>
             <version>${global.version}</version>
-        </dependency> 
-           
+        </dependency>
+
         <dependency>
             <groupId>dev.brachtendorf</groupId>
             <artifactId>JImageHash</artifactId>
@@ -188,7 +188,6 @@
                 <configuration>
                     <layers>
                         <enabled>true</enabled>
-                        <includeLayerTools>true</includeLayerTools>
                     </layers>
                 </configuration>
 

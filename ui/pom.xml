@@ -126,9 +126,9 @@
             <groupId>org.open4goods</groupId>
             <artifactId>product-repository</artifactId>
             <version>${global.version}</version>
-        </dependency>  
-        
-        
+        </dependency>
+
+
         <dependency>
             <groupId>org.open4goods</groupId>
             <artifactId>reviewgeneration</artifactId>
@@ -181,7 +181,7 @@
         </dependency>
 
 
-        <!-- 
+        <!--
 
 		<dependency>
 			<groupId>com.talanlabs</groupId>
@@ -273,14 +273,14 @@
     <build>
         <plugins>
 
-            <!-- Plugin for running npm and gulp 
+            <!-- Plugin for running npm and gulp
             <plugin>
                 <groupId>com.github.eirslett</groupId>
                 <artifactId>frontend-maven-plugin</artifactId>
                 <version>1.15.1</version>
-                
+
                 <executions>
-                  
+
                     <execution>
                         <id>install-node-and-npm</id>
                         <goals>
@@ -349,7 +349,6 @@
                 <configuration>
                     <layers>
                         <enabled>true</enabled>
-                        <includeLayerTools>true</includeLayerTools>
                     </layers>
                 </configuration>
 

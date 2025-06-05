@@ -57,7 +57,7 @@ import co.elastic.clients.elasticsearch._types.mapping.FieldType;
 /**
  * The Elastic Data Access Object for products TODO : Could maintain the elastic
  * buffer queue for ingestion here ?
- * 
+ *
  * @author goulven
  *
  */
@@ -67,15 +67,15 @@ public class ProductRepository {
 
 	public static final String MAIN_INDEX_NAME = Product.DEFAULT_REPO;
 
-	
+
 	// The file queue implementation for Full products (no partial updates)
 	private BlockingQueue<Product> fullProductQueue;
 
 	// The file queue implementation for Full products (no partial updates)
 	private BlockingQueue<ProductPartialUpdateHolder> partialProductQueue;
 
-	
-	
+
+
 	/**
 	 * !!!MAJOR CONST !!! Duration in ms where a price is considered to be valid. Only data with a
 	 * price greater than this one will be returned to the user. Also defines the caching TTL of redis
@@ -93,7 +93,7 @@ public class ProductRepository {
 	private @Autowired SerialisationService serialisationService;
 
 //	private @Autowired RedisProductRepository redisRepository;
-	
+
 //	private @Autowired RedisOperations<String, Product> redisRepo;
 
 	public ProductRepository() {
@@ -119,21 +119,21 @@ public class ProductRepository {
 
 	}
 
-	
+
 
 	public Stream<Product> getProductsMatchingVerticalId(VerticalConfig v) {
 		Criteria c = new Criteria("vertical").is(v.getId());
-		
+
 		final NativeQuery initialQuery = new NativeQueryBuilder().withQuery(new CriteriaQuery(c)).build();
 
 		return elasticsearchOperations.searchForStream(initialQuery, Product.class, CURRENT_INDEX).stream()
 				.map(SearchHit::getContent);
 
 	}
-	
+
 	/**
 	 * Export all aggregated data
-	 * 
+	 *
 	 * @return
 	 */
 	public Stream<Product> exportAll() {
@@ -155,28 +155,28 @@ public class ProductRepository {
 	public Stream<Product> exportForCategoriesMapping(Set<String> mustExistsfields, Integer maxResults) {
 	    Criteria c = new Criteria("datasourceCategories").exists();
 	    c = c.and(getRecentPriceQuery());
-	    
+
 	    for (String f : mustExistsfields) {
 	    	c = c.and(new Criteria(f).exists());
 	    }
-	    
+
 	    NativeQueryBuilder initialQueryBuilder = new NativeQueryBuilder()
 	            .withQuery(new CriteriaQuery(c))
-	            .withSourceFilter(new FetchSourceFilter(new String[]{"categoriesByDatasources"}, null));
-	    
+	            .withSourceFilter(new FetchSourceFilter(true,new String[]{"categoriesByDatasources"}, null));
+
 	    if (null != maxResults) {
 //            initialQueryBuilder = initialQueryBuilder.withMaxResults(maxResults);
 	    }
-	    
+
 	    NativeQuery initialQuery = initialQueryBuilder.build();
-	            
-	    initialQuery.setPageable(PageRequest.of(0, 1000)); 
+
+	    initialQuery.setPageable(PageRequest.of(0, 1000));
 
 	    return elasticsearchOperations.searchForStream(initialQuery, Product.class, CURRENT_INDEX).stream()
 	            .map(SearchHit::getContent);
 	}
-	
-	
+
+
 
 	public Stream<Product> exportAll(String vertical) {
 
@@ -191,19 +191,19 @@ public class ProductRepository {
 
 	/**
 	 * Export all aggregated data, corresponding to the given Barcodes
-	 * 
+	 *
 	 * @return
 	 */
 	public Stream<Product> exportAll(BarcodeType... barcodeTypes) {
-		
+
 		Criteria criteria = new Criteria("gtinInfos.upcType").in((Object[]) barcodeTypes);
 		CriteriaQuery query = new CriteriaQuery(criteria);
-		
+
 		return elasticsearchOperations.searchForStream(query, Product.class, CURRENT_INDEX).stream()
 				.map(SearchHit::getContent);
 	}
-	
-	
+
+
 	public Stream<Product> searchInValidPrices(String query, final String indexName, int from, int to) {
 
 		Criteria c = new Criteria().expression(query).and(getRecentPriceQuery());
@@ -216,21 +216,21 @@ public class ProductRepository {
 
 	}
 
-	
-	
+
+
 	// TODO(P2,design) : in a stat service
-	
+
 	/**
 	 * Return the scores coverage stats for a vertical
 	 * @param vConf
 	 * @return
 	 */
 	public Map<String,Long> scoresCoverage(VerticalConfig vConf) {
-		
+
 		Map<String, Long> ret = new HashMap<>();
-		
+
 		vConf.getAvailableImpactScoreCriterias().entrySet().forEach(criteria -> {
-			
+
 			Long count = countMainIndexHavingScore(criteria.getKey(),vConf.getId());
 
 			// TODO(p2, conf) : threshold from conf
@@ -240,14 +240,14 @@ public class ProductRepository {
 				logger.info("Excluded from score mapping : {}", criteria );
 			}
 		});
-		
-		
+
+
 		return ret;
 	}
-	
+
 	/**
 	 * Export all aggregateddatas for a vertical
-	 * 
+	 *
 	 * @param vertical
 	 * @param max
 	 * @param indexName
@@ -255,19 +255,19 @@ public class ProductRepository {
 	 */
 	public Stream<Product> exportVerticalWithValidDate(VerticalConfig vertical, boolean withExcluded) {
 
-		
-		
-		
+
+
+
 		Criteria c = getRecentPriceQuery()
 				.and( new Criteria("vertical").is(vertical.getId()))
 
 				//				.or(new Criteria("datasourceCategories").in(vertical.getMatchingCategories())
 				;
-		
+
 		if (!withExcluded) {
             c = c.and(new Criteria("excluded").is(false));
         }
-		
+
 		final NativeQuery initialQuery = new NativeQueryBuilder()
 				.withQuery(new CriteriaQuery(c)).build();
 		return elasticsearchOperations.searchForStream(initialQuery, Product.class, CURRENT_INDEX).stream()
@@ -282,32 +282,32 @@ public class ProductRepository {
 	 * @return
 	 */
 	public Stream<Product> exportVerticalWithOffersCountGreater(VerticalConfig vertical, Integer minOfferscount) {
-	
-		
+
+
 		Criteria c = getRecentPriceQuery()
 				.and( new Criteria("vertical").is(vertical.getId()))
 				.and(new Criteria("offersCount").greaterThanEqual(minOfferscount) )
 
 				//				.or(new Criteria("datasourceCategories").in(vertical.getMatchingCategories())
 				;
-		
-		
+
+
 		final NativeQuery initialQuery = new NativeQueryBuilder()
 				.withQuery(new CriteriaQuery(c)).build();
 		return elasticsearchOperations.searchForStream(initialQuery, Product.class, CURRENT_INDEX).stream()
 				.map(SearchHit::getContent);
 	}
 
-	
-	
-	
+
+
+
 	/**
 	 * Export all aggregateddatas for a vertical, ordered by ecoscore descending
-	 * 
+	 *
 	 * @param vertical
-	 * @param max 
 	 * @param max
-	 * @param withExcluded 
+	 * @param max
+	 * @param withExcluded
 	 * @param indexName
 	 * @return
 	 */
@@ -318,26 +318,26 @@ public class ProductRepository {
 				.and(new Criteria("aiDescriptions").exists())
 				;
 		NativeQueryBuilder initialQueryBuilder = new NativeQueryBuilder().withQuery(new CriteriaQuery(c));
-		
-		initialQueryBuilder =  initialQueryBuilder.withSort(Sort.by(org.springframework.data.domain.Sort.Order.desc("scores.ECOSCORE.value")));									
+
+		initialQueryBuilder =  initialQueryBuilder.withSort(Sort.by(org.springframework.data.domain.Sort.Order.desc("scores.ECOSCORE.value")));
 
 		NativeQuery initialQuery = initialQueryBuilder.build();
-		
+
 		return elasticsearchOperations.searchForStream(initialQuery, Product.class, CURRENT_INDEX).stream().map(SearchHit::getContent);
 	}
-	
-	
-	
-	
-	
-	
+
+
+
+
+
+
 	/**
 	 * Export all aggregateddatas for a vertical, ordered by ecoscore descending
-	 * 
+	 *
 	 * @param vertical
-	 * @param max 
 	 * @param max
-	 * @param withExcluded 
+	 * @param max
+	 * @param withExcluded
 	 * @param indexName
 	 * @return
 	 */
@@ -411,9 +411,9 @@ public class ProductRepository {
 
 	/**
 	 * Export all aggregateddatas for a vertical, ordered by ecoscore descending
-	 * 
+	 *
 	 * @param vertical
-	 * @param max 
+	 * @param max
 	 * @param max
 	 * @param indexName
 	 * @return
@@ -423,8 +423,8 @@ public class ProductRepository {
 		return exportVerticalWithValidDateOrderByEcoscore(vertical, null, withExcluded);
 	}
 
-	
-	
+
+
 	public SearchHits<Product> search(Query query, final String indexName) {
 		return elasticsearchOperations.search(query, Product.class, IndexCoordinates.of(indexName));
 
@@ -462,7 +462,7 @@ public class ProductRepository {
 		try {
 			fullProductQueue.put(p);
 		} catch (Exception e) {
-			logger.error("Cannot enqueue product {}",p,e);			
+			logger.error("Cannot enqueue product {}",p,e);
 		}
 
 	}
@@ -509,18 +509,18 @@ public class ProductRepository {
 	public void addToPartialIndexationQueue(Collection<ProductPartialUpdateHolder> data) {
 
 		logger.info("Queuing {} products", data.size());
-		
+
 		data.forEach(e -> {
-			
+
 			try {
 				partialProductQueue.put(e) ;
 			} catch (Exception e1) {
 				logger.error("!!!! exception, cannot enqueue product {}",e);
 			}
-			
+
 		});
 	}
-	
+
 	public void store(Collection<Product> data) {
 	    logger.info("Indexing {} products", data.size());
 
@@ -547,12 +547,12 @@ public class ProductRepository {
 //			redisRepository.save(data);
 //		});
 	}
-	
-	
-	
+
+
+
 	/**
 	 * Return an aggregated data by it's ID
-	 * 
+	 *
 	 * @param productId
 	 * @param indexName
 	 * @return
@@ -563,9 +563,9 @@ public class ProductRepository {
 
 		logger.info("Getting product  {}", productId);
 		// Getting from redis
-		
-		
-		
+
+
+
 //		Product result = redisRepo.opsForValue().get(productId);
 		Product result = null;
 //		try {
@@ -594,7 +594,7 @@ public class ProductRepository {
 			logger.info("Cache hit, got product {} from redis", productId);
 		}
 
-		
+
 		return result;
 
 	}
@@ -606,11 +606,11 @@ public class ProductRepository {
 	 */
 	public List<Product> getByTitle(String title) {
 		// Setting the query
-		
+
 		return getByTitle(title, MAX_TITLE_ITEMS_TO_FETCH);
-		
+
 	}
-	
+
 	/**
 	 * Get multiple data from ids
 	 * @param title
@@ -618,15 +618,15 @@ public class ProductRepository {
 	 */
 	public List<Product> getByTitle(String title, int maxItems) {
 		// Setting the query
-		
-		List<String> words = List.of(title.split(" "));		
+
+		List<String> words = List.of(title.split(" "));
 		NativeQueryBuilder esQuery = new NativeQueryBuilder().withQuery(new CriteriaQuery(new Criteria("offerNames").matchesAll(words) ));
 		SearchHits<Product> results = search(esQuery.withPageable(PageRequest.of(0, maxItems)).build(),ProductRepository.MAIN_INDEX_NAME);
 		return results.stream().map(SearchHit::getContent).collect(Collectors.toList());
-		
+
 	}
-	
-	
+
+
 	/**
 	 * Get multiple data from ids
 	 * @param ids
@@ -639,8 +639,8 @@ public class ProductRepository {
 
 		logger.info("Getting {} products from default index",ids.size());
 		Map<String, Product> ret = new HashMap<String, Product>();
-		
-		
+
+
 		// Getting from redis
 //		Iterable<Product> redisResults = redisRepository.findAllById(ids);
 //		redisResults.forEach(e -> {
@@ -649,22 +649,22 @@ public class ProductRepository {
 //			}
 //		});
 //
-		// Getting the one we don't have in redis from elastic 		
+		// Getting the one we don't have in redis from elastic
 		Set<String> missingIds = ids.stream().filter(e -> !ret.containsKey(e)).map(e-> String.valueOf(e)) .collect(Collectors.toSet());
 		logger.info("returned hits : {}, missing : {}",ret.size(), missingIds.size());
-		
-		
+
+
 		if (missingIds.size() != 0) {
-			
-			
+
+
 			NativeQuery query = new NativeQueryBuilder().withIds(missingIds).build();
-	
+
 			elasticsearchOperations.multiGet(query, Product.class,CURRENT_INDEX )
 			.stream().map(MultiGetItem::getItem)
 			.filter(Objects::nonNull)
 			.forEach(e -> ret.put(e.gtin(), e));
-	
-			
+
+
 			// Filtrer et collecter les produits à partir d'une liste en utilisant leur GTIN comme clé dans une map
 			Set<Product> redisItems = ret.values().stream()
 			    // Filtrer les éléments non nuls
@@ -673,14 +673,14 @@ public class ProductRepository {
 			    .filter(e -> missingIds.contains(e.gtin()))
 			    // Collecter les produits dans une map avec le GTIN comme clé
 			    .collect(Collectors.toSet());
-			
+
 			logger.info("Saving {} products in redis",redisItems.size());
 //			executor.submit(() -> {
-				
+
 //			redisRepository.saveAll(redisItems);
 //			});
 		}
-		
+
 		return ret;
 	}
 
@@ -701,8 +701,8 @@ public class ProductRepository {
 		CriteriaQuery query = new CriteriaQuery(new Criteria("vertical").is(vertical) .and(new Criteria("scores." + scoreName + ".value").exists()));
 		return elasticsearchOperations.count(query, CURRENT_INDEX);
 	}
-	
-	
+
+
 	@Cacheable(keyGenerator = CacheConstants.KEY_GENERATOR, cacheNames = CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME)
 	public Long countMainIndexHavingRecentUpdate() {
 		CriteriaQuery query = new CriteriaQuery(getRecentPriceQuery());
@@ -715,7 +715,7 @@ public class ProductRepository {
         CriteriaQuery query = new CriteriaQuery(criteria);
         return elasticsearchOperations.count(query, CURRENT_INDEX);
     }
-	
+
 	@Cacheable(keyGenerator = CacheConstants.KEY_GENERATOR, cacheNames = CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME)
 	public Map<Integer, Long> byTaxonomy() {
 
@@ -726,7 +726,7 @@ public class ProductRepository {
 		esQuery = esQuery
 				.withAggregation("taxonomy", 	Aggregation.of(a -> a.terms(ta -> ta.field("googleTaxonomyId").size(50000))  ))
 				;
-	
+
 		SearchHits<Product> results = search(esQuery.build(),ProductRepository.MAIN_INDEX_NAME);
 
 
@@ -744,13 +744,13 @@ public class ProductRepository {
 		for (LongTermsBucket b : taxonomy.buckets().array()) {
 			ret.put(new Long(b.key()).intValue(), b.docCount());
 		}
- 		
-		
+
+
 		return ret;
-		
+
 	}
-	
-	
+
+
 	/**
 	 * Bulk update, using Document
 	 * @param partialItemsResults
@@ -852,7 +852,7 @@ public class ProductRepository {
 
 	public void delete(Product p) {
 		elasticsearchOperations.delete(p.gtin(), CURRENT_INDEX);
-		
+
 	}
 
 	public ElasticsearchOperations getElasticsearchOperations() {
