@@ -37,12 +37,7 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-maven-
 
-      ############################################
-      # Checkout xwiki-springboot-starter
-      ###########################################
-      - uses: actions/checkout@v4
-        with:
-          repository: 'open4good/xwiki-spring-boot-starter'
+
 
       ############################################
       # Set up JDK 21 and Maven Cache
@@ -73,13 +68,7 @@ jobs:
             ]
 
             
-            
-      ############################################
-      # Build and test xwiki-springboot-starter
-      ###########################################
-      - name: Build and Test xwiki-springboot-starter
-        working-directory: ./xwiki-spring-boot-starter        
-        run: mvn --batch-mode --update-snapshots install
+     
 
       ############################################
       # Checkout Main Repository

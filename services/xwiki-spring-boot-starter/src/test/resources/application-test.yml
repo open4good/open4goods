@@ -1,0 +1,25 @@
+
+xwiki:
+  baseUrl: https://wiki.nudger.fr
+  password: couilledu22
+  username: Tif
+
+  httpsOnly: true
+  
+  
+  #media: json  
+  #entryPoint: rest
+  #wiki: xwiki
+  
+  
+#xwiki:
+#  baseUrl: https://wiki.nudger.fr
+#  auth:
+#    password: couilledu22
+#    username: Tif
+#  httpsOnly: true
+#  media: json
+#  api:
+#    entryPoint: rest
+#    wiki: xwiki
+

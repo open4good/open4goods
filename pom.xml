@@ -23,7 +23,7 @@
 		<processDependencyManagement>false</processDependencyManagement>
 		<processPluginDependenciesInPluginManagement>true</processPluginDependenciesInPluginManagement>
 		<maven-compiler-plugin-version>3.14.0</maven-compiler-plugin-version>
-		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>		
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<dependency.locations.enabled>false</dependency.locations.enabled>
 		<exclude.tests>nothing-to-exclude</exclude.tests>
 	</properties>
@@ -45,12 +45,14 @@
         <module>services/product-repository</module>
         <module>services/captcha</module>
         <module>services/remotefilecaching</module>
-        
+
         <module>services/favicon</module>
         <module>services/github-feedback</module>
-        
-        
-        
+        <module>services/xwiki-spring-boot-starter</module>
+
+
+
+
 	</modules>
 
 	<issueManagement>
@@ -335,7 +337,7 @@
                             <directory>node_modules</directory>
                             <followSymlinks>false</followSymlinks>
                         </fileset>
-                        
+
 						<fileset>
 							<directory>src/test/resources/last</directory>
 							<followSymlinks>false</followSymlinks>
