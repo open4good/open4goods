@@ -29,7 +29,7 @@ services:
 ###################################################################  
   # The container that runs MySQL
   mysql:
-    image: "mysql:9.2"
+    image: "mysql:9.3"
     container_name: mysql
     restart: always
     command: ['mysqld', '--character-set-server=utf8mb4', '--collation-server=utf8mb4_unicode_ci']
