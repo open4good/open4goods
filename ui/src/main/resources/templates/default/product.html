@@ -47,6 +47,28 @@
 <!--/* TODO: place this in your <head> or just before the chart script */-->
 <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@latest/dist/chartjs-plugin-annotation.min.js"></script>
 
+    <!-- Structured data for SEO -->
+    <script type="application/ld+json" th:inline="javascript">
+        /*<![CDATA[*/
+        {
+            "@context": "https://schema.org",
+            "@type": "Product",
+            "name": /*[[${product.shortestOfferName()}]]*/ "",
+            "image": /*[[( ${baseUrl} + '/images/' + ${product.gtin()} + '-cover.png' )]]*/ "",
+            "brand": {
+                "@type": "Brand",
+                "name": /*[[${product.brand()}]]*/ ""
+            }/*[[${product.bestPrice()} != null ? ',' : '' ]]*/
+            /*[[# th:if=${product.bestPrice()} ]]*/
+            "offers": {
+                "@type": "Offer",
+                "price": /*[[${product.bestPrice.price}]]*/ 0,
+                "priceCurrency": /*[[${product.bestPrice.currency}]]*/ ""
+            }
+            /*[[/]]*/
+        }
+        /*]]>*/
+    </script>
 
 
 
