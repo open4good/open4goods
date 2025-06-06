@@ -24,13 +24,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 /**
- * Service that performs hCaptcha Recaptcha validation and assigns a spring role to users 
+ * Service that performs hCaptcha Recaptcha validation and assigns a spring role to users
  * upon successful verification.
  * <p>
- * This class uses the {@link HcaptchaProperties} configuration to retrieve the secret key 
+ * This class uses the {@link HcaptchaProperties} configuration to retrieve the secret key
  * and the role that must be assigned to a valid user.
  * </p>
- * 
+ *
  * @author Goulven
  */
 @Service
@@ -63,7 +63,7 @@ public class HcaptchaService{
     @SuppressWarnings({ "unchecked", "rawtypes" })
     public void verifyRecaptcha(final String ip, final String recaptchaResponse) throws SecurityException {
         final Map<String, String> body = new HashMap<>();
-        body.put("secret", captchaProperties.getSecretKey());
+        body.put("secret", captchaProperties.secretKey());
         body.put("response", recaptchaResponse);
         body.put("remoteip", ip);
 
@@ -84,8 +84,8 @@ public class HcaptchaService{
         }
 
         // On successful captcha verification, assign the configured spring role to the user
-        assignRoleToUser(captchaProperties.getValidRole());
-        logger.info("Captcha verified successfully, assigned role: {}", captchaProperties.getValidRole());
+        assignRoleToUser(captchaProperties.validRole());
+        logger.info("Captcha verified successfully, assigned role: {}", captchaProperties.validRole());
     }
 
     /**
@@ -111,6 +111,6 @@ public class HcaptchaService{
             logger.warn("No authenticated user found. Role {} not assigned.", role);
         }
     }
-    
-  
+
+
 }

@@ -63,7 +63,7 @@ public class FeedbackController {
         String ip = IpHelper.getIp(request);
         var model = uiService.defaultModelAndView("feedback-issue", request);
         model.addObject("votes", voteService.getRemainingVotes(ip));
-        model.addObject("hcaptchaSiteKey", hcaptchaProperties.getKey());
+        model.addObject("hcaptchaSiteKey", hcaptchaProperties.key());
         return model;
     }
 

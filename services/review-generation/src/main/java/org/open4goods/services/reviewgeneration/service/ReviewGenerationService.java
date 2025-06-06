@@ -212,8 +212,8 @@ public class ReviewGenerationService implements HealthIndicator {
      * @param verticalConfig the vertical configuration.
      * @param status the process status to update.
      * @return a map of prompt variables.
-     * @throws IOException, InterruptedException, ExecutionException, SerialisationException, ResourceNotFoundException, NotEnoughDataException 
-     * @throws GoogleSearchException 
+     * @throws IOException, InterruptedException, ExecutionException, SerialisationException, ResourceNotFoundException, NotEnoughDataException
+     * @throws GoogleSearchException
      */
     private Map<String, Object> preparePromptVariables(Product product, VerticalConfig verticalConfig, ReviewGenerationStatus status)
             throws IOException, InterruptedException, ExecutionException, ResourceNotFoundException, SerialisationException, NotEnoughDataException, GoogleSearchException {
@@ -243,8 +243,8 @@ public class ReviewGenerationService implements HealthIndicator {
             GoogleSearchRequest searchRequest = new GoogleSearchRequest(query, "lang_fr", "countryFR");
             GoogleSearchResponse searchResponse = googleSearchService.search(searchRequest);
             searchesMade++;
-            if (searchResponse != null && searchResponse.getResults() != null) {
-                allResults.addAll(searchResponse.getResults());
+            if (searchResponse != null && searchResponse.results() != null) {
+                allResults.addAll(searchResponse.results());
             }
         }
 
@@ -252,20 +252,20 @@ public class ReviewGenerationService implements HealthIndicator {
 
         // Sort and deduplicate results.
         List<GoogleSearchResult> sortedResults = allResults.stream()
-                .filter(r -> r.getLink() != null && !r.getLink().isEmpty())
-                .filter(r -> !r.getLink().endsWith(".pdf"))
+                .filter(r -> r.link() != null && !r.link().isEmpty())
+                .filter(r -> !r.link().endsWith(".pdf"))
                 .filter(distinctByKey(r -> {
                     try {
-                        return new URL(r.getLink()).getHost();
+                        return new URL(r.link()).getHost();
                     } catch (Exception e) {
-                        return r.getLink();
+                        return r.link();
                     }
                 }))
                 .sorted((r1, r2) -> {
                     boolean r1Preferred = properties.getPreferredDomains().stream()
-                            .anyMatch(domain -> r1.getLink().contains(domain));
+                            .anyMatch(domain -> r1.link().contains(domain));
                     boolean r2Preferred = properties.getPreferredDomains().stream()
-                            .anyMatch(domain -> r2.getLink().contains(domain));
+                            .anyMatch(domain -> r2.link().contains(domain));
                     if (r1Preferred && !r2Preferred) return -1;
                     if (!r1Preferred && r2Preferred) return 1;
                     return 0;
@@ -275,7 +275,7 @@ public class ReviewGenerationService implements HealthIndicator {
         // Fetch URL contents concurrently.
         Map<String, CompletableFuture<FetchResponse>> fetchFutures = new HashMap<>();
         for (GoogleSearchResult result : sortedResults) {
-            String url = result.getLink();
+            String url = result.link();
             CompletableFuture<FetchResponse> future = CompletableFuture.supplyAsync(() -> {
                 try {
                     return urlFetchingService.fetchUrlAsync(url).get();
@@ -299,7 +299,7 @@ public class ReviewGenerationService implements HealthIndicator {
         Map<String, Integer> finalTokensMap = new LinkedHashMap<>();
 
         for (GoogleSearchResult result : sortedResults) {
-            String url = result.getLink();
+            String url = result.link();
             CompletableFuture<FetchResponse> future = fetchFutures.get(url);
             if (future == null) continue;
             FetchResponse fetchResponse = future.get();
@@ -371,7 +371,7 @@ public class ReviewGenerationService implements HealthIndicator {
         return promptVariables;
     }
 
-   
+
     /**
      * Asynchronous review generation using the realtime prompt service.
      * (Uses a ThreadPoolExecutor to run the process asynchronously.)
@@ -432,7 +432,7 @@ public class ReviewGenerationService implements HealthIndicator {
                 PromptResponse<AiReview> reviewResponse = genAiService.objectPrompt("review-generation", promptVariables, AiReview.class);
                 AiReview newReview = reviewResponse.getBody();
                 newReview = updateAiReviewReferences(newReview);
-                
+
             	// Populate attributes
             	populateAttributes(product, newReview);
 
@@ -542,7 +542,7 @@ public class ReviewGenerationService implements HealthIndicator {
      * checks the job status via batchPromptResponse (which will throw if not complete),
      * and if the job is complete, processes each BatchOutput to update the corresponding product review.
      * Finally, the tracking file is deleted.
-     * TODO(p2,design) : separate the handle method 
+     * TODO(p2,design) : separate the handle method
      * </p>
      */
     public void checkBatchJobStatuses() {
@@ -556,7 +556,7 @@ public class ReviewGenerationService implements HealthIndicator {
                 Map<String, Object> trackingInfo = objectMapper.readValue(file, Map.class);
                 String jobId = (String) trackingInfo.get("jobId");
                 @SuppressWarnings("unchecked")
-                // Retrieve batch results; this method throws if the job is not yet complete. 
+                // Retrieve batch results; this method throws if the job is not yet complete.
                 PromptResponse<List<BatchOutput>> response = batchAiService.batchPromptResponse(jobId);
                 if (response != null && response.getBody() != null && !response.getBody().isEmpty()) {
                     handleBatchResponse( jobId, response);
@@ -568,10 +568,10 @@ public class ReviewGenerationService implements HealthIndicator {
             }
         }
     }
-    
+
     public void triggerResponseHandling(String jobId) throws ResourceNotFoundException, IOException {
-    	
-    	 // Retrieve batch results; this method throws if the job is not yet complete. 
+
+    	 // Retrieve batch results; this method throws if the job is not yet complete.
         PromptResponse<List<BatchOutput>> response = batchAiService.batchPromptResponse(jobId);
         if (response != null && response.getBody() != null && !response.getBody().isEmpty()) {
             handleBatchResponse( jobId, response);
@@ -592,7 +592,7 @@ public class ReviewGenerationService implements HealthIndicator {
 		        if (null != newReview) {
 		        	// Populate attributes
 		        	populateAttributes(product, newReview);
-		        	
+
 		            AiReviewHolder holder = new AiReviewHolder();
 		            holder.setCreatedMs(Instant.now().toEpochMilli());
 		            holder.setReview(newReview);
@@ -607,7 +607,7 @@ public class ReviewGenerationService implements HealthIndicator {
 		        logger.warn("No product found with GTIN {}", productGtin);
 		    }
 		}
-		
+
 	}
 
     /**
@@ -618,7 +618,7 @@ public class ReviewGenerationService implements HealthIndicator {
 	private void populateAttributes(Product product, AiReview newReview) {
 		// Handling attributes
 		newReview.getAttributes().stream().forEach(a -> {
-			
+
 			ProductAttribute agg = product.getAttributes().getAll().get(a.getName());
 			if (null == agg) {
 				// A first time match
@@ -626,21 +626,21 @@ public class ReviewGenerationService implements HealthIndicator {
 				agg.setName(a.getName());
 			}
 
-			
+
 			String source;
 			try {
 				// TODO : i18n, const or deduct  provider name from source
 				source = "openai.com";
 				agg.addSourceAttribute(new SourcedAttribute(new Attribute(a.getName(), a.getValue(), "fr") , source));
-				
+
 				// Replacing new AggAttribute in product
 				product.getAttributes().getAll().put(agg.getName(), agg);
 			} catch (Exception e1) {
 				logger.error("Cannot extract domain name",e1);
 			}
-			
-		
-			
+
+
+
 		});
 	}
 
@@ -656,19 +656,19 @@ public class ReviewGenerationService implements HealthIndicator {
         }
         return domain.startsWith("www.") ? domain.substring(4) : domain;
     }
-    
+
     private AiReview processBatchOutputToAiReview(BatchOutput output) {
     	if (output.response().body().choices().size() > 1) {
     		logger.error("Error, multiple choices for {}", output);
     	}
     	//TODO(p2, perf) : instance variable
     	var outputConverter = new BeanOutputConverter<>(AiReview.class);
-		  
+
 		  String jsonContent = output.response().body().choices().getFirst().message().getContent();
 		  AiReview ret = outputConverter.convert(jsonContent);
-		    		
+
 		  ret = updateAiReviewReferences(ret);
-		    
+
 //			AiReview ret = serialisationService.fromJson(jsonContent, AiReview.class);
 		return ret;
 	}
