@@ -4,6 +4,8 @@ package org.open4goods.api.config.yml;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
 
 import org.apache.commons.lang3.ArrayUtils;
 import org.open4goods.api.services.feed.AffiliationConfig;
@@ -144,7 +146,10 @@ public class ApiProperties {
 	/**
 	 * The configuration for developpement mode services
 	 */
-	private DevModeConfiguration devModeConfig = new DevModeConfiguration();
+        private DevModeConfiguration devModeConfig = new DevModeConfiguration();
+
+        /** Map of language to Google taxonomy URL */
+        private Map<String, String> googleTaxonomy = new HashMap<>();
 
 
 	/**
@@ -484,9 +489,17 @@ public class ApiProperties {
 
 
 
-	public void setDevModeConfig(DevModeConfiguration devModeConfig) {
-		this.devModeConfig = devModeConfig;
-	}
+        public void setDevModeConfig(DevModeConfiguration devModeConfig) {
+                this.devModeConfig = devModeConfig;
+        }
+
+        public Map<String, String> getGoogleTaxonomy() {
+                return googleTaxonomy;
+        }
+
+        public void setGoogleTaxonomy(Map<String, String> googleTaxonomy) {
+                this.googleTaxonomy = googleTaxonomy;
+        }
 
 
 

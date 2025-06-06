@@ -63,5 +63,13 @@ springdoc:
   swagger-ui:
     disable-swagger-default-url: true
 
-genAiPauseDurationMs: 100          
+genAiPauseDurationMs: 100
+
+remote-file-caching:
+  connection-timeout: 30000
+  read-timeout: 30000
+
+google-taxonomy:
+  fr: https://www.google.com/basepages/producttype/taxonomy-with-ids.fr-FR.txt
+  en: https://www.google.com/basepages/producttype/taxonomy-with-ids.en-US.txt
 
