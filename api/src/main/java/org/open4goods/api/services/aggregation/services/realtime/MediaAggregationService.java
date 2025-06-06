@@ -87,17 +87,26 @@ public class MediaAggregationService extends AbstractAggregationService{
 	@Override
 	public void onProduct(Product data, VerticalConfig vConf) throws AggregationSkipException {
 		
-		// TODO(p1, perf) : Remove when sure there are no more protected urls
-		// We clean icecat protected items
-		data.getResources().removeIf(e -> {
-			if (e.getUrl().contains("icecat.biz") && e.getUrl().contains("?access")) {
-				logger.error("Removing icecat protected url : {}",e.getUrl());
-				return true;
-			} else {
-				return false;
-			}
-		});
-	}
+                // Clean protected Icecat resources that cannot be accessed anonymously
+                data.getResources().removeIf(r -> isProtectedIcecatUrl(r.getUrl()));
+        }
+
+        /**
+         * Detect Icecat URLs requiring authentication.
+         *
+         * @param url the resource URL
+         * @return {@code true} if the URL points to a protected Icecat resource
+         */
+        private boolean isProtectedIcecatUrl(String url) {
+                if (url == null) {
+                        return false;
+                }
+                boolean protectedLink = url.contains("icecat.biz") && url.contains("?access");
+                if (protectedLink) {
+                        logger.error("Removing icecat protected url : {}", url);
+                }
+                return protectedLink;
+        }
 
 
 }
