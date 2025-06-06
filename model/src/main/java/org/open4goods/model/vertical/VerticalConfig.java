@@ -527,13 +527,13 @@ public class VerticalConfig{
 
 	public String getRecommandationFilterFor(final String id) {
 
-		for (final RecommandationCriteria rc : recommandationsConfig.getRecommandations()) {
-			for (final RecommandationChoice rf : rc.getChoices()) {
-				if (rf.getName().equals(id)) {
-					return rf.getQueryFragment();
-				}
-			}
-		}
+                for (final RecommandationCriteria rc : recommandationsConfig.getRecommandations()) {
+                        for (final RecommandationChoice rf : rc.getChoices()) {
+                                if (rf.name().equals(id)) {
+                                        return rf.queryFragment();
+                                }
+                        }
+                }
 
 		return "";
 	}
