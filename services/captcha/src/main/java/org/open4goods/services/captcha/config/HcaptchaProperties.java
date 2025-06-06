@@ -11,40 +11,10 @@ import org.springframework.stereotype.Component;
  */
 @Component
 @ConfigurationProperties(prefix = "captcha")
-public class HcaptchaProperties {
+public record HcaptchaProperties(String key, String secretKey, String validRole) {
 
-	
-    /**
-     * The (public) key identifying captcha app.
-     */
-    private String key;
-
-    
-    
-    /**
-     * The secret key for captcha verification.
-     */
-    private String secretKey;
-
-    /**
-     * The Spring Security role assigned to users upon successful captcha verification.
-     */
-    private String validRole = "ROLE_HUMAN";
-
-    public String getSecretKey() {
-        return secretKey;
-    }
-
-    public void setSecretKey(String secretKey) {
-        this.secretKey = secretKey;
-    }
-
-    public String getValidRole() {
-        return validRole;
-    }
-
-    public void setValidRole(String validRole) {
-        this.validRole = validRole;
+    public HcaptchaProperties {
+        validRole = (validRole == null || validRole.isBlank()) ? "ROLE_HUMAN" : validRole;
     }
 
     /**
@@ -57,14 +27,4 @@ public class HcaptchaProperties {
     public String toString() {
         return "CaptchaProperties{secretKey=****, validRole='" + validRole + '\'' + '}';
     }
-
-	public String getKey() {
-		return key;
-	}
-
-	public void setKey(String key) {
-		this.key = key;
-	}
-    
-    
 }
