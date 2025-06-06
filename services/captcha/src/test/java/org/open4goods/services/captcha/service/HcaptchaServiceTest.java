@@ -34,7 +34,9 @@ public class HcaptchaServiceTest {
 
     @BeforeEach
     public void setUp() {
-        captchaProperties = new HcaptchaProperties("dummyKey", "dummySecret", "ROLE_CAPTCHA_VERIFIED");
+        captchaProperties = new HcaptchaProperties();
+        captchaProperties.setSecretKey("dummySecret");
+        captchaProperties.setValidRole("ROLE_CAPTCHA_VERIFIED");
 
         restTemplate = Mockito.mock(RestTemplate.class);
         restTemplateBuilder = Mockito.mock(RestTemplateBuilder.class);

@@ -161,7 +161,7 @@ public class ApiProperties {
 	/**
 	 * The configuration for amazon completion
 	 */
-	private AmazonCompletionConfig amazonConfig = new AmazonCompletionConfig();
+//	private AmazonCompletionConfig amazonConfig = new AmazonCompletionConfig();
 
 
 	/**
@@ -221,15 +221,15 @@ public class ApiProperties {
 
 
 
-	public AmazonCompletionConfig getAmazonConfig() {
-		return amazonConfig;
-	}
-
-
-
-	public void setAmazonConfig(AmazonCompletionConfig amazonConfig) {
-		this.amazonConfig = amazonConfig;
-	}
+//	public AmazonCompletionConfig getAmazonConfig() {
+//		return amazonConfig;
+//	}
+//
+//
+//
+//	public void setAmazonConfig(AmazonCompletionConfig amazonConfig) {
+//		this.amazonConfig = amazonConfig;
+//	}
 
 
 

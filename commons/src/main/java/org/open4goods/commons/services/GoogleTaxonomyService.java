@@ -21,10 +21,10 @@ import org.slf4j.LoggerFactory;
 
 /**
  * This service is in charge to google taxonomy id, from a product category
- * 
+ *
  * @author goulven
  *
- * 
+ *
  */
 public class GoogleTaxonomyService {
 
@@ -45,20 +45,20 @@ public class GoogleTaxonomyService {
 	 */
 
 	Map<String, Map<Integer, List<String>>> localizedTaxonomy = new HashMap<>();
-	
-	
+
+
 	/**
 	 * The tree version of google categories
 	 */
 	private ProductCategories categories = new ProductCategories();
-	
-	
+
+
 	/**
 	 * The categories by taxonomyId
 	 */
 	private Map<Integer,ProductCategory> categoriesById = new HashMap<Integer, ProductCategory>();
-	
-	
+
+
 	private RemoteFileCachingService fileCachingService;
 
 	public GoogleTaxonomyService(RemoteFileCachingService fileCachingService) {
@@ -68,7 +68,7 @@ public class GoogleTaxonomyService {
 
 	/**
 	 * Load a localized taxonomy file
-	 * 
+	 *
 	 * @param url
 	 * @param language
 	 * @throws IOException
@@ -97,10 +97,10 @@ public class GoogleTaxonomyService {
 
 			// The number
 			List<String> fragments = Arrays.asList(line.substring(pos+1).split(">")).stream().map(e -> e.trim()).toList();
-			
+
 			ProductCategory node = categories.addGooglecategories(id,fragments,language);
 			categoriesById.put(id, node);
-			
+
 			// Adding in the full category id
 			fullCategoriesId.put(IdHelper.azCharAndDigits(line.substring(pos + 2)).toLowerCase(), id);
 
@@ -142,7 +142,7 @@ public class GoogleTaxonomyService {
 				}
 			}
 		}
-		
+
 		logger.info("Google categories loaded");
 	}
 
@@ -154,28 +154,28 @@ public class GoogleTaxonomyService {
 	public ProductCategory byId(Integer id) {
 		return categoriesById.get(id);
 	}
-	
+
 	/**
-	 * 
+	 *
 	 * @param v
 	 */
 	public void updateCategoryWithVertical(VerticalConfig v) {
 		categoriesById.get(v.getGoogleTaxonomyId()).vertical(v);
 	}
-	
+
 	/**
 	 * Resolve a category to a taxonomy id
 	 * @param category
 	 * @return
 	 */
 	public Integer resolve (String category) {
-		
+
 		if (StringUtils.isEmpty(category)) {
 			return null;
 		}
-		
+
 		String token = IdHelper.azCharAndDigits( category).toLowerCase();
-		
+
 		// First resolving with full path
 		Integer ret = fullCategoriesId.get(token);
 
@@ -183,37 +183,37 @@ public class GoogleTaxonomyService {
 			// Fail, resolving with last path id
 			ret = lastCategoriesId.get(token);
 		}
-		
+
 		return ret;
-		
+
 	}
 
-	
+
 	/**
 	 * Resolve the deepest category if from several one
 	 * @param taxonomyIds
 	 * @return
 	 */
 	public Integer selectDeepest( String language, List<Integer> taxonomyIds) {
-		
+
 		int deepest = -1;
 		int deepestSize = -1;
-		
-		
+
+
 		for (Integer i = 0; i < taxonomyIds.size(); i++) {
-			
+
 			int size = localizedTaxonomy.get(language).get(taxonomyIds.get(i)).size();
 			if (  size  > deepestSize) {
 				deepest = taxonomyIds.get(i);
 				deepestSize = size;
 			}
 		}
-		
+
 		return deepest;
-				
+
 	}
-	
-	
+
+
 	/**
 	 * Retuen all leafes having vertical for a given category
 	 * @param googleTaxonomyId
@@ -221,23 +221,23 @@ public class GoogleTaxonomyService {
 	 */
 	public List<ProductCategory> leafs (Integer googleTaxonomyId) {
 		ProductCategory ret = categoriesById.get(googleTaxonomyId);
-		
+
 		if (null == ret) {
 			return new ArrayList<ProductCategory>();
 		}else {
 			return ret.leafs(true);
 		}
 	}
-	
+
 	/**
 	 * Get the FR taxonomy name from an id
 	 * @param taxonomyId
 	 * @return
 	 */
-	public List<String> getTaxonomyName(Integer taxonomyId) {		
+	public List<String> getTaxonomyName(Integer taxonomyId) {
 		return localizedTaxonomy.get("fr").get(taxonomyId);
 	}
-	
+
 	/**
 	 * Resolve the deepest category if from several one
 	 * @param language
@@ -245,10 +245,10 @@ public class GoogleTaxonomyService {
 	 * @return
 	 */
 	public int selectDeepest(String language, Integer... taxonomyIds) {
-		return selectDeepest(language, Arrays.asList(taxonomyIds));		
+		return selectDeepest(language, Arrays.asList(taxonomyIds));
 	}
-	
-	
+
+
 	public Map<String, Integer> getLastCategoriesId() {
 		return lastCategoriesId;
 	}
