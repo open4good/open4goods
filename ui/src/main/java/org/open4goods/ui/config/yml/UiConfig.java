@@ -72,7 +72,15 @@ public class UiConfig {
 	/**
 	 * The list of authorized dynamic image resizing suffixes
 	 */
-	private Set<String> allowedImagesSizeSuffixes = new HashSet<>();
+        private Set<String> allowedImagesSizeSuffixes = new HashSet<>();
+
+        /**
+         * Base URL used by the {@link ImageResizeInterceptor} to fetch source images.
+         */
+        private String imageBaseUrl = "https://nudger.fr";
+
+        /** Map of language code to Google taxonomy URL */
+        private Map<String, String> googleTaxonomy = new HashMap<>();
 
 	/**
 	 * The mapped wiki pages
@@ -491,9 +499,25 @@ public class UiConfig {
 	}
 
 
-	public void setAllowedImagesSizeSuffixes(Set<String> allowedImagesSizeSuffixes) {
-		this.allowedImagesSizeSuffixes = allowedImagesSizeSuffixes;
-	}
+        public void setAllowedImagesSizeSuffixes(Set<String> allowedImagesSizeSuffixes) {
+                this.allowedImagesSizeSuffixes = allowedImagesSizeSuffixes;
+        }
+
+        public String getImageBaseUrl() {
+                return imageBaseUrl;
+        }
+
+        public void setImageBaseUrl(String imageBaseUrl) {
+                this.imageBaseUrl = imageBaseUrl;
+        }
+
+        public Map<String, String> getGoogleTaxonomy() {
+                return googleTaxonomy;
+        }
+
+        public void setGoogleTaxonomy(Map<String, String> googleTaxonomy) {
+                this.googleTaxonomy = googleTaxonomy;
+        }
 
 
 	public UrlCheckConfig getUrlcheck() {
