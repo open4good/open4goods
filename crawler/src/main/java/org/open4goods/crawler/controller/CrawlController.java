@@ -20,8 +20,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-//TODO(gof) : Add SpringWebSecurity
-
 public class CrawlController {
 
 	private final FetchersService fetchersService;

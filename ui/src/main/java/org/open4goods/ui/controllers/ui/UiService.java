@@ -21,6 +21,8 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.server.ResponseStatusException;
+import org.springframework.http.HttpStatus;
 
 import jakarta.annotation.PostConstruct;
 import jakarta.servlet.http.HttpServletRequest;
@@ -182,12 +184,12 @@ public class UiService {
 	public String getSiteLanguage(HttpServletRequest request) {
 		String serverName = request.getServerName();
 		
-		if (config.getNamings().getServerNames().containsValue(serverName)) {
-			LOGGER.info("Server name {} found in configuration", serverName);
-		} else {
-			// TODO(p3,security) : Raise 403 ?
-			LOGGER.error("Server name {} not found in configuration", serverName);
-		}
+                if (config.getNamings().getServerNames().containsValue(serverName)) {
+                        LOGGER.info("Server name {} found in configuration", serverName);
+                } else {
+                        LOGGER.error("Server name {} not found in configuration", serverName);
+                        throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Unknown host");
+                }
 		
 		String language = languageByserverNames.get(serverName);		
 		if (null == language) {
