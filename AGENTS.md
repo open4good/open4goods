@@ -54,15 +54,26 @@ This project is a maven multi module project.
      - Refactor methods/classes to reduce complexity and improve separation of concerns.
    - **Exception Management:**
      - Enhance error handling with custom exceptions if needed.
-   **Logging Enhancements**
+
+**Address TODOs**
+   - Resolve TODO tags when possible.
+   - If additional context is required to address a TODO, ask targeted questions before proceeding.
+
+**Logging Enhancements**
    - Improve logging by using SLF4J’s parameterized messages.
    - Add structured logging and ensure appropriate log levels (INFO, WARN, ERROR) are used.
 
-  
-   **Testing**
+**POJO Enhancements**
+   - Implement or improve `toString()`, `hashCode()`, and `equals()` methods in model classes where relevant.
+
+**Configuration and Externalization**
+   - Use `@ConfigurationProperties` for externalized configuration.
+
+
+**Testing**
    - Create or improve tests, by writing comprehensive unit tests and integration tests.
 
-   **Structural Changes**
+**Structural Changes**
     - Refactor or split code into multiple classes if it improves separation of concerns.
     - **Important:** If you require additional context (e.g., details on dependency classes or intended functionality), ask clarifying questions before making significant structural changes.
 
