@@ -6,7 +6,6 @@ import org.springframework.context.annotation.Configuration;
 import java.util.Map;
 import java.util.Set;
 
-@Configuration
 @ConfigurationProperties(prefix = "feedconfig")
 public record FeedConfigProperties(Map<String, FeedProviderProperties> providers) {
 

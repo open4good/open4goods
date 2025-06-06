@@ -11,7 +11,6 @@ import org.open4goods.api.services.BatchService;
 import org.open4goods.api.services.CompletionFacadeService;
 import org.open4goods.api.services.ScrapperOrchestrationService;
 import org.open4goods.api.services.VerticalsGenerationService;
-import org.open4goods.api.services.completion.AmazonCompletionService;
 import org.open4goods.api.services.completion.IcecatCompletionService;
 import org.open4goods.api.services.completion.ResourceCompletionService;
 import org.open4goods.api.services.feed.AbstractFeedService;
@@ -57,8 +56,8 @@ import org.open4goods.services.evaluation.service.EvaluationService;
 import org.open4goods.services.imageprocessing.service.ImageMagickService;
 import org.open4goods.services.productrepository.services.ProductRepository;
 import org.open4goods.services.prompt.service.PromptService;
-import org.open4goods.services.remotefilecaching.service.RemoteFileCachingService;
 import org.open4goods.services.remotefilecaching.config.RemoteFileCachingProperties;
+import org.open4goods.services.remotefilecaching.service.RemoteFileCachingService;
 import org.open4goods.services.serialisation.service.SerialisationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -167,11 +166,11 @@ public class ApiConfig {
 		return new IcecatCompletionService(productRepository, verticalConfigService, apiProperties, dataSourceConfigService, aggregationFacade);
 	}
 
-	@Bean
-
-	AmazonCompletionService amazonCompletionService(ProductRepository dataRepository, VerticalsConfigService verticalConfigService, ApiProperties apiProperties, DataSourceConfigService dataSourceConfigService, AggregationFacadeService aggregationFacade) throws TechnicalException {
-		return new AmazonCompletionService(dataRepository, verticalConfigService, apiProperties, dataSourceConfigService, aggregationFacade);
-	}
+//	@Bean
+//
+//	AmazonCompletionService amazonCompletionService(ProductRepository dataRepository, VerticalsConfigService verticalConfigService, ApiProperties apiProperties, DataSourceConfigService dataSourceConfigService, AggregationFacadeService aggregationFacade) throws TechnicalException {
+//		return new AmazonCompletionService(dataRepository, verticalConfigService, apiProperties, dataSourceConfigService, aggregationFacade);
+//	}
 
 	@Bean
 	BatchService batchService(AggregationFacadeService aggregationFacadeService, CompletionFacadeService completionFacadeService, VerticalsConfigService verticalsConfigService, ProductRepository productRepository, CsvDatasourceFetchingService csvDatasourceFetchingService, FeedService feedService, SerialisationService serialisationService) {
@@ -179,8 +178,8 @@ public class ApiConfig {
 	}
 
 	@Bean
-	CompletionFacadeService completionFacadeService(ResourceCompletionService resourceCompletionService, AmazonCompletionService amazonCompletionService, IcecatCompletionService icecatCompletionService) {
-		return new CompletionFacadeService(resourceCompletionService, amazonCompletionService, icecatCompletionService);
+	CompletionFacadeService completionFacadeService(ResourceCompletionService resourceCompletionService,  IcecatCompletionService icecatCompletionService) {
+		return new CompletionFacadeService(resourceCompletionService, icecatCompletionService);
 	}
 
 	@Bean

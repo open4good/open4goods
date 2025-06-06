@@ -63,7 +63,7 @@ public class HcaptchaService{
     @SuppressWarnings({ "unchecked", "rawtypes" })
     public void verifyRecaptcha(final String ip, final String recaptchaResponse) throws SecurityException {
         final Map<String, String> body = new HashMap<>();
-        body.put("secret", captchaProperties.secretKey());
+        body.put("secret", captchaProperties.getSecretKey());
         body.put("response", recaptchaResponse);
         body.put("remoteip", ip);
 
@@ -84,8 +84,8 @@ public class HcaptchaService{
         }
 
         // On successful captcha verification, assign the configured spring role to the user
-        assignRoleToUser(captchaProperties.validRole());
-        logger.info("Captcha verified successfully, assigned role: {}", captchaProperties.validRole());
+        assignRoleToUser(captchaProperties.getValidRole());
+        logger.info("Captcha verified successfully, assigned role: {}", captchaProperties.getValidRole());
     }
 
     /**
