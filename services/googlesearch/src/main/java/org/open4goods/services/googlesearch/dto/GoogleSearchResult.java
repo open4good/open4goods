@@ -10,4 +10,10 @@ public record GoogleSearchResult(String title, String link) {
     public GoogleSearchResult() {
         this(null, null);
     }
+
+    /** Compatibility accessor preserving former API */
+    public String getTitle() { return title; }
+
+    /** Compatibility accessor preserving former API */
+    public String getLink() { return link; }
 }

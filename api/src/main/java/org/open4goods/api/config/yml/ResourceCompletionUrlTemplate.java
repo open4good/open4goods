@@ -5,45 +5,32 @@ import java.util.List;
 
 import org.open4goods.model.resource.ResourceTag;
 
-public class ResourceCompletionUrlTemplate {
-    private String url;
-    private String datasourceName;
-    private String language;
-    private List<ResourceTag> hardTags = new ArrayList<>();
+/**
+ * Template definition for building completion resource URLs.
+ */
+public record ResourceCompletionUrlTemplate(
+        String url,
+        String datasourceName,
+        String language,
+        List<ResourceTag> hardTags) {
 
-    // Getters and Setters
-    public String getUrl() {
-        return url;
+    /**
+     * Creates an empty template.
+     */
+    public ResourceCompletionUrlTemplate() {
+        this(null, null, null, new ArrayList<>());
     }
 
-    public void setUrl(String url) {
-        this.url = url;
+    /**
+     * Canonical constructor ensuring non-null list of tags.
+     */
+    public ResourceCompletionUrlTemplate {
+        hardTags = hardTags == null ? new ArrayList<>() : hardTags;
     }
 
-    public String getDatasourceName() {
-        return datasourceName;
-    }
-
-    public void setDatasourceName(String datasourceName) {
-        this.datasourceName = datasourceName;
-    }
-
-    public String getLanguage() {
-        return language;
-    }
-
-    public void setLanguage(String language) {
-        this.language = language;
-    }
-
-	public List<ResourceTag> getHardTags() {
-		return hardTags;
-	}
-
-	public void setHardTags(List<ResourceTag> hardTags) {
-		this.hardTags = hardTags;
-	}
-
-    
-
+    // Compatibility accessors -------------------------------------------------
+    public String getUrl() { return url; }
+    public String getDatasourceName() { return datasourceName; }
+    public String getLanguage() { return language; }
+    public List<ResourceTag> getHardTags() { return hardTags; }
 }
