@@ -13,6 +13,10 @@ import org.springframework.cache.annotation.Cacheable;
 import org.xwiki.rest.model.jaxb.Attachment;
 import org.xwiki.rest.model.jaxb.Page;
 import org.xwiki.rest.model.jaxb.Pages;
+import java.nio.charset.StandardCharsets;
+import org.springframework.web.server.ResponseStatusException;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.util.UriUtils;
 
 /**
  * An Xwiki facade service, which encapsulates xwiki unitary services to deliver
@@ -87,11 +91,14 @@ public class XwikiFacadeService {
 	
 	
 
-	public byte[] downloadAttachment(String string) {
-		// TODO : Security
-		String url = pathHelper.getDownloadpath() + string;		
-		return mappingService.downloadAttachment(url);
-	}
+    public byte[] downloadAttachment(String attachmentPath) {
+            if (attachmentPath.contains("..")) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid attachment path");
+            }
+            String encodedPath = UriUtils.encodePath(attachmentPath, StandardCharsets.UTF_8);
+            String url = pathHelper.getDownloadpath() + encodedPath;
+            return mappingService.downloadAttachment(url);
+    }
 
 	
 	public String detectMimeType (String filename) {
