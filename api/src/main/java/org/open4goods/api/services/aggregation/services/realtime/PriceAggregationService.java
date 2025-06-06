@@ -164,11 +164,11 @@ public class PriceAggregationService extends AbstractAggregationService {
      */
     private void computePriceHistory(AggregatedPrices prices, ProductCondition state) {
     	
-    	// TODO(p1, migration)  : put back when sanisation done
         AggregatedPrice minPrice = prices.getMinPrice(state).orElse(null);
-//        if (minPrice.isEmpty()) {
-//            return; // Exit if no minimum price is found for the condition
-//        }
+        // Skip history computation when no price is available for the condition
+        if (minPrice == null) {
+            return;
+        }
 
         ////////////////////
         // Normalization

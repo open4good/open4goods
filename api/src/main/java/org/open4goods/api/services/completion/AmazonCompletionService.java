@@ -80,7 +80,12 @@ public class AmazonCompletionService extends AbstractCompletionService {
 	// The amazon api componsnets
 	private DefaultApi api;
 	private ArrayList<GetItemsResource> getItemsResources;
-	private ArrayList<SearchItemsResource> searchItemsResources;
+        private ArrayList<SearchItemsResource> searchItemsResources;
+
+        /**
+         * Amazon completion will be triggered again only after this delay.
+         */
+        private static final int REFRESH_IN_DAYS = 30;
 
 
 	public AmazonCompletionService(ProductRepository dataRepository, VerticalsConfigService verticalConfigService,
@@ -126,11 +131,15 @@ public class AmazonCompletionService extends AbstractCompletionService {
 	}
 
 	
-	@Override
-	public boolean shouldProcess(VerticalConfig vertical, Product data) {
-		// TODO(p1,feature) : amazon completion disabled for now
-		return false;
-	}
+        @Override
+        public boolean shouldProcess(VerticalConfig vertical, Product data) {
+                Long lastProcessed = data.getDatasourceCodes().get(getDatasourceName());
+                if (lastProcessed == null) {
+                        return true;
+                }
+                long elapsed = System.currentTimeMillis() - lastProcessed;
+                return elapsed > REFRESH_IN_DAYS * 24L * 3600L * 1000L;
+        }
 
 	@Override
 	public String getDatasourceName() {
