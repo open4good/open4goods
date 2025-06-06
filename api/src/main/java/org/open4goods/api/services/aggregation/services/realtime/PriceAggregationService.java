@@ -108,14 +108,14 @@ public class PriceAggregationService extends AbstractAggregationService {
 			}
 		}
 
-		final Set<AggregatedPrice> prices = new HashSet<>(reducedPrices.values());
+                Set<AggregatedPrice> prices = new HashSet<>(reducedPrices.values());
 
-		////////////////////////////
-		// Set the contribution amount 
-		////////////////////////////
-		for (AggregatedPrice price : prices) {
-			price.setCompensation(computeEstimatedContribution(price.getPrice()));
-		}
+                ////////////////////////////
+                // Set the contribution amount
+                ////////////////////////////
+                prices = prices.stream()
+                                .map(p -> p.withCompensation(computeEstimatedContribution(p.getPrice())))
+                                .collect(Collectors.toSet());
 
 		AggregatedPrices aggPrices = data.getPrice();
 
