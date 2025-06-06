@@ -475,7 +475,7 @@ public class ProductController  {
 	@GetMapping(path = {"/review-request/{id:\\d+}"}   )
 	public ModelAndView review(final HttpServletRequest request, @PathVariable(required = false) String vertical, @PathVariable Long id) {
 		ModelAndView ret = uiService.defaultModelAndView("review-request", request)
-					.addObject("captchaKey", captchaProps.getKey())
+					.addObject("captchaKey", captchaProps.key())
 					.addObject("gtin",id);
 
 		// TODO : i18n, check not null
