@@ -1,71 +1,41 @@
 package org.open4goods.api.config.yml;
 
+/**
+ * Configuration for Amazon completion service.
+ */
+public record AmazonCompletionConfig(
+        String accessKey,
+        String secretKey,
+        String partnerTag,
+        String host,
+        String region,
+        Long sleepDuration,
+        int maxCallsPerBatch,
+        String datasourceName) {
 
-public class AmazonCompletionConfig {
+    /**
+     * Creates a config with default values.
+     */
+    public AmazonCompletionConfig() {
+        this(null, null, null, null, null, 1100L, 8640, "amazon.fr.yml");
+    }
 
-	private String accessKey;
-	private String secretKey;
-	private String partnerTag;
-	private String host;        
-	private String region;
-	// Wait time between 2 calls
-//	https://webservices.amazon.com/paapi5/documentation/troubleshooting/api-rates.html
-	private Long sleepDuration = 1100L;	
-	private int maxCallsPerBatch = 8640;
-	
-	// Yaml datasource config for amazon
-	private String datasourceName = "amazon.fr.yml";
-	
-	public String getAccessKey() {
-		return accessKey;
-	}
-	public void setAccessKey(String accessKey) {
-		this.accessKey = accessKey;
-	}
-	public String getSecretKey() {
-		return secretKey;
-	}
-	public void setSecretKey(String secretKey) {
-		this.secretKey = secretKey;
-	}
-	public String getPartnerTag() {
-		return partnerTag;
-	}
-	public void setPartnerTag(String partnerTag) {
-		this.partnerTag = partnerTag;
-	}
-	public String getHost() {
-		return host;
-	}
-	public void setHost(String host) {
-		this.host = host;
-	}
-	public String getRegion() {
-		return region;
-	}
-	public void setRegion(String region) {
-		this.region = region;
-	}
-	public Long getSleepDuration() {
-		return sleepDuration;
-	}
-	public void setSleepDuration(Long sleepDuration) {
-		this.sleepDuration = sleepDuration;
-	}
-	public int getMaxCallsPerBatch() {
-		return maxCallsPerBatch;
-	}
-	public void setMaxCallsPerBatch(int maxCallsPerBatch) {
-		this.maxCallsPerBatch = maxCallsPerBatch;
-	}
-	public String getDatasourceName() {
-		return datasourceName;
-	}
-	public void setDatasourceName(String datasourceName) {
-		this.datasourceName = datasourceName;
-	}
+    /**
+     * Canonical constructor applying defaults when values are missing.
+     */
+    public AmazonCompletionConfig {
+        sleepDuration = sleepDuration == null ? 1100L : sleepDuration;
+        maxCallsPerBatch = maxCallsPerBatch == 0 ? 8640 : maxCallsPerBatch;
+        datasourceName = datasourceName == null ? "amazon.fr.yml" : datasourceName;
+    }
 
-	
-	
-    
+    // Compatibility accessors -------------------------------------------------
+    public String getAccessKey() { return accessKey; }
+    public String getSecretKey() { return secretKey; }
+    public String getPartnerTag() { return partnerTag; }
+    public String getHost() { return host; }
+    public String getRegion() { return region; }
+    public Long getSleepDuration() { return sleepDuration; }
+    public int getMaxCallsPerBatch() { return maxCallsPerBatch; }
+    public String getDatasourceName() { return datasourceName; }
 }

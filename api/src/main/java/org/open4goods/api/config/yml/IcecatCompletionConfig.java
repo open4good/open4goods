@@ -1,21 +1,24 @@
 package org.open4goods.api.config.yml;
 
-public class IcecatCompletionConfig {
+/**
+ * Configuration for Icecat completion service.
+ */
+public record IcecatCompletionConfig(String iceCatUrlPrefix, Integer politnessDelayMs) {
 
-	private String iceCatUrlPrefix="https://live.icecat.biz/api?UserName=openIcecat-live&Language=fr&GTIN=";
-	private Integer politnessDelayMs=500;
-	public String getIceCatUrlPrefix() {
-		return iceCatUrlPrefix;
-	}
-	public void setIceCatUrlPrefix(String iceCatUrlPrefix) {
-		this.iceCatUrlPrefix = iceCatUrlPrefix;
-	}
-	public Integer getPolitnessDelayMs() {
-		return politnessDelayMs;
-	}
-	public void setPolitnessDelayMs(Integer politnessDelayMs) {
-		this.politnessDelayMs = politnessDelayMs;
-	}
-	
-	
+    /** Default constructor setting sane defaults. */
+    public IcecatCompletionConfig() {
+        this("https://live.icecat.biz/api?UserName=openIcecat-live&Language=fr&GTIN=", 500);
+    }
+
+    /** Canonical constructor applying defaults when null. */
+    public IcecatCompletionConfig {
+        iceCatUrlPrefix = iceCatUrlPrefix == null
+                ? "https://live.icecat.biz/api?UserName=openIcecat-live&Language=fr&GTIN="
+                : iceCatUrlPrefix;
+        politnessDelayMs = politnessDelayMs == null ? 500 : politnessDelayMs;
+    }
+
+    // Compatibility accessors -------------------------------------------------
+    public String getIceCatUrlPrefix() { return iceCatUrlPrefix; }
+    public Integer getPolitnessDelayMs() { return politnessDelayMs; }
 }

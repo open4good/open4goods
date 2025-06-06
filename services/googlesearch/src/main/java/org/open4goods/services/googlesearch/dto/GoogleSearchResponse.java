@@ -11,4 +11,7 @@ public record GoogleSearchResponse(List<GoogleSearchResult> results) {
     public GoogleSearchResponse() {
         this(new ArrayList<>());
     }
+
+    /** Compatibility accessor preserving former API */
+    public List<GoogleSearchResult> getResults() { return results; }
 }
