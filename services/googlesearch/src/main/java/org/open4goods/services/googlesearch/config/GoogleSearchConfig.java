@@ -123,108 +123,16 @@ public class GoogleSearchConfig {
     /**
      * Nested class to encapsulate default values for additional search options.
      */
-    public static class Defaults {
-        /**
-         * Default language restriction (lr).
-         */
-        private String lr = "lang_fr";
-        /**
-         * Default country restriction (cr).
-         */
-        private String cr = "countryFR";
-        /**
-         * Default safe search filtering (safe).
-         */
-        private String safe = "off";
-        /**
-         * Default sort option.
-         */
-        private String sort = "";
-        /**
-         * Default geolocation (gl).
-         */
-        private String gl = "fr";
-        /**
-         * Default interface language (hl).
-         */
-        private String hl = "fr";
+    public static record Defaults(
+            String lr,
+            String cr,
+            String safe,
+            String sort,
+            String gl,
+            String hl) {
 
-        public String getLr() {
-            return lr;
-        }
-
-        public void setLr(String lr) {
-            this.lr = lr;
-        }
-
-        public String getCr() {
-            return cr;
-        }
-
-        public void setCr(String cr) {
-            this.cr = cr;
-        }
-
-        public String getSafe() {
-            return safe;
-        }
-
-        public void setSafe(String safe) {
-            this.safe = safe;
-        }
-
-        public String getSort() {
-            return sort;
-        }
-
-        public void setSort(String sort) {
-            this.sort = sort;
-        }
-
-        public String getGl() {
-            return gl;
-        }
-
-        public void setGl(String gl) {
-            this.gl = gl;
-        }
-
-        public String getHl() {
-            return hl;
-        }
-
-        public void setHl(String hl) {
-            this.hl = hl;
-        }
-
-        @Override
-        public String toString() {
-            return "Defaults{" +
-                    "lr='" + lr + '\'' +
-                    ", cr='" + cr + '\'' +
-                    ", safe='" + safe + '\'' +
-                    ", sort='" + sort + '\'' +
-                    ", gl='" + gl + '\'' +
-                    ", hl='" + hl + '\'' +
-                    '}';
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(lr, cr, safe, sort, gl, hl);
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) return true;
-            if (!(o instanceof Defaults)) return false;
-            Defaults defaults = (Defaults) o;
-            return Objects.equals(lr, defaults.lr) &&
-                   Objects.equals(cr, defaults.cr) &&
-                   Objects.equals(safe, defaults.safe) &&
-                   Objects.equals(sort, defaults.sort) &&
-                   Objects.equals(gl, defaults.gl) &&
-                   Objects.equals(hl, defaults.hl);
+        public Defaults() {
+            this("lang_fr", "countryFR", "off", "", "fr", "fr");
         }
     }
 }

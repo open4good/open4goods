@@ -2,8 +2,8 @@
   "groups": [
     {
       "name": "captcha",
-      "type": "org.open4goods.services.captcha.config.CaptchaProperties",
-      "sourceType": "org.open4goods.services.captcha.config.CaptchaProperties"
+      "type": "org.open4goods.services.captcha.config.HcaptchaProperties",
+      "sourceType": "org.open4goods.services.captcha.config.HcaptchaProperties"
     }
   ],
   "properties": [
@@ -23,7 +23,7 @@
       "name": "captcha.valid-role",
       "type": "java.lang.String",
       "description": "Spring Security role assigned to users upon successful captcha verification.",
-      "defaultValue": "ROLE_CAPTCHA_VERIFIED"
+      "defaultValue": "ROLE_HUMAN"
     }
   ]
 }
