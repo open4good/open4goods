@@ -34,6 +34,7 @@ import org.open4goods.services.productrepository.services.ProductRepository;
 import org.open4goods.services.prompt.config.PromptServiceConfig;
 import org.open4goods.services.prompt.service.PromptService;
 import org.open4goods.services.remotefilecaching.service.RemoteFileCachingService;
+import org.open4goods.services.remotefilecaching.config.RemoteFileCachingProperties;
 import org.open4goods.services.serialisation.service.SerialisationService;
 import org.open4goods.ui.config.yml.UiConfig;
 import org.open4goods.ui.interceptors.GenericTemplateInterceptor;
@@ -332,35 +333,24 @@ public class AppConfig {
 
 
 	// TODO : should not be required at ui side
-	@Bean RemoteFileCachingService remoteFileCachingService() {
-		return new RemoteFileCachingService(config.getRemoteCachingFolder());
-	}
+        @Bean RemoteFileCachingService remoteFileCachingService(RemoteFileCachingProperties remoteFileCachingProperties) {
+                return new RemoteFileCachingService(config.getRemoteCachingFolder(), remoteFileCachingProperties);
+        }
 
     // TODO : should not be required at ui side
-    @Bean
     GoogleTaxonomyService googleTaxonomyService(@Autowired RemoteFileCachingService remoteFileCachingService) {
-		GoogleTaxonomyService gts = new GoogleTaxonomyService(remoteFileCachingService);
+                GoogleTaxonomyService gts = new GoogleTaxonomyService(remoteFileCachingService);
 
-		// TODO : From conf
-		// TODO : Add others
         try {
-			gts.loadGoogleTaxonUrl("https://www.google.com/basepages/producttype/taxonomy-with-ids.fr-FR.txt", "fr");
-			gts.loadGoogleTaxonUrl("https://www.google.com/basepages/producttype/taxonomy-with-ids.en-US.txt", "en");
-//			gts.loadGoogleTaxonUrl("https://www.google.com/basepages/producttype/taxonomy-with-ids.de-DE.txt", "de");
-//			gts.loadGoogleTaxonUrl("https://www.google.com/basepages/producttype/taxonomy-with-ids.es-ES.txt", "es");
-//			gts.loadGoogleTaxonUrl("https://www.google.com/basepages/producttype/taxonomy-with-ids.nl-NL.txt", "nl");
-
-
-
-
-		} catch (Exception e) {
-			// TODO
-			e.printStackTrace();
-		}
-
+                        for (var entry : config.getGoogleTaxonomy().entrySet()) {
+                                gts.loadGoogleTaxonUrl(entry.getValue(), entry.getKey());
+                        }
+                } catch (Exception e) {
+                        e.printStackTrace();
+                }
 
         return gts;
-	}
+        }
 
 
 	@Bean
@@ -450,7 +440,7 @@ public class AppConfig {
 //				registry.addInterceptor(new BanCheckerInterceptor(config.getBancheckerConfig()));
 //				registry.addInterceptor(AppConfig.localeChangeInterceptor());
 				registry.addInterceptor(new GenericTemplateInterceptor());
-				registry.addInterceptor(new ImageResizeInterceptor(resourceService(),config.getAllowedImagesSizeSuffixes()));
+                                registry.addInterceptor(new ImageResizeInterceptor(resourceService(), config.getAllowedImagesSizeSuffixes(), config.getImageBaseUrl()));
 
 			}
 

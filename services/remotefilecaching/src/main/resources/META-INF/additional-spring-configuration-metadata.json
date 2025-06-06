@@ -1,0 +1,21 @@
+{
+  "groups": [
+    {
+      "name": "remote-file-caching",
+      "type": "org.open4goods.services.remotefilecaching.config.RemoteFileCachingProperties",
+      "sourceType": "org.open4goods.services.remotefilecaching.config.RemoteFileCachingProperties"
+    }
+  ],
+  "properties": [
+    {
+      "name": "remote-file-caching.connectionTimeout",
+      "type": "java.lang.Integer",
+      "description": "Connection timeout in milliseconds for downloading remote files."
+    },
+    {
+      "name": "remote-file-caching.readTimeout",
+      "type": "java.lang.Integer",
+      "description": "Read timeout in milliseconds for downloading remote files."
+    }
+  ]
+}
