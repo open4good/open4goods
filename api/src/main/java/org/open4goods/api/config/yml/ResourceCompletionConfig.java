@@ -3,17 +3,25 @@ package org.open4goods.api.config.yml;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ResourceCompletionConfig {
+/**
+ * Configuration for static resource completion URLs.
+ */
+public record ResourceCompletionConfig(List<ResourceCompletionUrlTemplate> urlTemplates) {
 
-	private List<ResourceCompletionUrlTemplate> urlTemplates = new ArrayList<>();
+    /**
+     * Default constructor with an empty list.
+     */
+    public ResourceCompletionConfig() {
+        this(new ArrayList<>());
+    }
 
-	public List<ResourceCompletionUrlTemplate> getUrlTemplates() {
-		return urlTemplates;
-	}
+    /**
+     * Canonical constructor ensuring non-null list.
+     */
+    public ResourceCompletionConfig {
+        urlTemplates = urlTemplates == null ? new ArrayList<>() : urlTemplates;
+    }
 
-	public void setUrlTemplates(List<ResourceCompletionUrlTemplate> urlTemplates) {
-		this.urlTemplates = urlTemplates;
-	}
-	
-	
+    // Compatibility accessor ---------------------------------------------------
+    public List<ResourceCompletionUrlTemplate> getUrlTemplates() { return urlTemplates; }
 }
