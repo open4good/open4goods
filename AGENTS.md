@@ -33,10 +33,46 @@ This project is a maven multi module project.
 - Use **Java 21** and **Spring Boot 3** features where appropriate.
 - Follow the existing 4‑space indentation and brace style.
 - Keep class, method and variable names meaningful.
-- Document complex logic with Javadoc.
-- Document code with inline comment
 - Unit tests must accompany new features or fixes.
 - Prefer `@Component`/`@Service` and constructor injection for Spring beans.
+- **Javadoc:** Improve or generate detailed Javadoc comments at both the class and method levels, clearly explaining purpose and behavior.
+- **Inline Comments:** Add or refine in-method comments to clarify complex logic and overall flow.
+- generate or refine the `additional-spring-configuration-metadata.json` if relevant
+
+**Code Quality and Safety**
+   - Code clarity : Variables and methods renaming when needed
+   - **Modern Java Features:**
+     - Leverage Java records for immutable data structures where applicable (Java 16+).
+     - Use sealed classes for well-defined type hierarchies if needed (Java 17+).
+     - Employ pattern matching for more concise and readable type checks.
+   - **Dependency Injection & Immutability:**
+     - Use constructor injection with `final` fields.
+   - **Security:** Identify and fix potential security issues.
+   - **Performance:** Optimize code where performance gains are achievable.
+   - **Readability & Maintainability:**
+     - Adhere to SOLID principles.
+     - Refactor methods/classes to reduce complexity and improve separation of concerns.
+   - **Exception Management:**
+     - Enhance error handling with custom exceptions if needed.
+   **Logging Enhancements**
+   - Improve logging by using SLF4J’s parameterized messages.
+   - Add structured logging and ensure appropriate log levels (INFO, WARN, ERROR) are used.
+
+  
+   **Testing**
+   - Create or improve tests, by writing comprehensive unit tests and integration tests.
+
+   **Structural Changes**
+    - Refactor or split code into multiple classes if it improves separation of concerns.
+    - **Important:** If you require additional context (e.g., details on dependency classes or intended functionality), ask clarifying questions before making significant structural changes.
+
+**Caching & Monitoring:**
+  - Consider emiting actuator metrics if pertinent
+  - consider implementing HealthCheck (by making the service implements HealthIndicator and overriding the health() method) if pertinent
+  - Evaluate potential caching improvements using Spring Cache abstraction.
+
+
+
 
 
 ## Programmatic checks
