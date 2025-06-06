@@ -13,6 +13,7 @@ import org.open4goods.commons.services.GoogleTaxonomyService;
 import org.open4goods.commons.services.VerticalsConfigService;
 import org.open4goods.model.datafragment.DataFragment;
 import org.open4goods.model.product.Product;
+import org.open4goods.model.product.ProductTexts;
 import org.open4goods.model.vertical.VerticalConfig;
 import org.slf4j.Logger;
 
@@ -82,11 +83,14 @@ public class TaxonomyRealTimeAggregationService extends AbstractAggregationServi
 				dedicatedLogger.warn("Will erase existing vertical {} with {} for product {}, because of category {}", data.getVertical(), vertical.getId(), data.bestName());
 			}
 			data.setVertical(vertical.getId());
-		} else {
-			// Unsetting the vertical
-			// TODO(p1,design) : Should erase ai descriptions and generated names / urls : a telivision that unmaches continue to have "television" generated stuff 
-			data.setVertical(null);
-		}
+                } else {
+                        // Unsetting the vertical also requires cleaning previously generated
+                        // texts that may no longer be relevant when the product has no
+                        // associated category.
+                        data.setVertical(null);
+                        data.setNames(new ProductTexts());
+                        data.getGenaiTexts().clear();
+                }
 		
 		
 		/////////////////////////////////////
