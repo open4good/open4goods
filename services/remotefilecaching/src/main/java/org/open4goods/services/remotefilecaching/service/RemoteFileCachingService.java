@@ -16,6 +16,7 @@ import org.open4goods.model.exceptions.InvalidParameterException;
 import org.open4goods.model.exceptions.TechnicalException;
 import org.open4goods.model.helper.IdHelper;
 import org.open4goods.services.remotefilecaching.config.CacheResourceConfig;
+import org.open4goods.services.remotefilecaching.config.RemoteFileCachingProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpMethod;
@@ -44,7 +45,10 @@ public class RemoteFileCachingService {
 
 	private static final Logger logger = LoggerFactory.getLogger(RemoteFileCachingService.class);
 
-	private static final int BUFFER_SIZE = 2048;
+        private static final int BUFFER_SIZE = 2048;
+
+        private final int connectionTimeout;
+        private final int readTimeout;
 
 	private final String resourceFolder;
 	
@@ -52,12 +56,18 @@ public class RemoteFileCachingService {
 	private RestTemplate restTemplate = new RestTemplate();
 
 
-	public RemoteFileCachingService(final String resourceFolder) {
-		super();
-		this.resourceFolder = resourceFolder;
-		final File rFolder = new File(resourceFolder);
-		rFolder.mkdirs();
-	}
+        public RemoteFileCachingService(final String resourceFolder) {
+                this(resourceFolder, new RemoteFileCachingProperties());
+        }
+
+        public RemoteFileCachingService(final String resourceFolder, RemoteFileCachingProperties properties) {
+                super();
+                this.resourceFolder = resourceFolder;
+                this.connectionTimeout = properties.getConnectionTimeout();
+                this.readTimeout = properties.getReadTimeout();
+                final File rFolder = new File(resourceFolder);
+                rFolder.mkdirs();
+        }
 
 
 	public void cacheResource(final CacheResourceConfig resourceConfig) {
@@ -170,8 +180,7 @@ public class RemoteFileCachingService {
         try {
             // Handle HTTP/HTTPS URLs
             if (url.startsWith("http")) {
-            	//TODO(p3,conf) : timeouts from config
-                FileUtils.copyURLToFile(new URL(url), destFile, 30000, 30000);
+                FileUtils.copyURLToFile(new URL(url), destFile, connectionTimeout, readTimeout);
                 
             }
             // Handle classpath resources if necessary (currently commented out)
@@ -281,10 +290,9 @@ public class RemoteFileCachingService {
 	public File download(final String url,final File tmpFile) throws TechnicalException {
 
 
-		try {
-			logger.info("Downloading resource  from {} to {}", url, tmpFile);
-        	//TODO(p3,conf) : timeouts from config
-            FileUtils.copyURLToFile(new URL(url), tmpFile, 30000, 30000);
+                try {
+                        logger.info("Downloading resource  from {} to {}", url, tmpFile);
+            FileUtils.copyURLToFile(new URL(url), tmpFile, connectionTimeout, readTimeout);
 			return tmpFile;
 		} catch (Exception e) {
 			throw new TechnicalException("Cannot download resource " + url  + " : " + e.getMessage());

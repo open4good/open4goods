@@ -45,9 +45,8 @@ public class ImageResizeInterceptor implements HandlerInterceptor {
 
     private static final Logger logger = LoggerFactory.getLogger(ImageResizeInterceptor.class);
 
-    /** Base URL for fetching source images. Can be configured for deployment. */
-    // TODO(p1, conf) a big hack here, to bypass 401 on beta. Means that we cache the prod, on every environments !
-    private static final String IMAGE_BASE_URL = "https://nudger.fr";
+    /** Base URL for fetching source images. Configured via application properties. */
+    private final String imageBaseUrl;
 
     /** Regex pattern for parsing dimensions from the request URI. */
     private static final Pattern DIMENSION_PATTERN = Pattern.compile(
@@ -63,9 +62,10 @@ public class ImageResizeInterceptor implements HandlerInterceptor {
      * 
      * @param resourceService the service for managing cached resources
      */
-    public ImageResizeInterceptor(ResourceService resourceService, Set<String> allowedResize) {
+    public ImageResizeInterceptor(ResourceService resourceService, Set<String> allowedResize, String imageBaseUrl) {
         this.resourceService = resourceService;
         this.allowedResize = allowedResize;
+        this.imageBaseUrl = imageBaseUrl;
     }
 
     /**
@@ -189,7 +189,7 @@ public class ImageResizeInterceptor implements HandlerInterceptor {
         // TODO(p1,feature) : Enable original webp handling, (infinite loop cause re intercepted)
         String[] extensions = { "png", "jpg", "jpeg"};
         for (String ext : extensions) {
-            String url = IMAGE_BASE_URL + baseName + "." + ext;
+            String url = imageBaseUrl + baseName + "." + ext;
             logger.info("Testing image url  {} for basename {} (hasDimensions:{})",url,baseName, hasDimensionsArgument);
             BufferedImage image = fetchImageFromURL(url);
             if (image != null) {

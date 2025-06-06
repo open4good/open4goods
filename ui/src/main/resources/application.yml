@@ -64,12 +64,19 @@ spring:
         enabled: true
 
 allowedImagesSizeSuffixes:
-  - 30     
-  - 50    
-  
+  - 30
+  - 50
+
   - 100
-  - 360 
-  - 1000 
+  - 360
+  - 1000
+imageBaseUrl: https://nudger.fr
+googleTaxonomy:
+  fr: https://www.google.com/basepages/producttype/taxonomy-with-ids.fr-FR.txt
+  en: https://www.google.com/basepages/producttype/taxonomy-with-ids.en-US.txt
+remote-file-caching:
+  connection-timeout: 30000
+  read-timeout: 30000
               
 wikiPagesMapping:
   "[webpages/default/legal-notice/WebHome]":

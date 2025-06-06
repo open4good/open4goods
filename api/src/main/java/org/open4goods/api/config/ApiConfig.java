@@ -58,6 +58,7 @@ import org.open4goods.services.imageprocessing.service.ImageMagickService;
 import org.open4goods.services.productrepository.services.ProductRepository;
 import org.open4goods.services.prompt.service.PromptService;
 import org.open4goods.services.remotefilecaching.service.RemoteFileCachingService;
+import org.open4goods.services.remotefilecaching.config.RemoteFileCachingProperties;
 import org.open4goods.services.serialisation.service.SerialisationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -261,23 +262,19 @@ public class ApiConfig {
 	}
 
 	@Bean
-	GoogleTaxonomyService googleTaxonomyService(@Autowired RemoteFileCachingService remoteFileCachingService) {
-		GoogleTaxonomyService gts = new GoogleTaxonomyService(remoteFileCachingService);
+        GoogleTaxonomyService googleTaxonomyService( RemoteFileCachingService remoteFileCachingService,
+                        ApiProperties apiProperties) {
+                GoogleTaxonomyService gts = new GoogleTaxonomyService(remoteFileCachingService);
 
-		// TODO : From conf
-		// TODO : Add others
-		try {
-			gts.loadGoogleTaxonUrl("https://www.google.com/basepages/producttype/taxonomy-with-ids.fr-FR.txt", "fr");
-			gts.loadGoogleTaxonUrl("https://www.google.com/basepages/producttype/taxonomy-with-ids.en-US.txt", "en");
-//			gts.loadGoogleTaxonUrl("https://www.google.com/basepages/producttype/taxonomy-with-ids.de-DE.txt", "de");
-//			gts.loadGoogleTaxonUrl("https://www.google.com/basepages/producttype/taxonomy-with-ids.es-ES.txt", "es");
-//			gts.loadGoogleTaxonUrl("https://www.google.com/basepages/producttype/taxonomy-with-ids.nl-NL.txt", "nl");
+                try {
+                        for (var entry : apiProperties.getGoogleTaxonomy().entrySet()) {
+                                gts.loadGoogleTaxonUrl(entry.getValue(), entry.getKey());
+                        }
+                } catch (Exception e) {
+                        logger.error("Error loading google taxonomy", e);
+                }
 
-		} catch (Exception e) {
-			logger.error("Error loading google taxonomy", e);
-		}
-
-		return gts;
+                return gts;
 	}
 
 	@Bean
@@ -391,10 +388,11 @@ public class ApiConfig {
 		return new ImageMagickService();
 	}
 
-	@Bean
-	RemoteFileCachingService remoteFileCachingService(@Autowired final ApiProperties config) {
-		return new RemoteFileCachingService(config.remoteCachingFolder());
-	}
+        @Bean
+        RemoteFileCachingService remoteFileCachingService(@Autowired final ApiProperties config,
+                        RemoteFileCachingProperties remoteFileCachingProperties) {
+                return new RemoteFileCachingService(config.remoteCachingFolder(), remoteFileCachingProperties);
+        }
 
 	@Bean
 	DataFragmentStoreService dataFragmentStoreService(final ApiProperties config, @Autowired StandardiserService standardiserService, @Autowired AggregationFacadeService generationService, @Autowired ProductRepository aggregatedDataRepository) {
