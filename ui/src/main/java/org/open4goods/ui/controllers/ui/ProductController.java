@@ -411,14 +411,15 @@ public class ProductController  {
 
 
 			// Adding the affiliationTokens in all prices
-			for (AggregatedPrice price : data.getPrice().getOffers()) {
-				inferAffiliationToken(request, data, price);
-			}
+                        data.getPrice().setOffers(data.getPrice().getOffers().stream()
+                                        .map(p -> inferAffiliationToken(request, data, p))
+                                        .collect(Collectors.toSet()));
 
 
 			// Adding the affiliationTokens in min and max price
 			if (null != data.getPrice().getMinPrice()) {
-				inferAffiliationToken(request, data, data.getPrice().getMinPrice());
+                                data.getPrice().setMinPrice(
+                                                inferAffiliationToken(request, data, data.getPrice().getMinPrice()));
 			//		inferAffiliationToken(data, data.getPrice().getMaxPrice());
 			}
 
@@ -451,18 +452,19 @@ public class ProductController  {
 	 * @param price
 	 * @throws IOException
 	 */
-	private void inferAffiliationToken(HttpServletRequest  request, Product data, AggregatedPrice price)  {
+        private AggregatedPrice inferAffiliationToken(HttpServletRequest  request, Product data, AggregatedPrice price)  {
 
 		try {
 			ContributionVote token = new ContributionVote( price, data);
 
 
-			String serToken = URLEncoder.encode(serialisationService.compressString(serialisationService.toJson(token)), Charset.defaultCharset());
-			price.setAffiliationToken(serToken);
-		} catch (Exception e) {
-			LOGGER.error("Error while generating affiliation token for {} : {}", data, e.getMessage());
-		}
-	}
+                        String serToken = URLEncoder.encode(serialisationService.compressString(serialisationService.toJson(token)), Charset.defaultCharset());
+                        return price.withAffiliationToken(serToken);
+                } catch (Exception e) {
+                        LOGGER.error("Error while generating affiliation token for {} : {}", data, e.getMessage());
+                        return price;
+                }
+        }
 
 
 	///////////////////
