@@ -83,8 +83,9 @@ public class DevModeService {
 				Stream<String> stream = reader.lines()) {
 			stream.forEach(e -> {
 				try {
-					Product p = serialisationService.fromJson(e, Product.class);
-					p.getPrice().getMinPrice().setTimeStamp(System.currentTimeMillis());
+                                        Product p = serialisationService.fromJson(e, Product.class);
+                                        p.getPrice().setMinPrice(
+                                                        p.getPrice().getMinPrice().withTimeStamp(System.currentTimeMillis()));
 					LOGGER.info("DevMode : Indexing product : "+p.getId());
 					repository.forceIndex(p);
 				} catch (Exception e1) {
