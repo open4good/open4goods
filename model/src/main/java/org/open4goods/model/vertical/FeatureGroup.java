@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.open4goods.model.Localisable;
-import org.open4goods.model.icecat.IcecatFeature;
 
 /**
  * Strong icecat mapping, thanks to them !
@@ -22,10 +21,6 @@ public class FeatureGroup {
 	
 	private List<Integer> featuresId = new ArrayList<>();
 	
-	/**
-	 * Features, if loaded
-	 */
-	private List<IcecatFeature> features = new ArrayList<IcecatFeature>();
 	
 	
 	
@@ -55,12 +50,6 @@ public class FeatureGroup {
 	}
 	public void setName(Localisable<String, String> name) {
 		this.name = name;
-	}
-	public List<IcecatFeature> getFeatures() {
-		return features;
-	}
-	public void setFeatures(List<IcecatFeature> features) {
-		this.features = features;
 	}
 
 	

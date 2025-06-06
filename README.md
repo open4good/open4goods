@@ -18,6 +18,8 @@ Open4goods (o4g) is an open-source and open-data product aggregator, search engi
 
 * **aggregate data fragments into well structured product-data**, by verticals. Features are -among others- scoring, attributes merging and conflict detection, comments NLP processing... The business intelligence of product construction is weared in the [aggregation](aggregation/) sub-project, and the orchestration and product data construction is operated through the scalable [API](api/) component.
 
+* **integrate Icecat data through a dedicated microservice**, located under [services/icecat](services/icecat), which loads Icecat XML resources and exposes them to API and UI modules.
+
 * **Renders the data through API's, UI's, and through open data sets**, exposed through the [API](api/) component.
 
 * Make the truth available for everyone on **officially supported websites**, (only french [nudger.fr](https://nudger.fr) for now), through the [UI](ui/) component. The affiliation revenue business model is used to deliver ecological compensation, maintain the user service and the open-data delivery
@@ -98,6 +100,7 @@ This will build and run tests, hope in your terminal you'll get a
 [INFO] commons ............................................ SUCCESS [ 27.046 s]
 [INFO] crawler ............................................ SUCCESS [ 8.990 s]
 [INFO] verticals .......................................... SUCCESS [ 7.143 s]
+[INFO] icecat ............................................. SUCCESS [ 5.000 s]
 [INFO] api ................................................ SUCCESS [ 11.289 s]
 [INFO] ui ................................................. SUCCESS [ 7.895 s]
 [INFO] test ............................................... SUCCESS [ 1.496 s]
