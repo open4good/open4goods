@@ -43,8 +43,8 @@ public class GoogleSearchServiceMock {
         Mockito.when(mockService.search(Mockito.any())).thenAnswer(invocation -> {
             GoogleSearchRequest request = invocation.getArgument(0);
             // Sanitize the query to create a safe file name.
-            String sanitizedQuery = GoogleSearchService.sanitizeUrlToFileName(request.getQuery());
-            String fileName = sanitizedQuery + "-" + request.getNumResults() + ".json";
+            String sanitizedQuery = GoogleSearchService.sanitizeUrlToFileName(request.query());
+            String fileName = sanitizedQuery + "-" + request.numResults() + ".json";
             // Define the path where mocks are expected in the classpath.
             String resourcePath = "googlesearch/mocks/" + fileName;
 

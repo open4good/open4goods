@@ -85,7 +85,7 @@ public class GoogleSearchService implements HealthIndicator {
         meterRegistry.counter("google.search.count").increment();
 
         // Validate input query (constructor of GoogleSearchRequest already does basic validation)
-        final String encodedQuery = URLEncoder.encode(request.getQuery(), Charset.defaultCharset());
+        final String encodedQuery = URLEncoder.encode(request.query(), Charset.defaultCharset());
 
         // Build the API URL using externalized configuration.
         StringBuilder urlBuilder = new StringBuilder(String.format("%s?q=%s&key=%s&cx=%s&num=%d",
@@ -93,15 +93,15 @@ public class GoogleSearchService implements HealthIndicator {
                 encodedQuery,
                 properties.getApiKey(),
                 properties.getCx(),
-                request.getNumResults()));
+                request.numResults()));
 
         // Resolve additional parameters: use the request value if provided; otherwise, fallback to configuration defaults.
-        String lr = (request.getLr() != null && !request.getLr().isBlank()) ? request.getLr() : properties.getDefaults().getLr();
-        String cr = (request.getCr() != null && !request.getCr().isBlank()) ? request.getCr() : properties.getDefaults().getCr();
-        String safe = (request.getSafe() != null && !request.getSafe().isBlank()) ? request.getSafe() : properties.getDefaults().getSafe();
-        String sort = (request.getSort() != null && !request.getSort().isBlank()) ? request.getSort() : properties.getDefaults().getSort();
-        String gl = (request.getGl() != null && !request.getGl().isBlank()) ? request.getGl() : properties.getDefaults().getGl();
-        String hl = (request.getHl() != null && !request.getHl().isBlank()) ? request.getHl() : properties.getDefaults().getHl();
+        String lr = (request.lr() != null && !request.lr().isBlank()) ? request.lr() : properties.getDefaults().lr();
+        String cr = (request.cr() != null && !request.cr().isBlank()) ? request.cr() : properties.getDefaults().cr();
+        String safe = (request.safe() != null && !request.safe().isBlank()) ? request.safe() : properties.getDefaults().safe();
+        String sort = (request.sort() != null && !request.sort().isBlank()) ? request.sort() : properties.getDefaults().sort();
+        String gl = (request.gl() != null && !request.gl().isBlank()) ? request.gl() : properties.getDefaults().gl();
+        String hl = (request.hl() != null && !request.hl().isBlank()) ? request.hl() : properties.getDefaults().hl();
 
         // Append additional parameters to the URL if non-empty.
         if (lr != null && !lr.isBlank()) {
@@ -150,7 +150,7 @@ public class GoogleSearchService implements HealthIndicator {
             lastErrorMessage = null;
         }
 
-        logger.info("Search performed for query: '{}' with HTTP status: {}", request.getQuery(), response.statusCode());
+        logger.info("Search performed for query: '{}' with HTTP status: {}", request.query(), response.statusCode());
 
         // Parse the JSON response into our DTO.
         GoogleSearchResponse result = parseResponse(response.body());
@@ -159,8 +159,8 @@ public class GoogleSearchService implements HealthIndicator {
         if (properties.isRecordEnabled() && properties.getRecordFolder() != null && !properties.getRecordFolder().isBlank()) {
             try {
                 // Sanitize the query for a safe file name.
-                String sanitizedQuery = sanitizeUrlToFileName(request.getQuery());
-                String fileName = sanitizedQuery + "-" + request.getNumResults() + ".json";
+                String sanitizedQuery = sanitizeUrlToFileName(request.query());
+                String fileName = sanitizedQuery + "-" + request.numResults() + ".json";
                 Path folderPath = Paths.get(properties.getRecordFolder());
                 if (!Files.exists(folderPath)) {
                     Files.createDirectories(folderPath);
@@ -168,7 +168,7 @@ public class GoogleSearchService implements HealthIndicator {
                 Path filePath = folderPath.resolve(fileName);
                 String jsonContent = serialisationService.toJson(result,true);
                 Files.writeString(filePath, jsonContent);
-                logger.info("Search results for {} are : \n{}",request.getQuery(), jsonContent);
+                logger.info("Search results for {} are : \n{}",request.query(), jsonContent);
                 logger.info("Recorded search result to file: {}", filePath.toAbsolutePath());
 
             } catch (Exception e) {
