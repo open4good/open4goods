@@ -44,6 +44,8 @@ import com.rometools.rome.feed.synd.SyndFeed;
 import com.rometools.rome.feed.synd.SyndFeedImpl;
 import com.rometools.rome.io.FeedException;
 import com.rometools.rome.io.SyndFeedOutput;
+import org.jsoup.Jsoup;
+import org.jsoup.safety.Safelist;
 
 import jakarta.annotation.PostConstruct;
 
@@ -250,7 +252,8 @@ public class BlogService implements HealthIndicator {
                     if (stopPos != -1) {
                         html = html.substring(0, stopPos);
                     }
-                    // TODO: Implement HTML sanitization for security best practices
+                    // Sanitize HTML content to avoid XSS
+                    html = Jsoup.clean(html, Safelist.basicWithImages());
                     // Replace blog attachment links with proxied equivalent links
                     html = html.replace("\"/bin/download/Blog", "\"" + BlogController.DEFAULT_PATH);
                     post.setBody(html);

@@ -127,7 +127,6 @@ public class SearchService {
 
 	    NativeQueryBuilder nativeQueryBuilder = NativeQuery.builder();
 
-	    // TODO(P1,security) : entry sanitisation
         String[] tokens = query.split(" ");
         List<Query> shouldClauses = new ArrayList<>();
         
@@ -609,17 +608,14 @@ public class SearchService {
 		return vsr;
 	}
 
-	public String sanitize(String q) {
-		return StringUtils.normalizeSpace(q.replace("(", " ")
-				.replace(")", " ")
-				.replace("[", " ")
-				.replace("]", " ")
-				.replace("+", " ")
-				.replace("-", " ")
-				.replace(":", " ")
-				.replace("\"", " "));
+    public String sanitize(String q) {
+            if (q == null) {
+                    return "";
+            }
+            String sanitized = q.replaceAll("[^\\p{IsAlphabetic}\\p{IsDigit}\\s]", " ");
+            return StringUtils.normalizeSpace(sanitized);
 
-	}
+    }
 
 
 }
