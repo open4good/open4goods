@@ -3,33 +3,76 @@ package org.open4goods.api.config.yml;
 import java.util.HashSet;
 import java.util.Set;
 
-/**
- * Configuration driving the verticals generation batch.
- */
-public record VerticalsGenerationConfig(
-        Integer limit,
-        String mappingFilePath,
-        Set<String> mustExistsFields,
-        Double associatedCategoriesEvictionPercent,
-        Integer minimumTotalHits) {
+public class VerticalsGenerationConfig {
 
-    /** Creates config with default values. */
-    public VerticalsGenerationConfig() {
-        this(null, "/opt/open4goods/config/categories-comappings.json", new HashSet<>(), 0.05, 1);
-    }
+	/**
+	 * Max number of items to process
+	 */
+	private Integer limit;
 
-    /** Canonical constructor applying defaults where necessary. */
-    public VerticalsGenerationConfig {
-        mappingFilePath = mappingFilePath == null ? "/opt/open4goods/config/categories-comappings.json" : mappingFilePath;
-        mustExistsFields = mustExistsFields == null ? new HashSet<>() : mustExistsFields;
-        associatedCategoriesEvictionPercent = associatedCategoriesEvictionPercent == null ? 0.05 : associatedCategoriesEvictionPercent;
-        minimumTotalHits = minimumTotalHits == null ? 1 : minimumTotalHits;
-    }
+	/**
+	 * Used to fast load mappings
+	 */
+	private String mappingFilePath = "/opt/open4goods/config/categories-comappings.json";
 
-    // Compatibility accessors -------------------------------------------------
-    public Integer getLimit() { return limit; }
-    public String getMappingFilePath() { return mappingFilePath; }
-    public Set<String> getMustExistsFields() { return mustExistsFields; }
-    public Double getAssociatedCategoriesEvictionPercent() { return associatedCategoriesEvictionPercent; }
-    public Integer getMinimumTotalHits() { return minimumTotalHits; }
+	/**
+	 * Only products for which those attributes are not empty will be processed
+	 */
+	private Set<String> mustExistsFields = new HashSet<>();
+
+	/**
+	 * The minimum percent of product covrage an associated category must have to be conservated
+	 */
+	private Double associatedCategoriesEvictionPercent = 0.05;
+
+	/**
+	 * The minimum total hits a category must have
+	 */
+	private Integer minimumTotalHits = 1;
+
+
+	public String getMappingFilePath() {
+		return mappingFilePath;
+	}
+
+	public void setMappingFilePath(String mappingFilePath) {
+		this.mappingFilePath = mappingFilePath;
+	}
+
+	public Set<String> getMustExistsFields() {
+		return mustExistsFields;
+	}
+
+	public void setMustExistsFields(Set<String> attributesFilters) {
+		this.mustExistsFields = attributesFilters;
+	}
+
+	public Integer getLimit() {
+		return limit;
+	}
+
+	public void setLimit(Integer limit) {
+		this.limit = limit;
+	}
+
+	public Double getAssociatedCategoriesEvictionPercent() {
+		return associatedCategoriesEvictionPercent;
+	}
+
+	public void setAssociatedCategoriesEvictionPercent(Double associatedCatgoriesEvictionPercent) {
+		this.associatedCategoriesEvictionPercent = associatedCatgoriesEvictionPercent;
+	}
+
+	public Integer getMinimumTotalHits() {
+		return minimumTotalHits;
+	}
+
+	public void setMinimumTotalHits(Integer minimumTotalHits) {
+		this.minimumTotalHits = minimumTotalHits;
+	}
+
+
+
+
+
 }
