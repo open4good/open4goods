@@ -81,7 +81,7 @@ No class in a lower layer may depend on a higher one.
 ## 5  Coding standards
 
 - **Formatting**: 4-space indent, braces on a new line.  
-- **Language features**: Records, sealed classes, pattern matching where useful.  
+- **Language features**: Records (except for Spring Boot config binding), sealed classes, pattern matching where useful.  
 - **Error handling**: Custom exceptions + RFC 9457 / Problem-Detail responses.  
 - **Logging**: SLF4J parameterised messages and structured logging.  
 - **Tests**: Unit + integration tests for every feature or bug-fix.  
