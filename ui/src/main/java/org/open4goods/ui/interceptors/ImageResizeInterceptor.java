@@ -25,22 +25,21 @@ import jakarta.servlet.http.HttpServletResponse;
 
 /**
  * Interceptor that handles on-the-fly resizing and caching of image requests.
- * 
+ *
  * <p>This interceptor intercepts HTTP requests for images in WebP format,
  * checks for cached versions, resizes images if needed, and caches the results.
  * It improves performance by serving cached images and reduces server load.</p>
- * 
+ *
  * <ul>
  *   <li>Parses dimensions from the request URI.</li>
  *   <li>Fetches source images in multiple formats (e.g., PNG, JPG, WebP).</li>
  *   <li>Resizes images and caches them as WebP files.</li>
  *   <li>Serves cached images with appropriate headers for client-side caching.</li>
  * </ul>
- * 
+ *
  * This class is a Spring {@link Component} and implements {@link HandlerInterceptor}.
  * TODO(p2, perf) : perf : add a in memory cache for commons url patterns (/assets, ...)
  */
-@Component
 public class ImageResizeInterceptor implements HandlerInterceptor {
 
     private static final Logger logger = LoggerFactory.getLogger(ImageResizeInterceptor.class);
@@ -59,7 +58,7 @@ public class ImageResizeInterceptor implements HandlerInterceptor {
 
     /**
      * Constructs an {@code ImageResizeInterceptor} with the specified resource service.
-     * 
+     *
      * @param resourceService the service for managing cached resources
      */
     public ImageResizeInterceptor(ResourceService resourceService, Set<String> allowedResize, String imageBaseUrl) {
@@ -70,10 +69,10 @@ public class ImageResizeInterceptor implements HandlerInterceptor {
 
     /**
      * Intercepts HTTP requests to check for image resizing and caching logic.
-     * 
+     *
      * <p>If the request is for a WebP image, it verifies whether the cached image exists.
      * If not, it resizes and caches the image. The cached image is then served to the client.</p>
-     * 
+     *
      * @param request  the HTTP servlet request
      * @param response the HTTP servlet response
      * @param handler  the handler for the request
@@ -93,8 +92,8 @@ public class ImageResizeInterceptor implements HandlerInterceptor {
             	logger.info("Cache miss for file: {}", requestURI);
 
                 int[] dimensions = parseDimensions(requestURI);
-                
-                
+
+
                 BufferedImage sourceImage = findSourceImage(requestURI, dimensions != null);
 
                 if (sourceImage == null) {
@@ -105,14 +104,14 @@ public class ImageResizeInterceptor implements HandlerInterceptor {
 
                 // Resize the image if dimensions are provided
                 if (dimensions != null) {
-                
+
                 	// Wheck this is a valid requested size
                 	if (!allowedResize.contains(requestURI.substring(requestURI.lastIndexOf("-")+1,requestURI.lastIndexOf(".") ))) {
                 		logger.error("Image resizing suffix invalid for : {}",requestURI );
                         response.sendError(HttpServletResponse.SC_NOT_FOUND, "Image not found");
                         return false;
                 	}
-                	
+
                 	sourceImage = resizeImage(sourceImage, dimensions[0], dimensions[1]);
                     logger.info("Image resized to {}x{}", dimensions[0], dimensions[1]);
                 }
@@ -137,7 +136,7 @@ public class ImageResizeInterceptor implements HandlerInterceptor {
 
     /**
      * Builds a {@link Resource} object for the given request URI.
-     * 
+     *
      * @param requestURI the URI of the image request
      * @return a {@code Resource} representing the requested image
      */
@@ -151,9 +150,9 @@ public class ImageResizeInterceptor implements HandlerInterceptor {
 
     /**
      * Parses dimensions (width and height) from the given file name.
-     * 
+     *
      * @param fileName the file name to parse
-     * @param dimensions 
+     * @param dimensions
      * @return an array with width and height, or {@code null} if dimensions are not specified
      */
     private int[] parseDimensions(String fileName) {
@@ -172,20 +171,20 @@ public class ImageResizeInterceptor implements HandlerInterceptor {
 
     /**
      * Finds the source image by checking multiple file extensions.
-     * 
+     *
      * @param baseImageName the base name of the image file
-     * @param hasDimensionsArgument 
+     * @param hasDimensionsArgument
      * @return a {@link BufferedImage} of the source image, or {@code null} if not found
      * @throws IOException if an error occurs during image fetching
      */
     private BufferedImage findSourceImage(String baseImageName, boolean hasDimensionsArgument) throws IOException {
         String baseName = baseImageName.substring(0, baseImageName.lastIndexOf("."));
-        
+
         // If dimensions argument, trim to original
         if (hasDimensionsArgument) {
         	baseName = baseName.substring(0, baseImageName.lastIndexOf("-"));
         }
-        
+
         // TODO(p1,feature) : Enable original webp handling, (infinite loop cause re intercepted)
         String[] extensions = { "png", "jpg", "jpeg"};
         for (String ext : extensions) {
@@ -204,7 +203,7 @@ public class ImageResizeInterceptor implements HandlerInterceptor {
 
     /**
      * Fetches an image from a URL.
-     * 
+     *
      * @param urlString the URL of the image
      * @return a {@link BufferedImage} of the fetched image, or {@code null} if the image could not be fetched
      */
@@ -228,7 +227,7 @@ public class ImageResizeInterceptor implements HandlerInterceptor {
 
     /**
      * Resizes an image to the specified dimensions, maintaining aspect ratio.
-     * 
+     *
      * @param originalImage the original {@link BufferedImage} to resize
      * @param width the target width
      * @param height the target height
@@ -252,7 +251,7 @@ public class ImageResizeInterceptor implements HandlerInterceptor {
 
     /**
      * Serves a cached image file to the client.
-     * 
+     *
      * @param response   the HTTP servlet response
      * @param cachedFile the cached image file to serve
      * @throws IOException if an error occurs during file transfer

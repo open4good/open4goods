@@ -459,7 +459,9 @@ public class ProductController  {
 
 
                         String serToken = URLEncoder.encode(serialisationService.compressString(serialisationService.toJson(token)), Charset.defaultCharset());
-                        return price.withAffiliationToken(serToken);
+                        price.setAffiliationToken(serToken);
+
+                         return price;
                 } catch (Exception e) {
                         LOGGER.error("Error while generating affiliation token for {} : {}", data, e.getMessage());
                         return price;

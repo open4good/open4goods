@@ -39,22 +39,22 @@ import com.google.common.collect.Sets;
  *
  */
 public class PriceAggregationService extends AbstractAggregationService {
-	
+
 	/**
 	 * Allows to compute the incomes, it is the average percent reversed to Nudger by affiliation platforms
 	 */
 	private static Double averageAffiliationRatio = 0.05;
-	
+
 	/**
 	 * The ratio that allows to estimate benefits from revenue
 	 */
 	private static Double incomesToBenefitsRatio = 0.75;
-	
+
 	/**
 	 * The percent of benefits reversed
 	 */
 	private static Double percentBenefitsReversed = 0.1;
-	
+
 
 	public PriceAggregationService(final Logger logger) {
 		super(logger);
@@ -68,25 +68,25 @@ public class PriceAggregationService extends AbstractAggregationService {
 		} else if (fragment.getPrice().getPrice() == 0.0) {
 			// Checking price is not 0, can happens
 			dedicatedLogger.info("Price is 0 for datafragment {}, skipping", fragment);
-		} else {		
+		} else {
 			// Adding the price in the price list, we fill filter and remove outdated in the onProduct() méthod
 			AggregatedPrice aggPrice = new AggregatedPrice(fragment);
-			aggregatedData.getPrice().getOffers().add(aggPrice);			
+			aggregatedData.getPrice().getOffers().add(aggPrice);
 		}
-		
+
 		// Calling the stateless handling
 		onProduct(aggregatedData, vConf);
 		return null;
 	}
 
-	
+
 	@Override
 	public void onProduct(Product data, VerticalConfig vConf) throws AggregationSkipException {
 
 		///////////////////
-		// Filtering : 
+		// Filtering :
 		//////////////////
-		
+
 		// Key is providerName + name
 		final Map<String, AggregatedPrice> reducedPrices = new HashMap<>();
 
@@ -101,21 +101,21 @@ public class PriceAggregationService extends AbstractAggregationService {
 			} else {
 
 				final String key = pricMerchanteKey(df);
-				// Filtering : keeping lowest prices per provider and offer names	
+				// Filtering : keeping lowest prices per provider and offer names
 				if (null == reducedPrices.get(key) || reducedPrices.get(key).getPrice() > df.getPrice()) {
 					reducedPrices.put(key, df);
 				}
 			}
 		}
 
-                Set<AggregatedPrice> prices = new HashSet<>(reducedPrices.values());
+		final Set<AggregatedPrice> prices = new HashSet<>(reducedPrices.values());
 
-                ////////////////////////////
-                // Set the contribution amount
-                ////////////////////////////
-                prices = prices.stream()
-                                .map(p -> p.withCompensation(computeEstimatedContribution(p.getPrice())))
-                                .collect(Collectors.toSet());
+		////////////////////////////
+		// Set the contribution amount
+		////////////////////////////
+		for (AggregatedPrice price : prices) {
+			price.setCompensation(computeEstimatedContribution(price.getPrice()));
+		}
 
 		AggregatedPrices aggPrices = data.getPrice();
 
@@ -128,12 +128,12 @@ public class PriceAggregationService extends AbstractAggregationService {
 
 		// set Number of offers
 		data.setOffersCount(prices.size());
-		
+
 		// Reseting prices (reducing)
 		data.getPrice().setOffers(Sets.newHashSet(prices));
 
 		// Computing / incrementing history
-		computePriceHistory(aggPrices, ProductCondition.OCCASION);		
+		computePriceHistory(aggPrices, ProductCondition.OCCASION);
 		computePriceHistory(aggPrices, ProductCondition.NEW);
 
 		// Setting the product state summary
@@ -146,7 +146,7 @@ public class PriceAggregationService extends AbstractAggregationService {
 		// Setting if has an occasion offer
 	}
 
-	
+
 	/**
 	 * Compute the estimated contribution for the given price
 	 * @param price
@@ -158,12 +158,12 @@ public class PriceAggregationService extends AbstractAggregationService {
 
     /**
      * Compute the price history for a given product condition.
-     * 
+     *
      * @param prices the aggregated prices data
      * @param state  the product condition (NEW or OCCASION)
      */
     private void computePriceHistory(AggregatedPrices prices, ProductCondition state) {
-    	
+
         AggregatedPrice minPrice = prices.getMinPrice(state).orElse(null);
         // Skip history computation when no price is available for the condition
         if (minPrice == null) {
@@ -179,33 +179,33 @@ public class PriceAggregationService extends AbstractAggregationService {
         for (PriceHistory ph : prices.getHistory(state)) {
 
             // Check if we have a price for the current day
-            dailyLowestPrices.merge(ph.getDay(), ph, (existing, newPrice) -> 
+            dailyLowestPrices.merge(ph.getDay(), ph, (existing, newPrice) ->
                 existing.getPrice() <= newPrice.getPrice() ? existing : newPrice);
         }
 
-        
+
         // Update the history with normalized prices
         List<PriceHistory> history = new ArrayList<>(dailyLowestPrices.values());
         history.sort(Comparator.comparingLong(PriceHistory::getTimestamp)); // Sort by timestamp to maintain order
-        
 
-        
+
+
         /*
          * We conserve one history price a day
          */
         if (minPrice != null ) {
         	if (history.size() ==  0 || !history.getLast().getPrice().equals(minPrice.getPrice())) {
-        		history.add(new PriceHistory(minPrice));        			
+        		history.add(new PriceHistory(minPrice));
         	}
-        	else {        	
+        	else {
 	        	PriceHistory lastPrice = history.getLast();
 	        	if (null != lastPrice) {
-	        		
-	        		
+
+
 	        		if (lastPrice.getDay() ==  System.currentTimeMillis() / (1000 * 60 * 60 * 24)) {
 	        			history.removeLast();
-	        		} 
-	        		
+	        		}
+
 	        	}
         	}
         }
@@ -221,14 +221,14 @@ public class PriceAggregationService extends AbstractAggregationService {
             } else if (lastPrice.getPrice() > secondLastPrice.getPrice()) {
                 trend = 1; // Price increased
             }
-            
+
             prices.getTrends().put(state, trend);
-            
+
         } else {
         	 prices.getTrends().put(state, 0);
         }
 
-       
+
 
         // TODO(p3,conf) : price history max size From conf
         LocalDate twoYearsAgoDate = LocalDate.now().minusYears(2);
@@ -254,7 +254,7 @@ public class PriceAggregationService extends AbstractAggregationService {
 
 	/**
 	 * Add a key for a aprice and a marketplace.
-	 * 
+	 *
 	 * @param df
 	 * @return
 	 */
@@ -289,6 +289,6 @@ public class PriceAggregationService extends AbstractAggregationService {
 	}
 
 
-	
+
 
 }

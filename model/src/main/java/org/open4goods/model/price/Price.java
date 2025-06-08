@@ -31,15 +31,15 @@ public class Price implements Validable, Standardisable, Comparable<Double> {
 
 	@NotNull
 	@Field(index = true, store = false, type = FieldType.Double)
-	private Double price;
+	protected Double price;
 
 	@NotNull
 	@Field(index = false, store = false, type = FieldType.Keyword)
-	private Currency currency;
+	protected Currency currency;
 
 	@NotNull
 	@Field(index = true, store = false, type = FieldType.Date, format = DateFormat.epoch_millis)
-	private Long timeStamp;
+	protected Long timeStamp;
 
 	//	private static final SimpleDateFormat iso8601 = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
 
