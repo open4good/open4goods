@@ -21,7 +21,7 @@ import org.springframework.http.MediaType;
 import jakarta.servlet.http.HttpServletResponse;
 
 /**
- * This service provides stuff used in DevMode, is used to populate the database with demo data in dev mode, 
+ * This service provides stuff used in DevMode, is used to populate the database with demo data in dev mode,
  */
 public class DevModeService {
 
@@ -56,23 +56,23 @@ public class DevModeService {
 			}
 		}
 	}
-	
+
 	/**
 	 * Check if the database needs data ingestion
 	 * @return
 	 */
 	public boolean needsUpdate() {
 		// TODO(p1, design) : fix (no index auto creation)
-		
+
 		return false;
-//		
+//
 //		boolean ret = repository.countMainIndexHavingRecentPrices() == 0;
 //		LOGGER.info("DevMode : Products needs update : "+ret);
 //		return ret;
 	}
-	
+
 	/**
-	 * Fetch the demo products into stores. Index products from the configured endpoint, updating timestamp to have o longer product life. 
+	 * Fetch the demo products into stores. Index products from the configured endpoint, updating timestamp to have o longer product life.
 	 * @throws IOException
 	 * @throws MalformedURLException
 	 */
@@ -83,9 +83,8 @@ public class DevModeService {
 				Stream<String> stream = reader.lines()) {
 			stream.forEach(e -> {
 				try {
-                                        Product p = serialisationService.fromJson(e, Product.class);
-                                        p.getPrice().setMinPrice(
-                                                        p.getPrice().getMinPrice().withTimeStamp(System.currentTimeMillis()));
+					Product p = serialisationService.fromJson(e, Product.class);
+					p.getPrice().getMinPrice().setTimeStamp(System.currentTimeMillis());
 					LOGGER.info("DevMode : Indexing product : "+p.getId());
 					repository.forceIndex(p);
 				} catch (Exception e1) {

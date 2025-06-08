@@ -338,6 +338,7 @@ public class AppConfig {
         }
 
     // TODO : should not be required at ui side
+        @Bean
     GoogleTaxonomyService googleTaxonomyService(@Autowired RemoteFileCachingService remoteFileCachingService) {
                 GoogleTaxonomyService gts = new GoogleTaxonomyService(remoteFileCachingService);
 
