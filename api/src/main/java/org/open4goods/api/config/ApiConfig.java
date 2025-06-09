@@ -28,6 +28,7 @@ import org.open4goods.commons.services.DataSourceConfigService;
 import org.open4goods.commons.services.GoogleTaxonomyService;
 import org.open4goods.commons.services.Gs1PrefixService;
 import org.open4goods.commons.services.IcecatService;
+import org.open4goods.commons.config.yml.IcecatConfiguration;
 import org.open4goods.commons.services.ProductNameSelectionService;
 import org.open4goods.commons.services.ResourceService;
 import org.open4goods.commons.services.SearchService;
@@ -127,11 +128,15 @@ public class ApiConfig {
 
 	@Bean
 
-	IcecatService icecatFeatureService(RemoteFileCachingService fileCachingService, BrandService brandService, VerticalsConfigService verticalConfigService) throws SAXException {
-		// NOTE : xmlMapper not injected because corruct the springdoc used one. Could
-		// use a @Primary derivation
-		return new IcecatService(new XmlMapper(), apiProperties.getIcecatFeatureConfig(), fileCachingService, apiProperties.remoteCachingFolder(), brandService, verticalConfigService);
-	}
+    IcecatService icecatFeatureService(RemoteFileCachingService fileCachingService,
+                                       BrandService brandService,
+                                       VerticalsConfigService verticalConfigService,
+                                       IcecatConfiguration icecatConfiguration) throws SAXException {
+                // NOTE : xmlMapper not injected because corruct the springdoc used one. Could
+                // use a @Primary derivation
+                return new IcecatService(new XmlMapper(), icecatConfiguration,
+                                fileCachingService, apiProperties.remoteCachingFolder(), brandService, verticalConfigService);
+        }
 
 
 	@Bean
