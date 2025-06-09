@@ -1,5 +1,10 @@
 package org.open4goods.commons.config.yml;
 
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.stereotype.Component;
+
+@Component
+@ConfigurationProperties(prefix = "icecat")
 public class IcecatConfiguration {
 
 	private String featuresListFileUri;
