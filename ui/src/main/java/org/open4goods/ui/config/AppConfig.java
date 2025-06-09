@@ -17,6 +17,8 @@ import org.open4goods.commons.services.BrandService;
 import org.open4goods.commons.services.DataSourceConfigService;
 import org.open4goods.commons.services.GoogleTaxonomyService;
 import org.open4goods.commons.services.IcecatService;
+import org.open4goods.commons.services.loader.FeatureLoader;
+import org.open4goods.commons.services.loader.CategoryLoader;
 import org.open4goods.commons.services.MailService;
 import org.open4goods.commons.services.ResourceBundle;
 import org.open4goods.commons.services.ResourceService;
@@ -239,10 +241,18 @@ public class AppConfig {
 	}
 
 	@Bean
-	IcecatService icecatFeatureService(UiConfig properties, RemoteFileCachingService fileCachingService, BrandService brandService, VerticalsConfigService verticalConfigService) throws SAXException {
-		// TODO : xmlMapper not injected because corruct the springdoc used one. Should use a @Primary derivation
-		return new IcecatService(new XmlMapper(), properties.getIcecatFeatureConfig(), fileCachingService, properties.getRemoteCachingFolder(), brandService, verticalConfigService);
-	}
+    FeatureLoader featureLoader(UiConfig properties, RemoteFileCachingService fileCachingService, BrandService brandService) {
+                return new FeatureLoader(new XmlMapper(), properties.getIcecatFeatureConfig(), fileCachingService, properties.getRemoteCachingFolder(), brandService);
+        }
+
+    CategoryLoader categoryLoader(UiConfig properties, RemoteFileCachingService fileCachingService, VerticalsConfigService verticalConfigService, FeatureLoader featureLoader) {
+                return new CategoryLoader(new XmlMapper(), properties.getIcecatFeatureConfig(), fileCachingService, properties.getRemoteCachingFolder(), verticalConfigService, featureLoader);
+        }
+
+    IcecatService icecatFeatureService(UiConfig properties, RemoteFileCachingService fileCachingService, FeatureLoader featureLoader, CategoryLoader categoryLoader) {
+                // TODO : xmlMapper not injected because corruct the springdoc used one. Should use a @Primary derivation
+                return new IcecatService(new XmlMapper(), properties.getIcecatFeatureConfig(), fileCachingService, properties.getRemoteCachingFolder(), featureLoader, categoryLoader);
+        }
 
 
 	@Bean
