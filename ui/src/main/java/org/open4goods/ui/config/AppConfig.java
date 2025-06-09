@@ -17,6 +17,7 @@ import org.open4goods.commons.services.BrandService;
 import org.open4goods.commons.services.DataSourceConfigService;
 import org.open4goods.commons.services.GoogleTaxonomyService;
 import org.open4goods.commons.services.IcecatService;
+import org.open4goods.commons.config.yml.IcecatConfiguration;
 import org.open4goods.commons.services.MailService;
 import org.open4goods.commons.services.ResourceBundle;
 import org.open4goods.commons.services.ResourceService;
@@ -239,10 +240,14 @@ public class AppConfig {
 	}
 
 	@Bean
-	IcecatService icecatFeatureService(UiConfig properties, RemoteFileCachingService fileCachingService, BrandService brandService, VerticalsConfigService verticalConfigService) throws SAXException {
-		// TODO : xmlMapper not injected because corruct the springdoc used one. Should use a @Primary derivation
-		return new IcecatService(new XmlMapper(), properties.getIcecatFeatureConfig(), fileCachingService, properties.getRemoteCachingFolder(), brandService, verticalConfigService);
-	}
+        IcecatService icecatFeatureService(UiConfig properties,
+                                           RemoteFileCachingService fileCachingService,
+                                           BrandService brandService,
+                                           VerticalsConfigService verticalConfigService,
+                                           IcecatConfiguration icecatConfiguration) throws SAXException {
+                // TODO : xmlMapper not injected because corruct the springdoc used one. Should use a @Primary derivation
+                return new IcecatService(new XmlMapper(), icecatConfiguration, fileCachingService, properties.getRemoteCachingFolder(), brandService, verticalConfigService);
+        }
 
 
 	@Bean

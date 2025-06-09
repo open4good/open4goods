@@ -1,0 +1,51 @@
+{
+  "groups": [
+    {
+      "name": "icecat",
+      "type": "org.open4goods.commons.config.yml.IcecatConfiguration",
+      "sourceType": "org.open4goods.commons.config.yml.IcecatConfiguration"
+    }
+  ],
+  "properties": [
+    {
+      "name": "icecat.features-list-file-uri",
+      "type": "java.lang.String",
+      "description": "URI to the XML file listing available Icecat features."
+    },
+    {
+      "name": "icecat.category-feature-list-file-uri",
+      "type": "java.lang.String",
+      "description": "URI to the XML file mapping categories to features."
+    },
+    {
+      "name": "icecat.language-list-file-uri",
+      "type": "java.lang.String",
+      "description": "URI to the Icecat languages definition file."
+    },
+    {
+      "name": "icecat.brands-list-file-uri",
+      "type": "java.lang.String",
+      "description": "URI to the file containing the list of brands."
+    },
+    {
+      "name": "icecat.categories-list-file-uri",
+      "type": "java.lang.String",
+      "description": "URI to the file containing the list of categories."
+    },
+    {
+      "name": "icecat.feature-groups-file-uri",
+      "type": "java.lang.String",
+      "description": "URI to the Icecat feature groups file."
+    },
+    {
+      "name": "icecat.user",
+      "type": "java.lang.String",
+      "description": "Icecat username for authenticated downloads."
+    },
+    {
+      "name": "icecat.password",
+      "type": "java.lang.String",
+      "description": "Icecat password for authenticated downloads."
+    }
+  ]
+}
