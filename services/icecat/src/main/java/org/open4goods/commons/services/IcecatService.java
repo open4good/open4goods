@@ -3,6 +3,7 @@ package org.open4goods.commons.services;
 import java.io.File;
 import java.io.FileInputStream;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -12,26 +13,23 @@ import java.util.stream.Collectors;
 import org.apache.commons.io.FileUtils;
 import org.open4goods.commons.config.yml.IcecatConfiguration;
 import org.open4goods.commons.model.dto.AttributesFeatureGroups;
+import org.open4goods.commons.services.loader.CategoryLoader;
+import org.open4goods.commons.services.loader.FeatureLoader;
 import org.open4goods.model.attribute.ProductAttribute;
 import org.open4goods.model.exceptions.TechnicalException;
 import org.open4goods.model.helper.IdHelper;
 import org.open4goods.model.icecat.IcecatCategory;
 import org.open4goods.model.icecat.IcecatFeature;
-import org.open4goods.model.icecat.IcecatFeatureGroup;
 import org.open4goods.model.icecat.IcecatLanguageHandler;
-import org.open4goods.model.icecat.IcecatModel;
 import org.open4goods.model.icecat.IcecatName;
 import org.open4goods.model.product.Product;
 import org.open4goods.model.vertical.FeatureGroup;
 import org.open4goods.model.vertical.VerticalConfig;
 import org.open4goods.services.remotefilecaching.service.RemoteFileCachingService;
-import org.open4goods.commons.services.loader.CategoryLoader;
-import org.open4goods.commons.services.loader.FeatureLoader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;
 import org.xml.sax.XMLReader;
 import org.xml.sax.helpers.XMLReaderFactory;
 
@@ -39,10 +37,10 @@ import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 
 
 /**
- * This service preloads some open4goods with (great) icecat data. 
+ * This service preloads some open4goods with (great) icecat data.
  * Brands are injected in BrandService
  * FeatureGroups are injected in verticals
- * 
+ *
  *   It also provides endpoints to access icecat features, languages, and so on....
  * TODO : all Long to Integer
  */
@@ -61,9 +59,9 @@ public class IcecatService {
                 // For language
                 private Map<String, String> codeByLanguage;
                 private Map<String, String> languageByCode;
-		
-		
-		
+
+
+
 		/**
 		 * Constructor
 		 */
@@ -89,7 +87,7 @@ public class IcecatService {
 
 
 	public void icecatInit () throws TechnicalException {
-		
+
 		// Orders matters
 		// For names on feature groups
                 featureLoader.loadFeatureGroups();
@@ -101,29 +99,29 @@ public class IcecatService {
 
                 featureLoader.loadFeatures();
                 categoryLoader.loadCategoryFeatureList();
-		
+
 		LOGGER.info("Icecat up and running");
 	}
-	
+
 	/**
 	 * Load features from the IceCat XML file.
-	 * @throws TechnicalException 
-	 * TODO : Should be done in a separate thread 
+	 * @throws TechnicalException
+	 * TODO : Should be done in a separate thread
 	 */
 
 
-	
+
 	/**
 	 * Load features Groups from the IceCat XML file.
-	 * @throws TechnicalException 
-	 * TODO : Should be done in a separate thread 
+	 * @throws TechnicalException
+	 * TODO : Should be done in a separate thread
 	 */
 
-	
+
 	public void loadLanguages() throws TechnicalException {
-		
+
 		// 1 - Download the file with basic auth
-		
+
 		// Unzip it
 		if (null == iceCatConfig.getLanguageListFileUri()) {
 			LOGGER.error("No features list file uri configured");
@@ -133,7 +131,7 @@ public class IcecatService {
 		File icecatFile = getCachedFile(iceCatConfig.getLanguageListFileUri(), iceCatConfig.getUser(), iceCatConfig.getPassword());
 
 		 try {
-	
+
                         XMLReader xmlReader = XMLReaderFactory.createXMLReader();
                         xmlReader.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
                         xmlReader.setFeature("http://xml.org/sax/features/external-general-entities", false);
@@ -142,28 +140,28 @@ public class IcecatService {
 
                         // Créez une instance de votre gestionnaire
 			 IcecatLanguageHandler handler = new IcecatLanguageHandler();
-			 
+
 			 // Configurez le XMLReader pour utiliser votre gestionnaire
 			 xmlReader.setContentHandler(handler);
-			 
+
 			 // Parse le fichier XML
 			 FileInputStream inputStream = new FileInputStream(icecatFile);
 			 xmlReader.parse(new InputSource(inputStream));
-			 
+
 			 // Récupérez et affichez la map des languages
 			 this.languageByCode  = handler.getLanguageByCode();
 			 this.codeByLanguage  = handler.getCodeBylanguage();
-			 
+
 		 } catch (Exception e) {
 			LOGGER.error("Error while loading languages", e);
 		}
 		 LOGGER.info("End loading of features from {}", iceCatConfig.getFeaturesListFileUri());
 	}
 
-	
 
-	
-	
+
+
+
 
 
 	/**
@@ -178,9 +176,9 @@ public class IcecatService {
 
 
 
-	
-	
-	
+
+
+
 
 	/**
 	 * Donload feature file, unzip it and maintain the cached version
@@ -194,15 +192,15 @@ public class IcecatService {
 	private File getCachedFile(String url, String user, String password) throws TechnicalException {
 
 		LOGGER.info("Retrieving file : {}", url);
-		File destFile = new File(remoteCachingFolder+File.separator+IdHelper.getHashedName(url));		
+		File destFile = new File(remoteCachingFolder+File.separator+IdHelper.getHashedName(url));
 		// Return the cached file if it exists
 		if (destFile.exists()) {
 			// TODO (p3, evolution): Have a refresh policy
 			LOGGER.info("File {} already cached", url);
 			return destFile;
 		}
-		
-		File tmpFile = new File(remoteCachingFolder+File.separator+"tmp-"+IdHelper.getHashedName(url));		
+
+		File tmpFile = new File(remoteCachingFolder+File.separator+"tmp-"+IdHelper.getHashedName(url));
 		try {
 			LOGGER.info("Starting download : {}", url);
 			fileCachingService.downloadTo(user, password, url, tmpFile);
@@ -213,24 +211,24 @@ public class IcecatService {
 		} catch (Exception e) {
 			throw new TechnicalException("Error retrieving resource",e);
 		} finally {
-			FileUtils.deleteQuietly(tmpFile);			
+			FileUtils.deleteQuietly(tmpFile);
 		}
 	}
-	
-	
+
+
 	// TODO : Perf, caching
         public String getFeatureName(Integer featureID, String language) {
 
                 IcecatFeature feature = featureLoader.getFeaturesById().get(featureID);
 		Integer icecatLanguage = getIceCatLangId(language);
 		if (null != feature) {
-			
+
 			List<IcecatName> names = feature.getNames().getNames();
 			for (IcecatName name : names) {
 				if (name.getLangId() == icecatLanguage.intValue()) {
 					return name.getValue() == null ? name.getTextValue() : name.getValue();
 				}
-			}			
+			}
 		}
 		return "Unsolved : " + featureID + ","+ icecatLanguage;
 	}
@@ -244,8 +242,8 @@ public class IcecatService {
 		return Integer.valueOf(languageByCode.getOrDefault(language, "1"));
 	}
 
-	
-	
+
+
 	/**
 	 * Loads the FeatureGroups for a given product, according to Icecat taxonomy
 	 * @param vertical
@@ -257,9 +255,9 @@ public class IcecatService {
 	// of icecat stuff to open4goods attribute model
 	public List<AttributesFeatureGroups> features(VerticalConfig vertical, String language, Product product) {
 		List<AttributesFeatureGroups> ret = new ArrayList<>();
-		
+
 		Integer icecatLanguage = getIceCatLangId(language);
-			
+
 		// Initial building
 		if (null != vertical) {
 			for (FeatureGroup fg : vertical.getFeatureGroups()) {
@@ -277,12 +275,12 @@ public class IcecatService {
 						if (null != i18nName) {
 							a.setName(i18nName.getTextValue());
 						}
-						
-						
+
+
 						// Splitting on "," for multi values
 						if (a.getValue().contains(",")) {
 							String[] values = a.getValue().split(",");
-							if (values.length > 2) 
+							if (values.length > 2)
 							{
 									// No real multi value
 								StringBuilder sb =	new StringBuilder();
@@ -296,17 +294,17 @@ public class IcecatService {
 						}
 					}
 				}
-				
+
 				if (ufg.getAttributes().size() > 0) {
 					ret.add(ufg);
 				}
 			}
 		}
-		
+
 		return ret;
-		
+
 	}
-	
+
 	public Set<Integer> featuresId(VerticalConfig vertical) {
 		Set<Integer> ret = new HashSet<>();
 		// Initial building
@@ -315,14 +313,14 @@ public class IcecatService {
 				for (Integer fId : fg.getFeaturesId()) {
 					ret.add(fId);
 				}
-				
+
 			}
 		}
-		
+
 		return ret;
-		
+
 	}
-	
+
 	/**
 	 * Loads the list of features, aggegated by UiFeatureGroup
 	 * @param vertical
@@ -333,7 +331,7 @@ public class IcecatService {
 	// TODO  (P1, perf) : Caching of icecat stuff to open4goods attribute model
 	public Map<String, String> types(VerticalConfig vertical) {
 		Map<String,String> ret = new HashMap<>();
-		
+
 		// Initial building
 		if (null != vertical) {
 			for (FeatureGroup fg : vertical.getFeatureGroups()) {
@@ -342,42 +340,42 @@ public class IcecatService {
 				for (Integer fId : fg.getFeaturesId()) {
 						// Updating attribute name
                                                 IcecatFeature f = featureLoader.getFeaturesById().get(fId);
-						
+
 						// TODO : Perf
 						IcecatName i18nName = f.getNames().getNames().stream().filter(e->e.getLangId() == 1).findFirst().orElse(null);
-						
+
 						if (null != i18nName) {
 							ret.put(i18nName.getTextValue(), f.getType());
 						} else {
 							LOGGER.error("Name not found for feature {} - {}",fId, f);
 						}
 				}
-				
+
 			}
 		}
-		
+
 		return ret;
-		
+
 	}
 
 
 	/**
 	 * Resolve the icecat features id, and apply the english name if an unconflicted match is found.
-	 * The resolution is operated on the vertical matching features id if set, on all features id if not set 
+	 * The resolution is operated on the vertical matching features id if set, on all features id if not set
 	 * @param name
 	 * @return
 	 */
 	public String getOriginalEnglishName(String name, VerticalConfig vc) {
-		
+
 		Set<Integer> featuresId = resolveFeatureName(name);
-		
+
 		if (featuresId == null) {
 			LOGGER.warn("No icecat name found for {}",name);
 			return name;
-		} 
-		
+		}
+
 		if (vc != null && vc.getId() != null) {
-			
+
 			// Cloning, to not modify the original map
 			featuresId = new HashSet<Integer>(featuresId);
 			featuresId.retainAll(featuresId(vc));
@@ -386,17 +384,17 @@ public class IcecatService {
 				return name;
 			}
 		}
-	
+
 	 if (featuresId.size() ==1) {
 			String ret = getFeatureName(featuresId.stream().findFirst().orElse(null), "en");
 			LOGGER.error("Resolved feature name : {}->{}",name, ret);
 			return ret;
-			
+
 		} else {
 			Set<String> attrNames = featuresId.stream().map(e-> e + ":"+getFeatureName(e, "en")).collect(Collectors.toSet());
 			LOGGER.warn("Conflict ! attr {} can be resolved to {}", name, attrNames);
 			return name;
-		}		
+		}
 	}
 
 
@@ -420,8 +418,8 @@ public class IcecatService {
                 categoryLoader.getCategoriesById().clear();
                 categoryLoader.getCategoriesById().putAll(categoriesById);
         }
-	
-	
-	
-	
+
+
+
+
 }
