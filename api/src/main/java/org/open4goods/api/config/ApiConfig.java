@@ -28,6 +28,8 @@ import org.open4goods.commons.services.DataSourceConfigService;
 import org.open4goods.commons.services.GoogleTaxonomyService;
 import org.open4goods.commons.services.Gs1PrefixService;
 import org.open4goods.commons.services.IcecatService;
+import org.open4goods.commons.services.loader.FeatureLoader;
+import org.open4goods.commons.services.loader.CategoryLoader;
 import org.open4goods.commons.services.ProductNameSelectionService;
 import org.open4goods.commons.services.ResourceService;
 import org.open4goods.commons.services.SearchService;
@@ -127,11 +129,19 @@ public class ApiConfig {
 
 	@Bean
 
-	IcecatService icecatFeatureService(RemoteFileCachingService fileCachingService, BrandService brandService, VerticalsConfigService verticalConfigService) throws SAXException {
-		// NOTE : xmlMapper not injected because corruct the springdoc used one. Could
-		// use a @Primary derivation
-		return new IcecatService(new XmlMapper(), apiProperties.getIcecatFeatureConfig(), fileCachingService, apiProperties.remoteCachingFolder(), brandService, verticalConfigService);
-	}
+    FeatureLoader featureLoader(RemoteFileCachingService fileCachingService, BrandService brandService) {
+                return new FeatureLoader(new XmlMapper(), apiProperties.getIcecatFeatureConfig(), fileCachingService, apiProperties.remoteCachingFolder(), brandService);
+        }
+
+    CategoryLoader categoryLoader(RemoteFileCachingService fileCachingService, VerticalsConfigService verticalConfigService, FeatureLoader featureLoader) {
+                return new CategoryLoader(new XmlMapper(), apiProperties.getIcecatFeatureConfig(), fileCachingService, apiProperties.remoteCachingFolder(), verticalConfigService, featureLoader);
+        }
+
+    IcecatService icecatFeatureService(RemoteFileCachingService fileCachingService, FeatureLoader featureLoader, CategoryLoader categoryLoader) {
+                // NOTE : xmlMapper not injected because corruct the springdoc used one. Could
+                // use a @Primary derivation
+                return new IcecatService(new XmlMapper(), apiProperties.getIcecatFeatureConfig(), fileCachingService, apiProperties.remoteCachingFolder(), featureLoader, categoryLoader);
+        }
 
 
 	@Bean
