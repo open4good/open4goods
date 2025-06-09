@@ -27,7 +27,10 @@ public class IcecatServiceTest {
         BrandService brand = Mockito.mock(BrandService.class);
         VerticalsConfigService vertical = Mockito.mock(VerticalsConfigService.class);
 
-        assertDoesNotThrow(() -> new IcecatService(new XmlMapper(), cfg, cache, ".", brand, vertical));
+        FeatureLoader fl = new FeatureLoader(new XmlMapper(), cfg, cache, ".", brand);
+        CategoryLoader cl = new CategoryLoader(new XmlMapper(), cfg, cache, ".", vertical, fl);
+
+        assertDoesNotThrow(() -> new IcecatService(new XmlMapper(), cfg, cache, ".", fl, cl));
     }
 
     @Test
@@ -37,7 +40,10 @@ public class IcecatServiceTest {
         BrandService brand = Mockito.mock(BrandService.class);
         VerticalsConfigService vertical = Mockito.mock(VerticalsConfigService.class);
 
-        IcecatService service = new IcecatService(new XmlMapper(), cfg, cache, ".", brand, vertical);
+        FeatureLoader fl = new FeatureLoader(new XmlMapper(), cfg, cache, ".", brand);
+        CategoryLoader cl = new CategoryLoader(new XmlMapper(), cfg, cache, ".", vertical, fl);
+
+        IcecatService service = new IcecatService(new XmlMapper(), cfg, cache, ".", fl, cl);
 
         IcecatName nameEn = new IcecatName();
         nameEn.setLangId(1);
@@ -49,15 +55,10 @@ public class IcecatServiceTest {
         feature.setID("1");
         feature.setNames(names);
 
-        Map<Integer, IcecatFeature> map = new HashMap<>();
+        Map<Integer, IcecatFeature> map = fl.getFeaturesById();
         map.put(1, feature);
-        service.setFeaturesById(map);
 
-        Field f = IcecatService.class.getDeclaredField("featuresByNames");
-        f.setAccessible(true);
-        Map<String, Set<Integer>> featuresByNames = new HashMap<>();
-        featuresByNames.put(IdHelper.normalizeAttributeName("Color"), Collections.singleton(1));
-        f.set(service, featuresByNames);
+        fl.getFeaturesByNames().put(IdHelper.normalizeAttributeName("Color"), Collections.singleton(1));
 
         String resolved = service.getOriginalEnglishName("Color", null);
         assertEquals("Color", resolved);
