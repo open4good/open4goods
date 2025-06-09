@@ -1,20 +1,22 @@
 package org.open4goods.commons.services;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import java.lang.reflect.Field;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Map;
 
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.open4goods.commons.config.yml.IcecatConfiguration;
-import org.open4goods.commons.services.BrandService;
-import org.open4goods.commons.services.VerticalsConfigService;
-import org.open4goods.services.remotefilecaching.service.RemoteFileCachingService;
+import org.open4goods.commons.services.loader.CategoryLoader;
+import org.open4goods.commons.services.loader.FeatureLoader;
 import org.open4goods.model.helper.IdHelper;
 import org.open4goods.model.icecat.IcecatFeature;
 import org.open4goods.model.icecat.IcecatName;
 import org.open4goods.model.icecat.IcecatNames;
+import org.open4goods.services.remotefilecaching.service.RemoteFileCachingService;
 
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 
