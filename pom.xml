@@ -10,52 +10,50 @@
 	<description>The open4goods project parent pom</description>
 	<url>https://github.com/open4good/open4goods</url>
 	<properties>
-		<github.global.server>github</github.global.server>
-		<springboot.version>3.5.0</springboot.version>
-		<java.version>21</java.version>
-		<maven.compiler.source>21</maven.compiler.source>
-		<maven.compiler.target>21</maven.compiler.target>
-		<global.version>0.0.1-SNAPSHOT</global.version>
-		<swagger.version>2.9.2</swagger.version>
-		<jacoco.version>0.8.13</jacoco.version>
-		<xwiki.version>11.10.2</xwiki.version>
+                <springboot.version>3.5.0</springboot.version>
+                <java.version>21</java.version>
+                <maven.compiler.source>21</maven.compiler.source>
+                <maven.compiler.target>21</maven.compiler.target>
+                <global.version>0.0.1-SNAPSHOT</global.version>
+                <jacoco.version>0.8.13</jacoco.version>
+                <xwiki.version>11.10.2</xwiki.version>
 
-		<processDependencyManagement>false</processDependencyManagement>
-		<processPluginDependenciesInPluginManagement>true</processPluginDependenciesInPluginManagement>
-		<maven-compiler-plugin-version>3.14.0</maven-compiler-plugin-version>
-		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<dependency.locations.enabled>false</dependency.locations.enabled>
-		<exclude.tests>nothing-to-exclude</exclude.tests>
-	</properties>
+                <!-- Library versions -->
+                <jsoup.version>1.20.1</jsoup.version>
+                <commons-io.version>2.19.0</commons-io.version>
+                <spring-boot-admin.version>3.4.6</spring-boot-admin.version>
+                <spring-boot-admin-ui.version>3.5.0</spring-boot-admin-ui.version>
 
-	<modules>
-		<module>admin</module>
-        <module>model</module>
-		<module>commons</module>
-		<module>verticals</module>
-		<module>crawler</module>
-		<module>api</module>
-		<module>ui</module>
-		<module>services/urlfetching</module>
-        <module>services/googlesearch</module>
-        <module>services/evaluation</module>
-        <module>services/serialisation</module>
-        <module>services/prompt</module>
-        <module>services/review-generation</module>
-        <module>services/product-repository</module>
-        <module>services/captcha</module>
-        <module>services/remotefilecaching</module>
+                <processDependencyManagement>false</processDependencyManagement>
+                <processPluginDependenciesInPluginManagement>true</processPluginDependenciesInPluginManagement>
+                <maven-compiler-plugin-version>3.14.0</maven-compiler-plugin-version>
+                <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+                <dependency.locations.enabled>false</dependency.locations.enabled>
+        </properties>
 
-        <module>services/favicon</module>
-        <module>services/github-feedback</module>
-        <module>services/xwiki-spring-boot-starter</module>
-        <module>services/image-processing</module>
-        <module>services/icecat</module>
-
-
-
-
-	</modules>
+        <modules>
+            <module>admin</module>
+            <module>model</module>
+            <module>commons</module>
+            <module>verticals</module>
+            <module>crawler</module>
+            <module>api</module>
+            <module>ui</module>
+            <module>services/urlfetching</module>
+            <module>services/googlesearch</module>
+            <module>services/evaluation</module>
+            <module>services/serialisation</module>
+            <module>services/prompt</module>
+            <module>services/review-generation</module>
+            <module>services/product-repository</module>
+            <module>services/captcha</module>
+            <module>services/remotefilecaching</module>
+            <module>services/favicon</module>
+            <module>services/github-feedback</module>
+            <module>services/xwiki-spring-boot-starter</module>
+            <module>services/image-processing</module>
+            <module>services/icecat</module>
+        </modules>
 
 	<issueManagement>
 		<url>https://github.com/open4good/open4goods/issues</url>
@@ -335,10 +333,6 @@
                             <directory>node_modules</directory>
                             <followSymlinks>false</followSymlinks>
                         </fileset>
-                        <fileset>
-                            <directory>node_modules</directory>
-                            <followSymlinks>false</followSymlinks>
-                        </fileset>
 
 						<fileset>
 							<directory>src/test/resources/last</directory>
@@ -408,6 +402,18 @@
                                         <groupId>org.springframework.boot</groupId>
                                         <artifactId>spring-boot-maven-plugin</artifactId>
                                         <version>${springboot.version}</version>
+                                        <executions>
+                                                <execution>
+                                                        <goals>
+                                                                <goal>repackage</goal>
+                                                        </goals>
+                                                </execution>
+                                        </executions>
+                                        <configuration>
+                                                <layers>
+                                                        <enabled>true</enabled>
+                                                </layers>
+                                        </configuration>
                                 </plugin>
 			</plugins>
 		</pluginManagement>
