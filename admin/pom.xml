@@ -47,16 +47,16 @@
 			<version>0.0.1</version>
 		</dependency>
 
-		<dependency>
-			<groupId>de.codecentric</groupId>
-			<artifactId>spring-boot-admin-starter-server</artifactId>
-			<version>3.4.6</version>
-		</dependency>
-		<dependency>
-			<groupId>de.codecentric</groupId>
-			<artifactId>spring-boot-admin-server-ui</artifactId>
-			<version>3.5.0</version>
-		</dependency>
+                <dependency>
+                        <groupId>de.codecentric</groupId>
+                        <artifactId>spring-boot-admin-starter-server</artifactId>
+                        <version>${spring-boot-admin.version}</version>
+                </dependency>
+                <dependency>
+                        <groupId>de.codecentric</groupId>
+                        <artifactId>spring-boot-admin-server-ui</artifactId>
+                        <version>${spring-boot-admin-ui.version}</version>
+                </dependency>
 
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -78,18 +78,6 @@
                     </excludes>
                 </configuration>
             </plugin>
-            <plugin>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-maven-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>repackage</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
