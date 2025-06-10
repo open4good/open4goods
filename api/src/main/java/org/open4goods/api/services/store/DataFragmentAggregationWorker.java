@@ -42,11 +42,11 @@ public class DataFragmentAggregationWorker implements Runnable {
 		this.workerName = workerName;
 	}
 
-	@Override
-	public void run() {
+        @Override
+        public void run() {
 
-		while (true) {
-			try {
+                while (!service.getServiceShutdown().get()) {
+                        try {
 				if (!service.getQueue().isEmpty()) {
 					// There is data to consume and queue consummation is enabled
 					final Set<DataFragment> buffer = new HashSet<>();	
@@ -68,8 +68,9 @@ public class DataFragmentAggregationWorker implements Runnable {
 					}
 				}
 			} catch (final Exception e) {
-				logger.error("Error while dequeing DataFragments",e);
-			}
-		}
-	}
+                                logger.error("Error while dequeing DataFragments",e);
+                        }
+                }
+                logger.info("{} thread terminated", workerName);
+        }
 }
