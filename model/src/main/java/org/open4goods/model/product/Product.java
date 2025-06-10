@@ -371,56 +371,65 @@ public class Product implements Standardisable {
 		return ret;
 	}
 
-	// TODO(p2,perf) : Should be cached
-	public List<Resource> images() {
-	    // Filter resources of type IMAGE
-	    List<Resource> images = resources.stream()
-	                                     .filter(e -> e.getResourceType() != null && e.getResourceType().equals(ResourceType.IMAGE))
-	                                     .toList();
+        // TODO(p2,perf) : Should be cached
+        public List<Resource> images() {
+            Map<Integer, List<Resource>> imagesByGroup = new HashMap<>();
+            Map<Integer, Resource> bestByGroup = new HashMap<>();
+            Set<Integer> coverGroups = new HashSet<>();
+            List<Resource> coverNoGroup = new ArrayList<>();
+            List<Resource> otherNoGroup = new ArrayList<>();
 
-	    //////////////////////////////////
-	    // Applying filtering / ordering
-	    //////////////////////////////////
+            for (Resource r : resources) {
+                if (r.getResourceType() != null && r.getResourceType().equals(ResourceType.IMAGE)) {
+                    Integer groupId = r.getGroup();
+                    boolean cover = r.getTags().contains("cover");
 
-	    // Keep the covers
-	    List<Resource> covers = images.stream()
-	                                  .filter(e -> e.getTags().contains("cover"))
-	                                  .toList();
-	    Set<Integer> coversGroupsId = covers.stream()
-	                                        .map(Resource::getGroup)
-	                                        .collect(Collectors.toSet());
-	    Set<Integer> otherGroupsId = images.stream()
-	                                       .filter(e -> !coversGroupsId.contains(e.getGroup()))
-	                                       .map(Resource::getGroup)
-	                                       .collect(Collectors.toSet());
+                    if (groupId != null) {
+                        imagesByGroup.computeIfAbsent(groupId, g -> new ArrayList<>()).add(r);
 
-	    List<Resource> ret = new ArrayList<>();
+                        Resource best = bestByGroup.get(groupId);
+                        if (best == null || pixels(r) > pixels(best)) {
+                            bestByGroup.put(groupId, r);
+                        }
 
-	    // First, add the best cover images
-	    coversGroupsId.forEach(coverGroupId -> ret.add(bestByGroup(images, coverGroupId)));
+                        if (cover) {
+                            coverGroups.add(groupId);
+                        }
+                    } else {
+                        if (cover) {
+                            coverNoGroup.add(r);
+                        } else {
+                            otherNoGroup.add(r);
+                        }
+                    }
+                }
+            }
 
-	    // Then, add the other images by groups
-	    otherGroupsId.forEach(otherGroupId -> ret.add(bestByGroup(images, otherGroupId)));
+            List<Resource> ret = new ArrayList<>();
 
-	    // TODO(p3,perf) : perf : null check could be avoided
-	    return ret.stream().filter(e-> null != e).toList();
-	}
+            coverGroups.forEach(g -> {
+                Resource r = bestByGroup.get(g);
+                if (r != null) {
+                    ret.add(r);
+                }
+            });
 
-	/**
-	 * Finds the best resource by group based on the number of pixels
-	 *
-	 * @param images The list of images
-	 * @param groupId The group identifier
-	 * @return The best resource in the group
-	 */
-	private Resource bestByGroup(List<Resource> images, Integer groupId) {
-		return images.stream()
-		        .filter(image -> image.getGroup() != null && image.getGroup().equals(groupId)) // Filtrer les images du groupe spécifié
-		        .max(Comparator.comparingInt(image -> image.getImageInfo().pixels())) // Trouver l'image avec le plus de pixels
-		        .orElse(null); // Retourner null si aucune image n'est trouvée
+            ret.addAll(coverNoGroup);
 
+            bestByGroup.forEach((g, r) -> {
+                if (!coverGroups.contains(g)) {
+                    ret.add(r);
+                }
+            });
 
-	}
+            ret.addAll(otherNoGroup);
+
+            return ret;
+        }
+
+        private int pixels(Resource resource) {
+            return resource.getImageInfo() == null ? 0 : resource.getImageInfo().pixels();
+        }
 
 
 
