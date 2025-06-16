@@ -1,6 +1,13 @@
 # The project
-| [![Beta](https://github.com/open4good/open4goods/actions/workflows/testAndPublishBeta.yml/badge.svg?branch=main)](https://github.com/open4good/open4goods/actions/workflows/testAndPublishBeta.yml) | [![Production](https://github.com/open4good/open4goods/actions/workflows/releaseDeployProd.yml/badge.svg?branch=main)](https://github.com/open4good/open4goods/actions/workflows/releaseDeployProd.yml) |
-|--|--|
+
+[![Beta](https://github.com/open4good/open4goods/actions/workflows/testAndPublishBeta.yml/badge.svg?branch=main)](https://github.com/open4good/open4goods/actions/workflows/testAndPublishBeta.yml)
+[![Production](https://github.com/open4good/open4goods/actions/workflows/releaseDeployProd.yml/badge.svg?branch=main)](https://github.com/open4good/open4goods/actions/workflows/releaseDeployProd.yml)
+[![CI](https://github.com/open4good/open4goods/actions/workflows/ci-pr.yml/badge.svg?branch=main)](https://github.com/open4good/open4goods/actions/workflows/ci-pr.yml)
+[![HTTP Status](https://github.com/open4good/open4goods/actions/workflows/checkHttpStatus.yml/badge.svg?branch=main)](https://github.com/open4good/open4goods/actions/workflows/checkHttpStatus.yml)
+[![GitHub release](https://img.shields.io/github/v/release/open4good/open4goods?logo=github)](https://github.com/open4good/open4goods/releases)
+[![License](https://img.shields.io/badge/License-AGPL%20v3-blue.svg)](LICENSE)
+[![GitHub issues](https://img.shields.io/github/issues/open4good/open4goods)](https://github.com/open4good/open4goods/issues)
+[![GitHub stars](https://img.shields.io/github/stars/open4good/open4goods?style=social)](https://github.com/open4good/open4goods/stargazers)
 
 
 An open source online comparator  that operates ecological scoring, following a common good mindset.
