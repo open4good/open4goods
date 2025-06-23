@@ -4,7 +4,7 @@ import java.util.Map;
 
 import org.open4goods.nudgerfrontapi.dto.ProductViewRequest;
 import org.open4goods.nudgerfrontapi.dto.ProductViewResponse;
-import org.open4goods.nudgerfrontapi.services.ProductRenderingService;
+import org.open4goods.nudgerfrontapi.service.ProductViewService;
 import org.open4goods.services.productrepository.services.ProductRepository;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -16,7 +16,7 @@ public class ProductController {
 
 
 	private ProductRepository repository;
-	private ProductRenderingService renderingService;
+	private ProductViewService renderingService;
 
 
     @GetMapping("/product/{gtin}")
