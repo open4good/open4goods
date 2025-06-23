@@ -9,9 +9,9 @@ package org.open4goods.nudgerfrontapi.dto;
 public class ProductViewResponse {
 
 	// The initial resquet
-	ProductViewRequest request;
+        ProductViewRequest request;
 	
-	RequestMetadata metadatas;
+        RequestMetadata metadatas;
 	
 	
 	public ProductViewResponse(ProductViewRequest productViewRequest) {
@@ -19,7 +19,15 @@ public class ProductViewResponse {
 	}
 
 
-	private long gtin;
+        private long gtin;
+
+        public long getGtin() {
+                return gtin;
+        }
+
+        public void setGtin(long gtin) {
+                this.gtin = gtin;
+        }
 
 	// TODO : add other fields
 
