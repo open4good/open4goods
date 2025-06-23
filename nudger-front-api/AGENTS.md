@@ -49,6 +49,12 @@ mvn -pl nudger-front-api -am clean install
 
 ## Guidelines
 
-TODO : Explain and challenge the request/response pattern. I want to scale it on other system objects
+Follow the same strict layering used in the rest of the project:
 
-TODO : Explain and challenge the "MVC" spring architecture : controller -> rendering service -> repository
+```
+controller → service → repository
+```
+
+The controller only handles HTTP concerns and delegates all business logic to the
+`service` layer. Services orchestrate caching and data retrieval using repositories.
+Repositories provide access to persistence or remote APIs.
