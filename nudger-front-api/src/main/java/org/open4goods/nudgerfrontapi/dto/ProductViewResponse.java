@@ -1,26 +1,16 @@
 package org.open4goods.nudgerfrontapi.dto;
 
 /**
- * This is a dedicated view of a @see Product, dedicated to frontend rendering.
- * The object is cleaned from useless fields, is localised
+ * Frontend view of a product.
  */
-// TODO : I don'tl ike this name... But Product is my main persisted object model. Any correct naming conventions
-// TODO : Convert as record
-public class ProductViewResponse {
+public record ProductViewResponse(ProductViewRequest request,
+                                  RequestMetadata metadatas,
+                                  long gtin) {
 
-	// The initial resquet
-	ProductViewRequest request;
-	
-	RequestMetadata metadatas;
-	
-	
-	public ProductViewResponse(ProductViewRequest productViewRequest) {
-		this.request = productViewRequest;
-	}
-
-
-	private long gtin;
-
-	// TODO : add other fields
-
+    /**
+     * Convenience constructor keeping existing usage.
+     */
+    public ProductViewResponse(ProductViewRequest request) {
+        this(request, null, 0);
+    }
 }
