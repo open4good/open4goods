@@ -26,6 +26,11 @@ jobs:
     steps:
 
       ############################################
+      # Checkout Main Repository
+      ###########################################
+      - uses: actions/checkout@v4
+
+      ############################################
       # Cache Maven Dependencies
       ###########################################
       - name: Cache Maven Dependencies
@@ -69,11 +74,6 @@ jobs:
 
             
      
-
-      ############################################
-      # Checkout Main Repository
-      ###########################################
-      - uses: actions/checkout@v4
 
       ############################################
       # Build Maven site and Artifacts
