@@ -1,4 +1,4 @@
-package org.open4goods.admin.config;
+package org.open4goods.sbadmin.config;
 
 import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
