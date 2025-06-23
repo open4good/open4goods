@@ -136,16 +136,16 @@ public class ProductRepository {
 	 *
 	 * @return
 	 */
-	public Stream<Product> exportAll() {
-	    Query query = Query.findAll();
-	    // TODO : From conf, apply to other
-	    query.setPageable(PageRequest.of(0, 10000)); // Fetch larger batches
-	    return elasticsearchOperations.searchForStream(query, Product.class, CURRENT_INDEX)
-	    		.stream()
-	    		// TODO : Check CPU usage
-	    		.parallel()
-	            .map(SearchHit::getContent);
-	}
+        public Stream<Product> exportAll() {
+            Query query = Query.findAll();
+            // TODO : From conf, apply to other
+            query.setPageable(PageRequest.of(0, 10000)); // Fetch larger batches
+            // Stream sequentially to avoid parallel overhead
+            return elasticsearchOperations
+                    .searchForStream(query, Product.class, CURRENT_INDEX)
+                    .stream()
+                    .map(SearchHit::getContent);
+        }
 
 
 	/**
