@@ -88,9 +88,7 @@
 
                    <th:block th:insert="~{inc/product-documentation.html}"></th:block>
 
-
-
-                    <th:block th:insert="~{inc/product-admin.html}"></th:block>
+                    <th:block th:if="${user}" th:insert="~{inc/product-admin.html}"></th:block>
 
 
     </div>

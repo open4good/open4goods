@@ -127,16 +127,18 @@ public class ApiConfig {
 		return new ProductNameSelectionService();
 	}
 
-	@Bean
 
-    FeatureLoader featureLoader(RemoteFileCachingService fileCachingService, BrandService brandService) {
+	@Bean
+	FeatureLoader featureLoader(RemoteFileCachingService fileCachingService, BrandService brandService) {
                 return new FeatureLoader(new XmlMapper(), apiProperties.getIcecatFeatureConfig(), fileCachingService, apiProperties.remoteCachingFolder(), brandService);
         }
 
-    CategoryLoader categoryLoader(RemoteFileCachingService fileCachingService, VerticalsConfigService verticalConfigService, FeatureLoader featureLoader) {
+	@Bean
+	CategoryLoader categoryLoader(RemoteFileCachingService fileCachingService, VerticalsConfigService verticalConfigService, FeatureLoader featureLoader) {
                 return new CategoryLoader(new XmlMapper(), apiProperties.getIcecatFeatureConfig(), fileCachingService, apiProperties.remoteCachingFolder(), verticalConfigService, featureLoader);
         }
 
+    @Bean
     IcecatService icecatFeatureService(RemoteFileCachingService fileCachingService, FeatureLoader featureLoader, CategoryLoader categoryLoader) {
                 // NOTE : xmlMapper not injected because corruct the springdoc used one. Could
                 // use a @Primary derivation
