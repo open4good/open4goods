@@ -1,6 +1,9 @@
 package org.open4goods.nudgerfrontapi.dto;
 
-// TODO : convert to record
-public class ProductViewRequest {
-
+/**
+ * Request object for rendering a product view.
+ *
+ * @param gtin the product GTIN
+ */
+public record ProductViewRequest(long gtin) {
 }
