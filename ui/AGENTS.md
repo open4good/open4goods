@@ -1,7 +1,10 @@
 # Ui Agents Guide
 
-This module is part of the open4goods multi-module Maven project.
+THIS MODULE IS OUTDATED, A MIGRATION ON A NEW NUXT3 / VUE 3 FRONT IS BEING IMPLEMENTED.
+DO NOT WASTE TIME ON THIS SUBPROJECT, IGNORE IT
 
+
+This module is part of the open4goods multi-module Maven project. 
 ## Technology
 
 - Java 21
