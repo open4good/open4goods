@@ -38,6 +38,8 @@ import org.open4goods.services.prompt.service.PromptService;
 import org.open4goods.services.remotefilecaching.service.RemoteFileCachingService;
 import org.open4goods.services.remotefilecaching.config.RemoteFileCachingProperties;
 import org.open4goods.services.serialisation.service.SerialisationService;
+import org.open4goods.services.urlfetching.config.UrlFetcherConfig;
+import org.open4goods.services.urlfetching.service.UrlFetchingService;
 import org.open4goods.ui.config.yml.UiConfig;
 import org.open4goods.ui.interceptors.GenericTemplateInterceptor;
 import org.open4goods.ui.interceptors.ImageResizeInterceptor;
@@ -128,6 +130,12 @@ public class AppConfig {
 		return new PromptService(genAiConfig, perplexityApi, openAiCustomApi, serialisationService, spelEvaluationService, meterRegistry);
 	}
 
+
+
+	@Bean
+	UrlFetchingService urlFetchingService (@Autowired UrlFetcherConfig fetchingConfig, @Autowired MeterRegistry registry) {
+		return new UrlFetchingService(fetchingConfig, registry);
+	}
 
 
 	@Bean
@@ -245,10 +253,12 @@ public class AppConfig {
                 return new FeatureLoader(new XmlMapper(), properties.getIcecatFeatureConfig(), fileCachingService, properties.getRemoteCachingFolder(), brandService);
         }
 
+    @Bean
     CategoryLoader categoryLoader(UiConfig properties, RemoteFileCachingService fileCachingService, VerticalsConfigService verticalConfigService, FeatureLoader featureLoader) {
                 return new CategoryLoader(new XmlMapper(), properties.getIcecatFeatureConfig(), fileCachingService, properties.getRemoteCachingFolder(), verticalConfigService, featureLoader);
         }
 
+    @Bean
     IcecatService icecatFeatureService(UiConfig properties, RemoteFileCachingService fileCachingService, FeatureLoader featureLoader, CategoryLoader categoryLoader) {
                 // TODO : xmlMapper not injected because corruct the springdoc used one. Should use a @Primary derivation
                 return new IcecatService(new XmlMapper(), properties.getIcecatFeatureConfig(), fileCachingService, properties.getRemoteCachingFolder(), featureLoader, categoryLoader);

@@ -11,7 +11,7 @@
 
   <artifactId>nudger-front-api</artifactId>
   <name>nudger-front-api</name>
-  <description>Nudger public API</description>
+  <description>Nudger B2C API</description>
 
   <dependencies>
     <dependency>
