@@ -1,4 +1,4 @@
-package org.open4goods.admin;
+package org.open4goods.sbadmin;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
