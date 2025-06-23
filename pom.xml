@@ -33,10 +33,11 @@
         <module>model</module>
 		<module>commons</module>
 		<module>verticals</module>
-		<module>crawler</module>
-		<module>api</module>
-		<module>ui</module>
-		<module>services/urlfetching</module>
+                <module>crawler</module>
+                <module>api</module>
+                <module>ui</module>
+                <module>nudger-front-api</module>
+                <module>services/urlfetching</module>
         <module>services/googlesearch</module>
         <module>services/evaluation</module>
         <module>services/serialisation</module>

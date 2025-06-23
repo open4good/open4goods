@@ -1,0 +1,13 @@
+server:
+  port: 8082
+
+spring:
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: https://auth.example.com/issuer
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
