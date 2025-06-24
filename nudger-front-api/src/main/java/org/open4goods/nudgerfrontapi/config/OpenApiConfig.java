@@ -11,7 +11,7 @@ public class OpenApiConfig {
     public GroupedOpenApi frontApi() {
         return GroupedOpenApi.builder()
                 .group("front")
-                .pathsToMatch("/api/v1/**")
+                .pathsToMatch("/**")
                 .build();
     }
 }
