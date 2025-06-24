@@ -133,6 +133,18 @@
         </dependency>
 
         <dependency>
+            <groupId>org.open4goods</groupId>
+            <artifactId>github-feedback</artifactId>
+            <version>${global.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.open4goods</groupId>
+            <artifactId>captcha</artifactId>
+            <version>${global.version}</version>
+        </dependency>
+
+        <dependency>
             <groupId>dev.brachtendorf</groupId>
             <artifactId>JImageHash</artifactId>
             <version>1.0.0</version>
