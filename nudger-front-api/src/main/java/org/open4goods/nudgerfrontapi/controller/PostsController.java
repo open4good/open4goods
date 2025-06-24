@@ -22,7 +22,7 @@ public class PostsController {
 
     @GetMapping("/posts")
     @Operation(summary = "List blog posts")
-    public List<BlogPostDto> posts(@RequestParam(name = "locale", required = false) String locale) {
+    public List<BlogPostDto> posts(@RequestParam(required = false) String locale) {
         return blogService.getPosts(locale);
     }
 

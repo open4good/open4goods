@@ -24,16 +24,7 @@
       <artifactId>product-repository</artifactId>
       <version>${global.version}</version>
     </dependency>
-    <dependency>
-      <groupId>org.open4goods</groupId>
-      <artifactId>commons</artifactId>
-      <version>${global.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.open4goods</groupId>
-      <artifactId>reviewgeneration</artifactId>
-      <version>${global.version}</version>
-    </dependency>
+
     <dependency>
       <groupId>org.open4goods</groupId>
       <artifactId>captcha</artifactId>

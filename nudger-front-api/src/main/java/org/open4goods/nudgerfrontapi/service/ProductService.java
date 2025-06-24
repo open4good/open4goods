@@ -1,19 +1,55 @@
 package org.open4goods.nudgerfrontapi.service;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.open4goods.model.exceptions.ResourceNotFoundException;
+import org.open4goods.model.price.AggregatedPrice;
 import org.open4goods.nudgerfrontapi.dto.ImpactScoreDto;
 import org.open4goods.nudgerfrontapi.dto.OfferDto;
+import org.open4goods.nudgerfrontapi.dto.ProductViewRequest;
 import org.open4goods.nudgerfrontapi.dto.ProductViewResponse;
 import org.open4goods.nudgerfrontapi.dto.ReviewDto;
+import org.springframework.stereotype.Service;
 
 import jakarta.servlet.http.HttpServletRequest;
 
-public interface ProductService {
-    ProductViewResponse getProduct(long gtin) throws ResourceNotFoundException;
-    List<ReviewDto> getReviews(long gtin) throws ResourceNotFoundException;
-    List<OfferDto> getOffers(long gtin) throws ResourceNotFoundException;
-    ImpactScoreDto getImpactScore(long gtin) throws ResourceNotFoundException;
-    void createReview(long gtin, String captchaResponse, HttpServletRequest request) throws ResourceNotFoundException, SecurityException;
+@Service
+public class ProductService {
+
+
+    public ProductService() {
+
+    }
+
+    public ProductViewResponse getProduct(long gtin) throws ResourceNotFoundException {
+        return new ProductViewResponse(new ProductViewRequest(gtin));
+    }
+
+    public List<ReviewDto> getReviews(long gtin) throws ResourceNotFoundException {
+        return new ArrayList<>();
+    }
+
+    public List<OfferDto> getOffers(long gtin) throws ResourceNotFoundException {
+        return new ArrayList<>();
+    }
+
+    private OfferDto toOfferDto(AggregatedPrice price) {
+
+    	// TODO : handle the numll parameter (matching currency code)
+        return new OfferDto(price.getDatasourceName(), price.getOfferName(), price.getPrice(),
+               null, price.getUrl());
+    }
+
+    public ImpactScoreDto getImpactScore(long gtin) throws ResourceNotFoundException {
+
+        Map<String, Double> scores = null;
+		double avg = 0;
+		return new ImpactScoreDto(scores, avg);
+    }
+
+    public void createReview(long gtin, String captchaResponse, HttpServletRequest request)
+            throws ResourceNotFoundException, SecurityException {
+    }
 }
