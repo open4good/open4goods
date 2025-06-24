@@ -54,12 +54,9 @@ class ProductControllerIT {
         given(renderingService.render(any())).willReturn(new ProductViewResponse(req));
 
         mockMvc.perform(get("/product/{gtin}", gtin).with(jwt()))
-        .andExpect(status().isOk());
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.gtin").value(gtin));
 
-        // TODO : Complete once implemented
-//         .andExpect(jsonPath("$.gtin").value(gtin));
-
-// TODO : Fix the test
-        //assert healthEndpoint.health().getStatus().equals(Status.UP);
+        assert healthEndpoint.health().getStatus().equals(Status.UP);
     }
 }
