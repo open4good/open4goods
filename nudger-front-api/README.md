@@ -27,3 +27,5 @@ Execute the tests with:
 ```bash
 mvn test
 ```
+
+Tests are mandatory: the build will fail if none are found.

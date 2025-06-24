@@ -40,6 +40,8 @@ Run only the tests with:
 mvn test
 ```
 
+The `maven-surefire-plugin` is configured with `failIfNoTests=true` so the build fails if no tests are present.
+
 From the repository root you can also execute:
 
 ```bash
