@@ -16,6 +16,8 @@ import org.springframework.security.web.SecurityFilterChain;
 
 @Configuration
 @EnableWebSecurity
+// TODO : Adapt the security layer to best fit nuxt app requirements.
+
 public class WebSecurityConfig {
 
     @Bean
