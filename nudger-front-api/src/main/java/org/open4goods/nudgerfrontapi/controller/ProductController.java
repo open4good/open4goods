@@ -1,32 +1,29 @@
 package org.open4goods.nudgerfrontapi.controller;
 
-import java.util.Map;
-
 import org.open4goods.nudgerfrontapi.dto.ProductViewRequest;
 import org.open4goods.nudgerfrontapi.dto.ProductViewResponse;
 import org.open4goods.nudgerfrontapi.service.ProductViewService;
-import org.open4goods.services.productrepository.services.ProductRepository;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import io.swagger.v3.oas.annotations.Operation;
 
+/**
+ * REST controller exposing product endpoints for the frontend.
+ */
 @RestController
 public class ProductController {
 
+    private final ProductViewService renderingService;
 
-	private ProductRepository repository;
-	private ProductViewService renderingService;
-
+    public ProductController(ProductViewService renderingService) {
+        this.renderingService = renderingService;
+    }
 
     @GetMapping("/product/{gtin}")
-    @Operation(summary = "Get a ptoduct")
-	// TODO : Add spring doc maximum documentation
-
+    @Operation(summary = "Get a product")
+    // TODO : Add spring doc maximum documentation
     public ProductViewResponse product(ProductViewRequest productViewRequest) {
-
-    	ProductViewResponse ret = renderingService.render(productViewRequest);
-
-        return ret;
+        return renderingService.render(productViewRequest);
     }
 }
