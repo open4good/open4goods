@@ -27,3 +27,13 @@ Execute the tests with:
 ```bash
 mvn test
 ```
+
+## Health Endpoint
+
+Spring Boot Actuator exposes a dedicated health indicator for the `ProductViewServiceImpl` at:
+
+```
+GET /actuator/health/productViewServiceImpl
+```
+
+It reports `DOWN` when critical exceptions have been encountered by the service and `UP` otherwise.
