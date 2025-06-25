@@ -7,6 +7,9 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.open4goods.nudgerfrontapi.ratelimit.RateLimitException;
 
 @RestControllerAdvice
+/**
+ * RFC 9457 Compliant Exception to Problem Detail mapping
+ */
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(Exception.class)

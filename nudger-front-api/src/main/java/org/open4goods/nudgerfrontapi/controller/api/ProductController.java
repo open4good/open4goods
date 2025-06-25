@@ -7,6 +7,9 @@ import org.open4goods.nudgerfrontapi.dto.product.ProductDto;
 import org.open4goods.nudgerfrontapi.dto.product.ProductReviewDto;
 import org.open4goods.nudgerfrontapi.service.ProductService;
 import org.open4goods.nudgerfrontapi.ratelimit.RateLimit;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.CacheControl;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -19,9 +22,11 @@ import org.springframework.web.bind.annotation.RestController;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.headers.Header;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
@@ -80,20 +85,28 @@ public class ProductController {
             summary = "Get product reviews",
             description = "Return customer or AI‑generated reviews for a product.",
             security = @SecurityRequirement(name = "bearer-jwt"),
-            parameters = @Parameter(name = "gtin",
-                    description = "Global Trade Item Number (8–14 digit numeric code)",
-                    example = "00012345600012",
-                    required = true),
+            parameters = {
+                    @Parameter(name = "gtin",
+                            description = "Global Trade Item Number (8–14 digit numeric code)",
+                            example = "00012345600012",
+                            required = true),
+                    @Parameter(name = "page[number]", in = ParameterIn.QUERY,
+                            description = "Zero-based page index"),
+                    @Parameter(name = "page[size]", in = ParameterIn.QUERY,
+                            description = "Page size")
+            },
             responses = {
                     @ApiResponse(responseCode = "200", description = "Reviews returned",
+                            headers = @Header(name = "Link", description = "Pagination links as defined by RFC 8288"),
                             content = @Content(mediaType = "application/json",
                                     schema = @Schema(implementation = ProductReviewDto.class, type = "array"))),
                     @ApiResponse(responseCode = "404", description = "Product not found")
             }
     )
-    public ResponseEntity<List<ProductReviewDto>> reviews(@PathVariable
-                                                   @Pattern(regexp = "\\d{8,14}") String gtin) throws Exception {
-        List<ProductReviewDto> body = service.getReviews(Long.parseLong(gtin));
+    public ResponseEntity<Page<ProductReviewDto>> reviews(
+            @PathVariable @Pattern(regexp = "\\d{8,14}") String gtin,
+            @PageableDefault(size = 20) Pageable pageable) throws Exception {
+        Page<ProductReviewDto> body = service.getReviews(Long.parseLong(gtin), pageable);
         return ResponseEntity.ok()
                 .cacheControl(ONE_HOUR_PUBLIC_CACHE)
                 .body(body);
