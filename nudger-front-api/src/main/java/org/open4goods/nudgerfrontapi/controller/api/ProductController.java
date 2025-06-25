@@ -71,8 +71,7 @@ public class ProductController {
 
 
     //////////////////////////////////
-    /// Gen ai review
-    /// TODO : rename
+    /// AI review endpoints
     //////////////////////////////////
 
     @GetMapping("/{gtin}/reviews")
