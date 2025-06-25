@@ -2,6 +2,7 @@ package org.open4goods.nudgerfrontapi.controller;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anySet;
 import static org.mockito.BDDMockito.given;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -20,6 +21,8 @@ import org.junit.jupiter.api.Test;
 import org.open4goods.model.ai.AiReview;
 import org.open4goods.nudgerfrontapi.controller.api.ProductController;
 import org.open4goods.nudgerfrontapi.dto.product.ProductReviewDto;
+import org.open4goods.nudgerfrontapi.dto.product.ProductDto;
+import org.open4goods.nudgerfrontapi.dto.RequestMetadata;
 import org.open4goods.nudgerfrontapi.service.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.actuate.health.HealthEndpoint;
@@ -62,6 +65,19 @@ class ProductControllerIT {
             .andExpect(header().exists("Link"))
             .andExpect(jsonPath("$.page.number").value(0))
             .andExpect(jsonPath("$.data").isArray());
+    }
+
+    @Test
+    void includeParameterFiltersFields() throws Exception {
+        long gtin = 321L;
+        given(service.getProduct(anyLong(), anySet())).willReturn(new ProductDto(new RequestMetadata(1L, 2L, "f"), gtin));
+
+        mockMvc.perform(get("/product/{gtin}", gtin)
+                        .param("include", "gtin")
+                        .with(jwt()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.gtin").value(gtin))
+                .andExpect(jsonPath("$.metadatas").doesNotExist());
     }
 
 
