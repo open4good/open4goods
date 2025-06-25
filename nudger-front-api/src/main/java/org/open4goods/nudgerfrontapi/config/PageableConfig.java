@@ -12,9 +12,11 @@ public class PageableConfig implements WebMvcConfigurer {
 
     @Override
     public void addArgumentResolvers(List<HandlerMethodArgumentResolver> resolvers) {
-        PageableHandlerMethodArgumentResolver resolver = new PageableHandlerMethodArgumentResolver();
-        resolver.setPageParameterName("page[number]");
-        resolver.setSizeParameterName("page[size]");
-        resolvers.add(resolver);
+        PageableHandlerMethodArgumentResolver pageableResolver = new PageableHandlerMethodArgumentResolver();
+        pageableResolver.setPageParameterName("page[number]");
+        pageableResolver.setSizeParameterName("page[size]");
+        resolvers.add(pageableResolver);
+
+        resolvers.add(new IncludeArgumentResolver());
     }
 }

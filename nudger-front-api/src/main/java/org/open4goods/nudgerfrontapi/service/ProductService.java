@@ -23,7 +23,7 @@ public class ProductService {
 
     }
 
-    public ProductDto getProduct(long gtin) throws ResourceNotFoundException {
+    public ProductDto getProduct(long gtin, java.util.Set<String> includes) throws ResourceNotFoundException {
         return new ProductDto(null, gtin);
     }
 
