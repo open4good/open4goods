@@ -6,6 +6,11 @@ This module provides the REST endpoints used by the Nuxt 3 frontend. It exposes 
 
 The application runs on **port 8082** by default (`server.port` in `application.yml`). This keeps it separate from the main API on port 8081.
 
+## Security
+
+Security is enabled by default using JWT authentication. For local testing it can be disabled by setting
+`front.security.enabled=false` in `application.yml` or via an environment variable.
+
 ## Building
 
 From this directory run:
