@@ -53,9 +53,12 @@ class ProductControllerIT {
         var page = new PageImpl<>(List.of(new ProductReviewDto("fr", new AiReview(), 1L)), PageRequest.of(0, 20), 1);
         given(service.getReviews(anyLong(), any(Pageable.class))).willReturn(page);
 
-        mockMvc.perform(get("/product/{gtin}/reviews", gtin).with(jwt()))
+        mockMvc.perform(get("/product/{gtin}/reviews", gtin)
+                .header("Accept-Language", "de")
+                .with(jwt()))
             .andExpect(status().isOk())
             .andExpect(header().string("Cache-Control", "public, max-age=3600"))
+            .andExpect(header().string("X-Locale", "de"));
             .andExpect(header().exists("Link"))
             .andExpect(jsonPath("$.page.number").value(0))
             .andExpect(jsonPath("$.data").isArray());
