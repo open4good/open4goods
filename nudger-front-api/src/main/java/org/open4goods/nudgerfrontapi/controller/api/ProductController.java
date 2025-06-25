@@ -39,6 +39,10 @@ import jakarta.validation.constraints.Pattern;
  * REST controller exposing read‑only information about a product as well as the ability to
  * trigger an AI‑generated review.  All endpoints are grouped under the <i>Product</i> tag in the
  * generated OpenAPI contract and share the common base path <code>/product</code>.
+ * The locale used by the service is resolved via {@link
+ * org.open4goods.nudgerfrontapi.config.UserPreferenceLocaleResolver}, which
+ * checks a cookie or JWT claim before falling back to the request
+ * {@code Accept-Language} header.
  */
 @RestController
 @RequestMapping("/product")
@@ -97,13 +101,10 @@ public class ProductController {
     )
     public ResponseEntity<ProductDto> product(@PathVariable
                                                        @Pattern(regexp = "\\d{8,14}") Long gtin,
-                                                       Set<String> include) throws Exception {
+                                                       Set<String> include,
+                                                       Locale locale) throws Exception {
 
-
-    	// TODO : Retrieve nicely the locale, respecting nuxt locale management
-    	Locale local = Locale.FRANCE;
-
-        ProductDto body = service.getProduct(gtin, local, include);
+        ProductDto body = service.getProduct(gtin, locale, include);
 
 
 
