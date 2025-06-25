@@ -1,0 +1,17 @@
+{
+  "groups": [
+    {
+      "name": "front.security",
+      "type": "org.open4goods.nudgerfrontapi.config.SecurityProperties",
+      "sourceType": "org.open4goods.nudgerfrontapi.config.SecurityProperties"
+    }
+  ],
+  "properties": [
+    {
+      "name": "front.security.enabled",
+      "type": "java.lang.Boolean",
+      "description": "Enable or disable Spring Security for the frontend API.",
+      "defaultValue": true
+    }
+  ]
+}
