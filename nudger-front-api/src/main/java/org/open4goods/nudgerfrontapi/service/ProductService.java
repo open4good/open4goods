@@ -11,7 +11,7 @@ import org.springframework.stereotype.Service;
 import jakarta.servlet.http.HttpServletRequest;
 
 @Service
-// TODO : Will be later be replaced on the real external product-repository
+// Placeholder until we integrate with the real external product repository.
 public class ProductService {
 
 
