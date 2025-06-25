@@ -59,6 +59,18 @@ public class ProductController {
 
 
 
+    /**
+     * Return high level information for a product.
+     *
+     * <p>Error codes:</p>
+     * <ul>
+     *   <li><b>INVALID_GTIN</b> – 400</li>
+     *   <li><b>UNAUTHORIZED</b> – 401</li>
+     *   <li><b>FORBIDDEN</b> – 403</li>
+     *   <li><b>NOT_FOUND</b> – 404</li>
+     *   <li><b>INTERNAL_ERROR</b> – 500</li>
+     * </ul>
+     */
     @GetMapping("/{gtin}")
     @Operation(
             summary = "Get product view",
@@ -74,9 +86,13 @@ public class ProductController {
             },
             responses = {
                     @ApiResponse(responseCode = "200", description = "Product found",
-                            		content = @Content(mediaType = "application/json",
-                                    schema = @Schema(implementation = ProductDto.class))),
-                    @ApiResponse(responseCode = "404", description = "Product not found")
+                                    content = @Content(mediaType = "application/json",
+                                            schema = @Schema(implementation = ProductDto.class))),
+                    @ApiResponse(responseCode = "400", description = "Invalid GTIN or include parameter"),
+                    @ApiResponse(responseCode = "401", description = "Authentication required"),
+                    @ApiResponse(responseCode = "403", description = "Access forbidden"),
+                    @ApiResponse(responseCode = "404", description = "Product not found"),
+                    @ApiResponse(responseCode = "500", description = "Internal server error")
             }
     )
     public ResponseEntity<ProductDto> product(@PathVariable
@@ -101,6 +117,18 @@ public class ProductController {
     /// AI review endpoints
     //////////////////////////////////
 
+    /**
+     * List customer or AI reviews for a product.
+     *
+     * <p>Error codes:</p>
+     * <ul>
+     *   <li><b>INVALID_GTIN</b> – 400</li>
+     *   <li><b>UNAUTHORIZED</b> – 401</li>
+     *   <li><b>FORBIDDEN</b> – 403</li>
+     *   <li><b>NOT_FOUND</b> – 404</li>
+     *   <li><b>INTERNAL_ERROR</b> – 500</li>
+     * </ul>
+     */
     @GetMapping("/{gtin}/reviews")
     @Operation(
             summary = "Get product reviews",
@@ -116,7 +144,11 @@ public class ProductController {
                     @ApiResponse(responseCode = "200", description = "Reviews returned",
                             headers = @Header(name = "Link", description = "Pagination links as defined by RFC 8288"),
                             content = @Content(mediaType = "application/json", schema = @Schema(implementation = ProductReviewDto.class, type = "array"))),
-                    @ApiResponse(responseCode = "404", description = "Product not found")
+                    @ApiResponse(responseCode = "400", description = "Invalid GTIN"),
+                    @ApiResponse(responseCode = "401", description = "Authentication required"),
+                    @ApiResponse(responseCode = "403", description = "Access forbidden"),
+                    @ApiResponse(responseCode = "404", description = "Product not found"),
+                    @ApiResponse(responseCode = "500", description = "Internal server error")
             }
     )
     public ResponseEntity<Page<ProductReviewDto>> reviews(
@@ -130,6 +162,18 @@ public class ProductController {
                 .body(body);
     }
 
+    /**
+     * Enqueue an AI review generation.
+     *
+     * <p>Error codes:</p>
+     * <ul>
+     *   <li><b>INVALID_GTIN</b> – 400</li>
+     *   <li><b>UNAUTHORIZED</b> – 401</li>
+     *   <li><b>FORBIDDEN</b> – 403</li>
+     *   <li><b>TOO_MANY_REQUESTS</b> – 429</li>
+     *   <li><b>INTERNAL_ERROR</b> – 500</li>
+     * </ul>
+     */
     @PostMapping("/{gtin}/reviews")
     @Operation(
             summary = "Generate AI review",
@@ -146,7 +190,10 @@ public class ProductController {
             responses = {
                     @ApiResponse(responseCode = "202", description = "Accepted – review generation enqueued"),
                     @ApiResponse(responseCode = "400", description = "Invalid GTIN or hCaptcha token"),
-                    @ApiResponse(responseCode = "429", description = "Too many concurrent generations")
+                    @ApiResponse(responseCode = "401", description = "Authentication required"),
+                    @ApiResponse(responseCode = "403", description = "Access forbidden"),
+                    @ApiResponse(responseCode = "429", description = "Too many concurrent generations"),
+                    @ApiResponse(responseCode = "500", description = "Internal server error")
             }
     )
     public ResponseEntity<Void> generateReview(@PathVariable @Pattern(regexp = "\\d{8,14}") String gtin,
