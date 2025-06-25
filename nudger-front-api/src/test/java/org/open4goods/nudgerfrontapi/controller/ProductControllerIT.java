@@ -13,6 +13,7 @@ import org.junit.jupiter.api.Test;
 import java.util.List;
 
 import org.open4goods.model.ai.AiReview;
+import org.open4goods.nudgerfrontapi.controller.api.ProductController;
 import org.open4goods.nudgerfrontapi.dto.ImpactScoreDto;
 import org.open4goods.nudgerfrontapi.dto.OfferDto;
 import org.open4goods.nudgerfrontapi.dto.ProductViewRequest;

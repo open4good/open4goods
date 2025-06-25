@@ -1,4 +1,4 @@
-package org.open4goods.nudgerfrontapi.controller;
+package org.open4goods.nudgerfrontapi.controller.api;
 
 import java.time.Duration;
 import java.util.List;

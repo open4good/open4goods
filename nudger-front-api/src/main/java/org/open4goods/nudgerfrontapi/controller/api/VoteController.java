@@ -1,4 +1,4 @@
-package org.open4goods.nudgerfrontapi.controller;
+package org.open4goods.nudgerfrontapi.controller.api;
 
 import org.open4goods.nudgerfrontapi.dto.VoteRequest;
 import org.open4goods.nudgerfrontapi.service.VoteService;

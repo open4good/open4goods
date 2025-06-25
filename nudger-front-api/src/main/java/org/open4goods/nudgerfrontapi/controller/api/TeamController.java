@@ -1,10 +1,10 @@
-package org.open4goods.nudgerfrontapi.controller;
+package org.open4goods.nudgerfrontapi.controller.api;
 
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-import org.open4goods.nudgerfrontapi.dto.AssociationDto;
-import org.open4goods.nudgerfrontapi.service.AssociationsService;
+import org.open4goods.nudgerfrontapi.dto.TeamMemberDto;
+import org.open4goods.nudgerfrontapi.service.TeamService;
 import org.springframework.http.CacheControl;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -20,32 +20,32 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.annotations.Operation;
 
 @RestController
-@Tag(name = "Associations", description = "Environmental associations data")
-public class AssociationsController {
+@Tag(name = "Team", description = "Information about project team members")
+public class TeamController {
 
     private static final long TTL_SECONDS = 300;
 
-    private final AssociationsService associationsService;
+    private final TeamService teamService;
 
-    public AssociationsController(AssociationsService associationsService) {
-        this.associationsService = associationsService;
+    public TeamController(TeamService teamService) {
+        this.teamService = teamService;
     }
 
-    @GetMapping("/associations")
+    @GetMapping("/team")
     @Operation(
-            summary = "List associations",
-            description = "Return the list of partner associations.",
+            summary = "List team members",
+            description = "Return all team members contributing to the project.",
             security = @SecurityRequirement(name = "bearer-jwt")
     )
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Associations returned",
+            @ApiResponse(responseCode = "200", description = "Team returned",
                     content = @Content(mediaType = "application/json",
-                            schema = @Schema(implementation = AssociationDto.class, type = "array")))
+                            schema = @Schema(implementation = TeamMemberDto.class, type = "array")))
     })
-    public ResponseEntity<List<AssociationDto>> associations() {
-        List<AssociationDto> list = associationsService.getAssociations();
+    public ResponseEntity<List<TeamMemberDto>> team() {
+        List<TeamMemberDto> members = teamService.getMembers();
         return ResponseEntity.ok()
                 .cacheControl(CacheControl.maxAge(TTL_SECONDS, TimeUnit.SECONDS))
-                .body(list);
+                .body(members);
     }
 }
