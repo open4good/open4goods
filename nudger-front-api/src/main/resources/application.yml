@@ -17,4 +17,4 @@ springdoc:
 
 front:
   security:
-    enabled: true
+    enabled: false

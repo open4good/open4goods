@@ -1,15 +1,13 @@
 package org.open4goods.nudgerfrontapi.controller.api;
 
 import java.time.Duration;
-import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 
 import org.open4goods.nudgerfrontapi.dto.product.ProductDto;
+import org.open4goods.nudgerfrontapi.dto.product.ProductDto.ProductDtoComponent;
 import org.open4goods.nudgerfrontapi.dto.product.ProductReviewDto;
 import org.open4goods.nudgerfrontapi.service.ProductService;
-import com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter;
-import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
@@ -23,13 +21,16 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
+
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
+import io.swagger.v3.oas.annotations.headers.Header;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.headers.Header;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
@@ -45,17 +46,17 @@ import jakarta.validation.constraints.Pattern;
  * {@code Accept-Language} header.
  */
 @RestController
-@RequestMapping("/product")
+@RequestMapping("/products")
 @Validated
 @Tag(name = "Product", description = "Read product data, offers, impact score and reviews; trigger AI review generation.")
-public class ProductController {
+public class ProductsControllers {
 
     private static final CacheControl ONE_HOUR_PUBLIC_CACHE = CacheControl.maxAge(Duration.ofHours(1)).cachePublic();
 
     private final ProductService service;
     private final SimpleFilterProvider filterProvider;
 
-    public ProductController(ProductService service, SimpleFilterProvider filterProvider) {
+    public ProductsControllers(ProductService service, SimpleFilterProvider filterProvider) {
         this.service = service;
         this.filterProvider = filterProvider;
     }
@@ -85,8 +86,14 @@ public class ProductController {
                             description = "Global Trade Item Number (8–14 digit numeric code)",
                             example = "8806095491998",
                             required = true),
-                    @Parameter(name = "include", in = ParameterIn.QUERY,
-                            description = "Comma separated fields to include" )
+                    @Parameter(
+                            name        = "include",
+                            in          = ParameterIn.QUERY,
+                            description = "Champs à inclure (peut se répéter)",
+                            array       = @ArraySchema(
+                                schema = @Schema(implementation = ProductDtoComponent.class)
+                            )
+                        )
             },
             responses = {
                     @ApiResponse(responseCode = "200", description = "Product found",
