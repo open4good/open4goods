@@ -6,6 +6,7 @@ import java.util.List;
 import org.open4goods.nudgerfrontapi.dto.product.ProductDto;
 import org.open4goods.nudgerfrontapi.dto.product.ProductReviewDto;
 import org.open4goods.nudgerfrontapi.service.ProductService;
+import org.open4goods.nudgerfrontapi.ratelimit.RateLimit;
 import org.springframework.http.CacheControl;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -117,6 +118,7 @@ public class ProductController {
                     @ApiResponse(responseCode = "429", description = "Too many concurrent generations")
             }
     )
+    @RateLimit(capacity = 3, refillSeconds = 60)
     public ResponseEntity<Void> generateReview(@PathVariable @Pattern(regexp = "\\d{8,14}") String gtin,
                                                @RequestParam("hcaptchaResponse") String captcha,
                                                HttpServletRequest request) throws Exception {
