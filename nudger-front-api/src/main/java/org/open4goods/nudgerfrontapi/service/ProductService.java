@@ -3,6 +3,10 @@ package org.open4goods.nudgerfrontapi.service;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
+
 import org.open4goods.model.exceptions.ResourceNotFoundException;
 import org.open4goods.nudgerfrontapi.dto.product.ProductDto;
 import org.open4goods.nudgerfrontapi.dto.product.ProductReviewDto;
@@ -23,8 +27,9 @@ public class ProductService {
         return new ProductDto(null, gtin);
     }
 
-    public List<ProductReviewDto> getReviews(long gtin) throws ResourceNotFoundException {
-        return new ArrayList<>();
+    public Page<ProductReviewDto> getReviews(long gtin, Pageable pageable) throws ResourceNotFoundException {
+        List<ProductReviewDto> reviews = new ArrayList<>();
+        return new PageImpl<>(reviews, pageable, 0);
     }
 
 
