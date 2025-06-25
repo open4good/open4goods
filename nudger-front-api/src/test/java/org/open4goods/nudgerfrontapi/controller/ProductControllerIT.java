@@ -53,7 +53,8 @@ class ProductControllerIT {
 
         mockMvc.perform(get("/product/{gtin}", gtin).with(jwt()))
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$.gtin").value(gtin));
+            .andExpect(jsonPath("$.gtin").value(gtin))
+            .andExpect(jsonPath("$.metadatas").doesNotExist());
 
         assert healthEndpoint.health().getStatus().equals(Status.UP);
     }

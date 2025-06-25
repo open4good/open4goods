@@ -9,7 +9,7 @@ public record ProductViewResponse(
         @Schema(description = "Original request")
         ProductViewRequest request,
 
-        @Schema(description = "Timing metadata")
+        @Schema(description = "Timing metadata", nullable = true)
         RequestMetadata metadatas,
 
         @Schema(description = "Requested GTIN", example = "7612345678901")
