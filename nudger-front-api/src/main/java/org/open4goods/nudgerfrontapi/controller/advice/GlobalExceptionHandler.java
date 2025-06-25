@@ -6,6 +6,9 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 @RestControllerAdvice
+/**
+ * RFC 9457 Compliant Exception to Problem Detail mapping
+ */
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(Exception.class)
