@@ -9,7 +9,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import java.util.List;
 
@@ -21,7 +20,6 @@ import org.open4goods.nudgerfrontapi.dto.ProductViewResponse;
 import org.open4goods.nudgerfrontapi.dto.ReviewDto;
 import org.open4goods.nudgerfrontapi.service.ProductService;
 import java.util.Map;
-import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.actuate.health.HealthEndpoint;
 import org.springframework.boot.actuate.health.Status;
@@ -46,10 +44,6 @@ class ProductControllerIT {
     @Autowired
     private HealthEndpoint healthEndpoint;
 
-    @BeforeEach
-    void setUp() {
-        ReflectionTestUtils.setField(controller, "service", service);
-    }
 
     @Test
     void productEndpointReturnsViewAndHealthUp() throws Exception {
