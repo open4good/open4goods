@@ -2,10 +2,13 @@ package org.open4goods.nudgerfrontapi.controller.api;
 
 import java.time.Duration;
 import java.util.List;
+import java.util.Set;
 
 import org.open4goods.nudgerfrontapi.dto.product.ProductDto;
 import org.open4goods.nudgerfrontapi.dto.product.ProductReviewDto;
 import org.open4goods.nudgerfrontapi.service.ProductService;
+import com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter;
+import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
@@ -45,9 +48,11 @@ public class ProductController {
     private static final CacheControl ONE_HOUR_PUBLIC_CACHE = CacheControl.maxAge(Duration.ofHours(1)).cachePublic();
 
     private final ProductService service;
+    private final SimpleFilterProvider filterProvider;
 
-    public ProductController(ProductService service) {
+    public ProductController(ProductService service, SimpleFilterProvider filterProvider) {
         this.service = service;
+        this.filterProvider = filterProvider;
     }
 
     @GetMapping("/{gtin}")
@@ -55,10 +60,14 @@ public class ProductController {
             summary = "Get product view",
             description = "Return high‑level product information and aggregated scores.",
             security = @SecurityRequirement(name = "bearer-jwt"),
-            parameters = @Parameter(name = "gtin",
-                    description = "Global Trade Item Number (8–14 digit numeric code)",
-                    example = "8806095491998",
-                    required = true),
+            parameters = {
+                    @Parameter(name = "gtin",
+                            description = "Global Trade Item Number (8–14 digit numeric code)",
+                            example = "8806095491998",
+                            required = true),
+                    @Parameter(name = "include", in = ParameterIn.QUERY,
+                            description = "Comma separated fields to include" )
+            },
             responses = {
                     @ApiResponse(responseCode = "200", description = "Product found",
                             content = @Content(mediaType = "application/json",
@@ -67,8 +76,13 @@ public class ProductController {
             }
     )
     public ResponseEntity<ProductDto> product(@PathVariable
-                                                       @Pattern(regexp = "\\d{8,14}") String gtin) throws Exception {
-        ProductDto body = service.getProduct(Long.parseLong(gtin));
+                                                       @Pattern(regexp = "\\d{8,14}") String gtin,
+                                              Set<String> includes) throws Exception {
+        SimpleBeanPropertyFilter filter = includes.isEmpty()
+                ? SimpleBeanPropertyFilter.serializeAll()
+                : SimpleBeanPropertyFilter.filterOutAllExcept(includes);
+        filterProvider.addFilter("inc", filter);
+        ProductDto body = service.getProduct(Long.parseLong(gtin), includes);
         return ResponseEntity.ok()
                 .cacheControl(ONE_HOUR_PUBLIC_CACHE)
                 .body(body);

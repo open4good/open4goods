@@ -1,12 +1,14 @@
 package org.open4goods.nudgerfrontapi.dto.product;
 
 import org.open4goods.nudgerfrontapi.dto.RequestMetadata;
+import com.fasterxml.jackson.annotation.JsonFilter;
 
 /**
  * Frontend view of a product.
  */
 import io.swagger.v3.oas.annotations.media.Schema;
 
+@JsonFilter("inc")
 public record ProductDto(
 
 
