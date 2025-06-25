@@ -1,4 +1,4 @@
-package org.open4goods.nudgerfrontapi.dto;
+package org.open4goods.nudgerfrontapi.dto.product;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 

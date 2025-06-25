@@ -6,11 +6,11 @@ import java.util.Map;
 
 import org.open4goods.model.exceptions.ResourceNotFoundException;
 import org.open4goods.model.price.AggregatedPrice;
-import org.open4goods.nudgerfrontapi.dto.ImpactScoreDto;
-import org.open4goods.nudgerfrontapi.dto.OfferDto;
 import org.open4goods.nudgerfrontapi.dto.ProductViewRequest;
-import org.open4goods.nudgerfrontapi.dto.ProductViewResponse;
+import org.open4goods.nudgerfrontapi.dto.ProductView;
 import org.open4goods.nudgerfrontapi.dto.ReviewDto;
+import org.open4goods.nudgerfrontapi.dto.product.ImpactScoreDto;
+import org.open4goods.nudgerfrontapi.dto.product.OfferDto;
 import org.springframework.stereotype.Service;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -23,8 +23,8 @@ public class ProductService {
 
     }
 
-    public ProductViewResponse getProduct(long gtin) throws ResourceNotFoundException {
-        return new ProductViewResponse(new ProductViewRequest(gtin));
+    public ProductView getProduct(long gtin) throws ResourceNotFoundException {
+        return new ProductView(new ProductViewRequest(gtin));
     }
 
     public List<ReviewDto> getReviews(long gtin) throws ResourceNotFoundException {

@@ -1,4 +1,4 @@
-package org.open4goods.nudgerfrontapi.dto;
+package org.open4goods.nudgerfrontapi.dto.product;
 
 /**
  * Aggregated impact score information for a product.
