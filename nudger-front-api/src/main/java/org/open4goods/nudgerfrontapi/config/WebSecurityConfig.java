@@ -17,25 +17,40 @@ import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.servlet.LocaleResolver;
 
+import org.open4goods.nudgerfrontapi.config.SecurityProperties;
+
+/**
+ * Web security configuration for the frontend API.
+ */
+
 @Configuration
 @EnableWebSecurity
 // Security configuration adapted for the Nuxt frontend application.
 
 public class WebSecurityConfig {
 
+    private final SecurityProperties securityProperties;
+
+    public WebSecurityConfig(SecurityProperties securityProperties) {
+        this.securityProperties = securityProperties;
+    }
+
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http, LocaleResolver localeResolver) throws Exception {
         http
+            .csrf(AbstractHttpConfigurer::disable)
+            .setSharedObject(LocaleResolver.class, localeResolver);
 
-            .authorizeHttpRequests(auth -> auth
+        if (securityProperties.isEnabled()) {
+            http.authorizeHttpRequests(auth -> auth
                     .requestMatchers("/", "/v3/api-docs", "/v3/api-docs/**", "/swagger-ui.html", "/swagger-ui/**", "/auth/**").permitAll()
                     .anyRequest().authenticated())
-            .oauth2ResourceServer(OAuth2ResourceServerConfigurer::jwt)
-            .csrf(AbstractHttpConfigurer::disable)
+                .oauth2ResourceServer(OAuth2ResourceServerConfigurer::jwt)
+                .httpBasic(Customizer.withDefaults());
+        } else {
+            http.authorizeHttpRequests(auth -> auth.anyRequest().permitAll());
+        }
 
-            .httpBasic(Customizer.withDefaults())
-            .setSharedObject(LocaleResolver.class, localeResolver)
-            ;
         return http.build();
     }
 
