@@ -1,14 +1,20 @@
 package org.open4goods.nudgerfrontapi.controller;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.BDDMockito.given;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 
 import java.util.List;
+
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 
 import org.junit.jupiter.api.Test;
 import org.open4goods.model.ai.AiReview;
@@ -44,11 +50,15 @@ class ProductControllerIT {
     @Test
     void reviewsEndpointReturnsList() throws Exception {
         long gtin = 123L;
-        given(service.getReviews(any())).willReturn(List.of(new ProductReviewDto("fr", new AiReview(), 1L)));
+        var page = new PageImpl<>(List.of(new ProductReviewDto("fr", new AiReview(), 1L)), PageRequest.of(0, 20), 1);
+        given(service.getReviews(anyLong(), any(Pageable.class))).willReturn(page);
 
         mockMvc.perform(get("/product/{gtin}/reviews", gtin).with(jwt()))
             .andExpect(status().isOk())
-            .andExpect(header().string("Cache-Control", "public, max-age=3600"));
+            .andExpect(header().string("Cache-Control", "public, max-age=3600"))
+            .andExpect(header().exists("Link"))
+            .andExpect(jsonPath("$.page.number").value(0))
+            .andExpect(jsonPath("$.data").isArray());
     }
 
 
