@@ -144,7 +144,9 @@ public record OfferDto(
 
 Follow java / spring documentation best practices :
 * Use javadoc at class and at level field
-* use inline code comments to leverage human 
+* Use inline code comments to leverage human 
+* Keep README.md and AGENTS.md up to date
+
 ---
 
 ## 10. Quick references
