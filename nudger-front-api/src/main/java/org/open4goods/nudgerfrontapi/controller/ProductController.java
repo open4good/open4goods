@@ -53,6 +53,7 @@ public class ProductController {
     @Operation(
             summary = "Get product view",
             description = "Return high‑level product information and aggregated scores.",
+            security = @SecurityRequirement(name = "bearer-jwt"),
             parameters = @Parameter(name = "gtin",
                     description = "Global Trade Item Number (8–14 digit numeric code)",
                     example = "00012345600012",
@@ -76,6 +77,7 @@ public class ProductController {
     @Operation(
             summary = "Get product reviews",
             description = "Return customer or AI‑generated reviews for a product.",
+            security = @SecurityRequirement(name = "bearer-jwt"),
             parameters = @Parameter(name = "gtin",
                     description = "Global Trade Item Number (8–14 digit numeric code)",
                     example = "00012345600012",
@@ -104,7 +106,10 @@ public class ProductController {
                     @Parameter(name = "hcaptchaResponse", required = true,
                                description = "Token returned by hCaptcha widget for bot mitigation.")
             },
-            security = @SecurityRequirement(name = "hCaptcha"),
+            security = {
+                    @SecurityRequirement(name = "bearer-jwt"),
+                    @SecurityRequirement(name = "hCaptcha")
+            },
             responses = {
                     @ApiResponse(responseCode = "202", description = "Accepted – review generation enqueued"),
                     @ApiResponse(responseCode = "400", description = "Invalid GTIN or hCaptcha token"),
@@ -122,6 +127,7 @@ public class ProductController {
     @Operation(
             summary = "Get product offers",
             description = "Return available commercial offers for a product, sorted by total price ascending.",
+            security = @SecurityRequirement(name = "bearer-jwt"),
             parameters = @Parameter(name = "gtin", description = "Global Trade Item Number", example = "00012345600012", required = true),
             responses = {
                     @ApiResponse(responseCode = "200", description = "Offers returned",
@@ -141,6 +147,7 @@ public class ProductController {
     @Operation(
             summary = "Get product impact score",
             description = "Return environmental and social impact composite score for a product.",
+            security = @SecurityRequirement(name = "bearer-jwt"),
             parameters = @Parameter(name = "gtin", description = "Global Trade Item Number", example = "00012345600012", required = true),
             responses = {
                     @ApiResponse(responseCode = "200", description = "Impact score returned",
