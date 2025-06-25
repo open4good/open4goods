@@ -58,7 +58,7 @@ class ProductControllerIT {
                 .with(jwt()))
             .andExpect(status().isOk())
             .andExpect(header().string("Cache-Control", "public, max-age=3600"))
-            .andExpect(header().string("X-Locale", "de"));
+            .andExpect(header().string("X-Locale", "de"))
             .andExpect(header().exists("Link"))
             .andExpect(jsonPath("$.page.number").value(0))
             .andExpect(jsonPath("$.data").isArray());
