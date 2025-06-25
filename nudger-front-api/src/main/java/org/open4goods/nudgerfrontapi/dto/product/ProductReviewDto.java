@@ -1,9 +1,9 @@
-package org.open4goods.nudgerfrontapi.dto;
+package org.open4goods.nudgerfrontapi.dto.product;
 
 import org.open4goods.model.ai.AiReview;
 import io.swagger.v3.oas.annotations.media.Schema;
 
-public record ReviewDto(
+public record ProductReviewDto(
         @Schema(description = "Review language", example = "en")
         String language,
 

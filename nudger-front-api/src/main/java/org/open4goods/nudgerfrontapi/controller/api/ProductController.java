@@ -3,10 +3,8 @@ package org.open4goods.nudgerfrontapi.controller.api;
 import java.time.Duration;
 import java.util.List;
 
-import org.open4goods.nudgerfrontapi.dto.ProductView;
-import org.open4goods.nudgerfrontapi.dto.ReviewDto;
-import org.open4goods.nudgerfrontapi.dto.product.ImpactScoreDto;
-import org.open4goods.nudgerfrontapi.dto.product.OfferDto;
+import org.open4goods.nudgerfrontapi.dto.product.ProductDto;
+import org.open4goods.nudgerfrontapi.dto.product.ProductReviewDto;
 import org.open4goods.nudgerfrontapi.service.ProductService;
 import org.springframework.http.CacheControl;
 import org.springframework.http.ResponseEntity;
@@ -23,7 +21,6 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
@@ -55,22 +52,28 @@ public class ProductController {
             security = @SecurityRequirement(name = "bearer-jwt"),
             parameters = @Parameter(name = "gtin",
                     description = "Global Trade Item Number (8–14 digit numeric code)",
-                    example = "00012345600012",
+                    example = "8806095491998",
                     required = true),
             responses = {
                     @ApiResponse(responseCode = "200", description = "Product found",
                             content = @Content(mediaType = "application/json",
-                                    schema = @Schema(implementation = ProductView.class))),
+                                    schema = @Schema(implementation = ProductDto.class))),
                     @ApiResponse(responseCode = "404", description = "Product not found")
             }
     )
-    public ResponseEntity<ProductView> product(@PathVariable
+    public ResponseEntity<ProductDto> product(@PathVariable
                                                        @Pattern(regexp = "\\d{8,14}") String gtin) throws Exception {
-        ProductView body = service.getProduct(Long.parseLong(gtin));
+        ProductDto body = service.getProduct(Long.parseLong(gtin));
         return ResponseEntity.ok()
                 .cacheControl(ONE_HOUR_PUBLIC_CACHE)
                 .body(body);
     }
+
+
+    //////////////////////////////////
+    /// Gen ai review
+    /// TODO : rename
+    //////////////////////////////////
 
     @GetMapping("/{gtin}/reviews")
     @Operation(
@@ -84,13 +87,13 @@ public class ProductController {
             responses = {
                     @ApiResponse(responseCode = "200", description = "Reviews returned",
                             content = @Content(mediaType = "application/json",
-                                    schema = @Schema(implementation = ReviewDto.class, type = "array"))),
+                                    schema = @Schema(implementation = ProductReviewDto.class, type = "array"))),
                     @ApiResponse(responseCode = "404", description = "Product not found")
             }
     )
-    public ResponseEntity<List<ReviewDto>> reviews(@PathVariable
+    public ResponseEntity<List<ProductReviewDto>> reviews(@PathVariable
                                                    @Pattern(regexp = "\\d{8,14}") String gtin) throws Exception {
-        List<ReviewDto> body = service.getReviews(Long.parseLong(gtin));
+        List<ProductReviewDto> body = service.getReviews(Long.parseLong(gtin));
         return ResponseEntity.ok()
                 .cacheControl(ONE_HOUR_PUBLIC_CACHE)
                 .body(body);
@@ -122,43 +125,4 @@ public class ProductController {
         return ResponseEntity.accepted().build();
     }
 
-    @GetMapping("/{gtin}/offers")
-    @Operation(
-            summary = "Get product offers",
-            description = "Return available commercial offers for a product, sorted by total price ascending.",
-            security = @SecurityRequirement(name = "bearer-jwt"),
-            parameters = @Parameter(name = "gtin", description = "Global Trade Item Number", example = "00012345600012", required = true),
-            responses = {
-                    @ApiResponse(responseCode = "200", description = "Offers returned",
-                            content = @Content(mediaType = "application/json",
-                                    schema = @Schema(implementation = OfferDto.class, type = "array"))),
-                    @ApiResponse(responseCode = "404", description = "Product not found")
-            }
-    )
-    public ResponseEntity<List<OfferDto>> offers(@PathVariable @Pattern(regexp = "\\d{8,14}") String gtin) throws Exception {
-        List<OfferDto> body = service.getOffers(Long.parseLong(gtin));
-        return ResponseEntity.ok()
-                .cacheControl(ONE_HOUR_PUBLIC_CACHE)
-                .body(body);
-    }
-
-    @GetMapping("/{gtin}/impact")
-    @Operation(
-            summary = "Get product impact score",
-            description = "Return environmental and social impact composite score for a product.",
-            security = @SecurityRequirement(name = "bearer-jwt"),
-            parameters = @Parameter(name = "gtin", description = "Global Trade Item Number", example = "00012345600012", required = true),
-            responses = {
-                    @ApiResponse(responseCode = "200", description = "Impact score returned",
-                            content = @Content(mediaType = "application/json",
-                                    schema = @Schema(implementation = ImpactScoreDto.class))),
-                    @ApiResponse(responseCode = "404", description = "Product not found")
-            }
-    )
-    public ResponseEntity<ImpactScoreDto> impact(@PathVariable @Pattern(regexp = "\\d{8,14}") String gtin) throws Exception {
-        ImpactScoreDto body = service.getImpactScore(Long.parseLong(gtin));
-        return ResponseEntity.ok()
-                .cacheControl(ONE_HOUR_PUBLIC_CACHE)
-                .body(body);
-    }
 }
