@@ -1,6 +1,7 @@
 package org.open4goods.nudgerfrontapi.controller;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.BDDMockito.given;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -44,7 +45,7 @@ class ProductControllerIT {
     @Test
     void reviewsEndpointReturnsList() throws Exception {
         long gtin = 123L;
-        given(service.getReviews(any())).willReturn(List.of(new ProductReviewDto("fr", new AiReview(), 1L)));
+        given(service.getReviews(anyLong(), any())).willReturn(List.of(new ProductReviewDto("fr", new AiReview(), 1L)));
 
         mockMvc.perform(get("/product/{gtin}/reviews", gtin).with(jwt()))
             .andExpect(status().isOk())

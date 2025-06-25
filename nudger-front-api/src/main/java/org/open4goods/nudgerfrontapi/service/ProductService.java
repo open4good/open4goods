@@ -2,6 +2,7 @@ package org.open4goods.nudgerfrontapi.service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import org.open4goods.model.exceptions.ResourceNotFoundException;
 import org.open4goods.nudgerfrontapi.dto.product.ProductDto;
@@ -19,11 +20,11 @@ public class ProductService {
 
     }
 
-    public ProductDto getProduct(long gtin) throws ResourceNotFoundException {
+    public ProductDto getProduct(long gtin, Set<String> includes) throws ResourceNotFoundException {
         return new ProductDto(null, gtin);
     }
 
-    public List<ProductReviewDto> getReviews(long gtin) throws ResourceNotFoundException {
+    public List<ProductReviewDto> getReviews(long gtin, Set<String> includes) throws ResourceNotFoundException {
         return new ArrayList<>();
     }
 

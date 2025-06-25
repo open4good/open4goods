@@ -1,5 +1,6 @@
 package org.open4goods.nudgerfrontapi.dto.product;
 
+import com.fasterxml.jackson.annotation.JsonFilter;
 import org.open4goods.nudgerfrontapi.dto.RequestMetadata;
 
 /**
@@ -7,6 +8,7 @@ import org.open4goods.nudgerfrontapi.dto.RequestMetadata;
  */
 import io.swagger.v3.oas.annotations.media.Schema;
 
+@JsonFilter("inc")
 public record ProductDto(
 
 

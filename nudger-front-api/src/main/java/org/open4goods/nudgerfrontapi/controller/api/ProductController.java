@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import java.util.Set;
 import org.springframework.web.bind.annotation.RestController;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -50,10 +51,15 @@ public class ProductController {
             summary = "Get product view",
             description = "Return high‑level product information and aggregated scores.",
             security = @SecurityRequirement(name = "bearer-jwt"),
-            parameters = @Parameter(name = "gtin",
-                    description = "Global Trade Item Number (8–14 digit numeric code)",
-                    example = "8806095491998",
-                    required = true),
+            parameters = {
+                    @Parameter(name = "gtin",
+                            description = "Global Trade Item Number (8–14 digit numeric code)",
+                            example = "8806095491998",
+                            required = true),
+                    @Parameter(name = "include",
+                            description = "Comma-separated list of fields to include",
+                            required = false)
+            },
             responses = {
                     @ApiResponse(responseCode = "200", description = "Product found",
                             content = @Content(mediaType = "application/json",
@@ -62,8 +68,9 @@ public class ProductController {
             }
     )
     public ResponseEntity<ProductDto> product(@PathVariable
-                                                       @Pattern(regexp = "\\d{8,14}") String gtin) throws Exception {
-        ProductDto body = service.getProduct(Long.parseLong(gtin));
+                                                       @Pattern(regexp = "\\d{8,14}") String gtin,
+                                               Set<String> includes) throws Exception {
+        ProductDto body = service.getProduct(Long.parseLong(gtin), includes);
         return ResponseEntity.ok()
                 .cacheControl(ONE_HOUR_PUBLIC_CACHE)
                 .body(body);
@@ -79,10 +86,15 @@ public class ProductController {
             summary = "Get product reviews",
             description = "Return customer or AI‑generated reviews for a product.",
             security = @SecurityRequirement(name = "bearer-jwt"),
-            parameters = @Parameter(name = "gtin",
-                    description = "Global Trade Item Number (8–14 digit numeric code)",
-                    example = "00012345600012",
-                    required = true),
+            parameters = {
+                    @Parameter(name = "gtin",
+                            description = "Global Trade Item Number (8–14 digit numeric code)",
+                            example = "00012345600012",
+                            required = true),
+                    @Parameter(name = "include",
+                            description = "Comma-separated list of fields to include",
+                            required = false)
+            },
             responses = {
                     @ApiResponse(responseCode = "200", description = "Reviews returned",
                             content = @Content(mediaType = "application/json",
@@ -91,8 +103,9 @@ public class ProductController {
             }
     )
     public ResponseEntity<List<ProductReviewDto>> reviews(@PathVariable
-                                                   @Pattern(regexp = "\\d{8,14}") String gtin) throws Exception {
-        List<ProductReviewDto> body = service.getReviews(Long.parseLong(gtin));
+                                                   @Pattern(regexp = "\\d{8,14}") String gtin,
+                                                   Set<String> includes) throws Exception {
+        List<ProductReviewDto> body = service.getReviews(Long.parseLong(gtin), includes);
         return ResponseEntity.ok()
                 .cacheControl(ONE_HOUR_PUBLIC_CACHE)
                 .body(body);
