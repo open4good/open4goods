@@ -3,10 +3,10 @@ package org.open4goods.nudgerfrontapi.controller.api;
 import java.time.Duration;
 import java.util.List;
 
-import org.open4goods.nudgerfrontapi.dto.ImpactScoreDto;
-import org.open4goods.nudgerfrontapi.dto.OfferDto;
-import org.open4goods.nudgerfrontapi.dto.ProductViewResponse;
+import org.open4goods.nudgerfrontapi.dto.ProductView;
 import org.open4goods.nudgerfrontapi.dto.ReviewDto;
+import org.open4goods.nudgerfrontapi.dto.product.ImpactScoreDto;
+import org.open4goods.nudgerfrontapi.dto.product.OfferDto;
 import org.open4goods.nudgerfrontapi.service.ProductService;
 import org.springframework.http.CacheControl;
 import org.springframework.http.ResponseEntity;
@@ -40,8 +40,7 @@ import jakarta.validation.constraints.Pattern;
 @Tag(name = "Product", description = "Read product data, offers, impact score and reviews; trigger AI review generation.")
 public class ProductController {
 
-    private static final CacheControl ONE_HOUR_PUBLIC_CACHE =
-            CacheControl.maxAge(Duration.ofHours(1)).cachePublic();
+    private static final CacheControl ONE_HOUR_PUBLIC_CACHE = CacheControl.maxAge(Duration.ofHours(1)).cachePublic();
 
     private final ProductService service;
 
@@ -61,13 +60,13 @@ public class ProductController {
             responses = {
                     @ApiResponse(responseCode = "200", description = "Product found",
                             content = @Content(mediaType = "application/json",
-                                    schema = @Schema(implementation = ProductViewResponse.class))),
+                                    schema = @Schema(implementation = ProductView.class))),
                     @ApiResponse(responseCode = "404", description = "Product not found")
             }
     )
-    public ResponseEntity<ProductViewResponse> product(@PathVariable
+    public ResponseEntity<ProductView> product(@PathVariable
                                                        @Pattern(regexp = "\\d{8,14}") String gtin) throws Exception {
-        ProductViewResponse body = service.getProduct(Long.parseLong(gtin));
+        ProductView body = service.getProduct(Long.parseLong(gtin));
         return ResponseEntity.ok()
                 .cacheControl(ONE_HOUR_PUBLIC_CACHE)
                 .body(body);

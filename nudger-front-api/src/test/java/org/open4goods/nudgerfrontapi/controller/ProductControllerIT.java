@@ -14,11 +14,11 @@ import java.util.List;
 
 import org.open4goods.model.ai.AiReview;
 import org.open4goods.nudgerfrontapi.controller.api.ProductController;
-import org.open4goods.nudgerfrontapi.dto.ImpactScoreDto;
-import org.open4goods.nudgerfrontapi.dto.OfferDto;
 import org.open4goods.nudgerfrontapi.dto.ProductViewRequest;
-import org.open4goods.nudgerfrontapi.dto.ProductViewResponse;
+import org.open4goods.nudgerfrontapi.dto.ProductView;
 import org.open4goods.nudgerfrontapi.dto.ReviewDto;
+import org.open4goods.nudgerfrontapi.dto.product.ImpactScoreDto;
+import org.open4goods.nudgerfrontapi.dto.product.OfferDto;
 import org.open4goods.nudgerfrontapi.service.ProductService;
 import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,7 +50,7 @@ class ProductControllerIT {
     void productEndpointReturnsViewAndHealthUp() throws Exception {
         long gtin = 123L;
         ProductViewRequest req = new ProductViewRequest(gtin);
-        given(service.getProduct(any())).willReturn(new ProductViewResponse(req));
+        given(service.getProduct(any())).willReturn(new ProductView(req));
 
         mockMvc.perform(get("/product/{gtin}", gtin).with(jwt()))
             .andExpect(status().isOk())

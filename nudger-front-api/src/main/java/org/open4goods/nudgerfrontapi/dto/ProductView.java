@@ -5,7 +5,7 @@ package org.open4goods.nudgerfrontapi.dto;
  */
 import io.swagger.v3.oas.annotations.media.Schema;
 
-public record ProductViewResponse(
+public record ProductView(
         @Schema(description = "Original request")
         ProductViewRequest request,
 
@@ -18,7 +18,7 @@ public record ProductViewResponse(
     /**
      * Convenience constructor keeping existing usage.
      */
-    public ProductViewResponse(ProductViewRequest request) {
+    public ProductView(ProductViewRequest request) {
         this(request, null, 0);
     }
 }
