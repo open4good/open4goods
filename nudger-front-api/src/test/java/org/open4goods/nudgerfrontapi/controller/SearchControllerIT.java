@@ -2,6 +2,7 @@ package org.open4goods.nudgerfrontapi.controller;
 
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import org.junit.jupiter.api.Test;
@@ -18,8 +19,11 @@ class SearchControllerIT {
     private MockMvc mockMvc;
 
     @Test
-    void searchEndpointReturnsOk() throws Exception {
-        mockMvc.perform(get("/api/v1/search").param("query", "test").with(jwt()))
-               .andExpect(status().isOk());
+    void searchEndpointReturnsBody() throws Exception {
+        mockMvc.perform(get("/api/v1/search")
+                        .param("query", "test")
+                        .with(jwt()))
+               .andExpect(status().isOk())
+               .andExpect(jsonPath("$.total").value(0));
     }
 }
