@@ -54,11 +54,9 @@ public class ProductsControllers {
     private static final CacheControl ONE_HOUR_PUBLIC_CACHE = CacheControl.maxAge(Duration.ofHours(1)).cachePublic();
 
     private final ProductService service;
-    private final SimpleFilterProvider filterProvider;
 
-    public ProductsControllers(ProductService service, SimpleFilterProvider filterProvider) {
+    public ProductsControllers(ProductService service) {
         this.service = service;
-        this.filterProvider = filterProvider;
     }
 
 
@@ -107,14 +105,10 @@ public class ProductsControllers {
             }
     )
     public ResponseEntity<ProductDto> product(@PathVariable
-                                                       @Pattern(regexp = "\\d{8,14}") Long gtin,
-                                                       @RequestParam(name = "include", required = false)
+                                                       Long gtin,
+                                                       @RequestParam(required = false)
                                                        Set<String> include,
-                                                       Locale locale) throws Exception {
-
-        if (include == null) {
-            include = Set.of();
-        }
+                                                       Locale locale){
 
         ProductDto body = service.getProduct(gtin, locale, include);
 

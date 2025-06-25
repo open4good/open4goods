@@ -14,6 +14,8 @@ import org.open4goods.model.product.Product;
 import org.open4goods.nudgerfrontapi.dto.product.ProductAiReviewDto;
 import org.open4goods.nudgerfrontapi.dto.product.ProductDto;
 import org.open4goods.nudgerfrontapi.dto.product.ProductDto.ProductDtoComponent;
+import org.open4goods.nudgerfrontapi.dto.product.ProductImagesDto;
+import org.open4goods.nudgerfrontapi.dto.product.ProductOffersDto;
 import org.open4goods.nudgerfrontapi.dto.product.ProductReviewDto;
 import org.open4goods.services.productrepository.services.ProductRepository;
 import org.springframework.data.domain.Page;
@@ -36,8 +38,21 @@ public class ProductService {
     	this.repository = repository;
     }
 
-    public ProductDto getProduct(long gtin, Locale local, Set<String> includes) throws ResourceNotFoundException {
-        Product p = repository.getById(gtin);
+    /**
+     * 
+     * @param gtin
+     * @param local
+     * @param includes
+     * @return
+     */
+    public ProductDto getProduct(long gtin, Locale local, Set<String> includes)  {
+        Product p = null;
+		try {
+			p = repository.getById(gtin);
+		} catch (ResourceNotFoundException e) {
+			// TODO Make 404 back to the controller, through standard spring method
+			e.printStackTrace();
+		}
 
     	ProductDto pdto = new ProductDto();
 
@@ -52,27 +67,35 @@ public class ProductService {
     	for (String include : includes) {
     		ProductDtoComponent component = ProductDtoComponent.valueOf(include);
 
-    		switch (component) {
-			case aiReview : {
-				// AI Review component
-				pdto.setAiReview(getAiReview(p,local));
-				break;
-			}
-			default:
-				throw new IllegalArgumentException("undefined component value : " + include);
-			}
+    		 switch (component) {
+				case aiReview -> pdto.setAiReview(mapAiReview(p, local));
+				case offers -> pdto.setOffers(mapOffers(p, local));
+				case images -> pdto.setImages(mapImages(p, local));
+
+				default -> throw new IllegalArgumentException("Missing component mapper for: " + include);
+    	    }
     	}
     	return pdto;
     }
 
 
-    /**
+    private ProductOffersDto mapOffers(Product p, Locale local) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	private ProductImagesDto mapImages(Product p, Locale local) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	/**
      * AI Review component mapping
      * @param p
      * @param local
      * @return
      */
-    private ProductAiReviewDto getAiReview(Product p, Locale local) {
+    private ProductAiReviewDto mapAiReview(Product p, Locale local) {
         if (p == null || p.getReviews() == null) {
             return null;
         }
@@ -89,14 +112,6 @@ public class ProductService {
                 holder.getTotalTokens(),
                 holder.getCreatedMs());
     }
-
-
-
-
-
-
-
-
 
 
 

@@ -579,20 +579,16 @@ public class ProductRepository {
 //			result = null;
 //		}
 
+		// Fail, getting from elastic
+		logger.info("Cache miss, getting product {} from elastic", productId);
+		result = elasticsearchOperations.get(String.valueOf(productId), Product.class);
+
 		if (null == result) {
-			// Fail, getting from elastic
-			logger.info("Cache miss, getting product {} from elastic", productId);
-			result = elasticsearchOperations.get(String.valueOf(productId), Product.class);
-
-			if (null == result) {
-				throw new ResourceNotFoundException("Product '" + productId + "' does not exists");
-			}
-
-			// found, adding it in redis cache
-			saveToRedis(result);
-		} else {
-			logger.info("Cache hit, got product {} from redis", productId);
+			throw new ResourceNotFoundException("Product '" + productId + "' does not exists");
 		}
+
+		// found, adding it in redis cache
+		saveToRedis(result);
 
 
 		return result;
