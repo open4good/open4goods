@@ -108,8 +108,13 @@ public class ProductsControllers {
     )
     public ResponseEntity<ProductDto> product(@PathVariable
                                                        @Pattern(regexp = "\\d{8,14}") Long gtin,
+                                                       @RequestParam(name = "include", required = false)
                                                        Set<String> include,
                                                        Locale locale) throws Exception {
+
+        if (include == null) {
+            include = Set.of();
+        }
 
         ProductDto body = service.getProduct(gtin, locale, include);
 
