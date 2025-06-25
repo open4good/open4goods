@@ -2,6 +2,7 @@ package org.open4goods.nudgerfrontapi.controller.api;
 
 import java.time.Duration;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 
 import org.open4goods.nudgerfrontapi.dto.product.ProductDto;
@@ -55,6 +56,9 @@ public class ProductController {
         this.filterProvider = filterProvider;
     }
 
+
+
+
     @GetMapping("/{gtin}")
     @Operation(
             summary = "Get product view",
@@ -70,19 +74,23 @@ public class ProductController {
             },
             responses = {
                     @ApiResponse(responseCode = "200", description = "Product found",
-                            content = @Content(mediaType = "application/json",
+                            		content = @Content(mediaType = "application/json",
                                     schema = @Schema(implementation = ProductDto.class))),
                     @ApiResponse(responseCode = "404", description = "Product not found")
             }
     )
     public ResponseEntity<ProductDto> product(@PathVariable
-                                                       @Pattern(regexp = "\\d{8,14}") String gtin,
-                                              Set<String> includes) throws Exception {
-        SimpleBeanPropertyFilter filter = includes.isEmpty()
-                ? SimpleBeanPropertyFilter.serializeAll()
-                : SimpleBeanPropertyFilter.filterOutAllExcept(includes);
-        filterProvider.addFilter("inc", filter);
-        ProductDto body = service.getProduct(Long.parseLong(gtin), includes);
+                                                       @Pattern(regexp = "\\d{8,14}") Long gtin,
+                                                       Set<String> include) throws Exception {
+
+
+    	// TODO : Retrieve nicely the locale, respecting nuxt locale management
+    	Locale local = Locale.FRANCE;
+
+        ProductDto body = service.getProduct(gtin, local, include);
+
+
+
         return ResponseEntity.ok()
                 .cacheControl(ONE_HOUR_PUBLIC_CACHE)
                 .body(body);
@@ -99,26 +107,23 @@ public class ProductController {
             description = "Return customer or AI‑generated reviews for a product.",
             security = @SecurityRequirement(name = "bearer-jwt"),
             parameters = {
-                    @Parameter(name = "gtin",
-                            description = "Global Trade Item Number (8–14 digit numeric code)",
-                            example = "00012345600012",
-                            required = true),
-                    @Parameter(name = "page[number]", in = ParameterIn.QUERY,
-                            description = "Zero-based page index"),
-                    @Parameter(name = "page[size]", in = ParameterIn.QUERY,
-                            description = "Page size")
+                    @Parameter(name = "gtin", description = "Global Trade Item Number (8–14 digit numeric code)", example = "00012345600012", required = true),
+
+                    @Parameter(name = "page[number]", in = ParameterIn.QUERY, description = "Zero-based page index"),
+                    @Parameter(name = "page[size]", in = ParameterIn.QUERY, description = "Page size")
             },
             responses = {
                     @ApiResponse(responseCode = "200", description = "Reviews returned",
                             headers = @Header(name = "Link", description = "Pagination links as defined by RFC 8288"),
-                            content = @Content(mediaType = "application/json",
-                                    schema = @Schema(implementation = ProductReviewDto.class, type = "array"))),
+                            content = @Content(mediaType = "application/json", schema = @Schema(implementation = ProductReviewDto.class, type = "array"))),
                     @ApiResponse(responseCode = "404", description = "Product not found")
             }
     )
     public ResponseEntity<Page<ProductReviewDto>> reviews(
             @PathVariable @Pattern(regexp = "\\d{8,14}") String gtin,
             @PageableDefault(size = 20) Pageable pageable) throws Exception {
+
+
         Page<ProductReviewDto> body = service.getReviews(Long.parseLong(gtin), pageable);
         return ResponseEntity.ok()
                 .cacheControl(ONE_HOUR_PUBLIC_CACHE)

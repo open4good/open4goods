@@ -12,6 +12,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 
 import java.util.List;
+import java.util.Locale;
 
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -70,7 +71,7 @@ class ProductControllerIT {
     @Test
     void includeParameterFiltersFields() throws Exception {
         long gtin = 321L;
-        given(service.getProduct(anyLong(), anySet())).willReturn(new ProductDto(new RequestMetadata(1L, 2L, "f"), gtin));
+        given(service.getProduct(anyLong(), Locale.ENGLISH, anySet())).willReturn(new ProductDto());
 
         mockMvc.perform(get("/product/{gtin}", gtin)
                         .param("include", "gtin")
