@@ -1,9 +1,10 @@
-package org.open4goods.nudgerfrontapi.controller;
+package org.open4goods.nudgerfrontapi.controller.api;
 
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-import org.open4goods.nudgerfrontapi.dto.StatsDto;
-import org.open4goods.nudgerfrontapi.service.StatsService;
+import org.open4goods.nudgerfrontapi.dto.PartnerDto;
+import org.open4goods.nudgerfrontapi.service.PartnerService;
 import org.springframework.http.CacheControl;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -18,35 +19,35 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
 /**
- * REST endpoint exposing statistics.
+ * REST endpoint exposing partners.
  */
 @RestController
-@Tag(name = "Statistics", description = "Site usage and product statistics")
-public class StatsController {
+@Tag(name = "Partners", description = "Information about project partners")
+public class PartnerController {
 
     private static final long TTL_SECONDS = 300;
 
-    private final StatsService statsService;
+    private final PartnerService partnerService;
 
-    public StatsController(StatsService statsService) {
-        this.statsService = statsService;
+    public PartnerController(PartnerService partnerService) {
+        this.partnerService = partnerService;
     }
 
-    @GetMapping("/stats")
+    @GetMapping("/partners")
     @Operation(
-            summary = "Get statistics",
-            description = "Return site statistics such as product and review counts.",
+            summary = "List partners",
+            description = "Return all partner organisations.",
             security = @SecurityRequirement(name = "bearer-jwt")
     )
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Statistics returned",
+            @ApiResponse(responseCode = "200", description = "Partners returned",
                     content = @Content(mediaType = "application/json",
-                            schema = @Schema(implementation = StatsDto.class)))
+                            schema = @Schema(implementation = PartnerDto.class, type = "array")))
     })
-    public ResponseEntity<StatsDto> stats() {
-        StatsDto dto = statsService.fetchStats();
+    public ResponseEntity<List<PartnerDto>> partners() {
+        List<PartnerDto> list = partnerService.fetchPartners();
         return ResponseEntity.ok()
                 .cacheControl(CacheControl.maxAge(TTL_SECONDS, TimeUnit.SECONDS))
-                .body(dto);
+                .body(list);
     }
 }

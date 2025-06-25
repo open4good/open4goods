@@ -136,11 +136,18 @@ public record OfferDto(
 | Ban `Map<String,Object>`           | Schema clarity                  |
 | Mark nullable fields explicitly    | Client safety                   |
 | Use constants for descriptions     | DRY & consistency               |
-| Test controllers & services        | No contract regressions         |
+| Test controllers & inner services  | No contract regressions         |
 
+
+
+## 9. Documentation
+
+Follow java / spring documentation best practices :
+* Use javadoc at class and at level field
+* use inline code comments to leverage human 
 ---
 
-## 9. Quick references
+## 10. Quick references
 
 | Action          | URL / Command        |
 |-----------------|----------------------|
