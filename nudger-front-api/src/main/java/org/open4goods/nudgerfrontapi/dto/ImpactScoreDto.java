@@ -1,5 +1,8 @@
 package org.open4goods.nudgerfrontapi.dto;
 
+/**
+ * Aggregated impact score information for a product.
+ */
 import java.util.Map;
 import io.swagger.v3.oas.annotations.media.Schema;
 
