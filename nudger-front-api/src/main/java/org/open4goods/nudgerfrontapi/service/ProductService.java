@@ -6,6 +6,9 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 
+import org.open4goods.model.product.AiReviewHolder;
+import org.open4goods.model.Localisable;
+
 import org.open4goods.model.exceptions.ResourceNotFoundException;
 import org.open4goods.model.product.Product;
 import org.open4goods.nudgerfrontapi.dto.product.ProductAiReviewDto;
@@ -17,28 +20,24 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import jakarta.servlet.http.HttpServletRequest;
 
 @Service
 public class ProductService {
 
+    private static final Logger logger = LoggerFactory.getLogger(ProductService.class);
 
-	private ProductRepository repository;
+    private final ProductRepository repository;
 
     public ProductService(ProductRepository repository) {
     	this.repository = repository;
     }
 
-    public ProductDto getProduct(long gtin, Locale local, java.util.Set<String> includes)  {
-    	Product p = null;
-		try {
-			p = repository.getById(gtin);
-		} catch (ResourceNotFoundException e) {
-			// TODO Auto-generated catch block
-			// TODO : Handle 404, ... Return Optional ? Throw directly ? Have to check best practices. 404 also if null returned from repository
-			e.printStackTrace();
-		}
+    public ProductDto getProduct(long gtin, Locale local, Set<String> includes) throws ResourceNotFoundException {
+        Product p = repository.getById(gtin);
 
     	ProductDto pdto = new ProductDto();
 
@@ -74,11 +73,22 @@ public class ProductService {
      * @return
      */
     private ProductAiReviewDto getAiReview(Product p, Locale local) {
-		ProductAiReviewDto dto = new ProductAiReviewDto();
+        if (p == null || p.getReviews() == null) {
+            return null;
+        }
 
-		// TODO : Implement
-		return dto;
-	}
+        AiReviewHolder holder = p.getReviews().i18n(local.getLanguage());
+        if (holder == null) {
+            return null;
+        }
+
+        return new ProductAiReviewDto(
+                holder.getReview(),
+                holder.getSources(),
+                holder.isEnoughData(),
+                holder.getTotalTokens(),
+                holder.getCreatedMs());
+    }
 
 
 
@@ -98,5 +108,8 @@ public class ProductService {
 
     public void createReview(long gtin, String captchaResponse, HttpServletRequest request)
             throws ResourceNotFoundException, SecurityException {
+        // Ensure the product exists
+        repository.getById(gtin);
+        logger.info("AI review generation requested for product {}", gtin);
     }
 }
