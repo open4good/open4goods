@@ -1,16 +1,18 @@
 package org.open4goods.nudgerfrontapi.service;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
+import java.util.Map;
 
 import org.open4goods.model.exceptions.ResourceNotFoundException;
 import org.open4goods.model.product.Product;
 import org.open4goods.nudgerfrontapi.dto.product.ProductAiReviewDto;
 import org.open4goods.nudgerfrontapi.dto.product.ProductDto;
 import org.open4goods.nudgerfrontapi.dto.product.ProductDto.ProductDtoComponent;
+import org.open4goods.nudgerfrontapi.dto.product.ProductImagesDto;
+import org.open4goods.nudgerfrontapi.dto.product.ProductOffersDto;
 import org.open4goods.nudgerfrontapi.dto.product.ProductReviewDto;
 import org.open4goods.services.productrepository.services.ProductRepository;
 import org.springframework.data.domain.Page;
@@ -31,39 +33,28 @@ public class ProductService {
     }
 
     public ProductDto getProduct(long gtin, Locale local, java.util.Set<String> includes)  {
-    	Product p = null;
-		try {
-			p = repository.getById(gtin);
-		} catch (ResourceNotFoundException e) {
-			// TODO Auto-generated catch block
-			// TODO : Handle 404, ... Return Optional ? Throw directly ? Have to check best practices. 404 also if null returned from repository
-			e.printStackTrace();
-		}
+        Product p = null;
+        try {
+            p = repository.getById(gtin);
+        } catch (ResourceNotFoundException e) {
+            e.printStackTrace();
+        }
 
-    	ProductDto pdto = new ProductDto();
+        ProductAiReviewDto aiReview = null;
+        ProductOffersDto offers = null;
+        ProductImagesDto images = null;
 
-    	/////////////////////////////////////////////
-    	// Handling global / high level attributes
-    	/////////////////////////////////////////////
-    	pdto.setGtin(gtin );
+        for (String include : includes) {
+            ProductDtoComponent component = ProductDtoComponent.valueOf(include);
+            switch (component) {
+                case aiReview -> aiReview = getAiReview(p, local);
+                case offers -> offers = new ProductOffersDto(List.of());
+                case images -> images = new ProductImagesDto(List.of());
+                default -> throw new IllegalArgumentException("undefined component value : " + include);
+            }
+        }
 
-    	/////////////////////////////////////////////
-    	// Handling requested components
-    	/////////////////////////////////////////////
-    	for (String include : includes) {
-    		ProductDtoComponent component = ProductDtoComponent.valueOf(include);
-
-    		switch (component) {
-			case aiReview : {
-				// AI Review component
-				pdto.setAiReview(getAiReview(p,local));
-				break;
-			}
-			default:
-				throw new IllegalArgumentException("undefined component value : " + include);
-			}
-    	}
-    	return pdto;
+        return new ProductDto(gtin, aiReview, offers, images, null);
     }
 
 
@@ -74,11 +65,9 @@ public class ProductService {
      * @return
      */
     private ProductAiReviewDto getAiReview(Product p, Locale local) {
-		ProductAiReviewDto dto = new ProductAiReviewDto();
-
-		// TODO : Implement
-		return dto;
-	}
+        // TODO : Implement real mapping
+        return new ProductAiReviewDto(null, Map.of(), false, null, null);
+    }
 
 
 

@@ -1,6 +1,11 @@
 # Nudger Front API
 
-This module provides the REST endpoints used by the Nuxt 3 frontend. It exposes data aggregated by other open4goods modules and is secured with JWT tokens.
+This module provides the REST endpoints used by the Nuxt 3 frontend. It exposes
+data aggregated by other open4goods modules and is secured with JWT tokens.
+
+DTOs located under `org.open4goods.nudgerfrontapi.dto` are written as Java
+**records** and each field is annotated with `@Schema` to keep the generated
+OpenAPI contract in sync with the code.
 
 ## Default Port
 

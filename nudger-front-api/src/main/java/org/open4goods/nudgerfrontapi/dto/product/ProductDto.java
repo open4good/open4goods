@@ -1,67 +1,33 @@
 package org.open4goods.nudgerfrontapi.dto.product;
 
-/**
- * Frontend view of a product. We make the choixe to wear the mapping logic in the DTO, adapted with our "composition" principe
- */
+import org.open4goods.nudgerfrontapi.dto.RequestMetadata;
+import com.fasterxml.jackson.annotation.JsonFilter;
 import io.swagger.v3.oas.annotations.media.Schema;
 
-public class ProductDto extends AbstractDTO {
+/**
+ * Frontend view of a product. Components are optional and can be included on
+ * demand by the frontend.
+ */
+@JsonFilter("inc")
+public record ProductDto(
+        @Schema(description = "Product GTIN, unique identifier", example = "7612345678901")
+        long gtin,
 
-		public enum ProductDtoComponent {
-			aiReview,
-			offers,
-			images
-		}
+        @Schema(description = "AI review component", example = "{}", nullable = true)
+        ProductAiReviewDto aiReview,
 
-        @Schema(description = "Product GTIN, it is the unique identifier", example = "7612345678901")
-        long gtin;
+        @Schema(description = "Offers component", example = "{}", nullable = true)
+        ProductOffersDto offers,
 
-        private ProductAiReviewDto aiReview;
+        @Schema(description = "Images component", example = "{}", nullable = true)
+        ProductImagesDto images,
 
-        private ProductOffersDto offers;
+        @Schema(description = "Timing metadata", example = "null", nullable = true)
+        RequestMetadata metadatas) {
 
-        private ProductImagesDto images;
-
-
-
-		public long getGtin() {
-			return gtin;
-		}
-
-		public void setGtin(long gtin) {
-			this.gtin = gtin;
-		}
-
-		public ProductAiReviewDto getAiReview() {
-			return aiReview;
-		}
-
-		public void setAiReview(ProductAiReviewDto aiReview) {
-			this.aiReview = aiReview;
-		}
-
-		public ProductOffersDto getOffers() {
-			return offers;
-		}
-
-		public void setOffers(ProductOffersDto offers) {
-			this.offers = offers;
-		}
-
-		public ProductImagesDto getImages() {
-			return images;
-		}
-
-		public void setImages(ProductImagesDto images) {
-			this.images = images;
-		}
-
-
-
-
-
-
-
-
-
+    public enum ProductDtoComponent {
+        aiReview,
+        offers,
+        images
+    }
 }

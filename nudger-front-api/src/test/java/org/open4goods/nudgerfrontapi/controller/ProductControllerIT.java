@@ -71,7 +71,8 @@ class ProductControllerIT {
     @Test
     void includeParameterFiltersFields() throws Exception {
         long gtin = 321L;
-        given(service.getProduct(anyLong(), Locale.ENGLISH, anySet())).willReturn(new ProductDto());
+        given(service.getProduct(anyLong(), Locale.ENGLISH, anySet()))
+                .willReturn(new ProductDto(gtin, null, null, null, null));
 
         mockMvc.perform(get("/product/{gtin}", gtin)
                         .param("include", "gtin")
