@@ -46,9 +46,12 @@ class ProductControllerIT {
         long gtin = 123L;
         given(service.getReviews(any())).willReturn(List.of(new ProductReviewDto("fr", new AiReview(), 1L)));
 
-        mockMvc.perform(get("/product/{gtin}/reviews", gtin).with(jwt()))
+        mockMvc.perform(get("/product/{gtin}/reviews", gtin)
+                .header("Accept-Language", "de")
+                .with(jwt()))
             .andExpect(status().isOk())
-            .andExpect(header().string("Cache-Control", "public, max-age=3600"));
+            .andExpect(header().string("Cache-Control", "public, max-age=3600"))
+            .andExpect(header().string("X-Locale", "de"));
     }
 
 
