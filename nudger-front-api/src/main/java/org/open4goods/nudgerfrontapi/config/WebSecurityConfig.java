@@ -26,13 +26,16 @@ public class WebSecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http, LocaleResolver localeResolver) throws Exception {
         http
-            .setSharedObject(LocaleResolver.class, localeResolver)
+
             .authorizeHttpRequests(auth -> auth
                     .requestMatchers("/", "/v3/api-docs", "/v3/api-docs/**", "/swagger-ui.html", "/swagger-ui/**", "/auth/**").permitAll()
                     .anyRequest().authenticated())
             .oauth2ResourceServer(OAuth2ResourceServerConfigurer::jwt)
             .csrf(AbstractHttpConfigurer::disable)
-            .httpBasic(Customizer.withDefaults());
+
+            .httpBasic(Customizer.withDefaults())
+            .setSharedObject(LocaleResolver.class, localeResolver)
+            ;
         return http.build();
     }
 
