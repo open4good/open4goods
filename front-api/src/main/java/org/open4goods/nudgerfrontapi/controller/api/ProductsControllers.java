@@ -4,6 +4,7 @@ import java.time.Duration;
 import java.util.Locale;
 import java.util.Set;
 
+import org.open4goods.model.exceptions.ResourceNotFoundException;
 import org.open4goods.nudgerfrontapi.dto.product.ProductDto;
 import org.open4goods.nudgerfrontapi.dto.product.ProductDto.ProductDtoComponent;
 import org.open4goods.nudgerfrontapi.dto.product.ProductDto.ProductDtoSortableFields;
