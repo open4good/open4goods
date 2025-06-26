@@ -17,6 +17,5 @@ public class PageableConfig implements WebMvcConfigurer {
         pageableResolver.setSizeParameterName("page[size]");
         resolvers.add(pageableResolver);
 
-        resolvers.add(new IncludeArgumentResolver());
     }
 }
