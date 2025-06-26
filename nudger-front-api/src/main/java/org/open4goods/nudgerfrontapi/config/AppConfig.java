@@ -20,40 +20,11 @@ public class AppConfig {
     RemoteFileCachingService remoteFileCachingService(RemoteFileCachingProperties props) {
         return new RemoteFileCachingService("./cache", props);
     }
-//
-//    @Bean
-//    GoogleTaxonomyService googleTaxonomyService(RemoteFileCachingService cachingService) {
-//        return new GoogleTaxonomyService(cachingService);
-//    }
+
 
     @Bean
     ProductRepository productRepository() {
         return new ProductRepository();
     }
 
-    @Bean
-    @Scope(value = WebApplicationContext.SCOPE_REQUEST, proxyMode = ScopedProxyMode.TARGET_CLASS)
-    SimpleFilterProvider simpleFilterProvider() {
-        return new SimpleFilterProvider()
-                .setDefaultFilter(SimpleBeanPropertyFilter.serializeAll())
-                .setFailOnUnknownId(false);
-    }
-
-    @Bean
-    BeanPostProcessor filterProviderCustomizer(SimpleFilterProvider filters) {
-        return new BeanPostProcessor() {
-            @Override
-            public Object postProcessBeforeInitialization(Object bean, String name) {
-                if (bean instanceof Jackson2ObjectMapperBuilder builder) {
-                    builder.filters(filters);
-                }
-                return bean;
-            }
-        };
-    }
-//
-//    @Bean
-//    SearchService searchService(ProductRepository repository) {
-//        return new SearchService(repository, "./logs");
-//    }
 }
