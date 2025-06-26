@@ -110,6 +110,20 @@ public class ProductService {
                 holder.getCreatedMs());
     }
 
+    /**
+     * Retrieve a paginated list of products. This currently returns an empty
+     * page as the repository implementation is not yet wired.
+     *
+     * @param pageable page request information
+     * @param locale   resolved locale
+     * @param includes requested components to include
+     * @return paginated list of {@link ProductDto}
+     */
+    public Page<ProductDto> getProducts(Pageable pageable, Locale locale, Set<String> includes) {
+        List<ProductDto> products = new ArrayList<>();
+        return new PageImpl<>(products, pageable, 0);
+    }
+
 
 
 	public Page<ProductReviewDto> getReviews(long gtin, Pageable pageable) throws ResourceNotFoundException {

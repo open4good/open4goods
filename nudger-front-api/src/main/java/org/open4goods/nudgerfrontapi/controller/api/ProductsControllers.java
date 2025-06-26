@@ -60,6 +60,52 @@ public class ProductsControllers {
     }
 
 
+    /**
+     * List products.
+     *
+     * <p>Error codes:</p>
+     * <ul>
+     *   <li><b>UNAUTHORIZED</b> – 401</li>
+     *   <li><b>FORBIDDEN</b> – 403</li>
+     *   <li><b>INTERNAL_ERROR</b> – 500</li>
+     * </ul>
+     */
+    @GetMapping
+    @Operation(
+            summary = "List products",
+            description = "Return paginated products.",
+            security = @SecurityRequirement(name = "bearer-jwt"),
+            parameters = {
+                    @Parameter(name = "include",
+                            in = ParameterIn.QUERY,
+                            description = "Champs à inclure (peut se répéter)",
+                            array = @ArraySchema(
+                                    schema = @Schema(implementation = ProductDtoComponent.class)
+                            )),
+                    @Parameter(name = "page[number]", in = ParameterIn.QUERY, description = "Zero-based page index"),
+                    @Parameter(name = "page[size]", in = ParameterIn.QUERY, description = "Page size")
+            },
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Products returned",
+                            headers = @Header(name = "Link", description = "Pagination links as defined by RFC 8288"),
+                            content = @Content(mediaType = "application/json", schema = @Schema(implementation = ProductDto.class, type = "array"))),
+                    @ApiResponse(responseCode = "401", description = "Authentication required"),
+                    @ApiResponse(responseCode = "403", description = "Access forbidden"),
+                    @ApiResponse(responseCode = "500", description = "Internal server error")
+            }
+    )
+    public ResponseEntity<Page<ProductDto>> products(
+            @PageableDefault(size = 20) Pageable pageable,
+            @RequestParam(required = false) Set<String> include,
+            Locale locale) {
+
+        Page<ProductDto> body = service.getProducts(pageable, locale, include == null ? Set.of() : include);
+        return ResponseEntity.ok()
+                .cacheControl(ONE_HOUR_PUBLIC_CACHE)
+                .body(body);
+    }
+
+
 
 
     /**
