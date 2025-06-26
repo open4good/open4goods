@@ -181,7 +181,7 @@ public class ProductsControllers {
                                                        Long gtin,
                                                        @RequestParam(required = false)
                                                        Set<String> include,
-                                                       Locale locale){
+                                                       Locale locale) throws ResourceNotFoundException {
 
         ProductDto body = service.getProduct(gtin, locale, include);
 
