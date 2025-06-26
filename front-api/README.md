@@ -12,6 +12,9 @@ The application runs on **port 8082** by default (`server.port` in `application.
 
 Security is enabled by default using JWT authentication. For local testing it can be disabled by setting
 `front.security.enabled=false` in `application.yml` or via an environment variable.
+To allow the Nuxt frontend running on a different host during development, configure the list of allowed
+CORS origins using the `front.security.cors-allowed-hosts` property. By default it permits requests from
+`http://localhost:8082`.
 
 ## Building
 
