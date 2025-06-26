@@ -1,4 +1,4 @@
-package org.open4goods.ui.model;
+package org.open4goods.services.blog.model;
 
 import java.util.ArrayList;
 import java.util.Date;

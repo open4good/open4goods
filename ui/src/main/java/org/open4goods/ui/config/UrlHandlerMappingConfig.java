@@ -21,7 +21,7 @@ import org.open4goods.ui.controllers.ui.VerticalBrandsController;
 import org.open4goods.ui.controllers.ui.VerticalController;
 import org.open4goods.ui.controllers.ui.VerticalSubsetController;
 import org.open4goods.ui.controllers.ui.XwikiController;
-import org.open4goods.ui.services.BlogService;
+import org.open4goods.services.blog.service.BlogService;
 import org.open4goods.xwiki.services.XwikiFacadeService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

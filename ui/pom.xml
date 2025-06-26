@@ -83,6 +83,11 @@
             <artifactId>xwiki-spring-boot-starter</artifactId>
             <version>0.0.1</version>
         </dependency>
+        <dependency>
+            <groupId>org.open4goods</groupId>
+            <artifactId>blog</artifactId>
+            <version>${global.version}</version>
+        </dependency>
 
         <dependency>
             <groupId>com.opencsv</groupId>

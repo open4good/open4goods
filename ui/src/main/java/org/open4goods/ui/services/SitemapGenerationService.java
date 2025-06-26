@@ -22,7 +22,7 @@ import org.open4goods.services.productrepository.services.ProductRepository;
 import org.open4goods.ui.config.yml.UiConfig;
 import org.open4goods.ui.controllers.ui.pages.SitemapEntry;
 import org.open4goods.ui.controllers.ui.pages.SitemapExposedController;
-import org.open4goods.ui.model.BlogPost;
+import org.open4goods.services.blog.model.BlogPost;
 import org.open4goods.xwiki.model.FullPage;
 import org.open4goods.xwiki.services.XwikiFacadeService;
 import org.slf4j.Logger;
