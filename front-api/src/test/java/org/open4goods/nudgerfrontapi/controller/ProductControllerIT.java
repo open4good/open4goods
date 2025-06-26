@@ -25,6 +25,7 @@ import org.open4goods.nudgerfrontapi.dto.product.ProductReviewDto;
 import org.open4goods.nudgerfrontapi.dto.product.ProductDto;
 import org.open4goods.nudgerfrontapi.dto.RequestMetadata;
 import org.open4goods.nudgerfrontapi.service.ProductMappingService;
+import org.open4goods.model.exceptions.ResourceNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.actuate.health.HealthEndpoint;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -79,6 +80,16 @@ class ProductControllerIT {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.gtin").value(gtin))
                 .andExpect(jsonPath("$.metadatas").doesNotExist());
+    }
+
+    @Test
+    void productEndpointReturns404WhenServiceThrows() throws Exception {
+        long gtin = 999L;
+        given(service.getProduct(anyLong(), any(Locale.class), anySet()))
+                .willThrow(new ResourceNotFoundException());
+
+        mockMvc.perform(get("/products/{gtin}", gtin).with(jwt()))
+                .andExpect(status().isNotFound());
     }
 
     @Test
