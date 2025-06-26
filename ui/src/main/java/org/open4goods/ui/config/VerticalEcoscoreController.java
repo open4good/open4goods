@@ -8,7 +8,7 @@ import org.open4goods.services.prompt.dto.PromptResponse;
 import org.open4goods.services.prompt.service.PromptService;
 import org.open4goods.services.serialisation.service.SerialisationService;
 import org.open4goods.ui.controllers.ui.UiService;
-import org.open4goods.ui.services.BlogService;
+import org.open4goods.services.blog.service.BlogService;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.AbstractController;
 

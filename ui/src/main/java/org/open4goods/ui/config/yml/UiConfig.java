@@ -10,7 +10,7 @@ import java.util.Set;
 import org.open4goods.api.services.feed.AffiliationConfig;
 import org.open4goods.api.services.feed.FeedConfiguration;
 import org.open4goods.commons.config.yml.BanCheckerConfig;
-import org.open4goods.commons.config.yml.BlogConfiguration;
+import org.open4goods.services.blog.config.BlogConfiguration;
 import org.open4goods.commons.config.yml.DevModeConfiguration;
 import org.open4goods.commons.config.yml.IcecatConfiguration;
 import org.open4goods.commons.config.yml.ui.OpenSearchConfig;

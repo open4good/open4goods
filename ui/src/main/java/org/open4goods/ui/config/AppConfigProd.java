@@ -6,7 +6,7 @@ import java.util.List;
 import org.open4goods.commons.interceptors.BanCheckerInterceptor;
 import org.open4goods.ui.config.yml.UiConfig;
 import org.open4goods.ui.interceptors.GenericTemplateInterceptor;
-import org.open4goods.ui.services.BlogService;
+import org.open4goods.services.blog.service.BlogService;
 import org.open4goods.xwiki.services.XwikiFacadeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
