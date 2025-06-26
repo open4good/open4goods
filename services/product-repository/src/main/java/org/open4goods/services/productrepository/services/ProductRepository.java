@@ -26,6 +26,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.elasticsearch.UncategorizedElasticsearchException;
 import org.springframework.data.elasticsearch.client.elc.ElasticsearchAggregations;
@@ -147,6 +148,18 @@ public class ProductRepository {
                     .map(SearchHit::getContent);
         }
 
+
+    public SearchHits<Product> get(Pageable page) {
+        Query query = Query.findAll();
+        query.setPageable(page);
+        try {
+			return elasticsearchOperations.search(query, Product.class, CURRENT_INDEX);
+		} catch (Exception e) {
+			elasticLog(e);
+			// TODO : Should throw
+			return null;
+		}
+    }
 
 	/**
 	 * Retrieves only the mappedCategories for items having the minimal attributes set
@@ -380,15 +393,22 @@ public class ProductRepository {
 	            .stream()
 	            .map(SearchHit::getContent);
 	    } catch (Exception e) {
-	        if (e instanceof UncategorizedElasticsearchException) {
-	            Throwable cause = e.getCause();
-	            if (cause instanceof ElasticsearchException ee) {
-	                logger.error("Elasticsearch error: " + ee.response());
-	            }
-	        }
-
-	        throw e;
+	        elasticLog(e);
+			throw e;
 	    }
+	}
+
+	private void elasticLog(Exception e)  {
+		if (e instanceof UncategorizedElasticsearchException) {
+		    Throwable cause = e.getCause();
+		    if (cause instanceof ElasticsearchException ee) {
+		        logger.error("Elasticsearch error: " + ee.response());
+		    } else {
+		    	logger.error("Error : ",e );
+		    }
+		}
+
+
 	}
 
 

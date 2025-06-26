@@ -48,6 +48,13 @@
     </dependency>
 
     <dependency>
+        <groupId>org.open4goods</groupId>
+        <artifactId>xwiki-spring-boot-starter</artifactId>
+        <version>0.0.1</version>
+    </dependency>
+
+
+    <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-web</artifactId>
       <exclusions>
