@@ -9,9 +9,9 @@
     <version>0.0.1-SNAPSHOT</version>
   </parent>
 
-  <artifactId>nudger-front-api</artifactId>
-  <name>nudger-front-api</name>
-  <description>Nudger B2C API</description>
+  <artifactId>front-api</artifactId>
+  <name>front-api</name>
+  <description>Nudger B2C frontend API</description>
 
   <dependencies>
     <dependency>
