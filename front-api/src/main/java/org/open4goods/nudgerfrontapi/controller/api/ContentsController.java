@@ -56,7 +56,7 @@ public class ContentsController {
                                                        String blocId,
                                                        Locale locale){
 
-        XwikiContentBlocDto body = new XwikiContentBlocDto();
+        XwikiContentBlocDto body = new XwikiContentBlocDto(blocId, null, null);
         // TODO : implement this method, using xwikiHtmlservice
 
 		return ResponseEntity.ok()
