@@ -20,6 +20,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.elasticsearch.core.SearchHits;
+import org.springframework.data.util.Streamable;
 import org.springframework.stereotype.Service;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -51,29 +53,38 @@ public class ProductService {
 			e.printStackTrace();
 		}
 
-    	ProductDto pdto = new ProductDto();
+    	ProductDto pdto = mapProduct(p,local, includes);
+    	return pdto;
+    }
+
+	private ProductDto mapProduct(  Product p, Locale local, Set<String> includes) {
+		ProductDto pdto = new ProductDto();
 
     	/////////////////////////////////////////////
     	// Handling global / high level attributes
     	/////////////////////////////////////////////
-    	pdto.setGtin(gtin );
+    	pdto.setGtin(p.getId());
 
     	/////////////////////////////////////////////
     	// Handling requested components
     	/////////////////////////////////////////////
-    	for (String include : includes) {
-    		ProductDtoComponent component = ProductDtoComponent.valueOf(include);
 
-    		 switch (component) {
-				case aiReview -> pdto.setAiReview(mapAiReview(p, local));
-				case offers -> pdto.setOffers(mapOffers(p, local));
-				case images -> pdto.setImages(mapImages(p, local));
+    	if (null != includes) {
 
-				default -> throw new IllegalArgumentException("Missing component mapper for: " + include);
-    	    }
+    		for (String include : includes) {
+	    		ProductDtoComponent component = ProductDtoComponent.valueOf(include);
+
+	    		 switch (component) {
+					case aiReview -> pdto.setAiReview(mapAiReview(p, local));
+					case offers -> pdto.setOffers(mapOffers(p, local));
+					case images -> pdto.setImages(mapImages(p, local));
+
+					default -> throw new IllegalArgumentException("Missing component mapper for: " + include);
+	    	    }
+	    	}
     	}
-    	return pdto;
-    }
+		return pdto;
+	}
 
 
     private ProductOffersDto mapOffers(Product p, Locale local) {
@@ -110,18 +121,16 @@ public class ProductService {
                 holder.getCreatedMs());
     }
 
-    /**
-     * Retrieve a paginated list of products. This currently returns an empty
-     * page as the repository implementation is not yet wired.
-     *
-     * @param pageable page request information
-     * @param locale   resolved locale
-     * @param includes requested components to include
-     * @return paginated list of {@link ProductDto}
-     */
+
     public Page<ProductDto> getProducts(Pageable pageable, Locale locale, Set<String> includes) {
-        List<ProductDto> products = new ArrayList<>();
-        return new PageImpl<>(products, pageable, 0);
+
+		SearchHits<Product> response = repository.get(pageable);
+		List<ProductDto> items = response
+				.map(e -> e.getContent())
+				.map(e -> mapProduct(e, locale, includes))
+				.toList();
+
+		return  new PageImpl<ProductDto>(items, pageable, response.getTotalHits());
     }
 
 
