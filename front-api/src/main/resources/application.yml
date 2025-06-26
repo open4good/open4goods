@@ -18,3 +18,9 @@ springdoc:
 front:
   security:
     enabled: false
+    
+xwiki:
+    username: nudger
+    password: nudger 
+    baseUrl: https://wiki.nudger.fr
+        
