@@ -9,10 +9,11 @@ import io.swagger.v3.oas.annotations.servers.Server;
 
 @SpringBootApplication(scanBasePackages = "org.open4goods")
 @OpenAPIDefinition(
-		  servers = {
-		    @Server(url = "https://beta.front-api.nudger.fr", description = "Public beta HTTPS API")
-		  }
-		)
+        servers = {
+            @Server(url = "http://localhost:8082", description = "Local development API"),
+            @Server(url = "https://beta.front-api.nudger.fr", description = "Public beta HTTPS API")
+        }
+)
 @EnableCaching
 public class NudgerFrontApiApplication {
 
