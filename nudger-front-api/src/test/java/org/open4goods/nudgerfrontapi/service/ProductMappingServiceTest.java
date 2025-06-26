@@ -20,15 +20,15 @@ import org.open4goods.model.product.Product;
 import org.open4goods.nudgerfrontapi.dto.product.ProductDto;
 import org.open4goods.services.productrepository.services.ProductRepository;
 
-class ProductServiceTest {
+class ProductMappingServiceTest {
 
     private ProductRepository repository;
-    private ProductService service;
+    private ProductMappingService service;
 
     @BeforeEach
     void setUp() {
         repository = mock(ProductRepository.class);
-        service = new ProductService(repository);
+        service = new ProductMappingService(repository);
     }
 
     @Test

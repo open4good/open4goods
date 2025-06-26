@@ -24,7 +24,7 @@ import org.open4goods.nudgerfrontapi.controller.api.ProductsControllers;
 import org.open4goods.nudgerfrontapi.dto.product.ProductReviewDto;
 import org.open4goods.nudgerfrontapi.dto.product.ProductDto;
 import org.open4goods.nudgerfrontapi.dto.RequestMetadata;
-import org.open4goods.nudgerfrontapi.service.ProductService;
+import org.open4goods.nudgerfrontapi.service.ProductMappingService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.actuate.health.HealthEndpoint;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -43,7 +43,7 @@ class ProductControllerIT {
     private ProductsControllers controller;
 
     @MockBean
-    private ProductService service;
+    private ProductMappingService service;
 
     @Autowired
     private HealthEndpoint healthEndpoint;

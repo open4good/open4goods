@@ -14,12 +14,12 @@ import org.open4goods.nudgerfrontapi.config.UserPreferenceLocaleResolver;
 public class LocaleBeansConfig {
 
     @Bean
-    public LocaleResolver localeResolver() {
+    LocaleResolver localeResolver() {
         return new UserPreferenceLocaleResolver();
     }
 
     @Bean
-    public XLocaleHeaderInterceptor xLocaleHeaderInterceptor(LocaleResolver localeResolver) {
+    XLocaleHeaderInterceptor xLocaleHeaderInterceptor(LocaleResolver localeResolver) {
         return new XLocaleHeaderInterceptor(localeResolver);
     }
 }
