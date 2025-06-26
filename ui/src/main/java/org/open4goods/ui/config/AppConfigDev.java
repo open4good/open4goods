@@ -1,7 +1,7 @@
 package org.open4goods.ui.config;
 
 import org.open4goods.ui.config.yml.UiConfig;
-import org.open4goods.ui.services.BlogService;
+import org.open4goods.services.blog.service.BlogService;
 import org.open4goods.xwiki.services.XwikiFacadeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;

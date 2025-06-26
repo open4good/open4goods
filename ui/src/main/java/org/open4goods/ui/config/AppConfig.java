@@ -44,7 +44,7 @@ import org.open4goods.ui.config.yml.UiConfig;
 import org.open4goods.ui.interceptors.GenericTemplateInterceptor;
 import org.open4goods.ui.interceptors.ImageResizeInterceptor;
 import org.open4goods.ui.repository.ContributionVoteRepository;
-import org.open4goods.ui.services.BlogService;
+import org.open4goods.services.blog.service.BlogService;
 import org.open4goods.ui.services.ContributionService;
 import org.open4goods.ui.services.GoogleIndexationService;
 import org.open4goods.ui.services.GtinService;

@@ -1,4 +1,4 @@
-package org.open4goods.ui.services;
+package org.open4goods.services.blog.service;
 
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
@@ -17,11 +17,10 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.text.WordUtils;
-import org.open4goods.commons.config.yml.BlogConfiguration;
+import org.open4goods.services.blog.config.BlogConfiguration;
 import org.open4goods.model.Localisable;
 import org.open4goods.model.helper.IdHelper;
-import org.open4goods.ui.controllers.ui.pages.BlogController;
-import org.open4goods.ui.model.BlogPost;
+import org.open4goods.services.blog.model.BlogPost;
 import org.open4goods.xwiki.model.FullPage;
 import org.open4goods.xwiki.services.XwikiFacadeService;
 import org.slf4j.Logger;
@@ -255,7 +254,11 @@ public class BlogService implements HealthIndicator {
                     // Sanitize HTML content to avoid XSS
                     html = Jsoup.clean(html, Safelist.basicWithImages());
                     // Replace blog attachment links with proxied equivalent links
-                    html = html.replace("\"/bin/download/Blog", "\"" + BlogController.DEFAULT_PATH);
+                    String basePath = '/' + config.getBlogUrl();
+                    if (basePath.endsWith("/")) {
+                        basePath = basePath.substring(0, basePath.length() - 1);
+                    }
+                    html = html.replace("\"/bin/download/Blog", "\"" + basePath);
                     post.setBody(html);
 
                     // Generate a summary if not provided and the body is sufficiently long
@@ -363,7 +366,11 @@ public class BlogService implements HealthIndicator {
      * @return the proxified URL for the blog image
      */
     private String getBlogImageUrl(String name, String image) {
-        return BlogController.DEFAULT_PATH + "/" + name + "/" + image;
+        String basePath = '/' + config.getBlogUrl();
+        if (basePath.endsWith("/")) {
+            basePath = basePath.substring(0, basePath.length() - 1);
+        }
+        return basePath + '/' + name + '/' + image;
     }
 
     /**
