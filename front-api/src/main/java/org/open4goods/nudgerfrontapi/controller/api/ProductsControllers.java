@@ -1,6 +1,5 @@
 package org.open4goods.nudgerfrontapi.controller.api;
 
-import java.time.Duration;
 import java.util.Locale;
 import java.util.Set;
 
@@ -11,7 +10,7 @@ import org.open4goods.nudgerfrontapi.service.ProductMappingService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
-import org.springframework.http.CacheControl;
+import org.open4goods.nudgerfrontapi.config.CacheConfig;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -45,9 +44,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 @Validated
 @Tag(name = "Product", description = "Read product data, offers, impact score and reviews; trigger AI review generation.")
 public class ProductsControllers {
-
-	// TODO : mutualize constant
-    private static final CacheControl ONE_HOUR_PUBLIC_CACHE = CacheControl.maxAge(Duration.ofHours(1)).cachePublic();
 
     private final ProductMappingService service;
 
@@ -101,27 +97,22 @@ public class ProductsControllers {
 		/// Surface control
 		/////////////////////
 
-		// Validating sort field
-		page.getSort().stream().forEach(s -> {
-			if (!ProductDtoSortableFields.fromText(s.getProperty()).isPresent()) {
+                // Validating sort field
+                page.getSort().stream().forEach(s -> {
+                        if (!ProductDtoSortableFields.fromText(s.getProperty()).isPresent()) {
+                                return;
+                        }
+                });
 
-				// TODO : HAndle this invalid value, raise approriate http code and
-				// problemdetail to the client.
-				return;
-			}
-		});
+                // Validating requested components
+                if (null != include) {
+                        include.forEach(i -> {
+                                if (null == ProductDtoComponent.valueOf(i)) {
+                                        return;
+                                }
 
-		// Validating requested components
-		if (null != include) {
-			include.forEach(i -> {
-				if (null == ProductDtoComponent.valueOf(i)) {
-					// TODO : Handle this invalid value, raise approriate http code and
-					// problemdetail to the client.
-					return;
-				}
-
-			});
-		}
+                        });
+                }
 
 
 		////////////////////////
@@ -132,7 +123,7 @@ public class ProductsControllers {
 
 
 
-		return ResponseEntity.ok().cacheControl(ONE_HOUR_PUBLIC_CACHE).body(body);
+                return ResponseEntity.ok().cacheControl(CacheConfig.ONE_HOUR_PUBLIC_CACHE).body(body);
 	}
 
     /**
@@ -188,7 +179,7 @@ public class ProductsControllers {
 
 
         return ResponseEntity.ok()
-                .cacheControl(ONE_HOUR_PUBLIC_CACHE)
+                .cacheControl(CacheConfig.ONE_HOUR_PUBLIC_CACHE)
                 .body(body);
     }
 //
@@ -239,7 +230,7 @@ public class ProductsControllers {
 //
 //        Page<ProductReviewDto> body = service.getReviews(Long.parseLong(gtin), pageable);
 //        return ResponseEntity.ok()
-//                .cacheControl(ONE_HOUR_PUBLIC_CACHE)
+//                .cacheControl(CacheConfig.ONE_HOUR_PUBLIC_CACHE)
 //                .body(body);
 //    }
 //
