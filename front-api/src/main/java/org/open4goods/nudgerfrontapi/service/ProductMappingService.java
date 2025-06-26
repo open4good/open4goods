@@ -44,17 +44,12 @@ public class ProductMappingService {
      * @param includes
      * @return
      */
-    public ProductDto getProduct(long gtin, Locale local, Set<String> includes)  {
-        Product p = null;
-		try {
-			p = repository.getById(gtin);
-		} catch (ResourceNotFoundException e) {
-			// TODO Make 404 back to the controller, through standard spring method
-			e.printStackTrace();
-		}
+    public ProductDto getProduct(long gtin, Locale local, Set<String> includes)
+            throws ResourceNotFoundException {
+        Product p = repository.getById(gtin);
 
-    	ProductDto pdto = mapProduct(p,local, includes);
-    	return pdto;
+        ProductDto pdto = mapProduct(p, local, includes);
+        return pdto;
     }
 
 	private ProductDto mapProduct(  Product p, Locale local, Set<String> includes) {
