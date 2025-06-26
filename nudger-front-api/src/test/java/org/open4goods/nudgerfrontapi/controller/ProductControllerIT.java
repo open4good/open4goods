@@ -57,7 +57,7 @@ class ProductControllerIT {
         var page = new PageImpl<>(List.of(new ProductReviewDto("fr", new AiReview(), 1L)), PageRequest.of(0, 20), 1);
         given(service.getReviews(anyLong(), any(Pageable.class))).willReturn(page);
 
-        mockMvc.perform(get("/product/{gtin}/reviews", gtin)
+        mockMvc.perform(get("/products/{gtin}/reviews", gtin)
                 .header("Accept-Language", "de")
                 .with(jwt()))
             .andExpect(status().isOk())
@@ -73,12 +73,24 @@ class ProductControllerIT {
         long gtin = 321L;
         given(service.getProduct(anyLong(), Locale.ENGLISH, anySet())).willReturn(new ProductDto());
 
-        mockMvc.perform(get("/product/{gtin}", gtin)
+        mockMvc.perform(get("/products/{gtin}", gtin)
                         .param("include", "gtin")
                         .with(jwt()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.gtin").value(gtin))
                 .andExpect(jsonPath("$.metadatas").doesNotExist());
+    }
+
+    @Test
+    void productsEndpointReturnsPage() throws Exception {
+        var page = new PageImpl<>(List.of(new ProductDto()), PageRequest.of(0, 20), 1);
+        given(service.getProducts(any(Pageable.class), any(Locale.class), anySet())).willReturn(page);
+
+        mockMvc.perform(get("/products")
+                        .with(jwt()))
+                .andExpect(status().isOk())
+                .andExpect(header().string("Cache-Control", "public, max-age=3600"))
+                .andExpect(jsonPath("$.page.number").value(0));
     }
 
 
@@ -88,7 +100,7 @@ class ProductControllerIT {
     void postReviewUsesCaptcha() throws Exception {
         long gtin = 123L;
 
-        mockMvc.perform(post("/product/{gtin}/reviews", gtin)
+        mockMvc.perform(post("/products/{gtin}/reviews", gtin)
                 .param("hcaptchaResponse", "resp")
                 .with(jwt()))
             .andExpect(status().isAccepted());
