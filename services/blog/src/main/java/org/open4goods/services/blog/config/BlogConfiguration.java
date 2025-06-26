@@ -1,4 +1,4 @@
-package org.open4goods.commons.config.yml;
+package org.open4goods.services.blog.config;
 
 import org.open4goods.model.Localisable;
 
