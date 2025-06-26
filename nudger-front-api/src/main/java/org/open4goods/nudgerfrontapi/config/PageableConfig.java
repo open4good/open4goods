@@ -8,7 +8,6 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import org.springframework.data.web.PageableHandlerMethodArgumentResolver;
 
 @Configuration
-// TODO : Test / check : not sure this is necessary
 public class PageableConfig implements WebMvcConfigurer {
 
     @Override
@@ -17,6 +16,7 @@ public class PageableConfig implements WebMvcConfigurer {
         PageableHandlerMethodArgumentResolver pageableResolver = new PageableHandlerMethodArgumentResolver();
         pageableResolver.setPageParameterName("page[number]");
         pageableResolver.setSizeParameterName("page[size]");
+
         // TODO : Document, from conf
         pageableResolver.setMaxPageSize(50);
 

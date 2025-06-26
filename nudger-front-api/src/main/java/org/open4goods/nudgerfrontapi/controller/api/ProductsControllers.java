@@ -77,7 +77,7 @@ public class ProductsControllers {
                             )),
                     @Parameter(name = "page[number]", in = ParameterIn.QUERY, description = "Zero-based page index"),
                     @Parameter(name = "page[size]", in = ParameterIn.QUERY, description = "Page size"),
-                    @Parameter(name = "sort", in = ParameterIn.QUERY, description = "Sort criteria in the format: property,(asc|desc). Allowed fields: rating,createdAt",array = @ArraySchema(
+                    @Parameter(name = "sort", in = ParameterIn.QUERY, description = "Sort criteria in the format: property,(asc|desc). ",array = @ArraySchema(
                             schema = @Schema(implementation = ProductDtoSortableFields.class)
                     )),
             },
@@ -91,22 +91,48 @@ public class ProductsControllers {
             }
     )
     public ResponseEntity<Page<ProductDto>> products(
-    		@Parameter(hidden = true) @PageableDefault(size = 20) Pageable pageable,
-    		  @RequestParam(required=false) Set<String> include,
+    		@Parameter(hidden = true) @PageableDefault(size = 20) Pageable page,
+    		@RequestParam(required=false) Set<String> include,
     		  Locale locale) {
 
 
+		/////////////////////
+		/// Surface control
+		/////////////////////
+
+		// Validating sort field
+		page.getSort().stream().forEach(s -> {
+			if (!ProductDtoSortableFields.fromText(s.getProperty()).isPresent()) {
+
+				// TODO : HAndle this invalid value, raise approriate http code and
+				// problemdetail to the client.
+				return;
+			}
+		});
+
+		// Validating requested components
+		if (null != include) {
+			include.forEach(i -> {
+				if (null == ProductDtoComponent.valueOf(i)) {
+					// TODO : Handle this invalid value, raise approriate http code and
+					// problemdetail to the client.
+					return;
+				}
+
+			});
+		}
 
 
-    		  Page<ProductDto> body = service.getProducts(pageable, locale,
-    		                             include == null ? Set.of() : include);
-    		  return ResponseEntity.ok()
-    		                       .cacheControl(ONE_HOUR_PUBLIC_CACHE)
-    		                       .body(body);
-    		}
+		////////////////////////
+		// Transforming product to DTO
+		///////////////////////
+
+		Page<ProductDto> body = service.getProducts(page, locale, include == null ? Set.of() : include);
 
 
 
+		return ResponseEntity.ok().cacheControl(ONE_HOUR_PUBLIC_CACHE).body(body);
+	}
 
     /**
      * Return high level information for a product.
