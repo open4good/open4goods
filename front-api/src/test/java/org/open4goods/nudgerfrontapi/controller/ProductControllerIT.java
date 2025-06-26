@@ -25,6 +25,8 @@ import org.open4goods.nudgerfrontapi.dto.product.ProductReviewDto;
 import org.open4goods.nudgerfrontapi.dto.product.ProductDto;
 import org.open4goods.nudgerfrontapi.dto.RequestMetadata;
 import org.open4goods.nudgerfrontapi.service.ProductMappingService;
+import org.open4goods.nudgerfrontapi.controller.advice.GlobalExceptionHandler;
+import org.open4goods.model.exceptions.ResourceNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.actuate.health.HealthEndpoint;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -47,6 +49,9 @@ class ProductControllerIT {
 
     @Autowired
     private HealthEndpoint healthEndpoint;
+
+    @Autowired
+    private GlobalExceptionHandler exceptionHandler;
 
 
 
@@ -104,5 +109,18 @@ class ProductControllerIT {
                 .param("hcaptchaResponse", "resp")
                 .with(jwt()))
             .andExpect(status().isAccepted());
+    }
+
+    @Test
+    void healthEndpointReportsErrorCounts() {
+        exceptionHandler.handleException(new Exception("boom"));
+        exceptionHandler.handleNotFound(new ResourceNotFoundException("missing"));
+
+        var health = healthEndpoint.health();
+        var details = ((org.springframework.boot.actuate.health.SystemHealth) health)
+                .getComponents().get("globalExceptionHandler").getDetails();
+
+        org.assertj.core.api.Assertions.assertThat(details.get("serverErrors")).isEqualTo(1);
+        org.assertj.core.api.Assertions.assertThat(details.get("clientErrors")).isEqualTo(1);
     }
 }
