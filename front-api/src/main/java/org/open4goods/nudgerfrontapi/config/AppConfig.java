@@ -1,6 +1,9 @@
 package org.open4goods.nudgerfrontapi.config;
 
 import org.open4goods.services.productrepository.services.ProductRepository;
+import org.open4goods.services.blog.config.BlogConfiguration;
+import org.open4goods.services.blog.service.BlogService;
+import org.open4goods.xwiki.services.XwikiFacadeService;
 import org.open4goods.services.remotefilecaching.config.RemoteFileCachingProperties;
 import org.open4goods.services.remotefilecaching.service.RemoteFileCachingService;
 import org.springframework.context.annotation.Bean;
@@ -25,6 +28,11 @@ public class AppConfig {
     @Bean
     ProductRepository productRepository() {
         return new ProductRepository();
+    }
+
+    @Bean
+    BlogService blogService(XwikiFacadeService xwikiFacadeService) {
+        return new BlogService(xwikiFacadeService, new BlogConfiguration(), null);
     }
 
 }
