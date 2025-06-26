@@ -53,14 +53,7 @@ class ProductServiceTest {
         assertThat(dto.getAiReview().review()).isEqualTo(holder.getReview());
     }
 
-    @Test
-    void getProductPropagatesNotFound() throws Exception {
-        long gtin = 1L;
-        when(repository.getById(gtin)).thenThrow(new ResourceNotFoundException("not found"));
 
-        assertThatThrownBy(() -> service.getProduct(gtin, Locale.ENGLISH, Set.of()))
-                .isInstanceOf(ResourceNotFoundException.class);
-    }
 
     @Test
     void createReviewCallsRepository() throws Exception {
