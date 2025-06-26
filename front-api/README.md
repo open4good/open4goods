@@ -16,6 +16,20 @@ To allow the Nuxt frontend running on a different host during development, confi
 CORS origins using the `front.security.cors-allowed-hosts` property. By default it permits requests from
 `http://localhost:8082`.
 
+## Local development tips
+
+When starting the application locally you may be tempted to call the beta API
+(`https://beta.front-api.nudger.fr`). That server does not set CORS headers for
+`http://localhost:8082`, which leads the browser to reject the requests. Ensure
+your frontend uses the local API base URL instead:
+
+```bash
+export API_URL=http://localhost:8082
+```
+
+With this configuration all calls stay on the same origin and the built-in CORS
+rules apply correctly.
+
 ## Building
 
 From this directory run:
