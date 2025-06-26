@@ -101,27 +101,23 @@ public class ProductsControllers {
 		/// Surface control
 		/////////////////////
 
-		// Validating sort field
-		page.getSort().stream().forEach(s -> {
-			if (!ProductDtoSortableFields.fromText(s.getProperty()).isPresent()) {
+                // Validating sort field
+                page.getSort().forEach(s -> {
+                        if (!ProductDtoSortableFields.fromText(s.getProperty()).isPresent()) {
+                                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid sort field");
+                        }
+                });
 
-				// TODO : HAndle this invalid value, raise approriate http code and
-				// problemdetail to the client.
-				return;
-			}
-		});
-
-		// Validating requested components
-		if (null != include) {
-			include.forEach(i -> {
-				if (null == ProductDtoComponent.valueOf(i)) {
-					// TODO : Handle this invalid value, raise approriate http code and
-					// problemdetail to the client.
-					return;
-				}
-
-			});
-		}
+                // Validating requested components
+                if (null != include) {
+                        include.forEach(i -> {
+                                try {
+                                        ProductDtoComponent.valueOf(i);
+                                } catch (IllegalArgumentException ex) {
+                                        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid sort field");
+                                }
+                        });
+                }
 
 
 		////////////////////////
