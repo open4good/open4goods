@@ -46,6 +46,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 @Tag(name = "Product", description = "Read product data, offers, impact score and reviews; trigger AI review generation.")
 public class ProductsControllers {
 
+	// TODO : mutualize constant
     private static final CacheControl ONE_HOUR_PUBLIC_CACHE = CacheControl.maxAge(Duration.ofHours(1)).cachePublic();
 
     private final ProductMappingService service;
