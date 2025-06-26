@@ -27,13 +27,13 @@ import org.springframework.stereotype.Service;
 import jakarta.servlet.http.HttpServletRequest;
 
 @Service
-public class ProductService {
+public class ProductMappingService {
 
-    private static final Logger logger = LoggerFactory.getLogger(ProductService.class);
+    private static final Logger logger = LoggerFactory.getLogger(ProductMappingService.class);
 
     private final ProductRepository repository;
 
-    public ProductService(ProductRepository repository) {
+    public ProductMappingService(ProductRepository repository) {
     	this.repository = repository;
     }
 

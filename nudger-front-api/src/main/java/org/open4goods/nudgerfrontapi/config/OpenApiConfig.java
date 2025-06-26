@@ -8,7 +8,7 @@ import org.springframework.context.annotation.Configuration;
 public class OpenApiConfig {
 
     @Bean
-    public GroupedOpenApi frontApi() {
+    GroupedOpenApi frontApi() {
         return GroupedOpenApi.builder()
                 .group("front")
                 .pathsToMatch("/**")

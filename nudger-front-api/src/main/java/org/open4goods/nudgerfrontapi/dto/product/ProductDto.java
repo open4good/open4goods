@@ -13,6 +13,15 @@ public class ProductDto extends AbstractDTO {
 			images
 		}
 
+		public enum ProductDtoSortableFields {
+			price,
+			offersCount
+
+		}
+
+
+
+
         @Schema(description = "Product GTIN, it is the unique identifier", example = "7612345678901")
         long gtin;
 
