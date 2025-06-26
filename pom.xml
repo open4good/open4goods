@@ -36,7 +36,7 @@
         <module>crawler</module>
         <module>api</module>
         <module>ui</module>
-        <module>nudger-front-api</module>
+        <module>front-api</module>
         <module>services/urlfetching</module>
         <module>services/googlesearch</module>
         <module>services/evaluation</module>
