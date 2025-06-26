@@ -1,15 +1,12 @@
 package org.open4goods.nudgerfrontapi.service;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 
-import org.open4goods.model.product.AiReviewHolder;
-import org.open4goods.model.Localisable;
-
 import org.open4goods.model.exceptions.ResourceNotFoundException;
+import org.open4goods.model.product.AiReviewHolder;
 import org.open4goods.model.product.Product;
 import org.open4goods.nudgerfrontapi.dto.product.ProductAiReviewDto;
 import org.open4goods.nudgerfrontapi.dto.product.ProductDto;
@@ -18,12 +15,12 @@ import org.open4goods.nudgerfrontapi.dto.product.ProductImagesDto;
 import org.open4goods.nudgerfrontapi.dto.product.ProductOffersDto;
 import org.open4goods.nudgerfrontapi.dto.product.ProductReviewDto;
 import org.open4goods.services.productrepository.services.ProductRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import jakarta.servlet.http.HttpServletRequest;
 
@@ -39,7 +36,7 @@ public class ProductService {
     }
 
     /**
-     * 
+     *
      * @param gtin
      * @param local
      * @param includes
