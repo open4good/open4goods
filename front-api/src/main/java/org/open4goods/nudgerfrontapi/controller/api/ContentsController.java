@@ -25,9 +25,9 @@ import io.swagger.v3.oas.annotations.tags.Tag;
  * REST controller exposing XWiki content bloc
  */
 @RestController
-@RequestMapping("/contents/blocs")
+@RequestMapping("/blocs")
 @Validated
-@Tag(name = "Content", description = "Expose nudger Xwiki based CMS content")
+@Tag(name = "Content", description = "Content blocs")
 public class ContentsController {
 
 

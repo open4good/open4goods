@@ -1,17 +1,20 @@
 {
-  "groups": [
-    {
-      "name": "front.security",
-      "type": "org.open4goods.nudgerfrontapi.config.SecurityProperties",
-      "sourceType": "org.open4goods.nudgerfrontapi.config.SecurityProperties"
-    }
-  ],
+  "groups": [{
+    "name": "front.security",
+    "type": "org.open4goods.nudgerfrontapi.config.SecurityProperties",
+    "sourceType": "org.open4goods.nudgerfrontapi.config.SecurityProperties"
+  }],
   "properties": [
     {
       "name": "front.security.enabled",
       "type": "java.lang.Boolean",
       "description": "Enable or disable Spring Security for the frontend API.",
       "defaultValue": true
+    },
+    {
+      "name": "front.security.cors-allowed-hosts",
+      "type": "java.lang.String",
+      "description": "A description for 'front.security.cors-allowed-hosts'"
     }
   ]
 }
