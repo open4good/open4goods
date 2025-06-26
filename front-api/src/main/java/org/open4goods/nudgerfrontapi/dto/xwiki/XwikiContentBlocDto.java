@@ -1,16 +1,11 @@
 package org.open4goods.nudgerfrontapi.dto.xwiki;
 
-import org.open4goods.nudgerfrontapi.dto.AbstractDTO;
+/**
+ * DTO representing HTML content extracted from XWiki.
+ *
+ * @param blocId      identifier of the XWiki page
+ * @param htmlContent HTML representation of the bloc
+ * @param editLink    direct edit link for the page
+ */
+public record XwikiContentBlocDto(String blocId, String htmlContent, String editLink) {}
 
-// TODO : Document (javadoc, spring doc, comments, ...)
-// TODO : convert to record
-
-public class XwikiContentBlocDto extends AbstractDTO{
-
-	private String blocId;
-	private String htmlContent;
-	private String editLink;
-
-
-
-}
