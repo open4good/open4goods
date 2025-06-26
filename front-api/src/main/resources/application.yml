@@ -18,8 +18,8 @@ springdoc:
 front:
   security:
     enabled: false
-    cors-allowed-hosts:
-      - "http://localhost:8082"
+    cors-allowed-hosts: 
+      "http://localhost:8082"
     
 xwiki:
     username: nudger

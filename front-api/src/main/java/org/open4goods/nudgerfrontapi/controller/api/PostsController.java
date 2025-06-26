@@ -31,9 +31,9 @@ import io.swagger.v3.oas.annotations.tags.Tag;
  * REST controller exposing blog posts coming from XWiki.
  */
 @RestController
-@RequestMapping("/contents/posts")
+@RequestMapping("/posts")
 @Validated
-@Tag(name = "Content", description = "Expose nudger Xwiki based CMS content")
+@Tag(name = "blog", description = "Blog posts")
 public class PostsController {
 
     private static final CacheControl ONE_HOUR_PUBLIC_CACHE = CacheControl.maxAge(Duration.ofHours(1)).cachePublic();
