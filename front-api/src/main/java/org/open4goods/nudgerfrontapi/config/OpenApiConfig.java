@@ -5,6 +5,9 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
+/**
+ * SpringDoc configuration exposing only the frontend endpoints.
+ */
 public class OpenApiConfig {
 
     @Bean
