@@ -113,7 +113,7 @@ public class SitemapGenerationService {
 
 
 			// Adding blog posts
-			addBlogPost(blogService.getPosts(),  baseUrl, lang );
+                        addBlogPost(blogService.getPosts(null),  baseUrl, lang );
 
 			// Adding wiki pages
 			addWikiPages( baseUrl, lang);
