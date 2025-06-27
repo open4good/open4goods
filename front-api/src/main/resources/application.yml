@@ -16,9 +16,11 @@ springdoc:
     use-root-path: true
 
 front:
+  cache:
+    path: ./cache
   security:
     enabled: false
-    cors-allowed-hosts: 
+    cors-allowed-hosts:
       "http://localhost:8082"
     
 xwiki:
