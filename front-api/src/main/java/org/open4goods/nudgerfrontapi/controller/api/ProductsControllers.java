@@ -1,6 +1,5 @@
 package org.open4goods.nudgerfrontapi.controller.api;
 
-import java.time.Duration;
 import java.util.Locale;
 import java.util.Set;
 
@@ -47,13 +46,14 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 @Tag(name = "Product", description = "Read product data, offers, impact score and reviews; trigger AI review generation.")
 public class ProductsControllers {
 
-	// TODO : mutualize constant
-    private static final CacheControl ONE_HOUR_PUBLIC_CACHE = CacheControl.maxAge(Duration.ofHours(1)).cachePublic();
+    private final CacheControl oneHourPublicCache;
 
     private final ProductMappingService service;
 
-    public ProductsControllers(ProductMappingService service) {
+    public ProductsControllers(ProductMappingService service,
+                               CacheControl oneHourPublicCache) {
         this.service = service;
+        this.oneHourPublicCache = oneHourPublicCache;
     }
 
 
@@ -133,7 +133,7 @@ public class ProductsControllers {
 
 
 
-		return ResponseEntity.ok().cacheControl(ONE_HOUR_PUBLIC_CACHE).body(body);
+                return ResponseEntity.ok().cacheControl(oneHourPublicCache).body(body);
 	}
 
     /**
@@ -189,7 +189,7 @@ public class ProductsControllers {
 
 
         return ResponseEntity.ok()
-                .cacheControl(ONE_HOUR_PUBLIC_CACHE)
+                .cacheControl(oneHourPublicCache)
                 .body(body);
     }
 //

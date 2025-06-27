@@ -3,6 +3,10 @@
     "name": "front.security",
     "type": "org.open4goods.nudgerfrontapi.config.SecurityProperties",
     "sourceType": "org.open4goods.nudgerfrontapi.config.SecurityProperties"
+  }, {
+    "name": "front.pagination",
+    "type": "org.open4goods.nudgerfrontapi.config.PaginationProperties",
+    "sourceType": "org.open4goods.nudgerfrontapi.config.PaginationProperties"
   }],
   "properties": [
     {
@@ -15,6 +19,12 @@
       "name": "front.security.cors-allowed-hosts",
       "type": "java.lang.String",
       "description": "A description for 'front.security.cors-allowed-hosts'"
+    },
+    {
+      "name": "front.pagination.max-page-size",
+      "type": "java.lang.Integer",
+      "description": "Maximum allowed page size for pageable endpoints.",
+      "defaultValue": 50
     }
   ]
 }

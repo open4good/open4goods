@@ -1,6 +1,5 @@
 package org.open4goods.nudgerfrontapi.controller.api;
 
-import java.time.Duration;
 import java.util.Locale;
 
 import org.open4goods.nudgerfrontapi.dto.xwiki.XwikiContentBlocDto;
@@ -31,13 +30,14 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 public class ContentsController {
 
 
-    // TODO : mutualize constant
-    private static final CacheControl ONE_HOUR_PUBLIC_CACHE = CacheControl.maxAge(Duration.ofHours(1)).cachePublic();
+    private final CacheControl oneHourPublicCache;
 
     private final XWikiHtmlService xwikiHtmlService;
 
-    public ContentsController(XWikiHtmlService xwikiHtmlService) {
+    public ContentsController(XWikiHtmlService xwikiHtmlService,
+                              CacheControl oneHourPublicCache) {
         this.xwikiHtmlService = xwikiHtmlService;
+        this.oneHourPublicCache = oneHourPublicCache;
     }
 
 
@@ -63,7 +63,7 @@ public class ContentsController {
         XwikiContentBlocDto body = new XwikiContentBlocDto(blocId, htmlContent, editLink);
 
         return ResponseEntity.ok()
-                .cacheControl(ONE_HOUR_PUBLIC_CACHE)
+                .cacheControl(oneHourPublicCache)
                 .body(body);
     }
 
