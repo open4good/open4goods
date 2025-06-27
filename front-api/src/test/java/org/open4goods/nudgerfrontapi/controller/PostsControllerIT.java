@@ -10,6 +10,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.LinkedHashMap;
 
 import org.junit.jupiter.api.Test;
 import org.open4goods.nudgerfrontapi.controller.api.PostsController;
@@ -66,5 +67,17 @@ class PostsControllerIT {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.url").value("slug"))
                 .andExpect(jsonPath("$.title").value("Title"));
+    }
+
+    @Test
+    void tagsEndpointReturnsMap() throws Exception {
+        Map<String, Integer> tags = new LinkedHashMap<>();
+        tags.put("eco", 2);
+        given(blogService.getTags()).willReturn(tags);
+
+        mockMvc.perform(get("/blog/tags").with(jwt()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].name").value("eco"))
+                .andExpect(jsonPath("$[0].count").value(2));
     }
 }
