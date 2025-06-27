@@ -17,6 +17,9 @@ import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 
 @Configuration
+/**
+ * Beans providing core infrastructure services for the frontend API.
+ */
 public class AppConfig {
 
     @Bean

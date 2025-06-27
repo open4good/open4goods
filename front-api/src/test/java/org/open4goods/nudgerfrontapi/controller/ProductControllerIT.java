@@ -20,7 +20,7 @@ import org.springframework.data.domain.Pageable;
 
 import org.junit.jupiter.api.Test;
 import org.open4goods.model.ai.AiReview;
-import org.open4goods.nudgerfrontapi.controller.api.ProductsControllers;
+import org.open4goods.nudgerfrontapi.controller.api.ProductController;
 import org.open4goods.nudgerfrontapi.dto.product.ProductReviewDto;
 import org.open4goods.nudgerfrontapi.dto.product.ProductDto;
 import org.open4goods.nudgerfrontapi.dto.RequestMetadata;
@@ -41,7 +41,7 @@ class ProductControllerIT {
     private MockMvc mockMvc;
 
     @Autowired
-    private ProductsControllers controller;
+    private ProductController controller;
 
     @MockBean
     private ProductMappingService service;

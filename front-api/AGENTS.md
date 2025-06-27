@@ -5,6 +5,7 @@ Provide a **clear and fully documented REST API** for the Nuxt 3 frontend, using
 The OpenAPI contract is generated directly from the annotated controllers and DTOs.
 
 ---
+Main product endpoints are implemented by `ProductController`.
 
 ## 2. Architecture (hexagonal + cache)
 ~~~text
@@ -48,6 +49,14 @@ mvn test
 # From the repo root
 mvn -pl nudger-front-api -am clean install
 ~~~
+
+### Configuration properties
+
+The module exposes configurable security settings via
+`front.security.*` mapped by `SecurityProperties`:
+
+- `front.security.enabled` – toggle Spring Security.
+- `front.security.cors-allowed-hosts` – list of allowed CORS origins.
 
 ---
 

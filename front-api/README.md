@@ -2,6 +2,7 @@
 
 This module provides the REST endpoints used by the Nuxt 3 frontend. It exposes data aggregated by other open4goods modules and is secured with JWT tokens.
 The former `/api/v1/search` endpoint was removed from this module.
+The main REST endpoints are provided by the `ProductController` class.
 Use the main `api` service for search operations.
 
 ## Default Port
