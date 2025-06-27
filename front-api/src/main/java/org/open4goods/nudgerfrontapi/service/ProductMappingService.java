@@ -29,6 +29,11 @@ import org.springframework.stereotype.Service;
 
 import jakarta.servlet.http.HttpServletRequest;
 
+/**
+ * Maps {@link Product} domain entities to DTOs consumed by the frontend API.
+ * Handles localisation and filtering of the returned fields.
+ */
+
 @Service
 public class ProductMappingService {
 
