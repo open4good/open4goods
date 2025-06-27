@@ -53,6 +53,21 @@ class ProductMappingServiceTest {
         assertThat(dto.getAiReview().review()).isEqualTo(holder.getReview());
     }
 
+    @Test
+    void getProductReturnsDtoWithBase() throws Exception {
+        long gtin = 321L;
+        Product product = new Product(gtin);
+        product.setCreationDate(1L);
+        product.setLastChange(2L);
+
+        when(repository.getById(gtin)).thenReturn(product);
+
+        ProductDto dto = service.getProduct(gtin, Locale.ENGLISH, Set.of("base"));
+
+        assertThat(dto.getBase()).isNotNull();
+        assertThat(dto.getBase().gtin()).isEqualTo(gtin);
+    }
+
 
 
     @Test
