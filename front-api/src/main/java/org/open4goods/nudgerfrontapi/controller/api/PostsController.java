@@ -37,7 +37,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
  * REST controller exposing blog posts coming from XWiki.
  */
 @RestController
-@RequestMapping("/posts")
+@RequestMapping("/blog/posts")
 @Validated
 @Tag(name = "blog", description = "Blog posts")
 public class PostsController {
@@ -68,7 +68,7 @@ public class PostsController {
     )
     public ResponseEntity<Page<BlogPostDto>> posts(
             @Parameter(hidden = true) @PageableDefault(size = 20) Pageable pageable,
-            @RequestParam(name = "tag", required = false) String tag) {
+            @RequestParam(required = false) String tag) {
         List<BlogPostDto> posts = blogService.getPosts(tag).stream()
                 .map(this::map)
                 .toList();

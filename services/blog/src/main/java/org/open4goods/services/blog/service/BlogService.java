@@ -119,15 +119,15 @@ public class BlogService implements HealthIndicator {
     /**
      * Retrieves a list of blog posts matching the specified tag (vertical).
      *
-     * @param vertical the tag to filter blog posts by
+     * @param tag the tag to filter blog posts by
      * @return a list of blog posts that contain the specified tag in their category list
      */
-    public List<BlogPost> getPosts(String vertical) {
-        if (StringUtils.isEmpty(vertical)) {
+    public List<BlogPost> getPosts(String tag) {
+        if (StringUtils.isEmpty(tag)) {
             return posts; // return all posts if no tag provided
         }
         return posts.stream()
-                .filter(post -> post.getCategory() != null && post.getCategory().contains(vertical))
+                .filter(post -> post.getCategory() != null && post.getCategory().contains(tag))
                 .collect(Collectors.toList());
     }
 
