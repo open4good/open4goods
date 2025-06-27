@@ -61,34 +61,37 @@ public class ProductMappingService {
     }
 
 	private ProductDto mapProduct(  Product p, Locale local, Set<String> includes) {
-		ProductDto pdto = new ProductDto();
+        ProductBaseDto base = null;
+        ProductNamesDto names = null;
+        ProductResourcesDto resources = null;
+        ProductAiTextsDto aiTexts = null;
+        ProductAiReviewDto aiReview = null;
+        ProductOffersDto offers = null;
 
-    	/////////////////////////////////////////////
-    	// Handling global / high level attributes
-    	/////////////////////////////////////////////
-    	pdto.setGtin(p.getId());
-
-    	/////////////////////////////////////////////
-    	// Handling requested components
-    	/////////////////////////////////////////////
-
-    	if (null != includes) {
-
+        if (null != includes) {
                 for (String include : includes) {
                         ProductDtoComponent component = ProductDtoComponent.valueOf(include);
 
                         switch (component) {
-                                case base -> pdto.setBase(mapBase(p));
-                                case names -> pdto.setNames(mapNames(p, local));
-                                case resources -> pdto.setResources(mapResources(p));
-                                case aiReview -> pdto.setAiReview(mapAiReview(p, local));
-                                case offers -> pdto.setOffers(mapOffers(p, local));
+                                case base -> base = mapBase(p);
+                                case names -> names = mapNames(p, local);
+                                case resources -> resources = mapResources(p);
+                                case aiReview -> aiReview = mapAiReview(p, local);
+                                case offers -> offers = mapOffers(p, local);
                                 default -> throw new IllegalArgumentException("Missing component mapper for: " + include);
                         }
                 }
-    	}
-		return pdto;
-	}
+        }
+
+        return new ProductDto(
+                p.getId(),
+                base,
+                names,
+                resources,
+                aiTexts,
+                aiReview,
+                offers);
+        }
 
 
     private ProductOffersDto mapOffers(Product p, Locale local) {
