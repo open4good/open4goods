@@ -100,7 +100,7 @@ public class PostsController {
             }
     )
     public ResponseEntity<BlogPostDto> post(@PathVariable String slug) {
-        BlogPost post = blogService.getPostsByUrl().get(slug);
+        BlogPost post = blogService.getPost(slug);
         if (post == null) {
             return ResponseEntity.notFound().build();
         }

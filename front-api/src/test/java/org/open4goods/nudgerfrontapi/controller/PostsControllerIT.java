@@ -49,7 +49,7 @@ class PostsControllerIT {
 
     @Test
     void postEndpointReturns404WhenMissing() throws Exception {
-        given(blogService.getPostsByUrl()).willReturn(Map.of());
+        given(blogService.getPost("missing")).willReturn(null);
 
         mockMvc.perform(get("/contents/posts/{slug}", "missing").with(jwt()))
                 .andExpect(status().isNotFound());
@@ -61,7 +61,7 @@ class PostsControllerIT {
         post.setTitle("Title");
         post.setUrl("slug");
         post.setCreated(new Date(1L));
-        given(blogService.getPostsByUrl()).willReturn(Map.of("slug", post));
+        given(blogService.getPost("slug")).willReturn(post);
 
         mockMvc.perform(get("/contents/posts/{slug}", "slug").with(jwt()))
                 .andExpect(status().isOk())

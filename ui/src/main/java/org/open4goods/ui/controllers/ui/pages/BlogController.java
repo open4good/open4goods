@@ -57,7 +57,7 @@ public class BlogController  implements SitemapExposedController{
 	public ModelAndView blogIndex(final HttpServletRequest request) {
 		ModelAndView model = uiService.defaultModelAndView("blog", request);
 		model.addObject("url",  "/");
-		List<BlogPost> posts = blogService.getPosts();
+                List<BlogPost> posts = blogService.getPosts(null);
 		
 		model.addObject("posts", posts);
 		model.addObject("tags",blogService.getTags());
@@ -75,7 +75,7 @@ public class BlogController  implements SitemapExposedController{
 	public ModelAndView blogIndexByCat(final HttpServletRequest request, @PathVariable String tag) {
 		ModelAndView model = uiService.defaultModelAndView("blog", request);
 		model.addObject("url",  "/");
-		List<BlogPost> posts = blogService.getPosts();
+                List<BlogPost> posts = blogService.getPosts(null);
 		
 		// Filtering by tag
 		if (null != tag) {
@@ -102,7 +102,7 @@ public class BlogController  implements SitemapExposedController{
 	public ModelAndView post(@PathVariable String post, final HttpServletRequest request) {
 		ModelAndView model = uiService.defaultModelAndView("blog-post", request);
 
-		BlogPost blogPost = blogService.getPostsByUrl().get(post);
+                BlogPost blogPost = blogService.getPost(post);
 		
 		if (null == blogPost) {
 			LOGGER.info("Blog post not found : {}", post);
