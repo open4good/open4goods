@@ -1,9 +1,16 @@
 {
-  "groups": [{
-    "name": "front.security",
-    "type": "org.open4goods.nudgerfrontapi.config.SecurityProperties",
-    "sourceType": "org.open4goods.nudgerfrontapi.config.SecurityProperties"
-  }],
+  "groups": [
+    {
+      "name": "front.security",
+      "type": "org.open4goods.nudgerfrontapi.config.SecurityProperties",
+      "sourceType": "org.open4goods.nudgerfrontapi.config.SecurityProperties"
+    },
+    {
+      "name": "front.cache",
+      "type": "org.open4goods.nudgerfrontapi.config.CacheProperties",
+      "sourceType": "org.open4goods.nudgerfrontapi.config.CacheProperties"
+    }
+  ],
   "properties": [
     {
       "name": "front.security.enabled",
@@ -15,6 +22,12 @@
       "name": "front.security.cors-allowed-hosts",
       "type": "java.lang.String",
       "description": "A description for 'front.security.cors-allowed-hosts'"
+    },
+    {
+      "name": "front.cache.path",
+      "type": "java.lang.String",
+      "description": "Path used to store cached files.",
+      "defaultValue": "./cache"
     }
   ]
 }
