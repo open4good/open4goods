@@ -1,56 +1,71 @@
+# XWiki Spring Boot Starter
 
+This module provides helper services and configuration to consume the XWiki REST API within a Spring Boot application.  It exposes a set of beans for fetching pages, attachments and user information and can also act as a Spring `AuthenticationProvider`.
 
-# The project: Spring Boot Starter - o4g-xwiki
+## Provided Services
 
-Spring Boot Starter O4G-XWIKI offers services to retrieve xwiki objects via XWIKI REST api.
+* **XwikiFacadeService** – high level facade combining the read/object/html services.
+* **XWikiReadService** – access pages, page lists and attachments via REST calls.
+* **XWikiHtmlService** – fetch HTML content from the XWiki web endpoints.
+* **XWikiObjectService** – retrieve page properties and objects.
+* **XWikiAuthenticationService** – authenticate against XWiki and obtain user groups.
+* **XwikiAuthenticationProvider** – Spring Security provider delegating to `XWikiAuthenticationService`.
 
+All services are auto-configured by `XWikiServiceConfiguration` when the starter is on the classpath.
 
-# Enabling the O4G-XWIKI starter
+## Configuration Properties
 
-To add the o4g-xwiki starter to a Maven-based project,
-add the following dependency:
+Properties are loaded under the prefix `xwiki` and can be configured in `application.yml`:
 
+| Property | Description | Default |
+|----------|-------------|---------|
+| `xwiki.baseUrl` | Base URL to the XWiki instance. | – |
+| `xwiki.username` | Username used for API calls. | – |
+| `xwiki.password` | Password used for API calls. | – |
+| `xwiki.httpsOnly` | Force HTTPS for all generated URLs. | `false` |
+| `xwiki.media` | Media format requested from the API. | `json` |
+| `xwiki.apiEntrypoint` | REST entry point path. | `rest` |
+| `xwiki.apiWiki` | Target wiki name. | `xwiki` |
 
-	<dependencies>
-		<dependency>
-			<groupId>org.open4goods</groupId>
-			<artifactId>o4g-xwiki-spring-boot-starter</artifactId>
-			<version>0.0.1-SNAPSHOT</version
-		</dependency>
-	</dependencies>
-----
+## Sample `application.yml`
 
-For Gradle, use the following declaration:
+```yaml
+xwiki:
+    baseUrl: "https://wiki.example.com"
+    username: "api-user"
+    password: "secret"
+    httpsOnly: true
+    media: "json"
+    apiEntrypoint: "rest"
+    apiWiki: "xwiki"
+```
 
-	dependencies {
-		implementation 'org.open4goods:o4g-xwiki-spring-boot-starter'
-	}
-----
+## Usage Example
 
+Include the dependency in your project:
 
-# Data Model
+```xml
+<dependency>
+    <groupId>org.open4goods</groupId>
+    <artifactId>o4g-xwiki-spring-boot-starter</artifactId>
+    <version>0.0.1-SNAPSHOT</version>
+</dependency>
+```
 
-# Services
+Autowire `XwikiFacadeService` in your Spring components:
 
-* **getPages** TODO:
+```java
+@Autowired
+private XwikiFacadeService xwikiFacadeService;
 
-* **getPageList** TODO:
-  
-# Properties 
+public void loadPage() {
+    FullPage page = xwikiFacadeService.getFullPage("MySpace:MyPage");
+    // use page.getHtmlContent(), page.getWikiPage(), ...
+}
+```
 
-  The following properties should be set in the calling app
-  
-  Properties to set
+Build the module with:
 
-// pour les appel autres que rest ex: /bin/view
-xwiki.baseUrl= https://wiki.nudger.fr
-// to access rest resources
-xwiki.api.entryPoint= https://wiki.nudger.fr/rest
-// targeted wiki
-xwiki.api.wiki=xwiki
-
-
-xwiki.httpsOnly= true
-xwiki.media= json
-  
-  
+```bash
+mvn -pl services/xwiki-spring-boot-starter -am clean install
+```
