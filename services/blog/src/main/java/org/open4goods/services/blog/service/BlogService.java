@@ -52,7 +52,7 @@ import jakarta.annotation.PostConstruct;
  * Service class for handling blog functionalities built over the XWiki blog application.
  * <p>
  * This service is responsible for refreshing blog posts from XWiki, generating an RSS feed,
- * and exposing blog-related data for the UI. It uses a scheduled task to update posts and 
+ * and exposing blog-related data for the UI. It uses a scheduled task to update posts and
  * maintains internal health check data.
  * </p>
  *
@@ -305,7 +305,14 @@ public class BlogService implements HealthIndicator {
             }
 
             logger.info("Blog posts updated successfully. Total posts: {}", newPosts.size());
-        } finally {
+        } catch (Exception e) {
+
+        	// TODO : Handle healthchecks / metrics status
+        	logger.error("Error while updating blog posts !",e);
+		}
+
+
+        finally {
             // Ensure the loading flag is reset even if exceptions occur.
             loading.set(false);
         }
