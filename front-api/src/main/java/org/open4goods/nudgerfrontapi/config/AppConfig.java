@@ -6,6 +6,8 @@ import org.open4goods.services.blog.service.BlogService;
 import org.open4goods.xwiki.services.XwikiFacadeService;
 import org.open4goods.services.remotefilecaching.config.RemoteFileCachingProperties;
 import org.open4goods.services.remotefilecaching.service.RemoteFileCachingService;
+
+import org.open4goods.nudgerfrontapi.config.CacheProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Scope;
@@ -20,8 +22,9 @@ import org.springframework.beans.factory.config.BeanPostProcessor;
 public class AppConfig {
 
     @Bean
-    RemoteFileCachingService remoteFileCachingService(RemoteFileCachingProperties props) {
-        return new RemoteFileCachingService("./cache", props);
+    RemoteFileCachingService remoteFileCachingService(CacheProperties cacheProperties,
+                                                     RemoteFileCachingProperties props) {
+        return new RemoteFileCachingService(cacheProperties.getPath(), props);
     }
 
 
