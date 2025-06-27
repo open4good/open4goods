@@ -2,11 +2,10 @@ package org.open4goods.nudgerfrontapi.dto.product;
 
 import java.util.Arrays;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.open4goods.nudgerfrontapi.dto.AbstractDTO;
-
-import com.google.common.base.Optional;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 
@@ -47,7 +46,7 @@ public class ProductDto extends AbstractDTO {
 		private static final Map<String, ProductDtoSortableFields> LOOKUP = Arrays.stream(values()).collect(Collectors.toMap(ProductDtoSortableFields::getText, e -> e));
 
 		public static Optional<ProductDtoSortableFields> fromText(String text) {
-			return Optional.fromNullable(LOOKUP.get(text));
+			return Optional.ofNullable(LOOKUP.get(text));
 		}
 
 	}

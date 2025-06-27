@@ -40,7 +40,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
  * REST controller exposing blog posts coming from XWiki.
  */
 @RestController
-@RequestMapping("/blog/posts")
+@RequestMapping("/blog")
 @Validated
 @Tag(name = "blog", description = "Blog posts")
 public class PostsController {
@@ -53,7 +53,7 @@ public class PostsController {
         this.blogService = blogService;
     }
 
-    @GetMapping
+    @GetMapping("/posts")
     @Operation(
             summary = "List blog posts",
             description = "Return paginated blog posts optionally filtered by tag.",
@@ -85,7 +85,7 @@ public class PostsController {
                 .body(body);
     }
 
-    @GetMapping("/{slug}")
+    @GetMapping("/posts/{slug}")
     @Operation(
             summary = "Get blog post",
             description = "Return a single blog post identified by its slug.",
@@ -109,7 +109,7 @@ public class PostsController {
                 .body(map(post));
     }
 
-    @GetMapping("/blog/tags")
+    @GetMapping("/tags")
     @Operation(
             summary = "List blog tags",
             description = "Return the list of available blog tags with post counts.",
