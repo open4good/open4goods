@@ -28,6 +28,8 @@ import org.springframework.web.client.RestTemplate;
 
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.Ticker;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * This Configuration class handles :
@@ -51,9 +53,14 @@ public class XWikiServiceConfiguration {
 	RestTemplateBuilder localRestTemplateBuilder;
 	
 	
-	public XWikiServiceConfiguration(XWikiServiceProperties xWikiProps) {
-		this.xWikiProperties = xWikiProps;
-	}
+        public XWikiServiceConfiguration(XWikiServiceProperties xWikiProps) {
+                this.xWikiProperties = xWikiProps;
+        }
+
+       @Bean
+       ObjectMapper xwikiObjectMapper() {
+               return new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+       }
 
 	
 
@@ -145,13 +152,14 @@ public class XWikiServiceConfiguration {
 	 * @return
 	 */
 	@Bean( "mappingService" )
-	XwikiMappingService getMappingervice( 
-			@Qualifier("restTemplateService") RestTemplateService restTemplateService
-			) {
+       XwikiMappingService getMappingervice(
+                       @Qualifier("restTemplateService") RestTemplateService restTemplateService,
+                       ObjectMapper xwikiObjectMapper
+                       ) {
 		
 		XwikiMappingService mappingService = null;
-		try {
-			mappingService = new XwikiMappingService(restTemplateService, xWikiProperties);
+               try {
+                       mappingService = new XwikiMappingService(restTemplateService, xWikiProperties, xwikiObjectMapper);
 		} catch(Exception e) {
 			  logger.error("Unable to create MappingService as bean. error message {}", e.getMessage());
 		}
