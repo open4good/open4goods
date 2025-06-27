@@ -51,3 +51,10 @@ Execute the tests with:
 ```bash
 mvn test
 ```
+
+## Migration notes
+
+DTO classes such as `ProductDto` are now implemented using Java records. This
+means all fields are immutable and accessed via record accessors
+(e.g. `dto.base()`). Ensure any custom code or tests no longer rely on
+setters.

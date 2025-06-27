@@ -49,8 +49,8 @@ class ProductMappingServiceTest {
 
         ProductDto dto = service.getProduct(gtin, Locale.ENGLISH, Set.of("aiReview"));
 
-        assertThat(dto.getAiReview()).isNotNull();
-        assertThat(dto.getAiReview().review()).isEqualTo(holder.getReview());
+        assertThat(dto.aiReview()).isNotNull();
+        assertThat(dto.aiReview().review()).isEqualTo(holder.getReview());
     }
 
     @Test
@@ -64,8 +64,8 @@ class ProductMappingServiceTest {
 
         ProductDto dto = service.getProduct(gtin, Locale.ENGLISH, Set.of("base"));
 
-        assertThat(dto.getBase()).isNotNull();
-        assertThat(dto.getBase().gtin()).isEqualTo(gtin);
+        assertThat(dto.base()).isNotNull();
+        assertThat(dto.base().gtin()).isEqualTo(gtin);
     }
 
 
