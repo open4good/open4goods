@@ -15,6 +15,9 @@ import io.swagger.v3.oas.annotations.servers.Server;
         }
 )
 @EnableCaching
+/**
+ * Spring Boot application entry point for the frontend API.
+ */
 public class NudgerFrontApiApplication {
 
     public static void main(String[] args) {

@@ -8,6 +8,9 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import org.springframework.data.web.PageableHandlerMethodArgumentResolver;
 
 @Configuration
+/**
+ * Customises Spring MVC pageable parameter names for the API.
+ */
 public class PageableConfig implements WebMvcConfigurer {
 
     @Override
