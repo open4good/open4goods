@@ -44,15 +44,17 @@ public class XwikiMappingService {
 
 	private static Logger logger = LoggerFactory.getLogger(XwikiMappingService.class);
 
-	RestTemplateService restTemplateService;
-	XWikiServiceProperties properties;
-	private UrlManagementHelper urlHelper;
+       RestTemplateService restTemplateService;
+       XWikiServiceProperties properties;
+       private UrlManagementHelper urlHelper;
+       private final ObjectMapper mapper;
 	
-	public XwikiMappingService(RestTemplateService restTemplateService, XWikiServiceProperties properties){
-		this.restTemplateService = restTemplateService;
-		this.properties = properties;
-		this.urlHelper = new UrlManagementHelper(properties);
-	}
+       public XwikiMappingService(RestTemplateService restTemplateService, XWikiServiceProperties properties, ObjectMapper mapper){
+               this.restTemplateService = restTemplateService;
+               this.properties = properties;
+               this.urlHelper = new UrlManagementHelper(properties);
+               this.mapper = mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+       }
 	
 	/**
 	 * Map 'Page' object from json response endpoint
@@ -361,9 +363,8 @@ public class XwikiMappingService {
 	private Objects deserializeObjects(ResponseEntity<String> response) {
 
 		Objects objects = null;
-		try {
-			ObjectMapper mapper = new ObjectMapper();
-			objects = mapper.readValue(response.getBody(),new TypeReference<Objects>(){});
+                try {
+                        objects = mapper.readValue(response.getBody(),new TypeReference<Objects>(){});
 			logger.debug("Object 'Objects' mapped correctly}");
 		}
 		catch(Exception e) {
@@ -380,9 +381,8 @@ public class XwikiMappingService {
 	private Attachments deserializeAttachments(ResponseEntity<String> response) {
 
 		Attachments attachments = null;
-		try {
-			ObjectMapper mapper = new ObjectMapper();
-			attachments = mapper.readValue(response.getBody(),new TypeReference<Attachments>(){});
+                try {
+                        attachments = mapper.readValue(response.getBody(),new TypeReference<Attachments>(){});
 			logger.debug("Object 'Attachments' mapped correctly}");
 		}
 		catch(Exception e) {
@@ -400,10 +400,8 @@ public class XwikiMappingService {
 	private Page deserializePage(ResponseEntity<String> response) {
 
 		Page page = null;
-		try {
-			// TODO(p1,perf) : Do not re instanciate
-			ObjectMapper mapper = new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-			page = mapper.readValue(response.getBody(),new TypeReference<Page>(){});
+                try {
+                        page = mapper.readValue(response.getBody(),new TypeReference<Page>(){});
 			logger.debug("Object 'Page' mapped correctly}");
 		}
 		catch(Exception e) {
@@ -420,9 +418,8 @@ public class XwikiMappingService {
 	public SearchResults deserializeSearchResults(ResponseEntity<String> response) {
 
 		SearchResults results = null;	
-		try {
-			ObjectMapper mapper = new ObjectMapper();
-			results = mapper.readValue(response.getBody(), new TypeReference<SearchResults>() {});
+                try {
+                        results = mapper.readValue(response.getBody(), new TypeReference<SearchResults>() {});
 		} catch( Exception e ) {
 			ManageMappingExceptions(e, "SearchResults", response.getBody());
 		}
@@ -437,9 +434,8 @@ public class XwikiMappingService {
 	public SearchResult deserializeSearchResult(ResponseEntity<String> response) {
 
 		SearchResult result = null;
-		try {
-			ObjectMapper mapper = new ObjectMapper();
-			result = mapper.readValue(response.getBody(), new TypeReference<SearchResult>() {});
+                try {
+                        result = mapper.readValue(response.getBody(), new TypeReference<SearchResult>() {});
 		} catch( Exception e ) {
 			ManageMappingExceptions(e, "SearchResult", response.getBody());
 		}
@@ -454,9 +450,8 @@ public class XwikiMappingService {
 	public Pages deserializePages(ResponseEntity<String> response) {
 
 		Pages pages = null;
-		try {
-			ObjectMapper mapper = new ObjectMapper();
-			pages = mapper.readValue(response.getBody(),new TypeReference<Pages>(){});
+                try {
+                        pages = mapper.readValue(response.getBody(),new TypeReference<Pages>(){});
 			logger.debug("Object 'Pages' mapped correctly}");
 		}
 		catch(Exception e) {
@@ -474,9 +469,8 @@ public class XwikiMappingService {
 
 		Properties properties = null;
 		if( response != null ) {
-			try {
-				ObjectMapper mapper = new ObjectMapper();
-				properties = mapper.readValue(response.getBody(),new TypeReference<Properties>(){});
+                        try {
+                                properties = mapper.readValue(response.getBody(),new TypeReference<Properties>(){});
 				logger.debug("Object 'Map<String,String>' mapped correctly}");
 			}
 			catch(Exception e) {
@@ -494,9 +488,8 @@ public class XwikiMappingService {
 	public Xwiki deserializeXwiki(ResponseEntity<String> response) {
 
 		Xwiki xWiki = null;
-		try {
-			ObjectMapper mapper = new ObjectMapper();
-			xWiki = mapper.readValue(response.getBody(),new TypeReference<Xwiki>(){});
+                try {
+                        xWiki = mapper.readValue(response.getBody(),new TypeReference<Xwiki>(){});
 			logger.debug("Object 'Xwiki' mapped correctly}");
 		}	
 		catch(Exception e) {
@@ -513,9 +506,8 @@ public class XwikiMappingService {
 	public Wikis deserializeWikis(ResponseEntity<String> response) {
 
 		Wikis wikis = null;
-		try {
-			ObjectMapper mapper = new ObjectMapper();
-			wikis = mapper.readValue(response.getBody(),new TypeReference<Wikis>(){});
+                try {
+                        wikis = mapper.readValue(response.getBody(),new TypeReference<Wikis>(){});
 			logger.debug("Object 'Wikis' mapped correctly}");
 		}
 		catch(Exception e) {
@@ -532,9 +524,8 @@ public class XwikiMappingService {
 	public Wiki deserializeWiki(ResponseEntity<String> response) {
 
 		Wiki wikis = null;
-		try {
-			ObjectMapper mapper = new ObjectMapper();
-			wikis = mapper.readValue(response.getBody(),new TypeReference<Wiki>(){});
+                try {
+                        wikis = mapper.readValue(response.getBody(),new TypeReference<Wiki>(){});
 			logger.debug("Object 'Wiki' mapped correctly}");
 		}
 		catch(Exception e) {
