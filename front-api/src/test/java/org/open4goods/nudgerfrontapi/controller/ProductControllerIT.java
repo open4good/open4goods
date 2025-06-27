@@ -104,6 +104,24 @@ class ProductControllerIT {
                 .andExpect(jsonPath("$.page.number").value(0));
     }
 
+    @Test
+    void productsEndpointReturns400ForInvalidSort() throws Exception {
+        mockMvc.perform(get("/products")
+                        .param("sort", "unknown,asc")
+                        .with(jwt()))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.title").value("Bad Request"));
+    }
+
+    @Test
+    void productsEndpointReturns400ForInvalidInclude() throws Exception {
+        mockMvc.perform(get("/products")
+                        .param("include", "bad")
+                        .with(jwt()))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.title").value("Bad Request"));
+    }
+
 
 
 

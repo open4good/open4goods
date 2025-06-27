@@ -7,6 +7,7 @@ import org.springframework.http.ProblemDetail;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.open4goods.model.exceptions.ResourceNotFoundException;
+import org.open4goods.model.exceptions.InvalidParameterException;
 
 @RestControllerAdvice
 /**
@@ -30,6 +31,14 @@ public class GlobalExceptionHandler {
     public ProblemDetail handleNotFound(ResourceNotFoundException ex) {
         ProblemDetail pd = ProblemDetail.forStatus(HttpStatus.NOT_FOUND);
         pd.setTitle("Not Found");
+        pd.setDetail(ex.getMessage());
+        return pd;
+    }
+
+    @ExceptionHandler(InvalidParameterException.class)
+    public ProblemDetail handleInvalidParameter(InvalidParameterException ex) {
+        ProblemDetail pd = ProblemDetail.forStatus(HttpStatus.BAD_REQUEST);
+        pd.setTitle("Bad Request");
         pd.setDetail(ex.getMessage());
         return pd;
     }

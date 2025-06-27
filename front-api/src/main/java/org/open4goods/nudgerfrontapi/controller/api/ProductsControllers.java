@@ -5,6 +5,7 @@ import java.util.Locale;
 import java.util.Set;
 
 import org.open4goods.model.exceptions.ResourceNotFoundException;
+import org.open4goods.model.exceptions.InvalidParameterException;
 import org.open4goods.nudgerfrontapi.dto.product.ProductDto;
 import org.open4goods.nudgerfrontapi.dto.product.ProductDto.ProductDtoComponent;
 import org.open4goods.nudgerfrontapi.dto.product.ProductDto.ProductDtoSortableFields;
@@ -93,9 +94,9 @@ public class ProductsControllers {
             }
     )
     public ResponseEntity<Page<ProductDto>> products(
-    		@Parameter(hidden = true) @PageableDefault(size = 20) Pageable page,
-    		@RequestParam(required=false) Set<String> include,
-    		  Locale locale) {
+                @Parameter(hidden = true) @PageableDefault(size = 20) Pageable page,
+                @RequestParam(required=false) Set<String> include,
+                  Locale locale) throws InvalidParameterException {
 
 
 		/////////////////////
@@ -103,26 +104,22 @@ public class ProductsControllers {
 		/////////////////////
 
 		// Validating sort field
-		page.getSort().stream().forEach(s -> {
-			if (!ProductDtoSortableFields.fromText(s.getProperty()).isPresent()) {
-
-				// TODO : HAndle this invalid value, raise approriate http code and
-				// problemdetail to the client.
-				return;
-			}
-		});
+                for (var order : page.getSort()) {
+                        if (ProductDtoSortableFields.fromText(order.getProperty()).isEmpty()) {
+                                throw new InvalidParameterException("Invalid sort parameter: " + order.getProperty());
+                        }
+                }
 
 		// Validating requested components
-		if (null != include) {
-			include.forEach(i -> {
-				if (null == ProductDtoComponent.valueOf(i)) {
-					// TODO : Handle this invalid value, raise approriate http code and
-					// problemdetail to the client.
-					return;
-				}
-
-			});
-		}
+                if (include != null) {
+                        for (String i : include) {
+                                try {
+                                        ProductDtoComponent.valueOf(i);
+                                } catch (IllegalArgumentException ex) {
+                                        throw new InvalidParameterException("Invalid include parameter: " + i);
+                                }
+                        }
+                }
 
 
 		////////////////////////
