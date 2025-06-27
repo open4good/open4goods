@@ -3,6 +3,8 @@ package org.open4goods.nudgerfrontapi.controller.api;
 import java.time.Duration;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -10,6 +12,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 
 import org.open4goods.nudgerfrontapi.dto.blog.BlogPostDto;
+import org.open4goods.nudgerfrontapi.dto.blog.BlogTagDto;
 import org.open4goods.services.blog.model.BlogPost;
 import org.open4goods.services.blog.service.BlogService;
 import org.springframework.http.CacheControl;
@@ -104,6 +107,26 @@ public class PostsController {
         return ResponseEntity.ok()
                 .cacheControl(ONE_HOUR_PUBLIC_CACHE)
                 .body(map(post));
+    }
+
+    @GetMapping("/blog/tags")
+    @Operation(
+            summary = "List blog tags",
+            description = "Return the list of available blog tags with post counts.",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Tags returned",
+                            content = @Content(mediaType = "application/json",
+                                    array = @ArraySchema(schema = @Schema(implementation = BlogTagDto.class))))
+            }
+    )
+    public ResponseEntity<List<BlogTagDto>> tags() {
+        List<BlogTagDto> body = blogService.getTags().entrySet().stream()
+                .map(e -> new BlogTagDto(e.getKey(), e.getValue()))
+                .collect(Collectors.toList());
+
+        return ResponseEntity.ok()
+                .cacheControl(ONE_HOUR_PUBLIC_CACHE)
+                .body(body);
     }
 
     @GetMapping(value = "/rss", produces = "application/rss+xml")
