@@ -42,7 +42,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 @RestController
 @RequestMapping("/blog")
 @Validated
-@Tag(name = "blog", description = "Blog posts")
+@Tag(name = "Blog", description = "Blog posts, tags and RSS feed")
 public class PostsController {
 
     private static final CacheControl ONE_HOUR_PUBLIC_CACHE = CacheControl.maxAge(Duration.ofHours(1)).cachePublic();

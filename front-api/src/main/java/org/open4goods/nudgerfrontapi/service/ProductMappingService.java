@@ -76,7 +76,6 @@ public class ProductMappingService {
                                 case base -> pdto.setBase(mapBase(p));
                                 case names -> pdto.setNames(mapNames(p, local));
                                 case resources -> pdto.setResources(mapResources(p));
-                                case aiTexts -> pdto.setAiTexts(mapAiTexts(p, local));
                                 case aiReview -> pdto.setAiReview(mapAiReview(p, local));
                                 case offers -> pdto.setOffers(mapOffers(p, local));
                                 default -> throw new IllegalArgumentException("Missing component mapper for: " + include);
@@ -122,13 +121,6 @@ public class ProductMappingService {
                                 p.externalCover());
         }
 
-        private ProductAiTextsDto mapAiTexts(Product p, Locale local) {
-                if (p.getGenaiTexts() == null) {
-                        return null;
-                }
-                var ai = p.getGenaiTexts().i18n(local.getLanguage());
-                return ai == null ? null : new ProductAiTextsDto(ai.description());
-        }
 
 	/**
      * AI Review component mapping

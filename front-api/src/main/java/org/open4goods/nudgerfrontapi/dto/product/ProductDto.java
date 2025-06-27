@@ -18,7 +18,6 @@ public class ProductDto extends AbstractDTO {
                 base,
                 names,
                 resources,
-                aiTexts,
                 aiReview,
                 offers
         }
