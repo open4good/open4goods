@@ -4,6 +4,11 @@ import java.time.Duration;
 import java.util.List;
 import java.util.Locale;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
+
 import org.open4goods.nudgerfrontapi.dto.blog.BlogPostDto;
 import org.open4goods.services.blog.model.BlogPost;
 import org.open4goods.services.blog.service.BlogService;
@@ -24,6 +29,7 @@ import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.headers.Header;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
@@ -47,20 +53,30 @@ public class PostsController {
     @GetMapping
     @Operation(
             summary = "List blog posts",
-            description = "Return all blog posts optionally filtered by tag.",
+            description = "Return paginated blog posts optionally filtered by tag.",
             parameters = {
-                    @Parameter(name = "tag", in = ParameterIn.QUERY, description = "Category/tag to filter on")
+                    @Parameter(name = "tag", in = ParameterIn.QUERY, description = "Category/tag to filter on"),
+                    @Parameter(name = "page[number]", in = ParameterIn.QUERY, description = "Zero-based page index"),
+                    @Parameter(name = "page[size]", in = ParameterIn.QUERY, description = "Page size")
             },
             responses = {
                     @ApiResponse(responseCode = "200", description = "Posts returned",
+                            headers = @Header(name = "Link", description = "Pagination links as defined by RFC 8288"),
                             content = @Content(mediaType = "application/json",
                                     array = @ArraySchema(schema = @Schema(implementation = BlogPostDto.class))))
             }
     )
-    public ResponseEntity<List<BlogPostDto>> posts(@RequestParam(name = "tag", required = false) String tag) {
-        List<BlogPostDto> body = blogService.getPosts(tag).stream()
+    public ResponseEntity<Page<BlogPostDto>> posts(
+            @Parameter(hidden = true) @PageableDefault(size = 20) Pageable pageable,
+            @RequestParam(name = "tag", required = false) String tag) {
+        List<BlogPostDto> posts = blogService.getPosts(tag).stream()
                 .map(this::map)
                 .toList();
+
+        int start = (int) Math.min(pageable.getOffset(), posts.size());
+        int end = Math.min(start + pageable.getPageSize(), posts.size());
+        Page<BlogPostDto> body = new PageImpl<>(posts.subList(start, end), pageable, posts.size());
+
         return ResponseEntity.ok()
                 .cacheControl(ONE_HOUR_PUBLIC_CACHE)
                 .body(body);
