@@ -147,7 +147,7 @@
 		<dependency>
 			<groupId>org.jsoup</groupId>
 			<artifactId>jsoup</artifactId>
-			<version>1.21.1</version>
+			<version>1.20.1</version>
 		</dependency>
 
 		<dependency>
@@ -167,7 +167,7 @@
 		<dependency>
 			<groupId>org.xwiki.commons</groupId>
 			<artifactId>xwiki-commons-component-default</artifactId>
-		    <version>17.4.1</version>
+		    <version>17.1.0</version>
 		</dependency>
 
         <dependency>
@@ -178,7 +178,7 @@
 		<dependency>
 			<groupId>org.xwiki.rendering</groupId>
 			<artifactId>xwiki-rendering-api</artifactId>
-		    <version>17.4.1</version>
+		    <version>17.1.0</version>
 		</dependency>
 				
 
