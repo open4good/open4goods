@@ -11,7 +11,10 @@ import org.open4goods.model.product.Product;
 import org.open4goods.nudgerfrontapi.dto.product.ProductAiReviewDto;
 import org.open4goods.nudgerfrontapi.dto.product.ProductDto;
 import org.open4goods.nudgerfrontapi.dto.product.ProductDto.ProductDtoComponent;
-import org.open4goods.nudgerfrontapi.dto.product.ProductImagesDto;
+import org.open4goods.nudgerfrontapi.dto.product.ProductBaseDto;
+import org.open4goods.nudgerfrontapi.dto.product.ProductNamesDto;
+import org.open4goods.nudgerfrontapi.dto.product.ProductResourcesDto;
+import org.open4goods.nudgerfrontapi.dto.product.ProductAiTextsDto;
 import org.open4goods.nudgerfrontapi.dto.product.ProductOffersDto;
 import org.open4goods.nudgerfrontapi.dto.product.ProductReviewDto;
 import org.open4goods.services.productrepository.services.ProductRepository;
@@ -66,31 +69,66 @@ public class ProductMappingService {
 
     	if (null != includes) {
 
-    		for (String include : includes) {
-	    		ProductDtoComponent component = ProductDtoComponent.valueOf(include);
+                for (String include : includes) {
+                        ProductDtoComponent component = ProductDtoComponent.valueOf(include);
 
-	    		 switch (component) {
-					case aiReview -> pdto.setAiReview(mapAiReview(p, local));
-					case offers -> pdto.setOffers(mapOffers(p, local));
-					case images -> pdto.setImages(mapImages(p, local));
-
-					default -> throw new IllegalArgumentException("Missing component mapper for: " + include);
-	    	    }
-	    	}
+                        switch (component) {
+                                case base -> pdto.setBase(mapBase(p));
+                                case names -> pdto.setNames(mapNames(p, local));
+                                case resources -> pdto.setResources(mapResources(p));
+                                case aiTexts -> pdto.setAiTexts(mapAiTexts(p, local));
+                                case aiReview -> pdto.setAiReview(mapAiReview(p, local));
+                                case offers -> pdto.setOffers(mapOffers(p, local));
+                                default -> throw new IllegalArgumentException("Missing component mapper for: " + include);
+                        }
+                }
     	}
 		return pdto;
 	}
 
 
     private ProductOffersDto mapOffers(Product p, Locale local) {
-		// TODO Auto-generated method stub
-		return null;
-	}
+                return null;
+        }
 
-	private ProductImagesDto mapImages(Product p, Locale local) {
-		// TODO Auto-generated method stub
-		return null;
-	}
+        private ProductBaseDto mapBase(Product p) {
+                return new ProductBaseDto(
+                                p.getId(),
+                                p.getCreationDate(),
+                                p.getLastChange(),
+                                p.getVertical(),
+                                p.getExternalIds(),
+                                p.getGoogleTaxonomyId());
+        }
+
+        private ProductNamesDto mapNames(Product p, Locale local) {
+                if (p.getNames() == null) {
+                        return null;
+                }
+                return new ProductNamesDto(
+                                p.getNames().getH1Title().i18n(local.getLanguage()),
+                                p.getNames().getMetaDescription().i18n(local.getLanguage()),
+                                p.getNames().getProductMetaOpenGraphTitle().i18n(local.getLanguage()),
+                                p.getNames().getProductMetaOpenGraphDescription().i18n(local.getLanguage()),
+                                p.getNames().getProductMetaTwitterTitle().i18n(local.getLanguage()),
+                                p.getNames().getProductMetaTwitterDescription().i18n(local.getLanguage()));
+        }
+
+        private ProductResourcesDto mapResources(Product p) {
+                return new ProductResourcesDto(
+                                p.unprocessedImagesUrl(),
+                                p.videos().stream().map(r -> r.getUrl()).toList(),
+                                p.pdfs().stream().map(r -> r.getUrl()).toList(),
+                                p.externalCover());
+        }
+
+        private ProductAiTextsDto mapAiTexts(Product p, Locale local) {
+                if (p.getGenaiTexts() == null) {
+                        return null;
+                }
+                var ai = p.getGenaiTexts().i18n(local.getLanguage());
+                return ai == null ? null : new ProductAiTextsDto(ai.description());
+        }
 
 	/**
      * AI Review component mapping
