@@ -6,6 +6,12 @@ import java.util.HashSet;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import java.net.URL;
+import java.nio.charset.Charset;
+import jakarta.annotation.PostConstruct;
+import org.apache.commons.io.IOUtils;
+import org.open4goods.services.serialisation.service.SerialisationService;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import org.open4goods.api.services.feed.AffiliationConfig;
 import org.open4goods.api.services.feed.FeedConfiguration;
@@ -169,13 +175,21 @@ public class UiConfig {
 	/**
 	 * The localised mapping of exposed spaces in the wiki. Eg : "/mentions-legales" -> "/", "legalspace" -> "/legals""
 	 */
-	private Map<String,Localisable<String,String>> wikiPagesMapping = new HashMap<>();
+    private Map<String,Localisable<String,String>> wikiPagesMapping = new HashMap<>();
 
 
-	/**
-	 * Containing the project members, for restitution in /team
-	 */
-	private TeamConfig teamConfig = new TeamConfig();
+    /**
+     * Containing the project members, for restitution in /team
+     */
+    private TeamConfig teamConfig = new TeamConfig();
+
+    /**
+     * URL to load the team configuration from.
+     */
+    private String teamConfigUrl;
+
+    @Autowired
+    private SerialisationService serialisationService;
 
 
 	private BlogConfiguration blogConfig = new BlogConfiguration();
@@ -490,9 +504,17 @@ public class UiConfig {
 	}
 
 
-	public void setTeamConfig(TeamConfig teamConfig) {
-		this.teamConfig = teamConfig;
-	}
+        public void setTeamConfig(TeamConfig teamConfig) {
+                this.teamConfig = teamConfig;
+        }
+
+        public String getTeamConfigUrl() {
+                return teamConfigUrl;
+        }
+
+        public void setTeamConfigUrl(String teamConfigUrl) {
+                this.teamConfigUrl = teamConfigUrl;
+        }
 
 	public Set<String> getAllowedImagesSizeSuffixes() {
 		return allowedImagesSizeSuffixes;
@@ -573,5 +595,25 @@ public class UiConfig {
 
 	public AmazonConfig getAmazonConfig() { return amazonConfig; }
 
-	public void setAmazonConfig(AmazonConfig amazon) { this.amazonConfig = amazon; }
+        public void setAmazonConfig(AmazonConfig amazon) { this.amazonConfig = amazon; }
+
+        /**
+         * Load team configuration from the configured URL if provided.
+         */
+        @PostConstruct
+        public void loadTeamConfigFromUrl() {
+                if (teamConfigUrl == null || teamConfigUrl.isBlank()) {
+                        return;
+                }
+
+                try {
+                        String content = IOUtils.toString(new URL(teamConfigUrl), Charset.defaultCharset());
+                        TeamConfig loaded = serialisationService.fromYaml(content, TeamConfig.class);
+                        if (loaded != null) {
+                                this.teamConfig = loaded;
+                        }
+                } catch (Exception e) {
+                        LOGGER.error("Cannot load team config from {}", teamConfigUrl, e);
+                }
+        }
 }
