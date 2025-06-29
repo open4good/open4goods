@@ -8,42 +8,49 @@ jobs:
   add-to-project:
     runs-on: ubuntu-latest
     steps:
-      - name: Add issue to the right project(s) based on label(s)
+      - name: Add issue to classic project based on label (with debug)
         uses: actions/github-script@v6
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-            // 🛠️ CONFIGURATION : associe les labels aux IDs des projets classiques
+            // 🛠️ CONFIG : labels => project IDs (classic only)
             const labelToProjectMap = {
               'squad:ux': 4
             };
 
-            const issue = context.payload.issue;
             const label = context.payload.label.name;
+            const issue = context.payload.issue;
 
             const projectId = labelToProjectMap[label];
             if (!projectId) {
-              console.log(`Aucun projet associé au label : ${label}. Fin.`);
+              console.log(`Aucun projet associé au label "${label}".`);
               return;
             }
 
-            console.log(`Label "${label}" détecté. Ajout de l'issue #${issue.number} au projet ${projectId}...`);
+            console.log(`🔍 Tentative d'ajout de l'issue #${issue.number} au projet ${projectId}.`);
 
-            // 🔍 Liste les colonnes pour trouver "No Status"
-            const { data: columns } = await github.rest.projects.listColumns({
+            // Récupération des colonnes
+            const columnsResponse = await github.rest.projects.listColumns({
               project_id: projectId
             });
 
-            const column = columns.find(c => c.name === 'No Status');
-            if (!column) {
-              throw new Error(`La colonne "No Status" est introuvable dans le projet ${projectId}.`);
+            const columns = columnsResponse.data;
+            console.log(`🧱 ${columns.length} colonne(s) détectée(s) dans le projet :`);
+            for (const col of columns) {
+              console.log(` - ${col.name} (ID: ${col.id})`);
             }
 
-            // ✅ Ajoute la carte à la colonne
+            const noStatusColumn = columns.find(c => c.name === 'No Status');
+            if (!noStatusColumn) {
+              throw new Error(`❌ Colonne "No Status" introuvable dans le projet ${projectId}.`);
+            }
+
+            console.log(`✅ Colonne "No Status" trouvée avec ID: ${noStatusColumn.id}. Création de la carte...`);
+
             await github.rest.projects.createCard({
-              column_id: column.id,
+              column_id: noStatusColumn.id,
               content_id: issue.id,
               content_type: 'Issue'
             });
 
-            console.log(`✅ Issue ajoutée dans la colonne "No Status" du projet ${projectId}.`);
+            console.log(`🎉 Carte créée dans la colonne "No Status" du projet ${projectId}.`);
