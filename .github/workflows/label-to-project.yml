@@ -1,56 +1,44 @@
-name: Auto add issue to GitHub Project when labeled
+name: Add issue to Beta project when labeled
 
 on:
   issues:
     types: [labeled]
 
 jobs:
-  add-to-project:
+  add_to_beta_project:
     runs-on: ubuntu-latest
     steps:
-      - name: Add issue to classic project based on label (with debug)
+      - name: Retrieve Project V2 ID
+        id: get_project
         uses: actions/github-script@v6
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-            // 🛠️ CONFIG : labels => project IDs (classic only)
-            const labelToProjectMap = {
-              'squad:ux': 4
-            };
-
             const label = context.payload.label.name;
-            const issue = context.payload.issue;
+            if (label !== 'squad:ux') return null;
+            const org = 'open4good';
+            const projNum = 1; // adapter
+            const query = `
+              query($org: String!, $num: Int!) {
+                organization(login: $org) {
+                  projectV2(number: $num) { id }
+                }
+              }`;
+            const res = await github.graphql(query, { org, num: projNum });
+            return res.organization.projectV2?.id;
 
-            const projectId = labelToProjectMap[label];
-            if (!projectId) {
-              console.log(`Aucun projet associé au label "${label}".`);
-              return;
-            }
-
-            console.log(`🔍 Tentative d'ajout de l'issue #${issue.number} au projet ${projectId}.`);
-
-            // Récupération des colonnes
-            const columnsResponse = await github.rest.projects.listColumns({
-              project_id: projectId
-            });
-
-            const columns = columnsResponse.data;
-            console.log(`🧱 ${columns.length} colonne(s) détectée(s) dans le projet :`);
-            for (const col of columns) {
-              console.log(` - ${col.name} (ID: ${col.id})`);
-            }
-
-            const noStatusColumn = columns.find(c => c.name === 'No Status');
-            if (!noStatusColumn) {
-              throw new Error(`❌ Colonne "No Status" introuvable dans le projet ${projectId}.`);
-            }
-
-            console.log(`✅ Colonne "No Status" trouvée avec ID: ${noStatusColumn.id}. Création de la carte...`);
-
-            await github.rest.projects.createCard({
-              column_id: noStatusColumn.id,
-              content_id: issue.id,
-              content_type: 'Issue'
-            });
-
-            console.log(`🎉 Carte créée dans la colonne "No Status" du projet ${projectId}.`);
+      - name: Add issue to Project (Beta)
+        if: steps.get_project.outputs.result
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const projId = '${{ steps.get_project.outputs.result }}';
+            const issueId = context.payload.issue.node_id;
+            await github.graphql(`
+              mutation ($projId: ID!, $contentId: ID!) {
+                addProjectNextItem(input: { projectId: $projId, contentId: $contentId }) {
+                  projectNextItem { id }
+                }
+              }`, { projId, contentId: issueId });
+            console.log(`✅ Issue #${context.payload.issue.number} ajoutée à Project Beta ${projId}`);
