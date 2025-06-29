@@ -1,0 +1,28 @@
+name: Auto add issue to GitHub Project when labeled
+
+on:
+  issues:
+    types: [labeled]
+
+jobs:
+  add-to-project:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Add issue to project if label matches
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const label = context.payload.label.name;
+            const issue = context.payload.issue;
+
+            if (label === 'squad:ux') {
+              const projectId = '4';
+              const columnId = 'No Status'; // e.g., "To do" or "Backlog"
+
+              await github.rest.projects.createCard({
+                column_id: columnId,
+                content_id: issue.id,
+                content_type: 'Issue'
+              });
+            }
