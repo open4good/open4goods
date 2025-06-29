@@ -17,7 +17,7 @@ jobs:
             const label = context.payload.label.name;
             if (label !== 'squad:ux') return null;
             const org = 'open4good';
-            const projNum = 1; // adapter
+            const projNum = 4; // adapter
             const query = `
               query($org: String!, $num: Int!) {
                 organization(login: $org) {
