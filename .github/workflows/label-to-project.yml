@@ -1,71 +1,46 @@
-name: Add issue to GitHub Project (Beta) on label
+# .github/workflows/assign-issues-to-projects.yml
+name: Assign Issues to GitHub Projects (beta)
 
 on:
   issues:
     types: [labeled]
 
+env:
+  # Configure your label-to-project mapping here.
+  # To get the GraphQL project V2 ID for project number 4, you can run:
+  # {
+  #   organization(login: "open4good") {
+  #     projectV2(number: 4) { id }
+  #   }
+  # }
+  PROJECT_MAPPING: '{"squad:ux":"PVT_PROJECT_V2_XXXXXXXXXXXXXXXX"}'
+
 jobs:
-  add-to-project-beta:
+  assign-to-project:
+    if: github.event.action == 'labeled'
     runs-on: ubuntu-latest
     steps:
-      - name: Get ProjectV2 ID (org-level)
-        id: get_project
+      - name: Add issue to project based on label
         uses: actions/github-script@v6
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-            const label = context.payload.label.name;
-            if (label !== 'squad:ux') {
-              console.log(`Label "${label}" ignoré.`);
-              return;
-            }
-
-            const query = `
-              query($org: String!, $number: Int!) {
-                organization(login: $org) {
-                  projectV2(number: $number) {
-                    id
-                  }
-                }
-              }`;
-
-            const result = await github.graphql(query, {
-              org: "open4good",
-              number: 4
-            });
-
-            const projectId = result.organization?.projectV2?.id;
+            const labelName = context.payload.label.name;
+            const mapping = JSON.parse(process.env.PROJECT_MAPPING);
+            const projectId = mapping[labelName];
             if (!projectId) {
-              throw new Error("❌ Impossible de récupérer l'ID du ProjectV2.");
-            }
-
-            console.log(`📌 ProjectV2 ID : ${projectId}`);
-            return projectId;
-
-      - name: Add issue to Project (Beta)
-        if: steps.get_project.outputs.result != ''
-        uses: actions/github-script@v6
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          script: |
-            const projectId = '${{ steps.get_project.outputs.result }}';
-            const issueId = context.payload.issue.node_id;
-
-            const mutation = `
-              mutation($projectId: ID!, $contentId: ID!) {
-                addProjectV2ItemById(input: {
-                  projectId: $projectId,
-                  contentId: $contentId
-                }) {
-                  item {
-                    id
+              core.info(`No project configured for label '${labelName}', skipping.`);
+            } else {
+              const contentId = context.payload.issue.node_id;
+              await github.graphql(
+                `
+                mutation($projectId: ID!, $contentId: ID!) {
+                  addProjectV2Item(input: { projectId: $projectId, contentId: $contentId }) {
+                    item { id }
                   }
                 }
-              }`;
-
-            const result = await github.graphql(mutation, {
-              projectId: projectId,
-              contentId: issueId
-            });
-
-            console.log(`✅ Issue ajoutée au Project (Beta) avec item ID : ${result.addProjectV2ItemById.item.id}`);
+                `,
+                { projectId, contentId }
+              );
+              core.info(`Issue added to project ${projectId} for label '${labelName}'.`);
+            }
