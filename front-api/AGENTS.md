@@ -73,6 +73,16 @@ The module exposes configurable security settings via
 | `@SecurityRequirement` | auth or captcha                     |
 | `@Tag`                 | group controllers                   |
 
+> **Rule**: add `schema = @Schema(...)` for every `@Parameter` to specify the type.
+> Missing schemas lead to `UNKNOWN_PARAMETER_NAME` fields in the generated Nuxt client.
+>
+> Example:
+> ```java
+> @Parameter(name = "page[number]", in = ParameterIn.QUERY,
+>     description = "Zero-based page index",
+>     schema = @Schema(type = "integer", minimum = "0"))
+> ```
+
 **Example**
 ~~~java
 @Operation(
