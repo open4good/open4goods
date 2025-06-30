@@ -1,3 +1,9 @@
+name: Assign Issues to GitHub Projects V2
+
+on:
+  issues:
+    types: [labeled]
+
 env:
   ORG_NAME: open4good
   PROJECT_ID_MAPPING: |
