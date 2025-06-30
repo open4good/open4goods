@@ -59,8 +59,8 @@ public class PostsController {
             description = "Return paginated blog posts optionally filtered by tag.",
             parameters = {
                     @Parameter(name = "tag", in = ParameterIn.QUERY, description = "Category/tag to filter on"),
-                    @Parameter(name = "page[number]", in = ParameterIn.QUERY, description = "Zero-based page index"),
-                    @Parameter(name = "page[size]", in = ParameterIn.QUERY, description = "Page size")
+                    @Parameter(name = "pageNumber", in = ParameterIn.QUERY, description = "Zero-based page index"),
+                    @Parameter(name = "pageSize", in = ParameterIn.QUERY, description = "Page size")
             },
             responses = {
                     @ApiResponse(responseCode = "200", description = "Posts returned",
