@@ -1,0 +1,8 @@
+{
+  "blog": {
+    "title": "Blog",
+    "noPosts": "No posts found",
+    "by": "by",
+    "tags": "Tags"
+  }
+}

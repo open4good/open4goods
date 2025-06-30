@@ -9,7 +9,8 @@ export default defineConfig({
       // Map `@/` to the `src` directory so imports like `@/components` work in tests
       '@': fileURLToPath(new URL('./src', import.meta.url)),
       // Map `#app` to Nuxt's runtime directory to resolve Nuxt internals during tests
-      '#app': fileURLToPath(new URL('./node_modules/nuxt/dist/app', import.meta.url))
+      '#app': fileURLToPath(new URL('./node_modules/nuxt/dist/app', import.meta.url)),
+      '#imports': fileURLToPath(new URL('./node_modules/nuxt/dist/app', import.meta.url))
     }
   },
   test: {
