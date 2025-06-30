@@ -9,7 +9,7 @@ env:
   # Your org and a map of labels → ProjectV2 numbers.
   ORG_NAME: open4good
   PROJECT_NUMBER_MAPPING: |
-    squad:ux=4
+    squad:ux=PVT_kwDOBOJOp84A2ZRZ
     # squad:backend=5
     # squad:frontend=6
 
