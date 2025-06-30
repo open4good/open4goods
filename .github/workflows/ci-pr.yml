@@ -4,6 +4,15 @@ on:
   pull_request:
     branches:
       - 'main'
+    paths-ignore:
+      - 'frontend/**'
+    paths:
+      - 'api/**'
+      - 'admin/**'
+      - 'front-api/**'
+      - 'ui/**'
+      - 'services/**'
+      - 'commons/**'
 
 jobs:
   test:
