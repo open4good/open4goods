@@ -27,8 +27,12 @@ const route = useRoute()
 const blogApi = useBlogApi()
 const selectedTag = ref<string | undefined>(route.query.tag as string)
 
-const { data: posts } = await useAsyncData('posts', () => blogApi.posts({ tag: selectedTag.value }))
-const { data: tags } = await useAsyncData('tags', () => blogApi.tags())
+const { data: posts } = await useAsyncData(
+  'posts',
+  () => blogApi.posts({ tag: selectedTag.value }),
+  { default: () => [] }
+)
+const { data: tags } = await useAsyncData('tags', () => blogApi.tags(), { default: () => [] })
 
 watch(selectedTag, async () => {
   posts.value = await blogApi.posts({ tag: selectedTag.value })
