@@ -11,6 +11,7 @@ env:
     squad:backend=PVT_kwDOBOJOp84A8xdZ
     squad:exposition=PVT_kwDOBOJOp84A8xdy
     squad:pmo=PVT_kwDOBOJOp84A8tDc
+    EPIC=PVT_kwDOBOJOp84A8tDc
 
 jobs:
   assign-to-project:
