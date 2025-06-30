@@ -8,7 +8,7 @@ env:
   ORG_NAME: open4good
   # Ici on mappe label → numéro du projet (pas son ID)
   PROJECT_NUMBER_MAPPING: |
-    squad:ux=4
+    squad:ux=PVT_kwDOBOJOp84A2ZRZ
     # squad:backend=5
     # squad:frontend=6
 
