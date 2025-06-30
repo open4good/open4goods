@@ -152,6 +152,8 @@ export const Primary: Story = {
 ## Documentation
 - Always document produced code
 - Always update existing documentation (for example README.md, AGENTS.md) with features update, architecturals changes or considerations.
+- Dependency updates are handled by Renovate using the configs `renovate.json` at
+  the repository root and `frontend/renovate.json`. Updates run nightly.
 
 
 ## Linting and Formatting
