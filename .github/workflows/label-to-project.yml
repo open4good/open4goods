@@ -1,57 +1,31 @@
-name: Assign Issues to GitHub Projects V2
-
-on:
-  issues:
-    types: [labeled]
-
 env:
   ORG_NAME: open4good
-  # Ici on mappe label → numéro du projet (pas son ID)
-  PROJECT_NUMBER_MAPPING: |
+  PROJECT_ID_MAPPING: |
     squad:ux=PVT_kwDOBOJOp84A2ZRZ
-    # squad:backend=5
-    # squad:frontend=6
+    squad:backend=PVT_kwDO12345ABC
+    squad:frontend=PVT_ABC987ZYX
 
 jobs:
   assign-to-project:
     if: github.event.action == 'labeled'
     runs-on: ubuntu-latest
     steps:
-      - name: Add issue to project based on label
-        uses: actions/github-script@v6
+      - uses: actions/github-script@v6
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-            const org = process.env.ORG_NAME;
             const mapping = Object.fromEntries(
-              process.env.PROJECT_NUMBER_MAPPING
+              process.env.PROJECT_ID_MAPPING
                 .trim()
                 .split('\n')
                 .map(line => line.trim().split('='))
-                .map(([label, num]) => [label, Number(num)])
             );
-
             const labelName = context.payload.label.name;
-            const projectNumber = mapping[labelName];
-            if (!projectNumber) {
+            const projectId = mapping[labelName];
+            if (!projectId) {
               console.log(`No project configured for label '${labelName}', skipping.`);
               return;
             }
-
-            // On récupère l'ID via GraphQL
-            const { organization: { projectV2 } } = await github.graphql(
-              `
-              query($org: String!, $projectNumber: Int!) {
-                organization(login: $org) {
-                  projectV2(number: $projectNumber) { id }
-                }
-              }
-              `,
-              { org, projectNumber }
-            );
-            const projectId = projectV2.id;
-
-            // On ajoute à ProjectV2
             await github.graphql(
               `
               mutation($projectId: ID!, $contentId: ID!) {
@@ -60,10 +34,6 @@ jobs:
                 }
               }
               `,
-              {
-                projectId,
-                contentId: context.payload.issue.node_id
-              }
+              { projectId, contentId: context.payload.issue.node_id }
             );
-
-            console.log(`Issue #${context.payload.issue.number} added to project #${projectNumber}.`);
+            console.log(`Issue #${context.payload.issue.number} added to project ID ${projectId}.`);
