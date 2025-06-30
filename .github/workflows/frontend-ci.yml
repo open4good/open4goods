@@ -1,0 +1,28 @@
+name: Frontend CI
+on:
+  push:
+    paths:
+      - 'frontend/**'    
+    branches: [main]
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm lint
+      - run: pnpm generate
+      - run: pnpm test run
+      - name: Verify production build
+        run: |
+          pnpm build
+          node .output/server/index.mjs &
+          PREVIEW_PID=$!
+          trap "kill $PREVIEW_PID" EXIT
+          npx wait-on http://localhost:3000
+          for route in / /sitemap.xml; do
+            curl -sf "http://localhost:3000$route"
+          done

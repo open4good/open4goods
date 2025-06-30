@@ -1,0 +1,41 @@
+name: Deploy static frontend to GitHub Pages
+
+on:
+  push:
+    paths:
+      - 'frontend/**'    
+    branches:
+      - main
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build Nuxt (GitHub Pages)
+        run: NITRO_PRESET=github_pages pnpm generate
+
+      - name: Build Storybook
+        run: pnpm storybook:build -- --output-dir storybook-static
+
+      - name: Prepare dist/
+        run: |
+            rm -rf dist
+            mkdir -p dist/storybook
+            cp -r .output/public/* dist/
+            cp -r storybook-static/* dist/storybook/
+            echo 'static.nudger.fr' > dist/CNAME
+
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./dist
