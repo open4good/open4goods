@@ -59,8 +59,12 @@ public class PostsController {
             description = "Return paginated blog posts optionally filtered by tag.",
             parameters = {
                     @Parameter(name = "tag", in = ParameterIn.QUERY, description = "Category/tag to filter on"),
-                    @Parameter(name = "page[number]", in = ParameterIn.QUERY, description = "Zero-based page index"),
-                    @Parameter(name = "page[size]", in = ParameterIn.QUERY, description = "Page size")
+                    @Parameter(name = "page[number]", in = ParameterIn.QUERY,
+                            description = "Zero-based page index",
+                            schema = @Schema(type = "integer", minimum = "0")),
+                    @Parameter(name = "page[size]", in = ParameterIn.QUERY,
+                            description = "Page size",
+                            schema = @Schema(type = "integer", minimum = "0"))
             },
             responses = {
                     @ApiResponse(responseCode = "200", description = "Posts returned",
