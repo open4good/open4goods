@@ -1,19 +1,17 @@
 # .github/workflows/assign-issues-to-projects.yml
-name: Assign Issues to GitHub Projects (beta)
+name: Assign Issues to GitHub Projects V2
 
 on:
   issues:
     types: [labeled]
 
 env:
-  # Configure your label-to-project mapping here.
-  # To get the GraphQL project V2 ID for project number 4, you can run:
-  # {
-  #   organization(login: "open4good") {
-  #     projectV2(number: 4) { id }
-  #   }
-  # }
-  PROJECT_MAPPING: '{"squad:ux":"PVT_PROJECT_V2_XXXXXXXXXXXXXXXX"}'
+  # Your org and a map of labels → ProjectV2 numbers.
+  ORG_NAME: open4good
+  PROJECT_NUMBER_MAPPING: |
+    squad:ux=4
+    # squad:backend=5
+    # squad:frontend=6
 
 jobs:
   assign-to-project:
@@ -25,22 +23,53 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
+            const org = process.env.ORG_NAME;
+            // parse label→projectNumber map
+            const mapping = Object.fromEntries(
+              process.env.PROJECT_NUMBER_MAPPING
+                .trim()
+                .split('\n')
+                .map(line => line.trim().split('='))
+                .map(([label, num]) => [label, Number(num)])
+            );
+
             const labelName = context.payload.label.name;
-            const mapping = JSON.parse(process.env.PROJECT_MAPPING);
-            const projectId = mapping[labelName];
-            if (!projectId) {
-              core.info(`No project configured for label '${labelName}', skipping.`);
-            } else {
-              const contentId = context.payload.issue.node_id;
-              await github.graphql(
-                `
-                mutation($projectId: ID!, $contentId: ID!) {
-                  addProjectV2Item(input: { projectId: $projectId, contentId: $contentId }) {
-                    item { id }
+            const projectNumber = mapping[labelName];
+            if (!projectNumber) {
+              console.log(`No project configured for label '${labelName}', skipping.`);
+              return;
+            }
+
+            // 1) Fetch the ProjectV2 node ID for this project number
+            const projectQuery = await github.graphql(
+              `
+              query($org: String!, $projectNumber: Int!) {
+                organization(login: $org) {
+                  projectV2(number: $projectNumber) {
+                    id
                   }
                 }
-                `,
-                { projectId, contentId }
-              );
-              core.info(`Issue added to project ${projectId} for label '${labelName}'.`);
-            }
+              }
+              `,
+              { org, projectNumber }
+            );
+            const projectId = projectQuery.organization.projectV2.id;
+
+            // 2) Add the issue to the project
+            await github.graphql(
+              `
+              mutation($projectId: ID!, $contentId: ID!) {
+                addProjectV2ItemById(input: { projectId: $projectId, contentId: $contentId }) {
+                  item {
+                    id
+                  }
+                }
+              }
+              `,
+              {
+                projectId,
+                contentId: context.payload.issue.node_id
+              }
+            );
+
+            console.log(`Issue #${context.payload.issue.number} added to project #${projectNumber}.`);
