@@ -1,0 +1,12 @@
+/package-lock.json
+/.project
+node_modules/
+.nuxt/
+.output/
+/storybook-static/
+/.husky/*
+!/.husky/_/husky.sh
+!/.husky/_/
+!/.husky/pre-push
+!/.husky/pre-commit
+!/.husky/
