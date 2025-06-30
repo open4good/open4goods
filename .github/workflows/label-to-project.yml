@@ -8,8 +8,9 @@ env:
   ORG_NAME: open4good
   PROJECT_ID_MAPPING: |
     squad:ux=PVT_kwDOBOJOp84A2ZRZ
-    squad:backend=PVT_kwDO12345ABC
-    squad:frontend=PVT_ABC987ZYX
+    squad:backend=PVT_kwDOBOJOp84A8xdZ
+    squad:exposition=PVT_kwDOBOJOp84A8xdy
+    squad:pmo=PVT_kwDOBOJOp84A8tDc
 
 jobs:
   assign-to-project:
