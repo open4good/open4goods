@@ -12,10 +12,18 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'pnpm'
       - run: pnpm install --frozen-lockfile
+        working-directory: frontend
       - run: pnpm lint
+        working-directory: frontend
       - run: pnpm generate
+        working-directory: frontend
       - run: pnpm test run
+        working-directory: frontend
       - name: Verify production build
         run: |
           pnpm build
@@ -26,3 +34,4 @@ jobs:
           for route in / /sitemap.xml; do
             curl -sf "http://localhost:3000$route"
           done
+        working-directory: frontend
