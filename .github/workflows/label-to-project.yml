@@ -18,7 +18,7 @@ jobs:
     steps:
       - uses: actions/github-script@v6
         with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
+          github-token: ${{ secrets.PROJECT_PAT }}
           script: |
             const mapping = Object.fromEntries(
               process.env.PROJECT_ID_MAPPING
