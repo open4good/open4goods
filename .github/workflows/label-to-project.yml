@@ -1,4 +1,3 @@
-# .github/workflows/assign-issues-to-projects.yml
 name: Assign Issues to GitHub Projects V2
 
 on:
@@ -6,10 +5,10 @@ on:
     types: [labeled]
 
 env:
-  # Your org and a map of labels → ProjectV2 numbers.
   ORG_NAME: open4good
+  # Ici on mappe label → numéro du projet (pas son ID)
   PROJECT_NUMBER_MAPPING: |
-    squad:ux=PVT_kwDOBOJOp84A2ZRZ
+    squad:ux=4
     # squad:backend=5
     # squad:frontend=6
 
@@ -21,10 +20,9 @@ jobs:
       - name: Add issue to project based on label
         uses: actions/github-script@v6
         with:
-          github-token: ${{ GITHUB_TOKEN }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
             const org = process.env.ORG_NAME;
-            // parse label→projectNumber map
             const mapping = Object.fromEntries(
               process.env.PROJECT_NUMBER_MAPPING
                 .trim()
@@ -40,29 +38,25 @@ jobs:
               return;
             }
 
-            // 1) Fetch the ProjectV2 node ID for this project number
-            const projectQuery = await github.graphql(
+            // On récupère l'ID via GraphQL
+            const { organization: { projectV2 } } = await github.graphql(
               `
               query($org: String!, $projectNumber: Int!) {
                 organization(login: $org) {
-                  projectV2(number: $projectNumber) {
-                    id
-                  }
+                  projectV2(number: $projectNumber) { id }
                 }
               }
               `,
               { org, projectNumber }
             );
-            const projectId = projectQuery.organization.projectV2.id;
+            const projectId = projectV2.id;
 
-            // 2) Add the issue to the project
+            // On ajoute à ProjectV2
             await github.graphql(
               `
               mutation($projectId: ID!, $contentId: ID!) {
                 addProjectV2ItemById(input: { projectId: $projectId, contentId: $contentId }) {
-                  item {
-                    id
-                  }
+                  item { id }
                 }
               }
               `,
