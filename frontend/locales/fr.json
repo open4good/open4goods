@@ -1,0 +1,8 @@
+{
+  "blog": {
+    "title": "Blog",
+    "noPosts": "Aucun article",
+    "by": "par",
+    "tags": "Étiquettes"
+  }
+}
