@@ -77,8 +77,12 @@ public class ProductController {
                             array = @ArraySchema(
                                     schema = @Schema(implementation = ProductDtoComponent.class)
                             )),
-                    @Parameter(name = "page[number]", in = ParameterIn.QUERY, description = "Zero-based page index"),
-                    @Parameter(name = "page[size]", in = ParameterIn.QUERY, description = "Page size"),
+                    @Parameter(name = "page[number]", in = ParameterIn.QUERY,
+                            description = "Zero-based page index",
+                            schema = @Schema(type = "integer", minimum = "0")),
+                    @Parameter(name = "page[size]", in = ParameterIn.QUERY,
+                            description = "Page size",
+                            schema = @Schema(type = "integer", minimum = "0")),
                     @Parameter(name = "sort", in = ParameterIn.QUERY, description = "Sort criteria in the format: property,(asc|desc). ",array = @ArraySchema(
                             schema = @Schema(implementation = ProductDtoSortableFields.class)
                     )),
