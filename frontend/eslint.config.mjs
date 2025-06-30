@@ -8,4 +8,6 @@ export default createConfigForNuxt({
   rules: {
     'vue/multi-word-component-names': 'off'
   }
+}).append({
+  ignores: ['src/api/**']
 })
