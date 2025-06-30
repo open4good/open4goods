@@ -2,5 +2,19 @@
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": [
     "config:recommended"
+  ],
+  "schedule": ["after 10pm and before 5am"],
+  "github-actions": { "enabled": true },
+  "dependencyDashboard": false,
+  "packageRules": [
+    {
+      "matchManagers": ["maven"],
+      "matchUpdateTypes": ["major"],
+      "enabled": false
+    },
+    {
+      "matchPaths": ["frontend/**"],
+      "packageManager": "pnpm"
+    }
   ]
 }

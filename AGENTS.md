@@ -119,5 +119,11 @@ mvn -pl api -am clean install
 
 A predictable, enforced structure lowers cognitive load for humans and gives large-language models a deterministic environment in which to operate. This accelerates onboarding, reduces bugs, and keeps architecture sound as we migrate monolith parts to independent Spring Boot services (see the services/**) .
 
-> **Questions?**  
+## 10  Automated dependency updates
+
+Dependencies for Maven modules, Node projects (`frontend` and `ui`), and GitHub
+Actions workflows are maintained by Renovate. Updates run nightly (after 10pm
+and before 5am) with major Maven upgrades disabled.
+
+> **Questions?**
 > Open a GitHub Discussion or justify any deviation in your PR description.

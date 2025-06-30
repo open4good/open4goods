@@ -57,9 +57,15 @@ Our [verticals definitions are totaly open](https://github.com/open4good/open4go
 
 ## Geek it ! 
 
-Contribute to the websites, on the UI, on the content, or on the data aspects. Quiet simple to set-up, you can run open4goods website localy with the below instructions. 
+Contribute to the websites, on the UI, on the content, or on the data aspects. Quiet simple to set-up, you can run open4goods website localy with the below instructions.
 
- 
+
+### Automated dependency updates
+Dependencies across Maven modules, Node projects (`frontend` and `ui`) and GitHub Actions
+are maintained by [Renovate](https://github.com/renovatebot/renovate). Updates run
+nightly (`after 10pm and before 5am`), and major Maven upgrades are disabled by default.
+
+
 # Run in dev mode
 We will see here how to run open4goods frontends and API's on tour computer.
 
