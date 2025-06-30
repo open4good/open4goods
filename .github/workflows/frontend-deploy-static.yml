@@ -16,22 +16,31 @@ jobs:
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
+        with:
+          version: '8.15.9'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'pnpm'
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
+        working-directory: frontend
 
       - name: Build Nuxt (GitHub Pages)
         run: NITRO_PRESET=github_pages pnpm generate
+        working-directory: frontend
 
       - name: Build Storybook
         run: pnpm storybook:build -- --output-dir storybook-static
+        working-directory: frontend
 
       - name: Prepare dist/
         run: |
             rm -rf dist
             mkdir -p dist/storybook
-            cp -r .output/public/* dist/
-            cp -r storybook-static/* dist/storybook/
+            cp -r frontend/.output/public/* dist/
+            cp -r frontend/storybook-static/* dist/storybook/
             echo 'static.nudger.fr' > dist/CNAME
 
       - name: Deploy to GitHub Pages
