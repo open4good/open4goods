@@ -65,6 +65,15 @@ Dependencies across Maven modules, Node projects (`frontend` and `ui`) and GitHu
 are maintained by [Renovate](https://github.com/renovatebot/renovate). Updates run
 nightly (`after 10pm and before 5am`), and major Maven upgrades are disabled by default.
 
+### Project management automation
+Issues are organised using GitHub Projects V2. The workflow
+[label-to-project.yml](.github/workflows/label-to-project.yml) automatically
+assigns newly opened issues to the right project board based on their labels.
+If an issue has no `squad:*` label or carries the `EPIC` label, it is routed to
+the PMO board and placed in the `Triage` column. A manual workflow named
+[label-to-project-dispatch.yml](.github/workflows/label-to-project-dispatch.yml)
+can be triggered to reapply these rules to existing issues.
+
 
 # Run in dev mode
 We will see here how to run open4goods frontends and API's on tour computer.
