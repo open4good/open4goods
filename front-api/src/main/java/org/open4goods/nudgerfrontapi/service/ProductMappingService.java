@@ -1,8 +1,10 @@
 package org.open4goods.nudgerfrontapi.service;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Set;
 
 import org.open4goods.model.exceptions.ResourceNotFoundException;
@@ -17,13 +19,23 @@ import org.open4goods.nudgerfrontapi.dto.product.ProductResourcesDto;
 import org.open4goods.nudgerfrontapi.dto.product.ProductAiTextsDto;
 import org.open4goods.nudgerfrontapi.dto.product.ProductOffersDto;
 import org.open4goods.nudgerfrontapi.dto.product.ProductReviewDto;
+import org.open4goods.nudgerfrontapi.dto.product.ProductPageAggsDto;
+import org.open4goods.nudgerfrontapi.dto.product.TermsBucketDto;
 import org.open4goods.services.productrepository.services.ProductRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.elasticsearch.core.SearchHit;
 import org.springframework.data.elasticsearch.core.SearchHits;
+import org.springframework.data.elasticsearch.client.elc.ElasticsearchAggregation;
+import org.springframework.data.elasticsearch.client.elc.ElasticsearchAggregations;
+import co.elastic.clients.elasticsearch._types.aggregations.Aggregate;
+import co.elastic.clients.elasticsearch._types.aggregations.LongTermsAggregate;
+import co.elastic.clients.elasticsearch._types.aggregations.LongTermsBucket;
+import co.elastic.clients.elasticsearch._types.aggregations.StringTermsAggregate;
+import co.elastic.clients.elasticsearch._types.aggregations.StringTermsBucket;
 import org.springframework.data.util.Streamable;
 import org.springframework.stereotype.Service;
 
@@ -155,15 +167,40 @@ public class ProductMappingService {
     }
 
 
-    public Page<ProductDto> getProducts(Pageable pageable, Locale locale, Set<String> includes) {
+    public ProductPageAggsDto getProducts(Pageable pageable, Locale locale, Set<String> includes,
+                                          Set<String> aggs, Set<String> subAggs) {
 
-		SearchHits<Product> response = repository.get(pageable);
-		List<ProductDto> items = response
-				.map(e -> e.getContent())
-				.map(e -> mapProduct(e, locale, includes))
-				.toList();
+        SearchHits<Product> response = repository.get(pageable, aggs, subAggs);
+        List<ProductDto> items = response
+                .map(SearchHit::getContent)
+                .map(e -> mapProduct(e, locale, includes))
+                .toList();
 
-		return  new PageImpl<ProductDto>(items, pageable, response.getTotalHits());
+        Map<String, List<TermsBucketDto>> aggsMap = new HashMap<>();
+        if (response.getAggregations() instanceof ElasticsearchAggregations ea && aggs != null) {
+            for (String a : aggs) {
+                ElasticsearchAggregation agg = ea.get(a);
+                if (agg != null) {
+                    Aggregate aggregate = agg.aggregation().getAggregate();
+                    List<TermsBucketDto> buckets = new ArrayList<>();
+                    if (aggregate.isLterms()) {
+                        LongTermsAggregate lt = aggregate.lterms();
+                        for (LongTermsBucket b : lt.buckets().array()) {
+                            buckets.add(new TermsBucketDto(String.valueOf(b.key()), b.docCount()));
+                        }
+                    } else if (aggregate.isSterms()) {
+                        StringTermsAggregate st = aggregate.sterms();
+                        for (StringTermsBucket b : st.buckets().array()) {
+                            buckets.add(new TermsBucketDto(b.key().stringValue(), b.docCount()));
+                        }
+                    }
+                    aggsMap.put(a, buckets);
+                }
+            }
+        }
+
+        Page<ProductDto> pageRes = new PageImpl<>(items, pageable, response.getTotalHits());
+        return new ProductPageAggsDto(pageRes, aggsMap);
     }
 
 
