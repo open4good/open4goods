@@ -9,7 +9,7 @@
     "generate": "nuxt generate",
     "lint": "eslint .",
     "format": "prettier --check .",
-    "test": "vitest",
+    "test": "NODE_OPTIONS=--experimental-vm-modules vitest run",
     "storybook": "pnpm exec storybook dev -p 6006 --no-open",
     "storybook:build": "pnpm exec storybook build",
     "generate:api": "openapi-generator-cli generate -i https://beta.front-api.nudger.fr/v3/api-docs/front -g typescript-fetch -o src/api --skip-validate-spec",
