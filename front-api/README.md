@@ -14,15 +14,17 @@ The application runs on **port 8082** by default (`server.port` in `application.
 Security is enabled by default using JWT authentication. For local testing it can be disabled by setting
 `front.security.enabled=false` in `application.yml` or via an environment variable.
 To allow the Nuxt frontend running on a different host during development, configure the list of allowed
-CORS origins using the `front.security.cors-allowed-hosts` property. By default it permits requests from
+CORS origins using the `front.security.cors-allowed-hosts` property. You can override the default value
+via the `FRONT_SECURITY_CORS_ALLOWED_HOSTS` environment variable. By default it permits requests from
 `http://localhost:8082`.
 
 ## Local development tips
 
 When starting the application locally you may be tempted to call the beta API
 (`https://beta.front-api.nudger.fr`). That server does not set CORS headers for
-`http://localhost:8082`, which leads the browser to reject the requests. Ensure
-your frontend uses the local API base URL instead:
+`http://localhost:8082`, which leads the browser to reject the requests. Either
+set `FRONT_SECURITY_CORS_ALLOWED_HOSTS=http://localhost:3000` on the API server
+or keep your frontend pointed to the local API base URL:
 
 ```bash
 export API_URL=http://localhost:8082
