@@ -13,7 +13,7 @@ import java.util.Map;
 import java.util.LinkedHashMap;
 
 import org.junit.jupiter.api.Test;
-import org.open4goods.nudgerfrontapi.controller.api.PostsController;
+import org.open4goods.nudgerfrontapi.controller.api.BlogController;
 import org.open4goods.services.blog.model.BlogPost;
 import org.open4goods.services.blog.service.BlogService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,7 +30,7 @@ class PostsControllerIT {
     private MockMvc mockMvc;
 
     @Autowired
-    private PostsController controller;
+    private BlogController controller;
 
     @MockBean
     private BlogService blogService;
