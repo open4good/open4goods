@@ -17,12 +17,15 @@ import * as runtime from '../runtime';
 import type {
   BlogPostDto,
   BlogTagDto,
+  PageDto,
 } from '../models/index';
 import {
     BlogPostDtoFromJSON,
     BlogPostDtoToJSON,
     BlogTagDtoFromJSON,
     BlogTagDtoToJSON,
+    PageDtoFromJSON,
+    PageDtoToJSON,
 } from '../models/index';
 
 export interface PostRequest {
@@ -83,7 +86,7 @@ export class BlogApi extends runtime.BaseAPI {
      * Return paginated blog posts optionally filtered by tag.
      * List blog posts
      */
-    async postsRaw(requestParameters: PostsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<Array<BlogPostDto>>> {
+    async postsRaw(requestParameters: PostsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<PageDto>> {
         const queryParameters: any = {};
 
         if (requestParameters['tag'] != null) {
@@ -110,14 +113,14 @@ export class BlogApi extends runtime.BaseAPI {
             query: queryParameters,
         }, initOverrides);
 
-        return new runtime.JSONApiResponse(response, (jsonValue) => jsonValue.map(BlogPostDtoFromJSON));
+        return new runtime.JSONApiResponse(response, (jsonValue) => PageDtoFromJSON(jsonValue));
     }
 
     /**
      * Return paginated blog posts optionally filtered by tag.
      * List blog posts
      */
-    async posts(requestParameters: PostsRequest = {}, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<Array<BlogPostDto>> {
+    async posts(requestParameters: PostsRequest = {}, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<PageDto> {
         const response = await this.postsRaw(requestParameters, initOverrides);
         return await response.value();
     }

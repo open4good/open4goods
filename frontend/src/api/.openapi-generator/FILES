@@ -9,6 +9,8 @@ models/AiSource.ts
 models/BlogPostDto.ts
 models/BlogTagDto.ts
 models/ExternalIds.ts
+models/PageDto.ts
+models/PageMetaDto.ts
 models/PageProductDto.ts
 models/PageableObject.ts
 models/ProductAiReviewDto.ts
