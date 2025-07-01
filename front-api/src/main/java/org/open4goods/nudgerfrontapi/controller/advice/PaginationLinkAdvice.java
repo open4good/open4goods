@@ -72,8 +72,8 @@ public class PaginationLinkAdvice implements ResponseBodyAdvice<Object> {
     }
 
     private String buildLink(UriComponentsBuilder builder, long number, int size, String rel) {
-        String uri = builder.replaceQueryParam("page[number]", number)
-                .replaceQueryParam("page[size]", size)
+        String uri = builder.replaceQueryParam("pageNumber", number)
+                .replaceQueryParam("pageSize", size)
                 .toUriString();
         return "<" + uri + ">; rel=\"" + rel + "\"";
     }

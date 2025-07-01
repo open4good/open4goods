@@ -17,8 +17,8 @@ public class PageableConfig implements WebMvcConfigurer {
     public void addArgumentResolvers(List<HandlerMethodArgumentResolver> resolvers) {
 
         PageableHandlerMethodArgumentResolver pageableResolver = new PageableHandlerMethodArgumentResolver();
-        pageableResolver.setPageParameterName("page[number]");
-        pageableResolver.setSizeParameterName("page[size]");
+        pageableResolver.setPageParameterName("pageNumber");
+        pageableResolver.setSizeParameterName("pageSize");
 
         // TODO : Document, from conf
         pageableResolver.setMaxPageSize(50);

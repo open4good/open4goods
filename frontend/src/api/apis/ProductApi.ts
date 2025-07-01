@@ -32,8 +32,8 @@ export interface ProductRequest {
 
 export interface ProductsRequest {
     include?: Array<ProductsIncludeEnum>;
-    pageNumber?: number;
-    pageSize?: number;
+    UNKNOWN_PARAMETER_NAME?: ;
+    UNKNOWN_PARAMETER_NAME2?: ;
     sort?: Array<ProductsSortEnum>;
 }
 
@@ -96,12 +96,12 @@ export class ProductApi extends runtime.BaseAPI {
             queryParameters['include'] = requestParameters['include'];
         }
 
-        if (requestParameters['pageNumber'] != null) {
-            queryParameters['page[number]'] = requestParameters['pageNumber'];
+        if (requestParameters['UNKNOWN_PARAMETER_NAME'] != null) {
+            queryParameters['page[number]'] = requestParameters['UNKNOWN_PARAMETER_NAME'];
         }
 
-        if (requestParameters['pageSize'] != null) {
-            queryParameters['page[size]'] = requestParameters['pageSize'];
+        if (requestParameters['UNKNOWN_PARAMETER_NAME2'] != null) {
+            queryParameters['page[size]'] = requestParameters['UNKNOWN_PARAMETER_NAME2'];
         }
 
         if (requestParameters['sort'] != null) {
