@@ -6,6 +6,8 @@ export * from './AiSource';
 export * from './BlogPostDto';
 export * from './BlogTagDto';
 export * from './ExternalIds';
+export * from './PageDto';
+export * from './PageMetaDto';
 export * from './PageProductDto';
 export * from './PageableObject';
 export * from './ProductAiReviewDto';

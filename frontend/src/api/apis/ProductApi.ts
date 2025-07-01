@@ -15,10 +15,13 @@
 
 import * as runtime from '../runtime';
 import type {
+  PageDto,
   PageProductDto,
   ProductDto,
 } from '../models/index';
 import {
+    PageDtoFromJSON,
+    PageDtoToJSON,
     PageProductDtoFromJSON,
     PageProductDtoToJSON,
     ProductDtoFromJSON,
@@ -89,7 +92,7 @@ export class ProductApi extends runtime.BaseAPI {
      * Return paginated products.
      * List products
      */
-    async productsRaw(requestParameters: ProductsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<ProductDto<any>>> {
+    async productsRaw(requestParameters: ProductsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<PageDto>> {
         const queryParameters: any = {};
 
         if (requestParameters['include'] != null) {
@@ -120,14 +123,14 @@ export class ProductApi extends runtime.BaseAPI {
             query: queryParameters,
         }, initOverrides);
 
-        return new runtime.JSONApiResponse<any>(response);
+        return new runtime.JSONApiResponse(response, (jsonValue) => PageDtoFromJSON(jsonValue));
     }
 
     /**
      * Return paginated products.
      * List products
      */
-    async products(requestParameters: ProductsRequest = {}, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<ProductDto<any>> {
+    async products(requestParameters: ProductsRequest = {}, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<PageDto> {
         const response = await this.productsRaw(requestParameters, initOverrides);
         return await response.value();
     }
