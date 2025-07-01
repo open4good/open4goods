@@ -44,7 +44,8 @@ class PostsControllerIT {
 
         mockMvc.perform(get("/contents/posts").with(jwt()))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].title").value("Title"));
+                .andExpect(jsonPath("$.page.number").value(0))
+                .andExpect(jsonPath("$.data[0].title").value("Title"));
     }
 
     @Test

@@ -13,6 +13,7 @@ import org.springframework.data.web.PageableDefault;
 
 import org.open4goods.nudgerfrontapi.dto.blog.BlogPostDto;
 import org.open4goods.nudgerfrontapi.dto.blog.BlogTagDto;
+import org.open4goods.nudgerfrontapi.dto.PageDto;
 import org.open4goods.services.blog.model.BlogPost;
 import org.open4goods.services.blog.service.BlogService;
 import org.springframework.http.CacheControl;
@@ -70,7 +71,7 @@ public class PostsController {
                     @ApiResponse(responseCode = "200", description = "Posts returned",
                             headers = @Header(name = "Link", description = "Pagination links as defined by RFC 8288"),
                             content = @Content(mediaType = "application/json",
-                                    array = @ArraySchema(schema = @Schema(implementation = BlogPostDto.class))))
+                                    schema = @Schema(implementation = PageDto.class)))
             }
     )
     public ResponseEntity<Page<BlogPostDto>> posts(
