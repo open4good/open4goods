@@ -4,6 +4,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import org.open4goods.nudgerfrontapi.dto.PageDto;
+import org.open4goods.nudgerfrontapi.dto.PageMetaDto;
+
 import org.springframework.core.MethodParameter;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpHeaders;
@@ -61,14 +64,8 @@ public class PaginationLinkAdvice implements ResponseBodyAdvice<Object> {
             response.getHeaders().add(HttpHeaders.LINK, String.join(", ", links));
         }
 
-        Map<String, Object> meta = Map.of(
-                "number", pageNumber,
-                "size", pageSize,
-                "totalElements", page.getTotalElements(),
-                "totalPages", totalPages);
-        return Map.of(
-                "page", meta,
-                "data", page.getContent());
+        PageMetaDto meta = new PageMetaDto(pageNumber, pageSize, page.getTotalElements(), totalPages);
+        return new PageDto<>(meta, page.getContent());
     }
 
     private String buildLink(UriComponentsBuilder builder, long number, int size, String rel) {
