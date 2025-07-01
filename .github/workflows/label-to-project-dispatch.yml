@@ -1,72 +1,97 @@
-name: Backfill Issues to GitHub Projects V2
+name: Dispatch to Project Based on Label
 
-# Manual workflow to reapply project assignment rules to all open issues.
 on:
-  workflow_dispatch:
-
-env:
-  ORG_NAME: open4good
-  PROJECT_ID_MAPPING: |
-    squad:ux=PVT_kwDOBOJOp84A2ZRZ
-    squad:backend=PVT_kwDOBOJOp84A8xdZ
-    squad:exposition=PVT_kwDOBOJOp84A8xdy
-    squad:pmo=PVT_kwDOBOJOp84A8tDc
-    EPIC=PVT_kwDOBOJOp84A8tDc
-  PMO_PROJECT_ID: PVT_kwDOBOJOp84A8tDc
-  PMO_STATUS_FIELD_ID: ${{ secrets.PMO_STATUS_FIELD_ID }}
-  PMO_TRIAGE_OPTION_ID: ${{ secrets.PMO_TRIAGE_OPTION_ID }}
+  issues:
+    types: [labeled]
 
 jobs:
-  reassign:
+  add-to-project:
     runs-on: ubuntu-latest
+    if: github.event.label.name == 'triage'
+
+    permissions:
+      contents: read
+      issues: write
+      pull-requests: write
+      project: write
+
     steps:
-      - uses: actions/github-script@v7
+      - name: Add issue to project
+        uses: actions/github-script@v7
         with:
-          github-token: ${{ secrets.PROJECT_PAT }}
           script: |
-            const mapping = Object.fromEntries(
-              process.env.PROJECT_ID_MAPPING
-                .trim()
-                .split('\n')
-                .map(line => line.trim().split('='))
-            );
-            const issues = await github.paginate(github.rest.issues.listForRepo, {
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              state: 'open',
-              per_page: 100,
-            });
-            for (const issue of issues) {
-              const labels = issue.labels.map(l => l.name);
-              const hasSquad = labels.some(n => n.startsWith('squad:'));
-              const hasEpic = labels.includes('EPIC');
-              for (const label of labels) {
-                if (mapping[label]) {
-                  try {
-                    await github.graphql(
-                      `mutation($projectId: ID!, $contentId: ID!) { addProjectV2ItemById(input: { projectId: $projectId, contentId: $contentId }) { item { id } } }`,
-                      { projectId: mapping[label], contentId: issue.node_id }
-                    );
-                  } catch (e) {
-                    console.log(`Skip project add: ${e.message}`);
+            const projectId = "PVT_kwDOBOJOp84A8tDc";
+            const fieldName = "Status";
+            const fieldOption = "Triage";
+            const labelName = "triage";
+
+            const issue = context.payload.issue;
+            const issueNodeId = issue.node_id;
+
+            const result = await github.graphql(`
+              mutation($projectId:ID!, $contentId:ID!) {
+                addProjectV2ItemById(input: {projectId: $projectId, contentId: $contentId}) {
+                  item {
+                    id
                   }
                 }
               }
-              if (!hasSquad || hasEpic) {
-                const addRes = await github.graphql(
-                  `mutation($projectId: ID!, $contentId: ID!) { addProjectV2ItemById(input: { projectId: $projectId, contentId: $contentId }) { item { id } } }`,
-                  { projectId: process.env.PMO_PROJECT_ID, contentId: issue.node_id }
-                );
-                const itemId = addRes.addProjectV2ItemById.item.id;
-                await github.graphql(
-                  `mutation($projectId: ID!, $itemId: ID!, $fieldId: ID!, $optionId: String!) { updateProjectV2ItemFieldValue(input: { projectId: $projectId, itemId: $itemId, fieldId: $fieldId, value: { singleSelectOptionId: $optionId } }) { item { id } } }`,
-                  {
-                    projectId: process.env.PMO_PROJECT_ID,
-                    itemId,
-                    fieldId: process.env.PMO_STATUS_FIELD_ID,
-                    optionId: process.env.PMO_TRIAGE_OPTION_ID,
+            `, {
+              projectId,
+              contentId: issueNodeId
+            });
+
+            const itemId = result.addProjectV2ItemById.item.id;
+
+            const project = await github.graphql(`
+              query($projectId: ID!) {
+                node(id: $projectId) {
+                  ... on ProjectV2 {
+                    fields(first: 100) {
+                      nodes {
+                        ... on ProjectV2SingleSelectField {
+                          id
+                          name
+                          options {
+                            id
+                            name
+                          }
+                        }
+                      }
+                    }
                   }
-                );
+                }
               }
+            `, { projectId });
+
+            const fields = project.node.fields.nodes;
+            const statusField = fields.find(f => f.name === fieldName);
+            const option = statusField.options.find(o => o.name === fieldOption);
+
+            if (!statusField || !option) {
+              throw new Error(`Field or option not found: ${fieldName} / ${fieldOption}`);
             }
 
+            await github.graphql(`
+              mutation($projectId: ID!, $itemId: ID!, $fieldId: ID!, $optionId: String!) {
+                updateProjectV2ItemFieldValue(input: {
+                  projectId: $projectId,
+                  itemId: $itemId,
+                  fieldId: $fieldId,
+                  value: {
+                    singleSelectOptionId: $optionId
+                  }
+                }) {
+                  projectV2Item {
+                    id
+                  }
+                }
+              }
+            `, {
+              projectId,
+              itemId,
+              fieldId: statusField.id,
+              optionId: option.id
+            });
+
+            console.log(`Issue added to project and status set to "${fieldOption}"`);
