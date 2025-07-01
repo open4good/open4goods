@@ -31,8 +31,8 @@ export interface PostRequest {
 
 export interface PostsRequest {
     tag?: string;
-    pageNumber?: number;
-    pageSize?: number;
+    UNKNOWN_PARAMETER_NAME?: ;
+    UNKNOWN_PARAMETER_NAME2?: ;
 }
 
 /**
@@ -90,12 +90,12 @@ export class BlogApi extends runtime.BaseAPI {
             queryParameters['tag'] = requestParameters['tag'];
         }
 
-        if (requestParameters['pageNumber'] != null) {
-            queryParameters['page[number]'] = requestParameters['pageNumber'];
+        if (requestParameters['UNKNOWN_PARAMETER_NAME'] != null) {
+            queryParameters['page[number]'] = requestParameters['UNKNOWN_PARAMETER_NAME'];
         }
 
-        if (requestParameters['pageSize'] != null) {
-            queryParameters['page[size]'] = requestParameters['pageSize'];
+        if (requestParameters['UNKNOWN_PARAMETER_NAME2'] != null) {
+            queryParameters['page[size]'] = requestParameters['UNKNOWN_PARAMETER_NAME2'];
         }
 
         const headerParameters: runtime.HTTPHeaders = {};

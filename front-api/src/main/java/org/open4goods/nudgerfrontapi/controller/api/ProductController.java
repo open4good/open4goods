@@ -77,10 +77,10 @@ public class ProductController {
                             array = @ArraySchema(
                                     schema = @Schema(implementation = ProductDtoComponent.class)
                             )),
-                    @Parameter(name = "page[number]", in = ParameterIn.QUERY,
+                    @Parameter(name = "pageNumber", in = ParameterIn.QUERY,
                             description = "Zero-based page index",
                             schema = @Schema(type = "integer", minimum = "0")),
-                    @Parameter(name = "page[size]", in = ParameterIn.QUERY,
+                    @Parameter(name = "pageSize", in = ParameterIn.QUERY,
                             description = "Page size",
                             schema = @Schema(type = "integer", minimum = "0")),
                     @Parameter(name = "sort", in = ParameterIn.QUERY, description = "Sort criteria in the format: property,(asc|desc). ",array = @ArraySchema(
@@ -222,8 +222,8 @@ public class ProductController {
 //            parameters = {
 //                    @Parameter(name = "gtin", description = "Global Trade Item Number (8–14 digit numeric code)", example = "00012345600012", required = true),
 //
-//                    @Parameter(name = "page[number]", in = ParameterIn.QUERY, description = "Zero-based page index"),
-//                    @Parameter(name = "page[size]", in = ParameterIn.QUERY, description = "Page size")
+//                    @Parameter(name = "pageNumber", in = ParameterIn.QUERY, description = "Zero-based page index"),
+//                    @Parameter(name = "pageSize", in = ParameterIn.QUERY, description = "Page size")
 //
 //            },
 //            responses = {
