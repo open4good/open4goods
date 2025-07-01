@@ -15,10 +15,6 @@ jobs:
       - uses: pnpm/action-setup@v4
         with:
           version: 8.15.9
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: 'pnpm'
       - run: pnpm install --frozen-lockfile
         working-directory: frontend
       - run: pnpm lint
