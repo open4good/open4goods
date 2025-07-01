@@ -20,8 +20,7 @@ front:
     path: ./cache
   security:
     enabled: false
-    cors-allowed-hosts:
-      "http://localhost:8082"
+    cors-allowed-hosts: ${FRONT_SECURITY_CORS_ALLOWED_HOSTS:"http://localhost:8082"}
     
 xwiki:
     username: nudger
