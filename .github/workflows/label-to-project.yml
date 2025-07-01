@@ -1,30 +1,26 @@
 name: Assign Issues to GitHub Projects V2
 
-# Automatically routes issues to the appropriate GitHub Project V2 board
-# based on their labels. Issues without a `squad:*` label or with the
-# `EPIC` label are added to the PMO board and placed in the `Triage`
-# column. Triggered for newly opened issues and whenever labels are added.
-
 on:
   issues:
     types: [opened, labeled]
+  workflow_dispatch:  # Manual trigger for processing all issues
 
 env:
   ORG_NAME: open4good
-  # Add here the label to project mapping. 
   PROJECT_ID_MAPPING: |
     squad:pmo=PVT_kwDOBOJOp84A8tDc
     EPIC=PVT_kwDOBOJOp84A8tDc
+    RISKY=PVT_kwDOBOJOp84A8tDc        
     squad:ux=PVT_kwDOBOJOp84A2ZQ8
     squad:backend=PVT_kwDOBOJOp84A2ZRZ
     squad:exposition=PVT_kwDOBOJOp84A83dE
-    
   PMO_PROJECT_ID: PVT_kwDOBOJOp84A8tDc
   PMO_STATUS_FIELD_ID: ${{ secrets.PMO_STATUS_FIELD_ID }}
   PMO_TRIAGE_OPTION_ID: ${{ secrets.PMO_TRIAGE_OPTION_ID }}
 
 jobs:
-  assign-to-project:
+  assign-on-event:
+    if: github.event_name == 'issues'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/github-script@v7
@@ -76,3 +72,94 @@ jobs:
               console.log(`Issue #${issue.number} routed to PMO project.`);
             }
 
+  bulk-assign-on-dispatch:
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.PROJECT_PAT }}
+          script: |
+            const mapping = Object.fromEntries(
+              process.env.PROJECT_ID_MAPPING
+                .trim()
+                .split('\n')
+                .map(line => line.trim().split('='))
+            );
+
+            const issues = await github.paginate(
+              github.rest.issues.listForRepo,
+              {
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                state: 'open',
+                per_page: 100,
+              }
+            );
+
+            for (const issue of issues) {
+              if (issue.pull_request) continue; // skip PRs
+
+              const labels = issue.labels.map(l => l.name);
+              const hasSquad = labels.some(n => n.startsWith('squad:'));
+              const hasEpic = labels.includes('EPIC');
+
+              let assigned = false;
+              for (const label of labels) {
+                if (mapping[label]) {
+                  const projectId = mapping[label];
+                  try {
+                    await github.graphql(
+                      `mutation($projectId: ID!, $contentId: ID!) {
+                        addProjectV2ItemById(input: { projectId: $projectId, contentId: $contentId }) {
+                          item { id }
+                        }
+                      }`,
+                      { projectId, contentId: issue.node_id }
+                    );
+                    console.log(`Issue #${issue.number} added to project ID ${projectId}.`);
+                    assigned = true;
+                    break;
+                  } catch (e) {
+                    console.log(`Unable to add issue #${issue.number} to project ${projectId}: ${e.message}`);
+                  }
+                }
+              }
+
+              if (!assigned && (!hasSquad || hasEpic)) {
+                const projectId = process.env.PMO_PROJECT_ID;
+                try {
+                  const addRes = await github.graphql(
+                    `mutation($projectId: ID!, $contentId: ID!) {
+                      addProjectV2ItemById(input: { projectId: $projectId, contentId: $contentId }) {
+                        item { id }
+                      }
+                    }`,
+                    { projectId, contentId: issue.node_id }
+                  );
+                  const itemId = addRes.addProjectV2ItemById.item.id;
+
+                  await github.graphql(
+                    `mutation($projectId: ID!, $itemId: ID!, $fieldId: ID!, $optionId: String!) {
+                      updateProjectV2ItemFieldValue(input: {
+                        projectId: $projectId,
+                        itemId: $itemId,
+                        fieldId: $fieldId,
+                        value: { singleSelectOptionId: $optionId }
+                      }) {
+                        item { id }
+                      }
+                    }`,
+                    {
+                      projectId,
+                      itemId,
+                      fieldId: process.env.PMO_STATUS_FIELD_ID,
+                      optionId: process.env.PMO_TRIAGE_OPTION_ID,
+                    }
+                  );
+                  console.log(`Issue #${issue.number} routed to PMO project.`);
+                } catch (e) {
+                  console.log(`Error routing issue #${issue.number} to PMO: ${e.message}`);
+                }
+              }
+            }
