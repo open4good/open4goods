@@ -4,13 +4,7 @@ on:
       - 'main'
     paths-ignore:
       - 'frontend/**'
-    paths:
-      - 'api/**'
-      - 'admin/**'
-      - 'front-api/**'
-      - 'ui/**'
-      - 'services/**'
-      - 'commons/**'
+
           
 name: 🔘 Beta - Build, Test, and Publish
 
