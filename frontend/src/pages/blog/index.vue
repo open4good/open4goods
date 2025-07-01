@@ -16,7 +16,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch } from 'vue'
+import { ref, watch, computed } from 'vue'
 import { useRoute } from 'vue-router'
 import { useAsyncData, useI18n } from '#imports'
 import PostPreview from '@/components/blog/PostPreview.vue'
@@ -27,14 +27,15 @@ const route = useRoute()
 const blogApi = useBlogApi()
 const selectedTag = ref<string | undefined>(route.query.tag as string)
 
-const { data: posts } = await useAsyncData(
+const { data: page } = await useAsyncData(
   'posts',
   () => blogApi.posts({ tag: selectedTag.value }),
-  { default: () => [] }
+  { default: () => ({ data: [] }) }
 )
+const posts = computed(() => page.value?.data ?? [])
 const { data: tags } = await useAsyncData('tags', () => blogApi.tags(), { default: () => [] })
 
 watch(selectedTag, async () => {
-  posts.value = await blogApi.posts({ tag: selectedTag.value })
+  page.value = await blogApi.posts({ tag: selectedTag.value })
 })
 </script>
