@@ -8,6 +8,7 @@ import org.open4goods.model.exceptions.ResourceNotFoundException;
 import org.open4goods.nudgerfrontapi.dto.product.ProductDto;
 import org.open4goods.nudgerfrontapi.dto.product.ProductDto.ProductDtoComponent;
 import org.open4goods.nudgerfrontapi.dto.product.ProductDto.ProductDtoSortableFields;
+import org.open4goods.nudgerfrontapi.dto.PageDto;
 import org.open4goods.nudgerfrontapi.service.ProductMappingService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -90,7 +91,7 @@ public class ProductController {
             responses = {
                     @ApiResponse(responseCode = "200", description = "Products returned",
                             headers = @Header(name = "Link", description = "Pagination links as defined by RFC 8288"),
-                            content = @Content(mediaType = "application/json", schema = @Schema(implementation = ProductDto.class, type = "array"))),
+                            content = @Content(mediaType = "application/json", schema = @Schema(implementation = PageDto.class))),
                     @ApiResponse(responseCode = "401", description = "Authentication required"),
                     @ApiResponse(responseCode = "403", description = "Access forbidden"),
                     @ApiResponse(responseCode = "500", description = "Internal server error")
