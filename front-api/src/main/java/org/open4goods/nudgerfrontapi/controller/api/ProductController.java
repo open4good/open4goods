@@ -8,9 +8,9 @@ import org.open4goods.model.exceptions.ResourceNotFoundException;
 import org.open4goods.nudgerfrontapi.dto.product.ProductDto;
 import org.open4goods.nudgerfrontapi.dto.product.ProductDto.ProductDtoComponent;
 import org.open4goods.nudgerfrontapi.dto.product.ProductDto.ProductDtoSortableFields;
-import org.open4goods.nudgerfrontapi.dto.product.ProductDto.ProductDtoAggregatableFields;
-import org.open4goods.nudgerfrontapi.dto.product.ProductPageAggsDto;
+import org.open4goods.nudgerfrontapi.dto.PageDto;
 import org.open4goods.nudgerfrontapi.service.ProductMappingService;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.CacheControl;
@@ -87,26 +87,20 @@ public class ProductController {
                     @Parameter(name = "sort", in = ParameterIn.QUERY, description = "Sort criteria in the format: property,(asc|desc). ",array = @ArraySchema(
                             schema = @Schema(implementation = ProductDtoSortableFields.class)
                     )),
-                    @Parameter(name = "withAggs", in = ParameterIn.QUERY, description = "Fields to aggregate on",
-                            array = @ArraySchema(schema = @Schema(implementation = ProductDtoAggregatableFields.class))),
-                    @Parameter(name = "withSubAggs", in = ParameterIn.QUERY, description = "Sub aggregation fields",
-                            array = @ArraySchema(schema = @Schema(implementation = ProductDtoAggregatableFields.class)))
             },
             responses = {
                     @ApiResponse(responseCode = "200", description = "Products returned",
                             headers = @Header(name = "Link", description = "Pagination links as defined by RFC 8288"),
-                            content = @Content(mediaType = "application/json", schema = @Schema(implementation = ProductPageAggsDto.class))),
+                            content = @Content(mediaType = "application/json", schema = @Schema(implementation = PageDto.class))),
                     @ApiResponse(responseCode = "401", description = "Authentication required"),
                     @ApiResponse(responseCode = "403", description = "Access forbidden"),
                     @ApiResponse(responseCode = "500", description = "Internal server error")
             }
     )
-    public ResponseEntity<ProductPageAggsDto> products(
-                @Parameter(hidden = true) @PageableDefault(size = 20) Pageable page,
-                @RequestParam(required=false) Set<String> include,
-                @RequestParam(name = "withAggs", required = false) Set<String> aggs,
-                @RequestParam(name = "withSubAggs", required = false) Set<String> subAggs,
-                  Locale locale) {
+    public ResponseEntity<Page<ProductDto>> products(
+    		@Parameter(hidden = true) @PageableDefault(size = 20) Pageable page,
+    		@RequestParam(required=false) Set<String> include,
+    		  Locale locale) {
 
 
 		/////////////////////
@@ -140,28 +134,12 @@ public class ProductController {
 		// Transforming product to DTO
 		///////////////////////
 
-                if (aggs != null) {
-                        aggs.forEach(a -> {
-                                if (ProductDtoAggregatableFields.fromText(a).isEmpty()) {
-                                        return;
-                                }
-                        });
-                }
+		Page<ProductDto> body = service.getProducts(page, locale, include == null ? Set.of() : include);
 
-                if (subAggs != null) {
-                        subAggs.forEach(a -> {
-                                if (ProductDtoAggregatableFields.fromText(a).isEmpty()) {
-                                        return;
-                                }
-                        });
-                }
 
-                ProductPageAggsDto body = service.getProducts(page, locale,
-                                include == null ? Set.of() : include,
-                                aggs, subAggs);
 
-                return ResponseEntity.ok().cacheControl(ONE_HOUR_PUBLIC_CACHE).body(body);
-        }
+		return ResponseEntity.ok().cacheControl(ONE_HOUR_PUBLIC_CACHE).body(body);
+	}
 
     /**
      * Return high level information for a product.
