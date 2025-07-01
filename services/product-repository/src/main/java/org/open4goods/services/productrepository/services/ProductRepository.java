@@ -149,16 +149,28 @@ public class ProductRepository {
         }
 
 
-    public SearchHits<Product> get(Pageable page) {
-        Query query = Query.findAll();
-        query.setPageable(page);
+    public SearchHits<Product> get(Pageable page, Set<String> aggs, Set<String> subAggs) {
+        NativeQueryBuilder builder = new NativeQueryBuilder().withQuery(Query.findAll())
+                .withPageable(page);
+
+        if (aggs != null) {
+            for (String a : aggs) {
+                TermsAggregation.Builder tab = new TermsAggregation.Builder().field(a).size(50);
+                if (subAggs != null) {
+                    for (String sub : subAggs) {
+                        tab.aggregations(sub, Aggregation.of(sa -> sa.terms(t -> t.field(sub).size(50))));
+                    }
+                }
+                builder = builder.withAggregation(a, Aggregation.of(agg -> agg.terms(tab.build())));
+            }
+        }
+
         try {
-			return elasticsearchOperations.search(query, Product.class, CURRENT_INDEX);
-		} catch (Exception e) {
-			elasticLog(e);
-			// TODO : Should throw
-			return null;
-		}
+            return elasticsearchOperations.search(builder.build(), Product.class, CURRENT_INDEX);
+        } catch (Exception e) {
+            elasticLog(e);
+            return null;
+        }
     }
 
 	/**
