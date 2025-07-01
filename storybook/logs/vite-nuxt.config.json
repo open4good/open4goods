@@ -1,0 +1,690 @@
+{
+  "appType": "custom",
+  "base": "./",
+  "build": {
+    "assetsDir": "_nuxt/",
+    "copyPublicDir": false,
+    "emptyOutDir": false,
+    "manifest": "manifest.json",
+    "outDir": "/home/runner/work/open4goods/open4goods/frontend/.nuxt/dist/client",
+    "rollupOptions": {
+      "input": {
+        "entry": "/home/runner/work/open4goods/open4goods/frontend/node_modules/.pnpm/nuxt@3.17.5_eslint@9.29.0_rollup@4.44.1_typescript@5.8.3_vite@6.3.5/node_modules/nuxt/dist/app/entry.js"
+      },
+      "output": {
+        "chunkFileNames": "_nuxt/[hash].js",
+        "entryFileNames": "_nuxt/[hash].js"
+      }
+    },
+    "sourcemap": false
+  },
+  "cacheDir": "/home/runner/work/open4goods/open4goods/frontend/.nuxt/.vite-cache/client",
+  "clearScreen": true,
+  "configFile": false,
+  "css": {
+    "devSourcemap": false,
+    "postcss": {
+      "plugins": [
+        {
+          "options": {
+          },
+          "postcssPlugin": "autoprefixer"
+        },
+        {
+          "plugins": [
+            {
+              "postcssPlugin": "postcss-discard-comments"
+            },
+            {
+              "postcssPlugin": "postcss-minify-gradients"
+            },
+            {
+              "postcssPlugin": "postcss-reduce-initial"
+            },
+            {
+              "postcssPlugin": "postcss-svgo"
+            },
+            {
+              "postcssPlugin": "postcss-normalize-display-values"
+            },
+            {
+              "postcssPlugin": "postcss-reduce-transforms"
+            },
+            {
+              "postcssPlugin": "postcss-colormin"
+            },
+            {
+              "postcssPlugin": "postcss-normalize-timing-functions"
+            },
+            {
+              "postcssPlugin": "postcss-calc"
+            },
+            {
+              "postcssPlugin": "postcss-convert-values"
+            },
+            {
+              "postcssPlugin": "postcss-ordered-values"
+            },
+            {
+              "postcssPlugin": "postcss-minify-selectors"
+            },
+            {
+              "postcssPlugin": "postcss-minify-params"
+            },
+            {
+              "postcssPlugin": "postcss-normalize-charset"
+            },
+            {
+              "postcssPlugin": "postcss-discard-overridden"
+            },
+            {
+              "postcssPlugin": "postcss-normalize-string"
+            },
+            {
+              "postcssPlugin": "postcss-normalize-unicode"
+            },
+            {
+              "postcssPlugin": "postcss-minify-font-values"
+            },
+            {
+              "postcssPlugin": "postcss-normalize-url"
+            },
+            {
+              "postcssPlugin": "postcss-normalize-repeat-style"
+            },
+            {
+              "postcssPlugin": "postcss-normalize-positions"
+            },
+            {
+              "postcssPlugin": "postcss-normalize-whitespace"
+            },
+            {
+              "postcssPlugin": "postcss-merge-longhand"
+            },
+            {
+              "postcssPlugin": "postcss-discard-duplicates"
+            },
+            {
+              "postcssPlugin": "postcss-merge-rules"
+            },
+            {
+              "postcssPlugin": "postcss-discard-empty"
+            },
+            {
+              "postcssPlugin": "postcss-unique-selectors"
+            },
+            {
+              "postcssPlugin": "css-declaration-sorter"
+            },
+            {
+              "postcssPlugin": "cssnano-util-raw-cache"
+            }
+          ],
+          "version": "8.5.5"
+        }
+      ]
+    }
+  },
+  "customLogger": {
+    "hasWarned": false
+  },
+  "define": {
+    "__DEBUG__": "false",
+    "__NUXT_ASYNC_CONTEXT__": false,
+    "__NUXT_I18N_VERSION__": "\"9.5.6\"",
+    "__NUXT_VERSION__": "\"3.17.5\"",
+    "__TEST__": "undefined",
+    "__VUE_PROD_HYDRATION_MISMATCH_DETAILS__": false,
+    "import.meta.browser": true,
+    "import.meta.client": true,
+    "import.meta.dev": false,
+    "import.meta.nitro": false,
+    "import.meta.prerender": false,
+    "import.meta.server": false,
+    "import.meta.test": false,
+    "module.hot": false,
+    "process.browser": true,
+    "process.client": true,
+    "process.dev": false,
+    "process.env.NODE_ENV": "\"production\"",
+    "process.nitro": false,
+    "process.prerender": false,
+    "process.server": false,
+    "process.test": false
+  },
+  "esbuild": {
+    "jsxFactory": "h",
+    "jsxFragment": "Fragment",
+    "target": "esnext",
+    "tsconfigRaw": {
+    }
+  },
+  "experimental": {
+  },
+  "logLevel": "info",
+  "mode": "production",
+  "optimizeDeps": {
+    "entries": [
+      "/home/runner/work/open4goods/open4goods/frontend/node_modules/.pnpm/nuxt@3.17.5_eslint@9.29.0_rollup@4.44.1_typescript@5.8.3_vite@6.3.5/node_modules/nuxt/dist/app/entry.js"
+    ],
+    "esbuildOptions": {
+      "jsxFactory": "h",
+      "jsxFragment": "Fragment",
+      "target": "esnext",
+      "tsconfigRaw": {
+      }
+    },
+    "exclude": [
+      "vue-demi",
+      "@vueuse/core",
+      "@vueuse/shared",
+      "vue-demi",
+      "pinia",
+      "vue-i18n",
+      "@vueuse/components",
+      "@vueuse/motion",
+      "@vueuse/firebase",
+      "@vueuse/rxjs",
+      "@vueuse/sound",
+      "@vueuse/math",
+      "@vueuse/router",
+      "vue",
+      "@vue/runtime-core",
+      "@vue/runtime-dom",
+      "@vue/reactivity",
+      "@vue/shared",
+      "@vue/devtools-api",
+      "vue-router",
+      "vue-demi",
+      "nuxt",
+      "nuxt/app",
+      "@unhead/vue",
+      "consola",
+      "defu",
+      "devalue",
+      "h3",
+      "hookable",
+      "klona",
+      "ofetch",
+      "pathe",
+      "ufo",
+      "unctx",
+      "unenv",
+      "#app-manifest"
+    ],
+    "include": [
+      "@nuxtjs/storybook > @storybook-vue/nuxt > @storybook/vue3 > lodash/kebabCase",
+      "storybook > @storybook/core > jsdoc-type-pratt-parser"
+    ]
+  },
+  "plugins": [
+    {
+      "api": {
+        "options": {
+          "compiler": null,
+          "cssDevSourcemap": false,
+          "customElement": {
+          },
+          "features": {
+            "propsDestructure": true
+          },
+          "include": {
+          },
+          "isProduction": true,
+          "root": "/home/runner/work/open4goods/open4goods/frontend",
+          "script": {
+            "hoistStatic": {
+            }
+          },
+          "sourceMap": true,
+          "template": {
+            "compilerOptions": {
+            },
+            "transformAssetUrls": {
+              "image": [
+                "xlink:href",
+                "href"
+              ],
+              "img": [
+                "src"
+              ],
+              "source": [
+                "src"
+              ],
+              "use": [
+                "xlink:href",
+                "href"
+              ],
+              "video": [
+                "src",
+                "poster"
+              ]
+            }
+          }
+        },
+        "version": "5.2.4"
+      },
+      "name": "vite:vue"
+    },
+    {
+      "load": {
+        "filter": {
+          "id": {
+          }
+        }
+      },
+      "name": "vite:vue-jsx",
+      "resolveId": {
+        "filter": {
+          "id": {
+          }
+        }
+      },
+      "transform": {
+        "filter": {
+          "id": {
+            "include": {
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "ssr-styles",
+      "resolveId": {
+        "order": "pre"
+      }
+    },
+    {
+      "enforce": "pre",
+      "name": "nuxt:components-loader-pre",
+      "transform": {
+        "filter": {
+          "code": {
+            "include": {
+            }
+          }
+        }
+      }
+    },
+    {
+      "load": {
+        "enforce": "pre"
+      },
+      "name": "nuxt:vite-public-dir-resolution",
+      "resolveId": {
+        "enforce": "post"
+      },
+      "vite": {
+        "load": {
+          "enforce": "pre"
+        },
+        "resolveId": {
+          "enforce": "post"
+        }
+      }
+    },
+    {
+      "name": "nuxt:remove-plugin-metadata"
+    },
+    {
+      "enforce": "post",
+      "name": "nuxt:composable-keys",
+      "transform": {
+        "filter": {
+          "code": {
+            "include": {
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "nuxt:prehydrate-transform",
+      "transform": {
+        "filter": {
+          "code": {
+            "include": {
+            }
+          }
+        }
+      }
+    },
+    {
+      "enforce": "pre",
+      "name": "nuxt:layer-aliasing",
+      "resolveId": {
+        "order": "pre"
+      },
+      "transform": {
+        "filter": {
+          "code": {
+            "include": {
+            }
+          }
+        }
+      },
+      "vite": {
+        "resolveId": {
+          "order": "pre"
+        }
+      }
+    },
+    {
+      "enforce": "pre",
+      "name": "nuxt:server-devonly:transform",
+      "transform": {
+        "filter": {
+          "code": {
+            "include": {
+            }
+          }
+        }
+      }
+    },
+    {
+      "enforce": "post",
+      "name": "unhead:remove-server-composables",
+      "vite": {
+      }
+    },
+    {
+      "enforce": "post",
+      "name": "unhead:use-seo-meta-transform"
+    },
+    {
+      "enforce": "pre",
+      "name": "@tailwindcss/vite:scan"
+    },
+    {
+      "apply": "serve",
+      "enforce": "pre",
+      "name": "@tailwindcss/vite:generate:serve"
+    },
+    {
+      "apply": "build",
+      "enforce": "pre",
+      "name": "@tailwindcss/vite:generate:build"
+    },
+    {
+      "enforce": "post",
+      "name": "nuxt:head:unhead-imports",
+      "transform": {
+        "filter": {
+          "code": {
+            "include": {
+            }
+          }
+        }
+      }
+    },
+    {
+      "enforce": "post",
+      "name": "nuxt:imports-transform"
+    },
+    {
+      "enforce": "post",
+      "name": "unctx:transform",
+      "transform": {
+        "filter": {
+          "code": {
+            "exclude": {
+            }
+          }
+        }
+      }
+    },
+    {
+      "enforce": "pre",
+      "name": "nuxtjs:i18n-resource"
+    },
+    {
+      "enforce": "pre",
+      "name": "unplugin-vue-i18n:resource",
+      "vite": {
+      }
+    },
+    {
+      "enforce": "pre",
+      "name": "nuxtjs:i18n-macros-transform"
+    },
+    {
+      "enforce": "post",
+      "handleHotUpdate": {
+        "order": "post"
+      },
+      "name": "nuxt:pages-macros-transform",
+      "vite": {
+        "handleHotUpdate": {
+          "order": "post"
+        }
+      }
+    },
+    {
+      "apply": "serve",
+      "enforce": "post",
+      "name": "nuxt:dev-style-ssr"
+    },
+    {
+      "enforce": "post",
+      "name": "nuxt:runtime-paths-dep"
+    },
+    {
+      "enforce": "post",
+      "name": "nuxt:vite-node-server"
+    },
+    {
+      "name": "nuxt:module-preload-polyfill"
+    },
+    {
+      "name": "nuxt:virtual",
+      "resolveId": {
+        "order": "pre"
+      },
+      "vite": {
+        "resolveId": {
+          "order": "pre"
+        }
+      }
+    },
+    {
+      "enforce": "pre",
+      "name": "impound"
+    },
+    {
+      "enforce": "pre",
+      "name": "nuxt:import-protection"
+    },
+    {
+      "enforce": "post",
+      "name": "nuxt:resolve-bare-imports"
+    },
+    {
+      "apply": "build",
+      "name": "vite-pwa-nuxt:webmanifest:build"
+    },
+    {
+      "enforce": "pre",
+      "name": "vite-pwa-nuxt:configuration"
+    },
+    [
+      {
+        "api": {
+          "pwaInDevEnvironment": false
+        },
+        "enforce": "pre",
+        "name": "vite-plugin-pwa"
+      },
+      {
+        "enforce": "post",
+        "name": "vite-plugin-pwa:info"
+      },
+      {
+        "apply": "serve",
+        "name": "vite-plugin-pwa:dev-sw",
+        "transformIndexHtml": {
+          "enforce": "post",
+          "order": "post"
+        }
+      },
+      {
+        "enforce": "post",
+        "name": "vite-plugin-pwa:pwa-assets",
+        "transformIndexHtml": {
+          "enforce": "post",
+          "order": "post"
+        }
+      }
+    ],
+    {
+      "enforce": "post",
+      "name": "nuxt:route-injection-plugin",
+      "transform": {
+        "filter": {
+          "code": {
+            "include": {
+            }
+          }
+        }
+      }
+    },
+    {
+      "enforce": "post",
+      "name": "nuxt:components:imports"
+    },
+    {
+      "enforce": "post",
+      "name": "nuxt:components-loader"
+    },
+    {
+      "name": "nuxt-server-component-hmr"
+    },
+    {
+      "enforce": "post",
+      "name": "nuxt:tree-shake-composables:transform",
+      "transform": {
+        "filter": {
+          "code": {
+            "include": {
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "replace"
+    }
+  ],
+  "publicDir": false,
+  "resolve": {
+    "alias": {
+      "#app": "/home/runner/work/open4goods/open4goods/frontend/node_modules/.pnpm/nuxt@3.17.5_eslint@9.29.0_rollup@4.44.1_typescript@5.8.3_vite@6.3.5/node_modules/nuxt/dist/app",
+      "#app-manifest": "/home/runner/work/open4goods/open4goods/frontend/node_modules/.pnpm/mocked-exports@0.1.1/node_modules/mocked-exports/lib/empty.mjs",
+      "#build": "/home/runner/work/open4goods/open4goods/frontend/.nuxt",
+      "#i18n": "/home/runner/work/open4goods/open4goods/frontend/node_modules/.pnpm/@nuxtjs+i18n@9.5.6_eslint@9.29.0_rollup@4.44.1_vue@3.5.16/node_modules/@nuxtjs/i18n/dist/runtime/composables/index",
+      "#image": "/home/runner/work/open4goods/open4goods/frontend/node_modules/.pnpm/@nuxt+image@1.10.0/node_modules/@nuxt/image/dist/runtime",
+      "#imports": "/home/runner/work/open4goods/open4goods/frontend/.nuxt/imports",
+      "#internal-i18n-types": "/home/runner/work/open4goods/open4goods/frontend/node_modules/.pnpm/@nuxtjs+i18n@9.5.6_eslint@9.29.0_rollup@4.44.1_vue@3.5.16/node_modules/@nuxtjs/i18n/dist/types",
+      "#internal/nitro": "/home/runner/work/open4goods/open4goods/frontend/.nuxt/nitro.client.mjs",
+      "#internal/nuxt/paths": "/home/runner/work/open4goods/open4goods/frontend/.nuxt/paths.mjs",
+      "#nuxt-i18n/logger": "/home/runner/work/open4goods/open4goods/frontend/.nuxt/nuxt-i18n-logger.mjs",
+      "#pwa": "/home/runner/work/open4goods/open4goods/frontend/node_modules/.pnpm/@vite-pwa+nuxt@1.0.4_vite@6.3.5_workbox-build@7.3.0_workbox-window@7.3.0/node_modules/@vite-pwa/nuxt/dist/runtime/composables/index.js",
+      "#robots": "/home/runner/work/open4goods/open4goods/frontend/node_modules/.pnpm/@nuxtjs+robots@5.3.0_vue@3.5.16/node_modules/@nuxtjs/robots/dist/runtime",
+      "#schema-org": "/home/runner/work/open4goods/open4goods/frontend/node_modules/.pnpm/nuxt-schema-org@5.0.5_@unhead+vue@2.0.11_vue@3.5.16/node_modules/nuxt-schema-org/dist/runtime",
+      "#seo-utils": "/home/runner/work/open4goods/open4goods/frontend/node_modules/.pnpm/nuxt-seo-utils@7.0.12_rollup@4.44.1_vue@3.5.16/node_modules/nuxt-seo-utils/dist/runtime",
+      "#shared": "/home/runner/work/open4goods/open4goods/frontend/shared",
+      "#site-config": "/home/runner/work/open4goods/open4goods/frontend/node_modules/.pnpm/nuxt-site-config@3.2.2_vue@3.5.16/node_modules/nuxt-site-config/dist/runtime",
+      "#sitemap": "/home/runner/work/open4goods/open4goods/frontend/node_modules/.pnpm/@nuxtjs+sitemap@7.4.3_h3@1.15.3_vite@6.3.5_vue@3.5.16/node_modules/@nuxtjs/sitemap/dist/runtime",
+      "#tailwindcss": "/home/runner/work/open4goods/open4goods/frontend/.nuxt/tailwind.css",
+      "#tailwindcss/sources": "/home/runner/work/open4goods/open4goods/frontend/.nuxt/tailwindcss/sources.css",
+      "#unhead/composables": "/home/runner/work/open4goods/open4goods/frontend/node_modules/.pnpm/nuxt@3.17.5_eslint@9.29.0_rollup@4.44.1_typescript@5.8.3_vite@6.3.5/node_modules/nuxt/dist/head/runtime/composables/v3",
+      "#vue-router": "vue-router",
+      "@": "/home/runner/work/open4goods/open4goods/frontend/src",
+      "@@": "/home/runner/work/open4goods/open4goods/frontend",
+      "@intlify/core": "/home/runner/work/open4goods/open4goods/frontend/node_modules/.pnpm/@intlify+core@10.0.7/node_modules/@intlify/core/dist/core.node.mjs",
+      "@intlify/core-base": "/home/runner/work/open4goods/open4goods/frontend/node_modules/.pnpm/@intlify+core-base@10.0.7/node_modules/@intlify/core-base/dist/core-base.mjs",
+      "@intlify/message-compiler": "/home/runner/work/open4goods/open4goods/frontend/node_modules/.pnpm/@intlify+message-compiler@11.1.5/node_modules/@intlify/message-compiler/dist/message-compiler.mjs",
+      "@intlify/shared": "/home/runner/work/open4goods/open4goods/frontend/node_modules/.pnpm/@intlify+shared@10.0.7/node_modules/@intlify/shared/dist/shared.mjs",
+      "@intlify/utils/h3": "/home/runner/work/open4goods/open4goods/frontend/node_modules/.pnpm/@intlify+utils@0.13.0/node_modules/@intlify/utils/dist/h3.mjs",
+      "@vue/composition-api": "/home/runner/work/open4goods/open4goods/frontend/node_modules/.pnpm/nuxt@3.17.5_eslint@9.29.0_rollup@4.44.1_typescript@5.8.3_vite@6.3.5/node_modules/nuxt/dist/app/compat/capi",
+      "abort-controller": "/home/runner/work/open4goods/open4goods/frontend/node_modules/.pnpm/mocked-exports@0.1.1/node_modules/mocked-exports/lib/empty.mjs",
+      "assets": "/home/runner/work/open4goods/open4goods/frontend/src/assets",
+      "public": "/home/runner/work/open4goods/open4goods/frontend/src/public",
+      "ufo": "/home/runner/work/open4goods/open4goods/frontend/node_modules/.pnpm/ufo@1.6.1/node_modules/ufo/dist/index.mjs",
+      "vue-demi": "/home/runner/work/open4goods/open4goods/frontend/node_modules/.pnpm/nuxt@3.17.5_eslint@9.29.0_rollup@4.44.1_typescript@5.8.3_vite@6.3.5/node_modules/nuxt/dist/app/compat/vue-demi",
+      "vue-i18n": "/home/runner/work/open4goods/open4goods/frontend/node_modules/.pnpm/vue-i18n@10.0.7_vue@3.5.16/node_modules/vue-i18n/dist/vue-i18n.mjs",
+      "web-streams-polyfill/ponyfill/es2018": "/home/runner/work/open4goods/open4goods/frontend/node_modules/.pnpm/mocked-exports@0.1.1/node_modules/mocked-exports/lib/empty.mjs",
+      "~": "/home/runner/work/open4goods/open4goods/frontend/src",
+      "~~": "/home/runner/work/open4goods/open4goods/frontend"
+    },
+    "dedupe": [
+      "vue",
+      "vue-router"
+    ],
+    "extensions": [
+      ".mjs",
+      ".js",
+      ".ts",
+      ".jsx",
+      ".tsx",
+      ".json",
+      ".vue"
+    ]
+  },
+  "root": "/home/runner/work/open4goods/open4goods/frontend/src",
+  "server": {
+    "cors": false,
+    "fs": {
+      "allow": [
+        "/home/runner/work/open4goods/open4goods/frontend",
+        "/home/runner/work/open4goods/open4goods/frontend/.nuxt",
+        "/home/runner/work/open4goods/open4goods/frontend/src",
+        "/home/runner/work/open4goods/open4goods/frontend"
+      ]
+    },
+    "hmr": false,
+    "middlewareMode": true,
+    "warmup": {
+      "clientFiles": [
+        "/home/runner/work/open4goods/open4goods/frontend/node_modules/.pnpm/nuxt@3.17.5_eslint@9.29.0_rollup@4.44.1_typescript@5.8.3_vite@6.3.5/node_modules/nuxt/dist/app/entry.js"
+      ]
+    }
+  },
+  "vue": {
+    "features": {
+      "propsDestructure": true
+    },
+    "isProduction": true,
+    "script": {
+      "hoistStatic": {
+      }
+    },
+    "template": {
+      "compilerOptions": {
+      },
+      "transformAssetUrls": {
+        "image": [
+          "xlink:href",
+          "href"
+        ],
+        "img": [
+          "src"
+        ],
+        "source": [
+          "src"
+        ],
+        "use": [
+          "xlink:href",
+          "href"
+        ],
+        "video": [
+          "src",
+          "poster"
+        ]
+      }
+    }
+  },
+  "vueJsx": {
+  },
+  "workerThreads": true
+}
