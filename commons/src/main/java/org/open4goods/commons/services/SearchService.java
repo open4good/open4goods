@@ -24,6 +24,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.elasticsearch.UncategorizedElasticsearchException;
 import org.springframework.data.elasticsearch.client.elc.ElasticsearchAggregations;
@@ -72,11 +73,32 @@ public class SearchService {
 
 	public static final String MISSING_BUCKET = "ES-UNKNOWN";
 
-	private ProductRepository aggregatedDataRepository;
+        private ProductRepository aggregatedDataRepository;
 
-	public SearchService(ProductRepository aggregatedDataRepository, String logsFolder) {
-		this.aggregatedDataRepository = aggregatedDataRepository;
-	}
+        public SearchService(ProductRepository aggregatedDataRepository, String logsFolder) {
+                this.aggregatedDataRepository = aggregatedDataRepository;
+        }
+
+        /**
+         * Search products using a simple textual query.
+         *
+         * @param query the raw search query
+         * @param pageable the pagination information
+         * @return matching products
+         */
+        public SearchHits<Product> searchProducts(String query, Pageable pageable) {
+                String sanitized = sanitize(query);
+
+                Criteria criteria = new Criteria().expression(sanitized)
+                                .and(aggregatedDataRepository.getRecentPriceQuery());
+
+                NativeQuery esQuery = new NativeQueryBuilder()
+                                .withQuery(new CriteriaQuery(criteria))
+                                .withPageable(pageable)
+                                .build();
+
+                return aggregatedDataRepository.search(esQuery, ProductRepository.MAIN_INDEX_NAME);
+        }
 
 	/**
 	 * Operates a global search
