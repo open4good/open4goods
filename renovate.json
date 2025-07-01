@@ -14,7 +14,7 @@
     },
     {
       "matchPaths": ["frontend/**"],
-      "packageManager": "pnpm"
+      "matchManagers": ["pnpm"]
     }
   ]
 }
