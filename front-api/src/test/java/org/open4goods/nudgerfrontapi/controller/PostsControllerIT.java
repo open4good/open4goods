@@ -8,12 +8,12 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.util.Date;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.LinkedHashMap;
 
 import org.junit.jupiter.api.Test;
-import org.open4goods.nudgerfrontapi.controller.api.BlogController;
+import org.open4goods.nudgerfrontapi.controller.api.PostsController;
 import org.open4goods.services.blog.model.BlogPost;
 import org.open4goods.services.blog.service.BlogService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,7 +30,7 @@ class PostsControllerIT {
     private MockMvc mockMvc;
 
     @Autowired
-    private BlogController controller;
+    private PostsController controller;
 
     @MockBean
     private BlogService blogService;
