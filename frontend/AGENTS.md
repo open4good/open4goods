@@ -98,7 +98,7 @@ export const useCartStore = defineStore('cart', {
 ## OpenAPI Client Generation & Integration
 
 - OpenAPI spec (e.g., `nudger-api.json`)
-- Script: `pnpm generate:api` → generates a TypeScript fetch client in `src/api/`
+ - Script: `pnpm generate:api` → generates a TypeScript axios client in `src/api/`
 - Use generated API classes for type-safe calls
 - Don’t manually edit generated files
 
