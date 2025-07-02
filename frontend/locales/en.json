@@ -3,6 +3,8 @@
     "title": "Blog",
     "noPosts": "No posts found",
     "by": "by",
-    "tags": "Tags"
+    "tags": "Tags",
+    "previous": "Previous",
+    "next": "Next"
   }
 }
