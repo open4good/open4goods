@@ -4,7 +4,9 @@ import java.time.Duration;
 import java.util.Locale;
 
 import org.open4goods.nudgerfrontapi.dto.xwiki.XwikiContentBlocDto;
+import org.open4goods.xwiki.model.FullPage;
 import org.open4goods.xwiki.services.XWikiHtmlService;
+import org.open4goods.xwiki.services.XwikiFacadeService;
 import org.springframework.http.CacheControl;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -25,7 +27,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
  * REST controller exposing XWiki content bloc
  */
 @RestController
-@RequestMapping("/blocs")
+@RequestMapping
 @Validated
 @Tag(name = "Content", description = "Content blocs")
 public class ContentsController {
@@ -35,14 +37,17 @@ public class ContentsController {
     private static final CacheControl ONE_HOUR_PUBLIC_CACHE = CacheControl.maxAge(Duration.ofHours(1)).cachePublic();
 
     private final XWikiHtmlService xwikiHtmlService;
+    private final XwikiFacadeService xwikiFacadeService;
 
-    public ContentsController(XWikiHtmlService xwikiHtmlService) {
+    public ContentsController(XWikiHtmlService xwikiHtmlService,
+                              XwikiFacadeService xwikiFacadeService) {
         this.xwikiHtmlService = xwikiHtmlService;
+        this.xwikiFacadeService = xwikiFacadeService;
     }
 
 
 
-    @GetMapping("/{blocId}")
+    @GetMapping("/blocs/{blocId}")
     @Operation(
             summary = "Get content bloc",
             description = "Return the HTML content of the given XWiki bloc.",
@@ -65,6 +70,39 @@ public class ContentsController {
         return ResponseEntity.ok()
                 .cacheControl(ONE_HOUR_PUBLIC_CACHE)
                 .body(body);
+    }
+
+    @GetMapping("/pages/{xwikiPageId}")
+    @Operation(
+            summary = "Get XWiki page",
+            description = "Return the rendered XWiki page along with metadata.",
+            parameters = {
+                    @Parameter(name = "xwikiPageId", description = "XWiki page path", example = "Main.WebHome", in = ParameterIn.PATH, required = true)
+            },
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Page found", content = @Content(mediaType = "application/json", schema = @Schema(implementation = FullPage.class))),
+                    @ApiResponse(responseCode = "404", description = "Page not found"),
+                    @ApiResponse(responseCode = "500", description = "Internal server error")
+            }
+    )
+    public ResponseEntity<FullPage> page(@PathVariable String xwikiPageId,
+                                         Locale locale) {
+        String normalized = translatePageId(xwikiPageId);
+        FullPage page = xwikiFacadeService.getFullPage(normalized);
+        return ResponseEntity.ok()
+                .cacheControl(ONE_HOUR_PUBLIC_CACHE)
+                .body(page);
+    }
+
+    private String translatePageId(String raw) {
+        if (raw == null) {
+            return "";
+        }
+        String translated = raw.replace('.', '/').replace(':', '/');
+        if (translated.startsWith("/")) {
+            translated = translated.substring(1);
+        }
+        return translated;
     }
 
 
