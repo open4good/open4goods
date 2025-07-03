@@ -175,3 +175,20 @@ Before issueing a PR, systematically validate and check global non regession usi
 
 The `pnpm build` script runs `pnpm lint --fix` automatically before building to enforce consistent formatting.
 
+## Build sequence
+
+Run the following commands sequentially to mirror the CI steps:
+
+```bash
+pnpm lint --fix
+pnpm test --run
+pnpm build
+pnpm preview
+```
+
+You may chain them as a single command:
+
+```bash
+pnpm lint --fix && pnpm test --run && pnpm build && pnpm preview
+```
+
