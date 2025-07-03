@@ -1,131 +1,83 @@
-# Evaluation Microservice
+# Product Repository
 
-This microservice provides evaluation functionality for products using Spring Expression Language (SpEL) and Thymeleaf templates.
+The **Product Repository** service handles indexing and retrieval of products in an Elasticsearch cluster. It provides queue based workers for ingesting full product documents and partial updates so that writes do not block user facing requests.
 
-## Features
+## Purpose
 
-- **SpEL Evaluations:** Validate and compute product properties using trusted SpEL expressions.
-- **Thymeleaf Template Evaluations:** Generate dynamic strings based on product data with Thymeleaf templates.
-- **Configuration Driven:** Template caching is configurable via YAML with Spring IDE metadata for auto-completion.
-- **Robust Error Handling:** Critical failures in SpEL and template evaluations are logged at the ERROR level, and unresolved template variables raise a custom exception.
-- **Unit Testing:** Tests are written with Mockito and bootstrapped with a dedicated test configuration.
+- Index products into Elasticsearch for fast search and filtering
+- Retrieve products by identifiers or search criteria
+- Process full updates and partial updates via background worker threads
 
 ## Directory Structure
 
 ```
-.
+services/product-repository
 ├── pom.xml
 ├── src
-│   ├── main
-│   │   ├── java
-│   │   │   └── org
-│   │   │       └── open4goods
-│   │   │           └── evaluation
-│   │   │               ├── config
-│   │   │               │   └── EvaluationProperties.java
-│   │   │               ├── exception
-│   │   │               │   └── TemplateEvaluationException.java
-│   │   │               └── service
-│   │   │                   └── EvaluationService.java
-│   │   └── resources
-│   └── test
+│   └── main
 │       ├── java
 │       │   └── org
 │       │       └── open4goods
-│       │           └── evaluation
-│       │               └── service
-│       │                   └── EvaluationServiceTest.java
+│       │           └── services
+│       │               └── productrepository
+│       │                   ├── config
+│       │                   │   └── IndexationConfig.java
+│       │                   ├── repository
+│       │                   │   └── ElasticProductRepository.java
+│       │                   ├── services
+│       │                   │   └── ProductRepository.java
+│       │                   └── workers
+│       │                       ├── FullProductIndexationWorker.java
+│       │                       └── PartialProductIndexationWorker.java
 │       └── resources
-│           └── application-test.yml
 ```
 
 ## Configuration
 
-The microservice reads its configuration from YAML files. In particular, the template caching property is configured via:
+The `IndexationConfig` class exposes properties controlling worker counts, queue sizes and bulk sizes used when indexing data. Adjust these values in your Spring configuration:
 
-```yaml
-evaluation:
-  template:
-    cacheable: true
+```java
+IndexationConfig config = new IndexationConfig();
+config.setProductWorkers(2);                // number of threads for full products
+config.setPartialProductWorkers(2);         // number of threads for partial updates
+config.setProductsQueueMaxSize(5000);       // queue capacity for full products
 ```
 
-This property controls whether Thymeleaf template caching is enabled. IDE metadata is provided for enhanced Spring configuration support.
+## Example Usage
+
+Create a repository instance with a configured `IndexationConfig` and enqueue products for indexing. All writes are processed asynchronously by the workers.
+
+```java
+IndexationConfig config = new IndexationConfig();
+ProductRepository repo = new ProductRepository(config);
+
+// index a product
+repo.save(product);
+
+// export all indexed products as a stream
+Stream<Product> all = repo.exportAll();
+```
 
 ## How to Build
 
-Use Maven to build the project:
+From this directory:
 
 ```bash
 mvn clean install
 ```
 
-## Running
+Or from the repository root:
 
-Run the microservice as a Spring Boot application using your preferred method.
-
-## How to Use
-
-The `EvaluationService` is a Spring-managed service that can be injected into your controllers or other services. Here are some example usages:
-
-```java
-import org.open4goods.services.evaluation.service.EvaluationService;
-import org.open4goods.services.evaluation.exception.TemplateEvaluationException;
-import org.open4goods.model.product.Product;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
-@Service
-public class ProductController {
-
-    private final EvaluationService evaluationService;
-
-    @Autowired
-    public ProductController(EvaluationService evaluationService) {
-        this.evaluationService = evaluationService;
-    }
-
-    public void evaluateProduct(Product product) {
-        // Evaluate a condition using SpEL (e.g., check if the product price is greater than 100)
-        boolean isValid = evaluationService.spelEval(product, "p.price > 100");
-        System.out.println("Product valid: " + isValid);
-
-        // Compute a string value using SpEL (e.g., generate a product identifier)
-        String computedId = evaluationService.spelCompute(product, "'Product-' + p.id");
-        System.out.println("Computed Product ID: " + computedId);
-
-        // Evaluate a Thymeleaf template using product data
-        try {
-            String evaluatedTemplate = evaluationService.thymeleafEval(product, "Product Name: [[${p.name}]]");
-            System.out.println(evaluatedTemplate);
-        } catch (TemplateEvaluationException ex) {
-            // Handle unresolved variable exception
-            System.err.println("Error evaluating template: " + ex.getMessage());
-        }
-    }
-}
-```
-
-You can also pass a map of additional parameters to the Thymeleaf evaluation:
-
-```java
-Map<String, Object> params = new HashMap<>();
-params.put("customMessage", "Welcome to our product service!");
-String result = evaluationService.thymeleafEval(params, "Message: [[${customMessage}]]");
-System.out.println(result);
+```bash
+mvn -pl services/product-repository -am clean install
 ```
 
 ## Testing
 
-Unit tests are provided in the `src/test` directory. To run tests, execute:
+Run the tests with:
 
 ```bash
 mvn test
 ```
 
-## Logging
-
-Critical failures in SpEL and Thymeleaf evaluations are logged at the `ERROR` level for better traceability.
-
-## Contributing
-
-Contributions are welcome. Please ensure that any new code is accompanied by appropriate unit tests and documentation.
+Contributions are welcome! Please ensure that code changes include documentation and tests where applicable.
