@@ -323,7 +323,8 @@ We welcome pull requests! To contribute:
 1. Fork this repository and create a feature branch.
 2. Follow the [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) specification.
 3. Run `pnpm lint`, `pnpm generate`, and `pnpm test` before committing.
-4. Open a pull request against the `main` branch.
+4. A Husky **pre-commit hook** automatically runs `pnpm lint` and `pnpm format`.
+5. Open a pull request against the `main` branch.
 
 ## Semantic Commit Examples
 
