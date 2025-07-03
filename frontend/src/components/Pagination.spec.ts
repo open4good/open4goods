@@ -1,10 +1,10 @@
 import { describe, it, expect, vi } from 'vitest'
 import { mount } from '@vue/test-utils'
+import Pagination from './Pagination.vue'
 
 vi.mock('#imports', () => ({
   useI18n: () => ({ t: (key: string) => key })
 }))
-import Pagination from './Pagination.vue'
 
 const meta = { number: 0, size: 10, totalElements: 20, totalPages: 2 }
 
