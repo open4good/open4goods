@@ -10,3 +10,4 @@ node_modules/
 !/.husky/pre-push
 !/.husky/pre-commit
 !/.husky/
+dist/
