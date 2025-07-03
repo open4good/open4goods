@@ -15,6 +15,7 @@ This guide is a comprehensive overview of the Nudger UI project. It covers the N
    - `NUXT_PUBLIC_SITE_URL`, etc.
 5. **Run Dev Server**: `pnpm dev` → http://localhost:3000
 6. **Production Build**: `pnpm build` then `pnpm preview`
+   - The `build` script automatically runs `pnpm lint --fix` before invoking Nuxt, ensuring lint issues are corrected during CI.
 7. **Static Generation**: `pnpm generate`
 8. **Helper Scripts**:
    - `pnpm lint`
@@ -186,4 +187,6 @@ Before issueing a PR, systematically validate and check global non regession usi
 - pnpm generate
 - pnpm storybook, check all components have an associated storybook 
 - pnpm preview, then tests URLS are HTTP 200 or act as expected
+
+The `pnpm build` script runs `pnpm lint --fix` automatically before building to enforce consistent formatting.
 
