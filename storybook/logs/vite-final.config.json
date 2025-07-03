@@ -13,7 +13,7 @@
         }
       ],
       "input": {
-        "entry": "/home/runner/work/open4goods/open4goods/frontend/node_modules/.pnpm/nuxt@3.17.5_eslint@9.29.0_rollup@4.44.1_typescript@5.8.3_vite@6.3.5/node_modules/nuxt/dist/app/entry.js"
+        "entry": "/home/runner/work/open4goods/open4goods/frontend/node_modules/.pnpm/nuxt@3.17.5_@types+node@20.19.4_eslint@9.29.0_rollup@4.44.1_typescript@5.8.3_vite@6.3.5/node_modules/nuxt/dist/app/entry.js"
       },
       "output": {
         "chunkFileNames": "_nuxt/[hash].js",
@@ -174,7 +174,7 @@
   "mode": "production",
   "optimizeDeps": {
     "entries": [
-      "/home/runner/work/open4goods/open4goods/frontend/node_modules/.pnpm/nuxt@3.17.5_eslint@9.29.0_rollup@4.44.1_typescript@5.8.3_vite@6.3.5/node_modules/nuxt/dist/app/entry.js"
+      "/home/runner/work/open4goods/open4goods/frontend/node_modules/.pnpm/nuxt@3.17.5_@types+node@20.19.4_eslint@9.29.0_rollup@4.44.1_typescript@5.8.3_vite@6.3.5/node_modules/nuxt/dist/app/entry.js"
     ],
     "esbuildOptions": {
       "jsxFactory": "h",
@@ -603,7 +603,7 @@
   "publicDir": false,
   "resolve": {
     "alias": {
-      "#app": "/home/runner/work/open4goods/open4goods/frontend/node_modules/.pnpm/nuxt@3.17.5_eslint@9.29.0_rollup@4.44.1_typescript@5.8.3_vite@6.3.5/node_modules/nuxt/dist/app",
+      "#app": "/home/runner/work/open4goods/open4goods/frontend/node_modules/.pnpm/nuxt@3.17.5_@types+node@20.19.4_eslint@9.29.0_rollup@4.44.1_typescript@5.8.3_vite@6.3.5/node_modules/nuxt/dist/app",
       "#app-manifest": "/home/runner/work/open4goods/open4goods/frontend/node_modules/.pnpm/mocked-exports@0.1.1/node_modules/mocked-exports/lib/empty.mjs",
       "#build": "/home/runner/work/open4goods/open4goods/frontend/.nuxt",
       "#i18n": "/home/runner/work/open4goods/open4goods/frontend/node_modules/.pnpm/@nuxtjs+i18n@9.5.6_eslint@9.29.0_rollup@4.44.1_vue@3.5.17/node_modules/@nuxtjs/i18n/dist/runtime/composables/index",
@@ -622,7 +622,7 @@
       "#sitemap": "/home/runner/work/open4goods/open4goods/frontend/node_modules/.pnpm/@nuxtjs+sitemap@7.4.3_h3@1.15.3_vite@6.3.5_vue@3.5.17/node_modules/@nuxtjs/sitemap/dist/runtime",
       "#tailwindcss": "/home/runner/work/open4goods/open4goods/frontend/.nuxt/tailwind.css",
       "#tailwindcss/sources": "/home/runner/work/open4goods/open4goods/frontend/.nuxt/tailwindcss/sources.css",
-      "#unhead/composables": "/home/runner/work/open4goods/open4goods/frontend/node_modules/.pnpm/nuxt@3.17.5_eslint@9.29.0_rollup@4.44.1_typescript@5.8.3_vite@6.3.5/node_modules/nuxt/dist/head/runtime/composables/v3",
+      "#unhead/composables": "/home/runner/work/open4goods/open4goods/frontend/node_modules/.pnpm/nuxt@3.17.5_@types+node@20.19.4_eslint@9.29.0_rollup@4.44.1_typescript@5.8.3_vite@6.3.5/node_modules/nuxt/dist/head/runtime/composables/v3",
       "#vue-router": "vue-router",
       "@": "/home/runner/work/open4goods/open4goods/frontend/src",
       "@@": "/home/runner/work/open4goods/open4goods/frontend",
@@ -631,13 +631,13 @@
       "@intlify/message-compiler": "/home/runner/work/open4goods/open4goods/frontend/node_modules/.pnpm/@intlify+message-compiler@11.1.5/node_modules/@intlify/message-compiler/dist/message-compiler.mjs",
       "@intlify/shared": "/home/runner/work/open4goods/open4goods/frontend/node_modules/.pnpm/@intlify+shared@10.0.7/node_modules/@intlify/shared/dist/shared.mjs",
       "@intlify/utils/h3": "/home/runner/work/open4goods/open4goods/frontend/node_modules/.pnpm/@intlify+utils@0.13.0/node_modules/@intlify/utils/dist/h3.mjs",
-      "@vue/composition-api": "/home/runner/work/open4goods/open4goods/frontend/node_modules/.pnpm/nuxt@3.17.5_eslint@9.29.0_rollup@4.44.1_typescript@5.8.3_vite@6.3.5/node_modules/nuxt/dist/app/compat/capi",
+      "@vue/composition-api": "/home/runner/work/open4goods/open4goods/frontend/node_modules/.pnpm/nuxt@3.17.5_@types+node@20.19.4_eslint@9.29.0_rollup@4.44.1_typescript@5.8.3_vite@6.3.5/node_modules/nuxt/dist/app/compat/capi",
       "abort-controller": "/home/runner/work/open4goods/open4goods/frontend/node_modules/.pnpm/mocked-exports@0.1.1/node_modules/mocked-exports/lib/empty.mjs",
       "assert": "/home/runner/work/open4goods/open4goods/frontend/node_modules/.pnpm/browser-assert@1.2.1/node_modules/browser-assert/lib/assert.js",
       "assets": "/home/runner/work/open4goods/open4goods/frontend/src/assets",
       "public": "/home/runner/work/open4goods/open4goods/frontend/src/public",
       "ufo": "/home/runner/work/open4goods/open4goods/frontend/node_modules/.pnpm/ufo@1.6.1/node_modules/ufo/dist/index.mjs",
-      "vue-demi": "/home/runner/work/open4goods/open4goods/frontend/node_modules/.pnpm/nuxt@3.17.5_eslint@9.29.0_rollup@4.44.1_typescript@5.8.3_vite@6.3.5/node_modules/nuxt/dist/app/compat/vue-demi",
+      "vue-demi": "/home/runner/work/open4goods/open4goods/frontend/node_modules/.pnpm/nuxt@3.17.5_@types+node@20.19.4_eslint@9.29.0_rollup@4.44.1_typescript@5.8.3_vite@6.3.5/node_modules/nuxt/dist/app/compat/vue-demi",
       "vue-i18n": "/home/runner/work/open4goods/open4goods/frontend/node_modules/.pnpm/vue-i18n@10.0.7_vue@3.5.17/node_modules/vue-i18n/dist/vue-i18n.mjs",
       "web-streams-polyfill/ponyfill/es2018": "/home/runner/work/open4goods/open4goods/frontend/node_modules/.pnpm/mocked-exports@0.1.1/node_modules/mocked-exports/lib/empty.mjs",
       "~": "/home/runner/work/open4goods/open4goods/frontend/src",
@@ -675,10 +675,10 @@
         "/home/runner/work/open4goods/open4goods/frontend/src",
         "/home/runner/work/open4goods/open4goods/frontend",
         "/home/runner/work/open4goods/open4goods/frontend",
-        "/home/runner/work/open4goods/open4goods/frontend/node_modules/.pnpm/@storybook-vue+nuxt@8.3.5_eslint@9.29.0_nuxt@3.17.5_rollup@4.44.1_storybook@8.6.14_typescript_4oeeolqpq6hln7dp2fyfs47fqm/node_modules/@storybook-vue/nuxt/dist",
-        "/home/runner/work/open4goods/open4goods/frontend/node_modules/.pnpm/@storybook-vue+nuxt@8.3.5_eslint@9.29.0_nuxt@3.17.5_rollup@4.44.1_storybook@8.6.14_typescript_4oeeolqpq6hln7dp2fyfs47fqm/node_modules/@storybook-vue/nuxt",
-        "/home/runner/work/open4goods/open4goods/frontend/node_modules/.pnpm/@storybook-vue+nuxt@8.3.5_eslint@9.29.0_nuxt@3.17.5_rollup@4.44.1_storybook@8.6.14_typescript_4oeeolqpq6hln7dp2fyfs47fqm/node_modules/@storybook-vue/nuxt/dist/runtime/plugins",
-        "/home/runner/work/open4goods/open4goods/frontend/node_modules/.pnpm/@storybook-vue+nuxt@8.3.5_eslint@9.29.0_nuxt@3.17.5_rollup@4.44.1_storybook@8.6.14_typescript_4oeeolqpq6hln7dp2fyfs47fqm/node_modules/@storybook-vue/nuxt/dist/runtime/components"
+        "/home/runner/work/open4goods/open4goods/frontend/node_modules/.pnpm/@storybook-vue+nuxt@8.3.5_@types+node@20.19.4_eslint@9.29.0_nuxt@3.17.5_rollup@4.44.1_storybo_f2ec3nj27i7mcikj5gp6ckuy6y/node_modules/@storybook-vue/nuxt/dist",
+        "/home/runner/work/open4goods/open4goods/frontend/node_modules/.pnpm/@storybook-vue+nuxt@8.3.5_@types+node@20.19.4_eslint@9.29.0_nuxt@3.17.5_rollup@4.44.1_storybo_f2ec3nj27i7mcikj5gp6ckuy6y/node_modules/@storybook-vue/nuxt",
+        "/home/runner/work/open4goods/open4goods/frontend/node_modules/.pnpm/@storybook-vue+nuxt@8.3.5_@types+node@20.19.4_eslint@9.29.0_nuxt@3.17.5_rollup@4.44.1_storybo_f2ec3nj27i7mcikj5gp6ckuy6y/node_modules/@storybook-vue/nuxt/dist/runtime/plugins",
+        "/home/runner/work/open4goods/open4goods/frontend/node_modules/.pnpm/@storybook-vue+nuxt@8.3.5_@types+node@20.19.4_eslint@9.29.0_nuxt@3.17.5_rollup@4.44.1_storybo_f2ec3nj27i7mcikj5gp6ckuy6y/node_modules/@storybook-vue/nuxt/dist/runtime/components"
       ]
     },
     "hmr": false,
@@ -699,7 +699,7 @@
     },
     "warmup": {
       "clientFiles": [
-        "/home/runner/work/open4goods/open4goods/frontend/node_modules/.pnpm/nuxt@3.17.5_eslint@9.29.0_rollup@4.44.1_typescript@5.8.3_vite@6.3.5/node_modules/nuxt/dist/app/entry.js"
+        "/home/runner/work/open4goods/open4goods/frontend/node_modules/.pnpm/nuxt@3.17.5_@types+node@20.19.4_eslint@9.29.0_rollup@4.44.1_typescript@5.8.3_vite@6.3.5/node_modules/nuxt/dist/app/entry.js"
       ]
     }
   },
