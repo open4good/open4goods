@@ -1,4 +1,4 @@
-import type { NuxtConfig } from '@nuxt/schema'
+import { defineNuxtConfig } from 'nuxt/config'
 
 export default defineNuxtConfig({
   // Enable server-side rendering
@@ -96,4 +96,4 @@ export default defineNuxtConfig({
     preset: process.env.NITRO_PRESET === 'github_pages' ? 'github-pages' : undefined
   }
 
-} satisfies NuxtConfig)
+})
