@@ -28,6 +28,9 @@ export default defineNuxtConfig({
   devtools: {
     enabled: process.env.NODE_ENV !== 'production'
   },
+  tailwindcss: {
+    sourcemap: true
+  },
 
   // Additional build options
   build: {
