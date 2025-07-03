@@ -61,3 +61,7 @@ DTO classes such as `ProductDto` are now implemented using Java records. This
 means all fields are immutable and accessed via record accessors
 (e.g. `dto.base()`). Ensure any custom code or tests no longer rely on
 setters.
+
+## Blog service loading
+
+Blog posts are fetched from XWiki by the `BlogService`. Posts are now loaded asynchronously when the application starts, so the API becomes available immediately. See [../docs/blog_service_async_loading_plan.md](../docs/blog_service_async_loading_plan.md) for details.
