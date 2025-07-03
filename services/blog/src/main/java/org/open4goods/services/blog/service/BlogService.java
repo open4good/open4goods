@@ -46,7 +46,10 @@ import com.rometools.rome.io.SyndFeedOutput;
 import org.jsoup.Jsoup;
 import org.jsoup.safety.Safelist;
 
-import jakarta.annotation.PostConstruct;
+import java.util.concurrent.CompletableFuture;
+
+import org.springframework.boot.context.event.ApplicationReadyEvent;
+import org.springframework.context.event.EventListener;
 
 /**
  * Service class for handling blog functionalities built over the XWiki blog application.
@@ -98,14 +101,24 @@ public class BlogService implements HealthIndicator {
     }
 
     /**
+     * Trigger an asynchronous refresh once the application is ready.
+     * The actual load is delegated to {@link #refreshPosts()} and
+     * executed in a separate thread to avoid blocking startup.
+     */
+    @EventListener(ApplicationReadyEvent.class)
+    public void loadPostsAsync() {
+        CompletableFuture.runAsync(this::refreshPosts);
+    }
+
+    /**
      * Refreshes the blog posts by updating from XWiki.
      * <p>
-     * This method is scheduled to run every 2 hours and is also invoked on application startup.
+     * This method is scheduled to run every 2 hours and may also be triggered at
+     * startup by an asynchronous listener.
      * TODO (p3, conf): Schedule from configuration
      * </p>
      */
-    @PostConstruct
-    @Scheduled(initialDelay = 0, fixedDelay = 1000 * 3600 * 2)
+    @Scheduled(initialDelay = 1000 * 3600 * 2, fixedDelay = 1000 * 3600 * 2)
     public void refreshPosts() {
         try {
             updateBlogPosts();
