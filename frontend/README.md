@@ -80,6 +80,23 @@ To get the project up and running locally, follow these steps:
    - `pnpm build:ssr` – build with increased memory
    - `pnpm storybook:build` – build Storybook static site
 
+## Build sequence
+
+To replicate the CI pipeline locally run the following tasks one after another:
+
+```bash
+pnpm lint --fix
+pnpm test --run
+pnpm build
+pnpm preview
+```
+
+You can also chain them with `&&` as shown above:
+
+```bash
+pnpm lint --fix && pnpm test --run && pnpm build && pnpm preview
+```
+
 ## Design Tokens
 
 Design tokens are configured in `tokens.config.json`. Replace the
