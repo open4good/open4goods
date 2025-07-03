@@ -13,7 +13,10 @@
     "storybook": "pnpm exec storybook dev -p 6006 --no-open",
     "storybook:build": "pnpm exec storybook build",
     "generate:api": "openapi-generator-cli generate -i https://beta.front-api.nudger.fr/v3/api-docs/front -g typescript-fetch -o src/api --skip-validate-spec",
-    "semantic-release": "semantic-release"
+    "semantic-release": "semantic-release",
+    "docs:dev": "vitepress dev docs",
+    "docs:build": "vitepress build docs",
+    "docs:serve": "vitepress serve docs"
   },
   "devDependencies": {
     "@nuxt/devtools": "^2.5.0",
@@ -60,7 +63,8 @@
     "tailwindcss": "4.1.10",
     "vitest": "^3.2.3",
     "vue": "^3.5.16",
-    "vue-demi": "^0.14.10"
+    "vue-demi": "^0.14.10",
+    "vitepress": "^1.6.3"
   },
   "packageManager": "pnpm@8.15.9",
   "dependencies": {
