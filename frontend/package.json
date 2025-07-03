@@ -27,7 +27,6 @@
     "@nuxtjs/robots": "^5.2.11",
     "@nuxtjs/seo": "^3.0.3",
     "@nuxtjs/sitemap": "^7.4.3",
-    "@nuxtjs/strapi": "^2.0.0",
     "@nuxtjs/tailwindcss": "7.0.0-beta.0",
     "@pinia/nuxt": "^0.11.1",
     "@semantic-release/changelog": "^6.0.3",
