@@ -70,4 +70,35 @@ public record ProductDto(
                 }
 
         }
+
+        /**
+         * Allowed aggregation fields on Products. (must match elastic mapping)
+         */
+        public enum ProductDtoAggregatableFields {
+                price("price.minPrice.price"),
+                offersCount("offersCount");
+
+                private final String text;
+
+                ProductDtoAggregatableFields(String text) {
+                        this.text = text;
+                }
+
+                public String getText() {
+                        return text;
+                }
+
+                @Override
+                public String toString() {
+                        return text;
+                }
+
+                private static final Map<String, ProductDtoAggregatableFields> LOOKUP =
+                        Arrays.stream(values()).collect(Collectors.toMap(ProductDtoAggregatableFields::getText, e -> e));
+
+                public static Optional<ProductDtoAggregatableFields> fromText(String text) {
+                        return Optional.ofNullable(LOOKUP.get(text));
+                }
+
+        }
 }

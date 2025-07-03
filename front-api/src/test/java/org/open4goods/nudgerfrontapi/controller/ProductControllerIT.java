@@ -104,6 +104,27 @@ class ProductControllerIT {
                 .andExpect(jsonPath("$.page.number").value(0));
     }
 
+    @Test
+    void sortableFieldsEndpointReturnsList() throws Exception {
+        mockMvc.perform(get("/products/fields/sortable").with(jwt()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isArray());
+    }
+
+    @Test
+    void componentsEndpointReturnsList() throws Exception {
+        mockMvc.perform(get("/products/fields/components").with(jwt()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isArray());
+    }
+
+    @Test
+    void aggregatableFieldsEndpointReturnsList() throws Exception {
+        mockMvc.perform(get("/products/fields/aggregatable").with(jwt()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isArray());
+    }
+
 
 
 
