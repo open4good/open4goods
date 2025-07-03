@@ -23,13 +23,25 @@ Open4goods (o4g) is an open-source and open-data product aggregator, search engi
 
 * **crawl and ingest product based datas** (merchant offers, reviews, brands ratings). This is the job of the [crawler](crawler/) sub-project. Designed to ingest any kind of data, if having an UPC/GTIN code.
 
-* **aggregate data fragments into well structured product-data**, by verticals. Features are -among others- scoring, attributes merging and conflict detection, comments NLP processing... The business intelligence of product construction is weared in the [aggregation](aggregation/) sub-project, and the orchestration and product data construction is operated through the scalable [API](api/) component.
+* **aggregate data fragments into well structured product data**. The [api](api/) module orchestrates this through the `AggregationFacadeService`, handling scoring, attribute merging, conflict detection and NLP processing.
 
 * **integrate Icecat data through a dedicated microservice**, located under [services/icecat](services/icecat), which loads Icecat XML resources and exposes them to API and UI modules.
 
-* **Renders the data through API's, UI's, and through open data sets**, exposed through the [API](api/) component.
+* **Serve data to the Nuxt&nbsp;3 frontend** through the [front-api](front-api/) module. The [frontend](frontend/) project consumes this API. The legacy [ui](ui/) module is **deprecated**.
 
-* Make the truth available for everyone on **officially supported websites**, (only french [nudger.fr](https://nudger.fr) for now), through the [UI](ui/) component. The affiliation revenue business model is used to deliver ecological compensation, maintain the user service and the open-data delivery
+* **Gradually migrate commons and API features into dedicated microservices** located under [services](services/). This ongoing refactoring aims at a cleaner, service‑oriented architecture.
+
+## Architecture overview
+
+Open4goods is organised as a multi‑module Maven **modulith**. Core modules are:
+
+* `crawler` – scrapes external product sources.
+* `api` – central service exposing REST endpoints and aggregation logic.
+* `front-api` – lightweight API consumed by the Nuxt 3 `frontend`.
+* `frontend` – Nuxt 3 application working with `front-api`.
+* `commons` and `model` – shared utilities and domain objects.
+* `services/*` – independent Spring Boot microservices extracted from the monolith.
+* `ui` – historical Thymeleaf interface (deprecated).
   
 
 # <i class="icon-upload"></i> How to contribute
@@ -73,6 +85,12 @@ If an issue has no `squad:*` label or carries the `EPIC` label, it is routed to
 the PMO board and placed in the `Triage` column. A manual workflow named
 [label-to-project-dispatch.yml](.github/workflows/label-to-project-dispatch.yml)
 can be triggered to reapply these rules to existing issues.
+
+### Standard GitHub workflow
+1. Fork the repository and create a feature branch.
+2. Follow [Conventional Commits](https://www.conventionalcommits.org/) for commit messages.
+3. Ensure `mvn clean install` succeeds and update documentation.
+4. Open a Pull Request describing **why** and **what**.
 
 
 # Run in dev mode
@@ -246,3 +264,4 @@ After a space crash, elastic indexes are locked. You can get hand back on them b
 curl -XPUT -H "Content-Type: application/json" http://localhost:9200/_all/_settings -d '{"index.blocks.read_only_allow_delete": null}'
 
 ```
+
