@@ -11,7 +11,7 @@ The **Prompt Service** is part of the [open4goods](https://github.com/open4good/
 
 ## Requirements
 
-- Java 11 or higher
+- Java 21
 - Maven 3.6+
 - Spring Boot
 
@@ -23,6 +23,20 @@ Clone the repository and build using Maven:
 git clone https://github.com/open4good/open4goods.git
 cd open4goods/services/prompt
 mvn clean install
+```
+
+## Build & Test
+
+Run the tests only:
+
+```bash
+mvn test
+```
+
+You can also build from the project root:
+
+```bash
+mvn -pl services/prompt -am clean install
 ```
 
 ## Usage
@@ -237,3 +251,6 @@ Contributions are welcome! Please submit a pull request or open an issue for any
 ## License
 
 This project is licensed under the MIT License.
+
+For project-wide information see the [main README](../../README.md).
+
