@@ -3,11 +3,14 @@ package org.open4goods.nudgerfrontapi.controller.api;
 import java.time.Duration;
 import java.util.Locale;
 import java.util.Set;
+import java.util.Arrays;
+import java.util.List;
 
 import org.open4goods.model.exceptions.ResourceNotFoundException;
 import org.open4goods.nudgerfrontapi.dto.product.ProductDto;
 import org.open4goods.nudgerfrontapi.dto.product.ProductDto.ProductDtoComponent;
 import org.open4goods.nudgerfrontapi.dto.product.ProductDto.ProductDtoSortableFields;
+import org.open4goods.nudgerfrontapi.dto.product.ProductDto.ProductDtoAggregatableFields;
 import org.open4goods.nudgerfrontapi.dto.PageDto;
 import org.open4goods.nudgerfrontapi.service.ProductMappingService;
 import org.springframework.data.domain.Page;
@@ -55,6 +58,66 @@ public class ProductController {
 
     public ProductController(ProductMappingService service) {
         this.service = service;
+    }
+
+    /**
+     * List allowed component names that can be requested via the {@code include} parameter.
+     */
+    @GetMapping("/fields/components")
+    @Operation(
+            summary = "Get available components",
+            description = "Return the list of components that can be included in product responses.",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Components returned",
+                            content = @Content(mediaType = "application/json",
+                                    array = @ArraySchema(schema = @Schema(type = "string"))))
+            }
+    )
+    public ResponseEntity<List<String>> components() {
+        List<String> body = Arrays.stream(ProductDtoComponent.values())
+                .map(Enum::name)
+                .toList();
+        return ResponseEntity.ok(body);
+    }
+
+    /**
+     * List product fields that can be used for sorting.
+     */
+    @GetMapping("/fields/sortable")
+    @Operation(
+            summary = "Get sortable fields",
+            description = "Return the list of fields accepted by the sort parameter.",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Fields returned",
+                            content = @Content(mediaType = "application/json",
+                                    array = @ArraySchema(schema = @Schema(type = "string"))))
+            }
+    )
+    public ResponseEntity<List<String>> sortableFields() {
+        List<String> body = Arrays.stream(ProductDtoSortableFields.values())
+                .map(ProductDtoSortableFields::getText)
+                .toList();
+        return ResponseEntity.ok(body);
+    }
+
+    /**
+     * List product fields that support aggregation queries.
+     */
+    @GetMapping("/fields/aggregatable")
+    @Operation(
+            summary = "Get aggregatable fields",
+            description = "Return the list of fields available for aggregation.",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Fields returned",
+                            content = @Content(mediaType = "application/json",
+                                    array = @ArraySchema(schema = @Schema(type = "string"))))
+            }
+    )
+    public ResponseEntity<List<String>> aggregatableFields() {
+        List<String> body = Arrays.stream(ProductDtoAggregatableFields.values())
+                .map(ProductDtoAggregatableFields::getText)
+                .toList();
+        return ResponseEntity.ok(body);
     }
 
 
