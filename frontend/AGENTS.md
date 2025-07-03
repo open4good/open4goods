@@ -162,7 +162,7 @@ export const Primary: Story = {
 - Prettier integrated via ESLint
 - Run: `pnpm lint`, `pnpm lint --fix`
 - Run: `pnpm format` to check formatting
-- Husky hooks enforce checks on commits
+- Husky hooks enforce checks on commits and pushes. The `pre-push` hook runs `pnpm lint && pnpm test --run && pnpm build`.
 
 
 
