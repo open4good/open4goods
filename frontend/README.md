@@ -121,7 +121,7 @@ src/
 - `.storybook/` – Storybook configuration files
 - `nudger-api.json` – OpenAPI specification used by `generate:api`
 - `.env.example` – example environment variables
-- `.husky/` – Git hooks executed on commit
+- `.husky/` – Git hooks executed on commit and push (pre-push runs `pnpm lint && pnpm test --run && pnpm build`)
 
 ## Vue 3 & Nuxt 3 Conventions
 
