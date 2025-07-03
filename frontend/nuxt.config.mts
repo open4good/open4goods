@@ -50,9 +50,7 @@ export default defineNuxtConfig({
   },
   // Runtime configuration available on both client and server
   runtimeConfig: {
-    strapiToken: process.env.STRAPI_TOKEN, // private token for Strapi CMS
     public: {
-      strapiUrl: process.env.STRAPI_URL || 'http://localhost:1337', // Strapi base URL
       plausibleDomain: process.env.NUXT_PUBLIC_PLAUSIBLE_DOMAIN, // Plausible domain
       siteUrl: process.env.NUXT_PUBLIC_SITE_URL // Public site URL
     }

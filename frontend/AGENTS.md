@@ -10,8 +10,6 @@ This guide is a comprehensive overview of the Nudger UI project. It covers the N
 2. **Clone the Repository**: `git clone https://github.com/your-org/nudger-nuxt-front.git`
 3. **Install Dependencies**: `pnpm install`
 4. **Environment Variables**:
-   - `STRAPI_URL`: e.g. `http://localhost:1337`
-   - `STRAPI_TOKEN`: read-only token
    - `NUXT_PUBLIC_SITE_URL`, etc.
 5. **Run Dev Server**: `pnpm dev` → http://localhost:3000
 6. **Production Build**: `pnpm build` then `pnpm preview`
@@ -111,19 +109,6 @@ Workflow:
 
 ---
 
-## Content from Strapi CMS
-
-- Env vars: `STRAPI_URL`, `STRAPI_TOKEN`
-- Fetch using `useFetch`
-```ts
-const { data } = await useFetch(`${config.public.strapiUrl}/api/pages`, {
-  headers: { Authorization: `Bearer ${config.strapiToken}` },
-});
-```
-- Handle nested `data[].attributes`
-- Consider `useStrapiContent()` composable abstraction
-
----
 
 ## Testing with Vitest
 

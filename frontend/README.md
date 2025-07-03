@@ -19,7 +19,7 @@ Experience Nudger frontend online:
 
 **Welcome** to the Nudger front-end project. This guide is a comprehensive overview of the Nudger UI application structure, coding conventions, and tooling.
 
-The Nudger front-end is a Nuxt 3 app (Vue 3) that interfaces with a Strapi headless CMS for content and uses an OpenAPI-described backend for core application data. We employ modern frameworks and best practices – from Tailwind CSS and Pinia, to Vitest and Storybook – to maintain a robust, scalable codebase.
+The Nudger front-end is a Nuxt 3 app (Vue 3) that relies on an OpenAPI-described backend for application data. We employ modern frameworks and best practices – from Tailwind CSS and Pinia, to Vitest and Storybook – to maintain a robust, scalable codebase.
 
 Use this document as the bible for:
 
@@ -50,8 +50,6 @@ To get the project up and running locally, follow these steps:
 
 4. **Environment Variables**:  
    Copy `.env.example` to `.env` and set the following:
-   - `STRAPI_URL`: Base URL of the Strapi CMS (e.g. `http://localhost:1337`)
-   - `STRAPI_TOKEN`: API access token for Strapi (read-only)
    - `BASE_URL`: Base path for the Nuxt app (default `/`)
    - Other optional variables: `NUXT_PUBLIC_SITE_URL`, etc.
      These are declared in `nuxt.config.ts` under `runtimeConfig`.
@@ -224,18 +222,6 @@ const cart = useCartStore();
   const response = await api.listVersionsv2()
   ```
 
-## Fetching Content from Strapi
-
-```ts
-const config = useRuntimeConfig();
-const { data: postRes } = await useFetch(`${config.public.strapiUrl}/api/posts`, {
-  params: { filters: { slug } },
-  headers: {
-    Authorization: `Bearer ${config.strapiToken}`
-  }
-});
-const post = postRes.value?.data[0]?.attributes;
-```
 
 ## Vitest (Testing)
 
