@@ -57,11 +57,21 @@ This module is part of the [Open4Goods project](https://github.com/open4good/ope
    The module uses an `application-test.yml` for test-specific configurations.
 
 
-## Building the Project
+## Build & Test
 
-Ensure you have Java 11+ installed and then run:
+Build from this directory:
 ```bash
 mvn clean install
+```
+
+Run tests only:
+```bash
+mvn test
+```
+
+You can also build from the repository root:
+```bash
+mvn -pl services/serialisation -am clean install
 ```
 
 ## Additional Information
@@ -71,3 +81,6 @@ For more details, refer to the Javadoc comments in the source code and the unit 
 ---
 
 Happy coding!
+
+For project-wide information see the [main README](../../README.md).
+

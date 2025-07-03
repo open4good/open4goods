@@ -59,14 +59,29 @@ googlesearch:
 
 A sample unit test is provided in `src/test/java/org/open4goods/googlesearch/GoogleSearchServiceTest.java`. The test configuration is bootstrapped using an `application-test.yml`.
 
-## Maven Build
+## Build & Test
 
-The Maven POM is configured with the necessary dependencies and plugins. To build the service, run:
+Build the module from this directory:
 
 ```bash
 mvn clean install
 ```
 
+Run tests only:
+
+```bash
+mvn test
+```
+
+You can also build from the repository root:
+
+```bash
+mvn -pl services/googlesearch -am clean install
+```
+
 ## License
 
 This project is licensed under the terms of the [MIT License](LICENSE).
+
+For project-wide information see the [main README](../../README.md).
+

@@ -64,8 +64,22 @@ public void loadPage() {
 }
 ```
 
-Build the module with:
+## Build & Test
 
+Build from this directory:
+```bash
+mvn clean install
+```
+
+Run the tests:
+```bash
+mvn test
+```
+
+You can also build from the repository root:
 ```bash
 mvn -pl services/xwiki-spring-boot-starter -am clean install
 ```
+
+For project-wide information see the [main README](../../README.md).
+

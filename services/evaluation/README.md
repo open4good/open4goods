@@ -51,12 +51,24 @@ evaluation:
 
 This property controls whether Thymeleaf template caching is enabled. IDE metadata is provided for enhanced Spring configuration support.
 
-## How to Build
+## Build & Test
 
-Use Maven to build the project:
+Build the module from this folder:
 
 ```bash
 mvn clean install
+```
+
+Run the tests only:
+
+```bash
+mvn test
+```
+
+You can also build it from the repository root:
+
+```bash
+mvn -pl services/evaluation -am clean install
 ```
 
 ## Running
@@ -129,3 +141,6 @@ Critical failures in SpEL and Thymeleaf evaluations are logged at the `ERROR` le
 ## Contributing
 
 Contributions are welcome. Please ensure that any new code is accompanied by appropriate unit tests and documentation.
+
+For project-wide information see the [main README](../../README.md).
+
