@@ -236,9 +236,17 @@ const cart = useCartStore();
   ```ts
   import { DefaultApi } from '@/api'
   const api = new DefaultApi()
-  const response = await api.listVersionsv2()
-  ```
+const response = await api.listVersionsv2()
+```
 
+## Chart Components
+
+This project ships generic chart components powered by Chart.js:
+
+- `<BarChart />` – renders bar charts.
+- `<PieChart />` – renders pie charts with optional sub‑levels.
+
+Each accepts a simple `data` prop `{ labels: string[]; values: number[] }`.
 
 ## Vitest (Testing)
 
