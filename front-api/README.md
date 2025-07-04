@@ -5,6 +5,11 @@ The former `/api/v1/search` endpoint was removed from this module.
 The main REST endpoints are provided by the `ProductController` class.
 Use the main `api` service for search operations.
 
+### Content endpoints
+
+- `GET /blocs/{blocId}` – return a small HTML bloc from XWiki.
+- `GET /pages/{xwikiPageId}` – return a rendered XWiki page with metadata.
+
 ## Default Port
 
 The application runs on **port 8082** by default (`server.port` in `application.yml`). This keeps it separate from the main API on port 8081.
