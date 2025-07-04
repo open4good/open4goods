@@ -1,4 +1,5 @@
 #!/usr/bin/env sh
 . "$(dirname -- "$0")/_/husky.sh"
 
-pnpm lint && pnpm test --run && pnpm build
+#TODO : Renable, but whereas pnpm is installed, eclipse / giit fail, indicating "pnpm not found"
+#pnpm lint && pnpm test --run && pnpm build

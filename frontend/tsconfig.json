@@ -1,27 +1,4 @@
 {
-  // Compiler behaviour
-  "compilerOptions": {
-    // Allow JavaScript files to be compiled
-    "allowJs": true,
-
-    // Provide path alias for imports
-    "paths": {
-      "@/*": ["./src/*"]
-    },
-
-    // Enable the strictest type-checking options
-    "strict": true,
-
-    // Skip type checking of declaration files for faster builds
-    "skipLibCheck": true,
-
-    // Include node types globally
-    "types": ["@types/node"]
-  },
-
-  // Ignore build artifacts
-  "exclude": ["node_modules", "dist"],
-
-  // Inherit sensible defaults for Node 18
-  "extends": "@tsconfig/node18/tsconfig.json"
+  // https://nuxt.com/docs/guide/concepts/typescript
+  "extends": "./.nuxt/tsconfig.json"
 }
