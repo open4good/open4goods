@@ -5,8 +5,6 @@
 [![Release](https://github.com/open4good/nudger-front/actions/workflows/release.yml/badge.svg)](https://github.com/open4good/nudger-front/actions/workflows/release.yml)
 [![CodeQL](https://github.com/open4good/nudger-front/actions/workflows/codeql.yml/badge.svg)](https://github.com/open4good/nudger-front/actions/workflows/codeql.yml)
 
-
-
 ## Nudger UI in action
 
 Experience Nudger frontend online:
@@ -15,11 +13,9 @@ Experience Nudger frontend online:
 - [https://static.nudger.fr](https://static.nudger.fr) – statically generated version hosted on GitHub Pages.
 - [https://demo.nudger.fr](https://demo.nudger.fr) – server-rendered demo.
 
-
-
 **Welcome** to the Nudger front-end project. This guide is a comprehensive overview of the Nudger UI application structure, coding conventions, and tooling.
 
-The Nudger front-end is a Nuxt 3 app (Vue 3) that relies on an OpenAPI-described backend for application data. We employ modern frameworks and best practices – from Tailwind CSS and Pinia, to Vitest and Storybook – to maintain a robust, scalable codebase.
+The Nudger front-end is a Nuxt 3 app (Vue 3) that interfaces with a Strapi headless CMS for content and uses an OpenAPI-described backend for core application data. We employ modern frameworks and best practices – from Tailwind CSS and Pinia, to Vitest and Storybook – to maintain a robust, scalable codebase.
 
 Use this document as the bible for:
 
@@ -27,23 +23,25 @@ Use this document as the bible for:
 - understanding project architecture
 - adhering to our coding standards
 
-
 ## Getting Started: Installation & Setup
 
 To get the project up and running locally, follow these steps:
 
 1. **Prerequisites**:  
-   Ensure you have Node.js `18+` and `pnpm` installed. Install it globally via:  
+   Ensure you have Node.js `22+` and `pnpm` installed. Install it globally via:
+
    ```bash
    npm install -g pnpm
    ```
 
-2. **Clone the Repository**:  
+2. **Clone the Repository**:
+
    ```bash
    git clone https://github.com/open4good/nudger-front.git
    ```
 
-3. **Install Dependencies**:  
+3. **Install Dependencies**:
+
    ```bash
    pnpm install
    ```
@@ -54,18 +52,22 @@ To get the project up and running locally, follow these steps:
    - Other optional variables: `NUXT_PUBLIC_SITE_URL`, etc.
      These are declared in `nuxt.config.ts` under `runtimeConfig`.
 
-5. **Run the Dev Server**:  
+5. **Run the Dev Server**:
+
    ```bash
-   pnpm dev
-   ```  
+   pnpm run dev
+   ```
+
    Access it at [http://localhost:3000](http://localhost:3000)
 
-6. **Production Build**:  
+6. **Production Build**:
+
    ```bash
    pnpm build && pnpm preview
    ```
 
-7. **Static Generation (optional)**:  
+7. **Static Generation (optional)**:
+
    ```bash
    pnpm generate
    ```
@@ -80,23 +82,6 @@ To get the project up and running locally, follow these steps:
    - `pnpm build:ssr` – build with increased memory
    - `pnpm storybook:build` – build Storybook static site
 
-## Build sequence
-
-To replicate the CI pipeline locally run the following tasks one after another:
-
-```bash
-pnpm lint --fix
-pnpm test --run
-pnpm build
-pnpm preview
-```
-
-You can also chain them with `&&` as shown above:
-
-```bash
-pnpm lint --fix && pnpm test --run && pnpm build && pnpm preview
-```
-
 ## Design Tokens
 
 Design tokens are configured in `tokens.config.json`. Replace the
@@ -109,22 +94,19 @@ your design token generation command to pull the latest tokens.
 
 ```
 src/
-├── api/          # API client (OpenAPI)
+├── server/          # API client (OpenAPI)
 ├── assets/       # Images, fonts, global CSS
 ├── components/   # Reusable UI components
-├── composables/  # Logic hooks (e.g., useX)
 ├── layouts/      # Page layout wrappers
-├── middleware/   # Route guards
 ├── pages/        # File-based routes
-├── plugins/      # Nuxt plugins
 ├── stores/       # Pinia state stores
 ```
 
 - `tests/` or `*.spec.ts` files live next to components or logic.
 
 ### Key Config Files:
+
 - `nuxt.config.ts` – Nuxt modules and runtime configuration
-- `tailwind.config.ts` – Tailwind theming
 - `tsconfig.json` – TypeScript compiler options and path aliases
 - `eslint.config.mjs` and `.prettierrc` – linting and formatting rules
 - `vitest.config.ts` – test runner configuration
@@ -136,7 +118,7 @@ src/
 - `.storybook/` – Storybook configuration files
 - `nudger-api.json` – OpenAPI specification used by `generate:api`
 - `.env.example` – example environment variables
-- `.husky/` – Git hooks executed on commit and push (pre-push runs `pnpm lint && pnpm test --run && pnpm build`)
+- `.husky/` – Git hooks executed on commit
 
 ## Vue 3 & Nuxt 3 Conventions
 
@@ -151,44 +133,24 @@ src/
 
 ## Tailwind CSS
 
-- All styles use utility classes:
-  ```html
-  <div class="p-4 bg-blue-100 rounded text-center">
-    Content
-  </div>
-  ```
-- `assets/css/main.css` contains:
-  ```css
-  @tailwind base;
-  @tailwind components;
-  @tailwind utilities;
-  ```
-- Customize theme in `tailwind.config.js`
-- Use `@apply` sparingly
-- For frequently reused styles, create components like `<BaseButton>`
+## Vuetify
 
-## Example Button Component
+###Vuetify is a no design skills required Open Source UI Library with beautifully handcrafted Vue Components.
 
-```vue
-<template>
-  <button
-    class="px-4 py-2 bg-primary text-white font-semibold rounded hover:bg-primary-dark disabled:opacity-50"
-  >
-    {{ label }}
-  </button>
-</template>
-```
+- (Doc) [https://vuetifyjs.com/en/]
 
 ## Pinia (State Management)
 
+- (Doc) [https://pinia.vuejs.org/core-concepts/]
+
 ```ts
 // src/stores/cart.ts
-import { defineStore } from 'pinia';
+import { defineStore } from 'pinia'
 
 interface Product {
-  id: number;
-  name: string;
-  price: number;
+  id: number
+  name: string
+  price: number
 }
 
 export const useCartStore = defineStore('cart', {
@@ -197,17 +159,18 @@ export const useCartStore = defineStore('cart', {
   }),
   getters: {
     itemCount: (state) => state.items.length,
-    totalPrice: (state) => state.items.reduce((sum, item) => sum + item.price, 0),
+    totalPrice: (state) =>
+      state.items.reduce((sum, item) => sum + item.price, 0),
   },
   actions: {
     addItem(product: Product) {
-      this.items.push(product);
+      this.items.push(product)
     },
     removeItem(productId: number) {
-      this.items = this.items.filter((item) => item.id !== productId);
+      this.items = this.items.filter((item) => item.id !== productId)
     },
   },
-});
+})
 ```
 
 ## Using the Store
@@ -236,17 +199,8 @@ const cart = useCartStore();
   ```ts
   import { DefaultApi } from '@/api'
   const api = new DefaultApi()
-const response = await api.listVersionsv2()
-```
-
-## Chart Components
-
-This project ships generic chart components powered by Chart.js:
-
-- `<BarChart />` – renders bar charts.
-- `<PieChart />` – renders pie charts with optional sub‑levels.
-
-Each accepts a simple `data` prop `{ labels: string[]; values: number[] }`.
+  const response = await api.listVersionsv2()
+  ```
 
 ## Vitest (Testing)
 
@@ -255,20 +209,6 @@ Each accepts a simple `data` prop `{ labels: string[]; values: number[] }`.
   ```bash
   pnpm test
   ```
-
-### Example Test
-
-```ts
-import { mount } from '@vue/test-utils';
-import Button from '@/components/Button.vue';
-
-describe('Button', () => {
-  it('renders label', () => {
-    const wrapper = mount(Button, { props: { label: 'Click me' } });
-    expect(wrapper.text()).toContain('Click me');
-  });
-});
-```
 
 ## Storybook
 
@@ -280,16 +220,16 @@ describe('Button', () => {
 ### Example Story
 
 ```ts
-import Button from '@/components/Button.vue';
+import Button from '@/components/Button.vue'
 
 export default {
   title: 'Components/Button',
   component: Button,
-};
+}
 
 export const Primary = {
   args: { label: 'Primary Button' },
-};
+}
 ```
 
 ## Linting & Formatting
@@ -309,6 +249,7 @@ export const Primary = {
 ## Deployment & CI/CD
 
 - Build with:
+
   ```bash
   pnpm build
   ```
@@ -334,8 +275,7 @@ We welcome pull requests! To contribute:
 1. Fork this repository and create a feature branch.
 2. Follow the [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) specification.
 3. Run `pnpm lint`, `pnpm generate`, and `pnpm test` before committing.
-4. A Husky **pre-commit hook** automatically runs `pnpm lint` and `pnpm format`.
-5. Open a pull request against the `main` branch.
+4. Open a pull request against the `main` branch.
 
 ## Semantic Commit Examples
 
