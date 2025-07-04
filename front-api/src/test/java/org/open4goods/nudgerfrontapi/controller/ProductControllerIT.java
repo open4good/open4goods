@@ -95,13 +95,25 @@ class ProductControllerIT {
     @Test
     void productsEndpointReturnsPage() throws Exception {
         var page = new PageImpl<>(List.of(new ProductDto(0L, null, null, null, null, null, null)), PageRequest.of(0, 20), 1);
-        given(service.getProducts(any(Pageable.class), any(Locale.class), anySet())).willReturn(page);
+        given(service.getProducts(any(Pageable.class), any(Locale.class), anySet(), any())).willReturn(page);
 
         mockMvc.perform(get("/products")
                         .with(jwt()))
                 .andExpect(status().isOk())
                 .andExpect(header().string("Cache-Control", "public, max-age=3600"))
                 .andExpect(jsonPath("$.page.number").value(0));
+
+    }
+
+    @Test
+    void productsEndpointAcceptsAggregationParameter() throws Exception {
+        var page = new PageImpl<>(List.of(new ProductDto(0L, null, null, null, null, null, null)), PageRequest.of(0, 20), 1);
+        given(service.getProducts(any(Pageable.class), any(Locale.class), anySet(), any())).willReturn(page);
+
+        mockMvc.perform(get("/products")
+                        .param("aggregation", "{\"aggs\":[{\"name\":\"brands\",\"field\":\"offersCount\",\"type\":\"terms\"}]}")
+                        .with(jwt()))
+                .andExpect(status().isOk());
     }
 
     @Test
