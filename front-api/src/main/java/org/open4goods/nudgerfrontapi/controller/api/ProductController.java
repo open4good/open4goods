@@ -1,20 +1,19 @@
 package org.open4goods.nudgerfrontapi.controller.api;
 
 import java.time.Duration;
-import java.util.Locale;
-import java.util.Set;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
+import java.util.Set;
 
 import org.open4goods.model.exceptions.ResourceNotFoundException;
+import org.open4goods.nudgerfrontapi.dto.PageDto;
 import org.open4goods.nudgerfrontapi.dto.product.ProductDto;
+import org.open4goods.nudgerfrontapi.dto.product.ProductDto.ProductDtoAggregatableFields;
 import org.open4goods.nudgerfrontapi.dto.product.ProductDto.ProductDtoComponent;
 import org.open4goods.nudgerfrontapi.dto.product.ProductDto.ProductDtoSortableFields;
-import org.open4goods.nudgerfrontapi.dto.product.ProductDto.ProductDtoAggregatableFields;
-import org.open4goods.nudgerfrontapi.dto.PageDto;
-import org.open4goods.nudgerfrontapi.service.ProductMappingService;
 import org.open4goods.nudgerfrontapi.dto.search.AggregationRequestDto;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import org.open4goods.nudgerfrontapi.service.ProductMappingService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
@@ -26,6 +25,8 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;

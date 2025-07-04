@@ -46,6 +46,68 @@ export interface ProductsRequest {
 export class ProductApi extends runtime.BaseAPI {
 
     /**
+     * Return the list of fields available for aggregation.
+     * Get aggregatable fields
+     */
+    async aggregatableFieldsRaw(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<Array<string>>> {
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+
+        let urlPath = `/products/fields/aggregatable`;
+
+        const response = await this.request({
+            path: urlPath,
+            method: 'GET',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse<any>(response);
+    }
+
+    /**
+     * Return the list of fields available for aggregation.
+     * Get aggregatable fields
+     */
+    async aggregatableFields(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<Array<string>> {
+        const response = await this.aggregatableFieldsRaw(initOverrides);
+        return await response.value();
+    }
+
+    /**
+     * Return the list of components that can be included in product responses.
+     * Get available components
+     */
+    async componentsRaw(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<Array<string>>> {
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+
+        let urlPath = `/products/fields/components`;
+
+        const response = await this.request({
+            path: urlPath,
+            method: 'GET',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse<any>(response);
+    }
+
+    /**
+     * Return the list of components that can be included in product responses.
+     * Get available components
+     */
+    async components(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<Array<string>> {
+        const response = await this.componentsRaw(initOverrides);
+        return await response.value();
+    }
+
+    /**
      * Return high‑level product information and aggregated scores.
      * Get product view
      */
@@ -132,6 +194,37 @@ export class ProductApi extends runtime.BaseAPI {
      */
     async products(requestParameters: ProductsRequest = {}, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<PageDto> {
         const response = await this.productsRaw(requestParameters, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     * Return the list of fields accepted by the sort parameter.
+     * Get sortable fields
+     */
+    async sortableFieldsRaw(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<Array<string>>> {
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+
+        let urlPath = `/products/fields/sortable`;
+
+        const response = await this.request({
+            path: urlPath,
+            method: 'GET',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse<any>(response);
+    }
+
+    /**
+     * Return the list of fields accepted by the sort parameter.
+     * Get sortable fields
+     */
+    async sortableFields(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<Array<string>> {
+        const response = await this.sortableFieldsRaw(initOverrides);
         return await response.value();
     }
 
