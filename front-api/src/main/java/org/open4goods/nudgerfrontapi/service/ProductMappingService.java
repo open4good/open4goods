@@ -155,13 +155,15 @@ public class ProductMappingService {
     }
 
 
-    public Page<ProductDto> getProducts(Pageable pageable, Locale locale, Set<String> includes) {
+    public Page<ProductDto> getProducts(Pageable pageable, Locale locale, Set<String> includes,
+                                        AggregationRequestDto aggregation) {
 
-		SearchHits<Product> response = repository.get(pageable);
-		List<ProductDto> items = response
-				.map(e -> e.getContent())
-				.map(e -> mapProduct(e, locale, includes))
-				.toList();
+                // TODO implement aggregation handling once search service is ready
+                SearchHits<Product> response = repository.get(pageable);
+                List<ProductDto> items = response
+                                .map(e -> e.getContent())
+                                .map(e -> mapProduct(e, locale, includes))
+                                .toList();
 
 		return  new PageImpl<ProductDto>(items, pageable, response.getTotalHits());
     }

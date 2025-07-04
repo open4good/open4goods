@@ -13,6 +13,8 @@ import org.open4goods.nudgerfrontapi.dto.product.ProductDto.ProductDtoSortableFi
 import org.open4goods.nudgerfrontapi.dto.product.ProductDto.ProductDtoAggregatableFields;
 import org.open4goods.nudgerfrontapi.dto.PageDto;
 import org.open4goods.nudgerfrontapi.service.ProductMappingService;
+import org.open4goods.nudgerfrontapi.dto.search.AggregationRequestDto;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
@@ -55,9 +57,11 @@ public class ProductController {
     private static final CacheControl ONE_HOUR_PUBLIC_CACHE = CacheControl.maxAge(Duration.ofHours(1)).cachePublic();
 
     private final ProductMappingService service;
+    private final ObjectMapper objectMapper;
 
-    public ProductController(ProductMappingService service) {
+    public ProductController(ProductMappingService service, ObjectMapper objectMapper) {
         this.service = service;
+        this.objectMapper = objectMapper;
     }
 
     /**
@@ -150,6 +154,9 @@ public class ProductController {
                     @Parameter(name = "sort", in = ParameterIn.QUERY, description = "Sort criteria in the format: property,(asc|desc). ",array = @ArraySchema(
                             schema = @Schema(implementation = ProductDtoSortableFields.class)
                     )),
+                    @Parameter(name = "aggregation", in = ParameterIn.QUERY,
+                            description = "Aggregations definition as JSON",
+                            schema = @Schema(implementation = AggregationRequestDto.class))
             },
             responses = {
                     @ApiResponse(responseCode = "200", description = "Products returned",
@@ -162,8 +169,9 @@ public class ProductController {
     )
     public ResponseEntity<Page<ProductDto>> products(
     		@Parameter(hidden = true) @PageableDefault(size = 20) Pageable page,
-    		@RequestParam(required=false) Set<String> include,
-    		  Locale locale) {
+                @RequestParam(required=false) Set<String> include,
+                @RequestParam(required=false, name = "aggregation") String aggregation,
+                  Locale locale) {
 
 
 		/////////////////////
@@ -197,7 +205,16 @@ public class ProductController {
 		// Transforming product to DTO
 		///////////////////////
 
-		Page<ProductDto> body = service.getProducts(page, locale, include == null ? Set.of() : include);
+                AggregationRequestDto aggDto = null;
+                if (aggregation != null) {
+                        try {
+                                aggDto = objectMapper.readValue(aggregation, AggregationRequestDto.class);
+                        } catch (Exception e) {
+                                // TODO: handle invalid aggregation parameter
+                        }
+                }
+
+                Page<ProductDto> body = service.getProducts(page, locale, include == null ? Set.of() : include, aggDto);
 
 
 
