@@ -26,13 +26,13 @@ import io.swagger.v3.oas.annotations.Operation;
  */
 @RestController
 @PreAuthorize("hasAuthority('"+RolesConstants.ROLE_ADMIN+"')")
-public class ProductController {
+public class LegacyApiProductController {
 
         private final ProductRepository repository;
         private final VerticalsConfigService configService;
         private final ProductNameSelectionService productNameSelectionService;
 
-        public ProductController(ProductRepository repository,
+        public LegacyApiProductController(ProductRepository repository,
                                  VerticalsConfigService configService,
                                  ProductNameSelectionService productNameSelectionService) {
                 this.repository = repository;
