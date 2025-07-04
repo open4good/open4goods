@@ -11,3 +11,4 @@ node_modules/
 !/.husky/pre-commit
 !/.husky/
 dist/
+/dist
