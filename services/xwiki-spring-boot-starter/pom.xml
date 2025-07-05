@@ -163,24 +163,24 @@
 			<artifactId>xwiki-platform-rest-model</artifactId>
 			<version>16.0.0</version>
 		</dependency>
-		
+
 		<dependency>
 			<groupId>org.xwiki.commons</groupId>
 			<artifactId>xwiki-commons-component-default</artifactId>
-		    <version>17.5.0</version>
+		    <version>17.1.0</version>
 		</dependency>
 
         <dependency>
             <groupId>com.github.ben-manes.caffeine</groupId>
             <artifactId>caffeine</artifactId>
         </dependency>
-        
+
 		<dependency>
 			<groupId>org.xwiki.rendering</groupId>
 			<artifactId>xwiki-rendering-api</artifactId>
-		    <version>17.5.0</version>
+		    <version>17.1.0</version>
 		</dependency>
-				
+
 
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
