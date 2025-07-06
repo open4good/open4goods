@@ -1,9 +1,10 @@
 {
-  "source": ["../design-tokens/**/*.json"],
+  "usesDtcg": true,
+  "source": ["design-tokens/merged-tokens.json"],
   "platforms": {
     "css": {
       "transformGroup": "css",
-      "buildPath": "../styles/",
+      "buildPath": "styles/",
       "files": [
         {
           "destination": "variables.css",
@@ -13,7 +14,7 @@
     },
     "scss": {
       "transformGroup": "scss",
-      "buildPath": "../styles/",
+      "buildPath": "styles/",
       "files": [
         {
           "destination": "_variables.scss",

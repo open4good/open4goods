@@ -35,3 +35,8 @@ node_modules/
 !/.husky/pre-push
 !/.husky/pre-commit
 !/.husky/
+# Design token outputs
+styles/variables.css
+styles/_variables.scss
+design-tokens/merged-tokens.json
+
