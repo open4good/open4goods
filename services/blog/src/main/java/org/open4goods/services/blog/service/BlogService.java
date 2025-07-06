@@ -260,12 +260,12 @@ public class BlogService implements HealthIndicator {
                     if (startPos != -1) {
                         html = html.substring(startPos);
                     }
+
                     int stopPos = html.indexOf(XWIKI_BLOGPOST_STOP_MARKUP);
                     if (stopPos != -1) {
                         html = html.substring(0, stopPos);
                     }
-                    // Sanitize HTML content to avoid XSS
-                    html = Jsoup.clean(html, Safelist.basicWithImages());
+
                     // Replace blog attachment links with proxied equivalent links
                     String basePath = '/' + config.getBlogUrl();
                     if (basePath.endsWith("/")) {
