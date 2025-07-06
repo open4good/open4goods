@@ -19,7 +19,7 @@ logs
 .idea
 .start
 
-# Local env 
+# Local env
 .env.*
 !.env.examplefiles
 .env
@@ -35,8 +35,6 @@ node_modules/
 !/.husky/pre-push
 !/.husky/pre-commit
 !/.husky/
-# Design token outputs
-styles/variables.css
-styles/_variables.scss
+# Design token output
 design-tokens/merged-tokens.json
 
