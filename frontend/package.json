@@ -6,7 +6,7 @@
     "dev": "nuxt dev",
     "build": "nuxt build",
     "tokens:merge": "node scripts/merge-tokens.cjs",
-    "tokens:build": "pnpm run tokens:merge && cd style-dictionary && style-dictionary build --config config.json",
+    "tokens:build": "pnpm run tokens:merge && style-dictionary build --config style-dictionary/config.json",
     "preview": "nuxt preview",
     "generate": "nuxt generate",
     "lint": "eslint .",
