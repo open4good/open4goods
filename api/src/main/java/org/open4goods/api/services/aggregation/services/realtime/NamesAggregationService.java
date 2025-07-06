@@ -91,17 +91,24 @@ public class NamesAggregationService extends AbstractAggregationService {
 					data.getNames().getH1Title().put(lang, computePrefixedText(data, tConf.getH1Title(), " "));
 				}
 
+
+				// TODO (P1, critical) : disabled because of disk space faillure cause of stack traces
+
+				//Caused by: org.open4goods.services.evaluation.exception.TemplateEvaluationException: Unresolved variable in expression: ${p.model()}
+				// can be checked on 5397063677580
+
+
                                 // Generating SEO meta data using BlablaService templates
-                                data.getNames().getMetaDescription().put(lang,
-                                                blablaService.generateBlabla(tConf.getProductMetaDescription(), data));
-                                data.getNames().getProductMetaOpenGraphTitle().put(lang,
-                                                blablaService.generateBlabla(tConf.getProductMetaOpenGraphTitle(), data));
-                                data.getNames().getProductMetaOpenGraphDescription().put(lang,
-                                                blablaService.generateBlabla(tConf.getProductMetaOpenGraphDescription(), data));
-                                data.getNames().getProductMetaTwitterTitle().put(lang,
-                                                blablaService.generateBlabla(tConf.getProductMetaTwitterTitle(), data));
-                                data.getNames().getProductMetaTwitterDescription().put(lang,
-                                                blablaService.generateBlabla(tConf.getProductMetaTwitterDescription(), data));
+//                                data.getNames().getMetaDescription().put(lang,
+//                                                blablaService.generateBlabla(tConf.getProductMetaDescription(), data));
+//                                data.getNames().getProductMetaOpenGraphTitle().put(lang,
+//                                                blablaService.generateBlabla(tConf.getProductMetaOpenGraphTitle(), data));
+//                                data.getNames().getProductMetaOpenGraphDescription().put(lang,
+//                                                blablaService.generateBlabla(tConf.getProductMetaOpenGraphDescription(), data));
+//                                data.getNames().getProductMetaTwitterTitle().put(lang,
+//                                                blablaService.generateBlabla(tConf.getProductMetaTwitterTitle(), data));
+//                                data.getNames().getProductMetaTwitterDescription().put(lang,
+//                                                blablaService.generateBlabla(tConf.getProductMetaTwitterDescription(), data));
 
 
 
