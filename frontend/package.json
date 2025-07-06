@@ -5,7 +5,8 @@
   "scripts": {
     "dev": "nuxt dev",
     "build": "nuxt build",
-    "tokens:build": "style-dictionary build --config style-dictionary/config.json",
+    "tokens:merge": "node scripts/merge-tokens.cjs",
+    "tokens:build": "pnpm run tokens:merge && cd style-dictionary && style-dictionary build --config config.json",
     "preview": "nuxt preview",
     "generate": "nuxt generate",
     "lint": "eslint .",
@@ -58,7 +59,8 @@
     "jsdom": "^26.1.0",
     "prettier": "^3.5.3",
     "semantic-release": "^24.2.5",
-    "storybook": "8.6.14"
+    "storybook": "8.6.14",
+    "style-dictionary": "^5.0.1"
   },
   "packageManager": "pnpm@8.15.9",
   "engines": {
