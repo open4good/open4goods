@@ -7,6 +7,10 @@
     "build": "nuxt build",
     "tokens:merge": "node scripts/merge-tokens.cjs",
     "tokens:build": "pnpm run tokens:merge && style-dictionary build --config style-dictionary/config.json",
+    "predev": "pnpm run tokens:build",
+    "prebuild": "pnpm run tokens:build",
+    "pregenerate": "pnpm run tokens:build",
+    "prepreview": "pnpm run tokens:build",
     "preview": "nuxt preview",
     "generate": "nuxt generate",
     "lint": "eslint .",
@@ -16,7 +20,7 @@
     "storybook:build": "pnpm exec storybook build",
     "generate:api": "openapi-generator-cli generate -i https://beta.front-api.nudger.fr/v3/api-docs/front -g typescript-fetch -o src/api --skip-validate-spec",
     "semantic-release": "semantic-release",
-    "postinstall": "nuxt prepare"
+    "postinstall": "pnpm run tokens:build && nuxt prepare"
   },
   "dependencies": {
     "@nuxt/fonts": "0.11.4",

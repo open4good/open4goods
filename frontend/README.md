@@ -89,8 +89,10 @@ Design tokens are configured in `tokens.config.json`. Replace the
 (e.g. `https://www.figma.com/file/<FILE_ID>/...`) and provide a
 `FIGMA_TOKEN` environment variable. After setting these values, run
 your design token generation command to pull the latest tokens.
-Run `pnpm run tokens:build` to merge the exported token sets and
-generate the CSS and SCSS variable files in `styles/`.
+Design token styles are generated automatically during `pnpm install`,
+`pnpm dev`, `pnpm build` and `pnpm generate`. You can also run
+`pnpm run tokens:build` manually to update `styles/variables.css` and
+`styles/_variables.scss`.
 
 ## Project Structure
 
