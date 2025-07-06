@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "nuxt dev",
     "build": "nuxt build",
-    "build:ssr": "NODE_OPTIONS='--max-old-space-size=8192' nuxt build",
+    "tokens:build": "style-dictionary build --config style-dictionary/config.json",
     "preview": "nuxt preview",
     "generate": "nuxt generate",
     "lint": "eslint .",
