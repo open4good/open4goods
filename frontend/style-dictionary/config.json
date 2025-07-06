@@ -1,4 +1,5 @@
 {
+  "usesDtcg": true,
   "source": ["design-tokens/merged-tokens.json"],
   "platforms": {
     "css": {
