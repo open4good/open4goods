@@ -59,7 +59,7 @@
     "jsdom": "^26.1.0",
     "prettier": "^3.5.3",
     "semantic-release": "^24.2.5",
-    "storybook": "9.0.15",
+    "storybook": "9.0.16",
     "style-dictionary": "^5.0.1"
   },
   "packageManager": "pnpm@8.15.9",
