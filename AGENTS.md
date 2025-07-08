@@ -7,6 +7,8 @@ Adhering to these rules keeps every sub-project consistent, maintainable, and pr
 > Each sub-module (e.g. `/api`, `/crawler`, `/services/*`) ships its own `agents.md` that may add or override rules.  
 > The standards below are **mandatory everywhere** unless a module’s guide explicitly says otherwise.
 
+
+> IMPORTANT : The docs/business folder contains documentation about processes, accounting, project magamnt, team, ..... It is functional documentation that also aim to be understood by LLM agents in order to provide RAG functionalities. It is also to be used to ensure  code / design / platform  stays coherent with the global strategy
 ---
 
 ## 1  Technology stack
