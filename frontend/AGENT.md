@@ -20,9 +20,7 @@ This guide is a comprehensive overview of the Nudger UI project. It covers the N
    - `pnpm lint`
    - `pnpm format`
    - `pnpm test`
-   - `pnpm storybook`
    - `pnpm generate:api`
-   - `pnpm storybook:build`
 
 ---
 
@@ -147,22 +145,6 @@ const { data } = await useFetch(`${config.public.strapiUrl}/api/pages`, {
 
 ---
 
-## Storybook for UI Components
-
-- Run `pnpm storybook` → http://localhost:6006
-- Co-locate stories next to components
-
-```ts
-export const Primary: Story = {
-  args: { label: 'Primary Button' },
-}
-```
-
-- Update stories with component changes
-- Use Addon Essentials for docs
-
----
-
 ---
 
 ## Documentation
@@ -199,5 +181,4 @@ Before issueing a PR, systematically validate and check global non regession usi
 - pnpm lint
 - pnpm test run
 - pnpm generate
-- pnpm storybook, check all components have an associated storybook
 - pnpm preview, then tests URLS are HTTP 200 or act as expected
