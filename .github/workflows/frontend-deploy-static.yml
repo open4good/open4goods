@@ -27,16 +27,11 @@ jobs:
         run: NITRO_PRESET=github_pages pnpm generate
         working-directory: frontend
 
-      - name: Build Storybook
-        run: pnpm storybook:build -- --output-dir storybook-static
-        working-directory: frontend
-
       - name: Prepare dist/
         run: |
             rm -rf dist
-            mkdir -p dist/storybook
+            mkdir -p dist
             cp -r .output/public/* dist/
-            cp -r storybook-static/* dist/storybook/
             echo 'static.nudger.fr' > dist/CNAME
         working-directory: frontend
 
