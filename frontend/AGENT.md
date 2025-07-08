@@ -197,7 +197,7 @@ export const Primary: Story = {
 Before issueing a PR, systematically validate and check global non regession using
 
 - pnpm lint
-- pnpm test run
+- pnpm test
 - pnpm generate
 - pnpm storybook, check all components have an associated storybook
 - pnpm preview, then tests URLS are HTTP 200 or act as expected
