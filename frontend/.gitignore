@@ -28,7 +28,6 @@ logs
 node_modules/
 .nuxt/
 .output/
-/storybook-static/
 /.husky/*
 !/.husky/_/husky.sh
 !/.husky/_/
