@@ -9,13 +9,12 @@
 
 Experience Nudger frontend online:
 
-- [https://static.nudger.fr/storybook](https://static.nudger.fr/storybook) – Storybook component showcase.
 - [https://static.nudger.fr](https://static.nudger.fr) – statically generated version hosted on GitHub Pages.
 - [https://demo.nudger.fr](https://demo.nudger.fr) – server-rendered demo.
 
 **Welcome** to the Nudger front-end project. This guide is a comprehensive overview of the Nudger UI application structure, coding conventions, and tooling.
 
-The Nudger front-end is a Nuxt 3 app (Vue 3) that interfaces with a Strapi headless CMS for content and uses an OpenAPI-described backend for core application data. We employ modern frameworks and best practices – from Tailwind CSS and Pinia, to Vitest and Storybook – to maintain a robust, scalable codebase.
+The Nudger front-end is a Nuxt 3 app (Vue 3) that interfaces with a Strapi headless CMS for content and uses an OpenAPI-described backend for core application data. We employ modern frameworks and best practices – from Tailwind CSS and Pinia to Vitest – to maintain a robust, scalable codebase.
 
 Use this document as the bible for:
 
@@ -76,11 +75,9 @@ To get the project up and running locally, follow these steps:
    - `pnpm lint` – run ESLint
    - `pnpm format` – check formatting
    - `pnpm test` – run tests with Vitest
-   - `pnpm storybook` – launch Storybook
    - `pnpm generate:api` – regenerate the OpenAPI fetch client
    - `pnpm preview` – serve the production build locally
    - `pnpm build:ssr` – build with increased memory
-   - `pnpm storybook:build` – build Storybook static site
 
 ## Design Tokens
 
@@ -117,7 +114,6 @@ src/
 - `renovate.json` – Renovate bot configuration
 - `pnpm-workspace.yaml` – workspace and package management
 - `package.json` – scripts and dependencies
-- `.storybook/` – Storybook configuration files
 - `nudger-api.json` – OpenAPI specification used by `generate:api`
 - `.env.example` – example environment variables
 - `.husky/` – Git hooks executed on commit
@@ -212,27 +208,6 @@ const cart = useCartStore();
   pnpm test
   ```
 
-## Storybook
-
-- Run:
-  ```bash
-  pnpm storybook
-  ```
-
-### Example Story
-
-```ts
-import Button from '@/components/Button.vue'
-
-export default {
-  title: 'Components/Button',
-  component: Button,
-}
-
-export const Primary = {
-  args: { label: 'Primary Button' },
-}
-```
 
 ## Linting & Formatting
 
@@ -264,7 +239,6 @@ export const Primary = {
 - Production deployments are served from **GitHub Pages** at
   [https://static.nudger.fr](https://static.nudger.fr). The Storybook is
   published alongside the site under
-  [https://static.nudger.fr/storybook/](https://static.nudger.fr/storybook/).
 
 - CI likely includes:
   - Tests and lint on PRs
