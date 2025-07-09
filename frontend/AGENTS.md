@@ -2,6 +2,8 @@
 
 This guide is a comprehensive overview of the Nudger UI project. It covers the Nuxt 3 / vue 3 application structure, coding conventions and tooling. It is written for new contributors and AI code-generation agents alike, aiming to ensure consistency and clarity in development.
 
+
+IMPORTANT :  You will never consider the pnpm-lock.yaml. Ignore it
 ---
 
 ## Getting Started: Installation & Setup
