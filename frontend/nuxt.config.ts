@@ -10,6 +10,11 @@ export default defineNuxtConfig({
     define: {
       __VUE_PROD_DEVTOOLS__: false,
     },
+    resolve: {
+      alias: {
+        vue: 'vue/dist/vue.esm-bundler.js',
+      },
+    },
   },
 
   modules: [
