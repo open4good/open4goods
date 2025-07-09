@@ -10,6 +10,16 @@ export default defineNuxtConfig({
     define: {
       __VUE_PROD_DEVTOOLS__: false,
     },
+    build: {
+      commonjsOptions: {
+        requireReturnsDefault: false,
+      },
+    },
+    resolve: {
+      alias: {
+        vue: './scripts/vue-default.mjs',
+      },
+    },
   },
 
   modules: [
@@ -42,6 +52,15 @@ export default defineNuxtConfig({
     },
     vuetifyOptions: {
       /* vuetify options */
+    },
+  },
+  nitro: {
+    rollupConfig: {
+      plugins: {
+        commonjs: {
+          requireReturnsDefault: 'namespace',
+        },
+      },
     },
   },
 })
