@@ -7,174 +7,176 @@ settings:
 overrides:
   vue: 3.5.17
 
-dependencies:
-  '@mdi/font':
-    specifier: ^7.4.47
-    version: 7.4.47
-  '@nuxt/fonts':
-    specifier: 0.11.4
-    version: 0.11.4(vite@7.0.4)
-  '@nuxt/icon':
-    specifier: 1.15.0
-    version: 1.15.0(vite@7.0.4)(vue@3.5.17)
-  '@nuxt/image':
-    specifier: 1.10.0
-    version: 1.10.0
-  '@pinia/nuxt':
-    specifier: ^0.11.1
-    version: 0.11.1(pinia@3.0.3)
-  '@unhead/vue':
-    specifier: ^2.0.11
-    version: 2.0.12(vue@3.5.17)
-  '@vueuse/core':
-    specifier: ^10.11.0
-    version: 10.11.1(vue@3.5.17)
-  '@vueuse/nuxt':
-    specifier: ^10.11.0
-    version: 10.11.1(nuxt@3.17.6)(vue@3.5.17)
-  dompurify:
-    specifier: ^3.2.6
-    version: 3.2.6
-  i:
-    specifier: ^0.3.7
-    version: 0.3.7
-  npm:
-    specifier: ^11.4.2
-    version: 11.4.2
-  nuxt:
-    specifier: ^3.17.6
-    version: 3.17.6(@vue/compiler-sfc@3.5.17)(eslint@9.31.0)(rollup@4.45.0)(sass@1.89.2)(typescript@5.8.3)(vite@7.0.4)(vue-tsc@3.0.1)
-  nuxt-device:
-    specifier: ^2.1.0
-    version: 2.1.0
-  pinia:
-    specifier: ^3.0.3
-    version: 3.0.3(typescript@5.8.3)(vue@3.5.17)
-  sass-loader:
-    specifier: ^16.0.2
-    version: 16.0.5(sass@1.89.2)
-  unhead:
-    specifier: ^1.9.15
-    version: 1.11.20
-  vue:
-    specifier: 3.5.17
-    version: 3.5.17(typescript@5.8.3)
-  vue-router:
-    specifier: ^4.5.1
-    version: 4.5.1(vue@3.5.17)
+importers:
 
-devDependencies:
-  '@iconify-json/bxl':
-    specifier: ^1.1.10
-    version: 1.2.2
-  '@iconify-json/mdi':
-    specifier: ^1.1.67
-    version: 1.2.3
-  '@nuxt/devtools':
-    specifier: ^2.5.0
-    version: 2.6.2(vite@7.0.4)(vue@3.5.17)
-  '@nuxt/eslint':
-    specifier: 1.5.2
-    version: 1.5.2(@vue/compiler-sfc@3.5.17)(eslint@9.31.0)(typescript@5.8.3)(vite@7.0.4)
-  '@nuxt/eslint-config':
-    specifier: ^1.4.1
-    version: 1.5.2(@vue/compiler-sfc@3.5.17)(eslint@9.31.0)(typescript@5.8.3)
-  '@nuxt/scripts':
-    specifier: 0.11.8
-    version: 0.11.8(@unhead/vue@2.0.12)(nuxt@3.17.6)(typescript@5.8.3)(vue@3.5.17)
-  '@nuxt/test-utils':
-    specifier: 3.19.2
-    version: 3.19.2(@vue/test-utils@2.4.6)(happy-dom@18.0.1)(jsdom@26.1.0)(typescript@5.8.3)(vitest@3.2.4)
-  '@nuxtjs/i18n':
-    specifier: 9.5.6
-    version: 9.5.6(eslint@9.31.0)(rollup@4.45.0)(vue@3.5.17)
-  '@nuxtjs/plausible':
-    specifier: ^1.2.0
-    version: 1.2.0
-  '@nuxtjs/robots':
-    specifier: ^5.2.11
-    version: 5.4.0(vue@3.5.17)
-  '@nuxtjs/seo':
-    specifier: ^3.0.3
-    version: 3.1.0(@unhead/vue@2.0.12)(h3@1.15.3)(rollup@4.45.0)(unstorage@1.16.0)(vite@7.0.4)(vue@3.5.17)
-  '@nuxtjs/sitemap':
-    specifier: ^7.4.3
-    version: 7.4.3(h3@1.15.3)(vite@7.0.4)(vue@3.5.17)
-  '@nuxtjs/tailwindcss':
-    specifier: ^6.12.2
-    version: 6.14.0
-  '@openapitools/openapi-generator-cli':
-    specifier: ^2.21.0
-    version: 2.21.0
-  '@semantic-release/changelog':
-    specifier: ^6.0.3
-    version: 6.0.3(semantic-release@24.2.7)
-  '@semantic-release/git':
-    specifier: ^10.0.1
-    version: 10.0.1(semantic-release@24.2.7)
-  '@semantic-release/github':
-    specifier: ^11.0.3
-    version: 11.0.3(semantic-release@24.2.7)
-  '@semantic-release/npm':
-    specifier: ^12.0.1
-    version: 12.0.2(semantic-release@24.2.7)
-  '@typescript-eslint/parser':
-    specifier: ^8.34.0
-    version: 8.36.0(eslint@9.31.0)(typescript@5.8.3)
-  '@vite-pwa/nuxt':
-    specifier: ^1.0.4
-    version: 1.0.4(vite@7.0.4)(workbox-build@7.3.0)(workbox-window@7.3.0)
-  '@vitejs/plugin-vue':
-    specifier: ^6.0.0
-    version: 6.0.0(vite@7.0.4)(vue@3.5.17)
-  '@vue/test-utils':
-    specifier: ^2.4.6
-    version: 2.4.6
-  dayjs-nuxt:
-    specifier: ^2.1.11
-    version: 2.1.11
-  eslint:
-    specifier: ^9.30.1
-    version: 9.31.0
-  eslint-config-prettier:
-    specifier: ^10.1.5
-    version: 10.1.5(eslint@9.31.0)
-  eslint-plugin-vue:
-    specifier: ^10.2.0
-    version: 10.3.0(@typescript-eslint/parser@8.36.0)(eslint@9.31.0)(vue-eslint-parser@10.2.0)
-  happy-dom:
-    specifier: ^18.0.1
-    version: 18.0.1
-  husky:
-    specifier: ^9.1.7
-    version: 9.1.7
-  jsdom:
-    specifier: ^26.1.0
-    version: 26.1.0
-  prettier:
-    specifier: ^3.5.3
-    version: 3.6.2
-  resize-observer-polyfill:
-    specifier: ^1.5.1
-    version: 1.5.1
-  sass:
-    specifier: ^1.80.4
-    version: 1.89.2
-  semantic-release:
-    specifier: ^24.2.5
-    version: 24.2.7(typescript@5.8.3)
-  vite-plugin-vuetify:
-    specifier: ^2.1.0
-    version: 2.1.1(vite@7.0.4)(vue@3.5.17)(vuetify@3.9.0)
-  vitest:
-    specifier: ^3.2.4
-    version: 3.2.4(happy-dom@18.0.1)(jsdom@26.1.0)(sass@1.89.2)
-  vue-tsc:
-    specifier: ^3.0.1
-    version: 3.0.1(typescript@5.8.3)
-  vuetify:
-    specifier: ^3.7.3
-    version: 3.9.0(typescript@5.8.3)(vite-plugin-vuetify@2.1.1)(vue@3.5.17)
+  .:
+    dependencies:
+      '@mdi/font':
+        specifier: ^7.4.47
+        version: 7.4.47
+      '@nuxt/fonts':
+        specifier: 0.11.4
+        version: 0.11.4(vite@7.0.4)
+      '@nuxt/icon':
+        specifier: 1.15.0
+        version: 1.15.0(vite@7.0.4)(vue@3.5.17)
+      '@nuxt/image':
+        specifier: 1.10.0
+        version: 1.10.0
+      '@pinia/nuxt':
+        specifier: ^0.11.1
+        version: 0.11.1(pinia@3.0.3)
+      '@unhead/vue':
+        specifier: ^2.0.11
+        version: 2.0.12(vue@3.5.17)
+      '@vueuse/core':
+        specifier: ^10.11.0
+        version: 10.11.1(vue@3.5.17)
+      '@vueuse/nuxt':
+        specifier: ^10.11.0
+        version: 10.11.1(nuxt@3.17.6)(vue@3.5.17)
+      dompurify:
+        specifier: ^3.2.6
+        version: 3.2.6
+      i:
+        specifier: ^0.3.7
+        version: 0.3.7
+      npm:
+        specifier: ^11.4.2
+        version: 11.4.2
+      nuxt:
+        specifier: ^3.17.6
+        version: 3.17.6(@vue/compiler-sfc@3.5.17)(eslint@9.31.0)(rollup@4.45.0)(sass@1.89.2)(typescript@5.8.3)(vite@7.0.4)(vue-tsc@3.0.1)
+      nuxt-device:
+        specifier: ^2.1.0
+        version: 2.1.0
+      pinia:
+        specifier: ^3.0.3
+        version: 3.0.3(typescript@5.8.3)(vue@3.5.17)
+      sass-loader:
+        specifier: ^16.0.2
+        version: 16.0.5(sass@1.89.2)
+      unhead:
+        specifier: ^2.0.0
+        version: 2.0.12
+      vue:
+        specifier: 3.5.17
+        version: 3.5.17(typescript@5.8.3)
+      vue-router:
+        specifier: ^4.5.1
+        version: 4.5.1(vue@3.5.17)
+    devDependencies:
+      '@iconify-json/bxl':
+        specifier: ^1.1.10
+        version: 1.2.2
+      '@iconify-json/mdi':
+        specifier: ^1.1.67
+        version: 1.2.3
+      '@nuxt/devtools':
+        specifier: ^2.5.0
+        version: 2.6.2(vite@7.0.4)(vue@3.5.17)
+      '@nuxt/eslint':
+        specifier: 1.5.2
+        version: 1.5.2(@vue/compiler-sfc@3.5.17)(eslint@9.31.0)(typescript@5.8.3)(vite@7.0.4)
+      '@nuxt/eslint-config':
+        specifier: ^1.4.1
+        version: 1.5.2(@vue/compiler-sfc@3.5.17)(eslint@9.31.0)(typescript@5.8.3)
+      '@nuxt/scripts':
+        specifier: 0.11.8
+        version: 0.11.8(@unhead/vue@2.0.12)(nuxt@3.17.6)(typescript@5.8.3)(vue@3.5.17)
+      '@nuxt/test-utils':
+        specifier: 3.19.2
+        version: 3.19.2(@vue/test-utils@2.4.6)(happy-dom@18.0.1)(jsdom@26.1.0)(typescript@5.8.3)(vitest@3.2.4)
+      '@nuxtjs/i18n':
+        specifier: 9.5.6
+        version: 9.5.6(eslint@9.31.0)(rollup@4.45.0)(vue@3.5.17)
+      '@nuxtjs/plausible':
+        specifier: ^1.2.0
+        version: 1.2.0
+      '@nuxtjs/robots':
+        specifier: ^5.2.11
+        version: 5.4.0(vue@3.5.17)
+      '@nuxtjs/seo':
+        specifier: ^3.0.3
+        version: 3.1.0(@unhead/vue@2.0.12)(h3@1.15.3)(rollup@4.45.0)(unstorage@1.16.0)(vite@7.0.4)(vue@3.5.17)
+      '@nuxtjs/sitemap':
+        specifier: ^7.4.3
+        version: 7.4.3(h3@1.15.3)(vite@7.0.4)(vue@3.5.17)
+      '@nuxtjs/tailwindcss':
+        specifier: ^6.12.2
+        version: 6.14.0
+      '@openapitools/openapi-generator-cli':
+        specifier: ^2.21.0
+        version: 2.21.0
+      '@semantic-release/changelog':
+        specifier: ^6.0.3
+        version: 6.0.3(semantic-release@24.2.7)
+      '@semantic-release/git':
+        specifier: ^10.0.1
+        version: 10.0.1(semantic-release@24.2.7)
+      '@semantic-release/github':
+        specifier: ^11.0.3
+        version: 11.0.3(semantic-release@24.2.7)
+      '@semantic-release/npm':
+        specifier: ^12.0.1
+        version: 12.0.2(semantic-release@24.2.7)
+      '@typescript-eslint/parser':
+        specifier: ^8.34.0
+        version: 8.36.0(eslint@9.31.0)(typescript@5.8.3)
+      '@vite-pwa/nuxt':
+        specifier: ^1.0.4
+        version: 1.0.4(vite@7.0.4)(workbox-build@7.3.0)(workbox-window@7.3.0)
+      '@vitejs/plugin-vue':
+        specifier: ^6.0.0
+        version: 6.0.0(vite@7.0.4)(vue@3.5.17)
+      '@vue/test-utils':
+        specifier: ^2.4.6
+        version: 2.4.6
+      dayjs-nuxt:
+        specifier: ^2.1.11
+        version: 2.1.11
+      eslint:
+        specifier: ^9.30.1
+        version: 9.31.0
+      eslint-config-prettier:
+        specifier: ^10.1.5
+        version: 10.1.5(eslint@9.31.0)
+      eslint-plugin-vue:
+        specifier: ^10.2.0
+        version: 10.3.0(@typescript-eslint/parser@8.36.0)(eslint@9.31.0)(vue-eslint-parser@10.2.0)
+      happy-dom:
+        specifier: ^18.0.1
+        version: 18.0.1
+      husky:
+        specifier: ^9.1.7
+        version: 9.1.7
+      jsdom:
+        specifier: ^26.1.0
+        version: 26.1.0
+      prettier:
+        specifier: ^3.5.3
+        version: 3.6.2
+      resize-observer-polyfill:
+        specifier: ^1.5.1
+        version: 1.5.1
+      sass:
+        specifier: ^1.80.4
+        version: 1.89.2
+      semantic-release:
+        specifier: ^24.2.5
+        version: 24.2.7(typescript@5.8.3)
+      vite-plugin-vuetify:
+        specifier: ^2.1.0
+        version: 2.1.1(vite@7.0.4)(vue@3.5.17)(vuetify@3.9.0)
+      vitest:
+        specifier: ^3.2.4
+        version: 3.2.4(happy-dom@18.0.1)(jsdom@26.1.0)(sass@1.89.2)
+      vue-tsc:
+        specifier: ^3.0.1
+        version: 3.0.1(typescript@5.8.3)
+      vuetify:
+        specifier: ^3.7.3
+        version: 3.9.0(typescript@5.8.3)(vite-plugin-vuetify@2.1.1)(vue@3.5.17)
 
 packages:
 
@@ -4819,13 +4821,6 @@ packages:
       - rollup
     dev: true
 
-  /@unhead/dom@1.11.20:
-    resolution: {integrity: sha512-jgfGYdOH+xHJF/j8gudjsYu3oIjFyXhCWcgKaw3vQnT616gSqyqnGQGOItL+BQtQZACKNISwIfx5PuOtztMKLA==}
-    dependencies:
-      '@unhead/schema': 1.11.20
-      '@unhead/shared': 1.11.20
-    dev: false
-
   /@unhead/schema-org@2.0.12(@unhead/vue@2.0.12):
     resolution: {integrity: sha512-wsOjcTvNncJwTUouw84vku0dKSfYiWEKxqV9abzpbjOJ6+44woO7XKFGD7MdTcRgsfkjO1J0MLHaG7VEBwJkGg==}
     peerDependencies:
@@ -4849,20 +4844,6 @@ packages:
       ufo: 1.6.1
       unhead: 2.0.12
     dev: true
-
-  /@unhead/schema@1.11.20:
-    resolution: {integrity: sha512-0zWykKAaJdm+/Y7yi/Yds20PrUK7XabLe9c3IRcjnwYmSWY6z0Cr19VIs3ozCj8P+GhR+/TI2mwtGlueCEYouA==}
-    dependencies:
-      hookable: 5.5.3
-      zhead: 2.2.4
-    dev: false
-
-  /@unhead/shared@1.11.20:
-    resolution: {integrity: sha512-1MOrBkGgkUXS+sOKz/DBh4U20DNoITlJwpmvSInxEUNhghSNb56S0RnaHRq0iHkhrO/cDgz2zvfdlRpoPLGI3w==}
-    dependencies:
-      '@unhead/schema': 1.11.20
-      packrup: 0.1.2
-    dev: false
 
   /@unhead/vue@2.0.12(vue@3.5.17):
     resolution: {integrity: sha512-WFaiCVbBd39FK6Bx3GQskhgT9s45Vjx6dRQegYheVwU1AnF+FAfJVgWbrl21p6fRJcLAFp0xDz6wE18JYBM0eQ==}
@@ -5688,6 +5669,7 @@ packages:
 
   /b4a@1.6.7:
     resolution: {integrity: sha512-OnAYlL5b7LEkALw87fUVafQw5rVR9RjwGd4KUwNQ6DrrNmaVaUCgLipfVlzrPQ4tWOR9P0IXGNOx50jYCCdSJg==}
+    requiresBuild: true
 
   /babel-plugin-polyfill-corejs2@0.4.14(@babel/core@7.28.0):
     resolution: {integrity: sha512-Co2Y9wX854ts6U8gAAPXfn0GmAyctHuK8n0Yhfjd6t30g7yvKjspvvOo9yG+z52PZRgFErt7Ka2pYnXCjLKEpg==}
@@ -6179,6 +6161,7 @@ packages:
   /clone@1.0.4:
     resolution: {integrity: sha512-JQHZ2QMW6l3aH/j6xCqQThY/9OH4D/9ls34cgkUBiEeocRTU04tHfKPBsUK1PqZCUQM7GiA0IIXJSuXHI64Kbg==}
     engines: {node: '>=0.8'}
+    requiresBuild: true
     dev: true
 
   /clone@2.1.2:
@@ -6861,6 +6844,7 @@ packages:
 
   /defaults@1.0.4:
     resolution: {integrity: sha512-eFuaLoy/Rxalv2kr+lqMlUnrDWV+3j4pljOIJgLIhI058IQfWJ7vXhyEIHu+HtC738klGALYxOKDO0bQP3tg8A==}
+    requiresBuild: true
     dependencies:
       clone: 1.0.4
     dev: true
@@ -7814,6 +7798,7 @@ packages:
 
   /fast-fifo@1.3.2:
     resolution: {integrity: sha512-/d9sfos4yxzpwkDkuN7k2SqFKtYNmCTzgfEpz82x34IM9/zc8KGxQoXg1liNC/izpRM/MBdt44Nmx41ZWqk+FQ==}
+    requiresBuild: true
 
   /fast-glob@3.3.3:
     resolution: {integrity: sha512-7MptL8U0cqcFdzIzwOTHoilX9x5BrNqye7Z/LuC7kCMRio1EMSyqRK3BEAUD7sXRq4iT4AzTVuZdhgQ2TCvYLg==}
@@ -9162,6 +9147,7 @@ packages:
   /is64bit@2.0.0:
     resolution: {integrity: sha512-jv+8jaWCl0g2lSBkNSVXdzfBA0npK1HGC2KtWM9FumFRoGS94g3NbCCLVnCYHLjp4GrW2KZeeSTMo5ddtznmGw==}
     engines: {node: '>=18'}
+    requiresBuild: true
     dependencies:
       system-architecture: 0.1.0
 
@@ -11065,10 +11051,6 @@ packages:
   /package-manager-detector@1.3.0:
     resolution: {integrity: sha512-ZsEbbZORsyHuO00lY1kV3/t72yp6Ysay6Pd17ZAlNGuGwmWDLCJxFpRs0IzfXfj1o4icJOkUEioexFHzyPurSQ==}
 
-  /packrup@0.1.2:
-    resolution: {integrity: sha512-ZcKU7zrr5GlonoS9cxxrb5HVswGnyj6jQvwFBa6p5VFw7G71VAHcUKL5wyZSU/ECtPM/9gacWxy2KFQKt1gMNA==}
-    dev: false
-
   /pako@0.2.9:
     resolution: {integrity: sha512-NUcwaKxUxWrZLpDG+z/xZaCgQITkA/Dv4V/T6bw7VON6l1Xz/VnrBqrYjZQ12TamKHzITTfOEIYUj48y2KXImA==}
 
@@ -12746,6 +12728,7 @@ packages:
 
   /streamx@2.22.1:
     resolution: {integrity: sha512-znKXEBxfatz2GBNK02kRnCXjV+AA4kjZIUxeWSr3UGirZMJfTE9uiwKHobnbgxWyL/JWro8tTq+vOqAK1/qbSA==}
+    requiresBuild: true
     dependencies:
       fast-fifo: 1.3.2
       text-decoder: 1.2.3
@@ -13006,6 +12989,7 @@ packages:
   /system-architecture@0.1.0:
     resolution: {integrity: sha512-ulAk51I9UVUyJgxlv9M6lFot2WP3e7t8Kz9+IS6D4rVba1tR9kON+Ey69f+1R4Q8cd45Lod6a4IcJIxnzGc/zA==}
     engines: {node: '>=18'}
+    requiresBuild: true
 
   /tailwind-config-viewer@2.0.4(tailwindcss@3.4.17):
     resolution: {integrity: sha512-icvcmdMmt9dphvas8wL40qttrHwAnW3QEN4ExJ2zICjwRsPj7gowd1cOceaWG3IfTuM/cTNGQcx+bsjMtmV+cw==}
@@ -13160,6 +13144,7 @@ packages:
 
   /text-decoder@1.2.3:
     resolution: {integrity: sha512-3/o9z3X0X0fTupwsYvR03pJ/DjWuqqrfwBgTQzdWDiQSm9KitAyz/9WqsT2JQW7KV2m+bC2ol/zqpW37NHxLaA==}
+    requiresBuild: true
     dependencies:
       b4a: 1.6.7
 
@@ -13515,15 +13500,6 @@ packages:
       ohash: 2.0.11
       pathe: 2.0.3
       ufo: 1.6.1
-
-  /unhead@1.11.20:
-    resolution: {integrity: sha512-3AsNQC0pjwlLqEYHLjtichGWankK8yqmocReITecmpB1H0aOabeESueyy+8X1gyJx4ftZVwo9hqQ4O3fPWffCA==}
-    dependencies:
-      '@unhead/dom': 1.11.20
-      '@unhead/schema': 1.11.20
-      '@unhead/shared': 1.11.20
-      hookable: 5.5.3
-    dev: false
 
   /unhead@2.0.12:
     resolution: {integrity: sha512-5oo0lwz81XDXCmrHGzgmbaNOxM8R9MZ3FkEs2ROHeW8e16xsrv7qXykENlISrcxr3RLPHQEsD1b6js9P2Oj/Ow==}
@@ -14870,10 +14846,6 @@ packages:
       '@speed-highlight/core': 1.2.7
       cookie: 1.0.2
       youch-core: 0.3.3
-
-  /zhead@2.2.4:
-    resolution: {integrity: sha512-8F0OI5dpWIA5IGG5NHUg9staDwz/ZPxZtvGVf01j7vHqSyZ0raHY+78atOVxRqb73AotX22uV1pXt3gYSstGag==}
-    dev: false
 
   /zip-stream@6.0.1:
     resolution: {integrity: sha512-zK7YHHz4ZXpW89AHXUPbQVGKI7uvkd3hzusTdotCg1UxyaVtg0zFJSTfW/Dq5f7OBBVnq6cZIaC8Ti4hb6dtCA==}
