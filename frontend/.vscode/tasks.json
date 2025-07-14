@@ -1,0 +1,74 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Format with Prettier",
+      "type": "shell",
+      "command": "pnpm",
+      "args": ["format"],
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared",
+        "showReuseMessage": true,
+        "clear": false
+      },
+      "problemMatcher": [],
+      "detail": "Formate tout le code avec Prettier"
+    },
+    {
+      "label": "Check Prettier",
+      "type": "shell",
+      "command": "pnpm",
+      "args": ["format:check"],
+      "group": "build",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared",
+        "showReuseMessage": true,
+        "clear": false
+      },
+      "problemMatcher": [],
+      "detail": "Vérifie le formatage sans modifier les fichiers"
+    },
+    {
+      "label": "Lint & Format",
+      "type": "shell",
+      "command": "pnpm",
+      "args": ["lint:fix"],
+      "group": "build",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared",
+        "showReuseMessage": true,
+        "clear": false
+      },
+      "problemMatcher": ["$eslint-stylish"],
+      "detail": "Corrige ESLint et formate avec Prettier"
+    },
+    {
+      "label": "Format Current File",
+      "type": "shell",
+      "command": "pnpm",
+      "args": ["prettier", "--write", "${file}"],
+      "group": "build",
+      "presentation": {
+        "echo": true,
+        "reveal": "silent",
+        "focus": false,
+        "panel": "shared"
+      },
+      "problemMatcher": [],
+      "detail": "Formate uniquement le fichier actuel"
+    }
+  ]
+}

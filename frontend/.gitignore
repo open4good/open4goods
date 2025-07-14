@@ -19,6 +19,7 @@ logs
 .idea
 .start
 
+
 # Local env
 .env.*
 !.env.examplefiles
@@ -28,13 +29,10 @@ logs
 node_modules/
 .nuxt/
 .output/
-/storybook-static/
 /.husky/*
 !/.husky/_/husky.sh
 !/.husky/_/
 !/.husky/pre-push
 !/.husky/pre-commit
 !/.husky/
-# Design token output
-design-tokens/merged-tokens.json
-
+.cursorrules

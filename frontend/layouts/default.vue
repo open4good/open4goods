@@ -1,7 +1,11 @@
 <template>
-  <div>
-    <slot />
-  </div>
+  <v-app>
+    <v-main>
+      <slot />
+    </v-main>
+  </v-app>
 </template>
 
-<!-- Default layout for all pages -->
+<script setup lang="ts">
+// Layout par défaut avec Vuetify
+</script>

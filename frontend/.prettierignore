@@ -1,0 +1,27 @@
+# Ignore artifacts:
+.nuxt
+.output
+
+# Assets (only ignore compiled assets, not source files)
+assets/fonts/**
+
+# Version control
+**/.git
+**/.svn
+**/.hg
+
+# Dependencies
+**/node_modules
+
+# Lock file
+pnpm-lock.yaml
+
+# Build outputs
+dist/
+
+# Configuration files that should not be formatted
+nuxt.config.ts
+README.md
+AGENT.md
+.env
+*.log
