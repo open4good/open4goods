@@ -1,17 +1,32 @@
 <template>
-  <div>
-    <h1 class="text-h2 font-bold text-center pt-10">
-      Hello Nudger !
-      <v-icon icon="mdi-thumb-up" color="green" size="med" />
-    </h1>
+  <v-container
+    class="d-flex flex-column align-center justify-center min-height-screen pa-8"
+  >
+    <v-row>
+      <v-card class="text-center pa-8 mb-8 bg-green" elevation="4" rounded="lg">
+        <h1 class="text-h3 font-weight-bold text-white mb-4">Hello Nudger !</h1>
+        <v-icon icon="mdi-thumb-up" color="white" size="x-large" />
+      </v-card>
+    </v-row>
 
-    <h4 class="text-grey-darken-1 text-center pt-10">
-      A Nuxt template with Vuetify on It.
-    </h4>
+    <!-- 2. Carte Welcome to Vuetify centrée -->
+    <div class="mb-6">
+      <The-card />
+    </div>
 
-    <TheDialog />
-    <TheCard />
-  </div>
+    <!-- 3. Bouton Open Dialog centré -->
+    <div class="mb-6">
+      <The-dialog />
+    </div>
+
+    <!-- 4. Bouton Blog centré -->
+    <router-link to="/blog">
+      <v-btn color="success" variant="elevated" size="large" rounded="pill">
+        <v-icon start icon="mdi-book-open" />
+        Blog
+      </v-btn>
+    </router-link>
+  </v-container>
 </template>
 
-<!-- index page + basics components -->
+<!-- Page d'accueil simple et clean -->

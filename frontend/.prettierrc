@@ -1,4 +1,22 @@
 {
+  "semi": false,
+  "trailingComma": "es5",
   "singleQuote": true,
-  "semi": false
+  "printWidth": 80,
+  "tabWidth": 2,
+  "useTabs": false,
+  "vueIndentScriptAndStyle": false,
+  "endOfLine": "lf",
+  "bracketSpacing": true,
+  "arrowParens": "avoid",
+  "htmlWhitespaceSensitivity": "css",
+  "singleAttributePerLine": false,
+  "overrides": [
+    {
+      "files": "*.vue",
+      "options": {
+        "parser": "vue"
+      }
+    }
+  ]
 }
