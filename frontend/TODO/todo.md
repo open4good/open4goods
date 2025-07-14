@@ -1,0 +1,2 @@
+- install vitest
+- Implement nitro server (for blob)
