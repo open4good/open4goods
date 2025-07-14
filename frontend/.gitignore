@@ -1,0 +1,40 @@
+# Nuxt dev/build outputs
+.output
+.data
+.nuxt
+.nitro
+.cache
+dist
+
+# Node dependencies
+node_modules
+
+# Logs
+logs
+*.log
+
+# Misc
+.DS_Store
+.fleet
+.idea
+.start
+
+# Local env
+.env.*
+!.env.examplefiles
+.env
+/package-lock.json
+/.project
+node_modules/
+.nuxt/
+.output/
+/storybook-static/
+/.husky/*
+!/.husky/_/husky.sh
+!/.husky/_/
+!/.husky/pre-push
+!/.husky/pre-commit
+!/.husky/
+# Design token output
+design-tokens/merged-tokens.json
+
