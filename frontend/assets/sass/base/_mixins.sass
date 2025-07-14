@@ -1,0 +1,41 @@
+// assets/sass/base/_mixins.sass
+// Mixins utilitaires
+
+// Mixin pour les breakpoints
+@mixin mobile
+  @media (max-width: 767px)
+    @content
+
+@mixin tablet
+  @media (min-width: 768px) and (max-width: 1023px)
+    @content
+
+@mixin desktop
+  @media (min-width: 1024px)
+    @content
+
+// Mixin pour les transitions
+@mixin transition($property: all, $duration: 0.3s, $easing: ease)
+  transition: $property $duration $easing
+
+// Mixin pour les ombres
+@mixin box-shadow($level: 1)
+  @if $level == 1
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1)
+  @else if $level == 2
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15)
+  @else if $level == 3
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2)
+
+// Mixin pour les boutons
+@mixin button-style($bg-color: $primary, $text-color: white)
+  background-color: $bg-color
+  color: $text-color
+  border: none
+  padding: 12px 24px
+  border-radius: $border-radius-root
+  cursor: pointer
+  @include transition
+
+  &:hover
+    opacity: 0.8
