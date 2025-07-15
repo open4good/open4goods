@@ -1,6 +1,6 @@
 <script setup lang="ts">
 interface Props {
-  data: any
+  data: unknown
   title?: string
   showStatus?: boolean
 }
@@ -29,15 +29,15 @@ const copyToClipboard = async () => {
   }
 }
 
-const formatData = (data: any): string => {
+const formatData = (data: unknown): string => {
   try {
     return JSON.stringify(data, null, 2)
-  } catch (error) {
+  } catch {
     return String(data)
   }
 }
 
-const getDataType = (data: any): string => {
+const getDataType = (data: unknown): string => {
   if (data === null) return 'null'
   if (Array.isArray(data)) return 'array'
   if (typeof data === 'object') return 'object'

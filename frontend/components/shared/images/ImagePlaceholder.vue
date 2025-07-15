@@ -6,7 +6,7 @@ interface Props {
   icon?: string
 }
 
-const props = withDefaults(defineProps<Props>(), {
+withDefaults(defineProps<Props>(), {
   width: 200,
   height: 200,
   text: 'Image non disponible',
