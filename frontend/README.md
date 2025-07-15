@@ -298,6 +298,8 @@ describe('Button', () => {
 - CI likely includes:
   - Tests and lint on PRs
   - Semantic release (automated versioning via commit messages)
+  - Node SSR deployed to the beta server via
+    `.github/workflows/frontend-deploy-ssr.yml`
 
 ## Contributing
 
