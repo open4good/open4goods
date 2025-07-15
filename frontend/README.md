@@ -73,6 +73,7 @@ To get the project up and running locally, follow these steps:
   your disk to avoid problems. Build problems on generate are
   related to special characters in file names and spaces in window.
 
+
 8. **Other Useful Scripts**:
    - `pnpm lint` – run ESLint
    - `pnpm format` – check formatting
@@ -80,6 +81,18 @@ To get the project up and running locally, follow these steps:
    - `pnpm generate:api` – regenerate the OpenAPI fetch client
    - `pnpm preview` – serve the production build locally
    - `pnpm build:ssr` – build with increased memory
+
+## Blog environment variables
+
+The frontend interacts with the blog service using two runtime variables
+declared in `nuxt.config.ts`:
+
+- **`BLOG_URL`** – base URL of the blog API. If not specified, it defaults to
+  `https://beta.front-api.nudger.fr`. This value is part of the public runtime
+  configuration (`config.public.blogUrl`).
+- **`BLOG_TOKEN`** – authentication token for protected blog endpoints. It is
+  defined as a private runtime key (`config.blogToken`) and is therefore only
+  available on the server side.
 
 ## Design Tokens
 
